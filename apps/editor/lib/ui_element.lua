@@ -1325,6 +1325,7 @@ function ui_element.button(t)
 		focus_image  = nil,
 		single_button = false,
 		is_in_menu = false,
+		fade_in = false,
 		label_align = nil,
 		tab_button = false, 
     }
@@ -1349,6 +1350,16 @@ function ui_element.button(t)
     } 
     
     function b_group.extra.on_focus_in(key) 
+
+		if b_group.is_in_menu == true then 
+			if b_group.fade_in == true then 
+				b_group.fade_in = false
+				return 
+			else 
+				b_group.fade_in = true 
+			end 
+	   end 
+
 		current_focus = b_group
         if (p.skin == "Custom") then 
 	     	ring.opacity = 0
@@ -1378,6 +1389,14 @@ function ui_element.button(t)
     end
     
     function b_group.extra.on_focus_out(key, focus_to_tabButton) 
+
+			
+		if b_group.is_in_menu == true then 
+			if b_group.fade_in == false then 
+				return 
+			end
+	    end 
+
 		current_focus = nil 
 		if b_group.tab_button == true and focus_to_tabButton == nil then 
 			prev_tab = b_group
@@ -4456,6 +4475,10 @@ function ui_element.scrollPane(t)
 		scroll_group:grab_key_focus()
     end
 
+	function scroll_group.extra.on_focus_out() 
+		screen:grab_key_focus()
+    end
+
 	scroll_y = function(dir)
 		local new_y = p.content.y+ dir*10
 		animating = true
@@ -5282,7 +5305,6 @@ button
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
         align = "left",
         show_ring     = true,
-		status = nil,
 		ui_position = {300,300},
     }
     --overwrite defaults
@@ -5480,13 +5502,7 @@ button
                 end
                 curr_index = 0
 				umbrella:raise_to_top()
-				--[[
-				if screen:find_child("mouse_pointer") then 
-		 			screen:find_child("mouse_pointer"):raise_to_top()
-				end
-				]]
 				input_mode = hdr.S_MENU_M
-				p.status = "fade_in"
             end,
             fade_out = function()
                 dropDownMenu:complete_animation()
@@ -5498,7 +5514,6 @@ button
 		    		on_completed = function()  dropDownMenu:hide()  end,
                 }
 				input_mode = hdr.S_SELECT
-				p.status = "fade_out"
             end,
             set_item_function = function(index,f)
                 assert(index > 0 and index <= #selectable_items, "invalid index")
@@ -5521,7 +5536,7 @@ button
 	--yugi
 	if editor_lb == nil or editor_use then  
 		function button:on_key_down(key) 
-			if input_mode == hdr.S_SELECT or p.status ==  "fade_out" then 
+			if input_mode == hdr.S_SELECT then 
 				if key == keys.Down then 
 					umbrella.press_down()
 					return true
@@ -6654,6 +6669,8 @@ function ui_element.arrowPane(t)
 
         }
     }
+
+
 	umbrella.pan_by = function(self,dx,dy,f_arrow)		
 		self:pan_to(
 			-p.content.x + dx,
@@ -6665,6 +6682,15 @@ function ui_element.arrowPane(t)
 	end
 	
 	umbrella.extra.seek_to = function(x,y)
+    end
+	
+		
+	function umbrella.extra.on_focus_in() 
+		scroll_group:grab_key_focus()
+    end
+
+	function umbrella.extra.on_focus_out() 
+		screen:grab_key_focus()
     end
 
 

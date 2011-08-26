@@ -1,8 +1,5 @@
---local ui_element = dofile("/lib/ui_element.lua")
---dofile("apply.lua")
---dofile("editor_lib.lua")
-
 local factory = ui.factory
+
 local editor = {}
 
 local rect_init_x = 0
@@ -10,14 +7,25 @@ local rect_init_y = 0
 local g_init_x = 0
 local g_init_y = 0
 
-local uiElementLists = {"Rectangle", "Text", "Image", "Video", "Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane"}
-local uiElements_en = {"Rectangle", "Text", "Image", "Video"}
+local allUiElements     = { 
+						 	"Rectangle", "Text", "Image", "Video", "Button", "TextInput", "DialogBox", "ToastAlert", 
+						 	"CheckBoxGroup", "RadioButtonGroup", "ButtonPicker", "ProgressSpinner", "ProgressBar", 
+						 	"MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane"
+					      }
 
-local uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", 
-           "ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane" }
+local engineUiElements  = { 
+							"Rectangle", "Text", "Image", "Video" 
+						  }
+
+local editorUiElements 	= {
+							"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGroup", "RadioButtonGroup", 
+							"ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", 
+							"ScrollPane", "ArrowPane" 
+				     	  }
 
 
-local widget_f_map = {
+local widget_f_map = 
+{
      ["Rectangle"]	= function () input_mode = hdr.S_RECTANGLE screen:grab_key_focus() end, 
      ["Text"]		= function () editor.text() input_mode = hdr.S_SELECT end, 
      ["Image"]		= function () input_mode = hdr.S_SELECT editor.image() end, 	
@@ -38,6 +46,7 @@ local widget_f_map = {
      ["ArrowPane"]    		= function () return ui_element.arrowPane() end, 
 	 ["TabBar"]		 		= function () return ui_element.tabBar() end, 
      ["MenuBar"]    		= function () return ui_element.menuBar() end, 
+
 }
 
 local widget_n_map = {
@@ -57,18 +66,6 @@ local widget_n_map = {
      ["TabBar"]    			 = function () return "Tab Bar" end, 
      ["MenuBar"]     		 = function () return "Menu Bar" end, 
 }
-
-function guideline_type(name) 
-    local i, j = string.find(name,"v_guideline")
-    if(i ~= nil and j ~= nil)then 
-         return "v_guideline"
-    end 
-    local i, j = string.find(name,"h_guideline")
-    if(i ~= nil and j ~= nil)then 
-         return "h_guideline"
-    end 
-    return ""
-end 
 
 
 local function guideline_inspector(v)
@@ -93,7 +90,8 @@ local function guideline_inspector(v)
 
 	-- Text Input Field 	
 	local org_position 
-	if(guideline_type(v.name) == "v_guideline") then
+
+	if(util.guideline_type(v.name) == "v_guideline") then
 		org_position = tostring(math.floor(v.x))
 		title.text = "Vertical Guideline"
 		title_shadow.text = "Vertical Guideline"
@@ -132,7 +130,7 @@ local function guideline_inspector(v)
 			--editor.error_message("005", save_current_f, editor.save)  
 			return
    		end    
-		if(guideline_type(v.name) == "v_guideline") then
+		if(util.guideline_type(v.name) == "v_guideline") then
 				v.x = tonumber(text_input.text)
 		else 
 				v.y = tonumber(text_input.text)
@@ -216,7 +214,7 @@ local function guideline_inspector(v)
 		end
 	end
 
-	if(guideline_type(v.name) == "v_guideline") then
+	if(util.guideline_type(v.name) == "v_guideline") then
 		msgw.x= v.x - msgw.w/2
 		msgw.y= screen.h/2 - msgw.h/2
 	else
@@ -233,13 +231,10 @@ local function guideline_inspector(v)
 end 
 
 function editor.reference_image()
- 	if(current_dir == "") then 
-		--set_app_path() 
-	else 
-		input_mode = hdr.S_SELECT  
-		editor.image(true)
-		screen:grab_key_focus()
-	end 
+	input_mode = hdr.S_SELECT  
+	editor.image(true)
+	screen:grab_key_focus()
+
 	screen:find_child("menuButton_view").items[2]["icon"].opacity = 255
 	screen:find_child("menuButton_view").items[3]["icon"].opacity = 0
     screen:find_child("menuButton_view").items[4]["icon"].opacity = 0
@@ -355,7 +350,6 @@ function editor.timeline()
 
 end 
 
-
 local function create_on_line_down_f(v)
         function v:on_button_down(x,y,button,num_clicks)
             dragging = {v, x - v.x, y - v.y }
@@ -370,9 +364,9 @@ local function create_on_line_down_f(v)
         function v:on_button_up(x,y,button,num_clicks)
 	     if(dragging ~= nil) then 
 	        local actor , dx , dy = unpack( dragging )
-		  	if(guideline_type(v.name) == "v_guideline") then 
+		  	if(util.guideline_type(v.name) == "v_guideline") then 
 				v.x = x - dx
-		  	elseif(guideline_type(v.name) == "h_guideline") then  
+		  	elseif(util.guideline_type(v.name) == "h_guideline") then  
 				v.y = y - dy
 		  	end 
 	          	dragging = nil
@@ -427,231 +421,6 @@ function editor.h_guideline()
 	 end 
 end
 
-
-function editor.container_selected(obj, x, y)
-     if obj.extra.type ~= "LayoutManager" then 
-          obj_border = Rectangle{}
-          obj_border.name = obj.name.."border"
-          obj_border.color = {0,0,0,0}
-          --obj_border.border_color = {0,255,0,255}
-          obj_border.border_color = {255,25,25,255}
-          obj_border.border_width = 2
-          obj_border.position = obj.position
-          obj_border.anchor_point = obj.anchor_point
-          obj_border.x_rotation = obj.x_rotation
-          obj_border.y_rotation = obj.y_rotation
-          obj_border.z_rotation = obj.z_rotation
-		  --[[
-		  if obj.extra.type == "ScrollPane" or obj.extra.type == "ArrowPane" then 
-              obj_border.size = {obj.virtual_w, obj.virtual_h}
-		  else 
-              obj_border.size = obj.size
-		  end ]]
-          obj_border.size = obj.size
-          if(obj.scale ~= nil) then 
-               obj_border.scale = obj.scale
-          end 
-          if (screen:find_child(obj.name.."a_m") ~= nil) then 
-     	     screen:remove(screen:find_child(obj.name.."a_m"))
-          end
-          anchor_mark= ui.factory.draw_anchor_pointer()
-          if(obj.extra.is_in_group == true)then 
-               anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
-          else 
-               anchor_mark.position = {obj.x, obj.y, obj.z}
-          end
-          anchor_mark.name = obj.name.."a_m"
-          screen:add(anchor_mark)
-          screen:add(obj_border)
-          obj.extra.selected = true
-          table.insert(selected_objs, obj_border.name)
-     else -- Layout Manager Tile border
-	  	local col , row=  obj:r_c_from_abs_position(x,y)
-		local tile_x, tile_y, tile_w, tile_h 
-	  	if row and col then 
-			tile_x, tile_y, tile_w, tile_h = obj:cell_x_y_w_h(row,col)
-			tile_x = obj.x + tile_x
-			tile_y = obj.y + tile_y
-		end
-
-	  	obj_border = Rectangle{}
-        obj_border.name = obj.name.."border"
-        obj_border.color = {0,0,0,0}
-        --obj_border.border_color = {0,255,0,255}
-        obj_border.border_color = {255,25,25,255}
-        obj_border.border_width = 2
-        obj_border.position = {tile_x, tile_y, 0} 
-        obj_border.anchor_point = obj.anchor_point
-        obj_border.x_rotation = obj.x_rotation
-        obj_border.y_rotation = obj.y_rotation
-        obj_border.z_rotation = obj.z_rotation
-        obj_border.size = {tile_w, tile_h}
-	  	obj_border.extra.r_c = {row, col}
-
-        if(obj.scale ~= nil) then 
-        	obj_border.scale = obj.scale
-        end 
-        screen:add(obj_border)
-        obj.extra.selected = true
-        table.insert(selected_objs, obj_border.name)
-     end 
-end  
-
-
-function editor.selected(obj, call_by_inspector)
-   if obj.name == nil then 
-	  return 
-   end 
-
-   if(obj.type ~= "Video") then 
-   	if(shift == false)then 
-		while(table.getn(selected_objs) ~= 0) do
-			local t_border = screen:find_child(table.remove(selected_objs)) 
-			if(t_border ~= nil) then 
-				screen:remove(t_border)
-		    	local i, j = string.find(t_border.name,"border")
-		    	t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
-            	if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
-     				screen:remove(screen:find_child(t_obj.name.."a_m"))
-     			end
-		    	if(t_obj ~= nil) then 
-					t_obj.extra.selected = false
-	        	end
-			end
-		end
-   	end 
-   	obj_border = Rectangle{}
-   	obj_border.name = obj.name.."border"
-   	obj_border.color = {0,0,0,0}
-   	--obj_border.border_color = {0,255,0,255}
-    obj_border.border_color = {255,25,25,255}
-   	obj_border.border_width = 2
-   	local group_pos
-	local bumo	
-	local tab_extra
-
-   	if(obj.extra.is_in_group == true)then 
-		for i, c in pairs(g.children) do
-			if obj.name == c.name then 
-				break
-			else 
-				if c.extra then 
-					if c.extra.type == "ScrollPane" or c.extra.type == "ArrowPane" then 
-						for k, e in pairs (c.content.children) do 
-							if e.name == obj.name then 
-								bumo = c	
-							end 
-						end 
-					elseif c.extra.type == "TabBar" then 
-						for h,q in pairs (c.tabs) do 
-							for k,w in pairs (q.children) do 
-								if w.name == obj.name then 
-									tab_extra = c.ui_height
-								end
-							end
-						end 
-					end 
-				end
-			end
-    	end
-
-		group_pos = util.get_group_position(obj)
-		if bumo then 
-		   obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
-		else 
-     	   obj_border.x = obj.x + group_pos[1]
-     	   obj_border.y = obj.y + group_pos[2]
-		end
-		obj_border.extra.group_postion = obj.extra.group_position
-   	else 
-     	obj_border.position = obj.position
-   	end
-   
-	obj_border.anchor_point = obj.anchor_point
-    obj_border.x_rotation = obj.x_rotation
-    obj_border.y_rotation = obj.y_rotation
-    obj_border.z_rotation = obj.z_rotation
-    obj_border.size = obj.size
-    if(obj.scale ~= nil) then 
-    	obj_border.scale = obj.scale
-    end 
-
-    if (screen:find_child(obj.name.."a_m") ~= nil) then 
-     	screen:remove(screen:find_child(obj.name.."a_m"))
-    end
-
-    anchor_mark= ui.factory.draw_anchor_pointer()
-    if(obj.extra.is_in_group == true)then 
-		if bumo then 
-    		anchor_mark.position = {obj_border.x, obj_border.y, obj_border.z}
-		else
-    		anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
-		end
-    else 
-        anchor_mark.position = {obj.x, obj.y, obj.z}
-    end
-
-	if tab_extra then 
-		anchor_mark.y = anchor_mark.y + tab_extra 
-		obj_border.y = obj_border.y + tab_extra
-	end 
-
-    anchor_mark.name = obj.name.."a_m"
-    screen:add(anchor_mark)
-    screen:add(obj_border)
-    obj.extra.selected = true
-    table.insert(selected_objs, obj_border.name)
-    end 
-end  
-
-function editor.n_select(obj, call_by_inspector, drag)
-     if(obj.name == nil)then 
-		return 
-	 end 
-     if(obj.type ~= "Video") then 
-     	if(shift == false)then 
-			while(table.getn(selected_objs) ~= 0) do
-				local t_border = screen:find_child(table.remove(selected_objs)) 
-				if(t_border ~= nil) then 
-		     		screen:remove(t_border)
-		     		local i, j = string.find(t_border.name,"border")
-		     		t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
-		     		if(t_obj ~= nil) then 
-						t_obj.extra.selected = false
-        				if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
-	   						screen:remove(screen:find_child(t_obj.name.."a_m"))
-        				end
-	             	end
-				end
-			end
-			if(drag == nil) then
-	     		editor.selected(obj) 
-			end 
-     	else
-        	if (screen:find_child(obj.name.."a_m") ~= nil) then 
-	     		screen:remove(screen:find_child(obj.name.."a_m"))
-        	end
-        	screen:remove(screen:find_child(obj.name.."border"))
-        	table.remove(selected_objs)
-        	obj.extra.selected = false
-     	end 
-    end
-end  
-
-function editor.n_selected(obj, call_by_inspector)
-     if(obj.name == nil) then 
-		return 
-	 end 
-     if(obj.type ~= "Video") then 
-        screen:remove(screen:find_child(obj.name.."border"))
-        if (screen:find_child(obj.name.."a_m") ~= nil) then 
-	     	screen:remove(screen:find_child(obj.name.."a_m"))
-        end
-        table.remove(selected_objs)
-        obj.extra.selected = false
-     end 
-end  
-
 function editor.close(new, next_func, next_f_param, from_close)
 
 	local func_ok = function() 
@@ -693,7 +462,7 @@ function editor.close(new, next_func, next_f_param, from_close)
 
 	for i, j in pairs (g.children) do 
 	     if(j.extra.selected == true) then 
-			editor.n_selected(j) 
+			screen_ui.n_selected(j) 
 	     end 
 	end 
 
@@ -1061,31 +830,6 @@ function editor.the_image(bg_image)
 	 	end 
     end 
     screen:add(dialog)
-end 
-
-function editor.export ()
-	animate_out_dropdown()
-	ui:hide()
-	if(screen:find_child("xscroll_bar") ~= nil) then 
-		screen:find_child("xscroll_bar"):hide() 
-		screen:find_child("xscroll_box"):hide() 
-		screen:find_child("x_0_mark"):hide()
-		screen:find_child("x_1920_mark"):hide()
-	end 
-	if(screen:find_child("scroll_bar") ~= nil) then 
-		screen:find_child("scroll_bar"):hide() 
-		screen:find_child("scroll_box"):hide() 
-		screen:find_child("y_0_mark"):hide()
-		screen:find_child("y_1080_mark"):hide()
-	end 
-	menu_hide  = true 
-	screen:grab_key_focus()
-	screen:remove(g)
-	g:clear()
-	local f = loadfile(current_fn)
-	f(g)
-	screen:add(g)
-	
 end 
 
 local function open_files(input_purpose, bg_image, inspector)
@@ -1643,7 +1387,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
     end 
  	
 	for i, c in pairs(g.children) do
-	     editor.n_selected(c)
+	     screen_ui.n_selected(c)
 	end
 
 	-- Scroll	
@@ -1958,7 +1702,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
     inspector_xbox.reactive = true
 
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
-		editor.n_selected(v, true)
+		screen_ui.n_selected(v, true)
 		screen:remove(inspector)
 		inspector:clear() 
 		current_inspector = nil
@@ -1970,7 +1714,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
         end
 
 		for i, c in pairs(g.children) do
-	     		editor.n_selected(c)
+	     		screen_ui.n_selected(c)
 		end
 
         screen.grab_key_focus(screen) 
@@ -2162,7 +1906,7 @@ bg("Code", "Widget")
 		if screen:find_child(codeViewWin.name) then 
 			screen:remove(codeViewWin)
 		end
-		editor.n_selected(v, true)
+		screen_ui.n_selected(v, true)
         screen.grab_key_focus(screen) 
 	    input_mode = hdr.S_SELECT
 		return true
@@ -2674,7 +2418,7 @@ end
 
 local function ungroup(v)
      v.extra.children = {}
-     editor.n_selected(v)
+     screen_ui.n_selected(v)
      for i,c in pairs(v.children) do 
      	table.insert(v.extra.children, c.name) 
 		c.extra.is_in_group = false
@@ -2702,11 +2446,11 @@ print("editor.undo")
 
 	  if(undo_item == nill) then return true end
 	  if undo_item[2] == hdr.CHG then 
-	  	editor.n_selected(undo_item[1])
+	  	screen_ui.n_selected(undo_item[1])
 		util.set_obj(g:find_child(undo_item[1]), undo_item[3])
 	    table.insert(redo_list , undo_item)
 	  elseif undo_item[2] == ADD then 
-	    editor.n_selected(undo_item[3])
+	    screen_ui.n_selected(undo_item[3])
 	    if((undo_item[3]).type == "Group") then 
 			ungroup(undo_item[3])
 	    else
@@ -2714,12 +2458,12 @@ print("editor.undo")
 	    end 
         table.insert(redo_list , undo_item)
 	  elseif undo_item[2] == hdr.DEL then 
-	    editor.n_selected(undo_item[3])
+	    screen_ui.n_selected(undo_item[3])
 	    if((undo_item[3]).type == "Group") then 
-			if util.is_in_list(undo_item[3].extra.type, uiElements) == false then 
+			if util.is_in_list(undo_item[3].extra.type, editorUiElements) == false then 
 		        for i, c in pairs(undo_item[3].extra.children) do
 					local c_tmp = g:find_child(c)
-					editor.n_selected(c_tmp)
+					screen_ui.n_selected(c_tmp)
 					g:remove(g:find_child(c))
 					c_tmp.extra.is_in_group = true
 					c_tmp.x = c_tmp.x - undo_item[3].x
@@ -3099,7 +2843,7 @@ function editor.clone()
 	for i, v in pairs(g.children) do
     	if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		     	editor.n_selected(v)
+		     	screen_ui.n_selected(v)
 		     	ui.clone = Clone {
                	name="clone"..tostring(item_num),
 		     	source = v,
@@ -3270,7 +3014,7 @@ function editor.duplicate()
                     	while(util.is_available(string.lower(v.type)..tostring(item_num))== false) do
                         	item_num = item_num + 1
                         end 
-                        editor.n_selected(v)
+                        screen_ui.n_selected(v)
                         ui.dup = util.copy_obj(v)  
                         ui.dup.name=string.lower(v.type)..tostring(item_num)
                         if next_position then 
@@ -3527,7 +3271,7 @@ function editor.delete()
    	end 
 
 	local delete_f = function(del_obj)
-		editor.n_selected(del_obj)
+		screen_ui.n_selected(del_obj)
 
         table.insert(undo_list, {del_obj.name, DEL, del_obj})
 
@@ -3680,7 +3424,7 @@ function editor.group()
 	for i, v in pairs(g.children) do
              if g:find_child(v.name) then
 		  if(v.extra.selected == true) then
-			editor.n_selected(v)
+			screen_ui.n_selected(v)
 
 			g:remove(v)
         		ui.group:add(v)
@@ -3740,14 +3484,14 @@ function editor.ugroup()
              if g:find_child(v.name) then
 		  if(v.extra.selected == true) then
 			if(v.type == "Group") then 
-			     editor.n_selected(v)
+			     screen_ui.n_selected(v)
 			     v.extra.children = {}
 			     for i,c in pairs(v.children) do 
 				     table.insert(v.extra.children, c.name) 
 				---[[ 0128 : added for nested group 
         				if(c.type == "Group") then 
 	       				   for j, cc in pairs (c.children) do
-						if util.is_in_list(c.extra.type, uiElements) == false then 
+						if util.is_in_list(c.extra.type, editorUiElements) == false then 
                     				cc.reactive = true
 		    				cc.extra.is_in_group = true
 						cc.extra.lock = false
@@ -3786,79 +3530,6 @@ function editor.ugroup()
         end
         screen.grab_key_focus(screen)
 	input_mode = hdr.S_SELECT
-end
-	
-local m_init_x = 0 
-local m_init_y = 0 
-local multi_select_border
-
-function editor.multi_select(x,y) 
-
- 	m_init_x = x -- origin x
-        m_init_y = y -- origin y
-
-        multi_select_border = Rectangle{
-                name="multi_select_border", 
-                --border_color= {0,255,0},
-                border_color= {255,25,25,255},
-                border_width=0,
-                color= {0,0,0,0},
-                size = {1,1},
-                position = {x,y},
-		opacity = 255
-        }
-        multi_select_border.reactive = false
-        screen:add(multi_select_border)
-end 
-
-function editor.multi_select_done(x,y) 
-
-	if(multi_select_border == nil) then return end 
-        multi_select_border.size = { math.abs(x-m_init_x), math.abs(y-m_init_y) }
-
-        if(x-m_init_x < 0) then
-	   multi_select_border.x = x 
-	   m_init_x = x
-	   x = m_init_x + multi_select_border.w
-        end
-        if(y-m_init_y < 0) then
-	   multi_select_border.y = y 
-	   m_init_y = y
-	   y = m_init_y + multi_select_border.h
-        end
-
-        for i, v in pairs(g.children) do
-				if v.name then 
-             if g:find_child(v.name) then
-		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
-		(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
-			if(shift == true and v.extra.selected == false) then 
-		             editor.selected(v)
-			end 
-		end 
-             end
-			 end 
-        end
-	
-	screen:remove(multi_select_border)
-	m_init_x = 0 
-	m_init_y = 0 
-	multi_select_border = nil
-    screen.grab_key_focus(screen)
-	input_mode = hdr.S_SELECT
-
-end 
-
-function editor.multi_select_move(x,y)
-	if(multi_select_border == nil) then return end 
-	multi_select_border:set{border_width = 2}
-        multi_select_border.size = { math.abs(x-m_init_x), math.abs(y-m_init_y) }
-        if(x- m_init_x < 0) then
-            multi_select_border.x = x
-        end
-        if(y- m_init_y < 0) then
-            multi_select_border.y = y
-        end
 end
 
 function editor.group_done(x, y)
@@ -3928,7 +3599,7 @@ local function ang_cord()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-		     editor.n_selected(v)
+		     screen_ui.n_selected(v)
 		     v.x = v.x + v.anchor_point[1] 
 		     v.y = v.y + v.anchor_point[2] 
 		end 
@@ -3990,7 +3661,7 @@ function editor.right()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true and v.name ~= basis_obj_name) then
-		   --editor.n_selected(v)
+		   --screen_ui.n_selected(v)
 		   if(v.x ~= basis_obj.x + basis_obj.w - v.w) then
 	                org_object = util.copy_obj(v)
 			v.x = basis_obj.x + basis_obj.w - v.w
@@ -4024,7 +3695,7 @@ function editor.top()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true and v.name ~= basis_obj_name ) then
-		  --   editor.n_selected(v)
+		  --   screen_ui.n_selected(v)
 		     if(v.y ~= basis_obj.y) then
 	                org_object = util.copy_obj(v)
 			v.y = basis_obj.y 
@@ -4072,7 +3743,7 @@ function editor.bottom()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true and  v.name ~= basis_obj_name) then
-		     --editor.n_selected(v)
+		     --screen_ui.n_selected(v)
 		     if(v.y ~= basis_obj.y + basis_obj.h - v.h) then 	
 	                org_object = util.copy_obj(v)
 			v.y = basis_obj.y + basis_obj.h - v.h 
@@ -4106,7 +3777,7 @@ function editor.hcenter()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true and v.name ~= basis_obj_name) then
-		     -- editor.n_selected(v)
+		     -- screen_ui.n_selected(v)
 		     if(v.x ~= basis_obj.x + basis_obj.w/2 - v.w/2) then 
 	                org_object = util.copy_obj(v)
 			v.x = basis_obj.x + basis_obj.w/2 - v.w/2
@@ -4142,7 +3813,7 @@ function editor.vcenter()
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true and v.name ~= basis_obj_name) then
-		     -- editor.n_selected(v)
+		     -- screen_ui.n_selected(v)
 		     if(v.y ~=  basis_obj.y + basis_obj.h/2 - v.h/2) then 
 	                org_object = util.copy_obj(v)
 			v.y = basis_obj.y + basis_obj.h/2 - v.h/2
@@ -4243,7 +3914,7 @@ function editor.hspace()
     for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-			--editor.n_selected(v)
+			--screen_ui.n_selected(v)
 		end 
           end
     end
@@ -4358,7 +4029,7 @@ function editor.vspace()
     for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
-	--		editor.n_selected(v)
+	--		screen_ui.n_selected(v)
 		end 
           end
     end
@@ -4384,7 +4055,7 @@ function editor.bring_to_front()
 			g:remove(v)
 			g:add(v)
     			table.insert(undo_list, {v.name, hdr.ARG, hdr.hdr.BRING_FR})
-			editor.n_selected(v)
+			screen_ui.n_selected(v)
 		end 
           end
     end
@@ -4410,7 +4081,7 @@ function editor.send_to_back()
 	        g:remove(v) 
 	        if(v.extra.selected == true) then
 		        table.insert(slt_g, v)
-			editor.n_selected(v)
+			screen_ui.n_selected(v)
 		else 
 		     	table.insert(tmp_g, v) 
 		end
@@ -4457,7 +4128,7 @@ function editor.send_backward()
 		end 
 	        if(v.extra.selected == true) then
 			table.insert(slt_g, v) 
-			editor.n_selected(v)
+			screen_ui.n_selected(v)
 		else 
 		      	table.insert(tmp_g, v) 
 		end
@@ -4505,7 +4176,7 @@ function editor.bring_forward()
 		end 
 	        if(v.extra.selected == true) then
 			table.insert(slt_g, v) 
-			editor.n_selected(v)
+			screen_ui.n_selected(v)
 		else 
 		      	table.insert(tmp_g, v) 
 		end
@@ -4636,9 +4307,9 @@ function editor.the_ui_elements()
 	cur_w= PADDING
     cur_h= PADDING 
 
-	table.sort(uiElementLists)
+	table.sort(allUiElements)
 
-    for i, v in pairs(uiElementLists) do 
+    for i, v in pairs(allUiElements) do 
 
 		local widget_t, widget_ts = make_msgw_widget_item(v)
 		local h_rect = Rectangle{border_width = 1, border_color = {0,0,0,255}, name="h_rect", color="#a20000", size = {298, 22}, reactive = true, opacity=0}
@@ -4783,7 +4454,7 @@ function editor.ui_elements()
     cur_w = L_PADDING
     cur_h = TOP_PADDING + widgets_list.h - 10
 
-    for i, v in pairs(uiElements_en) do 
+    for i, v in pairs(engineUiElements) do 
     	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
 	
 	 widget_b.position =  {cur_w, cur_h}
@@ -4805,7 +4476,7 @@ function editor.ui_elements()
     end 
 
 
-    for i, v in pairs(uiElements) do
+    for i, v in pairs(editorUiElements) do
          if (i == 6) then 
               cur_w =  cur_w + 255 + Y_PADDING
               cur_h =  TOP_PADDING + widgets_list.h -10
@@ -4822,39 +4493,6 @@ function editor.ui_elements()
          
          function widget_b:on_button_down(x,y,button,num_clicks)
 	      local new_widget = widget_f_map[v]() 
---imsi  : for debugging, will be deleted 
-	      if (new_widget.extra.type == "Button") then 
-		b=new_widget
-	      elseif (new_widget.extra.type == "TextInput") then 
-		t=new_widget
-	      elseif (new_widget.extra.type == "DialogBox") then 
-		db=new_widget
-	      elseif (new_widget.extra.type == "ToastAlert") then 
-		tb=new_widget
-	      elseif (new_widget.extra.type == "RadioButtonGroup") then 
-		rb=new_widget
-	      elseif (new_widget.extra.type == "CheckBoxGroup") then 
-		cb=new_widget
-	      elseif (new_widget.extra.type == "ButtonPicker") then 
-		bp=new_widget
-	      elseif (new_widget.extra.type == "ProgressSpinner") then 
-		ld=new_widget
-	      elseif (new_widget.extra.type == "ProgressBar") then 
-		lb=new_widget
-          elseif (new_widget.extra.type == "LayoutManager") then 
-		d=new_widget
-         elseif (new_widget.extra.type == "ScrollPane") then 
-		si=new_widget
-         elseif (new_widget.extra.type == "ArrowPane") then 
-		ai=new_widget
-         elseif (new_widget.extra.type == "MenuButton") then 
-		dd=new_widget
-         elseif (new_widget.extra.type == "MenuBar") then 
-		mb=new_widget
-         elseif (new_widget.extra.type == "TabBar") then 
-		tb=new_widget
-	end
---imsi 
 	if new_widget.name:find("timeline") then 
 		    screen:add(new_widget)
 	else 
@@ -4871,57 +4509,22 @@ function editor.ui_elements()
 	end 
 	cleanMsgWin(msgw)
         end 
+
         function widget_t:on_button_down(x,y,button,num_clicks)
 
 	      local new_widget = widget_f_map[v]() 
---imsi  : for debugging, will be deleted 
-	      if (new_widget.extra.type == "Button") then 
-		b=new_widget
-	      elseif (new_widget.extra.type == "TextInput") then 
-		t=new_widget
-	      elseif (new_widget.extra.type == "DialogBox") then 
-		db=new_widget
-	      elseif (new_widget.extra.type == "ToastAlert") then 
-		tb=new_widget
-	      elseif (new_widget.extra.type == "RadioButtonGroup") then 
-		rb=new_widget
-	      elseif (new_widget.extra.type == "CheckBoxGroup") then 
-		cb=new_widget
-	      elseif (new_widget.extra.type == "ButtonPicker") then 
-		bp=new_widget
-	      elseif (new_widget.extra.type == "ProgressSpinner") then 
-		ld=new_widget
-	      elseif (new_widget.extra.type == "ProgressBar") then 
-		lb=new_widget
-              elseif (new_widget.extra.type == "LayoutManager") then 
-		d=new_widget
-              elseif (new_widget.extra.type == "ScrollPane") then 
-		si=new_widget
-              elseif (new_widget.extra.type == "ArrowPane") then 
-		ai=new_widget
-              elseif (new_widget.extra.type == "MenuButton") then 
-		dd=new_widget
-              elseif (new_widget.extra.type == "MenuBar") then 
-		mb=new_widget
-              elseif (new_widget.extra.type == "TabBar") then 
-		tb=new_widget
-	      end
---imsi  : for debugging, will be deleted 
-	
-             if new_widget.name:find("timeline") then 
+          if new_widget.name:find("timeline") then 
 		    screen:add(new_widget)
-	     else
+	      else
  	     	while (util.is_available(new_widget.name..tostring(item_num)) == false) do  
-			item_num = item_num + 1
+				item_num = item_num + 1
 	      	end 
 	      	new_widget.name = new_widget.name..tostring(item_num)
               	table.insert(undo_list, {new_widget.name, ADD, new_widget})
 	      	g:add(new_widget)
-		new_widget.extra.lock = false
-              	util.create_on_button_down_f(new_widget)
-	      	--screen:add(g)
+			new_widget.extra.lock = false
+            util.create_on_button_down_f(new_widget)
 	      	screen:grab_key_focus()
-
 	    end 
 	    cleanMsgWin(msgw)
        end 
@@ -5119,92 +4722,4 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	return msgw
 end
 
-function editor.timeline_show()
-	if not screen:find_child("timeline") then 
-		if table.getn(g.children) > 0 then
-			input_mode = hdr.S_SELECT local tl = ui_element.timeline() screen:add(tl)
-			screen:find_child("timeline").extra.show = true 
-		end
-	elseif table.getn(g.children) == 0 then 
-		screen:remove(screen:find_child("timeline"))
-		if screen:find_child("tline") then 
-			screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-		end 
-	elseif screen:find_child("timeline").extra.show ~= true  then 
-		screen:find_child("timeline"):show()
-		screen:find_child("timeline").extra.show = true
-	else 
-		screen:find_child("timeline"):hide()
-		screen:find_child("timeline").extra.show = false
-	end
-end 
-
-function editor.menu_hide()
-	if (menu_hide  == true) then 
-		menu.menuShow()
-		if(screen:find_child("xscroll_bar") ~= nil) then 
-			screen:find_child("xscroll_bar"):show() 
-			screen:find_child("xscroll_box"):show() 
-			screen:find_child("x_0_mark"):show()
-			screen:find_child("x_1920_mark"):show()
-		end 
-		if(screen:find_child("scroll_bar") ~= nil) then 
-			screen:find_child("scroll_bar"):show() 
-			screen:find_child("scroll_box"):show() 
-			screen:find_child("y_0_mark"):show()
-			screen:find_child("y_1080_mark"):show()
-		end 
-		menu_hide  = false 
-	else 
-		menu.menuHide()
-		if(screen:find_child("xscroll_bar") ~= nil) then 
-			screen:find_child("xscroll_bar"):hide() 
-			screen:find_child("xscroll_box"):hide() 
-			screen:find_child("x_0_mark"):hide()
-			screen:find_child("x_1920_mark"):hide()
-		end 
-		if(screen:find_child("scroll_bar") ~= nil) then 
-			screen:find_child("scroll_bar"):hide() 
-			screen:find_child("scroll_box"):hide() 
-			screen:find_child("y_0_mark"):hide()
-			screen:find_child("y_1080_mark"):hide()
-		end 
-		menu_hide  = true 
-		screen:grab_key_focus()
-	end 
-end 
-
-function editor.move_selected_obj(direction)
-	local direction_val = {["Left"] = function() return -1 end, 
-						   ["Right"] = function() return 1 end,  
-						   ["Up"] = function() return -1 end,  
-						   ["Down"] = function() return 1 end,  
-	}
-
-	if table.getn(selected_objs) ~= 0 then
-		for q, w in pairs (selected_objs) do
-			local t_border = screen:find_child(w)
-			if(t_border ~= nil) then 
-		     	local i, j = string.find(t_border.name,"border") 
-				local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
-
-				if direction == "Left" or direction == "Right" then 
-		    		t_border.x = t_border.x + direction_val[direction]()
-		        	if(t_obj ~= nil) then 
-			    		t_obj.x = t_obj.x + direction_val[direction]()
-					end 
-				else 
-		     		t_border.y = t_border.y + direction_val[direction]()
-					 if(t_obj ~= nil) then 
-			           	t_obj.y = t_obj.y + direction_val[direction]()
-					 end 
-				end 
-	       		if (screen:find_child(t_obj.name.."a_m") ~= nil) then 
-		     		local anchor_mark = screen:find_child(t_obj.name.."a_m")
-		     		anchor_mark.position = {t_obj.x, t_obj.y, t_obj.z}
-               	end
-	         end
-		end
-	end 
-end
 return editor
