@@ -15,15 +15,6 @@
 
 @implementation TrickplayUIElement
 
-/*
-@synthesize x_scale;
-@synthesize y_scale;
-@synthesize z_scale;
-@synthesize x_rotation;
-@synthesize y_rotation;
-@synthesize z_rotation;
- */
-
 @synthesize clip;
 @synthesize view;
 @synthesize ID;
@@ -903,7 +894,7 @@
  */
 
 - (void)get_center:(NSMutableDictionary *)dictionary {
-    NSArray *coords = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.center.x + x_position - x_anchor], [NSNumber numberWithFloat:view.center.y + y_position - y_anchor], nil];
+    NSArray *coords = [NSArray arrayWithObjects:[NSNumber numberWithFloat:w_size/2.0 + x_position - x_anchor], [NSNumber numberWithFloat:h_size/2.0 + y_position - y_anchor], nil];
     [dictionary setObject:coords forKey:@"center"];
 }
 
