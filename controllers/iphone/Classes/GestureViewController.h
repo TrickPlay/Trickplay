@@ -213,7 +213,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // The UIViewController for the virtual remote used to control the Television.
     VirtualRemoteViewController *virtualRemote;
     
-    // YES if graphics have been added to Take Control's views, NO otherwise.
+    // YES if static graphics have been added to Take Control's views, NO otherwise.
     BOOL graphics;
     
     // The TouchController. All touch events sent to this delegate
@@ -263,7 +263,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 - (void)clearUI;
 - (void)clean;
 
-- (void)object_added;
+- (void)advancedUIObjectAdded;
+- (void)advancedUIObjectDeleted;
+- (void)checkShowVirtualRemote;
 
 - (void)exitTrickplayApp:(id)sender;
 
