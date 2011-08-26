@@ -128,7 +128,8 @@
         [JSON_dic setObject:state forKey:@"state"];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:touchNumbers forKey:@"touch_id_list"];
-        [JSON_dic setObject:@"touch" forKey:@"event"];
+        [JSON_dic setObject:[NSArray arrayWithObjects:touchNumbers, state, nil] forKey:@"args"];
+        [JSON_dic setObject:@"on_touches" forKey:@"event"];
     
         [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
@@ -948,27 +949,65 @@
 }
 
 - (id)do_hide:(NSArray *)args {
+    if (!self.hidden) {
+        // send on_hide event
+        NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_hide" forKey:@"event"];
+        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    }
+    // hide the object
     self.hidden = YES;
+        
     return [NSNumber numberWithBool:YES];
 }
 
 - (id)do_hide_all:(NSArray *)args {
+    if (!self.hidden) {
+        // send on_hide event
+        NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_hide" forKey:@"event"];
+        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    }
+    // hide the object
     self.hidden = YES;
-    for (UIView *child in [self.view subviews]) {
-        child.hidden = YES;
+    
+    // hide the children
+    for (TrickplayUIElement *child in [self.view subviews]) {
+        [child do_hide:nil];
     }
     return [NSNumber numberWithBool:YES];
 }
 
 - (id)do_show:(NSArray *)args {
+    if (self.hidden) {
+        // send on_show event
+        NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_show" forKey:@"event"];
+        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    }
+    // show the object
     self.hidden = NO;
+    
     return [NSNumber numberWithBool:YES];
 }
 
 - (id)do_show_all:(NSArray *)args {
+    if (self.hidden) {
+        // send on_show event
+        NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_show" forKey:@"event"];
+        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    }
+    //show the object
     self.hidden = NO;
-    for (UIView *child in [self.view subviews]) {
-        child.hidden = NO;
+    
+    // show the children
+    for (TrickplayUIElement *child in [self.view subviews]) {
+        [child do_show:nil];
     }
     return [NSNumber numberWithBool:YES];;
 }
