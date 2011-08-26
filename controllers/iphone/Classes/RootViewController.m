@@ -21,7 +21,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];   
 
-  
     UILabel *version_label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320, 50)] autorelease];
     version_label.text = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
     // Colors and font
@@ -37,7 +36,7 @@
     // Add the UILabel to the tableview
     self.tableView.tableFooterView = version_label;
   
-  // Customize the View
+    // Customize the View
     self.title = @"TV";
     self.view.tag = 1;
 
@@ -109,11 +108,11 @@
 #pragma mark -
 #pragma mark - AppBrowserDelegate methods
 
-- (void)didRecieveCurrentAppInfo:(NSDictionary *)info {
+- (void)didReceiveCurrentAppInfo:(NSDictionary *)info {
     
 }
 
-- (void)didRecieveAvailableAppsInfo:(NSArray *)info {
+- (void)didReceiveAvailableAppsInfo:(NSArray *)info {
     
 }
 
@@ -538,7 +537,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"services %@\n", services);
     NSLog(@"number of services %d\n", [services count]);
     
-    if ([services count] == 0) { [self refresh]; return; }
+    if ([services count] == 0 || indexPath.row >= [services count]) { [self refresh]; return; }
     
     if (!currentTVName || ([currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
         
