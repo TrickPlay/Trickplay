@@ -160,7 +160,7 @@
             NSArray *imageSize = [NSArray arrayWithObjects:width, height, nil];
             [dictionary setObject:imageSize forKey:@"base_size"];
         } else {
-            NSArray *imageSize = [NSArray array];
+            NSArray *imageSize = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:0.0], nil];
             [dictionary setObject:imageSize forKey:@"base_size"];
         }
     }
