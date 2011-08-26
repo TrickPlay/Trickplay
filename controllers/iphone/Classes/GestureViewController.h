@@ -171,7 +171,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     UIView *textView;
     // Displays the background which the developer may change with the
     // controller:set_ui_background(string resource, string mode) call
-    // from Trickplay. Also has foregroundView as a the top subview.
+    // from Trickplay. Also has foregroundView as the top subview.
     UIImageView *backgroundView;
     // The Root view tree for all graphics added via the
     // controller:set_ui_image(string resource, int x, int y, int width,
@@ -225,7 +225,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // The AppBrowserViewController. Used to inform view controllers lower on
     // the navigation stack when the socket connection breaks or ends.
     id <GestureViewControllerSocketDelegate> socketDelegate;
-    // The AdvancedUIObjectManager. Any asynchronous messages set from Trickplay
+    // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
     // that refer to the AdvancedUIObjectManager are sent there via this
     // delegate's protocol.
     id <AdvancedUIDelegate> advancedUIDelegate;

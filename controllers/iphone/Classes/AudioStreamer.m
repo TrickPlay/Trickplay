@@ -1684,7 +1684,7 @@ cleanup:
 			bitRate = ~0;
 		}
 		
-		// we have successfully read the first packests from the audio stream, so
+		// we have successfully read the first packets from the audio stream, so
 		// clear the "discontinuous" flag
 		if (discontinuous)
 		{
