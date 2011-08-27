@@ -10,7 +10,7 @@ Description:  Verify that the iphone returns the correct api calls for supported
 
 -- Tests --
 
-function test_controllers_enter_text ()
+function test_controller_enter_text ()
 	assert_true ( enter_text_status,  "enter_text not returning true status")
 	--assert_false ( enter_text_status,  "enter_text not returning true status")
 	

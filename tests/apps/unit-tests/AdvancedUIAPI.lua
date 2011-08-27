@@ -404,10 +404,11 @@ local function create_local( id , T , proxy_metatable , property_cache )
 
         local absolute = send_request( "destroy" , destruction_payload ).destroyed
         --print("absolut vodka?", absolute)
+        rawset(proxies, id, nil)
 
     end
 
-    -- If not the screen then its destructable
+    -- If not the screen then it's destructable
     if id ~= 0 then
         rawset( proxy , "marker" , newudata(destruction_marker) )
     end
@@ -506,7 +507,6 @@ setmetatable( factory , mt )
 -- Handle events for individual proxies
 
 function controller:on_advanced_ui_event(json_object)
-    print("event recieved:", json_object)
     if not json_object then
         return
     end

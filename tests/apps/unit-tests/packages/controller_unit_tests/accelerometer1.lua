@@ -9,11 +9,11 @@ Description:  Verify that the iphone returns the correct api calls for supported
 -- Test Set up --
 
 -- Tests --
-function test_controllers_start_accelerometer ()
+function test_controller_start_accelerometer ()
 	assert_true ( start_accelerometer_status,  "start_accelerometer not returning true status")
 end
 
-function test_controllers_stop_accelerometer ()
+function test_controller_stop_accelerometer ()
 	assert_true ( stop_accelerometer_status,  "stop_accelerometer not returning true status")
 end
 

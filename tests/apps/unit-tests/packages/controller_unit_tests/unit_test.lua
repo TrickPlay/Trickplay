@@ -181,7 +181,7 @@ function controller_unit_test( )
 	layout["ui3"].pass_results_txt.text = pass_results
 	layout["ui3"].fail_results_txt.text = fail_results
 	
-	layout["ui3"].scrollPane12.virtual_h = #controller_results * 30 + 100
+	layout["ui3"].scrollPane12.virtual_h = #controller_results * 33 + 100
     
     return controller_results
 end
