@@ -1,7 +1,7 @@
 
-Interface: URLResponse
+Interface: URLRequestCancel
 
-This is a placeholder for the Networking:URLResponse section of the TrickPlay Runtime Engine Reference
+This is a placeholder for the Networking:URLRequestCancel section of the TrickPlay Runtime Engine Reference
 
 This Interface must be extracted from the engine/bindings/url_request.lb file.
 
