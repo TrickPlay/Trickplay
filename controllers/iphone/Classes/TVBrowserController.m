@@ -40,19 +40,8 @@
     return self;
 }
 
-- (NSArray *)getServices {
-    return netServiceManager.services;
-}
-
-- (void)resolveServiceAtIndex:(NSUInteger)index {
-    netServiceManager.currentService = [[self getServices] objectAtIndex:index];
-    [netServiceManager.currentService setDelegate:netServiceManager];
-    
-    [netServiceManager.currentService resolveWithTimeout:5.0];
-}
-
 #pragma mark -
-#pragma mark AppBrowserViewControllerSocketDelegate stuff
+#pragma mark TPAppViewControllerSocketDelegate method handling
 
 /**
  * Generic operations to perform when the network fails. Includes deallocating
@@ -96,6 +85,16 @@
     }
 }
 
+#pragma mark -
+#pragma mark - Managing Broadcasted Services
+
+- (void)resolveServiceAtIndex:(NSUInteger)index {
+    netServiceManager.currentService = [[self getServices] objectAtIndex:index];
+    [netServiceManager.currentService setDelegate:netServiceManager];
+    
+    [netServiceManager.currentService resolveWithTimeout:5.0];
+}
+
 /**
  * NetServiceManager delegate callback. Called when a connection may be established
  * to a service after the user selects a service they wish to connect to. Sends
@@ -124,11 +123,41 @@
 }
 
 - (void)refreshServices {
-    
+    [netServiceManager start];
 }
 
 - (NSNetService *)getCurrentService {
     return netServiceManager.currentService;
 }
 
+
+- (NSArray *)getServices {
+    return netServiceManager.services;
+}
+
+#pragma mark -
+#pragma mark Memory Management
+
+- (void)dealloc {
+    [netServiceManager stop];
+    [netServiceManager release];
+    netServiceManager = nil;
+    
+    if (appBrowserController) {
+        // Make sure to get rid of the AppBrowser's socket delegate
+        // or a race condition may occur where the AppBrowser recieves
+        // a call indicating that has a socket error and passes this
+        // information to a deallocated RootViewController before the
+        // RootViewController has a chance to deallocate the AppBrowser.
+        appBrowserController.delegate = nil;
+        self.appBrowserController = nil;
+    }
+    
+    self.currentTVName = nil;
+    self.delegate = nil;
+}
+
 @end
+
+
+
