@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TPAppViewController.h"
 
 @protocol AppBrowserControllerDelegate <NSObject>
 
@@ -25,7 +26,7 @@
     
     NSMutableArray *appsAvailable;
     NSString *currentAppName;
-    // TPAppViewController *appViewController;
+    TPAppViewController *appViewController;
 }
 
 - (void)setupService:(NSInteger)p
@@ -46,6 +47,6 @@
 @property (assign) id <AppBrowserControllerDelegate> delegate;
 @property (readonly) NSMutableArray *appsAvailable;
 @property (readonly) NSString *currentAppName;
-//@property (assign) TPAppViewController *appViewController;
+@property (assign) TPAppViewController *appViewController;
 
 @end

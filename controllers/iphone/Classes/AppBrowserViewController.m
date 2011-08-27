@@ -16,7 +16,7 @@
 @synthesize currentAppName;
 @synthesize pushingViewController;
 @synthesize socketDelegate;
-@synthesize gestureViewController;
+@synthesize appViewController;
 
 /*
 @synthesize appShopButton;
@@ -44,7 +44,7 @@
 
 /**
  * Called by RootViewController after a service is resolved. Creates a
- * GestureViewController and sends GestureViewController the host and port
+ * TPAppViewController and sends TPAppViewController the host and port
  * it will use for establishing the socket it will use for an initial
  * connection with Trickplay and communicating with Trickplay asynchronously.
  */
@@ -56,11 +56,11 @@
     
     viewDidAppear = NO;
     
-    [self createGestureViewWithPort:p hostName:h];
+    [self createTPAppViewWithPort:p hostName:h];
 }
 
 /**
- * Pushes the GestureViewController to the top of the navigation stack making it
+ * Pushes the TPAppViewController to the top of the navigation stack making it
  * the visible view controller.
  */
 - (void)pushApp {
@@ -74,7 +74,7 @@
     [[self navigationItem] setBackBarButtonItem: newBackButton];
     [newBackButton release];
     
-    [self.navigationController pushViewController:gestureViewController animated:YES];
+    [self.navigationController pushViewController:appViewController animated:YES];
 }
 
 #pragma mark -
@@ -85,7 +85,7 @@
  * on Trickplay by asking it over the network.
  */
 - (BOOL)hasRunningApp {
-    if (![gestureViewController hasConnection]) {
+    if (![appViewController hasConnection]) {
         return NO;
     }
     NSDictionary *currentAppInfo = [self getCurrentAppInfo];
@@ -108,11 +108,11 @@
  */
 - (NSDictionary *)getCurrentAppInfo {
     NSLog(@"Getting Current App Info");
-    if (![gestureViewController hasConnection]) {
+    if (![appViewController hasConnection]) {
         return nil;
     }
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", appViewController.socketManager.host, appViewController.socketManager.port];
     //NSLog(@"JSONString = %@", JSONString);
     
     NSURL *dataURL = [NSURL URLWithString:JSONString];
@@ -131,7 +131,7 @@
     
     currentAppDelegate = delegate;
     
-    if (![gestureViewController hasConnection]) {
+    if (![appViewController hasConnection]) {
         self.currentAppName = nil;
         [delegate didReceiveCurrentAppInfo:nil];
         return;
@@ -148,7 +148,7 @@
     }
     
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
     currentAppInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
@@ -171,12 +171,12 @@
  */
 - (NSArray *)fetchApps {
     NSLog(@"Fetching Apps");
-    if (![gestureViewController hasConnection]) {
+    if (![appViewController hasConnection]) {
         return nil;
     }
     
     //grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
     
     NSURL *dataURL = [NSURL URLWithString:JSONString];
     NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
@@ -198,7 +198,7 @@
     
     fetchAppsDelegate = delegate;
     
-    if (![gestureViewController hasConnection]) {
+    if (![appViewController hasConnection]) {
         self.appsAvailable = nil;
         [delegate didReceiveAvailableAppsInfo:nil];
         return;
@@ -216,7 +216,7 @@
     
     
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
     fetchAppsConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
@@ -297,7 +297,7 @@
     dispatch_queue_t launchApp_queue = dispatch_queue_create("launchAppQueue", NULL);
     dispatch_async(launchApp_queue, ^(void){
         NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
-        NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", gestureViewController.socketManager.host, gestureViewController.socketManager.port, appID];
+        NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", appViewController.socketManager.host, appViewController.socketManager.port, appID];
         NSLog(@"Launching app via url '%@'", launchString);
         NSURL *launchURL = [NSURL URLWithString:launchString];
         NSData *launchData = [NSData dataWithContentsOfURL:launchURL];
@@ -309,24 +309,24 @@
 }
 
 /**
- * Creates the GestureViewController, gives it a port and host name to establish
+ * Creates the TPAppViewController, gives it a port and host name to establish
  * a connection to a service, and tells it to establish this connection.
  */
-- (void)createGestureViewWithPort:(NSInteger)port hostName:(NSString *)hostName {
-    gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
+- (void)createTPAppViewWithPort:(NSInteger)port hostName:(NSString *)hostName {
+    appViewController = [[TPAppViewController alloc] initWithNibName:@"TPAppViewController" bundle:nil];
     
-    gestureViewController.socketDelegate = self;
+    appViewController.socketDelegate = self;
     
     CGFloat
     x = self.view.frame.origin.x,
     y = self.view.frame.origin.y,
     width = self.view.frame.size.width,
     height = self.view.frame.size.height;
-    gestureViewController.view.frame = CGRectMake(x, y, width, height);
-    [gestureViewController setupService:port hostname:hostName thetitle:@"Current Service"];
-    if (![gestureViewController startService]) {
-        [gestureViewController release];
-        gestureViewController = nil;
+    appViewController.view.frame = CGRectMake(x, y, width, height);
+    [appViewController setupService:port hostname:hostName thetitle:@"Current Service"];
+    if (![appViewController startService]) {
+        [appViewController release];
+        appViewController = nil;
     }
 }
 
@@ -354,7 +354,7 @@
 //*/
 
 - (void)viewDidAppear:(BOOL)animated {
-    if (self.navigationController.visibleViewController == self && (!gestureViewController || !gestureViewController.socketManager)) {
+    if (self.navigationController.visibleViewController == self && (!appViewController || !appViewController.socketManager)) {
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
     
@@ -371,7 +371,7 @@
 */
 
 #pragma mark -
-#pragma mark GestureViewControllerSocketDelegate stuff
+#pragma mark TPAppViewControllerSocketDelegate stuff
 
 /**
  * Called when a socket error occurs.
@@ -513,7 +513,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     }
     
     if (!currentAppName || [(NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"] compare:currentAppName] !=  NSOrderedSame) {
-        [gestureViewController clean];
+        [appViewController clean];
         [self launchApp:(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row]];
     }
     
@@ -568,10 +568,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (appsAvailable) {
         [appsAvailable release];
     }
-    if (gestureViewController) {
-        gestureViewController.socketDelegate = nil;
-        [gestureViewController release];
-        gestureViewController = nil;
+    if (appViewController) {
+        appViewController.socketDelegate = nil;
+        [appViewController release];
+        appViewController = nil;
     }
     if (currentAppName) {
         [currentAppName release];

@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <YAJLiOS/YAJL.h>
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
 
 @protocol AppBrowserDelegate <NSObject>
 
@@ -24,7 +24,7 @@
  *
  * Queries Trickplay for its available apps via a URL Request using an
  * HTTP port (the port number is received from a welcome message which 
- * Trickplay sends to the App Browser's associated GestureViewController).
+ * Trickplay sends to the App Browser's associated TPAppViewController).
  * The data received from the URL Request is a JSON string containing a
  * list of apps avaible for the connected service. The AppBrowser then
  * lists these available apps in a UITableView so the user may select them;
@@ -33,7 +33,7 @@
  * Refer to AppBrowserViewController.xib for the AppBrowser's view.
  */
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
-UITableViewDataSource, GestureViewControllerSocketDelegate> {
+UITableViewDataSource, TPAppViewControllerSocketDelegate> {
     /*
     UIBarButtonItem *appShopButton;
     UIBarButtonItem *showcaseButton;
@@ -47,7 +47,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     // An array of JSON strings containing information of apps available
     // on the Television/Trickplay
     NSMutableArray *appsAvailable;
-    GestureViewController *gestureViewController;
+    TPAppViewController *appViewController;
     
     // Name of the current app running on Trickplay
     NSString *currentAppName;
@@ -55,8 +55,8 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     UIImageView *currentAppIndicator;
     
     // YES if the NavigationViewController is in the middle of animating
-    // pushing the GestureViewController or if the visible view is the
-    // GestureViewController. Initialized to NO and set back to NO
+    // pushing the TPAppViewController or if the visible view is the
+    // TPAppViewController. Initialized to NO and set back to NO
     // when the AppBrowserViewController (self) calls viewDidAppear.
     BOOL pushingViewController;
     
@@ -76,7 +76,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
     
     // Refers to the RootViewController; informs the view controller
     // if a socket having an error or closing/ending
-    id <GestureViewControllerSocketDelegate> socketDelegate;
+    id <TPAppViewControllerSocketDelegate> socketDelegate;
 }
 
 // Exposed properties
@@ -89,14 +89,14 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 @property (retain) NSMutableArray *appsAvailable;
 @property (nonatomic, retain) NSString *currentAppName;
 @property (nonatomic, assign) BOOL pushingViewController;
-@property (nonatomic, assign) GestureViewController *gestureViewController;
+@property (nonatomic, assign) TPAppViewController *appViewController;
 
-@property (nonatomic, assign) id <GestureViewControllerSocketDelegate> socketDelegate;
+@property (nonatomic, assign) id <TPAppViewControllerSocketDelegate> socketDelegate;
 
 // Exposed methods
 - (IBAction) appShopButtonClick;
 - (IBAction) showcaseButtonClick;
-- (void)createGestureViewWithPort:(NSInteger)p hostName:(NSString *)h;
+- (void)createTPAppViewWithPort:(NSInteger)p hostName:(NSString *)h;
 - (NSDictionary *)getCurrentAppInfo;
 - (NSArray *)fetchApps;
 - (void)getAvailableAppsInfoWithDelegate:(id<AppBrowserDelegate>)delegate;
@@ -107,7 +107,7 @@ UITableViewDataSource, GestureViewControllerSocketDelegate> {
 - (BOOL)hasRunningApp;
 - (void)pushApp;
 
-// GestureViewControllerSocketDelegate methods
+// TPAppViewControllerSocketDelegate methods
 - (void)socketErrorOccurred;
 - (void)streamEndEncountered;
 
