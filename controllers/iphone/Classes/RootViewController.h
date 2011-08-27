@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "NetServiceManager.h"
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
 #import "AppBrowserViewController.h"
 
 /**
@@ -24,7 +24,7 @@
 
 @interface RootViewController : UITableViewController <UITableViewDelegate, 
 UITableViewDataSource, UINavigationControllerDelegate,
-GestureViewControllerSocketDelegate, NetServiceManagerDelegate,
+TPAppViewControllerSocketDelegate, NetServiceManagerDelegate,
 AppBrowserDelegate> {
     UIWindow *window;
 

@@ -158,10 +158,14 @@
     // and then push the app to the top of the stack. Meanwhile stop the
     // NetServiceManager from searching for advertised services to prevent
     // the network from bogging down.
+    
+    // TODO: use semaphore to guarentee this call completes before appBrowserViewController
+    // is deallocated
     dispatch_queue_t hasRunningApp_queue = dispatch_queue_create("hasRunningAppQueue", NULL);
     dispatch_async(hasRunningApp_queue, ^(void){
         if ([appBrowserViewController hasRunningApp]) {
             dispatch_async(dispatch_get_main_queue(), ^{
+                // TODO: Socket may close before this executes and cause inconsistancy
                 [self.navigationController pushViewController:appBrowserViewController animated:NO];
                 [appBrowserViewController pushApp];
                 [netServiceManager stop];
@@ -173,6 +177,7 @@
                 // If there are apps available, push the AppBrowser to the top of the
                 // stack and stop searching for service advertisements.
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    // TODO: Socket may close before this executes and cause inconsistancy
                     [self.navigationController pushViewController:appBrowserViewController animated:YES];
                     [appBrowserViewController.theTableView reloadData];
                     [netServiceManager stop];
@@ -222,8 +227,8 @@
  */
 - (void)didNotResolveService {
     NSLog(@"RootViewController didNotResolveService");
-    if (appBrowserViewController.gestureViewController) {
-        if (self.navigationController.visibleViewController == appBrowserViewController.gestureViewController) {
+    if (appBrowserViewController.appViewController) {
+        if (self.navigationController.visibleViewController == appBrowserViewController.appViewController) {
             [self.navigationController popViewControllerAnimated:NO];
         }
     }
@@ -286,8 +291,8 @@
 
     // if popping back to self
     if (viewController == self) {
-        if (appBrowserViewController && appBrowserViewController.gestureViewController
-        && ![appBrowserViewController.gestureViewController hasConnection]) {
+        if (appBrowserViewController && appBrowserViewController.appViewController
+        && ![appBrowserViewController.appViewController hasConnection]) {
                 
             [appBrowserViewController release];
             appBrowserViewController = nil;
@@ -346,7 +351,7 @@
 }
 
 /**
- * GestureViewControllerSocketDelegate callback called from AppBrowserViewController
+ * TPAppViewControllerSocketDelegate callback called from AppBrowserViewController
  * when an error occurs over the network.
  */
 - (void)socketErrorOccurred {
@@ -356,7 +361,7 @@
 }
 
 /**
- * GestureViewControllerSocketDelegate callback called from AppBrowserViewController
+ * TPAppViewControllerSocketDelegate callback called from AppBrowserViewController
  * when the stream socket closes.
  */
 - (void)streamEndEncountered {
