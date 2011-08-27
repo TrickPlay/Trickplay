@@ -32,6 +32,9 @@ layout["ui3"].button11.pressed = function() -- Handler for button11.pressed in t
 	layout["ui3"].steps_txt.text = ""
 	layout["ui3"].pass_results_txt.text = ""
 	layout["ui3"].fail_results_txt.text = ""
+	layout["ui3"].pass_summary_txt.text = ""
+	layout["ui3"].fail_summary_txt.text = ""
+	layout["ui3"].total_tests_txt.text = ""
 
 
 end
@@ -68,8 +71,11 @@ end
 
 -- UI2.BUTTON11 SECTION
 layout["ui2"].button11.pressed = function() -- Handler for button11.pressed in this screen
-	steps_txt.text = ""
-	results_txt.text = ""
+	layout["ui2"].results_col_1_txt.text = ""
+	layout["ui2"].results_col_2_txt.text = ""
+	layout["ui2"].results_col_3_txt.text = ""
+	layout["ui2"].results_col_4_txt.text = ""
+	
 end
 layout["ui2"].button11.released = function() -- Handler for button11.released in this screen
 end

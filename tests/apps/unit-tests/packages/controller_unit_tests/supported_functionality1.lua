@@ -1,15 +1,8 @@
---[[
-Filename: supportedFunctionality1.lua
-Author: Peter von dem Hagen
-Date: April 29, 2011
-Description:  Verify that the iphone returns the correct api calls for supported functionality.
---]]
-
 
 -- Test Set up --
 
 -- Tests --
-function test_controllers_connected ()
+function test_controller_connected ()
 	assert_true ( device_app_connected, "controller not connected")
 end
 
@@ -55,7 +48,7 @@ end
 
 
 function test_controller_has_audio_clips ()
-	assert_true ( device_has_audio_clips, "has_audio_clips ~= true")
+	assert_true ( device_has_audio_clips, "has_audio_clips ~= true\n ** Ignore. Not currently implemented. **\n")
 end
 
 

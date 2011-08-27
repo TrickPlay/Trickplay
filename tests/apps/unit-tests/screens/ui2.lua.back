@@ -26,13 +26,13 @@ function rect5:on_key_down(key)
 			rect5.focus[key]()
 		elseif screen:find_child(rect5.focus[key]) then
 			if rect5.on_focus_out then
-				rect5.on_focus_out()
+				rect5.on_focus_out(key)
 			end
 			screen:find_child(rect5.focus[key]):grab_key_focus()
 			if screen:find_child(rect5.focus[key]).on_focus_in then
 				screen:find_child(rect5.focus[key]).on_focus_in(key)
 			end
-			end
+		end
 	end
 	return true
 end
@@ -66,7 +66,7 @@ button0.x_rotation = {0,0,0}
 button0.y_rotation = {0,0,0}
 button0.z_rotation = {0,0,0}
 button0.opacity = 255
-button0.extra.focus = {[65293] = "button0", [65363] = "button11", }
+button0.extra.focus = {[keys.Return] = "button0", [keys.Right] = "button11", }
 
 function button0:on_key_down(key)
 	if button0.focus[key] then
@@ -74,13 +74,13 @@ function button0:on_key_down(key)
 			button0.focus[key]()
 		elseif screen:find_child(button0.focus[key]) then
 			if button0.on_focus_out then
-				button0.on_focus_out()
+				button0.on_focus_out(key)
 			end
 			screen:find_child(button0.focus[key]):grab_key_focus()
 			if screen:find_child(button0.focus[key]).on_focus_in then
 				screen:find_child(button0.focus[key]).on_focus_in(key)
 			end
-			end
+		end
 	end
 	return true
 end
@@ -114,7 +114,7 @@ button1.x_rotation = {0,0,0}
 button1.y_rotation = {0,0,0}
 button1.z_rotation = {0,0,0}
 button1.opacity = 255
-button1.extra.focus = {[65293] = "button1", [65361] = "button11", }
+button1.extra.focus = {[keys.Return] = "button1", [keys.Left] = "button11", }
 
 function button1:on_key_down(key)
 	if button1.focus[key] then
@@ -122,13 +122,13 @@ function button1:on_key_down(key)
 			button1.focus[key]()
 		elseif screen:find_child(button1.focus[key]) then
 			if button1.on_focus_out then
-				button1.on_focus_out()
+				button1.on_focus_out(key)
 			end
 			screen:find_child(button1.focus[key]):grab_key_focus()
 			if screen:find_child(button1.focus[key]).on_focus_in then
 				screen:find_child(button1.focus[key]).on_focus_in(key)
 			end
-			end
+		end
 	end
 	return true
 end
@@ -161,13 +161,13 @@ function rectangle28:on_key_down(key)
 			rectangle28.focus[key]()
 		elseif screen:find_child(rectangle28.focus[key]) then
 			if rectangle28.on_focus_out then
-				rectangle28.on_focus_out()
+				rectangle28.on_focus_out(key)
 			end
 			screen:find_child(rectangle28.focus[key]):grab_key_focus()
 			if screen:find_child(rectangle28.focus[key]).on_focus_in then
 				screen:find_child(rectangle28.focus[key]).on_focus_in(key)
 			end
-			end
+		end
 	end
 	return true
 end
@@ -197,10 +197,29 @@ local text30 = Text
 		cursor_visible = false,
 	}
 
+text30.extra.focus = {}
+
+function text30:on_key_down(key)
+	if text30.focus[key] then
+		if type(text30.focus[key]) == "function" then
+			text30.focus[key]()
+		elseif screen:find_child(text30.focus[key]) then
+			if text30.on_focus_out then
+				text30.on_focus_out(key)
+			end
+			screen:find_child(text30.focus[key]):grab_key_focus()
+			if screen:find_child(text30.focus[key]).on_focus_in then
+				screen:find_child(text30.focus[key]).on_focus_in(key)
+			end
+		end
+	end
+	return true
+end
+
 text30.extra.reactive = true
 
 
-results_col_3_txt = Text
+local results_col_3_txt = Text
 	{
 		color = {255,255,255,255},
 		font = "DejaVu Sans 18px",
@@ -230,13 +249,13 @@ function results_col_3_txt:on_key_down(key)
 			results_col_3_txt.focus[key]()
 		elseif screen:find_child(results_col_3_txt.focus[key]) then
 			if results_col_3_txt.on_focus_out then
-				results_col_3_txt.on_focus_out()
+				results_col_3_txt.on_focus_out(key)
 			end
 			screen:find_child(results_col_3_txt.focus[key]):grab_key_focus()
 			if screen:find_child(results_col_3_txt.focus[key]).on_focus_in then
 				screen:find_child(results_col_3_txt.focus[key]).on_focus_in(key)
 			end
-			end
+		end
 	end
 	return true
 end
@@ -244,7 +263,7 @@ end
 results_col_3_txt.extra.reactive = true
 
 
-results_col_1_txt = Text
+local results_col_1_txt = Text
 	{
 		color = {255,255,255,255},
 		font = "DejaVu Sans 18px",
@@ -274,13 +293,13 @@ function results_col_1_txt:on_key_down(key)
 			results_col_1_txt.focus[key]()
 		elseif screen:find_child(results_col_1_txt.focus[key]) then
 			if results_col_1_txt.on_focus_out then
-				results_col_1_txt.on_focus_out()
+				results_col_1_txt.on_focus_out(key)
 			end
 			screen:find_child(results_col_1_txt.focus[key]):grab_key_focus()
 			if screen:find_child(results_col_1_txt.focus[key]).on_focus_in then
 				screen:find_child(results_col_1_txt.focus[key]).on_focus_in(key)
 			end
-			end
+		end
 	end
 	return true
 end
@@ -288,7 +307,7 @@ end
 results_col_1_txt.extra.reactive = true
 
 
-results_col_2_txt = Text
+local results_col_2_txt = Text
 	{
 		color = {255,255,255,255},
 		font = "DejaVu Sans 18px",
@@ -318,13 +337,13 @@ function results_col_2_txt:on_key_down(key)
 			results_col_2_txt.focus[key]()
 		elseif screen:find_child(results_col_2_txt.focus[key]) then
 			if results_col_2_txt.on_focus_out then
-				results_col_2_txt.on_focus_out()
+				results_col_2_txt.on_focus_out(key)
 			end
 			screen:find_child(results_col_2_txt.focus[key]):grab_key_focus()
 			if screen:find_child(results_col_2_txt.focus[key]).on_focus_in then
 				screen:find_child(results_col_2_txt.focus[key]).on_focus_in(key)
 			end
-			end
+		end
 	end
 	return true
 end
@@ -358,7 +377,7 @@ button11.x_rotation = {0,0,0}
 button11.y_rotation = {0,0,0}
 button11.z_rotation = {0,0,0}
 button11.opacity = 255
-button11.extra.focus = {[65363] = "button1", [65293] = "button11", [65361] = "button0", }
+button11.extra.focus = {[keys.Right] = "button1", [keys.Return] = "button11", [keys.Left] = "button0", }
 
 function button11:on_key_down(key)
 	if button11.focus[key] then
@@ -366,13 +385,13 @@ function button11:on_key_down(key)
 			button11.focus[key]()
 		elseif screen:find_child(button11.focus[key]) then
 			if button11.on_focus_out then
-				button11.on_focus_out()
+				button11.on_focus_out(key)
 			end
 			screen:find_child(button11.focus[key]):grab_key_focus()
 			if screen:find_child(button11.focus[key]).on_focus_in then
 				screen:find_child(button11.focus[key]).on_focus_in(key)
 			end
-			end
+		end
 	end
 	return true
 end
@@ -380,7 +399,7 @@ end
 button11.extra.reactive = true
 
 
-results_col_4_txt = Text
+local results_col_4_txt = Text
 	{
 		color = {255,255,255,255},
 		font = "DejaVu Sans 18px",
@@ -410,13 +429,13 @@ function results_col_4_txt:on_key_down(key)
 			results_col_4_txt.focus[key]()
 		elseif screen:find_child(results_col_4_txt.focus[key]) then
 			if results_col_4_txt.on_focus_out then
-				results_col_4_txt.on_focus_out()
+				results_col_4_txt.on_focus_out(key)
 			end
 			screen:find_child(results_col_4_txt.focus[key]):grab_key_focus()
 			if screen:find_child(results_col_4_txt.focus[key]).on_focus_in then
 				screen:find_child(results_col_4_txt.focus[key]).on_focus_in(key)
 			end
-			end
+		end
 	end
 	return true
 end

@@ -10,7 +10,7 @@ Description:  Verify that the iphone returns the correct api calls for supported
 
 -- Tests --
 
-function test_controllers_declare_resource_status ()
+function test_controller_declare_resource_status ()
 	assert_true ( declare_resource_status,  "declare_resource not returning true status")
 end
 
