@@ -111,6 +111,7 @@ Group: Reference  {
 		}
 		
 		Group: Interfaces {
+			File: URLRequestCancel* (no auto-title, docs/rte/reference/url_request_cancel_ph.txt)
 			File: URLResponse* (no auto-title, docs/rte/reference/url_response_ph.txt)
 		}
 	}
