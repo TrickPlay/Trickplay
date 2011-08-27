@@ -10,6 +10,11 @@
 
 @implementation AppBrowserController
 
+@synthesize appsAvailable;
+@synthesize delegate;
+@synthesize currentAppName;
+//@synthesize appViewController;
+
 - (id)init
 {
     self = [super init];

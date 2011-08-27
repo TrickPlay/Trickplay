@@ -1,5 +1,5 @@
 //
-//  GestureViewController.h
+//  TPAppViewController.h
 //  TrickplayController_v2
 //
 //  Created by Rex Fenley on 2/14/11.
@@ -14,7 +14,7 @@
 /**
  * The AdvancedUIDelegate protocol implemented by AdvancedUIObjectManager
  * registers a delegate which is passed asyncronous calls made for AdvancedUI.
- * (Given that the GestureViewController is the only object which utilizes
+ * (Given that the TPAppViewController is the only object which utilizes
  * asynchronous socket communication with Trickplay, it is the only object
  * which has one of these delgates.)
  *
