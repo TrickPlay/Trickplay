@@ -1,0 +1,46 @@
+[
+{
+"name": "00002_ui_element.lua",
+"active": "true"
+},
+{
+"name": "00003_ui_element.lua",
+"active": "true"
+},
+{
+"name": "00004_rectangle.lua",
+"active": "true"
+},
+{
+"name": "00005_text.lua",
+"active": "true"
+},
+{
+"name": "00006_image.lua",
+"active": "true"
+},
+{
+"name": "00007_group.lua",
+"active": "true"
+},
+{
+"name": "00008_group.lua",
+"active": "true"
+},
+{
+"name": "00009_accelerometer.lua",
+"active": "true"
+},
+{
+"name": "00010_touch.lua",
+"active": "true"
+},
+{
+"name": "00011_sound.lua",
+"active": "true"
+},
+{
+"name": "00012_camera.lua",
+"active": "true"
+}
+]
