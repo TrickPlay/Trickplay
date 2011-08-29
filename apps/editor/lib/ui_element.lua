@@ -1518,10 +1518,14 @@ function ui_element.button(t)
 						end 
 					end 
 				end 
-
+				
 				if current_focus ~= b_group then 
 					if current_focus then 
+						local temp_focus = current_focus
 		     			current_focus.on_focus_out(nil,true)
+						if temp_focus.is_in_menu == true then 
+							temp_focus.fade_in = false
+						end 
 						if prev_tab then 
 							prev_tab.on_focus_out(nil,true)
 						end 
@@ -5548,6 +5552,9 @@ button
 						umbrella.press_enter()
 					end 
                     umbrella.fade_out()
+					if button.fade_in then -- ?
+						button.fade_in = false
+					end
 					umbrella:grab_key_focus()
 					return true
 				end 
@@ -5715,6 +5722,7 @@ button
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f(item.parameter) end
                             button.on_focus_out() 
+							button.fade_in = false
                         end
                         function ui_ele:on_motion()
                             for _,s_i in ipairs(selectable_items) do
@@ -5734,6 +5742,7 @@ button
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f(item.parameter) end
                             umbrella.fade_out()
+							button.fade_in = false
                         end
                         function ui_ele:on_motion()
                             for _,s_i in ipairs(selectable_items) do
@@ -5749,6 +5758,7 @@ button
                             if dropDownMenu.opacity == 0 then return end
                             if item.f then item.f(item.parameter) end
                             umbrella.fade_out()
+							button.fade_in = false
                         end
                         function ui_ele:on_motion()
                             for _,s_i in ipairs(selectable_items) do

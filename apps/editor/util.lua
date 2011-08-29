@@ -280,7 +280,6 @@ function util.find_container(x_pos, y_pos)
 			if j.extra then 
 				if util.is_this_container(j) then
 					table.insert(c_tbl, j)
-					print("--", j.name)
 				end 
 			end 
 		end 
@@ -300,6 +299,7 @@ function util.create_on_button_down_f(v)
 	local org_object, new_object 
 
 	function v:on_button_down(x,y,button,num_clicks)
+
 	   if (input_mode ~= hdr.S_RECTANGLE) then 
 	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
 	     		if(input_mode == hdr.S_SELECT) and  (screen:find_child("msgw") == nil) then

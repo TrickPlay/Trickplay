@@ -1,5 +1,25 @@
 local screen_ui = {}
 
+	
+local m_init_x = 0 
+local m_init_y = 0 
+local multi_select_border
+
+
+function screen_ui.n_selected(obj, call_by_inspector)
+     if(obj.name == nil) then 
+		return 
+	 end 
+     if(obj.type ~= "Video") then 
+        screen:remove(screen:find_child(obj.name.."border"))
+        if (screen:find_child(obj.name.."a_m") ~= nil) then 
+	     	screen:remove(screen:find_child(obj.name.."a_m"))
+        end
+        table.remove(selected_objs)
+        obj.extra.selected = false
+     end 
+end  
+
 function screen_ui.draw_selected_container_border(x,y) 
 
 	local prev_selected_container
@@ -93,112 +113,110 @@ end
 function screen_ui.selected(obj, call_by_inspector)
 
 	if obj.name == nil then return end 
-
-	if(shift == false)then 
+	if (shift == false) then 
 		while(#selected_objs ~= 0) do
 			local t_border = screen:find_child(table.remove(selected_objs)) 
 			if(t_border ~= nil) then 
 				-- t_obj 만 찾아서 n_select 불러 주면 되는걸 여기서 중복 되게 하고 있는건 아닌지 확인요망 
+				screen:remove(t_border)
 
 		    	local i, j = string.find(t_border.name,"border")
 		    	t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
 
-				screen:remove(t_border)
-
-            	if screen:find_child(t_obj.name.."a_m") then 
+            	if screen:find_child(t_obj.name.."a_m") ~= nil then 
      				screen:remove(screen:find_child(t_obj.name.."a_m"))
      			end
-
 		    	if(t_obj ~= nil) then 
 					t_obj.extra.selected = false
 	        	end
-
 			end
 		end -- while 
+	end 
 
-	   	local obj_border = Rectangle{
+	local obj_border = Rectangle{
    			name = obj.name.."border",
    			color = {0,0,0,0},
 	    	border_color = {255,25,25,255},
  	  		border_width = 2,
-		}
+	}
 
-	   	local group_pos
-		local bumo	
-		local tab_extra
+	local group_pos
+	local bumo	
+	local tab_extra
 
-   		if(obj.extra.is_in_group == true)then 
-			for i, c in pairs(g.children) do
-				if obj.name == c.name then 
-					break
-				else 
-					if c.extra then 
-						if c.extra.type == "ScrollPane" or c.extra.type == "ArrowPane" then 
-							for k, e in pairs (c.content.children) do 
-								if e.name == obj.name then 
-									bumo = c	
-								end 
-							end 
-						elseif c.extra.type == "TabBar" then 
-							for h,q in pairs (c.tabs) do 
-								for k,w in pairs (q.children) do 
-									if w.name == obj.name then 
-										tab_extra = c.ui_height
-									end
-								end
-							end 	
-						end 
-					end
-				end
-    		end
-
-			group_pos = util.get_group_position(obj)
-			if bumo then 
-		   		obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
+   	if(obj.extra.is_in_group == true)then 
+		for i, c in pairs(g.children) do
+			if obj.name == c.name then 
+				break
 			else 
-     	   		obj_border.x = obj.x + group_pos[1]
-     	   		obj_border.y = obj.y + group_pos[2]
+				if c.extra then 
+					if c.extra.type == "ScrollPane" or c.extra.type == "ArrowPane" then 
+						for k, e in pairs (c.content.children) do 
+							if e.name == obj.name then 
+								bumo = c	
+							end 
+						end 
+					elseif c.extra.type == "TabBar" then 
+						for h,q in pairs (c.tabs) do 
+							for k,w in pairs (q.children) do 
+								if w.name == obj.name then 
+									tab_extra = c.ui_height
+								end
+							end
+						end 	
+					end 
+				end
 			end
-			obj_border.extra.group_postion = obj.extra.group_position
-   		else 
-     		obj_border.position = obj.position
-   		end
-   	
-		obj_border.anchor_point = obj.anchor_point
-    	obj_border.x_rotation = obj.x_rotation
-    	obj_border.y_rotation = obj.y_rotation
-    	obj_border.z_rotation = obj.z_rotation
-    	obj_border.size = obj.size
-    	if(obj.scale ~= nil) then 
-    		obj_border.scale = obj.scale
-    	end 
+    	end
 
-    	if (screen:find_child(obj.name.."a_m") ~= nil) then 
-     		screen:remove(screen:find_child(obj.name.."a_m"))
-    	end
+		group_pos = util.get_group_position(obj)
+		if bumo then 
+			obj_border.x, obj_border.y = bumo:screen_pos_of_child(obj) 	
+		else 
+     		obj_border.x = obj.x + group_pos[1]
+     	   	obj_border.y = obj.y + group_pos[2]
+		end
+		obj_border.extra.group_postion = obj.extra.group_position
+   	else 
+    	obj_border.position = obj.position
+   	end
+   	
+	obj_border.anchor_point = obj.anchor_point
+    obj_border.x_rotation = obj.x_rotation
+    obj_border.y_rotation = obj.y_rotation
+    obj_border.z_rotation = obj.z_rotation
+    obj_border.size = obj.size
+
+    if(obj.scale ~= nil) then 
+    	obj_border.scale = obj.scale
+   	end 
+
+    if (screen:find_child(obj.name.."a_m") ~= nil) then 
+    	screen:remove(screen:find_child(obj.name.."a_m"))
+    end
 	
-    	anchor_mark= ui.factory.draw_anchor_pointer()
-    	if(obj.extra.is_in_group == true)then 
-			if bumo then 
-    			anchor_mark.position = {obj_border.x, obj_border.y, obj_border.z}
-			else
-    			anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
-			end
-    	else 
-        	anchor_mark.position = {obj.x, obj.y, obj.z}
-    	end
+    anchor_mark= ui.factory.draw_anchor_pointer()
+    if(obj.extra.is_in_group == true)then 
+		if bumo then 
+    		anchor_mark.position = {obj_border.x, obj_border.y, obj_border.z}
+		else
+    		anchor_mark.position = {obj.x + group_pos[1] , obj.y + group_pos[2], obj.z}
+		end
+    else 
+   		anchor_mark.position = {obj.x, obj.y, obj.z}
+    end
 	
-		if tab_extra then 
-			anchor_mark.y = anchor_mark.y + tab_extra 
-			obj_border.y = obj_border.y + tab_extra
-		end 
-	
-    	anchor_mark.name = obj.name.."a_m"
-    	screen:add(anchor_mark)
-    	screen:add(obj_border)
-    	obj.extra.selected = true
-    	table.insert(selected_objs, obj_border.name)
+	if tab_extra then 
+		anchor_mark.y = anchor_mark.y + tab_extra 
+		obj_border.y = obj_border.y + tab_extra
 	end 
+	
+    anchor_mark.name = obj.name.."a_m"
+    screen:add(anchor_mark)
+    screen:add(obj_border)
+    obj.extra.selected = true
+    table.insert(selected_objs, obj_border.name)
+
 end  
 
 function screen_ui.n_select(obj, call_by_inspector, drag)
@@ -233,20 +251,6 @@ function screen_ui.n_select(obj, call_by_inspector, drag)
         	obj.extra.selected = false
      	end 
     end
-end  
-
-function screen_ui.n_selected(obj, call_by_inspector)
-     if(obj.name == nil) then 
-		return 
-	 end 
-     if(obj.type ~= "Video") then 
-        screen:remove(screen:find_child(obj.name.."border"))
-        if (screen:find_child(obj.name.."a_m") ~= nil) then 
-	     	screen:remove(screen:find_child(obj.name.."a_m"))
-        end
-        table.remove(selected_objs)
-        obj.extra.selected = false
-     end 
 end  
 
 function screen_ui.nselect_all ()
@@ -296,28 +300,23 @@ function screen_ui.move_selected_obj(direction)
 	end 
 end
 
-	
-local m_init_x = 0 
-local m_init_y = 0 
-local multi_select_border
-
 function screen_ui.multi_select(x,y) 
-
+	
  	m_init_x = x -- origin x
-        m_init_y = y -- origin y
+    m_init_y = y -- origin y
 
-        multi_select_border = Rectangle{
-                name="multi_select_border", 
-                --border_color= {0,255,0},
-                border_color= {255,25,25,255},
-                border_width=0,
-                color= {0,0,0,0},
-                size = {1,1},
-                position = {x,y},
+    multi_select_border = Rectangle{
+        name="multi_select_border", 
+        --border_color= {0,255,0},
+        border_color= {255,25,25,255},
+        border_width=0,
+        color= {0,0,0,0},
+        size = {1,1},
+        position = {x,y},
 		opacity = 255
-        }
-        multi_select_border.reactive = false
-        screen:add(multi_select_border)
+    }
+    multi_select_border.reactive = false
+    screen:add(multi_select_border)
 end 
 
 function screen_ui.multi_select_done(x,y) 
@@ -326,26 +325,27 @@ function screen_ui.multi_select_done(x,y)
         multi_select_border.size = { math.abs(x-m_init_x), math.abs(y-m_init_y) }
 
         if(x-m_init_x < 0) then
-	   multi_select_border.x = x 
-	   m_init_x = x
-	   x = m_init_x + multi_select_border.w
+	   		multi_select_border.x = x 
+	   		m_init_x = x
+	   		x = m_init_x + multi_select_border.w
         end
+
         if(y-m_init_y < 0) then
-	   multi_select_border.y = y 
-	   m_init_y = y
-	   y = m_init_y + multi_select_border.h
+	   		multi_select_border.y = y 
+	   		m_init_y = y
+	   		y = m_init_y + multi_select_border.h
         end
 
         for i, v in pairs(g.children) do
-				if v.name then 
-             if g:find_child(v.name) then
-		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
-		(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
-			if(shift == true and v.extra.selected == false) then 
-		             screen_ui.selected(v)
-			end 
-		end 
-             end
+			if v.name then 
+        	    if g:find_child(v.name) then
+					if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
+					   (v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
+						if(shift == true and v.extra.selected == false) then 
+		             		screen_ui.selected(v)
+						end 
+					end 
+             	end
 			 end 
         end
 	
@@ -371,16 +371,23 @@ function screen_ui.multi_select_move(x,y)
 end
 
 function screen_ui.dragging_up(x,y)
+	if current_focus ~= nil and  current_focus.extra.type == "EditorButton" then 
+		local temp_focus = current_focus 
+		current_focus.on_focus_out()
+		temp_focus.on_focus_in()
+		return true
+	end 
+
 	if dragging then
-	    	local actor = unpack(dragging)
-	       	if actor.parent then 	
-		   		if actor.parent.name == "timeline" then 
-					local actor, dx , dy, pointer_up_f = unpack( dragging )
-					pointer_up_f(x,y,button,clicks_count) 
-					return true
-		   		end 
-	       	end 
-        end 	
+    	local actor = unpack(dragging)
+		if actor.parent then 	
+	   		if actor.parent.name == "timeline" then 
+				local actor, dx , dy, pointer_up_f = unpack( dragging )
+				pointer_up_f(x,y,button,clicks_count) 
+				return true
+		   	end 
+	    end
+	end 	
 end 
 
 function screen_ui.dragging(x,y)
@@ -582,8 +589,8 @@ function screen_ui.dragging(x,y)
 			if tab_extra then 
 				anchor_mark.y = anchor_mark.y + tab_extra
 		  	end 
-
 end 
+
 function screen_ui.cursor_setting()
 	if(input_mode == hdr.S_RECTANGLE) then 
 		editor_lb:set_cursor(34)
