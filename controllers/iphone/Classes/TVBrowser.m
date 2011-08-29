@@ -6,11 +6,11 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "TVBrowserController.h"
+#import "TVBrowser.h"
 
-@implementation TVBrowserController
+@implementation TVBrowser
 
-@synthesize appBrowserController;
+@synthesize appBrowser;
 @synthesize currentTVName;
 @synthesize delegate;
 
@@ -24,12 +24,12 @@
     return self;
 }
 
-- (id)initWithDelegate:(id<TVBrowserControllerDelegate>)theDelegate {
+- (id)initWithDelegate:(id<TVBrowserDelegate>)theDelegate {
     self = [super init];
     if (self) {
         delegate = theDelegate;
         self.currentTVName = nil;
-        self.appBrowserController = nil;
+        self.appBrowser = nil;
         // Initialize the NSNetServiceBrowser stuff
         // The netServiceManager manages advertisements from service broadcasts
         if (!netServiceManager) {
@@ -49,9 +49,9 @@
  * which will then begin browsing for advertised services.
  */
 - (void)handleSocketProblems {    
-    if (appBrowserController) {
-        [appBrowserController release];
-        appBrowserController = nil;
+    if (appBrowser) {
+        [appBrowser release];
+        appBrowser = nil;
         [currentTVName release];
         currentTVName = nil;
     }
@@ -105,7 +105,7 @@
 - (void)serviceResolved:(NSNetService *)service {
     NSLog(@"RootViewController serviceResolved");
     [netServiceManager stop];
-    [appBrowserController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
+    [appBrowser setupService:[service port] hostName:[service hostName] serviceName:[service name]];
     self.currentTVName = [service name];
 }
 
@@ -143,18 +143,20 @@
     [netServiceManager release];
     netServiceManager = nil;
     
-    if (appBrowserController) {
+    if (appBrowser) {
         // Make sure to get rid of the AppBrowser's socket delegate
         // or a race condition may occur where the AppBrowser recieves
         // a call indicating that has a socket error and passes this
         // information to a deallocated RootViewController before the
         // RootViewController has a chance to deallocate the AppBrowser.
-        appBrowserController.delegate = nil;
-        self.appBrowserController = nil;
+        appBrowser.delegate = nil;
+        self.appBrowser = nil;
     }
     
     self.currentTVName = nil;
     self.delegate = nil;
+    
+    [super dealloc];
 }
 
 @end

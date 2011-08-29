@@ -6,9 +6,9 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "AppBrowserController.h"
+#import "AppBrowser.h"
 
-@implementation AppBrowserController
+@implementation AppBrowser
 
 @synthesize appsAvailable;
 @synthesize delegate;
@@ -25,8 +25,12 @@
     return self;
 }
 
-- (void)setupService:(NSInteger)p hostname:(NSString *)h thetitle:(NSString *)n {
+- (void)setupService:(NSUInteger)port hostName:(NSString *)hostName serviceName:(NSString *)serviceName {
     
+}
+
+- (BOOL)startService {
+    return YES;
 }
 
 #pragma mark -
@@ -45,12 +49,10 @@
     if (!currentAppInfo) {
         return NO;
     }
-    // TODO: @syncronize any change in currentAppName to be thread safe
-    // TODO: always set currentAppName to nil upon release
-    if (currentAppName) {
-        [currentAppName release];
-    }
+    
     self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
+    
+    
     if (currentAppName && ![currentAppName isEqualToString:@"Empty"]) {
         return YES;
     }
@@ -65,11 +67,11 @@
  */
 - (NSDictionary *)getCurrentAppInfo {
     NSLog(@"Getting Current App Info");
-    if (![gestureViewController hasConnection]) {
+    if (![appViewController hasConnection]) {
         return nil;
     }
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", appViewController.socketManager.host, appViewController.socketManager.port];
     //NSLog(@"JSONString = %@", JSONString);
     
     NSURL *dataURL = [NSURL URLWithString:JSONString];
@@ -79,18 +81,18 @@
     return (NSDictionary *)[JSONData yajl_JSON];
 }
 
-- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
+- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)theDelegate {
     NSLog(@"Fetching Apps");
     
-    if (!delegate) {
-        return;
+    if (!theDelegate) {
+        theDelegate = delegate;
     }
     
-    currentAppDelegate = delegate;
+    currentAppDelegate = theDelegate;
     
-    if (![gestureViewController hasConnection]) {
+    if (![appViewController hasConnection]) {
         self.currentAppName = nil;
-        [delegate didReceiveCurrentAppInfo:nil];
+        [theDelegate didReceiveCurrentAppInfo:nil];
         return;
     }
     
@@ -105,14 +107,14 @@
     }
     
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
     currentAppInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
     
     if (!currentAppInfoConnection) {
         self.currentAppName = nil;
-        [delegate didReceiveCurrentAppInfo:nil];
+        [theDelegate didReceiveCurrentAppInfo:nil];
     }
 }
 
@@ -128,12 +130,12 @@
  */
 - (NSArray *)fetchApps {
     NSLog(@"Fetching Apps");
-    if (![gestureViewController hasConnection]) {
+    if (![appViewController hasConnection]) {
         return nil;
     }
     
     //grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
     
     NSURL *dataURL = [NSURL URLWithString:JSONString];
     NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
@@ -146,18 +148,18 @@
     return appsAvailable;
 }
 
-- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
+- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)theDelegate {
     NSLog(@"Fetching Apps");
     
-    if (!delegate) {
-        return;
+    if (!theDelegate) {
+        theDelegate = delegate;
     }
     
-    fetchAppsDelegate = delegate;
+    fetchAppsDelegate = theDelegate;
     
-    if (![gestureViewController hasConnection]) {
+    if (![appViewController hasConnection]) {
         self.appsAvailable = nil;
-        [delegate didReceiveAvailableAppsInfo:nil];
+        [theDelegate didReceiveAvailableAppsInfo:nil];
         return;
     }
     
@@ -173,14 +175,14 @@
     
     
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
     fetchAppsConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
     
     if (!fetchAppsConnection) {
         self.appsAvailable = nil;
-        [delegate didReceiveAvailableAppsInfo:nil];
+        [theDelegate didReceiveAvailableAppsInfo:nil];
     }
 }
 
@@ -254,7 +256,7 @@
     dispatch_queue_t launchApp_queue = dispatch_queue_create("launchAppQueue", NULL);
     dispatch_async(launchApp_queue, ^(void){
         NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
-        NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", gestureViewController.socketManager.host, gestureViewController.socketManager.port, appID];
+        NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", appViewController.socketManager.host, appViewController.socketManager.port, appID];
         NSLog(@"Launching app via url '%@'", launchString);
         NSURL *launchURL = [NSURL URLWithString:launchString];
         NSData *launchData = [NSData dataWithContentsOfURL:launchURL];
