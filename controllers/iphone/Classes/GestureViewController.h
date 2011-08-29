@@ -26,7 +26,7 @@
 @protocol AdvancedUIDelegate <NSObject>
 
 @required
-- (void)setupServiceWithPort:(NSInteger)p
+- (void)setupServiceWithPort:(NSUInteger)p
                     hostname:(NSString *)h;
 - (BOOL)startServiceWithID:(NSString *)ID;
 
@@ -149,7 +149,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // Current host name for asynchronous communication with Trickplay
     NSString *hostName;
     // Current port number for asynchronous communication with Trickplay
-    NSInteger port;
+    NSUInteger port;
     // HTTP port number used for http requests. Utilized for gathering lists
     // of app data from Trickplay and pulling resources such as images and
     // audio from Trickplay
@@ -248,7 +248,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @property (nonatomic, retain) id <AdvancedUIDelegate> advancedUIDelegate;
 
 
-- (void)setupService:(NSInteger)port
+- (void)setupService:(NSUInteger)port
             hostname:(NSString *)hostName
             thetitle:(NSString *)name;
 

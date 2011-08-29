@@ -323,7 +323,7 @@
     width = self.view.frame.size.width,
     height = self.view.frame.size.height;
     appViewController.view.frame = CGRectMake(x, y, width, height);
-    [appViewController setupService:port hostname:hostName thetitle:@"Current Service"];
+    [appViewController setupService:port hostname:hostName serviceName:@"Current Service"];
     if (![appViewController startService]) {
         [appViewController release];
         appViewController = nil;

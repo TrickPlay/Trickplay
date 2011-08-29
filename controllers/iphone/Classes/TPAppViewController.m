@@ -36,10 +36,7 @@
  * Establishes the host and port that will be used for the asynchronous socket
  * connection managed by TPAppViewController's SocketManager.
  */
-- (void)setupService:(NSInteger)p
-            hostname:(NSString *)h
-            thetitle:(NSString *)n {
-    
+- (void)setupService:(NSUInteger)p hostname:(NSString *)h serviceName:(NSString *)n {
     NSLog(@"TPAppView Service Setup: %@ host: %@ port: %d", n, h, p);
     
     port = p;
@@ -158,7 +155,7 @@
         [http_port release];
     }
     http_port = [my_http_port retain];
-    [socketManager setPort:[http_port integerValue]];
+    [socketManager setPort:(NSUInteger)[http_port integerValue]];
     [advancedUIDelegate setupServiceWithPort:port hostname:hostName];
 }
 
@@ -812,6 +809,10 @@
     [self.view addSubview:virtualRemote.view];
     graphics = NO;
     [touchDelegate setSwipe:graphics];
+    
+    NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+    [JSON_dic setObject:@"reset_hard" forKey:@"event"];
+    [self sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
 }
 
 /**

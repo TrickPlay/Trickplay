@@ -35,6 +35,7 @@
 		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
 		CD638F73140877690018AEEC /* TPAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD638F71140877690018AEEC /* TPAppViewController.m */; };
 		CD638F74140877690018AEEC /* TPAppViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD638F72140877690018AEEC /* TPAppViewController.xib */; };
+		CD638F77140C16D50018AEEC /* TVBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD638F76140C16D50018AEEC /* TVBrowser.m */; };
 		CD63B45513B9895300158169 /* arrows-generic-controls-comp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */; };
 		CD63B45613B9895300158169 /* back-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43F13B9895300158169 /* back-touch.png */; };
 		CD63B45713B9895300158169 /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44013B9895300158169 /* back.png */; };
@@ -74,8 +75,7 @@
 		CDB20FF113CFAE6900A9F166 /* TrickplayAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = CDB20FF013CFAE6900A9F166 /* TrickplayAnimation.m */; };
 		CDCE770013B28A0E00768A2A /* ImageEditorHelpViewPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */; };
 		CDDB36C614032DE7005FB306 /* AudioPlayback.m in Sources */ = {isa = PBXBuildFile; fileRef = CDDB36C514032DE7005FB306 /* AudioPlayback.m */; };
-		CDECA31414072872007C58ED /* TVBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDECA31314072872007C58ED /* TVBrowserController.m */; };
-		CDECA317140728B9007C58ED /* AppBrowserController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDECA316140728B9007C58ED /* AppBrowserController.m */; };
+		CDECA317140728B9007C58ED /* AppBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CDECA316140728B9007C58ED /* AppBrowser.m */; };
 		CDEE44A8137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */; };
 		CDEE44AD137CC93200A4B5E2 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CDEE44AC137CC93100A4B5E2 /* CommandInterpreter.m */; };
 		CDF509C913469721009870EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
@@ -91,8 +91,6 @@
 		CDFEBBA9130A4BA900A14307 /* NSStreamAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA5130A4BA900A14307 /* NSStreamAdditions.m */; };
 		CDFEBBAA130A4BA900A14307 /* CommandInterpreterApp.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBA7130A4BA900A14307 /* CommandInterpreterApp.m */; };
 		CDFEBBB7130A4CC700A14307 /* NetServiceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */; };
-		CDFEBC52130A57FA00A14307 /* GestureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBC50130A57FA00A14307 /* GestureViewController.m */; };
-		CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBC51130A57FA00A14307 /* GestureViewController.xib */; };
 		CDFEBEB8130C6F5F00A14307 /* AccelerometerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */; };
 		CDFEBEBD130C734B00A14307 /* TouchController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEBEBC130C734B00A14307 /* TouchController.m */; };
 		CDFEC0FC13147A6A00A14307 /* AudioController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDFEC0FB13147A6A00A14307 /* AudioController.m */; };
@@ -146,6 +144,7 @@
 		CD638F70140877690018AEEC /* TPAppViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPAppViewController.h; sourceTree = "<group>"; };
 		CD638F71140877690018AEEC /* TPAppViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPAppViewController.m; sourceTree = "<group>"; };
 		CD638F72140877690018AEEC /* TPAppViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = TPAppViewController.xib; path = Classes/TPAppViewController.xib; sourceTree = "<group>"; };
+		CD638F76140C16D50018AEEC /* TVBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVBrowser.m; sourceTree = "<group>"; };
 		CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "arrows-generic-controls-comp.jpg"; sourceTree = "<group>"; };
 		CD63B43F13B9895300158169 /* back-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-touch.png"; sourceTree = "<group>"; };
 		CD63B44013B9895300158169 /* back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = back.png; sourceTree = "<group>"; };
@@ -194,10 +193,9 @@
 		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ImageEditorHelpViewPad.xib; sourceTree = "<group>"; };
 		CDDB36C414032DE6005FB306 /* AudioPlayback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioPlayback.h; sourceTree = "<group>"; };
 		CDDB36C514032DE7005FB306 /* AudioPlayback.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioPlayback.m; sourceTree = "<group>"; };
-		CDECA31214072872007C58ED /* TVBrowserController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVBrowserController.h; sourceTree = "<group>"; };
-		CDECA31314072872007C58ED /* TVBrowserController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVBrowserController.m; sourceTree = "<group>"; };
-		CDECA315140728B9007C58ED /* AppBrowserController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppBrowserController.h; sourceTree = "<group>"; };
-		CDECA316140728B9007C58ED /* AppBrowserController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppBrowserController.m; sourceTree = "<group>"; };
+		CDECA31214072872007C58ED /* TVBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVBrowser.h; sourceTree = "<group>"; };
+		CDECA315140728B9007C58ED /* AppBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppBrowser.h; sourceTree = "<group>"; };
+		CDECA316140728B9007C58ED /* AppBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppBrowser.m; sourceTree = "<group>"; };
 		CDEE44A6137CBA2500A4B5E2 /* CommandInterpreterAdvancedUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreterAdvancedUI.h; sourceTree = "<group>"; };
 		CDEE44A7137CBA2600A4B5E2 /* CommandInterpreterAdvancedUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreterAdvancedUI.m; sourceTree = "<group>"; };
 		CDEE44AB137CC93100A4B5E2 /* CommandInterpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandInterpreter.h; sourceTree = "<group>"; };
@@ -221,9 +219,6 @@
 		CDFEBBA7130A4BA900A14307 /* CommandInterpreterApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandInterpreterApp.m; sourceTree = "<group>"; };
 		CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetServiceManager.h; sourceTree = "<group>"; };
 		CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetServiceManager.m; sourceTree = "<group>"; };
-		CDFEBC4F130A57FA00A14307 /* GestureViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GestureViewController.h; sourceTree = "<group>"; };
-		CDFEBC50130A57FA00A14307 /* GestureViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GestureViewController.m; sourceTree = "<group>"; };
-		CDFEBC51130A57FA00A14307 /* GestureViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = GestureViewController.xib; path = Classes/GestureViewController.xib; sourceTree = "<group>"; };
 		CDFEBEB6130C6F5F00A14307 /* AccelerometerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccelerometerController.h; sourceTree = "<group>"; };
 		CDFEBEB7130C6F5F00A14307 /* AccelerometerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccelerometerController.m; sourceTree = "<group>"; };
 		CDFEBEBB130C734B00A14307 /* TouchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TouchController.h; sourceTree = "<group>"; };
@@ -310,7 +305,6 @@
 			children = (
 				28F335F01007B36200424DE2 /* RootViewController.xib */,
 				CDFEC3F6131F1BB200A14307 /* AppBrowserViewController.xib */,
-				CDFEBC51130A57FA00A14307 /* GestureViewController.xib */,
 				CD638F72140877690018AEEC /* TPAppViewController.xib */,
 				CD4CA69B13B50AC100B5A7A3 /* VirtualRemoteViewController.xib */,
 				CD9A68641371CB0E00977730 /* ImageEditorViewController.xib */,
@@ -394,8 +388,6 @@
 				28C286E00D94DF7D0034E888 /* RootViewController.m */,
 				CDFEC3F4131F1BB200A14307 /* AppBrowserViewController.h */,
 				CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */,
-				CDFEBC4F130A57FA00A14307 /* GestureViewController.h */,
-				CDFEBC50130A57FA00A14307 /* GestureViewController.m */,
 				CD638F70140877690018AEEC /* TPAppViewController.h */,
 				CD638F71140877690018AEEC /* TPAppViewController.m */,
 				CD4CA69913B50AC100B5A7A3 /* VirtualRemoteViewController.h */,
@@ -460,10 +452,10 @@
 		CDECA31014072849007C58ED /* Main */ = {
 			isa = PBXGroup;
 			children = (
-				CDECA31214072872007C58ED /* TVBrowserController.h */,
-				CDECA31314072872007C58ED /* TVBrowserController.m */,
-				CDECA315140728B9007C58ED /* AppBrowserController.h */,
-				CDECA316140728B9007C58ED /* AppBrowserController.m */,
+				CDECA31214072872007C58ED /* TVBrowser.h */,
+				CD638F76140C16D50018AEEC /* TVBrowser.m */,
+				CDECA315140728B9007C58ED /* AppBrowser.h */,
+				CDECA316140728B9007C58ED /* AppBrowser.m */,
 			);
 			name = Main;
 			sourceTree = "<group>";
@@ -645,7 +637,6 @@
 				CDFEBB69130A498600A14307 /* background~iphone.png in Resources */,
 				CDFEBB6C130A498600A14307 /* MainWindow-iPhone.xib in Resources */,
 				CDFEBB73130A498C00A14307 /* MainWindow-iPad.xib in Resources */,
-				CDFEBC53130A57FA00A14307 /* GestureViewController.xib in Resources */,
 				CDFEC3F8131F1BB200A14307 /* AppBrowserViewController.xib in Resources */,
 				CD62293D1326BCBC003AB721 /* background.png in Resources */,
 				44AE7A4E133C2073000D7EE2 /* iOS-logo-57x57.png in Resources */,
@@ -719,7 +710,6 @@
 				CDFEBBA9130A4BA900A14307 /* NSStreamAdditions.m in Sources */,
 				CDFEBBAA130A4BA900A14307 /* CommandInterpreterApp.m in Sources */,
 				CDFEBBB7130A4CC700A14307 /* NetServiceManager.m in Sources */,
-				CDFEBC52130A57FA00A14307 /* GestureViewController.m in Sources */,
 				CDFEBEB8130C6F5F00A14307 /* AccelerometerController.m in Sources */,
 				CDFEBEBD130C734B00A14307 /* TouchController.m in Sources */,
 				CDFEC0FC13147A6A00A14307 /* AudioController.m in Sources */,
@@ -747,9 +737,9 @@
 				CDFDCB0713DE49D60025768E /* AudioRecordingViewController.m in Sources */,
 				CD2F80C013EC965F001EACEA /* TrickplayTimeline.m in Sources */,
 				CDDB36C614032DE7005FB306 /* AudioPlayback.m in Sources */,
-				CDECA31414072872007C58ED /* TVBrowserController.m in Sources */,
-				CDECA317140728B9007C58ED /* AppBrowserController.m in Sources */,
+				CDECA317140728B9007C58ED /* AppBrowser.m in Sources */,
 				CD638F73140877690018AEEC /* TPAppViewController.m in Sources */,
+				CD638F77140C16D50018AEEC /* TVBrowser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

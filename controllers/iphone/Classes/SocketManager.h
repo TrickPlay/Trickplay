@@ -42,7 +42,7 @@ typedef enum {
 
 @interface SocketManager : NSObject <NSStreamDelegate> {
     NSString *host;
-    NSInteger port;
+    NSUInteger port;
     
     NSInputStream *input_stream;
     NSOutputStream *output_stream;
@@ -63,7 +63,7 @@ typedef enum {
 
 
 - (id)initSocketStream:(NSString *)host
-                  port:(NSInteger)port
+                  port:(NSUInteger)port
               delegate:(id <SocketManagerDelegate>)theDelegate
               protocol:(CommandProtocol)protocol;
 - (BOOL)isFunctional;
@@ -73,7 +73,7 @@ typedef enum {
 - (BOOL)sendPacket;
 
 // Getters/Setters not synthesized
-- (NSInteger)port;
-- (void)setPort:(NSInteger)value;
+- (NSUInteger)port;
+- (void)setPort:(NSUInteger)value;
 
 @end
