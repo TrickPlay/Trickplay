@@ -97,12 +97,15 @@ public:
             tplog( "      pitch       : %u", image->pitch );
             tplog( "      depth       : %u", image->depth );
             tplog( "      bgr         : %u", image->bgr );
+            tplog( "      pm_alpha    : %u", image->pm_alpha );
             tplog( "      free_image  : %p", image->free_image );
 
             g_assert( image->pixels != NULL );
             g_assert( image->pitch >= image->width * image->depth );
             g_assert( image->depth == 3 || image->depth == 4 );
             g_assert( image->bgr == 0 );
+
+            Image::premultiply_alpha( image );
         }
         else
         {
@@ -289,6 +292,7 @@ Image * Image::screenshot()
     image.pitch = width * 4;
     image.bgr = 0;
     image.free_image = Image::free_image_with_g_free;
+    image.pm_alpha = 0;
 
     return Image::make( image );
 }
@@ -352,6 +356,7 @@ Image * Image::make( cairo_surface_t * surface )
     result.pitch = result.width * 4;
     result.free_image = 0;
     result.pixels = malloc( result.height * result.pitch );
+    result.pm_alpha = 1;
 
     if ( ! result.pixels )
     {
@@ -370,21 +375,14 @@ Image * Image::make( cairo_surface_t * surface )
         for ( unsigned int c = 0; c < result.width; ++c , source_pixel += 4 )
         {
 #if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
-
-            float alpha = source_pixel[3];
-            alpha = alpha == 0 ? 1 : 255 / alpha;
-
-            *(dest_pixel++) = source_pixel[2] * alpha;
-            *(dest_pixel++) = source_pixel[1] * alpha;
-            *(dest_pixel++) = source_pixel[0] * alpha;
+            *(dest_pixel++) = source_pixel[2];
+            *(dest_pixel++) = source_pixel[1];
+            *(dest_pixel++) = source_pixel[0];
             *(dest_pixel++) = source_pixel[3];
 #else
-            guint8 alpha = source_pixel[0];
-            alpha = alpha == 0 ? 1 : 255 / alpha;
-
-            *(dest_pixel++) = source_pixel[1] * alpha;
-            *(dest_pixel++) = source_pixel[2] * alpha;
-            *(dest_pixel++) = source_pixel[3] * alpha;
+            *(dest_pixel++) = source_pixel[1];
+            *(dest_pixel++) = source_pixel[2];
+            *(dest_pixel++) = source_pixel[3];
             *(dest_pixel++) = source_pixel[0];
 #endif
         }
@@ -409,6 +407,7 @@ Image * Image::convert_to_cairo_argb32() const
     result->pitch = image->width * 4;
     result->pixels = malloc( image->width * image->height * 4 );
     result->free_image = 0;
+    result->pm_alpha = 1;
 
     guint8 * dest_pixel = ( guint8 * ) result->pixels;
 
@@ -436,11 +435,17 @@ Image * Image::convert_to_cairo_argb32() const
                 *(dest_pixel++) = source_pixel[2];
 #endif
                 source_pixel += 3;
-
             }
             else
             {
-                mult = source_pixel[ 3 ] / 255.0;
+            	if ( ! image->pm_alpha )
+            	{
+            		mult = source_pixel[ 3 ] / 255.0;
+            	}
+            	else
+            	{
+            		mult = 1;
+            	}
 
 #if ( G_BYTE_ORDER == G_LITTLE_ENDIAN )
 
@@ -643,9 +648,17 @@ void Image::flip_y()
 
 //-----------------------------------------------------------------------------
 
-void Image::premultiply_alpha()
+#define MULT(d,a,t)                             \
+  G_STMT_START {                                \
+    t = d * a + 128;                            \
+    d = ((t >> 8) + t) >> 8;                    \
+  } G_STMT_END
+
+void Image::premultiply_alpha( TPImage * image )
 {
-    if ( image->depth != 4 )
+	g_assert( image );
+
+    if ( image->depth != 4 || image->pm_alpha )
     {
         return;
     }
@@ -656,18 +669,30 @@ void Image::premultiply_alpha()
     {
         guint8 * p = row;
 
-        for ( unsigned int c = 0; c < image->width; ++c )
+        for ( unsigned int c = 0; c < image->width; ++c , p += 4 )
         {
-            float a = p[3] / 255.0;
+            guint8 a = p[3];
 
-            *(p++) *= a;
-            *(p++) *= a;
-            *(p++) *= a;
-            ++p;
+            unsigned int t1;
+            unsigned int t2;
+            unsigned int t3;
+
+            MULT(p[0] , a , t1 );
+            MULT(p[1] , a , t2 );
+            MULT(p[2] , a , t3 );
         }
 
         row += image->pitch;
     }
+
+    image->pm_alpha = 1;
+}
+
+#undef MULT
+
+void Image::premultiply_alpha( )
+{
+	premultiply_alpha( image );
 }
 
 //-----------------------------------------------------------------------------
@@ -1363,6 +1388,13 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x ,
         height = h;
     }
 
+    ClutterTextureFlags flags = image->bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE;
+
+    if ( image->depth == 4 && image->pm_alpha )
+    {
+    	flags = ( ClutterTextureFlags ) ( flags | CLUTTER_TEXTURE_RGB_FLAG_PREMULT );
+    }
+
     clutter_texture_set_from_rgb_data(
         texture,
         pixels,
@@ -1371,7 +1403,7 @@ void Images::load_texture( ClutterTexture * texture, TPImage * image , guint x ,
         height,
         image->pitch,
         image->depth,
-        image->bgr ? CLUTTER_TEXTURE_RGB_FLAG_BGR : CLUTTER_TEXTURE_NONE,
+        flags,
         NULL );
 
 #ifndef TP_PRODUCTION

@@ -109,6 +109,9 @@ namespace ImageDecoders
                     image->depth = 4;
                     image->bgr = 0;
                     image->free_image = free_image;
+                    image->pm_alpha = 0;
+
+                    Image::premultiply_alpha( image );
 
                     result = TP_IMAGE_DECODE_OK;
                 }
@@ -290,6 +293,9 @@ namespace ImageDecoders
                                 image->depth = depth;
                                 image->bgr = 0;
                                 image->free_image = 0;
+                                image->pm_alpha = 0;
+
+                                Image::premultiply_alpha( image );
 
                                 result = TP_IMAGE_DECODE_OK;
                             }
@@ -586,6 +592,19 @@ namespace ImageDecoders
                 image->pitch = rotator.get_transformed_width() * image->depth;
                 image->bgr = 0;
                 image->free_image = 0;
+
+                switch ( cinfo->output_components )
+                {
+                case 1:
+                case 3:
+                	image->pm_alpha = 1;
+                	break;
+                case 4:
+                	image->pm_alpha = 0;
+                    Image::premultiply_alpha( image );
+                    break;
+                }
+
             }
             catch( ... )
             {
@@ -840,6 +859,7 @@ namespace ImageDecoders
                 image->height = g->SHeight;
                 image->depth = transparent_color >= 0 ? 4 : 3;
                 image->pitch = g->SWidth * image->depth;
+                image->pm_alpha = 0;
 
                 image->pixels = malloc( image->height * image->width * image->depth );
 
@@ -876,6 +896,8 @@ namespace ImageDecoders
                         }
                     }
                 }
+
+                Image::premultiply_alpha( image );
 
                 return TP_IMAGE_DECODE_OK;
             }
