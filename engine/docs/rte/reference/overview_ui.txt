@@ -1,9 +1,19 @@
 
 Title: User Interface Overview
 
-The TrickPlay SDK provides various classes to present information on the display and to accept user input. Additional user interface items are provided in the TrickPlay Visual Editor at <file:../../devtools/editor/introduction-txt.html>.
+The TrickPlay SDK provides various classes and variables to present information on a screen display.
 
-The global <screen> variable contains all the display's user-interface elements, such as text, buttons, checkboxes and images. A program can also produce complex vector graphics by using the <Canvas> class.
+Each item shown on the display must be added to the global <screen> variable.
 
-Most of the foundational capabilities of the user interface components are defined in the <UIElement> class. Also supported is the ability to combine multiple elements into a single <Group>, which enables modifications to all the elements by manipulating only the single Group item.
+The <Text> class enables the creation of string labels and text input fields and supports many configurable properties, including display settings, such as font usage, color, spacing and alignment.
+
+The <Rectangle> class provides a useful mechanism for laying out sections of the display.
+
+Existing <Image> files, such as company logos and other graphic assets, can be positioned easily anywhere on the display.
+
+Complex vector-based graphics can be created programmatically using the <Canvas> and <Bitmap> classes.
+
+All these items can be combined together into a conceptual <Group> and subsequent manipulations can then be performed upon the group in a single efficient operation, rather than multiple times upon each item.
+
+In addition, the TrickPlay Visual Editor provides a large number of user interface elements, including buttons, checkboxes, radio buttons, and much more. Information about the Visual Editor can be found at <file:../../devtools/editor/introduction-txt.html>.
 
