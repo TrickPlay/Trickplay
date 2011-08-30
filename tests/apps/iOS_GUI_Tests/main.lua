@@ -3,7 +3,7 @@
 local current_focus = 1
 local test_list = Group ()
 local all_tests = {}
-local test_img
+local test_img = nil
 local screenshot_name
 local screenshot = Image()
 local screen_w = screen.width
@@ -27,7 +27,7 @@ function create_UI()
 			text = "Manual Controller Test Suite",
 			position = { screen.w/2 - 300, 20 },
 			font = "DejaVu Bold 45px",
-			color = "FFFFFF"
+			color =  { 52, 102, 255, 200 }
 		}
 	test_list:add (app_title_txt)
 
@@ -49,7 +49,7 @@ function create_UI()
 			text = "Test Description",
 			position = {  525, 70 },
 			font = "DejaVu 40px",
-			color = "FFFFFF"
+			color = "FFC48A"
 		}
 	test_list:add (test_desc_title_txt)
 
@@ -71,7 +71,7 @@ function create_UI()
 			text = "Steps",
 			position = {  screen_w - 650, 70 },
 			font = "DejaVu 40px",
-			color = "FFFFFF"
+			color = "FFC48A"
 		}
 	test_list:add (test_steps_title_txt)
 
@@ -93,7 +93,7 @@ function create_UI()
 			text = "Verify",
 			position = {  screen_w - 650, 570 },
 			font = "DejaVu 40px",
-			color = "FFFFFF"
+			color = "FFC48A"
 		}
 	test_list:add (test_verify_title_txt)
 
@@ -116,7 +116,7 @@ function create_UI()
 			text = "Tests",
 			position = { 70, 70 },
 			font = "DejaVu 40px",
-			color = "FFFFFF"
+			color = "FFC48A"
 		}
 	test_list:add (test_list_box_title_txt)
 
@@ -138,19 +138,20 @@ function create_UI()
 			text = "Screenshot",
 			position = { 675, 425 },
 			font = "DejaVu 40px",
-			color = "FFFFFF"
+			color = "FFC48A"
 		}
 	test_list:add (test_screenshot_title_txt)
 
 -- UI: text for box containing steps
 	test_steps_txt = Text
 		{
-			text = "To start testing, open Trickplay on an iOS device and connect to for A_Test_TV.",
+			markup = "<span foreground\=\"red\">To start testing, open Trickplay on an iOS device and connect to QA_Test_TV.<\/span>",
 			position = { screen_w - 620, 130 },
 			size = { 500, 420 },
-			font = "DejaVu 35px",
+			font = "DejaVu 40px",
 			wrap = true, 
-			color = "FFFFFF"
+			color = "FFFFFF",
+			use_markup = true
 		}
 	test_list:add (test_steps_txt)
 
@@ -159,7 +160,7 @@ function create_UI()
 		{
 			text = "",
 			position = { 545, 130 },
-			size = {500, 425 },
+			size = {500, 475 },
 			font = "DejaVu 35px",
 			wrap = true, 
 			color = "FFFFFF"
@@ -211,6 +212,7 @@ function move_focus (direction, current_line)
 		focus_manager (current_line - 1)
 		current_focus = current_focus -1
 	end
+	populate_test_fields ()
 end
 
 
@@ -250,7 +252,9 @@ function populate_test_fields ()
 
 	if test_steps ~= nil then test_steps_txt.text = test_steps end
 	if test_verify ~= nil then test_verify_txt.text = test_verify end
-	if test_description ~= nil then test_desc_txt.text = test_description end
+	if test_description ~= nil then 
+			test_desc_txt.text = "Test Group:\t"..test_group.."\nArea:\t\t"..test_area.."\nAPI:\t\t"..test_api.."\nDescription: "..test_description
+	end
 end
 
 
@@ -281,7 +285,7 @@ end
 
 function controllers:on_controller_connected(controller)
     print("CONNECTED", controller.name)
-	test_steps_txt.text = "Connected...\nSelect a test in the Tests Section and hit enter."
+	test_steps_txt.markup = "<span foreground\=\"green\">Connected...\nSelect a test in the Tests Section and hit enter.<\/span>"
 
     -- Set up disconnection routine
     function controller:on_disconnected()

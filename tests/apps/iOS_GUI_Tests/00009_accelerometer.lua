@@ -14,13 +14,13 @@ function generate_test_image (controller, factory)
 
         function controller:on_accelerometer(x, y, z)
     		controller:start_accelerometer("L", 1)
-			local remaining_time = 10 - math.floor(total)
+			local remaining_time = 6 - math.floor(total)
             test_verify_txt.text = "Accelerometer at ("..tostring(x)..", "..tostring(y)..", "..tostring(z)..")\n\nAcclerometer off in "..remaining_time.." seconds."
         end
 
  	controller:start_accelerometer("L", 1)
 
-	-- Stop the accelerometer after 10 seconds
+	-- Stop the accelerometer after 6 seconds
 
     function idle.on_idle( idle , seconds )
       total = total + seconds

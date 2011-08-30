@@ -14,17 +14,17 @@ function generate_test_image (controller, factory)
 		controller:start_touches()
        	local remaining_time
 		function controller:on_touch_down(finger, x, y)
-			 remaining_time = 10 - math.floor(total)
+			 remaining_time = 6 - math.floor(total)
             test_verify_txt.text = "Touch down at "..tostring(x)..", "..tostring(y).." with finger "..tostring(finger).."\nTouch events off in "..remaining_time.." seconds."
         end
 
  		function controller:on_touch_up(finger, x, y)
-		   remaining_time = 10 - math.floor(total)
+		   remaining_time = 6 - math.floor(total)
            test_verify_txt.text = "Touch up at "..tostring(x)..", "..tostring(y).." with finger "..tostring(finger).."\nTouch events off in "..remaining_time.." seconds."
         end
 
         function controller:on_touch_move(finger, x, y)
-		   remaining_time = 10 - math.floor(total)
+		   remaining_time = 6 - math.floor(total)
            test_verify_txt.text = "Touch move at "..tostring(x)..", "..tostring(y).." with finger "..tostring(finger).."\nTouch events off in "..remaining_time.." seconds."
         end
  
