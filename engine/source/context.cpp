@@ -2688,7 +2688,7 @@ Image * TPContext::load_icon( const gchar * path )
         memset( &result, 0, sizeof( TPImage ) );
 
 
-        if ( sscanf( info_contents, "%s %u %u %u %u %u", actual_data_hash, &result.width, &result.height, &result.pitch, &result.depth, &result.bgr ) == 6 )
+        if ( sscanf( info_contents, "%s %u %u %u %u %u %u", actual_data_hash, &result.width, &result.height, &result.pitch, &result.depth, &result.bgr , &result.pm_alpha ) >= 6 )
         {
             if ( !strcmp( actual_data_hash, data_hash ) )
             {
@@ -2732,7 +2732,7 @@ Image * TPContext::load_icon( const gchar * path )
 
         if ( g_mkdir_with_parents( icon_cache_path, 0700 ) == 0 )
         {
-            gchar * info = g_strdup_printf( "%s %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() );
+            gchar * info = g_strdup_printf( "%s %u %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() , image->pm_alpha() );
 
             free_later( info );
 
