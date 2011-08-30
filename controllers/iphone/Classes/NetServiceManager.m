@@ -35,6 +35,9 @@
     return self;
 }
 
+#pragma mark -
+#pragma mark Start/Stop Search/Services
+
 - (void)stop {
     [self stopCurrentService];
     [netServiceBrowser stop];
@@ -54,8 +57,8 @@
 	currentService = nil;
 }
 
-
-//--------------- NSNetServiceDelegate methods ------------------
+#pragma mark -
+#pragma mark NSNetServiceDelegate methods
 
 
 // This should never be called, since we resolve with a timeout of 0.0, which means indefinite
@@ -84,9 +87,8 @@
 	[service release];
 }
 
-
-
-//--------------  NSNetServiceBrowserDelegate methods  -----------------
+#pragma mark -
+#pragma mark NSNetServiceBrowserDelegate methods
 
 
 // Sent when browsing begins
@@ -149,6 +151,8 @@
     NSLog(@"An error occurred in NetworkManager. Error code = %@, in Domain %@", error, domain);
 }
 
+#pragma mark -
+#pragma mark Deallocation
 
 - (void)dealloc {
     NSLog(@"Net Service Manager dealloc");

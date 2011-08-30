@@ -50,10 +50,8 @@
  */
 - (void)handleSocketProblems {    
     if (appBrowser) {
-        [appBrowser release];
-        appBrowser = nil;
-        [currentTVName release];
-        currentTVName = nil;
+        self.appBrowser = nil;
+        self.currentTVName = nil;
     }
     
     [netServiceManager start];
@@ -120,6 +118,14 @@
     NSLog(@"RootViewController didNotResolveService");
     
     [self refreshServices];
+}
+
+- (void)startSearchForServices {
+    [netServiceManager start];
+}
+
+- (void)stopSearchForServices {
+    [netServiceManager stop];
 }
 
 - (void)refreshServices {

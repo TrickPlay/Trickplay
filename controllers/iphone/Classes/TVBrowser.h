@@ -27,6 +27,8 @@
     AppBrowser *appBrowser;
     NetServiceManager *netServiceManager;
     
+    // Name of the current TV; stores the name of the current service
+    // used or nil if no service has been selected.
     NSString *currentTVName;
     id <TVBrowserDelegate> delegate;
 }
@@ -36,6 +38,8 @@
 
 - (NSArray *)getServices;
 - (NSNetService *)getCurrentService;
+- (void)startSearchForServices;
+- (void)stopSearchForServices;
 - (void)refreshServices;
 - (void)resolveServiceAtIndex:(NSUInteger)index;
 
