@@ -127,9 +127,9 @@ my_text.position=position
 (end)
 
 
-Topic: Events
+Topic: Event Handlers
 
-Events are just like other properties, but they let you set a function to handle
+Event handlers are like other properties, but they let you set a function to handle
 the event. All events in TrickPlay are prefixed with "on_". You can set an event
 handler like this:
 
@@ -201,7 +201,7 @@ Even though that is not a long list, it provides all the building blocks for com
 and rich user interfaces.
 
 
-Topic: screen
+Topic: screen Global Variable
 
 The screen object is created automatically and is initialized to the width and height
 of the display. It is a special kind of <Group> that is invisible; but all other
@@ -212,7 +212,7 @@ You can move and resize the screen, or even animate it, and you can place other
 UI elements anywhere inside it.
 
 
-Topic: Group
+Topic: Group Objects
 
 Groups let you do just that, group other UI elements. Groups are not visible and,
 by default, don't clip their children; so you can create a 1x1 pixel group that
@@ -220,13 +220,13 @@ contains all kinds of UI elements that spill outside its bounds. But, you can
 operate on the group and affect all of its children; you could rotate it, for example.
 
 
-Topic: Rectangle
+Topic: Rectangle Objects
 
 Rectangles are UI elements that have color and can have a border. They are always
 rectangular.
 
 
-Topic: Image
+Topic: Image Objects
 
 Images can be loaded from your app bundle or using a URL. They have a "src" property
 that lets you do this.
@@ -241,14 +241,14 @@ size changes.
 They can also be tiled horizontally and/or vertically to fill any space.
 
 
-Topic: Text
+Topic: Text Objects
 
 Text elements let you display and edit text. They support a variety of methods,
 properties and events for controlling their behavior. There are no real surprises
 here, so take a look at the reference.
 
 
-Topic: Clone
+Topic: Clone Objects
 
 Clone lets you clone another UI element without duplicating that element's texture.
 You do so by setting the "source" property of the clone; pointing it at another
@@ -276,7 +276,7 @@ It creates an image and sets a handler for the "on_loaded" event. Once the image
 is loaded, it creates a clone that is rotated around the x axis and is a bit transparent.
 
 
-Topic: Canvas
+Topic: Canvas Objects
 
 Canvas is a texture that you can paint on. You can create paths, fill them and stroke
 them. You can create irregular shapes and use color gradients. Once you are finished
