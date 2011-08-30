@@ -21,6 +21,8 @@
 		44AE7A55133C20E4000D7EE2 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A54133C20E4000D7EE2 /* Default.png */; };
 		44AE7A57133C20F0000D7EE2 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A56133C20F0000D7EE2 /* Default@2x.png */; };
 		44AE7A59133C210D000D7EE2 /* Default-Portrait~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */; };
+		CD277346140C8E4600A820BD /* TVBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD277344140C8E4600A820BD /* TVBrowserViewController.m */; };
+		CD277347140C8E4600A820BD /* TVBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD277345140C8E4600A820BD /* TVBrowserViewController.xib */; };
 		CD2F80C013EC965F001EACEA /* TrickplayTimeline.m in Sources */ = {isa = PBXBuildFile; fileRef = CD2F80BF13EC965F001EACEA /* TrickplayTimeline.m */; };
 		CD404C0F134A87CF0021D36C /* AdvancedUIObjectManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C0E134A87CF0021D36C /* AdvancedUIObjectManager.m */; };
 		CD404C12134BF1C70021D36C /* TrickplayUIElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CD404C11134BF1C70021D36C /* TrickplayUIElement.m */; };
@@ -121,6 +123,9 @@
 		44AE7A56133C20F0000D7EE2 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
 		44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* TrickplayController-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TrickplayController-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		CD277343140C8E4500A820BD /* TVBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVBrowserViewController.h; sourceTree = "<group>"; };
+		CD277344140C8E4600A820BD /* TVBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVBrowserViewController.m; sourceTree = "<group>"; };
+		CD277345140C8E4600A820BD /* TVBrowserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = TVBrowserViewController.xib; path = Classes/TVBrowserViewController.xib; sourceTree = "<group>"; };
 		CD2F80BE13EC965F001EACEA /* TrickplayTimeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrickplayTimeline.h; sourceTree = "<group>"; };
 		CD2F80BF13EC965F001EACEA /* TrickplayTimeline.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrickplayTimeline.m; sourceTree = "<group>"; };
 		CD404C0D134A87CF0021D36C /* AdvancedUIObjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AdvancedUIObjectManager.h; sourceTree = "<group>"; };
@@ -304,6 +309,7 @@
 			isa = PBXGroup;
 			children = (
 				28F335F01007B36200424DE2 /* RootViewController.xib */,
+				CD277345140C8E4600A820BD /* TVBrowserViewController.xib */,
 				CDFEC3F6131F1BB200A14307 /* AppBrowserViewController.xib */,
 				CD638F72140877690018AEEC /* TPAppViewController.xib */,
 				CD4CA69B13B50AC100B5A7A3 /* VirtualRemoteViewController.xib */,
@@ -386,6 +392,8 @@
 			children = (
 				28C286DF0D94DF7D0034E888 /* RootViewController.h */,
 				28C286E00D94DF7D0034E888 /* RootViewController.m */,
+				CD277343140C8E4500A820BD /* TVBrowserViewController.h */,
+				CD277344140C8E4600A820BD /* TVBrowserViewController.m */,
 				CDFEC3F4131F1BB200A14307 /* AppBrowserViewController.h */,
 				CDFEC3F5131F1BB200A14307 /* AppBrowserViewController.m */,
 				CD638F70140877690018AEEC /* TPAppViewController.h */,
@@ -677,6 +685,7 @@
 				CD5CFD6713D50F01002334E7 /* click.wav in Resources */,
 				CDFDCB0813DE49D60025768E /* AudioRecordingViewController.xib in Resources */,
 				CD638F74140877690018AEEC /* TPAppViewController.xib in Resources */,
+				CD277347140C8E4600A820BD /* TVBrowserViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -740,6 +749,7 @@
 				CDECA317140728B9007C58ED /* AppBrowser.m in Sources */,
 				CD638F73140877690018AEEC /* TPAppViewController.m in Sources */,
 				CD638F77140C16D50018AEEC /* TVBrowser.m in Sources */,
+				CD277346140C8E4600A820BD /* TVBrowserViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,7 +9,9 @@
 #import <UIKit/UIKit.h>
 #import <YAJLiOS/YAJL.h>
 #import "TPAppViewController.h"
+#import "AppBrowser.h"
 
+/*
 @protocol AppBrowserDelegate <NSObject>
 
 @required
@@ -18,6 +20,7 @@
 - (void)didReceiveCurrentAppInfo:(NSDictionary *)info;
 
 @end
+*/
 
 /**
  * The AppBrowserViewController lists apps available from a service.

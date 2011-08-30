@@ -66,7 +66,7 @@
         if ([command compare:@"WM"] == NSOrderedSame) {
             [delegate do_WM:args];
         }
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"PushAppBrowserNotification" object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"ConnectionEstablishedNotification" object:nil];
         firstCommand = NO;
     }
     if ([command compare:@"MC"] == NSOrderedSame) {

@@ -1,17 +1,24 @@
 //
-//  RootViewController.m
-//  TrickplayController_v2
+//  TVBrowserViewController.m
+//  TrickplayController
 //
-//  Created by Rex Fenley on 2/14/11.
+//  Created by Rex Fenley on 8/29/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "RootViewController.h"
+#import "TVBrowserViewController.h"
 
+@implementation TVBrowserViewController
 
-@implementation RootViewController
+- (id)initWithStyle:(UITableViewStyle)style
+{
+    self = [super initWithStyle:style];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
 
-@synthesize window;
 @synthesize tvBrowser;
 
 #pragma mark -
@@ -20,7 +27,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];   
-
+    
     UILabel *version_label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320, 50)] autorelease];
     version_label.text = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
     // Colors and font
@@ -35,11 +42,11 @@
     [version_label sizeToFit];
     // Add the UILabel to the tableview
     self.tableView.tableFooterView = version_label;
-  
+    
     // Customize the View
     self.title = @"TV";
     self.view.tag = 1;
-
+    
     self.navigationController.delegate = self;
     
     // After selecting a service the controller will try to make a connection
@@ -243,32 +250,32 @@
 
 
 /*
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-}
-*/
+ - (void)viewWillAppear:(BOOL)animated {
+ [super viewWillAppear:animated];
+ }
+ */
 /*
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-}
-*/
+ - (void)viewDidAppear:(BOOL)animated {
+ [super viewDidAppear:animated];
+ }
+ */
 /*
-- (void)viewWillDisappear:(BOOL)animated {
-	[super viewWillDisappear:animated];
-}
-*/
+ - (void)viewWillDisappear:(BOOL)animated {
+ [super viewWillDisappear:animated];
+ }
+ */
 /*
-- (void)viewDidDisappear:(BOOL)animated {
-	[super viewDidDisappear:animated];
-}
-*/
+ - (void)viewDidDisappear:(BOOL)animated {
+ [super viewDidDisappear:animated];
+ }
+ */
 
 /*
  // Override to allow orientations other than the default portrait orientation.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-	// Return YES for supported orientations.
-	return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
+ - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+ // Return YES for supported orientations.
+ return (interfaceOrientation == UIInterfaceOrientationPortrait);
+ }
  */
 
 
@@ -286,12 +293,12 @@
 - (void)navigationController:(UINavigationController *)navigationController 
       willShowViewController:(UIViewController *)viewController 
                     animated:(BOOL)animated {
-
+    
     // if popping back to self
     if (viewController == self) {
         if (appBrowserViewController && appBrowserViewController.appViewController
-        && ![appBrowserViewController.appViewController hasConnection]) {
-                
+            && ![appBrowserViewController.appViewController hasConnection]) {
+            
             [appBrowserViewController release];
             appBrowserViewController = nil;
             
@@ -299,7 +306,7 @@
                 [currentTVName release];
                 currentTVName = nil;
             }
-                
+            
             [currentTVIndicator removeFromSuperview];
         }
         [netServiceManager start];
@@ -354,7 +361,7 @@
  */
 - (void)socketErrorOccurred {
     NSLog(@"Socket Error Occurred in Root");
-        
+    
     [self handleSocketProblems];
 }
 
@@ -472,43 +479,43 @@
 
 
 /*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
+ // Override to support conditional editing of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+ // Return NO if you do not want the specified item to be editable.
+ return YES;
+ }
+ */
 
 
 /*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source.
-        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }   
-    else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
-    }   
-}
-*/
+ // Override to support editing the table view.
+ - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+ 
+ if (editingStyle == UITableViewCellEditingStyleDelete) {
+ // Delete the row from the data source.
+ [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+ }   
+ else if (editingStyle == UITableViewCellEditingStyleInsert) {
+ // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+ }   
+ }
+ */
 
 
 /*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
+ // Override to support rearranging the table view.
+ - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
+ }
+ */
 
 
 /*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
+ // Override to support conditional rearranging of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
+ // Return NO if you do not want the item to be re-orderable.
+ return YES;
+ }
+ */
 
 
 #pragma mark -
@@ -556,7 +563,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         
         netServiceManager.currentService = [services objectAtIndex:indexPath.row];
         [netServiceManager.currentService setDelegate:netServiceManager];
-    
+        
         [netServiceManager.currentService resolveWithTimeout:5.0];
         
         [tableView reloadData];
@@ -573,6 +580,14 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	
 }
 
+#pragma mark -
+#pragma mark AutoRotation
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
 
 #pragma mark -
 #pragma mark Memory management
@@ -613,10 +628,8 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     }
     // Remove the "PushAppBrowserNotification" from the default NSNotificationCenter.
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-
+    
     [super dealloc];
 }
 
-
 @end
-
