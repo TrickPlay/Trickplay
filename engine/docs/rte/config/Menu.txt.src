@@ -57,8 +57,8 @@ Group: Reference  {
 	        File: Animator* (no auto-title, bindings/clutter_animator.lb)
     	    File: AnimationState* (no auto-title, bindings/clutter_state.lb)
             File: Interval  (no auto-title, bindings/clutter_interval.lb)
-            File: Path* (no auto-title, bindings/clutter_path.lb)
-            File: Score* (no auto-title, bindings/clutter_score.lb)
+            File: Path (no auto-title, bindings/clutter_path.lb)
+            File: Score (no auto-title, bindings/clutter_score.lb)
             File: Timeline  (no auto-title, bindings/clutter_timeline.lb)
         }
 	}
