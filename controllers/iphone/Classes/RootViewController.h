@@ -10,7 +10,7 @@
 #import "NetServiceManager.h"
 #import "TPAppViewController.h"
 #import "AppBrowserViewController.h"
-#import "TVBrowser.h"
+#import "TVBrowserViewController.h"
 
 /**
  * The RootViewController controls the root view of the over-arching
@@ -23,26 +23,19 @@
  * Refer to RootViewController.xib for the Controller's View.
  */
 
-@interface RootViewController : UITableViewController <UITableViewDelegate, 
-UITableViewDataSource, UINavigationControllerDelegate,
+@interface RootViewController : UIViewController <UINavigationControllerDelegate,
 TPAppViewControllerSocketDelegate, NetServiceManagerDelegate,
 AppBrowserDelegate, TVBrowserDelegate> {
     UIWindow *window;
 
-    
-    // Orange dot that displays next to the current service
-    UIView *currentTVIndicator;
-    // Spins while a service is loading; disappears otherwise.
-    UIActivityIndicatorView *loadingSpinner;
     // Refreshes the list of services
     UIBarButtonItem *refreshButton;
     // Initialized to NO. Set to YES while the AppBrowser is in the course
     // of being pushed to the top of the navigation stack
     BOOL pushingAppBrowser;
     
+    TVBrowserViewController *tvBrowserViewController;
     AppBrowserViewController *appBrowserViewController;
-    
-    TVBrowser *tvBrowser;
 }
 
 // Exposed methods
@@ -52,7 +45,7 @@ AppBrowserDelegate, TVBrowserDelegate> {
 - (void)refresh;
 
 // Exposed properties
-@property (retain) TVBrowser *tvBrowser;
+@property (retain) IBOutlet TVBrowserViewController *tvBrowserViewController;
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 
 @end

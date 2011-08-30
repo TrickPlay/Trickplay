@@ -12,7 +12,7 @@
 @implementation RootViewController
 
 @synthesize window;
-@synthesize tvBrowser;
+@synthesize tvBrowserViewController;
 
 #pragma mark -
 #pragma mark View lifecycle
