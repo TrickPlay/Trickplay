@@ -38,7 +38,7 @@ execute_process(
 
 execute_process(
 	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	COMMAND git describe --tags ${GIT_CURRENT_REVISION}
+	COMMAND git describe --tags --dirty
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 	OUTPUT_VARIABLE GIT_CURRENT_TAG
 )
