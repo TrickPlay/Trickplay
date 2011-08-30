@@ -152,6 +152,8 @@
         [popOverController presentPopoverFromRect:frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
    
     } else {
+        // TODO: try this ((UIViewController *)delegate).parentViewController
+        // TODO: if (navigationController) then do stuff else figure something else
         [((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
     }
     if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
@@ -215,6 +217,8 @@
     imageEditor.targetHeight = targetHeight;
     imageEditor.mask = mask;
     
+    // TODO: try this ((UIViewController *)delegate).parentViewController
+    // TODO: if (navigationController) then do stuff else figure something else
     [((UIViewController *)delegate).navigationController presentModalViewController:imageEditor animated:NO];
 
     
