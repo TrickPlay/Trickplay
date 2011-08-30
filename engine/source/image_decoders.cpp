@@ -323,6 +323,12 @@ namespace ImageDecoders
         }
     };
 
+#ifdef TP_JPEG_FORCE_ALPHA
+#define TP_JPEG_DEPTH 			4
+#else
+#define TP_JPEG_DEPTH			3
+#endif
+
     class JPEGDecoder : public Images::Decoder
     {
     public:
@@ -498,7 +504,7 @@ namespace ImageDecoders
                 return TP_IMAGE_DECODE_FAILED;
             }
 
-            guchar * pixels = ( guchar * )malloc( cinfo->output_width * cinfo->output_height * 3 );
+            guchar * pixels = ( guchar * )malloc( cinfo->output_width * cinfo->output_height * TP_JPEG_DEPTH );
 
             if ( ! pixels )
             {
@@ -507,7 +513,7 @@ namespace ImageDecoders
 
             try
             {
-            	JPEGUtils::Rotator rotator( orientation, cinfo->output_width, cinfo->output_height, 3 );
+            	JPEGUtils::Rotator rotator( orientation, cinfo->output_width, cinfo->output_height, TP_JPEG_DEPTH );
 
             	if ( orientation > 1 )
             	{
@@ -534,6 +540,9 @@ namespace ImageDecoders
                             	*(p++) = (*buffer)[ index ];
                                 *(p++) = (*buffer)[ index ];
                                 *(p++) = (*buffer)[ index ];
+#ifdef TP_JPEG_FORCE_ALPHA
+                                *(p++) = 255;
+#endif
                             }
                             break;
 
@@ -545,6 +554,9 @@ namespace ImageDecoders
                             	*(p++) = (*buffer)[ index ];
                                 *(p++) = (*buffer)[ index + 1 ];
                                 *(p++) = (*buffer)[ index + 2 ];
+#ifdef TP_JPEG_FORCE_ALPHA
+                                *(p++) = 255;
+#endif
                             }
                             break;
 
@@ -559,6 +571,9 @@ namespace ImageDecoders
                                 *(p++) = k * (*buffer)[ index ] / 255;
                                 *(p++) = k * (*buffer)[ index + 1 ] / 255;
                                 *(p++) = k * (*buffer)[ index + 2 ] / 255;
+#ifdef TP_JPEG_FORCE_ALPHA
+                                *(p++) = 255;
+#endif
                             }
                             break;
                     }
@@ -567,8 +582,8 @@ namespace ImageDecoders
                 image->pixels = pixels;
                 image->width = rotator.get_transformed_width();
                 image->height = rotator.get_transformed_height();
-                image->depth = 3;
-                image->pitch = rotator.get_transformed_width() * 3;
+                image->depth = TP_JPEG_DEPTH;
+                image->pitch = rotator.get_transformed_width() * image->depth;
                 image->bgr = 0;
                 image->free_image = 0;
             }
