@@ -145,10 +145,10 @@ function create_UI()
 -- UI: text for box containing steps
 	test_steps_txt = Text
 		{
-			markup = "<span foreground\=\"red\">To start testing, open Trickplay on an iOS device and connect to QA_Test_TV.<\/span>",
+			markup = "<span foreground\=\"red\" size\=\"large\"\>To start testing, open Trickplay on an iOS device and connect to QA_Test_TV.<\/span>",
 			position = { screen_w - 620, 130 },
 			size = { 500, 420 },
-			font = "DejaVu 40px",
+			font = "DejaVu 30px",
 			wrap = true, 
 			color = "FFFFFF",
 			use_markup = true
@@ -161,7 +161,7 @@ function create_UI()
 			text = "",
 			position = { 545, 130 },
 			size = {500, 475 },
-			font = "DejaVu 35px",
+			font = "DejaVu 30px",
 			wrap = true, 
 			color = "FFFFFF"
 		}
@@ -174,7 +174,7 @@ function create_UI()
 			text = "",
 			position = { screen_w - 620, 630 },
 			size = { 560, 420 },
-			font = "DejaVu 35px",
+			font = "DejaVu 30px",
 			wrap = true,
 			color = "FFFFFF"
 		}
@@ -187,19 +187,14 @@ end
 
 function focus_manager (line)
 
-	print (screen:find_child("rect"..line))
-	local rect1 = screen:find_child("rect"..line)
-	rect1.color = { 52, 102, 255, 100 }
-	screen:add(rect1)
+	screen:find_child("rect"..line).color = { 52, 102, 255, 100 }
 
 	if line < #all_tests  then
-		local rect2 = screen:find_child("rect"..line + 1)
-		rect2.color = { 52, 102, 255, 0 }
+		screen:find_child("rect"..line + 1).color = { 52, 102, 255, 0 }
 	end
 
 	if line > 1 then
-		local rect3 = screen:find_child("rect"..line - 1)
-		rect3.color = { 52, 102, 255, 0 }
+		screen:find_child("rect"..line - 1).color = { 52, 102, 255, 0 }
 	end
 end
 
@@ -212,6 +207,7 @@ function move_focus (direction, current_line)
 		focus_manager (current_line - 1)
 		current_focus = current_focus -1
 	end
+	dofile (all_tests[current_focus]["name"])
 	populate_test_fields ()
 end
 
@@ -233,14 +229,15 @@ function populate_test_fields ()
 	function on_loadedHandler (loadedImage, failed)
 
 		if failed then
-			screen:remove(screenshot)
-			screen:add (no_screenshot_found_msg_txt)
+			screenshot:hide()
+			no_screenshot_found_msg_txt:show()
 		else      
 			screenshot.position = { 675, 470 }
 			screenshot.size = { 320, 480 }
-			screen:remove (no_screenshot_found_msg_txt)
-			screen:add(screenshot)
+			no_screenshot_found_msg_txt:hide()
+			screenshot:show()
 		end
+
 	end
 
 
@@ -249,12 +246,13 @@ function populate_test_fields ()
 	screenshot.async = true        
 	screenshot.src = "baseline_pics/"..screenshot_name
 	screenshot.on_loaded = on_loadedHandler
-
 	if test_steps ~= nil then test_steps_txt.text = test_steps end
 	if test_verify ~= nil then test_verify_txt.text = test_verify end
 	if test_description ~= nil then 
-			test_desc_txt.text = "Test Group:\t"..test_group.."\nArea:\t\t"..test_area.."\nAPI:\t\t"..test_api.."\nDescription: "..test_description
+			test_desc_txt.text = "Test Group:\t"..test_group.."\nArea:\t\t"..test_area.."\nAPI:\t\t"..test_api.."\n\nDescription: "..test_description
 	end
+
+
 end
 
 
@@ -265,7 +263,7 @@ function populate_test_list ()
 		    {
 			color = {255, 255, 255, 0},
 			position = {70, 40 * i + 90,0},
-			size = {380,40},
+			size = {395,40},
 			name = "rect"..i
 		    }
 		local text = Text
@@ -285,7 +283,7 @@ end
 
 function controllers:on_controller_connected(controller)
     print("CONNECTED", controller.name)
-	test_steps_txt.markup = "<span foreground\=\"green\">Connected...\nSelect a test in the Tests Section and hit enter.<\/span>"
+	test_steps_txt.markup = "<span foreground\=\"green\" size\=\"large\"\>Connected...\nScroll through the tests in the Tests Section and hit enter to run a specific test.<\/span>"
 
     -- Set up disconnection routine
     function controller:on_disconnected()
@@ -299,11 +297,8 @@ function controllers:on_controller_connected(controller)
 
 
 	function screen.on_key_down( screen , key )
-			print (all_tests[current_focus]["name"])
-
 			if key == keys.Return then
 					controller.screen:remove(test_img)
-					dofile (all_tests[current_focus]["name"])
 					test_img = generate_test_image(controller,controller.factory)
 					controller.screen:add(test_img)
 			elseif key == keys.Up then
@@ -311,7 +306,7 @@ function controllers:on_controller_connected(controller)
 			elseif key == keys.Down then
 				move_focus ("down", current_focus)
 			end
-			populate_test_fields ()
+			
 	end
 
 
@@ -330,12 +325,10 @@ end
 --main --
 create_UI() 
 all_tests = load_test_list()
-dumptable (all_tests)
 screen:add(test_list)
 populate_test_list()
 populate_test_fields ()	
 focus_manager(current_focus)
-print ("current_focus = ", current_focus)
---dofile (all_tests[current_focus]["name"])
+screen:add(screenshot)
 screen:show()
 
