@@ -1,7 +1,7 @@
 
 test_description = "Rotate 3 rectangles in x, y and z planes."
 test_steps = "View the device.\nVerify that there are 9 rects rotated as following."
-test_verify = "\t\t\t\t\t\t\tx\ty\tz\n1st Col Rects\tx_rotation\t\t20\t45\t80\n2nd Col Rects\ty_rotation\t\t20\t45\t80\n3rd Col Rects\tz_rotation\t\t20\t45\t80"
+test_verify = "\t\t\t\t\t\tx\ty\tz\n1st Col Rects\tx_rotation\t\t20\t45\t80\n2nd Col Rects\ty_rotation\t\t20\t45\t80\n3rd Col Rects\tz_rotation\t\t20\t45\t80"
 test_group = "smoke"
 test_area = "ui_element"
 test_api = "rotation"
