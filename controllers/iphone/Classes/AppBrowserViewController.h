@@ -11,16 +11,10 @@
 #import "TPAppViewController.h"
 #import "AppBrowser.h"
 
-/*
-@protocol AppBrowserDelegate <NSObject>
+@protocol AppBrowserViewControllerDelegate <AppBrowserDelegate>
 
-@required
-// If nil then didn't recieve data
-- (void)didReceiveAvailableAppsInfo:(NSArray *)info;
-- (void)didReceiveCurrentAppInfo:(NSDictionary *)info;
 
 @end
-*/
 
 /**
  * The AppBrowserViewController lists apps available from a service.
@@ -36,13 +30,12 @@
  * Refer to AppBrowserViewController.xib for the AppBrowser's view.
  */
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
-UITableViewDataSource, TPAppViewControllerSocketDelegate> {
+UITableViewDataSource, TPAppViewControllerSocketDelegate, AppBrowserDelegate> {
     /*
     UIBarButtonItem *appShopButton;
     UIBarButtonItem *showcaseButton;
     UIToolbar *toolBar;
     */
-    BOOL viewDidAppear;
      
     UITableView *theTableView;
     // Spins while a app data is loading; disappears otherwise.
@@ -63,23 +56,13 @@ UITableViewDataSource, TPAppViewControllerSocketDelegate> {
     // when the AppBrowserViewController (self) calls viewDidAppear.
     BOOL pushingViewController;
     
-    // Asynchronous URL connections for populating the table with
-    // available apps and fetching information on the current
-    // running app
-    NSURLConnection *fetchAppsConnection;
-    NSURLConnection *currentAppInfoConnection;
-    
-    // The data buffers for the connections
-    NSMutableData *fetchAppsData;
-    NSMutableData *currentAppData;
-    
-    // The delegates for the connections
-    id <AppBrowserDelegate> fetchAppsDelegate;
-    id <AppBrowserDelegate> currentAppDelegate;
+    AppBrowser *appBrowser;
     
     // Refers to the RootViewController; informs the view controller
     // if a socket having an error or closing/ending
     id <TPAppViewControllerSocketDelegate> socketDelegate;
+    
+    id <AppBrowserViewControllerDelegate> delegate;
 }
 
 // Exposed properties
@@ -95,6 +78,7 @@ UITableViewDataSource, TPAppViewControllerSocketDelegate> {
 @property (nonatomic, assign) TPAppViewController *appViewController;
 
 @property (nonatomic, assign) id <TPAppViewControllerSocketDelegate> socketDelegate;
+@property (assign) id <AppBrowserViewControllerDelegate> delegate;
 
 // Exposed methods
 - (IBAction) appShopButtonClick;
@@ -104,9 +88,9 @@ UITableViewDataSource, TPAppViewControllerSocketDelegate> {
 - (NSArray *)fetchApps;
 - (void)getAvailableAppsInfoWithDelegate:(id<AppBrowserDelegate>)delegate;
 - (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
-- (void)setupService:(NSInteger)p
-            hostname:(NSString *)h
-            thetitle:(NSString *)n;
+- (void)setupService:(NSUInteger)port
+            hostName:(NSString *)hostName
+         serviceName:(NSString *)serviceName;
 - (BOOL)hasRunningApp;
 - (void)pushApp;
 

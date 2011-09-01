@@ -10,6 +10,10 @@
 
 @implementation TVBrowserViewController
 
+@synthesize tvBrowser;
+@synthesize currentTVName;
+@synthesize delegate;
+
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
@@ -18,8 +22,6 @@
     }
     return self;
 }
-
-@synthesize tvBrowser;
 
 #pragma mark -
 #pragma mark View lifecycle
@@ -46,23 +48,21 @@
     // Customize the View
     self.title = @"TV";
     self.view.tag = 1;
-    
-    self.navigationController.delegate = self;
-    
+        
     // After selecting a service the controller will try to make a connection
     // to the said service. Once the service is connected this notification is
     // called to RootViewController to push the AppBrowserController
     // to the UINavigationController
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushAppBrowser:) name:@"ConnectionEstablishedNotification" object:nil];
-    
-    if (!tvBrowser) {
-        tvBrowser = [[TVBrowser alloc] initWithDelegate:self];
-    }
+    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushAppBrowser:) name:@"ConnectionEstablishedNotification" object:nil];
     
     // Add a button to the navigation bar that refreshes the list of advertised
     // services.
     refreshButton = [[UIBarButtonItem alloc] initWithTitle: @"Refresh" style:UIBarButtonItemStylePlain target:self action:@selector(refresh)];
     [[self navigationItem] setRightBarButtonItem:refreshButton];
+    
+    if (!tvBrowser) {
+        tvBrowser = [[TVBrowser alloc] initWithDelegate:self];
+    }
     
     // Initialize the currentTVIndicator if it does not exist
     if (!currentTVIndicator) {
@@ -78,15 +78,6 @@
         loadingSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     }
 }
-
-- (void)viewDidAppear:(BOOL)animated {
-    pushingAppBrowser = NO;
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-    pushingAppBrowser = NO;
-}
-
 
 - (void)viewDidUnload {
     //[super viewDidUnload];
@@ -106,8 +97,22 @@
         [refreshButton release];
         refreshButton = nil;
     }
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     self.tableView.tableFooterView = nil;
+}
+
+// TODO: Check that this is being called properly
+- (void)setCurrentTVName:(NSString *)_currentTVName {
+    @synchronized(self) {
+        [_currentTVName retain];
+        [currentTVName release];
+        currentTVName = _currentTVName;
+    }
+    
+    if (tvBrowser) {
+        tvBrowser.currentTVName = currentTVName;
+    }
 }
 
 #pragma mark -
@@ -138,75 +143,12 @@
     [tvBrowser refreshServices]; [self reloadData];
 }
 
-/**
- * Pushes the AppBrowserViewController to the top of the UINavigationController
- * stack. This makes the AppBrowserViewController's view visible pushing the
- * RootViewController's view off screen.
- *
- * This method may be called via the Apps default NSNotificationCenter with the
- * notification named "ConnectionEstablishedNotification" usually under the circumstances
- * that a connection to a service has been established. (Connections managed
- * in classes other than this one).
- */
-- (void)pushAppBrowser:(NSNotification *)notification {
-    NSLog(@"Pushing App Browser");
-    // If self is not the visible view controller then it has no authority
-    // to push another view controller to the top of the view controller stack.
-    if (self.navigationController.visibleViewController != self || pushingAppBrowser) {
-        return;
-    }
-    
-    pushingAppBrowser = YES;
-    
-    // If Trickplay is running an app and the AppBrowserViewController is aware
-    // that this app is running then push the AppBrowser to the top of the stack
-    // and then push the app to the top of the stack. Meanwhile stop the
-    // NetServiceManager from searching for advertised services to prevent
-    // the network from bogging down.
-    
-    // TODO: use semaphore to guarentee this call completes before appBrowserViewController
-    // is deallocated
-    dispatch_queue_t hasRunningApp_queue = dispatch_queue_create("hasRunningAppQueue", NULL);
-    dispatch_async(hasRunningApp_queue, ^(void){
-        if ([appBrowserViewController hasRunningApp]) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                // TODO: Socket may close before this executes and cause inconsistancy
-                [self.navigationController pushViewController:appBrowserViewController animated:NO];
-                [appBrowserViewController pushApp];
-                [tvBrowser stopSearchForServices];
-            });
-        } else {
-            // AppBrowserViewController is not aware of any currently running app
-            // on Trickplay, thus, fetch the apps this service provides.
-            if ([appBrowserViewController fetchApps]) {
-                // If there are apps available, push the AppBrowser to the top of the
-                // stack and stop searching for service advertisements.
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    // TODO: Socket may close before this executes and cause inconsistancy
-                    [self.navigationController pushViewController:appBrowserViewController animated:YES];
-                    [appBrowserViewController.theTableView reloadData];
-                    [tvBrowser stopSearchForServices];
-                });
-            } else {
-                // Either this service does not provide any of the functionality capable
-                // of running this controller or there was an error gathering data over
-                // the network; remain in the RootViewController and continue to search
-                // for services.
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.navigationController.view.layer removeAllAnimations];
-                    [self.navigationController popToRootViewControllerAnimated:YES];
-                    tvBrowser.currentTVName = nil;
-                    [appBrowserViewController release];
-                    appBrowserViewController = nil;
-                    pushingAppBrowser = NO;
-                    [self refresh];
-                });
-            }
-        }
-    });
-    dispatch_release(hasRunningApp_queue);
+- (void)startSearchForServices {
+    [tvBrowser startSearchForServices];
 }
-
+- (void)stopSearchForServices {
+    [tvBrowser stopSearchForServices];
+}
 
 /**
  * NetServiceManager delegate callback. Called when a connection may be established
@@ -216,11 +158,12 @@
  * to the currentTVName.
  */
 - (void)serviceResolved:(NSNetService *)service {
-    NSLog(@"RootViewController serviceResolved");
-    [netServiceManager stop];
-    [appBrowserViewController setupService:[service port] hostname:[service hostName] thetitle:[service name]];
-    currentTVName = [[service name] retain];
-    // add mask and spinner
+    NSLog(@"TVBrowserViewController serviceResolved");
+    [tvBrowser stopSearchForServices];
+    self.currentTVName = [[service name] retain];
+    if (delegate) {
+        [delegate serviceResolved:service];
+    }
 }
 
 /**
@@ -231,23 +174,17 @@
  * to the RootViewController.
  */
 - (void)didNotResolveService {
-    NSLog(@"RootViewController didNotResolveService");
-    if (appBrowserViewController.appViewController) {
-        if (self.navigationController.visibleViewController == appBrowserViewController.appViewController) {
-            [self.navigationController popViewControllerAnimated:NO];
-        }
-    }
-    if (appBrowserViewController) {
-        if (self.navigationController.visibleViewController == appBrowserViewController) {
-            [self.navigationController popViewControllerAnimated:YES];
-        } else {
-            [appBrowserViewController release];
-            appBrowserViewController = nil;
-        }
-    }
+    NSLog(@"TVBrowserViewController didNotResolveService");
+    
     [self refresh];
+    if (delegate) {
+        [delegate didNotResolveService];
+    }
 }
 
+- (void)didFindServices {
+    [self reloadData];
+}
 
 /*
  - (void)viewWillAppear:(BOOL)animated {
@@ -278,61 +215,6 @@
  }
  */
 
-
-#pragma mark -
-#pragma mark Navigation Controller Delegate methods
-
-/**
- * UINavigationController delegate callback called whenever a view controller
- * is about to be pushed or popped from the navigation controller.
- *
- * Callback is used to properly deallocate other view controllers when popping
- * back to the RootViewController or to fetch usable apps from Trickplay to display
- * in the AppBrowserViewController when the AppBrowser is about to be displayed.
- */
-- (void)navigationController:(UINavigationController *)navigationController 
-      willShowViewController:(UIViewController *)viewController 
-                    animated:(BOOL)animated {
-    
-    // if popping back to self
-    if (viewController == self) {
-        if (appBrowserViewController && appBrowserViewController.appViewController
-            && ![appBrowserViewController.appViewController hasConnection]) {
-            
-            [appBrowserViewController release];
-            appBrowserViewController = nil;
-            
-            if (currentTVName) {
-                [currentTVName release];
-                currentTVName = nil;
-            }
-            
-            [currentTVIndicator removeFromSuperview];
-        }
-        [netServiceManager start];
-    }
-    // if popping back to app browser
-    else if (viewController == appBrowserViewController) {
-        dispatch_queue_t fetchApps_queue = dispatch_queue_create("navControllerQueue", NULL);
-        dispatch_async(fetchApps_queue, ^(void){
-            if ([appBrowserViewController fetchApps]) {
-                appBrowserViewController.pushingViewController = NO;
-            } else {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.navigationController popToRootViewControllerAnimated:YES];
-                    [self reloadData];
-                });
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [appBrowserViewController.theTableView reloadData];
-            });
-        });
-        dispatch_release(fetchApps_queue);
-    }
-    
-    [self reloadData];
-}
-
 #pragma mark -
 #pragma mark AppBrowserViewControllerSocketDelegate stuff
 
@@ -344,15 +226,10 @@
 - (void)handleSocketProblems {
     [self.navigationController popToRootViewControllerAnimated:YES];
     
-    if (appBrowserViewController) {
-        [appBrowserViewController release];
-        appBrowserViewController = nil;
-        [currentTVName release];
-        currentTVName = nil;
-        [currentTVIndicator removeFromSuperview];
-    }
+    self.currentTVName = nil;
+    [currentTVIndicator removeFromSuperview];
     
-    [netServiceManager start];
+    [self startSearchForServices];
 }
 
 /**
@@ -395,7 +272,7 @@
  */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	
-	NSUInteger count = [netServiceManager.services count];
+	NSUInteger count = [[tvBrowser getServices] count];
 	if (count == 0) {
 		return 1;
 	}
@@ -418,7 +295,7 @@
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:tableCellIdentifier] autorelease];
 	}
     
-    NSMutableArray *services = netServiceManager.services;
+    NSArray *services = [tvBrowser getServices];
 	NSUInteger count = [services count];
     NSLog(@"number of services = %d", count);
     // If no service advertisements have been received then a single cell will
@@ -462,7 +339,7 @@
     // service selected by the user display a loadingSpinner for the indicator
     // and disable the user from selecting the service a second time (this
     // would unnecessarily restart the connection process).
-    if (netServiceManager.currentService == service) {
+    if ([tvBrowser getCurrentService] == service) {
         cell.accessoryView = loadingSpinner;
         [loadingSpinner startAnimating];
         cell.userInteractionEnabled = NO;
@@ -543,32 +420,22 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSLog(@"Selected row %@\n", indexPath);
     
-    NSMutableArray *services = netServiceManager.services;
+    NSArray *services = [tvBrowser getServices];
     NSLog(@"services %@\n", services);
     NSLog(@"number of services %d\n", [services count]);
     
-    if ([services count] == 0 || indexPath.row >= [services count]) { [self refresh]; return; }
-    
-    if (!currentTVName || ([currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
+    if ([services count] == 0 || indexPath.row >= [services count]) {
+        [self refresh];
+    } else if (!currentTVName || ([currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
+        self.currentTVName = nil;
         
-        if (appBrowserViewController) {
-            [appBrowserViewController release];
-        }
-        appBrowserViewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil];
-        appBrowserViewController.socketDelegate = self;
-        if (currentTVName) {
-            [currentTVName release];
-            currentTVName = nil;
-        }
+        [delegate serviceSelected:[services objectAtIndex:indexPath.row] isCurrentService:NO];
         
-        netServiceManager.currentService = [services objectAtIndex:indexPath.row];
-        [netServiceManager.currentService setDelegate:netServiceManager];
-        
-        [netServiceManager.currentService resolveWithTimeout:5.0];
+        [tvBrowser resolveServiceAtIndex:indexPath.row];
         
         [tableView reloadData];
     } else {
-        [self pushAppBrowser:nil];
+        [delegate serviceSelected:[services objectAtIndex:indexPath.row] isCurrentService:YES];
     }
     
 	
@@ -601,18 +468,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)dealloc {
     NSLog(@"RootViewController dealloc");
-    [netServiceManager release];
-    
-    if (appBrowserViewController) {
-        // Make sure to get rid of the AppBrowser's socket delegate
-        // or a race condition may occur where the AppBrowser recieves
-        // a call indicating that has a socket error and passes this
-        // information to a deallocated RootViewController before the
-        // RootViewController has a chance to deallocate the AppBrowser.
-        appBrowserViewController.socketDelegate = nil;
-        [appBrowserViewController release];
-        appBrowserViewController = nil;
-    }
     if (currentTVIndicator) {
         [currentTVIndicator release];
         currentTVIndicator = nil;
@@ -627,7 +482,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         loadingSpinner = nil;
     }
     // Remove the "PushAppBrowserNotification" from the default NSNotificationCenter.
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    //[[NSNotificationCenter defaultCenter] removeObserver:self];
     
     [super dealloc];
 }

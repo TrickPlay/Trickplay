@@ -35,6 +35,7 @@
         if (!netServiceManager) {
             netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
         }
+        [netServiceManager start];
     }
     
     return self;
@@ -66,7 +67,7 @@
     
     [self handleSocketProblems];
     if (delegate) {
-        [delegate socketErrorOccurred];
+        //[delegate socketErrorOccurred];
     }
 }
 
@@ -79,7 +80,7 @@
     
     [self handleSocketProblems];
     if (delegate) {
-        [delegate streamEndEncountered];
+        //[delegate streamEndEncountered];
     }
 }
 
@@ -103,8 +104,10 @@
 - (void)serviceResolved:(NSNetService *)service {
     NSLog(@"RootViewController serviceResolved");
     [netServiceManager stop];
-    [appBrowser setupService:[service port] hostName:[service hostName] serviceName:[service name]];
     self.currentTVName = [service name];
+    if (delegate) {
+        [delegate serviceResolved:service];
+    }
 }
 
 /**
@@ -118,6 +121,13 @@
     NSLog(@"RootViewController didNotResolveService");
     
     [self refreshServices];
+    if (delegate) {
+        [delegate didNotResolveService];
+    }
+}
+
+- (void)didFindServices {
+    [delegate didFindServices];
 }
 
 - (void)startSearchForServices {

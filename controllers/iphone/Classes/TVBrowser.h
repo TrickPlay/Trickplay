@@ -13,12 +13,9 @@
 @protocol TVBrowserDelegate <NSObject>
 
 @required
-- (void)socketErrorOccurred;
-- (void)streamEndEncountered;
 - (void)serviceResolved:(NSNetService *)service;
 - (void)didNotResolveService;
-- (void)appBrowserReady:(AppBrowser *)appBrowser;
-- (void)appBrowserInvalid:(AppBrowser *)appBrowser;
+- (void)didFindServices;
 
 @end
 

@@ -22,7 +22,7 @@
  * @property aClient : a client that will receive callbacks upon NSNetService
  *                     and NSNetServiceBrowser events.
  */
--(id)initWithDelegate:(id)client{
+-(id)initWithDelegate:(id)client {
     if ((self = [super init])) {
         delegate = client;
         currentService = nil;
@@ -79,7 +79,7 @@
     // TODO: make sure we got all the connection information for the service so
     // check host and port #
 	
-	NSLog(@"Did resolve address");
+	NSLog(@"Current NetService did resolve address");
     
     [[self delegate] serviceResolved:service];
 	
@@ -124,9 +124,9 @@
 	
 	// If moreComing is NO, it means that there are no more messages in the queue from the Bonjour daemon, so we should update the UI.
 	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
-    NSLog(@"service removed, more coming? %d", moreComing);
+    NSLog(@"service [ %@ ] removed, more coming? %d", service, moreComing);
 	if (!moreComing) {
-		[delegate reloadData];
+		[delegate didFindServices];
 	}
 }	
 
@@ -139,9 +139,9 @@
 	
 	// If moreComing is NO, it means that there are no more messages in the queue from the Bonjour daemon, so we should update the UI.
 	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
-    NSLog(@"service found, more coming? %d", moreComing);
+    NSLog(@"service [ %@ ] found, more coming? %d", service, moreComing);
 	if (!moreComing) {
-		[delegate reloadData];
+		[delegate didFindServices];
 	}
 }	
 
