@@ -268,6 +268,10 @@ private:
     void set_request_handler( const char * subject, TPRequestHandler handler, void * data );
 
     //.........................................................................
+
+    void load_background();
+
+    //.........................................................................
     // External functions are our friends
 
     friend void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version );

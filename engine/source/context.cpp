@@ -1360,6 +1360,10 @@ int TPContext::run()
     }
 
     //.........................................................................
+
+    load_background();
+
+    //.........................................................................
     // Load the app
 
     g_info( "LOADING APP..." );
@@ -2869,6 +2873,54 @@ void TPContext::audio_detection_match( const gchar * json )
 
         Action::post( new AudioMatchAction( this , json ) );
     }
+}
+
+void TPContext::load_background()
+{
+#ifndef TP_PRODUCTION
+
+	if ( const gchar * resources_path = get( TP_RESOURCES_PATH , 0 , true ) )
+	{
+		gchar * path = g_build_filename( resources_path , "background.jpg" , NULL );
+
+		FreeLater free_later( path );
+
+		if ( ! g_file_test( path , G_FILE_TEST_EXISTS ) )
+		{
+			return;
+		}
+
+		if ( Image * image = Image::decode( path , false ) )
+		{
+			ClutterActor * bg = clutter_texture_new();
+
+			clutter_actor_set_name( bg , "background" );
+
+			Images::load_texture( CLUTTER_TEXTURE( bg ) , image );
+
+			delete image;
+
+			gint iw;
+			gint ih;
+
+			clutter_texture_get_base_size( CLUTTER_TEXTURE( bg ) , & iw , & ih );
+
+			ClutterActor * stage = clutter_stage_get_default();
+
+	        gfloat width;
+	        gfloat height;
+
+	        clutter_actor_get_size( stage , & width , & height );
+
+	        clutter_actor_set_scale( bg , width / iw , height / ih );
+
+	        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , bg );
+
+	        g_object_set_data_full( G_OBJECT( bg ) , "tp-src", g_strdup( "[background]" ) , g_free);
+		}
+	}
+
+#endif
 }
 
 //=============================================================================
