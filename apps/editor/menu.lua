@@ -49,8 +49,8 @@ menuButton_file.insert_item(1,{type="item", string="New", bg=assets("assets/menu
 menuButton_file.insert_item(2,{type="item", string="Open...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.open, icon=Text{text="O"}})
 menuButton_file.insert_item(3,{type="item", string="Save", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=true, icon=Text{text="S"}})
 menuButton_file.insert_item(4,{type="item", string="Save As...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=false,  icon=Text{text="A"}})
-menuButton_file.insert_item(5,{type="item", string="New Project...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=new_project, parameter=false,  icon=Text{text="F"}})
-menuButton_file.insert_item(6,{type="item", string="Open Project...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=open_project, parameter=false,  icon=Text{text="P"}})
+menuButton_file.insert_item(5,{type="item", string="New Project...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=project_mng.new_project, icon=Text{text="F"}})
+menuButton_file.insert_item(6,{type="item", string="Open Project...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=project_mng.open_project, parameter=false,  icon=Text{text="P"}})
 menuButton_file.insert_item(7,{type="item", string="Quit", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=function() if editor.close(nil,exit) == nil then exit() end end, icon=Text{text="Q"}})
 
 menuButton_file.name = "menuButton_file"
@@ -123,9 +123,10 @@ menuButton_edit.insert_item(1,{type="item", string="Undo", bg=assets("assets/men
 
 menuButton_edit.insert_item(2,{type="item", string="Redo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="E"}})
 
-menuButton_edit.insert_item(3,{type="item", string="Insert UI Element", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.the_ui_elements,  icon=Text{text="I"}})
+menuButton_edit.insert_item(3,{type="item", string="Insert UI Element", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements,  icon=Text{text="I"}})
 
-menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.timeline,  icon=Text{text="J"}})
+--menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=screen_ui.timeline_show,  icon=Text{text="J"}})
+menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="J"}})
 
 menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete, icon=assets("assets/delete-menu-icon.png")})
 menuButton_edit.insert_item(6,{type="item", string="Duplicate", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate,  icon=Text{text="D"}})
@@ -283,12 +284,11 @@ local menuButton_view = ui_element.menuButton
 
 
 menuButton_view.insert_item(1,{type="label", string="  Background:", bg=assets("assets/menu-item-label.png")} )
-menuButton_view.insert_item(2,{type="item", string="Image...", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.reference_image, 
-			       			icon=assets("assets/menu-checkmark.png")})
+menuButton_view.insert_item(2,{type="item", string="Image...", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.image, parameter=true, icon=assets("assets/menu-checkmark.png")})
 menuButton_view.items[2]["icon"].opacity = 0
 menuButton_view.insert_item(3,{type="item", string="Small Grid", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.small_grid, icon=assets("assets/menu-checkmark.png")} )
 menuButton_view.items[3]["icon"].opacity = 0
-menuButton_view.insert_item(4,{type="item", string="Medium Grid", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=function() editor.medium_grid() end , icon=assets("assets/menu-checkmark.png")})
+menuButton_view.insert_item(4,{type="item", string="Medium Grid", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.medium_grid, icon=assets("assets/menu-checkmark.png")})
 menuButton_view.insert_item(5,{type="item", string="Large Grid", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.large_grid, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.items[5]["icon"].opacity = 0
 menuButton_view.insert_item(6,{type="item", string="White", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.white_bg, icon=assets("assets/menu-checkmark.png")})
@@ -398,14 +398,17 @@ screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButto
 -- Hides Menu 
 ----------------------------------------------------------------------------
     menu.menuHide = function()
-	screen:find_child("menu_bar"):hide()
-	screen:find_child("menuButton_file"):hide()
-	screen:find_child("menuButton_edit"):hide()
-	screen:find_child("menuButton_arrange"):hide()
-	screen:find_child("menuButton_view"):hide()
-	screen:find_child("menu_text"):hide()
-	screen:find_child("menu_text_shadow"):hide()
-	screen:grab_key_focus()
+
+		screen:find_child("menu_bar"):hide()
+		screen:find_child("menuButton_file"):hide()
+		screen:find_child("menuButton_edit"):hide()
+		screen:find_child("menuButton_arrange"):hide()
+		screen:find_child("menuButton_view"):hide()
+		screen:find_child("menu_text"):hide()
+		screen:find_child("menu_text_shadow"):hide()
+		screen:grab_key_focus()
+		menu_hide  = true 
+
     end 
 
 ----------------------------------------------------------------------------
@@ -413,27 +416,31 @@ screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButto
 ----------------------------------------------------------------------------
     
     menu.menuShow = function()
-	screen:find_child("menu_bar"):show()
-	screen:find_child("menu_bar"):raise_to_top()
-	screen:find_child("menuButton_file"):show()
-	screen:find_child("menuButton_file"):raise_to_top()
-	screen:find_child("menuButton_edit"):show()
-	screen:find_child("menuButton_edit"):raise_to_top()
-	screen:find_child("menuButton_arrange"):show()
-	screen:find_child("menuButton_arrange"):raise_to_top()
-	screen:find_child("menuButton_view"):show()
-	screen:find_child("menuButton_view"):raise_to_top()
-	screen:find_child("menu_text"):show()
-	screen:find_child("menu_text"):raise_to_top()
-	screen:find_child("menu_text_shadow"):show()
-	screen:find_child("menu_text_shadow"):raise_to_top()
 
-	screen:grab_key_focus()
+		screen:find_child("menu_bar"):show()
+		screen:find_child("menuButton_file"):show()
+		screen:find_child("menuButton_edit"):show()
+		screen:find_child("menuButton_arrange"):show()
+		screen:find_child("menuButton_view"):show()
+		screen:find_child("menu_text_shadow"):show()
+		screen:find_child("menu_text"):show()
+
+		screen:find_child("menu_bar"):raise_to_top()
+		screen:find_child("menuButton_file"):raise_to_top()
+		screen:find_child("menuButton_edit"):raise_to_top()
+		screen:find_child("menuButton_arrange"):raise_to_top()
+		screen:find_child("menuButton_view"):raise_to_top()
+		screen:find_child("menu_text_shadow"):raise_to_top()
+		screen:find_child("menu_text"):raise_to_top()
+	
+		screen:grab_key_focus()
+		menu_hide  = false
+
     end 
 ----------------------------------------------------------------------------
 -- Deactivate Menu 
 ----------------------------------------------------------------------------
-function deactivate_menu()
+function menu.deactivate_menu()
 	local menu_hide = Rectangle{name = "menu_hide_rect", color = {0,0,0,0}, position = {0,0,0}, size = {menu_bar.w, menu_bar.h}, reactive = true} 
 
 	function menu_hide.on_button_down()
@@ -448,7 +455,7 @@ end
 -- Reactivate Menu 
 ----------------------------------------------------------------------------
 
-function reactivate_menu()
+function menu.reactivate_menu()
 	screen:remove(screen:find_child("menu_hide_rect"))
 end 
 

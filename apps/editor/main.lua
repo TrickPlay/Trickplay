@@ -23,7 +23,7 @@
         [ keys.f	] = function() project_mng.new_project() input_mode = hdr.S_SELECT end,
         [ keys.g	] = function() editor.group() input_mode = hdr.S_SELECT end,
         [ keys.h	] = function() editor.h_guideline() input_mode = hdr.S_SELECT end,
-        [ keys.i	] = function() editor.the_ui_elements() input_mode = hdr.S_SELECT end,
+        [ keys.i	] = function() editor.ui_elements() input_mode = hdr.S_SELECT end,
         [ keys.j	] = function() screen_ui.timeline_show() input_mode = hdr.S_SELECT end,
         [ keys.m	] = function() screen_ui.menu_hide() input_mode = hdr.S_SELECT end,
         [ keys.n	] = function() editor.close(true) input_mode = hdr.S_SELECT end,
@@ -53,11 +53,6 @@
     
     function screen:on_key_down( key )
 
-		if(key == keys.Shift_L) then shift = true end
-		if(key == keys.Shift_R ) then shift = true end
-		if(key == keys.Control_L ) then control = true end
-		if(key == keys.Control_R ) then control = true end
-	
 		if(input_mode ~= hdr.S_POPUP) then 
           if key_map[key] then
               key_map[key](self)
@@ -73,7 +68,7 @@
 
     end
 
-	function screen:on_button_down(x,y,button,num_clicks)
+	function screen:on_button_down(x,y,button,num_clicks,m)
 
       	mouse_state = hdr.BUTTON_DOWN 		-- for drawing rectangle 
 
@@ -91,13 +86,13 @@
         	editor.inspector(g.extra.video)
         end 
 
-		if(shift == true) then 
+		if(m.shift == true) then 
 			screen_ui.multi_select(x,y)
 		end 
 
     end
 
-	function screen:on_button_up(x,y,button,clicks_count)
+	function screen:on_button_up(x,y,button,clicks_count, m)
 
 		-- for dragging timepoint 
 		screen_ui.dragging_up(x,y)
@@ -108,7 +103,7 @@
             if input_mode == hdr.S_RECTANGLE then 
 	           editor.rectangle_done(x, y) 
 	           input_mode = hdr.S_SELECT 
-	      	elseif input_mode == hdr.S_SELECT and shift == true then
+	      	elseif input_mode == hdr.S_SELECT and m and m.shift then
 				screen_ui.multi_select_done(x,y)
 	      	end 
        	end
@@ -164,7 +159,6 @@
 
 		-- auto save 
 		screen_ui.auto_save()
-
 		
     end
 

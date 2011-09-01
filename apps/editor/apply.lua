@@ -1,9 +1,25 @@
-dofile("util.lua") 
+--dofile("util.lua") 
 
 local factory = ui.factory
 
 local prev_skin, new_skin, prev_font_size, new_font_size
 local prev_ix, prev_iy, new_ix, new_iy, prev_line_space, new_line_space 
+
+local non_txt_items = {"arrows_visible", "anchor_point", "reactive", "focusChanger", "src", "source", "loop", "skin", "wrap_mode", "items", "itemsList", "icon", "items", "expansion_location", "tab_position", "style", "cell_size", "vert_bar_visible", "horz_bar_visible", "cells_focusable", "lock", "direction", "justify", "alignment", "single_line", }
+
+local reserved_words = {"and", "end", "break", "do" ,"else", "elseif", "false", "for", "function", "if", "in",
+"local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
+
+local focus_t_list = {"U","D","E","L","R",}
+
+local focus_map = {["U"] = keys.Up, ["D"] = keys.Down, ["E"] = keys.Return, ["L"] = keys.Left, ["R"] = keys.Right,["Red"] = keys.RED,["G"] = keys.GREEN,["Y"] = keys.YELLOW,["B"] = keys.BLUE}
+
+local focus_match= {["U"] = keys.Down, ["D"] = keys.Up, ["L"] = keys.Right,["R"] = keys.Left,}
+
+
+local number_attr_t = {"bwidth", "hor_arrow_y", "vert_arrow_x", "cx", "cy", "cw", "ch", "bw", "bh", "bx", "by", "ix", "iy", 
+	"left", "top", "width", "height", "x", "y", "z", "w", "h", "opacity", "button_radius", "select_radius", "line_space", "volume", "ui_width", "ui_height", "border_width", "border_corner_radius", "on_screen_duration", "fade_duration", "padding", "label_padding", "display_width", "display_height", "arrow_sz", "arrow_dist_to_frame", "visible_w", "visible_h", "virtual_w", "virtual_h", "frame_thickness", "bar_thickness", "bar_offset", "box_width", "overall_diameter", "dot_diameter", "number_of_dots", "cycle_time", "progress", "menu_width", "horz_padding", "vert_spacing", "horz_spacing", "vert_offset", "separator_thickness", "rows", "columns", "cell_w", "cell_h", "cell_spacing_w", "cell_spacing_h", "cell_timing", "cell_timing_offset", "title_separator_thickness", "selected_item", 
+} 
 
 local check_number_val = function(val, name)
 	if tonumber(val) == nil then 
@@ -11,15 +27,7 @@ local check_number_val = function(val, name)
 	end 
 end
 
-local number_attrs = { "x", "y", "z", "w", "h", "opacity", "button_radius", "select_radius", "line_space", "volume", "ui_width", "ui_height", "border_width", "border_corner_radius", "on_screen_duration", "fade_duration", "padding", "label_padding", "display_width", "display_height", "arrow_sz", "arrow_dist_to_frame", "visible_w", "visible_h", "virtual_w", "virtual_h", "frame_thickness", "bar_thickness", "bar_offset", "box_width", "overall_diameter", "dot_diameter", "number_of_dots", "cycle_time", "progress", "menu_width", "horz_padding", "vert_spacing", "horz_spacing", "vert_offset", "separator_thickness", "rows", "columns", "cell_w", "cell_h", "cell_spacing_w", "cell_spacing_h", "cell_timing", "cell_timing_offset", "title_separator_thickness",
-} 
-
-local non_txt_items = {"arrows_visible", "anchor_point", "reactive", "focusChanger", "src", "source", "loop", "skin", "wrap_mode", "items", "itemsList", "icon", "items", "expansion_location", "tab_position", "style", "cell_size", "vert_bar_visible", "horz_bar_visible", "cells_focusable", "lock", "direction", "justify", "alignment", "single_line", }
-
-local reserved_words = {"and", "end", "break", "do" ,"else", "elseif", "false", "for", "function", "if", "in",
-"local", "nil", "not", "or", "repeat", "return", "then", "true", "until", "while"}
-
-local function toboolean(s) if (s == "true") then return true else return false end end
+local toboolean = function(s) if (s == "true") then return true else return false end end
 
 local inspector_deactivate = function (inspector)
 	local rect = Rectangle {name = "deactivate_rect", color = {10,10,10,100}, size = {300,400}, position = {0,0}, reactive = true}
@@ -34,14 +42,6 @@ local is_this_txt_item = function(name)
 	end 
 	return true 
 end 
-
-local focus_t_list = {"U","D","E","L","R",}
-local focus_map = {["U"] = keys.Up, ["D"] = keys.Down, ["E"] = keys.Return, ["L"] = keys.Left, ["R"] = keys.Right,["Red"] = keys.RED,["G"] = keys.GREEN,["Y"] = keys.YELLOW,["B"] = keys.BLUE}
-local focus_match= {["U"] = keys.Down, ["D"] = keys.Up, ["L"] = keys.Right,["R"] = keys.Left,}
-
-local number_attr_t = {"bwidth", "hor_arrow_y", "vert_arrow_x", "cx", "cy", "cw", "ch", "bw", "bh", "bx", "by", "ix", "iy", 
-	"left", "top", "width", "height", "x", "y", "z", "w", "h", "opacity", "button_radius", "select_radius", "line_space", "volume", "ui_width", "ui_height", "border_width", "border_corner_radius", "on_screen_duration", "fade_duration", "padding", "label_padding", "display_width", "display_height", "arrow_sz", "arrow_dist_to_frame", "visible_w", "visible_h", "virtual_w", "virtual_h", "frame_thickness", "bar_thickness", "bar_offset", "box_width", "overall_diameter", "dot_diameter", "number_of_dots", "cycle_time", "progress", "menu_width", "horz_padding", "vert_spacing", "horz_spacing", "vert_offset", "separator_thickness", "rows", "columns", "cell_w", "cell_h", "cell_spacing_w", "cell_spacing_h", "cell_timing", "cell_timing_offset", "title_separator_thickness", "selected_item", 
-} 
 
 local verify_attr_val = function(attr_name, attr_val, v, inspector) 
 	
@@ -136,58 +136,37 @@ end
 
 
 local function CB_RB(v)
-local font_diff = new_font_size - prev_font_size 
-local line_space_diff = new_line_space - prev_line_space
-local ix_diff = new_ix - prev_ix
-local iy_diff = new_iy - prev_iy 
 
-if v.extra.type == "CheckBoxGroup" then 
-	if prev_skin ~= "CarbonCandy" and v.skin == "CarbonCandy" then -- Custom->CarbonCandy
-		if new_line_space == prev_line_space and new_ix == prev_ix and new_iy == prev_iy then 
-			v.line_space = v.line_space + 20
-			v.item_position = {v.item_position[1] + 20, v.item_position[2] + 20}
-		end
-	elseif  prev_skin ~= "Custom" and v.skin == "Custom" then -- CarbonCandy -> Custom
-		if new_line_space == prev_line_space and new_ix == prev_ix and new_iy == prev_iy then 
-			v.line_space = v.line_space - 20
-			v.item_position = {v.item_position[1] - 20, v.item_position[2] - 20}
-		end
+	local font_diff = new_font_size - prev_font_size 
+	local line_space_diff = new_line_space - prev_line_space
+	local ix_diff = new_ix - prev_ix
+	local iy_diff = new_iy - prev_iy 
+	local ls_val = 0 
+	local p_val = 0 
+	
+	if v.extra.type == "CheckBoxGroup" then 
+		if prev_skin ~= "CarbonCandy" and v.skin == "CarbonCandy" then -- Custom->CarbonCandy
+			ls_val = 20 p_val = 20
+		elseif  prev_skin ~= "Custom" and v.skin == "Custom" then -- CarbonCandy -> Custom
+			ls_val = -20 p_val = -20
+		end 
+	elseif v.extra.type == "RadioButtonGroup" then 
+		if prev_skin ~= "CarbonCandy" and v.skin == "CarbonCandy" then -- Custom->CarbonCandy
+			ls_val = 25 p_val = 20
+		elseif  prev_skin ~= "Custom" and v.skin == "Custom" then -- CarbonCandy -> Custom
+			ls_val = -25 p_val = -20
+		end 
 	end 
 
-	if prev_line_space == new_line_space and prev_ix == new_ix then 
-		if font_diff > 0 then -- bigger font
-			v.line_space = v.line_space + math.floor(font_diff/3)
-			v.item_position = {v.item_position[1]- font_diff, v.item_position[2] - font_diff}
-	elseif font_diff < 0 then -- smaller font 
-			v.line_space = v.line_space + math.floor(font_diff/3)
-			v.item_position = {v.item_position[1] - font_diff, v.item_position[2] - font_diff}
-		end 
+	if new_line_space == prev_line_space and new_ix == prev_ix and new_iy == prev_iy then 
+		v.line_space = v.line_space + ls_val
+		v.item_position = {v.item_position[1] + p_val, v.item_position[2] + p_val}
 	end
-elseif v.extra.type == "RadioButtonGroup" then 
-	if prev_skin ~= "CarbonCandy" and v.skin == "CarbonCandy" then -- Custom->CarbonCandy
-		if new_line_space == prev_line_space and new_ix == prev_ix and new_iy == prev_iy then 
-			v.line_space = v.line_space + 25
-			v.item_position = {v.item_position[1] + 20, v.item_position[2] + 20}
-		end
-	elseif  prev_skin ~= "Custom" and v.skin == "Custom" then -- CarbonCandy -> Custom
-		if new_line_space == prev_line_space and new_ix == prev_ix and new_iy == prev_iy then 
-			v.line_space = v.line_space - 25
-			v.item_position = {v.item_position[1] - 20, v.item_position[2] - 20}
-		end
+
+	if prev_line_space == new_line_space and prev_ix == new_ix then 
+		v.line_space = v.line_space + math.floor(font_diff/3)
+		v.item_position = {v.item_position[1]- font_diff, v.item_position[2] - font_diff}
 	end 
-
-	if prev_line_space == new_line_space and prev_ix == new_ix then 
-		if font_diff > 0 then -- bigger font
-			v.line_space = v.line_space + math.floor(font_diff/3)
-			v.item_position = {v.item_position[1]- font_diff, v.item_position[2] - font_diff}
-	elseif font_diff < 0 then -- smaller font 
-			v.line_space = v.line_space + math.floor(font_diff/3)
-			v.item_position = {v.item_position[1] - font_diff, v.item_position[2] - font_diff}
-		end 
-	end
-
-end 
-
 end 
 
 
@@ -208,18 +187,18 @@ function inspector_apply (v, inspector)
 
       local attr_map = {
       		["itemsList"] = function(j)
-         		local items, item, t_item
-               	local next = 1
-				local iList = item_group:find_child("itemsList")
+         			local items, item, t_item
+               		local next = 1
+					local iList = item_group:find_child("itemsList")
 
-		 		if iList then 
-		        	items = iList:find_child("items_list")
-         		end 
+		 			if iList then 
+		        		items = iList:find_child("items_list")
+         			end 
 
-		 		if items then 
-               		for next, _ in pairs(items.tiles) do 
-		       			item = items.tiles[next][1]
-						t_item = item:find_child("textInput")
+		 			if items then 
+               			for next, _ in pairs(items.tiles) do 
+		       				item = items.tiles[next][1]
+							t_item = item:find_child("textInput")
 
 		       			if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
 		            		v.items[next] = t_item.text
@@ -238,6 +217,7 @@ function inspector_apply (v, inspector)
 		       				end 
 		       			end 
                		end 
+
 		       		if v.extra.type == "TabBar" then 
 		       			v.tab_labels = v.tab_labels
 			   		else 
@@ -245,40 +225,40 @@ function inspector_apply (v, inspector)
 			   		end 
 		 		end
 
-         	end,
+         	    end,
 
        	["skin"] = function()
+
 				  prev_skin = v.skin
     	          v["skin"] = hdr.inspector_skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
 				  new_skin = skins[tonumber(item_group:find_child("skin"):find_child("item_picker").selected_item)]
 
-              end,
+               end,
 
 		["frame_thickness"] = function ()
 					
 				  v["frame_thickness"] =  tonumber(item_group:find_child("frame_thickness"):find_child("input_text").text)
 
-			end, 
+			  end, 
 
 		["arrows_visible"] = function() 
-	       	  	if item_group:find_child("bool_checkarrows_visible"):find_child("check1").opacity > 0 then 
-	          		v.arrows_visible = true
-	       		else 
-	            	v.arrows_visible = false
-	       		end
-			end,
+
+	       	  		if item_group:find_child("bool_checkarrows_visible"):find_child("check1").opacity > 0 then 
+	          			v.arrows_visible = true
+	       			else 
+	            		v.arrows_visible = false
+	       			end
+			   end,
 
        	["anchor_point"] = function()
 
 					local anchor_pnt = item_group:find_child("anchor_point"):find_child("anchor")
-
-	               	v:move_anchor_point(anchor_pnt.extra.anchor_point[1], anchor_pnt.extra.anchor_point[2]) 
+	           		v:move_anchor_point(anchor_pnt.extra.anchor_point[1], anchor_pnt.extra.anchor_point[2]) 
 
               end,     
 		["alignment"] = function()
 
 	      	  		local itemLists = {"left", "center", "right", }
-
               		v.alignment = string.upper(itemLists[tonumber(item_group:find_child("alignment"):find_child("item_picker").selected_item)])
 
               end,     
@@ -295,12 +275,12 @@ function inspector_apply (v, inspector)
                 		v.wrap_mode = string.upper(itemLists[s_num])
 	      			end 
                end,        
-
        	["bwidth"] = function()
+
 					local bwidth_txt = item_group:find_child("bwidth"):find_child("input_text").text
                    	v.border_width = tonumber(bwidth_txt)
-               end,
 
+               end,
        	["color"] = function(name)
 
 	      			local attr_name = "color"
@@ -322,13 +302,11 @@ function inspector_apply (v, inspector)
 	       			v.hor_arrow_y = tonumber(item_group:find_child("hor_arrow_y"):find_child("input_text").text)
 
 				end, 
-
        	["vert_arrow_x"] = function()
 
 	       			v.ver_arrow_x = tonumber(item_group:find_child("vert_arrow_y"):find_child("input_text").text)
 				
 				end,
-
        	["reactive"] = function()
 
 	       			if item_group:find_child("bool_checkreactive"):find_child("check1").opacity > 0 then 
@@ -336,8 +314,8 @@ function inspector_apply (v, inspector)
 	       			else 
 	            		v.extra.reactive = false
 	       			end
-	       		end,
 
+	       		end,
        	["loop"] = function()
 
 	       			if item_group:find_child("bool_checkloop"):find_child("check1").opacity > 0 then 
@@ -346,7 +324,6 @@ function inspector_apply (v, inspector)
 	            		v.loop = false
 	       		    end
 	       		end,
-
 		["vert_bar_visible"] = function()
 
 	       			if item_group:find_child("bool_checkvert_bar_visible"):find_child("check1").opacity > 0 then 
@@ -355,7 +332,6 @@ function inspector_apply (v, inspector)
 	            		v.vert_bar_visible = false
 	       			end
 	       		end,
-
 		["horz_bar_visible"] = function()
 
  	       			if item_group:find_child("bool_checkhorz_bar_visible"):find_child("check1").opacity > 0 then 
@@ -365,7 +341,6 @@ function inspector_apply (v, inspector)
 	       			end
 
 	       		end,
-
 		["lock"] = function()
 
  	       			if item_group:find_child("lock"):find_child("check1").opacity > 0 then 
@@ -385,7 +360,6 @@ function inspector_apply (v, inspector)
 	       		   end
 
 	       		end,
-
 		["justify"] = function()
  	       		
 					if item_group:find_child("justify"):find_child("check1").opacity > 0 then 
@@ -395,7 +369,6 @@ function inspector_apply (v, inspector)
 	       			end
 
 	       		end,
-
 		["single_line"] = function()
 
  	       			if item_group:find_child("single_line"):find_child("check1").opacity > 0 then 
@@ -422,7 +395,7 @@ function inspector_apply (v, inspector)
               		v["tab_position"] = itemLists[tonumber(item_group:find_child("tab_position"):find_child("item_picker").selected_item)]
 
 					if itemLists[tonumber(item_group:find_child("tab_position"):find_child("item_picker").selected_item)] == "top" and 
-			    	 inspector:find_child("focuschanger_bg".."R").opacity == 255 then 
+			    		inspector:find_child("focuschanger_bg".."R").opacity == 255 then 
 				 		for i = 1, #v.tab_labels do
 				 			v.tabs[i].extra.up_focus = v.tabs[i].extra.left_focus 
 				 			v.tabs[i].extra.left_focus = ""
@@ -741,7 +714,7 @@ function inspector_apply (v, inspector)
                     		v.viewport = viewport_t
 				 		end 
 				  else 
-		     			print(j.name, " 처리해 주세요")
+		     			print(j.name, "is missing")
 				  end 
 	   			end 
        		end 	  
@@ -879,8 +852,10 @@ function inspector_apply (v, inspector)
 		if v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then
 			CB_RB(v)
 		end
+
         util.set_obj(new_object, v) 
         input_mode = hdr.S_SELECT
+
         if(v.name ~= "video1") then 
        	    table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
         end 

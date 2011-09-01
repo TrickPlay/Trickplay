@@ -10,7 +10,7 @@ local icon_vc = Image{src = "assets/align-vertically-center.png", opacity = 175}
 local icon_dhc = Image{src = "assets/distribute-horizontal-center.png", opacity = 185}
 local icon_dvc = Image{src = "assets/distribute-vertical-center.png", opacity = 185}
 
-local info_attr_t_idx = {"name","left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "ui_width", "ui_height", "bw", "bh", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","style","border_colorr", "border_colorg", "border_colorb", "border_colora","colorr", "colorg", "colorb", "colora","fr","fg","fb","fa","border_width","scale","clip","cx", "cy", "cw", "ch","font","wrap_mode","x_angle", "y_angle", "z_angle","opacity", "reactive",}
+local info_attr_t_idx = {"name","label","left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "ui_width", "ui_height", "bw", "bh", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","style","border_colorr", "border_colorg", "border_colorb", "border_colora","colorr", "colorg", "colorb", "colora","fr","fg","fb","fa","border_width","scale","clip","cx", "cy", "cw", "ch","font","wrap_mode","x_angle", "y_angle", "z_angle","opacity", "reactive",}
 
 local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","message", "button_colorr","button_colorg","button_colorb","button_colora","border_colorr", "border_colorg", "border_colorb", "border_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_colorr","focus_colorg","focus_colorb","focus_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","text_colorr","text_colorg","text_colorb","text_colora", "select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "unsel_colorr", "unsel_colorg", "unsel_colorb", "unsel_colora", "text_font","colorr", "colorg", "colorb", "colora","title_colorr","title_colorg","title_colorb","title_colora","title_font","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera","bar_focus_color_innerr", "bar_focus_color_innerg","bar_focus_color_innerb","bar_focus_color_innera", "bar_focus_color_outerr","bar_focus_color_outerg","bar_focus_color_outerb","bar_focus_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora", "arrow_focus_colorr", "arrow_focus_colorg", "arrow_focus_colorb", "arrow_focus_colora", "box_colorr","box_colorg","box_colorb","box_colora", "box_focus_colorr","box_focus_colorg","box_focus_colorb","box_focus_colora", "box_width", "box_height", "check_width", "check_height",  "rows","columns","cell_size", "cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","padding", "border_width","border_corner_radius", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "label_padding", "tab_position", "display_width", "display_height", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","items","reactive", "focus"} 
 
@@ -86,671 +86,10 @@ local color_map =
         [ "OSK" ] = function()  size = {510, 680} color = {25,25,25,100}  return size, color end,
 
         [ "widgets" ] = function() size = {600, 620} color = {25,25,25,100}  return size, color end,
-        [ "Code" ] = function(file_list_size) size = {800, 600} color =  {25, 25, 25, 100}  return size, color end,
         [ "guidew" ] = function()  color =  {25,25,25,100} size = {700, 230} return size, color end,
         [ "msgw" ] = function(file_list_size) size = {900, file_list_size + 180} color = {25,25,25,100}  return size, color end,
         [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = {25,25,25,100}  return size, color end
 }
-
-
--------------------------------------------------------------------------------
--- Makes a popup window background 
--------------------------------------------------------------------------------
-
-function factory.make_popup_bg(o_type, file_list_size)
-
-    local size, color = color_map[o_type](file_list_size)
-    
-    local BORDER_WIDTH= 3 
-    local POINT_HEIGHT=34
-    local POINT_WIDTH=60
-    local BORDER_COLOR="FFFFFF"
-    local CORNER_RADIUS=22
-    local POINT_CORNER_RADIUS=2
-    local H_BORDER_WIDTH = BORDER_WIDTH / 2
-
-    local XBOX_SIZE = 25
-    local PADDING = 10
-
-    local function draw_path( c )
-
-        c:new_path()
-
-        c:move_to( H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
-
-        c:line_to( ( c.w )- H_BORDER_WIDTH - CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
-        c:curve_to( c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
-                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
-                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
-
-        c:line_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
-
-        c:curve_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    c.w - H_BORDER_WIDTH - CORNER_RADIUS , c.h - H_BORDER_WIDTH )
-        c:line_to( H_BORDER_WIDTH + CORNER_RADIUS , c.h - H_BORDER_WIDTH )
-
-        c:curve_to( H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
-
-        c:line_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
-
-        c:curve_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
-    end
-
-    local c = Canvas{ size = size }
-
-    c:begin_painting()
-    draw_path( c )
-
-    -- Fill the whole thing with the color passed in and keep the path
-
-    c:set_source_color(color) -- "050505")
-    c:fill(true)
-
-    -- Now, translate to the center and scale to its height. This will
-    -- make the radial gradient elliptical.
-    c:save()
-    c:translate( c.w / 2 , c.h / 2 )
-    c:scale( 2 , ( c.h / c.w ) )
-
-    local rr = ( c.w / 2 )
-    c:set_source_radial_pattern( 0 , 30 , 0 , 0 , 30 , c.w / 2 )
-    c:add_source_pattern_color_stop( 0 , "00000000" )
-    c:add_source_pattern_color_stop( 1 , "000000F0" )
-    c:fill()
-    c:restore()
-
-    -- Draw the glossy glow    
-    local R = c.w * 2.2
-
-    c:new_path()
-    c.op = "ATOP"
-    c:arc( 0 , -( R - 240 ) , R , 0 , 360 )
-    c:set_source_linear_pattern( c.w , 0 , 0 , c.h * 0.25 )
-    c:add_source_pattern_color_stop( 0 , "FFFFFF20" )
-    c:add_source_pattern_color_stop( 1 , "FFFFFF04" )
-    c:fill()
-
-    -- Now, draw the path again and stroke it with the border color
-    draw_path( c )
-
-    c:set_line_width( BORDER_WIDTH )
-    c:set_source_color( BORDER_COLOR )
-    c.op = "SOURCE"
-    c:stroke( true )
-
-  -- Draw title line
-    if(o_type ~= "msgw" and o_type ~= "Code") then 
-         c:new_path()
-         c:move_to (0, 74)
-         c:line_to (c.w, 74)
-         c:set_line_width (3)
-         c:set_source_color( BORDER_COLOR )
-         c:stroke (true)
-         c:fill (true)
-    end
-
-         c:finish_painting()
-         c.position = {0,0}
-
-    if c.Image then
-  	 c= c:Image()
-    end
-    return c
-end 
-
-
--------------------------------------------------------------------------------
--- Makes a messsage window button item 
--------------------------------------------------------------------------------
-
-function factory.make_msgw_button_item( assets , caption)
-
-    local STYLE         = { font = "FreeSans Medium 30px" , color = "FFFFFF" }
-    local PADDING_X     = 7 
-    local PADDING_Y     = 7
-    local WIDTH         = 180
-    local HEIGHT        = 60 
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 12
-    
-    local function make_ring()
-        local ring = Canvas{ size = { WIDTH , HEIGHT } }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH / 2,
-            PADDING_Y + BORDER_WIDTH / 2,
-            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
-            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-        ring:stroke()
-        ring:finish_painting()
-        if ring.Image then
-  	    ring= ring:Image()
-    	end
-        return ring
-    end
-    
-    local text = Text{ text = caption }:set( STYLE )
-    
-    text.name = "caption"
-
-    text.reactive = true
-
-    local ring = make_ring ()
-    
-    local focus = assets( "assets/button-focus.png" )
-
-
-    if ring.Image then
-  	 ring= ring:Image()
-    end
-
-    local group = Group
-    {
-        size = { WIDTH , HEIGHT },
-        children =
-        {
-            ring:set{ position = { 0 , 0 } },
-            focus:set{ position = { 0 , 0 } , size = { WIDTH , HEIGHT } , opacity = 0 },
-            text:set{ position = { (WIDTH  -text.w)/2, (HEIGHT - text.h)/2} }
-        }
-    }
-    
-    
-
-    function group.extra.on_focus_in()
-        focus.opacity = 255
-	group:grab_key_focus(group)
-    end
-    
-    function group.extra.on_focus_out()
-        focus.opacity = 0
-    end
-	
-    return group, text
-
-end
-
----------------------------------------------------------
--- 	editor.ui_elements call this function 
----------------------------------------------------------
-
-function factory.make_msgw_widget_item( assets , caption)
-
-    local STYLE         = { font = "FreeSans Medium 25px" , color = "FFFFFF" }
-    local PADDING_X     = 7 
-    local PADDING_Y     = 7
-    local WIDTH         = 280
-    local HEIGHT        = 60 
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 12
-    
-    local function make_ring()
-        local ring = Canvas{ size = { WIDTH , HEIGHT } }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH / 2,
-            PADDING_Y + BORDER_WIDTH / 2,
-            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
-            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-        ring:stroke()
-        ring:finish_painting()
-		if ring.Image then
-  	 		ring= ring:Image()
-        end
-
-        return ring
-    end
-    
-    local text = Text{ text = caption }:set( STYLE )
-    
-    text.name = "caption"
-
-    text.reactive = true
-
-    local ring = make_ring ()
-    
-    local focus = assets( "assets/button-focus.png" )
-
-    local group = Group
-    {
-        size = { WIDTH , HEIGHT },
-        children =
-        {
-            ring:set{ position = { 0 , 0 } },
-            focus:set{ position = { 0 , 0 } , size = { WIDTH , HEIGHT } , opacity = 0 },
-            text:set{ size = {WIDTH, HEIGHT}, position = { (WIDTH  -text.w)/2, (HEIGHT - text.h)/2} }
-        }
-    }
-    
-    function group.extra.on_focus_in()
-        focus.opacity = 255
-	group:grab_key_focus(group)
-    end
-    
-    function group.extra.on_focus_out()
-        focus.opacity = 0
-    end
-	
-	group.reactive = true
-    return group, text
-
-end
-
-
--------------------------------------------------------------------------------
--- Makes a scroll bar item
--------------------------------------------------------------------------------
-
-function factory.make_y_scroll_box()
-    local PADDING_X     = 5 --7
-    local PADDING_Y     = 5 --7
-    local WIDTH         = 50
-    local HEIGHT        = screen.h - 90 - 70 -- 90 is the menu bar height  
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 1
-    
-    local function make_ring()
-        local ring = Canvas{ size = { WIDTH , HEIGHT } }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH / 2,
-            PADDING_Y + BORDER_WIDTH / 2,
-            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
-            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-        ring:stroke()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-
-        return ring
-    end
-    ring = make_ring ()
-
-    ring.name = "scroll_box"
-    return ring
-end
-
-
-function factory.make_x_scroll_box()
-    local PADDING_X     = 5 
-    local PADDING_Y     = 5
-    local WIDTH         = screen.w - 70 
-    local HEIGHT        = 50
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 1
-    
-    local function make_ring()
-        local ring = Canvas{ size = { WIDTH , HEIGHT } }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH / 2,
-            PADDING_Y + BORDER_WIDTH / 2,
-            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
-            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-        ring:stroke()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-        return ring
-    end
-    ring = make_ring ()
-    ring.name = "xscroll_box"
-    return ring
-end
-
-
-function factory.make_msgw_scroll_box()
-
-    local PADDING_X     = 7 
-    local PADDING_Y     = 7
-    local WIDTH         = 50
-    local HEIGHT        = 500 
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 12
-    
-    local function make_ring()
-        local ring = Canvas{ size = { WIDTH , HEIGHT } }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH / 2,
-            PADDING_Y + BORDER_WIDTH / 2,
-            WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
-            HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-        ring:stroke()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-        return ring
-    end
-    ring = make_ring ()
-    return ring
-end
-
-function factory.make_x_scroll_bar(canvas_sz)
-
-    local PADDING_X     = 5 
-    local PADDING_Y     = 5
-    local WIDTH         = screen.w - 70 
-    local HEIGHT        = 50 
-    local S_HEIGHT      = 42
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 12
-
-    local S_WIDTH       = WIDTH / (canvas_sz/screen.w)
-    
-    local function make_scroll_bar()
-        local ring = Canvas{ size = { S_WIDTH , S_HEIGHT } }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH / 2,
-            PADDING_Y + BORDER_WIDTH / 2,
-            S_WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
-            S_HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-	ring:fill()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-        return ring
-    end
-
-    local scroll_bar = make_scroll_bar ()
-    
-    scroll_bar.name = "xscroll_bar"
-    scroll_bar.reactive = true 
-    
-    return scroll_bar
-end
-
-function factory.make_y_scroll_bar(canvas_sz)
-
-    local PADDING_X     = 5 
-    local PADDING_Y     = 5
-    local WIDTH         = 50
-    local SCROLL_Y_POS  = 90
-    local HEIGHT        = screen.h - SCROLL_Y_POS -70
-    local S_WIDTH       = 42
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 12
-    
-    local S_HEIGHT = HEIGHT / (canvas_sz/screen.h)
-
-    local function make_scroll_bar()
-        local ring = Canvas{ size = { S_WIDTH , S_HEIGHT } }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH / 2,
-            PADDING_Y + BORDER_WIDTH / 2,
-            S_WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
-            S_HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-		ring:fill()
-        ring:finish_painting()
-		if ring.Image then
-  	 		ring= ring:Image()
-        end
-        return ring
-    end
-
-    local scroll_bar = make_scroll_bar ()
-    
-    scroll_bar.name = "scroll_bar"
-    scroll_bar.reactive = true 
-    
-    return scroll_bar
-end
-
-function factory.make_msgw_scroll_bar(file_list_size)
-
-    local PADDING_X     = 7 
-    local PADDING_Y     = 7
-    local WIDTH         = 50
-    local HEIGHT        = 500 
-    local S_HEIGHT      = 2*HEIGHT - file_list_size 
-    local S_WIDTH       = 42
-    local BORDER_WIDTH  = 1
-    local BORDER_COLOR  = "FFFFFF"
-    local BORDER_RADIUS = 12
-    
-    local function make_scroll_bar()
-        local ring = Canvas{ size = { S_WIDTH , S_HEIGHT } }
-        ring:begin_painting()
-        ring:set_source_color( BORDER_COLOR )
-        ring:round_rectangle(
-            PADDING_X + BORDER_WIDTH / 2,
-            PADDING_Y + BORDER_WIDTH / 2,
-            S_WIDTH - BORDER_WIDTH - PADDING_X * 2 ,
-            S_HEIGHT - BORDER_WIDTH - PADDING_Y * 2 ,
-            BORDER_RADIUS )
-	ring:fill()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-        return ring
-    end
-
-    local scroll_bar = make_scroll_bar ()
-    
-    scroll_bar.name = "scroll_bar"
-    scroll_bar.reactive = true 
-    
-    function scroll_bar:on_button_down(x,y,button,num_clicks)
-	dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
-        return true
-    end 
-
-    function scroll_bar:on_button_up(x,y,button,num_clicks)
-	 if(dragging ~= nil) then 
-	      local actor , dx , dy = unpack( dragging )
-	      if (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 	
-	           scroll_bar.y = y - dy 
-	      end 
-	      dragging = nil
-	 end 
-         return true
-    end 
-
-    return scroll_bar
-end
-
-
--------------------------------------------------------------------------------
--- Makes an x(close) box
--------------------------------------------------------------------------------
-
-function factory.make_xbox()
-    local BORDER_WIDTH= 3 
-    local BORDER_COLOR="FFFFFF5C"
-
-    local XBOX_SIZE = 25
-    local PADDING = 10
-
-    local c = Canvas{ size = {XBOX_SIZE + PADDING, XBOX_SIZE + PADDING} }
-
-    c:begin_painting()
-    c:new_path()
-
-  -- Draw x button
-    local x=0 
-    local y=0
-
-    c:move_to ( x, y)
-    c:line_to ( x + XBOX_SIZE, y + XBOX_SIZE)
-    c:move_to ( x + XBOX_SIZE, y)
-    c:line_to ( x, y + XBOX_SIZE)
-
-  -- Draw x button box
-    c:move_to ( x, y)
-    c:line_to ( x + XBOX_SIZE, y)
-    c:move_to ( x + XBOX_SIZE, y)
-    c:line_to ( x + XBOX_SIZE, y + XBOX_SIZE)
-    c:move_to ( x + XBOX_SIZE, y + XBOX_SIZE)
-    c:line_to ( x, y + XBOX_SIZE)
-    c:move_to ( x, y + XBOX_SIZE)
-    c:line_to ( x, y)
-
-    c:set_line_width (3)
-    c:set_source_color( BORDER_COLOR )
-    c:stroke (true)
-    c:fill (true)
-
-    c:finish_painting()
-
-    if c.Image then
-  	 c= c:Image()
-    end
-    return c
-end 
-
--------------------------------------------------------------------------------
--- Makes a focus(green) ring 
--------------------------------------------------------------------------------
-function factory.draw_focus_ring()
-        local ring = Canvas{ size = {650, 60} }
-        ring:begin_painting()
-        ring:set_source_color("1b911b")
-        ring:round_rectangle( 7 + 1/2, 7 + 1/2, 635, 45, 12)
-    	ring:set_line_width (4)
-        ring:stroke()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-
-        return ring
-end
-
-function factory.draw_small_focus_ring()
-        local ring = Canvas{ size = {375, 60} }
-        ring:begin_painting()
-        ring:set_source_color("1b911b")
-        ring:round_rectangle( 7 + 1/2, 7 + 1/2, 365, 45, 12)
-    	ring:set_line_width (4)
-        ring:stroke()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-        return ring
-end
-
-function factory.draw_tiny_focus_ring()
-        local ring = Canvas{ size = {150, 50} }
-        ring:begin_painting()
-        ring:set_source_color("1b911b")
-        ring:round_rectangle( 4, 4, 142, 42, 12)
-    	ring:set_line_width (4)
-        ring:stroke()
-        ring:finish_painting()
-	if ring.Image then
-  	 ring= ring:Image()
-        end
-        return ring
-end
-
--------------------------------------------------------------------------------
--- Makes a focus(white, input) ring 
--------------------------------------------------------------------------------
-function factory.draw_ring()
-	local ring = Canvas{ size = {650, 60} }
-        ring:begin_painting()
-        ring:set_source_color( "FFFFFFC0" )
-        ring:round_rectangle( 7 + 1/2, 7 + 1/2, 635, 45, 12)
-    	ring:set_line_width (4)
-        ring:stroke()
-        ring:finish_painting()
-		if ring.Image then
-  	 		ring= ring:Image()
-        end
-        return ring
-end
-
-function factory.draw_small_ring()
-	local ring = Canvas{ size = {375, 60} }
-    ring:begin_painting()
-    ring:set_source_color( "FFFFFFC0" )
-    ring:round_rectangle( 7 + 1/2, 7 + 1/2, 365, 45, 12)
-    ring:set_line_width (4)
-    ring:stroke()
-    ring:finish_painting()
-	if ring.Image then
-  		ring= ring:Image()
-    end
-    return ring
-end
-
-
-function factory.draw_tiny_ring()
-	local ring = Canvas{ size = {150, 50} }
-    ring:begin_painting()
-    ring:set_source_color( "FFFFFFC0" )
-    ring:round_rectangle( 4, 4, 142, 42, 12 )
-    ring:set_line_width (4)
-    ring:stroke()
-    ring:finish_painting()
-	if ring.Image then
-  		ring= ring:Image()
-    end
-    return ring
-end
-
--------------------------------------------------------------------------------
--- Makes a line for categorizing menu items 
--------------------------------------------------------------------------------
-function factory.draw_line()
-    local PADDING_Y     = 7   
-    local WIDTH         = 900
-    local LINE_WIDTH    = 5
-    local LINE_COLOR    = "FFFFFF"
-
-
-	local line = Canvas{ size = {WIDTH, LINE_WIDTH + PADDING_Y} }
-    line:begin_painting()
-    line:new_path()
-    line:move_to (0,0)
-    line:line_to (WIDTH, 0)
-    line:set_line_width (LINE_WIDTH)
-    line:set_source_color(LINE_COLOR)
-    line:stroke (true)
-    line:fill (true)
-    line:finish_painting()
-	if line.Image then
-  		line= line:Image()
-    end
-    return line
-end 
-
-
-local org_items    
 
 -------------------------------------------------------------------------------
 -- Makes a popup window contents (attribute name, input text, input button)
@@ -799,10 +138,8 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
         end
         return ring
     end
-
 	
-	input_box_width = 150
-	ring = make_ring(input_box_width, 23) 
+	ring = make_ring(150, 23) 
 	ring.name = "ring"
 	if (text) then 
 		ring.position = {text.x+text.w+5, 0}
@@ -841,9 +178,6 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
 		filechooser.pressed = function() 
 				local msgw_img = editor.image(nil,inspector) 
 				inspector_deactivate() 
-				if msgw_img:find_child("h_rect1") then 
-					msgw_img:find_child("h_rect1"):grab_key_focus()
-				end 
 		end
 	end
 	--filechooser.released = function() inspector_activate() end 
@@ -909,7 +243,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			screen_ui.n_selected(v, true)
+			screen_ui.n_selected(v)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -941,7 +275,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			screen_ui.n_selected(v, true)
+			screen_ui.n_selected(v)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -993,7 +327,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			screen_ui.n_selected(v, true)
+			screen_ui.n_selected(v)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -1013,7 +347,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			screen_ui.n_selected(v, true)
+			screen_ui.n_selected(v)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -1034,7 +368,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			current_inspector = nil
             screen:grab_key_focus(screen) 
 			text_reactive()
-			screen_ui.n_selected(v, true)
+			screen_ui.n_selected(v)
 			inspector:clear()
 			editor.inspector(v, ix, iy, siy) --scroll position !!
 			if v.extra.last then 
@@ -1089,6 +423,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    end 
 	    --local minus = factory.draw_minus_item()
 		local minus = Image{src="lib/assets/li-btn-dim-minus.png"}
+		--local minus = Image{src="/home/hjkim/li-btn-dim-minus.png"}
 	    minus.name = "item_minus"..tostring(i)
 		minus.reactive = true
 	    --local up = factory.draw_up()
@@ -1144,7 +479,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		    current_inspector = nil
             screen:grab_key_focus(screen) 
 		    text_reactive()
-		    screen_ui.n_selected(v, true)
+		    screen_ui.n_selected(v)
 
 			inspector:clear()
 		    editor.inspector(v, ix, iy, siy)
@@ -1203,7 +538,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		   current_inspector = nil
            screen:grab_key_focus(screen) 
 		   text_reactive()
-		   screen_ui.n_selected(v, true)
+		   screen_ui.n_selected(v)
 
 		   inspector:clear()
 		   editor.inspector(v, ix, iy, siy)
@@ -1261,7 +596,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     current_inspector = nil
              screen:grab_key_focus(screen) 
 		     text_reactive()
-		     screen_ui.n_selected(v, true)
+		     screen_ui.n_selected(v)
 
 			 inspector:clear()
 		     editor.inspector(v, ix, iy, siy)
@@ -1281,7 +616,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			 return true
 	      end 
 
-	      function item:on_key_down(key)
+	      function item:on_key_down(key, u, t, m )
+
+			shift = false
+		  	if m and m.shift then 
+				shift = true 
+			end 
+
 			local item_group, si, item_group_name, si_name  
 			if inspector:find_child("tabs").current_tab == 1 then 
 				item_group_name = "item_group_info"
@@ -1481,7 +822,13 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 			return true 
 		end 
 
-		function item_picker:on_key_down(key)
+		function item_picker:on_key_down(key, u, t, m)
+
+			shift = false 
+			if m and m.shift then 
+				shift = true 
+			end 
+
 			local item_group, si, item_group_name, si_name  
 			if inspector:find_child("tabs").current_tab == 1 then 
 				item_group_name = "item_group_info"
@@ -1943,7 +1290,15 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
             return true
         end
 
-  		function input_text:on_key_down(key)
+  		function input_text:on_key_down(key, u, t, m)
+			if m then 
+				if m.shift then 
+					shift = true 
+				else 
+					shift = false 
+				end
+			end
+
 			local item_group, si, item_group_name, si_name  
 			if inspector:find_child("tabs").current_tab == 1 then 
 				item_group_name = "item_group_info"
@@ -1982,7 +1337,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		          		end
 		     		end 
     			end
-	     elseif (key == keys.Tab and shift == true )then 
+	     elseif (key == hdr.LeftTab and shift == true )then 
 		    group.extra.on_focus_out()
  		    for i, v in pairs(attr_t_idx) do
 				if(item_n == v or item_v == v) then 
@@ -2276,32 +1631,32 @@ local l_col = {150,150,150,200}
 local l_wid = 4
 local l_scale = 1
 
-text_label = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "Label +", name = "text_label", position = {7,0,0}, opacity = 255, }
+	text_label = Text { color = {255,255,255,255}, font = "FreeSans Medium 12px", text = "Label +", name = "text_label", position = {7,0,0}, opacity = 255, }
 
-rect_label = ui_element.button{font ="FreeSans Medium 12px", label="Label +", ui_width=100, ui_hieght=25, skin="inspector"}
-rect_label.name = "rect_label"
-rect_label.position = {0,0,0}
+	rect_label = ui_element.button{font ="FreeSans Medium 12px", label="Label +", ui_width=100, ui_hieght=25, skin="inspector"}
+	rect_label.name = "rect_label"
+	rect_label.position = {0,0,0}
+	
 
+	label_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "label_plus", position = {0,0,0}, size = {127,35}, opacity = 255, children = {text_label,rect_label}, reactive = true, }
 
-label_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "label_plus", position = {0,0,0}, size = {127,35}, opacity = 255, children = {text_label,rect_label}, reactive = true, }
+	
+	text_item = Text { color = {255,255,255,255}, font = "FreeSans Medium 26px", text = "Item +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_item", position = {10,0,0}, size = {120,30}, opacity = 255, } 
 
+	rect_item = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_item", position = {0,0,0}, size = {110,35}, opacity = 255, }
 
-text_item = Text { color = {255,255,255,255}, font = "FreeSans Medium 26px", text = "Item +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_item", position = {10,0,0}, size = {120,30}, opacity = 255, } 
-
-rect_item = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_item", position = {0,0,0}, size = {110,35}, opacity = 255, }
-
-item_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "item_plus", position = {129,0,0}, size = {130,35}, opacity = 255, children = {text_item,rect_item}, reactive = true, }
-
-
-text_separator = Text { color = {255,255,255,255}, font = "FreeSans Medium 26px", text = "Separator +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_separator", position = {7,0,0}, size = {180,30}, opacity = 255, }
+	item_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "item_plus", position = {129,0,0}, size = {130,35}, opacity = 255, children = {text_item,rect_item}, reactive = true, }
 
 
-rect_separator = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_separator", position = {0,0,0}, size = {180,35}, opacity = 255, }
+	text_separator = Text { color = {255,255,255,255}, font = "FreeSans Medium 26px", text = "Separator +", editable = false, wants_enter = true, wrap = false, wrap_mode = "CHAR", scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "text_separator", position = {7,0,0}, size = {180,30}, opacity = 255, }
 
-separator_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "separator_plus", position = {249,0,0}, size = {187,35}, opacity = 255, children = {text_separator,rect_separator}, reactive = true, }
+	
+	rect_separator = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect_separator", position = {0,0,0}, size = {180,35}, opacity = 255, }
+
+	separator_plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "separator_plus", position = {249,0,0}, size = {187,35}, opacity = 255, children = {text_separator,rect_separator}, reactive = true, }
 
 
-items_plus = Group { scale = {l_scale,l_scale,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "items_plus", position = {335,534,0}, size = {436,46}, opacity = 255, children = {label_plus,item_plus,separator_plus}, }
+	items_plus = Group { scale = {l_scale,l_scale,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "items_plus", position = {335,534,0}, size = {436,46}, opacity = 255, children = {label_plus,item_plus,separator_plus}, }
 
 return items_plus
 
@@ -2313,25 +1668,25 @@ local l_col = {150,150,150,200}
 local l_wid = 4
 local l_scale = 0.9
 
-rect1 = Rectangle { color = l_col, border_color = {255,255,255,255}, border_width = 0, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect1", position = {13,4,0}, size = {l_wid,25}, opacity = 255, }
+	rect1 = Rectangle { color = l_col, border_color = {255,255,255,255}, border_width = 0, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect1", position = {13,4,0}, size = {l_wid,25}, opacity = 255, }
 
 
-rect2 = Rectangle { color = l_col, border_color = {255,255,255,255}, border_width = 0, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect2", position = {2,12,0}, size = {25,l_wid}, opacity = 255, }
+	rect2 = Rectangle { color = l_col, border_color = {255,255,255,255}, border_width = 0, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect2", position = {2,12,0}, size = {25,l_wid}, opacity = 255, }
 
 
-rect0 = Rectangle { color = {25,25,25,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect0", position = {0,0,0}, size = {29,29}, opacity = 255, }
+	rect0 = Rectangle { color = {25,25,25,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect0", position = {0,0,0}, size = {29,29}, opacity = 255, }
 
 
-plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "plus", position = {0,0,0}, size = {29,29}, opacity = 255, children = {rect1,rect2,rect0}, }
+	plus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "plus", position = {0,0,0}, size = {29,29}, opacity = 255, children = {rect1,rect2,rect0}, }
 
 
-rect5 = Rectangle { color = l_col, border_color = {255,255,255,255}, border_width = 0, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect5", position = {2,12,0}, size = {25, l_wid}, opacity = 255, }
+	rect5 = Rectangle { color = l_col, border_color = {255,255,255,255}, border_width = 0, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect5", position = {2,12,0}, size = {25, l_wid}, opacity = 255, }
 
 
-rect4 = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect4", position = {0,0,0}, size = {29,29}, opacity = 255, }
+	rect4 = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "rect4", position = {0,0,0}, size = {29,29}, opacity = 255, }
 
-
-minus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "minus", position = {36,0,0}, size = {29,29}, opacity = 255, children = {rect5,rect4}, }
+	
+	minus = Group { scale = {1,1,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "minus", position = {36,0,0}, size = {29,29}, opacity = 255, children = {rect5,rect4}, }
 
 
 	plus_minus = Group { scale = {l_scale,l_scale,0,0}, x_rotation = {0,0,0}, y_rotation = {0,0,0}, z_rotation = {0,0,0}, anchor_point = {0,0}, name = "plus_minus", position = {0,0,0}, size = {65,29}, opacity = 255, children = {plus, minus},
@@ -2602,369 +1957,5 @@ function factory.draw_focus_changer(v)
 	end
 	return focus
 end 
-
-function factory.create_tiny_input_box(txt)
-     	local box_g = Group {}
-     	local box = factory.draw_tiny_ring()
-     	local box_focus = factory.draw_tiny_focus_ring()
-	box_g.name = "input_b"
-        box.position  = {0,0}
-        box.reactive = true
-        box.opacity = 255
-	box_g:add(box)
-	box_focus.opacity = 0 
-	box_g:add(box_focus)
-    	box_g:add(txt)
-
-        function box_g.extra.on_focus_in()
-		txt:grab_key_focus(txt)
-		txt.cursor_visible = true
-	        box.opacity = 0 
-            	box_focus.opacity = 255
-		msgw_focus = "input_b"
-        end
-
-        function box_g.extra.on_focus_out()
-	        box.opacity = 255 
-            	box_focus.opacity = 0
-		txt.cursor_visible = false
-        end
-
-	return box_g
-end 
-
-
-
-function factory.create_small_input_box(txt)
-     	local box_g = Group {}
-     	local box = factory.draw_small_ring()
-     	local box_focus = factory.draw_small_focus_ring()
-
-		box_g.name = "input_b"
-        box.position  = {0,0}
-        box.reactive = true
-        box.opacity = 255
-		box_g:add(box)
-		box_focus.opacity = 0 
-		box_g:add(box_focus)
-    	box_g:add(txt)
-
-        function box_g.extra.on_focus_in()
-		txt:grab_key_focus(txt)
-		txt.cursor_visible = true
-	        box.opacity = 0 
-            	box_focus.opacity = 255
-		msgw_focus = "input_b"
-        end
-
-        function box_g.extra.on_focus_out()
-	        box.opacity = 255 
-            	box_focus.opacity = 0
-		txt.cursor_visible = false
-        end
-
-	return box_g
-end 
-
-
-function factory.create_input_box()
-     	local box_g = Group {}
-        local input_l = Text { name="input", font= "FreeSans Medium 30px", color = "FFFFFF" ,
-              position = {25, 10}, text = project.."/screens/" } --hhhhhh
-        input_t = Text { name="input", font= "FreeSans Medium 30px", color = "FFFFFF" , ellipsize = "END",
-        -- 0111 position = {input_l.w + 25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
-        position = {input_l.w + 25, 10}, text = strings[""] , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
-     	local box = factory.draw_ring()
-     	local box_focus = factory.draw_focus_ring()
-	box_g.name = "input_b"
-        box.position  = {0,0}
-        box.reactive = true
-        box.opacity = 255
-	box_g:add(box)
-	box_focus.opacity = 0 
-	box_g:add(box_focus)
-    	box_g:add(input_l)
-    	box_g:add(input_t)
-
-        function box_g.extra.on_focus_in()
-		input_t:grab_key_focus(input_t)
-	        box.opacity = 0 
-            	box_focus.opacity = 255
-		msgw_focus = "input_b"
-		input_t.cursor_visible = true
-        end
-
-        function box_g.extra.on_focus_out()
-	        box.opacity = 255 
-            	box_focus.opacity = 0
-		input_t.cursor_visible = false
-        end
-
-	return box_g
-end 
-
-function factory.make_scroll (x_scroll_from, x_scroll_to, y_scroll_from, y_scroll_to)  
-     
-     local x_scroll_box, y_scroll_box 
-     local x_scroll_bar, y_scroll_bar 
-
-     if(x_scroll_to == 0)then 
-	 x_scroll_to = screen.w
-     end
-     if(y_scroll_to == 0)then 
-	 y_scroll_to = screen.h
-     end
-
-     g.extra.canvas_h = y_scroll_to - y_scroll_from -- y 전체 캔버스 사이즈가 되겠구 
-     g.extra.canvas_w = x_scroll_to - x_scroll_from -- x 전체 캔버스 사이즈가 되겠구 
-     g.extra.canvas_f = y_scroll_from
-     g.extra.canvas_xf = x_scroll_from
-     g.extra.canvas_t = y_scroll_to
-     g.extra.canvas_xt = x_scroll_to
-
-     screen_rect =  Rectangle{
-                name="screen_rect",
-                border_color= {2, 25, 25, 140},
-                border_width=2,
-                color= {255,255,255,0},
-                size = {screen.w+1,screen.h+1},
-                position = {0,0,0}, 
-     }
-     screen_rect.reactive = false
-     g:add(screen_rect)
-
-
-     
-    if (g.extra.canvas_w > screen.w) then 
-	local SCROLL_X_POS = 10
-	local BOX_BAR_SPACE = 6
-	
-        x_scroll_box = factory.make_x_scroll_box()
-        x_scroll_bar = factory.make_x_scroll_bar(g.extra.canvas_w)
-
-	x_scroll_box.position = {SCROLL_X_POS, screen.h - 60}
-	x_scroll_bar.position = {SCROLL_X_POS + BOX_BAR_SPACE, screen.h - 56}
-
-	
-        x_scroll_bar.extra.org_x = 16
-	x_scroll_bar.extra.h_x = 16
-	x_scroll_bar.extra.l_x = x_scroll_box.x + x_scroll_box.w - x_scroll_bar.w - BOX_BAR_SPACE -- 스크롤 되는 영역의 길이 
-
-	screen:add(x_scroll_box) 
-	screen:add(x_scroll_bar) 
-
-        -- 요 값은 스크롤 바가 움직일때 오브젝의 와이 포지션이 밖뀌는 값을 나타내는건데 이름이 너무 헤깔리는군 
-        g.extra.scroll_dx = ((g.extra.canvas_w - screen.w)/(x_scroll_bar.extra.l_x - x_scroll_bar.extra.h_x))
-
-		
-	local x0 = - g.extra.canvas_xf/g.extra.scroll_dx + 10 
-	local x1920 = (-g.extra.canvas_xf+1080)/g.extra.scroll_dx + 10
-
-	x_0_mark= Rectangle {
-		name="x_0_mark",
-		border_color={255,255,255,255},
-		border_width=0,
-		color={100,255,25,255},
-		size = {2, 40},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		position = {SCROLL_X_POS + x0, screen.h - 55, 0},
-		opacity = 255
-        }
-
-	x_1920_mark= Rectangle {
-		name="x_1920_mark",
-		border_color={255,255,255,255},
-		border_width=0,
-		color={100,255,25,255},
-		size = {2, 40},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		position = {SCROLL_X_POS + x1920, screen.h - 55, 0},
-		opacity = 255
-        }
-  
-	screen:add(x_0_mark)
-	screen:add(x_1920_mark) 
-
-        -- 스크롤 바 넣고 원래 좌표를 기억해 두는기지요 
-	for n,m in pairs (g.children) do 
-		m.extra.org_x = m.x
-	end 
-         
-        function x_scroll_bar:on_button_down(x,y,button,num_clicks)
-		dragging = {x_scroll_bar, x-x_scroll_bar.x, y-x_scroll_bar.y }
-
-		if table.getn(selected_objs) ~= 0 then
-		     for q, w in pairs (selected_objs) do
-			 local t_border = screen:find_child(w)
-			 local i, j = string.find(t_border.name,"border")
-		         local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
-		         if(t_obj ~= nil) then 
-			      screen:remove(screen:find_child(t_obj.name.."a_m"))
-			 end
-		     end
-		end
-
-        	return true
-    	end 
-
-    	function x_scroll_bar:on_button_up(x,y,button,num_clicks)
-	 	if(dragging ~= nil) then 
-	      		local actor , dx , dy = unpack( dragging )
-			local dif
-	      		if (actor.extra.h_x <= x-dx and x-dx <= actor.extra.l_x) then -- 스크롤 되는 범위안에 있으면	
-	           		dif = x - dx - x_scroll_bar.extra.org_x -- 스크롤이 이동한 거리 
-	           		x_scroll_bar.x = x - dx 
-	      		elseif (actor.extra.h_x > x-dx ) then
-				dif = actor.extra.h_x - x_scroll_bar.extra.org_x 
-	           		x_scroll_bar.x = actor.extra.h_x
-	      		elseif (actor.extra.l_x < x-dx ) then
-				dif = actor.extra.l_x- x_scroll_bar.extra.org_x 
-	           		x_scroll_bar.x = actor.extra.l_x
-			end 
-			dif = dif * g.extra.scroll_dx -- 스클롤된 길이 * 그 길이가 나타내는 와이값 증감 
-			for i,j in pairs (g.children) do 
-	           	     j.position = {j.extra.org_x-dif-x_scroll_from, j.y, j.z}
-			end 
-
-			if table.getn(selected_objs) ~= 0 then
-			     for q, w in pairs (selected_objs) do
-				 local t_border = screen:find_child(w)
-				 local i, j = string.find(t_border.name,"border")
-		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
-		                 if(t_obj ~= nil) then 
-			              t_border.x = t_obj.x 
-				 end
-			     end
-			end
-
-			g.extra.scroll_x = math.floor(dif) 
-	      		dragging = nil
-	 	end 
-         	return true
-    	end 
-     end 
-
-
-     if(g.extra.canvas_h > screen.h) then 
-
-
-	local SCROLL_Y_POS = 90
-	local BOX_BAR_SPACE = 6
-
-	y_scroll_box = factory.make_y_scroll_box()
-        y_scroll_bar = factory.make_y_scroll_bar(g.extra.canvas_h) 
-
-	y_scroll_box.position = {screen.w - 60, SCROLL_Y_POS}
-	y_scroll_bar.position = {screen.w - 56, SCROLL_Y_POS + BOX_BAR_SPACE}
-
-        y_scroll_bar.extra.org_y = 96
-	y_scroll_bar.extra.h_y = 96
-	y_scroll_bar.extra.l_y = y_scroll_box.y + y_scroll_box.h - y_scroll_bar.h - BOX_BAR_SPACE -- 스크롤 되는 영역의 길이 
-
-	screen:add(y_scroll_box) 
-	screen:add(y_scroll_bar) 
-
-        -- 요 값은 스크롤 바가 움직일때 오브젝의 와이 포지션이 밖뀌는 값을 나타내는건데 이름이 너무 헤깔리는군 
-        g.extra.scroll_dy = ((g.extra.canvas_h - screen.h)/(y_scroll_bar.extra.l_y - y_scroll_bar.extra.h_y))
-  
-	
-	local y0 = - g.extra.canvas_f/g.extra.scroll_dy + 10 
-	local y1080 = (-g.extra.canvas_f+1080)/g.extra.scroll_dy + 10
-
-	y_0_mark= Rectangle {
-		name="y_0_mark",
-		border_color={255,255,255,255},
-		border_width=0,
-		color={100,255,25,255},
-		size = {40,2},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		position = {screen.w - 55, SCROLL_Y_POS + y0, 0},
-		opacity = 255
-        }
-
-	y_1080_mark= Rectangle {
-		name="y_1080_mark",
-		border_color={255,255,255,255},
-		border_width=0,
-		color={100,255,25,255},
-		size = {40,2},
-		anchor_point = {0,0},
-		x_rotation={0,0,0},
-		y_rotation={0,0,0},
-		z_rotation={0,0,0},
-		position = {screen.w - 55, SCROLL_Y_POS + y1080, 0},
-		opacity = 255
-       }
-  
-	screen:add (y_0_mark)
-	screen:add (y_1080_mark)
-
-        -- 스크롤 바 넣고 원래 좌표를 기억해 두는기지요 
-	for n,m in pairs (g.children) do 
-		m.extra.org_y = m.y
-	end 
-         
-        function y_scroll_bar:on_button_down(x,y,button,num_clicks)
-		dragging = {y_scroll_bar, x-y_scroll_bar.x, y-y_scroll_bar.y }
-		if table.getn(selected_objs) ~= 0 then
-			for q, w in pairs (selected_objs) do
-				 local t_border = screen:find_child(w)
-				 local i, j = string.find(t_border.name,"border")
-		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
-		                 if(t_obj ~= nil) then 
-				      screen:remove(screen:find_child(t_obj.name.."a_m"))
-				 end
-			end
-		end
-
-        	return true
-    	end 
-
-    	function y_scroll_bar:on_button_up(x,y,button,num_clicks)
-	 	if(dragging ~= nil) then 
-	      		local actor , dx , dy = unpack( dragging )
-			local dif
-	      		if (actor.extra.h_y <= y-dy and y-dy <= actor.extra.l_y) then -- 스크롤 되는 범위안에 있으면	
-	           		dif = y - dy - y_scroll_bar.extra.org_y -- 스크롤이 이동한 거리 
-	           		y_scroll_bar.y = y - dy 
-	      		elseif (actor.extra.h_y > y-dy ) then
-				dif = actor.extra.h_y - y_scroll_bar.extra.org_y 
-	           		y_scroll_bar.y = actor.extra.h_y
-	      		elseif (actor.extra.l_y < y-dy ) then
-				dif = actor.extra.l_y- y_scroll_bar.extra.org_y 
-	           		y_scroll_bar.y = actor.extra.l_y
-			end 
-			dif = dif * g.extra.scroll_dy -- 스클롤된 길이 * 그 길이가 나타내는 와이값 증감 
-			for i,j in pairs (g.children) do 
-	           	     j.position = {j.x, j.extra.org_y-dif-y_scroll_from, j.z}
-			end 
-
-			if table.getn(selected_objs) ~= 0 then
-			     for q, w in pairs (selected_objs) do
-				 local t_border = screen:find_child(w)
-				 local i, j = string.find(t_border.name,"border")
-		                 local t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
-		                 if(t_obj ~= nil) then 
-			              t_border.y = t_obj.y 
-				 end
-			     end
-			end
-
-			g.extra.scroll_y = math.floor(dif) 
-	      		dragging = nil
-	 	end 
-         	return true
-    	end 
-     end 
-end
 
 return factory

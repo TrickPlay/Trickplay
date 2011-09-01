@@ -42,6 +42,7 @@ hdr.attr_name_list = {"color", "border_color", "border_width", "color", "border_
 
 hdr.AUTO_SAVE_DURATION = 60000  
 hdr.AUTO_SAVE = true
+hdr.LeftTab = 65056
 
 ---------------------
 -- Global Variables
@@ -83,7 +84,6 @@ cursor_type 	  = 68
 
 -- for the modifier keys 
 shift 		      = false
-shift_changed 	  = false
 control 	      = false
 
 

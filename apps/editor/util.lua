@@ -4,21 +4,26 @@
 local util = {}
 
 function util.table_copy(t)
+
   	local t2 = {}
   	for k,v in pairs(t) do
     	t2[k] = v
   	end
   	return t2
+
 end
 
 function util.table_insert(t, val)
+
 	if t then 
 	    table.insert(t, val) 
 	end 
 	return t
+
 end 
 
 function util.table_move_up(t, itemNum)
+
 	local prev_i, prev_j 
 	for i,j in pairs (t) do 
 		if i == itemNum then 
@@ -33,9 +38,11 @@ function util.table_move_up(t, itemNum)
 	    prev_i = i 
 	    prev_j = j 
 	end 
+
 end 
 
 function util.table_move_down(t, itemNum)
+
 	local i, j, next_i, next_j 
 	for i,j in pairs (t) do 
 		if i == itemNum then 
@@ -51,18 +58,22 @@ function util.table_move_down(t, itemNum)
 	     end 
 	end 
 	return     
+
 end 
 
 function util.table_remove_val(t, val)
+
 	for i,j in pairs (t) do
 		if j == val then 
 		     table.remove(t, i)
 		end 
 	end 
 	return t
+
 end 
 
 function util.table_removekey(table, key)
+
 	local idx = 1	
 	local temp_t = {}
 	table[key] = nil
@@ -71,18 +82,22 @@ function util.table_removekey(table, key)
 		idx = idx + 1 
 	end 
 	return temp_t
+
 end
 
 function __genOrderedIndex( t )
+
     local orderedIndex = {}
     for key in pairs(t) do
         table.insert( orderedIndex, key )
     end
     table.sort( orderedIndex )
     return orderedIndex
+
 end
 
 local function orderedNext(t, state)
+
     -- Equivalent of the next function, but returns the keys in the alphabetic
     -- order. We use a temporary ordered key table that is stored in the
     -- table being iterated.
@@ -108,37 +123,47 @@ local function orderedNext(t, state)
     -- no more value to return, cleanup
     t.__orderedIndex = nil
     return
+
 end
 
 function util.orderedPairs(t)
+
     -- Equivalent of the pairs() function on tables. Allows to iterate
     -- in order
     return orderedNext, t, nil
+
 end
 
 function util.values(t) 
+
 	local j = 0 
 	return function () j = j+1 return t[j] end 
+
 end 
 
 function util.is_available(new_name)
+
     if(g:find_child(new_name) ~= nil) then 
-	return false 
+		return false 
     else 
-	return true
+		return true
     end
+
 end 
 
 function util.is_lua_file(fn)
+
 	local i, j = string.find(fn, ".lua")
 	if (j == string.len(fn)) then
 		return true
 	else 
 		return false
 	end 
+
 end 
 
 function util.is_img_file(fn)
+
 	local i, j = string.find(fn, ".png")
 
 	if (j == string.len(fn)) then
@@ -158,18 +183,22 @@ function util.is_img_file(fn)
     end
 
 	return false
+
 end 
 
 function util.is_mp4_file(fn)
+
 	local i, j = string.find(fn, ".mp4")
 	if (j == string.len(fn)) then
 		return true
 	else 
 		return false
 	end 
+
 end 
 
 function util.is_in_list(item, list)
+
     if list == nil then 
         return false
     end 
@@ -180,10 +209,13 @@ function util.is_in_list(item, list)
 		end 
     end 
     return false
+
 end 
 
 function util.need_stub_code(v)
+
     local lists = {"Button", "ButtonPicker", "RadioButtonGroup", "CheckBoxGroup", "MenuButton"}
+
     if v.extra then 
         if util.is_in_list(v.extra.type, lists) == true then 
 	    	return true
@@ -193,9 +225,11 @@ function util.need_stub_code(v)
     else 
         return false
     end 
+
 end 
 
 function util.is_this_widget(v)
+
     if v.extra then 
         if util.is_in_list(v.extra.type, hdr.uiElements) == true then 
 	    	return true
@@ -205,10 +239,12 @@ function util.is_this_widget(v)
     else 
         return false
     end 
+
 end 
 
  
 function util.is_this_container(v)
+
     if v.extra then 
         if util.is_in_list(v.extra.type, hdr.uiContainers) == true then 
 	    	return true
@@ -218,9 +254,22 @@ function util.is_this_container(v)
     else 
         return false
     end 
+
+end 
+ 
+function util.is_this_group(v)
+
+	if v.extra then 
+		if v.extra.type == "Group" then 
+			return true 
+		end 
+	end 
+	return false
+
 end 
 
 function util.clear_bg()
+
     BG_IMAGE_20.opacity = 0
     BG_IMAGE_20:lower_to_bottom()
     BG_IMAGE_40.opacity = 0
@@ -236,6 +285,7 @@ function util.clear_bg()
 end
 
 function util.getObjnames()
+
     local obj_names = ""
     for i, v in pairs(g.children) do
 		if obj_names ~= "" then 
@@ -244,9 +294,11 @@ function util.getObjnames()
     	obj_names = obj_names..v.name
     end
     return obj_names
+
 end
 
 function util.is_there_guideline () 
+
 	for i, j in pairs (screen.children) do 
 		if j.name then 
 			if string.find(j.name, "_guideline") then 
@@ -255,10 +307,12 @@ function util.is_there_guideline ()
 		end 
     end 
 	return false
+
 end 
 
 
 function util.is_in_container_group(x_pos, y_pos) 
+
 	for i, j in pairs (g.children) do 
 	if j.x < x_pos and x_pos < j.x + j.w and j.y < y_pos and y_pos < j.y + j.h then 
 		if j.extra then 
@@ -269,6 +323,7 @@ function util.is_in_container_group(x_pos, y_pos)
 	end 
   	end 
   	return false 
+
 end 
 
 function util.find_container(x_pos, y_pos)
@@ -295,18 +350,29 @@ function util.find_container(x_pos, y_pos)
 end 
 
 function util.create_on_button_down_f(v)
+
 	v.extra.selected = false
 	local org_object, new_object 
 
-	function v:on_button_down(x,y,button,num_clicks)
+	function v:on_button_down(x,y,button,num_clicks, m)
 
-	   if (input_mode ~= hdr.S_RECTANGLE) then 
-	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw") then 
-	     		if(input_mode == hdr.S_SELECT) and  (screen:find_child("msgw") == nil) then
+		if m then 
+			if m.control then 
+				control = true 
+			else 
+				control = false 
+			end 
+		end 
+
+	   	if (input_mode ~= hdr.S_RECTANGLE) then 
+	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw") then 
+	     		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
+
 	       			if (v.extra.is_in_group == true and control == false ) then 
-		    			local p_obj = v.parent --find_parent(v)
-                		if(button == 3) then -- imsi : num_clicks is not correct ! 
-                		--if(button == 3 or num_clicks >= 2) then
+
+		    			local p_obj = v.parent 
+                		if(button == 3) then 	-- imsi : num_clicks is not correct ! 
+                							 	--if(button == 3 or num_clicks >= 2) then
                 			editor.inspector(p_obj, x, y)
                     		return true
                 		end 
@@ -316,26 +382,29 @@ function util.create_on_button_down_f(v)
 	            		elseif (p_obj.extra.selected == true) then 
 		     				screen_ui.n_select(p_obj)
 		    			end
+
 	            		org_object = util.copy_obj(p_obj)
+
 		    			if v.extra.lock == false then -- or  v.name =="inspector" then 
            	    			dragging = {p_obj, x - p_obj.x, y - p_obj.y }
 		    			end 
+
            	    		return true
 	      			else 
-                		if(button == 3) then-- imsi : num_clicks is not correct ! 
-		    		--if(button == 3 or num_clicks >= 2) then
+
+                		if(button == 3) then	-- imsi : num_clicks is not correct ! 
+								    			--if(button == 3 or num_clicks >= 2) then
                  			editor.inspector(v, x, y)
                     		return true
                 		end 
+
 	            		if(input_mode == hdr.S_SELECT and v.extra.selected == false) then 
-								----kkkk
 		     				screen_ui.selected(v) 
 							if(v.type == "Text") then 
 			      				v:set{cursor_visible = true}
 			      				v:set{editable= true}
      			    			v:grab_key_focus(v)
 							end 
-
 		    			elseif (v.extra.selected == true) then 
 								if(v.type == "Text") then 
 			      					v:set{cursor_visible = true}
@@ -344,10 +413,10 @@ function util.create_on_button_down_f(v)
 								end 
 								screen_ui.n_select(v) 
 	       				end
------[[ 	SHOW POSSIBLE CONTAINERS
+
+				-----[[	SHOW POSSIBLE CONTAINERS
 		    			if control == true then 
 							if v.type == "Text" then 
-								-- 0729
 								v.editable = false 
 								v.cursor_visible = false
 								screen:grab_key_focus()
@@ -362,9 +431,7 @@ function util.create_on_button_down_f(v)
 							editor_lb:set_cursor(52)
 							cursor_type = 52
 
-							--if util.is_this_container(v) == false then 
-								selected_content = v 
-							--end 
+							selected_content = v 
 			
 							local odr 
 							for i,j in pairs (g.children) do 
@@ -383,71 +450,79 @@ function util.create_on_button_down_f(v)
 									elseif i ~= odr then  
 										j.extra.org_opacity = j.opacity
                        					j:set{opacity = 50}
-								end 
-							end 
-						end
-					end 
------]]]] 
-
-					if v.type ~= "Text" then 
-						for i, j in pairs (g.children) do  
-	           				if j.type == "Text" then 
-	            				if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
-									ui.text = j	
-			  						if ui.text.on_key_down then 
-	                  					ui.text:on_key_down(keys.Return)
-			  						end 
-		    					end
-	           				end 
-	        			end 
-	    			end 
-	    			org_object = util.copy_obj(v)
-					if v.extra.lock == false then -- or v.name == "inspector" then 
-        				dragging = {v, x - v.x, y - v.y }
-					end
-        			return true
-				end
-	    	elseif (input_mode == hdr.S_FOCUS) then 
-				if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
-		     		screen_ui.selected(v)
-					local tabs_focus = screen:find_child("tabs_focus")
-					local focus = screen:find_child("focusChanger")
-					if tabs_focus then 
-						for i,j in pairs (tabs_focus.children) do 
-							if j.color[2] == 25 then --활성화 되어 있는 탭 
-								if focus_type == "U" then 
-									focus.extra.tabs[i].up_focus = v.name
-								elseif focus_type == "D" then 
-									focus.extra.tabs[i].down_focus = v.name
-								elseif focus_type == "R" then 
-									focus.extra.tabs[i].right_focus = v.name
-								elseif focus_type == "L" then 
-									focus.extra.tabs[i].left_focus = v.name
+									end 
 								end 
 							end
 						end 
-					end 
-		     		screen:find_child("text"..focus_type).text = v.name 
-				end 
-				input_mode = hdr.S_FOCUS
-           		return true
-            end
-	   elseif( input_mode ~= hdr.S_RECTANGLE ) then 
-			if v.extra.lock == false then --or v.name == inspector  then  
-				dragging = {v, x - v.x, y - v.y }
-           		return true
-			end 
-    	end
-	end
-end
+				-----]]]] 
 
+						if v.type ~= "Text" then 
+							for i, j in pairs (g.children) do  
+	           					if j.type == "Text" then 
+	            					if not((x > j.x and x <  j.x + j.w) and (y > j.y and y <  j.y + j.h)) then 
+										ui.text = j	
+			  							if ui.text.on_key_down then 
+	                  						ui.text:on_key_down(keys.Return)
+			  							end 
+		    						end
+	           					end 
+	        				end 
+	    				end 
+	    				org_object = util.copy_obj(v)
+						if v.extra.lock == false then -- or v.name == "inspector" then 
+        					dragging = {v, x - v.x, y - v.y }
+						end
+        				return true
+					end
+	    		elseif (input_mode == hdr.S_FOCUS) then 
+					if (v.name ~= "inspector" and  v.name ~= "ui_element_insert") then 
+		     			screen_ui.selected(v)
+						local tabs_focus = screen:find_child("tabs_focus")
+						local focus = screen:find_child("focusChanger")
+						if tabs_focus then 
+							for i,j in pairs (tabs_focus.children) do 
+								if j.color[2] == 25 then --활성화 되어 있는 탭 
+									if focus_type == "U" then 
+										focus.extra.tabs[i].up_focus = v.name
+									elseif focus_type == "D" then 
+										focus.extra.tabs[i].down_focus = v.name
+									elseif focus_type == "R" then 
+										focus.extra.tabs[i].right_focus = v.name
+									elseif focus_type == "L" then 
+										focus.extra.tabs[i].left_focus = v.name
+									end 
+								end
+							end 
+						end 
+		     			screen:find_child("text"..focus_type).text = v.name 
+					end 
+					input_mode = hdr.S_FOCUS
+           			return true
+            	end
+	   	elseif( input_mode ~= hdr.S_RECTANGLE ) then 
+				if v.extra.lock == false then --or v.name == inspector  then  
+					dragging = {v, x - v.x, y - v.y }
+           			return true
+				end 
+    		end
+		end
+	end
 	
-	function v:on_button_up(x,y,button,num_clicks)
+	function v:on_button_up(x,y,button,num_clicks, m)
+
+		if m then 
+			if m.control then 
+				control = true 
+			else 
+				control = false 
+			end 
+		end 
+
 		if shift == true then 
 			return 
 		end 
 		if (input_mode ~= hdr.S_RECTANGLE) then 
-	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "Code" and v.name ~= "msgw" ) then 
+	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw" ) then 
 	    		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
 	    			if (v.extra.is_in_group == true) then 
 						local p_obj = v.parent --find_parent(v)
@@ -463,9 +538,9 @@ end
 									return 
 							end 
 							if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-								screen_ui.n_select(v, false, dragging) 
-								screen_ui.n_select(new_object, false, dragging) 
-								screen_ui.n_select(org_object, false, dragging) 
+								screen_ui.n_select(v, dragging) 
+								screen_ui.n_select(new_object, dragging) 
+								screen_ui.n_select(org_object, dragging) 
                     			table.insert(undo_list, {p_obj.name, hdr.CHG, org_object, new_object})
 							end 
 	            			dragging = nil
@@ -481,7 +556,7 @@ end
 	               		local actor , dx , dy = unpack( dragging )
 		       			new_object = util.copy_obj(v)
 	               		new_object.position = {x-dx, y-dy}
----[[ Content Setting 
+					---[[ Content Setting 
 		       			if util.is_in_container_group(x,y) and selected_content then 
 			     			local c, t = util.find_container(x,y) 
 			     			if control == true then 
@@ -533,7 +608,7 @@ end
 								selected_container = nil
 			    			end 
 		       			end 
----]] Content Setting 
+					---]] Content Setting 
 		       			for i,j in pairs (g.children) do 
 			     			if j.extra then 
 				   				if j.extra.org_opacity then 
@@ -603,9 +678,9 @@ end
 							end 
 							if(org_object ~= nil) then  
 		           				if(new_object.x ~= org_object.x or new_object.y ~= org_object.y) then 
-			     					screen_ui.n_select(v, false, dragging) 
-			     					screen_ui.n_select(new_object, false, dragging) 
-			     					screen_ui.n_select(org_object, false, dragging) 
+			     					screen_ui.n_select(v, dragging) 
+			     					screen_ui.n_select(new_object, dragging) 
+			     					screen_ui.n_select(org_object, dragging) 
 			     					v.extra.org_x = v.x + g.extra.scroll_x + g.extra.canvas_xf
 			     					v.extra.org_y = v.y + g.extra.scroll_y + g.extra.canvas_f 
                     	     		table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
@@ -625,43 +700,45 @@ end
 end
 
 function util.get_group_position(child_obj)
+
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
-	       if (v.type == "Group") then 
-		    if(v:find_child(child_obj.name)) then
-			return v.position 
-		    end 
-	       end 
+	       		if (v.type == "Group") then 
+		    		if(v:find_child(child_obj.name)) then
+						return v.position 
+		    		end 
+	       		end 
           end
      end
 end 
 	
 function util.set_obj (f, v)
+
       for i,j in pairs(hdr.attr_name_list) do 
            if v[j] then f[j] = v[j] end 
       end 
+
 end 
 
 
 function util.copy_obj (v)
 
       local new_map = {
-	["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
-	["Text"] = function() new_obj = Text{} return new_obj end, 
-	["Image"] = function() new_obj = Image{} return new_obj end, 
-	["Clone"] = function() new_obj = Clone{} return new_obj end, 
-	["Group"] = function() new_obj = Group{} return new_obj end, 
-	["Video"] = function() new_obj = {} return new_obj end, 
+		["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
+		["Text"] = function() new_obj = Text{} return new_obj end, 
+		["Image"] = function() new_obj = Image{} return new_obj end, 
+		["Clone"] = function() new_obj = Clone{} return new_obj end, 
+		["Group"] = function() new_obj = Group{} return new_obj end, 
+		["Video"] = function() new_obj = {} return new_obj end, 
       }
 	
       local new_object = new_map[v.type]()
 
       util.set_obj(new_object, v)
 
-
       return new_object
-end	
 
+end	
 
 function util.make_attr_t(v)
 
@@ -691,18 +768,19 @@ function util.make_attr_t(v)
   end
 
   local function stringToitem(str)
+
        local first = ""
        local second = ""
        local last
 
        local i, j = str:find("_")
        if i then 
-       	first = str:sub(1,1)
-       	last = str:sub(i+1,-1)
-	i, j = last:find("_")
-	if i then 
-	    second = last:sub(1,1)
-        end 
+       		first = str:sub(1,1)
+       		last = str:sub(i+1,-1)
+			i, j = last:find("_")
+			if i then 
+	    		second = last:sub(1,1)
+        	end 
        end 
       
        return first..second
@@ -741,29 +819,29 @@ function util.make_attr_t(v)
         	table.insert(attr_t, {"z_angle", z_rotation_t[1], "Z"})
 		end,  
        ["clip"] = function()
-                table.insert(attr_t, {"caption", "Clipping Region"})
-                local clip_t = v.clip
-                if clip_t == nil then
-                     clip_t = {0,0 ,v.w, v.h}
-                end
-                table.insert(attr_t, {"cx", clip_t[1], "X"})
-                table.insert(attr_t, {"cy", clip_t[2], "Y"})
-                table.insert(attr_t, {"cw", clip_t[3], "W"})
-                table.insert(attr_t, {"ch", clip_t[4], "H"})
+            table.insert(attr_t, {"caption", "Clipping Region"})
+            local clip_t = v.clip
+            if clip_t == nil then
+            	clip_t = {0,0 ,v.w, v.h}
+            end
+            table.insert(attr_t, {"cx", clip_t[1], "X"})
+            table.insert(attr_t, {"cy", clip_t[2], "Y"})
+            table.insert(attr_t, {"cw", clip_t[3], "W"})
+            table.insert(attr_t, {"ch", clip_t[4], "H"})
 		end,
         ["anchor_point"] = function()	
- 		table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
+ 			table.insert(attr_t, {"anchor_point", v.anchor_point,"Anchor Point"})
 		end,
-	["src"] = function()
+		["src"] = function()
         	table.insert(attr_t, {"caption", "Source Location"})
         	table.insert(attr_t, {"src", v.src,"Source"})
 		end,
-	["icon"] = function()
+		["icon"] = function()
         	table.insert(attr_t, {"caption", "Icon Source"})
         	table.insert(attr_t, {"icon", v.icon,"Icon"})
 		end,
-	["color"] = function(j)
-		table.insert(attr_t, {"caption", stringTotitle(j)})
+		["color"] = function(j)
+			table.insert(attr_t, {"caption", stringTotitle(j)})
              	local color_t = v[j] 
              	if color_t == nil then 
                  	color_t = {0,0,0,0}
@@ -773,130 +851,129 @@ function util.make_attr_t(v)
             table.insert(attr_t, {j.."b", color_t[3], "B"})
        	    table.insert(attr_t, {j.."a", color_t[4], "A"})    
 		end,
-	["size"] = function(j)
-		table.insert(attr_t, {"caption", stringTotitle(j)})
-             	local size_t = v[j] 
-             	if size_t == nil then 
-                 	size_t = {0,0}
+		["size"] = function(j)
+			table.insert(attr_t, {"caption", stringTotitle(j)})
+            local size_t = v[j] 
+            if size_t == nil then 
+            	size_t = {0,0}
 	     	end
-             	local size_k = ""
-             	if j:sub(1,1) ~= "s" then
-                 	size_k = j:sub(1,1) 
-             	end 
+            local size_k = ""
+            if j:sub(1,1) ~= "s" then
+            	size_k = j:sub(1,1) 
+            end 
 	     	table.insert(attr_t, {size_k.."w", size_t[1], "W"})
-             	table.insert(attr_t, {size_k.."h", size_t[2], "H"})
+            table.insert(attr_t, {size_k.."h", size_t[2], "H"})
 		end,
 	["pos"] = function(j)
-		table.insert(attr_t, {"caption", stringTotitle(j)})
-             	local pos_t = v[j] 
-             	if pos_t == nil then 
-                 	pos_t = {0,0,0,0}
+			table.insert(attr_t, {"caption", stringTotitle(j)})
+            local pos_t = v[j] 
+            if pos_t == nil then 
+            	pos_t = {0,0,0,0}
 	     	end
-             	local pos_k = ""
-             	if j:sub(1,1) ~= "p" then 
-                 	pos_k = j:sub(1,1) 
-             	end 
+            local pos_k = ""
+            if j:sub(1,1) ~= "p" then 
+            	pos_k = j:sub(1,1) 
+            end 
 	     	table.insert(attr_t, {pos_k.."x", pos_t[1], "X"})
             table.insert(attr_t, {pos_k.."y", pos_t[2], "Y"})
 		end,
 	["focus"]= function()
- 		if v.extra.focus then 
- 		     table.insert(attr_t, {"focus", v.extra.focus, "Focus"})
- 		else 
- 		     table.insert(attr_t, {"focus", {"1","2","3","4","5"}, "Focus"})
- 		end 
+ 			if v.extra.focus then 
+ 		     	table.insert(attr_t, {"focus", v.extra.focus, "Focus"})
+ 			else 
+ 		     	table.insert(attr_t, {"focus", {"1","2","3","4","5"}, "Focus"})
+ 			end 
  		end, 
 	["label"]= function()
-		if v.extra.type == "ToastAlert" then 
-		     table.insert(attr_t, {"caption", "Title"})
-		else 
-		     table.insert(attr_t, {"caption", "Label"})
-		end 
+			if v.extra.type == "ToastAlert" then 
+		     	table.insert(attr_t, {"caption", "Title"})
+			else 
+		     	table.insert(attr_t, {"caption", "Label"})
+			end 
         	table.insert(attr_t, {"label", v.label,"Label"})
 		end,
 	["empty_top_color"] = function()
-		     table.insert(attr_t, {"caption", "Empty Bar"})
-		     local color_t = v.empty_top_color 
-             	     if color_t == nil then 
-                 	color_t = {0,0,0,0}
-	     	     end
-		     table.insert(attr_t, {"caption", "Gradient Top Color"})
-	     	     table.insert(attr_t, {"empty_top_color".."r", color_t[1], "R"})
-             	     table.insert(attr_t, {"empty_top_color".."g", color_t[2], "G"})
-             	     table.insert(attr_t, {"empty_top_color".."b", color_t[3], "B"})
-       	     	     table.insert(attr_t, {"empty_top_color".."a", color_t[4], "A"})    
-		     end,
+		    table.insert(attr_t, {"caption", "Empty Bar"})
+		    local color_t = v.empty_top_color 
+            if color_t == nil then 
+            	color_t = {0,0,0,0}
+	     	end
+		    table.insert(attr_t, {"caption", "Gradient Top Color"})
+	     	table.insert(attr_t, {"empty_top_color".."r", color_t[1], "R"})
+            table.insert(attr_t, {"empty_top_color".."g", color_t[2], "G"})
+            table.insert(attr_t, {"empty_top_color".."b", color_t[3], "B"})
+       	    table.insert(attr_t, {"empty_top_color".."a", color_t[4], "A"})    
+		end,
 	["empty_bottom_color"] = function()
 		     local color_t = v.empty_bottom_color 
-             	     if color_t == nil then 
-                 	color_t = {0,0,0,0}
-	     	     end
+             if color_t == nil then 
+                color_t = {0,0,0,0}
+	     	 end
 		     table.insert(attr_t, {"caption", "Gradient Bottom Color"})
-	     	     table.insert(attr_t, {"empty_bottom_color".."r", color_t[1], "R"})
-             	     table.insert(attr_t, {"empty_bottom_color".."g", color_t[2], "G"})
-             	     table.insert(attr_t, {"empty_bottom_color".."b", color_t[3], "B"})
-       	     	     table.insert(attr_t, {"empty_bottom_color".."a", color_t[4], "A"})    
-		     end,
+	     	 table.insert(attr_t, {"empty_bottom_color".."r", color_t[1], "R"})
+             table.insert(attr_t, {"empty_bottom_color".."g", color_t[2], "G"})
+             table.insert(attr_t, {"empty_bottom_color".."b", color_t[3], "B"})
+       	     table.insert(attr_t, {"empty_bottom_color".."a", color_t[4], "A"})    
+		 end,
 	["filled_top_color"] = function()
 		     table.insert(attr_t, {"caption", "Filled Bar"})
 		     local color_t = v.filled_top_color 
-             	     if color_t == nil then 
+             if color_t == nil then 
                  	color_t = {0,0,0,0}
-	     	     end
+	     	 end
 		     table.insert(attr_t, {"caption", "Gradient Top Color"})
-	     	     table.insert(attr_t, {"filled_top_color".."r", color_t[1], "R"})
-             	     table.insert(attr_t, {"filled_top_color".."g", color_t[2], "G"})
-             	     table.insert(attr_t, {"filled_top_color".."b", color_t[3], "B"})
-       	     	     table.insert(attr_t, {"filled_top_color".."a", color_t[4], "A"})    
-
-		     end,
+	     	 table.insert(attr_t, {"filled_top_color".."r", color_t[1], "R"})
+             table.insert(attr_t, {"filled_top_color".."g", color_t[2], "G"})
+             table.insert(attr_t, {"filled_top_color".."b", color_t[3], "B"})
+       	     table.insert(attr_t, {"filled_top_color".."a", color_t[4], "A"})    
+		 end,
 	["filled_bottom_color"] = function()
 		     local color_t = v.filled_bottom_color 
              	     if color_t == nil then 
                  	color_t = {0,0,0,0}
 	     	     end
 		     table.insert(attr_t, {"caption", "Gradient Bottom Color"})
-	     	     table.insert(attr_t, {"filled_bottom_color".."r", color_t[1], "R"})
-             	     table.insert(attr_t, {"filled_bottom_color".."g", color_t[2], "G"})
-             	     table.insert(attr_t, {"filled_bottom_color".."b", color_t[3], "B"})
-       	     	     table.insert(attr_t, {"filled_bottom_color".."a", color_t[4], "A"})   
-		     end,
+	     	 table.insert(attr_t, {"filled_bottom_color".."r", color_t[1], "R"})
+             table.insert(attr_t, {"filled_bottom_color".."g", color_t[2], "G"})
+             table.insert(attr_t, {"filled_bottom_color".."b", color_t[3], "B"})
+       	     table.insert(attr_t, {"filled_bottom_color".."a", color_t[4], "A"})   
+		 end,
 	["rows"] = function() 
-                     table.insert(attr_t, {"rows", v.rows, "Rows"})
-		     end,  	
+             table.insert(attr_t, {"rows", v.rows, "Rows"})
+		 end,  	
 	["visible_w"] = function ()
 		     table.insert(attr_t, {"caption", "Visible"})
-        	     table.insert(attr_t, {"visible_w", v.visible_w,"W"})
-		     end, 
+        	 table.insert(attr_t, {"visible_w", v.visible_w,"W"})
+		 end, 
 	["visible_h"] = function ()
-        	     table.insert(attr_t, {"visible_h", v.visible_h,"H"})
-		     end, 
+        	 table.insert(attr_t, {"visible_h", v.visible_h,"H"})
+		  end, 
 	["virtual_w"] = function ()
 		     table.insert(attr_t, {"caption", "Virtual"})
-        	     table.insert(attr_t, {"virtual_w", v.virtual_w,"W"})
-		     end, 
+        	 table.insert(attr_t, {"virtual_w", v.virtual_w,"W"})
+		  end, 
 	["virtual_h"] = function ()
-        	     table.insert(attr_t, {"virtual_h", v.virtual_h,"H"})
-		     end, 
+        	 table.insert(attr_t, {"virtual_h", v.virtual_h,"H"})
+		  end, 
 	["lock"]  = function ()
 		     table.insert(attr_t, {"lock", v.extra.lock, "Lock"})
-		     end,
+		  end,
 	["font"] = function ()
              table.insert(attr_t, {"caption", "Font"})
 			 table.insert(attr_t, {"font", v.font,"font"})
-			 end,
+		   end,
 	["text_font"] = function ()
              table.insert(attr_t, {"caption", "Text Font"})
 			 table.insert(attr_t, {"text_font", v.text_font,"text_font"})
-			 end,
+		   end,
 	["message_font"] = function ()
              table.insert(attr_t, {"caption", "Message Font"})
 			 table.insert(attr_t, {"message_font", v.message_font,"message_font"})
-			 end,
+		   end,
 	["title_font"] = function ()
              table.insert(attr_t, {"caption", "Title Font"})
 			 table.insert(attr_t, {"title_font", v.title_font,"title_font"})
-			 end,
+		   end,
   }
   
   local obj_map = {
