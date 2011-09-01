@@ -12,8 +12,6 @@
 @protocol AppBrowserDelegate <NSObject>
 
 @required
-- (void)socketErrorOccurred;
-- (void)streamEndEncountered;
 - (void)didReceiveAvailableAppsInfo:(NSArray *)info;
 - (void)didReceiveCurrentAppInfo:(NSDictionary *)info;
 
@@ -21,6 +19,10 @@
 
 @interface AppBrowser : NSObject {
     id <AppBrowserDelegate> delegate;
+    
+    NSString *host;
+    NSUInteger port;
+    NSString *serviceName;
     
     // The delegates for the connections
     id <AppBrowserDelegate> fetchAppsDelegate;
@@ -38,7 +40,6 @@
     
     NSMutableArray *appsAvailable;
     NSString *currentAppName;
-    TPAppViewController *appViewController;
 }
 
 - (void)setupService:(NSUInteger)port
@@ -59,6 +60,9 @@
 @property (assign) id <AppBrowserDelegate> delegate;
 @property (retain) NSMutableArray *appsAvailable;
 @property (retain) NSString *currentAppName;
-@property (assign) TPAppViewController *appViewController;
+
+@property (retain) NSString *host;
+@property (assign) NSUInteger port;
+@property (retain) NSString *serviceName;
 
 @end

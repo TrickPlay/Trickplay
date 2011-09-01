@@ -136,7 +136,7 @@
     
     // the virtual remote for controlling the Television
     virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
-    virtualRemote.view.frame = frame;
+    //virtualRemote.view.frame = frame;
     [self.view addSubview:virtualRemote.view];
     virtualRemote.delegate = self;
     
@@ -155,7 +155,7 @@
         [http_port release];
     }
     http_port = [my_http_port retain];
-    [socketManager setPort:(NSUInteger)[http_port integerValue]];
+    [socketManager setPort:[http_port integerValue]];
     [advancedUIDelegate setupServiceWithPort:port hostname:hostName];
 }
 
@@ -167,6 +167,7 @@
  * connected to Trickplay.
  */
 - (BOOL)hasConnection {
+    NSLog(@"socketman != nil: %d, isfunctional: %d", socketManager != nil, [socketManager isFunctional]);
     return socketManager != nil && [socketManager isFunctional];
 }
 

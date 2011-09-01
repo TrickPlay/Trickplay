@@ -17,6 +17,7 @@
 @synthesize pushingViewController;
 @synthesize socketDelegate;
 @synthesize appViewController;
+@synthesize delegate;
 
 /*
 @synthesize appShopButton;
@@ -32,15 +33,15 @@
 }
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
-/*
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization.
+        appBrowser = [[AppBrowser alloc] init];
     }
     return self;
 }
-*/
 
 /**
  * Called by RootViewController after a service is resolved. Creates a
@@ -48,15 +49,12 @@
  * it will use for establishing the socket it will use for an initial
  * connection with Trickplay and communicating with Trickplay asynchronously.
  */
-- (void)setupService:(NSInteger)p
-            hostname:(NSString *)h
-            thetitle:(NSString *)n {
-    
-    NSLog(@"AppBrowser Service Setup: %@ host: %@ port: %d", n, h, p);
-    
-    viewDidAppear = NO;
-    
-    [self createTPAppViewWithPort:p hostName:h];
+- (void)setupService:(NSUInteger)port
+            hostName:(NSString *)hostName
+         serviceName:(NSString *)serviceName {
+        
+    [appBrowser setupService:port hostName:hostName serviceName:serviceName];
+    [self createTPAppViewWithPort:port hostName:hostName];
 }
 
 /**
@@ -85,20 +83,13 @@
  * on Trickplay by asking it over the network.
  */
 - (BOOL)hasRunningApp {
+    NSLog(@"has connection: %d", [appViewController hasConnection]);
+    [appBrowser setupService:appViewController.socketManager.port hostName:appViewController.socketManager.host serviceName:nil];
     if (![appViewController hasConnection]) {
         return NO;
     }
-    NSDictionary *currentAppInfo = [self getCurrentAppInfo];
-    NSLog(@"Received JSON dictionary current app data = %@", currentAppInfo);
-    if (!currentAppInfo) {
-        return NO;
-    }
-    self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
-    if (currentAppName && ![currentAppName isEqualToString:@"Empty"]) {
-        return YES;
-    }
-    
-    return NO;
+    NSLog(@"\n\appBrowser: %@\n\n", appBrowser);
+    return [appBrowser hasRunningApp];
 }
 
 /**
@@ -107,56 +98,29 @@
  * and returns it as an NSDictionary or nil on error.
  */
 - (NSDictionary *)getCurrentAppInfo {
-    NSLog(@"Getting Current App Info");
     if (![appViewController hasConnection]) {
         return nil;
     }
-    // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", appViewController.socketManager.host, appViewController.socketManager.port];
-    //NSLog(@"JSONString = %@", JSONString);
-    
-    NSURL *dataURL = [NSURL URLWithString:JSONString];
-    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
-    //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
-    //NSArray *JSONArray = [JSONData yajl_JSON];
-    return (NSDictionary *)[JSONData yajl_JSON];
+    return [appBrowser getCurrentAppInfo];
 }
 
-- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
+- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)theDelegate {
     NSLog(@"Fetching Apps");
     
-    if (!delegate) {
-        return;
+    if (!theDelegate) {
+        theDelegate = delegate;
     }
-    
-    currentAppDelegate = delegate;
     
     if (![appViewController hasConnection]) {
         self.currentAppName = nil;
-        [delegate didReceiveCurrentAppInfo:nil];
+        appBrowser.currentAppName = nil;
+        if (theDelegate) {
+            [theDelegate didReceiveCurrentAppInfo:nil];
+        }
         return;
     }
     
-    if (currentAppInfoConnection) {
-        [currentAppInfoConnection cancel];
-        [currentAppInfoConnection release];
-        currentAppInfoConnection = nil;
-    }
-    if (currentAppData) {
-        [currentAppData release];
-        currentAppData = nil;
-    }
-    
-    // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
-    
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
-    currentAppInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-    
-    if (!currentAppInfoConnection) {
-        self.currentAppName = nil;
-        [delegate didReceiveCurrentAppInfo:nil];
-    }
+    [appBrowser getCurrentAppInfoWithDelegate:theDelegate];
 }
 
 /**
@@ -171,118 +135,41 @@
  */
 - (NSArray *)fetchApps {
     NSLog(@"Fetching Apps");
+    
     if (![appViewController hasConnection]) {
         return nil;
     }
     
-    //grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
-    
-    NSURL *dataURL = [NSURL URLWithString:JSONString];
-    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
-    self.appsAvailable = [JSONData yajl_JSON];
-    NSLog(@"Recieved JSON array app data = %@", appsAvailable);
-    if (!appsAvailable) {
-        return nil;
-    }
-    
-    return appsAvailable;
+    return [appBrowser fetchApps];
 }
 
-- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
+- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)theDelegate {
     NSLog(@"Fetching Apps");
     
-    if (!delegate) {
-        return;
+    if (!theDelegate) {
+        theDelegate = delegate;
     }
-    
-    fetchAppsDelegate = delegate;
     
     if (![appViewController hasConnection]) {
-        self.appsAvailable = nil;
-        [delegate didReceiveAvailableAppsInfo:nil];
+        self.currentAppName = nil;
+        appBrowser.currentAppName = nil;
+        if (theDelegate) {
+            [theDelegate didReceiveAvailableAppsInfo:nil];
+        }
         return;
     }
     
-    if (fetchAppsConnection) {
-        [fetchAppsConnection cancel];
-        [fetchAppsConnection release];
-        fetchAppsConnection = nil;
-    }
-    if (fetchAppsData) {
-        [fetchAppsData release];
-        fetchAppsData = nil;
-    }
-    
-    
-    // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
-    
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
-    fetchAppsConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-    
-    if (!fetchAppsConnection) {
-        self.appsAvailable = nil;
-        [delegate didReceiveAvailableAppsInfo:nil];
-    }
+    [appBrowser getAvailableAppsInfoWithDelegate:theDelegate];
 }
 
-#pragma mark -
-#pragma mark NSURLConnection Handling
-
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
-    if (connection == fetchAppsConnection) {
-        if (!fetchAppsData) {
-            fetchAppsData = [[NSMutableData alloc] initWithCapacity:10000];
-        }
-        
-        [fetchAppsData appendData:incrementalData];
-    } else if (connection == currentAppInfoConnection) {
-        if (!currentAppData) {
-            currentAppData = [[NSMutableData alloc] initWithCapacity:10000];
-        }
-        
-        [currentAppData appendData:incrementalData];
+- (void)didReceiveAvailableAppsInfo:(NSArray *)info {
+    if (delegate) {
+        [delegate didReceiveAvailableAppsInfo:info];
     }
 }
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    if (connection == fetchAppsDelegate) {
-        [fetchAppsConnection cancel];
-        [fetchAppsConnection release];
-        fetchAppsConnection = nil;
-        
-        self.appsAvailable = [fetchAppsData yajl_JSON];
-        NSLog(@"Received JSON array app data = %@", appsAvailable);
-        [fetchAppsDelegate didReceiveAvailableAppsInfo:appsAvailable];
-    } else if (connection == currentAppInfoConnection) {
-        [currentAppInfoConnection cancel];
-        [currentAppInfoConnection release];
-        currentAppInfoConnection = nil;
-        
-        NSDictionary *currentAppInfo = [currentAppData yajl_JSON];
-        self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
-        if ([currentAppName isEqualToString:@"Empty"]) {
-            self.currentAppName = nil;
-        }
-        [currentAppDelegate didReceiveCurrentAppInfo:currentAppInfo];
-    }
-}
-
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    if (connection == fetchAppsConnection) {
-        [fetchAppsConnection cancel];
-        [fetchAppsConnection release];
-        fetchAppsConnection = nil;
-        
-        self.appsAvailable = nil;
-        [fetchAppsDelegate didReceiveAvailableAppsInfo:nil];
-    } else if (connection == currentAppInfoConnection) {
-        [currentAppInfoConnection cancel];
-        [currentAppInfoConnection release];
-        currentAppInfoConnection = nil;
-        
-        [currentAppDelegate didReceiveCurrentAppInfo:nil];
+- (void)didReceiveCurrentAppInfo:(NSDictionary *)info {
+    if (delegate) {
+        [delegate didReceiveCurrentAppInfo:info];
     }
 }
 
@@ -358,7 +245,6 @@
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
     
-    viewDidAppear = YES;
     pushingViewController = NO;
 }
 
@@ -403,7 +289,6 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
 }
-
 
 /**
  * Customize the number of rows in the table view. The number of rows is equlivalent
@@ -580,6 +465,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [currentAppIndicator release];
     }
     socketDelegate = nil;
+    appBrowser.delegate = nil;
+    [appBrowser release];
+    appBrowser = nil;
     
     [super dealloc];
 }

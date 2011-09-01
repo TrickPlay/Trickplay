@@ -13,20 +13,86 @@
 @synthesize appsAvailable;
 @synthesize delegate;
 @synthesize currentAppName;
-@synthesize appViewController;
+@synthesize host;
+@synthesize port;
+@synthesize serviceName;
+
+#pragma mark -
+#pragma mark Initialization
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        // Initialization code here.
+        delegate = nil;
+        
+        host = nil;
+        port = 0;
+        serviceName = nil;
+        
+        // The delegates for the connections
+        fetchAppsDelegate = nil;
+        currentAppDelegate = nil;
+        
+        // Asynchronous URL connections for populating the table with
+        // available apps and fetching information on the current
+        // running app
+        fetchAppsConnection = nil;
+        currentAppInfoConnection = nil;
+        
+        // The data buffers for the connections
+        fetchAppsData = nil;
+        currentAppData = nil;
+        
+        appsAvailable = nil;
+        currentAppName = nil;
     }
     
     return self;
 }
 
-- (void)setupService:(NSUInteger)port hostName:(NSString *)hostName serviceName:(NSString *)serviceName {
+- (id)initWithDelegate:(id <AppBrowserDelegate>)_delegate {
+    self = [super init];
+    if (self) {
+        delegate = _delegate;
+        
+        host = nil;
+        port = 0;
+        serviceName = nil;
+        
+        // The delegates for the connections
+        fetchAppsDelegate = nil;
+        currentAppDelegate = nil;
+        
+        // Asynchronous URL connections for populating the table with
+        // available apps and fetching information on the current
+        // running app
+        fetchAppsConnection = nil;
+        currentAppInfoConnection = nil;
+        
+        // The data buffers for the connections
+        fetchAppsData = nil;
+        currentAppData = nil;
+        
+        appsAvailable = nil;
+        currentAppName = nil;
+    }
     
+    return self;
+}
+
+- (void)setupService:(NSUInteger)thePort hostName:(NSString *)theHostName serviceName:(NSString *)theServiceName {
+    @synchronized(self) {
+        port = thePort;
+        
+        [theHostName retain];
+        [host release];
+        host = theHostName;
+        
+        [theServiceName retain];
+        [serviceName release];
+        serviceName = theServiceName;
+    }
 }
 
 - (BOOL)startService {
@@ -41,9 +107,7 @@
  * on Trickplay by asking it over the network.
  */
 - (BOOL)hasRunningApp {
-    if (![appViewController hasConnection]) {
-        return NO;
-    }
+    
     NSDictionary *currentAppInfo = [self getCurrentAppInfo];
     NSLog(@"Received JSON dictionary current app data = %@", currentAppInfo);
     if (!currentAppInfo) {
@@ -64,15 +128,19 @@
  * Asks Trickplay for the currently running app and any information pertaining
  * to this app assembled in a JSON string. The method takes this JSON string reply
  * and returns it as an NSDictionary or nil on error.
+ *
+ * TODO: be very explicit of what instance variables are used to
+ * inform user of read/write locks necessary for multithreading
  */
 - (NSDictionary *)getCurrentAppInfo {
     NSLog(@"Getting Current App Info");
-    if (![appViewController hasConnection]) {
-        return nil;
-    }
+    
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", appViewController.socketManager.host, appViewController.socketManager.port];
-    //NSLog(@"JSONString = %@", JSONString);
+    NSString *JSONString;
+    @synchronized(self) {
+        JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", host, port];
+    }
+    NSLog(@"JSONString = %@", JSONString);
     
     NSURL *dataURL = [NSURL URLWithString:JSONString];
     NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
@@ -90,12 +158,6 @@
     
     currentAppDelegate = theDelegate;
     
-    if (![appViewController hasConnection]) {
-        self.currentAppName = nil;
-        [theDelegate didReceiveCurrentAppInfo:nil];
-        return;
-    }
-    
     if (currentAppInfoConnection) {
         [currentAppInfoConnection cancel];
         [currentAppInfoConnection release];
@@ -107,7 +169,10 @@
     }
     
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
+    NSString *JSONString;
+    @synchronized(self) {
+        JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", host, port];
+    }
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
     currentAppInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
@@ -130,12 +195,12 @@
  */
 - (NSArray *)fetchApps {
     NSLog(@"Fetching Apps");
-    if (![appViewController hasConnection]) {
-        return nil;
-    }
     
     //grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
+    NSString *JSONString;
+    @synchronized(self) {
+        JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", host, port];
+    }
     
     NSURL *dataURL = [NSURL URLWithString:JSONString];
     NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
@@ -157,12 +222,6 @@
     
     fetchAppsDelegate = theDelegate;
     
-    if (![appViewController hasConnection]) {
-        self.appsAvailable = nil;
-        [theDelegate didReceiveAvailableAppsInfo:nil];
-        return;
-    }
-    
     if (fetchAppsConnection) {
         [fetchAppsConnection cancel];
         [fetchAppsConnection release];
@@ -175,7 +234,10 @@
     
     
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appViewController.socketManager.host, appViewController.socketManager.port];
+    NSString *JSONString;
+    @synchronized(self) {
+        JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", host, port];
+    }
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
     fetchAppsConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
@@ -256,7 +318,10 @@
     dispatch_queue_t launchApp_queue = dispatch_queue_create("launchAppQueue", NULL);
     dispatch_async(launchApp_queue, ^(void){
         NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
-        NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", appViewController.socketManager.host, appViewController.socketManager.port, appID];
+        NSString *launchString;
+        @synchronized(self) {
+            launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", host, port, appID];
+        }
         NSLog(@"Launching app via url '%@'", launchString);
         NSURL *launchURL = [NSURL URLWithString:launchString];
         NSData *launchData = [NSData dataWithContentsOfURL:launchURL];
@@ -265,6 +330,52 @@
         self.currentAppName = (NSString *)[appInfo objectForKey:@"name"];
     });
     dispatch_release(launchApp_queue);
+}
+
+#pragma mark -
+#pragma mark Deallocation
+
+- (void)dealloc {
+    self.delegate = nil;
+    
+    @synchronized (self) {
+        if (host) {
+            [host release];
+            host = nil;
+        }
+        port = 0;
+        if (serviceName) {
+            [serviceName release];
+            serviceName = nil;
+        }
+    }
+    
+    if (fetchAppsConnection) {
+        [fetchAppsConnection cancel];
+        [fetchAppsConnection release];
+        fetchAppsConnection = nil;
+    }
+    if (currentAppInfoConnection) {
+        [currentAppInfoConnection cancel];
+        [currentAppInfoConnection release];
+        currentAppInfoConnection = nil;
+    }
+    if (currentAppData) {
+        [currentAppData release];
+        currentAppData = nil;
+    }
+    if (fetchAppsData) {
+        [fetchAppsData release];
+        fetchAppsData = nil;
+    }
+    
+    fetchAppsDelegate = nil;
+    currentAppDelegate = nil;
+    
+    self.appsAvailable = nil;
+    self.currentAppName = nil;
+    
+    [super dealloc];
 }
 
 @end

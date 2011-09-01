@@ -24,27 +24,25 @@
  */
 
 @interface RootViewController : UIViewController <UINavigationControllerDelegate,
-TPAppViewControllerSocketDelegate, NetServiceManagerDelegate,
-AppBrowserDelegate, TVBrowserDelegate> {
+TPAppViewControllerSocketDelegate, AppBrowserViewControllerDelegate, TVBrowserViewControllerDelegate> {
     UIWindow *window;
 
-    // Refreshes the list of services
-    UIBarButtonItem *refreshButton;
     // Initialized to NO. Set to YES while the AppBrowser is in the course
     // of being pushed to the top of the navigation stack
     BOOL pushingAppBrowser;
     
     TVBrowserViewController *tvBrowserViewController;
     AppBrowserViewController *appBrowserViewController;
+    
+    UINavigationController *navigationController;
 }
 
 // Exposed methods
 - (void)pushAppBrowser:(NSNotification *)notification;
 - (void)serviceResolved:(NSNetService *)service;
-- (void)reloadData;
-- (void)refresh;
 
 // Exposed properties
+@property (retain)IBOutlet UINavigationController *navigationController;
 @property (retain) IBOutlet TVBrowserViewController *tvBrowserViewController;
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 
