@@ -96,21 +96,21 @@ function editor_ui.button(table)
         b_group.size = { p.ui_width , p.ui_height}
 
 	    button = Group{name = "dim", opacity = 255, size = {p.ui_width, p.ui_height}}
-		leftcap = Image{src="lib/assets/button-dim-leftcap.png", position = {0,0}}
-		rightcap = Image{src="lib/assets/button-dim-rightcap.png", position = {p.ui_width-10,0}}
-		center1px = Image{src="lib/assets/button-dim-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
+		local leftcap = Image{src="lib/assets/button-dim-leftcap.png", position = {0,0}}
+		local rightcap = Image{src="lib/assets/button-dim-rightcap.png", position = {p.ui_width-10,0}}
+		local center1px = Image{src="lib/assets/button-dim-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
 		button:add(leftcap,center1px,rightcap) 
 		
 	    focus = Group{name  ="red", opacity = 0, size = {p.ui_width, p.ui_height}}
-		redleftcap = Image{src="lib/assets/button-red-leftcap.png", position = {0,0}}
-		redrightcap = Image{src="lib/assets/button-red-rightcap.png", position = {p.ui_width-10,0}}
-		redcenter1px = Image{src="lib/assets/button-red-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
+		local redleftcap = Image{src="lib/assets/button-red-leftcap.png", position = {0,0}}
+		local redrightcap = Image{src="lib/assets/button-red-rightcap.png", position = {p.ui_width-10,0}}
+		local redcenter1px = Image{src="lib/assets/button-red-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
 		focus:add(redleftcap,redcenter1px,redrightcap) 
 
 	    active = Group{name ="active", opacity = 0, size = {p.ui_width, p.ui_height}}
-		activeleftcap = Image{src="lib/assets/button-active-leftcap.png", position = {0,0}}
-		activerightcap = Image{src="lib/assets/button-active-rightcap.png", position = {p.ui_width-10,0}}
-		activecenter1px = Image{src="lib/assets/button-active-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
+		local activeleftcap = Image{src="lib/assets/button-active-leftcap.png", position = {0,0}}
+		local activerightcap = Image{src="lib/assets/button-active-rightcap.png", position = {p.ui_width-10,0}}
+		local activecenter1px = Image{src="lib/assets/button-active-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
 		active:add(activeleftcap,activecenter1px,activerightcap) 
 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
@@ -356,17 +356,6 @@ function editor_ui.scrollPane(t)
 
 
 	 function scroll_group.extra.on_focus_in(key) 
-
-		--print("scroll_group focus in", key)
-
---[[
-		if current_focus ~= nil then 
-			print(current_focus.name)
-			if current_focus.on_focus_out then 
-				current_focus.on_focus_out()
-			end 
-		end 
-]]
 		--current_focus = scroll_group 0701
 		for i,j in pairs (scroll_group.content.children) do 
 			if j.name then 

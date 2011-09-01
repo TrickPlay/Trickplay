@@ -13,7 +13,8 @@ local function copy_widget_imgs ()
 	-- all the editor asset files including skins to the newly created 
 	-- project directory.
 
-	local copy_dirs = {"/assets/", "/assets/default/", "/assets/CarbonCandy/", "/assets/OOBE/", }
+	--local copy_dirs = {"/assets/", "/assets/default/", "/assets/CarbonCandy/", "/assets/OOBE/", }
+	local copy_dirs = {"/assets/"}
 	local copy_files = {"/.trickplay", "/lib/ui_element.lua", "/lib/ui_element_header.lua", "/lib/strings.lua", } 
 	local source_files, source_file, dest_file, dest_dir
 
@@ -240,8 +241,6 @@ function project_mng.new_project(fname, from_new_project)
 	end 
 
 	function text_input:on_key_down(key)
-		if key == keys.Tab then
-		end
 		if text_input.focus[key] then
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
@@ -417,6 +416,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	-- Scroll	
 	local scroll = editor_ui.scrollPane{}
 
+	editor_use = true
 	-- Buttons 
 	local button_new = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     					  skin = "default", ui_width = 90, ui_height = 27, label = "New Project", focus_color = {27,145,27,255}, focus_object = scroll}
@@ -425,6 +425,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     					  skin = "default", ui_width = 90, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = scroll}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
     					  skin = "default", ui_width = 90, ui_height = 27, label = "OK", focus_color = {27,145,27,255},active_button =true, focus_object = scroll} 
+	editor_use = false
 
 	-- Button Event Handlers
 	button_new.pressed = function() xbox:on_button_down(1)  project_mng.new_project() end
@@ -443,8 +444,8 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	local tab_func = function()
 		button_ok:find_child("active").opacity = 0
 		button_ok:find_child("dim").opacity = 255
-		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_new:grab_key_focus()
+		button_new.on_focus_in()
 	end
 
 	--Focus Destination
@@ -502,7 +503,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 			selected_project = v
 		end
 
-		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab] = tab_func}
+		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab] = function() selected_project = project_t.name tab_func() end }
 
 		project_t.position =  {cur_w, cur_h}
 		project_t.extra.rect = h_rect.name
@@ -587,7 +588,6 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	button_ok:find_child("dim").opacity = 0
 	scroll.on_focus_in()
 
-
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(msgw)
 		msgw:clear() 
@@ -604,42 +604,6 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		return true
 	end 
 
-end 
-
-local function set_app_path()
-
-    -- Get the user's home directory and make sure it is valid
-    local home = editor_lb:get_home_dir()
-    
-    assert( home )
-    
-    -- The base directory where the editor will store its files, make sure
-    -- we are able to create it (or it already exists )
-    
-    base = editor_lb:build_path( home , "trickplay-editor"  )
-
-    assert( editor_lb:mkdir( base ) )
-    
-    -- The list of files and directories there. We go through it and look for
-    -- directories.
-    local list = editor_lb:readdir( base )
-    
-    if table.getn(projects) == 0 then 
-    for i = 1 , # list do
-    
-        if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
-        
-            table.insert( projects , list[ i ] )
-            
-        end
-        
-    end
-    end 
-    
-    input_mode = hdr.S_POPUP
-
-    msg_window.printMsgWindow("Select Project : ", "projectlist")
-    msg_window.inputMsgWindow("projectlist")
 end 
 
 local function set_project_path ()

@@ -23,129 +23,6 @@ end
 local projectlist_len 
 local selected_prj 	= ""
 
-function msg_window.printMsgWindow(txt, name)
-     if (name == nil) then
-        name = "pritMsgWindow"
-     end
-
-     txt_sz = string.len(txt) 
-     local n = table.getn(projects)
-  
-     if n == 0 then 
-     	txt = "New Project : "
-     	name = ""
-     end 
- 
-     if (name == "aleady_exists" ) then
-		txt_sz = txt_sz - 50
-     elseif(name == "projectlist") then  
-     	projectlist_len = n * 45 
-		txt_sz = projectlist_len + 20  
-		if (n > 14) then 
-			msgw.position = {400, 100}
-		elseif (n > 10) then 
-			msgw.position = {400, 200}
-		elseif (n > 5) then 
-			msgw.position = {400, 300}
-		end 
-     else 
-     	i, j = string.find(txt, "\n")
-     	if (j ~= nil) then 
-	     txt_sz = txt_sz + 20 
-        end 
-     end 
-     local msgw_bg = factory.make_popup_bg("msgw", txt_sz)
-     if msgw_bg.Image then
-  	 	msgw_bg= msgw_bg:Image()
-     end
-
-     msgw:add(msgw_bg)
-     input_mode = hdr.S_POPUP
-     local textText = Text{name= name, text = txt, font= "FreeSans Medium 32px",
-     color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
-     reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"}
-     msgw:add(textText)     
-     textText:grab_key_focus()
-  
-
-     if(name == "projectlist") then  
-         msgw_cur_x = msgw_cur_x + string.len(txt) * 20
-	 
-     	 for i, j in pairs (projects) do  
-	     --local prj_text = Text {text = j, color = {255,255,255,255}, font= "FreeSans Medium 32px", color = "FFFFFF"}
-	     local prj_text = Text {text = j, color = DEFAULT_COLOR, font= "FreeSans Medium 32px", color = "FFFFFF"}
-	     prj_text.reactive = true
-	     prj_text.position = {msgw_cur_x, msgw_cur_y+10}
-	     prj_text.extra.index = i 
-	     prj_text.name = "prj"..i 
-	     msgw:add(prj_text)
-	     msgw_cur_y = msgw_cur_y + 32 + 10 -- 10 : line padding 
-
-	     function prj_text.extra.on_focus_in()
-                  prj_text:set{color = {0,255,0,255}}
-	 	  prj_text:grab_key_focus()
-		  msgw_focus = prj_text.name
-             end
-    
-             function prj_text.extra.on_focus_out()
-                  prj_text:set{color = {255,255,255,255}}
-             end
-
-	     function prj_text:on_key_down(key)
-			if(key == keys.Return) then 
-		     if( selected_prj == prj_text.name) then 
-			selected_prj = ""
-			prj_text.extra.on_focus_in()
-		     else
-			if( selected_prj ~= "") then  
-			    if(msgw:find_child(selected_prj) ~= nil) then 
-				msgw:find_child(selected_prj):set{color = {255,255,255,255}} 
-			    end 
-			end 
-			selected_prj = prj_text.name
-		     end 
-			elseif(key == keys.Tab and shift == false) or (key == keys.Down) or key == keys.Right then 
-			prj_text.extra.on_focus_out()
-			if(prj_text.name == selected_prj) then
-			     prj_text:set{color = {0,255,0,255}}
-			end 
-			if (prj_text.extra.index < n) then 
-				local k = prj_text.extra.index + 1
-				msgw:find_child("prj"..k).extra.on_focus_in()
-			else 
-				msgw:find_child("input_b").extra.on_focus_in()
-			end 
-			elseif(key == keys.Tab and shift == true) or key == keys.Up or key == keys.Left then 
-			if (prj_text.extra.index > 1) then 
-				prj_text.extra.on_focus_out()
-				if(prj_text.name == selected_prj) then
-			     	     	prj_text:set{color = {0,255,0,255}}
-				end 
-				local k = prj_text.extra.index - 1
-				msgw:find_child("prj"..k).extra.on_focus_in()
-			end 
-			end 
-			return true 
-	     end 
-
-	     function prj_text:on_button_down(x,y,button,num)
-	         if( selected_prj ~= "") then  
-		      if(msgw:find_child(selected_prj) ~= nil) then 
-		           msgw:find_child(selected_prj):set{color = {255,255,255,255}} 
-	              end 
-		 	end 
-	         msgw:find_child(msgw_focus).extra.on_focus_out()
-		 	prj_text.extra.on_focus_in()
-		 	selected_prj = prj_text.name
-		 	msgw_focus = prj_text.name --1102
-	     end 
-
-	     if (i == 1) then msgw_focus = prj_text.name project = prj_text.text end 
-
-         end 
-     end 
-end
-
 function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 
      local global_section_contents, new_contents, global_section_footer_contents
@@ -176,66 +53,67 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 
 	   	local fileUpper= string.upper(string.sub(input_text, 1, -5))
 	   	local fileLower= string.lower(string.sub(input_text, 1, -5))
-	
-	   	local function gen_stub_code (grp) 
 
-		if new_contents == nil then 	
-			new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
-		end
+		local gen_stub_code 
 
-		for i, j in pairs (grp.children) do 
-		     local function there() 
+		local function there(j) 
 		     if util.need_stub_code(j) == true then 
-	                   new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n" 	--SECTION \n\n		
-			   if j.extra.type == "Button" then 
-	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
-	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
-	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
-			   elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
-	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
-			   elseif j.extra.type == "CheckBoxGroup" then 
-	                   	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
-			   elseif j.extra.type == "MenuButton" then 
-			   	for k,l in pairs (j.items) do 
-			   	     if l["type"] == "item" then 
-	                   			--new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
-	                   			new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for the menuButton Item, "..l["string"].."\n"
-			   	     end 
+	         	new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n" 	--SECTION \n\n		
+			   	if j.extra.type == "Button" then 
+	            	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
+	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
+	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
+			    elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
+	            	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   	elseif j.extra.type == "CheckBoxGroup" then 
+	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+			   	elseif j.extra.type == "MenuButton" then 
+			   		for k,l in pairs (j.items) do 
+			   	     	if l["type"] == "item" then 
+	                   		--new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
+	                   		new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for the menuButton Item, "..l["string"].."\n"
+			   	     	end 
+			   		end 
 			   	end 
-			   end 
-	                   new_contents = new_contents.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
+	            new_contents = new_contents.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
 		     else -- qqqq if j 가 컨테이너 이며는 그속을 다 확인하여 스터브 코드가 필요한 것을 가려내야함. 흐미..   
 			   if util.is_this_container(j) == true then 
-				if j.extra.type == "TabBar" then 
-					for q,w in pairs (j.tabs) do
-						gen_stub_code(w)
-					end
-				elseif j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
-					gen_stub_code(j.content)
-			    elseif j.extra.type == "LayoutManager" then 
-					local content_num = 0 
-					local lm_name = j.name
-			        for k,l in pairs (j.tiles) do 
-						for n,m in pairs (l) do 
-							if m then 
-								j = m 
-								there()
+					if j.extra.type == "TabBar" then 
+						for q,w in pairs (j.tabs) do
+							gen_stub_code(w)
+						end
+					elseif j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
+						gen_stub_code(j.content)
+			    	elseif j.extra.type == "LayoutManager" then 
+						local content_num = 0 
+						local lm_name = j.name
+			        	for k,l in pairs (j.tiles) do 
+							for n,m in pairs (l) do 
+								if m then 
+									j = m 
+									there(j)
+								end 
 							end 
 						end 
-					end 
+						new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add on_focus_in and on_focus_out function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.tiles[r][c]\n\t\t\t\tif cell_obj.extra.on_focus_in == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_in ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.on_focus_out == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_out ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
 
-					new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add on_focus_in and on_focus_out function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.tiles[r][c]\n\t\t\t\tif cell_obj.extra.on_focus_in == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_in ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.on_focus_out == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_out ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
+					elseif j.extra.type == "Group" then  
+						gen_stub_code(j)
+					end
+			   end -- is this container == true 
+		    end  -- need stub code ~= true
+		end -- function there
 
-				elseif j.extra.type == "Group" then  
-					gen_stub_code(j)
-				end
+	   	gen_stub_code = function(grp) 
+	 
+			if new_contents == nil then 	
+				new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
+			end
 
-			   end 
-		     end 
-		     end 
-		     there()	  
+			for i, j in pairs (grp.children) do 
+				there(j)	  
+	   		end -- for g.chilren do
 		end 
-	   end 
 
         for i, v in pairs(main_dir) do
           	if("main.lua" == v)then
@@ -487,11 +365,9 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
                file_not_exists = false
           end
      end
+
      if (file_not_exists) then
-          --cleanMsgWindow()
-          --printMsgWindow("The file not exists.\nFile Name :","err_msg")
-          --inputMsgWindow("reopenImg")
-	  return 0
+	  	return 0
      end
  
      if (input_purpose == "open_bg_imagefile") then  
@@ -508,8 +384,6 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 	  end 
 
           ui.image= Image { name="image"..tostring(item_num),
-          --src = input_text, opacity = 255 , position = {200,200}, 
-          --src = trickplay.config.app_path.."/assets/images/"..input_text, opacity = 255 , position = {200,200}, 
           src = "/assets/images/"..input_text, opacity = 255 , position = {200,200}, 
 	  extra = {org_x = 200, org_y = 200} }
           ui.image.reactive = true
@@ -550,285 +424,6 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
       item_num = item_num + 1
 
      end 
-end
-
-
-
-function msg_window.inputMsgWindow(input_purpose, cfn)
-
-
-     local save_b, cancel_b, input_box, open_b, yes_b, no_b
-     local save_t, cancel_t, input_box, open_t, yes_t, no_t
-    
-
-     if cfn then 
-		msg_window.inputMsgWindow_savefile(cfn)
-		return
-     end 
-
-     function create_on_key_down_f(button) 
-     	function button:on_key_down(key)
-	     if key == keys.Return then
-              	if (button.name == "savefile") then msg_window.inputMsgWindow_savefile()
-              	elseif (button.name == "yes") then msg_window.inputMsgWindow_yn(button.name)
-              	elseif (button.name == "no") then msg_window.inputMsgWindow_yn(button.name)
-              	elseif (button.name == "openfile") or (button.name == "reopenfile") then msg_window.inputMsgWindow_openfile() 
-              	elseif (button.name == "projectlist") then set_project_path() editor.close()
-              	elseif (button.name == "open_videofile") or (button.name == "reopen_videofile")then msg_window.inputMsgWindow_openvideo()
-              	elseif (button.name == "open_imagefile") or (button.name == "reopenImg")  then  msg_window.inputMsgWindow_openimage(input_purpose)
-              	elseif (button.name == "cancel") then 	cleanMsgWindow() screen:grab_key_focus(screen)
-							if(input_purpose == "projectlist") then projects = {} end 
-                end
-	        return true 
-	     elseif (key == keys.Tab and shift == false) or ( key == keys.Down ) or (key == keys.Right) then 
-		if (button.name == "savefile") then save_b.extra.on_focus_out() cancel_b.extra.on_focus_in()
-              	elseif (button.name == "yes") then yes_b.extra.on_focus_out() no_b.extra.on_focus_in() 
-              	elseif (button.name == "projectlist") then button.extra.on_focus_out() cancel_b.extra.on_focus_in() 
-              	elseif (button.name == "openfile") or (button.name == "open_videofile") or (button.name == "reopen_videofile") or 
-              	       (button.name == "open_imagefile") or (button.name == "reopenfile") or (button.name =="reopenImg") then 
-			open_b.extra.on_focus_out() cancel_b.extra.on_focus_in() 
-		end
-	     elseif (key == keys.Tab and shift == true) or ( key == keys.Up ) or (key == keys.Left) then 
-		if (button.name == "savefile") then save_b.extra.on_focus_out() input_box.extra.on_focus_in()
-              	elseif (button.name == "no") then no_b.extra.on_focus_out() yes_b.extra.on_focus_in()
-              	elseif (button.name == "projectlist") then button.extra.on_focus_out() 
-				                           msgw:find_child("input_b").extra.on_focus_in()
-              	elseif (button.name == "openfile") or (button.name == "open_videofile") or (button.name == "reopen_videofile") or 
-              	(button.name == "open_imagefile") or (button.name == "reopenfile") or (button.name =="reopenImg") then 
-			open_b.extra.on_focus_out() input_box.extra.on_focus_in()
-              	elseif (button.name == "cancel") then 
-			cancel_b.extra.on_focus_out() 
-			if(open_b ~= nil) then open_b.extra.on_focus_in()
-			elseif(save_b ~= nil) then save_b.extra.on_focus_in() end
-               end
-	     end 
-        end 
-     end 
-
-     if (input_purpose == "reopenfile" or input_purpose == "reopenImg") or (input_purpose== "reopen_videofile") then 
-		msgw_cur_x = msgw_cur_x + 200 
-		msgw_cur_y = msgw_cur_y + 45
-     elseif(input_purpose == "projectlist") then 
-		msgw_cur_x = 25
-		if(msgw_focus ~= "") then 
-			msgw:add(Text{name= name, text = "   New Project : ", font= "FreeSans Medium 32px",
-     		color = "FFFFFF", position ={msgw_cur_x, msgw_cur_y+10}, editable = false ,
-     		reactive = false, wants_enter = false, wrap=true, wrap_mode="CHAR"})  
-		else 
-	     	msgw_focus = "input_b"
-		end 
-
-		msgw_cur_x = 360
-		msgw_cur_y = msgw_cur_y + 10
-     else 
-		msgw_cur_x = msgw_cur_x + 200 
-     end
-     
-     position = {msgw_cur_x, msgw_cur_y} 
-
-     if (input_purpose ~= "yn") then 
-		if(input_purpose == "projectlist") then 
-            input_t = Text { name="input", font= "FreeSans Medium 30px", color = "FFFFFF" ,
-            position = {25, 10}, text = "" , editable = true , reactive = true, wants_enter = false, w = screen.w , h = 50 }
-            input_box = create_small_input_box(input_t)
-            input_box.position = position
-            msgw:add(input_box)
-	    	input_box.extra.on_focus_out()
-		else 
-            input_box = create_input_box()
-            input_box.position = position
-            msgw:add(input_box)
-	    input_box.extra.on_focus_in()
-		end
-
-     end 
-
-     if (input_purpose == "savefile") then 
-
-     	save_b, save_t  = factory.make_msgw_button_item( assets , "Save")
-        save_b.position = {msgw_cur_x + 260, msgw_cur_y + 70}
-		save_b.reactive = true 
-		save_b.name = "savefile"
-
-        cancel_b, cancel_t= factory.make_msgw_button_item( assets ,"Cancel")
-        cancel_b.position = {msgw_cur_x + 470, msgw_cur_y + 70}
-		cancel_b.reactive = true 
-		cancel_b.name = "cancel"
-	
-        msgw:add(save_b)
-        msgw:add(cancel_b)
-		create_on_key_down_f(save_b) 
-		create_on_key_down_f(cancel_b) 
-
-		function save_b:on_button_down(x,y,button,num_clicks)
-			msg_window.inputMsgWindow_savefile()	
-     	end 
-		function save_t:on_button_down(x,y,button,num_clicks)
-			msg_window.inputMsgWindow_savefile()	
-     	end 
-
-
-     elseif (input_purpose == "yn") then 
-     	yes_b, yes_t  = factory.make_msgw_button_item( assets , "Yes")
-        yes_b.position = {msgw_cur_x + 260, msgw_cur_y + 70}
-	yes_b.reactive = true
-	yes_b.name = "yes"
-
-        no_b, no_t= factory.make_msgw_button_item( assets ,"No")
-        no_b.position = {msgw_cur_x + 470, msgw_cur_y + 70}
-	no_b.reactive = true
-	no_b.name = "no"
-	
-        msgw:add(yes_b)
-        msgw:add(no_b)
-
-	create_on_key_down_f(yes_b) 
-	create_on_key_down_f(no_b) 
-
-	yes_b.extra.on_focus_in() 
-
-	function yes_b:on_button_down(x,y,button,num_clicks)
-		msg_window.inputMsgWindow_yn("yes")
-		return true
-     	end 
-     	function no_b:on_button_down(x,y,button,num_clicks)
-		msg_window.inputMsgWindow_yn("no")
-		return true
-     	end 
-	function yes_t:on_button_down(x,y,button,num_clicks)
-		msg_window.inputMsgWindow_yn("yes")
-		return true
-     	end 
-     	function no_t:on_button_down(x,y,button,num_clicks)
-		msg_window.inputMsgWindow_yn("no")
-		return true
-     	end 
-     else 
-     	open_b, open_t  = factory.make_msgw_button_item( assets , "Open")
-        open_b.position = {msgw_cur_x + 260, msgw_cur_y + 70}
-	open_b.reactive = true
-
-        cancel_b, cancel_t = factory.make_msgw_button_item( assets ,"Cancel")
-        cancel_b.position = {msgw_cur_x + 470, msgw_cur_y + 70}
-	cancel_b.reactive = true 
-	cancel_b.name = "cancel"
-	
-        msgw:add(open_b)
-        msgw:add(cancel_b)
-
-
-	if (input_purpose == "openfile") or  
-	   (input_purpose == "reopenfile") then  
-		open_b.name = "openfile"
-		function open_b:on_button_down(x,y,button,num_clicks)
-			msg_window.inputMsgWindow_openfile() 
-			--return true
-     		end 
-		function open_t:on_button_down(x,y,button,num_clicks)
-			msg_window.inputMsgWindow_openfile() 
-			--return true
-     		end 
-        elseif (input_purpose == "projectlist") then
- 		open_b.name = "projectlist"
-        	open_b.position = {360, msgw_cur_y + 70}
-        	cancel_b.position = {560, msgw_cur_y + 70}
-
-		function open_b:on_button_down(x,y,button,num_clicks)
-				set_project_path()
-		        editor.close()
-     		end 
-		function open_t:on_button_down(x,y,button,num_clicks)
-				set_project_path()
-		        editor.close()
-     		end 
-
-	elseif (input_purpose == "open_imagefile") or  
-	       (input_purpose == "open_bg_imagefile") or  
-	       (input_purpose == "reopenImg") then  
-		open_b.name = "open_imagefile"
-		function open_b:on_button_down(x,y,button,num_clicks)
-			msg_window.inputMsgWindow_openimage(input_purpose) 
-			--return true
-     		end 
-		function open_t:on_button_down(x,y,button,num_clicks)
-			msg_window.inputMsgWindow_openimage(input_purpose) 
-			--return true
-     		end 
-	elseif (input_purpose == "open_videofile") or (input_purpose == "reopen_videofile") then  
-		open_b.name = "open_videofile"
-		function open_b:on_button_down(x,y,button,num_clicks)
-			msg_window.inputMsgWindow_openvideo() 
-			return true
-     		end 
-		function open_t:on_button_down(x,y,button,num_clicks)
-			msg_window.inputMsgWindow_openvideo() 
-			return true
-     		end 
-	end 
-	create_on_key_down_f(open_b) 
-	create_on_key_down_f(cancel_b) 
-     end
-     if(cancel_b ~= nil) then 
-     	   function cancel_b:on_button_down(x,y,button,num_clicks)
-		cleanMsgWindow()	
-		screen:grab_key_focus(screen)
-		if(input_purpose == "projectlist") then projects = {} end 
-		--return true
-     	   end 
-     	   function cancel_t:on_button_down(x,y,button,num_clicks)
-		cleanMsgWindow()	
-		screen:grab_key_focus(screen)
-		if(input_purpose == "projectlist") then projects = {} end 
-		--return true
-     	   end 
-     end
-
-     screen:add(msgw)
-     input_mode = hdr.S_POPUP
-
-	
-     if( input_purpose =="yn") then 
-          yes_b:grab_key_focus(yes_b)
-     elseif( input_purpose == "projectlist") then 
-	  if(msgw_focus ~= "") then 
-	       msgw:find_child(msgw_focus).extra.on_focus_in()
-	  end 
-     else 
-          input_t:grab_key_focus(input_t)
-     end 
-
-     function input_t:on_key_down(key)
-	  if (input_t.text ~= "" and selected_prj ~= "") then 
-		if(msgw:find_child(selected_prj) ~= nil) then 
-			msgw:find_child(selected_prj):set{color = {255,255,255,255}}
-		end 
-		selected_prj = ""
-	  end 
-
-          if key == keys.Return or (key == keys.Tab and shift == false) or key == keys.Down or key == keys.Right then 
-	      input_box.extra.on_focus_out()
-	      if(open_b ~= nil) then open_b.extra.on_focus_in() 
-	      elseif(save_b ~= nil) then save_b.extra.on_focus_in() end
-	  elseif(key == keys.Tab and shift == true) or key == keys.Up or key == keys.Left then 
-	      if (input_purpose == "projectlist") then 
-	           local n = table.getn(projects)
-	           input_box.extra.on_focus_out()
-		   msgw:find_child("prj"..n).extra.on_focus_in()
-		   return true 
-	      end 
-          end
-     end 
-	
-    function input_t:on_button_down(x,y,button,num)
-	 msgw:find_child(msgw_focus).extra.on_focus_out()
-	 input_box.extra.on_focus_in()
-    end 
-
-    function input_box:on_button_down(x,y,button,num)
-	 msgw:find_child(msgw_focus).extra.on_focus_out()
-	 input_box.extra.on_focus_in()
-    end 
-
 end
 
 return msg_window

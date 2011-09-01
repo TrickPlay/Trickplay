@@ -1,7 +1,5 @@
 local factory = ui.factory
-
 local editor = {}
-
 local rect_init_x = 0
 local rect_init_y = 0
 local g_init_x = 0
@@ -22,7 +20,6 @@ local editorUiElements 	= {
 							"ButtonPicker", "ProgressSpinner", "ProgressBar", "MenuButton", "TabBar", "LayoutManager", 
 							"ScrollPane", "ArrowPane" 
 				     	  }
-
 
 local widget_f_map = 
 {
@@ -127,7 +124,6 @@ local function guideline_inspector(v)
 	button_ok.pressed = function() 
 		if text_input.text == "" then 
 			xbox:on_button_down() 
-			--editor.error_message("005", save_current_f, editor.save)  
 			return
    		end    
 		if(util.guideline_type(v.name) == "v_guideline") then
@@ -230,27 +226,14 @@ local function guideline_inspector(v)
 
 end 
 
-function editor.reference_image()
-	input_mode = hdr.S_SELECT  
-	editor.image(true)
-	screen:grab_key_focus()
-
-	screen:find_child("menuButton_view").items[2]["icon"].opacity = 255
-	screen:find_child("menuButton_view").items[3]["icon"].opacity = 0
-    screen:find_child("menuButton_view").items[4]["icon"].opacity = 0
-    screen:find_child("menuButton_view").items[5]["icon"].opacity = 0
-    screen:find_child("menuButton_view").items[6]["icon"].opacity = 0
-    screen:find_child("menuButton_view").items[7]["icon"].opacity = 0
-end 
-
 function editor.small_grid()
-	util.clear_bg() BG_IMAGE_20.opacity = 255 input_mode = hdr.S_SELECT
+	util.clear_bg() BG_IMAGE_20.opacity = 255 
 	screen:find_child("menuButton_view").items[3]["icon"].opacity = 255
 	screen:grab_key_focus()
+	input_mode = hdr.S_SELECT
 end 
 
 function editor.medium_grid()
-print("sjdhfjkshdfk")
 	util.clear_bg() BG_IMAGE_40.opacity = 255 input_mode = hdr.S_SELECT
 	screen:find_child("menuButton_view").items[4]["icon"].opacity = 255
 	screen:grab_key_focus()
@@ -311,7 +294,6 @@ function editor.show_guides()
 end 
 
 function editor.snap_guides()
-	--if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then
 	if util.is_there_guideline() then 
 		if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then 
 		 	screen:find_child("menuButton_view").items[12]["icon"].opacity = 0 
@@ -324,33 +306,8 @@ function editor.snap_guides()
 	screen:grab_key_focus()
 end 
 
-function editor.timeline() 
-        if not screen:find_child("timeline") then 
-			if table.getn(g.children) > 0 then
-				input_mode = hdr.S_SELECT local tl = ui_element.timeline() screen:add(tl)
-				screen:find_child("timeline").extra.show = true 
-				screen:find_child("timeline"):raise_to_top()
-			else 
-				print("Err : There is no UI element to make animation.")
-			end
-		elseif table.getn(g.children) == 0 then 
-			screen:remove(screen:find_child("timeline"))
-			if screen:find_child("tline") then 
-				screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-			end 
-		elseif screen:find_child("timeline").extra.show ~= true  then 
-			screen:find_child("timeline"):show()
-			screen:find_child("timeline").extra.show = true
-			screen:find_child("timeline"):raise_to_top()
-		else 
-			screen:find_child("timeline"):hide()
-			screen:find_child("timeline").extra.show = false
-		end
-		screen:grab_key_focus()
-
-end 
-
 local function create_on_line_down_f(v)
+
         function v:on_button_down(x,y,button,num_clicks)
             dragging = {v, x - v.x, y - v.y }
 	     	--if(button == 3 or num_clicks >= 2) then
@@ -362,17 +319,19 @@ local function create_on_line_down_f(v)
         end
 
         function v:on_button_up(x,y,button,num_clicks)
-	     if(dragging ~= nil) then 
-	        local actor , dx , dy = unpack( dragging )
-		  	if(util.guideline_type(v.name) == "v_guideline") then 
-				v.x = x - dx
-		  	elseif(util.guideline_type(v.name) == "h_guideline") then  
-				v.y = y - dy
-		  	end 
+	     	if(dragging ~= nil) then 
+
+	        	local actor , dx , dy = unpack( dragging )
+		  		if(util.guideline_type(v.name) == "v_guideline") then 
+					v.x = x - dx
+		  		elseif(util.guideline_type(v.name) == "h_guideline") then  
+					v.y = y - dy
+		  		end 
 	          	dragging = nil
             end
             return true
         end
+
 end 
 
 function editor.v_guideline()
@@ -382,7 +341,6 @@ function editor.v_guideline()
      local v_gl = Rectangle {
 		name="v_guideline"..tostring(v_guideline),
 		border_color= hdr.DEFAULT_COLOR, 
-		--color={25,255,25,255},
 		color={255,25,25,100},
 		size = {4, screen.h},
 		position = {screen.w/2, 0, 0}, 
@@ -396,6 +354,7 @@ function editor.v_guideline()
 	 if screen:find_child("menuButton_view").items[11]["icon"].opacity < 255 then 
 		v_gl:hide()
 	 end 
+
 end
 
 function editor.h_guideline()
@@ -405,7 +364,6 @@ function editor.h_guideline()
      local h_gl = Rectangle {
 		name="h_guideline"..tostring(h_guideline),
 		border_color= hdr.DEFAULT_COLOR, 
-		--color={25,255,25,255},
 		color={255,25,25,100},
 		size = {screen.w, 4},
 		position = {0, screen.h/2, 0}, 
@@ -430,12 +388,15 @@ function editor.close(new, next_func, next_f_param, from_close)
 		end 
 		return
  	end 
+
 	local func_nok = function() 
+
 		editor.close(true, nil, nil, true)
 		if next_func then 
 				next_func()
 		end 
 		return
+
  	end 
 
 	if #g.children > 0 then 
@@ -451,44 +412,21 @@ function editor.close(new, next_func, next_f_param, from_close)
 		end
 	end 
 
-	util.clear_bg()
+
     if(g.extra.video ~= nil) then 
 	    g.extra.video = nil
 	    mediaplayer:reset()
         mediaplayer.on_loaded = nil
 	end
 
+	-- set the background to the default small grid. 
+
+	util.clear_bg()
 	editor.small_grid()
 
-	for i, j in pairs (g.children) do 
-	     if(j.extra.selected == true) then 
-			screen_ui.n_selected(j) 
-	     end 
-	end 
+	screen_ui.nselect_all ()
 
-	for i, v in pairs(g.children) do
-          if g:find_child(v.name) then
-                g:remove(g:find_child(v.name))
-		  		if(screen:find_child(v.name.."border")) then
-                	screen:remove(screen:find_child(v.name.."border"))
-		  		end 
-          end
-    end
-
-	if(screen:find_child("xscroll_bar") ~= nil) then 
-		screen:remove(screen:find_child("xscroll_bar")) 
-		screen:remove(screen:find_child("xscroll_box")) 
-		screen:remove(screen:find_child("x_0_mark"))
-		screen:remove(screen:find_child("x_1920_mark"))
-	end 
-
-	if(screen:find_child("scroll_bar") ~= nil) then 
-		screen:remove(screen:find_child("scroll_bar")) 
-		screen:remove(screen:find_child("scroll_box")) 
-		screen:remove(screen:find_child("y_0_mark"))
-		screen:remove(screen:find_child("y_1080_mark"))
-	end 
-
+	-- remove all the guidelines
 
 	for i=1, v_guideline, 1 do 
 	   if(screen:find_child("v_guideline"..i) ~= nil) then 
@@ -504,7 +442,8 @@ function editor.close(new, next_func, next_f_param, from_close)
 
 	undo_list = {}
 	redo_list  = {}
-    item_num = 0
+    
+	item_num = 0
     current_fn = ""
     screen.grab_key_focus(screen)
 
@@ -520,6 +459,7 @@ function editor.close(new, next_func, next_f_param, from_close)
 	g.extra.scroll_dx = 0
 
 	g:clear()
+	
 	local timeline = screen:find_child("timeline")
 	if timeline then 
 		timeline:clear()
@@ -528,6 +468,7 @@ function editor.close(new, next_func, next_f_param, from_close)
 		     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
 		end
 	end 
+
 	if screen:find_child("menu_text").extra.project then 
 		screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
 	end 
@@ -540,296 +481,9 @@ function editor.close(new, next_func, next_f_param, from_close)
 end 
 
 local function cleanMsgWin(msgw)	
-	 --msgw:clear()
 	 if screen:find_child(msgw.name) then 
      	screen:remove(msgw)
 	 end 
-     --input_mode = hdr.S_SELECT 
-end 
-
-local function draw_dialogbox()
-    local scrollPane1 = ui_element.scrollPane
-	{
-		skin = "default",
-		reactive = true,
-		visible_w = 850,
-		visible_h = 300,
-		virtual_w = 1000,
-		virtual_h = 500,
-		bar_color_inner = {180,180,180,255},
-		bar_color_outer = {30,30,30,255},
-		empty_color_inner = {120,120,120,255},
-		empty_color_outer = {255,255,255,255},
-		frame_thickness = 2,
-		frame_color = {60,60,60,255},
-		bar_thickness = 15,
-		bar_offset = 5,
-		vert_bar_visible = true,
-		hor_bar_visible = false,
-		box_color = {160,160,160,255},
-		box_width = 0,
-		content= Group { children = {} },
-	}
-
-	scrollPane1.name = "scrollPane1"
-	scrollPane1.position = {16,64,0}
-	scrollPane1.scale = {1,1,0,0}
-	scrollPane1.anchor_point = {0,0}
-	scrollPane1.x_rotation = {0,0,0}
-	scrollPane1.y_rotation = {0,0,0}
-	scrollPane1.z_rotation = {0,0,0}
-	scrollPane1.opacity = 255
-	scrollPane1.extra.reactive = true
-
-	local button1 = ui_element.button
-	{
-		ui_width = 445,
-		ui_height = 60,
-		skin = "CarbonCandy",
-		label = "Open",
-		button_color = {255,255,255,255},
-		focus_color = {27,145,27,255},
-		text_color = {255,255,255,255},
-		text_font = "FreeSans Medium 30px",
-		border_width = 1,
-		border_corner_radius = 12,
-		reactive = true,
-	}
-
-	button1.name = "button1"
-	button1.position = {444,390,0}
-	button1.scale = {1,1,0,0}
-	button1.anchor_point = {0,0}
-	button1.x_rotation = {0,0,0}
-	button1.y_rotation = {0,0,0}
-	button1.z_rotation = {0,0,0}
-	button1.opacity = 255
-	button1.extra.focus = {[65293] = "button1", }
-
-	function button1:on_key_down(key)
-		if button1.focus[key] then
-			if type(button1.focus[key]) == "function" then
-				button1.focus[key]()
-			elseif screen:find_child(button1.focus[key]) then
-				if button1.on_focus_out then
-					button1.on_focus_out()
-				end
-				screen:find_child(button1.focus[key]):grab_key_focus()
-				if screen:find_child(button1.focus[key]).on_focus_in then
-					screen:find_child(button1.focus[key]).on_focus_in()
-				end
-			end
-		end
-		return true
-	end
-
-	button1.extra.reactive = true
-
-	local button0 = ui_element.button
-	{
-		ui_width = 445,
-		ui_height = 60,
-		skin = "CarbonCandy",
-		label = "Cancel",
-		button_color = {255,255,255,255},
-		focus_color = {27,145,27,255},
-		text_color = {255,255,255,255},
-		text_font = "FreeSans Medium 30px",
-		border_width = 1,
-		border_corner_radius = 12,
-		reactive = true,
-	}
-
-	button0.name = "button0"
-	button0.position = {6,390,0}
-	button0.scale = {1,1,0,0}
-	button0.anchor_point = {0,0}
-	button0.x_rotation = {0,0,0}
-	button0.y_rotation = {0,0,0}
-	button0.z_rotation = {0,0,0}
-	button0.opacity = 255
-	button0.extra.focus = {[65293] = "button0", }
-
-	function button0:on_key_down(key)
-		if button0.focus[key] then
-			if type(button0.focus[key]) == "function" then
-				button0.focus[key]()
-			elseif screen:find_child(button0.focus[key]) then
-				if button0.on_focus_out then
-					button0.on_focus_out()
-				end
-				screen:find_child(button0.focus[key]):grab_key_focus()
-				if screen:find_child(button0.focus[key]).on_focus_in then
-					screen:find_child(button0.focus[key]).on_focus_in()
-				end
-			end
-		end
-		return true
-	end
-
-	button0.extra.reactive = true
-
-
-	local dialogBox0 = ui_element.dialogBox
-	{
-		ui_width = 900,
-		ui_height = 500,
-		skin = "Custom",
-		label = "Dialog Box Title",
-		border_width = 4,
-		border_corner_radius = 22,
-		reactive = true,
-		border_color = {255,255,255,255},
-		fill_color = {25,25,25,100},
-		title_color = {255,255,255,255},
-		title_font = "FreeSans Medium 30px",
-		title_separator_color = {255,255,255,255},
-		title_separator_thickness = 4,
-		content= Group { children = {button0,button1,scrollPane1,} },
-	}
-
-	dialogBox0.name = "dialogBox0"
-	dialogBox0.position = {430,210,0}
-	dialogBox0.scale = {1,1,0,0}
-	dialogBox0.anchor_point = {0,0}
-	dialogBox0.x_rotation = {0,0,0}
-	dialogBox0.y_rotation = {0,0,0}
-	dialogBox0.z_rotation = {0,0,0}
-	dialogBox0.opacity = 255
-	dialogBox0.extra.reactive = true
-
-	return dialogBox0
-end 
-
-function editor.the_image(bg_image)
-	local WIDTH = 700
-	local L_PADDING = 50
-	local R_PADDING = 50
-    local TOP_PADDING = 60
-    local BOTTOM_PADDING = 12
-    local Y_PADDING = 10 
-	local X_PADDING = 10
-	local STYLE = {font = "FreeSans Medium 24px" , color = "FFFFFF"}
-	local space = WIDTH
-
-	local dir = editor_lb:readdir(current_dir.."/assets/images")
-	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/assets/images"}:set(STYLE)
-
-	local cur_w= (WIDTH - dir_text.w)/2
-	local cur_h= TOP_PADDING/2 + Y_PADDING
-
-
-	local dialog = draw_dialogbox()
-	dialog.label =  "File Location : "..current_dir.."/assets/images"
-	dialog.title_font = "FreeSans Medium 24px"
-
-	function get_file_list_sz() 
-	     local iw = cur_w
-	     local ih = cur_h
-	     cur_w = L_PADDING
-	     cur_h = cur_h + dir_text.h + Y_PADDING
-
-     	 for i, v in pairs(dir) do
-	     	if (util.is_img_file(v) == true) then 
-	        	text = Text {name = tostring(i), text = v}:set(STYLE)
-                text.position  = {cur_w, cur_h,0}
-		     	if(cur_w == L_PADDING) then
-					cur_w = cur_w + 7*L_PADDING
-		       	else 
-	            	cur_w = L_PADDING 
-	               	cur_h = cur_h + text.h + Y_PADDING
-		       	end
-            end 
-         end
-	     local return_h = cur_h - 40
-	     cur_w = iw
-	     cur_h = ih
-	     return return_h 
-	end 
-
-	local file_list_size = get_file_list_sz()
-	local text_g
-	local input_text
-
-	local function print_file_list() 
-	     cur_w = L_PADDING
-         cur_h = TOP_PADDING + dir_text.h + Y_PADDING
-	     text_g = Group{position = {cur_w, cur_h,0}}
-	     text_g.extra.org_y = cur_h
-	     text_g.reactive  = true 
-
-	     cur_w = 0
-	     cur_h = 0 
-     	 for i, v in pairs(dir) do
-	     	if (util.is_img_file(v) == true) then 
-	        	text = Text {name = tostring(i), text = v}:set(STYLE)
-                text.position = {cur_w, cur_h,0}
-	 	       	text.reactive = true
-    	        text_g:add(text)
-
-		    	if(cur_w == 0) then
-					cur_w = cur_w + 7*L_PADDING
-		    	else 
-	        		cur_w = 0
-	            	cur_h = cur_h + text.h + Y_PADDING
-		    	end
-         	end
-         end
-	     cur_w = cur_w + L_PADDING
-	     cur_h = cur_h + TOP_PADDING + dir_text.h + Y_PADDING
-    	 return text_g
-	end 
-	
-	text_g = print_file_list()
-	dialog.content:find_child("scrollPane1").content = text_g 
-	dialog.content:find_child("scrollPane1").content.x = 100	
-	dialog.content:find_child("scrollPane1").virtual_h = file_list_size  
-
-	if file_list_size < 300 then 
-		dialog.content:find_child("scrollPane1").vert_bar_visible = false
-	end
-
-    for i,j in pairs (text_g.children) do 
-    	function j:on_button_down(x,y,button, num_clicks)
-	    	if input_text ~= nil then 
-		    	input_text.color = hdr.DEFAULT_COLOR   --{255, 255, 255, 255}
-	      	end	 
-            input_text = j
-	      	--j.color = {0,255,0,255}
-	      	j.color = {255,25,25,255}
-	      	return true
-         end 
-    end 
-
-	cancel_b = dialog.content:find_child("button0")
-	function cancel_b:on_button_down ()
-	 	if screen:find_child(dialog.name) then 
-	 		screen:remove(dialog)
-		end
-	 	screen:grab_key_focus(screen)
-	end 
-
-	open_b = dialog.content:find_child("button1")
-    function open_b:on_button_down(x,y,button,num_clicks)
-		if (input_text ~= nil) then 
-	    	if bg_image then
-		   		BG_IMAGE_20.opacity = 0
-	            BG_IMAGE_40.opacity = 0
-	           	BG_IMAGE_80.opacity = 0
-	           	BG_IMAGE_white.opacity = 0
-	           	BG_IMAGE_import:set{src = "/assets/images/"..input_text.text, opacity = 255} 
-	           	input_mode = hdr.S_SELECT
-	      	elseif screen:find_child("inspector") then 
-		    	screen:find_child("file_name").text = input_text.text
-	      	else 
-	            msg_window.inputMsgWindow_openimage("open_imagefile", input_text.text)
-	      	end 
-	 		if screen:find_child(dialog.name) then 
-	      		screen:remove(dialog)
-			end 
-	 	end 
-    end 
-    screen:add(dialog)
 end 
 
 local function open_files(input_purpose, bg_image, inspector)
@@ -852,13 +506,14 @@ local function open_files(input_purpose, bg_image, inspector)
     local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
     local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
 
-	local dir 
     local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", "open_file", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title = Text{name = "title", text = "Open File"}:set(STYLE)
 	local title_shadow = Text {name = "title", text = "Open File"}:set(SSTYLE)
+
 	local selected_file 
 	local virtual_hieght = 0
+	local dir 
 	
 	if input_purpose == "open_luafile" then 
 		dir = editor_lb:readdir(current_dir.."/screens")
@@ -903,8 +558,15 @@ local function open_files(input_purpose, bg_image, inspector)
 	            BG_IMAGE_40.opacity = 0
 	           	BG_IMAGE_80.opacity = 0
 	           	BG_IMAGE_white.opacity = 0
+				
+				screen:find_child("menuButton_view").items[2]["icon"].opacity = 255
+				screen:find_child("menuButton_view").items[3]["icon"].opacity = 0
+    			screen:find_child("menuButton_view").items[4]["icon"].opacity = 0
+    			screen:find_child("menuButton_view").items[5]["icon"].opacity = 0
+    			screen:find_child("menuButton_view").items[6]["icon"].opacity = 0
+    			screen:find_child("menuButton_view").items[7]["icon"].opacity = 0
+
 	           	BG_IMAGE_import:set{src = "/assets/images/"..v, opacity = 255} 
-	           	input_mode = hdr.S_SELECT
 			else 
         		msg_window.inputMsgWindow_openimage("open_imagefile", v)
 			end
@@ -920,11 +582,14 @@ local function open_files(input_purpose, bg_image, inspector)
 	-- Scroll	
 	local scroll = editor_ui.scrollPane{virtual_h = virtual_hieght}
 
+	editor_use = true
 	-- Buttons 
     local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     					  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = scroll}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
     					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255},active_button =true, focus_object = scroll} 
+
+	editor_use = false
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down(1) if inspector then inspector_activate() end end
@@ -982,7 +647,16 @@ local function open_files(input_purpose, bg_image, inspector)
 		button_ok:find_child("dim").opacity = 0
 		scroll.on_focus_in()
 	end
+	
+	
+	local tab_func = function()
+		button_ok:find_child("active").opacity = 0
+		button_ok:find_child("dim").opacity = 255
+		button_cancel:grab_key_focus()
+		button_cancel.on_focus_in()
+	end
 
+	
 	--Focus Destination
 	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
@@ -1025,7 +699,8 @@ local function open_files(input_purpose, bg_image, inspector)
 	table.sort(dir)
 
     for i, v in pairs(dir) do 
-		if (input_purpose == "open_luafile" and  util.is_lua_file(v) == true) or (input_purpose == "open_imagefile" and  util.is_img_file(v) == true) or 
+		if (input_purpose == "open_luafile" and  util.is_lua_file(v) == true) or 
+		   (input_purpose == "open_imagefile" and  util.is_img_file(v) == true) or 
 		   (input_purpose == "open_videofile" and util.is_mp4_file(v) == true) then 
 
 			if v ~= "unsaved_temp.lua" then
@@ -1041,7 +716,7 @@ local function open_files(input_purpose, bg_image, inspector)
 				selected_file = v
 			end
 
-			h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1)}
+			h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() selected_file = v tab_func() end }
 	
 			item_t.position =  {cur_w, cur_h}
 			item_t.extra.rect = h_rect.name
@@ -1109,8 +784,9 @@ local function open_files(input_purpose, bg_image, inspector)
 				end
 				return true
 			end
-			end
-			end 
+		end
+	end 
+
 	end
 	scroll.virtual_h = virtual_hieght
 	if scroll.virtual_h <= scroll.visible_h then 
@@ -1152,7 +828,6 @@ local function open_files(input_purpose, bg_image, inspector)
 	return msgw
 
 end
-	
 
 function editor.open(from_open)
 	local func_ok = function() 
@@ -1180,158 +855,19 @@ function editor.video(inspector)
 	return open_files("open_videofile",nil,inspector)
 end
 
-
-function editor.the_open()
-
-    local WIDTH = 700
-	local L_PADDING = 50
-	local R_PADDING = 50
-    local TOP_PADDING = 60
-    local BOTTOM_PADDING = 12
-    local Y_PADDING = 10 
-	local X_PADDING = 10
-	local STYLE = {font = "FreeSans Medium 24px" , color = "FFFFFF"}
-	local space = WIDTH
-	local dir = editor_lb:readdir(current_dir.."/screens")
-	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/screens"}:set(STYLE)
-	local cur_w= (WIDTH - dir_text.w)/2
-	local cur_h= TOP_PADDING/2 + Y_PADDING
-	local dialog = draw_dialogbox()
-
-	dialog.label =  "File Location : "..current_dir.."/screens"
-	dialog.title_font = "FreeSans Medium 24px"
-
-	function get_file_list_sz() 
-	     local iw = cur_w
-	     local ih = cur_h
-	     cur_w = L_PADDING
-	     cur_h = cur_h + dir_text.h + Y_PADDING
-
-     	 for i, v in pairs(dir) do
-	     	if (util.is_lua_file(v) == true) then 
-	        	text = Text {name = tostring(i), text = v}:set(STYLE)
-                text.position  = {cur_w, cur_h}
-		       	if(cur_w == L_PADDING) then
-					cur_w = cur_w + 7*L_PADDING
-		       	else 
-	               	cur_w = L_PADDING 
-	               	cur_h = cur_h + text.h + Y_PADDING
-		       	end
-            end 
-         end
-
-	     local return_h = cur_h - 40
-	     cur_w = iw
-	     cur_h = ih
-	     return return_h 
-	end 
-	local file_list_size = get_file_list_sz()
-	local text_g 
-	local input_text
-	function print_file_list() 
-	     cur_w = L_PADDING
-         cur_h = TOP_PADDING + dir_text.h + Y_PADDING
-	     text_g = Group{position = {cur_w, cur_h}}
-	     text_g.extra.org_y = cur_h
-	     text_g.reactive  = true 
-
-	     cur_w = 0
-	     cur_h = 0 
-     	 for i, v in pairs(dir) do
-	     	if (util.is_lua_file(v) == true) then 
-	        	text = Text {name = tostring(i), text = v}:set(STYLE)
-                text.position = {cur_w, cur_h}
-		       	text.reactive = true
-    	        text_g:add(text)
-		       	if(cur_w == 0) then
-					cur_w = cur_w + 7*L_PADDING
-		       	else 
-	               	cur_w = 0
-	               	cur_h = cur_h + text.h + Y_PADDING
-		       	end
-            end
-         end
-
-	     cur_w = cur_w + L_PADDING
-	     cur_h = cur_h + TOP_PADDING + dir_text.h + Y_PADDING
-	     return text_g
-
-    end 
-	
-	text_g = print_file_list()
-	dialog.content:find_child("scrollPane1").content = text_g 
-	dialog.content:find_child("scrollPane1").content.x = 100	
-	dialog.content:find_child("scrollPane1").virtual_h = file_list_size  
-
-	if file_list_size < 300 then 
-		dialog.content:find_child("scrollPane1").vert_bar_visible = false
-	end
-
-	cancel_b = dialog.content:find_child("button0")
-	function cancel_b:on_button_down ()
-		if screen:find_child(dialog.name) then 
-	 		screen:remove(dialog)
-		end 
-	 	screen:grab_key_focus(screen)
-	end 
-
-	open_b = dialog.content:find_child("button1")
-	function open_b:on_button_down()
-		if (input_text ~= nil) then 
-	    	local timeline = screen:find_child("timeline")
-	       	if timeline then 
-		    	timeline:clear()
-	     	    screen:remove(timeline)
-		     	if screen:find_child("tline") then
-		        	screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-		     	end
-	       	end 
-            msg_window.inputMsgWindow_openfile(input_text.text) 
-			if screen:find_child(dialog.name) then
-	       		screen:remove(dialog)
-			end 
-	       	local timeline = screen:find_child("timeline") 
-	       	if timeline then  
-            	for n,m in pairs (g.children) do 
-	         		if m.extra.timeline[0] then 
-	            		m:show()
-	            		for l,k in pairs (m.extra.timeline[0]) do 
-		        			if l ~= "hide" then
-		            			m[l] = k
-		        			elseif k == true then 
-		            			m:hide() 
-		        			end 
-	            		end
-                	end 
-             	end 
-             end 
-	 	end 
-	end 
-
-    for i,j in pairs (text_g.children) do 
-    	function j:on_button_down(x,y,button, num_clicks)
-	    	if input_text ~= nil then 
-		    	input_text.color = hdr.DEFAULT_COLOR-- {255, 255, 255, 255}
-	      	end	 
-            input_text = j
-	      	j.color = {0,255,0,255}
-	      	return true
-        end 
-    end 
-    screen:add(dialog)
-end 
-
 function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
+
 	local save_items 
+
 	if not scroll_y_pos then 
 	     save_items = true 
 	else 
 	     save_items = false 
 	end 
-	----------------------------------------------------------------------------
+
 	local WIDTH = 300
   	local HEIGHT = 400
-    local PADDING = 6--13
+    local PADDING = 6
 
 	local L_PADDING = 20
     local R_PADDING = 50
@@ -1360,6 +896,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	if v.name == nil then 
 		return 
 	end 
+
 	local last_attr_n = "reactive"
 
 	if util.is_this_widget(v) == true then 
@@ -1375,11 +912,9 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		title_shadow = Text {name = "title", text = "Inspector: "..v.type}:set(SSTYLE)
 	end 
 	----------------------------------------------------------------------------
-	--local WIDTH = 450 -- 255  width for inspector's contents
 	local INSPECTOR_OFFSET = 30 
     local TOP_PADDING = 12
     local BOTTOM_PADDING = 12
-	--local xbox_xpos = 460
 	-------------------------------------------------------------
 
 	if(current_inspector ~= nil) then 
@@ -1399,15 +934,15 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	scroll_items.name = "si_items"
 
 	-- Buttons 
-    --local button_viewcode = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
-    					  --skin = "default", ui_width = 80, ui_height = 27, label = "View Code", focus_color = {27,145,27,255}, focus_object = tabs}
+    editor_use = true
     local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     					  skin = "default", ui_width = 80, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = tabs}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255,},
     					  skin = "default", ui_width = 80, ui_height = 27, label = "Apply", focus_color = {27,145,27,255},active_button =true, focus_object = tabs} 
+    editor_use = false
+
 	local labels_t= {}
 
- 	---[[
  	if util.is_this_widget(v) == true then 
  		if v.extra.type == "ToastAlert" or v.extra.type == "DialogBox" or       -- 2 Tabs 
  		   v.extra.type == "ProgressSpinner" or v.extra.type == "ProgressBar" or 
@@ -1436,7 +971,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
  		   table.insert (labels_t, "Info")
  		   table.insert (labels_t, "Focus")
  	end
- 	--- ]]
 
 	--Tabs 
 	local tabs = editor_ui.tabBar{tab_labels = labels_t}
@@ -1510,17 +1044,8 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local attr_t = util.make_attr_t(v)
 	local attr_n, attr_v, attr_s
 
-
 	local X_INDENT = 8 
 	local TOP_PADDING = 43
-
-	local attrn_map = {
-		["focus"] = function(assets, inspector, v, attr_n, attr_v, attr_s, save_items, b_val) 
-						local focus = factory.make_focuschanger(assets, inspector, v, attr_n, attr_v, attr_s, save_items, b_val) 
-						focus.position = {GUTTER, GUTTER}
-						tabs.tabs[2]:add(focus)	
-					end, 
-	} 
 
 	local item_group_info = Group{name = "item_group_info", position = {0,0}} 
 	local item_group_more = Group{name = "item_group_more", position = {0,0}} 
@@ -1556,14 +1081,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			scroll_items.position = {0, 0}
 			scroll_items.reactive = true
 			tabs.tabs[3]:add(scroll_items) 
-			--[[
-			if attr_n == "tab_labels" then 
-				tabs.tabs[2]:add(scroll_items) 
-			else
-				tabs.tabs[3]:add(scroll_items) 
-			end 
-			]]
-
 		else 
 			local item
 			if attr_n == "icon" or attr_n =="source"  or attr_n == "src" then -- File Chooser Button 
@@ -1580,8 +1097,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			end
 		
 			if item ~= nil then 
-				--print("attr_n", attr_n, "attr_s", attr_s)
-				--print("w",item.w,"h",item.h,"s", space,"u", used,"items height", items_height)
 	    		if(item.w < space) then 
 		 			if (item.h > items_height) then 
              			items_height = item.h
@@ -1608,11 +1123,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		 			items_height = item.h 
 					prev_y = item.y
         		end 
-				--[[
-				if attr_s == "W" then 
-					item.x = item.x - 3
-				end
-				]]
 		 		space = space - item.w - PADDING		
 	    		used = item.x + item.w  
 				used_y = item.y + items_height
@@ -1648,7 +1158,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
     scroll_info.extra.focus = {[keys.Tab] = "button_cancel"}
     scroll_more.extra.focus = {[keys.Tab] = "button_cancel"}
    	inspector.extra.lock = false
-   	--screen:add(inspector) --0701
    	util.create_on_button_down_f(inspector)	
 
 	--Focus
@@ -1657,16 +1166,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	scroll_info.on_focus_in()
 
 	local var_i = 1 
-	--[[
-	for i=1, 3 do 
-		local grp = tabs.tabs[var_i] 
-		if table.getn(grp.children) == 0 then 
-			tabs:remove_tab(var_i)
-			var_i = var_i - 1
-		end 
-		var_i = var_i + 1 
-	end 
-	]]
+
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(inspector)
 		inspector:clear() 
@@ -1691,8 +1191,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	end 
 
 	input_mode = hdr.S_POPUP
-	--inspector:find_child("name").extra.on_focus_in()
-	
 	current_inspector = inspector
     inspector.reactive = true
 	inspector.extra.lock = false
@@ -1702,7 +1200,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
     inspector_xbox.reactive = true
 
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
-		screen_ui.n_selected(v, true)
+		screen_ui.n_selected(v)
 		screen:remove(inspector)
 		inspector:clear() 
 		current_inspector = nil
@@ -1724,7 +1222,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
             	v.spin_out()
 	    	end 
 	    end 
-		reactivate_menu()
+		menu.reactivate_menu()
 		return true
 	end 
 
@@ -1750,182 +1248,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	     	screen:find_child("si_items").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
 		 end 
 	end 
-	deactivate_menu()
+	menu.deactivate_menu()
 end
-
-function editor.view_code(v)
-
-	local WIDTH = 750 
-    local TOP_PADDING = 0
-    local BOTTOM_PADDING = 12
-	local CODE_OFFSET = 30 
-    local codes = ""
-	local codeViewWin_bg 
-	local xbox = factory.make_xbox()
-	local codeViewWin 
-
-
-	codeViewWin_bg = factory.make_popup_bg("Code","")
---[[
-	if util.is_this_widget(v) == true then 
-	     codeViewWin_bg = factory.make_popup_ 
-bg("Code", "Widget")
-	else 
-	     codeViewWin_bg = factory.make_popup_bg("Code", v.type)
-	end 
-]]
-
-	if(v.type ~= "Video") then 
-	     codeViewWin = Group {
-	          name = "Code",
-	          position ={0, 0},
-              children =
-              {
-              	codeViewWin_bg,
-	            xbox:set{position = {765, 40}}
-              }
-	     }
-	else 
-	     codeViewWin = Group {
-	          name = "Code",
-	          position ={0, 0},
-              children =
-              {
-              	codeViewWin_bg,
-	            xbox:set{position = {1450, 40}}
-              }
-	     }
-
-    end 
-	codeViewWin.reactive = true
-	
-	if(v.type ~= "Group" or util.is_this_widget(v) == true) then 
-		codes = codes..util.itemTostring(v)
-	else 
-		local indent       = "\n\t\t"
-    	local b_indent       = "\n\t"
- 		local i = 1
-        local children = ""
-        for e in util.values(v.children) do
-			if i == 1 then
-	        	children = children..e.name
-	        else 
-				children = children..","..e.name
-		    end
-		     i = i + 1
-        end 
-		
-		codes =  codes..v.name.." = "..v.type..b_indent.."{"..indent..
-        	"name=\""..v.name.."\","..indent..
-	        "size={"..table.concat(v.size,",").."},"..indent..
-	        "position = {"..v.x..","..v.y.."},"..indent..
-	        "children = {"..children.."},"..indent..
-			"scale = {"..table.concat(v.scale,",").."},"..indent..
-			"anchor_point = {"..table.concat(v.anchor_point,",").."},"..indent..
-        	"x_rotation={"..table.concat(v.x_rotation,",").."},"..indent..
-        	"y_rotation={"..table.concat(v.y_rotation,",").."},"..indent..
-        	"z_rotation={"..table.concat(v.z_rotation,",").."},"..indent..
-	        "opacity = "..v.opacity..b_indent.."}\n\n"
-	end 
-	
-
-	local function codeViewWin_position() 
-	     local x_space, y_space
-	     if(v.type == "Video") then return end 
-	     if (v.x > screen.w - v.x - v.w) then 
-	        x_space = v.x 
-        	if (codeViewWin.w + CODE_OFFSET < x_space) then 
-				codeViewWin.x = x_space - codeViewWin.w - CODE_OFFSET
-		  	else 
-				codeViewWin.x = (v.x + v.w - codeViewWin.w)/2
-        	end 
-	     else 
-		  	x_space = screen.w - v.x - v.w
-        	if (codeViewWin.w + CODE_OFFSET < x_space) then 
-				codeViewWin.x = v.x + v.w + CODE_OFFSET
-		  	else 
-				codeViewWin.x = (v.x + v.w - codeViewWin.w)/2
-        	end 
-	    end  
-
-	    if (v.y > screen.h - v.y - v.h) then 
-			y_space = v.y 
-        	if (codeViewWin.h + CODE_OFFSET < y_space) then 
-				codeViewWin.y = v.y - codeViewWin.h - CODE_OFFSET
-				if(codeViewWin.y <= screen:find_child("menu_bar").h + CODE_OFFSET) then
-			    	codeViewWin.y = screen:find_child("menu_bar").h + CODE_OFFSET	
-				end	
-			else 
-            	codeViewWin.y = (v.y + v.h - codeViewWin.h) /2
-				if(codeViewWin.y <= screen:find_child("menu_bar").h + CODE_OFFSET) then
-					codeViewWin.y = screen:find_child("menu_bar").h + CODE_OFFSET	
-				end	
-        	end 
-	    else 
-			y_space = screen.h - v.y - v.h
-        	if (codeViewWin.h + CODE_OFFSET < y_space) then 
-				codeViewWin.y = v.y + v.h + CODE_OFFSET
-			else 
-				codeViewWin.y = (v.y + v.h - codeViewWin.h)/2
-				if (codeViewWin.y + codeViewWin.h + CODE_OFFSET >= screen.h) then 
-					codeViewWin.y = screen.h - codeViewWin.h - CODE_OFFSET
-				elseif (codeViewWin.y <= screen:find_child("menu_bar").h + CODE_OFFSET) then
-			     	codeViewWin.y = screen:find_child("menu_bar").h + CODE_OFFSET	
-				end
-        	end 
-	    end 
-	end 
-
-	if(v.type ~= "Video") then 
-	     codeViewWin_position() 
-	else 
-	     codeViewWin.x = screen.w / 16
-	     codeViewWin.y = screen.h / 16
-    end 
-
-    text_codes = Text{name="codes",text = codes,font="FreeSans Medium 25px" ,
-    color = "FFFFFF" , position = { 25 , 0} , editable = false ,
-    reactive = false, wants_enter = false, }
-
-	-- scroll function 
-	si = ui_element.scrollPane{virtual_w =text_codes.w , virtual_h = text_codes.h , visible_w = 765, visible_h = 500, border_is_visible = false, box_width = 0} 
-	si.content:add(text_codes)
-	si.position = {0,80,0}
-	si.name ="si"
-	--si.size = {item_group.w + 40, 480, 0} -- si must have {clip_w, clip_h} as size
-	codeViewWin:add(si)
-	--codeViewWin:add(text_codes)
-	screen:add(codeViewWin)
-	codeViewWin.extra.lock = false
-    util.create_on_button_down_f(codeViewWin)
-	input_mode = hdr.S_POPUP
-	si:grab_key_focus()
-	xbox.reactive = true
-
-	function xbox:on_button_down(x,y,button,num_clicks)
-		if screen:find_child(codeViewWin.name) then 
-			screen:remove(codeViewWin)
-		end
-		screen_ui.n_selected(v, true)
-        screen.grab_key_focus(screen) 
-	    input_mode = hdr.S_SELECT
-		return true
-    end 
-
-end 
-
- 
-local function is_this_group(v)
-	if v.extra then 
-		if v.extra.type == "Group" then 
-			return true 
-		end 
-	end 
-	return false
-end 
 
 
 local function save_new_file (fname, save_current_f, save_backup_f)
+
 	if current_fn == "unsaved_temp.lua" then
 		current_fn = ""
 	end 
@@ -1942,6 +1270,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	end 
 
 	contents = ""
+
     local obj_names = util.getObjnames()
     local n = table.getn(g.children)
 
@@ -1953,6 +1282,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		end
 
 	    local result, d_list, t_list, result2 = util.itemTostring(v, done_list, todo_list)  
+
 	    if result2  ~= nil then 
         	contents=result2..contents
 	    end  
@@ -2052,8 +1382,9 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 				-- input_t.text-새로 저장할 루아 파일에 대한 정보가 메인에 있는지를 확인하고 
 				-- 있으면 .. 그내용물에 대한 스터브 코드가 일일이 있는지 확인하고 양쪽을 맞춰 주어야 함. 
 				-- 그리고 저장 끝 	
-				for i, j in pairs (g.children) do 
-					local function here() 
+					local gen_added_stub_code 
+
+					local function here(j) 
 		   				if util.need_stub_code(j) == true then 
 							if j.extra.prev_name then 
 									-- object 의 이름이 변경된 경우 찾아서 변경해 준다. 
@@ -2090,19 +1421,51 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 			   						end 
 			   		     		end 
 	                   			added_stub_code = added_stub_code.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 	
-							end
-						end 
-					end -- here()
+						   end
+						else 
+							if util.is_this_container(j) == true then 
+								if j.extra.type == "TabBar" then 
+									for q,w in pairs (j.tabs) do
+										gen_added_stub_code(w)
+									end
+								elseif j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
+									gen_added_stub_code(j.content)
+			    				elseif j.extra.type == "LayoutManager" then 
+									local content_num = 0 
+									local lm_name = j.name
+			        				for k,l in pairs (j.tiles) do 
+										for n,m in pairs (l) do 
+											if m then 
+												j = m 
+												here(j)
+											end 
+										end 
+									end 
+									added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add on_focus_in and on_focus_out function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.tiles[r][c]\n\t\t\t\tif cell_obj.extra.on_focus_in == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_in ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.on_focus_out == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_out ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
 
-					if is_this_group(j) == false then 
-						here()
+								elseif j.extra.type == "Group" then  
+									gen_added_stub_code(j)
+								end
+			   			end -- is this container == true 
+				    end  -- need stub code ~= true
+				end -- here()
+
+				gen_added_stub_code = function (g)
+
+				for i, j in pairs (g.children) do 
+					if util.is_this_group(j) == false then 
+						here(j)
 					else 
 						for q,w in pairs (j.children) do 
 							j = w
-							here()
+							here(j)
 						end 
 					end 
-				end --for
+				end 
+
+				end 
+
+				gen_added_stub_code(g)
 
 				local q,w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
 				local main_first, main_last
@@ -2194,17 +1557,19 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 			next_func(next_f_param)
 		end
 		restore_fn = ""
+		menu.menu_raise_to_top()
 		return 
 	end 
 
 	if save_current_f == true and current_fn ~= "" then  
 		save_new_file(current_fn, save_current_f, save_backup_f) 
 		screen:grab_key_focus()
+		menu.menu_raise_to_top()
 		return 
 	end 
 
 	-- No current file or save as command 
-
+	editor_use = true
 	-- Text Input Field 	
 	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
 		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
@@ -2216,6 +1581,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
  		  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = text_input}
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     	  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button= true, focus_object = text_input} 
+	editor_use = false
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down() end 
@@ -2224,7 +1590,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 		if text_input.text == "" then 
 			xbox:on_button_down() 
 			editor.error_message("005", save_current_f, editor.save)  
-			return
+			return -1
 		elseif text_input.text then 
 			if string.sub(text_input.text, -4, -1) == ".lua" then 
 			   local name_val = string.sub(text_input.text, 1, -5)
@@ -2239,16 +1605,6 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 			   editor.error_message("015","name",nil,nil,inspector)
 			   return -1 
 			end 
-			--[[
-			   local name_val = text_input.text
-			   local name_format = "[%w_]+"
-			   local a, b = string.find(name_val, name_format) 
-			   if not (a and a == 1 and b == string.len(name_val)) then 
-			        editor.error_message("013","name",nil,nil,inspector)
-					return -1 
-			   end
-			   file_name = text_input.text..".lua"
-			]]
    		end   
 		save_new_file(file_name, save_current_f, save_backup_f) 
 		xbox:on_button_down() 
@@ -2265,7 +1621,6 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
-
 		text_input.on_focus_in()
 	end
 
@@ -2301,9 +1656,15 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 		,scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
 	}
 
+	msgw.extra.lock = false
+ 	screen:add(msgw)
+	util.create_on_button_down_f(msgw)	
+	-- Set focus 
+	ti_func()
+
 	function xbox:on_button_down()
-		msgw:clear() -- 0708
 		screen:remove(msgw)
+		msgw:clear() -- 0708
 		current_inspector = nil
 		current_focus = nil
         screen.grab_key_focus(screen) 
@@ -2327,11 +1688,6 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 		end
 	end
 
-	msgw.extra.lock = false
- 	screen:add(msgw)
-	util.create_on_button_down_f(msgw)	
-	-- Set focus 
-	ti_func()
 end 
 
 function editor.rectangle(x, y)
@@ -2440,7 +1796,6 @@ local function ungroup(v)
 end 
 
 function editor.undo()
-print("editor.undo")
 	  if( undo_list == nil) then return true end 
       local undo_item= table.remove(undo_list)
 
@@ -2521,16 +1876,6 @@ function editor.undo_history()
 	dumptable(redo_list )
 end
 	
-function editor.add(obj)
-	g:add(obj)
-        --screen:add(obj)
-end
-
-function editor.rm(obj)
-        --screen:remove(obj)
-	g:remove(obj)
-end
-
 function editor.debug()
 	print("selected objects")
 	dumptable(selected_objs)
@@ -2589,8 +1934,13 @@ function editor.text()
     ui.text.grab_key_focus(ui.text)
     local n = table.getn(g.children)
 
-    function ui.text:on_key_down(key)
-    	if key == keys.Return and shift == false then
+    function ui.text:on_key_down(key,u,t,m)
+
+		if m and m.shift then 
+			return true
+		end 
+
+    	if key == keys.Return then -- and shift == false then
 			ui.text:set{cursor_visible = false}
         	screen.grab_key_focus(screen)
 			ui.text:set{editable= false}
@@ -2618,219 +1968,10 @@ function editor.text()
 	ui.text.extra.lock = false
 	util.create_on_button_down_f(ui.text)
 end
-	
-function editor.the_video()
-	local WIDTH = 700
-	local L_PADDING = 50
-	local R_PADDING = 50
-    local TOP_PADDING = 60
-    local BOTTOM_PADDING = 12
-    local Y_PADDING = 10 
-	local X_PADDING = 10
-	local STYLE = {font = "FreeSans Medium 26px" , color = "FFFFFF"}
-	local space = WIDTH
-
-	local dir = editor_lb:readdir(current_dir.."/assets/videos")
-	local dir_text = Text {name = "dir", text = "File Location : "..current_dir.."/assets/videos"}:set(STYLE)
-
-	local cur_w= (WIDTH - dir_text.w)/2
-	local cur_h= TOP_PADDING/2 + Y_PADDING
-
-
-	dir_text.position = {cur_w,cur_h,0}
-
-	function get_file_list_sz() 
-	     local iw = cur_w
-	     local ih = cur_h
-	     cur_w = L_PADDING
-	     cur_h = cur_h + dir_text.h + Y_PADDING
-
-     	 for i, v in pairs(dir) do
-	     	if (util.is_mp4_file(v) == true) then 
-	        	text = Text {name = tostring(i), text = v}:set(STYLE)
-
-                text.position  = {cur_w, cur_h,0}
-		     	if(cur_w == L_PADDING) then
-					cur_w = cur_w + 7*L_PADDING
-		       	else 
-	               	cur_w = L_PADDING 
-	               	cur_h = cur_h + text.h + Y_PADDING
-		       	end
-             end 
-         end
-
-	     local return_h = cur_h - 40
-
-	     cur_w = iw
-	     cur_h = ih
-	     return return_h 
-    end 
-
-	local file_list_size = get_file_list_sz()
-    local scroll_box 
-    local scroll_bar 
-	
-	if (file_list_size > 500) then 
-         scroll_box = factory.make_msgw_scroll_box()
-         scroll_bar = factory.make_msgw_scroll_bar(file_list_size)
-	     file_list_size = 500 
-	end 
-	
-	local msgw_bg = factory.make_popup_bg("file_ls", file_list_size)
-
-	local msgw = Group {
-	     position ={500, 100,0},
-	     anchor_point = {0,0},
-         children =
-         {
-         	msgw_bg,
-         }
-	}
-
-    msgw:add(dir_text)
- 	if j.name == "w" or j.name == "h" then 
-		if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
-        	v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
-		end 
-	else 
-    	v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
-	end 
-
-	local text_g
-	local input_text
-	function print_file_list() 
-	     cur_w = L_PADDING
-         cur_h = TOP_PADDING + dir_text.h + Y_PADDING
-	     text_g = Group{position = {cur_w, cur_h,0}}
-	     text_g.extra.org_y = cur_h
-	     text_g.reactive  = true 
-
-	     cur_w = 0
-	     cur_h = 0 
-
-     	 for i, v in pairs(dir) do
-	     	if (util.is_mp4_file(v) == true) then 
-	        	text = Text {name = tostring(i), text = v}:set(STYLE)
-                text.position = {cur_w, cur_h,0}
-	 	       	text.reactive = true
-    	        text_g:add(text)
-		       	if(cur_w == 0) then
-					cur_w = cur_w + 7*L_PADDING
-		       	else 
-	               	cur_w = 0
-	               	cur_h = cur_h + text.h + Y_PADDING
-		       	end
-         	end
-         end
-	     cur_w = cur_w + L_PADDING
-	     cur_h = cur_h + TOP_PADDING + dir_text.h + Y_PADDING
-	     text_g.clip = {0,0,text_g.w,500}
-    	 msgw:add(text_g)
-	end 
-	
-	print_file_list()
-	if(scroll_bar ~= nil) then 
-	    scroll_box.position = {720, TOP_PADDING + dir_text.h + Y_PADDING}
-	    scroll_bar.position = {724, TOP_PADDING + dir_text.h + Y_PADDING + 4}
-	    scroll_bar.extra.org_y = TOP_PADDING + dir_text.h + Y_PADDING + 4
-	    scroll_bar.extra.txt_y = text_g.extra.org_y
-	    scroll_bar.extra.h_y = TOP_PADDING + dir_text.h + Y_PADDING + 4
-	    scroll_bar.extra.l_y = scroll_bar.extra.h_y + 500 - scroll_bar.h
-	    scroll_bar.extra.text_clip = text_g.clip 
-	    scroll_bar.extra.text_position = text_g.position 
-	    msgw:add(scroll_box)
-	    msgw:add(scroll_bar)
- 
-        function scroll_bar:on_button_down(x,y,button,num_clicks)
-	     	dragging = {scroll_bar, x- scroll_bar.x, y - scroll_bar.y }
-        	return true
-    	end  if j.name == "w" or j.name == "h" then 
-				if v[j.name] ~= tonumber(item_group:find_child(j.name):find_child("input_text").text) then 
-                            		v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
-				end 
-			    else 
-                            		v[j.name] = tonumber(item_group:find_child(j.name):find_child("input_text").text)
-			    end 
-
-
-    	function scroll_bar:on_button_up(x,y,button,num_clicks)
-	 		if(dragging ~= nil) then 
-	    		local actor , dx , dy = unpack( dragging )
-	       		if (actor.extra.h_y < y-dy and y-dy < actor.extra.l_y) then 	
-	        		local dif = y - dy - scroll_bar.extra.org_y
-	           		scroll_bar.y = y - dy 
-	           		text_g.position = {text_g.x, text_g.extra.org_y -dif}
-	           		text_g.clip = {0,dif,text_g.w,500}
-	      		end 
-	      		dragging = nil
-	 		end 
-         		return true
-       end 
- 	end 
-
-    for i,j in pairs (text_g.children) do 
-    	function j:on_button_down(x,y,button, num_clicks)
-	    	if input_text ~= nil then 
-		    	input_text.color = hdr.DEFAULT_COLOR -- {255, 255, 255, 255}
-	      	end 
-            input_text = j
-	      	j.color = {0,255,0,255}
-	      	return true
-     	end 
-    end 
-
-    local open_b, open_t  = factory.make_msgw_button_item( assets , "open")
-    open_b.position = {(WIDTH - 2*open_b.w - X_PADDING)/2, file_list_size + 110}
-    open_b.name = "openfile"
-    open_b.reactive = true
-
-    local cancel_b, cancel_t = factory.make_msgw_button_item( assets , "cancel")
-    cancel_b.position = {open_b.x + open_b.w + X_PADDING, file_list_size + 110}
-    cancel_b.name = "cancel"
-    cancel_b.reactive = true 
-	
-    msgw:add(open_b)
-    msgw:add(cancel_b)
-
-    function open_b:on_button_down(x,y,button,num_clicks)
-	 	if (input_text ~= nil) then 
- 	    	if screen:find_child("inspector") then 
-		    	screen:find_child("file_name").text = input_text.text
-	      	else 
-	            msg_window.inputMsgWindow_openvideo("open_videofile", input_text.text)
-	      	end
-	      	cleanMsgWin(msgw)
-	 	end 
-    end 
-
-    function open_t:on_button_down(x,y,button,num_clicks)
-	 if (input_text ~= nil) then	
- 	      if screen:find_child("inspector") then 
-		    screen:find_child("file_name").text = input_text.text
-	      else 
-    	     msg_window.inputMsgWindow_openvideo("open_videofile", input_text.text)
-	      end 
-	      cleanMsgWin(msgw)
-	 end 
-    end 
-
-    function cancel_b:on_button_down(x,y,button,num_clicks)
-	 	cleanMsgWin(msgw)
-	 	screen:grab_key_focus(screen)
-    end 
-
-    function cancel_t:on_button_down(x,y,button,num_clicks)
-	 	cleanMsgWin(msgw)
-	 	screen:grab_key_focus(screen)
-    end 
-
-    screen:add(msgw)
-	     
-end 
 
 function editor.clone()
 
-	if(table.getn(selected_objs) == 0 )then 
+	if table.getn(selected_objs) == 0 then 
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
@@ -3382,10 +2523,9 @@ function editor.delete()
 
 	input_mode = hdr.S_SELECT
 	screen:grab_key_focus()
-end
+
+end -- delete
 	
-
-
 	
 local function get_min_max () 
      local min_x = screen.w
@@ -3407,7 +2547,15 @@ local function get_min_max ()
 end 
 
 function editor.group()
-        local min_x, max_x, min_y, max_y = get_min_max () 
+
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
+    local min_x, max_x, min_y, max_y = get_min_max () 
        
 	while (util.is_available("group"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
@@ -3480,55 +2628,62 @@ function editor.group()
 end
 
 function editor.ugroup()
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
 	for i, v in pairs(g.children) do
-             if g:find_child(v.name) then
-		  if(v.extra.selected == true) then
-			if(v.type == "Group") then 
-			     screen_ui.n_selected(v)
-			     v.extra.children = {}
-			     for i,c in pairs(v.children) do 
-				     table.insert(v.extra.children, c.name) 
-				---[[ 0128 : added for nested group 
+    	if g:find_child(v.name) then
+		  	if(v.extra.selected == true) then
+				if(v.type == "Group") then 
+			     	screen_ui.n_selected(v)
+			     	v.extra.children = {}
+			     	for i,c in pairs(v.children) do 
+				     	table.insert(v.extra.children, c.name) 
+					---[[ 0128 : added for nested group 
         				if(c.type == "Group") then 
 	       				   for j, cc in pairs (c.children) do
-						if util.is_in_list(c.extra.type, editorUiElements) == false then 
+								if util.is_in_list(c.extra.type, editorUiElements) == false then 
                     				cc.reactive = true
-		    				cc.extra.is_in_group = true
-						cc.extra.lock = false
+		    						cc.extra.is_in_group = true
+									cc.extra.lock = false
                     				util.create_on_button_down_f(cc)
-						end 
+								end 
 	       				   end 
-					end 
-				--]]
-				     v:remove(c)
-				     c.extra.is_in_group = false
-				     c.x = c.x + v.x 
-				     c.y = c.y + v.y 
-		     		     g:add(c)
+						end 
+					--]]
+				     	v:remove(c)
+				     	c.extra.is_in_group = false
+				     	c.x = c.x + v.x 
+				     	c.y = c.y + v.y 
+		     		    g:add(c)
 				     -- 0328 
-				     if not c.reactive then 
-					c.reactive = true	
-				     end 
+				     	if not c.reactive then 
+							c.reactive = true	
+				     	end 
 				     -- 0328 
 				     --c.reactive = true
         			     --util.create_on_button_down_f(c)
-				     if(c.type == "Text") then
-					function c:on_key_down(key)
+				     	if(c.type == "Text") then
+							function c:on_key_down(key)
              				    if key == keys.Return then
-						c:set{cursor_visible = false}
-        					screen.grab_key_focus(screen)
-						return true
-	     				    end 
-					end 
-	  			     end 
-			     end
-			     g:remove(v)
-        		     table.insert(undo_list, {v.name, hdr.DEL, v})
+									c:set{cursor_visible = false}
+        							screen.grab_key_focus(screen)
+									return true
+	     				    	end 
+							end 
+	  			     	end 
+			     	end
+			     	g:remove(v)
+        		    table.insert(undo_list, {v.name, hdr.DEL, v})
 		        end 
 		   end 
-              end
-        end
-        screen.grab_key_focus(screen)
+		end
+	end
+    screen.grab_key_focus(screen)
 	input_mode = hdr.S_SELECT
 end
 
@@ -3567,16 +2722,16 @@ function editor.group_done(x, y)
 end 
 
 function editor.group_move(x,y)
-        ui.group.size = { math.abs(x-g_init_x), math.abs(y-g_init_y) }
-        group_border.size = { math.abs(x-g_init_x), math.abs(y-g_init_y) }
-        if(x- g_init_x < 0) then
-            ui.group.w = x - g_init_x
-	   group_border.x = x 
-        end
-        if(y- g_init_y < 0) then
-            ui.group.h = y - g_init_y
-	   group_border.y = y 
-        end
+	ui.group.size = { math.abs(x-g_init_x), math.abs(y-g_init_y) }
+    group_border.size = { math.abs(x-g_init_x), math.abs(y-g_init_y) }
+    if(x- g_init_x < 0) then
+    	ui.group.w = x - g_init_x
+	   	group_border.x = x 
+    end
+    if(y- g_init_y < 0) then
+    	ui.group.h = y - g_init_y
+	   	group_border.y = y 
+    end
 end
 
 local function getObjName (border_n) 
@@ -3586,55 +2741,53 @@ end
 
 local function org_cord() 
      for i, v in pairs(g.children) do
-          if g:find_child(v.name) then
+        if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
 		     v.x = v.x - v.anchor_point[1] 
 		     v.y = v.y - v.anchor_point[2] 
-		end 
-	  end 
+			end 
+	  	end 
      end 
 end  
 
 local function ang_cord() 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
-	        if(v.extra.selected == true) then
-		     screen_ui.n_selected(v)
-		     v.x = v.x + v.anchor_point[1] 
-		     v.y = v.y + v.anchor_point[2] 
-		end 
-	  end 
+	        	if(v.extra.selected == true) then
+		     		screen_ui.n_selected(v)
+		     		v.x = v.x + v.anchor_point[1] 
+		     		v.y = v.y + v.anchor_point[2] 
+				end 
+	  		end 
      end 
 end  
 
-
-
 function editor.left() 
-     local org_object, new_object 
+	local org_object, new_object 
 
-     org_cord()
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
 
-     if(table.getn(selected_objs) == 0 )then 
-	print("there are no selected objects") 
-                screen:grab_key_focus()
-	input_mode = hdr.S_SELECT
-	return 
-     end 
+    org_cord()
 
-     local basis_obj_name = getObjName(selected_objs[1])
-     local basis_obj = g:find_child(basis_obj_name)
+    local basis_obj_name = getObjName(selected_objs[1])
+    local basis_obj = g:find_child(basis_obj_name)
 
-     for i, v in pairs(g.children) do
-          if g:find_child(v.name) then
-	        if(v.extra.selected == true and v.name ~= basis_obj_name) then
-		     if(v.x ~= basis_obj.x) then
-	                  org_object = util.copy_obj(v)
-			  v.x = basis_obj.x
-			  new_object = util.copy_obj(v)
-                          table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
-		     end
-		end 
-          end
+    for i, v in pairs(g.children) do
+    	if g:find_child(v.name) then
+	    	if(v.extra.selected == true and v.name ~= basis_obj_name) then
+		    	if(v.x ~= basis_obj.x) then
+	            	org_object = util.copy_obj(v)
+			  		v.x = basis_obj.x
+			  		new_object = util.copy_obj(v)
+                    table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
+		     	end
+			end 
+    	end
     end
 
     ang_cord()
@@ -3644,21 +2797,21 @@ function editor.left()
 end
 
 function editor.right() 
-     local org_object, new_object 
+	local org_object, new_object 
 
-     if(table.getn(selected_objs) == 0 )then 
-	print(":there are no selected objects") 
-                screen:grab_key_focus()
-	input_mode = hdr.S_SELECT
-	return 
-     end 
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+    
+	org_cord()
 
-     org_cord()
+    local basis_obj_name = getObjName(selected_objs[1])
+    local basis_obj = g:find_child(basis_obj_name)
 
-     local basis_obj_name = getObjName(selected_objs[1])
-     local basis_obj = g:find_child(basis_obj_name)
-
-     for i, v in pairs(g.children) do
+    for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true and v.name ~= basis_obj_name) then
 		   --screen_ui.n_selected(v)
@@ -3673,26 +2826,27 @@ function editor.right()
     end
 
     ang_cord()
+
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
 end
 
 function editor.top()
-     local org_object, new_object 
-
-     if(table.getn(selected_objs) == 0 )then 
-		print("there are no selected objects") 
+	local org_object, new_object 
+	
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
 		input_mode = hdr.S_SELECT
 		return 
-     end 
+   	end 
 
-     org_cord()
+    org_cord()
 
-     local basis_obj_name = getObjName(selected_objs[1])
-     local basis_obj = g:find_child(basis_obj_name)
+    local basis_obj_name = getObjName(selected_objs[1])
+    local basis_obj = g:find_child(basis_obj_name)
 
-     for i, v in pairs(g.children) do
+    for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true and v.name ~= basis_obj_name ) then
 		  --   screen_ui.n_selected(v)
@@ -3704,43 +2858,28 @@ function editor.top()
 		     end 
 		end 
           end
-    end
+   end
 
---[[
-	for i, v in pairs (screen.children) do 
- 		if v.extra then 
-	        if(v.extra.selected == true and v.name ~= basis_obj_name ) then
-		     	if(v.y ~= basis_obj.y) then
-	                org_object = util.copy_obj(v)
-					v.y = basis_obj.y 
-					new_object = util.copy_obj(v)
-                    table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
-		     	end 
-			end 
-        end
-	end 
---]]
-	
-    ang_cord()
-    screen.grab_key_focus(screen)
-    input_mode = hdr.S_SELECT
+   ang_cord()
+   screen.grab_key_focus(screen)
+   input_mode = hdr.S_SELECT
 end
 
 function editor.bottom()
-     local org_object, new_object 
+    local org_object, new_object 
 
-     if(table.getn(selected_objs) == 0 )then 
-	print(":there are  no selected objects") 
-	input_mode = hdr.S_SELECT
-	return 
-     end 
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+    org_cord() 
 
-     org_cord() 
+    local basis_obj_name = getObjName(selected_objs[1])
+    local basis_obj = g:find_child(basis_obj_name)
 
-     local basis_obj_name = getObjName(selected_objs[1])
-     local basis_obj = g:find_child(basis_obj_name)
-
-     for i, v in pairs(g.children) do
+    for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true and  v.name ~= basis_obj_name) then
 		     --screen_ui.n_selected(v)
@@ -3759,15 +2898,16 @@ function editor.bottom()
     screen.grab_key_focus(screen)
     input_mode = hdr.S_SELECT
 end
+
 function editor.hcenter()
      local org_object, new_object 
 
-     if(table.getn(selected_objs) == 0 )then 
-	print("there are no selected objects") 
-                screen:grab_key_focus()
-	input_mode = hdr.S_SELECT
-	return 
-     end 
+	 if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	 end 
 
      org_cord() 
 
@@ -3798,12 +2938,13 @@ end
 function editor.vcenter()
      local org_object, new_object 
 
-     if(table.getn(selected_objs) == 0 )then 
-	print("there are no selected objects") 
-                screen:grab_key_focus()
-	input_mode = hdr.S_SELECT
-	return 
-     end 
+	 if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
+
 
      org_cord() 
 
@@ -3996,12 +3137,12 @@ end
 function editor.vspace()
     local org_object, new_object 
 
-    if(table.getn(selected_objs) == 0 )then 
-	print(":there are no selected objects") 
-                screen:grab_key_focus()
-	input_mode = hdr.S_SELECT
-	return 
-    end 
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
 
     local  y_sort_t, space, reverse_t, f, b
 
@@ -4042,19 +3183,19 @@ end
 
 function editor.bring_to_front()
 
-     if(table.getn(selected_objs) == 0 )then 
-	print(":there are no selected objects") 
-                screen:grab_key_focus()
-	input_mode = hdr.S_SELECT
-	return 
-     end 
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
 
      for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
 			g:remove(v)
 			g:add(v)
-    			table.insert(undo_list, {v.name, hdr.ARG, hdr.hdr.BRING_FR})
+    		table.insert(undo_list, {v.name, hdr.ARG, hdr.BRING_FR})
 			screen_ui.n_selected(v)
 		end 
           end
@@ -4066,12 +3207,12 @@ end
 
 function editor.send_to_back()
 
-     if(table.getn(selected_objs) == 0 )then 
-	print(":there are no selected objects") 
-                screen:grab_key_focus()
-	input_mode = hdr.S_SELECT
-	return 
-     end 
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
 
      local tmp_g = {}
      local slt_g = {}
@@ -4107,12 +3248,12 @@ end
 
 function editor.send_backward()
 
-     if(table.getn(selected_objs) == 0 )then 
-	print("there are no selected objects") 
-                screen:grab_key_focus()
-	input_mode = hdr.S_SELECT
-	return 
-     end 
+	if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	end 
 
      local tmp_g = {}
      local slt_g = {}
@@ -4157,12 +3298,14 @@ end
 
 
 function editor.bring_forward()
+	
+	 if table.getn(selected_objs) == 0 then 
+		editor.error_message("016","",nil,nil,nil)
+        screen:grab_key_focus()
+		input_mode = hdr.S_SELECT
+		return 
+   	 end 
 
-     if(table.getn(selected_objs) == 0 )then 
-	print("there are  no selected objects") 
-	input_mode = hdr.S_SELECT
-	return 
-     end 
 
      local tmp_g = {}
      local slt_g = {}
@@ -4198,9 +3341,8 @@ function editor.bring_forward()
 end
 
 
-function editor.the_ui_elements()
+function editor.ui_elements()
 
-	--editor_use = true
   	local WIDTH = 300
   	local HEIGHT = 400
 	local PADDING = 13
@@ -4255,6 +3397,8 @@ function editor.the_ui_elements()
 	-- Scroll	
 	local scroll = editor_ui.scrollPane{virtual_h = 380}
 
+	
+
 	-- Buttons 
     local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     					  skin = "default", ui_width = 100, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = scroll}
@@ -4278,8 +3422,14 @@ function editor.the_ui_elements()
 	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
 
-	--editor_use = false
-	
+
+	local tab_func = function()
+		button_ok:find_child("active").opacity = 0
+		button_ok:find_child("dim").opacity = 255
+		button_cancel:grab_key_focus()
+		button_cancel.on_focus_in()
+	end
+
 	local msgw = Group {
 		name = "ui_element_insert", 
 		position ={650, 250},
@@ -4320,7 +3470,7 @@ function editor.the_ui_elements()
 			selected_ui_element = v
 		end
 
-		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1)}
+		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() selected_ui_element = v tab_func() end}
 
 		widget_t.position =  {cur_w, cur_h}
 		widget_t.extra.rect = h_rect.name
@@ -4419,132 +3569,6 @@ function editor.the_ui_elements()
 end 
 
 
-function editor.ui_elements()
-    local WIDTH = 600
-    local L_PADDING = 20
-    local R_PADDING = 50
-    local TOP_PADDING = 60
-    local BOTTOM_PADDING = 12
-    local Y_PADDING = 5
-    local X_PADDING = 10
-    local STYLE = {font = "FreeSans Medium 25px" , color = "FFFFFF"}
-    local space = WIDTH
-    local msgw_bg = factory.make_popup_bg("widgets")
-    local xbox = factory.make_xbox()
-
-    local msgw = Group {
-         position ={650, 250},
-	 anchor_point = {0,0},
-         children =
-         {
-          msgw_bg,
-	  xbox:set{position = {555, 40}},
-         }
-    }
-    local widgets_list = Text {name = "w_list", text = "UI Elements"}:set(STYLE)
-    local text_g
-
-    cur_w= (WIDTH - widgets_list.w)/2
-    cur_h= TOP_PADDING/2 + Y_PADDING
-
-    widgets_list.position = {cur_w,cur_h}
-    msgw:add(widgets_list)
-
-            
-    cur_w = L_PADDING
-    cur_h = TOP_PADDING + widgets_list.h - 10
-
-    for i, v in pairs(engineUiElements) do 
-    	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , v)
-	
-	 widget_b.position =  {cur_w, cur_h}
-    	 widget_b.name = v
-    	 widget_b.reactive = true
-
-	 cur_h = cur_h + widget_b.h 
-         msgw:add(widget_b)
-         
-         function widget_b:on_button_down(x,y,button,num_clicks)
-	      widget_f_map[v]() 
-	      cleanMsgWin(msgw)
-        end 
-
-        function widget_t:on_button_down(x,y,button,num_clicks)
-	      widget_f_map[v]() 
-	      cleanMsgWin(msgw)
-	end
-    end 
-
-
-    for i, v in pairs(editorUiElements) do
-         if (i == 6) then 
-              cur_w =  cur_w + 255 + Y_PADDING
-              cur_h =  TOP_PADDING + widgets_list.h -10
-	 end 
-	 
-	 local widget_label = widget_n_map[v]() 
-	 local widget_b, widget_t  = factory.make_msgw_widget_item(assets , widget_label)
-
-    	 widget_b.position =  {cur_w, cur_h}
-    	 widget_b.name = v
-    	 widget_b.reactive = true
-	 cur_h = cur_h + widget_b.h 
-         msgw:add(widget_b)
-         
-         function widget_b:on_button_down(x,y,button,num_clicks)
-	      local new_widget = widget_f_map[v]() 
-	if new_widget.name:find("timeline") then 
-		    screen:add(new_widget)
-	else 
-	           while (util.is_available(new_widget.name..tostring(item_num)) == false) do  
-		     item_num = item_num + 1
-	           end 
-	           new_widget.name = new_widget.name..tostring(item_num)
-                   table.insert(undo_list, {new_widget.name, ADD, new_widget})
-	           g:add(new_widget)
-		   new_widget.extra.lock = false
-                   util.create_on_button_down_f(new_widget)
-	           --screen:add(g)
-	           screen:grab_key_focus()
-	end 
-	cleanMsgWin(msgw)
-        end 
-
-        function widget_t:on_button_down(x,y,button,num_clicks)
-
-	      local new_widget = widget_f_map[v]() 
-          if new_widget.name:find("timeline") then 
-		    screen:add(new_widget)
-	      else
- 	     	while (util.is_available(new_widget.name..tostring(item_num)) == false) do  
-				item_num = item_num + 1
-	      	end 
-	      	new_widget.name = new_widget.name..tostring(item_num)
-              	table.insert(undo_list, {new_widget.name, ADD, new_widget})
-	      	g:add(new_widget)
-			new_widget.extra.lock = false
-            util.create_on_button_down_f(new_widget)
-	      	screen:grab_key_focus()
-	    end 
-	    cleanMsgWin(msgw)
-       end 
-
-    end 
-
-    xbox.reactive = true
-    function xbox:on_button_down(x,y,button,num_clicks)
-	 	screen:remove(msgw)
-        msgw:clear()
-        screen.grab_key_focus(screen) 
-	  --input_mode = hdr.S_SELECT
-	 return true
-    end 
-
-    screen:add(msgw)
-
-end 
-
-
 function editor.error_message(error_num, str, func_ok, func_nok, inspector)
   	local WIDTH = 300
   	local HEIGHT = 150
@@ -4597,9 +3621,10 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	local message = Text{text = error_msg, wrap = true, wrap_mode = "WORD",}:set(MSTYLE)
 	local message_shadow = Text{text = error_msg, wrap = true, wrap_mode = "WORD",}:set(MSSTYLE)
 
-
 --Buttons 
 	local button_cancel, button_ok, button_nok
+
+	editor_use = true
     if Cancel_label == "" then 
  		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
      	skin = "default", ui_width = 100, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
@@ -4618,8 +3643,11 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
      				skin = "default", ui_width = 100, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
  	end 
-
+	editor_use = false
 	
+	button_ok:grab_key_focus() 
+
+
 	-- Button Event Handlers
 	if Cancel_label ~= "" then 
 		button_cancel.pressed = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
@@ -4627,31 +3655,38 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	button_ok.pressed = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
 
 	if func_nok then 
-		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok", [keys.Up] = ti_func}
- 		button_cancel.extra.focus = {[keys.Left] = "button_nok", [keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
- 		button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
+		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok"}
+ 		button_cancel.extra.focus = {[keys.Left] = "button_nok", [keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel"}
+ 		button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_nok", [keys.Return] = "button_ok"}
  	-- Button Position Set
  		button_nok:set{name = "button_nok", position = {WIDTH-button_cancel.w-button_ok.w-button_nok.w-3*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
  		button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}} 
  		button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
  	elseif Cancel_label ~= "" then 
  	-- Focus Destination 
- 		button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
- 		button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
+ 		button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel"}
+ 		button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok"}
  	-- Button Position Set
  		button_cancel:set{name = "button_cancel", position = { WIDTH-button_cancel.w-button_ok.w-2*PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}} 
  		button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
 	else 
- 		button_ok.extra.focus = {[keys.Return] = "button_ok", [keys.Up] = ti_func}
+ 		button_ok.extra.focus = {[keys.Return] = "button_ok"}
  		button_ok:set{name = "button_ok", position = { WIDTH-button_ok.w-PADDING, HEIGHT-BOTTOM_BAR+PADDING/2}}
  	end 
 
-
-	button_ok.name = "error_ok"
-	-- Focus Destination 
-	--button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok", [keys.Return] = "button_cancel", [keys.Up] = ti_func}
-	--button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = ti_func}
-
+	local tab_func = function()
+		if button_nok or button_cancel then 
+			button_ok:find_child("active").opacity = 0
+			button_ok:find_child("dim").opacity = 255
+		end 
+		if button_nok then 
+			button_nok:grab_key_focus()
+			button_nok.on_focus_in()
+		else 
+			button_cancel:grab_key_focus()
+			button_cancel.on_focus_in()
+		end 
+	end
 
 	local msgw = Group {
 		name = "msgw",  --ui_element_insert
@@ -4676,20 +3711,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
-
-		--button_ok.on_focus_in()
-		--button_ok:grab_key_focus() 
+		button_ok:grab_key_focus() 
 	end
-
-	local tab_func = function()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
-		if button_cancel then 
-			button_cancel:grab_key_focus()
-			button_cancel.on_focus_in()
-		end
-	end
-
 
 	if Cancel_label ~= "" then 
  		msgw:add(button_cancel) 
@@ -4703,6 +3726,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	screen:add(msgw)
 	util.create_on_button_down_f(msgw)	
 
+	
 	-- Focus 
 	ti_func()
 
@@ -4719,6 +3743,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		return true
 	end 
 
+	button_ok:grab_key_focus() 
 	return msgw
 end
 

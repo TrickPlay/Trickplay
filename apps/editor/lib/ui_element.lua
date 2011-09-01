@@ -466,8 +466,8 @@ end
 
 local function make_toastb_group_bg(w,h,bw,bc,fc,px,py,br)
 
-    local size = {w, h} 
-    local color = fc --"6d2b17"
+    local size = {w, h+30} 
+    local color = fc 
     local BORDER_WIDTH= bw
     local POINT_HEIGHT=34
     local POINT_WIDTH=60
@@ -2100,7 +2100,7 @@ function ui_element.toastAlert(t)
 
     	t_box = make_toastb_group_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
     	t_box:set{name="t_box"}
-	tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
+		tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
 		icon = Image {src = p.icon}
     	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
@@ -2118,8 +2118,7 @@ function ui_element.toastAlert(t)
 	     t_box_img = Image{}
 	end 
 
-	t_box.y = t_box.y -30
-	tb_group.h = tb_group.h - 30
+		t_box.y = t_box.y -30
 
     	tb_group:add(t_box, t_box_img, icon, title, message)
 
@@ -2273,7 +2272,6 @@ function ui_element.buttonPicker(t)
      local index 
 
      local padding = 5
-     --local pos = {26, 0} -- left arrow 
      local pos = {0, 0}    -- focus, unfocus 
      local t = nil
 
@@ -3429,7 +3427,7 @@ function ui_element.progressSpinner(t)
     local load_timeline = nil
     
     --the Canvas used to create the dots
-    local make_dot = function(x,y)
+    local make_dot = function()
           local dot  = Canvas{size={p.dot_diameter, p.dot_diameter}}
           dot:begin_painting()
           dot:arc(p.dot_diameter/2,p.dot_diameter/2,p.dot_diameter/2,0,360)
@@ -3442,7 +3440,6 @@ function ui_element.progressSpinner(t)
           end
           dot.anchor_point ={p.dot_diameter/2,p.dot_diameter/2}
           dot.name         = "Loading Dot"
-          dot.position     = {x,y}
 	  
 
           return dot
@@ -3507,23 +3504,20 @@ function ui_element.progressSpinner(t)
             --they're radial position
             rad = (2*math.pi)/(p.number_of_dots) * i
             if skin_list[p.skin]["loadingdot"] == nil then
-                dots[i] = make_dot(
-                    math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
-                    math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
-                )
+				dots[i] = make_dot()
 	        else
 		        img = assets(skin_list[p.skin]["loadingdot"])
-		        img.anchor_point = {
+                img.size={p.dot_diameter, p.dot_diameter}
+				img.anchor_point = {
                         img.w/2,
                         img.h/2
-                    }
-		        img.position = {
-                        math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
-                        math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
-                    }
-                    img.size={p.dot_diameter, p.dot_diameter}
+                }
 		        dots[i] = img
             end
+			dots[i].position = {
+                math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
+            }
             l_dots:add(dots[i])
         end
         
@@ -4958,13 +4952,24 @@ function ui_element.scrollPane(t)
                 
                 local rel_x = x - track_hor.transformed_position[1]/screen.scale[1]
 	   	        
+				if grip_hor.x > rel_x then
+					grip_hor.x = grip_hor.x - grip_hor.w
+					if grip_hor.x < 0 then grip_hor.x = 0 end
+				else
+					grip_hor.x = grip_hor.x + grip_hor.w
+					if grip_hor.x > track_hor.w-grip_hor.w then
+						grip_hor.x = track_hor.w-grip_hor.w
+					end
+				end
+
+--[[
                 if rel_x < grip_hor.w/2 then
                     rel_x = grip_hor.w/2
                 elseif rel_x > (track_hor.w-grip_hor.w/2) then
                     rel_x = (track_hor.w-grip_hor.w/2)
                 end
-                
                 grip_hor.x = rel_x-grip_hor.w/2
+   ]]            
                 
                 p.content.x = -(grip_hor.x) * p.virtual_w/track_w
                 
@@ -5053,6 +5058,17 @@ function ui_element.scrollPane(t)
                 
                 local rel_y = y - track_vert.transformed_position[2]/screen.scale[2]
 	   	        
+				if grip_vert.y > rel_y then
+					print("tees")
+					grip_vert.y = grip_vert.y - grip_vert.h
+					if grip_vert.y < 0 then grip_vert.y = 0 end
+				else
+					grip_vert.y = grip_vert.y + grip_vert.h
+					if grip_vert.y > track_vert.h-grip_vert.h then
+						grip_vert.y = track_vert.h-grip_vert.h
+					end
+				end
+--[[
                 if rel_y < grip_vert.h/2 then
                     rel_y = grip_vert.h/2
                 elseif rel_y > (track_vert.h-grip_vert.h/2) then
@@ -5060,7 +5076,8 @@ function ui_element.scrollPane(t)
                 end
                 
                 grip_vert.y = rel_y-grip_vert.h/2
-                
+    
+	]]
                 p.content.y = -(grip_vert.y) * p.virtual_h/track_h
                 
                 return true
@@ -5705,9 +5722,7 @@ button
                 end 
                 dropDownMenu:add(txt)
                 
-                
                 if item.bg then
-                    
                     ui_ele = item.bg
                     if i == #p.items and prev_item ~= nil then 
                     	ui_ele.anchor_point = { 0, prev_item.bg.h/2 }
@@ -5720,9 +5735,10 @@ button
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
-                            if item.f then item.f(item.parameter) end
                             button.on_focus_out() 
 							button.fade_in = false
+                            if item.f then item.f(item.parameter) end
+							return true
                         end
                         function ui_ele:on_motion()
                             for _,s_i in ipairs(selectable_items) do
@@ -5740,9 +5756,10 @@ button
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
-                            if item.f then item.f(item.parameter) end
                             umbrella.fade_out()
 							button.fade_in = false
+                            if item.f then item.f(item.parameter) end
+							return true
                         end
                         function ui_ele:on_motion()
                             for _,s_i in ipairs(selectable_items) do
@@ -5756,9 +5773,10 @@ button
                     if editor_lb == nil or editor_use then  
                         function txt:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
-                            if item.f then item.f(item.parameter) end
                             umbrella.fade_out()
 							button.fade_in = false
+                            if item.f then item.f(item.parameter) end
+							return true
                         end
                         function ui_ele:on_motion()
                             for _,s_i in ipairs(selectable_items) do
@@ -6716,13 +6734,11 @@ function ui_element.arrowPane(t)
 
 		if arrow_src ~= nil and
 			arrow_src.parent == umbrella then
-			
 			arrow_src:unparent()
 		end
 		
 		if focus_arrow_src ~= nil and
 			focus_arrow_src.parent == umbrella then
-			
 			focus_arrow_src:unparent()
 		end
 		
