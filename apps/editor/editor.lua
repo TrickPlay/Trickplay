@@ -460,6 +460,14 @@ function editor.close(new, next_func, next_f_param, from_close)
 
 	g:clear()
 	
+	for i,j in pairs (screen.children) do
+		if j.name then 
+			if string.find(j.name, "a_m") or string.find(j.name, "border") then 
+				screen:remove(j)
+			end
+		end 
+	end 
+
 	local timeline = screen:find_child("timeline")
 	if timeline then 
 		timeline:clear()
