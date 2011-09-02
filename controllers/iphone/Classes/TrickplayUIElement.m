@@ -122,7 +122,7 @@
         [JSON_dic setObject:[NSArray arrayWithObjects:touchNumbers, state, nil] forKey:@"args"];
         [JSON_dic setObject:@"on_touches" forKey:@"event"];
     
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     [touchNumbers release];
     [JSON_dic release];
@@ -130,7 +130,7 @@
 
 - (void)handleTouchesBegan:(NSSet *)touches {
     //NSLog(@"handle touches began: %@", self);
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             CGFloat
@@ -163,7 +163,7 @@
 }
 
 - (void)handleTouchesMoved:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -203,7 +203,7 @@
 }
 
 - (void)handleTouchesEnded:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -247,7 +247,7 @@
 }
 
 - (void)handleTouchesCancelled:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             if (CFDictionaryGetValue(activeTouches, touch)) {
@@ -945,7 +945,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_hide" forKey:@"event"];
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     // hide the object
     self.hidden = YES;
@@ -959,7 +959,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_hide" forKey:@"event"];
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     // hide the object
     self.hidden = YES;
@@ -977,7 +977,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_show" forKey:@"event"];
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     // show the object
     self.hidden = NO;
@@ -991,7 +991,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_show" forKey:@"event"];
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     //show the object
     self.hidden = NO;
@@ -1133,7 +1133,7 @@
         [completion setObject:ID forKey:@"id"];
         [completion setObject:@"on_completed" forKey:@"event"];
         
-        [manager.gestureViewController sendEvent:@"UX" JSON:[completion yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[completion yajl_JSONString]];
     }
     
     [animations removeObjectForKey:anim];

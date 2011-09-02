@@ -1,17 +1,17 @@
 //
-//  GestureViewController.m
+//  TPAppViewController.m
 //  TrickplayController_v2
 //
 //  Created by Rex Fenley on 2/14/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
 #import "TrickplayGroup.h"
 #import "TrickplayScreen.h"
 #import "AdvancedUIObjectManager.h"
 
-@implementation GestureViewController
+@implementation TPAppViewController
 
 @synthesize version;
 @synthesize socketManager;
@@ -34,13 +34,10 @@
 
 /**
  * Establishes the host and port that will be used for the asynchronous socket
- * connection managed by GestureViewController's SocketManager.
+ * connection managed by TPAppViewController's SocketManager.
  */
-- (void)setupService:(NSUInteger)p
-            hostname:(NSString *)h
-            thetitle:(NSString *)n {
-    
-    NSLog(@"GestureView Service Setup: %@ host: %@ port: %d", n, h, p);
+- (void)setupService:(NSUInteger)p hostname:(NSString *)h serviceName:(NSString *)n {
+    NSLog(@"TPAppView Service Setup: %@ host: %@ port: %d", n, h, p);
     
     port = p;
     if (hostName) {
@@ -76,7 +73,7 @@
  * for TakeControl are allocated and initialized to be used by the app.
  */
 - (BOOL)startService {
-    NSLog(@"GestureView Start Service");
+    NSLog(@"TPAppView Start Service");
     // Tell socket manager to create a socket and connect to the service selected
     socketManager = [[SocketManager alloc] initSocketStream:hostName
                                                        port:port
@@ -91,7 +88,7 @@
     }
     
     socketTimer = nil;
-        
+    
     viewDidAppear = NO;
     
     // Made a connection, let the service know!
@@ -130,7 +127,7 @@
     
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
     advancedView.manager = (AdvancedUIObjectManager *)advancedUIDelegate;
-    ((AdvancedUIObjectManager *)advancedUIDelegate).gestureViewController = self;
+    ((AdvancedUIObjectManager *)advancedUIDelegate).appViewController = self;
     
     // This is where the elements from UG (add_ui_image call) go
     CGRect frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
@@ -166,7 +163,7 @@
 #pragma mark Network Handling
 
 /**
- * Used to confirm that the GestureViewController has an async socket
+ * Used to confirm that the TPAppViewController has an async socket
  * connected to Trickplay.
  */
 - (BOOL)hasConnection {
@@ -174,7 +171,7 @@
 }
 
 /**
- * Called when a connection drops. Resets GestureViewController and all its
+ * Called when a connection drops. Resets TPAppViewController and all its
  * subsequent modules and managers and destoys the SocketManager.
  */
 - (void)handleDroppedConnection {
@@ -189,7 +186,7 @@
  * controllers lower on the navigation stack of an error occurring.
  */
 - (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in GestureView");
+    NSLog(@"Socket Error Occurred in TPAppView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
     if (socketDelegate) {
@@ -202,7 +199,7 @@
  * controllers lower on the navigation stack of the connection closing.
  */
 - (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered in GestureView");
+    NSLog(@"Socket End Encountered in TPAppView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
     if (socketDelegate) {
@@ -378,7 +375,7 @@
         if (buttonIndex < 5 && buttonIndex >= 0) {
             NSString *sentData = [NSString stringWithFormat:@"UI\tMC\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
             [socketManager sendData:[sentData UTF8String]
-                  numberOfBytes:[sentData length]];
+                      numberOfBytes:[sentData length]];
         }
     } else if (actionSheet == cameraActionSheet) {
         if ([[cameraActionSheet buttonTitleAtIndex:buttonIndex] compare:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE]] == NSOrderedSame) {
@@ -478,9 +475,9 @@
     
     
     [resourceManager declareResourceWithObject:[
-                              NSMutableDictionary dictionaryWithObjectsAndKeys:[args objectAtIndex:0], @"name", [args objectAtIndex:1], @"link", groupName, @"group", nil
-                              ]
-                      forKey:[args objectAtIndex:0]
+                                                NSMutableDictionary dictionaryWithObjectsAndKeys:[args objectAtIndex:0], @"name", [args objectAtIndex:1], @"link", groupName, @"group", nil
+                                                ]
+                                        forKey:[args objectAtIndex:0]
      ];
     
     [args release];
@@ -522,7 +519,7 @@
         
         [backgroundView addSubview:newImageView];
         [backgroundView sendSubviewToBack:newImageView];
-
+        
         graphics = YES;
         if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {
             [virtualRemote.view removeFromSuperview];
@@ -719,7 +716,7 @@
             cameraActionSheet = nil;
         }
         cameraActionSheet = [[UIActionSheet alloc] initWithTitle:camera.titleLabel delegate:self cancelButtonTitle:camera.cancelLabel destructiveButtonTitle:nil otherButtonTitles:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE], [NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE], nil];
-    
+        
         cameraActionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
         [cameraActionSheet showInView:self.view];
     }
@@ -812,6 +809,10 @@
     [self.view addSubview:virtualRemote.view];
     graphics = NO;
     [touchDelegate setSwipe:graphics];
+    
+    NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+    [JSON_dic setObject:@"reset_hard" forKey:@"event"];
+    [self sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
 }
 
 /**
@@ -857,11 +858,11 @@
     }
     
     /*
-    backgroundView.image = [UIImage imageNamed:@"background.png"];
-    for (UIView *subview in backgroundView.subviews) {
-        [subview removeFromSuperview];
-    }
-    //*/
+     backgroundView.image = [UIImage imageNamed:@"background.png"];
+     for (UIView *subview in backgroundView.subviews) {
+     [subview removeFromSuperview];
+     }
+     //*/
     
     //*
     UIImageView *newImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"background.png"]];
@@ -876,7 +877,7 @@
     [self.view sendSubviewToBack:backgroundView];
     
     [newImageView release];
-
+    
     [backgroundView addSubview:foregroundView];
     graphics = NO;
     
@@ -903,7 +904,7 @@
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSLog(@"GestureView loaded!");
+    NSLog(@"TPAppView loaded!");
     
     textView.layer.cornerRadius = 10.0;
     textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
@@ -920,8 +921,8 @@
         styleAlert = [[UIActionSheet alloc]
                       initWithTitle:@"TrickPlay Multiple Choice"
                       delegate:self cancelButtonTitle:nil
-                               destructiveButtonTitle:nil
-                                    otherButtonTitles:nil];
+                      destructiveButtonTitle:nil
+                      otherButtonTitles:nil];
     }
     
     if (!multipleChoiceArray) {
@@ -938,10 +939,10 @@
     [loadingIndicator stopAnimating];
     
     /*
-    CATransform3D transform = CATransform3DIdentity;
-    transform.m34 = 1.0/-2000;
-    self.view.layer.transform = transform;
-    */
+     CATransform3D transform = CATransform3DIdentity;
+     transform.m34 = 1.0/-2000;
+     self.view.layer.transform = transform;
+     */
     //[self startService];
 }
 
@@ -980,7 +981,7 @@
 
 - (void)viewDidUnload {
     [super viewDidUnload];
-    NSLog(@"GestureViewController Unload");
+    NSLog(@"TPAppViewController Unload");
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
     self.loadingIndicator = nil;
@@ -1001,7 +1002,7 @@
 #pragma mark Deallocation
 
 - (void)dealloc {
-    NSLog(@"Gesture View Controller dealloc");
+    NSLog(@"TPAppViewController dealloc");
     [self do_RT:nil];
     
     if (version) {
