@@ -264,6 +264,16 @@ Image * Image::screenshot()
 
     ClutterActor * stage = clutter_stage_get_default();
 
+    if ( ! stage )
+    {
+    	return 0;
+    }
+
+    if ( ! CLUTTER_ACTOR_IS_VISIBLE( stage ) )
+    {
+    	return 0;
+    }
+
     gfloat width;
     gfloat height;
 
