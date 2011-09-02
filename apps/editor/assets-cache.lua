@@ -16,10 +16,10 @@ local mt = {}
 
 mt.__index = mt
 
-function mt.__call( t , k , f )
+function mt.__call( t , k , f , ... )
     local asset = rawget( list , k )
     if not asset then
-        asset = ( f or make_image )( k )
+        asset = ( f or make_image )( k , ... )
         assert( asset , "Failed to create asset "..k )
         asset:set{ opacity = 0 }
         rawset( list , k , asset )
