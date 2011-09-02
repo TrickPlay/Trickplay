@@ -74,5 +74,17 @@
 {
 "name": "00019_ui_element.lua",
 "active": "true"
+},
+{
+"name": "00020_accelerometer.lua",
+"active": "true"
+},
+{
+"name": "00021_touch.lua",
+"active": "true"
+},
+{
+"name": "00022_touch.lua",
+"active": "true"
 }
 ]

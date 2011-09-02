@@ -11,6 +11,7 @@ local screen_h = screen.height
 
 
 
+
 function create_UI() 
 
 	no_screenshot_found_msg_txt = Text
@@ -101,7 +102,7 @@ function create_UI()
 	-- UI: Box containing tests
 	local test_list_box = Rectangle
 		{
-			size = { 400, screen.h - 150},
+			size = { 400, screen.h - 140},
 			position = { 70, 120 },
 			color = "000000",
 			border_color = "FFFFFF",
@@ -184,27 +185,42 @@ function create_UI()
 end
 
 
+local offset = 0
+function focus_manager (line, direction)
+	if line <= 23 + offset and line >= 1 + offset then
+		screen:find_child("rect"..line - offset).color = { 52, 102, 255, 100 }
 
-function focus_manager (line)
+		if line < #all_tests  then
+			screen:find_child("rect"..line - offset + 1).color = { 52, 102, 255, 0 }
+		end
 
-	screen:find_child("rect"..line).color = { 52, 102, 255, 100 }
-
-	if line < #all_tests  then
-		screen:find_child("rect"..line + 1).color = { 52, 102, 255, 0 }
-	end
-
-	if line > 1 then
-		screen:find_child("rect"..line - 1).color = { 52, 102, 255, 0 }
+		if line - offset > 1 then
+			screen:find_child("rect"..line - offset - 1).color = { 52, 102, 255, 0 }
+		end
+	elseif line > 23 and line <= 27 and direction == "down" then
+		for i = 1, #all_tests do
+			screen:find_child("tests"..i).y = screen:find_child("tests"..i).y - 40
+		end
+		screen:find_child("tests"..line - 23):hide()
+		screen:find_child("tests"..line):show()
+		offset = offset + 1
+	elseif line >= 1 and line <= 5 and direction == "up" then
+		for i = 1, #all_tests do
+			screen:find_child("tests"..i).y = screen:find_child("tests"..i).y + 40
+		end
+		screen:find_child("tests"..line + 23):hide()
+		screen:find_child("tests"..line):show()
+		offset = offset - 1
 	end
 end
 
 
 function move_focus (direction, current_line)
 	if direction == "down" and current_line < #all_tests then
-		focus_manager (current_line + 1)
+		focus_manager (current_line + 1, direction)
 		current_focus = current_focus + 1
 	elseif direction == "up" and current_line > 1 then
-		focus_manager (current_line - 1)
+		focus_manager (current_line - 1, direction)
 		current_focus = current_focus -1
 	end
 	dofile (all_tests[current_focus]["name"])
@@ -266,16 +282,19 @@ function populate_test_list ()
 			size = {395,40},
 			name = "rect"..i
 		    }
-		local text = Text
+		local tests_txt = Text
 		    {
 			color = {255, 255, 255, 200},
 			position = {100, 40 * i + 95, 0},
 			size = {400,50},
 			text = all_tests[i]["name"],
 			font = "DejaVu 35px",
-			name = "text"..i
+			name = "tests"..i
 		    }
-		test_list:add (rect, text)
+		if i > 23 then
+			tests_txt:hide()
+		end
+		test_list:add (rect, tests_txt)
 	end
 end
 
@@ -305,6 +324,10 @@ function controllers:on_controller_connected(controller)
 				move_focus ("up", current_focus)
 			elseif key == keys.Down then
 				move_focus ("down", current_focus)
+			elseif key == keys.Right then
+				controller:stop_accelerometer()
+			elseif key == keys.Left then
+				controller:stop_touches()
 			end
 			
 	end
