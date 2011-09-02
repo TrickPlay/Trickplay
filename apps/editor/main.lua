@@ -86,7 +86,7 @@
         	editor.inspector(g.extra.video)
         end 
 
-		if(m.shift == true) then 
+		if m and m.shift then 
 			screen_ui.multi_select(x,y)
 		end 
 
@@ -156,6 +156,8 @@
 
 		-- open project 
 		project_mng.open_project(nil,nil,"main")
+
+		
 
 		-- auto save 
 		screen_ui.auto_save()

@@ -3,6 +3,17 @@
 -----------
 local util = {}
 
+
+function util.color_to_string( color )
+        if type( color ) == "string" then
+            return color
+        end
+        if type( color ) == "table" then
+            return serialize( color )
+        end
+        return tostring( color )
+end
+
 function util.table_copy(t)
 
   	local t2 = {}
