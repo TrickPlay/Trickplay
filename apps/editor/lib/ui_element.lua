@@ -263,36 +263,8 @@ end
 
 setmetatable( strings , { __index = missing_localized_string } )
 
--- Asset() 
 
-local function make_image( k )
-    return Image{ src = k }
-end
-
-local list = {}
-local _mt = {}
-_mt.__index = _mt
-
-function _mt.__call( t , k , f )
-    local asset = rawget( list , k )
-    if not asset then
-        asset = ( f or make_image )( k )
-	if k then 
-        assert( asset , "Failed to create asset "..k )
-        asset:set{ opacity = 0 }
-        rawset( list , k , asset )
-        screen:add( asset )
-	end
-    end
-    return Clone{ source = asset , opacity = 255 }
-end
-
-
-function _mt.__newindex( t , k , v )
-    assert( false , "You cannot add assets to the asset cache" )
-end
-
-local assets = setmetatable( {} , _mt )
+local assets = dofile( "assets-cache.lua" )
 
 
 
@@ -561,7 +533,9 @@ end
 
 -- make_ring() : make ring for button or text input field 
 
+
 local function make_ring(w,h,bc,fc,bw,px,py,br)
+
         local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
         ring:set_source_color(bc)
@@ -1338,7 +1312,7 @@ function ui_element.button(t)
     end 
 
  --the umbrella Group
-    local ring, focus_ring, text, button, focus, s_txt, create_button
+    local ring , focus_ring, text, button, focus, s_txt, create_button
 
     local b_group = Group
     {
@@ -1424,13 +1398,33 @@ function ui_element.button(t)
 		end 
     end
 
+    local function color_to_string( color )
+        if type( color ) == "string" then
+            return color
+        end
+        if type( color ) == "table" then
+            return serialize( color )
+        end
+        return tostring( color )
+    end
+    
+    local function my_make_ring( _ , ... )
+        return make_ring( ... )
+    end
+
     create_button = function() 
         b_group:clear()
         b_group.size = { p.ui_width , p.ui_height}
-        ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
+        local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
+
+--        ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
+        ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius )
         ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
-        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
+        key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
+
+--        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
+        focus_ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius )
         focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 		
 		if(p.skin == "editor") then 
