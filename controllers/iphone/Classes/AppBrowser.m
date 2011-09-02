@@ -95,10 +95,6 @@
     }
 }
 
-- (BOOL)startService {
-    return YES;
-}
-
 #pragma mark -
 #pragma mark Retrieving App Info From Network
 
@@ -308,7 +304,7 @@
 }
 
 #pragma mark -
-#pragma mark Launching App View
+#pragma mark Launching App
 
 /**
  * Tells Trickplay to launch a selected app and sets this app as the current
