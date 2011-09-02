@@ -1,20 +1,19 @@
 --------------------------
 -- Project Management  
 --------------------------
-
 local project_mng = {}
-local project
-local base
+
+local home, base, app_path, project  
 local projects = {}
+
+local copy_dirs = {"/assets/"}
+local copy_files = {"/.trickplay", "/lib/ui_element.lua", "/lib/ui_element_header.lua", "/lib/strings.lua", "/assets-cache.lua"} 
 
 local function copy_widget_imgs ()
 	-- this function copys the UI Element library file, header file, 
 	-- all the editor asset files including skins to the newly created 
 	-- project directory.
 
-	--local copy_dirs = {"/assets/", "/assets/default/", "/assets/CarbonCandy/", "/assets/OOBE/", }
-	local copy_dirs = {"/assets/"}
-	local copy_files = {"/.trickplay", "/lib/ui_element.lua", "/lib/ui_element_header.lua", "/lib/strings.lua", } 
 	local source_files, source_file, dest_file, dest_dir
 
 	for a, b in pairs (copy_dirs) do 
@@ -39,27 +38,27 @@ end
 
 local function set_new_project (pname, replace)
 
-	  local home = editor_lb:get_home_dir()
-    
-	   projects = {}
-       assert( home )
+	projects = {}
+
+	home = editor_lb:get_home_dir()
+    assert( home )
+	local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "default" )
     
     -- The base directory where the editor will store its files, make sure
     -- we are able to create it (or it already exists )
     
-       base = editor_lb:build_path( home , "trickplay-editor"  )
-
-       assert( editor_lb:mkdir( base ) )
+    base = editor_lb:build_path( home , "trickplay-editor"  )
+    assert( editor_lb:mkdir( base ) )
     
     -- The list of files and directories there. We go through it and look for
     -- directories.
-       local list = editor_lb:readdir( base )
+    local list = editor_lb:readdir( base )
     
-       for i = 1 , #list do
-        	if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
-            	table.insert( projects , list[ i ] )
-        	end
-       end
+    for i = 1 , #list do
+      	if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
+        	table.insert( projects , list[ i ] )
+        end
+    end
 
 	if(pname~= "") then
     	project = pname
@@ -88,29 +87,31 @@ local function set_new_project (pname, replace)
 
     local screens_path = editor_lb:build_path( app_path, "screens" )
     editor_lb:mkdir( screens_path ) 
+
     local asset_path = editor_lb:build_path( app_path, "assets" )
     editor_lb:mkdir( asset_path ) 
 
     local asset_images_path = editor_lb:build_path( asset_path, "images" )
     editor_lb:mkdir( asset_images_path ) 
+
     local asset_sounds_path = editor_lb:build_path( asset_path, "sounds" )
     editor_lb:mkdir( asset_sounds_path ) 
-    local asset_videos_path = editor_lb:build_path( asset_path, "videos" )
+    
+	local asset_videos_path = editor_lb:build_path( asset_path, "videos" )
     editor_lb:mkdir( asset_videos_path ) 
 
     local lib_path = editor_lb:build_path( app_path, "lib" )
     editor_lb:mkdir( lib_path ) 
-    local lib_assets_path = editor_lb:build_path( lib_path, "assets" )
+    
+	local lib_assets_path = editor_lb:build_path( lib_path, "assets" )
     editor_lb:mkdir( lib_assets_path ) 
-    local lib_skins_path = editor_lb:build_path( lib_path, "skins" )
+    
+	local lib_skins_path = editor_lb:build_path( lib_path, "skins" )
     editor_lb:mkdir( lib_skins_path ) 
-    local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "default" )
+    
+	local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
     editor_lb:mkdir( lib_skins_default_path ) 
-    local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
-    editor_lb:mkdir( lib_skins_default_path ) 
-    local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "OOBE" )
-    editor_lb:mkdir( lib_skins_default_path ) 
-
+    
 	local menu_text = menu_items.menu_text -- screen:find_child("menu_text")
 
 	menu_text.text = project .. " "
@@ -155,7 +156,8 @@ function project_mng.new_project(fname, from_new_project)
 		return
 	end 
 
-	if #undo_list ~= 0 and from_new_project == nil then  -- 마지막 저장한 이후로 달라 진게 있으면 
+	if #undo_list ~= 0 and from_new_project == nil then  
+		-- if there are any changes since the last saving 
 		editor.error_message("003", true, func_ok, func_nok) 
 		return 
 	end
@@ -334,17 +336,14 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
 	local virtual_hieght = 0
 
-	local function load_project(v)
+	local function load_project(selected_prj)
 
-		if v == nil then 
+		if selected_prj == nil then 
 			return
 		end
 
-		selected_prj = v
-
         if(selected_prj ~= "") then                      
-           project = v
-	       selected_prj = ""
+           project = selected_prj
         end   
 	
         app_path = editor_lb:build_path( base , project )
@@ -356,51 +355,21 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	     	current_dir = app_path
         end
 
-        local screens_path = editor_lb:build_path( app_path, "screens" )
-        editor_lb:mkdir( screens_path ) 
-        local asset_path = editor_lb:build_path( app_path, "assets" )
-        editor_lb:mkdir( asset_path ) 
-
-        local asset_images_path = editor_lb:build_path( asset_path, "images" )
-        editor_lb:mkdir( asset_images_path ) 
-        local asset_sounds_path = editor_lb:build_path( asset_path, "sounds" )
-        editor_lb:mkdir( asset_sounds_path ) 
-        local asset_videos_path = editor_lb:build_path( asset_path, "videos" )
-        editor_lb:mkdir( asset_videos_path ) 
-
-        local lib_path = editor_lb:build_path( app_path, "lib" )
-        editor_lb:mkdir( lib_path ) 
-        local lib_assets_path = editor_lb:build_path( lib_path, "assets" )
-        editor_lb:mkdir( lib_assets_path ) 
-        local lib_skins_path = editor_lb:build_path( lib_path, "skins" )
-        editor_lb:mkdir( lib_skins_path ) 
-        local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "default" )
-        editor_lb:mkdir( lib_skins_default_path ) 
-        local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
-        editor_lb:mkdir( lib_skins_default_path ) 
-        local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "OOBE" )
-        editor_lb:mkdir( lib_skins_default_path ) 
-
-	
 		screen:find_child("menu_text").text = project .. " "
 		screen:find_child("menu_text").extra.project = project .. " "
 
-		copy_widget_imgs()
-
-		if from_main and settings.project then 
-			return true
-		end 
-		
-		settings.project = project
-		xbox:on_button_down()
-
-		undo_list = {}
 		editor.close(true)
+
+		if not (from_main and settings.project) then 
+			settings.project = project
+			xbox:on_button_down()
+		end 
+	
 		return true
 	end 
 
 	if from_main and settings.project then 
-		editor.close(true)
+
 		load_project(settings.project)
 
 		local dir = editor_lb:readdir(current_dir.."/screens")
@@ -414,6 +383,11 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 					end 
 				end 
 		end 
+		return 
+	elseif from_main then 
+
+		set_new_project("unsaved_temp")
+		editor.close(true)
 
 		return 
 	end 
@@ -441,14 +415,14 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		if current_focus then 
 			current_focus.on_focus_out()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
 		scroll.on_focus_in()
 	end
 
 	local tab_func = function()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+		button_ok.active.opacity = 0
+		button_ok.dim.opacity = 255
 		button_new:grab_key_focus()
 		button_new.on_focus_in()
 	end
@@ -589,8 +563,8 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	util.create_on_button_down_f(msgw)	
 
 	--Focus
-	button_ok:find_child("active").opacity = 255
-	button_ok:find_child("dim").opacity = 0
+	button_ok.active.opacity = 255
+	button_ok.dim.opacity = 0
 	scroll.on_focus_in()
 
 	function xbox:on_button_down(x,y,button,num_clicks)

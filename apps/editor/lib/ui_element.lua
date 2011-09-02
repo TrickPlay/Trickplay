@@ -2,6 +2,18 @@ local ui_element = {}
 
 dofile("/lib/ui_element_header.lua")     
 
+local assets = dofile( "assets-cache.lua" )
+
+local function color_to_string( color )
+        if type( color ) == "string" then
+            return color
+        end
+        if type( color ) == "table" then
+            return serialize( color )
+        end
+        return tostring( color )
+end
+
 function ui_element.populate_to (grp, tbl)
 
 	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "ArrowPane", "TabBar", "Group"} 
@@ -262,10 +274,6 @@ local function missing_localized_string( t , s )
 end
 
 setmetatable( strings , { __index = missing_localized_string } )
-
-
-local assets = dofile( "assets-cache.lua" )
-
 
 
 local function table_remove_val(t, val)
@@ -531,11 +539,12 @@ local function make_toastb_group_bg(w,h,bw,bc,fc,px,py,br)
     return c
 end 
 
+
+
 -- make_ring() : make ring for button or text input field 
 
-
 local function make_ring(w,h,bc,fc,bw,px,py,br)
-
+		print("make ring")
         local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
         ring:set_source_color(bc)
@@ -561,6 +570,10 @@ local function make_ring(w,h,bc,fc,bw,px,py,br)
     	end
         return ring
 end 
+
+local function my_make_ring( _ , ... )
+     return make_ring( ... )
+end
 
 local function create_select_circle(radius, color)
 -- make circle image
@@ -1312,7 +1325,6 @@ function ui_element.button(t)
     end 
 
  --the umbrella Group
-    local ring , focus_ring, text, button, focus, s_txt, create_button
 
     local b_group = Group
     {
@@ -1324,6 +1336,11 @@ function ui_element.button(t)
     } 
     
     function b_group.extra.on_focus_in(key) 
+
+		local ring = b_group:find_child("ring") 
+		local focus_ring = b_group:find_child("focus_ring") 
+		local button = b_group:find_child("button") 
+		local focus = b_group:find_child("focus") 
 
 		if b_group.is_in_menu == true then 
 			if b_group.fade_in == true then 
@@ -1364,6 +1381,11 @@ function ui_element.button(t)
     
     function b_group.extra.on_focus_out(key, focus_to_tabButton) 
 
+		local ring = b_group:find_child("ring") 
+		local focus_ring = b_group:find_child("focus_ring") 
+		local button = b_group:find_child("button") 
+		local focus = b_group:find_child("focus") 
+
 			
 		if b_group.is_in_menu == true then 
 			if b_group.fade_in == false then 
@@ -1379,11 +1401,9 @@ function ui_element.button(t)
         	if (p.skin == "Custom") then 
 	     		ring.opacity = 255
 	     		focus_ring.opacity = 0
-            	focus.opacity = 0
         	else
 	     		button.opacity = 255
             	focus.opacity = 0
-	     		focus_ring.opacity = 0
         	end
 		end 
         b_group:find_child("text").color = p.text_color
@@ -1398,66 +1418,58 @@ function ui_element.button(t)
 		end 
     end
 
-    local function color_to_string( color )
-        if type( color ) == "string" then
-            return color
-        end
-        if type( color ) == "table" then
-            return serialize( color )
-        end
-        return tostring( color )
-    end
+    local create_button = function() 
     
-    local function my_make_ring( _ , ... )
-        return make_ring( ... )
-    end
+		local ring, focus_ring, button, focus, text, s_txt
 
-    create_button = function() 
         b_group:clear()
-        b_group.size = { p.ui_width , p.ui_height}
-        local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
+        b_group.size = {p.ui_width , p.ui_height}
 
---        ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
-        ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius )
-        ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
+		if p.skin == "Custom" then
 
-        key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
+			local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
+	
+			ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius )
+        	ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
---        focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
-        focus_ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius )
-        focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
-		
-		if(p.skin == "editor") then 
+			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
+
+			focus_ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius )
+        	focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
+
+		elseif(p.skin == "editor") then 
 	    	button= assets("assets/invisible_pixel.png")
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 	    	focus= assets("assets/menu-bar-focus.png")
             focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 		elseif(p.skin == "inspector") then 
 	    	button= Group{}
-			left_cap = Image{src="lib/assets/button-small-leftcap.png", position = {0,0}} 
-			repeat_1px = Image{src="lib/assets/button-small-center1px.png", tile={true, false}, width = p.ui_width-left_cap.w*2, position = {left_cap.w, 0}} 
-			right_cap = Image{src="lib/assets/button-small-rightcap.png", position = {p.ui_width-left_cap.w, 0 }} 
+			focus = Group{}
+			
+			left_cap = assets("lib/assets/button-small-leftcap.png")
+			repeat_1px = assets("lib/assets/button-small-center1px.png")
+			repeat_1px:set{tile={true, false}, width = p.ui_width-left_cap.w*2, position = {left_cap.w, 0}} 
+			right_cap = assets("lib/assets/button-small-rightcap.png")
+			right_cap:set{position = {p.ui_width-left_cap.w, 0 }} 
 			button:add(left_cap, repeat_1px, right_cap)
 			button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
 			button.reactive = true 
 
-			focus = Group{}
-			left_cap_f = Image{src="lib/assets/button-small-leftcap-focus.png", position = {0,0}} 
-			repeat_1px_f = Image{src="lib/assets/button-small-center1px-focus.png", tile={true, false}, 
-						 width = p.ui_width - left_cap_f.w * 2, position = {left_cap_f.w, 0}} 
-			right_cap_f = Image{src="lib/assets/button-small-rightcap-focus.png", position = {p.ui_width-left_cap_f.w, 0 }} 
+
+			left_cap_f = assets("lib/assets/button-small-leftcap-focus.png")
+			repeat_1px_f = assets("lib/assets/button-small-center1px-focus.png")
+			repeat_1px_f:set{tile={true, false}, width = p.ui_width - left_cap_f.w * 2, position = {left_cap_f.w, 0}} 
+			right_cap_f = assets("lib/assets/button-small-rightcap-focus.png")
+			right_cap_f:set{position = {p.ui_width-left_cap_f.w, 0 }} 
 			focus:add(left_cap_f, repeat_1px_f, right_cap_f)
             focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 			button.reactive = true 
-		elseif(p.skin ~= "Custom") then 
+
+		else
             button = assets(skin_list[p.skin]["button"])
             button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
             focus = assets(skin_list[p.skin]["button_focus"])
             focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
-		else
-			
-	     	button = Image{}
-	     	focus = Image{}
 		end 
 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
@@ -1467,7 +1479,13 @@ function ui_element.button(t)
         	text:set{name = "text", position = { (p.ui_width-text.w)/2, p.ui_height/2 - text.h/2}}
 		end 
 	
-		b_group:add(ring, focus_ring, button, focus)
+		
+		if p.skin == "Custom" then 
+			b_group:add(ring, focus_ring)
+		else 
+			b_group:add(button, focus)
+		end 
+
 		if p.text_has_shadow then 
 	       	s_txt = Text{
 		    	name = "shadow",
@@ -1487,12 +1505,6 @@ function ui_element.button(t)
 
         b_group:add(text)
 
-        if (p.skin == "Custom") then 
-			button.opacity = 0 
-        else 
-			ring.opacity = 0 
-		end
-		
 		if editor_lb == nil or editor_use then 
 	     	function b_group:on_button_down(x,y,b,n)
 				
@@ -1503,11 +1515,9 @@ function ui_element.button(t)
 							if (w.skin == "Custom") then 
 	     						w:find_child("ring").opacity = 255
 	     						w:find_child("focus_ring").opacity = 0
-            					w:find_child("focus").opacity = 0
         					else
 	     						w:find_child("button").opacity = 255
             					w:find_child("focus").opacity = 0
-	     						w:find_child("focus_ring").opacity = 0
         					end
 						end 
 					end 
@@ -1676,7 +1686,6 @@ function ui_element.textInput(t)
     end
 
  --the umbrella Group
-    local box, focus_box, box_img, focus_img, readonly, text, create_textInputField
     local t_group = Group
     {
        name = "t_group", 
@@ -1687,6 +1696,12 @@ function ui_element.textInput(t)
     }
 
  	function t_group.extra.on_focus_in()
+    	local box 		= t_group:find_child("box") 
+		local focus_box = t_group:find_child("focus_box") 
+		local box_img	= t_group:find_child("box_img") 
+		local focus_img	= t_group:find_child("focus_img") 
+		local text	= t_group:find_child("textInput") 
+
 	  	current_focus = t_group
 
         if (p.skin == "Custom") then 
@@ -1703,6 +1718,12 @@ function ui_element.textInput(t)
      end
 
      function t_group.extra.on_focus_out()
+    	local box 		= t_group:find_child("box") 
+		local focus_box = t_group:find_child("focus_box") 
+		local box_img	= t_group:find_child("box_img") 
+		local focus_img	= t_group:find_child("focus_img") 
+		local text	= t_group:find_child("textInput") 
+
         if (p.skin == "Custom") then 
 	    	box.opacity = 255
 	     	focus_box.opacity = 0
@@ -1713,27 +1734,33 @@ function ui_element.textInput(t)
 	  	text.cursor_visible = false
 	  	text.reactive = false 
 		t_group.text = text.text
-		--current_focus = nil
      end 
 
-    create_textInputField= function()
+    local create_textInputField= function()
+    	local box, focus_box, box_img, focus_img, readonly, text
+
     	t_group:clear()
         t_group.size = { p.ui_width , p.ui_height}
 
-    	box = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
-    	box:set{name="box", position = {0 ,0}}
+		if p.skin == "Custom" then 
 
-    	focus_box = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
-    	focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
+			local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
 
-		if(p.skin ~= "Custom") then 
+    		box = assets( key, my_make_ring, p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
+    		box:set{name="box", position = {0 ,0}}
+
+			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
+
+    		focus_box = assets(key, my_make_ring, p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
+    		focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
+    		t_group:add(box, focus_box)
+
+		else
     		box_img = assets(skin_list[p.skin]["textinput"])
     		box_img:set{name="box_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
     		focus_img = assets(skin_list[p.skin]["textinput_focus"])
     		focus_img:set{name="focus_img", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0 }
-		else 
-	    	box_img = Image{}
-	    	focus_img = Image{}
+    		t_group:add(box_img, focus_img)
 		end 
 
 		if p.readonly ~= "" then 
@@ -1746,9 +1773,8 @@ function ui_element.textInput(t)
 			
     		readonly:set{name = "readonlyText", position = {p.padding, (p.ui_height - text.h)/2},}
     		text:set{name = "textInput", position = {readonly.x+readonly.w, (p.ui_height - text.h)/2},}
-    		--text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
 
-    		t_group:add(box, focus_box, box_img, focus_img, readonly, text)
+    		t_group:add(readonly, text)
 		else 
 
     		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = p.single_line, 
@@ -1761,7 +1787,8 @@ function ui_element.textInput(t)
 			else
     			text:set{name = "textInput", position = {p.padding, (p.ui_height - text.h)/2},}
 			end 
-    		t_group:add(box, focus_box, box_img, focus_img, text)
+
+    		t_group:add(text)
 		end
 
 
@@ -1785,12 +1812,6 @@ function ui_element.textInput(t)
 			p.text = text.text 
 		end 
 
-    	if (p.skin == "Custom") then 
-			box_img.opacity = 0
-    	else 
-			box.opacity = 0 
-			box_img.opacity = 255 
-		end 
      end 
 
      create_textInputField()
@@ -5574,6 +5595,7 @@ button
 	end
 
     local function make_item_ring(w,h,padding)
+	print("canvas ring")
         local ring = Canvas{ size = { w , h } }
         ring:begin_painting()
         ring:set_source_color( p.text_color )
@@ -5744,6 +5766,7 @@ button
                     end
                 elseif p.show_ring then
                     ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
+					
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = { 0, 	   txt.y }
                     dropDownMenu:add(ui_ele)

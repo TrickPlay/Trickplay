@@ -3580,6 +3580,27 @@ function editor.ui_elements()
 
 end 
 
+local error_msg_map = {
+	["001"] = function(str) return "Open", "Cancel", "", "","A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
+ 	["002"] = function(str) return "OK", "Cancel", "", "", "Before saving the screen, a project must be open." end,
+ 	["003"] = function(str) return "Save","Cancel", "", "", "You have unsaved changes. Save the file before closing?" end, 					
+ 	["004"] = function(str) return "Overwrite","Cancel", "", "", "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
+ 	["005"] = function(str) return "OK", "Cancel", "Error", "Error", "A file name is required." end, 
+ 	["006"] = function(str) return "OK", "Cancel", "Error", "Error", "A guideline position is required." end, 
+ 	["007"] = function(str) return "OK", "Cancel", "Error", "Error", "Field \""..str.."\" is required." end, 
+ 	["008"] = function(str) return "OK", "Cancel", "Error", "Error", "There are no guidelines."  end, 
+ 	["009"] = function(str) return "Restore", "Ignore", "", "", "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
+ 	["010"] = function(str) return "OK", "Cancel", "Error", "Error", "This UI Element requires a minimum of "..str.." item(s)." end, 
+ 	["011"] = function(str) return "OK", "Cancel", "Error", "Error", "Field \""..str.."\" requires a numeric value." end, 		 
+	["012"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid value for \""..str.."\" field." end,
+ 	["013"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
+ 	["014"] = function(str) return "OK", "Cancel", "Error", "Error", "A project name is required." end, 
+ 	["015"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid file name. \n File extention must be .lua" end, 
+	-- new error messages 
+	["016"] = function(str) return "OK", "Cancel", "Error", "Error", "There is no selected object." end, 
+	["017"] = function(str) return "OK", "Cancel", "Error", "Error", "Can't delete this object. Clone exists." end, 
+}
+
 
 function editor.error_message(error_num, str, func_ok, func_nok, inspector)
   	local WIDTH = 300
@@ -3598,37 +3619,9 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
 	local title = Text {name = "title", text = "Save " }:set(TSTYLE)
 	local title_shadow = Text {name = "title", text = "Save "}:set(TSSTYLE)
-	local OK_label = "OK"
-	local Cancel_label = "Cancel"
+	local OK_label, Cancel_label 
 
-
-	title.text = "" 
-	title_shadow.text = ""
-
-	local error_msg_map = {
-		["001"] = function(str) OK_label = "Open" return "A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
- 		["002"] = function() OK_label = "OK" return "Before saving the screen, a project must be open." end,
- 		["003"] = function() OK_label = "Save" return "You have unsaved changes. Save the file before closing?" end, 					
- 		["004"] = function(str) OK_label = "Overwrite" return "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
- 		["005"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A file name is required." end, 
- 		["006"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A guideline position is required." end, 
- 		["007"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" is required." end, 
- 		["008"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "There are no guidelines."  end, 
- 		["009"] = function(str) OK_label = "Restore" Cancel_label = "Ignore" return "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
- 		["010"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "This UI Element requires a minimum of "..str.." item(s)." end, 
- 		["011"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Field \""..str.."\" requires a numeric value." end, 		 
-		["012"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid value for \""..str.."\" field." end,
- 		["013"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
- 		["014"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "A project name is required." end, 
- 		["015"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Invalid file name. \n File extention must be .lua" end, 
-
-		-- new error messages 
-
-	    ["016"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "There is no selected object." end, 
- 		["017"] = function(str) OK_label = "OK" Cancel_label = "" title.text = "Error" title_shadow.text = "Error" return "Can't delete this object. Clone exists." end, 
-	}
-
-	local error_msg = error_msg_map[error_num](str) 
+	OK_label, Cancel_label, title.text, title_shadow.text, error_msg = error_msg_map[error_num](str) 
 	
 	local message = Text{text = error_msg, wrap = true, wrap_mode = "WORD",}:set(MSTYLE)
 	local message_shadow = Text{text = error_msg, wrap = true, wrap_mode = "WORD",}:set(MSSTYLE)
