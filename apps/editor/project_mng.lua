@@ -3,7 +3,6 @@
 --------------------------
 
 local project_mng = {}
-local set_project_path 
 local project
 local base
 local projects = {}
@@ -112,8 +111,10 @@ local function set_new_project (pname, replace)
     local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "OOBE" )
     editor_lb:mkdir( lib_skins_default_path ) 
 
-	screen:find_child("menu_text").text = project .. " "
-	screen:find_child("menu_text").extra.project = project .. " "
+	local menu_text = menu_items.menu_text -- screen:find_child("menu_text")
+
+	menu_text.text = project .. " "
+	menu_text.extra.project = project .. " "
 
 	copy_widget_imgs()
 	settings.project = project
@@ -186,15 +187,19 @@ function project_mng.new_project(fname, from_new_project)
 		if current_focus then 
 			current_focus.on_focus_out()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+
+		button_ok.extra.active.opacity = 255
+		button_ok.extra.dim.opacity = 0
+
 		text_input.on_focus_in()
 	end
 
 	local tab_func = function()
 		text_input.on_focus_out()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
+
 		button_cancel:grab_key_focus()
 		button_cancel.on_focus_in()
 	end
@@ -604,56 +609,6 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		return true
 	end 
 
-end 
-
-local function set_project_path ()
-	if(selected_prj == "" and input_t.text ~= "") then
-               project = input_t.text                           
-        elseif(selected_prj ~= "") then                      
-               project = msgw:find_child(selected_prj).text   
-	       selected_prj = ""
-        end   
-	
-        app_path = editor_lb:build_path( base , project )
-        if not editor_lb:mkdir( app_path ) then
-        -- Tell the user we were not able to create it
-   	     print("couldn't create ",app_path)  
-        else
-             editor_lb:change_app_path( app_path )
-	     	 current_dir = app_path
-        end
-
-        local screens_path = editor_lb:build_path( app_path, "screens" )
-        editor_lb:mkdir( screens_path ) 
-        local asset_path = editor_lb:build_path( app_path, "assets" )
-        editor_lb:mkdir( asset_path ) 
-
-        local asset_images_path = editor_lb:build_path( asset_path, "images" )
-        editor_lb:mkdir( asset_images_path ) 
-        local asset_sounds_path = editor_lb:build_path( asset_path, "sounds" )
-        editor_lb:mkdir( asset_sounds_path ) 
-        local asset_videos_path = editor_lb:build_path( asset_path, "videos" )
-        editor_lb:mkdir( asset_videos_path ) 
-
-        local lib_path = editor_lb:build_path( app_path, "lib" )
-        editor_lb:mkdir( lib_path ) 
-        local lib_assets_path = editor_lb:build_path( lib_path, "assets" )
-        editor_lb:mkdir( lib_assets_path ) 
-        local lib_skins_path = editor_lb:build_path( lib_path, "skins" )
-        editor_lb:mkdir( lib_skins_path ) 
-        local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "default" )
-        editor_lb:mkdir( lib_skins_default_path ) 
-        local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
-        editor_lb:mkdir( lib_skins_default_path ) 
-        local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "OOBE" )
-        editor_lb:mkdir( lib_skins_default_path ) 
-	
-		screen:find_child("menu_text").text = project .. " "
-		screen:find_child("menu_text").extra.project = project .. " "
-
-		copy_widget_imgs()
-		cleanMsgWindow()
-    	screen:grab_key_focus(screen)
 end 
 
 return project_mng

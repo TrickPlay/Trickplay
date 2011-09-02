@@ -134,7 +134,7 @@ setmetatable( strings , { __index = missing_localized_string } )
 -- Editor functions 
 	editor 	   	= dofile("editor")
 -- Editor Main Menu 
-	menu 		= dofile("menu")
+	menu,menu_items = dofile("menu")
 -- Screen ui functions 
 	screen_ui 		= dofile("screen_ui")
 

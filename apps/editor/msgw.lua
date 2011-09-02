@@ -2,23 +2,7 @@
 -- Message Window 
 --------------------
 local msg_window 		= {}
-local msgw_focus 		= ""
 local input_purpose     = ""
-
-local  msgw = Group {
-	     name = "msgw",
-}
-
-local msgw_cur_x = 25  
-local msgw_cur_y = 50
-
-local function cleanMsgWindow()
-     msgw_cur_x = 25
-     msgw_cur_y = 50
-	 local msgw = screen:find_child("msgw")
-     screen:remove(msgw)
-     input_mode = hdr.S_SELECT
-end 
 
 local projectlist_len 
 local selected_prj 	= ""
@@ -34,7 +18,6 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	 if cfn ~= "OK" and save_current_file == nil then 
      	for i, v in pairs(screen_dir) do
           if(input_text == v)then
-			cleanMsgWindow()
 			editor.error_message("004",input_text,msg_window.inputMsgWindow_savefile)
 			return 
           end
@@ -171,7 +154,6 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
 	   		end 
             contents = ""
-	   		cleanMsgWindow()
             screen:grab_key_focus(screen) 
       end
       menu.menu_raise_to_top()
@@ -312,7 +294,6 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 end
 
 function msg_window.inputMsgWindow_yn(txt)
-     cleanMsgWindow()
      if(txt == "no") then
           editor.save(false)
      elseif(txt =="yes") then 

@@ -118,6 +118,13 @@ function editor_ui.button(table)
 	
 		b_group:add(button, active, focus)
 
+--new 0901
+		b_group.extra.dim = button
+		b_group.extra.active = active
+		b_group.extra.focus = focus
+--new 0901
+
+
 		if p.text_has_shadow then 
 	       s_txt = Text {
 		        	name = "shadow",
