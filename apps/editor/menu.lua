@@ -1,6 +1,6 @@
 editor_use = true
 local menu = {}
-
+local menu_items
 local menu_bar = Image
 	{
 		src = "assets/menu-bar.png",
@@ -282,7 +282,6 @@ local menuButton_view = ui_element.menuButton
 		ui_position = {971,28,0}, 
 	}
 
-
 menuButton_view.insert_item(1,{type="label", string="  Background:", bg=assets("assets/menu-item-label.png")} )
 menuButton_view.insert_item(2,{type="item", string="Image...", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.image, parameter=true, icon=assets("assets/menu-checkmark.png")})
 menuButton_view.items[2]["icon"].opacity = 0
@@ -393,19 +392,25 @@ local menu_text_shadow = Text
 	}
 
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
+menu_items = {["menu_item"]=menu_item, 
+			  ["menu_bar"]=menu_bar, 
+			  ["menuButton_file"]=menuButton_file,
+			  ["menuButton_edit"]= menuButton_edit, 
+			  ["menuButton_arrange"]=menuButton_arrange, 
+			  ["menuButton_view"] = menuButton_view,
+			  ["menu_text"]=menu_text,
+			  ["menu_text_shadow"]=menu_text_shadow 
+			  } 
 
 ----------------------------------------------------------------------------
 -- Hides Menu 
 ----------------------------------------------------------------------------
     menu.menuHide = function()
 
-		screen:find_child("menu_bar"):hide()
-		screen:find_child("menuButton_file"):hide()
-		screen:find_child("menuButton_edit"):hide()
-		screen:find_child("menuButton_arrange"):hide()
-		screen:find_child("menuButton_view"):hide()
-		screen:find_child("menu_text"):hide()
-		screen:find_child("menu_text_shadow"):hide()
+		for i,j in pairs (menu_items) do 
+			j:hide()
+		end 
+
 		screen:grab_key_focus()
 		menu_hide  = true 
 
@@ -417,22 +422,11 @@ screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButto
     
     menu.menuShow = function()
 
-		screen:find_child("menu_bar"):show()
-		screen:find_child("menuButton_file"):show()
-		screen:find_child("menuButton_edit"):show()
-		screen:find_child("menuButton_arrange"):show()
-		screen:find_child("menuButton_view"):show()
-		screen:find_child("menu_text_shadow"):show()
-		screen:find_child("menu_text"):show()
+		for i,j in pairs (menu_items) do 
+			j:show()
+			j:raise_to_top()
+		end 
 
-		screen:find_child("menu_bar"):raise_to_top()
-		screen:find_child("menuButton_file"):raise_to_top()
-		screen:find_child("menuButton_edit"):raise_to_top()
-		screen:find_child("menuButton_arrange"):raise_to_top()
-		screen:find_child("menuButton_view"):raise_to_top()
-		screen:find_child("menu_text_shadow"):raise_to_top()
-		screen:find_child("menu_text"):raise_to_top()
-	
 		screen:grab_key_focus()
 		menu_hide  = false
 
@@ -470,4 +464,4 @@ screen:add(g)
 menu.menu_raise_to_top()
 editor_use = false
 
-return menu
+return menu, menu_items

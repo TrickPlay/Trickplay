@@ -29,35 +29,6 @@ local icon_map =
     ["Vertically 	  "] = function() icon = icon_dvc return icon end 
 }
 
-local item_map = 
-{
-    ["Undo".."\t\t\t".."[U]"]   = function()  return "undo" end,
-    ["Redo".."\t\t\t".."[E]"]   = function()  return "redo" end,
-    ["Clone".."\t\t\t".."[C]"]   = function() return "clone" end,
-    ["Duplicate".."\t\t".."[D]"]   = function() return "duplicate" end,
-    ["Delete".."\t\t     ".."[Del]"]   = function() return "delete" end,
-    ["Group".."\t\t\t".."[G]"]   = function() return "group" end,
-    ["UnGroup".."\t\t\t"..""]   = function() return "ungroup" end,
-    ["Timeline".."\t\t\t".."[J]"]   = function() return "tline" end,
-    ["Timeline Show".."\t".."[J]"]   = function() return "tline" end,
-    ["Timeline Hide".."\t\t".."[J]"]   = function() return "tline" end,
-	["Left Edge      "] = function() return "left" end, 
-    ["Right Edge    "] = function() return "right" end, 
-    ["Top             "] = function() return "top" end, 
-    ["Bottom        "] = function() return "bottom" end, 
-    ["Horiz. Center   "] = function() return "hcenter" end, 
-    ["Vert. Center    "] = function() return "vcenter" end, 
-    ["Horizontally	  "] = function() return "hspace" end,  
-    ["Vertically 	  "] = function() return "vspace" end,
-	["Bring To Front"] = function() return "bring_front" end,
-    ["Bring Forward "] = function() return "bring_forward" end,
-    ["Send To Back "] = function() return "send_back" end,
-    ["Send Backward "] = function() return "send_backward"end,
-	["Reference Image        "] = function() return "bgimage" end, 
-	["Show Lines"] = function() return "guideline" end, 
-	["Hide Lines"] = function() return "guideline" end,
-}
-
 local color_map =
 {
         [ "Text" ] = function()  size = {490, 680} color = {25,25,25,100}  return size, color end,

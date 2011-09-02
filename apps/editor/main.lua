@@ -44,7 +44,7 @@
 		[ keys.Shift_R   ] = function() shift = true end,
 		[ keys.Control_L ] = function() control = true end,
 		[ keys.Control_R ] = function() control = true end,
-        [ keys.Return    ] = function() screen_ui.nselect_all() input_mode = hdr.S_SELECT end ,
+        [ keys.Return    ] = function() screen_ui.n_select_all() input_mode = hdr.S_SELECT end ,
         [ keys.Left     ] = function() screen_ui.move_selected_obj("Left") input_mode = hdr.S_SELECT end,
         [ keys.Right    ] = function() screen_ui.move_selected_obj("Right") input_mode = hdr.S_SELECT end ,
         [ keys.Down     ] = function() screen_ui.move_selected_obj("Down") input_mode = hdr.S_SELECT end,

@@ -5,6 +5,8 @@ local rect_init_y = 0
 local g_init_x = 0
 local g_init_y = 0
 
+local menuButtonView 
+
 local allUiElements     = { 
 						 	"Rectangle", "Text", "Image", "Video", "Button", "TextInput", "DialogBox", "ToastAlert", 
 						 	"CheckBoxGroup", "RadioButtonGroup", "ButtonPicker", "ProgressSpinner", "ProgressBar", 
@@ -140,7 +142,6 @@ local function guideline_inspector(v)
 		end 
 		button_ok:find_child("active").opacity = 255
 		button_ok:find_child("dim").opacity = 0
-
 		text_input.on_focus_in()
 	end
 
@@ -195,19 +196,23 @@ local function guideline_inspector(v)
 	end 
 
 	function text_input:on_key_down(key)
+
+		local key_focus_obj = screen:find_child(text_input.focus[key]) 
+
 		if text_input.focus[key] then
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
-			elseif screen:find_child(text_input.focus[key]) then
+			elseif key_focus_obj then
 				if text_input.on_focus_out then
 					text_input.on_focus_out()
 				end
-				screen:find_child(text_input.focus[key]):grab_key_focus()
-				if screen:find_child(text_input.focus[key]).on_focus_in then
-					screen:find_child(text_input.focus[key]).on_focus_in(key)
+				key_focus_obj:grab_key_focus()
+				if key_focus_obj.on_focus_in then
+					key_focus_obj.on_focus_in(key)
 				end
 			end
 		end
+
 	end
 
 	if(util.guideline_type(v.name) == "v_guideline") then
@@ -228,62 +233,67 @@ end
 
 function editor.small_grid()
 	util.clear_bg() BG_IMAGE_20.opacity = 255 
-	screen:find_child("menuButton_view").items[3]["icon"].opacity = 255
+	menuButtonView.items[3]["icon"].opacity = 255
 	screen:grab_key_focus()
 	input_mode = hdr.S_SELECT
 end 
 
 function editor.medium_grid()
 	util.clear_bg() BG_IMAGE_40.opacity = 255 input_mode = hdr.S_SELECT
-	screen:find_child("menuButton_view").items[4]["icon"].opacity = 255
+	menuButtonView.items[4]["icon"].opacity = 255
 	screen:grab_key_focus()
 end 
 
 function editor.large_grid()
 	util.clear_bg() BG_IMAGE_80.opacity = 255 input_mode = hdr.S_SELECT
-	screen:find_child("menuButton_view").items[5]["icon"].opacity = 255
+	menuButtonView.items[5]["icon"].opacity = 255
 	screen:grab_key_focus()
 end 
 
 function editor.white_bg()
 	util.clear_bg() BG_IMAGE_white.opacity = 255 input_mode = hdr.S_SELECT
-	screen:find_child("menuButton_view").items[6]["icon"].opacity = 255
+	menuButtonView.items[6]["icon"].opacity = 255
 	screen:grab_key_focus()
 end 
 
 function editor.black_bg()
 	util.clear_bg() input_mode = hdr.S_SELECT
-	screen:find_child("menuButton_view").items[7]["icon"].opacity = 255
+	menuButtonView.items[7]["icon"].opacity = 255
 	screen:grab_key_focus()
 end 
 
 function editor.show_guides()
+
 	if guideline_show == false then 
-		screen:find_child("menuButton_view").items[11]["icon"].opacity = 255
+		menuButtonView.items[11]["icon"].opacity = 255
 		guideline_show = true
 		for i= 1, h_guideline, 1 do 
-			if screen:find_child("h_guideline"..tostring(i)) then 
-				screen:find_child("h_guideline"..tostring(i)):show() 
+			local h_guide = screen:find_child("h_guideline"..tostring(i))
+			if h_guide then 
+				h_guide:show() 
 			end 
 		end 
 		for i= 1, v_guideline, 1 do 
-			if screen:find_child("v_guideline"..tostring(i)) then 
-				screen:find_child("v_guideline"..tostring(i)):show() 
+			local v_guide = screen:find_child("v_guideline"..tostring(i)) 
+			if v_guide then 
+				v_guide:show() 
 			end
 		end 
 	else 
 		--if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then 
 		if util.is_there_guideline() then 
-			screen:find_child("menuButton_view").items[11]["icon"].opacity = 0
+			menuButtonView.items[11]["icon"].opacity = 0
 			guideline_show = false
 			for i= 1, h_guideline, 1 do 
-				if screen:find_child("h_guideline"..tostring(i)) then 
-					screen:find_child("h_guideline"..tostring(i)):hide() 
+				local h_guide = screen:find_child("h_guideline"..tostring(i)) 
+				if h_guide then 
+					h_guide:hide() 
 				end
 			end 
 			for i= 1, v_guideline, 1 do 
-				if screen:find_child("v_guideline"..tostring(i)) then 
-					screen:find_child("v_guideline"..tostring(i)):hide() 
+				local v_guide = screen:find_child("v_guideline"..tostring(i)) 
+				if v_guide then 
+					v_guide:hide() 
 				end 
 			end 
 		else 
@@ -295,10 +305,10 @@ end
 
 function editor.snap_guides()
 	if util.is_there_guideline() then 
-		if screen:find_child("menuButton_view").items[12]["icon"].opacity > 0 then 
-		 	screen:find_child("menuButton_view").items[12]["icon"].opacity = 0 
+		if menuButtonView.items[12]["icon"].opacity > 0 then 
+		 	menuButtonView.items[12]["icon"].opacity = 0 
 		else 
-		 	screen:find_child("menuButton_view").items[12]["icon"].opacity = 255 
+		 	menuButtonView.items[12]["icon"].opacity = 255 
 		end
     else
     	editor.error_message("008", nil, nil)
@@ -351,7 +361,7 @@ function editor.v_guideline()
      screen:add(v_gl)
      screen:grab_key_focus()
 
-	 if screen:find_child("menuButton_view").items[11]["icon"].opacity < 255 then 
+	 if menuButtonView.items[11]["icon"].opacity < 255 then 
 		v_gl:hide()
 	 end 
 
@@ -374,12 +384,16 @@ function editor.h_guideline()
      screen:add(h_gl)
      screen:grab_key_focus()
 
-	 if screen:find_child("menuButton_view").items[11]["icon"].opacity < 255 then 
+	 if menuButtonView.items[11]["icon"].opacity < 255 then 
 		h_gl:hide()
 	 end 
 end
 
 function editor.close(new, next_func, next_f_param, from_close)
+
+	if menuButtonView == nil then 
+		menuButtonView = menu_items.menuButton_view
+	end 
 
 	local func_ok = function() 
  		editor.save(true, nil, editor.close, {true, nil, nil, true})
@@ -424,19 +438,21 @@ function editor.close(new, next_func, next_f_param, from_close)
 	util.clear_bg()
 	editor.small_grid()
 
-	screen_ui.nselect_all ()
+	screen_ui.n_select_all ()
 
 	-- remove all the guidelines
 
 	for i=1, v_guideline, 1 do 
-	   if(screen:find_child("v_guideline"..i) ~= nil) then 
-	     screen:remove(screen:find_child("v_guideline"..i))
+	   local v_guide = screen:find_child("v_guideline"..i)
+	   if v_guide then 
+	     screen:remove(v_guide) 
 	   end 
 	end
     
 	for i=1, h_guideline, 1 do 
-	   if(screen:find_child("h_guideline"..i) ~= nil) then 
-	     screen:remove(screen:find_child("h_guideline"..i))
+	   local h_guide = screen:find_child("h_guideline"..i)
+	   if h_guide then 
+	     screen:remove(h_guide)
 	   end 
 	end
 
@@ -460,6 +476,21 @@ function editor.close(new, next_func, next_f_param, from_close)
 
 	g:clear()
 	
+	local timeline = screen:find_child("timeline")
+	if timeline then 
+		timeline:clear()
+		screen:remove(timeline)
+	end 
+
+	local menu_t = screen:find_child("menu_text")
+	if menu_t.extra.project then 
+		menu_t.text = menu_t.extra.project
+	end 
+
+	if next_func then 
+ 		next_func(next_f_param)
+ 	end 
+
 	for i,j in pairs (screen.children) do
 		if j.name then 
 			if string.find(j.name, "a_m") or string.find(j.name, "border") then 
@@ -468,30 +499,7 @@ function editor.close(new, next_func, next_f_param, from_close)
 		end 
 	end 
 
-	local timeline = screen:find_child("timeline")
-	if timeline then 
-		timeline:clear()
-		screen:remove(timeline)
-		if screen:find_child("tline") then
-		     screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-		end
-	end 
-
-	if screen:find_child("menu_text").extra.project then 
-		screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
-	end 
-
-	if next_func then 
- 		next_func(next_f_param)
- 	end 
-
 	return
-end 
-
-local function cleanMsgWin(msgw)	
-	 if screen:find_child(msgw.name) then 
-     	screen:remove(msgw)
-	 end 
 end 
 
 local function open_files(input_purpose, bg_image, inspector)
@@ -540,12 +548,9 @@ local function open_files(input_purpose, bg_image, inspector)
 	    	if timeline then 
 				timeline:clear()
 	     		screen:remove(timeline)
-		    	if screen:find_child("tline") then
-		    		screen:find_child("tline"):find_child("caption").text = "Timeline".."\t\t\t".."[J]"
-		    	end
 	    	end 
         	msg_window.inputMsgWindow_openfile(v)
-	    	local timeline = screen:find_child("timeline") 
+	    	timeline = screen:find_child("timeline") 
 	    	if timeline then  
         		for n,m in pairs (g.children) do 
 	        		if m.extra.timeline[0] then 
@@ -567,12 +572,12 @@ local function open_files(input_purpose, bg_image, inspector)
 	           	BG_IMAGE_80.opacity = 0
 	           	BG_IMAGE_white.opacity = 0
 				
-				screen:find_child("menuButton_view").items[2]["icon"].opacity = 255
-				screen:find_child("menuButton_view").items[3]["icon"].opacity = 0
-    			screen:find_child("menuButton_view").items[4]["icon"].opacity = 0
-    			screen:find_child("menuButton_view").items[5]["icon"].opacity = 0
-    			screen:find_child("menuButton_view").items[6]["icon"].opacity = 0
-    			screen:find_child("menuButton_view").items[7]["icon"].opacity = 0
+				menuButtonView.items[2]["icon"].opacity = 255
+				menuButtonView.items[3]["icon"].opacity = 0
+    			menuButtonView.items[4]["icon"].opacity = 0
+    			menuButtonView.items[5]["icon"].opacity = 0
+    			menuButtonView.items[6]["icon"].opacity = 0
+    			menuButtonView.items[7]["icon"].opacity = 0
 
 	           	BG_IMAGE_import:set{src = "/assets/images/"..v, opacity = 255} 
 			else 
@@ -605,9 +610,10 @@ local function open_files(input_purpose, bg_image, inspector)
 	
 	if inspector then 
 		button_ok.pressed = function() 
-			if screen:find_child("file_name") then 
+			local f_name = screen:find_child("file_name") 
+			if f_name then 
 				if selected_file then 
-					screen:find_child("file_name").text = selected_file 
+					f_name.text = selected_file 
 				end
 			end 
 			-- clip 
@@ -773,19 +779,20 @@ local function open_files(input_purpose, bg_image, inspector)
 				return true
         	end 
 			function h_rect:on_key_down(key)
+
+				local key_focus_obj = msgw:find_child(h_rect.focus[key]) 
 				if h_rect.focus[key] then
 					if type(h_rect.focus[key]) == "function" then
 						h_rect.focus[key]()
-					elseif screen:find_child(h_rect.focus[key]) then
+					elseif key_focus_obj then
 						if h_rect.on_focus_out then
 							h_rect.on_focus_out()
 						end
-						--screen:find_child(h_rect.focus[key]):grab_key_focus()
-						if msgw:find_child(h_rect.focus[key]).on_focus_in then
+						if key_focus_obj.on_focus_in then
 							selected_file = v
-							msgw:find_child(h_rect.focus[key]).on_focus_in(key)
+							key_focus_obj.on_focus_in(key)
 							if h_rect.focus[key] ~= "button_ok" then 
-								scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
+								scroll.seek_to_middle(0,key_focus_obj.y) 
 							end
 						end
 					end
@@ -1720,9 +1727,6 @@ function editor.rectangle(x, y)
     ui.rect.reactive = true
     table.insert(undo_list, {ui.rect.name, hdr.ADD, ui.rect})
     g:add(ui.rect)
-	if(screen:find_child("screen_objects") == nil) then 
-    	--screen:add(g)
-	end
 	
 	ui.rect.extra.lock = false
     util.create_on_button_down_f(ui.rect) 
