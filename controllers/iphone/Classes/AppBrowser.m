@@ -332,6 +332,8 @@
 #pragma mark Deallocation
 
 - (void)dealloc {
+    NSLog(@"AppBrowser Dealloc");
+    
     self.delegate = nil;
     
     @synchronized (self) {

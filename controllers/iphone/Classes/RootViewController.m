@@ -140,7 +140,6 @@
         // a call indicating that has a socket error and passes this
         // information to a deallocated RootViewController before the
         // RootViewController has a chance to deallocate the AppBrowser.
-        appBrowserViewController.socketDelegate = nil;
         appBrowserViewController.delegate = nil;
         [appBrowserViewController release];
         appBrowserViewController = nil;
@@ -175,8 +174,8 @@
     // NetServiceManager from searching for advertised services to prevent
     // the network from bogging down.
     
-    // TODO: use semaphore to guarentee this call completes before appBrowserViewController
-    // is deallocated
+    // TODO: use semaphore to guarentee this call completes before
+    // appBrowserViewController is deallocated
     dispatch_queue_t hasRunningApp_queue = dispatch_queue_create("hasRunningAppQueue", NULL);
     dispatch_async(hasRunningApp_queue, ^(void){
         if ([appBrowserViewController hasRunningApp]) {
@@ -207,9 +206,8 @@
                     [self.navigationController.view.layer removeAllAnimations];
                     [self.navigationController popToRootViewControllerAnimated:YES];
                     [tvBrowserViewController setCurrentTVName:nil];
-                    [appBrowserViewController release];
-                    appBrowserViewController = nil;
-                    pushingAppBrowser = NO;
+                    //[appBrowserViewController release];
+                    //appBrowserViewController = nil;
                     [tvBrowserViewController refresh];
                 });
             }
@@ -251,11 +249,10 @@
 
 - (void)didSelectService:(NSNetService *)service isCurrentService:(BOOL)isCurrentService {
     if (!isCurrentService) {
-        if (appBrowserViewController) {
-            [appBrowserViewController release];
-        }
+        [self destroyAppBrowserViewController];
+        [self destroyTPAppViewController];
         appBrowserViewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil];
-        appBrowserViewController.socketDelegate = self;
+        appBrowserViewController.delegate = self;
     } else {
         [self pushAppBrowser:nil];
     }
@@ -310,34 +307,37 @@
  * in the AppBrowserViewController when the AppBrowser is about to be displayed.
  */
 - (void)navigationController:(UINavigationController *)navigationController 
-      willShowViewController:(UIViewController *)viewController 
+      didShowViewController:(UIViewController *)viewController 
                     animated:(BOOL)animated {
 
+    pushingAppBrowser = NO;
+    pushingAppViewController = NO;
     // if popping back to self
     if (viewController == tvBrowserViewController) {
         if (appViewController && ![appViewController hasConnection]) {
             if (appBrowserViewController) {
-                [appBrowserViewController release];
-                appBrowserViewController = nil;
+                [self destroyAppBrowserViewController];
             }
             
             [self destroyTPAppViewController];
             
             tvBrowserViewController.currentTVName = nil;
         }
-        pushingAppBrowser = NO;
         [tvBrowserViewController startSearchForServices];
     }
     // if popping back to app browser
     else if (viewController == appBrowserViewController) {
-        pushingAppViewController = NO;
-        if (!appViewController || !appViewController.socketManager) {
+        /*
+        if (!appViewController || ![appViewController hasConnection]) {
             [self.navigationController popToRootViewControllerAnimated:YES];
         }
+         */
+        // TODO: use semaphore to guarentee this call completes before
+        // appBrowserViewController is deallocated
         dispatch_queue_t fetchApps_queue = dispatch_queue_create("navControllerQueue", NULL);
         dispatch_async(fetchApps_queue, ^(void){
             if ([appBrowserViewController fetchApps]) {
-                appBrowserViewController.pushingViewController = NO;
+                // do nothing
             } else {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self.navigationController popToRootViewControllerAnimated:YES];
@@ -350,8 +350,21 @@
         });
         dispatch_release(fetchApps_queue);
     }
+    // if app
+    else if (viewController == appViewController) {
+        if (!appViewController || ![appViewController hasConnection]) {
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    }
     
     [tvBrowserViewController reloadData];
+}
+
+- (void)navigationController:(UINavigationController *)navigationController
+      willShowViewController:(UIViewController *)viewController
+                    animated:(BOOL)animated {
+    pushingAppViewController = YES;
+    [tvBrowserViewController startSearchForServices];
 }
 
 #pragma mark -
@@ -363,6 +376,10 @@
  * which will then begin browsing for advertised services.
  */
 - (void)handleSocketProblems {
+    if (pushingAppBrowser || pushingAppViewController) {
+        return;
+    }
+    
     [self.navigationController popToRootViewControllerAnimated:YES];
     
     tvBrowserViewController.currentTVName = nil;
@@ -416,7 +433,6 @@
         // a call indicating that has a socket error and passes this
         // information to a deallocated RootViewController before the
         // RootViewController has a chance to deallocate the AppBrowser.
-        appBrowserViewController.socketDelegate = nil;
         appBrowserViewController.delegate = nil;
         [appBrowserViewController release];
         appBrowserViewController = nil;
