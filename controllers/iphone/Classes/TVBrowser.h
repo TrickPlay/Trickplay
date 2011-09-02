@@ -7,42 +7,43 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "AppBrowserController.h"
+#import "AppBrowser.h"
 #import "NetServiceManager.h"
 
-@protocol TVBrowserControllerDelegate <NSObject>
+@protocol TVBrowserDelegate <NSObject>
 
 @required
-- (void)socketErrorOccurred;
-- (void)streamEndEncountered;
 - (void)serviceResolved:(NSNetService *)service;
 - (void)didNotResolveService;
-- (void)appBrowserReady:(AppBrowserController *)appBrowser;
-- (void)appBrowserInvalid:(AppBrowserController *)appBrowser;
+- (void)didFindServices;
 
 @end
 
 
-@interface TVBrowserController : NSObject {
-    AppBrowserController *appBrowserController;
+@interface TVBrowser : NSObject {
+    AppBrowser *appBrowser;
     NetServiceManager *netServiceManager;
     
+    // Name of the current TV; stores the name of the current service
+    // used or nil if no service has been selected.
     NSString *currentTVName;
-    id <TVBrowserControllerDelegate> delegate;
+    id <TVBrowserDelegate> delegate;
 }
 
 // Exposed methods
-- (id)initWithDelegate:(id <TVBrowserControllerDelegate>)delegate;
+- (id)initWithDelegate:(id <TVBrowserDelegate>)delegate;
 
 - (NSArray *)getServices;
 - (NSNetService *)getCurrentService;
+- (void)startSearchForServices;
+- (void)stopSearchForServices;
 - (void)refreshServices;
 - (void)resolveServiceAtIndex:(NSUInteger)index;
 
 
 // Exposed instance variables
-@property (retain) AppBrowserController *appBrowserController;
+@property (retain) AppBrowser *appBrowser;
 @property (nonatomic, retain) NSString *currentTVName;
-@property (assign) id <TVBrowserControllerDelegate> delegate;
+@property (assign) id <TVBrowserDelegate> delegate;
 
 @end

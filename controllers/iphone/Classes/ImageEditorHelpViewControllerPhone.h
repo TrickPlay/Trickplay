@@ -9,10 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface ImageEditorHelpViewControllerPhone : UIViewController {
-    //UINavigationBar *navBar;
 }
-
-//@property (retain) IBOutlet UINavigationBar *navBar;
 
 - (IBAction)donePressed:(id)sender;
 

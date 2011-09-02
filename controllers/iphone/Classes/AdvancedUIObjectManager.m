@@ -22,7 +22,7 @@
 @synthesize webTexts;
 @synthesize groups;
 @synthesize resourceManager;
-@synthesize gestureViewController;
+@synthesize appViewController;
 
 - (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager {
     if ((self = [super init])) {
@@ -38,7 +38,7 @@
         timeLine = [[TrickplayTimeline alloc] init];
         
         view = aView;
-        gestureViewController = nil;
+        appViewController = nil;
     }
     
     return self;
@@ -140,7 +140,7 @@
     }
     [groups removeAllObjects];
     
-    [gestureViewController advancedUIObjectDeleted];
+    [appViewController advancedUIObjectDeleted];
 }
 
 
@@ -322,7 +322,7 @@
         return;
     }
     
-    [gestureViewController advancedUIObjectDeleted];
+    [appViewController advancedUIObjectDeleted];
     
     [self destroyObjectReply:ID absolute:destroy_absolutely];
 }
@@ -407,7 +407,7 @@
     }
     
     if (view.view.subviews.count == 0) {
-        [gestureViewController performSelector:@selector(advancedUIObjectDeleted)];
+        [appViewController performSelector:@selector(advancedUIObjectDeleted)];
     }
     
     if (result) {
@@ -459,7 +459,7 @@
     self.groups = nil;
     self.resourceManager = nil;
     
-    gestureViewController = nil;
+    appViewController = nil;
     
     [super dealloc];
 }

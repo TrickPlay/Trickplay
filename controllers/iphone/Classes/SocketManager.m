@@ -31,7 +31,7 @@
 
 
 -(id)initSocketStream:(NSString *)theHost
-                 port:(NSInteger)thePort
+                 port:(NSUInteger)thePort
              delegate:(id <SocketManagerDelegate>)theDelegate
              protocol:(CommandProtocol)protocol {
     if ((self = [super init])) {
@@ -238,11 +238,11 @@
 
 
 // Getters/Setters not synthesized
-- (NSInteger)port {
+- (NSUInteger)port {
     return port;
 }
 // Used if switching to http server
-- (void)setPort:(NSInteger)value {
+- (void)setPort:(NSUInteger)value {
     port = value;
 }
 

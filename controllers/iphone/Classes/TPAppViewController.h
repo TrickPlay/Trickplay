@@ -36,7 +36,7 @@
 
 
 /**
- * The GestureViewControllerSocketDelegate recieves messages delegated
+ * The TPAppViewControllerSocketDelegate recieves messages delegated
  * originally from the SocketManager which inform of either a socket
  * error or socket stream ending. The delegate is assumed to depend
  * on the socket in some way and must respond to these messages.
@@ -44,7 +44,7 @@
  * The AppBrowserViewController and RootViewController both apply this protocol.
  */
 
-@protocol GestureViewControllerSocketDelegate <NSObject>
+@protocol TPAppViewControllerSocketDelegate <NSObject>
 
 @required
 - (void)socketErrorOccurred;
@@ -72,7 +72,7 @@
 /**
  * The ViewControllerTouchDelegate handles commands from Trickplay to
  * enable/disable touch events. Likewise this delegate must inform
- * the GestureViewController of iOS touch events so these events can be
+ * the TPAppViewController of iOS touch events so these events can be
  * forwarded back to Trickplay.
  *
  * Only the TouchController class implements this protocol.
@@ -105,13 +105,13 @@
 #import "GestureImageView.h"
 
 /**
- * The GestureViewController class is the core component of the Take Control app.
+ * The TPAppViewController class is the core component of the Take Control app.
  * This class serves as the main interface for user interaction with their
  * Television as well as the main controller for all other modules, models,
  * and views in the app.
  *
  * After establishing a connection with Trickplay and selecting an app Take Control
- * pushes the GestureViewController to the top of the NavigationViewController
+ * pushes the TPAppViewController to the top of the NavigationViewController
  * stack. This controller's view intializes with a virtual remote for controlling
  * the Television. Drawing graphics to this view or activating touch control
  * removes the VirtualRemote from the view and gives the user a blank view for
@@ -127,7 +127,7 @@
  * and models for the Take Control app receive messages from the Television and
  * through which these objects asynchronously send messages back to the Television.
  * 
- * Refer to GestureViewController.xib for the GestureViewController's view.
+ * Refer to TPAppViewController.xib for the TPAppViewController's view.
  */
 
 @class TrickplayScreen;
@@ -137,13 +137,13 @@
 #define CAMERA_BUTTON_TITLE "Camera"
 #define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
 
-@interface GestureViewController : UIViewController <SocketManagerDelegate, 
+@interface TPAppViewController : UIViewController <SocketManagerDelegate, 
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
 UITextFieldDelegate, UIActionSheetDelegate,
 UINavigationControllerDelegate, VirtualRemoteDelegate> {
     BOOL viewDidAppear;
     
-    // Manages the asynchronous socket the GestureViewController communicates
+    // Manages the asynchronous socket the TPAppViewController communicates
     // to Trickplay with
     SocketManager *socketManager;
     // Current host name for asynchronous communication with Trickplay
@@ -160,7 +160,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // A timer that when firing calls timerFiredMethod:
     NSTimer *socketTimer;
     
-    // Displays itself and spins when the GestureViewController first loads.
+    // Displays itself and spins when the TPAppViewController first loads.
     // This is rarely seen on anything but the oldest iPods.
     UIActivityIndicatorView *loadingIndicator;
     // TextField for entering text; used when Trickplay requests text input
@@ -224,7 +224,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     id <ViewControllerAccelerometerDelegate> accelDelegate;
     // The AppBrowserViewController. Used to inform view controllers lower on
     // the navigation stack when the socket connection breaks or ends.
-    id <GestureViewControllerSocketDelegate> socketDelegate;
+    id <TPAppViewControllerSocketDelegate> socketDelegate;
     // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
     // that refer to the AdvancedUIObjectManager are sent there via this
     // delegate's protocol.
@@ -244,13 +244,13 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 @property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
 @property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
-@property (nonatomic, assign) id <GestureViewControllerSocketDelegate> socketDelegate;
+@property (nonatomic, assign) id <TPAppViewControllerSocketDelegate> socketDelegate;
 @property (nonatomic, retain) id <AdvancedUIDelegate> advancedUIDelegate;
 
 
 - (void)setupService:(NSUInteger)port
             hostname:(NSString *)hostName
-            thetitle:(NSString *)name;
+            serviceName:(NSString *)name;
 
 - (BOOL)startService;
 - (BOOL)hasConnection;
