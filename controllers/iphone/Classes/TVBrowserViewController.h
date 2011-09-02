@@ -17,7 +17,7 @@
 @required
 - (void)serviceResolved:(NSNetService *)service;
 - (void)didNotResolveService;
-- (void)serviceSelected:(NSNetService *)service isCurrentService:(BOOL)isCurrentService;
+- (void)didSelectService:(NSNetService *)service isCurrentService:(BOOL)isCurrentService;
 
 @end
 

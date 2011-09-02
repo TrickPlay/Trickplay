@@ -39,13 +39,13 @@
     NSMutableData *currentAppData;
     
     NSMutableArray *appsAvailable;
+    // Name of the current app running on Trickplay
     NSString *currentAppName;
 }
 
 - (void)setupService:(NSUInteger)port
             hostName:(NSString *)hostName
             serviceName:(NSString *)serviceName;
-- (BOOL)startService;
 
 - (BOOL)hasRunningApp;
 

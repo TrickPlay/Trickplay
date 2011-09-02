@@ -15,17 +15,16 @@
 @synthesize navigationController;
 @synthesize tvBrowserViewController;
 
-/*
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     if (self = [super initWithNibName:@"TVBrowserViewController" bundle:nibBundleOrNil]) {
-        // Custom initialization
+        pushingAppViewController = NO;
+        pushingAppBrowser = NO;
     }
     return self;
 }
- */
 
 #pragma mark -
-#pragma mark View lifecycl
+#pragma mark View lifecycle
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -47,8 +46,6 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     pushingAppBrowser = NO;
-    
-    //[self presentModalViewController:tvBrowserViewController animated:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -63,7 +60,8 @@
     
     // Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
     // For example: self.myOutlet = nil;
-    
+    [self destroyTPAppViewController];
+    [self destroyAppBrowserViewController];
     self.navigationController = nil;
     if (tvBrowserViewController) {
         tvBrowserViewController.delegate = nil;
@@ -72,6 +70,24 @@
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
+
+/*
+ - (void)viewWillAppear:(BOOL)animated {
+ [super viewWillAppear:animated];
+ }
+ */
+/*
+ - (void)viewWillDisappear:(BOOL)animated {
+ [super viewWillDisappear:animated];
+ }
+ */
+/*
+ // Override to allow orientations other than the default portrait orientation.
+ - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+ // Return YES for supported orientations.
+ return (interfaceOrientation == UIInterfaceOrientationPortrait);
+ }
+ */
 
 #pragma mark -
 #pragma mark - AppBrowserDelegate methods
@@ -86,6 +102,50 @@
 
 #pragma mark -
 #pragma mark - Managing ViewControllers
+
+/**
+ * Creates the TPAppViewController, gives it a port and host name to establish
+ * a connection to a service, and tells it to establish this connection.
+ */
+- (void)createTPAppViewControllerWithPort:(NSInteger)port hostName:(NSString *)hostName {
+    appViewController = [[TPAppViewController alloc] initWithNibName:@"TPAppViewController" bundle:nil];
+    
+    appViewController.socketDelegate = self;
+    
+    CGFloat
+    x = self.view.frame.origin.x,
+    y = self.view.frame.origin.y,
+    width = self.view.frame.size.width,
+    height = self.view.frame.size.height;
+    appViewController.view.frame = CGRectMake(x, y, width, height);
+    [appViewController setupService:port hostname:hostName serviceName:@"Current Service"];
+    if (![appViewController startService]) {
+        [appViewController release];
+        appViewController = nil;
+    }
+}
+
+- (void)destroyTPAppViewController {
+    if (appViewController) {
+        appViewController.socketDelegate = nil;
+        [appViewController release];
+        appViewController = nil;
+    }
+}
+
+- (void)destroyAppBrowserViewController {
+    if (appBrowserViewController) {
+        // Make sure to get rid of the AppBrowser's socket delegate
+        // or a race condition may occur where the AppBrowser recieves
+        // a call indicating that has a socket error and passes this
+        // information to a deallocated RootViewController before the
+        // RootViewController has a chance to deallocate the AppBrowser.
+        appBrowserViewController.socketDelegate = nil;
+        appBrowserViewController.delegate = nil;
+        [appBrowserViewController release];
+        appBrowserViewController = nil;
+    }
+}
 
 /**
  * Pushes the AppBrowserViewController to the top of the UINavigationController
@@ -107,6 +167,8 @@
     
     pushingAppBrowser = YES;
     
+    [appBrowserViewController setupService:appViewController.socketManager.port hostName:appViewController.socketManager.host serviceName:tvBrowserViewController.currentTVName];
+    
     // If Trickplay is running an app and the AppBrowserViewController is aware
     // that this app is running then push the AppBrowser to the top of the stack
     // and then push the app to the top of the stack. Meanwhile stop the
@@ -121,7 +183,7 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 // TODO: Socket may close before this executes and cause inconsistancy
                 [self.navigationController pushViewController:appBrowserViewController animated:NO];
-                [appBrowserViewController pushApp];
+                [self pushTPAppViewController];
                 [tvBrowserViewController stopSearchForServices];
             });
         } else {
@@ -156,39 +218,38 @@
     dispatch_release(hasRunningApp_queue);
 }
 
-/*
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-}
-*/
-/*
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-}
-*/
-/*
-- (void)viewWillDisappear:(BOOL)animated {
-	[super viewWillDisappear:animated];
-}
-*/
-/*
-- (void)viewDidDisappear:(BOOL)animated {
-	[super viewDidDisappear:animated];
-}
-*/
-
-/*
- // Override to allow orientations other than the default portrait orientation.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-	// Return YES for supported orientations.
-	return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
+/**
+ * Pushes the TPAppViewController to the top of the navigation stack making it
+ * the visible view controller.
  */
+- (void)pushTPAppViewController {
+    pushingAppViewController = YES;
+    
+    if (self.navigationController.visibleViewController != appBrowserViewController) {
+        [self.navigationController pushViewController:appBrowserViewController animated:NO];
+    }
+    
+    UIBarButtonItem *newBackButton = [[UIBarButtonItem alloc] initWithTitle: @"Apps List" style: UIBarButtonItemStyleBordered target: nil action: nil];
+    [[appBrowserViewController navigationItem] setBackBarButtonItem: newBackButton];
+    [newBackButton release];
+    
+    [self.navigationController pushViewController:appViewController animated:YES];
+}
 
 #pragma mark -
-#pragma mark NetService Callbacks
+#pragma mark AppBrowserViewControllerDelegate Methods
 
-- (void)serviceSelected:(NSNetService *)service isCurrentService:(BOOL)isCurrentService {
+- (void)didSelectAppWithInfo:(NSDictionary *)info isCurrentApp:(BOOL)isCurrentApp {
+    if (!isCurrentApp) {
+        [appViewController clean];
+    }
+    [self pushTPAppViewController];
+}
+
+#pragma mark -
+#pragma mark TVBrowserViewControllerDelegate Methods
+
+- (void)didSelectService:(NSNetService *)service isCurrentService:(BOOL)isCurrentService {
     if (!isCurrentService) {
         if (appBrowserViewController) {
             [appBrowserViewController release];
@@ -210,6 +271,7 @@
 - (void)serviceResolved:(NSNetService *)service {
     NSLog(@"RootViewController serviceResolved");
     [appBrowserViewController setupService:[service port] hostName:[service hostName] serviceName:[service name]];
+    [self createTPAppViewControllerWithPort:[service port] hostName:[service hostName]];
 }
 
 /**
@@ -221,8 +283,8 @@
  */
 - (void)didNotResolveService {
     NSLog(@"RootViewController didNotResolveService");
-    if (appBrowserViewController.appViewController) {
-        if (self.navigationController.visibleViewController == appBrowserViewController.appViewController) {
+    if (appViewController) {
+        if (self.navigationController.visibleViewController == appViewController) {
             [self.navigationController popViewControllerAnimated:NO];
         }
     }
@@ -253,20 +315,25 @@
 
     // if popping back to self
     if (viewController == tvBrowserViewController) {
-        if (appBrowserViewController && appBrowserViewController.appViewController
-        && ![appBrowserViewController.appViewController hasConnection]) {
-                
-            [appBrowserViewController release];
-            appBrowserViewController = nil;
+        if (appViewController && ![appViewController hasConnection]) {
+            if (appBrowserViewController) {
+                [appBrowserViewController release];
+                appBrowserViewController = nil;
+            }
+            
+            [self destroyTPAppViewController];
             
             tvBrowserViewController.currentTVName = nil;
-            
-            pushingAppBrowser = NO;
         }
+        pushingAppBrowser = NO;
         [tvBrowserViewController startSearchForServices];
     }
     // if popping back to app browser
     else if (viewController == appBrowserViewController) {
+        pushingAppViewController = NO;
+        if (!appViewController || !appViewController.socketManager) {
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        }
         dispatch_queue_t fetchApps_queue = dispatch_queue_create("navControllerQueue", NULL);
         dispatch_async(fetchApps_queue, ^(void){
             if ([appBrowserViewController fetchApps]) {
@@ -299,6 +366,7 @@
     [self.navigationController popToRootViewControllerAnimated:YES];
     
     tvBrowserViewController.currentTVName = nil;
+    [self destroyTPAppViewController];
     if (appBrowserViewController) {
         [appBrowserViewController release];
         appBrowserViewController = nil;
@@ -339,6 +407,8 @@
 
 - (void)dealloc {
     NSLog(@"RootViewController dealloc");
+    
+    [self destroyTPAppViewController];
     
     if (appBrowserViewController) {
         // Make sure to get rid of the AppBrowser's socket delegate

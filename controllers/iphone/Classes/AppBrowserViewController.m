@@ -12,11 +12,8 @@
 @implementation AppBrowserViewController
 
 @synthesize theTableView;
-@synthesize appsAvailable;
-@synthesize currentAppName;
 @synthesize pushingViewController;
 @synthesize socketDelegate;
-@synthesize appViewController;
 @synthesize delegate;
 
 /*
@@ -54,26 +51,63 @@
          serviceName:(NSString *)serviceName {
         
     [appBrowser setupService:port hostName:hostName serviceName:serviceName];
-    [self createTPAppViewWithPort:port hostName:hostName];
 }
 
-/**
- * Pushes the TPAppViewController to the top of the navigation stack making it
- * the visible view controller.
- */
-- (void)pushApp {
-    pushingViewController = YES;
+#pragma mark -
+#pragma mark View lifecycle
 
-    if (self.navigationController.visibleViewController != self) {
-        [self.navigationController pushViewController:self animated:NO];
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    NSLog(@"AppBrowserView Loaded!");
+    // Initialize the orange indicator for the current running app
+    if (!currentAppIndicator) {
+        currentAppIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
+        currentAppIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
+        currentAppIndicator.layer.borderWidth = 3.0;
+        currentAppIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
+        currentAppIndicator.layer.cornerRadius = currentAppIndicator.frame.size.height/2.0;
     }
     
-    UIBarButtonItem *newBackButton = [[UIBarButtonItem alloc] initWithTitle: @"Apps List" style: UIBarButtonItemStyleBordered target: nil action: nil];
-    [[self navigationItem] setBackBarButtonItem: newBackButton];
-    [newBackButton release];
-    
-    [self.navigationController pushViewController:appViewController animated:YES];
+    // Initialize the loadingSpinner if it does not exist
+    if (!loadingSpinner) {
+        loadingSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    }
+    // Set the delegate for the table which holds the app info
+    [theTableView setDelegate:self];
 }
+
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    NSLog(@"AppBrowserController Unload");
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+    if (theTableView) {
+        [theTableView release];
+        theTableView = nil;
+    }
+    if (loadingSpinner) {
+        [loadingSpinner stopAnimating];
+        [loadingSpinner release];
+        loadingSpinner = nil;
+    }
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    pushingViewController = NO;
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    pushingViewController = NO;
+}
+
+/*
+ // Override to allow orientations other than the default portrait orientation.
+ - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+ // Return YES for supported orientations.
+ return (interfaceOrientation == UIInterfaceOrientationPortrait);
+ }
+ */
 
 #pragma mark -
 #pragma mark Retrieving App Info From Network
@@ -83,11 +117,15 @@
  * on Trickplay by asking it over the network.
  */
 - (BOOL)hasRunningApp {
-    NSLog(@"has connection: %d", [appViewController hasConnection]);
-    [appBrowser setupService:appViewController.socketManager.port hostName:appViewController.socketManager.host serviceName:nil];
+    if (!appBrowser) {
+        return NO;
+    }
+    /*
     if (![appViewController hasConnection]) {
         return NO;
     }
+    */
+    
     NSLog(@"\n\appBrowser: %@\n\n", appBrowser);
     return [appBrowser hasRunningApp];
 }
@@ -98,9 +136,15 @@
  * and returns it as an NSDictionary or nil on error.
  */
 - (NSDictionary *)getCurrentAppInfo {
+    if (!appBrowser) {
+        return nil;
+    }
+    /*
     if (![appViewController hasConnection]) {
         return nil;
     }
+    */
+    
     return [appBrowser getCurrentAppInfo];
 }
 
@@ -110,15 +154,21 @@
     if (!theDelegate) {
         theDelegate = delegate;
     }
-    
+    if (!appBrowser) {
+        if (theDelegate) {
+            [theDelegate didReceiveCurrentAppInfo:nil];
+        }
+        return;
+    }
+    /*
     if (![appViewController hasConnection]) {
-        self.currentAppName = nil;
         appBrowser.currentAppName = nil;
         if (theDelegate) {
             [theDelegate didReceiveCurrentAppInfo:nil];
         }
         return;
     }
+    */
     
     [appBrowser getCurrentAppInfoWithDelegate:theDelegate];
 }
@@ -136,9 +186,14 @@
 - (NSArray *)fetchApps {
     NSLog(@"Fetching Apps");
     
+    if (!appBrowser) {
+        return nil;
+    }
+    /*
     if (![appViewController hasConnection]) {
         return nil;
     }
+    */
     
     return [appBrowser fetchApps];
 }
@@ -150,14 +205,22 @@
         theDelegate = delegate;
     }
     
+    if (!appBrowser) {
+        if (theDelegate) {
+            [theDelegate didReceiveAvailableAppsInfo:nil];
+        }
+        return;
+    }
+    
+    /*
     if (![appViewController hasConnection]) {
-        self.currentAppName = nil;
         appBrowser.currentAppName = nil;
         if (theDelegate) {
             [theDelegate didReceiveAvailableAppsInfo:nil];
         }
         return;
     }
+    */
     
     [appBrowser getAvailableAppsInfoWithDelegate:theDelegate];
 }
@@ -181,106 +244,12 @@
  * app.
  */
 - (void)launchApp:(NSDictionary *)appInfo {
-    dispatch_queue_t launchApp_queue = dispatch_queue_create("launchAppQueue", NULL);
-    dispatch_async(launchApp_queue, ^(void){
-        NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
-        NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", appViewController.socketManager.host, appViewController.socketManager.port, appID];
-        NSLog(@"Launching app via url '%@'", launchString);
-        NSURL *launchURL = [NSURL URLWithString:launchString];
-        NSData *launchData = [NSData dataWithContentsOfURL:launchURL];
-        NSLog(@"launch data = %@", launchData);
-    
-        self.currentAppName = (NSString *)[appInfo objectForKey:@"name"];
-    });
-    dispatch_release(launchApp_queue);
-}
-
-/**
- * Creates the TPAppViewController, gives it a port and host name to establish
- * a connection to a service, and tells it to establish this connection.
- */
-- (void)createTPAppViewWithPort:(NSInteger)port hostName:(NSString *)hostName {
-    appViewController = [[TPAppViewController alloc] initWithNibName:@"TPAppViewController" bundle:nil];
-    
-    appViewController.socketDelegate = self;
-    
-    CGFloat
-    x = self.view.frame.origin.x,
-    y = self.view.frame.origin.y,
-    width = self.view.frame.size.width,
-    height = self.view.frame.size.height;
-    appViewController.view.frame = CGRectMake(x, y, width, height);
-    [appViewController setupService:port hostname:hostName serviceName:@"Current Service"];
-    if (![appViewController startService]) {
-        [appViewController release];
-        appViewController = nil;
-    }
-}
-
-//*
-// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    NSLog(@"AppBrowserView Loaded!");
-    // Initialize the orange indicator for the current running app
-    if (!currentAppIndicator) {
-        currentAppIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
-        currentAppIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
-        currentAppIndicator.layer.borderWidth = 3.0;
-        currentAppIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
-        currentAppIndicator.layer.cornerRadius = currentAppIndicator.frame.size.height/2.0;
+    if (!appBrowser) {
+        return;
     }
     
-    // Initialize the loadingSpinner if it does not exist
-    if (!loadingSpinner) {
-        loadingSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    }
-    // Set the delegate for the table which holds the app info
-    [theTableView setDelegate:self];
+    [appBrowser launchApp:appInfo];
 }
-//*/
-
-- (void)viewDidAppear:(BOOL)animated {
-    if (self.navigationController.visibleViewController == self && (!appViewController || !appViewController.socketManager)) {
-        [self.navigationController popToRootViewControllerAnimated:YES];
-    }
-    
-    pushingViewController = NO;
-}
-
-/*
-// Override to allow orientations other than the default portrait orientation.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    // Return YES for supported orientations.
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-*/
-
-#pragma mark -
-#pragma mark TPAppViewControllerSocketDelegate stuff
-
-/**
- * Called when a socket error occurs.
- */
-- (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in AppBrowser");
-
-    if (socketDelegate) {
-        [socketDelegate socketErrorOccurred];
-    }
-}
-
-/**
- * Called when a socket closes.
- */
-- (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered in AppBrowser");
-    
-    if (socketDelegate) {
-        [socketDelegate streamEndEncountered];
-    }
-}
-
 
 #pragma mark -
 #pragma mark Table view data source
@@ -297,10 +266,10 @@
  * are no available apps.
  */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	if (!appsAvailable || [appsAvailable count] == 0) {
+	if (!appBrowser || !appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0) {
         return 1;
     }
-    return [appsAvailable count];
+    return [appBrowser.appsAvailable count];
 }
 
 /**
@@ -316,7 +285,7 @@
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:tableCellIdentifier] autorelease];
 	}
 
-    if (!appsAvailable || [appsAvailable count] == 0) {
+    if (!appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0) {
         cell.textLabel.text = @"Loading Data...";
         cell.accessoryView = loadingSpinner;
         [loadingSpinner startAnimating];
@@ -325,13 +294,15 @@
         return cell;
     }
     
+    cell.userInteractionEnabled = YES;
+    
     [loadingSpinner stopAnimating];
     [loadingSpinner removeFromSuperview];
     cell.accessoryView = nil;
     
-    cell.textLabel.text = (NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"];
+    cell.textLabel.text = (NSString *)[(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"];
     cell.textLabel.textColor = [UIColor blackColor];
-    if (currentAppName && [cell.textLabel.text compare:currentAppName] == NSOrderedSame) {
+    if (appBrowser.currentAppName && [cell.textLabel.text compare:appBrowser.currentAppName] == NSOrderedSame) {
         [cell addSubview:currentAppIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
     }
@@ -393,16 +364,15 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSLog(@"Selected row %@\n", indexPath);
     
-    if (!appsAvailable || [appsAvailable count] == 0 || pushingViewController) {
-        return;
+    if (!appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0 || pushingViewController) {
+        // just don't do anything
+    } else if (!appBrowser.currentAppName || [(NSString *)[(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"] compare:appBrowser.currentAppName] !=  NSOrderedSame) {
+        
+        [self launchApp:(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row]];
+        [delegate didSelectAppWithInfo:(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] isCurrentApp:NO];
+    } else {
+        [delegate didSelectAppWithInfo:(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] isCurrentApp:YES];
     }
-    
-    if (!currentAppName || [(NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"] compare:currentAppName] !=  NSOrderedSame) {
-        [appViewController clean];
-        [self launchApp:(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row]];
-    }
-    
-    [self pushApp];   
     
 	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
 	if (indexPath2 != nil)
@@ -422,23 +392,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     // Release any cached data, images, etc. that aren't in use.
 }
 
-- (void)viewDidUnload {
-    [super viewDidUnload];
-    NSLog(@"AppBrowserController Unload");
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-    if (theTableView) {
-        [theTableView release];
-        theTableView = nil;
-    }
-    if (loadingSpinner) {
-        [loadingSpinner stopAnimating];
-        [loadingSpinner release];
-        loadingSpinner = nil;
-    }
-}
-
-
 - (void)dealloc {
     NSLog(@"AppBrowserViewController dealloc");
     if (theTableView) {
@@ -449,17 +402,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [loadingSpinner stopAnimating];
         [loadingSpinner release];
         loadingSpinner = nil;
-    }
-    if (appsAvailable) {
-        [appsAvailable release];
-    }
-    if (appViewController) {
-        appViewController.socketDelegate = nil;
-        [appViewController release];
-        appViewController = nil;
-    }
-    if (currentAppName) {
-        [currentAppName release];
     }
     if (currentAppIndicator) {
         [currentAppIndicator release];

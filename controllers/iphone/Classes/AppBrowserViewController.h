@@ -13,6 +13,7 @@
 
 @protocol AppBrowserViewControllerDelegate <AppBrowserDelegate>
 
+- (void)didSelectAppWithInfo:(NSDictionary *)info isCurrentApp:(BOOL)isCurrentApp;
 
 @end
 
@@ -30,7 +31,7 @@
  * Refer to AppBrowserViewController.xib for the AppBrowser's view.
  */
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
-UITableViewDataSource, TPAppViewControllerSocketDelegate, AppBrowserDelegate> {
+UITableViewDataSource, AppBrowserDelegate> {
     /*
     UIBarButtonItem *appShopButton;
     UIBarButtonItem *showcaseButton;
@@ -40,27 +41,11 @@ UITableViewDataSource, TPAppViewControllerSocketDelegate, AppBrowserDelegate> {
     UITableView *theTableView;
     // Spins while a app data is loading; disappears otherwise.
     UIActivityIndicatorView *loadingSpinner;
-    // An array of JSON strings containing information of apps available
-    // on the Television/Trickplay
-    NSMutableArray *appsAvailable;
-    TPAppViewController *appViewController;
     
-    // Name of the current app running on Trickplay
-    NSString *currentAppName;
     // Orange dot indicating which app is the current app
     UIImageView *currentAppIndicator;
     
-    // YES if the NavigationViewController is in the middle of animating
-    // pushing the TPAppViewController or if the visible view is the
-    // TPAppViewController. Initialized to NO and set back to NO
-    // when the AppBrowserViewController (self) calls viewDidAppear.
-    BOOL pushingViewController;
-    
     AppBrowser *appBrowser;
-    
-    // Refers to the RootViewController; informs the view controller
-    // if a socket having an error or closing/ending
-    id <TPAppViewControllerSocketDelegate> socketDelegate;
     
     id <AppBrowserViewControllerDelegate> delegate;
 }
@@ -72,10 +57,7 @@ UITableViewDataSource, TPAppViewControllerSocketDelegate, AppBrowserDelegate> {
 @property (nonatomic, retain) IBOutlet UIToolbar *toolBar;
 */
 @property (retain) IBOutlet UITableView *theTableView;
-@property (retain) NSMutableArray *appsAvailable;
-@property (nonatomic, retain) NSString *currentAppName;
 @property (nonatomic, assign) BOOL pushingViewController;
-@property (nonatomic, assign) TPAppViewController *appViewController;
 
 @property (nonatomic, assign) id <TPAppViewControllerSocketDelegate> socketDelegate;
 @property (assign) id <AppBrowserViewControllerDelegate> delegate;
@@ -83,7 +65,6 @@ UITableViewDataSource, TPAppViewControllerSocketDelegate, AppBrowserDelegate> {
 // Exposed methods
 - (IBAction) appShopButtonClick;
 - (IBAction) showcaseButtonClick;
-- (void)createTPAppViewWithPort:(NSInteger)p hostName:(NSString *)h;
 - (NSDictionary *)getCurrentAppInfo;
 - (NSArray *)fetchApps;
 - (void)getAvailableAppsInfoWithDelegate:(id<AppBrowserDelegate>)delegate;
@@ -92,10 +73,6 @@ UITableViewDataSource, TPAppViewControllerSocketDelegate, AppBrowserDelegate> {
             hostName:(NSString *)hostName
          serviceName:(NSString *)serviceName;
 - (BOOL)hasRunningApp;
-- (void)pushApp;
-
-// TPAppViewControllerSocketDelegate methods
-- (void)socketErrorOccurred;
-- (void)streamEndEncountered;
+- (void)launchApp:(NSDictionary *)appInfo;
 
 @end

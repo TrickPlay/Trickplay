@@ -330,7 +330,7 @@
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
     } else {
         // Remove the current TV indicator
-        if (currentTVIndicator.superview) {
+        if (currentTVIndicator.superview == cell) {
             [currentTVIndicator removeFromSuperview];
         }
     }
@@ -429,13 +429,13 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     } else if (!currentTVName || ([currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
         self.currentTVName = nil;
         
-        [delegate serviceSelected:[services objectAtIndex:indexPath.row] isCurrentService:NO];
+        [delegate didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:NO];
         
         [tvBrowser resolveServiceAtIndex:indexPath.row];
         
         [tableView reloadData];
     } else {
-        [delegate serviceSelected:[services objectAtIndex:indexPath.row] isCurrentService:YES];
+        [delegate didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:YES];
     }
     
 	

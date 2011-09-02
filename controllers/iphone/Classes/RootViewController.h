@@ -31,14 +31,25 @@ TPAppViewControllerSocketDelegate, AppBrowserViewControllerDelegate, TVBrowserVi
     // of being pushed to the top of the navigation stack
     BOOL pushingAppBrowser;
     
+    // YES if the NavigationViewController is in the middle of animating
+    // pushing the TPAppViewController or if the visible view is the
+    // TPAppViewController. Initialized to NO and set back to NO
+    // when the AppBrowserViewController (self) calls viewDidAppear.
+    BOOL pushingAppViewController;
+    
     TVBrowserViewController *tvBrowserViewController;
     AppBrowserViewController *appBrowserViewController;
+    TPAppViewController *appViewController;
     
     UINavigationController *navigationController;
 }
 
 // Exposed methods
 - (void)pushAppBrowser:(NSNotification *)notification;
+- (void)destroyAppBrowserViewController;
+- (void)createTPAppViewControllerWithPort:(NSInteger)port hostName:(NSString *)hostName;
+- (void)pushTPAppViewController;
+- (void)destroyTPAppViewController;
 - (void)serviceResolved:(NSNetService *)service;
 
 // Exposed properties

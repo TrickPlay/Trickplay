@@ -136,7 +136,7 @@
     
     // the virtual remote for controlling the Television
     virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
-    //virtualRemote.view.frame = frame;
+    virtualRemote.view.frame = frame;
     [self.view addSubview:virtualRemote.view];
     virtualRemote.delegate = self;
     
