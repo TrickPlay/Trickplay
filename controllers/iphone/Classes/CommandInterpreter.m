@@ -67,7 +67,7 @@
 }
 
 - (void)executeCommand:(NSString *)command args:(NSArray *)args {
-    // This class is a n interface, this code just prevents a warning
+    // This class is an interface, this code just prevents a warning
 }
 
 - (void)dealloc {

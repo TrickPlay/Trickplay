@@ -167,7 +167,6 @@
  * connected to Trickplay.
  */
 - (BOOL)hasConnection {
-    NSLog(@"socketman != nil: %d, isfunctional: %d", socketManager != nil, [socketManager isFunctional]);
     return socketManager != nil && [socketManager isFunctional];
 }
 

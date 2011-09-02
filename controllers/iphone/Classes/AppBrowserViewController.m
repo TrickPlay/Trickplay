@@ -12,8 +12,6 @@
 @implementation AppBrowserViewController
 
 @synthesize theTableView;
-@synthesize pushingViewController;
-@synthesize socketDelegate;
 @synthesize delegate;
 
 /*
@@ -91,14 +89,6 @@
         [loadingSpinner release];
         loadingSpinner = nil;
     }
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    pushingViewController = NO;
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-    pushingViewController = NO;
 }
 
 /*
@@ -363,8 +353,8 @@
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSLog(@"Selected row %@\n", indexPath);
-    
-    if (!appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0 || pushingViewController) {
+        
+    if (!appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0) {// TODO: || pushingViewController) {
         // just don't do anything
     } else if (!appBrowser.currentAppName || [(NSString *)[(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"] compare:appBrowser.currentAppName] !=  NSOrderedSame) {
         
@@ -406,7 +396,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (currentAppIndicator) {
         [currentAppIndicator release];
     }
-    socketDelegate = nil;
     appBrowser.delegate = nil;
     [appBrowser release];
     appBrowser = nil;

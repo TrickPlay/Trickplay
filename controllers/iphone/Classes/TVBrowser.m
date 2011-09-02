@@ -155,6 +155,8 @@
 #pragma mark Memory Management
 
 - (void)dealloc {
+    NSLog(@"TVBrowser Dealloc");
+    
     [netServiceManager stop];
     [netServiceManager release];
     netServiceManager = nil;

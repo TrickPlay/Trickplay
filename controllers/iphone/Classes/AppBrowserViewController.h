@@ -57,9 +57,6 @@ UITableViewDataSource, AppBrowserDelegate> {
 @property (nonatomic, retain) IBOutlet UIToolbar *toolBar;
 */
 @property (retain) IBOutlet UITableView *theTableView;
-@property (nonatomic, assign) BOOL pushingViewController;
-
-@property (nonatomic, assign) id <TPAppViewControllerSocketDelegate> socketDelegate;
 @property (assign) id <AppBrowserViewControllerDelegate> delegate;
 
 // Exposed methods

@@ -11,7 +11,6 @@
 @implementation TVBrowserViewController
 
 @synthesize tvBrowser;
-@synthesize currentTVName;
 @synthesize delegate;
 
 - (id)initWithStyle:(UITableViewStyle)style
@@ -102,6 +101,22 @@
     self.tableView.tableFooterView = nil;
 }
 
+#pragma mark -
+#pragma mark Current TV Name Getter/Setter
+
+- (NSString *)currentTVName {
+    NSString *_currentTVName = nil;
+    @synchronized(self) {
+        if (tvBrowser) {
+            _currentTVName = [[tvBrowser.currentTVName retain] autorelease];
+        } else {
+            _currentTVName = [[currentTVName retain] autorelease];
+        }
+    }
+    NSLog(@"_currentTVName: %@", _currentTVName);
+    return _currentTVName;
+}
+
 // TODO: Check that this is being called properly
 - (void)setCurrentTVName:(NSString *)_currentTVName {
     @synchronized(self) {
@@ -113,6 +128,7 @@
     if (tvBrowser) {
         tvBrowser.currentTVName = currentTVName;
     }
+    NSLog(@"_currentTVName: %@, currentTVName: %@", _currentTVName, tvBrowser.currentTVName);
 }
 
 #pragma mark -
@@ -216,7 +232,7 @@
  */
 
 #pragma mark -
-#pragma mark AppBrowserViewControllerSocketDelegate stuff
+#pragma mark TPAppViewControllerSocketDelegate stuff
 
 /**
  * Generic operations to perform when the network fails. Includes deallocating
@@ -233,7 +249,7 @@
 }
 
 /**
- * TPAppViewControllerSocketDelegate callback called from AppBrowserViewController
+ * TPAppViewControllerSocketDelegate callback called from TPAppViewController
  * when an error occurs over the network.
  */
 - (void)socketErrorOccurred {
@@ -243,7 +259,7 @@
 }
 
 /**
- * TPAppViewControllerSocketDelegate callback called from AppBrowserViewController
+ * TPAppViewControllerSocketDelegate callback called from TPAppViewController
  * when the stream socket closes.
  */
 - (void)streamEndEncountered {
@@ -304,8 +320,7 @@
         [currentTVIndicator removeFromSuperview];
         [loadingSpinner removeFromSuperview];
         if ([self.navigationController visibleViewController] == self) {
-            [currentTVName release];
-            currentTVName = nil;
+            self.currentTVName = nil;
         }
         cell.textLabel.text = @"Searching for services...";
 		cell.accessoryType = UITableViewCellAccessoryNone;
@@ -323,6 +338,7 @@
     // If the controller is currently connected to this service then
     // display an orange indicator dot. (Be sure to remove the loadingSpinner
     // in case the service had only just loaded)
+    NSLog(@"currentTVName: %@", currentTVName);
     if ([cell.textLabel.text compare:currentTVName] == NSOrderedSame) {
         [loadingSpinner removeFromSuperview];
         [loadingSpinner stopAnimating];
@@ -467,7 +483,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 - (void)dealloc {
-    NSLog(@"RootViewController dealloc");
+    NSLog(@"TVBrowserViewController dealloc");
     if (currentTVIndicator) {
         [currentTVIndicator release];
         currentTVIndicator = nil;
