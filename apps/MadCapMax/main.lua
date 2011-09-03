@@ -15,7 +15,7 @@ local function main()
     function make_flash_anim(obj,stop_check)
         return {
             loop     = true,
-            duration = 1,
+            duration = .7,
             on_step  = function(s,p)
                 obj.opacity = 255*(.5-.5*math.cos(math.pi*2*p))
             end,
@@ -156,7 +156,7 @@ local function main()
         if Jazz and Max then
             
             Jazz.x1 = Jazz.x-Jazz.anchor_point[1]+40
-            Jazz.y1 = Jazz.y-Jazz.anchor_point[2]+100
+            Jazz.y1 = Jazz.y-Jazz.anchor_point[2]+150
             Jazz.x2 = Jazz.x-Jazz.anchor_point[1]+Jazz.w-40
             Jazz.y2 = Jazz.y-Jazz.anchor_point[2]+Jazz.h
             
@@ -180,7 +180,7 @@ local function main()
             
             if not Max.hit and collided(Max,Jazz) then
                 
-                
+                --[[
                 if Jazz.y < Max.y - 20 then
                     print("above")
                 else
@@ -192,10 +192,10 @@ local function main()
                 else
                     print("right")
                 end
-                
+                --]]
                 Max:recieve_impact(-1600,-1600)
                 --Max:apply_v(Jazz.)
-                print("hit")
+                --print("hit")
                 
             end
             
@@ -272,7 +272,9 @@ local function main()
         end
     )
     
-    
+    Transition_Menu:init{
+        player = Max,
+    }
     
     LVL_Object:init{
         layers        = layers,
@@ -291,11 +293,13 @@ local function main()
     ----------------------------------------------------------------------------
     
     launch_lvl = {
-        function()
+        function(loader)
             
             LVL_Object:prep_level{
                 level = 1,
                 scroll_speed = 100,
+                set_progress = loader.set_progress,
+                inc_progress = loader.inc_progress,
             }
             
             Jazz:load_assets(layers.srcs, layers.enemy)
@@ -311,7 +315,7 @@ local function main()
             
             
             LVL_Object.animation = Animation_Loop:add_animation{
-                on_step = LVL_Object.on_idle
+                on_step = LVL_Object.on_idle,
             }
             
             Max.animation = Animation_Loop:add_animation{

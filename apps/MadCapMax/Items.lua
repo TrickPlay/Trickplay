@@ -30,10 +30,11 @@ local item_type = {
                 
                 layers.items:add(piece)
                 
-                local vx = math.random(-1,1)*60
+                local vx = math.random(-1,1)*200
                 
                 local start_x = piece.x
                 local start_y = piece.y
+                
                 
                 Animation_Loop:add_animation{
                     

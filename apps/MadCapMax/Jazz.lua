@@ -821,6 +821,9 @@ do
     
     run_7  = function()
         
+        if target.dead then
+            dolater(Animation_Loop.delete_animation,Animation_Loop,cat_animation)
+        end
         frame_i = 1
         
         if obstacles[obstacle_i] then
@@ -830,8 +833,6 @@ do
             next_obst_x = false
         end
         
-        
-            
         if jazz.x > stop_point then
             
             jazz.source = imgs.default[1]
@@ -913,7 +914,11 @@ do
                 
                 
                 
-                attack_prep{x=next_obst_x+jazz.w/2,y=next_obst_y-jazz.h/2,land=obstacles[obstacle_i]}
+                attack_prep{
+                    x    = next_obst_x+jazz.w/2,
+                    y    = next_obst_y-jazz.h/2,
+                    land = obstacles[obstacle_i]
+                }
                 
                 obstacle_i = obstacle_i + 1
                 

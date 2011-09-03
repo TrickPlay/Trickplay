@@ -18,6 +18,12 @@ local wings   = Group{
         Image{ src = "assets/max/wing-5.png" ,x = 80,y=40, anchor_point = {30,10} },
     }
 }
+local feathers = {
+    Image{src = "assets/max/feather-1.png" },
+    Image{src = "assets/max/feather-2.png" },
+    Image{src = "assets/max/feather-3.png" },
+    Image{src = "assets/max/feather-4.png" },
+}
 local tail = Image{ src = "assets/max/tail.png" ,x = 25, y = 75, anchor_point = {105,25} }
 wings:hide()
 
@@ -53,6 +59,7 @@ head:add(
 
 local srcs = Group{}
 srcs:add(poop_drop,poop_splat)
+srcs:add(unpack(feathers))
 srcs:hide()
 
 local front_wing = Clone{x = 80, y = 40}
@@ -105,7 +112,7 @@ function bird:init(t)
     
     
     
-    t.parent:add(bird)
+    --t.parent:add(bird)
     
     has_been_initialized = true
     
@@ -126,35 +133,212 @@ function bird:collect_cherry()
     cherries = cherries + 1
 end
 
+local function launch_feather(vx,vy,d)
+    
+    local f = Clone{
+        source = feathers[math.random(1,# feathers)],
+        position = bird.position,
+    }
+    f.x = f.x + math.random(-90,90)
+    local orig_x = f.x
+    f.anchor_point = { f.w/2, -100}
+    
+    local orig_y = f.y + f.anchor_point[2]
+    
+    layers.player:add(f)
+    print("VY",vy)
+    
+    local e = 0
+    
+    
+    
+    
+    
+    f.stage_1 = {
+        duration = 1,
+        on_step = function(s,p)
+            
+            f.y = orig_y + vy*s + 500*s*s
+            f.x = orig_x + vx*s - 10*s*s
+            f.z_rotation = {
+                    10*p*math.sin(math.pi*2*s),
+                    0,
+                    0
+                }
+            
+        end,
+        on_completed = function()
+            
+            Animation_Loop:add_animation(f.stage_2)
+            Animation_Loop:add_animation(f.waft)
+            
+        end
+    }
+    
+    f.waft = {
+        on_step = function(s)
+            e = e + s
+            f.z_rotation = {
+                    10*math.sin(math.pi*2*e),
+                    0,
+                    0
+                }
+                
+        end
+    }
+    
+    f.stage_2 = {
+        on_step = function(s)
+            --e = e + s
+            f.y = f.y - vy/2 *s
+            f.x = f.x + vx/10*s
+            --f.z_rotation = {
+            --        10*math.sin(math.pi*2*e),
+            --        0,
+            --        0
+            --    }
+            if f.y > screen_h then
+                
+                Animation_Loop:delete_animation(f.stage_2)
+                Animation_Loop:delete_animation(f.waft)
+                
+            end
+            
+        end,
+    }
+    
+    Animation_Loop:add_animation(f.stage_1)
+    
+    --[[
+    f.animation = Animation_Loop:add_animation{
+        
+        --duration = d,
+        --
+        --loop = true,
+        
+        on_step = function(s)
+            e = e + s
+            
+            f:set{
+                x       = orig_x + vx*e,
+                y       = orig_y + vy*e ,
+                --opacity = 255*(1-p)
+                --z_rotation = {
+                --    30*math.sin(math.pi*2*s),
+                --    0,
+                --    0
+                --}
+            }
+            
+            vy = vy + 80*e
+            
+            if f.y > screen_h then
+                Animation_Loop:delete_animation(f.animation)
+            end
+        end,
+        on_loop = function()
+            
+            
+            
+        end
+    }
+    --]]
+    return f
+    
+end
+
 local count = 0
 local hit_timer = Timer{
-    interval = 400,
+    interval = 100,
     on_timer = function(self)
         if count == 0 then
             hit_v_x = scroll_speed
             hit_v_y = 0
-        else
+            
+        elseif count == 4 then
             self:stop()
             bird.hit = false
             bird.z_rotation = {0,0,0}
         end
+        
         count = count + 1
+        
         
         
     end
 }
-
+local e,start_y = 0,0
+bird.death_sequence = {
+    
+    on_step  = function(s)
+        e = e + s
+        bird.y = start_y-1500*e+1500*e*e
+        bird.x = bird.x+200*s
+        bird.z_rotation = {(bird.z_rotation[1]+200*s)%360,bird.w/2,bird.h/2}
+        print(bird.z_rotation[1])
+        if bird.y > 1300 then
+            print("1",bird.death_sequence)
+            Animation_Loop:delete_animation(bird.death_sequence)
+            print("2")
+            
+            gamestate:change_state_to("LVL_TRANSITION")
+            
+            --Animation_Loop:add_animation(bird.death_sequence_pt2)
+            --bird.y = -200
+            --bird.scale = {2,2}
+        end
+    end,
+}
+--[[
+bird.death_sequence_pt2 = {
+    on_step  = function(s,p)
+        bird.y = bird.y+700*s
+        bird.x = bird.x+200*s
+        bird.z_rotation = {bird.z_rotation[1]+200*s,bird.w/2,bird.h/2}
+    end
+}
+--]]
 function bird:recieve_impact(v_x,v_y)
+    
+    --print()
+    
+    if bird.invincible or bird.dead then return end
     
     damage = damage +1
     
     if damage == 1 then
+        
         eye_l_i.opacity = 255
+        
     elseif damage == 2 then
+        
         eye_r_i.opacity = 255
+        
     elseif damage == 3 then
-        v_y
+        
+        bird.dead = true
+        
+        start_y = bird.y
+        
+        e = 0
+        
+        Animation_Loop:delete_animation(bird.animation)
+        
+        Animation_Loop:add_animation(bird.death_sequence)
+        
+        return
     end
+    
+    
+    for i = 1, 4 do
+        
+        launch_feather(
+            math.random( -2, 2 ) *  100,
+            math.random(  60, 70 ) * -10
+        )
+        
+    end
+    
     
     bird.hit = true
     
@@ -170,18 +354,28 @@ end
 
 function bird:setup_for_level(t)--next_lvl, start_x, start_y)
     
+    eye_l_i.opacity = 0
+    eye_r_i.opacity = 0
+    
+    bird.z_rotation = {0,0,0}
+    bird.dead = false
+    damage = 0
+    bird.hit = false
+    
     --required
     lvl = t.lvl or error("must pass lvl object to 'lvl",2)
     
     scroll_speed = t.scroll_speed or  100
     bird.x       = t.start_x      or  200
     bird.y       = t.start_y      or  200
-    bird.y       = t.start_y      or  200
+    y_base       = t.start_y      or  200
     bottom_limit = t.bottom_limit or  700
     floor_y      = t.floor_y      or 1050
     ceiling_y    = t.ceiling_y    or   40
     
     vx = scroll_speed
+    
+    layers.player:add(bird)
 end
 
 
