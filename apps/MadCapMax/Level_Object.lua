@@ -7,6 +7,9 @@ local generic_srcs = {
     "cherry-leaf.png",
     "cherry-stem-1.png",
     "cherry-stem-2.png",
+    "cracker.png",
+    "cracker-crumble1.png",
+    "cracker-crumble2.png",
 }
 --[[
     Level Organization
@@ -214,7 +217,7 @@ local lvls = {
             {
                 type   = "foreground",
                 source = "bedroom-door-frame",
-                x      = 3840+1880+115,
+                x      = 3840+1880+105,
                 y      = 140,
             },
 
@@ -899,28 +902,45 @@ local lvls = {
         },
         
         collectables = {
+            ----pre-bed
             {
                 x = 1000,
                 y = 700,
-                type = "seed",
+                type = "cracker",
             },
             {
                 x = 1200,
                 y = 700,
-                type = "seed",
+                type = "cracker",
             },
             {
                 x = 1400,
                 y = 700,
-                type = "seed",
+                type = "cracker",
             },
             {
                 x = 1920+1250,
                 y = 700,
                 type = "cherry",
             },
+            --bathroom area
             {
-                x = 3840+813- 50,
+                x = 3840+813- 750,
+                y = 700,
+                type = "seed",
+            },
+            {
+                x = 3840+813- 550,
+                y = 700,
+                type = "seed",
+            },
+            {
+                x = 3840+813- 350,
+                y = 700,
+                type = "seed",
+            },
+            {
+                x = 3840+813- 150,
                 y = 700,
                 type = "seed",
             },
@@ -940,10 +960,22 @@ local lvls = {
                 type = "seed",
             },
             {
+                x = 6077,
+                y = 700,
+                type = "cracker",
+            },
+            {
+                x = 6277,
+                y = 700,
+                type = "cracker",
+            },
+            
+            {
                 x = 5760+1387+100,
                 y = 700,
                 type = "cherry",
             },
+            --couches
             {
                 x = 7680+196+360,
                 y = 700,
@@ -960,10 +992,11 @@ local lvls = {
                 type = "seed",
             },
             {
-                x = 7680+196+810,
+                x = 7680+196+910,
                 y = 700,
                 type = "seed",
             },
+            --pre-bar
             {
                 x = 9600+33+265,
                 y = 700,
@@ -984,6 +1017,7 @@ local lvls = {
                 y = 700,
                 type = "seed",
             },
+            --bar
             {
                 x = 9600+33+1065,
                 y = 400,
@@ -1004,6 +1038,7 @@ local lvls = {
                 y = 700,
                 type = "cherry",
             },
+            --kitchen counter
             {
                 x = 11520+264+470,
                 y = 350,
@@ -1019,6 +1054,12 @@ local lvls = {
                 y = 350,
                 type = "seed",
             },
+            
+            {
+                x = 11520+1674-70,
+                y = 200,
+                type = "seed",
+            },
             {
                 x = 11520+1674+170,
                 y = 200,
@@ -1031,6 +1072,21 @@ local lvls = {
             },
             {
                 x = 11520+1674+570,
+                y = 200,
+                type = "cherry",
+            },
+            {
+                x = 11520+1674+770,
+                y = 200,
+                type = "seed",
+            },
+            {
+                x = 11520+1674+970,
+                y = 200,
+                type = "seed",
+            },
+            {
+                x = 11520+1674+1170,
                 y = 200,
                 type = "seed",
             },
@@ -1268,6 +1324,8 @@ function LVL_Object:prep_level(t)
     LVL_Object.left_screen_edge  = -screen_w
     LVL_Object.right_screen_edge = LVL_Object.left_screen_edge + screen_w
     
+    t.set_progress(#lvls[curr_lvl_i].clone_srcs)
+    
     --load up the assets for the level
     for _,img in pairs(lvls[curr_lvl_i].clone_srcs) do
         
@@ -1285,6 +1343,8 @@ function LVL_Object:prep_level(t)
                 ) - 1
             )
         ] = obj
+        
+        t.inc_progress()
         
     end
     
@@ -1563,6 +1623,20 @@ function LVL_Object:scroll_by(dx)
                 },
             }
             
+        elseif collectables[collectable_i].type == "cracker" then
+            
+            obj.source = generic_imgs["cracker"]
+            
+            obj = Item{
+                source         = obj,
+                item_type      = "collectable",
+                initial_impact = Max.collect_seed,
+                pieces = {
+                    generic_imgs["cracker-crumble1"],
+                    generic_imgs["cracker-crumble2"],
+                },
+            }
+            
         end
         
         obj.anchor_point = {
@@ -1599,6 +1673,8 @@ function LVL_Object:scroll_by(dx)
             local orig_x = items[item_i].x
             local orig_y = items[item_i].y
             
+            print("\n\n\nPREEENT:\t\t",orig_x,orig_y,"\n\n\n")
+            
             for i = 1, items[item_i].tile[1] do
                 for j = 1, items[item_i].tile[2] do
                     
@@ -1611,6 +1687,9 @@ function LVL_Object:scroll_by(dx)
                     
                 end
             end
+            
+            items[item_i].x = orig_x
+            items[item_i].y = orig_y
             
         else
             
@@ -1756,7 +1835,7 @@ function LVL_Object:unload_lvl()
     layers.wall_objs:clear()
     layers.background:clear()
     layers.items:clear()
-    --layers.player:clear()
+    layers.player:clear()
     --layers.enemy:clear()
     layers.foreground:clear()
     

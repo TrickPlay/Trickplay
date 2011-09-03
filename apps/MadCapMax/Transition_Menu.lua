@@ -1,14 +1,17 @@
 Transition_Menu = Group{}
 
-local bg,help,play,flash_play_hl
+local bg, retry, retry_hl, continue, continue_hl
+
 local index = 1
-local splash_path_dir = "menus/transition/"
+local trans_path_dir = "menus/transition/"
+
+local player
 
 local prev_lvl, next_lvl
 
 local enter_press = {
     function()
-        
+        --[[
         Transition_Menu:animate{
             duration = 500,
             opacity=30,
@@ -24,10 +27,10 @@ local enter_press = {
                 collectgarbage("collect")
             end
         }
-        
+        --]]
         
         gamestate:change_state_to("ACTIVE")
-        launch_lvl[prev_lvl]()
+        launch_lvl[prev_lvl](Transition_Menu)
         
     end,
     function() 
@@ -60,7 +63,67 @@ local enter_press = {
     end,
 }
 
-local focus_on
+local focus_on, right_i
+local prog  = Rectangle{x = 40, y = screen_h - 100, w=10,         h = 30,color="f69024dd"}
+local track = Rectangle{x = 40, y = screen_h - 100, w=screen_w-80,h = 30,color="00000066"}
+
+Transition_Menu:add(track,prog)
+
+
+local num_assets, num_loaded
+
+function Transition_Menu.set_progress(amt)
+    retry_hl.flash = nil
+    continue_hl.flash = nil
+    continue:unparent()    
+    continue_hl:unparent() 
+    retry:unparent()   
+    retry_hl:unparent()
+    continue = nil
+    continue_hl = nil
+    retry = nil
+    retry_hl = nil
+    collectgarbage("collect")
+    
+    if type(amt) ~= "number" then
+        
+        error("must pass a number for the number of assets",2)
+        
+    end
+    
+    track:raise_to_top()
+    track:show()
+    prog:raise_to_top()
+    prog:show()
+    
+    num_assets = amt
+    num_loaded = 0
+end
+function Transition_Menu:inc_progress()
+    
+    num_loaded = num_loaded + 1
+    
+    if num_loaded > num_assets then
+        
+        error("miscalculation with progress",2)
+        
+    elseif num_loaded == num_assets then
+        
+        bg:unparent()
+        bg = nil
+        Transition_Menu:unparent()
+        
+        collectgarbage("collect")
+        
+        
+        gamestate:change_state_to("ACTIVE")
+        
+    end
+    
+    prog.w = num_loaded/num_assets*track.w
+    
+end
+
 
 gamestate:add_state_change_function(
     function()
@@ -69,17 +132,26 @@ gamestate:add_state_change_function(
     "ACTIVE","LVL_TRANSITION"
 )
 
+function Transition_Menu:init(t)
+    
+    player = t.player
+    
+end
+
 function Transition_Menu:load_assets(parent,prev_level)
     
     prev_lvl = prev_level
     
-    index = 2
+    index   = player.dead and 1 or 2
+    right_i = player.dead and 1 or 2
     
-    bg          = Image{src = assets_path_dir..splash_path_dir.."level-transition.jpg", }
-    retry       = Image{src = assets_path_dir..splash_path_dir.."retry.png",       x =  100,y=400}
-    retry_hl    = Image{src = assets_path_dir..splash_path_dir.."retry-hl.png",    x =  100,y=400,opacity=0}
-    continue    = Image{src = assets_path_dir..splash_path_dir.."continue.png",    x = 1500,y=400}
-    continue_hl = Image{src = assets_path_dir..splash_path_dir.."continue-hl.png", x = 1500,y=400,opacity=0}
+    bg          = Image{src = assets_path_dir..trans_path_dir.."level-transition.jpg", scale = {4/3,4/3} }
+    retry       = Image{src = assets_path_dir..trans_path_dir.."retry.png",       x =   50,y=800}
+    retry_hl    = Image{src = assets_path_dir..trans_path_dir.."retry-hl.png",    x =   50,y=800,opacity=0}
+    continue    = Image{src = assets_path_dir..trans_path_dir.."continue.png",    x = 1400,y=800}
+    continue_hl = Image{src = assets_path_dir..trans_path_dir.."continue-hl.png", x = 1400,y=800,opacity=0}
+    
+    continue.opacity = player.dead and 255*.25 or 255
     
     retry_hl.flash    = make_flash_anim(    retry_hl, function() return index ~= 1 end )
     continue_hl.flash = make_flash_anim( continue_hl, function() return index ~= 2 end )
@@ -128,7 +200,7 @@ local keys = {
     end,
     [keys.Right] = function()
         
-        if index ~= # focus_on then
+        if index ~= right_i then
             
             index = index + 1
             
