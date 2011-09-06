@@ -1518,8 +1518,8 @@ function ui_element.button(t)
 	     						w:find_child("ring").opacity = 255
 	     						w:find_child("focus_ring").opacity = 0
         					else
-	     						w:find_child("button").opacity = 255
-            					w:find_child("focus").opacity = 0
+	     						w:find_child("button_dim").opacity = 255
+            					w:find_child("button_focus").opacity = 0
         					end
 						end 
 					end 
@@ -1950,7 +1950,6 @@ function ui_element.dialogBox(t)
 
  --the umbrella Group
     local db_group_cur_y = 6
-    local d_box, title_separator, title, d_box_img, title_separator_img, create_dialogBox
 
     local  db_group = Group {
     	  name = "dialogBox",  
@@ -1960,50 +1959,44 @@ function ui_element.dialogBox(t)
     }
 
 
-    create_dialogBox  = function ()
+    local create_dialogBox  = function ()
+
+    local d_box, title_separator, title, d_box_img, title_separator_img
    
         db_group:clear()
+        --db_group.size = { p.ui_width , p.ui_height - 34}
         db_group.size = { p.ui_width , p.ui_height }
 
-
-        --db_group.size = { p.ui_width , p.ui_height - 34}
-	    --d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
+		d_box = draw_dialogBG(p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
+        --d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
 		--d_box.y = d_box.y - 34
-		--[[
-			if p.title_separator_thickness >  0 then 
+		d_box.y = d_box.y 
+		d_box:set{name="d_box"} 
+		db_group:add(d_box)
+--[[
+	if p.title_separator_thickness >  0 then 
              title_separator = make_title_separator(p.title_separator_thickness, p.title_separator_color, p.ui_width)
              title_separator:set{name = "title_separator", position  = {0, db_group_cur_y + 30}}
-	     	 db_group:add(title_separator)
-			end
-  		]]
+	     db_group:add(title_separator)
+	end
+  ]]
 
         title= Text{text = p.label, font= p.title_font, color = p.title_color}     
         title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
 
-		if(p.skin == "Custom") then 
-			d_box = draw_dialogBG(p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
-			d_box.y = d_box.y 
-			d_box:set{name="d_box"} 
-			db_group:add(d_box)
-		else 
-			d_box = draw_dialogBG(p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
-			d_box.y = d_box.y 
-			d_box:set{name="d_box"} 
-			db_group:add(d_box)
-			--[[ 
-			
-			--carbon candy skin for dialog box is not supported 
+	if(p.skin ~= "Custom") then 
+        	d_box_img = assets(skin_list[p.skin]["dialogbox"])
+        	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
+	else 
+		d_box_img = Image{} 
+	end
 
-    		d_box_img = assets(skin_list[p.skin]["dialogbox"])
-        	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
-			db_group:add(d_box_img)
-			]]
-		end
-
-		db_group:add(title)
-		if p.content then 
-	     	db_group:add(p.content)
-		end 
+	db_group:add(d_box_img, title)
+	if p.content then 
+	     db_group:add(p.content)
+	end 
+	if (p.skin == "Custom") then d_box_img.opacity = 0
+        else d_box.opacity = 0 end 
 
      end 
 
@@ -2033,6 +2026,7 @@ function ui_element.dialogBox(t)
      setmetatable (db_group.extra, mt) 
      return db_group
 end 
+
 
 --[[
 Function: toastAlert
@@ -2104,48 +2098,31 @@ function ui_element.toastAlert(t)
     end 
 
  --the umbrella Group
+    local t_box, icon, title, message, t_box_img, create_toastBox  
     local tb_group = Group {
-    	  name = "toastbGroup",  
+    	  name = "toastb_group",  
     	  position = p.ui_position, 
           reactive = true, 
           extra = {type = "ToastAlert"} 
      }
 
-    local create_toastBox = function()
+    local tb_group_cur_y = 10
+    local tb_group_cur_x = 20
+    local tb_group_timer = Timer()
+    local tb_group_timeline = Timeline ()
+    
 
-    	local t_box, icon, title, message, t_box_img
-    	local tb_group_cur_y = 10
-    	local tb_group_cur_x = 20
-    	local tb_group_timer = Timer()
-    	local tb_group_timeline = Timeline ()
-	
+    create_toastBox = function()
+
     	tb_group:clear()
         tb_group.size = { p.ui_width , p.ui_height}
 
-
-		if(p.skin == "Custom") then 
-    		t_box = make_toastb_group_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
-    		t_box:set{name="t_box"}
-			t_box.y = t_box.y -30
-
-    		tb_group:add(t_box)
-		else 
-    	    t_box_img = assets(skin_list[p.skin]["toast"])
-    	    t_box_img:set{name="t_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
-    		tb_group:add(t_box_img)
-		end 
-
+    	t_box = make_toastb_group_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
+    	t_box:set{name="t_box"}
 		tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
 		icon = Image {src = p.icon}
     	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
-tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
-
-		icon = Image {src = p.icon}
-    	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
-
-    	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-    	title:set{name = "title", position = { icon.w + icon.x + 20 , tb_group_cur_y }}  --,50
 
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
     	title:set{name = "title", position = { icon.w + icon.x + 20 , tb_group_cur_y }}  --,50
@@ -2153,7 +2130,19 @@ tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
     	message= Text{text = p.message, font= p.message_font, color = p.message_color, wrap = true, wrap_mode = "CHAR"}     
     	message:set{name = "message", position = {icon.w  + icon.x + 20 , title.h + tb_group_cur_y }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
 
-    	tb_group:add(icon, title, message)
+	if(p.skin ~= "Custom") then 
+    	     t_box_img = assets(skin_list[p.skin]["toast"])
+    	     t_box_img:set{name="t_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
+	else 
+	     t_box_img = Image{}
+	end 
+
+		t_box.y = t_box.y -30
+
+    	tb_group:add(t_box, t_box_img, icon, title, message)
+
+    	if (p.skin == "Custom") then t_box_img.opacity = 0
+    	else t_box.opacity = 0 end 
 
     	tb_group_timer.interval = p.on_screen_duration 
     	tb_group_timeline.duration = p.fade_duration
@@ -2161,10 +2150,10 @@ tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
     	tb_group_timeline.loop = false
 
 
-		local my_alpha = Alpha{timeline=tb_group_timeline,mode="EASE_OUT_SINE"}
+	local my_alpha = Alpha{timeline=tb_group_timeline,mode="EASE_OUT_SINE"}
 
-		local opacity_interval = Interval(255, 0)
-		local scale_interval = Interval(1,0.8)
+	local opacity_interval = Interval(255, 0)
+	local scale_interval = Interval(1,0.8)
 
      	function tb_group_timeline.on_new_frame(t, m)
 			tb_group.opacity = opacity_interval:get_value(my_alpha.alpha)
@@ -2172,13 +2161,14 @@ tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
      	end  
 
      	function tb_group_timeline.on_completed()
+		--tb_group.opacity = 0
 			tb_group.scale = {0.8, 0.8}
 			tb_group.opacity = 255
 			tb_group:hide()
      	end 
 
      	function tb_group_timer.on_timer(tb_group_timer)
-			tb_group_timeline:start()
+		tb_group_timeline:start()
         	tb_group_timer:stop()
      	end 
      end 
@@ -2218,6 +2208,8 @@ tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
      return tb_group
 end 
+
+
 
 --[[
 Function: buttonPicker
