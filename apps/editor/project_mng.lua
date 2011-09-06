@@ -66,8 +66,10 @@ local function set_new_project (pname, replace)
 			for i, j in pairs (projects) do 
 				if j == pname then 
 					if replace == nil then 
-						editor.error_message("001", pname, set_new_project)  
-						return 
+						if j ~= "unsaved_temp" then 
+							editor.error_message("001", pname, set_new_project)  
+							return 
+					    end
 					end  
 				end 
 			end 
