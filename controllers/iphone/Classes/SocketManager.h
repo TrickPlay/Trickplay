@@ -8,7 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "NSStreamAdditions.h"
-#import "CommandInterpreter.h"
+#import "CommandInterpreterApp.h"
+#import "CommandInterpreterAdvancedUI.h"
 
 
 @interface WritePacket : NSObject
@@ -34,13 +35,19 @@
 @end
 
 
+typedef enum {
+    APP_PROTOCOL,
+    ADVANCED_UI_PROTOCOL
+} CommandProtocol;
 
 @interface SocketManager : NSObject <NSStreamDelegate> {
     NSString *host;
-    NSInteger port;
+    NSUInteger port;
     
     NSInputStream *input_stream;
     NSOutputStream *output_stream;
+    
+    BOOL functional;
     
     id <SocketManagerDelegate> delegate;
     
@@ -56,15 +63,17 @@
 
 
 - (id)initSocketStream:(NSString *)host
-                  port:(NSInteger)port
-              delegate:(id <SocketManagerDelegate>)theDelegate;
+                  port:(NSUInteger)port
+              delegate:(id <SocketManagerDelegate>)theDelegate
+              protocol:(CommandProtocol)protocol;
+- (BOOL)isFunctional;
 
 - (void)sendData:(const void *)data numberOfBytes:(int)bytes;
 - (BOOL)sendPackets;
 - (BOOL)sendPacket;
 
 // Getters/Setters not synthesized
-- (NSInteger)port;
-- (void)setPort:(NSInteger)value;
+- (NSUInteger)port;
+- (void)setPort:(NSUInteger)value;
 
 @end

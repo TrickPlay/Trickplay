@@ -8,6 +8,7 @@
 #include "profiler.h"
 #include "json.h"
 #include "common.h"
+#include "keyboard.h"
 
 //.............................................................................
 
@@ -27,6 +28,7 @@
 #define APP_FIELD_RELEASE       "release"
 #define APP_FIELD_VERSION       "version"
 #define APP_FIELD_ACTIONS       "actions"
+#define APP_FIELD_ATTRIBUTES    "attributes"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -42,10 +44,13 @@ extern int luaopen_clutter_group( lua_State * L );
 extern int luaopen_clutter_image( lua_State * L );
 
 extern int luaopen_clutter_timeline( lua_State * L );
+extern int luaopen_clutter_animator( lua_State * L );
+extern int luaopen_clutter_state( lua_State * L );
 extern int luaopen_clutter_score( lua_State * L );
 extern int luaopen_clutter_alpha( lua_State * L );
 extern int luaopen_clutter_interval( lua_State * L );
 extern int luaopen_clutter_path( lua_State * L );
+extern int luaopen_clutter_constraint( lua_State * L );
 
 extern int luaopen_idle( lua_State * L );
 extern int luaopen_timer( lua_State * L );
@@ -58,7 +63,6 @@ extern int luaopen_profile( lua_State * L );
 extern int luaopen_xml( lua_State * L );
 extern int luaopen_controllers_module( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
-extern int luaopen_audiosampler_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
 
@@ -70,7 +74,13 @@ extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 extern int luaopen_bitmap( lua_State * L );
 extern int luaopen_canvas( lua_State * L );
+extern int luaopen_keyboard( lua_State * L );
 extern int luaopen_http_module( lua_State * L );
+
+#ifdef TP_WITH_WEBGL
+extern int luaopen_typed_array( lua_State * L );
+extern int luaopen_webgl( lua_State * L );
+#endif
 
 #ifndef TP_PRODUCTION
 extern int luaopen_devtools( lua_State * L );
@@ -334,6 +344,23 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
             md.copyright = lua_tostring( L, -1 );
         }
         lua_pop( L, 1 );
+
+        // Look for attributes
+
+        lua_getfield( L , -1 , APP_FIELD_ATTRIBUTES );
+        if ( lua_istable( L , -1 ) )
+        {
+            lua_pushnil( L );
+            while( lua_next( L , -2 ) )
+            {
+                if ( lua_type( L , -1 ) == LUA_TSTRING )
+                {
+                    md.attributes.insert( lua_tostring( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+            }
+        }
+        lua_pop( L , 1 );
 
         // Look for actions
 
@@ -816,7 +843,7 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
     if ( ! splash_path.empty() )
     {
-        Image * splash_image = Image::decode( splash_path.c_str() );
+        Image * splash_image = Image::decode( splash_path.c_str() , false );
 
         if ( ! splash_image )
         {
@@ -905,10 +932,13 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_clutter_group( L );
     luaopen_clutter_image( L );
     luaopen_clutter_timeline( L );
+    luaopen_clutter_animator( L );
+    luaopen_clutter_state( L );
     luaopen_clutter_score( L );
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
     luaopen_clutter_path( L );
+    luaopen_clutter_constraint( L );
 
     luaopen_idle( L );
     luaopen_timer( L );
@@ -920,7 +950,6 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_stopwatch( L );
     luaopen_json( L );
     luaopen_controllers_module( L );
-    luaopen_audiosampler_module( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
     luaopen_url_request( L );
@@ -931,6 +960,12 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_bitmap( L );
     luaopen_canvas( L );
     luaopen_http_module( L );
+    luaopen_keyboard( L );
+
+#ifdef TP_WITH_WEBGL
+    luaopen_typed_array( L );
+    luaopen_webgl( L );
+#endif
 
 #ifndef TP_PRODUCTION
     luaopen_devtools( L );
@@ -1001,6 +1036,10 @@ App::~App()
     debugger.uninstall();
 
 #endif
+
+    // Get rid of the keyboard
+
+    Keyboard::hide( L , true );
 
     notify( context , TP_NOTIFICATION_APP_CLOSING );
 
@@ -1620,7 +1659,7 @@ gboolean App::animate_out_callback( gpointer s )
 //-----------------------------------------------------------------------------
 
 
-Image * App::load_image( const gchar * source )
+Image * App::load_image( const gchar * source , bool read_tags )
 {
     tplog( "LOADING SYNC '%s'" , source );
 
@@ -1655,7 +1694,7 @@ Image * App::load_image( const gchar * source )
         {
             tplog( "  DECODING" );
 
-            image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
+            image = Image::decode( response.body->data, response.body->len, read_tags , response.get_header( "Content-Type" ) );
         }
         else
         {
@@ -1667,7 +1706,7 @@ Image * App::load_image( const gchar * source )
         tplog( "  PATH IS '%s'" , path );
         tplog( "  DECODING" );
 
-        image = Image::decode( path );
+        image = Image::decode( path , read_tags );
     }
 
     tplog( "  %s" , image ? "SUCCEEDED" : "FAILED" );
@@ -1679,8 +1718,9 @@ class ImageResponseClosure
 {
 public:
 
-    ImageResponseClosure( Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    ImageResponseClosure( bool _read_tags , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
     :
+    	read_tags( _read_tags ),
         callback( _callback ),
         user( _user ),
         destroy_notify( _destroy_notify )
@@ -1702,6 +1742,7 @@ public:
             tplog( "  STARTING DECODE FOM BUFFER" );
 
             Image::decode_async( response.body ,
+            		self->read_tags ,
                     response.get_header( "Content-Type" ),
                     self->callback,
                     self->user,
@@ -1725,18 +1766,23 @@ public:
 
 private:
 
-
+    bool						read_tags;
     Image::DecodeAsyncCallback  callback;
     gpointer                    user;
     GDestroyNotify              destroy_notify;
 };
 
-bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+bool App::load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
     tplog( "LOADING ASYNC '%s'" , source );
 
     if ( ! source )
     {
+    	if ( destroy_notify )
+    	{
+    		destroy_notify( user );
+    	}
+
         return false;
     }
 
@@ -1747,6 +1793,12 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
     if ( ! path )
     {
         tplog( "  INVALID PATH" );
+
+        if ( destroy_notify )
+    	{
+    		destroy_notify( user );
+    	}
+
         return false;
     }
 
@@ -1762,7 +1814,7 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
             request,
             get_cookie_jar(),
             ImageResponseClosure::response_callback,
-            new ImageResponseClosure( callback , user , destroy_notify ),
+            new ImageResponseClosure( read_tags , callback , user , destroy_notify ),
             ImageResponseClosure::destroy );
     }
     else
@@ -1770,7 +1822,7 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
         tplog( "  PATH IS '%s'" , path );
         tplog( "  STARTING DECODE FROM FILE" );
 
-        Image::decode_async( path , callback , user , destroy_notify );
+        Image::decode_async( path , read_tags , callback , user , destroy_notify );
     }
 
     return true;

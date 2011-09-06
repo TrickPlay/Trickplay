@@ -21,6 +21,37 @@
 
 //=============================================================================
 
+HttpServer::RequestHandler::RequestHandler()
+:
+	server( 0 )
+{
+}
+
+//-----------------------------------------------------------------------------
+
+HttpServer::RequestHandler::RequestHandler( HttpServer * _server , const String & _path )
+:
+	server( _server ),
+	path( _path )
+{
+	g_assert( server );
+	g_assert( ! path.empty() );
+
+	server->register_handler( path , this );
+}
+
+//-----------------------------------------------------------------------------
+
+HttpServer::RequestHandler::~RequestHandler()
+{
+	if ( server )
+	{
+		server->unregister_handler( path );
+	}
+}
+
+//=============================================================================
+
 HttpServer::HttpServer( guint16 port ) : server( NULL )
 {
 	server = soup_server_new( SOUP_SERVER_PORT, port , NULL );
@@ -284,7 +315,10 @@ public:
 
             while ( g_hash_table_iter_next( & it , & key , & value ) )
             {
-                result[ ( const char * ) key ] = ( const char * ) value;
+                const char * k = key ? ( const char * ) key : "";
+                const char * v = value ? ( const char * ) value : "";
+
+                result[ k ] = v;
             }
 		}
 		return result;
@@ -306,7 +340,10 @@ public:
 
             while ( g_hash_table_iter_next( & it , & key , & value ) )
             {
-                result.push_back( ( const char * ) key );
+                if ( key )
+                {
+                    result.push_back( ( const char * ) key );
+                }
             }
         }
 		return result;
@@ -395,7 +432,7 @@ public:
         tplog2( "CREATED RESPONSE BODY %p" , this );
     }
 
-    ~StreamBody()
+    virtual ~StreamBody()
     {
         if ( wrote_headers_handler )
         {
