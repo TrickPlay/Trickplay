@@ -41,7 +41,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushAppBrowser:) name:@"ConnectionEstablishedNotification" object:nil];
     
     tvBrowserViewController.delegate = self;
-    self.view = navigationController.view;
+    [self.view addSubview:navigationController.view];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
