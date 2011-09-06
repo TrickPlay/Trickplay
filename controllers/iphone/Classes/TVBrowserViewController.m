@@ -460,7 +460,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	{
 		[tableView deselectRowAtIndexPath:indexPath2 animated:YES];
 	}
-	
 }
 
 #pragma mark -
