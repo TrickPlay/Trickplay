@@ -541,10 +541,7 @@ end
 
 
 
--- make_ring() : make ring for button or text input field 
-
 local function make_ring(w,h,bc,fc,bw,px,py,br)
-		print("make ring")
         local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
         ring:set_source_color(bc)
@@ -628,56 +625,63 @@ end
 return c
 end
 
+local function my_create_select_circle( _ , ... ) 
+	return create_select_circle( ... )
+end 
 
 local function create_circle(radius, color)
 
 -- Determines kappa, necessary for circle with bezier curves
-kappa = 4*((math.pow(2,.5)-1)/3)
+	kappa = 4*((math.pow(2,.5)-1)/3)
 
 ----circle canvas size
-c = Canvas { size = {radius*4, radius*4} }
+	c = Canvas { size = {radius*4, radius*4} }
 --- sets x and y of circle
 
-center_x = radius*2
-center_y = radius*2
+	center_x = radius*2
+	center_y = radius*2
 
 -- Start point of circle creation
 
-c:begin_painting()
-c:new_path()
+	c:begin_painting()
+	c:new_path()
 
-c:move_to( center_x, center_y-radius )
+	c:move_to( center_x, center_y-radius )
+	
+	c:curve_to(  center_x+kappa*radius , center_y-radius ,
+				center_x+radius , center_y-kappa*radius ,
+				center_x+radius , center_y
+			 	)
+	
+	c:curve_to(  center_x+radius , center_y+kappa*radius ,
+				center_x+kappa*radius , center_y+radius ,
+				center_x , center_y+radius
+				)
+			 	
+	c:curve_to(  center_x-kappa*radius , center_y+radius ,
+				center_x-radius , center_y+radius*kappa ,
+				center_x-radius , center_y
+			 	)
 
-c:curve_to(  center_x+kappa*radius , center_y-radius ,
-			center_x+radius , center_y-kappa*radius ,
-			center_x+radius , center_y
-			 )
+	c:curve_to(  center_x-radius , center_y-radius*kappa,
+				center_x-radius*kappa , center_y-radius ,
+				center_x , center_y-radius
+			 	)
+			 		 	
+	c:set_source_color( color )
+	c:set_line_width(3)
+	c:stroke(true)
+	-- Finishes painting on Canvas
+	c:finish_painting()
+	if c.Image then
+  		c = c:Image()
+	end
 
-c:curve_to(  center_x+radius , center_y+kappa*radius ,
-			center_x+kappa*radius , center_y+radius ,
-			center_x , center_y+radius
-			)
-			 
-c:curve_to(  center_x-kappa*radius , center_y+radius ,
-			center_x-radius , center_y+radius*kappa ,
-			center_x-radius , center_y
-			 )
-
-c:curve_to(  center_x-radius , center_y-radius*kappa,
-			center_x-radius*kappa , center_y-radius ,
-			center_x , center_y-radius
-			 )
-			 		 
-c:set_source_color( color )
-c:set_line_width(3)
-c:stroke(true)
--- Finishes painting on Canvas
-c:finish_painting()
-if c.Image then
-  c = c:Image()
+	return c
 end
 
-return c
+local function my_create_circle( _ , ... )
+     return create_circle( ... )
 end
 
 local function name2num(name)
@@ -1336,11 +1340,10 @@ function ui_element.button(t)
     } 
     
     function b_group.extra.on_focus_in(key) 
-
 		local ring = b_group:find_child("ring") 
 		local focus_ring = b_group:find_child("focus_ring") 
-		local button = b_group:find_child("button") 
-		local focus = b_group:find_child("focus") 
+		local button = b_group:find_child("button_dim") 
+		local focus = b_group:find_child("button_focus") 
 
 		if b_group.is_in_menu == true then 
 			if b_group.fade_in == true then 
@@ -1383,8 +1386,8 @@ function ui_element.button(t)
 
 		local ring = b_group:find_child("ring") 
 		local focus_ring = b_group:find_child("focus_ring") 
-		local button = b_group:find_child("button") 
-		local focus = b_group:find_child("focus") 
+		local button = b_group:find_child("button_dim") 
+		local focus = b_group:find_child("button_focus") 
 
 			
 		if b_group.is_in_menu == true then 
@@ -1419,7 +1422,7 @@ function ui_element.button(t)
     end
 
     local create_button = function() 
-    
+	
 		local ring, focus_ring, button, focus, text, s_txt
 
         b_group:clear()
@@ -1439,9 +1442,9 @@ function ui_element.button(t)
 
 		elseif(p.skin == "editor") then 
 	    	button= assets("assets/invisible_pixel.png")
-            button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
+            button:set{name="button_dim", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 	    	focus= assets("assets/menu-bar-focus.png")
-            focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
+            focus:set{name="button_focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 		elseif(p.skin == "inspector") then 
 	    	button= Group{}
 			focus = Group{}
@@ -1452,7 +1455,7 @@ function ui_element.button(t)
 			right_cap = assets("lib/assets/button-small-rightcap.png")
 			right_cap:set{position = {p.ui_width-left_cap.w, 0 }} 
 			button:add(left_cap, repeat_1px, right_cap)
-			button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
+			button:set{name="button_dim", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
 			button.reactive = true 
 
 
@@ -1462,14 +1465,14 @@ function ui_element.button(t)
 			right_cap_f = assets("lib/assets/button-small-rightcap-focus.png")
 			right_cap_f:set{position = {p.ui_width-left_cap_f.w, 0 }} 
 			focus:add(left_cap_f, repeat_1px_f, right_cap_f)
-            focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
+            focus:set{name="button_focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 			button.reactive = true 
 
 		else
             button = assets(skin_list[p.skin]["button"])
-            button:set{name="button", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
+            button:set{name="button_dim", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 255}
             focus = assets(skin_list[p.skin]["button_focus"])
-            focus:set{name="focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
+            focus:set{name="button_focus", position = { 0 , 0 } , size = { p.ui_width , p.ui_height } , opacity = 0}
 		end 
 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
@@ -1511,7 +1514,6 @@ function ui_element.button(t)
 				if b_group.tab_button == true and b_group.parent.buttons ~= nil then 
 					for q,w in pairs (b_group.parent.buttons) do
 						if w.label ~= b_group.label then 
-							print("tab",w.label,"focus out")
 							if (w.skin == "Custom") then 
 	     						w:find_child("ring").opacity = 255
 	     						w:find_child("focus_ring").opacity = 0
@@ -1602,7 +1604,7 @@ function ui_element.button(t)
         else 
            	p[k] = v
         end
-		if k ~= "selected" then 
+		if k ~= "selected" and k ~= "fade_in" then 
         	create_button()
 		end
     end 
@@ -1696,6 +1698,7 @@ function ui_element.textInput(t)
     }
 
  	function t_group.extra.on_focus_in()
+
     	local box 		= t_group:find_child("box") 
 		local focus_box = t_group:find_child("focus_box") 
 		local box_img	= t_group:find_child("box_img") 
@@ -1718,6 +1721,7 @@ function ui_element.textInput(t)
      end
 
      function t_group.extra.on_focus_out()
+
     	local box 		= t_group:find_child("box") 
 		local focus_box = t_group:find_child("focus_box") 
 		local box_img	= t_group:find_child("box_img") 
@@ -1961,39 +1965,47 @@ function ui_element.dialogBox(t)
     create_dialogBox  = function ()
    
         db_group:clear()
-        --db_group.size = { p.ui_width , p.ui_height - 34}
         db_group.size = { p.ui_width , p.ui_height }
 
-		d_box = draw_dialogBG(p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
-        --d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
+
+        --db_group.size = { p.ui_width , p.ui_height - 34}
+	    --d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
 		--d_box.y = d_box.y - 34
-		d_box.y = d_box.y 
-		d_box:set{name="d_box"} 
-		db_group:add(d_box)
---[[
-	if p.title_separator_thickness >  0 then 
+		--[[
+			if p.title_separator_thickness >  0 then 
              title_separator = make_title_separator(p.title_separator_thickness, p.title_separator_color, p.ui_width)
              title_separator:set{name = "title_separator", position  = {0, db_group_cur_y + 30}}
-	     db_group:add(title_separator)
-	end
-  ]]
+	     	 db_group:add(title_separator)
+			end
+  		]]
 
         title= Text{text = p.label, font= p.title_font, color = p.title_color}     
         title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
 
-	if(p.skin ~= "Custom") then 
-        	d_box_img = assets(skin_list[p.skin]["dialogbox"])
-        	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
-	else 
-		d_box_img = Image{} 
-	end
+		if(p.skin == "Custom") then 
+			d_box = draw_dialogBG(p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
+			d_box.y = d_box.y 
+			d_box:set{name="d_box"} 
+			db_group:add(d_box)
+		else 
+			d_box = draw_dialogBG(p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
+			d_box.y = d_box.y 
+			d_box:set{name="d_box"} 
+			db_group:add(d_box)
+			--[[ 
+			
+			--carbon candy skin for dialog box is not supported 
 
-	db_group:add(d_box_img, title)
-	if p.content then 
-	     db_group:add(p.content)
-	end 
-	if (p.skin == "Custom") then d_box_img.opacity = 0
-        else d_box.opacity = 0 end 
+    		d_box_img = assets(skin_list[p.skin]["dialogbox"])
+        	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
+			db_group:add(d_box_img)
+			]]
+		end
+
+		db_group:add(title)
+		if p.content then 
+	     	db_group:add(p.content)
+		end 
 
      end 
 
@@ -2094,28 +2106,42 @@ function ui_element.toastAlert(t)
     end 
 
  --the umbrella Group
-    local t_box, icon, title, message, t_box_img, create_toastBox  
     local tb_group = Group {
-    	  name = "toastb_group",  
+    	  name = "toastbGroup",  
     	  position = p.ui_position, 
           reactive = true, 
           extra = {type = "ToastAlert"} 
      }
 
-    local tb_group_cur_y = 10
-    local tb_group_cur_x = 20
-    local tb_group_timer = Timer()
-    local tb_group_timeline = Timeline ()
-    
+    local create_toastBox = function()
 
-    create_toastBox = function()
-
+    	local t_box, icon, title, message, t_box_img
+    	local tb_group_cur_y = 10
+    	local tb_group_cur_x = 20
+    	local tb_group_timer = Timer()
+    	local tb_group_timeline = Timeline ()
+	
     	tb_group:clear()
         tb_group.size = { p.ui_width , p.ui_height}
 
-    	t_box = make_toastb_group_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
-    	t_box:set{name="t_box"}
+
+		if(p.skin == "Custom") then 
+    		t_box = make_toastb_group_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
+    		t_box:set{name="t_box"}
+			t_box.y = t_box.y -30
+
+    		tb_group:add(t_box)
+		else 
+    	    t_box_img = assets(skin_list[p.skin]["toast"])
+    	    t_box_img:set{name="t_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
+    		tb_group:add(t_box_img)
+		end 
+
 		tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
+
+		icon = Image {src = p.icon}
+    	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
+tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
 
 		icon = Image {src = p.icon}
     	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
@@ -2123,22 +2149,13 @@ function ui_element.toastAlert(t)
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
     	title:set{name = "title", position = { icon.w + icon.x + 20 , tb_group_cur_y }}  --,50
 
+    	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
+    	title:set{name = "title", position = { icon.w + icon.x + 20 , tb_group_cur_y }}  --,50
+
     	message= Text{text = p.message, font= p.message_font, color = p.message_color, wrap = true, wrap_mode = "CHAR"}     
     	message:set{name = "message", position = {icon.w  + icon.x + 20 , title.h + tb_group_cur_y }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
 
-	if(p.skin ~= "Custom") then 
-    	     t_box_img = assets(skin_list[p.skin]["toast"])
-    	     t_box_img:set{name="t_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
-	else 
-	     t_box_img = Image{}
-	end 
-
-		t_box.y = t_box.y -30
-
-    	tb_group:add(t_box, t_box_img, icon, title, message)
-
-    	if (p.skin == "Custom") then t_box_img.opacity = 0
-    	else t_box.opacity = 0 end 
+    	tb_group:add(icon, title, message)
 
     	tb_group_timer.interval = p.on_screen_duration 
     	tb_group_timeline.duration = p.fade_duration
@@ -2146,10 +2163,10 @@ function ui_element.toastAlert(t)
     	tb_group_timeline.loop = false
 
 
-	local my_alpha = Alpha{timeline=tb_group_timeline,mode="EASE_OUT_SINE"}
+		local my_alpha = Alpha{timeline=tb_group_timeline,mode="EASE_OUT_SINE"}
 
-	local opacity_interval = Interval(255, 0)
-	local scale_interval = Interval(1,0.8)
+		local opacity_interval = Interval(255, 0)
+		local scale_interval = Interval(1,0.8)
 
      	function tb_group_timeline.on_new_frame(t, m)
 			tb_group.opacity = opacity_interval:get_value(my_alpha.alpha)
@@ -2157,14 +2174,13 @@ function ui_element.toastAlert(t)
      	end  
 
      	function tb_group_timeline.on_completed()
-		--tb_group.opacity = 0
 			tb_group.scale = {0.8, 0.8}
 			tb_group.opacity = 255
 			tb_group:hide()
      	end 
 
      	function tb_group_timer.on_timer(tb_group_timer)
-		tb_group_timeline:start()
+			tb_group_timeline:start()
         	tb_group_timer:stop()
      	end 
      end 
@@ -2273,8 +2289,6 @@ function ui_element.buttonPicker(t)
      end 
      
  --the umbrella Group
-     local unfocus, focus, left_un, left_sel, right_un, right_sel, create_buttonPicker
-     local items = Group{name = "items"}
 
      local bp_group = Group
      {
@@ -2284,51 +2298,66 @@ function ui_element.buttonPicker(t)
 		extra = {type = "ButtonPicker"}
      }
 
-     local index 
+	 local index 
 
      local padding = 5
      local pos = {0, 0}    -- focus, unfocus 
      local t = nil
 
-     create_buttonPicker = function() 
+     local create_buttonPicker = function() 
 
-		index = p.selected_item 
+     	local unfocus, focus, left_un, left_sel, right_un, right_sel
+     	local items = Group{name = "items"}
+		local button_w 
+	
 		bp_group:clear()
 		items:clear()
+
+		index = p.selected_item 
     	bp_group.size = { p.ui_width , p.ui_height}
 
-		ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, 1, 7, 7, 12)
-    	ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
-
-    	focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, 1, 7, 7, 12)
-    	focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
-
-
 		if p.skin == "Custom" then 
-    		unfocus = assets(skin_list["default"]["buttonpicker"])
-     		focus =   assets(skin_list["default"]["buttonpicker_focus"])
+
+			local key = string.format( "ring:%d:%d:%s:%s" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ))
+	
+			ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.border_color, p.fill_color, 1, 7, 7, 1)
+        	ring:set{name="ring", position = { pos[1] , pos[2] }, opacity = 255 }
+
+			key = string.format( "ring:%d:%d:%s:%s" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ))
+
+			focus_ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, 1, 7, 7, 1)
+        	focus_ring:set{name="focus_ring", position = { pos[1] , pos[2] }, opacity = 0}
+
+			button_w = focus_ring.w 
+
         	left_un   = assets(skin_list["default"]["buttonpicker_left_un"])
 	    	left_sel  = assets(skin_list["default"]["buttonpciker_left_sel"])
 	    	right_un  = assets(skin_list["default"]["buttonpicker_right_un"])
         	right_sel = assets(skin_list["default"]["buttonpicker_right_sel"])
+
 		elseif p.skin == "inspector" then  
-     		unfocus = Group{} --name = "unfocus-button", reactive = true, position = {pos[1], pos[2]}}
-			local left, right, u1px 
+
+			local left, right, u1px, fleft, fright, f1px
+
+     		unfocus = Group{} 
 			
-			left = Image{src="lib/assets/picker-left-cap.png"} 
-			right = Image{src="lib/assets/picker-right-cap.png", position = {p.ui_width - left.w, 0}} 
-			u1px = Image{src="lib/assets/picker-repeat1px.png", position = {left.w, 0}, tile = {true, false}, width = p.ui_width - left.w - right.w}
+			left = assets("lib/assets/picker-left-cap.png")
+			right = assets("lib/assets/picker-right-cap.png")
+			right:set{position = {p.ui_width - left.w, 0}} 
+			u1px = assets("lib/assets/picker-repeat1px.png")
+			u1px:set{position = {left.w, 0}, tile = {true, false}, width = p.ui_width - left.w - right.w}
 
 			unfocus:add(left)
 			unfocus:add(u1px)
 			unfocus:add(right)
 
-     		focus = Group{} --name = "focus-button", reactive = true, position = {pos[1], pos[2]}}
+     		focus = Group{} 
 
-			local fleft, fright, f1px
-			fleft = Image{src="lib/assets/picker-left-cap-focus.png"}
-			fright = Image{src="lib/assets/picker-right-cap-focus.png", position = {p.ui_width - fleft.w, 0}}
-			f1px = Image{src="lib/assets/picker-repeat1px-focus.png", position = {fleft.w, 0}, tile = {true, false}, width = p.ui_width - left.w - right.w}
+			fleft = assets("lib/assets/picker-left-cap-focus.png")
+			fright = assets("lib/assets/picker-right-cap-focus.png")
+			fright:set{position = {p.ui_width - fleft.w, 0}}
+			f1px = assets("lib/assets/picker-repeat1px-focus.png")
+			f1px:set{position = {fleft.w, 0}, tile = {true, false}, width = p.ui_width - left.w - right.w}
 
 			focus:add(fleft)
 			focus:add(f1px)
@@ -2338,13 +2367,23 @@ function ui_element.buttonPicker(t)
 	    	left_sel  = assets("lib/assets/picker-left-arrow-focus.png")
 	    	right_un  = assets("lib/assets/picker-right-arrow.png")
         	right_sel = assets("lib/assets/picker-right-arrow-focus.png")
+
+     		unfocus:set{name = "unfocus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 255, reactive = true}
+			focus:set{name = "focus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 0}
+			button_w = focus.w 
+
 		else 
      		unfocus = assets(skin_list[p.skin]["buttonpicker"])
      		focus = assets(skin_list[p.skin]["buttonpicker_focus"])
+
 	    	left_un   = assets(skin_list[p.skin]["buttonpicker_left_un"])
 	    	left_sel  = assets(skin_list[p.skin]["buttonpciker_left_sel"])
 	    	right_un  = assets(skin_list[p.skin]["buttonpicker_right_un"])
         	right_sel = assets(skin_list[p.skin]["buttonpicker_right_sel"])
+
+     		unfocus:set{name = "unfocus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 255, reactive = true}
+			focus:set{name = "focus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 0}
+			button_w = focus.w 
  		end 
 
 		left_un.scale = {w_scale, h_scale}
@@ -2352,28 +2391,26 @@ function ui_element.buttonPicker(t)
 		right_un.scale = {w_scale, h_scale}
 		right_sel.scale = {w_scale, h_scale}
 
-     	unfocus:set{name = "unfocus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 255, reactive = true}
-		focus:set{name = "focus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 0}
 
 		if p.direction == "horizontal" then 
 			left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
-			left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 0}
-			right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
-			right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
+			left_sel:set{name = "left_sel", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 0}
+			right_un:set{name = "right_un", position = {pos[1] + button_w + padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
+			right_sel:set{name = "right_sel", position = {right_un.x, right_un.y},  opacity = 0}
 		elseif p.direction == "vertical" then 
             left_un.anchor_point={left_un.w/2,left_un.h/2}
             left_un.z_rotation={90,0,0}
 			left_un:set{name = "left_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 + 12}, opacity = 255, reactive = true} -- top
 			left_sel.anchor_point={left_un.w/2,left_un.h/2}
             left_sel.z_rotation={90,0,0}
-			left_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2+ 12 }, opacity = 0}
+			left_sel:set{name = "left_sel", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2+ 12 }, opacity = 0}
 
             right_un.anchor_point={right_un.w/2,right_un.h/2}
             right_un.z_rotation={90,0,0}
 			right_un:set{name = "right_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2+ 5 }, opacity = 255, reactive = true} -- bottom
             right_sel.anchor_point={right_un.w/2,right_un.h/2}
             right_sel.z_rotation={90,0,0}
-			right_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2 + 5 },  opacity = 0}
+			right_sel:set{position = {name = "right_sel", pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2 + 5 },  opacity = 0}
 		end
 
      	for i, j in pairs(p.items) do 
@@ -2404,69 +2441,80 @@ function ui_element.buttonPicker(t)
 			items.clip = { 0, 0, p.ui_width, p.ui_height }
      	end 
 
-   		bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
 
 		if(p.skin == "Custom") then 
-			unfocus.opacity = 0 
+   			bp_group:add(ring, focus_ring, right_un, right_sel, left_un, left_sel, items) 
        	else 
-			ring.opacity = 0 
+   			bp_group:add(unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
 		end 
 
         t = nil
 
-		if editor_lb == nil or editor_use then 
-			local unfocus, left_arrow, right_arrow 
-			unfocus = bp_group:find_child("unfocus")
-			unfocus.reactive = true
-			function unfocus:on_button_down (x,y,b,n)
-				if current_focus then
-   			         current_focus.extra.on_focus_out()
-	        		 current_focus = group
-				end 
-				bp_group.on_focus_in()
-	            bp_group:grab_key_focus()
-		        return true
-			end 
-
-        	left_arrow = bp_group:find_child("left_un")
-			left_arrow.reactive = true 
-			function left_arrow:on_button_down(x, y, b, n)
-				if current_focus then
-					current_focus.extra.on_focus_out()
-	        		current_focus = group
-				end
-				bp_group.on_focus_in()
-	        	bp_group:grab_key_focus()
-				if p.direction == "vertical" then 
-					bp_group.press_up()
-				else 
-					bp_group.press_left()
-				end 
-				return true 
-			end 
-
-			right_arrow = bp_group:find_child("right_un")
-			right_arrow.reactive = true 
-			function right_arrow:on_button_down(x, y, b, n)
-				if current_focus then
-					current_focus.extra.on_focus_out()
-	        		current_focus = group
-				end
-				bp_group.on_focus_in()
-	        	bp_group:grab_key_focus()
-				if p.direction == "vertical" then 
-					bp_group.press_down()
-				else
-					bp_group.press_right()
-				end 
-				return true 
-			end 
-		end 
-     end 
+	 end 
  
      create_buttonPicker()
 
-     function bp_group.extra.on_focus_in()
+	 if editor_lb == nil or editor_use then 
+		local unfocus, left_arrow, right_arrow 
+		unfocus = bp_group:find_child("unfocus")
+		unfocus.reactive = true
+
+		function unfocus:on_button_down (x,y,b,n)
+			if current_focus then
+   				current_focus.extra.on_focus_out()
+	        	current_focus = group
+			end 
+			bp_group.on_focus_in()
+	        bp_group:grab_key_focus()
+		    return true
+		end 
+
+        left_arrow = bp_group:find_child("left_un")
+		left_arrow.reactive = true 
+
+		function left_arrow:on_button_down(x, y, b, n)
+			if current_focus then
+				current_focus.extra.on_focus_out()
+	        	current_focus = group
+			end
+			bp_group.on_focus_in()
+	        bp_group:grab_key_focus()
+			if p.direction == "vertical" then 
+				bp_group.press_up()
+			else 
+				bp_group.press_left()
+			end 
+			return true 
+		end 
+
+		right_arrow = bp_group:find_child("right_un")
+		right_arrow.reactive = true 
+
+		function right_arrow:on_button_down(x, y, b, n)
+			if current_focus then
+				current_focus.extra.on_focus_out()
+	        	current_focus = group
+			end
+
+			bp_group.on_focus_in()
+	        bp_group:grab_key_focus()
+
+			if p.direction == "vertical" then 
+				bp_group.press_down()
+			else
+				bp_group.press_right()
+			end 
+			return true 
+		end 
+	end 
+
+
+    function bp_group.extra.on_focus_in()
+     	local unfocus = bp_group:find_child("unfocus")
+		local focus= bp_group:find_child("focus") 
+		local ring= bp_group:find_child("ring")
+		local focus_ring= bp_group:find_child("focus_ring") 
+
 		current_focus = bp_group
 		if(p.skin == "Custom") then 
             ring.opacity = 0 
@@ -2482,6 +2530,11 @@ function ui_element.buttonPicker(t)
      end
 
      function bp_group.extra.on_focus_out()
+     	local unfocus = bp_group:find_child("unfocus")
+		local focus= bp_group:find_child("focus") 
+		local ring= bp_group:find_child("ring")
+		local focus_ring= bp_group:find_child("focus_ring") 
+
 		if(p.skin == "Custom") then 
         	ring.opacity = 255 
 	     	focus_ring.opacity = 0
@@ -2495,12 +2548,15 @@ function ui_element.buttonPicker(t)
      end
 
      function bp_group.extra.press_left()
+		local focus= bp_group:find_child("focus") 
+		local left_sel= bp_group:find_child("left_sel") 
      	local prev_i = index
         local next_i = (index-2)%(#p.items)+1
+		local items = bp_group:find_child("items")
 
 	    index = next_i
 
-	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
+	    local j = items:find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2 - p.inspector
 	    local next_old_x = p.ui_width/2 - j.width/2 + focus.w
@@ -2550,11 +2606,21 @@ function ui_element.buttonPicker(t)
 	end
 
 	function bp_group.extra.press_right()
+
+		local index = p.selected_item 
 	    local prev_i = index
-            local next_i = (index)%(#p.items)+1
+        local next_i = (index)%(#p.items)+1
+
+		local items = bp_group:find_child("items")
+     	local unfocus = bp_group:find_child("unfocus")
+		local focus= bp_group:find_child("focus") 
+		local ring= bp_group:find_child("ring")
+		local focus_ring= bp_group:find_child("focus_ring") 
+		local right_sel = bp_group:find_child("right_sel") 
+
 	    index = next_i
 
-	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
+	    local j = items:find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2 - p.inspector 
 	    local next_old_x = p.ui_width/2 - j.width/2 - focus.w
@@ -2571,18 +2637,18 @@ function ui_element.buttonPicker(t)
 
 	    t = Timeline {
 	        duration = 300,
-		direction = "FORWARD",
-		loop = false
+			direction = "FORWARD",
+			loop = false
 	    }
 
 	    function t.on_new_frame(t,msecs,p)
 	        if msecs <= 100 then
 		     right_sel.opacity = 255* msecs/100
-		elseif msecs <= 200 then
+			elseif msecs <= 200 then
 		     right_sel.opacity = 255
-		else 
+			else 
 		     right_sel.opacity = 255*(1- (msecs-200)/100)
-		end
+			end
 
 		items:find_child("item"..tostring(prev_i)).x = prev_old_x + p*(prev_new_x - prev_old_x)
 		items:find_child("item"..tostring(prev_i)).y = prev_old_y + p*(prev_new_y - prev_old_y)
@@ -2591,26 +2657,27 @@ function ui_element.buttonPicker(t)
 	    end
 	    function t.on_completed()
 	        items:find_child("item"..tostring(prev_i)).x = prev_new_x
-		items:find_child("item"..tostring(prev_i)).y = prev_new_y
-		items:find_child("item"..tostring(next_i)).x = next_new_x
-		items:find_child("item"..tostring(next_i)).y = next_new_y
-		p.selected_item = next_i
-		if p.rotate_func then
+			items:find_child("item"..tostring(prev_i)).y = prev_new_y
+			items:find_child("item"..tostring(next_i)).x = next_new_x
+			items:find_child("item"..tostring(next_i)).y = next_new_y
+			p.selected_item = next_i
+			if p.rotate_func then
 	       	     p.rotate_func(next_i)
 	    	end
-		t = nil
+			t = nil
 	    end
 	    t:start()
 	end
 
  	function bp_group.extra.press_up()
 	    local prev_i = index
-
         local next_i = (index-2)%(#p.items)+1
+		local items = bp_group:find_child("items")
+		local left_sel = bp_group:find_child("left_sel") 
 
 	    index = next_i
 
-	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
+	    local j = items:find_child("item"..tostring(index))
 	    
 		local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2
@@ -2668,10 +2735,13 @@ function ui_element.buttonPicker(t)
 
 	function bp_group.extra.press_down()
 	    local prev_i = index
-            local next_i = (index)%(#p.items)+1
+        local next_i = (index)%(#p.items)+1
+		local items = bp_group:find_child("items")
+		local right_sel = bp_group:find_child("right_sel") 
+
 	    index = next_i
 
-	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
+	    local j = items:find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2
 	    local next_old_x = p.ui_width/2 - j.width/2 
@@ -2694,28 +2764,28 @@ function ui_element.buttonPicker(t)
 
 	    function t.on_new_frame(t,msecs,p)
 	        if msecs <= 100 then
-		     right_sel.opacity = 255* msecs/100
-		elseif msecs <= 200 then
-		     right_sel.opacity = 255
-		else 
-		     right_sel.opacity = 255*(1- (msecs-200)/100)
-		end
+		     	right_sel.opacity = 255* msecs/100
+			elseif msecs <= 200 then
+		     	right_sel.opacity = 255
+			else 
+		     	right_sel.opacity = 255*(1- (msecs-200)/100)
+			end
 
-		items:find_child("item"..tostring(prev_i)).x = prev_old_x + p*(prev_new_x - prev_old_x)
-		items:find_child("item"..tostring(prev_i)).y = prev_old_y + p*(prev_new_y - prev_old_y)
-		items:find_child("item"..tostring(next_i)).x = next_old_x + p*(next_new_x - next_old_x)
-		items:find_child("item"..tostring(next_i)).y = next_old_y + p*(next_new_y - next_old_y)
+			items:find_child("item"..tostring(prev_i)).x = prev_old_x + p*(prev_new_x - prev_old_x)
+			items:find_child("item"..tostring(prev_i)).y = prev_old_y + p*(prev_new_y - prev_old_y)
+			items:find_child("item"..tostring(next_i)).x = next_old_x + p*(next_new_x - next_old_x)
+			items:find_child("item"..tostring(next_i)).y = next_old_y + p*(next_new_y - next_old_y)
 	    end
 	    function t.on_completed()
 	        items:find_child("item"..tostring(prev_i)).x = prev_new_x
-		items:find_child("item"..tostring(prev_i)).y = prev_new_y
-		items:find_child("item"..tostring(next_i)).x = next_new_x
-		items:find_child("item"..tostring(next_i)).y = next_new_y
-		p.selected_item = next_i
-		if p.rotate_func then
+			items:find_child("item"..tostring(prev_i)).y = prev_new_y
+			items:find_child("item"..tostring(next_i)).x = next_new_x
+			items:find_child("item"..tostring(next_i)).y = next_new_y
+			p.selected_item = next_i
+			if p.rotate_func then
 	       	     p.rotate_func(next_i)
 	    	end
-		t = nil
+			t = nil
 	    end
 	    t:start()
 	end
@@ -2726,48 +2796,50 @@ function ui_element.buttonPicker(t)
 	function bp_group.extra.insert_item(itm) 
 		table.insert(p.items, itm) 
 		create_buttonPicker()
-        end 
+    end 
 
 	function bp_group.extra.remove_item() 
 		table.remove(p.items)
 		create_buttonPicker()
-        end 
+    end 
 	--bp_group.out_focus()
         
-        mt = {}
-        mt.__newindex = function (t, k, v)
+    mt = {}
+    mt.__newindex = function (t, k, v)
 
-             if k == "bsize" then  
-	    	p.ui_width = v[1] 	
-		p.ui_height = v[2]  
-		w_scale = v[1]/180
-		h_scale = v[2]/60
-             elseif k == "ui_width" then 
-		w_scale = v/180
-                p[k] = v
-	     elseif k == "ui_height" then   
-		h_scale = v/60
-                p[k] = v
-	     else 
-                p[k] = v
-             end
+    	if k == "bsize" then  
+			p.ui_width = v[1] 	
+			p.ui_height = v[2]  
+			w_scale = v[1]/180
+			h_scale = v[2]/60
+    	elseif k == "ui_width" then 
+			w_scale = v/180
+        	p[k] = v
+		elseif k == "ui_height" then   
+			h_scale = v/60
+        	p[k] = v
+		else 
+        	p[k] = v
+    	end
+	
 	     if k ~= "selected" and k ~= "org_x"  and k ~= "org_y" and 
-		k ~= "is_in_group" and k ~= "group_position" then 
+			k ~= "is_in_group" and k ~= "group_position" then 
                  create_buttonPicker()
 	     end 
-        end 
+	end 
 
-        mt.__index = function (t,k)
-             if k == "bsize" then 
+    mt.__index = function (t,k)
+    	if k == "bsize" then 
 	        return {p.ui_width, p.ui_height}  
-             else 
+        else 
 	        return p[k]
-             end 
         end 
+    end 
 
-        setmetatable (bp_group.extra, mt) 
+    setmetatable (bp_group.extra, mt) 
 
-        return bp_group 
+    return bp_group 
+
 end
 
 
@@ -2841,9 +2913,7 @@ function ui_element.radioButtonGroup(t)
     end 
 
  --the umbrella Group
-    local items = Group()
-    local rings = Group() 
-    local select_img
+    local create_radioButton 
 
     local rb_group = Group {
           name = "radioButtonGroup",  
@@ -2854,33 +2924,29 @@ function ui_element.radioButtonGroup(t)
 
 
 	function rb_group.extra.on_focus_in()
+		local rings = rb_group:find_child("rings") 
+
 	  	current_focus = cb_group
-        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
 	    rings:find_child("ring"..1).opacity = 0 
 	    rings:find_child("focus"..1).opacity = 255 
-        --end 
 		rings:find_child("ring"..1):grab_key_focus() 
     end
 
     function rb_group.extra.on_focus_out()
-        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-			--for i=1, table.getn(rings.children)/2 do 
-			for i=1,  #rings.children/2 do 
-	    		rings:find_child("ring"..i).opacity = 255 
-	    		rings:find_child("focus"..i).opacity = 0 
-			end 
-        --end 
+		local rings = rb_group:find_child("rings") 
+		for i=1,  #rings.children/2 do 
+	    	rings:find_child("ring"..i).opacity = 255 
+	    	rings:find_child("focus"..i).opacity = 0 
+		end 
     end 
 
     function rb_group.extra.select_button(item_n) 
 	    rb_group.selected_item = item_n
-	    --p.selected_item = item_n
         if p.rotate_func then
 	       p.rotate_func(p.selected_item)
 	    end
     end 
 
-    local create_radioButton 
 
     function rb_group.extra.insert_item(itm) 
 		table.insert(p.items, itm) 
@@ -2894,7 +2960,11 @@ function ui_element.radioButtonGroup(t)
 
     create_radioButton = function() 
 
-	if(p.skin ~= "Custom" and p.skin ~= "default") then 
+    local items = Group()
+    local rings = Group() 
+    local select_img
+
+	if(p.skin ~= "Custom") then 
 	     p.button_image = skin_list[p.skin]["radiobutton"]
 	     p.button_focus_image = skin_list[p.skin]["radiobutton_focus"]
 	     p.select_image = skin_list[p.skin]["radiobutton_sel"]
@@ -2909,15 +2979,15 @@ function ui_element.radioButtonGroup(t)
     items:clear()
          --rb_group.size = { p.ui_width , p.ui_height},
 	
-    if(p.skin == "Custom" or p.skin == "default") then 
-		select_img = create_select_circle(p.select_radius, p.select_color)
+    if(p.skin == "Custom") then 
+		local key = string.format("s_circle:%d:%s", p.select_radius,color_to_string(p.select_color))
+		select_img = assets(key, my_create_select_circle, p.select_radius, p.select_color)
         select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
     else 
-    	select_img = Image{src = p.select_image}
+    	select_img = assets(p.select_image)
         select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
     end 
     
-
 	local pos = {0,0}
     for i, j in pairs(p.items) do 
 		local donut, focus 
@@ -2925,87 +2995,88 @@ function ui_element.radioButtonGroup(t)
         	pos= {0, i * p.line_space - p.line_space}
 	    end   	
         items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, position = pos})     
-	    if p.skin == "Custom"  or p.skin == "default"then 
-		   		donut =  create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
-		   	   	focus =  create_circle(p.button_radius, p.focus_color):set{name="focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}  
-    	       	rings:add(donut, focus) 
+
+	    if p.skin == "Custom" then 
+			local key = string.format("circle:%d:%s", p.button_radius,color_to_string(p.button_color))
+
+		   	donut =  assets(key, my_create_circle, p.button_radius, p.button_color)
+			donut:set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
+
+			key = string.format("f_circle:%d:%s", p.button_radius,color_to_string(p.focus_color))
+		   	focus = assets(key, my_create_circle, p.button_radius, p.focus_color)
+			focus:set{name="focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}  
+
+    	    rings:add(donut, focus) 
 	    else
-	           	donut = Image{name = "ring"..tostring(i),  src=p.button_image, position = {pos[1], pos[2] - 8}}
-	           	focus = Image{name = "focus"..tostring(i),  src=p.button_focus_image, position = {pos[1], pos[2] - 8}, opacity = 0}
-    	       	rings:add(donut, focus) 
+	        donut = assets(p.button_image)
+			donut:set{name = "ring"..tostring(i),  src=p.button_image, position = {pos[1], pos[2] - 8}}
+
+	        focus = assets(p.button_focus_image)
+	        focus:set{name = "focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}
+
+    	    rings:add(donut, focus) 
 	    end 
 
 	    if(p.direction == "horizontal") then --horizontal
-		  	   	pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
+			pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
 	    end 
 	    donut.reactive = true
 
         if editor_lb == nil or editor_use then  
-				function donut:on_key_down(key)
-					local ring_num = tonumber(donut.name:sub(5,-1))
-					local next_num
-					if key == keys.Up then 
-						if ring_num > 1 then 
-							next_num = ring_num - 1
-				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
-	    						rings:find_child("ring"..ring_num).opacity = 255 
-	    						rings:find_child("focus"..ring_num).opacity = 0 
-	    						rings:find_child("ring"..next_num).opacity = 0 
-	    						rings:find_child("focus"..next_num).opacity = 255 
-        					--end 
-	    					rings:find_child("ring"..next_num):grab_key_focus()
-							return true 
-						end
-					elseif key == keys.Down then 
-						--if ring_num < table.getn(rings.children)/2 then 
-						if ring_num < #rings.children/2 then 
-							next_num = ring_num + 1
-				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
-	    						rings:find_child("ring"..ring_num).opacity = 255 
-	    						rings:find_child("focus"..ring_num).opacity = 0 
-	    						rings:find_child("ring"..next_num).opacity = 0 
-	    						rings:find_child("focus"..next_num).opacity = 255 
-        					--end 
-							rings:find_child("ring"..next_num):grab_key_focus() 
-							return true 
-						end
-					elseif key == keys.Return then 
-						rb_group.extra.select_button(ring_num)
-
-						--if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-	    					rings:find_child("ring"..ring_num).opacity = 0 
-	    					rings:find_child("focus"..ring_num).opacity = 255 
-        				--end 
-
-						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.button_position[1]
-	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.button_position[2]
-
-						rings:find_child("ring"..ring_num):grab_key_focus() 
-
+			function donut:on_key_down(key)
+				local ring_num = tonumber(donut.name:sub(5,-1))
+				local next_num
+				if key == keys.Up then 
+					if ring_num > 1 then 
+						next_num = ring_num - 1
+	    				rings:find_child("ring"..ring_num).opacity = 255 
+	    				rings:find_child("focus"..ring_num).opacity = 0 
+	    				rings:find_child("ring"..next_num).opacity = 0 
+	    				rings:find_child("focus"..next_num).opacity = 255 
+	    				rings:find_child("ring"..next_num):grab_key_focus()
 						return true 
-					end 
-				end 
-	
-	           	function donut:on_button_down (x,y,b,n)
-					if current_focus then 
-						current_focus.on_focus_out() 
-					end 
-
-				    local ring_num = tonumber(donut.name:sub(5,-1))
+					end
+				elseif key == keys.Down then 
+					if ring_num < #rings.children/2 then 
+						next_num = ring_num + 1
+	    				rings:find_child("ring"..ring_num).opacity = 255 
+	    				rings:find_child("focus"..ring_num).opacity = 0 
+	    				rings:find_child("ring"..next_num).opacity = 0 
+	    				rings:find_child("focus"..next_num).opacity = 255 
+						rings:find_child("ring"..next_num):grab_key_focus() 
+						return true 
+					end
+				elseif key == keys.Return then 
 					rb_group.extra.select_button(ring_num)
+	    			rings:find_child("ring"..ring_num).opacity = 0 
+	    			rings:find_child("focus"..ring_num).opacity = 255 
 
-					current_focus = rb_group
-        			--if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-	    				rings:find_child("ring"..ring_num).opacity = 0 
-	    				rings:find_child("focus"..ring_num).opacity = 255 
-        			--end 
+					select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.button_position[1]
+	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.button_position[2]
+
 					rings:find_child("ring"..ring_num):grab_key_focus() 
+					return true 
+				end 
+			end 
+	
+	        function donut:on_button_down (x,y,b,n)
+				if current_focus then 
+					current_focus.on_focus_out() 
+				end 
 
-					select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
-	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
-					return true
-	     		end 
-	      	end
+				local ring_num = tonumber(donut.name:sub(5,-1))
+				rb_group.extra.select_button(ring_num)
+
+				current_focus = rb_group
+	    		rings:find_child("ring"..ring_num).opacity = 0 
+	    		rings:find_child("focus"..ring_num).opacity = 255 
+				rings:find_child("ring"..ring_num):grab_key_focus() 
+
+				select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
+	    		select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
+				return true
+	     	end 
+	     end
          end 
 	 	 rings:set{name = "rings", position = p.button_position} 
 	 	 items:set{name = "items", position = p.item_position} 
@@ -3084,7 +3155,6 @@ Extra Function:
 		remove_item(item) - Remove an item from the items table 
 ]]
 
-
 function ui_element.checkBoxGroup(t) 
 
  --default parameters
@@ -3110,13 +3180,6 @@ function ui_element.checkBoxGroup(t)
 	rotate_func = nil,  
 	ui_position = {200, 200, 0}, 
     } 
-
---[[
-	if p.skin == "CarbonCandy" then
-		p.item_position = {70, 15}
-		p.line_space = 60
-	end 
-]]
  --overwrite defaults
     if t ~= nil then 
         for k, v in pairs (t) do
@@ -3125,12 +3188,7 @@ function ui_element.checkBoxGroup(t)
     end
 
  --the umbrella Group
-    local check_image
-    local checks = Group()
-    local items = Group{name = "items"}
-    local boxes = Group() 
-    local cb_group = Group()
-	local create_checkBox
+    local create_checkBox
 
     local  cb_group = Group {
     	  name = "checkBoxGroup",  
@@ -3139,22 +3197,114 @@ function ui_element.checkBoxGroup(t)
           extra = {type = "CheckBoxGroup"}
     }
 
+	local function gen (boxes, box)
+		function box:on_key_down(key)
+			local box_num = tonumber(box.name:sub(4,-1))
+			local next_num
+			local next_key, prev_key
+
+			if cb_group.direction == "vertical" then 
+				next_key = keys.Down 
+				prev_key = keys.Up
+			else 
+				next_key = keys.Right 
+				prev_key = keys.Left
+			end 
+							
+			if key == prev_key then 
+				if box_num > 1 then 
+					next_num = box_num - 1
+	    			boxes:find_child("box"..box_num).opacity = 255 
+	    			boxes:find_child("focus"..box_num).opacity = 0 
+	    			boxes:find_child("box"..next_num).opacity = 0 
+	    			boxes:find_child("focus"..next_num).opacity = 255 
+	    			boxes:find_child("box"..next_num):grab_key_focus()
+					return true 
+				end
+			elseif key == next_key then 
+				if box_num < table.getn(boxes.children)/2 then 
+					next_num = box_num + 1
+	    			boxes:find_child("box"..box_num).opacity = 255 
+	    			boxes:find_child("focus"..box_num).opacity = 0 
+	    			boxes:find_child("box"..next_num).opacity = 0 
+	    			boxes:find_child("focus"..next_num).opacity = 255 
+					boxes:find_child("box"..next_num):grab_key_focus() 
+					return true 
+				end
+			elseif key == keys.Return then 
+    			cb_group.extra.select_button(p.selected_items) 
+				if cb_group:find_child("check"..tostring(box_num)).opacity == 255 then 
+					cb_group.selected_items = table_remove_val(cb_group.selected_items, box_num)
+					cb_group:find_child("check"..tostring(box_num)).opacity = 0 
+					cb_group:find_child("check"..tostring(box_num)).reactive = true 
+	    			cb_group:find_child("box"..box_num).opacity = 0 
+	    			cb_group:find_child("focus"..box_num).opacity = 255 
+				else 
+					table.insert(cb_group.selected_items, box_num)
+					cb_group:find_child("check"..tostring(box_num)).opacity = 255 
+	    			cb_group:find_child("box"..box_num).opacity = 0 
+	    			cb_group:find_child("focus"..box_num).opacity = 255 
+				end 
+					boxes:find_child("box"..box_num):grab_key_focus() 
+					return true 
+				end 
+			end 
+
+	     	function box:on_button_down (x,y,b,n)
+				if current_focus then 
+						current_focus.on_focus_out() 
+				end 
+				local box_num = tonumber(box.name:sub(4,-1))
+	  				
+				current_focus = cb_group
+
+				table.insert(cb_group.selected_items, box_num)
+    			cb_group.extra.select_button(cb_group.selected_items) 
+				cb_group:find_child("check"..tostring(box_num)).opacity = 255
+				cb_group:find_child("check"..tostring(box_num)).reactive = true
+					
+	    		boxes:find_child("box"..tostring(box_num)).opacity = 0 
+	    		boxes:find_child("focus"..tostring(box_num)).opacity = 255 
+				boxes:find_child("box"..tostring(box_num)):grab_key_focus() 
+				return true
+	     	end 
+
+	     	function check:on_button_down(x,y,b,n)
+				if current_focus then 
+					current_focus.on_focus_out() 
+				end 
+				local check_num = tonumber(check.name:sub(6,-1))
+				current_focus = cb_group
+				if cb_group:find_child("check"..tostring(check_num)).opacity == 255 then 
+					cb_group.selected_items = table_remove_val(cb_group.selected_items, check_num)
+					cb_group:find_child("check"..tostring(check_num)).opacity = 0 
+					cb_group:find_child("check"..tostring(check_num)).reactive = true 
+				else 
+					table.insert(cb_group.selected_items, check_num)
+					cb_group:find_child("check"..tostring(check_num)).opacity = 255 
+				end 
+    			cb_group.extra.select_button(cb_group.selected_items) 
+	    		cb_group:find_child("box"..check_num).opacity = 0 
+	    		cb_group:find_child("focus"..check_num).opacity = 255 
+				boxes:find_child("box"..check_num):grab_key_focus() 
+				return true
+	     	end 
+	end
+
 	function cb_group.extra.on_focus_in()
+		local boxes = cb_group:find_child("boxes")
 	  	current_focus = cb_group
-        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-	    	boxes:find_child("box"..1).opacity = 0 
-	    	boxes:find_child("focus"..1).opacity = 255 
-        --end 
+	    boxes:find_child("box"..1).opacity = 0 
+	    boxes:find_child("focus"..1).opacity = 255 
 		boxes:find_child("box"..1):grab_key_focus() 
     end
 
     function cb_group.extra.on_focus_out()
-        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-			for i=1, table.getn(boxes.children)/2 do 
-	    		boxes:find_child("box"..i).opacity = 255 
-	    		boxes:find_child("focus"..i).opacity = 0 
-			end 
-        --end 
+		local boxes = cb_group:find_child("boxes")
+		for i=1, table.getn(boxes.children)/2 do 
+	    	boxes:find_child("box"..i).opacity = 255 
+	    	boxes:find_child("focus"..i).opacity = 0 
+		end 
     end 
 
     function cb_group.extra.select_button(items) 
@@ -3175,28 +3325,23 @@ function ui_element.checkBoxGroup(t)
     end 
 
     function create_checkBox()
+		local check_image
+    	local checks = Group()
+    	local items = Group{name = "items"}
+    	local boxes = Group() 
+
 	 	items:clear() 
 	 	checks:clear() 
 	 	boxes:clear() 
 	 	cb_group:clear()
 
 
-	 	if(p.skin ~= "Custom" and p.skin ~= "default") then 
+	 	if p.skin == "Custom" then 
+             p.check_image = "lib/assets/checkmark.png"
+	 	else 
              p.box_image = skin_list[p.skin]["checkbox"]
              p.box_focus_image = skin_list[p.skin]["checkbox_focus"]
              p.check_image = skin_list[p.skin]["checkbox_sel"]
-
---[[
-			 if p.skin == "CarbonCandy" then
-				p.item_position = {70, 15}
-				p.line_space = 60
-			 end 
-]]
-
-	 	else 
-	     	 p.box_image = Image{}
-			 p.box_focus_image = Image{}
-             p.check_image = "lib/assets/checkmark.png"
 	 	end
 	
 	 	boxes:set{name = "boxes", position = p.box_position} 
@@ -3211,125 +3356,31 @@ function ui_element.checkBoxGroup(t)
 	      	end   			
 
 	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
-	      	if p.skin == "Custom"  or p.skin == "default"then 
+	      	if p.skin == "Custom" then 
 		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 0}
 		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 255}
-    	        boxes:add(box, focus) 
 	     	else
-	           	focus = Image{name = "focus"..tostring(i),  src=p.box_focus_image, position = pos, reactive = true, opacity = 0}
-	           	box = Image{name = "box"..tostring(i),  src=p.box_image, position = pos, reactive = true, opacity = 255}
-		   		boxes:add(box, focus) 
+	           	focus = assets(p.box_focus_image)
+	           	focus:set{name = "focus"..tostring(i), position = pos, reactive = true, opacity = 0}
+	           	box = assets(p.box_image)
+	           	box:set{name = "box"..tostring(i), position = pos, reactive = true, opacity = 255}
 	     	end 
+		   	boxes:add(box, focus) 
 
-	      	if p.skin == "Custom"  or p.skin == "default"  then 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = true, opacity = 0}
+	     	check = assets(p.check_image)
+	      	if p.skin == "Custom"  then 
+	     		check:set{name="check"..tostring(i), size = p.check_size, position = pos, reactive = true, opacity = 0}
 			else 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, position = pos, reactive = true, opacity = 0}
+	     		check:set{name="check"..tostring(i), position = pos, reactive = true, opacity = 0}
 			end
+
 	     	checks:add(check) 
 
             if editor_lb == nil or editor_use then  
-
-				function box:on_key_down(key)
-					local box_num = tonumber(box.name:sub(4,-1))
-					local next_num
-					local next_key, prev_key
-
-					if cb_group.direction == "vertical" then 
-						next_key = keys.Down 
-						prev_key = keys.Up
-					else 
-						next_key = keys.Right 
-						prev_key = keys.Left
-					end 
-							
-					if key == prev_key then 
-						if box_num > 1 then 
-							next_num = box_num - 1
-				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
-	    						boxes:find_child("box"..box_num).opacity = 255 
-	    						boxes:find_child("focus"..box_num).opacity = 0 
-	    						boxes:find_child("box"..next_num).opacity = 0 
-	    						boxes:find_child("focus"..next_num).opacity = 255 
-        					--end 
-	    					boxes:find_child("box"..next_num):grab_key_focus()
-							return true 
-						end
-					elseif key == next_key then 
-						if box_num < table.getn(boxes.children)/2 then 
-							next_num = box_num + 1
-				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
-	    						boxes:find_child("box"..box_num).opacity = 255 
-	    						boxes:find_child("focus"..box_num).opacity = 0 
-	    						boxes:find_child("box"..next_num).opacity = 0 
-	    						boxes:find_child("focus"..next_num).opacity = 255 
-        					--end 
-							boxes:find_child("box"..next_num):grab_key_focus() 
-							return true 
-						end
-					elseif key == keys.Return then 
-    					cb_group.extra.select_button(p.selected_items) 
-						if cb_group:find_child("check"..tostring(box_num)).opacity == 255 then 
-							cb_group.selected_items = table_remove_val(cb_group.selected_items, box_num)
-							cb_group:find_child("check"..tostring(box_num)).opacity = 0 
-							cb_group:find_child("check"..tostring(box_num)).reactive = true 
-	    					cb_group:find_child("box"..box_num).opacity = 0 
-	    					cb_group:find_child("focus"..box_num).opacity = 255 
-						else 
-							table.insert(cb_group.selected_items, box_num)
-							cb_group:find_child("check"..tostring(box_num)).opacity = 255 
-	    					cb_group:find_child("box"..box_num).opacity = 0 
-	    					cb_group:find_child("focus"..box_num).opacity = 255 
-
-						end 
-						boxes:find_child("box"..box_num):grab_key_focus() 
-						return true 
-					end 
-				end 
-
-	     		function box:on_button_down (x,y,b,n)
-					if current_focus then 
-						current_focus.on_focus_out() 
-					end 
-					local box_num = tonumber(box.name:sub(4,-1))
-	  				
-					current_focus = cb_group
-
-					table.insert(cb_group.selected_items, box_num)
-    				cb_group.extra.select_button(cb_group.selected_items) 
-
-					cb_group:find_child("check"..tostring(box_num)).opacity = 255
-					cb_group:find_child("check"..tostring(box_num)).reactive = true
-					
-	    			boxes:find_child("box"..tostring(box_num)).opacity = 0 
-	    			boxes:find_child("focus"..tostring(box_num)).opacity = 255 
-					boxes:find_child("box"..tostring(box_num)):grab_key_focus() 
-					return true
-	     		end 
-
-	     		function check:on_button_down(x,y,b,n)
-					if current_focus then 
-						current_focus.on_focus_out() 
-					end 
-					local check_num = tonumber(check.name:sub(6,-1))
-					current_focus = cb_group
-					if cb_group:find_child("check"..tostring(check_num)).opacity == 255 then 
-						cb_group.selected_items = table_remove_val(cb_group.selected_items, check_num)
-						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
-						cb_group:find_child("check"..tostring(check_num)).reactive = true 
-					else 
-						table.insert(cb_group.selected_items, check_num)
-						cb_group:find_child("check"..tostring(check_num)).opacity = 255 
-					end 
-    				cb_group.extra.select_button(cb_group.selected_items) 
-	    			cb_group:find_child("box"..check_num).opacity = 0 
-	    			cb_group:find_child("focus"..check_num).opacity = 255 
-					boxes:find_child("box"..check_num):grab_key_focus() 
-					return true
-	     		end 
-	     	end
+				gen (boxes, box)
+			end
 
 	     	if(p.direction == "horizontal") then 
 		  		pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
@@ -3375,6 +3426,7 @@ function ui_element.checkBoxGroup(t)
 end 
 
 
+
 --[[
 Function: Progress Spinner
 
@@ -3397,7 +3449,231 @@ Extra Function:
 	speed_down() - spin slower
 ]]
  
----[[
+--[[
+local make_dot = function(dot_diameter, dot_color )
+          local dot  = Canvas{size={dot_diameter, dot_diameter}}
+          dot:begin_painting()
+          dot:arc(dot_diameter/2,dot_diameter/2,dot_diameter/2,0,360)
+          dot:set_source_color(dot_color)
+          dot:fill(true)
+          dot:finish_painting()
+
+          if dot.Image then
+              dot = dot:Image()
+          end
+          dot.anchor_point ={dot_diameter/2,dot_diameter/2}
+          dot.name         = "Loading Dot"
+	  
+
+          return dot
+end
+
+local function my_make_dot( _ , ... )
+     return make_dot( ... )
+end
+
+local make_big_dot = function(overall_diameter, dot_color)
+
+        local dot  = Canvas{size={overall_diameter, overall_diameter}}
+		dot:begin_painting()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,0,90)
+		dot:line_to(overall_diameter/2,overall_diameter/2)
+		dot:line_to(overall_diameter,  overall_diameter/2)
+		dot:set_source_color(dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,90,180)
+		dot:line_to(overall_diameter/2,overall_diameter/2)
+		dot:line_to(overall_diameter/2,overall_diameter)
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,180,270)
+		dot:line_to( overall_diameter/2, overall_diameter/2 )
+		dot:line_to(                    0, overall_diameter/2 )
+		dot:set_source_color(dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,270,360)
+		dot:line_to( overall_diameter/2, overall_diameter/2 )
+		dot:line_to( overall_diameter/2,                    0 )
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+        dot:finish_painting()
+		
+        if dot.Image then
+            dot = dot:Image()
+        end
+        dot.anchor_point ={overall_diameter/2,overall_diameter/2}
+        dot.name         = "Loading Dot"
+        dot.position     = {x,y}
+
+        return dot
+end
+
+local function my_make_big_dot( _ , ... )
+     return make_big_dot( ... )
+end
+
+function ui_element.progressSpinner(t) 
+    --default parameters
+    local p = {
+        skin          = "Custom",
+        dot_diameter    = 10,
+        dot_color     = {255,255,255,255},
+        number_of_dots      = 12,
+        overall_diameter   = 100,
+        cycle_time = 150*12,
+        style = "orbitting", p.overall_diameter, color_to_string( p.dot_color )
+		ui_position = {400,400, 0},
+    }
+    --overwrite defaults
+    if t ~= nil then
+        for k, v in pairs (t) do
+            p[k] = v
+        end
+    end
+
+    local create_dots
+    
+    --the umbrella Group
+    local l_dots = Group{ 
+        name     = "progressSpinner",
+        position = p.ui_position,  
+        --anchor_point = {p.overall_diameter/2,p.overall_diameter/2},
+        reactive = true,
+        extra = {
+            type = "ProgressSpinner", 
+            speed_up = function()
+                p.cycle_time = p.cycle_time - 50
+                create_dots()
+            end,
+            speed_down = function()
+                p.cycle_time = p.cycle_time + 50
+                create_dots()
+            end,
+        },
+    }
+    --table of the dots, used by the animation
+    local dots   = {}
+    local load_timeline = nil
+    
+    --the Canvas used to create the dots
+    local img, load_timeline
+    --function used to remake the dots upon a parameter change
+    create_dots = function()
+        l_dots:clear()
+        dots = {}
+        
+        if p.style == "orbitting" then
+        
+        local rad
+        
+        for i = 1, p.number_of_dots do
+            --they're radial position
+            rad = (2*math.pi)/(p.number_of_dots) * i
+            if skin_list[p.skin]["loadingdot"] == nil then
+				local key = string.format( "dot:%d:%s" , p.dot_diameter, color_to_string( p.dot_color ))
+				dots[i] = assets(key, my_make_dot, p.dot_diameter, p.dot_color)
+	        else
+		        img = assets(skin_list[p.skin]["loadingdot"])
+                img.size={p.dot_diameter, p.dot_diameter}
+				img.anchor_point = {
+                        img.w/2,
+                        img.h/2
+                }
+		        dots[i] = img
+            end
+			dots[i].position = {
+                math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
+            }
+            l_dots:add(dots[i])
+        end
+        
+        -- the animation timeline
+        if load_timeline ~= nil and load_timeline.is_playing then
+            load_timeline:stop()
+            load_timeline = nil
+        end
+        load_timeline = Timeline
+        {
+            name      = "Loading Animation",
+            loop      =  true,
+            duration  =  p.cycle_time,
+            direction = "FORWARD", 
+        }
+
+
+        local increment = math.ceil(255/p.number_of_dots)
+        
+        function load_timeline.on_new_frame(t)
+            local start_i   = math.ceil(t.elapsed/(p.cycle_time/p.number_of_dots))
+            local curr_i    = nil
+            
+            for i = 1, p.number_of_dots do
+                curr_i = (start_i + (i-1))%(p.number_of_dots) +1
+                
+                dots[curr_i].opacity = increment*i
+            end
+            
+        end
+        load_timeline:start()
+        
+        else
+        if skin_list[p.skin]["loadingdot"] == nil then
+			local key = string.format( "big_dot:%d:%s" , p.overall_diameter, color_to_string( p.dot_color ))
+			img = assets (key, my_make_big_dot, p.overall_diameter, p.dot_color )
+        else
+            img = assets(skin_list[p.skin]["loadingdot"])
+            img.anchor_point={img.w/2,img.h/2}
+        end
+        l_dots:add(img)
+
+        img.position={img.w/2,img.h/2}
+        if load_timeline ~= nil and load_timeline.is_playing then
+            load_timeline:stop()
+            load_timeline = nil
+        end
+        load_timeline = Timeline
+        {
+            name      = "Loading Animation",
+            loop      =  true,
+            duration  =  p.cycle_time,
+            direction = "FORWARD", 
+        }
+        function load_timeline.on_new_frame(t,msces,p)
+            img.z_rotation={360*p,0,0}
+        end
+        load_timeline:start()
+        end
+    end
+    create_dots()
+
+
+    local mt = {}
+    mt.__newindex = function(t,k,v)
+       p[k] = v
+	   if k ~= "selected" then 
+       		create_dots()
+	   end
+    end
+    mt.__index = function(t,k)       
+       return p[k]
+    end
+    setmetatable(l_dots.extra, mt)
+    return l_dots
+end
+
+--]]
 function ui_element.progressSpinner(t) 
     --default parameters
     local p = {
@@ -3612,10 +3888,6 @@ function ui_element.progressSpinner(t)
     setmetatable(l_dots.extra, mt)
     return l_dots
 end
-
---]]
-
-
 
 --[[
 Function: Progress Bar
@@ -5595,7 +5867,6 @@ button
 	end
 
     local function make_item_ring(w,h,padding)
-	print("canvas ring")
         local ring = Canvas{ size = { w , h } }
         ring:begin_painting()
         ring:set_source_color( p.text_color )
