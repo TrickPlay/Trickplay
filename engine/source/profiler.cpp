@@ -192,9 +192,12 @@ void Profiler::destroyed( const char * name, gpointer p )
 
 void Profiler::dump_objects()
 {
+	g_info( "%24s  %9s %9s %9s" , "type" , "created" , "destroyed" , "alive" );
+	g_info( "%24s--%9s-%9s-%9s" , "--------------------" , "---------" , "---------" , "---------" );
+
     for( ObjectMap::const_iterator it = objects.begin(); it != objects.end(); ++it )
     {
-        g_info( "%24s  %5d %5d %5d",
+        g_info( "%24s  %9d %9d %9d",
                 it->first.c_str(),
                 it->second.created,
                 it->second.destroyed,

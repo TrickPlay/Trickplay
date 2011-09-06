@@ -9,7 +9,7 @@
 
 #define TP_LOG_DOMAIN   "DB"
 #define TP_LOG_ON       true
-#define TP_LOG2_ON      false
+#define TP_LOG2_ON      true
 
 #include "log.h"
 
@@ -171,6 +171,46 @@ namespace SQLite
         sqlite3 * db = get_db();
         reset_db( NULL );
         return db;
+    }
+
+    bool DB::set_schema_version( const char * schema , const char * hash )
+    {
+        String schema_hash( hash ? hash : "" );
+
+        if ( schema_hash.empty() )
+        {
+            // Calculate the hash for the new schema
+
+            gchar * h = g_compute_checksum_for_string( G_CHECKSUM_MD5, schema, -1 );
+
+            schema_hash = h;
+
+            g_free( h );
+        }
+
+        try
+        {
+            exec( "create table if not exists schema_version (name TEXT NOT NULL PRIMARY KEY, value TEXT);" );
+
+            exception( "FAILED TO CREATE SCHEMA VERSION TABLE IN DESTINATION DB" );
+
+            Statement insert_hash( * this , "insert into schema_version (name,value) values ('hash',?1);" );
+
+            insert_hash.bind( 1, schema_hash );
+
+            insert_hash.step();
+
+            insert_hash.exception( "FAILED TO INSERT SCHEMA HASH IN DESTINATION DB" );
+
+            return true;
+        }
+        catch( const String & e )
+        {
+            tpwarn( "FAILED TO SET SCHEMA VERSION : %s", e.c_str() );
+        }
+
+        return false;
+
     }
 
     bool DB::migrate_schema( const char * schema )
@@ -352,17 +392,10 @@ namespace SQLite
 
             // Now create the schema version in the new database
 
-            new_db.exec( "create table if not exists schema_version (name TEXT NOT NULL PRIMARY KEY, value TEXT);" );
-
-            new_db.exception( "FAILED TO CREATE SCHEMA VERSION TABLE IN DESTINATION DB" );
-
-            Statement insert_hash( new_db, "insert into schema_version (name,value) values ('hash',?1);" );
-
-            insert_hash.bind( 1, schema_hash );
-
-            insert_hash.step();
-
-            insert_hash.exception( "FAILED TO INSERT SCHEMA HASH IN DESTINATION DB" );
+            if ( ! new_db.set_schema_version( schema , schema_hash ) )
+            {
+                return false;
+            }
 
             // Close the source database and replace it with the new database
 
@@ -378,6 +411,11 @@ namespace SQLite
         }
 
         return false;
+    }
+
+    int DB::changes()
+    {
+        return ! ok() ? 0 : sqlite3_changes( get_db() );
     }
 
     //-------------------------------------------------------------------------

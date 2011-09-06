@@ -6751,6 +6751,8 @@ function ui_element.arrowPane(t)
 	
 	local function create()
 		
+		
+		
 		umbrella:clear()
 		arrow_pane_keys = {}
 

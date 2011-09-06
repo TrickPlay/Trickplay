@@ -129,6 +129,11 @@ namespace JSON
 
                 // If it has a length, we treat it as an array
 
+                // Unfortunately, this means that a Lua empty table will be
+                // converted to an empty object. Should it be an empty array?
+                //
+                // If in Lua it is {} , should it be {} or [] in JSON?
+
                 if ( lua_objlen( L, index ) > 0 )
                 {
                     Array & array( result.as< Array >() );
@@ -667,6 +672,24 @@ namespace JSON
         return type;
     }
 
+    double Value::as_number() const
+    {
+        switch( type )
+        {
+            case T_DOUBLE:
+                return value.double_value;
+
+            case T_INT:
+                return value.int_value;
+
+            case T_BOOL:
+                return value.boolean_value ? 1 : 0;
+
+            default:
+                return 0;
+        }
+    }
+
     std::ostream & operator << ( std::ostream & os , const Value & value )
     {
         switch( value.get_type() )
@@ -725,6 +748,11 @@ namespace JSON
     {
         return map[ key ];
     }
+    
+    Value & Object::at ( const String & key )
+    {
+        return map[ key ];
+    }
 
     bool Object::has( const String & key ) const
     {
@@ -779,6 +807,12 @@ namespace JSON
 
         return os.str();
     }
+
+    Object::Map::size_type Object::size() const
+    {
+    	return map.size();
+    }
+
 
     //=============================================================================
 

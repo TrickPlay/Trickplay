@@ -80,6 +80,34 @@ String Util::random_string( guint length )
 
 //-----------------------------------------------------------------------------
 
+String Util::canonical_external_path( const char * path , bool abort_on_error )
+{
+	String result;
+
+	if ( path )
+	{
+		GFile * file = g_file_new_for_commandline_arg( path );
+
+		gchar * p = g_file_get_path( file );
+
+		g_object_unref( file );
+
+		if ( p )
+		{
+			result = p;
+			g_free( p );
+		}
+	}
+
+	if ( abort_on_error && result.empty() )
+	{
+		g_error( "INVALID PATH '%s'" , path ? path : "<null>" );
+	}
+
+	return result;
+}
+//-----------------------------------------------------------------------------
+
 Action::~Action()
 {
     tplog( "DESTROYING ACTION %p" , this );
@@ -206,3 +234,4 @@ gboolean Action::run_internal( Action * action )
 
     return action->run() ? TRUE : FALSE;
 }
+

@@ -1,0 +1,218 @@
+Format: 1.4
+
+
+Title: TrickPlay
+SubTitle: Programmer's Guide, Reference and DevTools
+Footer: v__REPLACE_ME_VERSION_TAG__
+
+# You can add a footer to your documentation like this:
+# Footer: [text]
+# If you want to add a copyright notice, this would be the place to do it.
+Timestamp: mm.d.yyyy
+#   m     - One or two digit month.  January is "1"
+#   mm    - Always two digit month.  January is "01"
+#   mon   - Short month word.  January is "Jan"
+#   month - Long month word.  January is "January"
+#   d     - One or two digit day.  1 is "1"
+#   dd    - Always two digit day.  1 is "01"
+#   day   - Day with letter extension.  1 is "1st"
+#   yy    - Two digit year.  2006 is "06"
+#   yyyy  - Four digit year.  2006 is "2006"
+#   year  - Four digit year.  2006 is "2006"
+
+
+# --------------------------------------------------------------------------
+# 
+# Cut and paste the lines below to change the order in which your files
+# appear on the menu.  Don't worry about adding or removing files, Natural
+# Docs will take care of that.
+# 
+# You can further organize the menu by grouping the entries.  Add a
+# "Group: [name] {" line to start a group, and add a "}" to end it.
+# 
+# You can add text and web links to the menu by adding "Text: [text]" and
+# "Link: [name] ([URL])" lines, respectively.
+# 
+# The formatting and comments are auto-generated, so don't worry about
+# neatness when editing the file.  Natural Docs will clean it up the next
+# time it is run.  When working with groups, just deal with the braces and
+# forget about the indentation and comments.
+# 
+# --------------------------------------------------------------------------
+
+
+Group: Programmer's Guide  {
+	File: Getting Started*  (no auto-title, docs/rte/progguide/getting_started.txt)
+   	File: User Interface*  (no auto-title, docs/rte/progguide/user_interface.txt)
+}
+
+Group: Reference  {
+	File: Overview* (no auto-title, docs/rte/reference/overview_rte.txt)
+	
+	Group: Animation {
+		File: Overview* (no auto-title, docs/rte/reference/overview_animation.txt)
+		
+		Group: Classes {
+			File: Alpha  (no auto-title, bindings/clutter_alpha.lb)
+	        File: Animator* (no auto-title, bindings/clutter_animator.lb)
+    	    File: AnimationState* (no auto-title, bindings/clutter_state.lb)
+            File: Interval  (no auto-title, bindings/clutter_interval.lb)
+            File: Path (no auto-title, bindings/clutter_path.lb)
+            File: Score (no auto-title, bindings/clutter_score.lb)
+            File: Timeline  (no auto-title, bindings/clutter_timeline.lb)
+        }
+	}
+	
+	Group: Data Persistence {
+		File: Overview* (no auto-title, docs/rte/reference/overview_datapers.txt)
+		
+		Group: Globals {
+			File: profile*  (no auto-title, bindings/profile.lb)
+      		File: settings*  (no auto-title, bindings/settings.lb)
+      	}
+    }
+	
+	Group: Event Handling {
+		File: Overview* (no auto-title, docs/rte/reference/overview_events.txt)
+		
+		Group: Globals {
+			File: controllers*  (no auto-title, bindings/controllers.lb)
+      		File: idle*  (no auto-title, bindings/idle.lb)
+			File: keyboard*  (no auto-title, bindings/keyboard.lb)
+			File: keys (no auto-title, docs/rte/reference/key_codes.txt)
+		}
+		
+		Group: Classes {
+			File: Controller* (no auto-title, docs/rte/reference/controller_ph.txt)
+			File: Stopwatch*  (no auto-title, bindings/stopwatch.lb)
+			File: Timer*  (no auto-title, bindings/timer.lb)
+		}
+	}
+	
+	Group: Media Playback {
+		File: Overview* (no auto-title, docs/rte/reference/overview_media.txt)
+		
+		Group: Globals {
+			File: mediaplayer* (no auto-title, bindings/mediaplayer.lb)
+		}
+	}
+	
+	Group: Networking {
+		File: Overview* (no auto-title, docs/rte/reference/overview_network.txt)
+		
+		Group: Globals {
+			File: json*  (no auto-title, bindings/json.lb)
+			File: uri*  (no auto-title, bindings/uri.lb)
+		}
+		
+		Group: Classes {
+			File: URLRequest*  (no auto-title, bindings/url_request.lb)
+			File: XMLParser*  (no auto-title, bindings/xml.lb)
+		}
+		
+		Group: Interfaces {
+			File: URLRequestCancel* (no auto-title, docs/rte/reference/url_request_cancel_ph.txt)
+			File: URLResponse* (no auto-title, docs/rte/reference/url_response_ph.txt)
+		}
+	}
+
+	Group: Physics Engine {
+		File: Overview* (no auto-title, docs/rte/reference/overview_physics.txt)
+		
+		Group: Classes {
+			File: Shape, Body and Physics* (no auto-title, bindings/physics.lb)
+		}
+	}
+	
+	Group: System and App Components {
+		File: Overview* (no auto-title, docs/rte/reference/overview_system.txt)
+		
+		Group: Globals {
+			File: app*  (no auto-title, bindings/app.lb)
+			File: system*  (no auto-title, bindings/system.lb)
+			File: trickplay*  (no auto-title, bindings/trickplay.lb)
+		}
+	}
+	
+	Group: User Interface {
+		File: Overview (no auto-title, docs/rte/reference/overview_ui.txt)
+		
+		Group: Globals {
+			File: screen  (no auto-title, bindings/clutter_screen.lb)
+		}
+		
+		Group: Classes {
+			File: Bitmap   (no auto-title, bindings/bitmap.lb)
+            File: Canvas  (no auto-title, bindings/canvas.lb)
+            File: Clone  (no auto-title, bindings/clutter_clone.lb)
+            File: Group  (no auto-title, bindings/clutter_group.lb)
+            File: Image  (no auto-title, bindings/clutter_image.lb)
+            File: Rectangle  (no auto-title, bindings/clutter_rectangle.lb)
+            File: Text  (no auto-title, bindings/clutter_text.lb)
+        }
+        
+        Group: Interfaces {
+         	File: UIElement  (no auto-title, bindings/clutter_actor.lb)
+            File: Container  (no auto-title, bindings/clutter_container.lb)
+        }
+    }
+    
+    Group: Utility {
+    	File: Overview* (no auto-title, docs/rte/reference/overview_util.txt)
+    	
+    	Group: Globals {
+			File: Utility Functions*  (no auto-title, bindings/globals.lb)
+		}
+	}
+
+	Group: Index {
+		Index: Everything
+        Class Index: Classes
+    	Function Index: Functions
+	    Global Index: Globals
+    	Property Index: Properties
+	    Event Index: Events
+    	Event Handler Index: Event Handlers
+    	Constructor Index: Constructors
+    	Interface Index: Interfaces
+    	Constant Index: Constants
+	}
+
+}  # Group: Reference
+
+Group: Development Tools {
+	File: Overview* (no auto-title, docs/devtools/overview_tools.txt)
+	
+	Group: Visual Editor {
+		File: Overview (no auto-title, docs/devtools/editor/introduction.txt)
+		
+		Group: Tutorial {
+			File: Introduction  (no auto-title, docs/devtools/editor/tutorial/introduction.txt)
+			File: Create a New Project  (no auto-title, docs/devtools/editor/tutorial/createnewproject.txt)
+			File: Visual Editor Menus  (no auto-title, docs/devtools/editor/tutorial/menus.txt)
+      		File: Add a Background Image  (no auto-title, docs/devtools/editor/tutorial/addBackgroundImage.txt)
+      		File: Save the Screen  (no auto-title, docs/devtools/editor/tutorial/saveScreen.txt)
+      		File: Create the Screen Layout  (no auto-title, docs/devtools/editor/tutorial/createLayoutRectangles.txt)
+      		File: Add a Button Group  (no auto-title, docs/devtools/editor/tutorial/addButtonGroup.txt)
+      		File: The main.lua File  (no auto-title, docs/devtools/editor/tutorial/mainLua.txt)
+      		File: Connect Elements to Code  (no auto-title, docs/devtools/editor/tutorial/connectCode.txt)
+      		File: Create a Second Screen  (no auto-title, docs/devtools/editor/tutorial/createModeScreen.txt)
+      		File: Transition to Another Screen  (no auto-title, docs/devtools/editor/tutorial/screenTransition.txt)
+      		File: CheckBox and RadioButton Elements  (no auto-title, docs/devtools/editor/tutorial/checkBoxRadioButton.txt)
+      		File: ProgressBar and ProgressSpinner  (no auto-title, docs/devtools/editor/tutorial/progBarSpinner.txt)
+		}
+		
+		Group: Reference {
+			Group: User Interface {
+				File: Button  (no auto-title, docs/devtools/editor/reference/button.txt)
+				File: ButtonPicker  (no auto-title, docs/devtools/editor/reference/buttonPicker.txt)
+         		File: CheckBox  (no auto-title, docs/devtools/editor/reference/checkBoxGroup.txt)
+         		File: ProgressBar  (no auto-title, docs/devtools/editor/reference/progBar.txt)
+         		File: ProgressSpinner  (no auto-title, docs/devtools/editor/reference/progSpinner.txt)
+         		File: RadioButtonGroup  (no auto-title, docs/devtools/editor/reference/radioButtonGroup.txt)
+			}
+		}
+	}
+}
+
+Text: (*) section docs not yet complete
