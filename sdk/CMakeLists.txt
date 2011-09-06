@@ -20,7 +20,6 @@ if (UNIX AND NOT APPLE)
             "libavahi-common3 (>= 0.6.25)"
             "libavahi-core6 (>= 0.6.25) | libavahi-core7"
             "libavahi-glib1(>= 0.6.25)"
-            "libc-ares2"
             "libc6 (>= 2.7)"
             "libcairo2 (>= 1.4.10)"
             "libclutter-1.0-0 (>= 1.6.14)"
