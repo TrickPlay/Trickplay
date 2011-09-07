@@ -232,44 +232,6 @@
  */
 
 #pragma mark -
-#pragma mark TPAppViewControllerSocketDelegate stuff
-
-/**
- * Generic operations to perform when the network fails. Includes deallocating
- * other view controllers and their resources and restarting the NetServiceManager
- * which will then begin browsing for advertised services.
- */
-- (void)handleSocketProblems {
-    [self.navigationController popToRootViewControllerAnimated:YES];
-    
-    self.currentTVName = nil;
-    [currentTVIndicator removeFromSuperview];
-    
-    [self startSearchForServices];
-}
-
-/**
- * TPAppViewControllerSocketDelegate callback called from TPAppViewController
- * when an error occurs over the network.
- */
-- (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in Root");
-    
-    [self handleSocketProblems];
-}
-
-/**
- * TPAppViewControllerSocketDelegate callback called from TPAppViewController
- * when the stream socket closes.
- */
-- (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered in Root");
-    
-    [self handleSocketProblems];
-}
-
-
-#pragma mark -
 #pragma mark Table view data source
 
 /**
@@ -448,8 +410,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [delegate didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:NO];
         
         [tvBrowser resolveServiceAtIndex:indexPath.row];
-        
-        [tableView reloadData];
     } else {
         [delegate didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:YES];
     }
@@ -460,6 +420,8 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	{
 		[tableView deselectRowAtIndexPath:indexPath2 animated:YES];
 	}
+    
+    [tableView reloadData];
 }
 
 #pragma mark -
