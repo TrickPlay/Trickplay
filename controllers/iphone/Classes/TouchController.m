@@ -28,7 +28,7 @@
         //activeTouches = [[NSMutableDictionary alloc] initWithCapacity:10];
         openFinger = 1;
         
-        [view setMultipleTouchEnabled:NO];
+        view.multipleTouchEnabled = NO;
     }
     
     return self;
@@ -238,11 +238,13 @@
 - (void)startTouches {
     NSLog(@"start touches");
     touchEventsAllowed = YES;
+    view.multipleTouchEnabled = YES;
 }
 
 - (void)stopTouches {
     NSLog(@"stop touches");
     touchEventsAllowed = NO;
+    view.multipleTouchEnabled = NO;
 }
 
 - (void)reset {

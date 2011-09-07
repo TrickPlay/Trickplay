@@ -38,6 +38,7 @@
         timeLine = [[TrickplayTimeline alloc] init];
         
         view = [aView retain];
+        view.multipleTouchEnabled = YES;
         appViewController = nil;
     }
     
