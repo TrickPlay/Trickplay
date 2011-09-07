@@ -43,8 +43,6 @@ NetServiceManagerDelegate, TVBrowserDelegate> {
 // Exposed methods
 - (void)stopSearchForServices;
 - (void)startSearchForServices;
-- (NSString *)currentTVName;
-- (void)setCurrentTVName:(NSString *)_currentTVName;
 - (void)reloadData;
 - (void)refresh;
 
