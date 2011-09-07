@@ -379,7 +379,13 @@ globals
         [[
             App::get(L)->get_context()->close_app();        
         ]];
+
+    /*
+        Function: reload
         
+        Reloads the app, as though it had been shutdown then restarted
+    */
+
     reload()
     	[[
     		App::get(L)->get_context()->reload_app();
@@ -795,7 +801,7 @@ globals
     		result = ( const char * ) decoded;
     		result_len = length;
     	]];
-        
+
 	lstring uint32_to_be( int n )
 		[[
 			guint32 i = GUINT32_TO_BE( n );
@@ -803,7 +809,7 @@ globals
 			result = ( char * ) & i;
 			result_len = 4;
 		]];
-		
+
 	lstring uint32_to_le( int n )
 		[[
 			guint32 i = GUINT32_TO_LE( n );
@@ -811,7 +817,7 @@ globals
 			result = ( char * ) & i;
 			result_len = 4;
 		]];       
-		
+
 	int uint32_from_be( lstring s )
 		[[
 			if ( s_len >= 4 )
@@ -997,6 +1003,22 @@ globals
 	        lua_pushvalue( L , metatable );
 	        lua_setmetatable( L , -2 );
         ]];
+
+    /*
+        Function: split
+        
+        Split the given string using delimiters, returning the result in a Lua table
+        
+        Arguments:
+        source - The string to tokenize
+        delimiter - The delimiter on which to split up the source string
+        max_tokens - Optional parameter limiting the number of tokens returned.  If the limit is exceeded, the final element of the table will contain the remainder of the source String
+        
+        Returns:
+        strings - a Lua table containing the split elements of the string, with the delimiters removed.
+        
+        eg. split("a,b,c,d,e",",",3) ==> { "a","b","c,d,e" }
+    */
 
 	table split( string source , string delimiter , int max_tokens = 0 )
         [[

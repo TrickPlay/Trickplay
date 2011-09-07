@@ -521,7 +521,7 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         for ( StringMap::const_iterator it = context->config.begin(); it != context->config.end(); ++it )
         {
-            g_info( "%-15.15s %s", it->first.c_str(), it->second.c_str() );
+            g_info( "%-25.25s %s", it->first.c_str(), it->second.c_str() );
         }
     }
     else if ( !strcmp( command, "profile" ) )
@@ -1358,6 +1358,10 @@ int TPContext::run()
     {
         g_info( "MEDIA PLAYER IS DISABLED..." );
     }
+
+    //.........................................................................
+
+    load_background();
 
     //.........................................................................
     // Load the app
@@ -2223,7 +2227,6 @@ void TPContext::load_external_configuration()
         TP_FIRST_APP_EXITS,
         TP_HTTP_PORT,
         TP_RESOURCES_PATH,
-        TP_TEXTURE_CACHE_ENABLED,
         TP_TEXTURE_CACHE_LIMIT,
 
         NULL
@@ -2689,7 +2692,7 @@ Image * TPContext::load_icon( const gchar * path )
         memset( &result, 0, sizeof( TPImage ) );
 
 
-        if ( sscanf( info_contents, "%s %u %u %u %u %u", actual_data_hash, &result.width, &result.height, &result.pitch, &result.depth, &result.bgr ) == 6 )
+        if ( sscanf( info_contents, "%s %u %u %u %u %u %u", actual_data_hash, &result.width, &result.height, &result.pitch, &result.depth, &result.bgr , &result.pm_alpha ) >= 6 )
         {
             if ( !strcmp( actual_data_hash, data_hash ) )
             {
@@ -2733,7 +2736,7 @@ Image * TPContext::load_icon( const gchar * path )
 
         if ( g_mkdir_with_parents( icon_cache_path, 0700 ) == 0 )
         {
-            gchar * info = g_strdup_printf( "%s %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() );
+            gchar * info = g_strdup_printf( "%s %u %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() , image->pm_alpha() );
 
             free_later( info );
 
@@ -2870,6 +2873,54 @@ void TPContext::audio_detection_match( const gchar * json )
 
         Action::post( new AudioMatchAction( this , json ) );
     }
+}
+
+void TPContext::load_background()
+{
+#ifndef TP_PRODUCTION
+
+	if ( const gchar * resources_path = get( TP_RESOURCES_PATH , 0 , true ) )
+	{
+		gchar * path = g_build_filename( resources_path , "background.jpg" , NULL );
+
+		FreeLater free_later( path );
+
+		if ( ! g_file_test( path , G_FILE_TEST_EXISTS ) )
+		{
+			return;
+		}
+
+		if ( Image * image = Image::decode( path , false ) )
+		{
+			ClutterActor * bg = clutter_texture_new();
+
+			clutter_actor_set_name( bg , "background" );
+
+			Images::load_texture( CLUTTER_TEXTURE( bg ) , image );
+
+			delete image;
+
+			gint iw;
+			gint ih;
+
+			clutter_texture_get_base_size( CLUTTER_TEXTURE( bg ) , & iw , & ih );
+
+			ClutterActor * stage = clutter_stage_get_default();
+
+	        gfloat width;
+	        gfloat height;
+
+	        clutter_actor_get_size( stage , & width , & height );
+
+	        clutter_actor_set_scale( bg , width / iw , height / ih );
+
+	        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , bg );
+
+	        g_object_set_data_full( G_OBJECT( bg ) , "tp-src", g_strdup( "[background]" ) , g_free);
+		}
+	}
+
+#endif
 }
 
 //=============================================================================

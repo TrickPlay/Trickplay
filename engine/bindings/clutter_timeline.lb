@@ -283,7 +283,7 @@ class Timeline [[ClutterTimeline*]]
 		
 		The pause() function halts a running Timeline at its current position and invokes the on_paused() event handler.
 		
-		To resume the paused Timeline, call the start() function again; the Timeline will resume from the point at which it had been paused.
+		To resume the paused Timeline, call the start() function again; the Timeline will resume from the point at which it had been paused. Note: Calling start() to resume a paused Timeline causes the on_started() event handler to be called.
 		
 		*Arguments:* None
 		

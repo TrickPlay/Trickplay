@@ -5,3 +5,5 @@ This is a placeholder for the Networking:URLResponse section of the TrickPlay Ru
 
 This Interface must be extracted from the engine/bindings/url_request.lb file.
 
+At the moment, this Interface is documented with <URLRequest>.
+

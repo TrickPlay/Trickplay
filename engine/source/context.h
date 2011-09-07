@@ -42,7 +42,6 @@
 #define TP_LIRC_REPEAT_DEFAULT          	150
 #define TP_APP_PUSH_ENABLED_DEFAULT     	true
 #define TP_APP_PUSH_PORT_DEFAULT        	8888
-#define TP_TEXTURE_CACHE_ENABLED_DEFAULT	false
 #define TP_TEXTURE_CACHE_LIMIT_DEFAULT		0
 
 // TODO: Don't like hard-coding this app id here
@@ -267,6 +266,10 @@ private:
     // Request handlers
 
     void set_request_handler( const char * subject, TPRequestHandler handler, void * data );
+
+    //.........................................................................
+
+    void load_background();
 
     //.........................................................................
     // External functions are our friends

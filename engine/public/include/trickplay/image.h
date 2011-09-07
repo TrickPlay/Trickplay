@@ -74,6 +74,16 @@ extern "C" {
         unsigned int        bgr;
 
         /*
+            Field: pm_alpha
+
+            If the color components have been multiplied by the alpha component,
+            set this to 1, otherwise it should be zero. If depth is 3, this
+            field is ignored.
+        */
+
+        unsigned int 		pm_alpha;
+
+        /*
             Field: free_image
 
             Pointer to a function that will be used to free the pixels once
