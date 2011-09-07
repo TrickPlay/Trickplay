@@ -1017,6 +1017,10 @@
     if (audioController) {
         [audioController release];
     }
+    if (advancedView) {
+        [advancedView do_unparent:nil];
+        [advancedView release];
+    }
     if (advancedUIDelegate) {
         [(AdvancedUIObjectManager *)advancedUIDelegate release];
     }
@@ -1049,9 +1053,6 @@
     }
     if (multipleChoiceArray) {
         [multipleChoiceArray release];
-    }
-    if (advancedView) {
-        [advancedView release];
     }
     if (socketTimer) {
         [socketTimer invalidate];
