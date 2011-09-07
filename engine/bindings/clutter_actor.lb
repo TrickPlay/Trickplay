@@ -1724,7 +1724,7 @@ interface actor [[ClutterActor*]]
 	*Supported Animation Properties:* Property names are case-sensitive. The duration property is required; all other properties are optional.
 	
 	duration - length of animation in milliseconds. Required.
-	mode - string describing the type of tweening to implement. The list of supported mode strings is shown after the property list. Default = "LINEAR"
+	mode - string specifying the Alpha mode to apply to the animated property. For descriptions of the supported modes, refer to the <Alpha.mode> section. Default = "LINEAR"
 	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called.
 	on_completed - function to call when the animation is finished
 	x - X coordinate at end of animation
@@ -1742,20 +1742,6 @@ interface actor [[ClutterActor*]]
 	x_rotation - object's rotation in degrees along the x-axis at end of animation
 	y_rotation - object's rotation in degrees along the y-axis at end of animation
 	z_rotation - object's rotation in degrees along the z-axis at end of animation
-	
-	*Mode Property Settings:* Property settings are case-sensitive
-	
-	"LINEAR" - perform linear tweening. This is the default mode.
-	"EASE_IN_QUAD", "EASE_OUT_QUAD", "EASE_IN_OUT_QUAD" - perform quadratic tweening
-	"EASE_IN_CUBIC", "EASE_OUT_CUBIC", "EASE_IN_OUT_CUBIC" - perform cubic tweening
-	"EASE_IN_QUART", "EASE_OUT_QUART", "EASE_IN_OUT_QUART" - perform quartic tweening
-	"EASE_IN_QUINT", "EASE_OUT_QUINT", "EASE_IN_OUT_QUINT" - perform quintic tweening
-	"EASE_IN_SINE", "EASE_OUT_SINE", "EASE_IN_OUT_SINE" - perform sinusoidal tweening
-	"EASE_IN_EXPO", "EASE_OUT_EXPO", "EASE_IN_OUT_EXPO" - perform exponential tweening
-	"EASE_IN_CIRC", "EASE_OUT_CIRC", "EASE_IN_OUT_CIRC" - perform circular tweening
-	"EASE_IN_ELASTIC", "EASE_OUT_ELASTIC", "EASE_IN_OUT_ELASTIC" - perform elastic tweening, with offshoot on start/end/both ends
-	"EASE_IN_BACK", "EASE_OUT_BACK", "EASE_IN_OUT_BACK" - perform overshooting cubic tweening, with backtracking on start/end/both ends
-	"EASE_IN_BOUNCE", "EASE_OUT_BOUNCE", "EASE_IN_OUT_BOUNCE" - perform exponentially decaying parabolic (bounce) tweening, with bounce on start/end/both ends
 	
 	*Return Value:* If the animation was started successfully, returns a reference to an Animation object. Else returns nil.
 	

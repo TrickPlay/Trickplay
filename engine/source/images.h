@@ -40,6 +40,7 @@ public:
     inline guint pitch() const { return image->pitch; }
     inline guint depth() const { return image->depth; }
     inline bool bgr() const { return image->bgr; }
+    inline bool pm_alpha() const { return image->pm_alpha; }
 
     inline guint size() const { return image->height * image->pitch; }
 
@@ -72,6 +73,8 @@ public:
     // Premultiplies alpha
 
     void premultiply_alpha();
+
+    static void premultiply_alpha( TPImage * image );
 
     const JSON::Object & get_tags() const;
 
