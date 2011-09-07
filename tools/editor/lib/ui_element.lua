@@ -2903,6 +2903,10 @@ function ui_element.radioButtonGroup(t)
 
     create_radioButton = function() 
 
+	local sel_off_x = 12
+	local sel_off_y = 4
+
+
 	if(p.skin ~= "Custom" and p.skin ~= "default") then 
 	     p.button_image = skin_list[p.skin]["radiobutton"]
 	     p.button_focus_image = skin_list[p.skin]["radiobutton_focus"]
@@ -2986,8 +2990,18 @@ function ui_element.radioButtonGroup(t)
 	    					rings:find_child("focus"..ring_num).opacity = 255 
         				--end 
 
-						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.button_position[1]
-	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.button_position[2]
+						--select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.button_position[1]
+	    				--select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.button_position[2]
+
+						if (p.skin == "CarbonCandy") then 
+							select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + p.button_position[1]
+	    					select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + p.button_position[2] - 8
+						else 
+							select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + sel_off_x + p.button_position[1]
+	    					select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + sel_off_y + p.button_position[2]
+						end 
+
+
 
 						rings:find_child("ring"..ring_num):grab_key_focus() 
 
@@ -3010,8 +3024,17 @@ function ui_element.radioButtonGroup(t)
         			--end 
 					rings:find_child("ring"..ring_num):grab_key_focus() 
 
-					select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
-	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
+					--select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
+	    			--select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
+
+					if (p.skin == "CarbonCandy") then 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x 
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y - 8 
+					else 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + sel_off_x
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + sel_off_y
+					end 
+
 					return true
 	     		end 
 	      	end
@@ -4333,7 +4356,7 @@ function ui_element.scrollPane(t)
         --arrows_centered = false,
         --hor_arrow_y     = nil,
         --vert_arrow_x    = nil,
-         bar_color_inner       = {180,180,180,255},
+        bar_color_inner       = {180,180,180,255},
         bar_color_outer       = { 30, 30, 30,255},
         bar_focus_color_inner = {180,255,180,255},
         bar_focus_color_outer = { 30, 30, 30,255},
@@ -6736,7 +6759,7 @@ function ui_element.arrowPane(t)
 	
 		
 	function umbrella.extra.on_focus_in() 
-		scroll_group:grab_key_focus()
+		umbrella:grab_key_focus()
     end
 
 	function umbrella.extra.on_focus_out() 
@@ -6750,8 +6773,6 @@ function ui_element.arrowPane(t)
 	local arrow_pane_keys = {}
 	
 	local function create()
-		
-		
 		
 		umbrella:clear()
 		arrow_pane_keys = {}
