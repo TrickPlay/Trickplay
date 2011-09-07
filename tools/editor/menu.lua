@@ -57,33 +57,6 @@ menuButton_file.name = "menuButton_file"
 menuButton_file.anchor_point = {71,30.5}
 menuButton_file.extra.focus = {[65293] = "menuButton_file", [65363] = "menuButton_edit",  [65364]=menuButton_file.press_down, [65362]=menuButton_file.press_up}
 
-function menuButton_file:on_key_down(key)
-	if menuButton_file.focus[key] then
-		if type(menuButton_file.focus[key]) == "function" then
-			menuButton_file.focus[key]()
-		elseif screen:find_child(menuButton_file.focus[key]) then
-			if screen:find_child(menuButton_file.focus[key]) ~= menuButton_file then
-				if menuButton_file.on_focus_out then 
-					menuButton_file.on_focus_out()
-				end
-				if screen:find_child(menuButton_file.focus[key]).on_focus_in then
-					screen:find_child(menuButton_file.focus[key]).on_focus_in()
-				end
-				screen:find_child(menuButton_file.focus[key]):grab_key_focus()
-			else 
-
-				if menuButton_file.get_index() ~= 0 then 
-				    menuButton_file.press_enter()
-			    end
-
-				menuButton_file.on_focus_out()
-				screen:grab_key_focus()
-			end 
-		end
-	end
-	return true
-end
-
 menuButton_file.extra.reactive = true
 
 local menuButton_edit = ui_element.menuButton
@@ -141,31 +114,6 @@ menuButton_edit.name = "menuButton_edit"
 menuButton_edit.anchor_point = {71,30.5}
 menuButton_edit.extra.focus = {[65363] = "menuButton_arrange", [65293] = "menuButton_edit", [65361] = "menuButton_file", [65364]=menuButton_edit.press_down, [65362]=menuButton_edit.press_up}
 
-function menuButton_edit:on_key_down(key)
-	if menuButton_edit.focus[key] then
-		if type(menuButton_edit.focus[key]) == "function" then
-			menuButton_edit.focus[key]()
-		elseif screen:find_child(menuButton_edit.focus[key]) then
-			if screen:find_child(menuButton_edit.focus[key]) ~= menuButton_edit then
-				if menuButton_edit.on_focus_out then 
-					menuButton_edit.on_focus_out()
-				end
-				if screen:find_child(menuButton_edit.focus[key]).on_focus_in then
-					screen:find_child(menuButton_edit.focus[key]).on_focus_in()
-				end
-				screen:find_child(menuButton_edit.focus[key]):grab_key_focus()
-			else 
-				if menuButton_edit.get_index() ~= 0 then 
-				    menuButton_edit.press_enter()
-			    end
-				menuButton_edit.on_focus_out()
-				screen:grab_key_focus()
-			end 
-		end
-	end
-	return true
-end
-
 menuButton_edit.extra.reactive = true
 
 
@@ -220,31 +168,6 @@ menuButton_arrange.insert_item(15,{type="item", string="Send Backward", bg=asset
 menuButton_arrange.name = "menuButton_arrange"
 menuButton_arrange.anchor_point = {71,30.5}
 menuButton_arrange.extra.focus = {[65363] = "menuButton_view", [65293] = "menuButton_arrange", [65361] = "menuButton_edit", [65364]=menuButton_arrange.press_down, [65362]=menuButton_arrange.press_up }
-
-function menuButton_arrange:on_key_down(key)
-	if menuButton_arrange.focus[key] then
-		if type(menuButton_arrange.focus[key]) == "function" then
-			menuButton_arrange.focus[key]()
-		elseif screen:find_child(menuButton_arrange.focus[key]) then
-			if screen:find_child(menuButton_arrange.focus[key]) ~= menuButton_arrange then
-				if menuButton_arrange.on_focus_out then 
-					menuButton_arrange.on_focus_out()
-				end
-				if screen:find_child(menuButton_arrange.focus[key]).on_focus_in then
-					screen:find_child(menuButton_arrange.focus[key]).on_focus_in()
-				end
-				screen:find_child(menuButton_arrange.focus[key]):grab_key_focus()
-			else 
-				if menuButton_arrange.get_index() ~= 0 then 
-				    menuButton_arrange.press_enter()
-			        end
-				menuButton_arrange.on_focus_out()
-				screen:grab_key_focus()
-			end
-		end
-	end
-	return true
-end
 
 menuButton_arrange.extra.reactive = true
 
@@ -314,32 +237,6 @@ menuButton_view.insert_item(12,{type="item", string="Snap to Guides", bg=assets(
 menuButton_view.name = "menuButton_view"
 menuButton_view.anchor_point = {71,30.5}
 menuButton_view.extra.focus = {[65293] = "menuButton_view", [65361] = "menuButton_arrange", [65364]=menuButton_view.press_down, [65362]=menuButton_view.press_up }
-
-function menuButton_view:on_key_down(key)
-	if menuButton_view.focus[key] then
-		if type(menuButton_view.focus[key]) == "function" then
-			menuButton_view.focus[key]()
-		elseif screen:find_child(menuButton_view.focus[key]) then
-			if screen:find_child(menuButton_view.focus[key]) ~= menuButton_view then
-				if menuButton_view.on_focus_out then
-					menuButton_view.on_focus_out()
-				end
-				if screen:find_child(menuButton_view.focus[key]).on_focus_in then
-					screen:find_child(menuButton_view.focus[key]).on_focus_in()
-				end
-				screen:find_child(menuButton_view.focus[key]):grab_key_focus()
-			else
-
-			      if menuButton_view.get_index() ~= 0 then 
-				    menuButton_view.press_enter()
-			      end
-			      menuButton_view.on_focus_out()
-				  screen:grab_key_focus()
-			end
-		end
-	end
-	return true
-end
 
 menuButton_view.extra.reactive = true
 
