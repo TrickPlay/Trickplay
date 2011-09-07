@@ -54,7 +54,7 @@ Group: Reference  {
 		
 		Group: Classes {
 			File: Alpha  (no auto-title, bindings/clutter_alpha.lb)
-	        File: Animator* (no auto-title, bindings/clutter_animator.lb)
+	        File: Animator (no auto-title, bindings/clutter_animator.lb)
     	    File: AnimationState* (no auto-title, bindings/clutter_state.lb)
             File: Interval  (no auto-title, bindings/clutter_interval.lb)
             File: Path (no auto-title, bindings/clutter_path.lb)
