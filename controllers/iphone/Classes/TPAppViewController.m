@@ -136,7 +136,7 @@
     
     // the virtual remote for controlling the Television
     virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
-    virtualRemote.view.frame = frame;
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight + 44);
     [self.view addSubview:virtualRemote.view];
     virtualRemote.delegate = self;
     
@@ -1017,6 +1017,10 @@
     if (audioController) {
         [audioController release];
     }
+    if (advancedView) {
+        [advancedView do_unparent:nil];
+        [advancedView release];
+    }
     if (advancedUIDelegate) {
         [(AdvancedUIObjectManager *)advancedUIDelegate release];
     }
@@ -1049,9 +1053,6 @@
     }
     if (multipleChoiceArray) {
         [multipleChoiceArray release];
-    }
-    if (advancedView) {
-        [advancedView release];
     }
     if (socketTimer) {
         [socketTimer invalidate];
