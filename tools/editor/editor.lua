@@ -140,15 +140,15 @@ local function guideline_inspector(v)
 		if current_focus then 
 			current_focus.on_focus_out()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
 		text_input.on_focus_in()
 	end
 
 	local tab_func = function()
 		text_input.on_focus_out()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+		button_ok.active.opacity = 0
+		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
 		button_cancel.on_focus_in()
 	end
@@ -280,7 +280,6 @@ function editor.show_guides()
 			end
 		end 
 	else 
-		--if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then 
 		if util.is_there_guideline() then 
 			menuButtonView.items[11]["icon"].opacity = 0
 			guideline_show = false
@@ -606,7 +605,6 @@ local function open_files(input_purpose, bg_image, inspector)
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down(1) if inspector then inspector_activate() end end
-	--button_ok.pressed = function() load_file(selected_file)  xbox:on_button_down(1) end
 	
 	if inspector then 
 		button_ok.pressed = function() 
@@ -632,7 +630,7 @@ local function open_files(input_purpose, bg_image, inspector)
 		button_ok.pressed = function() 
 			if input_purpose == "open_luafile" then
 				undo_list = {} 
-				if editor.close(true) ~= "-1" then --, load_file, selected_file) == nil then --0802
+				if editor.close(true) ~= "-1" then 
 					load_file(selected_file) 
 				end 
 			else 
@@ -640,7 +638,6 @@ local function open_files(input_purpose, bg_image, inspector)
 			end 
 			xbox:on_button_down(1) 
 
-			-- 0802		
 			local dir = editor_lb:readdir(current_dir.."/screens")
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
@@ -649,7 +646,6 @@ local function open_files(input_purpose, bg_image, inspector)
 					end 
 				end 
 			end 
-			--0802
 		end 
 	end 
 
@@ -657,15 +653,15 @@ local function open_files(input_purpose, bg_image, inspector)
 		if current_focus then 
 			current_focus.on_focus_out()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
 		scroll.on_focus_in()
 	end
 	
 	
 	local tab_func = function()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+		button_ok.active.opacity = 0
+		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
 		button_cancel.on_focus_in()
 	end
@@ -675,7 +671,6 @@ local function open_files(input_purpose, bg_image, inspector)
 	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
 
-	--editor_use = false
 	
 	local msgw = Group {
 		name = "msgw", 
@@ -816,8 +811,8 @@ local function open_files(input_purpose, bg_image, inspector)
 	util.create_on_button_down_f(msgw)	
 	
 	--Focus
-	button_ok:find_child("active").opacity = 255
-	button_ok:find_child("dim").opacity = 0
+	button_ok.active.opacity = 255
+	button_ok.dim.opacity = 0
 	scroll.on_focus_in()
 
 	function xbox:on_button_down(x,y,button,num_clicks)
@@ -926,7 +921,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		title = Text{name = "title", text = "Inspector: "..v.type}:set(STYLE)
 		title_shadow = Text {name = "title", text = "Inspector: "..v.type}:set(SSTYLE)
 	end 
-	----------------------------------------------------------------------------
+	-------------------------------------------------------------
 	local INSPECTOR_OFFSET = 30 
     local TOP_PADDING = 12
     local BOTTOM_PADDING = 12
@@ -959,7 +954,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local labels_t= {}
 
  	if util.is_this_widget(v) == true then 
- 		if v.extra.type == "ToastAlert" or v.extra.type == "DialogBox" or       -- 2 Tabs 
+ 		if v.extra.type == "ToastAlert" or v.extra.type == "DialogBox" or   -- 2 Tabs 
  		   v.extra.type == "ProgressSpinner" or v.extra.type == "ProgressBar" or 
  		   v.extra.type == "ScrollPane" or v.extra.type == "ArrowPane" then 
  		   table.insert (labels_t, "Info")
@@ -994,16 +989,13 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		if current_focus then 
 			current_focus.on_focus_out()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
 	end
 
 	--Focus Destination
-	--button_viewcode.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel",  [keys.Return] = "button_viewcode", [keys.Up] = s_func}
 	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
-	--editor_use = false
-	
 	-- inspector group 
 	local inspector = Group {
 		name = "inspector", --msgw
@@ -1016,7 +1008,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			title_shadow:set{position = {X_PADDING, 5}, opacity=50}, 
 			title:set{position = {X_PADDING + 1, 6}}, 
 			tabs:set{name = "tabs", position = {0, TOP_BAR}, reactive=true},
-			--button_viewcode:set{name = "button_viewcode", position = { WIDTH - button_viewcode.w - button_cancel.w - button_ok.w - 3*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
 			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
 			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - 1*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}
 		},
@@ -1024,7 +1015,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	}
 
 	-- Button Event Handlers
-	--button_viewcode.pressed = function() editor.view_code(v)  xbox:on_button_down(1) end
 	button_cancel.pressed = function() xbox:on_button_down(1) end
 	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1)  end end
 
@@ -1119,7 +1109,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 					if space == 261 then 
          				item.x = GUTTER
 					else
-         				item.x = used + PADDING  -- PADDING, 6
+         				item.x = used + PADDING  
 					end 
 
 					if used_y == 0 then 
@@ -1130,11 +1120,10 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 					prev_y = item.y 
 	    		else 
 		 			if (attr_n == "ui_width" or attr_n == "w") then 
-						--items_height = items_height - 12 -- imsi !! 
  		 			end 
          			item.x = GUTTER
 		 			item.y = used_y +  7
-		 			space = 261 --WIDTH - item.w
+		 			space = 261 
 		 			items_height = item.h 
 					prev_y = item.y
         		end 
@@ -1155,13 +1144,13 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		end 
    	end 
 
-	scroll_info.virtual_h = item_group_info.h --+ 35
+	scroll_info.virtual_h = item_group_info.h 
    	scroll_info.content:add(item_group_info)
 	scroll_info.position = {0, 0}
 	scroll_info.reactive = true
 	tabs.tabs[1]:add(scroll_info) 
 
-	scroll_more.virtual_h = item_group_more.h --+ 35
+	scroll_more.virtual_h = item_group_more.h 
 	local tab_n = table.getn(tabs.tab_labels) 
 	if item_group_more.h ~= 0 then 
    		scroll_more.content:add(item_group_more)
@@ -1176,8 +1165,8 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
    	util.create_on_button_down_f(inspector)	
 
 	--Focus
-	button_ok:find_child("active").opacity = 255
-	button_ok:find_child("dim").opacity = 0
+	button_ok.active.opacity = 255
+	button_ok.dim.opacity = 0
 	scroll_info.on_focus_in()
 
 	local var_i = 1 
@@ -1292,7 +1281,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	for i, v in pairs(g.children) do
 		if v.extra then 
 			if v.extra.focus == nil then 
-				editor.inspector(v, "touch") --0701
+				editor.inspector(v, "touch") 
 			end 
 		end
 
@@ -1491,23 +1480,18 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 						main = ""
 						main = main_first..added_stub_code..main_last
 						editor_lb:writefile("main.lua",main, true)
-			   			--print("main.lua 안에 해당 부분을 찾아서 수정이 필요하면 해줘여..") 
 					end 
 			   	end 
-     	  	else	-- if string.find(main, "-- "..fileUpper.." SECTION") == nil then 
-			   	--print("main.lua 안에 딱히 해당 될 내용이 없으면 새로 구성해 줘야지..") 
+     	  	else	
 				msg_window.inputMsgWindow_savefile(fname, current_fn, save_current_f)
 	      	end	
-		elseif (current_fn ~= "" and main == nil) then  -- if(current_fn ~= "" and main ) then 
-			 --print("main.lua 자체가 없어서 만들라고 ? ") 
+		elseif (current_fn ~= "" and main == nil) then  
 			 msg_window.inputMsgWindow_savefile(fname, current_fn, save_current_f)
 		else
-			 --print("이건 무슨 경우랴 ?") 
 			 editor.save(false)
 			 return
 		end 
     else -- save_current_file == false, "Save As"   
-		--print("Save As 경우") 
 		msg_window.inputMsgWindow_savefile(fname, current_fn)
 	end 	
 end 
@@ -1634,15 +1618,15 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 		if current_focus then 
 			current_focus.on_focus_out()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
 		text_input.on_focus_in()
 	end
 
 	local tab_func = function()
 		text_input.on_focus_out()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+		button_ok.active.opacity = 0
+		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
 		button_cancel.on_focus_in()
 	end
@@ -1845,7 +1829,7 @@ function editor.undo()
 	    end
         table.insert(redo_list , undo_item)
  	  end 
-	  screen:grab_key_focus() --1115
+	  screen:grab_key_focus() 
 end
 	
 function editor.redo()
@@ -1879,7 +1863,7 @@ function editor.redo()
 	    end 
         table.insert(undo_list, redo_item)
       end 
-	  screen:grab_key_focus() --1115
+	  screen:grab_key_focus() 
 end
 
 function editor.undo_history()
@@ -1903,11 +1887,9 @@ function editor.text()
     ui.text = Text{
     name="text"..tostring(item_num),
 	text = strings[""], font= "FreeSans Medium 30px",
-	-- 0111 text = "", font= "FreeSans Medium 40px",
     color = hdr.DEFAULT_COLOR, 
 	position ={200, 200, 0}, 
-	editable = true , reactive = true, --ellipsize = "END", 
-	--wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR", 
+	editable = true , reactive = true, 
 	wants_enter = true, wrap=true, wrap_mode="CHAR", 
 	extra = {org_x = 200, org_y = 200}
 	} 
@@ -1941,9 +1923,6 @@ function editor.text()
 	    end 
 	end 
 
-	if(screen:find_child("screen_objects") == nil) then 
-             --screen:add(g)
-	end
     ui.text.grab_key_focus(ui.text)
     local n = table.getn(g.children)
 
@@ -1953,7 +1932,7 @@ function editor.text()
 			return true
 		end 
 
-    	if key == keys.Return then -- and shift == false then
+    	if key == keys.Return then 
 			ui.text:set{cursor_visible = false}
         	screen.grab_key_focus(screen)
 			ui.text:set{editable= false}
@@ -2039,10 +2018,6 @@ function editor.clone()
 	    	        end 
 		     	end 
  
-		     
-	           	if(screen:find_child("screen_objects") == nil) then 
-        	          --screen:add(g)        
-		     	end 
         	    ui.clone.reactive = true
 		     	ui.clone.extra.lock = false
 		     	util.create_on_button_down_f(ui.clone)
@@ -2193,20 +2168,17 @@ function editor.duplicate()
                         				ui.dup:add(ui.dup_c)
                         				item_num = item_num + 1
 									else 
-										---[[
 										ui.dup_c = copy_widget(j)
 										ui.dup:add(ui.dup_c)
                         				ui.dup_c.extra.lock = false
                         				util.create_on_button_down_f(ui.dup_c)
                         				item_num = item_num + 1
-										---]]
 										-- group's child is widget 
 									---[[	
 										 for a,b in pairs(w_attr_list) do 
                         				 	if j[b] ~= nil then 
                             					if b ~= "name" and b ~= "position" then  
                                  					if b == "content" then  
-														--print("1 : content")
 														local temp_g
 														if util.is_this_widget(j) == false then 
 															temp_g = util.copy_obj(j[b])
@@ -2238,7 +2210,6 @@ function editor.duplicate()
 			     	   	   								end 
 														ui.dup_c[b] = temp_g
                                     				elseif b == "tiles" then 
-														--print("2 : tiles")
 						   								for k,l in pairs (j[b]) do 
 															if type(l) == "table" then 
 							     								for o,p in pairs(l) do 
@@ -2256,19 +2227,16 @@ function editor.duplicate()
 															end 
 						   								end
                                     				elseif type(j[b]) == "table" then  
-														--print("3 : table", b)
 														if b ~= "children" then 
 						   									local temp_t = {}
 						   									for k,l in pairs (j[b]) do 
 																temp_t[k] = l
-																--ui.dup[b][k] = l
 						   									end
 															if ui.dup_c then 
 					           									ui.dup_c[b] = temp_t
 															end 
 														end 
                                    					else --elseif ui.dup_c[b] ~= j[b]  then  
-														--print("-->", b, ":", j[b])
 														if ui.dup_c then 
 					           								ui.dup_c[b] = j[b] 
 														end
@@ -2289,8 +2257,6 @@ function editor.duplicate()
                         	end 
                    	else --util.is_this_widget == true
                    			
-					--	ui.dup = copy_widget(v)
-
 						----[[
                        	ui.dup = widget_f_map[v.extra.type]() 
 
@@ -2311,7 +2277,6 @@ function editor.duplicate()
                         	if v[j] ~= nil then 
                             	if j ~= "name" and j ~= "position" then  
                                  	if j == "content" then  
-												--print("1 : content")
 										local temp_g = util.copy_obj(v[j])
 										for m,n in pairs(v.content.children) do 
 			     	   		     			if n.name then 
@@ -2338,7 +2303,6 @@ function editor.duplicate()
 			     	   	   				end 
 										ui.dup[j] = temp_g
                                     elseif j == "tiles" then 
-										--print("2 : tiles")
 						   				for k,l in pairs (v[j]) do 
 											if type(l) == "table" then 
 							     				for o,p in pairs(l) do 
@@ -2363,7 +2327,7 @@ function editor.duplicate()
 						   					end
 					           				ui.dup[j] = temp_t
 										end 
-                                   else--elseif ui.dup[j] ~= v[j]  then  
+                                   else
 					           			ui.dup[j] = v[j] 
                                    end 
                                  end -- not position, name 
@@ -3426,8 +3390,8 @@ function editor.ui_elements()
 		if current_focus then 
 			current_focus.on_focus_out()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
 		scroll.on_focus_in()
 	end
 
@@ -3437,8 +3401,8 @@ function editor.ui_elements()
 
 
 	local tab_func = function()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+		button_ok.active.opacity = 0
+		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
 		button_cancel.on_focus_in()
 	end
@@ -3560,8 +3524,8 @@ function editor.ui_elements()
 	util.create_on_button_down_f(msgw)	
 
 	--Focus
-	button_ok:find_child("active").opacity = 255
-	button_ok:find_child("dim").opacity = 0
+	button_ok.active.opacity = 255
+	button_ok.dim.opacity = 0
 	scroll.on_focus_in()
 
 
@@ -3682,8 +3646,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 
 	local tab_func = function()
 		if button_nok or button_cancel then 
-			button_ok:find_child("active").opacity = 0
-			button_ok:find_child("dim").opacity = 255
+			button_ok.active.opacity = 0
+			button_ok.dim.opacity = 255
 		end 
 		if button_nok then 
 			button_nok:grab_key_focus()
@@ -3715,8 +3679,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		if current_focus then 
 			current_focus.on_focus_out()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
 		button_ok:grab_key_focus() 
 	end
 

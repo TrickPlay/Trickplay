@@ -118,12 +118,9 @@ function editor_ui.button(table)
 	
 		b_group:add(button, active, focus)
 
---new 0901
 		b_group.extra.dim = button
 		b_group.extra.active = active
 		b_group.extra.focus = focus
---new 0901
-
 
 		if p.text_has_shadow then 
 	       s_txt = Text {
@@ -214,8 +211,6 @@ function editor_ui.button(table)
         else 
            p[k] = v
         end
-		--print(k,v)
-		--print("create_button()called")
         create_button()
     end 
 
@@ -238,7 +233,7 @@ function editor_ui.scrollPane(t)
         visible_w    =  285,
         visible_h    =  330,
         content   	 = Group{},
-        virtual_h 	 = 242,--1000,
+        virtual_h 	 = 242,
         virtual_w 	 = 285,
         arrow_color  = {255,255,255,255},
         arrows_visible = true,
@@ -275,7 +270,7 @@ function editor_ui.scrollPane(t)
 	--flag to hold back key presses while animating content group
 	local animating = false
 
-	local border = Rectangle{ color = "00000000", } --opacity = 0}
+	local border = Rectangle{ color = "00000000", } 
 	
 	local track_h, track_w, grip_hor, grip_vert, track_hor, track_vert
 	
@@ -303,13 +298,10 @@ function editor_ui.scrollPane(t)
                 if p.virtual_h > p.visible_h then
                     if y > p.virtual_h - p.visible_h/2 then
                         new_y = -p.virtual_h + p.visible_h
-                        --print(1)
                     elseif y < p.visible_h/2 then
                         new_y = 0
-                        --print(2)
                     else
                         new_y = -y + p.visible_h/2
-                        --print(3)
                     end
                 else
                     new_y =0
@@ -353,17 +345,11 @@ function editor_ui.scrollPane(t)
                     end
                 end
             end
-            --[[
-			get_content_group = function()
-				return content
-			end
-            --]]
         }
     }
 
 
 	 function scroll_group.extra.on_focus_in(key) 
-		--current_focus = scroll_group 0701
 		for i,j in pairs (scroll_group.content.children) do 
 			if j.name then 
 			if string.find(j.name, "h_rect") ~= nil then 
@@ -376,7 +362,6 @@ function editor_ui.scrollPane(t)
     end
     
     function scroll_group.extra.on_focus_out(key) 
-		--print("scroll_group focus out")
     end
 
     scroll_group.extra.seek_to = function(x,y)
@@ -397,28 +382,7 @@ function editor_ui.scrollPane(t)
 		end,
 	}
 	scroll_group.on_key_down = function(self,key)
-	--[[
-		if animating then return end
-		--if keys[key] then
-			--keys[key]()
-		if scroll_group.focus[key] then
-			if type(scroll_group.focus[key]) == "function" then
-				scroll_group.focus[key]()
-			elseif screen:find_child(scroll_group.focus[key]) then
-				if scroll_group.on_focus_out then
-					scroll_group.on_focus_out()
-				end
-				screen:find_child(scroll_group.focus[key]):grab_key_focus()
-				if screen:find_child(scroll_group.focus[key]).on_focus_in then
-					screen:find_child(scroll_group.focus[key]).on_focus_in(key)
-				end
-			end
-		else
-			dumptable(scroll_group.extra.focus)
-		end
-		]]
 		scroll_group.extra.on_focus_in()
-
 	end
 	
 	scroll_y = function(dir)
@@ -520,7 +484,6 @@ function editor_ui.scrollPane(t)
     local function make_hor_bar(w,h,ratio)
     end
     local function make_vert_bar(w,h,ratio)
-		--print(w,h)
 		local bar = Group()
         local fill = Group{name="grip",reactive = true, }
         local shell = Group{name="track",reactive = true, }
@@ -777,12 +740,6 @@ function editor_ui.scrollPane(t)
     end
     setmetatable(scroll_group.extra, mt)
 
---[[
-	if scroll.virtual_h <= scroll.visible_h then
-            scroll_group:find_child("vert_s_bar")
-            scroll_group:find_child("dn")
-	end 
-]]
     return scroll_group
 end
 
@@ -799,9 +756,9 @@ function editor_ui.tabBar(t)
     	ui_width = 97,
     	ui_height = 21, 
         
-    	focus_color = {255,255,255,255}, --{27,145,27,255}, 	  --"1b911b", 
-    	focus_fill_color = {27,145,27,255}, --"1b911b", 
-    	focus_text_color = {255,255,255,255}, --"1b911b", 
+    	focus_color = {255,255,255,255}, 
+    	focus_fill_color = {27,145,27,255}, 
+    	focus_text_color = {255,255,255,255}, 
     	border_width = 0,
     	border_corner_radius = 0,
         
@@ -844,7 +801,6 @@ function editor_ui.tabBar(t)
 
     local create
     local current_index = 1
-    --local tabs = {}
     local tab_bg = {}
     local tab_focus = {}
 	
@@ -909,27 +865,11 @@ function editor_ui.tabBar(t)
             display_tab = function(self,index)
                 if index < 1 or index > #p.tab_labels then return end
                 p.tabs[current_index]:hide()
-				--tab_bg[current_index]:show()
-				--tab_focus[current_index]:hide()
                 p.buttons[current_index].on_focus_out()
                 current_index = index
                 p.tabs[current_index]:show()
                 p.buttons[current_index]:raise_to_top()
                 p.buttons[current_index].on_focus_in()
-				--tab_bg[current_index]:hide()
-				--tab_focus[current_index]:show()
-
-				if ap then
-				--[[	
-					ap:pan_to(
-						
-						p.buttons[current_index].x+p.buttons[current_index].w/2,
-						p.buttons[current_index].y+p.buttons[current_index].h/2
-						
-					)
-				]]	
-				end
-
             end,
             previous_tab = function(self)
                 if current_index == 1 then return end
@@ -1007,7 +947,6 @@ function editor_ui.tabBar(t)
 
 		ap = nil
 		
-		--if p.arrow_image then p.arrow_sz = p.arrow_image.w end
 		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
 		
 		if p.tab_position == "TOP" and
@@ -1269,7 +1208,6 @@ function editor_ui.checkBoxGroup(t)
 
 	     		function box:on_button_down (x,y,b,n)
 					local box_num = tonumber(box.name:sub(4,-1))
-					--dumptable(p.selected_items)
 					table.insert(p.selected_items, box_num)
 					cb_group:find_child("check"..tostring(box_num)).opacity = 255
 					cb_group:find_child("check"..tostring(box_num)).reactive = true

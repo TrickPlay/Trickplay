@@ -385,8 +385,7 @@ function util.create_on_button_down_f(v)
 	       			if (v.extra.is_in_group == true and control == false ) then 
 
 		    			local p_obj = v.parent 
-                		if(button == 3) then 	-- imsi : num_clicks is not correct ! 
-                							 	--if(button == 3 or num_clicks >= 2) then
+                		if(button == 3) then 
                 			editor.inspector(p_obj, x, y)
                     		return true
                 		end 
@@ -399,15 +398,14 @@ function util.create_on_button_down_f(v)
 
 	            		org_object = util.copy_obj(p_obj)
 
-		    			if v.extra.lock == false then -- or  v.name =="inspector" then 
+		    			if v.extra.lock == false then 
            	    			dragging = {p_obj, x - p_obj.x, y - p_obj.y }
 		    			end 
 
            	    		return true
 	      			else 
 
-                		if(button == 3) then	-- imsi : num_clicks is not correct ! 
-								    			--if(button == 3 or num_clicks >= 2) then
+                		if(button == 3) then	
                  			editor.inspector(v, x, y)
                     		return true
                 		end 
@@ -483,7 +481,7 @@ function util.create_on_button_down_f(v)
 	        				end 
 	    				end 
 	    				org_object = util.copy_obj(v)
-						if v.extra.lock == false then -- or v.name == "inspector" then 
+						if v.extra.lock == false then 
         					dragging = {v, x - v.x, y - v.y }
 						end
         				return true
@@ -514,7 +512,7 @@ function util.create_on_button_down_f(v)
            			return true
             	end
 	   	elseif( input_mode ~= hdr.S_RECTANGLE ) then 
-				if v.extra.lock == false then --or v.name == inspector  then  
+				if v.extra.lock == false then 
 					dragging = {v, x - v.x, y - v.y }
            			return true
 				end 
@@ -540,7 +538,7 @@ function util.create_on_button_down_f(v)
 	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw" ) then 
 	    		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
 	    			if (v.extra.is_in_group == true) then 
-						local p_obj = v.parent --find_parent(v)
+						local p_obj = v.parent 
 						new_object = util.copy_obj(p_obj)
 					    if(dragging ~= nil) then 
 	            			local actor , dx , dy = unpack( dragging )
@@ -564,7 +562,7 @@ function util.create_on_button_down_f(v)
 				elseif( input_mode ~= hdr.S_RECTANGLE) then  
 	      	    	if(dragging ~= nil) then 
 	       	       		local actor = unpack(dragging) 
-		       			if (actor.name == "grip") then  -- scroll_window -> grip
+		       			if (actor.name == "grip") then  
 							dragging = nil 
 							return true 
 		       			end 
@@ -827,7 +825,6 @@ function util.make_attr_t(v)
 		if v.extra.type == "ButtonPicker" then 
 		    table.insert(attr_t, {"items", v.items, "Items"})
 		else 
-		    --table.insert(attr_t, {"caption", "Menu Contents"}) --0714
 		    table.insert(attr_t, {"items", v.items, "Items"})
 		end 
 		end,
@@ -1113,7 +1110,6 @@ function util.make_attr_t(v)
   for i,j in pairs(obj_map[obj_type]()) do 
 		
 	if (j == "message") then 
-	--print (j)
 	end 
        	if attr_map[j] then
              attr_map[j](j)
@@ -1160,7 +1156,6 @@ function util.make_attr_t(v)
 	end 
    end 
  
-   --table.insert(attr_t, {"opacity", v.opacity, "Opacity"})
    table.insert(attr_t, {"button", "view code", "View code"})
    table.insert(attr_t, {"button", "apply", "OK"})
    table.insert(attr_t, {"button", "cancel", "Cancel"})
@@ -1203,8 +1198,6 @@ function util.itemTostring(v, d_list, t_list)
        local item_string =""
        for i,j in pairs(list) do 
           if v[j] ~= nil then 
-	      --if j == "src" and v.type == "Image" then 
-		  --item_string = item_string..head..j.." = \"assets\/images\/"..v[j].."\""..tail
 	      if j == "position" then 
 		  item_string = item_string..head..j.." = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..tail
 	      elseif j == "children" then 
@@ -1317,7 +1310,6 @@ function util.itemTostring(v, d_list, t_list)
     if (v.type == "Text") then
 		v.cursor_visible = false
     elseif (v.type == "Image") then
-		--if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
     elseif (v.type == "Clone") then
 	 	src = v.source 
 		if src ~= nil then 
