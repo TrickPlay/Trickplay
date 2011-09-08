@@ -46,10 +46,12 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     pushingAppBrowser = NO;
+    [navigationController viewDidAppear:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     pushingAppBrowser = NO;
+    [navigationController viewDidDisappear:animated];
 }
 
 
@@ -71,16 +73,16 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-/*
- - (void)viewWillAppear:(BOOL)animated {
- [super viewWillAppear:animated];
- }
- */
-/*
- - (void)viewWillDisappear:(BOOL)animated {
- [super viewWillDisappear:animated];
- }
- */
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [navigationController viewWillAppear:animated];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [navigationController viewWillDisappear:animated];
+}
+
 /*
  // Override to allow orientations other than the default portrait orientation.
  - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -247,7 +249,9 @@
 #pragma mark -
 #pragma mark TVBrowserViewControllerDelegate Methods
 
-- (void)didSelectService:(NSNetService *)service isCurrentService:(BOOL)isCurrentService {
+- (void)tvBrowserViewController:(TVBrowserViewController *)viewController
+               didSelectService:(NSNetService *)service
+               isCurrentService:(BOOL)isCurrentService {
     if (!isCurrentService) {
         [self destroyAppBrowserViewController];
         [self destroyTPAppViewController];
@@ -265,7 +269,8 @@
  * to classes to create a stream socket. Additionally, stores the service name
  * to the currentTVName.
  */
-- (void)serviceResolved:(NSNetService *)service {
+- (void)tvBrowserViewController:(TVBrowserViewController *)viewController
+                serviceResolved:(NSNetService *)service {
     NSLog(@"RootViewController serviceResolved");
     [appBrowserViewController setupService:[service port] hostName:[service hostName] serviceName:[service name]];
     [self createTPAppViewControllerWithPort:[service port] hostName:[service hostName]];
@@ -278,7 +283,7 @@
  * properly pop and deallocate these resources as the system regresses back
  * to the RootViewController.
  */
-- (void)didNotResolveService {
+- (void)tvBrowserViewControllerDidNotResolveService {
     NSLog(@"RootViewController didNotResolveService");
     if (appViewController) {
         if (self.navigationController.visibleViewController == appViewController) {
