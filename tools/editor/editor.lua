@@ -1811,12 +1811,13 @@ function editor.undo()
 	  if( undo_list == nil) then return true end 
       local undo_item= table.remove(undo_list)
 
-	  if(undo_item == nill) then return true end
+	  if(undo_item == nil) then return true end
+
 	  if undo_item[2] == hdr.CHG then 
 	  	screen_ui.n_selected(undo_item[1])
 		util.set_obj(g:find_child(undo_item[1]), undo_item[3])
 	    table.insert(redo_list , undo_item)
-	  elseif undo_item[2] == ADD then 
+	  elseif undo_item[2] == hdr.ADD then 
 	    screen_ui.n_selected(undo_item[3])
 	    if((undo_item[3]).type == "Group") then 
 			ungroup(undo_item[3])
@@ -1855,7 +1856,7 @@ function editor.redo()
       if redo_item[2] == hdr.CHG then 
 	  	util.set_obj(g:find_child(redo_item[1]),  redo_item[4])
 	    table.insert(undo_list, redo_item)
-      elseif redo_item[2] == ADD then 
+      elseif redo_item[2] == hdr.ADD then 
 	  	if(redo_item[3].type == "Group") then 
 	    	for i, c in pairs(redo_item[3].extra.children) do
 				local c_tmp = g:find_child(c)
