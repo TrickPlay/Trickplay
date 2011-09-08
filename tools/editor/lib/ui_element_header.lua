@@ -1,3 +1,8 @@
+if assets == nil then 
+	print("new assets")
+	assets = dofile( "assets-cache.lua" )
+end 
+
 skin_list = { 
 	["default"] = {
 		["button"] = "lib/assets/smallbutton.png", 

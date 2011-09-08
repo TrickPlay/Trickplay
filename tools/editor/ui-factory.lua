@@ -151,7 +151,6 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
 				inspector_deactivate() 
 		end
 	end
-	--filechooser.released = function() inspector_activate() end 
 
 	group:add(filechooser)
 	return group
@@ -192,7 +191,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
 		local text = Text {name = "attr", text = item_s}:set(STYLE)
-        --text.position  = {PADDING_X, 5}
         text.position  = {0,0}
     	group:add(text)
 
@@ -224,7 +222,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 	elseif v.extra.type =="TabBar" then 
 		local text = Text {name = "attr", text = item_s}:set(STYLE)
-        --text.position  = {PADDING_X, 5}
         text.position  = {0,0}
     	group:add(text)
 
@@ -353,10 +350,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={255,25,25,255}, }
 	local items_list = ui_element.layoutManager{rows = rows, columns = 4, cell_w = 100, cell_h = 40, cell_spacing_w=5, cell_spacing_h=5, cell_size="variable", cells_focusable=false}
 	if text then 
-    	--items_list.position = {PADDING_X , text.y + text.h + PADDING_Y}
     	items_list.position = {0, text.y + text.h + 7}
 	else 
-        --items_list.position = {PADDING_X , plus.y + plus.h + PADDING_Y/2}
         items_list.position = {0 ,plus.y + plus.h + 7}
 	end 
     items_list.name = "items_list"
@@ -389,19 +384,14 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    item.name = "item_text"..tostring(i)
 
 		if item_type then 
-        	--item:find_child("textInput").item_type = item_type
         	item.item_type = item_type
 	    end 
-	    --local minus = factory.draw_minus_item()
 		local minus = Image{src="lib/assets/li-btn-dim-minus.png"}
-		--local minus = Image{src="/home/hjkim/li-btn-dim-minus.png"}
 	    minus.name = "item_minus"..tostring(i)
 		minus.reactive = true
-	    --local up = factory.draw_up()
 		local up = Image{src="lib/assets/li-btn-dim-up.png"}
 	    up.name = "item_up"..tostring(i)
 		up.reactive = true
-	    --local down = factory.draw_down()
 		local down = Image{src="lib/assets/li-btn-dim-down.png"}
 	    down.name = "item_down"..tostring(i)
 		down.reactive = true
@@ -673,7 +663,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    	items_list:replace(i,4,down)
 	end
 	function group.extra.on_focus_in()
-		current_focus = group --0701 
+		current_focus = group 
 		a = items_list.tiles[1][1]
 		a.on_focus_in()
 		a:grab_key_focus()
@@ -747,7 +737,6 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		else 
 			item_picker.ui_width = 150
 		end
-		--item_picker.text_font = "FreeSans Medium 12px"
 		if item_n == "style" then 
         	item_picker.position = {text.x + text.w + 17 , -5}
 		else 
@@ -883,10 +872,8 @@ function factory.make_onecheckbox(assets, inspector, v, item_n, item_v, item_s, 
 	
 	editor_use = true
 	if item_v == "true" then 
-	     --reactive_checkbox = ui_element.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {1}}
 	     reactive_checkbox = editor_ui.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {1}}
 	else 
-	     --reactive_checkbox = ui_element.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {}}
 	     reactive_checkbox = editor_ui.checkBoxGroup {skin = "inspector", ui_width = 21, ui_height = 22, items = {""}, selected_items = {}}
 	end 
 	editor_use = false
@@ -922,26 +909,24 @@ function factory.make_anchorpoint(assets, inspector, v, item_n, item_v, item_s, 
     return group
 end
 
+local focus_map = {[keys.Up] = "U",  [keys.Down] = "D", [keys.Return] = "E", [keys.Left] = "L", [keys.Right] = "R", 
+				   [keys.RED] = "Red", [keys.GREEN] = "G", [keys.YELLOW] = "Y", [keys.BLUE] = "B"}
+
 function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s, save_items)
 -- item group  
     local PADDING_X     = 0
     local WIDTH         = 260
-
     local group = Group {}
+    -- item group's children 
+    local text, input_text, ring, focus, line, button	
+
     group:clear()
     	
-    -- item group's children 
-    local text, input_text, ring, focus, line, button	--, checkbox, radio_button, button_picker
-	
 	if(item_n == "focus") then  
 		group:clear()
 		group.name = "focusChanger"
 		group.reactive = true
 		local focus_changer = factory.draw_focus_changer(v)
-
-		local focus_map = {[keys.Up] = "U",  [keys.Down] = "D", [keys.Return] = "E", [keys.Left] = "L", [keys.Right] = "R", 
-	                   [keys.RED] = "Red", [keys.GREEN] = "G", [keys.YELLOW] = "Y", [keys.BLUE] = "B"}
-
 	
 		local function deactive_tab(tab_type) 
 			focus_changer:find_child("text"..tab_type).text = v.name 
@@ -1088,7 +1073,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
     local BORDER_WIDTH  = 1
     local BORDER_COLOR  = {255,255,255,255}
     local FOCUS_COLOR  = {0,255,0,255}
-    local LINE_COLOR    = {255,255,255,255}  --"FFFFFF"
+    local LINE_COLOR    = {255,255,255,255}  
     local BORDER_RADIUS = 0
     local LINE_WIDTH    = 1
     local input_box_width     
@@ -1346,7 +1331,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
     	group:add(input_text)
         function group.extra.on_focus_in()
-	         current_focus = group --0701
+	         current_focus = group 
              ring.opacity = 0
              input_text.cursor_visible = true
              focus.opacity = 255
@@ -1367,7 +1352,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		group.w = group.w + 200
 	end 
 
-	if item_n == "cell_timing_offset" or item_n == "cell_timing" then -- or item_n == "cell_spacing" then 
+	if item_n == "cell_timing_offset" or item_n == "cell_timing" then 
         input_text.position = {130, 4.5}
         ring.position = {125, 0}
         focus.position ={125, 0} 

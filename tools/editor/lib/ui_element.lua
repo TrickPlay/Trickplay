@@ -1,8 +1,6 @@
-local ui_element = {}
-
 dofile("/lib/ui_element_header.lua")     
 
-local assets = dofile( "assets-cache.lua" )
+local ui_element = {}
 
 local function color_to_string( color )
         if type( color ) == "string" then
@@ -146,7 +144,6 @@ function ui_element.transit_to (prev_grp, next_grp, effect)
 
      	function fade_timeline.on_completed()
 			screen:remove(prev_grp)
-			--g:clear()
 			g = next_grp
 			screen:add(g)
 			screen:grab_key_focus()
@@ -157,7 +154,6 @@ function ui_element.transit_to (prev_grp, next_grp, effect)
 		if prev_grp then 
 			screen:remove(prev_grp)
 		end 
-		--g:clear()
 		g = next_grp
 		screen:add(g)
 		screen:grab_key_focus()
@@ -165,7 +161,6 @@ function ui_element.transit_to (prev_grp, next_grp, effect)
 end 
 
 function ui_element.screen_add(grp)
-	--g:clear()
 	g = grp
 	screen:add(g)
 end 

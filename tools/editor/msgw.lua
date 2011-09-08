@@ -53,13 +53,12 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 			   	elseif j.extra.type == "MenuButton" then 
 			   		for k,l in pairs (j.items) do 
 			   	     	if l["type"] == "item" then 
-	                   		--new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
 	                   		new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for the menuButton Item, "..l["string"].."\n"
 			   	     	end 
 			   		end 
 			   	end 
 	            new_contents = new_contents.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
-		     else -- qqqq if j 가 컨테이너 이며는 그속을 다 확인하여 스터브 코드가 필요한 것을 가려내야함. 흐미..   
+		     else -- if j 가 컨테이너 이며는 그속을 다 확인하여 스터브 코드가 필요한 것을 가려내야함. 흐미..   
 			   if util.is_this_container(j) == true then 
 					if j.extra.type == "TabBar" then 
 						for q,w in pairs (j.tabs) do
@@ -125,7 +124,6 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 		end 
 	   end 
 
-	   --print(main_exist)
 
 	   if main_exist == false then 
 		-- main.lua 생성해서 
@@ -258,7 +256,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 		    	end 
 	       end 
 	       if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" or v.extra.type == "ArrowPane" then 
-		    	for j, c in pairs(v.content.children) do -- Group { children = {button4,rect3,} },
+		    	for j, c in pairs(v.content.children) do 
 					c.reactive = true
 		        	c.extra.is_in_group = true
 	  				c.extra.lock = false
@@ -266,7 +264,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 		    	end 
 	       elseif v.extra.type == "TabBar" then 
 		    	for j, c in pairs(v.tabs) do 
-					for k, d in pairs (c.children) do -- Group { children = {button4,rect3,} },
+					for k, d in pairs (c.children) do
 						d.reactive = true
 		        		d.extra.is_in_group = true
 	  					d.extra.lock = false
