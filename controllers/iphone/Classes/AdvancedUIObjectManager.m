@@ -37,7 +37,8 @@
         
         timeLine = [[TrickplayTimeline alloc] init];
         
-        view = aView;
+        view = [aView retain];
+        view.multipleTouchEnabled = YES;
         appViewController = nil;
     }
     
@@ -114,28 +115,35 @@
 
 - (void)clean {
     NSLog(@"AdvancedUI clean");
+
+    // TODO: figure out why there are no objects in any of these tables!
     
-    for (UIView *rectangle in [rectangles allValues]) {
+    for (TrickplayUIElement *rectangle in [rectangles allValues]) {
+        rectangle.manager = nil;
         [rectangle removeFromSuperview];
     }
     [rectangles removeAllObjects];
     
-    for (UIView *image in [images allValues]) {
+    for (TrickplayUIElement *image in [images allValues]) {
+        image.manager = nil;
         [image removeFromSuperview];
     }
     [images removeAllObjects];
     
-    for (UIView *textField in [textFields allValues]) {
+    for (TrickplayUIElement *textField in [textFields allValues]) {
+        textField.manager = nil;
         [textField removeFromSuperview];
     }
     [textFields removeAllObjects];
     
-    for (UIView *webText in [webTexts allValues]) {
+    for (TrickplayUIElement *webText in [webTexts allValues]) {
+        webText.manager = nil;
         [webText removeFromSuperview];
     }
     [webTexts removeAllObjects];
     
-    for (UIView *group in [groups allValues]) {
+    for (TrickplayUIElement *group in [groups allValues]) {
+        group.manager = nil;
         [group removeFromSuperview];
     }
     [groups removeAllObjects];
@@ -458,6 +466,8 @@
     self.webTexts= nil;
     self.groups = nil;
     self.resourceManager = nil;
+    
+    [view release];
     
     appViewController = nil;
     

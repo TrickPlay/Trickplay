@@ -24,7 +24,8 @@
  */
 
 @interface RootViewController : UIViewController <UINavigationControllerDelegate,
-TPAppViewControllerSocketDelegate, AppBrowserViewControllerDelegate, TVBrowserViewControllerDelegate> {
+TPAppViewControllerSocketDelegate, AppBrowserViewControllerDelegate,
+TVBrowserViewControllerDelegate> {
     UIWindow *window;
 
     // Initialized to NO. Set to YES while the AppBrowser is in the course
@@ -50,7 +51,6 @@ TPAppViewControllerSocketDelegate, AppBrowserViewControllerDelegate, TVBrowserVi
 - (void)createTPAppViewControllerWithPort:(NSInteger)port hostName:(NSString *)hostName;
 - (void)pushTPAppViewController;
 - (void)destroyTPAppViewController;
-- (void)serviceResolved:(NSNetService *)service;
 
 // Exposed properties
 @property (retain)IBOutlet UINavigationController *navigationController;

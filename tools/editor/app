@@ -1,0 +1,7 @@
+app = {
+    id          = "ID",
+    release     = "1",
+    version     = "0.1",
+    name        = "NAME",
+    copyright   = "",
+}

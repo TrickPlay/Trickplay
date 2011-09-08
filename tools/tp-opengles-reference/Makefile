@@ -3,18 +3,18 @@
 # Set CC to the full path to your C compiler, for example
 # CC=/opt/toolchains/some-gcc/bin/gcc
 
-CC=gcc
+CC ?= gcc
 
 #------------------------------------------------------------------------------
 # Set CFLAGS to the include path where EGL and GLES2 directories are located
 
-CFLAGS=
+CFLAGS ?=
 
 #------------------------------------------------------------------------------
 # Set LDFLAGS to -L<path to libEGL.so and libGLESv2.so> and add any additional
 # libraries required.
 
-LDFLAGS=
+LDFLAGS ?=
 
 #------------------------------------------------------------------------------
 

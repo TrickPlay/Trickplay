@@ -1,0 +1,268 @@
+{
+  "stat": "ok",
+  "results": 17,
+  "page": 0,
+  "sort": "name",
+  "order": "desc",
+  "applications": 
+  [
+    {
+      "id": 1,
+      "name": "True Blood Comics",
+      "description": "View full screen art with new stories never seen before! Blood and sex mix on a hot rainy night at Merlotte's, when Sookie and her friends are trapped by a vengeful spirit who feeds on shame. Bon Temps, Louisiana has never been stranger, or more twisted, in a new story co-plotted by TRUE BLOOD series creator Alan Ball, with a script from David Tischman and Mariah Huehner, and lush art by David Messina.",
+      "icon": "fake-server/v1/com.trickplay.fake.trueblood/icon.jpg",
+      "url": "http://hbo.com/",
+      "email": "support@trickplay.com",
+      "license": "free for all",
+      "price": 1.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+        {
+          "url": "fake-server/v1/com.trickplay.fake.trueblood/background.jpg",
+          "imageType": "background",
+          "mimeType": "image/jpeg"
+        },
+        {
+          "url": "fake-server/v1/com.trickplay.fake.trueblood/featured.png",
+          "imageType": "featuredIcon",
+          "mimeType": "image/png"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "The Game of Life",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.life/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Spirals",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.spirals/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Solitaire",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.solitaire/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Poker Dawgs",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.pokerdawgs/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Plants vs. Zombies",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.pvz/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 12,
+      "name": "NFL",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.nfl/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 4,
+      "name": "NBA",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.nba/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Hulu Plus",
+      "description": "Choose from more than 2,600 current primetime TV hits such as The Simpsons, 30 Rock, Lost, Glee and The Office the morning after they air; classics like Buffy the Vampire Slayer, The A-Team, Airwolf and Married...with Children; movies like Last of the Mohicans and Basic Instinct; documentaries like Super Size Me, and other popular TV shows and movies.",
+      "icon": "fake-server/v1/com.trickplay.fake.hulu/icon.jpg",
+      "url": "http://www.hulu.com/",
+      "email": "support@hulu.com",
+      "license": "None",
+      "price": 0,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+        {
+          "url": "fake-server/v1/com.trickplay.fake.hulu/background.jpg",
+          "imageType": "background",
+          "mimeType": "image/jpeg"
+        },
+        {
+          "url": "fake-server/v1/com.trickplay.fake.hulu/featured.png",
+          "imageType": "featuredIcon",
+          "mimeType": "image/png"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "HBO",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.hbo/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Cow Tipper",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.cowtipper/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Carlsberg",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.carlsberg/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Candyland",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.candyland/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Aquaria",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.aquaria/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 13,
+      "name": "American Idol",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.idol/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 10,
+      "name": "8 Ball Billiards HD",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.billiards/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    },
+    {
+      "id": 9,
+      "name": "1945",
+      "description": "Lorem ipsum.",
+      "icon": "fake-server/v1/com.trickplay.fake.1945/icon.jpg",
+      "url": "http://www.trickplay.com/",
+      "email": "support@trickplay.com",
+      "license": "GPL",
+      "price": 0.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+      ]
+    }
+  ]
+}
