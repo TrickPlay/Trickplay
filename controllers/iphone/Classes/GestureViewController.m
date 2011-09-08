@@ -36,7 +36,7 @@
  * Establishes the host and port that will be used for the asynchronous socket
  * connection managed by GestureViewController's SocketManager.
  */
-- (void)setupService:(NSInteger)p
+- (void)setupService:(NSUInteger)p
             hostname:(NSString *)h
             thetitle:(NSString *)n {
     

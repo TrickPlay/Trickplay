@@ -41,7 +41,7 @@
 
 - (void)handleTouchesBegan:(NSSet *)touches {
     //NSLog(@"handle touches began: %@", self);
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             CGFloat
@@ -77,7 +77,7 @@
 }
 
 - (void)handleTouchesMoved:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -123,7 +123,7 @@
 }
 
 - (void)handleTouchesEnded:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -173,7 +173,7 @@
 }
 
 - (void)handleTouchesCancelled:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             if (CFDictionaryGetValue(activeTouches, touch)) {

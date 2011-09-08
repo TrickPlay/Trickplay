@@ -40,14 +40,14 @@
 }
 
 - (void)on_loadedFailed:(BOOL)failed {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_loaded" forKey:@"event"];
         [JSON_dic setObject:[NSArray arrayWithObjects:[NSNumber numberWithBool:failed], nil] forKey:@"args"];
         [JSON_dic setObject:[NSNumber numberWithBool:failed] forKey:@"failed"];
         
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
         
         [JSON_dic release];
     }

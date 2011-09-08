@@ -22,7 +22,7 @@
  * @property aClient : a client that will receive callbacks upon NSNetService
  *                     and NSNetServiceBrowser events.
  */
--(id)initWithDelegate:(id)client{
+-(id)initWithDelegate:(id)client {
     if ((self = [super init])) {
         delegate = client;
         currentService = nil;
@@ -34,6 +34,9 @@
     
     return self;
 }
+
+#pragma mark -
+#pragma mark Start/Stop Search/Services
 
 - (void)stop {
     [self stopCurrentService];
@@ -54,8 +57,8 @@
 	currentService = nil;
 }
 
-
-//--------------- NSNetServiceDelegate methods ------------------
+#pragma mark -
+#pragma mark NSNetServiceDelegate methods
 
 
 // This should never be called, since we resolve with a timeout of 0.0, which means indefinite
@@ -76,7 +79,7 @@
     // TODO: make sure we got all the connection information for the service so
     // check host and port #
 	
-	NSLog(@"Did resolve address");
+	NSLog(@"Current NetService did resolve address");
     
     [[self delegate] serviceResolved:service];
 	
@@ -84,9 +87,8 @@
 	[service release];
 }
 
-
-
-//--------------  NSNetServiceBrowserDelegate methods  -----------------
+#pragma mark -
+#pragma mark NSNetServiceBrowserDelegate methods
 
 
 // Sent when browsing begins
@@ -122,9 +124,9 @@
 	
 	// If moreComing is NO, it means that there are no more messages in the queue from the Bonjour daemon, so we should update the UI.
 	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
-    NSLog(@"service removed, more coming? %d", moreComing);
+    NSLog(@"service [ %@ ] removed, more coming? %d", service, moreComing);
 	if (!moreComing) {
-		[delegate reloadData];
+		[delegate didFindServices];
 	}
 }	
 
@@ -137,9 +139,9 @@
 	
 	// If moreComing is NO, it means that there are no more messages in the queue from the Bonjour daemon, so we should update the UI.
 	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
-    NSLog(@"service found, more coming? %d", moreComing);
+    NSLog(@"service [ %@ ] found, more coming? %d", service, moreComing);
 	if (!moreComing) {
-		[delegate reloadData];
+		[delegate didFindServices];
 	}
 }	
 
@@ -149,6 +151,8 @@
     NSLog(@"An error occurred in NetworkManager. Error code = %@, in Domain %@", error, domain);
 }
 
+#pragma mark -
+#pragma mark Deallocation
 
 - (void)dealloc {
     NSLog(@"Net Service Manager dealloc");

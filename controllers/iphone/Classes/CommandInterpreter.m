@@ -16,28 +16,6 @@
     return nil;
 }
 
-- (void)createCommandDictionary {
-    commandDictionary = [[NSMutableDictionary alloc] initWithCapacity:40];
-    
-    /*
-     Protocol *commandProtocol = @protocol(CommandInterpreterDelegate);
-     unsigned int outCount;
-     struct objc_method_description *methods = protocol_copyMethodDescriptionList(commandProtocol, YES, YES, &outCount);
-     if (methods) {
-     int i;
-     for (i = 0; i < outCount; i++){
-     struct objc_method_description method = methods[i];
-     fprintf(stderr, "Protocol has method: %s\n", [[NSStringFromSelector(method.name)] UTF8String]);
-     }
-     
-     free(methods);
-     }
-     */
-    
-    SEL method = NSSelectorFromString(@"do_DR:");
-    [commandDictionary setObject:(id)method forKey:@"DR"];
-}
-
 /**
  * Append bytes recieved over the socket to the end of the command line to
  * be interpreted.
@@ -89,7 +67,7 @@
 }
 
 - (void)executeCommand:(NSString *)command args:(NSArray *)args {
-    // This class is a n interface, this code just prevents a warning
+    // This class is an interface, this code just prevents a warning
 }
 
 - (void)dealloc {
