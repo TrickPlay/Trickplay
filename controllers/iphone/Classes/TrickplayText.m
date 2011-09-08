@@ -107,6 +107,11 @@
         
         if ([TrickplayText instancesRespondToSelector:selector]) {
             [self performSelector:selector withObject:properties];
+        } else {
+            selector = NSSelectorFromString([NSString stringWithFormat:@"do_set_%@:", property]);
+            if ([TrickplayText instancesRespondToSelector:selector]) {
+                [self performSelector:selector withObject:properties];
+            }
         }
     }
 }
@@ -198,14 +203,36 @@
  * Set the string of text that is displayed.
  */
 
+- (void)on_text_changed:(NSString *)theText {
+    if (manager && manager.appViewController) {
+        NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_text_changed" forKey:@"event"];
+        [JSON_dic setObject:[NSArray arrayWithObjects:theText, nil] forKey:@"args"];
+        [JSON_dic setObject:theText forKey:@"text"];
+        
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [JSON_dic release];
+    }
+}
+
 - (void)set_text:(NSDictionary *)args {
     NSString *text = [args objectForKey:@"text"];
     
     if (text) {
         ((UITextView *)view).text = text;
     }
+    [self on_text_changed:text];
 }
 
+- (void)do_set_text:(NSDictionary *)args {
+    NSString *text = [args objectForKey:@"text"];
+    
+    if (text) {
+        ((UITextView *)view).text = text;
+    }
+    [self on_text_changed:text];
+}
 
 /**
  * Set the color of the Text.
@@ -332,38 +359,34 @@
  * Get color
  */
 
-- (void)get_color:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"color"]) {
-        NSNumber *red, *green, *blue, *alpha;
+- (void)get_background_color:(NSMutableDictionary *)dictionary {
+    NSNumber *red, *green, *blue, *alpha;
         
-        const CGFloat *components = CGColorGetComponents(view.layer.backgroundColor);
-        red = [NSNumber numberWithFloat:components[0] * 255.0];
-        green = [NSNumber numberWithFloat:components[1] * 255.0];
-        blue = [NSNumber numberWithFloat:components[2] * 255.0];
-        alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.layer.backgroundColor) * 255.0];
+    const CGFloat *components = CGColorGetComponents(view.layer.backgroundColor);
+    red = [NSNumber numberWithFloat:components[0] * 255.0];
+    green = [NSNumber numberWithFloat:components[1] * 255.0];
+    blue = [NSNumber numberWithFloat:components[2] * 255.0];
+    alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.layer.backgroundColor) * 255.0];
         
-        NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
-        [dictionary setObject:colorArray forKey:@"color"];
-    }
+    NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
+    [dictionary setObject:colorArray forKey:@"color"];
 }
 
 /**
  * Get background color
  */
 
-- (void)get_background_color:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"background_color"]) {
-        NSNumber *red, *green, *blue, *alpha;
+- (void)get_color:(NSMutableDictionary *)dictionary {
+    NSNumber *red, *green, *blue, *alpha;
         
-        const CGFloat *components = CGColorGetComponents(((UITextView *)view).textColor.CGColor);
-        red = [NSNumber numberWithFloat:components[0] * 255.0];
-        green = [NSNumber numberWithFloat:components[1] * 255.0];
-        blue = [NSNumber numberWithFloat:components[2] * 255.0];
-        alpha = [NSNumber numberWithFloat:CGColorGetAlpha(((UITextView *)view).textColor.CGColor) * 255.0];
+    const CGFloat *components = CGColorGetComponents(((UITextView *)view).textColor.CGColor);
+    red = [NSNumber numberWithFloat:components[0] * 255.0];
+    green = [NSNumber numberWithFloat:components[1] * 255.0];
+    blue = [NSNumber numberWithFloat:components[2] * 255.0];
+    alpha = [NSNumber numberWithFloat:CGColorGetAlpha(((UITextView *)view).textColor.CGColor) * 255.0];
         
-        NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
-        [dictionary setObject:colorArray forKey:@"background_color"];
-    }
+    NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
+    [dictionary setObject:colorArray forKey:@"background_color"];
 }
 
 /**
@@ -371,9 +394,7 @@
  */
 
 - (void)get_text:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"text"]) {
-        [dictionary setObject:((UITextView *)view).text forKey:@"text"];
-    }
+    [dictionary setObject:((UITextView *)view).text forKey:@"text"];
 }
 
 /**
@@ -381,9 +402,7 @@
  */
 
 - (void)get_editable:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"editable"]) {
-        [dictionary setObject:[NSNumber numberWithBool:((UITextView *)view).editable] forKey:@"editable"];
-    }
+    [dictionary setObject:[NSNumber numberWithBool:((UITextView *)view).editable] forKey:@"editable"];
 }
 
 /**
@@ -391,14 +410,14 @@
  */
 
 - (void)get_alignment:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"alignment"]) {
-        if (((UITextView *)view).textAlignment == UITextAlignmentLeft) {
-            [dictionary setObject:@"LEFT" forKey:@"alignment"];
-        } else if (((UITextView *)view).textAlignment == UITextAlignmentRight) {
-            [dictionary setObject:@"RIGHT" forKey:@"alignment"];
-        } else if (((UITextView *)view).textAlignment == UITextAlignmentCenter) {
-            [dictionary setObject:@"CENTER" forKey:@"alignment"];
-        }
+    if (((UITextView *)view).textAlignment == UITextAlignmentLeft) {
+        [dictionary setObject:@"LEFT" forKey:@"alignment"];
+    } else if (((UITextView *)view).textAlignment == UITextAlignmentRight) {
+        [dictionary setObject:@"RIGHT" forKey:@"alignment"];
+    } else if (((UITextView *)view).textAlignment == UITextAlignmentCenter) {
+        [dictionary setObject:@"CENTER" forKey:@"alignment"];
+    } else {
+        [dictionary setObject:@"[null]" forKey:@"alignment"];
     }
 }
 
@@ -407,13 +426,11 @@
  */
 
 - (void)get_font:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"font"]) {
-        UIFont *font = ((UITextView *)view).font;
-        NSString *fontName = font.fontName;
-        CGFloat fontSize = font.pointSize;
+    UIFont *font = ((UITextView *)view).font;
+    NSString *fontName = font.fontName;
+    CGFloat fontSize = font.pointSize;
         
-        [dictionary setObject:[NSString stringWithFormat:@"%@ %f", fontName, fontSize] forKey:@"font"];
-    }
+    [dictionary setObject:[NSString stringWithFormat:@"%@ %f", fontName, fontSize] forKey:@"font"];
 }
 
 /**
@@ -421,11 +438,9 @@
  */
 
 - (void)get_cursor_position:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"cursor_position"]) {
-        NSUInteger location = ((UITextView *)view).selectedRange.location;
-        if (location != NSNotFound) {
-            [dictionary setObject:[NSNumber numberWithUnsignedInt:location] forKey:@"cursor_position"];
-        }
+    NSUInteger location = ((UITextView *)view).selectedRange.location;
+    if (location != NSNotFound) {
+        [dictionary setObject:[NSNumber numberWithUnsignedInt:location] forKey:@"cursor_position"];
     }
 }
 
@@ -434,9 +449,7 @@
  */
 
 - (void)get_max_length:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"max_length"]) {
-        [dictionary setObject:[NSNumber numberWithUnsignedInt:maxLength] forKey:@"max_length"];
-    }
+    [dictionary setObject:[NSNumber numberWithUnsignedInt:maxLength] forKey:@"max_length"];
 }
 
 /**
@@ -444,11 +457,9 @@
  */
 
 - (void)get_selected_text:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"selected_text"]) {
-        NSRange range = ((UITextView *)view).selectedRange;
-        NSString *selection = [((UITextView *)view).text substringWithRange:range];
-        [dictionary setObject:selection forKey:@"selected_text"];
-    }
+    NSRange range = ((UITextView *)view).selectedRange;
+    NSString *selection = [((UITextView *)view).text substringWithRange:range];
+    [dictionary setObject:selection forKey:@"selected_text"];
 }
 
 /**
@@ -469,12 +480,10 @@
  */
 
 - (void)get_cursor_visible:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"cursor_visible"]) {
-        if ([((UITextView *)view) isFirstResponder]) {
-            [dictionary setObject:[NSNumber numberWithBool:YES] forKey:@"cursor_visible"];
-        } else {
-            [dictionary setObject:[NSNumber numberWithBool:NO] forKey:@"cursor_visible"];
-        }
+    if ([((UITextView *)view) isFirstResponder]) {
+        [dictionary setObject:[NSNumber numberWithBool:YES] forKey:@"cursor_visible"];
+    } else {
+        [dictionary setObject:[NSNumber numberWithBool:NO] forKey:@"cursor_visible"];
     }
 }
 

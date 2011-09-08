@@ -12,6 +12,9 @@
 
 @protocol AsyncImageViewDelegate
 
+@optional
+- (void)on_loadedFailed:(BOOL)failed;
+
 @required
 - (void)dataReceived:(NSData *)data resourcekey:(id)resourceKey;
 
@@ -40,10 +43,13 @@
 @property (assign) BOOL loaded;
 @property (retain) UIImage *image;
 @property (retain) id resourceKey;
-@property (retain) id <AsyncImageViewDelegate> otherDelegate;
+@property (assign) BOOL tileWidth;
+@property (assign) BOOL tileHeight;
+@property (assign) id <AsyncImageViewDelegate> otherDelegate;
 @property (retain) id <AsyncImageViewDelegate> dataCacheDelegate;
 
 - (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key;
+- (void)on_loadedFailed:(BOOL)failed;
 - (void)loadImageFromData:(NSData *)data;
 - (void)setTileWidth:(BOOL)toTileWidth height:(BOOL)toTileHeight;
 - (void)animateSpinner;

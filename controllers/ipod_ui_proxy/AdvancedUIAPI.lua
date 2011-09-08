@@ -1,7 +1,11 @@
 local log = print
 -- Load the AdvancedUI Classes into a class table
-local class_table = dofile("AdvancedUIClasses.lua")
-local controller , CACHE_LOCAL_PROPERTIES = ...
+local controller , class_table , CACHE_LOCAL_PROPERTIES = ...
+if not class_table then
+    class_table = dofile("AdvancedUIClasses.lua")
+end
+
+local foo = 0
 
 assert(controller)
 assert(class_table)
@@ -38,6 +42,22 @@ end
 -- Every local proxy we create is kept here, keyed by its id
 
 local proxies = {}
+-- the proxies have weak values
+setmetatable(proxies, {__mode = "v"})
+
+local function reset_proxies()
+
+    -- prevent deallocation being sent over the network
+    for id,proxy in pairs(proxies) do
+        if proxy.marker then
+            getmetatable(proxy.marker).__gc = nil
+        end
+    end
+    
+    proxies = {}
+    setmetatable(proxies, {__mode = "v"})
+
+end
 
 ---------------------------------------------------------------------------
 -- This is how we talk to the remote end
@@ -48,53 +68,31 @@ local function send_request( end_point , payload )
     payload = payload or {}
 
     payload.method = end_point
+    --[[
     print("send_request payload:", payload)
     if type(payload) == "table" then
         dumptable(payload)
     end
+    --]]
     result = controller:advanced_ui( payload )
+    foo = foo + 1
+    --result = {id = foo}
+    if foo%30 == 0 then
+        print("\t\tcalls = ", foo)
+    end
+    ---[[
     print("send_request result:", result)
     if type(result) == "table" then
-        dumptable(result)
+        --dumptable(result)
     end
+    --]]
+
+    if result == json.null then
+        return nil
+    end
+
     return result
 end
-
----------------------------------------------------------------------------
--- Connect a streaming web request to receive events
---[[
-do
-    local request = URLRequest{ url = base_url.."/events" , timeout = 0 }
-    
-    function request:on_complete( )
-        -- TODO: what do we do?
-        log( "** DISCONNECED FROM EVENTS" )          
-    end
-    
-    local body = ""
-    
-    local function deliver_event( event )
-        
-        event = json:parse( event )
-        if event then
-            local proxy = proxies[ event.id ]
-            if proxy then
-                proxy:__event( event.event , event.args )
-            end
-        end
-        return ""
-    end
-    
-    function request:on_response_chunk( response )
-        if response.body then
-            -- Append the new chunk and parse out the newline delimited chunks
-            body = string.gsub( body..response.body , "([^\n]*\n)" , deliver_event )
-        end
-    end
-
-    request:stream()
-end
---]]
 
 ---------------------------------------------------------------------------
 -- This is a table that contains the metatables for each class. It starts
@@ -143,6 +141,31 @@ do
         function proxy:__newindex( key , value )
             
             -- See if there is a setter function for this property
+
+            if key == "marker" then
+                print("The key 'marker' is reserved for the garbage collector")
+                return
+            end
+            
+            -- Protect on_completeds
+            if key == "on_completeds" then
+                print("The key 'on_completeds' is reserved for animations")
+                return
+            end
+
+            -- Protect event handlers
+
+            if (key == "on_touches" or key == "on_loaded"
+            or key == "on_text_changed") and value
+            and type(value) ~= "function" then
+                print("The key", key, "is reserved for functions only")
+                return
+            end
+
+            if key == "__parent" then
+                print("The key", key, "is reserved for referencing parents")
+                return
+            end
 
             local setter = rawget( set , key )
             if type( setter ) == "function" then
@@ -243,7 +266,14 @@ do
             -- OK, just fetch its value from the remote
         
             local payload = { id = self.id , properties = { [ key ] = true } }
-            local result = send_request( "get" , payload ).properties[ key ]
+            local result = send_request( "get" , payload )
+            if not result then return nil end
+            result = result.properties
+            if not result then return nil end
+            result = result[ key ]
+            if not result or result == json.null then
+                return nil
+            end
             
             -- And cache it
             
@@ -259,27 +289,15 @@ do
         end
         
         -----------------------------------------------------------------------
-        -- Calls an event handler function on the proxy. If there is a local
-        -- filter for that event, it is called to filter the arguments
-        
-        function proxy:__event( name , args )
-            local handler = rawget( self.__events , name )
-            if type( handler ) == "function" then
-                local filter = rawget( event , name )
-                if type( filter ) == "function" then
-                    handler( self , filter( self , unpack( args ) ) )
-                else
-                    handler( self , unpack( args ) )
-                end
-            end
-        end
-        
-        -----------------------------------------------------------------------
         -- Calls a remote function
 
         function proxy:__call( function_name , ... )
             local payload = { id = self.id , call = function_name , args = {...} }
-            local result = send_request( "call" , payload ).result
+            local result = send_request( "call" , payload )
+            if result == nil then return nil end
+            if not result.result then return nil end
+
+            result = result.result
             if result == json.null then
                 return nil
             end
@@ -329,19 +347,43 @@ local function create_local( id , T , proxy_metatable , property_cache )
     
     -- Here it is
     
-    proxy = setmetatable(
-    {
-        id = id ,
-        type = T ,
-        --__pcache = property_cache,
-        __events = {}
+    local events = {}
+
+    proxy_table = {
+        id = id,
+        type = T,
+        --__pcache = property,
+        __events = events,
+        __children = {}
     }
-    , proxy_metatable )
+
+    proxy = setmetatable(proxy_table, proxy_metatable )
     
     -- Store it
     
     rawset( proxies , id , proxy )
-    
+
+    -- Set up garbage collection
+
+    local destruction_marker = {}
+    local destruction_payload = {
+        id = id,
+        type = T
+    }
+    destruction_marker.__gc = function()
+
+        local absolute = send_request( "destroy" , destruction_payload )
+        if absolute then absolute = absolute.destroyed end
+        --print("absolut vodka?", absolute)
+        rawset(proxies, id, nil)
+
+    end
+
+    -- If not the screen then it's destructable
+    if id ~= 0 then
+        rawset( proxy , "marker" , newudata(destruction_marker) )
+    end
+
     return proxy
 end
 
@@ -433,9 +475,53 @@ end
 setmetatable( factory , mt )
 
 ---------------------------------------------------------------------------
+-- Handle events for individual proxies
+
+function controller:on_advanced_ui_event(json_object)
+    if not json_object then
+        return
+    end
+
+    if json_object.event == "reset_hard" then
+        reset_proxies()
+        return
+    end
+
+    local proxy = rawget( proxies , json_object.id )
+    if not proxy then
+        return
+    end
+    
+    --[[
+        events are:
+        on_touches(touch_id_list, state)
+        on_loaded(failed)
+        on_text_changed(text)
+        on_show()
+        on_hide()
+        on_completed()
+
+        reset_hard
+    --]]
+
+    -- call the right callback for the event
+    local events = rawget(proxy, "__events")
+    local on_completeds = rawget(proxy, "on_completeds")
+    if events[json_object.event] then
+        json_object.args = json_object.args or {}
+        events[json_object.event](proxy, unpack(json_object.args))
+    elseif json_object.event == "on_completed" and on_completeds
+    and on_completeds[json_object.animation_id] then
+        on_completeds[json_object.animation_id]()
+        on_completeds[json_object.animation_id] = nil
+    end
+end
+
+---------------------------------------------------------------------------
 -- Give the controller Container like abilities
 
 controller.screen = factory:create_local(0, "Controller") 
+controller.factory = factory
 
 ---------------------------------------------------------------------------
 

@@ -1032,7 +1032,10 @@ std::string lb_value_desc( lua_State * L , int index )
             break;
 
         case LUA_TUSERDATA:
-            result = result + " (" + UserData::get(L,index)->get_type() + ")";
+        	if ( lua_objlen( L , index ) == sizeof( UserData ) )
+        	{
+        		result = result + " (" + UserData::get(L,index)->get_type() + ")";
+        	}
             break;
     }
 

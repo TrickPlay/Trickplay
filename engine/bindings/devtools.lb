@@ -52,7 +52,7 @@ global devtools [[ void * ]]
             lua_newuserdata( L , 1 );
 
             lua_newtable( L );
-            lua_pushvalue( L , 1 );
+            lua_pushlstring( L , name , name_len );
             lua_pushcclosure( L , marker_gc , 1 );
             lua_setfield( L , -2 , "__gc" );
             lua_setmetatable( L , -2 );
@@ -106,12 +106,89 @@ global devtools [[ void * ]]
 
     udata gid( int gid )
         [[
-            ClutterUtil::wrap_concrete_actor( L , clutter_get_actor_by_gid( gid ) );
+            ClutterActor * actor = clutter_get_actor_by_gid( gid );
+            
+            // There is a bug in clutter 1.6.14 where free gids are
+            // set to this value but not checked later.
+             
+            if ( actor == 0 || actor == (gpointer) 0xdecafbad )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                ClutterUtil::wrap_concrete_actor( L , actor );
+            }
         ]];
 
     sleep( int ms )
         [[
             usleep( ms * 1000 );
         ]];
+        
+    string screenshot( string filename = 0 )
+        [[
+            // WE ARE BREAKING THE RULES HERE BY ALLOWING THE APP TO SAVE
+            // A FILE TO ITS BUNDLE, BUT THAT IS OK BECAUSE THIS IS DONE
+            // IN DEVTOOLS WHICH IS NOT AVAILABLE ON PRODUCTION BUILDS.
+            
+            result = 0;
+            
+            Image * image = Image::screenshot();
+            
+            if ( ! image )
+            {
+                g_warning( "FAILED TO TAKE SCREENSHOT" );
+            }
+            else
+            {
+                String path;
+                String name;
+                
+                App * app = App::get( L );
+                
+                String app_path = app->get_metadata().path;
+                
+                if ( ! filename || ( filename && 0 == strlen( filename ) ) )
+                {
+                    GTimeVal t;
+    
+                    g_get_current_time( & t );
+    
+                    gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
+    
+                    gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
+    
+                    name = ts;
+                    path = fn;
+                    
+                    g_free( ts );
+                    g_free( fn );
+                }
+                else
+                {
+                    gchar * ts = g_strdup_printf( "%s.png" , filename );
+                    
+                    gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
+                    
+                    name = ts;
+                    path = fn;
+                    
+                    g_free( ts );
+                    g_free( fn );
+                }
+                
+                if ( ! image->write_to_png( path.c_str() ) )
+                {
+                    g_warning( "FAILED TO WRITE SCREENSHOT TO '%s'" , path.c_str() );
+                }
+                else
+                {
+                    result = name.c_str();
+                }
+                
+                delete image;
+            }                   
+        ]];        
 }
 

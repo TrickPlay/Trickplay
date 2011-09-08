@@ -8,14 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import <YAJLiOS/YAJL.h>
-#import "ResourceManager.h"
 #import "TrickplayUIElement.h"
 
 @protocol AdvancedUIScreenDelegate <NSObject>
 
 @required
 - (void)do_UB:(NSArray *)args;
-- (void)object_added;
+- (void)advancedUIObjectAdded;
 
 @end
 
@@ -28,5 +27,6 @@
 - (id)initWithID:(NSString *)groupID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager;
 
 - (NSDictionary *)do_find_child:(NSArray *)args;
+- (NSNumber *)do_clear:(NSArray *)args;
 
 @end

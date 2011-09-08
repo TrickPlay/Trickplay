@@ -42,13 +42,6 @@ module clutter_group;
     Group's boundary settings; it must be calculated. A function that 
     calculates a Group's boundary is included in an Example section below.
     
-    The <UIElement.natural_size> and <UIElement.min_size> properties of a Group 
-    are set to the Group's <UIElement.size> property at the time the Group 
-    object is created and are never modified thereafter. Subsequent operations 
-    that may affect the Group's size or boundary, such as resetting the size 
-    property or moving, resizing, adding, or removing children, have no effect 
-    on the Group's natural_size and min_size properties.
-    
     Reducing the Group's <UIElement.size> property has no effect on the size 
     of its children, i.e., it does not scale them. To resize the objects in a 
     Group, set the <UIElement.scale> property.
@@ -57,8 +50,9 @@ module clutter_group;
     display of the children; by default, a Group's children will display even 
     if they exist outside the Group's size region. To clip children that lie 
     outside a particular region, define a clipping area by setting the 
-    <UIElement.clip> property. A code snippet demonstrating how to clip a 
-    region is included in an Example section below.
+    <UIElement.clip> property or set the <UIElement.clip_to_size> property to
+    true. A code snippet demonstrating how to clip a region using a clipping
+    rectangle is included in an Example section below.
     
     *Example:* Determine the width and height of a Group's boundary
     
@@ -131,7 +125,7 @@ module clutter_group;
                              size = { 1400, 650 } }                                 
     
     -- Add three Rectangles to the Group
-    RectGroup.children = { RectRed, RectGreen, RectBlue }
+    RectGroup.children = { RedRect, GreenRect, BlueRect }
     
     -- -----------------------------------------------------
     -- Rotate all three Rectangles as a single object
@@ -152,7 +146,7 @@ module clutter_group;
 	(end)
 	
     *See Also:* the <UIElement> interface, the <Container> interface, 
-    the <UIElement.clip> property
+    the <UIElement.clip> and <UIElement.clip_to_size> properties
     
 */
 

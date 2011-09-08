@@ -37,7 +37,7 @@
     //*/
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
 
-    //NSLog(@"AdvancedUI Command received: %@", command);
+    fprintf(stderr, "\n\nAdvancedUI Command received: %s\n\n", [command UTF8String]);
     NSDictionary *JSON_Object = [command yajl_JSON];
     //NSLog(@"object: %@", JSON_Object);
     
@@ -67,6 +67,8 @@
         [delegate callMethodOnObject:JSON_Object];
     } else if ([method compare:@"delete"] == NSOrderedSame) {
         [delegate deleteValuesForObject:JSON_Object];
+    } else if ([method compare:@"destroy"] == NSOrderedSame) {
+        [delegate destroyObject:JSON_Object];
     } else {
         NSLog(@"AdvancedUI Command not recognized");
     }

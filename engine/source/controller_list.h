@@ -148,6 +148,10 @@ public:
 
     bool advanced_ui( const String & payload , String & result );
 
+    bool show_virtual_remote();
+
+    bool hide_virtual_remote();
+
     inline bool wants_accelerometer_events() const
     {
         return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && g_atomic_int_get( & ts_accelerometer_started );

@@ -206,6 +206,7 @@ void MyAudioSessionInterruptionListener(void *inClientData, UInt32 inInterruptio
 //
 // Invoked when an error occurs, the stream ends or we have data to read.
 //
+void ASReadStreamCallBack(CFReadStreamRef aStream, CFStreamEventType eventType, void* inClientInfo);
 void ASReadStreamCallBack
 (
    CFReadStreamRef aStream,
@@ -1683,7 +1684,7 @@ cleanup:
 			bitRate = ~0;
 		}
 		
-		// we have successfully read the first packests from the audio stream, so
+		// we have successfully read the first packets from the audio stream, so
 		// clear the "discontinuous" flag
 		if (discontinuous)
 		{
