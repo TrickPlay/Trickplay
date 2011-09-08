@@ -11,6 +11,8 @@
 
 @implementation TouchController
 
+@synthesize touchEventsAllowed;
+@synthesize swipeEventsAllowed;
 @synthesize view;
 @synthesize socketManager;
 
@@ -19,7 +21,6 @@
         self.view = aView;
         self.socketManager = sockman;
         touchEventsAllowed = NO;
-        clickEventsAllowed = YES;
         swipeStarted = NO;
         swipeSent = NO;
         keySent = NO;
@@ -27,16 +28,16 @@
         //activeTouches = [[NSMutableDictionary alloc] initWithCapacity:10];
         openFinger = 1;
         
-        [view setMultipleTouchEnabled:NO];
+        view.multipleTouchEnabled = NO;
     }
     
     return self;
 }
 
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount {
-	if (socketManager)
+	if (socketManager && !touchEventsAllowed && swipeEventsAllowed)
 	{
-	    int index;	
+	    int index;
 		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", thekey];
         
 		for (index = 1; index <= thecount; index++) {
@@ -60,6 +61,10 @@
 - (void)setMultipleTouch:(BOOL)val {
     view.multipleTouchEnabled = val;
     [self resetTouches];
+}
+
+- (void)setSwipe:(BOOL)allowed {
+    swipeEventsAllowed = allowed;
 }
 
 //*
@@ -86,7 +91,7 @@
     CGPoint currentTouchPosition = [touch locationInView:view];
     NSString *sentTouchData = [NSString stringWithFormat:@"%@\t%d\t%f\t%f\n", command, [(NSNumber *)CFDictionaryGetValue(activeTouches, touch) unsignedIntValue], currentTouchPosition.x, currentTouchPosition.y];
     //NSString *sentTouchData = [NSString stringWithFormat:@"%@\t%d\t%f\t%f\n", command, [(NSNumber *)[activeTouches objectForKey:touch] unsignedIntValue], currentTouchPosition.x, currentTouchPosition.y];
-    NSLog(@"sent touch data: '%@'", sentTouchData);
+    //NSLog(@"sent touch data: '%@'", sentTouchData);
     [socketManager sendData:[sentTouchData UTF8String] numberOfBytes:[sentTouchData length]];
     
     return YES;
@@ -110,7 +115,9 @@
     //NSLog(@"multitouch = %d", view.multipleTouchEnabled);
     //NSLog(@"touches = %@", touches);
     if (!view.multipleTouchEnabled) {
-        touchedTime = [NSDate timeIntervalSinceReferenceDate];
+        // leaving the name as a time interval incase in the future
+        // we decide to include this data we'll know which var to use
+        touchedTime = 1.0;//[NSDate timeIntervalSinceReferenceDate];
     } else {
         touchedTime = 0;
     }
@@ -120,7 +127,7 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     NSMutableArray *movedTouches = [NSMutableArray arrayWithArray:[touches allObjects]];
     int i;
-    BOOL stillActive;
+    BOOL stillActive = YES;
     for (i = 0; i < [movedTouches count]; i++) {
         UITouch *touch = [movedTouches objectAtIndex:i];
         [self sendTouch:touch withCommand:@"TM"];
@@ -147,23 +154,20 @@
     
     //Horizontal swipe
     // To be a swipe, direction of touch must be horizontal and long enough.
-    if (fabsf(startTouchPosition.x - currentTouchPosition.x) >= HORIZ_SWIPE_DRAG_MIN) {
-        if (touchedTime > 0) {
-            NSLog(@"swipe speed horiz :%f ", [NSDate timeIntervalSinceReferenceDate] - touchedTime);
-            // It appears to be a swipe.
-            if (startTouchPosition.x < currentTouchPosition.x) {
-                //Send right key -  FF53
-                NSLog(@"swipe right");
-                [self sendKeyToTrickplay:@"FF53" thecount:1];
-            } else {
-                //Send left key  - FF51
-                NSLog(@"Swipe Left");
-                [self sendKeyToTrickplay:@"FF51" thecount:1];
-            }
-            swipeSent = YES;
-            
-            return YES;
+    if (fabsf(startTouchPosition.x - currentTouchPosition.x) > fabsf(startTouchPosition.y - currentTouchPosition.y) && fabsf(startTouchPosition.x - currentTouchPosition.x) >= HORIZ_SWIPE_DRAG_MIN) {
+        // It appears to be a swipe.
+        if (startTouchPosition.x < currentTouchPosition.x) {
+            //Send right key -  FF53
+            NSLog(@"swipe right");
+            [self sendKeyToTrickplay:@"FF53" thecount:1];
+        } else {
+            //Send left key  - FF51
+            NSLog(@"Swipe Left");
+            [self sendKeyToTrickplay:@"FF51" thecount:1];
         }
+        swipeSent = YES;
+            
+        return YES;
     }
     //Vertical swipe
     else if (fabsf(startTouchPosition.y - currentTouchPosition.y) >= VERT_SWIPE_DRAG_MIN) {
@@ -231,24 +235,21 @@
     // TODO: tell trickplay the touches cancelled
 }
 
-/** depricated
-- (void)startClicks {
-    clickEventsAllowed = YES;
-}
-
-- (void)stopClicks {
-    clickEventsAllowed = NO;
-}
-//*/
-
 - (void)startTouches {
     NSLog(@"start touches");
     touchEventsAllowed = YES;
+    view.multipleTouchEnabled = YES;
 }
 
 - (void)stopTouches {
     NSLog(@"stop touches");
     touchEventsAllowed = NO;
+    view.multipleTouchEnabled = NO;
+}
+
+- (void)reset {
+    [self stopTouches];
+    [self setMultipleTouch:NO];
 }
 
 - (void)dealloc {
@@ -261,7 +262,6 @@
     }
     if (activeTouches) {
         CFRelease(activeTouches);
-        //[activeTouches release];
     }
     
     [super dealloc];

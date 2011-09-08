@@ -2065,7 +2065,7 @@ static int find_key( lua_State * L )
         {"braille_dots_2345678", CLUTTER_braille_dots_2345678},
         {"braille_dots_12345678", CLUTTER_braille_dots_12345678},
 
-        {NULL, NULL}
+        {0, 0}
     };
 
     int top = lua_gettop( L );

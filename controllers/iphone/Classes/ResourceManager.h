@@ -14,18 +14,22 @@
 @interface ResourceManager : NSObject <AsyncImageViewDelegate> {
 
     SocketManager *socketManager;
+
     NSMutableDictionary *resourceNames;
     NSMutableDictionary *resources;
     
+    NSMutableDictionary *loadingResources;
 }
 
 - (id)initWithSocketManager:(SocketManager *)sockman;
 
 - (void)declareResourceWithObject:(id)Object forKey:(id)key;
+- (void)loadImageDataForImageView:(AsyncImageView *)imageView withResource:(NSString *)name;
 - (NSData *)fetchResource:(NSString *)name;
-- (UIImageView *)fetchImageViewUsingResource:(NSString *)name frame:(CGRect)frame;
+- (AsyncImageView *)fetchImageViewUsingResource:(NSString *)name frame:(CGRect)frame;
 - (NSMutableDictionary *)getResourceInfo:(NSString *)name;
 
+- (void)dropResourceGroup:(NSString *)groupName;
 - (void)clean;
 
 @end

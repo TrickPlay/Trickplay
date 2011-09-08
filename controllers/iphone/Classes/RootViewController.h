@@ -8,22 +8,53 @@
 
 #import <UIKit/UIKit.h>
 #import "NetServiceManager.h"
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
 #import "AppBrowserViewController.h"
+#import "TVBrowserViewController.h"
 
-@interface RootViewController : UITableViewController <UITableViewDelegate, 
-UITableViewDataSource, UINavigationControllerDelegate,
-NetServiceManagerDelegate> {
+/**
+ * The RootViewController controls the root view of the over-arching
+ * NavigationViewController for the TrickplayController app.
+ *
+ * Loads a TableViewController whose view lists possible TVs to connect to.
+ * These TVs advertise their connection information via an mDNS service broadcast.
+ * From here on the words TV and service will be used synonymously.
+ *
+ * Refer to RootViewController.xib for the Controller's View.
+ */
+
+@interface RootViewController : UIViewController <UINavigationControllerDelegate,
+TPAppViewControllerSocketDelegate, AppBrowserViewControllerDelegate, TVBrowserViewControllerDelegate> {
     UIWindow *window;
-    //UINavigationController *navigationController;
-    NetServiceManager *netServiceManager;
-    GestureViewController *gestureViewController;
+
+    // Initialized to NO. Set to YES while the AppBrowser is in the course
+    // of being pushed to the top of the navigation stack
+    BOOL pushingAppBrowser;
+    
+    // YES if the NavigationViewController is in the middle of animating
+    // pushing the TPAppViewController or if the visible view is the
+    // TPAppViewController. Initialized to NO and set back to NO
+    // when the AppBrowserViewController (self) calls viewDidAppear.
+    BOOL pushingAppViewController;
+    
+    TVBrowserViewController *tvBrowserViewController;
     AppBrowserViewController *appBrowserViewController;
+    TPAppViewController *appViewController;
+    
+    UINavigationController *navigationController;
 }
 
+// Exposed methods
+- (void)pushAppBrowser:(NSNotification *)notification;
+- (void)destroyAppBrowserViewController;
+- (void)createTPAppViewControllerWithPort:(NSInteger)port hostName:(NSString *)hostName;
+- (void)pushTPAppViewController;
+- (void)destroyTPAppViewController;
 - (void)serviceResolved:(NSNetService *)service;
-- (void)reloadData;
 
+// Exposed properties
+@property (retain)IBOutlet UINavigationController *navigationController;
+@property (retain) IBOutlet TVBrowserViewController *tvBrowserViewController;
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 
 @end

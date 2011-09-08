@@ -16,7 +16,7 @@
     ResourceManager *resourceManager;
     SocketManager *socketManager;
     
-    //AudioStreamer *audioStreamer;
+    AudioStreamer *audioStreamer;
     NSString *soundLoopName;
 }
 
