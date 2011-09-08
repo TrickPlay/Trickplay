@@ -10,7 +10,6 @@
 
 @implementation TVBrowser
 
-@synthesize appBrowser;
 @synthesize currentTVName;
 @synthesize delegate;
 
@@ -29,7 +28,6 @@
     if (self) {
         delegate = theDelegate;
         self.currentTVName = nil;
-        self.appBrowser = nil;
         // Initialize the NSNetServiceBrowser stuff
         // The netServiceManager manages advertisements from service broadcasts
         if (!netServiceManager) {
@@ -39,49 +37,6 @@
     }
     
     return self;
-}
-
-#pragma mark -
-#pragma mark TPAppViewControllerSocketDelegate method handling
-
-/**
- * Generic operations to perform when the network fails. Includes deallocating
- * other view controllers and their resources and restarting the NetServiceManager
- * which will then begin browsing for advertised services.
- */
-- (void)handleSocketProblems {    
-    if (appBrowser) {
-        self.appBrowser = nil;
-        self.currentTVName = nil;
-    }
-    
-    [netServiceManager start];
-}
-
-/**
- * GestureViewControllerSocketDelegate callback called from AppBrowserViewController
- * when an error occurs over the network.
- */
-- (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in Root");
-    
-    [self handleSocketProblems];
-    if (delegate) {
-        //[delegate socketErrorOccurred];
-    }
-}
-
-/**
- * GestureViewControllerSocketDelegate callback called from AppBrowserViewController
- * when the stream socket closes.
- */
-- (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered in Root");
-    
-    [self handleSocketProblems];
-    if (delegate) {
-        //[delegate streamEndEncountered];
-    }
 }
 
 #pragma mark -
@@ -106,7 +61,7 @@
     [netServiceManager stop];
     self.currentTVName = [service name];
     if (delegate) {
-        [delegate serviceResolved:service];
+        [delegate tvBrowser:self serviceResolved:service];
     }
 }
 
@@ -122,12 +77,16 @@
     
     [self refreshServices];
     if (delegate) {
-        [delegate didNotResolveService];
+        [delegate tvBrowserDidNotResolveService:self];
     }
 }
 
-- (void)didFindServices {
-    [delegate didFindServices];
+- (void)didFindService:(NSNetService *)service {
+    [delegate tvBrowser:self didFindService:service];
+}
+
+- (void)didRemoveService:(NSNetService *)service {
+    [delegate tvBrowser:self didRemoveService:service];
 }
 
 - (void)startSearchForServices {
@@ -160,16 +119,6 @@
     [netServiceManager stop];
     [netServiceManager release];
     netServiceManager = nil;
-    
-    if (appBrowser) {
-        // Make sure to get rid of the AppBrowser's socket delegate
-        // or a race condition may occur where the AppBrowser recieves
-        // a call indicating that has a socket error and passes this
-        // information to a deallocated RootViewController before the
-        // RootViewController has a chance to deallocate the AppBrowser.
-        appBrowser.delegate = nil;
-        self.appBrowser = nil;
-    }
     
     self.currentTVName = nil;
     self.delegate = nil;
