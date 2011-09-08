@@ -331,12 +331,13 @@ Controller::Controller( ControllerList * _list, TPContext * _context , const cha
     loaded_external_map( false ),
     ts_accelerometer_started( 0 ),
     ts_pointer_started( 0 ),
-    ts_touch_started( 0 )
+    ts_touch_started( 0 ),
+    advanced_ui_is_ready( false )
 {
     // If the outside world did not provide a function to execute commands,
     // we set our own which always fails.
 
-    if ( !spec.execute_command )
+    if ( ! spec.execute_command )
     {
         spec.execute_command = default_execute_command;
     }
@@ -352,7 +353,18 @@ Controller::Controller( ControllerList * _list, TPContext * _context , const cha
 
         // NULL it because we don't own the memory past this call
 
-        spec.key_map = NULL;
+        spec.key_map = 0;
+    }
+
+    if ( spec.id )
+    {
+    	id = spec.id;
+
+    	spec.id = 0;
+    }
+    else
+    {
+    	id = Util::make_v4_uuid();
     }
 }
 
@@ -831,6 +843,8 @@ void Controller::advanced_ui_ready( void )
     {
         return;
     }
+
+    advanced_ui_is_ready = true;
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
