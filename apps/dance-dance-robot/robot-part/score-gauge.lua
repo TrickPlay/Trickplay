@@ -27,9 +27,32 @@ score_gauge.y = 100
 
 score_gauge.extras.set_score = function(new_score)
     assert(new_score >= 0 and new_score <= 100)
+    local old_score = score_gauge.extras.score
     score_gauge.extras.score = new_score
-    gauge.w = bground.w * score_gauge.extras.score/100 + 1
-    heart.x = gauge.x + gauge.w
+
+    local animator = Animator {
+                                duration = 250,
+                                properties = {
+                                    {
+                                        source = gauge,
+                                        name = "width",
+                                        keys = {
+                                            { 0.0,  "LINEAR",   bground.w * old_score/100 + 1 },
+                                            { 1.0,  "EASE_IN_OUT_SINE", bground.w * score_gauge.extras.score/100 + 1 },
+                                        }
+                                    },
+                                    {
+                                        source = heart,
+                                        name = "x",
+                                        keys = {
+                                            { 0.0,  "LINEAR",   gauge.x + bground.w * old_score/100 + 1 },
+                                            { 1.0,  "EASE_IN_OUT_SINE", gauge.x + bground.w * score_gauge.extras.score/100 + 1 },
+                                        }
+                                    },
+                                },
+                    }
+
+    animator:start()
 end
 
 
