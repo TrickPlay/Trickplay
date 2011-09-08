@@ -1335,6 +1335,8 @@ int TPContext::run()
 
     spec.execute_command = controller_execute_command;
 
+    spec.id = "d6a59106-8879-4748-bcfe-e3c976f82556";
+
     // This controller won't leak because the controller list will free it
 
     TPController * keyboard = tp_context_add_controller( this, "Keyboard", &spec, NULL );

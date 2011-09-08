@@ -126,7 +126,7 @@
 	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
     NSLog(@"service [ %@ ] removed, more coming? %d", service, moreComing);
 	if (!moreComing) {
-		[delegate didFindServices];
+		[delegate didRemoveService:service];
 	}
 }	
 
@@ -141,7 +141,7 @@
 	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
     NSLog(@"service [ %@ ] found, more coming? %d", service, moreComing);
 	if (!moreComing) {
-		[delegate didFindServices];
+		[delegate didFindService:service];
 	}
 }	
 

@@ -12,25 +12,27 @@
 #import "AppBrowserViewController.h"
 #import "TVBrowser.h"
 
+@class TVBrowserViewController;
+
 @protocol TVBrowserViewControllerDelegate <NSObject>
 
 @required
-- (void)serviceResolved:(NSNetService *)service;
-- (void)didNotResolveService;
-- (void)didSelectService:(NSNetService *)service isCurrentService:(BOOL)isCurrentService;
+- (void)tvBrowserViewController:(TVBrowserViewController *)viewController
+                serviceResolved:(NSNetService *)service;
+- (void)tvBrowserViewControllerDidNotResolveService;
+- (void)tvBrowserViewController:(TVBrowserViewController *)viewController
+               didSelectService:(NSNetService *)service
+               isCurrentService:(BOOL)isCurrentService;
 
 @end
 
 @interface TVBrowserViewController : UITableViewController <UITableViewDelegate, 
 UITableViewDataSource, UINavigationControllerDelegate,
-NetServiceManagerDelegate, TVBrowserDelegate> {
+TVBrowserDelegate> {
     // Orange dot that displays next to the current service
     UIView *currentTVIndicator;
     // Spins while a service is loading; disappears otherwise.
     UIActivityIndicatorView *loadingSpinner;
-    // Name of the current TV; stores the name of the current service
-    // used or nil if no service has been selected.
-    NSString *currentTVName;
     
     // Refreshes the list of services
     UIBarButtonItem *refreshButton;
@@ -43,8 +45,6 @@ NetServiceManagerDelegate, TVBrowserDelegate> {
 // Exposed methods
 - (void)stopSearchForServices;
 - (void)startSearchForServices;
-- (NSString *)currentTVName;
-- (void)setCurrentTVName:(NSString *)_currentTVName;
 - (void)reloadData;
 - (void)refresh;
 

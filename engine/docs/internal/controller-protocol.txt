@@ -1,5 +1,11 @@
-Version 4.2
+Version 4.3
 -----------
+
+Summary of changes between 4.2 and 4.3
+--------------------------------------
+
+    In ID message to server, server reads ID=<id> as the identifier of the controller.
+
 
 Summary of changes between 4.1 and 4.2
 --------------------------------------
@@ -73,7 +79,7 @@ Controller->Server
 
     (version must be >=4)
     
-    ID <version> <name> <cap>* <size>
+    ID <version> <name> <cap>* <size> <id>
     
         caps are:
         
@@ -97,6 +103,10 @@ Controller->Server
         
             IS=<w>x<h>
             US=<w>x<h>
+    
+        id is:
+        
+            ID=<id> (Added in v4.3)
     
     Key down
         KD <key> <unicode>

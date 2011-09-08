@@ -136,7 +136,7 @@ if (UNIX AND NOT APPLE)
     #--------------------------------------------------------------------------	
     # Editor
 
-    if ( EXISTS ${PROJECT_SOURCE_DIR}/apps/editor )
+    if ( EXISTS ${PROJECT_SOURCE_DIR}/tools/editor )
 
 	    # Editor script
 	
@@ -144,13 +144,13 @@ if (UNIX AND NOT APPLE)
 	
 	    # Editor app
 	
-	    install(DIRECTORY ${PROJECT_SOURCE_DIR}/apps/editor DESTINATION share/trickplay/apps/ )
+	    install(DIRECTORY ${PROJECT_SOURCE_DIR}/tools/editor DESTINATION share/trickplay/apps/ )
 
         # Editor icons
 
 	    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor.desktop DESTINATION share/applications/ ) 
 	    
-    endif ( EXISTS ${PROJECT_SOURCE_DIR}/apps/editor )
+    endif ( EXISTS ${PROJECT_SOURCE_DIR}/tools/editor )
 
     #--------------------------------------------------------------------------	
 
