@@ -379,54 +379,283 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 
 /*
     Class: Animator
+    
+    The Animator class provides a method for creating complex animations. Unlike animations based on the Timeline class or the UIElement animate() function, an Animator animation can animate two or more objects. Animator animations can also modify multiple properties and each property's value can change at varying rates during the course of the animation. An Animator animation can be used in conjunction with a Timeline to combine the advantages of both methods in a single animation.
+    
+    In many cases, the same animation can be created using either an Animator or one or more Timelines, perhaps combined with Path, Interval and/or Score objects. It is the responsibility of the programmer to decide on the best method of implementation.
+    
+    *Animator Modifiable Properties*
+    
+    An Animator animation can modify one or more of the following UIElement properties: (also shown is the property's data type)
+    
+    x, y, z, depth - float
+    width, height, w, h - float
+    opacity - int
+    position - table of {float x, float y}
+    size - table of {float width, float height}
+    scale - table of {double x, double y}
+    x_rotation - double specifying rotation angle
+    y_rotation - double specifying rotation angle
+    z_rotation - double specifying rotation angle
+    color - table or string specifying color. The format of the color is described in <RGB/Alpha Color Formats>.
+    
+    *Defining the Animator Animation: Object-Property Pairs*
+    
+    An Animator animation comprises one or more Object-Property pairs. The Object is any UIElement-based object. The Property is one of the properties listed above that can be animated. For example, if we wanted to animate a UIElement Rectangle object called "rect" along the X-axis, the Object-Property pair would be "rect-x". If we also wanted to animate the Rectangle along its Y-axis, a second pair of "rect-y" would be defined.
+    
+    When defining an Animator animation, each Object-Property pair is specified as a table contained within an Animator property called "properties." The "properties" property is itself a table of Object-Property pairs. The "properties" property must be set in the Animator object's constructor. The Object is specified as "source" and the Property is specified as "name." An example Animator object that defines our earlier rect-x and rect-y pairs is shown below.
+    
+    (code)
+    myAnimation = Animator( { properties = {
+	                             { -- Object-Property #1 (rect-x)
+                                   source = rect,
+                                   name   = "x"
+                                 },
+                                 
+                                 { -- Object-Property #2 (rect-y)
+                                   source = rect,
+                                   name   = "y"
+                                 }
+                              } -- end of properties table
+                            } )
+	(end)
 
-    A animator is an object providing declarative animations for UIElements' properties. Animator is used to
-    build and describe complex animations in terms of "key frames".
+	*Defining the Animator Animation: Key Frames*
+	
+    In addition to Object-Property pairs, an Animator animation specifies various key frames. Key frames define a property's value at specific points in the animation. They also enable a property's value to change at different rates throughout the animation. For example, key frames can be defined so that an object moves quickly along the X-axis for the first half of the animation, but then moves very slowly for the second half.
+    
+    A key frame consists of the following three pieces of information.
+    
+    progress - the animation's percentage of completion expressed as a value between 0.0 and 1.0, inclusive. The start of the animation is 0.0; the end is 1.0. By the point in the animation specified by progress, the target value should be reached.
+    easing mode - the alpha mode, if any, to use while moving toward the target value. By default, a LINEAR alpha mode is used. Supported alpha modes are described in the <Alpha.mode> section.
+    target value - the property's value when the animation has reached the point specified by progress
+    
+    Each key frame is defined in a table called "keys." As an example, say we want our Rectangle to move along the X-axis from point 0 to 200 and arrive there when the Animator has completed 20% of its animation. To accomplish this, the following two key frames should be defined.
+    
+    (code)
+    -- X-axis key frames
+    keys = { 
+    	{ 0.0, "LINEAR",       0.0   }, -- start at this location
+    	{ 0.2, "EASE_IN_QUAD", 200.0 }  -- by this point in the animation, move to this location
+    }
+    (end)
+
+	The first key frame defined above specifies that at the start of the animation (at progress value 0.0), the Rectangle's position along the X-axis should be at 0. There is no transition at this key frame, so the "LINEAR" alpha mode is simply a dummy value. The second key frame states that when the animation is 20% complete at 0.2, the Rectangle's X-axis position should be at 200. Also, as it moves to that position, it should use an alpha mode of EASE_IN_QUAD.
+	
+	To continue with the example, let's move onto the Y-axis. After moving the Rectangle along the X-axis, we'll move it along the Y-axis by the same amount. The following key frames accomplish this.
+	
+	(code)
+	-- Y-axis key frames
+	keys = {
+		{ 0.0, "LINEAR",       0.0   }, -- start at this location
+		{ 0.2, "LINEAR",       0.0   }, -- at this point in the animation, remain at last location
+		{ 0.4, "EASE_IN_QUAD", 200.0 }  -- at this point in the animation, move to this location
+	}
+	(end)
+	
+	The first key frame starts the Rectangle along the Y-axis at position 0. When the animation is 20% complete, the Rectangle is still at point 0 on the Y-axis. This intermediate key frame is necessary to guarantee that no movement occurs along the Y-axis while the Rectangle is moving along the X-axis. Because there is no movement, the alpha mode is another dummy value. The third key frame states that when the animation is 40% complete, the Rectangle should be positioned at point 200 on the Y-axis and the movement should follow the EASE_IN_QUAD alpha mode.
+	
+	For the remainder of the animation, we'll move the Rectangle along both the X- and Y-axes, simultaneously, resulting in a diagonal line. The following key frames accomplish this.
+	
+	(code)
+	-- X-axis key frames
+	keys = {
+		{ 0.0, "LINEAR",       0.0   },  -- start at this location
+		{ 0.2, "EASE_IN_QUAD", 200.0 },  -- by this point in the animation, move to this location
+		{ 0.4, "LINEAR",       200.0 },  -- by this point in the animation, remain at last location
+		{ 1.0, "EASE_IN_QUAD", 800.0 }   -- by this point in the animation, move to this location
+	}
+	-- Y-axis key frames
+	keys = {
+		{ 0.0, "LINEAR",       0.0   },  -- start at this location
+		{ 0.2, "LINEAR",       0.0   },  -- by this point in the animation, remain at last location
+		{ 0.4, "EASE_IN_QUAD", 200.0 },  -- by this point in the animation, move to this location
+		{ 1.0, "EASE_IN_QUAD", 800.0 }   -- by this point in the animation, move to this location
+	}
+	(end)
+	
+	The final key frames in each table move the Rectangle along both the X- and Y-axes. The Rectangle is travelling a farther distance in this phase that it was in its earlier movements, so it will also move faster.
+	
+	The key tables should be defined within their associated Object-Property table in the Animator's "properties" table. The combined definition is shown below.
+	
+	(code)
+    myAnimation = Animator( { properties = {
+	                             { -- Object-Property #1 (rect-x)
+                                   source = rect,
+                                   name   = "x",
+                                   
+							       -- X-axis key frames
+								   keys = {
+										{ 0.0, "LINEAR",       0.0   },  -- start at this location
+										{ 0.2, "EASE_IN_QUAD", 200.0 },  -- by this point in the animation, move to this location
+										{ 0.4, "LINEAR",       200.0 },  -- by this point in the animation, remain at last location
+										{ 1.0, "EASE_IN_QUAD", 800.0 }   -- by this point in the animation, move to this location
+								   }
+                                 },
+                                 
+                                 { -- Object-Property #2 (rect-y)
+                                   source = rect,
+                                   name   = "y",
+
+							       -- Y-axis key frames
+								   keys = {
+										{ 0.0, "LINEAR",       0.0   },  -- start at this location
+										{ 0.2, "LINEAR",       0.0   },  -- by this point in the animation, remain at last location
+										{ 0.4, "EASE_IN_QUAD", 200.0 },  -- by this point in the animation, move to this location
+										{ 1.0, "EASE_IN_QUAD", 800.0 }   -- by this point in the animation, move to this location
+							       }
+                                 }
+                              } -- end of properties table
+                            } -- end of Animator table 
+                          )
+	(end)
+
+	*Defining the Animator Animation: Optional Properties*
+	
+    Two optional properties may be set if desired in the Animator object's constructor. First, the duration property can specify the animation's length in milliseconds. The duration property, if set, is not part of the "properties" property; it should be defined as its own property, separate from properties. A sample is shown below.
+    
+    (code)
+    myAnimation = Animator( { duration = 2000,
+                              properties = { ... }
+                            }
+                          )
+    (end)
+    
+    Specifying the animation's duration in the object's constructor is optional, but an animation *must* have a duration. If not specified in the constructor, the duration must be specified in either the Animator object's <duration> property or the duration property of an attached Timeline object.
+    
+	The second optional property is called "ease_in". It is a boolean value indicating whether or not the animation should gradually move the object from its current location to the location specified in the first key frame. If ease_in is false, the object will jump instantly from its current location to the first key frame's location without inserting any intermediate steps; if ease_in is true, the object will move gradually to the first frame's location. By default, ease_in is true.
+	
+	The ease_in property is associated with an Object-Property pair, so it is defined within the Object-Property table, as shown in the example below.
+	
+	(code)
+	myAnimation = Animator( { properties = {
+								{ -- Object-Property #1 (rect-x)
+								  source  = rect,
+								  name    = "x",
+								  ease_in = false,
+								  keys = { ... }
+								},
+								
+								{ -- Object-Property #2 (rect-y)
+								  source  = rect,
+								  name    = "y",
+								  ease_in = false,
+								  keys = { ... }
+								}
+							}
+						  )
+	(end)
+	
+	An Animator object can define and run an animation by itself, but it can also work in conjunction with a Timeline object. When a Timeline object is attached to an Animator, the properties of the Timeline provide additional characteristics to the animation that are not available in an Animator alone. For example, a Timeline animation can loop infinitely, define an initial delay, or play in reverse; an Animator by itself cannot perform these operations.
+	
+	To attach a Timeline object to the Animator animation, set the Animator's <timeline> property.
+	
+	*Complete Animator Code Example*
+	
+	The program below animates a sphere to circle around an orbit, getting larger as it approaches and smaller as it moves farther away. In actuality, the sphere animates two properties: the X-axis and scale properties. The animation uses an attached Timeline object to have the animation loop. The Animator-specific code is located in the bottom half of the example.
+	
+	(code)
+	-- Create a screen background
+	bckgnd = Canvas( 1920, 1080 )
+	bckgnd:set_source_color( "ffffffFF" )
+	bckgnd:paint()
+	bckgndImage = bckgnd:Image()
+	bckgndImage.name = "Background"
+	screen:add( bckgndImage )
+
+	-- Create a rectangular demo area
+	demoArea = Rectangle {
+					color = { 100, 100, 100, 255 },
+					border_color = { 0, 0, 0, 255 },
+					border_width = 4,
+					name = "demoArea",
+					position = { 746, 96, 0 },
+					size = { 308, 308 },
+					opacity = 255,
+				}
+	screen:add( demoArea )
+
+	-- Create a sphere image using Canvas
+	sphere = Canvas( 40, 40 )
+	sphere:set_source_radial_pattern( 12, 12, 2, 20, 20, 20 )
+	sphere:add_source_pattern_color_stop( 0.0, "d00000FF" )
+	sphere:add_source_pattern_color_stop( 1.0, "000000FF" )
+	sphere:arc( 20, 20, 20, 0, 360 )
+	sphere:fill()
+
+	-- Convert Canvas object to Image object and show on the screen
+	sphereImage = sphere:Image()
+	sphereImage.position = { 770, 220 }
+	sphereImage.name = "Sphere"
+	sphereImage.anchor_point = { 20, 20 },
+	screen:add( sphereImage )
+
+	-- Define an Animator for the sphere
+	sphereAnimator = Animator( {
+		properties = {
+			-- Object-Property #1
+			-- Animate along the X-axis. The sphere simply moves back and forth along the X-axis.
+			-- When moving from left to right, it moves faster than when moving from right to left.
+			-- When combined with the scale key frames below, this gives the appearance of the sphere
+			-- moving faster when it is closer to us, and slower when farther away.
+			{ source = sphereImage,   -- object to animate
+			  name = "x",             -- property to animate
+			  -- X-axis key frames
+			  keys = {
+			  	{ 0.000, "LINEAR", 770 },
+			  	{ 0.150, "LINEAR", 900 },
+			  	{ 0.300, "LINEAR", 1030 },
+			  	{ 0.600, "LINEAR", 900 },
+			  	{ 1.000, "LINEAR", 770 }
+			  }
+			},
+		
+			-- Object-Property #2
+			-- Animate the sphere's scale to give the appearance of moving closer and then farther away.
+			{ source = sphereImage,
+			  name = "scale",
+			  -- Scale key frames
+			  keys = {
+			    { 0.000, "LINEAR", { 1.0, 1.0 } },
+			    { 0.150, "LINEAR", { 3.0, 3.0 } },
+			    { 0.300, "LINEAR", { 1.0, 1.0 } },
+			    { 0.600, "EASE_OUT_QUAD", { 0.5, 0.5 } },
+			    { 1.000, "EASE_IN_QUAD", { 1.0, 1.0 } }
+			  }
+			}
+		}
+	} )
+	
+	-- Attach a Timeline to the Animator's animation to have it loop
+	sphereTL = Timeline { duration = 1500, loop = true }
+	sphereAnimator.timeline = sphereTL
+
+	-- Start the Animator animation
+	sphereAnimator:start()
+	(end)
+							
+The animation generated by the example code is shown below.
+
+(see animatorDemo.gif)
+
 */
 
 class Animator [[ClutterAnimator*]]
 {
-    /*
-        Function: Animator
-        You initialize an Animator by passing it a table containing the information about the keyframes, along the lines of this one:
 
-(code)
-    local my_animator = Animator({
-                                    duration = 2000,
-                                    properties = {
-                                        {
-                                            source = some_ui_element,
-                                            name = "position",
-                                            ease_in = true,
-                                            keys = {
-                                                {   0.0, "LINEAR", { 0, 0 } } ,
-                                                {   1.0, "EASE_IN_OUT_SINE", {
-                                                                            math.random(0, screen.w-shader_name.w),
-                                                                            math.random(0, screen.h-shader_name.h)
-                                                                        }
-                                                },
-                                            },
-                                        },
-                                        {
-                                            source = some_ui_element,
-                                            name = "opacity",
-                                            ease_in = true,
-                                            keys = {
-                                                {   0.0, "LINEAR", 0 },
-                                                {   0.5, "EASE_IN_SINE", 255 },
-                                                {   1.0, "EASE_OUT_SINE", 0 },
-                                            },
-                                        },
-                                    },
-                              })
-(end)
+	/* Constructor: Animator
+	
+	The Animator() constructor defines most aspects of the animation, including all Object-Property pairs and key frames. The opening section of this page fully describes the creation of an Animator animation.
+	
+	The Animator animation can be run by calling the object's start() function.
 
-        NOTE: There are some real oddities to the way the keyframes behave.  Here's the basics.
-
-        If "ease_in" is set to true, then the first keyframe will be ignored, and the animator will move from the pre-animation state of the object to the state
-        described by the SECOND keyframe, then on the to third, fourth, etc. in turn if those exist.  AGAIN: if ease_in is set, the first keyframe is apparently ignored.
-
-        If "ease_in" is set to false, then the animator will SNAP (not animate) the object to the state described by that keyframe, and then animate to the third, fourth, etc frames.  The snap will happen at the timeline point described by that first keyframe.
+	*Arguments:*
+	
+	props - table of Animator properties that define the Object-Property pairs and key frames of the animation
+	
+	*Return Value:* Animator object containing the defined animation
+	
+	*See Also:* the <start> function
 
     */
 
@@ -445,7 +674,14 @@ class Animator [[ClutterAnimator*]]
 
 	/*
 		Property: duration
-		The duration of the animator in milliseconds.
+		
+		The duration property is an integer value specifying the length of the animation in milliseconds.
+		
+		The animation's duration can also be set in the Animator object's constructor or in the duration property of an attached Timeline.
+		
+		*Default Value:* 0
+		
+		*See Also:* the <Timeline.duration> property
 	*/
 
     int duration
@@ -454,6 +690,12 @@ class Animator [[ClutterAnimator*]]
 
  	/*
 		Property: timeline
+		
+		The timeline property specifies a Timeline object whose characteristics are used to drive the animation. For example, the Timeline's loop property can be set to have the animation loop infinitely.
+		
+		*Default Value:* nil
+		
+		*See Also:* the <Timeline> class
 	*/
 
 	Timeline timeline
@@ -469,7 +711,14 @@ class Animator [[ClutterAnimator*]]
 
 	/*
 		Function: start
-		Starts the animator.
+		
+		The start() function begins running the object's animation.
+		
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*See Also:* the description located at the beginning of this page about defining an Animator animation 
 	*/
 
     start()
