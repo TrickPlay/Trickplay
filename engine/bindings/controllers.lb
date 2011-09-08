@@ -340,6 +340,15 @@ interface controller [[ControllerDelegate*]]
         ]];
         
     /*
+        Property: is_advanced_ui_ready
+    */
+    
+    readonly bool is_advanced_ui_ready
+        [[
+            is_advanced_ui_ready = self->get_controller()->is_advanced_ui_ready();
+        ]];
+        
+    /*
         Property: has_virtual_remote
         
         Whether the controller supports a virtual remote.
