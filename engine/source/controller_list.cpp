@@ -833,12 +833,12 @@ void Controller::advanced_ui_ready( void )
         return;
     }
 
+    advanced_ui_is_ready = true;
+
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
         ( *it )->advanced_ui_ready( );
     }
-
-    advanced_ui_is_ready = true;
 }
 
 
