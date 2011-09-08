@@ -86,5 +86,25 @@
 {
 "name": "00022_touch.lua",
 "active": "true"
+},
+{
+"name": "00023_multiple_choice.lua",
+"active": "true"
+},
+{
+"name": "00024_clear_ui.lua",
+"active": "true"
+},
+{
+"name": "00025_set_ui_background.lua",
+"active": "true"
+},
+{
+"name": "00026_sound.lua",
+"active": "true"
+},
+{
+"name": "00027_enter_text.lua",
+"active": "true"
 }
 ]
