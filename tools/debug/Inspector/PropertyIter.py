@@ -1,47 +1,38 @@
 
-"""
-Return the attributes in the order they should be added to the model
-"""
-class AttrIter:
-    
+
+class PropertyIter:
+    """
+    Return the UI Element properties in the order they should be
+    added to the model
+    """    
+
     def __init__(self, group = None):
         
         if group:
-        
-            self.group = NESTED_ATTR_LIST[group]
-        
+            self.group = NESTED_PROP_LIST[group]
         else:
-            
-            self.group = ATTR_LIST
+            self.group = PROP_LIST
         
         self.current = 0
         
         self.limit = len(self.group)
         
-        
     def __iter__(self):
-        
         return self
-        
         
     def next(self):
         
-        if self.current < self.limit:
-            
+        if self.current < self.limit:    
             r = self.group[self.current]
-            
             self.current += 1
-            
             return r
             
         else:
-            
             self.current = 0
-            
             raise StopIteration
 
      
-ATTR_LIST = [
+PROP_LIST = [
     'source', 
     'src', 
     'text',
@@ -63,11 +54,11 @@ ATTR_LIST = [
     # Hidden
     #'gid',
     #'name', 
-    #'type', 
-    'children', 
+    #'type',
+    #'children', 
 ]
 
-NESTED_ATTR_LIST = {
+NESTED_PROP_LIST = {
     'position' : ['x', 'y', 'z'], 
     'size' : ['w', 'h'],
     'color' : ['r', 'g', 'b', 'a'],

@@ -1,0 +1,58 @@
+{
+  "stat": "ok",
+  "results": 2,
+  "page": 0,
+  "sort": "name",
+  "order": "desc",
+  "applications": 
+  [
+    {
+      "id": 1,
+      "name": "True Blood Comics",
+      "description": "View full screen art with new stories never seen before! Blood and sex mix on a hot rainy night at Merlotte's, when Sookie and her friends are trapped by a vengeful spirit who feeds on shame. Bon Temps, Louisiana has never been stranger, or more twisted, in a new story co-plotted by TRUE BLOOD series creator Alan Ball, with a script from David Tischman and Mariah Huehner, and lush art by David Messina.",
+      "icon": "fake-server/v1/com.trickplay.fake.trueblood/icon.jpg",
+      "url": "http://hbo.com/",
+      "email": "support@trickplay.com",
+      "license": "free for all",
+      "price": 1.99,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+        {
+          "url": "fake-server/v1/com.trickplay.fake.trueblood/background.jpg",
+          "imageType": "background",
+          "mimeType": "image/jpeg"
+        },
+        {
+          "url": "fake-server/v1/com.trickplay.fake.trueblood/featured.png",
+          "imageType": "featuredIcon",
+          "mimeType": "image/png"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Hulu Plus",
+      "description": "Choose from more than 2,600 current primetime TV hits such as The Simpsons, 30 Rock, Lost, Glee and The Office the morning after they air; classics like Buffy the Vampire Slayer, The A-Team, Airwolf and Married...with Children; movies like Last of the Mohicans and Basic Instinct; documentaries like Super Size Me, and other popular TV shows and movies.",
+      "icon": "fake-server/v1/com.trickplay.fake.hulu/icon.jpg",
+      "url": "http://www.hulu.com/",
+      "email": "support@hulu.com",
+      "license": "None",
+      "price": 0,
+      "vendor": "Trickplay",
+      "medias": 
+      [
+        {
+          "url": "fake-server/v1/com.trickplay.fake.hulu/featured.png",
+          "imageType": "featuredIcon",
+          "mimeType": "image/png"
+        },
+        {
+          "url": "fake-server/v1/com.trickplay.fake.hulu/background.jpg",
+          "imageType": "background",
+          "mimeType": "image/jpeg"
+        }
+      ]
+    }
+  ]
+}
