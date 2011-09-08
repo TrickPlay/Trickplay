@@ -1,0 +1,64 @@
+Index: clutter-1.6.4/clutter/egl/clutter-backend-egl.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/egl/clutter-backend-egl.c	2011-07-11 13:18:18.721629939 -0700
++++ clutter-1.6.4/clutter/egl/clutter-backend-egl.c	2011-07-11 13:19:54.881629999 -0700
+@@ -280,9 +280,8 @@
+           goto fail;
+         }
+ 
+-#ifdef COGL_HAS_XLIB_SUPPORT
+       backend_egl->egl_config = config;
+-#endif
++
+       CLUTTER_NOTE (GL, "Created EGL Context");
+     }
+ 
+@@ -924,3 +923,15 @@
+ 
+   return backend_singleton->edpy;
+ }
++
++EGLConfig
++clutter_egl_get_egl_config (void)
++{
++  if (backend_singleton == NULL)
++    {
++      g_critical ("%s has been called before clutter_init()", G_STRFUNC);
++      return 0;
++    }
++
++  return backend_singleton->egl_config;
++}
+Index: clutter-1.6.4/clutter/egl/clutter-backend-egl.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/egl/clutter-backend-egl.h	2011-07-11 13:17:35.601629913 -0700
++++ clutter-1.6.4/clutter/egl/clutter-backend-egl.h	2011-07-11 13:17:58.161629927 -0700
+@@ -85,7 +85,6 @@
+   /* EGL Specific */
+   EGLDisplay edpy;
+   EGLContext egl_context;
+-  EGLConfig  egl_config;
+ 
+   Window     dummy_xwin;
+   EGLSurface dummy_surface;
+@@ -98,6 +97,7 @@
+   EGLDisplay edpy;
+   EGLSurface egl_surface;
+   EGLContext egl_context;
++  EGLConfig  egl_config;
+ 
+   /* from the backend */
+   gint surface_width;
+Index: clutter-1.6.4/clutter/egl/clutter-egl.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/egl/clutter-egl.h	2011-07-11 13:16:54.731629889 -0700
++++ clutter-1.6.4/clutter/egl/clutter-egl.h	2011-07-11 13:17:20.071629905 -0700
+@@ -87,6 +87,8 @@
+  */
+ EGLDisplay      clutter_egl_get_egl_display     (void);
+ 
++EGLConfig       clutter_egl_get_egl_config      (void);
++
+ G_END_DECLS
+ 
+ #endif /* __CLUTTER_EGL_H__ */

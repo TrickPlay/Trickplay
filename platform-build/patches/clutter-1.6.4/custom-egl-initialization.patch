@@ -1,17 +1,27 @@
 Index: clutter-1.6.4/clutter/egl/clutter-backend-egl.c
 ===================================================================
---- clutter-1.6.4.orig/clutter/egl/clutter-backend-egl.c	2011-02-01 17:27:18.797713178 -0800
-+++ clutter-1.6.4/clutter/egl/clutter-backend-egl.c	2011-02-01 17:28:07.098962834 -0800
-@@ -56,6 +56,8 @@
+--- clutter-1.6.4.orig/clutter/egl/clutter-backend-egl.c	2011-02-11 07:13:53.000000000 -0800
++++ clutter-1.6.4/clutter/egl/clutter-backend-egl.c	2011-09-08 12:08:01.026301510 -0700
+@@ -56,6 +56,9 @@
  
  static gchar *clutter_vblank_name = NULL;
  
 +extern NativeWindowType tp_egl_get_native_window();
++extern NativeDisplayType tp_egl_get_native_display();
 +
  #ifdef COGL_HAS_X11_SUPPORT
  G_DEFINE_TYPE (ClutterBackendEGL, _clutter_backend_egl, CLUTTER_TYPE_BACKEND_X11);
  #else
-@@ -367,7 +369,7 @@
+@@ -122,7 +125,7 @@
+                           &backend_egl->egl_version_major,
+                           &backend_egl->egl_version_minor);
+ #else
+-  backend_egl->edpy = eglGetDisplay (EGL_DEFAULT_DISPLAY);
++  backend_egl->edpy = eglGetDisplay (tp_egl_get_native_display());
+ 
+   status = eglInitialize (backend_egl->edpy,
+ 			  &backend_egl->egl_version_major,
+@@ -367,7 +370,7 @@
        backend_egl->egl_surface =
          eglCreateWindowSurface (edpy,
                                  config,

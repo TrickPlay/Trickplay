@@ -11,6 +11,11 @@ extern "C" NativeWindowType tp_egl_get_native_window()
   return 0;
 }
 
+extern "C" NativeDisplayType tp_egl_get_native_display()
+{
+  return EGL_DEFAULT_DISPLAY;
+}
+
 static TPController * remote = NULL;
 
 int main( int argc , char * argv[] )
@@ -60,8 +65,8 @@ void remote_control_callback( unsigned char key )
 {
 	if ( remote )
 	{
-        tp_controller_key_down( remote, key, 0 );
-        tp_controller_key_up( remote, key, 0 );
+        tp_controller_key_down( remote, key, 0 , 0 );
+        tp_controller_key_up( remote, key, 0 , 0 );
 	}	
 }
 

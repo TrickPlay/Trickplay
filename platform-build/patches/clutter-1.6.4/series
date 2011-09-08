@@ -3,3 +3,4 @@ custom-egl-initialization.patch
 #uprof-for-egl-setup-timers.patch
 dispose-crash.patch
 egl_config_alpha.patch
+get_egl_config.patch
