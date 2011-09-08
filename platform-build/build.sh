@@ -367,8 +367,16 @@ SOUP_SOURCE="libsoup-${SOUP_V}"
 SOUP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --without-gnome --disable-ssl --disable-glibtest && make && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
+# libexif
 
-ALL="GLIB_HOST GET_TEXT ZLIB EXPAT XML GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
+EXIF_V="0.6.20"
+EXIF_DIST="libexif-${EXIF_V}.tar.gz"
+EXIF_SOURCE="libexif-${EXIF_V}"
+EXIF_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-docs && make && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
+
+ALL="GET_TEXT ZLIB EXPAT XML EXIF GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 
 #-----------------------------------------------------------------------------
 
@@ -640,7 +648,8 @@ then
 	    -lsndfile \
 	    -lsoup-2.4 \
 	    -lxml2 \
-            -lMali \
+        -lMali \
+        -lexif \
 	    ${THERE}/test/main.cpp \
 	    -Wl,--end-group 
 	
