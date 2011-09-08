@@ -12,11 +12,7 @@
 @implementation AppBrowserViewController
 
 @synthesize theTableView;
-@synthesize appsAvailable;
-@synthesize currentAppName;
-@synthesize pushingViewController;
-@synthesize socketDelegate;
-@synthesize gestureViewController;
+@synthesize delegate;
 
 /*
 @synthesize appShopButton;
@@ -32,305 +28,32 @@
 }
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
-/*
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization.
+        appBrowser = [[AppBrowser alloc] init];
     }
     return self;
 }
-*/
 
 /**
  * Called by RootViewController after a service is resolved. Creates a
- * GestureViewController and sends GestureViewController the host and port
+ * TPAppViewController and sends TPAppViewController the host and port
  * it will use for establishing the socket it will use for an initial
  * connection with Trickplay and communicating with Trickplay asynchronously.
  */
-- (void)setupService:(NSInteger)p
-            hostname:(NSString *)h
-            thetitle:(NSString *)n {
-    
-    NSLog(@"AppBrowser Service Setup: %@ host: %@ port: %d", n, h, p);
-    
-    viewDidAppear = NO;
-    
-    [self createGestureViewWithPort:p hostName:h];
-}
-
-/**
- * Pushes the GestureViewController to the top of the navigation stack making it
- * the visible view controller.
- */
-- (void)pushApp {
-    pushingViewController = YES;
-
-    if (self.navigationController.visibleViewController != self) {
-        [self.navigationController pushViewController:self animated:NO];
-    }
-    
-    UIBarButtonItem *newBackButton = [[UIBarButtonItem alloc] initWithTitle: @"Apps List" style: UIBarButtonItemStyleBordered target: nil action: nil];
-    [[self navigationItem] setBackBarButtonItem: newBackButton];
-    [newBackButton release];
-    
-    [self.navigationController pushViewController:gestureViewController animated:YES];
+- (void)setupService:(NSUInteger)port
+            hostName:(NSString *)hostName
+         serviceName:(NSString *)serviceName {
+        
+    [appBrowser setupService:port hostName:hostName serviceName:serviceName];
 }
 
 #pragma mark -
-#pragma mark Retrieving App Info From Network
+#pragma mark View lifecycle
 
-/**
- * Returns true if the AppBrowserViewController can confirm an app is running
- * on Trickplay by asking it over the network.
- */
-- (BOOL)hasRunningApp {
-    if (![gestureViewController hasConnection]) {
-        return NO;
-    }
-    NSDictionary *currentAppInfo = [self getCurrentAppInfo];
-    NSLog(@"Received JSON dictionary current app data = %@", currentAppInfo);
-    if (!currentAppInfo) {
-        return NO;
-    }
-    self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
-    if (currentAppName && ![currentAppName isEqualToString:@"Empty"]) {
-        return YES;
-    }
-    
-    return NO;
-}
-
-/**
- * Asks Trickplay for the currently running app and any information pertaining
- * to this app assembled in a JSON string. The method takes this JSON string reply
- * and returns it as an NSDictionary or nil on error.
- */
-- (NSDictionary *)getCurrentAppInfo {
-    NSLog(@"Getting Current App Info");
-    if (![gestureViewController hasConnection]) {
-        return nil;
-    }
-    // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
-    //NSLog(@"JSONString = %@", JSONString);
-    
-    NSURL *dataURL = [NSURL URLWithString:JSONString];
-    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
-    //NSLog(@"Received JSONData = %@", [NSString stringWithCharacters:[JSONData bytes] length:[JSONData length]]);
-    //NSArray *JSONArray = [JSONData yajl_JSON];
-    return (NSDictionary *)[JSONData yajl_JSON];
-}
-
-- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
-    NSLog(@"Fetching Apps");
-    
-    if (!delegate) {
-        return;
-    }
-    
-    currentAppDelegate = delegate;
-    
-    if (![gestureViewController hasConnection]) {
-        self.currentAppName = nil;
-        [delegate didReceiveCurrentAppInfo:nil];
-        return;
-    }
-    
-    if (currentAppInfoConnection) {
-        [currentAppInfoConnection cancel];
-        [currentAppInfoConnection release];
-        currentAppInfoConnection = nil;
-    }
-    if (currentAppData) {
-        [currentAppData release];
-        currentAppData = nil;
-    }
-    
-    // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
-    
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
-    currentAppInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-    
-    if (!currentAppInfoConnection) {
-        self.currentAppName = nil;
-        [delegate didReceiveCurrentAppInfo:nil];
-    }
-}
-
-/**
- * Asks Trickplay for the most up-to-date information of apps it has available.
- * Trickplay replies with a JSON string of up-to-date apps. The method then
- * composes an NSArray of NSDictioanry Objects with information on each app
- * available to the user on the TV, each individual NSDictionary Object referring
- * to one app, and returns this NSArray to the caller. The method also sets
- * appsAvailable to this NSArray which is later used to populate the TableView.
- *
- * Returns the NSArray passed to appsAvailable or nil on error.
- */
-- (NSArray *)fetchApps {
-    NSLog(@"Fetching Apps");
-    if (![gestureViewController hasConnection]) {
-        return nil;
-    }
-    
-    //grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
-    
-    NSURL *dataURL = [NSURL URLWithString:JSONString];
-    NSData *JSONData = [NSData dataWithContentsOfURL:dataURL];
-    self.appsAvailable = [JSONData yajl_JSON];
-    NSLog(@"Recieved JSON array app data = %@", appsAvailable);
-    if (!appsAvailable) {
-        return nil;
-    }
-    
-    return appsAvailable;
-}
-
-- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)delegate {
-    NSLog(@"Fetching Apps");
-    
-    if (!delegate) {
-        return;
-    }
-    
-    fetchAppsDelegate = delegate;
-    
-    if (![gestureViewController hasConnection]) {
-        self.appsAvailable = nil;
-        [delegate didReceiveAvailableAppsInfo:nil];
-        return;
-    }
-    
-    if (fetchAppsConnection) {
-        [fetchAppsConnection cancel];
-        [fetchAppsConnection release];
-        fetchAppsConnection = nil;
-    }
-    if (fetchAppsData) {
-        [fetchAppsData release];
-        fetchAppsData = nil;
-    }
-    
-    
-    // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", gestureViewController.socketManager.host, gestureViewController.socketManager.port];
-    
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
-    fetchAppsConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-    
-    if (!fetchAppsConnection) {
-        self.appsAvailable = nil;
-        [delegate didReceiveAvailableAppsInfo:nil];
-    }
-}
-
-#pragma mark -
-#pragma mark NSURLConnection Handling
-
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
-    if (connection == fetchAppsConnection) {
-        if (!fetchAppsData) {
-            fetchAppsData = [[NSMutableData alloc] initWithCapacity:10000];
-        }
-        
-        [fetchAppsData appendData:incrementalData];
-    } else if (connection == currentAppInfoConnection) {
-        if (!currentAppData) {
-            currentAppData = [[NSMutableData alloc] initWithCapacity:10000];
-        }
-        
-        [currentAppData appendData:incrementalData];
-    }
-}
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    if (connection == fetchAppsDelegate) {
-        [fetchAppsConnection cancel];
-        [fetchAppsConnection release];
-        fetchAppsConnection = nil;
-        
-        self.appsAvailable = [fetchAppsData yajl_JSON];
-        NSLog(@"Received JSON array app data = %@", appsAvailable);
-        [fetchAppsDelegate didReceiveAvailableAppsInfo:appsAvailable];
-    } else if (connection == currentAppInfoConnection) {
-        [currentAppInfoConnection cancel];
-        [currentAppInfoConnection release];
-        currentAppInfoConnection = nil;
-        
-        NSDictionary *currentAppInfo = [currentAppData yajl_JSON];
-        self.currentAppName = (NSString *)[currentAppInfo objectForKey:@"name"];
-        if ([currentAppName isEqualToString:@"Empty"]) {
-            self.currentAppName = nil;
-        }
-        [currentAppDelegate didReceiveCurrentAppInfo:currentAppInfo];
-    }
-}
-
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    if (connection == fetchAppsConnection) {
-        [fetchAppsConnection cancel];
-        [fetchAppsConnection release];
-        fetchAppsConnection = nil;
-        
-        self.appsAvailable = nil;
-        [fetchAppsDelegate didReceiveAvailableAppsInfo:nil];
-    } else if (connection == currentAppInfoConnection) {
-        [currentAppInfoConnection cancel];
-        [currentAppInfoConnection release];
-        currentAppInfoConnection = nil;
-        
-        [currentAppDelegate didReceiveCurrentAppInfo:nil];
-    }
-}
-
-#pragma mark -
-#pragma mark Launching App View
-
-/**
- * Tells Trickplay to launch a selected app and sets this app as the current
- * app.
- */
-- (void)launchApp:(NSDictionary *)appInfo {
-    dispatch_queue_t launchApp_queue = dispatch_queue_create("launchAppQueue", NULL);
-    dispatch_async(launchApp_queue, ^(void){
-        NSString *appID = (NSString *)[appInfo objectForKey:@"id"];
-        NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", gestureViewController.socketManager.host, gestureViewController.socketManager.port, appID];
-        NSLog(@"Launching app via url '%@'", launchString);
-        NSURL *launchURL = [NSURL URLWithString:launchString];
-        NSData *launchData = [NSData dataWithContentsOfURL:launchURL];
-        NSLog(@"launch data = %@", launchData);
-    
-        self.currentAppName = (NSString *)[appInfo objectForKey:@"name"];
-    });
-    dispatch_release(launchApp_queue);
-}
-
-/**
- * Creates the GestureViewController, gives it a port and host name to establish
- * a connection to a service, and tells it to establish this connection.
- */
-- (void)createGestureViewWithPort:(NSInteger)port hostName:(NSString *)hostName {
-    gestureViewController = [[GestureViewController alloc] initWithNibName:@"GestureViewController" bundle:nil];
-    
-    gestureViewController.socketDelegate = self;
-    
-    CGFloat
-    x = self.view.frame.origin.x,
-    y = self.view.frame.origin.y,
-    width = self.view.frame.size.width,
-    height = self.view.frame.size.height;
-    gestureViewController.view.frame = CGRectMake(x, y, width, height);
-    [gestureViewController setupService:port hostname:hostName thetitle:@"Current Service"];
-    if (![gestureViewController startService]) {
-        [gestureViewController release];
-        gestureViewController = nil;
-    }
-}
-
-//*
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -351,50 +74,172 @@
     // Set the delegate for the table which holds the app info
     [theTableView setDelegate:self];
 }
-//*/
 
-- (void)viewDidAppear:(BOOL)animated {
-    if (self.navigationController.visibleViewController == self && (!gestureViewController || !gestureViewController.socketManager)) {
-        [self.navigationController popToRootViewControllerAnimated:YES];
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    NSLog(@"AppBrowserController Unload");
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+    if (theTableView) {
+        [theTableView release];
+        theTableView = nil;
     }
-    
-    viewDidAppear = YES;
-    pushingViewController = NO;
+    if (loadingSpinner) {
+        [loadingSpinner stopAnimating];
+        [loadingSpinner release];
+        loadingSpinner = nil;
+    }
 }
 
 /*
-// Override to allow orientations other than the default portrait orientation.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    // Return YES for supported orientations.
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-*/
+ // Override to allow orientations other than the default portrait orientation.
+ - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+ // Return YES for supported orientations.
+ return (interfaceOrientation == UIInterfaceOrientationPortrait);
+ }
+ */
 
 #pragma mark -
-#pragma mark GestureViewControllerSocketDelegate stuff
+#pragma mark Retrieving App Info From Network
 
 /**
- * Called when a socket error occurs.
+ * Returns true if the AppBrowserViewController can confirm an app is running
+ * on Trickplay by asking it over the network.
  */
-- (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in AppBrowser");
-
-    if (socketDelegate) {
-        [socketDelegate socketErrorOccurred];
+- (BOOL)hasRunningApp {
+    if (!appBrowser) {
+        return NO;
     }
-}
-
-/**
- * Called when a socket closes.
- */
-- (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered in AppBrowser");
+    /*
+    if (![appViewController hasConnection]) {
+        return NO;
+    }
+    */
     
-    if (socketDelegate) {
-        [socketDelegate streamEndEncountered];
+    NSLog(@"\n\appBrowser: %@\n\n", appBrowser);
+    return [appBrowser hasRunningApp];
+}
+
+/**
+ * Asks Trickplay for the currently running app and any information pertaining
+ * to this app assembled in a JSON string. The method takes this JSON string reply
+ * and returns it as an NSDictionary or nil on error.
+ */
+- (NSDictionary *)getCurrentAppInfo {
+    if (!appBrowser) {
+        return nil;
+    }
+    /*
+    if (![appViewController hasConnection]) {
+        return nil;
+    }
+    */
+    
+    return [appBrowser getCurrentAppInfo];
+}
+
+- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)theDelegate {
+    NSLog(@"Fetching Apps");
+    
+    if (!theDelegate) {
+        theDelegate = delegate;
+    }
+    if (!appBrowser) {
+        if (theDelegate) {
+            [theDelegate didReceiveCurrentAppInfo:nil];
+        }
+        return;
+    }
+    /*
+    if (![appViewController hasConnection]) {
+        appBrowser.currentAppName = nil;
+        if (theDelegate) {
+            [theDelegate didReceiveCurrentAppInfo:nil];
+        }
+        return;
+    }
+    */
+    
+    [appBrowser getCurrentAppInfoWithDelegate:theDelegate];
+}
+
+/**
+ * Asks Trickplay for the most up-to-date information of apps it has available.
+ * Trickplay replies with a JSON string of up-to-date apps. The method then
+ * composes an NSArray of NSDictioanry Objects with information on each app
+ * available to the user on the TV, each individual NSDictionary Object referring
+ * to one app, and returns this NSArray to the caller. The method also sets
+ * appsAvailable to this NSArray which is later used to populate the TableView.
+ *
+ * Returns the NSArray passed to appsAvailable or nil on error.
+ */
+- (NSArray *)fetchApps {
+    NSLog(@"Fetching Apps");
+    
+    if (!appBrowser) {
+        return nil;
+    }
+    /*
+    if (![appViewController hasConnection]) {
+        return nil;
+    }
+    */
+    
+    return [appBrowser fetchApps];
+}
+
+- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)theDelegate {
+    NSLog(@"Fetching Apps");
+    
+    if (!theDelegate) {
+        theDelegate = delegate;
+    }
+    
+    if (!appBrowser) {
+        if (theDelegate) {
+            [theDelegate didReceiveAvailableAppsInfo:nil];
+        }
+        return;
+    }
+    
+    /*
+    if (![appViewController hasConnection]) {
+        appBrowser.currentAppName = nil;
+        if (theDelegate) {
+            [theDelegate didReceiveAvailableAppsInfo:nil];
+        }
+        return;
+    }
+    */
+    
+    [appBrowser getAvailableAppsInfoWithDelegate:theDelegate];
+}
+
+- (void)didReceiveAvailableAppsInfo:(NSArray *)info {
+    if (delegate) {
+        [delegate didReceiveAvailableAppsInfo:info];
+    }
+}
+- (void)didReceiveCurrentAppInfo:(NSDictionary *)info {
+    if (delegate) {
+        [delegate didReceiveCurrentAppInfo:info];
     }
 }
 
+#pragma mark -
+#pragma mark Launching App View
+
+/**
+ * Tells Trickplay to launch a selected app and sets this app as the current
+ * app.
+ */
+- (void)launchApp:(NSDictionary *)appInfo {
+    if (!appBrowser) {
+        return;
+    }
+    
+    [appBrowser launchApp:appInfo];
+}
 
 #pragma mark -
 #pragma mark Table view data source
@@ -404,7 +249,6 @@
     return 1;
 }
 
-
 /**
  * Customize the number of rows in the table view. The number of rows is equlivalent
  * to the number of apps available. If Trickplay has no apps then one row is
@@ -412,10 +256,10 @@
  * are no available apps.
  */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	if (!appsAvailable || [appsAvailable count] == 0) {
+	if (!appBrowser || !appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0) {
         return 1;
     }
-    return [appsAvailable count];
+    return [appBrowser.appsAvailable count];
 }
 
 /**
@@ -431,7 +275,7 @@
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:tableCellIdentifier] autorelease];
 	}
 
-    if (!appsAvailable || [appsAvailable count] == 0) {
+    if (!appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0) {
         cell.textLabel.text = @"Loading Data...";
         cell.accessoryView = loadingSpinner;
         [loadingSpinner startAnimating];
@@ -440,13 +284,15 @@
         return cell;
     }
     
+    cell.userInteractionEnabled = YES;
+    
     [loadingSpinner stopAnimating];
     [loadingSpinner removeFromSuperview];
     cell.accessoryView = nil;
     
-    cell.textLabel.text = (NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"];
+    cell.textLabel.text = (NSString *)[(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"];
     cell.textLabel.textColor = [UIColor blackColor];
-    if (currentAppName && [cell.textLabel.text compare:currentAppName] == NSOrderedSame) {
+    if (appBrowser.currentAppName && [cell.textLabel.text compare:appBrowser.currentAppName] == NSOrderedSame) {
         [cell addSubview:currentAppIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
     }
@@ -507,17 +353,16 @@
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSLog(@"Selected row %@\n", indexPath);
-    
-    if (!appsAvailable || [appsAvailable count] == 0 || pushingViewController) {
-        return;
+        
+    if (!appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0) {// TODO: || pushingViewController) {
+        // just don't do anything
+    } else if (!appBrowser.currentAppName || [(NSString *)[(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"] compare:appBrowser.currentAppName] !=  NSOrderedSame) {
+        
+        [self launchApp:(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row]];
+        [delegate didSelectAppWithInfo:(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] isCurrentApp:NO];
+    } else {
+        [delegate didSelectAppWithInfo:(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] isCurrentApp:YES];
     }
-    
-    if (!currentAppName || [(NSString *)[(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"] compare:currentAppName] !=  NSOrderedSame) {
-        [gestureViewController clean];
-        [self launchApp:(NSDictionary *)[appsAvailable objectAtIndex:indexPath.row]];
-    }
-    
-    [self pushApp];   
     
 	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
 	if (indexPath2 != nil)
@@ -537,23 +382,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     // Release any cached data, images, etc. that aren't in use.
 }
 
-- (void)viewDidUnload {
-    [super viewDidUnload];
-    NSLog(@"AppBrowserController Unload");
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-    if (theTableView) {
-        [theTableView release];
-        theTableView = nil;
-    }
-    if (loadingSpinner) {
-        [loadingSpinner stopAnimating];
-        [loadingSpinner release];
-        loadingSpinner = nil;
-    }
-}
-
-
 - (void)dealloc {
     NSLog(@"AppBrowserViewController dealloc");
     if (theTableView) {
@@ -565,21 +393,12 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
         [loadingSpinner release];
         loadingSpinner = nil;
     }
-    if (appsAvailable) {
-        [appsAvailable release];
-    }
-    if (gestureViewController) {
-        gestureViewController.socketDelegate = nil;
-        [gestureViewController release];
-        gestureViewController = nil;
-    }
-    if (currentAppName) {
-        [currentAppName release];
-    }
     if (currentAppIndicator) {
         [currentAppIndicator release];
     }
-    socketDelegate = nil;
+    appBrowser.delegate = nil;
+    [appBrowser release];
+    appBrowser = nil;
     
     [super dealloc];
 }

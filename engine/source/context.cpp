@@ -521,7 +521,7 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         for ( StringMap::const_iterator it = context->config.begin(); it != context->config.end(); ++it )
         {
-            g_info( "%-15.15s %s", it->first.c_str(), it->second.c_str() );
+            g_info( "%-25.25s %s", it->first.c_str(), it->second.c_str() );
         }
     }
     else if ( !strcmp( command, "profile" ) )

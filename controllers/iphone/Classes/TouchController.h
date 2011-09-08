@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
 
 #define HORIZ_SWIPE_DRAG_MIN  30
 #define VERT_SWIPE_DRAG_MIN    30

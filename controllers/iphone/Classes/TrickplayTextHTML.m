@@ -199,14 +199,14 @@
  */
 
 - (void)on_text_changed:(NSString *)theText {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_text_changed" forKey:@"event"];
         [JSON_dic setObject:[NSArray arrayWithObjects:theText, nil] forKey:@"args"];
         [JSON_dic setObject:theText forKey:@"text"];
         
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
         [JSON_dic release];
     }
 }

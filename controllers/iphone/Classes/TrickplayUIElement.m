@@ -108,7 +108,6 @@
 }
 
 - (void)sendTouches:(NSArray *)touches withState:(NSString *)state {
-    //NSLog(@"touch sent");
     NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
     NSMutableArray *touchNumbers = [[NSMutableArray alloc] initWithCapacity:10];
     for (UITouch *touch in touches) {
@@ -122,15 +121,14 @@
         [JSON_dic setObject:[NSArray arrayWithObjects:touchNumbers, state, nil] forKey:@"args"];
         [JSON_dic setObject:@"on_touches" forKey:@"event"];
     
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     [touchNumbers release];
     [JSON_dic release];
 }
 
 - (void)handleTouchesBegan:(NSSet *)touches {
-    //NSLog(@"handle touches began: %@", self);
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             CGFloat
@@ -163,7 +161,7 @@
 }
 
 - (void)handleTouchesMoved:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -203,7 +201,7 @@
 }
 
 - (void)handleTouchesEnded:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -247,7 +245,7 @@
 }
 
 - (void)handleTouchesCancelled:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             if (CFDictionaryGetValue(activeTouches, touch)) {
@@ -387,7 +385,6 @@
     }
     if (z) {
         // TODO: this isn't working
-        NSLog(@"z: %@", z);
         self.layer.zPosition = [z floatValue];
         CATransform3D transform = CATransform3DIdentity;
         transform.m34 = 1.0/-2000;
@@ -522,9 +519,6 @@
     if (!anchorPoint || [anchorPoint count] < 2) {
         return;
     }
-    
-    //NSLog(@"anchor_x: %f, anchor_y: %f", [(NSNumber *)[anchorPoint objectAtIndex:0] floatValue], [(NSNumber *)[anchorPoint objectAtIndex:1] floatValue]);
-    //NSLog(@"view.layer.position.x: %f; view.layer.position.y: %f", view.layer.position.x, view.layer.position.y);
     
     x_anchor = [(NSNumber *)[anchorPoint objectAtIndex:0] floatValue];
     y_anchor = [(NSNumber *)[anchorPoint objectAtIndex:1] floatValue];
@@ -930,7 +924,7 @@
 
 - (id)do_set:(NSArray *)args {
     id properties = [args objectAtIndex:0];
-    NSLog(@"properties for set: %@", properties);
+    
     if ([properties isKindOfClass:[NSDictionary class]]) {
         [self setValuesFromArgs:properties];
         return [NSNumber numberWithBool:YES];
@@ -945,7 +939,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_hide" forKey:@"event"];
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     // hide the object
     self.hidden = YES;
@@ -959,7 +953,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_hide" forKey:@"event"];
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     // hide the object
     self.hidden = YES;
@@ -977,7 +971,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_show" forKey:@"event"];
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     // show the object
     self.hidden = NO;
@@ -991,7 +985,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_show" forKey:@"event"];
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     //show the object
     self.hidden = NO;
@@ -1094,7 +1088,7 @@
     [self.superview sendSubviewToBack:self];
     return [NSNumber numberWithBool:YES];
 }
-// TODO: fix this
+
 - (id)do_move_anchor_point:(NSArray *)args {
     if (!([args count] >= 2)) {
         return [NSNumber numberWithBool:NO];
@@ -1108,6 +1102,7 @@
     return [NSNumber numberWithBool:YES];
 }
 
+// TODO: transform point doesn't work
 - (id)do_transform_point:(NSArray *)args {
     TrickplayUIElement *ancestor = [manager findObjectForID:[(NSDictionary *)[args objectAtIndex:0] objectForKey:@"id"]];
     NSLog(@"ancester: %@", ancestor);
@@ -1132,16 +1127,15 @@
     if (completion && [completion isKindOfClass:[NSMutableDictionary class]]) {
         [completion setObject:ID forKey:@"id"];
         [completion setObject:@"on_completed" forKey:@"event"];
-        
-        [manager.gestureViewController sendEvent:@"UX" JSON:[completion yajl_JSONString]];
+        if (manager && manager.appViewController) {
+            [manager.appViewController sendEvent:@"UX" JSON:[completion yajl_JSONString]];
+        }
     }
     
     [animations removeObjectForKey:anim];
 }
 
 - (id)do_animate:(NSArray *)args {
-    //NSLog(@"do_animate:%@", args);
-    
     NSMutableDictionary *table = [NSMutableDictionary dictionaryWithDictionary:[args objectAtIndex:0]];
     NSNumber *duration = [table objectForKey:@"duration"];
     [table removeObjectForKey:@"duration"];
@@ -1200,7 +1194,6 @@
     
     if ([TrickplayUIElement instancesRespondToSelector:selector]) {
         result = [self performSelector:selector withObject:args];
-        //NSLog(@"result: %@", result);
     }
     
     return result;
