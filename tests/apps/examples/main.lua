@@ -6,6 +6,7 @@ local top = 10
 local left = 10
 
 local tests = {}
+local tests_per_column = 0
 
 local last_run = settings.last
 
@@ -32,6 +33,8 @@ for i = 1 , #contents do
         
         top = top + H
         if top + H > screen.h then
+            tests_per_column = #tests-1
+            print("tests_per_column",tests_per_column)
             top = 10
             left = left + screen.w / 4
         end
@@ -65,6 +68,12 @@ if # tests > 0 then
             focus.position = tests[ focused ].position
         elseif key == keys.Down and focused < # tests then
             focused = focused + 1
+            focus.position = tests[ focused ].position
+        elseif key == keys.Left and focused > tests_per_column then
+            focused = focused - (tests_per_column+1)
+            focus.position = tests[ focused ].position
+        elseif key == keys.Right and focused < #tests-tests_per_column then
+            focused = focused + (tests_per_column+1)
             focus.position = tests[ focused ].position
         elseif key == keys.Return then
             local file = tests[ focused ].extra.file

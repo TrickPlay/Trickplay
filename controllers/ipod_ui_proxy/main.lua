@@ -1,4 +1,4 @@
-dumptable = function() end
+--dumptable = function() end
 -- Load the AdvancedUI Classes into a class table.
 local class_table = dofile("AdvancedUIClasses.lua")
 
@@ -13,6 +13,7 @@ function controllers:on_controller_connected(controller)
     end
     function controller:on_advanced_ui_ready()
         controller.factory = loadfile("AdvancedUIAPI.lua")( controller )
+        print(controller.factory)
     end
 
     local key_handler = {}
@@ -45,7 +46,7 @@ function controllers:on_controller_connected(controller)
     --]]
 
     -- Declare an image resource than may be used to load images
-    controller:declare_resource("chip", "assets/chip1.png")
+    --controller:declare_resource("chip", "assets/chip1.png")
 
     -- create a Rectangle
     key_handler[keys.r] = function()
@@ -67,8 +68,9 @@ function controllers:on_controller_connected(controller)
     end
     -- create an Image using the 'chip' image
     key_handler[keys.i] = function()
+        controller:declare_resource("chip", "assets/chip1.png")
         i = controller.factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
-        j = controller.factory:Image{x = 200, y = 500, w = 100, h = 100, src = ""}
+        j = controller.factory:Image{x = 200, y = 500, w = 100, h = 100, src = "chip"}
         function i:on_loaded(failed)
             print("i image loaded?: "..tostring(not failed))
         end
@@ -139,7 +141,3 @@ end
 
 
 screen:show()
-screen:add(Text{
-    w = 100, h = 100, x = 200, y = 200, color = "FF00FF",
-    markup = "text<span style='color:#ff00ff55;font-family:arial;font-variant:small-caps;font-stretch:condensed;font-size:32px;font-style:italic;font-weight:bold;text-decoration:underline;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:10px'>text</span>"
-})

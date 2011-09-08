@@ -15,20 +15,12 @@
 
 @implementation TrickplayUIElement
 
-/*
-@synthesize x_scale;
-@synthesize y_scale;
-@synthesize z_scale;
-@synthesize x_rotation;
-@synthesize y_rotation;
-@synthesize z_rotation;
- */
-
 @synthesize clip;
 @synthesize view;
 @synthesize ID;
 @synthesize name;
 @synthesize manager;
+@synthesize timeLine;
 
 @synthesize x_position;
 @synthesize y_position;
@@ -70,9 +62,12 @@
         x_rotation = 0.0;
         y_rotation = 0.0;
         z_rotation = 0.0;
+        x_anchor = 0.0;
+        y_anchor = 0.0;
         opacity = 1.0;
         
         animations = [[NSMutableDictionary alloc] initWithCapacity:20];
+        self.timeLine = nil;
         
         self.manager = objectManager;
         
@@ -81,6 +76,13 @@
         self.name = nil;
         
         self.frame = [[UIScreen mainScreen] applicationFrame];
+        self.layer.anchorPoint = CGPointMake(0.0, 0.0);
+        self.layer.position = CGPointMake(0.0, 0.0);
+        
+        clip_x = self.frame.origin.x;
+        clip_y = self.frame.origin.y;
+        clip_w = self.frame.size.width;
+        clip_h = self.frame.size.height;
     }
     
     return self;
@@ -106,7 +108,6 @@
 }
 
 - (void)sendTouches:(NSArray *)touches withState:(NSString *)state {
-    //NSLog(@"touch sent");
     NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
     NSMutableArray *touchNumbers = [[NSMutableArray alloc] initWithCapacity:10];
     for (UITouch *touch in touches) {
@@ -117,17 +118,17 @@
         [JSON_dic setObject:state forKey:@"state"];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:touchNumbers forKey:@"touch_id_list"];
-        [JSON_dic setObject:@"touch" forKey:@"event"];
+        [JSON_dic setObject:[NSArray arrayWithObjects:touchNumbers, state, nil] forKey:@"args"];
+        [JSON_dic setObject:@"on_touches" forKey:@"event"];
     
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
     }
     [touchNumbers release];
     [JSON_dic release];
 }
 
 - (void)handleTouchesBegan:(NSSet *)touches {
-    //NSLog(@"handle touches began: %@", self);
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             CGFloat
@@ -145,7 +146,8 @@
                 && x_sub >= view.bounds.origin.x
                 && x_sub <= view.bounds.size.width
                 && y_sub >= view.bounds.origin.y
-                && y_sub <= view.bounds.size.height) {
+                && y_sub <= view.bounds.size.height
+                && !self.isHidden) {
                 
                 CFArrayAppendValue(newTouches, touch);
                 [self addTouch:touch];
@@ -159,7 +161,7 @@
 }
 
 - (void)handleTouchesMoved:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -178,7 +180,8 @@
                     && x_sub >= view.bounds.origin.x
                     && x_sub <= view.bounds.size.width
                     && y_sub >= view.bounds.origin.y
-                    && y_sub <= view.bounds.size.height) {
+                    && y_sub <= view.bounds.size.height
+                    && !self.isHidden) {
                     
                     CFArrayAppendValue(newTouchesIn, touch);
                 } else {
@@ -198,7 +201,7 @@
 }
 
 - (void)handleTouchesEnded:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -217,7 +220,8 @@
                     && x_sub >= view.bounds.origin.x
                     && x_sub <= view.bounds.size.width
                     && y_sub >= view.bounds.origin.y
-                    && y_sub <= view.bounds.size.height) {
+                    && y_sub <= view.bounds.size.height
+                    && !self.isHidden) {
                     
                     CFArrayAppendValue(newTouchesIn, touch);
                 } else {
@@ -241,7 +245,7 @@
 }
 
 - (void)handleTouchesCancelled:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             if (CFDictionaryGetValue(activeTouches, touch)) {
@@ -344,7 +348,7 @@
     CGFloat x_prime = [self get_x_prime];
     CGFloat y_prime = [self get_y_prime];
     
-    view.layer.position = CGPointMake(x_prime, y_prime);
+    self.layer.position = CGPointMake(x_prime, y_prime);
 }
 
 #pragma mark -
@@ -381,11 +385,10 @@
     }
     if (z) {
         // TODO: this isn't working
-        NSLog(@"z: %@", z);
-        view.layer.zPosition = [z floatValue];
+        self.layer.zPosition = [z floatValue];
         CATransform3D transform = CATransform3DIdentity;
         transform.m34 = 1.0/-2000;
-        view.layer.transform = CATransform3DConcat(view.layer.transform, transform);
+        self.layer.transform = CATransform3DConcat(self.layer.transform, transform);
         //view.layer.transform = CATransform3DMakeTranslation(0.0, 0.0, [z floatValue]);
         //[view.layer setValue:z forKeyPath:@"transform.translation.z"];
         //NSLog(@"z after: %@", [view.layer valueForKeyPath:@"transform.translation.z"]);
@@ -415,19 +418,19 @@
 - (void)set_z:(NSDictionary *)args {
     if ([args objectForKey:@"z"]) {
         //view.layer.transform = CATransform3DMakeTranslation(0.0, 0.0, [[args objectForKey:@"z"] floatValue]);
-        view.layer.zPosition = [[args objectForKey:@"z"] floatValue];
+        self.layer.zPosition = [[args objectForKey:@"z"] floatValue];
         CATransform3D transform = CATransform3DIdentity;
         transform.m34 = 1.0/-2000;
-        view.layer.transform = CATransform3DConcat(view.layer.transform, transform);
+        self.layer.transform = CATransform3DConcat(self.layer.transform, transform);
     }
 }
 
 - (void)set_depth:(NSDictionary *)args {
     if ([args objectForKey:@"depth"]) {
-        view.layer.zPosition = [[args objectForKey:@"depth"] floatValue];
+        self.layer.zPosition = [[args objectForKey:@"depth"] floatValue];
         CATransform3D transform = CATransform3DIdentity;
         transform.m34 = 1.0/-2000;
-        view.layer.transform = CATransform3DConcat(view.layer.transform, transform);
+        self.layer.transform = CATransform3DConcat(self.layer.transform, transform);
     }
 }
 
@@ -473,6 +476,8 @@
     h_size = [height floatValue];
     
     view.bounds = CGRectMake(0.0, 0.0, [width floatValue], [height floatValue]);
+    
+    [view setNeedsDisplay];
 }
 
 - (void)set_w:(NSDictionary *)args {
@@ -498,6 +503,14 @@
  * anchor point is a CGPoint{0.0 <= x <= 1.0, 0.0 <= y <= 1.0}
  */
 
+- (void)set_anchor {
+    CGFloat
+    x = (x_anchor + view.layer.position.x)/self.bounds.size.width,
+    y = (y_anchor + view.layer.position.y)/self.bounds.size.height;
+    
+    self.layer.anchorPoint = CGPointMake(x, y);
+}
+
 - (void)set_anchor_point:(NSDictionary *)args {
     if (![[args objectForKey:@"anchor_point"] isKindOfClass:[NSArray class]]) {
         return;
@@ -507,11 +520,10 @@
         return;
     }
     
-    CGFloat
-    x = [(NSNumber *)[anchorPoint objectAtIndex:0] floatValue]/w_size,
-    y = [(NSNumber *)[anchorPoint objectAtIndex:1] floatValue]/h_size;
+    x_anchor = [(NSNumber *)[anchorPoint objectAtIndex:0] floatValue];
+    y_anchor = [(NSNumber *)[anchorPoint objectAtIndex:1] floatValue];
     
-    view.layer.anchorPoint = CGPointMake(x, y);
+    [self set_anchor];
 }
 
 
@@ -544,25 +556,8 @@
     x_scale = [[layer_scale objectAtIndex:0] floatValue];
     y_scale = [[layer_scale objectAtIndex:1] floatValue];
     
-    [view.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
-    [view.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
-    /*
-    CABasicAnimation *animation_x = [CABasicAnimation animationWithKeyPath:@"transform.scale.x"];
-    animation_x.fillMode = kCAFillModeForwards;
-    animation_x.removedOnCompletion = NO;
-    [animation_x setToValue:[NSNumber numberWithFloat:x_scale]];
-    [animation_x setDuration:3.0];
-    animation_x.delegate = self;
-    [view.layer addAnimation:animation_x forKey:@"scale_x"];
-    
-    CABasicAnimation *animation_y = [CABasicAnimation animationWithKeyPath:@"transform.scale.y"];
-    animation_y.fillMode = kCAFillModeForwards;
-    animation_y.removedOnCompletion = NO;
-    [animation_y setToValue:[NSNumber numberWithFloat:y_scale]];
-    [animation_y setDuration:3.0];
-    animation_y.delegate = self;
-    [view.layer addAnimation:animation_y forKey:@"scale_y"];
-     //*/
+    [self.layer setValue:[NSNumber numberWithFloat:x_scale] forKeyPath:@"transform.scale.x"];
+    [self.layer setValue:[NSNumber numberWithFloat:y_scale] forKeyPath:@"transform.scale.y"];
 }
 
 /**
@@ -586,7 +581,7 @@
             return;
         }
         x_rot = [NSNumber numberWithFloat:[x_rot floatValue] * M_PI/180.0];
-        [view.layer setValue:x_rot forKeyPath:@"transform.rotation.x"];
+        [self.layer setValue:x_rot forKeyPath:@"transform.rotation.x"];
         x_rotation = [x_rot floatValue];
         
         [self rotate_and_translate];
@@ -608,7 +603,7 @@
             return;
         }
         y_rot = [NSNumber numberWithFloat:[y_rot floatValue] * M_PI/180.0];
-        [view.layer setValue:y_rot forKeyPath:@"transform.rotation.y"];
+        [self.layer setValue:y_rot forKeyPath:@"transform.rotation.y"];
         y_rotation = [y_rot floatValue];
         
         [self rotate_and_translate];
@@ -636,7 +631,7 @@
             return;
         }
         z_rot = [NSNumber numberWithFloat:[z_rot floatValue] * M_PI/180.0];
-        [view.layer setValue:z_rot forKeyPath:@"transform.rotation.z"];
+        [self.layer setValue:z_rot forKeyPath:@"transform.rotation.z"];
         z_rotation = [z_rot floatValue];
         
         [self rotate_and_translate];
@@ -675,10 +670,9 @@
     self.clip = [args objectForKey:@"clip"];
     
     if (clip.count > 3) {
-        CGFloat
-        clip_x = [(NSNumber *)[clip objectAtIndex:0] floatValue],
-        clip_y = [(NSNumber *)[clip objectAtIndex:1] floatValue],
-        clip_w = [(NSNumber *)[clip objectAtIndex:2] floatValue],
+        clip_x = [(NSNumber *)[clip objectAtIndex:0] floatValue];
+        clip_y = [(NSNumber *)[clip objectAtIndex:1] floatValue];
+        clip_w = [(NSNumber *)[clip objectAtIndex:2] floatValue];
         clip_h = [(NSNumber *)[clip objectAtIndex:3] floatValue];
         // create the bounding box
         
@@ -687,8 +681,11 @@
         NSLog(@"Frame before: %f, %f, %f, %f", self.frame.origin.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height);
         //*/
         
-        self.bounds = CGRectMake(clip_x, clip_y, clip_w, clip_h);
-        self.layer.position = CGPointMake(clip_x + clip_w/2.0, clip_y + clip_h/2.0);
+        self.bounds = CGRectMake(0.0, 0.0, clip_w, clip_h);
+        view.layer.position = CGPointMake(-clip_x, -clip_y);
+        [self set_anchor];
+        [self rotate_and_translate];
+        //self.layer.position = CGPointMake(clip_x + clip_w/2.0, clip_y + clip_h/2.0);
         
         /* for testing
         NSLog(@"clip after: %f, %f, %f, %f", self.layer.bounds.origin.x, self.layer.bounds.origin.y, self.layer.bounds.size.width, self.layer.bounds.size.height);
@@ -717,7 +714,7 @@
  * Delete Clip
  */
 
-- (void)delete_clip:(NSDictionary *)args {
+- (void)delete_clip {
     self.clipsToBounds = NO;
 }
 
@@ -749,23 +746,21 @@
  */
 
 - (void)get_position:(NSMutableDictionary *)dictionary {
-    NSArray *position = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.position.x], [NSNumber numberWithFloat:view.layer.position.y], [NSNumber numberWithFloat:view.layer.zPosition], nil];
+    NSArray *position = [NSArray arrayWithObjects:[NSNumber numberWithFloat:x_position], [NSNumber numberWithFloat:y_position], [NSNumber numberWithFloat:self.layer.zPosition], nil];
         
     [dictionary setObject:position forKey:@"position"];
 }
 
 - (void)get_x:(NSMutableDictionary *)dictionary {
-    //[dictionary setObject:[NSNumber numberWithFloat:view.layer.position.x] forKey:@"x"];
     [dictionary setObject:[NSNumber numberWithFloat:x_position] forKey:@"x"];
 }
 
 - (void)get_y:(NSMutableDictionary *)dictionary {
-    //[dictionary setObject:[NSNumber numberWithFloat:view.layer.position.y] forKey:@"y"];
     [dictionary setObject:[NSNumber numberWithFloat:y_position] forKey:@"y"];
 }
 
 - (void)get_z:(NSMutableDictionary *)dictionary {
-    [dictionary setObject:[NSNumber numberWithFloat:view.layer.zPosition] forKey:@"z"];
+    [dictionary setObject:[NSNumber numberWithFloat:self.layer.zPosition] forKey:@"z"];
 }
 
 /**
@@ -799,7 +794,7 @@
  */
 
 - (void)get_anchor_point:(NSMutableDictionary *)dictionary {
-    NSArray *anchor_point = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.layer.anchorPoint.x], [NSNumber numberWithFloat:view.layer.anchorPoint.y], [NSNumber numberWithFloat:view.layer.anchorPointZ], nil];
+    NSArray *anchor_point = [NSArray arrayWithObjects:[NSNumber numberWithFloat:x_anchor], [NSNumber numberWithFloat:y_anchor], [NSNumber numberWithFloat:self.layer.anchorPointZ], nil];
         
     [dictionary setObject:anchor_point forKey:@"anchor_point"];
 }
@@ -809,7 +804,7 @@
  */
 
 - (void)get_scale:(NSMutableDictionary *)dictionary {
-    NSArray *scale = [NSArray arrayWithObjects:[view.layer valueForKeyPath:@"transform.scale.x"], [view.layer valueForKeyPath:@"transform.scale.y"], [view.layer valueForKeyPath:@"transform.scale.z"], nil];
+    NSArray *scale = [NSArray arrayWithObjects:[self.layer valueForKeyPath:@"transform.scale.x"], [self.layer valueForKeyPath:@"transform.scale.y"], [self.layer valueForKeyPath:@"transform.scale.z"], nil];
         
     [dictionary setObject:scale forKey:@"scale"];
 }
@@ -819,19 +814,19 @@
  */
 
 - (void)get_x_rotation:(NSMutableDictionary *)dictionary {
-    NSNumber *x_rot = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.x"] floatValue] * 180.0/M_PI];
+    NSNumber *x_rot = [NSNumber numberWithFloat:[[self.layer valueForKeyPath:@"transform.rotation.x"] floatValue] * 180.0/M_PI];
         
     [dictionary setObject:x_rot forKey:@"x_rotation"];
 }
 
 - (void)get_y_rotation:(NSMutableDictionary *)dictionary {
-    NSNumber *y_rot = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.y"] floatValue] * 180.0/M_PI];
+    NSNumber *y_rot = [NSNumber numberWithFloat:[[self.layer valueForKeyPath:@"transform.rotation.y"] floatValue] * 180.0/M_PI];
         
     [dictionary setObject:y_rot forKey:@"y_rotation"];
 }
 
 - (void)get_z_rotation:(NSMutableDictionary *)dictionary {
-    NSNumber *z_rot = [NSNumber numberWithFloat:[[view.layer valueForKeyPath:@"transform.rotation.z"] floatValue] * 180.0/M_PI];
+    NSNumber *z_rot = [NSNumber numberWithFloat:[[self.layer valueForKeyPath:@"transform.rotation.z"] floatValue] * 180.0/M_PI];
         
     [dictionary setObject:z_rot forKey:@"z_rotation"];
 }
@@ -874,12 +869,6 @@
     if (!self.clipsToBounds) {
         [dictionary removeObjectForKey:@"clip"];
     } else if ([dictionary objectForKey:@"clip"]) {
-        CGFloat
-        clip_x = self.bounds.origin.x,
-        clip_y = self.bounds.origin.y,
-        clip_w = self.bounds.size.width,
-        clip_h = self.bounds.size.height;
-        
         NSArray *clipBox = [NSArray arrayWithObjects:[NSNumber numberWithFloat:clip_x], [NSNumber numberWithFloat:clip_y], [NSNumber numberWithFloat:clip_w], [NSNumber numberWithFloat:clip_h], nil];
         
         [dictionary setObject:clipBox forKey:@"clip"];
@@ -899,7 +888,7 @@
  */
 
 - (void)get_center:(NSMutableDictionary *)dictionary {
-    NSArray *coords = [NSArray arrayWithObjects:[NSNumber numberWithFloat:view.center.x], [NSNumber numberWithFloat:view.center.y], nil];
+    NSArray *coords = [NSArray arrayWithObjects:[NSNumber numberWithFloat:w_size/2.0 + x_position - x_anchor], [NSNumber numberWithFloat:h_size/2.0 + y_position - y_anchor], nil];
     [dictionary setObject:coords forKey:@"center"];
 }
 
@@ -935,7 +924,7 @@
 
 - (id)do_set:(NSArray *)args {
     id properties = [args objectAtIndex:0];
-    NSLog(@"properties for set: %@", properties);
+    
     if ([properties isKindOfClass:[NSDictionary class]]) {
         [self setValuesFromArgs:properties];
         return [NSNumber numberWithBool:YES];
@@ -945,27 +934,65 @@
 }
 
 - (id)do_hide:(NSArray *)args {
+    if (!self.hidden) {
+        // send on_hide event
+        NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_hide" forKey:@"event"];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    }
+    // hide the object
     self.hidden = YES;
+        
     return [NSNumber numberWithBool:YES];
 }
 
 - (id)do_hide_all:(NSArray *)args {
+    if (!self.hidden) {
+        // send on_hide event
+        NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_hide" forKey:@"event"];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    }
+    // hide the object
     self.hidden = YES;
-    for (UIView *child in [self.view subviews]) {
-        child.hidden = YES;
+    
+    // hide the children
+    for (TrickplayUIElement *child in [self.view subviews]) {
+        [child do_hide:nil];
     }
     return [NSNumber numberWithBool:YES];
 }
 
 - (id)do_show:(NSArray *)args {
+    if (self.hidden) {
+        // send on_show event
+        NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_show" forKey:@"event"];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    }
+    // show the object
     self.hidden = NO;
+    
     return [NSNumber numberWithBool:YES];
 }
 
 - (id)do_show_all:(NSArray *)args {
+    if (self.hidden) {
+        // send on_show event
+        NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+        [JSON_dic setObject:ID forKey:@"id"];
+        [JSON_dic setObject:@"on_show" forKey:@"event"];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    }
+    //show the object
     self.hidden = NO;
-    for (UIView *child in [self.view subviews]) {
-        child.hidden = NO;
+    
+    // show the children
+    for (TrickplayUIElement *child in [self.view subviews]) {
+        [child do_show:nil];
     }
     return [NSNumber numberWithBool:YES];;
 }
@@ -975,10 +1002,10 @@
         return [NSNumber numberWithBool:NO];
     }
     
-    CGFloat x = view.layer.position.x + [[args objectAtIndex:0] floatValue];
-    CGFloat y = view.layer.position.y + [[args objectAtIndex:1] floatValue];
+    x_position += [[args objectAtIndex:0] floatValue];
+    y_position += [[args objectAtIndex:1] floatValue];
     
-    view.layer.position = CGPointMake(x, y);
+    [self rotate_and_translate];
     return [NSNumber numberWithBool:YES];
 }
 
@@ -1001,6 +1028,7 @@
 }
 
 - (id)do_unparent:(NSArray *)args {
+    [self do_complete_animation:nil];
     [self removeFromSuperview];
     return [NSNumber numberWithBool:YES];
 }
@@ -1067,13 +1095,14 @@
     }
     
     CGFloat
-    x = [[args objectAtIndex:0] floatValue],
-    y = [[args objectAtIndex:1] floatValue];
+    x = [(NSNumber *)[args objectAtIndex:0] floatValue]/w_size + view.layer.position.x,
+    y = [(NSNumber *)[args objectAtIndex:1] floatValue]/h_size + view.layer.position.y;
     
-    view.layer.anchorPoint = CGPointMake(x, y);
+    self.layer.anchorPoint = CGPointMake(x, y);
     return [NSNumber numberWithBool:YES];
 }
 
+// TODO: transform point doesn't work
 - (id)do_transform_point:(NSArray *)args {
     TrickplayUIElement *ancestor = [manager findObjectForID:[(NSDictionary *)[args objectAtIndex:0] objectForKey:@"id"]];
     NSLog(@"ancester: %@", ancestor);
@@ -1086,38 +1115,27 @@
     return [NSNumber numberWithBool:NO];
 }
 
-- (id)do_complete_animation:(NSArray *)args {
-    for (TrickplayAnimation *anim in [animations allKeys]) {
-        [anim animationDidStop:nil finished:NO];
-    }
-    [view.layer removeAllAnimations];
-    [animations removeAllObjects];
-    
-    return [NSNumber numberWithBool:YES];
-}
-
 
 #pragma mark -
 #pragma mark Animations
 
-- (void)trickplayAnimationDidStop:(TrickplayAnimation *)anim {
+- (void)trickplayAnimationDidStop:(id)anim {
+    id completion = [animations objectForKey:anim];
+    if ([anim isKindOfClass:[NSMutableDictionary class]]) {
+        completion = anim;
+    }
+    if (completion && [completion isKindOfClass:[NSMutableDictionary class]]) {
+        [completion setObject:ID forKey:@"id"];
+        [completion setObject:@"on_completed" forKey:@"event"];
+        if (manager && manager.appViewController) {
+            [manager.appViewController sendEvent:@"UX" JSON:[completion yajl_JSONString]];
+        }
+    }
+    
     [animations removeObjectForKey:anim];
 }
 
-- (void)do_animate_x:(NSNumber *)val duration:(NSNumber *)duration {
-    x_position = [val floatValue];
-    CGFloat actual_x = [self get_x_prime];
-    CGFloat actual_y = [self get_y_prime];
-    [UIView animateWithDuration:[duration floatValue]/1000.0 delay:0.0
-                        options:UIViewAnimationCurveLinear
-                     animations:^{
-                         view.layer.position = CGPointMake(actual_x, actual_y);
-                     } completion:NULL
-     ];
-}
-
 - (id)do_animate:(NSArray *)args {
-    //NSLog(@"do_animate:%@", args);
     NSMutableDictionary *table = [NSMutableDictionary dictionaryWithDictionary:[args objectAtIndex:0]];
     NSNumber *duration = [table objectForKey:@"duration"];
     [table removeObjectForKey:@"duration"];
@@ -1125,12 +1143,43 @@
         return [NSNumber numberWithBool:NO];
     }
     
-    TrickplayAnimation *anim = [[TrickplayAnimation alloc] initWithTable:table duration:duration view:self];
-    [animations setObject:@"1" forKey:anim];
-    [anim animationStart];
-    [anim release];
+    if (timeLine) {
+        if ([table objectForKey:@"on_completed"]) {
+            NSMutableDictionary *completion = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[table objectForKey:@"on_completed"], @"animation_id", nil];
+            [animations setObject:completion forKey:table];
+            [completion release];
+        } else {
+            [animations setObject:@"1" forKey:table];
+        }
+        [timeLine animateWithTable:table duration:duration view:self];
+    } else {
+        TrickplayAnimation *anim = [[TrickplayAnimation alloc] initWithTable:table duration:duration view:self];
+
+        if ([table objectForKey:@"on_completed"]) {
+            NSMutableDictionary *completion = [NSMutableDictionary dictionaryWithObjectsAndKeys:[table objectForKey:@"on_completed"], @"animation_id", nil];
+            [animations setObject:completion forKey:anim];
+        } else {
+            [animations setObject:@"1" forKey:anim];
+        }
+        
+        [anim animationStart];
+        [anim release];
+    }
+    //start = CFAbsoluteTimeGetCurrent();
     
-    start = CFAbsoluteTimeGetCurrent();
+    return [NSNumber numberWithBool:YES];
+}
+
+- (id)do_complete_animation:(NSArray *)args {
+    if (timeLine) {
+        [timeLine removeAnimations:self];
+    } else {
+        for (TrickplayAnimation *anim in [animations allKeys]) {
+            [anim animationDidStop:nil finished:NO];
+        }
+        [self.layer removeAllAnimations];
+        [animations removeAllObjects];
+    }
     
     return [NSNumber numberWithBool:YES];
 }
@@ -1145,12 +1194,17 @@
     
     if ([TrickplayUIElement instancesRespondToSelector:selector]) {
         result = [self performSelector:selector withObject:args];
-        //NSLog(@"result: %@", result);
     }
     
     return result;
 }
 
+#pragma mark -
+#pragma mark Copy/Deallocation
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [self retain];
+}
 
 - (void)dealloc {
     if (activeTouches) {
@@ -1159,15 +1213,7 @@
     if (animations) {
         [animations release];
     }
-    
-    /*
-    self.x_scale = nil;
-    self.y_scale = nil;
-    self.z_scale = nil;
-    self.x_rotation = nil;
-    self.y_rotation = nil;
-    self.z_rotation = nil;
-     */
+    self.timeLine = nil;
     
     self.view = nil;
     self.clip = nil;

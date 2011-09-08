@@ -8,7 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <YAJLiOS/YAJL.h>
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
+#import "TrickplayTimeline.h"
 
 @class TrickplayUIElement;
 @class TrickplayGroup;
@@ -24,12 +25,14 @@
     ResourceManager *resourceManager;
     SocketManager *socketManager;
     
+    TrickplayTimeline *timeLine;
+    
     NSString *hostName;
     NSInteger port;
     
     TrickplayGroup *view;
     
-    GestureViewController *gestureViewController;
+    TPAppViewController *appViewController;
 }
 
 @property (nonatomic, retain) NSMutableDictionary *rectangles;
@@ -40,7 +43,7 @@
 
 @property (nonatomic, retain) ResourceManager *resourceManager;
 
-@property (assign) GestureViewController *gestureViewController;
+@property (assign) TPAppViewController *appViewController;
 
 - (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager;
 

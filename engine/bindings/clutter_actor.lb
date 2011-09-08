@@ -294,10 +294,34 @@ interface actor [[ClutterActor*]]
     /*
 	Property: z
 	
-	The z property specifies the object's Z coordinate location relative to its parent, which is usually the global <screen at file:clutter_screen-lb.html#Screen> variable. Positive values move toward the viewer along the z-axis; negative values move further away. The Z coordinate's value does not take into account any transformations, such as rotation or scaling.
+	The z property specifies the object's Z coordinate location relative to its parent, which is usually the global <screen at file:clutter_screen-lb.html#Screen> variable. Positive values move toward the viewer along the Z-axis; negative values move farther away. The Z coordinate's value does not take into account any transformations, such as rotation or scaling.
 	
 	The <depth> property sets and retrieves the same Z coordinate.
 	
+	Understanding the Z-Axis:
+	
+	It is valuable to understand the relationship between an object's location along the Z-axis and the effect that location has on how the object is shown within the display's viewing area.
+	
+	The Z-axis moves perpendicular to the X and Y-axes. At any given X,Y point, the Z-axis is a perpendicular line extending straight back and forward in the third dimension. Given two different X,Y points, two perpendicular Z-axis lines extend forward and back. These Z-axis lines are *parallel* to each other. This is an important point to remember when dealing with the Z-axis because, as will be explained later, it is the reason why objects located farther back on the Z-axis appear smaller, while objects closer on the Z-axis appear larger. When projecting lines extend in parallel, the process is called "orthographic projection."
+	
+	Each point on a display can be thought of as extending back in orthographic projection along the Z-axis, perpendicular to the flat plane of the display. Think of the display as one end of a shoebox and the Z-axis as extending back in space, forming the rectangular sides of the box. Each X,Y point on the display will extend a unique line through the shoebox along its Z-axis.
+	
+	In addition to orthographic projection, there exists another process called "perspective projection." Unlike orthographic projection which extends along parallel lines, perspective projection extends along lines that converge and eventually intersect at a vanishing point. The traditional example is two railroad tracks extending toward the horizon, converging until they eventually appear to touch each other.
+	
+	The expanding projection lines also work in reverse and can be thought of as starting at a single, common point and expanding outward as they project farther away. As an example, consider the view from a camera; it starts at a single point (the camera lens) and its field of vision expands outward like a megaphone as it moves farther away in distance. The display's camera-viewing environment works in the same way, expanding wider and wider as it extends back in depth.
+	
+	A megaphone is typically shaped like a circular cone, but the display's camera-viewing shape is that of a rectangular cone. The megaphone's narrow end is placed immediately in front of the viewer's eyes, and expands wider and wider as it projects farther away.
+	
+	Now place the orthographic shoebox display described earlier into that rectangular megaphone. Push the shoebox into the megaphone as far as it will go, until its edges touch the interior of the megaphone. The flat plane where the orthographic shoebox touches the rectangular megaphone represents the position where the display fills the entire camera view. At this point, the Z-axis has a value of zero. As positions move farther in depth from this point, they move in the shoebox along their perpendicular and parallel lines. But as the camera view moves farther in depth in the same direction, its lines widen outward. Similarly, as points move closer to the viewer along the Z-axis, they remain perpendicular to the display, but the camera view lines converge as they get closer to the viewer.
+	
+	Image a solid black graphic image that fills the entire display when positioned on the Z-axis at Z=0. Now move that same image back in depth along the Z-axis until it is located at Z=-100. The points of the image move back perpendicular to the X,Y display plane in orthographic projection. But as the camera view moves back the same distance, its view lines expand in perspective projection. When the image is located at Z=-100, the image remains the exact same size as when it was located at Z=0. But the expanding camera view now encompasses a larger viewing area. Because of this, the image will no longer fill the entire display; it will appear to be smaller, even though its size remains unchanged. The apparent change in size is due to the widening camera view as the object is placed farther in depth.
+	
+	A similar effect occurs when objects move closer to the viewer along the Z-axis. The perspective projection of the rectangular megaphone gets narrower as it gets closer to the viewer. Think of a small dot in the center of the display at Z=0  and move it closer to the viewer along the Z-axis. As the dot moves closer and closer, its actual size remains unchanged, but the dot takes up more of the narrowing viewing area as it gets closer to the viewer. Eventually, the small dot will fill the entire display without having altered its size, but solely by positioning itself closer to the viewer in the narrowing viewing area.
+	
+	Finally, think of a circle located in the upper-left corner of the display at Z=0. Move it closer to the viewer along the Z-axis. The Z-axis extends forward perpendicular to the X,Y display plane. Because the viewing area is narrowing, the circle's Z-axis line will eventually extend outside the boundary of the viewing area. As the circle moves closer to the viewer, with larger values of Z, it will appear to move above the viewer's line of sight. Eventually, the circle will move completely outside of the viewing area, even though it will still exist at a position along its Z-axis.
+	
+	Knowing this relationship between the orthographic display and the perspective viewing camera will enable you to understand how items on the display will interact with each other as they move along the Z-axis. Thinking of them as a shoebox contained within a rectangular megaphone provides a concrete and clear example of the relationship.
+
 	*Default Setting:* 0
 	
 	*See Also:* the <x>, <y>, <depth> and <position> properties
@@ -580,7 +604,7 @@ interface actor [[ClutterActor*]]
 	
 	(code)
 	-- Flip 180 degrees around object's horizontal center
-	myObject.x_rotation = { 180, myObject.height / 2, 0 }
+	myObject.x_rotation = { 180, 0, 0 }
 	(end)
 	
 	*See Also:* the <y_rotation> and <z_rotation> properties
@@ -621,7 +645,7 @@ interface actor [[ClutterActor*]]
 	
 	(code)
 	-- Flip 180 degrees around object's vertical center
-	myObject.y_rotation = { 180, myObject.width / 2, 0 }
+	myObject.y_rotation = { 180, 0, 0 }
 	(end)
 	
 	*See Also:* the <x_rotation> and <z_rotation> properties
@@ -662,7 +686,7 @@ interface actor [[ClutterActor*]]
 	
 	(code)
 	-- Rotate 180 degrees around object's horizontal and vertical centers
-	myObject.z_rotation = { 180, myObject.width / 2, myObject.height / 2 }
+	myObject.z_rotation = { 180, 0, 0 }
 	(end)
 	
 	*See Also:* the <x_rotation> and <y_rotation> properties
@@ -811,14 +835,12 @@ interface actor [[ClutterActor*]]
     /*
 	Property: has_clip
 	
-	The has_clip property is a boolean value specifying whether or not the object has a defined clipping rectangle (true = clipping rectangle defined).
-	
-	A clipping rectangle is defined by setting the <clip> property. By default, clipping is not enabled. To enable clipping, define a clipping rectangle.
+	The has_clip property is a boolean value specifying whether or not the object has enabled clipping. Clipping can be enabled by either defining a clipping rectangle via the <clip> property or setting the clip_to_size property to true.
 	
 	*Default Setting:* false (clipping is not enabled)
 	
-	*See Also:* the <clip> property
-	
+	*See Also:* the <clip> and <clip_to_size> properties
+
     */
 
     readonly bool has_clip
@@ -830,9 +852,15 @@ interface actor [[ClutterActor*]]
     /*
     Property: clip_to_size
     
-    The clip_to_size property works on <Group> objects only. TODO
+	The clip_to_size property is a boolean value that enables and disables clipping on a <Group at file:clutter_group-lb.html> object. By default, objects within a Group can be displayed outside of the Group's defined size. To enable clipping to the Group's defined size, set the clip_to_size property to true.
+	
+	Clipping on a Group object can also be enabled by defining a clipping rectangle via the <clip> property.
+	
+	The clip_to_size property affects objects of type Group only; it has no effect on other object types.
+
+    *Default Setting:* false (clipping in the Group is disabled)
     
-    The clip_to_size property seems to be intended for build-it-yourself type layout managers, which the runtime engine does not support. As is, the property currently has no effect. It should be left undocumented.
+    *See Also:* the <Group at file:clutter_group-lb.html> class and the <clip> and <has_clip> properties
     
     */
     
@@ -1457,13 +1485,15 @@ interface actor [[ClutterActor*]]
     
     /* ***FOR INTERNAL USE ONLY***
     
-    //This function will apply a blur effect to the UI element.  Reversible with unblur()
+      blur()
+    
+      This function will apply a blur effect to the UI element.  Reversible with unblur()
 
-    //Returns:
+      Returns:
 
-    //  true - The effect was applied.
+        true - The effect was applied.
 
-    //  false - If the effect is not available.
+        false - If the effect is not available.
     */
 
     bool blur()
@@ -1480,13 +1510,15 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Turn off a blur effect on the UI element.  The opposite of blur()
+      unblur()
+    
+      Turn off a blur effect on the UI element.  The opposite of blur()
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool unblur()
@@ -1502,18 +1534,20 @@ interface actor [[ClutterActor*]]
     ]];
 
     /* ***FOR INTERNAL USE ONLY***
+    
+      desaturate()
 	
-	//How much to desaturate the UI element.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
+	  How much to desaturate the UI element.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
 
-	//Arguments:
+	  Arguments:
 
-    //    desaturation - 0 for fully saturated, 1 for fully desaturated.
+          desaturation - 0 for fully saturated, 1 for fully desaturated.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool desaturate(double desaturation)
@@ -1528,14 +1562,16 @@ interface actor [[ClutterActor*]]
     ]];
 
     /* ***FOR INTERNAL USE ONLY***
+    
+      saturate()
 	
-	//Restore saturation to the UI element.  This undoes any call to <desaturate>.
+	  Restore saturation to the UI element.  This undoes any call to <desaturate>.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool saturate()
@@ -1550,17 +1586,19 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Turn on a tint effect for the UI element.
+      tint()
     
-    //Arguments:
+      Turn on a tint effect for the UI element.
+    
+      Arguments:
 
-    //    color - Required.  The tint color to apply to the UI element.
+          color - Required.  The tint color to apply to the UI element.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool tint(...)
@@ -1578,13 +1616,15 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Turn off any existing tint effect for the UI element.
+      untint()
+    
+      Turn off any existing tint effect for the UI element.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool untint()
@@ -1600,21 +1640,23 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Apply a "page turn" effect to the UIElement.
+      pageturn()
     
-    //Arguments:
+      Apply a "page turn" effect to the UIElement.
     
-    //    period - The period of the page curl, between 0.0 (flat) and 1.0 (fully curled) [defaults to 0]
+      Arguments:
+    
+          period - The period of the page curl, between 0.0 (flat) and 1.0 (fully curled) [defaults to 0]
 
-    //    angle - The angle of the page curl, in degrees, between 0.0 and 360.0 [defaults to 45]
+          angle - The angle of the page curl, in degrees, between 0.0 and 360.0 [defaults to 45]
 
-    //    radius - The radius of the page curl effect, in pixels [defaults to 1/16 width of the UIElement]
+          radius - The radius of the page curl effect, in pixels [defaults to 1/16 width of the UIElement]
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
     
     bool pageturn(double period=0.5, double angle=45, double radius=0)
@@ -1643,13 +1685,15 @@ interface actor [[ClutterActor*]]
 
     /* ***FOR INTERNAL USE ONLY***
     
-    //Remove any "page turn" effect on the UIElement.
+      pageflatten()
+    
+      Remove any "page turn" effect on the UIElement.
 
-    //Returns:
+      Returns:
 
-    //    true - The effect was applied.
+          true - The effect was applied.
 
-    //    false - If the effect is not available.
+          false - If the effect is not available.
     */
 
     bool pageflatten()
@@ -1667,6 +1711,12 @@ interface actor [[ClutterActor*]]
 	
 	The animate() function performs an asynchronous animation by changing one or more property values, such as X, Y coordinates, opacity and rotation, over a period of time.
 	
+	If the object's animate() function is called while an animation is already in progress, the animation is updated with the new settings.
+	
+	A program can be notified when the animation completes by specifying a function name for the on_completed argument.
+	
+	The animation provides no notifications while it is running. For an animation that requires in-progress notifications, consider basing the animation on the <Timeline> class.
+	
 	*Arguments:*
 	
 	props - table of comma-separated properties and settings that define the animation. Supported properties and settings are listed below.
@@ -1674,7 +1724,7 @@ interface actor [[ClutterActor*]]
 	*Supported Animation Properties:* Property names are case-sensitive. The duration property is required; all other properties are optional.
 	
 	duration - length of animation in milliseconds. Required.
-	mode - string describing the type of tweening to implement. The list of supported mode strings is shown after the property list. Default = "LINEAR"
+	mode - string specifying the Alpha mode to apply to the animated property. For descriptions of the supported modes, refer to the <Alpha.mode> section. Default = "LINEAR"
 	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called.
 	on_completed - function to call when the animation is finished
 	x - X coordinate at end of animation
@@ -1692,20 +1742,6 @@ interface actor [[ClutterActor*]]
 	x_rotation - object's rotation in degrees along the x-axis at end of animation
 	y_rotation - object's rotation in degrees along the y-axis at end of animation
 	z_rotation - object's rotation in degrees along the z-axis at end of animation
-	
-	*Mode Property Settings:* Property settings are case-sensitive
-	
-	"LINEAR" - perform linear tweening. This is the default mode.
-	"EASE_IN_QUAD", "EASE_OUT_QUAD", "EASE_IN_OUT_QUAD" - perform quadratic tweening
-	"EASE_IN_CUBIC", "EASE_OUT_CUBIC", "EASE_IN_OUT_CUBIC" - perform cubic tweening
-	"EASE_IN_QUART", "EASE_OUT_QUART", "EASE_IN_OUT_QUART" - perform quartic tweening
-	"EASE_IN_QUINT", "EASE_OUT_QUINT", "EASE_IN_OUT_QUINT" - perform quintic tweening
-	"EASE_IN_SINE", "EASE_OUT_SINE", "EASE_IN_OUT_SINE" - perform sinusoidal tweening
-	"EASE_IN_EXPO", "EASE_OUT_EXPO", "EASE_IN_OUT_EXPO" - perform exponential tweening
-	"EASE_IN_CIRC", "EASE_OUT_CIRC", "EASE_IN_OUT_CIRC" - perform circular tweening
-	"EASE_IN_ELASTIC", "EASE_OUT_ELASTIC", "EASE_IN_OUT_ELASTIC" - perform elastic tweening, with offshoot on start/end/both ends
-	"EASE_IN_BACK", "EASE_OUT_BACK", "EASE_IN_OUT_BACK" - perform overshooting cubic tweening, with backtracking on start/end/both ends
-	"EASE_IN_BOUNCE", "EASE_OUT_BOUNCE", "EASE_IN_OUT_BOUNCE" - perform exponentially decaying parabolic (bounce) tweening, with bounce on start/end/both ends
 	
 	*Return Value:* If the animation was started successfully, returns a reference to an Animation object. Else returns nil.
 	
@@ -1727,7 +1763,7 @@ interface actor [[ClutterActor*]]
 	                    } )  
 	(end)
 	
-	*See Also:* the <complete_animation> function
+	*See Also:* the <complete_animation> function and the <Timeline> class
 	
     */
 
@@ -2093,7 +2129,7 @@ interface actor [[ClutterActor*]]
         ]];
 
     /*
-	Event: on_key_focus_in
+	Event Handler: on_key_focus_in
 	
 	The on_key_focus_in() event handler is called whenever the object receives the key focus. Focus can be directed to the object by the user or the object can force focus to itself by calling its <grab_key_focus> function.
 	
@@ -2118,7 +2154,7 @@ interface actor [[ClutterActor*]]
 	]];
 
     /*
-	Event: on_key_focus_out
+	Event Handler: on_key_focus_out
 	
 	The on_key_focus_out() event handler is called whenever the object loses the key focus.
 	
@@ -2143,17 +2179,17 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Event: on_key_down
+	Event Handler: on_key_down
 	
 	The on_key_down() event handler is called whenever a key is pressed while the object has the key focus.
 
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	keyval - integer key value. This value can be compared to the global <keys> variable.
-	unicode - the key's Unicode representation, if any
-	time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
-	modifiers - table of modifiers, if any. If no modifiers, set to nil.
+		self - reference to the object receiving the event
+		keyval - integer key value. This value can be compared to the global <keys> variable.
+		unicode - the key's Unicode representation, if any
+		time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
 	
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
@@ -2172,17 +2208,17 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Event: on_key_up
+	Event Handler: on_key_up
 	
 	The on_key_up() event handler is called whenever a key is released while the object has the key focus.
 	
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	keyval - integer key value. This value can be compared to the global <keys> variable.
-	unicode - the key's Unicode representation, if any
-	time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
-	modifiers - table of modifiers, if any. If no modifiers, set to nil.
+		self - reference to the object receiving the event
+		keyval - integer key value. This value can be compared to the global <keys> variable.
+		unicode - the key's Unicode representation, if any
+		time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
 	
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
@@ -2200,29 +2236,8 @@ interface actor [[ClutterActor*]]
 			L);	    
 	]];
 	
-	/* ***FOR INTERNAL USE ONLY***
-	
-	//The on_scroll() event handler is called whenever a scroll wheel event occurs.
-	
-	//*Arguments:*
-	//	??? - ???
-		
-	//*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
-
-	*/
-
-    callback on_scroll
-	[[
-		UserData::get(L)->connect_signal_if( 
-			on_scroll,
-			"on_scroll",
-			"scroll-event",
-			G_CALLBACK(actor_on_scroll),
-			L);	    
-	]];
-	
 	/*
-	Event: on_button_down
+	Event Handler: on_button_down
 	
 	The on_button_down() event handler is called whenever a mouse button is pressed.
 	
@@ -2230,12 +2245,13 @@ interface actor [[ClutterActor*]]
 	
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	x - X coordinate position of the mouse pointer
-	y - Y coordinate position of the mouse pointer
-	button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
-	num_clicks - number of repeated mouse clicks
-	
+		self - reference to the object receiving the event
+		x - X coordinate position of the mouse pointer
+		y - Y coordinate position of the mouse pointer
+		button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
+		num_clicks - number of repeated mouse clicks
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.	
+	    
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
 	*See Also:* the <on_button_up> event handler
@@ -2253,7 +2269,7 @@ interface actor [[ClutterActor*]]
 	]];
 	
 	/*
-	Event: on_button_up
+	Event Handler: on_button_up
 	
 	The on_button_up() event handler is called whenever a mouse button is released.
 	
@@ -2261,12 +2277,13 @@ interface actor [[ClutterActor*]]
 	
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	x - X coordinate position of the mouse pointer
-	y - Y coordinate position of the mouse pointer
-	button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
-	num_clicks - number of repeated mouse clicks
-	
+		self - reference to the object receiving the event
+		x - X coordinate position of the mouse pointer
+		y - Y coordinate position of the mouse pointer
+		button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
+		num_clicks - number of repeated mouse clicks
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.	
+	    
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
 	*See Also:* the <on_button_down> event handler
@@ -2284,7 +2301,7 @@ interface actor [[ClutterActor*]]
 	]];
 	
 	/*
-	Event: on_motion
+	Event Handler: on_motion
 	
 	The on_motion() event handler is called whenever the mouse pointer moves.
 	
@@ -2292,10 +2309,11 @@ interface actor [[ClutterActor*]]
 	
 	*Arguments:*
 	
-	self - reference to the object receiving the event
-	x - X coordinate position of the mouse pointer
-	y - Y coordinate position of the mouse pointer
-	
+		self - reference to the object receiving the event
+		x - X coordinate position of the mouse pointer
+		y - Y coordinate position of the mouse pointer
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
+	    	
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
 	
 	*See Also:* the <on_enter> and <on_leave> event handlers
@@ -2313,7 +2331,34 @@ interface actor [[ClutterActor*]]
 	]];
 
 	/*
-	Event: on_enter
+	Event Handler: on_scroll
+	
+	The on_scroll() event handler is called whenever a scroll wheel event occurs. Scroll wheels are commonly found on computer mice and can be on other input devices, as well.
+	
+	*Arguments:*
+	
+	    self - reference to the object receiving the event
+	    x - X coordinate position of the pointer
+	    y - Y coordinate position of the pointer
+	    scroll_direction - direction of scroll wheel. 0 = scrolling up, 1 = scrolling down
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
+		
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+
+	*/
+
+    callback on_scroll
+	[[
+		UserData::get(L)->connect_signal_if( 
+			on_scroll,
+			"on_scroll",
+			"scroll-event",
+			G_CALLBACK(actor_on_scroll),
+			L);	    
+	]];
+	
+	/*
+	Event Handler: on_enter
 	
 	The on_enter() event handler is called whenever the mouse pointer enters the object's display space.
 	
@@ -2342,7 +2387,7 @@ interface actor [[ClutterActor*]]
     ]];
 
 	/*
-	Event: on_leave
+	Event Handler: on_leave
 	
 	The on_leave() event handler is called whenever the mouse pointer leaves the object's display space.
 	
@@ -2372,7 +2417,7 @@ interface actor [[ClutterActor*]]
 
 
     /*
-	Event: on_show
+	Event Handler: on_show
 	
 	The on_show() event handler is called whenever the object's <show> or <show_all> function is called.
 	
@@ -2397,7 +2442,7 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Event: on_hide
+	Event Handler: on_hide
 	
 	The on_hide() event handler is called whenever the object's <hide> or <hide_all> function is called.
 	

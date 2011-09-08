@@ -14,7 +14,7 @@
 @protocol TrickplayAnimationDelegate <NSObject>
 
 @required
-- (void)trickplayAnimationDidStop:(TrickplayAnimation *)anim;
+- (void)trickplayAnimationDidStop:(id)anim;
 
 @end
 

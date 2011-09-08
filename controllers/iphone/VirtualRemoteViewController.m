@@ -11,6 +11,7 @@
 @implementation VirtualRemoteViewController
 
 @synthesize delegate;
+@synthesize background;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -120,6 +121,7 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+    self.background = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -134,6 +136,8 @@
     AudioServicesDisposeSystemSoundID(audioClick);
     CFRelease(clickSoundRef);
     delegate = nil;
+    self.background = nil;
+    
     [super dealloc];
 }
 

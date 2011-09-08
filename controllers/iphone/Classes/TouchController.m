@@ -11,6 +11,8 @@
 
 @implementation TouchController
 
+@synthesize touchEventsAllowed;
+@synthesize swipeEventsAllowed;
 @synthesize view;
 @synthesize socketManager;
 
@@ -19,7 +21,6 @@
         self.view = aView;
         self.socketManager = sockman;
         touchEventsAllowed = NO;
-        clickEventsAllowed = YES;
         swipeStarted = NO;
         swipeSent = NO;
         keySent = NO;
@@ -27,16 +28,16 @@
         //activeTouches = [[NSMutableDictionary alloc] initWithCapacity:10];
         openFinger = 1;
         
-        [view setMultipleTouchEnabled:NO];
+        view.multipleTouchEnabled = NO;
     }
     
     return self;
 }
 
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount {
-	if (socketManager)
+	if (socketManager && !touchEventsAllowed && swipeEventsAllowed)
 	{
-	    int index;	
+	    int index;
 		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", thekey];
         
 		for (index = 1; index <= thecount; index++) {
@@ -60,6 +61,10 @@
 - (void)setMultipleTouch:(BOOL)val {
     view.multipleTouchEnabled = val;
     [self resetTouches];
+}
+
+- (void)setSwipe:(BOOL)allowed {
+    swipeEventsAllowed = allowed;
 }
 
 //*
@@ -230,24 +235,16 @@
     // TODO: tell trickplay the touches cancelled
 }
 
-/** depricated
-- (void)startClicks {
-    clickEventsAllowed = YES;
-}
-
-- (void)stopClicks {
-    clickEventsAllowed = NO;
-}
-//*/
-
 - (void)startTouches {
     NSLog(@"start touches");
     touchEventsAllowed = YES;
+    view.multipleTouchEnabled = YES;
 }
 
 - (void)stopTouches {
     NSLog(@"stop touches");
     touchEventsAllowed = NO;
+    view.multipleTouchEnabled = NO;
 }
 
 - (void)reset {

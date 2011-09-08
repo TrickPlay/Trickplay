@@ -125,5 +125,70 @@ global devtools [[ void * ]]
         [[
             usleep( ms * 1000 );
         ]];
+        
+    string screenshot( string filename = 0 )
+        [[
+            // WE ARE BREAKING THE RULES HERE BY ALLOWING THE APP TO SAVE
+            // A FILE TO ITS BUNDLE, BUT THAT IS OK BECAUSE THIS IS DONE
+            // IN DEVTOOLS WHICH IS NOT AVAILABLE ON PRODUCTION BUILDS.
+            
+            result = 0;
+            
+            Image * image = Image::screenshot();
+            
+            if ( ! image )
+            {
+                g_warning( "FAILED TO TAKE SCREENSHOT" );
+            }
+            else
+            {
+                String path;
+                String name;
+                
+                App * app = App::get( L );
+                
+                String app_path = app->get_metadata().path;
+                
+                if ( ! filename || ( filename && 0 == strlen( filename ) ) )
+                {
+                    GTimeVal t;
+    
+                    g_get_current_time( & t );
+    
+                    gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
+    
+                    gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
+    
+                    name = ts;
+                    path = fn;
+                    
+                    g_free( ts );
+                    g_free( fn );
+                }
+                else
+                {
+                    gchar * ts = g_strdup_printf( "%s.png" , filename );
+                    
+                    gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
+                    
+                    name = ts;
+                    path = fn;
+                    
+                    g_free( ts );
+                    g_free( fn );
+                }
+                
+                if ( ! image->write_to_png( path.c_str() ) )
+                {
+                    g_warning( "FAILED TO WRITE SCREENSHOT TO '%s'" , path.c_str() );
+                }
+                else
+                {
+                    result = name.c_str();
+                }
+                
+                delete image;
+            }                   
+        ]];        
 }
 

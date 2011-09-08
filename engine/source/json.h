@@ -174,6 +174,8 @@ namespace JSON
 
         String stringify() const;
 
+        Map::size_type size() const;
+
     private:
 
         Map map;

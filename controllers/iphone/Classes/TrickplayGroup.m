@@ -41,7 +41,7 @@
 
 - (void)handleTouchesBegan:(NSSet *)touches {
     //NSLog(@"handle touches began: %@", self);
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             CGFloat
@@ -59,7 +59,8 @@
                 && x_sub >= view.bounds.origin.x
                 && x_sub <= view.bounds.size.width
                 && y_sub >= view.bounds.origin.y
-                && y_sub <= view.bounds.size.height) {
+                && y_sub <= view.bounds.size.height
+                && !self.isHidden) {
                 
                 CFArrayAppendValue(newTouches, touch);
                 [self addTouch:touch];
@@ -76,7 +77,7 @@
 }
 
 - (void)handleTouchesMoved:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -95,7 +96,8 @@
                     && x_sub >= view.bounds.origin.x
                     && x_sub <= view.bounds.size.width
                     && y_sub >= view.bounds.origin.y
-                    && y_sub <= view.bounds.size.height) {
+                    && y_sub <= view.bounds.size.height
+                    && !self.isHidden) {
                     
                     CFArrayAppendValue(newTouchesIn, touch);
                 } else {
@@ -121,7 +123,7 @@
 }
 
 - (void)handleTouchesEnded:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouchesIn = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         CFMutableArrayRef newTouchesOut = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
@@ -140,7 +142,8 @@
                     && x_sub >= view.bounds.origin.x
                     && x_sub <= view.bounds.size.width
                     && y_sub >= view.bounds.origin.y
-                    && y_sub <= view.bounds.size.height) {
+                    && y_sub <= view.bounds.size.height
+                    && !self.isHidden) {
                     
                     CFArrayAppendValue(newTouchesIn, touch);
                 } else {
@@ -170,7 +173,7 @@
 }
 
 - (void)handleTouchesCancelled:(NSSet *)touches {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         CFMutableArrayRef newTouches = (CFMutableArrayRef)[[NSMutableArray alloc] initWithCapacity:10];
         for (UITouch *touch in [touches allObjects]) {
             if (CFDictionaryGetValue(activeTouches, touch)) {
@@ -210,6 +213,62 @@
 
 #pragma mark -
 #pragma mark Setters
+
+/**
+ * Set the background color of the Text.
+ */
+
+- (void)set_background_color:(NSDictionary *)args {
+    // ** Get the color and alpha values **
+    CGFloat red, green, blue, alpha;
+    if ([[args objectForKey:@"background_color"] isKindOfClass:[NSArray class]]) {
+        NSArray *colorArray = [args objectForKey:@"background_color"];
+        if (!colorArray || [colorArray count] < 3) {
+            return;
+        }
+        
+        red = [(NSNumber *)[colorArray objectAtIndex:0] floatValue]/255.0;
+        green = [(NSNumber *)[colorArray objectAtIndex:1] floatValue]/255.0;
+        blue = [(NSNumber *)[colorArray objectAtIndex:2] floatValue]/255.0;
+        
+        if ([colorArray count] > 3) {
+            alpha = [(NSNumber *)[colorArray objectAtIndex:3] floatValue]/255.0;
+        } else {
+            alpha = CGColorGetAlpha(view.backgroundColor.CGColor);
+        }
+    } else if ([[args objectForKey:@"background_color"] isKindOfClass:[NSString class]]) {
+        NSString *hexString = [args objectForKey:@"background_color"];
+        if (!hexString || [hexString length] < 6) {
+            return;
+        }
+        
+        unsigned int value;
+        
+        if ([hexString characterAtIndex:0] == '#') {
+            hexString = [hexString substringFromIndex:1];
+        }
+        
+        [[NSScanner scannerWithString:hexString] scanHexInt:&value];
+        if ([hexString length] > 6) {
+            // alpha exists
+            red = ((value & 0xFF000000) >> 24)/255.0;
+            green = ((value & 0x00FF0000) >> 16)/255.0;
+            blue = ((value & 0x0000FF00) >> 8)/255.0;
+            alpha = (value & 0x000000FF)/255.0;
+        } else {
+            // just RGB
+            red = ((value & 0xFF0000) >> 16)/255.0;
+            green = ((value & 0x00FF00) >> 8)/255.0;
+            blue = (value & 0x0000FF)/255.0;
+            alpha = CGColorGetAlpha(view.backgroundColor.CGColor);
+        }
+    } else {
+        return;
+    }
+    
+    view.backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
+}
+
 
 /**
  * Setter function
@@ -258,14 +317,17 @@
 #pragma mark Function Calls
 
 - (NSNumber *)do_add:(NSArray *)args {
-    NSArray *childIDs = [args objectAtIndex:0];
+    id childIDs = [args objectAtIndex:0];
+    if (![childIDs isKindOfClass:[NSArray class]]) {
+        return [NSNumber numberWithBool:NO];
+    }
     BOOL result = NO;
     for (NSString *childID in childIDs) {
         TrickplayUIElement *child = [manager findObjectForID:childID];
         [child removeFromSuperview];
         [self.view addSubview:child];
         if (delegate) {
-            [delegate object_added];
+            [delegate advancedUIObjectAdded];
         }
         result = YES;
     }
@@ -279,7 +341,7 @@
     for (NSString *childID in childIDs) {
         TrickplayUIElement *child = [manager findObjectForID:childID];
         if (child && [child isDescendantOfView:self.view]) {
-            [child removeFromSuperview];
+            [child do_unparent:nil];
             result = YES;
         }
     }
@@ -329,8 +391,8 @@
 }
 
 - (NSNumber *)do_clear:(NSArray *)args {
-    for (UIView *child in self.view.subviews) {
-        [child removeFromSuperview];
+    for (TrickplayUIElement *child in self.view.subviews) {
+        [child do_unparent:nil];
     }
     
     return [NSNumber numberWithBool:YES];
@@ -401,6 +463,7 @@
 
 - (void)dealloc {
     NSLog(@"TrickplayGroup dealloc: %@", self);
+    [self do_clear:nil];
     self.manager = nil;
     
     [super dealloc];

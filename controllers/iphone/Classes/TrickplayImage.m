@@ -40,13 +40,14 @@
 }
 
 - (void)on_loadedFailed:(BOOL)failed {
-    if (manager && manager.gestureViewController) {
+    if (manager && manager.appViewController) {
         NSMutableDictionary *JSON_dic = [[NSMutableDictionary alloc] initWithCapacity:10];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_loaded" forKey:@"event"];
+        [JSON_dic setObject:[NSArray arrayWithObjects:[NSNumber numberWithBool:failed], nil] forKey:@"args"];
         [JSON_dic setObject:[NSNumber numberWithBool:failed] forKey:@"failed"];
         
-        [manager.gestureViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
         
         [JSON_dic release];
     }
@@ -54,6 +55,15 @@
 
 #pragma mark -
 #pragma mark Deleter
+
+/**
+ * Stop tiling
+ */
+- (void)delete_tile {
+    BOOL toTileWidth = NO;
+    BOOL toTileHeight = NO;
+    [((AsyncImageView *)view) setTileWidth:toTileWidth height:toTileHeight];
+}
 
 /**
  * Deleter function
@@ -113,9 +123,20 @@
  */
 
 - (void)get_src:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"src"] && src) {
+    if (src) {
         [dictionary setObject:src forKey:@"src"];
+    } else {
+        [dictionary setObject:@"[null]" forKey:@"src"];
     }
+}
+
+/**
+ * Get the tile
+ */
+
+- (void)get_tile:(NSMutableDictionary *)dictionary {
+    NSArray *tiling = [NSArray arrayWithObjects:[NSNumber numberWithBool:((AsyncImageView *)view).tileWidth], [NSNumber numberWithBool:((AsyncImageView *)view).tileHeight], nil];
+    [dictionary setObject:tiling forKey:@"tile"];
 }
 
 /**
@@ -123,9 +144,7 @@
  */
 
 - (void)get_loaded:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"loaded"]) {
-        [dictionary setObject:[NSNumber numberWithBool:((AsyncImageView *)view).loaded] forKey:@"loaded"];
-    }
+    [dictionary setObject:[NSNumber numberWithBool:((AsyncImageView *)view).loaded] forKey:@"loaded"];
 }
 
 /**
@@ -133,10 +152,13 @@
  */
 
 - (void)get_base_size:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"base_size"] && ((AsyncImageView *)view).loaded) {
+    if (((AsyncImageView *)view).loaded) {
         NSNumber *width = [NSNumber numberWithFloat:((UIImageView *)view).image.size.width];
         NSNumber *height = [NSNumber numberWithFloat:((UIImageView *)view).image.size.height];
         NSArray *imageSize = [NSArray arrayWithObjects:width, height, nil];
+        [dictionary setObject:imageSize forKey:@"base_size"];
+    } else {
+        NSArray *imageSize = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0], [NSNumber numberWithFloat:0.0], nil];
         [dictionary setObject:imageSize forKey:@"base_size"];
     }
 }
@@ -168,10 +190,14 @@
     return [super callMethod:method withArgs:args];
 }
 
+#pragma mark -
+#pragma mark Deallocation
+
 - (void)dealloc {
     NSLog(@"TrickplayImage dealloc");
     
     self.src = nil;
+    ((AsyncImageView *)self.view).otherDelegate = nil;
     
     [super dealloc];
 }

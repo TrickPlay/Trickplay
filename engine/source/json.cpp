@@ -808,6 +808,12 @@ namespace JSON
         return os.str();
     }
 
+    Object::Map::size_type Object::size() const
+    {
+    	return map.size();
+    }
+
+
     //=============================================================================
 
     Array::Array()

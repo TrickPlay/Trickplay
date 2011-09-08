@@ -15,7 +15,6 @@
 }
 
 - (id)init:(id)theDelegate;
-- (void)createCommandDictionary;
 - (void)addBytes:(const uint8_t *)bytes length:(NSUInteger)length;
 - (void)parse;
 - (void)interpretCommand:(NSString *)command;

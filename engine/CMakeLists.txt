@@ -35,7 +35,7 @@ IF( PKG_CONFIG_FOUND )
     pkg_check_modules(SOUP          REQUIRED    libsoup-2.4)
     pkg_check_modules(SQLITE        REQUIRED    sqlite3)
     pkg_check_modules(OPENSSL       REQUIRED    openssl)
-    pkg_check_modules(CARES                     libcares)
+    pkg_check_modules(EXIF          REQUIRED    libexif)
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_CLUTTER_BACKEND_EGL)
         pkg_check_modules(UUID      REQUIRED    uuid)
@@ -66,9 +66,9 @@ IF( PKG_CONFIG_FOUND )
         ${SOUP_INCLUDE_DIRS}
         ${SQLITE_INCLUDE_DIRS}
         ${OPENSSL_INCLUDE_DIRS}
-        ${CARES_INCLUDE_DIRS}
         ${AVAHI_CORE_INCLUDE_DIRS}
         ${AVAHI_GLIB_INCLUDE_DIRS}
+        ${EXIF_INCLUDE_INCLUDE_DIRS}
     )
 
     list(APPEND ENGINE_LIBRARY_NAMES
@@ -88,9 +88,9 @@ IF( PKG_CONFIG_FOUND )
         ${SOUP_LIBRARIES}
         ${SQLITE_LIBRARIES}
         ${OPENSSL_LIBRARIES}
-        ${CARES_LIBRARIES}
         ${AVAHI_CORE_LIBRARIES}
         ${AVAHI_GLIB_LIBRARIES}
+        ${EXIF_LIBRARIES}
     )
 
 ELSE ( PKG_CONFIG_FOUND )
@@ -110,6 +110,7 @@ ELSE ( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( atk-1.0 atk/atk.h                      ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( sndfile.h                              ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( libsoup-2.4 libsoup/soup.h             ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( libexif/exif-data.h                    ENGINE_INCLUDE_DIRS )
 
     if (TP_CONTROLLER_DISCOVERY_MDNS)
         TP_FIND_INCLUDE( avahi-core core.h                  ENGINE_INCLUDE_DIRS )
@@ -131,7 +132,7 @@ ELSE ( PKG_CONFIG_FOUND )
 
         cairo pango-1.0 pangocairo-1.0 fontconfig
 
-        ssl crypto cares curl
+        ssl crypto curl
 
         sqlite3
 
@@ -140,6 +141,8 @@ ELSE ( PKG_CONFIG_FOUND )
         json-glib-1.0
 
         sndfile
+        
+        exif
     )
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -153,7 +156,7 @@ ELSE ( PKG_CONFIG_FOUND )
 
     if (TP_CLUTTER_BACKEND_EGL)
 
-        list( APPEND ENGINE_LIBRARY_NAMES clutter-eglnative-1.0 )
+        list( APPEND ENGINE_LIBRARY_NAMES clutter-eglnative-1.0 cares )
 
     else (TP_CLUTTER_BACKEND_EGL)
 
@@ -322,6 +325,14 @@ if (TP_PRODUCTION)
 endif (TP_PRODUCTION)
 
 #------------------------------------------------------------------------------
+
+if (TP_JPEG_FORCE_ALPHA)
+
+    add_definitions( -DTP_JPEG_FORCE_ALPHA=1 )
+    
+endif (TP_JPEG_FORCE_ALPHA)
+    
+#------------------------------------------------------------------------------
 # Profiling
 #------------------------------------------------------------------------------
 
@@ -420,7 +431,7 @@ foreach( LB_FILE ${LB_FILES} )
 
     add_custom_command(
         OUTPUT ${LB_FILE_NAME}.cpp
-        COMMAND ${LB_GENERATOR} ${LB_OPTIONS} ${NATIVE_LB_FILE}
+        COMMAND ${LB_GENERATOR} ${LB_OPTIONS} "${NATIVE_LB_FILE}"
         DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 
 endforeach( LB_FILE )
@@ -435,7 +446,7 @@ foreach( LB_FILE ${LB_SPECIAL_MAC_FILES} )
 
     add_custom_command(
         OUTPUT ${LB_FILE_NAME}.mm
-        COMMAND ${LB_GENERATOR} ${LB_OPTIONS} --mac ${NATIVE_LB_FILE}
+        COMMAND ${LB_GENERATOR} ${LB_OPTIONS} --mac "${NATIVE_LB_FILE}"
         DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 
 endforeach( LB_FILE )

@@ -24,6 +24,7 @@
 - (id)initWithSocketManager:(SocketManager *)sockman;
 
 - (void)declareResourceWithObject:(id)Object forKey:(id)key;
+- (void)loadImageDataForImageView:(AsyncImageView *)imageView withResource:(NSString *)name;
 - (NSData *)fetchResource:(NSString *)name;
 - (AsyncImageView *)fetchImageViewUsingResource:(NSString *)name frame:(CGRect)frame;
 - (NSMutableDictionary *)getResourceInfo:(NSString *)name;

@@ -13,20 +13,12 @@
 #import "AdvancedUIObjectManager.h"
 #import "TrickplayAnimation.h"
 
+
 @class AdvancedUIObjectManager;
 
 @interface TrickplayUIElement : UIView <TrickplayAnimationDelegate> {
     CFMutableDictionaryRef activeTouches;
     NSUInteger touchNumber;
-    
-    /*
-     NSNumber *x_scale;
-     NSNumber *y_scale;
-     NSNumber *z_scale;
-     NSNumber *x_rotation;
-     NSNumber *y_rotation;
-     NSNumber *z_rotation;
-    */
     
     CFAbsoluteTime start;
     
@@ -44,6 +36,12 @@
     CGFloat x_rot_point;
     CGFloat y_rot_point;
     CGFloat z_rot_point;
+    CGFloat x_anchor;
+    CGFloat y_anchor;
+    CGFloat clip_x;
+    CGFloat clip_y;
+    CGFloat clip_w;
+    CGFloat clip_h;
     CGFloat opacity;
     
     NSArray *clip;
@@ -53,6 +51,7 @@
     
     // Needed for .is_animating property
     NSMutableDictionary *animations;
+    TrickplayTimeline *timeLine;
     
     AdvancedUIObjectManager *manager;
     
@@ -69,6 +68,7 @@
 */
  
 @property (nonatomic, assign) AdvancedUIObjectManager *manager;
+@property (retain) TrickplayTimeline *timeLine;
 @property (retain) NSString *ID;
 @property (retain) NSString *name;
 @property (retain) NSArray *clip;
@@ -116,6 +116,10 @@
 - (void)handleTouchesMoved:(NSSet *)touches;
 - (void)handleTouchesEnded:(NSSet *)touches;
 - (void)handleTouchesCancelled:(NSSet *)touches;
+
+// Animation completion
+- (void)trickplayAnimationDidStop:(id)anim;
+- (id)do_complete_animation:(NSArray *)args;
 
 // Math stuff
 - (CGFloat)get_x_prime;

@@ -2,6 +2,11 @@ local gl = WebGLCanvas{ size = screen.size }
 
 screen:add( gl )
 
+local shader_name = Text { font = "Highway Gothic Wide 120px", text = "ShaderName", color = "ffffff", opacity=255 }
+local shader_scrim = Rectangle { color = "88888888", z = 1 }
+screen:add(shader_scrim)
+screen:add(shader_name)
+
 program = nil
 
 local function make_shader(i,z)
@@ -26,9 +31,70 @@ local function next_shader()
     end
     program = gl:createProgram()
     current_shader = (current_shader % #shaders)+1
-    print("Loading shader ",current_shader)
+    shader_name.text = shaders[current_shader]
+    shader_name.x = math.random(0, screen.w-shader_name.w)
+    shader_name.y = math.random(0, screen.h-shader_name.h)
+    local dest_x = math.random(0, screen.w-shader_name.w)
+    local dest_y = math.random(0, screen.h-shader_name.h)
+    shader_scrim.x = shader_name.x - 5
+    shader_scrim.y = shader_name.y - 5
+    shader_scrim.w = shader_name.w + 10
+    shader_scrim.h = shader_name.h + 10
+    local shader_name_animator = Animator({
+                                    duration = 2000,
+                                    properties = {
+                                        {
+                                            source = shader_name,
+                                            name = "position",
+                                            ease_in = true,
+                                            keys = {
+                                                {   0.0, "LINEAR", { 0, 0 } } ,
+                                                {   1.0, "EASE_IN_OUT_SINE", {
+                                                                            dest_x,
+                                                                            dest_y
+                                                                        }
+                                                },
+                                            },
+                                        },
+                                        {
+                                            source = shader_scrim,
+                                            name = "position",
+                                            ease_in = true,
+                                            keys = {
+                                                {   0.0, "LINEAR", { 0, 0 } } ,
+                                                {   1.0, "EASE_IN_OUT_SINE", {
+                                                                            dest_x - 5,
+                                                                            dest_y - 5
+                                                                        }
+                                                },
+                                            },
+                                        },
+                                        {
+                                            source = shader_name,
+                                            name = "opacity",
+                                            ease_in = true,
+                                            keys = {
+                                                {   0.0, "LINEAR", 0 } ,
+                                                {   0.5, "EASE_IN_SINE", 255 },
+                                                {   1.0, "EASE_OUT_SINE", 0 },
+                                            },
+                                        },
+                                        {
+                                            source = shader_scrim,
+                                            name = "opacity",
+                                            ease_in = true,
+                                            keys = {
+                                                {   0.0, "LINEAR", 0 } ,
+                                                {   0.5, "EASE_IN_SINE", 255 },
+                                                {   1.0, "EASE_OUT_SINE", 0 },
+                                            },
+                                        },
+                                    },
+                              })
+    shader_name_animator:start()
+    print("Loading shader ",shader_name.text)
     make_shader(gl.VERTEX_SHADER,readfile("generic.vertex"))
-    make_shader(gl.FRAGMENT_SHADER,readfile(shaders[current_shader]..".fragment"))
+    make_shader(gl.FRAGMENT_SHADER,readfile(shader_name.text..".fragment"))
     gl:linkProgram(program)
     assert(gl:getProgramParameter( program , gl.LINK_STATUS ))
     gl:useProgram(program)
