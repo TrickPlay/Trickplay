@@ -1345,17 +1345,7 @@ function ui_element.button(t)
 		local button = b_group:find_child("button_dim") 
 		local focus = b_group:find_child("button_focus") 
 
-		if b_group.is_in_menu == true then 
-			if b_group.fade_in == true then 
-				b_group.fade_in = false
-				return 
-			else 
-				b_group.fade_in = true 
-			end 
-	   end 
-
-		current_focus = b_group
-        if (p.skin == "Custom") then 
+		if (p.skin == "Custom") then 
 	     	ring.opacity = 0
 	     	focus_ring.opacity = 255
         else
@@ -1363,6 +1353,14 @@ function ui_element.button(t)
             focus.opacity = 255
         end 
         b_group:find_child("text").color = p.focus_text_color
+
+		if b_group.is_in_menu == true then 
+			if b_group.fade_in == true then 
+				return 
+			end 
+	   end 
+
+		current_focus = b_group
 	
 	    if p.focused ~= nil then 
 			p.focused()
@@ -1373,13 +1371,15 @@ function ui_element.button(t)
 		if key then 
 	    	if p.pressed and key == keys.Return then
 				p.pressed()
+				if b_group.is_in_menu == true and b_group.fade_in == false then 
+					b_group.fade_in = true 
+				end
 	    	end 
 		end 
 		
 		if p.skin == "edit" then 
 			input_mode = 5 -- hdr.S_MENU_M
 		end 
-
     end
     
     function b_group.extra.on_focus_out(key, focus_to_tabButton) 
@@ -1390,13 +1390,6 @@ function ui_element.button(t)
 		local focus = b_group:find_child("button_focus") 
 
 			
-		if b_group.is_in_menu == true then 
-			if b_group.fade_in == false then 
-				return 
-			end
-	    end 
-
-		current_focus = nil 
 		if b_group.tab_button == true and focus_to_tabButton == nil then 
 			prev_tab = b_group
 			return 
@@ -1410,10 +1403,24 @@ function ui_element.button(t)
         	end
 		end 
         b_group:find_child("text").color = p.text_color
+
+
+
+		if b_group.is_in_menu == true then 
+			if b_group.fade_in == false then 
+				return 
+			end
+	    end 
+
+		current_focus = nil 
+
 		if p.released then  
 			if p.is_in_menu then 
 				if key ~= keys.Return and b_group.single_button == false then
 					p.released()
+					if b_group.is_in_menu == true and b_group.fade_in == true then 
+						b_group.fade_in = false 
+					end
 				end 
 			elseif b_group.single_button == false then 
 				p.released()
@@ -1539,8 +1546,10 @@ function ui_element.button(t)
 					b_group.extra.on_focus_in(keys.Return)
 				else 
 		     		current_focus.on_focus_out()
-					current_focus = b_group
-		     		current_focus.on_focus_in(keys.Return)
+					if b_group.is_in_menu ~= true then 
+						current_focus = b_group
+		     			current_focus.on_focus_in(keys.Return)
+					end 
 					screen:grab_key_focus()
 				end 
 				return true
@@ -5103,7 +5112,6 @@ function ui_element.scrollPane(t)
                 local rel_y = y - track_vert.transformed_position[2]/screen.scale[2]
 	   	        
 				if grip_vert.y > rel_y then
-					print("tees")
 					grip_vert.y = grip_vert.y - grip_vert.h
 					if grip_vert.y < 0 then grip_vert.y = 0 end
 				else
@@ -5601,24 +5609,22 @@ button
 	--yugi
 	if editor_lb == nil or editor_use then  
 		function button:on_key_down(key) 
-			if input_mode == 0 then  -- SELECT
-				if key == keys.Down then 
-					umbrella.press_down()
-					return true
-				elseif key == keys.Up then 
-					umbrella.press_up()
-					return true
-				elseif key == keys.Return then 
-					if curr_index > 0 then 
-						umbrella.press_enter()
-					end 
-                    umbrella.fade_out()
-					if button.fade_in then -- ?
-						button.fade_in = false
-					end
-					umbrella:grab_key_focus()
-					return true
+			if key == keys.Down then 
+				umbrella.press_down()
+				return true
+			elseif key == keys.Up then 
+				umbrella.press_up()
+				return true
+			elseif key == keys.Return then 
+				if curr_index > 0 then 
+					umbrella.press_enter()
 				end 
+                umbrella.fade_out()
+				if button.fade_in then -- ?
+					button.fade_in = false
+				end
+				umbrella:grab_key_focus()
+				return true
 			end 
 		end 
 	end
