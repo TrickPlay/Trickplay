@@ -26,7 +26,13 @@ screen:add(screen_border)
 
 screen:show()
 
-function screen:on_key_down()
-    background.extras.jiggle(200)
+function screen:on_key_down(key)
+    background.extras.jiggle(150)
     score_gauge.extras.set_score((score_gauge.extras.score+10) % 110 )
 end
+
+local timer = Timer(1000)
+function timer:on_timer()
+    screen:on_key_down(keys.OK)
+end
+timer:start()
