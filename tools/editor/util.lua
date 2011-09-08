@@ -532,9 +532,10 @@ function util.create_on_button_down_f(v)
 			end 
 		end 
 
-		if shift == true then 
+		if screen:find_child("multi_select_border") then
 			return 
 		end 
+
 		if (input_mode ~= hdr.S_RECTANGLE) then 
 	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw" ) then 
 	    		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then

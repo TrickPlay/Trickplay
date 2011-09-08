@@ -75,23 +75,24 @@
 		if current_focus then 				-- for closing menu button or escaping from text editting 
 			current_focus.on_focus_out()
 			screen:grab_key_focus()
+			return
 		end 
 
       	if(input_mode == hdr.S_RECTANGLE) then 
 	       editor.rectangle( x, y) 
+		   return
 	  	end
 
-		-- if(button == 3 or num_clicks >= 2) and (g.extra.video ~= nil) and current_inspector == nil then
 		if button == 3 and g.extra.video ~= nil and current_inspector == nil then
         	editor.inspector(g.extra.video)
+			return
         end 
 
-		if m and m.shift then 
-			screen_ui.multi_select(x,y)
-		end 
+		screen_ui.multi_select(x,y)
 
     end
 
+	local move 
 	function screen:on_button_up(x,y,button,clicks_count, m)
 
 		-- for dragging timepoint 
@@ -103,8 +104,12 @@
             if input_mode == hdr.S_RECTANGLE then 
 	           editor.rectangle_done(x, y) 
 	           input_mode = hdr.S_SELECT 
-	      	elseif input_mode == hdr.S_SELECT and m and m.shift then
+	      	else
 				screen_ui.multi_select_done(x,y)
+				if move == nil then
+					screen_ui.n_selected_all()
+				end
+				move = nil
 	      	end 
        	end
 
@@ -119,15 +124,15 @@
 		end 
 	 
 	 	screen_ui.cursor_setting()
-
 	 	screen_ui.dragging(x,y)
 
         if(mouse_state == hdr.BUTTON_DOWN) then
             if (input_mode == hdr.S_RECTANGLE) then 
 				editor.rectangle_move(x, y) 
 			end
-            if (input_mode == hdr.S_SELECT)  then 
+            if (input_mode == hdr.S_SELECT) then 
 		    	screen_ui.multi_select_move(x, y) 
+				move = true
 			end
         end
 	end
@@ -156,8 +161,6 @@
 
 		-- open project 
 		project_mng.open_project(nil,nil,"main")
-
-		
 
 		-- auto save 
 		screen_ui.auto_save()

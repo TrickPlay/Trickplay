@@ -7,21 +7,24 @@ local multi_select_border
 
 function screen_ui.n_selected_all() 
 
-	while(table.getn(selected_objs) ~= 0) do
-		local t_border = screen:find_child(table.remove(selected_objs)) 
-		if(t_border ~= nil) then 
-			screen:remove(t_border)
-		   	local i, j = string.find(t_border.name,"border")
-		    t_obj = g:find_child(string.sub(t_border.name, 1, i-1))	
-		    if(t_obj ~= nil) then 
-				t_obj.extra.selected = false
-				local am = screen:find_child(t_obj.name.."a_m")
-        		if am then 
-	   				screen:remove(am)
-        		end
-	        end
+	for i, j in pairs (screen.children) do 
+		if j.name then 
+			if string.find(j.name, "border") then 
+				screen:remove(j)
+				local a, b = string.find(j.name,"border")
+		    	local t_obj = g:find_child(string.sub(j.name, 1, a-1))	
+		    	if(t_obj ~= nil) then 
+					t_obj.extra.selected = false
+					local am = screen:find_child(t_obj.name.."a_m")
+        			if am then 
+	   					screen:remove(am)
+        			end
+	        	end
+			end 
 		end
 	end
+
+	selected_objs = {}
 
 end
 
@@ -119,7 +122,7 @@ function screen_ui.selected(obj)
 
 	if obj.name == nil then return end 
 
-	if shift == false then 
+	if screen:find_child("multi_select_border") == nil and shift == false then 
 		screen_ui.n_selected_all()
 	end 
 
@@ -329,14 +332,28 @@ function screen_ui.multi_select_done(x,y)
 	   	y = m_init_y + multi_select_border.h
     end
 
+	local m_slt_flag 
+
+	for i, v in pairs(g.children) do
+		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
+			(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
+			m_slt_flag = true 
+		end 
+    end
+
+	if m_slt_flag then 
+		screen_ui.n_select_all()
+	end 
+
     for i, v in pairs(g.children) do
 		if (v.x > m_init_x and v.x < x and v.y < y and v.y > m_init_y ) and
 			(v.x + v.w > m_init_x and v.x + v.w < x and v.y + v.h < y and v.y + v.h > m_init_y ) then 
-			if(shift == true and v.extra.selected == false) then 
+			if(v.extra.selected == false) then 
 		    	screen_ui.selected(v)
 			end 
 		end 
     end
+
 	
 	screen:remove(multi_select_border)
 	m_init_x = 0 
@@ -476,11 +493,11 @@ function screen_ui.dragging(x,y)
 		    end 
 
 			if tab_extra then 
-				--anchor.y = anchor.y + tab_extra 
 				border.y = border.y + tab_extra
 			end 
-
-	    end -- if dragging then 
+		else 
+			screen_ui.n_select_all()
+	    end -- if border ~= nil 
 
 	     
 	    actor.x =  x - dx 
