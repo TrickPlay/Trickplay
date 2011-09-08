@@ -139,19 +139,14 @@ setmetatable( strings , { __index = missing_localized_string } )
 	screen_ui 		= dofile("screen_ui")
 
 -- background images 
---BG_IMAGE_20 = Image{src = "assets/transparency-grid-20-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
 BG_IMAGE_20 = assets("assets/transparency-grid-20-2.png")
 BG_IMAGE_20:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
---BG_IMAGE_40 = Image{src = "assets/transparency-grid-40-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_40 = assets("assets/transparency-grid-40-2.png")
 BG_IMAGE_40:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
---BG_IMAGE_80 = Image{src = "assets/transparency-grid-80-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_80 = assets("assets/transparency-grid-80-2.png")
 BG_IMAGE_80:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
---BG_IMAGE_white = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_white = assets("assets/white.png")
 BG_IMAGE_white:set{tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
---BG_IMAGE_import = Image{src = "assets/white.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_import = assets("assets/white.png")
 BG_IMAGE_import:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 

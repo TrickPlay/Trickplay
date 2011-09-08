@@ -5,13 +5,16 @@ local util = {}
 
 
 function util.color_to_string( color )
+
         if type( color ) == "string" then
             return color
         end
-        if type( color ) == "table" then
+        
+		if type( color ) == "table" then
             return serialize( color )
         end
         return tostring( color )
+
 end
 
 function util.table_copy(t)
@@ -731,24 +734,40 @@ function util.set_obj (f, v)
 
 end 
 
+local new_map = {
+	["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
+	["Text"] = function() new_obj = Text{} return new_obj end, 
+	["Image"] = function() new_obj = Image{} return new_obj end, 
+	["Clone"] = function() new_obj = Clone{} return new_obj end, 
+	["Group"] = function() new_obj = Group{} return new_obj end, 
+	["Video"] = function() new_obj = {} return new_obj end, 
+	["ArrowPane"] = function() new_obj = ui_element.arrowPane() return new_obj end, 
+	["Button"] = function() new_obj = ui_element.button() return new_obj end, 
+	["CheckBoxGroup"] = function() new_obj = ui_element.checkBoxGroup() return new_obj end, 
+	["LayoutManager"] = function() new_obj = ui_element.layoutManager() return new_obj end, 
+	["MenuButton"] = function() new_obj = ui_element.menuButton() return new_obj end, 
+	["ProgressBar"] = function() new_obj = ui_element.progressBar() return new_obj end, 
+	["ProgressSpinner"] = function() new_obj = ui_element.progressSpinner() return new_obj end, 
+	["RadioButtonGroup"] = function() new_obj = ui_element.radioButtonGroup() return new_obj end, 
+	["ScrollPane"] = function() new_obj = ui_element.scorllPane() return new_obj end, 
+	["TabBar"] = function() new_obj = ui_element.tabBar() return new_obj end, 
+	["TextInput"] = function() new_obj = ui_element.textInput() return new_obj end, 
+	["ToastAlert"] = function() new_obj = ui_element.toastAlert() return new_obj end, 
+}
 
 function util.copy_obj (v)
 
-      local new_map = {
-		["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
-		["Text"] = function() new_obj = Text{} return new_obj end, 
-		["Image"] = function() new_obj = Image{} return new_obj end, 
-		["Clone"] = function() new_obj = Clone{} return new_obj end, 
-		["Group"] = function() new_obj = Group{} return new_obj end, 
-		["Video"] = function() new_obj = {} return new_obj end, 
-      }
-	
-      local new_object = new_map[v.type]()
+      local new_object 
+
+	  if util.is_this_widget(v) == true then 
+      	new_object = new_map[v.extra.type]()
+	  else 
+      	new_object = new_map[v.type]()
+	  end 
 
       util.set_obj(new_object, v)
 
       return new_object
-
 end	
 
 function util.make_attr_t(v)
