@@ -49,37 +49,28 @@ dataToModelTable = {
 }
 
 def angleToFloat(v):
-    
     v['angle'] = float(v['angle'])
-    
     return v
 
 def scaleToFloat(v):
-    
     v['x'] = float(v['x'])
-    
     v['y'] = float(v['y'])
-    
     return v
     
-
 def summarizeSource(v):
-
+    """
+    Summarize clone data into a string
+    """
+    
     # Clone may not have source
     try:
-    
         s = str(v['gid']) 
-        
         name = v['name']
-        
         if '' != name:
-            
             s += ' : ' + name
-        
         return s
         
     except:
-    
         return '' 
 
 def tileToBool(v):
@@ -88,18 +79,10 @@ def tileToBool(v):
     return v
 
 def typeTextureToImage(v):
-    
     if 'Texture' == v:
-    
         return "Image"
-        
     else:
-
         return v
-    
-def modelToData(title,  value):
-    t, v = typeTable[title](value)
-    return (t, v)
     
 def dataToModel(title, value):
 
@@ -113,7 +96,6 @@ def modelToData(title, value):
     return modelToDataTable[title](value)
 
 def color(v):
-
     return 'rgba(' + str(v['r']) + ', ' + str(v['g']) + ', ' + str(v['b']) + ', ' + str(float(v['a'])/255) + ')'
 
 def opacity(v):
