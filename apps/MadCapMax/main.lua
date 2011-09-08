@@ -110,6 +110,7 @@ local function main()
         enemy        = Group{  name  =  "Enemy layer"              },
         foreground   = Group{  name  =  "Foreground layer"         },
         
+        hud          = Group{  name  =  "HUD layer"              },
         menus        = Group{  name  =  "Menus layer"              },
     }
     
@@ -124,7 +125,7 @@ local function main()
         layers.enemy,     
         layers.foreground
     )
-    screen:add(layers.srcs,physics_world,layers.menus)
+    screen:add(layers.srcs,physics_world,layers.hud,layers.menus)
     
     layers.srcs:hide()
     
@@ -148,9 +149,9 @@ local function main()
         
     end
     
-    r1 = Rectangle{w=100,h=100,color="00009955"}
-    r2 = Rectangle{w=100,h=100,color="99000055"}
-    layers.foreground:add(r1,r2)
+    --r1 = Rectangle{w=100,h=100,color="00009955"}
+    --r2 = Rectangle{w=100,h=100,color="99000055"}
+    --layers.foreground:add(r1,r2)
     check_collisions = function()
         
         if Jazz and Max then
@@ -164,7 +165,7 @@ local function main()
             Max.y1 = Max.y-Max.anchor_point[2]
             Max.x2 = Max.x-Max.anchor_point[1]+Max.w-50
             Max.y2 = Max.y-Max.anchor_point[2]+Max.h-40
-            
+            --[[
             r1.x = Max.x1
             r1.w = Max.x2 - Max.x1
             
@@ -176,7 +177,7 @@ local function main()
             
             r2.y = Jazz.y1
             r2.h = Jazz.y2 - Jazz.y1
-            
+            --]]
             
             if not Max.hit and collided(Max,Jazz) then
                 
@@ -193,7 +194,7 @@ local function main()
                     print("right")
                 end
                 --]]
-                Max:recieve_impact(-1600,-1600)
+                Max:recieve_impact(-800,-800)
                 --Max:apply_v(Jazz.)
                 --print("hit")
                 
@@ -209,6 +210,7 @@ local function main()
                 item.y2 = item.y-item.anchor_point[2]+item.h
                 
                 if collided(Max,item) then
+                    --print("weeeee")
                     item:collision()
                 end
                 
@@ -247,6 +249,7 @@ local function main()
     
     --MadCapMax specific
     Item            = dofile("Items.lua")
+    Hud             = dofile("Hud.lua")
     Splash_Menu     = dofile("Splash_Menu.lua")
     Transition_Menu = dofile("Transition_Menu.lua")
     LVL_Object      = dofile("Level_Object.lua")
@@ -311,6 +314,7 @@ local function main()
                 start_x = 200,
                 start_y = 300,
                 scroll_speed = 100,
+                enemy_obstacles = LVL_Object.obstacles,
             }
             
             
@@ -325,6 +329,8 @@ local function main()
             check_collisions_animation = Animation_Loop:add_animation{on_step = check_collisions}
             
             Max:grab_key_focus()
+            
+            Hud:setup_lvl{}
         end
     }
     

@@ -57,7 +57,7 @@ head:add(
     eye_l  , eye_l_i, eye_l_b  -- left eye
 )
 
-local srcs = Group{}
+local srcs = Group()
 srcs:add(poop_drop,poop_splat)
 srcs:add(unpack(feathers))
 srcs:hide()
@@ -65,7 +65,9 @@ srcs:hide()
 local front_wing = Clone{x = 80, y = 40}
 local back_wing  = Clone{source = front_wing,x=100,y=40,scale={.9,.9}}
 
-bird:add(  srcs,  wings,  back_wing,  body,  front_wing,  head,  tail  )
+local bob_group = Group()
+bob_group:add(  srcs,  wings,  back_wing,  body,  front_wing,  head,  tail  )
+bird:add(bob_group)
 
 front_wing.source = wings.children[1]
 
@@ -96,6 +98,8 @@ local cherries = 0
 bird.hit = false
 local hit_v_x, hit_v_y
 local hit_a = 200
+local enemy_obstacles, my_obstacles
+
 
 --------------------------------------------------------------------------------
 -- Methods
@@ -120,6 +124,7 @@ end
 
 function bird:collect_seed()
     seeds = seeds + 1
+    Hud:inc_poop(1)
 end
 
 function bird:collect_cherry()
@@ -146,7 +151,7 @@ local function launch_feather(vx,vy,d)
     local orig_y = f.y + f.anchor_point[2]
     
     layers.player:add(f)
-    print("VY",vy)
+    --print("VY",vy)
     
     local e = 0
     
@@ -256,9 +261,12 @@ local hit_timer = Timer{
             hit_v_y = 0
             
         elseif count == 4 then
-            self:stop()
             bird.hit = false
+            bird.invincible = true
             bird.z_rotation = {0,0,0}
+        elseif count == 8 then
+            self:stop()
+            bird.invincible = false
         end
         
         count = count + 1
@@ -275,11 +283,11 @@ bird.death_sequence = {
         bird.y = start_y-1500*e+1500*e*e
         bird.x = bird.x+200*s
         bird.z_rotation = {(bird.z_rotation[1]+200*s)%360,bird.w/2,bird.h/2}
-        print(bird.z_rotation[1])
+        --print(bird.z_rotation[1])
         if bird.y > 1300 then
-            print("1",bird.death_sequence)
+            --print("1",bird.death_sequence)
             Animation_Loop:delete_animation(bird.death_sequence)
-            print("2")
+            --print("2")
             
             gamestate:change_state_to("LVL_TRANSITION")
             
@@ -298,6 +306,20 @@ bird.death_sequence_pt2 = {
     end
 }
 --]]
+
+function bird:death()
+    
+    bird.dead = true
+    
+    start_y = bird.y
+    
+    e = 0
+    
+    dolater(Animation_Loop.delete_animation,Animation_Loop,bird.animation)
+    
+    Animation_Loop:add_animation(bird.death_sequence)
+    
+end
 function bird:recieve_impact(v_x,v_y)
     
     --print()
@@ -316,15 +338,7 @@ function bird:recieve_impact(v_x,v_y)
         
     elseif damage == 3 then
         
-        bird.dead = true
-        
-        start_y = bird.y
-        
-        e = 0
-        
-        Animation_Loop:delete_animation(bird.animation)
-        
-        Animation_Loop:add_animation(bird.death_sequence)
+        bird:death()
         
         return
     end
@@ -373,6 +387,33 @@ function bird:setup_for_level(t)--next_lvl, start_x, start_y)
     floor_y      = t.floor_y      or 1050
     ceiling_y    = t.ceiling_y    or   40
     
+    enemy_obstacles = t.enemy_obstacles or {}
+    my_obstacles    = t.my_obstacles    or {}
+    
+    
+    if # enemy_obstacles ~= 0 then
+        for i = 1, # enemy_obstacles do
+            
+            if enemy_obstacles[i].x > bird.x then
+                
+                bird.right_obstacle = i
+                
+                break
+                
+            elseif enemy_obstacles[i].x < bird.x and
+                enemy_obstacles[i].x + enemy_obstacles[i].w > bird.x then
+                
+                bird.under_obstacle = i
+                
+            else
+                
+                bird.left_obstacle = i
+                
+            end
+            
+        end
+    end
+    
     vx = scroll_speed
     
     layers.player:add(bird)
@@ -414,7 +455,28 @@ end
 bird.flap = flap_func
 
 
+local undo_dx, undo_dy
 
+function bird.undo_move(item)
+    
+    --prin
+    
+    if     bird.x1+undo_dx > item.x2 or bird.x2+undo_dx < item.x1 then
+        bird.x = bird.x + undo_dx
+    elseif bird.y1+undo_dy > item.y2 or bird.y2+undo_dy < item.y1 then
+        bird.y = bird.y + undo_dy
+    end
+    
+    
+    
+    
+    if bird.x < lvl.left_screen_edge then
+        
+        bird:death()
+        
+    end
+    
+end
 
 
 do
@@ -422,6 +484,9 @@ do
     local bob_period = flap_speed * (# flap_order)
     
     function bird.on_idle(s)
+        
+        undo_dx = bird.x
+        undo_dy = bird.y
         
         if bird.hit then
             
@@ -451,8 +516,15 @@ do
             
             bird.y = y_base
             
+            
+            undo_dx = undo_dx - bird.x
+            undo_dy = undo_dy - bird.y
+            
             return
         end
+        
+        
+        
         e = e + s
         
         if e > bob_period then e = 0 end
@@ -466,9 +538,9 @@ do
         
         --bob up and down
         if bob then
-            bird.y = y_base + 10*math.cos(p)
+            bob_group.y =  10*math.cos(p)
         else
-            bird.y = y_base
+            bob_group.y = 0
         end
         
         --move its crest and tail
@@ -488,21 +560,92 @@ do
         elseif bird.x > lvl.stop_scroll then
             
             gamestate:change_state_to("LVL_TRANSITION")
-            --Transition_Menu:load_assets(lvl:curr_lvl())
             
         end
         
-        y_base = y_base + vy*s
-        
-        if y_base < ceiling_y then
-            
-            y_base = ceiling_y
-            
-        elseif y_base > bottom_limit then
-            
-            y_base = bottom_limit
+        if bird.under_obstacle then
+            if bird.x >
+                enemy_obstacles[bird.under_obstacle].x +
+                enemy_obstacles[bird.under_obstacle].w then
+                
+                
+                bird.left_obstacle = bird.under_obstacle
+                
+                bird.under_obstacle = nil
+                
+                print("MAX OBST:",bird.left_obstacle,bird.under_obstacle,bird.right_obstacle)
+                
+            elseif bird.x < enemy_obstacles[bird.under_obstacle].x then
+                
+                
+                bird.right_obstacle = bird.under_obstacle
+                
+                bird.under_obstacle = nil
+                
+                
+                print("MAX OBST:",bird.left_obstacle,bird.under_obstacle,bird.right_obstacle)
+                
+            end
             
         end
+        
+        if vx > 0 and bird.right_obstacle and bird.x > enemy_obstacles[bird.right_obstacle].x then
+            
+            if bird.x <
+                enemy_obstacles[bird.right_obstacle].x +
+                enemy_obstacles[bird.right_obstacle].w then
+                
+                
+                bird.under_obstacle = bird.right_obstacle
+                
+            else
+                
+                bird.left_obstacle = bird.right_obstacle
+                
+            end
+            
+            --if doesn't exist, then it nils it for us
+            bird.right_obstacle = enemy_obstacles[bird.right_obstacle + 1] ~= nil and bird.right_obstacle + 1 or nil
+            
+            print("MAX OBST:",bird.left_obstacle,bird.under_obstacle,bird.right_obstacle)
+            
+        elseif vx < 0 and bird.left_obstacle and bird.x <
+            enemy_obstacles[bird.left_obstacle].x +
+            enemy_obstacles[bird.left_obstacle].w then
+            
+            
+            if bird.x > enemy_obstacles[bird.left_obstacle].x then
+                
+                
+                bird.under_obstacle = bird.left_obstacle
+                
+            else
+                
+                bird.right_obstacle = bird.left_obstacle
+                
+            end
+            
+            --if doesn't exist, then it nils it for us
+            bird.left_obstacle = enemy_obstacles[bird.left_obstacle - 1] ~= nil and bird.left_obstacle - 1 or nil
+            
+            print("MAX OBST:",bird.left_obstacle,bird.under_obstacle,bird.right_obstacle)
+            
+        end
+        
+        bird.y = bird.y + vy*s
+        
+        if bird.y < ceiling_y then
+            
+            bird.y = ceiling_y
+            
+        elseif bird.y > bottom_limit then
+            
+            bird.y = bottom_limit
+            
+        end
+        
+        undo_dx = undo_dx - bird.x
+        undo_dy = undo_dy - bird.y
         
     end
 end
@@ -586,6 +729,8 @@ do
         
         if not sphincter_ready then return end
         
+        if not Hud:drop_poop() then return end
+        
         next_poop = table.remove(old_poo) or new_poo()
         
         next_poop.x = bird.x+30
@@ -598,7 +743,7 @@ do
         collides_with_enemy[next_poop] = next_poop
         
         Animation_Loop:add_animation(next_poop.fall)
-        print("POOOOOOPP",next_poop.fall)
+        --print("POOOOOOPP",next_poop.fall)
         sphincter_ready = false
         sphincter_shutter_speed:start()
     end
