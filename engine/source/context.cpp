@@ -427,6 +427,86 @@ private:
 
 //-----------------------------------------------------------------------------
 
+class MemReporter : public Action
+{
+public:
+
+	MemReporter( bool _once )
+	:
+		once( _once )
+	{
+		gchar * fn = g_build_filename( G_DIR_SEPARATOR_S "proc" , "self" , "status" , NULL );
+
+		filename = fn;
+
+		g_free( fn );
+
+		regex = g_regex_new( "^VmRSS:[^0-9]*([0-9]+).*$" , G_REGEX_MULTILINE , ( GRegexMatchFlags ) 0 , 0 );
+	}
+
+	~MemReporter()
+	{
+		g_regex_unref( regex );
+	}
+
+protected:
+
+	virtual bool run()
+	{
+		bool ok = false;
+
+		gchar * contents = 0;
+
+		if ( g_file_get_contents( filename.c_str() , & contents , 0 , 0 ) )
+		{
+			GMatchInfo * mi = 0;
+
+			if ( g_regex_match( regex , contents , ( GRegexMatchFlags ) 0 , & mi ) )
+			{
+				if ( gchar * n = g_match_info_fetch( mi , 1 ) )
+				{
+					int rss = atoi( n );
+
+					if ( rss > peak )
+					{
+						peak = rss;
+					}
+
+					g_info( "RSS = %d : %+d : peak %d " , rss , last ? rss - last : 0 , peak );
+
+					last = rss;
+
+					g_free( n );
+
+					ok = true;
+				}
+			}
+
+			g_match_info_free( mi );
+
+			g_free( contents );
+		}
+
+		if ( ! ok )
+		{
+			g_info( "FAILED TO GET MEMORY INFORMATION" );
+			return false;
+		}
+
+		return ! once;
+	}
+
+	bool		once;
+	String 		filename;
+	GRegex *	regex;
+	static int	peak;
+	static int 	last;
+};
+
+int MemReporter::peak = 0;
+int MemReporter::last = 0;
+
+//-----------------------------------------------------------------------------
 
 int TPContext::console_command_handler( const char * command, const char * parameters, void * self )
 {
@@ -441,7 +521,7 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         for ( StringMap::const_iterator it = context->config.begin(); it != context->config.end(); ++it )
         {
-            g_info( "%-15.15s %s", it->first.c_str(), it->second.c_str() );
+            g_info( "%-25.25s %s", it->first.c_str(), it->second.c_str() );
         }
     }
     else if ( !strcmp( command, "profile" ) )
@@ -629,6 +709,17 @@ int TPContext::console_command_handler( const char * command, const char * param
                 g_info( "FAILED TO OPEN '%s'" , parameters );
             }
         }
+    }
+    else if ( ! strcmp( command , "mem" ) )
+    {
+    	int interval = -1;
+
+    	if ( parameters )
+    	{
+    		interval = atoi( parameters ) * 1000;
+    	}
+
+    	Action::post( new MemReporter( interval == -1 ? true : false ) , interval );
     }
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
@@ -1269,6 +1360,10 @@ int TPContext::run()
     }
 
     //.........................................................................
+
+    load_background();
+
+    //.........................................................................
     // Load the app
 
     g_info( "LOADING APP..." );
@@ -1695,6 +1790,8 @@ void TPContext::close_current_app()
 
 void TPContext::reload_app()
 {
+	close_current_app();
+
     App * new_app = NULL;
 
     load_app( &new_app );
@@ -2130,6 +2227,7 @@ void TPContext::load_external_configuration()
         TP_FIRST_APP_EXITS,
         TP_HTTP_PORT,
         TP_RESOURCES_PATH,
+        TP_TEXTURE_CACHE_LIMIT,
 
         NULL
     };
@@ -2260,9 +2358,13 @@ void TPContext::validate_configuration()
 
     // DOWNLOADS PATH
 
-    String downloads_path = Util::canonical_external_path( get( TP_DOWNLOADS_PATH , "downloads" , true ) );
+    gchar * default_downloads_path = g_build_filename( get( TP_DATA_PATH ) , "downloads" , NULL );
+
+    String downloads_path = Util::canonical_external_path( get( TP_DOWNLOADS_PATH , default_downloads_path , true ) );
 
     set( TP_DOWNLOADS_PATH , downloads_path );
+
+    g_free( default_downloads_path );
 
     if ( g_mkdir_with_parents( downloads_path.c_str() , 0700 ) != 0 )
     {
@@ -2590,7 +2692,7 @@ Image * TPContext::load_icon( const gchar * path )
         memset( &result, 0, sizeof( TPImage ) );
 
 
-        if ( sscanf( info_contents, "%s %u %u %u %u %u", actual_data_hash, &result.width, &result.height, &result.pitch, &result.depth, &result.bgr ) == 6 )
+        if ( sscanf( info_contents, "%s %u %u %u %u %u %u", actual_data_hash, &result.width, &result.height, &result.pitch, &result.depth, &result.bgr , &result.pm_alpha ) >= 6 )
         {
             if ( !strcmp( actual_data_hash, data_hash ) )
             {
@@ -2603,7 +2705,7 @@ Image * TPContext::load_icon( const gchar * path )
                 if ( g_file_get_contents( icon_file_path, &raw_contents, &length, NULL ) )
                 {
                     result.pixels = raw_contents;
-                    result.free_pixels = g_free;
+                    result.free_image = Image::free_image_with_g_free;
 
                     return Image::make( result );
                 }
@@ -2634,7 +2736,7 @@ Image * TPContext::load_icon( const gchar * path )
 
         if ( g_mkdir_with_parents( icon_cache_path, 0700 ) == 0 )
         {
-            gchar * info = g_strdup_printf( "%s %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() );
+            gchar * info = g_strdup_printf( "%s %u %u %u %u %u %u", data_hash, image->width(), image->height(), image->pitch(), image->depth(), image->bgr() , image->pm_alpha() );
 
             free_later( info );
 
@@ -2771,6 +2873,54 @@ void TPContext::audio_detection_match( const gchar * json )
 
         Action::post( new AudioMatchAction( this , json ) );
     }
+}
+
+void TPContext::load_background()
+{
+#ifndef TP_PRODUCTION
+
+	if ( const gchar * resources_path = get( TP_RESOURCES_PATH , 0 , true ) )
+	{
+		gchar * path = g_build_filename( resources_path , "background.jpg" , NULL );
+
+		FreeLater free_later( path );
+
+		if ( ! g_file_test( path , G_FILE_TEST_EXISTS ) )
+		{
+			return;
+		}
+
+		if ( Image * image = Image::decode( path , false ) )
+		{
+			ClutterActor * bg = clutter_texture_new();
+
+			clutter_actor_set_name( bg , "background" );
+
+			Images::load_texture( CLUTTER_TEXTURE( bg ) , image );
+
+			delete image;
+
+			gint iw;
+			gint ih;
+
+			clutter_texture_get_base_size( CLUTTER_TEXTURE( bg ) , & iw , & ih );
+
+			ClutterActor * stage = clutter_stage_get_default();
+
+	        gfloat width;
+	        gfloat height;
+
+	        clutter_actor_get_size( stage , & width , & height );
+
+	        clutter_actor_set_scale( bg , width / iw , height / ih );
+
+	        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , bg );
+
+	        g_object_set_data_full( G_OBJECT( bg ) , "tp-src", g_strdup( "[background]" ) , g_free);
+		}
+	}
+
+#endif
 }
 
 //=============================================================================

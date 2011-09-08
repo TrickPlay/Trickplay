@@ -843,7 +843,7 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
     if ( ! splash_path.empty() )
     {
-        Image * splash_image = Image::decode( splash_path.c_str() );
+        Image * splash_image = Image::decode( splash_path.c_str() , false );
 
         if ( ! splash_image )
         {
@@ -1659,7 +1659,7 @@ gboolean App::animate_out_callback( gpointer s )
 //-----------------------------------------------------------------------------
 
 
-Image * App::load_image( const gchar * source )
+Image * App::load_image( const gchar * source , bool read_tags )
 {
     tplog( "LOADING SYNC '%s'" , source );
 
@@ -1694,7 +1694,7 @@ Image * App::load_image( const gchar * source )
         {
             tplog( "  DECODING" );
 
-            image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
+            image = Image::decode( response.body->data, response.body->len, read_tags , response.get_header( "Content-Type" ) );
         }
         else
         {
@@ -1706,7 +1706,7 @@ Image * App::load_image( const gchar * source )
         tplog( "  PATH IS '%s'" , path );
         tplog( "  DECODING" );
 
-        image = Image::decode( path );
+        image = Image::decode( path , read_tags );
     }
 
     tplog( "  %s" , image ? "SUCCEEDED" : "FAILED" );
@@ -1718,8 +1718,9 @@ class ImageResponseClosure
 {
 public:
 
-    ImageResponseClosure( Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    ImageResponseClosure( bool _read_tags , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
     :
+    	read_tags( _read_tags ),
         callback( _callback ),
         user( _user ),
         destroy_notify( _destroy_notify )
@@ -1741,6 +1742,7 @@ public:
             tplog( "  STARTING DECODE FOM BUFFER" );
 
             Image::decode_async( response.body ,
+            		self->read_tags ,
                     response.get_header( "Content-Type" ),
                     self->callback,
                     self->user,
@@ -1764,18 +1766,23 @@ public:
 
 private:
 
-
+    bool						read_tags;
     Image::DecodeAsyncCallback  callback;
     gpointer                    user;
     GDestroyNotify              destroy_notify;
 };
 
-bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+bool App::load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
     tplog( "LOADING ASYNC '%s'" , source );
 
     if ( ! source )
     {
+    	if ( destroy_notify )
+    	{
+    		destroy_notify( user );
+    	}
+
         return false;
     }
 
@@ -1786,6 +1793,12 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
     if ( ! path )
     {
         tplog( "  INVALID PATH" );
+
+        if ( destroy_notify )
+    	{
+    		destroy_notify( user );
+    	}
+
         return false;
     }
 
@@ -1801,7 +1814,7 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
             request,
             get_cookie_jar(),
             ImageResponseClosure::response_callback,
-            new ImageResponseClosure( callback , user , destroy_notify ),
+            new ImageResponseClosure( read_tags , callback , user , destroy_notify ),
             ImageResponseClosure::destroy );
     }
     else
@@ -1809,7 +1822,7 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
         tplog( "  PATH IS '%s'" , path );
         tplog( "  STARTING DECODE FROM FILE" );
 
-        Image::decode_async( path , callback , user , destroy_notify );
+        Image::decode_async( path , read_tags , callback , user , destroy_notify );
     }
 
     return true;

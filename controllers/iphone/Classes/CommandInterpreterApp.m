@@ -23,8 +23,6 @@
         delegate = theDelegate;
         
         firstCommand = YES;
-        
-        //[self createCommandDictionary];
     }
     
     return self;
@@ -32,7 +30,7 @@
 
 
 - (void)interpretCommand:(NSString *)command {
-    //NSLog(@"Received command: %@", command);
+    fprintf(stderr, "\n\nAsync Command received: %s\n\n", [command UTF8String]);
     
     NSArray *components = [[command componentsSeparatedByString:@"\t"] retain];
     NSMutableArray *args = [[[NSMutableArray alloc] initWithCapacity:20] autorelease];
@@ -53,20 +51,12 @@
         return;
     }
     //NSLog(@"CommandInterpreterApp delegate: %@", delegate);
-    /*
-    SEL method = (SEL)[commandDictionary objectForKey:key];
-    if (method) {
-        [delegate performSelector:method withObject:args];
-    } else {
-        fprintf(stderr, "Unrecognized command %s\n", [key UTF8String]);
-    }
-    //*/
     //NSLog(@"CommandInterpreterApp command: %@", args);
     if (firstCommand) {
         if ([command compare:@"WM"] == NSOrderedSame) {
             [delegate do_WM:args];
         }
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"PushAppBrowserNotification" object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"ConnectionEstablishedNotification" object:nil];
         firstCommand = NO;
     }
     if ([command compare:@"MC"] == NSOrderedSame) {
@@ -103,8 +93,10 @@
         [delegate do_SS:args];
     } else if ([command compare:@"PS"] == NSOrderedSame) {
         [delegate do_PS:args];
-    } else if ([command compare:@"UX"] == NSOrderedSame) {
-        [delegate do_UX:args];
+    } else if ([command compare:@"SV"] == NSOrderedSame) {
+        [delegate do_SV];
+    } else if ([command compare:@"HV"] == NSOrderedSame) {
+        [delegate do_HV];
     } else if ([command compare:@"PI"] == NSOrderedSame) {
         [delegate do_PI:args];
     } else {

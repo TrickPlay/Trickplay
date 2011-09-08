@@ -13,7 +13,7 @@
 @optional
 - (void)serviceResolved:(NSNetService *)service;
 - (void)didNotResolveService;
-- (void)reloadData;
+- (void)didFindServices;
 
 @end
 

@@ -195,18 +195,16 @@
  */
 
 - (void)get_color:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"color"]) {
-        NSNumber *red, *green, *blue, *alpha;
+    NSNumber *red, *green, *blue, *alpha;
         
-        const CGFloat *components = CGColorGetComponents(view.backgroundColor.CGColor);
-        red = [NSNumber numberWithFloat:components[0] * 255.0];
-        green = [NSNumber numberWithFloat:components[1] * 255.0];
-        blue = [NSNumber numberWithFloat:components[2] * 255.0];
-        alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.backgroundColor.CGColor) * 255.0];
+    const CGFloat *components = CGColorGetComponents(view.backgroundColor.CGColor);
+    red = [NSNumber numberWithFloat:components[0] * 255.0];
+    green = [NSNumber numberWithFloat:components[1] * 255.0];
+    blue = [NSNumber numberWithFloat:components[2] * 255.0];
+    alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.backgroundColor.CGColor) * 255.0];
         
-        NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
-        [dictionary setObject:colorArray forKey:@"color"];
-    }
+    NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
+    [dictionary setObject:colorArray forKey:@"color"];
 }
 
 /**
@@ -214,18 +212,16 @@
  */
 
 - (void)get_border_color:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"border_color"]) {
-        NSNumber *red, *green, *blue, *alpha;
+    NSNumber *red, *green, *blue, *alpha;
         
-        const CGFloat *components = CGColorGetComponents(view.layer.borderColor);
-        red = [NSNumber numberWithFloat:components[0] * 255.0];
-        green = [NSNumber numberWithFloat:components[1] * 255.0];
-        blue = [NSNumber numberWithFloat:components[2] * 255.0];
-        alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.layer.borderColor) * 255.0];
+    const CGFloat *components = CGColorGetComponents(view.layer.borderColor);
+    red = [NSNumber numberWithFloat:components[0] * 255.0];
+    green = [NSNumber numberWithFloat:components[1] * 255.0];
+    blue = [NSNumber numberWithFloat:components[2] * 255.0];
+    alpha = [NSNumber numberWithFloat:CGColorGetAlpha(view.layer.borderColor) * 255.0];
         
-        NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
-        [dictionary setObject:colorArray forKey:@"border_color"];
-    }
+    NSArray *colorArray = [NSArray arrayWithObjects:red, green, blue, alpha, nil];
+    [dictionary setObject:colorArray forKey:@"border_color"];
 }
 
 /**
@@ -233,9 +229,7 @@
  */
 
 - (void)get_border_width:(NSMutableDictionary *)dictionary {
-    if ([dictionary objectForKey:@"border_width"]) {
-        [dictionary setObject:[NSNumber numberWithFloat:view.layer.borderWidth] forKey:@"border_width"];
-    }
+    [dictionary setObject:[NSNumber numberWithFloat:view.layer.borderWidth] forKey:@"border_width"];
 }
 
 /**

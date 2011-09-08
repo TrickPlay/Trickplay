@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
 
 // Constant for the number of times per second (Hertz) to sample acceleration.
 #define ACCEL_FREQ_LOW          40

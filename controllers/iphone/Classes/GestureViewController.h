@@ -1,5 +1,5 @@
 //
-//  GestureViewController.h
+//  TPAppViewController.h
 //  TrickplayController_v2
 //
 //  Created by Rex Fenley on 2/14/11.
@@ -14,7 +14,7 @@
 /**
  * The AdvancedUIDelegate protocol implemented by AdvancedUIObjectManager
  * registers a delegate which is passed asyncronous calls made for AdvancedUI.
- * (Given that the GestureViewController is the only object which utilizes
+ * (Given that the TPAppViewController is the only object which utilizes
  * asynchronous socket communication with Trickplay, it is the only object
  * which has one of these delgates.)
  *
@@ -26,7 +26,7 @@
 @protocol AdvancedUIDelegate <NSObject>
 
 @required
-- (void)setupServiceWithPort:(NSInteger)p
+- (void)setupServiceWithPort:(NSUInteger)p
                     hostname:(NSString *)h;
 - (BOOL)startServiceWithID:(NSString *)ID;
 
@@ -89,6 +89,8 @@
 - (void)startTouches;
 - (void)stopTouches;
 
+- (void)setSwipe:(BOOL)allowed;
+
 - (void)reset;
 
 @end
@@ -147,7 +149,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // Current host name for asynchronous communication with Trickplay
     NSString *hostName;
     // Current port number for asynchronous communication with Trickplay
-    NSInteger port;
+    NSUInteger port;
     // HTTP port number used for http requests. Utilized for gathering lists
     // of app data from Trickplay and pulling resources such as images and
     // audio from Trickplay
@@ -164,11 +166,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // TextField for entering text; used when Trickplay requests text input
     // with controller:enter_text(string label, string text) call from Trickplay.
     UITextField *theTextField;
+    UILabel *theLabel;
     // Black border around theTextField
     UIView *textView;
     // Displays the background which the developer may change with the
     // controller:set_ui_background(string resource, string mode) call
-    // from Trickplay. Also has foregroundView as a the top subview.
+    // from Trickplay. Also has foregroundView as the top subview.
     UIImageView *backgroundView;
     // The Root view tree for all graphics added via the
     // controller:set_ui_image(string resource, int x, int y, int width,
@@ -210,7 +213,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // The UIViewController for the virtual remote used to control the Television.
     VirtualRemoteViewController *virtualRemote;
     
-    // YES if graphics have been added to Take Control's views, NO otherwise.
+    // YES if static graphics have been added to Take Control's views, NO otherwise.
     BOOL graphics;
     
     // The TouchController. All touch events sent to this delegate
@@ -222,7 +225,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // The AppBrowserViewController. Used to inform view controllers lower on
     // the navigation stack when the socket connection breaks or ends.
     id <GestureViewControllerSocketDelegate> socketDelegate;
-    // The AdvancedUIObjectManager. Any asynchronous messages set from Trickplay
+    // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
     // that refer to the AdvancedUIObjectManager are sent there via this
     // delegate's protocol.
     id <AdvancedUIDelegate> advancedUIDelegate;
@@ -231,8 +234,11 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @property (nonatomic, retain) NSString *version;
 @property (nonatomic, assign) SocketManager *socketManager;
 
+@property (assign) BOOL graphics;
+
 @property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
 @property (nonatomic, retain) IBOutlet UITextField *theTextField;
+@property (nonatomic, retain) IBOutlet UILabel *theLabel;
 @property (nonatomic, retain) IBOutlet UIView *textView;
 @property (retain) IBOutlet UIImageView *backgroundView;
 
@@ -242,7 +248,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @property (nonatomic, retain) id <AdvancedUIDelegate> advancedUIDelegate;
 
 
-- (void)setupService:(NSInteger)port
+- (void)setupService:(NSUInteger)port
             hostname:(NSString *)hostName
             thetitle:(NSString *)name;
 
@@ -255,8 +261,11 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 - (IBAction)hideTextBox:(id)sender;
 
 - (void)clearUI;
-
 - (void)clean;
+
+- (void)advancedUIObjectAdded;
+- (void)advancedUIObjectDeleted;
+- (void)checkShowVirtualRemote;
 
 - (void)exitTrickplayApp:(id)sender;
 

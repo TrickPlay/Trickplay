@@ -22,7 +22,7 @@
 @synthesize webTexts;
 @synthesize groups;
 @synthesize resourceManager;
-@synthesize gestureViewController;
+@synthesize appViewController;
 
 - (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager {
     if ((self = [super init])) {
@@ -35,8 +35,11 @@
         
         self.resourceManager = aResourceManager;
         
-        view = aView;
-        gestureViewController = nil;
+        timeLine = [[TrickplayTimeline alloc] init];
+        
+        view = [aView retain];
+        view.multipleTouchEnabled = YES;
+        appViewController = nil;
     }
     
     return self;
@@ -75,6 +78,8 @@
 
     [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
+    [timeLine startTimeline];
+    
     return YES;
 }
 
@@ -110,36 +115,47 @@
 
 - (void)clean {
     NSLog(@"AdvancedUI clean");
+
+    // TODO: figure out why there are no objects in any of these tables!
     
-    for (UIView *rectangle in [rectangles allValues]) {
+    for (TrickplayUIElement *rectangle in [rectangles allValues]) {
+        rectangle.manager = nil;
         [rectangle removeFromSuperview];
     }
     [rectangles removeAllObjects];
     
-    for (UIView *image in [images allValues]) {
+    for (TrickplayUIElement *image in [images allValues]) {
+        image.manager = nil;
         [image removeFromSuperview];
     }
     [images removeAllObjects];
     
-    for (UIView *textField in [textFields allValues]) {
+    for (TrickplayUIElement *textField in [textFields allValues]) {
+        textField.manager = nil;
         [textField removeFromSuperview];
     }
     [textFields removeAllObjects];
     
-    for (UIView *webText in [webTexts allValues]) {
+    for (TrickplayUIElement *webText in [webTexts allValues]) {
+        webText.manager = nil;
         [webText removeFromSuperview];
     }
     [webTexts removeAllObjects];
     
-    for (UIView *group in [groups allValues]) {
+    for (TrickplayUIElement *group in [groups allValues]) {
+        group.manager = nil;
         [group removeFromSuperview];
     }
     [groups removeAllObjects];
+    
+    [appViewController advancedUIObjectDeleted];
 }
 
 
 /**
  * Creates Images and stores them
+ *
+ * MUST NOT USE AUTORELEASE POOL FOR ADVANCED_UI OBJECTS!
  */
 
 - (void)createImage:(NSString *)imageID withArgs:(NSDictionary *)args {
@@ -148,6 +164,7 @@
     TrickplayImage *image = [[TrickplayImage alloc] initWithID:imageID args:args resourceManager:resourceManager objectManager:self];
     
     [images setObject:image forKey:imageID];
+    image.timeLine = timeLine;
     
     [image release];
 }
@@ -161,6 +178,7 @@
     TrickplayRectangle *rect = [[TrickplayRectangle alloc] initWithID:rectID args:args objectManager:self];
     
     [rectangles setObject:rect forKey:rectID];
+    rect.timeLine = timeLine;
     
     [rect release];
 }
@@ -174,6 +192,7 @@
     TrickplayText *text = [[TrickplayText alloc] initWithID:textID args:args objectManager:self];
     
     [textFields setObject:text forKey:textID];
+    text.timeLine = timeLine;
     
     [text release];
 }
@@ -186,6 +205,7 @@
     TrickplayTextHTML *text = [[TrickplayTextHTML alloc] initWithID:textID args:args objectManager:self];
     
     [webTexts setObject:text forKey:textID];
+    text.timeLine = timeLine;
     
     [text release];
 }
@@ -199,6 +219,7 @@
     TrickplayGroup *group = [[TrickplayGroup alloc] initWithID:groupID args:args objectManager:self];
     
     [groups setObject:group forKey:groupID];
+    group.timeLine = timeLine;
     
     [group release];
 }
@@ -221,6 +242,16 @@
     }
     
     NSDictionary *object = [NSDictionary dictionaryWithObject:ID forKey:@"id"];
+    NSString *JSON_String = [object yajl_JSONString];
+    [self reply:JSON_String];
+}
+
+- (void)destroyObjectReply:(NSString *)ID absolute:(BOOL)absolute {
+    if (!socketManager) {
+        return;
+    }
+    
+    NSDictionary *object = [NSDictionary dictionaryWithObjectsAndKeys:ID, @"id", [NSNumber numberWithBool:absolute], @"destroyed", nil];
     NSString *JSON_String = [object yajl_JSONString];
     [self reply:JSON_String];
 }
@@ -267,31 +298,41 @@
     // Must have class type and id, type must be a string, id must be a string
     // id cannot equal 0 since this is the ID for screen
     if (!type || !ID || ![type isKindOfClass:[NSString class]]
-        || ![ID isKindOfClass:[NSString class]] || [ID unsignedIntValue] == 0) {
+        || ![ID isKindOfClass:[NSString class]] || [(NSString *)ID compare:@"0"] == NSOrderedSame) {
         [self reply:nil];
         return;
     }
     
+    BOOL destroy_absolutely = NO;
     if ([rectangles objectForKey:ID]) {
+        TrickplayRectangle *rectangle = [rectangles objectForKey:ID];
+        destroy_absolutely = (rectangle.retainCount <= 1);
         [rectangles removeObjectForKey:ID];
     } else if ([groups objectForKey:ID]) {
         TrickplayGroup * group = [groups objectForKey:ID];
-        for (TrickplayUIElement *element in group.view.subviews) {
-            [element do_unparent:nil];
-        }
+        [group do_clear:nil];
+        destroy_absolutely = (group.retainCount <= 1);
         [groups removeObjectForKey:ID];
     } else if ([textFields objectForKey:ID]) {
+        TrickplayText *text = [textFields objectForKey:ID];
+        destroy_absolutely = (text.retainCount <= 1);
         [textFields removeObjectForKey:ID];
     } else if ([webTexts objectForKey:ID]) {
+        TrickplayTextHTML *webText = [webTexts objectForKey:ID];
+        destroy_absolutely = (webText.retainCount <= 1);
         [webTexts removeObjectForKey:ID];
     } else if ([images objectForKey:ID]) {
+        TrickplayImage *image = [images objectForKey:ID];
+        destroy_absolutely = (image.retainCount <= 1);
         [images removeObjectForKey:ID];
     } else {
         [self reply:nil];
         return;
     }
     
-    [self createObjectReply:ID];
+    [appViewController advancedUIObjectDeleted];
+    
+    [self destroyObjectReply:ID absolute:destroy_absolutely];
 }
 
 - (void)setValuesForObject:(NSDictionary *)JSON_object {
@@ -299,6 +340,10 @@
     
     // Set values for class specific properties
     TrickplayUIElement *object = [self findObjectForID:[JSON_object objectForKey:@"id"]];
+    if (!object) {
+        [self reply:nil];
+        return;
+    }
     [object setValuesFromArgs:args];
     
     [self reply:@"[true]"];
@@ -309,6 +354,10 @@
     NSDictionary *properties = [JSON_object objectForKey:@"properties"];
     // Find the AdvancedUI Object to get properties from
     TrickplayUIElement *object = [self findObjectForID:[JSON_object objectForKey:@"id"]];
+    if (!object) {
+        [self reply:nil];
+        return;
+    }
     // Make a dictionary that will carry the returned values
     NSMutableDictionary *JSON_dictionary = [NSMutableDictionary dictionaryWithDictionary:JSON_object];
     // Set the properties to this dictionary
@@ -322,6 +371,10 @@
     
     // Set values for class specific properties
     TrickplayUIElement *object = [self findObjectForID:[JSON_object objectForKey:@"id"]];
+    if (!object) {
+        [self reply:nil];
+        return;
+    }
     [object deleteValuesFromArgs:args];    // TODO: finish this
     [self reply:@"[false]"];
 }
@@ -361,6 +414,10 @@
         result = [uiObject callMethod:method withArgs:args];
     }
     
+    if (view.view.subviews.count == 0) {
+        [appViewController performSelector:@selector(advancedUIObjectDeleted)];
+    }
+    
     if (result) {
         [self reply:[[NSDictionary dictionaryWithObject:result forKey:@"result"] yajl_JSONString]];
     } else {
@@ -375,12 +432,24 @@
     [self reply:nil];
 }
 
+#pragma mark -
+#pragma mark Copy/Deallocation
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [self retain];
+}
 
 - (void)dealloc {
     NSLog(@"AdvancedUIObjectManager dealloc");
     if (hostName) {
         [hostName release];
         hostName = nil;
+    }
+    
+    if (timeLine) {
+        [timeLine stopTimeline];
+        [timeLine release];
+        timeLine = nil;
     }
     
     if (socketManager) {
@@ -398,7 +467,9 @@
     self.groups = nil;
     self.resourceManager = nil;
     
-    gestureViewController = nil;
+    [view release];
+    
+    appViewController = nil;
     
     [super dealloc];
 }
