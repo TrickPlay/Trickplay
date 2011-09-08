@@ -331,7 +331,8 @@ Controller::Controller( ControllerList * _list, TPContext * _context , const cha
     loaded_external_map( false ),
     ts_accelerometer_started( 0 ),
     ts_pointer_started( 0 ),
-    ts_touch_started( 0 )
+    ts_touch_started( 0 ),
+    advanced_ui_is_ready( false )
 {
     // If the outside world did not provide a function to execute commands,
     // we set our own which always fails.
@@ -836,6 +837,8 @@ void Controller::advanced_ui_ready( void )
     {
         ( *it )->advanced_ui_ready( );
     }
+
+    advanced_ui_is_ready = true;
 }
 
 
