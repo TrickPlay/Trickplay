@@ -75,11 +75,13 @@ typedef struct TPController TPController;
                                         sent by TrickPlay. This can be via an on
                                         screen keyboard.
 
-    TP_CONTROLLER_HAS_PICTURES        - The controller can can send pictures to Trickplay.
+    TP_CONTROLLER_HAS_IMAGES          - The controller can can send pictures to Trickplay.
 
     TP_CONTROLLER_HAS_AUDIO_CLIPS     - The controller can send audio clips to Trickplay.
 
     TP_CONTROLLER_HAS_ADVANCED_UI     - The controller supports advanced UI operations.
+
+    TP_CONTROLLER_HAS_VIRTUAL_REMOTE  - The controller can display a virtual remote.
 
 */
 
@@ -91,8 +93,9 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_SOUND                     0x0020
 #define TP_CONTROLLER_HAS_UI                        0x0040
 #define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
-#define TP_CONTROLLER_HAS_PICTURES                	0x0100
+#define TP_CONTROLLER_HAS_IMAGES                	0x0100
 #define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0200
+#define TP_CONTROLLER_HAS_VIRTUAL_REMOTE			0x0400
 
 #define TP_CONTROLLER_HAS_ADVANCED_UI               0x1000
 
@@ -483,6 +486,36 @@ struct TPControllerSpec
 #define TP_CONTROLLER_COMMAND_SET_UI_IMAGE          31
 
 /*
+    Constant: TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE
+
+    The controller should display a virtual remote that sends key events.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_VIRTUAL_REMOTE
+    in its capabilities.
+
+    Parameters:
+
+        None.
+*/
+
+#define TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE   32
+
+/*
+    Constant: TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE
+
+    The controller should hide the virtual remote.
+
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_VIRTUAL_REMOTE
+    in its capabilities.
+
+    Parameters:
+
+        None.
+*/
+
+#define TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE   33
+
+/*
     Constant: TP_CONTROLLER_COMMAND_PLAY_SOUND
     
     The controller should play a sound. The parameters include the resource name
@@ -514,34 +547,34 @@ struct TPControllerSpec
 #define TP_CONTROLLER_COMMAND_STOP_SOUND            41
 
 /*
-    Constant: TP_CONTROLLER_COMMAND_SUBMIT_PICTURE
+    Constant: TP_CONTROLLER_COMMAND_REQUEST_IMAGE
 
-    The controller should send a picture.
+    The controller should send an image.
 
-    This command is only sent if the controller includes TP_CONTROLLER_HAS_PICTURES
+    This command is only sent if the controller includes TP_CONTROLLER_HAS_IMAGES
     in its capabilities.
 
     Parameters:
 
-        None
+        A pointer to a <TPControllerRequestImage> structure
 */
 
-#define TP_CONTROLLER_COMMAND_SUBMIT_PICTURE        100
+#define TP_CONTROLLER_COMMAND_REQUEST_IMAGE        100
 
 /*
-    Constant: TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP
+    Constant: TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP
 
-    The controller should send a picture.
+    The controller should send an audio clip.
 
     This command is only sent if the controller includes TP_CONTROLLER_HAS_AUDIO_CLIPS
     in its capabilities.
 
     Parameters:
 
-        None
+        A point to a <TPControllerRequestAudio> structure
 */
 
-#define TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP     101
+#define TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP     101
 
 /*
    Constant: TP_CONTROLLER_COMMAND_ADVANCED_UI
@@ -886,11 +919,6 @@ struct TPControllerPlaySound
 
 typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
 
-#define TP_CONTROLLER_ADVANCED_UI_CREATE    1
-#define TP_CONTROLLER_ADVANCED_UI_DESTROY   2
-#define TP_CONTROLLER_ADVANCED_UI_GET       3
-#define TP_CONTROLLER_ADVANCED_UI_SET       4
-
 /*
     Struct: TPControllerAdvancedUI
 
@@ -901,28 +929,133 @@ typedef struct TPControllerAdvancedUI TPControllerAdvancedUI;
 struct TPControllerAdvancedUI
 {
     /*
-        Field: command
-
-        Values:
-
-            TP_CONTROLLER_ADVANCED_UI_CREATE    - Create UI elements.
-
-            TP_CONTROLLER_ADVANCED_UI_DESTROY   - Detsroy UI elements.
-
-            TP_CONTROLLER_ADVANCED_UI_GET       - Get UI element properties.
-
-            TP_CONTROLLER_ADVANCED_UI_SET       - Set UI element properties.
-    */
-
-    int             command;
-
-    /*
         Field: payload
 
         A JSON text describing the advanced UI command.
     */
 
     const char *    payload;
+
+    /*
+        Field: result
+
+        A JSON text describing the result of the command.
+    */
+
+    char *          result;
+
+    /*
+        Field: free_result
+
+        A function that will be called to free the result.
+    */
+
+    void            (*free_result)( void * result);
+};
+
+/*-----------------------------------------------------------------------------*/
+
+typedef struct TPControllerSubmitPicture TPControllerSubmitPicture;
+
+/*
+    Struct: TPControllerRequestImage
+
+    A pointer to a structure of this type is passed to execute_command when
+    the command is <TP_CONTROLLER_COMMAND_REQUEST_IMAGE>.
+*/
+
+struct TPControllerRequestImage
+{
+    /*
+        Field: max_width
+
+        If max_width is greater than zero, the controller should scale the
+        picture preserving its aspect ratio so that the width is not more
+        than max_width.
+    */
+
+    unsigned int max_width;
+
+    /*
+        Field: max_height
+
+        If max_height is greater than zero, the controller should scale the
+        picture preserving its aspect ratio so that the height is not more
+        than max_height.
+    */
+
+    unsigned int max_height;
+
+    /*
+        Field: edit
+
+        If edit is not zero, the controller should give the user a chance to
+        edit the picture before it is sent to Trickplay.
+    */
+
+    int edit;
+
+    /*
+        Field: mask
+
+        If this field is not NULL, it will be the name of a resource declared
+        in a previous call to execute_command with <TP_CONTROLLER_COMMAND_DECLARE_RESOURCE>.
+
+        If present, the controller should retrieve the mask and composite it with
+        the picture before submitting the result to Trickplay.
+    */
+
+    const char * mask;
+
+    /*
+        Field: dialog_label
+        
+        If this field is not NULL, it will be a label which should be displayed to the user as a 
+        prompt to choose an image to be sent from the controller.
+    */
+    
+    const char * dialog_label;
+
+    /*
+        Field: cancel_label
+        
+        If this field is not NULL, it will be a label which should be displayed to the user on a 
+        button, allowing the user to cancel choosing an image to be sent from the controller.
+        When the user presses that button, the controller should then generate a cancel event to the
+        engine through <tp_controller_cancel_image>
+    */
+    
+    const char * cancel_label;
+};
+
+/*
+    Struct: TPControllerRequestAudio
+
+    A pointer to a structure of this type is passed to execute_command when
+    the command is <TP_CONTROLLER_COMMAND_REQUEST_AUDIO>.
+*/
+
+struct TPControllerRequestAudioClip
+{
+    /*
+        Field: dialog_label
+        
+        If this field is not NULL, it will be a label which should be displayed to the user as a 
+        prompt to choose an audio clip to be sent from the controller.
+    */
+    
+    const char * dialog_label;
+
+    /*
+        Field: cancel_label
+        
+        If this field is not NULL, it will be a label which should be displayed to the user on a 
+        button, allowing the user to cancel choosing an audio clip to be sent from the controller.
+        When the user presses that button, the controller should then generate a cancel event to the
+        engine through <tp_controller_cancel_audio_clip>
+    */
+    
+    const char * cancel_label;
 };
 
 /*-----------------------------------------------------------------------------*/
@@ -933,6 +1066,42 @@ struct TPControllerAdvancedUI
     one or more of the functions described below. All of these functions are
     thread safe.
 */
+
+/*
+    Constants: Key Modifiers
+
+    These constants describe key modifiers for key and pointer events. They can be
+    ORed together and passed as the 'modifier' argument of event functions.
+
+    TP_CONTROLLER_MODIFIER_NONE			- No modifier key is down.
+    TP_CONTROLLER_MODIFIER_SHIFT		- The shift key is down.
+    TP_CONTROLLER_MODIFIER_LOCK			- The caps lock key is down.
+    TP_CONTROLLER_MODIFIER_CONTROL		- A control key is down.
+    TP_CONTROLLER_MODIFIER_SUPER		- The super key is down.
+    TP_CONTROLLER_MODIFIER_HYPER		- The hyper key is down.
+    TP_CONTROLLER_MODIFIER_META			- The meta key is down.
+
+	TP_CONTROLLER_MODIFIER_1			- Modifier key 1
+	TP_CONTROLLER_MODIFIER_2			- Modifier key 2
+	TP_CONTROLLER_MODIFIER_3			- Modifier key 3
+	TP_CONTROLLER_MODIFIER_4			- Modifier key 4
+	TP_CONTROLLER_MODIFIER_5			- Modifier key 5
+*/
+
+#define TP_CONTROLLER_MODIFIER_NONE			0x0000
+#define TP_CONTROLLER_MODIFIER_SHIFT		0x0001
+#define TP_CONTROLLER_MODIFIER_LOCK			0x0002
+#define TP_CONTROLLER_MODIFIER_CONTROL		0x0004
+#define TP_CONTROLLER_MODIFIER_SUPER		0x0008
+#define TP_CONTROLLER_MODIFIER_HYPER		0x0010
+#define TP_CONTROLLER_MODIFIER_META			0x0020
+
+#define TP_CONTROLLER_MODIFIER_1			0x0100
+#define TP_CONTROLLER_MODIFIER_2			0x0200
+#define TP_CONTROLLER_MODIFIER_3			0x0400
+#define TP_CONTROLLER_MODIFIER_4			0x0800
+#define TP_CONTROLLER_MODIFIER_5			0x1000
+
 
 /*
     Callback: tp_controller_key_down
@@ -946,6 +1115,8 @@ struct TPControllerAdvancedUI
         key_code -      An identifier for the key. There is a list of key codes in keys.h.
         
         unicode -       The unicode character for the key, if any, or zero.
+
+        modifiers -		A combination of <Key Modifiers>.
 */    
     
     TP_API_EXPORT
@@ -954,7 +1125,8 @@ struct TPControllerAdvancedUI
             
         TPController * controller,
         unsigned int key_code,
-        unsigned long int unicode);
+        unsigned long int unicode,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_key_up
@@ -968,6 +1140,8 @@ struct TPControllerAdvancedUI
         key_code -      An identifier for the key. There is a list of key codes in keys.h.
         
         unicode -       The unicode character for the key, if any, or zero.
+
+        modifiers -		A combination of <Key Modifiers>.
 */    
 
     TP_API_EXPORT
@@ -976,7 +1150,8 @@ struct TPControllerAdvancedUI
                               
         TPController * controller,
         unsigned int key_code,
-        unsigned long int unicode);
+        unsigned long int unicode,
+        unsigned long int modifiers);
     
 /*
     Callback: tp_controller_accelerometer
@@ -988,6 +1163,8 @@ struct TPControllerAdvancedUI
         controller -    The controller returned by <tp_context_add_controller>.
         
         x,y,z -         The accelerometer values for each axis.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -997,7 +1174,8 @@ struct TPControllerAdvancedUI
         TPController * controller,
         double x,
         double y,
-        double z);
+        double z,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_pointer_move
@@ -1009,6 +1187,8 @@ struct TPControllerAdvancedUI
         controller -    The controller returned by <tp_context_add_controller>.
 
         x,y -           The coordinates of the event, in pixels, relative to the display size.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1017,7 +1197,8 @@ struct TPControllerAdvancedUI
 
         TPController * controller,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_pointer_button_down
@@ -1031,6 +1212,8 @@ struct TPControllerAdvancedUI
         button -        The button number, where 1 is the first button.
 
         x,y -           The coordinates of the event, in pixels, relative to the display size.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1040,7 +1223,8 @@ struct TPControllerAdvancedUI
         TPController * controller,
         int button,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_pointer_button_up
@@ -1054,6 +1238,8 @@ struct TPControllerAdvancedUI
         button -        The button number, where 1 is the first button.
 
         x,y -           The coordinates of the event, in pixels, relative to the display size.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1063,7 +1249,8 @@ struct TPControllerAdvancedUI
         TPController * controller,
         int button,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
     
 /*
     Callback: tp_controller_touch_down
@@ -1077,6 +1264,8 @@ struct TPControllerAdvancedUI
         finger -        The finger number, starting with 1.
 
         x,y -           The coordinates of the event, in pixels.    
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1086,7 +1275,8 @@ struct TPControllerAdvancedUI
         TPController * controller,
         int finger,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
 
 /*
     Callback: tp_controller_touch_move
@@ -1100,6 +1290,8 @@ struct TPControllerAdvancedUI
         finger -        The finger number, starting with 1.
 
         x,y -           The coordinates of the event, in pixels.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1109,7 +1301,8 @@ struct TPControllerAdvancedUI
         TPController * controller,
         int finger,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
     
 /*
     Callback: tp_controller_touch_up
@@ -1123,6 +1316,8 @@ struct TPControllerAdvancedUI
         finger -        The finger number, starting with 1.
 
         x,y -           The coordinates of the event, in pixels.
+
+        modifiers -		A combination of <Key Modifiers>.
 */
 
     TP_API_EXPORT
@@ -1132,7 +1327,8 @@ struct TPControllerAdvancedUI
         TPController * controller,
         int finger,
         int x,
-        int y);
+        int y,
+        unsigned long int modifiers);
     
 /*
     Callback: tp_controller_ui_event
@@ -1158,24 +1354,24 @@ struct TPControllerAdvancedUI
 
 
 /*
-	Callback: tp_controller_submit_picture
+	Callback: tp_controller_submit_image
 
-	Send picture data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_SUBMIT_PICTURE>.
+	Send image data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_REQUEST_IMAGE>.
 
 	Arguments:
 
 		controller -    The controller returned by <tp_context_add_controller>.
 
-		data 		-   A pointer to the picture data.
+		data 		-   A pointer to the image data.
 
-		size		- 	The size of the picture data.
+		size		- 	The size of the image data.
 
-		mime_type	- 	The mime type of the picture data. This can be NULL.
+		mime_type	- 	The mime type of the image data. This can be NULL.
 */
 
     TP_API_EXPORT
     void
-    tp_controller_submit_picture(
+    tp_controller_submit_image(
 
         TPController * controller,
         const void * data,
@@ -1185,7 +1381,7 @@ struct TPControllerAdvancedUI
 /*
 	Callback: tp_controller_submit_audio_clip
 
-	Send audio clip data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP>.
+	Send audio clip data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP>.
 
 	Arguments:
 
@@ -1206,6 +1402,75 @@ struct TPControllerAdvancedUI
         const void * data,
         unsigned int size,
         const char * mime_type);
+
+/*
+	Callback: tp_controller_cancel_image
+
+	Cancel send of image data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_REQUEST_IMAGE>.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_cancel_image(
+
+        TPController * controller);
+
+/*
+	Callback: tp_controller_cancel_audio_clip
+
+	Cancel send of audio clip data to Trickplay. This is in response to <TP_CONTROLLER_COMMAND_REQUEST_IMAGE>.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_cancel_audio_clip(
+
+        TPController * controller);
+
+
+/*
+    Callback: tp_controller_advanced_ui_ready
+
+    Report that advanced UI features are ready for use.
+
+    Arguments:
+
+        controller -    The controller returned by <tp_context_add_controller>.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_advanced_ui_ready(
+
+		TPController * controller);
+
+/*
+	Callback: tp_controller_advanced_ui_event
+
+	Report an advanced UI event.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		json 	   -    A NULL terminated string.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_advanced_ui_event(
+
+		TPController * controller,
+		const char * json);
+
 
 /*-----------------------------------------------------------------------------*/
 /*

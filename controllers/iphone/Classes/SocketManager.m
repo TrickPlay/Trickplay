@@ -8,10 +8,6 @@
 
 #import "SocketManager.h"
 
-
-#define HOST "10.0.190.153"
-
-
 @implementation WritePacket
 
 @synthesize data;
@@ -35,10 +31,25 @@
 
 
 -(id)initSocketStream:(NSString *)theHost
-                 port:(NSInteger)thePort
-             delegate:(id <SocketManagerDelegate>)theDelegate{
-    if (self == [super init]) {
+                 port:(NSUInteger)thePort
+             delegate:(id <SocketManagerDelegate>)theDelegate
+             protocol:(CommandProtocol)protocol {
+    if ((self = [super init])) {
+        functional = YES;
         
+        // Defines the type of communications protocol that will be used
+        // for messages coming through this socket
+        if (protocol == ADVANCED_UI_PROTOCOL) {
+            commandInterpreter = [[CommandInterpreterAdvancedUI alloc] init:(id)theDelegate];
+        } else if (protocol == APP_PROTOCOL) {
+            commandInterpreter = [[CommandInterpreterApp alloc] init:(id)theDelegate];
+        } else {
+            NSLog(@"Error, protocol not defined");
+            functional = NO;
+            return self;
+        }
+        
+        // Create the socket
         NSInputStream *inputStream;
         NSOutputStream *outputStream;
     
@@ -56,8 +67,8 @@
                 [outputStream release];
             }
             
-            [super dealloc];
-            return nil;
+            functional = NO;
+            return self;
         }
         
         // Dot syntax properly releases and retains objects
@@ -72,9 +83,6 @@
 
         
         writeQueue = [[NSMutableArray alloc] initWithCapacity:20];
-        
-        commandInterpreter = [[CommandInterpreter alloc] 
-                              init:(id <CommandInterpreterDelegate>)theDelegate];
         
         delegate = theDelegate;
         
@@ -91,8 +99,12 @@
     return self;
 }
 
+- (BOOL)isFunctional {
+    return functional;
+}
 
 -(void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode {
+    CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
     switch (eventCode) {
         /**
          * Unload all the data from the socket stream and send it to the command
@@ -101,7 +113,7 @@
         case NSStreamEventHasBytesAvailable:
             if (stream != input_stream) return;
             
-            NSLog(@"Has bytes available");
+            //NSLog(@"\n\nHas bytes available. delegate: %@\n\n", delegate);
             
             NSInteger numbytes = 1;
             
@@ -119,6 +131,8 @@
                     // occurred and would never reach this point.
                     [commandInterpreter addBytes:(const uint8_t *)buffer
                                            length:(NSUInteger)numbytes];
+                } else {
+                    NSLog(@"Zero bytes. delegate: %@", delegate);
                 }
             }
             
@@ -130,18 +144,37 @@
             buffer[numbytes] = '\0';
             fprintf(stderr, "received: '%s' length: %d\n", buffer, numbytes);
             */
+            //NSLog(@"\n\nBytes done reading. delegate %@\n\n", delegate);
+            CFAbsoluteTime then = CFAbsoluteTimeGetCurrent();
+            fprintf(stderr, "read time = %lf\n", (then-start)*1000.0);
+            //NSLog(@"read time = %lf \t. delegate %@", (then - now)*1000.0, delegate);
             break;
         // Close up the streams cuz there aint nothin left.
         case NSStreamEventEndEncountered:
             NSLog(@"Stream end encountered");
-            [delegate streamEndEncountered];
+            if (delegate) {
+                [delegate streamEndEncountered];
+            }
             break;
         case NSStreamEventHasSpaceAvailable:
-            NSLog(@"Stream has space available");
+            //NSLog(@"\n\nStream has space available. delegate: %@\n\n", delegate);
             [self sendPackets];
+
+            //CFAbsoluteTime bytessenttime = CFAbsoluteTimeGetCurrent();
+            //fprintf(stderr, "write time = %lf\n", (bytessenttime-start)*1000.0);
+            //NSLog(@"write time = %lf\t. delegate %@", (bytessenttime - start)*1000.0, delegate);
+            //NSLog(@"\n\nBytes done sending. delegate: %@\n\n", delegate);
             break;
         case NSStreamEventErrorOccurred:
-            [[self delegate] socketErrorOccurred];
+            if (delegate) {
+                [delegate socketErrorOccurred];
+            }
+            break;
+        case NSStreamEventNone:
+            NSLog(@"Stream no event has occurred");
+            break;
+        case NSStreamEventOpenCompleted:
+            NSLog(@"Stream Open Completed");
             break;
         default:
             NSLog(@"Some other event code");
@@ -176,14 +209,14 @@
 
 
 - (BOOL)sendPacket {
-    NSLog(@"Sending Data");
+    //NSLog(@"Sending Data");
     if (![output_stream hasSpaceAvailable]) {
         return NO;
     }
     
     WritePacket *packet = [writeQueue objectAtIndex:0];
     int numbytes = [output_stream write:[packet.data bytes]+packet.position
-                              maxLength:[packet.data length]-packet.position ];
+                              maxLength:[packet.data length]-packet.position];
     
     if (numbytes == -1) {
         NSLog(@"Error sending bytes");
@@ -204,15 +237,18 @@
 }
 
 
-//Getters/Setters not synthesized
-- (NSInteger)port {
+// Getters/Setters not synthesized
+- (NSUInteger)port {
     return port;
 }
+// Used if switching to http server
+- (void)setPort:(NSUInteger)value {
+    port = value;
+}
 
+- (void)dealloc {
+    NSLog(@"Socket Manager dealloc with CommandInterpreter: %@", commandInterpreter);
 
-
-- (void)dealloc{
-    NSLog(@"Socket Manager dealloc");
     [host release];
     
     [input_stream close];
@@ -223,11 +259,16 @@
     [output_stream removeFromRunLoop:[NSRunLoop currentRunLoop] 
                              forMode:NSDefaultRunLoopMode];
     
+    [input_stream setDelegate:nil];
+    [output_stream setDelegate:nil];
+    
     [input_stream release];
     [output_stream release];
     
     [writeQueue release];
     [commandInterpreter release];
+    
+    self.delegate = nil;
     
     [super dealloc];
 }
