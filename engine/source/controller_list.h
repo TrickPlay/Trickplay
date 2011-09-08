@@ -21,6 +21,11 @@ public:
 
     String get_name() const;
 
+    const String & get_id() const
+    {
+    	return id;
+    }
+
     unsigned int get_capabilities() const;
 
     inline bool has_cap( int cap ) const
@@ -208,6 +213,8 @@ private:
     gint                ts_touch_started;
 
     bool				advanced_ui_is_ready;
+
+    String				id;
 };
 
 //-----------------------------------------------------------------------------

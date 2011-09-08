@@ -214,6 +214,19 @@ interface controller [[ControllerDelegate*]]
         ]];
         
     /*
+        Property: id
+        
+        A string that identifies this controller. In some cases, this string will be the same
+        when a controller connects for a second time.
+    */        
+    
+    readonly string id
+        [[
+           String s( self->get_controller()->get_id());
+           id = s.c_str();
+        ]];
+        
+    /*
     	Property: has_keys
     	
     	This property tells you whether the controller can send key events.
