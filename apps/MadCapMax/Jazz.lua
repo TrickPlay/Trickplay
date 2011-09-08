@@ -8,7 +8,7 @@ local jazz = Clone{}
 
 
 --------------------------------------------------------------------------------
--- Attributes
+-- Attributes                                                                 --
 --------------------------------------------------------------------------------
 
 --constant
@@ -151,6 +151,8 @@ do
     
     --Upvals
     
+    local run_dir = 1
+    
     --frame table
     local frames, frame_i
     
@@ -165,6 +167,86 @@ do
     
     
     local next_obst_x, next_obst_y, o_x, o_y
+    
+    
+    
+    
+    local function check_obstacles()
+        
+        if jazz.under_obstacle then
+            if jazz.x >
+                obstacles[jazz.under_obstacle].x +
+                obstacles[jazz.under_obstacle].w then
+                
+                
+                jazz.left_obstacle = jazz.under_obstacle
+                
+                jazz.under_obstacle = nil
+                
+                print("JAZ OBST:",jazz.left_obstacle,jazz.under_obstacle,jazz.right_obstacle)
+                
+            elseif jazz.x < obstacles[jazz.under_obstacle].x then
+                
+                
+                jazz.right_obstacle = jazz.under_obstacle
+                
+                jazz.under_obstacle = nil
+                
+                print("JAZ OBST:",jazz.left_obstacle,jazz.under_obstacle,jazz.right_obstacle)
+                
+            end
+            
+        end
+        
+        while jazz.right_obstacle and jazz.x > obstacles[jazz.right_obstacle].x do
+            
+            if jazz.x <
+                obstacles[jazz.right_obstacle].x +
+                obstacles[jazz.right_obstacle].w then
+                
+                
+                jazz.under_obstacle = jazz.right_obstacle
+                
+            else
+                
+                jazz.left_obstacle = jazz.right_obstacle
+                
+            end
+            
+            --if doesn't exist, then it nils it for us
+            jazz.right_obstacle = obstacles[jazz.right_obstacle + 1] ~= nil and jazz.right_obstacle + 1 or nil
+            
+            print("JAZ OBST:",jazz.left_obstacle,jazz.under_obstacle,jazz.right_obstacle)
+            
+        end
+        
+        while jazz.left_obstacle and jazz.x <
+            obstacles[jazz.left_obstacle].x +
+            obstacles[jazz.left_obstacle].w do
+            
+            
+            if jazz.x > obstacles[jazz.left_obstacle].x then
+                
+                
+                jazz.under_obstacle = jazz.left_obstacle
+                
+            else
+                
+                jazz.right_obstacle = jazz.left_obstacle
+                
+            end
+            
+            --if doesn't exist, then it nils it for us
+            jazz.left_obstacle = obstacles[jazz.left_obstacle - 1] ~= nil and jazz.left_obstacle - 1 or nil
+            
+            print("JAZ OBST:",jazz.left_obstacle,jazz.under_obstacle,jazz.right_obstacle)
+            
+        end
+        
+    end
+    
+    
+    
     
     ----------------------------------------------------------------------------
     --init's all of the sequences
@@ -196,19 +278,19 @@ do
         }
         
         run_sequence = {
-            function() jazz.x = jazz.x + 30 end,
+            function() jazz.x = jazz.x + run_dir*30 end,
             imgs.run[7],
-            function() jazz.x = jazz.x + 20 end,
+            function() jazz.x = jazz.x + run_dir*20 end,
             imgs.run[1],
-            function() jazz.x = jazz.x + 20 end,
+            function() jazz.x = jazz.x + run_dir*20 end,
             imgs.run[2],
             --function() jazz.x = jazz.x + 50 end,
             --imgs.run[3],
-            function() jazz.x = jazz.x + 90 end,
+            function() jazz.x = jazz.x + run_dir*90 end,
             imgs.run[4],
-            function() jazz.x = jazz.x + 70 end,
+            function() jazz.x = jazz.x + run_dir*70 end,
             imgs.run[5],
-            function() jazz.x = jazz.x + 70 end,
+            function() jazz.x = jazz.x + run_dir*70 end,
             imgs.run[6],
             run_7,
         }
@@ -302,8 +384,8 @@ do
             run_7,
         }
         wait_sequence = {
-            500,
-            wait_check,
+            100,
+            run_7,
         }
     end
     
@@ -407,7 +489,7 @@ do
         end,
         on_completed = function()
             marker_i = 1
-            print("attack done")
+            --print("attack done")
             
             jazz.on_obstacle = will_be_on
             
@@ -427,13 +509,13 @@ do
                     
                     obstacle_i = i
                     
-                    print("BEHIND",obstacles[i].source)
+                    --print("BEHIND",obstacles[i].source)
                     
                     break
                     
                 end
             end
-            print("attack_done_end\n\n")
+            --print("attack_done_end\n\n")
         end,
     }
     
@@ -487,7 +569,7 @@ do
         will_be_on = false
         
         if position.land ~= nil then
-            print("yuuuup")
+            --print("yuuuup")
             land_y = position.y
             
             --aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
@@ -495,9 +577,11 @@ do
             attack_animation.duration = t
             
             if position.x < jazz.x then
+                jazz.y_rotation = {180,0,0}
                 attack_z_rot.from =  position.y < jazz.y and  z_rot_mag or 0
                 attack_z_rot.to   =  land_y+150 > jazz.y and -z_rot_mag or 0
             else
+                jazz.y_rotation = {0,0,0}
                 attack_z_rot.to   = land_y+150 > jazz.y and  z_rot_mag or 0
                 attack_z_rot.from = position.y < jazz.y and -z_rot_mag or 0
             end
@@ -505,9 +589,9 @@ do
         elseif position.x < jazz.x then
             
             jazz.y_rotation = {180,0,0}
-            
+            print("jumping to the left")
             for i, o in pairs( obstacles ) do
-                print(o.source)
+                --print(o.source)
                 
                 o_x = o.x + ( o.x_off or 0 )
                 o_y = o.y + ( o.y_off or 0 ) - jazz.h/2
@@ -515,7 +599,7 @@ do
                 if  o_y < jazz_y_func(jazz_rev_x_func(o_x)) and
                     o_y > jazz_y_func(jazz_rev_x_func(o_x+obstacles[i].w)) and
                     o_y < land_y then
-                    print("gah",o_y,o.source)
+                    --print("gah",o_y,o.source)
                     will_be_on = o
                     
                     land_y = o_y
@@ -533,17 +617,18 @@ do
             
         else
             
+            jazz.y_rotation = {0,0,0}
             
             for i, o in pairs( obstacles ) do
                 
                 o_x = o.x + ( o.x_off or 0 )
                 o_y = o.y + ( o.y_off or 0 ) - jazz.h/2
-                print(o_y , jazz_y_func(jazz_rev_x_func(o_x)),jazz_y_func(jazz_rev_x_func(o_x+obstacles[i].w)))
+                --print(o_y , jazz_y_func(jazz_rev_x_func(o_x)),jazz_y_func(jazz_rev_x_func(o_x+obstacles[i].w)))
                 if  o_y > jazz_y_func(jazz_rev_x_func(o_x)) and
                     o_y < jazz_y_func(jazz_rev_x_func(o_x+obstacles[i].w)) and
                     o_y < land_y - jazz.h then
                     
-                    print("gah",o_y,o.source)
+                   --print("gah",o_y,o.source)
                     will_be_on = o
                     
                     land_y = o_y
@@ -559,12 +644,12 @@ do
             
         end
         
-        print("LAND_Y",land_y)
+        --print("LAND_Y",land_y)
         
     end
     
     function attack()
-        print("attack")
+        --print("attack")
         
         Animation_Loop:delete_animation(cat_animation)
         
@@ -692,6 +777,8 @@ do
     
     function wait_check()
         
+        check_obstacles()
+        
         frame_i = 1
         --[[
         if  math.abs(target.x - jazz.x) < swat_threshold_x and
@@ -704,9 +791,10 @@ do
             return 
             
         --if Max is in lunge range, then lunge with a probabilty of missing
-        else]]if in_attack_range(true) then   
+        else]]
+        if in_attack_range(true) then   
             
-            print("lunge")
+            --print("lunge")
             
             attack_prep(target)
             
@@ -720,7 +808,7 @@ do
             
         end
         
-        print(math.abs(target.x - jazz.x),math.abs(target.y - jazz.y))
+        --print(math.abs(target.x - jazz.x),math.abs(target.y - jazz.y))
     end
     ----------------------------------------------------------------------------
     --Swatting at the target
@@ -777,6 +865,8 @@ do
     --]=]
     swat_pos_check = function()
         
+        check_obstacles()
+        
         frame_i = 1
         
         if  math.abs(target.x - jazz.x) < swat_threshold_x and
@@ -819,7 +909,162 @@ do
     ----------------------------------------------------------------------------
     --Running
     
+    function run(dir)
+        
+        run_dir = dir
+        
+        jazz.y_rotation = { 90 - dir*90,0,0}
+        
+        --moving to the right
+        if dir == 1 then
+            
+            --jump up to the next 
+            if jazz.right_obstacle and jazz.x + jazz.w/2 + 400 > obstacles[jazz.right_obstacle].x then
+                
+                attack_prep{
+                    x    = obstacles[jazz.right_obstacle].x+jazz.w/2,
+                    y    = obstacles[jazz.right_obstacle].y-jazz.h/2,
+                    land = obstacles[jazz.right_obstacle]
+                }
+                
+                frames = attack_sequence
+                
+            elseif jazz.under_obstacle and jazz.y ~= floor_y and jazz.x + jazz.w/2 + 400 >
+                obstacles[jazz.under_obstacle].x + obstacles[jazz.under_obstacle].w then
+                
+                
+                attack_prep{x=jazz.x + 300,y=floor_y,land=false}
+                
+                frames = attack_sequence
+                
+            else
+                
+                frames  = run_sequence
+                
+            end
+            
+        else
+            
+            if jazz.left_obstacle and jazz.x - jazz.w/2 - 400 < obstacles[jazz.left_obstacle].x +
+                obstacles[jazz.left_obstacle].w then
+                
+                
+                attack_prep{
+                    x    = obstacles[jazz.left_obstacle].x+obstacles[jazz.left_obstacle].w-jazz.w/2,
+                    y    = obstacles[jazz.left_obstacle].y-jazz.h/2,
+                    land = obstacles[jazz.left_obstacle]
+                }
+                
+                frames = attack_sequence
+                
+            elseif jazz.under_obstacle and jazz.y ~= floor_y  and jazz.x - jazz.w/2 - 400 <
+                obstacles[jazz.under_obstacle].x then
+                
+                
+                attack_prep{x=jazz.x - 300,y=floor_y,land=false}
+                
+                frames = attack_sequence
+                
+            else
+                
+                frames  = run_sequence
+                
+            end
+            
+        end
+        
+        
+    end
+    
+    
+    function aim_for_obstacle(obstacle_i)
+        print(1111)
+        if type(obstacle_i) ~= "number" then error("invalid index",2) end
+        --if Jazz is to the left of the obstacle
+        if jazz.x + jazz.w/2 < obstacles[obstacle_i].x then
+            print("Jazz left of target")
+            --if Jazz is in jumping range
+            if jazz.x + jazz.w/2 > obstacles[obstacle_i].x - 400 then
+                print("jump to it")
+                attack_prep{
+                    x    = obstacles[obstacle_i].x+jazz.w/2,
+                    y    = obstacles[obstacle_i].y-jazz.h/2,
+                    land = obstacles[obstacle_i]
+                }
+                
+                frames = attack_sequence
+                
+            else
+                print("run to it")
+                run(1)
+                
+            end
+            
+        --if Jazz is to the right of the obstacle
+        elseif jazz.x - jazz.w/2 > obstacles[obstacle_i].x + obstacles[obstacle_i].w then
+            print("Jazz right of target")
+            
+            --if Jazz is in jumping range
+            if jazz.x - jazz.w/2 < obstacles[obstacle_i].x + obstacles[obstacle_i].w + 400 then
+                print("jump to it",obstacles[obstacle_i].x + obstacles[obstacle_i].w - jazz.w/2, jazz.x)
+                
+                attack_prep{
+                    x    = obstacles[obstacle_i].x + obstacles[obstacle_i].w - jazz.w/2,
+                    y    = obstacles[obstacle_i].y-jazz.h/2,
+                    land = obstacles[obstacle_i]
+                }
+                
+                frames = attack_sequence
+                
+            else
+                print("run to it")
+                
+                run(-1)
+            end
+            
+        --if Jazz is under the obstacle
+        elseif jazz.x + jazz.w/2 > obstacles[obstacle_i].x and
+               jazz.x - jazz.w/2 < obstacles[obstacle_i].x + obstacles[obstacle_i].w then
+            print("Jazz under target")
+            
+            if obstacles[obstacle_i].can_jump_through then
+                print("can jump through")
+                if target.x < jazz.x then
+                    
+                    attack_prep{
+                        x    = jazz.x-400 > obstacles[obstacle_i].x and jazz.x-400 or obstacles[obstacle_i].x + jazz.w/2,
+                        y    = obstacles[obstacle_i].y-jazz.h/2,
+                        land = obstacles[obstacle_i]
+                    }
+                    
+                else
+                    
+                    attack_prep{
+                        x    = jazz.x+400 < obstacles[obstacle_i].x + obstacles[obstacle_i].w and
+                            jazz.x+400 or obstacles[obstacle_i].x + obstacles[obstacle_i].w - jazz.w/2,
+                        y    = obstacles[obstacle_i].y-jazz.h/2,
+                        land = obstacles[obstacle_i]
+                    }
+                    
+                end
+                
+                frames = attack_sequence
+                
+            else
+                print("run")
+                run(1)
+                
+            end
+            
+        else
+            error("IMPOSSIBLE",2)
+        end
+        
+    end
+    
     run_7  = function()
+        
+        check_obstacles()
         
         if target.dead then
             dolater(Animation_Loop.delete_animation,Animation_Loop,cat_animation)
@@ -871,12 +1116,55 @@ do
             frames = attack_sequence
             
             return
-            --]]
+            
+        elseif jazz.under_obstacle and jazz.y ~= floor_y and target.x < jazz.x then
+            --print("Jazz high wait")
+            jazz.y_rotation = {180,0,0}
+            
+            jazz.source = imgs.default[1]
+            
+            frames = wait_sequence
+        
+        elseif target.under_obstacle and target.under_obstacle ~= jazz.under_obstacle then
+            
+            aim_for_obstacle( target.under_obstacle )
+            
+        elseif target.right_obstacle and
+            obstacles[target.right_obstacle].x - target.x < lunge_radius*3/2 then
+            
+            aim_for_obstacle( target.right_obstacle )
+            
+        elseif target.left_obstacle  and target.x -
+            obstacles[target.left_obstacle].x -
+            obstacles[target.left_obstacle].w < lunge_radius/3 then
+            
+            aim_for_obstacle( target.left_obstacle )
+            
+            
+        elseif target.x < jazz.x - 200 then
+            run(-1)
+        elseif target.x > jazz.x + 200 then
+            run(1)
+        else
+            
+            --print("Jazz floor wait")
+            --jazz.y_rotation = {180,0,0}
+            
+            jazz.source = imgs.default[1]
+            
+            frames = wait_sequence
+        end
+        
+        
+        
+        
+        
+        --[=[
         --if jazz is on an obstacle and Max is behind, wait to swat
         elseif jazz.on_obstacle and
             target.x < jazz.x - lunge_threshold_x then
             
-            print("prep swat")
+            --print("prep swat")
             
             jazz.y_rotation = {180,0,0}
             
@@ -885,11 +1173,10 @@ do
             frames = wait_sequence
             
             return
-        --]]
         -- if jazz is nearing the end of an obstacle
         elseif jazz.on_obstacle and
             jazz.on_obstacle.x + (jazz.on_obstacle.x_off or 0) + jazz.on_obstacle.w -
-                jazz.x < 300 then 
+            jazz.x < 300 then 
             
             if next_obst_x ~= false and next_obst_x - jazz.x - jazz.w < 300 then
                 --jump to next obstacle
@@ -959,7 +1246,7 @@ do
         --if nearing an obstacle, jump to it
         elseif next_obst_x ~= false and next_obst_x - jazz.x - jazz.w < 300 then
             
-            print("AAAAAfrom floor x: ",next_obst_x - jazz.x - jazz.w)
+            --print("AAAAAfrom floor x: ",next_obst_x - jazz.x - jazz.w)
             --[[
             jump_prep{
                 duration   = 500,
@@ -996,11 +1283,11 @@ do
             return
             
         end
-        
-        jazz.z_rotation = {0,0,0}
+        --]=]
+        --jazz.z_rotation = {0,0,0}
         --else just keep running
-        print("run")
-        frames = run_sequence
+        --print("run")
+        --frames = run_sequence
         
     end
     
@@ -1095,9 +1382,29 @@ do
         
         obstacles  = obstacle_list
         
-        --arm.source = imgs.arm
         
-        --dumptable(obstacle_list)
+        if # obstacles ~= 0 then
+            for i = 1, # obstacles do
+                if obstacles[i].x > jazz.x then
+                    
+                    jazz.right_obstacle = i
+                    
+                    break
+                    
+                elseif obstacles[i].x < jazz.x and
+                    obstacles[i].x + obstacles[i].w > jazz.x then
+                    
+                    jazz.under_obstacle = i
+                    
+                else
+                    
+                    jazz.left_obstacle = i
+                    
+                end
+            end
+        end
+        
+        
         stop_point = end_x
         
         make_sequences()
@@ -1112,7 +1419,7 @@ do
         
         jazz.x = 0
         jazz.y = floor_y
-        
+        jazz.y_rotation = {0,0,0}
     end
     
 end

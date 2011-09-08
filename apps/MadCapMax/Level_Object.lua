@@ -116,6 +116,7 @@ local lvls = {
                 x_off  = 200,
                 y_off  = 120,
                 enemy  = true,
+                player = true,
             },--]]
             {
                 type   = "static",
@@ -123,6 +124,7 @@ local lvls = {
                 x      = 1420+495-130,
                 y      = 0,
                 scale  = {3/4,3/4},
+                player = true,
             },
             {
                 type   = "background",
@@ -179,7 +181,7 @@ local lvls = {
                 type   = "dynamic",
                 source = "bedroom-clock",
                 x      = 1920+1596-120,
-                y      = 527+30,
+                y      = 527+25,
             },
             
 
@@ -213,22 +215,24 @@ local lvls = {
                 source = "bedroom-door",
                 x      = 3840+1431+190,
                 y      = 140,
+                player = true,
             },
             {
                 type   = "foreground",
                 source = "bedroom-door-frame",
-                x      = 3840+1880+105,
-                y      = 140,
+                x      = 3840+1880+105+13,
+                y      = 135,
             },
 
             {
                 type   = "static",
                 source = "dining-light",
-                x      = 5760+424+130,
+                x      = 5760+424+132,
                 y      = 30,
                 w      = 150,
                 h      = 200,
-                scale  = {-1,1}
+                scale  = {-1,1},
+                player = true,
             },
             {
                 type   = "static",
@@ -277,7 +281,7 @@ local lvls = {
                 w      = 800,
                 h      = 40,
                 enemy  = true,
-                
+                player = true,
                 scale = {3/4,3/4},
             },
             {
@@ -327,6 +331,7 @@ local lvls = {
                 x_off  = 50,
                 y_off  = 200,
                 enemy  = true,
+                player = true,
             },
 
             {
@@ -443,6 +448,7 @@ local lvls = {
                 source = "living-tv",
                 x      = 7680+1506+160,
                 y      = 420+80,
+                player = true,
             },
 
             {
@@ -466,6 +472,7 @@ local lvls = {
                 y      = 50,
                 w      = 100,
                 h      = 60,
+                player = true,
             },
 --[[
 {
@@ -504,6 +511,7 @@ local lvls = {
                 y      = 15,
                 w      = 200,
                 scale  = {-1,1},
+                player = true,
             },
             {
                 type   = "static",
@@ -599,6 +607,7 @@ local lvls = {
                 source = "kitchen-archway",
                 x      = 11520+254-110,
                 y      = 135,
+                player = true,
             },
             {
                 type   = "foreground",
@@ -723,8 +732,6 @@ local lvls = {
                 y      = 326+20,
             },
 
-            
-            
             {
                 type   = "background",
                 source = "kitchen-rug",
@@ -832,6 +839,7 @@ local lvls = {
                 y      = 125,
                 w      = 195,
                 stop_scroll = true,
+                player = true,
             },
 
             
@@ -900,6 +908,140 @@ local lvls = {
                 source = "wall-gradient-pc.jpg",
             },
         },
+        player_obstacles = {
+            {
+                x = 1970, 
+                y = 650 ,
+                w = 550 ,
+                h = 200 ,
+            },
+            {
+                x = 1785 ,
+                y = 0 ,
+                w = 173, 
+                h = 149 ,
+            },
+            {
+                x = 5800 ,
+                y = 0 ,
+                w = 120 ,
+                h = 40 ,
+            },
+            {
+                x = 6316 ,
+                y = 30 ,
+                w = 300 ,
+                h = 200 ,
+            },
+            {
+                x = 6282 ,
+                y = 756 ,
+                w = 650 ,
+                h = 40 ,
+            },
+            {
+                x = 9346, 
+                y = 550 ,
+                w = 100 ,
+                h = 497 ,
+            },
+            {
+                x = 9091 ,
+                y = 100 ,
+                w = 100 ,
+                h = 160 ,
+            },
+            {
+                x = 10799 ,
+                y = 15 ,
+                w = 340 ,
+                h = 104 ,
+            },
+            {
+                x = 11664, 
+                y = 0 ,
+                w = 234 ,
+                h = 160 ,
+            },
+            {
+                x = 17165, 
+                y = 800 ,
+                w = 195 ,
+                h = 100 ,
+            },
+        },
+        enemy_obstacles = {
+            {
+                x = 1970 ,
+                y = 650 ,
+                w = 550 ,
+                h = 200 ,
+            },
+            {
+                x = 3241 ,
+                y = 601 ,
+                w = 400 ,
+                h = 400 ,
+            },
+            {
+                x = 6332 ,
+                y = 756 ,
+                w = 550 ,
+                h = 40 ,
+            },
+            {
+                x = 7287, 
+                y = 819 ,
+                w = 200 ,
+                h = 50 ,
+            },
+            {
+                x = 8036, 
+                y = 915 ,
+                w = 300 ,
+                h = 130 ,
+            },
+            {
+                x = 8710 ,
+                y = 881 ,
+                w = 293 ,
+                h = 170 ,
+            },
+            {
+                x = 10734, 
+                y = 610 ,
+                w = 520 ,
+                h = 377 ,
+            },
+            {
+                x = 12204, 
+                y = 501 ,
+                w = 230 ,
+                h = 83 ,
+                can_jump_through = true,
+            },
+            {
+                x = 12854, 
+                y = 501 ,
+                w = 450 ,
+                h = 83 ,
+                can_jump_through = true,
+            },
+            
+            {
+                x = 13754, 
+                y = 501 ,
+                w = 700 ,
+                h = 83 ,
+                can_jump_through = true,
+            },
+            {
+                x = 15525 ,
+                y = 530 ,
+                w = 700 ,
+                h = 70 ,
+            },
+        },
         
         collectables = {
             ----pre-bed
@@ -960,12 +1102,12 @@ local lvls = {
                 type = "seed",
             },
             {
-                x = 6077,
+                x = 5977,
                 y = 700,
                 type = "cracker",
             },
             {
-                x = 6277,
+                x = 6177,
                 y = 700,
                 type = "cracker",
             },
@@ -1295,10 +1437,12 @@ local on_screen_items = {}
 local tiling_i      = 1
 local item_i        = 1
 local collectable_i = 1
+local player_obst_i = 1
 
 local items        = lvls[curr_lvl_i].items        --pointer to items
 local tiling       = lvls[curr_lvl_i].tiling       --pointer to tiling
 local collectables = lvls[curr_lvl_i].collectables --pointer to tiling
+local player_obst  = lvls[curr_lvl_i].collectables --pointer to tiling
 
 local final_edge = nil
 
@@ -1351,11 +1495,20 @@ function LVL_Object:prep_level(t)
     -- get the list of obstacles
     
     for j = 1, # lvls[curr_lvl_i].items do
-        if lvls[curr_lvl_i].items[j].enemy then
+        --[[
+        if lvls[curr_lvl_i].items[j].player then
             
             table.insert(LVL_Object.obstacles,lvls[curr_lvl_i].items[j])
             
+            print("\n{"..
+            "\n\tx =",lvls[curr_lvl_i].items[j].x + (lvls[curr_lvl_i].items[j].x_off or 0),
+            "\n\ty =",lvls[curr_lvl_i].items[j].y + (lvls[curr_lvl_i].items[j].y_off or 0),
+            "\n\tw =",(lvls[curr_lvl_i].items[j].w or lvl_objs[lvls[curr_lvl_i].items[j].source].w),
+            "\n\th =",(lvls[curr_lvl_i].items[j].h or lvl_objs[lvls[curr_lvl_i].items[j].source].h),
+            "\n},")
+            
         end
+        --]]
         if lvls[curr_lvl_i].items[j].enemy_stop then
             
             LVL_Object.enemy_stop = lvls[curr_lvl_i].items[j].x
@@ -1368,14 +1521,25 @@ function LVL_Object:prep_level(t)
         end
     end
     
+    LVL_Object.obstacles = lvls[curr_lvl_i].enemy_obstacles
+    --[[
+    for j,o in ipairs(LVL_Object.obstacles) do
+        layers.foreground:add(Rectangle{x = o.x,y = o.y, w = o.w, h = o.h, color="77770055"})
+    end
+    for j,o in ipairs(lvls[curr_lvl_i].player_obstacles) do
+        layers.foreground:add(Rectangle{x = o.x,y = o.y, w = o.w, h = o.h, color="00777755"})
+    end
+    --]]
     -- reset the counters    
     tiling_i      = 1
     item_i        = 1
     collectable_i = 1
+    player_obst_i = 1
     
     items        = lvls[curr_lvl_i].items  
     tiling       = lvls[curr_lvl_i].tiling 
     collectables = lvls[curr_lvl_i].collectables
+    player_obst  = lvls[curr_lvl_i].player_obstacles
     
     self:scroll_by(physics_world.x)
 
@@ -1451,7 +1615,7 @@ local function make_obj(item)
         )
         --]]
         obj:move_anchor_point(obj.w/2,obj.h/2)
-        
+        --[[
         r = Rectangle{
             w       = item.w or obj.w*obj.scale[1],
             h       = item.h or obj.h*obj.scale[2],
@@ -1460,9 +1624,10 @@ local function make_obj(item)
             color   = "bb3300",
             opacity = 255*.7
         }
+        --]]
         --r.anchor_point = {r.w/2,r.h/2}
         
-        layers.items:add( obj,r )
+        layers.items:add( obj )
         
     elseif items[item_i].type == "dynamic" then
         --[[
@@ -1475,7 +1640,8 @@ local function make_obj(item)
         )
         --]]
         obj:move_anchor_point(obj.w/2,obj.h/2)
-         r= Rectangle{
+        --[[
+        r= Rectangle{
             w            = item.w or obj.w*obj.scale[1],
             h            = item.h or obj.h*obj.scale[2],
             x       = item.x + (item.x_off or 0),
@@ -1484,8 +1650,9 @@ local function make_obj(item)
             color   = "33bb00",
             opacity = 255*.7
         }
+        --]]
         --r.anchor_point = {r.w/2,r.h/2}
-        layers.items:add( obj, r )
+        layers.items:add( obj )
         
     else
         
@@ -1530,8 +1697,9 @@ function LVL_Object:scroll_by(dx)
     
     physics_world.x = physics_world.x - dx
     
+    --exit clause
     if LVL_Object.right_screen_edge > LVL_Object.stop_scroll then
-        print("shit",LVL_Object.right_screen_edge , LVL_Object.stop_scroll)
+        
         physics_world.x = -(LVL_Object.stop_scroll - screen_w)
         LVL_Object.right_screen_edge = LVL_Object.right_screen_edge + 1000
         Animation_Loop:delete_animation(LVL_Object.animation)
@@ -1545,7 +1713,7 @@ function LVL_Object:scroll_by(dx)
         
         if right_edge < -physics_world.x then
             --print("delete")
-            obj:unparent()
+            if obj.parent then obj:unparent() end
             
             on_screen_items[     obj ] = nil
             collides_with_max[   obj ] = nil
@@ -1582,6 +1750,23 @@ function LVL_Object:scroll_by(dx)
         on_screen_items[ obj ] = obj.x + obj.w
         
         tiling_i = tiling_i + 1
+        
+    end
+    
+    while  player_obst_i <= # player_obst   and
+        player_obst[player_obst_i].x    <    (  2*screen_w - physics_world.x)  do
+        
+        obj = player_obst[player_obst_i]
+        
+        collides_with_max[obj] = obj
+        
+        obj.anchor_point = {0,0}
+        
+        obj.collision = Max.undo_move
+        
+        on_screen_items[ obj ] = obj.x + obj.w
+        
+        player_obst_i = player_obst_i + 1
         
     end
     
@@ -1664,7 +1849,7 @@ function LVL_Object:scroll_by(dx)
     --print("x's",items[item_i].x    ,    (  2*screen_w - physics_world.x))
     
     while  item_i <= # items   and
-        items[item_i].x    <    (  2*screen_w - physics_world.x)  do
+        items[item_i].x    <    (  2*screen_w - physics_world.x  )  do
         
         --print("add item")
         
