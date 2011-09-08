@@ -156,18 +156,6 @@
 
 	end 
 
---[[
-	local obj_map = {
-
-	["Rectangle"] = function() org_obj = Rectangle{} new_obj = Rectangle{} return org_obj, new_obj end, 
-	["Text"] = function() org_obj = Text{} new_obj = Text{} return org_obj, new_obj end, 
-	["Image"] = function() org_obj = Image{} new_obj = Image{} return org_obj, new_obj end, 
-	["Clone"] = function() org_obj = Clone{} new_obj = Clone{} return org_obj, new_obj end, 
-	["Group"] = function() org_obj = Group{} new_obj = Group{} return org_obj, new_obj end, 
-	["Video"] = function() org_obj = {} new_obj = {} return org_obj, new_obj end, 
-
-	}
-]]
 	local attr_map = {
     ["itemsList"] = function(j,v,inspector)
     	local items, item, t_item
@@ -719,95 +707,47 @@
 		return 1 
 	end 
 
+
+
+local function tab_item_apply (inspector_focus, v_focus, rel_key, v_name)
+							 
+	if inspector_focus ~= nil and  inspector_focus ~= "" then 
+		v_focus = inspector_focus
+		if g:find_child(inspector_focus).extra.focus == nil then 
+			g:find_child(inspector_focus).extra.focus = {}
+		end 
+		g:find_child(inspector_focus).extra.focus[rel_key] = v_name
+	elseif inspector_focus == "" then 
+		v_focus = nil
+	end 
+
+	return v_focus
+
+end 
+
 local function tab_apply (v, inspector)
+
 	if v.extra.type == "TabBar" then 
-		for i = 1, #v.tab_labels do
+		for i = 1, #v.tab_labels, 1 do
 			if v.tab_position == "top" then 
-				if item_group.extra.tabs[i].up_focus ~= nil then 
-					v.tabs[i].extra.up_focus = item_group.extra.tabs[i].up_focus
-					if g:find_child(item_group.extra.tabs[i].up_focus).extra.focus == nil then 
-						g:find_child(item_group.extra.tabs[i].up_focus).extra.focus = {}
-						print("1")
-					end 
-					g:find_child(item_group.extra.tabs[i].up_focus).extra.focus[keys.Down] = v.name
-						print("11")
-				end 
-
-				if item_group.extra.tabs[i].down_focus ~= nil then 
-					v.tabs[i].extra.down_focus = item_group.extra.tabs[i].down_focus
-					if g:find_child(item_group.extra.tabs[i].down_focus).extra.focus == nil then 
-						g:find_child(item_group.extra.tabs[i].down_focus).extra.focus = {}
-						print("2")
-					end 
-					g:find_child(item_group.extra.tabs[i].down_focus).extra.focus[keys.Up] = v.name
-						print("22")
-				end 
+ 				 v.tabs[i].extra.up_focus = tab_item_apply (item_group.extra.tabs[i].up_focus, v.tabs[i].extra.up_focus, keys.Down, v.name)
+ 				 v.tabs[i].extra.down_focus = tab_item_apply (item_group.extra.tabs[i].down_focus, v.tabs[i].extra.down_focus, keys.Up, v.name)
 			else 
-				if item_group.extra.tabs[i].left_focus ~= nil then 
-					v.tabs[i].extra.left_focus = item_group.extra.tabs[i].left_focus
-					if g:find_child(item_group.extra.tabs[i].left_focus).extra.focus == nil then 
-						g:find_child(item_group.extra.tabs[i].left_focus).extra.focus = {}
-						print("3")
-					end 
-					g:find_child(item_group.extra.tabs[i].left_focus).extra.focus[keys.Right] = v.name
-						print("33")
-				end 
-
-				if item_group.extra.tabs[i].right_focus ~= nil then 
-					v.tabs[i].extra.right_focus = item_group.extra.tabs[i].right_focus
-					if g:find_child(item_group.extra.tabs[i].right_focus).extra.focus == nil then 
-						g:find_child(item_group.extra.tabs[i].right_focus).extra.focus = {}
-						print("4")
-					end 
-						print("44")
-					g:find_child(item_group.extra.tabs[i].right_focus).extra.focus[keys.Left] = v.name
-				end 
-
+ 				 v.tabs[i].extra.left_focus = tab_item_apply (item_group.extra.tabs[i].left_focus, v.tabs[i].extra.left_focus, keys.Right, v.name)
+ 				 v.tabs[i].extra.right_focus = tab_item_apply (item_group.extra.tabs[i].right_focus, v.tabs[i].extra.right_focus, keys.Left, v.name)
 			end 
 
 			if i == 1 then 
 				if v.tab_position == "top" then 
-					if item_group.extra.tabs[i].left_focus ~= nil then 
-						v.extra.focus[keys.Left] = item_group.extra.tabs[i].left_focus
-						if g:find_child(item_group.extra.tabs[i].left_focus).extra.focus == nil then 
-							g:find_child(item_group.extra.tabs[i].left_focus).extra.focus = {}
-						print("5")
-						end 
-						print("55")
-						g:find_child(item_group.extra.tabs[i].left_focus).extra.focus[keys.Right] = v.name
-					end 
+ 				 	v.extra.focus[keys.Left] = tab_item_apply (item_group.extra.tabs[i].left_focus, v.extra.focus[keys.Left], keys.Right, v.name)
 				else 
-					if item_group.extra.tabs[i].up_focus ~= nil then 
-						v.extra.focus[keys.Up] = item_group.extra.tabs[i].up_focus
-						if g:find_child(item_group.extra.tabs[i].up_focus).extra.focus == nil then 
-							g:find_child(item_group.extra.tabs[i].up_focus).extra.focus = {}
-						print("6")
-						end 
-						print("66")
-						g:find_child(item_group.extra.tabs[i].up_focus).extra.focus[keys.Down] = v.name
-					end 
+ 				 	v.extra.focus[keys.Up] = tab_item_apply (item_group.extra.tabs[i].up_focus, v.extra.focus[keys.Up], keys.Down, v.name)
 				end 
 			elseif i == #v.tab_labels then 
 				if v.tab_position == "top" then 
-					if item_group.extra.tabs[i].right_focus ~= nil then 
-						v.extra.focus[keys.Right] = item_group.extra.tabs[i].right_focus
-						if g:find_child(item_group.extra.tabs[i].right_focus).extra.focus == nil then 
-							g:find_child(item_group.extra.tabs[i].right_focus).extra.focus = {}
-						print("7")
-						end 
-						print("77")
-						g:find_child(item_group.extra.tabs[i].right_focus).extra.focus[keys.Left] = v.name
-					end
+ 				 	v.extra.focus[keys.Right] = tab_item_apply (item_group.extra.tabs[i].right_focus, v.extra.focus[keys.Right], keys.Left, v.name)
 				else
-					if item_group.extra.tabs[i].down_focus ~= nil then 
-						v.extra.focus[keys.Down] = item_group.extra.tabs[i].down_focus
-						if g:find_child(item_group.extra.tabs[i].down_focus).extra.focus == nil then 
-							g:find_child(item_group.extra.tabs[i].down_focus).extra.focus = {}
-						print("8")
-						end 
-						print("88")
-						g:find_child(item_group.extra.tabs[i].down_focus).extra.focus[keys.Up] = v.name
-					end
+ 				 	v.extra.focus[keys.Down] = tab_item_apply (item_group.extra.tabs[i].down_focus, v.extra.focus[keys.Down], keys.Up, v.name)
 				end
 			end 
 		end 
@@ -834,6 +774,7 @@ local function tab_apply (v, inspector)
 			end 
 		end 
 	end 
+
 end 
 
 function inspector_apply (v, inspector)
@@ -848,12 +789,7 @@ function inspector_apply (v, inspector)
 		end 
 	end 
 
-	if inspector:find_child("focusChanger") then 
-		item_group = inspector:find_child("focusChanger") 
-		v.extra.focus = {}
-		tab_apply(v,inspector)
-	end 
-
+	
 	if inspector:find_child("item_group_more") then 
 		item_group = inspector:find_child("item_group_more")
 		if apply(item_group, v, inspector) == -1 then 
@@ -866,6 +802,12 @@ function inspector_apply (v, inspector)
 		if apply(item_group, v, inspector) == -1 then 
 			return -1 
 		end 
+	end 
+	
+	if inspector:find_child("focusChanger") then 
+		item_group = inspector:find_child("focusChanger") 
+		v.extra.focus = {}
+		tab_apply(v,inspector)
 	end 
 
 	if v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then
