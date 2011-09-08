@@ -1,10 +1,10 @@
 
-test_description = "Check that sound is playing."
+test_description = "Check that sound plays correct number of times."
 test_steps = "Listen to the device."
-test_verify = "Bark sound plays for 5 seconds and then is turned off."
-test_group = "smoke"
+test_verify = "Bark sound plays 5 times."
+test_group = "acceptance"
 test_area = "sound"
-test_api = "play_sound/stop_sound"
+test_api = "play_sound"
 
 
 function generate_test_image (controller, factory)
@@ -14,7 +14,7 @@ function generate_test_image (controller, factory)
 	     local remaining_time
 		 controller:declare_resource("sound_file", "assets/barkpant.mp3")
 
-		local success = controller:play_sound("sound_file", 0)
+		local success = controller:play_sound("sound_file", 5)
 
 		if success == true then
 			test_verify_txt.text = "play_sound = true."
@@ -22,18 +22,7 @@ function generate_test_image (controller, factory)
 			test_verify_txt.text = "play_sound = false."
 		end
 	
-		function idle.on_idle( idle , seconds )
-	      total = total + seconds
-	      if total >= 5 then
-			idle.on_idle = nil
-			local success = controller:stop_sound()
-			if success == true then
-				test_verify_txt.text = "stop_sound returned true."
-			else
-				test_verify_txt.text = "stop_sound returned false."
-			end
-	      end
-	    end
+
 
   	else
 		test_steps = "has_sound = false. Either confirm this device does not have one or that it is disabled."
