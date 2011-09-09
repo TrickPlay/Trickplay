@@ -3,119 +3,126 @@ dofile("/lib/ui_element_header.lua")
 local ui_element = {}
 
 local function color_to_string( color )
-        if type( color ) == "string" then
-            return color
-        end
-        if type( color ) == "table" then
-            return serialize( color )
-        end
-        return tostring( color )
+
+    if type( color ) == "string" then
+       return color
+    end
+
+    if type( color ) == "table" then
+       return serialize( color )
+    end
+
+    return tostring( color )
+
 end
 
-function ui_element.populate_to (grp, tbl)
-
-	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "ArrowPane", "TabBar", "Group"} 
+local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "ArrowPane", "TabBar", "Group"} 
 	 
-	local function is_in_list(item, list)
-    		if list == nil then 
-        		return false
-    		end 
+local function is_in_list(item, list)
 
-    		for i, j in pairs (list) do
-			if item == j then 
-				return true
-			end 
-    		end 
-    		return false
-	end 
+	if list == nil then 
+    	return false
+    end 
 
-	local function is_this_container(v)
-    		if v.extra then 
-        		if is_in_list(v.extra.type, uiContainers) == true then 
-	    			return true
-        		else 
-	    			return false
-        		end 
-    		else 
-        		return false
-    		end 
-	end 	
-
-	for i, j in pairs (grp.children) do 
-		local function there()
-			if j.extra then 
-				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
-					tbl[j.name] = grp:find_child(j.name) 
-					for k,l in pairs (j.content.children) do 
-						if is_this_container(l) == true then 
-							j = l 
-							there()
-						else 
-							tbl[l.name] = grp:find_child(l.name) 
-						end 
-					end 
-
-				elseif j.extra.type == "LayoutManager" then
-					tbl[j.name] = grp:find_child(j.name) 
-					for k,l in pairs (j.tiles) do 
-						for n,m in pairs (l) do 
-							if m then 
-								if is_this_container(m) == true then 
-									j = m 
-									there()
-								else 
-									tbl[m.name] = grp:find_child(m.name) 
-								end 
-							end 
-						end 
-					end 
-
-				elseif j.extra.type == "TabBar" then 
-					tbl[j.name] = grp:find_child(j.name) 
-
-					for k, l in pairs (j.tabs) do 
-						for n,m in pairs (l.children) do 
-							if m then 
-								if is_this_container(m) == true then 
-									j = m 
-									there()
-								else 
-									tbl[m.name] = grp:find_child(m.name) 
-								end 
-							end 
-						end
-					end 
-
-				elseif j.type == "Group" and j.extra.type == nil then 
-					tbl[j.name] = grp:find_child(j.name) 
-					for k,l in pairs (j.children) do 
-						if is_this_container(l) == true then 
-							j = l 
-							there()
-						else 
-							tbl[l.name] = grp:find_child(l.name) 
-						end 
-					end 
-				else 
-					if j.name then 
-						tbl[j.name] = j
-					end 
-				end 
-			else 
-				if j.name then 
-					tbl[j.name] = j
-				end 
-			end 
+    for i, j in pairs (list) do
+		if item == j then 
+			return true
 		end 
-		there()
+    end 
+
+    return false
+
+end 
+
+local function is_this_container(v)
+
+	if v.extra then 
+    	if is_in_list(v.extra.type, uiContainers) == true then 
+	    	return true
+        else 
+	    	return false
+        end 
+    else 
+    	return false
+    end 
+
+end 	
+
+local function groupTotable(grp, tbl, j)
+
+	if j.extra then 
+		if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
+			tbl[j.name] = grp:find_child(j.name) 
+			for k,l in pairs (j.content.children) do 
+				if is_this_container(l) == true then 
+					j = l 
+					groupTotable(grp, tbl, j)
+				else 
+					tbl[l.name] = grp:find_child(l.name) 
+				end 
+			end 
+			return
+		elseif j.extra.type == "LayoutManager" then
+			tbl[j.name] = grp:find_child(j.name) 
+			for k,l in pairs (j.tiles) do 
+				for n,m in pairs (l) do 
+					if m then 
+						if is_this_container(m) == true then 
+							j = m 
+							groupTotable(grp, tbl, j)
+						else 
+							tbl[m.name] = grp:find_child(m.name) 
+						end 
+					end 
+				end 
+			end 
+			return
+		elseif j.extra.type == "TabBar" then 
+			tbl[j.name] = grp:find_child(j.name) 
+			for k, l in pairs (j.tabs) do 
+				for n,m in pairs (l.children) do 
+					if m then 
+						if is_this_container(m) == true then 
+							j = m 
+							groupTotable(grp, tbl, j)
+						else 
+							tbl[m.name] = grp:find_child(m.name) 
+						end 
+					end 
+				end
+			end 
+			return
+		elseif j.type == "Group" and j.extra.type == nil then 
+			tbl[j.name] = grp:find_child(j.name) 
+			for k,l in pairs (j.children) do 
+				if is_this_container(l) == true then 
+					j = l 
+					groupTotable(grp, tbl, j)
+				else 
+					tbl[l.name] = grp:find_child(l.name) 
+				end 
+			end 
+			return
+		end 
 	end 
+	if j.name then 
+		tbl[j.name] = j
+	end 
+end
+
+function ui_element.populate_to(grp, tbl)
+	
+	for i, j in pairs (grp.children) do 
+		groupTotable(grp, tbl, j)
+	end 
+
 	if grp.extra then 	
 		if grp.extra.video then 
 			tbl[grp.extra.video.name] = grp.extra.video
 		end
 	end
 
-return tbl
+	return tbl
 
 end 
 
@@ -124,11 +131,13 @@ function ui_element.set_cursor_pointer (src_file)
 end 
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
+	
 	for i, j in pairs (g.children) do
 		if j.on_focus_out then 
 				j.on_focus_out()
 		end
 	end 
+	
 	if effect == "fade" then 
 		screen:add(next_grp)
     	local fade_timeline = Timeline ()
@@ -150,29 +159,39 @@ function ui_element.transit_to (prev_grp, next_grp, effect)
 			prev_grp.opacity = 255
      	end 
 		fade_timeline:start()
+	
 	else 
+		
 		if prev_grp then 
 			screen:remove(prev_grp)
 		end 
 		g = next_grp
 		screen:add(g)
 		screen:grab_key_focus()
+
 	end 
+
 end 
 
 function ui_element.screen_add(grp)
+	
 	g = grp
 	screen:add(g)
+
 end 
 
 function ui_element.start_animation()
+	
 	screen:find_child("timeline").start_timer()
+
 end
 
  -- for mouse control 
 
 if controllers.start_pointer then 
-  controllers:start_pointer()
+  	
+	controllers:start_pointer()
+
 end
 
 
@@ -185,11 +204,13 @@ Arguments:
 ]]
 
 function ui_element.change_all_skin(skin_name)
-    for i = 1, table.getn(g.children), 1 do
-	if g.children[i].skin then 
-	     g.children[i].skin = skin_name
-	end 
+    
+	for i = 1, table.getn(g.children), 1 do
+		if g.children[i].skin then 
+	     	g.children[i].skin = skin_name
+		end 
     end 
+
 end
 
 --[[
@@ -203,11 +224,13 @@ Arguments:
 
 
 function ui_element.change_button_skin(skin_name)
-    for i = 1, table.getn(g.children), 1 do
-	if g.children[i].extra.type == "Button" then 
-	     g.children[i].skin = skin_name
-	end 
+    
+	for i = 1, table.getn(g.children), 1 do
+		if g.children[i].extra.type == "Button" then 
+	     	g.children[i].skin = skin_name
+		end 
     end 
+
 end 
 
 -------------
@@ -216,12 +239,16 @@ end
 
 
 local function __genOrderedIndex( t )
+
     local orderedIndex = {}
-    for key in pairs(t) do
+    
+	for key in pairs(t) do
         table.insert( orderedIndex, key )
     end
     table.sort( orderedIndex )
-    return orderedIndex
+    
+	return orderedIndex
+
 end
 
 local function orderedNext(t, state)
@@ -250,12 +277,15 @@ local function orderedNext(t, state)
     -- no more value to return, cleanup
     t.__orderedIndex = nil
     return
+
 end
 
 local function orderedPairs(t)
-    -- Equivalent of the pairs() function on tables. Allows to iterate
+    
+	-- Equivalent of the pairs() function on tables. Allows to iterate
     -- in order
     return orderedNext, t, nil
+
 end
 
 
@@ -264,20 +294,24 @@ end
 local strings = dofile( "localized:lib/strings.lua" ) or {}
 
 local function missing_localized_string( t , s )
-     rawset(t,s,s) 
+    
+	 rawset(t,s,s) 
      return s
+
 end
 
 setmetatable( strings , { __index = missing_localized_string } )
 
-
 local function table_remove_val(t, val)
+	
 	for i,j in pairs (t) do
 		if j == val then 
 		     table.remove(t, i)
 		end 
 	end 
+
 	return t
+
 end 
 
 local function table_removekey(t, key)
@@ -324,11 +358,12 @@ local function make_title_separator(thickness, color, length)
     return c
 end 
 
-
+local function my_make_title_separator( _ , ... )
+     return make_title_separator( ... )
+end
 
 -- make_dialogBox_bg() : make message window background 
 
---make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_corner_radius) 
 local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
 
     local size = {w, h} 
@@ -437,6 +472,65 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
     return c
 end 
 
+local function my_make_dialogBox_bg( _ , ... )
+     return make_dialogBox_bg( ... )
+end
+
+
+local function draw_dialogBG(w,h,lw,color)
+	local c = Canvas(w,h)
+ 	local x=0 
+    local y=35
+
+	c:round_rectangle(10,10,w-20,h-20,10)
+
+	c.line_width = lw
+	c:set_source_linear_pattern(0,0,0,h)
+	c:add_source_pattern_color_stop(0.0, "00000060")
+	c:add_source_pattern_color_stop(1.0, "ffffff60")
+	c:stroke(true)
+	
+	c:set_source_linear_pattern(0,w+20,0,0)
+	c:add_source_pattern_color_stop(0.00,"000000ff")
+	c:add_source_pattern_color_stop(0.35,"444444ff")
+	c:add_source_pattern_color_stop(0.43,"525252ff")
+	c:add_source_pattern_color_stop(0.50,"565656ff")
+	c:add_source_pattern_color_stop(0.57,"525252ff")
+	c:add_source_pattern_color_stop(0.65,"444444ff")
+	c:add_source_pattern_color_stop(0.82,"1c1c1cff")
+	c:add_source_pattern_color_stop(1.00,"000000ff")
+	c:fill(true)
+	
+	c:clip()
+	--c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
+	c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
+	
+	c:set_source_linear_pattern(0,0,w,0)
+	c:add_source_pattern_color_stop(0.0, "ffffff0c")
+	c:add_source_pattern_color_stop(1.0, "ffffff40")
+	c:fill()
+
+
+    c:new_path()
+	c:move_to ( x, y)
+    c:line_to ( x + w, y)
+    c:set_line_width (lw/2)
+    c:set_source_color(color)
+    c:stroke (true)
+    c:fill (true)
+
+	if c.Image then
+         c = c:Image()
+    end
+    
+    return c
+end 
+
+
+local function my_draw_dialogBG( _ , ... )
+     return draw_dialogBG( ... )
+end
+
 -- make_toastb_group_bg() : make toast box background  
 
 local function make_toastb_group_bg(w,h,bw,bc,fc,px,py,br)
@@ -534,13 +628,17 @@ local function make_toastb_group_bg(w,h,bw,bc,fc,px,py,br)
     return c
 end 
 
+local function my_make_toastb_group_bg( _ , ... )
+     return make_toastb_group_bg( ... )
+end
 
 
 local function make_ring(w,h,bc,fc,bw,px,py,br)
-        local ring = Canvas{ size = {w, h} }
-        ring:begin_painting()
-        ring:set_source_color(bc)
-        ring:round_rectangle(
+
+     local ring = Canvas{ size = {w, h} }
+     ring:begin_painting()
+     ring:set_source_color(bc)
+     ring:round_rectangle(
             px + bw / 2,
             py + bw / 2,
             w - bw - px * 2 ,
@@ -548,19 +646,18 @@ local function make_ring(w,h,bc,fc,bw,px,py,br)
             br )
 	if fc then 
 		ring:set_source_color( fc )
-    		ring:fill(true)
+    	ring:fill(true)
 
 		ring:set_line_width (bw)
-    		ring:set_source_color(bc)
+    	ring:set_source_color(bc)
 	end
-    	ring:stroke(true)
-	
+    ring:stroke(true)
+    ring:finish_painting()
+    if ring.Image then
+    	ring = ring:Image()
+   	end
+    return ring
 
-        ring:finish_painting()
-    	if ring.Image then
-            ring = ring:Image()
-    	end
-        return ring
 end 
 
 local function my_make_ring( _ , ... )
@@ -568,56 +665,56 @@ local function my_make_ring( _ , ... )
 end
 
 local function create_select_circle(radius, color)
--- make circle image
--- Determines kappa, necessary for circle with bezier curves
-kappa = 4*((math.pow(2,.5)-1)/3)
+	-- make circle image
+	-- Determines kappa, necessary for circle with bezier curves
+	kappa = 4*((math.pow(2,.5)-1)/3)
+	
+	----circle canvas size
+	c = Canvas { size = {radius*4, radius*4} }
+	--- sets x and y of circle
+	
+	center_x = radius*2
+	center_y = radius*2
 
-----circle canvas size
-c = Canvas { size = {radius*4, radius*4} }
---- sets x and y of circle
+	-- Start point of circle creation
+	
+	c:begin_painting()
+	c:new_path()
+	
+	c:move_to( center_x, center_y-radius )
+	
+	c:curve_to(  center_x+kappa*radius , center_y-radius ,
+				center_x+radius , center_y-kappa*radius ,
+				center_x+radius , center_y
+			 	)
 
-center_x = radius*2
-center_y = radius*2
-
--- Start point of circle creation
-
-c:begin_painting()
-c:new_path()
-
-c:move_to( center_x, center_y-radius )
-
-c:curve_to(  center_x+kappa*radius , center_y-radius ,
-			center_x+radius , center_y-kappa*radius ,
-			center_x+radius , center_y
-			 )
-
-c:curve_to(  center_x+radius , center_y+kappa*radius ,
-			center_x+kappa*radius , center_y+radius ,
-			center_x , center_y+radius
-			)
+	c:curve_to(  center_x+radius , center_y+kappa*radius ,
+				center_x+kappa*radius , center_y+radius ,
+				center_x , center_y+radius
+				)
 			 
-c:curve_to(  center_x-kappa*radius , center_y+radius ,
-			center_x-radius , center_y+radius*kappa ,
-			center_x-radius , center_y
-			 )
+	c:curve_to( center_x-kappa*radius , center_y+radius ,
+				center_x-radius , center_y+radius*kappa ,
+				center_x-radius , center_y
+			  )
 
-c:curve_to(  center_x-radius , center_y-radius*kappa,
-			center_x-radius*kappa , center_y-radius ,
-			center_x , center_y-radius
-			 )
+	c:curve_to(  center_x-radius , center_y-radius*kappa,
+				center_x-radius*kappa , center_y-radius ,
+				center_x , center_y-radius
+			  )
 			 		 
--- Sets color and fill
-c:set_source_color( color )
-c:fill(true)
+	-- Sets color and fill
+	c:set_source_color( color )
+	c:fill(true)
+	
+	c:stroke(stroke_bool)
+	-- Finishes painting on Canvas
+	c:finish_painting()
+	if c.Image then
+  	c = c:Image()
+	end
 
-c:stroke(stroke_bool)
--- Finishes painting on Canvas
-c:finish_painting()
-if c.Image then
-  c = c:Image()
-end
-
-return c
+	return c
 end
 
 local function my_create_select_circle( _ , ... ) 
@@ -910,37 +1007,37 @@ function ui_element.timeline(t)
 
 -- make_on_button_down() function for time pointer image
     local function make_on_button_down(name) 
-	 local pointer = timeline:find_child(name)
+		local pointer = timeline:find_child(name)
 
-	 local function pointer_on_button_up(x,y,b,n)
-	     if(dragging ~= nil) then 
-	          local actor , dx , dy = unpack( dragging )
-		  local timepoint, new_timepoint, prev_point, next_point, last_point, new_x
-		  local timeline_length = 1800
-		  local duration = screen:find_child("timeline").duration
-		  for j,k in orderedPairs (screen:find_child("timeline").points) do
-	     	       last_point = j
-		  end 
-		  timepoint = tonumber(actor.name:sub(8, -1))
-		  new_x = x - dx 
-		  if timepoint == last_point then 
-		      if new_x > timeline_length + 60 then 
-		          new_x = timeline_length + 60
-	              end 
-	          end
-		  screen:find_child("text"..tostring(timepoint)).x = new_x - 120 
-		  pointer.x = new_x
-	          dragging = nil
+	 	local function pointer_on_button_up(x,y,b,n)
+	     	if(dragging ~= nil) then 
+	        	local actor , dx , dy = unpack( dragging )
+		  		local timepoint, new_timepoint, prev_point, next_point, last_point, new_x
+		  		local timeline_length = 1800
+		  		local duration = screen:find_child("timeline").duration
+		  		for j,k in orderedPairs (screen:find_child("timeline").points) do
+	     	       	last_point = j
+		  		end 
+		  		timepoint = tonumber(actor.name:sub(8, -1))
+		  		new_x = x - dx 
+		  		if timepoint == last_point then 
+		      		if new_x > timeline_length + 60 then 
+		          		new_x = timeline_length + 60
+	              	end 
+	          	end
+		  		screen:find_child("text"..tostring(timepoint)).x = new_x - 120 
+		  		pointer.x = new_x
+	          	dragging = nil
 
-		  new_timepoint = math.floor((new_x - 60)/timeline_length * duration)
+		  		new_timepoint = math.floor((new_x - 60)/timeline_length * duration)
 
-		  if new_timepoint ~= timepoint then 
-		      screen:find_child("timeline").points[new_timepoint] = {}
-		      screen:find_child("timeline").points[new_timepoint][1] = 
-		      screen:find_child("timeline").points[timepoint][1]	
+		  		if new_timepoint ~= timepoint then 
+		      		screen:find_child("timeline").points[new_timepoint] = {}
+		      		screen:find_child("timeline").points[new_timepoint][1] = 
+		      		screen:find_child("timeline").points[timepoint][1]	
 
-		      table_removekey(screen:find_child("timeline").points, timepoint)
-
+		      		table_removekey(screen:find_child("timeline").points, timepoint)
+	
 		      local prev_i = 0
 		      for j,k in orderedPairs (screen:find_child("timeline").points) do
 	    	          if j == new_timepoint then 
@@ -1046,12 +1143,11 @@ function ui_element.timeline(t)
 		end 
 	   end 
            if name2num(pointer.name) ~= 0 then 
-	   	if(b == 3) then-- imsi : num_clicks is not correct ! 
-	 	--if(b == 3 or n >= 2) then
+	   	if(b == 3) then
 			-- point_inspector()
 	   	else
-                 	--imsi : dragging = {pointer, x - pointer.x, y - pointer.y, pointer_on_button_up }
-           	 	return true
+            --imsi : dragging = {pointer, x - pointer.x, y - pointer.y, pointer_on_button_up }
+           	return true
 	   	end 
 	   end 
 	end 
@@ -1249,9 +1345,6 @@ function ui_element.timeline(t)
 	
 end 
 
-
-
-
 --[[
 Function: button
 
@@ -1261,17 +1354,17 @@ Arguments:
 	Table of button properties
 	
 	skin - Modify the skin for the button by changing this value
-    	bwidth  - Width of the button
-    	bheight - Height of the button
-    	button_color - Border color of the button
-    	focus_color - Focus color of the button
-    	border_width - Border width of the button
-    	text - Caption of the button
-    	text_font - Font of the button text
-    	text_color - Color of the button text
-    	padding_x - Padding of the button image on the X axis
-    	padding_y - Padding of the button image on the Y axis
-    	border_corner_radius - Radius of the border for the button
+    bwidth  - Width of the button
+    bheight - Height of the button
+    button_color - Border color of the button
+    focus_color - Focus color of the button
+    border_width - Border width of the button
+    text - Caption of the button
+    text_font - Font of the button text
+    text_color - Color of the button text
+    padding_x - Padding of the button image on the X axis
+    padding_y - Padding of the button image on the Y axis
+    border_corner_radius - Radius of the border for the button
 	pressed - Function that is called by on_focus_in() or on_key_down() event
 	release - Function that is called by on_focus_out()
 Return:
@@ -1280,7 +1373,6 @@ Return:
 Extra Function:
 	on_focus_out() - Releases the button focus
 	on_focus_in() - Grabs the button focus
-	
 ]]
 
 function ui_element.button(t) 
@@ -1431,7 +1523,6 @@ function ui_element.button(t)
         b_group.size = {p.ui_width , p.ui_height}
 
 		if p.skin == "Custom" then
-
 			local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
 	
 			ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius )
@@ -1484,7 +1575,6 @@ function ui_element.button(t)
         	text:set{name = "text", position = { (p.ui_width-text.w)/2, p.ui_height/2 - text.h/2}}
 		end 
 	
-		
 		if p.skin == "Custom" then 
 			b_group:add(ring, focus_ring)
 		else 
@@ -1509,95 +1599,64 @@ function ui_element.button(t)
 		end 
 
         b_group:add(text)
-
-		if editor_lb == nil or editor_use then 
-	     	function b_group:on_button_down(x,y,b,n)
-				
-				if b_group.tab_button == true and b_group.parent.buttons ~= nil then 
-					for q,w in pairs (b_group.parent.buttons) do
-						if w.label ~= b_group.label then 
-							if (w.skin == "Custom") then 
-	     						w:find_child("ring").opacity = 255
-	     						w:find_child("focus_ring").opacity = 0
-        					else
-	     						w:find_child("button_dim").opacity = 255
-            					w:find_child("button_focus").opacity = 0
-        					end
-						end 
-					end 
-				end 
-				
-				if current_focus ~= b_group then 
-					if current_focus then 
-						local temp_focus = current_focus
-		     			current_focus.on_focus_out(nil,true)
-						if temp_focus.is_in_menu == true then 
-							temp_focus.fade_in = false
-						end 
-						if prev_tab then 
-							prev_tab.on_focus_out(nil,true)
-						end 
-					end
-					b_group.extra.on_focus_in(keys.Return)
-				else 
-		     		current_focus.on_focus_out()
-					if b_group.is_in_menu ~= true then 
-						current_focus = b_group
-		     			current_focus.on_focus_in(keys.Return)
-					end 
-					screen:grab_key_focus()
-				end 
-				return true
-	     	end 
-
-			function b_group:on_button_up(x,y,b,n)
-				if b_group.single_button == true then 
-	     			button.opacity = 255
-            		focus.opacity = 0
-	     			focus_ring.opacity = 0
-				end 
-				return true
-	     	end 
-
-		--[[
-			function b_group:on_enter()
-				if input_mode ~= hdr.S_MENU_M then 
-		    		if current_focus ~= b_group then 
-						if current_focus then 
-		     				current_focus.on_focus_out()
-						end
-						b_group.extra.on_focus_in(keys.Return)
-		    		else 
-		     			current_focus.on_focus_in(keys.Return)
-		    		end 
-				end
-				return true
-            end
-			function b_group:on_leave()
-				b_group.extra.on_focus_out()
-			end
-			---]]
-		end
-
-		--[[
-		if p.skin == "editor"  then 
-	     	function b_group:on_motion()
-				if input_mode == hdr.S_MENU_M then 
-		    		if current_focus ~= b_group then 
-						if current_focus then 
-		     				current_focus.on_focus_out()
-						end
-						b_group.extra.on_focus_in(keys.Return)
-		    		else 
-		     			current_focus.on_focus_in(keys.Return)
-		    		end 
-				end 
-             end
-		end 
-		]]
-    end 
+	end 
 
     create_button()
+	
+	if editor_lb == nil or editor_use then 
+
+		local ring = b_group:find_child("ring") 
+		local focus_ring = b_group:find_child("focus_ring") 
+		local button = b_group:find_child("button_dim") 
+		local focus = b_group:find_child("button_focus") 
+
+     	function b_group:on_button_down(x,y,b,n)
+			if b_group.tab_button == true and b_group.parent.buttons ~= nil then 
+				for q,w in pairs (b_group.parent.buttons) do
+					if w.label ~= b_group.label then 
+						if (w.skin == "Custom") then 
+     						w:find_child("ring").opacity = 255
+     						w:find_child("focus_ring").opacity = 0
+       					else
+     						w:find_child("button_dim").opacity = 255
+           					w:find_child("button_focus").opacity = 0
+       					end
+					end 
+				end 
+			end 
+				
+			if current_focus ~= b_group then 
+				if current_focus then 
+					local temp_focus = current_focus
+	     			current_focus.on_focus_out(nil,true)
+					if temp_focus.is_in_menu == true then 
+						temp_focus.fade_in = false
+					end 
+					if prev_tab then 
+						prev_tab.on_focus_out(nil,true)
+					end 
+				end
+				b_group.extra.on_focus_in(keys.Return)
+			else 
+	     		current_focus.on_focus_out()
+				if b_group.is_in_menu ~= true then 
+					current_focus = b_group
+	     			current_focus.on_focus_in(keys.Return)
+				end 
+				screen:grab_key_focus()
+			end 
+			return true
+     	end 
+
+		function b_group:on_button_up(x,y,b,n)
+			if b_group.single_button == true then 
+     			button.opacity = 255
+           		focus.opacity = 0
+     			focus_ring.opacity = 0
+			end 
+			return true
+     	end 
+	end
 	
     mt = {}
     mt.__newindex = function (t, k, v)
@@ -1633,17 +1692,17 @@ Creates a text field ui element
 Arguments:
 	Table of text field properties
 
-		skin - Modify the skin used for the text field by changing this value
-    	bwidth  - Width of the text field
-    	bheight - Height of the text field 
-    	border_color - Border color of the text field
-    	focus_color - Focus color of the text field
-    	text_color - Color of the text in the text field
-    	text_font - Font of the text in the text field
-    	border_width - Border width of the text field 
-    	padding - Size of the text indentiation 
-    	border_corner_radius - Radius of the border for the button image 
-    	text - Caption of the text field  
+	skin - Modify the skin used for the text field by changing this value
+    bwidth  - Width of the text field
+    bheight - Height of the text field 
+    border_color - Border color of the text field
+    focus_color - Focus color of the text field
+    text_color - Color of the text in the text field
+    text_font - Font of the text in the text field
+    border_width - Border width of the text field 
+    padding - Size of the text indentiation 
+    border_corner_radius - Radius of the border for the button image 
+    text - Caption of the text field  
 
 Return:
  	t_group - The group contaning the text field
@@ -1651,7 +1710,6 @@ Return:
 Extra Function:
 	on_focus_out() - Releases the text field focus
 	on_focus_in() - Grabs the text field focus
-	
 ]]
 
 
@@ -1669,7 +1727,7 @@ function ui_element.textInput(t)
     	focus_color  = {0,255,0,255},
     	focus_fill_color = {27,145,27,0}, 
     	cursor_color = {255,255,255,255},
-    	text_font = "FreeSans Medium 30px"  , 
+    	text_font = "FreeSans Medium 30px", 
     	text_color =  {255,255,255,255},
     	border_corner_radius = 12 ,
 		readonly = "",
@@ -1749,13 +1807,14 @@ function ui_element.textInput(t)
         t_group.size = { p.ui_width , p.ui_height}
 
 		if p.skin == "Custom" then 
-
-			local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
+			local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), 
+										color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
 
     		box = assets( key, my_make_ring, p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
     		box:set{name="box", position = {0 ,0}}
 
-			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
+			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), 
+								  color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
 
     		focus_box = assets(key, my_make_ring, p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
     		focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
@@ -1782,7 +1841,6 @@ function ui_element.textInput(t)
 
     		t_group:add(readonly, text)
 		else 
-
     		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = p.single_line, 
 						cursor_color = p.cursor_color, wants_enter = true, 
 						alignment = p.alignment, justify = p.justify, wrap = p.wrap, wrap_mode = p.wrap_mode, 
@@ -1797,30 +1855,31 @@ function ui_element.textInput(t)
     		t_group:add(text)
 		end
 
-
 		local t_pos_min = t_group.x + t_group:find_child("textInput").x 
-
-		if editor_lb == nil or editor_use then 
-	   		function t_group:on_button_down()
-				t_group.extra.on_focus_in()
-				return true
-	   		end 
-	    end 
-
+	
 		function text:on_key_down(key)
-			if key == keys.Return then 
-				t_group:grab_key_focus()
-				t_group:on_key_down(key)
-			elseif key == keys.Tab then 
-				t_group:grab_key_focus()
-				t_group:on_key_down(key)
+			if p.single_line == true then 
+				if key == keys.Return then 
+					t_group:grab_key_focus()
+					t_group:on_key_down(key)
+				elseif key == keys.Tab then 
+					t_group:grab_key_focus()
+					t_group:on_key_down(key)
+				end 
 			end 
 			p.text = text.text 
 		end 
+    end 
 
-     end 
+    create_textInputField()
 
-     create_textInputField()
+	if editor_lb == nil or editor_use then 
+	   	function t_group:on_button_down()
+			t_group.extra.on_focus_in()
+			return true
+		end 
+	end 
+
 
      mt = {}
      mt.__newindex = function (t, k, v)
@@ -1846,56 +1905,6 @@ function ui_element.textInput(t)
 
      return t_group
 end 
-
-local function draw_dialogBG(w,h,lw,color)
-	local c = Canvas(w,h)
- 	local x=0 
-    local y=35
-
-	c:round_rectangle(10,10,w-20,h-20,10)
-
-	c.line_width = lw
-	c:set_source_linear_pattern(0,0,0,h)
-	c:add_source_pattern_color_stop(0.0, "00000060")
-	c:add_source_pattern_color_stop(1.0, "ffffff60")
-	c:stroke(true)
-	
-	c:set_source_linear_pattern(0,w+20,0,0)
-	c:add_source_pattern_color_stop(0.00,"000000ff")
-	c:add_source_pattern_color_stop(0.35,"444444ff")
-	c:add_source_pattern_color_stop(0.43,"525252ff")
-	c:add_source_pattern_color_stop(0.50,"565656ff")
-	c:add_source_pattern_color_stop(0.57,"525252ff")
-	c:add_source_pattern_color_stop(0.65,"444444ff")
-	c:add_source_pattern_color_stop(0.82,"1c1c1cff")
-	c:add_source_pattern_color_stop(1.00,"000000ff")
-	c:fill(true)
-	
-	c:clip()
-	--c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
-	c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
-	
-	c:set_source_linear_pattern(0,0,w,0)
-	c:add_source_pattern_color_stop(0.0, "ffffff0c")
-	c:add_source_pattern_color_stop(1.0, "ffffff40")
-	c:fill()
-
-
-    c:new_path()
-	c:move_to ( x, y)
-    c:line_to ( x + w, y)
-    c:set_line_width (lw/2)
-    c:set_source_color(color)
-    c:stroke (true)
-    c:fill (true)
-
-	if c.Image then
-         c = c:Image()
-    end
-    
-    return c
-end 
-
 
 --[[
 Function: dialogBox
