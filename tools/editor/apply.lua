@@ -365,6 +365,10 @@
 			  		local itemLists = {"top", "right"} 
               		v["tab_position"] = itemLists[tonumber(item_group:find_child("tab_position"):find_child("item_picker").selected_item)]
 
+					if v.extra.focus == nil then 
+						v.extra.focus = {}
+					end 
+
 					if itemLists[tonumber(item_group:find_child("tab_position"):find_child("item_picker").selected_item)] == "top" and 
 			    		inspector:find_child("focuschanger_bg".."R").opacity == 255 then 
 				 		for i = 1, #v.tab_labels do

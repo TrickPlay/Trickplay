@@ -319,7 +319,6 @@ local function create_on_line_down_f(v)
 
         function v:on_button_down(x,y,button,num_clicks)
             dragging = {v, x - v.x, y - v.y }
-	     	--if(button == 3 or num_clicks >= 2) then
 	     	if(button == 3) then
 		  		guideline_inspector(v)
                 return true
@@ -2442,8 +2441,14 @@ function editor.delete()
 	
 	for i, j in pairs(selected_objs) do 
 		j = string.sub(j, 1,-7)
+		local bumo
 		local s_obj = g:find_child(j)
-		local bumo = s_obj.parent 
+
+		if s_obj then 
+			bumo = s_obj.parent 
+		else 
+			return 
+		end 
 
 		if bumo.name == nil then 
 				if (bumo.parent.name == "window") then -- AP, SP 
