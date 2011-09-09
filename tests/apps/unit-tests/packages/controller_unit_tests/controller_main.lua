@@ -54,11 +54,15 @@ function controllers:on_controller_connected(controller)
 	device_has_images = controller.has_images
 	device_has_audio_clips = controller.has_audio_clips
 	device_has_advanced_ui = controller.has_advanced_ui
+
 	-- support_functionality1.lua	[end]
 
 
 	-- ui_input1.lua				test_controllers_ui_size
 	ui_size = controller.ui_size
+
+	-- ui_input1.lua				test_controllers_id
+	ui_id = controller.id
 
 	-- ui_input1.lua				test_controllers_input_size
 	input_size = controller.input_size
