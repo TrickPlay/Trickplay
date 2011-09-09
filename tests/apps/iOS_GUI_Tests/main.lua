@@ -197,7 +197,7 @@ function focus_manager (line, direction)
 		if line - offset > 1 then
 			screen:find_child("rect"..line - offset - 1).color = { 52, 102, 255, 0 }
 		end
-	elseif line > 23 and line <= 27 and direction == "down" then
+	elseif line > 23 and direction == "down" then
 		for i = 1, #all_tests do
 			screen:find_child("tests"..i).y = screen:find_child("tests"..i).y - 40
 		end

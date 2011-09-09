@@ -44,7 +44,7 @@
 "active": "true"
 },
 {
-"name": "00012_camera.lua",
+"name": "00012_request_image.lua",
 "active": "true"
 },
 {
@@ -105,6 +105,18 @@
 },
 {
 "name": "00027_enter_text.lua",
+"active": "true"
+},
+{
+"name": "00028_set_ui_image.lua",
+"active": "true"
+},
+{
+"name": "00029_request_image.lua",
+"active": "true"
+},
+{
+"name": "00030_request_image.lua",
 "active": "true"
 }
 ]
