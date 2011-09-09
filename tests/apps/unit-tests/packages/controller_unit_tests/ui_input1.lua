@@ -21,6 +21,10 @@ function test_controller_input_size ()
 	assert_equal ( input_size[2], 435, "input_size not returning the correct heigth.\n** Disregard if not testing on iTouch/iPhone. **\n")
 end
 
+function test_controller_id()
+	assert_not_nil ( ui_id,  "id is not a strong. **\n")
+end
+
 -- Test Tear down --
 
 
