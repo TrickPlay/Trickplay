@@ -987,9 +987,12 @@
     
     viewDidAppear = YES;
     [self performSelectorOnMainThread:@selector(createTimer) withObject:nil waitUntilDone:YES];
-    theTextField.text = currentText;
-    [theTextField selectAll:theTextField];
-    [UIMenuController sharedMenuController].menuVisible = NO;
+    
+    if (theTextField.isFirstResponder) {
+        theTextField.text = currentText;
+        [theTextField selectAll:theTextField];
+        [UIMenuController sharedMenuController].menuVisible = NO;
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
