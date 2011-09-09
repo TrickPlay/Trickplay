@@ -21,6 +21,11 @@ public:
 
     String get_name() const;
 
+    const String & get_id() const
+    {
+    	return id;
+    }
+
     unsigned int get_capabilities() const;
 
     inline bool has_cap( int cap ) const
@@ -171,6 +176,11 @@ public:
 
     bool save_key_map( const KeyMap & km );
 
+    bool is_advanced_ui_ready() const
+    {
+    	return advanced_ui_is_ready;
+    }
+
 protected:
 
     virtual ~Controller();
@@ -201,6 +211,10 @@ private:
     gint                ts_accelerometer_started;
     gint                ts_pointer_started;
     gint                ts_touch_started;
+
+    bool				advanced_ui_is_ready;
+
+    String				id;
 };
 
 //-----------------------------------------------------------------------------
