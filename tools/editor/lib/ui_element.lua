@@ -3534,6 +3534,79 @@ Extra Function:
 	speed_down() - spin slower
 ]]
  
+  --the Canvas used to create the dots
+    local make_dot = function(dot_diameter, dot_color)
+          local dot  = Canvas{size={dot_diameter, dot_diameter}}
+          dot:begin_painting()
+          dot:arc(dot_diameter/2,dot_diameter/2,dot_diameter/2,0,360)
+          dot:set_source_color(dot_color)
+          dot:fill(true)
+          dot:finish_painting()
+
+          if dot.Image then
+              dot = dot:Image()
+          end
+          dot.anchor_point ={dot_diameter/2,dot_diameter/2}
+          dot.name = "Loading Dot"
+
+          return dot
+    end
+
+	local function my_make_dot( _ , ... )
+     	return make_dot( ... )
+	end
+
+    local make_big_dot = function(overall_diameter, dot_color)
+
+        local dot  = Canvas{size={overall_diameter, overall_diameter}}
+		dot:begin_painting()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,0,90)
+		dot:line_to(overall_diameter/2,overall_diameter/2)
+		dot:line_to(overall_diameter,  overall_diameter/2)
+		dot:set_source_color(dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,90,180)
+		dot:line_to(overall_diameter/2,overall_diameter/2)
+		dot:line_to(overall_diameter/2,overall_diameter)
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,180,270)
+		dot:line_to( overall_diameter/2, overall_diameter/2 )
+		dot:line_to(                    0, overall_diameter/2 )
+		dot:set_source_color(dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,270,360)
+		dot:line_to( overall_diameter/2, overall_diameter/2 )
+		dot:line_to( overall_diameter/2,                    0 )
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+        dot:finish_painting()
+		
+        if dot.Image then
+            dot = dot:Image()
+        end
+        dot.anchor_point ={overall_diameter/2,overall_diameter/2}
+        dot.name         = "Loading Dot"
+        dot.position     = {x,y}
+
+        return dot
+    end
+
+	local function my_make_big_dot( _ , ... )
+     	return make_big_dot( ... )
+	end
+
 function ui_element.progressSpinner(t) 
     --default parameters
     local p = {
@@ -3576,164 +3649,104 @@ function ui_element.progressSpinner(t)
     --table of the dots, used by the animation
     local dots   = {}
     local load_timeline = nil
-    
-    --the Canvas used to create the dots
-    local make_dot = function()
-          local dot  = Canvas{size={p.dot_diameter, p.dot_diameter}}
-          dot:begin_painting()
-          dot:arc(p.dot_diameter/2,p.dot_diameter/2,p.dot_diameter/2,0,360)
-          dot:set_source_color(p.dot_color)
-          dot:fill(true)
-          dot:finish_painting()
+    local load_timeline
 
-          if dot.Image then
-              dot = dot:Image()
-          end
-          dot.anchor_point ={p.dot_diameter/2,p.dot_diameter/2}
-          dot.name         = "Loading Dot"
-	  
-
-          return dot
-    end
-    local make_big_dot = function()
-
-        local dot  = Canvas{size={p.overall_diameter, p.overall_diameter}}
-		dot:begin_painting()
-		
-		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,0,90)
-		dot:line_to(p.overall_diameter/2,p.overall_diameter/2)
-		dot:line_to(p.overall_diameter,  p.overall_diameter/2)
-		dot:set_source_color(p.dot_color)
-		dot:fill(true)
-		
-		dot:new_path()
-		
-		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,90,180)
-		dot:line_to(p.overall_diameter/2,p.overall_diameter/2)
-		dot:line_to(p.overall_diameter/2,p.overall_diameter)
-		dot:set_source_color("000000")
-		dot:fill(true)
-		
-		dot:new_path()
-		
-		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,180,270)
-		dot:line_to( p.overall_diameter/2, p.overall_diameter/2 )
-		dot:line_to(                    0, p.overall_diameter/2 )
-		dot:set_source_color(p.dot_color)
-		dot:fill(true)
-		
-		dot:new_path()
-		
-		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,270,360)
-		dot:line_to( p.overall_diameter/2, p.overall_diameter/2 )
-		dot:line_to( p.overall_diameter/2,                    0 )
-		dot:set_source_color("000000")
-		dot:fill(true)
-		
-        dot:finish_painting()
-		
-        if dot.Image then
-            dot = dot:Image()
-        end
-        dot.anchor_point ={p.overall_diameter/2,p.overall_diameter/2}
-        dot.name         = "Loading Dot"
-        dot.position     = {x,y}
-
-        return dot
-    end
-    local img, load_timeline
     --function used to remake the dots upon a parameter change
     create_dots = function()
+
         l_dots:clear()
         dots = {}
         
         if p.style == "orbitting" then
         
-        local rad
+        	local rad, key
         
-        for i = 1, p.number_of_dots do
-            --they're radial position
-            rad = (2*math.pi)/(p.number_of_dots) * i
-            if skin_list[p.skin]["loadingdot"] == nil then
-				dots[i] = make_dot()
-	        else
-		        img = assets(skin_list[p.skin]["loadingdot"])
-                img.size={p.dot_diameter, p.dot_diameter}
-				img.anchor_point = {
-                        img.w/2,
-                        img.h/2
-                }
-		        dots[i] = img
-            end
-			dots[i].position = {
-                math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
-                math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
-            }
-            l_dots:add(dots[i])
-        end
-        
-        -- the animation timeline
-        if load_timeline ~= nil and load_timeline.is_playing then
-            load_timeline:stop()
-            load_timeline = nil
-        end
-        load_timeline = Timeline
-        {
-            name      = "Loading Animation",
-            loop      =  true,
-            duration  =  p.cycle_time,
-            direction = "FORWARD", 
-        }
+        	for i = 1, p.number_of_dots do
+            	--they're radial position
+            	rad = (2*math.pi)/(p.number_of_dots) * i
+            	if p.skin == "Custom" then -- skin_list[p.skin]["loadingdot"] == nil then
+					key = string.format("dot:%d:%s", p.dot_diameter, color_to_string(p.dot_color))
+					dots[i] = assets(key, my_make_dot, p.dot_diameter, p.dot_color)
+	        	else		        
+		        	dots[i] = assets(skin_list[p.skin]["loadingdot"])
+                	dots[i].size={p.dot_diameter, p.dot_diameter}
+					dots[i].anchor_point = {
+                		dots[i].w/2,
+                    	dots[i].h/2
+                	}
+            	end
 
+				dots[i].position = {
+                	math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                	math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
+            	}
 
-        local increment = math.ceil(255/p.number_of_dots)
+            	l_dots:add(dots[i])		
+        	end
         
-        function load_timeline.on_new_frame(t)
-            local start_i   = math.ceil(t.elapsed/(p.cycle_time/p.number_of_dots))
-            local curr_i    = nil
-            
-            for i = 1, p.number_of_dots do
-                curr_i = (start_i + (i-1))%(p.number_of_dots) +1
-                
-                dots[curr_i].opacity = increment*i
-            end
-            
-        end
-        load_timeline:start()
-        
-        else
-        if skin_list[p.skin]["loadingdot"] == nil then
-            img = make_big_dot()
-            l_dots:add(img)
-        else
-            img = assets(skin_list[p.skin]["loadingdot"])
-            img.anchor_point={img.w/2,img.h/2}
-            
-            l_dots:add(img)
-        end
-        img.position={img.w/2,img.h/2}
-        if load_timeline ~= nil and load_timeline.is_playing then
-            load_timeline:stop()
-            load_timeline = nil
-        end
-        load_timeline = Timeline
-        {
-            name      = "Loading Animation",
-            loop      =  true,
-            duration  =  p.cycle_time,
-            direction = "FORWARD", 
-        }
-        function load_timeline.on_new_frame(t,msces,p)
-            img.z_rotation={360*p,0,0}
-        end
-        load_timeline:start()
-        
-        end
-        
+        	-- the animation timeline
+        	if load_timeline ~= nil and load_timeline.is_playing then
+            	load_timeline:stop()
+            	load_timeline = nil
+        	end
+
+        	load_timeline = Timeline
+        	{
+            	name      = "Loading Animation",
+            	loop      =  true,
+            	duration  =  p.cycle_time,
+            	direction = "FORWARD", 
+        	}
 	
-    end
-    create_dots()
+        	local increment = math.ceil(255/p.number_of_dots)
+        
+        	function load_timeline.on_new_frame(t)
+            	local start_i   = math.ceil(t.elapsed/(p.cycle_time/p.number_of_dots))
+            	local curr_i    = nil
+            
+            	for i = 1, p.number_of_dots do
+                	curr_i = (start_i + (i-1))%(p.number_of_dots) +1
+                	dots[curr_i].opacity = increment*i
+            	end
+        	end
+        	load_timeline:start()
 
+        else -- spinning 
+
+			local img, key
+
+			if p.skin == "Custom" then 
+				key = string.format("big_dot:%d:%s", p.overall_diameter, color_to_string(p.dot_color))
+            	img = assets(key, my_make_big_dot, p.overall_diameter, p.dot_color)
+            	img.anchor_point={img.w/2,img.h/2}
+            	l_dots:add(img)
+        	else
+            	img = assets(skin_list[p.skin]["loadingdot"])
+            	img.anchor_point={img.w/2,img.h/2}
+            	l_dots:add(img)
+        	end
+        	img.position={img.w/2,img.h/2}
+        	if load_timeline ~= nil and load_timeline.is_playing then
+            	load_timeline:stop()
+            	load_timeline = nil
+        	end
+
+        	load_timeline = Timeline
+        	{
+            	name      = "Loading Animation",
+            	loop      =  true,
+            	duration  =  p.cycle_time,
+            	direction = "FORWARD", 
+        	}
+
+        	function load_timeline.on_new_frame(t,msces,p)
+            	img.z_rotation={360*p,0,0}
+        	end
+        	load_timeline:start()        	
+        end
+    end
+
+    create_dots()
 
     local mt = {}
     mt.__newindex = function(t,k,v)
@@ -3756,23 +3769,117 @@ Creates a Loading bar ui element
 
 Arguments:
 	Table of Loading bar properties
-		bsize - Size of the loading bar
-		shell_upper_color - The upper color for the inside of the loading bar
-		shell_lower_color - The upper color for the inside of the loading bar
-		border_color - Color for the border
-		fill_upper_color - The upper color for the loading bar fill
-		fill_lower_color - The lower color for the loading bar fill
+	bsize - Size of the loading bar
+	shell_upper_color - The upper color for the inside of the loading bar
+	shell_lower_color - The upper color for the inside of the loading bar
+	border_color - Color for the border
+	fill_upper_color - The upper color for the loading bar fill
+	fill_lower_color - The lower color for the loading bar fill
 
 Return:
-
-		loading_bar_group - Group containing the loading bar
+	loading_bar_group - Group containing the loading bar
         
 Extra Function:
 	set_prog(prog) - set the progress of the loading bar (meant to be called in an on_new_frame())
-	start_prog() 
 ]]
 
----[[
+
+local function draw_c_shell(ui_width, ui_height, empty_top_color, empty_bottom_color, border_color)
+
+	local c_shell = Canvas {
+		size = {ui_width,ui_height},
+	}
+        
+    local stroke_width = 2
+	local RAD = 6
+	local top    = math.ceil(stroke_width/2)
+	local left   = math.ceil(stroke_width/2)
+	local bottom = c_shell.h - math.ceil(stroke_width/2)
+	local right  = c_shell.w - math.ceil(stroke_width/2)
+        
+	c_shell:begin_painting()
+		
+	c_shell:move_to(        left,         top )
+	c_shell:line_to(   right-RAD,         top )
+	c_shell:curve_to( right, top,right,top,right,top+RAD)
+	c_shell:line_to(       right,  bottom-RAD )
+	c_shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+	c_shell:line_to(           left+RAD,          bottom )
+	c_shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+	c_shell:line_to(           left,            top+RAD )
+	c_shell:curve_to(left,top,left,top,left+RAD,top)
+        
+	c_shell:set_source_linear_pattern(
+		c_shell.w/2,0,
+		c_shell.w/2,c_shell.h
+	)
+	c_shell:add_source_pattern_color_stop( 0 , empty_top_color )
+	c_shell:add_source_pattern_color_stop( 1 , empty_bottom_color )
+        
+	c_shell:fill(true)
+	c_shell:set_line_width(   stroke_width )
+	c_shell:set_source_color( border_color )
+	c_shell:stroke( true )
+	c_shell:finish_painting()
+
+    if c_shell.Image then
+		c_shell = c_shell:Image()
+	end
+ 
+    return c_shell 
+end 
+        
+local function my_draw_c_shell( _ , ... )
+    return draw_c_shell( ... )
+end
+
+
+local function draw_c_fill(c_shell_w, c_shell_h, ui_width, ui_height, filled_top_color, filled_bottom_color, progress)
+
+    local stroke_width = 2
+	local RAD = 6
+	local top    = math.ceil(stroke_width/2)
+	local left   = math.ceil(stroke_width/2)
+
+	local bottom = c_shell_h - math.ceil(stroke_width/2)
+	local right  = c_shell_w - math.ceil(stroke_width/2)
+        
+	local c_fill  = Canvas{ size = {1,ui_height-stroke_width} }  
+        
+	c_fill:begin_painting()
+        
+	c_fill:move_to(-1,    top )
+	c_fill:line_to( 2,    top )
+	c_fill:line_to( 2, bottom )
+	c_fill:line_to(-1, bottom )
+	c_fill:line_to(-1,    top )
+        
+	c_fill:set_source_linear_pattern(
+		c_shell_w/2,0,
+		c_shell_w/2,c_shell_h
+	)
+	c_fill:add_source_pattern_color_stop( 0 , filled_top_color )
+	c_fill:add_source_pattern_color_stop( 1 , filled_bottom_color )
+	c_fill:fill(true)
+	c_fill:finish_painting()
+
+	if c_fill.Image then
+		c_fill = c_fill:Image()
+	end
+
+	c_fill.x=stroke_width
+    c_fill.y=stroke_width/2
+    c_fill.scale = {(ui_width-4)*(progress),1}
+   
+	return c_fill
+end 
+
+local function my_draw_c_fill( _ , ... )
+   	return draw_c_fill( ... )
+end
+
+
 function ui_element.progressBar(t)
 
     --default parameters
@@ -3818,114 +3925,27 @@ function ui_element.progressBar(t)
         	    end,
 	        },
 	}
-
---[[
-	local l_bar_timer = Timer()
-    local l_bar_timeline = Timeline ()
-]]
 	local function create_loading_bar()
+
 		l_bar_group:clear()
-        local stroke_width = 2
-		c_shell = Canvas{
-				size = {p.ui_width,p.ui_height},
-		}
-		c_fill  = Canvas{
-				size = {1,p.ui_height-stroke_width},
-		}  
-        
-		
-		local RAD = 6
-        
-		local top    = math.ceil(stroke_width/2)
-		local bottom = c_shell.h - math.ceil(stroke_width/2)
-		local left   = math.ceil(stroke_width/2)
-		local right  = c_shell.w - math.ceil(stroke_width/2)
-        
-		c_shell:begin_painting()
-        
-		
-		c_shell:move_to(        left,         top )
-		c_shell:line_to(   right-RAD,         top )
-		c_shell:curve_to( right, top,right,top,right,top+RAD)
-		c_shell:line_to(       right,  bottom-RAD )
-		c_shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		c_shell:line_to(           left+RAD,          bottom )
-		c_shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		c_shell:line_to(           left,            top+RAD )
-		c_shell:curve_to(left,top,left,top,left+RAD,top)
-        
-		c_shell:set_source_linear_pattern(
-			c_shell.w/2,0,
-			c_shell.w/2,c_shell.h
-		)
-		c_shell:add_source_pattern_color_stop( 0 , p.empty_top_color )
-		c_shell:add_source_pattern_color_stop( 1 , p.empty_bottom_color )
-        
-		c_shell:fill(true)
-		c_shell:set_line_width(   stroke_width )
-		c_shell:set_source_color( p.border_color )
-		c_shell:stroke( true )
-		c_shell:finish_painting()
-        
-        
-        
-		c_fill:begin_painting()
-        
-		c_fill:move_to(-1,    top )
-		c_fill:line_to( 2,    top )
-		c_fill:line_to( 2, bottom )
-		c_fill:line_to(-1, bottom )
-		c_fill:line_to(-1,    top )
-        
-		c_fill:set_source_linear_pattern(
-			c_shell.w/2,0,
-			c_shell.w/2,c_shell.h
-		)
-		c_fill:add_source_pattern_color_stop( 0 , p.filled_top_color )
-		c_fill:add_source_pattern_color_stop( 1 , p.filled_bottom_color )
-		c_fill:fill(true)
-		c_fill:finish_painting()
-		if c_shell.Image then
-			c_shell = c_shell:Image()
-		end
-		if c_fill.Image then
-			c_fill = c_fill:Image()
-		end
-        	c_fill.x=stroke_width
-        	c_fill.y=stroke_width/2
-        	c_fill.scale = {(p.ui_width-4)*(p.progress),1}
-		l_bar_group:add(c_shell,c_fill)
 
---[[
-		l_bar_timer.interval = 1 -- immediately 
-    	l_bar_timeline.duration = 3000 -- progress duration 
-    	l_bar_timeline.direction = "FORWARD"
-    	l_bar_timeline.loop = false
+		local key = string.format("cshell:%d:%d:%s:%s:%s", p.ui_width, p.ui_height, color_to_string(p.empty_top_color), 
+								   color_to_string(p.empty_bottom_color), color_to_string(p.border_color))
 
-     	function l_bar_timeline.on_new_frame(t, m, p)
-			l_bar_group.set_prog(p)
-     	end  
+		c_shell =  assets(key, my_draw_c_shell, p.ui_width, p.ui_height, p.empty_top_color, p.empty_bottom_color, p.border_color)
 
-     	function l_bar_timeline.on_completed()
-			l_bar_group.set_prog(1)
-     	end 
+		key = string.format("cshell:%d:%d:%d:%d:%s:%s:%d", c_shell.w, c_shell.h, p.ui_width, p.ui_height, 
+							color_to_string(p.filled_top_color), color_to_string(p.filled_bottom_color), p.progress)
 
-     	function l_bar_timer.on_timer(l_bar_timer)
-			l_bar_timeline:start()
-        	l_bar_timer:stop()
-     	end 
-]]
+		c_fill  = assets(key, my_draw_c_fill, c_shell.w, c_shell.h, p.ui_width, p.ui_height, p.filled_top_color, p.filled_bottom_color, p.progress)
+
+
+		l_bar_group:add(c_shell,c_fill) 
+
 	end
     
 	create_loading_bar()
     
-	--[[
-    function l_bar_group.extra.start_timer() 
-		l_bar_timer:start()
-    end 
- 	]]
-
 
 	local mt = {}
     
