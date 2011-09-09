@@ -166,6 +166,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // TextField for entering text; used when Trickplay requests text input
     // with controller:enter_text(string label, string text) call from Trickplay.
     UITextField *theTextField;
+    NSString *currentText;
     UILabel *theLabel;
     // Black border around theTextField
     UIView *textView;
