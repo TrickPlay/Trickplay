@@ -22,7 +22,7 @@ heart.x = gauge.x + gauge.w
 score_gauge:add(bground,gauge,frame,heart)
 
 score_gauge.x = (screen.w - score_gauge.w)/2
-score_gauge.y = 100
+score_gauge.y = 60
 
 
 score_gauge.extra.set_score = function(self,new_score)
@@ -56,5 +56,7 @@ score_gauge.extra.set_score = function(self,new_score)
     animator:start()
 end
 
+score_gauge:move_anchor_point( score_gauge.w/2, score_gauge.h/2 )
+score_gauge.scale = { 2, 2 }
 
 return score_gauge
