@@ -4,17 +4,12 @@ local background = Image { src = "/assets/robot-part/screen/Background.jpg" }
 
 local ratio = (screen.h + SCREEN_JIGGLE_DISTANCE) / background.h
 
-print("ratio is",ratio,"which makes width =",background.w*ratio,"height=",background.h*ratio)
-
 background.anchor_point = { SCREEN_JIGGLE_DISTANCE/ratio, SCREEN_JIGGLE_DISTANCE/ratio }
 
 background.scale = { ratio, ratio }
 
-dumptable(background.size)
 
-
-background.extras = {
-    jiggle = function(duration)
+background.extra.jiggle = function(self,duration)
         local path = Path()
         path:move_to(0, 0)
         path:line_to( SCREEN_JIGGLE_DISTANCE, SCREEN_JIGGLE_DISTANCE * 1/4)
@@ -32,7 +27,6 @@ background.extras = {
             background.position = path:get_position(alpha.alpha)
         end
         timeline:start()
-    end,
-}
+end
 
 return background
