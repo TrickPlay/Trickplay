@@ -12,8 +12,9 @@
         Each of those is broken out into its own file that implements its behaviors, except the border which is just a static image.  Those behaviors are then controlled from here.
 ]]--
 
-local girl_in_white = dofile("robot-part/girl-in-white.lua")
-local girl_in_black = dofile("robot-part/girl-in-black.lua")
+local girl_factory  = dofile("robot-part/generic-girl.lua")
+local girl_in_white = dofile("robot-part/girl-in-white.lua")(girl_factory)
+local girl_in_black = dofile("robot-part/girl-in-black.lua")(girl_factory)
 local robot         = dofile("robot-part/robot.lua")
 local score_gauge   = dofile("robot-part/score-gauge.lua")
 local background    = dofile("robot-part/background.lua")
@@ -27,12 +28,14 @@ screen:add(screen_border)
 screen:show()
 
 function screen:on_key_down(key)
-    background.extras.jiggle(150)
-    score_gauge.extras.set_score((score_gauge.extras.score+10) % 110 )
+    if(key == keys.OK) then
+        background:jiggle(150)
+        score_gauge:set_score((score_gauge.extra.score+10) % 110 )
+    elseif(key == keys.Right) then
+        girl_in_white:go_to_state('knockdown1')
+        girl_in_black:go_to_state('run1')
+    elseif(key == keys.Left) then
+        girl_in_white:go_to_state('roll1')
+        girl_in_black:go_to_state('runToStop1')
+    end
 end
-
-local timer = Timer(1000)
-function timer:on_timer()
-    screen:on_key_down(keys.OK)
-end
-timer:start()
