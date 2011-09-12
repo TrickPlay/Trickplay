@@ -1,7 +1,10 @@
-app = {
-    id          = "ID",
-    release     = "1",
-    version     = "0.1",
-    name        = "NAME",
-    copyright   = "",
+app=
+{
+    id          = "com.trickplay.editor",
+    release     = "4",
+    version     = "1.0",
+    name        = "Visual Editor",
+    copyright   = "© Trickplay Inc.",
+    attributes  = { "nolauncher" }
 }
+
