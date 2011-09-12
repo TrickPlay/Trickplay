@@ -13,14 +13,6 @@ local screen_h = screen.height
 
 
 function create_UI() 
-
-	no_screenshot_found_msg_txt = Text
-			{
-			text = "No screenshot found\n for this test",
-			position = {  685, 490 },
-			font = "DejaVu 35px",
-			color = "FFFFFF"
-			}
 	
 	-- UI: App Title
 	local app_title_txt = Text
@@ -181,7 +173,15 @@ function create_UI()
 		}
 	test_list:add (test_verify_txt)
 
+	no_screenshot_found_msg_txt = Text
+			{
+			text = "No screenshot found\n for this test",
+			position = {  685, 490 },
+			font = "DejaVu 35px",
+			color = "FFFFFF"
+			}
 
+	test_list:add (no_screenshot_found_msg_txt)
 end
 
 
@@ -246,10 +246,12 @@ function populate_test_fields ()
 
 		if failed then
 			screenshot:hide()
+			print ("1")
 			no_screenshot_found_msg_txt:show()
 		else      
 			screenshot.position = { 675, 470 }
 			screenshot.size = { 320, 480 }
+			print ("2")
 			no_screenshot_found_msg_txt:hide()
 			screenshot:show()
 		end
