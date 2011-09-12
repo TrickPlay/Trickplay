@@ -503,11 +503,15 @@ interface actor [[ClutterActor*]]
     /*
 	Property: anchor_point
 	
+	The anchor_point property is a table specifying the location of the object's origin or "anchor point," which is used to position, scale and rotate the object. By default, an object's anchor point is located at the upper-left corner of the object. The anchor_point property specifies offsets to the object's upper-left corner 
+	
+	 The anchor_point property table specifies offsets along the X- and Y-axes at which to locate the object's origin at {0,0} and corresponds to the upper-left corner of the object. The anchor_point property contains offsets from the {0,0} origin X- and Y-axis offsets relative to the object's {0,0} origin.
+	
 	The anchor_point property is a table containing the object's X and Y coordinates, relative to itself, to use as the object's origin. The origin is used when positioning, scaling and rotating the object.
 	
-	Setting the anchor point moves the object so the anchor point is positioned at the object's <x> and <y> coordinates. To set the anchor point without moving the object, call the <move_anchor_point> function.
+	Setting the anchor point moves the object so its anchor point remains positioned at the object's current <x> and <y> location. To set the anchor point without moving the object, call the <move_anchor_point> function.
 	
-	*Format:* { x-coordinate, y-coordinate }
+	*Format:* { X-axis offset, Y-axis offset }
 	
 	*Default Setting:* { 0, 0 }, i.e., the object's top-left corner
 	
