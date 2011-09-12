@@ -269,7 +269,7 @@ class Path [[ClutterPath*]]
         
         string_path - string specifying the nodes to add to the path. If the string format is incorrect in any way then no nodes are added to the path. The format of the string_path is described below.
         
-        *Return Value:* True if the nodes were added succesfully. False otherwise. 
+        *Return Value:* Boolean indicating success or failure (true=nodes were added successfully)
         
         A node is defined by specifying a node type, usually followed by one or more X, Y coordinates. Node types are specified by a single alphabetic character. An uppercase character indicates that the specified X, Y coordinates are absolute to the display; a lowercase character indicates the X, Y coordinates are relative to the last-defined node. The coordinate values can be separated by spaces or a comma.
         
