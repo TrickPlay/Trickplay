@@ -42,6 +42,16 @@ local content = {
      {"text.txt", "no", "n/a", "error case text file"}
 }
 
+-- Round function
+function round(num, idp)
+  if idp and idp>0 then
+    local mult = 10^idp
+    return math.floor(num * mult + 0.5) / mult
+  end
+  return math.floor(num + 0.5)
+end
+
+
 -- Load video control images
 local start_btn = Image{ src = "app_assets/start.png", position = { 510, screen.h - 150 }, scale = {0.7, 0.7 } }
 local skip_back_btn = Image{ src = "app_assets/skip_back.png", position = { 590, screen.h - 150 }, scale = {0.7, 0.7 } }
@@ -127,15 +137,15 @@ function display_test ( test_list, test_no )
 				markup = "<b>"..test_no.."</b> of<b> "..#test_list.."</b>"
 				},
 			Text {
-				font = "DejaVu Serif 20px",
+				font = "DejaVu Serif 25px",
 				color = "E6AC00",
-				position = { screen.w - 520, 90 },
+				position = { screen.w - 650, 90 },
 				markup = "<b>F7 = Previous</b>"
 				},
 			Text {
-				font = "DejaVu Serif 20px",
+				font = "DejaVu Serif 25px",
 				color = "00289E",
-				position = { screen.w - 350, 90 },
+				position = { screen.w - 400, 90 },
 				markup = "<b>F8 = Forward</b>"
 				}
 		}
@@ -198,25 +208,25 @@ local video_sel_text_header_box =
 					border_width = 3
 				},
 				Text {
-					font = "San 35px",
+					font = "DejaVu 25px",
 					color = "000000",
 					position = { 23, 340 },
 					text = "Type"
 				},
 				Text {
-					font = "San 35px",
+					font = "DejaVu 25px",
 					color = "000000",
 					position = { 101, 340 },
 					text = "Streamed"
 				},
 				Text {
-					font = "San 35px",
+					font = "DejaVu 25px",
 					color = "000000",
 					position = { 221, 340 },
 					text = "Bitrate"
 				},
 				Text {
-					font = "San 35px",
+					font = "DejaVu 25px",
 					color = "000000",
 					position = { 320, 340 },
 					text = "Description"
@@ -226,9 +236,9 @@ local video_sel_text_header_box =
 screen:add (video_sel_text_header_box)
 
 local video_sel_text_box_txt = Text {
-			font = "San 50px",
+			font = "DejaVu 40px",
 			color = "99B3CC",
-			position = { 25, 295 },
+			position = { 25, 290 },
 			text = "Choose media:"
 			}
 
@@ -244,9 +254,9 @@ local video_info_text_box = Rectangle {
 screen:add (video_info_text_box)
 
 local video_info_text_box_txt = Text {
-			font = "San 50px",
+			font = "DejaVu 40px",
 			color = "99B3CC",
-			position = { screen.w - 430, 300 },
+			position = { screen.w - 430, 290 },
 			text = "Media info"
 			}
 
@@ -265,7 +275,7 @@ local test_step_text_box = Rectangle {
 screen:add (test_step_text_box)
 
 local test_step_title_box_txt = Text {
-			font = "San 45px",
+			font = "DejaVu 40px",
 			color = "99B3CC",
 			position = { 46, 44 },
 			text = "Test Steps"
@@ -418,7 +428,8 @@ function update_audio_status (volume, mute)
 				font = "DejaVu Serif 20px",
 				color = "000000",
 				position = {  screen.w - 430, 550 },
-				markup = "<b>Volume: </b>"..volume.."  <b>\nMute: </b>"..mute,
+				single_line = true,
+				markup = "<b>Volume: </b>"..round(volume, 2).."\t<b>Mute: </b>"..mute,
 				name = "update_audio_status"
 				}
 	screen:add ( update_audio_status_txt )
@@ -486,10 +497,10 @@ end
 function create_content_list ()
 	for i=1, #content do
 	    local content_list_txt = Text {
-			font = "DejaVu Sans Mono 23px",
+			font = "DejaVu Sans Mono 20px",
 			color = "000000",
 			position = { 30, 350 + i * 25 },
-			text = string.lower (string.sub(content[i][1], -3)).."     "..content[i][2].."     "..content[i][3].."   "..content[i][4]
+			text = string.lower (string.sub(content[i][1], -3)).."\t"..content[i][2].."\t"..content[i][3].."\t"..content[i][4]
 			}
 
 	    screen:add (content_list_txt)
