@@ -4728,6 +4728,7 @@ function ui_element.scrollPane(t)
 	end
     
 	local function my_make_arrow( _ , ... )
+	print("my Mk arrow")
      	return make_arrow( ... )
 	end
 
@@ -5463,6 +5464,10 @@ local function make_dropdown( size , color )
     
 end
 
+local function my_make_dropdown ( _ , ...)
+	return make_dropdown( ... )
+end 
+
 function ui_element.menuButton(t)
     --default parameters
     local p = {
@@ -5557,6 +5562,7 @@ button
     end 
 
     local dropDownMenu = Group{}
+
     local button       = ui_element.button{
 		name = "button",
         text_font=p.text_font,
@@ -5576,7 +5582,9 @@ button
 		is_in_menu = true, 
 		ui_position = p.ui_position,
     }
+
     local umbrella
+
     umbrella     = Group{
         name="menuButton",
         reactive = true,
@@ -5740,7 +5748,6 @@ button
             end
         }
 
-  	--[[ umbrella.size = {p.ui_width, p.ui_height} ]]
     }
 
 	--yugi
@@ -5784,6 +5791,10 @@ button
         return ring
     end
     
+	local function my_make_item_ring (_, ...)
+		return make_item_ring(...)	
+	end 
+
     function umbrella.extra.on_focus_in(key) 
 		if key then 
 			if key == keys.Return then 
@@ -5798,20 +5809,7 @@ button
 		end 
     end
 	 
-	 --[[ not working
-    function umbrella.extra.on_focus_in(key) 
-		if key then 
-			if key == keys.Return then 
-				button.on_focus_in(keys.Return)
-				return 
-			end 
-		end  
-		button.on_focus_in()
-		umbrella:grab_key_focus()
-    end
-	]]
-
-    function umbrella.extra.on_focus_out(key) 
+	function umbrella.extra.on_focus_out(key) 
 		if key then 
 			button.on_focus_out(key)
 		end
@@ -5819,6 +5817,7 @@ button
    
     function create()
         --local vars used to create the menu
+
         local ui_ele = nil
         local txt, s_txt
         local curr_y = 0
@@ -5830,6 +5829,8 @@ button
         local txt_h       = Text{font=p.font}.h
         local inset       = 20
         
+		local key 
+		
         --reset globals
         curr_cat   = 1
         curr_index = 0
@@ -5855,9 +5856,10 @@ button
         
         --For each category
         local prev_item 
+
         for i = 1, #p.items do
+
             local item=p.items[i]
-            --focus_sel_items[cat] = {}
              
             if item.type == "separator" then
                 dropDownMenu:add(
@@ -5936,8 +5938,9 @@ button
                         ui_ele.reactive=true
                     end
                 elseif p.show_ring then
-                    ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
-					
+					key = string.format("item_ring:%d, %d", p.menu_width-2*p.horz_spacing,txt.h+10)
+                    ui_ele = assets (key, my_make_item_ring, p.menu_width-2*p.horz_spacing,txt.h+10,7)
+                    --ui_ele = make_item_ring (p.menu_width-2*p.horz_spacing,txt.h+10,7)
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = { 0, 	   txt.y }
                     dropDownMenu:add(ui_ele)
@@ -5979,9 +5982,11 @@ button
                 if item.focus then
                     ui_ele = item.focus
                 else
-                    ui_ele = assets(skin_list[p.skin]["button_focus"])
-                    ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
-                    item.focus  = ui_ele
+					if skin_list[p.skin]["button_focus"] ~= nil then 
+                    	ui_ele = assets(skin_list[p.skin]["button_focus"])
+                    	ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
+                    	item.focus  = ui_ele
+					end
                 end
                 
                 ui_ele.name="focus"
@@ -5994,8 +5999,6 @@ button
                     ui_ele.anchor_point = {  0, ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                 end 
-                --ui_ele.anchor_point = { 0, ui_ele.h/2 }
-                --ui_ele.position     = { 0, txt.y }
                 ui_ele.opacity      = 0
                 if ui_ele.parent then ui_ele:unparent() end
                 dropDownMenu:add(ui_ele)
@@ -6088,14 +6091,17 @@ button
             else
                 print("Invalid type in the item list. Type: ",item.type)
             end
-	    prev_item = item
+	    	prev_item = item
+
         end
         
+
         if p.background_color[4] ~= 0 then
-            ui_ele = make_dropdown(
-                { p.menu_width , curr_y } ,
-                p.background_color
-            )
+
+			key = string.format ("dropDown:%d:%d:%s",  p.menu_width , curr_y, color_to_string(p.background_color) )
+            ui_ele = assets(key, my_make_dropdown, { p.menu_width , curr_y } , p.background_color)
+
+			--ui_ele = make_dropdown({ p.menu_width , curr_y } , p.background_color)
             
             dropDownMenu:add(ui_ele)
             ui_ele:lower_to_bottom()
@@ -6141,7 +6147,6 @@ button
             dropDownMenu.y = dropDownMenu.y + button.h
         end
         
-        --dropDownMenu.x = dropDownMenu.x + p.horz_offset
     end
     
     
@@ -6152,13 +6157,14 @@ button
 		
         p[k] = v
 	    if k ~= "selected" then 
-        	create()
+			create()
 	    end
 		
     end
     mt.__index = function(t,k)       
        return p[k]
     end
+
     setmetatable(umbrella.extra, mt)
 
     return umbrella
@@ -6352,7 +6358,7 @@ function ui_element.tabBar(t)
         tab_bg = {}
         tab_focus = {}
         
-        local bg = Rectangle{
+        local bg = Rectangle {
             color        = p.fill_color,
             border_color = p.border_color,
             border_width = p.border_width,
@@ -6707,7 +6713,8 @@ function ui_element.arrowPane(t)
 		return c
 		
 	end
-	
+
+--[[
 	local make_arrow = function(sz,color)
 		
 		local c = Canvas{size={sz,sz}}
@@ -6729,7 +6736,10 @@ function ui_element.arrowPane(t)
 		return c
 		
 	end
-
+	]]
+    local function my_make_arrow( _ , ...) 
+		make_arrow(...)
+	end 
 	--overwrite defaults
     if t ~= nil then
        	for k, v in pairs (t) do
@@ -6917,6 +6927,8 @@ function ui_element.arrowPane(t)
 	
 	local function create()
 		
+		local key 
+
 		umbrella:clear()
 		arrow_pane_keys = {}
 
@@ -6944,7 +6956,8 @@ function ui_element.arrowPane(t)
 			end
 			
 		else
-			
+			--key = string.format ("arrow:%d:%s",  p.arrow_sz, color_to_string(p.arrow_color))
+			--arrow_src = assets(key, my_make_arrow,  p.arrow_sz, p.arrow_color )
 			arrow_src   = make_arrow( p.arrow_sz, p.arrow_color )
 			umbrella:add(arrow_src)
 			arrow_src:hide()
@@ -6964,28 +6977,21 @@ function ui_element.arrowPane(t)
 			end
 			
 		else
-			
+			--key = string.format ("tab_farrow:%d:%s",  p.arrow_sz, color_to_string(p.arrow_focus_color))
+			--focus_arrow_src = assets(key, my_make_arrow,  p.arrow_sz, p.arrow_focus_color )
 			focus_arrow_src   = make_arrow( p.arrow_sz, p.arrow_focus_color )
 			umbrella:add(focus_arrow_src)
 			focus_arrow_src:hide()
 		end
-		--[[
-		if arrow_src.parent       then arrow_src:unparent() end
-		if focus_arrow_src.parent then focus_arrow_src:unparent() end
-		umbrella:add(arrow_src)
-		umbrella:add(focus_arrow_src)
-		arrow_src:hide()
-		focus_arrow_src:hide()
-		--]]
+
         window.position={ p.box_width, p.box_width }
 		window.clip = { 0,0, p.visible_w, p.visible_h }
-        border:set{
+        border:set {
             w = p.visible_w+2*p.box_width,
             h = p.visible_h+2*p.box_width,
             border_width =    p.box_width,
             border_color =    p.box_color,
         }
-		
         
         if p.arrows_visible then
 			if p.visible_h < p.virtual_h then
@@ -7082,9 +7088,40 @@ function ui_element.arrowPane(t)
 					}
 					f_arrow:hide()
 
+--[[
 					local arrow = Image {
 						name = "right",
 						src ="/lib/assets/tab-arrow-right-on.png",
+						x = border.w+p.arrow_dist_to_frame  - 15,
+						y = border.h/2 - 10,
+						reactive=true,
+						on_button_down = function()
+							umbrella:pan_by(p.dist_per_press,0)
+							if p.tab then 
+								local current_tab = p.tab.current_tab
+								if umbrella:find_child("right").src == "/lib/assets/tab-arrow-right-on.png" then
+									if current_tab == 1 then 
+										p.tab_buttons[2].on_button_down()
+									end 
+									umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-off.png"
+									umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-on.png"
+								end 
+								if p.tab_buttons[4].reactive == false then 
+									p.tab_buttons[4]:show()
+									p.tab_buttons[4].reactive = true 
+								end 
+								return true
+							end 
+						end,
+						extra = {
+							focus = f_arrow
+						}
+					}
+	]]
+
+					local arrow = assets ("/lib/assets/tab-arrow-right-on.png")
+					arrow:set{
+						name = "right",
 						x = border.w+p.arrow_dist_to_frame  - 15,
 						y = border.h/2 - 10,
 						reactive=true,
@@ -7155,6 +7192,8 @@ function ui_element.arrowPane(t)
 				end 
 				
 				if p.tab_buttons then 
+--[[
+
 					arrow = Image {
 						name = "left",
 						src ="/lib/assets/tab-arrow-left-off.png",
@@ -7179,6 +7218,34 @@ function ui_element.arrowPane(t)
 							end 
 						end
 					}
+
+]]
+
+					arrow = assets ("/lib/assets/tab-arrow-left-off.png")
+					arrow:set{
+						name = "left",
+						x = - 20,
+						reactive = true,
+						on_button_down = function()
+							umbrella:pan_by(-p.dist_per_press,0)
+							if p.tab then 
+								local current_tab = p.tab.current_tab
+								if umbrella:find_child("left").src == "/lib/assets/tab-arrow-left-on.png" then 
+									if current_tab == 4 then 
+										p.tab_buttons[1].on_button_down()
+									end 
+									umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-on.png"
+									umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-off.png"
+								end 
+								if  p.tab_buttons[4].reactive == true then 
+									p.tab_buttons[4]:hide()
+									p.tab_buttons[4].reactive = false 
+								end 
+								return true
+							end 
+						end
+					}
+
 					umbrella:add(arrow)
 				else
 					
