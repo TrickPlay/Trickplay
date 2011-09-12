@@ -4218,7 +4218,6 @@ function ui_element.layoutManager(t)
         }
     }
 
-
 	local make_tile = function(w,h)
         local c = Canvas{size={w,h}}
         c:begin_painting()
@@ -4238,43 +4237,34 @@ function ui_element.layoutManager(t)
         c.name="placeholder"
 		return c
 	end
+
+	
+	local function my_make_tile( _ , ... )
+     	return make_tile( ... )
+	end
 	
 	make_grid = function()
         
-		local g
+		local cell, key
         slate:clear()
         
         focus_i[1] = 1
         focus_i[2] = 1
         
         if p.cell_size == "variable" then
-            
             for r = 1, p.rows  do
-			    
                 for c = 1, p.columns do
-                    
                     if p.tiles[r]    == nil then break end
-                    
                     if p.tiles[r][c] ~= nil and p.tiles[r][c].name ~= "placeholder" then 
-                        
                         if row_hs[r] == nil or row_hs[r] < p.tiles[r][c].h then
-                            
                             row_hs[r] = p.tiles[r][c].h
-                            
                         end
-                        
                         if col_ws[c] == nil or col_ws[c] < p.tiles[r][c].w then
-                            
                             col_ws[c] = p.tiles[r][c].w
-                            
                         end
-                        
                     end
-                    
                 end
-                
             end
-            
         end
         
 		for r = 1, p.rows  do
@@ -4285,27 +4275,29 @@ function ui_element.layoutManager(t)
 			for c = 1, p.columns do
                 if p.tiles[r][c] == nil then
                     if p.cell_size == "variable" then
-                        g = make_tile(col_ws[c] or p.cell_w, row_hs[r] or p.cell_h)
+						key = string.format("cell:%d:%d",col_ws[c] or p.cell_w, row_hs[r] or p.cell_h) 
+
+                        cell = assets(key, my_make_tile, col_ws[c] or p.cell_w, row_hs[r] or p.cell_h)
+
                     else
-                        g = make_tile(p.cell_w,p.cell_h)
+						key = string.format("cell:%d:%d",p.cell_w,p.cell_h)
+                        cell = assets(key, my_make_tile, p.cell_w,p.cell_h)
                     end
                 else
-                    g = p.tiles[r][c]
-                    if g.parent ~= nil then
-                        g:unparent()
+                    cell = p.tiles[r][c]
+                    if cell.parent ~= nil then
+                        cell:unparent()
                     end
                 end
-                slate:add(g)
-                g.x, g.y = x_y_from_index(r,c)
-                g.delay = p.cell_timing_offset*(r+c-1)
-                g.anchor_point = {g.w/2,g.h/2}
+                slate:add(cell)
+                cell.x, cell.y = x_y_from_index(r,c)
+                cell.delay = p.cell_timing_offset*(r+c-1)
+                cell.anchor_point = {cell.w/2,cell.h/2}
 			end
 		end
         
         slate.w, slate.h = x_y_from_index(p.rows,p.columns)
-        
         slate.w = slate.w + (col_ws[p.columns] or p.cell_w)/2
-        
         slate.h = slate.h + (row_hs[p.rows]    or p.cell_h)/2
         
         if p.rows < #p.tiles then
@@ -4331,6 +4323,7 @@ function ui_element.layoutManager(t)
             end
         end
 	end
+
 	make_grid()
 	
 	local function layoutManager_on_key_down(key)
@@ -4412,9 +4405,6 @@ function ui_element.layoutManager(t)
 		screen:grab_key_focus()
 	end 
 
-	ssss = slate 
-
-
     mt = {}
     mt.__newindex = function(t,k,v)
 		
@@ -4466,19 +4456,12 @@ function ui_element.scrollPane(t)
     --default parameters
     local p = {
         visible_w    =  600,
-        --color     =  {255,255,255,255},
         visible_h    =  600,
         content   = Group{},
         virtual_h = 1000,
         virtual_w = 1000,
-        --arrow_clone_source = nil,
-        --arrow_sz = 15,
         arrow_color = {255,255,255,255},
         arrows_visible = false,
-        --arrows_in_box = false,
-        --arrows_centered = false,
-        --hor_arrow_y     = nil,
-        --vert_arrow_x    = nil,
         bar_color_inner       = {180,180,180,255},
         bar_color_outer       = { 30, 30, 30,255},
         bar_focus_color_inner = {180,255,180,255},
@@ -4507,8 +4490,6 @@ function ui_element.scrollPane(t)
 	
 	--Group that Clips the content
 	local window  = Group{name="window"}
-	--Group that contains all of the content
-	--local content = Group{}
 	--declarations for dependencies from scroll_group
 	local scroll, scroll_x, scroll_y
 	--flag to hold back key presses while animating content group
@@ -4521,7 +4502,7 @@ function ui_element.scrollPane(t)
 	
 
     --the umbrella Group, containing the full slate of tiles
-    local scroll_group = Group{ 
+    local scroll_group = Group { 
         name     = "scrollPane",
         position = p.ui_position, 
         reactive = true,
@@ -4590,11 +4571,6 @@ function ui_element.scrollPane(t)
                     end
                 end
             end,
-            --[[
-			get_content_group = function()
-				return content
-			end
-            --]]
             screen_pos_of_child = function(self,child)
                 return  child.x + child.parent.x + self.x + p.box_width,
                         child.y + child.parent.y + self.y + p.box_width
@@ -4729,16 +4705,16 @@ function ui_element.scrollPane(t)
 		end
 	end
 
-    local make_arrow = function()
+    local make_arrow = function(bar_thickness, arrow_color)
 		
-		local c = Canvas{size={p.bar_thickness,p.bar_thickness}}
+		local c = Canvas{size={bar_thickness,bar_thickness}}
 		
 		c:move_to(    0,c.h)
 		c:line_to(c.w/2,  0)
 		c:line_to(  c.w,c.h)
 		c:line_to(    0,c.h)
 		
-		c:set_source_color( p.arrow_color )
+		c:set_source_color( arrow_color )
 		c:fill(true)
 		
 		if c.Image then
@@ -4751,126 +4727,163 @@ function ui_element.scrollPane(t)
 		
 	end
     
+	local function my_make_arrow( _ , ... )
+     	return make_arrow( ... )
+	end
+
 	local function make_hor_bar(w,h,ratio)
         local bar = Group{}
         
-		local shell = Canvas{
-				size = {w,h},
-		}
-		local fill = Canvas{
-			size = {w*ratio,h-p.frame_thickness},
-		}
-		local focus = Canvas{
-			size = {w*ratio,h-p.frame_thickness},
-		}  
-        
-		
 		local RAD = 6
         
-		local top    =           math.ceil(p.frame_thickness/2)
-		local bottom = shell.h - math.ceil(p.frame_thickness/2)
-		local left   =           math.ceil(p.frame_thickness/2)
-		local right  = shell.w - math.ceil(p.frame_thickness/2)
+		local top    = math.ceil(p.frame_thickness/2)
+		local bottom = h - math.ceil(p.frame_thickness/2)
+		local left   = math.ceil(p.frame_thickness/2)
+		local right  = w - math.ceil(p.frame_thickness/2)
+       	local shell, fill, focus, key 
+
+		local function make_hor_shell ()
+			shell = Canvas{
+				size = {w,h},
+			}
+			shell:begin_painting()
         
-		shell:begin_painting()
+			shell:move_to(        left,         top )
+			shell:line_to(   right-RAD,         top )
+			shell:curve_to( right, top,right,top,right,top+RAD)
+			shell:line_to(       right,  bottom-RAD )
+			shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        	
+			shell:line_to(           left+RAD,          bottom )
+			shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			shell:line_to(           left,            top+RAD )
+			shell:curve_to(left,top,left,top,left+RAD,top)
+        	
+			shell:set_source_linear_pattern(
+            	shell.w/2,0,
+				shell.w/2,shell.h
+			)
+			shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
+			shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
+        	
+			shell:fill(true)
+			shell:set_line_width(   p.frame_thickness )
+			shell:set_source_color( p.frame_color )
+			shell:stroke( true )
+			shell:finish_painting()
         
+        	-----------------------------------------------------
+
+			if shell.Image then shell = shell:Image() end
+
+			return shell
+		end 
+
+		local function my_make_hor_shell( _ , ...)
+			return  make_hor_shell( ... )
+		end 
+
+		key = string.format ("h_shell:%d:%d:%f:%s:%s:%d:%s",w,h,ratio,color_to_string(p.empty_color_inner),color_to_string(p.empty_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		shell = assets(key, my_make_hor_shell) 
 		
-		shell:move_to(        left,         top )
-		shell:line_to(   right-RAD,         top )
-		shell:curve_to( right, top,right,top,right,top+RAD)
-		shell:line_to(       right,  bottom-RAD )
-		shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+		local function make_hor_fill()
+
+			fill = Canvas{
+				size = {w*ratio,h-p.frame_thickness},
+			}
+				
+			top    =          math.ceil(p.frame_thickness/2)
+			bottom = h-p.frame_thickness - math.ceil(p.frame_thickness/2)
+			left   =          math.ceil(p.frame_thickness/2)
+			right  = w*ratio - math.ceil(p.frame_thickness/2)
         
-		shell:line_to(           left+RAD,          bottom )
-		shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		shell:line_to(           left,            top+RAD )
-		shell:curve_to(left,top,left,top,left+RAD,top)
+			fill:begin_painting() -- shell -> fill
+
+			fill:move_to(        left,         top )
+			fill:line_to(   right-RAD,         top )
+			fill:curve_to( right, top,right,top,right,top+RAD)
+			fill:line_to(       right,  bottom-RAD )
+			fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        	
+			fill:line_to(           left+RAD,          bottom )
+			fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			fill:line_to(           left,            top+RAD )
+			fill:curve_to(left,top,left,top,left+RAD,top)
+        	
+			fill:set_source_linear_pattern(
+				fill.w/2,0,
+				fill.w/2,fill.h
+			)
+			fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
+			fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
+			fill:fill(true)
+        	fill:set_line_width(   p.frame_thickness )
+			fill:set_source_color( p.frame_color )
+			fill:stroke( true )
+			fill:finish_painting()
+        	
+			if  fill.Image then  fill =  fill:Image() end
+
+			return fill
+		end 
+
+		local function my_make_hor_fill( _ , ...)
+     		return make_hor_fill( ... )
+		end 
+
+		key = string.format ("h_fill:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_color_inner),color_to_string(p.bar_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		fill = assets(key, my_make_hor_fill) 
+
+		local function make_hor_focus()
+			focus = Canvas{
+				size = {w*ratio,h-p.frame_thickness},
+			}  
+        	    
+			top    =           math.ceil(p.frame_thickness/2)
+			bottom = h-p.frame_thickness - math.ceil(p.frame_thickness/2)
+			left   =           math.ceil(p.frame_thickness/2)
+			right  = w*ratio - math.ceil(p.frame_thickness/2)
+        	
+			focus:begin_painting() -- fill -> focus
+
+			focus:move_to(        left,         top )
+			focus:line_to(   right-RAD,         top )
+			focus:curve_to( right, top,right,top,right,top+RAD)
+			focus:line_to(       right,  bottom-RAD )
+			focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        	
+			focus:line_to(           left+RAD,          bottom )
+			focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			focus:line_to(           left,            top+RAD )
+			focus:curve_to(left,top,left,top,left+RAD,top)
         
-		shell:set_source_linear_pattern(
-            
-            shell.w/2,0,
-			shell.w/2,shell.h
-		)
-		shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
-		shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
-        
-		shell:fill(true)
-		shell:set_line_width(   p.frame_thickness )
-		shell:set_source_color( p.frame_color )
-		shell:stroke( true )
-		shell:finish_painting()
-        
-        -----------------------------------------------------
-		top    =          math.ceil(p.frame_thickness/2)
-		bottom = fill.h - math.ceil(p.frame_thickness/2)
-		left   =          math.ceil(p.frame_thickness/2)
-		right  = fill.w - math.ceil(p.frame_thickness/2)
-        
-		shell:begin_painting()
-        
-		
-		fill:move_to(        left,         top )
-		fill:line_to(   right-RAD,         top )
-		fill:curve_to( right, top,right,top,right,top+RAD)
-		fill:line_to(       right,  bottom-RAD )
-		fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		fill:line_to(           left+RAD,          bottom )
-		fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		fill:line_to(           left,            top+RAD )
-		fill:curve_to(left,top,left,top,left+RAD,top)
-        
-		fill:set_source_linear_pattern(
-			fill.w/2,0,
-			fill.w/2,fill.h
-		)
-		fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
-		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
-		fill:fill(true)
-        fill:set_line_width(   p.frame_thickness )
-		fill:set_source_color( p.frame_color )
-		fill:stroke( true )
-		fill:finish_painting()
-        
-        -----------------------------------------------------
-        
-		top    =           math.ceil(p.frame_thickness/2)
-		bottom = focus.h - math.ceil(p.frame_thickness/2)
-		left   =           math.ceil(p.frame_thickness/2)
-		right  = focus.w - math.ceil(p.frame_thickness/2)
-        
-		shell:begin_painting()
-        
-		
-		focus:move_to(        left,         top )
-		focus:line_to(   right-RAD,         top )
-		focus:curve_to( right, top,right,top,right,top+RAD)
-		focus:line_to(       right,  bottom-RAD )
-		focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		focus:line_to(           left+RAD,          bottom )
-		focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		focus:line_to(           left,            top+RAD )
-		focus:curve_to(left,top,left,top,left+RAD,top)
-        
-		focus:set_source_linear_pattern(
-			focus.w/2,0,
-			focus.w/2,focus.h
-		)
-		focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
-		focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
-		focus:fill(true)
-        focus:set_line_width(   p.frame_thickness )
-		focus:set_source_color( p.frame_color )
-		focus:stroke( true )
-		focus:finish_painting()
-        
-		if shell.Image then shell = shell:Image() end
-		if  fill.Image then  fill =  fill:Image() end
-        if focus.Image then focus = focus:Image() end
- 
-		bar:add(shell,fill,focus)
-        
+			focus:set_source_linear_pattern(
+				focus.w/2,0,
+				focus.w/2,focus.h
+			)
+			focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
+			focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
+			focus:fill(true)
+        	focus:set_line_width(   p.frame_thickness )
+			focus:set_source_color( p.frame_color )
+			focus:stroke( true )
+			focus:finish_painting()
+
+        	if focus.Image then focus = focus:Image() end
+
+			return focus
+		end 
+
+		local function my_make_hor_focus( _ , ...)
+     		return make_hor_focus( ... )
+		end 
+
+		key = string.format ("h_focus:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_focus_color_inner),color_to_string(p.bar_focus_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		focus = assets(key, my_make_hor_focus)
+
         shell.name="track"
         shell.reactive = true
         fill.name="grip"
@@ -4880,130 +4893,168 @@ function ui_element.scrollPane(t)
 		focus.reactive=true
         focus.y=p.frame_thickness/2
 		focus:hide()
+
+		bar:add(shell,fill,focus)
+
         return bar
     end
 
     local function make_vert_bar(w,h,ratio)
         local bar = Group{}
-        
-		local shell = Canvas{
-				size = {w,h},
-		}
-		local fill  = Canvas{
-			size = {w-p.frame_thickness,h*ratio},
-		}
-		local focus  = Canvas{
-			size = {w-p.frame_thickness,h*ratio},
-		}
-        
 		
 		local RAD = 6
         
 		local top    =           math.ceil(p.frame_thickness/2)
-		local bottom = shell.h - math.ceil(p.frame_thickness/2)
+		local bottom = h - math.ceil(p.frame_thickness/2)
 		local left   =           math.ceil(p.frame_thickness/2)
-		local right  = shell.w - math.ceil(p.frame_thickness/2)
-        
-		shell:begin_painting()
-        
-		
-		shell:move_to(        left,         top )
-		shell:line_to(   right-RAD,         top )
-		shell:curve_to( right, top,right,top,right,top+RAD)
-		shell:line_to(       right,  bottom-RAD )
-		shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		shell:line_to(           left+RAD,          bottom )
-		shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		shell:line_to(           left,            top+RAD )
-		shell:curve_to(left,top,left,top,left+RAD,top)
-        
-		shell:set_source_linear_pattern(
-			0,shell.h/2,
-            shell.w,shell.h/2
-		)
-		shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
-		shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
-        
-		shell:fill(true)
-		shell:set_line_width(   p.frame_thickness )
-		shell:set_source_color( p.frame_color )
-		shell:stroke( true )
-		shell:finish_painting()
-        
-        -----------------------------------------------------
-        
-		top    =          math.ceil(p.frame_thickness/2)
-		bottom = fill.h - math.ceil(p.frame_thickness/2)
-		left   =          math.ceil(p.frame_thickness/2)
-		right  = fill.w - math.ceil(p.frame_thickness/2)
-        
-		shell:begin_painting()
-        
-		
-		fill:move_to(        left,         top )
-		fill:line_to(   right-RAD,         top )
-		fill:curve_to( right, top,right,top,right,top+RAD)
-		fill:line_to(       right,  bottom-RAD )
-		fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		fill:line_to(           left+RAD,          bottom )
-		fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		fill:line_to(           left,            top+RAD )
-		fill:curve_to(left,top,left,top,left+RAD,top)
-        
-		fill:set_source_linear_pattern(
-			0,fill.h/2,
-            fill.w,fill.h/2
-		)
-		fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
-		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
-		fill:fill(true)
-        fill:set_line_width(   p.frame_thickness )
-		fill:set_source_color( p.frame_color )
-		fill:stroke( true )
+		local right  = w - math.ceil(p.frame_thickness/2)
 
-		fill:finish_painting()
+		local shell, fill, focus, key
+
+		local function make_vert_shell ()
+			local shell = Canvas{
+				size = {w,h},
+			}
+
+			shell:begin_painting()
+        		
+			shell:move_to(        left,         top )
+			shell:line_to(   right-RAD,         top )
+			shell:curve_to( right, top,right,top,right,top+RAD)
+			shell:line_to(       right,  bottom-RAD )
+			shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
         
-        -----------------------------------------------------
+			shell:line_to(           left+RAD,          bottom )
+			shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			shell:line_to(           left,            top+RAD )
+			shell:curve_to(left,top,left,top,left+RAD,top)
+        	
+			shell:set_source_linear_pattern(
+				0,shell.h/2,
+            	shell.w,shell.h/2
+			)
+			shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
+			shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
+        	
+			shell:fill(true)
+			shell:set_line_width(   p.frame_thickness )
+			shell:set_source_color( p.frame_color )
+			shell:stroke( true )
+			shell:finish_painting()
         
-		top    =           math.ceil(p.frame_thickness/2)
-		bottom = focus.h - math.ceil(p.frame_thickness/2)
-		left   =           math.ceil(p.frame_thickness/2)
-		right  = focus.w - math.ceil(p.frame_thickness/2)
+			if shell.Image then shell = shell:Image() end
+
+			return shell 
+
+		end 
+
+		local function my_make_vert_shell( _ , ...)
+     		return make_vert_shell( ... )
+		end 
+
+		key = string.format ("h_shell:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.empty_color_inner),color_to_string(p.empty_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		shell = assets(key, my_make_vert_shell)
+
+		local function make_vert_fill()
+			local fill  = Canvas{
+				size = {w-p.frame_thickness,h*ratio},
+			}
+			 
+			top    =          math.ceil(p.frame_thickness/2)
+			bottom = fill.h - math.ceil(p.frame_thickness/2)
+			left   =          math.ceil(p.frame_thickness/2)
+			right  = fill.w - math.ceil(p.frame_thickness/2)
         
-		shell:begin_painting()
+			fill:begin_painting() -- shell -? fill ? 
         
 		
-		focus:move_to(        left,         top )
-		focus:line_to(   right-RAD,         top )
-		focus:curve_to( right, top,right,top,right,top+RAD)
-		focus:line_to(       right,  bottom-RAD )
-		focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+			fill:move_to(        left,         top )
+			fill:line_to(   right-RAD,         top )
+			fill:curve_to( right, top,right,top,right,top+RAD)
+			fill:line_to(       right,  bottom-RAD )
+			fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
         
-		focus:line_to(           left+RAD,          bottom )
-		focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		focus:line_to(           left,            top+RAD )
-		focus:curve_to(left,top,left,top,left+RAD,top)
+			fill:line_to(           left+RAD,          bottom )
+			fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			fill:line_to(           left,            top+RAD )
+			fill:curve_to(left,top,left,top,left+RAD,top)
+        	
+			fill:set_source_linear_pattern(
+				0,fill.h/2,
+            	fill.w,fill.h/2
+			)
+			fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
+			fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
+			fill:fill(true)
+        	fill:set_line_width(   p.frame_thickness )
+			fill:set_source_color( p.frame_color )
+			fill:stroke( true )
+
+			fill:finish_painting()
+
+			if  fill.Image then fill  =  fill:Image() end
+	
+			return fill
+		end 
+
+		local function my_make_vert_fill( _ , ...)
+     		return make_vert_fill( ... )
+		end 
+
+		key = string.format ("h_fill:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_color_inner),color_to_string(p.bar_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		fill = assets(key, my_make_vert_fill) 
+
+		local function make_vert_focus()
+			local focus  = Canvas{
+				size = {w-p.frame_thickness,h*ratio},
+			}
+
+			top    =           math.ceil(p.frame_thickness/2)
+			bottom = focus.h - math.ceil(p.frame_thickness/2)
+			left   =           math.ceil(p.frame_thickness/2)
+			right  = focus.w - math.ceil(p.frame_thickness/2)
+        	
+			focus:begin_painting() -- shell -> focus ?
         
-		focus:set_source_linear_pattern(
-			0,focus.h/2,
-            focus.w,focus.h/2
-		)
-		focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
-		focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
-		focus:fill(true)
-        focus:set_line_width(   p.frame_thickness )
-		focus:set_source_color( p.frame_color )
-		focus:stroke( true )
-		focus:finish_painting()
-        
-        -----------------------------------------------------
 		
-		if shell.Image then shell = shell:Image() end
-		if  fill.Image then fill  =  fill:Image() end
-		if focus.Image then focus = focus:Image() end
-        
+			focus:move_to(        left,         top )
+			focus:line_to(   right-RAD,         top )
+			focus:curve_to( right, top,right,top,right,top+RAD)
+			focus:line_to(       right,  bottom-RAD )
+			focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        	
+			focus:line_to(           left+RAD,          bottom )
+			focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			focus:line_to(           left,            top+RAD )
+			focus:curve_to(left,top,left,top,left+RAD,top)
+        	
+			focus:set_source_linear_pattern(
+				0,focus.h/2,
+            	focus.w,focus.h/2
+			)
+			focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
+			focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
+			focus:fill(true)
+        	focus:set_line_width(   p.frame_thickness )
+			focus:set_source_color( p.frame_color )
+			focus:stroke( true )
+			focus:finish_painting()
+			
+			if focus.Image then focus = focus:Image() end
+
+			return focus
+		end 
+
+		local function my_make_vert_focus( _ , ...)
+     		return make_vert_focus( ... )
+		end 
+
+		key = string.format ("h_focus:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_focus_color_inner),color_to_string(p.bar_focus_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		focus = assets(key, my_make_vert_focus)
+		        
 		bar:add(shell,fill,focus)
         
         shell.name="track"
@@ -5019,10 +5070,11 @@ function ui_element.scrollPane(t)
         return bar
     end
 	
-	
 	--this function creates the whole scroll bar box
     local hold = false
+
 	local function create()
+        scroll_group:clear()
         window.position={ p.box_width, p.box_width }
 		window.clip = { 0,0, p.visible_w, p.visible_h }
         border:set{
@@ -5052,19 +5104,18 @@ function ui_element.scrollPane(t)
         end
         
         if p.horz_bar_visible and p.visible_w/p.virtual_w < 1 then
-            hor_s_bar = make_hor_bar(
-                track_w,
-                p.bar_thickness,
-                track_w/p.virtual_w
-            )
+            hor_s_bar = make_hor_bar(track_w, p.bar_thickness, track_w/p.virtual_w)
             hor_s_bar.name = "Horizontal Scroll Bar"
+
             if p.arrows_visible then
-                local l = make_arrow()
+				key = format("arrorwl:%d:%s", p.bar_thickness, color_to_string(p.arrow_color))
+                local l = assets(key, my_make_arrow, p.bar_thickness, p.arrow_color)
+
                 l.name="L"
                 l.x = p.box_width+p.bar_thickness
                 l.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
-                scroll_group:add(l)
                 l.reactive=true
+                scroll_group:add(l)
                 function l:on_button_down()
                     scroll_x(1)
                 end
@@ -5072,12 +5123,14 @@ function ui_element.scrollPane(t)
                     p.box_width+p.bar_thickness+5,
                     p.box_width*2+p.visible_h+p.bar_offset
                 }
-                local r = make_arrow()
+				key = format("arrorwr:%d:%s", p.bar_thickness, color_to_string(p.arrow_color))
+                local r = assets(key, my_make_arrow, p.bar_thickness, p.arrow_color)
+
                 r.name="R"
                 r.x = p.box_width+p.bar_thickness+hor_s_bar.w+10
                 r.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
-                scroll_group:add(r)
                 r.reactive=true
+                scroll_group:add(r)
             else
                 hor_s_bar.position={
                     p.box_width,
@@ -5129,15 +5182,6 @@ function ui_element.scrollPane(t)
 					end
 				end
 
---[[
-                if rel_x < grip_hor.w/2 then
-                    rel_x = grip_hor.w/2
-                elseif rel_x > (track_hor.w-grip_hor.w/2) then
-                    rel_x = (track_hor.w-grip_hor.w/2)
-                end
-                grip_hor.x = rel_x-grip_hor.w/2
-   ]]            
-                
                 p.content.x = -(grip_hor.x) * p.virtual_w/track_w
                 
                 return true
@@ -5149,11 +5193,7 @@ function ui_element.scrollPane(t)
 			unfocus_grip_hor=nil
         end
         if p.vert_bar_visible and p.visible_h/p.virtual_h < 1 then
-            vert_s_bar = make_vert_bar(
-                p.bar_thickness,
-                track_h,
-                track_h/p.virtual_h
-            )
+            vert_s_bar = make_vert_bar( p.bar_thickness, track_h, track_h/p.virtual_h)
             vert_s_bar.name = "Vertical Scroll Bar"
             if p.arrows_visible then
                 local up = make_arrow()
@@ -5193,7 +5233,7 @@ function ui_element.scrollPane(t)
             focus_grip_vert = vert_s_bar:find_child("focus_grip")
 			
 			grip_vert = unfocus_grip_vert
-            ---[[
+
             function grip_vert:on_button_down(x,y,button,num_clicks)
                 
                 local dy = y - grip_vert.y
@@ -5217,10 +5257,6 @@ function ui_element.scrollPane(t)
                 return true
             end
 
-	    --]]
-
-
-	    
             function track_vert:on_button_down(x,y,button,num_clicks)
                 
                 local rel_y = y - track_vert.transformed_position[2]/screen.scale[2]
@@ -5234,16 +5270,7 @@ function ui_element.scrollPane(t)
 						grip_vert.y = track_vert.h-grip_vert.h
 					end
 				end
---[[
-                if rel_y < grip_vert.h/2 then
-                    rel_y = grip_vert.h/2
-                elseif rel_y > (track_vert.h-grip_vert.h/2) then
-                    rel_y = (track_vert.h-grip_vert.h/2)
-                end
-                
-                grip_vert.y = rel_y-grip_vert.h/2
-    
-	]]
+
                 p.content.y = -(grip_vert.y) * p.virtual_h/track_h
                 
                 return true
@@ -5256,14 +5283,13 @@ function ui_element.scrollPane(t)
         end
         
 		scroll_group.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
+	
+		scroll_group:add(border,window)
 	end
-	
-    
-	scroll_group:add(border,window)
+
     create()
+
 	window:add(p.content)
-	
-	
 		
 	function scroll_group:on_key_focus_in()
 		if grip_hor ~= nil then
@@ -5296,9 +5322,6 @@ function ui_element.scrollPane(t)
 		end
 		border.border_color = p.box_color
 	end
-
-	
-
 
 	--set the meta table to overwrite the parameters
     mt = {}
