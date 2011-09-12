@@ -1,7 +1,7 @@
 
 test_description = "Clear UI clears all UI items on the screen."
 test_steps = "Touch the 'Press this' button"
-test_verify = "Verify the following UI items are removed:\n - Panda pic\n - Pink rect\n - UI background\n - Trickplay Log pic\n - Trickplay Text"
+test_verify = "Verify that only the Tickplay logo pic is removed."
 test_group = "acceptance"
 test_area = "clear_ui"
 test_api = "clear_ui"

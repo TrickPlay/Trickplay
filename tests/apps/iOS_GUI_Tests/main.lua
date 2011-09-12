@@ -318,6 +318,7 @@ function controllers:on_controller_connected(controller)
 	function screen.on_key_down( screen , key )
 			if key == keys.Return then
 					controller.screen:remove(test_img)
+					collectgarbage("collect")
 					test_img = generate_test_image(controller,controller.factory)
 					controller.screen:add(test_img)
 			elseif key == keys.Up then
@@ -352,6 +353,7 @@ screen:add(test_list)
 populate_test_list()
 populate_test_fields ()	
 focus_manager(current_focus)
+move_focus (nil, 1)
 screen:add(screenshot)
 screen:show()
 

@@ -118,5 +118,17 @@
 {
 "name": "00030_request_image.lua",
 "active": "true"
+},
+{
+"name": "00031_group.lua",
+"active": "true"
+},
+{
+"name": "00032_group.lua",
+"active": "true"
+},
+{
+"name": "00033_group.lua",
+"active": "true"
 }
 ]
