@@ -227,7 +227,9 @@ function screen_ui.n_selected(obj)
         if (screen:find_child(obj.name.."a_m") ~= nil) then 
 	     	screen:remove(screen:find_child(obj.name.."a_m"))
         end
-        table.remove(selected_objs)
+
+		util.table_removekey(selected_objs, obj.name.."border")
+
         obj.extra.selected = false
      end 
 

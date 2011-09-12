@@ -2379,7 +2379,6 @@ function editor.duplicate()
 end
 
 function editor.delete()
-
 	if(table.getn(selected_objs) == 0 )then 
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
@@ -2388,6 +2387,7 @@ function editor.delete()
    	end 
 
 	local delete_f = function(del_obj)
+
 		screen_ui.n_selected(del_obj)
 
         table.insert(undo_list, {del_obj.name, DEL, del_obj})
@@ -2417,7 +2417,6 @@ function editor.delete()
     end 
 
 	for i, v in pairs(g.children) do
-
 		if(v.extra.selected == true) then
 			if v.extra.clone then 
 				if #v.extra.clone > 0 then
@@ -2439,6 +2438,7 @@ function editor.delete()
 		end 
 	end 
 	
+
 	for i, j in pairs(selected_objs) do 
 		j = string.sub(j, 1,-7)
 		local bumo
@@ -2494,12 +2494,11 @@ function editor.delete()
 					end 
 				end 
 		end 
-
 	end 
 
 	if table.getn(g.children) == 0 then 
 	    if screen:find_child("timeline") then 
-		screen:remove(screen:find_child("timeline"))
+			screen:remove(screen:find_child("timeline"))
 	    end 
 	end 
 
@@ -3378,8 +3377,6 @@ function editor.ui_elements()
 
 	-- Scroll	
 	local scroll = editor_ui.scrollPane{virtual_h = 380}
-
-	
 
 	-- Buttons 
     local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
