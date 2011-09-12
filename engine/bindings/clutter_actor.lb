@@ -503,13 +503,11 @@ interface actor [[ClutterActor*]]
     /*
 	Property: anchor_point
 	
-	The anchor_point property is a table specifying the location of the object's origin or "anchor point," which is used to position, scale and rotate the object. By default, an object's anchor point is located at the upper-left corner of the object. The anchor_point property specifies offsets to the object's upper-left corner 
+	The anchor_point property is a table specifying X,Y offsets from the object's upper-left corner. An object's anchor point is used to position, scale and rotate the object.
 	
-	 The anchor_point property table specifies offsets along the X- and Y-axes at which to locate the object's origin at {0,0} and corresponds to the upper-left corner of the object. The anchor_point property contains offsets from the {0,0} origin X- and Y-axis offsets relative to the object's {0,0} origin.
-	
-	The anchor_point property is a table containing the object's X and Y coordinates, relative to itself, to use as the object's origin. The origin is used when positioning, scaling and rotating the object.
-	
-	Setting the anchor point moves the object so its anchor point remains positioned at the object's current <x> and <y> location. To set the anchor point without moving the object, call the <move_anchor_point> function.
+	Because the anchor point is used to position the object, changing the offsets in the anchor_point property causes the object to move so the new anchor point remains located at the object's X and Y position. To change the anchor point without moving the object (but, instead, changing the object's X and Y coordinates), use the <move_anchor_point> function.
+
+	It is possible to set the anchor point anywhere, including outside the object's boundary.
 	
 	*Format:* { X-axis offset, Y-axis offset }
 	
@@ -1394,18 +1392,20 @@ interface actor [[ClutterActor*]]
     /*
 	Function: move_anchor_point
 	
-	The move_anchor_point() function sets the object's anchor point and adjusts the object's <x> and <y> coordinates so the object does not move from its current position. The anchor point is used when positioning, scaling and rotating the object.
+	The move_anchor_point() function sets the object's anchor point and adjusts the object's X and Y coordinates so the object does not move from its current position. The anchor point is used when positioning, scaling and rotating the object.
 	
-	To modify the anchor point without adjusting the object's X and Y coordinates, set the <anchor_point> property.
-	
-	The function's x and y arguments specify the new anchor point and are relative to the object's current anchor point. The default anchor point is 0, 0, which references the object's top-left corner.
+	The function's x and y arguments specify the new anchor point and are relative to the object's top-left corner.
 
 	*Arguments:*
 	
-		x - new anchor point's X coordinate. Value is relative to the object's current anchor point.
-		y - new anchor point's Y coordinate. Value is relative to the object's current anchor point.
+		x - new anchor point's X coordinate. Value is relative to the object's top-left corner.
+		y - new anchor point's Y coordinate. Value is relative to the object's top-left corner.
 		
 	*Return Value:* None
+	
+	To modify the anchor point without adjusting the object's X and Y coordinates (but, instead, moving the object), set the <anchor_point> property.
+	
+	It is possible to set the anchor point anywhere, including outside the object's boundary.
 	
 	*Code Example:* Set the object's anchor point to the object's center, adjusting the object's X and Y coordinates so the object does not move
 	
@@ -1413,7 +1413,7 @@ interface actor [[ClutterActor*]]
 	myObject:move_anchor_point( myObject.width / 2, myObject.height / 2 )
 	(end)
 
-	*See Also:* the <anchor_point> property
+	*See Also:* the <x>, <y> and <anchor_point> properties
 			
     */
 
