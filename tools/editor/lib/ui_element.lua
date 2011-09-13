@@ -2056,11 +2056,11 @@ function ui_element.dialogBox(t)
 	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
 	fill_color  = {25,25,25,100},
 	title_color = {255,255,255,255} , --"FFFFFF" , 
-	title_font = "FreeSans Medium 28px" , 
 	border_width  = 12 ,
 	padding_x = 0 ,
 	padding_y = 0 ,
 	border_corner_radius = 22 ,
+	title_font = "FreeSans Medium 28px" , 
 	title_separator_thickness = 10, 
 	title_separator_color = {100,100,100,100},
 	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
@@ -2146,19 +2146,19 @@ function ui_element.dialogBox(t)
 --default parameters
    local p = {
 	skin = "Custom", 
-	ui_width = 600 ,
-	ui_height = 350 ,
+	ui_width = 500 ,
+	ui_height = 400 ,
 	label = "Dialog Box Title" ,
-	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
-	fill_color  = {25,25,25,100},
-	title_color = {255,255,255,255} , --"FFFFFF" , 
-	title_font = "DejaVu Sans 20" , 
+	border_color  = {255,255,255,100}, --"FFFFFFC0" , 
+	fill_color  = {255,255,255,100},
+	title_color = {255,255,255,180} , --"FFFFFF" , 
+	title_font = "FreeSans Medium 28px" , 
 	border_width  = 4 ,
 	padding_x = 0 ,
 	padding_y = 0 ,
 	border_corner_radius = 22 ,
 	title_separator_thickness = 4, 
-	title_separator_color = {255,255,255,255},
+	title_separator_color = {255,255,255,100},
 	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
     }
 
@@ -2196,12 +2196,30 @@ function ui_element.dialogBox(t)
 			d_box:set{name="d_box"} 
 			db_group:add(d_box)
 		else 
-        	d_box_img = assets(skin_list[p.skin]["dialogbox"])
-        	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
-			db_group:add(d_box_img)
+        	--d_box_img = assets(skin_list[p.skin]["dialogbox"])
+        	--d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
+			--db_group:add(d_box_img)
+
+			p.title_font = "FreeSans Medium 24px"  
+			p.title_separator_thickness = 10
+			p.title_separator_color = {100,100,100,100}
+
+			local key = string.format("dBG:%d,%d,%d,%s", p.ui_width, p.ui_height, p.border_width, color_to_string(p.title_separator_color))
+
+			d_box = assets(key, my_draw_dialogBG, p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
+			d_box.y = d_box.y 
+			d_box:set{name="d_box"} 
+
+    		title= Text{text = p.label, font= p.title_font, color = p.title_color}     
+    		title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
+			db_group:add(d_box)
+
+			db_group.w = d_box.w
+			db_group.h = d_box.h
+
 		end
         title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-        title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
+        title:set{name = "title", position = {(p.ui_width - title.w )/2 , db_group_cur_y }}
 		db_group:add(title)
 
 		if p.content then 
