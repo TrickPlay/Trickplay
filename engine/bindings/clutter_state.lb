@@ -218,7 +218,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
     if (lua_type(L, index) != LUA_TTABLE) 
 		return luaL_error(L, "incorrect argument, table expected");
 
-	guint duration;
+	guint duration=0;
 
 	lua_getfield(L, index, "duration");
 	if(!lua_isnil(L, -1)) 
@@ -232,8 +232,6 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		{	
 			return luaL_error(L, "incorrect argument, failed to set \'duration\' : positive number expected");
 		}
-
-	    clutter_state_set_duration(state,NULL,NULL,duration);
 	}
     lua_pop(L, 1);
 
@@ -286,11 +284,6 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		// duration 
 		lua_getfield(L, -1, "duration");
 		guint sduration = lua_tointeger(L,-1);
-
-		if (sduration) 
-		{
-			clutter_state_set_duration(state,source_name,target.c_str(),sduration);
-		}
 
 	    lua_pop(L,1);
 
@@ -375,8 +368,19 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			clutter_state_set_animator (state, source_name, target.c_str(), animator);  
 		 }
 	     lua_pop(L,2);
+
+         if (sduration) 
+         {
+            clutter_state_set_duration(state,source_name,target.c_str(),sduration);
+         }
+
 	 }
 	 lua_pop(L,1);
+
+    if(duration)
+    {
+	    clutter_state_set_duration(state,NULL,NULL,duration);
+    }
 
      return 0;
 }
