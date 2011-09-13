@@ -44,7 +44,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 	}
 
 	if (!strcmp("x",k)||!strcmp("y",k)||!strcmp("w",k)||!strcmp("width",k)||!strcmp("h",k)||!strcmp("height",k)||
-		!strcmp("z",k)||!strcmp("depth",k)||!strcmp("opacity",k))
+		!strcmp("z",k)||!strcmp("depth",k))
 	{
 		if (lua_type(L, index) == LUA_TNUMBER) 
 		{
@@ -52,6 +52,23 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 
 			g_value_init(&gvalue,G_TYPE_FLOAT);
 			g_value_set_float(&gvalue,value);
+
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
+		} 
+		else 
+		{
+		    return luaL_error(L, "incorrect argument, failed to set the fourth argument of keys : number expected");
+		}
+	}
+	else if (!strcmp("opacity",k))
+	{
+		if (lua_type(L, index) == LUA_TNUMBER) 
+		{
+		    int temp;
+			g_value_init(&gvalue,G_TYPE_UINT);
+			temp = lua_tointeger(L, index);
+			g_value_set_uint(&gvalue,temp);
 
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
@@ -273,12 +290,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		if (sduration) 
 		{
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),sduration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),sduration);
 		}
 		else
 		{
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),duration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),duration);
 		}
 		*/
 	    lua_pop(L,1);
@@ -367,12 +382,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		 if (sduration) 
 		 {
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),sduration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),sduration);
 		 }
 		 else
 		 {
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),duration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),duration);
 		 }
 	 }
 	 lua_pop(L,1);
