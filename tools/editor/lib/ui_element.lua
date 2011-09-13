@@ -1933,6 +1933,118 @@ Return:
  	db_group - group containing the dialog box
 ]]
 
+local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
+
+    local size = {w, h} 
+    local color = fc 
+    local BORDER_WIDTH= bw
+    local POINT_HEIGHT=34
+    local POINT_WIDTH=60
+    local BORDER_COLOR=bc
+    local CORNER_RADIUS=br 
+    local POINT_CORNER_RADIUS=2
+    local H_BORDER_WIDTH = BORDER_WIDTH / 2
+
+    local XBOX_SIZE = 25
+    local PADDING = px 
+
+    local function draw_path( c )
+
+        c:new_path()
+
+        c:move_to( H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
+
+        c:line_to( ( c.w )- H_BORDER_WIDTH - CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
+        c:curve_to( c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
+                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
+                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
+
+        c:line_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
+
+        c:curve_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    c.w - H_BORDER_WIDTH - CORNER_RADIUS , c.h - H_BORDER_WIDTH )
+        c:line_to( H_BORDER_WIDTH + CORNER_RADIUS , c.h - H_BORDER_WIDTH )
+
+        c:curve_to( H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
+
+        c:line_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
+
+        c:curve_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
+    end
+
+    local c = Canvas{ size = size }
+
+    c:begin_painting()
+    draw_path( c )
+
+    -- Fill the whole thing with the color passed in and keep the path
+
+    c:set_source_color(color) 
+    c:fill(true)
+
+    -- Now, translate to the center and scale to its height. This will
+    -- make the radial gradient elliptical.
+    c:save()
+    c:translate( c.w / 2 , c.h / 2 )
+    c:scale( 2 , ( c.h / c.w ) )
+
+    local rr = ( c.w / 2 )
+    c:set_source_radial_pattern( 0 , 30 , 0 , 0 , 30 , c.w / 2 )
+    c:add_source_pattern_color_stop( 0 , "00000000" )
+    c:add_source_pattern_color_stop( 1 , "000000F0" )
+    c:fill()
+    c:restore()
+
+    -- Draw the glossy glow    
+    local R = c.w * 2.2
+
+    c:new_path()
+    c.op = "ATOP"
+    c:arc( 0 , -( R - 240 ) , R , 0 , 360 )
+    c:set_source_linear_pattern( c.w , 0 , 0 , c.h * 0.25 )
+    c:add_source_pattern_color_stop( 0 , "FFFFFF20" )
+    c:add_source_pattern_color_stop( 1 , "FFFFFF04" )
+    c:fill()
+
+    -- Now, draw the path again and stroke it with the border color
+    draw_path( c )
+
+    c:set_line_width( BORDER_WIDTH )
+    c:set_source_color( BORDER_COLOR )
+    c.op = "SOURCE"
+    -- test c:set_dash(0,{10,10})
+    c:stroke( true )
+
+  -- Draw title line
+    if tst > 0 then 
+    c:new_path()
+    c:move_to (0, 74)
+    c:line_to (c.w, 74)
+    c:set_line_width (tst)
+    c:set_source_color(tsc)
+    c:stroke (true)
+    c:fill (true)
+    end 
+  --  end
+
+    c:finish_painting()
+    if c.Image then
+         c = c:Image()
+    end
+    c.position = {0,0}
+
+    return c
+end 
+
+--[[
+
+-- Dialog Box with josh's canvas image 
+
 function ui_element.dialogBox(t) 
  
 --default parameters
@@ -1999,6 +2111,102 @@ function ui_element.dialogBox(t)
 	     	db_group:add(p.content)
 		end 
 
+     end 
+
+     create_dialogBox ()
+
+     mt = {}
+     mt.__newindex = function (t, k, v)
+	 	if k == "bsize" then  
+	    	p.ui_width = v[1] 
+	    	p.ui_height = v[2]  
+        else 
+           p[k] = v
+        end
+		if k ~= "selected" then 
+        	create_dialogBox()
+		end
+     end 
+
+     mt.__index = function (t,k)
+	if k == "bsize" then 
+	    return {p.ui_width, p.ui_height}  
+        else 
+	    return p[k]
+        end 
+     end 
+
+     setmetatable (db_group.extra, mt) 
+     return db_group
+end 
+]]
+
+function ui_element.dialogBox(t) 
+ 
+--default parameters
+   local p = {
+	skin = "Custom", 
+	ui_width = 600 ,
+	ui_height = 350 ,
+	label = "Dialog Box Title" ,
+	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
+	fill_color  = {25,25,25,100},
+	title_color = {255,255,255,255} , --"FFFFFF" , 
+	title_font = "DejaVu Sans 20" , 
+	border_width  = 4 ,
+	padding_x = 0 ,
+	padding_y = 0 ,
+	border_corner_radius = 22 ,
+	title_separator_thickness = 4, 
+	title_separator_color = {255,255,255,255},
+	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
+    }
+
+ --overwrite defaults
+    if t~= nil then 
+        for k, v in pairs (t) do
+	    p[k] = v 
+        end 
+    end 
+
+ --the umbrella Group
+    local db_group_cur_y = 6
+
+    local  db_group = Group {
+    	  name = "dialogBox",  
+    	  position = {200, 200, 0}, 
+          reactive = true, 
+          extra = {type = "DialogBox"} 
+    }
+
+
+    local create_dialogBox  = function ()
+   
+    	local d_box, title_separator, title, d_box_img, title_separator_img, key
+
+        db_group:clear()
+        db_group.size = { p.ui_width , p.ui_height - 34}
+
+		if p.skin == "Custom" then 
+			key = string.format("dialogBox:%d:%d:%d:%s:%s:%d:%d:%d:%d:%s", p.ui_width, p.ui_height, p.border_width, color_to_string(p.border_color), color_to_string( p.fill_color ), p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, color_to_string( p.title_separator_color))
+
+        	d_box = assets(key, my_make_dialogBox_bg, p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
+
+			d_box.y = d_box.y - 34
+			d_box:set{name="d_box"} 
+			db_group:add(d_box)
+		else 
+        	d_box_img = assets(skin_list[p.skin]["dialogbox"])
+        	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
+			db_group:add(d_box_img)
+		end
+        title= Text{text = p.label, font= p.title_font, color = p.title_color}     
+        title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
+		db_group:add(title)
+
+		if p.content then 
+	     	db_group:add(p.content)
+		end 
      end 
 
      create_dialogBox ()
