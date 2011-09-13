@@ -1,4 +1,4 @@
-local SCREEN_JIGGLE_DISTANCE = 50
+local SCREEN_JIGGLE_DISTANCE = 10
 
 local background = Image { src = "/assets/robot-part/screen/Background.jpg" }
 
@@ -20,9 +20,9 @@ background.extra.jiggle = function(self,duration)
         path:line_to(-SCREEN_JIGGLE_DISTANCE, SCREEN_JIGGLE_DISTANCE * 2/4)
         path:line_to( SCREEN_JIGGLE_DISTANCE, SCREEN_JIGGLE_DISTANCE * 1/4)
         path:line_to(0, 0)
-        
+
         local timeline = Timeline { duration = duration }
-        local alpha = Alpha { mode = "EASE_IN_OUT_SINE", timeline = timeline }
+        local alpha = Alpha { mode = "EASE_IN_OUT_BOUNCE", timeline = timeline }
         function timeline:on_new_frame(msecs, progress)
             background.position = path:get_position(alpha.alpha)
         end
