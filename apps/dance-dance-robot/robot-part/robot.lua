@@ -1,6 +1,5 @@
 local robot = Group { name = "robot" }
 
-
 local Left_Hand = Image { name = "Left_Hand", src = "assets/robot-part/robot/Left_Hand.png" }
 Left_Hand:move_anchor_point(145, 10)
 
@@ -38,8 +37,8 @@ local Jaw = Image { name = "Jaw", src = "assets/robot-part/robot/Jaw.png" }
 Jaw:move_anchor_point(280, 70)
 
 local Tire = Image { name = "Tire", src = "assets/robot-part/robot/Tire.png" }
-z_rotation = { 0, 330, 295 }
-Tire:move_anchor_point(330, 295)
+Tire:move_anchor_point(332, 290)
+z_rotation = { 0, 0, 0 }
 
 local Right_Hip = Image { name = "Right_Hip", src = "assets/robot-part/robot/Right_Hip.png" }
 Right_Hip:move_anchor_point(282, 80)
@@ -54,22 +53,19 @@ local Right_Foot = Image { name = "Right_Foot", src = "assets/robot-part/robot/R
 Right_Foot:move_anchor_point(392, 20)
 
 local Right_Hand = Image { name = "Right_Hand", src = "assets/robot-part/robot/Right_Hand.png" }
-Right_Hand.z_rotation = { 0, 250, 48 }
-Right_Hand:move_anchor_point(250, 48)
-
-local collision_sensor = physics:Body(
-        Rectangle {
-            color = { 198, 28, 111 },
-            opacity = 50,
-            size =  { 700, 800 },
-            position = { -200, 200 },
-        },
-        { sensor = true }
-)
+Right_Hand:move_anchor_point(260, 60)
+Right_Hand.z_rotation = { 0, 0, 0 }
 
 local Shadow = Image { name = "Shadow", src = "assets/robot-part/robot/Shadow.png" }
 Shadow:move_anchor_point(Shadow.w/2, Shadow.h/2)
 
+local collision_sensor = Rectangle {
+                                        name = "collision_sensor",
+                                        size = { 1000, 800 },
+                                        position = { -400, 200 },
+                                        color = { 198, 28, 111 },
+                                        opacity = 50,
+                                    }
 
 robot.extra = {}
 
@@ -79,8 +75,12 @@ robot.extra.states = AnimationState( {
                                             {
                                                 --  These positions done by eyeballing the original
                                                 source = "*",
-                                                target = "start",
+                                                target = "base",
                                                 keys = {
+                                                    { robot, "y", "EASE_IN_OUT_SINE",                   440, 0, 0 },
+                                                    { Shadow, "opacity", "EASE_IN_OUT_SINE",            200, 0, 0 },
+                                                    { Shadow, "position", "EASE_IN_OUT_SINE",           {   100, 1100 }, 0, 0 },
+                                                    { Shadow, "scale", "EASE_IN_OUT_SINE",              {     1,    1 }, 0, 0 },
                                                     { Head, "position", "EASE_IN_OUT_SINE",             {     0,    0 }, 0, 0 },
                                                     { Jaw, "position", "EASE_IN_OUT_SINE",              {   -70,   55 }, 0, 0 },
                                                     { Mouth_Inside, "position", "EASE_IN_OUT_SINE",     {  -164,   83 }, 0, 0 },
@@ -101,14 +101,16 @@ robot.extra.states = AnimationState( {
                                                     { Body_Inside, "position", "EASE_IN_OUT_SINE",      {   250,  -90 }, 0, 0 },
                                                     { Tire, "position", "EASE_IN_OUT_SINE",             {   420,  -60 }, 0, 0 },
                                                     { Tire, "z_rotation", "EASE_IN_OUT_SINE",           0,               0, 0 },
-                                                    { Shadow, "position", "EASE_IN_OUT_SINE",           {   100, 1100 }, 0, 0 },
-                                                    { Shadow, "opacity", "EASE_IN_OUT_SINE",            200, 0, 0 },
                                                 },
                                             },
                                             {
-                                                source = "*",
-                                                target = "jiggle",
+                                                source = "base",
+                                                target = "bounce",
                                                 keys = {
+                                                    { robot, "y", "EASE_IN_OUT_SINE",                   440, 0, 0 },
+                                                    { Shadow, "y", "EASE_IN_OUT_SINE",                  1100, 0, 0 },
+                                                    { Shadow, "scale", "EASE_IN_OUT_SINE",              {     1,    1 }, 0, 0 },
+                                                    { Shadow, "opacity", "EASE_IN_OUT_SINE",            200, 0, 0 },
                                                     { Head, "position", "EASE_IN_OUT_SINE",             {     0,  -20 }, 0, 0 },
                                                     { Jaw, "position", "EASE_IN_OUT_SINE",              {   -60,    0 }, 0, 0 },
                                                     { Mouth_Inside, "position", "EASE_IN_OUT_SINE",     {  -154,   28 }, 0, 0 },
@@ -121,20 +123,83 @@ robot.extra.states = AnimationState( {
                                                     { Pipe_In_Front, "position", "EASE_IN_OUT_SINE",    {   340,   60 }, 0, 0 },
                                                     { Pipe_On_Back, "position", "EASE_IN_OUT_SINE",     {   440,  340 }, 0, 0 },
                                                     { Right_Foot, "position", "EASE_IN_OUT_SINE",       {   580,  960 }, 0, 0 },
-                                                    { Right_Hand, "z_rotation", "EASE_IN_OUT_SINE",     5,               0, 0 },
+                                                    { Right_Hand, "z_rotation", "EASE_IN_OUT_SINE",     10,               0, 0 },
                                                     { Right_Hip, "position", "EASE_IN_OUT_SINE",        {   600,  540 }, 0, 0 },
                                                     { Right_Lower_Leg, "position", "EASE_IN_OUT_SINE",  {   430,  788 }, 0, 0 },
                                                     { Right_Thigh, "position", "EASE_IN_OUT_SINE",      {   440,  630 }, 0, 0 },
                                                     { Body_Inside, "position", "EASE_IN_OUT_SINE",      {   250, -100 }, 0, 0 },
-                                                    { Tire, "position", "EASE_IN_OUT_SINE",             {   420,  -70 }, 0, 0 },
-                                                    { Tire, "z_rotation", "EASE_IN_OUT_SINE",           10,              0, 0 },
+                                                    { Tire, "z_rotation", "EASE_IN_OUT_SINE",           2,              0, 0 },
+                                                },
+                                            },
+                                            {
+                                                source = "*",
+                                                target = "crouch",
+                                                keys = {
+                                                    { robot, "y", "EASE_IN_OUT_SINE",                   540, 0, 0 },
+                                                    { Shadow, "y", "EASE_IN_OUT_SINE",                  900, 0, 0 },
+                                                    { Shadow, "scale", "EASE_IN_OUT_SINE",              {     1.1,    1.1 }, 0, 0 },
+                                                    { Shadow, "opacity", "EASE_IN_OUT_SINE",            220, 0, 0 },
+                                                },
+                                            },
+                                            {
+                                                source = "*",
+                                                target = "jump",
+                                                keys = {
+                                                    { robot, "y", "EASE_OUT_QUAD",                   -400, 0, 0 },
+                                                    { Shadow, "y", "EASE_OUT_QUAD",                  2780, 0, 0 },
+                                                    { Shadow, "scale", "EASE_OUT_QUAD",              {     0.25,    0.25 }, 0, 0 },
+                                                    { Shadow, "opacity", "EASE_OUT_QUAD",            100, 0, 0 },
+                                                },
+                                            },
+                                            {
+                                                source = "jump",
+                                                target = "hover",
+                                                duration = 2000,
+                                                keys = {
+                                                    { robot, "y", "LINEAR",                   -400, 0, 0 },
+                                                    { Shadow, "y", "LINEAR",                  2780, 0, 0 },
+                                                    { Shadow, "scale", "LINEAR",              {     0.25,    0.25 }, 0, 0 },
+                                                    { Shadow, "opacity", "LINEAR",            100, 0, 0 },
+                                                },
+                                            },
+                                            {
+                                                source = "*",
+                                                target = "fall",
+                                                keys = {
+                                                    { robot, "y", "EASE_IN_QUAD",                   0, 0, 0 },
+                                                    { Shadow, "y", "EASE_IN_QUAD",                  1980, 0, 0 },
+                                                    { Shadow, "scale", "EASE_IN_QUAD",              {     0.25,    0.25 }, 0, 0 },
+                                                    { Shadow, "opacity", "EASE_IN_QUAD",            100, 0, 0 },
                                                 },
                                             },
                                         },
 })
 
-robot.states:warp("start")
-robot.states.state = "jiggle"
+robot.extra.sequence = {
+                            'base',
+                            'bounce',
+                            'base',
+                            'bounce',
+                            'base',
+                            'crouch',
+                            'jump',
+                            'hover',
+                            'fall',
+                            'crouch'
+                        }
+robot.extra.current_pos = 1
+function robot.extra:next_position()
+    robot.extra.current_pos = (robot.current_pos % #robot.sequence) + 1
+    print("Going to",robot.sequence[robot.current_pos])
+    robot.states.state = robot.sequence[robot.current_pos]
+end
+function robot.states:on_completed()
+    robot:next_position()
+end
+
+
+robot.states:warp(robot.sequence[robot.current_pos])
+robot:next_position()
 
 robot:add(Shadow)
 robot:add(Left_Hand)
@@ -157,21 +222,8 @@ robot:add(Right_Thigh)
 robot:add(Right_Hand)
 robot:add(collision_sensor)
 
-
 robot.scale = { 1/2, 1/2 }
 robot.position = { screen.w/2, 440 }
 
-
-robot.extra.states.on_completed = function()
-    robot.extra.jiggle()
-end
-
-robot.extra.jiggle = function()
-    if(robot.extra.states.state == "start") then
-        robot.extra.states.state = "jiggle"
-    elseif(robot.extra.states.state == "jiggle") then
-        robot.extra.states.state = "start"
-    end
-end
 
 return robot
