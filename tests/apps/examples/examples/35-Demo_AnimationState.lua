@@ -37,14 +37,14 @@ screen:add( sphereImage )
 sphereAnimationState = AnimationState( {
 		duration = 2000,  -- default transition duration
 		transitions = {
-			{ -- Appear->Disappear
-			  source = "appear",
+			{ -- Wildcard state--->Disappear
+			  source = "*",
 			  target = "disappear",
 			  keys = {
 			  		{ sphereImage, "scale", "EASE_IN_OUT_QUAD", {0.0, 0.0}, 0, 0 },
 			  }
 			},
-			{ -- Disappear->Appear
+			{ -- Disappear--->Appear
 			  source = "disappear",
 			  target = "appear",
 			  keys = {
@@ -65,6 +65,5 @@ function sphereAnimationState:on_completed()
 end
 
 -- Start the animation
-sphereAnimationState.state = "appear"     -- This sets the initial state only; no animation yet
-sphereAnimationState.state = "disappear"  -- This starts the transition animation running
+sphereAnimationState.state = "disappear"  -- Matches the wildcard "*" source transition
 
