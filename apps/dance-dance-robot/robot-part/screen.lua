@@ -55,18 +55,28 @@ end
 
 function check_collision(a,b)
     local a = a:find_child("collision_sensor")
-    local min_a = a.transformed_position[1]
-    local max_a = min_a + a.transformed_size[1]
+    local min_x_a = a.transformed_position[1]
+    local max_x_a = min_x_a + a.transformed_size[1]
+    local min_y_a = a.transformed_position[2]
+    local max_y_a = min_y_a + a.transformed_size[2]
 
     local b = b:find_child("collision_sensor")
-    local min_b = b.transformed_position[1]
-    local max_b = min_b + b.transformed_size[1]
+    local min_x_b = b.transformed_position[1]
+    local max_x_b = min_x_b + b.transformed_size[1]
+    local min_y_b = b.transformed_position[2]
+    local max_y_b = min_y_b + b.transformed_size[2]
     
-    if( min_a > max_b ) then
+    if( min_x_a > max_x_b ) then
         -- A is fully to the right of b
         return false
-    elseif( max_a < min_b ) then
+    elseif( max_x_a < min_x_b ) then
         -- A is fully to the left of b
+        return false
+    elseif( min_y_a > max_y_b ) then
+        -- A is fully above b
+        return false
+    elseif( max_y_a < min_y_b ) then
+        -- A is fully below b
         return false
     else
         return true
