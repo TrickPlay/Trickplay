@@ -27,7 +27,6 @@ screen:add(screen_border)
 
 screen:show()
 
-
 local DELAY_TIME = 120
 local GOAL_COUNT = 8
 local MAX_COUNT_SCORE = GOAL_COUNT
@@ -36,6 +35,7 @@ local isEnd = false
 
 local snd_puck_bad = "/assets/robot-part/audio/puck_bad-1.mp3"
 local snd_good_effect = "/assets/robot-part/audio/"
+
 
 function screen:on_key_down(key)
     if(key == keys.OK) then
@@ -50,5 +50,35 @@ function screen:on_key_down(key)
     elseif(key == keys.Down) then
         girl_in_white:roll()
         girl_in_black:roll()
+    end
+end
+
+function check_collision(a,b)
+    local a = a:find_child("collision_sensor")
+    local min_a = a.transformed_position[1]
+    local max_a = min_a + a.transformed_size[1]
+
+    local b = b:find_child("collision_sensor")
+    local min_b = b.transformed_position[1]
+    local max_b = min_b + b.transformed_size[1]
+    
+    if( min_a > max_b ) then
+        -- A is fully to the right of b
+        return false
+    elseif( max_a < min_b ) then
+        -- A is fully to the left of b
+        return false
+    else
+        return true
+    end
+end
+
+function idle:on_idle(secs)
+    if(check_collision(robot,girl_in_white)) then
+        print("White girl hit robot")
+    end
+    
+    if(check_collision(robot,girl_in_black)) then
+        print("Black girl hit robot")
     end
 end
