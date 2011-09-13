@@ -16,6 +16,14 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 	gulong nmode=ClutterUtil::to_clutter_animation_mode(mode.c_str());
 	double pre_delay;
     double post_delay;
+    const char *source_name;
+    
+    if(source.compare("*") != 0)
+    {
+        source_name = source.c_str();
+    } else {
+        source_name = NULL;
+    }
 
 	if (lua_type(L, index+1) == LUA_TNUMBER) 
 	{
@@ -42,10 +50,16 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		{
 			value = lua_tonumber(L, index);
 
-			g_value_init(&gvalue,G_TYPE_FLOAT);
-			g_value_set_float(&gvalue,value);
+            if(strcmp("opacity",k))
+            {
+                g_value_init(&gvalue,G_TYPE_FLOAT);
+                g_value_set_float(&gvalue,value);
+            } else {
+                g_value_init(&gvalue,G_TYPE_UINT);
+                g_value_set_uint(&gvalue,value);
+            }
 
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
 		} 
 		else 
@@ -63,7 +77,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,G_TYPE_FLOAT);
 			g_value_set_float(&gvalue, value);
 			lua_pop(L,1);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "x", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "x", nmode, &gvalue, pre_delay, post_delay);
 			    
 			lua_rawgeti(L,index,2);
 			value = lua_tonumber(L, -1);
@@ -71,7 +85,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,G_TYPE_FLOAT);
 			g_value_set_float(&gvalue,value);
 			lua_pop(L,1);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "y", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "y", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
 		}
 		else 
@@ -89,7 +103,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,G_TYPE_FLOAT);
 			g_value_set_float(&gvalue, value);
 			lua_pop(L,1);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "width", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "width", nmode, &gvalue, pre_delay, post_delay);
 			    
 			lua_rawgeti(L,index,2);
 			value = lua_tonumber(L, -1);
@@ -115,7 +129,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_double(&gvalue, value);
 			lua_pop(L,1);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "scale-x", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "scale-x", nmode, &gvalue, pre_delay, post_delay);
 			    
 			lua_rawgeti(L,index,2);
 			value = lua_tonumber(L, -1);
@@ -123,7 +137,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_double(&gvalue,value);
 			lua_pop(L,1);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "scale-y", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "scale-y", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
 		}			
 		else 
@@ -139,10 +153,10 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}
 		else
 		{
-			value = lua_tonumber(L, -1);
+			value = lua_tonumber(L, index);
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_double(&gvalue,value);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "rotation-angle-x", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "rotation-angle-x", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
 		}
 	}
@@ -154,10 +168,10 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}
 		else
 		{
-			value = lua_tonumber(L, -1);
+			value = lua_tonumber(L, index);
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_double(&gvalue,value);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "rotation-angle-y", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "rotation-angle-y", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
 		}
 	}
@@ -169,10 +183,10 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}
 		else
 		{
-			value = lua_tonumber(L, -1);
+			value = lua_tonumber(L, index);
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_double(&gvalue,value);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "rotation-angle-z", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "rotation-angle-z", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
 		}
 	}
@@ -187,7 +201,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 
 			g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
 			clutter_value_set_color(&gvalue, &color);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "color", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "color", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);			    
 		}
 		else 
@@ -265,12 +279,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		if (sduration) 
 		{
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),sduration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),sduration);
 		}
 		else
 		{
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),duration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),duration);
 		}
 		*/
 	    lua_pop(L,1);
@@ -359,12 +371,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		 if (sduration) 
 		 {
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),sduration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),sduration);
 		 }
 		 else
 		 {
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),duration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),duration);
 		 }
 	 }
 	 lua_pop(L,1);
@@ -403,15 +413,15 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	The remainder of the constructor definition consists of a table of transitions. Each transition must include the following components.
 	
-	source - unique string identifying a particular beginning state. Can also be nil, which will act as a wildcard starting state.
+	source - unique string identifying a particular beginning state. Can also be "*", which will act as a wildcard starting state.
 	target - unique string identifying a particular ending state
 	duration - Optional. Positive numeric value specifying the time in milliseconds required to transition from the source state to the target state. If not specified, the value specified in the constructor's duration property is used. If the constructor's duration property is not specified, a value of 1000 is used. The maximum duration value is 86,400,000 (24 hours).
 	animator - Animator object used to drive animation. Each transition table contains either an animator property or a keys table, but never both.
 	keys - table of key frames specifying the objects and properties to animate and various characteristics of the animation. Additional information about the contents and format of the keys table is described below. Each transition table contains either a keys table or an animator property, but never both.
 
-	The transition's source and target properties specify the starting and ending states, respectively. During processing of an AnimationState, one state is always current. Setting a new state causes a transition to occur between the current, source state and the new, target state. When a new state is set, the AnimationState object selects the appropriate transition to perform based on these source and target states. If the object contains a transition that explicitly specifies the current source and new target states, that transition is selected and the associated animation is executed. If no matching transition is found, the AnimationState searches for a transition with the specified target state and a source state with a wildcard value of nil, which matches all states.
+	The transition's source and target properties specify the starting and ending states, respectively. During processing of an AnimationState, one state is always current. Setting a new state causes a transition to occur between the current, source state and the new, target state. When a new state is set, the AnimationState object selects the appropriate transition to perform based on these source and target states. If the object contains a transition that explicitly specifies the current source and new target states, that transition is selected and the associated animation is executed. If no matching transition is found, the AnimationState searches for a transition with the specified target state and a source state with a wildcard value of "*", which matches all states.
 	
-	For example, assume an AnimationState that defines the following state transitions: (#1) State1 to State3 and (#2) nil to State3. If the current state is State1 and the state is changed to State3 then the AnimationState object performs the animation associated with transition (#1) which explicitly matches the move from State1 to State3. If the current state is State2 and the state is changed to State3, the AnimationState does not have a transition that explicitly matches a move from State2 to State3. But transition (#2) matches moving to State3 from any state that does not have an explicitly defined source state, so the animation associated with transition (#2) is performed.
+	For example, assume an AnimationState that defines the following state transitions: (#1) State1 to State3 and (#2) "*" to State3. If the current state is State1 and the state is changed to State3 then the AnimationState object performs the animation associated with transition (#1) which explicitly matches the move from State1 to State3. If the current state is State2 and the state is changed to State3, the AnimationState does not have a transition that explicitly matches a move from State2 to State3. But transition (#2) matches moving to State3 from any state that does not have an explicitly defined source state, so the animation associated with transition (#2) is performed.
 	
 	The duration property specifies the length of time in milliseconds of the transition to the target state. This instance of duration applies only to the current transition. If not specified, any value specified in the default duration property specified outside of the transitions table is used. If the default duration property is not specified, a default value of 1000 milliseconds (1 second) is used.
 	
@@ -496,7 +506,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 	(end)
 	
-	An AnimationState object's current state is stored in its <state> property. Initially, the object's state is nil. Setting the state property changes the current state and potentially performs a transition animation if one is defined for the two states. Notice that because an object's initial state is nil, the first time the state property is explicitly set, if a transition definition has a target of that first state and a wildcard source of nil, its associated animation will run.
+	An AnimationState object's current state is stored in its <state> property. Initially, the object's state is nil. Setting the state property changes the current state and potentially performs a transition animation if one is defined for the two states. Notice that because an object's initial state is nil, the first time the state property is explicitly set, if a transition definition has a target of that first state and a wildcard source of "*", its associated animation will run.
 	
 	It is possible to change the current state and bypass any associated transition animation by calling the object's <warp> function.
 	
