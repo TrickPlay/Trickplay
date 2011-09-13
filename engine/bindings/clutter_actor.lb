@@ -1831,8 +1831,8 @@ interface actor [[ClutterActor*]]
 		    }
 		    else if (!strcmp("opacity",k))
 		    {
-			g_value_init(&value,G_TYPE_UCHAR);
-			g_value_set_uchar(&value,lua_tointeger(L,-1));
+			g_value_init(&value,G_TYPE_UINT);
+			g_value_set_uint(&value,lua_tointeger(L,-1));
 			g_ptr_array_add(names,g_strdup(k));
 			g_value_array_append(values,&value);
 		    }
