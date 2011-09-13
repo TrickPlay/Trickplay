@@ -1756,6 +1756,7 @@ function editor.rectangle_done(x,y)
 end 
 
 function editor.rectangle_move(x,y)
+
 	if ui.rect then 
         ui.rect.size = { math.abs(x-rect_init_x), math.abs(y-rect_init_y) }
         if(x- rect_init_x < 0) then
@@ -1765,70 +1766,60 @@ function editor.rectangle_move(x,y)
             ui.rect.y = y
         end
 	end
+
 end
 
 local function ungroup(v)
-     v.extra.children = {}
-     screen_ui.n_selected(v)
-     for i,c in pairs(v.children) do 
-     	table.insert(v.extra.children, c.name) 
-		c.extra.is_in_group = false
-		v:remove(c)
-		c.x = c.x + v.x 
-		c.y = c.y + v.y 
-		g:add(c)
-		if(c.type == "Text") then
-	   		function c:on_key_down(key)
-        		if key == keys.Return then
-	        		c:set{cursor_visible = false}
-        	  		screen.grab_key_focus(screen)
-		  			return true
-	     		end 
-	   		end 
-		end 
-     end
-     g:remove(v)
+
+	screen_ui.n_selected_all()
+	screen_ui.selected(v)
+	editor.ugroup(v)
+
 end 
 
 function editor.undo()
-	  if( undo_list == nil) then return true end 
-      local undo_item= table.remove(undo_list)
+	  
+	if( undo_list == nil) then 
+		return true 
+	end 
+    
+	local undo_item= table.remove(undo_list)
 
-	  if(undo_item == nil) then return true end
+	if(undo_item == nil) then 
+		return true 
+	end
 
-	  if undo_item[2] == hdr.CHG then 
-	  	screen_ui.n_selected(undo_item[1])
+	if undo_item[2] == hdr.CHG then 
+		screen_ui.n_selected(undo_item[1])
 		util.set_obj(g:find_child(undo_item[1]), undo_item[3])
-	    table.insert(redo_list , undo_item)
-	  elseif undo_item[2] == hdr.ADD then 
+	elseif undo_item[2] == hdr.ADD then 
 	    screen_ui.n_selected(undo_item[3])
-	    if((undo_item[3]).type == "Group") then 
+		if util.is_this_group(undo_item[3]) == true then 
+			print("그룹일세")
 			ungroup(undo_item[3])
-	    else
+		else
+			print("그룹이 아니랄쎄") 
 			g:remove(g:find_child(undo_item[1]))
 	    end 
-        table.insert(redo_list , undo_item)
-	  elseif undo_item[2] == hdr.DEL then 
-	    screen_ui.n_selected(undo_item[3])
-	    if((undo_item[3]).type == "Group") then 
-			if util.is_in_list(undo_item[3].extra.type, editorUiElements) == false then 
-		        for i, c in pairs(undo_item[3].extra.children) do
-					local c_tmp = g:find_child(c)
-					screen_ui.n_selected(c_tmp)
-					g:remove(g:find_child(c))
-					c_tmp.extra.is_in_group = true
-					c_tmp.x = c_tmp.x - undo_item[3].x
-					c_tmp.y = c_tmp.y - undo_item[3].y
-					undo_item[3]:add(c_tmp)
-		    	end 
+	elseif undo_item[2] == hdr.DEL then 
+		screen_ui.n_selected(undo_item[3])
+		if util.is_this_group(undo_item[3]) == true then 
+		    for i, c in pairs(undo_item[3].extra.children) do
+				local c_tmp = g:find_child(c)
+				screen_ui.n_selected(c_tmp)
+				g:remove(g:find_child(c))
+				c_tmp.extra.is_in_group = true
+				c_tmp.x = c_tmp.x - undo_item[3].x
+				c_tmp.y = c_tmp.y - undo_item[3].y
+				undo_item[3]:add(c_tmp)
 		    end 
 		    g:add(undo_item[3])
 	    else 
 	    	g:add(undo_item[3])
 	    end
-        table.insert(redo_list , undo_item)
- 	  end 
-	  screen:grab_key_focus() 
+ 	end 
+	table.insert(redo_list, undo_item)
+	screen:grab_key_focus() 
 end
 	
 function editor.redo()
@@ -1837,23 +1828,26 @@ function editor.redo()
 	  if(redo_item == nill) then return true end
  	  
       if redo_item[2] == hdr.CHG then 
-	  	util.set_obj(g:find_child(redo_item[1]),  redo_item[4])
-	    table.insert(undo_list, redo_item)
+	  		util.set_obj(g:find_child(redo_item[1]),  redo_item[4])
+	    	table.insert(undo_list, redo_item)
       elseif redo_item[2] == hdr.ADD then 
-	  	if(redo_item[3].type == "Group") then 
-	    	for i, c in pairs(redo_item[3].extra.children) do
-				local c_tmp = g:find_child(c)
-				g:remove(g:find_child(c))
-				c_tmp.extra.is_in_group = true
-				c_tmp.x = c_tmp.x - redo_item[3].x
-				c_tmp.y = c_tmp.y - redo_item[3].y
-				redo_item[3]:add(c_tmp)
-		   	end 
-		   	g:add(redo_item[3])
-	    else 
-        	g:add(redo_item[3])
-	    end 
-        table.insert(undo_list, redo_item)
+	  print("add")
+			if util.is_this_group(redo_item[3]) then 
+	  		--if(redo_item[3].type == "Group") then 
+			print("그룹")
+	    		for i, c in pairs(redo_item[3].extra.children) do
+					local c_tmp = g:find_child(c)
+					g:remove(g:find_child(c))
+					c_tmp.extra.is_in_group = true
+					c_tmp.x = c_tmp.x - redo_item[3].x
+					c_tmp.y = c_tmp.y - redo_item[3].y
+					redo_item[3]:add(c_tmp)
+		   		end 
+		   		g:add(redo_item[3])
+	    	else 
+        		g:add(redo_item[3])
+	    	end 
+        	table.insert(undo_list, redo_item)
       elseif redo_item[2] == hdr.DEL then 
 	  	if(redo_item[3].type == "Group") then 
 			ungroup(redo_item[3])
@@ -1892,7 +1886,7 @@ function editor.text()
 	wants_enter = true, wrap=true, wrap_mode="CHAR", 
 	extra = {org_x = 200, org_y = 200}
 	} 
-    table.insert(undo_list, {ui.text.name, ADD, ui.text})
+    table.insert(undo_list, {ui.text.name, hdr.ADD, ui.text})
     g:add(ui.text)
 
 	local timeline = screen:find_child("timeline")
@@ -1981,7 +1975,7 @@ function editor.clone()
 		     	source = v,
                 position = {v.x + 20, v.y +20}
         	    }
-        	    table.insert(undo_list, {ui.clone.name, ADD, ui.clone})
+        	    table.insert(undo_list, {ui.clone.name, hdr.ADD, ui.clone})
         	    g:add(ui.clone)
 
 				if v.extra.clone then 
@@ -2338,7 +2332,7 @@ function editor.duplicate()
                 dup_function()
 
 				if ui.dup then 
-                	table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
+                	table.insert(undo_list, {ui.dup.name, hdr.ADD, ui.dup})
                 	g:add(ui.dup)
                 	local timeline = screen:find_child("timeline")
                 	if timeline then 
@@ -2390,7 +2384,7 @@ function editor.delete()
 
 		screen_ui.n_selected(del_obj)
 
-        table.insert(undo_list, {del_obj.name, DEL, del_obj})
+        table.insert(undo_list, {del_obj.name, hdr.DEL, del_obj})
 
         if (screen:find_child(del_obj.name.."a_m") ~= nil) then 
 	     		screen:remove(screen:find_child(del_obj.name.."a_m"))
@@ -2541,40 +2535,32 @@ function editor.group()
 	while (util.is_available("group"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	end 
-        ui.group = Group{
-                name="group"..tostring(item_num),
-        	position = {min_x, min_y}
-        }
-        ui.group.reactive = false
-        ui.group.extra.selected = false
-        ui.group.extra.type = "Group" -- uiContainer
-        table.insert(undo_list, {ui.group.name, ADD, ui.group})
+    ui.group = Group{
+    	name="group"..tostring(item_num),
+        position = {min_x, min_y}
+    }
+
+    ui.group.reactive = true
+    ui.group.extra.selected = false
+    ui.group.extra.type = "Group" -- uiContainer
+
+    table.insert(undo_list, {ui.group.name, hdr.ADD, ui.group})
 
 	for i, v in pairs(g.children) do
-             if g:find_child(v.name) then
-		  if(v.extra.selected == true) then
+		if(v.extra.selected == true) then
 			screen_ui.n_selected(v)
-
-			g:remove(v)
-        		ui.group:add(v)
-		  end 
-             end
-        end
-
-	for i, v in pairs (ui.group.children) do 
-		if ui.group:find_child(v.name) then 
+			v:unparent()
+        	ui.group:add(v)
 			v.extra.is_in_group = true
 			v.extra.group_position = ui.group.position
 			v.x = v.x - min_x
 			v.y = v.y - min_y
 		end 
-	end 
+        --end
+    end
 
-        g:add(ui.group)
-	if(screen:find_child("screen_objects") == nil) then 
-             --screen:add(g)
-	end 
-	
+    g:add(ui.group)
+
 	local timeline = screen:find_child("timeline")
 	if timeline then 
 	     ui.group.extra.timeline = {}
@@ -2601,12 +2587,14 @@ function editor.group()
 	     end 
 	end 
 
-        item_num = item_num + 1
+    item_num = item_num + 1
 	ui.group.extra.lock = false
-        --util.create_on_button_down_f(ui.group) 
-        screen.grab_key_focus(screen)
+    --util.create_on_button_down_f(ui.group) 
+    screen.grab_key_focus(screen)
 	input_mode = hdr.S_SELECT
 end
+
+
 
 function editor.ugroup()
 	if table.getn(selected_objs) == 0 then 
@@ -2619,44 +2607,17 @@ function editor.ugroup()
 	for i, v in pairs(g.children) do
     	if g:find_child(v.name) then
 		  	if(v.extra.selected == true) then
-				if(v.type == "Group") then 
+				if util.is_this_group(v) == true then
 			     	screen_ui.n_selected(v)
 			     	v.extra.children = {}
 			     	for i,c in pairs(v.children) do 
 				     	table.insert(v.extra.children, c.name) 
-					---[[ 0128 : added for nested group 
-        				if(c.type == "Group") then 
-	       				   for j, cc in pairs (c.children) do
-								if util.is_in_list(c.extra.type, editorUiElements) == false then 
-                    				cc.reactive = true
-		    						cc.extra.is_in_group = true
-									cc.extra.lock = false
-                    				util.create_on_button_down_f(cc)
-								end 
-	       				   end 
-						end 
-					--]]
-				     	v:remove(c)
+						c:unparent()
 				     	c.extra.is_in_group = false
 				     	c.x = c.x + v.x 
 				     	c.y = c.y + v.y 
+						c.reactive = true	
 		     		    g:add(c)
-				     -- 0328 
-				     	if not c.reactive then 
-							c.reactive = true	
-				     	end 
-				     -- 0328 
-				     --c.reactive = true
-        			     --util.create_on_button_down_f(c)
-				     	if(c.type == "Text") then
-							function c:on_key_down(key)
-             				    if key == keys.Return then
-									c:set{cursor_visible = false}
-        							screen.grab_key_focus(screen)
-									return true
-	     				    	end 
-							end 
-	  			     	end 
 			     	end
 			     	g:remove(v)
         		    table.insert(undo_list, {v.name, hdr.DEL, v})
@@ -3362,7 +3323,7 @@ function editor.ui_elements()
 		     		item_num = item_num + 1
 	           	end 
 	           	new_widget.name = new_widget.name..tostring(item_num)
-                table.insert(undo_list, {new_widget.name, ADD, new_widget})
+                table.insert(undo_list, {new_widget.name, hdr.ADD, new_widget})
 	           	g:add(new_widget)
 		   		new_widget.extra.lock = false
                 util.create_on_button_down_f(new_widget)
