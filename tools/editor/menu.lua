@@ -92,23 +92,22 @@ local menuButton_edit = ui_element.menuButton
 		ui_position = {489,28,0}, 
 	}
 
-menuButton_edit.insert_item(1,{type="item", string="Undo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="Z"}})
+--menuButton_edit.insert_item(1,{type="item", string="Undo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="Z"}})
 
-menuButton_edit.insert_item(2,{type="item", string="Redo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="E"}})
+--menuButton_edit.insert_item(2,{type="item", string="Redo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="E"}})
 
-menuButton_edit.insert_item(3,{type="item", string="Insert UI Element", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements,  icon=Text{text="I"}})
+menuButton_edit.insert_item(1,{type="item", string="Insert UI Element", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements,  icon=Text{text="I"}})
 
---menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=screen_ui.timeline_show,  icon=Text{text="J"}})
-menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="J"}})
+--menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="J"}})
 
-menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete, icon=assets("assets/delete-menu-icon.png")})
-menuButton_edit.insert_item(6,{type="item", string="Duplicate", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate,  icon=Text{text="D"}})
+menuButton_edit.insert_item(2,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete, icon=assets("assets/delete-menu-icon.png")})
+menuButton_edit.insert_item(3,{type="item", string="Duplicate", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate,  icon=Text{text="D"}})
 
-menuButton_edit.insert_item(7,{type="item", string="Clone", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone,   icon=Text{text="C"}})
+menuButton_edit.insert_item(4,{type="item", string="Clone", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone,   icon=Text{text="C"}})
 
-menuButton_edit.insert_item(8,{type="item", string="Group", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group,   icon=Text{text="G"}})
+menuButton_edit.insert_item(5,{type="item", string="Group", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group,   icon=Text{text="G"}})
 
-menuButton_edit.insert_item(9,{type="item", string="UnGroup", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.ugroup,  icon=Text{text="U"}})
+menuButton_edit.insert_item(6,{type="item", string="UnGroup", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.ugroup,  icon=Text{text="U"}})
 
 menuButton_edit.name = "menuButton_edit"
 menuButton_edit.anchor_point = {71,30.5}
