@@ -44,31 +44,20 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 	}
 
 	if (!strcmp("x",k)||!strcmp("y",k)||!strcmp("w",k)||!strcmp("width",k)||!strcmp("h",k)||!strcmp("height",k)||
-		!strcmp("z",k)||!strcmp("depth",k))
+		!strcmp("z",k)||!strcmp("depth",k)||!strcmp("opacity",k))
 	{
 		if (lua_type(L, index) == LUA_TNUMBER) 
 		{
 			value = lua_tonumber(L, index);
 
-			g_value_init(&gvalue,G_TYPE_FLOAT);
-			g_value_set_float(&gvalue,value);
-
-			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
-            g_value_unset(&gvalue);
-		} 
-		else 
-		{
-		    return luaL_error(L, "incorrect argument, failed to set the fourth argument of keys : number expected");
-		}
-	}
-	else if (!strcmp("opacity",k))
-	{
-		if (lua_type(L, index) == LUA_TNUMBER) 
-		{
-		    int temp;
-			g_value_init(&gvalue,G_TYPE_UINT);
-			temp = lua_tointeger(L, index);
-			g_value_set_uint(&gvalue,temp);
+            if(strcmp("opacity",k))
+            {
+                g_value_init(&gvalue,G_TYPE_FLOAT);
+                g_value_set_float(&gvalue,value);
+            } else {
+                g_value_init(&gvalue,G_TYPE_UINT);
+                g_value_set_uint(&gvalue,value);
+            }
 
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
