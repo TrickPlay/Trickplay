@@ -381,10 +381,15 @@ function util.create_on_button_down_f(v)
 	   	if (input_mode ~= hdr.S_RECTANGLE) then 
 	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw") then 
 	     		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
-
-	       			if (v.extra.is_in_group == true and control == false ) then 
+				
+					if (v.extra.is_in_group == true and control == false ) then 
 
 		    			local p_obj = v.parent 
+
+						while p_obj.extra.is_in_group == true do
+								p_obj = p_obj.parent
+					    end 
+
                 		if(button == 3) then 
                 			editor.inspector(p_obj, x, y)
                     		return true
