@@ -118,7 +118,7 @@ local girl_factory = function(images)
                                 size = { 200, 500 },
                                 position = { -100, -500 },
                                 color = { 198, 28, 111 },
-                                opacity = 50,
+                                opacity = 0,
                             }
             )
 

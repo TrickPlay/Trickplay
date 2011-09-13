@@ -64,7 +64,7 @@ local collision_sensor = Rectangle {
                                         size = { 1000, 800 },
                                         position = { -400, 200 },
                                         color = { 198, 28, 111 },
-                                        opacity = 50,
+                                        opacity = 0,
                                     }
 
 robot.extra = {}
