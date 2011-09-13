@@ -104,7 +104,7 @@ robot.extra.states = AnimationState( {
                                                 },
                                             },
                                             {
-                                                source = "base",
+                                                source = "*",
                                                 target = "bounce",
                                                 keys = {
                                                     { robot, "y", "EASE_IN_OUT_SINE",                   440, 0, 0 },
