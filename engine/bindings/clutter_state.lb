@@ -50,8 +50,14 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		{
 			value = lua_tonumber(L, index);
 
-			g_value_init(&gvalue,G_TYPE_FLOAT);
-			g_value_set_float(&gvalue,value);
+            if(strcmp("opacity",k))
+            {
+                g_value_init(&gvalue,G_TYPE_FLOAT);
+                g_value_set_float(&gvalue,value);
+            } else {
+                g_value_init(&gvalue,G_TYPE_UINT);
+                g_value_set_uint(&gvalue,value);
+            }
 
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
@@ -273,12 +279,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		if (sduration) 
 		{
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),sduration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),sduration);
 		}
 		else
 		{
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),duration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),duration);
 		}
 		*/
 	    lua_pop(L,1);
@@ -367,12 +371,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		 if (sduration) 
 		 {
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),sduration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),sduration);
 		 }
 		 else
 		 {
 			clutter_state_set_duration(state,source.c_str(),target.c_str(),duration);
-			printf("%s,%s,%f\n", source.c_str(),target.c_str(),duration);
 		 }
 	 }
 	 lua_pop(L,1);
