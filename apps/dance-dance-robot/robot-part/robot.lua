@@ -70,7 +70,7 @@ local collision_sensor = Rectangle {
 robot.extra = {}
 
 robot.extra.states = AnimationState( {
-                                        duration = 250,
+                                        duration = 200,
                                         transitions = {
                                             {
                                                 --  These positions done by eyeballing the original
@@ -145,8 +145,8 @@ robot.extra.states = AnimationState( {
                                                 source = "*",
                                                 target = "jump",
                                                 keys = {
-                                                    { robot, "y", "EASE_OUT_QUAD",                   -400, 0, 0 },
-                                                    { Shadow, "y", "EASE_OUT_QUAD",                  2780, 0, 0 },
+                                                    { robot, "y", "EASE_OUT_QUAD",                   -600, 0, 0 },
+                                                    { Shadow, "y", "EASE_OUT_QUAD",                  3180, 0, 0 },
                                                     { Shadow, "scale", "EASE_OUT_QUAD",              {     0.25,    0.25 }, 0, 0 },
                                                     { Shadow, "opacity", "EASE_OUT_QUAD",            100, 0, 0 },
                                                 },
@@ -154,10 +154,10 @@ robot.extra.states = AnimationState( {
                                             {
                                                 source = "jump",
                                                 target = "hover",
-                                                duration = 2000,
+                                                duration = 3000,
                                                 keys = {
-                                                    { robot, "y", "LINEAR",                   -400, 0, 0 },
-                                                    { Shadow, "y", "LINEAR",                  2780, 0, 0 },
+                                                    { robot, "y", "LINEAR",                   -600, 0, 0 },
+                                                    { Shadow, "y", "LINEAR",                  3180, 0, 0 },
                                                     { Shadow, "scale", "LINEAR",              {     0.25,    0.25 }, 0, 0 },
                                                     { Shadow, "opacity", "LINEAR",            100, 0, 0 },
                                                 },
@@ -181,6 +181,8 @@ robot.extra.sequence = {
                             'base',
                             'bounce',
                             'base',
+                            'bounce',
+                            'base',
                             'crouch',
                             'jump',
                             'hover',
@@ -190,7 +192,6 @@ robot.extra.sequence = {
 robot.extra.current_pos = 1
 function robot.extra:next_position()
     robot.extra.current_pos = (robot.current_pos % #robot.sequence) + 1
-    print("Going to",robot.sequence[robot.current_pos])
     robot.states.state = robot.sequence[robot.current_pos]
 end
 function robot.states:on_completed()
