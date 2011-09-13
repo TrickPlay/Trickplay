@@ -32,6 +32,7 @@ local my_hook = function(factory)
 
     girl.name = "white"
     girl.position = { girl.extra.MIN_X, screen.h * 9/10 }
+    girl.target_x = girl.x
 
     return girl
 end

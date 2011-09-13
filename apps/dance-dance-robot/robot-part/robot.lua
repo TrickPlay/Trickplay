@@ -57,6 +57,16 @@ local Right_Hand = Image { name = "Right_Hand", src = "assets/robot-part/robot/R
 Right_Hand.z_rotation = { 0, 250, 48 }
 Right_Hand:move_anchor_point(250, 48)
 
+local collision_sensor = physics:Body(
+        Rectangle {
+            color = { 198, 28, 111 },
+            opacity = 50,
+            size =  { 700, 800 },
+            position = { -200, 200 },
+        },
+        { sensor = true }
+)
+
 local Shadow = Image { name = "Shadow", src = "assets/robot-part/robot/Shadow.png" }
 Shadow:move_anchor_point(Shadow.w/2, Shadow.h/2)
 
@@ -92,6 +102,7 @@ robot.extra.states = AnimationState( {
                                                     { Tire, "position", "EASE_IN_OUT_SINE",             {   420,  -60 }, 0, 0 },
                                                     { Tire, "z_rotation", "EASE_IN_OUT_SINE",           0,               0, 0 },
                                                     { Shadow, "position", "EASE_IN_OUT_SINE",           {   100, 1100 }, 0, 0 },
+                                                    { Shadow, "opacity", "EASE_IN_OUT_SINE",            200, 0, 0 },
                                                 },
                                             },
                                             {
@@ -117,13 +128,13 @@ robot.extra.states = AnimationState( {
                                                     { Body_Inside, "position", "EASE_IN_OUT_SINE",      {   250, -100 }, 0, 0 },
                                                     { Tire, "position", "EASE_IN_OUT_SINE",             {   420,  -70 }, 0, 0 },
                                                     { Tire, "z_rotation", "EASE_IN_OUT_SINE",           10,              0, 0 },
-                                                    { Shadow, "position", "EASE_IN_OUT_SINE",           {   100, 1100 }, 0, 0 },
                                                 },
                                             },
                                         },
 })
 
-robot.extra.states:warp("start")
+robot.states:warp("start")
+robot.states.state = "jiggle"
 
 robot:add(Shadow)
 robot:add(Left_Hand)
@@ -144,6 +155,7 @@ robot:add(Right_Foot)
 robot:add(Right_Lower_Leg)
 robot:add(Right_Thigh)
 robot:add(Right_Hand)
+robot:add(collision_sensor)
 
 
 robot.scale = { 1/2, 1/2 }

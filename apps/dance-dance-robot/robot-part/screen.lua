@@ -27,18 +27,25 @@ screen:add(screen_border)
 
 screen:show()
 
+
+local DELAY_TIME = 120
+local GOAL_COUNT = 8
+local MAX_COUNT_SCORE = GOAL_COUNT
+local score = 0
+local isEnd = false
+
+local snd_puck_bad = "/assets/robot-part/audio/puck_bad-1.mp3"
+local snd_good_effect = "/assets/robot-part/audio/"
+
 function screen:on_key_down(key)
     if(key == keys.OK) then
         background:jiggle(150)
         score_gauge:set_score((score_gauge.extra.score+10) % 110 )
-    elseif(key == keys.Right) then
-        girl_in_white:go_to_state('run1')
-        girl_in_black:go_to_state('run1')
-    elseif(key == keys.Left) then
-        girl_in_white:go_to_state('runToStop1')
-        girl_in_black:go_to_state('runToStop1')
+    elseif(key == keys.Right or key == keys.Left) then
+        girl_in_white:move(key)
+        dolater(DELAY_TIME, girl_in_black.move, girl_in_black, key)
     elseif(key == keys.Down) then
-        girl_in_white:go_to_state('roll1')
-        girl_in_black:go_to_state('knockdown1')
+        girl_in_white:roll()
+        dolater(DELAY_TIME, girl_in_black.roll, girl_in_black)
     end
 end
