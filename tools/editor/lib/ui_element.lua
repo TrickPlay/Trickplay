@@ -2254,7 +2254,7 @@ function ui_element.buttonPicker(t)
 	skin = "CarbonCandy", 
 	ui_width =  180,
 	ui_height = 60,
-	items = {"item1", "item2", "item3"},
+	items = {"item", "item", "item"},
 	text_font = "FreeSans Medium 30px" , 
 	focus_text_font = "FreeSans Medium 30px" , 
 	text_color = {255,255,255,255}, 
@@ -2946,7 +2946,7 @@ function ui_element.radioButtonGroup(t)
 	skin = "Custom", 
 	ui_width = 600,
 	ui_height = 200,
-	items = {"item1", "item2", "item3"},
+	items = {"item", "item", "item"},
 	text_font = "FreeSans Medium 30px", 
 	text_color = {255,255,255,255}, 
 	button_color = {255,255,255,255}, 
@@ -3252,7 +3252,7 @@ function ui_element.checkBoxGroup(t)
 	skin = "Custom", 
 	ui_width = 600,
 	ui_height = 200,
-	items = {"item1", "item2", "item3"},
+	items = {"item", "item", "item"},
 	text_font = "FreeSans Medium 30px", 
 	text_color = {255,255,255,255}, 
 	box_color = {255,255,255,255},
@@ -4356,7 +4356,9 @@ function ui_element.layoutManager(t)
 	local keys={
 		[keys.Return] = function()
 			if 1 <= focus_i[1] and focus_i[1] <= p.rows and 1 <= focus_i[2] and focus_i[2] <= p.columns then
-				p.tiles[focus_i[1]][focus_i[2]].pressed()
+				if p.tiles[focus_i[1]][focus_i[2]].pressed then 
+					p.tiles[focus_i[1]][focus_i[2]].pressed()
+				end
 		    end 
 		end,
 		[keys.Left] = function()
@@ -5488,7 +5490,7 @@ button
     	text_focus_color = nil,
         label_text_font = nil,
     	label_text_color = nil,
-    	label_text_focus_color = nil,
+    	label_text_focus_colr = nil,
         item_text_font = nil,
     	item_text_color = nil,
     	item_text_focus_color = nil,
@@ -5511,12 +5513,12 @@ button
 
         name  = "dropdownbar",
         items = {
-            {type="label", string="Label ..."},
+            {type="label", string="Label"},
             {type="separator"},
-            {type="item",  string="Item ...", f=nil},
+            {type="item",  string="Item", f=nil},
         },
         vert_spacing = 5, --item_spacing
-        horz_spacing = 10, -- new 
+        horz_spacing = 5, -- new 
         vert_offset  = 40, --item_start_y
         horz_offset  = 0,
         text_has_shadow = true,
@@ -5524,7 +5526,7 @@ button
         background_color     = {255,0,0,255},
         
         menu_width = 250,   -- bg_w 
-        horz_padding  = 10, -- padding 
+        horz_padding  = 0, -- padding 
         separator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
         align = "left",

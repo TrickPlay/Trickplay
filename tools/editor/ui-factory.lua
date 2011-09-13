@@ -202,7 +202,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			plus.src="lib/assets/li-btn-red-plus.png"
 		end 
 		function plus:on_button_up(x,y)
-			table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
+			--table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
+			table.insert(v.items, "item")
 			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
@@ -305,7 +306,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    end 
 
 	    function item_plus:on_button_up(x,y)
-			table.insert(v.items, {type="item", string="Item ...", f=nil})
+			table.insert(v.items, {type="item", string="Item", f=nil})
 			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
@@ -325,7 +326,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 
 	    function label_plus:on_button_up(x,y)
-			table.insert(v.items, {type="label", string="Label ..."})
+			table.insert(v.items, {type="label", string="Label"})
 			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
@@ -370,7 +371,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		    	input_txt = j["string"] 
 		     	item_type = "label"
 		  	elseif j["type"] == "item" then 
-		     	input_txt = "   "..j["string"] 
+		     	input_txt = j["string"] 
 		     	item_type = "item"
 		  	elseif j["type"] == "separator" then 
 		     	input_txt = "--------------"
