@@ -15,7 +15,7 @@
 local girl_factory  = dofile("robot-part/generic-girl.lua")
 local girl_in_white = dofile("robot-part/girl-in-white.lua")(girl_factory)
 local girl_in_black = dofile("robot-part/girl-in-black.lua")(girl_factory)
-local robot         = dofile("robot-part/robot.lua")
+ robot         = dofile("robot-part/robot.lua")
 local score_gauge   = dofile("robot-part/score-gauge.lua")
 local background    = dofile("robot-part/background.lua")
 local screen_border = Image { src = "/assets/robot-part/screen/FrameUI.png", width = screen.w, height = screen.h }
@@ -32,10 +32,13 @@ function screen:on_key_down(key)
         background:jiggle(150)
         score_gauge:set_score((score_gauge.extra.score+10) % 110 )
     elseif(key == keys.Right) then
-        girl_in_white:go_to_state('knockdown1')
+        girl_in_white:go_to_state('run1')
         girl_in_black:go_to_state('run1')
     elseif(key == keys.Left) then
-        girl_in_white:go_to_state('roll1')
+        girl_in_white:go_to_state('runToStop1')
         girl_in_black:go_to_state('runToStop1')
+    elseif(key == keys.Down) then
+        girl_in_white:go_to_state('roll1')
+        girl_in_black:go_to_state('knockdown1')
     end
 end

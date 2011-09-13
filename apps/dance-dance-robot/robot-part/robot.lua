@@ -38,6 +38,7 @@ local Jaw = Image { name = "Jaw", src = "assets/robot-part/robot/Jaw.png" }
 Jaw:move_anchor_point(280, 70)
 
 local Tire = Image { name = "Tire", src = "assets/robot-part/robot/Tire.png" }
+z_rotation = { 0, 330, 295 }
 Tire:move_anchor_point(330, 295)
 
 local Right_Hip = Image { name = "Right_Hip", src = "assets/robot-part/robot/Right_Hip.png" }
@@ -53,33 +54,78 @@ local Right_Foot = Image { name = "Right_Foot", src = "assets/robot-part/robot/R
 Right_Foot:move_anchor_point(392, 20)
 
 local Right_Hand = Image { name = "Right_Hand", src = "assets/robot-part/robot/Right_Hand.png" }
+Right_Hand.z_rotation = { 0, 250, 48 }
 Right_Hand:move_anchor_point(250, 48)
---[[
+
 local Shadow = Image { name = "Shadow", src = "assets/robot-part/robot/Shadow.png" }
 Shadow:move_anchor_point(Shadow.w/2, Shadow.h/2)
+
+
+robot.extra = {}
+
+robot.extra.states = AnimationState( {
+                                        duration = 250,
+                                        transitions = {
+                                            {
+                                                --  These positions done by eyeballing the original
+                                                source = "*",
+                                                target = "start",
+                                                keys = {
+                                                    { Head, "position", "EASE_IN_OUT_SINE",             {     0,    0 }, 0, 0 },
+                                                    { Jaw, "position", "EASE_IN_OUT_SINE",              {   -70,   55 }, 0, 0 },
+                                                    { Mouth_Inside, "position", "EASE_IN_OUT_SINE",     {  -164,   83 }, 0, 0 },
+                                                    { Left_Foot, "position", "EASE_IN_OUT_SINE",        {   140,  910 }, 0, 0 },
+                                                    { Left_Hand, "position", "EASE_IN_OUT_SINE",        {    50,  130 }, 0, 0 },
+                                                    { Left_Hip, "position", "EASE_IN_OUT_SINE",         {   400,  500 }, 0, 0 },
+                                                    { Left_Lower_Leg, "position", "EASE_IN_OUT_SINE",   {   100,  710 }, 0, 0 },
+                                                    { Left_Thigh, "position", "EASE_IN_OUT_SINE",       {   240,  640 }, 0, 0 },
+                                                    { Pelvis, "position", "EASE_IN_OUT_SINE",           {   370,  180 }, 0, 0 },
+                                                    { Pipe_In_Front, "position", "EASE_IN_OUT_SINE",    {   340,   80 }, 0, 0 },
+                                                    { Pipe_On_Back, "position", "EASE_IN_OUT_SINE",     {   440,  360 }, 0, 0 },
+                                                    { Right_Foot, "position", "EASE_IN_OUT_SINE",       {   580,  960 }, 0, 0 },
+                                                    { Right_Hand, "position", "EASE_IN_OUT_SINE",       {   420,  -60 }, 0, 0 },
+                                                    { Right_Hand, "z_rotation", "EASE_IN_OUT_SINE",     0,               0, 0 },
+                                                    { Right_Hip, "position", "EASE_IN_OUT_SINE",        {   600,  550 }, 0, 0 },
+                                                    { Right_Lower_Leg, "position", "EASE_IN_OUT_SINE",  {   430,  790 }, 0, 0 },
+                                                    { Right_Thigh, "position", "EASE_IN_OUT_SINE",      {   440,  640 }, 0, 0 },
+                                                    { Body_Inside, "position", "EASE_IN_OUT_SINE",      {   250,  -90 }, 0, 0 },
+                                                    { Tire, "position", "EASE_IN_OUT_SINE",             {   420,  -60 }, 0, 0 },
+                                                    { Tire, "z_rotation", "EASE_IN_OUT_SINE",           0,               0, 0 },
+                                                    { Shadow, "position", "EASE_IN_OUT_SINE",           {   100, 1100 }, 0, 0 },
+                                                },
+                                            },
+                                            {
+                                                source = "*",
+                                                target = "jiggle",
+                                                keys = {
+                                                    { Head, "position", "EASE_IN_OUT_SINE",             {     0,  -20 }, 0, 0 },
+                                                    { Jaw, "position", "EASE_IN_OUT_SINE",              {   -60,    0 }, 0, 0 },
+                                                    { Mouth_Inside, "position", "EASE_IN_OUT_SINE",     {  -154,   28 }, 0, 0 },
+                                                    { Left_Foot, "position", "EASE_IN_OUT_SINE",        {   140,  910 }, 0, 0 },
+                                                    { Left_Hand, "position", "EASE_IN_OUT_SINE",        {    40,  110 }, 0, 0 },
+                                                    { Left_Hip, "position", "EASE_IN_OUT_SINE",         {   400,  490 }, 0, 0 },
+                                                    { Left_Lower_Leg, "position", "EASE_IN_OUT_SINE",   {   100,  708 }, 0, 0 },
+                                                    { Left_Thigh, "position", "EASE_IN_OUT_SINE",       {   240,  630 }, 0, 0 },
+                                                    { Pelvis, "position", "EASE_IN_OUT_SINE",           {   370,  160 }, 0, 0 },
+                                                    { Pipe_In_Front, "position", "EASE_IN_OUT_SINE",    {   340,   60 }, 0, 0 },
+                                                    { Pipe_On_Back, "position", "EASE_IN_OUT_SINE",     {   440,  340 }, 0, 0 },
+                                                    { Right_Foot, "position", "EASE_IN_OUT_SINE",       {   580,  960 }, 0, 0 },
+                                                    { Right_Hand, "z_rotation", "EASE_IN_OUT_SINE",     5,               0, 0 },
+                                                    { Right_Hip, "position", "EASE_IN_OUT_SINE",        {   600,  540 }, 0, 0 },
+                                                    { Right_Lower_Leg, "position", "EASE_IN_OUT_SINE",  {   430,  788 }, 0, 0 },
+                                                    { Right_Thigh, "position", "EASE_IN_OUT_SINE",      {   440,  630 }, 0, 0 },
+                                                    { Body_Inside, "position", "EASE_IN_OUT_SINE",      {   250, -100 }, 0, 0 },
+                                                    { Tire, "position", "EASE_IN_OUT_SINE",             {   420,  -70 }, 0, 0 },
+                                                    { Tire, "z_rotation", "EASE_IN_OUT_SINE",           10,              0, 0 },
+                                                    { Shadow, "position", "EASE_IN_OUT_SINE",           {   100, 1100 }, 0, 0 },
+                                                },
+                                            },
+                                        },
+})
+
+robot.extra.states:warp("start")
+
 robot:add(Shadow)
-]]--
-
---  These positions done by eyeballing the original
-Head.position               = {     0,    0 }
-Mouth_Inside.position       = {  -164,   83 }
-Jaw.position                = {   -70,   55 }
-Tire.position               = {   420,  -60 }
-Body_Inside.position        = {   250,  -90 }
-Left_Hand.position          = {    50,  130 }
-Pipe_On_Back.position       = {   440,  360 }
-Pelvis.position             = {   370,  180 }
-Pipe_In_Front.position      = {   340,   80 }
-Right_Hand.position         = {   420,  -60 }
-Right_Hip.position          = {   600,  550 }
-Right_Thigh.position        = {   440,  640 }
-Right_Lower_Leg.position    = {   430,  790 }
-Right_Foot.position         = {   580,  960 }
-Left_Hip.position           = {   400,  500 }
-Left_Thigh.position         = {   240,  640 }
-Left_Lower_Leg.position     = {   100,  710 }
-Left_Foot.position          = {   140,  910 }
-
 robot:add(Left_Hand)
 robot:add(Left_Foot)
 robot:add(Left_Lower_Leg)
@@ -101,6 +147,19 @@ robot:add(Right_Hand)
 
 
 robot.scale = { 1/2, 1/2 }
-robot.position = { 1400, 440 }
+robot.position = { screen.w/2, 440 }
+
+
+robot.extra.states.on_completed = function()
+    robot.extra.jiggle()
+end
+
+robot.extra.jiggle = function()
+    if(robot.extra.states.state == "start") then
+        robot.extra.states.state = "jiggle"
+    elseif(robot.extra.states.state == "jiggle") then
+        robot.extra.states.state = "start"
+    end
+end
 
 return robot
