@@ -2947,24 +2947,23 @@ function ui_element.radioButtonGroup(t)
 	ui_width = 600,
 	ui_height = 200,
 	items = {"item1", "item2", "item3"},
-	text_font = "FreeSans Medium 30px", -- items 
-	text_color = {255,255,255,255}, --"FFFFFF", -- items 
-	button_color = {255,255,255,255}, -- items 
-	select_color = {255, 255, 255, 255}, -- items 
+	text_font = "FreeSans Medium 30px", 
+	text_color = {255,255,255,255}, 
+	button_color = {255,255,255,255}, 
+	select_color = {255, 255, 255, 255},
 	focus_color = {0,255,0,255},
-	--focus_fill_color = {0,50,0,100},
-	button_radius = 10, -- items 
-	select_radius = 4,  -- items 
-	button_position = {0, 0},  -- items 
-	item_position = {50,-10},  -- items 
-	line_space = 40,  -- items 
+	button_radius = 10,
+	select_radius = 4,  
+	button_position = {0, 0},  
+	item_position = {50,-10},  
+	line_space = 40,  
 	rotate_func = nil, 
 	direction = "vertical", 
 	selected_item = 1,  
 	ui_position = {200, 200, 0}, 
 	------------------------------------------------
-	button_image = Image{}, --assets("assets/radiobutton.png"),
-	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
+	button_image = Image{}, 
+	select_image = Image{}, 
     }
 
  --overwrite defaults
@@ -3085,51 +3084,61 @@ function ui_element.radioButtonGroup(t)
 	    if(p.direction == "horizontal") then --horizontal
 		  	   	pos= {pos[1] + items:find_child("item"..tostring(i)).w + 2*p.line_space, 0}
 	    end 
-	    	donut.reactive = true
+	    donut.reactive = true
 
-        	if editor_lb == nil or editor_use then  
-				function donut:on_key_down(key)
-					local ring_num = tonumber(donut.name:sub(5,-1))
-					local next_num
-					if key == keys.Up then 
-						if ring_num > 1 then 
-							next_num = ring_num - 1
-	    					rings:find_child("ring"..ring_num).opacity = 255 
-	    					rings:find_child("focus"..ring_num).opacity = 0 
-	    					rings:find_child("ring"..next_num).opacity = 0 
-	    					rings:find_child("focus"..next_num).opacity = 255 
-	    					rings:find_child("ring"..next_num):grab_key_focus()
-							return true 
-						end
-					elseif key == keys.Down then 
-						if ring_num < #rings.children/2 then 
-							next_num = ring_num + 1
-	    					rings:find_child("ring"..ring_num).opacity = 255 
-	    					rings:find_child("focus"..ring_num).opacity = 0 
-	    					rings:find_child("ring"..next_num).opacity = 0 
-	    					rings:find_child("focus"..next_num).opacity = 255 
-							rings:find_child("ring"..next_num):grab_key_focus() 
-							return true 
-						end
-					elseif key == keys.Return then 
-						rb_group.extra.select_button(ring_num)
+        if editor_lb == nil or editor_use then  
+			function donut:on_key_down(key)
+				local ring_num = tonumber(donut.name:sub(5,-1))
+				local next_num
+				local next_key, prev_key 
 
-	    					rings:find_child("ring"..ring_num).opacity = 0 
-	    					rings:find_child("focus"..ring_num).opacity = 255 
-
-						if (p.skin == "CarbonCandy") then 
-							select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + p.button_position[1]
-	    					select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + p.button_position[2] - 8
-						else 
-							select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + sel_off_x + p.button_position[1]
-	    					select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + sel_off_y + p.button_position[2]
-						end 
-
-						rings:find_child("ring"..ring_num):grab_key_focus() 
-
-						return true 
-					end 
+				if rb_group.direction == "vertical" then 
+					next_key = keys.Down 
+					prev_key = keys.Up
+				else 
+					next_key = keys.Right 
+					prev_key = keys.Left
 				end 
+	
+				if key == prev_key then 
+					if ring_num > 1 then 
+						next_num = ring_num - 1
+	    				rings:find_child("ring"..ring_num).opacity = 255 
+	    				rings:find_child("focus"..ring_num).opacity = 0 
+	    				rings:find_child("ring"..next_num).opacity = 0 
+	    				rings:find_child("focus"..next_num).opacity = 255 
+	    				rings:find_child("ring"..next_num):grab_key_focus()
+						return true 
+					end
+				elseif key == next_key then 
+					if ring_num < #rings.children/2 then 
+						next_num = ring_num + 1
+	    				rings:find_child("ring"..ring_num).opacity = 255 
+	    				rings:find_child("focus"..ring_num).opacity = 0 
+	    				rings:find_child("ring"..next_num).opacity = 0 
+	    				rings:find_child("focus"..next_num).opacity = 255 
+						rings:find_child("ring"..next_num):grab_key_focus() 
+						return true 
+					end
+				elseif key == keys.Return then 
+					rb_group.extra.select_button(ring_num)
+
+	    			rings:find_child("ring"..ring_num).opacity = 0 
+	    			rings:find_child("focus"..ring_num).opacity = 255 
+
+					if (p.skin == "CarbonCandy") then 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + p.button_position[1]
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + p.button_position[2] - 8
+					else 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + sel_off_x + p.button_position[1]
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + sel_off_y + p.button_position[2]
+					end 
+
+					rings:find_child("ring"..ring_num):grab_key_focus() 
+
+					return true 
+				end 
+			end 
 	
 	           	function donut:on_button_down (x,y,b,n)
 					if current_focus then 
