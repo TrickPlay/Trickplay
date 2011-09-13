@@ -2,6 +2,7 @@
 
 
 local GIRL_ANIMATION_FRAME_RATE = 100
+local GIRL_MOVE_DISTANCE = 300
 
 -- This table tracks the state transitions -- from a given current frame for the girl, which comes next by default?
 -- User input or collision events can jump us to another position in the table, but we'll automate from there.
@@ -20,7 +21,7 @@ local animation_states = {
     roll1 = "rollToStand1",
     
     rollToStand1 = "rollToStand2",
-    rollToStand2 = "idle1",
+    rollToStand2 = "run1",
     
     run1 = "run2",
     run2 = "run3",
@@ -50,6 +51,48 @@ function animation_ticker:on_timer()
     end
 end
 
+local girl_move = function(girl, direction)
+    local left_right = 0
+    if(direction == keys.Left) then
+        if(girl.y_rotation[1] == 0) then
+            girl.y_rotation = { 180, 0, 0 }
+            girl.extra.target_x = girl.x
+        end
+        left_right = -1
+    else
+        if(girl.y_rotation[1] == 180) then
+            girl.y_rotation = { 0, 0, 0 }
+            girl.extra.target_x = girl.x
+        end
+        left_right = 1
+    end
+
+    girl.extra.target_x = math.min(math.max(girl.target_x+(left_right*GIRL_MOVE_DISTANCE),girl.MIN_X),girl.MAX_X)
+
+    if(not girl_animation_list[girl]:find("run%d")) then
+        girl:go_to_state("run1")
+    end
+    -- one running frame per 1/20th of the screen width traveled
+    girl:animate({ duration = 1+ GIRL_ANIMATION_FRAME_RATE*20 * math.abs(girl.x-girl.target_x)/screen.w, x = girl.target_x, on_completed = function() girl:go_to_state("runToStop1") end })
+end
+
+local girl_roll = function(girl)
+    local left_right = 0
+    if(girl.y_rotation[1] == 0) then
+        left_right = 1
+    else
+        left_right = -1
+    end
+
+    girl.extra.target_x = math.min(math.max(girl.target_x+(left_right*GIRL_MOVE_DISTANCE),girl.MIN_X),girl.MAX_X)
+
+    if(not girl_animation_list[girl]:find("roll")) then
+        girl:go_to_state("roll1")
+    end
+    -- one running frame per 1/20th of the screen width traveled
+    girl:animate({ duration = 1+ GIRL_ANIMATION_FRAME_RATE*20 * math.abs(girl.x-girl.target_x)/screen.w, x = girl.target_x, on_completed = function() girl:go_to_state("runToStop1") end })
+end
+
 animation_ticker:start()
 
 local girl_factory = function(images)
@@ -66,9 +109,25 @@ local girl_factory = function(images)
         img:hide()
     end
 
-    local height,width = the_girl.h, the_girl.w
-    print("**",width,height)
---    the_girl:foreach_child(function(img) img.position = { width/2, height } end)
+    the_girl.extra.on_collision = function() end
+    local collision_sensor = physics:Body(
+            Rectangle {
+                name = "collision_sensor",
+                color = { 198, 28, 111 },
+                opacity = 50,
+                size =  { 150, 500 },
+                position = { -75, -500 },
+            },
+            { sensor = true }
+    )
+    collision_sensor.on_begin_contact = function( self, contact )
+        dump_table(contact)
+    end
+
+    the_girl:add(collision_sensor)
+
+    the_girl.extra.move = girl_move
+    the_girl.extra.roll = girl_roll
 
     -- Start the girl in idle position 1 and schedule her for animation
     the_girl.extra.images.idle1:show()
@@ -88,6 +147,7 @@ local girl_factory = function(images)
 
     the_girl.extra.MIN_X = screen.w * 1/10
     the_girl.extra.MAX_X = screen.w * 9/10
+    the_girl.extra.target_x = 0
 
     return the_girl
 end
