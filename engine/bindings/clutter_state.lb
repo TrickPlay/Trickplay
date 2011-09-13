@@ -147,7 +147,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}
 		else
 		{
-			value = lua_tonumber(L, -1);
+			value = lua_tonumber(L, index);
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_double(&gvalue,value);
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "rotation-angle-x", nmode, &gvalue, pre_delay, post_delay);
@@ -162,7 +162,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}
 		else
 		{
-			value = lua_tonumber(L, -1);
+			value = lua_tonumber(L, index);
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_double(&gvalue,value);
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "rotation-angle-y", nmode, &gvalue, pre_delay, post_delay);
@@ -177,7 +177,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}
 		else
 		{
-			value = lua_tonumber(L, -1);
+			value = lua_tonumber(L, index);
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
 			g_value_set_double(&gvalue,value);
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "rotation-angle-z", nmode, &gvalue, pre_delay, post_delay);
