@@ -111,7 +111,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 			g_value_init(&gvalue,G_TYPE_FLOAT);
 			g_value_set_float(&gvalue,value);
 			lua_pop(L,1);
-			clutter_state_set_key(state, source.c_str(), target.c_str(), G_OBJECT(object), "height", nmode, &gvalue, pre_delay, post_delay);
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "height", nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
 		}			
 		else 
@@ -218,7 +218,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
     if (lua_type(L, index) != LUA_TTABLE) 
 		return luaL_error(L, "incorrect argument, table expected");
 
-	double duration = 1000;
+	guint duration;
 
 	lua_getfield(L, index, "duration");
 	if(!lua_isnil(L, -1)) 
@@ -227,14 +227,15 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		{
 			return luaL_error(L, "incorrect argument, failed to set \'duration\' : number expected");
 		}
-		duration =  lua_tonumber(L, -1);
+		duration =  lua_tointeger(L, -1);
 		if (!(duration > 0 ))
 		{	
 			return luaL_error(L, "incorrect argument, failed to set \'duration\' : positive number expected");
 		}
+
+	    clutter_state_set_duration(state,NULL,NULL,duration);
 	}
     lua_pop(L, 1);
-	//clutter_state_set_duration(state,NULL,NULL,duration);
 
 	//transitions 
 	lua_getfield(L, index, "transitions");
@@ -259,7 +260,17 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		{
 			return luaL_error(L, "incorrect argument, fail to set \'source\' : string expected");
 		}
-		String source = csource; 
+		String source = csource;
+
+        const char *source_name;
+        
+        if(source.compare("*") != 0)
+        {
+            source_name = source.c_str();
+        } else {
+            source_name = NULL;
+        }
+
 	    lua_pop(L,1);
 
 		// target 
@@ -274,17 +285,13 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 		// duration 
 		lua_getfield(L, -1, "duration");
-		double sduration = lua_tonumber(L,-1);
-		/*
+		guint sduration = lua_tointeger(L,-1);
+
 		if (sduration) 
 		{
-			clutter_state_set_duration(state,source.c_str(),target.c_str(),sduration);
+			clutter_state_set_duration(state,source_name,target.c_str(),sduration);
 		}
-		else
-		{
-			clutter_state_set_duration(state,source.c_str(),target.c_str(),duration);
-		}
-		*/
+
 	    lua_pop(L,1);
 
 		// keys 
@@ -365,21 +372,11 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			{
 				return luaL_error(L, "incorrect argument, failed to set \'animator\' : Animator expected");
 			}
-			clutter_state_set_animator (state, source.c_str(), target.c_str(), animator);  
+			clutter_state_set_animator (state, source_name, target.c_str(), animator);  
 		 }
 	     lua_pop(L,2);
-		 if (sduration) 
-		 {
-			clutter_state_set_duration(state,source.c_str(),target.c_str(),sduration);
-		 }
-		 else
-		 {
-			clutter_state_set_duration(state,source.c_str(),target.c_str(),duration);
-		 }
 	 }
 	 lua_pop(L,1);
-
-	 clutter_state_set_duration(state,NULL,NULL,duration);
 
      return 0;
 }
@@ -506,13 +503,13 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 	(end)
 	
-	An AnimationState object's current state is stored in its <state> property. Initially, the object's state is nil. Setting the state property changes the current state and potentially performs a transition animation if one is defined for the two states. Notice that because an object's initial state is nil, the first time the state property is explicitly set, if a transition definition has a target of that first state and a wildcard source of "*", its associated animation will run.
+	An AnimationState object's current state is stored in its <state> property. Initially, the object's state is nil. Setting the state property changes the current state and potentially performs a transition animation if one is defined for the two states. Notice that because an object's initial state is nil, the first time the state property is explicitly set, if a transition definition has a target of that state and a wildcard source of "*", its associated animation will run.
 	
 	It is possible to change the current state and bypass any associated transition animation by calling the object's <warp> function.
 	
 	When the animation has completed, the program is notified by calling the object's <on_completed> event handler. This enables the program to perform any desired operations, including immediately transitioning to another state to daisy-chain animations.
 	
-	*Code Example:* Animate a sphere in two states: (1) from Appear State to Disappear State and (2) from Disappear State to Appear State. For demonstration purposes, the program loops from one state to the other; in a real application, some activity, such as user input, would commonly cause the state transitions. All the AnimationState code is located in the bottom portion of the code sample.
+	*Code Example:* Animate a sphere in two states: (1) from wildcard-source State to Disappear State and (2) from Disappear State to Appear State. For demonstration purposes, the program loops from one state to the other; in a real application, some activity, such as user input, would commonly cause the state transitions. All the AnimationState code is located in the bottom portion of the code sample.
 	
 	(code)
 	-- Create a screen background
@@ -554,14 +551,14 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	sphereAnimationState = AnimationState( {
 			duration = 2000,  -- default transition duration
 			transitions = {
-				{ -- Appear->Disappear
-				  source = "appear",
+				{ -- Wildcard state--->Disappear
+				  source = "*",
 				  target = "disappear",
 				  keys = {
 				  		{ sphereImage, "scale", "EASE_IN_OUT_QUAD", {0.0, 0.0}, 0, 0 },
 				  }
 				},
-				{ -- Disappear->Appear
+				{ -- Disappear--->Appear
 				  source = "disappear",
 				  target = "appear",
 				  keys = {
@@ -580,8 +577,15 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			sphereAnimationState.state = "disappear"
 		end
 	end
+
+	-- Start the animation
+	sphereAnimationState.state = "disappear"  -- Matches the wildcard "*" source transition
 	(end)
 	
+	The animation generated by the code example is shown below.
+	
+(see animationStateDemo.gif)
+
 */
 
 class AnimationState [[ClutterState*]]
