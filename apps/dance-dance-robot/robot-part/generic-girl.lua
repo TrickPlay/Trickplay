@@ -86,6 +86,9 @@ local girl_factory = function(images)
 
     the_girl.scale = { 1/2, 1/2 }
 
+    the_girl.extra.MIN_X = screen.w * 1/10
+    the_girl.extra.MAX_X = screen.w * 9/10
+
     return the_girl
 end
 
