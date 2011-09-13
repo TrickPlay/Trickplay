@@ -31,7 +31,8 @@ local my_hook = function(factory)
     local girl = factory(images)
 
     girl.name = "white"
-    girl.position = { girl.extra.MIN_X, screen.h * 9/10 }
+    girl.extra.MAX_X = girl.MAX_X-150
+    girl.position = { girl.MIN_X, screen.h * 9/10 }
     girl.target_x = girl.x
 
     return girl

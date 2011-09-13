@@ -41,11 +41,14 @@ function screen:on_key_down(key)
     if(key == keys.OK) then
         background:jiggle(150)
         score_gauge:set_score((score_gauge.extra.score+10) % 110 )
-    elseif(key == keys.Right or key == keys.Left) then
+    elseif(key == keys.Right) then
+        girl_in_black:move(key)
+        dolater(DELAY_TIME, girl_in_white.move, girl_in_white, key)
+    elseif(key == keys.Left) then
         girl_in_white:move(key)
         dolater(DELAY_TIME, girl_in_black.move, girl_in_black, key)
     elseif(key == keys.Down) then
         girl_in_white:roll()
-        dolater(DELAY_TIME, girl_in_black.roll, girl_in_black)
+        girl_in_black:roll()
     end
 end
