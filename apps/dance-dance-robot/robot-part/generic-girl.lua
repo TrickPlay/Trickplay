@@ -55,12 +55,14 @@ local girl_move = function(girl, direction)
     local left_right = 0
     if(direction == keys.Left) then
         if(girl.y_rotation[1] == 0) then
+            girl:find_child("collision_sensor").y_rotation = { 180, girl:find_child("collision_sensor").w/2, 0 }
             girl.y_rotation = { 180, 0, 0 }
             girl.extra.target_x = girl.x
         end
         left_right = -1
     else
         if(girl.y_rotation[1] == 180) then
+            girl:find_child("collision_sensor").y_rotation = { 0, girl:find_child("collision_sensor").w/2, 0 }
             girl.y_rotation = { 0, 0, 0 }
             girl.extra.target_x = girl.x
         end
@@ -73,7 +75,8 @@ local girl_move = function(girl, direction)
         girl:go_to_state("run1")
     end
     -- one running frame per 1/20th of the screen width traveled
-    girl:animate({ duration = 1+ GIRL_ANIMATION_FRAME_RATE*20 * math.abs(girl.x-girl.target_x)/screen.w, x = girl.target_x, on_completed = function() girl:go_to_state("runToStop1") end })
+    local duration = 1+ GIRL_ANIMATION_FRAME_RATE*20 * math.abs(girl.x-girl.target_x)/screen.w
+    girl:animate({ duration = duration, x = girl.target_x, on_completed = function() girl:go_to_state("runToStop1") end })
 end
 
 local girl_roll = function(girl)
@@ -90,7 +93,8 @@ local girl_roll = function(girl)
         girl:go_to_state("roll1")
     end
     -- one running frame per 1/20th of the screen width traveled
-    girl:animate({ duration = 1+ GIRL_ANIMATION_FRAME_RATE*20 * math.abs(girl.x-girl.target_x)/screen.w, x = girl.target_x, on_completed = function() girl:go_to_state("runToStop1") end })
+    local duration = 1+ GIRL_ANIMATION_FRAME_RATE*20 * math.abs(girl.x-girl.target_x)/screen.w
+    girl:animate({ duration = duration, x = girl.target_x, on_completed = function() girl:go_to_state("runToStop1") end })
 end
 
 animation_ticker:start()
@@ -109,23 +113,16 @@ local girl_factory = function(images)
         img:hide()
     end
 
-    the_girl.extra.on_collision = function() end
-    local collision_sensor = physics:Body(
-            Rectangle {
-                name = "collision_sensor",
-                color = { 198, 28, 111 },
-                opacity = 50,
-                size =  { 150, 500 },
-                position = { -75, -500 },
-            },
-            { sensor = true }
-    )
-    collision_sensor.on_begin_contact = function( self, contact )
-        dump_table(contact)
-    end
+    the_girl:add( Rectangle {
+                                name = "collision_sensor",
+                                size = { 200, 500 },
+                                position = { -100, -500 },
+                                color = { 198, 28, 111 },
+                                opacity = 50,
+                            }
+            )
 
-    the_girl:add(collision_sensor)
-
+    -- Hook up movement functions
     the_girl.extra.move = girl_move
     the_girl.extra.roll = girl_roll
 
