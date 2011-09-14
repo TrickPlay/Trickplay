@@ -421,41 +421,30 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
     }
 }
 
-
 bool App::load_metadata( const char * app_path, App::Metadata & md )
 {
-    FreeLater free_later;
-
     g_assert( app_path );
 
-    // Build the path to the metadata file and load its contents
+    Sandbox sandbox( app_path );
 
-    gchar * path = g_build_filename( app_path, APP_METADATA_FILENAME, NULL );
+    gsize length = 0;
 
-    free_later( path );
+    gchar * contents = sandbox.get_native_child_contents( APP_METADATA_FILENAME , length );
 
-    GError * error = NULL;
-
-    gchar * contents = NULL;
-
-    g_file_get_contents( path, &contents, NULL, &error );
-
-    free_later( contents );
-
-    if ( error )
+    if ( ! contents )
     {
-        g_warning( "FAILED TO LOAD APP METADATA FROM '%s' : %s", path, error->message );
+		g_warning( "FAILED TO LOAD APP METADATA FROM '%s'" , app_path );
 
-        g_clear_error( &error );
-
-        return false;
+		return false;
     }
+
+    FreeLater free_later( contents );
 
     bool result = App::load_metadata_from_data( contents, md );
 
     if ( result )
     {
-        md.path = app_path;
+        md.sandbox = sandbox;
     }
 
     return result;
@@ -710,6 +699,7 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
 
 #endif
 {
+	metadata.sandbox.set_context( c );
 
     // Create the user agent
 
@@ -819,62 +809,42 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
     ClutterActor * splash = 0;
 
-    String splash_path;
+	Image * splash_image = 0;
 
-    gchar * splash_jpg = g_build_filename( metadata.path.c_str(), "default.jpg", NULL );
+	if ( metadata.sandbox.native_child_exists( "default.jpg" ) )
+	{
+		splash_image = load_image( "default.jpg" , false );
+	}
+	else if ( metadata.sandbox.native_child_exists( "default.png" ) )
+	{
+		splash_image = load_image( "default.png" , false );
+	}
 
-    free_later( splash_jpg );
+	if ( splash_image )
+	{
+		splash = clutter_texture_new();
 
-    if ( g_file_test( splash_jpg , G_FILE_TEST_EXISTS ) )
-    {
-        splash_path = splash_jpg;
-    }
-    else
-    {
-        gchar * splash_png = g_build_filename( metadata.path.c_str(), "default.png", NULL );
+		clutter_actor_set_name( splash , "splash" );
 
-        free_later( splash_png );
+		Images::load_texture( CLUTTER_TEXTURE( splash ) , splash_image );
 
-        if ( g_file_test( splash_png , G_FILE_TEST_EXISTS ) )
-        {
-            splash_path = splash_png;
-        }
-    }
+		gfloat width;
+		gfloat height;
 
-    if ( ! splash_path.empty() )
-    {
-        Image * splash_image = Image::decode( splash_path.c_str() , false );
+		clutter_actor_get_size( stage , & width , & height );
 
-        if ( ! splash_image )
-        {
-            g_warning( "SPLASH IMAGE EXISTS BUT COULD NOT BE DECODED" );
-        }
-        else
-        {
-            splash = clutter_texture_new();
+		clutter_actor_set_scale( splash , width / splash_image->width() , height / splash_image->height() );
 
-            clutter_actor_set_name( splash , "splash" );
+		clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , splash );
 
-            Images::load_texture( CLUTTER_TEXTURE( splash ) , splash_image );
+		clutter_actor_show( stage );
 
-            gfloat width;
-            gfloat height;
+		clutter_actor_queue_redraw( stage );
 
-            clutter_actor_get_size( stage , & width , & height );
+		delete splash_image;
 
-            clutter_actor_set_scale( splash , width / splash_image->width() , height / splash_image->height() );
-
-            clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , splash );
-
-            clutter_actor_show( stage );
-
-            clutter_actor_queue_redraw( stage );
-
-            delete splash_image;
-
-            g_info( "APP SPLASH %s : %1.3f s", metadata.id.c_str() , t.elapsed() );
-        }
-    }
+		g_info( "APP SPLASH %s : %1.3f s", metadata.id.c_str() , t.elapsed() );
+	}
 
     //.........................................................................
 
@@ -988,41 +958,37 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     FreeLater free_later;
 
-    gchar * main_path = g_build_filename( metadata.path.c_str() , "main.lua" , NULL );
-
-    free_later( main_path );
-
-    int top = lua_gettop( L );
-
     int result = TP_RUN_OK;
 
-    if ( luaL_dofile( L , main_path ) )
-    {
-        g_critical( "%s", String( 60, '=' ).c_str() );
-        g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
-        g_critical( "%s", String( 60, '=' ).c_str() );
+	int top = lua_gettop( L );
 
-        lua_pop( L , lua_gettop( L ) - top );
+	if ( metadata.sandbox.lua_load_pi_child( L , APP_MAIN_FILENAME ) || lua_pcall( L , 0 , LUA_MULTRET , 0 ) )
+	{
+		g_critical( "%s", String( 60, '=' ).c_str() );
+		g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
+		g_critical( "%s", String( 60, '=' ).c_str() );
 
-        result = TP_RUN_APP_ERROR;
-    }
-    else
-    {
-        lua_pop( L , lua_gettop( L ) - top );
+		lua_pop( L , lua_gettop( L ) - top );
 
-        // Make it small
+		result = TP_RUN_APP_ERROR;
+	}
+	else
+	{
+		lua_pop( L , lua_gettop( L ) - top );
 
-        //clutter_actor_set_scale( screen, 0, 0 );
+		// Make it small
 
-        // By adding it to the stage, the ref is sunk, so we don't need
-        // to unref it here.
+		//clutter_actor_set_scale( screen, 0, 0 );
 
-        clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
+		// By adding it to the stage, the ref is sunk, so we don't need
+		// to unref it here.
 
-        g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
+		clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
 
-        notify( context , TP_NOTIFICATION_APP_LOADED );
-    }
+		g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
+
+		notify( context , TP_NOTIFICATION_APP_LOADED );
+	}
 
     run_callback( this , result );
 }
@@ -1366,145 +1332,55 @@ EventGroup * App::get_event_group()
 
 char * App::normalize_path( const gchar * path_or_uri, bool * is_uri, const StringSet & additional_uri_schemes )
 {
-    bool it_is_a_uri = false;
+	FreeLater free_later;
 
-    const char * app_path = metadata.path.c_str();
+	char * scheme = g_uri_parse_scheme( path_or_uri );
 
-    char * result = NULL;
+	if ( scheme )
+	{
+		free_later( scheme );
 
-    // First, see if there is a scheme
+		if ( ! strcmp( scheme , "http" ) || ! strcmp( scheme , "https" ) )
+		{
+			* is_uri = true;
 
-    gchar ** parts = g_strsplit( path_or_uri, ":", 2 );
+			return g_strdup( path_or_uri );
+		}
 
-    guint count = g_strv_length( parts );
+		if ( additional_uri_schemes.find( scheme ) != additional_uri_schemes.end() )
+		{
+			* is_uri = true;
 
-    if ( count == 0 )
-    {
-        // What do we do? This is clearly not a good path
+			return g_strdup( path_or_uri );
+		}
+	}
 
-        g_critical( "INVALID EMPTY PATH OR URI" );
-    }
+	// There is no recognizable scheme, we assume it is a platform independent path,
+	// which may have a scheme of its own.
 
-    else if ( count == 1 )
-    {
-        // There is no scheme, so this is a simple path
+	String result;
 
-        result = Util::rebase_path( app_path, path_or_uri );
-    }
-    else
-    {
-        // There is a scheme
+	if ( metadata.sandbox.is_native() )
+	{
+		* is_uri = false;
 
-        gchar * scheme = parts[0];
-        gchar * uri = parts[1];
+		result = metadata.sandbox.get_pi_child_native_path( path_or_uri );
+	}
+	else
+	{
+		* is_uri = true;
 
-        // The scheme is only one character long - assume it
-        // is a windows drive letter
+		bool is_native = false;
 
-        if ( strlen( scheme ) == 1 )
-        {
-            result = Util::rebase_path( app_path, path_or_uri );
-        }
-        else
-        {
-            // If it is HTTP or HTTPS, we just return the whole thing passed in
+		result = metadata.sandbox.get_pi_child_uri( path_or_uri , is_native );
+	}
 
-            if ( !strcmp( scheme, "http" ) || !strcmp( scheme, "https" ) )
-            {
-                it_is_a_uri = true;
+	if ( result.empty() )
+	{
+		return 0;
+	}
 
-                result = g_strdup( path_or_uri );
-            }
-
-            // If it is one of the additional schemes passed in, do the same
-
-            else if ( additional_uri_schemes.find( scheme ) != additional_uri_schemes.end() )
-            {
-                it_is_a_uri = true;
-
-                result = g_strdup( path_or_uri );
-            }
-
-            // Localized file
-
-            else if ( !strcmp( scheme, "localized" ) )
-            {
-                const char * language = context->get( TP_SYSTEM_LANGUAGE, TP_SYSTEM_LANGUAGE_DEFAULT );
-                const char * country = context->get( TP_SYSTEM_COUNTRY, TP_SYSTEM_COUNTRY_DEFAULT );
-
-                gchar * try_path = NULL;
-
-                // Try <app>/localized/en/US/<path>
-
-                try_path = g_build_filename( app_path, "localized", language, country, NULL );
-
-                result = Util::rebase_path( try_path, uri );
-
-                g_free( try_path );
-
-                if ( !g_file_test( result, G_FILE_TEST_EXISTS ) )
-                {
-                    // Try <app>/localized/en/<path>
-
-                    g_free( result );
-
-                    try_path = g_build_filename( app_path, "localized", language, NULL );
-
-                    result = Util::rebase_path( try_path, uri );
-
-                    g_free( try_path );
-
-                    if ( !g_file_test( result, G_FILE_TEST_EXISTS ) )
-                    {
-                        // Try <app>/localized/<path>
-
-                        g_free( result );
-
-                        try_path = g_build_filename( app_path, "localized", NULL );
-
-                        result = Util::rebase_path( try_path, uri );
-
-                        g_free( try_path );
-
-                        if ( !g_file_test( result, G_FILE_TEST_EXISTS ) )
-                        {
-                            // End up with <app>/<path>
-
-                            g_free( result );
-
-                            result = Util::rebase_path( app_path, uri );
-                        }
-                    }
-                }
-            }
-            else
-            {
-                g_critical( "INVALID SCHEME IN '%s'", path_or_uri );
-            }
-        }
-    }
-
-    g_strfreev( parts );
-
-    if ( result && is_uri )
-    {
-        *is_uri = it_is_a_uri;
-    }
-
-#ifdef TP_PRODUCTION
-
-    // Check for links
-
-    if ( result && !it_is_a_uri && g_file_test( result, G_FILE_TEST_IS_SYMLINK ) )
-    {
-        g_critical( "SYMBOLIC LINKS NOT ALLOWED : %s", result );
-        g_free( result );
-        result = NULL;
-    }
-
-#endif
-
-    return result;
+	return g_strdup( result.c_str() );
 }
 
 //-----------------------------------------------------------------------------
@@ -1518,9 +1394,11 @@ bool App::change_app_path( const char * path )
         return false;
     }
 
-    metadata.path = path;
+    metadata.sandbox = Sandbox( path );
+    metadata.sandbox.set_context( context );
 
-    g_warning( "*** APP SANDBOX CHANGED FOR %s TO '%s'" , metadata.id.c_str() , path );
+    g_warning( "*** APP SANDBOX CHANGED FOR %s TO '%s'" , metadata.id.c_str() , metadata.sandbox.get_root_uri().c_str() );
+
     return true;
 }
 
