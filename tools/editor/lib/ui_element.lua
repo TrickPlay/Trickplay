@@ -4562,7 +4562,7 @@ function ui_element.layoutManager(t)
 	make_grid()
 	
 	local function layoutManager_on_key_down(key)
-		if slate.focus[key] then
+		if slate.focus and slate.focus[key] then
 			if type(slate.focus[key]) == "function" then
 				slate.focus[key]()
 			elseif screen:find_child(slate.focus[key]) then
@@ -4575,7 +4575,7 @@ function ui_element.layoutManager(t)
 				end
 			end
 		end
-		return true
+		return 
 	end
 
     --Key Handler
