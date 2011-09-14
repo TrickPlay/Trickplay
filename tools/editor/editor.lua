@@ -80,7 +80,7 @@ local function guideline_inspector(v)
     local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
     local MSSTYLE = {font = "FreeSans Medium 12px" , color = "000000", opacity=50}
 
-    local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
+    local msgw_bg = assets("lib/assets/panel-new.png"):set{name = "save_file_bg", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
 	local title = Text {name = "title", text = "Guideline" }:set(TSTYLE)
 	local title_shadow = Text {name = "title", text = "Guideline"}:set(TSSTYLE)
@@ -520,7 +520,7 @@ local function open_files(input_purpose, bg_image, inspector)
     local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
     local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
 
-    local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", "open_file", position = {0,0}}
+    local msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name="open_file", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title = Text{name = "title", text = "Open File"}:set(STYLE)
 	local title_shadow = Text {name = "title", text = "Open File"}:set(SSTYLE)
@@ -616,7 +616,7 @@ local function open_files(input_purpose, bg_image, inspector)
 			-- clip 
 			local tmpImage 
 			if selected_file then 
-				tmpImage = Image{src = "assets/images/"..selected_file}
+				tmpImage = assets("assets/images/"..selected_file)
 			end
 			if inspector:find_child("cw") then 
 				inspector:find_child("cw"):find_child("input_text").text = tostring(tmpImage.w)
@@ -898,7 +898,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title, title_shadow 
-	local inspector_bg = Image{src = "lib/assets/panel-tabs.png", name = "open_project", position = {0,0}}
+	local inspector_bg = assets("lib/assets/panel-tabs.png"):set{name = "open_project", position = {0,0}}
 	local inspector_items = {}
 	
 
@@ -925,7 +925,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
     local TOP_PADDING = 12
     local BOTTOM_PADDING = 12
 	-------------------------------------------------------------
-
 	if(current_inspector ~= nil) then 
 		return 
     end 
@@ -1509,7 +1508,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
     local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
     local MSSTYLE = {font = "FreeSans Medium 12px" , color = "000000", opacity=50}
 
-    local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
+    local msgw_bg = assets("lib/assets/panel-new.png"):set{name = "save_file_bg", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
 	local title = Text {name = "title", text = "Save " }:set(TSTYLE)
 	local title_shadow = Text {name = "title", text = "Save "}:set(TSSTYLE)
@@ -1795,10 +1794,8 @@ function editor.undo()
 	elseif undo_item[2] == hdr.ADD then 
 	    screen_ui.n_selected(undo_item[3])
 		if util.is_this_group(undo_item[3]) == true then 
-			print("그룹일세")
 			ungroup(undo_item[3])
 		else
-			print("그룹이 아니랄쎄") 
 			g:remove(g:find_child(undo_item[1]))
 	    end 
 	elseif undo_item[2] == hdr.DEL then 
@@ -1831,10 +1828,8 @@ function editor.redo()
 	  		util.set_obj(g:find_child(redo_item[1]),  redo_item[4])
 	    	table.insert(undo_list, redo_item)
       elseif redo_item[2] == hdr.ADD then 
-	  print("add")
 			if util.is_this_group(redo_item[3]) then 
 	  		--if(redo_item[3].type == "Group") then 
-			print("그룹")
 	    		for i, c in pairs(redo_item[3].extra.children) do
 					local c_tmp = g:find_child(c)
 					g:remove(g:find_child(c))
@@ -3304,7 +3299,7 @@ function editor.ui_elements()
     local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
     local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
 
-    local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", name = "ui_elements_insert", position = {0,0}}
+    local msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name = "ui_elements_insert", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title = Text{name = "title", text = "UI Elements"}:set(STYLE)
 	local title_shadow = Text {name = "title", text = "UI Elements"}:set(SSTYLE)
@@ -3543,7 +3538,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
     local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
     local MSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
 
-    local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
+    local msgw_bg = assets("lib/assets/panel-new.png"):set{name = "save_file_bg", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
 	local title = Text {name = "title", text = "Save " }:set(TSTYLE)
 	local title_shadow = Text {name = "title", text = "Save "}:set(TSSTYLE)

@@ -362,11 +362,10 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 		item_num = item_num + 1
 	  end 
 
-          ui.image= Image { name="image"..tostring(item_num),
-          src = "/assets/images/"..input_text, opacity = 255 , position = {200,200}, 
-	  extra = {org_x = 200, org_y = 200} }
+          ui.image= assets("/assets/images/"..input_text)
+		  ui.image:set{ name="image"..tostring(item_num),opacity = 255 , position = {200,200}, extra = {org_x = 200, org_y = 200} }
           ui.image.reactive = true
-	  ui.image.extra.lock = false
+	  	  ui.image.extra.lock = false
           util.create_on_button_down_f(ui.image)
           table.insert(undo_list, {ui.image.name, hdr.ADD, ui.image})
           g:add(ui.image)

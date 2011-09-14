@@ -1,14 +1,14 @@
 local factory = {}
 
 -- Arrange Icon image
-local icon_l = Image{src = "assets/left.png", opacity = 155}
-local icon_r = Image{src = "assets/right.png", opacity = 155} 
-local icon_t = Image{src = "assets/top.png", opacity = 155}
-local icon_b = Image{src = "assets/bottom.png", opacity = 155} 
-local icon_hc = Image{src = "assets/align-horizontally-center.png", opacity = 175} 
-local icon_vc = Image{src = "assets/align-vertically-center.png", opacity = 175}
-local icon_dhc = Image{src = "assets/distribute-horizontal-center.png", opacity = 185}
-local icon_dvc = Image{src = "assets/distribute-vertical-center.png", opacity = 185}
+local icon_l = assets("assets/left.png"):set{opacity = 155}
+local icon_r = assets("assets/right.png"):set{opacity = 155} 
+local icon_t = assets("assets/top.png"):set{opacity = 155}
+local icon_b = assets("assets/bottom.png"):set{opacity = 155} 
+local icon_hc = assets("assets/align-horizontally-center.png"):set{opacity = 175} 
+local icon_vc = assets("assets/align-vertically-center.png"):set{opacity = 175}
+local icon_dhc = assets("assets/distribute-horizontal-center.png"):set{opacity = 185}
+local icon_dvc = assets("assets/distribute-vertical-center.png"):set{opacity = 185}
 
 local info_attr_t_idx = {"name","label","left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "ui_width", "ui_height", "bw", "bh", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","style","border_colorr", "border_colorg", "border_colorb", "border_colora","colorr", "colorg", "colorb", "colora","fr","fg","fb","fa","border_width","scale","clip","cx", "cy", "cw", "ch","font","wrap_mode","x_angle", "y_angle", "z_angle","opacity", "reactive",}
 
@@ -62,20 +62,6 @@ local color_map =
         [ "file_ls" ] = function(file_list_size) size = {800, file_list_size + 180} color = {25,25,25,100}  return size, color end
 }
 
--------------------------------------------------------------------------------
--- Makes a popup window contents (attribute name, input text, input button)
--------------------------------------------------------------------------------
-function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, save_items)
-	local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
-	local group = Group{}
-	local PADDING_X     = 7 -- The focus ring has this much padding around it
-    local PADDING_Y     = 7
- 	group:clear()
-	group.name = item_n
-	group.reactive = true
-
-	local text
-
 	local function make_focus_ring(w, h)
 		local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
@@ -93,6 +79,10 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
         return ring
     end
 
+	local function my_make_focus_ring ( _, ...)
+		return make_focus_ring(...)
+	end
+
     local function make_ring(w, h)
 		local ring = Canvas{ size = {w, h} }
         ring:begin_painting()
@@ -109,8 +99,29 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
         end
         return ring
     end
-	
-	ring = make_ring(150, 23) 
+
+	local function my_make_ring ( _, ...)
+		return make_ring(...)
+	end
+
+-------------------------------------------------------------------------------
+-- Makes a popup window contents (attribute name, input text, input button)
+-------------------------------------------------------------------------------
+function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, save_items)
+
+	local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
+	local group = Group{}
+	local PADDING_X     = 7 -- The focus ring has this much padding around it
+    local PADDING_Y     = 7
+	local text
+	local key 
+ 	group:clear()
+	group.name = item_n
+	group.reactive = true
+
+	key = string.format("ring:%d:%d", 150,23)
+	ring = assets(key, my_make_ring, 150, 23) 
+
 	ring.name = "ring"
 	if (text) then 
 		ring.position = {text.x+text.w+5, 0}
@@ -194,7 +205,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
         text.position  = {0,0}
     	group:add(text)
 
-		plus = Image{src="lib/assets/li-btn-dim-plus.png"}
+		plus = assets("lib/assets/li-btn-dim-plus.png")
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
 		group:add(plus)
@@ -202,7 +213,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			plus.src="lib/assets/li-btn-red-plus.png"
 		end 
 		function plus:on_button_up(x,y)
-			--table.insert(v.items, "item"..tostring(table.getn(v.items)+1)) 
 			table.insert(v.items, "item")
 			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
@@ -226,7 +236,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
         text.position  = {0,0}
     	group:add(text)
 
-		plus = Image{src="lib/assets/li-btn-dim-plus.png"}
+		plus = assets("lib/assets/li-btn-dim-plus.png")
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
 		group:add(plus)
@@ -387,13 +397,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		if item_type then 
         	item.item_type = item_type
 	    end 
-		local minus = Image{src="lib/assets/li-btn-dim-minus.png"}
+		local minus = assets("lib/assets/li-btn-dim-minus.png")
 	    minus.name = "item_minus"..tostring(i)
 		minus.reactive = true
-		local up = Image{src="lib/assets/li-btn-dim-up.png"}
+		local up = assets("lib/assets/li-btn-dim-up.png")
 	    up.name = "item_up"..tostring(i)
 		up.reactive = true
-		local down = Image{src="lib/assets/li-btn-dim-down.png"}
+		local down = assets("lib/assets/li-btn-dim-down.png")
 	    down.name = "item_down"..tostring(i)
 		down.reactive = true
 
@@ -627,7 +637,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		        		    end 
     		     	  end
 		  		 end
-	       	elseif (key == keys.Tab and shift == true )then 
+	       	elseif (key == hdr.LeftTab and shift == true) then 
 		     	item.on_focus_out()
 		     	local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
 		     	if (item_group:find_child("item_text"..tostring(prev_i))) then
@@ -653,9 +663,11 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	       	elseif (key == keys.Up )then 
 				item:find_child("textInput").cursor_position = 0 -- first charactor position 
 				item:find_child("textInput").selection_end = 0 -- first charactor position 
+				return true
 	       	elseif (key == keys.Down )then 
 				item:find_child("textInput").cursor_position = -1 -- first charactor position 
 				item:find_child("textInput").selection_end = -1 -- first charactor position 
+				return true
 	       	end 
 	    	end 
 			items_list:replace(i,1,item)
@@ -1100,47 +1112,12 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
         end
     end 
 
-    local function make_focus_ring(w, h)
-		local ring = Canvas{ size = {w, h} }
-        ring:begin_painting()
-        ring:set_source_color({255,0,0,255})
-        ring:round_rectangle( 1/2, 1/2, w - 1 , h - 1 , 0)
-		ring:set_source_color( {50,0,0,255})
-    	ring:fill(true)
-		ring:set_line_width (1)
-    	ring:set_source_color({255,0,0,255})
-        ring:stroke(true)
-        ring:finish_painting()
-		if ring.Image then
-  	 		ring= ring:Image()
-        end
-        return ring
-
-    end
-
-    local function make_ring(w, h)
-		local ring = Canvas{ size = {w, h} }
-        ring:begin_painting()
-        ring:set_source_color({255,255,255,255})
-        ring:round_rectangle( 1/2, 1/2, w - 1 , h - 1 , 0)
-		ring:set_source_color( {0,0,0,255})
-    	ring:fill(true)
-		ring:set_line_width (1)
-    	ring:set_source_color({255,255,255,255})
-        ring:stroke(true)
-        ring:finish_painting()
-		if ring.Image then
-  	 		ring= ring:Image()
-        end
-        return ring
-    end
-
     -- item group 
     local group = Group {}
     group:clear()
     	
     -- item group's children 
-    local text, input_text, ring, focus, line, button --, checkbox, radio_button, button_picker
+    local text, input_text, ring, focus, line, button, key --, checkbox, radio_button, button_picker
 
     if(item_n == "caption") then
     	text = Text {text = item_v}:set(STYLE)
@@ -1177,8 +1154,9 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 	     	end
         end 
 
+		key = string.format("ring:%d:%d", input_box_width, HEIGHT + 5)
+		ring = assets (key, my_make_ring, input_box_width, HEIGHT + 5)
 
-        ring = make_ring(input_box_width, HEIGHT + 5 ) 
 		ring.name = "ring"
 		if text then 
 			if item_n == "menu_width" then 
@@ -1192,7 +1170,10 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
         ring.opacity = 255
         group:add(ring)
 
-        focus = make_focus_ring(input_box_width, HEIGHT + 5)
+		key = string.format("focus_ring:%d%d", input_box_width, HEIGHT + 5)
+		focus = assets (key, my_make_focus_ring, input_box_width, HEIGHT + 5)
+
+        -- focus = make_focus_ring(input_box_width, HEIGHT + 5)
         focus.name = "focus"
 		if (text) then 
 	     	focus.position = {text.x+text.w+5, 0}
@@ -1445,16 +1426,35 @@ function factory.draw_anchor_point(v, inspector)
 
     find_current_anchor (v)
 
-	object = Image{src = "lib/assets/anchor-point-box.png", name = "rect0", position = {0,0}}
-	mid_top = Image{src = "lib/assets/anchor-point-off.png", name = "mid_top", position = {15,0}}
-	center = Image{src = "lib/assets/anchor-point-off.png", name = "center", position = {15,15}}
-	mid_bottom = Image{src = "lib/assets/anchor-point-off.png", name = "mid_bottom", position = {15,30}}
-	right_mid = Image{src = "lib/assets/anchor-point-off.png", name = "right_mid", position = {30,15}}
-	right_top = Image{src = "lib/assets/anchor-point-off.png", name = "right_top", position = {30,0}}
-	right_bottom = Image{src = "lib/assets/anchor-point-off.png", name = "right_bottom", position = {30,30}}
-	left_mid = Image{src = "lib/assets/anchor-point-off.png", name = "left_mid", position = {0,15}}
-	left_top = Image{src = "lib/assets/anchor-point-off.png", name = "left_top", position = {0,0}}
-	left_bottom = Image{src = "lib/assets/anchor-point-off.png", name = "left_bottom", position = {0,30}}
+	object = assets("lib/assets/anchor-point-box.png")
+	object:set{name = "rect0", position = {0,0}}
+
+	mid_top = assets("lib/assets/anchor-point-off.png") 
+	mid_top:set{name = "mid_top", position = {15,0}}
+
+	center = assets("lib/assets/anchor-point-off.png") 
+	center:set{name = "center", position = {15,15}}
+
+	mid_bottom = assets("lib/assets/anchor-point-off.png")
+	mid_bottom:set{name = "mid_bottom", position = {15,30}}
+
+	right_mid = assets("lib/assets/anchor-point-off.png") 
+	right_mid:set{name = "right_mid", position = {30,15}}
+
+	right_top = assets("lib/assets/anchor-point-off.png") 
+	right_top:set{ name = "right_top", position = {30,0}}
+
+	right_bottom = assets("lib/assets/anchor-point-off.png") 
+	right_bottom:set{ name = "right_bottom", position = {30,30}}
+
+	left_mid = assets("lib/assets/anchor-point-off.png")
+	left_mid:set{ name = "left_mid", position = {0,15}}
+
+	left_top = assets("lib/assets/anchor-point-off.png") 
+	left_top:set{ name = "left_top", position = {0,0}}
+
+	left_bottom = assets("lib/assets/anchor-point-off.png") 
+	left_bottom:set{ name = "left_bottom", position = {0,30}}
 
     mid_top.reactive = true
     center.reactive = true
@@ -1541,7 +1541,8 @@ local l_scale = 0.8
 rect_up = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, name = "rect_up", position = {0,0,0}, size = {30,30}, opacity = 255, }
 
 
-img_up = Image { src = "/lib/assets/left.png", scale = {l_scale,l_scale,0,0}, z_rotation = {90,0,0}, anchor_point = {0,0}, name = "img_up", position = {30,5,0}, opacity = 255, }
+img_up = assets("/lib/assets/left.png")
+img_up:set{scale = {l_scale,l_scale,0,0}, z_rotation = {90,0,0}, anchor_point = {0,0}, name = "img_up", position = {30,5,0}, opacity = 255, }
 
 
 up = Group { name = "up", position = {0,0,0}, size = {30,30}, opacity = 255, children = {rect_up,img_up}, reactive = true, }
@@ -1558,7 +1559,8 @@ local l_scale = 0.8
 rect_down = Rectangle { color = {255,255,255,0}, border_color = l_col, border_width = l_wid, name = "rect_down", position = {0,0,0}, size = {30,30}, opacity = 255, }
 
 
-img_down = Image { src = "lib/assets/left.png", scale = {l_scale,l_scale,0,0}, z_rotation = {270,0,0}, anchor_point = {0,0}, name = "img_down", position = {0,23,0}, opacity = 255, }
+img_down = assets("lib/assets/left.png")
+img_down:set{scale = {l_scale,l_scale,0,0}, z_rotation = {270,0,0}, anchor_point = {0,0}, name = "img_down", position = {0,23,0}, opacity = 255, }
 
 
 down = Group { name = "down", position = {0,0,0}, size = {30,30}, opacity = 255, children = {rect_down,img_down}, reactive = true, }
@@ -1661,11 +1663,16 @@ function factory.draw_focus_changer(v)
 		reactive = true,
 	}
 
-	focus_changer_bgU = Image{src = "lib/assets/assign-focus-up.png", name = "focuschanger_bgU", position = {85,25}}
-	focus_changer_bgD = Image{src = "lib/assets/assign-focus-down.png", name = "focuschanger_bgD", position = {85,195}}
-	focus_changer_bgR = Image{src = "lib/assets/assign-focus-right.png", name = "focuschanger_bgR", position = {170, 110}}
-	focus_changer_bgL = Image{src = "lib/assets/assign-focus-left.png", name = "focuschanger_bgL", position = {0,110}}
-	focus_changer_bgE = Image{src = "lib/assets/assign-focus-ok.png", name = "focuschanger_bgE", position = {85,110}}
+	focus_changer_bgU = assets("lib/assets/assign-focus-up.png") 
+	focus_changer_bgU:set{name = "focuschanger_bgU", position = {85,25}}
+	focus_changer_bgD = assets("lib/assets/assign-focus-down.png") 
+	focus_changer_bgD:set{name = "focuschanger_bgD", position = {85,195}}
+	focus_changer_bgR = assets("lib/assets/assign-focus-right.png") 
+	focus_changer_bgR:set{name = "focuschanger_bgR", position = {170, 110}}
+	focus_changer_bgL = assets("lib/assets/assign-focus-left.png") 
+	focus_changer_bgL:set{name = "focuschanger_bgL", position = {0,110}}
+	focus_changer_bgE = assets("lib/assets/assign-focus-ok.png") 
+	focus_changer_bgE:set{name = "focuschanger_bgE", position = {85,110}}
 
 	if v.extra.type == "TabBar" then 
 		local space = 0

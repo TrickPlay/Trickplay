@@ -96,21 +96,21 @@ function editor_ui.button(table)
         b_group.size = { p.ui_width , p.ui_height}
 
 	    button = Group{name = "dim", opacity = 255, size = {p.ui_width, p.ui_height}}
-		local leftcap = Image{src="lib/assets/button-dim-leftcap.png", position = {0,0}}
-		local rightcap = Image{src="lib/assets/button-dim-rightcap.png", position = {p.ui_width-10,0}}
-		local center1px = Image{src="lib/assets/button-dim-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
+		local leftcap = assets("lib/assets/button-dim-leftcap.png"):set{position = {0,0}}
+		local rightcap = assets("lib/assets/button-dim-rightcap.png"):set{position = {p.ui_width-10,0}}
+		local center1px = assets("lib/assets/button-dim-center1px.png"):set{position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
 		button:add(leftcap,center1px,rightcap) 
 		
 	    focus = Group{name  ="red", opacity = 0, size = {p.ui_width, p.ui_height}}
-		local redleftcap = Image{src="lib/assets/button-red-leftcap.png", position = {0,0}}
-		local redrightcap = Image{src="lib/assets/button-red-rightcap.png", position = {p.ui_width-10,0}}
-		local redcenter1px = Image{src="lib/assets/button-red-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
+		local redleftcap = assets("lib/assets/button-red-leftcap.png"):set{ position = {0,0}}
+		local redrightcap = assets("lib/assets/button-red-rightcap.png"):set{ position = {p.ui_width-10,0}}
+		local redcenter1px = assets("lib/assets/button-red-center1px.png"):set{ position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
 		focus:add(redleftcap,redcenter1px,redrightcap) 
 
 	    active = Group{name ="active", opacity = 0, size = {p.ui_width, p.ui_height}}
-		local activeleftcap = Image{src="lib/assets/button-active-leftcap.png", position = {0,0}}
-		local activerightcap = Image{src="lib/assets/button-active-rightcap.png", position = {p.ui_width-10,0}}
-		local activecenter1px = Image{src="lib/assets/button-active-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
+		local activeleftcap = assets("lib/assets/button-active-leftcap.png"):set{ position = {0,0}}
+		local activerightcap = assets("lib/assets/button-active-rightcap.png"):set{ position = {p.ui_width-10,0}}
+		local activecenter1px = assets("lib/assets/button-active-center1px.png"):set{ position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
 		active:add(activeleftcap,activecenter1px,activerightcap) 
 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
@@ -192,10 +192,6 @@ function editor_ui.button(table)
 							screen:find_child(b_group.focus[key]).on_focus_in(key)
 						end
 					else 
-					   print("b_group:grab_key_focus")
-					   print("b_group:grab_key_focus")
-					   print("b_group:grab_key_focus")
-					   print("b_group:grab_key_focus")
 					   b_group:grab_key_focus()
 					end
 				end
@@ -472,10 +468,10 @@ function editor_ui.scrollPane(t)
     local make_arrow = function(dir)
 		local arrow
 		if dir == "up" then 
-			arrow = Image{src="lib/assets/scrollbar-btn-up.png"}
+			arrow = assets("lib/assets/scrollbar-btn-up.png")
 			arrow.anchor_point={arrow.w/2,arrow.h}
 		else 
-			arrow = Image{src="lib/assets/scrollbar-btn-down.png"}
+			arrow = assets("lib/assets/scrollbar-btn-down.png")
 			arrow.anchor_point={arrow.w/2,0}
 		end 
 		return arrow
@@ -488,20 +484,20 @@ function editor_ui.scrollPane(t)
         local fill = Group{name="grip",reactive = true, }
         local shell = Group{name="track",reactive = true, }
 
-		local top= Image{src="lib/assets/scrollbar-grip-top.png", position = {0,0}}
-		local bottom= Image{src="lib/assets/scrollbar-grip-bottom.png"}
-		local handle= Image{src="lib/assets/scrollbar-grip-handle.png"}
-		local t_1px = Image{src="lib/assets/scrollbar-grip-repeat1px.png", position = {0,top.h}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2}
-		local b_1px = Image{src="lib/assets/scrollbar-grip-repeat1px.png", position = {0,top.h+t_1px.h+handle.h}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2}
+		local top= assets("lib/assets/scrollbar-grip-top.png")
+		local bottom= assets("lib/assets/scrollbar-grip-bottom.png")
+		local handle= assets("lib/assets/scrollbar-grip-handle.png")
+		local t_1px = assets("lib/assets/scrollbar-grip-repeat1px.png"):set{position = {0,top.h}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2 }
+		local b_1px = assets("lib/assets/scrollbar-grip-repeat1px.png"):set{position = {0,top.h+t_1px.h+handle.h - 1}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2 }
 
-		bottom.position={0,top.h+t_1px.h+handle.h+b_1px.h}
-		handle.position={0,top.h + t_1px.h}
+		bottom.position={0,top.h+t_1px.h+handle.h+b_1px.h - 2}
+		handle.position={0,top.h + t_1px.h - 1}
 		fill.anchor_point = {t_1px.w/2,0}
 
-		local shell_top= Image{src="lib/assets/scrollbar-track-top.png", position = {0,0}}
-		local shell_bottom= Image{src="lib/assets/scrollbar-track-bottom.png"}
-		local shell_t_1px = Image{src="lib/assets/scrollbar-track-repeat1px.png", position = {0,shell_top.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2}
-		local shell_b_1px = Image{src="lib/assets/scrollbar-track-repeat1px.png", position = {0,shell_top.h+shell_t_1px.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2}
+		local shell_top= assets("lib/assets/scrollbar-track-top.png")
+		local shell_bottom= assets("lib/assets/scrollbar-track-bottom.png")
+		local shell_t_1px = assets("lib/assets/scrollbar-track-repeat1px.png"):set{position = {0,shell_top.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2 }
+		local shell_b_1px = assets("lib/assets/scrollbar-track-repeat1px.png"):set{position = {0,shell_top.h+shell_t_1px.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2}
 
 		shell_bottom.position={0,shell_top.h+shell_t_1px.h+shell_b_1px.h}
 
@@ -1150,15 +1146,15 @@ function editor_ui.checkBoxGroup(t)
 				size = p.box_size, position = pos, reactive = true, opacity = 255}
     	        boxes:add(box, focus) 
 	     	else
-	           	focus = Image{name = "focus"..tostring(i),  src=p.box_focus_image, position = pos, reactive = true, opacity = 0}
-	           	box = Image{name = "box"..tostring(i),  src=p.box_image, position = pos, reactive = true, opacity = 255}
+	           	focus = Image {name = "focus"..tostring(i), src=p.box_focus_image, position = pos, reactive = true, opacity = 0}
+	           	box = Image {name = "box"..tostring(i), src=p.box_image, position = pos, reactive = true, opacity = 255}
 		   		boxes:add(box, focus) 
 	     	end 
 
 	      	if p.skin == "custom" then 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = true, opacity = 0}
+	     		check = assets(p.check_image):set{name="check"..tostring(i), size = p.check_size, position = pos, reactive = true, opacity = 0}
 			else 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, position = pos, reactive = true, opacity = 0}
+	     		check = assets(p.check_image):set{name="check"..tostring(i), position = pos, reactive = true, opacity = 0}
 			end
 	     	checks:add(check) 
 

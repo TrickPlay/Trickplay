@@ -114,7 +114,7 @@ local function set_new_project (pname, replace)
 	local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
     editor_lb:mkdir( lib_skins_default_path ) 
     
-	local menu_text = menu_items.menu_text -- screen:find_child("menu_text")
+	local menu_text = menu_items.menu_text 
 
 	menu_text.text = project .. " "
 	menu_text.extra.project = project .. " "
