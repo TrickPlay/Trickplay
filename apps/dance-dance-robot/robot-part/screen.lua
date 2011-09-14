@@ -15,7 +15,7 @@
 local girl_factory  = dofile("robot-part/generic-girl.lua")
 local girl_in_white = dofile("robot-part/girl-in-white.lua")(girl_factory)
 local girl_in_black = dofile("robot-part/girl-in-black.lua")(girl_factory)
- robot         = dofile("robot-part/robot.lua")
+local robot         = dofile("robot-part/robot.lua")
 local score_gauge   = dofile("robot-part/score-gauge.lua")
 local background    = dofile("robot-part/background.lua")
 local screen_border = Image { src = "/assets/robot-part/screen/FrameUI.png", width = screen.w, height = screen.h }
@@ -28,19 +28,11 @@ screen:add(screen_border)
 screen:show()
 
 local DELAY_TIME = 120
-local GOAL_COUNT = 8
-local MAX_COUNT_SCORE = GOAL_COUNT
-local score = 0
-local isEnd = false
-
-local snd_puck_bad = "/assets/robot-part/audio/puck_bad-1.mp3"
-local snd_good_effect = "/assets/robot-part/audio/"
-
 
 function screen:on_key_down(key)
     if(key == keys.OK) then
         background:jiggle(150)
-        score_gauge:set_score((score_gauge.extra.score+10) % 110 )
+        score_gauge:set_score((score_gauge.score+10) % 110 )
     elseif(key == keys.Right) then
         girl_in_black:move(key)
         dolater(DELAY_TIME, girl_in_white.move, girl_in_white, key)
