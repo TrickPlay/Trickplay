@@ -359,7 +359,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
 
     gchar * app_path = g_build_filename( context->get( TP_DATA_PATH ) , "pushed" , push_info.metadata.id.c_str() , NULL );
 
-    push_info.metadata.path = app_path;
+    push_info.metadata.sandbox = Sandbox( app_path );
 
     free_later( app_path );
 
@@ -659,11 +659,11 @@ void AppPushServer::write_file( const TargetInfo & target_info , const HttpServe
 
 void AppPushServer::launch_it( )
 {
-    tplog( "LAUNCHING FROM %s" , current_push_info.metadata.path.c_str() );
+    tplog( "LAUNCHING FROM %s" , current_push_info.metadata.sandbox.get_root_uri().c_str() );
 
     context->close_current_app();
 
-    context->launch_app( current_push_info.metadata.path.c_str() , App::LaunchInfo() , true );
+    context->launch_app( current_push_info.metadata.sandbox.get_root_uri().c_str() , App::LaunchInfo() , true );
 }
 
 //.............................................................................

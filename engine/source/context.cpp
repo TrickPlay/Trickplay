@@ -2278,9 +2278,12 @@ void TPContext::validate_configuration()
 
     if ( app_path )
     {
-    	String app_path_s = Util::canonical_external_path( app_path );
+    	String app_path_s = Util::canonical_external_path( app_path , false );
 
-    	set( TP_APP_PATH , app_path_s );
+    	if ( ! app_path_s.empty() )
+    	{
+    		set( TP_APP_PATH , app_path_s );
+    	}
     }
 
     // TP_SYSTEM_LANGUAGE
@@ -2633,12 +2636,19 @@ Image * TPContext::load_icon( const gchar * path )
     gchar * contents = NULL;
     gsize content_length = 0;
 
-    if ( !g_file_get_contents( path, &contents, &content_length, NULL ) )
+    GFile * file = g_file_new_for_commandline_arg( path );
+
+    if ( ! g_file_load_contents( file , 0 , & contents , & content_length , 0 , 0 ) )
     {
-        return NULL;
+    	g_object_unref( G_OBJECT( file ) );
+
+        return 0;
     }
 
+    g_object_unref( G_OBJECT( file ) );
+
     free_later( contents );
+
 
     //.........................................................................
     // Now, we compute an md5 hash of the contents

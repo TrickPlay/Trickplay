@@ -1204,6 +1204,19 @@ Network::Network( const Settings & _settings, EventGroup * _event_group )
 
 //.............................................................................
 
+Network::Network()
+:
+    event_group( 0 ),
+    queue( g_async_queue_new_full( Event::destroy ) ),
+    thread( 0 )
+{
+    g_assert( queue );
+
+    event_group = new EventGroup();
+}
+
+//.............................................................................
+
 Network::~Network()
 {
     if ( thread )

@@ -530,7 +530,7 @@ bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet
 
     SQLite::Statement insert( db, "insert or replace into apps (id,path,name,release,version,fingerprints,attributes) values (?1,?2,?3,?4,?5,?6,?7);" );
     insert.bind( 1, metadata.id );
-    insert.bind( 2, metadata.path );
+    insert.bind( 2, metadata.sandbox.get_root_uri() );
     insert.bind( 3, metadata.name );
     insert.bind( 4, metadata.release );
     insert.bind( 5, metadata.version );
@@ -654,7 +654,7 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
                 it->id.c_str(),
                 it->version.c_str(),
                 it->release,
-                it->path.c_str() );
+                it->sandbox.get_root_uri().c_str() );
 
         if ( ! existed )
         {

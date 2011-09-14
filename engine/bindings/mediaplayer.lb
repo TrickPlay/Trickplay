@@ -428,32 +428,31 @@ global mediaplayer [[MP*]]
     
     int load(string uri,string extra="")
         [[
-            // Normalize app path only accepts http and https by default, so we
-            // have to tell it to like others too.
+            String real_uri;
             
-            StringSet schemes;
-            schemes.insert("rtsp");
+            GFile * file = g_file_new_for_commandline_arg( uri );
             
-            bool is_uri=false;
+            if ( g_file_has_uri_scheme( file , "http" ) || g_file_has_uri_scheme( file , "https" ) || g_file_has_uri_scheme( file , "rtsp" ) )
+            {
+                gchar * u = g_file_get_uri( file );
+                real_uri = u;
+                g_free( u );
+            }
+            else
+            {
+                bool is_native;
+                real_uri = App::get(L)->get_metadata().sandbox.get_pi_child_uri( uri , is_native );  
+            }
             
-            char * path=App::get(L)->normalize_path(uri,&is_uri,schemes);
+            g_object_unref( G_OBJECT( file ) );
             
-            if (!path)
+            if ( real_uri.empty() )
             {
                 result=TP_MEDIAPLAYER_ERROR_INVALID_URI;
             }
             else
             {
-                if (!is_uri)
-                {
-                    gchar * file_uri=g_strdup_printf("file://%s",path);
-                    g_free(path);
-                    path=file_uri;
-                }
-                
-                result=self->get_player()?self->get_player()->load(path,extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-                
-                g_free(path);
+                result=self->get_player()?self->get_player()->load(real_uri.c_str(),extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             }
         ]];
         
@@ -640,32 +639,31 @@ global mediaplayer [[MP*]]
     
     int play_sound(string uri)
         [[
-            // Normalize app path only accepts http and https by default, so we
-            // have to tell it to like others too.
+            String real_uri;
             
-            StringSet schemes;
-            schemes.insert("rtsp");
+            GFile * file = g_file_new_for_commandline_arg( uri );
             
-            bool is_uri=false;
+            if ( g_file_has_uri_scheme( file , "http" ) || g_file_has_uri_scheme( file , "https" ) || g_file_has_uri_scheme( file , "rtsp" ) )
+            {
+                gchar * u = g_file_get_uri( file );
+                real_uri = u;
+                g_free( u );
+            }
+            else
+            {
+                bool is_native;
+                real_uri = App::get(L)->get_metadata().sandbox.get_pi_child_uri( uri , is_native );  
+            }
             
-            char * path=App::get(L)->normalize_path(uri,&is_uri,schemes);
-            
-            if (!path)
+            g_object_unref( G_OBJECT( file ) );
+
+            if ( real_uri.empty() )
             {
                 result=TP_MEDIAPLAYER_ERROR_INVALID_URI;
             }
             else
             {
-                if (!is_uri)
-                {
-                    gchar * file_uri=g_strdup_printf("file://%s",path);
-                    g_free(path);
-                    path=file_uri;
-                }
-                
-                result=self->get_player()?self->get_player()->play_sound(path):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-                
-                g_free(path);
+                result=self->get_player()?self->get_player()->play_sound(real_uri.c_str()):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             }
         ]];
 

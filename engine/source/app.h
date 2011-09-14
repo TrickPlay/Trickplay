@@ -8,8 +8,10 @@
 #include "event_group.h"
 #include "debugger.h"
 #include "images.h"
+#include "sandbox.h"
 
 #define APP_METADATA_FILENAME   "app"
+#define APP_MAIN_FILENAME		"main.lua"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -79,7 +81,8 @@ public:
 
         Metadata() : release( 0 ) {}
 
-        String      path;
+        Sandbox		sandbox;
+
         String      id;
         String      name;
         int         release;

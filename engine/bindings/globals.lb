@@ -199,7 +199,6 @@ String hmac( GChecksumType type , const void * key , gsize key_len , const void 
 	return result;	
 }
 
-
 ]]
 
 /*
@@ -254,25 +253,26 @@ globals
     
     multi dofile(string file_name)
         [[
-            bool is_uri=false;
-            char * path=App::get(L)->normalize_path(file_name,&is_uri);
-
-            FreeLater free_later(path);
+            String path;
             
-            if (!path || is_uri)
+            if ( g_str_has_suffix( file_name , ".lua" ) )
             {
-                return luaL_error(L,"Invalid path '%s'",file_name);
+                path = file_name;
+            }
+            else
+            {
+                gchar * p = g_strdup_printf( "%s.lua" , file_name );
+                path = p;
+                g_free( p );
             }
             
-            if (!g_str_has_suffix(path,".lua"))
-            {
-            	path = g_strdup_printf( "%s.lua",path);
-            	free_later( path );
-            }
+            App * app = App::get( L );
             
             int n = lua_gettop(L);
-            if (luaL_loadfile(L,path) != 0)
+            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) != 0)
+            {
                 lua_error(L);
+            }
             lua_call(L,0,LUA_MULTRET);
             return lua_gettop(L) - n;            
         ]];
@@ -295,25 +295,22 @@ globals
     
     multi loadfile(string file_name)
         [[
-            bool is_uri=false;
-            char * path=App::get(L)->normalize_path(file_name,&is_uri);
+            String path;
             
-            FreeLater free_later(path);
-                        
-            if (!path || is_uri)
+            if ( g_str_has_suffix( file_name , ".lua" ) )
             {
-                lua_pushnil(L);
-                lua_pushfstring(L,"Invalid path '%s'",file_name);
-                return 2;
+                path = file_name;
             }
-            
-            if (!g_str_has_suffix(path,".lua"))
+            else
             {
-            	path = g_strdup_printf( "%s.lua",path);
-            	free_later( path );
+                gchar * p = g_strdup_printf( "%s.lua" , file_name );
+                path = p;
+                g_free( p );
             }
 
-            if (luaL_loadfile(L,path)==0)
+            App * app = App::get( L );
+            
+            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) == 0)
             {
                 return 1;
             }
@@ -343,29 +340,21 @@ globals
     
 	lstring readfile(string file_name )
 		[[
-			result = NULL;
+			result = 0;
 			result_len = 0;
-			
-            bool is_uri=false;
+
+            gsize length = 0;
+            gchar * contents = App::get( L )->get_metadata().sandbox.get_pi_child_contents( file_name , length );
             
-            char * path=App::get(L)->normalize_path(file_name,&is_uri);
+            FreeLater free_later;
             
-            FreeLater free_later(path);
-            
-            if ( path && ! is_uri )
+            if ( contents )
             {
-            	gsize length = 0;
-            	
-            	gchar * contents = NULL;
-            	
-            	if ( g_file_get_contents( path, & contents, & length, NULL ) )
-            	{
-            		result = contents;
-            		result_len = length;
-            		
-            		free_later( contents );
-            	} 
-            }                        
+                free_later( contents );
+                
+                result = contents;
+                result_len = length;
+            }
 		]];       
         
     /*
