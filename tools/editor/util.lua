@@ -77,6 +77,10 @@ end
 
 function util.table_remove_val(t, val)
 
+	if t == nil then 
+		return 
+	end 
+
 	for i,j in pairs (t) do
 		if j == val then 
 		     table.remove(t, i)

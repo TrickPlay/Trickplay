@@ -7,11 +7,11 @@ local g_init_y = 0
 
 local menuButtonView 
 
-local allUiElements     = { 
-						 	"Rectangle", "Text", "Image", "Video", "Button", "TextInput", "DialogBox", "ToastAlert", 
-						 	"CheckBoxGroup", "RadioButtonGroup", "ButtonPicker", "ProgressSpinner", "ProgressBar", 
-						 	"MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane"
-					      }
+local allUiElements     = {
+							"ArrowPane", "Button", "ButtonPicker", "CheckBoxGroup","DialogBox","Image", "LayoutManager",
+							"MenuButton", "ProgressBar","ProgressSpinner", "RadioButtonGroup", "Rectangle", "ScrollPane", 
+							"TabBar",  "Text",  "TextInput", "ToastAlert", "Video"
+						  }
 
 local engineUiElements  = { 
 							"Rectangle", "Text", "Image", "Video" 
@@ -525,7 +525,7 @@ local function open_files(input_purpose, bg_image, inspector)
 	local title = Text{name = "title", text = "Open File"}:set(STYLE)
 	local title_shadow = Text {name = "title", text = "Open File"}:set(SSTYLE)
 
-	local selected_file 
+	local selected_file, ss, nn 
 	local virtual_hieght = 0
 	local dir 
 	
@@ -591,7 +591,7 @@ local function open_files(input_purpose, bg_image, inspector)
 	end 
 
 	-- Scroll	
-	local scroll = editor_ui.scrollPane{virtual_h = virtual_hieght}
+	local scroll = editor_ui.scrollPane{virtual_h = virtual_hieght }
 
 	editor_use = true
 	-- Buttons 
@@ -607,6 +607,8 @@ local function open_files(input_purpose, bg_image, inspector)
 	
 	if inspector then 
 		button_ok.pressed = function() 
+			if ss == selected_file then selected_file = nn end 
+
 			local f_name = screen:find_child("file_name") 
 			if f_name then 
 				if selected_file then 
@@ -627,6 +629,9 @@ local function open_files(input_purpose, bg_image, inspector)
 		end
 	else 
 		button_ok.pressed = function() 
+
+			if ss == selected_file then selected_file = nn end 
+
 			if input_purpose == "open_luafile" then
 				undo_list = {} 
 				if editor.close(true) ~= "-1" then 
@@ -730,7 +735,7 @@ local function open_files(input_purpose, bg_image, inspector)
 			item_t.extra.rect = h_rect.name
 			item_ts.position =  {cur_w-1, cur_h-1}
 			item_ts.extra.rect = h_rect.name
-			h_rect.position =  {cur_w - 12, cur_h-1}
+			h_rect.position =  {cur_w - 12, cur_h-3}
 	
     		item_t.name = v
     		item_t.reactive = true
@@ -774,7 +779,14 @@ local function open_files(input_purpose, bg_image, inspector)
         	end 
 			function h_rect:on_key_down(key)
 
-				local key_focus_obj = msgw:find_child(h_rect.focus[key]) 
+				local key_focus_obj
+
+				if h_rect.focus[key] then 
+					key_focus_obj = msgw:find_child(h_rect.focus[key]) 
+				else 
+					return true
+				end 
+
 				if h_rect.focus[key] then
 					if type(h_rect.focus[key]) == "function" then
 						h_rect.focus[key]()
@@ -784,6 +796,14 @@ local function open_files(input_purpose, bg_image, inspector)
 						end
 						if key_focus_obj.on_focus_in then
 							selected_file = v
+
+							ss = v
+							nn = dir[ i + 1 ] 
+
+							if key == keys.Return then 
+								ss = nil 
+							end 
+
 							key_focus_obj.on_focus_in(key)
 							if h_rect.focus[key] ~= "button_ok" then 
 								scroll.seek_to_middle(0,key_focus_obj.y) 
@@ -797,7 +817,7 @@ local function open_files(input_purpose, bg_image, inspector)
 	end 
 
 	end
-	scroll.virtual_h = virtual_hieght
+	scroll.virtual_h = virtual_hieght + 25
 	if scroll.virtual_h <= scroll.visible_h then 
 		scroll.visible_w = 300
 	end 
@@ -1203,10 +1223,11 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
 		screen_ui.n_selected(v)
-		screen:remove(inspector)
+		if screen:find_child("inspector") then 
+			screen:remove(inspector)
+		end 
 		inspector:clear() 
 		current_inspector = nil
-			
        	for i, c in pairs(g.children) do
 		    if(c.type == "Text") then 
 				c.reactive = true
@@ -1294,7 +1315,6 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	    done_list = d_list
 	    todo_list = t_list
 	end
-
 	if(g.extra.video ~= nil) then
 		contents = contents..util.itemTostring(g.extra.video)
 	end 
@@ -1515,7 +1535,6 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	local message = Text {text = "File Name:"}:set(MSTYLE)
 	local message_shadow = Text {text = "File Name:"}:set(MSSTYLE)
 
-		
 	if restore_fn ~= "" then 
 		current_fn = "screens/"..restore_fn
 	end 
@@ -2989,13 +3008,15 @@ function editor.hspace()
     x_sort_t = get_x_sort_t()
     reverse_t = get_reverse_t(x_sort_t)
 
+--[[
     for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
 			--screen_ui.n_selected(v)
-		end 
+			end 
           end
     end
+]]
 
     f = table.remove(reverse_t)
     while(table.getn(reverse_t) ~= 0) do  
@@ -3303,7 +3324,7 @@ function editor.ui_elements()
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title = Text{name = "title", text = "UI Elements"}:set(STYLE)
 	local title_shadow = Text {name = "title", text = "UI Elements"}:set(SSTYLE)
-	local selected_ui_element 
+	local selected_ui_element, ss, nn
 
 	local function load_ui_element(v)
 		if v == nil then 
@@ -3332,7 +3353,7 @@ function editor.ui_elements()
 	end 
 
 	-- Scroll	
-	local scroll = editor_ui.scrollPane{virtual_h = 380}
+	local scroll = editor_ui.scrollPane{virtual_h = 407}
 
 	-- Buttons 
     local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
@@ -3342,7 +3363,7 @@ function editor.ui_elements()
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() load_ui_element(selected_ui_element) end
+	button_ok.pressed = function() if ss == selected_ui_element then selected_ui_element = nn end load_ui_element(selected_ui_element) end
 	
 	local s_func = function()
 		if current_focus then 
@@ -3411,7 +3432,7 @@ function editor.ui_elements()
 		widget_t.extra.rect = h_rect.name
 		widget_ts.position =  {cur_w-1, cur_h-1}
 		widget_ts.extra.rect = h_rect.name
-		h_rect.position =  {cur_w - 12, cur_h-1}
+		h_rect.position =  {cur_w - 12, cur_h-3}
 
     	widget_t.name = v
     	widget_t.reactive = true
@@ -3464,6 +3485,11 @@ function editor.ui_elements()
 					--screen:find_child(h_rect.focus[key]):grab_key_focus()
 					if screen:find_child(h_rect.focus[key]).on_focus_in then
 						selected_ui_element = v
+						ss = v
+						nn = allUiElements[i+1]
+						if key == keys.Return then 
+								ss = nil 
+						end 
 						screen:find_child(h_rect.focus[key]).on_focus_in(key)
 						if h_rect.focus[key] ~= "button_ok" then 
 							scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
@@ -3495,16 +3521,19 @@ function editor.ui_elements()
 		if x then 
 	    	input_mode = hdr.S_SELECT
 		end 
+		--[[
 		if textUIElement == nil then 
 			screen.grab_key_focus(screen) 
 		end
+		]]
+		screen.grab_key_focus(screen) 
 		return true
 	end 
 
 end 
 
 local error_msg_map = {
-	["001"] = function(str) return "Open", "Cancel", "", "","A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
+	["001"] = function(str) return "Open", "Cancel", "Error", "","A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
  	["002"] = function(str) return "OK", "Cancel", "", "", "Before saving the screen, a project must be open." end,
  	["003"] = function(str) return "Save","Cancel", "", "", "You have unsaved changes. Save the file before closing?" end, 					
  	["004"] = function(str) return "Overwrite","Cancel", "", "", "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
@@ -3573,8 +3602,6 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 	editor_use = false
 	
-	button_ok:grab_key_focus() 
-
 
 	-- Button Event Handlers
 	if Cancel_label ~= "" then 
@@ -3650,11 +3677,39 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		msgw:add(button_nok) 
  	end 
 
+	button_ok:grab_key_focus() 
+	function button_cancel:on_key_down(key)
+		if key == keys.Return then 
+			button_cancel.pressed()
+		elseif (key == hdr.Tab and shift == false) or key == keys.Right then 
+			button_cancel.on_focus_out()
+			button_ok.on_focus_in()
+		elseif (key == hdr.TabLeft and shift == true) or key == keys.Left then 
+			if button_nok then 
+				button_cancel.on_focus_out()
+				button_nok.on_focus_in()
+			end
+		end 
+		return true
+	end 
+
+	function button_ok:on_key_down(key)
+		if key == keys.Return then 
+			button_ok.pressed()
+		elseif (key == hdr.TabLeft and shift == true) or key == keys.Left then 
+			button_ok.on_focus_out()
+			button_cancel.on_focus_in()
+		end 
+		return true
+	end 
+
 	msgw.extra.lock = false
  	screen:add(msgw)
+
+	button_ok:grab_key_focus() 
+
 	util.create_on_button_down_f(msgw)	
 
-	
 	-- Focus 
 	ti_func()
 
@@ -3671,7 +3726,6 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		return true
 	end 
 
-	button_ok:grab_key_focus() 
 	return msgw
 end
 

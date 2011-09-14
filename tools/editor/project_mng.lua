@@ -66,7 +66,7 @@ local function set_new_project (pname, replace)
 			for i, j in pairs (projects) do 
 				if j == pname then 
 					if replace == nil then 
-						if j ~= "unsaved_temp" then 
+						if j ~= "unsaved_project" then 
 							editor.error_message("001", pname, set_new_project)  
 							return 
 					    end
@@ -294,7 +294,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title = Text{name = "title", text = "Open Project"}:set(STYLE)
 	local title_shadow = Text {name = "title", text = "Open Project"}:set(SSTYLE)
-	local selected_project
+	local selected_project, ss, nn
 	
 	local func_ok = function() 
 		editor.save(true,nil,project_mng.open_project,{nil,nil,nil,true})
@@ -326,13 +326,13 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     -- directories.
     local list = editor_lb:readdir( base )
     
-    if table.getn(projects) == 0 then 
-    	for i = 1 , # list do
-        	if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
+    for i = 1 , #list do
+        if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
+			if util.is_in_list(list[ i ], projects) == false then 
             	table.insert( projects , list[ i ])
-        	end
-    	end
-    end 
+			end 
+        end
+    end
     
     input_mode = hdr.S_POPUP
 
@@ -374,10 +374,9 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
 		load_project(settings.project)
 
-		if dir then 
-			local dir = editor_lb:readdir(current_dir.."/screens")
+		local dir = editor_lb:readdir(current_dir.."/screens")
 
-			for i, v in pairs(dir) do
+		for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
 					if readfile("screens/"..v) ~= "" then 
 						msg_window.inputMsgWindow_openfile(v) 
@@ -385,12 +384,11 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 						current_fn = "" 
 					end 
 				end 
-			end 
-		end
+		end 
 		return 
 	elseif from_main then 
 
-		set_new_project("unsaved_temp")
+		set_new_project("unsaved_project")
 		editor.close(true)
 
 		return 
@@ -413,7 +411,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	-- Button Event Handlers
 	button_new.pressed = function() xbox:on_button_down(1)  project_mng.new_project() end
 	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() load_project(selected_project) end
+	button_ok.pressed = function() if selected_project == ss then selected_project = nn end load_project(selected_project) end
 	
 	local s_func = function()
 		if current_focus then 
@@ -475,7 +473,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
     for i, v in pairs(projects) do 
 
-		virtual_hieght = virtual_hieght + 22
+		virtual_hieght = virtual_hieght + 22 
 
 		local project_t, project_ts = make_msgw_project_item(v)
 		local h_rect = Rectangle{border_width = 1, border_color = {0,0,0,255}, name="h_rect", color="#a20000", size = {298, 22}, reactive = true, opacity=0}
@@ -492,7 +490,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		project_t.extra.rect = h_rect.name
 		project_ts.position =  {cur_w-1, cur_h-1}
 		project_ts.extra.rect = h_rect.name
-		h_rect.position =  {cur_w - 12, cur_h-1}
+		h_rect.position =  {cur_w - 12, cur_h-3}
 
     	project_t.name = v
     	project_t.reactive = true
@@ -545,6 +543,12 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 					--screen:find_child(h_rect.focus[key]):grab_key_focus()
 					if screen:find_child(h_rect.focus[key]).on_focus_in then
 						selected_project = v
+						ss = v
+						nn = projects[ i + 1] 
+						if key == keys.Return then 
+							ss = nil 
+						end 
+
 						screen:find_child(h_rect.focus[key]).on_focus_in(key)
 						if h_rect.focus[key] ~= "button_ok" then 
 							scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
@@ -556,7 +560,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		end
 	end
 	
-	scroll.virtual_h = virtual_hieght
+	scroll.virtual_h = virtual_hieght + 25
 	if scroll.virtual_h <= scroll.visible_h then 
 			scroll.visible_w = 300
 	end 
