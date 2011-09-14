@@ -823,6 +823,9 @@ function inspector_apply (v, inspector)
 
     if(v.name ~= "video1") then 
     	table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
+		vvv = v
+		aaa = org_object
+		bbb = new_object
     end 
 		
     return org_object, new_object

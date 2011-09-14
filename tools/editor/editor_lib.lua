@@ -114,7 +114,7 @@ function editor_ui.button(table)
 		active:add(activeleftcap,activecenter1px,activerightcap) 
 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
-        text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
+        text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2 - 1}}
 	
 		b_group:add(button, active, focus)
 
@@ -129,7 +129,7 @@ function editor_ui.button(table)
                     font  = p.text_font,
                     color = {0,0,0,255/2},
                     x= (p.ui_width  -text.w)/2 - 1,
-                    y= (p.ui_height - text.h)/2 - 1,
+                    y= (p.ui_height - text.h)/2 - 2,
             }
             s_txt.anchor_point={0,s_txt.h/2}
             s_txt.y = s_txt.y+s_txt.h/2
@@ -488,9 +488,9 @@ function editor_ui.scrollPane(t)
 		local bottom= assets("lib/assets/scrollbar-grip-bottom.png")
 		local handle= assets("lib/assets/scrollbar-grip-handle.png")
 		local t_1px = assets("lib/assets/scrollbar-grip-repeat1px.png"):set{position = {0,top.h}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2 }
-		local b_1px = assets("lib/assets/scrollbar-grip-repeat1px.png"):set{position = {0,top.h+t_1px.h+handle.h - 1}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2 }
+		local b_1px = assets("lib/assets/scrollbar-grip-repeat1px.png"):set{position = {0,top.h+t_1px.h+handle.h - 2}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2 }
 
-		bottom.position={0,top.h+t_1px.h+handle.h+b_1px.h - 2}
+		bottom.position={0,top.h+t_1px.h+handle.h+b_1px.h - 3}
 		handle.position={0,top.h + t_1px.h - 1}
 		fill.anchor_point = {t_1px.w/2,0}
 

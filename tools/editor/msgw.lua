@@ -152,7 +152,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
 	   		end 
             contents = ""
-            screen:grab_key_focus(screen) 
+            --screen:grab_key_focus(screen) 
       end
       menu.menu_raise_to_top()
 
