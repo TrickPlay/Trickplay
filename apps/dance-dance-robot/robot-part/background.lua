@@ -22,6 +22,7 @@ path:line_to( SCREEN_JIGGLE_DISTANCE, SCREEN_JIGGLE_DISTANCE * 1/4)
 path:line_to(0, 0)
 
 background.extra.jiggle = function(self,duration)
+        mediaplayer:play_sound("assets/robot-part/audio/Robot_Landing.mp3")
         timeline.duration = duration
         function timeline:on_new_frame(msecs, progress)
             background.position = path:get_position(alpha.alpha)

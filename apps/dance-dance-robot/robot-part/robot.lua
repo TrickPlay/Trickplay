@@ -188,14 +188,32 @@ robot.extra.sequence = {
                             'crouch'
                         }
 robot.extra.current_pos = 1
+
+-- Dummy callback which should be replaced by caller
+function robot.extra:score_callback()
+    print("You're supposed to replace this function with something that records a score")
+end
+
+local did_collide = false
+function robot.extra:collision()
+    mediaplayer:play_sound("assets/robot-part/audio/puck_bad-1.mp3")
+    did_collide = true
+end
+
 function robot.extra:next_position()
     robot.extra.current_pos = (robot.current_pos % #robot.sequence) + 1
     robot.states.state = robot.sequence[robot.current_pos]
     if(robot.sequence[robot.current_pos] == "hover") then
         robot:hover()
+    elseif(robot.sequence[robot.current_pos] == "jump") then
+        mediaplayer:play_sound("assets/robot-part/audio/Robot_Takeoff.mp3")
+        did_collide = false
     end
 end
 function robot.states:on_completed()
+    if(not did_collide and robot.current_pos == #robot.sequence) then
+        robot:score_callback()
+    end
     robot:next_position()
 end
 
