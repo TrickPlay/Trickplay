@@ -53,7 +53,7 @@ ui_element.populate_to(groups["ui2"],layout["ui2"]) -- Populate the elements int
 -- UI2.BUTTON0 SECTION
 
 layout["ui2"].button0.pressed = function() -- Handler for button0.pressed in this screen
-	dofile("packages/acceptance_unit_tests/acceptance_main.lua")
+	dofile("packages/engine_unit_tests/acceptance_main.lua")
 end
 layout["ui2"].button0.released = function() -- Handler for button0.released in this screen
 end
