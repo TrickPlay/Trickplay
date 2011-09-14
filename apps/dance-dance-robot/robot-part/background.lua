@@ -1,6 +1,6 @@
 local SCREEN_JIGGLE_DISTANCE = 10
 
-local background = Image { src = "/assets/robot-part/screen/Background.jpg" }
+local background = Image { src = "assets/robot-part/screen/Background.jpg" }
 
 local ratio = (screen.h + SCREEN_JIGGLE_DISTANCE) / background.h
 
