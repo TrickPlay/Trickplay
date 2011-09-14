@@ -54,16 +54,17 @@ end
 local girl_move = function(girl, direction)
     if(not girl.interactive) then return end
     local left_right = 0
+    local sensor = girl.collision_sensor
     if(direction == keys.Left) then
         if(girl.y_rotation[1] == 0) then
-            girl:find_child("collision_sensor").y_rotation = { 180, girl:find_child("collision_sensor").w/2, 0 }
+            sensor.y_rotation = { 180, sensor.w/2, 0 }
             girl.y_rotation = { 180, 0, 0 }
             girl.extra.target_x = girl.x
         end
         left_right = -1
     else
         if(girl.y_rotation[1] == 180) then
-            girl:find_child("collision_sensor").y_rotation = { 0, girl:find_child("collision_sensor").w/2, 0 }
+            sensor.y_rotation = { 0, sensor.w/2, 0 }
             girl.y_rotation = { 0, 0, 0 }
             girl.extra.target_x = girl.x
         end
@@ -130,14 +131,16 @@ local girl_factory = function(images)
         img:hide()
     end
 
-    the_girl:add( Rectangle {
+    the_girl.extra.collision_sensor = Rectangle {
                                 name = "collision_sensor",
                                 size = { 200, 500 },
                                 position = { -100, -500 },
                                 color = { 198, 28, 111 },
                                 opacity = 0,
                             }
-            )
+
+
+    the_girl:add(the_girl.extra.collision_sensor)
 
     -- Hook up movement functions
     the_girl.extra.move = girl_move

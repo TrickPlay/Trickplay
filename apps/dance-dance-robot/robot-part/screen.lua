@@ -46,17 +46,21 @@ function screen:on_key_down(key)
 end
 
 function check_collision(a,b)
-    local a = a:find_child("collision_sensor")
-    local min_x_a = a.transformed_position[1]
-    local max_x_a = min_x_a + a.transformed_size[1]
-    local min_y_a = a.transformed_position[2]
-    local max_y_a = min_y_a + a.transformed_size[2]
+    local a = a.collision_sensor
+    local a_tp = a.transformed_position
+    local a_ts = a.extra.transformed_size
+    local min_x_a = a_tp[1]
+    local max_x_a = min_x_a + a_ts[1]
+    local min_y_a = a_tp[2]
+    local max_y_a = min_y_a + a_ts[2]
 
-    local b = b:find_child("collision_sensor")
-    local min_x_b = b.transformed_position[1]
-    local max_x_b = min_x_b + b.transformed_size[1]
-    local min_y_b = b.transformed_position[2]
-    local max_y_b = min_y_b + b.transformed_size[2]
+    local b = b.collision_sensor
+    local b_tp = b.transformed_position
+    local b_ts = b.extra.transformed_size
+    local min_x_b = b_tp[1]
+    local max_x_b = min_x_b + b_ts[1]
+    local min_y_b = b_tp[2]
+    local max_y_b = min_y_b + b_ts[2]
     
     if( min_x_a > max_x_b ) then
         -- A is fully to the right of b
@@ -74,6 +78,14 @@ function check_collision(a,b)
         return true
     end
 end
+
+-- Cache the transformed_size to save those calls in on_idle
+local function ts_store()
+    robot.collision_sensor.extra.transformed_size = robot.collision_sensor.transformed_size
+    girl_in_white.collision_sensor.extra.transformed_size = girl_in_white.collision_sensor.transformed_size
+    girl_in_black.collision_sensor.extra.transformed_size = girl_in_white.collision_sensor.extra.transformed_size
+end
+dolater(ts_store)
 
 function idle:on_idle(secs)
     if(girl_in_white.interactive and check_collision(robot,girl_in_white)) then

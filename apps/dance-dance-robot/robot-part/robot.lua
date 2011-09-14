@@ -59,15 +59,13 @@ Right_Hand.z_rotation = { 0, 0, 0 }
 local Shadow = Image { name = "Shadow", src = "assets/robot-part/robot/Shadow.png" }
 Shadow:move_anchor_point(Shadow.w/2, Shadow.h/2)
 
-local collision_sensor = Rectangle {
+robot.extra.collision_sensor = Rectangle {
                                         name = "collision_sensor",
                                         size = { 600, 800 },
                                         position = { 0, 200 },
                                         color = { 198, 28, 111 },
                                         opacity = 0,
                                     }
-
-robot.extra = {}
 
 robot.extra.states = AnimationState( {
                                         duration = 200,
@@ -276,7 +274,7 @@ robot:add(Right_Foot)
 robot:add(Right_Lower_Leg)
 robot:add(Right_Thigh)
 robot:add(Right_Hand)
-robot:add(collision_sensor)
+robot:add(robot.collision_sensor)
 
 robot.scale = { 1/2, 1/2 }
 robot.position = { robot_x_positions[2], 440 }
