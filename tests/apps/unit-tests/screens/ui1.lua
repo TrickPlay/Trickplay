@@ -45,7 +45,7 @@ local button0 = ui_element.button
 		ui_width = 400,
 		ui_height = 60,
 		skin = "default",
-		label = "Acceptance Tests",
+		label = "Engine Tests",
 		focus_color = {27,145,27,255},
 		text_color = {255,255,255,255},
 		text_font = "DejaVu Sans 30px",
@@ -223,7 +223,7 @@ local text11 = Text
 	{
 		color = {255,255,255,255},
 		font = "DejaVu Sans 30px",
-		text = "Acceptance Tests - Comprehensive set of API tests that verify that strings, tables or boolean values are returned. \n\niPhone Controller Tests - Similar to the Acceptance Unit tests except this set of tests only hits the controller APIs. You need to have an iPhone or similar suppported Trickplay device to run these tests.",
+		text = "Engine Tests - Comprehensive set of API tests that verify that strings, tables or boolean values are returned. \n\niPhone Controller Tests - Similar to the Acceptance Unit tests except this set of tests only hits the controller APIs. You need to have an iPhone or similar suppported Trickplay device to run these tests.",
 		editable = true,
 		wants_enter = true,
 		wrap = true,
