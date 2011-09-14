@@ -61,8 +61,8 @@ Shadow:move_anchor_point(Shadow.w/2, Shadow.h/2)
 
 local collision_sensor = Rectangle {
                                         name = "collision_sensor",
-                                        size = { 1000, 800 },
-                                        position = { -400, 200 },
+                                        size = { 600, 800 },
+                                        position = { 0, 200 },
                                         color = { 198, 28, 111 },
                                         opacity = 0,
                                     }
