@@ -193,11 +193,66 @@ robot.extra.current_pos = 1
 function robot.extra:next_position()
     robot.extra.current_pos = (robot.current_pos % #robot.sequence) + 1
     robot.states.state = robot.sequence[robot.current_pos]
+    if(robot.sequence[robot.current_pos] == "hover") then
+        robot:hover()
+    end
 end
 function robot.states:on_completed()
     robot:next_position()
 end
 
+local robot_x_positions = {
+                                screen.w  * 2/10,
+                                screen.w  * 1/2,
+                                screen.w  * 8/10
+                            }
+
+function robot.extra:hover()
+    local sequence = {
+                        math.random(1,3),
+                        math.random(1,3),
+                        math.random(1,3),
+                        math.random(1,3)
+                    }
+    local cur = 1
+
+    local animator = AnimationState( {
+                                    duration = 600,
+                                    transitions = {
+                                                    {
+                                                        source = "*",
+                                                        target = "1",
+                                                        keys = {
+                                                            { self, "x", "EASE_IN_OUT_SINE", robot_x_positions[1], 0, 0 },
+                                                        },
+                                                    },
+                                                    {
+                                                        source = "*",
+                                                        target = "2",
+                                                        keys = {
+                                                            { self, "x", "EASE_IN_OUT_SINE", robot_x_positions[2], 0, 0 },
+                                                        },
+                                                    },
+                                                    {
+                                                        source = "*",
+                                                        target = "3",
+                                                        keys = {
+                                                            { self, "x", "EASE_IN_OUT_SINE", robot_x_positions[3], 0, 0 },
+                                                        },
+                                                    },
+                                                },
+                                })
+    animator.on_completed = function()
+        cur = cur + 1
+        if(cur <= #sequence) then
+            animator.state = sequence[cur]
+        else
+            cur = 1
+        end
+    end
+
+    animator.state = math.random(1,3)
+end
 
 robot.states:warp(robot.sequence[robot.current_pos])
 robot:next_position()
@@ -224,7 +279,7 @@ robot:add(Right_Hand)
 robot:add(collision_sensor)
 
 robot.scale = { 1/2, 1/2 }
-robot.position = { screen.w/2, 440 }
+robot.position = { robot_x_positions[2], 440 }
 
 
 return robot
