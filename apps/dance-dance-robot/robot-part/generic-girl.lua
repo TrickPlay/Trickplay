@@ -52,6 +52,7 @@ function animation_ticker:on_timer()
 end
 
 local girl_move = function(girl, direction)
+    if(not girl.interactive) then return end
     local left_right = 0
     if(direction == keys.Left) then
         if(girl.y_rotation[1] == 0) then
@@ -80,6 +81,7 @@ local girl_move = function(girl, direction)
 end
 
 local girl_roll = function(girl)
+    if(not girl.interactive) then return end
     local left_right = 0
     if(girl.y_rotation[1] == 0) then
         left_right = 1
@@ -95,6 +97,21 @@ local girl_roll = function(girl)
     -- one running frame per 1/20th of the screen width traveled
     local duration = 1+ GIRL_ANIMATION_FRAME_RATE*20 * math.abs(girl.x-girl.target_x)/screen.w
     girl:animate({ duration = duration, x = girl.target_x, on_completed = function() girl:go_to_state("runToStop1") end })
+end
+
+local girl_knockdown = function(girl)
+    if(not girl.interactive) then return end
+    girl.extra.interactive = false
+    local left_right = 0
+    if(girl.y_rotation[1] == 0) then
+        left_right = 1
+    else
+        left_right = -1
+    end
+
+    girl:animate({ duration = GIRL_ANIMATION_FRAME_RATE*5, x = girl.x - 350, on_completed = function() girl.extra.interactive=true end })
+
+    girl:go_to_state('knockdown1')
 end
 
 animation_ticker:start()
@@ -125,6 +142,8 @@ local girl_factory = function(images)
     -- Hook up movement functions
     the_girl.extra.move = girl_move
     the_girl.extra.roll = girl_roll
+    the_girl.extra.knock_down = girl_knockdown
+    the_girl.extra.interactive = true
 
     -- Start the girl in idle position 1 and schedule her for animation
     the_girl.extra.images.idle1:show()

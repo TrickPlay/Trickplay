@@ -84,11 +84,11 @@ function check_collision(a,b)
 end
 
 function idle:on_idle(secs)
-    if(check_collision(robot,girl_in_white)) then
-        print("White girl hit robot")
+    if(girl_in_white.interactive and check_collision(robot,girl_in_white)) then
+        girl_in_white:knock_down()
     end
     
-    if(check_collision(robot,girl_in_black)) then
-        print("Black girl hit robot")
+    if(girl_in_black.interactive and check_collision(robot,girl_in_black)) then
+        girl_in_black:knock_down()
     end
 end
