@@ -1715,7 +1715,7 @@ interface actor [[ClutterActor*]]
 	
 	The animate() function performs an asynchronous animation by changing one or more property values, such as X, Y coordinates, opacity and rotation, over a period of time.
 	
-	If the object's animate() function is called while an animation is already in progress, the animation is updated with the new settings.
+	If the object's animate() function is called while an animation is already in progress, the running animation is terminated immediately, all its animating properties are set to their ending values, and the new animation begins.
 	
 	A program can be notified when the animation completes by specifying a function name for the on_completed argument.
 	
