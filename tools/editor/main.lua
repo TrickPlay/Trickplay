@@ -143,8 +143,9 @@
 
     function main()
 
+		-- settings.project = nil 
+
 		-- to activate mouse handlers 
-		
     	if controllers.start_pointer then 
   			controllers:start_pointer()
     	end
