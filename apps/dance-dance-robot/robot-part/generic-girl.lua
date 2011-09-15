@@ -90,13 +90,14 @@ local girl_roll = function(girl)
         left_right = -1
     end
 
-    girl.extra.target_x = math.min(math.max(girl.target_x+(left_right*GIRL_MOVE_DISTANCE),girl.MIN_X),girl.MAX_X)
+    -- Rol 1.5x running speed
+    girl.extra.target_x = math.min(math.max(girl.target_x+(left_right*GIRL_MOVE_DISTANCE*1.5),girl.MIN_X),girl.MAX_X)
 
     if(not girl_animation_list[girl]:find("roll")) then
         girl:go_to_state("roll1")
     end
-    -- one running frame per 1/20th of the screen width traveled
-    local duration = 1+ GIRL_ANIMATION_FRAME_RATE*20 * math.abs(girl.x-girl.target_x)/screen.w
+    -- one rolling frame per 1/15th of the screen width traveled
+    local duration = 1+ GIRL_ANIMATION_FRAME_RATE*10 * math.abs(girl.x-girl.target_x)/screen.w
     girl:animate({ duration = duration, x = girl.target_x, on_completed = function() girl:go_to_state("runToStop1") end })
 end
 
