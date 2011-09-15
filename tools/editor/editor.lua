@@ -2086,26 +2086,6 @@ function dup_function (v, from_dup_f)
 
     dup_obj.name = dup_obj.name..tostring(item_num)
 
---[[
-    if next_position then 
-		if from_dup_f == nil then 
-    		dup_obj.extra.position = {v.x, v.y}
-        	dup_obj.position = next_position
-		elseif util.is_this_widget(v) == true then 
-        	dup_obj.extra.position = {v.x, v.y}
-        	dup_obj.position = {v.x, v.y}
-		end 
-    else 
-		if from_dup_f == nil then 
-        	dup_obj.extra.position = {v.x, v.y}
-        	dup_obj.position = {v.x + 20, v.y +20}
-		elseif util.is_this_widget(v) == true then 
-        	dup_obj.extra.position = {v.x, v.y}
-        	dup_obj.position = {v.x, v.y}
-		end 
-    end 
-]]
-
 	if util.is_this_widget(v) == true and from_dup_f ~= nil then 
        	dup_obj.position = {v.x, v.y}
 	elseif next_position and from_dup_f == nil then  
@@ -2177,11 +2157,8 @@ function editor.duplicate()
 	for i, v in pairs(g.children) do
 	    if(v.extra.selected == true) then
 			
-			print("editor.duplicate", v.name) 
-
 		    if ui.dup then
 		    	if ui.dup.name == v.name then 
-					print ("ui.dup is not null", v.name)
 					next_position = {2 * v.x - ui.dup.extra.position[1], 2 * v.y - ui.dup.extra.position[2]}
 				else 
 					ui.dup = nil 
