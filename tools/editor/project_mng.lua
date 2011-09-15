@@ -357,8 +357,6 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     	if editor_lb:readdir( app_path ) == nil or #editor_lb:readdir( app_path ) == 0 then 
 			set_new_project("unsaved_project")
 			return  
-			--project = "unnamed_project"
-        	--app_path = editor_lb:build_path( base , project )
 		end 
 
 
