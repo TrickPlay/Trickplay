@@ -10,23 +10,27 @@
 #import "AppBrowser.h"
 #import "NetServiceManager.h"
 
+@class TVBrowser;
+
 @protocol TVBrowserDelegate <NSObject>
 
 @required
-- (void)serviceResolved:(NSNetService *)service;
-- (void)didNotResolveService;
-- (void)didFindServices;
+- (void)tvBrowser:(TVBrowser *)browser serviceResolved:(NSNetService *)service;
+- (void)tvBrowserDidNotResolveService:(TVBrowser *)browser;
+- (void)tvBrowser:(TVBrowser *)browser didFindService:(NSNetService *)service;
+- (void)tvBrowser:(TVBrowser *)browser didRemoveService:(NSNetService *)service;
 
 @end
 
 
-@interface TVBrowser : NSObject {
-    AppBrowser *appBrowser;
+@interface TVBrowser : NSObject <NetServiceManagerDelegate> {
+    // The netServiceManager informs the TVBrowser of mDNS broadcasts
     NetServiceManager *netServiceManager;
     
     // Name of the current TV; stores the name of the current service
     // used or nil if no service has been selected.
     NSString *currentTVName;
+    
     id <TVBrowserDelegate> delegate;
 }
 
@@ -42,7 +46,6 @@
 
 
 // Exposed instance variables
-@property (retain) AppBrowser *appBrowser;
 @property (nonatomic, retain) NSString *currentTVName;
 @property (assign) id <TVBrowserDelegate> delegate;
 

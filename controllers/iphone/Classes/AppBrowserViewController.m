@@ -49,6 +49,7 @@
          serviceName:(NSString *)serviceName {
         
     [appBrowser setupService:port hostName:hostName serviceName:serviceName];
+    self.title = serviceName;
 }
 
 #pragma mark -

@@ -39,7 +39,7 @@ void Score_completed( ClutterScore * score , gpointer )
 /*
     Class: Score
     
-    The Score class sequences multiple Timeline animations. By using a Score, multiple animations can begin at the same time or one or more animations can begin immediately following the completion of another animation.
+    The Score class choreographs multiple Timeline animations. By using a Score, multiple animations can begin at the same time or one or more animations can begin when another animation completes or reaches a marked point.
     
     To create a sequence of animations, each animation must be attached to the Score object using the append() or append_at_marker() function. Animations are arranged in a parent/child relationship. When the parent animation completes, its immediate children, if any, begin. Multiple levels of parent/child relationships can be defined. An animation with no parent begins running as soon as the Score starts. Scores can also loop, so following the completion of the last child animation, the initial parent animation will begin again. A Score can also be prematurely stopped or temporarily paused and then restarted or rewound to its beginning.
     

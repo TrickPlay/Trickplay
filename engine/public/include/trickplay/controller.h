@@ -201,6 +201,16 @@ struct TPControllerSpec
     TPControllerKeyMap * key_map;
     
     /*
+        Field: id
+
+        This is an optional string that can uniquely identify this controller across
+        multiple connections. It can be NULL, in which case TrickPlay will assign a
+        newly created id to the controller.
+    */
+
+    const char * id;
+
+    /*
         Function: execute_command
         
         An optional callback that TrickPlay will invoke to instruct the controller
