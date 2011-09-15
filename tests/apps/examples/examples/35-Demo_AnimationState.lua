@@ -43,14 +43,14 @@ sphereAnimationState = AnimationState( {
 			  target = "disappear",
 			  mode = "EASE_IN_OUT_BOUNCE", -- default alpha mode
 			  keys = {
-			  		{ sphereImage, "scale", {0.0, 0.0}, 0, 0 },
+			  		{ sphereImage, "scale", {0.0, 0.0} },
 			  }
 			},
 			{ -- Disappear--->Appear
 			  source = "disappear",
 			  target = "appear",
 			  keys = {
-			  		{ sphereImage, "scale", {2.0, 2.0}, 0, 0 },
+			  		{ sphereImage, "scale", {2.0, 2.0} },
 			  }
 			}
 		}
