@@ -25,23 +25,33 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
         source_name = NULL;
     }
 
-	if (lua_type(L, index+1) == LUA_TNUMBER) 
-	{
-		pre_delay = lua_tonumber(L, index + 1);
-	} 
-	else 
-	{
-		return luaL_error(L, "incorrect argument, failed to set the fifth argument of keys : number expected");
-	}
-
-	if (lua_type(L, index+2) == LUA_TNUMBER) 
-	{
-		post_delay = lua_tonumber(L, index + 2);
-	}
-	else 
-	{
-		return luaL_error(L, "incorrect argument, failed to set the sixth argument of keys : number expected");
-	}
+    // Check if there are pre/post arguments
+    if (!lua_isnoneornil(L, index+1))
+    {
+        if (lua_type(L, index+1) == LUA_TNUMBER) 
+        {
+            pre_delay = lua_tonumber(L, index + 1);
+        } 
+        else 
+        {
+            return luaL_error(L, "incorrect argument, failed to set the fifth argument of keys : number expected");
+        }
+    
+        if (lua_type(L, index+2) == LUA_TNUMBER) 
+        {
+            post_delay = lua_tonumber(L, index + 2);
+        }
+        else 
+        {
+            return luaL_error(L, "incorrect argument, failed to set the sixth argument of keys : number expected");
+        }
+    }
+    else
+    {
+        // Use default pre and post of 0.0
+        pre_delay = 0.0;
+        post_delay = 0.0;
+    }
 
 	if (!strcmp("x",k)||!strcmp("y",k)||!strcmp("w",k)||!strcmp("width",k)||!strcmp("h",k)||!strcmp("height",k)||
 		!strcmp("z",k)||!strcmp("depth",k)||!strcmp("opacity",k))
@@ -467,10 +477,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 	AnimatedObject - the UIElement-based object to animate
 	AnimatedProperty - a string identifying the property to animate. A list of recognized property strings is shown below.
-	AlphaMode - a string identifying the Alpha mode to use in the animation. Supported Alpha modes are described in <Alpha.mode>.  This will override any default mode set in the AnimationState or in the parent transition.
+	AlphaMode - a string identifying the Alpha mode to use in the animation. Supported Alpha modes are described in <Alpha.mode>.  Optional.  If specified, this will override any default mode set in the AnimationState or in the parent transition.
 	FinalValue - a table or numeric value specifying the final value of the animated property at the conclusion of the animation
-	PreDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *before* starting. The PreDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PreDelay had been specified.
-	PostDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *after* completing. The PostDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PostDelay had been specified.
+	PreDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *before* starting. The PreDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PreDelay had been specified.  Optional (but required if you specify PostDelay), default is 0.0
+	PostDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *after* completing. The PostDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PostDelay had been specified.  Optional (but required if you specify PreDelay), defaults to 0.0
 	
 	By setting the PreDelay and PostDelay fields, the animation can be divided into sections. For example, one key frame can set a PostDelay value of .5 so that it will run in the first half of the animation. A second key frame can set its PreDelay to .5 so it runs in the animation's second half, after the first key frame has completed. An example using this technique is shown later in this section.
 	
@@ -491,10 +501,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	(code)
 	keys = {
-		{ Obj, "position", "LINEAR", { 100, 100 }, 0, 0 },  -- animate Obj's position
-		{ Obj, "scale", "LINEAR", { 2.0, 2.0 }, 0, 0 },     -- animate Obj's scale
-		{ Obj, "z_rotation", "LINEAR", 45, 0, 0 },          -- animate Obj's rotation along Z-axis
-		{ Obj2, "position", "LINEAR", { 300, 300 }, 0, 0 }  -- animate Obj2's position. This is okay; you can modify the same property for DIFFERENT objects
+		{ Obj, "position", { 100, 100 } },  -- animate Obj's position
+		{ Obj, "scale", { 2.0, 2.0 } },     -- animate Obj's scale
+		{ Obj, "z_rotation", 45 },          -- animate Obj's rotation along Z-axis
+		{ Obj2, "position", { 300, 300 } }  -- animate Obj2's position. This is okay; you can modify the same property for DIFFERENT objects
 	}
 	(end)
 	
@@ -502,8 +512,8 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	(code)
 	keys = {
-		{ Obj, "position", "LINEAR", { 100, 100 }, 0.0, 0.5 },  -- in the first half of the animation, move Obj to {100,100}
-		{ Obj, "position", "LINEAR", { 300, 300 }, 0.5, 0.0 )   -- in the second half, move Obj to {300,300} ***DOES NOT WORK!***
+		{ Obj, "position", { 100, 100 }, 0.0, 0.5 },  -- in the first half of the animation, move Obj to {100,100}
+		{ Obj, "position", { 300, 300 }, 0.5, 0.0 )   -- in the second half, move Obj to {300,300} ***DOES NOT WORK!***
 		                                                        -- Cannot modify same property for same object in same keys table
 	}
 	(end)
@@ -594,14 +604,14 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 				  source = "*",
 				  target = "disappear",
 				  keys = {
-				  		{ sphereImage, "scale", {0.0, 0.0}, 0, 0 },
+				  		{ sphereImage, "scale", {0.0, 0.0} },
 				  }
 				},
 				{ -- Disappear--->Appear
 				  source = "disappear",
 				  target = "appear",
 				  keys = {
-				  		{ sphereImage, "scale", {2.0, 2.0}, 0, 0 },
+				  		{ sphereImage, "scale", {2.0, 2.0} },
 				  }
 				}
 			}
