@@ -1492,8 +1492,12 @@ function util.itemTostring(v, d_list, t_list)
     end 
 
     if v.extra.reactive ~= nil then 
-	itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
+		itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
     end 
+	if v.extra.type == "Group" then 
+		itm_str = itm_str..v.name.."\.extra\.type= \"Group\"".."\n\n"
+	end 
+
 
     if v.extra.timeline then 
 	    itm_str = itm_str..v.name.."\.extra\.timeline = {" 

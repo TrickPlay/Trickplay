@@ -934,7 +934,7 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
     local text, input_text, ring, focus, line, button	
 
     group:clear()
-    	
+    					
 	if(item_n == "focus") then  
 		group:clear()
 		group.name = "focusChanger"
@@ -1059,6 +1059,9 @@ function factory.make_focuschanger(assets, inspector, v, item_n, item_v, item_s,
 			for m, n in pairs (v.extra.focus) do
 		     	if type(n) ~= "function" then 
 		          	focus_changer:find_child("text"..focus_map[m]).text = n
+					if n == v.name and m ~= keys.Return and v.extra.type == "ButtonPicker" then 
+		          		focus_changer:find_child("text"..focus_map[m]).text = ""
+					end 
 		     	else 
 		          	focus_changer:find_child("text"..focus_map[m]).text = v.name
 		          	focus_changer:find_child("text"..focus_map[m]).color = {150,150,150,150}
