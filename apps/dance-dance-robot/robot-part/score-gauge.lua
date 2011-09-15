@@ -1,9 +1,9 @@
 local score_gauge = Group { name = "Score Gauge" }
 
-local frame = Image { name = "frame", src = "/assets/robot-part/gauge/GaugeFront.png" }
-local bground = Image { name = "bground", src = "/assets/robot-part/gauge/GaugeBack.png" }
-local heart = Image { name = "heart", src = "/assets/robot-part/gauge/Heart.png" }
-local gauge = Image { name = "gauge", src = "/assets/robot-part/gauge/Gauge.png" }
+local frame = Image { name = "frame", src = "assets/robot-part/gauge/GaugeFront.png" }
+local bground = Image { name = "bground", src = "assets/robot-part/gauge/GaugeBack.png" }
+local heart = Image { name = "heart", src = "assets/robot-part/gauge/Heart.png" }
+local gauge = Image { name = "gauge", src = "assets/robot-part/gauge/Gauge.png" }
 
 bground.x = (frame.w-bground.w)/2
 bground.y = (frame.h-bground.h)/2
