@@ -1,18 +1,22 @@
 local robot = Group { name = "robot" }
 
 local Left_Hand = Image { name = "Left_Hand", src = "assets/robot-part/robot/Left_Hand.png" }
+Left_Hand.z_rotation = { 0, 0, 0 }
 Left_Hand:move_anchor_point(145, 10)
 
 local Left_Foot = Image { name = "Left_Foot", src = "assets/robot-part/robot/Left_Foot.png" }
 Left_Foot:move_anchor_point(217, 8)
 
 local Left_Lower_Leg = Image { name = "Left_Lower_Leg", src = "assets/robot-part/robot/Left_Lower_Leg.png" }
+Left_Lower_Leg.z_rotation = { 0, 64, 211 }
 Left_Lower_Leg:move_anchor_point(52, 6)
 
 local Left_Thigh = Image { name = "Left_Thigh", src = "assets/robot-part/robot/Left_Thigh.png" }
+Left_Thigh.z_rotation = { 0, -152, 105 }
 Left_Thigh:move_anchor_point(189, 31)
 
 local Left_Hip = Image { name = "Left_Hip", src = "assets/robot-part/robot/Left_Hip.png" }
+Left_Hip.z_rotation = { 0, 0, 0 }
 Left_Hip:move_anchor_point(217, 60)
 
 local Body_Inside = Image { name = "Body_Inside", src = "assets/robot-part/robot/Body_Inside.png" }
@@ -31,6 +35,7 @@ local Mouth_Inside = Image { name = "Mouth_Inside", src = "assets/robot-part/rob
 Mouth_Inside:move_anchor_point(117, 50)
 
 local Head = Image { name = "Head", src = "assets/robot-part/robot/Head.png" }
+Head.z_rotation = { 0, 0, 0 }
 Head:move_anchor_point(800, 594)
 
 local Jaw = Image { name = "Jaw", src = "assets/robot-part/robot/Jaw.png" }
@@ -41,12 +46,15 @@ Tire:move_anchor_point(332, 290)
 z_rotation = { 0, 0, 0 }
 
 local Right_Hip = Image { name = "Right_Hip", src = "assets/robot-part/robot/Right_Hip.png" }
+Right_Hip.z_rotation = { 0, 0, 0 }
 Right_Hip:move_anchor_point(282, 80)
 
 local Right_Thigh = Image { name = "Right_Thigh", src = "assets/robot-part/robot/Right_Thigh.png" }
+Right_Thigh.z_rotation = { 0, 11, 174 }
 Right_Thigh:move_anchor_point(80, 40)
 
 local Right_Lower_Leg = Image { name = "Right_Lower_Leg", src = "assets/robot-part/robot/Right_Lower_Leg.png" }
+Right_Lower_Leg.z_rotation = { 0, 152, 170 }
 Right_Lower_Leg:move_anchor_point(50, 32)
 
 local Right_Foot = Image { name = "Right_Foot", src = "assets/robot-part/robot/Right_Foot.png" }
@@ -76,29 +84,44 @@ robot.extra.states = AnimationState( {
                                                 target = "base",
                                                 keys = {
                                                     { robot, "y", "EASE_IN_OUT_SINE",                   440, 0, 0 },
-                                                    { Shadow, "opacity", "EASE_IN_OUT_SINE",            200, 0, 0 },
-                                                    { Shadow, "position", "EASE_IN_OUT_SINE",           {   100, 1100 }, 0, 0 },
-                                                    { Shadow, "scale", "EASE_IN_OUT_SINE",              {     1,    1 }, 0, 0 },
-                                                    { Head, "position", "EASE_IN_OUT_SINE",             {     0,    0 }, 0, 0 },
-                                                    { Jaw, "position", "EASE_IN_OUT_SINE",              {   -70,   55 }, 0, 0 },
-                                                    { Mouth_Inside, "position", "EASE_IN_OUT_SINE",     {  -164,   83 }, 0, 0 },
+
+                                                    { Right_Foot, "position", "EASE_IN_OUT_SINE",       {   580,  960 }, 0, 0 },
+                                                    { Right_Lower_Leg, "position", "EASE_IN_OUT_SINE",  {   430,  790 }, 0, 0 },
+                                                    { Right_Lower_Leg, "z_rotation", "EASE_IN_OUT_SINE", 0, 0, 0 },
+                                                    { Right_Thigh, "position", "EASE_IN_OUT_SINE",      {   440,  640 }, 0, 0 },
+                                                    { Right_Thigh, "z_rotation", "EASE_IN_OUT_SINE",    0, 0, 0 },
+                                                    { Right_Hip, "position", "EASE_IN_OUT_SINE",        {   600,  550 }, 0, 0 },
+                                                    { Right_Hip, "z_rotation", "EASE_IN_OUT_SINE",      0, 0, 0 },
+
                                                     { Left_Foot, "position", "EASE_IN_OUT_SINE",        {   140,  910 }, 0, 0 },
-                                                    { Left_Hand, "position", "EASE_IN_OUT_SINE",        {    50,  130 }, 0, 0 },
-                                                    { Left_Hip, "position", "EASE_IN_OUT_SINE",         {   400,  500 }, 0, 0 },
                                                     { Left_Lower_Leg, "position", "EASE_IN_OUT_SINE",   {   100,  710 }, 0, 0 },
+                                                    { Left_Lower_Leg, "z_rotation", "EASE_IN_OUT_SINE", 0, 0, 0 },
                                                     { Left_Thigh, "position", "EASE_IN_OUT_SINE",       {   240,  640 }, 0, 0 },
+                                                    { Left_Thigh, "z_rotation", "EASE_IN_OUT_SINE",     0, 0, 0 },
+                                                    { Left_Hip, "position", "EASE_IN_OUT_SINE",         {   400,  500 }, 0, 0 },
+                                                    { Left_Hip, "z_rotation", "EASE_IN_OUT_SINE",       0, 0, 0 },
+
                                                     { Pelvis, "position", "EASE_IN_OUT_SINE",           {   370,  180 }, 0, 0 },
                                                     { Pipe_In_Front, "position", "EASE_IN_OUT_SINE",    {   340,   80 }, 0, 0 },
                                                     { Pipe_On_Back, "position", "EASE_IN_OUT_SINE",     {   440,  360 }, 0, 0 },
-                                                    { Right_Foot, "position", "EASE_IN_OUT_SINE",       {   580,  960 }, 0, 0 },
+
+                                                    { Body_Inside, "position", "EASE_IN_OUT_SINE",      {   250,  -90 }, 0, 0 },
+
+                                                    { Head, "position", "EASE_IN_OUT_SINE",             {     0,    0 }, 0, 0 },
+                                                    { Head, "z_rotation", "EASE_IN_OUT_SINE",           0, 0, 0 },
+                                                    { Jaw, "position", "EASE_IN_OUT_SINE",              {   -70,   55 }, 0, 0 },
+                                                    { Mouth_Inside, "position", "EASE_IN_OUT_SINE",     {  -164,   83 }, 0, 0 },
+
+                                                    { Left_Hand, "position", "EASE_IN_OUT_SINE",        {    50,  130 }, 0, 0 },
+                                                    { Left_Hand, "z_rotation", "EASE_IN_OUT_SINE",      0, 0, 0 },
                                                     { Right_Hand, "position", "EASE_IN_OUT_SINE",       {   420,  -60 }, 0, 0 },
                                                     { Right_Hand, "z_rotation", "EASE_IN_OUT_SINE",     0,               0, 0 },
-                                                    { Right_Hip, "position", "EASE_IN_OUT_SINE",        {   600,  550 }, 0, 0 },
-                                                    { Right_Lower_Leg, "position", "EASE_IN_OUT_SINE",  {   430,  790 }, 0, 0 },
-                                                    { Right_Thigh, "position", "EASE_IN_OUT_SINE",      {   440,  640 }, 0, 0 },
-                                                    { Body_Inside, "position", "EASE_IN_OUT_SINE",      {   250,  -90 }, 0, 0 },
                                                     { Tire, "position", "EASE_IN_OUT_SINE",             {   420,  -60 }, 0, 0 },
                                                     { Tire, "z_rotation", "EASE_IN_OUT_SINE",           0,               0, 0 },
+
+                                                    { Shadow, "opacity", "EASE_IN_OUT_SINE",            200, 0, 0 },
+                                                    { Shadow, "position", "EASE_IN_OUT_SINE",           {   100, 1100 }, 0, 0 },
+                                                    { Shadow, "scale", "EASE_IN_OUT_SINE",              {     1,    1 }, 0, 0 },
                                                 },
                                             },
                                             {
@@ -124,6 +147,7 @@ robot.extra.states = AnimationState( {
                                                     { Right_Hand, "z_rotation", "EASE_IN_OUT_SINE",     10,               0, 0 },
                                                     { Right_Hip, "position", "EASE_IN_OUT_SINE",        {   600,  540 }, 0, 0 },
                                                     { Right_Lower_Leg, "position", "EASE_IN_OUT_SINE",  {   430,  788 }, 0, 0 },
+                                                    { Right_Lower_Leg, "z_rotation", "EASE_IN_OUT_SINE", 0, 0, 0 },
                                                     { Right_Thigh, "position", "EASE_IN_OUT_SINE",      {   440,  630 }, 0, 0 },
                                                     { Body_Inside, "position", "EASE_IN_OUT_SINE",      {   250, -100 }, 0, 0 },
                                                     { Tire, "z_rotation", "EASE_IN_OUT_SINE",           2,              0, 0 },
@@ -133,10 +157,42 @@ robot.extra.states = AnimationState( {
                                                 source = "*",
                                                 target = "crouch",
                                                 keys = {
-                                                    { robot, "y", "EASE_IN_OUT_SINE",                   540, 0, 0 },
-                                                    { Shadow, "y", "EASE_IN_OUT_SINE",                  900, 0, 0 },
-                                                    { Shadow, "scale", "EASE_IN_OUT_SINE",              {     1.1,    1.1 }, 0, 0 },
-                                                    { Shadow, "opacity", "EASE_IN_OUT_SINE",            220, 0, 0 },
+                                                    { robot, "y", "EASE_IN_OUT_SINE",                   440, 0, 0 },
+
+                                                    { Right_Lower_Leg, "z_rotation", "EASE_OUT_SINE", -40, 0, 0 },
+                                                    { Right_Thigh, "position", "EASE_OUT_SINE",      {   320,  800 }, 0, 0 },
+                                                    { Right_Thigh, "z_rotation", "EASE_OUT_SINE",    40, 0, 0 },
+                                                    { Right_Hip, "position", "EASE_OUT_SINE",        {   600,  820 }, 0, 0 },
+                                                    { Right_Hip, "z_rotation", "EASE_OUT_SINE",      30, 0, 0 },
+
+                                                    { Left_Lower_Leg, "position", "EASE_OUT_SINE",   {   100,  710 }, 0, 0 },
+                                                    { Left_Lower_Leg, "z_rotation", "EASE_OUT_SINE", -40, 0, 0 },
+                                                    { Left_Thigh, "position", "EASE_OUT_SINE",       {   100,  730 }, 0, 0 },
+                                                    { Left_Thigh, "z_rotation", "EASE_OUT_SINE",     20, 0, 0 },
+                                                    { Left_Hip, "position", "EASE_OUT_SINE",         {   300,  750 }, 0, 0 },
+                                                    { Left_Hip, "z_rotation", "EASE_OUT_SINE",       20, 0, 0 },
+
+                                                    { Pelvis, "position", "EASE_OUT_SINE",           {   370,  410 }, 0, 0 },
+                                                    { Pipe_In_Front, "position", "EASE_OUT_SINE",    {   340,  310 }, 0, 0 },
+                                                    { Pipe_On_Back, "position", "EASE_OUT_SINE",     {   440,  590 }, 0, 0 },
+
+                                                    { Body_Inside, "position", "EASE_OUT_SINE",      {   250, 150 }, 0, 0 },
+
+                                                    { Head, "position", "EASE_OUT_SINE",             {     0,  330 }, 0, 0 },
+                                                    { Head, "z_rotation", "EASE_OUT_SINE",           -15, 0, 0 },
+                                                    { Jaw, "position", "EASE_OUT_SINE",              {   -40,  350 }, 0, 0 },
+                                                    { Mouth_Inside, "position", "EASE_OUT_SINE",     {  -134,  378 }, 0, 0 },
+
+                                                    { Left_Hand, "position", "EASE_OUT_SINE",        {    40,  260 }, 0, 0 },
+                                                    { Left_Hand, "z_rotation", "EASE_OUT_SINE",      -75, 0, 0 },
+                                                    { Right_Hand, "position", "EASE_OUT_SINE",       {   420,  190 }, 0, 0 },
+                                                    { Right_Hand, "z_rotation", "EASE_OUT_SINE",     -75,               0, 0 },
+                                                    { Tire, "z_rotation", "EASE_OUT_SINE",           -30,              0, 0 },
+                                                    { Tire, "position", "EASE_OUT_SINE",             {   420,  190 }, 0, 0 },
+
+                                                    { Shadow, "y", "EASE_OUT_SINE",                  1100, 0, 0 },
+                                                    { Shadow, "scale", "EASE_OUT_SINE",              {     1.1,    1.1 }, 0, 0 },
+                                                    { Shadow, "opacity", "EASE_OUT_SINE",            220, 0, 0 },
                                                 },
                                             },
                                             {
@@ -182,6 +238,7 @@ robot.extra.sequence = {
                             'bounce',
                             'base',
                             'crouch',
+                            'base',
                             'jump',
                             'hover',
                             'fall',
@@ -210,6 +267,7 @@ function robot.extra:next_position()
         did_collide = false
     end
 end
+
 function robot.states:on_completed()
     if(not did_collide and robot.current_pos == #robot.sequence) then
         robot:score_callback()
