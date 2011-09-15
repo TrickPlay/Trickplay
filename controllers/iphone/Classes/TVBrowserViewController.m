@@ -109,37 +109,17 @@
     @synchronized(self) {
         if (tvBrowser) {
             _currentTVName = [[tvBrowser.currentTVName retain] autorelease];
-        } else {
-            _currentTVName = [[currentTVName retain] autorelease];
         }
     }
-    NSLog(@"_currentTVName: %@", _currentTVName);
     return _currentTVName;
 }
 
-// TODO: Check that this is being called properly
 - (void)setCurrentTVName:(NSString *)_currentTVName {
     @synchronized(self) {
-        [_currentTVName retain];
-        [currentTVName release];
-        currentTVName = _currentTVName;
+        if (tvBrowser) {
+            tvBrowser.currentTVName = _currentTVName;
+        }
     }
-    
-    if (tvBrowser) {
-        tvBrowser.currentTVName = currentTVName;
-    }
-    NSLog(@"_currentTVName: %@, currentTVName: %@", _currentTVName, tvBrowser.currentTVName);
-}
-
-#pragma mark -
-#pragma mark - AppBrowserDelegate methods
-
-- (void)didReceiveCurrentAppInfo:(NSDictionary *)info {
-    
-}
-
-- (void)didReceiveAvailableAppsInfo:(NSArray *)info {
-    
 }
 
 #pragma mark -
@@ -173,12 +153,12 @@
  * to classes to create a stream socket. Additionally, stores the service name
  * to the currentTVName.
  */
-- (void)serviceResolved:(NSNetService *)service {
+- (void)tvBrowser:(TVBrowser *)browser serviceResolved:(NSNetService *)service {
     NSLog(@"TVBrowserViewController serviceResolved");
     [tvBrowser stopSearchForServices];
     self.currentTVName = [[service name] retain];
     if (delegate) {
-        [delegate serviceResolved:service];
+        [delegate tvBrowserViewController:self serviceResolved:service];
     }
 }
 
@@ -189,16 +169,20 @@
  * properly pop and deallocate these resources as the system regresses back
  * to the RootViewController.
  */
-- (void)didNotResolveService {
+- (void)tvBrowserDidNotResolveService:(TVBrowser *)browser {
     NSLog(@"TVBrowserViewController didNotResolveService");
     
     [self refresh];
     if (delegate) {
-        [delegate didNotResolveService];
+        [delegate tvBrowserViewControllerDidNotResolveService];
     }
 }
 
-- (void)didFindServices {
+- (void)tvBrowser:(TVBrowser *)browser didFindService:(NSNetService *)service {
+    [self reloadData];
+}
+
+- (void)tvBrowser:(TVBrowser *)browser didRemoveService:(NSNetService *)service {
     [self reloadData];
 }
 
@@ -230,44 +214,6 @@
  return (interfaceOrientation == UIInterfaceOrientationPortrait);
  }
  */
-
-#pragma mark -
-#pragma mark TPAppViewControllerSocketDelegate stuff
-
-/**
- * Generic operations to perform when the network fails. Includes deallocating
- * other view controllers and their resources and restarting the NetServiceManager
- * which will then begin browsing for advertised services.
- */
-- (void)handleSocketProblems {
-    [self.navigationController popToRootViewControllerAnimated:YES];
-    
-    self.currentTVName = nil;
-    [currentTVIndicator removeFromSuperview];
-    
-    [self startSearchForServices];
-}
-
-/**
- * TPAppViewControllerSocketDelegate callback called from TPAppViewController
- * when an error occurs over the network.
- */
-- (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in Root");
-    
-    [self handleSocketProblems];
-}
-
-/**
- * TPAppViewControllerSocketDelegate callback called from TPAppViewController
- * when the stream socket closes.
- */
-- (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered in Root");
-    
-    [self handleSocketProblems];
-}
-
 
 #pragma mark -
 #pragma mark Table view data source
@@ -338,8 +284,8 @@
     // If the controller is currently connected to this service then
     // display an orange indicator dot. (Be sure to remove the loadingSpinner
     // in case the service had only just loaded)
-    NSLog(@"currentTVName: %@", currentTVName);
-    if ([cell.textLabel.text compare:currentTVName] == NSOrderedSame) {
+    NSLog(@"currentTVName: %@", self.currentTVName);
+    if ([cell.textLabel.text compare:self.currentTVName] == NSOrderedSame) {
         [loadingSpinner removeFromSuperview];
         [loadingSpinner stopAnimating];
         [cell addSubview:currentTVIndicator];
@@ -442,16 +388,14 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     if ([services count] == 0 || indexPath.row >= [services count]) {
         [self refresh];
-    } else if (!currentTVName || ([currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
+    } else if (!self.currentTVName || ([self.currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
         self.currentTVName = nil;
         
-        [delegate didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:NO];
+        [delegate tvBrowserViewController:self didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:NO];
         
         [tvBrowser resolveServiceAtIndex:indexPath.row];
-        
-        [tableView reloadData];
     } else {
-        [delegate didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:YES];
+        [delegate tvBrowserViewController:self didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:YES];
     }
     
 	
@@ -460,7 +404,8 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	{
 		[tableView deselectRowAtIndexPath:indexPath2 animated:YES];
 	}
-	
+    
+    [tableView reloadData];
 }
 
 #pragma mark -
@@ -487,10 +432,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (currentTVIndicator) {
         [currentTVIndicator release];
         currentTVIndicator = nil;
-    }
-    if (currentTVName) {
-        [currentTVName release];
-        currentTVName = nil;
     }
     if (loadingSpinner) {
         [loadingSpinner stopAnimating];

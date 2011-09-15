@@ -136,7 +136,7 @@
     
     // the virtual remote for controlling the Television
     virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
-    virtualRemote.view.frame = frame;
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight + 44);
     [self.view addSubview:virtualRemote.view];
     virtualRemote.delegate = self;
     
@@ -423,6 +423,7 @@
     [UIMenuController sharedMenuController].menuVisible = NO;
     // start editing
     [self.view bringSubviewToFront:textView];
+    currentText = [theTextField.text retain];
 }
 
 /**
@@ -904,6 +905,7 @@
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
     NSLog(@"TPAppView loaded!");
     
     textView.layer.cornerRadius = 10.0;
@@ -938,6 +940,8 @@
     
     [loadingIndicator stopAnimating];
     
+    currentText = nil;
+    
     /*
      CATransform3D transform = CATransform3DIdentity;
      transform.m34 = 1.0/-2000;
@@ -946,16 +950,54 @@
     //[self startService];
 }
 
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    
+    NSLog(@"TPAppViewController Unload");
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+    self.loadingIndicator = nil;
+    
+    if (styleAlert) {
+        [styleAlert release];
+        styleAlert = nil;
+    }
+    
+    multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
+    if (multipleChoiceArray) {
+        [multipleChoiceArray release];
+        multipleChoiceArray = nil;
+    }
+    
+    self.theTextField = nil;
+    self.theLabel = nil;
+    self.textView = nil;
+    if (currentText) {
+        [currentText release];
+        currentText = nil;
+    }
+}
+
 - (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
     if (!socketManager) {
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
     
     viewDidAppear = YES;
     [self performSelectorOnMainThread:@selector(createTimer) withObject:nil waitUntilDone:YES];
+    
+    if (theTextField.isFirstResponder) {
+        theTextField.text = currentText;
+        [theTextField selectAll:theTextField];
+        [UIMenuController sharedMenuController].menuVisible = NO;
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    
     if (socketTimer) {
         [socketTimer invalidate];
         [socketTimer release];
@@ -979,25 +1021,6 @@
     // Release any cached data, images, etc. that aren't in use.
 }
 
-- (void)viewDidUnload {
-    [super viewDidUnload];
-    NSLog(@"TPAppViewController Unload");
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-    self.loadingIndicator = nil;
-    
-    if (styleAlert) {
-        [styleAlert release];
-        styleAlert = nil;
-    }
-    
-    multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
-    if (multipleChoiceArray) {
-        [multipleChoiceArray release];
-        multipleChoiceArray = nil;
-    }
-}
-
 #pragma mark -
 #pragma mark Deallocation
 
@@ -1016,6 +1039,10 @@
     }
     if (audioController) {
         [audioController release];
+    }
+    if (advancedView) {
+        [advancedView do_unparent:nil];
+        [advancedView release];
     }
     if (advancedUIDelegate) {
         [(AdvancedUIObjectManager *)advancedUIDelegate release];
@@ -1049,9 +1076,6 @@
     }
     if (multipleChoiceArray) {
         [multipleChoiceArray release];
-    }
-    if (advancedView) {
-        [advancedView release];
     }
     if (socketTimer) {
         [socketTimer invalidate];
