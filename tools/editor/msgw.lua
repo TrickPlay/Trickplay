@@ -232,8 +232,20 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
      local y_scroll_from=0
      local y_scroll_to=0
 
-     for i, v in pairs(g.children) do
-        v.reactive = true
+
+
+	local function set_children (obj, reactive, lock, is_in_group)
+     	obj.reactive = reactive
+	  	obj.extra.lock = lock
+		obj.extra.is_in_group = is_in_group
+        util.create_on_button_down_f(obj)
+	end 
+
+
+	local function there (v, is_in_group)
+	 	
+		set_children(v,true,false,is_in_group,nil)	  
+
 	  	if(v.type == "Text") then
 			v.cursor_visible = false
 			function v:on_key_down(key)
@@ -243,51 +255,58 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 	     			end 
 			end 
 	  	end 
-	  	v.extra.lock = false
-        util.create_on_button_down_f(v)
-	  
-	  	if(v.type == "Group") then 
-	       for j, c in pairs (v.children) do
-		    	if util.is_in_list(v.extra.type, hdr.uiElements) == false then 
-                	c.reactive = true
-		        	c.extra.is_in_group = true
-	  				c.extra.lock = false
-                    util.create_on_button_down_f(c)
-		    	end 
-	       end 
-	       if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" or v.extra.type == "ArrowPane" then 
+
+		if(v.type == "Group") then 
+		    if v.extra.type == "Group" then 
+	       		for j, c in pairs (v.children) do
+					if c.extra.type and c.extra.type == "Group" then 
+						there(c,true)
+					else 
+						set_children(c,true,false,true)
+					end 
+	       		end 
+		    end 
+
+	       	if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" or v.extra.type == "ArrowPane" then 
 		    	for j, c in pairs(v.content.children) do 
-					c.reactive = true
-		        	c.extra.is_in_group = true
-	  				c.extra.lock = false
-                    util.create_on_button_down_f(c)
+					if c.extra.type and c.extra.type == "Group" then 
+						there(c,false)
+					else
+						set_children(c,true,false,true)
+					end
 		    	end 
-	       elseif v.extra.type == "TabBar" then 
+	       	elseif v.extra.type == "TabBar" then 
 		    	for j, c in pairs(v.tabs) do 
 					for k, d in pairs (c.children) do
-						d.reactive = true
-		        		d.extra.is_in_group = true
-	  					d.extra.lock = false
-                    	util.create_on_button_down_f(d)
+						if c.extra.type and c.extra.type == "Group" then 
+							there(d,false)
+						else
+							set_children(d,true,false,true)
+						end
 					end 
 		    	end 
-	       elseif v.extra.type == "LayoutManager" then 
+	       	elseif v.extra.type == "LayoutManager" then 
 		   		local f 
 		   		f = function (k, c) 
      		    	if type(c) == "table" then
 	 		   			table.foreach(c, f)
      		    	elseif not c.extra.is_in_group then 
-			   			c.reactive = true
-		           		c.extra.is_in_group = true
-	  		   			c.extra.lock = false
-                    	util.create_on_button_down_f(c)
+						if c.extra.type and c.extra.type == "Group" then 
+							there(d,false)
+						else
+							set_children(c,true,false,true)
+						end 
      		    	end 
 		   		end 
 		   		table.foreach(v.tiles, f)
 	       end 
-	  end 
+	  	end 
+	end 
 
-     end 
+    for i, v in pairs(g.children) do
+		there(v, false)
+    end 
+
      menu.menu_raise_to_top()
 end
 

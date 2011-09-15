@@ -634,7 +634,7 @@ local function open_files(input_purpose, bg_image, inspector)
 
 			if input_purpose == "open_luafile" then
 				undo_list = {} 
-				if editor.close(true) ~= "-1" then 
+				if editor.close(true) ~= -1 then -- "-1" 
 					load_file(selected_file) 
 				end 
 			else 
@@ -2619,7 +2619,7 @@ function editor.ugroup()
    	end 
 
 	for i, v in pairs(g.children) do
-    	if g:find_child(v.name) then
+    	--if g:find_child(v.name) then
 		  	if(v.extra.selected == true) then
 				if util.is_this_group(v) == true then
 			     	screen_ui.n_selected(v)
@@ -2637,7 +2637,7 @@ function editor.ugroup()
         		    table.insert(undo_list, {v.name, hdr.DEL, v})
 		        end 
 		   end 
-		end
+		--end
 	end
     screen.grab_key_focus(screen)
 	input_mode = hdr.S_SELECT
