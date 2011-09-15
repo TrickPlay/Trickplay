@@ -445,7 +445,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	"x", "y", "z", "depth" - float
 	"width", "w", "height", "h" - float
-	"opacity" - float
+	"opacity" - unsigned integer
 	"position" - table of { float x, float y }
 	"size" - table of { float width, float height }
 	"scale" - table of { double scale_x, double scale_y }
