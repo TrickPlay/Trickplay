@@ -24,14 +24,16 @@ score_gauge:add(bground,gauge,frame,heart)
 score_gauge.x = (screen.w - score_gauge.w)/2
 score_gauge.y = 60
 
-
+-- Hold this animator outside the function scope so it sticks around and doesn't get garbage collected
+local gauge_animator
 score_gauge.extra.set_score = function(self,new_score)
     assert(new_score >= 0 and new_score <= 100)
     local old_score = score_gauge.extra.score
     local gauge, bground, heart = self:find_child('gauge'),self:find_child('bground'),self:find_child('heart')
     self.extra.score = new_score
 
-    local animator = Animator {
+    -- Can't just :animate() because we need to sync the heart moving with the width change on the gauge
+    gauge_animator = Animator {
                                 duration = 250,
                                 properties = {
                                     {
@@ -52,8 +54,7 @@ score_gauge.extra.set_score = function(self,new_score)
                                     },
                                 },
                     }
-
-    animator:start()
+    gauge_animator:start()
 end
 
 score_gauge:move_anchor_point( score_gauge.w/2, score_gauge.h/2 )
