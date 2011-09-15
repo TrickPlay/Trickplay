@@ -10,7 +10,7 @@ local my_hook = function(factory)
                                     knockdown3 = "assets/robot-part/girls/knockdown.0003-1.png",
                                     knockdown4 = "assets/robot-part/girls/knockdown.0004-1.png",
 
-                                    knockdownToStand1 = "assets/robot-part/girls/knockdownToStand.0001-1.png",
+                                    knockdownToStand1 = "assets/robot-part/girls/knockdownTostand.0001-1.png",
 
                                     roll1 = "assets/robot-part/girls/roll.0001-1.png",
 
