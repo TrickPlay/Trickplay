@@ -320,6 +320,10 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     
     base = editor_lb:build_path( home , "trickplay-editor"  )
 
+    if editor_lb:readdir( base ) == nil then 
+		settings.project = nil
+	end 
+
     assert( editor_lb:mkdir( base ) )
     
     -- The list of files and directories there. We go through it and look for
@@ -349,6 +353,15 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
         end   
 	
         app_path = editor_lb:build_path( base , project )
+
+    	if editor_lb:readdir( app_path ) == nil or #editor_lb:readdir( app_path ) == 0 then 
+			set_new_project("unsaved_project")
+			return  
+			--project = "unnamed_project"
+        	--app_path = editor_lb:build_path( base , project )
+		end 
+
+
         if not editor_lb:mkdir( app_path ) then
         -- Tell the user we were not able to create it
    	     	print("couldn't create ",app_path)  
@@ -376,16 +389,19 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
 		local dir = editor_lb:readdir(current_dir.."/screens")
 
+		if dir == nil then return end 
+
 		for i, v in pairs(dir) do
-				if v == "unsaved_temp.lua" then 
-					if readfile("screens/"..v) ~= "" then 
-						msg_window.inputMsgWindow_openfile(v) 
-						editor_lb:writefile("screens/"..v, "", true)
-						current_fn = "" 
-					end 
+			if v == "unsaved_temp.lua" then 
+				if readfile("screens/"..v) ~= "" then 
+					msg_window.inputMsgWindow_openfile(v) 
+					editor_lb:writefile("screens/"..v, "", true)
+					current_fn = "" 
 				end 
+			end 
 		end 
 		return 
+
 	elseif from_main then 
 
 		set_new_project("unsaved_project")
