@@ -426,7 +426,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	The duration property specifies the length of time in milliseconds of the transition to the target state. This instance of duration applies only to the current transition. If not specified, any value specified in the default duration property specified outside of the transitions table is used. If the default duration property is not specified, a default value of 1000 milliseconds (1 second) is used.
 	
-	Finally, each entry in the transitions table must contain either an animator property or a keys property, but not both. Both properties specify the animation to perform when the states change from the source to the target states. The animator property specifies an <Animator> object that defines the associated animation. The keys property specifies a table of key frame entries that define the associated animation. Each key frame is itself a table containing the following six components.
+	Finally, each entry in the transitions table must contain either an animator property or a keys property, but not both. Both properties specify the animation to perform when the state changes from the source to the target. The animator property specifies an <Animator> object that defines the associated animation. The keys property specifies a table of key frame entries that define the associated animation. Each key frame is itself a table containing the following six components.
 	
 	(code)
 	{ AnimatedObject, AnimatedProperty, AlphaMode, FinalValue, PreDelay, PostDelay }
