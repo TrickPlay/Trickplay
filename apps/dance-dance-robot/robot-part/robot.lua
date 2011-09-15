@@ -242,6 +242,7 @@ robot.extra.sequence = {
                             'jump',
                             'hover',
                             'fall',
+                            'base',
                             'crouch'
                         }
 robot.extra.current_pos = 1

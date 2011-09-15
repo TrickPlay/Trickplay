@@ -26,7 +26,7 @@ well_done.scale = { 2, 2 }
 well_done:hide()
 
 screen:add(background)
-screen:add(girl_in_white,girl_in_black,robot)
+screen:add(robot,girl_in_white,girl_in_black)
 screen:add(score_gauge)
 screen:add(screen_border)
 screen:add(well_done)
