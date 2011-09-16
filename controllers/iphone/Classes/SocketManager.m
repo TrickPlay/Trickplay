@@ -30,12 +30,20 @@
 @synthesize host;
 
 
--(id)initSocketStream:(NSString *)theHost
+- (id)initSocketStream:(NSString *)theHost
                  port:(NSUInteger)thePort
              delegate:(id <SocketManagerDelegate>)theDelegate
              protocol:(CommandProtocol)protocol {
     if ((self = [super init])) {
         functional = YES;
+        
+        self.input_stream = nil;
+        self.output_stream = nil;
+        self.host = nil;
+        self.delegate = nil;
+        
+        commandInterpreter = nil;
+        writeQueue = nil;
         
         // Defines the type of communications protocol that will be used
         // for messages coming through this socket
@@ -81,11 +89,9 @@
         [input_stream setDelegate:self];
         [output_stream setDelegate:self];
 
-        
         writeQueue = [[NSMutableArray alloc] initWithCapacity:20];
         
         delegate = theDelegate;
-        
         
         [input_stream scheduleInRunLoop:[NSRunLoop currentRunLoop]
                                 forMode:NSDefaultRunLoopMode];
@@ -103,7 +109,7 @@
     return functional;
 }
 
--(void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode {
+- (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode {
     CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
     switch (eventCode) {
         /**
@@ -246,30 +252,56 @@
     port = value;
 }
 
+- (void)setCommandInterpreterDelegate:(id)_delegate {
+    if (commandInterpreter && _delegate) {
+        if ([commandInterpreter isKindOfClass:[CommandInterpreterApp class]]) {
+            ((CommandInterpreterApp *)commandInterpreter).delegate = (id <CommandInterpreterAppDelegate>)_delegate;
+        } else if ([commandInterpreter isKindOfClass:[CommandInterpreterAdvancedUI class]]) {
+            ((CommandInterpreterAdvancedUI *)commandInterpreter).delegate = (id <CommandInterpreterAdvancedUIDelegate>)_delegate;
+        }
+    }
+}
+
+- (void)disconnect {
+    functional = NO;
+    
+    self.host = nil;
+    self.delegate = nil;
+    
+    if (input_stream) {
+        [input_stream close];
+        [input_stream removeFromRunLoop:[NSRunLoop currentRunLoop]
+                                forMode:NSDefaultRunLoopMode];
+        input_stream.delegate = nil;
+        self.input_stream = nil;
+    }
+    
+    if (output_stream) {
+        [output_stream close];    
+        [output_stream removeFromRunLoop:[NSRunLoop currentRunLoop] 
+                                 forMode:NSDefaultRunLoopMode];
+        output_stream.delegate = nil;
+        self.output_stream = nil;
+    }
+    
+    if (writeQueue) {
+        [writeQueue release];
+        writeQueue = nil;
+    }
+    
+    if (commandInterpreter) {
+        [commandInterpreter release];
+        commandInterpreter = nil;
+    }
+    
+    NSLog(@"Socket disconnected");
+}
+
 - (void)dealloc {
     NSLog(@"Socket Manager dealloc with CommandInterpreter: %@", commandInterpreter);
 
-    [host release];
-    
-    [input_stream close];
-    [output_stream close];
-    
-    [input_stream removeFromRunLoop:[NSRunLoop currentRunLoop]
-                            forMode:NSDefaultRunLoopMode];
-    [output_stream removeFromRunLoop:[NSRunLoop currentRunLoop] 
-                             forMode:NSDefaultRunLoopMode];
-    
-    [input_stream setDelegate:nil];
-    [output_stream setDelegate:nil];
-    
-    [input_stream release];
-    [output_stream release];
-    
-    [writeQueue release];
-    [commandInterpreter release];
-    
-    self.delegate = nil;
-    
+    [self disconnect];
+        
     [super dealloc];
 }
 

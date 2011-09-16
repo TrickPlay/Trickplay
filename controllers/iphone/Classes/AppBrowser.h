@@ -7,26 +7,50 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "TPAppViewController.h"
+#import "TVConnection.h"
+
+@class AppBrowser;
+@class AppBrowserViewController;
+
+
+@interface AppInfo : NSObject {
+
+    // TODO: Remember to add all the variables
+    @private
+    NSString *name;
+    NSString *appID;
+}
+
+@property (readonly) NSString *name;
+@property (readonly) NSString *appID;
+
+@end
+
+
 
 @protocol AppBrowserDelegate <NSObject>
 
 @required
-- (void)didReceiveAvailableAppsInfo:(NSArray *)info;
-- (void)didReceiveCurrentAppInfo:(NSDictionary *)info;
+- (void)appBrowser:(AppBrowser *)appBrowser didReceiveAvailableApps:(NSArray *)apps;
+- (void)appBrowser:(AppBrowser *)appBrowser didReceiveCurrentApp:(AppInfo *)app;
+- (void)appBrowser:(AppBrowser *)appBrowser newAppLaunched:(AppInfo *)app successfully:(BOOL)success;
 
 @end
 
+
+
 @interface AppBrowser : NSObject {
+    @public
     id <AppBrowserDelegate> delegate;
     
-    NSString *host;
-    NSUInteger port;
-    NSString *serviceName;
+    TVConnection *tvConnection;
     
-    // The delegates for the connections
-    id <AppBrowserDelegate> fetchAppsDelegate;
-    id <AppBrowserDelegate> currentAppDelegate;
+    NSMutableArray *availableApps;
+    // The current app running on Trickplay
+    AppInfo *currentApp;
+
+    @private
+    NSMutableArray *viewControllers;
     
     // Asynchronous URL connections for populating the table with
     // available apps and fetching information on the current
@@ -37,32 +61,30 @@
     // The data buffers for the connections
     NSMutableData *fetchAppsData;
     NSMutableData *currentAppData;
-    
-    NSMutableArray *appsAvailable;
-    // Name of the current app running on Trickplay
-    NSString *currentAppName;
 }
-
-- (void)setupService:(NSUInteger)port
-            hostName:(NSString *)hostName
-            serviceName:(NSString *)serviceName;
-
-- (BOOL)hasRunningApp;
-
-- (NSDictionary *)getCurrentAppInfo;
-- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
-- (NSArray *)fetchApps;
-- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
-
-- (void)launchApp:(NSDictionary *)appInfo;
 
 // Exposed instance variables
 @property (assign) id <AppBrowserDelegate> delegate;
-@property (retain) NSMutableArray *appsAvailable;
-@property (retain) NSString *currentAppName;
+@property (readonly) NSMutableArray *availableApps;
+@property (readonly) AppInfo *currentApp;
+@property (retain) TVConnection *tvConnection;
 
-@property (retain) NSString *host;
-@property (assign) NSUInteger port;
-@property (retain) NSString *serviceName;
+- (id)initWithDelegate:(id <AppBrowserDelegate>)delegate;
+- (id)initWithConnection:(TVConnection *)tvConnection delegate:(id <AppBrowserDelegate>)delegate;
+
+- (AppBrowserViewController *)createAppBrowserViewController;
+
+- (void)refresh;
+
+//- (BOOL)hasRunningApp;
+
+//- (NSDictionary *)getCurrentAppInfo;
+- (void)refreshCurrentApp;
+//- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
+//- (NSArray *)getAvailableAppsInfo;
+//- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
+- (void)refreshAvailableApps;
+- (void)launchApp:(AppInfo *)app;
+
 
 @end

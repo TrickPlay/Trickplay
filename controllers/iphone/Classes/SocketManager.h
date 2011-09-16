@@ -24,8 +24,6 @@
 @end
 
 
-
-
 @protocol SocketManagerDelegate
 
 @required
@@ -67,6 +65,7 @@ typedef enum {
               delegate:(id <SocketManagerDelegate>)theDelegate
               protocol:(CommandProtocol)protocol;
 - (BOOL)isFunctional;
+- (void)disconnect;
 
 - (void)sendData:(const void *)data numberOfBytes:(int)bytes;
 - (BOOL)sendPackets;
@@ -75,5 +74,7 @@ typedef enum {
 // Getters/Setters not synthesized
 - (NSUInteger)port;
 - (void)setPort:(NSUInteger)value;
+
+- (void)setCommandInterpreterDelegate:(id)delegate;
 
 @end

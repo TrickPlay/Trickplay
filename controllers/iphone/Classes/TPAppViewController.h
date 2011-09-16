@@ -103,6 +103,7 @@
 #import "CameraViewController.h"
 #import "VirtualRemoteViewController.h"
 #import "GestureImageView.h"
+#import "TVConnection.h"
 
 /**
  * The TPAppViewController class is the core component of the Take Control app.
@@ -146,14 +147,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // Manages the asynchronous socket the TPAppViewController communicates
     // to Trickplay with
     SocketManager *socketManager;
-    // Current host name for asynchronous communication with Trickplay
-    NSString *hostName;
-    // Current port number for asynchronous communication with Trickplay
-    NSUInteger port;
-    // HTTP port number used for http requests. Utilized for gathering lists
-    // of app data from Trickplay and pulling resources such as images and
-    // audio from Trickplay
-    NSString *http_port;
+    // The Connection
+    TVConnection *tvConnection;
     // Current version of the app
     NSString *version;
     
@@ -234,6 +229,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 @property (nonatomic, retain) NSString *version;
 @property (nonatomic, assign) SocketManager *socketManager;
+@property (retain) TVConnection *tvConnection;
 
 @property (assign) BOOL graphics;
 
@@ -249,11 +245,10 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @property (nonatomic, retain) id <AdvancedUIDelegate> advancedUIDelegate;
 
 
-- (void)setupService:(NSUInteger)port
-            hostname:(NSString *)hostName
-            serviceName:(NSString *)name;
 
-- (BOOL)startService;
+- (id)initWithTVConnection:(TVConnection *)tvConnection;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection;
+
 - (BOOL)hasConnection;
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
 
