@@ -7,6 +7,29 @@
 #include "common.h"
 //-----------------------------------------------------------------------------
 
+//.............................................................................
+// Copied from lauxlib.c
+
+#define abs_index(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : lua_gettop(L) + (i) + 1)
+
+//.............................................................................
+
+// Returns ms
+
+inline double timestamp()
+{
+    static GTimer * timer = 0;
+
+    if ( ! timer )
+    {
+        timer = g_timer_new();
+    }
+
+    return g_timer_elapsed( timer , 0 ) * 1000;
+}
+
+//-----------------------------------------------------------------------------
+
 inline void g_info( const gchar * format, ... )
 {
     va_list args;
@@ -69,6 +92,10 @@ inline StringVector split_string( const String & source , const gchar * delimite
 
 //-----------------------------------------------------------------------------
 
+#define lua_really_isstring(L,i) (lua_type(L,i)==LUA_TSTRING)
+
+//-----------------------------------------------------------------------------
+
 class RefCounted
 {
 public:
@@ -109,12 +136,20 @@ public:
         return NULL;
     }
 
+    static void ref_counted_destroy( gpointer rc )
+    {
+        RefCounted::unref( ( RefCounted * ) rc );
+    }
+
 protected:
 
     virtual ~RefCounted()
     {}
 
 private:
+
+    RefCounted( const RefCounted & )
+    {}
 
     gint ref_count;
 };
@@ -164,79 +199,6 @@ protected:
         }
     }
 };
-
-//-----------------------------------------------------------------------------
-
-class _Debug_ON
-{
-public:
-
-    _Debug_ON( const char * _prefix = 0 )
-    {
-        prefix = _prefix ? g_strdup_printf( "[%s]" , _prefix ) : 0;
-    }
-
-    ~_Debug_ON()
-    {
-        g_free( prefix );
-    }
-
-    inline void operator()( const gchar * format, ...)
-    {
-        if ( prefix )
-        {
-            va_list args;
-            va_start( args, format );
-            gchar * message = g_strdup_vprintf( format , args );
-            va_end( args );
-            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , "%s %s" , prefix , message );
-            g_free( message );
-        }
-        else
-        {
-            va_list args;
-            va_start( args, format );
-            g_logv( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , format , args );
-            va_end( args );
-        }
-    }
-
-    inline operator bool()
-    {
-        return true;
-    }
-
-private:
-
-    gchar * prefix;
-};
-
-class _Debug_OFF
-{
-public:
-
-    _Debug_OFF( const char * prefix = 0 )
-    {
-    }
-
-    inline void operator()( const gchar * format, ...)
-    {
-    }
-
-    inline operator bool()
-    {
-        return false;
-    }
-};
-
-#ifdef TP_PRODUCTION
-#define Debug_ON    _Debug_OFF
-#define Debug_OFF   _Debug_OFF
-#else
-#define Debug_ON    _Debug_ON
-#define Debug_OFF   _Debug_OFF
-#endif
-
 
 //-----------------------------------------------------------------------------
 // This class lets you push things to free into it - when this instance is
@@ -298,23 +260,46 @@ class Action
 {
 public:
 
-    Action( int interval = -1 );
-
     virtual ~Action();
 
-    static guint post( Action * action );
+    static void destroy( gpointer action );
+
+    // Posts this action to run as an idle, or a timeout if interval_ms > -1
+    // Returns the source tag.
+
+    static guint post( Action * action , int interval_ms = -1 );
+
+    // Pushes the action into the queue
+
+    static void push( GAsyncQueue * queue , Action * action );
+
+    // Tries to pop and run one from the queue, waiting if wait_ms > 0.
+    // Returns true if one ran.
+
+    static bool run_one( GAsyncQueue * queue , gulong wait_ms );
+
+    // Tries to run as many as it can pop from the queue, without
+    // waiting. Returns how many ran.
+
+    static int run_all( GAsyncQueue * queue );
+
+    // Posts an idle action that will call run_all from the given
+    // queue when it executes. Refs the queue and then unrefs it.
+
+    static void post_run_all( GAsyncQueue * queue );
 
 protected:
+
+    // You implement this. In the case of idle or timeout actions,
+    // returning true will let them run again. Returning false
+    // will take them out and destroy them. For queue actions,
+    // the return value is ignored.
 
     virtual bool run() = 0;
 
 private:
 
-    static void destroy( Action * action );
-
     static gboolean run_internal( Action * action );
-
-    int interval;
 };
 
 //-----------------------------------------------------------------------------
@@ -332,6 +317,8 @@ namespace Util
         g_free( s );
         return result;
     }
+
+    String random_string( guint length );
 
     //-----------------------------------------------------------------------------
 
@@ -423,6 +410,19 @@ namespace Util
         ::GTimer *  timer;
     };
 
+    //-------------------------------------------------------------------------
+    // This takes a path that came from a configuration file or command line
+    // and ensures that it is an absolute, canonical path. It accepts file:
+    // URIs. If the path is relative, it will be made absolute with respect
+    // to the current working directory.
+    //
+    // This should NOT be used for paths that come from Lua apps.
+    //
+    // If there is an error, it will return an empty string, unless
+    // abort_on_error is true, in which case it will abort.
+
+    String canonical_external_path( const char * path , bool abort_on_error = true );
+
     //-----------------------------------------------------------------------------
     // Converts a path using / to a platform path in place - modifies the string
     // passed in.
@@ -444,13 +444,20 @@ namespace Util
     // NOTE: if path contains any .. elements, this will abort. The assumption
     // is that root is trusted and path came from Lua - and cannot be trusted
 
-    inline gchar * rebase_path( const gchar * root, const gchar * path )
+    inline gchar * rebase_path( const gchar * root, const gchar * path , bool abort = true )
     {
         FreeLater free_later;
 
         if ( strstr( path, ".." ) )
         {
-            g_error( "Invalid relative path '%s'", path );
+            if ( abort )
+            {
+                g_error( "Invalid relative path '%s'", path );
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         gchar * p = path_to_native_path( g_strdup( path ) );
@@ -461,7 +468,7 @@ namespace Util
         gchar * first = path_to_native_path( g_strdup( root ) );
         free_later( first );
 
-        return g_build_filename( first, last, NULL );
+        return g_build_filename( first, last, ( gpointer ) 0 );
     }
 
     //-----------------------------------------------------------------------------

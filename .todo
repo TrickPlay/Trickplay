@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<todo version="0.1.20">
-    <title>
-        TrickPlay TODO list
-    </title>
-    <note priority="medium" time="1274135381">
-        Resolve font glyph rendering/blending bug
-    </note>
-</todo>

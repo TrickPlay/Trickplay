@@ -11,8 +11,13 @@
 #include "network.h"
 
 //.............................................................................
-static Debug_ON log( "AUDIO-SAMPLING" );
-static Debug_OFF log2( "AUDIO-SAMPLING" );
+
+#define TP_LOG_DOMAIN   "AUDIO-SAMPLING"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
+
 //.............................................................................
 
 struct TPAudioSampler
@@ -69,7 +74,9 @@ struct TPAudioSampler
         //.....................................................................
         // List of buffers
 
-        typedef std::list< TPAudioBuffer * > BufferList;
+        typedef std::pair< TPAudioBuffer * , SF_INFO > BufferPair;
+
+        typedef std::list< BufferPair > BufferList;
 
         //.....................................................................
         // List of plugins
@@ -167,9 +174,12 @@ struct TPAudioSampler
         //.....................................................................
 
         TPContext *     context;
+        GMutex *        mutex;
         GAsyncQueue *   queue;
         GThread *       thread;
         PluginList      plugins;
+        guint32         max_buffer_kb;
+        guint           max_interval;
 
         //.....................................................................
         // Network stuff
@@ -430,13 +440,13 @@ TPAudioSampler::Thread::Plugin * TPAudioSampler::Thread::Plugin::make( const gch
 {
     g_assert( file_name );
 
-    log( "FOUND PLUGIN %s" , file_name );
+    tplog( "FOUND PLUGIN %s" , file_name );
 
     GModule * module = g_module_open( file_name , G_MODULE_BIND_LOCAL );
 
     if ( ! module )
     {
-        log( "  FAILED TO OPEN : %s" , g_module_error() );
+        tplog( "  FAILED TO OPEN : %s" , g_module_error() );
         return 0;
     }
 
@@ -488,7 +498,7 @@ TPAudioSampler::Thread::Plugin::Plugin( GModule * _module ,
 
         if ( g_file_get_contents( file_name.c_str() , & config , 0 , 0 ) )
         {
-            log( "CONFIG LOADED" );
+            tplog( "CONFIG LOADED" );
         }
     }
 
@@ -506,11 +516,11 @@ TPAudioSampler::Thread::Plugin::Plugin( GModule * _module ,
     info.name[ sizeof( info.name ) - 1 ] = 0;
     info.version[ sizeof( info.version ) - 1 ] = 0;
 
-    log( "  NAME        : %s" , info.name );
-    log( "  VERSION     : %s" , info.version );
-    log( "  RESIDENT    : %s" , info.resident ? "YES" : "NO" );
-    log( "  MIN SECONDS : %u" , info.min_buffer_seconds );
-    log( "  USER DATA   : %p" , info.user_data );
+    tplog( "  NAME        : %s" , info.name );
+    tplog( "  VERSION     : %s" , info.version );
+    tplog( "  RESIDENT    : %s" , info.resident ? "YES" : "NO" );
+    tplog( "  MIN SECONDS : %u" , info.min_buffer_seconds );
+    tplog( "  USER DATA   : %p" , info.user_data );
 
     if ( info.resident )
     {
@@ -534,13 +544,13 @@ gpointer TPAudioSampler::Thread::Plugin::get_symbol( GModule * module , const gc
 
     if ( ! g_module_symbol( module , name , & result ) )
     {
-        log( "  MISSING SYMBOL '%s'" , name );
+        tplog( "  MISSING SYMBOL '%s'" , name );
         return 0;
     }
 
     if ( ! result )
     {
-        log( "  SYMBOL '%s' IS NULL" , name );
+        tplog( "  SYMBOL '%s' IS NULL" , name );
         return 0;
     }
 
@@ -553,20 +563,40 @@ gpointer TPAudioSampler::Thread::Plugin::get_symbol( GModule * module , const gc
 TPAudioSampler::Thread::Thread( TPContext * _context )
 :
     context( _context ),
+    mutex( g_mutex_new() ),
     queue( g_async_queue_new_full( ( GDestroyNotify ) Event::destroy ) ),
     thread( 0 ),
+    max_buffer_kb( 0 ),
+    max_interval( 0 ),
     event_group( 0 ),
     network( 0 )
-
 {
     if ( ! context->get_bool( TP_AUDIO_SAMPLER_ENABLED , true ) )
     {
-        g_warning( "AUDIO SAMPLER IS DISABLED" );
+        tpwarn( "AUDIO SAMPLER IS DISABLED" );
     }
     else
     {
+        max_buffer_kb = context->get_int( TP_AUDIO_SAMPLER_MAX_BUFFER_KB , 5000 );
+
+        if ( max_buffer_kb == 0 )
+        {
+            max_buffer_kb = 5000;
+        }
+
+        max_interval = context->get_int( TP_AUDIO_SAMPLER_MAX_INTERVAL , 10 );
+
+        if ( max_interval == 0 )
+        {
+            max_interval = 1;
+        }
+
         if ( scan_for_plugins( context ) )
         {
+            // Lock this mutex so the thread won't start until we are done
+
+            g_mutex_lock( mutex );
+
             // Create the thread that will process the audio samples
 
             GError * error = 0;
@@ -575,7 +605,7 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
 
             if ( ! thread )
             {
-                g_warning( "FAILED TO CREATE AUDIO SAMPLER PROCESSING THREAD : %s" , error->message );
+                tpwarn( "FAILED TO CREATE AUDIO SAMPLER PROCESSING THREAD : %s" , error->message );
 
                 g_clear_error( & error );
 
@@ -589,6 +619,8 @@ TPAudioSampler::Thread::Thread( TPContext * _context )
 
                 network = new Network( Network::Settings( context ) , event_group );
             }
+
+            g_mutex_unlock( mutex );
         }
     }
 }
@@ -613,16 +645,18 @@ TPAudioSampler::Thread::~Thread()
     {
         push_event( Event::make( Event::QUIT ) );
 
-        log( "WAITING FOR PROCESSING THREAD..." );
+        tplog( "WAITING FOR PROCESSING THREAD..." );
 
         g_thread_join( thread );
     }
 
     g_async_queue_unref( queue );
 
+    g_mutex_free( mutex );
+
     if ( ! plugins.empty() )
     {
-        log( "CLOSING PLUGINS..." );
+        tplog( "CLOSING PLUGINS..." );
 
         for ( PluginList::iterator it = plugins.begin(); it != plugins.end(); ++ it )
         {
@@ -637,7 +671,7 @@ bool TPAudioSampler::Thread::scan_for_plugins( TPContext * context )
 {
     if ( ! g_module_supported() )
     {
-        g_warning( "PLUGINS ARE NOT SUPPORTED ON THIS PLATFORM" );
+        tpwarn( "PLUGINS ARE NOT SUPPORTED ON THIS PLATFORM" );
 
         return false;
     }
@@ -646,7 +680,7 @@ bool TPAudioSampler::Thread::scan_for_plugins( TPContext * context )
 
     if ( ! plugins_path )
     {
-        g_warning( "PLUGINS PATH IS NOT SET" );
+        tpwarn( "PLUGINS PATH IS NOT SET" );
 
         return false;
     }
@@ -657,7 +691,7 @@ bool TPAudioSampler::Thread::scan_for_plugins( TPContext * context )
 
     if ( ! dir )
     {
-        g_warning( "FAILED TO OPEN PLUGINS PATH '%s' : %s" , plugins_path , error->message );
+        tpwarn( "FAILED TO OPEN PLUGINS PATH '%s' : %s" , plugins_path , error->message );
 
         g_clear_error( & error );
 
@@ -736,38 +770,38 @@ void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
         return;
     }
 
-    log2( "BUFFER : sample_rate=%u : channels=%u : format=0x%x : samples=%p : size=%lu : copy_samples=%d : free_samples=%p",
+    tplog2( "BUFFER : sample_rate=%u : channels=%u : format=0x%x : samples=%p : size=%lu : copy_samples=%d : free_samples=%p",
             _buffer->sample_rate , _buffer->channels , _buffer->format , _buffer->samples , _buffer->size , _buffer->copy_samples , _buffer->free_samples );
 
     // First pass validation
 
     if ( _buffer->sample_rate == 0 )
     {
-        g_warning( "INVALID AUDIO BUFFER : sample_rate == 0" );
+        tpwarn( "INVALID AUDIO BUFFER : sample_rate == 0" );
         return;
     }
 
     if ( _buffer->channels == 0 )
     {
-        g_warning( "INVALID AUDIO BUFFER : channels == 0" );
+        tpwarn( "INVALID AUDIO BUFFER : channels == 0" );
         return;
     }
 
     if ( _buffer->samples == 0 )
     {
-        g_warning( "INVALID AUDIO BUFFER : samples == 0" );
+        tpwarn( "INVALID AUDIO BUFFER : samples == 0" );
         return;
     }
 
     if ( _buffer->size == 0  )
     {
-        g_warning( "INVALID AUDIO BUFFER : size == 0" );
+        tpwarn( "INVALID AUDIO BUFFER : size == 0" );
         return;
     }
 
     if ( _buffer->copy_samples == 0 && _buffer->free_samples == 0 )
     {
-        g_warning( "INVALID AUDIO BUFFER : copy_samples == 0 && free_samples == 0" );
+        tpwarn( "INVALID AUDIO BUFFER : copy_samples == 0 && free_samples == 0" );
         return;
     }
 
@@ -777,7 +811,7 @@ void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
 
     if ( ! buffer )
     {
-        g_warning( "FAILED TO ALLOCATE MEMORY FOR AUDIO BUFFER" );
+        tpwarn( "FAILED TO ALLOCATE MEMORY FOR AUDIO BUFFER" );
 
         return;
     }
@@ -792,7 +826,7 @@ void TPAudioSampler::Thread::submit_buffer( TPAudioBuffer * _buffer )
 
         if ( ! samples )
         {
-            g_warning( "FAILED TO COPY AUDIO BUFFER SAMPLES : size = %lu" , _buffer->size );
+            tpwarn( "FAILED TO COPY AUDIO BUFFER SAMPLES : size = %lu" , _buffer->size );
 
             destroy_buffer( buffer );
 
@@ -825,7 +859,7 @@ void TPAudioSampler::Thread::source_changed()
 {
     if ( thread )
     {
-        log( "SOURCE CHANGED" );
+        tplog( "SOURCE CHANGED" );
 
         push_event( Event::make( Event::SOURCE_CHANGED ) );
     }
@@ -837,7 +871,7 @@ void TPAudioSampler::Thread::pause()
 {
     if ( thread )
     {
-        log( "PAUSE" );
+        tplog( "PAUSE" );
 
         push_event( Event::make( Event::PAUSE ) );
     }
@@ -849,7 +883,7 @@ void TPAudioSampler::Thread::resume()
 {
     if ( thread )
     {
-        log( "RESUME" );
+        tplog( "RESUME" );
 
         push_event( Event::make( Event::RESUME ) );
     }
@@ -874,7 +908,12 @@ void TPAudioSampler::Thread::push_event( Event * event )
 
 void TPAudioSampler::Thread::process()
 {
-    log( "STARTED PROCESSING THREAD" );
+    // Wait until this mutex is available to continue
+
+    g_mutex_lock( mutex );
+    g_mutex_unlock( mutex );
+
+    tplog( "STARTED PROCESSING THREAD" );
 
     g_async_queue_ref( queue );
 
@@ -885,6 +924,8 @@ void TPAudioSampler::Thread::process()
     BufferList buffers;
 
     gdouble buffered_seconds = 0;
+
+    gdouble buffered_kb = 0;
 
     int paused = 0;
 
@@ -922,12 +963,14 @@ void TPAudioSampler::Thread::process()
 
                 for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
                 {
-                    destroy_buffer( * it );
+                    destroy_buffer( it->first );
                 }
 
                 buffers.clear();
 
                 buffered_seconds = 0;
+
+                buffered_kb = 0;
 
                 // We also cancel any outstanding callbacks we have from
                 // network requests.
@@ -978,7 +1021,7 @@ void TPAudioSampler::Thread::process()
 
                     if ( ! sf )
                     {
-                        log( "FAILED TO OPEN AUDIO BUFFER" );
+                        tplog( "FAILED TO OPEN AUDIO BUFFER" );
                     }
                     else
                     {
@@ -986,10 +1029,12 @@ void TPAudioSampler::Thread::process()
 
                         buffered_seconds += gdouble( info.frames ) / gdouble( info.samplerate );
 
+                        buffered_kb += event->buffer->size / 1024.0;
+
                         // We put the buffer in our list and steal it
                         // from the event - so that it won't free it.
 
-                        buffers.push_back( event->buffer );
+                        buffers.push_back( BufferPair( event->buffer , info ) );
 
                         event->buffer = 0;
                     }
@@ -1005,9 +1050,9 @@ void TPAudioSampler::Thread::process()
                 {
                     // This one is out of order, we ignore it
 
-                    log( "REQ %u : NEXT REQ %u : LAST RESP %u" , event->request , event->plugin->next_request , event->plugin->last_response );
+                    tplog( "REQ %u : NEXT REQ %u : LAST RESP %u" , event->request , event->plugin->next_request , event->plugin->last_response );
 
-                    log( "RESPONSE IS OUT OF ORDER, WILL BE IGNORED." );
+                    tplog( "RESPONSE IS OUT OF ORDER, WILL BE IGNORED." );
                 }
                 else
                 {
@@ -1019,7 +1064,7 @@ void TPAudioSampler::Thread::process()
 
                     if ( ! event->result->parse_response )
                     {
-                        log( "GOT URL RESPONSE WITH JSON" );
+                        tplog( "GOT URL RESPONSE WITH JSON" );
 
                         // We use strndup to make sure it is NULL terminated
 
@@ -1033,7 +1078,7 @@ void TPAudioSampler::Thread::process()
                     {
                         // The plugin does have a parse response function, we call it now
 
-                        log( "GOT URL RESPONSE TO PARSE. INVOKING PARSE_RESPONSE" );
+                        tplog( "GOT URL RESPONSE TO PARSE. INVOKING PARSE_RESPONSE" );
 
                         event->result->parse_response( event->result , ( const char * ) event->response->data , event->response->len );
 
@@ -1041,11 +1086,11 @@ void TPAudioSampler::Thread::process()
 
                         if ( ! event->result->json )
                         {
-                            log( "PLUGIN FAILED TO PARSE RESPONSE" );
+                            tplog( "PLUGIN FAILED TO PARSE RESPONSE" );
                         }
                         else
                         {
-                            log( "RESPONSE PARSED" );
+                            tplog( "RESPONSE PARSED" );
 
                             got_a_match( event->result->json );
                         }
@@ -1064,28 +1109,69 @@ void TPAudioSampler::Thread::process()
         Event::destroy( event );
 
         //.................................................................
-        // Process pending buffers
+        // No buffers, so carry on waiting.
 
-        if ( paused || buffers.empty() )
+        if ( buffers.empty() )
         {
             continue;
         }
 
         //.................................................................
-        // How much time do we have?
+        // See if our buffer list is getting too big
 
-        if ( buffered_seconds < 5 )
+        bool overflow = max_buffer_kb == 0 ? false : buffered_kb >= max_buffer_kb;
+
+        //.................................................................
+        // If we are paused, and there is an overflow, we need to dump
+        // some buffers.
+
+        if ( paused )
+        {
+            // TODO: If max_buffer_kb is 0, this will not get rid of anything.
+
+            if ( overflow )
+            {
+                tplog( "BUFFER TOO BIG : HAVE %1.0f KB , %1.1f s , %u BUFFERS : MAX IS %" G_GUINT32_FORMAT " KB" , buffered_kb , buffered_seconds , buffers.size() , max_buffer_kb );
+
+                gdouble target = max_buffer_kb / 2;
+
+                while ( buffered_kb > target && ! buffers.empty() )
+                {
+                    BufferPair & item( buffers.front() );
+
+                    buffered_kb -= item.first->size / 1024.0;
+
+                    buffered_seconds -= gdouble( item.second.frames ) / gdouble( item.second.samplerate );
+
+                    destroy_buffer( item.first );
+
+                    buffers.pop_front();
+                }
+            }
+
+            continue;
+        }
+
+        //.................................................................
+        // If we have not reached our max buffer size and we have less
+        // than interval seconds, we keep accumulating.
+
+        if ( ! overflow && buffered_seconds < max_interval )
         {
             continue;
         }
+
+        // Otherwise, we pass all of the current buffers to the plugins.
+
+        tplog2( "PROCESSING %1.0f KB , %1.1f s , %u BUFFERS : %s" , buffered_kb , buffered_seconds , buffers.size() , overflow ? "MAX BUFFER REACHED" : "INTERVAL REACHED" );
 
         // Iterate over all the buffers in the list
 
         for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
         {
-            TPAudioBuffer * buffer = * it;
+            TPAudioBuffer * buffer = it->first;
 
-            log2( "PROCESSING BUFFER" );
+            tplog2( "PROCESSING BUFFER" );
 
             // Create the virtual IO structure for this buffer
 
@@ -1107,11 +1193,11 @@ void TPAudioSampler::Thread::process()
 
             if ( ! sf )
             {
-                g_warning( "FAILED TO OPEN SOURCE BUFFER FOR READ" );
+                tpwarn( "FAILED TO OPEN SOURCE BUFFER FOR READ" );
             }
             else
             {
-                log2( "  sample rate=%d : channels=%d : frames=%" G_GOFFSET_FORMAT , info.samplerate , info.channels , info.frames );
+                tplog2( "  sample rate=%d : channels=%d : frames=%" G_GOFFSET_FORMAT , info.samplerate , info.channels , info.frames );
 
                 // Now, we read from the audio buffer a new buffer that uses float samples
 
@@ -1119,7 +1205,7 @@ void TPAudioSampler::Thread::process()
 
                 if ( ! float_samples )
                 {
-                    g_warning( "FAILED TO ALLOCATE MEMORY FOR FLOAT SAMPLES : NEED %" G_GOFFSET_FORMAT " BYTES" , info.frames * info.channels );
+                    tpwarn( "FAILED TO ALLOCATE MEMORY FOR FLOAT SAMPLES : NEED %" G_GOFFSET_FORMAT " BYTES" , goffset( info.frames * info.channels ) );
                 }
                 else
                 {
@@ -1127,14 +1213,14 @@ void TPAudioSampler::Thread::process()
 
                     if ( read != info.frames )
                     {
-                        g_warning( "FAILED TO READ FLOAT SAMPLES" );
+                        tpwarn( "FAILED TO READ FLOAT SAMPLES" );
                     }
                     else
                     {
                         // OK, now we have floating point samples that we can hand off to
                         // a library for processing.
 
-                        log2( "  READY TO PROCESS SAMPLES" );
+                        tplog2( "  READY TO PROCESS SAMPLES" );
 
                         invoke_plugins( & info , float_samples );
                     }
@@ -1154,6 +1240,8 @@ void TPAudioSampler::Thread::process()
         buffers.clear();
 
         buffered_seconds = 0;
+
+        buffered_kb = 0;
     }
 
     // The thread is exiting...
@@ -1162,12 +1250,12 @@ void TPAudioSampler::Thread::process()
 
     for ( BufferList::iterator it = buffers.begin(); it != buffers.end(); ++it )
     {
-        destroy_buffer( * it );
+        destroy_buffer( it->first );
     }
 
     g_async_queue_unref( queue );
 
-    log( "EXITING PROCESSING THREAD" );
+    tplog( "EXITING PROCESSING THREAD" );
 }
 
 //.........................................................................
@@ -1187,7 +1275,7 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
 
         g_assert( plugin );
 
-        log2( "  CALLING %s" , plugin->info.name );
+        tplog2( "  CALLING %s" , plugin->info.name );
 
         TPAudioDetectionResult * result = plugin->process_samples( & s , plugin->info.user_data );
 
@@ -1195,7 +1283,7 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
 
         if ( ! result )
         {
-            log2( "    RETURNED NULL" );
+            tplog2( "    RETURNED NULL" );
             continue;
         }
 
@@ -1209,7 +1297,7 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
 
         if ( result->json )
         {
-            log( "    RETURNED JSON '%s'" , result->json );
+            tplog( "    RETURNED JSON '%s'" , result->json );
 
             got_a_match( result->json );
 
@@ -1219,11 +1307,11 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
         {
             if ( ! result->url )
             {
-                log( "    DID NOT RETURN JSON OR A URL" );
+                tplog( "    DID NOT RETURN JSON OR A URL" );
             }
             else
             {
-                log( "    RETURNED URL '%s'" , result->url );
+                tplog( "    RETURNED URL '%s'" , result->url );
 
                 // The plugin returned a URL, which means it wants us to
                 // call that URL, so we create a request for it.
@@ -1305,19 +1393,19 @@ void TPAudioSampler::Thread::response_callback( const Network::Response & respon
 
     if ( response.failed )
     {
-        log( "REQUEST FROM PLUGIN FAILED FOR '%s' : %s" , rc->result->url , response.status.c_str() );
+        tplog( "REQUEST FROM PLUGIN FAILED FOR '%s' : %s" , rc->result->url , response.status.c_str() );
 
         return;
     }
 
     if ( response.body->len == 0 )
     {
-        log( "REQUEST FROM PLUGIN CAME BACK WITH AN EMPTY BODY" );
+        tplog( "REQUEST FROM PLUGIN CAME BACK WITH AN EMPTY BODY" );
 
         return;
     }
 
-    log( "GOT URL RESPONSE" );
+    tplog( "GOT URL RESPONSE" );
 
     // Now, we ship the response to the processing thread. We create
     // an event and steal the result from the request closure.
