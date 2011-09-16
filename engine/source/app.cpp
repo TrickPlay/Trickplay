@@ -8,8 +8,15 @@
 #include "profiler.h"
 #include "json.h"
 #include "common.h"
+#include "keyboard.h"
 
-static Debug_OFF ai( "APP-IMAGE" );
+//.............................................................................
+
+#define TP_LOG_DOMAIN   "APP"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //-----------------------------------------------------------------------------
 #define APP_TABLE_NAME          "app"
@@ -21,6 +28,7 @@ static Debug_OFF ai( "APP-IMAGE" );
 #define APP_FIELD_RELEASE       "release"
 #define APP_FIELD_VERSION       "version"
 #define APP_FIELD_ACTIONS       "actions"
+#define APP_FIELD_ATTRIBUTES    "attributes"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -36,9 +44,13 @@ extern int luaopen_clutter_group( lua_State * L );
 extern int luaopen_clutter_image( lua_State * L );
 
 extern int luaopen_clutter_timeline( lua_State * L );
+extern int luaopen_clutter_animator( lua_State * L );
+extern int luaopen_clutter_state( lua_State * L );
+extern int luaopen_clutter_score( lua_State * L );
 extern int luaopen_clutter_alpha( lua_State * L );
 extern int luaopen_clutter_interval( lua_State * L );
 extern int luaopen_clutter_path( lua_State * L );
+extern int luaopen_clutter_constraint( lua_State * L );
 
 extern int luaopen_idle( lua_State * L );
 extern int luaopen_timer( lua_State * L );
@@ -51,7 +63,6 @@ extern int luaopen_profile( lua_State * L );
 extern int luaopen_xml( lua_State * L );
 extern int luaopen_controllers_module( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
-extern int luaopen_audiosampler_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
 
@@ -63,6 +74,13 @@ extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 extern int luaopen_bitmap( lua_State * L );
 extern int luaopen_canvas( lua_State * L );
+extern int luaopen_keyboard( lua_State * L );
+extern int luaopen_http_module( lua_State * L );
+
+#ifdef TP_WITH_WEBGL
+extern int luaopen_typed_array( lua_State * L );
+extern int luaopen_webgl( lua_State * L );
+#endif
 
 #ifndef TP_PRODUCTION
 extern int luaopen_devtools( lua_State * L );
@@ -114,6 +132,67 @@ bool LuaStateProxy::is_valid()
 {
     return L != NULL;
 }
+
+//=============================================================================
+
+class App::RunAction : public ::Action
+{
+public:
+
+    RunAction( App * _app , const StringSet & _allowed_names , RunCallback _run_callback , ClutterActor * _splash )
+    :
+        app( _app ),
+        allowed_names( _allowed_names ),
+        run_callback( _run_callback ),
+        splash( _splash )
+    {
+        g_assert( app );
+        g_assert( run_callback );
+
+        app->ref();
+
+        if ( splash )
+        {
+            g_object_ref( splash );
+        }
+    }
+
+    ~RunAction()
+    {
+        app->unref();
+
+        if ( splash )
+        {
+            g_object_unref( splash );
+        }
+    }
+
+protected:
+
+    bool run()
+    {
+        app->run_part2( allowed_names , run_callback );
+
+        if ( splash )
+        {
+            if ( ClutterActor * parent = clutter_actor_get_parent( splash ) )
+            {
+                clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , splash );
+            }
+        }
+
+        return false;
+    }
+
+private:
+
+    App *               app;
+    StringSet           allowed_names;
+    App::RunCallback    run_callback;
+    ClutterActor *      splash;
+
+};
+
 
 //=============================================================================
 
@@ -266,6 +345,23 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
         }
         lua_pop( L, 1 );
 
+        // Look for attributes
+
+        lua_getfield( L , -1 , APP_FIELD_ATTRIBUTES );
+        if ( lua_istable( L , -1 ) )
+        {
+            lua_pushnil( L );
+            while( lua_next( L , -2 ) )
+            {
+                if ( lua_type( L , -1 ) == LUA_TSTRING )
+                {
+                    md.attributes.insert( lua_tostring( L , -1 ) );
+                }
+                lua_pop( L , 1 );
+            }
+        }
+        lua_pop( L , 1 );
+
         // Look for actions
 
         lua_getfield( L, -1, APP_FIELD_ACTIONS );
@@ -275,7 +371,7 @@ bool App::load_metadata_from_data( const gchar * data, Metadata & md)
 
             while ( lua_next( L, -2 ) )
             {
-                if ( lua_isstring( L, -2 ) && lua_type( L, -1 ) == LUA_TTABLE )
+                if ( lua_really_isstring( L, -2 ) && lua_type( L, -1 ) == LUA_TTABLE )
                 {
                     String action_name = lua_tostring( L, -2 );
                     String uri;
@@ -706,20 +802,100 @@ void App::stage_allocation_notify( gpointer , gpointer , gpointer screen_gid )
 
 //-----------------------------------------------------------------------------
 
-int App::run( const StringSet & allowed_names )
+void App::run( const StringSet & allowed_names , RunCallback run_callback )
 {
+    FreeLater free_later;
+
     Util::GTimer t;
-
-    PROFILER( "App::run" , PROFILER_INTERNAL_CALLS );
-
-    int result = TP_RUN_OK;
 
     // Get the screen ready for the app
 
     ClutterActor * stage = clutter_stage_get_default();
+
+    g_assert( stage );
+
+    //.........................................................................
+    // Look for a splash image
+
+    ClutterActor * splash = 0;
+
+    String splash_path;
+
+    gchar * splash_jpg = g_build_filename( metadata.path.c_str(), "default.jpg", NULL );
+
+    free_later( splash_jpg );
+
+    if ( g_file_test( splash_jpg , G_FILE_TEST_EXISTS ) )
+    {
+        splash_path = splash_jpg;
+    }
+    else
+    {
+        gchar * splash_png = g_build_filename( metadata.path.c_str(), "default.png", NULL );
+
+        free_later( splash_png );
+
+        if ( g_file_test( splash_png , G_FILE_TEST_EXISTS ) )
+        {
+            splash_path = splash_png;
+        }
+    }
+
+    if ( ! splash_path.empty() )
+    {
+        Image * splash_image = Image::decode( splash_path.c_str() , false );
+
+        if ( ! splash_image )
+        {
+            g_warning( "SPLASH IMAGE EXISTS BUT COULD NOT BE DECODED" );
+        }
+        else
+        {
+            splash = clutter_texture_new();
+
+            clutter_actor_set_name( splash , "splash" );
+
+            Images::load_texture( CLUTTER_TEXTURE( splash ) , splash_image );
+
+            gfloat width;
+            gfloat height;
+
+            clutter_actor_get_size( stage , & width , & height );
+
+            clutter_actor_set_scale( splash , width / splash_image->width() , height / splash_image->height() );
+
+            clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , splash );
+
+            clutter_actor_show( stage );
+
+            clutter_actor_queue_redraw( stage );
+
+            delete splash_image;
+
+            g_info( "APP SPLASH %s : %1.3f s", metadata.id.c_str() , t.elapsed() );
+        }
+    }
+
+    //.........................................................................
+
+    ::Action::post( new RunAction( this , allowed_names , run_callback , splash ) );
+}
+
+
+void App::run_part2( const StringSet & allowed_names , RunCallback run_callback )
+{
+    PROFILER( "App::run" , PROFILER_INTERNAL_CALLS );
+
+    g_info( "RUNNING %s" , metadata.id.c_str() );
+
+    Util::GTimer t;
+
+    ClutterActor * stage = clutter_stage_get_default();
+
     g_assert( stage );
 
     ClutterActor * screen = clutter_group_new();
+
     g_assert( screen );
 
     clutter_actor_set_position( screen, 0, 0 );
@@ -730,6 +906,10 @@ int App::run( const StringSet & allowed_names )
     screen_gid = clutter_actor_get_gid( screen );
 
     stage_allocation_handler = g_signal_connect( stage , "notify::allocation" , ( GCallback ) stage_allocation_notify , GINT_TO_POINTER( screen_gid ) );
+
+    // Call it now to set the screen's initial scale
+
+    stage_allocation_notify( 0 , 0 , GINT_TO_POINTER( screen_gid ) );
 
     secure_lua_state( allowed_names );
 
@@ -752,9 +932,13 @@ int App::run( const StringSet & allowed_names )
     luaopen_clutter_group( L );
     luaopen_clutter_image( L );
     luaopen_clutter_timeline( L );
+    luaopen_clutter_animator( L );
+    luaopen_clutter_state( L );
+    luaopen_clutter_score( L );
     luaopen_clutter_alpha( L );
     luaopen_clutter_interval( L );
     luaopen_clutter_path( L );
+    luaopen_clutter_constraint( L );
 
     luaopen_idle( L );
     luaopen_timer( L );
@@ -766,7 +950,6 @@ int App::run( const StringSet & allowed_names )
     luaopen_stopwatch( L );
     luaopen_json( L );
     luaopen_controllers_module( L );
-    luaopen_audiosampler_module( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
     luaopen_url_request( L );
@@ -776,6 +959,13 @@ int App::run( const StringSet & allowed_names )
     luaopen_trickplay( L );
     luaopen_bitmap( L );
     luaopen_canvas( L );
+    luaopen_http_module( L );
+    luaopen_keyboard( L );
+
+#ifdef TP_WITH_WEBGL
+    luaopen_typed_array( L );
+    luaopen_webgl( L );
+#endif
 
 #ifndef TP_PRODUCTION
     luaopen_devtools( L );
@@ -792,50 +982,49 @@ int App::run( const StringSet & allowed_names )
 
     //.........................................................................
 
-
     luaopen_keys( L );
-
-    // TODO
-    // DEBUG HOOK
-//    lua_sethook(L,debug_hook,LUA_MASKCALL|LUA_MASKRET|LUA_MASKLINE|LUA_MASKCOUNT,1);
 
     // Run the script
 
     FreeLater free_later;
 
-    gchar * main_path = g_build_filename( metadata.path.c_str(), "main.lua", NULL );
+    gchar * main_path = g_build_filename( metadata.path.c_str() , "main.lua" , NULL );
+
     free_later( main_path );
 
-    if ( luaL_dofile( L, main_path ) )
+    int top = lua_gettop( L );
+
+    int result = TP_RUN_OK;
+
+    if ( luaL_dofile( L , main_path ) )
     {
         g_critical( "%s", String( 60, '=' ).c_str() );
         g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
         g_critical( "%s", String( 60, '=' ).c_str() );
 
+        lua_pop( L , lua_gettop( L ) - top );
+
         result = TP_RUN_APP_ERROR;
-
-        if ( g_object_is_floating( screen ) )
-        {
-            g_object_unref( G_OBJECT( screen ) );
-        }
-
-        screen_gid = 0;
     }
     else
     {
+        lua_pop( L , lua_gettop( L ) - top );
+
         // Make it small
 
-        clutter_actor_set_scale( screen, 0, 0 );
+        //clutter_actor_set_scale( screen, 0, 0 );
 
         // By adding it to the stage, the ref is sunk, so we don't need
         // to unref it here.
 
         clutter_container_add_actor( CLUTTER_CONTAINER( stage ), screen );
+
+        g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
+
+        notify( context , TP_NOTIFICATION_APP_LOADED );
     }
 
-    g_info( "APP RUN %s : %1.3f s", metadata.id.c_str(), t.elapsed() );
-
-    return result;
+    run_callback( this , result );
 }
 
 //-----------------------------------------------------------------------------
@@ -847,6 +1036,12 @@ App::~App()
     debugger.uninstall();
 
 #endif
+
+    // Get rid of the keyboard
+
+    Keyboard::hide( L , true );
+
+    notify( context , TP_NOTIFICATION_APP_CLOSING );
 
     context->remove_notification_handler( "*", forward_notification_handler, this );
     context->remove_notification_handler( TP_NOTIFICATION_PROFILE_CHANGE, profile_notification_handler, this );
@@ -1124,15 +1319,15 @@ String App::get_user_agent() const
 //-----------------------------------------------------------------------------
 // This one forwards all notifications from the context to our listeners
 
-void App::forward_notification_handler( const char * subject, void * data )
+void App::forward_notification_handler( TPContext * context , const char * subject, void * data )
 {
-    ( ( App * )data )->notify( subject );
+    ( ( App * )data )->notify( context , subject );
 }
 
 //-----------------------------------------------------------------------------
 // Notification handler for profile switches
 
-void App::profile_notification_handler( const char * subject, void * data )
+void App::profile_notification_handler( TPContext * context , const char * subject, void * data )
 {
     ( ( App * )data )->profile_switch();
 }
@@ -1464,9 +1659,9 @@ gboolean App::animate_out_callback( gpointer s )
 //-----------------------------------------------------------------------------
 
 
-Image * App::load_image( const gchar * source )
+Image * App::load_image( const gchar * source , bool read_tags )
 {
-    ai( "LOADING SYNC '%s'" , source );
+    tplog( "LOADING SYNC '%s'" , source );
 
     if ( ! source )
     {
@@ -1479,7 +1674,7 @@ Image * App::load_image( const gchar * source )
 
     if ( ! path )
     {
-        ai( "  INVALID PATH" );
+        tplog( "  INVALID PATH" );
         return 0;
     }
 
@@ -1489,7 +1684,7 @@ Image * App::load_image( const gchar * source )
 
     if ( is_uri )
     {
-        ai( "  STARTING REQUEST" );
+        tplog( "  STARTING REQUEST" );
 
         Network::Request request( get_user_agent(), path );
 
@@ -1497,24 +1692,24 @@ Image * App::load_image( const gchar * source )
 
         if ( ! response.failed && response.body->len > 0 )
         {
-            ai( "  DECODING" );
+            tplog( "  DECODING" );
 
-            image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
+            image = Image::decode( response.body->data, response.body->len, read_tags , response.get_header( "Content-Type" ) );
         }
         else
         {
-            ai( "  REQUEST FAILED" );
+            tplog( "  REQUEST FAILED" );
         }
     }
     else
     {
-        ai( "  PATH IS '%s'" , path );
-        ai( "  DECODING" );
+        tplog( "  PATH IS '%s'" , path );
+        tplog( "  DECODING" );
 
-        image = Image::decode( path );
+        image = Image::decode( path , read_tags );
     }
 
-    ai( "  %s" , image ? "SUCCEEDED" : "FAILED" );
+    tplog( "  %s" , image ? "SUCCEEDED" : "FAILED" );
 
     return image;
 }
@@ -1523,8 +1718,9 @@ class ImageResponseClosure
 {
 public:
 
-    ImageResponseClosure( Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
+    ImageResponseClosure( bool _read_tags , Image::DecodeAsyncCallback _callback , gpointer _user , GDestroyNotify _destroy_notify )
     :
+    	read_tags( _read_tags ),
         callback( _callback ),
         user( _user ),
         destroy_notify( _destroy_notify )
@@ -1537,15 +1733,16 @@ public:
 
         if ( response.failed || response.body->len == 0 )
         {
-            ai( "  REQUEST FAILED" );
+            tplog( "  REQUEST FAILED" );
 
             self->callback( 0 , self->user );
         }
         else
         {
-            ai( "  STARTING DECODE FOM BUFFER" );
+            tplog( "  STARTING DECODE FOM BUFFER" );
 
             Image::decode_async( response.body ,
+            		self->read_tags ,
                     response.get_header( "Content-Type" ),
                     self->callback,
                     self->user,
@@ -1569,18 +1766,23 @@ public:
 
 private:
 
-
+    bool						read_tags;
     Image::DecodeAsyncCallback  callback;
     gpointer                    user;
     GDestroyNotify              destroy_notify;
 };
 
-bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
+bool App::load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
-    ai( "LOADING ASYNC '%s'" , source );
+    tplog( "LOADING ASYNC '%s'" , source );
 
     if ( ! source )
     {
+    	if ( destroy_notify )
+    	{
+    		destroy_notify( user );
+    	}
+
         return false;
     }
 
@@ -1590,7 +1792,13 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
 
     if ( ! path )
     {
-        ai( "  INVALID PATH" );
+        tplog( "  INVALID PATH" );
+
+        if ( destroy_notify )
+    	{
+    		destroy_notify( user );
+    	}
+
         return false;
     }
 
@@ -1598,7 +1806,7 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
 
     if ( is_uri )
     {
-        ai( "  STARTING NETWORK REQUEST" );
+        tplog( "  STARTING NETWORK REQUEST" );
 
         Network::Request request( get_user_agent(), path );
 
@@ -1606,15 +1814,15 @@ bool App::load_image_async( const gchar * source , Image::DecodeAsyncCallback ca
             request,
             get_cookie_jar(),
             ImageResponseClosure::response_callback,
-            new ImageResponseClosure( callback , user , destroy_notify ),
+            new ImageResponseClosure( read_tags , callback , user , destroy_notify ),
             ImageResponseClosure::destroy );
     }
     else
     {
-        ai( "  PATH IS '%s'" , path );
-        ai( "  STARTING DECODE FROM FILE" );
+        tplog( "  PATH IS '%s'" , path );
+        tplog( "  STARTING DECODE FROM FILE" );
 
-        Image::decode_async( path , callback , user , destroy_notify );
+        Image::decode_async( path , read_tags , callback , user , destroy_notify );
     }
 
     return true;

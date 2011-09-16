@@ -36,8 +36,9 @@ gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     lua_pushinteger(L,event->keyval);
     lua_pushinteger(L,event->unicode_value);
     lua_pushinteger(L,event->time);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if (UserData::invoke_callback( G_OBJECT( actor ) , "on_key_down" , 3 , 1 , L ))    
+    if (UserData::invoke_callback( G_OBJECT( actor ) , "on_key_down" , 4 , 1 , L ))    
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -56,8 +57,9 @@ gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     lua_pushinteger(L,event->keyval);
     lua_pushinteger(L,event->unicode_value);
     lua_pushinteger(L,event->time);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_up" , 3 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_up" , 4 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -79,9 +81,10 @@ gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_St
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     lua_pushinteger(L,event->button);
-    lua_pushinteger(L,event->click_count);
+    lua_pushinteger(L,event->click_count > 1 ? event->click_count - 1 : 1 );
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_down" , 4 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_down" , 5 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -102,9 +105,10 @@ gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_Stat
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     lua_pushinteger(L,event->button);
-    lua_pushinteger(L,event->click_count);
+    lua_pushinteger(L,event->click_count > 1 ? event->click_count - 1 : 1 );
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_up" , 4 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_button_up" , 5 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -124,8 +128,9 @@ gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L
 
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_motion" , 2 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_motion" , 3 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
@@ -146,14 +151,57 @@ gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     lua_pushinteger(L,event->direction);
+    ClutterUtil::push_event_modifiers( L , ( ClutterEvent * ) event );
     
-    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_scroll" , 3 , 1 , L ))
+    if(	UserData::invoke_callback( G_OBJECT( actor ) , "on_scroll" , 4 , 1 , L ))
     {
 		if (lua_toboolean(L,-1))
 		{
 	    	result = TRUE;
 	    }
 		lua_pop(L,1);
+    }
+
+    return result;
+}
+
+gboolean actor_on_enter(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+
+    if( UserData::invoke_callback( G_OBJECT( actor ) , "on_enter" , 2 , 1 , L ))
+    {
+        if (lua_toboolean(L,-1))
+        {
+            result = TRUE;
+        }
+        lua_pop(L,1);
+    }
+
+    return result;
+}
+
+gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
+{
+    int result = FALSE;
+    gdouble x = event->x, y = event->y;
+    ClutterUtil::stage_coordinates_to_screen_coordinates(&x, &y);
+
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+
+    if( UserData::invoke_callback( G_OBJECT( actor ) , "on_leave" , 2 , 1 , L ))
+    {
+        if (lua_toboolean(L,-1))
+        {
+            result = TRUE;
+        }
+        lua_pop(L,1);
     }
 
     return result;
@@ -180,8 +228,8 @@ interface Animation [[ClutterAnimation*]]
 /*
     Interface: UIElement
     
-    This is an interface that is supported by all UI classes, including screen.
- 
+    The UIElement defines a group of basic foundational properties and functions that are implemented by most of the TrickPlay data types, including <Rectangle>, <Image>, <Text>, and others.
+
 */
 
 interface actor [[ClutterActor*]]
@@ -189,7 +237,14 @@ interface actor [[ClutterActor*]]
     /*
 	Property: name
 	
-	Lets you set a name for this element.
+	The name property specifies a string identifier for the object. The name should be unique.
+	
+	The name property is used by the <Container.find_child> function when searching for a particular UIElement object stored in a Container.
+	
+	*Default Setting:* nil
+	
+	*See Also:* the <Container.find_child> function
+	
     */
     
     string name
@@ -199,7 +254,8 @@ interface actor [[ClutterActor*]]
     /*
 	Property: gid
 	
-	Every UI element has a unique identifier that is assigned automatically.
+	The gid property is a globally unique numeric value for each instance of a UIElement object. The gid is assigned automatically when the UIElement object is created.
+
     */
     
     readonly long gid
@@ -207,8 +263,13 @@ interface actor [[ClutterActor*]]
     
     /*
 	Property: x
+
+	The x property specifies the object's X coordinate location relative to its parent, which is usually the global <screen at file:clutter_screen-lb.html#Screen> variable. The property's unit of measure is pixels. The X coordinate's value does not take into account any transformations, such as rotation or scaling. 
 	
-	The x coodinate of the UI element.
+	*Default Setting:* 0
+	
+	*See Also:* the <y>, <z>, <depth> and <position> properties
+
     */
     
     double x
@@ -218,7 +279,12 @@ interface actor [[ClutterActor*]]
     /*
 	Property: y
 	
-	The y coordinate of the UI element.
+	The y property specifies the object's Y coordinate location relative to its parent, which is usually the global <screen at file:clutter_screen-lb.html#Screen> variable. The property's unit of measure is pixels. The Y coordinate's value does not take into account any transformations, such as rotation or scaling.
+	
+	*Default Setting:* 0
+	
+	*See Also:* the <x>, <z>, <depth> and <position> properties
+
     */
     
     double y
@@ -228,7 +294,38 @@ interface actor [[ClutterActor*]]
     /*
 	Property: z
 	
-	The z coordinate of the UI element. Negative z is farther away.
+	The z property specifies the object's Z coordinate location relative to its parent, which is usually the global <screen at file:clutter_screen-lb.html#Screen> variable. Positive values move toward the viewer along the Z-axis; negative values move farther away. The Z coordinate's value does not take into account any transformations, such as rotation or scaling.
+	
+	The <depth> property sets and retrieves the same Z coordinate.
+	
+	Understanding the Z-Axis:
+	
+	It is valuable to understand the relationship between an object's location along the Z-axis and the effect that location has on how the object is shown within the display's viewing area.
+	
+	The Z-axis moves perpendicular to the X and Y-axes. At any given X,Y point, the Z-axis is a perpendicular line extending straight back and forward in the third dimension. Given two different X,Y points, two perpendicular Z-axis lines extend forward and back. These Z-axis lines are *parallel* to each other. This is an important point to remember when dealing with the Z-axis because, as will be explained later, it is the reason why objects located farther back on the Z-axis appear smaller, while objects closer on the Z-axis appear larger. When projecting lines extend in parallel, the process is called "orthographic projection."
+	
+	Each point on a display can be thought of as extending back in orthographic projection along the Z-axis, perpendicular to the flat plane of the display. Think of the display as one end of a shoebox and the Z-axis as extending back in space, forming the rectangular sides of the box. Each X,Y point on the display will extend a unique line through the shoebox along its Z-axis.
+	
+	In addition to orthographic projection, there exists another process called "perspective projection." Unlike orthographic projection which extends along parallel lines, perspective projection extends along lines that converge and eventually intersect at a vanishing point. The traditional example is two railroad tracks extending toward the horizon, converging until they eventually appear to touch each other.
+	
+	The expanding projection lines also work in reverse and can be thought of as starting at a single, common point and expanding outward as they project farther away. As an example, consider the view from a camera; it starts at a single point (the camera lens) and its field of vision expands outward like a megaphone as it moves farther away in distance. The display's camera-viewing environment works in the same way, expanding wider and wider as it extends back in depth.
+	
+	A megaphone is typically shaped like a circular cone, but the display's camera-viewing shape is that of a rectangular cone. The megaphone's narrow end is placed immediately in front of the viewer's eyes, and expands wider and wider as it projects farther away.
+	
+	Now place the orthographic shoebox display described earlier into that rectangular megaphone. Push the shoebox into the megaphone as far as it will go, until its edges touch the interior of the megaphone. The flat plane where the orthographic shoebox touches the rectangular megaphone represents the position where the display fills the entire camera view. At this point, the Z-axis has a value of zero. As positions move farther in depth from this point, they move in the shoebox along their perpendicular and parallel lines. But as the camera view moves farther in depth in the same direction, its lines widen outward. Similarly, as points move closer to the viewer along the Z-axis, they remain perpendicular to the display, but the camera view lines converge as they get closer to the viewer.
+	
+	Image a solid black graphic image that fills the entire display when positioned on the Z-axis at Z=0. Now move that same image back in depth along the Z-axis until it is located at Z=-100. The points of the image move back perpendicular to the X,Y display plane in orthographic projection. But as the camera view moves back the same distance, its view lines expand in perspective projection. When the image is located at Z=-100, the image remains the exact same size as when it was located at Z=0. But the expanding camera view now encompasses a larger viewing area. Because of this, the image will no longer fill the entire display; it will appear to be smaller, even though its size remains unchanged. The apparent change in size is due to the widening camera view as the object is placed farther in depth.
+	
+	A similar effect occurs when objects move closer to the viewer along the Z-axis. The perspective projection of the rectangular megaphone gets narrower as it gets closer to the viewer. Think of a small dot in the center of the display at Z=0  and move it closer to the viewer along the Z-axis. As the dot moves closer and closer, its actual size remains unchanged, but the dot takes up more of the narrowing viewing area as it gets closer to the viewer. Eventually, the small dot will fill the entire display without having altered its size, but solely by positioning itself closer to the viewer in the narrowing viewing area.
+	
+	Finally, think of a circle located in the upper-left corner of the display at Z=0. Move it closer to the viewer along the Z-axis. The Z-axis extends forward perpendicular to the X,Y display plane. Because the viewing area is narrowing, the circle's Z-axis line will eventually extend outside the boundary of the viewing area. As the circle moves closer to the viewer, with larger values of Z, it will appear to move above the viewer's line of sight. Eventually, the circle will move completely outside of the viewing area, even though it will still exist at a position along its Z-axis.
+	
+	Knowing this relationship between the orthographic display and the perspective viewing camera will enable you to understand how items on the display will interact with each other as they move along the Z-axis. Thinking of them as a shoebox contained within a rectangular megaphone provides a concrete and clear example of the relationship.
+
+	*Default Setting:* 0
+	
+	*See Also:* the <x>, <y>, <depth> and <position> properties
+
     */
     
     double z
@@ -238,7 +335,10 @@ interface actor [[ClutterActor*]]
     /*
 	Property: depth
 	
-	Another name for the z coordinate.
+	The depth property specifies the object's Z coordinate. It stores and retrieves the same value as the UIElement's z property. Refer to the <z> property for additional information.
+	
+	*See Also:* the <x>, <y>, <z> and <position> properties
+	
     */
     
     double depth
@@ -246,57 +346,16 @@ interface actor [[ClutterActor*]]
         [[clutter_actor_set_depth(self,depth);]];
 	
     /*
-	Property: w
-	
-	The width of the UI element.
-    */
-    
-    double w
-        [[ w = clutter_actor_get_width( self ); ]]
-        [[ clutter_actor_set_width( self , w ); ]];
-    
-    /*
-	Property: h
-	
-	The height of the UI element.
-    */
-    
-    double h
-        [[ h = clutter_actor_get_height( self ); ]]
-        [[ clutter_actor_set_height( self , h ); ]];
-
-    /*
-	Property: width
-	
-	Another name for the width of the UI element.
-    */
-    
-    double width
-        [[ width = clutter_actor_get_width( self ); ]]
-        [[ clutter_actor_set_width( self , width ); ]];
-    
-    /*
-	Property: height
-	
-	Another name for the height of the UI element.
-    */
-    
-    double height
-        [[ height = clutter_actor_get_height( self ); ]]
-        [[ clutter_actor_set_height( self , height ); ]];
-
-    /*
 	Property: position
 	
-	A way to set the x and y coordinates of the UI element using a table.
+	The position property is a table of three integer values specifying the object's X, Y and Z coordinates, respectively.
 	
-	> element.position={10,20}
+	The <x>, <y> and <z> properties will return the same coordinate values.
 	
-	Is the same as
+	*Format:* { x-coordinate, y-coodinate, z-coordinate }
 	
-	> element.x=10
-	> element.y=20
-	
+	*See Also:* the <x>, <y>, <z> and <depth> properties
+		
     */
     
     table position
@@ -313,19 +372,115 @@ interface actor [[ClutterActor*]]
             luaL_checktype(L,2,LUA_TTABLE);
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
-	    lua_rawgeti(L,2,3);
+	        lua_rawgeti(L,2,3);
             clutter_actor_set_position(self,lua_tonumber(L,-3),lua_tonumber(L,-2));
-	    clutter_actor_set_depth(self,lua_tonumber(L,-1));
+            if ( lua_isnumber( L , -1 ) )
+            {
+	           clutter_actor_set_depth(self,lua_tonumber(L,-1));
+	        }
+	        
             lua_pop(L,3);
         ]];
             
     /*
+	Property: w
+	
+	The w property specifies the object's width in pixels.
+	
+	The <width> property will return the same value.
+
+	*See Also:* the <width>, <h>, <height> and <size> properties
+	
+    */
+    
+    double w
+        [[ w = clutter_actor_get_width( self ); ]]
+        [[ clutter_actor_set_width( self , w ); ]];
+    
+    /*
+	Property: h
+	
+	The h property specifies the object's height in pixels.
+	
+	The <height> property will return the same value.
+	
+	*See Also:* the <height>, <w>, <width> and <size> properties
+	
+    */
+    
+    double h
+        [[ h = clutter_actor_get_height( self ); ]]
+        [[ clutter_actor_set_height( self , h ); ]];
+
+    /*
+	Property: width
+	
+	The width property specifies the object's width in pixels.
+	
+	The <w> property will return the same value.
+	
+	*See Also:* the <w>, <h>, <height> and <size> properties
+	
+    */
+    
+    double width
+        [[ width = clutter_actor_get_width( self ); ]]
+        [[ clutter_actor_set_width( self , width ); ]];
+    
+    /*
+	Property: height
+	
+	The height property specifies the object's height in pixels.
+	
+	The <h> property will return the same value.
+	
+	*See Also:* the <h>, <w>, <width> and <size> properties
+	
+    */
+    
+    double height
+        [[ height = clutter_actor_get_height( self ); ]]
+        [[ clutter_actor_set_height( self , height ); ]];
+
+    /*
+	Property: size
+	
+	The size property is a table that specifies the object's width and height, respectively.
+	
+	The <w>, <width>, <h> and <height> properties return the same width and height values as the size property.
+	
+	*Format:* { width, height }
+	
+	*See Also:* the <w>, <width>, <h> and <height> properties
+	
+    */
+        
+    table size
+        [[
+            lua_newtable(L);
+            lua_pushnumber(L,clutter_actor_get_width(self));
+            lua_rawseti(L,-2,1);
+            lua_pushnumber(L,clutter_actor_get_height(self));
+            lua_rawseti(L,-2,2);
+        ]]
+        [[
+            luaL_checktype(L,2,LUA_TTABLE);
+            lua_rawgeti(L,2,1);
+            lua_rawgeti(L,2,2);
+            clutter_actor_set_size(self,lua_tonumber(L,-2),lua_tonumber(L,-1));
+            lua_pop(L,2);
+        ]];
+        
+    /*
 
     Property: center
+    
+    The center property is a table specifying the X and Y coordinates, respectively, of the object's center, relative to its parent, which is usually the screen.
 
-    Returns a table with the x and y coordinates of the element relative to its
-    parent.
+	*Format:* { x-coordinate, y-coordinate }
 
+	*See Also:* the <position> and <size> properties
+	
     */
 
     readonly table center
@@ -352,12 +507,24 @@ interface actor [[ClutterActor*]]
     /*
 	Property: anchor_point
 	
-	The handle to the UI element. All UI elements have their handle set to
-	0,0 initially. You can change this using the anchor_point property. A
-	common thing to do is to set the anchor point to the center of the UI
-	element, like this:
+	The anchor_point property is a table specifying X,Y offsets from the object's upper-left corner. An object's anchor point is used to position, scale and rotate the object.
 	
-	> element.anchor_point={element.w/2,element.h/2}
+	Because the anchor point is used to position the object, changing the offsets in the anchor_point property causes the object to move so the new anchor point remains located at the object's X and Y position. To change the anchor point without moving the object (but, instead, changing the object's X and Y coordinates), use the <move_anchor_point> function.
+
+	It is possible to set the anchor point anywhere, including outside the object's boundary.
+	
+	*Format:* { X-axis offset, Y-axis offset }
+	
+	*Default Setting:* { 0, 0 }, i.e., the object's top-left corner
+	
+	*Code Example:* Set the object's anchor point to the object's center
+	
+	(code)
+	myObject.anchor_point = { myObject.width / 2, myObject.height / 2 }
+	(end)
+	
+	*See Also:* the <position> property and the <move_anchor_point> function
+	
     */
     
     table anchor_point
@@ -380,34 +547,24 @@ interface actor [[ClutterActor*]]
         ]];
 	
     /*
-	Property: size
-	
-	The width and height of the UI element in a table. 
-    */
-        
-    table size
-        [[
-            lua_newtable(L);
-            lua_pushnumber(L,clutter_actor_get_width(self));
-            lua_rawseti(L,-2,1);
-            lua_pushnumber(L,clutter_actor_get_height(self));
-            lua_rawseti(L,-2,2);
-        ]]
-        [[
-            luaL_checktype(L,2,LUA_TTABLE);
-            lua_rawgeti(L,2,1);
-            lua_rawgeti(L,2,2);
-            clutter_actor_set_size(self,lua_tonumber(L,-2),lua_tonumber(L,-1));
-            lua_pop(L,2);
-        ]];
-        
-    /*
 	Property: scale
 	
-	The x and y scale of the UI element. For example, you can double the
-	scale of an element like this:
+	The scale property is a table of four numeric values specifying (1) the object's X/Y scale factor and (2) the object's X/Y scaling center coordinates. The scaling center coordinates are specified in pixels and are relative to the object's anchor point, which is usually 0, 0.
 	
-	> element.scale={2,2}
+	When setting the scale property, the scaling center coordinates are optional and will default to 0, 0, i.e., the object's default anchor point. 
+	
+	*Format:* { x/horizontal_scale_factor, y/vertical_scale_factor, x_center_coordinate, y_center_coordinate }
+	
+	*Default Setting:* { 1, 1, 0, 0 }
+	
+	*Code Example:* Double the object's size both horizontally and vertically. Use default center coordinates.
+	
+	(code)
+	myObject.scale = { 2, 2 }
+	(end)
+	
+	*See Also:* the <anchor_point> and <is_scaled> properties
+	
     */
     
     table scale
@@ -445,11 +602,19 @@ interface actor [[ClutterActor*]]
     /*
 	Property: x_rotation
 	
-	Rotation about the y axis. This is a table that has 3 entries: the rotation
-	angle in degrees, the y coordinate and the z coordinate for the center of
-	rotation. You can flip an element about the x axis like this:
+	The x_rotation property is a table containing the rotation angle and Y and Z coordinates, respectively; the table's contents specify the object's rotation around the X axis. The rotation angle is specified in degrees; positive degrees rotate in a counter-clockwise direction, negative degrees rotate clockwise. The Y and Z coordinates specify the center of the rotation; the coordinates are relative to the object's anchor point.
 	
-	> element.x_rotation={-180,element.h,0}		
+	*Format:* { rotation_angle, y-coordinate, z-coordinate }
+	
+	*Code Example:* Flip the object horizontally to display its mirror image. 
+	
+	(code)
+	-- Flip 180 degrees around object's horizontal center
+	myObject.x_rotation = { 180, 0, 0 }
+	(end)
+	
+	*See Also:* the <y_rotation> and <z_rotation> properties
+	
     */
         
     table x_rotation
@@ -477,10 +642,20 @@ interface actor [[ClutterActor*]]
 
     /*
 	Property: y_rotation
+
+	The y_rotation property is a table containing the rotation angle and X and Z coordinates, respectively; the table's contents specify the object's rotation around the Y axis. The rotation angle is specified in degrees; positive degrees rotate in a counter-clockwise direction, negative degrees rotate clockwise. The X and Z coordinates specify the center of the rotation; the coordinates are relative to the object's anchor point.
 	
-	Rotation about the y axis. This is a table that has 3 entries: the rotation
-	angle in degrees, the x coordinate and the z coordinate for the center of
-	rotation.
+	*Format:* { rotation_angle, x-coordinate, z-coordinate }
+	
+	*Code Example:* Flip the object vertically to display its mirror image. 
+	
+	(code)
+	-- Flip 180 degrees around object's vertical center
+	myObject.y_rotation = { 180, 0, 0 }
+	(end)
+	
+	*See Also:* the <x_rotation> and <z_rotation> properties
+	
     */
     
     table y_rotation
@@ -509,9 +684,19 @@ interface actor [[ClutterActor*]]
     /*
 	Property: z_rotation
 	
-	Rotation about the z axis. This is a table that has 3 entries: the rotation
-	angle in degrees, the x coordinate and the y coordinate for the center of
-	rotation.
+	The z_rotation property is a table containing the rotation angle and X and Y coordinates, respectively; the table's contents specify the object's rotation around the Z axis. The rotation angle is specified in degrees; positive degrees rotate in a counter-clockwise direction, negative degrees rotate clockwise. The X and Y coordinates specify the center of the rotation; the coordinates are relative to the object's anchor point.
+	
+	*Format:* { rotation_angle, x-coordinate, y-coordinate }
+	
+	*Code Example:* Rotate the object along the z-axis to display its image upside-down.
+	
+	(code)
+	-- Rotate 180 degrees around object's horizontal and vertical centers
+	myObject.z_rotation = { 180, 0, 0 }
+	(end)
+	
+	*See Also:* the <x_rotation> and <y_rotation> properties
+	
     */
 
     table z_rotation
@@ -541,7 +726,12 @@ interface actor [[ClutterActor*]]
     /*
 	Property: is_scaled
 	
-	Returns true if the UI element is scaled.
+	The is_scaled property is a boolean value indicating whether or not the object is scaled in any dimension (true = scaled).
+	
+	*Default Setting:* false (object is not scaled)
+	
+	*See Also:* the <scale> property
+	
     */
 
     readonly bool is_scaled
@@ -550,7 +740,10 @@ interface actor [[ClutterActor*]]
     /*
 	Property: is_rotated
 	
-	Returns true if the UI element is rotated.
+	The is_rotated property is a boolean value indicating whether or not the object is rotated (true = rotated).
+	
+	*See Also:* the <x_rotation>, <y_rotation> and <z_rotation> properties
+	
     */
 
     readonly bool is_rotated
@@ -559,8 +752,14 @@ interface actor [[ClutterActor*]]
     /*
 	Property: opacity
 	
-	This is a number that specifies the transparency of a UI element. It
-	ranges from 0 (fully transparent) to 255 (fully opaque).
+	The opacity property is an integer value specifying the object's opacity/transparency setting; valid settings are from 0 (completely transparent) to 255 (completely opaque), inclusive.
+
+	*Valid Settings:* 0..255 (completely transparent..completely opaque)
+	
+	*Default Setting:* 255 (completely opaque)
+	
+	*See Also:* the <is_visible> property and the <show> and <hide> functions
+		
     */
 
     int opacity
@@ -570,12 +769,32 @@ interface actor [[ClutterActor*]]
     /*
 	Property: clip
 	
-	This is a table with x,y,width and height for a clipping rectangle. If
-	set, anything painted outside those bounds won't be visible. By
-	default, UI elements are not clipped, so their contents can spill outside
-	their bounds. You can clip an element like this:
+	The clip property is a table of four integer values (x origin, y origin, width, height, respectively) specifying the object's clipping rectangle. All values are measured in pixels.
 	
-	> element.clip={0,0,element.w,element.h}
+	By default, objects are not clipped, even if output is placed beyond the object's width and height boundaries. To activate clipping, define a clipping rectangle.
+	
+	Retrieving the clip property when there is no clipping rectangle defined, returns a value of nil.
+	
+	To clear a defined clipping rectangle and deactivate clipping, set the clip property to a value of nil.
+	
+	*Format:* { x-coordinate origin, y-coodinate origin, width, height }
+	
+	*Default Setting:* nil (clipping does not occur)
+	
+	*Code Examples:*
+	
+	(code)
+	-- Define a clipping rectangle around the object's normal boundaries
+	myObject.clip = { 0, 0, myObject.width, myObject.height }
+	(end)
+	
+	(code)
+	-- Clear the clipping rectangle and deactivate clipping
+	myObject.clip = nil
+	(end)
+	
+	*See Also:* the <has_clip> property
+	
     */
 
     table clip
@@ -622,17 +841,54 @@ interface actor [[ClutterActor*]]
     /*
 	Property: has_clip
 	
-	Returns true if the element is clipped.
+	The has_clip property is a boolean value specifying whether or not the object has enabled clipping. Clipping can be enabled by either defining a clipping rectangle via the <clip> property or setting the clip_to_size property to true.
+	
+	*Default Setting:* false (clipping is not enabled)
+	
+	*See Also:* the <clip> and <clip_to_size> properties
+
     */
 
     readonly bool has_clip
-        [[has_clip=clutter_actor_has_clip(self);]];
+        [[
+            has_clip=clutter_actor_has_clip(self) || clutter_actor_get_clip_to_allocation(self);
+        ]];
         
+    
+    /*
+    Property: clip_to_size
+    
+	The clip_to_size property is a boolean value that enables and disables clipping on a <Group at file:clutter_group-lb.html> object. By default, objects within a Group can be displayed outside of the Group's defined size. To enable clipping to the Group's defined size, set the clip_to_size property to true.
+	
+	Clipping on a Group object can also be enabled by defining a clipping rectangle via the <clip> property.
+	
+	The clip_to_size property affects objects of type Group only; it has no effect on other object types.
+
+    *Default Setting:* false (clipping in the Group is disabled)
+    
+    *See Also:* the <Group at file:clutter_group-lb.html> class and the <clip> and <has_clip> properties
+    
+    */
+    
+    bool clip_to_size
+        [[
+            clip_to_size = clutter_actor_get_clip_to_allocation( self );
+        ]]
+        [[
+            clutter_actor_set_clip_to_allocation( self , clip_to_size );
+        ]];
+    
     /*
 	Property: parent
 	
-	If this UI element is inside a container, this property returns the
-	container. Otherwise, it returns nil.
+	The parent property contains the parent UIElement object of the current object. An object has a parent if it is contained within a <Group at file:clutter_group-lb.html#Group> or has been added to the <screen at file:clutter_screen-lb.html#screen> global variable. If the object has no parent, the parent property contains nil.
+	
+	An object cannot be added to a Group by setting its parent property. To add an object to a Group, call the Group object's <add at file:clutter_container-lb.html#Container.add> function.
+	
+	*Default Setting:* nil (the object has no parent)
+	
+	*See Also:* the Container interface's <add at file:clutter_container-lb.html#Container.add> function
+	
     */
     
     readonly UIElement parent
@@ -642,9 +898,16 @@ interface actor [[ClutterActor*]]
     /*
 	Property: reactive
 	
-	Wether the UI element will react to events.
+	The reactive property is a boolean value specifying whether or not the object should receive mouse events and emit pointer events (true = receive mouse events and send pointer events).
 	
-	TODO:explain
+	Mouse events include button clicks, which are processed by the <on_button_down> and <on_button_up> event handlers. Pointer events include motion notifications and enter-element and leave-element events, which are handled by the <on_motion>, <on_enter> and <on_leave> handlers, respectively.
+	
+	To receive mouse events and emit pointer events, the following conditions must be enabled: (1) start mouse and pointer events by calling the global <controllers.start_pointer> function and (2) set the object's reactive property to true.
+	
+	*Default Setting:* false (the object neither receives mouse events nor sends pointer events)
+	
+	*See Also:* the <on_button_down>, <on_button_up>, <on_motion>, <on_enter> and <on_leave> event handlers
+
     */
     
     bool reactive
@@ -654,9 +917,15 @@ interface actor [[ClutterActor*]]
     /*
 	Property: transformed_size
 	
-	This is a table that has the width and height of the UI element after it
-	has been transformed. It may be an approximation if the element is rotated.
-    */
+	The transformed_size property is a table that contains the width and height in pixels of the object; the values take into account any transformations applied to the object.
+	
+	If the object has been rotated on its x and/or y axes, the resulting object will be a quadrangle with sides of unequal lengths. In such cases, the values in the transformed_size property specify a rectangle large enough to contain the entire quadrangle. One side effect of this is that the X, Y position of the rectangle, as specified in the <transformed_position> property, may not contain the actual coordinates of the quadrangle.
+	
+	*Format:* { transformed_width, transformed_height }
+	
+	*See Also:* the <transformed_position> property and the <transform_point> function
+	
+	*/
     
     readonly table transformed_size
 	[[
@@ -673,7 +942,14 @@ interface actor [[ClutterActor*]]
     /*
 	Property: transformed_position
 	
-	The x and y coordinates of the UI element after it has been transformed.
+	The transformed_position property is a table that contains the X and Y coordinates in pixels of the object's location taking into account any transformations applied to the object.
+	
+	If the object has been rotated on its x and/or y axes, the resulting object will be a quadrangle with sides of unequal lengths. The transformed_position property specifies the X, Y coordinates of a rectangle large enough to contain the entire quadrangle. Depending upon the nature of the quadrangle, its X, Y position coordinates may not be identical to those of the enclosing rectangle.
+	
+	*Format:* { transformed_X, transformed_Y }
+	
+	*See Also:* the <transformed_size> property and the <transform_point> function
+	
     */
     
     readonly table transformed_position
@@ -689,12 +965,10 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Property: min_size
+	This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
 	
 	This is either the preferred size of a UI element or its natural size,
 	depending on how the element is transformed.
-	
-	TODO:explain
     */
     
     readonly table min_size
@@ -713,8 +987,8 @@ interface actor [[ClutterActor*]]
 	]];
 
     /*
-	Property: natural_size
-	
+	This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
+
 	This is the original, or natural size of a UI element. For example, it
 	may be an image's orginal size before it was transformed.
     */
@@ -734,16 +1008,18 @@ interface actor [[ClutterActor*]]
 	    lua_rawseti(L,-2,2);
 	]];
 	
-    /*
-	Property: request_mode
+    
+	/*
 	
+	This property seems to be associated with build-it-yourself type layout managers, which TrickPlay does not support. Until further information is discovered, this property will remain undocumented.
+
 	Mostly useful for images, this lets you specify how to resize UI elements.
 	It can have one of two values:
 	
-	"HEIGHT_FOR_WIDTH" - In this case, given a width, the height is
-			    computed automatically.
+	HEIGHT_FOR_WIDTH - In this case, given a width, the height is
+		    computed automatically. Default setting.
 			    
-	"WIDTH_FOR_HEIGHT" - Given a new height, the width is calculated.
+	WIDTH_FOR_HEIGHT - Given a new height, the width is calculated.
     */
     
     string request_mode
@@ -776,8 +1052,11 @@ interface actor [[ClutterActor*]]
     /*
 	Property: is_animating
 	
-	Returns true if the UI element is being animated using the <animate>
-	function.	
+	The is_animating property is a boolean value specifying whether or not the object is currently running an animation started by the <animate> function (true = running an animation).
+	
+	*Default Setting:* false
+	
+	*See Also:* the <animate> function
     */
     
     readonly bool is_animating
@@ -787,8 +1066,17 @@ interface actor [[ClutterActor*]]
 
     /*
     Property: is_visible
+    
+    The is_visible property is a boolean value specifying whether the object is shown or hidden (true = shown).
+    
+    If the object uses the <show> and <hide> functions to determine its visibility, the is_visible property will accurately represent the object's current state.
+    
+    If the object uses the <opacity> property to determine its visibility, e.g., sets opacity to 0 to make itself completely transparent/invisible, then the is_visible property may not return the expected state. If the opacity is set to zero, the object is still shown -- even though it happens to be completely transparent-- and thus is_visible returns true. To determine if the object is visible in such cases, check the current value of the opacity property (if equal to zero, object is not visible, else is visible).
 
-    Returns true if the UI element is visible.
+	*Default Setting:* true (object is shown)
+	
+	*See Also:* the <show> and <hide> functions
+	
     */
 
     readonly bool is_visible
@@ -796,21 +1084,46 @@ interface actor [[ClutterActor*]]
         is_visible = CLUTTER_ACTOR_IS_VISIBLE(self);
     ]];
 
+    bool visible
+        [[
+            visible = CLUTTER_ACTOR_IS_VISIBLE(self);
+        ]]
+        [[
+            if ( visible )
+            {
+                clutter_actor_show( self );
+            }
+            else
+            {
+                clutter_actor_hide( self );
+            }
+        ]];
+
     /*
 	Function: set
 	
-	This allows you to set any properties on a UI element using a table, the
-	same way that you construct a UI element. For example:
+	The set() function enables the setting of multiple properties using a table. The syntax used is identical to that used when initializing property values during object creation and is shown below.
 	
-	> element:set{size={100,100},position={10,15}}
+	*Arguments:*
 	
-	Arguments:
+	props - table of properties and settings. One or more table entries can be specified. Each entry is separated by a comma. Table entries use the following syntax:
 	
-	props - A table of properties and values to set on the UI element.
+	(code)
+	propertyName = propertySetting
+	(end)
 	
-	Returns:
+	*Return Value:*
 	
-	element - The UI element that it was called on, so you can chain calls.
+	UIElement - returns the modified object
+	
+	*Code Examples:* Sample calls to the set() function
+	
+	(code)
+	myObject:set( { name = "OkButton" } )
+	myObject:set( { size = { 100, 100 }, position = { 10, 15 } } )
+	myObject:set( { opacity = 255, x = 200, y = 300, size = { 100, 100 } } )
+	(end)
+	
     */
 
     UIElement set(table props)
@@ -822,7 +1135,28 @@ interface actor [[ClutterActor*]]
     /*
 	Function: show
 	
-	Shows the UI element.
+	The show() function makes the object "shown" on the screen. Note: The object will be shown, but it may not be visible, depending upon its <opacity> setting and any obstructing objects in front of it.
+	
+	If the object has children, the show() function does not apply to them. To show the object and its children, call the <show_all> function.
+	
+	By default, objects on the screen are shown.
+	
+	To show an object on the display, it should be added to the <screen at file:clutter_screen-lb.html#Screen> global variable. Refer to the Code Example below for a demonstration.
+	
+	*Return Value:* None
+	
+	*Code Example:* Create a Rectangle object, add it to the screen, and then show it
+	
+	(code)
+    myRect = Rectangle{ color = { 255, 0, 0, 255 }, 
+                        position = { 600, 100, 0 },
+                        size = { 100, 250 } }
+	screen:add( myRect )
+	myRect:show()
+	(end)
+	
+	*See Also:* the <is_visible> property and the <show_all> and <hide> functions
+	
     */
 
     show()
@@ -831,7 +1165,18 @@ interface actor [[ClutterActor*]]
     /*
 	Function: show_all
 	
-	Shows the UI element and any children that were previously hidden.
+	The show_all() function makes the object and all its children "shown" on the screen. Note: The object(s) will be shown, but they may not be visible, depending upon their <opacity> settings and any obstructing objects in front of them.
+	
+	To show only the parent object and not its children, call the <show> function.
+	
+	By default, objects on the screen are shown.
+	
+	To show an object on the display, it should be added to the <screen at file:clutter_screen-lb.html#Screen> global variable. Refer to the Code Example in the <show> function for a demonstration.
+	
+	*Return Value:* None
+	
+	*See Also:* the <is_visible> property and the <show> and <hide_all> functions
+
     */
 
     show_all()
@@ -840,7 +1185,32 @@ interface actor [[ClutterActor*]]
     /*
 	Function: hide
 	
-	Hides the UI element.
+	The hide() function prevents the object from showing on the screen. To show the object on the screen again, call the <show> function.
+	
+	If the object has children, the hide() function does not apply to them. To hide the object and its children, call the <hide_all> function.
+	
+	By default, objects on the screen are shown.
+	
+	*Return Value:* None
+	
+	*Code Example:* Create a Rectangle object, show it on the screen, hide it, then show it again
+	
+	(code)
+    myRect = Rectangle{ color = { 255, 0, 0, 255 }, 
+                        position = { 600, 100, 0 },
+                        size = { 100, 250 } }
+	screen:add( myRect )
+	myRect:show()
+	
+	-- ... Do some operations, then hide the object
+	myRect:hide()
+	
+	-- ... Do some more operations, then show the object again
+	myRect:show()
+	(end)
+	
+	*See Also:* the <is_visible> property and the <hide_all> and <show> functions
+	
     */
 
     hide()
@@ -849,7 +1219,16 @@ interface actor [[ClutterActor*]]
     /*
 	Function: hide_all
 	
-	Hides the UI element and all of its children.
+	The hide_all() function prevents the object and all its children from showing on the screen. To show the object and its children again, call the <show_all> function.
+	
+	To hide only the parent object and not its children, call the <hide> function.
+	
+	By default, objects on the screen are shown.
+	
+	*Return Value:* None
+	
+	*See Also:* the <is_visible> property and the <hide> and <show_all> functions
+	
     */
 
     hide_all()
@@ -858,22 +1237,44 @@ interface actor [[ClutterActor*]]
     /*
 	Function: move_by
 	
-	Lets you change the position of the element using relative distance.
+	The move_by() function moves the object a specified number of pixels along the X and Y axes. The function's arguments are relative to the object's current location.
 	
-	Arguments:
+	Changing the object's anchor point will also move the object.
 	
-	dx - How many pixels to move in the x direction.
-	dy - How many pixels to move in the y direction.
+	*Arguments:*
+	
+	dx - number of pixels to move along the x-axis. Value is relative to the object's current location.
+	dy - number of pixels to move along the y-axis. Value is relative to the object's current location.
+	
+	*Return Value:* None
+	
+	*Code Example:* Move an object a few pixels along the x and y axes
+	
+	(code)
+	-- Move object 10 pixels to the right (along x-axis) and 20 pixels up (along the y-axis)
+	myObject.move_by( 10, -20 )
+	(end)
+	
+	*See Also:* the <x>, <y>, <position> and <anchor_point> properties
+	
     */
 
-    move_by( double dx , double dy )
+    move_by( double dx, double dy )
 	[[clutter_actor_move_by(self,dx,dy);]];
 	
     /*
 	Function: unparent
 	
-	If the UI element has a parent, this function removes the element from
-	its parent.
+	The unparent() function removes the object from its parent, such as the screen or a Group object.
+	
+	Another method to remove an object from its parent is to call the Container remove() function.
+	
+	To define a parent for the object, call the Container add() function.
+	
+	*Return Value:* None
+	
+	*See Also:* the <Container.add> and <Container.remove> functions
+	
     */
 
     unparent()
@@ -887,11 +1288,36 @@ interface actor [[ClutterActor*]]
     /*
 	Function: raise
 	
-	Raises the UI element above the one you pass in.
+	The raise() function moves the object within its group (usually the screen) so that the object is located immediately in front of the specified object. Both objects must belong to the same group (either the <screen at file:clutter_screen-lb.html#screen> or a <Group at file:clutter_group-lb.html#Group> object).
 	
-	Arguments:
+	To better understand what the raise() function does, think of it as a move_before() operation, where the calling object will be moved immediately in front of the argument object. The discussion below will explain this in more detail.
 	
-	above - Another UI element that will end up just below this one.
+	*Argument:*
+	
+	above - a UIElement object in the group. The calling object will be placed immediately in front of this object.
+	
+	*Return Value:* None
+	
+	There are two factors that determine how objects are positioned in depth relative to each other on the screen or in any other type of Group: first, their positions along the z-axis and, second, their positions within the group's <Container.children> table.
+	
+	An object's location along the z-axis is the first determining factor. Objects with a <z> setting of zero are positioned directly on the display plane. Objects with negative z settings are positioned further back along the z-axis, away from the display; they will also appear smaller than objects of the same size that have larger z settings. Objects with positive z settings are located in front of the display plane and will appear larger than objects of the same size that have lower z settings. By default, objects have z settings of zero.
+	
+	The three squares shown below are actually the same size, but because they are located at different points along the z-axis, they appear to have different sizes.
+	
+	(see uiElementRaiseZaxis.png)
+	
+	Objects that have the same z setting are further organized based upon their order within the group; objects at the end of the group's children table are positioned *in front of* objects earlier in the list. That may seem counter-intuitive, at first. To repeat: Objects at the end of the children table are positioned in front of objects at the beginning of the table. The relationship between an object's position within the children table and its depth order is shown in the children table below. As a final note, when an object is added to a group, it is appended to the end of the group's list, i.e, in *front* of any other objects in the group with the same z setting.
+	
+	(see uiElementRaiseChildren.png)
+	
+	Of these two ordering factors, the location along the z-axis takes precedence. When multiple objects have the same z value, their position within the group determines their final ordering.
+	
+	When an object calls the raise() function, it can affect both its z setting and its position within the group. First, if the z settings of the moving object and the argument objects are different, the moving object is assigned the argument object's z setting. This change to the moving object's z setting occurs regardless of its original setting; the moving object may already be located on the z-axis in front of the argument object, but it will still be assigned the argument object's z setting. Then, the moving object is positioned in the group's children table so that it immediately follows the argument object (and is, thus, in terms of depth, immediately in front of the argument object). Again, this repositioning occurs even if the moving object was already positioned somewhere in the table after the argument object, and was therefore already in front of the argument object.
+	
+	It should now be clear why the raise() function can more accurately be thought of as move_before(). Similarly, the lower() function can be thought of as move_behind().
+	
+	*See Also:* the <raise_to_top>, <lower> and <lower_to_bottom> functions
+	
     */
 
     raise( UIElement above )
@@ -906,11 +1332,20 @@ interface actor [[ClutterActor*]]
     /*
 	Function: lower
 	
-	Lowers the UI element below another one.
+	The lower() function moves the object within its group (usually the screen) so that it is located immediately behind the specified object. Both objects must belong to the same group (either the <screen at file:clutter_screen-lb.html#screen> or a <Group at file:clutter_group-lb.html#Group> object).
 	
-	Arguments:
+	*Argument:*
 	
-	below - Another UI element that will end up just above this one.
+	below - a UIElement object in the group. The calling object will be placed immediately behind this object.
+	
+	*Return Value:* None
+	
+	To better understand what the lower() function does, think of it as a move_behind() operation, where the calling object will be moved immediately behind the argument object.
+
+	Refer to the <raise> function for a discussion on the depth ordering of objects within a group.
+	
+	*See Also:* the <lower_to_bottom>, <raise> and <raise_to_top> functions
+	
     */
 
     lower( UIElement below )
@@ -925,7 +1360,14 @@ interface actor [[ClutterActor*]]
     /*
 	Function: raise_to_top
 	
-	Raises this element to the top.
+	The raise_to_top() function moves the object to the front of its group (usually the screen), placing it in front of all other objects in the group.
+	
+	*Return Value:* None
+	
+	The raise_to_top() function sets the object's <z> position on the z-axis to the same setting as the current front object, and then moves the object to the end of the group's <Container.children> table, making it the first object in the group. Refer to the discussion in the <raise> function for additional details.
+	
+	*See Also:* the <raise>, <lower> and <lower_to_bottom> functions
+
     */
 
     raise_to_top()
@@ -936,7 +1378,14 @@ interface actor [[ClutterActor*]]
     /*
 	Function: lower_to_bottom
 	
-	Lowers this element to the bottom.
+	The lower_to_bottom() function moves the object to the end of its group (usually the screen), placing it behind all other objects in the group.
+	
+	*Return Value:* None
+	
+	The lower_to_bottom() function sets the object's <z> position on the z-axis to the same setting as the current last object, and then moves the object to the beginning of the group's <Container.children> table, making it the last object in the group. Refer to the discussion in the <raise> function for additional details.
+	
+	*See Also:* the <lower>, <raise> and <raise_to_top> functions
+
     */
 
     lower_to_bottom()
@@ -947,36 +1396,53 @@ interface actor [[ClutterActor*]]
     /*
 	Function: move_anchor_point
 	
-	Moves the anchor point to a new position within the UI element without
-	moving the UI element.
+	The move_anchor_point() function sets the object's anchor point and adjusts the object's X and Y coordinates so the object does not move from its current position. The anchor point is used when positioning, scaling and rotating the object.
 	
-	Arguments:
+	The function's x and y arguments specify the new anchor point and are relative to the object's top-left corner.
+
+	*Arguments:*
 	
-	x - The new x coordinate of the anchor point.
-	y - The new y coordinate of the anchor point.
+		x - new anchor point's X coordinate. Value is relative to the object's top-left corner.
+		y - new anchor point's Y coordinate. Value is relative to the object's top-left corner.
+		
+	*Return Value:* None
+	
+	To modify the anchor point without adjusting the object's X and Y coordinates (but, instead, moving the object), set the <anchor_point> property.
+	
+	It is possible to set the anchor point anywhere, including outside the object's boundary.
+	
+	*Code Example:* Set the object's anchor point to the object's center, adjusting the object's X and Y coordinates so the object does not move
+	
+	(code)
+	myObject:move_anchor_point( myObject.width / 2, myObject.height / 2 )
+	(end)
+
+	*See Also:* the <x>, <y> and <anchor_point> properties
+			
     */
 
-    move_anchor_point( double x , double y )
+    move_anchor_point( double x, double y )
 	[[clutter_actor_move_anchor_point(self,x,y);]];
 	
 	/*
 	Function: transform_point
 	
-	Transforms a point in this element's coordinate space into the coordinate space of 
-	one of its ancestors.
+	The transform_point() function accepts an X, Y and Z coodinate point relative to the object and returns the same point relative to an ancestor object (such as the screen), after any transformations, such as rotation and scaling, have been performed upon it.
 	
-	Arguments:
+	*Arguments:*
 	
-	ancestor - An ancestor of this element.
-	x , y , z - The coordinates of the point.
+		ancestor - a UIElement ancestor object, such as the screen or another Group
+		x , y , z - coordinates relative to the object. The X and Y coordinates are required; the Z coordinate is optional, and defaults to 0.
+
+	*Returns:* A table containing the X, Y and Z coordinates, respectively, of the transformed point relative to the ancestor.
 	
+	*Format:* { transformed_X, transformed_Y, transformed_Z }
 	
-	Returns:
+	*See Also:* the <transformed_position> and <transformed_size> properties
 	
-	A table with 3 elements corresponding to the coordinates of the transformed point.
 	*/
 	
-	table transform_point( UIElement ancestor, double x , double y , double z = 0 )
+	table transform_point( UIElement ancestor, double x, double y, double z = 0 )
 		[[
 			lua_newtable(L);
 			
@@ -1005,63 +1471,308 @@ interface actor [[ClutterActor*]]
     /*
 	Function: grab_key_focus
 	
-	Causes this element to receive input events. By default, all input events
-	are sent to the screen.
+	The grab_key_focus() function directs all keyboard and remote control events to the object. Calling grab_key_focus() will also cause the object's <on_key_focus_in> event handler to be called.
+	
+	By default, keyboard and remote control events are directed to the <screen at file:clutter_screen-lb.html#Screen> global variable.
+
+	Keyboard/remote events are handled by the object's event handlers <on_key_down> and <on_key_up>.
+	
+	To receive mouse events and send pointer events, call the global <controllers.start_pointer> function and set the object's <reactive> property to true.
+	
+	*Arguments:* None
+	
+	*Return Value:* None
+	
+	*See Also:* the <on_key_down>, <on_key_up> and <on_key_focus_in> event handlers
+	
     */
 
     grab_key_focus()
 	[[clutter_actor_grab_key_focus(self);]];
 	
     
+    /* ***FOR INTERNAL USE ONLY***
+    
+      blur()
+    
+      This function will apply a blur effect to the UI element.  Reversible with unblur()
+
+      Returns:
+
+        true - The effect was applied.
+
+        false - If the effect is not available.
+    */
+
+    bool blur()
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+
+        clutter_actor_remove_effect_by_name(self, "blur_effect");
+        clutter_actor_add_effect_with_name(self, "blur_effect", clutter_blur_effect_new());
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
+    /* ***FOR INTERNAL USE ONLY***
+    
+      unblur()
+    
+      Turn off a blur effect on the UI element.  The opposite of blur()
+
+      Returns:
+
+          true - The effect was applied.
+
+          false - If the effect is not available.
+    */
+
+    bool unblur()
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "blur_effect");
+        // Need to force a redraw or it sometimes doesn't update
+        clutter_actor_queue_redraw(self);
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
+    /* ***FOR INTERNAL USE ONLY***
+    
+      desaturate()
+	
+	  How much to desaturate the UI element.  On a scale from 0.0 for fully saturated to 1.0 (default) for fully desaturated.
+
+	  Arguments:
+
+          desaturation - 0 for fully saturated, 1 for fully desaturated.
+
+      Returns:
+
+          true - The effect was applied.
+
+          false - If the effect is not available.
+    */
+
+    bool desaturate(double desaturation)
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "desaturation_effect");
+        clutter_actor_add_effect_with_name(self, "desaturation_effect", clutter_desaturate_effect_new( desaturation ));
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
+    /* ***FOR INTERNAL USE ONLY***
+    
+      saturate()
+	
+	  Restore saturation to the UI element.  This undoes any call to <desaturate>.
+
+      Returns:
+
+          true - The effect was applied.
+
+          false - If the effect is not available.
+    */
+
+    bool saturate()
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "desaturation_effect");
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
+    /* ***FOR INTERNAL USE ONLY***
+    
+      tint()
+    
+      Turn on a tint effect for the UI element.
+    
+      Arguments:
+
+          color - Required.  The tint color to apply to the UI element.
+
+      Returns:
+
+          true - The effect was applied.
+
+          false - If the effect is not available.
+    */
+
+    bool tint(...)
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        ClutterColor color;
+        ClutterUtil::to_clutter_color(L,2,&color);
+        clutter_actor_remove_effect_by_name(self, "tint_effect");
+        clutter_actor_add_effect_with_name(self, "tint_effect", clutter_colorize_effect_new( &color ));
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
+    /* ***FOR INTERNAL USE ONLY***
+    
+      untint()
+    
+      Turn off any existing tint effect for the UI element.
+
+      Returns:
+
+          true - The effect was applied.
+
+          false - If the effect is not available.
+    */
+
+    bool untint()
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "tint_effect");
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
+
+    /* ***FOR INTERNAL USE ONLY***
+    
+      pageturn()
+    
+      Apply a "page turn" effect to the UIElement.
+    
+      Arguments:
+    
+          period - The period of the page curl, between 0.0 (flat) and 1.0 (fully curled) [defaults to 0]
+
+          angle - The angle of the page curl, in degrees, between 0.0 and 360.0 [defaults to 45]
+
+          radius - The radius of the page curl effect, in pixels [defaults to 1/16 width of the UIElement]
+
+      Returns:
+
+          true - The effect was applied.
+
+          false - If the effect is not available.
+    */
+    
+    bool pageturn(double period=0.5, double angle=45, double radius=0)
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        if(0 == radius)
+        {
+            radius = clutter_actor_get_width(self)/16;
+        }
+        ClutterPageTurnEffect *effect = (ClutterPageTurnEffect *)clutter_actor_get_effect(self, "pageturn_effect");
+        if(effect)
+        {
+            clutter_page_turn_effect_set_period(effect, period);
+            clutter_page_turn_effect_set_angle(effect, angle);
+            clutter_page_turn_effect_set_radius(effect, radius);
+        }
+        else
+        {
+            clutter_actor_add_effect_with_name(self, "pageturn_effect", clutter_page_turn_effect_new(period,angle,radius));
+        }
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
+    /* ***FOR INTERNAL USE ONLY***
+    
+      pageflatten()
+    
+      Remove any "page turn" effect on the UIElement.
+
+      Returns:
+
+          true - The effect was applied.
+
+          false - If the effect is not available.
+    */
+
+    bool pageflatten()
+    [[
+#if CLUTTER_CHECK_VERSION(1,4,0)
+        clutter_actor_remove_effect_by_name(self, "pageturn_effect");
+        result = true;
+#else
+        result = false;
+#endif
+    ]];
+
     /*
 	Function: animate
 	
-	This function lets you animate a UI element. The function accepts a table
-	with parameters that control the animation, for example:
+	The animate() function performs an asynchronous animation by changing one or more property values, such as X, Y coordinates, opacity and rotation, over a period of time.
 	
-	> element:animate{duration=1000,x=300,opacity=0}
+	If the object's animate() function is called while an animation is already in progress, the running animation is terminated immediately, all its animating properties are set to their ending values, and the new animation begins.
 	
-	This will move the element to 300 and make it completely transparent
-	over a duration of 1 second.
+	A program can be notified when the animation completes by specifying a function name for the on_completed argument.
 	
-	All properties are animated from their current values to the ones you
-	specify.
+	The animation provides no notifications while it is running. For an animation that requires in-progress notifications, consider basing the animation on the <Timeline> class.
 	
-	Here are the possible values:
+	*Arguments:*
 	
-	duration - Required. How long the animation will run, in milliseconds.
+	props - table of comma-separated properties and settings that define the animation. Supported properties and settings are listed below.
 	
-	mode - A string describing the progression of the animation. TODO: explain and list.
+	*Supported Animation Properties:* Property names are case-sensitive. The duration property is required; all other properties are optional.
 	
-	loop - If true, the animation will loop forever and will never call the
-		on_completed callback.
-		
-	on_completed - A function that is called when the animation is finished.
+	duration - length of animation in milliseconds. Required.
+	mode - string specifying the Alpha mode to apply to the animated property. For descriptions of the supported modes, refer to the <Alpha.mode> section. Default = "LINEAR"
+	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called.
+	on_completed - function to call when the animation is finished
+	x - X coordinate at end of animation
+	y - Y coordinate at end of animation
+	z - Z coordinate at end of animation
+	depth - Z coordinate at end of animation. Another name for the z property
+	w - width at end of animation
+	width - width at end of animation. Another name for the w property
+	h - height at end of animation
+	height - height at end of animation. Another name for the h property
+	opacity - opacity at end of animation. Possible values: 0 (completely transparent) to 255 (completely opaque), inclusive.
+	position - X and Y coordinates at end of animation. Same as specifying x and y properties individually. The position property is specified as a table with two integers in the format { x, y }.
+	size - width and height at end of animation. Same as specifying width and height properties individually. The size property is specified as a table with two floating point values in the format { width, height }.
+	scale - object's scaling factor at end of animation. The scale property is specified as a table with two double values in the format { X_scale_factor, Y_scale_factor }.
+	x_rotation - object's rotation in degrees along the x-axis at end of animation
+	y_rotation - object's rotation in degrees along the y-axis at end of animation
+	z_rotation - object's rotation in degrees along the z-axis at end of animation
 	
-	x - The final x coordinate for the element.
+	*Return Value:* If the animation was started successfully, returns a reference to an Animation object. Else returns nil.
 	
-	y - The final y coordinate.
+	*Code Example:* Create a simple rectangle and rotate it while moving it across the screen in an infinite loop
 	
-	z or depth - The final z coordinate.
-
-	w or width - The final width.
+	(code)
+	-- Create the rectangle
+	movingRect = Rectangle{ position = { -100, 400 },
+	                        size = { 100, 100 },
+	                        color = { 225, 225, 0, 0 } }
+	-- Show it on the screen
+	screen:add( movingRect )	                        
 	
-	h or height - The final height.
-
-	opacity - The final opacity of the element (0-255).
+	--Animate it
+	movingRect:animate( { duration = 5000,   -- 5 seconds
+	                      loop = true,       -- loop forever
+	                      x = 2020,          -- move to off-screen right
+	                      x_rotation = 360,  -- flip all the way around
+	                    } )  
+	(end)
 	
-	position - An alternative way to specify both x and y as a table.
+	*See Also:* the <complete_animation> function and the <Timeline> class
 	
-	size - An alternative way to specify both width and height as a table.
-	
-	scale - A table with two values, one for the final x scale and another for
-		the final y scale of the element.
-		
-	x_rotation - The final angle of rotation around the x axis.
-	
-	y_rotation - The final angle of rotation around the y axis.
-	
-	z_rotation - The final angle of rotation around the z axis.	
     */
 
     Animation animate(table props)
@@ -1090,7 +1801,7 @@ interface actor [[ClutterActor*]]
 	    {
 		GValue value={0};
 		
-		if (lua_isstring(L,-2)&&!lua_isnil(L,-2))
+		if (lua_really_isstring(L,-2)&&!lua_isnil(L,-2))
 		{
 		    const char * k=lua_tostring(L,-2);
 		
@@ -1124,8 +1835,8 @@ interface actor [[ClutterActor*]]
 		    }
 		    else if (!strcmp("opacity",k))
 		    {
-			g_value_init(&value,G_TYPE_UCHAR);
-			g_value_set_uchar(&value,lua_tointeger(L,-1));
+			g_value_init(&value,G_TYPE_UINT);
+			g_value_set_uint(&value,lua_tointeger(L,-1));
 			g_ptr_array_add(names,g_strdup(k));
 			g_value_array_append(values,&value);
 		    }
@@ -1316,15 +2027,13 @@ interface actor [[ClutterActor*]]
     /*
 	Function: complete_animation
 	
-	If the element is being animated using the <animate> function, you can
-	finish it early by calling complete_animation. All properties that were
-	animated will receive their final values and the on_completed callback,
-	if you set one, will be called.
+	The complete_animation() function terminates the animation started with a call to <animate>. All the properties that were being animated are forced to their final values. If the animation specified an on_completed property, its associated function will be called.
 	
-	Returns:
+	*Arguments:* None
 	
-	true - If the element was being animated.
-	false - Otherwise.
+	*Return Value:* Boolean indicating whether or not an animation had been running (true = animation was running and was terminated).
+	
+	*See Also:* the <animate> function
 	
     */
 
@@ -1342,14 +2051,104 @@ interface actor [[ClutterActor*]]
 	    }
 	]];
 	
+	table constraints
+	   [[
+            GList * list = clutter_actor_get_constraints( self );
+        
+            lua_newtable(L);
+            int n = 1;
+            for( GList * item = g_list_first( list ); item; item = g_list_next( item ) , ++n )
+            {
+                ClutterUtil::wrap_constraint( L , CLUTTER_CONSTRAINT( item->data ) );
+                lua_rawseti( L , -2 , n );
+            }
+            g_list_free( list );
+	   ]]
+	   [[
+	       luaL_checktype( L , 2 , LUA_TTABLE );
+	       
+	       clutter_actor_clear_constraints( self );
+	       
+	       lua_pushnil( L );
+	       
+	       while( lua_next( L , 2 ) )
+	       {
+                if ( ClutterConstraint * c = ClutterUtil::user_data_to_constraint( L , lua_gettop( L ) ) )
+                {
+                    if ( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( c ) ) )
+                    {
+                        g_warning( "Trying to add a constraint that has already been added to another actor" ); 
+                    }
+                    else
+                    {
+                        clutter_actor_add_constraint( self , c );
+                    }
+                }
+                
+                lua_pop( L , 1 );	           
+	       }
+	       
+	   ]];
+	   
     /*
-	Event: on_key_focus_in
+    
+    Note: The add_constraints(), remove_constraints() and clear_constraints() functions use the ClutterConstraint Align, Bind and Snap bindings in clutter_constraint.lb. They seem like they would be useful, but a comment in the Snap code states that the Clutter code seems to be broken. For the moment, these functions will remain undocumented.
+    
+    */
+    
+    add_constraints( ... )
+        [[
+            for ( int i = 2; i <= lua_gettop( L ); ++i )
+            {
+                if ( ! lua_isnil( L , i ) )
+                {
+                    if ( ClutterConstraint * c = ClutterUtil::user_data_to_constraint( L , i ) )
+                    {
+                        if ( clutter_actor_meta_get_actor( CLUTTER_ACTOR_META( c ) ) )
+                        {
+                            luaL_error( L , "Constraints cannot be added to multiple UI elements" );
+                        }
+                        else
+                        {
+                            clutter_actor_add_constraint( self , c );
+                        }
+                    }
+                }
+            }
+        ]];
+        
+    remove_constraints( ... )
+        [[
+            for ( int i = 2; i <= lua_gettop( L ); ++i )
+            {
+                if ( ! lua_isnil( L , i ) )
+                {
+                    if ( ClutterConstraint * c = ClutterUtil::user_data_to_constraint( L , i ) )
+                    {
+                        clutter_actor_remove_constraint( self , c );
+                    }
+                }
+            }
+        ]];
+        
+    clear_constraints( )
+        [[
+            clutter_actor_clear_constraints( self );
+        ]];
+
+    /*
+	Event Handler: on_key_focus_in
 	
-	This event is fired whenever this UI element receives key focus.
+	The on_key_focus_in() event handler is called whenever the object receives the key focus. Focus can be directed to the object by the user or the object can force focus to itself by calling its <grab_key_focus> function.
 	
-	Arguments:
+	*Arguments:*
 	
-	self - The UI element.
+	self - reference to the object receiving key focus
+	
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_key_focus_out> event handler and the <grab_key_focus> function
+	
     */
 
     callback on_key_focus_in
@@ -1363,13 +2162,18 @@ interface actor [[ClutterActor*]]
 	]];
 
     /*
-	Event: on_key_focus_out
+	Event Handler: on_key_focus_out
 	
-	This event is fired when the UI element loses key focus.
+	The on_key_focus_out() event handler is called whenever the object loses the key focus.
 	
-	Arguments:
+	*Arguments:*
 	
-	self - The UI element.
+	self - reference to the object losing key focus
+	
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_key_focus_in> event handler
+	
     */
 
     callback on_key_focus_out
@@ -1383,16 +2187,21 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Event: on_key_down
+	Event Handler: on_key_down
 	
-	This event fires when the element receives a key down.
+	The on_key_down() event handler is called whenever a key is pressed while the object has the key focus.
+
+	*Arguments:*
 	
-	Arguments:
+		self - reference to the object receiving the event
+		keyval - integer key value. This value can be compared to the global <keys> variable.
+		unicode - the key's Unicode representation, if any
+		time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
 	
-	self - The actor that received the event.
-	keyval - An integer key value. This can be compared with the <keys> global.
-	unicode - The unicode character, if any.
-	time - The time at which the event was generated.
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_key_up> event handler
 	
     */
 
@@ -1407,16 +2216,21 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Event: on_key_up
+	Event Handler: on_key_up
 	
-	This event fires when the element receives a key up.
+	The on_key_up() event handler is called whenever a key is released while the object has the key focus.
 	
-	Arguments:
+	*Arguments:*
 	
-	self - The actor that received the event.
-	keyval - An integer key value. This can be compared with the <keys> global.
-	unicode - The unicode character, if any.
-	time - The time at which the event was generated.
+		self - reference to the object receiving the event
+		keyval - integer key value. This value can be compared to the global <keys> variable.
+		unicode - the key's Unicode representation, if any
+		time - system time when the event was generated. The argument is an unsigned 32-bit numeric value.
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
+	
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_key_down> event handler
 	
     */
 
@@ -1430,15 +2244,27 @@ interface actor [[ClutterActor*]]
 			L);	    
 	]];
 	
-    callback on_scroll
-	[[
-		UserData::get(L)->connect_signal_if( 
-			on_scroll,
-			"on_scroll",
-			"scroll-event",
-			G_CALLBACK(actor_on_scroll),
-			L);	    
-	]];
+	/*
+	Event Handler: on_button_down
+	
+	The on_button_down() event handler is called whenever a mouse button is pressed.
+	
+	To receive on_button_down() events, the object's <reactive> property must be set to true and a call must have been made to the global <controllers.start_pointer> function.
+	
+	*Arguments:*
+	
+		self - reference to the object receiving the event
+		x - X coordinate position of the mouse pointer
+		y - Y coordinate position of the mouse pointer
+		button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
+		num_clicks - number of repeated mouse clicks
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.	
+	    
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_button_up> event handler
+	
+	*/
 	
     callback on_button_down
 	[[
@@ -1450,6 +2276,28 @@ interface actor [[ClutterActor*]]
 			L);	    
 	]];
 	
+	/*
+	Event Handler: on_button_up
+	
+	The on_button_up() event handler is called whenever a mouse button is released.
+	
+	To receive on_button_up() events, the object's <reactive> property must be set to true and a call must have been made to the global <controllers.start_pointer> function.
+	
+	*Arguments:*
+	
+		self - reference to the object receiving the event
+		x - X coordinate position of the mouse pointer
+		y - Y coordinate position of the mouse pointer
+		button - identification of the pressed button. Possible values are: 1 - left mouse button; 2 - middle mouse button; 3 - right mouse button.
+		num_clicks - number of repeated mouse clicks
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.	
+	    
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_button_down> event handler
+
+	*/
+	
     callback on_button_up
 	[[
 		UserData::get(L)->connect_signal_if( 
@@ -1459,6 +2307,26 @@ interface actor [[ClutterActor*]]
 			G_CALLBACK(actor_on_button_up),
 			L);	    
 	]];
+	
+	/*
+	Event Handler: on_motion
+	
+	The on_motion() event handler is called whenever the mouse pointer moves.
+	
+	To receive on_motion() events, the object's <reactive> property must be set to true and a call must have been made to the global <controllers.start_pointer> function.
+	
+	*Arguments:*
+	
+		self - reference to the object receiving the event
+		x - X coordinate position of the mouse pointer
+		y - Y coordinate position of the mouse pointer
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
+	    	
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_enter> and <on_leave> event handlers
+
+	*/
 	
 	callback on_motion
 	[[
@@ -1470,14 +2338,105 @@ interface actor [[ClutterActor*]]
 			L);	    
 	]];
 
+	/*
+	Event Handler: on_scroll
+	
+	The on_scroll() event handler is called whenever a scroll wheel event occurs. Scroll wheels are commonly found on computer mice and can be on other input devices, as well.
+	
+	*Arguments:*
+	
+	    self - reference to the object receiving the event
+	    x - X coordinate position of the pointer
+	    y - Y coordinate position of the pointer
+	    scroll_direction - direction of scroll wheel. 0 = scrolling up, 1 = scrolling down
+	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
+		
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+
+	*/
+
+    callback on_scroll
+	[[
+		UserData::get(L)->connect_signal_if( 
+			on_scroll,
+			"on_scroll",
+			"scroll-event",
+			G_CALLBACK(actor_on_scroll),
+			L);	    
+	]];
+	
+	/*
+	Event Handler: on_enter
+	
+	The on_enter() event handler is called whenever the mouse pointer enters the object's display space.
+	
+	To receive on_enter() events, the object's <reactive> property must be set to true and a call must have been made to the global <controllers.start_pointer> function.
+	
+	*Arguments:*
+	
+	self - reference to the object receiving the event
+	x - X coordinate position of the mouse pointer
+	y - Y coordinate position of the mouse pointer
+	
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_leave> event handler
+	
+	*/
+	
+    callback on_enter
+    [[
+        UserData::get(L)->connect_signal_if(
+            on_enter,
+            "on_enter",
+            "enter-event",
+            G_CALLBACK(actor_on_enter),
+            L);
+    ]];
+
+	/*
+	Event Handler: on_leave
+	
+	The on_leave() event handler is called whenever the mouse pointer leaves the object's display space.
+	
+	To receive on_leave() events, the object's <reactive> property must be set to true and a call must have been made to the global <controllers.start_pointer> function.
+	
+	*Arguments:*
+	
+	self - reference to the object receiving the event
+	x - X coordinate position of the mouse pointer
+	y - Y coordinate position of the mouse pointer
+	
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_enter> event handler
+
+	*/
+	
+    callback on_leave
+    [[
+        UserData::get(L)->connect_signal_if(
+            on_leave,
+            "on_leave",
+            "leave-event",
+            G_CALLBACK(actor_on_leave),
+            L);
+    ]];
+
+
     /*
-	Event: on_show
+	Event Handler: on_show
 	
-	This event fires when the UI element is shown.
+	The on_show() event handler is called whenever the object's <show> or <show_all> function is called.
 	
-	Arguments:
+	*Arguments:*
 	
-	self - The UI element.
+	self - reference to the object receiving the event
+	
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_hide> event handler
+
     */
     
     callback on_show
@@ -1491,13 +2450,18 @@ interface actor [[ClutterActor*]]
 	]];
 	
     /*
-	Event: on_hide
+	Event Handler: on_hide
 	
-	This event fires when the UI element is hidden.
+	The on_hide() event handler is called whenever the object's <hide> or <hide_all> function is called.
 	
-	Arguments:
+	*Arguments:*
 	
-	self - The UI element.
+	self - reference to the object receiving the event
+	
+	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <on_show> event handler
+
     */
     
     callback on_hide

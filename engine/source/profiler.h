@@ -16,7 +16,11 @@
 #define PROFILE_START(name,type)    (new Profiler(name,type))
 #define PROFILE_STOP(p)             delete (Profiler*) (p)
 
-#include "common.h"
+#include <string>
+#include <map>
+#include <vector>
+
+#include "glib.h"
 
 //-----------------------------------------------------------------------------
 // This class lets us gather profiling information on blocks of code. You
@@ -47,6 +51,8 @@ public:
     static void dump_objects();
 
 private:
+
+    typedef std::string String;
 
     static GQueue * get_queue();
 

@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.tests.ipod",
+    release     = "1",
+    version     = "1.0",
+    name        = "iPod AdvancedUIAPI Test",
+    author      = "Rex Fenley",
+    copyright   = "© Trickplay Inc."
+}
+

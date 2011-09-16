@@ -84,6 +84,7 @@ public:
         StringSet   fingerprints;
         String      badge_style;
         String      badge_text;
+        StringSet   attributes;
     };
 
     int get_app_count();
@@ -105,13 +106,19 @@ public:
 
     bool add_app_to_current_profile( const String & app_id );
 
-    AppInfo::List get_apps_for_current_profile();
+    enum AppSort { BY_NAME , BY_DATE_USED , BY_TIMES_USED };
+
+    AppInfo::List get_apps_for_current_profile( AppSort sort = BY_NAME , bool reverse = false );
 
     bool remove_app_from_all_profiles( const String & app_id );
 
     bool remove_app_from_current_profile( const String & app_id );
 
     std::list<int> get_profiles_for_app( const String & app_id );
+
+    bool is_app_in_current_profile( const String & app_id );
+
+    void app_launched( const String & app_id );
 
     //.....................................................................
     // App actions
