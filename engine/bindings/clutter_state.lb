@@ -25,23 +25,33 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
         source_name = NULL;
     }
 
-	if (lua_type(L, index+1) == LUA_TNUMBER) 
-	{
-		pre_delay = lua_tonumber(L, index + 1);
-	} 
-	else 
-	{
-		return luaL_error(L, "incorrect argument, failed to set the fifth argument of keys : number expected");
-	}
-
-	if (lua_type(L, index+2) == LUA_TNUMBER) 
-	{
-		post_delay = lua_tonumber(L, index + 2);
-	}
-	else 
-	{
-		return luaL_error(L, "incorrect argument, failed to set the sixth argument of keys : number expected");
-	}
+    // Check if there are pre/post arguments
+    if (!lua_isnoneornil(L, index+1))
+    {
+        if (lua_type(L, index+1) == LUA_TNUMBER) 
+        {
+            pre_delay = lua_tonumber(L, index + 1);
+        } 
+        else 
+        {
+            return luaL_error(L, "incorrect argument, failed to set the fifth argument of keys : number expected");
+        }
+    
+        if (lua_type(L, index+2) == LUA_TNUMBER) 
+        {
+            post_delay = lua_tonumber(L, index + 2);
+        }
+        else 
+        {
+            return luaL_error(L, "incorrect argument, failed to set the sixth argument of keys : number expected");
+        }
+    }
+    else
+    {
+        // Use default pre and post of 0.0
+        pre_delay = 0.0;
+        post_delay = 0.0;
+    }
 
 	if (!strcmp("x",k)||!strcmp("y",k)||!strcmp("w",k)||!strcmp("width",k)||!strcmp("h",k)||!strcmp("height",k)||
 		!strcmp("z",k)||!strcmp("depth",k)||!strcmp("opacity",k))
@@ -219,6 +229,8 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		return luaL_error(L, "incorrect argument, table expected");
 
 	guint duration=0;
+    // Default mode for the whole ClutterState
+	String source_mode = "LINEAR";
 
 	lua_getfield(L, index, "duration");
 	if(!lua_isnil(L, -1)) 
@@ -233,6 +245,19 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			return luaL_error(L, "incorrect argument, failed to set \'duration\' : positive number expected");
 		}
 	}
+    lua_pop(L, 1);
+
+    lua_getfield(L, index, "mode");
+    if(!lua_isnil(L, -1))
+    {
+        // The state has a default mode defined
+        const char * smode = lua_tostring(L, -1);
+        if(!smode)
+        {
+            return luaL_error(L, "incorrect argument, failed to set 'mode' : string expected");
+        }
+        source_mode = smode;
+    }
     lua_pop(L, 1);
 
 	//transitions 
@@ -250,6 +275,21 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		{
 			return luaL_error(L, "incorrect argument, fail to set \'transitions\' elements : table expected");
 		}
+
+        // Transition's default mode -- default to source mode
+        String transition_mode = source_mode;
+
+        lua_getfield(L, -1, "mode");
+        if(!lua_isnil(L, -1))
+        {
+            const char * tmode = lua_tostring(L, -1);
+            if(!tmode)
+            {
+                return luaL_error(L, "incorrect argument, failed to set 'mode' : string expected");
+            }
+            transition_mode = tmode;
+        }
+        lua_pop(L,1);
 
 		// source 
 		lua_getfield(L, -1, "source");
@@ -307,7 +347,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 				}
 
 				// default parameter
-    	    	String mode = "LINEAR"; 
+    	    	String mode = transition_mode; 
 	
 		 		lua_rawgeti(L,-1,1);
 		 		lua_rawgeti(L,-2,2);
@@ -398,6 +438,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	(code)
 	aStates = AnimationState( { duration = 2000,  -- default duration for each transition animation. Optional. If not specified, defaults to 1000.
+	                mode = "EASE_OUT_SINE",       -- default alpha mode for each transition animation.  Optional.  If not specified, defaults to "LINEAR".
 					transitions = {
 						{ -- Transition #1
 							...
@@ -411,12 +452,14 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	(end)
 	
 	The duration property shown above specifies the default duration in milliseconds for any transition animation that does not set its duration explicitly. The duration property is optional. If it is not set, a default duration of 1000 milliseconds will be assigned to any transition that does not define its own duration.
+	The mode property specified the default alpha mode for any transition animation that does not set its alpha mode explicitly.  The mode property is optional.  If it is not set, a default mode of "LINEAR" will be used.  Supported alpha modes are decribed in <Alpha.mode>.
 	
 	The remainder of the constructor definition consists of a table of transitions. Each transition must include the following components.
 	
 	source - unique string identifying a particular beginning state. Can also be "*", which will act as a wildcard starting state.
 	target - unique string identifying a particular ending state
 	duration - Optional. Positive numeric value specifying the time in milliseconds required to transition from the source state to the target state. If not specified, the value specified in the constructor's duration property is used. If the constructor's duration property is not specified, a value of 1000 is used. The maximum duration value is 86,400,000 (24 hours).
+	mode - Optional. A string identifying the default Alpha mode to use in the transition.  Supported Alpha modes are described in <Alpha.mode>.  This will override the AnimationState's alpha mode default for keys in this transition.
 	animator - Animator object used to drive animation. Each transition table contains either an animator property or a keys table, but never both.
 	keys - table of key frames specifying the objects and properties to animate and various characteristics of the animation. Additional information about the contents and format of the keys table is described below. Each transition table contains either a keys table or an animator property, but never both.
 
@@ -434,10 +477,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 	AnimatedObject - the UIElement-based object to animate
 	AnimatedProperty - a string identifying the property to animate. A list of recognized property strings is shown below.
-	AlphaMode - a string identifying the Alpha mode to use in the animation. Supported Alpha modes are described in <Alpha.mode>.
+	AlphaMode - a string identifying the Alpha mode to use in the animation. Supported Alpha modes are described in <Alpha.mode>.  Optional.  If specified, this will override any default mode set in the AnimationState or in the parent transition.
 	FinalValue - a table or numeric value specifying the final value of the animated property at the conclusion of the animation
-	PreDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *before* starting. The PreDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PreDelay had been specified.
-	PostDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *after* completing. The PostDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PostDelay had been specified.
+	PreDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *before* starting. The PreDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PreDelay had been specified.  Optional (but required if you specify PostDelay), default is 0.0
+	PostDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *after* completing. The PostDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PostDelay had been specified.  Optional (but required if you specify PreDelay), defaults to 0.0
 	
 	By setting the PreDelay and PostDelay fields, the animation can be divided into sections. For example, one key frame can set a PostDelay value of .5 so that it will run in the first half of the animation. A second key frame can set its PreDelay to .5 so it runs in the animation's second half, after the first key frame has completed. An example using this technique is shown later in this section.
 	
@@ -458,10 +501,10 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	(code)
 	keys = {
-		{ Obj, "position", "LINEAR", { 100, 100 }, 0, 0 },  -- animate Obj's position
-		{ Obj, "scale", "LINEAR", { 2.0, 2.0 }, 0, 0 },     -- animate Obj's scale
-		{ Obj, "z_rotation", "LINEAR", 45, 0, 0 },          -- animate Obj's rotation along Z-axis
-		{ Obj2, "position", "LINEAR", { 300, 300 }, 0, 0 }  -- animate Obj2's position. This is okay; you can modify the same property for DIFFERENT objects
+		{ Obj, "position", { 100, 100 } },  -- animate Obj's position
+		{ Obj, "scale", { 2.0, 2.0 } },     -- animate Obj's scale
+		{ Obj, "z_rotation", 45 },          -- animate Obj's rotation along Z-axis
+		{ Obj2, "position", { 300, 300 } }  -- animate Obj2's position. This is okay; you can modify the same property for DIFFERENT objects
 	}
 	(end)
 	
@@ -469,8 +512,8 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	(code)
 	keys = {
-		{ Obj, "position", "LINEAR", { 100, 100 }, 0.0, 0.5 },  -- in the first half of the animation, move Obj to {100,100}
-		{ Obj, "position", "LINEAR", { 300, 300 }, 0.5, 0.0 )   -- in the second half, move Obj to {300,300} ***DOES NOT WORK!***
+		{ Obj, "position", { 100, 100 }, 0.0, 0.5 },  -- in the first half of the animation, move Obj to {100,100}
+		{ Obj, "position", { 300, 300 }, 0.5, 0.0 )   -- in the second half, move Obj to {300,300} ***DOES NOT WORK!***
 		                                                        -- Cannot modify same property for same object in same keys table
 	}
 	(end)
@@ -493,13 +536,14 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 							source = "MenuOpened",
 							target = "MenuClosed",
 							duration = 500,
+							mode = "EASE_OUT_QUAD",
 							-- Animation Key Frames
 							-- In the first half of the animation, close the submenu. Notice that by setting the PostDelay to .5, the key
 							-- frame's animation will run in the first half of the animation.
 							-- In the second half, close the main menu. Notice for this key frame that the PreDelay setting is .5.
 							keys = {
-								{ submenu, "scale", "EASE_OUT_QUAD", {0,0}, 0, 0.5 },
-								{ menu,    "scale", "EASE_OUT_QUAD", {0,0}, 0.5, 0 }
+								{ submenu, "scale", {0,0}, 0, 0.5 },
+								{ menu,    "scale", {0,0}, 0.5, 0 }
 							}
 						}
 					}  -- end of transitions table
@@ -554,19 +598,20 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	-- Define an AnimationState for the sphere
 	sphereAnimationState = AnimationState( {
 			duration = 2000,  -- default transition duration
+			mode = "EASE_IN_OUT_QUAD",
 			transitions = {
 				{ -- Wildcard state--->Disappear
 				  source = "*",
 				  target = "disappear",
 				  keys = {
-				  		{ sphereImage, "scale", "EASE_IN_OUT_QUAD", {0.0, 0.0}, 0, 0 },
+				  		{ sphereImage, "scale", {0.0, 0.0} },
 				  }
 				},
 				{ -- Disappear--->Appear
 				  source = "disappear",
 				  target = "appear",
 				  keys = {
-				  		{ sphereImage, "scale", "EASE_IN_OUT_QUAD", {2.0, 2.0}, 0, 0 },
+				  		{ sphereImage, "scale", {2.0, 2.0} },
 				  }
 				}
 			}
