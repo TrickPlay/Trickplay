@@ -72,7 +72,7 @@
 
       	mouse_state = hdr.BUTTON_DOWN 		-- for drawing rectangle 
 
-		if current_focus then 				-- for closing menu button or escaping from text editting 
+		if current_focus and input_mode ~=  hdr.S_RECTANGLE then -- for closing menu button or escaping from text editting 
 			current_focus.on_focus_out()
 			screen:grab_key_focus()
 			return

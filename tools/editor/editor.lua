@@ -113,10 +113,13 @@ local function guideline_inspector(v)
 	--Buttons 
    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
  		  skin = "default", ui_width = 80, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = text_input}
-   	local button_delete = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+		  button_cancel.name = "button_cancel"
+   	local button_delete = editor_ui.button{ text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
  		  skin = "default", ui_width = 80, ui_height = 27, label = "Delete", focus_color = {27,145,27,255}, focus_object = text_input}
+		  button_delete.name = "button_delete"
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     	  skin = "default", ui_width = 80, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button= true, focus_object = text_input} 
+		  button_ok.name = "button_ok"
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down() end 
@@ -127,7 +130,6 @@ local function guideline_inspector(v)
 	button_ok.pressed = function() 
 		if text_input.text == "" then 
 			xbox:on_button_down() 
-			return
    		end    
 		if(util.guideline_type(v.name) == "v_guideline") then
 				v.x = tonumber(text_input.text)
@@ -150,8 +152,8 @@ local function guideline_inspector(v)
 		text_input.on_focus_out()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
-		button_cancel:grab_key_focus()
 		button_cancel.on_focus_in()
+		button_cancel:grab_key_focus()
 	end
 
 	-- Focus Destination 
@@ -198,12 +200,19 @@ local function guideline_inspector(v)
 
 	function text_input:on_key_down(key)
 
-		local key_focus_obj = screen:find_child(text_input.focus[key]) 
+		local key_focus_obj 
+
+		if text_input.focus[key] == nil then return end 
 
 		if text_input.focus[key] then
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
-			elseif key_focus_obj then
+				return true
+			else
+				local key_focus_obj = screen:find_child(text_input.focus[key]) 
+
+				if key_focus_obj == nil then return end 
+
 				if text_input.on_focus_out then
 					text_input.on_focus_out()
 				end
@@ -1710,6 +1719,7 @@ end
 function editor.rectangle(x, y)
     rect_init_x = x 
     rect_init_y = y 
+
     if (ui.rect ~= nil and "rectangle"..tostring(item_num) == ui.rect.name) then
     	return 0
     end
@@ -1717,21 +1727,21 @@ function editor.rectangle(x, y)
 	while (util.is_available("rectangle"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	end 
-    ui.rect = Rectangle{
-    name="rectangle"..tostring(item_num),
-    border_color= hdr.DEFAULT_COLOR,
-    border_width=0,
-    color= hdr.DEFAULT_COLOR,
-    size = {1,1},
-    position = {x,y,0}, 
-	extra = {org_x = x, org_y = y}
+    
+	ui.rect = Rectangle{
+    	name="rectangle"..tostring(item_num),
+    	border_color= hdr.DEFAULT_COLOR,
+    	border_width=0,
+    	color= hdr.DEFAULT_COLOR,
+    	size = {1,1},
+    	position = {x,y,0}, 
+		extra = {org_x = x, org_y = y}
     }
     ui.rect.reactive = true
-    table.insert(undo_list, {ui.rect.name, hdr.ADD, ui.rect})
-    g:add(ui.rect)
-	
 	ui.rect.extra.lock = false
+    g:add(ui.rect)
     util.create_on_button_down_f(ui.rect) 
+    table.insert(undo_list, {ui.rect.name, hdr.ADD, ui.rect})
 end 
 
 function editor.rectangle_done(x,y)
@@ -1962,6 +1972,11 @@ function editor.text()
 		end 
 
 		return true
+	end 
+
+	if ui.text.w == 1 then 
+		ui.text.w = 500
+		ui.text:set{cursor_visible = true}
 	end 
 
 	ui.text.reactive = true

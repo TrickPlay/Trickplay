@@ -228,8 +228,10 @@ function menu.clearMenuButtonView_BGIcons()
 end 
 
 menuButton_view.insert_item(8,{type="label", string="  Guides:", bg=assets("assets/menu-item-label.png")} )
-menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline, icon=Text{text="H"}})
-menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline, icon=Text{text="V"}})
+menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline})
+--menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline, icon=Text{text="H"}})
+menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline})
+--menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline, icon=Text{text="V"}})
 menuButton_view.insert_item(11,{type="item", string="Show Guides", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.show_guides, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.insert_item(12,{type="item", string="Snap to Guides", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.snap_guides, icon=assets("assets/menu-checkmark.png")}) 
 

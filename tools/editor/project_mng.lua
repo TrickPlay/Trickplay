@@ -290,7 +290,16 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     local SSTYLE = {font = "FreeSans Medium 14px" , color = {0,0,0,255}}
     local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
 
-    local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", name = "open_project", position = {0,0}}
+	local msgw_bg 
+
+    --msgw_bg = Image{src = "/assets/panel-no-tabs.png", name = "open_project", position = {0,0}}
+    msgw_bg = assets("/assets/panel-no-tabs.png")
+	if msgw_bg == nil then 
+    	msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name = "open_project", position = {0,0}}
+	else 
+		msgw_bg:set{name = "open_project", position = {0,0}}
+	end 
+
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title = Text{name = "title", text = "Open Project"}:set(STYLE)
 	local title_shadow = Text {name = "title", text = "Open Project"}:set(SSTYLE)
@@ -358,7 +367,6 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 			set_new_project("unsaved_project")
 			return  
 		end 
-
 
         if not editor_lb:mkdir( app_path ) then
         -- Tell the user we were not able to create it

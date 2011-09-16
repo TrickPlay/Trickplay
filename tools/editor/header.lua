@@ -148,7 +148,7 @@ BG_IMAGE_80 = assets("assets/transparency-grid-80-2.png")
 BG_IMAGE_80:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_white = assets("assets/white.png")
 BG_IMAGE_white:set{tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-BG_IMAGE_import = assets("assets/white.png")
+BG_IMAGE_import = Image{src = "assets/white.png"}
 BG_IMAGE_import:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 
 return hdr
