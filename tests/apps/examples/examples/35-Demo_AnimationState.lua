@@ -36,19 +36,21 @@ screen:add( sphereImage )
 -- Define an AnimationState for the sphere
 sphereAnimationState = AnimationState( {
 		duration = 2000,  -- default transition duration
+		mode = "EASE_IN_BOUNCE",
 		transitions = {
 			{ -- Wildcard state--->Disappear
 			  source = "*",
 			  target = "disappear",
+			  mode = "EASE_IN_OUT_BOUNCE", -- default alpha mode
 			  keys = {
-			  		{ sphereImage, "scale", "EASE_IN_OUT_QUAD", {0.0, 0.0}, 0, 0 },
+			  		{ sphereImage, "scale", {0.0, 0.0} },
 			  }
 			},
 			{ -- Disappear--->Appear
 			  source = "disappear",
 			  target = "appear",
 			  keys = {
-			  		{ sphereImage, "scale", "EASE_IN_OUT_QUAD", {2.0, 2.0}, 0, 0 },
+			  		{ sphereImage, "scale", {2.0, 2.0} },
 			  }
 			}
 		}
