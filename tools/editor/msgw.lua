@@ -175,6 +175,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 
     if(util.is_lua_file(input_text) == true) then 
         editor.close()
+
         current_fn = "screens/"..input_text
 
 		local cfc = readfile(current_fn)
@@ -322,7 +323,6 @@ end
 
 function msg_window.inputMsgWindow_openvideo(notused, parm_txt)
      
-	 print("inputMsgWindow_openvideo")
      if(util.is_mp4_file(parm_txt) == true) then 
           mediaplayer:load("assets/videos/"..parm_txt)
      else 
@@ -381,7 +381,7 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 		item_num = item_num + 1
 	  end 
 
-          ui.image= assets("/assets/images/"..input_text)
+          ui.image= Image{src = "/assets/images/"..input_text}
 		  ui.image:set{ name="image"..tostring(item_num),opacity = 255 , position = {200,200}, extra = {org_x = 200, org_y = 200} }
           ui.image.reactive = true
 	  	  ui.image.extra.lock = false

@@ -214,7 +214,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 		function plus:on_button_up(x,y)
 			table.insert(v.items, "item")
-			inspector_apply (v, inspector)
+			--inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -245,7 +245,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 		function plus:on_button_up(x,y)
 			v:insert_tab(#v.tab_labels + 1)
-			inspector_apply (v, inspector)
+
+			--inspector_apply (v, inspector)
+
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -529,15 +531,15 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			end
 		 end 
 	     function down:on_button_up(x,y)
-		    if v.extra.type == "TabBar" then 
+		     if v.extra.type == "TabBar" then 
 				if #v.tab_labels == 1 then 
 					return
 				end 
-			else
+			 else
 		 	 	if #v.items == 1 then 
 					return 
 			 	end 
-			end 
+			 end 
 
 			 if v.extra.type == "TabBar" then 
 				 if tonumber(string.sub(up.name, 8,-1))+1 <= #v.tab_labels then 
@@ -1429,35 +1431,16 @@ function factory.draw_anchor_point(v, inspector)
 
     find_current_anchor (v)
 
-	object = assets("lib/assets/anchor-point-box.png")
-	object:set{name = "rect0", position = {0,0}}
-
-	mid_top = assets("lib/assets/anchor-point-off.png") 
-	mid_top:set{name = "mid_top", position = {15,0}}
-
-	center = assets("lib/assets/anchor-point-off.png") 
-	center:set{name = "center", position = {15,15}}
-
-	mid_bottom = assets("lib/assets/anchor-point-off.png")
-	mid_bottom:set{name = "mid_bottom", position = {15,30}}
-
-	right_mid = assets("lib/assets/anchor-point-off.png") 
-	right_mid:set{name = "right_mid", position = {30,15}}
-
-	right_top = assets("lib/assets/anchor-point-off.png") 
-	right_top:set{ name = "right_top", position = {30,0}}
-
-	right_bottom = assets("lib/assets/anchor-point-off.png") 
-	right_bottom:set{ name = "right_bottom", position = {30,30}}
-
-	left_mid = assets("lib/assets/anchor-point-off.png")
-	left_mid:set{ name = "left_mid", position = {0,15}}
-
-	left_top = assets("lib/assets/anchor-point-off.png") 
-	left_top:set{ name = "left_top", position = {0,0}}
-
-	left_bottom = assets("lib/assets/anchor-point-off.png") 
-	left_bottom:set{ name = "left_bottom", position = {0,30}}
+	object = Image{src = "lib/assets/anchor-point-box.png", name = "rect0", position = {0,0}}
+	mid_top = Image{src = "lib/assets/anchor-point-off.png", name = "mid_top", position = {15,0}}
+	center = Image{src = "lib/assets/anchor-point-off.png", name = "center", position = {15,15}}
+	mid_bottom = Image{src = "lib/assets/anchor-point-off.png", name = "mid_bottom", position = {15,30}}
+	right_mid = Image{src = "lib/assets/anchor-point-off.png", name = "right_mid", position = {30,15}}
+	right_top = Image{src = "lib/assets/anchor-point-off.png", name = "right_top", position = {30,0}}
+	right_bottom = Image{src = "lib/assets/anchor-point-off.png", name = "right_bottom", position = {30,30}}
+	left_mid = Image{src = "lib/assets/anchor-point-off.png", name = "left_mid", position = {0,15}}
+	left_top = Image{src = "lib/assets/anchor-point-off.png", name = "left_top", position = {0,0}}
+	left_bottom = Image{src = "lib/assets/anchor-point-off.png", name = "left_bottom", position = {0,30}}
 
     mid_top.reactive = true
     center.reactive = true

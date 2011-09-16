@@ -510,44 +510,7 @@ function editor.close(new, next_func, next_f_param, from_close)
 	return
 end 
 
-local function open_files(input_purpose, bg_image, inspector)
-	local WIDTH = 300
-  	local HEIGHT = 400
-    local PADDING = 13
-
-	local L_PADDING = 20
-    local R_PADDING = 50
-
-	local TOP_BAR = 30
-    local MSG_BAR = 530
-    local BOTTOM_BAR = 40
-
-	local Y_PADDING = 22
-    local X_PADDING = 10
-
-	local STYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
-    local WSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
-    local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
-    local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
-
-    local msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name="open_file", position = {0,0}}
-    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
-	local title = Text{name = "title", text = "Open File"}:set(STYLE)
-	local title_shadow = Text {name = "title", text = "Open File"}:set(SSTYLE)
-
-	local selected_file, ss, nn 
-	local virtual_hieght = 0
-	local dir 
-	
-	if input_purpose == "open_luafile" then 
-		dir = editor_lb:readdir(current_dir.."/screens")
-	elseif input_purpose == "open_imagefile" then 
-		dir = editor_lb:readdir(current_dir.."/assets/images")
-	elseif input_purpose =="open_videofile" then  
-		dir = editor_lb:readdir(current_dir.."/assets/videos")
-	end 
-
-	local function load_file(v)
+function editor.load_file(v,input_purpose,bg_image)
 		if v == nil then 
 			return
 		end
@@ -594,8 +557,45 @@ local function open_files(input_purpose, bg_image, inspector)
 		elseif input_purpose == "open_videofile" then 
         	msg_window.inputMsgWindow_openvideo("open_videofile", v)
 		end
-	end
+end
 
+
+local function open_files(input_purpose, bg_image, inspector)
+	local WIDTH = 300
+  	local HEIGHT = 400
+    local PADDING = 13
+
+	local L_PADDING = 20
+    local R_PADDING = 50
+
+	local TOP_BAR = 30
+    local MSG_BAR = 530
+    local BOTTOM_BAR = 40
+
+	local Y_PADDING = 22
+    local X_PADDING = 10
+
+	local STYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local WSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
+    local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
+
+    local msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name="open_file", position = {0,0}}
+    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
+	local title = Text{name = "title", text = "Open File"}:set(STYLE)
+	local title_shadow = Text {name = "title", text = "Open File"}:set(SSTYLE)
+
+	local selected_file, ss, nn 
+	local virtual_hieght = 0
+	local dir 
+	
+	if input_purpose == "open_luafile" then 
+		dir = editor_lb:readdir(current_dir.."/screens")
+	elseif input_purpose == "open_imagefile" then 
+		dir = editor_lb:readdir(current_dir.."/assets/images")
+	elseif input_purpose =="open_videofile" then  
+		dir = editor_lb:readdir(current_dir.."/assets/videos")
+	end 
 	local inspector_activate = function ()
 		inspector:remove(inspector:find_child("deactivate_rect"))
 	end 
@@ -645,10 +645,10 @@ local function open_files(input_purpose, bg_image, inspector)
 			if input_purpose == "open_luafile" then
 				undo_list = {} 
 				if editor.close(true) ~= -1 then -- "-1" 
-					load_file(selected_file) 
+					editor.load_file(selected_file,input_purpose,bg_image) 
 				end 
 			else 
-				load_file(selected_file) 
+				editor.load_file(selected_file,input_purpose,bg_image) 
 			end 
 			xbox:on_button_down(1) 
 
@@ -783,7 +783,7 @@ local function open_files(input_purpose, bg_image, inspector)
 				h_rect:grab_key_focus()
 				selected_file = item_t.name 
 				if button == 3 and inspector == nil then 
-					load_file(selected_file)
+					editor.load_file(selected_file,input_purpose,bg_image)
 				end
 				return true
         	end 
@@ -1272,11 +1272,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	end 
 
 	if scroll_y_pos then 
-		 if v.extra.type == "TabBar" then 
-		 	tabs.buttons[2].on_button_down()
-		 else 
-		 	tabs.buttons[3].on_button_down()
-		 end 
+		 tabs.buttons[3].on_button_down()
 		 if screen:find_child("si_items") then 
 	     	screen:find_child("si_items").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
 		 end 
@@ -1946,10 +1942,6 @@ function editor.text()
 
     function ui.text:on_key_down(key,u,t,m)
 
-		if m and m.shift then 
-			return true
-		end 
-
     	if key == keys.Return then 
 			ui.text:set{cursor_visible = false}
         	screen.grab_key_focus(screen)
@@ -1964,6 +1956,7 @@ function editor.text()
 			item_num = item_num + 1
 			return true
 	    end 
+
 	end 
 
 	function ui.text:on_button_down()
@@ -1974,10 +1967,10 @@ function editor.text()
 		return true
 	end 
 
-	if ui.text.w == 1 then 
-		ui.text.w = 500
-		ui.text:set{cursor_visible = true}
-	end 
+	--if ui.text.w == 1 then 
+		--ui.text.w = 500
+		--ui.text:set{cursor_visible = true}
+	--end 
 
 	ui.text.reactive = true
 	ui.text.extra.lock = false
@@ -3285,11 +3278,11 @@ function editor.ui_elements()
        function widget_t:on_button_down(x,y,button,num_click)
 			selected_ui_element = widget_t.name 
 			scroll:find_child(widget_t.extra.rect):on_button_down(x,y,button,num_click)
-			return true
+			--return true
         end 
         function widget_ts:on_button_down()
 			widget_t:on_button_down()
-			return true
+			--return true
 		end
 		function h_rect.extra.on_focus_in()
 			h_rect.opacity = 255
@@ -3360,12 +3353,9 @@ function editor.ui_elements()
 		if x then 
 	    	input_mode = hdr.S_SELECT
 		end 
-		--[[
 		if textUIElement == nil then 
 			screen.grab_key_focus(screen) 
 		end
-		]]
-		screen.grab_key_focus(screen) 
 		return true
 	end 
 
