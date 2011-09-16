@@ -10,11 +10,13 @@
 #import "TrickplayGroup.h"
 #import "TrickplayScreen.h"
 #import "AdvancedUIObjectManager.h"
+#import "Extensions.h"
 
 @implementation TPAppViewController
 
 @synthesize version;
 @synthesize socketManager;
+@synthesize tvConnection;
 
 @synthesize graphics;
 
@@ -29,23 +31,43 @@
 @synthesize socketDelegate;
 @synthesize advancedUIDelegate;
 
+
+- (id)init {
+    return [self initWithNibName:nil bundle:nil tvConnection:nil];
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    [self release];
+    return nil;
+}
+
+- (id)initWithTVConnection:(TVConnection *)_tvConnection {
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection];
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil];
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection {
+    
+    if (!_tvConnection || !_tvConnection.isConnected) {
+        [self release];
+        return nil;
+    }
+    
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        self.tvConnection = _tvConnection;
+        
+        [self startService];
+    }
+    
+    return self;
+}
+
 #pragma mark -
 #pragma mark Network Setup
-
-/**
- * Establishes the host and port that will be used for the asynchronous socket
- * connection managed by TPAppViewController's SocketManager.
- */
-- (void)setupService:(NSUInteger)p hostname:(NSString *)h serviceName:(NSString *)n {
-    NSLog(@"TPAppView Service Setup: %@ host: %@ port: %d", n, h, p);
-    
-    port = p;
-    if (hostName) {
-        [hostName release];
-    }
-    hostName = [h retain];
-    http_port = nil;
-}
 
 /**
  * Sends an arbitrary newline to the async socket which will be ignored by
@@ -62,7 +84,7 @@
  */
 - (void)createTimer {
     socketTimer = [NSTimer timerWithTimeInterval:(NSTimeInterval).1 target:self selector:@selector(timerFireMethod:) userInfo:nil repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:socketTimer forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop mainRunLoop] addTimer:socketTimer forMode:NSDefaultRunLoopMode];
     [socketTimer retain];
 }
 
@@ -72,20 +94,11 @@
  * the connection established then all the remaining managers and modules
  * for TakeControl are allocated and initialized to be used by the app.
  */
-- (BOOL)startService {
+- (void)startService {
     NSLog(@"TPAppView Start Service");
-    // Tell socket manager to create a socket and connect to the service selected
-    socketManager = [[SocketManager alloc] initSocketStream:hostName
-                                                       port:port
-                                                   delegate:self
-                                                   protocol:APP_PROTOCOL];
+    self.socketManager = tvConnection.socketManager;
     
-    if (![socketManager isFunctional]) {
-        // If null then error connecting, back up to selecting services view
-        [self.navigationController popToRootViewControllerAnimated:YES];
-        NSLog(@"Could Not Establish Connection");
-        return NO;
-    }
+    assert(socketManager);
     
     socketTimer = nil;
     
@@ -97,14 +110,6 @@
 	backgroundHeight = mainframe.size.height;
 	backgroundHeight = backgroundHeight - 44;  //subtract the height of navbar
 	backgroundWidth = mainframe.size.width;
-    // Figure out if the device can use pcitures
-    NSString *hasPictures = @"";
-    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
-        hasPictures = @"\tPS";
-    }
-    // Tell the service what this device is capable of
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.2\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
-	[socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
     // Manages resources created with declare_resource
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
@@ -141,22 +146,7 @@
     virtualRemote.delegate = self;
     
     graphics = NO;
-    [touchDelegate setSwipe:graphics];
-    
-    return YES;
-}
-
-/**
- * Sets the http port number used by Trickplay for sending app data, images,
- * and audio.
- */
-- (void)setHTTPPort:(NSString *)my_http_port {
-    if (http_port) {
-        [http_port release];
-    }
-    http_port = [my_http_port retain];
-    [socketManager setPort:[http_port integerValue]];
-    [advancedUIDelegate setupServiceWithPort:port hostname:hostName];
+    [touchDelegate setSwipe:graphics];    
 }
 
 #pragma mark -
@@ -269,9 +259,10 @@
     if ([version floatValue] < 4.1) {
         NSLog(@"WARNING: Protocol Version is less than 4.1");
     }
-    [self setHTTPPort:(NSString *)[args objectAtIndex:1]];
+    [tvConnection setHttp_port:[[args objectAtIndex:1] unsignedIntValue]];
     // if controller ID then open a new socket for advanced UI
     if ([args count] > 2 && [args objectAtIndex:2]) {
+        [advancedUIDelegate setupServiceWithPort:tvConnection.port hostname:tvConnection.hostName];
         if (![advancedUIDelegate startServiceWithID:(NSString *)[args objectAtIndex:2]]) {
             [advancedUIDelegate release];
             advancedUIDelegate = nil;
@@ -663,7 +654,7 @@
  */
 - (void)do_PI:(NSArray *)args {
     NSLog(@"Submit Picture, args:%@", args);
-    if ([self.navigationController visibleViewController] != self) {
+    if ([self.navigationController visibleViewController] != self || !tvConnection || !tvConnection.hostName) {
         [self canceledPickingImage];
         return;
     }
@@ -700,7 +691,7 @@
     }
     camera = [[CameraViewController alloc] initWithView:self.view targetWidth:width targetHeight:height editable:editable mask:mask];
     
-    [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
+    [camera setupService:tvConnection.http_port host:tvConnection.hostName path:[args objectAtIndex:0] delegate:self];
     camera.titleLabel = cameraLabel;
     camera.cancelLabel = cameraCancelLabel;
     camera.navController = self.navigationController;
@@ -1030,12 +1021,6 @@
     
     if (version) {
         [version release];
-    }
-    if (hostName) {
-        [hostName release];
-    }
-    if (http_port) {
-        [http_port release];
     }
     if (audioController) {
         [audioController release];

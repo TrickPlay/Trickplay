@@ -16,7 +16,7 @@
 @synthesize tvBrowserViewController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    if (self = [super initWithNibName:@"TVBrowserViewController" bundle:nibBundleOrNil]) {
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
         pushingAppViewController = NO;
         pushingAppBrowser = NO;
     }
@@ -41,6 +41,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushAppBrowser:) name:@"ConnectionEstablishedNotification" object:nil];
     
     tvBrowserViewController.delegate = self;
+    tvBrowserViewController.tvBrowser.delegate = self;
+    
     [self.view addSubview:navigationController.view];
 }
 
@@ -53,7 +55,6 @@
     pushingAppBrowser = NO;
     [navigationController viewDidDisappear:animated];
 }
-
 
 - (void)viewDidUnload {
     [super viewDidUnload];
@@ -92,6 +93,68 @@
  */
 
 #pragma mark -
+#pragma mark TVBrowserDelegate Methods
+
+- (void)tvBrowser:(TVBrowser *)browser didEstablishConnection:(TVConnection *)connection {
+    
+    connection.delegate = self;
+    
+    AppBrowser *appBrowser = [[[AppBrowser alloc] initWithConnection:connection delegate:self] autorelease];
+    appBrowserViewController = [appBrowser createAppBrowserViewController];
+    appBrowserViewController.delegate = self;
+    
+    [self createTPAppViewControllerWithConnection:connection];
+}
+
+- (void)tvBrowser:(TVBrowser *)browser DidNotEstablishConnectionToService:(NSNetService *)service {
+    
+}
+
+- (void)tvBrowser:(TVBrowser *)browser didFindService:(NSNetService *)service {
+    
+}
+
+- (void)tvBrowser:(TVBrowser *)browser didRemoveService:(NSNetService *)service {
+    
+}
+
+#pragma mark -
+#pragma mark TVBrowserViewControllerDelegate Methods
+
+- (void)tvBrowserViewController:(TVBrowserViewController *)_tvBrowserViewController didSelectService:(NSNetService *)service {
+    if (![[_tvBrowserViewController.tvBrowser getConnectedServices] containsObject:service]) {
+        [self destroyAppBrowserViewController];
+        [self destroyTPAppViewController];
+    } else {
+        [self pushAppBrowser:nil];
+    }
+}
+
+/**
+ * NetServiceManager delegate callback. Called when establishing a stream
+ * socket to the service the user selected fails. Based on which ViewController
+ * is at the top of the UINavigationController view controller stack it will
+ * properly pop and deallocate these resources as the system regresses back
+ * to the RootViewController.
+ */
+- (void)tvBrowserViewControllerDidNotResolveService {
+    NSLog(@"RootViewController didNotResolveService");
+    if (appViewController) {
+        if (self.navigationController.visibleViewController == appViewController) {
+            [self.navigationController popViewControllerAnimated:NO];
+        }
+    }
+    if (appBrowserViewController) {
+        if (self.navigationController.visibleViewController == appBrowserViewController) {
+            [self.navigationController popViewControllerAnimated:YES];
+        } else {
+            [appBrowserViewController release];
+            appBrowserViewController = nil;
+        }
+    }
+}
+
+#pragma mark -
 #pragma mark - AppBrowserDelegate methods
 
 - (void)didReceiveCurrentAppInfo:(NSDictionary *)info {
@@ -109,8 +172,13 @@
  * Creates the TPAppViewController, gives it a port and host name to establish
  * a connection to a service, and tells it to establish this connection.
  */
-- (void)createTPAppViewControllerWithPort:(NSInteger)port hostName:(NSString *)hostName {
-    appViewController = [[TPAppViewController alloc] initWithNibName:@"TPAppViewController" bundle:nil];
+- (void)createTPAppViewControllerWithConnection:(TVConnection *)tvConnection {
+    appViewController = [[TPAppViewController alloc] initWithTVConnection:tvConnection];
+    
+    assert(appViewController);
+    if (!appViewController) {
+        return;
+    }
     
     appViewController.socketDelegate = self;
     
@@ -120,11 +188,6 @@
     width = self.view.frame.size.width,
     height = self.view.frame.size.height;
     appViewController.view.frame = CGRectMake(x, y, width, height);
-    [appViewController setupService:port hostname:hostName serviceName:@"Current Service"];
-    if (![appViewController startService]) {
-        [appViewController release];
-        appViewController = nil;
-    }
 }
 
 - (void)destroyTPAppViewController {
@@ -167,8 +230,6 @@
     }
     
     pushingAppBrowser = YES;
-    
-    [appBrowserViewController setupService:appViewController.socketManager.port hostName:appViewController.socketManager.host serviceName:tvBrowserViewController.currentTVName];
     
     // If Trickplay is running an app and the AppBrowserViewController is aware
     // that this app is running then push the AppBrowser to the top of the stack
@@ -244,60 +305,6 @@
         [appViewController clean];
     }
     [self pushTPAppViewController];
-}
-
-#pragma mark -
-#pragma mark TVBrowserViewControllerDelegate Methods
-
-- (void)tvBrowserViewController:(TVBrowserViewController *)viewController
-               didSelectService:(NSNetService *)service
-               isCurrentService:(BOOL)isCurrentService {
-    if (!isCurrentService) {
-        [self destroyAppBrowserViewController];
-        [self destroyTPAppViewController];
-        appBrowserViewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil];
-        appBrowserViewController.delegate = self;
-    } else {
-        [self pushAppBrowser:nil];
-    }
-}
-
-/**
- * NetServiceManager delegate callback. Called when a connection may be established
- * to a service after the user selects a service they wish to connect to. Sends
- * the connection information to the AppBrowser which will pass said information
- * to classes to create a stream socket. Additionally, stores the service name
- * to the currentTVName.
- */
-- (void)tvBrowserViewController:(TVBrowserViewController *)viewController
-                serviceResolved:(NSNetService *)service {
-    NSLog(@"RootViewController serviceResolved");
-    [appBrowserViewController setupService:[service port] hostName:[service hostName] serviceName:[service name]];
-    [self createTPAppViewControllerWithPort:[service port] hostName:[service hostName]];
-}
-
-/**
- * NetServiceManager delegate callback. Called when establishing a stream
- * socket to the service the user selected fails. Based on which ViewController
- * is at the top of the UINavigationController view controller stack it will
- * properly pop and deallocate these resources as the system regresses back
- * to the RootViewController.
- */
-- (void)tvBrowserViewControllerDidNotResolveService {
-    NSLog(@"RootViewController didNotResolveService");
-    if (appViewController) {
-        if (self.navigationController.visibleViewController == appViewController) {
-            [self.navigationController popViewControllerAnimated:NO];
-        }
-    }
-    if (appBrowserViewController) {
-        if (self.navigationController.visibleViewController == appBrowserViewController) {
-            [self.navigationController popViewControllerAnimated:YES];
-        } else {
-            [appBrowserViewController release];
-            appBrowserViewController = nil;
-        }
-    }
 }
 
 #pragma mark -
