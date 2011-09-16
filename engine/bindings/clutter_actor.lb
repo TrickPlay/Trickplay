@@ -372,9 +372,13 @@ interface actor [[ClutterActor*]]
             luaL_checktype(L,2,LUA_TTABLE);
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
-	    lua_rawgeti(L,2,3);
+	        lua_rawgeti(L,2,3);
             clutter_actor_set_position(self,lua_tonumber(L,-3),lua_tonumber(L,-2));
-	    clutter_actor_set_depth(self,lua_tonumber(L,-1));
+            if ( lua_isnumber( L , -1 ) )
+            {
+	           clutter_actor_set_depth(self,lua_tonumber(L,-1));
+	        }
+	        
             lua_pop(L,3);
         ]];
             
