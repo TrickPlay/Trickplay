@@ -1059,7 +1059,7 @@ function util.make_attr_t(v)
              	{"title", "Inspector : "..(v.extra.type)},
              	{"caption", "Object Name"},
              	{"name", v.name,"name"},
-             	{"progress", math.floor(v.progress) , "Progress"},
+             	{"progress", v.progress , "Progress"},
              	{"caption", "Position"},
              	{"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
              	{"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},

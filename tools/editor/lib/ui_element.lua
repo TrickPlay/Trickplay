@@ -4167,15 +4167,14 @@ function ui_element.progressBar(t)
 		local key = string.format("cshell:%d:%d:%s:%s:%s", p.ui_width, p.ui_height, color_to_string(p.empty_top_color), 
 								   color_to_string(p.empty_bottom_color), color_to_string(p.border_color))
 
-		c_shell =  assets(key, my_draw_c_shell, p.ui_width, p.ui_height, p.empty_top_color, p.empty_bottom_color, p.border_color)
+--		c_shell =  assets(key, my_draw_c_shell, p.ui_width, p.ui_height, p.empty_top_color, p.empty_bottom_color, p.border_color)
+		c_shell =  draw_c_shell( p.ui_width, p.ui_height, p.empty_top_color, p.empty_bottom_color, p.border_color)
 
 		key = string.format("cshell:%d:%d:%d:%d:%s:%s:%f", c_shell.w, c_shell.h, p.ui_width, p.ui_height, 
 							color_to_string(p.filled_top_color), color_to_string(p.filled_bottom_color), p.progress)
 
-		print(key, p.progress)
-
-		c_fill  = assets(key, my_draw_c_fill, c_shell.w, c_shell.h, p.ui_width, p.ui_height, p.filled_top_color, p.filled_bottom_color, p.progress)
-
+--		c_fill  = assets(key, my_draw_c_fill, c_shell.w, c_shell.h, p.ui_width, p.ui_height, p.filled_top_color, p.filled_bottom_color, p.progress)
+		c_fill  = draw_c_fill( c_shell.w, c_shell.h, p.ui_width, p.ui_height, p.filled_top_color, p.filled_bottom_color, p.progress)
 
 		l_bar_group:add(c_shell,c_fill) 
 
