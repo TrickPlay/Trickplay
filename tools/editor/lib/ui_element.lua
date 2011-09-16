@@ -6500,7 +6500,6 @@ function ui_element.tabBar(t)
 				if index == nil then index = #p.tab_labels + 1 end
                 
                 table.remove(p.tab_labels,index, "Label "..tostring(index))
-                
                 table.remove(p.tabs,index,Group{})
                 
                 create()
@@ -6592,6 +6591,8 @@ function ui_element.tabBar(t)
 		current_index = 1
 		
         umbrella:clear()
+		if ap then ap = nil end
+
         tab_bg = {}
         tab_focus = {}
         
@@ -6604,6 +6605,7 @@ function ui_element.tabBar(t)
         }
         
         umbrella:add(bg)
+
         for i = 1, #p.tab_labels do
             
 			editor_use = true
@@ -6615,7 +6617,7 @@ function ui_element.tabBar(t)
 			
 			buttons[i] = ui_element.button{
 				
-				ui_position             = { 0, 0 },
+				ui_position          = { 0, 0 },
 				skin                 = p.skin,
 				ui_width             = p.ui_width,
 				ui_height            = p.ui_height,
@@ -6646,7 +6648,7 @@ function ui_element.tabBar(t)
 			editor_use = false
         end
 		
-		ap = nil
+		--ap = nil
 		
 		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
 		
@@ -6884,7 +6886,7 @@ function ui_element.tabBar(t)
 		__newindex = function(t,k,v)
 			
 			p[k] = v
-			
+
 			if k ~= "selected" then
 				
 				create()

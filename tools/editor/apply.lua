@@ -2,7 +2,7 @@
 
 	local org_object, new_object, item_group 
 	local prev_skin, new_skin, prev_font_size, new_font_size
-	local prev_ix, prev_iy, new_ix, new_iy, prev_line_space, new_line_space 
+	local prev_ix, prev_iy, new_ix, new_iy, prev_line_space, new_line_space, img_w, img_h
 
 	local non_txt_items = {"arrows_visible", "anchor_point", "reactive", "focusChanger", "src", "source", "loop", "skin", "wrap_mode", "items", "itemsList", "icon", "items", "expansion_location", "tab_position", "style", "cell_size", "vert_bar_visible", "horz_bar_visible", "cells_focusable", "lock", "direction", "justify", "alignment", "single_line", }
 
@@ -24,8 +24,8 @@
 	local toboolean = function(s) if (s == "true") then return true else return false end end
 
 	local inspector_deactivate = function (inspector)
-	local rect = Rectangle {name = "deactivate_rect", color = {10,10,10,100}, size = {300,400}, position = {0,0}, reactive = true}
-	inspector:add(rect)
+		local rect = Rectangle {name = "deactivate_rect", color = {10,10,10,100}, size = {300,400}, position = {0,0}, reactive = true}
+		inspector:add(rect)
 	end 
 
 	local is_this_txt_item = function(name) 
@@ -567,15 +567,22 @@
 			 	--	Numeric Text Input Field 
 					local inum = tonumber(itxt)
               		if inum then 
-						if j.name == "w" or j.name == "h" then 
+						if j.name == "w" then 
+							img_w = v.w
 							if v[j.name] ~= inum then 
                         		v[j.name] = inum
 							end 
+						elseif  j.name == "h" then 
+							img_h = v.h 
+							if v[j.name] ~= inum then 
+                        		v[j.name] = inum
+							end 
+						
 						elseif j.name == "line_space" then 
 							prev_line_space = v[j.name]
 					        v[j.name] = inum
 							new_line_space = inum
-			    	 	else
+			    		else
                         	v[j.name] = inum 
 			    		end 
                 	else 
@@ -643,8 +650,8 @@
 							if tonumber(itxt) then 
 								if j.name == "cx" then clip_t[1] = tonumber(itxt)
 								elseif j.name == "cy" then clip_t[2] = tonumber(itxt)
-								elseif j.name == "cw" then clip_t[3] = tonumber(itxt)
-								elseif j.name == "ch" then clip_t[4] = tonumber(itxt)
+								elseif j.name == "cw" then if img_w ~= v.w then clip_t[3] = v.w else clip_t[3] = tonumber(itxt) end 
+								elseif j.name == "ch" then if img_h ~= v.h then clip_t[4] = v.h else clip_t[4] = tonumber(itxt) end  
 								end 
                             	v.clip = clip_t
 							end 
@@ -734,6 +741,8 @@ local function tab_apply (v, inspector)
 	if v.extra.type == "TabBar" then 
 		for i = 1, #v.tab_labels, 1 do
 			if v.tab_position == "top" then 
+				-- item_group.extra.tabs[i] 새로 생성한 텝에 대해서 이게 없는거이 문제구마이.. 
+
  				 v.tabs[i].extra.up_focus = tab_item_apply (item_group.extra.tabs[i].up_focus, v.tabs[i].extra.up_focus, keys.Down, v.name)
  				 v.tabs[i].extra.down_focus = tab_item_apply (item_group.extra.tabs[i].down_focus, v.tabs[i].extra.down_focus, keys.Up, v.name)
 			else 
@@ -814,18 +823,15 @@ function inspector_apply (v, inspector)
 		tab_apply(v,inspector)
 	end 
 
-	if v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then
+	if v.extra and ( v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" ) then
 		CB_RB(v)
 	end
 
     new_object = util.copy_obj(v) 
     input_mode = hdr.S_SELECT
 
-    if(v.name ~= "video1") then 
+    if(v.type ~= "Video") then 
     	table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
-		vvv = v
-		aaa = org_object
-		bbb = new_object
     end 
 		
     return org_object, new_object
