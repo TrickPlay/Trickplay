@@ -6499,8 +6499,8 @@ function ui_element.tabBar(t)
                 
 				if index == nil then index = #p.tab_labels + 1 end
                 
-                table.remove(p.tab_labels,index, "Label "..tostring(index))
-                table.remove(p.tabs,index,Group{})
+                table.remove(p.tab_labels,index)
+                table.remove(p.tabs,index)
                 
                 create()
 				
@@ -6648,6 +6648,13 @@ function ui_element.tabBar(t)
 			editor_use = false
         end
 		
+        for i = #p.tab_labels + 1, #buttons do
+            
+            if buttons[i].parent then buttons[i]:unparent() end
+            
+            buttons[i] = nil
+            
+        end
 		--ap = nil
 		
 		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
