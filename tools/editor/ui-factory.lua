@@ -1,5 +1,11 @@
 local factory = {}
 
+
+local inspector_deactivate = function (inspector)
+	local rect = Rectangle {name = "deactivate_rect", color = {10,10,10,100}, size = {300,400}, position = {0,0}, reactive = true}
+	inspector:add(rect)
+end 
+
 -- Arrange Icon image
 local icon_l = assets("assets/left.png"):set{opacity = 155}
 local icon_r = assets("assets/right.png"):set{opacity = 155} 
@@ -172,7 +178,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	local group = Group{}
 	local PADDING_X     = 7 -- The focus ring has this much padding around it
     local PADDING_Y     = 7
-	local plus, item_plus, label_plus, separator_plus, rows, org_items 
+	local plus, item_plus, label_plus, separator_plus, rows, org_items
 
 	if item_n == "tab_labels" then 
 		rows = table.getn(v.tab_labels)
@@ -205,7 +211,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
         text.position  = {0,0}
     	group:add(text)
 
-		plus = assets("lib/assets/li-btn-dim-plus.png")
+		--plus = assets("lib/assets/li-btn-dim-plus.png")
+		plus = Image{src = "lib/assets/li-btn-dim-plus.png"}
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
 		group:add(plus)
@@ -236,7 +243,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
         text.position  = {0,0}
     	group:add(text)
 
-		plus = assets("lib/assets/li-btn-dim-plus.png")
+		--plus = assets("lib/assets/li-btn-dim-plus.png")
+		plus = Image{src = "lib/assets/li-btn-dim-plus.png"}
+
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
 		group:add(plus)
@@ -244,6 +253,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			plus.src="lib/assets/li-btn-red-plus.png"
 		end 
 		function plus:on_button_up(x,y)
+
+			if #v.tab_labels == 6 then 
+				editor.error_message("018","six",nil,nil,inspector)
+				inspector_deactivate(inspector)
+				return true
+			end 
+
 			v:insert_tab(#v.tab_labels + 1)
 
 			--inspector_apply (v, inspector)
@@ -299,7 +315,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 	    function separator_plus:on_button_up(x,y)
 			table.insert(v.items, {type="separator"})
-			inspector_apply (v, inspector)
+			--inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -319,7 +335,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	    function item_plus:on_button_up(x,y)
 			table.insert(v.items, {type="item", string="Item", f=nil})
-			inspector_apply (v, inspector)
+			--inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -339,7 +355,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	    function label_plus:on_button_up(x,y)
 			table.insert(v.items, {type="label", string="Label"})
-			inspector_apply (v, inspector)
+			--inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -399,13 +415,21 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		if item_type then 
         	item.item_type = item_type
 	    end 
-		local minus = assets("lib/assets/li-btn-dim-minus.png")
+		--local minus = assets("lib/assets/li-btn-dim-minus.png")
+		--minus = assets("lib/assets/li-btn-dim-minus.png")
+		local minus = Image {src = "lib/assets/li-btn-dim-minus.png"}
 	    minus.name = "item_minus"..tostring(i)
 		minus.reactive = true
-		local up = assets("lib/assets/li-btn-dim-up.png")
+		--local up = assets("lib/assets/li-btn-dim-up.png")
+		--up = assets("lib/assets/li-btn-dim-up.png")
+
+		local up = Image{src = "lib/assets/li-btn-dim-up.png"}
 	    up.name = "item_up"..tostring(i)
 		up.reactive = true
-		local down = assets("lib/assets/li-btn-dim-down.png")
+		--local down = assets("lib/assets/li-btn-dim-down.png")
+		--down = assets("lib/assets/li-btn-dim-down.png")
+		local down = Image {src = "lib/assets/li-btn-dim-down.png"}
+
 	    down.name = "item_down"..tostring(i)
 		down.reactive = true
 
@@ -416,6 +440,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 				else 
 					v.extra.last = true
 					editor.error_message("010","two",nil,nil,inspector)
+					inspector_deactivate(inspector)
+					return true
 				end 
 			elseif v.extra.type == "TabBar" then 
 				if #v.tab_labels > 2 then 
@@ -423,6 +449,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 				else 
 					v.extra.last = true
 					editor.error_message("010","two",nil,nil,inspector)
+					inspector_deactivate(inspector)
+					return true
 				end 
 			else
 				if #v.items > 1 then 
@@ -430,6 +458,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 				else 
 					v.extra.last = true
 					editor.error_message("010","one",nil,nil,inspector)
+					inspector_deactivate(inspector)
+					return true
 				end 
 		    end 
 		end 

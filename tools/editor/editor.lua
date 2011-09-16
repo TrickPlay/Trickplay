@@ -3380,6 +3380,7 @@ local error_msg_map = {
 	-- new error messages 
 	["016"] = function(str) return "OK", "Cancel", "Error", "Error", "There is no selected object." end, 
 	["017"] = function(str) return "OK", "Cancel", "Error", "Error", "Can't delete this object. Clone exists." end, 
+ 	["018"] = function(str) return "OK", "Cancel", "Error", "Error", "This UI Element can have maximum of "..str.." items." end, 
 }
 
 
