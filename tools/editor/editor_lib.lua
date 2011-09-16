@@ -43,12 +43,12 @@ function editor_ui.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
+
 		if current_focus ~= nil then 
 			if current_focus.on_focus_out then 
 				current_focus.on_focus_out()
 			end 
 		end 
-		current_focus = b_group
 
 		if key == "focus" then 
         	focus.opacity = 255
@@ -61,6 +61,8 @@ function editor_ui.button(table)
         button.opacity = 0
         b_group:find_child("text").color = p.focus_text_color
 	
+		current_focus = b_group
+
 	    if p.focused ~= nil then 
 			p.focused()
 		end 
@@ -76,7 +78,6 @@ function editor_ui.button(table)
     end
     
     function b_group.extra.on_focus_out(key) 
-		current_focus = nil 
 		if key == "active" then 
         	active.opacity = 255
 	    	button.opacity = 0
@@ -86,6 +87,8 @@ function editor_ui.button(table)
 		end
         focus.opacity = 0
         b_group:find_child("text").color = p.text_color
+		current_focus = nil 
+
 		if p.released then 
 			p.released()
 		end 

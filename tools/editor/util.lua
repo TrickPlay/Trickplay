@@ -1308,7 +1308,9 @@ function util.itemTostring(v, d_list, t_list)
 					item_string = item_string.."} }"..tail
 				end 
 	      elseif type(v[j]) == "userdata" then 
-		  		item_string = item_string..head..j.." = "..v[j].name..tail 
+		  		if v[j].name then 
+		  			item_string = item_string..head..j.." = "..v[j].name..tail 
+				end 
 	      else
 	          print("--", j, " 처리해 주세용 ~")
 	      end 
