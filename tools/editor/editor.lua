@@ -1044,7 +1044,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1)  end end
+	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1)  print(v.progress) end end
 
 	local function inspector_position() 
 		inspector.x = x_pos
@@ -1264,6 +1264,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			screen:add(inspector)
 		else 
 			if inspector_apply (v, inspector) ~= -1 then 
+					print("2", v.progress)
 				inspector_xbox:on_button_down()
 			end 
 		end 
