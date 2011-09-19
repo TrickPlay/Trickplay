@@ -6430,9 +6430,9 @@ function ui_element.tabBar(t)
     	border_corner_radius = 12,
         
         tab_labels = {
-            "Label 1",
-			"Label 2",
-            "Label 3",
+            "Label",
+			"Label",
+            "Label",
         },
         tabs = {},
         --tab_align          = "CENTER",
@@ -6486,7 +6486,8 @@ function ui_element.tabBar(t)
                 
                 if index == nil then index = #p.tab_labels + 1 end
                 
-                table.insert(p.tab_labels,index,"Label "..tostring(index))
+                --table.insert(p.tab_labels,index,"Label "..tostring(index))
+                table.insert(p.tab_labels,index,"Label")
                 
                 table.insert(p.tabs,index,Group{})
                 

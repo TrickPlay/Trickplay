@@ -173,12 +173,14 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
 	return group
 end 
 
+local org_items = nil 
+
 function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, save_items)
 	local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
 	local group = Group{}
 	local PADDING_X     = 7 -- The focus ring has this much padding around it
     local PADDING_Y     = 7
-	local plus, item_plus, label_plus, separator_plus, rows, org_items
+	local plus, item_plus, label_plus, separator_plus, rows --, org_items
 
 	if item_n == "tab_labels" then 
 		rows = table.getn(v.tab_labels)
@@ -199,10 +201,10 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	group.reactive = true
 
 	local function text_reactive()
-	for i, c in pairs(g.children) do
-	     if(c.type == "Text") then 
+		for i, c in pairs(g.children) do
+	     	if(c.type == "Text") then 
 	          c.reactive = true
-	     end 
+	     	end 
         end
     end 
 
@@ -216,12 +218,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
 		group:add(plus)
+
 		function plus:on_button_down(x,y)
 			plus.src="lib/assets/li-btn-red-plus.png"
 		end 
 		function plus:on_button_up(x,y)
 			table.insert(v.items, "item")
-			--inspector_apply (v, inspector)
+			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -232,7 +235,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -249,9 +252,11 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
 		group:add(plus)
+
 		function plus:on_button_down(x,y)
 			plus.src="lib/assets/li-btn-red-plus.png"
 		end 
+
 		function plus:on_button_up(x,y)
 
 			if #v.tab_labels == 6 then 
@@ -261,9 +266,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			end 
 
 			v:insert_tab(#v.tab_labels + 1)
-
 			--inspector_apply (v, inspector)
-
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -274,7 +277,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -315,7 +318,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		end 
 	    function separator_plus:on_button_up(x,y)
 			table.insert(v.items, {type="separator"})
-			--inspector_apply (v, inspector)
+			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -326,7 +329,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -335,7 +338,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	    function item_plus:on_button_up(x,y)
 			table.insert(v.items, {type="item", string="Item", f=nil})
-			--inspector_apply (v, inspector)
+			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -346,7 +349,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -355,7 +358,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	    function label_plus:on_button_up(x,y)
 			table.insert(v.items, {type="label", string="Label"})
-			--inspector_apply (v, inspector)
+			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -367,7 +370,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -486,7 +489,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		    screen_ui.n_selected(v)
 
 			inspector:clear()
-		    editor.inspector(v, ix, iy, siy)
+		    editor.inspector(v, ix, iy, siy, org_items)
 		    return true 
 	    end 
 
@@ -514,6 +517,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			end
 
 			if v.extra.type == "TabBar" then 
+		    	for i, j in pairs (v.tab_labels) do
+					v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	end 
 				if tonumber(string.sub(up.name, 8,-1))-1 >= 1 then 
 					v:move_tab_down(tonumber(string.sub(up.name, 8,-1))-1)
 				end 
@@ -545,7 +551,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		   screen_ui.n_selected(v)
 
 		   inspector:clear()
-		   editor.inspector(v, ix, iy, siy)
+		   editor.inspector(v, ix, iy, siy, org_items)
 		   return true 
 	     end 
 
@@ -572,6 +578,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			 end 
 
 			 if v.extra.type == "TabBar" then 
+		    	for i, j in pairs (v.tab_labels) do
+					v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	end 
 				 if tonumber(string.sub(up.name, 8,-1))+1 <= #v.tab_labels then 
 					v:move_tab_up(tonumber(string.sub(up.name, 8,-1))+1)
 				 end 
@@ -603,7 +612,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     screen_ui.n_selected(v)
 
 			 inspector:clear()
-		     editor.inspector(v, ix, iy, siy)
+		     editor.inspector(v, ix, iy, siy, org_items)
 		     return true 
 	      end 
 

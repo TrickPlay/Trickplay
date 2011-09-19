@@ -742,7 +742,6 @@ local function tab_apply (v, inspector)
 		for i = 1, #v.tab_labels, 1 do
 			if v.tab_position == "top" then 
 				-- item_group.extra.tabs[i] 새로 생성한 텝에 대해서 이게 없는거이 문제구마이.. 
-
  				 v.tabs[i].extra.up_focus = tab_item_apply (item_group.extra.tabs[i].up_focus, v.tabs[i].extra.up_focus, keys.Down, v.name)
  				 v.tabs[i].extra.down_focus = tab_item_apply (item_group.extra.tabs[i].down_focus, v.tabs[i].extra.down_focus, keys.Up, v.name)
 			else 

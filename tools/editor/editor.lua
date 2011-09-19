@@ -894,7 +894,7 @@ function editor.video(inspector)
 	return open_files("open_videofile",nil,inspector)
 end
 
-function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
+function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 
 	local save_items 
 
@@ -1043,7 +1043,18 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	}
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) end
+	button_cancel.pressed = function() xbox:on_button_down(1) 
+	
+		if org_items then 
+			if v.tab_labels then 
+				v.tab_labels = org_items 
+			else 
+				v.items = org_items  
+			end 
+		end 
+	
+	end
+
 	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1) end end
 
 	local function inspector_position() 
