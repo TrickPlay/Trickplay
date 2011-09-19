@@ -630,10 +630,6 @@ local function open_files(input_purpose, bg_image, inspector)
 			if selected_file then 
 				tmpImage = assets("assets/images/"..selected_file)
 			end
-			if inspector:find_child("cw") then 
-				inspector:find_child("cw"):find_child("input_text").text = tostring(tmpImage.w)
-				inspector:find_child("ch"):find_child("input_text").text = tostring(tmpImage.h)
-			end 
 			xbox:on_button_down(1) 
 			inspector_activate() 
 		end
