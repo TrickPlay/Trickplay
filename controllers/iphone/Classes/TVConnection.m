@@ -39,8 +39,8 @@
     self = [super init];
     if (self) {
         // Tell socket manager to create a socket and connect to the service selected
-        socketManager = [[SocketManager alloc] initSocketStream:hostName
-                                                           port:port
+        socketManager = [[SocketManager alloc] initSocketStream:service.hostName
+                                                           port:service.port
                                                        delegate:self
                                                        protocol:APP_PROTOCOL];
         
@@ -89,7 +89,7 @@
         }
         
         // Tell the service what this device is capable of
-        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.2\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
         
         [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
         
@@ -100,6 +100,19 @@
 }
 
 - (void)handleSocketDisconnectAbruptly:(BOOL)abruptly {
+    
+    isConnected = NO;
+    
+    if (hostName) {
+        [hostName release];
+        hostName = nil;
+    }
+    
+    if (appBrowser) {
+        [appBrowser refresh];
+        appBrowser = nil;
+    }
+    
     if (tvBrowser) {
         [tvBrowser invalidateTVConnection:self];
         tvBrowser = nil;
@@ -115,20 +128,12 @@
         TVName = nil;
     }
     
-    if (hostName) {
-        [hostName release];
-        hostName = nil;
-    }
-    
     if (socketManager) {
-        [socketManager disconnect];
         socketManager.delegate = nil;
         [socketManager release];
         socketManager = nil;
     }
-    
-    isConnected = NO;
-    
+        
     [delegate tvConnectionDidDisconnect:self abruptly:abruptly];
 }
 
@@ -153,6 +158,13 @@
 
 - (void)setHttp_port:(NSUInteger)_port {
     http_port = _port;
+    if (appBrowser) {
+        [appBrowser refresh];
+    }
+}
+
+- (void)setAppBrowser:(AppBrowser *)_appBrowser {
+    appBrowser = _appBrowser;
 }
 
 - (void)setTVBrowser:(TVBrowser *)_tvBrowser {
@@ -163,7 +175,19 @@
 #pragma mark Deallocation
 
 - (void)dealloc {
+    NSLog(@"TVConnection Dealloc");
+    
+    isConnected = NO;
     self.delegate = nil;
+    
+    if (hostName) {
+        [hostName release];
+        hostName = nil;
+    }
+    
+    if (appBrowser) {
+        appBrowser = nil;
+    }
     
     if (tvBrowser) {
         [tvBrowser invalidateTVConnection:self];
@@ -180,17 +204,14 @@
         TVName = nil;
     }
     
-    if (hostName) {
-        [hostName release];
-        hostName = nil;
-    }
-    
     if (socketManager) {
         [socketManager disconnect];
         socketManager.delegate = nil;
         [socketManager release];
         socketManager = nil;
     }
+    
+    [super dealloc];
 }
 
 @end

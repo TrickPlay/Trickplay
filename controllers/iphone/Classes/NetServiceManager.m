@@ -79,7 +79,7 @@
 	NSLog(@"NetService did resolve address");
     
     [service stop];    
-    [[self delegate] serviceResolved:service];
+    [self.delegate serviceResolved:service];
 }
 
 #pragma mark -

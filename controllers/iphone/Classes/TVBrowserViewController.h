@@ -24,6 +24,7 @@
 
 @interface TVBrowserViewController : UITableViewController <UITableViewDelegate, 
 UITableViewDataSource, UINavigationControllerDelegate> {
+    @private
     // Orange dot that displays next to the current service
     //UIView *currentTVIndicator;
     // Spins while a service is loading; disappears otherwise.

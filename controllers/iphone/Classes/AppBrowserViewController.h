@@ -34,6 +34,7 @@
  */
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
 UITableViewDataSource> {
+    @private
     /*
     UIBarButtonItem *appShopButton;
     UIBarButtonItem *showcaseButton;
@@ -62,6 +63,7 @@ UITableViewDataSource> {
 @property (nonatomic, retain) IBOutlet UIToolbar *toolBar;
 */
 @property (retain) IBOutlet UITableView *tableView;
+@property (readonly) AppBrowser *appBrowser;
 @property (assign) id <AppBrowserViewControllerDelegate> delegate;
 
 // Exposed methods

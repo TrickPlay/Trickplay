@@ -12,6 +12,7 @@
 @implementation AppBrowserViewController
 
 @synthesize tableView;
+@synthesize appBrowser;
 @synthesize delegate;
 
 /*
@@ -49,9 +50,17 @@
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil appBrowser:(AppBrowser *)browser {
     
+    if (!nibNameOrNil || [nibNameOrNil compare:@"AppBrowserViewController"] != NSOrderedSame || nibBundleOrNil || !browser || ![browser isKindOfClass:[AppBrowser class]]) {
+        
+        [self release];
+        return nil;
+    }
+    
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        delegate = nil;
         appBrowser = [browser retain];
+        [appBrowser addViewController:self];
     }
     
     return self;
@@ -157,6 +166,7 @@
 
     if (!appBrowser.availableApps || [appBrowser.availableApps count] == 0) {
         cell.textLabel.text = @"Loading Data...";
+        [currentAppIndicator removeFromSuperview];
         cell.accessoryView = loadingSpinner;
         [loadingSpinner startAnimating];
         cell.userInteractionEnabled = NO;
@@ -173,10 +183,18 @@
     AppInfo *app = [appBrowser.availableApps objectAtIndex:indexPath.row];
     cell.textLabel.text = app.name;
     cell.textLabel.textColor = [UIColor blackColor];
+
     if (appBrowser.currentApp && appBrowser.currentApp.name && [cell.textLabel.text compare:appBrowser.currentApp.name] == NSOrderedSame) {
         [cell addSubview:currentAppIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
+    } else {
+        for (UIImageView *view in cell.subviews) {
+            if (view == currentAppIndicator) {
+                [currentAppIndicator removeFromSuperview];
+            }
+        }
     }
+    
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     
 	return cell;
@@ -269,6 +287,8 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)dealloc {
     NSLog(@"AppBrowserViewController dealloc");
+    self.delegate = nil;
+    
     if (tableView) {
         [tableView release];
         tableView = nil;
@@ -283,7 +303,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     }
     
     [appBrowser invalidateViewController:self];
-    appBrowser.delegate = nil;
+    [appBrowser cancelRefresh];
     [appBrowser release];
     appBrowser = nil;
     

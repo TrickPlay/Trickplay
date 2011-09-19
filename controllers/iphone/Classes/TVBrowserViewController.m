@@ -10,6 +10,30 @@
 #import "TVBrowser.h"
 #import "Extensions.h"
 
+@interface ConnectedTVIndicator : UIImageView
+
+@end
+
+@implementation ConnectedTVIndicator
+
+- (id)initWithFrame:(CGRect)frame {
+    
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
+        self.layer.borderWidth = 3.0;
+        self.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
+        self.layer.cornerRadius = self.frame.size.height/2.0;
+    }
+    
+    return self;
+}
+
+@end
+
+
+
+
 @implementation TVBrowserViewController
 
 @synthesize tvBrowser;
@@ -40,7 +64,8 @@
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvBrowser:(TVBrowser *)browser {
-    if (!browser || ![browser isKindOfClass:[TVBrowser class]]) {
+    if (!browser || ![browser isKindOfClass:[TVBrowser class]] || !nibNameOrNil || [nibNameOrNil compare:@"TVBrowserViewController"] != NSOrderedSame || nibBundleOrNil) {
+        
         [self release];
         return nil;
     }
@@ -218,6 +243,12 @@
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:tableCellIdentifier] autorelease];
 	}
     
+    for (UIView *subview in cell.subviews) {
+        if ([subview isKindOfClass:[ConnectedTVIndicator class]]) {
+            [subview removeFromSuperview];
+        }
+    }
+    
     NSArray *services = [tvBrowser getAllServices];
 	NSUInteger count = services.count;
     NSLog(@"number of services = %d", count);
@@ -248,11 +279,7 @@
         [loadingSpinner removeFromSuperview];
         [loadingSpinner stopAnimating];
         
-        UIImageView *connectedTVIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
-        connectedTVIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
-        connectedTVIndicator.layer.borderWidth = 3.0;
-        connectedTVIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
-        connectedTVIndicator.layer.cornerRadius = connectedTVIndicator.frame.size.height/2.0;
+        ConnectedTVIndicator *connectedTVIndicator = [[[ConnectedTVIndicator alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)] autorelease];
         
         [cell addSubview:connectedTVIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];

@@ -40,16 +40,16 @@
 
 
 @interface AppBrowser : NSObject {
-    @public
+    @private
     id <AppBrowserDelegate> delegate;
     
     TVConnection *tvConnection;
     
+    // TODO: this var needs an immutable copy to be passed to the client
     NSMutableArray *availableApps;
     // The current app running on Trickplay
     AppInfo *currentApp;
 
-    @private
     NSMutableArray *viewControllers;
     
     // Asynchronous URL connections for populating the table with
@@ -65,7 +65,7 @@
 
 // Exposed instance variables
 @property (assign) id <AppBrowserDelegate> delegate;
-@property (readonly) NSMutableArray *availableApps;
+@property (readonly) NSArray *availableApps;
 @property (readonly) AppInfo *currentApp;
 @property (retain) TVConnection *tvConnection;
 
@@ -75,7 +75,8 @@
 - (AppBrowserViewController *)createAppBrowserViewController;
 
 - (void)refresh;
-
+// prevents retain cycles
+- (void)cancelRefresh;
 //- (BOOL)hasRunningApp;
 
 //- (NSDictionary *)getCurrentAppInfo;

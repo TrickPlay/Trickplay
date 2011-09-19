@@ -39,6 +39,10 @@
 - (void)dealloc {
     [name release];
     name = nil;
+    [appID release];
+    appID = nil;
+    
+    [super dealloc];
 }
 
 @end
@@ -72,6 +76,8 @@
     if (self) {
         self.delegate = _delegate;
         self.tvConnection = _connection;
+        [self.tvConnection setAppBrowser:self];
+
         viewControllers = [[NSMutableArray alloc] initWithCapacity:5];
         
         // Asynchronous URL connections for populating the table with
@@ -84,13 +90,16 @@
         fetchAppsData = nil;
         currentAppData = nil;
         
-        availableApps = nil;
+        availableApps = [[NSMutableArray alloc] initWithCapacity:10];
         currentApp = nil;
         
+        /**
+        // Can't do this automatically for now
         if (self.delegate) {
             [self refreshCurrentApp];
             [self refreshAvailableApps];
         }
+        **/
     }
     
     return self;
@@ -98,13 +107,21 @@
 
 
 #pragma mark -
-#pragma Setters
+#pragma Setters/Getters
 
 - (void)setCurrentApp:(AppInfo *)_currentApp {
     @synchronized (self) {
         [_currentApp retain];
-        [_currentApp release];
+        [currentApp release];
         currentApp = _currentApp;
+    }
+}
+
+- (void)setAvailableApps:(NSMutableArray *)_availableApps {
+    @synchronized (self) {
+        [_availableApps retain];
+        [availableApps release];
+        availableApps = _availableApps;
     }
 }
 
@@ -149,24 +166,27 @@
 - (void)matchCurrentAppToAvailableApps {
     if (currentApp && availableApps) {
         for (AppInfo *app in availableApps) {
-            if (currentApp.name == app.name) {
+            if ([currentApp.name compare:app.name] == NSOrderedSame) {
                 self.currentApp = app;
+                break;
             }
         }
     }
 }
 
+// TODO: if either currentapp or availableApps have no match this
+// could cause problems
 - (void)matchAvailableAppsToCurrentApp {
     if (currentApp && availableApps) {
         NSUInteger i;
         for (i = 0; i < availableApps.count; i++) {
             AppInfo *app = [availableApps objectAtIndex:i];
-            if (currentApp.name == app.name) {
+            if ([currentApp.name compare:app.name] == NSOrderedSame) {
                 break;
             }
         }
         
-        if (currentApp == [availableApps objectAtIndex:i]) {
+        if (currentApp.name == ((AppInfo *)[availableApps objectAtIndex:i]).name) {
             [availableApps replaceObjectAtIndex:i withObject:currentApp];
         }
     }
@@ -236,26 +256,36 @@
 - (void)informOfCurrentApp:(AppInfo *)app {
     @synchronized (self) {
         self.currentApp = app;
+        if ([[self.currentApp name] isEqualToString:@"Empty"]) {
+            self.currentApp = nil;
+        }
+        
         [self matchCurrentAppToAvailableApps];
     }
-    [self.delegate appBrowser:self didReceiveCurrentApp:app];
+    NSLog(@"current app: %@", self.currentApp);
+    [self.delegate appBrowser:self didReceiveCurrentApp:self.currentApp];
     [self viewControllersRefresh];
 }
 
 - (void)informOfAvailableApps:(NSArray *)apps {
     @synchronized (self) {
-        [availableApps release];
-        availableApps = [NSMutableArray arrayWithArray:apps];
+        [availableApps removeAllObjects];
+        if (apps) {
+            for (NSUInteger i = 0; i < apps.count; i++) {
+                [availableApps addObject:[[[AppInfo alloc] initWithAppDictionary:[apps objectAtIndex:i]] autorelease]];
+            }
+        }
         [self matchAvailableAppsToCurrentApp];
     }
-    [self.delegate appBrowser:self didReceiveAvailableApps:apps];
+    [self.delegate appBrowser:self didReceiveAvailableApps:self.availableApps];
     [self viewControllersRefresh];
 }
 
 - (void)refreshCurrentApp {
-    NSLog(@"Fetching Apps");
+    NSLog(@"Fetching Current App");
     
     if (!tvConnection || !tvConnection.hostName) {
+        self.currentApp = nil;
         return;
     }
         
@@ -272,7 +302,7 @@
     // grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", tvConnection.hostName, tvConnection.http_port];
     
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:50.0];
     currentAppInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
     
     if (!currentAppInfoConnection) {
@@ -314,9 +344,10 @@
  */
 
 - (void)refreshAvailableApps {
-    NSLog(@"Fetching Apps");
+    NSLog(@"Fetching Available Apps");
     
     if (!tvConnection || !tvConnection.hostName) {
+        [availableApps removeAllObjects];
         return;
     }
         
@@ -333,7 +364,7 @@
     // grab json data and put it into an array
     NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", tvConnection.hostName, tvConnection.http_port];
     
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:50.0];
     fetchAppsConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
     
     if (!fetchAppsConnection) {
@@ -366,22 +397,19 @@
         [fetchAppsConnection release];
         fetchAppsConnection = nil;
         
-        NSLog(@"Received JSON array app data = %@", availableApps);
+        NSMutableArray *apps = [fetchAppsData yajl_JSON];
+        NSLog(@"Received JSON array available apps = %@", apps);
         
-        [availableApps release];
-        availableApps = [[fetchAppsData yajl_JSON] retain];
-        
-        [self informOfAvailableApps:availableApps];
+        [self informOfAvailableApps:apps];
     } else if (connection == currentAppInfoConnection) {
         [currentAppInfoConnection cancel];
         [currentAppInfoConnection release];
         currentAppInfoConnection = nil;
         
-        self.currentApp = [[AppInfo alloc] initWithAppDictionary:[currentAppData yajl_JSON]];
-        if ([self.currentApp.name isEqualToString:@"Empty"]) {
-            self.currentApp = nil;
-        }
-        [self informOfCurrentApp:self.currentApp];
+        NSLog(@"Current app: %@", [currentAppData yajl_JSON]);
+        AppInfo *app = [[[AppInfo alloc] initWithAppDictionary:[currentAppData yajl_JSON]] autorelease];
+                
+        [self informOfCurrentApp:app];
     }
 }
 
@@ -391,15 +419,18 @@
         [fetchAppsConnection release];
         fetchAppsConnection = nil;
         
-        [availableApps release];
-        availableApps = nil;
+        if (error) {
+            NSLog(@"Did fail fetching available apps with error: %@", error);
+        }
         [self informOfAvailableApps:nil];
     } else if (connection == currentAppInfoConnection) {
         [currentAppInfoConnection cancel];
         [currentAppInfoConnection release];
         currentAppInfoConnection = nil;
         
-        self.currentApp = nil;
+        if (error) {
+            NSLog(@"Did fail fetching current app with error: %@", error);
+        }
         [self informOfCurrentApp:nil];
     }
 }
@@ -412,7 +443,7 @@
  * app.
  */
 - (void)launchApp:(AppInfo *)app {
-    if (!tvConnection || !tvConnection.hostName || !app) {
+    if (!tvConnection || !tvConnection.hostName || !app || ![app isKindOfClass:[AppBrowser class]]) {
         return;
     }
     
@@ -448,14 +479,7 @@
 #pragma mark -
 #pragma mark Deallocation
 
-- (void)dealloc {
-    NSLog(@"AppBrowser Dealloc");
-    
-    self.delegate = nil;
-    
-    [tvConnection release];
-    tvConnection = nil;
-    
+- (void)cancelRefresh {
     if (fetchAppsConnection) {
         [fetchAppsConnection cancel];
         [fetchAppsConnection release];
@@ -466,22 +490,30 @@
         [currentAppInfoConnection release];
         currentAppInfoConnection = nil;
     }
-    if (currentAppData) {
-        [currentAppData release];
-        currentAppData = nil;
-    }
     if (fetchAppsData) {
         [fetchAppsData release];
         fetchAppsData = nil;
     }
+    if (currentAppData) {
+        [currentAppData release];
+        currentAppData = nil;
+    }
+}
+
+- (void)dealloc {
+    NSLog(@"AppBrowser Dealloc");
+    
+    self.delegate = nil;
+    [self.tvConnection setAppBrowser:nil];
+    self.tvConnection = nil;
+    
+    [self cancelRefresh];
     
     [viewControllers release];
     
-    [availableApps release];
-    availableApps = nil;
-    
     self.currentApp = nil;
-    
+    self.availableApps = nil;
+        
     [super dealloc];
 }
 
