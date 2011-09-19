@@ -834,8 +834,6 @@ function inspector_apply (v, inspector)
     	table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
     end 
 		
-	if v.progress then print(v.progress, org_object.progress, new_object.progress) end
-
     return org_object, new_object
 end	
 
