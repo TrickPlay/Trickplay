@@ -387,9 +387,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
             [tvBrowser refreshServices];
         }
     } else {
-        [delegate tvBrowserViewController:self didSelectService:[services objectAtIndex:indexPath.row]];
+        if (tvBrowser && ![[tvBrowser getConnectingServices] containsObject:[services objectAtIndex:indexPath.row]]) {
+            [delegate tvBrowserViewController:self didSelectService:[services objectAtIndex:indexPath.row]];
         
-        if (tvBrowser) {
             [tvBrowser connectToService:[services objectAtIndex:indexPath.row]];
         }
     }
