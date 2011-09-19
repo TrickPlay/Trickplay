@@ -1044,7 +1044,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	-- Button Event Handlers
 	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1)  print(v.progress) end end
+	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1) end end
 
 	local function inspector_position() 
 		inspector.x = x_pos
@@ -1264,7 +1264,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			screen:add(inspector)
 		else 
 			if inspector_apply (v, inspector) ~= -1 then 
-					print("2", v.progress)
 				inspector_xbox:on_button_down()
 			end 
 		end 
@@ -2164,8 +2163,7 @@ function editor.duplicate()
    	end 
 
 	for i, v in pairs(g.children) do
-	    if(v.extra.selected == true) then
-			
+		if util.is_this_selected(v) == true then 
 		    if ui.dup then
 		    	if ui.dup.name == v.name then 
 					next_position = {2 * v.x - ui.dup.extra.position[1], 2 * v.y - ui.dup.extra.position[2]}
