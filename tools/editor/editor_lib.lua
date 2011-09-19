@@ -43,12 +43,12 @@ function editor_ui.button(table)
     } 
     
     function b_group.extra.on_focus_in(key) 
+
 		if current_focus ~= nil then 
 			if current_focus.on_focus_out then 
 				current_focus.on_focus_out()
 			end 
 		end 
-		current_focus = b_group
 
 		if key == "focus" then 
         	focus.opacity = 255
@@ -61,6 +61,8 @@ function editor_ui.button(table)
         button.opacity = 0
         b_group:find_child("text").color = p.focus_text_color
 	
+		current_focus = b_group
+
 	    if p.focused ~= nil then 
 			p.focused()
 		end 
@@ -76,7 +78,6 @@ function editor_ui.button(table)
     end
     
     function b_group.extra.on_focus_out(key) 
-		current_focus = nil 
 		if key == "active" then 
         	active.opacity = 255
 	    	button.opacity = 0
@@ -86,6 +87,8 @@ function editor_ui.button(table)
 		end
         focus.opacity = 0
         b_group:find_child("text").color = p.text_color
+		current_focus = nil 
+
 		if p.released then 
 			p.released()
 		end 
@@ -96,34 +99,31 @@ function editor_ui.button(table)
         b_group.size = { p.ui_width , p.ui_height}
 
 	    button = Group{name = "dim", opacity = 255, size = {p.ui_width, p.ui_height}}
-		local leftcap = Image{src="lib/assets/button-dim-leftcap.png", position = {0,0}}
-		local rightcap = Image{src="lib/assets/button-dim-rightcap.png", position = {p.ui_width-10,0}}
-		local center1px = Image{src="lib/assets/button-dim-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
+		local leftcap = assets("lib/assets/button-dim-leftcap.png"):set{position = {0,0}}
+		local rightcap = assets("lib/assets/button-dim-rightcap.png"):set{position = {p.ui_width-10,0}}
+		local center1px = assets("lib/assets/button-dim-center1px.png"):set{position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
 		button:add(leftcap,center1px,rightcap) 
 		
 	    focus = Group{name  ="red", opacity = 0, size = {p.ui_width, p.ui_height}}
-		local redleftcap = Image{src="lib/assets/button-red-leftcap.png", position = {0,0}}
-		local redrightcap = Image{src="lib/assets/button-red-rightcap.png", position = {p.ui_width-10,0}}
-		local redcenter1px = Image{src="lib/assets/button-red-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
+		local redleftcap = assets("lib/assets/button-red-leftcap.png"):set{ position = {0,0}}
+		local redrightcap = assets("lib/assets/button-red-rightcap.png"):set{ position = {p.ui_width-10,0}}
+		local redcenter1px = assets("lib/assets/button-red-center1px.png"):set{ position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
 		focus:add(redleftcap,redcenter1px,redrightcap) 
 
 	    active = Group{name ="active", opacity = 0, size = {p.ui_width, p.ui_height}}
-		local activeleftcap = Image{src="lib/assets/button-active-leftcap.png", position = {0,0}}
-		local activerightcap = Image{src="lib/assets/button-active-rightcap.png", position = {p.ui_width-10,0}}
-		local activecenter1px = Image{src="lib/assets/button-active-center1px.png", position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
+		local activeleftcap = assets("lib/assets/button-active-leftcap.png"):set{ position = {0,0}}
+		local activerightcap = assets("lib/assets/button-active-rightcap.png"):set{ position = {p.ui_width-10,0}}
+		local activecenter1px = assets("lib/assets/button-active-center1px.png"):set{ position = {leftcap.w,0}, tile = {true, false}, width = p.ui_width-20}
 		active:add(activeleftcap,activecenter1px,activerightcap) 
 
         text = Text{name = "text", text = p.label, font = p.text_font, color = p.text_color} --reactive = true 
-        text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2}}
+        text:set{name = "text", position = { (p.ui_width  -text.w)/2, (p.ui_height - text.h)/2 - 1}}
 	
 		b_group:add(button, active, focus)
 
---new 0901
 		b_group.extra.dim = button
 		b_group.extra.active = active
 		b_group.extra.focus = focus
---new 0901
-
 
 		if p.text_has_shadow then 
 	       s_txt = Text {
@@ -132,7 +132,7 @@ function editor_ui.button(table)
                     font  = p.text_font,
                     color = {0,0,0,255/2},
                     x= (p.ui_width  -text.w)/2 - 1,
-                    y= (p.ui_height - text.h)/2 - 1,
+                    y= (p.ui_height - text.h)/2 - 2,
             }
             s_txt.anchor_point={0,s_txt.h/2}
             s_txt.y = s_txt.y+s_txt.h/2
@@ -195,10 +195,6 @@ function editor_ui.button(table)
 							screen:find_child(b_group.focus[key]).on_focus_in(key)
 						end
 					else 
-					   print("b_group:grab_key_focus")
-					   print("b_group:grab_key_focus")
-					   print("b_group:grab_key_focus")
-					   print("b_group:grab_key_focus")
 					   b_group:grab_key_focus()
 					end
 				end
@@ -214,8 +210,6 @@ function editor_ui.button(table)
         else 
            p[k] = v
         end
-		--print(k,v)
-		--print("create_button()called")
         create_button()
     end 
 
@@ -238,7 +232,7 @@ function editor_ui.scrollPane(t)
         visible_w    =  285,
         visible_h    =  330,
         content   	 = Group{},
-        virtual_h 	 = 242,--1000,
+        virtual_h 	 = 242,
         virtual_w 	 = 285,
         arrow_color  = {255,255,255,255},
         arrows_visible = true,
@@ -275,7 +269,7 @@ function editor_ui.scrollPane(t)
 	--flag to hold back key presses while animating content group
 	local animating = false
 
-	local border = Rectangle{ color = "00000000", } --opacity = 0}
+	local border = Rectangle{ color = "00000000", } 
 	
 	local track_h, track_w, grip_hor, grip_vert, track_hor, track_vert
 	
@@ -303,13 +297,10 @@ function editor_ui.scrollPane(t)
                 if p.virtual_h > p.visible_h then
                     if y > p.virtual_h - p.visible_h/2 then
                         new_y = -p.virtual_h + p.visible_h
-                        --print(1)
                     elseif y < p.visible_h/2 then
                         new_y = 0
-                        --print(2)
                     else
                         new_y = -y + p.visible_h/2
-                        --print(3)
                     end
                 else
                     new_y =0
@@ -353,17 +344,11 @@ function editor_ui.scrollPane(t)
                     end
                 end
             end
-            --[[
-			get_content_group = function()
-				return content
-			end
-            --]]
         }
     }
 
 
 	 function scroll_group.extra.on_focus_in(key) 
-		--current_focus = scroll_group 0701
 		for i,j in pairs (scroll_group.content.children) do 
 			if j.name then 
 			if string.find(j.name, "h_rect") ~= nil then 
@@ -376,7 +361,6 @@ function editor_ui.scrollPane(t)
     end
     
     function scroll_group.extra.on_focus_out(key) 
-		--print("scroll_group focus out")
     end
 
     scroll_group.extra.seek_to = function(x,y)
@@ -397,28 +381,7 @@ function editor_ui.scrollPane(t)
 		end,
 	}
 	scroll_group.on_key_down = function(self,key)
-	--[[
-		if animating then return end
-		--if keys[key] then
-			--keys[key]()
-		if scroll_group.focus[key] then
-			if type(scroll_group.focus[key]) == "function" then
-				scroll_group.focus[key]()
-			elseif screen:find_child(scroll_group.focus[key]) then
-				if scroll_group.on_focus_out then
-					scroll_group.on_focus_out()
-				end
-				screen:find_child(scroll_group.focus[key]):grab_key_focus()
-				if screen:find_child(scroll_group.focus[key]).on_focus_in then
-					screen:find_child(scroll_group.focus[key]).on_focus_in(key)
-				end
-			end
-		else
-			dumptable(scroll_group.extra.focus)
-		end
-		]]
 		scroll_group.extra.on_focus_in()
-
 	end
 	
 	scroll_y = function(dir)
@@ -508,10 +471,10 @@ function editor_ui.scrollPane(t)
     local make_arrow = function(dir)
 		local arrow
 		if dir == "up" then 
-			arrow = Image{src="lib/assets/scrollbar-btn-up.png"}
+			arrow = assets("lib/assets/scrollbar-btn-up.png")
 			arrow.anchor_point={arrow.w/2,arrow.h}
 		else 
-			arrow = Image{src="lib/assets/scrollbar-btn-down.png"}
+			arrow = assets("lib/assets/scrollbar-btn-down.png")
 			arrow.anchor_point={arrow.w/2,0}
 		end 
 		return arrow
@@ -520,25 +483,24 @@ function editor_ui.scrollPane(t)
     local function make_hor_bar(w,h,ratio)
     end
     local function make_vert_bar(w,h,ratio)
-		--print(w,h)
 		local bar = Group()
         local fill = Group{name="grip",reactive = true, }
         local shell = Group{name="track",reactive = true, }
 
-		local top= Image{src="lib/assets/scrollbar-grip-top.png", position = {0,0}}
-		local bottom= Image{src="lib/assets/scrollbar-grip-bottom.png"}
-		local handle= Image{src="lib/assets/scrollbar-grip-handle.png"}
-		local t_1px = Image{src="lib/assets/scrollbar-grip-repeat1px.png", position = {0,top.h}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2}
-		local b_1px = Image{src="lib/assets/scrollbar-grip-repeat1px.png", position = {0,top.h+t_1px.h+handle.h}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2}
+		local top= assets("lib/assets/scrollbar-grip-top.png")
+		local bottom= assets("lib/assets/scrollbar-grip-bottom.png")
+		local handle= assets("lib/assets/scrollbar-grip-handle.png")
+		local t_1px = assets("lib/assets/scrollbar-grip-repeat1px.png"):set{position = {0,top.h}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2 }
+		local b_1px = assets("lib/assets/scrollbar-grip-repeat1px.png"):set{position = {0,top.h+t_1px.h+handle.h - 2}, tile = {false, true}, height = (h*ratio-(top.h+bottom.h+handle.h))/2 }
 
-		bottom.position={0,top.h+t_1px.h+handle.h+b_1px.h}
-		handle.position={0,top.h + t_1px.h}
+		bottom.position={0,top.h+t_1px.h+handle.h+b_1px.h - 3}
+		handle.position={0,top.h + t_1px.h - 1}
 		fill.anchor_point = {t_1px.w/2,0}
 
-		local shell_top= Image{src="lib/assets/scrollbar-track-top.png", position = {0,0}}
-		local shell_bottom= Image{src="lib/assets/scrollbar-track-bottom.png"}
-		local shell_t_1px = Image{src="lib/assets/scrollbar-track-repeat1px.png", position = {0,shell_top.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2}
-		local shell_b_1px = Image{src="lib/assets/scrollbar-track-repeat1px.png", position = {0,shell_top.h+shell_t_1px.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2}
+		local shell_top= assets("lib/assets/scrollbar-track-top.png")
+		local shell_bottom= assets("lib/assets/scrollbar-track-bottom.png")
+		local shell_t_1px = assets("lib/assets/scrollbar-track-repeat1px.png"):set{position = {0,shell_top.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2 }
+		local shell_b_1px = assets("lib/assets/scrollbar-track-repeat1px.png"):set{position = {0,shell_top.h+shell_t_1px.h}, tile = {false, true}, height = (h-(shell_top.h+shell_bottom.h))/2}
 
 		shell_bottom.position={0,shell_top.h+shell_t_1px.h+shell_b_1px.h}
 
@@ -777,12 +739,6 @@ function editor_ui.scrollPane(t)
     end
     setmetatable(scroll_group.extra, mt)
 
---[[
-	if scroll.virtual_h <= scroll.visible_h then
-            scroll_group:find_child("vert_s_bar")
-            scroll_group:find_child("dn")
-	end 
-]]
     return scroll_group
 end
 
@@ -799,9 +755,9 @@ function editor_ui.tabBar(t)
     	ui_width = 97,
     	ui_height = 21, 
         
-    	focus_color = {255,255,255,255}, --{27,145,27,255}, 	  --"1b911b", 
-    	focus_fill_color = {27,145,27,255}, --"1b911b", 
-    	focus_text_color = {255,255,255,255}, --"1b911b", 
+    	focus_color = {255,255,255,255}, 
+    	focus_fill_color = {27,145,27,255}, 
+    	focus_text_color = {255,255,255,255}, 
     	border_width = 0,
     	border_corner_radius = 0,
         
@@ -844,7 +800,6 @@ function editor_ui.tabBar(t)
 
     local create
     local current_index = 1
-    --local tabs = {}
     local tab_bg = {}
     local tab_focus = {}
 	
@@ -909,27 +864,11 @@ function editor_ui.tabBar(t)
             display_tab = function(self,index)
                 if index < 1 or index > #p.tab_labels then return end
                 p.tabs[current_index]:hide()
-				--tab_bg[current_index]:show()
-				--tab_focus[current_index]:hide()
                 p.buttons[current_index].on_focus_out()
                 current_index = index
                 p.tabs[current_index]:show()
                 p.buttons[current_index]:raise_to_top()
                 p.buttons[current_index].on_focus_in()
-				--tab_bg[current_index]:hide()
-				--tab_focus[current_index]:show()
-
-				if ap then
-				--[[	
-					ap:pan_to(
-						
-						p.buttons[current_index].x+p.buttons[current_index].w/2,
-						p.buttons[current_index].y+p.buttons[current_index].h/2
-						
-					)
-				]]	
-				end
-
             end,
             previous_tab = function(self)
                 if current_index == 1 then return end
@@ -1007,7 +946,6 @@ function editor_ui.tabBar(t)
 
 		ap = nil
 		
-		--if p.arrow_image then p.arrow_sz = p.arrow_image.w end
 		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
 		
 		if p.tab_position == "TOP" and
@@ -1211,15 +1149,15 @@ function editor_ui.checkBoxGroup(t)
 				size = p.box_size, position = pos, reactive = true, opacity = 255}
     	        boxes:add(box, focus) 
 	     	else
-	           	focus = Image{name = "focus"..tostring(i),  src=p.box_focus_image, position = pos, reactive = true, opacity = 0}
-	           	box = Image{name = "box"..tostring(i),  src=p.box_image, position = pos, reactive = true, opacity = 255}
+	           	focus = Image {name = "focus"..tostring(i), src=p.box_focus_image, position = pos, reactive = true, opacity = 0}
+	           	box = Image {name = "box"..tostring(i), src=p.box_image, position = pos, reactive = true, opacity = 255}
 		   		boxes:add(box, focus) 
 	     	end 
 
 	      	if p.skin == "custom" then 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = true, opacity = 0}
+	     		check = assets(p.check_image):set{name="check"..tostring(i), size = p.check_size, position = pos, reactive = true, opacity = 0}
 			else 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, position = pos, reactive = true, opacity = 0}
+	     		check = assets(p.check_image):set{name="check"..tostring(i), position = pos, reactive = true, opacity = 0}
 			end
 	     	checks:add(check) 
 
@@ -1269,7 +1207,6 @@ function editor_ui.checkBoxGroup(t)
 
 	     		function box:on_button_down (x,y,b,n)
 					local box_num = tonumber(box.name:sub(4,-1))
-					--dumptable(p.selected_items)
 					table.insert(p.selected_items, box_num)
 					cb_group:find_child("check"..tostring(box_num)).opacity = 255
 					cb_group:find_child("check"..tostring(box_num)).reactive = true

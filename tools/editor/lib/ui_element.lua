@@ -1,123 +1,128 @@
-local ui_element = {}
-
 dofile("/lib/ui_element_header.lua")     
 
-local assets = dofile( "assets-cache.lua" )
+local ui_element = {}
 
 local function color_to_string( color )
-        if type( color ) == "string" then
-            return color
-        end
-        if type( color ) == "table" then
-            return serialize( color )
-        end
-        return tostring( color )
+
+    if type( color ) == "string" then
+       return color
+    end
+
+    if type( color ) == "table" then
+       return serialize( color )
+    end
+
+    return tostring( color )
+
 end
 
-function ui_element.populate_to (grp, tbl)
-
-	local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "ArrowPane", "TabBar", "Group"} 
+local uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "ArrowPane", "TabBar", "Group"} 
 	 
-	local function is_in_list(item, list)
-    		if list == nil then 
-        		return false
-    		end 
+local function is_in_list(item, list)
 
-    		for i, j in pairs (list) do
-			if item == j then 
-				return true
-			end 
-    		end 
-    		return false
-	end 
+	if list == nil then 
+    	return false
+    end 
 
-	local function is_this_container(v)
-    		if v.extra then 
-        		if is_in_list(v.extra.type, uiContainers) == true then 
-	    			return true
-        		else 
-	    			return false
-        		end 
-    		else 
-        		return false
-    		end 
-	end 	
-
-	for i, j in pairs (grp.children) do 
-		local function there()
-			if j.extra then 
-				if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
-					tbl[j.name] = grp:find_child(j.name) 
-					for k,l in pairs (j.content.children) do 
-						if is_this_container(l) == true then 
-							j = l 
-							there()
-						else 
-							tbl[l.name] = grp:find_child(l.name) 
-						end 
-					end 
-
-				elseif j.extra.type == "LayoutManager" then
-					tbl[j.name] = grp:find_child(j.name) 
-					for k,l in pairs (j.tiles) do 
-						for n,m in pairs (l) do 
-							if m then 
-								if is_this_container(m) == true then 
-									j = m 
-									there()
-								else 
-									tbl[m.name] = grp:find_child(m.name) 
-								end 
-							end 
-						end 
-					end 
-
-				elseif j.extra.type == "TabBar" then 
-					tbl[j.name] = grp:find_child(j.name) 
-
-					for k, l in pairs (j.tabs) do 
-						for n,m in pairs (l.children) do 
-							if m then 
-								if is_this_container(m) == true then 
-									j = m 
-									there()
-								else 
-									tbl[m.name] = grp:find_child(m.name) 
-								end 
-							end 
-						end
-					end 
-
-				elseif j.type == "Group" and j.extra.type == nil then 
-					tbl[j.name] = grp:find_child(j.name) 
-					for k,l in pairs (j.children) do 
-						if is_this_container(l) == true then 
-							j = l 
-							there()
-						else 
-							tbl[l.name] = grp:find_child(l.name) 
-						end 
-					end 
-				else 
-					if j.name then 
-						tbl[j.name] = j
-					end 
-				end 
-			else 
-				if j.name then 
-					tbl[j.name] = j
-				end 
-			end 
+    for i, j in pairs (list) do
+		if item == j then 
+			return true
 		end 
-		there()
+    end 
+
+    return false
+
+end 
+
+local function is_this_container(v)
+
+	if v.extra then 
+    	if is_in_list(v.extra.type, uiContainers) == true then 
+	    	return true
+        else 
+	    	return false
+        end 
+    else 
+    	return false
+    end 
+
+end 	
+
+local function groupTotable(grp, tbl, j)
+
+	if j.extra then 
+		if j.extra.type == "ScrollPane" or j.extra.type == "DialogBox" or j.extra.type == "ArrowPane" then 
+			tbl[j.name] = grp:find_child(j.name) 
+			for k,l in pairs (j.content.children) do 
+				if is_this_container(l) == true then 
+					j = l 
+					groupTotable(grp, tbl, j)
+				else 
+					tbl[l.name] = grp:find_child(l.name) 
+				end 
+			end 
+			return
+		elseif j.extra.type == "LayoutManager" then
+			tbl[j.name] = grp:find_child(j.name) 
+			for k,l in pairs (j.tiles) do 
+				for n,m in pairs (l) do 
+					if m then 
+						if is_this_container(m) == true then 
+							j = m 
+							groupTotable(grp, tbl, j)
+						else 
+							tbl[m.name] = grp:find_child(m.name) 
+						end 
+					end 
+				end 
+			end 
+			return
+		elseif j.extra.type == "TabBar" then 
+			tbl[j.name] = grp:find_child(j.name) 
+			for k, l in pairs (j.tabs) do 
+				for n,m in pairs (l.children) do 
+					if m then 
+						if is_this_container(m) == true then 
+							j = m 
+							groupTotable(grp, tbl, j)
+						else 
+							tbl[m.name] = grp:find_child(m.name) 
+						end 
+					end 
+				end
+			end 
+			return
+		elseif j.type == "Group" and j.extra.type == nil then 
+			tbl[j.name] = grp:find_child(j.name) 
+			for k,l in pairs (j.children) do 
+				if is_this_container(l) == true then 
+					j = l 
+					groupTotable(grp, tbl, j)
+				else 
+					tbl[l.name] = grp:find_child(l.name) 
+				end 
+			end 
+			return
+		end 
 	end 
+	if j.name then 
+		tbl[j.name] = j
+	end 
+end
+
+function ui_element.populate_to(grp, tbl)
+	
+	for i, j in pairs (grp.children) do 
+		groupTotable(grp, tbl, j)
+	end 
+
 	if grp.extra then 	
 		if grp.extra.video then 
 			tbl[grp.extra.video.name] = grp.extra.video
 		end
 	end
 
-return tbl
+	return tbl
 
 end 
 
@@ -126,11 +131,13 @@ function ui_element.set_cursor_pointer (src_file)
 end 
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
+	
 	for i, j in pairs (g.children) do
 		if j.on_focus_out then 
 				j.on_focus_out()
 		end
 	end 
+	
 	if effect == "fade" then 
 		screen:add(next_grp)
     	local fade_timeline = Timeline ()
@@ -146,38 +153,45 @@ function ui_element.transit_to (prev_grp, next_grp, effect)
 
      	function fade_timeline.on_completed()
 			screen:remove(prev_grp)
-			--g:clear()
 			g = next_grp
 			screen:add(g)
 			screen:grab_key_focus()
 			prev_grp.opacity = 255
      	end 
 		fade_timeline:start()
+	
 	else 
+		
 		if prev_grp then 
 			screen:remove(prev_grp)
 		end 
-		--g:clear()
 		g = next_grp
 		screen:add(g)
 		screen:grab_key_focus()
+
 	end 
+
 end 
 
 function ui_element.screen_add(grp)
-	--g:clear()
+	
 	g = grp
 	screen:add(g)
+
 end 
 
 function ui_element.start_animation()
+	
 	screen:find_child("timeline").start_timer()
+
 end
 
  -- for mouse control 
 
 if controllers.start_pointer then 
-  controllers:start_pointer()
+  	
+	controllers:start_pointer()
+
 end
 
 
@@ -190,11 +204,13 @@ Arguments:
 ]]
 
 function ui_element.change_all_skin(skin_name)
-    for i = 1, table.getn(g.children), 1 do
-	if g.children[i].skin then 
-	     g.children[i].skin = skin_name
-	end 
+    
+	for i = 1, table.getn(g.children), 1 do
+		if g.children[i].skin then 
+	     	g.children[i].skin = skin_name
+		end 
     end 
+
 end
 
 --[[
@@ -208,11 +224,13 @@ Arguments:
 
 
 function ui_element.change_button_skin(skin_name)
-    for i = 1, table.getn(g.children), 1 do
-	if g.children[i].extra.type == "Button" then 
-	     g.children[i].skin = skin_name
-	end 
+    
+	for i = 1, table.getn(g.children), 1 do
+		if g.children[i].extra.type == "Button" then 
+	     	g.children[i].skin = skin_name
+		end 
     end 
+
 end 
 
 -------------
@@ -221,12 +239,16 @@ end
 
 
 local function __genOrderedIndex( t )
+
     local orderedIndex = {}
-    for key in pairs(t) do
+    
+	for key in pairs(t) do
         table.insert( orderedIndex, key )
     end
     table.sort( orderedIndex )
-    return orderedIndex
+    
+	return orderedIndex
+
 end
 
 local function orderedNext(t, state)
@@ -255,12 +277,15 @@ local function orderedNext(t, state)
     -- no more value to return, cleanup
     t.__orderedIndex = nil
     return
+
 end
 
 local function orderedPairs(t)
-    -- Equivalent of the pairs() function on tables. Allows to iterate
+    
+	-- Equivalent of the pairs() function on tables. Allows to iterate
     -- in order
     return orderedNext, t, nil
+
 end
 
 
@@ -269,20 +294,24 @@ end
 local strings = dofile( "localized:lib/strings.lua" ) or {}
 
 local function missing_localized_string( t , s )
-     rawset(t,s,s) 
+    
+	 rawset(t,s,s) 
      return s
+
 end
 
 setmetatable( strings , { __index = missing_localized_string } )
 
-
 local function table_remove_val(t, val)
+	
 	for i,j in pairs (t) do
 		if j == val then 
 		     table.remove(t, i)
 		end 
 	end 
+
 	return t
+
 end 
 
 local function table_removekey(t, key)
@@ -329,11 +358,12 @@ local function make_title_separator(thickness, color, length)
     return c
 end 
 
-
+local function my_make_title_separator( _ , ... )
+     return make_title_separator( ... )
+end
 
 -- make_dialogBox_bg() : make message window background 
 
---make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.f_color, p.padding_x, p.padding_y, p.border_corner_radius) 
 local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
 
     local size = {w, h} 
@@ -442,6 +472,65 @@ local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
     return c
 end 
 
+local function my_make_dialogBox_bg( _ , ... )
+     return make_dialogBox_bg( ... )
+end
+
+
+local function draw_dialogBG(w,h,lw,color)
+	local c = Canvas(w,h)
+ 	local x=0 
+    local y=35
+
+	c:round_rectangle(10,10,w-20,h-20,10)
+
+	c.line_width = lw
+	c:set_source_linear_pattern(0,0,0,h)
+	c:add_source_pattern_color_stop(0.0, "00000060")
+	c:add_source_pattern_color_stop(1.0, "ffffff60")
+	c:stroke(true)
+	
+	c:set_source_linear_pattern(0,w+20,0,0)
+	c:add_source_pattern_color_stop(0.00,"000000ff")
+	c:add_source_pattern_color_stop(0.35,"444444ff")
+	c:add_source_pattern_color_stop(0.43,"525252ff")
+	c:add_source_pattern_color_stop(0.50,"565656ff")
+	c:add_source_pattern_color_stop(0.57,"525252ff")
+	c:add_source_pattern_color_stop(0.65,"444444ff")
+	c:add_source_pattern_color_stop(0.82,"1c1c1cff")
+	c:add_source_pattern_color_stop(1.00,"000000ff")
+	c:fill(true)
+	
+	c:clip()
+	--c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
+	c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
+	
+	c:set_source_linear_pattern(0,0,w,0)
+	c:add_source_pattern_color_stop(0.0, "ffffff0c")
+	c:add_source_pattern_color_stop(1.0, "ffffff40")
+	c:fill()
+
+
+    c:new_path()
+	c:move_to ( x, y)
+    c:line_to ( x + w, y)
+    c:set_line_width (lw/2)
+    c:set_source_color(color)
+    c:stroke (true)
+    c:fill (true)
+
+	if c.Image then
+         c = c:Image()
+    end
+    
+    return c
+end 
+
+
+local function my_draw_dialogBG( _ , ... )
+     return draw_dialogBG( ... )
+end
+
 -- make_toastb_group_bg() : make toast box background  
 
 local function make_toastb_group_bg(w,h,bw,bc,fc,px,py,br)
@@ -539,13 +628,17 @@ local function make_toastb_group_bg(w,h,bw,bc,fc,px,py,br)
     return c
 end 
 
+local function my_make_toastb_group_bg( _ , ... )
+     return make_toastb_group_bg( ... )
+end
 
 
 local function make_ring(w,h,bc,fc,bw,px,py,br)
-        local ring = Canvas{ size = {w, h} }
-        ring:begin_painting()
-        ring:set_source_color(bc)
-        ring:round_rectangle(
+
+     local ring = Canvas{ size = {w, h} }
+     ring:begin_painting()
+     ring:set_source_color(bc)
+     ring:round_rectangle(
             px + bw / 2,
             py + bw / 2,
             w - bw - px * 2 ,
@@ -553,19 +646,18 @@ local function make_ring(w,h,bc,fc,bw,px,py,br)
             br )
 	if fc then 
 		ring:set_source_color( fc )
-    		ring:fill(true)
+    	ring:fill(true)
 
 		ring:set_line_width (bw)
-    		ring:set_source_color(bc)
+    	ring:set_source_color(bc)
 	end
-    	ring:stroke(true)
-	
+    ring:stroke(true)
+    ring:finish_painting()
+    if ring.Image then
+    	ring = ring:Image()
+   	end
+    return ring
 
-        ring:finish_painting()
-    	if ring.Image then
-            ring = ring:Image()
-    	end
-        return ring
 end 
 
 local function my_make_ring( _ , ... )
@@ -573,56 +665,56 @@ local function my_make_ring( _ , ... )
 end
 
 local function create_select_circle(radius, color)
--- make circle image
--- Determines kappa, necessary for circle with bezier curves
-kappa = 4*((math.pow(2,.5)-1)/3)
+	-- make circle image
+	-- Determines kappa, necessary for circle with bezier curves
+	kappa = 4*((math.pow(2,.5)-1)/3)
+	
+	----circle canvas size
+	c = Canvas { size = {radius*4, radius*4} }
+	--- sets x and y of circle
+	
+	center_x = radius*2
+	center_y = radius*2
 
-----circle canvas size
-c = Canvas { size = {radius*4, radius*4} }
---- sets x and y of circle
+	-- Start point of circle creation
+	
+	c:begin_painting()
+	c:new_path()
+	
+	c:move_to( center_x, center_y-radius )
+	
+	c:curve_to(  center_x+kappa*radius , center_y-radius ,
+				center_x+radius , center_y-kappa*radius ,
+				center_x+radius , center_y
+			 	)
 
-center_x = radius*2
-center_y = radius*2
-
--- Start point of circle creation
-
-c:begin_painting()
-c:new_path()
-
-c:move_to( center_x, center_y-radius )
-
-c:curve_to(  center_x+kappa*radius , center_y-radius ,
-			center_x+radius , center_y-kappa*radius ,
-			center_x+radius , center_y
-			 )
-
-c:curve_to(  center_x+radius , center_y+kappa*radius ,
-			center_x+kappa*radius , center_y+radius ,
-			center_x , center_y+radius
-			)
+	c:curve_to(  center_x+radius , center_y+kappa*radius ,
+				center_x+kappa*radius , center_y+radius ,
+				center_x , center_y+radius
+				)
 			 
-c:curve_to(  center_x-kappa*radius , center_y+radius ,
-			center_x-radius , center_y+radius*kappa ,
-			center_x-radius , center_y
-			 )
+	c:curve_to( center_x-kappa*radius , center_y+radius ,
+				center_x-radius , center_y+radius*kappa ,
+				center_x-radius , center_y
+			  )
 
-c:curve_to(  center_x-radius , center_y-radius*kappa,
-			center_x-radius*kappa , center_y-radius ,
-			center_x , center_y-radius
-			 )
+	c:curve_to(  center_x-radius , center_y-radius*kappa,
+				center_x-radius*kappa , center_y-radius ,
+				center_x , center_y-radius
+			  )
 			 		 
--- Sets color and fill
-c:set_source_color( color )
-c:fill(true)
+	-- Sets color and fill
+	c:set_source_color( color )
+	c:fill(true)
+	
+	c:stroke(stroke_bool)
+	-- Finishes painting on Canvas
+	c:finish_painting()
+	if c.Image then
+  	c = c:Image()
+	end
 
-c:stroke(stroke_bool)
--- Finishes painting on Canvas
-c:finish_painting()
-if c.Image then
-  c = c:Image()
-end
-
-return c
+	return c
 end
 
 local function my_create_select_circle( _ , ... ) 
@@ -915,37 +1007,37 @@ function ui_element.timeline(t)
 
 -- make_on_button_down() function for time pointer image
     local function make_on_button_down(name) 
-	 local pointer = timeline:find_child(name)
+		local pointer = timeline:find_child(name)
 
-	 local function pointer_on_button_up(x,y,b,n)
-	     if(dragging ~= nil) then 
-	          local actor , dx , dy = unpack( dragging )
-		  local timepoint, new_timepoint, prev_point, next_point, last_point, new_x
-		  local timeline_length = 1800
-		  local duration = screen:find_child("timeline").duration
-		  for j,k in orderedPairs (screen:find_child("timeline").points) do
-	     	       last_point = j
-		  end 
-		  timepoint = tonumber(actor.name:sub(8, -1))
-		  new_x = x - dx 
-		  if timepoint == last_point then 
-		      if new_x > timeline_length + 60 then 
-		          new_x = timeline_length + 60
-	              end 
-	          end
-		  screen:find_child("text"..tostring(timepoint)).x = new_x - 120 
-		  pointer.x = new_x
-	          dragging = nil
+	 	local function pointer_on_button_up(x,y,b,n)
+	     	if(dragging ~= nil) then 
+	        	local actor , dx , dy = unpack( dragging )
+		  		local timepoint, new_timepoint, prev_point, next_point, last_point, new_x
+		  		local timeline_length = 1800
+		  		local duration = screen:find_child("timeline").duration
+		  		for j,k in orderedPairs (screen:find_child("timeline").points) do
+	     	       	last_point = j
+		  		end 
+		  		timepoint = tonumber(actor.name:sub(8, -1))
+		  		new_x = x - dx 
+		  		if timepoint == last_point then 
+		      		if new_x > timeline_length + 60 then 
+		          		new_x = timeline_length + 60
+	              	end 
+	          	end
+		  		screen:find_child("text"..tostring(timepoint)).x = new_x - 120 
+		  		pointer.x = new_x
+	          	dragging = nil
 
-		  new_timepoint = math.floor((new_x - 60)/timeline_length * duration)
+		  		new_timepoint = math.floor((new_x - 60)/timeline_length * duration)
 
-		  if new_timepoint ~= timepoint then 
-		      screen:find_child("timeline").points[new_timepoint] = {}
-		      screen:find_child("timeline").points[new_timepoint][1] = 
-		      screen:find_child("timeline").points[timepoint][1]	
+		  		if new_timepoint ~= timepoint then 
+		      		screen:find_child("timeline").points[new_timepoint] = {}
+		      		screen:find_child("timeline").points[new_timepoint][1] = 
+		      		screen:find_child("timeline").points[timepoint][1]	
 
-		      table_removekey(screen:find_child("timeline").points, timepoint)
-
+		      		table_removekey(screen:find_child("timeline").points, timepoint)
+	
 		      local prev_i = 0
 		      for j,k in orderedPairs (screen:find_child("timeline").points) do
 	    	          if j == new_timepoint then 
@@ -1051,12 +1143,11 @@ function ui_element.timeline(t)
 		end 
 	   end 
            if name2num(pointer.name) ~= 0 then 
-	   	if(b == 3) then-- imsi : num_clicks is not correct ! 
-	 	--if(b == 3 or n >= 2) then
+	   	if(b == 3) then
 			-- point_inspector()
 	   	else
-                 	--imsi : dragging = {pointer, x - pointer.x, y - pointer.y, pointer_on_button_up }
-           	 	return true
+            --imsi : dragging = {pointer, x - pointer.x, y - pointer.y, pointer_on_button_up }
+           	return true
 	   	end 
 	   end 
 	end 
@@ -1254,9 +1345,6 @@ function ui_element.timeline(t)
 	
 end 
 
-
-
-
 --[[
 Function: button
 
@@ -1266,17 +1354,17 @@ Arguments:
 	Table of button properties
 	
 	skin - Modify the skin for the button by changing this value
-    	bwidth  - Width of the button
-    	bheight - Height of the button
-    	button_color - Border color of the button
-    	focus_color - Focus color of the button
-    	border_width - Border width of the button
-    	text - Caption of the button
-    	text_font - Font of the button text
-    	text_color - Color of the button text
-    	padding_x - Padding of the button image on the X axis
-    	padding_y - Padding of the button image on the Y axis
-    	border_corner_radius - Radius of the border for the button
+    bwidth  - Width of the button
+    bheight - Height of the button
+    button_color - Border color of the button
+    focus_color - Focus color of the button
+    border_width - Border width of the button
+    text - Caption of the button
+    text_font - Font of the button text
+    text_color - Color of the button text
+    padding_x - Padding of the button image on the X axis
+    padding_y - Padding of the button image on the Y axis
+    border_corner_radius - Radius of the border for the button
 	pressed - Function that is called by on_focus_in() or on_key_down() event
 	release - Function that is called by on_focus_out()
 Return:
@@ -1285,7 +1373,6 @@ Return:
 Extra Function:
 	on_focus_out() - Releases the button focus
 	on_focus_in() - Grabs the button focus
-	
 ]]
 
 function ui_element.button(t) 
@@ -1345,17 +1432,7 @@ function ui_element.button(t)
 		local button = b_group:find_child("button_dim") 
 		local focus = b_group:find_child("button_focus") 
 
-		if b_group.is_in_menu == true then 
-			if b_group.fade_in == true then 
-				b_group.fade_in = false
-				return 
-			else 
-				b_group.fade_in = true 
-			end 
-	   end 
-
-		current_focus = b_group
-        if (p.skin == "Custom") then 
+		if (p.skin == "Custom") then 
 	     	ring.opacity = 0
 	     	focus_ring.opacity = 255
         else
@@ -1363,6 +1440,14 @@ function ui_element.button(t)
             focus.opacity = 255
         end 
         b_group:find_child("text").color = p.focus_text_color
+
+		if b_group.is_in_menu == true then 
+			if b_group.fade_in == true then 
+				return 
+			end 
+	   end 
+
+		current_focus = b_group
 	
 	    if p.focused ~= nil then 
 			p.focused()
@@ -1373,13 +1458,15 @@ function ui_element.button(t)
 		if key then 
 	    	if p.pressed and key == keys.Return then
 				p.pressed()
+				if b_group.is_in_menu == true and b_group.fade_in == false then 
+					b_group.fade_in = true 
+				end
 	    	end 
 		end 
 		
 		if p.skin == "edit" then 
 			input_mode = 5 -- hdr.S_MENU_M
 		end 
-
     end
     
     function b_group.extra.on_focus_out(key, focus_to_tabButton) 
@@ -1390,13 +1477,6 @@ function ui_element.button(t)
 		local focus = b_group:find_child("button_focus") 
 
 			
-		if b_group.is_in_menu == true then 
-			if b_group.fade_in == false then 
-				return 
-			end
-	    end 
-
-		current_focus = nil 
 		if b_group.tab_button == true and focus_to_tabButton == nil then 
 			prev_tab = b_group
 			return 
@@ -1410,10 +1490,24 @@ function ui_element.button(t)
         	end
 		end 
         b_group:find_child("text").color = p.text_color
+
+
+
+		if b_group.is_in_menu == true then 
+			if b_group.fade_in == false then 
+				return 
+			end
+	    end 
+
+		current_focus = nil 
+
 		if p.released then  
 			if p.is_in_menu then 
 				if key ~= keys.Return and b_group.single_button == false then
 					p.released()
+					if b_group.is_in_menu == true and b_group.fade_in == true then 
+						b_group.fade_in = false 
+					end
 				end 
 			elseif b_group.single_button == false then 
 				p.released()
@@ -1429,7 +1523,6 @@ function ui_element.button(t)
         b_group.size = {p.ui_width , p.ui_height}
 
 		if p.skin == "Custom" then
-
 			local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
 	
 			ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius )
@@ -1482,7 +1575,6 @@ function ui_element.button(t)
         	text:set{name = "text", position = { (p.ui_width-text.w)/2, p.ui_height/2 - text.h/2}}
 		end 
 	
-		
 		if p.skin == "Custom" then 
 			b_group:add(ring, focus_ring)
 		else 
@@ -1507,93 +1599,64 @@ function ui_element.button(t)
 		end 
 
         b_group:add(text)
-
-		if editor_lb == nil or editor_use then 
-	     	function b_group:on_button_down(x,y,b,n)
-				
-				if b_group.tab_button == true and b_group.parent.buttons ~= nil then 
-					for q,w in pairs (b_group.parent.buttons) do
-						if w.label ~= b_group.label then 
-							if (w.skin == "Custom") then 
-	     						w:find_child("ring").opacity = 255
-	     						w:find_child("focus_ring").opacity = 0
-        					else
-	     						w:find_child("button_dim").opacity = 255
-            					w:find_child("button_focus").opacity = 0
-        					end
-						end 
-					end 
-				end 
-				
-				if current_focus ~= b_group then 
-					if current_focus then 
-						local temp_focus = current_focus
-		     			current_focus.on_focus_out(nil,true)
-						if temp_focus.is_in_menu == true then 
-							temp_focus.fade_in = false
-						end 
-						if prev_tab then 
-							prev_tab.on_focus_out(nil,true)
-						end 
-					end
-					b_group.extra.on_focus_in(keys.Return)
-				else 
-		     		current_focus.on_focus_out()
-					current_focus = b_group
-		     		current_focus.on_focus_in(keys.Return)
-					screen:grab_key_focus()
-				end 
-				return true
-	     	end 
-
-			function b_group:on_button_up(x,y,b,n)
-				if b_group.single_button == true then 
-	     			button.opacity = 255
-            		focus.opacity = 0
-	     			focus_ring.opacity = 0
-				end 
-				return true
-	     	end 
-
-		--[[
-			function b_group:on_enter()
-				if input_mode ~= hdr.S_MENU_M then 
-		    		if current_focus ~= b_group then 
-						if current_focus then 
-		     				current_focus.on_focus_out()
-						end
-						b_group.extra.on_focus_in(keys.Return)
-		    		else 
-		     			current_focus.on_focus_in(keys.Return)
-		    		end 
-				end
-				return true
-            end
-			function b_group:on_leave()
-				b_group.extra.on_focus_out()
-			end
-			---]]
-		end
-
-		--[[
-		if p.skin == "editor"  then 
-	     	function b_group:on_motion()
-				if input_mode == hdr.S_MENU_M then 
-		    		if current_focus ~= b_group then 
-						if current_focus then 
-		     				current_focus.on_focus_out()
-						end
-						b_group.extra.on_focus_in(keys.Return)
-		    		else 
-		     			current_focus.on_focus_in(keys.Return)
-		    		end 
-				end 
-             end
-		end 
-		]]
-    end 
+	end 
 
     create_button()
+	
+	if editor_lb == nil or editor_use then 
+
+		local ring = b_group:find_child("ring") 
+		local focus_ring = b_group:find_child("focus_ring") 
+		local button = b_group:find_child("button_dim") 
+		local focus = b_group:find_child("button_focus") 
+
+     	function b_group:on_button_down(x,y,b,n)
+			if b_group.tab_button == true and b_group.parent.buttons ~= nil then 
+				for q,w in pairs (b_group.parent.buttons) do
+					if w.label ~= b_group.label then 
+						if (w.skin == "Custom") then 
+     						w:find_child("ring").opacity = 255
+     						w:find_child("focus_ring").opacity = 0
+       					else
+     						w:find_child("button_dim").opacity = 255
+           					w:find_child("button_focus").opacity = 0
+       					end
+					end 
+				end 
+			end 
+				
+			if current_focus ~= b_group then 
+				if current_focus then 
+					local temp_focus = current_focus
+	     			current_focus.on_focus_out(nil,true)
+					if temp_focus.is_in_menu == true then 
+						temp_focus.fade_in = false
+					end 
+					if prev_tab then 
+						prev_tab.on_focus_out(nil,true)
+					end 
+				end
+				b_group.extra.on_focus_in(keys.Return)
+			else 
+	     		current_focus.on_focus_out()
+				if b_group.is_in_menu ~= true then 
+					current_focus = b_group
+	     			current_focus.on_focus_in(keys.Return)
+				end 
+				screen:grab_key_focus()
+			end 
+			return true
+     	end 
+
+		function b_group:on_button_up(x,y,b,n)
+			if b_group.single_button == true then 
+     			button.opacity = 255
+           		focus.opacity = 0
+     			focus_ring.opacity = 0
+			end 
+			return true
+     	end 
+	end
 	
     mt = {}
     mt.__newindex = function (t, k, v)
@@ -1629,17 +1692,17 @@ Creates a text field ui element
 Arguments:
 	Table of text field properties
 
-		skin - Modify the skin used for the text field by changing this value
-    	bwidth  - Width of the text field
-    	bheight - Height of the text field 
-    	border_color - Border color of the text field
-    	focus_color - Focus color of the text field
-    	text_color - Color of the text in the text field
-    	text_font - Font of the text in the text field
-    	border_width - Border width of the text field 
-    	padding - Size of the text indentiation 
-    	border_corner_radius - Radius of the border for the button image 
-    	text - Caption of the text field  
+	skin - Modify the skin used for the text field by changing this value
+    bwidth  - Width of the text field
+    bheight - Height of the text field 
+    border_color - Border color of the text field
+    focus_color - Focus color of the text field
+    text_color - Color of the text in the text field
+    text_font - Font of the text in the text field
+    border_width - Border width of the text field 
+    padding - Size of the text indentiation 
+    border_corner_radius - Radius of the border for the button image 
+    text - Caption of the text field  
 
 Return:
  	t_group - The group contaning the text field
@@ -1647,7 +1710,6 @@ Return:
 Extra Function:
 	on_focus_out() - Releases the text field focus
 	on_focus_in() - Grabs the text field focus
-	
 ]]
 
 
@@ -1665,7 +1727,7 @@ function ui_element.textInput(t)
     	focus_color  = {0,255,0,255},
     	focus_fill_color = {27,145,27,0}, 
     	cursor_color = {255,255,255,255},
-    	text_font = "FreeSans Medium 30px"  , 
+    	text_font = "FreeSans Medium 30px", 
     	text_color =  {255,255,255,255},
     	border_corner_radius = 12 ,
 		readonly = "",
@@ -1745,13 +1807,14 @@ function ui_element.textInput(t)
         t_group.size = { p.ui_width , p.ui_height}
 
 		if p.skin == "Custom" then 
-
-			local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
+			local key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.border_color ), 
+										color_to_string( p.fill_color ), p.border_width, p.border_corner_radius )
 
     		box = assets( key, my_make_ring, p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
     		box:set{name="box", position = {0 ,0}}
 
-			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
+			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), 
+								  color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
 
     		focus_box = assets(key, my_make_ring, p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
     		focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
@@ -1778,7 +1841,6 @@ function ui_element.textInput(t)
 
     		t_group:add(readonly, text)
 		else 
-
     		text = Text{text= p.text, editable=true, cursor_visible=false, single_line = p.single_line, 
 						cursor_color = p.cursor_color, wants_enter = true, 
 						alignment = p.alignment, justify = p.justify, wrap = p.wrap, wrap_mode = p.wrap_mode, 
@@ -1793,30 +1855,31 @@ function ui_element.textInput(t)
     		t_group:add(text)
 		end
 
-
 		local t_pos_min = t_group.x + t_group:find_child("textInput").x 
-
-		if editor_lb == nil or editor_use then 
-	   		function t_group:on_button_down()
-				t_group.extra.on_focus_in()
-				return true
-	   		end 
-	    end 
-
+	
 		function text:on_key_down(key)
-			if key == keys.Return then 
-				t_group:grab_key_focus()
-				t_group:on_key_down(key)
-			elseif key == keys.Tab then 
-				t_group:grab_key_focus()
-				t_group:on_key_down(key)
+			if p.single_line == true then 
+				if key == keys.Return then 
+					t_group:grab_key_focus()
+					t_group:on_key_down(key)
+				elseif key == keys.Tab then 
+					t_group:grab_key_focus()
+					t_group:on_key_down(key)
+				end 
 			end 
 			p.text = text.text 
 		end 
+    end 
 
-     end 
+    create_textInputField()
 
-     create_textInputField()
+	if editor_lb == nil or editor_use then 
+	   	function t_group:on_button_down()
+			t_group.extra.on_focus_in()
+			return true
+		end 
+	end 
+
 
      mt = {}
      mt.__newindex = function (t, k, v)
@@ -1843,56 +1906,6 @@ function ui_element.textInput(t)
      return t_group
 end 
 
-local function draw_dialogBG(w,h,lw,color)
-	local c = Canvas(w,h)
- 	local x=0 
-    local y=35
-
-	c:round_rectangle(10,10,w-20,h-20,10)
-
-	c.line_width = lw
-	c:set_source_linear_pattern(0,0,0,h)
-	c:add_source_pattern_color_stop(0.0, "00000060")
-	c:add_source_pattern_color_stop(1.0, "ffffff60")
-	c:stroke(true)
-	
-	c:set_source_linear_pattern(0,w+20,0,0)
-	c:add_source_pattern_color_stop(0.00,"000000ff")
-	c:add_source_pattern_color_stop(0.35,"444444ff")
-	c:add_source_pattern_color_stop(0.43,"525252ff")
-	c:add_source_pattern_color_stop(0.50,"565656ff")
-	c:add_source_pattern_color_stop(0.57,"525252ff")
-	c:add_source_pattern_color_stop(0.65,"444444ff")
-	c:add_source_pattern_color_stop(0.82,"1c1c1cff")
-	c:add_source_pattern_color_stop(1.00,"000000ff")
-	c:fill(true)
-	
-	c:clip()
-	--c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
-	c:add_string_path("M0 240 C200 230, 370 190, 500 110 L500 0 L0 0 z")
-	
-	c:set_source_linear_pattern(0,0,w,0)
-	c:add_source_pattern_color_stop(0.0, "ffffff0c")
-	c:add_source_pattern_color_stop(1.0, "ffffff40")
-	c:fill()
-
-
-    c:new_path()
-	c:move_to ( x, y)
-    c:line_to ( x + w, y)
-    c:set_line_width (lw/2)
-    c:set_source_color(color)
-    c:stroke (true)
-    c:fill (true)
-
-	if c.Image then
-         c = c:Image()
-    end
-    
-    return c
-end 
-
-
 --[[
 Function: dialogBox
 
@@ -1902,23 +1915,135 @@ Arguments:
 	Table of Dialog box properties
 
 	skin - Modify the skin used for the dialog box by changing this value
-    	bwidth  - Width of the dialog box 
-    	bheight - Height of the dialog box
-    	label - Title in the dialog box
-    	fill_color - Background color of the dialog box
-    	border_color - Border color of the dialog box
-    	title_color - Color of the dialog box text 
-    	title_font - Font of the text in the dialog box
-    	border_width - Border width of the dialog box  
-    	border_corner_radius - The radius of the border of the dialog box
+    bwidth  - Width of the dialog box 
+    bheight - Height of the dialog box
+    label - Title in the dialog box
+    fill_color - Background color of the dialog box
+    border_color - Border color of the dialog box
+    title_color - Color of the dialog box text 
+    title_font - Font of the text in the dialog box
+    border_width - Border width of the dialog box  
+    border_corner_radius - The radius of the border of the dialog box
 	title_separator_thickness - Thickness of the title separator 
 	title_separator_color - Color of the title separator 
-    	padding_x - Padding of the dialog box on the X axis
-    	padding_y - Padding of the dialog box on the Y axis
+    padding_x - Padding of the dialog box on the X axis
+    padding_y - Padding of the dialog box on the Y axis
 
 Return:
  	db_group - group containing the dialog box
 ]]
+
+local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
+
+    local size = {w, h} 
+    local color = fc 
+    local BORDER_WIDTH= bw
+    local POINT_HEIGHT=34
+    local POINT_WIDTH=60
+    local BORDER_COLOR=bc
+    local CORNER_RADIUS=br 
+    local POINT_CORNER_RADIUS=2
+    local H_BORDER_WIDTH = BORDER_WIDTH / 2
+
+    local XBOX_SIZE = 25
+    local PADDING = px 
+
+    local function draw_path( c )
+
+        c:new_path()
+
+        c:move_to( H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
+
+        c:line_to( ( c.w )- H_BORDER_WIDTH - CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
+        c:curve_to( c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
+                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
+                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
+
+        c:line_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
+
+        c:curve_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    c.w - H_BORDER_WIDTH - CORNER_RADIUS , c.h - H_BORDER_WIDTH )
+        c:line_to( H_BORDER_WIDTH + CORNER_RADIUS , c.h - H_BORDER_WIDTH )
+
+        c:curve_to( H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
+
+        c:line_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
+
+        c:curve_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
+    end
+
+    local c = Canvas{ size = size }
+
+    c:begin_painting()
+    draw_path( c )
+
+    -- Fill the whole thing with the color passed in and keep the path
+
+    c:set_source_color(color) 
+    c:fill(true)
+
+    -- Now, translate to the center and scale to its height. This will
+    -- make the radial gradient elliptical.
+    c:save()
+    c:translate( c.w / 2 , c.h / 2 )
+    c:scale( 2 , ( c.h / c.w ) )
+
+    local rr = ( c.w / 2 )
+    c:set_source_radial_pattern( 0 , 30 , 0 , 0 , 30 , c.w / 2 )
+    c:add_source_pattern_color_stop( 0 , "00000000" )
+    c:add_source_pattern_color_stop( 1 , "000000F0" )
+    c:fill()
+    c:restore()
+
+    -- Draw the glossy glow    
+    local R = c.w * 2.2
+
+    c:new_path()
+    c.op = "ATOP"
+    c:arc( 0 , -( R - 240 ) , R , 0 , 360 )
+    c:set_source_linear_pattern( c.w , 0 , 0 , c.h * 0.25 )
+    c:add_source_pattern_color_stop( 0 , "FFFFFF20" )
+    c:add_source_pattern_color_stop( 1 , "FFFFFF04" )
+    c:fill()
+
+    -- Now, draw the path again and stroke it with the border color
+    draw_path( c )
+
+    c:set_line_width( BORDER_WIDTH )
+    c:set_source_color( BORDER_COLOR )
+    c.op = "SOURCE"
+    -- test c:set_dash(0,{10,10})
+    c:stroke( true )
+
+  -- Draw title line
+    if tst > 0 then 
+    c:new_path()
+    c:move_to (0, 74)
+    c:line_to (c.w, 74)
+    c:set_line_width (tst)
+    c:set_source_color(tsc)
+    c:stroke (true)
+    c:fill (true)
+    end 
+  --  end
+
+    c:finish_painting()
+    if c.Image then
+         c = c:Image()
+    end
+    c.position = {0,0}
+
+    return c
+end 
+
+--[[
+
+-- Dialog Box with josh's canvas image 
 
 function ui_element.dialogBox(t) 
  
@@ -1931,11 +2056,11 @@ function ui_element.dialogBox(t)
 	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
 	fill_color  = {25,25,25,100},
 	title_color = {255,255,255,255} , --"FFFFFF" , 
-	title_font = "FreeSans Medium 28px" , 
 	border_width  = 12 ,
 	padding_x = 0 ,
 	padding_y = 0 ,
 	border_corner_radius = 22 ,
+	title_font = "FreeSans Medium 28px" , 
 	title_separator_thickness = 10, 
 	title_separator_color = {100,100,100,100},
 	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
@@ -1961,43 +2086,145 @@ function ui_element.dialogBox(t)
 
     local create_dialogBox  = function ()
 
-    local d_box, title_separator, title, d_box_img, title_separator_img
+    	local d_box, title_separator, title, d_box_img, title_separator_img
    
-        db_group:clear()
-        --db_group.size = { p.ui_width , p.ui_height - 34}
-        db_group.size = { p.ui_width , p.ui_height }
+    	db_group:clear()
+    	db_group.size = { p.ui_width , p.ui_height }
 
-		d_box = draw_dialogBG(p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
-        --d_box = make_dialogBox_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
-		--d_box.y = d_box.y - 34
-		d_box.y = d_box.y 
-		d_box:set{name="d_box"} 
-		db_group:add(d_box)
---[[
-	if p.title_separator_thickness >  0 then 
-             title_separator = make_title_separator(p.title_separator_thickness, p.title_separator_color, p.ui_width)
-             title_separator:set{name = "title_separator", position  = {0, db_group_cur_y + 30}}
-	     db_group:add(title_separator)
-	end
-  ]]
+		if p.skin == "Custom" then 
+			local key = string.format("dBG:%d,%d,%d,%s", p.ui_width, p.ui_height, p.border_width, color_to_string(p.title_separator_color))
 
-        title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-        title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
+			d_box = assets(key, my_draw_dialogBG, p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
+			d_box.y = d_box.y 
+			d_box:set{name="d_box"} 
 
-	if(p.skin ~= "Custom") then 
+    		title= Text{text = p.label, font= p.title_font, color = p.title_color}     
+    		title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
+			db_group:add(d_box,title)
+		else 
         	d_box_img = assets(skin_list[p.skin]["dialogbox"])
         	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
-	else 
-		d_box_img = Image{} 
-	end
+			db_group:add(d_box_img, title)
+		end
 
-	db_group:add(d_box_img, title)
-	if p.content then 
-	     db_group:add(p.content)
-	end 
-	if (p.skin == "Custom") then d_box_img.opacity = 0
-        else d_box.opacity = 0 end 
+		if p.content then 
+	     	db_group:add(p.content)
+		end 
 
+     end 
+
+     create_dialogBox ()
+
+     mt = {}
+     mt.__newindex = function (t, k, v)
+	 	if k == "bsize" then  
+	    	p.ui_width = v[1] 
+	    	p.ui_height = v[2]  
+        else 
+           p[k] = v
+        end
+		if k ~= "selected" then 
+        	create_dialogBox()
+		end
+     end 
+
+     mt.__index = function (t,k)
+	if k == "bsize" then 
+	    return {p.ui_width, p.ui_height}  
+        else 
+	    return p[k]
+        end 
+     end 
+
+     setmetatable (db_group.extra, mt) 
+     return db_group
+end 
+]]
+
+function ui_element.dialogBox(t) 
+ 
+--default parameters
+   local p = {
+	skin = "Custom", 
+	ui_width = 500 ,
+	ui_height = 400 ,
+	label = "Dialog Box Title" ,
+	border_color  = {255,255,255,100}, --"FFFFFFC0" , 
+	fill_color  = {255,255,255,100},
+	title_color = {255,255,255,180} , --"FFFFFF" , 
+	title_font = "FreeSans Medium 28px" , 
+	border_width  = 4 ,
+	padding_x = 0 ,
+	padding_y = 0 ,
+	border_corner_radius = 22 ,
+	title_separator_thickness = 4, 
+	title_separator_color = {255,255,255,100},
+	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
+    }
+
+ --overwrite defaults
+    if t~= nil then 
+        for k, v in pairs (t) do
+	    p[k] = v 
+        end 
+    end 
+
+ --the umbrella Group
+    local db_group_cur_y = 6
+
+    local  db_group = Group {
+    	  name = "dialogBox",  
+    	  position = {200, 200, 0}, 
+          reactive = true, 
+          extra = {type = "DialogBox"} 
+    }
+
+
+    local create_dialogBox  = function ()
+   
+    	local d_box, title_separator, title, d_box_img, title_separator_img, key
+
+        db_group:clear()
+        db_group.size = { p.ui_width , p.ui_height - 34}
+
+		if p.skin == "Custom" then 
+			key = string.format("dialogBox:%d:%d:%d:%s:%s:%d:%d:%d:%d:%s", p.ui_width, p.ui_height, p.border_width, color_to_string(p.border_color), color_to_string( p.fill_color ), p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, color_to_string( p.title_separator_color))
+
+        	d_box = assets(key, my_make_dialogBox_bg, p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
+
+			d_box.y = d_box.y - 34
+			d_box:set{name="d_box"} 
+			db_group:add(d_box)
+		else 
+        	--d_box_img = assets(skin_list[p.skin]["dialogbox"])
+        	--d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
+			--db_group:add(d_box_img)
+
+			p.title_font = "FreeSans Medium 24px"  
+			p.title_separator_thickness = 10
+			p.title_separator_color = {100,100,100,100}
+
+			local key = string.format("dBG:%d,%d,%d,%s", p.ui_width, p.ui_height, p.border_width, color_to_string(p.title_separator_color))
+
+			d_box = assets(key, my_draw_dialogBG, p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
+			d_box.y = d_box.y 
+			d_box:set{name="d_box"} 
+
+    		title= Text{text = p.label, font= p.title_font, color = p.title_color}     
+    		title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
+			db_group:add(d_box)
+
+			db_group.w = d_box.w
+			db_group.h = d_box.h
+
+		end
+        title= Text{text = p.label, font= p.title_font, color = p.title_color}     
+        title:set{name = "title", position = {(p.ui_width - title.w )/2 , db_group_cur_y }}
+		db_group:add(title)
+
+		if p.content then 
+	     	db_group:add(p.content)
+		end 
      end 
 
      create_dialogBox ()
@@ -2098,7 +2325,6 @@ function ui_element.toastAlert(t)
     end 
 
  --the umbrella Group
-    local t_box, icon, title, message, t_box_img, create_toastBox  
     local tb_group = Group {
     	  name = "toastb_group",  
     	  position = p.ui_position, 
@@ -2112,16 +2338,30 @@ function ui_element.toastAlert(t)
     local tb_group_timeline = Timeline ()
     
 
-    create_toastBox = function()
+    local create_toastBox = function()
+
+    	local t_box, icon, title, message, t_box_img, key
 
     	tb_group:clear()
         tb_group.size = { p.ui_width , p.ui_height}
 
-    	t_box = make_toastb_group_bg(p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
-    	t_box:set{name="t_box"}
-		tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
+		if p.skin == "Custom" then 
+			key = string.format("toast:%d:%d:%d:%s:%s:%d:%d:%d", p.ui_width, p.ui_height, p.border_width, color_to_string( p.border_color ),color_to_string( p.fill_color ), p.padding_x, p.padding_y, p.border_corner_radius)
 
-		icon = Image {src = p.icon}
+    		t_box = assets(key, my_make_toastb_group_bg, p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius) 
+
+    		t_box:set{name="t_box"}
+			tb_group.anchor_point = {p.ui_width/2, p.ui_height/2}
+
+			t_box.y = t_box.y -30
+    		tb_group:add(t_box)
+		else 
+    	     t_box_img = assets(skin_list[p.skin]["toast"])
+    	     t_box_img:set{name="t_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
+    		 tb_group:add(t_box_img)
+		end 
+
+		icon = assets(p.icon)
     	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
 
     	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
@@ -2130,47 +2370,7 @@ function ui_element.toastAlert(t)
     	message= Text{text = p.message, font= p.message_font, color = p.message_color, wrap = true, wrap_mode = "CHAR"}     
     	message:set{name = "message", position = {icon.w  + icon.x + 20 , title.h + tb_group_cur_y }, size = {p.ui_width - 150 , p.ui_height - 150 }  } 
 
-	if(p.skin ~= "Custom") then 
-    	     t_box_img = assets(skin_list[p.skin]["toast"])
-    	     t_box_img:set{name="t_box_img", size = { p.ui_width , p.ui_height } , opacity = 255}
-	else 
-	     t_box_img = Image{}
-	end 
-
-		t_box.y = t_box.y -30
-
-    	tb_group:add(t_box, t_box_img, icon, title, message)
-
-    	if (p.skin == "Custom") then t_box_img.opacity = 0
-    	else t_box.opacity = 0 end 
-
-    	tb_group_timer.interval = p.on_screen_duration 
-    	tb_group_timeline.duration = p.fade_duration
-    	tb_group_timeline.direction = "FORWARD"
-    	tb_group_timeline.loop = false
-
-
-	local my_alpha = Alpha{timeline=tb_group_timeline,mode="EASE_OUT_SINE"}
-
-	local opacity_interval = Interval(255, 0)
-	local scale_interval = Interval(1,0.8)
-
-     	function tb_group_timeline.on_new_frame(t, m)
-			tb_group.opacity = opacity_interval:get_value(my_alpha.alpha)
-			tb_group.scale = {scale_interval:get_value(my_alpha.alpha),scale_interval:get_value(my_alpha.alpha)}
-     	end  
-
-     	function tb_group_timeline.on_completed()
-		--tb_group.opacity = 0
-			tb_group.scale = {0.8, 0.8}
-			tb_group.opacity = 255
-			tb_group:hide()
-     	end 
-
-     	function tb_group_timer.on_timer(tb_group_timer)
-		tb_group_timeline:start()
-        	tb_group_timer:stop()
-     	end 
+    	tb_group:add(icon, title, message)
      end 
 
      create_toastBox()
@@ -2179,6 +2379,31 @@ function ui_element.toastAlert(t)
 	 	tb_group:hide()
 	 end 
        
+     tb_group_timer.interval = p.on_screen_duration 
+     tb_group_timeline.duration = p.fade_duration
+     tb_group_timeline.direction = "FORWARD"
+     tb_group_timeline.loop = false
+
+	 local my_alpha = Alpha{timeline=tb_group_timeline,mode="EASE_OUT_SINE"}
+	 local opacity_interval = Interval(255, 0)
+	 local scale_interval = Interval(1,0.8)
+	 
+     function tb_group_timeline.on_new_frame(t, m)
+		tb_group.opacity = opacity_interval:get_value(my_alpha.alpha)
+		tb_group.scale = {scale_interval:get_value(my_alpha.alpha),scale_interval:get_value(my_alpha.alpha)}
+     end  
+
+     function tb_group_timeline.on_completed()
+		tb_group.scale = {0.8, 0.8}
+		tb_group.opacity = 255
+		tb_group:hide()
+     end 
+
+     function tb_group_timer.on_timer(tb_group_timer)
+		tb_group_timeline:start()
+        tb_group_timer:stop()
+     end 
+
      function tb_group.extra.start_timer() 
 	 	tb_group:show()
 		tb_group_timer:start()
@@ -2255,7 +2480,7 @@ function ui_element.buttonPicker(t)
 	skin = "CarbonCandy", 
 	ui_width =  180,
 	ui_height = 60,
-	items = {"item1", "item2", "item3"},
+	items = {"item", "item", "item"},
 	text_font = "FreeSans Medium 30px" , 
 	focus_text_font = "FreeSans Medium 30px" , 
 	text_color = {255,255,255,255}, 
@@ -2280,7 +2505,6 @@ function ui_element.buttonPicker(t)
      end 
      
  --the umbrella Group
-     local unfocus, focus, left_un, left_sel, right_un, right_sel, create_buttonPicker
      local items = Group{name = "items"}
 
      local bp_group = Group
@@ -2297,30 +2521,42 @@ function ui_element.buttonPicker(t)
      local pos = {0, 0}    -- focus, unfocus 
      local t = nil
 
-     create_buttonPicker = function() 
+     local create_buttonPicker = function() 
 
-		index = p.selected_item 
+     	local ring, focus_ring, unfocus, focus, left_un, left_sel, right_un, right_sel
+		local button_w 
+
 		bp_group:clear()
 		items:clear()
+
+		index = p.selected_item 
     	bp_group.size = { p.ui_width , p.ui_height}
 
-		ring = make_ring(p.ui_width, p.ui_height, p.border_color, p.fill_color, 1, 7, 7, 12)
-    	ring:set{name="ring", position = {pos[1] , pos[2]}, opacity = 255 }
-
-    	focus_ring = make_ring(p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, 1, 7, 7, 12)
-    	focus_ring:set{name="focus_ring", position = {pos[1], pos[2]}, opacity = 0}
-
-
+		
 		if p.skin == "Custom" then 
-    		unfocus = assets(skin_list["default"]["buttonpicker"])
-     		focus =   assets(skin_list["default"]["buttonpicker_focus"])
+
+			local key = string.format( "ring:%d:%d:%s:%s" , p.ui_width, p.ui_height, color_to_string( p.border_color ), color_to_string( p.fill_color ))
+	
+			ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.border_color, p.fill_color, 1, 7, 7, 1)
+        	ring:set{name="ring", position = { pos[1] , pos[2] }, opacity = 255 }
+
+			key = string.format( "ring:%d:%d:%s:%s" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ))
+
+			focus_ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, 1, 7, 7, 1)
+        	focus_ring:set{name="focus_ring", position = { pos[1] , pos[2] }, opacity = 0}
+
+			button_w = focus_ring.w 
+   			bp_group:add(ring, focus_ring)
+
         	left_un   = assets(skin_list["default"]["buttonpicker_left_un"])
 	    	left_sel  = assets(skin_list["default"]["buttonpciker_left_sel"])
 	    	right_un  = assets(skin_list["default"]["buttonpicker_right_un"])
         	right_sel = assets(skin_list["default"]["buttonpicker_right_sel"])
+
 		elseif p.skin == "inspector" then  
-     		unfocus = Group{} --name = "unfocus-button", reactive = true, position = {pos[1], pos[2]}}
+
 			local left, right, u1px 
+     		unfocus = Group{} --name = "unfocus-button", reactive = true, position = {pos[1], pos[2]}}
 			
 			left = Image{src="lib/assets/picker-left-cap.png"} 
 			right = Image{src="lib/assets/picker-right-cap.png", position = {p.ui_width - left.w, 0}} 
@@ -2340,6 +2576,10 @@ function ui_element.buttonPicker(t)
 			focus:add(fleft)
 			focus:add(f1px)
 			focus:add(fright)
+			
+			bp_group:add(unfocus, focus)
+
+			button_w = focus.w
 
 	    	left_un   = assets("lib/assets/picker-left-arrow.png")
 	    	left_sel  = assets("lib/assets/picker-left-arrow-focus.png")
@@ -2348,7 +2588,11 @@ function ui_element.buttonPicker(t)
 		else 
      		unfocus = assets(skin_list[p.skin]["buttonpicker"])
      		focus = assets(skin_list[p.skin]["buttonpicker_focus"])
-	    	left_un   = assets(skin_list[p.skin]["buttonpicker_left_un"])
+
+			button_w = p.ui_width 
+			bp_group:add(unfocus, focus)
+			
+			left_un   = assets(skin_list[p.skin]["buttonpicker_left_un"])
 	    	left_sel  = assets(skin_list[p.skin]["buttonpciker_left_sel"])
 	    	right_un  = assets(skin_list[p.skin]["buttonpicker_right_un"])
         	right_sel = assets(skin_list[p.skin]["buttonpicker_right_sel"])
@@ -2359,28 +2603,32 @@ function ui_element.buttonPicker(t)
 		right_un.scale = {w_scale, h_scale}
 		right_sel.scale = {w_scale, h_scale}
 
-     	unfocus:set{name = "unfocus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 255, reactive = true}
-		focus:set{name = "focus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 0}
+		if unfocus then 
+     		unfocus:set{name = "unfocus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 255, reactive = true}
+		end 
+		if focus then 
+			focus:set{name = "focus",  position = {pos[1], pos[2]+padding}, size = {p.ui_width, p.ui_height}, opacity = 0}
+		end 
 
 		if p.direction == "horizontal" then 
 			left_un:set{name = "left_un", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
-			left_sel:set{position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 0}
-			right_un:set{name = "right_un", position = {pos[1] + focus_ring.w + padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
-			right_sel:set{position = {right_un.x, right_un.y},  opacity = 0}
+			left_sel:set{name = "left_sel", position = {pos[1] - left_un.w*w_scale - padding, pos[2] + p.ui_height/5}, opacity = 0}
+			right_un:set{name = "right_un", position = {pos[1] + button_w + padding, pos[2] + p.ui_height/5}, opacity = 255, reactive = true}
+			right_sel:set{name = "right_sel", position = {right_un.x, right_un.y},  opacity = 0}
 		elseif p.direction == "vertical" then 
             left_un.anchor_point={left_un.w/2,left_un.h/2}
             left_un.z_rotation={90,0,0}
 			left_un:set{name = "left_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2 + 12}, opacity = 255, reactive = true} -- top
 			left_sel.anchor_point={left_un.w/2,left_un.h/2}
             left_sel.z_rotation={90,0,0}
-			left_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2+ 12 }, opacity = 0}
+			left_sel:set{name = "left_sel", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] - left_un.h/2+ 12 }, opacity = 0}
 
             right_un.anchor_point={right_un.w/2,right_un.h/2}
             right_un.z_rotation={90,0,0}
 			right_un:set{name = "right_un", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2+ 5 }, opacity = 255, reactive = true} -- bottom
             right_sel.anchor_point={right_un.w/2,right_un.h/2}
             right_sel.z_rotation={90,0,0}
-			right_sel:set{position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2 + 5 },  opacity = 0}
+			right_sel:set{name = "right_sel", position = {pos[1] + p.ui_width/2 - left_un.w/2 + padding, pos[2] + p.ui_height + padding * 2 + 5 },  opacity = 0}
 		end
 
      	for i, j in pairs(p.items) do 
@@ -2411,33 +2659,38 @@ function ui_element.buttonPicker(t)
 			items.clip = { 0, 0, p.ui_width, p.ui_height }
      	end 
 
-   		bp_group:add(ring, focus_ring, unfocus, focus, right_un, right_sel, left_un, left_sel, items) 
-
-		if(p.skin == "Custom") then 
-			unfocus.opacity = 0 
-       	else 
-			ring.opacity = 0 
-		end 
+   		bp_group:add(right_un, right_sel, left_un, left_sel, items) 
 
         t = nil
 
 		if editor_lb == nil or editor_use then 
-			local unfocus, left_arrow, right_arrow 
-			unfocus = bp_group:find_child("unfocus")
-			unfocus.reactive = true
-			function unfocus:on_button_down (x,y,b,n)
-				if current_focus then
-   			         current_focus.extra.on_focus_out()
-	        		 current_focus = group
-				end 
-				bp_group.on_focus_in()
-	            bp_group:grab_key_focus()
-		        return true
-			end 
 
-        	left_arrow = bp_group:find_child("left_un")
-			left_arrow.reactive = true 
-			function left_arrow:on_button_down(x, y, b, n)
+			if ring then 
+				ring.reactive = true
+				function ring:on_button_down (x,y,b,n)
+					if current_focus then
+   			         	current_focus.extra.on_focus_out()
+	        		 	current_focus = group
+					end 
+					bp_group.on_focus_in()
+	            	bp_group:grab_key_focus()
+		        	return true
+				end 
+			elseif unfocus then 
+				unfocus.reactive = true
+				function unfocus:on_button_down (x,y,b,n)
+					if current_focus then
+   			         	current_focus.extra.on_focus_out()
+	        		 	current_focus = group
+					end 
+					bp_group.on_focus_in()
+	            	bp_group:grab_key_focus()
+		        	return true
+				end 
+			end
+
+			left_un.reactive = true 
+			function left_un:on_button_down(x, y, b, n)
 				if current_focus then
 					current_focus.extra.on_focus_out()
 	        		current_focus = group
@@ -2452,9 +2705,8 @@ function ui_element.buttonPicker(t)
 				return true 
 			end 
 
-			right_arrow = bp_group:find_child("right_un")
-			right_arrow.reactive = true 
-			function right_arrow:on_button_down(x, y, b, n)
+			right_un.reactive = true 
+			function right_un:on_button_down(x, y, b, n)
 				if current_focus then
 					current_focus.extra.on_focus_out()
 	        		current_focus = group
@@ -2469,11 +2721,19 @@ function ui_element.buttonPicker(t)
 				return true 
 			end 
 		end 
-     end 
+
+	end 
  
      create_buttonPicker()
 
-     function bp_group.extra.on_focus_in()
+	 
+
+    function bp_group.extra.on_focus_in()
+		local unfocus = bp_group:find_child("unfocus")
+		local focus = bp_group:find_child("focus")
+		local ring = bp_group:find_child("ring")
+		local focus_ring = bp_group:find_child("focus_ring")
+
 		current_focus = bp_group
 		if(p.skin == "Custom") then 
             ring.opacity = 0 
@@ -2489,6 +2749,11 @@ function ui_element.buttonPicker(t)
      end
 
      function bp_group.extra.on_focus_out()
+		local unfocus = bp_group:find_child("unfocus")
+		local focus = bp_group:find_child("focus")
+		local ring = bp_group:find_child("ring")
+		local focus_ring = bp_group:find_child("focus_ring")
+
 		if(p.skin == "Custom") then 
         	ring.opacity = 255 
 	     	focus_ring.opacity = 0
@@ -2502,6 +2767,16 @@ function ui_element.buttonPicker(t)
      end
 
      function bp_group.extra.press_left()
+		local unfocus = bp_group:find_child("unfocus")
+		local focus = bp_group:find_child("focus")
+		local ring = bp_group:find_child("ring")
+		local focus_ring = bp_group:find_child("focus_ring")
+
+		local left_sel = bp_group:find_child("left_sel")
+		local left_un = bp_group:find_child("left_un")
+		local right_sel = bp_group:find_child("right_sel")
+		local right_un  = bp_group:find_child("right_un")
+
      	local prev_i = index
         local next_i = (index-2)%(#p.items)+1
 
@@ -2510,9 +2785,22 @@ function ui_element.buttonPicker(t)
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2 - p.inspector
-	    local next_old_x = p.ui_width/2 - j.width/2 + focus.w
+		local next_old_x, prev_new_x
+
+		if focus then  
+	    	next_old_x = p.ui_width/2 - j.width/2 + focus.w
+		else 
+	    	next_old_x = p.ui_width/2 - j.width/2 + focus_ring.w
+		end 
+
 	    local next_old_y = p.ui_height/2 - j.height/2 - p.inspector 
-	    local prev_new_x = p.ui_width/2 - j.width/2 - focus.w
+
+		if focus then  
+	    	prev_new_x = p.ui_width/2 - j.width/2 - focus.w
+		else
+	    	prev_new_x = p.ui_width/2 - j.width/2 - focus_ring.w
+		end 
+
 	    local prev_new_y = p.ui_height/2 - j.height/2 - p.inspector 
 	    local next_new_x = p.ui_width/2 - j.width/2
 	    local next_new_y = p.ui_height/2 - j.height/2 - p.inspector 
@@ -2557,16 +2845,38 @@ function ui_element.buttonPicker(t)
 	end
 
 	function bp_group.extra.press_right()
+		local unfocus = bp_group:find_child("unfocus")
+		local focus = bp_group:find_child("focus")
+		local ring = bp_group:find_child("ring")
+		local focus_ring = bp_group:find_child("focus_ring")
+
+		local left_sel = bp_group:find_child("left_sel")
+		local left_un = bp_group:find_child("left_un")
+		local right_sel = bp_group:find_child("right_sel")
+		local right_un  = bp_group:find_child("right_un")
+
 	    local prev_i = index
-            local next_i = (index)%(#p.items)+1
+        local next_i = (index)%(#p.items)+1
 	    index = next_i
 
 	    local j = (bp_group:find_child("items")):find_child("item"..tostring(index))
 	    local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2 - p.inspector 
-	    local next_old_x = p.ui_width/2 - j.width/2 - focus.w
+	    local next_old_x, prev_new_x 
+		if focus then 
+	    	next_old_x = p.ui_width/2 - j.width/2 - focus.w
+		else 
+	    	next_old_x = p.ui_width/2 - j.width/2 - focus_ring.w
+		end
+
 	    local next_old_y = p.ui_height/2 - j.height/2 - p.inspector 
-	    local prev_new_x = p.ui_width/2 - j.width/2 + focus.w
+
+		if focus then 
+	    	prev_new_x = p.ui_width/2 - j.width/2 + focus.w
+		else
+	    	prev_new_x = p.ui_width/2 - j.width/2 + focus_ring.w
+		end 
+
 	    local prev_new_y = p.ui_height/2 - j.height/2 - p.inspector 
 	    local next_new_x = p.ui_width/2 - j.width/2
 	    local next_new_y = p.ui_height/2 - j.height/2 - p.inspector 
@@ -2611,6 +2921,16 @@ function ui_element.buttonPicker(t)
 	end
 
  	function bp_group.extra.press_up()
+		local unfocus = bp_group:find_child("unfocus")
+		local focus = bp_group:find_child("focus")
+		local ring = bp_group:find_child("ring")
+		local focus_ring = bp_group:find_child("focus_ring")
+
+		local left_sel = bp_group:find_child("left_sel")
+		local left_un = bp_group:find_child("left_un")
+		local right_sel = bp_group:find_child("right_sel")
+		local right_un  = bp_group:find_child("right_un")
+
 	    local prev_i = index
 
         local next_i = (index-2)%(#p.items)+1
@@ -2623,10 +2943,21 @@ function ui_element.buttonPicker(t)
 	    local prev_old_y = p.ui_height/2 - j.height/2
 
 	    local next_old_x = p.ui_width/2 - j.width/2 
-	    local next_old_y = p.ui_height/2 - j.height/2 + focus.h
+	    local next_old_y, prev_new_y 
+
+		if focus then 
+	    	next_old_y = p.ui_height/2 - j.height/2 + focus.h
+		else
+	    	next_old_y = p.ui_height/2 - j.height/2 + focus_ring.h
+		end
 
 	    local prev_new_x = p.ui_width/2 - j.width/2 
-	    local prev_new_y = p.ui_height/2 - j.height/2 - focus.h
+
+		if focus then 
+	    	prev_new_y = p.ui_height/2 - j.height/2 - focus.h
+		else 
+	    	prev_new_y = p.ui_height/2 - j.height/2 - focus_ring.h
+		end 
 
 	    local next_new_x = p.ui_width/2 - j.width/2
 	    local next_new_y = p.ui_height/2 - j.height/2
@@ -2674,6 +3005,16 @@ function ui_element.buttonPicker(t)
 	end
 
 	function bp_group.extra.press_down()
+		local unfocus = bp_group:find_child("unfocus")
+		local focus = bp_group:find_child("focus")
+		local ring = bp_group:find_child("ring")
+		local focus_ring = bp_group:find_child("focus_ring")
+
+		local left_sel = bp_group:find_child("left_sel")
+		local left_un = bp_group:find_child("left_un")
+		local right_sel = bp_group:find_child("right_sel")
+		local right_un  = bp_group:find_child("right_un")
+
 	    local prev_i = index
             local next_i = (index)%(#p.items)+1
 	    index = next_i
@@ -2682,9 +3023,20 @@ function ui_element.buttonPicker(t)
 	    local prev_old_x = p.ui_width/2 - j.width/2
 	    local prev_old_y = p.ui_height/2 - j.height/2
 	    local next_old_x = p.ui_width/2 - j.width/2 
-	    local next_old_y = p.ui_height/2 - j.height/2 - focus.h
+	    local next_old_y, prev_new_y
+		if focus then
+	    	next_old_y = p.ui_height/2 - j.height/2 - focus.h
+		else 
+	    	next_old_y = p.ui_height/2 - j.height/2 - focus_ring.h
+		end
+
 	    local prev_new_x = p.ui_width/2 - j.width/2 
-	    local prev_new_y = p.ui_height/2 - j.height/2 + focus.h
+
+		if focus then 
+	    	prev_new_y = p.ui_height/2 - j.height/2 + focus.h
+		else 
+	    	prev_new_y = p.ui_height/2 - j.height/2 + focus_ring.h
+		end
 	    local next_new_x = p.ui_width/2 - j.width/2
 	    local next_new_y = p.ui_height/2 - j.height/2
 
@@ -2820,25 +3172,24 @@ function ui_element.radioButtonGroup(t)
 	skin = "Custom", 
 	ui_width = 600,
 	ui_height = 200,
-	items = {"item1", "item2", "item3"},
-	text_font = "FreeSans Medium 30px", -- items 
-	text_color = {255,255,255,255}, --"FFFFFF", -- items 
-	button_color = {255,255,255,255}, -- items 
-	select_color = {255, 255, 255, 255}, -- items 
+	items = {"item", "item", "item"},
+	text_font = "FreeSans Medium 30px", 
+	text_color = {255,255,255,255}, 
+	button_color = {255,255,255,255}, 
+	select_color = {255, 255, 255, 255},
 	focus_color = {0,255,0,255},
-	--focus_fill_color = {0,50,0,100},
-	button_radius = 10, -- items 
-	select_radius = 4,  -- items 
-	button_position = {0, 0},  -- items 
-	item_position = {50,-10},  -- items 
-	line_space = 40,  -- items 
+	button_radius = 10,
+	select_radius = 4,  
+	button_position = {0, 0},  
+	item_position = {50,-10},  
+	line_space = 40,  
 	rotate_func = nil, 
 	direction = "vertical", 
 	selected_item = 1,  
 	ui_position = {200, 200, 0}, 
 	------------------------------------------------
-	button_image = Image{}, --assets("assets/radiobutton.png"),
-	select_image = Image{}, --assets("assets/radiobutton_selected.png"),
+	button_image = Image{}, 
+	select_image = Image{}, 
     }
 
  --overwrite defaults
@@ -2864,26 +3215,20 @@ function ui_element.radioButtonGroup(t)
 
 	function rb_group.extra.on_focus_in()
 	  	current_focus = cb_group
-        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
 	    rings:find_child("ring"..1).opacity = 0 
 	    rings:find_child("focus"..1).opacity = 255 
-        --end 
 		rings:find_child("ring"..1):grab_key_focus() 
     end
 
     function rb_group.extra.on_focus_out()
-        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-			--for i=1, table.getn(rings.children)/2 do 
-			for i=1,  #rings.children/2 do 
-	    		rings:find_child("ring"..i).opacity = 255 
-	    		rings:find_child("focus"..i).opacity = 0 
-			end 
-        --end 
+		for i=1,  #rings.children/2 do 
+	    	rings:find_child("ring"..i).opacity = 255 
+	    	rings:find_child("focus"..i).opacity = 0 
+		end 
     end 
 
     function rb_group.extra.select_button(item_n) 
 	    rb_group.selected_item = item_n
-	    --p.selected_item = item_n
         if p.rotate_func then
 	       p.rotate_func(p.selected_item)
 	    end
@@ -2903,6 +3248,10 @@ function ui_element.radioButtonGroup(t)
 
     create_radioButton = function() 
 
+	local sel_off_x = 12
+	local sel_off_y = 4
+
+
 	if(p.skin ~= "Custom" and p.skin ~= "default") then 
 	     p.button_image = skin_list[p.skin]["radiobutton"]
 	     p.button_focus_image = skin_list[p.skin]["radiobutton_focus"]
@@ -2918,30 +3267,44 @@ function ui_element.radioButtonGroup(t)
     items:clear()
          --rb_group.size = { p.ui_width , p.ui_height},
 	
-    if(p.skin == "Custom" or p.skin == "default") then 
-		select_img = create_select_circle(p.select_radius, p.select_color)
+    if p.skin == "Custom" then 
+		local key = string.format("circle:%d:%s",p.select_radius, color_to_string(p.select_color))
+		select_img = assets(key, my_create_select_circle, p.select_radius, p.select_color)
         select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
     else 
-    	select_img = Image{src = p.select_image}
+    	select_img = assets(p.select_image)
         select_img:set{name = "select_img", position = {0,0}, opacity = 255} 
     end 
-    
 
 	local pos = {0,0}
+
     for i, j in pairs(p.items) do 
+		
 		local donut, focus 
+
 	    if(p.direction == "vertical") then --vertical 
         	pos= {0, i * p.line_space - p.line_space}
 	    end   	
         items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color =p.text_color, position = pos})     
-	    if p.skin == "Custom"  or p.skin == "default"then 
-		   		donut =  create_circle(p.button_radius, p.button_color):set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
-		   	   	focus =  create_circle(p.button_radius, p.focus_color):set{name="focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}  
-    	       	rings:add(donut, focus) 
+
+	    if p.skin == "Custom" then 
+			local key = string.format("donut:%d:%s",p.button_radius, color_to_string(p.button_color))
+		   	donut =  assets(key, my_create_circle, p.button_radius, p.button_color)
+			donut:set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
+
+			key = string.format("focus:%d:%s",p.button_radius, color_to_string(p.focus_color))
+		   	focus = assets(key, my_create_circle, p.button_radius, p.focus_color)
+			focus:set{name="focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}  
+
+    	    rings:add(donut, focus) 
 	    else
-	           	donut = Image{name = "ring"..tostring(i),  src=p.button_image, position = {pos[1], pos[2] - 8}}
-	           	focus = Image{name = "focus"..tostring(i),  src=p.button_focus_image, position = {pos[1], pos[2] - 8}, opacity = 0}
-    	       	rings:add(donut, focus) 
+	        donut = assets(p.button_image)
+			donut:set{name = "ring"..tostring(i), position = {pos[1], pos[2] - 8}}
+	        
+			focus = assets(p.button_focus_image)
+	        focus:set{name = "focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}
+
+    	    rings:add(donut, focus) 
 	    end 
 
 	    if(p.direction == "horizontal") then --horizontal
@@ -2950,50 +3313,58 @@ function ui_element.radioButtonGroup(t)
 	    donut.reactive = true
 
         if editor_lb == nil or editor_use then  
-				function donut:on_key_down(key)
-					local ring_num = tonumber(donut.name:sub(5,-1))
-					local next_num
-					if key == keys.Up then 
-						if ring_num > 1 then 
-							next_num = ring_num - 1
-				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
-	    						rings:find_child("ring"..ring_num).opacity = 255 
-	    						rings:find_child("focus"..ring_num).opacity = 0 
-	    						rings:find_child("ring"..next_num).opacity = 0 
-	    						rings:find_child("focus"..next_num).opacity = 255 
-        					--end 
-	    					rings:find_child("ring"..next_num):grab_key_focus()
-							return true 
-						end
-					elseif key == keys.Down then 
-						--if ring_num < table.getn(rings.children)/2 then 
-						if ring_num < #rings.children/2 then 
-							next_num = ring_num + 1
-				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
-	    						rings:find_child("ring"..ring_num).opacity = 255 
-	    						rings:find_child("focus"..ring_num).opacity = 0 
-	    						rings:find_child("ring"..next_num).opacity = 0 
-	    						rings:find_child("focus"..next_num).opacity = 255 
-        					--end 
-							rings:find_child("ring"..next_num):grab_key_focus() 
-							return true 
-						end
-					elseif key == keys.Return then 
-						rb_group.extra.select_button(ring_num)
+			function donut:on_key_down(key)
+				local ring_num = tonumber(donut.name:sub(5,-1))
+				local next_num
+				local next_key, prev_key 
 
-						--if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-	    					rings:find_child("ring"..ring_num).opacity = 0 
-	    					rings:find_child("focus"..ring_num).opacity = 255 
-        				--end 
-
-						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12 + p.button_position[1]
-	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4 + p.button_position[2]
-
-						rings:find_child("ring"..ring_num):grab_key_focus() 
-
-						return true 
-					end 
+				if rb_group.direction == "vertical" then 
+					next_key = keys.Down 
+					prev_key = keys.Up
+				else 
+					next_key = keys.Right 
+					prev_key = keys.Left
 				end 
+	
+				if key == prev_key then 
+					if ring_num > 1 then 
+						next_num = ring_num - 1
+	    				rings:find_child("ring"..ring_num).opacity = 255 
+	    				rings:find_child("focus"..ring_num).opacity = 0 
+	    				rings:find_child("ring"..next_num).opacity = 0 
+	    				rings:find_child("focus"..next_num).opacity = 255 
+	    				rings:find_child("ring"..next_num):grab_key_focus()
+						return true 
+					end
+				elseif key == next_key then 
+					if ring_num < #rings.children/2 then 
+						next_num = ring_num + 1
+	    				rings:find_child("ring"..ring_num).opacity = 255 
+	    				rings:find_child("focus"..ring_num).opacity = 0 
+	    				rings:find_child("ring"..next_num).opacity = 0 
+	    				rings:find_child("focus"..next_num).opacity = 255 
+						rings:find_child("ring"..next_num):grab_key_focus() 
+						return true 
+					end
+				elseif key == keys.Return then 
+					rb_group.extra.select_button(ring_num)
+
+	    			rings:find_child("ring"..ring_num).opacity = 0 
+	    			rings:find_child("focus"..ring_num).opacity = 255 
+
+					if (p.skin == "CarbonCandy") then 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + p.button_position[1]
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + p.button_position[2] - 8
+					else 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + sel_off_x + p.button_position[1]
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + sel_off_y + p.button_position[2]
+					end 
+
+					rings:find_child("ring"..ring_num):grab_key_focus() 
+
+					return true 
+				end 
+			end 
 	
 	           	function donut:on_button_down (x,y,b,n)
 					if current_focus then 
@@ -3004,14 +3375,19 @@ function ui_element.radioButtonGroup(t)
 					rb_group.extra.select_button(ring_num)
 
 					current_focus = rb_group
-        			--if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-	    				rings:find_child("ring"..ring_num).opacity = 0 
-	    				rings:find_child("focus"..ring_num).opacity = 255 
-        			--end 
+	    			rings:find_child("ring"..ring_num).opacity = 0 
+	    			rings:find_child("focus"..ring_num).opacity = 255 
 					rings:find_child("ring"..ring_num):grab_key_focus() 
 
-					select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + 12
-	    			select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + 4
+
+					if (p.skin == "CarbonCandy") then 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x 
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y - 8 
+					else 
+						select_img.x  = items:find_child("item"..tostring(p.selected_item)).x + sel_off_x
+	    				select_img.y  = items:find_child("item"..tostring(p.selected_item)).y + sel_off_y
+					end 
+
 					return true
 	     		end 
 	      	end
@@ -3102,7 +3478,7 @@ function ui_element.checkBoxGroup(t)
 	skin = "Custom", 
 	ui_width = 600,
 	ui_height = 200,
-	items = {"item1", "item2", "item3"},
+	items = {"item", "item", "item"},
 	text_font = "FreeSans Medium 30px", 
 	text_color = {255,255,255,255}, 
 	box_color = {255,255,255,255},
@@ -3121,12 +3497,6 @@ function ui_element.checkBoxGroup(t)
 	ui_position = {200, 200, 0}, 
     } 
 
---[[
-	if p.skin == "CarbonCandy" then
-		p.item_position = {70, 15}
-		p.line_space = 60
-	end 
-]]
  --overwrite defaults
     if t ~= nil then 
         for k, v in pairs (t) do
@@ -3151,20 +3521,16 @@ function ui_element.checkBoxGroup(t)
 
 	function cb_group.extra.on_focus_in()
 	  	current_focus = cb_group
-        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-	    	boxes:find_child("box"..1).opacity = 0 
-	    	boxes:find_child("focus"..1).opacity = 255 
-        --end 
+	    boxes:find_child("box"..1).opacity = 0 
+	    boxes:find_child("focus"..1).opacity = 255 
 		boxes:find_child("box"..1):grab_key_focus() 
     end
 
     function cb_group.extra.on_focus_out()
-        --if (p.skin == "CarbonCandy") or p.skin == "Custom" then 
-			for i=1, table.getn(boxes.children)/2 do 
-	    		boxes:find_child("box"..i).opacity = 255 
-	    		boxes:find_child("focus"..i).opacity = 0 
-			end 
-        --end 
+		for i=1, table.getn(boxes.children)/2 do 
+	    	boxes:find_child("box"..i).opacity = 255 
+	    	boxes:find_child("focus"..i).opacity = 0 
+		end 
     end 
 
     function cb_group.extra.select_button(items) 
@@ -3190,23 +3556,14 @@ function ui_element.checkBoxGroup(t)
 	 	boxes:clear() 
 	 	cb_group:clear()
 
-
-	 	if(p.skin ~= "Custom" and p.skin ~= "default") then 
+		if p.skin == "Custom" then 
+	     	 --p.box_image = Image{}
+			 --p.box_focus_image = Image{}
+             p.check_image = "lib/assets/checkmark.png"
+		else 
              p.box_image = skin_list[p.skin]["checkbox"]
              p.box_focus_image = skin_list[p.skin]["checkbox_focus"]
              p.check_image = skin_list[p.skin]["checkbox_sel"]
-
---[[
-			 if p.skin == "CarbonCandy" then
-				p.item_position = {70, 15}
-				p.line_space = 60
-			 end 
-]]
-
-	 	else 
-	     	 p.box_image = Image{}
-			 p.box_focus_image = Image{}
-             p.check_image = "lib/assets/checkmark.png"
 	 	end
 	
 	 	boxes:set{name = "boxes", position = p.box_position} 
@@ -3214,30 +3571,38 @@ function ui_element.checkBoxGroup(t)
 	 	items:set{name = "items", position = p.item_position} 
 
         local pos = {0, 0}
+
         for i, j in pairs(p.items) do 
-	      	local box, check, focus
-	      	if(p.direction == "vertical") then --vertical 
+	    
+			local box, check, focus
+	      	
+			if(p.direction == "vertical") then --vertical 
                   pos= {0, i * p.line_space - p.line_space}
 	      	end   			
 
 	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
-	      	if p.skin == "Custom"  or p.skin == "default"then 
+	      	if p.skin == "Custom" then 
 		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 0}
 		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 255}
     	        boxes:add(box, focus) 
 	     	else
-	           	focus = Image{name = "focus"..tostring(i),  src=p.box_focus_image, position = pos, reactive = true, opacity = 0}
-	           	box = Image{name = "box"..tostring(i),  src=p.box_image, position = pos, reactive = true, opacity = 255}
+	           	focus = assets(p.box_focus_image)
+	           	focus:set{name = "focus"..tostring(i), position = pos, reactive = true, opacity = 0}
+	           	box = assets(p.box_image)
+	           	box:set{name = "box"..tostring(i), position = pos, reactive = true, opacity = 255}
 		   		boxes:add(box, focus) 
 	     	end 
 
 	      	if p.skin == "Custom"  or p.skin == "default"  then 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, size = p.check_size, position = pos, reactive = true, opacity = 0}
+	     		check = assets(p.check_image)
+	     		check:set{name="check"..tostring(i), size = p.check_size, position = pos, reactive = true, opacity = 0}
 			else 
-	     		check = Image{name="check"..tostring(i), src=p.check_image, position = pos, reactive = true, opacity = 0}
+	     		check = assets(p.check_image)
+	     		check:set{name="check"..tostring(i), position = pos, reactive = true, opacity = 0}
 			end
+
 	     	checks:add(check) 
 
             if editor_lb == nil or editor_use then  
@@ -3258,24 +3623,20 @@ function ui_element.checkBoxGroup(t)
 					if key == prev_key then 
 						if box_num > 1 then 
 							next_num = box_num - 1
-				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
-	    						boxes:find_child("box"..box_num).opacity = 255 
-	    						boxes:find_child("focus"..box_num).opacity = 0 
-	    						boxes:find_child("box"..next_num).opacity = 0 
-	    						boxes:find_child("focus"..next_num).opacity = 255 
-        					--end 
+	    					boxes:find_child("box"..box_num).opacity = 255 
+	    					boxes:find_child("focus"..box_num).opacity = 0 
+	    					boxes:find_child("box"..next_num).opacity = 0 
+	    					boxes:find_child("focus"..next_num).opacity = 255 
 	    					boxes:find_child("box"..next_num):grab_key_focus()
 							return true 
 						end
 					elseif key == next_key then 
 						if box_num < table.getn(boxes.children)/2 then 
 							next_num = box_num + 1
-				 			--if (p.skin == "CarbonCandy") or (p.skin == "Custom") then 
-	    						boxes:find_child("box"..box_num).opacity = 255 
-	    						boxes:find_child("focus"..box_num).opacity = 0 
-	    						boxes:find_child("box"..next_num).opacity = 0 
-	    						boxes:find_child("focus"..next_num).opacity = 255 
-        					--end 
+	    					boxes:find_child("box"..box_num).opacity = 255 
+	    					boxes:find_child("focus"..box_num).opacity = 0 
+	    					boxes:find_child("box"..next_num).opacity = 0 
+	    					boxes:find_child("focus"..next_num).opacity = 255 
 							boxes:find_child("box"..next_num):grab_key_focus() 
 							return true 
 						end
@@ -3408,6 +3769,79 @@ Extra Function:
 	speed_down() - spin slower
 ]]
  
+  --the Canvas used to create the dots
+    local make_dot = function(dot_diameter, dot_color)
+          local dot  = Canvas{size={dot_diameter, dot_diameter}}
+          dot:begin_painting()
+          dot:arc(dot_diameter/2,dot_diameter/2,dot_diameter/2,0,360)
+          dot:set_source_color(dot_color)
+          dot:fill(true)
+          dot:finish_painting()
+
+          if dot.Image then
+              dot = dot:Image()
+          end
+          dot.anchor_point ={dot_diameter/2,dot_diameter/2}
+          dot.name = "Loading Dot"
+
+          return dot
+    end
+
+	local function my_make_dot( _ , ... )
+     	return make_dot( ... )
+	end
+
+    local make_big_dot = function(overall_diameter, dot_color)
+
+        local dot  = Canvas{size={overall_diameter, overall_diameter}}
+		dot:begin_painting()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,0,90)
+		dot:line_to(overall_diameter/2,overall_diameter/2)
+		dot:line_to(overall_diameter,  overall_diameter/2)
+		dot:set_source_color(dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,90,180)
+		dot:line_to(overall_diameter/2,overall_diameter/2)
+		dot:line_to(overall_diameter/2,overall_diameter)
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,180,270)
+		dot:line_to( overall_diameter/2, overall_diameter/2 )
+		dot:line_to(                    0, overall_diameter/2 )
+		dot:set_source_color(dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,270,360)
+		dot:line_to( overall_diameter/2, overall_diameter/2 )
+		dot:line_to( overall_diameter/2,                    0 )
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+        dot:finish_painting()
+		
+        if dot.Image then
+            dot = dot:Image()
+        end
+        dot.anchor_point ={overall_diameter/2,overall_diameter/2}
+        dot.name         = "Loading Dot"
+        dot.position     = {x,y}
+
+        return dot
+    end
+
+	local function my_make_big_dot( _ , ... )
+     	return make_big_dot( ... )
+	end
+
 function ui_element.progressSpinner(t) 
     --default parameters
     local p = {
@@ -3450,164 +3884,104 @@ function ui_element.progressSpinner(t)
     --table of the dots, used by the animation
     local dots   = {}
     local load_timeline = nil
-    
-    --the Canvas used to create the dots
-    local make_dot = function()
-          local dot  = Canvas{size={p.dot_diameter, p.dot_diameter}}
-          dot:begin_painting()
-          dot:arc(p.dot_diameter/2,p.dot_diameter/2,p.dot_diameter/2,0,360)
-          dot:set_source_color(p.dot_color)
-          dot:fill(true)
-          dot:finish_painting()
+    local load_timeline
 
-          if dot.Image then
-              dot = dot:Image()
-          end
-          dot.anchor_point ={p.dot_diameter/2,p.dot_diameter/2}
-          dot.name         = "Loading Dot"
-	  
-
-          return dot
-    end
-    local make_big_dot = function()
-
-        local dot  = Canvas{size={p.overall_diameter, p.overall_diameter}}
-		dot:begin_painting()
-		
-		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,0,90)
-		dot:line_to(p.overall_diameter/2,p.overall_diameter/2)
-		dot:line_to(p.overall_diameter,  p.overall_diameter/2)
-		dot:set_source_color(p.dot_color)
-		dot:fill(true)
-		
-		dot:new_path()
-		
-		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,90,180)
-		dot:line_to(p.overall_diameter/2,p.overall_diameter/2)
-		dot:line_to(p.overall_diameter/2,p.overall_diameter)
-		dot:set_source_color("000000")
-		dot:fill(true)
-		
-		dot:new_path()
-		
-		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,180,270)
-		dot:line_to( p.overall_diameter/2, p.overall_diameter/2 )
-		dot:line_to(                    0, p.overall_diameter/2 )
-		dot:set_source_color(p.dot_color)
-		dot:fill(true)
-		
-		dot:new_path()
-		
-		dot:arc(p.overall_diameter/2,p.overall_diameter/2,p.overall_diameter/2,270,360)
-		dot:line_to( p.overall_diameter/2, p.overall_diameter/2 )
-		dot:line_to( p.overall_diameter/2,                    0 )
-		dot:set_source_color("000000")
-		dot:fill(true)
-		
-        dot:finish_painting()
-		
-        if dot.Image then
-            dot = dot:Image()
-        end
-        dot.anchor_point ={p.overall_diameter/2,p.overall_diameter/2}
-        dot.name         = "Loading Dot"
-        dot.position     = {x,y}
-
-        return dot
-    end
-    local img, load_timeline
     --function used to remake the dots upon a parameter change
     create_dots = function()
+
         l_dots:clear()
         dots = {}
         
         if p.style == "orbitting" then
         
-        local rad
+        	local rad, key
         
-        for i = 1, p.number_of_dots do
-            --they're radial position
-            rad = (2*math.pi)/(p.number_of_dots) * i
-            if skin_list[p.skin]["loadingdot"] == nil then
-				dots[i] = make_dot()
-	        else
-		        img = assets(skin_list[p.skin]["loadingdot"])
-                img.size={p.dot_diameter, p.dot_diameter}
-				img.anchor_point = {
-                        img.w/2,
-                        img.h/2
-                }
-		        dots[i] = img
-            end
-			dots[i].position = {
-                math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
-                math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
-            }
-            l_dots:add(dots[i])
-        end
-        
-        -- the animation timeline
-        if load_timeline ~= nil and load_timeline.is_playing then
-            load_timeline:stop()
-            load_timeline = nil
-        end
-        load_timeline = Timeline
-        {
-            name      = "Loading Animation",
-            loop      =  true,
-            duration  =  p.cycle_time,
-            direction = "FORWARD", 
-        }
+        	for i = 1, p.number_of_dots do
+            	--they're radial position
+            	rad = (2*math.pi)/(p.number_of_dots) * i
+            	if p.skin == "Custom" then -- skin_list[p.skin]["loadingdot"] == nil then
+					key = string.format("dot:%d:%s", p.dot_diameter, color_to_string(p.dot_color))
+					dots[i] = assets(key, my_make_dot, p.dot_diameter, p.dot_color)
+	        	else		        
+		        	dots[i] = assets(skin_list[p.skin]["loadingdot"])
+                	dots[i].size={p.dot_diameter, p.dot_diameter}
+					dots[i].anchor_point = {
+                		dots[i].w/2,
+                    	dots[i].h/2
+                	}
+            	end
 
+				dots[i].position = {
+                	math.floor( p.overall_diameter/2 * math.cos(rad) )+p.overall_diameter/2+p.dot_diameter/2,
+                	math.floor( p.overall_diameter/2 * math.sin(rad) )+p.overall_diameter/2+p.dot_diameter/2
+            	}
 
-        local increment = math.ceil(255/p.number_of_dots)
+            	l_dots:add(dots[i])		
+        	end
         
-        function load_timeline.on_new_frame(t)
-            local start_i   = math.ceil(t.elapsed/(p.cycle_time/p.number_of_dots))
-            local curr_i    = nil
-            
-            for i = 1, p.number_of_dots do
-                curr_i = (start_i + (i-1))%(p.number_of_dots) +1
-                
-                dots[curr_i].opacity = increment*i
-            end
-            
-        end
-        load_timeline:start()
-        
-        else
-        if skin_list[p.skin]["loadingdot"] == nil then
-            img = make_big_dot()
-            l_dots:add(img)
-        else
-            img = assets(skin_list[p.skin]["loadingdot"])
-            img.anchor_point={img.w/2,img.h/2}
-            
-            l_dots:add(img)
-        end
-        img.position={img.w/2,img.h/2}
-        if load_timeline ~= nil and load_timeline.is_playing then
-            load_timeline:stop()
-            load_timeline = nil
-        end
-        load_timeline = Timeline
-        {
-            name      = "Loading Animation",
-            loop      =  true,
-            duration  =  p.cycle_time,
-            direction = "FORWARD", 
-        }
-        function load_timeline.on_new_frame(t,msces,p)
-            img.z_rotation={360*p,0,0}
-        end
-        load_timeline:start()
-        
-        end
-        
+        	-- the animation timeline
+        	if load_timeline ~= nil and load_timeline.is_playing then
+            	load_timeline:stop()
+            	load_timeline = nil
+        	end
+
+        	load_timeline = Timeline
+        	{
+            	name      = "Loading Animation",
+            	loop      =  true,
+            	duration  =  p.cycle_time,
+            	direction = "FORWARD", 
+        	}
 	
-    end
-    create_dots()
+        	local increment = math.ceil(255/p.number_of_dots)
+        
+        	function load_timeline.on_new_frame(t)
+            	local start_i   = math.ceil(t.elapsed/(p.cycle_time/p.number_of_dots))
+            	local curr_i    = nil
+            
+            	for i = 1, p.number_of_dots do
+                	curr_i = (start_i + (i-1))%(p.number_of_dots) +1
+                	dots[curr_i].opacity = increment*i
+            	end
+        	end
+        	load_timeline:start()
 
+        else -- spinning 
+
+			local img, key
+
+			if p.skin == "Custom" then 
+				key = string.format("big_dot:%d:%s", p.overall_diameter, color_to_string(p.dot_color))
+            	img = assets(key, my_make_big_dot, p.overall_diameter, p.dot_color)
+            	img.anchor_point={img.w/2,img.h/2}
+            	l_dots:add(img)
+        	else
+            	img = assets(skin_list[p.skin]["loadingdot"])
+            	img.anchor_point={img.w/2,img.h/2}
+            	l_dots:add(img)
+        	end
+        	img.position={img.w/2,img.h/2}
+        	if load_timeline ~= nil and load_timeline.is_playing then
+            	load_timeline:stop()
+            	load_timeline = nil
+        	end
+
+        	load_timeline = Timeline
+        	{
+            	name      = "Loading Animation",
+            	loop      =  true,
+            	duration  =  p.cycle_time,
+            	direction = "FORWARD", 
+        	}
+
+        	function load_timeline.on_new_frame(t,msces,p)
+            	img.z_rotation={360*p,0,0}
+        	end
+        	load_timeline:start()        	
+        end
+    end
+
+    create_dots()
 
     local mt = {}
     mt.__newindex = function(t,k,v)
@@ -3630,23 +4004,117 @@ Creates a Loading bar ui element
 
 Arguments:
 	Table of Loading bar properties
-		bsize - Size of the loading bar
-		shell_upper_color - The upper color for the inside of the loading bar
-		shell_lower_color - The upper color for the inside of the loading bar
-		border_color - Color for the border
-		fill_upper_color - The upper color for the loading bar fill
-		fill_lower_color - The lower color for the loading bar fill
+	bsize - Size of the loading bar
+	shell_upper_color - The upper color for the inside of the loading bar
+	shell_lower_color - The upper color for the inside of the loading bar
+	border_color - Color for the border
+	fill_upper_color - The upper color for the loading bar fill
+	fill_lower_color - The lower color for the loading bar fill
 
 Return:
-
-		loading_bar_group - Group containing the loading bar
+	loading_bar_group - Group containing the loading bar
         
 Extra Function:
 	set_prog(prog) - set the progress of the loading bar (meant to be called in an on_new_frame())
-	start_prog() 
 ]]
 
----[[
+
+local function draw_c_shell(ui_width, ui_height, empty_top_color, empty_bottom_color, border_color)
+
+	local c_shell = Canvas {
+		size = {ui_width,ui_height},
+	}
+        
+    local stroke_width = 2
+	local RAD = 6
+	local top    = math.ceil(stroke_width/2)
+	local left   = math.ceil(stroke_width/2)
+	local bottom = c_shell.h - math.ceil(stroke_width/2)
+	local right  = c_shell.w - math.ceil(stroke_width/2)
+        
+	c_shell:begin_painting()
+		
+	c_shell:move_to(        left,         top )
+	c_shell:line_to(   right-RAD,         top )
+	c_shell:curve_to( right, top,right,top,right,top+RAD)
+	c_shell:line_to(       right,  bottom-RAD )
+	c_shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        
+	c_shell:line_to(           left+RAD,          bottom )
+	c_shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+	c_shell:line_to(           left,            top+RAD )
+	c_shell:curve_to(left,top,left,top,left+RAD,top)
+        
+	c_shell:set_source_linear_pattern(
+		c_shell.w/2,0,
+		c_shell.w/2,c_shell.h
+	)
+	c_shell:add_source_pattern_color_stop( 0 , empty_top_color )
+	c_shell:add_source_pattern_color_stop( 1 , empty_bottom_color )
+        
+	c_shell:fill(true)
+	c_shell:set_line_width(   stroke_width )
+	c_shell:set_source_color( border_color )
+	c_shell:stroke( true )
+	c_shell:finish_painting()
+
+    if c_shell.Image then
+		c_shell = c_shell:Image()
+	end
+ 
+    return c_shell 
+end 
+        
+local function my_draw_c_shell( _ , ... )
+    return draw_c_shell( ... )
+end
+
+
+local function draw_c_fill(c_shell_w, c_shell_h, ui_width, ui_height, filled_top_color, filled_bottom_color, progress)
+
+    local stroke_width = 2
+	local RAD = 6
+	local top    = math.ceil(stroke_width/2)
+	local left   = math.ceil(stroke_width/2)
+
+	local bottom = c_shell_h - math.ceil(stroke_width/2)
+	local right  = c_shell_w - math.ceil(stroke_width/2)
+        
+	local c_fill  = Canvas{ size = {1,ui_height-stroke_width} }  
+        
+	c_fill:begin_painting()
+        
+	c_fill:move_to(-1,    top )
+	c_fill:line_to( 2,    top )
+	c_fill:line_to( 2, bottom )
+	c_fill:line_to(-1, bottom )
+	c_fill:line_to(-1,    top )
+        
+	c_fill:set_source_linear_pattern(
+		c_shell_w/2,0,
+		c_shell_w/2,c_shell_h
+	)
+	c_fill:add_source_pattern_color_stop( 0 , filled_top_color )
+	c_fill:add_source_pattern_color_stop( 1 , filled_bottom_color )
+	c_fill:fill(true)
+	c_fill:finish_painting()
+
+	if c_fill.Image then
+		c_fill = c_fill:Image()
+	end
+
+	c_fill.x=stroke_width
+    c_fill.y=stroke_width/2
+    c_fill.scale = {(ui_width-4)*(progress),1}
+   
+	return c_fill
+end 
+
+local function my_draw_c_fill( _ , ... )
+   	return draw_c_fill( ... )
+end
+
+
 function ui_element.progressBar(t)
 
     --default parameters
@@ -3692,120 +4160,35 @@ function ui_element.progressBar(t)
         	    end,
 	        },
 	}
-
---[[
-	local l_bar_timer = Timer()
-    local l_bar_timeline = Timeline ()
-]]
 	local function create_loading_bar()
+
 		l_bar_group:clear()
-        local stroke_width = 2
-		c_shell = Canvas{
-				size = {p.ui_width,p.ui_height},
-		}
-		c_fill  = Canvas{
-				size = {1,p.ui_height-stroke_width},
-		}  
-        
-		
-		local RAD = 6
-        
-		local top    = math.ceil(stroke_width/2)
-		local bottom = c_shell.h - math.ceil(stroke_width/2)
-		local left   = math.ceil(stroke_width/2)
-		local right  = c_shell.w - math.ceil(stroke_width/2)
-        
-		c_shell:begin_painting()
-        
-		
-		c_shell:move_to(        left,         top )
-		c_shell:line_to(   right-RAD,         top )
-		c_shell:curve_to( right, top,right,top,right,top+RAD)
-		c_shell:line_to(       right,  bottom-RAD )
-		c_shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		c_shell:line_to(           left+RAD,          bottom )
-		c_shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		c_shell:line_to(           left,            top+RAD )
-		c_shell:curve_to(left,top,left,top,left+RAD,top)
-        
-		c_shell:set_source_linear_pattern(
-			c_shell.w/2,0,
-			c_shell.w/2,c_shell.h
-		)
-		c_shell:add_source_pattern_color_stop( 0 , p.empty_top_color )
-		c_shell:add_source_pattern_color_stop( 1 , p.empty_bottom_color )
-        
-		c_shell:fill(true)
-		c_shell:set_line_width(   stroke_width )
-		c_shell:set_source_color( p.border_color )
-		c_shell:stroke( true )
-		c_shell:finish_painting()
-        
-        
-        
-		c_fill:begin_painting()
-        
-		c_fill:move_to(-1,    top )
-		c_fill:line_to( 2,    top )
-		c_fill:line_to( 2, bottom )
-		c_fill:line_to(-1, bottom )
-		c_fill:line_to(-1,    top )
-        
-		c_fill:set_source_linear_pattern(
-			c_shell.w/2,0,
-			c_shell.w/2,c_shell.h
-		)
-		c_fill:add_source_pattern_color_stop( 0 , p.filled_top_color )
-		c_fill:add_source_pattern_color_stop( 1 , p.filled_bottom_color )
-		c_fill:fill(true)
-		c_fill:finish_painting()
-		if c_shell.Image then
-			c_shell = c_shell:Image()
-		end
-		if c_fill.Image then
-			c_fill = c_fill:Image()
-		end
-        	c_fill.x=stroke_width
-        	c_fill.y=stroke_width/2
-        	c_fill.scale = {(p.ui_width-4)*(p.progress),1}
-		l_bar_group:add(c_shell,c_fill)
 
---[[
-		l_bar_timer.interval = 1 -- immediately 
-    	l_bar_timeline.duration = 3000 -- progress duration 
-    	l_bar_timeline.direction = "FORWARD"
-    	l_bar_timeline.loop = false
+		local key = string.format("cshell:%d:%d:%s:%s:%s", p.ui_width, p.ui_height, color_to_string(p.empty_top_color), 
+								   color_to_string(p.empty_bottom_color), color_to_string(p.border_color))
 
-     	function l_bar_timeline.on_new_frame(t, m, p)
-			l_bar_group.set_prog(p)
-     	end  
+--		c_shell =  assets(key, my_draw_c_shell, p.ui_width, p.ui_height, p.empty_top_color, p.empty_bottom_color, p.border_color)
+		c_shell =  draw_c_shell( p.ui_width, p.ui_height, p.empty_top_color, p.empty_bottom_color, p.border_color)
 
-     	function l_bar_timeline.on_completed()
-			l_bar_group.set_prog(1)
-     	end 
+		key = string.format("cshell:%d:%d:%d:%d:%s:%s:%f", c_shell.w, c_shell.h, p.ui_width, p.ui_height, 
+							color_to_string(p.filled_top_color), color_to_string(p.filled_bottom_color), p.progress)
 
-     	function l_bar_timer.on_timer(l_bar_timer)
-			l_bar_timeline:start()
-        	l_bar_timer:stop()
-     	end 
-]]
+--		c_fill  = assets(key, my_draw_c_fill, c_shell.w, c_shell.h, p.ui_width, p.ui_height, p.filled_top_color, p.filled_bottom_color, p.progress)
+		c_fill  = draw_c_fill( c_shell.w, c_shell.h, p.ui_width, p.ui_height, p.filled_top_color, p.filled_bottom_color, p.progress)
+
+		l_bar_group:add(c_shell,c_fill) 
+
 	end
     
 	create_loading_bar()
     
-	--[[
-    function l_bar_group.extra.start_timer() 
-		l_bar_timer:start()
-    end 
- 	]]
-
 
 	local mt = {}
     
     mt.__newindex = function(t,k,v)
         p[k] = v
         if k == "progress" then
+				print("progress",v)
             c_fill.scale = {(p.ui_width-4)*(v),1}
         else
 	   		if k ~= "selected" then 
@@ -4072,7 +4455,6 @@ function ui_element.layoutManager(t)
         }
     }
 
-
 	local make_tile = function(w,h)
         local c = Canvas{size={w,h}}
         c:begin_painting()
@@ -4092,43 +4474,34 @@ function ui_element.layoutManager(t)
         c.name="placeholder"
 		return c
 	end
+
+	
+	local function my_make_tile( _ , ... )
+     	return make_tile( ... )
+	end
 	
 	make_grid = function()
         
-		local g
+		local cell, key
         slate:clear()
         
         focus_i[1] = 1
         focus_i[2] = 1
         
         if p.cell_size == "variable" then
-            
             for r = 1, p.rows  do
-			    
                 for c = 1, p.columns do
-                    
                     if p.tiles[r]    == nil then break end
-                    
                     if p.tiles[r][c] ~= nil and p.tiles[r][c].name ~= "placeholder" then 
-                        
                         if row_hs[r] == nil or row_hs[r] < p.tiles[r][c].h then
-                            
                             row_hs[r] = p.tiles[r][c].h
-                            
                         end
-                        
                         if col_ws[c] == nil or col_ws[c] < p.tiles[r][c].w then
-                            
                             col_ws[c] = p.tiles[r][c].w
-                            
                         end
-                        
                     end
-                    
                 end
-                
             end
-            
         end
         
 		for r = 1, p.rows  do
@@ -4139,27 +4512,29 @@ function ui_element.layoutManager(t)
 			for c = 1, p.columns do
                 if p.tiles[r][c] == nil then
                     if p.cell_size == "variable" then
-                        g = make_tile(col_ws[c] or p.cell_w, row_hs[r] or p.cell_h)
+						key = string.format("cell:%d:%d",col_ws[c] or p.cell_w, row_hs[r] or p.cell_h) 
+
+                        cell = assets(key, my_make_tile, col_ws[c] or p.cell_w, row_hs[r] or p.cell_h)
+
                     else
-                        g = make_tile(p.cell_w,p.cell_h)
+						key = string.format("cell:%d:%d",p.cell_w,p.cell_h)
+                        cell = assets(key, my_make_tile, p.cell_w,p.cell_h)
                     end
                 else
-                    g = p.tiles[r][c]
-                    if g.parent ~= nil then
-                        g:unparent()
+                    cell = p.tiles[r][c]
+                    if cell.parent ~= nil then
+                        cell:unparent()
                     end
                 end
-                slate:add(g)
-                g.x, g.y = x_y_from_index(r,c)
-                g.delay = p.cell_timing_offset*(r+c-1)
-                g.anchor_point = {g.w/2,g.h/2}
+                slate:add(cell)
+                cell.x, cell.y = x_y_from_index(r,c)
+                cell.delay = p.cell_timing_offset*(r+c-1)
+                cell.anchor_point = {cell.w/2,cell.h/2}
 			end
 		end
         
         slate.w, slate.h = x_y_from_index(p.rows,p.columns)
-        
         slate.w = slate.w + (col_ws[p.columns] or p.cell_w)/2
-        
         slate.h = slate.h + (row_hs[p.rows]    or p.cell_h)/2
         
         if p.rows < #p.tiles then
@@ -4185,10 +4560,11 @@ function ui_element.layoutManager(t)
             end
         end
 	end
+
 	make_grid()
 	
 	local function layoutManager_on_key_down(key)
-		if slate.focus[key] then
+		if slate.focus and slate.focus[key] then
 			if type(slate.focus[key]) == "function" then
 				slate.focus[key]()
 			elseif screen:find_child(slate.focus[key]) then
@@ -4201,14 +4577,16 @@ function ui_element.layoutManager(t)
 				end
 			end
 		end
-		return true
+		return 
 	end
 
     --Key Handler
 	local keys={
 		[keys.Return] = function()
 			if 1 <= focus_i[1] and focus_i[1] <= p.rows and 1 <= focus_i[2] and focus_i[2] <= p.columns then
-				p.tiles[focus_i[1]][focus_i[2]].pressed()
+				if p.tiles[focus_i[1]][focus_i[2]].pressed then 
+					p.tiles[focus_i[1]][focus_i[2]].pressed()
+				end
 		    end 
 		end,
 		[keys.Left] = function()
@@ -4266,9 +4644,6 @@ function ui_element.layoutManager(t)
 		screen:grab_key_focus()
 	end 
 
-	ssss = slate 
-
-
     mt = {}
     mt.__newindex = function(t,k,v)
 		
@@ -4320,20 +4695,13 @@ function ui_element.scrollPane(t)
     --default parameters
     local p = {
         visible_w    =  600,
-        --color     =  {255,255,255,255},
         visible_h    =  600,
         content   = Group{},
         virtual_h = 1000,
         virtual_w = 1000,
-        --arrow_clone_source = nil,
-        --arrow_sz = 15,
         arrow_color = {255,255,255,255},
         arrows_visible = false,
-        --arrows_in_box = false,
-        --arrows_centered = false,
-        --hor_arrow_y     = nil,
-        --vert_arrow_x    = nil,
-         bar_color_inner       = {180,180,180,255},
+        bar_color_inner       = {180,180,180,255},
         bar_color_outer       = { 30, 30, 30,255},
         bar_focus_color_inner = {180,255,180,255},
         bar_focus_color_outer = { 30, 30, 30,255},
@@ -4361,8 +4729,6 @@ function ui_element.scrollPane(t)
 	
 	--Group that Clips the content
 	local window  = Group{name="window"}
-	--Group that contains all of the content
-	--local content = Group{}
 	--declarations for dependencies from scroll_group
 	local scroll, scroll_x, scroll_y
 	--flag to hold back key presses while animating content group
@@ -4375,7 +4741,7 @@ function ui_element.scrollPane(t)
 	
 
     --the umbrella Group, containing the full slate of tiles
-    local scroll_group = Group{ 
+    local scroll_group = Group { 
         name     = "scrollPane",
         position = p.ui_position, 
         reactive = true,
@@ -4444,11 +4810,6 @@ function ui_element.scrollPane(t)
                     end
                 end
             end,
-            --[[
-			get_content_group = function()
-				return content
-			end
-            --]]
             screen_pos_of_child = function(self,child)
                 return  child.x + child.parent.x + self.x + p.box_width,
                         child.y + child.parent.y + self.y + p.box_width
@@ -4583,16 +4944,16 @@ function ui_element.scrollPane(t)
 		end
 	end
 
-    local make_arrow = function()
+    local make_arrow = function(bar_thickness, arrow_color)
 		
-		local c = Canvas{size={p.bar_thickness,p.bar_thickness}}
+		local c = Canvas{size={bar_thickness,bar_thickness}}
 		
 		c:move_to(    0,c.h)
 		c:line_to(c.w/2,  0)
 		c:line_to(  c.w,c.h)
 		c:line_to(    0,c.h)
 		
-		c:set_source_color( p.arrow_color )
+		c:set_source_color( arrow_color )
 		c:fill(true)
 		
 		if c.Image then
@@ -4605,126 +4966,164 @@ function ui_element.scrollPane(t)
 		
 	end
     
+	local function my_make_arrow( _ , ... )
+	print("my Mk arrow")
+     	return make_arrow( ... )
+	end
+
 	local function make_hor_bar(w,h,ratio)
         local bar = Group{}
         
-		local shell = Canvas{
-				size = {w,h},
-		}
-		local fill = Canvas{
-			size = {w*ratio,h-p.frame_thickness},
-		}
-		local focus = Canvas{
-			size = {w*ratio,h-p.frame_thickness},
-		}  
-        
-		
 		local RAD = 6
         
-		local top    =           math.ceil(p.frame_thickness/2)
-		local bottom = shell.h - math.ceil(p.frame_thickness/2)
-		local left   =           math.ceil(p.frame_thickness/2)
-		local right  = shell.w - math.ceil(p.frame_thickness/2)
+		local top    = math.ceil(p.frame_thickness/2)
+		local bottom = h - math.ceil(p.frame_thickness/2)
+		local left   = math.ceil(p.frame_thickness/2)
+		local right  = w - math.ceil(p.frame_thickness/2)
+       	local shell, fill, focus, key 
+
+		local function make_hor_shell ()
+			shell = Canvas{
+				size = {w,h},
+			}
+			shell:begin_painting()
         
-		shell:begin_painting()
+			shell:move_to(        left,         top )
+			shell:line_to(   right-RAD,         top )
+			shell:curve_to( right, top,right,top,right,top+RAD)
+			shell:line_to(       right,  bottom-RAD )
+			shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        	
+			shell:line_to(           left+RAD,          bottom )
+			shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			shell:line_to(           left,            top+RAD )
+			shell:curve_to(left,top,left,top,left+RAD,top)
+        	
+			shell:set_source_linear_pattern(
+            	shell.w/2,0,
+				shell.w/2,shell.h
+			)
+			shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
+			shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
+        	
+			shell:fill(true)
+			shell:set_line_width(   p.frame_thickness )
+			shell:set_source_color( p.frame_color )
+			shell:stroke( true )
+			shell:finish_painting()
         
+        	-----------------------------------------------------
+
+			if shell.Image then shell = shell:Image() end
+
+			return shell
+		end 
+
+		local function my_make_hor_shell( _ , ...)
+			return  make_hor_shell( ... )
+		end 
+
+		key = string.format ("h_shell:%d:%d:%f:%s:%s:%d:%s",w,h,ratio,color_to_string(p.empty_color_inner),color_to_string(p.empty_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		shell = assets(key, my_make_hor_shell) 
 		
-		shell:move_to(        left,         top )
-		shell:line_to(   right-RAD,         top )
-		shell:curve_to( right, top,right,top,right,top+RAD)
-		shell:line_to(       right,  bottom-RAD )
-		shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+		local function make_hor_fill()
+
+			fill = Canvas{
+				size = {w*ratio,h-p.frame_thickness},
+			}
+				
+			top    =          math.ceil(p.frame_thickness/2)
+			bottom = h-p.frame_thickness - math.ceil(p.frame_thickness/2)
+			left   =          math.ceil(p.frame_thickness/2)
+			right  = w*ratio - math.ceil(p.frame_thickness/2)
         
-		shell:line_to(           left+RAD,          bottom )
-		shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		shell:line_to(           left,            top+RAD )
-		shell:curve_to(left,top,left,top,left+RAD,top)
+			fill:begin_painting() -- shell -> fill
+
+			fill:move_to(        left,         top )
+			fill:line_to(   right-RAD,         top )
+			fill:curve_to( right, top,right,top,right,top+RAD)
+			fill:line_to(       right,  bottom-RAD )
+			fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        	
+			fill:line_to(           left+RAD,          bottom )
+			fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			fill:line_to(           left,            top+RAD )
+			fill:curve_to(left,top,left,top,left+RAD,top)
+        	
+			fill:set_source_linear_pattern(
+				fill.w/2,0,
+				fill.w/2,fill.h
+			)
+			fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
+			fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
+			fill:fill(true)
+        	fill:set_line_width(   p.frame_thickness )
+			fill:set_source_color( p.frame_color )
+			fill:stroke( true )
+			fill:finish_painting()
+        	
+			if  fill.Image then  fill =  fill:Image() end
+
+			return fill
+		end 
+
+		local function my_make_hor_fill( _ , ...)
+     		return make_hor_fill( ... )
+		end 
+
+		key = string.format ("h_fill:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_color_inner),color_to_string(p.bar_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		fill = assets(key, my_make_hor_fill) 
+
+		local function make_hor_focus()
+			focus = Canvas{
+				size = {w*ratio,h-p.frame_thickness},
+			}  
+        	    
+			top    =           math.ceil(p.frame_thickness/2)
+			bottom = h-p.frame_thickness - math.ceil(p.frame_thickness/2)
+			left   =           math.ceil(p.frame_thickness/2)
+			right  = w*ratio - math.ceil(p.frame_thickness/2)
+        	
+			focus:begin_painting() -- fill -> focus
+
+			focus:move_to(        left,         top )
+			focus:line_to(   right-RAD,         top )
+			focus:curve_to( right, top,right,top,right,top+RAD)
+			focus:line_to(       right,  bottom-RAD )
+			focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        	
+			focus:line_to(           left+RAD,          bottom )
+			focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			focus:line_to(           left,            top+RAD )
+			focus:curve_to(left,top,left,top,left+RAD,top)
         
-		shell:set_source_linear_pattern(
-            
-            shell.w/2,0,
-			shell.w/2,shell.h
-		)
-		shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
-		shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
-        
-		shell:fill(true)
-		shell:set_line_width(   p.frame_thickness )
-		shell:set_source_color( p.frame_color )
-		shell:stroke( true )
-		shell:finish_painting()
-        
-        -----------------------------------------------------
-		top    =          math.ceil(p.frame_thickness/2)
-		bottom = fill.h - math.ceil(p.frame_thickness/2)
-		left   =          math.ceil(p.frame_thickness/2)
-		right  = fill.w - math.ceil(p.frame_thickness/2)
-        
-		shell:begin_painting()
-        
-		
-		fill:move_to(        left,         top )
-		fill:line_to(   right-RAD,         top )
-		fill:curve_to( right, top,right,top,right,top+RAD)
-		fill:line_to(       right,  bottom-RAD )
-		fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		fill:line_to(           left+RAD,          bottom )
-		fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		fill:line_to(           left,            top+RAD )
-		fill:curve_to(left,top,left,top,left+RAD,top)
-        
-		fill:set_source_linear_pattern(
-			fill.w/2,0,
-			fill.w/2,fill.h
-		)
-		fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
-		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
-		fill:fill(true)
-        fill:set_line_width(   p.frame_thickness )
-		fill:set_source_color( p.frame_color )
-		fill:stroke( true )
-		fill:finish_painting()
-        
-        -----------------------------------------------------
-        
-		top    =           math.ceil(p.frame_thickness/2)
-		bottom = focus.h - math.ceil(p.frame_thickness/2)
-		left   =           math.ceil(p.frame_thickness/2)
-		right  = focus.w - math.ceil(p.frame_thickness/2)
-        
-		shell:begin_painting()
-        
-		
-		focus:move_to(        left,         top )
-		focus:line_to(   right-RAD,         top )
-		focus:curve_to( right, top,right,top,right,top+RAD)
-		focus:line_to(       right,  bottom-RAD )
-		focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		focus:line_to(           left+RAD,          bottom )
-		focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		focus:line_to(           left,            top+RAD )
-		focus:curve_to(left,top,left,top,left+RAD,top)
-        
-		focus:set_source_linear_pattern(
-			focus.w/2,0,
-			focus.w/2,focus.h
-		)
-		focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
-		focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
-		focus:fill(true)
-        focus:set_line_width(   p.frame_thickness )
-		focus:set_source_color( p.frame_color )
-		focus:stroke( true )
-		focus:finish_painting()
-        
-		if shell.Image then shell = shell:Image() end
-		if  fill.Image then  fill =  fill:Image() end
-        if focus.Image then focus = focus:Image() end
- 
-		bar:add(shell,fill,focus)
-        
+			focus:set_source_linear_pattern(
+				focus.w/2,0,
+				focus.w/2,focus.h
+			)
+			focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
+			focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
+			focus:fill(true)
+        	focus:set_line_width(   p.frame_thickness )
+			focus:set_source_color( p.frame_color )
+			focus:stroke( true )
+			focus:finish_painting()
+
+        	if focus.Image then focus = focus:Image() end
+
+			return focus
+		end 
+
+		local function my_make_hor_focus( _ , ...)
+     		return make_hor_focus( ... )
+		end 
+
+		key = string.format ("h_focus:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_focus_color_inner),color_to_string(p.bar_focus_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		focus = assets(key, my_make_hor_focus)
+
         shell.name="track"
         shell.reactive = true
         fill.name="grip"
@@ -4734,130 +5133,168 @@ function ui_element.scrollPane(t)
 		focus.reactive=true
         focus.y=p.frame_thickness/2
 		focus:hide()
+
+		bar:add(shell,fill,focus)
+
         return bar
     end
 
     local function make_vert_bar(w,h,ratio)
         local bar = Group{}
-        
-		local shell = Canvas{
-				size = {w,h},
-		}
-		local fill  = Canvas{
-			size = {w-p.frame_thickness,h*ratio},
-		}
-		local focus  = Canvas{
-			size = {w-p.frame_thickness,h*ratio},
-		}
-        
 		
 		local RAD = 6
         
 		local top    =           math.ceil(p.frame_thickness/2)
-		local bottom = shell.h - math.ceil(p.frame_thickness/2)
+		local bottom = h - math.ceil(p.frame_thickness/2)
 		local left   =           math.ceil(p.frame_thickness/2)
-		local right  = shell.w - math.ceil(p.frame_thickness/2)
-        
-		shell:begin_painting()
-        
-		
-		shell:move_to(        left,         top )
-		shell:line_to(   right-RAD,         top )
-		shell:curve_to( right, top,right,top,right,top+RAD)
-		shell:line_to(       right,  bottom-RAD )
-		shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		shell:line_to(           left+RAD,          bottom )
-		shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		shell:line_to(           left,            top+RAD )
-		shell:curve_to(left,top,left,top,left+RAD,top)
-        
-		shell:set_source_linear_pattern(
-			0,shell.h/2,
-            shell.w,shell.h/2
-		)
-		shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
-		shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
-        
-		shell:fill(true)
-		shell:set_line_width(   p.frame_thickness )
-		shell:set_source_color( p.frame_color )
-		shell:stroke( true )
-		shell:finish_painting()
-        
-        -----------------------------------------------------
-        
-		top    =          math.ceil(p.frame_thickness/2)
-		bottom = fill.h - math.ceil(p.frame_thickness/2)
-		left   =          math.ceil(p.frame_thickness/2)
-		right  = fill.w - math.ceil(p.frame_thickness/2)
-        
-		shell:begin_painting()
-        
-		
-		fill:move_to(        left,         top )
-		fill:line_to(   right-RAD,         top )
-		fill:curve_to( right, top,right,top,right,top+RAD)
-		fill:line_to(       right,  bottom-RAD )
-		fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
-        
-		fill:line_to(           left+RAD,          bottom )
-		fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		fill:line_to(           left,            top+RAD )
-		fill:curve_to(left,top,left,top,left+RAD,top)
-        
-		fill:set_source_linear_pattern(
-			0,fill.h/2,
-            fill.w,fill.h/2
-		)
-		fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
-		fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
-		fill:fill(true)
-        fill:set_line_width(   p.frame_thickness )
-		fill:set_source_color( p.frame_color )
-		fill:stroke( true )
+		local right  = w - math.ceil(p.frame_thickness/2)
 
-		fill:finish_painting()
+		local shell, fill, focus, key
+
+		local function make_vert_shell ()
+			local shell = Canvas{
+				size = {w,h},
+			}
+
+			shell:begin_painting()
+        		
+			shell:move_to(        left,         top )
+			shell:line_to(   right-RAD,         top )
+			shell:curve_to( right, top,right,top,right,top+RAD)
+			shell:line_to(       right,  bottom-RAD )
+			shell:curve_to( right,bottom,right,bottom,right-RAD,bottom)
         
-        -----------------------------------------------------
+			shell:line_to(           left+RAD,          bottom )
+			shell:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			shell:line_to(           left,            top+RAD )
+			shell:curve_to(left,top,left,top,left+RAD,top)
+        	
+			shell:set_source_linear_pattern(
+				0,shell.h/2,
+            	shell.w,shell.h/2
+			)
+			shell:add_source_pattern_color_stop( 0 , p.empty_color_inner )
+			shell:add_source_pattern_color_stop( 1 , p.empty_color_outer )
+        	
+			shell:fill(true)
+			shell:set_line_width(   p.frame_thickness )
+			shell:set_source_color( p.frame_color )
+			shell:stroke( true )
+			shell:finish_painting()
         
-		top    =           math.ceil(p.frame_thickness/2)
-		bottom = focus.h - math.ceil(p.frame_thickness/2)
-		left   =           math.ceil(p.frame_thickness/2)
-		right  = focus.w - math.ceil(p.frame_thickness/2)
+			if shell.Image then shell = shell:Image() end
+
+			return shell 
+
+		end 
+
+		local function my_make_vert_shell( _ , ...)
+     		return make_vert_shell( ... )
+		end 
+
+		key = string.format ("h_shell:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.empty_color_inner),color_to_string(p.empty_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		shell = assets(key, my_make_vert_shell)
+
+		local function make_vert_fill()
+			local fill  = Canvas{
+				size = {w-p.frame_thickness,h*ratio},
+			}
+			 
+			top    =          math.ceil(p.frame_thickness/2)
+			bottom = fill.h - math.ceil(p.frame_thickness/2)
+			left   =          math.ceil(p.frame_thickness/2)
+			right  = fill.w - math.ceil(p.frame_thickness/2)
         
-		shell:begin_painting()
+			fill:begin_painting() -- shell -? fill ? 
         
 		
-		focus:move_to(        left,         top )
-		focus:line_to(   right-RAD,         top )
-		focus:curve_to( right, top,right,top,right,top+RAD)
-		focus:line_to(       right,  bottom-RAD )
-		focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+			fill:move_to(        left,         top )
+			fill:line_to(   right-RAD,         top )
+			fill:curve_to( right, top,right,top,right,top+RAD)
+			fill:line_to(       right,  bottom-RAD )
+			fill:curve_to( right,bottom,right,bottom,right-RAD,bottom)
         
-		focus:line_to(           left+RAD,          bottom )
-		focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
-		focus:line_to(           left,            top+RAD )
-		focus:curve_to(left,top,left,top,left+RAD,top)
+			fill:line_to(           left+RAD,          bottom )
+			fill:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			fill:line_to(           left,            top+RAD )
+			fill:curve_to(left,top,left,top,left+RAD,top)
+        	
+			fill:set_source_linear_pattern(
+				0,fill.h/2,
+            	fill.w,fill.h/2
+			)
+			fill:add_source_pattern_color_stop( 0 , p.bar_color_inner )
+			fill:add_source_pattern_color_stop( 1 , p.bar_color_outer )
+			fill:fill(true)
+        	fill:set_line_width(   p.frame_thickness )
+			fill:set_source_color( p.frame_color )
+			fill:stroke( true )
+
+			fill:finish_painting()
+
+			if  fill.Image then fill  =  fill:Image() end
+	
+			return fill
+		end 
+
+		local function my_make_vert_fill( _ , ...)
+     		return make_vert_fill( ... )
+		end 
+
+		key = string.format ("h_fill:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_color_inner),color_to_string(p.bar_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		fill = assets(key, my_make_vert_fill) 
+
+		local function make_vert_focus()
+			local focus  = Canvas{
+				size = {w-p.frame_thickness,h*ratio},
+			}
+
+			top    =           math.ceil(p.frame_thickness/2)
+			bottom = focus.h - math.ceil(p.frame_thickness/2)
+			left   =           math.ceil(p.frame_thickness/2)
+			right  = focus.w - math.ceil(p.frame_thickness/2)
+        	
+			focus:begin_painting() -- shell -> focus ?
         
-		focus:set_source_linear_pattern(
-			0,focus.h/2,
-            focus.w,focus.h/2
-		)
-		focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
-		focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
-		focus:fill(true)
-        focus:set_line_width(   p.frame_thickness )
-		focus:set_source_color( p.frame_color )
-		focus:stroke( true )
-		focus:finish_painting()
-        
-        -----------------------------------------------------
 		
-		if shell.Image then shell = shell:Image() end
-		if  fill.Image then fill  =  fill:Image() end
-		if focus.Image then focus = focus:Image() end
-        
+			focus:move_to(        left,         top )
+			focus:line_to(   right-RAD,         top )
+			focus:curve_to( right, top,right,top,right,top+RAD)
+			focus:line_to(       right,  bottom-RAD )
+			focus:curve_to( right,bottom,right,bottom,right-RAD,bottom)
+        	
+			focus:line_to(           left+RAD,          bottom )
+			focus:curve_to(left,bottom,left,bottom,left,bottom-RAD)
+			focus:line_to(           left,            top+RAD )
+			focus:curve_to(left,top,left,top,left+RAD,top)
+        	
+			focus:set_source_linear_pattern(
+				0,focus.h/2,
+            	focus.w,focus.h/2
+			)
+			focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
+			focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
+			focus:fill(true)
+        	focus:set_line_width(   p.frame_thickness )
+			focus:set_source_color( p.frame_color )
+			focus:stroke( true )
+			focus:finish_painting()
+			
+			if focus.Image then focus = focus:Image() end
+
+			return focus
+		end 
+
+		local function my_make_vert_focus( _ , ...)
+     		return make_vert_focus( ... )
+		end 
+
+		key = string.format ("h_focus:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_focus_color_inner),color_to_string(p.bar_focus_color_outer), 
+							p.frame_thickness, color_to_string(p.frame_color))
+		focus = assets(key, my_make_vert_focus)
+		        
 		bar:add(shell,fill,focus)
         
         shell.name="track"
@@ -4873,10 +5310,11 @@ function ui_element.scrollPane(t)
         return bar
     end
 	
-	
 	--this function creates the whole scroll bar box
     local hold = false
+
 	local function create()
+        scroll_group:clear()
         window.position={ p.box_width, p.box_width }
 		window.clip = { 0,0, p.visible_w, p.visible_h }
         border:set{
@@ -4906,19 +5344,18 @@ function ui_element.scrollPane(t)
         end
         
         if p.horz_bar_visible and p.visible_w/p.virtual_w < 1 then
-            hor_s_bar = make_hor_bar(
-                track_w,
-                p.bar_thickness,
-                track_w/p.virtual_w
-            )
+            hor_s_bar = make_hor_bar(track_w, p.bar_thickness, track_w/p.virtual_w)
             hor_s_bar.name = "Horizontal Scroll Bar"
+
             if p.arrows_visible then
-                local l = make_arrow()
+				key = format("arrorwl:%d:%s", p.bar_thickness, color_to_string(p.arrow_color))
+                local l = assets(key, my_make_arrow, p.bar_thickness, p.arrow_color)
+
                 l.name="L"
                 l.x = p.box_width+p.bar_thickness
                 l.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
-                scroll_group:add(l)
                 l.reactive=true
+                scroll_group:add(l)
                 function l:on_button_down()
                     scroll_x(1)
                 end
@@ -4926,12 +5363,14 @@ function ui_element.scrollPane(t)
                     p.box_width+p.bar_thickness+5,
                     p.box_width*2+p.visible_h+p.bar_offset
                 }
-                local r = make_arrow()
+				key = format("arrorwr:%d:%s", p.bar_thickness, color_to_string(p.arrow_color))
+                local r = assets(key, my_make_arrow, p.bar_thickness, p.arrow_color)
+
                 r.name="R"
                 r.x = p.box_width+p.bar_thickness+hor_s_bar.w+10
                 r.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
-                scroll_group:add(r)
                 r.reactive=true
+                scroll_group:add(r)
             else
                 hor_s_bar.position={
                     p.box_width,
@@ -4983,15 +5422,6 @@ function ui_element.scrollPane(t)
 					end
 				end
 
---[[
-                if rel_x < grip_hor.w/2 then
-                    rel_x = grip_hor.w/2
-                elseif rel_x > (track_hor.w-grip_hor.w/2) then
-                    rel_x = (track_hor.w-grip_hor.w/2)
-                end
-                grip_hor.x = rel_x-grip_hor.w/2
-   ]]            
-                
                 p.content.x = -(grip_hor.x) * p.virtual_w/track_w
                 
                 return true
@@ -5003,11 +5433,7 @@ function ui_element.scrollPane(t)
 			unfocus_grip_hor=nil
         end
         if p.vert_bar_visible and p.visible_h/p.virtual_h < 1 then
-            vert_s_bar = make_vert_bar(
-                p.bar_thickness,
-                track_h,
-                track_h/p.virtual_h
-            )
+            vert_s_bar = make_vert_bar( p.bar_thickness, track_h, track_h/p.virtual_h)
             vert_s_bar.name = "Vertical Scroll Bar"
             if p.arrows_visible then
                 local up = make_arrow()
@@ -5047,7 +5473,7 @@ function ui_element.scrollPane(t)
             focus_grip_vert = vert_s_bar:find_child("focus_grip")
 			
 			grip_vert = unfocus_grip_vert
-            ---[[
+
             function grip_vert:on_button_down(x,y,button,num_clicks)
                 
                 local dy = y - grip_vert.y
@@ -5071,16 +5497,11 @@ function ui_element.scrollPane(t)
                 return true
             end
 
-	    --]]
-
-
-	    
             function track_vert:on_button_down(x,y,button,num_clicks)
                 
                 local rel_y = y - track_vert.transformed_position[2]/screen.scale[2]
 	   	        
 				if grip_vert.y > rel_y then
-					print("tees")
 					grip_vert.y = grip_vert.y - grip_vert.h
 					if grip_vert.y < 0 then grip_vert.y = 0 end
 				else
@@ -5089,16 +5510,7 @@ function ui_element.scrollPane(t)
 						grip_vert.y = track_vert.h-grip_vert.h
 					end
 				end
---[[
-                if rel_y < grip_vert.h/2 then
-                    rel_y = grip_vert.h/2
-                elseif rel_y > (track_vert.h-grip_vert.h/2) then
-                    rel_y = (track_vert.h-grip_vert.h/2)
-                end
-                
-                grip_vert.y = rel_y-grip_vert.h/2
-    
-	]]
+
                 p.content.y = -(grip_vert.y) * p.virtual_h/track_h
                 
                 return true
@@ -5111,14 +5523,13 @@ function ui_element.scrollPane(t)
         end
         
 		scroll_group.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
+	
+		scroll_group:add(border,window)
 	end
-	
-    
-	scroll_group:add(border,window)
+
     create()
+
 	window:add(p.content)
-	
-	
 		
 	function scroll_group:on_key_focus_in()
 		if grip_hor ~= nil then
@@ -5151,9 +5562,6 @@ function ui_element.scrollPane(t)
 		end
 		border.border_color = p.box_color
 	end
-
-	
-
 
 	--set the meta table to overwrite the parameters
     mt = {}
@@ -5295,6 +5703,10 @@ local function make_dropdown( size , color )
     
 end
 
+local function my_make_dropdown ( _ , ...)
+	return make_dropdown( ... )
+end 
+
 function ui_element.menuButton(t)
     --default parameters
     local p = {
@@ -5306,7 +5718,7 @@ button
     	text_focus_color = nil,
         label_text_font = nil,
     	label_text_color = nil,
-    	label_text_focus_color = nil,
+    	label_text_focus_colr = nil,
         item_text_font = nil,
     	item_text_color = nil,
     	item_text_focus_color = nil,
@@ -5329,12 +5741,12 @@ button
 
         name  = "dropdownbar",
         items = {
-            {type="label", string="Label ..."},
+            {type="label", string="Label"},
             {type="separator"},
-            {type="item",  string="Item ...", f=nil},
+            {type="item",  string="Item", f=nil},
         },
         vert_spacing = 5, --item_spacing
-        horz_spacing = 10, -- new 
+        horz_spacing = 5, -- new 
         vert_offset  = 40, --item_start_y
         horz_offset  = 0,
         text_has_shadow = true,
@@ -5342,7 +5754,7 @@ button
         background_color     = {255,0,0,255},
         
         menu_width = 250,   -- bg_w 
-        horz_padding  = 10, -- padding 
+        horz_padding  = 0, -- padding 
         separator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
         align = "left",
@@ -5389,6 +5801,7 @@ button
     end 
 
     local dropDownMenu = Group{}
+
     local button       = ui_element.button{
 		name = "button",
         text_font=p.text_font,
@@ -5408,7 +5821,9 @@ button
 		is_in_menu = true, 
 		ui_position = p.ui_position,
     }
+
     local umbrella
+
     umbrella     = Group{
         name="menuButton",
         reactive = true,
@@ -5572,30 +5987,27 @@ button
             end
         }
 
-  	--[[ umbrella.size = {p.ui_width, p.ui_height} ]]
     }
 
 	--yugi
 	if editor_lb == nil or editor_use then  
 		function button:on_key_down(key) 
-			if input_mode == 0 then  -- SELECT
-				if key == keys.Down then 
-					umbrella.press_down()
-					return true
-				elseif key == keys.Up then 
-					umbrella.press_up()
-					return true
-				elseif key == keys.Return then 
-					if curr_index > 0 then 
-						umbrella.press_enter()
-					end 
-                    umbrella.fade_out()
-					if button.fade_in then -- ?
-						button.fade_in = false
-					end
-					umbrella:grab_key_focus()
-					return true
+			if key == keys.Down then 
+				umbrella.press_down()
+				return true
+			elseif key == keys.Up then 
+				umbrella.press_up()
+				return true
+			elseif key == keys.Return then 
+				if curr_index > 0 then 
+					umbrella.press_enter()
 				end 
+                umbrella.fade_out()
+				if button.fade_in then -- ?
+					button.fade_in = false
+				end
+				umbrella:grab_key_focus()
+				return true
 			end 
 		end 
 	end
@@ -5618,6 +6030,10 @@ button
         return ring
     end
     
+	local function my_make_item_ring (_, ...)
+		return make_item_ring(...)	
+	end 
+
     function umbrella.extra.on_focus_in(key) 
 		if key then 
 			if key == keys.Return then 
@@ -5632,20 +6048,7 @@ button
 		end 
     end
 	 
-	 --[[ not working
-    function umbrella.extra.on_focus_in(key) 
-		if key then 
-			if key == keys.Return then 
-				button.on_focus_in(keys.Return)
-				return 
-			end 
-		end  
-		button.on_focus_in()
-		umbrella:grab_key_focus()
-    end
-	]]
-
-    function umbrella.extra.on_focus_out(key) 
+	function umbrella.extra.on_focus_out(key) 
 		if key then 
 			button.on_focus_out(key)
 		end
@@ -5653,6 +6056,7 @@ button
    
     function create()
         --local vars used to create the menu
+
         local ui_ele = nil
         local txt, s_txt
         local curr_y = 0
@@ -5664,6 +6068,8 @@ button
         local txt_h       = Text{font=p.font}.h
         local inset       = 20
         
+		local key 
+		
         --reset globals
         curr_cat   = 1
         curr_index = 0
@@ -5689,9 +6095,10 @@ button
         
         --For each category
         local prev_item 
+
         for i = 1, #p.items do
+
             local item=p.items[i]
-            --focus_sel_items[cat] = {}
              
             if item.type == "separator" then
                 dropDownMenu:add(
@@ -5770,8 +6177,9 @@ button
                         ui_ele.reactive=true
                     end
                 elseif p.show_ring then
-                    ui_ele = make_item_ring(p.menu_width-2*p.horz_spacing,txt.h+10,7)
-					
+					key = string.format("item_ring:%d, %d", p.menu_width-2*p.horz_spacing,txt.h+10)
+                    ui_ele = assets (key, my_make_item_ring, p.menu_width-2*p.horz_spacing,txt.h+10,7)
+                    --ui_ele = make_item_ring (p.menu_width-2*p.horz_spacing,txt.h+10,7)
                     ui_ele.anchor_point = { 0,     ui_ele.h/2 }
                     ui_ele.position     = { 0, 	   txt.y }
                     dropDownMenu:add(ui_ele)
@@ -5813,9 +6221,11 @@ button
                 if item.focus then
                     ui_ele = item.focus
                 else
-                    ui_ele = assets(skin_list[p.skin]["button_focus"])
-                    ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
-                    item.focus  = ui_ele
+					if skin_list[p.skin]["button_focus"] ~= nil then 
+                    	ui_ele = assets(skin_list[p.skin]["button_focus"])
+                    	ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
+                    	item.focus  = ui_ele
+					end
                 end
                 
                 ui_ele.name="focus"
@@ -5828,8 +6238,6 @@ button
                     ui_ele.anchor_point = {  0, ui_ele.h/2 }
                     ui_ele.position     = {  0, txt.y }
                 end 
-                --ui_ele.anchor_point = { 0, ui_ele.h/2 }
-                --ui_ele.position     = { 0, txt.y }
                 ui_ele.opacity      = 0
                 if ui_ele.parent then ui_ele:unparent() end
                 dropDownMenu:add(ui_ele)
@@ -5922,14 +6330,17 @@ button
             else
                 print("Invalid type in the item list. Type: ",item.type)
             end
-	    prev_item = item
+	    	prev_item = item
+
         end
         
+
         if p.background_color[4] ~= 0 then
-            ui_ele = make_dropdown(
-                { p.menu_width , curr_y } ,
-                p.background_color
-            )
+
+			key = string.format ("dropDown:%d:%d:%s",  p.menu_width , curr_y, color_to_string(p.background_color) )
+            ui_ele = assets(key, my_make_dropdown, { p.menu_width , curr_y } , p.background_color)
+
+			--ui_ele = make_dropdown({ p.menu_width , curr_y } , p.background_color)
             
             dropDownMenu:add(ui_ele)
             ui_ele:lower_to_bottom()
@@ -5975,7 +6386,6 @@ button
             dropDownMenu.y = dropDownMenu.y + button.h
         end
         
-        --dropDownMenu.x = dropDownMenu.x + p.horz_offset
     end
     
     
@@ -5986,13 +6396,14 @@ button
 		
         p[k] = v
 	    if k ~= "selected" then 
-        	create()
+			create()
 	    end
 		
     end
     mt.__index = function(t,k)       
        return p[k]
     end
+
     setmetatable(umbrella.extra, mt)
 
     return umbrella
@@ -6090,9 +6501,8 @@ function ui_element.tabBar(t)
                 
 				if index == nil then index = #p.tab_labels + 1 end
                 
-                table.remove(p.tab_labels,index, "Label "..tostring(index))
-                
-                table.remove(p.tabs,index,Group{})
+                table.remove(p.tab_labels,index)
+                table.remove(p.tabs,index)
                 
                 create()
 				
@@ -6183,10 +6593,12 @@ function ui_element.tabBar(t)
 		current_index = 1
 		
         umbrella:clear()
+		if ap then ap = nil end
+
         tab_bg = {}
         tab_focus = {}
         
-        local bg = Rectangle{
+        local bg = Rectangle {
             color        = p.fill_color,
             border_color = p.border_color,
             border_width = p.border_width,
@@ -6195,6 +6607,7 @@ function ui_element.tabBar(t)
         }
         
         umbrella:add(bg)
+
         for i = 1, #p.tab_labels do
             
 			editor_use = true
@@ -6206,7 +6619,7 @@ function ui_element.tabBar(t)
 			
 			buttons[i] = ui_element.button{
 				
-				ui_position             = { 0, 0 },
+				ui_position          = { 0, 0 },
 				skin                 = p.skin,
 				ui_width             = p.ui_width,
 				ui_height            = p.ui_height,
@@ -6237,7 +6650,14 @@ function ui_element.tabBar(t)
 			editor_use = false
         end
 		
-		ap = nil
+        for i = #p.tab_labels + 1, #buttons do
+            
+            if buttons[i].parent then buttons[i]:unparent() end
+            
+            buttons[i] = nil
+            
+        end
+		--ap = nil
 		
 		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
 		
@@ -6475,7 +6895,7 @@ function ui_element.tabBar(t)
 		__newindex = function(t,k,v)
 			
 			p[k] = v
-			
+
 			if k ~= "selected" then
 				
 				create()
@@ -6541,7 +6961,8 @@ function ui_element.arrowPane(t)
 		return c
 		
 	end
-	
+
+--[[
 	local make_arrow = function(sz,color)
 		
 		local c = Canvas{size={sz,sz}}
@@ -6563,7 +6984,10 @@ function ui_element.arrowPane(t)
 		return c
 		
 	end
-
+	]]
+    local function my_make_arrow( _ , ...) 
+		make_arrow(...)
+	end 
 	--overwrite defaults
     if t ~= nil then
        	for k, v in pairs (t) do
@@ -6736,7 +7160,7 @@ function ui_element.arrowPane(t)
 	
 		
 	function umbrella.extra.on_focus_in() 
-		scroll_group:grab_key_focus()
+		umbrella:grab_key_focus()
     end
 
 	function umbrella.extra.on_focus_out() 
@@ -6751,8 +7175,8 @@ function ui_element.arrowPane(t)
 	
 	local function create()
 		
-		
-		
+		local key 
+
 		umbrella:clear()
 		arrow_pane_keys = {}
 
@@ -6780,7 +7204,8 @@ function ui_element.arrowPane(t)
 			end
 			
 		else
-			
+			--key = string.format ("arrow:%d:%s",  p.arrow_sz, color_to_string(p.arrow_color))
+			--arrow_src = assets(key, my_make_arrow,  p.arrow_sz, p.arrow_color )
 			arrow_src   = make_arrow( p.arrow_sz, p.arrow_color )
 			umbrella:add(arrow_src)
 			arrow_src:hide()
@@ -6800,28 +7225,21 @@ function ui_element.arrowPane(t)
 			end
 			
 		else
-			
+			--key = string.format ("tab_farrow:%d:%s",  p.arrow_sz, color_to_string(p.arrow_focus_color))
+			--focus_arrow_src = assets(key, my_make_arrow,  p.arrow_sz, p.arrow_focus_color )
 			focus_arrow_src   = make_arrow( p.arrow_sz, p.arrow_focus_color )
 			umbrella:add(focus_arrow_src)
 			focus_arrow_src:hide()
 		end
-		--[[
-		if arrow_src.parent       then arrow_src:unparent() end
-		if focus_arrow_src.parent then focus_arrow_src:unparent() end
-		umbrella:add(arrow_src)
-		umbrella:add(focus_arrow_src)
-		arrow_src:hide()
-		focus_arrow_src:hide()
-		--]]
+
         window.position={ p.box_width, p.box_width }
 		window.clip = { 0,0, p.visible_w, p.visible_h }
-        border:set{
+        border:set {
             w = p.visible_w+2*p.box_width,
             h = p.visible_h+2*p.box_width,
             border_width =    p.box_width,
             border_color =    p.box_color,
         }
-		
         
         if p.arrows_visible then
 			if p.visible_h < p.virtual_h then
@@ -6918,9 +7336,40 @@ function ui_element.arrowPane(t)
 					}
 					f_arrow:hide()
 
+--[[
 					local arrow = Image {
 						name = "right",
 						src ="/lib/assets/tab-arrow-right-on.png",
+						x = border.w+p.arrow_dist_to_frame  - 15,
+						y = border.h/2 - 10,
+						reactive=true,
+						on_button_down = function()
+							umbrella:pan_by(p.dist_per_press,0)
+							if p.tab then 
+								local current_tab = p.tab.current_tab
+								if umbrella:find_child("right").src == "/lib/assets/tab-arrow-right-on.png" then
+									if current_tab == 1 then 
+										p.tab_buttons[2].on_button_down()
+									end 
+									umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-off.png"
+									umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-on.png"
+								end 
+								if p.tab_buttons[4].reactive == false then 
+									p.tab_buttons[4]:show()
+									p.tab_buttons[4].reactive = true 
+								end 
+								return true
+							end 
+						end,
+						extra = {
+							focus = f_arrow
+						}
+					}
+	]]
+
+					local arrow = assets ("/lib/assets/tab-arrow-right-on.png")
+					arrow:set{
+						name = "right",
 						x = border.w+p.arrow_dist_to_frame  - 15,
 						y = border.h/2 - 10,
 						reactive=true,
@@ -6991,6 +7440,8 @@ function ui_element.arrowPane(t)
 				end 
 				
 				if p.tab_buttons then 
+--[[
+
 					arrow = Image {
 						name = "left",
 						src ="/lib/assets/tab-arrow-left-off.png",
@@ -7015,6 +7466,34 @@ function ui_element.arrowPane(t)
 							end 
 						end
 					}
+
+]]
+
+					arrow = assets ("/lib/assets/tab-arrow-left-off.png")
+					arrow:set{
+						name = "left",
+						x = - 20,
+						reactive = true,
+						on_button_down = function()
+							umbrella:pan_by(-p.dist_per_press,0)
+							if p.tab then 
+								local current_tab = p.tab.current_tab
+								if umbrella:find_child("left").src == "/lib/assets/tab-arrow-left-on.png" then 
+									if current_tab == 4 then 
+										p.tab_buttons[1].on_button_down()
+									end 
+									umbrella:find_child("right").src = "/lib/assets/tab-arrow-right-on.png"
+									umbrella:find_child("left").src = "/lib/assets/tab-arrow-left-off.png"
+								end 
+								if  p.tab_buttons[4].reactive == true then 
+									p.tab_buttons[4]:hide()
+									p.tab_buttons[4].reactive = false 
+								end 
+								return true
+							end 
+						end
+					}
+
 					umbrella:add(arrow)
 				else
 					

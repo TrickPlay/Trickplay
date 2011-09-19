@@ -372,9 +372,13 @@ interface actor [[ClutterActor*]]
             luaL_checktype(L,2,LUA_TTABLE);
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
-	    lua_rawgeti(L,2,3);
+	        lua_rawgeti(L,2,3);
             clutter_actor_set_position(self,lua_tonumber(L,-3),lua_tonumber(L,-2));
-	    clutter_actor_set_depth(self,lua_tonumber(L,-1));
+            if ( lua_isnumber( L , -1 ) )
+            {
+	           clutter_actor_set_depth(self,lua_tonumber(L,-1));
+	        }
+	        
             lua_pop(L,3);
         ]];
             
@@ -503,11 +507,13 @@ interface actor [[ClutterActor*]]
     /*
 	Property: anchor_point
 	
-	The anchor_point property is a table containing the object's X and Y coordinates, relative to itself, to use as the object's origin. The origin is used when positioning, scaling and rotating the object.
+	The anchor_point property is a table specifying X,Y offsets from the object's upper-left corner. An object's anchor point is used to position, scale and rotate the object.
 	
-	Setting the anchor point moves the object so the anchor point is positioned at the object's <x> and <y> coordinates. To set the anchor point without moving the object, call the <move_anchor_point> function.
+	Because the anchor point is used to position the object, changing the offsets in the anchor_point property causes the object to move so the new anchor point remains located at the object's X and Y position. To change the anchor point without moving the object (but, instead, changing the object's X and Y coordinates), use the <move_anchor_point> function.
+
+	It is possible to set the anchor point anywhere, including outside the object's boundary.
 	
-	*Format:* { x-coordinate, y-coordinate }
+	*Format:* { X-axis offset, Y-axis offset }
 	
 	*Default Setting:* { 0, 0 }, i.e., the object's top-left corner
 	
@@ -1390,18 +1396,20 @@ interface actor [[ClutterActor*]]
     /*
 	Function: move_anchor_point
 	
-	The move_anchor_point() function sets the object's anchor point and adjusts the object's <x> and <y> coordinates so the object does not move from its current position. The anchor point is used when positioning, scaling and rotating the object.
+	The move_anchor_point() function sets the object's anchor point and adjusts the object's X and Y coordinates so the object does not move from its current position. The anchor point is used when positioning, scaling and rotating the object.
 	
-	To modify the anchor point without adjusting the object's X and Y coordinates, set the <anchor_point> property.
-	
-	The function's x and y arguments specify the new anchor point and are relative to the object's current anchor point. The default anchor point is 0, 0, which references the object's top-left corner.
+	The function's x and y arguments specify the new anchor point and are relative to the object's top-left corner.
 
 	*Arguments:*
 	
-		x - new anchor point's X coordinate. Value is relative to the object's current anchor point.
-		y - new anchor point's Y coordinate. Value is relative to the object's current anchor point.
+		x - new anchor point's X coordinate. Value is relative to the object's top-left corner.
+		y - new anchor point's Y coordinate. Value is relative to the object's top-left corner.
 		
 	*Return Value:* None
+	
+	To modify the anchor point without adjusting the object's X and Y coordinates (but, instead, moving the object), set the <anchor_point> property.
+	
+	It is possible to set the anchor point anywhere, including outside the object's boundary.
 	
 	*Code Example:* Set the object's anchor point to the object's center, adjusting the object's X and Y coordinates so the object does not move
 	
@@ -1409,7 +1417,7 @@ interface actor [[ClutterActor*]]
 	myObject:move_anchor_point( myObject.width / 2, myObject.height / 2 )
 	(end)
 
-	*See Also:* the <anchor_point> property
+	*See Also:* the <x>, <y> and <anchor_point> properties
 			
     */
 
@@ -1711,7 +1719,7 @@ interface actor [[ClutterActor*]]
 	
 	The animate() function performs an asynchronous animation by changing one or more property values, such as X, Y coordinates, opacity and rotation, over a period of time.
 	
-	If the object's animate() function is called while an animation is already in progress, the animation is updated with the new settings.
+	If the object's animate() function is called while an animation is already in progress, the running animation is terminated immediately, all its animating properties are set to their ending values, and the new animation begins.
 	
 	A program can be notified when the animation completes by specifying a function name for the on_completed argument.
 	
@@ -1827,8 +1835,8 @@ interface actor [[ClutterActor*]]
 		    }
 		    else if (!strcmp("opacity",k))
 		    {
-			g_value_init(&value,G_TYPE_UCHAR);
-			g_value_set_uchar(&value,lua_tointeger(L,-1));
+			g_value_init(&value,G_TYPE_UINT);
+			g_value_set_uint(&value,lua_tointeger(L,-1));
 			g_ptr_array_add(names,g_strdup(k));
 			g_value_array_append(values,&value);
 		    }
