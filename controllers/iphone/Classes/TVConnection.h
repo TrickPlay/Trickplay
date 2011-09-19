@@ -11,6 +11,7 @@
 
 @class TVConnection;
 @class TVBrowser;
+@class AppBrowser;
 
 @protocol TVConnectionDelegate <NSObject>
 
@@ -20,7 +21,7 @@
 @end
 
 @interface TVConnection : NSObject <SocketManagerDelegate> {
-    @public
+    @private
     NSUInteger port;
     NSUInteger http_port;
     NSString *hostName;
@@ -32,10 +33,10 @@
     
     id <TVConnectionDelegate> delegate;
     
-    @private
     SocketManager *socketManager;
     
     TVBrowser *tvBrowser;
+    AppBrowser *appBrowser;
 }
 
 @property (readonly) BOOL isConnected;

@@ -24,10 +24,12 @@
  */
 
 @interface RootViewController : UIViewController <UINavigationControllerDelegate,
-TPAppViewControllerSocketDelegate, TVConnectionDelegate,
+TPAppViewControllerDelegate, TVConnectionDelegate,
 TVBrowserViewControllerDelegate, TVBrowserDelegate,
 AppBrowserViewControllerDelegate, AppBrowserDelegate> {
     UIWindow *window;
+    
+    NSUInteger refreshCount;
 
     // Initialized to NO. Set to YES while the AppBrowser is in the course
     // of being pushed to the top of the navigation stack

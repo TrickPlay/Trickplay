@@ -48,6 +48,7 @@ typedef enum {
     BOOL functional;
     
     id <SocketManagerDelegate> delegate;
+    id <SocketManagerDelegate> appViewController;
     
     NSMutableArray *writeQueue;
     
@@ -58,6 +59,7 @@ typedef enum {
 @property (nonatomic, retain) NSOutputStream *output_stream;
 @property (nonatomic, retain) NSInputStream *input_stream;
 @property (nonatomic, assign) id <SocketManagerDelegate> delegate;
+@property (nonatomic, assign) id <SocketManagerDelegate> appViewController;
 
 
 - (id)initSocketStream:(NSString *)host
@@ -75,6 +77,6 @@ typedef enum {
 - (NSUInteger)port;
 - (void)setPort:(NSUInteger)value;
 
-- (void)setCommandInterpreterDelegate:(id)delegate;
+- (void)setCommandInterpreterDelegate:(id)delegate withProtocol:(CommandProtocol)protocol;
 
 @end

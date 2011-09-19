@@ -11,6 +11,8 @@
 #import "ResourceManager.h"
 #import "SocketManager.h"
 
+@class TPAppViewController;
+
 /**
  * The AdvancedUIDelegate protocol implemented by AdvancedUIObjectManager
  * registers a delegate which is passed asyncronous calls made for AdvancedUI.
@@ -44,11 +46,10 @@
  * The AppBrowserViewController and RootViewController both apply this protocol.
  */
 
-@protocol TPAppViewControllerSocketDelegate <NSObject>
+@protocol TPAppViewControllerDelegate <NSObject>
 
 @required
-- (void)socketErrorOccurred;
-- (void)streamEndEncountered;
+- (void)tpAppViewControllerNoLongerFunctional:(TPAppViewController *)tpAppViewController;
 
 @end
 
@@ -142,6 +143,8 @@
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
 UITextFieldDelegate, UIActionSheetDelegate,
 UINavigationControllerDelegate, VirtualRemoteDelegate> {
+    @private
+    
     BOOL viewDidAppear;
     
     // Manages the asynchronous socket the TPAppViewController communicates
@@ -218,51 +221,28 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // The AccelerometerController. All accelerometer events sent to this delegate
     // for proper handling.
     id <ViewControllerAccelerometerDelegate> accelDelegate;
-    // The AppBrowserViewController. Used to inform view controllers lower on
-    // the navigation stack when the socket connection breaks or ends.
-    id <TPAppViewControllerSocketDelegate> socketDelegate;
+    // Used to inform of a non-functional TPAppViewController.
+    // Generally this happens when the connection breaks.
+    id <TPAppViewControllerDelegate> delegate;
     // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
     // that refer to the AdvancedUIObjectManager are sent there via this
     // delegate's protocol.
     id <AdvancedUIDelegate> advancedUIDelegate;
 }
 
-@property (nonatomic, retain) NSString *version;
-@property (nonatomic, assign) SocketManager *socketManager;
-@property (retain) TVConnection *tvConnection;
-
-@property (assign) BOOL graphics;
-
-@property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
-@property (nonatomic, retain) IBOutlet UITextField *theTextField;
-@property (nonatomic, retain) IBOutlet UILabel *theLabel;
-@property (nonatomic, retain) IBOutlet UIView *textView;
-@property (retain) IBOutlet UIImageView *backgroundView;
-
-@property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
-@property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
-@property (nonatomic, assign) id <TPAppViewControllerSocketDelegate> socketDelegate;
-@property (nonatomic, retain) id <AdvancedUIDelegate> advancedUIDelegate;
-
-
+@property (readonly) NSString *version;
+@property (readonly) TVConnection *tvConnection;
+@property (assign) id <TPAppViewControllerDelegate> delegate;
 
 - (id)initWithTVConnection:(TVConnection *)tvConnection;
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection;
-
+- (id)initWithTVConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
+- (void)clearUI;
+- (void)clean;
+- (void)exitTrickplayApp:(id)sender;
 - (BOOL)hasConnection;
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
 
-- (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
-
-- (IBAction)hideTextBox:(id)sender;
-
-- (void)clearUI;
-- (void)clean;
-
-- (void)advancedUIObjectAdded;
-- (void)advancedUIObjectDeleted;
-- (void)checkShowVirtualRemote;
-
-- (void)exitTrickplayApp:(id)sender;
-
 @end
+
+
+

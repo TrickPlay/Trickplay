@@ -19,17 +19,16 @@
 - (void)tvBrowser:(TVBrowser *)browser didFindService:(NSNetService *)service;
 - (void)tvBrowser:(TVBrowser *)browser didRemoveService:(NSNetService *)service;
 
-- (void)tvBrowser:(TVBrowser *)browser didEstablishConnection:(TVConnection *)tvConnection;
-- (void)tvBrowser:(TVBrowser *)browser DidNotEstablishConnectionToService:(NSNetService *)service;
+- (void)tvBrowser:(TVBrowser *)browser didEstablishConnection:(TVConnection *)connection newConnection:(BOOL)new;
+- (void)tvBrowser:(TVBrowser *)browser didNotEstablishConnectionToService:(NSNetService *)service;
 
 @end
 
 
 @interface TVBrowser : NSObject <NetServiceManagerDelegate> {
-    @public
+    @private
     id <TVBrowserDelegate> delegate;
     
-    @private
     // The netServiceManager informs the TVBrowser of mDNS broadcasts
     NetServiceManager *netServiceManager;
         

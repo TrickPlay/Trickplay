@@ -15,10 +15,12 @@
 @implementation TPAppViewController
 
 @synthesize version;
-@synthesize socketManager;
 @synthesize tvConnection;
+@synthesize delegate;
 
 @synthesize graphics;
+
+@synthesize socketManager;
 
 @synthesize loadingIndicator;
 @synthesize theTextField;
@@ -28,12 +30,21 @@
 
 @synthesize touchDelegate;
 @synthesize accelDelegate;
-@synthesize socketDelegate;
 @synthesize advancedUIDelegate;
 
+- (void)setTvConnection:(TVConnection *)_tvConnection {
+    @synchronized (self) {
+        [_tvConnection retain];
+        [tvConnection release];
+        tvConnection = _tvConnection;
+    }
+}
+
+#pragma mark -
+#pragma mark init methods
 
 - (id)init {
-    return [self initWithNibName:nil bundle:nil tvConnection:nil];
+    return [self initWithNibName:nil bundle:nil tvConnection:nil delegate:nil];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
@@ -42,16 +53,22 @@
 }
 
 - (id)initWithTVConnection:(TVConnection *)_tvConnection {
-    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection];
+    return [self initWithTVConnection:_tvConnection delegate:nil];
+}
+
+- (id)initWithTVConnection:(TVConnection *)_tvConnection
+                  delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection delegate:_delegate];
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil];
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil delegate:nil];
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection {
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
     
-    if (!_tvConnection || !_tvConnection.isConnected) {
+    if (!_tvConnection || !_tvConnection.isConnected || !nibNameOrNil || [nibNameOrNil compare:@"TPAppViewController"] != NSOrderedSame || nibBundleOrNil) {
+        
         [self release];
         return nil;
     }
@@ -59,6 +76,7 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         self.tvConnection = _tvConnection;
+        self.delegate = _delegate;
         
         [self startService];
     }
@@ -97,6 +115,8 @@
 - (void)startService {
     NSLog(@"TPAppView Start Service");
     self.socketManager = tvConnection.socketManager;
+    [socketManager setCommandInterpreterDelegate:self withProtocol:APP_PROTOCOL];
+    socketManager.appViewController = self;
     
     assert(socketManager);
     
@@ -157,7 +177,7 @@
  * connected to Trickplay.
  */
 - (BOOL)hasConnection {
-    return socketManager != nil && [socketManager isFunctional];
+    return tvConnection != nil && socketManager != nil && [socketManager isFunctional];
 }
 
 /**
@@ -167,8 +187,7 @@
 - (void)handleDroppedConnection {
     // resets stuff
     [self do_RT:nil];
-    [socketManager release];
-    socketManager = nil;
+    self.socketManager = nil;
 }
 
 /**
@@ -179,8 +198,8 @@
     NSLog(@"Socket Error Occurred in TPAppView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
-    if (socketDelegate) {
-        [socketDelegate socketErrorOccurred];
+    if (delegate) {
+        [delegate tpAppViewControllerNoLongerFunctional:self];
     }
 }
 
@@ -192,8 +211,8 @@
     NSLog(@"Socket End Encountered in TPAppView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
-    if (socketDelegate) {
-        [socketDelegate streamEndEncountered];
+    if (delegate) {
+        [delegate tpAppViewControllerNoLongerFunctional:self];
     }
 }
 
@@ -255,9 +274,9 @@
  *  2. AdvancedUI Controller ID.
  */
 - (void)do_WM:(NSArray *)args {
-    self.version = [args objectAtIndex:0];
-    if ([version floatValue] < 4.1) {
-        NSLog(@"WARNING: Protocol Version is less than 4.1");
+    version = [[args objectAtIndex:0] retain];
+    if ([version floatValue] < 4.3) {
+        NSLog(@"WARNING: Protocol Version is less than 4.3, please update Trickplay.");
     }
     [tvConnection setHttp_port:[[args objectAtIndex:1] unsignedIntValue]];
     // if controller ID then open a new socket for advanced UI
@@ -1036,9 +1055,11 @@
         [resourceManager release];
     }
     if (socketManager) {
+        socketManager.appViewController = nil;
+        [socketManager setCommandInterpreterDelegate:nil withProtocol:APP_PROTOCOL];
         [socketManager release];
-        socketManager.delegate = nil;
     }
+    self.tvConnection = nil;
     if (touchDelegate) {
         [(TouchController *)touchDelegate release];
     }
