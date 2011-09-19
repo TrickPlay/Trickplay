@@ -7,43 +7,50 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "AppBrowser.h"
 #import "NetServiceManager.h"
+#import "TVConnection.h"
+#import "TVBrowserViewController.h"
+
+@class TVBrowser;
 
 @protocol TVBrowserDelegate <NSObject>
 
 @required
-- (void)serviceResolved:(NSNetService *)service;
-- (void)didNotResolveService;
-- (void)didFindServices;
+- (void)tvBrowser:(TVBrowser *)browser didFindService:(NSNetService *)service;
+- (void)tvBrowser:(TVBrowser *)browser didRemoveService:(NSNetService *)service;
+
+- (void)tvBrowser:(TVBrowser *)browser didEstablishConnection:(TVConnection *)connection newConnection:(BOOL)new;
+- (void)tvBrowser:(TVBrowser *)browser didNotEstablishConnectionToService:(NSNetService *)service;
 
 @end
 
 
-@interface TVBrowser : NSObject {
-    AppBrowser *appBrowser;
-    NetServiceManager *netServiceManager;
-    
-    // Name of the current TV; stores the name of the current service
-    // used or nil if no service has been selected.
-    NSString *currentTVName;
+@interface TVBrowser : NSObject <NetServiceManagerDelegate> {
+    @private
     id <TVBrowserDelegate> delegate;
+    
+    // The netServiceManager informs the TVBrowser of mDNS broadcasts
+    NetServiceManager *netServiceManager;
+        
+    NSMutableArray *tvConnections;
+    NSMutableArray *connectedServices;
+    NSMutableArray *viewControllers;
 }
+
+// Exposed instance variables
+@property (assign) id <TVBrowserDelegate> delegate;
 
 // Exposed methods
 - (id)initWithDelegate:(id <TVBrowserDelegate>)delegate;
 
-- (NSArray *)getServices;
-- (NSNetService *)getCurrentService;
+- (TVBrowserViewController *)createTVBrowserViewController;
+
+- (NSArray *)getAllServices;
+- (NSArray *)getConnectedServices;
+- (NSArray *)getConnectingServices;
 - (void)startSearchForServices;
 - (void)stopSearchForServices;
 - (void)refreshServices;
-- (void)resolveServiceAtIndex:(NSUInteger)index;
-
-
-// Exposed instance variables
-@property (retain) AppBrowser *appBrowser;
-@property (nonatomic, retain) NSString *currentTVName;
-@property (assign) id <TVBrowserDelegate> delegate;
+- (void)connectToService:(NSNetService *)service;
 
 @end

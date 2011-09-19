@@ -5,13 +5,16 @@ local util = {}
 
 
 function util.color_to_string( color )
+
         if type( color ) == "string" then
             return color
         end
-        if type( color ) == "table" then
+        
+		if type( color ) == "table" then
             return serialize( color )
         end
         return tostring( color )
+
 end
 
 function util.table_copy(t)
@@ -73,6 +76,10 @@ function util.table_move_down(t, itemNum)
 end 
 
 function util.table_remove_val(t, val)
+
+	if t == nil then 
+		return 
+	end 
 
 	for i,j in pairs (t) do
 		if j == val then 
@@ -378,12 +385,16 @@ function util.create_on_button_down_f(v)
 	   	if (input_mode ~= hdr.S_RECTANGLE) then 
 	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw") then 
 	     		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
-
-	       			if (v.extra.is_in_group == true and control == false ) then 
+				
+					if (v.extra.is_in_group == true and control == false ) then 
 
 		    			local p_obj = v.parent 
-                		if(button == 3) then 	-- imsi : num_clicks is not correct ! 
-                							 	--if(button == 3 or num_clicks >= 2) then
+
+						while p_obj.extra.is_in_group == true do
+								p_obj = p_obj.parent
+					    end 
+
+                		if(button == 3) then 
                 			editor.inspector(p_obj, x, y)
                     		return true
                 		end 
@@ -396,15 +407,14 @@ function util.create_on_button_down_f(v)
 
 	            		org_object = util.copy_obj(p_obj)
 
-		    			if v.extra.lock == false then -- or  v.name =="inspector" then 
+		    			if v.extra.lock == false then 
            	    			dragging = {p_obj, x - p_obj.x, y - p_obj.y }
 		    			end 
 
            	    		return true
 	      			else 
 
-                		if(button == 3) then	-- imsi : num_clicks is not correct ! 
-								    			--if(button == 3 or num_clicks >= 2) then
+                		if(button == 3) then	
                  			editor.inspector(v, x, y)
                     		return true
                 		end 
@@ -480,7 +490,7 @@ function util.create_on_button_down_f(v)
 	        				end 
 	    				end 
 	    				org_object = util.copy_obj(v)
-						if v.extra.lock == false then -- or v.name == "inspector" then 
+						if v.extra.lock == false then 
         					dragging = {v, x - v.x, y - v.y }
 						end
         				return true
@@ -511,7 +521,7 @@ function util.create_on_button_down_f(v)
            			return true
             	end
 	   	elseif( input_mode ~= hdr.S_RECTANGLE ) then 
-				if v.extra.lock == false then --or v.name == inspector  then  
+				if v.extra.lock == false then 
 					dragging = {v, x - v.x, y - v.y }
            			return true
 				end 
@@ -529,14 +539,15 @@ function util.create_on_button_down_f(v)
 			end 
 		end 
 
-		if shift == true then 
+		if screen:find_child("multi_select_border") then
 			return 
 		end 
+
 		if (input_mode ~= hdr.S_RECTANGLE) then 
 	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw" ) then 
 	    		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
 	    			if (v.extra.is_in_group == true) then 
-						local p_obj = v.parent --find_parent(v)
+						local p_obj = v.parent 
 						new_object = util.copy_obj(p_obj)
 					    if(dragging ~= nil) then 
 	            			local actor , dx , dy = unpack( dragging )
@@ -560,7 +571,7 @@ function util.create_on_button_down_f(v)
 				elseif( input_mode ~= hdr.S_RECTANGLE) then  
 	      	    	if(dragging ~= nil) then 
 	       	       		local actor = unpack(dragging) 
-		       			if (actor.name == "grip") then  -- scroll_window -> grip
+		       			if (actor.name == "grip") then  
 							dragging = nil 
 							return true 
 		       			end 
@@ -731,24 +742,42 @@ function util.set_obj (f, v)
 
 end 
 
+local new_map = {
+	["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
+	["Text"] = function() new_obj = Text{} return new_obj end, 
+	["Image"] = function() new_obj = Image{} return new_obj end, 
+	["Clone"] = function() new_obj = Clone{} return new_obj end, 
+	["Group"] = function() new_obj = Group{} return new_obj end, 
+	["Video"] = function() new_obj = {} return new_obj end, 
+	["ArrowPane"] = function() new_obj = ui_element.arrowPane() return new_obj end, 
+	["Button"] = function() new_obj = ui_element.button() return new_obj end, 
+	["ButtonPicker"] = function() new_obj = ui_element.buttonPicker() return new_obj end, 
+	["CheckBoxGroup"] = function() new_obj = ui_element.checkBoxGroup() return new_obj end, 
+	["DialogBox"] = function() new_obj = ui_element.dialogBox() return new_obj end, 
+	["LayoutManager"] = function() new_obj = ui_element.layoutManager() return new_obj end, 
+	["MenuButton"] = function() new_obj = ui_element.menuButton() return new_obj end, 
+	["ProgressBar"] = function() new_obj = ui_element.progressBar() return new_obj end, 
+	["ProgressSpinner"] = function() new_obj = ui_element.progressSpinner() return new_obj end, 
+	["RadioButtonGroup"] = function() new_obj = ui_element.radioButtonGroup() return new_obj end, 
+	["ScrollPane"] = function() new_obj = ui_element.scrollPane() return new_obj end, 
+	["TabBar"] = function() new_obj = ui_element.tabBar() return new_obj end, 
+	["TextInput"] = function() new_obj = ui_element.textInput() return new_obj end, 
+	["ToastAlert"] = function() new_obj = ui_element.toastAlert() return new_obj end, 
+}
 
 function util.copy_obj (v)
 
-      local new_map = {
-		["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
-		["Text"] = function() new_obj = Text{} return new_obj end, 
-		["Image"] = function() new_obj = Image{} return new_obj end, 
-		["Clone"] = function() new_obj = Clone{} return new_obj end, 
-		["Group"] = function() new_obj = Group{} return new_obj end, 
-		["Video"] = function() new_obj = {} return new_obj end, 
-      }
-	
-      local new_object = new_map[v.type]()
+      local new_object 
+
+	  if util.is_this_widget(v) == true then 
+      	new_object = new_map[v.extra.type]()
+	  else 
+      	new_object = new_map[v.type]()
+	  end 
 
       util.set_obj(new_object, v)
 
       return new_object
-
 end	
 
 function util.make_attr_t(v)
@@ -807,7 +836,6 @@ function util.make_attr_t(v)
 		if v.extra.type == "ButtonPicker" then 
 		    table.insert(attr_t, {"items", v.items, "Items"})
 		else 
-		    --table.insert(attr_t, {"caption", "Menu Contents"}) --0714
 		    table.insert(attr_t, {"items", v.items, "Items"})
 		end 
 		end,
@@ -1031,7 +1059,7 @@ function util.make_attr_t(v)
              	{"title", "Inspector : "..(v.extra.type)},
              	{"caption", "Object Name"},
              	{"name", v.name,"name"},
-             	{"progress", math.floor(v.progress) , "Progress"},
+             	{"progress", v.progress , "Progress"},
              	{"caption", "Position"},
              	{"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
              	{"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
@@ -1093,7 +1121,6 @@ function util.make_attr_t(v)
   for i,j in pairs(obj_map[obj_type]()) do 
 		
 	if (j == "message") then 
-	--print (j)
 	end 
        	if attr_map[j] then
              attr_map[j](j)
@@ -1140,7 +1167,6 @@ function util.make_attr_t(v)
 	end 
    end 
  
-   --table.insert(attr_t, {"opacity", v.opacity, "Opacity"})
    table.insert(attr_t, {"button", "view code", "View code"})
    table.insert(attr_t, {"button", "apply", "OK"})
    table.insert(attr_t, {"button", "cancel", "Cancel"})
@@ -1183,8 +1209,6 @@ function util.itemTostring(v, d_list, t_list)
        local item_string =""
        for i,j in pairs(list) do 
           if v[j] ~= nil then 
-	      --if j == "src" and v.type == "Image" then 
-		  --item_string = item_string..head..j.." = \"assets\/images\/"..v[j].."\""..tail
 	      if j == "position" then 
 		  item_string = item_string..head..j.." = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..tail
 	      elseif j == "children" then 
@@ -1284,7 +1308,9 @@ function util.itemTostring(v, d_list, t_list)
 					item_string = item_string.."} }"..tail
 				end 
 	      elseif type(v[j]) == "userdata" then 
-		  item_string = item_string..head..j.." = "..v[j].name..tail 
+		  		if v[j].name then 
+		  			item_string = item_string..head..j.." = "..v[j].name..tail 
+				end 
 	      else
 	          print("--", j, " 처리해 주세용 ~")
 	      end 
@@ -1297,7 +1323,6 @@ function util.itemTostring(v, d_list, t_list)
     if (v.type == "Text") then
 		v.cursor_visible = false
     elseif (v.type == "Image") then
-		--if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
     elseif (v.type == "Clone") then
 	 	src = v.source 
 		if src ~= nil then 
@@ -1469,8 +1494,12 @@ function util.itemTostring(v, d_list, t_list)
     end 
 
     if v.extra.reactive ~= nil then 
-	itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
+		itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
     end 
+	if v.extra.type == "Group" then 
+		itm_str = itm_str..v.name.."\.extra\.type= \"Group\"".."\n\n"
+	end 
+
 
     if v.extra.timeline then 
 	    itm_str = itm_str..v.name.."\.extra\.timeline = {" 

@@ -13,7 +13,9 @@
 
 @protocol AppBrowserViewControllerDelegate <AppBrowserDelegate>
 
-- (void)didSelectAppWithInfo:(NSDictionary *)info isCurrentApp:(BOOL)isCurrentApp;
+- (void)appBrowserViewController:(AppBrowserViewController *)appBrowserViewController
+                    didSelectApp:(AppInfo *)app
+                    isCurrentApp:(BOOL)isCurrentApp;
 
 @end
 
@@ -31,16 +33,20 @@
  * Refer to AppBrowserViewController.xib for the AppBrowser's view.
  */
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
-UITableViewDataSource, AppBrowserDelegate> {
+UITableViewDataSource> {
+    @private
     /*
     UIBarButtonItem *appShopButton;
     UIBarButtonItem *showcaseButton;
     UIToolbar *toolBar;
     */
      
-    UITableView *theTableView;
+    UITableView *tableView;
     // Spins while a app data is loading; disappears otherwise.
     UIActivityIndicatorView *loadingSpinner;
+    
+    // Refreshes the list of apps
+    UIBarButtonItem *refreshButton;
     
     // Orange dot indicating which app is the current app
     UIImageView *currentAppIndicator;
@@ -56,20 +62,13 @@ UITableViewDataSource, AppBrowserDelegate> {
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *showcaseButton;
 @property (nonatomic, retain) IBOutlet UIToolbar *toolBar;
 */
-@property (retain) IBOutlet UITableView *theTableView;
+@property (retain) IBOutlet UITableView *tableView;
+@property (readonly) AppBrowser *appBrowser;
 @property (assign) id <AppBrowserViewControllerDelegate> delegate;
 
 // Exposed methods
 - (IBAction) appShopButtonClick;
 - (IBAction) showcaseButtonClick;
-- (NSDictionary *)getCurrentAppInfo;
-- (NSArray *)fetchApps;
-- (void)getAvailableAppsInfoWithDelegate:(id<AppBrowserDelegate>)delegate;
-- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
-- (void)setupService:(NSUInteger)port
-            hostName:(NSString *)hostName
-         serviceName:(NSString *)serviceName;
-- (BOOL)hasRunningApp;
-- (void)launchApp:(NSDictionary *)appInfo;
+- (void)refresh;
 
 @end

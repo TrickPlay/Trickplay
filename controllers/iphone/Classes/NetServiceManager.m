@@ -11,7 +11,7 @@
 
 @implementation NetServiceManager
 
-@synthesize currentService;
+@synthesize connectingServices;
 @synthesize services;
 @synthesize delegate;
 
@@ -25,11 +25,10 @@
 -(id)initWithDelegate:(id)client {
     if ((self = [super init])) {
         delegate = client;
-        currentService = nil;
-        services = [[NSMutableArray alloc] init];
+        connectingServices = [[NSMutableArray alloc] initWithCapacity:5];
+        services = [[NSMutableArray alloc] initWithCapacity:5];
         netServiceBrowser = [[NSNetServiceBrowser alloc] init];
         netServiceBrowser.delegate = self;
-        //[netServiceBrowser searchForServicesOfType:@"_tp-remote._tcp" inDomain:@""];
     }
     
     return self;
@@ -38,8 +37,15 @@
 #pragma mark -
 #pragma mark Start/Stop Search/Services
 
+- (void)stopServices {
+    for (NSNetService *service in connectingServices) {
+        [service stop];
+    }
+    [connectingServices removeAllObjects];
+}
+
 - (void)stop {
-    [self stopCurrentService];
+    [self stopServices];
     [netServiceBrowser stop];
     [services removeAllObjects];
 }
@@ -49,42 +55,31 @@
     [netServiceBrowser searchForServicesOfType:@"_tp-remote._tcp" inDomain:@""];
 }
 
-- (void)stopCurrentService {
-    if (currentService) {
-        [currentService stop];
-        [currentService release];
-    }
-	currentService = nil;
-}
-
 #pragma mark -
 #pragma mark NSNetServiceDelegate methods
 
 
 // This should never be called, since we resolve with a timeout of 0.0, which means indefinite
-- (void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict {
-    NSLog(@"Current NetService did not resolve address");
+- (void)netService:(NSNetService *)service didNotResolve:(NSDictionary *)errorDict {
+    NSLog(@"NetService did not resolve address");
     
-	[self stopCurrentService];
-	[delegate didNotResolveService];
+    [service stop];
+	[delegate didNotResolveService:service];
 }
 
+- (void)netServiceDidStop:(NSNetService *)service {
+    if ([connectingServices containsObject:service]) {
+        [connectingServices removeObject:service];
+    }
+    
+    [delegate didStopService:service];
+}
 
 - (void)netServiceDidResolveAddress:(NSNetService *)service {
-    assert(service == currentService);
-    // make sure the service is retained before stopped, else, deletion
-	[service retain];
-	[self stopCurrentService];
+	NSLog(@"NetService did resolve address");
     
-    // TODO: make sure we got all the connection information for the service so
-    // check host and port #
-	
-	NSLog(@"Current NetService did resolve address");
-    
-    [[self delegate] serviceResolved:service];
-	
-    [service stop];
-	[service release];
+    [service stop];    
+    [self.delegate serviceResolved:service];
 }
 
 #pragma mark -
@@ -117,16 +112,14 @@
                moreComing:(BOOL)moreComing {
 	// If a service went away, stop resolving it if it's currently being resolved,
 	// remove it from the list and update the table view if no more events are queued.
-	if (self.currentService && [service isEqual:currentService]) {
-		[self stopCurrentService];
-	}
+	[service stop];
 	[self.services removeObject:service];
 	
 	// If moreComing is NO, it means that there are no more messages in the queue from the Bonjour daemon, so we should update the UI.
 	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
     NSLog(@"service [ %@ ] removed, more coming? %d", service, moreComing);
 	if (!moreComing) {
-		[delegate didFindServices];
+		[delegate didRemoveService:service];
 	}
 }	
 
@@ -134,14 +127,16 @@
 - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser
            didFindService:(NSNetService *)service
                moreComing:(BOOL)moreComing {
-	// If a service came online, add it to the list and update the table view if no more events are queued.
+	// If a service came online, add it to the list and update the table view
+    // if no more events are queued.
 	[self.services addObject:service];
 	
-	// If moreComing is NO, it means that there are no more messages in the queue from the Bonjour daemon, so we should update the UI.
+	// If moreComing is NO, it means that there are no more messages
+    // in the queue from the Bonjour daemon, so we should update the UI.
 	// When moreComing is set, we don't update the UI so that it doesn't 'flash'.
     NSLog(@"service [ %@ ] found, more coming? %d", service, moreComing);
 	if (!moreComing) {
-		[delegate didFindServices];
+		[delegate didFindService:service];
 	}
 }	
 
@@ -156,9 +151,14 @@
 
 - (void)dealloc {
     NSLog(@"Net Service Manager dealloc");
-    if (currentService) {
-        [currentService stop];
-        [currentService release];
+    [self stopServices];
+    if (connectingServices) {
+        [connectingServices release];
+    }
+    for (NSNetService *service in services) {
+        if (self == service.delegate) {
+            service.delegate = nil;
+        }
     }
     [services release];
     [netServiceBrowser stop];
