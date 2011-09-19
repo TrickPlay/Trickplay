@@ -42,6 +42,7 @@ Timestamp: mm.d.yyyy
 
 
 Group: Programmer's Guide  {
+	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
 	File: Getting Started*  (no auto-title, docs/rte/progguide/getting_started.txt)
    	File: User Interface*  (no auto-title, docs/rte/progguide/user_interface.txt)
 }
@@ -50,12 +51,12 @@ Group: Reference  {
 	File: Overview* (no auto-title, docs/rte/reference/overview_rte.txt)
 	
 	Group: Animation {
-		File: Overview* (no auto-title, docs/rte/reference/overview_animation.txt)
+		File: Overview (no auto-title, docs/rte/reference/overview_animation.txt)
 		
 		Group: Classes {
 			File: Alpha  (no auto-title, bindings/clutter_alpha.lb)
 	        File: Animator (no auto-title, bindings/clutter_animator.lb)
-    	    File: AnimationState* (no auto-title, bindings/clutter_state.lb)
+    	    File: AnimationState (no auto-title, bindings/clutter_state.lb)
             File: Interval  (no auto-title, bindings/clutter_interval.lb)
             File: Path (no auto-title, bindings/clutter_path.lb)
             File: Score (no auto-title, bindings/clutter_score.lb)

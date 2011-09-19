@@ -53,13 +53,12 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 			   	elseif j.extra.type == "MenuButton" then 
 			   		for k,l in pairs (j.items) do 
 			   	     	if l["type"] == "item" then 
-	                   		--new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for in this menu button\n"
 	                   		new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.items["..k.."][\"f\"] = function() end -- Handler for the menuButton Item, "..l["string"].."\n"
 			   	     	end 
 			   		end 
 			   	end 
 	            new_contents = new_contents.."-- END "..fileUpper.."\."..string.upper(j.name).." SECTION\n\n" 			
-		     else -- qqqq if j 가 컨테이너 이며는 그속을 다 확인하여 스터브 코드가 필요한 것을 가려내야함. 흐미..   
+		     else -- if j 가 컨테이너 이며는 그속을 다 확인하여 스터브 코드가 필요한 것을 가려내야함. 흐미..   
 			   if util.is_this_container(j) == true then 
 					if j.extra.type == "TabBar" then 
 						for q,w in pairs (j.tabs) do
@@ -125,7 +124,6 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 		end 
 	   end 
 
-	   --print(main_exist)
 
 	   if main_exist == false then 
 		-- main.lua 생성해서 
@@ -154,7 +152,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
 	   		end 
             contents = ""
-            screen:grab_key_focus(screen) 
+            --screen:grab_key_focus(screen) 
       end
       menu.menu_raise_to_top()
 
@@ -177,6 +175,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 
     if(util.is_lua_file(input_text) == true) then 
         editor.close()
+
         current_fn = "screens/"..input_text
 
 		local cfc = readfile(current_fn)
@@ -234,8 +233,20 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
      local y_scroll_from=0
      local y_scroll_to=0
 
-     for i, v in pairs(g.children) do
-        v.reactive = true
+
+
+	local function set_children (obj, reactive, lock, is_in_group)
+     	obj.reactive = reactive
+	  	obj.extra.lock = lock
+		obj.extra.is_in_group = is_in_group
+        util.create_on_button_down_f(obj)
+	end 
+
+
+	local function there (v, is_in_group)
+	 	
+		set_children(v,true,false,is_in_group,nil)	  
+
 	  	if(v.type == "Text") then
 			v.cursor_visible = false
 			function v:on_key_down(key)
@@ -245,51 +256,58 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 	     			end 
 			end 
 	  	end 
-	  	v.extra.lock = false
-        util.create_on_button_down_f(v)
-	  
-	  	if(v.type == "Group") then 
-	       for j, c in pairs (v.children) do
-		    	if util.is_in_list(v.extra.type, hdr.uiElements) == false then 
-                	c.reactive = true
-		        	c.extra.is_in_group = true
-	  				c.extra.lock = false
-                    util.create_on_button_down_f(c)
+
+		if(v.type == "Group") then 
+		    if v.extra.type == "Group" then 
+	       		for j, c in pairs (v.children) do
+					if c.extra.type and c.extra.type == "Group" then 
+						there(c,true)
+					else 
+						set_children(c,true,false,true)
+					end 
+	       		end 
+		    end 
+
+	       	if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" or v.extra.type == "ArrowPane" then 
+		    	for j, c in pairs(v.content.children) do 
+					if c.extra.type and c.extra.type == "Group" then 
+						there(c,false)
+					else
+						set_children(c,true,false,true)
+					end
 		    	end 
-	       end 
-	       if v.extra.type == "ScrollPane" or v.extra.type == "DialogBox" or v.extra.type == "ArrowPane" then 
-		    	for j, c in pairs(v.content.children) do -- Group { children = {button4,rect3,} },
-					c.reactive = true
-		        	c.extra.is_in_group = true
-	  				c.extra.lock = false
-                    util.create_on_button_down_f(c)
-		    	end 
-	       elseif v.extra.type == "TabBar" then 
+	       	elseif v.extra.type == "TabBar" then 
 		    	for j, c in pairs(v.tabs) do 
-					for k, d in pairs (c.children) do -- Group { children = {button4,rect3,} },
-						d.reactive = true
-		        		d.extra.is_in_group = true
-	  					d.extra.lock = false
-                    	util.create_on_button_down_f(d)
+					for k, d in pairs (c.children) do
+						if c.extra.type and c.extra.type == "Group" then 
+							there(d,false)
+						else
+							set_children(d,true,false,true)
+						end
 					end 
 		    	end 
-	       elseif v.extra.type == "LayoutManager" then 
+	       	elseif v.extra.type == "LayoutManager" then 
 		   		local f 
 		   		f = function (k, c) 
      		    	if type(c) == "table" then
 	 		   			table.foreach(c, f)
      		    	elseif not c.extra.is_in_group then 
-			   			c.reactive = true
-		           		c.extra.is_in_group = true
-	  		   			c.extra.lock = false
-                    	util.create_on_button_down_f(c)
+						if c.extra.type and c.extra.type == "Group" then 
+							there(d,false)
+						else
+							set_children(c,true,false,true)
+						end 
      		    	end 
 		   		end 
 		   		table.foreach(v.tiles, f)
 	       end 
-	  end 
+	  	end 
+	end 
 
-     end 
+    for i, v in pairs(g.children) do
+		there(v, false)
+    end 
+
      menu.menu_raise_to_top()
 end
 
@@ -305,7 +323,6 @@ end
 
 function msg_window.inputMsgWindow_openvideo(notused, parm_txt)
      
-	 print("inputMsgWindow_openvideo")
      if(util.is_mp4_file(parm_txt) == true) then 
           mediaplayer:load("assets/videos/"..parm_txt)
      else 
@@ -364,11 +381,10 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 		item_num = item_num + 1
 	  end 
 
-          ui.image= Image { name="image"..tostring(item_num),
-          src = "/assets/images/"..input_text, opacity = 255 , position = {200,200}, 
-	  extra = {org_x = 200, org_y = 200} }
+          ui.image= Image{src = "/assets/images/"..input_text}
+		  ui.image:set{ name="image"..tostring(item_num),opacity = 255 , position = {200,200}, extra = {org_x = 200, org_y = 200} }
           ui.image.reactive = true
-	  ui.image.extra.lock = false
+	  	  ui.image.extra.lock = false
           util.create_on_button_down_f(ui.image)
           table.insert(undo_list, {ui.image.name, hdr.ADD, ui.image})
           g:add(ui.image)
