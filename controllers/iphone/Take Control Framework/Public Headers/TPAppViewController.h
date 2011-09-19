@@ -8,8 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
-#import "ResourceManager.h"
-#import "SocketManager.h"
+
+@class TPAppViewController;
 
 /**
  * The AdvancedUIDelegate protocol implemented by AdvancedUIObjectManager
@@ -36,7 +36,7 @@
 
 
 /**
- * The GestureViewControllerSocketDelegate recieves messages delegated
+ * The TPAppViewControllerSocketDelegate recieves messages delegated
  * originally from the SocketManager which inform of either a socket
  * error or socket stream ending. The delegate is assumed to depend
  * on the socket in some way and must respond to these messages.
@@ -44,11 +44,10 @@
  * The AppBrowserViewController and RootViewController both apply this protocol.
  */
 
-@protocol GestureViewControllerSocketDelegate <NSObject>
+@protocol TPAppViewControllerDelegate <NSObject>
 
 @required
-- (void)socketErrorOccurred;
-- (void)streamEndEncountered;
+- (void)tpAppViewControllerNoLongerFunctional:(TPAppViewController *)tpAppViewController;
 
 @end
 
@@ -72,7 +71,7 @@
 /**
  * The ViewControllerTouchDelegate handles commands from Trickplay to
  * enable/disable touch events. Likewise this delegate must inform
- * the GestureViewController of iOS touch events so these events can be
+ * the TPAppViewController of iOS touch events so these events can be
  * forwarded back to Trickplay.
  *
  * Only the TouchController class implements this protocol.
@@ -103,15 +102,16 @@
 #import "CameraViewController.h"
 #import "VirtualRemoteViewController.h"
 #import "GestureImageView.h"
+#import "TVConnection.h"
 
 /**
- * The GestureViewController class is the core component of the Take Control app.
+ * The TPAppViewController class is the core component of the Take Control app.
  * This class serves as the main interface for user interaction with their
  * Television as well as the main controller for all other modules, models,
  * and views in the app.
  *
  * After establishing a connection with Trickplay and selecting an app Take Control
- * pushes the GestureViewController to the top of the NavigationViewController
+ * pushes the TPAppViewController to the top of the NavigationViewController
  * stack. This controller's view intializes with a virtual remote for controlling
  * the Television. Drawing graphics to this view or activating touch control
  * removes the VirtualRemote from the view and gives the user a blank view for
@@ -127,7 +127,7 @@
  * and models for the Take Control app receive messages from the Television and
  * through which these objects asynchronously send messages back to the Television.
  * 
- * Refer to GestureViewController.xib for the GestureViewController's view.
+ * Refer to TPAppViewController.xib for the TPAppViewController's view.
  */
 
 @class TrickplayScreen;
@@ -137,35 +137,35 @@
 #define CAMERA_BUTTON_TITLE "Camera"
 #define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
 
-@interface GestureViewController : UIViewController <SocketManagerDelegate, 
+@class ResourceManager;
+@class SocketManager;
+
+@interface TPAppViewController : UIViewController <SocketManagerDelegate, 
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
 UITextFieldDelegate, UIActionSheetDelegate,
 UINavigationControllerDelegate, VirtualRemoteDelegate> {
+    @private
+    
     BOOL viewDidAppear;
     
-    // Manages the asynchronous socket the GestureViewController communicates
+    // Manages the asynchronous socket the TPAppViewController communicates
     // to Trickplay with
     SocketManager *socketManager;
-    // Current host name for asynchronous communication with Trickplay
-    NSString *hostName;
-    // Current port number for asynchronous communication with Trickplay
-    NSUInteger port;
-    // HTTP port number used for http requests. Utilized for gathering lists
-    // of app data from Trickplay and pulling resources such as images and
-    // audio from Trickplay
-    NSString *http_port;
+    // The Connection
+    TVConnection *tvConnection;
     // Current version of the app
     NSString *version;
     
     // A timer that when firing calls timerFiredMethod:
     NSTimer *socketTimer;
     
-    // Displays itself and spins when the GestureViewController first loads.
+    // Displays itself and spins when the TPAppViewController first loads.
     // This is rarely seen on anything but the oldest iPods.
     UIActivityIndicatorView *loadingIndicator;
     // TextField for entering text; used when Trickplay requests text input
     // with controller:enter_text(string label, string text) call from Trickplay.
     UITextField *theTextField;
+    NSString *currentText;
     UILabel *theLabel;
     // Black border around theTextField
     UIView *textView;
@@ -222,51 +222,28 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // The AccelerometerController. All accelerometer events sent to this delegate
     // for proper handling.
     id <ViewControllerAccelerometerDelegate> accelDelegate;
-    // The AppBrowserViewController. Used to inform view controllers lower on
-    // the navigation stack when the socket connection breaks or ends.
-    id <GestureViewControllerSocketDelegate> socketDelegate;
+    // Used to inform of a non-functional TPAppViewController.
+    // Generally this happens when the connection breaks.
+    id <TPAppViewControllerDelegate> delegate;
     // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
     // that refer to the AdvancedUIObjectManager are sent there via this
     // delegate's protocol.
     id <AdvancedUIDelegate> advancedUIDelegate;
 }
 
-@property (nonatomic, retain) NSString *version;
-@property (nonatomic, assign) SocketManager *socketManager;
+@property (readonly) NSString *version;
+@property (readonly) TVConnection *tvConnection;
+@property (assign) id <TPAppViewControllerDelegate> delegate;
 
-@property (assign) BOOL graphics;
-
-@property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
-@property (nonatomic, retain) IBOutlet UITextField *theTextField;
-@property (nonatomic, retain) IBOutlet UILabel *theLabel;
-@property (nonatomic, retain) IBOutlet UIView *textView;
-@property (retain) IBOutlet UIImageView *backgroundView;
-
-@property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
-@property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
-@property (nonatomic, assign) id <GestureViewControllerSocketDelegate> socketDelegate;
-@property (nonatomic, retain) id <AdvancedUIDelegate> advancedUIDelegate;
-
-
-- (void)setupService:(NSUInteger)port
-            hostname:(NSString *)hostName
-            thetitle:(NSString *)name;
-
-- (BOOL)startService;
+- (id)initWithTVConnection:(TVConnection *)tvConnection;
+- (id)initWithTVConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
+- (void)clearUI;
+- (void)clean;
+- (void)exitTrickplayApp:(id)sender;
 - (BOOL)hasConnection;
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
 
-- (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
-
-- (IBAction)hideTextBox:(id)sender;
-
-- (void)clearUI;
-- (void)clean;
-
-- (void)advancedUIObjectAdded;
-- (void)advancedUIObjectDeleted;
-- (void)checkShowVirtualRemote;
-
-- (void)exitTrickplayApp:(id)sender;
-
 @end
+
+
+

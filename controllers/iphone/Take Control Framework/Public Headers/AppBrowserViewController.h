@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import <YAJLiOS/YAJL.h>
-#import "TPAppViewController.h"
 #import "AppBrowser.h"
 
 @protocol AppBrowserViewControllerDelegate <AppBrowserDelegate>

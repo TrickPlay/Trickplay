@@ -26,7 +26,7 @@
 UITableViewDataSource, UINavigationControllerDelegate> {
     @private
     // Orange dot that displays next to the current service
-    //UIView *currentTVIndicator;
+    // UIView *currentTVIndicator;
     // Spins while a service is loading; disappears otherwise.
     UIActivityIndicatorView *loadingSpinner;
     

@@ -1,22 +1,28 @@
 //
-//  GestureViewController.m
+//  TPAppViewController.m
 //  TrickplayController_v2
 //
 //  Created by Rex Fenley on 2/14/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
 #import "TrickplayGroup.h"
 #import "TrickplayScreen.h"
 #import "AdvancedUIObjectManager.h"
+#import "Extensions.h"
+#import "ResourceManager.h"
+#import "SocketManager.h"
 
-@implementation GestureViewController
+@implementation TPAppViewController
 
 @synthesize version;
-@synthesize socketManager;
+@synthesize tvConnection;
+@synthesize delegate;
 
 @synthesize graphics;
+
+@synthesize socketManager;
 
 @synthesize loadingIndicator;
 @synthesize theTextField;
@@ -26,29 +32,62 @@
 
 @synthesize touchDelegate;
 @synthesize accelDelegate;
-@synthesize socketDelegate;
 @synthesize advancedUIDelegate;
+
+- (void)setTvConnection:(TVConnection *)_tvConnection {
+    @synchronized (self) {
+        [_tvConnection retain];
+        [tvConnection release];
+        tvConnection = _tvConnection;
+    }
+}
+
+#pragma mark -
+#pragma mark init methods
+
+- (id)init {
+    return [self initWithNibName:nil bundle:nil tvConnection:nil delegate:nil];
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    [self release];
+    return nil;
+}
+
+- (id)initWithTVConnection:(TVConnection *)_tvConnection {
+    return [self initWithTVConnection:_tvConnection delegate:nil];
+}
+
+- (id)initWithTVConnection:(TVConnection *)_tvConnection
+                  delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection delegate:_delegate];
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil delegate:nil];
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    
+    if (!_tvConnection || !_tvConnection.isConnected || !nibNameOrNil || [nibNameOrNil compare:@"TPAppViewController"] != NSOrderedSame || nibBundleOrNil) {
+        
+        [self release];
+        return nil;
+    }
+    
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        self.tvConnection = _tvConnection;
+        self.delegate = _delegate;
+        
+        [self startService];
+    }
+    
+    return self;
+}
 
 #pragma mark -
 #pragma mark Network Setup
-
-/**
- * Establishes the host and port that will be used for the asynchronous socket
- * connection managed by GestureViewController's SocketManager.
- */
-- (void)setupService:(NSUInteger)p
-            hostname:(NSString *)h
-            thetitle:(NSString *)n {
-    
-    NSLog(@"GestureView Service Setup: %@ host: %@ port: %d", n, h, p);
-    
-    port = p;
-    if (hostName) {
-        [hostName release];
-    }
-    hostName = [h retain];
-    http_port = nil;
-}
 
 /**
  * Sends an arbitrary newline to the async socket which will be ignored by
@@ -65,7 +104,7 @@
  */
 - (void)createTimer {
     socketTimer = [NSTimer timerWithTimeInterval:(NSTimeInterval).1 target:self selector:@selector(timerFireMethod:) userInfo:nil repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:socketTimer forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop mainRunLoop] addTimer:socketTimer forMode:NSDefaultRunLoopMode];
     [socketTimer retain];
 }
 
@@ -75,23 +114,16 @@
  * the connection established then all the remaining managers and modules
  * for TakeControl are allocated and initialized to be used by the app.
  */
-- (BOOL)startService {
-    NSLog(@"GestureView Start Service");
-    // Tell socket manager to create a socket and connect to the service selected
-    socketManager = [[SocketManager alloc] initSocketStream:hostName
-                                                       port:port
-                                                   delegate:self
-                                                   protocol:APP_PROTOCOL];
+- (void)startService {
+    NSLog(@"TPAppView Start Service");
+    self.socketManager = tvConnection.socketManager;
+    [socketManager setCommandInterpreterDelegate:self withProtocol:APP_PROTOCOL];
+    socketManager.appViewController = self;
     
-    if (![socketManager isFunctional]) {
-        // If null then error connecting, back up to selecting services view
-        [self.navigationController popToRootViewControllerAnimated:YES];
-        NSLog(@"Could Not Establish Connection");
-        return NO;
-    }
+    assert(socketManager);
     
     socketTimer = nil;
-        
+    
     viewDidAppear = NO;
     
     // Made a connection, let the service know!
@@ -100,14 +132,6 @@
 	backgroundHeight = mainframe.size.height;
 	backgroundHeight = backgroundHeight - 44;  //subtract the height of navbar
 	backgroundWidth = mainframe.size.width;
-    // Figure out if the device can use pcitures
-    NSString *hasPictures = @"";
-    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
-        hasPictures = @"\tPS";
-    }
-    // Tell the service what this device is capable of
-	NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.2\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight] dataUsingEncoding:NSUTF8StringEncoding];
-	[socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
     
     // Manages resources created with declare_resource
     resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
@@ -130,7 +154,7 @@
     
     advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
     advancedView.manager = (AdvancedUIObjectManager *)advancedUIDelegate;
-    ((AdvancedUIObjectManager *)advancedUIDelegate).gestureViewController = self;
+    ((AdvancedUIObjectManager *)advancedUIDelegate).appViewController = self;
     
     // This is where the elements from UG (add_ui_image call) go
     CGRect frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
@@ -139,49 +163,33 @@
     
     // the virtual remote for controlling the Television
     virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
-    virtualRemote.view.frame = frame;
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight + 44);
     [self.view addSubview:virtualRemote.view];
     virtualRemote.delegate = self;
     
     graphics = NO;
-    [touchDelegate setSwipe:graphics];
-    
-    return YES;
-}
-
-/**
- * Sets the http port number used by Trickplay for sending app data, images,
- * and audio.
- */
-- (void)setHTTPPort:(NSString *)my_http_port {
-    if (http_port) {
-        [http_port release];
-    }
-    http_port = [my_http_port retain];
-    [socketManager setPort:[http_port integerValue]];
-    [advancedUIDelegate setupServiceWithPort:port hostname:hostName];
+    [touchDelegate setSwipe:graphics];    
 }
 
 #pragma mark -
 #pragma mark Network Handling
 
 /**
- * Used to confirm that the GestureViewController has an async socket
+ * Used to confirm that the TPAppViewController has an async socket
  * connected to Trickplay.
  */
 - (BOOL)hasConnection {
-    return socketManager != nil && [socketManager isFunctional];
+    return tvConnection != nil && socketManager != nil && [socketManager isFunctional];
 }
 
 /**
- * Called when a connection drops. Resets GestureViewController and all its
+ * Called when a connection drops. Resets TPAppViewController and all its
  * subsequent modules and managers and destoys the SocketManager.
  */
 - (void)handleDroppedConnection {
     // resets stuff
     [self do_RT:nil];
-    [socketManager release];
-    socketManager = nil;
+    self.socketManager = nil;
 }
 
 /**
@@ -189,11 +197,11 @@
  * controllers lower on the navigation stack of an error occurring.
  */
 - (void)socketErrorOccurred {
-    NSLog(@"Socket Error Occurred in GestureView");
+    NSLog(@"Socket Error Occurred in TPAppView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
-    if (socketDelegate) {
-        [socketDelegate socketErrorOccurred];
+    if (delegate) {
+        [delegate tpAppViewControllerNoLongerFunctional:self];
     }
 }
 
@@ -202,11 +210,11 @@
  * controllers lower on the navigation stack of the connection closing.
  */
 - (void)streamEndEncountered {
-    NSLog(@"Socket End Encountered in GestureView");
+    NSLog(@"Socket End Encountered in TPAppView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
-    if (socketDelegate) {
-        [socketDelegate streamEndEncountered];
+    if (delegate) {
+        [delegate tpAppViewControllerNoLongerFunctional:self];
     }
 }
 
@@ -268,13 +276,14 @@
  *  2. AdvancedUI Controller ID.
  */
 - (void)do_WM:(NSArray *)args {
-    self.version = [args objectAtIndex:0];
-    if ([version floatValue] < 4.1) {
-        NSLog(@"WARNING: Protocol Version is less than 4.1");
+    version = [[args objectAtIndex:0] retain];
+    if ([version floatValue] < 4.3) {
+        NSLog(@"WARNING: Protocol Version is less than 4.3, please update Trickplay.");
     }
-    [self setHTTPPort:(NSString *)[args objectAtIndex:1]];
+    [tvConnection setHttp_port:[[args objectAtIndex:1] unsignedIntValue]];
     // if controller ID then open a new socket for advanced UI
     if ([args count] > 2 && [args objectAtIndex:2]) {
+        [advancedUIDelegate setupServiceWithPort:tvConnection.port hostname:tvConnection.hostName];
         if (![advancedUIDelegate startServiceWithID:(NSString *)[args objectAtIndex:2]]) {
             [advancedUIDelegate release];
             advancedUIDelegate = nil;
@@ -378,7 +387,7 @@
         if (buttonIndex < 5 && buttonIndex >= 0) {
             NSString *sentData = [NSString stringWithFormat:@"UI\tMC\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
             [socketManager sendData:[sentData UTF8String]
-                  numberOfBytes:[sentData length]];
+                      numberOfBytes:[sentData length]];
         }
     } else if (actionSheet == cameraActionSheet) {
         if ([[cameraActionSheet buttonTitleAtIndex:buttonIndex] compare:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE]] == NSOrderedSame) {
@@ -426,6 +435,7 @@
     [UIMenuController sharedMenuController].menuVisible = NO;
     // start editing
     [self.view bringSubviewToFront:textView];
+    currentText = [theTextField.text retain];
 }
 
 /**
@@ -478,9 +488,9 @@
     
     
     [resourceManager declareResourceWithObject:[
-                              NSMutableDictionary dictionaryWithObjectsAndKeys:[args objectAtIndex:0], @"name", [args objectAtIndex:1], @"link", groupName, @"group", nil
-                              ]
-                      forKey:[args objectAtIndex:0]
+                                                NSMutableDictionary dictionaryWithObjectsAndKeys:[args objectAtIndex:0], @"name", [args objectAtIndex:1], @"link", groupName, @"group", nil
+                                                ]
+                                        forKey:[args objectAtIndex:0]
      ];
     
     [args release];
@@ -522,7 +532,7 @@
         
         [backgroundView addSubview:newImageView];
         [backgroundView sendSubviewToBack:newImageView];
-
+        
         graphics = YES;
         if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {
             [virtualRemote.view removeFromSuperview];
@@ -665,7 +675,7 @@
  */
 - (void)do_PI:(NSArray *)args {
     NSLog(@"Submit Picture, args:%@", args);
-    if ([self.navigationController visibleViewController] != self) {
+    if ([self.navigationController visibleViewController] != self || !tvConnection || !tvConnection.hostName) {
         [self canceledPickingImage];
         return;
     }
@@ -702,7 +712,7 @@
     }
     camera = [[CameraViewController alloc] initWithView:self.view targetWidth:width targetHeight:height editable:editable mask:mask];
     
-    [camera setupService:[socketManager port] host:hostName path:[args objectAtIndex:0] delegate:self];
+    [camera setupService:tvConnection.http_port host:tvConnection.hostName path:[args objectAtIndex:0] delegate:self];
     camera.titleLabel = cameraLabel;
     camera.cancelLabel = cameraCancelLabel;
     camera.navController = self.navigationController;
@@ -719,7 +729,7 @@
             cameraActionSheet = nil;
         }
         cameraActionSheet = [[UIActionSheet alloc] initWithTitle:camera.titleLabel delegate:self cancelButtonTitle:camera.cancelLabel destructiveButtonTitle:nil otherButtonTitles:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE], [NSString stringWithUTF8String:PHOTO_LIBRARY_BUTTON_TITLE], nil];
-    
+        
         cameraActionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
         [cameraActionSheet showInView:self.view];
     }
@@ -812,6 +822,10 @@
     [self.view addSubview:virtualRemote.view];
     graphics = NO;
     [touchDelegate setSwipe:graphics];
+    
+    NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
+    [JSON_dic setObject:@"reset_hard" forKey:@"event"];
+    [self sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
 }
 
 /**
@@ -857,11 +871,11 @@
     }
     
     /*
-    backgroundView.image = [UIImage imageNamed:@"background.png"];
-    for (UIView *subview in backgroundView.subviews) {
-        [subview removeFromSuperview];
-    }
-    //*/
+     backgroundView.image = [UIImage imageNamed:@"background.png"];
+     for (UIView *subview in backgroundView.subviews) {
+     [subview removeFromSuperview];
+     }
+     //*/
     
     //*
     UIImageView *newImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"background.png"]];
@@ -876,7 +890,7 @@
     [self.view sendSubviewToBack:backgroundView];
     
     [newImageView release];
-
+    
     [backgroundView addSubview:foregroundView];
     graphics = NO;
     
@@ -903,7 +917,8 @@
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSLog(@"GestureView loaded!");
+    
+    NSLog(@"TPAppView loaded!");
     
     textView.layer.cornerRadius = 10.0;
     textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
@@ -920,8 +935,8 @@
         styleAlert = [[UIActionSheet alloc]
                       initWithTitle:@"TrickPlay Multiple Choice"
                       delegate:self cancelButtonTitle:nil
-                               destructiveButtonTitle:nil
-                                    otherButtonTitles:nil];
+                      destructiveButtonTitle:nil
+                      otherButtonTitles:nil];
     }
     
     if (!multipleChoiceArray) {
@@ -937,24 +952,64 @@
     
     [loadingIndicator stopAnimating];
     
+    currentText = nil;
+    
     /*
-    CATransform3D transform = CATransform3DIdentity;
-    transform.m34 = 1.0/-2000;
-    self.view.layer.transform = transform;
-    */
+     CATransform3D transform = CATransform3DIdentity;
+     transform.m34 = 1.0/-2000;
+     self.view.layer.transform = transform;
+     */
     //[self startService];
 }
 
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    
+    NSLog(@"TPAppViewController Unload");
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+    self.loadingIndicator = nil;
+    
+    if (styleAlert) {
+        [styleAlert release];
+        styleAlert = nil;
+    }
+    
+    multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
+    if (multipleChoiceArray) {
+        [multipleChoiceArray release];
+        multipleChoiceArray = nil;
+    }
+    
+    self.theTextField = nil;
+    self.theLabel = nil;
+    self.textView = nil;
+    if (currentText) {
+        [currentText release];
+        currentText = nil;
+    }
+}
+
 - (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
     if (!socketManager) {
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
     
     viewDidAppear = YES;
     [self performSelectorOnMainThread:@selector(createTimer) withObject:nil waitUntilDone:YES];
+    
+    if (theTextField.isFirstResponder) {
+        theTextField.text = currentText;
+        [theTextField selectAll:theTextField];
+        [UIMenuController sharedMenuController].menuVisible = NO;
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    
     if (socketTimer) {
         [socketTimer invalidate];
         [socketTimer release];
@@ -978,43 +1033,22 @@
     // Release any cached data, images, etc. that aren't in use.
 }
 
-- (void)viewDidUnload {
-    [super viewDidUnload];
-    NSLog(@"GestureViewController Unload");
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-    self.loadingIndicator = nil;
-    
-    if (styleAlert) {
-        [styleAlert release];
-        styleAlert = nil;
-    }
-    
-    multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
-    if (multipleChoiceArray) {
-        [multipleChoiceArray release];
-        multipleChoiceArray = nil;
-    }
-}
-
 #pragma mark -
 #pragma mark Deallocation
 
 - (void)dealloc {
-    NSLog(@"Gesture View Controller dealloc");
+    NSLog(@"TPAppViewController dealloc");
     [self do_RT:nil];
     
     if (version) {
         [version release];
     }
-    if (hostName) {
-        [hostName release];
-    }
-    if (http_port) {
-        [http_port release];
-    }
     if (audioController) {
         [audioController release];
+    }
+    if (advancedView) {
+        [advancedView do_unparent:nil];
+        [advancedView release];
     }
     if (advancedUIDelegate) {
         [(AdvancedUIObjectManager *)advancedUIDelegate release];
@@ -1023,9 +1057,11 @@
         [resourceManager release];
     }
     if (socketManager) {
+        socketManager.appViewController = nil;
+        [socketManager setCommandInterpreterDelegate:nil withProtocol:APP_PROTOCOL];
         [socketManager release];
-        socketManager.delegate = nil;
     }
+    self.tvConnection = nil;
     if (touchDelegate) {
         [(TouchController *)touchDelegate release];
     }
@@ -1048,9 +1084,6 @@
     }
     if (multipleChoiceArray) {
         [multipleChoiceArray release];
-    }
-    if (advancedView) {
-        [advancedView release];
     }
     if (socketTimer) {
         [socketTimer invalidate];

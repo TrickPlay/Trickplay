@@ -19,7 +19,7 @@
 
 - (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIView *)aMask {
     if ((self = [super initWithNibName:nil bundle:nil])) {
-        self.view = [[[UIView alloc] initWithFrame:aView.frame] autorelease];
+        self.view = [[UIView alloc] initWithFrame:aView.frame];
         [aView addSubview:self.view];
         
         imagePickerController = [[UIImagePickerController alloc] init];
@@ -27,7 +27,7 @@
         //imagePickerController.cameraOverlayView = mask;
 
         if (aMask) {
-            mask = [aMask retain];
+            mask = aMask;
         } else {
             mask = nil;
         }
@@ -68,8 +68,8 @@
 
 - (void)setupService:(NSInteger)thePort host:(NSString *)theHost path:(NSString *)thePath delegate:theDelegate {
     port = thePort;
-    host = [theHost retain];
-    path = [thePath retain];
+    host = theHost;
+    path = thePath;
     delegate = theDelegate;
     
     connections = [[NSMutableArray alloc] initWithCapacity:20];
@@ -93,7 +93,6 @@
     }
     
     [connections addObject:connection];
-    [connection release];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
@@ -143,7 +142,6 @@
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad && imagePickerController.sourceType != UIImagePickerControllerSourceTypeCamera) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
-            [popOverController release];
         }
         popOverController = [[UIPopoverController alloc] initWithContentViewController:imagePickerController];
         popOverController.delegate = self;
@@ -169,7 +167,6 @@
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad && picker.sourceType != UIImagePickerControllerSourceTypeCamera) {
         if (popOverController) {
             [popOverController dismissPopoverAnimated:NO];
-            [popOverController release];
             popOverController = nil;
         }
     } else if (picker.parentViewController) {
@@ -182,7 +179,6 @@
         if (imageEditor.parentViewController) {
             [imageEditor.parentViewController dismissModalViewControllerAnimated:NO];
         }
-        [imageEditor release];
         imageEditor = nil;
     }
 }
@@ -205,9 +201,6 @@
 }
 
 - (void)editImage:(UIImage *)image {
-    if (imageEditor) {
-        [imageEditor release];
-    }
     
     imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:nil title:self.titleLabel cancelLabel:self.cancelLabel];
     imageEditor.imageEditorDelegate = self;
@@ -251,7 +244,7 @@
     UIImage *originalImage, *editedImage, *imageToUse;
     
     // Handle a still image picked from a photo album
-    if (CFStringCompare((CFStringRef) mediaType, kUTTypeImage, 0) == kCFCompareEqualTo) {
+    if (CFStringCompare((CFStringRef) objc_unretainedPointer(mediaType), kUTTypeImage, 0) == kCFCompareEqualTo) {
         editedImage = (UIImage *)[info objectForKey:UIImagePickerControllerEditedImage];
         originalImage = (UIImage *)[info objectForKey:UIImagePickerControllerOriginalImage];
         
@@ -268,7 +261,7 @@
             [self sendImage:imageToUse];
             [self dismissTheCamera:picker];
         }
-    } else if (CFStringCompare((CFStringRef) mediaType, kUTTypeMovie, 0) == kCFCompareEqualTo) {
+    } else if (CFStringCompare((CFStringRef) objc_unretainedPointer(mediaType), kUTTypeMovie, 0) == kCFCompareEqualTo) {
         
     }
     
@@ -342,37 +335,22 @@
     [self dismissImageEditor];
     [self dismissTheCamera:imagePickerController];
     
-    self.navController = nil;
     
-    [imagePickerController release];
     imagePickerController = nil;
     
-    if (mask) {
-        [mask release];
-    }
     
-    if (host) {
-        [host release];
-    }
     host = nil;
-    if (path) {
-        [path release];
-    }
     path = nil;
     
     if (connections) {
         for (NSURLConnection *connection in connections) {
             [connection cancel];
         }
-        [connections release];
     }
     
-    self.titleLabel = nil;
-    self.cancelLabel = nil;
     
     self.delegate = nil;
     
-    [super dealloc];
 }
 
 @end
