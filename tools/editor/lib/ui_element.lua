@@ -4188,7 +4188,6 @@ function ui_element.progressBar(t)
     mt.__newindex = function(t,k,v)
         p[k] = v
         if k == "progress" then
-				print("progress",v)
             c_fill.scale = {(p.ui_width-4)*(v),1}
         else
 	   		if k ~= "selected" then 
@@ -4967,7 +4966,6 @@ function ui_element.scrollPane(t)
 	end
     
 	local function my_make_arrow( _ , ... )
-	print("my Mk arrow")
      	return make_arrow( ... )
 	end
 
@@ -6580,7 +6578,7 @@ function ui_element.tabBar(t)
 			
 			get_index = function(self) return current_index end,
 			
-			get_offset = function(self) return self.x+offset.x, self.y+offset.y end
+			get_offset = function(self) return self.x+offset.x, self.y+offset.y end 
 			
         }
 		
@@ -6593,6 +6591,7 @@ function ui_element.tabBar(t)
 		current_index = 1
 		
         umbrella:clear()
+
 		if ap then ap = nil end
 
         tab_bg = {}
@@ -6635,12 +6634,12 @@ function ui_element.tabBar(t)
 				
 			}
 			
-			--buttons[i].position         = {0,0}
-			
             if p.tab_position == "top" then
                 buttons[i].x = (p.tab_spacing+buttons[i].w)*(i-1)
                 p.tabs[i].y  = buttons[i].h
+                p.tabs[i].x  = 0
             else
+                p.tabs[i].y  = 0
                 p.tabs[i].x  = buttons[i].w
                 buttons[i].y = (p.tab_spacing+buttons[i].h)*(i-1)
             end
@@ -6736,10 +6735,10 @@ function ui_element.tabBar(t)
 		if editor_lb then 
 			umbrella:display_tab(current_index)
 		end 
+
     end
     
     create()
-    
 	
 	local function tabBar_on_key_down(key)
 		if umbrella.focus[key] then

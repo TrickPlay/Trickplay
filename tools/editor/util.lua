@@ -386,18 +386,15 @@ function util.create_on_button_down_f(v)
 
 	function v:on_button_down(x,y,button,num_clicks, m)
 
-		if m then 
-			if m.control then 
-				control = true 
-			else 
-				control = false 
-			end 
+		if m and m.control then 
+			control = true 
+		else 
+			control = false 
 		end 
 
 	   	if (input_mode ~= hdr.S_RECTANGLE) then 
 	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw") then 
 	     		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
-				
 					if (v.extra.is_in_group == true and control == false ) then 
 
 		    			local p_obj = v.parent 
@@ -543,12 +540,10 @@ function util.create_on_button_down_f(v)
 	
 	function v:on_button_up(x,y,button,num_clicks, m)
 
-		if m then 
-			if m.control then 
-				control = true 
-			else 
-				control = false 
-			end 
+		if m  and m.control then 
+			control = true 
+		else 
+			control = false 
 		end 
 
 		if screen:find_child("multi_select_border") then
@@ -617,13 +612,14 @@ function util.create_on_button_down_f(v)
 				     							c:replace(row,col,v) 
 			        						elseif t == "TabBar" then 
 												local x_off, y_off = c:get_offset()
-												local t_index = c:get_index()
 
+												local t_index = c:get_index()
+												
 												if t_index then 
 													v.x = v.x - x_off	
 													v.y = v.y - y_off	
 			            							c.tabs[t_index]:add(v) 
-												end 
+												end
 											elseif t == "Group" then 
 												c:add(v)
 			        						end 
