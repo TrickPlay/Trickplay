@@ -69,6 +69,20 @@ public:
 
     //.........................................................................
 
+    struct URI
+    {
+        String  scheme;
+        String  user;
+        String  password;
+        String  host;
+        guint   port;
+        String  path;
+        String  query;
+        String  fragment;
+    };
+
+    //.........................................................................
+
 	class Request
 	{
 	public:
@@ -92,6 +106,7 @@ public:
         virtual Method get_method() const = 0;
 		virtual guint16 get_server_port( ) const = 0;
 		virtual String get_path( ) const = 0;
+		virtual URI get_uri() const = 0;
 		virtual String get_request_uri( ) const = 0;
 		virtual String get_header( const String & name ) const = 0;
 		virtual StringMultiMap get_headers( ) const = 0;
@@ -126,6 +141,7 @@ public:
 	        virtual void cancel() = 0;
 	    protected:
 	        StreamBody() {}
+	        virtual ~StreamBody() {}
 	    private:
 	        StreamBody( const StreamBody & ) {}
 	    };
@@ -143,6 +159,7 @@ public:
 	    virtual void set_status( Status status , const String & msg = String() ) = 0;
 	    virtual void set_content_type( const String & content_type ) = 0;
 	    virtual void set_content_length( goffset content_length ) = 0;
+	    virtual String get_content_type( ) const = 0;
 	    virtual void set_stream_writer( StreamWriter * stream_writer ) = 0;
 	    virtual bool respond_with_file_contents( const String & file_name , const String & content_type = String() ) = 0;
 
@@ -157,7 +174,11 @@ public:
 	class RequestHandler
     {
     public:
-	    virtual ~RequestHandler() {};
+
+		RequestHandler();
+		RequestHandler( HttpServer * server , const String & path );
+
+	    virtual ~RequestHandler();
 
 	    virtual void handle_http_request( const Request & request , Response & response ) {}
 
@@ -166,6 +187,11 @@ public:
         virtual void handle_http_put    ( const Request & request , Response & response ) { handle_http_request( request , response ); }
         virtual void handle_http_delete ( const Request & request , Response & response ) { handle_http_request( request , response ); }
         virtual void handle_http_head   ( const Request & request , Response & response ) { handle_http_request( request , response ); }
+
+    protected:
+
+        HttpServer *	server;
+        String			path;
     };
 
     //.........................................................................
