@@ -71,6 +71,8 @@ void lb_set_props_from_table(lua_State*L);
 void lb_chain(lua_State*L,int index,const char * metatable );
 bool lb_check_udata_type(lua_State*L,int index,const char * type, bool fail = true);
 
+#define lb_checkany(L,i) (luaL_checkany(L,i),i)
+#define lb_optany(L,i,d) (lua_isnone(L,i)?d:i)
 #define lb_checktable(L,i) (luaL_checktype(L,i,LUA_TTABLE),i)
 #define lb_opttable(L,i,d) (lua_istable(L,i)?i:d)
 #define lb_checkfunction(L,i) (luaL_checktype(L,i,LUA_TFUNCTION),i)
