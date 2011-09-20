@@ -1,0 +1,194 @@
+[[
+#include "common.h"
+#include "util.h"
+#include "app.h"
+#include "context.h"
+#include "clutter_util.h"
+#include "images.h"
+
+//-----------------------------------------------------------------------------
+// __gc metamethod for markers
+
+static int marker_gc( lua_State * L )
+{
+    g_info( "MARKER COLLECTED '%s'" , lua_tostring( L , lua_upvalueindex( 1 ) ) );
+    return 0;
+}
+
+]]
+
+/*
+-------------------------------------------------------------------------------
+Undocumented developer tools that are only available in non-production builds
+*/
+
+global devtools [[ void * ]]
+{
+    devtools()
+        [[
+            lb_construct_empty();
+        ]];
+
+    debug()
+        [[
+            if ( Debugger * debugger = App::get( L )->get_debugger() )
+            {
+                debugger->break_next_line();
+            }
+        ]];
+
+    table registry()
+        [[
+            lua_pushvalue( L , LUA_REGISTRYINDEX );
+        ]];
+
+    /*
+        Marker is a thing that prints out its name when it is garbage collected. This
+        lets us attach it to stuff and see when it goes away.
+    */
+
+    udata marker( lstring name )
+        [[
+            lua_newuserdata( L , 1 );
+
+            lua_newtable( L );
+            lua_pushlstring( L , name , name_len );
+            lua_pushcclosure( L , marker_gc , 1 );
+            lua_setfield( L , -2 , "__gc" );
+            lua_setmetatable( L , -2 );
+        ]];
+
+    table udatatypes( udata u )
+        [[
+            LSG;
+            if ( ! lua_isuserdata( L , u ) )
+            {
+                lua_pushnil( L );
+            }
+            else if ( ! lua_getmetatable( L , u ) )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_getfield( L , -1 , "__types__" );
+                lua_remove( L , -2 );
+            }
+            LSG_CHECK(1);
+        ]];
+
+    bool checkudatatype( udata u , string type )
+        [[
+            result = lb_check_udata_type( L , u , type , false );
+        ]];
+
+    string screensum()
+        [[
+            Image * image = Image::screenshot();
+
+            String checksum;
+
+            if ( image )
+            {
+                checksum = image->checksum();
+
+                delete image;
+            }
+
+            result = checksum.c_str();
+        ]];
+
+    keypress( int key , int unicode = 0 )
+        [[
+            ClutterUtil::inject_key_down( key , unicode , 0 );
+            ClutterUtil::inject_key_up( key , unicode , 0 );
+        ]];
+
+    udata gid( int gid )
+        [[
+            ClutterActor * actor = clutter_get_actor_by_gid( gid );
+            
+            // There is a bug in clutter 1.6.14 where free gids are
+            // set to this value but not checked later.
+             
+            if ( actor == 0 || actor == (gpointer) 0xdecafbad )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                ClutterUtil::wrap_concrete_actor( L , actor );
+            }
+        ]];
+
+    sleep( int ms )
+        [[
+            usleep( ms * 1000 );
+        ]];
+        
+    string screenshot( string filename = 0 )
+        [[
+            // WE ARE BREAKING THE RULES HERE BY ALLOWING THE APP TO SAVE
+            // A FILE TO ITS BUNDLE, BUT THAT IS OK BECAUSE THIS IS DONE
+            // IN DEVTOOLS WHICH IS NOT AVAILABLE ON PRODUCTION BUILDS.
+            
+            result = 0;
+            
+            Image * image = Image::screenshot();
+            
+            if ( ! image )
+            {
+                g_warning( "FAILED TO TAKE SCREENSHOT" );
+            }
+            else
+            {
+                String path;
+                String name;
+                
+                App * app = App::get( L );
+                
+                String app_path = app->get_metadata().path;
+                
+                if ( ! filename || ( filename && 0 == strlen( filename ) ) )
+                {
+                    GTimeVal t;
+    
+                    g_get_current_time( & t );
+    
+                    gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
+    
+                    gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
+    
+                    name = ts;
+                    path = fn;
+                    
+                    g_free( ts );
+                    g_free( fn );
+                }
+                else
+                {
+                    gchar * ts = g_strdup_printf( "%s.png" , filename );
+                    
+                    gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
+                    
+                    name = ts;
+                    path = fn;
+                    
+                    g_free( ts );
+                    g_free( fn );
+                }
+                
+                if ( ! image->write_to_png( path.c_str() ) )
+                {
+                    g_warning( "FAILED TO WRITE SCREENSHOT TO '%s'" , path.c_str() );
+                }
+                else
+                {
+                    result = name.c_str();
+                }
+                
+                delete image;
+            }                   
+        ]];        
+}
+

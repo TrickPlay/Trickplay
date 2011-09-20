@@ -2,25 +2,26 @@ module clutter_screen;
 
 [[
 #include "clutter/clutter.h"
-
 #include "context.h"
-#include "util.h"
 #include "clutter_util.h"
+#include "toast.h"
+#include "bitmap.h"
+
 ]]
 
 /*
     Global: screen 
     
-    The screen is a <UIElement> and also a <Container>. TrickPlay creates it 
-    for you automatically before your app is loaded. 
+    The screen variable is a global variable created automatically by the TrickPlay Engine. The screen variable is available to every application at any time during its execution.
     
-    Initially, the screen has the fixed dimension of 1920x1080 (1080p). It also
-    has x and y scale factors such that it will be automatically scaled to fit the
-    real display dimensions. There is a property called <display_size> which gives
-    you the actual dimensions of the display.
+    In addition to the properties and functions described on this page, the screen variable also supports all the properties and functions defined in the <UIElement> and <Container> interfaces.
     
-    Although screen has all the properties and methods of a <UIElement>, some are
-    overriden. For example, the screen's <parent> property will always return nil.
+    As its name suggests, the screen variable represents an application's display screen. The screen has a fixed size of 1920 pixels (width) x 1080 pixels (height). This fixed size is automatically scaled to fit the actual display dimensions. A program can retrieve the actual display dimensions by accessing the screen variable's <display_size> property.
+    
+    Upon application start-up, the screen is not visible. This enables an application to completely organize and arrange the desired display prior to showing it. To place a user interface element on the display, the element should be added to the screen variable. After the screen has been composed and is ready to be displayed, it can be shown by calling the <show> function.
+    
+    The order in which elements are added to the screen defines the screen's Z-order, or the order in which elements are in front of and behind each other. An element added to the screen is appended to the end of the Z-order; that is, it is placed behind all previously-added elements. The screen's Z-order can be modified by calling the <Container.raise_child> and <Container.lower_child> functions, or the <UIElement.raise>, <UIElement.lower>, <UIElement.raise_to_top>, and <UIElement.lower_to_bottom> functions.
+
 */
 
 global screen [[ClutterActor*]] actor , container
@@ -38,56 +39,39 @@ global screen [[ClutterActor*]] actor , container
     
     ~screen()
 	[[
+	    Toast::hide(App::get(L)->get_context());
 		g_object_unref( self );
 	]];
-
-    #..........................................................................
-    # We have to override these from regular actors, so that app developers
-    # cannot reach outside their screen
-    
-    /*
-    	Function: show
-    	
-    	Shows the screen. Unlike <show_all>, calling this function does not 
-    	show any elements that were explicitly hidden.
-    */
-    
-    show()
-        [[
-	    	clutter_actor_show(self);
-	    	// Show the stage as well
-	    	clutter_actor_show(clutter_stage_get_default());
-		]];
-        
-    /*
-    	Function: show_all
-    	
-    	Shows the screen and all of its child elements, including hidden ones.
-   	*/
-   	
-    show_all()
-        [[
-	    	clutter_actor_show_all(self);
-	    	// Show the stage as well
-	    	clutter_actor_show(clutter_stage_get_default());
-		]];
-	
-	/*
-		Property: parent
-		
-		This property always returns nil, because the screen's parent is private to
-		TrickPlay.
-	*/
-	
-    readonly UIElement parent
-		[[
-		    lua_pushnil(L);
-		]];
 
 	/*
 		Property: display_size
 		
-		Returns a table containing the width and height of the underlying display.
+		The display_size property is a table of integers specifying the screen's actual width and height, respectively.
+		
+		*Table Format:* { width, height }
+		
+		The screen variable has a fixed size of 1920 x 1080 pixels. These values are automatically scaled to match the actual screen dimensions.
+		
+		*Code Example:* Output screen dimension information
+		
+		(code)
+		print( "Screen: Width = ", screen.width, ", Height = ", screen.height )
+		print( "Screen: Actual Width = ", screen.display_size[ 1 ], ", Actual Height = ", screen.display_size[ 2 ] )
+		if( screen.is_scaled ) then
+			print( "Screen is scaled. Scaling factors: X = ", screen.scale[ 1 ], ", Y = ", screen.scale[ 2 ] )
+		else
+			print( "Screen is not scaled" )
+		end
+		(end)
+
+		When executed on a sample machine, the following output resulted. Output will vary depending upon the underlying system hardware.
+		
+		(code)
+			Screen: Width =  1920 , Height =  1080
+			Screen: Actual Width =  960 , Actual Height =  540
+			Screen is scaled. Scaling factors: X =  0.5 , Y =  0.5
+		(end)
+		
 	*/	
 	
     readonly table display_size
@@ -105,8 +89,73 @@ global screen [[ClutterActor*]] actor , container
             lua_rawseti( L, -2, 2 );
         ]];
 
+    #..........................................................................
+    # We have to override these from regular actors, so that app developers
+    # cannot reach outside their screen
+    
+    /*
+    	Function: show
+    	
+    	The show() function displays all the non-hidden user interface elements currently on the screen.
+    	
+    	When an application begins, the display screen is not shown. This enables the screen to be fully constructed by adding user interface elements to it prior to being displayed.
+    	
+    	*Return Value:* None
+    	
+		*Code Example:* Add some user interface elements to the screen and then display the screen
+		
+		(code)
+		-- Add some user interface elements to the screen
+		-- Assume these elements have been appropriately constructed and initialized
+		screen:add( buttonOne, buttonTwo, checkBoxOne )
+		
+		-- Show the screen
+		screen:show()
+		(end)
+		
+		*See Also:* the <show_all> function
+    */
+    
+    show()
+        [[
+	    	clutter_actor_show(self);
+	    	// Show the stage as well
+	    	clutter_actor_show(clutter_stage_get_default());
+		]];
+        
+    /*
+    	Function: show_all
+    	
+    	The show_all() function displays all the user interface elements, hidden, as well as non-hidden, currently on the screen.
+    	
+    	*Return Value:* None
+    	
+    	*See Also:* the <show> function
+   	*/
+   	
+    show_all()
+        [[
+	    	clutter_actor_show_all(self);
+	    	// Show the stage as well
+	    	clutter_actor_show(clutter_stage_get_default());
+		]];
+	
+	# I don't think parent and unparent need to be documented here. They are
+	# documented sufficiently in UIElement.
 	/*
-		Function: unparent
+		# Property: parent
+		
+		This property always returns nil, because the screen's parent is private to
+		TrickPlay.
+	*/
+	
+    readonly UIElement parent
+		[[
+		    lua_pushnil(L);
+		]];
+
+	/*
+		# Function: unparent
 		
 		Calling unparent on the screen has no effect, because the screen's parent
 		is private to TrickPlay.
@@ -190,6 +239,15 @@ global screen [[ClutterActor*]] actor , container
         clutter_stage_set_perspective(CLUTTER_STAGE(clutter_stage_get_default()),&p);
         lua_pop(L,4);
 	]];	
-	
+
+
+    bool toast( string title , string prompt , Bitmap bitmap = 0 )
+        [[
+            Image * image = bitmap ? Bitmap::get_image( L , bitmap ) : 0;
+
+            result = Toast::show( L , title , prompt , image );
+        ]];
+
+    callback on_toast;
 }
 

@@ -8,7 +8,11 @@
 
 //.............................................................................
 
-static Debug_ON log( "LIRC" );
+#define TP_LOG_DOMAIN   "LIRC"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //.............................................................................
 
@@ -45,7 +49,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
 
     if ( ! socket_address )
     {
-        log( "FAILED TO CREATE SOCKET ADDRESS WITH '%d'" , uds );
+        tpwarn( "FAILED TO CREATE SOCKET ADDRESS WITH '%d'" , uds );
         return;
     }
 
@@ -62,7 +66,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
 
     if ( ! connection )
     {
-        log( "FAILED TO CONNECT TO LIRC SOCKET" );
+        tplog( "FAILED TO CONNECT TO LIRC SOCKET" );
         return;
     }
 
@@ -128,10 +132,11 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
     key_map[ "GREEN"     ] = TP_KEY_GREEN;
     key_map[ "YELLOW"    ] = TP_KEY_YELLOW;
     key_map[ "BLUE"      ] = TP_KEY_BLUE;
+    key_map[ "BACK"      ] = TP_KEY_BACK;
 
     timer = g_timer_new();
 
-    g_info( "LIRC CONTROLLER READY" );
+    tplog( "READY" );
 }
 
 //.............................................................................
@@ -174,7 +179,7 @@ void ControllerLIRC::line_read( GObject * stream , GAsyncResult * result )
 
     if ( error )
     {
-        log( "READ ERROR : %s" , error->message );
+        tplog( "READ ERROR : %s" , error->message );
         g_clear_error( & error );
         g_object_unref( connection );
         connection = 0;
@@ -195,8 +200,8 @@ void ControllerLIRC::line_read( GObject * stream , GAsyncResult * result )
             {
                 if ( g_timer_elapsed( timer , NULL ) >= repeat )
                 {
-                    tp_controller_key_down( controller , it->second , 0 );
-                    tp_controller_key_up( controller , it->second , 0 );
+                    tp_controller_key_down( controller , it->second , 0 , TP_CONTROLLER_MODIFIER_NONE );
+                    tp_controller_key_up( controller , it->second , 0 , TP_CONTROLLER_MODIFIER_NONE );
 
                     g_timer_start( timer );
                 }

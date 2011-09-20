@@ -14,8 +14,6 @@ Server::Server( guint16 p, Delegate * del, char acc, GError ** error )
     delegate( del ),
     accumulate( acc )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
-
     GInetAddress * ia = g_inet_address_new_any( G_SOCKET_FAMILY_IPV4 );
 
     GSocketAddress * address = g_inet_socket_address_new( ia, p );
@@ -51,17 +49,12 @@ Server::Server( guint16 p, Delegate * del, char acc, GError ** error )
     {
         g_object_unref( G_OBJECT( ea ) );
     }
-
-#else
-    g_set_error( error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED, "WE NEED GLIB > 2.22 FOR THIS TO WORK" );
-#endif
 }
 
 //------------------------------------------------------------------------------
 
 Server::~Server()
 {
-#if GLIB_CHECK_VERSION(2,22,0)
     if ( listener )
     {
         g_socket_listener_close( listener );
@@ -72,25 +65,42 @@ Server::~Server()
     {
         g_io_stream_close( G_IO_STREAM( *it ), NULL, NULL );
     }
-
-#endif
 }
 
 //------------------------------------------------------------------------------
 
 void Server::close_connection( gpointer connection )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
     g_io_stream_close( G_IO_STREAM( connection ), NULL, NULL );
-#endif
 }
 
 //------------------------------------------------------------------------------
 
-bool Server::write( gpointer connection, const char * data )
+gssize Server::read( gpointer connection , void * buffer , gsize count )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
+    GInputStream * input_stream = g_io_stream_get_input_stream( G_IO_STREAM( connection ) );
 
+    if ( ! input_stream )
+    {
+        return -1;
+    }
+
+    gssize read = g_input_stream_read( input_stream , buffer , count , 0 , 0 );
+
+    if ( read < 0 )
+    {
+        connections.erase( G_SOCKET_CONNECTION( connection ) );
+        g_debug( "CONNECTION WRITE ERROR %p", connection );
+        g_io_stream_close( G_IO_STREAM( connection ), NULL, NULL );
+    }
+
+    return read;
+}
+
+//------------------------------------------------------------------------------
+
+bool Server::write( gpointer connection, const char * data , gssize size )
+{
     GOutputStream * output_stream = g_io_stream_get_output_stream( G_IO_STREAM( connection ) );
 
     // Try to write - if we fail, we close the stream, this should also cause
@@ -98,7 +108,7 @@ bool Server::write( gpointer connection, const char * data )
 
     GError * error = NULL;
 
-    g_output_stream_write_all( output_stream, data, strlen( data ), NULL, NULL, &error );
+    g_output_stream_write_all( output_stream, data, size < 0 ? strlen( data ) : size , NULL, NULL, &error );
 
     if ( error )
     {
@@ -113,10 +123,6 @@ bool Server::write( gpointer connection, const char * data )
     {
         return true;
     }
-
-#else
-    return false;
-#endif
 }
 
 //------------------------------------------------------------------------------
@@ -136,20 +142,16 @@ bool Server::write_printf( gpointer connection, const char * format, ... )
 
 void Server::write_to_all( const char * data )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
     for ( ConnectionSet::iterator it = connections.begin(); it != connections.end(); ++it )
     {
         write( *it, data );
     }
-#endif
 }
 
 //------------------------------------------------------------------------------
 
 bool Server::write_file( gpointer connection, const char * path, bool http_headers )
 {
-#if GLIB_CHECK_VERSION(2,22,0)
-
     // Get the output stream for the connection
 
     GOutputStream * output_stream = g_io_stream_get_output_stream( G_IO_STREAM( connection ) );
@@ -210,7 +212,7 @@ bool Server::write_file( gpointer connection, const char * path, bool http_heade
         output_stream,
         G_INPUT_STREAM( input_stream ),
         G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE,
-        G_PRIORITY_DEFAULT,
+        TRICKPLAY_PRIORITY,
         NULL,
         splice_callback,
         NULL );
@@ -219,10 +221,6 @@ bool Server::write_file( gpointer connection, const char * path, bool http_heade
     g_object_unref( file );
 
     return true;
-#else
-    return false;
-#endif
-
 }
 
 //------------------------------------------------------------------------------
@@ -231,10 +229,6 @@ guint16 Server::get_port() const
 {
     return port;
 }
-
-//------------------------------------------------------------------------------
-
-#if GLIB_CHECK_VERSION(2,22,0)
 
 //------------------------------------------------------------------------------
 
@@ -286,7 +280,7 @@ void Server::accept_callback( GObject * source, GAsyncResult * result, gpointer 
 
         // Start reading from the input stream
 
-        g_input_stream_read_async( input_stream, buffer, SERVER_BUFFER_SIZE - 1, G_PRIORITY_DEFAULT, NULL, data_read_callback, connection );
+        g_input_stream_read_async( input_stream, buffer, SERVER_BUFFER_SIZE - 1, TRICKPLAY_PRIORITY, NULL, data_read_callback, connection );
 
         // Hook up a weak ref callback so we know when the connection is destroyed
 
@@ -321,55 +315,59 @@ void Server::data_read_callback( GObject * source, GAsyncResult * result, gpoint
 
         g_io_stream_close( G_IO_STREAM( connection ), NULL, NULL );
         g_object_unref( G_OBJECT( connection ) );
+        return;
     }
-    else
+
+    // We have some data - get the buffer from the input stream, append a
+    // NULL and process it
+
+    bool read_again = true;
+
+    gchar * buffer = ( gchar * )g_object_get_data( G_OBJECT( input_stream ), "tp-buffer" );
+
+    buffer[bytes_read>SERVER_BUFFER_SIZE-1?SERVER_BUFFER_SIZE-1:bytes_read] = 0;
+
+    if ( server->accumulate )
     {
-        // We have some data - get the buffer from the input stream, append a
-        // NULL and process it
+        GString * line = ( GString * )g_object_get_data( G_OBJECT( input_stream ), "tp-line" );
 
-        gchar * buffer = ( gchar * )g_object_get_data( G_OBJECT( input_stream ), "tp-buffer" );
+        g_string_append( line, buffer );
 
-        buffer[bytes_read>SERVER_BUFFER_SIZE-1?SERVER_BUFFER_SIZE-1:bytes_read] = 0;
+        gchar * s = line->str;
+        gchar * e = NULL;
 
-        if ( server->accumulate )
+        while ( ( *s ) && ( e = strchr( s, server->accumulate ) ) )
         {
-            GString * line = ( GString * )g_object_get_data( G_OBJECT( input_stream ), "tp-line" );
-
-            g_string_append( line, buffer );
-
-            gchar * s = line->str;
-            gchar * e = NULL;
-
-            while ( ( *s ) && ( e = strchr( s, server->accumulate ) ) )
-            {
-                *e = 0;
-                s = g_strstrip( s );
+            *e = 0;
+            s = g_strstrip( s );
 
 //                g_debug("GOT DATA %p [%s]",connection,s);
 
-                if ( server->delegate )
-                {
-                    server->delegate->connection_data_received( connection, s , bytes_read );
-                }
-
-                s = e + 1;
-            }
-
-            // Erase what we processed from the line buffer
-
-            if ( s != line->str )
+            if ( server->delegate )
             {
-                g_string_erase( line, 0, s - line->str );
+                server->delegate->connection_data_received( connection, s , strlen( s ) , & read_again );
             }
-        }
-        else if ( server->delegate )
-        {
-            server->delegate->connection_data_received( connection, buffer , bytes_read );
+
+            s = e + 1;
         }
 
+        // Erase what we processed from the line buffer
+
+        if ( s != line->str )
+        {
+            g_string_erase( line, 0, s - line->str );
+        }
+    }
+    else if ( server->delegate )
+    {
+        server->delegate->connection_data_received( connection, buffer , bytes_read , & read_again );
+    }
+
+    if ( read_again )
+    {
         // Read again
 
-        g_input_stream_read_async( input_stream, buffer, SERVER_BUFFER_SIZE - 1, G_PRIORITY_DEFAULT, NULL, data_read_callback, data );
+        g_input_stream_read_async( input_stream, buffer, SERVER_BUFFER_SIZE - 1, TRICKPLAY_PRIORITY, NULL, data_read_callback, data );
     }
 }
 
@@ -400,9 +398,6 @@ void Server::splice_callback( GObject * source, GAsyncResult * result, gpointer 
 {
     g_output_stream_splice_finish( G_OUTPUT_STREAM( source ), result, NULL );
 }
-
-
-#endif
 
 //------------------------------------------------------------------------------
 
