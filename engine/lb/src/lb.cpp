@@ -378,7 +378,13 @@ int lb_copy_table(lua_State*L,int target,int source)
     {
         // If the key is not a string or it is a string that does not start
         // with two underscores, copy it        
-        if(!lua_isstring(L,-2)||(lua_isstring(L,-2)&&strncmp(lua_tostring(L,-2),"__",2)))
+        bool copy_it = true;
+        if ( lua_type( L , -2 ) == LUA_TSTRING )
+        {
+            copy_it = strncmp( lua_tostring(L,-2),"__",2);
+        }
+
+        if(copy_it)
         {
             // See if the key already exists in the target
             // If so, skip it
@@ -1026,7 +1032,10 @@ std::string lb_value_desc( lua_State * L , int index )
             break;
 
         case LUA_TUSERDATA:
-            result = result + " (" + UserData::get(L,index)->get_type() + ")";
+        	if ( lua_objlen( L , index ) == sizeof( UserData ) )
+        	{
+        		result = result + " (" + UserData::get(L,index)->get_type() + ")";
+        	}
             break;
     }
 

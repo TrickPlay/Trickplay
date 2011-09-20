@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
 
 #define HORIZ_SWIPE_DRAG_MIN  30
 #define VERT_SWIPE_DRAG_MIN    30
@@ -15,8 +15,8 @@
 
 
 @interface TouchController : NSObject <ViewControllerTouchDelegate> {
-    BOOL clickEventsAllowed; //depricated
     BOOL touchEventsAllowed;
+    BOOL swipeEventsAllowed;
     
     NSTimeInterval touchedTime;
     
@@ -34,6 +34,8 @@
     BOOL swipeStarted;
 }
 
+@property (assign) BOOL touchEventsAllowed;
+@property (assign) BOOL swipeEventsAllowed;
 @property (retain) SocketManager *socketManager;
 @property (retain) UIView *view;
 
@@ -41,6 +43,8 @@
 
 - (void)resetTouches;
 - (void)setMultipleTouch:(BOOL)val;
+- (void)setSwipe:(BOOL)allowed;
+
 - (void)addTouch:(UITouch *)touch;
 - (BOOL)sendTouch:(UITouch *)touch withCommand:(NSString *)command;
 
