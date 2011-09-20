@@ -1,4 +1,0 @@
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:153: warning: property 'tableView' requires method '-tableView' to be defined - use @synthesize, @dynamic or provide a method implementation
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:153: warning: property 'tableView' requires the method 'setTableView:' to be defined - use @synthesize, @dynamic or provide a method implementation
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:153: warning: incomplete implementation of class 'NetServiceManager'
-/Users/rex/Documents/TrickplayController_v2/Classes/NetServiceManager.m:153: warning: method definition for '-init:delegate:' not found

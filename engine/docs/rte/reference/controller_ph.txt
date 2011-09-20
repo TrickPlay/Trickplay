@@ -1,0 +1,7 @@
+
+Title: Controller Placeholder
+
+This is a placeholder for the Event Handler:Classes:Controller section of the TrickPlay Runtime Engine Reference
+
+This Interface:Controller needs to be extracted from the engine/bindings/controllers.lb file.
+
