@@ -1,0 +1,23 @@
+
+Topic: Save the Screen
+
+To retain the modifications applied to a screen, it is necessary to save the screen to a disk file. Doing so enables you to retrieve the screen in the future without having to regenerate it from scratch. The saved screen image will also be used when the finished application is eventually run by the TrickPlay Engine.
+
+To save the current screen, select the File->Save... menu item. A Save File dialog window will display.
+
+(see images/EdSaveScreen.png)
+
+All screen files are saved in a folder called screens in your project directory. Thus, for our Tutorial project, all the screens will be stored in the Tutorial/screens directory.
+
+Recall that the project directory is always stored in a directory called trickplay-editor in your home directory. Therefore, the complete file specification for a saved screen called MyScreen.lua would be ~/trickplay-editor/Tutorial/screens/MyScreen.lua.
+
+Each UI element on the screen, including the element's property settings, is converted by the Visual Editor to Lua source code. When a screen is saved, it is this generated Lua code that is written to the file. Because the screen file actually contains Lua code, you should always use a file extension of .lua when saving a screen.
+
+Our present screen will enable the user to set the display's language, so let's save this screen in a file called language.lua. Enter language.lua in the Editor's Save Screen dialog and press the OK key.
+
+If you stop running this tutorial before finishing and wish to resume where you left off, you can specify the Tutorial project when the Editor starts running (or select the File->Open Project... menu item any time the Editor is running) and then select the File->Open... menu item and choose the language.lua screen from the displayed file list. Your last saved screen will be restored and you will be able to continue through the tutorial.
+
+After the screen has been saved the first time, the Visual Editor performs an automatic screen-save operation every minute. The automatic saves are written to a separate file in the screens directory. When opening a screen file, if the Visual Editor discovers that one of these automatically-saved files is more recent than your last saved file, it will ask if you wish to open the more-recent file. If you open the more-recent file and discover it is not what you want, you can still open your last saved file by performing a normal File->Open operation.
+
+More information about the Editor-generated Lua source code will be described later in this tutorial.
+
