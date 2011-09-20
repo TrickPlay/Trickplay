@@ -121,10 +121,6 @@ lvls = {
                 source = "bedroom-bed",
                 x      = 1770, --1920+138+50
                 y      = 180+130+220,
-                w      = 550,
-                h      = 200,
-                x_off  = 200,
-                y_off  = 120,
                 enemy  = true,
                 player = true,
             },--]]
@@ -175,10 +171,6 @@ lvls = {
                 source = "bedroom-dresser-small",
                 x      = 1920+1381-60,
                 y      = 591+40,
-                w      = 400,
-                h      = 400,
-                x_off  = 0,
-                y_off  = -30,
                 enemy  = true,
             },
             {
@@ -239,8 +231,6 @@ lvls = {
                 source = "dining-light",
                 x      = 5760+424+132,
                 y      = 30,
-                w      = 150,
-                h      = 200,
                 scale  = {-1,1},
                 player = true,
             },
@@ -249,8 +239,6 @@ lvls = {
                 source = "dining-light",
                 x      = 5760+424+300,
                 y      = 30,
-                w      = 150,
-                h      = 200,
             },
             {
                 type   = "wall_objs",
@@ -292,10 +280,6 @@ lvls = {
                 source = "dining-table-left-corner",
                 x      = 5760+42+340,
                 y      = 535+5+156,
-                x_off  = 40,
-                y_off  = 60,
-                w      = 800,
-                h      = 40,
                 enemy  = true,
                 player = true,
                 scale = {3/4,3/4},
@@ -349,10 +333,6 @@ lvls = {
                 source = "living-chair",
                 x      = 5760+1387+140,
                 y      = 549+70,
-                w      = 200,
-                h      = 50,
-                x_off  = 50,
-                y_off  = 200,
                 enemy  = true,
                 player = true,
             },
@@ -431,9 +411,6 @@ lvls = {
                 source = "living-ottoman",
                 x      = 7680+196+160,
                 y      = 845+30,
-                w      = 300,
-                h      = 130,
-                y_off  = 40,
                 enemy  = true,
             },
 
@@ -442,8 +419,6 @@ lvls = {
                 source = "living-coffee-table",
                 x      = 7680+870+160,
                 y      = 806+35,
-                w      = 293,
-                h      = 170,
                 enemy  = true,
             },
             {
@@ -493,8 +468,6 @@ lvls = {
                 source = "living-hanging-plant",
                 x      = 7680+1241+140,
                 y      = 50,
-                w      = 100,
-                h      = 60,
                 player = true,
             },
 --[[
@@ -532,7 +505,6 @@ lvls = {
                 source = "bar-lights",
                 x      = 9600+904+295,
                 y      = 15,
-                w      = 200,
                 scale  = {-1,1},
                 player = true,
             },
@@ -541,15 +513,12 @@ lvls = {
                 source = "bar-lights",
                 x      = 9600+904+510,
                 y      = 15,
-                w      = 200,
             },
             {
                 type   = "static",
                 source = "bar",
                 x      = 9600+904+230,
                 y      = 550+30,
-                y_off  = 30,
-                w      = 520,
                 enemy  = true,
             },--[[
             {
@@ -707,9 +676,6 @@ lvls = {
                 source = "kitchen-counter",
                 x      = 11520+264+470,
                 y      = 446+15,
-                w      = 1700,
-                x_off  = 100,
-                y_off  = 40,
                 enemy  = true,
             },
 --]]
@@ -840,9 +806,6 @@ lvls = {
                 source = "kitchen-table-2",
                 x      = 11520+3870+135,
                 y      = 300+160,
-                y_off  = 70,
-                w      = 700,
-                h      = 70,
                 scale  = {-1,1},
                 enemy  = true,
             },
@@ -1553,6 +1516,13 @@ lvls = {
             },
             {
                 type   = "background",
+                source = "heart1",
+                x      = 13190,
+                y      = 500,
+                opacity = 0,
+            },
+            {
+                type   = "background",
                 source = "maxina-eyelids",
                 x      = 13290,
                 y      = 760,
@@ -1577,6 +1547,8 @@ lvls = {
                 on_completed = function()
                     print(1)
                     Animation_Loop:add_animation(  lvls[2].outro[2]  )
+                    
+                    mediaplayer:play_sound("audio/birds-meet-greet.wav")
                     
                 end,
             },
@@ -1622,7 +1594,6 @@ lvls = {
                 on_step = function()
                 end,
                 on_completed = function()
-                    print(3)
                     lvls[2].outro[4].actors[1].opacity = 255
                     lvls[2].outro[4].actors[1].scale = {0,0}
                     Animation_Loop:add_animation(  lvls[2].outro[4]  )
@@ -1633,11 +1604,32 @@ lvls = {
                 duration = .5,
                 on_step = function(s,p)
                     
-                    lvls[2].outro[4].actors[1].scale = {p,p}
+                    lvls[2].outro[4].actors[1].scale = {.5*p,.5*p}
                 end,
                 on_completed = function()
-                    print(4)
                     Animation_Loop:add_animation(  lvls[2].outro[5]  )
+                    
+                end,
+            },
+            {
+                duration = .5,
+                on_step = function()
+                end,
+                on_completed = function()
+                    lvls[2].outro[6].actors[1].opacity = 255
+                    lvls[2].outro[6].actors[1].scale = {0,0}
+                    Animation_Loop:add_animation(  lvls[2].outro[6]  )
+                    
+                end,
+            },
+            {
+                duration = .5,
+                on_step = function(s,p)
+                    
+                    lvls[2].outro[6].actors[1].scale = {.5*p,.5*p}
+                end,
+                on_completed = function()
+                    Animation_Loop:add_animation(  lvls[2].outro[7]  )
                     
                 end,
             },
@@ -1646,7 +1638,6 @@ lvls = {
                 on_step = function(s,p)
                 end,
                 on_completed = function()
-                    print(5)
                     gamestate:change_state_to("LVL_TRANSITION")
                     
                 end,
@@ -2011,6 +2002,7 @@ lvls = {
             "sky-water.jpg",
             --]]
             "heart.png",
+            "heart1.png",
             "maxina-eyelids.png",
             "swamp_1.jpg",
             "swamp_2.jpg",
@@ -2062,8 +2054,6 @@ lvls = {
     }
 }
 
-clone_counter = {}
-setmetatable(clone_counter,{__mode = "k"})
 
 --------------------------------------------------------------------------------
 ----  The Level Loader
@@ -2157,7 +2147,7 @@ function LVL_Object:curr_lvl() return curr_lvl_i end
 
 local base_path = "assets/lvl"
 function LVL_Object:setup_for_level(t)
-    print("fsdfsdfggffgbgfbg")
+    
     if not has_been_initialized then
         error("LVL_Object has not been initialized",2)
     end
@@ -2204,20 +2194,7 @@ function LVL_Object:setup_for_level(t)
     local exit_count = 0
     
     for j = 1, # lvls[curr_lvl_i].items do
-        --[[
-        if lvls[curr_lvl_i].items[j].player then
-            
-            table.insert(LVL_Object.obstacles,lvls[curr_lvl_i].items[j])
-            
-            print("\n{"..
-            "\n\tx =",lvls[curr_lvl_i].items[j].x + (lvls[curr_lvl_i].items[j].x_off or 0),
-            "\n\ty =",lvls[curr_lvl_i].items[j].y + (lvls[curr_lvl_i].items[j].y_off or 0),
-            "\n\tw =",(lvls[curr_lvl_i].items[j].w or lvl_objs[lvls[curr_lvl_i].items[j].source].w),
-            "\n\th =",(lvls[curr_lvl_i].items[j].h or lvl_objs[lvls[curr_lvl_i].items[j].source].h),
-            "\n},")
-            
-        end
-        --]]
+        
         if lvls[curr_lvl_i].items[j].exit_piece then
             
             exit_count = exit_count + 1
@@ -2256,7 +2233,7 @@ function LVL_Object:setup_for_level(t)
     end
     
     LVL_Object.obstacles = lvls[curr_lvl_i].enemy_obstacles
-    --[[
+    ---[[
     for j,o in ipairs(LVL_Object.obstacles) do
         layers.foreground:add(Rectangle{x = o.x,y = o.y, w = o.w, h = o.h, color="77770099"})
     end
@@ -2337,7 +2314,7 @@ local dx, obj
 
 local function make_obj(item)
     
-    
+    local obj
     
     if type(item.source) == "string" then
         
@@ -2346,7 +2323,7 @@ local function make_obj(item)
             source = lvl_objs[ item.source ],
             x      = item.x,
             y      = item.y,
-            opacity = item.opacity
+            opacity = item.opacity,
         }
         
         if item.scale then
@@ -2422,7 +2399,7 @@ local function make_obj(item)
         item.exit_link.exit_piece = obj
     end
     
-    clone_counter[obj] = true
+    clone_counter[obj] = obj.source and obj.source.src or true
     
     return obj
     
@@ -2433,7 +2410,9 @@ end
 
 
 function LVL_Object:add_to_scroll_off(obj)
+    
     on_screen_items[ obj ] = obj.x + obj.w
+    
 end
 
 
@@ -2468,10 +2447,11 @@ function LVL_Object:scroll_by(dx,need_actors)
                 for j,actor_name in pairs(as) do
                     
                     lvls[curr_lvl_i].outro[i].actors[j] = screen:find_child(actor_name)
-                    print("herer",lvls[curr_lvl_i].outro[i].actors[j])
+                    
                 end
                 
             end
+            
             dumptable(lvls[curr_lvl_i].outro)
             
             Animation_Loop:add_animation(lvls[curr_lvl_i].outro[1])
@@ -2495,6 +2475,16 @@ function LVL_Object:scroll_by(dx,need_actors)
             print("delete")
             if obj.parent then obj:unparent() end
             
+            if obj.on_idle then
+                if Animation_Loop:has_animation(obj.on_idle) then
+                    
+                    Animation_Loop:delete_animation(obj.on_idle)
+                    
+                end
+                obj.on_idle = nil
+                
+            end
+            
             on_screen_items[     obj ] = nil
             collides_with_max[   obj ] = nil
             collides_with_enemy[ obj ] = nil
@@ -2513,7 +2503,7 @@ function LVL_Object:scroll_by(dx,need_actors)
     while  tiling_i <= # tiling   and
         tiling[tiling_i].x    <    ( 2*screen_w - physics_world.x)  do
         
-        obj = Image{
+        local obj = Image{
             src    = "assets/lvl"..curr_lvl_i.."/"..tiling[tiling_i].source,
             x      = tiling[ tiling_i ].x,
             y      = tiling[ tiling_i ].y,
@@ -2537,7 +2527,7 @@ function LVL_Object:scroll_by(dx,need_actors)
     while  player_obst_i <= # player_obst   and
         player_obst[player_obst_i].x    <    (  2*screen_w - physics_world.x)  do
         
-        obj = player_obst[player_obst_i]
+        local obj = player_obst[player_obst_i]
         
         collides_with_max[obj] = obj
         
@@ -2550,16 +2540,14 @@ function LVL_Object:scroll_by(dx,need_actors)
         player_obst_i = player_obst_i + 1
         
     end
-    --[[
+    ---[[
     while  collectable_i <= # collectables   and
         collectables[collectable_i].x    <    (  2*screen_w - physics_world.x)  do
         
-        
-        obj = Clone{
-            x      = collectables[collectable_i].x,
-            y      = collectables[collectable_i].y,
+        local obj = Clone{
+            x     = collectables[collectable_i].x,
+            y     = collectables[collectable_i].y,
         }
-        
         if collectables[collectable_i].type == "seed" then
             
             obj.source = generic_imgs["seed"]
@@ -2604,6 +2592,7 @@ function LVL_Object:scroll_by(dx,need_actors)
             }
             
         end
+        clone_counter[obj] = obj.source.src
         
         obj.anchor_point = {
             obj.w/2,
@@ -2685,17 +2674,18 @@ LVL_Object.on_idle = {
 }
 
 function LVL_Object:unload_lvl()
-    
+    obj = nil
     print("this happens")
     
     if Animation_Loop:has_animation(LVL_Object.animation) then
         
         Animation_Loop:delete_animation(LVL_Object.animation)
-       
+        
     elseif lvls[curr_lvl_i].outro then
         
         for i,o in ipairs(lvls[curr_lvl_i].outro) do
             
+            o.actors = nil
             if Animation_Loop:has_animation(o) then
                 
                 Animation_Loop:delete_animation(o)
@@ -2706,9 +2696,36 @@ function LVL_Object:unload_lvl()
         
     end
     
-    on_screen_items = {}
-    collides_with_max   ={}
-    collides_with_enemy ={}
+    if lvls[curr_lvl_i].intro then
+        for _,i in ipairs(lvls[curr_lvl_i].intro) do
+            
+            i.actors = nil
+            
+        end
+    end
+    for obj,_ in pairs(on_screen_items) do
+        
+        
+        if obj.parent then obj:unparent() end
+        
+        if obj.on_idle then
+            if Animation_Loop:has_animation(obj.on_idle) then
+                
+                Animation_Loop:delete_animation(obj.on_idle)
+                
+            end
+            obj.on_idle = nil
+            
+        end
+        
+        on_screen_items[     obj ] = nil
+        collides_with_max[   obj ] = nil
+        collides_with_enemy[ obj ] = nil
+        
+    end
+    on_screen_items     = {}
+    collides_with_max   = {}
+    collides_with_enemy = {}
     
     layers.distance:clear()
     

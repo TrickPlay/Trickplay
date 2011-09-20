@@ -18,6 +18,11 @@ local abort
 
 local has_been_initialized = false
 
+
+
+function Animation_Loop:dump_states()
+    dumptable(states)
+end
 function Animation_Loop:init(t)
     
     if has_been_initialized then

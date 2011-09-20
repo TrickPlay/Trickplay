@@ -8,7 +8,7 @@ local enter_press = {
     function() --[[DOES NOTHING]] end,
     function()
        
-        launch_lvl(2,Splash_Menu)
+        launch_lvl(1,Splash_Menu)
         
     end,
 }

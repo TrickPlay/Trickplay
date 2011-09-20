@@ -4,9 +4,9 @@ local g  = 4000
 local vy = - 500
 
 local item_type = {
-    collectable = function(obj,pieces,initial_impact)
+    collectable = function(pieces,initial_impact)
         
-        return function()
+        return function(obj)
             
             if obj.hit then return end
             
@@ -29,7 +29,7 @@ local item_type = {
                     x      = obj.x-obj.anchor_point[1],
                     y      = obj.y-obj.anchor_point[2],
                 }
-                
+                clone_counter[piece] = true
                 layers.items:add(piece)
                 
                 local vx = math.random(-1,1)*200
@@ -60,9 +60,9 @@ local item_type = {
         
     end,
     
-    knockdownable = function(obj,targ_y,initial_impact,floor_func)
+    knockdownable = function(targ_y,initial_impact,floor_func)
         
-        return function(_,vx)
+        return function(obj,vx)
             
             if obj.hit then return end
             
@@ -157,7 +157,7 @@ make_item = function(t)
         end
         
         
-        t.source.collision = item_type[t.item_type](t.source,t.pieces,t.initial_impact)
+        t.source.collision = item_type[t.item_type](t.pieces,t.initial_impact)
         
         t.source.on_idle = rock_back_and_forth(t.source)
         
