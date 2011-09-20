@@ -1,0 +1,43 @@
+
+Title: The app Metadata File
+
+Every TrickPlay application must have a file called "app" in its top-level, "app bundle" directory. The "app" file contains information about the application, such as its name and version number. If the "app" file does not exist, the application will not run.
+
+The contents of the "app" file is a single Lua table called "app". Each entry in the table must be in the following format.
+
+	(code)
+	field = value
+	(end)
+	
+where "field" is a name specifying a unique field and "value" is the field's string setting. The "value" string conforms to Lua syntax so it must be surrounded by either single or double quotation marks. Table entries are separated by a comma. The comma following the last entry is optional. The fields in the "app" file may be specified in any order.
+
+A sample app table definition is shown below.
+
+	(code)
+	app = {
+		id = "com.trickplay.examples.hello-world",
+		name = "Hello World",
+		version = "1.0",
+		release = "1",
+	}
+	(end)
+	
+*Required Fields*
+
+The following fields must be defined in every "app" file.
+
+	id - specifies a unique identifier for your application. A suggested format to follow is the reverse-DNS notation used in the example shown above. The URL does not have to exist; it is only a method used to generate a unique identifier. The id may have a maximum length of 64 characters and contain the alphanumeric ASCII characters A-Z, a-z, 0-9, period, minus, and underscore. This value can be retrieved by a program by accessing the app global variable's id property (<app.id>).
+	name - the application's name. May be retrieved by accessing the name property of the app global variable (<app.name>).
+	version - the application's version number that is typically shown to the user. May be retrieved by accessing the version property of the app global variable (<app.version>).
+	release - integer value specifying the application's release number. This setting is never shown to the user; it is used for internal purposes only. May be retrieved by accessing the release property of the app global variable (<app.release>).
+	
+*Optional Fields*
+
+The following fields may optionally be defined in the "app" file.
+
+	copyright - specifies copyright information. May be retrieved by accessing the copyright property of the app global variable (<app.copyright>).
+	author - specifies the application's author. May be retrieved by accessing the author property of the app global variable (<app.author>).
+	description - specifies additional descriptive information about the application. May be retrieved by accessing the description property of the app global variable (<app.description>).
+	
+	
+	
