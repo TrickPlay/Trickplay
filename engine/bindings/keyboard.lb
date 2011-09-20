@@ -1,0 +1,180 @@
+
+[[
+#include "keyboard.h"
+]]
+/*
+    Global: keyboard
+
+    The keyboard lets you bring up an on-screen-keyboard, so that
+    users may enter data using their remote control.
+
+    Unlike most on-screen-keyboards, this one has built-in form
+    functionality, so your app can pass it an entire form for the
+    user to fill in.
+*/
+
+global keyboard [[ void * ]]
+{
+    keyboard()
+        [[
+            lb_construct_empty();
+        ]];
+
+    /*
+        Function: show
+
+        To use the keyboard, you first prepare a form and then call
+        the keyboard's show function.
+
+        *Form:*
+
+        A form is a Lua table of fields. The keyboard displays the fields in the order that they
+        are provided.
+
+        Each field is a Lua table with some pre-defined properties.
+
+        There are only two mandatory properties for each field, its id and its caption.
+        The id of a field should be a unique string. It will never be displayed to the user;
+        it is only used in the <on_submit> event as the key for the resulting value.
+
+        The caption of a field is the name for the field that is shown to the user, it cannot
+        be empty.
+
+        *A very simple form would look like this:*
+
+        (code)
+        {
+            { id = "A" , caption = "Name" }
+        }
+        (end)
+
+        This form has a single field, with the id "A" and the caption "Name".
+
+        *Optional Field Properties:*
+
+        placeholder -   If provided, this string is shown to the user when the field
+                        is empty, to provide a hint as to what is expected.
+
+        value -         If you wish to provide an initial value for the field, use
+                        the value property.
+
+        type -          This is the type of field. If this property is omitted or not
+                        recognized, the field will be a standard text entry field.
+                        Only two other types of fields are recognized: "list" and "password".
+
+        *Password Fields:*
+
+        If the field type is "password", the user will be able to edit it just like any
+        other text field, but the characters entered by the user will be masked by a password
+        character.
+
+        password_char - This property lets you change the default character that is used to
+                        mask the text entered by the user.
+
+        *List Fields:*
+
+        List fields let the user choose the value for a field from a list of choices that you
+        provide. Therefore, if you set the type to "list", you must also provide the choices.
+
+        choices -   This is a Lua table of Lua tables. Each inner table should have two items, an
+                    identifier for the choice and the caption for the choice that is shown to
+                    the user. The choices are displayed in the order you provide them.
+
+        When using a list field, the field value should always be the id of a valid choice,
+        not its caption.
+
+        For example, this is how you chould let the user choose a state, with "Alaska" set
+        as the existing value,
+
+        (code)
+        local form =
+        {
+            {
+                id = "STATE",
+                caption = "State",
+                type = "list",
+                value = "AK",
+                choices =
+                {
+                    { "AL" , "Alabama" },
+                    { "AK" , "Alaska" },
+                    { "AS" , "American Samoa" },
+                    -- etc...
+                }
+            }
+        }
+
+        keyboard:show( form )
+        (end)
+
+
+        The keyboard can only be dismissed by the user, by pressing either the
+        'Cancel' or 'Submit' button. If the user presses 'Cancel', you will get
+        the <on_cancel> event with no results.
+
+        If the user presses 'Submit', you will get the <on_submit> event with a table
+        of results. This table has the field id as the key and the text that the
+        user typed in as the value.
+
+        *Arguments:*
+
+            form - A table of form fields as described above.
+
+        *Return Values:*
+
+            true - If the keyboard was shown, or
+            false - if there was a problem with the form.
+    */
+
+    bool show( table form )
+        [[
+            result = Keyboard::show( L , form );
+        ]];
+
+    /*
+        Event: on_field_changed
+
+        As the user edits a field, this event lets you know its current value.
+
+        *Arguments:*
+
+            keyboard - The keyboard.
+
+            id - The id of the field that has changed.
+
+            value - The new value of the field. If it is a list field, this will be the id of
+                    one of the choices.
+    */
+
+    callback on_field_changed( Keyboard keyboard , string id , string value );
+
+    /*
+        Event: on_cancel
+
+        This event lets you know that the user canceled the keyboard, and it will be hidden soon.
+
+        *Arguments:*
+
+            keyboard - The keyboard.
+    */
+
+    callback on_cancel( Keyboard keyboard );
+
+    /*
+        Event: on_submit
+
+        This event happens when the user presses the 'Submit' button on the keyboard.
+
+        *Arguments:*
+
+        keyboard - The keyboard.
+
+        results - A table of results. This table will contain a key-value pair for
+                  each field in the form. The key will be field's id and its value
+                  will be the value entered by the user. For list fields, the value
+                  will be the id of one of the choices. If a field is blank, this table
+                  will contain an entry for it, and the value will be an empty string.
+    */
+
+    callback on_submit( Keyboard keyboard , table results );
+}
