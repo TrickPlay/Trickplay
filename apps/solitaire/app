@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.solitaire",
+    release     = "6",
+    version     = "1.4",
+    name        = "Solitaire",
+    author      = "James Fenley",
+    copyright   = "© Trickplay Inc."
+}
+
