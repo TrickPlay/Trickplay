@@ -372,9 +372,13 @@ interface actor [[ClutterActor*]]
             luaL_checktype(L,2,LUA_TTABLE);
             lua_rawgeti(L,2,1);
             lua_rawgeti(L,2,2);
-	    lua_rawgeti(L,2,3);
+	        lua_rawgeti(L,2,3);
             clutter_actor_set_position(self,lua_tonumber(L,-3),lua_tonumber(L,-2));
-	    clutter_actor_set_depth(self,lua_tonumber(L,-1));
+            if ( lua_isnumber( L , -1 ) )
+            {
+	           clutter_actor_set_depth(self,lua_tonumber(L,-1));
+	        }
+	        
             lua_pop(L,3);
         ]];
             
@@ -917,6 +921,8 @@ interface actor [[ClutterActor*]]
 	
 	If the object has been rotated on its x and/or y axes, the resulting object will be a quadrangle with sides of unequal lengths. In such cases, the values in the transformed_size property specify a rectangle large enough to contain the entire quadrangle. One side effect of this is that the X, Y position of the rectangle, as specified in the <transformed_position> property, may not contain the actual coordinates of the quadrangle.
 	
+	*Note:* The transformed_size property's values are undefined until the object has been added to the global <screen> variable.
+	
 	*Format:* { transformed_width, transformed_height }
 	
 	*See Also:* the <transformed_position> property and the <transform_point> function
@@ -941,6 +947,8 @@ interface actor [[ClutterActor*]]
 	The transformed_position property is a table that contains the X and Y coordinates in pixels of the object's location taking into account any transformations applied to the object.
 	
 	If the object has been rotated on its x and/or y axes, the resulting object will be a quadrangle with sides of unequal lengths. The transformed_position property specifies the X, Y coordinates of a rectangle large enough to contain the entire quadrangle. Depending upon the nature of the quadrangle, its X, Y position coordinates may not be identical to those of the enclosing rectangle.
+	
+	*Note:* The transformed_position property's values are undefined until the object has been added to the global <screen> variable.
 	
 	*Format:* { transformed_X, transformed_Y }
 	
@@ -1715,7 +1723,7 @@ interface actor [[ClutterActor*]]
 	
 	The animate() function performs an asynchronous animation by changing one or more property values, such as X, Y coordinates, opacity and rotation, over a period of time.
 	
-	If the object's animate() function is called while an animation is already in progress, the animation is updated with the new settings.
+	If the object's animate() function is called while an animation is already in progress, the running animation is terminated immediately, all its animating properties are set to their ending values, and the new animation begins.
 	
 	A program can be notified when the animation completes by specifying a function name for the on_completed argument.
 	

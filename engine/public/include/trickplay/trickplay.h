@@ -33,7 +33,7 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    21
+#define TP_MINOR_VERSION    22
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------

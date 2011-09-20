@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.crittertwins",
+    release     = "3",
+    version     = "1.0",
+    name        = "Critter Twins",
+    author      = "Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}

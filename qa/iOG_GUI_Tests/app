@@ -1,0 +1,11 @@
+app=
+{
+    id          = "com.trickplay.iOS_manual_gui_tests",
+    release     = 1,
+    version     = "1.0",
+    name        = "Trickplay iOS Manual GUI Tests",
+    author      = "Trickplay QA",
+    copyright   = "© Trickplay Inc.",
+    description = "These tests are used to verify the GUI on the iOS device is rendering graphics as expected."
+}
+

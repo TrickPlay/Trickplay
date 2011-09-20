@@ -33,6 +33,7 @@
 		CD404C2A1353E18E0021D36C /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD404C291353E18D0021D36C /* MobileCoreServices.framework */; };
 		CD4CA69C13B50AC100B5A7A3 /* VirtualRemoteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4CA69A13B50AC100B5A7A3 /* VirtualRemoteViewController.m */; };
 		CD4CA69D13B50AC100B5A7A3 /* VirtualRemoteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD4CA69B13B50AC100B5A7A3 /* VirtualRemoteViewController.xib */; };
+		CD5B5920141AF1230048819E /* TVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = CD5B591F141AF1230048819E /* TVConnection.m */; };
 		CD5CFD6713D50F01002334E7 /* click.wav in Resources */ = {isa = PBXBuildFile; fileRef = CD5CFD6613D50F01002334E7 /* click.wav */; };
 		CD62293D1326BCBC003AB721 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
 		CD638F73140877690018AEEC /* TPAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD638F71140877690018AEEC /* TPAppViewController.m */; };
@@ -144,6 +145,9 @@
 		CD4CA69913B50AC100B5A7A3 /* VirtualRemoteViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VirtualRemoteViewController.h; path = ../VirtualRemoteViewController.h; sourceTree = "<group>"; };
 		CD4CA69A13B50AC100B5A7A3 /* VirtualRemoteViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VirtualRemoteViewController.m; path = ../VirtualRemoteViewController.m; sourceTree = "<group>"; };
 		CD4CA69B13B50AC100B5A7A3 /* VirtualRemoteViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VirtualRemoteViewController.xib; sourceTree = "<group>"; };
+		CD54637E14203CFD00965577 /* Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Extensions.h; sourceTree = "<group>"; };
+		CD5B591E141AF1230048819E /* TVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVConnection.h; sourceTree = "<group>"; };
+		CD5B591F141AF1230048819E /* TVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVConnection.m; sourceTree = "<group>"; };
 		CD5CFD6613D50F01002334E7 /* click.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = click.wav; sourceTree = "<group>"; };
 		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		CD638F70140877690018AEEC /* TPAppViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPAppViewController.h; sourceTree = "<group>"; };
@@ -264,6 +268,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				CD54637D14203CBF00965577 /* PrivateMethods */,
 				CDFEBBB8130A4CD100A14307 /* ViewControllers */,
 				CDFEBBA1130A4B8700A14307 /* Modules */,
 				1D3623240D0F684500981E51 /* AppDelegate.h */,
@@ -418,6 +423,23 @@
 			name = Camera;
 			sourceTree = "<group>";
 		};
+		CD54637D14203CBF00965577 /* PrivateMethods */ = {
+			isa = PBXGroup;
+			children = (
+				CD54637E14203CFD00965577 /* Extensions.h */,
+			);
+			name = PrivateMethods;
+			sourceTree = "<group>";
+		};
+		CD5B5925141E917C0048819E /* TVConnection */ = {
+			isa = PBXGroup;
+			children = (
+				CD5B591E141AF1230048819E /* TVConnection.h */,
+				CD5B591F141AF1230048819E /* TVConnection.m */,
+			);
+			name = TVConnection;
+			sourceTree = "<group>";
+		};
 		CD63B43D13B9895300158169 /* VirtualRemoteAssets */ = {
 			isa = PBXGroup;
 			children = (
@@ -543,6 +565,7 @@
 		CDFEBEB9130C6F9A00A14307 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
+				CD5B5925141E917C0048819E /* TVConnection */,
 				CDEE44AA137CC42400A4B5E2 /* CommandInterpreters */,
 				CDFEBBB5130A4CC700A14307 /* NetServiceManager.h */,
 				CDFEBBB6130A4CC700A14307 /* NetServiceManager.m */,
@@ -750,6 +773,7 @@
 				CD638F73140877690018AEEC /* TPAppViewController.m in Sources */,
 				CD638F77140C16D50018AEEC /* TVBrowser.m in Sources */,
 				CD277346140C8E4600A820BD /* TVBrowserViewController.m in Sources */,
+				CD5B5920141AF1230048819E /* TVConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
