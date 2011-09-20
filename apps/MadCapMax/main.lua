@@ -12,6 +12,52 @@ local function main()
     -- Utility Functions                                                      --
     ----------------------------------------------------------------------------
     
+    --calculates a pararbola that the 2 points (x1,y1), (x2,y2), (x3,y3) lie on
+    function calc_parabola(
+            x1, y1,
+            x2, y2,
+            x3, y3
+        )
+        
+        if type(x1) ~= "number" then error("arg 1 must be a number",2) end
+        if type(y1) ~= "number" then error("arg 2 must be a number",2) end
+        if type(x2) ~= "number" then error("arg 3 must be a number",2) end
+        if type(y2) ~= "number" then error("arg 4 must be a number",2) end
+        if type(x3) ~= "number" then error("arg 5 must be a number",2) end
+        if type(y3) ~= "number" then error("arg 6 must be a number",2) end
+        
+        
+        local denom = (x1 - x2) * (x1 - x3) * (x2 - x3)
+        
+        local a = (      x3 * (y2 - y1)      +      x2 * (y1 - y3)      +      x1 * (y3 - y2)      ) / denom
+        local b = ( x3 * x3 * (y1 - y2)      + x2 * x2 * (y3 - y1)      + x1 * x1 * (y2 - y3)      ) / denom
+        local c = ( x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3 ) / denom
+        
+        local f = function(x) return a * x * x   +   b * x   +   c end
+        
+        print("\n",
+            x1, y1, f(x1),"\n",
+            x2, y2, f(x2),"\n",
+            x3, y3, f(x3)
+        )
+        print("\n\n\nfunc is:",a,b,c)
+        
+        local v_x = -b/ (2*a)
+        local v_y = c - b*b / (4*a)
+        
+        local dist = math.sqrt( (x1-v_x)*(x1-v_x) + (y1-v_y)*(y1-v_y))+
+            math.sqrt( (x3-v_x)*(x3-v_x) + (y3-v_y)*(y3-v_y))
+            
+        local t = 1+(dist/650-1)/4
+        
+        print("dist",dist,"t",t)
+        
+        
+        return f, t
+        
+    end
+
+    
     function make_flash_anim(obj,stop_check)
         return {
             loop     = true,
@@ -100,6 +146,7 @@ local function main()
     -- Game Layers
     layers = {
         srcs         = Group{  name  =  "Clone Sources layer"      },
+        backdrop     = Rectangle{name = "Backdrop", size = screen.size,color="000000" },
         
         distance     = Group{  name  =  "'In the Distance' layer"  },
         wall         = Group{  name  =  "'Tiled Wall' layer"       },
@@ -125,7 +172,7 @@ local function main()
         layers.enemy,     
         layers.foreground
     )
-    screen:add(layers.srcs,physics_world,layers.hud,layers.menus)
+    screen:add(layers.srcs,layers.backdrop,physics_world,layers.hud,layers.menus)
     
     layers.srcs:hide()
     
@@ -133,8 +180,8 @@ local function main()
     -- Collisions
     collides_with_max = {}
     collides_with_enemy = {}
-    enemies = {}
-    local collided = function(object_1,object_2)
+    curr_enemies = {}
+    collided = function(object_1,object_2)
     
         --do box collision detection
         
@@ -149,90 +196,62 @@ local function main()
         
     end
     
-    --r1 = Rectangle{w=100,h=100,color="00009955"}
-    --r2 = Rectangle{w=100,h=100,color="99000055"}
-    --layers.foreground:add(r1,r2)
-    check_collisions = function()
-        
-        if Jazz and Max then
+    check_collisions = {
+        on_step = function()
             
-            Jazz.x1 = Jazz.x-Jazz.anchor_point[1]+40
-            Jazz.y1 = Jazz.y-Jazz.anchor_point[2]+150
-            Jazz.x2 = Jazz.x-Jazz.anchor_point[1]+Jazz.w-40
-            Jazz.y2 = Jazz.y-Jazz.anchor_point[2]+Jazz.h
-            
-            Max.x1 = Max.x-Max.anchor_point[1]+20
-            Max.y1 = Max.y-Max.anchor_point[2]
-            Max.x2 = Max.x-Max.anchor_point[1]+Max.w-50
-            Max.y2 = Max.y-Max.anchor_point[2]+Max.h-40
-            --[[
-            r1.x = Max.x1
-            r1.w = Max.x2 - Max.x1
-            
-            r1.y = Max.y1
-            r1.h = Max.y2 - Max.y1
-            
-            r2.x = Jazz.x1
-            r2.w = Jazz.x2 - Jazz.x1
-            
-            r2.y = Jazz.y1
-            r2.h = Jazz.y2 - Jazz.y1
-            --]]
-            
-            if not Max.hit and collided(Max,Jazz) then
+            if Max and not Max.dead then
                 
-                --[[
-                if Jazz.y < Max.y - 20 then
-                    print("above")
-                else
-                    print("below")
+                Max:update_coll_box()
+                
+                for e,_ in pairs(curr_enemies) do
+                    
+                    e:update_coll_box()
+                    
+                    if not Max.hit and not e.harmless and collided(Max,e) then
+                        
+                        Max:recieve_impact(-1200,-1200)
+                        
+                    end
                 end
                 
-                if Jazz.x < Max.x then
-                    print("left")
-                else
-                    print("right")
-                end
-                --]]
-                Max:recieve_impact(-800,-800)
-                --Max:apply_v(Jazz.)
-                --print("hit")
-                
-            end
-            
-            
-            
-            for i, item in pairs(collides_with_max) do
-                
-                item.x1 = item.x-item.anchor_point[1]
-                item.y1 = item.y-item.anchor_point[2]
-                item.x2 = item.x-item.anchor_point[1]+item.w
-                item.y2 = item.y-item.anchor_point[2]+item.h
-                
-                if collided(Max,item) then
-                    --print("weeeee")
-                    item:collision()
-                end
-                
-            end
-            
-            for i, item in pairs(collides_with_enemy) do
-                --for j, e in pairs(enemies) do
+                for i, item in pairs(collides_with_max) do
                     
                     item.x1 = item.x-item.anchor_point[1]
                     item.y1 = item.y-item.anchor_point[2]
                     item.x2 = item.x-item.anchor_point[1]+item.w
                     item.y2 = item.y-item.anchor_point[2]+item.h
                     
-                    if collided(Jazz,item) then
-                        item:collision(Jazz)
+                    if collided(Max,item) then
+                        
+                        item:collision()
+                        
                     end
                     
-                --end
+                end
+                
+                for i, item in pairs(collides_with_enemy) do
+                    
+                    for e,_ in pairs(curr_enemies) do
+                        
+                        item.x1 = item.x-item.anchor_point[1]
+                        item.y1 = item.y-item.anchor_point[2]
+                        item.x2 = item.x-item.anchor_point[1]+item.w
+                        item.y2 = item.y-item.anchor_point[2]+item.h
+                        
+                        if collided(e,item) then
+                            
+                            item:collision(e)
+                            
+                        end
+                        
+                    end
+                    
+                end
+                
             end
             
         end
-    end
+    }
     
     
     
@@ -245,38 +264,60 @@ local function main()
     Animation_Loop = dofile("Utils/Animation_Loop.lua")
     StateMachine   = dofile("Utils/State_Machine.lua")
     
-    gamestate = StateMachine{"OFFLINE","SPLASH","LVL_TRANSITION","ACTIVE","PAUSED"}
+    gamestate = StateMachine{
+        "OFFLINE",
+        "SPLASH",
+        "LVL_TRANSITION",
+        "HS_MENU",
+        "ACTIVE",
+        "PAUSED"
+    }
     
     --MadCapMax specific
+    Max             = dofile("Max.lua")
+    Make_Cat        = dofile("Jazz.lua")
+    Frog            = dofile("Frog.lua")
+    Crawfish        = dofile("Crawfish.lua")
+    Tuffy           = dofile("Tuffy.lua")
+    
     Item            = dofile("Items.lua")
     Hud             = dofile("Hud.lua")
+    LVL_Object      = dofile("Level_Object.lua")
+    ScoreKeeper     = dofile("Score_Keeper.lua")
+    
     Splash_Menu     = dofile("Splash_Menu.lua")
     Transition_Menu = dofile("Transition_Menu.lua")
-    LVL_Object      = dofile("Level_Object.lua")
-    Max             = dofile("Max.lua")
-    Jazz            = dofile("Jazz.lua")
-    
+    HS_Menu         = dofile("High_Score_Menu.lua")
     
     ----------------------------------------------------------------------------
-    -- Link them up                                                           --
+    -- Link them up - removes circular dependencies                           --
     ----------------------------------------------------------------------------
     
     
-    Animation_Loop:init{
-        states = gamestate:states()
-    }
+    Jazz  = Make_Cat("Jazz")
+    Frank = Make_Cat("Frank")
+    
+    
+    
+    Animation_Loop:init{   states = gamestate:states()   }
+    
+    local in_game_animations = {}
     
     gamestate:add_state_change_function(
         function(old,new)
+            
             if new ~= "PAUSED" then
                 Animation_Loop:clear_state(old)
             end
             Animation_Loop:switch_state_to(new)
+            
         end
     )
     
     Transition_Menu:init{
-        player = Max,
+        player  = Max,
+        sk      = ScoreKeeper,
+        hs_menu = HS_Menu
     }
     
     LVL_Object:init{
@@ -285,66 +326,133 @@ local function main()
     }
     Jazz:init{
         target = Max,
-        parent = layers.enemy,
+        lvl    = LVL_Object,
+    }
+    Frank:init{
+        target = Max,
+        lvl    = LVL_Object,
+    }
+    Tuffy:init{
+        target = Max,
+        lvl    = LVL_Object,
     }
     Max:init{
-        parent = layers.player
+        lvl    = LVL_Object,
+        sk     = ScoreKeeper,
+        hud    = Hud,
     }
     
     ---------------------------------------------------------------------------- 
     -- Init                                                                   --
     ----------------------------------------------------------------------------
     
-    launch_lvl = {
-        function(loader)
-            
-            LVL_Object:prep_level{
-                level = 1,
-                scroll_speed = 100,
-                set_progress = loader.set_progress,
-                inc_progress = loader.inc_progress,
+    lvl_params = {
+        {
+            [Max] = {
+                launch  = false,
+                start_x = 400-30,
+                start_y = 380,
+                start_wing_src = 5,
+                start_z_rot    = -20,
+                start_wing_rot = 60,
+            },
+            [LVL_Object] = {
+                intro_actors = {
+                    [2] = { --in stage 2
+                        2--the first actor is item 2
+                    }
+                },
+                --call_before_intro = {Jazz.attack}
+                call_after_intro = {Max.launch}--,Jazz.launch}
+            },
+            enemies = {
+                [Jazz] = { launch = true}
+            },
+        },
+        {
+            [Max] = {
+                launch  = true,
+            },
+            [LVL_Object] = {
+                outro_actors = {
+                    [2] = { --in stage 2
+                        "maxina-eyelids"
+                    },
+                    
+                    [4] = { --in stage 4
+                        "heart"
+                    }
+                },
+                call_before_outro = {
+                    
+                    [Max.fly_to] = {d = 1,x = 13060-100, y=800}
+                    
+                }
+            },
+            enemies = {
+                [Frank] = {start_x = 2500, launch = true },
+                [Tuffy] = {call_on_start = Frank.exit },
             }
-            
-            Jazz:load_assets(layers.srcs, layers.enemy)
-            
-            Jazz:launch_AI(LVL_Object.obstacles,LVL_Object.enemy_stop)
-            
-            Max:setup_for_level{--(LVL_Object,200,300)
-                lvl = LVL_Object,
-                start_x = 200,
-                start_y = 300,
-                scroll_speed = 100,
-                enemy_obstacles = LVL_Object.obstacles,
-            }
-            
-            
-            LVL_Object.animation = Animation_Loop:add_animation{
-                on_step = LVL_Object.on_idle,
-            }
-            
-            Max.animation = Animation_Loop:add_animation{
-                on_step = Max.on_idle
-            }
-            
-            check_collisions_animation = Animation_Loop:add_animation{on_step = check_collisions}
-            
-            Max:grab_key_focus()
-            
-            Hud:setup_lvl{}
-        end
+        }
     }
     
-    
-    --Splash_Menu:load_assets(layers.menus)
+    function launch_lvl(lvl_i,loader)
+        
+        
+        --in_game_animations = {}
+        
+        print("LNCH_LVL")
+        
+        --setup level
+        LVL_Object:setup_for_level{
+            
+            level        = lvl_i,
+            
+            set_progress = loader.set_progress,
+            
+            inc_progress = loader.inc_progress,
+            
+            intro_actors =  lvl_params[lvl_i][LVL_Object] and
+                            lvl_params[lvl_i][LVL_Object].intro_actors or nil,
+            
+            call_after_intro =  lvl_params[lvl_i][LVL_Object] and
+                                lvl_params[lvl_i][LVL_Object].call_after_intro or nil,
+            
+            outro_actors =  lvl_params[lvl_i][LVL_Object] and
+                            lvl_params[lvl_i][LVL_Object].outro_actors or nil,
+            
+            call_before_outro = lvl_params[lvl_i][LVL_Object] and
+                                lvl_params[lvl_i][LVL_Object].call_before_outro or nil,
+        }
+        
+        Hud:setup_lvl()
+        
+        Animation_Loop:add_animation(check_collisions,"ACTIVE")
+        
+        --setup enemies
+        curr_enemies = lvl_params[lvl_i].enemies
+        
+        for e,p in pairs(curr_enemies) do
+            
+            e:setup_for_level(p)
+            
+        end
+        
+        --setup Max
+        Max:setup_for_level(lvl_params[lvl_i][Max])
+        
+        Max:grab_key_focus()
+        
+        --gamestate:change_state_to("ACTIVE")
+        
+    end
     
     idle.on_idle = Animation_Loop.loop
-    
-    --dolater(100,Splash_Menu.grab_key_focus,Splash_Menu)
     
     gamestate:change_state_to("SPLASH")
     
 end
 
-dolater(main)
+dolater( main )
 
 

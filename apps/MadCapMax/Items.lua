@@ -10,6 +10,8 @@ local item_type = {
             
             if obj.hit then return end
             
+            mediaplayer:play_sound("audio/crunch.wav")
+            
             initial_impact()
             
             Animation_Loop:delete_animation(obj.on_idle)
@@ -48,6 +50,7 @@ local item_type = {
                     end,
                     on_completed = function()
                         piece:unparent()
+                        piece = nil
                     end
                 }
                 
@@ -158,7 +161,9 @@ make_item = function(t)
         
         t.source.on_idle = rock_back_and_forth(t.source)
         
-        Animation_Loop:add_animation(t.source.on_idle)
+        
+        Animation_Loop:add_animation(t.source.on_idle,"ACTIVE")
+        
     end
     
     
