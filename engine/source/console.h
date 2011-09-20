@@ -10,13 +10,17 @@ public:
 
     static Console * make( TPContext * context );
 
-    ~Console();
+    virtual ~Console();
 
     typedef int ( *CommandHandler )( const char * command, const char * parameters, void * data );
 
     void add_command_handler( CommandHandler handler, void * data );
 
     void attach_to_lua( lua_State * l );
+
+    void enable();
+
+    void disable();
 
 protected:
 
@@ -56,6 +60,7 @@ private:
     GString        *        stdin_buffer;
     CommandHandlerList      handlers;
     std::auto_ptr<Server>   server;
+    bool                    enabled;
 };
 
 

@@ -37,11 +37,10 @@ AppPushServer * AppPushServer::make( TPContext * context )
 
 AppPushServer::AppPushServer( TPContext * _context )
 :
+	HttpServer::RequestHandler( _context->get_http_server() , "/push" ),
     context( _context ),
     current_push_path( 0 )
 {
-    context->get_http_server()->register_handler( "/push" , this );
-
     tplog( "READY" );
 }
 
@@ -49,8 +48,6 @@ AppPushServer::AppPushServer( TPContext * _context )
 
 AppPushServer::~AppPushServer()
 {
-    context->get_http_server()->unregister_handler( "/push" );
-
     g_free( current_push_path );
 }
 
