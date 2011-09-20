@@ -6,11 +6,15 @@
 
 //.............................................................................
 
-static Debug_OFF log( "BITMAP" );
+#define TP_LOG_DOMAIN   "BITMAP"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //.............................................................................
 
-Bitmap::Bitmap( lua_State * L , const char * _src , bool _async )
+Bitmap::Bitmap( lua_State * L , const char * _src , bool _async , bool read_tags )
 :
     src( _src ),
     image( 0 ),
@@ -26,19 +30,16 @@ Bitmap::Bitmap( lua_State * L , const char * _src , bool _async )
     {
         if ( strlen( _src ) > 0 )
         {
-            image = app->load_image( _src );
+            image = app->load_image( _src , read_tags );
         }
     }
     else
     {
-        log( "LOADING ASYNC '%s'" , _src );
+        tplog( "LOADING ASYNC '%s'" , _src );
 
         RefCounted::ref( this );
 
-        if ( ! app->load_image_async( _src , callback , this , destroy_notify ) )
-        {
-            RefCounted::unref( this );
-        }
+        app->load_image_async( _src , read_tags , callback , this , destroy_notify );
     }
 }
 
@@ -46,7 +47,7 @@ Bitmap::Bitmap( lua_State * L , const char * _src , bool _async )
 
 Bitmap::~Bitmap()
 {
-    log( "DESTROYING BITMAP %p" , this );
+    tplog( "DESTROYING BITMAP %p" , this );
 
     if ( image )
     {
@@ -54,6 +55,19 @@ Bitmap::~Bitmap()
     }
 
     lsp->unref();
+}
+
+
+//.............................................................................
+
+Bitmap * Bitmap::get( lua_State * L , int index )
+{
+    if ( ! lb_check_udata_type( L , index , "Bitmap" ) )
+    {
+        return 0;
+    }
+
+    return ( Bitmap * ) UserData::get_client( L , index );
 }
 
 //.............................................................................
@@ -72,6 +86,13 @@ guint Bitmap::height() const
 
 //.............................................................................
 
+guint Bitmap::depth() const
+{
+    return image ? image->depth() : 0;
+}
+
+//.............................................................................
+
 bool Bitmap::loaded() const
 {
     return image ? true : false;
@@ -81,7 +102,7 @@ bool Bitmap::loaded() const
 
 void Bitmap::callback( Image * image , gpointer me )
 {
-    log( "  ASYNC DECODE COMPLETED FOR %p : %s" , me , image ? "SUCCESS" : "FAILED" );
+    tplog( "  ASYNC DECODE COMPLETED FOR %p : %s" , me , image ? "SUCCESS" : "FAILED" );
 
     Bitmap * self = ( Bitmap * ) me;
 
@@ -100,7 +121,7 @@ void Bitmap::callback( Image * image , gpointer me )
 
 void Bitmap::destroy_notify( gpointer me )
 {
-    log( "  UNREF %p" , me );
+    tplog( "  UNREF %p" , me );
 
     RefCounted::unref( ( RefCounted * ) me );
 }
@@ -109,14 +130,11 @@ void Bitmap::destroy_notify( gpointer me )
 
 Image * Bitmap::get_image( lua_State * L , int index )
 {
-    if ( ! lb_check_udata_type( L , index , "Bitmap" ) )
+    if ( Bitmap * bitmap = Bitmap::get( L , index ) )
     {
-        return 0;
+        return bitmap->image;
     }
-
-    Bitmap * b = ( Bitmap * ) UserData::get_client( L , index );
-
-    return b ? b->image : 0;
+    return 0;
 }
 
 //.............................................................................
