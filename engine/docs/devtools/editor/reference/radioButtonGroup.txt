@@ -1,0 +1,358 @@
+Class: RadioButtonGroup
+
+The RadioButtonGroup class enables the user to select a single setting from a group of possible settings. Only one setting in the group may be selected at any given time. A RadioButtonGroup contains two or more possible settings.
+
+In this documentation, the term "RadioButtonGroup" is used to refer to a RadioButtonGroup object. A "radio button" refers to a single radio button within the RadioButtonGroup.
+
+
+
+Constructor: radioButtonGroup( properties )
+
+The radioButtonGroup() constructor creates a new RadioButtonGroup UI element object. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+
+*Prototype:*
+
+	(code)
+	rbGroup radioButtonGroup( properties )
+	(end)
+
+*Argument:*
+
+properties - table of RadioButtonGroup property settings
+
+The properties table contains a comma-separated list of property settings for the new RadioButtonGroup. If a property is not explicitly set, its default value is used.
+
+*Return Value:* Returns an object that contains the new RadioButtonGroup and related support objects. The returned object should be used to access the RadioButtonGroup's properties and functions.
+
+*Example:* Create a new RadioButtonGroup, specifying some properties
+
+	(code)
+	-- Load the UI Element library
+	ui_element = dofile( "/lib/ui_element.lua" )
+
+	-- Create a new RadioButtonGroup, setting some of its RadioButtonGroup-specific properties
+	-- Note: We are creating a single RadioButtonGroup, but that group actually contains 
+	-- three radio buttons defined in the items property. The second radio button will be
+	-- initialized as selected.
+	local radioButton = ui_element.radioButtonGroup{ items = { "Strict Mode", "Quirks Mode", "A la Mode" },
+                                                     selected_item = { 2 } }
+
+	-- Set some of the RadioButtonGroup's UIElement properties
+	radioButton.name = "Operating Mode"
+	radioButton.position = { 700, 500, 0 }
+	(end)
+
+
+
+Property: items
+
+The items property is a table of strings where each string specifies the text displayed alongside one radio button in the RadioButtonGroup. For each string in the items table, there will be one radio button displayed in the group. The first radio button in the items table is at index 1.
+
+*Default Setting:* { "item1", "item2", "item3" }
+
+*See Also:* the <selected_item> property
+
+
+
+Property: selected_item
+
+The selected_item property specifies the currently-selected radio button. The property's value is an integer index into the RadioButtonGroup's <items> property table.
+
+You can assign values to the selected_item property to set the currently-selected radio button. If the RadioButtonGroup is visible onscreen, the display will be updated automatically when the value of the selected_item property changes.
+
+*Default Setting:* 1, i.e., first radio button in the items table is checked
+
+*Code Example:* Demonstrate how to determine the currently-selected radio button and also how to forcibly set it
+
+	(code)
+	-- Load the UI Element library
+	ui_element = dofile("/lib/ui_element.lua")
+
+	-- Create a new RadioButtonGroup, setting some of its RadioButtonGroup-specific properties
+	local radioButton = ui_element.radioButtonGroup{
+			items = { "Blue Period", "Red Period", "Cubist Period" },
+			selected_item = 2 }
+
+	-- Set some of the RadioButtonGroup's UIElement properties
+	radioButton.name = "Favorite Picasso Period"
+	radioButton.position = { 700, 500, 0 }
+	
+	-- This code can be placed in an event handler, such as a button.pressed() handler,
+	-- to determine the RadioButtonGroup's currently-selected radio button.
+	print( "Your favorite Picasso period is the", radioButton.items[ radioButton.selected_item ] )
+	
+	-- This will force the currently-selected radio button to the third radio button
+	radioButton.selected_item = 3
+	(end)
+
+*See Also:* the <items> and <rotate_func> properties
+
+
+
+Property: ui_width 
+
+The ui_width property is an integer value specifying the RadioButtonGroup's width in pixels.
+
+*Default Setting:* 600
+
+*See Also:* the <ui_height> property
+
+
+
+Property: ui_height
+
+The ui_height property is an integer specifying the RadioButtonGroup's height in pixels.
+
+*Default Setting:* 200
+
+*See Also:* the <ui_width> property
+
+
+
+Property: direction
+
+The direction property is a text string specifying whether the radio buttons will display vertically (one atop each other) or horizontally (alongside each other).
+
+*Supported Settings:* The direction property is case-sensitive
+
+"horizontal" - radio buttons will display alongside each other. The first radio button in the <items> property is the leftmost.
+"vertical" - radio buttons will display atop each other. The first radio button in the <items> property is the top-most.
+
+*Default Setting:* "vertical"
+
+*See Also:* the <items> property
+
+
+
+Property: line_space
+
+The line_space property is an integer value specifying the pixel space between each of the object's radio buttons. The line_space property inserts the space below each radio button for vertically-arranged buttons, and after each radio button for horizontally-arranged buttons.
+
+*Default Setting:* 40
+
+*See Also:* the <items> and <direction> properties
+
+
+
+Property: ui_position
+
+The ui_position property is a table of integer values specifying the RadioButtonGroup object's X, Y, and Z screen coordinates, respectively.
+
+*Default Setting:* { 200, 200, 0 }
+
+*See Also:* the <box_position> and <item_position> properties
+
+
+
+Property: box_position
+
+The box_position property is a table of integer values specifying the X,Y offsets, respectively, at which to position the radio button's outer circle. The offsets are specified in pixels and are relative to the object's <ui_position> property.
+
+By specifying the button's outer-circle location, the button can be positioned in various relations to its associated descriptive text, such as to the right of the text or below it.
+
+*Default Setting:* { 0, 0 }, i.e., the button's outer circle is positioned at the <ui_position> location
+
+*See Also:* the <ui_position> and <item_position> properties
+
+
+
+Property: item_position
+
+The item_position property is a table of integer values specifying the X,Y offsets, respectively, at which to position the radio button's associated descriptive text. The offsets are specified in pixels and are relative to the object's <ui_position> property.
+
+*Default Setting:* { 50, -5 }, i.e., the text is displayed to the right and slightly above the <ui_position> location
+
+*See Also:* the <ui_position> and <box_position> properties
+
+
+
+Property: text_font
+
+The text_font property is a text string describing the font to use for the RadioButtonGroup's descriptive text. The font string's format is described in the <Text.font> section.
+
+*Default Setting:* "DejaVu Sans 30px"
+
+*See Also:* the <text_color> property
+
+
+
+Property: text_color
+
+The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the RadioBoxGroup's text.
+
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* { 255, 255, 255, 255 } (white and completely opaque)
+
+*See Also:* the <text_font> property
+
+
+
+Property: button_color
+
+The button_color property is a table of integer RGB and alpha settings specifying the color of the radio button's outer-circle when the object does not have the input focus.
+
+The button_color property is used only if the object's <skin> property is set to "custom".
+
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* {255, 255, 255, 255} (white and opaque)
+
+*See Also:* the <focus_color>, <select_color> and <skin> properties
+
+
+
+Property: focus_color
+
+The focus_color property is a table of integer RGB and alpha settings specifying the color of the radio button's outer-circle when the object has the input focus.
+
+The focus_color property is used only if the object's <skin> property is set to "custom".
+
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* { 0, 255, 0, 255 } (green and completely opaque)
+
+*See Also:* the <button_color> and <skin> properties
+
+
+
+Property: select_color
+
+The select_color property is a table of integer RGB and alpha settings specifying the color of the radio button's inner-circle which is displayed only when the radio button is selected.
+
+The select_color property is used only if the object's <skin> property is set to "custom".
+
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* {255, 255, 255, 255} (white and opaque)
+
+*See Also:* the <button_color> and <skin> properties
+
+
+
+Property: button_radius
+
+The button_radius property is an integer value specifying the radius in pixels of the radio button's outer circle. All radio buttons, whether selected or not selected, display this outer circle. When a radio button is selected, it also displays an inner circle, whose size can be specified in the <select_radius> property.
+
+The button_radius property is used only if the object's <skin> property is set to "custom."
+
+*Default Setting:* 10
+
+*See Also:* the <select_radius> and <skin> properties
+
+
+
+Property: select_radius
+
+The select_radius property is an integer value specifying the radius in pixels of the radio button's inner circle which gets displayed when the button is selected. The value of the inner circle/select_radius property should be less than or equal to the value of the outer circle/button_radius property.
+
+The select_radius property is used only if the object's <skin> property is set to "custom".
+
+*Default Setting:* 4
+
+*See Also:* the <button_radius> and <skin> properties
+
+
+
+Property: skin
+
+The skin property is a string that specifies the display appearance of a radio button.
+
+Predefined skins are provided, and the developer may define a custom skin. The following skin appearances are supported.
+
+*Supported Settings:* The skin property is case-sensitive.
+
+"default" - a utilitarian and sedate skin
+"CarbonCandy" - an alternative skin. Flashy, attracts attention
+"custom" - the skin is defined by the developer
+
+When the "custom" skin is selected, the developer must define the <button_radius>, <button_color>, <focus_color>, <select_radius> and <select_color> properties.
+
+*Default Setting:* "default"
+
+
+
+Function: insert_item
+
+The insert_item() function appends a specified string to the RadioButtonGroup's <items> property.
+
+*Prototype:* insert_item( item )
+
+*Argument:*
+
+item - string specifying the new radio button
+
+*Return Value:* None
+
+*See Also:* the <items> property and the <remove_item> function
+
+
+
+Function: remove_item
+
+The remove_item() function removes the last item in the RadioButtonGroup's <items> property.
+
+*Prototype:* remove_item()
+
+*Return Value:* None
+
+*See Also:* the <items> property and the <insert_item> function
+
+
+
+Function: select_button
+
+The select_button() function selects the specified radio button. If the RadioButtonGroup's <rotate_func> property is defined, it is called after setting the selection.
+
+*Prototype:* select_button( selected_item )
+
+*Argument:*
+
+selected_item - integer index into the RadioButtonGroup's <items> table that references the radio button to select. The first entry in the items table is at index 1.
+
+*Return Value:* None
+
+*See Also:* the <items> and <selected_item> properties
+
+
+
+Function: on_focus_in
+
+The on_focus_in() function forces the input focus to the RadioButtonGroup.
+
+*Prototype:* on_focus_in()
+
+*Return Value:* None
+
+
+
+Function: on_focus_out
+
+The on_focus_out() function releases the input focus from the RadioButtonGroup.
+
+After calling on_focus_out(), no UI element has the input focus.
+
+*Prototype:* on_focus_out()
+
+*Arguments:* None.
+
+*Return Value:* None.
+
+
+
+Event Handler: rotate_func
+
+The rotate_func() event handler is called whenever the selected button in the RadioButtonGroup has changed. Based upon the selected radio button, the program can perform appropriate operations, such as displaying or hiding display elements.
+
+*Prototype:* rotate_func( selected_item )
+
+*Argument:*
+
+selected_item - the current setting of the RadioButtonGroup's <selected_item> property
+
+*Return Value:* None
+
+*Default Setting:* nil
+
+*See Also:* the <items> and <selected_item> properties
+

@@ -33,7 +33,7 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    18
+#define TP_MINOR_VERSION    22
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
@@ -242,6 +242,16 @@ typedef struct TPContext TPContext;
                                 EXIT key will be passed to it.
                                 Defaults is true.
 
+    TP_HTTP_PORT -              The port for Trickplay's HTTP server.
+                                Defaults to "0".
+
+    TP_RESOURCES_PATH -         The path to various Trickplay resources.
+                                Defaults to "resources" (in the current working directory).
+
+    TP_TEXTURE_CACHE_LIMIT	 -	The size of the texture cache (in MB). A value <= 0 will disable
+    							the cache altogether.
+                                Defaults to "0".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -277,7 +287,6 @@ typedef struct TPContext TPContext;
 #define TP_LIRC_UDS                     "lirc_uds"
 #define TP_LIRC_REPEAT                  "lirc_repeat"
 #define TP_APP_PUSH_ENABLED             "app_push_enabled"
-#define TP_APP_PUSH_PORT                "app_push_port"
 #define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
 #define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
 #define TP_RANDOM_SEED                  "random_seed"
@@ -287,6 +296,9 @@ typedef struct TPContext TPContext;
 #define TP_AUDIO_SAMPLER_MAX_INTERVAL   "audio_sampler_max_interval"
 #define TP_TOAST_JSON_PATH              "toast_json_path"
 #define TP_FIRST_APP_EXITS              "first_app_exits"
+#define TP_HTTP_PORT                    "http_port"
+#define TP_RESOURCES_PATH               "resources_path"
+#define TP_TEXTURE_CACHE_LIMIT			"texture_cache_limit"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

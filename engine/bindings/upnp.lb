@@ -11,7 +11,15 @@ module upnp;
 
 #include "util.h"
 
-Debug_ON ulog;
+//=============================================================================
+
+#define TP_LOG_DOMAIN   "UPNP"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      true
+
+#include "log.h"
+
+//=============================================================================
 
 class Client
 {
@@ -64,14 +72,14 @@ public:
 		
 		if ( UPNP_E_SUCCESS != UpnpSearchAsync( handle , timeout , target , udata ) )
 		{
-			ulog( "UPNP SEARCH FOR '%s' FAILED" , target );
+			tplog2( "UPNP SEARCH FOR '%s' FAILED" , target );
 			
 			UserData::Handle::destroy( udata );
 			
 			return 0;
 		}  
 		
-		ulog( "STARTED UPNP SEARCH %d FOR '%s'" , next_search_id , target );
+		tplog2( "STARTED UPNP SEARCH %d FOR '%s'" , next_search_id , target );
 		
 		return next_search_id++;
 	}
@@ -84,7 +92,7 @@ public:
 		
 		while ( lua_next( L , arguments ) )
 		{
-			if ( lua_isstring( L , -2 ) )
+			if ( lua_really_isstring( L , -2 ) )
 			{
 				const char * k = lua_tostring( L , -2 );
 				const char * v = lua_tostring( L , -1 );
@@ -111,14 +119,14 @@ public:
 		
 		if ( UPNP_E_SUCCESS != UpnpSendActionAsync( handle , control_url , service_type , 0 , xml , action_callback , udata ) )
 		{
-			ulog( "UPNP ACTION '%s' FAILED" , action );
+			tplog2( "UPNP ACTION '%s' FAILED" , action );
 			
 			UserData::Handle::destroy( udata );
 			
 			return 0;
 		}  
 		
-		ulog( "STARTED UPNP ACTION %d FOR '%s'" , next_action_id , action );
+		tplog2( "STARTED UPNP ACTION %d FOR '%s'" , next_action_id , action );
 		
 		return next_action_id++;
 	}
@@ -141,7 +149,7 @@ private:
 			
 			Action * a = ( Action * ) udata->get_user();
 			
-			ulog( "ACTION %d FINISHED WITH ERROR CODE %d" , a->id , action->ErrCode );
+			tplog2( "ACTION %d FINISHED WITH ERROR CODE %d" , a->id , action->ErrCode );
 			
     		g_idle_add_full( 
     		    TRICKPLAY_PRIORITY ,
@@ -377,7 +385,7 @@ private:
 		{
         	case UPNP_DISCOVERY_SEARCH_RESULT:
 	        	{
-	        		ulog( "SEARCH RESULT" );
+	        		tplog2( "SEARCH RESULT" );
 	        		// This gathers the results of the search into a search result structure
 	        		// and puts that in the main thread - to callback
 	        		
@@ -387,7 +395,7 @@ private:
         	
         	case UPNP_DISCOVERY_SEARCH_TIMEOUT:
 	        	{
-	        		ulog( "SEARCH FINISHED" );
+	        		tplog2( "SEARCH FINISHED" );
 	        		
 	        		// This will issue a completed callback and then destroy the user data handle
 	        			        		
