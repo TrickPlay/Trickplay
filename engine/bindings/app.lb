@@ -3,8 +3,8 @@
 #include "context.h"
 #include "sysdb.h"
 
-void app_loaded_handler(const char *,void * l);
-void app_closing_handler(const char *,void * l);
+void app_loaded_handler(TPContext *,const char *,void * l);
+void app_closing_handler(TPContext *,const char *,void * l);
 ]]
 
 # Global: app
@@ -63,6 +63,23 @@ global app [[App*]]
     
     readonly string version
         [[version=self->get_metadata().version.c_str();]];
+
+    # Property: attributes
+    # Returns a table containing any attributes defined in the app file. The
+    # attributes are the keys of the table, and the values are always true.
+
+    readonly table attributes
+        [[
+            lua_newtable( L );
+            const App::Metadata & md( self->get_metadata() );
+
+            for ( StringSet::const_iterator it = md.attributes.begin(); it != md.attributes.end(); ++it )
+            {
+                lua_pushstring( L , it->c_str() );
+                lua_pushboolean( L , true );
+                lua_rawset( L , -3 );
+            }
+        ]];
 
     # Property: contents
     # Returns a table containing the names of all files contained
@@ -229,16 +246,18 @@ global app [[App*]]
     # This callback is invoked just before the app is about to close.
     
     callback on_closing;
+
+    callback on_audio_match;
 }
 
 [[
-void app_loaded_handler(const char *,void * l)
+void app_loaded_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
     invoke_app_on_loaded(L,App::get(L),0,0);
 }
 
-void app_closing_handler(const char *,void * l)
+void app_closing_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
     invoke_app_on_closing(L,App::get(L),0,0);

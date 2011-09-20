@@ -7,6 +7,7 @@
 #include "util.h"
 #include "event_group.h"
 #include "debugger.h"
+#include "images.h"
 
 #define APP_METADATA_FILENAME   "app"
 
@@ -43,7 +44,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-class App : public Notify
+class App : public RefCounted , public Notify
 {
 public:
 
@@ -86,6 +87,7 @@ public:
         String      description;
         String      author;
         String      copyright;
+        StringSet   attributes;
 
         Action::Map actions;
     };
@@ -149,13 +151,11 @@ public:
     static App * get( lua_State * L );
 
     //.........................................................................
-
-    ~App();
-
-    //.........................................................................
     // Runs the app
 
-    int run( const StringSet & allowed_names );
+    typedef void ( * RunCallback )( App * app , int result );
+
+    void run( const StringSet & allowed_names , RunCallback run_callback );
 
     //.........................................................................
     // Get the metadata
@@ -247,12 +247,31 @@ public:
 
     //.........................................................................
 
-    Debugger * get_debugger();
+    class Debugger * get_debugger();
 
+    //.........................................................................
+
+    Image * load_image( const gchar * source , bool read_tags );
+
+    bool load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
+
+    void audio_match( const String & json );
+
+protected:
+
+    ~App();
 
 private:
 
     App( TPContext * context, const Metadata & metadata, const String & data_path, const LaunchInfo & launch );
+
+    //.........................................................................
+
+    class RunAction;
+
+    friend class RunAction;
+
+    void run_part2( const StringSet & allowed_names , RunCallback run_callback );
 
     //.........................................................................
     // Drop the cookie jar
@@ -262,7 +281,7 @@ private:
     //.........................................................................
     // Notification handler for profile switches
 
-    static void profile_notification_handler( const char * subject, void * data );
+    static void profile_notification_handler( TPContext * context , const char * subject, void * data );
 
     void profile_switch();
 
@@ -273,7 +292,7 @@ private:
     //.........................................................................
     // Notification handler to forward everything to our listeners
 
-    static void forward_notification_handler( const char * subject, void * data );
+    static void forward_notification_handler( TPContext * context , const char * subject, void * data );
 
     //.........................................................................
     // Gets called in an idle source to animate the screen out
@@ -307,7 +326,7 @@ private:
 
 #ifndef TP_PRODUCTION
 
-    Debugger                debugger;
+    class Debugger                debugger;
 
 #endif
 };

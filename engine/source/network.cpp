@@ -8,12 +8,19 @@
 #include "network.h"
 #include "util.h"
 #include "app.h"
+#include "context.h"
+
+//-----------------------------------------------------------------------------
+
+#define TP_LOG_DOMAIN   "NETWORK"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //****************************************************************************
 // Internal structure to hold all the things we care about while we are
 // working on a request
-
-static Debug_ON log( "NETWORK" );
 
 class Network::RequestClosure
 {
@@ -238,7 +245,7 @@ public:
         file_name( fn ),
         mutex( g_mutex_new() )
     {
-        log( "CREATED COOKIE JAR %p", this );
+        tplog( "CREATED COOKIE JAR %p", this );
 
         if ( g_file_test( fn, G_FILE_TEST_EXISTS ) )
         {
@@ -249,7 +256,7 @@ public:
 
             if ( error )
             {
-                g_warning( "FAILED TO READ COOKIE FILE '%s' : %s", fn, error->message );
+                tpwarn( "FAILED TO READ COOKIE FILE '%s' : %s", fn, error->message );
                 g_clear_error( &error );
             }
             else
@@ -304,7 +311,7 @@ private:
 
     ~CookieJar()
     {
-        log( "DESTROYING COOKIE JAR %p", this );
+        tplog( "DESTROYING COOKIE JAR %p", this );
 
         save();
         g_mutex_free( mutex );
@@ -340,6 +347,26 @@ Network::Request::Request( const String & _user_agent, const String & _url )
     redirect( true ),
     user_agent( _user_agent )
 {
+}
+
+void Network::Request::set_headers( const gchar * _headers )
+{
+    g_assert( _headers );
+
+    StringVector lines( split_string( _headers , "\n" ) );
+
+    for( StringVector::const_iterator it = lines.begin(); it != lines.end(); ++it )
+    {
+        StringVector parts( split_string( *it , ": " , 2 ) );
+
+        if ( parts.size() == 2 )
+        {
+            if ( ! parts[ 0 ].empty() && ! parts[ 1 ].empty() )
+            {
+                headers[ parts[ 0 ] ] = parts[ 1 ];
+            }
+        }
+    }
 }
 
 //*****************************************************************************
@@ -382,7 +409,7 @@ const Network::Response & Network::Response::operator =( const Network::Response
     return * this;
 }
 
-const char * Network::Response::get_header( const String & name )
+const char * Network::Response::get_header( const String & name ) const
 {
     StringMultiMap::const_iterator it = headers.find( name );
 
@@ -397,6 +424,18 @@ void Network::Response::replace_body( gpointer data , gsize size )
 
     g_byte_array_append( body , ( const guint8 * ) data , size );
 }
+
+//*****************************************************************************
+// Settings
+
+Network::Settings::Settings( TPContext * context )
+:
+    debug( context->get_bool( TP_NETWORK_DEBUG, false ) ),
+    ssl_verify_peer( context->get_bool( TP_SSL_VERIFY_PEER, true ) ),
+    ssl_cert_bundle( context->get( TP_SSL_CA_CERT_FILE, "" ) )
+{
+}
+
 
 //*****************************************************************************
 
@@ -519,7 +558,7 @@ public:
         closure->response.code = c;
         closure->response.status = curl_easy_strerror( c );
 
-        g_warning( "URL REQUEST FAILED '%s' : %d : %s", closure->request.url.c_str(), c, closure->response.status.c_str() );
+        tpwarn( "URL REQUEST FAILED '%s' : %d : %s", closure->request.url.c_str(), c, closure->response.status.c_str() );
     }
 
 
@@ -584,7 +623,7 @@ public:
 
         if ( left )
         {
-            memcpy( ptr, closure->request.body.c_str(), left );
+            memcpy( ptr, closure->request.body.c_str() + closure->put_offset , left );
 
             closure->put_offset += left;
         }
@@ -657,7 +696,7 @@ public:
 
                 if ( g_strv_length( parts ) != 3 )
                 {
-                    g_warning( "BAD HEADER LINE '%s'", header.c_str() );
+                    tpwarn( "BAD HEADER LINE '%s'", header.c_str() );
                 }
                 else
                 {
@@ -677,7 +716,7 @@ public:
 
                 if ( g_strv_length( parts ) != 2 )
                 {
-                    g_warning( "BAD HEADER LINE '%s'", header.c_str() );
+                    tpwarn( "BAD HEADER LINE '%s'", header.c_str() );
                 }
                 else
                 {
@@ -699,7 +738,7 @@ public:
 
         if ( ! ctx )
         {
-            g_warning( "FAILED TO GET SSL CONTEXT IN CLIENT CERT CALLBACK" );
+            tpwarn( "FAILED TO GET SSL CONTEXT IN CLIENT CERT CALLBACK" );
             return 0;
         }
 
@@ -707,7 +746,7 @@ public:
 
         if ( ! closure )
         {
-            g_warning( "FAILED TO GET REQUEST CLOSURE IN CLIENT CERT CALLBACK" );
+            tpwarn( "FAILED TO GET REQUEST CLOSURE IN CLIENT CERT CALLBACK" );
             return 0;
         }
 
@@ -721,11 +760,11 @@ public:
 
             if ( ! cert )
             {
-                g_warning( "FAILED TO READ CLIENT CERTIFICATE" );
+                tpwarn( "FAILED TO READ CLIENT CERTIFICATE" );
             }
             else
             {
-                log( "SSL CLIENT CERTIFICATE SET" );
+                tplog( "SSL CLIENT CERTIFICATE SET" );
             }
 
             BIO_free( bio );
@@ -741,11 +780,11 @@ public:
 
             if ( ! key )
             {
-                g_warning( "FAILED TO READ CLIENT PRIVATE KEY" );
+                tpwarn( "FAILED TO READ CLIENT PRIVATE KEY" );
             }
             else
             {
-                log( "SSL CLIENT PRIVATE KEY SET" );
+                tplog( "SSL CLIENT PRIVATE KEY SET" );
             }
 
             BIO_free( bio );
@@ -870,7 +909,10 @@ public:
                 cc( curl_easy_setopt( eh, CURLOPT_CUSTOMREQUEST, closure->request.method.c_str() ) );
             }
 
-            cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, closure->request.timeout_s * 1000 ) );
+            if ( closure->request.timeout_s > 0 )
+            {
+                cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, closure->request.timeout_s * 1000 ) );
+            }
 
             if ( closure->cookie_jar )
             {
@@ -899,7 +941,7 @@ public:
 
     static gpointer process( gpointer q )
     {
-        log( "STARTED NETWORK THREAD %p", g_thread_self() );
+        tplog( "STARTED NETWORK THREAD %p", g_thread_self() );
 
         // Get the queue
 
@@ -1027,7 +1069,7 @@ public:
                         {
                             if ( closure->id == event->id )
                             {
-                                log( "FOUND HANDLE FOR REQUEST %u" , event->id );
+                                tplog( "FOUND HANDLE FOR REQUEST %u" , event->id );
 
                                 curl_multi_remove_handle( multi, eh );
                                 curl_easy_cleanup( eh );
@@ -1036,7 +1078,7 @@ public:
 
                                 handles.erase( it );
 
-                                log( "  REQUEST CANCELED" );
+                                tplog( "  REQUEST CANCELED" );
 
                                 found = true;
 
@@ -1047,7 +1089,7 @@ public:
 
                     if ( ! found )
                     {
-                        log( "REQUEST %u WAS NOT FOUND" , event->id );
+                        tplog( "REQUEST %u WAS NOT FOUND" , event->id );
                     }
 
                     delete event;
@@ -1134,7 +1176,7 @@ public:
 
         curl_multi_cleanup( multi );
 
-        log( "NETWORK THREAD TERMINATING %p", g_thread_self() );
+        tplog( "NETWORK THREAD TERMINATING %p", g_thread_self() );
 
         return NULL;
     }
@@ -1291,7 +1333,7 @@ void Network::cancel_async_request( guint id )
 {
     if ( thread )
     {
-        log( "CANCELING REQUEST %u" , id );
+        tplog( "CANCELING REQUEST %u" , id );
 
         g_async_queue_push( queue , Event::cancel( id ) );
     }
