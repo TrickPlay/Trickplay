@@ -11,9 +11,9 @@
 
 @implementation ResourceManager
 
-- (id)initWithSocketManager:(SocketManager *)sockman {
+- (id)initWithTVConnection:(TVConnection *)_tvConnection {
     if ((self = [super init])) {
-        socketManager = [sockman retain];
+        tvConnection = [_tvConnection retain];
         resourceNames = [[NSMutableDictionary alloc] initWithCapacity:40];
         resources = [[NSMutableDictionary alloc] initWithCapacity:40];
         loadingResources = [[NSMutableDictionary alloc] initWithCapacity:40];
@@ -53,7 +53,7 @@
         dataurl = [NSURL URLWithString:dataURLString];
     } else {
         //Use the hostname and port to construct the url
-        dataurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString]];
+        dataurl = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%d/%@", tvConnection.hostName, tvConnection.http_port, dataURLString]];
     }
     
     if (![loadingResources objectForKey:name]) {
@@ -91,7 +91,7 @@
             tempData = [NSData dataWithContentsOfURL:[NSURL URLWithString:dataURLString]];
         } else {
             //Use the hostname and port to construct the url
-            dataURLString = [NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], dataURLString];
+            dataURLString = [NSString stringWithFormat:@"http://%@:%d/%@", tvConnection.hostName, tvConnection.http_port, dataURLString];
             NSURL *dataurl = [NSURL URLWithString:dataURLString];
             
             tempData = [NSData dataWithContentsOfURL:dataurl];
@@ -181,8 +181,10 @@
 - (void)dealloc {
     NSLog(@"ResourceManager dealloc");
     [self clean];
-    if (socketManager) {
-        [socketManager release];
+
+    if (tvConnection) {
+        [tvConnection release];
+        tvConnection = nil;
     }
     if (resourceNames) {
         [resourceNames release];
