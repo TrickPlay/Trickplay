@@ -3,10 +3,14 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "libsoup/soup.h"
 #include "clutter/clutter.h"
+#include "uriparser/Uri.h"
 
+#include "app.h"
 #include "controller_server.h"
 #include "util.h"
+#include "sysdb.h"
 
 //-----------------------------------------------------------------------------
 
@@ -19,9 +23,24 @@
 #endif
 
 //-----------------------------------------------------------------------------
+#define TP_LOG_DOMAIN   "CONTROLLER-SERVER"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
+
+//-----------------------------------------------------------------------------
+
+#define CONTROLLER_PROTOCOL_VERSION		"43"
+
+//-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
 
-#define DISCONNECT_TIMEOUT_SEC  120
+#define DISCONNECT_TIMEOUT_SEC  30
+
+//-----------------------------------------------------------------------------
+
+gulong ControllerServer::ConnectionInfo::aui_next_id = 1;
 
 //-----------------------------------------------------------------------------
 
@@ -39,25 +58,40 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
     if ( error )
     {
         delete new_server;
-        g_warning( "FAILED TO START CONTROLLER SERVER ON PORT %d : %s", port, error->message );
+        tpwarn( "FAILED TO START ON PORT %d : %s", port, error->message );
         g_clear_error( &error );
     }
     else
     {
         server.reset( new_server );
 
-        g_info( "CONTROLLER SERVER LISTENER READY ON PORT %d", server->get_port() );
+        tplog( "READY ON PORT %d", server->get_port() );
+
+        context->get_http_server()->register_handler( "/controllers" , this );
 
 #ifdef TP_CONTROLLER_DISCOVERY_MDNS
 
-        discovery_mdns.reset( new ControllerDiscoveryMDNS( context , name, server->get_port() ) );
+        if ( context->get_bool( TP_CONTROLLERS_MDNS_ENABLED , true ) )
+        {
+            discovery_mdns.reset( new ControllerDiscoveryMDNS( context , name, server->get_port() ) );
+        }
+        else
+        {
+            tplog( "MDNS DISCOVERY IS DISABLED" );
+        }
 
 #endif
 
 #ifdef TP_CONTROLLER_DISCOVERY_UPNP
 
-        discovery_upnp.reset( new ControllerDiscoveryUPnP( context , name, server->get_port() ) );
-
+        if ( context->get_bool( TP_CONTROLLERS_UPNP_ENABLED , false ) )
+        {
+            discovery_upnp.reset( new ControllerDiscoveryUPnP( context , name, server->get_port() ) );
+        }
+        else
+        {
+            tplog( "UPNP DISCOVERY IS DISABLED" );
+        }
 #endif
 
     }
@@ -67,6 +101,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
 ControllerServer::~ControllerServer()
 {
+    context->get_http_server()->unregister_handler( "/controllers" );
 }
 
 //-----------------------------------------------------------------------------
@@ -102,18 +137,21 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
         return 1;
     }
 
-    gpointer connection = NULL;
+    ConnectionInfo * info = 0;
 
-    for ( ConnectionMap::const_iterator it = connections.begin(); it != connections.end(); ++it )
+    gpointer connection = 0;
+
+    for ( ConnectionMap::iterator it = connections.begin(); it != connections.end(); ++it )
     {
         if ( it->second.controller == controller )
         {
+            info = & it->second;
             connection = it->first;
             break;
         }
     }
 
-    if ( !connection )
+    if ( ! connection || ! info )
     {
         return 2;
     }
@@ -154,15 +192,16 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             break;
         }
 
-        case TP_CONTROLLER_COMMAND_START_CLICKS          :
+
+        case TP_CONTROLLER_COMMAND_START_POINTER         :
         {
-            server->write( connection, "SC\n" );
+            server->write( connection, "SP\n" );
             break;
         }
 
-        case TP_CONTROLLER_COMMAND_STOP_CLICKS           :
+        case TP_CONTROLLER_COMMAND_STOP_POINTER          :
         {
-            server->write( connection, "PC\n" );
+            server->write( connection, "PP\n" );
             break;
         }
 
@@ -263,7 +302,7 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             }
             else if ( g_str_has_prefix( ds->uri, "file://" ) )
             {
-                path = serve_path( "", String( ( ds->uri ) + 7 ) );
+                path = start_serving_resource( connection , ( ds->uri ) + 7 , ds->group );
                 uri = path.c_str();
             }
 
@@ -272,7 +311,23 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
                 return 5;
             }
 
-            server->write_printf( connection, "DR\t%s\t%s\n", ds->resource, uri );
+            if ( * uri == '/' )
+            {
+                ++uri;
+            }
+
+            server->write_printf( connection, "DR\t%s\t%s\t%s\n", ds->resource, uri , ds->group );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_DROP_RESOURCE_GROUP   :
+        {
+            TPControllerDropResourceGroup * dg = ( TPControllerDropResourceGroup * ) parameters;
+
+            drop_resource_group( connection , dg->group );
+
+            server->write_printf( connection , "DG\t%s\n" , dg->group );
+
             break;
         }
 
@@ -281,6 +336,92 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             TPControllerEnterText * et = ( TPControllerEnterText * )parameters;
             server->write_printf( connection, "ET\t%s\t%s\n", et->label, et->text );
             break;
+        }
+
+        case TP_CONTROLLER_COMMAND_REQUEST_IMAGE	:
+		{
+		    TPControllerRequestImage * ri = ( TPControllerRequestImage * ) parameters;
+		    String path = start_post_endpoint( connection , PostInfo::IMAGE );
+			server->write_printf( connection, "PI\t%s\t%u\t%u\t%d\t%s\t%s\t%s\n" ,
+			        path.c_str() + 1 ,
+			        ri->max_width ,
+			        ri->max_height ,
+			        ri->edit ? 1 : 0 ,
+			        ri->mask ? ri->mask : "",
+			        ri->dialog_label ? ri->dialog_label : "",
+			        ri->cancel_label ? ri->cancel_label : "");
+			break;
+		}
+
+        case TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP	:
+		{
+		    TPControllerRequestAudioClip * ra = ( TPControllerRequestAudioClip * ) parameters;
+            String path = start_post_endpoint( connection , PostInfo::AUDIO);
+			server->write_printf( connection, "AC\t%s\t%s\t%s\n" , path.c_str() + 1,
+			        ra->dialog_label ? ra->dialog_label : "",
+			        ra->cancel_label ? ra->cancel_label : "");
+			break;
+		}
+
+        case TP_CONTROLLER_COMMAND_ADVANCED_UI:
+        {
+            if ( ! info->aui_connection )
+            {
+                return 4;
+            }
+
+            TPControllerAdvancedUI * aui = ( TPControllerAdvancedUI * ) parameters;
+
+            if ( ! server->write_printf( info->aui_connection , "%s\n" , aui->payload ) )
+            {
+                return 5;
+            }
+
+            // Read the response synchronously
+
+            gssize bytes_read;
+
+            GString * response = g_string_new( "" );
+
+            gchar * new_line = 0;
+
+            char buffer[256];
+
+            while( new_line == 0 )
+            {
+                bytes_read = server->read( info->aui_connection , buffer , 256 );
+
+                if ( bytes_read <= 0 )
+                {
+                    g_string_free( response , TRUE );
+                    return 6;
+                }
+
+                g_string_append_len( response , buffer , bytes_read );
+
+                new_line = g_strstr_len( response->str , response->len , "\n" );
+            }
+
+            * new_line = 0;
+
+            aui->result = response->str;
+            aui->free_result = g_free;
+
+            g_string_free( response , FALSE );
+
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE:
+        {
+            server->write( connection, "SV\n" );
+        	break;
+        }
+
+        case TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE:
+        {
+            server->write( connection, "HV\n" );
+        	break;
         }
 
         default:
@@ -307,7 +448,7 @@ ControllerServer::ConnectionInfo * ControllerServer::find_connection( gpointer c
 
 void ControllerServer::connection_accepted( gpointer connection, const char * remote_address )
 {
-    g_debug( "ACCEPTED CONTROLLER CONNECTION %p FROM %s", connection, remote_address );
+    tplog( "ACCEPTED CONNECTION %p FROM %s", connection, remote_address );
 
     // This adds the connection to the map and sets its address at the same time
 
@@ -328,7 +469,7 @@ void ControllerServer::connection_accepted( gpointer connection, const char * re
 
 gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 {
-    g_debug( "TIMED DISCONNECT" );
+    tplog( "TIMED DISCONNECT" );
 
     // Check to see that the controller has reported a version
 
@@ -336,9 +477,9 @@ gboolean ControllerServer::timed_disconnect_callback( gpointer data )
 
     ConnectionInfo * ci = tc->self->find_connection( tc->connection );
 
-    if ( ci && ci->disconnect && !ci->version )
+    if ( ci && !ci->version )
     {
-        g_debug( "DROPPING UNIDENTIFIED CONNECTION %p", tc->connection );
+        tplog( "DROPPING UNIDENTIFIED CONNECTION %p", tc->connection );
 
         if ( tc->self->server.get() )
         {
@@ -362,15 +503,31 @@ void ControllerServer::connection_closed( gpointer connection )
         tp_context_remove_controller( context, info->controller );
     }
 
+    drop_resource_group( connection , String() );
+
+    drop_post_endpoint( connection );
+
+    gpointer aui_connection = info->aui_connection;
+
     connections.erase( connection );
 
-    g_debug( "CONTROLLER CONNECTION CLOSED %p", connection );
+    if ( aui_connection )
+    {
+        server->close_connection( aui_connection );
+    }
+
+    tplog( "CONNECTION CLOSED %p", connection );
 }
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::connection_data_received( gpointer connection, const char * line , gsize bytes_read )
+void ControllerServer::connection_data_received( gpointer connection, const char * line , gsize bytes_read , bool * read_again )
 {
+    if ( ! strlen( line ) )
+    {
+        return;
+    }
+
     ConnectionMap::iterator it = connections.find( connection );
 
     if ( it == connections.end() )
@@ -378,23 +535,11 @@ void ControllerServer::connection_data_received( gpointer connection, const char
         return;
     }
 
-    if ( it->second.http.is_http )
-    {
-        handle_http_line( connection, it->second, line );
-    }
-    else
-    {
-        if ( !strlen( line ) )
-        {
-            return;
-        }
+    gchar ** parts = g_strsplit( line, "\t", 0 );
 
-        gchar ** parts = g_strsplit( line, "\t", 0 );
+    process_command( connection, it->second, parts , read_again );
 
-        process_command( connection, it->second, parts );
-
-        g_strfreev( parts );
-    }
+    g_strfreev( parts );
 }
 
 //-----------------------------------------------------------------------------
@@ -404,7 +549,7 @@ static inline bool cmp2( const char * a, const char * b )
     return ( a[0] == b[0] ) && ( a[1] == b[1] );
 }
 
-void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts )
+void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
 {
     guint count = g_strv_length( parts );
 
@@ -425,6 +570,8 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         // Device id line
         // ID <version> <name> <cap>*
 
+        * read_again = false;
+
         // Not enough parts
 
         if ( count < 3 )
@@ -439,12 +586,6 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        // It is http
-
-        if ( info.http.is_http )
-        {
-            return;
-        }
 
         info.version = atoi( parts[1] );
 
@@ -456,6 +597,21 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         if ( info.version < 2 )
         {
             g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 2" );
+            info.version = 0;
+            return;
+        }
+
+        if ( info.version < 3 )
+        {
+            g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 3" );
+            info.version = 0;
+            return;
+        }
+
+        if ( info.version < 4 )
+        {
+            g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 4" );
+            info.version = 0;
             return;
         }
 
@@ -483,9 +639,14 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_ACCELEROMETER;
                 }
+                else if ( cmp2( cap, "PT" ) )
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_POINTER;
+                }
                 else if ( cmp2( cap, "CK" ) )
                 {
-                    spec.capabilities |= TP_CONTROLLER_HAS_CLICKS;
+                    // Deprecated
+                    // spec.capabilities |= TP_CONTROLLER_HAS_CLICKS;
                 }
                 else if ( cmp2( cap, "TC" ) )
                 {
@@ -507,6 +668,22 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_TEXT_ENTRY;
                 }
+                else if ( cmp2( cap, "PS" ) )
+				{
+					spec.capabilities |= TP_CONTROLLER_HAS_IMAGES;
+				}
+                else if ( cmp2( cap, "AC" ) )
+				{
+					spec.capabilities |= TP_CONTROLLER_HAS_AUDIO_CLIPS;
+				}
+                else if ( cmp2( cap , "UX" ) )
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_ADVANCED_UI;
+                }
+                else if ( cmp2( cap , "VR" ) )
+                {
+                	spec.capabilities |= TP_CONTROLLER_HAS_VIRTUAL_REMOTE;
+                }
                 else
                 {
                     g_warning( "UNKNOWN CONTROLLER CAPABILITY '%s'", cap );
@@ -522,6 +699,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     sscanf( cap, "US=%ux%u", &spec.ui_width, &spec.ui_height );
                 }
+                else if ( cmp2( cap , "ID" ) )
+                {
+                	spec.id = cap + 3;
+                }
                 else
                 {
                     g_warning( "UNKNOWN CONTROLLER CAPABILITY '%s'", cap );
@@ -529,9 +710,13 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             }
         }
 
+        * read_again = true;
+
         spec.execute_command = execute_command;
 
         info.controller = tp_context_add_controller( context, name, &spec, this );
+
+        server->write_printf( connection , "WM\t%s\t%u\t%lu\n" , CONTROLLER_PROTOCOL_VERSION , context->get_http_server()->get_port() , info.aui_id );
     }
     else if ( cmp2( cmd, "KP" ) )
     {
@@ -553,8 +738,8 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             sscanf( parts[2], "%lx", &unicode );
         }
 
-        tp_controller_key_down( info.controller, key_code, unicode );
-        tp_controller_key_up( info.controller, key_code, unicode );
+        tp_controller_key_down( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
+        tp_controller_key_up( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "KD" ) )
     {
@@ -576,7 +761,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             sscanf( parts[2], "%lx", &unicode );
         }
 
-        tp_controller_key_down( info.controller, key_code, unicode );
+        tp_controller_key_down( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "KU" ) )
     {
@@ -598,19 +783,16 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             sscanf( parts[2], "%lx", &unicode );
         }
 
-        tp_controller_key_up( info.controller, key_code, unicode );
+        tp_controller_key_up( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "CK" ) )
     {
         // Click
         // CK <x> <y>
 
-        if ( count < 3 || !info.controller )
-        {
-            return;
-        }
+        // deprecated
 
-        tp_controller_click( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        return;
     }
     else if ( cmp2( cmd, "AX" ) )
     {
@@ -622,68 +804,184 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_accelerometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) );
+        tp_controller_accelerometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "UI" ) )
     {
         // UI
-        // UI <txt>
+        // UI <type> <txt>
 
-        if ( count < 2 || !info.controller )
+        if ( count < 2 || !info.controller || strlen(parts[1]) != 2)
         {
             return;
         }
 
-        tp_controller_ui_event( info.controller, parts[1] );
+        // Enter text or multiple-choice
+        if(cmp2( parts[1], "ET") || cmp2( parts[1], "MC"))
+        {
+            if(count < 3)
+            {
+                return;
+            }
+            tp_controller_ui_event( info.controller, parts[2] );
+        }
+        // Advanced UI event
+        else if (cmp2( parts[1] , "UX" ) )
+        {
+        	if ( count < 3 )
+        	{
+        		return;
+        	}
+        	tp_controller_advanced_ui_event( info.controller , parts[ 2 ] );
+        }
+        // Cancel image
+        else if(cmp2( parts[1], "CI"))
+        {
+            tp_controller_cancel_image( info.controller );
+        }
+        // Cancel audio
+        else if(cmp2( parts[1], "CA"))
+        {
+            tp_controller_cancel_audio_clip( info.controller );
+        }
+    }
+    else if ( cmp2( cmd, "PD" ) )
+    {
+        // Pointer button down
+        // PD <button> <x> <y>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_pointer_button_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "PM" ) )
+    {
+        // Pointer move
+        // PM <x> <y>
+
+        if ( count < 3 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_pointer_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "PU" ) )
+    {
+        // Pointer button up
+        // PU <button> <x> <y>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_pointer_button_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "TD" ) )
     {
         // Touch down
-        // TD <x> <y>
+        // TD <finger> <x> <y>
 
-        if ( count < 3 || !info.controller )
+        if ( count < 4 || !info.controller )
         {
             return;
         }
 
-        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "TM" ) )
     {
         // Touch move
-        // TM <x> <y>
+        // TM <finger> <x> <y>
 
-        if ( count < 3 || !info.controller )
+        if ( count < 4 || !info.controller )
         {
             return;
         }
 
-        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "TU" ) )
     {
         // Touch up
-        // TU <x> <y>
+        // TU <finger> <x> <y>
 
-        if ( count < 3 || !info.controller )
+        if ( count < 4 || !info.controller )
         {
             return;
         }
 
-        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
-    else if ( cmp2( cmd, "GE" ) )
+    else if ( cmp2( cmd , "UX" ) )
     {
-        // Possibly an HTTP get
+        // Stop reading from this connection. We will only read
+        // synchronously after we write. If there is a problem with the UX message,
+        // we stop reading anyway - they only get one shot at it.
 
-        // Cannot come from a connection that is already a controller
+        * read_again = false;
 
-        if ( info.controller )
+        if ( count < 2 )
         {
             return;
         }
 
-        handle_http_get( connection, parts[0] );
+        gulong id = 0;
+
+        if ( sscanf( parts[1], "%lu", & id ) != 1 )
+        {
+            return;
+        }
+
+        // The ID is bad
+
+        if ( id == 0 )
+        {
+            return;
+        }
+
+        ConnectionInfo * parent_info = 0;
+
+        for ( ConnectionMap::iterator it = connections.begin(); it != connections.end(); ++it )
+        {
+            if ( it->second.aui_id == id )
+            {
+                parent_info = & it->second;
+                break;
+            }
+        }
+
+        // Could not find a connection for this ID
+
+        if ( ! parent_info )
+        {
+            return;
+        }
+
+        // The controller connection for this ID has not identified itself yet
+
+        if ( ! parent_info->version )
+        {
+            return;
+        }
+
+        // OK, everything is cool
+
+        // Set this connection's version, so it does not get booted.
+
+        info.version = parent_info->version;
+
+        // Tell the parent that this connection belongs to it
+
+        parent_info->aui_connection = connection;
+
+        // Now, generate the event that it is ready
+
+        tp_controller_advanced_ui_ready( parent_info->controller );
     }
     else
     {
@@ -693,168 +991,40 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::handle_http_get( gpointer connection, const gchar * line )
+String ControllerServer::start_serving_resource( gpointer connection , const String & file_name , const String & group )
 {
-    ConnectionInfo * info = find_connection( connection );
+    String path = group + ":" + file_name;
 
-    if ( !info )
-    {
-        return;
-    }
+    gchar * h = g_compute_checksum_for_string( G_CHECKSUM_MD5 , path.c_str() , path.length() );
 
-    gchar ** parts = g_strsplit( line, " ", 3 );
+    path = h;
 
-    if ( g_strv_length( parts ) == 3 && !strcmp( parts[0], "GET" ) )
-    {
-        info->disconnect = false;
-        info->http.is_http = true;
-        info->http.method = parts[0];
-        info->http.url = parts[1];
-        info->http.version = parts[2];
-    }
+    g_free( h );
 
-    g_strfreev( parts );
+    path = String( "/controllers/resource/" ) + path;
+
+    tplog( "SERVING %s : %s" , path.c_str() , file_name.c_str() );
+
+    ResourceInfo & info( resources[ path ] );
+
+    info.connection = connection;
+    info.file_name = file_name;
+    info.group = group;
+
+    return path;
 }
 
 //-----------------------------------------------------------------------------
 
-void ControllerServer::handle_http_line( gpointer connection, ConnectionInfo & info, const gchar * line )
+void ControllerServer::drop_resource_group( gpointer connection , const String & group )
 {
-    HTTPInfo & hi = info.http;
-
-    if ( !hi.headers_done )
+    for ( ResourceMap::iterator it = resources.begin(); it != resources.end(); )
     {
-        if ( strlen( line ) )
+        if ( it->second.connection == connection && ( group.empty() || it->second.group == group  ) )
         {
-// We are not using the headers yet
-#if 0
+            tplog( "DROPPING %s : %s : %s", it->first.c_str(), it->second.group.c_str() , it->second.file_name.c_str() );
 
-            hi.headers.push_back( line );
-
-            // Protect against too many headers
-
-            if ( hi.headers.size() > 256 )
-            {
-                server->close_connection( connection );
-            }
-#endif
-        }
-        else
-        {
-            // We have received all the headers
-
-#if 0
-            for ( StringList::const_iterator it = hi.headers.begin(); it != hi.headers.end(); ++it )
-            {
-                g_debug( "[%s]", it->c_str() );
-            }
-#endif
-
-            g_debug( "PROCESSING %s '%s'", hi.method.c_str(), hi.url.c_str() );
-
-            bool found = false;
-
-            if ( hi.url.size() > 1 )
-            {
-                String id( hi.url.substr( 1 ) );
-
-                WebServerPathMap::const_iterator it = path_map.find( id );
-
-                if ( it != path_map.end() )
-                {
-                    String path( it->second.first );
-
-                    found = server->write_file( connection, path.c_str(), true );
-
-                    g_debug( "  SERVED '%s'", path.c_str() );
-                }
-            }
-
-            if ( !found )
-            {
-                server->write_printf( connection, "%s 404 Not found\r\nContent-Length: 0\r\n\r\n", hi.version.c_str() );
-
-                g_debug( "  NOT FOUND" );
-            }
-
-            hi.reset();
-        }
-    }
-}
-
-String get_file_extension( const String & path, bool include_dot = true )
-{
-    String result;
-
-    if ( !path.empty() )
-    {
-        // See if the last character is a separator. If it is,
-        // we bail. Otherwise, g_path_get_basename would give us
-        // the element before the separator and not the last element.
-
-        if ( !g_str_has_suffix( path.c_str(), G_DIR_SEPARATOR_S ) )
-        {
-            gchar * basename = g_path_get_basename( path.c_str() );
-
-            if ( basename )
-            {
-                gchar * * parts = g_strsplit( basename, ".", 0 );
-
-                guint count = g_strv_length( parts );
-
-                if ( count > 1 )
-                {
-                    result = parts[count - 1];
-
-                    if ( !result.empty() && include_dot )
-                    {
-                        result = "." + result;
-                    }
-                }
-
-                g_strfreev( parts );
-
-                g_free( basename );
-            }
-        }
-    }
-
-    return result;
-}
-
-//-----------------------------------------------------------------------------
-
-String ControllerServer::serve_path( const String & group, const String & path )
-{
-    String s = group + ":" + path;
-
-    gchar * id = g_compute_checksum_for_string( G_CHECKSUM_SHA1, s.c_str(), -1 );
-    String result( id );
-    g_free( id );
-
-    result += get_file_extension( path );
-
-    if ( path_map.find( result ) == path_map.end() )
-    {
-        g_debug( "SERVING %s : %s", result.c_str(), path.c_str() );
-
-        path_map[result] = StringPair( path, group );
-    }
-
-    return result;
-}
-
-//-----------------------------------------------------------------------------
-
-void ControllerServer::drop_web_server_group( const String & group )
-{
-    for ( WebServerPathMap::iterator it = path_map.begin(); it != path_map.end(); )
-    {
-        if ( it->second.second == group )
-        {
-            g_debug( "DROPPING %s : %s", it->first.c_str(), it->second.first.c_str() );
-
-            path_map.erase( it++ );
+            resources.erase( it++ );
         }
         else
         {
@@ -864,3 +1034,124 @@ void ControllerServer::drop_web_server_group( const String & group )
 }
 
 //-----------------------------------------------------------------------------
+
+void ControllerServer::handle_http_get( const HttpServer::Request & request , HttpServer::Response & response )
+{
+    ResourceMap::iterator it = resources.find( request.get_path() );
+
+    if ( it == resources.end() )
+    {
+        return;
+    }
+
+    response.respond_with_file_contents( it->second.file_name );
+}
+
+//-----------------------------------------------------------------------------
+
+String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Type type )
+{
+    for ( PostMap::const_iterator it = post_map.begin(); it != post_map.end(); ++it )
+    {
+        if ( it->second.connection == connection && it->second.type == type )
+        {
+            return it->first;
+        }
+    }
+
+    // It doesn't exist
+
+    String path;
+
+    do
+    {
+        path = "/controllers";
+        switch(type)
+        {
+            case PostInfo::AUDIO:
+                path += "/audio/";
+                break;
+            case PostInfo::IMAGE:
+                path += "/image/";
+                break;
+        }
+
+        path += Util::random_string( 20 );
+    }
+    while( post_map.find( path ) != post_map.end() );
+
+    tplog( "STARTED POST END POINT %s" , path.c_str() );
+
+    PostInfo & info( post_map[ path ] );
+
+    info.connection = connection;
+    info.type = type;
+
+    return path;
+}
+
+void ControllerServer::drop_post_endpoint( gpointer connection )
+{
+    for ( PostMap::iterator it = post_map.begin(); it != post_map.end(); )
+    {
+        if ( it->second.connection == connection )
+        {
+            tplog( "DROPPING POST END POINT %s", it->first.c_str() );
+
+            post_map.erase( it++ );
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void ControllerServer::handle_http_post( const HttpServer::Request & request , HttpServer::Response & response )
+{
+    PostMap::iterator it = post_map.find( request.get_path() );
+
+    if ( it == post_map.end() )
+    {
+        return;
+    }
+
+    ConnectionInfo * info = find_connection( it->second.connection );
+
+    if ( ! info )
+    {
+        return;
+    }
+
+    const HttpServer::Request::Body & body( request.get_body() );
+
+    if ( ! body.get_data() || ! body.get_length() )
+    {
+        response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
+
+        return;
+    }
+
+    String ct( request.get_content_type() );
+
+    const char * content_type = ct.empty() ? 0 : ct.c_str();
+
+    switch ( it->second.type )
+    {
+        case PostInfo::AUDIO:
+            tp_controller_submit_audio_clip( info->controller , body.get_data() , body.get_length() , content_type );
+            break;
+
+        case PostInfo::IMAGE:
+            tp_controller_submit_image( info->controller , body.get_data() , body.get_length() , content_type );
+            break;
+    }
+
+    response.set_status( HttpServer::HTTP_STATUS_OK );
+}
+
+//-----------------------------------------------------------------------------
+
+

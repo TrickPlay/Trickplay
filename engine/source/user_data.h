@@ -226,6 +226,10 @@ struct UserData
     int invoke_callback( const char * name , int nargs , int nresults );
 
     //.........................................................................
+
+    static int invoke_global_callback( lua_State * L , const char * global , const char * name , int nargs , int nresults );
+
+    //.........................................................................
     // Connect a signal handler to the master. We do this so that we can
     // track the connected handlers and disconnect them all when the proxy
     // object goes away.
@@ -243,6 +247,8 @@ struct UserData
     // Debugging.
 
     static void dump_cb( lua_State * L , int index = 1 );
+
+    static void dump();
 
 private:
 

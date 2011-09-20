@@ -21,12 +21,14 @@
 #include "trickplay/trickplay.h"
 //-----------------------------------------------------------------------------
 typedef std::string                             String;
-typedef std::map<std::string, std::string>       StringMap;
-typedef std::multimap<std::string, std::string>  StringMultiMap;
+typedef std::map<std::string, std::string>      StringMap;
+typedef std::multimap<std::string, std::string> StringMultiMap;
 typedef std::list<String>                       StringList;
 typedef std::set<String>                        StringSet;
-typedef std::pair<String, String>                StringPair;
+typedef std::pair<String, String>               StringPair;
 typedef std::list<StringPair>                   StringPairList;
+typedef std::vector<String>                     StringVector;
+typedef std::vector<StringPair>                 StringPairVector;
 
 
 #endif // _TRICKPLAY_COMMON_H

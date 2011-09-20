@@ -14,7 +14,13 @@ void Text_on_text_changed(ClutterText*text,lua_State*L);
 /*
     Class: Text
     
-    Text is a <UIElement> that lets you display text. 
+    The Text data type provides various operations to support text on the 
+    display.
+    
+    In addition to the properties and functions described on this page, the 
+    Text data type also supports all the properties and functions defined in 
+    the <UIElement> interface.
+
 */
 
 class Text [[ClutterActor*]] actor
@@ -34,7 +40,13 @@ class Text [[ClutterActor*]] actor
     /*
     	Property: color
     	
-    	The color of the text. See <Rectangle.color> for details.
+    	The color property specifies the color of the text string when 
+    	displayed.
+    	
+    	The format of the color property is described in <RGB/Alpha Color 
+    	Formats>.
+    	
+    	*See Also:* the <cursor_color> property
     */
     
     table color
@@ -52,7 +64,20 @@ class Text [[ClutterActor*]] actor
     /*
     	Property: text
     	
-    	The string that the text displays.
+    	The text property is the object's string to display.
+    	
+    	The string can include any text characters, but it may not
+    	specify formatting instructions, e.g., marking certain words as bold. 
+    	To include these types of formatting instructions, use the <markup> 
+    	property.
+    	
+    	*Example:* Create a new Text object and set its text property
+    	
+    	(code)
+    	title = Text{ text = "Welcome to My World!" }
+    	(end)
+    	
+    	*See Also:* the <markup> property, the <on_text_changed> event handler
     */
         
     string text
@@ -62,10 +87,30 @@ class Text [[ClutterActor*]] actor
     /*
     	Property: markup
     	
-    	Text can contain simple HTML-like markup. Setting this
-    	property sets <use_markup> to true and then sets <text>.
+    	The markup property is the object's string to display. It differs from
+    	the <text> property in that the markup string may contain HTML-like
+    	formatting instructions. This capability is provided by the Pango Text
+    	Attribute Markup language. Only a small subset of HTML tags are 
+    	supported; refer to the <Pango documentation at
+    	http://developer.gnome.org/pango/stable/PangoMarkupFormat.html>    	
+    	for complete details.
     	
-    	For more details on the markup, see <http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html>.
+    	When a string is assigned to the markup property, the object's 
+    	<use_markup> property is automatically set to true and the string
+    	is also copied into the object's text property.
+    	
+    	The markup property can be set, but it may not be retrieved. If you 
+    	need to retrieve the string after setting it, you can get it from the 
+    	object's text property.
+    	
+    	*Example:*
+    	
+    	(code)
+    	cool = Text{ markup = 'This is <span underline="single">soooo <b>cool!</b></span>' }
+    	(end)
+    	
+    	*See Also:* the <text> property, the <use_markup> property
+    	
     */
     
     string markup
@@ -78,14 +123,96 @@ class Text [[ClutterActor*]] actor
     /*
     	Property: font
     	
-    	The font used to render the text. This string can contain a
-    	family list, style options and the size of the text.
-    	
-    	For more details, see <http://library.gnome.org/devel/pango/stable/pango-Fonts.html#pango-font-description-from-string>.
-    	
-    	(code)
-    		local t = Text{ font = "Sans 38px", color = "FFFFFF", text = "Hello World!" }
-    	(end)
+		The font property specifies the font to use when rendering the <text> 
+		string.
+		
+		The TrickPlay Engine uses the Pango open-source framework to implement 
+		the layout and rendering of internationalized text on the display. This 
+		section will describe the information necessary to enable you to 
+		specify a desired font; additional information about Pango will 
+		not be required. In case you would like more details about Pango, go 
+		to <the Pango website at 
+		http://developer.gnome.org/platform-overview/stable/pango>. 
+		Information about the Pango API function that the TrickPlay Engine 
+		calls to specify a font can be found <here at 
+		http://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string>.
+		
+		A font is described in a string comprising the following 
+		components: *[FamilyList] [StyleList] [Size]*
+		
+		Each of the components is optional, so it is possible to specify an 
+		empty string, and a font will still be selected. In such a case, the 
+		selected font will have default settings for all three components, 
+		i.e., "Normal" FamilyList, "Normal" StyleList, and a size of 11 points.
+		
+		Supported values for each component are shown below.
+		
+		*[FamilyList] Settings:* A comma-separated list of families. The list 
+		may optionally terminate with a comma. The first family in the list that
+		is installed on the system will be used.
+		
+		"Normal" - (default) a sans-serif, variable-width font. Comparable to 
+		Helvetica
+		"Sans" - a sans-serif, variable-width font. Depending on the system, 
+		could be different from the "Normal" sans-serif font. Comparable to 
+		Helvetica
+		"Serif" - a serif, variable-width font. Comparable to Times Roman
+		"Monospace" - a serif, fixed-width font. Comparable to Courier
+		
+		You can also include the names of fonts, such as "Helvetica" or 
+		"Garamond."
+				
+		*[StyleList] Settings:* A whitespace-separated list of words, where 
+		each word describes one of the styles listed below. The words can be 
+		specified in any order.
+		
+		*Style*
+		
+		"Normal" - (default) upright
+		"Oblique" - slanted in a Roman style
+		"Italic" - slanted in an italic style
+		
+		*Weight*
+		
+		"Ultra-Light" - a weight of 200
+		"Light" - a weight of 300
+		"Normal" - (default) a weight of 400
+		"Bold" - a weight of 700
+		"Ultra-Bold" - a weight of 800
+		"Heavy" - a weight of 900
+		
+		*Variant*
+		
+		"Normal" - (default) no variant
+		"Small-Caps" - small uppercase letters
+		
+		*Stretch*
+		
+		"Ultra-Condensed" - the smallest width
+		"Extra-Condensed" - getting wider...
+		"Condensed" - wider...
+		"Semi-Condensed" - wider......
+		"Normal" - (default)
+		"Semi-Expanded" - getting wider still...
+		"Expanded" - wider...
+		"Extra-Expanded" - wider......
+		"Ultra-Expanded" - the widest width
+		
+		*[Size] Settings:* An integer specifying the font size in points. The 
+		default size is 11 points. 
+		Alternatively, you may specify an absolute font size in pixels by 
+		appending the integer value with the "PX" or "px" string, e.g., "72px".
+		
+		*Examples:* The following are some sample font strings.
+		
+		(code)
+		"Sans 38px"
+		"'Century Schoolbook',Garamond,Serif 72px"
+		"Sans Italic Bold 30"
+		(end)
+		
+		*See Also:* the <markup> property
+
     */
     
     string font
@@ -95,7 +222,12 @@ class Text [[ClutterActor*]] actor
     /*
     	Property: justify
     	
-    	This is a boolean property that justifies the text on both margins.
+    	The justify property is a boolean flag to toggle text justification.
+    	If the property is true, text justifies on both the left and right
+    	margins.
+    	
+    	*Default Setting:* false
+    	
     */
     
     bool justify
@@ -105,7 +237,22 @@ class Text [[ClutterActor*]] actor
     /*
     	Property: wrap
     	
-    	Whether text should be wrapped into multiple lines.
+		The wrap property is a boolean flag to toggle text wrapping. If the 
+		property is true, wrapping will occur if the text extends beyond the 
+		right edge of the display area.
+		
+		Various types of wrapping are supported, such as word wrapping and
+		character wrapping. The wrapping method is set by the object's 
+		wrap_mode property.
+		
+		If the object's <single_line> property is set to true, it overrides 
+		any wrap property setting and the text line will not wrap.
+		
+		*Default Setting:* false
+		
+		*See Also:* the <wrap_mode> property, the <alignment> property, the
+		<single_line> property
+
     */    
     
     bool wrap
@@ -115,15 +262,22 @@ class Text [[ClutterActor*]] actor
     /*
     	Property: wrap_mode
 
-	How the line wrapping is performed. 
-        The default is WORD which means wrap on word boundaries.
-
-	     Possible Values:
+		The wrap_mode property specifies the type of text wrapping to perform.
 		
-		WORD	  - wrap lines at word boundaries
-		CHAR	  - wrap lines at character boundaries 
-		WORD_CHAR - wrap lines at word boundaries, but fall back to character 
-			   boundaries if there is not enough space for a full word. 
+		For wrapping to occur, the object's <wrap> property must be set to true.
+		
+		*Supported wrap_mode Settings:*
+		
+		WORD - text is wrapped at word boundaries
+		CHAR - text is wrapped at character boundaries
+		WORD_CHAR - text is wrapped at word boundaries, unless there is not
+		enough space on the next line for the full word, in which case CHAR
+		wrapping occurs
+		
+		*Default Setting:* WORD
+		
+		*See Also:* the <wrap> property, the <alignment> property
+		
     */    
 
     string wrap_mode
@@ -157,7 +311,32 @@ class Text [[ClutterActor*]] actor
     /*
     	Property: use_markup
     	
-    	Whether to interpret the text's string as markup or not.
+    	The use_markup property is a boolean flag indicating whether or not the
+    	object's text string contains Pango Text Attribute Markup tags. If set
+    	to true, formatting tags in the string will be appropriately processed.
+    	
+    	If you simply set the object's <markup> property to a text string, 
+    	the TrickPlay Engine automatically sets the use_markup property to 
+    	true. Alternatively, you may set the use_markup property yourself and
+    	then assign a text string containing formatting tags to the object's
+    	text property. Depending upon the structure of your application, this 
+    	second method may be preferable because it enables your program to 
+    	consistently assign the string to the text property, regardless of 
+    	whether or not it contains formatting tags.
+    	
+    	*Default Setting:* false
+    	
+    	*Example:* Create a string with formatting tags and assign it to the
+    	text property
+    	
+    	(code)
+    	local myText = Text()
+    	myText.use_markup = true
+    	myText.text = "This string contains <big>large words</big> and <small>tiny words</small>."
+    	(end)
+    	
+    	*See Also:* the <markup> property, the <text> property
+    	
     */    
     
     bool use_markup
@@ -167,15 +346,36 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: ellipsize
 		
-		When the text is clipped, you can have TrickPlay automatically
-		add ellipsis to it.
+		The ellipsize property is a string indicating if and where ellipsis 
+		("...") should be added to clipped text.
 		
-		Possible Values:
+		Text is always clipped if it does not fit in its allocated display
+		space; there is no way to turn clipping off.
 		
-			START - The ellipsis will be at the beginning of the string.
-			MIDDLE - Ellipsis in the middle of the string.
-			END - Ellipsis at the end of the string.
-			NONE - No ellipsis (this is the default).
+		If an ellipsis is appended to the end of the text, enough extra 
+		characters are clipped from the string to guarantee that the ellipsis 
+		is viewable. For example, if the last character of the string doesn't 
+		fit in the display area, the last three or four characters are actually 
+		clipped in order to fit in the ellipsis.
+		
+		*Supported Settings:*
+		
+		NONE - (default) Do not add ellipsis to clipped text
+		START - Insert ellipsis at the beginning of the text
+		MIDDLE - Insert ellipsis in the middle of the text
+		END - Append ellipsis to the end of the text
+
+		*Note:* The ellipsize string is case-sensitive; it must be all 
+		uppercase characters.
+		
+		*Default Setting:* "NONE"
+		
+		*Example:*
+		
+		(code)
+		myText.ellipsize = "END"
+		(end)
+		
 	*/
 	
     string ellipsize
@@ -213,13 +413,25 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: alignment
 		
-		How lines of a wrapped text element align respective to each other.
+		The alignment property is a string indicating how lines of wrapped text
+		should align with each other.
 		
-		Possible Values:
+		If text wrapping is turned off (as specified in the <wrap> property)
+		then the alignment property has no effect.
 		
-			LEFT - Left aligned.
-			CENTER - Center aligned.
-			RIGHT - Right aligned.
+		*Supported Settings:*
+		
+		LEFT - (default) lines are left-aligned
+		CENTER - lines are center-aligned
+		RIGHT - lines are right-aligned
+		
+		*Note:* The alignment string is case-sensitive; all the 
+		characters must be uppercase.
+
+		*Default Setting:* "LEFT"
+		
+		*See Also:* the <wrap> property, the <wrap_mode> property
+		
 	*/	
 	
     string alignment
@@ -252,8 +464,18 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: max_length
 		
-		The maximum number of characters allowed in this text element. Set to 
-		0 to allow any number of characters.
+		The max_length property specifies the maximum number of characters
+		allowed in the object's text string. To allow an unlimited number of
+		characters, set this property to zero.
+		
+		If the text string contains Pango Text Attribute Markup tags, the
+		characters used to define the tags are included when determining the 
+		string's length.
+		
+		*Default Setting:* 0, i.e., unlimited length
+		
+		*See Also:* the <text> property
+		
 	*/	
 	
     int max_length
@@ -263,7 +485,19 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: selected_text
 		
-		Returns the text that is currently selected.
+		The selected_text property is the portion of the object's text string 
+		that is currently selected. If no text is selected, the property is an 
+		empty string.
+		
+		The selected_text property can be used to access the current selection,
+		but it cannot set the selection. To set the selected text, use the 
+		object's <cursor_position> and <selection_end> properties.
+		
+		*Default Setting:* empty string, i.e., no selected text
+		
+		*See Also:* the <selection_color> property, the <cursor_position>
+		property, the <selection_end> property
+		
 	*/
 		
     readonly string selected_text
@@ -276,7 +510,28 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: selection_end
 		
-		Get or set the end of the selection in characters.
+		The selection_end property specifies the index of the last character, 
+		inclusive, in a selected text string. The text string is zero-based,
+		i.e., the first character in the string is at index zero.
+		
+		The selection_end property is used in conjunction with the
+		<cursor_position> property to define the selected text.
+		
+		*Default Setting:* 0
+		
+		*Example:* Select part of a string
+		
+		(code)
+		myText = { text = "The dog ate the bone." }
+		-- Select the word "dog"
+		myText.cursor_position = 4
+		myText.selection_end = 6
+		print( 'Selection: "' .. myText.selected_text .. '"' )	-- prints Selection: "dog"
+		(end)
+		
+		*See Also:* the <cursor_position> property, the <selection_color>
+		property, the <selected_text> property
+		
 	*/
 	
     int selection_end
@@ -286,7 +541,32 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: single_line
 		
-		Whether the text should remain as a single line and be clipped to its width.
+		The single_line property is a boolean flag indicating whether the text
+		should display as a single line during editing or if it should wrap.
+		
+		If the single_line property is true and the string's length exceeds 
+		its display area, the string will scroll so its cursor position remains 
+		visible.
+		
+		If the single_line property is true, the object's <wants_enter> 
+		property is automatically set to true so that pressing the <Enter> key 
+		will fire a Clutter "activate" event/signal. Refer to the 
+		<wants_enter> description for additional details.
+		
+		If the single_line property is true, line wrapping is deactivated, 
+		regardless of the setting of the <wrap> property.
+		
+		If the single_line property is false, the method of handling line 
+		wrapping is determined by the settings of the object's <wrap> and
+		<wrap_mode> properties.
+		
+		The single_line property has no effect if the object's text string is 
+		not editable, as specified by the <editable> property.
+		
+		*Default Setting:* true
+		
+		*See Also:* the <editable> property, the <wants_enter> property
+		
 	*/
     bool single_line
 		[[single_line=clutter_text_get_single_line_mode(CLUTTER_TEXT(self));]]
@@ -296,7 +576,13 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: editable
 		
-		Whether the Text element is editable or not.
+		The editable property is a boolean flag that indicates whether or not
+		the object's text string is editable.
+		
+		*Default Setting:* false
+		
+		*See Also:* the <single_line> property, the <cursor_color> property
+		
 	*/
 	
     bool editable
@@ -305,8 +591,22 @@ class Text [[ClutterActor*]] actor
 
 	/*
 		Property: cursor_color
+
+		The cursor_color property is a series of RGB (Red/Green/Blue) and alpha 
+		(transparency) values that define the color of the cursor when editing 
+		the object's text property.
 		
-		The color of the cursor when text is editable.
+		The format of the RGB and alpha values is described in 
+		<RGB/Alpha Color Formats>.
+		
+		The cursor_color property has an effect only if the text string is
+		editable as defined by the <editable> property.
+		
+		*Default Setting:* RGB( 255, 255, 255 )/white with an alpha of 
+		255/opaque
+		
+		*See Also:* the <editable> property
+
 	*/
 
     table cursor_color
@@ -322,9 +622,18 @@ class Text [[ClutterActor*]] actor
 		]];
 
 	/*
-		Property : selection_color
+		Property: selection_color
 		
-		The color of selected text.
+		The selection_color property is a series of RGB (Red/Green/Blue) and
+		alpha (transparency) values that define the color of selected text.
+		
+		The format of the RGB and alpha values is described in 
+		<RGB/Alpha Color Formats>.
+
+		*Default Setting:* nil
+		
+		*See Also:* the <selected_text> property
+
 	*/	
     
     table selection_color
@@ -342,7 +651,21 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: cursor_position
 		
-		Get or set the position of the cursor in characters.
+		The cursor_position property specifies the character position of the 
+		cursor. The value is zero-based, so the first character is at position 
+		zero.
+
+		In addition to the common operation of positioning the cursor for 
+		editing purposes, the cursor_position property can also be used to
+		define the starting point of a text selection.
+		
+		The cursor_position property has no effect if the object's text 
+		property is not editable, as defined by the <editable> property.
+		
+		*Default Setting:* 0
+		
+		*See Also:* the <editable> property, the <cursor_color> property
+
 	*/	
     
     int cursor_position
@@ -352,7 +675,17 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: cursor_visible
 		
-		Whether the cursor is visible.
+		The cursor_visible property is a boolean flag indicating whether or not
+		the cursor is visible.
+		
+		The cursor_visible property has no effect if the object's text 
+		property is not editable, as defined by the <editable> property.
+		
+		*Default Setting:* false, i.e., not visible
+		
+		*See Also:* the <editable> property, the <cursor_position> property,
+		the <cursor_size> property
+
 	*/
 		
     bool cursor_visible
@@ -362,7 +695,17 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: cursor_size
 		
-		The size of the cursor in pixels, or -1 to use the default size.
+		The cursor_size property specifies the width of the cursor in pixels.
+		
+		If the value of cursor_size is -1, the default cursor width is used.
+		
+		The cursor_size property has no effect if the object's text property
+		is not editable, as defined by the <editable> property.
+		
+		*Default Setting:* -1
+		
+		*See Also:* the <editable> property, the <cursor_color> property
+		
 	*/    
     
     int cursor_size
@@ -372,8 +715,28 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: wants_enter
 		
-                Whether the user needs to first press Enter to activate text box editing.
-		See http://docs.clutter-project.org/docs/clutter/stable/ClutterText.html#ClutterText--activatable
+		The wants_enter property is a boolean flag that toggles whether or not 
+		pressing of the <Enter> key will fire a Clutter "activate" 
+		signal/event.
+		
+		If the wants_enter property is true and the <Enter> key is pressed 
+		during editing of the object's text string, a Clutter "activate" event 
+		is fired. Your application can hook into the event with its own event 
+		handler and perform any relevant processing. Refer to the <Clutter 
+		documentation at 
+		http://docs.clutter-project.org/docs/clutter/stable/ClutterText.html#clutter-text-set-single-line-mode>
+		for further information.
+		
+		If the wants_enter property is false, pressing the <Enter> key while 
+		editing simply adds a newline character to the string.
+		
+		The wants_enter property has no effect if the object's text property
+		is not editable, as defined by the <editable> property.
+		
+		*Default Setting:* true
+		
+		*See Also:* the <editable> property, the <single_line> property
+
 	*/
 	
     bool wants_enter
@@ -383,13 +746,137 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: password_char
 		
-		A replacement character to show instead of the text's string.
+		The password_char property specifies the Unicode character to display 
+		in place of the entered text.
+		
+		By setting an object's password_char property, the text string becomes,
+		in effect, a password string.
+		
+		If the password_char property is set to 0, text will display as entered.
+		
+		*Default Setting:* 0
+
 	*/
 
     int password_char
 		[[password_char=clutter_text_get_password_char(CLUTTER_TEXT(self));]]
 		[[clutter_text_set_password_char(CLUTTER_TEXT(self),password_char);]];
 	
+
+    /*
+        Property: baseline
+        
+        The baseline property specifies the numeric Y position in pixels of 
+        the baseline of the text's first line.
+        
+        The value of the baseline property may be retrieved, but it may not be 
+        set.
+        
+        The origin of the baseline property lies in a PangoLayout object owned 
+        by the ClutterText object underlying the Text object. 
+        Additional information may be found in the <ClutterText at 
+        http://developer.gnome.org/cluttermm/1.3/classClutter_1_1Text.html#a69b07051234dbbc8192d18cf3ca637f5>
+        and the <PangoLayout documentation at
+        http://developer.gnome.org/pangomm/stable/classPango_1_1Layout.html#a701fa3a4a90cb9ca00144ad2054dee7b>.
+        
+        The baseline property is a low-level system value that will be useful
+        only in rare situations.
+        
+        *Default Setting:* 0
+
+    */
+
+    readonly int baseline
+        [[
+            if ( PangoLayout * p = clutter_text_get_layout( CLUTTER_TEXT( self ) ) )
+            {
+                baseline = pango_layout_get_baseline( p ) / PANGO_SCALE;
+            }
+            else
+            {
+                baseline = 0;
+            }
+        ]];
+
+    /*
+        Property: line_spacing
+
+		The line_spacing property specifies the amount of spacing in pixels 
+		between text lines.
+		
+		*Default Setting:* 0
+		
+		*See Also:* the <wrap> property
+
+    */
+
+    int line_spacing
+        [[
+            if ( PangoLayout * p = clutter_text_get_layout( CLUTTER_TEXT( self ) ) )
+            {
+                line_spacing = pango_layout_get_spacing( p ) / PANGO_SCALE;
+            }
+            else
+            {
+                line_spacing = 0;
+            }
+        ]]
+        [[
+            if ( PangoLayout * p = clutter_text_get_layout( CLUTTER_TEXT( self ) ) )
+            {
+                pango_layout_set_spacing( p , line_spacing * PANGO_SCALE );
+                clutter_actor_queue_redraw( self );
+            }
+        ]];
+
+    /*
+        Function: position_to_coordinates
+
+		The position_to_coordinates() function accepts an index position within 
+		the text string and calculates the position's X, Y, and line height 
+		values in pixels. The X and Y values are positive offset values 
+		relative to the string's upper-left corner.
+		
+		*Arguments:*
+		
+		position - the numeric index within the text string. The first 
+		character in the string is at index 0. To indicate the end of the 
+		string, specify a position value of -1.
+		
+		*Return Values:* If the specified position was invalid, returns nil. 
+		Otherwise, returns a table containing three integers. The table 
+		contents are shown below.
+		
+		(code)
+		{ X coordinate, Y coordinate, line height in pixels }
+		(end)
+		
+*/
+
+    table position_to_coordinates( int position )
+        [[
+            gfloat x;
+            gfloat y;
+            gfloat lh;
+
+            if ( clutter_text_position_to_coords( CLUTTER_TEXT( self ) , position , & x , & y , &lh ) )
+            {
+                lua_newtable( L );
+
+                lua_pushnumber( L , x );
+                lua_rawseti( L , -2 , 1 );
+
+                lua_pushnumber( L , y );
+                lua_rawseti( L , -2 , 2 );
+
+                lua_pushnumber( L , lh );
+                lua_rawseti( L , -2 , 3 );
+            }
+            else
+            {
+                lua_pushnil( L );
+            }
+        ]];
 
     set_selection( int start_pos , int end_pos )
 	[[clutter_text_set_selection(CLUTTER_TEXT(self),start_pos,end_pos);]];
@@ -415,13 +902,25 @@ class Text [[ClutterActor*]] actor
 	]];
 
 	/*
-		Event: on_text_changed
+		Event Handler: on_text_changed
 		
-		Called every time the text changes.
+		The on_text_changed event handler is called whenever the Text object's 
+		text string is modified.
 		
-		Arguments:
+		*Prototype:*
 		
-			text - The Text element this event applies to.
+		(code)
+		on_text_changed( Text text )
+		(end)
+		
+		*Arguments:*
+		
+		text - the Text object whose text string has been modified
+		
+		*Return Values:* None
+		
+		*See Also:* the <text> property, the <editable> property
+		
 	*/	
 	
     callback on_text_changed
@@ -433,6 +932,7 @@ class Text [[ClutterActor*]] actor
 				G_CALLBACK(Text_on_text_changed),
 				L);	    
 		]];
+
 }
 
 [[

@@ -1,3 +1,0 @@
-[submodule "libs/clutter"]
-	path = libs/clutter
-	url = git://git.clutter-project.org/clutter

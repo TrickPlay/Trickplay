@@ -2,8 +2,8 @@
 #include "context.h"
 #include "app.h"
 
-void profile_changing_handler(const char *,void * l);
-void profile_changed_handler(const char *,void * l);
+void profile_changing_handler(TPContext *,const char *,void * l);
+void profile_changed_handler(TPContext *,const char *,void * l);
 ]]
 
 # Global: profile
@@ -43,13 +43,13 @@ global profile [[App*]]
 }
 
 [[
-void profile_changing_handler(const char *,void * l)
+void profile_changing_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
     invoke_profile_on_changing(L,App::get(L),0,0);
 }
 
-void profile_changed_handler(const char *,void * l)
+void profile_changed_handler(TPContext *,const char *,void * l)
 {
     lua_State * L=(lua_State*)l;
     invoke_profile_on_changed(L,App::get(L),0,0);

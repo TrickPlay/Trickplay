@@ -1,9 +1,9 @@
 //
 //  NSStreamAdditions.m
-//  TrickplayRemote
+//  ImageOverSocket-test
 //
-//  Created by Kenny Ham on 9/11/10.
-//  Copyright 2010 Northrop. All rights reserved.
+//  Created by Rex Fenley on 2/7/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
 #import "NSStreamAdditions.h"
@@ -12,7 +12,7 @@
 @implementation NSStream (MyAdditions)
 
 + (void)getStreamsToHostNamed:(NSString *)hostName 
-                         port:(NSInteger)port 
+                         port:(NSUInteger)port 
                   inputStream:(NSInputStream **)inputStreamPtr 
                  outputStream:(NSOutputStream **)outputStreamPtr
 {

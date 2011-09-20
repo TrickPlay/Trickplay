@@ -5,6 +5,14 @@
 #include "util.h"
 #include "db.h"
 
+//.............................................................................
+
+#define TP_LOG_DOMAIN   "DB"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
+
 //-----------------------------------------------------------------------------
 
 static const char * schema_create =
@@ -19,10 +27,13 @@ static const char * schema_create =
     "                   name TEXT,"
     "                   release INTEGER NOT NULL,"
     "                   version TEXT NOT NULL,"
-    "                   fingerprints TEXT);"
+    "                   fingerprints TEXT,"
+    "                   attributes TEXT NOT NULL DEFAULT '');"
 
     "create table profile_apps( profile_id INTEGER NOT NULL,"
     "                           app_id TEXT NOT NULL,"
+    "                           start_count INTEGER NOT NULL DEFAULT 0,"
+    "                           last_start INTEGER NOT NULL DEFAULT 0,"
     "                           PRIMARY KEY( profile_id, app_id) );"
 
     "create table app_actions( app_id TEXT NOT NULL,"
@@ -102,7 +113,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
     if ( !g_file_test( filename, G_FILE_TEST_EXISTS ) )
     {
-        g_info( "SYSTEM DATABASE DOES NOT EXIST" );
+        tpinfo( "SYSTEM DATABASE DOES NOT EXIST" );
     }
 
     // Try to open the on-disk database in read-only mode
@@ -113,7 +124,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
         if ( !source.ok() )
         {
-            g_warning( "FAILED TO OPEN EXISTING SYSTEM DATABASE" );
+            tpwarn( "FAILED TO OPEN EXISTING SYSTEM DATABASE" );
         }
         else
         {
@@ -124,7 +135,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
             if ( !integrity.ok() || integrity.get_string( 0 ) != "ok" )
             {
-                g_warning( "FAILED INTEGRITY CHECK ON EXISTING SYSTEM DATABASE" );
+                tpwarn( "FAILED INTEGRITY CHECK ON EXISTING SYSTEM DATABASE" );
             }
             else
             {
@@ -132,19 +143,19 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
                 if ( !SQLite::Backup( db, source ).ok() )
                 {
-                    g_warning( "FAILED TO RESTORE EXISTING SYSTEM DATABASE" );
+                    tpwarn( "FAILED TO RESTORE EXISTING SYSTEM DATABASE" );
                 }
                 else
                 {
                     create = false;
 
-                    g_info( "SYSTEM DATABASE LOADED" );
+                    tpinfo( "SYSTEM DATABASE LOADED" );
 
                     migrated = db.migrate_schema( schema_create );
 
                     if ( migrated )
                     {
-                        g_info( "SYSTEM DATABASE MIGRATED" );
+                        tpinfo( "SYSTEM DATABASE MIGRATED" );
                     }
                 }
             }
@@ -160,11 +171,13 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
         if ( !db.ok() )
         {
-            g_warning( "FAILED TO CREATE INITIAL SYSTEM DATABASE SCHEMA" );
+            tpwarn( "FAILED TO CREATE INITIAL SYSTEM DATABASE SCHEMA" );
             return NULL;
         }
 
-        g_info( "SYSTEM DATABASE CREATED" );
+        db.set_schema_version( schema_create );
+
+        tpinfo( "SYSTEM DATABASE CREATED" );
     }
 
     // Now, we create an instance of a system database - which will steal the
@@ -178,7 +191,7 @@ SystemDatabase * SystemDatabase::open( const char * path )
 
     if ( !result->insert_initial_data() )
     {
-        g_warning( "FAILED TO POPULATE SYSTEM DATABASE" );
+        tpwarn( "FAILED TO POPULATE SYSTEM DATABASE" );
 
         // We reset dirty so that this bad database doesn't get flushed when
         // we delete it
@@ -238,7 +251,7 @@ bool SystemDatabase::flush()
 
     if ( fd == -1 )
     {
-        g_warning( "FAILED TO CREATE TEMPORARY FILE FOR SYSTEM DATABASE" );
+        tpwarn( "FAILED TO CREATE TEMPORARY FILE FOR SYSTEM DATABASE" );
         return false;
     }
 
@@ -248,14 +261,14 @@ bool SystemDatabase::flush()
 
     if ( !dest.ok() )
     {
-        g_warning( "FAILED TO OPEN TEMPORARY BACKUP FOR SYSTEM DATABASE" );
+        tpwarn( "FAILED TO OPEN TEMPORARY BACKUP FOR SYSTEM DATABASE" );
         g_unlink( backup_filename );
         return false;
     }
 
     if ( !SQLite::Backup( dest, db ).ok() )
     {
-        g_warning( "FAILED TO BACKUP SYSTEM DATABASE" );
+        tpwarn( "FAILED TO BACKUP SYSTEM DATABASE" );
         g_unlink( backup_filename );
         return false;
     }
@@ -267,12 +280,12 @@ bool SystemDatabase::flush()
 
     if ( g_rename( backup_filename, target_filename ) != 0 )
     {
-        g_warning( "FAILED TO MOVE BACKUP SYSTEM DATABASE" );
+        tpwarn( "FAILED TO MOVE BACKUP SYSTEM DATABASE" );
         g_unlink( backup_filename );
         return false;
     }
 
-    g_info( "SYSTEM DATABASE FLUSHED" );
+    tpinfo( "SYSTEM DATABASE FLUSHED" );
     dirt = 0;
     return true;
 }
@@ -504,14 +517,25 @@ bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet
         fingerprint_list += *it;
     }
 
-    SQLite::Statement insert( db, "insert or replace into apps (id,path,name,release,version,fingerprints) values (?1,?2,?3,?4,?5,?6);" );
+    String attribute_list;
+
+    for ( StringSet::const_iterator it = metadata.attributes.begin(); it != metadata.attributes.end(); ++it )
+    {
+        if ( ! attribute_list.empty() )
+        {
+            attribute_list += ",";
+        }
+        attribute_list += *it;
+    }
+
+    SQLite::Statement insert( db, "insert or replace into apps (id,path,name,release,version,fingerprints,attributes) values (?1,?2,?3,?4,?5,?6,?7);" );
     insert.bind( 1, metadata.id );
     insert.bind( 2, metadata.path );
     insert.bind( 3, metadata.name );
     insert.bind( 4, metadata.release );
     insert.bind( 5, metadata.version );
     insert.bind( 6, fingerprint_list );
-
+    insert.bind( 7, attribute_list );
     insert.step();
 
     if ( ! insert.ok() )
@@ -578,14 +602,13 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
         app.release = select->get_int( 3 );
         app.version = select->get_string( 4 );
 
-        gchar * * fingerprints = g_strsplit( select->get_string( 5 ).c_str(), ",", 0 );
+        StringVector fingerprints = split_string( select->get_string( 5 ) , "," );
 
-        for ( gchar * * f = fingerprints; *f; ++f )
-        {
-            app.fingerprints.insert( String( *f ) );
-        }
+        app.fingerprints.insert( fingerprints.begin() , fingerprints.end() );
 
-        g_strfreev( fingerprints );
+        StringVector attributes = split_string( select->get_string( 6 ) , "," );
+
+        app.attributes.insert( attributes.begin() , attributes.end() );
 
         result.push_back( app );
     }
@@ -597,7 +620,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
 
 SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
 {
-    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints from apps;" );
+    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints,attributes from apps;" );
 
     return get_app_list( &select );
 }
@@ -626,7 +649,7 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
 
         bool existed = existing_ids.erase( it->id );
 
-        g_info( "%s %s (%s/%d) @ %s",
+        tpinfo( "%s %s (%s/%d) @ %s",
                 existed ? "UPDATING" : "ADDING",
                 it->id.c_str(),
                 it->version.c_str(),
@@ -654,7 +677,7 @@ void SystemDatabase::update_all_apps( const App::Metadata::List & apps )
             del.reset();
             del.clear();
 
-            g_info( "DELETING %s", it->c_str() );
+            tpinfo( "DELETING %s", it->c_str() );
         }
     }
 }
@@ -718,7 +741,7 @@ bool SystemDatabase::add_app_to_current_profile( const String & app_id )
 
 //.............................................................................
 
-SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile()
+SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile( AppSort sort , bool reverse )
 {
     Profile profile = get_current_profile();
 
@@ -727,9 +750,28 @@ SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile()
         return AppInfo::List();
     }
 
-    SQLite::Statement select( db,
-            "select a.id,a.path,a.name,a.release,a.version,a.fingerprints"
-            " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id;" );
+    String s("select a.id,a.path,a.name,a.release,a.version,a.fingerprints,a.attributes"
+             " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id " );
+
+    switch ( sort )
+    {
+        case BY_NAME:
+            s += "order by a.name ";
+            s += reverse ? "desc" : "asc";
+            break;
+
+        case BY_DATE_USED:
+            s += "order by p.last_start ";
+            s += reverse ? "asc" : "desc";
+            break;
+
+        case BY_TIMES_USED:
+            s += "order by p.start_count ";
+            s += reverse ? "asc" : "desc";
+            break;
+    }
+
+    SQLite::Statement select( db , s );
 
     select.bind( 1, profile.id );
 
@@ -808,6 +850,25 @@ std::list<int> SystemDatabase::get_profiles_for_app( const String & app_id )
 
 //.............................................................................
 
+bool SystemDatabase::is_app_in_current_profile( const String & app_id )
+{
+    Profile profile = get_current_profile();
+
+    if ( ! profile.id )
+    {
+        return false;
+    }
+
+    SQLite::Statement select( db, "select 1 from profile_apps where app_id = ?1 and profile_id = ?2;" );
+
+    select.bind( 1, app_id );
+    select.bind( 2, profile.id );
+
+    return select.step_row();
+}
+
+//.............................................................................
+
 SystemDatabase::AppActionMap SystemDatabase::get_app_actions_for_current_profile()
 {
     AppActionMap result;
@@ -829,4 +890,34 @@ SystemDatabase::AppActionMap SystemDatabase::get_app_actions_for_current_profile
     }
 
     return result;
+}
+
+void SystemDatabase::app_launched( const String & app_id )
+{
+    Profile profile = get_current_profile();
+
+    if ( ! profile.id )
+    {
+        return;
+    }
+
+    SQLite::Statement update( db ,
+            "update or ignore profile_apps set start_count = start_count + 1 , last_start = ?1 "
+            "where profile_id = ?2 and app_id = ?3;" );
+
+    GTimeVal t;
+    g_get_current_time( & t );
+
+    update.bind( 1 , t.tv_sec );
+    update.bind( 2 , profile.id );
+    update.bind( 3 , app_id );
+
+    if ( update.step() )
+    {
+        if ( db.changes() > 0 )
+        {
+            make_dirty();
+            tplog2( "UPDATED APP STATS FOR '%s'" , app_id.c_str() );
+        }
+    }
 }

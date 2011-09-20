@@ -213,17 +213,25 @@ local function start()
             
             if iteration == 1 then
                 local tv = ( trickplay and trickplay.version ) or "< 0.0.12"
-            
+                        
                 print( "" )
-                print( "PLEASE NOTE the clutter version (/ver) and whether profiling is enabled (/prof)" )
+            
                 print( "TRICKPLAY VERSION  : "..tv )
                 print( "BENCHMARK VERSION  : "..md5( readfile( "main.lua" ) ) )
                 print( "DISPLAY DIMENSIONS : "..string.format( "%dx%d" , screen.display_size[1] , screen.display_size[2] ) )
+
+                if trickplay and trickplay.libraries ~= nil and trickplay.profiling ~= nil then    
+                    print( "CLUTTER VERSION    : "..trickplay.libraries.clutter[ 1 ].." "..trickplay.libraries.clutter[ 3 ] )
+                    print( "PROFILING          : "..tostring( trickplay.profiling ) )
+                else
+                    print( "PLEASE NOTE the clutter version (/ver) and whether profiling is enabled (/prof)" )
+                end
+                
                 print( "" )
-                print( "#\ttick %\tactors\tframes\ts\tfps" )
+                print( "  #\ttick %\tactors\tframes\ts\tfps" )
             end
             
-            print( string.format( "%d\t%d\t%d\t%d\t%2.3f\t%d" ,
+            print( string.format( "%3d\t%3d\t%d\t%d\t%2.3f\t%d" ,
                 iteration,
                 math.ceil( ticks / ( total.elapsed / timer.interval ) * 100 ),
                 actors,
