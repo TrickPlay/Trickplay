@@ -7,33 +7,52 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <QuartzCore/QuartzCore.h>
 
 
 @protocol AsyncImageViewDelegate
+
+@optional
+- (void)on_loadedFailed:(BOOL)failed;
 
 @required
 - (void)dataReceived:(NSData *)data resourcekey:(id)resourceKey;
 
 @end
 
-#import "ResourceManager.h"
+//#import "ResourceManager.h"
+@class ResourceManager;
 
-
-@interface AsyncImageView : UIImageView {
+@interface AsyncImageView : UIView {
     NSURLConnection *connection;
     NSMutableData *data;
+    BOOL loaded;
     id resourceKey;
+    
+    BOOL tileWidth;
+    BOOL tileHeight;
+    
+    UIImage *image;
     
     UIActivityIndicatorView *loadingIndicator;
     
     id <AsyncImageViewDelegate> dataCacheDelegate;
+    id <AsyncImageViewDelegate> otherDelegate;
 }
 
-@property (nonatomic, retain) id resourceKey;
-//@property (nonatomic, assign) id <AsyncImageViewDelegate> dataCacheDelegate;
-@property (nonatomic, retain) id <AsyncImageViewDelegate> dataCacheDelegate;
+@property (assign) BOOL loaded;
+@property (retain) UIImage *image;
+@property (retain) id resourceKey;
+@property (assign) BOOL tileWidth;
+@property (assign) BOOL tileHeight;
+@property (assign) id <AsyncImageViewDelegate> otherDelegate;
+@property (retain) id <AsyncImageViewDelegate> dataCacheDelegate;
 
 - (void)loadImageFromURL:(NSURL *)url resourceKey:(id)key;
-- (UIImageView *)imageView;
+- (void)on_loadedFailed:(BOOL)failed;
+- (void)loadImageFromData:(NSData *)data;
+- (void)setTileWidth:(BOOL)toTileWidth height:(BOOL)toTileHeight;
+- (void)animateSpinner;
+//- (UIImageView *)imageView;
 
 @end

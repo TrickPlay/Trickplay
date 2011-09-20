@@ -7,15 +7,16 @@
 //
 
 #import "AudioController.h"
-
+#import "Extensions.h"
 
 @implementation AudioController
 
 - (id)initWithResourceManager:(ResourceManager *)resman
-               socketManager:(SocketManager *)sockman {
+                 tvConnection:(TVConnection *)_tvConnection {
+
     if ((self = [super init])) {
         resourceManager = [resman retain];
-        socketManager = [sockman retain];
+        tvConnection = [_tvConnection retain];
         soundLoopName = nil;
     }
     
@@ -23,8 +24,8 @@
 }
 
 - (void)sendSoundStatusMessage:(NSString *)resource message:(NSString *)message {
-	//NSData *sentData = [[NSString stringWithFormat:@"SOUND\t%@\t%@\n", resource, message] dataUsingEncoding:NSUTF8StringEncoding];
-    //[socketManager sendData:[sentData bytes] numberOfBytes:[sentData length]];
+	NSData *sentData = [[NSString stringWithFormat:@"SOUND\t%@\t%@\n", resource, message] dataUsingEncoding:NSUTF8StringEncoding];
+    [[tvConnection socketManager] sendData:[sentData bytes] numberOfBytes:[sentData length]];
 }
 
 - (void)playSoundFile:(NSString *)resourcename filename:(NSString *)filename {
@@ -33,14 +34,14 @@
 		//NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:filename ofType: @"mp3"];
 		//NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:soundFilePath];
 		//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
-        /**
+        //**
 		[self createAudioStreamer:filename];
         //*/
 	}
 	else
 	{
-        /**
-		[self createAudioStreamer:[NSString stringWithFormat:@"http://%@:%d/%@", [socketManager host], [socketManager port], filename]];
+        //**
+		[self createAudioStreamer:[NSString stringWithFormat:@"http://%@:%d/%@", tvConnection.hostName, tvConnection.http_port, filename]];
         //*/
 		//NSURL *fileURL = [NSURL URLWithString:];
 		//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
@@ -54,10 +55,8 @@
     soundLoopName = [resourcename retain];
 }
 
-
-
 - (void)playbackStateChanged:(NSNotification *)aNotification {
-    /**
+    //**
 	if ([audioStreamer isWaiting]) // not sure why this is here
 	{
 		
@@ -94,7 +93,7 @@
 
 - (void)createAudioStreamer:(NSString *)audioURL
 {
-    /**
+    //**
 	if (audioStreamer)
 	{
         [self destroyAudioStreamer];
@@ -103,16 +102,18 @@
 	NSURL *url = [NSURL URLWithString:audioURL];
 	audioStreamer = [[AudioStreamer alloc] initWithURL:url];
 	
-	[[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(playbackStateChanged:) name:ASStatusChangedNotification
-                                               object:audioStreamer];
+	[[NSNotificationCenter defaultCenter] 
+        addObserver:self
+           selector:@selector(playbackStateChanged:)
+               name:ASStatusChangedNotification
+             object:audioStreamer];
 	[audioStreamer start];
      //*/
 }
 
 - (void)destroyAudioStreamer
 {
-    /**
+    //**
 	if (audioStreamer) {
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:ASStatusChangedNotification object:audioStreamer];
 		
@@ -125,12 +126,13 @@
 
 - (void)dealloc {
     NSLog(@"AudioController dealloc");
-    //[self destroyAudioStreamer];
+    [self destroyAudioStreamer];
     if (resourceManager) {
         [resourceManager release];
     }
-    if (socketManager) {
-        [socketManager release];
+    if (tvConnection) {
+        [tvConnection release];
+        tvConnection = nil;
     }
     if (soundLoopName) {
         [soundLoopName release];
