@@ -1,0 +1,309 @@
+#!/usr/bin/python
+
+import argparse
+import shutil
+import os
+import sys
+from HTMLParser import HTMLParser 
+
+argparser = argparse.ArgumentParser(description='Convert Photoshop-generated HTML/slices into a Trickplay application.')
+argparser.add_argument('inputFiles', metavar='HTMLFILE', type=str, nargs='+',
+                        help='File names to convert. The first file will be on top, and the subsequent files will be layered beneath.')
+argparser.add_argument('outputDir', metavar='DIR', nargs=1,
+                        help='Directory of output. By default, will use the path of the first file given.')
+argparser.add_argument('-n, --name', metavar='SCREEN', type=str, dest='screenFile', default='screen.lua',
+                        help='The filename of the screen created. Default is screen.lua')
+
+class getImageData(HTMLParser):
+    
+    def __init__(self, images):
+        HTMLParser.__init__(self)
+        self.document = False
+        self.lastdiv = {}
+        self.images = images
+
+    def handle_starttag(self, tag, attrs):
+        
+        # A div will always be encountered right before an img
+        # The div contains all necessary properties except for src
+        # The first div encountered contains properties for the entire document
+        if 'div' == tag:
+            self.lastdiv = {}
+            a = attrs[0][1].replace(';', '').split()
+            for e in a:
+                attr = e.split(':')
+                name = attr[0]
+                if name != 'position':
+                    val = attr[1]
+                    self.lastdiv[attr[0]] = attr[1].replace('px', '')
+            if not self.document:
+                self.document = True
+                self.images['__document'] = self.lastdiv
+                    
+        # Grab the src attribute
+        elif 'img' == tag:
+            src = attrs[0][1]
+            self.lastdiv['src'] = src
+            self.images[src] = self.lastdiv
+        # Must use inline CSS... no tables
+        elif 'table' == tag:
+            sys.exit('This HTML file was output from Photoshop Save-for-web-and-devices\n' +
+                     'using incorrect settings. Please output using the "Inline CSS" option.')
+
+
+def parseHTML(inputFiles):
+
+    # Parse files, store in files dictionary
+    data = {}
+    
+    for file in inputFiles:
+    
+        f = open(file)
+        contents = f.read()
+        
+        # Container for image properties
+        images = {}
+        
+        # The div before an image tag
+        lastdiv = ''
+                
+        parser = getImageData(images)
+        parser.feed(contents)
+        
+        data[file] = images
+        
+    return data
+
+
+def output(outputDir, screenDir, screenFile, data, imageDir, imagePrefix, indent):
+
+    # Total number of images, used for naming them
+    total = 0;
+    
+    # String of groups to add to 'g'
+    groups = ''
+
+    o = open(outputDir + screenDir + screenFile, 'w')        
+    o.write("g = ...\n\n")
+        
+    for i, file in enumerate(data):
+        
+        # Directory for this html file and its images
+        filedir = file.rsplit('/', 1)[0] + '/'
+        
+        # String of images to add to group
+        group = ""
+        
+        for image in data[file]:
+            
+            # Process all Image()s, document is the Group() which comes last
+            if image != '__document':
+            
+                # Copy images to their new directory
+                filePath = data[file][image]['src'].rsplit('/', 1)[1]
+                initialPath = filedir + image
+                finalPath   = outputDir + imageDir + filePath
+                shutil.copy(initialPath, finalPath)
+                
+                # Store all attr in local variables... more readable this way
+                attr = data[file][image]
+                width = attr["width"]
+                height = attr["height"]
+                x = attr["left"]
+                y = attr["top"]
+                name = imagePrefix + str(total)
+                src = imageDir + filePath
+                
+                # Save image name for adding to group at the end of the file
+                group += imagePrefix + str(total) + ','
+                
+                # Generate Trickplay editor Image()
+                text = ''
+                text += 'local ' + name + ' = Image' + '\n'
+                text += indent + '{\n'
+                text += indent*2 + 'src = "' + src + '",\n'
+                text += indent*2 + 'clip = {0,0,' + width + ',' + height + '},\n'
+                text += indent*2 + 'scale = {1,1,0,0},\n'
+                text += indent*2 + 'x_rotation = {0,0,0},\n'
+                text += indent*2 + 'y_rotation = {0,0,0},\n'
+                text += indent*2 + 'z_rotation = {0,0,0},\n'
+                text += indent*2 + 'anchor_point = {0,0},\n'
+                text += indent*2 + 'name = "' + name + '",\n'
+                text += indent*2 + 'position = {' + x + ',' + y + ',0},\n'
+                text += indent*2 + 'size = {' + width + ',' + height + '},\n'
+                text += indent*2 + 'opacity = 255,\n'
+                text += indent + '}\n\n'
+                
+                o.write(text)
+                
+                total = total + 1;
+        
+        # Output the group, add children
+        attr = data[file]['__document']
+        width = attr["width"]
+        height = attr["height"]
+        x = attr["left"]
+        y = attr["top"]
+        name = 'group' + str(i)
+        
+        # Store name for adding to g at end of file
+        groups += name + ','
+        
+        text = '''local ''' + name + ''' = Group
+    {
+        scale = {1,1,0,0},
+        x_rotation = {0,0,0},
+        y_rotation = {0,0,0},
+        z_rotation = {0,0,0},
+        anchor_point = {0,0},
+        name = "''' + name + '''",
+        position = {''' + x + ',' + y + ''',0},
+        size = {''' + width + ',' + height + '''},
+        opacity = 255,
+        children = {''' + group[:len(group)-1] + '''},
+    }
+
+'''
+        
+        o.write(text)
+        
+    # Add groups to g at end of file
+    o.write("g:add(")
+    o.write(groups[:len(groups)-1])
+    o.write(")\n")
+
+#
+#def createMain(name):
+#
+#    globalSection = '''
+#function main()
+#
+#-- GLOBAL SECTION
+#ui_element = dofile("/lib/ui_element.lua") --Load widget helper library
+#layout = {} --Table containing all the UIElements that make up each screen
+#groups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed
+#-- END GLOBAL SECTION
+#'''
+#
+#    importedSection = '''
+#--  {0} SECTION
+#groups["{1}"] = Group() -- Create a Group for this screen
+#layout["{1}"] = '''.format(str.upper(name), name) + '{}' + '''
+#loadfile("/screens/{1}.lua")(groups["{1}"]) -- Load all the elements for this screen
+#ui_element.populate_to(groups["{1}"],layout["{1}"]) -- Populate the elements into the Group
+#
+#-- END {0} SECTION
+#'''.format(str.upper(name), name)
+#
+#    footerSection = '''
+#-- GLOBAL SECTION FOOTER 
+#screen:grab_key_focus()
+#screen:show()
+#screen.reactive = true
+#
+#''' + 'ui_element.screen_add(groups["{0}"])'.format(name) + '''
+#
+#-- SCREEN ON_KEY_DOWN SECTION
+#function screen:on_key_down(key)
+#end
+#-- END SCREEN ON_KEY_DOWN SECTION
+#
+#-- SCREEN ON_MONTION SECTION
+#function screen:on_motion(x,y)
+#    if(screen:find_child("user_mouse_pointer") == nil) then
+#        screen:add(user_mouse_pointer)
+#    end
+#    user_mouse_pointer.position = ''' + '{' + 'x-15 ,y-10 ,0' + '}' + '''
+#    user_mouse_pointer:raise_to_top()
+#    if dragging then
+#        local actor = unpack(dragging)
+#        if (actor.name == "grip") then
+#            local actor,s_on_motion = unpack(dragging)
+#            s_on_motion(x, y)
+#            return true
+#        end
+#        return true
+#    end
+#end
+#-- END SCREEN ON_MONTION SECTION
+#
+#-- SCREEN ON_BUTTON_UP SECTION
+#function screen:on_button_up()
+#    if dragging then
+#        dragging = nil
+#    end
+#end
+#-- END SCREEN ON_BUTTON_UP SECTION
+#
+#-- END GLOBAL SECTION FOOTER 
+#end
+#
+#dolater( main )
+#'''
+#    
+#    return globalSection + importedSection + footerSection
+
+
+def getFileExt(filename):
+    return os.path.splitext(filename)[1]
+    
+def removeFileExt(filename):
+    return os.path.splitext(filename)[0]
+
+def main():
+    
+    args = argparser.parse_args()
+    
+    inputFiles = args.inputFiles
+    numFiles = len(args.inputFiles)
+    size = numFiles - 1
+    outputDir = args.outputDir[0]
+    screenFile = args.screenFile
+    
+    # Output settings
+    imagePrefix = removeFileExt(screenFile)
+    imageDir = 'assets/images/'
+    screenDir = 'screens/'
+    indent = '    '
+
+    # Make sure input files are html
+    for file in inputFiles:
+        if '.html' != getFileExt(file):
+            sys.exit("Input files must be HTML files.")
+            
+    # Make sure outputDir is really a directory
+    if '/' != outputDir[len(outputDir)-1]:
+        outputDir += '/'
+    
+    # If screen name is given, make sure it has the .lua file extension
+    if '.lua' != getFileExt(screenFile):
+        screenFile += '.lua'
+        
+    # Parse the HTML and store files in the dictionary data
+    # Files are stored as: data[Filename][Imagename][Properties]
+    data = parseHTML(inputFiles)
+        
+    # If app directory exists, fail
+    # Then make the app directories (root, screens, assets/images)
+    if os.path.exists(outputDir):
+        sys.exit("Directory given already exists. Please give a new directory name.")
+    else:  
+        os.makedirs(outputDir)
+        os.makedirs(outputDir + screenDir)
+        os.makedirs(outputDir + imageDir)
+    
+    # Write output, copy images to new directory
+    output(outputDir, screenDir, screenFile, data, imageDir, imagePrefix, indent)
+    
+    # Apparently creating main is not necessary
+    # o = open(outputDir + 'main.lua', 'w')
+    # o.write(createMain(imagePrefix))
+    
+    print("Success: Created app directory " + outputDir)
+
+
+main()
+
+#git tools
+
+#tp-photoshop-convert
