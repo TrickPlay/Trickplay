@@ -87,6 +87,7 @@ cursor_type 	  = 68
 shift 		      = false
 control 	      = false
 
+menu_bar_hover 	  = false
 
 -- table for skin 
 skins = {}
