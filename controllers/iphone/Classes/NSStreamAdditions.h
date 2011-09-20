@@ -12,7 +12,7 @@
 @interface NSStream (MyAdditions)
     
 + (void)getStreamsToHostNamed:(NSString *)hostName 
-                         port:(NSInteger)port 
+                         port:(NSUInteger)port 
                   inputStream:(NSInputStream **)inputStreamPtr 
                  outputStream:(NSOutputStream **)outputStreamPtr;
 @end
