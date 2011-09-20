@@ -12,9 +12,9 @@
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFiles</key>
 	<array>
-		<string>iOS-logo-57x57</string>
-		<string>iOS-logo-114x114</string>
-		<string>iOS-logo-72x72</string>
+		<string>iOS-logo-114x114.png</string>
+		<string>iOS-logo-57x57.png</string>
+		<string>iOS-logo-72x72.png</string>
 	</array>
 	<key>CFBundleIdentifier</key>
 	<string>com.trickplay.${PRODUCT_NAME:rfc1034identifier}</string>
@@ -38,6 +38,8 @@
 	<string>MainWindow-iPad</string>
 	<key>NSMainNibFile~iphone</key>
 	<string>MainWindow-iPhone</string>
+	<key>UIApplicationExitsOnSuspend</key>
+	<true/>
 	<key>UIInterfaceOrientation</key>
 	<string>UIInterfaceOrientationPortrait</string>
 	<key>UIPrerenderedIcon</key>
@@ -56,5 +58,9 @@
 	<array/>
 	<key>UTImportedTypeDeclarations</key>
 	<array/>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>wifi</string>
+	</array>
 </dict>
 </plist>
