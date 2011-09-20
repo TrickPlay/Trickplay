@@ -1,7 +1,7 @@
 app=
 {
     id          = "com.trickplay.holdem_2",
-    release     = "5",
+    release     = "6",
     version     = "2.0",
     name        = "Poker Dawgz v2",
     author      = "Darren, Devin, and Rex",
