@@ -8,43 +8,67 @@
 
 #import <UIKit/UIKit.h>
 #import <YAJLiOS/YAJL.h>
-#import "GestureViewController.h"
+#import "TPAppViewController.h"
+#import "AppBrowser.h"
 
+@protocol AppBrowserViewControllerDelegate <AppBrowserDelegate>
+
+- (void)appBrowserViewController:(AppBrowserViewController *)appBrowserViewController
+                    didSelectApp:(AppInfo *)app
+                    isCurrentApp:(BOOL)isCurrentApp;
+
+@end
+
+/**
+ * The AppBrowserViewController lists apps available from a service.
+ *
+ * Queries Trickplay for its available apps via a URL Request using an
+ * HTTP port (the port number is received from a welcome message which 
+ * Trickplay sends to the App Browser's associated TPAppViewController).
+ * The data received from the URL Request is a JSON string containing a
+ * list of apps avaible for the connected service. The AppBrowser then
+ * lists these available apps in a UITableView so the user may select them;
+ * starting the selected app on the television.
+ *
+ * Refer to AppBrowserViewController.xib for the AppBrowser's view.
+ */
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
 UITableViewDataSource> {
-    NSString *hostName;
-    NSInteger port;
-    
+    @private
     /*
     UIBarButtonItem *appShopButton;
     UIBarButtonItem *showcaseButton;
     UIToolbar *toolBar;
     */
      
-    UITableView *theTableView;
-    NSArray *appsAvailable;
-    GestureViewController *gestureViewController;
+    UITableView *tableView;
+    // Spins while a app data is loading; disappears otherwise.
+    UIActivityIndicatorView *loadingSpinner;
     
-    NSString *currentAppName;
+    // Refreshes the list of apps
+    UIBarButtonItem *refreshButton;
     
-    BOOL pushingViewController;
+    // Orange dot indicating which app is the current app
+    UIImageView *currentAppIndicator;
+    
+    AppBrowser *appBrowser;
+    
+    id <AppBrowserViewControllerDelegate> delegate;
 }
+
+// Exposed properties
 /*
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *appShopButton;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *showcaseButton;
 @property (nonatomic, retain) IBOutlet UIToolbar *toolBar;
 */
-@property (retain) IBOutlet UITableView *theTableView;
-@property (retain) NSArray *appsAvailable;
-@property (nonatomic, retain) NSString *currentAppName;
-@property (nonatomic, assign) BOOL pushingViewController;
+@property (retain) IBOutlet UITableView *tableView;
+@property (readonly) AppBrowser *appBrowser;
+@property (assign) id <AppBrowserViewControllerDelegate> delegate;
 
+// Exposed methods
 - (IBAction) appShopButtonClick;
 - (IBAction) showcaseButtonClick;
-- (void)createGestureView;
-- (BOOL)fetchApps;
-- (void)setupService:(NSInteger)p
-            hostname:(NSString *)h
-            thetitle:(NSString *)n;
+- (void)refresh;
 
 @end
