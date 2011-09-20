@@ -1,6 +1,8 @@
 [[
 #include <cstdlib>
 
+#include "fontconfig/fontconfig.h"
+
 #include "util.h"
 #include "versions.h"
 #include "app.h"
@@ -150,6 +152,42 @@ global trickplay [[void*]]
             lua_rawset( L , -3 );
         ]];
 
+    /*
+        Property: fonts
+        
+        Returns a table of available font family names. 
+    */
+    
+    readonly table fonts
+        [[
+            StringSet names;
+            
+            if ( FcFontSet * fs = FcConfigGetFonts( 0 , FcSetApplication ) )
+            {
+                for ( int i = 0; i < fs->nfont; ++i )
+                {
+                    FcPattern * p = fs->fonts[ i ];
+        
+                    if ( FcChar8 * family = FcPatternFormat( p , ( const FcChar8 * ) "%{family[0]}" ) )
+                    {
+                        names.insert( ( char * ) family );
+                        free( family );
+                    }
+                }
+            }
+            
+            lua_newtable( L );
+            
+            int i = 1;
+            
+            for ( StringSet::const_iterator it = names.begin(); it != names.end(); ++it , ++i )
+            {
+                lua_pushstring( L , it->c_str() );
+                lua_rawseti( L , -2 , i );
+            }
+            
+        ]];
+    
     /*
         Function: check_version
 
