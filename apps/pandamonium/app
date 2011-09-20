@@ -1,7 +1,7 @@
 app=
 {
     id          = "com.trickplay.pandamonium",
-    release     = "1",
+    release     = "2",
     version     = "1.0",
     name        = "Pandamonium",
     author      = "Alex Indaco",
