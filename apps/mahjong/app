@@ -1,7 +1,7 @@
 app=
 {
     id          = "com.trickplay.mahjong",
-    release     = "6",
+    release     = "7",
     version     = "1.1",
     name        = "Mahjong",
     author      = "James Fenley",
