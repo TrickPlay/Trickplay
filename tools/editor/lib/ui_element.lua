@@ -6362,8 +6362,8 @@ button
         button.reactive=true
        
 	if editor_lb == nil or editor_use then  
-		button.pressed = function() umbrella.fade_in() end 
-		button.released = function() umbrella.fade_out() end 
+		button.pressed = function() umbrella.fade_in() menu_bar_hover = true end 
+		button.released = function() umbrella.fade_out() menu_bar_hover = false end 
  	end 
         
         button.position = {button.w/2,button.h/2}

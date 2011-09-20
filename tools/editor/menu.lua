@@ -1,4 +1,5 @@
 editor_use = true
+
 local menu = {}
 local menu_items
 local menu_bar = Image
@@ -44,6 +45,22 @@ local menuButton_file = ui_element.menuButton
 		ui_position = {249,28,0}
 	}
 
+ function menuButton_file:on_enter()
+  	if menu_bar_hover == false then return true end 
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_file" then 
+		local temp_focus = current_focus
+	   	current_focus.on_focus_out(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_file") then 
+		menuButton_file.extra.on_focus_in(keys.Return)
+		current_focus.name = "menuButton_file"
+    end 
+	return true
+ end 
 
 menuButton_file.insert_item(1,{type="item", string="New", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close, parameter=true, icon=Text{text="N"}})
 menuButton_file.insert_item(2,{type="item", string="Open...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.open, icon=Text{text="O"}})
@@ -115,6 +132,24 @@ menuButton_edit.extra.focus = {[65363] = "menuButton_arrange", [65293] = "menuBu
 
 menuButton_edit.extra.reactive = true
 
+ function menuButton_edit:on_enter()
+  	if menu_bar_hover == false then return true end 
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_edit" then 
+		local temp_focus = current_focus
+	   	current_focus.on_focus_out(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_edit") then 
+		menuButton_edit.extra.on_focus_in(keys.Return)
+		current_focus.name = "menuButton_edit"
+    end 
+
+	return true
+ end 
+
 
 local menuButton_arrange = ui_element.menuButton
 	{
@@ -170,6 +205,23 @@ menuButton_arrange.extra.focus = {[65363] = "menuButton_view", [65293] = "menuBu
 
 menuButton_arrange.extra.reactive = true
 
+ function menuButton_arrange:on_enter()
+  	if menu_bar_hover == false then return true end 
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_arrange" then 
+		local temp_focus = current_focus
+	   	current_focus.on_focus_out(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_arrange") then 
+		menuButton_arrange.extra.on_focus_in(keys.Return)
+		current_focus.name = "menuButton_arrange"
+    end 
+
+	return true
+ end 
 
 local menuButton_view = ui_element.menuButton
 	{
@@ -218,6 +270,7 @@ menuButton_view.insert_item(7,{type="item", string="Black", bg=assets("assets/me
 menuButton_view.items[7]["icon"].opacity = 0
 
 
+
 function menu.clearMenuButtonView_BGIcons() 
 	menuButton_view.items[2]["icon"].opacity = 0
 	menuButton_view.items[3]["icon"].opacity = 0
@@ -241,6 +294,23 @@ menuButton_view.extra.focus = {[65293] = "menuButton_view", [65361] = "menuButto
 
 menuButton_view.extra.reactive = true
 
+ function menuButton_view:on_enter()
+  	if menu_bar_hover == false then return true end 
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_view" then 
+		local temp_focus = current_focus
+	   	current_focus.on_focus_out(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_view") then 
+		menuButton_view.extra.on_focus_in(keys.Return)
+		current_focus.name = "menuButton_view"
+    end 
+
+	return true
+ end 
 
 local menu_text = Text
 	{
