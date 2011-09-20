@@ -22,10 +22,10 @@ local test_to_run = 54-- if automation_option == 2
 -- the package file. 
 -- It contains the generated checksum so  ensure that all tests pass before using this as a baseline.
 local console_display_option_choices = { test_results = 1, dump_screensum = 2 } 
-local console_display_option = 1
+local console_display_option = 2
 
 -- Time interval between tests
-local test_interval = 4.0
+local test_interval = 0.1
 
 -- Globals --
 local test_list
@@ -116,7 +116,7 @@ function do_test (tests)
 			background:rectangle (0, 0, screen.w, screen.h)
 			background:set_source_color ("FFFFFF")
 			background:fill()
-			background:move_to (screen.w/2 - 500, 50)
+	--[[		background:move_to (screen.w/2 - 500, 50)
 			background:text_path ("DejaVu Sans 30px","Description: "..test_description)
 			background:move_to (100, 10)
 			background:text_path ("DejaVu Sans 30px","Test Group: "..test_group)
@@ -125,7 +125,7 @@ function do_test (tests)
 			background:move_to (screen.w - 450, 10)
 			background:text_path ("DejaVu Sans 30px","API: "..test_api)
 			background:set_source_color ("000000")
-			background:fill()
+			background:fill() --]]
 			screen:add(background:Image ())
 			image = background:Image()
 			screen:add(image) 
@@ -134,6 +134,7 @@ function do_test (tests)
 			g = generate_test_image()
 			print (g)
 			screen:add(g)
+			local screenshot = devtools:screenshot(string.sub(filename,1, (string.len(filename)-4)))
 			screen:show()
 			view_generated = true
 
