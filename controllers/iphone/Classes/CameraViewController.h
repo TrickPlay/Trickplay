@@ -8,23 +8,30 @@
 
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/UTCoreTypes.h>
+#import "ImageEditorViewController.h"
 
 @protocol CameraViewControllerDelegate <NSObject>
 
 @required
-- (void)finishedPickingImage;
+- (void)finishedPickingImage:(UIImage *)image;
 - (void)finishedSendingImage;
 - (void)canceledPickingImage;
 
 @end
 
-@interface CameraViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate> {
-    UIButton *cameraButton;
-    UIButton *imageLibraryButton;
+@interface CameraViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate, ImageEditorDelegate, UIPopoverControllerDelegate> {
+    
+    NSString *titleLabel;
+    NSString *cancelLabel;
     
     UIImagePickerController *imagePickerController;
     UIPopoverController *popOverController;
-    UIImageView *backgroundView;
+    ImageEditorViewController *imageEditor;
+    
+    UIView *mask;
+    CGFloat targetWidth;
+    CGFloat targetHeight;
+    BOOL editable;
     
     NSInteger port;
     NSString *host;
@@ -32,15 +39,27 @@
     
     NSMutableArray *connections;
     
+    UINavigationController *navController;
+    
     id <CameraViewControllerDelegate> delegate;
 }
 
-@property (nonatomic, retain) IBOutlet UIButton *cameraButton;
-@property (nonatomic, retain) IBOutlet UIButton *imageLibraryButton;
+@property (retain) NSString *titleLabel;
+@property (retain) NSString *cancelLabel;
+
+@property (retain) UINavigationController *navController;
+
+@property (assign) BOOL editable;
+
 @property (assign) id <CameraViewControllerDelegate> delegate;
 
-- (IBAction)startCamera:(id)sender;
-- (IBAction)openLibrary:(id)sender;
+
+- (id)initWithView:(UIView *)aView targetWidth:(CGFloat)width targetHeight:(CGFloat)height editable:(BOOL)is_editable mask:(UIView *)aMask;
+
+- (void)setMask:(UIImageView *)mask;
+
+- (void)startCamera;
+- (void)openLibrary;
 
 - (void)setupService:(NSInteger)thePort host:(NSString *)theHost path:(NSString *)thePath delegate:theDelegate;
 

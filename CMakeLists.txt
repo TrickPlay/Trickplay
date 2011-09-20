@@ -21,6 +21,10 @@ set( TP_CONTROLLER_DISCOVERY_UPNP 1 )
 
 set( TP_UPNP_CLIENT 1 )
 
+if(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
+	set( TP_WITH_WEBGL 1 )
+endif(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
+
 #------------------------------------------------------------------------------
 
 include(util.cmake)
@@ -34,7 +38,7 @@ execute_process(
 
 execute_process(
 	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	COMMAND git describe --tags ${GIT_CURRENT_REVISION}
+	COMMAND git describe --tags --dirty
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 	OUTPUT_VARIABLE GIT_CURRENT_TAG
 )
@@ -64,6 +68,8 @@ else (CMAKE_TOOLCHAIN_FILE)
     add_subdirectory( clients/desktop )
 
     add_subdirectory( clients/clutter-mediaplayer )
+    
+#    add_subdirectory( clients/jpeg-utils-test )
     
     add_subdirectory( sdk )
     

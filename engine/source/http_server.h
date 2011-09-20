@@ -141,6 +141,7 @@ public:
 	        virtual void cancel() = 0;
 	    protected:
 	        StreamBody() {}
+	        virtual ~StreamBody() {}
 	    private:
 	        StreamBody( const StreamBody & ) {}
 	    };
@@ -173,7 +174,11 @@ public:
 	class RequestHandler
     {
     public:
-	    virtual ~RequestHandler() {};
+
+		RequestHandler();
+		RequestHandler( HttpServer * server , const String & path );
+
+	    virtual ~RequestHandler();
 
 	    virtual void handle_http_request( const Request & request , Response & response ) {}
 
@@ -182,6 +187,11 @@ public:
         virtual void handle_http_put    ( const Request & request , Response & response ) { handle_http_request( request , response ); }
         virtual void handle_http_delete ( const Request & request , Response & response ) { handle_http_request( request , response ); }
         virtual void handle_http_head   ( const Request & request , Response & response ) { handle_http_request( request , response ); }
+
+    protected:
+
+        HttpServer *	server;
+        String			path;
     };
 
     //.........................................................................

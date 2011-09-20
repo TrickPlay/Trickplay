@@ -27,7 +27,8 @@ static const char * schema_create =
     "                   name TEXT,"
     "                   release INTEGER NOT NULL,"
     "                   version TEXT NOT NULL,"
-    "                   fingerprints TEXT);"
+    "                   fingerprints TEXT,"
+    "                   attributes TEXT NOT NULL DEFAULT '');"
 
     "create table profile_apps( profile_id INTEGER NOT NULL,"
     "                           app_id TEXT NOT NULL,"
@@ -516,14 +517,25 @@ bool SystemDatabase::insert_app( const App::Metadata & metadata, const StringSet
         fingerprint_list += *it;
     }
 
-    SQLite::Statement insert( db, "insert or replace into apps (id,path,name,release,version,fingerprints) values (?1,?2,?3,?4,?5,?6);" );
+    String attribute_list;
+
+    for ( StringSet::const_iterator it = metadata.attributes.begin(); it != metadata.attributes.end(); ++it )
+    {
+        if ( ! attribute_list.empty() )
+        {
+            attribute_list += ",";
+        }
+        attribute_list += *it;
+    }
+
+    SQLite::Statement insert( db, "insert or replace into apps (id,path,name,release,version,fingerprints,attributes) values (?1,?2,?3,?4,?5,?6,?7);" );
     insert.bind( 1, metadata.id );
     insert.bind( 2, metadata.path );
     insert.bind( 3, metadata.name );
     insert.bind( 4, metadata.release );
     insert.bind( 5, metadata.version );
     insert.bind( 6, fingerprint_list );
-
+    insert.bind( 7, attribute_list );
     insert.step();
 
     if ( ! insert.ok() )
@@ -590,14 +602,13 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
         app.release = select->get_int( 3 );
         app.version = select->get_string( 4 );
 
-        gchar * * fingerprints = g_strsplit( select->get_string( 5 ).c_str(), ",", 0 );
+        StringVector fingerprints = split_string( select->get_string( 5 ) , "," );
 
-        for ( gchar * * f = fingerprints; *f; ++f )
-        {
-            app.fingerprints.insert( String( *f ) );
-        }
+        app.fingerprints.insert( fingerprints.begin() , fingerprints.end() );
 
-        g_strfreev( fingerprints );
+        StringVector attributes = split_string( select->get_string( 6 ) , "," );
+
+        app.attributes.insert( attributes.begin() , attributes.end() );
 
         result.push_back( app );
     }
@@ -609,7 +620,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_app_list( SQLite::Statement * 
 
 SystemDatabase::AppInfo::List SystemDatabase::get_all_apps()
 {
-    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints from apps;" );
+    SQLite::Statement select( db, "select id,path,name,release,version,fingerprints,attributes from apps;" );
 
     return get_app_list( &select );
 }
@@ -739,7 +750,7 @@ SystemDatabase::AppInfo::List SystemDatabase::get_apps_for_current_profile( AppS
         return AppInfo::List();
     }
 
-    String s("select a.id,a.path,a.name,a.release,a.version,a.fingerprints"
+    String s("select a.id,a.path,a.name,a.release,a.version,a.fingerprints,a.attributes"
              " from apps a, profile_apps p where p.profile_id = ?1 and a.id = p.app_id " );
 
     switch ( sort )

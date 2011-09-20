@@ -8,6 +8,7 @@ module controllers_module;
 #include "images.h"
 #include "bitmap.h"
 #include "json.h"
+#include "clutter_util.h"
 ]]
 
 #==============================================================================
@@ -30,25 +31,29 @@ public:
     
     inline bool has_cap(unsigned int cap)
     {
-        return controller->get_capabilities()&cap;        
+        return controller->get_capabilities()&cap;
     }
     
     //.........................................................................
     // Delegate functions
     
     virtual void disconnected();
-    virtual bool key_down(unsigned int key_code,unsigned long int unicode);
-    virtual bool key_up(unsigned int key_code,unsigned long int unicode);
-    virtual void accelerometer(double x,double y,double z);
-    virtual bool pointer_move( int x, int y );
-    virtual bool pointer_button_down( int button , int x, int y );
-    virtual bool pointer_button_up( int button , int x, int y );
-    virtual void touch_down(int finger,int x,int y);
-    virtual void touch_move(int finger,int x,int y);
-    virtual void touch_up(int finger,int x,int y);
+    virtual bool key_down(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers);
+    virtual bool key_up(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers);
+    virtual void accelerometer(double x,double y,double z,unsigned long int modifiers);
+    virtual bool pointer_move( int x, int y ,unsigned long int modifiers);
+    virtual bool pointer_button_down( int button , int x, int y ,unsigned long int modifiers);
+    virtual bool pointer_button_up( int button , int x, int y ,unsigned long int modifiers);
+    virtual void touch_down(int finger,int x,int y,unsigned long int modifiers);
+    virtual void touch_move(int finger,int x,int y,unsigned long int modifiers);
+    virtual void touch_up(int finger,int x,int y,unsigned long int modifiers);
     virtual void ui_event(const String & parameters);
-    virtual void submit_picture( void * data, unsigned int size, const char * mime_type );
+    virtual void submit_image( void * data, unsigned int size, const char * mime_type );
     virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
+    virtual void cancel_image( void );
+    virtual void cancel_audio_clip( void );
+    virtual void advanced_ui_ready( void );
+    virtual void advanced_ui_event( const char * json );
     
     bool declare_resource( const String & name , const String & uri );
 
@@ -209,6 +214,19 @@ interface controller [[ControllerDelegate*]]
         ]];
         
     /*
+        Property: id
+        
+        A string that identifies this controller. In some cases, this string will be the same
+        when a controller connects for a second time.
+    */        
+    
+    readonly string id
+        [[
+           String s( self->get_controller()->get_id());
+           id = s.c_str();
+        ]];
+        
+    /*
     	Property: has_keys
     	
     	This property tells you whether the controller can send key events.
@@ -302,20 +320,20 @@ interface controller [[ControllerDelegate*]]
         ]];
     
     /*
-        Property: has_pictures
+        Property: has_images
         
-        Whether the controller supports pictures.
+        Whether the controller supports sending images.
     */
            
-    readonly bool has_pictures
+    readonly bool has_images
         [[
-            has_pictures=self->has_cap(TP_CONTROLLER_HAS_PICTURES);
+            has_images=self->has_cap(TP_CONTROLLER_HAS_IMAGES);
         ]];
     
     /*
         Property: has_audio_clips
         
-        Whether the controller supports audio clips.
+        Whether the controller supports sending audio clips.
     */
            
     readonly bool has_audio_clips
@@ -332,6 +350,26 @@ interface controller [[ControllerDelegate*]]
     readonly bool has_advanced_ui
         [[
             has_advanced_ui = self->has_cap( TP_CONTROLLER_HAS_ADVANCED_UI );
+        ]];
+        
+    /*
+        Property: is_advanced_ui_ready
+    */
+    
+    readonly bool is_advanced_ui_ready
+        [[
+            is_advanced_ui_ready = self->get_controller()->is_advanced_ui_ready();
+        ]];
+        
+    /*
+        Property: has_virtual_remote
+        
+        Whether the controller supports a virtual remote.
+    */        
+    
+    readonly bool has_virtual_remote
+        [[
+            has_virtual_remote = self->has_cap( TP_CONTROLLER_HAS_VIRTUAL_REMOTE );
         ]];
 
     /*
@@ -780,23 +818,34 @@ interface controller [[ControllerDelegate*]]
         ]];
 
     /*
-        Function: submit_picture
+        Function: request_image
         
-        Tells the controller to send a picture. The app will receive the picture via <on_picture>.
+        Tells the controller to send an image. The app will receive the image via <on_image>.
+        If the user cancels the image selection, the app will receive <on_image_cancelled>.
         
         Arguments:
         
             max_dimensions - An optional table containing two integers. The first is the
-                             maximum desired width for the picture. The second is the maximum
-                             desired height for the picture. If they are both zero or not
-                             provided, the picture will be sent at its original dimensions.
+                             maximum desired width for the image. The second is the maximum
+                             desired height for the image. If they are both zero or not
+                             provided, the image will be sent at its original dimensions.
 
             edit -           If true, the controller may give the user a chance to edit
-                             the picture before it is submitted.
+                             the image before it is submitted.  Default is false
 
             mask -           This should be the name of an image previously declared as a
                              resource. When it is present, the controller will composite the
-                             mask with the picture and submit the result.
+                             mask with the image and submit the result.  Pass "" for no mask.
+
+			dialog_label -   This should be a text label to place on the controller's screen
+							 as a prompt for the user to select an image or capture a new one.
+							 Default value is "Send image to TV".
+
+			cancel_label -   This should be a text label for the "cancel" button.  Default is
+							 "Cancel", but you may wish to relabel this depending on how your app
+							 will respond to such a cancellation -- "Use default" might be more
+							 appropriate if user cancelling will result in a default image being
+							 used instead, for example.
          
         Returns:
         
@@ -805,7 +854,7 @@ interface controller [[ControllerDelegate*]]
             false - Otherwise.      
     */
             
-    bool submit_picture( table max_dimensions = 0 , bool edit = false , string mask = "" )
+    bool request_image( table max_dimensions = 0 , bool edit = false , string mask = "", string dialog_label = "SendImageToTV", string cancel_label = "Cancel" )
         [[
             unsigned int max_width = 0;
             unsigned int max_height = 0;
@@ -820,16 +869,27 @@ interface controller [[ControllerDelegate*]]
                 lua_pop( L , 1 );
             }
 
-            result=self->get_controller()->submit_picture( max_width , max_height , edit , String( mask ) );
+            result=self->get_controller()->request_image( max_width , max_height , edit , String( mask ), String( dialog_label ), String( cancel_label ) );
         ]];
 
     /*
-        Function: submit_audio_clip
+        Function: request_audio_clip
         
         Tells the controller to send an audio clip. The app will receive the audio clip via <on_audio_clip>.
-        
-        
-         
+        If the user cancels the audio selection, the app will receive <on_audio_clip_cancelled>.
+
+		Arguments:
+
+			dialog_label -   This should be a text label to place on the controller's screen
+							 as a prompt for the user to select an image or capture a new one.
+							 Default value is "Send audio to TV".
+
+			cancel_label -   This should be a text label for the "cancel" button.  Default is
+							 "Cancel", but you may wish to relabel this depending on how your app
+							 will respond to such a cancellation -- "Use default" might be more
+							 appropriate if user cancelling will result in a default image being
+							 used instead, for example.
+
         Returns:
         
             true - If it was successful.
@@ -837,9 +897,9 @@ interface controller [[ControllerDelegate*]]
             false - Otherwise.      
     */
             
-    bool submit_audio_clip( )
+    bool request_audio_clip( string dialog_label = "SendAudioToTV", string cancel_label = "Cancel" )
         [[
-            result=self->get_controller()->submit_audio_clip( );    
+            result=self->get_controller()->request_audio_clip( String( dialog_label ), String( cancel_label ) );
         ]];
 
     /*
@@ -870,8 +930,42 @@ interface controller [[ControllerDelegate*]]
                 }
             }
         ]];
+        
+    /*
+        Function: show_virtual_remote
+        
+        Instructs the controller to show a virtual remote.
 
-     /*
+        Returns:
+        
+            true - If it was successful.
+            
+            false - Otherwise.      
+    */
+    
+    bool show_virtual_remote()
+        [[
+            result = self->get_controller()->show_virtual_remote();
+        ]];        
+
+    /*
+        Function: hide_virtual_remote
+        
+        Instructs the controller to hide the virtual remote.
+
+        Returns:
+        
+            true - If it was successful.
+            
+            false - Otherwise.      
+    */
+    
+    bool hide_virtual_remote()
+        [[
+            result = self->get_controller()->hide_virtual_remote();
+        ]];        
+
+    /*
 		Event: on_disconnected
 		
 		This event is triggered when the controller is disconnected from
@@ -1062,9 +1156,10 @@ interface controller [[ControllerDelegate*]]
 
 
     /*
-        Event: on_picture
+        Event: on_image
         
-        A picture event. This is sent when you use <submit_picture>.
+        An image event. This is sent when you use <request_image> and the user sends and image from
+        the controller.
         
         Arguments:
             controller - The controller that generated the event.
@@ -1072,8 +1167,76 @@ interface controller [[ControllerDelegate*]]
             bitmap - The bitmap received from the controller.
             
     */
-    callback on_picture;
+
+    callback on_image;
+
+	/*
+		Event: on_image_cancelled
+		
+		This is sent when the user cancels sending an image after you use <request_image>
+		
+		Arguments:
+			controller - The controller that generated the event
+	*/
+
+    callback on_image_cancelled;
+
+	/*
+		Event: on_audio_clip_cancelled
+		
+		This is sent when the user cancels sending an audio clip after you use <request_audio_clip>
+		
+		Arguments:
+			controller - The controller that generated the event
+	*/
+
+    callback on_audio_clip_cancelled;
+
+    /*
+        Event: on_advanced_ui_ready
+
+        This event lets you know that the controller's advanced UI capabilities
+        are ready for use.
+    */
+
+    callback on_advanced_ui_ready;
+
+
+    /*
+        Event: on_advanced_ui_event
+        
+        An advanced UI event has been received.
+    */
     
+    callback on_advanced_ui_event;
+    
+    /* TODO:Undocumented. We may want to restrict this one or move it somewhere else */
+
+    bool save_key_map( table map )
+        [[
+
+#ifndef TP_PRODUCTION
+
+            Controller::KeyMap km;
+    
+            lua_pushnil( L );
+
+            while( lua_next( L , map ) )
+            {
+                if ( lua_isnumber( L , -2 ) && lua_isnumber( L , -1 ) )
+                {
+                    km.insert( std::make_pair( lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) ) );
+                }
+                lua_pop( L , 1 );
+            }
+
+            result = self->get_controller()->save_key_map( km );
+
+#else
+            result = false;
+#endif
+
+        ]];
 }
 
 #==============================================================================
@@ -1115,14 +1278,15 @@ void ControllerDelegate::disconnected()
     list->proxy_disconnected(this);    
 }
 
-bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicode)
+bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers)
 {
     lua_pushnumber(L,key_code);
     lua_pushnumber(L,unicode);
-
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    
     bool result = true;
 
-    if ( invoke_controller_on_key_down(L,this,2,1) )
+    if ( invoke_controller_on_key_down(L,this,3,1) )
     {
 	    if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
 	    {
@@ -1135,14 +1299,15 @@ bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicod
     return result;
 }
 
-bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode)
+bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers)
 {
     lua_pushnumber(L,key_code);
     lua_pushnumber(L,unicode);
+    ClutterUtil::push_event_modifiers(L,modifiers);
 
     bool result = true;
 
-    if ( invoke_controller_on_key_up(L,this,2,1) )
+    if ( invoke_controller_on_key_up(L,this,3,1) )
     {
     
     	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
@@ -1156,22 +1321,24 @@ bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode)
     return result;
 }
 
-void ControllerDelegate::accelerometer(double x,double y,double z)
+void ControllerDelegate::accelerometer(double x,double y,double z,unsigned long int modifiers)
 {
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     lua_pushnumber(L,z);    
-    invoke_controller_on_accelerometer(L,this,3,0);    
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_controller_on_accelerometer(L,this,4,0);    
 }
 
-bool ControllerDelegate::pointer_move(int x,int y)
+bool ControllerDelegate::pointer_move(int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
+    ClutterUtil::push_event_modifiers(L,modifiers);
 
     bool result = true;
 
-    if ( invoke_controller_on_pointer_move(L,this,2,1) )
+    if ( invoke_controller_on_pointer_move(L,this,3,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -1183,35 +1350,16 @@ bool ControllerDelegate::pointer_move(int x,int y)
     return result;
 }
 
-bool ControllerDelegate::pointer_button_down(int button,int x,int y)
-{
-    lua_pushnumber(L,button);
-    lua_pushnumber(L,x);
-    lua_pushnumber(L,y);
-
-    bool result = true;
-
-    if ( invoke_controller_on_pointer_button_down(L,this,3,1) )
-    {
-        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
-        {
-            result = false;
-        }
-
-        lua_pop( L , 1 );
-    }
-    return result;
-}
-
-bool ControllerDelegate::pointer_button_up(int button,int x,int y)
+bool ControllerDelegate::pointer_button_down(int button,int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,button);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
+    ClutterUtil::push_event_modifiers(L,modifiers);
 
     bool result = true;
 
-    if ( invoke_controller_on_pointer_button_up(L,this,3,1) )
+    if ( invoke_controller_on_pointer_button_down(L,this,4,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -1223,28 +1371,52 @@ bool ControllerDelegate::pointer_button_up(int button,int x,int y)
     return result;
 }
 
-void ControllerDelegate::touch_down(int finger,int x,int y)
+bool ControllerDelegate::pointer_button_up(int button,int x,int y,unsigned long int modifiers)
+{
+    lua_pushnumber(L,button);
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+
+    bool result = true;
+
+    if ( invoke_controller_on_pointer_button_up(L,this,4,1) )
+    {
+        if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+        {
+            result = false;
+        }
+
+        lua_pop( L , 1 );
+    }
+    return result;
+}
+
+void ControllerDelegate::touch_down(int finger,int x,int y,unsigned long int modifiers)
 {   
     lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_down(L,this,3,0);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_controller_on_touch_down(L,this,4,0);
 }
 
-void ControllerDelegate::touch_move(int finger, int x,int y)
+void ControllerDelegate::touch_move(int finger, int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_move(L,this,3,0);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_controller_on_touch_move(L,this,4,0);
 }
 
-void ControllerDelegate::touch_up(int finger, int x,int y)
+void ControllerDelegate::touch_up(int finger, int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,finger);
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
-    invoke_controller_on_touch_up(L,this,3,0);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_controller_on_touch_up(L,this,4,0);
 }
 
 void ControllerDelegate::ui_event(const String & parameters)
@@ -1253,7 +1425,7 @@ void ControllerDelegate::ui_event(const String & parameters)
     invoke_controller_on_ui_event(L,this,1,0);
 }
 
-void ControllerDelegate::submit_picture( void * data, unsigned int size, const char * mime_type )
+void ControllerDelegate::submit_image( void * data, unsigned int size, const char * mime_type )
 {
     Image * image = Image::decode(data, size, mime_type);
     
@@ -1270,7 +1442,7 @@ void ControllerDelegate::submit_picture( void * data, unsigned int size, const c
     {
         bitmap->set_image( image ); 
         
-        invoke_controller_on_picture( L , this , 1 , 0 );
+        invoke_controller_on_image( L , this , 1 , 0 );
     }
     else
     {
@@ -1278,6 +1450,16 @@ void ControllerDelegate::submit_picture( void * data, unsigned int size, const c
         
         delete image;
     }
+}
+
+void ControllerDelegate::cancel_image( void )
+{
+	invoke_controller_on_image_cancelled( L, this, 0, 0 );
+}
+
+void ControllerDelegate::cancel_audio_clip( void )
+{
+	invoke_controller_on_audio_clip_cancelled( L, this, 0, 0 );
 }
 
 void ControllerDelegate::submit_audio_clip( void * data, unsigned int size, const char * mime_type )
@@ -1292,6 +1474,18 @@ bool ControllerDelegate::declare_resource( const String & name , const String & 
     }
 
     return controller->declare_resource( name , uri , resource_group );
+}
+
+void ControllerDelegate::advanced_ui_ready( void )
+{
+    invoke_controller_on_advanced_ui_ready( L, this, 0, 0 );
+}
+
+void ControllerDelegate::advanced_ui_event( const char * json )
+{
+    JSON::parse( L , json );
+    
+    invoke_controller_on_advanced_ui_event( L , this , 1 , 0 );
 }
 
 ]]

@@ -11,15 +11,10 @@
 #import <QuartzCore/CATransform3D.h>
 #import "TrickplayUIElement.h"
 
-
 @interface TrickplayRectangle : TrickplayUIElement {
 
 }
 
-- (id)initWithID:(NSString *)rectID args:(NSDictionary *)args;
-
-- (void)setColorFromArgs:(NSDictionary *)args;
-- (void)setBorderColorFromArgs:(NSDictionary *)args;
-- (void)setBorderWidthFromArgs:(NSDictionary *)args;
+- (id)initWithID:(NSString *)rectID args:(NSDictionary *)args objectManager:(AdvancedUIObjectManager *)objectManager;
 
 @end

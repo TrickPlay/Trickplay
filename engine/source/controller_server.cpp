@@ -30,6 +30,10 @@
 #include "log.h"
 
 //-----------------------------------------------------------------------------
+
+#define CONTROLLER_PROTOCOL_VERSION		"43"
+
+//-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
 
 #define DISCONNECT_TIMEOUT_SEC  30
@@ -334,23 +338,28 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             break;
         }
 
-        case TP_CONTROLLER_COMMAND_SUBMIT_PICTURE	:
+        case TP_CONTROLLER_COMMAND_REQUEST_IMAGE	:
 		{
-		    TPControllerSubmitPicture * sp = ( TPControllerSubmitPicture * ) parameters;
-		    String path = start_post_endpoint( connection , PostInfo::PICTURES );
-			server->write_printf( connection, "PI\t%s\t%u\t%u\t%d\t%s\n" ,
+		    TPControllerRequestImage * ri = ( TPControllerRequestImage * ) parameters;
+		    String path = start_post_endpoint( connection , PostInfo::IMAGE );
+			server->write_printf( connection, "PI\t%s\t%u\t%u\t%d\t%s\t%s\t%s\n" ,
 			        path.c_str() + 1 ,
-			        sp->max_width ,
-			        sp->max_height ,
-			        sp->edit ? 1 : 0 ,
-			        sp->mask ? sp->mask : "" );
+			        ri->max_width ,
+			        ri->max_height ,
+			        ri->edit ? 1 : 0 ,
+			        ri->mask ? ri->mask : "",
+			        ri->dialog_label ? ri->dialog_label : "",
+			        ri->cancel_label ? ri->cancel_label : "");
 			break;
 		}
 
-        case TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP	:
+        case TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP	:
 		{
+		    TPControllerRequestAudioClip * ra = ( TPControllerRequestAudioClip * ) parameters;
             String path = start_post_endpoint( connection , PostInfo::AUDIO);
-			server->write_printf( connection, "AC\t%s\n" , path.c_str() + 1 );
+			server->write_printf( connection, "AC\t%s\t%s\t%s\n" , path.c_str() + 1,
+			        ra->dialog_label ? ra->dialog_label : "",
+			        ra->cancel_label ? ra->cancel_label : "");
 			break;
 		}
 
@@ -401,6 +410,18 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
             g_string_free( response , FALSE );
 
             break;
+        }
+
+        case TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE:
+        {
+            server->write( connection, "SV\n" );
+        	break;
+        }
+
+        case TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE:
+        {
+            server->write( connection, "HV\n" );
+        	break;
         }
 
         default:
@@ -530,8 +551,6 @@ static inline bool cmp2( const char * a, const char * b )
 
 void ControllerServer::process_command( gpointer connection, ConnectionInfo & info, gchar ** parts , bool * read_again )
 {
-    static const char * PROTOCOL_VERSION = "34";
-
     guint count = g_strv_length( parts );
 
     if ( count < 1 )
@@ -585,6 +604,13 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         if ( info.version < 3 )
         {
             g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 3" );
+            info.version = 0;
+            return;
+        }
+
+        if ( info.version < 4 )
+        {
+            g_warning( "CONTROLLER DOES NOT SUPPORT PROTOCOL VERSION >= 4" );
             info.version = 0;
             return;
         }
@@ -644,7 +670,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 }
                 else if ( cmp2( cap, "PS" ) )
 				{
-					spec.capabilities |= TP_CONTROLLER_HAS_PICTURES;
+					spec.capabilities |= TP_CONTROLLER_HAS_IMAGES;
 				}
                 else if ( cmp2( cap, "AC" ) )
 				{
@@ -653,6 +679,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 else if ( cmp2( cap , "UX" ) )
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_ADVANCED_UI;
+                }
+                else if ( cmp2( cap , "VR" ) )
+                {
+                	spec.capabilities |= TP_CONTROLLER_HAS_VIRTUAL_REMOTE;
                 }
                 else
                 {
@@ -669,6 +699,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     sscanf( cap, "US=%ux%u", &spec.ui_width, &spec.ui_height );
                 }
+                else if ( cmp2( cap , "ID" ) )
+                {
+                	spec.id = cap + 3;
+                }
                 else
                 {
                     g_warning( "UNKNOWN CONTROLLER CAPABILITY '%s'", cap );
@@ -682,7 +716,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         info.controller = tp_context_add_controller( context, name, &spec, this );
 
-        server->write_printf( connection , "WM\t%s\t%u\t%lu\n" , PROTOCOL_VERSION , context->get_http_server()->get_port() , info.aui_id );
+        server->write_printf( connection , "WM\t%s\t%u\t%lu\n" , CONTROLLER_PROTOCOL_VERSION , context->get_http_server()->get_port() , info.aui_id );
     }
     else if ( cmp2( cmd, "KP" ) )
     {
@@ -704,8 +738,8 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             sscanf( parts[2], "%lx", &unicode );
         }
 
-        tp_controller_key_down( info.controller, key_code, unicode );
-        tp_controller_key_up( info.controller, key_code, unicode );
+        tp_controller_key_down( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
+        tp_controller_key_up( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "KD" ) )
     {
@@ -727,7 +761,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             sscanf( parts[2], "%lx", &unicode );
         }
 
-        tp_controller_key_down( info.controller, key_code, unicode );
+        tp_controller_key_down( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "KU" ) )
     {
@@ -749,7 +783,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             sscanf( parts[2], "%lx", &unicode );
         }
 
-        tp_controller_key_up( info.controller, key_code, unicode );
+        tp_controller_key_up( info.controller, key_code, unicode , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "CK" ) )
     {
@@ -770,19 +804,46 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_accelerometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) );
+        tp_controller_accelerometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "UI" ) )
     {
         // UI
-        // UI <txt>
+        // UI <type> <txt>
 
-        if ( count < 2 || !info.controller )
+        if ( count < 2 || !info.controller || strlen(parts[1]) != 2)
         {
             return;
         }
 
-        tp_controller_ui_event( info.controller, parts[1] );
+        // Enter text or multiple-choice
+        if(cmp2( parts[1], "ET") || cmp2( parts[1], "MC"))
+        {
+            if(count < 3)
+            {
+                return;
+            }
+            tp_controller_ui_event( info.controller, parts[2] );
+        }
+        // Advanced UI event
+        else if (cmp2( parts[1] , "UX" ) )
+        {
+        	if ( count < 3 )
+        	{
+        		return;
+        	}
+        	tp_controller_advanced_ui_event( info.controller , parts[ 2 ] );
+        }
+        // Cancel image
+        else if(cmp2( parts[1], "CI"))
+        {
+            tp_controller_cancel_image( info.controller );
+        }
+        // Cancel audio
+        else if(cmp2( parts[1], "CA"))
+        {
+            tp_controller_cancel_audio_clip( info.controller );
+        }
     }
     else if ( cmp2( cmd, "PD" ) )
     {
@@ -794,7 +855,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_pointer_button_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_pointer_button_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "PM" ) )
     {
@@ -806,7 +867,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_pointer_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) );
+        tp_controller_pointer_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "PU" ) )
     {
@@ -818,7 +879,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_pointer_button_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_pointer_button_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "TD" ) )
     {
@@ -830,7 +891,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_touch_down( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "TM" ) )
     {
@@ -842,7 +903,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_touch_move( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "TU" ) )
     {
@@ -854,7 +915,7 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
             return;
         }
 
-        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) );
+        tp_controller_touch_up( info.controller, atoi( parts[1] ), atoi( parts[2] ) , atoi( parts[ 3 ] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd , "UX" ) )
     {
@@ -918,6 +979,9 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
         parent_info->aui_connection = connection;
 
+        // Now, generate the event that it is ready
+
+        tp_controller_advanced_ui_ready( parent_info->controller );
     }
     else
     {
@@ -1002,7 +1066,16 @@ String ControllerServer::start_post_endpoint( gpointer connection , PostInfo::Ty
     do
     {
         path = "/controllers";
-        path += type == PostInfo::AUDIO ? "/audio/" : "/picture/";
+        switch(type)
+        {
+            case PostInfo::AUDIO:
+                path += "/audio/";
+                break;
+            case PostInfo::IMAGE:
+                path += "/image/";
+                break;
+        }
+
         path += Util::random_string( 20 );
     }
     while( post_map.find( path ) != post_map.end() );
@@ -1065,16 +1138,14 @@ void ControllerServer::handle_http_post( const HttpServer::Request & request , H
 
     const char * content_type = ct.empty() ? 0 : ct.c_str();
 
-    switch( it->second.type )
+    switch ( it->second.type )
     {
         case PostInfo::AUDIO:
-
             tp_controller_submit_audio_clip( info->controller , body.get_data() , body.get_length() , content_type );
             break;
 
-        case PostInfo::PICTURES:
-
-            tp_controller_submit_picture( info->controller , body.get_data() , body.get_length() , content_type );
+        case PostInfo::IMAGE:
+            tp_controller_submit_image( info->controller , body.get_data() , body.get_length() , content_type );
             break;
     }
 
