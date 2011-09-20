@@ -1,0 +1,72 @@
+
+Topic: Create a Second Screen
+
+It's common for an application to have various screens which the user can cycle among, so let's create a second screen for our Tutorial application.
+
+Our second screen will share some of the same UI elements that our initial Language screen had, so rather than starting from scratch, let's use the Language screen as a foundation on which to build.
+
+If you don't already have the Language screen active, load it via the File->Open... menu.
+
+Our new screen will share the basic screen layout, but will not use the four language-related buttons in the button area. To delete a button, select it and choose the Edit->Delete menu item. Alternatively, you can select the button and press the Editor shortcut key <Backspace> to delete the button. Delete each of the four language-related buttons: English, Spanish, Chinese, and Korean. Keep the Continue button; we will use it for our new screen. Also keep the button area rectangle.
+
+Our new screen should have its own name, so select the Title element that is currently displaying the string "Language." Click at the end of the "Language" string and press <Backspace> until the entire string has been deleted. Then type in the name of our new screen: "Mode".
+
+This will be the foundation of our new screen. Save it by selecting the File->Save as... menu item. When prompted for a filename, enter "mode.lua". (Remember that the Visual Editor converts our UI elements to Lua source code, so the file should have a .lua extension.)
+
+The screen should look something like this.
+
+(see images/EdModeStart.png)
+
+Our new Mode screen can be display by pressing the Continue button in the Language screen. (We'll describe how to transition from one screen to another later in this tutorial.) We'll give the user the ability to return to the Language screen by providing a Previous button. First, select the Continue button and press the <D> key to create a duplicate. Then select the new button and right-click to display its Inspector dialog. Set the following button properties.
+
+- Object Name: ButtonPrevious
+- Label: Previous
+
+Using the alignment techniques that you learned while designing the Language screen, position each button roughly alongside each other and then align them horizontally by using either the Arrange->Align:Top or Arrange->Align:Bottom menu item. When you are finished, your screen should look similar to this.
+
+(see images/EdModeButtons.png)
+
+We'll add to this screen a UI element that we haven't seen yet--a Button Picker--and a text label identifying it. First, define the text label by selecting the Edit->Insert UI Element menu item and pressing the Text button. A new Text element marked by a caret cursor will exist near the middle of the display. Type "Mode", then right-click to display its Inspector dialog. Set the following properties.
+
+- Object Name: TextMode
+- Font: DejaVu Sans 60px
+
+Position the text label in the right half of the button area rectangle.
+
+Define the Button Picker by selecting the Edit->Insert UI Element menu item and pressing the Button Picker item. Position the new Button Picker in the left half of the button area, alongside its text label. Then right-click it to display its Inspector and set the following properties.
+
+- Object Name: PickerMode
+- H: 80
+- Text Font: DejaVu Sans 60px (Note: The Text Font property is located in the Inspector's More tab.)
+
+A Button Picker element cycles through a list of possible property settings. Arrows on either the top and bottom of the button (for vertical cycling) or the left and right (for horizontal cycling) cause scrolling through each entry in the list. The entry displayed on the button will be the selected setting.
+
+We'll define our Button Picker so the user can scroll through a list of possible modes. In the Button Picker's Inspector dialog, click on the More tab and locate the Direction area. We can define either a vertical scrolling or horizontal scrolling button. We'll select horizontal scrolling for this tutorial, but you can select vertical now if you wish to see how that scrolling method works.
+
+Click on the ButtonPicker's Items tab to display the button's list of possible settings. Three default entries are specified. Replace each default entry with the following modes.
+
+- Quirks
+- Strict
+- a la
+
+To add a fourth entry, click the <+> graphic button alongside the Items title; a new list entry will be created. Set this list entry to--
+
+- Depeche
+
+There are three graphic buttons alongside each list entry. The operation that each performs is described below.
+
+minus sign - Delete the entry
+up arrow - Shift the entry up in the list
+down arrow - Shift the entry down in the list
+
+When you have the list entries defined, click the Apply button to accept the property settings.
+
+Your screen should look something like this.
+
+(see images/EdModePicker.png)
+
+Finally, let's define our focus navigation using the same technique that was described when creating the Language screen. In the Mode picker button, define the <UpArrow> key to shift focus to the Previous button and define the <DownArrow> key to move focus to the Continue button. Notice that the <LeftArrow> and <RightArrow> buttons have already defined their focus to cycle through the list entries. (If you defined the Picker Button for Vertical scrolling, the <UpArrow> and <DownArrow> keys will be defined to cycle through the list.)
+
+If you check the focus navigation for the Previous and Continue buttons, you'll see that the Editor has already defined the necessary linkage to the Button Picker element based upon the settings just defined for the Picker. Set any additional focus navigations as you see fit. For example, you may wish to define the Previous button's <RightArrow> key to shift focus to the Continue button.
+
+
