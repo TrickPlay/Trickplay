@@ -6,6 +6,16 @@
 
 #include "util.h"
 
+//.............................................................................
+
+#define TP_LOG_DOMAIN   "ACTION"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
+
+//.............................................................................
+
 static String make_uuid( unsigned int mode )
 {
     String result;
@@ -44,13 +54,63 @@ String Util::make_v4_uuid()
     return make_uuid( UUID_MAKE_V4 );
 }
 
+
+String Util::random_string( guint length )
+{
+    String result;
+
+    if ( length > 0 )
+    {
+        static const char * pieces = "0123456789ABCDEF";
+
+        gint32 end = strlen( pieces );
+
+        char buffer[ length ];
+
+        for ( guint i = 0; i < length ; ++i )
+        {
+            buffer[ i ] = pieces[ g_random_int_range( 0 , end ) ];
+        }
+
+        result = String( buffer , length );
+    }
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------
 
-static Debug_OFF al( "ACTION" );
+String Util::canonical_external_path( const char * path , bool abort_on_error )
+{
+	String result;
+
+	if ( path )
+	{
+		GFile * file = g_file_new_for_commandline_arg( path );
+
+		gchar * p = g_file_get_path( file );
+
+		g_object_unref( file );
+
+		if ( p )
+		{
+			result = p;
+			g_free( p );
+		}
+	}
+
+	if ( abort_on_error && result.empty() )
+	{
+		g_error( "INVALID PATH '%s'" , path ? path : "<null>" );
+	}
+
+	return result;
+}
+//-----------------------------------------------------------------------------
 
 Action::~Action()
 {
-    al( "DESTROYING ACTION %p" , this );
+    tplog( "DESTROYING ACTION %p" , this );
 }
 
 void Action::destroy( gpointer action )
@@ -66,12 +126,12 @@ guint Action::post( Action * action , int interval_ms )
 
     if ( interval_ms < 0 )
     {
-        al( "POSTING IDLE ACTION %p" , action );
+        tplog( "POSTING IDLE ACTION %p" , action );
 
         return g_idle_add_full( TRICKPLAY_PRIORITY , ( GSourceFunc ) run_internal , action , destroy );
     }
 
-    al( "POSTING TIMEOUT ACTION %p EVERY %d ms" , action , interval_ms );
+    tplog( "POSTING TIMEOUT ACTION %p EVERY %d ms" , action , interval_ms );
 
     return g_timeout_add_full( TRICKPLAY_PRIORITY , guint( interval_ms ) , ( GSourceFunc ) run_internal , action , destroy );
 }
@@ -81,7 +141,7 @@ void Action::push( GAsyncQueue * queue , Action * action )
     g_assert( queue );
     g_assert( action );
 
-    al( "QUEUEING ACTION %p IN QUEUE %p" , action , queue );
+    tplog( "QUEUEING ACTION %p IN QUEUE %p" , action , queue );
 
     g_async_queue_push( queue , action );
 }
@@ -170,7 +230,8 @@ void Action::post_run_all( GAsyncQueue * queue )
 
 gboolean Action::run_internal( Action * action )
 {
-    al( "RUNNING ACTION %p" , action );
+    tplog( "RUNNING ACTION %p" , action );
 
     return action->run() ? TRUE : FALSE;
 }
+
