@@ -122,6 +122,16 @@ public:
         
         lua_pushstring(L,info.badge_text.c_str() );
         lua_setfield(L,-2,"badge_text" );
+
+        lua_newtable( L );
+        i = 1;
+        for ( StringSet::const_iterator fit = info.attributes.begin(); fit != info.attributes.end(); ++fit )
+        {
+            lua_pushstring( L , fit->c_str() );
+            lua_pushboolean( L , true );
+            lua_rawset( L , -3 );
+        }
+        lua_setfield(L,-2,"attributes");
     }
 
 private:

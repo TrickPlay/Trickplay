@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.burberry",
+    release     = "3",
+    version     = "1.0",
+    name        = "Burberry",
+    author      = "Indaco, Alex",
+    copyright   = "© Trickplay Inc.",
+    attributes  = { "nolauncher" }
+}

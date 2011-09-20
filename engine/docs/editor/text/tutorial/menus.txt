@@ -1,5 +1,0 @@
-Topic: SDK Visual Editor Menus
-
-At the top of the SDK Visual Editor window is the Editor menu bar.
-(see images/EdMenus.png)
-To Do: Describe briefly the available top menu items (File, Edit, Arrange, and View)...

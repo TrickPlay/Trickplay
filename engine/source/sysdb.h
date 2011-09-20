@@ -84,6 +84,7 @@ public:
         StringSet   fingerprints;
         String      badge_style;
         String      badge_text;
+        StringSet   attributes;
     };
 
     int get_app_count();

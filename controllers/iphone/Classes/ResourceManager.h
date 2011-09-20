@@ -7,24 +7,25 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "SocketManager.h"
 #import "AsyncImageView.h"
+#import "TVConnection.h"
 
 
 @interface ResourceManager : NSObject <AsyncImageViewDelegate> {
-
-    SocketManager *socketManager;
+    TVConnection *tvConnection;
 
     NSMutableDictionary *resourceNames;
     NSMutableDictionary *resources;
     
+    NSMutableDictionary *loadingResources;
 }
 
-- (id)initWithSocketManager:(SocketManager *)sockman;
+- (id)initWithTVConnection:(TVConnection *)tvConnection;
 
 - (void)declareResourceWithObject:(id)Object forKey:(id)key;
+- (void)loadImageDataForImageView:(AsyncImageView *)imageView withResource:(NSString *)name;
 - (NSData *)fetchResource:(NSString *)name;
-- (UIImageView *)fetchImageViewUsingResource:(NSString *)name frame:(CGRect)frame;
+- (AsyncImageView *)fetchImageViewUsingResource:(NSString *)name frame:(CGRect)frame;
 - (NSMutableDictionary *)getResourceInfo:(NSString *)name;
 
 - (void)dropResourceGroup:(NSString *)groupName;
