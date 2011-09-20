@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.editor",
+    release     = "5",
+    version     = "1.1",
+    name        = "Visual Editor",
+    copyright   = "© Trickplay Inc.",
+    attributes  = { "nolauncher" }
+}
+

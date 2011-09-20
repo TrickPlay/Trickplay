@@ -11,6 +11,14 @@ module physics_module;
 
 /*===========================================================================*/
 
+/*
+
+	Interface: Shape
+	
+	TODO
+	
+*/
+
 interface Shape [[ b2Shape * ]]
 {
     Shape()
@@ -26,14 +34,45 @@ interface Shape [[ b2Shape * ]]
 
 /*===========================================================================*/
 
+/*
+	Interface: Body
+	
+	TODO
+	
+*/
+
 interface Body [[ ClutterActor * ]]
 {
+
+	/* 
+		Property: handle
+		
+		The handle property is an integer that uniquely identifies this body. It is used in 
+		collision callbacks to refer to the two bodies that are colliding.
+	*/
+	
 	readonly int handle
         [[
             Physics::Body * me = Physics::Body::get( self );
             handle = me->handle;
         ]];
 		
+	/*
+		Property: type
+		
+		The type property is a string specifying the Body object's type.
+		
+		*Supported Settings:* The type setting is case-sensitive.
+		
+		"static" - the body has infinite mass; it is immovable when operating under the influence of the physics engine, but can be moved manually by the user
+		"kinematic" - moves according to its velocity, but is not influenced by other forces, such as gravity or collisions. Behaves as if it had infinite mass.
+		"dynamic" - moves according to the forces placed upon it, such as gravity and collisions. Has finite, non-zero mass.
+		
+		*Default Settings:* "dynamic"
+		
+		TODO
+	*/
+	
 	string type
 	    [[
             Physics::Body * me = Physics::Body::get( self );
@@ -83,6 +122,14 @@ interface Body [[ ClutterActor * ]]
                 }
             }
 	    ]];
+	    
+	/*
+		Property: awake
+		
+		When the physics engine determines that a body has come to rest, it is put to "sleep", 
+		waiting on a collision to wake it up. You can also explicitly wake up a body by setting
+		this property to true.
+	*/	    
 		
 	bool awake
 		[[
@@ -94,6 +141,13 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetAwake( awake );
 		]];
 		
+	/*
+		Property: active
+		
+		This property lets you specify whether a body participates in the physics simulation. A body
+		that is not active will be ignored.
+	*/
+	
 	bool active
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -104,6 +158,12 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetActive( active );
 		]];
 
+	/*
+		Property: position
+		
+		A table of X and Y screen coordinates for the position of the center of the body. 
+	*/
+	
 	table position
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -132,6 +192,12 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
 		]];
 
+	/*
+		Property: x
+		
+		The X screen coordinate of the body's center.
+	*/
+	
 	double x
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -152,26 +218,133 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
         ]];
 
+	/*
+		Property: y
+		
+		The Y screen coordinate of the body's center.
+	*/
+	
     double y
         [[
             Physics::Body * me = Physics::Body::get( self );
-
-            const b2Vec2 & pos( me->body->GetPosition() );
-
-            y = me->world->world_to_screen( pos.y );
+    
+            if ( me->world->z_for_y ) 
+            {
+                y = clutter_actor_get_y( self );
+            }
+            else
+            {
+                const b2Vec2 & pos( me->body->GetPosition() );
+    
+                y = me->world->world_to_screen( pos.y );
+            }
         ]]
         [[
             Physics::Body * me = Physics::Body::get( self );
-
-            b2Vec2 pos( me->body->GetTransform().position );
-
-            pos.y = me->world->screen_to_world( y );
-
-            me->body->SetTransform( pos , me->body->GetAngle() );
-
-            me->synchronize_actor();
+    
+            if ( me->world->z_for_y ) 
+            {
+                clutter_actor_set_y( self , y );
+            }
+            else
+            {
+                b2Vec2 pos( me->body->GetTransform().position );
+    
+                pos.y = me->world->screen_to_world( y );
+    
+                me->body->SetTransform( pos , me->body->GetAngle() );
+    
+                me->synchronize_actor();
+            }
         ]];
 
+
+    /*
+        Property: z
+        
+        The Z coordinate of the body's center.
+    */
+
+    double z
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+
+            if ( ! me->world->z_for_y ) 
+            {
+                z = clutter_actor_get_depth( self );
+            }
+            else
+            {
+                const b2Vec2 & pos( me->body->GetPosition() );
+    
+                z = - me->world->world_to_screen( pos.y );
+            }
+        ]]
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+    
+            if ( ! me->world->z_for_y ) 
+            {
+                clutter_actor_set_depth( self , z );
+            }
+            else
+            {
+                b2Vec2 pos( me->body->GetTransform().position );
+    
+                pos.y = me->world->screen_to_world( - z );
+    
+                me->body->SetTransform( pos , me->body->GetAngle() );
+    
+                me->synchronize_actor();
+            }
+        ]];
+
+    /*
+        Property: depth
+        
+        The Z coordinate of the body's center.
+    */
+
+    double depth
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+
+            if ( ! me->world->z_for_y ) 
+            {
+                depth = clutter_actor_get_depth( self );
+            }
+            else
+            {
+                const b2Vec2 & pos( me->body->GetPosition() );
+    
+                depth = - me->world->world_to_screen( pos.y );
+            }
+        ]]
+        [[
+            Physics::Body * me = Physics::Body::get( self );
+    
+            if ( ! me->world->z_for_y ) 
+            {
+                clutter_actor_set_depth( self , depth );
+            }
+            else
+            {
+                b2Vec2 pos( me->body->GetTransform().position );
+    
+                pos.y = me->world->screen_to_world( - depth );
+    
+                me->body->SetTransform( pos , me->body->GetAngle() );
+    
+                me->synchronize_actor();
+            }
+        ]];
+
+	/*
+		Property: angle
+		
+		The angle of rotation (in degrees) along the Z axis.
+	*/
+	
 	double angle
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -187,6 +360,12 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
 		]];
 
+	/*
+		Property: rotation
+		
+		Same as <angle>.
+	*/
+	
     double rotation
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -202,6 +381,12 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
         ]];
 
+	/*
+		Property: world_center
+		
+		A table of X and Y coordinates for the world center of this body.
+	*/
+	
     readonly table world_center
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -213,6 +398,12 @@ interface Body [[ ClutterActor * ]]
             lua_rawseti( L , -2 , 2 );
         ]];
 
+	/*
+		Property: local_center
+		
+	    A table of X and Y coordinates for this body's center.
+	*/
+	
 	readonly table local_center
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -224,6 +415,12 @@ interface Body [[ ClutterActor * ]]
             lua_rawseti( L , -2 , 2 );
         ]];
 		
+	/*
+		Property: linear_velocity
+		
+		A table of velocity in X and Y direction.
+	*/
+	
 	table linear_velocity
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -246,6 +443,12 @@ interface Body [[ ClutterActor * ]]
 			lua_pop( L , 2 );
 		]];
 		
+	/*
+		Property: angular_velocity
+		
+		The velocity of the body's rotation around the Z axis.
+	*/
+	
 	double angular_velocity
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -258,6 +461,12 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetAngularVelocity( Physics::World::degrees_to_radians( angular_velocity ) );
 		]];
 
+	/*
+		Property: mass
+		
+		The mass of the body.
+	*/
+	
 	readonly double mass
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -267,6 +476,12 @@ interface Body [[ ClutterActor * ]]
 
 	/* TODO: mass_data */
 		
+	/*
+		Property: linear_damping
+		
+		Damping value for the body's linear velocity.
+	*/
+	
 	double linear_damping
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -279,6 +494,12 @@ interface Body [[ ClutterActor * ]]
             me->body->SetLinearDamping( linear_damping );
         ]];
 
+	/*
+		Property: angular_damping
+		
+		Damping value for the body's angular velocity.
+	*/
+	
 	double angular_damping
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -291,6 +512,14 @@ interface Body [[ ClutterActor * ]]
             me->body->SetAngularDamping( angular_damping );
         ]];
 
+	/*
+		Property: bullet
+		
+		Whether this body is considered a bullet (a very fast-moving body). This
+		has implications on collision detection for the body; extra work is performed
+		to avoid tunneling.
+	*/
+	
 	bool bullet
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -303,6 +532,12 @@ interface Body [[ ClutterActor * ]]
             me->body->SetBullet( bullet );
         ]];
 
+	/*
+		Property: sleeping_allowed
+		
+		Whether the body is allowed to go to sleep when it comes to rest.
+	*/
+	
 	bool sleeping_allowed
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -315,6 +550,13 @@ interface Body [[ ClutterActor * ]]
             me->body->SetSleepingAllowed( sleeping_allowed );
         ]];
 
+	/*
+		Property: fixed_rotation
+		
+		If fixed rotation is set to true, the body will not rotate 
+		along the Z axis.
+	*/
+	
 	bool fixed_rotation
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -327,6 +569,13 @@ interface Body [[ ClutterActor * ]]
             me->body->SetFixedRotation( fixed_rotation );
         ]];
 
+	/*
+		Property: contacts
+		
+		A table of current contacts for this body (touch points
+		with other bodies).
+	*/
+	
 	readonly table contacts
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -334,6 +583,12 @@ interface Body [[ ClutterActor * ]]
             me->world->push_contact_list( me->body->GetContactList() );
         ]];
 
+	/*
+		Function: synchronize
+		
+		Explicitly insures that this body and its UIElement are in synch.
+	*/
+	
 	synchronize( )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -341,6 +596,16 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_body();
         ]];
 
+	/*
+		Function: apply_force
+		
+		Apply a force to the body.
+		
+		force - A table of X and Y forces.
+		point - The point, on the body where the force should be applied. This is a
+		        table of X and Y coordinates.
+	*/
+	
 	apply_force( table force , table point )
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -359,6 +624,12 @@ interface Body [[ ClutterActor * ]]
 			lua_pop( L , 4 );
 		]];
 		
+	/*
+		Function: apply_torque
+		
+		A force to apply that will cause the body to rotate.
+	*/
+	
 	apply_torque( double torque )
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -366,6 +637,16 @@ interface Body [[ ClutterActor * ]]
             me->body->ApplyTorque( torque );
 		]];
 		
+	/*
+		Function: apply_linear_impulse
+		
+		A linear impulse to apply to the body.
+		
+		force - X and Y force values.
+		point - The point, on the body, where the impulse should be applied. This is a
+		        table of X and Y coordinates.
+	*/
+	
 	apply_linear_impulse( table force , table point )
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -384,6 +665,12 @@ interface Body [[ ClutterActor * ]]
             lua_pop( L , 4 );
 		]];
 	
+	/*
+		Function: apply_angular_impulse
+		
+		An impulse that will rotate the body.
+	*/
+	
 	apply_angular_impulse( double impulse )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -395,6 +682,20 @@ interface Body [[ ClutterActor * ]]
     #-------------------------------------------------------------------------
     # Fixtures
 
+	/*
+		Property: fixtures
+		
+		Returns a table of all fixtures belonging to this body. For each fixture, the
+		following keys are provided:
+		
+		handle - An integer that uniquely identifies the fixture.
+		type - "circle" or "polygon".
+		sensor - Boolean indicating whether the fixture is a sensor.
+		density - The density of the fixture.
+		friction - The friction of the fixture.
+		bounce - Restitution value for the fixture. 
+	*/
+	
     readonly table fixtures
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -442,6 +743,12 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
+	/*
+		Function: remove_fixture()
+		
+		Removes the given fixture from the body.
+	*/
+	
     bool remove_fixture( int fixture_handle )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -459,6 +766,12 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
+	/*
+		Function: remove_all_fixtures
+		
+		Removes all fixtures from the body.
+	*/
+	
     remove_all_fixtures()
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -474,6 +787,21 @@ interface Body [[ ClutterActor * ]]
 
         ]];
 
+	/*
+		Function: add_fixture
+		
+		Adds a new fixture to the body. A fixture can have the following properties:
+		
+		friction - Between 0 (slippery) and 1 (not slippery at all).
+		restitution or bounce - Between 0 (not bouncy) and 1 (perfectly elastic).
+		density - The density of the fixture. 
+		sensor - Whether the fixture is a sensor. A sensor fixture does not affect 
+		          other fixtures but detects contacts.
+        filter - Collision filtering. (TODO: Complicated, need full explanation).
+        shape - The shape for the fixture, this can be created using the <Box>, 
+                <Edge>, <Polygon> or <Circle> functions on the <physics> global.  		         
+	*/
+	
     int add_fixture( table properties )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -497,6 +825,12 @@ interface Body [[ ClutterActor * ]]
     #..........................................................................
     # Joints
 
+	/*
+		Function: remove_joint
+		
+		Removes a joint from the body.
+	*/
+	
     bool remove_joint( int joint_handle )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -518,6 +852,17 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
+	/*
+		Function: DistanceJoint
+		
+		Creates a distance joint on this body.
+		
+		anchor - The X and Y coordinates for the joint's anchor on this body.
+		other_body - The other body this joint will be attached to.
+		other_anchor - The X and Y coordinates on the other body.
+		properties - "frequency" and "damping_ratio".
+	*/
+	
     int DistanceJoint( table anchor , Body other_body , table other_anchor , table properties = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
@@ -579,6 +924,21 @@ interface Body [[ ClutterActor * ]]
 
         ]];
 
+	/*
+		Function: RevoluteJoint
+		
+		Creates a revolute joint on this body.
+		
+		other_body - The other body to attach to.
+		anchor - Coordinates for the point where the joint is attached.
+		properties -  "enable_limit" (boolean) 
+		              "lower_angle" (degrees) 
+		              "upper_angle" (degrees)
+		              "enable_motor" (boolean)
+		              "motor_speed" (number)
+		              "max_motor_torque" (number)
+	*/
+	
     int RevoluteJoint( Body other_body , table anchor , table properties = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
@@ -660,6 +1020,12 @@ interface Body [[ ClutterActor * ]]
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
 
+	/*
+		Function: PrismaticJoint
+		
+		TODO
+	*/
+	
     int PrismaticJoint( Body other_body , table anchor , table axis , table properties = 0 )
         [[
             lb_check_udata_type( L , other_body , "Body" );
@@ -757,6 +1123,29 @@ interface Body [[ ClutterActor * ]]
             joint->SetUserData( GINT_TO_POINTER( result ) );
         ]];
 
+	/*
+		Event: on_begin_contact
+		
+		When a body begins to touch another, this callback is triggered.
+		
+		The single argument "contact" is a table with several values
+		describing the contact.
+		
+		point - A table of X and Y coordinates for the contact point.
+		fixtures - A table containing the handles of the fixtures that made contact.
+		other_fixture - A table containing the same two handles, but indexed by each other, 
+		                so that if my fixture handle is 42, I can get the handle of the other fixture
+		                by using contact.other_fixture[ 42 ].
+        bodies - A table containing the handles of the two bodies that made contact.
+        other_body - Same as "other_fixture" but with body handles.
+        touching - Whether the contact is touching or not.
+        enabled - Whether the contact is enabled. You can actually change this value
+                  only during the <on_pre_solve_contact> event.  		         
+                  
+        *Note:* You should not change bodies in any of the contact callbacks. Instead 
+        make a note of the event and change things after the step is done.                         
+	*/
+	
     callback on_begin_contact( table contact )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -764,6 +1153,13 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::BEGIN_CONTACT , on_begin_contact );
         ]];
 
+	/*
+		Event: on_end_contact
+		
+		When two fixtures are no longer in contact. The contact details are the same as
+		in <on_begin_contact>.
+	*/
+	
     callback on_end_contact( table contact )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -771,7 +1167,15 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::END_CONTACT , on_end_contact );
         ]];
 
-
+	/*
+		Event: on_pre_solve_contact
+		
+		This callback is called after collision detection but before collision resolution. It 
+		lets you change the "enabled" property on the contact to affect behavior.
+		
+		The contact details are the same as in <on_begin_contact>.
+	*/
+	
     callback on_pre_solve_contact( table contact )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -779,6 +1183,15 @@ interface Body [[ ClutterActor * ]]
             me->world->attach_body_callback( me , Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
         ]];
 
+	/*
+		Event: on_post_solve_contact
+		
+	    This callback is called after collision resolution and gives you a chance to look at
+	    the impulses generated by a collision.
+	    
+	    The contact details are the same as in <on_begin_contact>.
+	*/
+	
     callback on_post_solve_contact( table contact )
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -789,6 +1202,12 @@ interface Body [[ ClutterActor * ]]
 
 /*===========================================================================*/
 
+	/*
+		Global: physics
+		
+		The physics global lets you create bodies and run a physics simulation.
+	*/
+	
 global physics [[ Physics::World * ]]
 {
 	physics()
@@ -803,6 +1222,12 @@ global physics [[ Physics::World * ]]
 			delete self;
 		]];
 
+	/*
+		Property: pixels_per_meter
+		
+		Pixels per meter.
+	*/
+	
 	double pixels_per_meter
         [[
             pixels_per_meter = self->ppm;
@@ -811,6 +1236,15 @@ global physics [[ Physics::World * ]]
             self->ppm = pixels_per_meter;
         ]];
 
+	/*
+		Property: gravity
+		
+		Gravity is a table with two values, one for X and another for Y. Either can be 
+		positive, negative or zero. Setting gravity to { 0 , 0 } means no gravity. A positive
+		value for X will push objects to the right, negative to the left. Positive for Y
+		will push objects down, negative will push them up.
+	*/
+	
     table gravity
         [[
             b2Vec2 g( self->get_world()->GetGravity() );
@@ -829,6 +1263,12 @@ global physics [[ Physics::World * ]]
             lua_pop( L , 2 );
         ]];
 
+	/*
+		Property: auto_clear_forces
+		
+		Whether forces should be automatically cleared after each time step.
+	*/
+	
     bool auto_clear_forces
         [[
             auto_clear_forces = self->get_world()->GetAutoClearForces();
@@ -837,46 +1277,98 @@ global physics [[ Physics::World * ]]
             self->get_world()->SetAutoClearForces( auto_clear_forces );
         ]];
 
+	/*
+		Property: contacts
+		
+		A list of all current contacts in the whole physics world.
+	*/
+	
     readonly table contacts
         [[
             self->push_contact_list( self->get_world()->GetContactList() );
         ]];
 
+	/*
+		Property: running
+		
+		Whether the simulation is running.
+	*/
+	
     readonly bool running
         [[
             running = self->running();
         ]];
 
+	/*
+		Function: start
+		
+		Start the physics simulation with the given velocity and position
+		iterations. For each step, the <on_step> callback will be called.
+	*/
+	
     start( int velocity_iterations = 10, int position_iterations = 10 )
         [[
             self->start( velocity_iterations , position_iterations );
         ]];
 
+	/*
+		Function: stop
+		
+		Stop the simulation. It can be started again with <start>.
+	*/
+	
 	stop()
         [[
             self->stop();
         ]];
 		
+	/*
+	THIS ONE SHOULD BE UNDOCUMENTED AS IT WILL BE DEPRECATED.
+	*/
+	
 	step( double time_step = 1.0f/60.0f , int velocity_iterations = 10, int position_iterations = 10 )
 		[[
             self->step( time_step , velocity_iterations , position_iterations );
 		]];
 
+	/*
+		Function: clear_forces
+		
+		Clears all current forces.
+	*/
+	
 	clear_forces()
         [[
             self->get_world()->ClearForces();
         ]];
 
+	/*
+		Function: draw_debug
+		
+		Draws a debug overlay that shows you bodies, fixtures, joints and other information. You 
+		need to call it after every step.
+	*/
+	
 	draw_debug( int opacity = 127 )
         [[
             self->draw_debug( opacity );
         ]];
 
+	/*
+		Function: clear_debug
+		
+		Clears the debug overlay.
+	*/
+	
 	clear_debug()
         [[
             self->clear_debug();
         ]];
 
+	/*
+	NOT IMPLEMENTED COMPLETELY 
+	*/
+	
 	table get_fixtures_in_rectangle( table top_left , table bottom_right )
         [[
             float32 x1;
@@ -908,8 +1400,30 @@ global physics [[ Physics::World * ]]
             Physics::AABBQuery q( L );
 
             self->get_world()->QueryAABB( & q , a );
+            
+            // TODO: put results in a table.
+            
+            lua_pushnil( L );
         ]];
 		
+	/*
+		Function: Body
+		
+		This function lets you create physics bodies. You pass an existing UIElement that 
+		is attached directly to the screen and a table of properties for the body.
+		
+		This call returns the same UIElement enhanced to provide all the functions
+		and properties of a <Body>. If there is a problem, this call can return nil.
+		
+		*Note:* This moves the anchor point of the UIElement to its center.
+		
+		The "properties" table can include any of the properties of <Body>, such as
+		its type. It can also have any of the properties of a fixture. A default 
+		fixture is always created and, if you do not include a "shape" for the
+		fixture, a default rectangular shape is created that fits the dimensions of the 
+		entire UIElement.
+	*/
+	
 	Body Body( UIElement element , table properties )
 		[[
             lb_check_udata_type( L , element , "actor" );
@@ -929,6 +1443,16 @@ global physics [[ Physics::World * ]]
     #..........................................................................
     # Shape factory methods
 
+	/*
+		Function: Box
+		
+		Creates a box shape that can be used for fixtures. 
+		
+		size - A table with width and height (in pixels) for the box.
+		center - A table of X and Y coordinates relative to the body.
+		rotation - The angle (in degrees) of the box along the Z axis relative to its center.
+	*/
+	
 	Shape Box( table size , table center = 0 , double rotation = 0 )
         [[
             b2PolygonShape * shape = new b2PolygonShape();
@@ -967,6 +1491,13 @@ global physics [[ Physics::World * ]]
             lua_remove( L , -2 );
         ]];
 
+	/*
+		Function: Edge
+		
+		Creates an edge shape (a line) to be used for a fixture.
+		You pass two tables, each with X and Y coordinates relative to the center of the body.
+	*/
+	
 	Shape Edge( table point_a , table point_b )
         [[
             b2PolygonShape * shape = new b2PolygonShape();
@@ -990,7 +1521,15 @@ global physics [[ Physics::World * ]]
             lua_remove( L , -2 );
         ]];
 
-
+	/*
+		Function: Polygon
+		
+		Creates a polygon shape given a table of points, a table of tables, each with X and
+		Y coordinates relative to the center of the body.
+		
+		*Note:* You should not specify more than 8 points and the resulting shape should be convex. 
+	*/
+	
 	Shape Polygon( table points )
         [[
             std::vector< b2Vec2 > p;
@@ -1027,6 +1566,16 @@ global physics [[ Physics::World * ]]
             lua_remove( L , -2 );
         ]];
 
+	/*
+		Function: Circle
+		
+		Creates a circular shape to be used for fixtures.
+		
+		radius - The radius of the circle (in pixels).
+		center - A table of X and Y coordinates for the center of the circle relative 
+		          to the center of the body.
+	*/
+	
 	Shape Circle( double radius , table center = 0 )
         [[
             b2CircleShape * shape = new b2CircleShape();
@@ -1055,25 +1604,72 @@ global physics [[ Physics::World * ]]
 
     #..........................................................................
 
-    callback on_step;
+	/*
+		Event: on_step
+		
+		This callback occurs every time the physics simulation completes a step. This
+		will be at most every 1/60 of a second.
+		
+		seconds - The fractional number of seconds since on_step was last called.
+	*/
+	
+    callback on_step( double seconds );
 
+	/*
+		Event: on_begin_contact
+		
+		Same as the the callback for each Body, but for the entire world.
+	*/
+	
 	callback on_begin_contact( table contact )
         [[
             self->attach_global_callback( Physics::BEGIN_CONTACT , on_begin_contact );
         ]];
 
+	/*
+		Event: on_end_contact
+		
+        Same as the the callback for each Body, but for the entire world.
+	*/
+	
     callback on_end_contact( table contact )
         [[
             self->attach_global_callback( Physics::END_CONTACT , on_end_contact );
         ]];
 
+	/*
+		Event: on_pre_solve_contact
+		
+        Same as the the callback for each Body, but for the entire world.
+	*/
+	
     callback on_pre_solve_contact( table contact )
         [[
             self->attach_global_callback( Physics::PRE_SOLVE_CONTACT , on_pre_solve_contact );
         ]];
 
+	/*
+		Event: on_post_solve_contact
+		
+        Same as the the callback for each Body, but for the entire world.
+	*/
+	
     callback on_post_solve_contact( table contact )
         [[
             self->attach_global_callback( Physics::POST_SOLVE_CONTACT , on_post_solve_contact );
         ]];
+
+    /*
+        Property: z_for_y
+        
+        When set to true, the physics simulation treats the UIElement's z as its y. 
+    */
+            
+    bool z_for_y
+        [[
+            z_for_y = self->z_for_y;
+        ]]
+        [[
+            self->z_for_y = z_for_y;
+        ]];        
 }

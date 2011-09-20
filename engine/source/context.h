@@ -8,7 +8,6 @@
 #include "mediaplayers.h"
 #include "controller_list.h"
 #include "app.h"
-
 //-----------------------------------------------------------------------------
 // Internal notifications
 
@@ -23,26 +22,27 @@
 //-----------------------------------------------------------------------------
 // Default values
 
-#define TP_SYSTEM_LANGUAGE_DEFAULT      "en"
-#define TP_SYSTEM_COUNTRY_DEFAULT       "US"
-#define TP_SYSTEM_NAME_DEFAULT          "Desktop"
-#define TP_SYSTEM_VERSION_DEFAULT       "0.0.0"
-#define TP_SYSTEM_SN_DEFAULT            "SN"
-#define TP_SCAN_APP_SOURCES_DEFAULT     false
-#define TP_CONFIG_FROM_ENV_DEFAULT      true
-#define TP_CONFIG_FROM_FILE_DEFAULT     ".trickplay"
-#define TP_CONSOLE_ENABLED_DEFAULT      true
-#define TP_TELNET_CONSOLE_PORT_DEFAULT  7777
-#define TP_CONTROLLERS_ENABLED_DEFAULT  false
-#define TP_CONTROLLERS_PORT_DEFAULT     0
-#define TP_SCREEN_WIDTH_DEFAULT         960
-#define TP_SCREEN_HEIGHT_DEFAULT        540
-#define TP_CONTROLLERS_NAME_DEFAULT     "TrickPlay"
-#define TP_LIRC_ENABLED_DEFAULT         true
-#define TP_LIRC_UDS_DEFAULT             "/var/run/lirc/lircd"
-#define TP_LIRC_REPEAT_DEFAULT          150
-#define TP_APP_PUSH_ENABLED_DEFAULT     true
-#define TP_APP_PUSH_PORT_DEFAULT        8888
+#define TP_SYSTEM_LANGUAGE_DEFAULT      	"en"
+#define TP_SYSTEM_COUNTRY_DEFAULT       	"US"
+#define TP_SYSTEM_NAME_DEFAULT          	"Desktop"
+#define TP_SYSTEM_VERSION_DEFAULT       	"0.0.0"
+#define TP_SYSTEM_SN_DEFAULT            	"SN"
+#define TP_SCAN_APP_SOURCES_DEFAULT     	false
+#define TP_CONFIG_FROM_ENV_DEFAULT      	true
+#define TP_CONFIG_FROM_FILE_DEFAULT     	".trickplay"
+#define TP_CONSOLE_ENABLED_DEFAULT      	true
+#define TP_TELNET_CONSOLE_PORT_DEFAULT  	7777
+#define TP_CONTROLLERS_ENABLED_DEFAULT  	false
+#define TP_CONTROLLERS_PORT_DEFAULT     	0
+#define TP_SCREEN_WIDTH_DEFAULT         	960
+#define TP_SCREEN_HEIGHT_DEFAULT        	540
+#define TP_CONTROLLERS_NAME_DEFAULT     	"TrickPlay"
+#define TP_LIRC_ENABLED_DEFAULT         	true
+#define TP_LIRC_UDS_DEFAULT             	"/var/run/lirc/lircd"
+#define TP_LIRC_REPEAT_DEFAULT          	150
+#define TP_APP_PUSH_ENABLED_DEFAULT     	true
+#define TP_APP_PUSH_PORT_DEFAULT        	8888
+#define TP_TEXTURE_CACHE_LIMIT_DEFAULT		0
 
 // TODO: Don't like hard-coding this app id here
 
@@ -59,6 +59,8 @@ class Installer;
 class Image;
 class ControllerLIRC;
 class AppPushServer;
+class HttpServer;
+class HttpTrickplayApiSupport;
 
 //-----------------------------------------------------------------------------
 
@@ -69,7 +71,7 @@ public:
     //.........................................................................
     // Getting context configuration variables
 
-    const char * get( const char * key, const char * def = NULL );
+    const char * get( const char * key, const char * def = NULL , bool default_if_empty = false );
     bool get_bool( const char * key, bool def = false );
     int get_int( const char * key, int def = 0 );
 
@@ -121,7 +123,7 @@ public:
     //.........................................................................
     // Launches one app from another, and kills the first.
 
-    int launch_app( const char * app_id, const App::LaunchInfo & launch );
+    int launch_app( const char * app_id, const App::LaunchInfo & launch , bool id_is_path = false );
 
     //.........................................................................
     // Kills the current app and either goes back to the previous one, or
@@ -154,6 +156,14 @@ public:
     //.........................................................................
 
     Installer * get_installer() const;
+
+    //.........................................................................
+
+    HttpServer * get_http_server() const;
+
+    //.........................................................................
+
+    Console * get_console() const;
 
     //.........................................................................
 
@@ -258,6 +268,10 @@ private:
     void set_request_handler( const char * subject, TPRequestHandler handler, void * data );
 
     //.........................................................................
+
+    void load_background();
+
+    //.........................................................................
     // External functions are our friends
 
     friend void tp_init_version( int * argc, char ** * argv, int major_version, int minor_version, int patch_version );
@@ -309,6 +323,8 @@ private:
 
     AppPushServer *             app_push_server;
 
+    HttpServer *                http_server;
+
     Console *                   console;
 
     Downloads *                 downloads;
@@ -321,6 +337,8 @@ private:
 
     TPMediaPlayerConstructor    media_player_constructor;
     MediaPlayer *               media_player;
+
+    HttpTrickplayApiSupport * 	http_trickplay_api_support;
 
     TPLogHandler                external_log_handler;
     void *                      external_log_handler_data;

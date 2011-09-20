@@ -14,12 +14,14 @@ sudo apt-get install \
     libtiff4-dev \
     libgif-dev \
     libjson-glib-dev \
-    libclutter-gst-0.10-dev \
+    libclutter-gst-dev \
     libupnp3-dev \
     libossp-uuid-dev \
     libreadline6-dev \
     liburiparser-dev \
     libsndfile1-dev \
-    cmake \
-    git-core
+    libsoup2.4-dev \
+    libc-ares-dev \
+    libexif-dev \
+    cmake 
 
