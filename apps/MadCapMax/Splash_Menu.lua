@@ -1,15 +1,14 @@
 Splash_Menu = Group{}
 
 
-local continue, continue_hl, start_new, start_new_hl, help, bg
+local continue, continue_hl, start_new, start_new_hl, help, bg, how_to_tips
 local index = 1
 local splash_path_dir = "menus/splash/"
 local enter_press = {
     function() --[[DOES NOTHING]] end,
     function()
-        
        
-        launch_lvl[1](Splash_Menu)
+        launch_lvl(2,Splash_Menu)
         
     end,
 }
@@ -17,10 +16,11 @@ local enter_press = {
 local focus_on, help_focused
 
 gamestate:add_state_change_function(
-    function()
-        Splash_Menu:load_assets(layers.menus)
-    end,
+    
+    function()   Splash_Menu:load_assets(layers.menus)   end,
+    
     nil,"SPLASH"
+    
 )
 local prog  = Rectangle{x = 40, y = screen_h - 100, w=10,         h = 30,color="f69024dd"}
 local track = Rectangle{x = 40, y = screen_h - 100, w=screen_w-80,h = 30,color="00000066"}
@@ -34,9 +34,11 @@ function Splash_Menu.set_progress(amt)
     continue_hl:unparent() 
     start_new:unparent()   
     start_new_hl:unparent()
-    continue = nil
-    continue_hl = nil
-    start_new = nil
+    how_to_tips:unparent()
+    how_to_tips  = nil
+    continue     = nil
+    continue_hl  = nil
+    start_new    = nil
     start_new_hl = nil
     collectgarbage("collect")
     
@@ -70,8 +72,12 @@ function Splash_Menu:inc_progress()
         
         collectgarbage("collect")
         
-        
-        gamestate:change_state_to("ACTIVE")
+        dolater(
+            gamestate.change_state_to,
+            gamestate,
+            "ACTIVE"
+        )
+        --gamestate:change_state_to("ACTIVE")
         
     end
     
@@ -84,35 +90,49 @@ function Splash_Menu:load_assets(parent)
     index = 2
     
     bg   = Image{src = assets_path_dir..splash_path_dir.."splash.jpg",scale = {4/3,4/3}}
-    help = Image{src = assets_path_dir..splash_path_dir.."how-to-card.png", x=500, y=970}
+    help = Image{src = assets_path_dir..splash_path_dir.."how-to-card.png", x=screen_w/2, y=970}
+    help.anchor_point = {help.w/2,0}
     --play = Image{src = assets_path_dir..splash_path_dir.."splash-arrow-highlight.png",scale = {4/3,4/3}, x=1064,y=568}
-    continue     = Image{src = assets_path_dir..splash_path_dir.."splash-continue-btn-yellow.png", x=  50, y=500}
-    continue_hl  = Image{src = assets_path_dir..splash_path_dir.."splash-continue-btn-orange.png", x=  50, y=500,opacity = 0}
-    start_new    = Image{src = assets_path_dir..splash_path_dir.."splash-new-btn-yellow.png",      x=1400, y=500}
-    start_new_hl = Image{src = assets_path_dir..splash_path_dir.."splash-new-btn-orange.png",      x=1400, y=500,opacity = 0}
+    continue     = Image{src = assets_path_dir..splash_path_dir.."splash-continue-btn-yellow.png", x=  50, y=300}
+    continue_hl  = Image{src = assets_path_dir..splash_path_dir.."splash-continue-btn-orange.png", x=  50, y=300,opacity = 0}
+    start_new    = Image{src = assets_path_dir..splash_path_dir.."splash-new-btn-yellow.png",      x=1400, y=300}
+    start_new_hl = Image{src = assets_path_dir..splash_path_dir.."splash-new-btn-orange.png",      x=1400, y=300,opacity = 0}
+    how_to_tips  = Image{src = assets_path_dir..splash_path_dir.."how-to-tips.png",                x=-350, y=500-85}
+    how_to_tips2 = Image{src = assets_path_dir..splash_path_dir.."how-to-tips2.png",               x=screen.w+350, y=500-85}
     
-    continue_hl.flash  = make_flash_anim(    continue_hl, function() return index ~= 1 or help_focused end )
+    continue_hl.flash  = make_flash_anim(    continue_hl,  function() return index ~= 1 or help_focused end )
     start_new_hl.flash = make_flash_anim(    start_new_hl, function() return index ~= 2 or help_focused end )
     
     
     if not settings.save_game then
         
         continue.opacity = 255*.25
+        continue.o_max   = 255*.25
         
     end
     
-    local help_y_up = Interval(970,200)
-    local help_y_dn = Interval(200,970)
+    local help_y_up = Interval(  970,  400-65 )
+    local tips_in   = Interval( -350,  170 )
+    local help_y_dn = Interval(  400-65,  970 )
+    local tips_out  = Interval(  170, -350 )
     local slide_up_help = {
         duration = .3,
         on_step = function(s,p)
-            help.y = help_y_up:get_value(p)
+            continue.opacity  = continue.o_max*(1-p)
+            start_new.opacity = 255*(1-p)
+            how_to_tips.x = tips_in:get_value(p)
+            how_to_tips2.x = screen_w-tips_in:get_value(p)-300
+            help.y        = help_y_up:get_value(p)
         end
     }
     local slide_down_help = {
         duration = .3,
         on_step = function(s,p)
-            help.y = help_y_dn:get_value(p)
+            continue.opacity  = continue.o_max*(p)
+            start_new.opacity = 255*(p)
+            how_to_tips2.x = screen_w-tips_out:get_value(p)-300
+            how_to_tips.x = tips_out:get_value(p)
+            help.y        = help_y_dn:get_value(p)
         end
     }
     --[[
@@ -177,6 +197,9 @@ function Splash_Menu:load_assets(parent)
     }
     
     help_focus_on = function()
+        
+        help_focused = true
+        
         if Animation_Loop:has_animation(slide_down_help) then
             
             Animation_Loop:delete_animation(slide_down_help)
@@ -187,6 +210,9 @@ function Splash_Menu:load_assets(parent)
     end
     
     help_focus_out = function()
+        
+        help_focused = false
+        
         if Animation_Loop:has_animation(slide_up_help) then
             
             Animation_Loop:delete_animation(slide_up_help)
@@ -200,7 +226,7 @@ function Splash_Menu:load_assets(parent)
     
     Splash_Menu.opacity = 255
     
-    Splash_Menu:add(bg,help,continue,continue_hl,start_new,start_new_hl)
+    Splash_Menu:add(bg,help,continue,continue_hl,start_new,start_new_hl,how_to_tips,how_to_tips2)
     parent:add(Splash_Menu)
     
     Splash_Menu:grab_key_focus()
@@ -211,8 +237,6 @@ local Splash_keys = {
     [keys.Left] = function()
         
         if help_focused then
-            
-            help_focused = false
             
             help_focus_out()
             
@@ -234,8 +258,6 @@ local Splash_keys = {
     [keys.Right] = function()
         
         if help_focused then
-            
-            help_focused = false
             
             help_focus_out()
             
@@ -268,13 +290,20 @@ local Splash_keys = {
             
         end
         
-        help_focused = not help_focused
-        
     end,
     [keys.OK] = function()
         
-        enter_press[index]()
-        
+        if help_focused then
+            
+            help_focus_out()
+            
+            focus_on[index]()
+            
+        else
+            
+            enter_press[index]()
+            
+        end
     end,
 }
 Splash_keys[keys.Up] = Splash_keys[keys.Down]

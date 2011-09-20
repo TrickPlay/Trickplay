@@ -1,1448 +1,1527 @@
 
---------------------------------------------------------------------------------
--- Object
---------------------------------------------------------------------------------
-
-local jazz = Clone{}
 
 
 
---------------------------------------------------------------------------------
--- Attributes                                                                 --
---------------------------------------------------------------------------------
-
---constant
-local  swat_threshold_x = 200
-local  swat_threshold_y = 200
-local lunge_threshold_x = 600
-local lunge_threshold_y = 400
-local lunge_radius = 700
-local hop_dx            = 40   -- dist travelled per hop while running
-
---private
-local is_loaded = false
-local srcs = Group{}
-local imgs = {}
-local has_been_initialized = false
-local stop_point, obstacles, flip_interval, floor_y, target
-
---local arm = Clone{anchor_point = { 5, 90 }}
---arm:hide()
-
---public
-jazz.attacking = false
-
-
-
-
---------------------------------------------------------------------------------
--- Methods
---------------------------------------------------------------------------------
-
-
-function jazz:init(t)
-    
-    if has_been_initialized then
-        
-        error("jazz has already been initialized",2)
-        
-    end
-    
-    flip_interval = t.flip_interval or .08
-    floor_y       = t.floor_y       or 900
-    jump_dur      = t.jump_duration or 400
-    target        = t.target
-    
-    has_been_initialized = true
-    
-end
-
---Loads up the assets for jazz into memory
---That way the character is only in memory when it needs to be
-function jazz:load_assets(src_parent, actor_parent)
-    
-    if not has_been_initialized then
-        
-        error("Call jazz:Init{} first",2)
-        
-    end
-    
-    if type(src_parent) ~= "userdata" then
-        
-        error("parameter must be a group",2)
-        
-    end
-    
-    if is_loaded then
-        
-        if # srcs.children == 0 then
-            
-            error("meta-data 'jazz.is_loaded' is incorrect",2)
-            
-        else
-            
-            error("load_assets was called when the assets where already loaded",2)
-            
-        end
-        
-    end
-    
-    imgs.default = {
-        Image{src ="assets/jazz_sprite/jazz-default-1.png"},
-        Image{src ="assets/jazz_sprite/jazz-default-2.png"},
-        Image{src ="assets/jazz_sprite/jazz-default-3.png"},
-    }
-    ---[[
-    imgs.jump_down = {
-        --Image{src ="assets/jazz_sprite/jazz-jump-down-1.png"},
-        Image{src ="assets/jazz_sprite/jazz-jump-down-2.png"},
-        --Image{src ="assets/jazz_sprite/jazz-jump-down-3.png"},
-    }--]]
-    imgs.jump_up = {
-        Image{src ="assets/jazz_sprite/jazz-jump-up-1.png"},
-        --Image{src ="assets/jazz_sprite/jazz-jump-up-2.png"},
-        --Image{src ="assets/jazz_sprite/jazz-jump-up-3.png"},
-        Image{src ="assets/jazz_sprite/jazz-jump-up-4.png"},
-    }
-    --]]
-    imgs.run = {
-        Image{src ="assets/jazz_sprite/jazz-run-1.png"},
-        Image{src ="assets/jazz_sprite/jazz-run-2.png"},
-        Image{src ="assets/jazz_sprite/jazz-run-3.png"},
-        Image{src ="assets/jazz_sprite/jazz-run-4.png"},
-        Image{src ="assets/jazz_sprite/jazz-run-5.png"},
-        Image{src ="assets/jazz_sprite/jazz-run-6.png"},
-        Image{src ="assets/jazz_sprite/jazz-run-7.png"},
-    }
-    --[[
-    imgs.swat = {
-        Image{src ="assets/jazz_sprite/jazz-swat-1.png"},
-        Image{src ="assets/jazz_sprite/jazz-swat-2.png"},
-        Image{src ="assets/jazz_sprite/jazz-swat-3.png"},
-    }
-    --]]
-    imgs.poop_shake = {
-        Image{src ="assets/jazz_sprite/jazz-poop-shake-1.png"},
-        Image{src ="assets/jazz_sprite/jazz-poop-shake-2.png"},
-        Image{src ="assets/jazz_sprite/jazz-poop-shake-3.png"},
-        Image{src ="assets/jazz_sprite/jazz-poop-shake-4.png"},
-        Image{src ="assets/jazz_sprite/jazz-poop-shake-5.png"},
-    }
-    --imgs.arm = Image{src ="assets/jazz_sprite/jazz-swat-arm.png"}
-    
-    apply_func_to_table(imgs, function(img) srcs:add(img) end)
-    
-    src_parent:add(srcs)
-    
-    actor_parent:add(jazz)
-    
-    is_loaded = true
-    
-    jazz.anchor_point = {
-        imgs.default[1].w/2,
-        imgs.default[2].h/2
-    }
-    
-end
-
-
---The AI of the cat
-do
-    
-    --Upvals
-    
-    local run_dir = 1
-    
-    --frame table
-    local frames, frame_i
-    
-    --functions
-    local run_7, swat, swat_pos_check, animating, act_on_frame,
-    jump, show_arm, wait_check, attack
-    
-    --sequences
-    local run_sequence, jump_up_sequence, jump_down_sequence,
-    to_swat_sequence, swat_sequence, swat_blink_sequence, swat_to_run_sequence,
-    swat_wait, attack_sequence, pos_wait, poop_shake_sequence
-    
-    
-    local next_obst_x, next_obst_y, o_x, o_y
-    
-    
-    
-    
-    local function check_obstacles()
-        
-        if jazz.under_obstacle then
-            if jazz.x >
-                obstacles[jazz.under_obstacle].x +
-                obstacles[jazz.under_obstacle].w then
-                
-                
-                jazz.left_obstacle = jazz.under_obstacle
-                
-                jazz.under_obstacle = nil
-                
-                print("JAZ OBST:",jazz.left_obstacle,jazz.under_obstacle,jazz.right_obstacle)
-                
-            elseif jazz.x < obstacles[jazz.under_obstacle].x then
-                
-                
-                jazz.right_obstacle = jazz.under_obstacle
-                
-                jazz.under_obstacle = nil
-                
-                print("JAZ OBST:",jazz.left_obstacle,jazz.under_obstacle,jazz.right_obstacle)
-                
-            end
-            
-        end
-        
-        while jazz.right_obstacle and jazz.x > obstacles[jazz.right_obstacle].x do
-            
-            if jazz.x <
-                obstacles[jazz.right_obstacle].x +
-                obstacles[jazz.right_obstacle].w then
-                
-                
-                jazz.under_obstacle = jazz.right_obstacle
-                
-            else
-                
-                jazz.left_obstacle = jazz.right_obstacle
-                
-            end
-            
-            --if doesn't exist, then it nils it for us
-            jazz.right_obstacle = obstacles[jazz.right_obstacle + 1] ~= nil and jazz.right_obstacle + 1 or nil
-            
-            print("JAZ OBST:",jazz.left_obstacle,jazz.under_obstacle,jazz.right_obstacle)
-            
-        end
-        
-        while jazz.left_obstacle and jazz.x <
-            obstacles[jazz.left_obstacle].x +
-            obstacles[jazz.left_obstacle].w do
-            
-            
-            if jazz.x > obstacles[jazz.left_obstacle].x then
-                
-                
-                jazz.under_obstacle = jazz.left_obstacle
-                
-            else
-                
-                jazz.right_obstacle = jazz.left_obstacle
-                
-            end
-            
-            --if doesn't exist, then it nils it for us
-            jazz.left_obstacle = obstacles[jazz.left_obstacle - 1] ~= nil and jazz.left_obstacle - 1 or nil
-            
-            print("JAZ OBST:",jazz.left_obstacle,jazz.under_obstacle,jazz.right_obstacle)
-            
-        end
-        
-    end
-    
-    
-    
-    
-    ----------------------------------------------------------------------------
-    --init's all of the sequences
-    --can only be called once assets were loaded
-    local function make_sequences()
-        poop_shake_sequence = {
-            imgs.poop_shake[1],
-            imgs.poop_shake[2],
-            imgs.poop_shake[3],
-            imgs.poop_shake[4],
-            imgs.poop_shake[5], --
-            imgs.poop_shake[4],
-            imgs.poop_shake[3],
-            imgs.poop_shake[4],
-            imgs.poop_shake[5], --
-            imgs.poop_shake[4],
-            imgs.poop_shake[3],
-            imgs.poop_shake[4],
-            imgs.poop_shake[5], --
-            imgs.poop_shake[4],
-            imgs.poop_shake[3],
-            imgs.poop_shake[4],
-            imgs.poop_shake[5], --
-            imgs.poop_shake[4],
-            imgs.poop_shake[3],
-            imgs.poop_shake[2],
-            imgs.poop_shake[1],
-            run_7,
+local asset_loaders = {
+    ["Jazz"] = function(t)
+        t.default = {
+            Image{src ="assets/jazz_sprite/jazz-default-1.png"},
+            Image{src ="assets/jazz_sprite/jazz-default-2.png"},
+            Image{src ="assets/jazz_sprite/jazz-default-3.png"},
         }
-        
-        run_sequence = {
-            function() jazz.x = jazz.x + run_dir*30 end,
-            imgs.run[7],
-            function() jazz.x = jazz.x + run_dir*20 end,
-            imgs.run[1],
-            function() jazz.x = jazz.x + run_dir*20 end,
-            imgs.run[2],
-            --function() jazz.x = jazz.x + 50 end,
-            --imgs.run[3],
-            function() jazz.x = jazz.x + run_dir*90 end,
-            imgs.run[4],
-            function() jazz.x = jazz.x + run_dir*70 end,
-            imgs.run[5],
-            function() jazz.x = jazz.x + run_dir*70 end,
-            imgs.run[6],
-            run_7,
+        t.jump_down = {
+            Image{src ="assets/jazz_sprite/jazz-jump-down-2.png"},
         }
-        attack_sequence = {
-            imgs.jump_up[2],
-            flip_interval*2,
-            imgs.jump_up[1],
-            imgs.run[2],
-            attack,
-            imgs.run[3],
-            imgs.run[4],
-            imgs.jump_down[1],
-            imgs.run[6],
-            run_7,
+        t.jump_up = {
+            Image{src ="assets/jazz_sprite/jazz-jump-up-1.png"},
+            Image{src ="assets/jazz_sprite/jazz-jump-up-4.png"},
         }
-        --[[
-        oldattack_sequence = {
-            imgs.run[1],
-            imgs.run[2],
-            attack,
-            imgs.jump_up[2],
-            imgs.jump_down[2],
-            imgs.jump_down[3],
-            imgs.run[7],
-            run_7,
+        t.run = {
+            Image{src ="assets/jazz_sprite/jazz-run-1.png"},
+            Image{src ="assets/jazz_sprite/jazz-run-2.png"},
+            Image{src ="assets/jazz_sprite/jazz-run-3.png"},
+            Image{src ="assets/jazz_sprite/jazz-run-4.png"},
+            Image{src ="assets/jazz_sprite/jazz-run-5.png"},
+            Image{src ="assets/jazz_sprite/jazz-run-6.png"},
+            Image{src ="assets/jazz_sprite/jazz-run-7.png"},
         }
-        --]]
-        --[[
-        jump_up_sequence = {
-            function() jazz.x = jazz.x + 20 end,
-            imgs.run[1],
-            function() jazz.x = jazz.x + 20 end,
-            imgs.run[2],
-            imgs.jump_up[1],
-            jump,
-            imgs.jump_up[2],
-            imgs.jump_up[3],
-            function() jazz.x = jazz.x + 50 end,
-            imgs.jump_up[4],
-            function() jazz.x = jazz.x + 30 end,
-            imgs.run[7],
-            run_7,
+        t.poop_shake = {
+            Image{src ="assets/jazz_sprite/jazz-poop-shake-1.png"},
+            Image{src ="assets/jazz_sprite/jazz-poop-shake-2.png"},
+            Image{src ="assets/jazz_sprite/jazz-poop-shake-3.png"},
+            Image{src ="assets/jazz_sprite/jazz-poop-shake-4.png"},
+            Image{src ="assets/jazz_sprite/jazz-poop-shake-5.png"},
         }
-        jump_down_sequence = {
-            function() jazz.x = jazz.x + 20 end,
-            imgs.run[1],
-            function() jazz.x = jazz.x + 20 end,
-            imgs.run[2],
-            --imgs.jump_up[1],
-            jump,
-            imgs.jump_down[1],
-            imgs.jump_down[2],
-            function() jazz.x = jazz.x + 50 end,
-            imgs.jump_down[3],
-            function() jazz.x = jazz.x + 50 end,
-            imgs.run[7],
-            run_7,
+    end,
+    ["Frank"] = function(t)
+        t.default = {
+            Image{src ="assets/frank/frank-default-1.png"},
+            Image{src ="assets/frank/frank-default-2.png"},
+            Image{src ="assets/frank/frank-default-3.png"},
         }
-        --]]
-        --[[
-        to_swat_sequence = {
-            imgs.jump_up[4],
-            show_arm,
-            imgs.swat[1],
-            swat_pos_check
+        t.jump_down = {
+            Image{src ="assets/frank/frank-jump-down-2.png"},
         }
-        swat_sequence = {
-            swat,
-            1000,
-            swat_pos_check,
+        t.jump_up = {
+            Image{src ="assets/frank/frank-jump-up-1.png"},
+            Image{src ="assets/frank/frank-jump-up-4.png"},
         }
-        swat_blink_sequence = {
-            imgs.swat[2],
-            imgs.swat[3],
-            imgs.swat[2],
-            imgs.swat[1],
-            swat_pos_check,
+        t.run = {
+            Image{src ="assets/frank/frank-run-1.png"},
+            Image{src ="assets/frank/frank-run-2.png"},
+            Image{src ="assets/frank/frank-run-3.png"},
+            Image{src ="assets/frank/frank-run-4.png"},
+            Image{src ="assets/frank/frank-run-5.png"},
+            Image{src ="assets/frank/frank-run-6.png"},
+            Image{src ="assets/frank/frank-run-7.png"},
         }
-        swat_to_run_sequence = {
-            imgs.jump_up[4],
-            imgs.run[7],
-            run_7
+        t.poop_shake = {
+            Image{src ="assets/frank/frank-poop-shake-1.png"},
+            Image{src ="assets/frank/frank-poop-shake-2.png"},
+            Image{src ="assets/frank/frank-poop-shake-3.png"},
+            Image{src ="assets/frank/frank-poop-shake-4.png"},
+            Image{src ="assets/frank/frank-poop-shake-5.png"},
         }
-        swat_wait = {
-            500,
-            swat_pos_check,
-        }
-        --]]
-        pos_wait = {
-            500,
-            run_7,
-        }
-        wait_sequence = {
-            100,
-            run_7,
-        }
-    end
+        t.tall_splash = Image{src ="assets/lvl2/swamp-splash-back.png"}
+        t.wide_splash = Image{src ="assets/lvl2/swamp-splash-front.png"}
+        t.swamp = Image{src ="assets/lvl2/swamp-splash-btm-cutout.jpg"}
+    end,
+}
+
+
+local make_cat = function(cat_name)
+    
+    if asset_loaders[cat_name] == nil then error("not a valid name",2) end
+    
+    --------------------------------------------------------------------------------
+    -- Object                                                                     --
+    --------------------------------------------------------------------------------
+    
+    local cat = Clone{}
     
     
-    ----------------------------------------------------------------------------
-    --lunging at the bird
     
-    local in_attack_range = function(always)
+    --------------------------------------------------------------------------------
+    -- Attributes                                                                 --
+    --------------------------------------------------------------------------------
+    
+    --constant
+    local  swat_threshold_x = 200
+    local  swat_threshold_y = 200
+    local lunge_threshold_x = 600
+    local lunge_threshold_y = 400
+    local lunge_radius      = 700
+    local hop_dx            =  40   -- dist travelled per hop while running
+    
+    --private
+    local is_loaded = false
+    local srcs = Group{}
+    local imgs = {}
+    local has_been_initialized = false
+    local stop_point, obstacles, flip_interval, floor_y, target, lvl
+    
+    --local arm = Clone{anchor_point = { 5, 90 }}
+    --arm:hide()
+    
+    --public
+    cat.attacking = false
+    
+    
+    
+    
+    --------------------------------------------------------------------------------
+    -- Methods                                                                    --
+    --------------------------------------------------------------------------------
+    
+    
+    function cat:init(t)
         
-        return (always or math.random(1,3) == 1) and
-            (
-                math.sqrt(
-                    math.pow(target.x - jazz.x, 2) +
-                    math.pow(target.y - jazz.y, 2)
-                ) < lunge_radius
-            )
-        
-    end
-    
-    local jazz_y_func, land_y, jazz_x_func, start_x, start_y, will_be_on
-    local attack_x = Interval(0,0)
-    local z_rot_mag = 10
-    local attack_z_rot = Interval(-z_rot_mag,z_rot_mag)
-    --[=[
-    local attack_tl = Timeline{
-        duration = jump_dur,
-        on_new_frame = function(tl,ms,p)
+        if has_been_initialized then
             
-            --print("A",jazz.x,jazz.y)
-            
-            jazz:set{
-                x          = jazz_x_func(ms/1000),--attack_x:get_value(p),
-                --p*(land_x - start_x),
-                y          = jazz_y_func(ms/1000),--attack_x:get_value(p)),
-                --peak_y - math.pow( jump_dist*p-jump_dist/2 ,2),
-                z_rotation = {attack_z_rot:get_value(p),0,0},
-            }
-            
-            --print("B",jazz.x,jazz.y)
-            
-        end,
-        on_completed = function()
-            
-            print("attack done")
-            
-            jazz.on_obstacle = will_be_on
-            
-            Animation_Loop:add_animation(cat_animation)
-            --[[
-            jazz:set{
-                x          = final_x,
-                y          = final_y,
-                z_rotation = final_z_rot,
-            }
-            --]]
-            jazz.y_rotation = {0,0,0}
-            jazz.z_rotation = {0,0,0}
-            
-            for i = 1, # obstacles do
-                if jazz.x < obstacles[i].x + (obstacles[i].x_off or 0) then
-                    
-                    obstacle_i = i
-                    
-                    print("BEHIND",obstacles[i].source)
-                    
-                    break
-                    
-                end
-            end
-            print("attack_done_end\n\n")
-        end,
-        on_marker_reached = function()
-            
-            cat_animation:on_loop()
-            
-        end
-    }
-    --]=]
-    local markers = {
-        .2,
-        .5,
-        .7,
-        .8
-    }
-    local marker_i = 1
-    local attack_animation = {
-        duration = 1,
-        on_step = function(s,p)
-            jazz:set{
-                x          = jazz_x_func(s),--attack_x:get_value(p),
-                --p*(land_x - start_x),
-                y          = jazz_y_func(s),--attack_x:get_value(p)),
-                --peak_y - math.pow( jump_dist*p-jump_dist/2 ,2),
-                z_rotation = {attack_z_rot:get_value(p),0,0},
-            }
-            
-            if markers[marker_i] and markers[marker_i] < p then
-                cat_animation:on_loop()
-                marker_i = marker_i + 1
-            end
-        end,
-        on_completed = function()
-            marker_i = 1
-            --print("attack done")
-            
-            jazz.on_obstacle = will_be_on
-            
-            Animation_Loop:add_animation(cat_animation)
-            --[[
-            jazz:set{
-                x          = final_x,
-                y          = final_y,
-                z_rotation = final_z_rot,
-            }
-            --]]
-            jazz.y_rotation = {0,0,0}
-            jazz.z_rotation = {0,0,0}
-            
-            for i = 1, # obstacles do
-                if jazz.x < obstacles[i].x + (obstacles[i].x_off or 0) then
-                    
-                    obstacle_i = i
-                    
-                    --print("BEHIND",obstacles[i].source)
-                    
-                    break
-                    
-                end
-            end
-            --print("attack_done_end\n\n")
-        end,
-    }
-    
-    --markers are used to flip between images during the jump
-    --attack_tl:add_marker( "launch_to_mid", attack_tl.duration * .3 )
-    --attack_tl:add_marker( "mid_to_land",   attack_tl.duration * .8 )
-    
-    local min_vy = -10
-    local max_vy = -1500
-    local min_vx = 10
-    local max_vx = 700
-    
-    local g = -max_vy*1.5
-    
-    local function attack_prep(position)
-        
-        start_x = jazz.x
-        start_y = jazz.y
-        
-        local vx = (position.x - jazz.x)*3
-        --print(vx)
-        vx = clamp_mag(vx,min_vx,max_vx)
-        
-        jazz_x_func = function(t)
-            
-            return start_x + vx * t --x_t = x_0 + v_x_0 * t
+            error("cat has already been initialized",2)
             
         end
         
-        jazz_rev_x_func = function(x)
-            
-            return (x - start_x) / vx
-            
-        end
+        flip_interval = t.flip_interval or .08
+        floor_y       = t.floor_y       or 900
+        target        = t.target        or error("must give cat a target",2)
+        lvl           = t.lvl           or error("must give cat the level object",2)
         
-        local t = jazz_rev_x_func(position.x)
-        
-        local vy = (position.y - jazz.y - .5 * g * t * t) / t
-        --print("vy",vy,t)
-        if position.land == nil then vy = clamp(vy,max_vy,min_vy) end
-        
-        jazz_y_func = function(t)
-            --print(start_y,vy,start_y   +   vy * t   +   .5 * g * t * t)
-            
-            -- y_t = y_0 + y_t_0 * t + .5*a*t^2
-            return start_y   +   vy * t   +   .5 * g * t * t
-            
-        end
-        
-        land_y = floor_y
-        will_be_on = false
-        
-        if position.land ~= nil then
-            --print("yuuuup")
-            land_y = position.y
-            
-            --aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
-            will_be_on = position.land
-            attack_animation.duration = t
-            
-            if position.x < jazz.x then
-                jazz.y_rotation = {180,0,0}
-                attack_z_rot.from =  position.y < jazz.y and  z_rot_mag or 0
-                attack_z_rot.to   =  land_y+150 > jazz.y and -z_rot_mag or 0
-            else
-                jazz.y_rotation = {0,0,0}
-                attack_z_rot.to   = land_y+150 > jazz.y and  z_rot_mag or 0
-                attack_z_rot.from = position.y < jazz.y and -z_rot_mag or 0
-            end
-            
-        elseif position.x < jazz.x then
-            
-            jazz.y_rotation = {180,0,0}
-            print("jumping to the left")
-            for i, o in pairs( obstacles ) do
-                --print(o.source)
-                
-                o_x = o.x + ( o.x_off or 0 )
-                o_y = o.y + ( o.y_off or 0 ) - jazz.h/2
-                
-                if  o_y < jazz_y_func(jazz_rev_x_func(o_x)) and
-                    o_y > jazz_y_func(jazz_rev_x_func(o_x+obstacles[i].w)) and
-                    o_y < land_y then
-                    --print("gah",o_y,o.source)
-                    will_be_on = o
-                    
-                    land_y = o_y
-                end
-                
-            end
-            
-            
-            attack_z_rot.from =  position.y < jazz.y and  z_rot_mag or 0
-            attack_z_rot.to   =  land_y+150 > jazz.y and -z_rot_mag or 0
-            
-            aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
-            
-            attack_animation.duration = aaa
-            
-        else
-            
-            jazz.y_rotation = {0,0,0}
-            
-            for i, o in pairs( obstacles ) do
-                
-                o_x = o.x + ( o.x_off or 0 )
-                o_y = o.y + ( o.y_off or 0 ) - jazz.h/2
-                --print(o_y , jazz_y_func(jazz_rev_x_func(o_x)),jazz_y_func(jazz_rev_x_func(o_x+obstacles[i].w)))
-                if  o_y > jazz_y_func(jazz_rev_x_func(o_x)) and
-                    o_y < jazz_y_func(jazz_rev_x_func(o_x+obstacles[i].w)) and
-                    o_y < land_y - jazz.h then
-                    
-                   --print("gah",o_y,o.source)
-                    will_be_on = o
-                    
-                    land_y = o_y
-                end
-                
-            end
-            attack_z_rot.to   = land_y+150 > jazz.y and  z_rot_mag or 0
-            attack_z_rot.from = position.y < jazz.y and -z_rot_mag or 0
-            
-            aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
-            
-            attack_animation.duration = aaa
-            
-        end
-        
-        --print("LAND_Y",land_y)
+        has_been_initialized = true
         
     end
     
-    function attack()
-        --print("attack")
-        
-        Animation_Loop:delete_animation(cat_animation)
-        
-        attack_x.from = jazz.x
-        
-        start_x = jazz.x
-        start_y = jazz.y
-        
-        --attack_tl:start()
-        Animation_Loop:add_animation(attack_animation)
-        
-        return true
-        
-    end
-    
-    
-    ----------------------------------------------------------------------------
-    --Jumping up to obstacles
-    --[=[
-    local alpha_x    = Alpha{mode = "EASE_OUT_QUAD" }
-    local alpha_y    = Alpha()
-    local jump_x     = Interval(0,0)
-    local jump_y     = Interval(0,0)
-    local jump_z_rot = Interval(-20,0)
-    
-    local final_x, final_y, final_z_rot
-    
-    local jump_tl = Timeline{
-        duration = jump_dur,
-        on_new_frame = function(tl,ms,p)
-            
-            jazz:set{
-                x          = jump_x:get_value(alpha_x.alpha),
-                y          = jump_y:get_value(alpha_y.alpha),
-                z_rotation = {jump_z_rot:get_value(alpha_x.alpha),0,0},
-            }
-            
-        end,
-        on_completed = function()
-            
-            Animation_Loop:add_animation(cat_animation)
-            --[[
-            jazz:set{
-                x          = final_x,
-                y          = final_y,
-                z_rotation = final_z_rot,
-            }
-            --]]
-            jazz.z_rotation = {0,0,0}
-        end,
-        on_marker_reached = function()
-            
-            cat_animation:on_loop()
-            
-        end
-    }
-    
-    jump_tl:add_marker("launch_to_mid",jump_tl.duration*.3)
-    jump_tl:add_marker("mid_to_land",jump_tl.duration*.8)
-    
-    alpha_x.timeline = jump_tl
-    alpha_y.timeline = jump_tl
-    
-    local jump_prep = function(t)
-        
-        --dumptable(t)
-        
-        --jump_tl.duration = t.duration
-        
-        --jump_x.from      = t.curr_x
-        --jump_y.from      = t.curr_y
-        --jump_z_rot.from  = t.curr_z_rot or 0
-        
-        jump_x.to        = t.targ_x + jazz.w/2
-        jump_y.to        = t.targ_y + jazz.h/2
-        --jump_z_rot.to    = t.targ_z_rot
-        
-        jazz.on_obstacle = t.obstacle or false
-        
-        jazz.attacking   = t.attacking or false
-        
-    end
-    
-    jump = function()
-        
-        Animation_Loop:delete_animation(cat_animation)
-        
-        jump_x.from      = jazz.x
-        jump_y.from      = jazz.y
-        
-        --if jumping up
-        if jump_y.from > jump_y.to then
-            alpha_y.mode = "EASE_OUT_BACK"
-            
-            jump_z_rot.from = math.deg(
-                math.atan2(
-                    (jump_y.to-jump_y.from),
-                    (jump_x.to-jump_x.from)
-                )
-            )/2
-            
-            jump_z_rot.to   =   0
-        --if jumping down
-        else
-            alpha_y.mode    = "EASE_IN_CIRC"
-            jump_z_rot.from =  -5
-            jump_z_rot.to   =  10
-        end
-        
-        print(jump_x.from,jump_x.to)
-        if not jazz.attacking and jump_x.from + 150 > jump_x.to then
-            print("capped")
-            jump_x.to = jump_x.from + 150
-            
-        end
-        
-        jump_tl:start()
-        
-        return true
-        
-    end
-    --]=]
-    ----------------------------------------------------------------------------
-    --Wait
-    
-    function wait_check()
-        
-        check_obstacles()
-        
-        frame_i = 1
-        --[[
-        if  math.abs(target.x - jazz.x) < swat_threshold_x and
-            math.abs(target.y - jazz.y) < swat_threshold_y then
-            
-            print("SWAT")
-            
-            frames = to_swat_sequence
-            
-            return 
-            
-        --if Max is in lunge range, then lunge with a probabilty of missing
-        else]]
-        if in_attack_range(true) then   
-            
-            --print("lunge")
-            
-            attack_prep(target)
-            
-            frames = attack_sequence
-            
-            return
-            
-        elseif target.x > jazz.x + lunge_threshold_x then
-            
-            run_7()
-            
-        end
-        
-        --print(math.abs(target.x - jazz.x),math.abs(target.y - jazz.y))
-    end
-    ----------------------------------------------------------------------------
-    --Swatting at the target
-    --[=[
-    function show_arm()
-        arm:show()
-        arm.x = jazz.x --+ 210
-        arm.y = jazz.y --+ 150
-    end
-    
-    local swat_angle = Interval(10,-10)
-    local swat_tl_count = 0
-    local swat_tl = Timeline{
-        duration = 300,
-        loop     = true,
-        on_new_frame = function(tl,ms,p)
-            
-            arm.z_rotation = {
-                
-                swat_angle:get_value(
-                    .5 + .5 * math.sin(
-                        math.pi*2*p
-                    )
-                ),
-                
-                0,
-                
-                0
-            }
-            
-        end,
-        on_completed = function(self)
-            
-            swat_tl_count = swat_tl_count + 1
-            
-            if swat_tl_count > 3 then
-                
-                self:stop()
-                
-            end
-            
-        end,
-    }
-    
-    swat_tl_count = 0
-    
-    swat = function()
-        
-        swat_tl_count = 0
-        
-        swat_tl:start()
-        
-    end
-    --]=]
-    swat_pos_check = function()
-        
-        check_obstacles()
-        
-        frame_i = 1
-        
-        if  math.abs(target.x - jazz.x) < swat_threshold_x and
-            math.abs(target.y - jazz.y) < swat_threshold_y then
-            
-            
-            if math.random(1,4) == 1 then
-                
-                --print("swat blink")
-                
-                frames = swat_blink_sequence
-                
-            else
-                
-                --print("commence swatting!")
-                
-                frames = swat_sequence
-                
-            end
-            
-        elseif jazz.on_obstacle and
-            target.x < jazz.x + swat_threshold_x then
-            
-            
-            frames = swat_wait
-            
-        else
-            
-            --print("f this",math.abs(target.x - jazz.x),math.abs(target.y - jazz.y))
-            
-            arm:hide()
-            
-            frames = swat_to_run_sequence
-            
-        end
-        
-    end
-    
-    --]=]
-    ----------------------------------------------------------------------------
-    --Running
-    
-    function run(dir)
-        
-        run_dir = dir
-        
-        jazz.y_rotation = { 90 - dir*90,0,0}
-        
-        --moving to the right
-        if dir == 1 then
-            
-            --jump up to the next 
-            if jazz.right_obstacle and jazz.x + jazz.w/2 + 400 > obstacles[jazz.right_obstacle].x then
-                
-                attack_prep{
-                    x    = obstacles[jazz.right_obstacle].x+jazz.w/2,
-                    y    = obstacles[jazz.right_obstacle].y-jazz.h/2,
-                    land = obstacles[jazz.right_obstacle]
-                }
-                
-                frames = attack_sequence
-                
-            elseif jazz.under_obstacle and jazz.y ~= floor_y and jazz.x + jazz.w/2 + 400 >
-                obstacles[jazz.under_obstacle].x + obstacles[jazz.under_obstacle].w then
-                
-                
-                attack_prep{x=jazz.x + 300,y=floor_y,land=false}
-                
-                frames = attack_sequence
-                
-            else
-                
-                frames  = run_sequence
-                
-            end
-            
-        else
-            
-            if jazz.left_obstacle and jazz.x - jazz.w/2 - 400 < obstacles[jazz.left_obstacle].x +
-                obstacles[jazz.left_obstacle].w then
-                
-                
-                attack_prep{
-                    x    = obstacles[jazz.left_obstacle].x+obstacles[jazz.left_obstacle].w-jazz.w/2,
-                    y    = obstacles[jazz.left_obstacle].y-jazz.h/2,
-                    land = obstacles[jazz.left_obstacle]
-                }
-                
-                frames = attack_sequence
-                
-            elseif jazz.under_obstacle and jazz.y ~= floor_y  and jazz.x - jazz.w/2 - 400 <
-                obstacles[jazz.under_obstacle].x then
-                
-                
-                attack_prep{x=jazz.x - 300,y=floor_y,land=false}
-                
-                frames = attack_sequence
-                
-            else
-                
-                frames  = run_sequence
-                
-            end
-            
-        end
-        
-        
-    end
-    
-    
-    function aim_for_obstacle(obstacle_i)
-        print(1111)
-        if type(obstacle_i) ~= "number" then error("invalid index",2) end
-        --if Jazz is to the left of the obstacle
-        if jazz.x + jazz.w/2 < obstacles[obstacle_i].x then
-            print("Jazz left of target")
-            --if Jazz is in jumping range
-            if jazz.x + jazz.w/2 > obstacles[obstacle_i].x - 400 then
-                print("jump to it")
-                attack_prep{
-                    x    = obstacles[obstacle_i].x+jazz.w/2,
-                    y    = obstacles[obstacle_i].y-jazz.h/2,
-                    land = obstacles[obstacle_i]
-                }
-                
-                frames = attack_sequence
-                
-            else
-                print("run to it")
-                run(1)
-                
-            end
-            
-        --if Jazz is to the right of the obstacle
-        elseif jazz.x - jazz.w/2 > obstacles[obstacle_i].x + obstacles[obstacle_i].w then
-            print("Jazz right of target")
-            
-            --if Jazz is in jumping range
-            if jazz.x - jazz.w/2 < obstacles[obstacle_i].x + obstacles[obstacle_i].w + 400 then
-                print("jump to it",obstacles[obstacle_i].x + obstacles[obstacle_i].w - jazz.w/2, jazz.x)
-                
-                attack_prep{
-                    x    = obstacles[obstacle_i].x + obstacles[obstacle_i].w - jazz.w/2,
-                    y    = obstacles[obstacle_i].y-jazz.h/2,
-                    land = obstacles[obstacle_i]
-                }
-                
-                frames = attack_sequence
-                
-            else
-                print("run to it")
-                
-                run(-1)
-            end
-            
-        --if Jazz is under the obstacle
-        elseif jazz.x + jazz.w/2 > obstacles[obstacle_i].x and
-               jazz.x - jazz.w/2 < obstacles[obstacle_i].x + obstacles[obstacle_i].w then
-            print("Jazz under target")
-            
-            if obstacles[obstacle_i].can_jump_through then
-                print("can jump through")
-                if target.x < jazz.x then
-                    
-                    attack_prep{
-                        x    = jazz.x-400 > obstacles[obstacle_i].x and jazz.x-400 or obstacles[obstacle_i].x + jazz.w/2,
-                        y    = obstacles[obstacle_i].y-jazz.h/2,
-                        land = obstacles[obstacle_i]
-                    }
-                    
-                else
-                    
-                    attack_prep{
-                        x    = jazz.x+400 < obstacles[obstacle_i].x + obstacles[obstacle_i].w and
-                            jazz.x+400 or obstacles[obstacle_i].x + obstacles[obstacle_i].w - jazz.w/2,
-                        y    = obstacles[obstacle_i].y-jazz.h/2,
-                        land = obstacles[obstacle_i]
-                    }
-                    
-                end
-                
-                frames = attack_sequence
-                
-            else
-                print("run")
-                run(1)
-                
-            end
-            
-        else
-            error("IMPOSSIBLE",2)
-        end
-        
-    end
-    
-    run_7  = function()
-        
-        check_obstacles()
-        
-        if target.dead then
-            dolater(Animation_Loop.delete_animation,Animation_Loop,cat_animation)
-        end
-        frame_i = 1
-        
-        if obstacles[obstacle_i] then
-            next_obst_x = obstacles[obstacle_i].x + (obstacles[obstacle_i].x_off or 0)
-            next_obst_y = obstacles[obstacle_i].y + (obstacles[obstacle_i].y_off or 0)
-        else
-            next_obst_x = false
-        end
-        
-        if jazz.x > stop_point then
-            
-            jazz.source = imgs.default[1]
-            print("Jazz stopping")
-            Animation_Loop:delete_animation(cat_animation)
-            
-            return
-            
-        --if jazz got pooped on, then wipe it off
-        elseif jazz.pooped_on then
-            
-            jazz.pooped_on = false
-            
-            frames = poop_shake_sequence
-            
-            return
-            
-        --[[
-        --if Max is in swat range, then swat
-        elseif math.abs(target.x - jazz.x) < swat_threshold_x and
-               math.abs(target.y - jazz.y) < swat_threshold_y then
-            
-            print("SWAT")
-            
-            frames = to_swat_sequence
-            
-            return 
-        --]]
-        --if Max is in lunge range, then lunge with a probabilty of missing
-        elseif in_attack_range() then   
-            
-            print("lunge")
-            
-            attack_prep(target)
-            
-            frames = attack_sequence
-            
-            return
-            
-        elseif jazz.under_obstacle and jazz.y ~= floor_y and target.x < jazz.x then
-            --print("Jazz high wait")
-            jazz.y_rotation = {180,0,0}
-            
-            jazz.source = imgs.default[1]
-            
-            frames = wait_sequence
-        
-        elseif target.under_obstacle and target.under_obstacle ~= jazz.under_obstacle then
-            
-            aim_for_obstacle( target.under_obstacle )
-            
-        elseif target.right_obstacle and
-            obstacles[target.right_obstacle].x - target.x < lunge_radius*3/2 then
-            
-            aim_for_obstacle( target.right_obstacle )
-            
-        elseif target.left_obstacle  and target.x -
-            obstacles[target.left_obstacle].x -
-            obstacles[target.left_obstacle].w < lunge_radius/3 then
-            
-            aim_for_obstacle( target.left_obstacle )
-            
-            
-        elseif target.x < jazz.x - 200 then
-            run(-1)
-        elseif target.x > jazz.x + 200 then
-            run(1)
-        else
-            
-            --print("Jazz floor wait")
-            --jazz.y_rotation = {180,0,0}
-            
-            jazz.source = imgs.default[1]
-            
-            frames = wait_sequence
-        end
-        
-        
-        
-        
-        
-        --[=[
-        --if jazz is on an obstacle and Max is behind, wait to swat
-        elseif jazz.on_obstacle and
-            target.x < jazz.x - lunge_threshold_x then
-            
-            --print("prep swat")
-            
-            jazz.y_rotation = {180,0,0}
-            
-            jazz.source = imgs.default[1]
-            
-            frames = wait_sequence
-            
-            return
-        -- if jazz is nearing the end of an obstacle
-        elseif jazz.on_obstacle and
-            jazz.on_obstacle.x + (jazz.on_obstacle.x_off or 0) + jazz.on_obstacle.w -
-            jazz.x < 300 then 
-            
-            if next_obst_x ~= false and next_obst_x - jazz.x - jazz.w < 300 then
-                --jump to next obstacle
-                
-                --[[
-                jump_prep{
-                    duration   = 500,
-                    targ_x     = next_obst_x,
-                    targ_y     = next_obst_y - jazz.h,
-                    targ_z_rot = 0,
-                    obstacle   = obstacles[obstacle_i],
-                }
-                
-                obstacle_i = obstacle_i + 1
-                
-                if next_obst_y > jazz.y then
-                    frames = jump_down_sequence
-                else
-                    frames = jump_up_sequence
-                end
-                --]]
-                
-                
-                
-                attack_prep{
-                    x    = next_obst_x+jazz.w/2,
-                    y    = next_obst_y-jazz.h/2,
-                    land = obstacles[obstacle_i]
-                }
-                
-                obstacle_i = obstacle_i + 1
-                
-                frames = attack_sequence
-                
-                return
-                
-            else
-                --jump back to the floor
-                
-                --[[
-                jump_prep{
-                    duration   = 500,
-                    targ_x     = jazz.x + 300,
-                    targ_y     = floor_y - jazz.h/2,
-                    targ_z_rot = 0,
-                    obstacle   = false,
-                }
-                
-                frames = jump_down_sequence
-                --]]
-                
-                
-                
-                attack_prep{x=jazz.x + 300,y=floor_y,land=false}
-                
-                obstacle_i = obstacle_i + 1
-                
-                frames = attack_sequence
-                
-                return
-            end
-            
-            jazz.z_rotation = {0,0,0}
-            
-            return
-            
-        --if nearing an obstacle, jump to it
-        elseif next_obst_x ~= false and next_obst_x - jazz.x - jazz.w < 300 then
-            
-            --print("AAAAAfrom floor x: ",next_obst_x - jazz.x - jazz.w)
-            --[[
-            jump_prep{
-                duration   = 500,
-                targ_x     = next_obst_x - jazz.w/3,
-                targ_y     = next_obst_y - jazz.h,
-                targ_z_rot = 0,
-                obstacle   = obstacles[obstacle_i],
-            }
-            
-            obstacle_i = obstacle_i + 1
-            
-            frames = jump_up_sequence
-            
-            jazz.z_rotation = {0,0,0}
-            --]]
-            
-            
-            
-            attack_prep{x=next_obst_x+jazz.w/2,y=next_obst_y-jazz.h/2,land=obstacles[obstacle_i]}
-            
-            obstacle_i = obstacle_i + 1
-            
-            frames = attack_sequence
-            
-            return
-            
-        elseif next_obst_x ~= false and target.x < jazz.x
-            and next_obst_x - jazz.x - jazz.w > 600 then
-            
-            jazz.source = imgs.default[1]
-            
-            frames = pos_wait
-            
-            return
-            
-        end
-        --]=]
-        --jazz.z_rotation = {0,0,0}
-        --else just keep running
-        --print("run")
-        --frames = run_sequence
-        
-    end
-    
-    
-    ----------------------------------------------------------------------------
-    --General Animation Stuff
-    
-    act_on_frame = function(item)
-        
-        frame_i = frame_i + 1
-        
-        if type(item) == "userdata" then
-            
-            jazz.source = item
-            
-            return true
-            
-        elseif type(item) == "number" then
-            
-            cat_animation.duration = item/1000--cat_animation.duration = item
-            
-            return true
-            
-        elseif type(item) == "function" then
-            
-            return item() or false
-            
-        else
-            
-            error("frame type not expected " .. type(item), 2)
-            
-        end
-    end
-    
-    cat_animation = {
-        duration = flip_interval,
-        loop    = true,
-        on_step = function() end,
-        on_loop = function(self)
-            
-            self.duration = flip_interval   -- if a delay was set, then this resets
-            
-            while not act_on_frame(frames[frame_i]) do end
-            
-        end
-    }
-    --[[
-    animating = Timer{
-        
-        interval  = flip_interval,
-        
-        on_timer  = function(self)
-            
-            self.interval = flip_interval   -- if a delay was set, then this resets
-            
-            while not act_on_frame(frames[frame_i]) do end
-            
-        end
-        
-    }
-    
-    Animation_Loop:delete_animation(cat_animation)
-    --]]
-    
-    function jazz:launch_AI(obstacle_list,end_x)
+    --Loads up the assets for cat into memory
+    --That way the character is only in memory when it needs to be
+    function cat:load_assets(src_parent, actor_parent)
         
         if not has_been_initialized then
             
-            error("Call jazz:Init{} first",2)
+            error("Call cat:Init{} first",2)
             
         end
         
-        if not is_loaded then
+        if type(src_parent) ~= "userdata" then
             
-            error("Call jazz:load_assets{} first",2)
-            
-        end
-        
-        if type(obstacle_list) ~= "table" then
-            
-            error("expected type 'table' for parameter 1",2)
+            error("parameter must be a group",2)
             
         end
         
-        if type(end_x) ~= "number" then
+        if is_loaded then
             
-            error("expected type 'number' for parameter 2",2)
+            if # srcs.children == 0 then
+                
+                error("meta-data 'cat.is_loaded' is incorrect",2)
+                
+            else
+                
+                error("load_assets was called when the assets where already loaded",2)
+                
+            end
             
         end
         
-        obstacle_i = 1
+        asset_loaders[cat_name](imgs)
+        --imgs.arm = Image{src ="assets/jazz_sprite/jazz-swat-arm.png"}
         
-        obstacles  = obstacle_list
+        apply_func_to_table(imgs, function(img) srcs:add(img) end)
+        
+        src_parent:add(srcs)
+        
+        actor_parent:add(cat)
+        
+        is_loaded = true
+        
+        cat.anchor_point = {
+            imgs.default[1].w/3,
+            imgs.default[2].h/2
+        }
+        
+    end
+    
+    
+    --The AI of the cat
+    do
+        
+        --Upvals
+        
+        local run_dir = 1
+        
+        --frame table
+        local frames, frame_i
+        
+        --functions
+        local next_move, swat, swat_pos_check, animating, act_on_frame,
+        jump, show_arm, wait_check, attack
+        
+        --sequences
+        local run_sequence, jump_up_sequence, jump_down_sequence,
+        to_swat_sequence, swat_sequence, swat_blink_sequence, swat_to_run_sequence,
+        swat_wait, attack_sequence, pos_wait, poop_shake_sequence
         
         
-        if # obstacles ~= 0 then
-            for i = 1, # obstacles do
-                if obstacles[i].x > jazz.x then
+        local next_obst_x, next_obst_y, o_x, o_y
+        
+        local no_floor = false
+        
+        local locked_pre_exit
+        local locked_post_exit
+        local locked_reentry
+        
+        local function check_obstacles()
+            
+            if cat.under_obstacle then
+                if cat.x >
+                    obstacles[cat.under_obstacle].x +
+                    obstacles[cat.under_obstacle].w then
                     
-                    jazz.right_obstacle = i
                     
-                    break
+                    cat.left_obstacle = cat.under_obstacle
                     
-                elseif obstacles[i].x < jazz.x and
-                    obstacles[i].x + obstacles[i].w > jazz.x then
+                    cat.under_obstacle = nil
                     
-                    jazz.under_obstacle = i
+                    print("JAZ OBST1:",cat.left_obstacle,cat.under_obstacle,cat.right_obstacle)
+                    
+                elseif cat.x < obstacles[cat.under_obstacle].x then
+                    
+                    
+                    cat.right_obstacle = cat.under_obstacle
+                    
+                    cat.under_obstacle = nil
+                    
+                    print("JAZ OBST2:",cat.left_obstacle,cat.under_obstacle,cat.right_obstacle)
+                    
+                end
+                
+            end
+            
+            while cat.right_obstacle and cat.x > obstacles[cat.right_obstacle].x do
+                
+                if cat.x <
+                    obstacles[cat.right_obstacle].x +
+                    obstacles[cat.right_obstacle].w then
+                    
+                    
+                    cat.left_obstacle = cat.under_obstacle or cat.left_obstacle
+                    cat.under_obstacle = cat.right_obstacle
                     
                 else
                     
-                    jazz.left_obstacle = i
+                    cat.left_obstacle = cat.right_obstacle or cat.left_obstacle
                     
                 end
+                
+                --if doesn't exist, then it nils it for us
+                repeat
+                    
+                    cat.right_obstacle = obstacles[cat.right_obstacle + 1] ~= nil and
+                        cat.right_obstacle + 1 or nil
+                    
+                until
+                    obstacles[cat.right_obstacle] == nil or
+                    obstacles[cat.right_obstacle].post_exit ~= true and
+                    (locked_pre_exit ~= nil or
+                    obstacles[cat.right_obstacle].pre_exit  ~= true)
+                    
+                
+                print("JAZ OBST3:",cat.left_obstacle,cat.under_obstacle,cat.right_obstacle)
+                --print(cat.x , obstacles[cat.right_obstacle].x)
             end
+            
+            while cat.left_obstacle and cat.x <
+                obstacles[cat.left_obstacle].x +
+                obstacles[cat.left_obstacle].w do
+                
+                
+                if cat.x > obstacles[cat.left_obstacle].x then
+                    
+                    
+                    cat.right_obstacle = cat.under_obstacle or cat.right_obstacle
+                    cat.under_obstacle = cat.left_obstacle
+                    
+                else
+                    
+                    cat.right_obstacle = cat.left_obstacle or cat.right_obstacle
+                    
+                end
+                
+                --if doesn't exist, then it nils it for us
+                repeat
+                    
+                    cat.left_obstacle = obstacles[cat.left_obstacle - 1] ~= nil and
+                        cat.left_obstacle - 1 or nil
+                    
+                until
+                    obstacles[cat.left_obstacle] == nil or
+                    obstacles[cat.left_obstacle].post_exit ~= true and
+                    (locked_pre_exit ~= nil or
+                    obstacles[cat.left_obstacle].pre_exit  ~= true)
+                
+                print("JAZ OBST4:",cat.left_obstacle,cat.under_obstacle,cat.right_obstacle)
+                
+            end
+            
         end
         
         
-        stop_point = end_x
         
-        make_sequences()
         
-        frame_i = 1
+        ----------------------------------------------------------------------------
+        --init's all of the sequences
+        --can only be called once assets were loaded
+        local function make_sequences()
+            poop_shake_sequence = {
+                imgs.poop_shake[1],
+                imgs.poop_shake[2],
+                imgs.poop_shake[3],
+                imgs.poop_shake[4],
+                imgs.poop_shake[5], --
+                imgs.poop_shake[4],
+                imgs.poop_shake[3],
+                imgs.poop_shake[4],
+                imgs.poop_shake[5], --
+                imgs.poop_shake[4],
+                imgs.poop_shake[3],
+                imgs.poop_shake[4],
+                imgs.poop_shake[5], --
+                imgs.poop_shake[4],
+                imgs.poop_shake[3],
+                imgs.poop_shake[4],
+                imgs.poop_shake[5], --
+                imgs.poop_shake[4],
+                imgs.poop_shake[3],
+                imgs.poop_shake[2],
+                imgs.poop_shake[1],
+            }
+            
+            run_sequence = {
+                function() cat.x = cat.x + run_dir*30 end,
+                imgs.run[7],
+                function() cat.x = cat.x + run_dir*20 end,
+                imgs.run[1],
+                function() cat.x = cat.x + run_dir*20 end,
+                imgs.run[2],
+                --function() cat.x = cat.x + 50 end,
+                --imgs.run[3],
+                function() cat.x = cat.x + run_dir*90 end,
+                imgs.run[4],
+                function() cat.x = cat.x + run_dir*70 end,
+                imgs.run[5],
+                function() cat.x = cat.x + run_dir*70 end,
+                imgs.run[6],
+            }
+            attack_sequence = {
+                imgs.jump_up[2],
+                flip_interval*2,
+                imgs.jump_up[1],
+                imgs.run[2],
+                attack,
+                imgs.run[3],
+                imgs.run[4],
+                imgs.jump_down[1],
+                imgs.run[6],
+            }
+            wait_sequence = {
+                100,
+            }
+        end
         
-        frames = run_sequence
         
-        cat_animation.duration = flip_interval
+        ----------------------------------------------------------------------------
+        --lunging at the bird
         
-        Animation_Loop:add_animation(cat_animation)
+        local in_attack_range = function(always)
+            
+            return (
+                    math.sqrt(
+                        math.pow(target.x - cat.x, 2) +
+                        math.pow(target.y - cat.y, 2)
+                    ) < lunge_radius
+                )
+            
+        end
         
-        jazz.x = 0
-        jazz.y = floor_y
-        jazz.y_rotation = {0,0,0}
+        local cat_y_func, land_y, cat_x_func, start_x, start_y, will_be_on
+        local attack_x = Interval(0,0)
+        local z_rot_mag = 10
+        local attack_z_rot = Interval(-z_rot_mag,z_rot_mag)
+        local cat_animation
+        local markers = {
+            .2,
+            .5,
+            .7,
+            .8
+        }
+        local marker_i = 1
+        local on_complete
+        
+        local big_splash_phase_2 = {
+            duration = .3,
+            on_step = function(s,p)
+                cat.tall_splash.opacity = 255*(1-p)
+                cat.wide_splash.opacity = 255*(1-p)
+                
+            end,
+            on_completed = function()
+                cat.tall_splash:unparent()
+                cat.tall_splash = nil
+                cat.wide_splash:unparent()
+                cat.wide_splash = nil
+                --cat.swamp:unparent()
+                cat.swamp = nil
+            end
+        }
+        local big_splash_phase_1 = {
+            duration = .3,
+            on_step = function(s,p)
+                cat.tall_splash.scale = {1,p}
+                cat.wide_splash.scale = {p,1.2*p}
+                cat.y = start_y + cat.h*p
+            end,
+            on_completed = function()
+                cat.opacity = 0
+                Animation_Loop:add_animation(big_splash_phase_2)
+            end
+        }
+        
+        
+        local attack_animation = {
+            duration = 1,
+            on_step = function(s,p)
+                cat:set{
+                    x          = cat_x_func(p),--attack_x:get_value(p),
+                    --p*(land_x - start_x),
+                    y          = cat_y_func(p),--attack_x:get_value(p)),
+                    --peak_y - math.pow( jump_dist*p-jump_dist/2 ,2),
+                    z_rotation = {attack_z_rot:get_value(p),0,0},
+                }
+                
+                if markers[marker_i] and markers[marker_i] < p then
+                    cat_animation:on_loop()
+                    marker_i = marker_i + 1
+                end
+            end,
+            on_completed = function()
+                marker_i = 1
+                print("attack done",cat.y)
+                
+                cat.on_obstacle = will_be_on
+                
+                Animation_Loop:add_animation(cat_animation)
+                --[[
+                cat:set{
+                    x          = final_x,
+                    y          = final_y,
+                    z_rotation = final_z_rot,
+                }
+                --]]
+                --cat.y_rotation = {0,0,0}
+                cat.scale = {1,1}
+                cat.z_rotation = {0,0,0}
+                
+                for i = 1, # obstacles do
+                    if cat.x < obstacles[i].x + (obstacles[i].x_off or 0) then
+                        
+                        obstacle_i = i
+                        
+                        --print("BEHIND",obstacles[i].source)
+                        
+                        break
+                        
+                    end
+                end
+                
+                if on_complete then on_complete() end
+                --print("attack_done_end\n\n")
+            end,
+        }
+        
+        --markers are used to flip between images during the jump
+        --attack_tl:add_marker( "launch_to_mid", attack_tl.duration * .3 )
+        --attack_tl:add_marker( "mid_to_land",   attack_tl.duration * .8 )
+        
+        local min_vy = -10
+        local max_vy = -1500
+        local min_vx = 10
+        local max_vx = 700
+        local ppm    = 200
+        local g = -max_vy*1.5
+        
+        
+        
+        local one_sec_A = 0.0059353880964885
+        local one_n_half_sec_A = 0.058130242561448
+        
+        local function leap_prep(land_x,land_y,on_c)
+            
+            start_x = cat.x
+            start_y = cat.y
+            
+            local jumping_down = land_y > start_y 
+            
+            local peak_x =  jumping_down and
+                    (land_x - start_x)/4 + start_x or
+                    (land_x - start_x)/2 + start_x
+            local peak_y = jumping_down and start_y - 100 or land_y - 100
+            
+            cat_y_func, t = calc_parabola(
+                
+                start_x, start_y,
+                
+                peak_x,
+                peak_y,
+                
+                land_x,  land_y
+                
+            )
+            
+            local vx = (land_x - start_x) --* (jumping_down and 2 or 1)
+            
+            cat_x_func = function(t)
+                
+                return start_x + vx * t --x_t = x_0 + v_x_0 * t
+                
+            end
+            
+            local old_y_f = cat_y_func
+            if land_x == start_x and land_y == start_y then
+                cat_y_func = function(e)
+                    return peak_y + (land_y-peak_y)*(2*e-1)*(2*e-1)
+                end
+                t = math.abs(land_y-peak_y)/650
+            else
+                cat_y_func = function(e)
+                    return old_y_f(cat_x_func(e))
+                    --print(cat_x_func(t),"\t",old_y_f(cat_x_func(t)))
+                end
+            end
+            attack_animation.duration = t--jumping_down and .5 or 1
+            
+            --print("try t = ", one_sec_A/a, a/one_sec_A)
+            
+            
+            if land_x < cat.x then
+                --cat.y_rotation = {180,0,0}
+                cat.scale = {-1,1}
+            else
+                --cat.y_rotation = {0,0,0}
+                cat.scale = {1,1}
+            end
+            
+            on_complete = on_c
+            land_x = nil
+        end
+        
+        local function find_land_y(land_x, y_thresh)
+            
+            land_y = floor_y 
+            
+            for i, o in pairs( obstacles ) do
+                
+                
+                if  land_x   > o.x           and
+                    land_x   < o.x + o.w     and
+                    land_y   > o.y - cat.h/2 and
+                    y_thresh < o.y           then
+                    
+                    
+                    will_be_on = o
+                    
+                    land_y = o.y - cat.h/2
+                    
+                end
+                
+            end
+            
+            return  land_y
+            
+        end
+        
+        local function strike_prep(on_c)
+            
+            start_x = cat.x
+            start_y = cat.y
+            local land_x
+            local peak_x, peak_y
+            if no_floor then
+                
+                if target.x < cat.x then
+                    
+                    land_x = obstacles[target.left_obstacle].x + cat.w/2
+                    land_y = obstacles[target.left_obstacle].y - cat.h/2
+                    
+                    
+                else
+                    
+                    if no_floor and target.right_obstacle == nil then
+                        
+                        land_x = death_spot and death_spot.x or 11350
+                        land_y = death_spot and death_spot.y or start_y
+                        
+                        on_c = function()
+                            print("cat die")
+                            dolater(
+                                Animation_Loop.delete_animation,
+                                Animation_Loop,
+                                cat_animation
+                            )
+                            cat.tall_splash = Clone{
+                                source = imgs.tall_splash,
+                                anchor_point = {imgs.tall_splash.w/2,imgs.tall_splash.h}
+                            }
+                            cat.wide_splash = Clone{
+                                source = imgs.wide_splash,
+                                anchor_point = {imgs.wide_splash.w/2,imgs.wide_splash.h}
+                            }
+                            cat.swamp = Clone{
+                                source = imgs.swamp,
+                                anchor_point = {imgs.wide_splash.w/2,0},
+                                --scale = {4/3,4/3}
+                            }
+                            
+                            cat.parent:add(
+                                cat.tall_splash,
+                                cat.swamp,
+                                cat.wide_splash
+                            )
+                            cat.tall_splash:lower_to_bottom()
+                            
+                            cat.tall_splash.x = cat.x1+(cat.x2-cat.x1)/2
+                            cat.tall_splash.y = cat.y2
+                            cat.wide_splash.x = cat.x1+(cat.x2-cat.x1)/2
+                            cat.wide_splash.y = cat.y2
+                            cat.swamp.x = 11366--cat.x1+(cat.x2-cat.x1)/2-40
+                            cat.swamp.y = 799--cat.y2 - 68
+                            
+                            Animation_Loop:add_animation(big_splash_phase_1)
+                        end
+                        
+                    else
+                        
+                        land_x = obstacles[target.right_obstacle].x + cat.w/2
+                        land_y = obstacles[target.right_obstacle].y - cat.h/2
+                        
+                    end
+                end
+                
+                peak_x = (land_x - start_x)/2 + start_x
+                
+                peak_y = land_y < start_y and
+                    (target.y < land_y  - 100 and target.y or land_y  - 100) or
+                    (target.y < start_y - 100 and target.y or start_y - 100)
+                
+                
+            end
+            
+            local jumping_down = target.y > start_y
+            local jumping_level = target.y > start_y -100
+            
+            
+            
+            land_x = land_x or
+                (jumping_down and 1.2 or jumping_level and 1.5 or 2) *
+                (target.x - start_x) + start_x
+            
+            peak_x = peak_x or target.x
+            peak_y = peak_y or target.y
+            
+            land_y = land_y or find_land_y(land_x, target.y-100)
+            
+            cat_y_func, t = calc_parabola(
+                start_x, start_y,
+                peak_x,  peak_y,
+                land_x,  land_y
+            )
+            
+            local vx = (land_x - start_x)
+            
+            cat_x_func = function(t)
+                
+                return start_x + vx * t --x_t = x_0 + v_x_0 * t
+                
+            end
+            local old_y_f = cat_y_func            
+            
+            if land_x == start_x and land_y == start_y then
+                print("or")
+                cat_y_func = function(e)
+                    return peak_y + (land_y-peak_y)*(2*e-1)*(2*e-1)
+                end
+                t = math.abs(land_y-peak_y)/650
+            else
+                cat_y_func = function(e)
+                    return old_y_f(cat_x_func(e))
+                    --print(cat_x_func(t),"\t",old_y_f(cat_x_func(t)))
+                end
+            end
+            
+            
+            
+            --print("try t = ",one_n_half_sec_A/a, a/one_n_half_sec_A)
+            
+            attack_animation.duration = t
+            
+            if land_x < cat.x then
+                --cat.y_rotation = {180,0,0}
+                cat.scale = {-1,1}
+            else
+                --cat.y_rotation = {0,0,0}
+                cat.scale = {1,1}
+            end
+            land_x = nil
+            on_complete = on_c
+            
+        end
+        
+        --[[
+        local function attack_prep(position)
+            error("why")
+            start_x = cat.x
+            start_y = cat.y
+            
+            local vx = (position.x - cat.x)*3
+            
+            vx = clamp_mag(vx,min_vx,max_vx)
+            
+            cat_x_func = function(t)
+                
+                return start_x + vx * t --x_t = x_0 + v_x_0 * t
+                
+            end
+            
+            cat_rev_x_func = function(x)
+                
+                return (x - start_x) / vx
+                
+            end
+            
+            local t = cat_rev_x_func(position.x)
+            
+            local vy = (position.y - cat.y - .5 * g * t * t) / t
+            --print("vy",vy,t)
+            if position.land == nil then vy = clamp(vy,max_vy,min_vy) end
+            
+            cat_y_func = function(t)
+                --print(start_y,vy,start_y   +   vy * t   +   .5 * g * t * t)
+                
+                -- y_t = y_0 + y_t_0 * t + .5*a*t^2
+                return start_y   +   vy * t   +   .5 * g * t * t
+                
+            end
+            
+            land_y = floor_y
+            will_be_on = false
+            
+            if position.land ~= nil then
+                
+                land_y = position.y
+                
+                --aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
+                will_be_on = position.land
+                attack_animation.duration = t
+                
+                if position.x < cat.x then
+                    cat.y_rotation = {180,0,0}
+                    attack_z_rot.from =  position.y < cat.y and  z_rot_mag or 0
+                    attack_z_rot.to   =  land_y+150 > cat.y and -z_rot_mag or 0
+                else
+                    cat.y_rotation = {0,0,0}
+                    attack_z_rot.to   = land_y+150 > cat.y and  z_rot_mag or 0
+                    attack_z_rot.from = position.y < cat.y and -z_rot_mag or 0
+                end
+                
+            elseif position.x < cat.x then
+                
+                cat.y_rotation = {180,0,0}
+                print("jumping to the left")
+                for i, o in pairs( obstacles ) do
+                    --print(o.source)
+                    
+                    o_x = o.x + ( o.x_off or 0 )
+                    o_y = o.y + ( o.y_off or 0 ) - cat.h/2
+                    
+                    if  o_y < cat_y_func(cat_rev_x_func(o_x)) and
+                        o_y > cat_y_func(cat_rev_x_func(o_x+obstacles[i].w)) and
+                        o_y < land_y then
+                        --print("gah",o_y,o.source)
+                        will_be_on = o
+                        
+                        land_y = o_y
+                    end
+                    
+                end
+                
+                
+                attack_z_rot.from =  position.y < cat.y and  z_rot_mag or 0
+                attack_z_rot.to   =  land_y+150 > cat.y and -z_rot_mag or 0
+                
+                aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
+                
+                attack_animation.duration = aaa
+                
+            else
+                
+                cat.y_rotation = {0,0,0}
+                
+                for i, o in pairs( obstacles ) do
+                    
+                    o_x = o.x + ( o.x_off or 0 )
+                    o_y = o.y + ( o.y_off or 0 ) - cat.h/2
+                    --print(o_y , cat_y_func(cat_rev_x_func(o_x)),cat_y_func(cat_rev_x_func(o_x+obstacles[i].w)))
+                    if  o_y > cat_y_func(cat_rev_x_func(o_x)) and
+                        o_y < cat_y_func(cat_rev_x_func(o_x+obstacles[i].w)) and
+                        o_y < land_y - cat.h then
+                        
+                    --print("gah",o_y,o.source)
+                        will_be_on = o
+                        
+                        land_y = o_y
+                    end
+                    
+                end
+                attack_z_rot.to   = land_y+150 > cat.y and  z_rot_mag or 0
+                attack_z_rot.from = position.y < cat.y and -z_rot_mag or 0
+                
+                aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
+                
+                attack_animation.duration = aaa
+                
+            end
+            
+            --print("LAND_Y",land_y)
+            
+        end
+        --]]
+        function attack()
+            --print("attack")
+            
+            Animation_Loop:delete_animation(cat_animation)
+            
+            attack_x.from = cat.x
+            
+            start_x = cat.x
+            start_y = cat.y
+            
+            --attack_tl:start()
+            Animation_Loop:add_animation(attack_animation)
+            
+            return true
+            
+        end
+        
+        ----------------------------------------------------------------------------
+        --Running
+        
+        local function run(dir)
+            
+            run_dir = dir
+            
+            --cat.y_rotation = { 90 - dir*90,0,0}
+            
+            cat.scale = {dir,1}
+            
+            --moving to the right
+            if dir == 1 then
+                
+                --jump up to the next 
+                if cat.right_obstacle and cat.x + cat.w/2 + 400 >
+                    obstacles[cat.right_obstacle].x or no_floor then
+                    
+                    print("run("..dir.."), jump to next")
+                    --[[
+                    attack_prep{
+                        x    = obstacles[cat.right_obstacle].x+cat.w/2,
+                        y    = obstacles[cat.right_obstacle].y-cat.h/2,
+                        land = obstacles[cat.right_obstacle]
+                    }
+                    --]]
+                    leap_prep(
+                        obstacles[cat.right_obstacle].x+cat.w/2,
+                        obstacles[cat.right_obstacle].y-cat.h/2
+                    )
+                    
+                    frames = attack_sequence
+                    
+                elseif cat.under_obstacle and cat.y ~= floor_y and cat.x + cat.w/2 + 400 >
+                    obstacles[cat.under_obstacle].x + obstacles[cat.under_obstacle].w then
+                    
+                    print("run("..dir.."), jump down")
+                    --[[
+                    attack_prep{x=cat.x + 300,y=floor_y,land=false}
+                    --]]
+                    leap_prep(
+                        cat.x + 400,
+                        floor_y
+                    )
+                    
+                    frames = attack_sequence
+                    
+                else
+                    
+                    print("run("..dir.."), run")
+                    frames  = run_sequence
+                    
+                end
+                
+            else
+                
+                if cat.left_obstacle and cat.x - cat.w/2 - 400 <
+                    obstacles[cat.left_obstacle].x +
+                    obstacles[cat.left_obstacle].w or no_floor then
+                    
+                    print("run("..dir.."), jump to next")
+                    --[[
+                    attack_prep{
+                        x    = obstacles[cat.left_obstacle].x+obstacles[cat.left_obstacle].w-cat.w/2,
+                        y    = obstacles[cat.left_obstacle].y-cat.h/2,
+                        land = obstacles[cat.left_obstacle]
+                    }
+                    --]]
+                    leap_prep(
+                        obstacles[cat.left_obstacle].x+obstacles[cat.left_obstacle].w-cat.w/2,
+                        obstacles[cat.left_obstacle].y-cat.h/2
+                    )
+                    
+                    frames = attack_sequence
+                    
+                elseif cat.under_obstacle and cat.y ~= floor_y  and cat.x - cat.w/2 - 400 <
+                    obstacles[cat.under_obstacle].x then
+                    
+                    print("run("..dir.."), jump down")
+                    --[[
+                    attack_prep{x=cat.x - 300,y=floor_y,land=false}
+                    --]]
+                    leap_prep(
+                        cat.x - 400,
+                        floor_y
+                    )
+                    
+                    frames = attack_sequence
+                    
+                else
+                    
+                    frames  = run_sequence
+                    
+                end
+                
+            end
+            
+            
+        end
+        
+        
+        local function aim_for_obstacle(o)
+            
+            if type(o) ~= "table" then error("invalid index",2) end
+            --if cat is to the left of the obstacle
+            if cat.x + cat.w/2 < o.x then
+                print("cat left of target")
+                --if cat is in jumping range
+                if cat.x + cat.w/2 > o.x - 400 then
+                    print("jump to it")
+                    --[[
+                    attack_prep{
+                        x    = o.x+cat.w/2,
+                        y    = o.y-cat.h/2,
+                        land = o
+                    }
+                    --]]
+                    leap_prep(o.x+cat.w/2,o.y-cat.h/2)
+                    
+                    frames = attack_sequence
+                    
+                else
+                    print("run to it")
+                    run(1)
+                    
+                end
+                
+            --if cat is to the right of the obstacle
+            elseif cat.x - cat.w/2 > o.x + o.w then
+                print("cat right of target")
+                
+                --if cat is in jumping range
+                if cat.x - cat.w/2 < o.x + o.w + 400 then
+                    print("jump to it",o.x + o.w - cat.w/2, cat.x)
+                    --[[
+                    attack_prep{
+                        x    = o.x + o.w - cat.w/2,
+                        y    = o.y-cat.h/2,
+                        land = o
+                    }
+                    --]]
+                    leap_prep(o.x+cat.w/2,o.y-cat.h/2)
+                    
+                    frames = attack_sequence
+                    
+                else
+                    print("run to it")
+                    
+                    run(-1)
+                end
+                
+            --if cat is under the obstacle
+            elseif cat.x + cat.w/2 >= o.x and
+                cat.x - cat.w/2 <= o.x + o.w then
+                print("cat under target")
+                
+                if o.can_jump_through then
+                    print("can jump through")
+                    if target.x < cat.x then
+                        --[[
+                        attack_prep{
+                            x    = cat.x-400 > o.x and cat.x-400 or o.x + cat.w/2,
+                            y    = o.y-cat.h/2,
+                            land = o
+                        }
+                        --]]
+                        print(2222222)
+                        leap_prep(cat.x-400 > o.x and cat.x-400 or o.x + cat.w/2,o.y-cat.h/2)
+                        
+                    else
+                        --[[
+                        attack_prep{
+                            x    = cat.x+400 < o.x + o.w and
+                                cat.x+400 or o.x + o.w - cat.w/2,
+                            y    = o.y-cat.h/2,
+                            land = o
+                        }
+                    --]]
+                        print(3333)
+                        leap_prep(
+                            cat.x+400 < o.x + o.w and
+                            cat.x+400 or o.x + o.w - cat.w/2,
+                            o.y-cat.h/2
+                        )
+                        
+                    end
+                    
+                    frames = attack_sequence
+                    
+                else
+                    print("run")
+                    run(1)
+                    
+                end
+                
+                
+                
+            else    error("IMPOSSIBLE",2)    end
+            
+        end
+        
+        
+        local exit_count = 1
+        local move_to_exit
+        cat.exit = function()
+            
+            local curr_count = 0
+            
+            for i = 1, # obstacles do
+                
+                if obstacles[i].pre_exit then
+                    
+                    curr_count = curr_count + 1
+                    
+                    if curr_count == exit_count then
+                        
+                        locked_pre_exit  = obstacles[  i  ]
+                        locked_post_exit = obstacles[ i+1 ]
+                        
+                        assert(
+                            locked_pre_exit ~= nil and
+                            locked_post_exit ~= nil,
+                            "Something went wrong"
+                        )
+                        
+                    end
+                    
+                end
+                
+            end
+            
+            curr_count = 0
+            
+            for i = 1, # obstacles do
+                
+                if obstacles[i].reentry then
+                    
+                    curr_count = curr_count + 1
+                    
+                    if curr_count == exit_count then
+                        
+                        locked_reentry = obstacles[i]
+                        
+                    end
+                    
+                end
+                
+            end
+            
+            
+            cat.left_obstacle  = nil
+            cat.under_obstacle = nil
+            cat.right_obstacle = 1
+            
+            check_obstacles()
+            
+            next_move = move_to_exit
+            
+        end
+        local next_move_w_floor
+        local reentry_wait = function()
+            
+            frame_i = 1
+            
+            if -physics_world.x > locked_reentry.x + locked_reentry.w then
+                cat.harmless = false
+                
+                cat.x = locked_reentry.x
+                
+                if locked_reentry.reentry == "floorless" then
+                    
+                    no_floor = true
+                    
+                else
+                    
+                    no_floor = false
+                    
+                end
+                
+                locked_pre_exit  = nil
+                locked_post_exit = nil
+                locked_reentry   = nil
+                
+                
+                cat.left_obstacle  = nil
+                cat.under_obstacle = nil
+                cat.right_obstacle = 1
+                
+                check_obstacles()
+                
+                next_move = next_move_w_floor
+                
+            end
+            
+        end
+        
+        move_to_exit = function()
+            print("meeeeee")
+            check_obstacles()
+            frame_i = 1
+            
+            if obstacles[cat.under_obstacle] == locked_pre_exit and cat.y ~= floor_y then
+                print("on pre, jumping to post")
+                cat.harmless = true
+                leap_prep(
+                    locked_post_exit.x + cat.w/2,
+                    locked_post_exit.y - cat.h/2,
+                    function()
+                        --if reentry then wait for it
+                        if locked_reentry then
+                            print("on post, waiting for reentry")
+                            frames = wait_sequence
+                            
+                            next_move = reentry_wait
+                            
+                        --otherwise exit
+                        else
+                            print("on post, halting")
+                            dolater(
+                                Animation_Loop.delete_animation,
+                                Animation_Loop,
+                                cat_animation
+                            )
+                            
+                        end
+                    end
+                )
+                
+                cat:unparent()
+                
+                locked_pre_exit.exit_piece.parent:add(cat)
+                
+                cat:lower_to_bottom()
+                
+                frames = attack_sequence
+                
+            else
+                print("aiming for pre")
+                aim_for_obstacle( locked_pre_exit )
+                
+            end
+            
+        end
+        local deleting_self = false
+        next_move_w_floor = function()
+            
+            check_obstacles()
+            
+            if target.dead then
+                if deleting_self then
+                    return
+                end
+                print("target is dead")
+                deleting_self = true
+                dolater(
+                    Animation_Loop.delete_animation,
+                    Animation_Loop,
+                    cat_animation
+                )
+                return
+            end
+            
+            frame_i = 1
+            if no_floor and cat.right_obstacle == nil and target.right_obstacle == nil then
+                
+                if -physics_world.x < 9300 then
+                    
+                    cat.scale = {1,1}
+                    
+                    cat.source = imgs.default[1]
+                    
+                    frames = wait_sequence
+                    
+                else
+                    
+                    strike_prep()--with death parameters
+                    
+                    frames = attack_sequence
+                    
+                end
+                
+                return
+            elseif cat.x > stop_point then
+                
+                cat.source = imgs.default[1]
+                print("cat stopping")
+                Animation_Loop:delete_animation(cat_animation)
+                
+                return
+                
+            --if cat got pooped on, then wipe it off
+            elseif cat.pooped_on then
+                
+                cat.pooped_on = false
+                
+                frames = poop_shake_sequence
+                
+                return
+                
+            --if Max is in lunge range, then lunge with a probabilty of missing
+            elseif in_attack_range() then   
+                
+                print("lunge")
+                
+                strike_prep()
+                
+                frames = attack_sequence
+                
+                return
+                
+            --if on an obstacle, and target is behind then wait
+            elseif cat.under_obstacle and cat.y ~= floor_y and target.x < cat.x then
+                --print("cat high wait")
+                --cat.y_rotation = {180,0,0}
+                cat.scale = {-1,1}
+                
+                cat.source = imgs.default[1]
+                
+                frames = wait_sequence
+                
+            --if Max is over an obstacle, I'm not on it, then run to it
+            elseif target.under_obstacle and target.under_obstacle ~= cat.under_obstacle then
+                print("aim for bir:under")
+                aim_for_obstacle( obstacles[target.under_obstacle] )
+                
+            --if Max is to the left of an obstacle, and it will be in range of him soon
+            elseif target.right_obstacle and
+                obstacles[target.right_obstacle].x - target.x < lunge_radius*3/2 then
+                print("aim for bir:right")
+                
+                aim_for_obstacle( obstacles[target.right_obstacle] )
+                
+            --if Max is to the right of an obstacle, and it is still close to him
+            elseif target.left_obstacle  and target.x -
+                obstacles[target.left_obstacle].x -
+                obstacles[target.left_obstacle].w < lunge_radius/3 then
+                print("aim for bir:left")
+                
+                aim_for_obstacle( obstacles[target.left_obstacle] )
+                
+                
+            elseif target.x < cat.x - 200 then
+                run(-1)
+            elseif target.x > cat.x + 200 then
+                print(target.x, cat.x + 200)
+                run(1)
+            else
+                
+                cat.source = imgs.default[1]
+                
+                frames = wait_sequence
+                
+            end
+            
+        end
+        
+        
+        ----------------------------------------------------------------------------
+        --General Animation Stuff
+        
+        act_on_frame = function(item)
+            
+            frame_i = frame_i + 1
+            
+            if type(item) == "userdata" then
+                
+                cat.source = item
+                
+                return true
+                
+            elseif type(item) == "number" then
+                
+                cat_animation.duration = item/1000--cat_animation.duration = item
+                
+                return true
+                
+            elseif type(item) == "function" then
+                
+                return item() or false
+                
+            else
+                
+                error("frame type not expected " .. type(item), 2)
+                
+            end
+        end
+        
+        cat_animation = {
+            duration = flip_interval,
+            loop    = true,
+            on_step = function() end,
+            on_loop = function(self)
+                
+                self.duration = flip_interval   -- if a delay was set, then this resets
+                
+                if frame_i > #frames then
+                    
+                    frame_i = 1
+                    
+                    if next_move then next_move() end
+                    
+                else
+                    
+                    while not act_on_frame(frames[frame_i]) do end
+                    
+                end
+                
+            end
+        }
+        --[[
+        animating = Timer{
+            
+            interval  = flip_interval,
+            
+            on_timer  = function(self)
+                
+                self.interval = flip_interval   -- if a delay was set, then this resets
+                
+                while not act_on_frame(frames[frame_i]) do end
+                
+            end
+            
+        }
+        
+        Animation_Loop:delete_animation(cat_animation)
+        --]]
+        
+        
+        function cat:toggle_floor()
+            no_floor = true
+        end
+        function cat:setup_for_level(t)
+            
+            if not has_been_initialized then
+                
+                error("Call cat:Init{} first",2)
+                
+            end
+            
+            cat.harmless = false
+            
+            cat:load_assets(layers.srcs, layers.enemy)
+            
+            cat.source = imgs.default[1]
+            
+            obstacle_i = 1
+            
+            obstacles  = lvl.obstacles or error("an obstacles must be set")
+            
+            no_floor = false
+            
+            if # obstacles ~= 0 then
+                for i = 1, # obstacles do
+                    if obstacles[i].x > cat.x then
+                        
+                        cat.right_obstacle = i
+                        
+                        break
+                        
+                    elseif obstacles[i].x < cat.x and
+                        obstacles[i].x + obstacles[i].w > cat.x then
+                        
+                        cat.under_obstacle = i
+                        
+                    else
+                        
+                        cat.left_obstacle = i
+                        
+                    end
+                end
+            end
+            
+            exit_count = 1
+            
+            locked_pre_exit  = nil
+            locked_post_exit = nil
+            locked_reentry   = nil
+            
+            
+            stop_point = lvl.enemy_stop or error("an enemy stop must be set")
+            
+            make_sequences()
+            
+            frame_i = 1
+            
+            frames = run_sequence
+            
+            cat_animation.duration = flip_interval
+            
+--            Animation_Loop:add_animation(cat_animation)
+            
+            next_move = next_move_w_floor
+            
+            cat.x = t.start_x or 300
+            cat.y = t.start_y or floor_y
+            --cat.y_rotation = {0,0,0}
+            cat.scale = {1,1}
+            cat.opacity = 255
+            
+            
+            deleting_self = false
+            cat.left_obstacle  = nil
+            cat.under_obstacle = nil
+            cat.right_obstacle = 1
+            
+            check_obstacles()
+            
+            if t.launch then cat:launch() end
+            
+        end
+        
+        function cat:launch()
+            
+            Animation_Loop:add_animation(cat_animation,"ACTIVE")
+            
+        end
     end
+    
+    
+    function cat:hit()
+        
+        cat.pooped_on = true
+        
+        mediaplayer:play_sound("audio/cat_2.wav")
+        
+    end
+    
+    --[[
+    local debug_rect1 = Rectangle{color="00009944"}
+    local debug_rect2 = Rectangle{color="99000099",w=10,h=10,anchor_point = {5,5}}
+    
+    physics_world:add(debug_rect1,debug_rect2)
+    --]]
+    function cat:update_coll_box()
+        
+        cat.x1 = cat.x - cat.anchor_point[1] + (cat.scale[1] == -1 and -60 or 40)
+        cat.y1 = cat.y - cat.anchor_point[2] + 150
+        cat.x2 = cat.x - cat.anchor_point[1] + (cat.scale[1] == 1 and cat.w-40 or 200)
+        cat.y2 = cat.y - cat.anchor_point[2] + cat.h
+        --[[
+        debug_rect1.x = cat.x1
+        debug_rect1.y = cat.y1
+        debug_rect1.w = cat.x2 - cat.x1
+        debug_rect1.h = cat.y2 - cat.y1
+        
+        debug_rect2.x = cat.x
+        debug_rect2.y = cat.y
+        --]]
+    end
+    
+    gamestate:add_state_change_function(
+        function()
+            
+            cat:unparent()
+            
+            srcs:clear()
+            srcs:unparent()
+            
+            is_loaded = false
+            
+        end,
+        "ACTIVE","LVL_TRANSITION"
+    )
+    
+    ----------------------------------------------------------------------------
+    -- Object
+    ----------------------------------------------------------------------------
+    
+    return cat
     
 end
 
-gamestate:add_state_change_function(
-    function()
-        
-        jazz:unparent()
-        
-        srcs:clear()
-        srcs:unparent()
-        
-        is_loaded = false
-    end,
-    "ACTIVE","LVL_TRANSITION"
-)
-
---------------------------------------------------------------------------------
--- Object
---------------------------------------------------------------------------------
-
-return jazz
-
+return make_cat
 
 
 

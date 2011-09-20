@@ -1,73 +1,72 @@
 Transition_Menu = Group{}
 
-local bg, retry, retry_hl, continue, continue_hl
+local bg, retry, retry_hl, continue, continue_hl, title
+
+local text_layer = Group{}
 
 local index = 1
 local trans_path_dir = "menus/transition/"
 
-local player
+local player, sk, hs
 
 local prev_lvl, next_lvl
 
+local lvl_total = {}
+local current_lvl = {}
+local multipliers = {}
+local totals = {}
+local total_score, lvl_txt
+
 local enter_press = {
     function()
-        --[[
-        Transition_Menu:animate{
-            duration = 500,
-            opacity=30,
-            on_completed = function()
-                --Animation_Loop:delete_animation(flash_play_hl)
-                bg = nil
-                retry = nil
-                retry_hl = nil
-                continue = nil
-                continue_hl = nil
-                Transition_Menu:clear()
-                Transition_Menu:unparent()
-                collectgarbage("collect")
-            end
-        }
-        --]]
         
-        gamestate:change_state_to("ACTIVE")
-        launch_lvl[prev_lvl](Transition_Menu)
+        sk:reset_lvl()
+        
+        launch_lvl(prev_lvl,Transition_Menu)
         
     end,
-    function() 
-        Transition_Menu:animate{
-            duration = 500,
-            opacity=30,
-            on_completed = function()
-                --Animation_Loop:delete_animation(flash_play_hl)
-                retry_hl.flash = nil
-                continue_hl.flash = nil
-                bg = nil
-                retry = nil
-                retry_hl = nil
-                continue = nil
-                continue_hl = nil
-                Transition_Menu:clear()
-                Transition_Menu:unparent()
-                collectgarbage("collect")
-            end
-        }
+    function()
         
-        if launch_lvl[prev_lvl+1] then
+        if lvl_params[prev_lvl+1] then
             
-            gamestate:change_state_to("ACTIVE")
-            launch_lvl[prev_lvl+1]()
+            sk:new_lvl()
+            
+            launch_lvl(prev_lvl+1,Transition_Menu)
+            
         else
             
-            gamestate:change_state_to("SPLASH")
+            sk:reset_all()
+            
+            retry_hl.flash = nil
+            continue_hl.flash = nil
+            continue:unparent()    
+            continue_hl:unparent() 
+            retry:unparent()   
+            retry_hl:unparent()
+            title:unparent()
+            title = nil
+            continue = nil
+            continue_hl = nil
+            retry = nil
+            retry_hl = nil
+            
+            bg:unparent()
+            bg = nil
+            Transition_Menu:unparent()
+            
+            High_Score_Menu:load_assets(layers.menus, total_score.score)
+            
+            gamestate:change_state_to("HS_MENU")
+            
         end
     end,
 }
 
 local focus_on, right_i
-local prog  = Rectangle{x = 40, y = screen_h - 100, w=10,         h = 30,color="f69024dd"}
-local track = Rectangle{x = 40, y = screen_h - 100, w=screen_w-80,h = 30,color="00000066"}
+local prog  = Rectangle{x = 40, y = screen_h - 100, w=10,          h = 30, color="f69024dd"}
+local track = Rectangle{x = 40, y = screen_h - 100, w=screen_w-80, h = 30, color="00000066"}
 
-Transition_Menu:add(track,prog)
+Transition_Menu:add(track,prog,text_layer)
 
 
 local num_assets, num_loaded
@@ -79,6 +78,8 @@ function Transition_Menu.set_progress(amt)
     continue_hl:unparent() 
     retry:unparent()   
     retry_hl:unparent()
+    title:unparent()
+    title = nil
     continue = nil
     continue_hl = nil
     retry = nil
@@ -116,7 +117,11 @@ function Transition_Menu:inc_progress()
         collectgarbage("collect")
         
         
-        gamestate:change_state_to("ACTIVE")
+        dolater(
+            gamestate.change_state_to,
+            gamestate,
+            "ACTIVE"
+        )
         
     end
     
@@ -131,12 +136,102 @@ gamestate:add_state_change_function(
     end,
     "ACTIVE","LVL_TRANSITION"
 )
+gamestate:add_state_change_function(
+    function()
+        
+        retry_hl.flash = nil
+        continue_hl.flash = nil
+        continue:unparent()    
+        continue_hl:unparent() 
+        retry:unparent()   
+        retry_hl:unparent()
+        continue = nil
+        continue_hl = nil
+        retry = nil
+        retry_hl = nil
+        bg:unparent()
+        bg = nil
+        title:unparent()
+        title = nil
+        
+        Transition_Menu:unparent()
+        
+        hs:load_assets(layers.menus, total_score.score)
+        
+    end,
+    "LVL_TRANSITION","SPLASH"
+)
+
+local font = "Gladatur Rum"
 
 function Transition_Menu:init(t)
     
-    player = t.player
+    player = t.player  or error("failed to pass Max to Transition Menu",2)
+    sk     = t.sk      or error("failed to pass ScoreKeeper to Transition Menu",2)
+    hs     = t.hs_menu or error("failed to pass High_Score_Menu to Transition Menu",2)
     
 end
+
+local categor_multipliers = {5,5,20,10}
+local categories = {"seeds","crackers","cherries","poop"}
+
+local categories_r = {}
+
+for i,c in pairs(categories) do
+    
+    categories_r[c] = i
+    
+end
+
+
+local base_y = 530
+local y_interval = 90
+
+for i,c in pairs(categories) do
+    
+    lvl_total[i] = Text{
+        name  = c.." pre_lvl_total",
+        font  = font.." 60px",
+        color = "000000",
+        x     = 900,
+        y     = base_y + y_interval * (i-1),
+    }
+    
+    multipliers[i] = Text{
+        name  = c.." multiplier",
+        font  = font.." 60px",
+        text  = categor_multipliers[i],
+        color = "000000",
+        x     = 1000,
+        y     = base_y + y_interval * (i-1),
+    }
+    
+    totals[i] = Text{
+        name  = c.." total",
+        font  = font.." 60px",
+        color = "000000",
+        x     = 1070,
+        y     = base_y + y_interval * (i-1),
+    }
+    text_layer:add(
+        lvl_total[i],
+        Text{
+            name  = c.." x",
+            font  = font.." 40px",
+            text  = "x",
+            color = "000000",
+            x     = 965,
+            y     = base_y + y_interval * (i-1)+15,
+        },
+        multipliers[i],
+        totals[i]
+    )
+end
+
+total_score = Text{font = font.." 70px",color="000000", x = 920+155, y = 950}
+lvl_txt     = Text{font = font.." bold 110px",color="000000", x = screen_w/2+30, y = 380, text = "0"}
+
+text_layer:add(lvl_txt,total_score)
 
 function Transition_Menu:load_assets(parent,prev_level)
     
@@ -148,8 +243,12 @@ function Transition_Menu:load_assets(parent,prev_level)
     bg          = Image{src = assets_path_dir..trans_path_dir.."level-transition.jpg", scale = {4/3,4/3} }
     retry       = Image{src = assets_path_dir..trans_path_dir.."retry.png",       x =   50,y=800}
     retry_hl    = Image{src = assets_path_dir..trans_path_dir.."retry-hl.png",    x =   50,y=800,opacity=0}
-    continue    = Image{src = assets_path_dir..trans_path_dir.."continue.png",    x = 1400,y=800}
-    continue_hl = Image{src = assets_path_dir..trans_path_dir.."continue-hl.png", x = 1400,y=800,opacity=0}
+    continue    = Image{src = assets_path_dir..trans_path_dir.."continue.png",    x = 1415,y=800}
+    continue_hl = Image{src = assets_path_dir..trans_path_dir.."continue-hl.png", x = 1415,y=800,opacity=0}
+    
+    title = player.dead and
+        Image{src = assets_path_dir..trans_path_dir.."transition-tryagain.png", x = 350,y=100} or
+        Image{src = assets_path_dir..trans_path_dir.."transition-hurray.png",   x = 540,y=100}
     
     continue.opacity = player.dead and 255*.25 or 255
     
@@ -173,13 +272,48 @@ function Transition_Menu:load_assets(parent,prev_level)
         end,
     }
     
+    local pre_tot  = sk:total()
+    local curr_lvl = sk:current_level()
+    
+    total_score.score = 0
+    for i,c in pairs(categories) do
+        
+        lvl_total[ i ].text = ((pre_tot[c] or 0) + (curr_lvl[c] or 0))
+        
+        totals[ i ].score       = ((pre_tot[c] or 0) + (curr_lvl[c] or 0))* categor_multipliers[ i ]
+        
+        totals[ i ].text        = "= "..totals[ i ].score
+        
+        total_score.score       = total_score.score + totals[ i ].score
+    end
+    
+    
+    total_score.text = total_score.score
+    total_score.anchor_point = {total_score.w,0}
+    --[[
+    for c,amt in pairs(sk:total()) do
+        
+        lvl_total[  categories_r[c]  ].text = ((pre_tot[c] or 0) + (curr_lvl[c] or 0))
+        
+    end
+    
+    for c,amt in pairs(sk:current_level()) do
+        
+        current_lvl[  categories_r[c]  ].text = "+ "..amt
+        
+    end
+    --]]
+    lvl_txt.text = prev_level
+    
     dolater(focus_on[index])
     
-    Transition_Menu:add(bg,retry,retry_hl,continue,continue_hl)
+    Transition_Menu:add(bg,retry,retry_hl,continue,continue_hl,title)
     
     Transition_Menu.opacity = 255
     
     parent:add(Transition_Menu)
+    
+    text_layer:raise_to_top()
     
     Transition_Menu:grab_key_focus()
     print("added")

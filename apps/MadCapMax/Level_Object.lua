@@ -74,7 +74,8 @@ Levels{
 
 --]]
 
-local lvls = {
+local lvls
+lvls = {
     {    --   Level 1 Information
         
         items = {
@@ -86,10 +87,13 @@ local lvls = {
                 y      = 269,
             },
             {
-                type   = "background",
+                type   = "foreground",
                 source = "cage-door",
-                x      = 261,
-                y      = 306,
+                x      = 531,
+                y      = 286,
+                w      = 900,
+                anchor_point = {5,0},
+                scale  = {-1,1},
             },--[[
             {
                 type   = "background",
@@ -104,6 +108,12 @@ local lvls = {
                 x      = 900,
                 y      = 181,
                 scale  = {3/4,3/4},
+            },
+            {
+                type   = "background",
+                source = "dining-plant",
+                x      = 1200,
+                y      = 235+75,--+300,
             },
             ---[[
             {
@@ -181,7 +191,7 @@ local lvls = {
                 type   = "dynamic",
                 source = "bedroom-clock",
                 x      = 1920+1596-120,
-                y      = 527+25,
+                y      = 527+5,
             },
             
 
@@ -273,6 +283,12 @@ local lvls = {
             },
             {
                 type   = "background",
+                source = "dining-rm-chair",
+                x      = 5760+42+220,
+                y      = 535+45,--+300,
+            },
+            {
+                type   = "background",
                 source = "dining-table-left-corner",
                 x      = 5760+42+340,
                 y      = 535+5+156,
@@ -285,7 +301,7 @@ local lvls = {
                 scale = {3/4,3/4},
             },
             {
-                type   = "background",
+                type   = "dynamic",
                 source = "dining-table-right-corner",
                 x      = 5760+42+940+40,
                 y      = 535+5+156,
@@ -314,6 +330,13 @@ local lvls = {
                 source = "dining-plant",
                 x      = 5760+1051+140,
                 y      = 214+90,
+            },
+            {
+                type   = "background",
+                source = "dining-rm-chair",
+                x      = 5760+42+940+60,
+                y      = 535+45,--+300,
+                scale = {-1,1},
             },
             {
                 type   = "background",
@@ -807,6 +830,12 @@ local lvls = {
                 y      = 0,
             },
             {
+                type   = "background",
+                source = "kitchen-chair",
+                x      = 11520+3870+35-150,
+                y      = 600-150,
+            },
+            {
                 type   = "static",
                 source = "kitchen-table-2",
                 x      = 11520+3870+135,
@@ -823,7 +852,19 @@ local lvls = {
                 x      = 11520+3870+505,
                 y      = 300+160,
             },
-
+            {
+                type   = "background",
+                source = "kitchen-chair",
+                x      = 11520+3870+750,
+                y      = 600-150,
+                scale  = {-1,1},
+            },
+            {
+                type   = "dynamic",
+                source = "kitchen-flower-vase",
+                x      = 11520+3870+505-90,
+                y      = 300+160-240,
+            },
             {
                 type   = "wall_objs",
                 source = "sliding-door-1",
@@ -914,60 +955,70 @@ local lvls = {
                 y = 650 ,
                 w = 550 ,
                 h = 200 ,
+                arrow = "up",
             },
             {
                 x = 1785 ,
                 y = 0 ,
                 w = 173, 
                 h = 149 ,
+                arrow = "down",
             },
             {
                 x = 5800 ,
                 y = 0 ,
                 w = 120 ,
                 h = 40 ,
+                arrow = "down",
             },
             {
                 x = 6316 ,
                 y = 30 ,
                 w = 300 ,
                 h = 200 ,
+                arrow = "down",
             },
             {
                 x = 6282 ,
                 y = 756 ,
                 w = 650 ,
                 h = 40 ,
+                arrow = "up",
             },
             {
                 x = 9346, 
                 y = 550 ,
                 w = 100 ,
                 h = 497 ,
+                arrow = "up",
             },
             {
                 x = 9091 ,
                 y = 100 ,
                 w = 100 ,
                 h = 160 ,
+                arrow = "down",
             },
             {
                 x = 10799 ,
                 y = 15 ,
                 w = 340 ,
                 h = 104 ,
+                arrow = "down",
             },
             {
                 x = 11664, 
                 y = 0 ,
                 w = 234 ,
                 h = 160 ,
+                arrow = "down",
             },
             {
                 x = 17165, 
                 y = 800 ,
                 w = 195 ,
                 h = 100 ,
+                arrow = "up",
             },
         },
         enemy_obstacles = {
@@ -986,7 +1037,7 @@ local lvls = {
             {
                 x = 6332 ,
                 y = 756 ,
-                w = 550 ,
+                w = 580 ,
                 h = 40 ,
             },
             {
@@ -1233,6 +1284,42 @@ local lvls = {
                 type = "seed",
             },
         },
+        intro = {
+            {
+                duration = 1.2,
+                on_step = function()
+                end,
+                on_completed = function()
+                    
+                    Animation_Loop:add_animation(  lvls[1].intro[2]  )
+                    
+                end,
+            },
+            {
+                duration = .5,
+                on_step = function(s,p)
+                    
+                    lvls[1].intro[2].actors[1].y_rotation = {
+                        -180*p,0,0
+                    }
+                    
+                end,
+                on_completed = function()
+                    
+                    lvls[1].intro[2].actors[1]:unparent()
+                    layers.background:add(lvls[1].intro[2].actors[1])
+                    
+                    for _,f in pairs(lvls[1].intro.post_intro_funcs) do
+                        
+                        f()
+                        
+                    end
+                    
+                    Animation_Loop:add_animation(LVL_Object.on_idle,"ACTIVE")
+                    
+                end
+            },
+        },
         clone_srcs = {
             --"bdrm-left.jpg",
             --"bdrm-rt.png",
@@ -1277,6 +1364,7 @@ local lvls = {
             "dining-light.png",
             "dining-pictures.png",
             "dining-plant.png",
+            "dining-rm-chair.png",
             "dining-shelves.png",
             "dining-table-left-corner.png",
             "dining-table-right-corner.png",
@@ -1289,6 +1377,7 @@ local lvls = {
             "kitchen-board.png",
             "kitchen-books.png",
             "kitchen-bowl.png",
+            "kitchen-chair.png",
             "kitchen-cookbook.png",
             "kitchen-counter.png",
             "kitchen-cupboard-side.png",
@@ -1296,6 +1385,7 @@ local lvls = {
             "kitchen-cupboards.png",
             "kitchen-cupboard-top.png",
             "kitchen-drip.png",
+            "kitchen-flower-vase.png",
             "kitchen-fridge.png",
             "kitchen-lemon.png",
             "kitchen-lemon2.png",
@@ -1350,13 +1440,630 @@ local lvls = {
     },
     ----------------------------------------------------------------------------
     { --Level 2 Information
-        
+        items = {
+            
+            {
+                type   = "wall_objs",
+                source = "yard_1",
+                x      = 417-100,
+                y      = 135,
+                --scale = {3/4,3/4},
+            },
+            {
+                type   = "foreground",
+                source = "umbrella",
+                x      = 1300-100,
+                y      = 335,
+                --scale = {3/4,3/4},
+            },
+            {
+                type   = "background",
+                x = 2300-52-1-100,
+                y = 255+14,
+                source = "yard-fence-piece",
+                exit_piece = true
+            },
+            {
+                type   = "background",
+                x = 2300+40-100,
+                y = 600-130,
+                source = "yard-flowers",
+            },
+            {
+                type   = "foreground",
+                x = 2000+40-100,
+                y = 900,
+                source = "yard-barrow",
+            },
+            {
+                type   = "foreground",
+                x = 2500+40-100,
+                y = 870,
+                source = "yard-flamingos",
+            },
+            {
+                type   = "wall_objs",
+                source = "yard_2",
+                x      = 2*screen_w-693-100,
+                y      = 135,
+                --scale = {3/4,3/4},
+            },
+            {
+                type   = "foreground",
+                x = 3300+70-200-100,
+                y = 900-240,
+                source = "yard-fountain",
+                scale  = {-1,1}
+            },
+            {
+                type   = "foreground",
+                x = 3300+40-100,
+                y = 900-240,
+                source = "yard-fountain",
+            },
+            {
+                type   = "foreground",
+                x = 4300+40-100,
+                y = 900,
+                source = "yard-pool",
+            },
+            {
+                type   = "background",
+                x = 4300+40+516-100,
+                y = 600-160,
+                source = "yard-hammock",
+            },
+            {
+                type   = "wall_objs",
+                source = "swamp_1",
+                x      = screen_w*4-1803-100,
+                y      = 135,
+                --scale = {3/4,3/4},
+            },
+            {
+                type   = "wall_objs",
+                source = "swamp_2",
+                x      = screen_w*6-1803-1110-100,
+                y      = 135,
+                --scale = {3/4,3/4},
+            },
+            {
+                type   = "wall_objs",
+                source = "swamp_3",
+                x      = screen_w*8-1803-1110-1313+210-7-100,
+                y      = 135,
+                w      = 2048+340,
+                --scale = {3/4,3/4},
+                stop_scroll = true,
+                enemy_stop = true,
+            },--[[
+            {
+                type   = "background",
+                source = "swamp-splash-btm-cutout",
+                x      = 12090,
+                y      = 500,
+                opacity = 0,
+            },--]]
+            {
+                type   = "background",
+                source = "heart",
+                x      = 12990,
+                y      = 500,
+                opacity = 0,
+            },
+            {
+                type   = "background",
+                source = "maxina-eyelids",
+                x      = 13290,
+                y      = 760,
+                opacity = 0,
+            },
+            {
+                type   = "wall_objs",
+                source = "swamp_3",
+                x      = screen_w*8-1803-1110-1313+210-7-100,
+                y      = 135,
+                w      = 2048+340,
+                --scale = {3/4,3/4},
+                stop_scroll = true,
+                enemy_stop = true,
+            },
+        },
+        outro = {
+            {
+                duration = 1,
+                on_step = function()
+                end,
+                on_completed = function()
+                    print(1)
+                    Animation_Loop:add_animation(  lvls[2].outro[2]  )
+                    
+                end,
+            },
+            {
+                duration = .3,
+                loop     = true,
+                on_step  = function(s,p)
+                    
+                    if p > .3 then
+                        
+                        lvls[2].outro[2].actors[1].opacity = 0
+                        
+                    end
+                    
+                end,
+                on_loop = function()
+                    
+                    lvls[2].outro[2].count = (lvls[2].outro[2].count or 1) + 1
+                    print(2)
+                    if lvls[2].outro[2].count > 3 then
+                        
+                        lvls[2].outro[2].count = 0
+                        
+                        dolater(
+                            function()
+                                
+                                Animation_Loop:delete_animation(lvls[2].outro[2])
+                                Animation_Loop:add_animation(  lvls[2].outro[3]  )
+                                
+                                
+                            end
+                        )
+                        
+                    else
+                        
+                        lvls[2].outro[2].actors[1].opacity = 255
+                        
+                    end
+                end,
+            },
+            {
+                duration = .5,
+                on_step = function()
+                end,
+                on_completed = function()
+                    print(3)
+                    lvls[2].outro[4].actors[1].opacity = 255
+                    lvls[2].outro[4].actors[1].scale = {0,0}
+                    Animation_Loop:add_animation(  lvls[2].outro[4]  )
+                    
+                end,
+            },
+            {
+                duration = .5,
+                on_step = function(s,p)
+                    
+                    lvls[2].outro[4].actors[1].scale = {p,p}
+                end,
+                on_completed = function()
+                    print(4)
+                    Animation_Loop:add_animation(  lvls[2].outro[5]  )
+                    
+                end,
+            },
+            {
+                duration = 1,
+                on_step = function(s,p)
+                end,
+                on_completed = function()
+                    print(5)
+                    gamestate:change_state_to("LVL_TRANSITION")
+                    
+                end,
+            },
+        },
+        tiling = {
+        },
+        player_obstacles = {
+            {
+                x = 5900-100,
+                y =  500,
+                w =  50,
+                h =  600,
+                arrow = "up",
+            },
+        },
+        enemy_obstacles = {
+            {
+                x =  500-100,
+                y =  780,
+                w =  250,
+                h =   30,
+            },
+            {
+                x =  830-100,
+                y =  700,
+                w =  180,
+                h =   30,
+            },
+            {
+                x = 1100-100,
+                y =  780,
+                w =  180,
+                h =   30,
+            },
+            {
+                x = 2026-100,
+                y =  220,
+                w =  200,
+                h =   30,
+                pre_exit = true,
+            },
+            {
+                x = 2300-100,
+                y =  750,
+                w =  200,
+                h =   30,
+                post_exit = true,
+            },
+            {
+                x = 5654-100,
+                y =  830,
+                w =  180,
+                h =   30,
+                reentry = "floorless",
+            },
+            
+            {
+                x = 6654-100,
+                y =  830,
+                w =  200,
+                h =   30,
+                can_jump_through = true,
+            },
+            {
+                x = 7180-130,
+                y =  730,
+                w =  200,
+                h =   30,
+                can_jump_through = true,
+            },--[[
+            {
+                x = 7340,
+                y = 1010,
+                w =  170,
+                h =   30,
+                can_jump_through = true,
+            },--]]
+            {
+                x = 7680-200,
+                y =  860,
+                w =  200,
+                h =   30,
+                can_jump_through = true,
+            },--[[
+            {
+                x = 7790,
+                y = 1010,
+                w =  300,
+                h =   30,
+                can_jump_through = true,
+            },--]]
+            {
+                x = 8110-200,
+                y =  750,
+                w =  200,
+                h =   30,
+                can_jump_through = true,
+            },--[[
+            {
+                x = 8350,
+                y = 1010,
+                w =  270,
+                h =   30,
+                can_jump_through = true,
+            },
+            --]]
+            {
+                x = 8600-100,
+                y =  760,
+                w =  200,
+                h =   30,
+                can_jump_through = true,
+            },
+            {
+                x = 9200-100,
+                y =  800,
+                w =  200,
+                h =   30,
+                can_jump_through = true,
+            },
+            {
+                x = 10150-100,
+                y =   870,
+                w =   200,
+                h =    30,
+                can_jump_through = true,
+                cat_exit = true,
+            },
+        },
+        collectables = {
+            --table and chairs
+            {
+                x = 700-100,
+                y = 400,
+                type = "seed",
+            },
+            {
+                x = 800-100,
+                y = 400,
+                type = "seed",
+            },
+            {
+                x = 900-100,
+                y = 400,
+                type = "seed",
+            },
+            --umbrella
+            {
+                x = 1300-100,
+                y = 100,
+                type = "seed",
+            },
+            {
+                x = 1400-100,
+                y = 100,
+                type = "seed",
+            },
+            {
+                x = 1500-100,
+                y = 100,
+                type = "seed",
+            },
+            --wheel barrow
+            {
+                x = 2000-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 2100-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 2200-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 2700-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 2800-100,
+                y = 800,
+                type = "cherry",
+            },
+            {
+                x = 2900-100,
+                y = 800,
+                type = "seed",
+            },
+            
+            --fountain
+            {
+                x = 3100-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 3200-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 3300-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 3700-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 3800-100,
+                y = 800,
+                type = "cherry",
+            },
+            --fountain
+            {
+                x = 3900-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 4300-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 4400-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 4500-100,
+                y = 800,
+                type = "seed",
+            },
+            
+            --pool
+            {
+                x = 5200-100,
+                y = 700,
+                type = "cracker",
+            },
+            {
+                x = 5200-100,
+                y = 800,
+                type = "cracker",
+            },
+            {
+                x = 5400-100,
+                y = 700,
+                type = "cracker",
+            },
+            {
+                x = 5400-100,
+                y = 800,
+                type = "cracker",
+            },
+            {
+                x = 5600-100,
+                y = 700,
+                type = "cracker",
+            },
+            {
+                x = 5600-100,
+                y = 800,
+                type = "cracker",
+            },
+            --swamp begin
+            {
+                x = 7000-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 7200-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 7400-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 7600-100,
+                y = 800,
+                type = "seed",
+            },
+            --
+            {
+                x = 8000-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 8200-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 8400-100,
+                y = 800,
+                type = "cherry",
+            },
+            {
+                x = 8600-100,
+                y = 800,
+                type = "seed",
+            },
+            {
+                x = 8800-100,
+                y = 800,
+                type = "seed",
+            },
+            --main tree
+            {
+                x = 9800-100,
+                y = 800,
+                type = "cherry",
+            },
+            {
+                x = 9800-100,
+                y = 700,
+                type = "seed",
+            },
+
+        },
+        clone_srcs = {
+            --[[
+            "algae.png",
+            "bbq.png",
+            "cattail-1.png",
+            "cattail-2.png",
+            "cattail-3.png",
+            "deck.png",
+            "deck-chair.png",
+            "deck-end-piece.png",
+            "deck-table.png",
+            "grass-1.png",
+            "grass-background.png",
+            "lily-flower.png",
+            "lily-pads.png",
+            "plant-1.png",
+            "plant-2.png",
+            "plant-3.png",
+            "plant-4.png",
+            "plant-clump-back-1.png",
+            "plant-clump-back-2.png",
+            "plant-clump-back-3.png",
+            "plant-clump-back-4.png",
+            "plant-clump-front-1.png",
+            "plant-clump-front-2.png",
+            "pots-watercan.png",
+            "sidegate.png",
+            "sky-water.jpg",
+            --]]
+            "heart.png",
+            "maxina-eyelids.png",
+            "swamp_1.jpg",
+            "swamp_2.jpg",
+            "swamp_3.jpg",
+            --"swamp-splash-btm-cutout.jpg",
+            --[[
+            "tree.png",
+            "tree2.png",
+            "tree-left.png",
+            "tree-limbs.png",
+            "tree-middle.png",
+            "umbrella.png",
+            "water-waves.png",
+            --]]
+            "umbrella.png",
+            "yard_1.jpg",
+            "yard_2.jpg",
+            "yard-barrow.png",
+            "yard-fence-piece.jpg",
+            "yard-flamingos.png",
+            "yard-flowers.png",
+            "yard-fountain.png",
+            "yard-hammock.png",
+            "yard-pool.png",
+            --"yard_3.jpg",
+            --[[
+            "yard-barrow.png",
+            "yard-bush.png",
+            "yard-deck.png",
+            "yard-doghouse.png",
+            "yard-fence.png",
+            "yard-fence-end.jpg",
+            "yard-flamingos.png",
+            "yard-flowers.png",
+            "yard-football.png",
+            "yard-fountain.png",
+            "yard-hammock.png",
+            "yard-pool.png",
+            "yard-rake.png",
+            "yard-tree1.png",
+            "yard-tree2.png",
+            "yard-treetop1.png",
+            "yard-treetop2.png",
+            "yard-treetop3.png",
+            "yard_waterdrop.png",
+            "yard-waterdrop.png",
+            --]]
+        }
     }
 }
 
-
-
-
+clone_counter = {}
+setmetatable(clone_counter,{__mode = "k"})
 
 --------------------------------------------------------------------------------
 ----  The Level Loader
@@ -1445,12 +2152,12 @@ local collectables = lvls[curr_lvl_i].collectables --pointer to tiling
 local player_obst  = lvls[curr_lvl_i].collectables --pointer to tiling
 
 local final_edge = nil
-
+local call_before_outro, outro_actors
 function LVL_Object:curr_lvl() return curr_lvl_i end
 
 local base_path = "assets/lvl"
-function LVL_Object:prep_level(t)
-    
+function LVL_Object:setup_for_level(t)
+    print("fsdfsdfggffgbgfbg")
     if not has_been_initialized then
         error("LVL_Object has not been initialized",2)
     end
@@ -1494,6 +2201,8 @@ function LVL_Object:prep_level(t)
     
     -- get the list of obstacles
     
+    local exit_count = 0
+    
     for j = 1, # lvls[curr_lvl_i].items do
         --[[
         if lvls[curr_lvl_i].items[j].player then
@@ -1509,6 +2218,31 @@ function LVL_Object:prep_level(t)
             
         end
         --]]
+        if lvls[curr_lvl_i].items[j].exit_piece then
+            
+            exit_count = exit_count + 1
+            
+            local other_exit_count = 0
+            
+            for i = 1, # lvls[curr_lvl_i].enemy_obstacles do
+                
+                if lvls[curr_lvl_i].enemy_obstacles[i].pre_exit then
+                    
+                    other_exit_count = other_exit_count + 1
+                    
+                    if exit_count == other_exit_count then
+                        
+                        lvls[curr_lvl_i].enemy_obstacles[i].exit_piece =
+                            lvls[curr_lvl_i].items[j]
+                        lvls[curr_lvl_i].items[j].exit_link = lvls[curr_lvl_i].enemy_obstacles[i]
+                        break
+                        
+                    end
+                end
+                
+            end
+            
+        end
         if lvls[curr_lvl_i].items[j].enemy_stop then
             
             LVL_Object.enemy_stop = lvls[curr_lvl_i].items[j].x
@@ -1524,7 +2258,7 @@ function LVL_Object:prep_level(t)
     LVL_Object.obstacles = lvls[curr_lvl_i].enemy_obstacles
     --[[
     for j,o in ipairs(LVL_Object.obstacles) do
-        layers.foreground:add(Rectangle{x = o.x,y = o.y, w = o.w, h = o.h, color="77770055"})
+        layers.foreground:add(Rectangle{x = o.x,y = o.y, w = o.w, h = o.h, color="77770099"})
     end
     for j,o in ipairs(lvls[curr_lvl_i].player_obstacles) do
         layers.foreground:add(Rectangle{x = o.x,y = o.y, w = o.w, h = o.h, color="00777755"})
@@ -1540,17 +2274,70 @@ function LVL_Object:prep_level(t)
     tiling       = lvls[curr_lvl_i].tiling 
     collectables = lvls[curr_lvl_i].collectables
     player_obst  = lvls[curr_lvl_i].player_obstacles
+    outro_actors      = t.outro_actors
+    call_before_outro = t.call_before_outro
     
-    self:scroll_by(physics_world.x)
-
-
+    if t.intro_actors then
+        
+        local need_actors = {}
+        
+        for i,as in pairs(t.intro_actors) do
+            
+            for j,actor_i in pairs(as) do
+                print("gggg")
+                need_actors[actor_i] = true
+                
+            end
+            
+        end
+        
+        dumptable(need_actors)
+        
+        self:scroll_by(physics_world.x,need_actors)
+        
+        
+        dumptable(need_actors)
+        dumptable(t.intro_actors)
+        for i,as in pairs(t.intro_actors) do
+            
+            lvls[curr_lvl_i].intro[i].actors = {}
+            
+            for j,actor_i in pairs(as) do
+                
+                lvls[curr_lvl_i].intro[i].actors[j] = need_actors[actor_i]
+                
+            end
+            
+        end
+        
+        lvls[curr_lvl_i].intro.post_intro_funcs = t.call_after_intro
+        
+        Animation_Loop:add_animation(lvls[curr_lvl_i].intro[1],"ACTIVE")
+        
+        dumptable(lvls[curr_lvl_i].intro)
+        
+    else
+        
+        self:scroll_by(physics_world.x)
+        
+        Animation_Loop:add_animation(LVL_Object.on_idle,"ACTIVE")
+        
+    end
+    
+    
+    
+    
+    
 end
+
 
 
 --upvals
 local dx, obj
 
 local function make_obj(item)
+    
+    
     
     if type(item.source) == "string" then
         
@@ -1559,7 +2346,7 @@ local function make_obj(item)
             source = lvl_objs[ item.source ],
             x      = item.x,
             y      = item.y,
-            
+            opacity = item.opacity
         }
         
         if item.scale then
@@ -1601,65 +2388,25 @@ local function make_obj(item)
     
     
     
+    if item.anchor_point then
+        obj:move_anchor_point(  unpack(item.anchor_point)  )
+    else
+        obj:move_anchor_point(obj.w/2,obj.h/2)
+    end
     
     if item.type == "static" then
         
         assert(item.source)
-        --[[
-        obj = physics:Body(
-            obj,
-            {
-                type  = "static",
-                shape = item.shape
-            }
-        )
-        --]]
-        obj:move_anchor_point(obj.w/2,obj.h/2)
-        --[[
-        r = Rectangle{
-            w       = item.w or obj.w*obj.scale[1],
-            h       = item.h or obj.h*obj.scale[2],
-            x       = item.x + (item.x_off or 0),
-            y       = item.y + (item.y_off or 0),
-            color   = "bb3300",
-            opacity = 255*.7
-        }
-        --]]
-        --r.anchor_point = {r.w/2,r.h/2}
         
         layers.items:add( obj )
         
     elseif items[item_i].type == "dynamic" then
-        --[[
-        obj = physics:Body(
-            obj,
-            {
-                type  = "dynamic",
-                shape = item.shape
-            }
-        )
-        --]]
-        obj:move_anchor_point(obj.w/2,obj.h/2)
-        --[[
-        r= Rectangle{
-            w            = item.w or obj.w*obj.scale[1],
-            h            = item.h or obj.h*obj.scale[2],
-            x       = item.x + (item.x_off or 0),
-            y       = item.y + (item.y_off or 0),
-            --anchor_point = obj.anchor_point,
-            color   = "33bb00",
-            opacity = 255*.7
-        }
-        --]]
-        --r.anchor_point = {r.w/2,r.h/2}
+        
         layers.items:add( obj )
         
     else
         
         assert(item.source)
-        
-        obj:move_anchor_point(obj.w/2,obj.h/2)
-        
         
         assert(layers[item.type],item.type.." is not a layer")
         
@@ -1669,8 +2416,15 @@ local function make_obj(item)
     end
     
     
+    on_screen_items[ obj ] = obj.x + (item.w and item.w - obj.w/2 or obj.w/2*4/3)
     
-    on_screen_items[ obj ] = obj.x + obj.w/2*4/3
+    if item.exit_link then
+        item.exit_link.exit_piece = obj
+    end
+    
+    clone_counter[obj] = true
+    
+    return obj
     
 end
 
@@ -1683,7 +2437,7 @@ function LVL_Object:add_to_scroll_off(obj)
 end
 
 
-function LVL_Object:scroll_by(dx)
+function LVL_Object:scroll_by(dx,need_actors)
     
     if not has_been_initialized then
         
@@ -1702,7 +2456,33 @@ function LVL_Object:scroll_by(dx)
         
         physics_world.x = -(LVL_Object.stop_scroll - screen_w)
         LVL_Object.right_screen_edge = LVL_Object.right_screen_edge + 1000
-        Animation_Loop:delete_animation(LVL_Object.animation)
+        print("exit clause")
+        Animation_Loop:delete_animation(LVL_Object.on_idle)
+        
+        if lvls[curr_lvl_i].outro then
+            
+            for i,as in pairs(outro_actors) do
+                
+                lvls[curr_lvl_i].outro[i].actors = {}
+                
+                for j,actor_name in pairs(as) do
+                    
+                    lvls[curr_lvl_i].outro[i].actors[j] = screen:find_child(actor_name)
+                    print("herer",lvls[curr_lvl_i].outro[i].actors[j])
+                end
+                
+            end
+            dumptable(lvls[curr_lvl_i].outro)
+            
+            Animation_Loop:add_animation(lvls[curr_lvl_i].outro[1])
+            
+            for f,p in pairs(call_before_outro) do
+                
+                f(p)
+                
+            end
+            
+        end
         
         return
         
@@ -1712,7 +2492,7 @@ function LVL_Object:scroll_by(dx)
     for obj,right_edge in pairs(on_screen_items) do
         
         if right_edge < -physics_world.x then
-            --print("delete")
+            print("delete")
             if obj.parent then obj:unparent() end
             
             on_screen_items[     obj ] = nil
@@ -1720,6 +2500,7 @@ function LVL_Object:scroll_by(dx)
             collides_with_enemy[ obj ] = nil
             
         end
+        
         
     end
     
@@ -1733,7 +2514,7 @@ function LVL_Object:scroll_by(dx)
         tiling[tiling_i].x    <    ( 2*screen_w - physics_world.x)  do
         
         obj = Image{
-            src    = "assets/lvl1/"..tiling[tiling_i].source,
+            src    = "assets/lvl"..curr_lvl_i.."/"..tiling[tiling_i].source,
             x      = tiling[ tiling_i ].x,
             y      = tiling[ tiling_i ].y,
             tile   = { true, false },
@@ -1769,7 +2550,7 @@ function LVL_Object:scroll_by(dx)
         player_obst_i = player_obst_i + 1
         
     end
-    
+    --[[
     while  collectable_i <= # collectables   and
         collectables[collectable_i].x    <    (  2*screen_w - physics_world.x)  do
         
@@ -1858,7 +2639,7 @@ function LVL_Object:scroll_by(dx)
             local orig_x = items[item_i].x
             local orig_y = items[item_i].y
             
-            print("\n\n\nPREEENT:\t\t",orig_x,orig_y,"\n\n\n")
+            --print("\n\n\nPREEENT:\t\t",orig_x,orig_y,"\n\n\n")
             
             for i = 1, items[item_i].tile[1] do
                 for j = 1, items[item_i].tile[2] do
@@ -1878,7 +2659,15 @@ function LVL_Object:scroll_by(dx)
             
         else
             
-            make_obj(items[item_i])
+            if need_actors and need_actors[item_i] then
+                
+                need_actors[item_i] = make_obj(items[item_i])
+                
+            else
+                
+                make_obj(items[item_i])
+                
+            end
             
         end
         
@@ -1889,124 +2678,31 @@ function LVL_Object:scroll_by(dx)
 end
 
 
-function LVL_Object.on_idle(s)
-    LVL_Object:scroll_by(scroll_speed*s)
-end
-
---[[
-function LVL_Object:load(next_lvl_i)
+LVL_Object.on_idle = {
     
-    --for each full screen segment
-    for i,seg in pairs(lvls[next_lvl_i]) do
-        
-        segments[i] = Group{}
-        
-        if i <=2 then   curr_lvl:add(segments[i])
-        else            not_visible:add(segments[i])    end
-        
-        
-        --   add the background to the screen
-        segments[i]:add(seg.bg)
-        
-        --   load up each static collidable
-        for pos,sz in pairs(seg.statics) do
-            
-            segments[i]:add(
-                
-                physics:Body(
-                    
-                    Group{
-                        size     = sz,
-                        position = pos,
-                    },
-                    {
-                        type = "static"
-                    }
-                    
-                )
-                
-            )
-            
-        end
-        
-        --   and all the knock-down-able's
-        for obj,pos in pairs(seg.objects) do
-            
-            segments[i]:add(
-                
-                physics:Body(
-                    
-                    Clone{
-                        source   = obj,
-                        position = pos,
-                    },
-                    {}
-                    
-                )
-                
-            )
-            
-        end
-        
-    end
+    on_step = function(s)   LVL_Object:scroll_by(scroll_speed*s)   end
     
-end
---]]
---Animation Functions
-
-local fade_in = {
-    
-    duration = .2,
-    
-    on_step = function(_,p)
-        
-        curr_lvl.opacity = 255*p
-        
-    end,
-    
-    --[[
-    on_completed = function()
-        
-    end
-    --]]
 }
-
-local fade_out = {
-    
-    duration = .2,
-    
-    on_step  = function(_,p)
-        
-        curr_lvl.opacity = 255*(1-p)
-        
-    end,
-    
-    on_completed = function()
-        
-        curr_lvl:clear()
-        
-        not_visible:clear()
-        
-        segments = {}
-        
-        collectgarbage("collect")
-        
-        curr_lvl_i = curr_lvl_i + 1
-        
-        LVL_Object:load(curr_lvl_i)
-        
-        Animation_Loop:add(fade_in)
-        
-    end
-}
-
-
 
 function LVL_Object:unload_lvl()
+    
+    print("this happens")
     
     if Animation_Loop:has_animation(LVL_Object.animation) then
         
         Animation_Loop:delete_animation(LVL_Object.animation)
+       
+    elseif lvls[curr_lvl_i].outro then
+        
+        for i,o in ipairs(lvls[curr_lvl_i].outro) do
+            
+            if Animation_Loop:has_animation(o) then
+                
+                Animation_Loop:delete_animation(o)
+                
+            end
+            
+        end
         
     end
     
@@ -2021,13 +2717,14 @@ function LVL_Object:unload_lvl()
     layers.background:clear()
     layers.items:clear()
     layers.player:clear()
-    --layers.enemy:clear()
+    layers.enemy:clear()
     layers.foreground:clear()
     
     LVL_Object.obstacles = {}
     lvl_objs = {}
     lvl_srcs:clear()
     
+    collectgarbage("collect")
 end
 
 gamestate:add_state_change_function(
