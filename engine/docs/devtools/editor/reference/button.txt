@@ -1,0 +1,272 @@
+Class: Button
+
+A Button is a standard user interface button. In addition to Button-specific properties, Buttons also provide all the properties, events, and functions implemented by the TrickPlay Runtime Engine's <UIElement> interface.
+
+
+
+Constructor: button( properties )
+
+The button() function creates a new Button UI Element. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+
+*Argument:*
+
+properties - table of Button property settings
+
+The properties table contains a comma-separated list of property settings for the new Button. If a property is not explicitly set, its default value is used.
+
+*Return Value:* Returns a Group object that contains the new Button
+
+*Example:* Create a new button, specifying some properties
+
+(code)
+-- Create all the UI Elements
+ui_element = dofile( "/lib/ui_element.lua" )
+
+-- Create a new button, setting some of its Button-specific properties
+local myButton = ui_element.button{ label = "myButton", ui_width = 400 }
+
+-- Set some of the button's UIElement properties
+myButton.name = "myButton"
+myButton.position = { 700, 300, 0 }
+(end)
+
+
+
+Property: ui_width 
+
+The ui_width property is an integer value specifying the button's width in pixels.
+
+*Default Setting:* 180
+
+*See Also:* the <ui_height> property
+
+
+
+Property: ui_height
+
+The ui_height property is an integer specifying the button's height in pixels.
+
+*Default Setting:* 60
+
+*See Also:* the <ui_width> property
+
+
+
+Property: ui_position
+
+The ui_position property is a table of integer values specifying the object's screen coordinates: X, Y and Z, respectively.
+
+*Default Setting:* { 100, 100, 0 }
+
+*See Also:* the <ui_width> and <ui_height> properties
+
+
+
+Property: label
+
+The label property is a string to display within the button.
+
+*Default Setting:* "Button"
+
+*See Also:* the <text_font> and the <text_color> properties
+
+
+
+Property: text_font
+
+The text_font property is a string specifying the Button's font. The font string's format is described in the <Text.font> section.
+
+*Default Setting:* "DejaVu Sans 30px"
+
+*See Also:* the <label> and <text_color> properties
+
+
+
+Property: text_color 
+
+The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* {255, 255, 255, 255} (white and completely opaque)
+
+*See Also:* the <label>, <text_font> and <focus_text_color> properties
+
+
+
+Property: focus_text_color
+
+The focus_text_color property is a table of integer RGB and alpha settings specifying the button's text color when it has input focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* {255, 255, 255, 255} (white and completely opaque)
+
+*See Also:* the <text_color> property
+
+
+
+Property: text_has_shadow
+
+The text_has_shadow property is a boolean value indicating whether or not the button text displays a shadow (true=has shadow).
+
+*Default Setting:* true
+
+
+
+Property: skin
+
+The skin property is a string specifying the button's skin. The skin functionality is under active development.
+
+*Default Setting:* "default"
+
+
+
+Property: fill_color
+
+The fill_color property is a table of integer RGB and alpha settings specifying the button's fill color. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* { 255, 255, 255, 0 } (white and transparent)
+
+*See Also:* the <focus_fill_color> and <border_color> properties
+
+
+
+Property: focus_fill_color
+
+The focus_fill_color property is a table of integer RGB and alpha settings specifying the button's fill color when it has focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* {27, 145, 27, 0}
+
+*See Also:* the <fill_color> property
+
+
+
+Property: border_width
+
+The border_width property is an integer specifying button's border width in pixels.
+
+*Default Setting:* 1
+
+*See Also:* the <border_corner_radius> and <border_color> properties
+
+
+
+Property: border_corner_radius
+
+The border_corner_radius property is an integer specifying the radius in pixels of each of the button's four corners.
+
+A radius of 0 will produce square, 90-degree corners. As values increase, the corners become more rounded. To produce a button with a completely rounded left and right side, set the border_corner_radius property to a value of ui_height / 2. To create a circular button, set the button's ui_width and ui_height to identical values, and set the border_corner_radius property to ui_height (or ui_width) / 2.
+
+*Default Setting:* 12
+
+*See Also:* the <ui_width> and <ui_height> properties
+
+
+
+Property: border_color
+
+The border_color property is a table of integer RGB and alpha settings specifying the button's border color. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+The border's color when the button has key focus is specified in the <focus_color> property.
+
+*Default Setting:* {255, 255, 255, 255} (white and opaque)
+
+*See Also:* the <focus_color> and <fill_color> properties
+
+
+
+Property: focus_color
+
+The focus_color is a table of integer RGB and alpha settings specifying the button's border color when it has focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* {27, 145, 27, 255}
+
+*See Also:* the <border_color> property
+
+
+
+Function: on_focus_in
+
+The on_focus_in() function forces the key focus to the button. To accurately understand what this function does, think of it as get_focus().
+
+Calling on_focus_in() also causes the <focused> event handler to be called.
+
+If the function's key argument is set to keys.Return then the button's <pressed> event handler is also called.
+
+*Prototype:* on_focus_in( key )
+
+*Arguments:*
+
+key - Optional argument. If equal to keys.Return, the pressed() event handler is called. Other values have no effect.
+
+*Return Value:* None.
+
+*See Also:* the <focused> and <pressed> event handlers
+
+
+
+Function: on_focus_out
+
+The on_focus_out() function releases the key focus from the button. To accurately understand what this function does, think of it as remove_focus().
+
+Calling on_focus_out() also causes the <released> event handler to be called.
+
+After calling on_focus_out(), no screen element has the input focus.
+
+*Prototype:* on_focus_out()
+
+*Arguments:* None.
+
+*Return Value:* None.
+
+*See Also:* the <released> event handler
+
+
+
+Event Handler: focused
+
+The focused() event handler is called whenever the button receives the key focus.
+
+The TrickPlay Visual Editor generates an empty focused() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button receives the key focus.
+
+*Default Setting:* nil or references an empty skeleton handler, i.e., focus-in events are ignored.
+
+*See Also:* the <on_focus_in> function and the <released> event handler
+
+
+
+Event Handler: released
+
+The released() event handler is called whenever the button loses the key focus.
+
+The TrickPlay Visual Editor generates an empty released() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button loses the key focus.
+
+*Default Setting:* nil or references an empty skeleton handler, i.e., focus-out events are ignored.
+
+*See Also:* the <on_focus_out> function and the <focused> event handler
+
+
+
+Event Handler: pressed
+
+The pressed() event handler is called whenever the button is pressed.
+
+The TrickPlay Visual Editor generates an empty pressed() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button is pressed.
+
+*Default Setting:* nil or references an empty skeleton handler, i.e., button-press events are ignored.
+
+*Example:* When button is pressed, transition to another screen
+
+(code)
+-- Assume we have two screens: FirstScreen and NextScreen.
+-- We are currently in the FirstScreen, which contains a button with its name property set to "GoToNextScreen".
+-- When the GoToNextScreen button is pressed, its pressed() event handler below is called.
+
+-- The TrickPlay Visual Editor automatically generates the handler skeleton and saves it in the
+-- project's main.lua file. You can also write the handler definition yourself if you don't use the Editor.
+layout["FirstScreen"].GoToNextScreen.pressed = function() -- Handler for GoToNextScreen.pressed in this screen
+  -- We add this code...
+  -- Transition to NextScreen using a fade-out/fade-in effect
+  ui_element.transit_to( groups["FirstScreen"], groups["NextScreen"], "fade" )
+end
+
+
+(end)
+
