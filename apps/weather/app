@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.weather",
+    release     = "2",
+    version     = "1.0",
+    name        = "Weather",
+    author      = "Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}

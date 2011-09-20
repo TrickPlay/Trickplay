@@ -254,12 +254,9 @@
 
 - (void)dealloc {
     NSLog(@"TouchController dealloc");
-    if (view) {
-        [view release];
-    }
-    if (socketManager) {
-        [socketManager release];
-    }
+
+    self.socketManager = nil;
+    self.view = nil;
     if (activeTouches) {
         CFRelease(activeTouches);
     }
