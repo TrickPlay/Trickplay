@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Trickplay Visual Editor
+Exec=trickplay-editor
+Icon=trickplay
+Categories=Development;Application;
+Comment=Trickplay Visual Editor
