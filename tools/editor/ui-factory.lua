@@ -739,6 +739,7 @@ end
 
 function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s, save_items)
 
+
 		local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
 		local group = Group{}
 		group:clear()
@@ -786,11 +787,14 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		editor_use = true
         local item_picker = ui_element.buttonPicker{skin = "inspector", items = itemLists, text_font = "FreeSans Medium 12px", selected_item = selected, inspector  = 5}
 		item_picker.ui_height = 45
-		if item_n == "expansion_location" or "cell_size" then 
+		if item_n == "expansion_location" or item_n == "cell_size" then 
 			item_picker.ui_width = 110
+		elseif item_n == "skin" then 
+			item_picker.ui_width = 130 
 		else 
 			item_picker.ui_width = 150
 		end
+
 		if item_n == "style" then 
         	item_picker.position = {text.x + text.w + 17 , -5}
 		else 
