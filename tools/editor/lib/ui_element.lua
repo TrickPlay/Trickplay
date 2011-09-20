@@ -4157,6 +4157,7 @@ function ui_element.progressBar(t)
         	    type = "ProgressBar", 
         	    set_prog = function(prog)
 	                c_fill.scale = {(p.ui_width-4)*(prog),1}
+					progress = prog
         	    end,
 	        },
 	}
