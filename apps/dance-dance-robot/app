@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.ddr",
+    release     = "1",
+    version     = "1.0",
+    name        = "Dance Dance Robot",
+    copyright   = "© Trickplay Inc.",
+}
+
