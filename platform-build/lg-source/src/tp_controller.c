@@ -232,13 +232,13 @@ BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, ADDON_KEY_COND_T keyCond)
 	switch (keyCond)
 	{
 		case ADDON_KEY_PRESS:
-			tp_controller_key_down(_gpRemoteController, key, 0);
+			tp_controller_key_down(_gpRemoteController, key, 0,0);
 			break;
 		case ADDON_KEY_RELEASE:
-			tp_controller_key_up(_gpRemoteController, key, 0);
+			tp_controller_key_up(_gpRemoteController, key, 0,0);
 			break;
 		case ADDON_KEY_REPEAT:
-			tp_controller_key_down(_gpRemoteController, key, 0);
+			tp_controller_key_down(_gpRemoteController, key, 0,0);
 			break;
 		default:
 			return FALSE;
@@ -258,7 +258,7 @@ BOOLEAN	TP_Controller_MouseEventCallback(
 
 	if ((keyCode == AO_RF_KEY_NONE) || (keyCond == ADDON_KEY_COND_LAST))
 	{
-		tp_controller_pointer_move(_gpMouseController, posX, posY);
+		tp_controller_pointer_move(_gpMouseController, posX, posY,0);
 		return TRUE;
 	}
 
@@ -275,13 +275,13 @@ BOOLEAN	TP_Controller_MouseEventCallback(
 	switch (keyCond)
 	{
 		case ADDON_KEY_PRESS:
-			tp_controller_pointer_button_down(_gpMouseController, tpButton, posX, posY);
+			tp_controller_pointer_button_down(_gpMouseController, tpButton, posX, posY,0);
 			break;
 		case ADDON_KEY_RELEASE:
-			tp_controller_pointer_button_up(_gpMouseController, tpButton, posX, posY);
+			tp_controller_pointer_button_up(_gpMouseController, tpButton, posX, posY,0);
 			break;
 		case ADDON_KEY_REPEAT:
-			tp_controller_pointer_button_down(_gpMouseController, tpButton, posX, posY);
+			tp_controller_pointer_button_down(_gpMouseController, tpButton, posX, posY,0);
 			break;
 		default:
 			return FALSE;
