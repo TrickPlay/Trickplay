@@ -26,13 +26,35 @@ void Console::readline_handler( char * line )
 
 #endif
 
+
+//-----------------------------------------------------------------------------
+#define TP_LOG_DOMAIN   "CONSOLE"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
+//-----------------------------------------------------------------------------
+
+Console * Console::make( TPContext * context )
+{
+#ifdef TP_PRODUCTION
+    return 0;
+#else
+
+    return new Console( context , context->get_bool( TP_CONSOLE_ENABLED, TP_CONSOLE_ENABLED_DEFAULT ),
+                           context->get_int( TP_TELNET_CONSOLE_PORT, TP_TELNET_CONSOLE_PORT_DEFAULT ) );
+#endif
+}
+
 Console::Console( TPContext * ctx, bool read_stdin, int port )
     :
     context( ctx ),
     L( NULL ),
     channel( NULL ),
+    watch( 0 ),
     stdin_buffer( NULL ),
-    server( NULL )
+    server( NULL ),
+    enabled( true )
 {
     if ( read_stdin )
     {
@@ -46,7 +68,7 @@ Console::Console( TPContext * ctx, bool read_stdin, int port )
             {
                 stdin_buffer = g_string_new( NULL );
 
-                g_io_add_watch( channel, G_IO_IN, channel_watch, this );
+                watch = g_io_add_watch( channel, G_IO_IN, channel_watch, this );
 
 #ifdef TP_HAS_READLINE
 
@@ -70,13 +92,13 @@ Console::Console( TPContext * ctx, bool read_stdin, int port )
         if ( error )
         {
             delete new_server;
-            g_warning( "FAILED TO START TELNET CONSOLE ON PORT %d : %s", port, error->message );
+            tpwarn( "FAILED TO START ON PORT %d : %s", port, error->message );
             g_clear_error( &error );
         }
         else
         {
             server.reset( new_server );
-            g_info( "TELNET CONSOLE LISTENING ON PORT %d", server->get_port() );
+            tplog( "READY ON PORT %d", server->get_port() );
         }
     }
 
@@ -87,6 +109,11 @@ Console::~Console()
 {
     if ( channel )
     {
+        if ( watch )
+        {
+            g_source_remove( watch );
+        }
+
         g_io_channel_unref( channel );
     }
 
@@ -201,9 +228,16 @@ void Console::process_line( gchar * line )
 
 gboolean Console::channel_watch( GIOChannel * source, GIOCondition condition, gpointer data )
 {
+    Console * self = ( Console * ) data;
+
+    if ( ! self->enabled )
+    {
+        return TRUE;
+    }
+
 #ifdef TP_HAS_READLINE
 
-    readline_console = ( Console * ) data;
+    readline_console = self;
 
     rl_callback_read_char();
 
@@ -212,17 +246,17 @@ gboolean Console::channel_watch( GIOChannel * source, GIOCondition condition, gp
     return TRUE;
 
 #else
-    return ( ( Console * )data )->read_data();
+    return self->read_data();
 #endif
 }
 
 void Console::connection_accepted( gpointer connection, const char * remote_address )
 {
     server->write_printf( connection, "WELCOME TO TrickPlay %d.%d.%d\n", TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION );
-    g_debug( "ACCEPTED CONSOLE CONNECTION FROM %s", remote_address );
+    tplog( "ACCEPTED CONNECTION FROM %s", remote_address );
 }
 
-void Console::connection_data_received( gpointer connection, const char * data , gsize )
+void Console::connection_data_received( gpointer connection, const char * data , gsize , bool * )
 {
     gchar * line = g_strdup( data );
     process_line( line );
@@ -237,4 +271,22 @@ void Console::output_handler( const gchar * line, gpointer data )
     {
         console->server->write_to_all( line );
     }
+}
+
+void Console::enable()
+{
+#ifdef TP_HAS_READLINE
+    rl_callback_handler_install( "" , readline_handler );
+#endif
+
+    enabled = true;
+}
+
+void Console::disable()
+{
+#ifdef TP_HAS_READLINE
+    rl_callback_handler_remove();
+#endif
+
+    enabled = false;
 }

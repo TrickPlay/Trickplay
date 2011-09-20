@@ -39,7 +39,7 @@ class MP : private MediaPlayer::Delegate
             }
         }
         
-        ~MP()
+        virtual ~MP()
         {
             if (player)
             {
@@ -601,6 +601,22 @@ global mediaplayer [[MP*]]
                 height=0;
                 
             result=self->get_player()?self->get_player()->set_viewport_geometry(left,top,width,height):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+        ]];
+
+    /*
+    Function: reset_viewport_geometry
+
+    Attempts to set the size and position of the viewport to their default, full screen values.
+
+    Returns:
+
+    0 -     The viewport position and size were set.
+    other - There was a problem setting the viewport position and size.
+    */
+
+    int reset_viewport_geometry()
+        [[
+          result=self->get_player()?self->get_player()->reset_viewport_geometry():TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
         ]];
         
     /*

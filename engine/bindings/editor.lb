@@ -1,112 +1,202 @@
 [[
+#include <gio/gio.h>
+
 #include "common.h"
 #include "util.h"
 #include "app.h"
 #include "context.h"
 #include "actions.h"
+#include <cstdio>
+
+#ifndef TP_CLUTTER_BACKEND_EGL
+#ifndef __APPLE__
+#include "clutter/x11/clutter-x11.h"
+#else  // __APPLE__
+#include "osx/osx-cursor-glue.h"
+#endif // __APPLE__
+#endif
+
 ]]
 
 restricted global editor [[ void * ]]
 {
 
-      editor()
-	[[
-	     lb_construct_empty();
-	]];
+    editor()
+        [[
+             lb_construct_empty();
+        ]];
+
+    table readdir(string dir_name)
+        [[
+             gchar *filename = NULL;
+             GDir *dir = NULL;
+
+             dir = g_dir_open(dir_name, 0, NULL);
+
+            if(dir)
+            {
+                filename = (gchar *)g_dir_read_name(dir);
+                lua_newtable( L );
+                int t = lua_gettop( L );
+                int i = 1;
+                while(filename != NULL)
+                {
+                    lua_pushstring( L , filename );
+                    lua_rawseti( L , t , i++ );
+                    filename = (gchar *)g_dir_read_name(dir);
+                }
+                g_dir_close(dir);
+            }
+            else
+            {
+                lua_pushnil( L );
+            }
+        ]];
 
 
-    /*
-        Function: readdir
+     bool writefile(string file_name, lstring contents, bool overwrite=true)
+        [[
+            bool is_uri=false;
+            char * path=App::get(L)->normalize_path(file_name,&is_uri);
 
-        List file names of the given directory name and returns them as a table. If
-        there are any problems, it returns nil.
+            result = false;              
 
-        Arguments:
+            if ( path && ! is_uri )
+            {
+                const char *mode;
 
-                dir_name - The name of the directory to look up.
+                if( overwrite )
+                {
+                    mode = "w";
+                }
+                else
+                {
+                    mode = "a";
+                }
 
-        Returns:
-                table - The file names or 
-                nil - If something went wrong.
+                FILE *fp;
 
-    */
+                if( ( fp = fopen( path , mode ) ) )
+                {
+                    if( contents_len == fwrite( contents , sizeof( char ) , contents_len , fp ) )
+                    {
+                        result = true;
+                    }
+                    fclose( fp );
+                }
+            }
 
-     table readdir(string dir_name)
-        [[	
-	    gchar *filename = NULL;
-	    GDir *dir = NULL;
+            g_free( path );
+        ]];
 
-            dir = g_dir_open(dir_name, 0, NULL);
+     bool change_app_path( string path )
+        [[
+            result = App::get(L)->change_app_path( path );
+        ]];
 
-	    if(dir) 
-	    {
-		filename = (gchar *)g_dir_read_name(dir);
-		lua_newtable( L );
-		int t = lua_gettop( L );
-		int i = 1; 
-		while(filename != NULL)
-		{
-			lua_pushstring( L , filename );
-   			lua_rawseti( L , t , i++ );  
-			filename = (gchar *)g_dir_read_name(dir);
-		}
-	    	g_dir_close(dir);
-	    }
-	    else 
-	    {
-   		lua_pushnil( L );
-	    }
+     bool mkdir( string path )
+        [[
+            result = 0 == g_mkdir_with_parents( path , 0700 );
+        ]];
+
+     string get_home_dir()
+         [[
+             result = g_getenv( "HOME" );
+
+             if ( ! result )
+             {
+                 result = g_get_home_dir();
+             }
+         ]];
+
+     bool dir_exists( string path )
+         [[
+             result = g_file_test( path , G_FILE_TEST_IS_DIR );
+         ]];
+
+     bool file_exists( string path )
+         [[
+             result = g_file_test( path , G_FILE_TEST_IS_REGULAR );
+         ]];
+
+     string build_path( ... )
+         [[
+             std::vector< gchar * > paths;
+
+             for( int i = 2; i <= lua_gettop( L ); ++i )
+             {
+                 paths.push_back( ( gchar * ) lua_tostring( L , i ) );
+             }
+
+             paths.push_back( 0 );
+
+             FreeLater free_later;
+
+             gchar * f = g_build_filenamev( & paths[0] );
+
+             free_later( f );
+
+             result = f;
+         ]];
+
+     bool file_copy(string src_file_name, string dest_file_name)
+         [[
+             GFile * source = g_file_new_for_path( src_file_name );
+             GFile * dest = g_file_new_for_path(dest_file_name);
+             result = g_file_copy ( source , dest , G_FILE_COPY_NONE, NULL, NULL, NULL, NULL);
+             g_object_unref( source );
+             g_object_unref( dest );
+         ]];
+
+    disable_exit()
+         [[
+             App::get( L )->get_context()->set_first_app_exits( false );
          ]];
 
     /*
-        Function: writefile
-
-        List file names of the given directory name and returns them as a table. 
-
-        Arguments:
-
-                file_name - The name of the file to write
-	        contents - The contents to write  
-	        overwrite - The boolean values which determine whether 
-			    the contents will be overwritten into the file 
-			    default is true 
+        "X Font Cursors"
+        These come from http://tronche.com/gui/x/xlib/appendix/b/
     */
 
-     writefile(string file_name, string contents, bool overwrite=true)
-         [[
-	     bool is_uri=false;
-             char * path=App::get(L)->normalize_path(file_name,&is_uri);
-             gchar * old_contents = NULL;
-             gsize old_length = 0;
+    const int CURSOR_BOTTOM_SIDE = 16;
+    const int CURSOR_CROSSHAIR = 34;
+    const int CURSOR_FLEUR = 52;
+    const int CURSOR_LEFT_PTR = 68;
+    const int CURSOR_LEFT_SIDE = 70;
+    const int CURSOR_RIGHT_SIDE = 96;
+    const int CURSOR_SB_H_DOUBLE_ARROW = 108;
+    const int CURSOR_SB_V_DOUBLE_ARROW = 116;
+    const int CURSOR_TOP_SIDE = 138;
+    const int CURSOR_XTERM = 152;
 
-             FreeLater free_later(path);
+    set_cursor( int shape )
+        [[
+#ifndef TP_CLUTTER_BACKEND_EGL
 
-             if ( path && ! is_uri )
-             {
-             	 gsize length = strlen(contents);
-		 if( overwrite == false && g_file_get_contents( path, & old_contents, & old_length, NULL ) )
-                 {
-                      length += old_length;
-		      if (old_length != 0) 
-		      {
-                           gchar new_contents[length];
-                           g_strlcpy(new_contents, old_contents, old_length+1);
-                           g_strlcat(new_contents, contents, length+1);
-                           g_file_set_contents(path, new_contents, length, NULL);
-		      } 
-		      else 
-		      {
-                           g_file_set_contents(path, contents, length, NULL);
-		      }
-                 } 
-		 else 
-		 {
-                 	   g_file_set_contents(path, contents, length, NULL);
-                           length += old_length;
-                 }
-             }
-          ]];
+#ifndef CLUTTER_WINDOWING_OSX
 
+            Display * display = clutter_x11_get_default_display();
 
+            Window window = clutter_x11_get_stage_window( CLUTTER_STAGE( clutter_stage_get_default() ) );
+
+            if ( shape >= 0 )
+            {
+                Cursor cursor = XCreateFontCursor( display , shape );
+
+                XDefineCursor( display , window , cursor );
+            }
+            else
+            {
+                XDefineCursor( display , window , None );
+            }
+
+#else // CLUTTER_WINDOWING_OSX
+
+            osx_cursor_glue_set( shape );
+
+#endif
+
+#endif
+        ]];
 }
 

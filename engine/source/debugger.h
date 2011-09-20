@@ -21,7 +21,7 @@ public:
 
 private:
 
-    static void command_handler( const char * command, const char * parameters, void * me );
+    static void command_handler( TPContext * context , const char * command, const char * parameters, void * me );
 
     void handle_command( const char * parameters );
 
@@ -29,16 +29,24 @@ private:
 
     void debug_break( lua_State * L, lua_Debug * ar );
 
+    StringVector * load_source_file( const char * file_name );
+
     App *           app;
     bool            installed;
 
     bool            break_next;
+
+    bool 			tracing;
 
     typedef std::pair< String, int > Breakpoint;
 
     typedef std::list< Breakpoint > BreakpointList;
 
     BreakpointList  breakpoints;
+
+    typedef std::map< String , StringVector > SourceMap;
+
+    SourceMap		source;
 };
 
 #endif // _TRICKPLAY_DEBUGGER_H

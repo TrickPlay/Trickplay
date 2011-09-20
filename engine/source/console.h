@@ -8,8 +8,9 @@ class Console : private Server::Delegate
 {
 public:
 
-    Console( TPContext * context, bool read_stdin, int port );
-    ~Console();
+    static Console * make( TPContext * context );
+
+    virtual ~Console();
 
     typedef int ( *CommandHandler )( const char * command, const char * parameters, void * data );
 
@@ -17,7 +18,13 @@ public:
 
     void attach_to_lua( lua_State * l );
 
+    void enable();
+
+    void disable();
+
 protected:
+
+    Console( TPContext * context, bool read_stdin, int port );
 
     gboolean read_data();
 
@@ -39,7 +46,7 @@ private:
     // Server delegate methods
 
     virtual void connection_accepted( gpointer connection, const char * remote_address );
-    virtual void connection_data_received( gpointer connection, const char * data , gsize );
+    virtual void connection_data_received( gpointer connection, const char * data , gsize , bool * );
 
     static void output_handler( const gchar * line, gpointer data );
 
@@ -49,9 +56,11 @@ private:
     TPContext       *       context;
     lua_State       *       L;
     GIOChannel       *      channel;
+    guint                   watch;
     GString        *        stdin_buffer;
     CommandHandlerList      handlers;
     std::auto_ptr<Server>   server;
+    bool                    enabled;
 };
 
 

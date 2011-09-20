@@ -2,7 +2,13 @@
 #include "socket.h"
 #include "util.h"
 
-Debug_OFF slog;
+//-----------------------------------------------------------------------------
+#define TP_LOG_DOMAIN   "SOCKET"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
+//-----------------------------------------------------------------------------
 
 #define INPUT_BUFFER_SIZE   1024
 #define INPUT_BUFFER_KEY    "tp-input-buffer"
@@ -111,7 +117,7 @@ void Socket::connect_async( GObject * source_object, GAsyncResult * res, gpointe
 
     if ( error )
     {
-        g_warning( "SOCKET CONNECT FAILED : %s", error->message );
+        tpwarn( "CONNECT FAILED : %s", error->message );
 
         g_clear_error( & error );
 
@@ -158,7 +164,7 @@ void Socket::start_async_read()
 
     g_assert( input_buffer );
 
-    g_input_stream_read_async( input, input_buffer, INPUT_BUFFER_SIZE, G_PRIORITY_DEFAULT, NULL, read_async, this );
+    g_input_stream_read_async( input, input_buffer, INPUT_BUFFER_SIZE, TRICKPLAY_PRIORITY, NULL, read_async, this );
 }
 
 //.............................................................................
@@ -177,7 +183,7 @@ void Socket::read_async( GObject * source_object, GAsyncResult * res, gpointer m
 
         if ( code != G_IO_ERROR_CLOSED )
         {
-            g_warning( "SOCKET READ ERROR : %s", error ? error->message : "SHORT READ" );
+            tpwarn( "READ ERROR : %s", error ? error->message : "SHORT READ" );
 
             if ( self->delegate )
             {
@@ -215,7 +221,7 @@ void Socket::start_async_write()
 
         g_object_set_data_full( G_OBJECT( output ), OUTPUT_BUFFER_KEY, output_buffer, ( GDestroyNotify) g_byte_array_unref );
 
-        g_output_stream_write_async( output, output_buffer->data, output_buffer->len, G_PRIORITY_DEFAULT, NULL, write_async, this );
+        g_output_stream_write_async( output, output_buffer->data, output_buffer->len, TRICKPLAY_PRIORITY, NULL, write_async, this );
 
         output_buffer = g_byte_array_new();
     }
@@ -233,7 +239,7 @@ void Socket::write_async( GObject * source_object, GAsyncResult * res, gpointer 
 
     gssize bytes_written = g_output_stream_write_finish( self->output, res, & error );
 
-    slog( "WROTE %" G_GSSIZE_FORMAT " BYTES", bytes_written );
+    tplog( "WROTE %" G_GSSIZE_FORMAT " BYTES", bytes_written );
 
     if ( error || bytes_written <= 0 )
     {
@@ -241,7 +247,7 @@ void Socket::write_async( GObject * source_object, GAsyncResult * res, gpointer 
 
         if ( code != G_IO_ERROR_CLOSED )
         {
-            g_warning( "SOCKET WRITE ERROR : %s", error ? error->message : "SHORT WRITE" );
+            tpwarn( "SOCKET WRITE ERROR : %s", error ? error->message : "SHORT WRITE" );
 
             if ( self->delegate )
             {
@@ -257,7 +263,7 @@ void Socket::write_async( GObject * source_object, GAsyncResult * res, gpointer 
     {
         GByteArray * write_buffer = ( GByteArray * ) g_object_get_data( G_OBJECT( self->output ), OUTPUT_BUFFER_KEY );
 
-        slog( "BYTES LEFT IN BUFFER %" G_GSSIZE_FORMAT , write_buffer->len - bytes_written );
+        tplog( "BYTES LEFT IN BUFFER %" G_GSSIZE_FORMAT , write_buffer->len - bytes_written );
 
         if ( bytes_written < gssize( write_buffer->len ) )
         {

@@ -43,10 +43,11 @@ Profiler::EntryMap Profiler::entries;
 
 Profiler::ObjectMap Profiler::objects;
 
-Profiler::Profiler( const char * _name )
+Profiler::Profiler( const char * _name , int _type )
 {
-
     name = _name;
+
+    type = _type;
 
     timer = g_timer_new();
 
@@ -87,15 +88,16 @@ Profiler::~Profiler()
 
     Entry & entry( entries[ name ] );
 
-    entry.first += 1;
-    entry.second += elapsed;
+    entry.count += 1;
+    entry.time += elapsed;
+    entry.type = type;
 
     lock( false );
 }
 
 bool Profiler::compare( std::pair< String, Entry > a, std::pair< String, Entry > b )
 {
-    return a.second.second > b.second.second;
+    return a.second.time > b.second.time;
 }
 
 void Profiler::dump( EntryVector & v )
@@ -112,17 +114,17 @@ void Profiler::dump( EntryVector & v )
 
     for( it = v.begin(); it != v.end(); ++it )
     {
-        time += it->second.second;
+        time += it->second.time;
     }
 
     for( it = v.begin(); it != v.end(); ++it )
     {
         g_info( "%40s %8d %8.1f %6.1f %6.1f %%",
                 it->first.c_str(),
-                it->second.first,
-                it->second.second,
-                it->second.second / it->second.first,
-                time ? it->second.second / time * 100.0 : 0.0 );
+                it->second.count,
+                it->second.time,
+                it->second.time / it->second.count,
+                time ? it->second.time / time * 100.0 : 0.0 );
     }
 
     g_info( "%40s          %8.1f", String( 40, '-' ).c_str(), time );
@@ -138,29 +140,35 @@ void Profiler::dump()
 
     lock( false );
 
-    EntryVector from_lua;
-    EntryVector to_lua;
+    typedef std::map< int , EntryVector > EntryTypeMap;
+
+    EntryTypeMap entries_by_type;
+
+    // Now separate them by type
 
     for ( EntryVector::iterator it = v.begin(); it != v.end(); ++it )
     {
-        if ( ! strncmp( it->first.c_str() , "on_" , 3 ) )
-        {
-            to_lua.push_back( *it );
-        }
-        else
-        {
-            from_lua.push_back( *it );
-        }
+        entries_by_type[ it->second.type ].push_back( *it );
     }
 
-    g_info( "CALLS FROM APP:" );
+    // Dump stats for each type
 
-    dump( from_lua );
+    for ( EntryTypeMap::iterator it = entries_by_type.begin(); it != entries_by_type.end(); ++it )
+    {
+        const char * t = "OTHER";
 
-    g_info( "" );
-    g_info( "CALLS TO APP (CALLBACKS):" );
+        switch( it->first )
+        {
+            case PROFILER_CALLS_FROM_LUA:   t = "CALLS FROM APP:"; break;
+            case PROFILER_CALLS_TO_LUA:     t = "CALLS TO APP (CALLBACKS):"; break;
+            case PROFILER_INTERNAL_CALLS:   t = "INTERNAL CALLS"; break;
+        }
 
-    dump( to_lua );
+        g_info( "" );
+        g_info( "%s"  , t );
+
+        dump( it->second );
+    }
 }
 
 void Profiler::reset()
@@ -184,9 +192,12 @@ void Profiler::destroyed( const char * name, gpointer p )
 
 void Profiler::dump_objects()
 {
+	g_info( "%24s  %9s %9s %9s" , "type" , "created" , "destroyed" , "alive" );
+	g_info( "%24s--%9s-%9s-%9s" , "--------------------" , "---------" , "---------" , "---------" );
+
     for( ObjectMap::const_iterator it = objects.begin(); it != objects.end(); ++it )
     {
-        g_info( "%24s  %5d %5d %5d",
+        g_info( "%24s  %9d %9d %9d",
                 it->first.c_str(),
                 it->second.created,
                 it->second.destroyed,

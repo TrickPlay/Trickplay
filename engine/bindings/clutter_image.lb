@@ -15,148 +15,123 @@ module clutter_image;
 [[
 
 //-----------------------------------------------------------------------------
-// A structure we attach to the image to keep track of extra stuff
 
-struct ImageExtra
-{
-	static ImageExtra * get( gpointer texture )
-	{
-		ImageExtra * result = ( ImageExtra * ) g_object_get_data( G_OBJECT( texture ), "tp-image-extra" );
-		
-		if ( ! result )
-		{
-			result = g_new0( ImageExtra , 1 );
-			
-			g_object_set_data_full( G_OBJECT( texture ), "tp-image-extra", result, g_free );
-		}
-		
-		return result;
-	}
-	
-	int constructing;
-	int loaded;
-	int async;
-};
-
-//-----------------------------------------------------------------------------
-// ThreadPool task that decodes images
-
-class DecodeTask : public ThreadPool::Task
+class ImageLoadedFromCacheAction : public Action
 {
 public:
 
-	DecodeTask( const char * _path, ClutterTexture * _texture )
-	:
-		path( _path ),
-		texture( _texture ),
-		image( NULL )
-	{
-		g_object_ref( G_OBJECT( texture ) );		
-	}
+    ImageLoadedFromCacheAction( ClutterTexture * _texture , CoglHandle _handle , const JSON::Object _tags )
+    :
+        texture( CLUTTER_TEXTURE( g_object_ref( _texture ) ) ),
+        handle( cogl_handle_ref( _handle ) ),
+        tags( _tags )
+    {
+    }
+    
+    ~ImageLoadedFromCacheAction()
+    {
+        g_object_unref( texture );
+        cogl_handle_unref( handle );
+    }
+    
+protected:
 
-	DecodeTask( const Network::Response & _response, ClutterTexture * _texture )
-	:
-		response( _response ),
-		texture( _texture ),
-		image( NULL )
-	{
-		g_object_ref( G_OBJECT( texture ) );
-	}
-	
-	~DecodeTask()
-	{
-		g_object_unref( G_OBJECT( texture ) );
+    bool run()
+    {
+        ImageExtra * extra = ImageExtra::get( texture );
+        
+        extra->loaded = true;
+        extra->tags = tags;
+        
+        clutter_texture_set_cogl_texture( texture , handle );
+        
+        Images::add_to_image_list( texture );
+        
+        g_signal_emit_by_name( G_OBJECT( texture ) , "load-finished" , 0 );
 
-		if ( image )
-		{
-			delete image;
-		}
-	}
-	
-	virtual void process()
-	{
-		if ( ! path.empty() )
-		{
-			image = Image::decode( path.c_str() ); 
-		}
-		else
-		{
-	    	image = Image::decode( response.body->data, response.body->len, response.get_header( "Content-Type" ) );
-	    }
-	}
-	
-	virtual void process_main_thread()
-	{
-		if ( ! image )
-		{
-			GError * error = NULL;
-		
-		    g_set_error(&error,
-				CLUTTER_TEXTURE_ERROR,
-				CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-				"Failed to load texture data");
-				
-			g_warning("FAILED TO LOAD IMAGE : %s",error->message);
-			
-			g_signal_emit_by_name( G_OBJECT( texture ), "load-finished", error );
-			
-			g_clear_error( &error );
-		}
-		else
-		{
-			ImageExtra::get( texture )->loaded = TRUE;
+        return false;
+    }
+    
+private:
 
-			Images::load_texture( texture, image );
-		}		
-	} 
-	
-	static void push( DecodeTask * task )
-	{
-		static ThreadPool * thread_pool = NULL;
-		
-		if ( ! thread_pool )
-		{
-			thread_pool = new ThreadPool( 2 );
-		}
-		
-		thread_pool->push( task );
-	}
-	
-	String				path;
-	Network::Response	response;
-	ClutterTexture *  	texture;
-	Image *		      	image;
+    ClutterTexture *    texture;
+    CoglHandle          handle;
+    JSON::Object        tags;
 };
 
 //-----------------------------------------------------------------------------
-// Callback for network requests
 
-void Image_response_callback(const Network::Response & response,gpointer texture)
+class ImageLoadedAsyncAction : public Action
 {
-    if ( response.failed )
+public:
+
+    static void image_load_callback( Image * image , gpointer me )
     {
-    	GError * error=NULL;
+        ( ( ImageLoadedAsyncAction * ) me )->image_loaded( image ); 
+    }
+
+    ImageLoadedAsyncAction( TPContext * _context , ClutterTexture * _texture , const String & _cache_key )
+    :
+        context( _context ),
+        texture( CLUTTER_TEXTURE( g_object_ref( _texture ) ) ),
+        cache_key( _cache_key )
+    {
+    }
     
-		g_set_error(&error,
-		    CLUTTER_TEXTURE_ERROR,
-		    CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
-		    "Request failed : %s" , response.status.c_str() );	
-
-		g_warning("FAILED TO LOAD IMAGE : %s",error->message);
-	
-		g_signal_emit_by_name(G_OBJECT(texture),"load-finished",error);
-	
-		g_clear_error(&error);    
-    }
-    else
+    ~ImageLoadedAsyncAction()
     {
-    	DecodeTask::push( new DecodeTask( response , CLUTTER_TEXTURE( texture ) ) );    			
+        g_object_unref( texture );
     }
-}
+    
+private:
 
-]]
+    bool run()
+    {
+        return false;
+    }
+    
+    void image_loaded( Image * image )
+    {
+        if ( ! image )
+        {
+            GError * error = NULL;
+    
+            g_set_error( & error,
+                CLUTTER_TEXTURE_ERROR,
+                CLUTTER_TEXTURE_ERROR_BAD_FORMAT,
+                "Failed to load texture data");
+    
+            g_warning("FAILED TO LOAD IMAGE : %s",error->message);
+    
+            g_signal_emit_by_name( G_OBJECT( texture ), "load-finished", error );
+    
+            g_clear_error( & error );
+            
+            return;
+        }
 
-[[
+        ImageExtra * extra = ImageExtra::get( texture );
+        
+        extra->loaded = true;
+        extra->tags = image->get_tags();
+
+        Images::load_texture( texture, image );
+
+        delete image;
+        
+        if ( ! cache_key.empty() )
+        {
+            Images::cache_put( context , cache_key , clutter_texture_get_cogl_texture( texture ) , extra->tags );
+        }
+    }
+
+    TPContext *         context;
+    ClutterTexture *    texture;
+    String              cache_key;
+
+};
+
+//-----------------------------------------------------------------------------
 
 bool load_image( lua_State * L, ClutterTexture * texture )
 {
@@ -174,6 +149,12 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 		return false;
 	}
 	
+	// Clear existing tags
+	
+	extra->tags = JSON::Object();
+	
+	extra->loaded = false;
+	
 	//.........................................................................
 	// Get the image source 
 	
@@ -184,44 +165,71 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 		return false;
 	}
 	
-	//.........................................................................
-	// Sanitize it, convert it to an app path or determine whether it is a valid
-	// uri.
-	
+    //.........................................................................
+    
     App * app = App::get( L );
-
+    
     bool is_uri = false;
     
-    char * path = app->normalize_path( src, & is_uri );
+    char * path = app->normalize_path( src , & is_uri );
     
-    if ( ! path ) 
+    if ( ! path )
     {
-    	return false;
+        return false;
     }
     
     FreeLater free_later( path );
-
+    
+    String key;
+    
+    CoglHandle cached_handle = COGL_INVALID_HANDLE;
+    
+    JSON::Object cached_tags;
+    
+    if ( ! is_uri )
+    {
+        key = app->get_id() + ":" + src;
+        
+        cached_handle = Images::cache_get( key , cached_tags );
+    }
+    
 	//.........................................................................
 	// Synchronous loading
 	
 	if ( ! extra->async )
 	{
-		bool result = false;
-		
-		if ( is_uri )
-		{
-			Network::Request request( app->get_user_agent(), path );
+        if ( COGL_INVALID_HANDLE != cached_handle )
+        {
+            clutter_texture_set_cogl_texture( texture , cached_handle );
+            
+            Images::add_to_image_list( texture ); 
+            
+            extra->loaded = true;
+            
+            if ( extra->read_tags )
+            {
+                extra->tags = cached_tags;
+            }
+            
+            return true;      
+        }
+	     
+	    Image * image = app->load_image( src , extra->read_tags );
 
-			Network::Response response = app->get_network()->perform_request( request, app->get_cookie_jar() );
-			
-			if ( ! response.failed )
-			{
-				result = Images::load_texture( texture, response.body->data, response.body->len, response.get_header( "Content-Type" ) );
-			}
-		}
-		else
+		bool result = image != 0;
+		
+		if ( result )
 		{
-			result = Images::load_texture( texture, path );
+		    Images::load_texture( texture , image );
+        
+            extra->tags = image->get_tags();		    
+
+		    delete image;
+		    
+		    if ( ! key.empty() )
+		    {
+		        Images::cache_put( app->get_context() , key , clutter_texture_get_cogl_texture( texture ) , extra->tags );
+		    }
 		}
 		
 		extra->loaded = result;
@@ -232,27 +240,22 @@ bool load_image( lua_State * L, ClutterTexture * texture )
 	//.........................................................................
 	// Asynchronous loading
 	
-	if ( is_uri )
-	{
-		Network::Request request( app->get_user_agent(), path );
-		
-		g_object_ref( G_OBJECT( texture ) );
-		    
-		app->get_network()->perform_request_async(
-			request,
-			app->get_cookie_jar(),
-			Image_response_callback,
-			texture,
-			g_object_unref );		    
-	}
-	else
-	{
-		DecodeTask::push( new DecodeTask( path, texture ) );
-	} 
-	
-	extra->loaded = false;
-	
-	return true;
+    extra->loaded = false;
+
+    if ( COGL_INVALID_HANDLE != cached_handle )
+    {
+        // If we found it in the cache, we still need to load it asynchronously,
+        // so that we don't deviate from the async behavior - so that on_loaded
+        // will be called 'later'.
+        
+        Action::post( new ImageLoadedFromCacheAction( texture , cached_handle , extra->read_tags ? cached_tags : JSON::Object() ) );
+        
+        return true;
+    }
+
+    Action * action = new ImageLoadedAsyncAction( app->get_context() , texture , key );
+    
+	return app->load_image_async( src , extra->read_tags , ImageLoadedAsyncAction::image_load_callback , action , Action::destroy );
 } 
 
 void Image_on_loaded(ClutterTexture*self,gpointer error,lua_State*L);
@@ -262,12 +265,13 @@ void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*
 /*
     Class: Image
     
-    Images let you load and display images...wether from local files or URIs. They have
-    all the functions and methods of <UIElement>.
+    The Image data type handles operations associated with image files, such as 
+    their loading and display.
     
-    All images are, by default, loaded synchronously; you have to set the <async> property
-    to true if you want to override that behavior. If you do, you can attach a function to
-    the <on_loaded> event. This will tell you when, and if, the image data is loaded.   
+    In addition to the properties and functions described on this page, the 
+    Image data type also supports all the properties and functions defined in 
+    the <UIElement> interface.
+
 */
 
 class Image [[ClutterActor*]] actor
@@ -298,30 +302,41 @@ class Image [[ClutterActor*]] actor
     
     	Property: src
     	
-    	This is a string that specifies where the image will be loaded from. It can
-    	be a path into your app bundle or a URI. 
+    	The src property is a string that references an image file. The string
+    	may refer to either a path in your application bundle or a URI.
     	
-    	If the <async> property is not set or is false, the image will be loaded 
-    	immediately after you set this property. You can then consult the <loaded> 
-    	property to make sure it was loaded succesfully.
+    	Setting the src property also begins the process of loading the image.
+    	By default, image loading is performed synchronously. To determine the
+    	success or failure of a synchronous load, you can check the <loaded> 
+    	property immediately after setting the src property.
     	
-    	If the <async> property is set to true, the image will begin loading in 
-    	the background and the <on_loaded> event will fire when it is finished. In the
-    	meantime, the <loaded> property will be false. If you set the src more than once
-    	before you receive the <on_loaded> event, there are no guarantees as to which 
-    	one will be loaded last, so be careful.
+    	Asynchronous image loading is supported by setting the async
+    	property prior to setting the src property. For instructions on 
+    	handling asynchonous image loading, refer to the <async> property.
     	
-    	(code)
-    	local my_image = Image()
-    	my_image.src = "assets/foo.png"
-    	(end)
+    	*Default Setting:* nil
     	
-    	or
+    	*Examples:* Create an Image object and load its associated image synchronously
     	
     	(code)
-    	local my_image = Image{ src = "assets/foo.png" }
+    	local myImage = Image()
+    	myImage.src = "assets/images/foo.png"		-- load image synchronously
+    	if myImage.loaded == false then
+    	  -- Image not loaded; insert error-handling code here
+    	end
     	(end)
-    
+    	
+    	(code)
+    	-- Same as above, but combining object creation and
+    	-- the setting of the src property in a single statement
+    	local myImage = Image{ src = "assets/images/foo.png" }
+    	if myImage.loaded == false then
+    	  -- Insert error-handling code here
+    	end
+    	(end)
+    	
+    	*See Also:* the <read_tags>, <loaded>, and <async> properties
+    	    
     */
     
     string src
@@ -335,10 +350,185 @@ class Image [[ClutterActor*]] actor
 		]];
 	
 	/*
+		Property: loaded
+		
+		The boolean loaded property indicates the success/true or failure/false
+		of the image's synchronous-load operation.
+		
+		The loaded property will also be set to false while an image is loading
+		asynchronously. This may make it tempting to intermittently poll the 
+		loaded property to determine if the image has finished loading, but you 
+		should not do this because the loaded property can also be set to false 
+		due to the load operation failing; in such a scenario, your polling 
+		application will wait forever for the property to become true. Instead, 
+		you should set up an on_loaded() event handler to notify your 
+		application when an asynchronous-load operation has completed.
+		
+		*Default Setting:* false
+		
+		*Example:* To see the loaded property in use, check the code example 
+		given in the <src> property.
+		
+		*See Also:* the <src> property
+	*/	
+	
+	readonly bool loaded
+		[[
+			loaded = ImageExtra::get( self )->loaded;
+		]];
+		
+	/*
+		Property: async
+		
+		The async property is a boolean value that determines whether the image
+		is loaded synchronously (async == nil or async == false) or 
+		asynchronously (async == true).
+		
+		Asynchronously-loaded images enable your application to continue to run 
+		while the image is loading. After the image is completely loaded, your 
+		application is notified by firing the Image object's on_loaded() event 
+		handler. The event handler can then perform any applicable operations, 
+		such as resize or display the image.
+		
+		After starting one asynchronous load, it is possible for your 
+		application to begin a second image-load  (synchronous or 
+		asynchronous) before the first load completes. There is no guarantee, 
+		however, that load operations will complete in the same order in which 
+		they were started; it is possible that the second load will finish 
+		before the first load. Therefore, your code should not contain any
+		assumptions about the order in which images finish loading.
+		
+		To load the image asynchronously, the async property must be initialized
+		prior to beginning the load operation. The load operation is then started
+		by setting the src property. The example code below demonstrates the required
+		operations.
+		
+		*Default Setting:* false, i.e., images are loaded synchronously
+		
+		*Example:* Load an image asynchronously
+		
+		(code)
+		-- Create an Image object
+		local myImage = Image()
+		myImage.async = true		-- will load image asynchronously
+
+		-- Define event handler
+		function on_loadedHandler( loadedImage, failed )
+		  -- Best practice is to unhook the handler after it has served its purpose
+		  loadedImage.on_loaded = nil
+
+		  if failed then
+		    -- Image did not load; insert handling code here
+		  else
+		    -- Image is loaded; insert any applicable operations here
+		  end
+		end
+
+		-- Hook our event handler to the Image object
+		myImage.on_loaded = on_loadedHandler
+
+		-- Start loading the image asynchronously
+		myImage.src = "assets/images/SplashScreen.png"
+		(end)
+		
+		*See Also:* the <on_loaded> event handler, the <src> property
+	*/
+	
+    bool async
+		[[
+			async=ImageExtra::get( self )->async;
+		]]
+		[[
+			ImageExtra::get( self )->async = async;
+		]];
+	
+	/*
+		Property: read_tags
+		
+		The read_tags property is a boolean value specifying whether or not to store any Exif (Exchangable image file format) tags contained in the image file (true = save Exif tags). Exif tags are read while the image is loading, so the read_tags property must be set before loading the image. After the image has loaded, stored Exif tags can be accessed through the <tags> property.
+		
+		Exif tags that have a format of "undefined" are never stored. Also tags of type "long" that are actually pointers to data are never stored.
+		
+		*Default Setting:* false, i.e., do not store Exif tags
+		
+		*Code Example:* Load an image, specifying that Exif tags should be saved.
+		
+			(code)
+	    	myImage = Image{ src = "assets/images/foo.jpg", read_tags = true }
+    		if myImage.loaded == false then
+    		  -- Insert error-handling code here
+    		end		
+			(end)
+		
+		*See Also:* the <tags> property
+	*/
+	
+	bool read_tags
+	    [[
+            ImageExtra * extra = ImageExtra::get( self );
+	        read_tags = extra->read_tags; 
+	    ]]
+	    [[
+            ImageExtra * extra = ImageExtra::get( self );
+            extra->read_tags = read_tags ? 1 : 0;	        
+	    ]];
+	
+    /*
+        Property: tags
+        
+        The tags property is a table containing any Exif (Exchangable image file format) tags stored in the loaded image. If the storage of Exif tags was not enabled (via the <read_tags> property) or if the image file contained no tags then the tags table will be empty.
+        
+   		Exif tags that have a format of "undefined" are not stored. Also tags of type "long" that are actually pointers to data are not stored.
+        
+        *Table Format:* Each table entry contains a string tagName and an associated tagValue. The tagValue data type will be numeric, a string or a table, depending upon the value.
+        
+        *Default Setting:* {}, i.e., an empty table
+        
+        *Code Example:* Output image tag names and values to the console        
+
+			(code)
+			-- Load an image, including its Exif tags
+			myImage = Image{ src = "assets/images/foo.jpg", read_tags = true }
+			
+			-- If the image loaded successfully, dump all the Exif tags to the console
+			if( myImage.loaded ) then
+				dumptable( myImage.tags )
+			end
+			(end)
+        
+        *See Also:* the <read_tags> property
+    */		
+    
+    readonly table tags
+        [[
+            const JSON::Object & tags( ImageExtra::get( self )->tags );
+            
+            JSON::to_lua( L , tags );
+            
+            if ( lua_isnil( L , -1 ) )
+            {
+                lua_pop( L , 1 );
+                lua_newtable( L );
+            }
+        ]];
+	
+	/*
 		Property: base_size
 		
-		This is a table containing the width and height of the image as it was when 
-		you loaded it; not its current dimension on screen.
+		The base_size is a table that contains two integer values that specify
+		the image's original width and height, in that order, in pixels.
+		
+		The base_size property is set automatically as part of the image-loading
+		operation. Its values can be retrieved, but they cannot be set.
+		
+		Notice that the image's display width and height may change during
+		the execution of your application, but the base_size values will remain
+		set to the image's original size.
+		
+		*Default Setting:* Before the image has been loaded: nil.
+		
+		*See Also:* the <src> property
+		
 	*/
 	
     readonly table base_size
@@ -353,6 +543,15 @@ class Image [[ClutterActor*]] actor
 		    lua_rawseti(L,-2,2);
 		]];
 	
+	/*
+	  	*** FOR INTERNAL USE ONLY ***
+	  
+	  	The sync_size property is a boolean value specifying whether or not the texture's preferred size should be the same as the image size.
+	  	
+	  	The Clutter "preferred size"-related functions seem intended for developers wishing to create their own layout manager. The TrickPlay SDK does not currently support the creation of alternative layout managers.
+	  
+	*/
+	  
     bool sync_size
 		[[
 			sync_size=clutter_texture_get_sync_size(CLUTTER_TEXTURE(self));
@@ -362,14 +561,50 @@ class Image [[ClutterActor*]] actor
 		]];
 	
 	/*
+		*** FOR INTERNAL USE ONLY ***
+		
+		The keep_aspect_ratio property is a boolean value specifying whether or not the texture's preferred size should preserve the aspect ratio of the image.
+		
+		The Clutter "preferred size"-related functions seem intended for developers wishing to create their own layout manager. The TrickPlay SDK does not currently support the creation of alternative layout managers.
+		
+	*/
+
+    bool keep_aspect_ratio
+		[[
+			keep_aspect_ratio=clutter_texture_get_keep_aspect_ratio(CLUTTER_TEXTURE(self));
+		]]
+		[[
+			clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);
+		]];
+	
+	/*
 		Property: tile
 		
-		This property is a table of two boolean values which determine whether the
-		image will be tiled horizontally and vertically to fill its width and height.
+		The tile property is a table containing two boolean values that specify 
+		whether the image should be tiled horizontally and/or vertically. An 
+		image may be tiled if its actual size is less than the size of the area 
+		it needs to fill.
 		
-		So, for example, if you load an image that is 50 pixels wide, set its
-		width to 200 and tile to { true, fale }, the image will be tiled 4 times, to fill
-		the 200 pixels. 
+		The image area to fill is defined by setting the Image object's 
+		width and height properties.
+
+		If tiling is activated, the image will tile as many times as necessary 
+		to fill the area. For example, an image that is 50 pixels wide and 
+		whose width property is 200 pixels will tile four times to fill the 
+		entire width. Given the same scenario, but with tiling not activated, 
+		the image will display one time and the remaining space will remain 
+		empty.
+		
+		*Default Setting:* tile = { false, false }
+		
+		*Example:* Activate horizontal tiling
+		
+		(code)
+		mImage.tile = { true, false }	-- horizontal tiling active, vertical tiling inactive
+		(end)
+		
+		*See Also:* the <UIElement.width> and <UIElement.height> properties
+		
 	*/
 	
     table tile
@@ -391,45 +626,11 @@ class Image [[ClutterActor*]] actor
 		    lua_pop(L,2);
 		]];
 	
-    bool keep_aspect_ratio
-		[[
-			keep_aspect_ratio=clutter_texture_get_keep_aspect_ratio(CLUTTER_TEXTURE(self));
-		]]
-		[[
-			clutter_texture_set_keep_aspect_ratio(CLUTTER_TEXTURE(self),keep_aspect_ratio);
-		]];
-	
-	/*
-		Property: async
-		
-		This is a boolean value that determines how the image is loaded. If set to true, the
-		image will be loaded in the background. You should set this before you set the <src> 
-		property.
-	*/
-	
-    bool async
-		[[
-			async=ImageExtra::get( self )->async;
-		]]
-		[[
-			ImageExtra::get( self )->async = async;
-		]];
-	
-	/*
-		Property: loaded
-		
-		This will be true if an image was loaded successfully. It can be false if the last image
-		failed to load or while a new image is being loaded asynchronously. 
-	*/	
-	
-	readonly bool loaded
-		[[
-			loaded = ImageExtra::get( self )->loaded;
-		]];
-	
     bool load_from_data(lstring data)
 		[[
 		    result = Images::load_texture(CLUTTER_TEXTURE(self),(gpointer)data,data_len);
+
+            g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup( "[data]" ) , g_free);
 		]];
 	
     /*
@@ -461,6 +662,8 @@ class Image [[ClutterActor*]] actor
 	                	
 	                	delete image;
 	
+                        g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup_printf( "[icon:%s]" , app_id ) , g_free);
+
 	                    result = true;
 	                }
 				}	              
@@ -469,18 +672,35 @@ class Image [[ClutterActor*]] actor
         ]];
 	
 	/*
-		Event: on_loaded
+		Event Handler: on_loaded
 		
-		If an image is loaded asynchronously, this event will fire when it is done loading
-		or if it fails to load.
+		The on_loaded() event handler is fired when an asynchronously-loaded 
+		image has finished loading.
 		
-		It is recommended that you detach this event when you are done with it by setting
-		it to nil.
+		*Prototype:*
 		
-		Arguments:
+		(code)
+		void on_loaded( Image loadedImage, boolean failed )
+		(end)
 		
-			image - The image that finished loading.
-			failed - A boolean value that is true if the image failed to load.
+		*Arguments:*
+		
+		loadedImage - the Image object that has finished loading
+		failed - boolean value indicating failure/true or success/false of the 
+		load operation
+		
+		*Return Value:* None
+		
+		When you are finished with the event handler, it is a recommended best
+		practice to set it to nil.
+		
+		*Default Setting:* nil
+		
+		*Example:* To see a code sample that uses the on_loaded() event handler,
+	    refer to the <async> property.
+		
+		*See Also:* the <async> property, the <src> property
+		
 	*/
 	
     callback on_loaded
@@ -494,15 +714,67 @@ class Image [[ClutterActor*]] actor
 		]];
 	
 	/*
-		Event: on_size_changed
+		Event Handler: on_size_changed
 		
-		This event fires every time the image size changes.
+		The on_size_changed() event handler is fired in the following 
+		situations: (1) after the object's first image is loaded, and (2) after 
+		the object loads a subsequent image whose size differs from the 
+		previously-loaded image.
 		
-		Arguments:
+		The event handler is *not* fired by changing the image's display size, 
+		for example, by scaling the image or altering its width or height 
+		properties in any way. The handler is also not fired if a 
+		subsequently-loaded image is the same size as the previously-loaded 
+		image.
 		
-			image - The image that the event applies to.
-			width - The new width of the image.
-			height - The new height of the image.
+		*Prototype:*
+		
+		(code)
+		void on_size_changed( Image changedImage, int newWidth, int newHeight )
+		(end)
+		
+		*Arguments:*
+		
+		changedImage - the Image object that has changed size
+		newWidth - integer width in pixels of the loaded image
+		newHeight - integer height in pixels of the loaded image
+
+		*Return Value:* None
+		
+		*Default Setting:* nil
+		
+		*Example:*
+
+		(code)
+		-- Create an Image object
+		local myImage = Image()
+
+		-- Define event handler
+		function on_changeHandler( changedImage, newWidth, newHeight )
+		  -- Perform any desired operations here. For example...
+
+		  -- Get current tile settings
+		  local tile = changedImage.tile
+
+		  -- Will new size fit horizontally in display area?
+		  if( newWidth < changedImage.width )then
+		    -- No, image is too small, so tile the image horizontally
+		    tile[ 1 ] = true
+		  end
+
+		  -- Will image fit vertically?
+		  if( newHeight < changedImage.height )then
+		    -- No, so tile the image vertically
+		    tile[ 2 ] = true
+		  end
+
+		  -- Apply any changed tile settings
+		  changedImage.tile = tile
+		end
+
+		-- Hook our event handler into the Image object
+		myImage.on_size_changed = on_changeHandler
+        (end)
 	*/
 	
     callback on_size_changed
@@ -534,3 +806,72 @@ void Image_on_size_changed(ClutterTexture*self,gint width,gint height,lua_State*
 }
 ]]
 
+class ImageCache [[ void * ]]
+{
+    ImageCache( )
+        [[
+            lb_construct_empty();
+        ]];
+        
+    Image get( string key )
+        [[
+            JSON::Object tags;
+            
+            String k = App::get( L )->get_id() + ":" + key;
+            
+            CoglHandle handle = Images::cache_get( k , tags );
+            
+            if ( COGL_INVALID_HANDLE == handle )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_getglobal( L , "Image" );
+
+                lua_call( L , 0 , 1 );
+
+                ClutterTexture * t = CLUTTER_TEXTURE( UserData::get( L , lua_gettop( L ) )->get_master() );
+
+                clutter_texture_set_cogl_texture( t , handle );
+                
+                Images::add_to_image_list( t );
+
+                g_object_set_data_full( G_OBJECT( t ), "tp-src", g_strdup( key ) , g_free );
+                
+                ImageExtra * extra = ImageExtra::get( t );
+                
+                extra->tags = tags;
+                extra->loaded = true;
+            }
+        ]];        
+        
+    bool has( string key )
+        [[
+            String k = App::get( L )->get_id() + ":" + key;
+            
+            result = Images::cache_has( k );
+        ]];        
+
+    put( string key , Image image )
+        [[
+            if ( ClutterActor * actor = ClutterUtil::user_data_to_actor( L , image ) )
+            {
+                if ( CLUTTER_IS_TEXTURE( actor ) )
+                {
+                    ClutterTexture * t = CLUTTER_TEXTURE( actor );
+                    
+                    CoglHandle handle = clutter_texture_get_cogl_texture( t );
+                    
+                    if ( COGL_INVALID_HANDLE != handle )
+                    {
+                        String k = App::get( L )->get_id() + ":" + key;
+                        
+                        ImageExtra * extra = ImageExtra::get( t );
+                        
+                        Images::cache_put( App::get( L )->get_context() , k , handle , extra->tags );             
+                    }  
+                }
+            }
+        ]];            
+}
