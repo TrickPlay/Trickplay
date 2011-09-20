@@ -86,6 +86,7 @@ INCLUDE_MODULE	+= cairo
 INCLUDE_MODULE	+= cares
 INCLUDE_MODULE	+= clutter-eglnative-1.0
 INCLUDE_MODULE	+= curl
+INCLUDE_MODULE	+= exif
 INCLUDE_MODULE	+= expat
 INCLUDE_MODULE	+= fontconfig
 INCLUDE_MODULE	+= freetype
