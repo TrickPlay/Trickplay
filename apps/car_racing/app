@@ -1,8 +1,8 @@
 app=
 {
     id          = "com.trickplay.racing",
-    release     = "1",
-    version     = ".1",
+    release     = "2",
+    version     = "1.0",
     name        = "Racing",
     author      = "Francesco Alex Indaco",
     copyright   = "© Trickplay Inc."
