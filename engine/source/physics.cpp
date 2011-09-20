@@ -5,16 +5,21 @@
 #include "lb.h"
 #include "util.h"
 
+//-----------------------------------------------------------------------------
+#define TP_LOG_DOMAIN   "PHYSICS"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
+//.............................................................................
+
 namespace Physics
 {
-
-static Debug_OFF plog;
-
-//.............................................................................
 
 World::World( lua_State * _L , ClutterActor * _screen , float32 _pixels_per_meter )
 :
     ppm( _pixels_per_meter ),
+    z_for_y( false ),
     global_callbacks( 0 ),
     L( _L ),
     world( b2Vec2( 0.0f , 10.0f ) , true ),
@@ -234,7 +239,7 @@ int World::create_body( int element , int properties , const char * metatable )
 
     if ( ! body )
     {
-        g_warning( "FAILED TO CREATE PHYSICS BODY" );
+        tpwarn( "FAILED TO CREATE PHYSICS BODY" );
         return 0;
     }
 
@@ -981,7 +986,7 @@ Body::Body( World * _world , b2Body * _body , ClutterActor * _actor )
     mapped_handler = g_signal_connect_after( G_OBJECT( actor ) , "notify::mapped" , ( GCallback ) actor_mapped_notify , this );
 
 
-    plog( "CREATED BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
+    tplog( "CREATED BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
 }
 
 //.............................................................................
@@ -989,7 +994,7 @@ Body::Body( World * _world , b2Body * _body , ClutterActor * _actor )
 
 Body::~Body()
 {
-    plog( "DESTROYING BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
+    tplog( "DESTROYING BODY %d : %p : b2body %p : actor %p" , handle , this , body , actor );
 
     if ( body )
     {
@@ -1037,11 +1042,11 @@ Body::~Body()
 
 void Body::body_destroyed( b2Body * body )
 {
-    plog( "B2BODY BEING DESTROYED" );
+    tplog( "B2BODY BEING DESTROYED" );
 
     if ( Body * self = Body::get( body ) )
     {
-        plog( "CLEARING B2BODY %d : %p : b2body %p : actor %p" , self->handle , self , self->body , self->actor );
+        tplog( "CLEARING B2BODY %d : %p : b2body %p : actor %p" , self->handle , self , self->body , self->actor );
 
         if ( self->actor )
         {
@@ -1090,9 +1095,19 @@ void Body::synchronize_actor()
     {
         const b2Vec2 & pos( body->GetPosition() );
 
-        clutter_actor_set_position( actor , world->world_to_screen( pos.x ) , world->world_to_screen( pos.y ) );
+        if ( world->z_for_y )
+        {
+			clutter_actor_set_x( actor , world->world_to_screen( pos.x ) );
+			clutter_actor_set_depth( actor , - world->world_to_screen( pos.y ) );
 
-        clutter_actor_set_rotation( actor , CLUTTER_Z_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
+			clutter_actor_set_rotation( actor , CLUTTER_Y_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
+        }
+        else
+        {
+			clutter_actor_set_position( actor , world->world_to_screen( pos.x ) , world->world_to_screen( pos.y ) );
+
+			clutter_actor_set_rotation( actor , CLUTTER_Z_AXIS , World::radians_to_degrees( body->GetAngle() ) , 0 , 0 , 0 );
+        }
     }
 }
 
@@ -1114,10 +1129,20 @@ void Body::synchronize_body()
     {
         gfloat x;
         gfloat y;
+        float32 angle;
 
-        clutter_actor_get_position( actor , & x , & y );
+        if ( world->z_for_y )
+        {
+        	x = clutter_actor_get_x( actor );
+        	y = -clutter_actor_get_depth( actor );
+        	angle = clutter_actor_get_rotation( actor , CLUTTER_Y_AXIS , 0 , 0 , 0 );
+        }
+        else
+        {
+        	clutter_actor_get_position( actor , & x , & y );
 
-        float32 angle = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , 0 , 0 , 0 );
+        	angle = clutter_actor_get_rotation( actor , CLUTTER_Z_AXIS , 0 , 0 , 0 );
+        }
 
         x = world->screen_to_world( x );
         y = world->screen_to_world( y );
