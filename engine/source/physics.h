@@ -125,6 +125,8 @@ namespace Physics
 
         float32   ppm;  // Pixels per meter
 
+        bool z_for_y;
+
     private:
 
         //.........................................................................
