@@ -1,5 +1,0 @@
-Topic: Create a New Project
-
-Run the SDK Visual Editor. The New Project window displays.
-(see images/EdNewProject.png)
-In the New Project field, enter Tutorial, then click the Open button. A new project is created and an empty Editor workspace is displayed.

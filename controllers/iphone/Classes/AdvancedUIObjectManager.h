@@ -8,31 +8,54 @@
 
 #import <Foundation/Foundation.h>
 #import <YAJLiOS/YAJL.h>
-#import "GestureViewController.h"
-#import "TrickplayImage.h"
-#import "TrickplayRectangle.h"
+#import "TPAppViewController.h"
+#import "TrickplayTimeline.h"
 
-@interface AdvancedUIObjectManager : NSObject <AdvancedUIDelegate> {
+@class TrickplayUIElement;
+@class TrickplayGroup;
+
+@interface AdvancedUIObjectManager : NSObject <AdvancedUIDelegate, SocketManagerDelegate, CommandInterpreterAdvancedUIDelegate> {
     NSMutableDictionary *rectangles;
     NSMutableDictionary *images;
     NSMutableDictionary *textFields;
+    NSMutableDictionary *webTexts;
     NSMutableDictionary *groups;
+    NSUInteger currentID;
     
     ResourceManager *resourceManager;
+    SocketManager *socketManager;
     
-    UIView *view;
+    TrickplayTimeline *timeLine;
+    
+    NSString *hostName;
+    NSInteger port;
+    
+    TrickplayGroup *view;
+    
+    TPAppViewController *appViewController;
 }
 
 @property (nonatomic, retain) NSMutableDictionary *rectangles;
 @property (nonatomic, retain) NSMutableDictionary *images;
 @property (nonatomic, retain) NSMutableDictionary *textFields;
+@property (nonatomic, retain) NSMutableDictionary *webTexts;
 @property (nonatomic, retain) NSMutableDictionary *groups;
 
 @property (nonatomic, retain) ResourceManager *resourceManager;
 
-- (id)initWithView:(UIView *)aView resourceManager:(ResourceManager *)aResourceManager;
+@property (assign) TPAppViewController *appViewController;
 
-- (void)createObject:(NSString *)JSON_String;
-- (void)destroyObject:(NSString *)JSON_String;
+- (id)initWithView:(TrickplayGroup *)aView resourceManager:(ResourceManager *)aResourceManager;
+
+- (void)setupServiceWithPort:(NSInteger)p
+                    hostname:(NSString *)h;
+- (BOOL)startServiceWithID:(NSString *)ID;
+
+- (void)storeObject:(TrickplayUIElement *)object;
+
+- (void)clean;
+
+// New protocol
+- (TrickplayUIElement *)findObjectForID:(NSString *)ID;
 
 @end

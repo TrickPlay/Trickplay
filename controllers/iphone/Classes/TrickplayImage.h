@@ -7,13 +7,22 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "TrickplayUIElement.h"
 #import "ResourceManager.h"
+#import "TrickplayUIElement.h"
 
-@interface TrickplayImage : TrickplayUIElement {
-    
+@class AdvancedUIObjectManager;
+
+@interface TrickplayImage : TrickplayUIElement <AsyncImageViewDelegate> {
+    BOOL loaded;
+    NSString *src;
 }
 
-- (id)initWithID:(NSString *)imageID args:(NSDictionary *)args resourceManager:(ResourceManager *)resourceManager;
+@property (nonatomic, retain) NSString *src;
+
+// Async protocol
+- (void)dataReceived:(NSData *)data resourcekey:(id)resourceKey;
+
+//
+- (id)initWithID:(NSString *)imageID args:(NSDictionary *)args resourceManager:(ResourceManager *)resourceManager objectManager:(AdvancedUIObjectManager *)objectManager;
 
 @end

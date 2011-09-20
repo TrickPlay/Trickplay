@@ -342,11 +342,6 @@ void UserData::finalize( lua_State * L , int index )
 }
 
 //.............................................................................
-// Copied from lauxlib.c
-
-#define abs_index(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : lua_gettop(L) + (i) + 1)
-
-//.............................................................................
 
 /*
 
@@ -674,17 +669,32 @@ int UserData::invoke_global_callback( lua_State * L , const char * global , cons
 
     lua_getglobal( L , global );
 
-    int top = lua_gettop( L );
-
-    if ( ! lua_isnil( L , top ) )
+    if ( lua_isnil( L , -1 ) )
     {
-        if ( UserData * ud = UserData::get( L , top ) )
-        {
-            result = ud->invoke_callback( name , nargs , nresults );
-        }
+        lua_pop( L , nargs + 1 );
+        return 0;
     }
 
-    lua_remove( L , top );
+    UserData * ud = UserData::get( L , lua_gettop( L ) );
+
+    if ( ! ud )
+    {
+        lua_pop( L , nargs + 1 );
+        return 0;
+    }
+
+    lua_insert( L , - ( nargs + 1 ) );
+
+    result = ud->invoke_callback( name , nargs , nresults );
+
+    if ( result )
+    {
+        lua_remove( L , - ( nresults + 1 ) );
+    }
+    else
+    {
+        lua_pop( L , 1 );
+    }
 
     return result;
 }
@@ -822,3 +832,24 @@ void UserData::dump_cb( lua_State * L , int index )
 }
 
 
+void UserData::dump()
+{
+#ifndef TP_PRODUCTION
+
+	GHashTable * client_map = get_client_map();
+
+	GHashTableIter it;
+
+	g_hash_table_iter_init( & it , client_map );
+
+	gpointer client;
+	gpointer master;
+
+	while( g_hash_table_iter_next( & it , & client , & master ) )
+	{
+		UserData * ud = UserData::get( G_OBJECT( master ) );
+
+		g_info( "%p : %p : %s" , master , client , ud->type );
+	}
+#endif
+}
