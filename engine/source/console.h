@@ -10,13 +10,17 @@ public:
 
     static Console * make( TPContext * context );
 
-    ~Console();
+    virtual ~Console();
 
     typedef int ( *CommandHandler )( const char * command, const char * parameters, void * data );
 
     void add_command_handler( CommandHandler handler, void * data );
 
     void attach_to_lua( lua_State * l );
+
+    void enable();
+
+    void disable();
 
 protected:
 
@@ -42,7 +46,7 @@ private:
     // Server delegate methods
 
     virtual void connection_accepted( gpointer connection, const char * remote_address );
-    virtual void connection_data_received( gpointer connection, const char * data , gsize );
+    virtual void connection_data_received( gpointer connection, const char * data , gsize , bool * );
 
     static void output_handler( const gchar * line, gpointer data );
 
@@ -56,6 +60,7 @@ private:
     GString        *        stdin_buffer;
     CommandHandlerList      handlers;
     std::auto_ptr<Server>   server;
+    bool                    enabled;
 };
 
 

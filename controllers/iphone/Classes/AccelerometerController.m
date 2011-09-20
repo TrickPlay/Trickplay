@@ -12,16 +12,20 @@
 @implementation AccelerometerController
 
 - (id)initWithSocketManager:(SocketManager *)sockMan {
-    if (self = [super init]) {
+    if ((self = [super init])) {
         socketManager = [sockMan retain];
     
         accelerationX = 0;
         accelerationY = 0;
         accelerationZ = 0;
         accelMode = 0;      //Don't send accelerometer events
+        myAcceleration[0] = 0;
         myAcceleration[1] = 0;
         myAcceleration[2] = 0;
-        myAcceleration[3] = 0;
+        lastX = 0;
+        lastY = 0;
+        lastZ = 0;
+        //filterConstant = 0;
         accelFreq = ACCEL_FREQ_LOW;
     
         [[UIAccelerometer sharedAccelerometer] setUpdateInterval:(1.0/accelFreq)];
@@ -32,17 +36,23 @@
 }
 
 - (void)startAccelerometerWithFilter:(NSString *)filter interval:(float)interval {
+    fprintf(stderr, "interval: %f", interval);
     if ([filter compare:@"L"] == NSOrderedSame) {
         accelMode = 1;
+		filterConstant = interval/(interval + 1/CUTOFF_FREQ);
         [[UIAccelerometer sharedAccelerometer] setUpdateInterval:interval];
     } else if ([filter compare:@"H"] == NSOrderedSame) {
         accelMode = 2;
+        filterConstant = (1/CUTOFF_FREQ)/(interval + 1/CUTOFF_FREQ);
         [[UIAccelerometer sharedAccelerometer] setUpdateInterval:interval];
     }
+    
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
 }
 
 - (void)pauseAccelerometer {
     accelMode = 0;
+    [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
 }
 
 - (void)accelerometer:(UIAccelerometer *)accelerometer
@@ -62,13 +72,12 @@
     // Use a basic low-pass filter to only keep the gravity in the accelerometer values for the X and Y axes
 	if (accelMode == 1) //low pass filter
 	{
-		accelerationX = acceleration.x * FILTERING_FACTOR + accelerationX * (1.0 - FILTERING_FACTOR);
-		accelerationY = acceleration.y * FILTERING_FACTOR + accelerationY * (1.0 - FILTERING_FACTOR);
-		accelerationZ = acceleration.z * FILTERING_FACTOR + accelerationZ * (1.0 - FILTERING_FACTOR);
+		accelerationX = acceleration.x * filterConstant + accelerationX * (1.0 - filterConstant);
+		accelerationY = acceleration.y * filterConstant + accelerationY * (1.0 - filterConstant);
+		accelerationZ = acceleration.z * filterConstant + accelerationZ * (1.0 - filterConstant);
 		NSString *sentData = [NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", accelerationX,accelerationY,accelerationZ];
+        NSLog(@"low pass data: %@", sentData);
 		[socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
-		
-		
 	}
     // keep the raw reading, to use during calibrations
     //currentRawReading = atan2(accelerationY, accelerationX);
@@ -76,17 +85,14 @@
     else if (accelMode == 2) //high pass filter
 	{
 		//Method 2 for high pass filter
-		UIAccelerationValue x, y, z;
-        
+
         //Use a basic high-pass filter to remove the influence of the gravity
-        myAcceleration[0] = acceleration.x * FILTERING_FACTOR + myAcceleration[0] * (1.0 - FILTERING_FACTOR);
-        myAcceleration[1] = acceleration.y * FILTERING_FACTOR + myAcceleration[1] * (1.0 - FILTERING_FACTOR);
-        myAcceleration[2] = acceleration.z * FILTERING_FACTOR + myAcceleration[2] * (1.0 - FILTERING_FACTOR);
-        // Compute values for the three axes of the acceleromater
-        x = acceleration.x - myAcceleration[0];
-        y = acceleration.y - myAcceleration[1];
-        z = acceleration.z - myAcceleration[2];
+        myAcceleration[0] = filterConstant * (myAcceleration[0] + acceleration.x - lastX);
+        myAcceleration[1] = filterConstant * (myAcceleration[1] + acceleration.y - lastY);
+        myAcceleration[2] = filterConstant * (myAcceleration[2] + acceleration.z - lastZ);
+
 		NSString *sentData = [NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", myAcceleration[0],myAcceleration[1],myAcceleration[2]];
+        NSLog(@"high pass data: %@", sentData);
 		[socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 		
         //Compute the intensity of the current acceleration 
@@ -96,14 +102,19 @@
         //[[mainViewController mainView] aFunction];
         //lastTime = CFAbsoluteTimeGetCurrent();
         //}
-        
-		
     }
+    
+    lastX = acceleration.x;
+    lastY = acceleration.y;
+    lastZ = acceleration.z;
+    
 	//NSLog([NSString stringWithFormat: @"acceleration (x,y): %f,%f ", accelerationX,accelerationY]);
     
 }
 
 - (void)dealloc {
+    NSLog(@"AccelerometerController dealloc");
+    
     [UIAccelerometer sharedAccelerometer].delegate = nil;
     [socketManager release];
     [super dealloc];
