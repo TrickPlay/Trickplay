@@ -43,6 +43,7 @@ Timestamp: mm.d.yyyy
 
 Group: Programmer's Guide  {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
+	File: Localization (no auto-title, docs/rte/progguide/localization.txt)
 	File: Getting Started*  (no auto-title, docs/rte/progguide/getting_started.txt)
    	File: User Interface*  (no auto-title, docs/rte/progguide/user_interface.txt)
 }
