@@ -618,7 +618,9 @@ local make_cat = function(cat_name)
                                 anchor_point = {imgs.wide_splash.w/2,0},
                                 --scale = {4/3,4/3}
                             }
-                            
+                            clone_counter[cat.tall_splash] = true
+                            clone_counter[cat.wide_splash] = true
+                            clone_counter[cat.swamp] = true
                             cat.parent:add(
                                 cat.tall_splash,
                                 cat.swamp,
@@ -631,7 +633,7 @@ local make_cat = function(cat_name)
                             cat.wide_splash.x = cat.x1+(cat.x2-cat.x1)/2
                             cat.wide_splash.y = cat.y2
                             cat.swamp.x = 11366--cat.x1+(cat.x2-cat.x1)/2-40
-                            cat.swamp.y = 799--cat.y2 - 68
+                            cat.swamp.y = 792--cat.y2 - 68
                             
                             Animation_Loop:add_animation(big_splash_phase_1)
                         end
@@ -1157,6 +1159,7 @@ local make_cat = function(cat_name)
                     locked_post_exit.x + cat.w/2,
                     locked_post_exit.y - cat.h/2,
                     function()
+                        locked_pre_exit.exit_piece = nil
                         --if reentry then wait for it
                         if locked_reentry then
                             print("on post, waiting for reentry")
@@ -1212,7 +1215,17 @@ local make_cat = function(cat_name)
             end
             
             frame_i = 1
-            if no_floor and cat.right_obstacle == nil and target.right_obstacle == nil then
+            --if cat got pooped on, then wipe it off
+            if cat.pooped_on then
+                
+                cat.pooped_on = false
+                
+                frames = poop_shake_sequence
+                
+                return
+                
+            --if ready to die
+            elseif no_floor and cat.right_obstacle == nil and target.right_obstacle == nil then
                 
                 if -physics_world.x < 9300 then
                     
@@ -1236,15 +1249,6 @@ local make_cat = function(cat_name)
                 cat.source = imgs.default[1]
                 print("cat stopping")
                 Animation_Loop:delete_animation(cat_animation)
-                
-                return
-                
-            --if cat got pooped on, then wipe it off
-            elseif cat.pooped_on then
-                
-                cat.pooped_on = false
-                
-                frames = poop_shake_sequence
                 
                 return
                 

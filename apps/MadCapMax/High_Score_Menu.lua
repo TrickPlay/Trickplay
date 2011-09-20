@@ -251,7 +251,7 @@ curr_letter.blink = {
     on_loop = function()
         if black then
             print("a")
-            curr_letter.color = "bdd5ef"
+            curr_letter.color = "7696b9"
             
         else
             print("b")

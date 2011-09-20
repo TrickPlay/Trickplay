@@ -1,5 +1,9 @@
 screen:show()
 
+
+clone_counter = {}
+setmetatable(clone_counter,{__mode = "k"})
+
 local function main()
     screen_w = screen.w
     screen_h = screen.h
@@ -381,6 +385,10 @@ local function main()
                     
                     [4] = { --in stage 4
                         "heart"
+                    },
+                    
+                    [6] = { --in stage 6
+                        "heart1"
                     }
                 },
                 call_before_outro = {

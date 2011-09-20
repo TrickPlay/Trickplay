@@ -169,6 +169,7 @@ local function launch_feather(vx,vy,d)
         source = feathers[math.random(1,# feathers)],
         position = bird.position,
     }
+    clone_counter[f] = true
     f.x = f.x + math.random(-90,90)
     local orig_x = f.x
     f.anchor_point = { f.w/2, -100}
@@ -354,7 +355,7 @@ bird.death_sequence_pt2 = {
 
 function bird:death()
     
-    mediaplayer:play_sound("audio/bird-fall.wav")
+    mediaplayer:play_sound("audio/bird-die.wav")
     
     bird.dead = true
     
@@ -629,10 +630,10 @@ function bird.undo_move(item)
     
     arrow_timer:start()
     --]]
-    if     bird.x1+undo_dx > item.x2 or bird.x2+undo_dx < item.x1 then
-        bird.x = bird.x + undo_dx
-    elseif bird.y1+undo_dy > item.y2 or bird.y2+undo_dy < item.y1 then
+    if bird.y1+undo_dy > item.y2 or bird.y2+undo_dy < item.y1 then
         bird.y = bird.y + undo_dy
+    elseif     bird.x1+undo_dx > item.x2 or bird.x2+undo_dx < item.x1 then
+        bird.x = bird.x + undo_dx
     end
     
     
@@ -917,7 +918,7 @@ do
                 poop_drop.h/2
             }
         }
-        
+        clone_counter[poop] = true
         function poop:collision(enemy)
             
             sk:inc("poop")
@@ -955,7 +956,7 @@ do
                             poop_splat.h/2
                         }
                     }
-                    
+                    clone_counter[splat] = true
                     layers.player:add(splat)
                     
                     lvl:add_to_scroll_off(splat)
