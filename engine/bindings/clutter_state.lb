@@ -434,11 +434,12 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	The animation may be controlled by key frames defined in the AnimationState object itself or, alternatively, the animation may be driven by an external Animator object. For simple animations, it may be most convenient to have everything handled by the AnimationState object. For complex animations, it usually makes sense to have an Animator object perform the processing. By dividing responsibilities between the two objects--with the AnimationState object handling the state transitions and the Animator object performing the complex animation--each object performs the task it is most efficiently suited for.
 	
-	All the states and state-transitions are defined in the AnimationState's constructor. Also in the constructor, the default duration for a transition animation can optionally be specified. The skeleton structure for an AnimationState constructor is shown below.
+	All the states and state-transitions are defined in the AnimationState's constructor. Also in the constructor, the default duration and Alpha mode for a transition animation can optionally be specified. The skeleton structure for an AnimationState constructor is shown below.
 	
 	(code)
-	aStates = AnimationState( { duration = 2000,  -- default duration for each transition animation. Optional. If not specified, defaults to 1000.
-	                mode = "EASE_OUT_SINE",       -- default alpha mode for each transition animation.  Optional.  If not specified, defaults to "LINEAR".
+	aStates = AnimationState( {
+					duration = 2000,           -- default duration for each transition animation. Optional. If not specified, defaults to 1000.
+	                mode = "EASE_OUT_SINE",    -- default Alpha mode for each transition animation. Optional. If not specified, defaults to "LINEAR".
 					transitions = {
 						{ -- Transition #1
 							...
@@ -452,14 +453,15 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	(end)
 	
 	The duration property shown above specifies the default duration in milliseconds for any transition animation that does not set its duration explicitly. The duration property is optional. If it is not set, a default duration of 1000 milliseconds will be assigned to any transition that does not define its own duration.
-	The mode property specified the default alpha mode for any transition animation that does not set its alpha mode explicitly.  The mode property is optional.  If it is not set, a default mode of "LINEAR" will be used.  Supported alpha modes are decribed in <Alpha.mode>.
 	
-	The remainder of the constructor definition consists of a table of transitions. Each transition must include the following components.
+	The mode property specifies the default Alpha mode for any transition animation that does not set its Alpha mode explicitly. The mode property is optional. If it is not set, a default mode of "LINEAR" is used.  Supported Alpha modes are decribed in <Alpha.mode>.
+	
+	The remainder of the constructor definition consists of a table of transitions. Each transition includes the following components.
 	
 	source - unique string identifying a particular beginning state. Can also be "*", which will act as a wildcard starting state.
 	target - unique string identifying a particular ending state
 	duration - Optional. Positive numeric value specifying the time in milliseconds required to transition from the source state to the target state. If not specified, the value specified in the constructor's duration property is used. If the constructor's duration property is not specified, a value of 1000 is used. The maximum duration value is 86,400,000 (24 hours).
-	mode - Optional. A string identifying the default Alpha mode to use in the transition.  Supported Alpha modes are described in <Alpha.mode>.  This will override the AnimationState's alpha mode default for keys in this transition.
+	mode - Optional. String identifying the Alpha mode to use in the transition's animation. Supported Alpha modes are described in <Alpha.mode>. If not specified, the mode setting specified in the constructor's mode property is used. If the constructor's mode property is not specified, the "LINEAR" mode is used.
 	animator - Animator object used to drive animation. Each transition table contains either an animator property or a keys table, but never both.
 	keys - table of key frames specifying the objects and properties to animate and various characteristics of the animation. Additional information about the contents and format of the keys table is described below. Each transition table contains either a keys table or an animator property, but never both.
 
@@ -467,20 +469,26 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	For example, assume an AnimationState that defines the following state transitions: (#1) State1 to State3 and (#2) "*" to State3. If the current state is State1 and the state is changed to State3 then the AnimationState object performs the animation associated with transition (#1) which explicitly matches the move from State1 to State3. If the current state is State2 and the state is changed to State3, the AnimationState does not have a transition that explicitly matches a move from State2 to State3. But transition (#2) matches moving to State3 from any state that does not have an explicitly defined source state, so the animation associated with transition (#2) is performed.
 	
-	The duration property specifies the length of time in milliseconds of the transition to the target state. This instance of duration applies only to the current transition. If not specified, any value specified in the default duration property specified outside of the transitions table is used. If the default duration property is not specified, a default value of 1000 milliseconds (1 second) is used.
+	The duration property specifies the length of time in milliseconds of the transition to the target state. This instance of duration applies only to the current transition.
 	
-	Finally, each entry in the transitions table must contain either an animator property or a keys property, but not both. Both properties specify the animation to perform when the state changes from the source to the target. The animator property specifies an <Animator> object that defines the associated animation. The keys property specifies a table of key frame entries that define the associated animation. Each key frame is itself a table containing the following six components.
+	The mode property specifies the Alpha mode to use in the transition's animation. This instance of mode applies only to the current transition.
+	
+	Finally, each entry in the transitions table must contain either an animator property or a keys property, but not both. Both properties specify the animation to perform when the state changes from the source to the target.
+	
+	The animator property specifies an <Animator> object that defines the associated animation. When using an Animator-based animation, the duration and mode properties defined in the AnimationState object are ignored. Instead, these properties should be set in the Animator object.
+	
+	The keys property specifies a table of key frame entries that define the associated animation. Each key frame is itself a table containing the following components.
 	
 	(code)
-	{ AnimatedObject, AnimatedProperty, AlphaMode, FinalValue, PreDelay, PostDelay }
+	{ AnimatedObject, AnimatedProperty, [AlphaMode,] FinalValue [, PreDelay, PostDelay] }
 	(end)
 
 	AnimatedObject - the UIElement-based object to animate
 	AnimatedProperty - a string identifying the property to animate. A list of recognized property strings is shown below.
-	AlphaMode - a string identifying the Alpha mode to use in the animation. Supported Alpha modes are described in <Alpha.mode>.  Optional.  If specified, this will override any default mode set in the AnimationState or in the parent transition.
+	AlphaMode - Optional. String identifying the Alpha mode to use in this portion of the animation. Supported Alpha modes are described in <Alpha.mode>. If not specified, any mode defined for the transition is used. If no transition mode is specified, the mode defined in the AnimationState's constructor is used. If no constructor mode is specified, then a "LINEAR" mode is used.
 	FinalValue - a table or numeric value specifying the final value of the animated property at the conclusion of the animation
-	PreDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *before* starting. The PreDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PreDelay had been specified.  Optional (but required if you specify PostDelay), default is 0.0
-	PostDelay - numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *after* completing. The PostDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PostDelay had been specified.  Optional (but required if you specify PreDelay), defaults to 0.0
+	PreDelay - Optional. Numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *before* starting. The PreDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PreDelay had been specified. If not specified then no predelay is used. Note: If the PostDelay property is set then PreDelay must also be set, even if it is set to 0.0.
+	PostDelay - Optional. Numeric value between 0.0 and 1.0, inclusive, specifying the percentage of total time (duration) that the animation should delay *after* completing. The PostDelay time is taken from the animation's duration time, thereby causing the animation to run faster than if no PostDelay had been specified. If not specified then no postdelay is used. Note: If the PreDelay property is set then PostDelay must also be set, even if it is set to 0.0.
 	
 	By setting the PreDelay and PostDelay fields, the animation can be divided into sections. For example, one key frame can set a PostDelay value of .5 so that it will run in the first half of the animation. A second key frame can set its PreDelay to .5 so it runs in the animation's second half, after the first key frame has completed. An example using this technique is shown later in this section.
 	
@@ -497,14 +505,12 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	"z_rotation" - double specifying rotation angle
 	"color" - table or string specifying color. The format is described in <RGB/Alpha Color Formats>.
 	
-	An AnimatedObject may modify any particular property exactly one time in a keys table. For example, the following AnimatedObject-AnimatedProperty definitions are valid.
+	An AnimatedObject may modify any particular property exactly one time in a keys table. For example, the following AnimatedObject-AnimatedProperty definition is valid.
 	
 	(code)
 	keys = {
-		{ Obj, "position", { 100, 100 } },  -- animate Obj's position
-		{ Obj, "scale", { 2.0, 2.0 } },     -- animate Obj's scale
-		{ Obj, "z_rotation", 45 },          -- animate Obj's rotation along Z-axis
-		{ Obj2, "position", { 300, 300 } }  -- animate Obj2's position. This is okay; you can modify the same property for DIFFERENT objects
+		{ Obj,  "position", { 100, 100 } },  -- animate Obj's position
+		{ Obj2, "position", { 300, 300 } }   -- animate Obj2's position. This is okay; you can modify the same property for DIFFERENT objects
 	}
 	(end)
 	
@@ -514,21 +520,22 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	keys = {
 		{ Obj, "position", { 100, 100 }, 0.0, 0.5 },  -- in the first half of the animation, move Obj to {100,100}
 		{ Obj, "position", { 300, 300 }, 0.5, 0.0 )   -- in the second half, move Obj to {300,300} ***DOES NOT WORK!***
-		                                                        -- Cannot modify same property for same object in same keys table
+		                                              -- Cannot modify same property for same object in same keys table
 	}
 	(end)
 	
 	To animate the same property for the same object as part of a transition animation, you must break up the animation into two separate states and have the object's on_completed() event handler transition from the first part to the second. (Note: In the preceding example, you could employ a trick by replacing the second modification of the "position" property with two additional key frames that modify the "x" and "y" properties.)
 		
-	Some sample transition table entries are shown below. The first transition uses an Animator object to control the animation, while the second transition defines the animation in its keys table.
+	Some sample transition table entries are shown below. The first transition uses an Animator object to control the animation, while the second transition defines the animation in a keys table.
 	
 	(code)
 	menuStates = AnimationState( {
+					mode = "EASE_IN_OUT_QUAD",  -- default Alpha mode for all transitions
 					transitions = {
 						{ -- Transition #1 - From closed to opened
 							source = "MenuClosed",
 							target = "MenuOpened",
-							-- An Animator object will handle this transition's animation, including its duration
+							-- An Animator object will handle this transition's animation, including its duration and Alpha mode
 							animator = OpenMenuAnimator
 						},
 						
@@ -536,14 +543,14 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 							source = "MenuOpened",
 							target = "MenuClosed",
 							duration = 500,
-							mode = "EASE_OUT_QUAD",
+							mode = "EASE_OUT_SINE", -- default Alpha mode for all keys in this transition
 							-- Animation Key Frames
 							-- In the first half of the animation, close the submenu. Notice that by setting the PostDelay to .5, the key
 							-- frame's animation will run in the first half of the animation.
 							-- In the second half, close the main menu. Notice for this key frame that the PreDelay setting is .5.
 							keys = {
-								{ submenu, "scale", {0,0}, 0, 0.5 },
-								{ menu,    "scale", {0,0}, 0.5, 0 }
+								{ submenu, "scale", "EASE_IN_OUT_SINE", {0,0}, 0, 0.5 }, -- explicit Alpha mode for this key
+								{ menu,    "scale",                     {0,0}, 0.5, 0 }  -- uses default Alpha mode for this transition ("EASE_OUT_SINE")
 							}
 						}
 					}  -- end of transitions table
@@ -597,8 +604,8 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 	-- Define an AnimationState for the sphere
 	sphereAnimationState = AnimationState( {
-			duration = 2000,  -- default transition duration
-			mode = "EASE_IN_OUT_QUAD",
+			duration = 2000,            -- default transition duration
+			mode = "EASE_IN_OUT_QUAD",  -- default Alpha mode for all transitions
 			transitions = {
 				{ -- Wildcard state--->Disappear
 				  source = "*",

@@ -10,9 +10,10 @@
 
 @protocol NetServiceManagerDelegate
 
-@optional
+@required
 - (void)serviceResolved:(NSNetService *)service;
-- (void)didNotResolveService;
+- (void)didNotResolveService:(NSNetService *)service;
+- (void)didStopService:(NSNetService *)service;
 - (void)didFindService:(NSNetService *)service;
 - (void)didRemoveService:(NSNetService *)service;
 
@@ -25,7 +26,7 @@ NSNetServiceDelegate> {
     id <NetServiceManagerDelegate> delegate;
     
     NSNetServiceBrowser *netServiceBrowser;
-    NSNetService *currentService;
+    NSMutableArray *connectingServices;
     NSMutableArray *services;
 }
 
@@ -33,11 +34,11 @@ NSNetServiceDelegate> {
 
 - (void)stop;
 - (void)start;
-- (void)stopCurrentService;
+- (void)stopServices;
 
 - (void)handleError:(NSNumber *)error domain:(NSString *)domain;
 
-@property (retain) NSNetService *currentService;
+@property (retain) NSMutableArray *connectingServices;
 @property (retain) NSMutableArray *services;
 @property (nonatomic, assign) id <NetServiceManagerDelegate> delegate;
 
