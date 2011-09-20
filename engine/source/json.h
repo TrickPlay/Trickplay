@@ -101,6 +101,8 @@ namespace JSON
 
         String stringify() const;
 
+        double as_number() const;
+
     private:
 
         Type    type;
@@ -157,6 +159,7 @@ namespace JSON
         virtual ~Object();
 
         Value & operator [] ( const String & key );
+        Value & at( const String & key );
 
         typedef std::map< String , Value > Map;
 
@@ -170,6 +173,8 @@ namespace JSON
         friend std::ostream & operator<<( std::ostream & os , const Object & object );
 
         String stringify() const;
+
+        Map::size_type size() const;
 
     private:
 

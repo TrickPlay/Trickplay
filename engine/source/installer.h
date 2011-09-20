@@ -12,7 +12,7 @@ public:
 
     Installer( TPContext * context );
 
-    ~Installer();
+    virtual ~Installer();
 
     //.........................................................................
     // This will download and install an app. The download is done in a download
