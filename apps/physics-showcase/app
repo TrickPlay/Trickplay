@@ -1,9 +1,10 @@
+app = 
 {
-    "id" : "com.trickplay.physics-showcase",
-    "release" : "7",
-    "version" : "1.0",
-    "name"    : "Physics Showcase",
-    "author"  : "Pablo Pissanetzky",
-    "copyright" : "© Trickplay Inc."
+    id      = "com.trickplay.physics-showcase",
+    release = 7,
+    version = "1.0",
+    name    = "Physics Showcase",
+    author  = "Pablo Pissanetzky",
+    copyright = "© Trickplay Inc."
 }
 
