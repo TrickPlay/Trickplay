@@ -1750,7 +1750,7 @@ function ui_element.textInput(t)
  --the umbrella Group
     local t_group = Group
     {
-       name = "t_group", 
+       name = "textInput", 
        size = { p.ui_width , p.ui_height},
        position = p.ui_position, 
        reactive = true, 
@@ -2326,7 +2326,7 @@ function ui_element.toastAlert(t)
 
  --the umbrella Group
     local tb_group = Group {
-    	  name = "toastb_group",  
+    	  name = "toastAlert",  
     	  position = p.ui_position, 
           reactive = true, 
           extra = {type = "ToastAlert"} 
