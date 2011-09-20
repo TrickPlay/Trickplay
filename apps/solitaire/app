@@ -1,7 +1,7 @@
 app=
 {
     id          = "com.trickplay.solitaire",
-    release     = "6",
+    release     = "7",
     version     = "1.4",
     name        = "Solitaire",
     author      = "James Fenley",
