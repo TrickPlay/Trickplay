@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.1 r9760"
+   inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90"
+   sodipodi:docname="canvasFillRuleWRectangles.svg">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path4611"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none"
+         transform="scale(0.8) translate(12.5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;">
+      <path
+         id="path4614"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none;"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.5857392"
+     inkscape:cx="126.04884"
+     inkscape:cy="716.32547"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1440"
+     inkscape:window-height="876"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#cccccc;fill-opacity:1;stroke:#000000;stroke-width:1.19475007;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect8672"
+       width="295.8399"
+       height="155.1727"
+       x="47.257149"
+       y="179.59642"
+       inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <rect
+       style="fill:#cccccc;fill-opacity:1;stroke:#000000;stroke-width:1.125;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect8666"
+       width="224.89511"
+       height="110.67392"
+       x="108.26969"
+       y="209.19675"
+       inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <rect
+       style="fill:#cccccc;fill-opacity:1;stroke:#000000;stroke-width:1.125;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect8668"
+       width="121.31566"
+       height="59.593658"
+       x="188.43738"
+       y="241.83138"
+       inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.14652467;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Lend)"
+       d="m 110.70322,179.31799 98.90992,0.16385"
+       id="path10837"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path11543"
+       d="m 140.50004,209.11483 98.90993,0.16385"
+       style="fill:none;stroke:#000000;stroke-width:1.14652467;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Lend)"
+       inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.14637506;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow1Lend)"
+       d="m 299.39104,241.74944 -53.89263,0.16386"
+       id="path11545"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <text
+       xml:space="preserve"
+       style="font-size:22.5px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="60.027222"
+       y="212.74396"
+       id="text11547"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan11549"
+         x="60.027222"
+         y="212.74396">+1</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:22.5px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="128.13426"
+       y="242.54082"
+       id="text11551"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan11553"
+         x="128.13426"
+         y="242.54082">+2</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text11555"
+       y="268.08096"
+       x="205.46413"
+       style="font-size:22.5px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"
+       inkscape:export-filename="/home/calwas/code/trickplay/engine/bindings/canvasFillRuleWRectangles.png"><tspan
+         y="268.08096"
+         x="205.46413"
+         id="tspan11557"
+         sodipodi:role="line">+1</tspan></text>
+  </g>
+</svg>

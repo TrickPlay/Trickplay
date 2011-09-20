@@ -287,6 +287,14 @@ int lb_index(lua_State*L)
     lua_pushliteral(L,"__getters__");// push "_getters_"
     lua_rawget(L,-2);               // get the getters table from the mt
     lua_remove(L,-2);              // replace mt with getters table
+
+    if (lua_type(L,-1)!=LUA_TTABLE)
+    {
+        lua_pop(L,1);
+        lua_pushnil(L);
+        return LSG_END(1);
+    }
+
     lua_pushvalue(L,2);             // push the key
     lua_rawget(L,-2);               // get the value for that key from the getters table
     lua_remove(L,-2);              // get rid of the getters table
@@ -370,7 +378,13 @@ int lb_copy_table(lua_State*L,int target,int source)
     {
         // If the key is not a string or it is a string that does not start
         // with two underscores, copy it        
-        if(!lua_isstring(L,-2)||(lua_isstring(L,-2)&&strncmp(lua_tostring(L,-2),"__",2)))
+        bool copy_it = true;
+        if ( lua_type( L , -2 ) == LUA_TSTRING )
+        {
+            copy_it = strncmp( lua_tostring(L,-2),"__",2);
+        }
+
+        if(copy_it)
         {
             // See if the key already exists in the target
             // If so, skip it
@@ -1018,7 +1032,10 @@ std::string lb_value_desc( lua_State * L , int index )
             break;
 
         case LUA_TUSERDATA:
-            result = result + " (" + UserData::get(L,index)->get_type() + ")";
+        	if ( lua_objlen( L , index ) == sizeof( UserData ) )
+        	{
+        		result = result + " (" + UserData::get(L,index)->get_type() + ")";
+        	}
             break;
     }
 
