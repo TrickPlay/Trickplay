@@ -7,6 +7,13 @@
 #include "common.h"
 //-----------------------------------------------------------------------------
 
+//.............................................................................
+// Copied from lauxlib.c
+
+#define abs_index(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : lua_gettop(L) + (i) + 1)
+
+//.............................................................................
+
 // Returns ms
 
 inline double timestamp()
@@ -82,6 +89,10 @@ inline StringVector split_string( const String & source , const gchar * delimite
 {
     return split_string( source.c_str() , delimiter , max_tokens );
 }
+
+//-----------------------------------------------------------------------------
+
+#define lua_really_isstring(L,i) (lua_type(L,i)==LUA_TSTRING)
 
 //-----------------------------------------------------------------------------
 
@@ -188,81 +199,6 @@ protected:
         }
     }
 };
-
-//-----------------------------------------------------------------------------
-
-class _Debug_ON
-{
-public:
-
-    _Debug_ON( const char * _prefix = 0 )
-    {
-        if ( _prefix )
-        {
-            prefix = _prefix;
-        }
-    }
-
-    ~_Debug_ON()
-    {
-    }
-
-    inline void operator()( const gchar * format, ...)
-    {
-        if ( ! prefix.empty() )
-        {
-            va_list args;
-            va_start( args, format );
-            gchar * message = g_strdup_vprintf( format , args );
-            va_end( args );
-            g_log( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , "[%s] %s" , prefix.c_str() , message );
-            g_free( message );
-        }
-        else
-        {
-            va_list args;
-            va_start( args, format );
-            g_logv( G_LOG_DOMAIN , G_LOG_LEVEL_DEBUG , format , args );
-            va_end( args );
-        }
-    }
-
-    inline operator bool()
-    {
-        return true;
-    }
-
-private:
-
-    String prefix;
-};
-
-class _Debug_OFF
-{
-public:
-
-    _Debug_OFF( const char * prefix = 0 )
-    {
-    }
-
-    inline void operator()( const gchar * format, ...)
-    {
-    }
-
-    inline operator bool()
-    {
-        return false;
-    }
-};
-
-#ifdef TP_PRODUCTION
-#define Debug_ON    _Debug_OFF
-#define Debug_OFF   _Debug_OFF
-#else
-#define Debug_ON    _Debug_ON
-#define Debug_OFF   _Debug_OFF
-#endif
-
 
 //-----------------------------------------------------------------------------
 // This class lets you push things to free into it - when this instance is
@@ -382,6 +318,8 @@ namespace Util
         return result;
     }
 
+    String random_string( guint length );
+
     //-----------------------------------------------------------------------------
 
     class GMutexLock
@@ -472,6 +410,19 @@ namespace Util
         ::GTimer *  timer;
     };
 
+    //-------------------------------------------------------------------------
+    // This takes a path that came from a configuration file or command line
+    // and ensures that it is an absolute, canonical path. It accepts file:
+    // URIs. If the path is relative, it will be made absolute with respect
+    // to the current working directory.
+    //
+    // This should NOT be used for paths that come from Lua apps.
+    //
+    // If there is an error, it will return an empty string, unless
+    // abort_on_error is true, in which case it will abort.
+
+    String canonical_external_path( const char * path , bool abort_on_error = true );
+
     //-----------------------------------------------------------------------------
     // Converts a path using / to a platform path in place - modifies the string
     // passed in.
@@ -493,13 +444,20 @@ namespace Util
     // NOTE: if path contains any .. elements, this will abort. The assumption
     // is that root is trusted and path came from Lua - and cannot be trusted
 
-    inline gchar * rebase_path( const gchar * root, const gchar * path )
+    inline gchar * rebase_path( const gchar * root, const gchar * path , bool abort = true )
     {
         FreeLater free_later;
 
         if ( strstr( path, ".." ) )
         {
-            g_error( "Invalid relative path '%s'", path );
+            if ( abort )
+            {
+                g_error( "Invalid relative path '%s'", path );
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         gchar * p = path_to_native_path( g_strdup( path ) );
@@ -510,7 +468,7 @@ namespace Util
         gchar * first = path_to_native_path( g_strdup( root ) );
         free_later( first );
 
-        return g_build_filename( first, last, NULL );
+        return g_build_filename( first, last, ( gpointer ) 0 );
     }
 
     //-----------------------------------------------------------------------------

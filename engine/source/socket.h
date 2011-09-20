@@ -23,6 +23,7 @@ public:
     class Delegate
     {
     public:
+    	virtual ~Delegate() {}
 
         virtual void on_connected() = 0;
         virtual void on_connect_failed() = 0;
