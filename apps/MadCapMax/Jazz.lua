@@ -554,6 +554,7 @@ local make_cat = function(cat_name)
         
         local function find_land_y(land_x, y_thresh)
             
+            local ret_lend_x = land_x
             land_y = floor_y 
             
             for i, o in pairs( obstacles ) do
@@ -569,11 +570,43 @@ local make_cat = function(cat_name)
                     
                     land_y = o.y - cat.h/2
                     
+                    ret_lend_x = land_x
+                    
+                    
+                elseif
+                    land_x   > o.x       - cat.w/4 and
+                    land_x   < o.x + o.w           and
+                    land_y   > o.y       - cat.h/2 and
+                    y_thresh < o.y then
+                    
+                    print("SPECIAL CASE 1")
+                    
+                    will_be_on = o
+                    
+                    land_y = o.y - cat.h/2
+                    
+                    ret_lend_x = o.x
+                    
+                elseif
+                    land_x   > o.x                 and
+                    land_x   < o.x + o.w + cat.w/4 and
+                    land_y   > o.y       - cat.h/2 and
+                    y_thresh < o.y then
+                    
+                    
+                    print("SPECIAL CASE 2")
+                    
+                    will_be_on = o
+                    
+                    land_y = o.y - cat.h/2
+                    
+                    ret_lend_x = o.x + o.w - cat.w/2
+                    
                 end
                 
             end
             
-            return  land_y
+            return  land_y, ret_lend_x
             
         end
         
@@ -581,7 +614,7 @@ local make_cat = function(cat_name)
             
             start_x = cat.x
             start_y = cat.y
-            local land_x
+            local land_x, land_y
             local peak_x, peak_y
             if no_floor then
                 
@@ -660,14 +693,22 @@ local make_cat = function(cat_name)
             
             
             
-            land_x = land_x or
-                (jumping_down and 1.2 or jumping_level and 1.5 or 2) *
-                (target.x - start_x) + start_x
+            
+            if not land_x then
+                land_x = (jumping_down and 1.2 or jumping_level and 1.5 or 2) *
+                    (target.x - start_x) + start_x
+                
+                land_y,land_x = find_land_y(land_x, target.y-100)
+            end
+            
             
             peak_x = peak_x or target.x
             peak_y = peak_y or target.y
             
-            land_y = land_y or find_land_y(land_x, target.y-100)
+            peak_y = land_y < start_y and
+                    (peak_y < land_y  - 100 and peak_y or land_y  - 100) or
+                    (peak_y < start_y - 100 and peak_y or start_y - 100)
+                
             
             cat_y_func, t = calc_parabola(
                 start_x, start_y,
@@ -1224,7 +1265,7 @@ local make_cat = function(cat_name)
                 
                 return
                 
-            --if ready to die
+            --if ready to die, level2 hardcoding...
             elseif no_floor and cat.right_obstacle == nil and target.right_obstacle == nil then
                 
                 if -physics_world.x < 9300 then
@@ -1245,10 +1286,10 @@ local make_cat = function(cat_name)
                 
                 return
             elseif cat.x > stop_point then
-                
+                cat.x = stop_point
                 cat.source = imgs.default[1]
-                print("cat stopping")
-                Animation_Loop:delete_animation(cat_animation)
+                
+                frames = wait_sequence
                 
                 return
                 
@@ -1516,6 +1557,10 @@ local make_cat = function(cat_name)
         end,
         "ACTIVE","LVL_TRANSITION"
     )
+    
+    function cat:get_vx()
+        return 500
+    end
     
     ----------------------------------------------------------------------------
     -- Object

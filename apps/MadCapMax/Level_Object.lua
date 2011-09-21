@@ -184,6 +184,7 @@ lvls = {
                 source = "bedroom-clock",
                 x      = 1920+1596-120,
                 y      = 527+5,
+                m      = .5,
             },
             
 
@@ -285,17 +286,19 @@ lvls = {
                 scale = {3/4,3/4},
             },
             {
-                type   = "dynamic",
+                type   = "static",
                 source = "dining-table-right-corner",
                 x      = 5760+42+940+40,
                 y      = 535+5+156,
                 scale = {3/4,3/4},
+                m      = .5,
             },
             {
                 type   = "dynamic",
                 source = "dining-fruit-basket",
                 x      = 5760+454+240,
                 y      = 556+40,
+                m      = 1,
             },
             {
                 type   = "foreground",
@@ -331,7 +334,7 @@ lvls = {
             {
                 type   = "static",
                 source = "living-chair",
-                x      = 5760+1387+140,
+                x      = 5760+1387+40,
                 y      = 549+70,
                 enemy  = true,
                 player = true,
@@ -341,6 +344,7 @@ lvls = {
                 type   = "dynamic",
                 x      = 5760+1526,
                 y      = 302,
+                m      = .7,
                 pieces = {
                     
                     {
@@ -464,7 +468,7 @@ lvls = {
             },
 
             {
-                type   = "dynamic",
+                type   = "static",
                 source = "living-hanging-plant",
                 x      = 7680+1241+140,
                 y      = 50,
@@ -538,7 +542,7 @@ lvls = {
                 type   = "dynamic",
                 x      = 9600+1324+270,
                 y      = 410,
-                
+                m      = 1,
                 pieces = {
                     {
                         source = "scotch-top",
@@ -572,7 +576,7 @@ lvls = {
             },
 
             {
-                type   = "dynamic",
+                type   = "static",
                 source = "bar-glass",
                 x      = 9600+1295+270,
                 y      = 516,
@@ -698,6 +702,7 @@ lvls = {
                 source = "kitchen-cookbook",
                 x      = 11520+1314+150,
                 y      = 426,
+                m      = 1.1,
             },
 
             {
@@ -733,6 +738,7 @@ lvls = {
                 source = "kitchen-spoon",
                 x      = 11520+1204+140,
                 y      = 436+10,
+                m      = .5,
             },
 
             {
@@ -740,6 +746,7 @@ lvls = {
                 source = "kitchen-lemon",
                 x      = 11520+2144+170,
                 y      = 436+20,
+                m      = .5,
             },
 
             {
@@ -747,6 +754,7 @@ lvls = {
                 source = "kitchen-lemon2",
                 x      = 11520+2284+170,
                 y      = 436+20,
+                m      = .6,
             },
 
             {
@@ -754,6 +762,7 @@ lvls = {
                 source = "kitchen-bowl",
                 x      = 11520+2644+140,
                 y      = 346+20,
+                m      = 1.8,
             },
             
             {
@@ -827,6 +836,7 @@ lvls = {
                 source = "kitchen-flower-vase",
                 x      = 11520+3870+505-90,
                 y      = 300+160-240,
+                m      = 2.5,
             },
             {
                 type   = "wall_objs",
@@ -992,8 +1002,8 @@ lvls = {
                 h = 200 ,
             },
             {
-                x = 3241 ,
-                y = 601 ,
+                x = 3221 ,
+                y = 651 ,
                 w = 400 ,
                 h = 400 ,
             },
@@ -1004,7 +1014,7 @@ lvls = {
                 h = 40 ,
             },
             {
-                x = 7287, 
+                x = 7287-100, 
                 y = 819 ,
                 w = 200 ,
                 h = 50 ,
@@ -1255,6 +1265,8 @@ lvls = {
                 on_completed = function()
                     
                     Animation_Loop:add_animation(  lvls[1].intro[2]  )
+                    
+                    mediaplayer:play_sound("audio/creek-door.wav")
                     
                 end,
             },
@@ -2381,6 +2393,15 @@ local function make_obj(item)
         
         layers.items:add( obj )
         
+        Item{
+                source         = obj,
+                item_type      = "knockdownable",
+                targ_y         = 1200,
+                initial_impact = function() end,
+                m              = items[item_i].m
+            }
+        collides_with_max[obj]   = obj
+        collides_with_enemy[obj] = obj
     else
         
         assert(item.source)

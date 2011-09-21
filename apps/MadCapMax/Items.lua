@@ -60,20 +60,23 @@ local item_type = {
         
     end,
     
-    knockdownable = function(targ_y,initial_impact,floor_func)
+    knockdownable = function(targ_y,m,initial_impact,floor_func)
         
-        return function(obj,vx)
+        return function(obj,creature)
             
             if obj.hit then return end
             
             initial_impact()
             
-            obj:hide()
             
             obj.hit = true
             
             local start_x = obj.x
             local start_y = obj.y
+            
+            local vx = creature:get_vx()*1.1
+            
+            local vy = -800*(.5+m/2)
             
             aaa, bbb = quadratic( .5 * g, vy, start_y - targ_y )
             
@@ -87,6 +90,8 @@ local item_type = {
                         x = start_x   +   vx * s,
                         y = start_y   +   vy * s   +   .5 * g * s * s,
                     }
+                    
+                    obj.z_rotation = {180/m*p,0,0}
                 end,
                 
                 on_completed = floor_func
@@ -144,9 +149,9 @@ make_item = function(t)
     end
     
     
-    if t.type == "knockdownable" then
+    if t.item_type == "knockdownable" then
         
-        t.source.collision = item_type[t.item_type](t.source,t.targ_y,t.initial_impact,t.floor_func)
+        t.source.collision = item_type[t.item_type](t.targ_y,t.m,t.initial_impact,t.floor_func)
         
     else
         

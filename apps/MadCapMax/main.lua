@@ -227,7 +227,7 @@ local function main()
                     
                     if collided(Max,item) then
                         
-                        item:collision()
+                        item:collision(Max)
                         
                     end
                     
@@ -459,6 +459,7 @@ local function main()
     
     gamestate:change_state_to("SPLASH")
     
+    mediaplayer:play_sound("audio/start.wav")
 end
 
 dolater( main )
