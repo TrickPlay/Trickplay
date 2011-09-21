@@ -4703,8 +4703,6 @@ function ui_element.scrollPane(t)
         content   = Group{},
         virtual_h = 1000,
         virtual_w = 1000,
-        arrow_color = {255,255,255,255},
-        arrows_visible = false,
         bar_color_inner       = {180,180,180,255},
         bar_color_outer       = { 30, 30, 30,255},
         bar_focus_color_inner = {180,255,180,255},
@@ -4946,32 +4944,6 @@ function ui_element.scrollPane(t)
 				x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
 			}
 		end
-	end
-
-    local make_arrow = function(bar_thickness, arrow_color)
-		
-		local c = Canvas{size={bar_thickness,bar_thickness}}
-		
-		c:move_to(    0,c.h)
-		c:line_to(c.w/2,  0)
-		c:line_to(  c.w,c.h)
-		c:line_to(    0,c.h)
-		
-		c:set_source_color( arrow_color )
-		c:fill(true)
-		
-		if c.Image then
-			c= c:Image()
-		end
-		
-		c.anchor_point={c.w/2,c.h}
-		
-		return c
-		
-	end
-    
-	local function my_make_arrow( _ , ... )
-     	return make_arrow( ... )
 	end
 
 	local function make_hor_bar(w,h,ratio)
@@ -5338,9 +5310,6 @@ function ui_element.scrollPane(t)
         if p.bar_offset < 0 then
             track_w = p.visible_w+p.bar_offset
             track_h = p.visible_h+p.bar_offset
-        elseif p.arrows_visible then
-            track_w = p.visible_w-p.bar_thickness*2-10
-            track_h = p.visible_h-p.bar_thickness*2-10
         else
             track_w = p.visible_w
             track_h = p.visible_h
@@ -5350,36 +5319,12 @@ function ui_element.scrollPane(t)
             hor_s_bar = make_hor_bar(track_w, p.bar_thickness, track_w/p.virtual_w)
             hor_s_bar.name = "Horizontal Scroll Bar"
 
-            if p.arrows_visible then
-				key = format("arrorwl:%d:%s", p.bar_thickness, color_to_string(p.arrow_color))
-                local l = assets(key, my_make_arrow, p.bar_thickness, p.arrow_color)
-
-                l.name="L"
-                l.x = p.box_width+p.bar_thickness
-                l.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
-                l.reactive=true
-                scroll_group:add(l)
-                function l:on_button_down()
-                    scroll_x(1)
-                end
-                hor_s_bar.position={
-                    p.box_width+p.bar_thickness+5,
-                    p.box_width*2+p.visible_h+p.bar_offset
-                }
-				key = format("arrorwr:%d:%s", p.bar_thickness, color_to_string(p.arrow_color))
-                local r = assets(key, my_make_arrow, p.bar_thickness, p.arrow_color)
-
-                r.name="R"
-                r.x = p.box_width+p.bar_thickness+hor_s_bar.w+10
-                r.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
-                r.reactive=true
-                scroll_group:add(r)
-            else
-                hor_s_bar.position={
-                    p.box_width,
-                    p.box_width*2+p.visible_h+p.bar_offset
-                }
-            end
+            
+            hor_s_bar.position={
+                p.box_width,
+                p.box_width*2+p.visible_h+p.bar_offset
+            }
+            
             scroll_group:add(hor_s_bar)
             
             unfocus_grip_hor = hor_s_bar:find_child("grip")
@@ -5438,36 +5383,12 @@ function ui_element.scrollPane(t)
         if p.vert_bar_visible and p.visible_h/p.virtual_h < 1 then
             vert_s_bar = make_vert_bar( p.bar_thickness, track_h, track_h/p.virtual_h)
             vert_s_bar.name = "Vertical Scroll Bar"
-            if p.arrows_visible then
-                local up = make_arrow()
-                up.name="UP"
-                up.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
-                up.y = p.box_width+p.bar_thickness
-                scroll_group:add(up)
-                up.reactive=true
-                function up:on_button_down()
-                    scroll_y(1)
-                end
-                vert_s_bar.position={
-                    p.box_width*2+p.visible_w+p.bar_offset,
-                    p.box_width+p.bar_thickness+5
-                }
-                local dn = make_arrow()
-                dn.name="DN"
-                dn.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
-                dn.y = p.box_width+p.bar_thickness+vert_s_bar.h+10
-                dn.z_rotation = {180,0,0}
-                scroll_group:add(dn)
-                dn.reactive=true
-                function dn:on_button_down()
-                    scroll_y(-1)
-                end
-            else
-                vert_s_bar.position={
-                    p.box_width*2+p.visible_w+p.bar_offset,
-                    p.box_width
-                }
-            end
+            
+            vert_s_bar.position={
+                p.box_width*2+p.visible_w+p.bar_offset,
+                p.box_width
+            }
+            
             --vert_s_bar.z_rotation={90,0,0}
             scroll_group:add(vert_s_bar)
             
@@ -5716,6 +5637,7 @@ function ui_element.menuButton(t)
 --[[
 button 
 --]]
+--[[
         text_font = nil,
     	text_color = nil,
     	text_focus_color = nil,
@@ -5725,8 +5647,8 @@ button
         item_text_font = nil,
     	item_text_color = nil,
     	item_text_focus_color = nil,
-
-		text_font = "FreeSans Medium 30px",
+--]]
+	text_font = "FreeSans Medium 30px",
     	text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "CarbonCandy", 
     	ui_width = 250,
@@ -5735,14 +5657,13 @@ button
     	label = "Menu Button", 
     	focus_color = {27,145,27,255}, 	  --"1b911b", 
     	focus_fill_color = {27,145,27,0}, --"1b911b", 
-		focus_text_color =  {255,255,255,255},   
+	focus_text_color =  {255,255,255,255},   
     	border_color = {255,255,255,255}, --"FFFFFF"
     	fill_color = {255,255,255,0},     --"FFFFFF"
     	border_width = 1,
     	border_corner_radius = 12,
 --]]
 
-        name  = "dropdownbar",
         items = {
             {type="label", string="Label"},
             {type="separator"},
@@ -6421,7 +6342,6 @@ function ui_element.tabBar(t)
         
         text_font = "FreeSans Medium 26px",
     	text_color = {255,255,255,255}, 
-    	text_focus_color = {27,145,27,255}, 	  --"1b911b",
         
     	skin = "CarbonCandy", 
     	ui_width = 150,
@@ -6436,28 +6356,24 @@ function ui_element.tabBar(t)
         
         tab_labels = {
             "Label",
-			"Label",
+            "Label",
             "Label",
         },
         tabs = {},
-        --tab_align          = "CENTER",
-        --label_align        = "CENTER",
         label_padding = 10,
         tab_position = "top",
         
         display_width  = 600,
         display_height = 500,
         tab_spacing = 0,--10,
-        --slant_width  = 20,
         border_width =  2,
-        --border_color = {255,255,255,255},
         fill_color   = {  0,  0,  0,255},
         label_color  = {255,255,255,255},
         unsel_color  = { 60, 60, 60,255},
 		
 		arrow_sz     = 15,
 		arrow_dist_to_frame = 5,
-		arrow_image = nil,
+--		arrow_image = nil,
 
 		ui_position = {200,200},
     }
@@ -6485,7 +6401,7 @@ function ui_element.tabBar(t)
 		position = p.ui_position, 
         extra={
             
-			type="TabBar",
+            type="TabBar",
 			
             insert_tab = function(self,index)
                 
