@@ -136,6 +136,15 @@
 		CD91EAF31427D6790043C8BF /* CommandInterpreterApp.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */; };
 		CD91EAF71427D6990043C8BF /* ResourceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAF51427D6980043C8BF /* ResourceManager.m */; };
 		CD91EAFC1427E2DE0043C8BF /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EAFB1427E2DE0043C8BF /* RootViewController.xib */; };
+		CDFB6D9014294F45002557A3 /* YAJLiOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDFEC56F1320608400A14307 /* YAJLiOS.framework */; };
+		CDFB6D9114295424002557A3 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
+		CDFB6D9214295433002557A3 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */; };
+		CDFB6D931429545D002557A3 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC36E136794CD00CF1973 /* AudioToolbox.framework */; };
+		CDFB6D9414295465002557A3 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6705EE13CE44940001C6E4 /* AssetsLibrary.framework */; };
+		CDFB6D9514295472002557A3 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC370136794EA00CF1973 /* MediaPlayer.framework */; };
+		CDFB6D9614295483002557A3 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD6BC3721367950700CF1973 /* CFNetwork.framework */; };
+		CDFB6D97142954DD002557A3 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD404C291353E18D0021D36C /* MobileCoreServices.framework */; };
+		CDFB6D981429636D002557A3 /* NetServiceManager.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EAC81427D6090043C8BF /* NetServiceManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -312,8 +321,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				CD91EA161427CACC0043C8BF /* libTake Control Framework.a in Frameworks */,
+				CDFB6D9414295465002557A3 /* AssetsLibrary.framework in Frameworks */,
+				CDFB6D931429545D002557A3 /* AudioToolbox.framework in Frameworks */,
+				CDFB6D9514295472002557A3 /* MediaPlayer.framework in Frameworks */,
+				CDFB6D9614295483002557A3 /* CFNetwork.framework in Frameworks */,
+				CDFB6D97142954DD002557A3 /* MobileCoreServices.framework in Frameworks */,
+				CDFB6D9214295433002557A3 /* CoreGraphics.framework in Frameworks */,
+				CDFB6D9114295424002557A3 /* QuartzCore.framework in Frameworks */,
 				CD91E9FC1427C8B60043C8BF /* UIKit.framework in Frameworks */,
 				CD91E9FD1427C8B60043C8BF /* Foundation.framework in Frameworks */,
+				CDFB6D9014294F45002557A3 /* YAJLiOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,8 +349,8 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				CD91E8BE1427B50C0043C8BF /* Take Control Framework */,
-				CD91E9FF1427C8B60043C8BF /* Take Control App */,
+				CD91E8BE1427B50C0043C8BF /* TakeControlFramework */,
+				CD91E9FF1427C8B60043C8BF /* TakeControlApp */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
 			name = CustomTemplate;
@@ -363,20 +380,20 @@
 				CD2F80C213ECA8C2001EACEA /* Animations */,
 				CD91EA9A1427D5AC0043C8BF /* AdvancedUIObjectManager.h */,
 				CD91EA9B1427D5AC0043C8BF /* AdvancedUIObjectManager.m */,
+				CD91EAA81427D5AC0043C8BF /* TrickplayUIElement.h */,
+				CD91EAA91427D5AC0043C8BF /* TrickplayUIElement.m */,
+				CD91EAA21427D5AC0043C8BF /* TrickplayScreen.h */,
+				CD91EAA31427D5AC0043C8BF /* TrickplayScreen.m */,
+				CD91EAA01427D5AC0043C8BF /* TrickplayRectangle.h */,
+				CD91EAA11427D5AC0043C8BF /* TrickplayRectangle.m */,
 				CD91EA9C1427D5AC0043C8BF /* TrickplayGroup.h */,
 				CD91EA9D1427D5AC0043C8BF /* TrickplayGroup.m */,
 				CD91EA9E1427D5AC0043C8BF /* TrickplayImage.h */,
 				CD91EA9F1427D5AC0043C8BF /* TrickplayImage.m */,
-				CD91EAA01427D5AC0043C8BF /* TrickplayRectangle.h */,
-				CD91EAA11427D5AC0043C8BF /* TrickplayRectangle.m */,
-				CD91EAA21427D5AC0043C8BF /* TrickplayScreen.h */,
-				CD91EAA31427D5AC0043C8BF /* TrickplayScreen.m */,
 				CD91EAA41427D5AC0043C8BF /* TrickplayText.h */,
 				CD91EAA51427D5AC0043C8BF /* TrickplayText.m */,
 				CD91EAA61427D5AC0043C8BF /* TrickplayTextHTML.h */,
 				CD91EAA71427D5AC0043C8BF /* TrickplayTextHTML.m */,
-				CD91EAA81427D5AC0043C8BF /* TrickplayUIElement.h */,
-				CD91EAA91427D5AC0043C8BF /* TrickplayUIElement.m */,
 			);
 			name = AdvancedUI;
 			sourceTree = "<group>";
@@ -481,19 +498,21 @@
 			path = ../VirtualRemoteAssets;
 			sourceTree = "<group>";
 		};
-		CD91E8BE1427B50C0043C8BF /* Take Control Framework */ = {
+		CD91E8BE1427B50C0043C8BF /* TakeControlFramework */ = {
 			isa = PBXGroup;
 			children = (
 				CD63B43D13B9895300158169 /* VirtualRemoteAssets */,
-				CD91EA181427CB5B0043C8BF /* Public Header Files */,
+				CD91EA181427CB5B0043C8BF /* PublicHeaderFiles */,
+				CD54637D14203CBF00965577 /* PrivateMethods */,
 				CD91EA151427C9FF0043C8BF /* Classes */,
 				CD91EA141427C9DC0043C8BF /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 			);
+			name = TakeControlFramework;
 			path = "Take Control Framework";
 			sourceTree = "<group>";
 		};
-		CD91E9FF1427C8B60043C8BF /* Take Control App */ = {
+		CD91E9FF1427C8B60043C8BF /* TakeControlApp */ = {
 			isa = PBXGroup;
 			children = (
 				441321321355335600009206 /* Entitlements.plist */,
@@ -501,7 +520,7 @@
 				CDFEBB6D130A498C00A14307 /* iPad */,
 				CD91EA001427C8B60043C8BF /* Supporting Files */,
 			);
-			name = "Take Control App";
+			name = TakeControlApp;
 			path = "Take Control";
 			sourceTree = "<group>";
 		};
@@ -540,12 +559,11 @@
 			children = (
 				CDFEBBA1130A4B8700A14307 /* Modules */,
 				CDFEBBB8130A4CD100A14307 /* ViewControllers */,
-				CD54637D14203CBF00965577 /* PrivateMethods */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
 		};
-		CD91EA181427CB5B0043C8BF /* Public Header Files */ = {
+		CD91EA181427CB5B0043C8BF /* PublicHeaderFiles */ = {
 			isa = PBXGroup;
 			children = (
 				CD91EA541427D3600043C8BF /* TVBrowserViewController.h */,
@@ -555,14 +573,14 @@
 				CD91EA501427D3600043C8BF /* AppBrowser.h */,
 				CD91EA551427D3600043C8BF /* TVConnection.h */,
 			);
-			name = "Public Header Files";
+			name = PublicHeaderFiles;
 			sourceTree = "<group>";
 		};
 		CDECA31014072849007C58ED /* Main */ = {
 			isa = PBXGroup;
 			children = (
-				CD91EA8E1427D55E0043C8BF /* AppBrowser.m */,
 				CD91EA8F1427D55E0043C8BF /* TVBrowser.m */,
+				CD91EA8E1427D55E0043C8BF /* AppBrowser.m */,
 			);
 			name = Main;
 			sourceTree = "<group>";
@@ -702,6 +720,7 @@
 				CD91EA5B1427D3600043C8BF /* TVConnection.h in Headers */,
 				CD91EA591427D3600043C8BF /* TVBrowser.h in Headers */,
 				CD91EA561427D3600043C8BF /* AppBrowser.h in Headers */,
+				CDFB6D981429636D002557A3 /* NetServiceManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -948,7 +967,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
-				GCC_DYNAMIC_NO_PIC = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LD_RUNPATH_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
@@ -961,7 +981,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
-				GCC_DYNAMIC_NO_PIC = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LD_RUNPATH_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
@@ -975,8 +996,17 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PREFIX_HEADER = "Take Control/Take Control App.pch";
 				INFOPLIST_FILE = "Take Control/Take Control-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -989,8 +1019,17 @@
 				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PREFIX_HEADER = "Take Control/Take Control App.pch";
 				INFOPLIST_FILE = "Take Control/Take Control-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -1010,7 +1049,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
-				GCC_DYNAMIC_NO_PIC = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LD_RUNPATH_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
@@ -1024,8 +1064,17 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PREFIX_HEADER = "Take Control/Take Control App.pch";
 				INFOPLIST_FILE = "Take Control/Take Control-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;

@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NetServiceManager.h"
-#import "TVConnection.h"
-#import "TVBrowserViewController.h"
 
+@class TVConnection;
 @class TVBrowser;
+@class TVBrowserViewController;
+
+
+
 
 @protocol TVBrowserDelegate <NSObject>
 
@@ -25,16 +27,13 @@
 @end
 
 
-@interface TVBrowser : NSObject <NetServiceManagerDelegate> {
-    @private
+
+
+@interface TVBrowser : NSObject {
+
+@protected
     id <TVBrowserDelegate> delegate;
-    
-    // The netServiceManager informs the TVBrowser of mDNS broadcasts
-    NetServiceManager *netServiceManager;
-        
-    NSMutableArray *tvConnections;
-    NSMutableArray *connectedServices;
-    NSMutableArray *viewControllers;
+    id context;
 }
 
 // Exposed instance variables

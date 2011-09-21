@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <YAJLiOS/YAJL.h>
 #import "CommandInterpreter.h"
+#import <YAJLiOS/YAJL.h>
 
 
 @protocol CommandInterpreterAdvancedUIDelegate <NSObject>

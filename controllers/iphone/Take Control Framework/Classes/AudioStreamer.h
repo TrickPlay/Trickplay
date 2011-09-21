@@ -21,10 +21,11 @@
 //     distribution.
 //
 
+#import <Foundation/Foundation.h>
 #if TARGET_OS_IPHONE			
 #import <UIKit/UIKit.h>
 #else
-#import <Cocoa/Cocoa.h>
+//#import <Cocoa/Cocoa.h>
 #endif //TARGET_OS_IPHONE			
 
 #include <pthread.h>

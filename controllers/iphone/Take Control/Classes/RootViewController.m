@@ -20,6 +20,7 @@
         pushingAppViewController = NO;
         pushingAppBrowser = NO;
         refreshCount = 0;
+        [TVBrowserViewController class];
     }
     return self;
 }
@@ -142,7 +143,7 @@
 #pragma mark TVBrowserViewControllerDelegate Methods
 
 - (void)tvBrowserViewController:(TVBrowserViewController *)_tvBrowserViewController didSelectService:(NSNetService *)service {
-    if (![[_tvBrowserViewController.tvBrowser getConnectedServices] containsObject:service]) {
+    if (![[_tvBrowserViewController.tvBrowser getConnectedServices] containsObject:service] && ![[_tvBrowserViewController.tvBrowser getConnectingServices] containsObject:service]) {
         [self destroyAppBrowserViewController];
         [self destroyTPAppViewController];
     } else {
@@ -330,7 +331,7 @@
     // if app
     else if (navigationController.visibleViewController == appViewController) {
         if (![appViewController hasConnection]) {
-            [self.navigationController popViewControllerAnimated:YES];
+            [self.navigationController popViewControllerAnimated:NO];
         }
     }
     
@@ -376,7 +377,7 @@
     // if app
     else if (viewController == appViewController) {
         if (![appViewController hasConnection]) {
-            [self.navigationController popViewControllerAnimated:YES];
+            [self.navigationController popViewControllerAnimated:NO];
         }
     }
     

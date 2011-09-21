@@ -22,7 +22,7 @@
  * @property aClient : a client that will receive callbacks upon NSNetService
  *                     and NSNetServiceBrowser events.
  */
--(id)initWithDelegate:(id)client {
+-(id)initWithClientDelegate:(id <NetServiceManagerDelegate>)client {
     if ((self = [super init])) {
         delegate = client;
         connectingServices = [[NSMutableArray alloc] initWithCapacity:5];
