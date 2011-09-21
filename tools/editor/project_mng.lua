@@ -189,23 +189,23 @@ function project_mng.new_project(fname, from_new_project)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 
 		button_ok.extra.active.opacity = 255
 		button_ok.extra.dim.opacity = 0
 
-		text_input.on_focus_in()
+		text_input.set_focus()
 	end
 
 	local tab_func = function()
-		text_input.on_focus_out()
+		text_input.clear_focus()
 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
 
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	-- Focus Destination 
@@ -254,12 +254,12 @@ function project_mng.new_project(fname, from_new_project)
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
 			elseif screen:find_child(text_input.focus[key]) then
-				if text_input.on_focus_out then
-					text_input.on_focus_out()
+				if text_input.clear_focus then
+					text_input.clear_focus()
 				end
 				screen:find_child(text_input.focus[key]):grab_key_focus()
-				if screen:find_child(text_input.focus[key]).on_focus_in then
-					screen:find_child(text_input.focus[key]).on_focus_in(key)
+				if screen:find_child(text_input.focus[key]).set_focus then
+					screen:find_child(text_input.focus[key]).set_focus(key)
 				end
 			end
 		end
@@ -437,18 +437,18 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		scroll.on_focus_in()
+		scroll.set_focus()
 	end
 
 	local tab_func = function()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_new:grab_key_focus()
-		button_new.on_focus_in()
+		button_new.set_focus()
 	end
 
 	--Focus Destination
@@ -532,11 +532,11 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 			project_t:on_button_down()
 			return true
 		end
-		function h_rect.extra.on_focus_in()
+		function h_rect.extra.set_focus()
 			h_rect.opacity = 255
 			h_rect:grab_key_focus()
 		end
-		function h_rect.extra.on_focus_out()
+		function h_rect.extra.clear_focus()
 			h_rect.opacity = 0
 		end
 		function h_rect:on_button_down(x,y,button,num_click)
@@ -559,11 +559,11 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 				if type(h_rect.focus[key]) == "function" then
 					h_rect.focus[key]()
 				elseif screen:find_child(h_rect.focus[key]) then
-					if h_rect.on_focus_out then
-						h_rect.on_focus_out()
+					if h_rect.clear_focus then
+						h_rect.clear_focus()
 					end
 					--screen:find_child(h_rect.focus[key]):grab_key_focus()
-					if screen:find_child(h_rect.focus[key]).on_focus_in then
+					if screen:find_child(h_rect.focus[key]).set_focus then
 						selected_project = v
 						ss = v
 						nn = projects[ i + 1] 
@@ -571,7 +571,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 							ss = nil 
 						end 
 
-						screen:find_child(h_rect.focus[key]).on_focus_in(key)
+						screen:find_child(h_rect.focus[key]).set_focus(key)
 						if h_rect.focus[key] ~= "button_ok" then 
 							scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
 						end
@@ -595,7 +595,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	--Focus
 	button_ok.active.opacity = 255
 	button_ok.dim.opacity = 0
-	scroll.on_focus_in()
+	scroll.set_focus()
 
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(msgw)

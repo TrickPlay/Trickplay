@@ -303,16 +303,16 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		group:add(item_plus, label_plus, separator_plus) 
 
 		function separator_plus:on_button_down(x,y)
-			separator_plus.on_focus_in()
+			separator_plus.set_focus()
 			return true 
 
 		end 
 		function item_plus:on_button_down(x,y)
-			item_plus.on_focus_in()
+			item_plus.set_focus()
 			return true 
 		end 
 		function label_plus:on_button_down(x,y)
-			label_plus.on_focus_in()
+			label_plus.set_focus()
 			return true 
 		end 
 	    function separator_plus:on_button_up(x,y)
@@ -633,11 +633,11 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	      function item:on_button_down()
 		 	 if current_focus then 
-   			 	current_focus.extra.on_focus_out()
+   			 	current_focus.extra.clear_focus()
 			 else
 			 end 
 	         current_focus = group
-		     item.on_focus_in()
+		     item.set_focus()
 			 if item_type then 
                    item:find_child("textInput").extra.item_type = item_type
 	         end 
@@ -665,10 +665,10 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			si = inspector:find_child(si_name)
 
 	       	if (key == keys.Tab and shift == false) then
-		  	     item.on_focus_out()
+		  	     item.clear_focus()
 		  		 local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
 		  		 if (item_group:find_child("item_text"..tostring(next_i))) then
-					 item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
+					 item_group:find_child("item_text"..tostring(next_i)).extra.set_focus()
 		  			 si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 		  		 else 	
 		     		 for i, v in pairs(attr_t_idx) do
@@ -680,8 +680,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		          			    end 
 		          			    if(item_group:find_child(attr_t_idx[i+1])) then
 		               			  local n_item = attr_t_idx[i+1]
-			       				  if item_group:find_child(n_item).extra.on_focus_in then 
-			           				item_group:find_child(n_item).extra.on_focus_in()	
+			       				  if item_group:find_child(n_item).extra.set_focus then 
+			           				item_group:find_child(n_item).extra.set_focus()	
 	       							current_focus = item_group:find_child(n_item)
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 			       				  else
@@ -694,10 +694,10 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
     		     	  end
 		  		 end
 	       	elseif (key == hdr.LeftTab and shift == true) then 
-		     	item.on_focus_out()
+		     	item.clear_focus()
 		     	local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
 		     	if (item_group:find_child("item_text"..tostring(prev_i))) then
-					item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
+					item_group:find_child("item_text"..tostring(prev_i)).extra.set_focus()
 		  			si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 		     	else 	
 		      		for i, v in pairs(attr_t_idx) do
@@ -708,7 +708,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			     				end 
 			     				if(item_group:find_child(attr_t_idx[i-1])) then
 			     					local p_item = attr_t_idx[i-1]
-									item_group:find_child(p_item).extra.on_focus_in()	
+									item_group:find_child(p_item).extra.set_focus()	
 	       							current_focus = item_group:find_child(p_item)
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 									break
@@ -731,17 +731,17 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    	items_list:replace(i,3,up)
 	    	items_list:replace(i,4,down)
 	end
-	function group.extra.on_focus_in()
+	function group.extra.set_focus()
 		current_focus = group 
 		a = items_list.tiles[1][1]
-		a.on_focus_in()
+		a.set_focus()
 		a:grab_key_focus()
     end
 
-    function group.extra.on_focus_out()
+    function group.extra.clear_focus()
 		for i,j in pairs(items_list.children) do 
-			if j.on_focus_out then 
-				j.on_focus_out()
+			if j.clear_focus then 
+				j.clear_focus()
 		    end 
 		end 
 		return true
@@ -821,10 +821,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		unfocus = item_picker:find_child("unfocus")
 		function unfocus:on_button_down (x,y,b,n)
 			if current_focus then 
-   				current_focus.extra.on_focus_out()
+   				current_focus.extra.clear_focus()
 			end 
 	        current_focus = group
-			item_picker.on_focus_in()
+			item_picker.set_focus()
 	        item_picker:grab_key_focus()
 			return true
 		end 
@@ -833,10 +833,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		left_arrow.reactive = true 
 		function left_arrow:on_button_down(x, y, b, n)
 			if current_focus then 
-				current_focus.extra.on_focus_out()
+				current_focus.extra.clear_focus()
 			end 
 	        current_focus = group
-			item_picker.on_focus_in()
+			item_picker.set_focus()
 	        item_picker:grab_key_focus()
 			item_picker.press_left()
 			return true 
@@ -846,10 +846,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		right_arrow.reactive = true 
 		function right_arrow:on_button_down(x, y, b, n)
 			if current_focus then 
-				current_focus.extra.on_focus_out()
+				current_focus.extra.clear_focus()
 			end 
 	        current_focus = group
-			item_picker.on_focus_in()
+			item_picker.set_focus()
 	        item_picker:grab_key_focus()
 			item_picker.press_right()
 			return true 
@@ -880,7 +880,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 	       	elseif key == keys.Right then  
 		     	item_picker.press_right()
 	       	elseif (key == keys.Tab and shift == false) then
-		     	item_picker.on_focus_out()
+		     	item_picker.clear_focus()
 		     	for i, v in pairs(attr_t_idx) do
 		     		if(item_n == v or item_v == v) then 
 		          		while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
@@ -889,8 +889,8 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		          		end 
 		          		if(item_group:find_child(attr_t_idx[i+1])) then
 		               		local n_item = attr_t_idx[i+1]
-							if item_group:find_child(n_item).extra.on_focus_in then 
-			       				item_group:find_child(n_item).extra.on_focus_in()	
+							if item_group:find_child(n_item).extra.set_focus then 
+			       				item_group:find_child(n_item).extra.set_focus()	
 	       						current_focus = item_group:find_child(n_item)
 			       				si.seek_to_middle(0, item_group:find_child(n_item).y)
 							end 
@@ -899,7 +899,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		     		end 
     		     end
 	       elseif (key == keys.Tab and shift == true )then 
-		     item_picker.on_focus_out()
+		     item_picker.clear_focus()
 		      for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
 			     if(attr_t_idx[i-1] == nil) then return true end 
@@ -908,7 +908,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 			     end 
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
-				item_group:find_child(p_item).extra.on_focus_in()	
+				item_group:find_child(p_item).extra.set_focus()	
 	       		current_focus = item_group:find_child(p_item)
 				si.seek_to_middle(0, item_group:find_child(p_item).y)
 				break
@@ -918,13 +918,13 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 	       end 
 		end 
 
-        function group.extra.on_focus_in()
-		 group:find_child("item_picker").extra.on_focus_in()
+        function group.extra.set_focus()
+		 group:find_child("item_picker").extra.set_focus()
 	         group:find_child("item_picker"):grab_key_focus()
         end
 
-        function group.extra.on_focus_out()
-		 group:find_child("item_picker").extra.on_focus_out()
+        function group.extra.clear_focus()
+		 group:find_child("item_picker").extra.clear_focus()
         end 
 		group:add(item_picker)
 		group.h = 23
@@ -1270,24 +1270,24 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 						 local pt = current_focus.parent
 						 pt = pt.extra.type
 						 if pt ~= "TabBar" then 
-							current_focus.extra.on_focus_out()
+							current_focus.extra.clear_focus()
 		   				end 
 					else 
-						current_focus.extra.on_focus_out()
+						current_focus.extra.clear_focus()
 					end
 				end
 			end 
 	       	current_focus = group
-	       	group.extra.on_focus_in()
+	       	group.extra.set_focus()
            	return true
         end
 
 		function group:on_button_down(x,y,button,num_clicks)
 			if current_focus then 
- 	       		current_focus.extra.on_focus_out()
+ 	       		current_focus.extra.clear_focus()
 			end 
 	        current_focus = group
-	        group.extra.on_focus_in()
+	        group.extra.set_focus()
             return true
         end
 
@@ -1314,7 +1314,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 			si = inspector:find_child(si_name)
 
 	    	if key == keys.Return or (key == keys.Tab and shift == false)  then
-	       		group.extra.on_focus_out()
+	       		group.extra.clear_focus()
 		 		for i, j in pairs(attr_t_idx) do
 		    		if(item_n == j or item_v == j) then 
 		          		while(item_group:find_child(attr_t_idx[i+1]) == nil ) do 
@@ -1324,8 +1324,8 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		          		if item_group:find_child("skin") then end 	
 		          		if(item_group:find_child(attr_t_idx[i+1])) then
 		               		local n_item = attr_t_idx[i+1]
-			       			if item_group:find_child(n_item).extra.on_focus_in then 
-			       				item_group:find_child(n_item).extra.on_focus_in()	
+			       			if item_group:find_child(n_item).extra.set_focus then 
+			       				item_group:find_child(n_item).extra.set_focus()	
 	       						current_focus = item_group:find_child(n_item)
 			       			if (si) then 
 				    			si.seek_to_middle(0, item_group:find_child(n_item).y)
@@ -1339,7 +1339,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		     		end 
     			end
 	     elseif (key == hdr.LeftTab and shift == true )then 
-		    group.extra.on_focus_out()
+		    group.extra.clear_focus()
  		    for i, v in pairs(attr_t_idx) do
 				if(item_n == v or item_v == v) then 
 			     	if(attr_t_idx[i-1] == nil) then return true end  
@@ -1350,8 +1350,8 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 			     			end 
 			     			if(item_group:find_child(attr_t_idx[i-1])) then
 			     				local p_item = attr_t_idx[i-1]
-								if item_group:find_child(p_item).extra.on_focus_in then 	
-				     				item_group:find_child(p_item).extra.on_focus_in()	
+								if item_group:find_child(p_item).extra.set_focus then 	
+				     				item_group:find_child(p_item).extra.set_focus()	
 	       							current_focus = item_group:find_child(p_item)
 			             			if (si) then 
 				          				si.seek_to_middle(0, item_group:find_child(p_item).y)
@@ -1375,14 +1375,14 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
    		end 
 
     	group:add(input_text)
-        function group.extra.on_focus_in()
+        function group.extra.set_focus()
 	         current_focus = group 
              ring.opacity = 0
              input_text.cursor_visible = true
              focus.opacity = 255
 	         input_text:grab_key_focus(input_text)
         end
-        function group.extra.on_focus_out()
+        function group.extra.clear_focus()
              focus.opacity = 0
              input_text.cursor_visible = false
              ring.opacity = 255
@@ -1761,9 +1761,9 @@ function factory.draw_focus_changer(v)
 		focus:add(text11, focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
 	end 
 	
-	function focus.extra.on_focus_in()
+	function focus.extra.set_focus()
 	 	if current_focus then 
-	 		current_focus.extra.on_focus_out()
+	 		current_focus.extra.clear_focus()
 	 	end 
 	 	current_focus = focus
 	 	for i,j in pairs(focus.children) do
@@ -1774,7 +1774,7 @@ function factory.draw_focus_changer(v)
 	 	end 
 	end 
 
-	function focus.extra.on_focus_out(call_by_inspector)
+	function focus.extra.clear_focus(call_by_inspector)
 		focus_type = ""
 		input_mode = hdr.S_POPUP
         for i,j in pairs(focus.children) do
@@ -1788,8 +1788,8 @@ function factory.draw_focus_changer(v)
 	function make_on_button_down_f(r)
      	function r:on_button_down(x,y,b,n)
 	 		if focus then 
-				if focus.extra.on_focus_in then 
-        			focus.extra.on_focus_in()
+				if focus.extra.set_focus then 
+        			focus.extra.set_focus()
 				end 
 			end
 	   		focus_type = r.name:sub(2,-1)

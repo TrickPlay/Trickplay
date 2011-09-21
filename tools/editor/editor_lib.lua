@@ -42,11 +42,11 @@ function editor_ui.button(table)
         extra = {type = "EditorButton"}
     } 
     
-    function b_group.extra.on_focus_in(key) 
+    function b_group.extra.set_focus(key) 
 
 		if current_focus ~= nil then 
-			if current_focus.on_focus_out then 
-				current_focus.on_focus_out()
+			if current_focus.clear_focus then 
+				current_focus.clear_focus()
 			end 
 		end 
 
@@ -77,7 +77,7 @@ function editor_ui.button(table)
 	
     end
     
-    function b_group.extra.on_focus_out(key) 
+    function b_group.extra.clear_focus(key) 
 		if key == "active" then 
         	active.opacity = 255
 	    	button.opacity = 0
@@ -144,40 +144,40 @@ function editor_ui.button(table)
 	    function b_group:on_button_down(x,y,b,n)
 			if current_focus ~= b_group then 
 				if current_focus then 
-		     		current_focus.on_focus_out()
+		     		current_focus.clear_focus()
 				end
 			end 
-		    b_group.extra.on_focus_in("focus")
+		    b_group.extra.set_focus("focus")
 			return true
 	  	end 
 		function b_group:on_button_up(x,y,b,n)
 				if current_focus ~= b_group then 
 					if current_focus then 
-		     			current_focus.on_focus_out()
+		     			current_focus.clear_focus()
 					end
 				end 
-				b_group.extra.on_focus_in(keys.Return)
+				b_group.extra.set_focus(keys.Return)
 				return true
 	     end 
 	     function b_group:on_enter()
 		 		if current_focus ~= b_group then 
 					if current_focus then 
-		     			current_focus.on_focus_out()
+		     			current_focus.clear_focus()
 					end
 				end 
-				b_group.extra.on_focus_in("focus")
+				b_group.extra.set_focus("focus")
 		 end 
 
 	     function b_group:on_leave()
 			if b_group.active_button == true then 
-				b_group.on_focus_out("active")
+				b_group.clear_focus("active")
 			else 
-				b_group.on_focus_out()
+				b_group.clear_focus()
 			end 
 
 			if p.focus_object ~= nil then 
-				if 	p.focus_object.on_focus_in then
-					p.focus_object.on_focus_in()
+				if 	p.focus_object.set_focus then
+					p.focus_object.set_focus()
 				end
 			end 
 		 end 
@@ -187,12 +187,12 @@ function editor_ui.button(table)
 					if type(b_group.focus[key]) == "function" then
 							b_group.focus[key]()
 					elseif screen:find_child(b_group.focus[key]) then
-						if b_group.on_focus_out then
-							b_group.on_focus_out()
+						if b_group.clear_focus then
+							b_group.clear_focus()
 						end
 						screen:find_child(b_group.focus[key]):grab_key_focus()
-						if screen:find_child(b_group.focus[key]).on_focus_in then
-							screen:find_child(b_group.focus[key]).on_focus_in(key)
+						if screen:find_child(b_group.focus[key]).set_focus then
+							screen:find_child(b_group.focus[key]).set_focus(key)
 						end
 					else 
 					   b_group:grab_key_focus()
@@ -348,7 +348,7 @@ function editor_ui.scrollPane(t)
     }
 
 
-	 function scroll_group.extra.on_focus_in(key) 
+	 function scroll_group.extra.set_focus(key) 
 		for i,j in pairs (scroll_group.content.children) do 
 			if j.name then 
 			if string.find(j.name, "h_rect") ~= nil then 
@@ -360,7 +360,7 @@ function editor_ui.scrollPane(t)
 		end 
     end
     
-    function scroll_group.extra.on_focus_out(key) 
+    function scroll_group.extra.clear_focus(key) 
     end
 
     scroll_group.extra.seek_to = function(x,y)
@@ -381,7 +381,7 @@ function editor_ui.scrollPane(t)
 		end,
 	}
 	scroll_group.on_key_down = function(self,key)
-		scroll_group.extra.on_focus_in()
+		scroll_group.extra.set_focus()
 	end
 	
 	scroll_y = function(dir)
@@ -864,11 +864,11 @@ function editor_ui.tabBar(t)
             display_tab = function(self,index)
                 if index < 1 or index > #p.tab_labels then return end
                 p.tabs[current_index]:hide()
-                p.buttons[current_index].on_focus_out()
+                p.buttons[current_index].clear_focus()
                 current_index = index
                 p.tabs[current_index]:show()
                 p.buttons[current_index]:raise_to_top()
-                p.buttons[current_index].on_focus_in()
+                p.buttons[current_index].set_focus()
             end,
             previous_tab = function(self)
                 if current_index == 1 then return end
@@ -927,7 +927,7 @@ function editor_ui.tabBar(t)
 
 			p.tabs[i]:hide()
             p.buttons[i].position = {0,0}
-            p.buttons[i].on_focus_out()
+            p.buttons[i].clear_focus()
 
             if p.tab_position == "TOP" then
                 p.buttons[i].x = (p.tab_spacing+p.buttons[i].w)*(i-1)
@@ -1079,7 +1079,7 @@ function editor_ui.checkBoxGroup(t)
           extra = {type = "CheckBoxGroup"}
     }
 
-	function cb_group.extra.on_focus_in()
+	function cb_group.extra.set_focus()
 	  	current_focus = cb_group
         if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    	boxes:find_child("box"..1).opacity = 0 
@@ -1088,7 +1088,7 @@ function editor_ui.checkBoxGroup(t)
 		boxes:find_child("box"..1):grab_key_focus() 
     end
 
-    function cb_group.extra.on_focus_out()
+    function cb_group.extra.clear_focus()
         if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 			for i=1, table.getn(boxes.children)/2 do 
 	    		boxes:find_child("box"..i).opacity = 255 
