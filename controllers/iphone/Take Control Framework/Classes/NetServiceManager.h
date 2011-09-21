@@ -30,7 +30,7 @@ NSNetServiceDelegate> {
     NSMutableArray *services;
 }
 
-- (id)initWithDelegate:(id)client;
+- (id)initWithClientDelegate:(id <NetServiceManagerDelegate>)client;
 
 - (void)stop;
 - (void)start;

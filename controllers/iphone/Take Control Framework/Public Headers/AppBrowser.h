@@ -40,7 +40,7 @@
 
 
 @interface AppBrowser : NSObject {
-    @private
+    @protected
     id <AppBrowserDelegate> delegate;
     
     TVConnection *tvConnection;
@@ -75,15 +75,8 @@
 - (AppBrowserViewController *)createAppBrowserViewController;
 
 - (void)refresh;
-// prevents retain cycles
 - (void)cancelRefresh;
-//- (BOOL)hasRunningApp;
-
-//- (NSDictionary *)getCurrentAppInfo;
 - (void)refreshCurrentApp;
-//- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
-//- (NSArray *)getAvailableAppsInfo;
-//- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)delegate;
 - (void)refreshAvailableApps;
 - (void)launchApp:(AppInfo *)app;
 

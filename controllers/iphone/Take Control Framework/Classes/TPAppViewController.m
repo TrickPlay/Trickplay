@@ -11,8 +11,6 @@
 #import "TrickplayScreen.h"
 #import "AdvancedUIObjectManager.h"
 #import "Extensions.h"
-#import "ResourceManager.h"
-#import "SocketManager.h"
 
 @implementation TPAppViewController
 
@@ -134,12 +132,12 @@
 	backgroundWidth = mainframe.size.width;
     
     // Manages resources created with declare_resource
-    resourceManager = [[ResourceManager alloc] initWithSocketManager:socketManager];
+    resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
     
     camera = nil;
 	
     // For audio playback
-    audioController = [[AudioController alloc] initWithResourceManager:resourceManager socketManager:socketManager];
+    audioController = [[AudioController alloc] initWithResourceManager:resourceManager tvConnection:tvConnection];
     // Controls touches
     touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
     // Controls Acceleration

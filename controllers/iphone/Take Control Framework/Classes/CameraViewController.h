@@ -41,7 +41,7 @@
     
     UINavigationController *navController;
     
-    id <CameraViewControllerDelegate> __unsafe_unretained delegate;
+    id <CameraViewControllerDelegate> delegate;
 }
 
 @property (retain) NSString *titleLabel;

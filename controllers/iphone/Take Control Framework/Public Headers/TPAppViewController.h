@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
+#import "ResourceManager.h"
+#import "SocketManager.h"
 
 @class TPAppViewController;
 
@@ -136,9 +138,6 @@
 
 #define CAMERA_BUTTON_TITLE "Camera"
 #define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
-
-@class ResourceManager;
-@class SocketManager;
 
 @interface TPAppViewController : UIViewController <SocketManagerDelegate, 
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,

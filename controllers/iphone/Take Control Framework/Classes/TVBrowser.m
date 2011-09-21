@@ -7,27 +7,69 @@
 //
 
 #import "TVBrowser.h"
+#import "NetServiceManager.h"
+#import "TVConnection.h"
 #import "Extensions.h"
 
-@implementation TVBrowser
-
-@synthesize delegate;
-
-- (id)init {
-    return [self initWithDelegate:nil];
+@interface TVBrowserContext : NSObject <NetServiceManagerDelegate> {
+    @protected
+    // The netServiceManager informs the TVBrowser of mDNS broadcasts
+    NetServiceManager *netServiceManager;
+    
+    NSMutableArray *tvConnections;
+    NSMutableArray *connectedServices;
+    NSMutableArray *viewControllers;
+    
+    TVBrowser *tvBrowser;
 }
 
-- (id)initWithDelegate:(id<TVBrowserDelegate>)theDelegate {
+@property (nonatomic, readonly) NetServiceManager *netServiceManager;
+@property (nonatomic, readonly) NSMutableArray *tvConnections;
+@property (nonatomic, readonly) NSMutableArray *connectedServices;
+@property (nonatomic, readonly) NSMutableArray *viewControllers;
+
+- (id)initWithTVBrowser:(TVBrowser *)tvBrowser;
+
+- (void)addViewController:(TVBrowserViewController *)viewController;
+- (void)invalidateViewController:(TVBrowserViewController *)viewController;
+- (void)viewControllersRefresh;
+
+- (TVConnection *)getConnectionForService:(NSNetService *)service;
+- (void)invalidateTVConnection:(TVConnection *)tvConnection;
+
+- (void)connectToService:(NSNetService *)service;
+
+@end
+
+
+
+@implementation TVBrowserContext
+
+@synthesize netServiceManager;
+@synthesize tvConnections;
+@synthesize connectedServices;
+@synthesize viewControllers;
+
+- (id)init {
+    [self initWithTVBrowser:nil];
+}
+
+- (id)initWithTVBrowser:(TVBrowser *)_tvBrowser {
+    if (!_tvBrowser) {
+        [self release];
+        return nil;
+    }
+    
     self = [super init];
     if (self) {
         tvConnections = [[NSMutableArray alloc] initWithCapacity:5];
         connectedServices = [[NSMutableArray alloc] initWithCapacity:5];
         viewControllers = [[NSMutableArray alloc] initWithCapacity:5];
-        self.delegate = theDelegate;
+        tvBrowser = _tvBrowser;
         
         // Initialize the NSNetServiceBrowser stuff
         // The netServiceManager manages advertisements from service broadcasts
-        netServiceManager = [[NetServiceManager alloc] initWithDelegate:self];
+        netServiceManager = [[NetServiceManager alloc] initWithClientDelegate:self];
         
         [netServiceManager start];
     }
@@ -37,12 +79,6 @@
 
 #pragma mark -
 #pragma mark TVBrowserViewController
-
-- (TVBrowserViewController *)createTVBrowserViewController {
-    TVBrowserViewController *viewController = [[TVBrowserViewController alloc] initWithNibName:@"TVBrowserViewController" bundle:nil tvBrowser:self];
-        
-    return viewController;
-}
 
 - (void)addViewController:(TVBrowserViewController *)viewController {
     [viewControllers addObject:[NSValue valueWithPointer:viewController]];
@@ -104,11 +140,11 @@
 }
 
 - (void)informOfSameConnection:(TVConnection *)tvConnection {
-    [delegate tvBrowser:self didEstablishConnection:tvConnection newConnection:NO];
+    [tvBrowser.delegate tvBrowser:tvBrowser didEstablishConnection:tvConnection newConnection:NO];
 }
 
 - (void)informOfFailedService:(NSNetService *)service {
-    [delegate tvBrowser:self didNotEstablishConnectionToService:service];
+    [tvBrowser.delegate tvBrowser:tvBrowser didNotEstablishConnectionToService:service];
 }
 
 - (void)connectToService:(NSNetService *)service {
@@ -155,16 +191,16 @@
     TVConnection *connection = [[[TVConnection alloc] initWithService:service delegate:nil] autorelease];
     
     if (connection) {
-        [connection setTVBrowser:self];
+        [connection setTVBrowser:tvBrowser];
         [connectedServices addObject:service];
         [tvConnections addObject:[NSValue valueWithPointer:connection]];
     }
     
-    if (delegate) {
+    if (tvBrowser.delegate) {
         if (connection) {
-            [delegate tvBrowser:self didEstablishConnection:connection newConnection:YES];
+            [tvBrowser.delegate tvBrowser:tvBrowser didEstablishConnection:connection newConnection:YES];
         } else {
-            [delegate tvBrowser:self didNotEstablishConnectionToService:service];
+            [tvBrowser.delegate tvBrowser:tvBrowser didNotEstablishConnectionToService:service];
         }
     }
     
@@ -181,29 +217,30 @@
 - (void)didNotResolveService:(NSNetService *)service {
     NSLog(@"TVBrowser did not resolve service");
     
-    [self refreshServices];
-    if (delegate) {
-        [delegate tvBrowser:self didNotEstablishConnectionToService:service];
+    [tvBrowser refreshServices];
+    if (tvBrowser.delegate) {
+        [tvBrowser.delegate tvBrowser:tvBrowser didNotEstablishConnectionToService:service];
     }
     
     [self viewControllersRefresh];
 }
+
 
 - (void)didStopService:(NSNetService *)service {
     // Nothing to do
 }
 
 - (void)didFindService:(NSNetService *)service {
-    if (delegate) {
-        [delegate tvBrowser:self didFindService:service];
+    if (tvBrowser.delegate) {
+        [tvBrowser.delegate tvBrowser:tvBrowser didFindService:service];
     }
     
     [self viewControllersRefresh];
 }
 
 - (void)didRemoveService:(NSNetService *)service {
-    if (delegate) {
-        [delegate tvBrowser:self didRemoveService:service];
+    if (tvBrowser.delegate) {
+        [tvBrowser.delegate tvBrowser:tvBrowser didRemoveService:service];
     }
     
     [self viewControllersRefresh];
@@ -222,25 +259,9 @@
 }
 
 #pragma mark -
-#pragma mark Getters
-
-- (NSArray *)getConnectedServices {
-    return [[connectedServices retain] autorelease];
-}
-
-- (NSArray *)getConnectingServices {
-    return netServiceManager.connectingServices;
-}
-
-- (NSArray *)getAllServices {
-    return netServiceManager.services;
-}
-
-#pragma mark -
-#pragma mark Memory Management
+#pragma mark Deallocation
 
 - (void)dealloc {
-    NSLog(@"TVBrowser Dealloc");
     for (unsigned int i = 0; i < tvConnections.count; i++) {
         TVConnection *connection = [[tvConnections objectAtIndex:i] pointerValue];
         [connection setTVBrowser:nil];
@@ -255,6 +276,117 @@
     [netServiceManager release];
     netServiceManager = nil;
     
+    tvBrowser = nil;
+    
+    [super dealloc];
+}
+
+@end
+
+
+
+
+
+
+@implementation TVBrowser
+
+@synthesize delegate;
+
+- (id)init {
+    return [self initWithDelegate:nil];
+}
+
+- (id)initWithDelegate:(id<TVBrowserDelegate>)theDelegate {
+    self = [super init];
+    if (self) {
+        context = [[TVBrowserContext alloc] initWithTVBrowser:self];
+        if (!context) {
+            [self release];
+            return nil;
+        }
+        
+        self.delegate = theDelegate;
+    }
+    
+    return self;
+}
+
+#pragma mark -
+#pragma mark TVBrowserViewController
+
+- (TVBrowserViewController *)createTVBrowserViewController {
+    TVBrowserViewController *viewController = [[TVBrowserViewController alloc] initWithNibName:@"TVBrowserViewController" bundle:nil tvBrowser:self];
+        
+    return viewController;
+}
+
+- (void)addViewController:(TVBrowserViewController *)viewController {
+    [(TVBrowserContext *)context addViewController:viewController];
+}
+
+- (void)invalidateViewController:(TVBrowserViewController *)viewController {
+    [(TVBrowserContext *)context invalidateViewController:viewController];
+}
+
+- (void)viewControllersRefresh {
+    [(TVBrowserContext *)context viewControllersRefresh];
+}
+
+#pragma mark -
+#pragma mark Managing TVConnections
+
+// TODO: more secure method will prevent from 1 phone having 10+ connections to the same
+// TV
+- (TVConnection *)getConnectionForService:(NSNetService *)service {
+    return [(TVBrowserContext *)context getConnectionForService:service];
+}
+
+- (void)invalidateTVConnection:(TVConnection *)tvConnection {
+    [(TVBrowserContext *)context invalidateTVConnection:tvConnection];
+}
+
+- (void)connectToService:(NSNetService *)service {
+    [(TVBrowserContext *)context connectToService:service];
+}
+
+#pragma mark -
+#pragma mark Managing Broadcasted Services
+
+- (void)startSearchForServices {
+    [(TVBrowserContext *)context startSearchForServices];
+}
+
+- (void)stopSearchForServices {
+    [(TVBrowserContext *)context stopSearchForServices];
+}
+
+- (void)refreshServices {
+    [(TVBrowserContext *)context refreshServices];
+}
+
+#pragma mark -
+#pragma mark Getters
+
+- (NSArray *)getConnectedServices {
+    return [[((TVBrowserContext *)context).connectedServices retain] autorelease];
+}
+
+- (NSArray *)getConnectingServices {
+    return ((TVBrowserContext *)context).netServiceManager.connectingServices;
+}
+
+- (NSArray *)getAllServices {
+    return ((TVBrowserContext *)context).netServiceManager.services;
+}
+
+#pragma mark -
+#pragma mark Memory Management
+
+- (void)dealloc {
+    NSLog(@"TVBrowser Dealloc");
+    
+    [context release];
+    context = nil;
     self.delegate = nil;
     
     [super dealloc];
