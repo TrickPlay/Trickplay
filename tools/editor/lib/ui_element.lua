@@ -2364,7 +2364,7 @@ Return:
  		tb_group - Group containing the Toast alert
 
 Extra Function:
-		start_timer() - Start the timer of the Toast alert
+		popup() - Start the timer of the Toast alert
 ]]
 
 
@@ -2376,7 +2376,7 @@ function ui_element.toastAlert(t)
  	skin = "Custom",  
 	ui_width = 770,
 	ui_height = 113,
-	label = "Toast Alert Title",
+	title = "Toast Alert Title",
 	message = "Toast alert message",
 	title_font = "FreeSans Medium 22px", 
 	message_font = "FreeSans Medium 20px", 
@@ -2442,7 +2442,7 @@ function ui_element.toastAlert(t)
 		icon = assets(p.icon)
     	icon:set{size = {150, 150}, name = "icon", position  = {tb_group_cur_x/2, -80}} --30,30
 
-    	title= Text{text = p.label, font= p.title_font, color = p.title_color}     
+    	title= Text{text = p.title, font= p.title_font, color = p.title_color}     
     	title:set{name = "title", position = { icon.w + icon.x + 20 , tb_group_cur_y }}  --,50
 
     	message= Text{text = p.message, font= p.message_font, color = p.message_color, wrap = true, wrap_mode = "CHAR"}     
@@ -2482,7 +2482,7 @@ function ui_element.toastAlert(t)
         tb_group_timer:stop()
      end 
 
-     function tb_group.extra.start_timer() 
+     function tb_group.extra.popup() 
 	 	tb_group:show()
 		tb_group_timer:start()
      end 
