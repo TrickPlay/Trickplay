@@ -1220,6 +1220,8 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 			end 
 		end 
 		screen.grab_key_focus(screen) 
+
+	
 		return true
 	end 
 
@@ -1263,6 +1265,17 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 	    	end 
 	    end 
 		menu.reactivate_menu()
+
+		if x and y and button and num_clicks then 
+			if org_items then 
+				if v.tab_labels then 
+					v.tab_labels = org_items 
+				else 
+					v.items = org_items  
+				end 
+			end 
+		end 
+
 		return true
 	end 
 

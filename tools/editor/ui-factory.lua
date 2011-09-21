@@ -180,7 +180,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	local group = Group{}
 	local PADDING_X     = 7 -- The focus ring has this much padding around it
     local PADDING_Y     = 7
-	local plus, item_plus, label_plus, separator_plus, rows --, org_items
+	local plus, item_plus, label_plus, separator_plus, rows 
 
 	if item_n == "tab_labels" then 
 		rows = table.getn(v.tab_labels)
@@ -266,7 +266,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			end 
 
 			v:insert_tab(#v.tab_labels + 1)
-			--inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -471,10 +470,26 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 				return 
 			end 
 
-			if v.tab_labels then 
+			if v.extra.type == "TabBar" then 
+				for i, j in pairs (v.tab_labels) do
+					v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	end 
 				v:remove_tab(tonumber(string.sub(minus.name, 11,-1)))
-			else 
+			elseif v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
+				for i, j in pairs (v.items) do
+					v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	end 
 				v.items = util.table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+			else 
+				for i, j in pairs (v.items) do
+					if j["type"] == "label" then 
+		    			j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		  			elseif j["type"] == "item" then 
+		     			j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+					end
+		     	end 
+				v.items = util.table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+
 			end 
 
 			local siy = inspector:find_child("si_items").content.y
