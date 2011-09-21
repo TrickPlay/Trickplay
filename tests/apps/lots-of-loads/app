@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.tests.lots-of-loads",
+    release     = "1",
+    version     = "1.0",
+    name        = "Lots of Loads",
+    author      = "Craig Hughes",
+    copyright   = "© Trickplay Inc."
+}
+
