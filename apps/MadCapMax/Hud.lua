@@ -17,7 +17,7 @@ local pause_screen = Group{
     }
 }
 
-local life_meter = Image{src = assets_path_dir..hud_path.."life-meter.png",x = 5,y = 5}
+local life_meter = Image{src = assets_path_dir..hud_path.."life-meter.png",x = 270,y = 1024}
 local life_gone  = Image{src = assets_path_dir..hud_path.."life-gone.png"}
 
 poop:move_anchor_point(poop.w/2,0)
@@ -39,7 +39,7 @@ local spot_i
 local lives = {}
 for i = 1, 3 do
     
-    lives[i] = Clone{source = life_gone, x =  65 + (i-1)*27, y = 5 }
+    lives[i] = Clone{source = life_gone, x =  life_meter.x+7 + (i-1)*27, y = life_meter.y+5 }
     
 end
 

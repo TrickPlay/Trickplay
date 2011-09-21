@@ -145,6 +145,9 @@ function bird:collect_cracker()
     sk:inc("crackers")
     hud:inc_poop()
 end
+function bird:get_vx()
+    return vx
+end
 
 function bird:collect_cherry()
     
@@ -634,16 +637,16 @@ function bird.undo_move(item)
         bird.y = bird.y + undo_dy
     elseif     bird.x1+undo_dx > item.x2 or bird.x2+undo_dx < item.x1 then
         bird.x = bird.x + undo_dx
+        if bird.x < lvl.left_screen_edge then
+            
+            bird:death()
+            
+        end
     end
     
     
     
     
-    if bird.x < lvl.left_screen_edge then
-        
-        bird:death()
-        
-    end
     
 end
 
