@@ -394,8 +394,8 @@ function screen_ui.dragging_up(x,y)
 
 	if current_focus ~= nil and  current_focus.extra.type == "EditorButton" then 
 		local temp_focus = current_focus 
-		current_focus.on_focus_out()
-		temp_focus.on_focus_in()
+		current_focus.clear_focus()
+		temp_focus.set_focus()
 		return true
 	end 
 

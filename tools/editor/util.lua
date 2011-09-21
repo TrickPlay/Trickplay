@@ -1489,11 +1489,11 @@ function util.itemTostring(v, d_list, t_list)
 			.."if type("..v.name..".focus[key]) == \"function\" then\n\t\t\t"
 			..v.name..".focus[key]()\n\t\t"
 			.."elseif screen:find_child("..v.name..".focus[key]) then\n\t\t\t"
-			.."if "..v.name..".on_focus_out then\n\t\t\t\t"
-			..v.name..".on_focus_out(key)\n\t\t\t".."end\n\t\t\t" -- on_focus_out
+			.."if "..v.name..".clear_focus then\n\t\t\t\t"
+			..v.name..".clear_focus(key)\n\t\t\t".."end\n\t\t\t" -- clear_focus
 			.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
-			.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
-        	.."screen:find_child("..v.name..".focus[key]).on_focus_in(key)\n\t\t\t"..scroll_seek_to_line.."end\n\t\t"
+			.."if ".."screen:find_child("..v.name..".focus[key]).set_focus then\n\t\t\t\t"
+        	.."screen:find_child("..v.name..".focus[key]).set_focus(key)\n\t\t\t"..scroll_seek_to_line.."end\n\t\t"
 			.."end\n\t"
 			.."end\n\t"
 			.."return true\n"

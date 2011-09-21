@@ -141,18 +141,18 @@ local function guideline_inspector(v)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		text_input.on_focus_in()
+		text_input.set_focus()
 	end
 
 	local tab_func = function()
-		text_input.on_focus_out()
+		text_input.clear_focus()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 		button_cancel:grab_key_focus()
 	end
 
@@ -213,12 +213,12 @@ local function guideline_inspector(v)
 
 				if key_focus_obj == nil then return end 
 
-				if text_input.on_focus_out then
-					text_input.on_focus_out()
+				if text_input.clear_focus then
+					text_input.clear_focus()
 				end
 				key_focus_obj:grab_key_focus()
-				if key_focus_obj.on_focus_in then
-					key_focus_obj.on_focus_in(key)
+				if key_focus_obj.set_focus then
+					key_focus_obj.set_focus(key)
 				end
 			end
 		end
@@ -661,11 +661,11 @@ local function open_files(input_purpose, bg_image, inspector)
 
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		scroll.on_focus_in()
+		scroll.set_focus()
 	end
 	
 	
@@ -673,7 +673,7 @@ local function open_files(input_purpose, bg_image, inspector)
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	
@@ -761,11 +761,11 @@ local function open_files(input_purpose, bg_image, inspector)
 				item_t:on_button_down()
 				return true
 			end
-			function h_rect.extra.on_focus_in()
+			function h_rect.extra.set_focus()
 				h_rect.opacity = 255
 				h_rect:grab_key_focus()
 			end
-			function h_rect.extra.on_focus_out()
+			function h_rect.extra.clear_focus()
 				h_rect.opacity = 0
 			end
 			function h_rect:on_button_down(x,y,button,num_click)
@@ -797,10 +797,10 @@ local function open_files(input_purpose, bg_image, inspector)
 					if type(h_rect.focus[key]) == "function" then
 						h_rect.focus[key]()
 					elseif key_focus_obj then
-						if h_rect.on_focus_out then
-							h_rect.on_focus_out()
+						if h_rect.clear_focus then
+							h_rect.clear_focus()
 						end
-						if key_focus_obj.on_focus_in then
+						if key_focus_obj.set_focus then
 							selected_file = v
 
 							ss = v
@@ -810,7 +810,7 @@ local function open_files(input_purpose, bg_image, inspector)
 								ss = nil 
 							end 
 
-							key_focus_obj.on_focus_in(key)
+							key_focus_obj.set_focus(key)
 							if h_rect.focus[key] ~= "button_ok" then 
 								scroll.seek_to_middle(0,key_focus_obj.y) 
 							end
@@ -838,7 +838,7 @@ local function open_files(input_purpose, bg_image, inspector)
 	--Focus
 	button_ok.active.opacity = 255
 	button_ok.dim.opacity = 0
-	scroll.on_focus_in()
+	scroll.set_focus()
 
 	function xbox:on_button_down(x,y,button,num_clicks)
 		if screen:find_child(msgw.name) then 
@@ -1011,7 +1011,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
@@ -1202,7 +1202,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 	--Focus
 	button_ok.active.opacity = 255
 	button_ok.dim.opacity = 0
-	scroll_info.on_focus_in()
+	scroll_info.set_focus()
 
 	local var_i = 1 
 
@@ -1489,7 +1489,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 											end 
 										end 
 									end 
-									added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add on_focus_in and on_focus_out function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.tiles[r][c]\n\t\t\t\tif cell_obj.extra.on_focus_in == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_in ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.on_focus_out == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_out ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
+									added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add set_focus and clear_focus function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.tiles[r][c]\n\t\t\t\tif cell_obj.extra.set_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.set_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.clear_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.clear_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
 
 								elseif j.extra.type == "Group" then  
 									gen_added_stub_code(j)
@@ -1581,7 +1581,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
     end 
 
     if current_time_focus then 
-		current_time_focus.on_focus_out()
+		current_time_focus.clear_focus()
 		current_time_focus = nil
     end 
 	
@@ -1659,19 +1659,19 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		text_input.on_focus_in()
+		text_input.set_focus()
 	end
 
 	local tab_func = function()
-		text_input.on_focus_out()
+		text_input.clear_focus()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	-- Focus Destination 
@@ -1719,12 +1719,12 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
 			elseif screen:find_child(text_input.focus[key]) then
-				if text_input.on_focus_out then
-					text_input.on_focus_out()
+				if text_input.clear_focus then
+					text_input.clear_focus()
 				end
 				screen:find_child(text_input.focus[key]):grab_key_focus()
-				if screen:find_child(text_input.focus[key]).on_focus_in then
-					screen:find_child(text_input.focus[key]).on_focus_in(key)
+				if screen:find_child(text_input.focus[key]).set_focus then
+					screen:find_child(text_input.focus[key]).set_focus(key)
 				end
 			end
 		end
@@ -3218,11 +3218,11 @@ function editor.ui_elements()
 	
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		scroll.on_focus_in()
+		scroll.set_focus()
 	end
 
 	--Focus Destination
@@ -3234,7 +3234,7 @@ function editor.ui_elements()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	local msgw = Group {
@@ -3303,11 +3303,11 @@ function editor.ui_elements()
 			widget_t:on_button_down()
 			--return true
 		end
-		function h_rect.extra.on_focus_in()
+		function h_rect.extra.set_focus()
 			h_rect.opacity = 255
 			h_rect:grab_key_focus()
 		end
-		function h_rect.extra.on_focus_out()
+		function h_rect.extra.clear_focus()
 			h_rect.opacity = 0
 		end
 		function h_rect:on_button_down(x,y,button,num_click)
@@ -3330,18 +3330,18 @@ function editor.ui_elements()
 				if type(h_rect.focus[key]) == "function" then
 					h_rect.focus[key]()
 				elseif screen:find_child(h_rect.focus[key]) then
-					if h_rect.on_focus_out then
-						h_rect.on_focus_out()
+					if h_rect.clear_focus then
+						h_rect.clear_focus()
 					end
 					--screen:find_child(h_rect.focus[key]):grab_key_focus()
-					if screen:find_child(h_rect.focus[key]).on_focus_in then
+					if screen:find_child(h_rect.focus[key]).set_focus then
 						selected_ui_element = v
 						ss = v
 						nn = allUiElements[i+1]
 						if key == keys.Return then 
 								ss = nil 
 						end 
-						screen:find_child(h_rect.focus[key]).on_focus_in(key)
+						screen:find_child(h_rect.focus[key]).set_focus(key)
 						if h_rect.focus[key] ~= "button_ok" then 
 							scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
 						end
@@ -3361,7 +3361,7 @@ function editor.ui_elements()
 	--Focus
 	button_ok.active.opacity = 255
 	button_ok.dim.opacity = 0
-	scroll.on_focus_in()
+	scroll.set_focus()
 
 
 	function xbox:on_button_down(x,y,button,num_clicks,textUIElement)
@@ -3485,10 +3485,10 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		end 
 		if button_nok then 
 			button_nok:grab_key_focus()
-			button_nok.on_focus_in()
+			button_nok.set_focus()
 		else 
 			button_cancel:grab_key_focus()
-			button_cancel.on_focus_in()
+			button_cancel.set_focus()
 		end 
 	end
 
@@ -3511,7 +3511,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
@@ -3531,12 +3531,12 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		if key == keys.Return then 
 			button_cancel.pressed()
 		elseif (key == hdr.Tab and shift == false) or key == keys.Right then 
-			button_cancel.on_focus_out()
-			button_ok.on_focus_in()
+			button_cancel.clear_focus()
+			button_ok.set_focus()
 		elseif (key == hdr.TabLeft and shift == true) or key == keys.Left then 
 			if button_nok then 
-				button_cancel.on_focus_out()
-				button_nok.on_focus_in()
+				button_cancel.clear_focus()
+				button_nok.set_focus()
 			end
 		end 
 		return true
@@ -3546,8 +3546,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		if key == keys.Return then 
 			button_ok.pressed()
 		elseif (key == hdr.TabLeft and shift == true) or key == keys.Left then 
-			button_ok.on_focus_out()
-			button_cancel.on_focus_in()
+			button_ok.clear_focus()
+			button_cancel.set_focus()
 		end 
 		return true
 	end 

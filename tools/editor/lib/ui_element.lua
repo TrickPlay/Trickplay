@@ -126,15 +126,12 @@ function ui_element.populate_to(grp, tbl)
 
 end 
 
-function ui_element.set_cursor_pointer (src_file)
-	--user_mouse_pointer.src = "/assets/images/"..src_file
-end 
 
 function ui_element.transit_to (prev_grp, next_grp, effect)
 	
 	for i, j in pairs (g.children) do
-		if j.on_focus_out then 
-				j.on_focus_out()
+		if j.clear_focus then 
+				j.clear_focus()
 		end
 	end 
 	
@@ -856,11 +853,11 @@ local function draw_timeline(timeline, p, duration, num_pointer)
 	local function make_pointer_focus(pointerName)
 	    local pointer = timeline:find_child(pointerName)
 	    if pointer then 
-	       function pointer.extra.on_focus_in()
+	       function pointer.extra.set_focus()
 		    timeline:find_child(pointer.name).src = "lib/assets/leftfocus.png"
 	       end
       
-	       function pointer.extra.on_focus_out()
+	       function pointer.extra.clear_focus()
 		 pointer.src = "lib/assets/left.png"
 		 for n,m in pairs (g.children) do 
 		     if m.extra.timeline then 
@@ -1089,10 +1086,10 @@ function ui_element.timeline(t)
 		      end
 			
 		      if current_time_focus then 
-			     current_time_focus.extra.on_focus_out()
+			     current_time_focus.extra.clear_focus()
 		      end 
 		      current_time_focus = timeline:find_child("pointer"..tostring(new_timepoint)) 
-		      timeline:find_child("pointer"..tostring(new_timepoint)).on_focus_in()
+		      timeline:find_child("pointer"..tostring(new_timepoint)).set_focus()
 
         	      for n,m in pairs (g.children) do 
 	                  if m.extra.timeline then 
@@ -1116,10 +1113,10 @@ function ui_element.timeline(t)
 
 	 function pointer:on_button_down(x,y,b,n)
 	    if current_time_focus then 
-	         current_time_focus.on_focus_out()
+	         current_time_focus.clear_focus()
 	    end 
 	    current_time_focus = pointer
-	    pointer.on_focus_in()
+	    pointer.set_focus()
 	    
             for n,m in pairs (g.children) do 
 		if pointer.extra.set == false then 
@@ -1176,7 +1173,7 @@ function ui_element.timeline(t)
     	timeline = draw_timeline(timeline, p.points, p.duration, p.num_point)
 
         current_time_focus = timeline:find_child("pointer0") 
-	timeline:find_child("pointer0").on_focus_in()
+	timeline:find_child("pointer0").set_focus()
 
 	
         for n,m in pairs (g.children) do 
@@ -1285,7 +1282,7 @@ function ui_element.timeline(t)
      --function g.extra.start_timer()
      function timeline.extra.start_timer() 
 	if current_time_focus then 
-		current_time_focus.on_focus_out()
+		current_time_focus.clear_focus()
 		current_time_focus = nil
 	end 
 	for i, j in orderedPairs(p.points) do 
@@ -1345,6 +1342,12 @@ function ui_element.timeline(t)
 	
 end 
 
+--[[ ------------------------------------------------------------------------------------
+	 -------------------------------- UI ELEMENTS --------------------------------------- 
+	 ------------------------------------------------------------------------------------
+  ]]
+
+
 --[[
 Function: button
 
@@ -1365,14 +1368,14 @@ Arguments:
     padding_x - Padding of the button image on the X axis
     padding_y - Padding of the button image on the Y axis
     border_corner_radius - Radius of the border for the button
-	pressed - Function that is called by on_focus_in() or on_key_down() event
-	release - Function that is called by on_focus_out()
+	pressed - Function that is called by set_focus() or on_key_down() event
+	release - Function that is called by clear_focus()
 Return:
  	b_group - The group containing the button 
 
 Extra Function:
-	on_focus_out() - Releases the button focus
-	on_focus_in() - Grabs the button focus
+	clear_focus() - Releases the button focus
+	set_focus() - Grabs the button focus
 ]]
 
 function ui_element.button(t) 
@@ -1393,9 +1396,11 @@ function ui_element.button(t)
     	fill_color = {255,255,255,0},
     	border_width = 1,
     	border_corner_radius = 12,
+
 		focused=nil, 
 		pressed = nil, 
 		released = nil, 
+
 		text_has_shadow = true,
 		ui_position = {100,100,0},
 		--------------------------------
@@ -1416,7 +1421,6 @@ function ui_element.button(t)
     end 
 
  --the umbrella Group
-
     local b_group = Group
     {
         name = "button", 
@@ -1426,7 +1430,7 @@ function ui_element.button(t)
         extra = {type = "Button"}
     } 
     
-    function b_group.extra.on_focus_in(key) 
+    function b_group.extra.set_focus(key) 
 		local ring = b_group:find_child("ring") 
 		local focus_ring = b_group:find_child("focus_ring") 
 		local button = b_group:find_child("button_dim") 
@@ -1465,11 +1469,11 @@ function ui_element.button(t)
 		end 
 		
 		if p.skin == "edit" then 
-			input_mode = 5 -- hdr.S_MENU_M
+			input_mode = 5 
 		end 
     end
     
-    function b_group.extra.on_focus_out(key, focus_to_tabButton) 
+    function b_group.extra.clear_focus(key, focus_to_tabButton) 
 
 		local ring = b_group:find_child("ring") 
 		local focus_ring = b_group:find_child("focus_ring") 
@@ -1628,20 +1632,20 @@ function ui_element.button(t)
 			if current_focus ~= b_group then 
 				if current_focus then 
 					local temp_focus = current_focus
-	     			current_focus.on_focus_out(nil,true)
+	     			current_focus.clear_focus(nil,true)
 					if temp_focus.is_in_menu == true then 
 						temp_focus.fade_in = false
 					end 
 					if prev_tab then 
-						prev_tab.on_focus_out(nil,true)
+						prev_tab.clear_focus(nil,true)
 					end 
 				end
-				b_group.extra.on_focus_in(keys.Return)
+				b_group.extra.set_focus(keys.Return)
 			else 
-	     		current_focus.on_focus_out()
+	     		current_focus.clear_focus()
 				if b_group.is_in_menu ~= true then 
 					current_focus = b_group
-	     			current_focus.on_focus_in(keys.Return)
+	     			current_focus.set_focus(keys.Return)
 				end 
 				screen:grab_key_focus()
 			end 
@@ -1708,8 +1712,8 @@ Return:
  	t_group - The group contaning the text field
  	
 Extra Function:
-	on_focus_out() - Releases the text field focus
-	on_focus_in() - Grabs the text field focus
+	clear_focus() - Releases the text field focus
+	set_focus() - Grabs the text field focus
 ]]
 
 
@@ -1757,7 +1761,7 @@ function ui_element.textInput(t)
        extra = {type = "TextInput"} 
     }
 
- 	function t_group.extra.on_focus_in()
+ 	function t_group.extra.set_focus()
 
     	local box 		= t_group:find_child("box") 
 		local focus_box = t_group:find_child("focus_box") 
@@ -1780,7 +1784,7 @@ function ui_element.textInput(t)
         text:grab_key_focus(text)
      end
 
-     function t_group.extra.on_focus_out()
+     function t_group.extra.clear_focus()
 
     	local box 		= t_group:find_child("box") 
 		local focus_box = t_group:find_child("focus_box") 
@@ -1875,7 +1879,7 @@ function ui_element.textInput(t)
 
 	if editor_lb == nil or editor_use then 
 	   	function t_group:on_button_down()
-			t_group.extra.on_focus_in()
+			t_group.extra.set_focus()
 			return true
 		end 
 	end 
@@ -2459,8 +2463,8 @@ Return:
  		bp_group - Group containing the button picker 
 
 Extra Function:
-		on_focus_in() - Grab focus of button picker 
-		on_focus_out() - Release focus of button picker
+		set_focus() - Grab focus of button picker 
+		clear_focus() - Release focus of button picker
 		press_left() - Left key press event, apply the selection of button picker
 		press_right() - Right key press event, apply the selection of button picker
 		press_up() - Up key press event, apply the selection of button picker
@@ -2669,10 +2673,10 @@ function ui_element.buttonPicker(t)
 				ring.reactive = true
 				function ring:on_button_down (x,y,b,n)
 					if current_focus then
-   			         	current_focus.extra.on_focus_out()
+   			         	current_focus.extra.clear_focus()
 	        		 	current_focus = group
 					end 
-					bp_group.on_focus_in()
+					bp_group.set_focus()
 	            	bp_group:grab_key_focus()
 		        	return true
 				end 
@@ -2680,10 +2684,10 @@ function ui_element.buttonPicker(t)
 				unfocus.reactive = true
 				function unfocus:on_button_down (x,y,b,n)
 					if current_focus then
-   			         	current_focus.extra.on_focus_out()
+   			         	current_focus.extra.clear_focus()
 	        		 	current_focus = group
 					end 
-					bp_group.on_focus_in()
+					bp_group.set_focus()
 	            	bp_group:grab_key_focus()
 		        	return true
 				end 
@@ -2692,10 +2696,10 @@ function ui_element.buttonPicker(t)
 			left_un.reactive = true 
 			function left_un:on_button_down(x, y, b, n)
 				if current_focus then
-					current_focus.extra.on_focus_out()
+					current_focus.extra.clear_focus()
 	        		current_focus = group
 				end
-				bp_group.on_focus_in()
+				bp_group.set_focus()
 	        	bp_group:grab_key_focus()
 				if p.direction == "vertical" then 
 					bp_group.press_up()
@@ -2708,10 +2712,10 @@ function ui_element.buttonPicker(t)
 			right_un.reactive = true 
 			function right_un:on_button_down(x, y, b, n)
 				if current_focus then
-					current_focus.extra.on_focus_out()
+					current_focus.extra.clear_focus()
 	        		current_focus = group
 				end
-				bp_group.on_focus_in()
+				bp_group.set_focus()
 	        	bp_group:grab_key_focus()
 				if p.direction == "vertical" then 
 					bp_group.press_down()
@@ -2728,7 +2732,7 @@ function ui_element.buttonPicker(t)
 
 	 
 
-    function bp_group.extra.on_focus_in()
+    function bp_group.extra.set_focus()
 		local unfocus = bp_group:find_child("unfocus")
 		local focus = bp_group:find_child("focus")
 		local ring = bp_group:find_child("ring")
@@ -2748,7 +2752,7 @@ function ui_element.buttonPicker(t)
 	    bp_group:grab_key_focus()
      end
 
-     function bp_group.extra.on_focus_out()
+     function bp_group.extra.clear_focus()
 		local unfocus = bp_group:find_child("unfocus")
 		local focus = bp_group:find_child("focus")
 		local ring = bp_group:find_child("ring")
@@ -3213,14 +3217,14 @@ function ui_element.radioButtonGroup(t)
      }
 
 
-	function rb_group.extra.on_focus_in()
+	function rb_group.extra.set_focus()
 	  	current_focus = cb_group
 	    rings:find_child("ring"..1).opacity = 0 
 	    rings:find_child("focus"..1).opacity = 255 
 		rings:find_child("ring"..1):grab_key_focus() 
     end
 
-    function rb_group.extra.on_focus_out()
+    function rb_group.extra.clear_focus()
 		for i=1,  #rings.children/2 do 
 	    	rings:find_child("ring"..i).opacity = 255 
 	    	rings:find_child("focus"..i).opacity = 0 
@@ -3368,7 +3372,7 @@ function ui_element.radioButtonGroup(t)
 	
 	           	function donut:on_button_down (x,y,b,n)
 					if current_focus then 
-						current_focus.on_focus_out() 
+						current_focus.clear_focus() 
 					end 
 
 				    local ring_num = tonumber(donut.name:sub(5,-1))
@@ -3519,14 +3523,14 @@ function ui_element.checkBoxGroup(t)
           extra = {type = "CheckBoxGroup"}
     }
 
-	function cb_group.extra.on_focus_in()
+	function cb_group.extra.set_focus()
 	  	current_focus = cb_group
 	    boxes:find_child("box"..1).opacity = 0 
 	    boxes:find_child("focus"..1).opacity = 255 
 		boxes:find_child("box"..1):grab_key_focus() 
     end
 
-    function cb_group.extra.on_focus_out()
+    function cb_group.extra.clear_focus()
 		for i=1, table.getn(boxes.children)/2 do 
 	    	boxes:find_child("box"..i).opacity = 255 
 	    	boxes:find_child("focus"..i).opacity = 0 
@@ -3662,7 +3666,7 @@ function ui_element.checkBoxGroup(t)
 
 	     		function box:on_button_down (x,y,b,n)
 					if current_focus then 
-						current_focus.on_focus_out() 
+						current_focus.clear_focus() 
 					end 
 					local box_num = tonumber(box.name:sub(4,-1))
 	  				
@@ -3682,7 +3686,7 @@ function ui_element.checkBoxGroup(t)
 
 	     		function check:on_button_down(x,y,b,n)
 					if current_focus then 
-						current_focus.on_focus_out() 
+						current_focus.clear_focus() 
 					end 
 					local check_num = tonumber(check.name:sub(6,-1))
 					current_focus = cb_group
@@ -4351,11 +4355,11 @@ function ui_element.layoutManager(t)
             end,
             focus_to = function(r,c)
 				if current_focus then
-					current_focus.on_focus_out()
+					current_focus.clear_focus()
 				end
 
-				if p.tiles[r][c].on_focus_in then 
-					 p.tiles[r][c].on_focus_in()
+				if p.tiles[r][c].set_focus then 
+					 p.tiles[r][c].set_focus()
 					 current_focus = p.tiles[r][c]
 					 focus_i[1] = r
 					 focus_i[2] = c 
@@ -4568,12 +4572,12 @@ function ui_element.layoutManager(t)
 			if type(slate.focus[key]) == "function" then
 				slate.focus[key]()
 			elseif screen:find_child(slate.focus[key]) then
-				if slate.on_focus_out then
-					slate.on_focus_out(key)
+				if slate.clear_focus then
+					slate.clear_focus(key)
 				end
 				screen:find_child(slate.focus[key]):grab_key_focus()
-				if screen:find_child(slate.focus[key]).on_focus_in then
-					screen:find_child(slate.focus[key]).on_focus_in(key)
+				if screen:find_child(slate.focus[key]).set_focus then
+					screen:find_child(slate.focus[key]).set_focus(key)
 				end
 			end
 		end
@@ -4629,16 +4633,16 @@ function ui_element.layoutManager(t)
 		
 	end
 
-	slate.on_focus_in = function()
+	slate.set_focus = function()
 
 		slate:grab_key_focus()
 		slate.focus_to(1,1)
 
 	end 
 
-	slate.on_focus_out = function ()
+	slate.clear_focus = function ()
 		if current_focus then 
-			current_focus.on_focus_out ()
+			current_focus.clear_focus ()
 		end 
 		current_focus = nil 
 		screen:grab_key_focus()
@@ -4851,11 +4855,11 @@ function ui_element.scrollPane(t)
 		end
 	end
 	
-	function scroll_group.extra.on_focus_in() 
+	function scroll_group.extra.set_focus() 
 		scroll_group:grab_key_focus()
     end
 
-	function scroll_group.extra.on_focus_out() 
+	function scroll_group.extra.clear_focus() 
 		screen:grab_key_focus()
     end
 
@@ -5843,7 +5847,7 @@ button
                 	opacity=0
                 }
             elseif curr_index==0 then
-                    --button:on_focus_out()
+                    --button:clear_focus()
             end
             if selectable_items[i] ~= nil then
                selectable_items[i].focus:complete_animation()
@@ -5855,7 +5859,7 @@ button
                }
                curr_index=i
            elseif i==0 then
-           	   button:on_focus_in()
+           	   button:set_focus()
                curr_index=i
            end
            end,
@@ -6033,23 +6037,23 @@ button
 		return make_item_ring(...)	
 	end 
 
-    function umbrella.extra.on_focus_in(key) 
+    function umbrella.extra.set_focus(key) 
 		if key then 
 			if key == keys.Return then 
-				button.on_focus_in(keys.Return)
+				button.set_focus(keys.Return)
 			else 
-				button.on_focus_in()
+				button.set_focus()
 				umbrella:grab_key_focus()
 			end 
 		else 
-				button.on_focus_in()
+				button.set_focus()
 				umbrella:grab_key_focus()
 		end 
     end
 	 
-	function umbrella.extra.on_focus_out(key) 
+	function umbrella.extra.clear_focus(key) 
 		if key then 
-			button.on_focus_out(key)
+			button.clear_focus(key)
 		end
     end
    
@@ -6162,7 +6166,7 @@ button
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
                             if dropDownMenu.opacity == 0 then return end
-                            button.on_focus_out() 
+                            button.clear_focus() 
 							button.fade_in = false
                             if item.f then item.f(item.parameter) end
 							return true
@@ -6546,12 +6550,12 @@ function ui_element.tabBar(t)
 				if index < 1 or index > #p.tab_labels then return end
                 
 				p.tabs[current_index]:hide()
-                buttons[current_index].on_focus_out()
+                buttons[current_index].clear_focus()
 				
                 current_index = index
 				
                 p.tabs[current_index]:show()
-                buttons[current_index].on_focus_in()
+                buttons[current_index].set_focus()
 				
 				if ap then
 					ap:pan_to(
@@ -6747,12 +6751,12 @@ function ui_element.tabBar(t)
 			if type(umbrella.focus[key]) == "function" then
 				umbrella.focus[key]()
 			elseif screen:find_child(umbrella.focus[key]) then
-				if umbrella.on_focus_out then
-					umbrella.on_focus_out(key)
+				if umbrella.clear_focus then
+					umbrella.clear_focus(key)
 				end
 				screen:find_child(umbrella.focus[key]):grab_key_focus()
-				if screen:find_child(umbrella.focus[key]).on_focus_in then
-					screen:find_child(umbrella.focus[key]).on_focus_in(key)
+				if screen:find_child(umbrella.focus[key]).set_focus then
+					screen:find_child(umbrella.focus[key]).set_focus(key)
 				end
 			end
 		end
@@ -6777,12 +6781,12 @@ function ui_element.tabBar(t)
 					if left_obj_name then
 						left_obj = screen:find_child(left_obj_name)
 						if left_obj then
-							if umbrella.on_focus_out then
-								umbrella.on_focus_out(key)
+							if umbrella.clear_focus then
+								umbrella.clear_focus(key)
 							end
 							left_obj:grab_key_focus()
-							if left_obj.on_focus_in then
-								left_obj.on_focus_in(key)
+							if left_obj.set_focus then
+								left_obj.set_focus(key)
 							end
 						end
 					end
@@ -6803,12 +6807,12 @@ function ui_element.tabBar(t)
 				if right_obj_name then
 					right_obj = screen:find_child(right_obj_name)
 					if right_obj then
-						if umbrella.on_focus_out then
-							umbrella.on_focus_out(key)
+						if umbrella.clear_focus then
+							umbrella.clear_focus(key)
 						end
 						right_obj:grab_key_focus()
-						if right_obj.on_focus_in then
-							right_obj.on_focus_in(key)
+						if right_obj.set_focus then
+							right_obj.set_focus(key)
 						end
 					end
 				end
@@ -6825,12 +6829,12 @@ function ui_element.tabBar(t)
 					if up_obj_name then
 						up_obj = screen:find_child(up_obj_name)
 						if up_obj then
-							if umbrella.on_focus_out then
-								umbrella.on_focus_out(key)
+							if umbrella.clear_focus then
+								umbrella.clear_focus(key)
 							end
 							up_obj:grab_key_focus()
-							if up_obj.on_focus_in then
-								up_obj.on_focus_in(key)
+							if up_obj.set_focus then
+								up_obj.set_focus(key)
 							end
 						end
 					end
@@ -6851,12 +6855,12 @@ function ui_element.tabBar(t)
 				if down_obj_name then
 					down_obj = screen:find_child(down_obj_name)
 					if down_obj then
-						if umbrella.on_focus_out then
-							umbrella.on_focus_out(key)
+						if umbrella.clear_focus then
+							umbrella.clear_focus(key)
 						end
 						down_obj:grab_key_focus()
-						if down_obj.on_focus_in then
-							down_obj.on_focus_in(key)
+						if down_obj.set_focus then
+							down_obj.set_focus(key)
 						end
 					end
 				end
@@ -6877,14 +6881,14 @@ function ui_element.tabBar(t)
 
 	end 
 
-	umbrella.on_focus_in = function (key)
+	umbrella.set_focus = function (key)
 		umbrella:grab_key_focus()
 		umbrella:display_tab(current_index)
 	end 
 
-	umbrella.on_focus_out = function ()
+	umbrella.clear_focus = function ()
 		if current_focus then 
-			current_focus.on_focus_out ()
+			current_focus.clear_focus ()
 		end 
 		current_focus = nil 
 		screen:grab_key_focus()
@@ -7160,11 +7164,11 @@ function ui_element.arrowPane(t)
     end
 	
 		
-	function umbrella.extra.on_focus_in() 
+	function umbrella.extra.set_focus() 
 		umbrella:grab_key_focus()
     end
 
-	function umbrella.extra.on_focus_out() 
+	function umbrella.extra.clear_focus() 
 		screen:grab_key_focus()
     end
 

@@ -49,14 +49,14 @@ local menuButton_file = ui_element.menuButton
   	if menu_bar_hover == false then return true end 
 	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_file" then 
 		local temp_focus = current_focus
-	   	current_focus.on_focus_out(nil,true)
+	   	current_focus.clear_focus(nil,true)
 		if temp_focus.is_in_menu == true then 
 			temp_focus.fade_in = false
 		end 
 	end 
 	
 	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_file") then 
-		menuButton_file.extra.on_focus_in(keys.Return)
+		menuButton_file.extra.set_focus(keys.Return)
 		current_focus.name = "menuButton_file"
     end 
 	return true
@@ -136,14 +136,14 @@ menuButton_edit.extra.reactive = true
   	if menu_bar_hover == false then return true end 
 	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_edit" then 
 		local temp_focus = current_focus
-	   	current_focus.on_focus_out(nil,true)
+	   	current_focus.clear_focus(nil,true)
 		if temp_focus.is_in_menu == true then 
 			temp_focus.fade_in = false
 		end 
 	end 
 	
 	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_edit") then 
-		menuButton_edit.extra.on_focus_in(keys.Return)
+		menuButton_edit.extra.set_focus(keys.Return)
 		current_focus.name = "menuButton_edit"
     end 
 
@@ -209,14 +209,14 @@ menuButton_arrange.extra.reactive = true
   	if menu_bar_hover == false then return true end 
 	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_arrange" then 
 		local temp_focus = current_focus
-	   	current_focus.on_focus_out(nil,true)
+	   	current_focus.clear_focus(nil,true)
 		if temp_focus.is_in_menu == true then 
 			temp_focus.fade_in = false
 		end 
 	end 
 	
 	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_arrange") then 
-		menuButton_arrange.extra.on_focus_in(keys.Return)
+		menuButton_arrange.extra.set_focus(keys.Return)
 		current_focus.name = "menuButton_arrange"
     end 
 
@@ -298,14 +298,14 @@ menuButton_view.extra.reactive = true
   	if menu_bar_hover == false then return true end 
 	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_view" then 
 		local temp_focus = current_focus
-	   	current_focus.on_focus_out(nil,true)
+	   	current_focus.clear_focus(nil,true)
 		if temp_focus.is_in_menu == true then 
 			temp_focus.fade_in = false
 		end 
 	end 
 	
 	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_view") then 
-		menuButton_view.extra.on_focus_in(keys.Return)
+		menuButton_view.extra.set_focus(keys.Return)
 		current_focus.name = "menuButton_view"
     end 
 
