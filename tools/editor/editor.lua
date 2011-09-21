@@ -106,7 +106,7 @@ local function guideline_inspector(v)
 	end 
 
 	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = org_position, padding = 5 , border_width  = 1,
-		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
+		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_border_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px", text_color =  {255,255,255,255},
     	  border_corner_radius = 0,}
 
@@ -122,12 +122,12 @@ local function guideline_inspector(v)
 		  button_ok.name = "button_ok"
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_delete.pressed = function() screen:remove(screen:find_child(v.name))
+	button_cancel.on_press = function() xbox:on_button_down() end 
+	button_delete.on_press = function() screen:remove(screen:find_child(v.name))
  									   xbox:on_button_down() 
 							end 
 
-	button_ok.pressed = function() 
+	button_ok.on_press = function() 
 		if text_input.text == "" then 
 			xbox:on_button_down() 
    		end    
@@ -613,10 +613,10 @@ local function open_files(input_purpose, bg_image, inspector)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) if inspector then inspector_activate() end end
+	button_cancel.on_press = function() xbox:on_button_down(1) if inspector then inspector_activate() end end
 	
 	if inspector then 
-		button_ok.pressed = function() 
+		button_ok.on_press = function() 
 			if ss == selected_file then selected_file = nn end 
 
 			local f_name = screen:find_child("file_name") 
@@ -634,7 +634,7 @@ local function open_files(input_purpose, bg_image, inspector)
 			inspector_activate() 
 		end
 	else 
-		button_ok.pressed = function() 
+		button_ok.on_press = function() 
 
 			if ss == selected_file then selected_file = nn end 
 
@@ -1039,7 +1039,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 	}
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) 
+	button_cancel.on_press = function() xbox:on_button_down(1) 
 	
 		if org_items then 
 			if v.tab_labels then 
@@ -1051,7 +1051,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 	
 	end
 
-	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1) end end
+	button_ok.on_press = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1) end end
 
 	local function inspector_position() 
 		inspector.x = x_pos
@@ -1454,9 +1454,9 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 								-- object의 코드가 없을경우에 새로히 추가해 주어야 한다.
 					 			added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
 					    		if j.extra.type == "Button" then 
-					     			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
-					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
-					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
+					     			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_focus = function() -- Handler for "..j.name.."\.on_focus in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_press = function() -- Handler for "..j.name.."\.on_press in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_release = function() -- Handler for "..j.name.."\.on_release in this screen\nend\n"
 			   		     		elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
 	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
 			   		     		elseif j.extra.type == "CheckBoxGroup" then 
@@ -1613,10 +1613,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	-- No current file or save as command 
 	editor_use = true
 	-- Text Input Field 	
-	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
-		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
-		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
-    	  border_corner_radius = 0, readonly="screen/" }
+	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1, border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_border_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255}, border_corner_radius = 0, readonly="screen/" }
 
 	--Buttons 
    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
@@ -1626,8 +1623,8 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_ok.pressed = function() 
+	button_cancel.on_press = function() xbox:on_button_down() end 
+	button_ok.on_press = function() 
 		local file_name 
 		if text_input.text == "" then 
 			xbox:on_button_down() 
@@ -2067,7 +2064,7 @@ function editor.clone()
 	screen:grab_key_focus()
 end
 	
-local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "bar_focus_color_inner", "bar_focus_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_focus_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive", "arrow_color", "arrow_focus_color", "tabs"}
+local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","focus_border_color", "focus_button_color", "focus_box_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "focus_box_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive", "arrow_color", "focus_arrow_color", "tabs"}
 
 
 local function copy_content(n)
@@ -3213,8 +3210,8 @@ function editor.ui_elements()
     					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button =true, focus_object = scroll} 
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() if ss == selected_ui_element then selected_ui_element = nn end load_ui_element(selected_ui_element) end
+	button_cancel.on_press = function() xbox:on_button_down(1) end
+	button_ok.on_press = function() if ss == selected_ui_element then selected_ui_element = nn end load_ui_element(selected_ui_element) end
 	
 	local s_func = function()
 		if current_focus then 
@@ -3442,7 +3439,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
      				skin = "default", ui_width = 75, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
  		-- Button Event Handlers
- 		button_nok.pressed = function() func_nok(1) xbox:on_button_down() end
+ 		button_nok.on_press = function() func_nok(1) xbox:on_button_down() end
  	else
     	button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
   					skin = "default", ui_width = 100, ui_height = 27, label = Cancel_label, focus_color = {27,145,27,255}, focus_object = nil}
@@ -3454,9 +3451,9 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 
 	-- Button Event Handlers
 	if Cancel_label ~= "" then 
-		button_cancel.pressed = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
+		button_cancel.on_press = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
 	end 
-	button_ok.pressed = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
+	button_ok.on_press = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
 
 	if func_nok then 
 		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok"}
@@ -3529,7 +3526,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	button_ok:grab_key_focus() 
 	function button_cancel:on_key_down(key)
 		if key == keys.Return then 
-			button_cancel.pressed()
+			button_cancel.on_press()
 		elseif (key == hdr.Tab and shift == false) or key == keys.Right then 
 			button_cancel.clear_focus()
 			button_ok.set_focus()
@@ -3544,7 +3541,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 
 	function button_ok:on_key_down(key)
 		if key == keys.Return then 
-			button_ok.pressed()
+			button_ok.on_press()
 		elseif (key == hdr.TabLeft and shift == true) or key == keys.Left then 
 			button_ok.clear_focus()
 			button_cancel.set_focus()

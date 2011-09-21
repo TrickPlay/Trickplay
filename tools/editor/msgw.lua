@@ -43,9 +43,9 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 		     if util.need_stub_code(j) == true then 
 	         	new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n" 	--SECTION \n\n		
 			   	if j.extra.type == "Button" then 
-	            	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
-	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
-	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
+	            	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_focus = function() -- Handler for "..j.name.."\.on_focus in this screen\nend\n"
+	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_press = function() -- Handler for "..j.name.."\.on_press in this screen\nend\n"
+	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_release = function() -- Handler for "..j.name.."\.on_release in this screen\nend\n"
 			    elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
 	            	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
 			   	elseif j.extra.type == "CheckBoxGroup" then 

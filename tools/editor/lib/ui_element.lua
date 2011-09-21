@@ -773,6 +773,188 @@ local function my_create_circle( _ , ... )
      return create_circle( ... )
 end
 
+--the Canvas used to create the dots
+local make_dot = function(dot_diameter, dot_color)
+          local dot  = Canvas{size={dot_diameter, dot_diameter}}
+          dot:begin_painting()
+          dot:arc(dot_diameter/2,dot_diameter/2,dot_diameter/2,0,360)
+          dot:set_source_color(dot_color)
+          dot:fill(true)
+          dot:finish_painting()
+
+          if dot.Image then
+              dot = dot:Image()
+          end
+          dot.anchor_point ={dot_diameter/2,dot_diameter/2}
+          dot.name = "Loading Dot"
+
+          return dot
+end
+
+local function my_make_dot( _ , ... )
+     	return make_dot( ... )
+end
+
+local make_big_dot = function(overall_diameter, dot_color)
+
+        local dot  = Canvas{size={overall_diameter, overall_diameter}}
+		dot:begin_painting()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,0,90)
+		dot:line_to(overall_diameter/2,overall_diameter/2)
+		dot:line_to(overall_diameter,  overall_diameter/2)
+		dot:set_source_color(dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,90,180)
+		dot:line_to(overall_diameter/2,overall_diameter/2)
+		dot:line_to(overall_diameter/2,overall_diameter)
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,180,270)
+		dot:line_to( overall_diameter/2, overall_diameter/2 )
+		dot:line_to(                    0, overall_diameter/2 )
+		dot:set_source_color(dot_color)
+		dot:fill(true)
+		
+		dot:new_path()
+		
+		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,270,360)
+		dot:line_to( overall_diameter/2, overall_diameter/2 )
+		dot:line_to( overall_diameter/2,                    0 )
+		dot:set_source_color("000000")
+		dot:fill(true)
+		
+        dot:finish_painting()
+		
+        if dot.Image then
+            dot = dot:Image()
+        end
+        dot.anchor_point ={overall_diameter/2,overall_diameter/2}
+        dot.name         = "Loading Dot"
+        dot.position     = {x,y}
+
+        return dot
+end
+
+local function my_make_big_dot( _ , ... )
+     	return make_big_dot( ... )
+end
+
+
+local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
+
+    local size = {w, h} 
+    local color = fc 
+    local BORDER_WIDTH= bw
+    local POINT_HEIGHT=34
+    local POINT_WIDTH=60
+    local BORDER_COLOR=bc
+    local CORNER_RADIUS=br 
+    local POINT_CORNER_RADIUS=2
+    local H_BORDER_WIDTH = BORDER_WIDTH / 2
+
+    local XBOX_SIZE = 25
+    local PADDING = px 
+
+    local function draw_path( c )
+
+        c:new_path()
+
+        c:move_to( H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
+
+        c:line_to( ( c.w )- H_BORDER_WIDTH - CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
+        c:curve_to( c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
+                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
+                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
+
+        c:line_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
+
+        c:curve_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    c.w - H_BORDER_WIDTH - CORNER_RADIUS , c.h - H_BORDER_WIDTH )
+        c:line_to( H_BORDER_WIDTH + CORNER_RADIUS , c.h - H_BORDER_WIDTH )
+
+        c:curve_to( H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
+
+        c:line_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
+
+        c:curve_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
+                    H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
+    end
+
+    local c = Canvas{ size = size }
+
+    c:begin_painting()
+    draw_path( c )
+
+    -- Fill the whole thing with the color passed in and keep the path
+
+    c:set_source_color(color) 
+    c:fill(true)
+
+    -- Now, translate to the center and scale to its height. This will
+    -- make the radial gradient elliptical.
+    c:save()
+    c:translate( c.w / 2 , c.h / 2 )
+    c:scale( 2 , ( c.h / c.w ) )
+
+    local rr = ( c.w / 2 )
+    c:set_source_radial_pattern( 0 , 30 , 0 , 0 , 30 , c.w / 2 )
+    c:add_source_pattern_color_stop( 0 , "00000000" )
+    c:add_source_pattern_color_stop( 1 , "000000F0" )
+    c:fill()
+    c:restore()
+
+    -- Draw the glossy glow    
+    local R = c.w * 2.2
+
+    c:new_path()
+    c.op = "ATOP"
+    c:arc( 0 , -( R - 240 ) , R , 0 , 360 )
+    c:set_source_linear_pattern( c.w , 0 , 0 , c.h * 0.25 )
+    c:add_source_pattern_color_stop( 0 , "FFFFFF20" )
+    c:add_source_pattern_color_stop( 1 , "FFFFFF04" )
+    c:fill()
+
+    -- Now, draw the path again and stroke it with the border color
+    draw_path( c )
+
+    c:set_line_width( BORDER_WIDTH )
+    c:set_source_color( BORDER_COLOR )
+    c.op = "SOURCE"
+    -- test c:set_dash(0,{10,10})
+    c:stroke( true )
+
+  -- Draw title line
+    if tst > 0 then 
+    c:new_path()
+    c:move_to (0, 74)
+    c:line_to (c.w, 74)
+    c:set_line_width (tst)
+    c:set_source_color(tsc)
+    c:stroke (true)
+    c:fill (true)
+    end 
+  --  end
+
+    c:finish_painting()
+    if c.Image then
+         c = c:Image()
+    end
+    c.position = {0,0}
+
+    return c
+end 
+
 local function name2num(name)
 	if name then 
 	    return tonumber(name:sub(8, -1))	
@@ -1360,7 +1542,7 @@ Arguments:
     bwidth  - Width of the button
     bheight - Height of the button
     button_color - Border color of the button
-    focus_color - Focus color of the button
+    focus_border_color - Focus color of the button
     border_width - Border width of the button
     text - Caption of the button
     text_font - Font of the button text
@@ -1368,8 +1550,8 @@ Arguments:
     padding_x - Padding of the button image on the X axis
     padding_y - Padding of the button image on the Y axis
     border_corner_radius - Radius of the border for the button
-	pressed - Function that is called by set_focus() or on_key_down() event
-	release - Function that is called by clear_focus()
+	on_press - Function that is called by set_focus() or on_key_down() event
+	on_release - Function that is called by clear_focus()
 Return:
  	b_group - The group containing the button 
 
@@ -1389,7 +1571,7 @@ function ui_element.button(t)
     	ui_height = 60, 
 
     	label = "Button", 
-    	focus_color = {27,145,27,255}, 
+    	focus_border_color = {27,145,27,255}, 
     	focus_fill_color = {27,145,27,0}, 
     	focus_text_color = {255,255,255,255},
     	border_color = {255,255,255,255}, 
@@ -1397,9 +1579,9 @@ function ui_element.button(t)
     	border_width = 1,
     	border_corner_radius = 12,
 
-		focused=nil, 
-		pressed = nil, 
-		released = nil, 
+		on_focus = nil, 
+		on_press = nil, 
+		on_release = nil, 
 
 		text_has_shadow = true,
 		ui_position = {100,100,0},
@@ -1453,15 +1635,15 @@ function ui_element.button(t)
 
 		current_focus = b_group
 	
-	    if p.focused ~= nil then 
-			p.focused()
+	    if p.on_focus ~= nil then 
+			p.on_focus()
 		end 
 
 		b_group:grab_key_focus(b_group)
 
 		if key then 
-	    	if p.pressed and key == keys.Return then
-				p.pressed()
+	    	if p.on_press and key == keys.Return then
+				p.on_press()
 				if b_group.is_in_menu == true and b_group.fade_in == false then 
 					b_group.fade_in = true 
 				end
@@ -1505,16 +1687,16 @@ function ui_element.button(t)
 
 		current_focus = nil 
 
-		if p.released then  
+		if p.on_release then  
 			if p.is_in_menu then 
 				if key ~= keys.Return and b_group.single_button == false then
-					p.released()
+					p.on_release()
 					if b_group.is_in_menu == true and b_group.fade_in == true then 
 						b_group.fade_in = false 
 					end
 				end 
 			elseif b_group.single_button == false then 
-				p.released()
+				p.on_release()
 			end
 		end 
     end
@@ -1532,9 +1714,9 @@ function ui_element.button(t)
 			ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius )
         	ring:set{name="ring", position = { 0 , 0 }, opacity = 255 }
 
-			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
+			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_border_color ), color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
 
-			focus_ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius )
+			focus_ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.focus_border_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius )
         	focus_ring:set{name="focus_ring", position = { 0 , 0 }, opacity = 0}
 
 		elseif(p.skin == "editor") then 
@@ -1700,7 +1882,7 @@ Arguments:
     bwidth  - Width of the text field
     bheight - Height of the text field 
     border_color - Border color of the text field
-    focus_color - Focus color of the text field
+    focus_border_color - Focus color of the text field
     text_color - Color of the text in the text field
     text_font - Font of the text in the text field
     border_width - Border width of the text field 
@@ -1728,7 +1910,7 @@ function ui_element.textInput(t)
     	border_width  = 4 ,
     	border_color  = {255,255,255,255}, 
     	fill_color = {255,255,255,0},
-    	focus_color  = {0,255,0,255},
+    	focus_border_color  = {0,255,0,255},
     	focus_fill_color = {27,145,27,0}, 
     	cursor_color = {255,255,255,255},
     	text_font = "FreeSans Medium 30px", 
@@ -1817,10 +1999,10 @@ function ui_element.textInput(t)
     		box = assets( key, my_make_ring, p.ui_width, p.ui_height, p.border_color, p.fill_color, p.border_width, 0, 0, p.border_corner_radius)
     		box:set{name="box", position = {0 ,0}}
 
-			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), 
+			key = string.format( "ring:%d:%d:%s:%s:%d:%d" , p.ui_width, p.ui_height, color_to_string( p.focus_border_color ), 
 								  color_to_string( p.focus_fill_color ), p.border_width, p.border_corner_radius )
 
-    		focus_box = assets(key, my_make_ring, p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
+    		focus_box = assets(key, my_make_ring, p.ui_width, p.ui_height, p.focus_border_color, p.focus_fill_color, p.border_width, 0, 0, p.border_corner_radius)
     		focus_box:set{name="focus_box", position = { 0 , 0 }, opacity = 0}
     		t_group:add(box, focus_box)
 
@@ -1936,114 +2118,6 @@ Arguments:
 Return:
  	db_group - group containing the dialog box
 ]]
-
-local function make_dialogBox_bg(w,h,bw,bc,fc,px,py,br,tst,tsc)
-
-    local size = {w, h} 
-    local color = fc 
-    local BORDER_WIDTH= bw
-    local POINT_HEIGHT=34
-    local POINT_WIDTH=60
-    local BORDER_COLOR=bc
-    local CORNER_RADIUS=br 
-    local POINT_CORNER_RADIUS=2
-    local H_BORDER_WIDTH = BORDER_WIDTH / 2
-
-    local XBOX_SIZE = 25
-    local PADDING = px 
-
-    local function draw_path( c )
-
-        c:new_path()
-
-        c:move_to( H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
-
-        c:line_to( ( c.w )- H_BORDER_WIDTH - CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
-        c:curve_to( c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
-                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH ,
-                    c.w - H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
-
-        c:line_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
-
-        c:curve_to( c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    c.w - H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    c.w - H_BORDER_WIDTH - CORNER_RADIUS , c.h - H_BORDER_WIDTH )
-        c:line_to( H_BORDER_WIDTH + CORNER_RADIUS , c.h - H_BORDER_WIDTH )
-
-        c:curve_to( H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH , c.h - H_BORDER_WIDTH - CORNER_RADIUS )
-
-        c:line_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH + CORNER_RADIUS )
-
-        c:curve_to( H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH , POINT_HEIGHT - H_BORDER_WIDTH,
-                    H_BORDER_WIDTH + CORNER_RADIUS, POINT_HEIGHT - H_BORDER_WIDTH )
-    end
-
-    local c = Canvas{ size = size }
-
-    c:begin_painting()
-    draw_path( c )
-
-    -- Fill the whole thing with the color passed in and keep the path
-
-    c:set_source_color(color) 
-    c:fill(true)
-
-    -- Now, translate to the center and scale to its height. This will
-    -- make the radial gradient elliptical.
-    c:save()
-    c:translate( c.w / 2 , c.h / 2 )
-    c:scale( 2 , ( c.h / c.w ) )
-
-    local rr = ( c.w / 2 )
-    c:set_source_radial_pattern( 0 , 30 , 0 , 0 , 30 , c.w / 2 )
-    c:add_source_pattern_color_stop( 0 , "00000000" )
-    c:add_source_pattern_color_stop( 1 , "000000F0" )
-    c:fill()
-    c:restore()
-
-    -- Draw the glossy glow    
-    local R = c.w * 2.2
-
-    c:new_path()
-    c.op = "ATOP"
-    c:arc( 0 , -( R - 240 ) , R , 0 , 360 )
-    c:set_source_linear_pattern( c.w , 0 , 0 , c.h * 0.25 )
-    c:add_source_pattern_color_stop( 0 , "FFFFFF20" )
-    c:add_source_pattern_color_stop( 1 , "FFFFFF04" )
-    c:fill()
-
-    -- Now, draw the path again and stroke it with the border color
-    draw_path( c )
-
-    c:set_line_width( BORDER_WIDTH )
-    c:set_source_color( BORDER_COLOR )
-    c.op = "SOURCE"
-    -- test c:set_dash(0,{10,10})
-    c:stroke( true )
-
-  -- Draw title line
-    if tst > 0 then 
-    c:new_path()
-    c:move_to (0, 74)
-    c:line_to (c.w, 74)
-    c:set_line_width (tst)
-    c:set_source_color(tsc)
-    c:stroke (true)
-    c:fill (true)
-    end 
-  --  end
-
-    c:finish_painting()
-    if c.Image then
-         c = c:Image()
-    end
-    c.position = {0,0}
-
-    return c
-end 
 
 --[[
 
@@ -2455,7 +2529,7 @@ Arguments:
     	text_font - Font of the Button picker items
     	text_color - Color of the Button picker items
     	border_color - Color of the Button 
-    	focus_color - Focus color of the Button 
+    	focus_border_color - Focus color of the Button 
 		selected_item - The number of the selected item 
 		rotate_func - function that is called by selected item number   
 
@@ -2491,7 +2565,7 @@ function ui_element.buttonPicker(t)
 	focus_text_color = {255,255,255,255}, 
 	border_color = {255,255,255,255},
 	fill_color = {255,255,255,0},
-	focus_color = {0,255,0,255},
+	focus_border_color = {0,255,0,255},
 	focus_fill_color = {0,255,0,0},
 	rotate_func = nil, 
     selected_item = 1, 
@@ -2544,9 +2618,9 @@ function ui_element.buttonPicker(t)
 			ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.border_color, p.fill_color, 1, 7, 7, 1)
         	ring:set{name="ring", position = { pos[1] , pos[2] }, opacity = 255 }
 
-			key = string.format( "ring:%d:%d:%s:%s" , p.ui_width, p.ui_height, color_to_string( p.focus_color ), color_to_string( p.focus_fill_color ))
+			key = string.format( "ring:%d:%d:%s:%s" , p.ui_width, p.ui_height, color_to_string( p.focus_border_color ), color_to_string( p.focus_fill_color ))
 
-			focus_ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.focus_color, p.focus_fill_color, 1, 7, 7, 1)
+			focus_ring = assets( key , my_make_ring , p.ui_width, p.ui_height, p.focus_border_color, p.focus_fill_color, 1, 7, 7, 1)
         	focus_ring:set{name="focus_ring", position = { pos[1] , pos[2] }, opacity = 0}
 
 			button_w = focus_ring.w 
@@ -3181,7 +3255,7 @@ function ui_element.radioButtonGroup(t)
 	text_color = {255,255,255,255}, 
 	button_color = {255,255,255,255}, 
 	select_color = {255, 255, 255, 255},
-	focus_color = {0,255,0,255},
+	focus_button_color = {0,255,0,255},
 	button_radius = 10,
 	select_radius = 4,  
 	button_position = {0, 0},  
@@ -3296,8 +3370,8 @@ function ui_element.radioButtonGroup(t)
 		   	donut =  assets(key, my_create_circle, p.button_radius, p.button_color)
 			donut:set{name="ring"..tostring(i), position = {pos[1], pos[2] - 8}}  
 
-			key = string.format("focus:%d:%s",p.button_radius, color_to_string(p.focus_color))
-		   	focus = assets(key, my_create_circle, p.button_radius, p.focus_color)
+			key = string.format("focus:%d:%s",p.button_radius, color_to_string(p.focus_button_color))
+		   	focus = assets(key, my_create_circle, p.button_radius, p.focus_button_color)
 			focus:set{name="focus"..tostring(i), position = {pos[1], pos[2] - 8}, opacity = 0}  
 
     	    rings:add(donut, focus) 
@@ -3487,7 +3561,7 @@ function ui_element.checkBoxGroup(t)
 	text_color = {255,255,255,255}, 
 	box_color = {255,255,255,255},
 	fill_color = {255,255,255,0},
-	focus_color = {0,255,0,255},
+	focus_box_color = {0,255,0,255},
 	focus_fill_color = {0,50,0,0},
 	box_width = 2,
 	box_size = {25,25},
@@ -3561,8 +3635,6 @@ function ui_element.checkBoxGroup(t)
 	 	cb_group:clear()
 
 		if p.skin == "Custom" then 
-	     	 --p.box_image = Image{}
-			 --p.box_focus_image = Image{}
              p.check_image = "lib/assets/checkmark.png"
 		else 
              p.box_image = skin_list[p.skin]["checkbox"]
@@ -3586,7 +3658,7 @@ function ui_element.checkBoxGroup(t)
 
 	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
 	      	if p.skin == "Custom" then 
-		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_width, 
+		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_box_color, border_width= p.box_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 0}
 		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 255}
@@ -3773,79 +3845,7 @@ Extra Function:
 	speed_down() - spin slower
 ]]
  
-  --the Canvas used to create the dots
-    local make_dot = function(dot_diameter, dot_color)
-          local dot  = Canvas{size={dot_diameter, dot_diameter}}
-          dot:begin_painting()
-          dot:arc(dot_diameter/2,dot_diameter/2,dot_diameter/2,0,360)
-          dot:set_source_color(dot_color)
-          dot:fill(true)
-          dot:finish_painting()
-
-          if dot.Image then
-              dot = dot:Image()
-          end
-          dot.anchor_point ={dot_diameter/2,dot_diameter/2}
-          dot.name = "Loading Dot"
-
-          return dot
-    end
-
-	local function my_make_dot( _ , ... )
-     	return make_dot( ... )
-	end
-
-    local make_big_dot = function(overall_diameter, dot_color)
-
-        local dot  = Canvas{size={overall_diameter, overall_diameter}}
-		dot:begin_painting()
-		
-		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,0,90)
-		dot:line_to(overall_diameter/2,overall_diameter/2)
-		dot:line_to(overall_diameter,  overall_diameter/2)
-		dot:set_source_color(dot_color)
-		dot:fill(true)
-		
-		dot:new_path()
-		
-		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,90,180)
-		dot:line_to(overall_diameter/2,overall_diameter/2)
-		dot:line_to(overall_diameter/2,overall_diameter)
-		dot:set_source_color("000000")
-		dot:fill(true)
-		
-		dot:new_path()
-		
-		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,180,270)
-		dot:line_to( overall_diameter/2, overall_diameter/2 )
-		dot:line_to(                    0, overall_diameter/2 )
-		dot:set_source_color(dot_color)
-		dot:fill(true)
-		
-		dot:new_path()
-		
-		dot:arc(overall_diameter/2,overall_diameter/2,overall_diameter/2,270,360)
-		dot:line_to( overall_diameter/2, overall_diameter/2 )
-		dot:line_to( overall_diameter/2,                    0 )
-		dot:set_source_color("000000")
-		dot:fill(true)
-		
-        dot:finish_painting()
-		
-        if dot.Image then
-            dot = dot:Image()
-        end
-        dot.anchor_point ={overall_diameter/2,overall_diameter/2}
-        dot.name         = "Loading Dot"
-        dot.position     = {x,y}
-
-        return dot
-    end
-
-	local function my_make_big_dot( _ , ... )
-     	return make_big_dot( ... )
-	end
-
+ 
 function ui_element.progressSpinner(t) 
     --default parameters
     local p = {
@@ -4161,7 +4161,7 @@ function ui_element.progressBar(t)
         	    type = "ProgressBar", 
         	    set_prog = function(prog)
 	                c_fill.scale = {(p.ui_width-4)*(prog),1}
-					progress = prog
+					p.progress = prog
         	    end,
 	        },
 	}
@@ -4588,8 +4588,8 @@ function ui_element.layoutManager(t)
 	local keys={
 		[keys.Return] = function()
 			if 1 <= focus_i[1] and focus_i[1] <= p.rows and 1 <= focus_i[2] and focus_i[2] <= p.columns then
-				if p.tiles[focus_i[1]][focus_i[2]].pressed then 
-					p.tiles[focus_i[1]][focus_i[2]].pressed()
+				if p.tiles[focus_i[1]][focus_i[2]].on_press then 
+					p.tiles[focus_i[1]][focus_i[2]].on_press()
 				end
 		    end 
 		end,
@@ -4707,8 +4707,8 @@ function ui_element.scrollPane(t)
         arrows_visible = false,
         bar_color_inner       = {180,180,180,255},
         bar_color_outer       = { 30, 30, 30,255},
-        bar_focus_color_inner = {180,255,180,255},
-        bar_focus_color_outer = { 30, 30, 30,255},
+        focus_bar_color_inner = {180,255,180,255},
+        focus_bar_color_outer = { 30, 30, 30,255},
         empty_color_inner     = {120,120,120,255},
         empty_color_outer     = {255,255,255,255},
         frame_thickness       = 2,
@@ -4718,7 +4718,7 @@ function ui_element.scrollPane(t)
         vert_bar_visible      = true,
         horz_bar_visible      = true,
         box_color             = {160,160,160,255},
-        box_focus_color       = {160,255,160,255},
+        focus_box_color       = {160,255,160,255},
         box_width             = 2,
         skin                  = "Custom",
 		ui_position           = {200,100},    
@@ -5106,8 +5106,8 @@ function ui_element.scrollPane(t)
 				focus.w/2,0,
 				focus.w/2,focus.h
 			)
-			focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
-			focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
+			focus:add_source_pattern_color_stop( 0 , p.focus_bar_color_inner )
+			focus:add_source_pattern_color_stop( 1 , p.focus_bar_color_outer )
 			focus:fill(true)
         	focus:set_line_width(   p.frame_thickness )
 			focus:set_source_color( p.frame_color )
@@ -5123,7 +5123,7 @@ function ui_element.scrollPane(t)
      		return make_hor_focus( ... )
 		end 
 
-		key = string.format ("h_focus:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_focus_color_inner),color_to_string(p.bar_focus_color_outer), 
+		key = string.format ("h_focus:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.focus_bar_color_inner),color_to_string(p.focus_bar_color_outer), 
 							p.frame_thickness, color_to_string(p.frame_color))
 		focus = assets(key, my_make_hor_focus)
 
@@ -5277,8 +5277,8 @@ function ui_element.scrollPane(t)
 				0,focus.h/2,
             	focus.w,focus.h/2
 			)
-			focus:add_source_pattern_color_stop( 0 , p.bar_focus_color_inner )
-			focus:add_source_pattern_color_stop( 1 , p.bar_focus_color_outer )
+			focus:add_source_pattern_color_stop( 0 , p.focus_bar_color_inner )
+			focus:add_source_pattern_color_stop( 1 , p.focus_bar_color_outer )
 			focus:fill(true)
         	focus:set_line_width(   p.frame_thickness )
 			focus:set_source_color( p.frame_color )
@@ -5294,7 +5294,7 @@ function ui_element.scrollPane(t)
      		return make_vert_focus( ... )
 		end 
 
-		key = string.format ("h_focus:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.bar_focus_color_inner),color_to_string(p.bar_focus_color_outer), 
+		key = string.format ("h_focus:%d:%d:%f:%s:%s:%d:%s", w,h,ratio,color_to_string(p.focus_bar_color_inner),color_to_string(p.focus_bar_color_outer), 
 							p.frame_thickness, color_to_string(p.frame_color))
 		focus = assets(key, my_make_vert_focus)
 		        
@@ -5547,7 +5547,7 @@ function ui_element.scrollPane(t)
 			focus_grip_vert.y = unfocus_grip_vert.y
 			grip_vert = focus_grip_vert
 		end
-		border.border_color = p.box_focus_color
+		border.border_color = p.focus_box_color
 	end
 	
 	function scroll_group:on_key_focus_out()
@@ -5733,7 +5733,7 @@ button
     	ui_height = 60, 
 
     	label = "Menu Button", 
-    	focus_color = {27,145,27,255}, 	  --"1b911b", 
+    	focus_border_color = {27,145,27,255}, 	  --"1b911b", 
     	focus_fill_color = {27,145,27,0}, --"1b911b", 
 		focus_text_color =  {255,255,255,255},   
     	border_color = {255,255,255,255}, --"FFFFFF"
@@ -5814,7 +5814,7 @@ button
     	ui_width=p.ui_width,
     	ui_height=p.ui_height, 
     	label=p.label, 
-    	focus_color=p.focus_color,
+    	focus_border_color=p.focus_border_color,
     	focus_fill_color=p.focus_fill_color,
     	border_color=p.border_color, 
     	fill_color=p.fill_color, 
@@ -6088,7 +6088,7 @@ button
     	button.ui_height=p.ui_height
         
     	button.label=p.label
-    	button.focus_color=p.focus_color
+    	button.focus_border_color=p.focus_border_color
     	button.fill_color=p.button_color
     	button.border_width=p.border_width
     	button.border_corner_radius=p.border_corner_radius
@@ -6367,8 +6367,8 @@ button
         button.reactive=true
        
 	if editor_lb == nil or editor_use then  
-		button.pressed = function() umbrella.fade_in() menu_bar_hover = true end 
-		button.released = function() umbrella.fade_out() menu_bar_hover = false end 
+		button.on_press = function() umbrella.fade_in() menu_bar_hover = true end 
+		button.on_release = function() umbrella.fade_out() menu_bar_hover = false end 
  	end 
         
         button.position = {button.w/2,button.h/2}
@@ -6427,7 +6427,7 @@ function ui_element.tabBar(t)
     	ui_width = 150,
     	ui_height = 60, 
         
-    	focus_color      = { 27,145, 27,255}, --"1b911b", 
+    	focus_border_color      = { 27,145, 27,255}, --"1b911b", 
     	focus_fill_color = { 27,145, 27,255}, --"1b911b", 
     	focus_text_color = {255,255,255,255}, --"1b911b", 
     	border_color     = {255,255,255,255}, --"FFFFFF"
@@ -6628,7 +6628,7 @@ function ui_element.tabBar(t)
 				skin                 = p.skin,
 				ui_width             = p.ui_width,
 				ui_height            = p.ui_height,
-				focus_color          = p.focus_color,
+				focus_border_color          = p.focus_border_color,
 				border_width         = p.border_width,
 				border_corner_radius = p.border_corner_radius,
 				label                = p.tab_labels[i],
@@ -6636,7 +6636,7 @@ function ui_element.tabBar(t)
 				fill_color           = p.unsel_color,
 				focus_fill_color     = p.fill_color,
 				focus_text_color     = p.focus_text_color,
-				pressed              = function () umbrella:display_tab(i) end,
+				on_press              = function () umbrella:display_tab(i) end,
 				
 			}
 			
@@ -6933,9 +6933,9 @@ function ui_element.arrowPane(t)
         arrow_dist_to_frame = 5,
         arrows_visible =   true,
         arrow_color       = {160,160,160,255},
-        arrow_focus_color = {160,255,160,255},
+        focus_arrow_color = {160,255,160,255},
         box_color         = {160,160,160,255},
-        box_focus_color   = {160,255,160,255},
+        focus_box_color   = {160,255,160,255},
         box_width =    2,
         skin = "Custom",
 		ui_position = {200,100},
@@ -7230,9 +7230,7 @@ function ui_element.arrowPane(t)
 			end
 			
 		else
-			--key = string.format ("tab_farrow:%d:%s",  p.arrow_sz, color_to_string(p.arrow_focus_color))
-			--focus_arrow_src = assets(key, my_make_arrow,  p.arrow_sz, p.arrow_focus_color )
-			focus_arrow_src   = make_arrow( p.arrow_sz, p.arrow_focus_color )
+			focus_arrow_src   = make_arrow( p.arrow_sz, p.focus_arrow_color )
 			umbrella:add(focus_arrow_src)
 			focus_arrow_src:hide()
 		end
@@ -7546,7 +7544,7 @@ function ui_element.arrowPane(t)
 		
 		function umbrella:on_key_focus_in()
 			
-			border.border_color = p.box_focus_color
+			border.border_color = p.focus_box_color
 			
 		end
 		function umbrella:on_key_focus_out()
