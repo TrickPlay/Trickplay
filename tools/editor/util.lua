@@ -1029,14 +1029,14 @@ function util.make_attr_t(v)
        ["Image"] = function() return {"src", "clip","lock",  "x_rotation","anchor_point","opacity", "reactive", "focus",} end,
        ["Group"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","border_color","fill_color", "focus_border_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius"} end,
-       ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","border_color","fill_color", "focus_border_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "justify","single_line", "alignment", "wrap_mode"} end,
-       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive","focus","border_color","fill_color","focus_border_color","focus_fill_color","focus_text_color","text_color","text_font","direction","selected_item","items",} end,
-       ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus", "border_color","fill_color","focus_border_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items"} end,
-	   ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","fill_color","focus_box_color","focus_fill_color","text_color","text_font","box_color","box_width","direction","box_size","check_size","line_space", "box_position", "item_position","items", "selected_items"} end,
+       ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","border_color", "focus_border_color", "fill_color", "focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius"} end,
+       ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","border_color","focus_border_color", "fill_color", "focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "justify","single_line", "alignment", "wrap_mode"} end,
+       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive","focus","border_color","focus_border_color","fill_color","focus_fill_color","focus_text_color","text_color","text_font","direction","selected_item","items",} end,
+       ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus", "border_color","focus_border_color","fill_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items"} end,
+	   ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","box_color","focus_box_color","fill_color","focus_fill_color","text_color","text_font","direction","box_size","check_size","line_space", "box_position", "item_position","items", "box_width", "selected_items"} end,
        ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_button_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","button_position", "item_position","items","selected_item"} end,
        ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","focus","border_color","fill_color","focus_border_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels", "arrow_sz", "arrow_dist_to_frame",} end,  
-       ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon", "title", "title_font", "title_color", "message", "message_font", "message_color", "border_color","fill_color",  "border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
+       ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","title",  "title_color","title_font", "message","message_color", "message_font", "border_color","fill_color", "border_width","border_corner_radius", "on_screen_duration","fade_duration",} end,
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
        ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color",} end,
@@ -1050,7 +1050,7 @@ function util.make_attr_t(v)
 		if v.extra.type == "Button" or v.extra.type ==  "MenuButton" or v.extra.type == "DialogBox" then 
 			attr_t =
       		{
-             	{"title", "Inspector : "..(v.extra.type)},
+             	{"ui_title", "Inspector : "..(v.extra.type)},
              	{"caption", "Object Name"},
              	{"name", v.name, "name"},
              	{"caption", "Label"},
@@ -1063,7 +1063,7 @@ function util.make_attr_t(v)
 	  	elseif v.extra.type == "ProgressBar" then 
 			attr_t =
       		{
-             	{"title", "Inspector : "..(v.extra.type)},
+             	{"ui_title", "Inspector : "..(v.extra.type)},
              	{"caption", "Object Name"},
              	{"name", v.name,"name"},
              	{"progress", v.progress , "Progress"},
@@ -1075,7 +1075,7 @@ function util.make_attr_t(v)
 	  	else 
 			attr_t =
       		{
-             	{"title", "Inspector : "..(v.extra.type)},
+             	{"ui_title", "Inspector : "..(v.extra.type)},
              	{"caption", "Object Name"},
              	{"name", v.name,"name"},
              	{"caption", "Position"},
@@ -1093,7 +1093,7 @@ function util.make_attr_t(v)
   elseif v.type ~= "Video" then  --Rectangle, Image, Text, Group, Clone
 	attr_t =
       {
-             {"title", "Inspector : "..(v.type)},
+             {"ui_title", "Inspector : "..(v.type)},
              {"caption", "Object Name"},
              {"name", v.name,"name"},
              {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
@@ -1106,7 +1106,7 @@ function util.make_attr_t(v)
   else -- Video 
       attr_t =
       {
-             {"title", "Inspector : "..(v.type)},
+             {"ui_title", "Inspector : "..(v.type)},
              {"caption", "Object Name"},
              {"name", v.name,"name"},
              {"caption", "Source"},

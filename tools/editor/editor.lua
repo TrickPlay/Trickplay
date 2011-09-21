@@ -1458,9 +1458,9 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_press = function() -- Handler for "..j.name.."\.on_press in this screen\nend\n"
 					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_release = function() -- Handler for "..j.name.."\.on_release in this screen\nend\n"
 			   		     		elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
-	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_item) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
 			   		     		elseif j.extra.type == "CheckBoxGroup" then 
-	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_items) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
 			   		     		elseif j.extra.type == "MenuButton" then 
 			   						for k,l in pairs (j.items) do 
 			   	     		     		if l["type"] == "item" then 

@@ -2531,7 +2531,7 @@ Arguments:
     	border_color - Color of the Button 
     	focus_border_color - Focus color of the Button 
 		selected_item - The number of the selected item 
-		rotate_func - function that is called by selected item number   
+		on_selection_change - function that is called by selected item number   
 
 Return:
  		bp_group - Group containing the button picker 
@@ -2567,7 +2567,7 @@ function ui_element.buttonPicker(t)
 	fill_color = {255,255,255,0},
 	focus_border_color = {0,255,0,255},
 	focus_fill_color = {0,255,0,0},
-	rotate_func = nil, 
+	on_selection_change = nil, 
     selected_item = 1, 
 	direction = "horizontal", 
 	ui_position = {300, 300, 0},  
@@ -2914,8 +2914,8 @@ function ui_element.buttonPicker(t)
 			items:find_child("item"..tostring(next_i)).x = next_new_x
 			items:find_child("item"..tostring(next_i)).y = next_new_y
 			p.selected_item = next_i
-			if p.rotate_func then
-	       		p.rotate_func(next_i)
+			if p.on_selection_change then
+	       		p.on_selection_change(next_i)
 	    	end
 			t = nil
 	    end
@@ -2990,8 +2990,8 @@ function ui_element.buttonPicker(t)
 		items:find_child("item"..tostring(next_i)).x = next_new_x
 		items:find_child("item"..tostring(next_i)).y = next_new_y
 		p.selected_item = next_i
-		if p.rotate_func then
-	       	     p.rotate_func(next_i)
+		if p.on_selection_change then
+	       	     p.on_selection_change(next_i)
 	    	end
 		t = nil
 	    end
@@ -3070,8 +3070,8 @@ function ui_element.buttonPicker(t)
 			items:find_child("item"..tostring(next_i)).x = next_new_x
 			items:find_child("item"..tostring(next_i)).y = next_new_y
 			p.selected_item = next_i
-			if p.rotate_func then
-	       		     p.rotate_func(next_i)
+			if p.on_selection_change then
+	       		     p.on_selection_change(next_i)
 	    		end
 
 			t = nil
@@ -3149,8 +3149,8 @@ function ui_element.buttonPicker(t)
 		items:find_child("item"..tostring(next_i)).x = next_new_x
 		items:find_child("item"..tostring(next_i)).y = next_new_y
 		p.selected_item = next_i
-		if p.rotate_func then
-	       	     p.rotate_func(next_i)
+		if p.on_selection_change then
+	       	     p.on_selection_change(next_i)
 	    	end
 		t = nil
 	    end
@@ -3232,7 +3232,7 @@ Arguments:
 	item_position - The position of the group of text items 
 	line_space - The space between the text items 
 	selected_item - Selected item's number 
-	rotate_func - function that is called by selceted item number
+	on_selection_change - function that is called by selceted item number
 
 Return:
  	rb_group - Group containing the radio button 
@@ -3261,7 +3261,7 @@ function ui_element.radioButtonGroup(t)
 	button_position = {0, 0},  
 	item_position = {50,-10},  
 	line_space = 40,  
-	rotate_func = nil, 
+	on_selection_change = nil, 
 	direction = "vertical", 
 	selected_item = 1,  
 	ui_position = {200, 200, 0}, 
@@ -3307,8 +3307,8 @@ function ui_element.radioButtonGroup(t)
 
     function rb_group.extra.select_button(item_n) 
 	    rb_group.selected_item = item_n
-        if p.rotate_func then
-	       p.rotate_func(p.selected_item)
+        if p.on_selection_change then
+	       p.on_selection_change(p.selected_item)
 	    end
     end 
 
@@ -3535,7 +3535,7 @@ Arguments:
 		item_position - Position of the group of text items 
 		line_space - Space between the text items 
 		selected_item - Selected item's number 
-		rotate_func - function that is called by selected item number   
+		on_selection_change - function that is called by selected item number   
 		direction - Option of list direction (1=Vertical, 2=Horizontal)
 
 Return:
@@ -3571,7 +3571,7 @@ function ui_element.checkBoxGroup(t)
 	item_position = {50,-5},  
 	selected_items = {1},  
 	direction = "vertical",  -- 1:vertical 2:horizontal
-	rotate_func = nil,  
+	on_selection_change = nil,  
 	ui_position = {200, 200, 0}, 
     } 
 
@@ -3613,8 +3613,8 @@ function ui_element.checkBoxGroup(t)
 
     function cb_group.extra.select_button(items) 
 	    cb_group.selected_items = items
-        if cb_group.rotate_func then
-	       cb_group.rotate_func(cb_group.selected_items)
+        if cb_group.on_selection_change then
+	       cb_group.on_selection_change(cb_group.selected_items)
 	    end
     end 
 

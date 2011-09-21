@@ -1071,7 +1071,7 @@ function editor_ui.checkBoxGroup(t)
 	item_pos = {50,-5},  
 	selected_items = {1},  
 	direction = "vertical",  -- 1:vertical 2:horizontal
-	rotate_func = nil,  
+	on_selection_change = nil,  
 	ui_position = {200, 200, 0}, 
     } 
 
@@ -1116,8 +1116,8 @@ function editor_ui.checkBoxGroup(t)
 
     function cb_group.extra.select_button(items) 
 	    p.selected_items = items
-        if p.rotate_func then
-	       p.rotate_func(p.selected_items)
+        if p.on_selection_change then
+	       p.on_selection_change(p.selected_items)
 	    end
     end 
 
