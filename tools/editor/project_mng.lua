@@ -167,7 +167,7 @@ function project_mng.new_project(fname, from_new_project)
 	editor_use = true
 	-- Text Input Field 	
 	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
-		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
+		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_border_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
     	  border_corner_radius = 0,}
 
@@ -179,8 +179,8 @@ function project_mng.new_project(fname, from_new_project)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_ok.pressed = function() 
+	button_cancel.on_press = function() xbox:on_button_down() end 
+	button_ok.on_press = function() 
 							set_new_project(text_input.text) 
 							xbox:on_button_down()
 							undo_list = {}
@@ -431,9 +431,9 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_new.pressed = function() xbox:on_button_down(1)  project_mng.new_project() end
-	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() if selected_project == ss then selected_project = nn end load_project(selected_project) end
+	button_new.on_press = function() xbox:on_button_down(1)  project_mng.new_project() end
+	button_cancel.on_press = function() xbox:on_button_down(1) end
+	button_ok.on_press = function() if selected_project == ss then selected_project = nn end load_project(selected_project) end
 	
 	local s_func = function()
 		if current_focus then 

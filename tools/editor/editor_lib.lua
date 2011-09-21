@@ -12,9 +12,9 @@ function editor_ui.button(table)
     	text_color = {255,255,255,255}, --"FFFFFF",
     	focus_text_color = {255,255,255,255},
 
-		focused=nil, 
-		pressed = nil, 
-		released = nil, 
+		on_focus=nil, 
+		on_press = nil, 
+		on_release = nil, 
 
 		button_image = nil,
 		focus_image  = nil,
@@ -63,15 +63,15 @@ function editor_ui.button(table)
 	
 		current_focus = b_group
 
-	    if p.focused ~= nil then 
-			p.focused()
+	    if p.on_focus ~= nil then 
+			p.on_focus()
 		end 
 
 		b_group:grab_key_focus(b_group)
 
 		if key then 
-	    	if p.pressed and key == keys.Return then
-				p.pressed()
+	    	if p.on_press and key == keys.Return then
+				p.on_press()
 	    	end 
 		end 
 	
@@ -89,8 +89,8 @@ function editor_ui.button(table)
         b_group:find_child("text").color = p.text_color
 		current_focus = nil 
 
-		if p.released then 
-			p.released()
+		if p.on_release then 
+			p.on_release()
 		end 
     end
 
@@ -920,10 +920,10 @@ function editor_ui.tabBar(t)
             end
 
 			p.buttons[i] = ui_element.button{ skin=p.skin, ui_width=p.ui_width, ui_height=p.ui_height, 
-						 focus_color=p.focus_color, border_width=p.border_width, border_corner_radius=p.border_corner_radius,
+						 focus_border_color=p.focus_color, border_width=p.border_width, border_corner_radius=p.border_corner_radius,
 						 label= b_indent..p.tab_labels[i], text_font=p.font, text_color=p.text_color, fill_color=p.unsel_color, 
 						 focus_fill_color=p.fill_color, focus_text_color=p.focus_text_color, 
-						 pressed=function() umbrella:display_tab(i) p.current_tab = i end, label_align = "left", tab_button=true} 
+						 on_press=function() umbrella:display_tab(i) p.current_tab = i end, label_align = "left", tab_button=true} 
 
 			p.tabs[i]:hide()
             p.buttons[i].position = {0,0}
@@ -968,9 +968,26 @@ function editor_ui.tabBar(t)
 				tab_arrow_right_on = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_left_off = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_right_off = "lib/assets/tab-arrow-left-off.png",  
+					--[[
+				visible_width=p.display_width - (p.arrow_sz+p.arrow_dist_to_frame),
+				visible_height=p.buttons[# p.buttons].h,
+				virtual_width=p.buttons[# p.buttons].w + p.buttons[# p.buttons].x,
+				virtual_height=p.buttons[# p.buttons].h,
+				arrow_color=p.label_color,
+				scroll_distance=p.buttons[# p.buttons].w + 20, 
+				arrow_size = p.arrow_sz,
+				arrow_dist_to_frame = p.arrow_dist_to_frame,
+				arrow_src = p.arrow_image,
+				tab = umbrella, -- p.current_tab, -- 1
+				tab_buttons = p.buttons,
+				box_border_width = 0,
+				tab_arrow_left_on = "lib/assets/tab-arrow-left-off.png",  
+				tab_arrow_right_on = "lib/assets/tab-arrow-left-off.png",  
+				tab_arrow_left_off = "lib/assets/tab-arrow-left-off.png",  
+				tab_arrow_right_off = "lib/assets/tab-arrow-left-off.png",  
+				]]
 			}
 			
-
 			ap.x = p.arrow_sz+p.arrow_dist_to_frame
 			ap.y = 0
 			
