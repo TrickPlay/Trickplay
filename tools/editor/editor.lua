@@ -735,7 +735,8 @@ local function open_files(input_purpose, bg_image, inspector)
 				selected_file = v
 			end
 
-			h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() selected_file = v tab_func() end }
+			h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() end }
+			--h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() selected_file = v tab_func() end }
 	
 			item_t.position =  {cur_w, cur_h}
 			item_t.extra.rect = h_rect.name
@@ -1218,8 +1219,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 			end 
 		end 
 		screen.grab_key_focus(screen) 
-
-	
+		menu.reactivate_menu()
 		return true
 	end 
 
@@ -3274,7 +3274,8 @@ function editor.ui_elements()
 			selected_ui_element = v
 		end
 
-		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() selected_ui_element = v tab_func() end}
+		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() end}
+		--h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() selected_ui_element = v tab_func() end}
 
 		widget_t.position =  {cur_w, cur_h}
 		widget_t.extra.rect = h_rect.name
