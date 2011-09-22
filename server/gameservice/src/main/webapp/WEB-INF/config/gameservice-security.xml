@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    					http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    					http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+	<security:global-method-security
+		pre-post-annotations="enabled" />
+
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider
+			user-service-ref="tpUserDetailsService">
+			<security:password-encoder ref="passwordEncoder" />
+		</security:authentication-provider>
+		<security:authentication-provider
+			ref="anonymousAuthenticationProvider" />
+	</security:authentication-manager>
+
+	<bean id="tpUserDetailsService"
+		class="com.trickplay.gameservice.security.CustomUserDetailsService">
+		<property name="dataSource" ref="dataSource" />
+		<property name="usersByUsernameQuery"
+			value="select id, username, password, true from user where username = ?" />
+		<property name="authoritiesByUsernameQuery"
+			value="select U.username, R.name authorities from user U, USER_ROLE UR, role R where (U.id=UR.user_id) and (R.id=UR.role_id) and (u.username=?)" />
+	</bean>
+	<!-- <security:jdbc-user-service data-source-ref="dataSource" users-by-username-query="select 
+		username, password, true from user where username = ?" authorities-by-username-query="select 
+		U.username, R.name authorities from user U, USER_ROLE UR, role R where (U.id=UR.user_id) 
+		and (R.id=UR.role_id) and (u.username=?)" /> -->
+
+	<!-- These beans are only created to pre-populate an admin user -->
+	<bean id="adminUser" class="com.trickplay.gameservice.domain.User">
+		<property name="username" value="admin" />
+		<!-- this is the login email for the admin user -->
+		<property name="email" value="admin@trickplay.com" />
+		<!-- and this is the password -->
+		<property name="password" value="admin" />
+	</bean>
+
+
+	<bean id="springSecurityFilterChain" class="org.springframework.security.web.FilterChainProxy">
+		<security:filter-chain-map path-type="ant">
+			<security:filter-chain pattern="/rest/**"
+				filters="
+				securityContextPersistenceFilterWithASCFalse,
+				basicAuthenticationFilter,
+				anonymousAuthenticationFilter,
+				basicExceptionTranslationFilter,
+				filterSecurityInterceptor" />
+
+			<security:filter-chain pattern="/**"
+				filters="
+				securityContextPersistenceFilterWithASCTrue,
+				logoutFilter,
+				formLoginFilter,
+				securityContextHolderAwareFilter,
+				anonymousAuthenticationFilter,
+				formExceptionTranslationFilter,
+				filterSecurityInterceptor" />
+		</security:filter-chain-map>
+	</bean>
+
+	<!-- Don't seem to be able to create one without session?? -->
+	<bean id="securityContextPersistenceFilterWithASCFalse"
+		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+		<property name='securityContextRepository'>
+			<bean
+				class='com.trickplay.gameservice.security.EmptySecurityContextRepository'>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="securityContextPersistenceFilterWithASCTrue"
+		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+		<property name='securityContextRepository'>
+			<bean
+				class='org.springframework.security.web.context.HttpSessionSecurityContextRepository'>
+				<property name='allowSessionCreation' value='true' />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="logoutFilter"
+		class="org.springframework.security.web.authentication.logout.LogoutFilter"> <!-- the post-logout destination -->
+		<constructor-arg value="/" />
+		<constructor-arg>
+			<array>
+				<ref local="logoutHandler" />
+			</array>
+		</constructor-arg>
+		<property name="filterProcessesUrl" value="/logout" />
+	</bean>
+
+	<bean id="logoutHandler"
+		class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+
+	<bean id="formLoginFilter"
+		class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+
+		<property name="authenticationSuccessHandler">
+			<bean
+				class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/index.jsp"></property>
+			</bean>
+		</property>
+
+		<property name="filterProcessesUrl" value="/j_spring_security_check" />
+	</bean>
+
+	<!-- SecurityContextHolderAwareFilter -->
+	<bean id="securityContextHolderAwareFilter"
+		class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter" />
+
+	<bean id="formAuthenticationEntryPoint"
+		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<property name="loginFormUrl" value="/login.jsp" />
+		<property name="forceHttps" value="false" />
+	</bean>
+
+	<bean id="formExceptionTranslationFilter"
+		class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<property name="authenticationEntryPoint" ref="formAuthenticationEntryPoint" />
+		<property name="accessDeniedHandler" ref="formAccessDeniedHandler" />
+	</bean>
+
+	<bean id="formAccessDeniedHandler"
+		class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+		<property name="errorPage" value="/login.jsp?login_error=t" />
+	</bean>
+
+
+	<bean id="basicAuthenticationFilter"
+		class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="authenticationEntryPoint" ref="basicAuthenticationEntryPoint" />
+	</bean>
+
+	<bean id="basicAuthenticationEntryPoint"
+		class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+		<property name="realmName" value="trickplay.com" />
+	</bean>
+
+	<bean id="basicExceptionTranslationFilter"
+		class="org.springframework.security.web.access.ExceptionTranslationFilter">
+		<property name="authenticationEntryPoint" ref="basicAuthenticationEntryPoint" />
+		<property name="accessDeniedHandler" ref="basicAccessDeniedHandler" />
+	</bean>
+
+
+	<bean id="basicAccessDeniedHandler"
+		class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+	</bean>
+
+	<bean id="anonymousAuthenticationFilter"
+		class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
+		<property name="userAttribute" value="anonymousUser,ROLE_ANONYMOUS" />
+		<property name="key" value="BF93JFJ091N00Q7HF" />
+	</bean>
+
+	<bean class="org.springframework.security.access.vote.RoleVoter"
+		id="roleVoter" />
+
+	<bean class="org.springframework.security.access.vote.AuthenticatedVoter"
+		id="authenticatedVoter" />
+
+	<bean id="anonymousAuthenticationProvider"
+		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
+		<property name="key" value="BF93JFJ091N00Q7HF" />
+	</bean>
+
+	<bean id="filterSecurityInterceptor"
+		class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="accessDecisionManager" />
+
+		<property name="securityMetadataSource">
+			<security:filter-security-metadata-source>
+				<security:intercept-url pattern="/images/**"
+					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+				<security:intercept-url pattern="/resources/**"
+					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+				<security:intercept-url pattern="/styles/**"
+					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+				<security:intercept-url pattern="/rest/user"
+					method="POST" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_ADMIN" />
+				<security:intercept-url pattern="/user"
+					method="POST" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_ADMIN" />
+				<security:intercept-url pattern="/user/form"
+					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+				<security:intercept-url pattern="/login.jsp"
+					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+				<security:intercept-url pattern="/index.jsp"
+					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+				<security:intercept-url pattern="/rest/**"
+					access="ROLE_USER,ROLE_ADMIN" />
+				<security:intercept-url pattern="/**"
+					access="ROLE_USER,ROLE_ADMIN" />
+			</security:filter-security-metadata-source>
+		</property>
+	</bean>
+
+	<bean id="accessDecisionManager"
+		class="org.springframework.security.access.vote.AffirmativeBased">
+		<property name="allowIfAllAbstainDecisions" value="false" />
+		<property name="decisionVoters">
+			<list>
+				<ref bean="roleVoter" />
+				<ref bean="authenticatedVoter" />
+			</list>
+		</property>
+	</bean>
+
+	<bean
+		class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"
+		id="passwordEncoder" />
+
+</beans>
