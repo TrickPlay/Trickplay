@@ -12,6 +12,7 @@
 #import "TrickplayTextHTML.h"
 #import "TrickplayImage.h"
 #import "TrickplayGroup.h"
+#import "Extensions.h"
 
 @implementation TrickplayUIElement
 
