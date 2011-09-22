@@ -921,6 +921,8 @@ interface actor [[ClutterActor*]]
 	
 	If the object has been rotated on its x and/or y axes, the resulting object will be a quadrangle with sides of unequal lengths. In such cases, the values in the transformed_size property specify a rectangle large enough to contain the entire quadrangle. One side effect of this is that the X, Y position of the rectangle, as specified in the <transformed_position> property, may not contain the actual coordinates of the quadrangle.
 	
+	*Note:* The transformed_size property's values are undefined until the object has been added to the global <screen> variable.
+	
 	*Format:* { transformed_width, transformed_height }
 	
 	*See Also:* the <transformed_position> property and the <transform_point> function
@@ -945,6 +947,8 @@ interface actor [[ClutterActor*]]
 	The transformed_position property is a table that contains the X and Y coordinates in pixels of the object's location taking into account any transformations applied to the object.
 	
 	If the object has been rotated on its x and/or y axes, the resulting object will be a quadrangle with sides of unequal lengths. The transformed_position property specifies the X, Y coordinates of a rectangle large enough to contain the entire quadrangle. Depending upon the nature of the quadrangle, its X, Y position coordinates may not be identical to those of the enclosing rectangle.
+	
+	*Note:* The transformed_position property's values are undefined until the object has been added to the global <screen> variable.
 	
 	*Format:* { transformed_X, transformed_Y }
 	

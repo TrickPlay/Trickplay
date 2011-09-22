@@ -29,6 +29,7 @@ if (NATURAL_DOCS)
 			-r
             -i ${PROJECT_SOURCE_DIR}/engine
 			-img ${PROJECT_SOURCE_DIR}/engine/docs/rte/reference/images
+			-img ${PROJECT_SOURCE_DIR}/engine/docs/rte/progguide/images
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/oem
             -xi ${PROJECT_SOURCE_DIR}/engine/3rd_party
             -xi ${PROJECT_SOURCE_DIR}/engine/lb
