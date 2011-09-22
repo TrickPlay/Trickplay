@@ -61,6 +61,8 @@ if (CMAKE_TOOLCHAIN_FILE)
 
     add_subdirectory( engine )
     
+    add_subdirectory( pdk )
+    
 else (CMAKE_TOOLCHAIN_FILE)
 
     add_subdirectory( engine )
