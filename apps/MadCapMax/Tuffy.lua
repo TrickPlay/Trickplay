@@ -79,6 +79,7 @@ function dog:load_assets(src_parent, actor_parent)
         Image{src ="assets/tuffy/tuffy-9.png"},
         Image{src ="assets/tuffy/tuffy-10.png"},
     }
+    imgs.eye_lids = Image{src ="assets/tuffy/tuffy-eyelid-full.png"}
     imgs.run = {
         Image{src ="assets/tuffy/tuffy-run1.png"},
         Image{src ="assets/tuffy/tuffy-run2.png"},
@@ -95,7 +96,9 @@ function dog:load_assets(src_parent, actor_parent)
     
     src_parent:add(srcs)
     
-    actor_parent:add(dog)
+    dog.lids = Clone{source = imgs.eye_lids}
+    
+    actor_parent:add(dog,dog.lids)
     
     is_loaded = true
     
@@ -125,6 +128,7 @@ do
             function() dog.x = dog.x + run_dir*60 end,
             imgs.run[1],
             function() dog.x = dog.x + run_dir*80 end,
+            function() if math.random(1,10) == 1 then mediaplayer:play_sound("audio/dog bark"..math.random(1,2)..".mp3") end end,
             imgs.run[2],
             function() dog.x = dog.x + run_dir*60 end,
             imgs.run[3],
@@ -145,6 +149,7 @@ do
             imgs.attack[3],
             imgs.attack[2],
             imgs.attack[3],
+            function() if math.random(1,4) == 1 then mediaplayer:play_sound("audio/dog bark"..math.random(1,2)..".mp3") end end,
             imgs.attack[4],
             imgs.attack[5],
             imgs.attack[4],
@@ -170,6 +175,25 @@ do
             imgs.poop[2],
             imgs.poop[1],
             next_move
+        }
+        blink_sequence = {
+            function()
+                if math.random(1,10) == 1 then
+                    
+                    dog.lids.x = dog.x +  28
+                    dog.lids.y = dog.y - 124
+                    
+                    dog.lids:show()
+                    
+                    dolater(
+                        100,
+                        dog.lids.hide,
+                        dog.lids
+                    )
+                end
+            end,
+            100,
+            next_move,
         }
         wait_sequence = {
             100,
@@ -221,12 +245,12 @@ do
                 frames = run_sequence
                 
             elseif dog.x < -physics_world.x then
-                print("\n\n\nsjf;klsdjfklsjfk;ljdk;lsfj;sakfj\n\n\n")
+                
                 Animation_Loop:delete_animation(dog_animation)
                 
             else
                 dog.source = imgs.poop[1]
-                frames = wait_sequence
+                frames = blink_sequence
                 
             end
             

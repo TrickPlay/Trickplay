@@ -8,7 +8,7 @@ local enter_press = {
     function() --[[DOES NOTHING]] end,
     function()
        
-        launch_lvl(1,Splash_Menu)
+        launch_lvl(2,Splash_Menu)
         
     end,
 }
@@ -17,7 +17,13 @@ local focus_on, help_focused
 
 gamestate:add_state_change_function(
     
-    function()   Splash_Menu:load_assets(layers.menus)   end,
+    function()
+        
+        Splash_Menu:load_assets(layers.menus)
+        
+        mediaplayer:load("audio/opening theme.mp3")
+        
+    end,
     
     nil,"SPLASH"
     
@@ -207,6 +213,7 @@ function Splash_Menu:load_assets(parent)
         end
         
         Animation_Loop:add_animation(slide_up_help)
+        mediaplayer:play_sound("audio/hlp tips cue music.mp3")
     end
     
     help_focus_out = function()
@@ -220,6 +227,7 @@ function Splash_Menu:load_assets(parent)
         end
         
         Animation_Loop:add_animation(slide_down_help)
+        mediaplayer:play_sound("audio/hlp-swish-out.mp3")
     end
     
     dolater(focus_on[index])
@@ -300,6 +308,8 @@ local Splash_keys = {
             focus_on[index]()
             
         else
+            
+            fade_out_mediaplayer(.5)
             
             enter_press[index]()
             

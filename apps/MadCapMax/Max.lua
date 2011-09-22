@@ -139,10 +139,12 @@ end
 
 function bird:collect_seed()
     sk:inc("seeds")
+    mediaplayer:play_sound("audio/crunch.wav")
     hud:inc_poop()
 end
 function bird:collect_cracker()
     sk:inc("crackers")
+    mediaplayer:play_sound("audio/crunch.wav")
     hud:inc_poop()
 end
 function bird:get_vx()
@@ -163,6 +165,7 @@ function bird:collect_cherry()
     end
     
     sk:inc("cherries")
+    mediaplayer:play_sound("audio/collect2.WAV")
     
 end
 
@@ -358,7 +361,7 @@ bird.death_sequence_pt2 = {
 
 function bird:death()
     
-    mediaplayer:play_sound("audio/bird-die.wav")
+    mediaplayer:play_sound("audio/whistle-ding.mp3")
     
     bird.dead = true
     
@@ -941,7 +944,7 @@ do
         poop.fall = {
             on_step = function(s)
                 poop.y = poop.y + poop_speed_y * s
-                if poop.y > floor_y then
+                if poop.y > poop.floor_y then
                     
                     Animation_Loop:delete_animation(poop.fall)
                     
@@ -989,7 +992,7 @@ do
             
             mediaplayer:play_sound("audio/fart.wav")
             
-            fart_cloud.x = 0
+            fart_cloud.x = 10
             fart_cloud.y = 100
             
             Animation_Loop:add_animation(fart_animation)
@@ -1005,6 +1008,8 @@ do
         next_poop.x = bird.x+30
         next_poop.y = bird.y+100
         
+        next_poop.floor_y = lvl:poop_fall(next_poop.x) and 1200 or floor_y
+        print("ze poopen floor!",next_poop.floor_y)
         layers.player:add(next_poop)
         
         next_poop:lower_to_bottom()
@@ -1072,6 +1077,8 @@ do
     local keys = {
         [keys.Up] = function()
             
+            if gamestate:current_state() == "PAUSED" then return end
+            
             --if pressed during the timer, then reset the timer to continue moving up
             if dy_state ~= "UP" then
                 
@@ -1088,6 +1095,8 @@ do
             
         end,
         [keys.Down] = function()
+            
+            if gamestate:current_state() == "PAUSED" then return end
             
             --if pressed during the timer, then reset the timer to continue moving down
             if dy_state ~= "DOWN" then
@@ -1110,6 +1119,8 @@ do
         end,
         [keys.Left] = function()
             
+            if gamestate:current_state() == "PAUSED" then return end
+            
             --if pressed during the timer, then reset the timer to continue moving left
             if dx_state ~= "LEFT" then
                 
@@ -1123,6 +1134,8 @@ do
             
         end,
         [keys.Right] = function()
+            
+            if gamestate:current_state() == "PAUSED" then return end
             
             --if pressed during the timer, then reset the timer to continue moving right
             if dx_state ~= "RIGHT" then

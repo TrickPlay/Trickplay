@@ -843,16 +843,16 @@ lvls = {
                 source = "sliding-door-1",
                 x      = 11520+4660+220,
                 y      = 125,
-                enemy_stop = true,
             },
 
             {
-                type   = "foreground",
+                type   = "btw_p_n_e",
                 source = "sliding-door-2",
                 x      = 11520+5500+145,
                 y      = 125,
                 w      = 195,
                 stop_scroll = true,
+                enemy_stop = true,
                 player = true,
             },
 
@@ -1003,14 +1003,14 @@ lvls = {
             },
             {
                 x = 3221 ,
-                y = 651 ,
+                y = 621 ,
                 w = 400 ,
                 h = 400 ,
             },
             {
                 x = 6332 ,
                 y = 756 ,
-                w = 580 ,
+                w = 615 ,
                 h = 40 ,
             },
             {
@@ -1064,6 +1064,7 @@ lvls = {
                 y = 530 ,
                 w = 700 ,
                 h = 70 ,
+                can_jump_through = true,
             },
         },
         
@@ -1496,10 +1497,38 @@ lvls = {
                 --scale = {3/4,3/4},
             },
             {
+                type   = "foreground",
+                source = "grass-1",
+                x      = screen_w*4-1803-100+300,
+                y      = 500,
+                --scale = {3/4,3/4},
+            },
+            {
                 type   = "wall_objs",
                 source = "swamp_2",
                 x      = screen_w*6-1803-1110-100,
                 y      = 135,
+                --scale = {3/4,3/4},
+            },
+            {
+                type   = "foreground",
+                source = "cattail-2",
+                x      = screen_w*6-1803-1110-100+200,
+                y      = 500,
+                --scale = {3/4,3/4},
+            },
+            {
+                type   = "foreground",
+                source = "tree-limbs",
+                x      = screen_w*6-1803-1110-100,
+                y      = 0,
+                --scale = {3/4,3/4},
+            },
+            {
+                type   = "foreground",
+                source = "plant-2",
+                x      = screen_w*7-1803-1110-100-200,
+                y      = 500+140,
                 --scale = {3/4,3/4},
             },
             {
@@ -1508,10 +1537,26 @@ lvls = {
                 x      = screen_w*8-1803-1110-1313+210-7-100,
                 y      = 135,
                 w      = 2048+340,
+                media  = {file = "audio/birds chirping 29sec.mp3",delay = 18},
                 --scale = {3/4,3/4},
                 stop_scroll = true,
                 enemy_stop = true,
-            },--[[
+            },
+            {
+                type   = "foreground",
+                source = "cattail-3",
+                x      = screen_w*7-1803-1110-100+600,
+                y      = 500+140,
+                --scale = {3/4,3/4},
+            },
+            {
+                type   = "foreground",
+                source = "cattail-1",
+                x      = screen_w*7-1803-1110-100+1300,
+                y      = 500+140,
+                --scale = {3/4,3/4},
+            },
+            --[[
             {
                 type   = "background",
                 source = "swamp-splash-btm-cutout",
@@ -1530,7 +1575,7 @@ lvls = {
                 type   = "background",
                 source = "heart1",
                 x      = 13190,
-                y      = 500,
+                y      = 600,
                 opacity = 0,
             },
             {
@@ -1539,16 +1584,6 @@ lvls = {
                 x      = 13290,
                 y      = 760,
                 opacity = 0,
-            },
-            {
-                type   = "wall_objs",
-                source = "swamp_3",
-                x      = screen_w*8-1803-1110-1313+210-7-100,
-                y      = 135,
-                w      = 2048+340,
-                --scale = {3/4,3/4},
-                stop_scroll = true,
-                enemy_stop = true,
             },
         },
         outro = {
@@ -1780,6 +1815,11 @@ lvls = {
                 cat_exit = true,
             },
         },
+        poop_floorless = {
+            --from = to
+            [5654-100] = screen_w*8-1803-1110-1313+210-7-100+ 2048+340
+            
+        },
         collectables = {
             --table and chairs
             {
@@ -1988,19 +2028,14 @@ lvls = {
             --[[
             "algae.png",
             "bbq.png",
-            "cattail-1.png",
-            "cattail-2.png",
-            "cattail-3.png",
             "deck.png",
             "deck-chair.png",
             "deck-end-piece.png",
             "deck-table.png",
-            "grass-1.png",
             "grass-background.png",
             "lily-flower.png",
             "lily-pads.png",
             "plant-1.png",
-            "plant-2.png",
             "plant-3.png",
             "plant-4.png",
             "plant-clump-back-1.png",
@@ -2013,18 +2048,23 @@ lvls = {
             "sidegate.png",
             "sky-water.jpg",
             --]]
+            "cattail-1.png",
+            "cattail-3.png",
+            "cattail-2.png",
+            "plant-2.png",
+            "grass-1.png",
             "heart.png",
             "heart1.png",
             "maxina-eyelids.png",
             "swamp_1.jpg",
             "swamp_2.jpg",
             "swamp_3.jpg",
+            "tree-limbs.png",
             --"swamp-splash-btm-cutout.jpg",
             --[[
             "tree.png",
             "tree2.png",
             "tree-left.png",
-            "tree-limbs.png",
             "tree-middle.png",
             "umbrella.png",
             "water-waves.png",
@@ -2158,6 +2198,24 @@ local call_before_outro, outro_actors
 function LVL_Object:curr_lvl() return curr_lvl_i end
 
 local base_path = "assets/lvl"
+function LVL_Object:poop_fall(x)
+    
+    if lvls[curr_lvl_i].poop_floorless == nil then
+        return
+    end
+        
+    for from,to in pairs(lvls[curr_lvl_i].poop_floorless) do
+        
+        if x > from and x < to then
+            
+            return true
+            
+        end
+        
+    end
+    
+    print("le poo?")
+end
 function LVL_Object:setup_for_level(t)
     
     if not has_been_initialized then
@@ -2245,7 +2303,7 @@ function LVL_Object:setup_for_level(t)
     end
     
     LVL_Object.obstacles = lvls[curr_lvl_i].enemy_obstacles
-    ---[[
+    --[[
     for j,o in ipairs(LVL_Object.obstacles) do
         layers.foreground:add(Rectangle{x = o.x,y = o.y, w = o.w, h = o.h, color="77770099"})
     end
@@ -2679,6 +2737,20 @@ function LVL_Object:scroll_by(dx,need_actors)
                 
             end
             
+        end
+        
+        if items[item_i].media then
+            
+            if items[item_i].media.delay == 0 then
+                mediaplayer:load(items[item_i].media.file)
+            else
+                dolater(
+                    items[item_i].media.delay*1000,
+                    mediaplayer.load,
+                    mediaplayer,
+                    items[item_i].media.file
+                )
+            end
         end
         
         item_i = item_i + 1

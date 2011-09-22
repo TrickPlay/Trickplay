@@ -363,6 +363,8 @@ local make_cat = function(cat_name)
             }
             wait_sequence = {
                 100,
+                function() if math.random(1,5) == 1 then mediaplayer:play_sound("audio/cat sad growl "..math.random(1,3)..".mp3") end end,
+                100,
             }
         end
         
@@ -444,6 +446,8 @@ local make_cat = function(cat_name)
             on_completed = function()
                 marker_i = 1
                 print("attack done",cat.y)
+                
+                mediaplayer:play_sound("audio/cat landing"..math.random(1,2)..".mp3")
                 
                 cat.on_obstacle = will_be_on
                 
@@ -633,6 +637,9 @@ local make_cat = function(cat_name)
                         
                         on_c = function()
                             print("cat die")
+                            
+                            mediaplayer:play_sound("audio/splash.mp3")
+                            
                             dolater(
                                 Animation_Loop.delete_animation,
                                 Animation_Loop,
@@ -705,6 +712,12 @@ local make_cat = function(cat_name)
             peak_x = peak_x or target.x
             peak_y = peak_y or target.y
             
+            peak_x =
+                (land_x > start_x and
+                    (land_x < peak_x or start_x > peak_x) or
+                    (land_x > peak_x or start_x < peak_x)
+                ) and
+                start_x + (land_x - start_x)/2 or peak_x
             peak_y = land_y < start_y and
                     (peak_y < land_y  - 100 and peak_y or land_y  - 100) or
                     (peak_y < start_y - 100 and peak_y or start_y - 100)
@@ -905,6 +918,10 @@ local make_cat = function(cat_name)
             
             --moving to the right
             if dir == 1 then
+                
+                if cat.x > stop_point then
+                    return
+                end
                 
                 --jump up to the next 
                 if cat.right_obstacle and cat.x + cat.w/2 + 400 >
