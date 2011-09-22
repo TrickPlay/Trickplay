@@ -3305,7 +3305,7 @@ function ui_element.radioButtonGroup(t)
 		end 
     end 
 
-    function rb_group.extra.select_button(item_n) 
+    function rb_group.extra.set_selection(item_n) 
 	    rb_group.selected_item = item_n
         if p.on_selection_change then
 	       p.on_selection_change(p.selected_item)
@@ -3425,7 +3425,7 @@ function ui_element.radioButtonGroup(t)
 						return true 
 					end
 				elseif key == keys.Return then 
-					rb_group.extra.select_button(ring_num)
+					rb_group.extra.set_selection(ring_num)
 
 	    			rings:find_child("ring"..ring_num).opacity = 0 
 	    			rings:find_child("focus"..ring_num).opacity = 255 
@@ -3450,7 +3450,7 @@ function ui_element.radioButtonGroup(t)
 					end 
 
 				    local ring_num = tonumber(donut.name:sub(5,-1))
-					rb_group.extra.select_button(ring_num)
+					rb_group.extra.set_selection(ring_num)
 
 					current_focus = rb_group
 	    			rings:find_child("ring"..ring_num).opacity = 0 
@@ -3528,7 +3528,7 @@ Arguments:
     	color - Color of the Check box items
 		box_color - Color of the Check box border 
 		f_color - the color of the Check box 
-		box_width - Width of Check box border
+		box_border_width - Width of Check box border
 		box_size - The size of Check box 
         check_size - The size of Check image 
 		box_pos - Postion of the group of check boxes
@@ -3563,7 +3563,7 @@ function ui_element.checkBoxGroup(t)
 	fill_color = {255,255,255,0},
 	focus_box_color = {0,255,0,255},
 	focus_fill_color = {0,50,0,0},
-	box_width = 2,
+	box_border_width = 2,
 	box_size = {25,25},
 	check_size = {25,25},
 	line_space = 40,   
@@ -3611,7 +3611,7 @@ function ui_element.checkBoxGroup(t)
 		end 
     end 
 
-    function cb_group.extra.select_button(items) 
+    function cb_group.extra.set_selection(items) 
 	    cb_group.selected_items = items
         if cb_group.on_selection_change then
 	       cb_group.on_selection_change(cb_group.selected_items)
@@ -3658,9 +3658,9 @@ function ui_element.checkBoxGroup(t)
 
 	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
 	      	if p.skin == "Custom" then 
-		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_box_color, border_width= p.box_width, 
+		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_box_color, border_width= p.box_border_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 0}
-		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
+		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_border_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 255}
     	        boxes:add(box, focus) 
 	     	else
@@ -3717,7 +3717,7 @@ function ui_element.checkBoxGroup(t)
 							return true 
 						end
 					elseif key == keys.Return then 
-    					cb_group.extra.select_button(p.selected_items) 
+    					cb_group.extra.set_selection(p.selected_items) 
 						if cb_group:find_child("check"..tostring(box_num)).opacity == 255 then 
 							cb_group.selected_items = table_remove_val(cb_group.selected_items, box_num)
 							cb_group:find_child("check"..tostring(box_num)).opacity = 0 
@@ -3745,7 +3745,7 @@ function ui_element.checkBoxGroup(t)
 					current_focus = cb_group
 
 					table.insert(cb_group.selected_items, box_num)
-    				cb_group.extra.select_button(cb_group.selected_items) 
+    				cb_group.extra.set_selection(cb_group.selected_items) 
 
 					cb_group:find_child("check"..tostring(box_num)).opacity = 255
 					cb_group:find_child("check"..tostring(box_num)).reactive = true
@@ -3770,7 +3770,7 @@ function ui_element.checkBoxGroup(t)
 						table.insert(cb_group.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 255 
 					end 
-    				cb_group.extra.select_button(cb_group.selected_items) 
+    				cb_group.extra.set_selection(cb_group.selected_items) 
 	    			cb_group:find_child("box"..check_num).opacity = 0 
 	    			cb_group:find_child("focus"..check_num).opacity = 255 
 					boxes:find_child("box"..check_num):grab_key_focus() 
@@ -4717,7 +4717,7 @@ function ui_element.scrollPane(t)
         horz_bar_visible      = true,
         box_color             = {160,160,160,255},
         focus_box_color       = {160,255,160,255},
-        box_width             = 2,
+        box_border_width             = 2,
         skin                  = "Custom",
 		ui_position           = {200,100},    
 		}
@@ -4813,8 +4813,8 @@ function ui_element.scrollPane(t)
                 end
             end,
             screen_pos_of_child = function(self,child)
-                return  child.x + child.parent.x + self.x + p.box_width,
-                        child.y + child.parent.y + self.y + p.box_width
+                return  child.x + child.parent.x + self.x + p.box_border_width,
+                        child.y + child.parent.y + self.y + p.box_border_width
             end,
         }
     }
@@ -5290,12 +5290,12 @@ function ui_element.scrollPane(t)
 
 	local function create()
         scroll_group:clear()
-        window.position={ p.box_width, p.box_width }
+        window.position={ p.box_border_width, p.box_border_width }
 		window.clip = { 0,0, p.visible_w, p.visible_h }
         border:set{
-            w = p.visible_w+2*p.box_width,
-            h = p.visible_h+2*p.box_width,
-            border_width =    p.box_width,
+            w = p.visible_w+2*p.box_border_width,
+            h = p.visible_h+2*p.box_border_width,
+            border_width =    p.box_border_width,
             border_color =    p.box_color,
         }
 		
@@ -5321,8 +5321,8 @@ function ui_element.scrollPane(t)
 
             
             hor_s_bar.position={
-                p.box_width,
-                p.box_width*2+p.visible_h+p.bar_offset
+                p.box_border_width,
+                p.box_border_width*2+p.visible_h+p.bar_offset
             }
             
             scroll_group:add(hor_s_bar)
@@ -5385,8 +5385,8 @@ function ui_element.scrollPane(t)
             vert_s_bar.name = "Vertical Scroll Bar"
             
             vert_s_bar.position={
-                p.box_width*2+p.visible_w+p.bar_offset,
-                p.box_width
+                p.box_border_width*2+p.visible_w+p.bar_offset,
+                p.box_border_width
             }
             
             --vert_s_bar.z_rotation={90,0,0}
@@ -5446,7 +5446,7 @@ function ui_element.scrollPane(t)
 			unfocus_grip_vert=nil
         end
         
-		scroll_group.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
+		scroll_group.size = {p.visible_w + 2*p.box_border_width, p.visible_h + 2*p.box_border_width}
 	
 		scroll_group:add(border,window)
 	end
@@ -6591,7 +6591,7 @@ function ui_element.tabBar(t)
 				virtual_w=buttons[# buttons].w + buttons[# buttons].x,
 				virtual_h=buttons[# buttons].h,
 				arrow_color=p.label_color,
-				box_width=0,
+				box_border_width=0,
 				dist_per_press=buttons[# buttons].w,
 				arrow_sz = p.arrow_sz,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
@@ -6618,7 +6618,7 @@ function ui_element.tabBar(t)
 				virtual_w=buttons[# buttons].w,
 				virtual_h=buttons[# buttons].h + buttons[# buttons].y,
 				arrow_color=p.label_color,
-				box_width=0,
+				box_border_width=0,
 				dist_per_press=buttons[# buttons].h,
 				arrow_sz = p.arrow_sz,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
@@ -6852,7 +6852,7 @@ function ui_element.arrowPane(t)
         focus_arrow_color = {160,255,160,255},
         box_color         = {160,160,160,255},
         focus_box_color   = {160,255,160,255},
-        box_width =    2,
+        box_border_width =    2,
         skin = "Custom",
 		ui_position = {200,100},
 		--------------------------
@@ -7058,8 +7058,8 @@ function ui_element.arrowPane(t)
                 end
             end,
 			screen_pos_of_child = function(self,child)
-                return  child.x + child.parent.x + self.x + p.box_width,
-                        child.y + child.parent.y + self.y + p.box_width
+                return  child.x + child.parent.x + self.x + p.box_border_width,
+                        child.y + child.parent.y + self.y + p.box_border_width
            end,
 
         }
@@ -7151,12 +7151,12 @@ function ui_element.arrowPane(t)
 			focus_arrow_src:hide()
 		end
 
-        window.position={ p.box_width, p.box_width }
+        window.position={ p.box_border_width, p.box_border_width }
 		window.clip = { 0,0, p.visible_w, p.visible_h }
         border:set {
-            w = p.visible_w+2*p.box_width,
-            h = p.visible_h+2*p.box_width,
-            border_width =    p.box_width,
+            w = p.visible_w+2*p.box_border_width,
+            h = p.visible_h+2*p.box_border_width,
+            border_width =    p.box_border_width,
             border_color =    p.box_color,
         }
         
@@ -7469,7 +7469,7 @@ function ui_element.arrowPane(t)
 			
 		end
         
-		umbrella.size = {p.visible_w + 2*p.box_width, p.visible_h + 2*p.box_width}
+		umbrella.size = {p.visible_w + 2*p.box_border_width, p.visible_h + 2*p.box_border_width}
 		umbrella:add(border,window)
 	end
 	
