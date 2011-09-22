@@ -42,25 +42,10 @@ local menuButton_file = ui_element.menuButton
     	label_text_color = "#808080",
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
-		ui_position = {249,28,0}
+		ui_position = {249,28,0}, 
+		button_name = "menuButton_file", 
 	}
 
- function menuButton_file:on_enter()
-  	if menu_bar_hover == false then return true end 
-	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_file" then 
-		local temp_focus = current_focus
-	   	current_focus.clear_focus(nil,true)
-		if temp_focus.is_in_menu == true then 
-			temp_focus.fade_in = false
-		end 
-	end 
-	
-	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_file") then 
-		menuButton_file.extra.set_focus(keys.Return)
-		current_focus.name = "menuButton_file"
-    end 
-	return true
- end 
 
 menuButton_file.insert_item(1,{type="item", string="New", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=editor.close, parameter=true, icon=Text{text="N"}})
 menuButton_file.insert_item(2,{type="item", string="Open...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.open, icon=Text{text="O"}})
@@ -75,6 +60,26 @@ menuButton_file.anchor_point = {71,30.5}
 menuButton_file.extra.focus = {[65293] = "menuButton_file", [65363] = "menuButton_edit",  [65364]=menuButton_file.press_down, [65362]=menuButton_file.press_up}
 
 menuButton_file.extra.reactive = true
+
+function menuButton_file:on_enter()
+
+  	if menu_bar_hover == false then return true end 
+
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_file" then 
+		local temp_focus = current_focus
+	   	current_focus.clear_focus(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_file" ) then 
+		menuButton_file.extra.set_focus(keys.Return)
+		current_focus.name = "menuButton_file"
+    end 
+
+	return true
+end 
 
 local menuButton_edit = ui_element.menuButton
 	{
@@ -107,6 +112,7 @@ local menuButton_edit = ui_element.menuButton
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 		ui_position = {489,28,0}, 
+		button_name = "menuButton_edit", 
 	}
 
 --menuButton_edit.insert_item(1,{type="item", string="Undo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="Z"}})
@@ -133,6 +139,7 @@ menuButton_edit.extra.focus = {[65363] = "menuButton_arrange", [65293] = "menuBu
 menuButton_edit.extra.reactive = true
 
  function menuButton_edit:on_enter()
+ 	
   	if menu_bar_hover == false then return true end 
 	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_edit" then 
 		local temp_focus = current_focus
@@ -182,6 +189,7 @@ local menuButton_arrange = ui_element.menuButton
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 		ui_position = {729,28,0}, 
+		button_name = "menuButton_arrange", 
 	}
 
 menuButton_arrange.insert_item(1,{type="label", string="  Align:", bg=assets("assets/menu-item-label.png")} )
@@ -206,7 +214,9 @@ menuButton_arrange.extra.focus = {[65363] = "menuButton_view", [65293] = "menuBu
 menuButton_arrange.extra.reactive = true
 
  function menuButton_arrange:on_enter()
+
   	if menu_bar_hover == false then return true end 
+
 	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_arrange" then 
 		local temp_focus = current_focus
 	   	current_focus.clear_focus(nil,true)
@@ -254,6 +264,7 @@ local menuButton_view = ui_element.menuButton
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 		ui_position = {971,28,0}, 
+		button_name = "menuButton_view", 
 	}
 
 menuButton_view.insert_item(1,{type="label", string="  Background:", bg=assets("assets/menu-item-label.png")} )
@@ -268,8 +279,6 @@ menuButton_view.insert_item(6,{type="item", string="White", bg=assets("assets/me
 menuButton_view.items[6]["icon"].opacity = 0
 menuButton_view.insert_item(7,{type="item", string="Black", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.black_bg, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.items[7]["icon"].opacity = 0
-
-
 
 function menu.clearMenuButtonView_BGIcons() 
 	menuButton_view.items[2]["icon"].opacity = 0
@@ -295,7 +304,9 @@ menuButton_view.extra.focus = {[65293] = "menuButton_view", [65361] = "menuButto
 menuButton_view.extra.reactive = true
 
  function menuButton_view:on_enter()
-  	if menu_bar_hover == false then return true end 
+  	
+	if menu_bar_hover == false then return true end 
+	
 	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_view" then 
 		local temp_focus = current_focus
 	   	current_focus.clear_focus(nil,true)
