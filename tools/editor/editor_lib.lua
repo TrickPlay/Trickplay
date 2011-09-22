@@ -963,7 +963,7 @@ function editor_ui.tabBar(t)
 				arrow_src = p.arrow_image,
 				tab = umbrella, -- p.current_tab, -- 1
 				tab_buttons = p.buttons,
-				box_width = 0,
+				box_border_width = 0,
 				tab_arrow_left_on = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_right_on = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_left_off = "lib/assets/tab-arrow-left-off.png",  
@@ -1114,7 +1114,7 @@ function editor_ui.checkBoxGroup(t)
         end 
     end 
 
-    function cb_group.extra.select_button(items) 
+    function cb_group.extra.set_selection(items) 
 	    p.selected_items = items
         if p.on_selection_change then
 	       p.on_selection_change(p.selected_items)
@@ -1212,11 +1212,11 @@ function editor_ui.checkBoxGroup(t)
 							p.selected_items = util.table_remove_val(p.selected_items, box_num)
 							cb_group:find_child("check"..tostring(box_num)).opacity = 0 
 							cb_group:find_child("check"..tostring(box_num)).reactive = true 
-    						cb_group.extra.select_button(p.selected_items) 
+    						cb_group.extra.set_selection(p.selected_items) 
 						else 
 							table.insert(p.selected_items, box_num)
 							cb_group:find_child("check"..tostring(box_num)).opacity = 255 
-    						cb_group.extra.select_button(p.selected_items) 
+    						cb_group.extra.set_selection(p.selected_items) 
 						end 
 						return true 
 					end 
@@ -1227,7 +1227,7 @@ function editor_ui.checkBoxGroup(t)
 					table.insert(p.selected_items, box_num)
 					cb_group:find_child("check"..tostring(box_num)).opacity = 255
 					cb_group:find_child("check"..tostring(box_num)).reactive = true
-    				cb_group.extra.select_button(p.selected_items) 
+    				cb_group.extra.set_selection(p.selected_items) 
 					return true
 	     		end 
 
@@ -1237,13 +1237,13 @@ function editor_ui.checkBoxGroup(t)
 						p.selected_items = util.table_remove_val(p.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
 						cb_group:find_child("check"..tostring(check_num)).reactive = true 
-    					cb_group.extra.select_button(p.selected_items) 
+    					cb_group.extra.set_selection(p.selected_items) 
 					else 
 						table.insert(p.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 255 
-    					cb_group.extra.select_button(p.selected_items) 
+    					cb_group.extra.set_selection(p.selected_items) 
 					end 
-    				cb_group.extra.select_button(p.selected_items) 
+    				cb_group.extra.set_selection(p.selected_items) 
 					return true
 	     		end 
 	     	end
