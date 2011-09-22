@@ -64,7 +64,7 @@ local function groupTotable(grp, tbl, j)
 			return
 		elseif j.extra.type == "LayoutManager" then
 			tbl[j.name] = grp:find_child(j.name) 
-			for k,l in pairs (j.tiles) do 
+			for k,l in pairs (j.cells) do 
 				for n,m in pairs (l) do 
 					if m then 
 						if is_this_container(m) == true then 
@@ -4019,7 +4019,7 @@ Return:
 	loading_bar_group - Group containing the loading bar
         
 Extra Function:
-	set_prog(prog) - set the progress of the loading bar (meant to be called in an on_new_frame())
+	set_progress(prog) - set the progress of the loading bar (meant to be called in an on_new_frame())
 ]]
 
 
@@ -4159,7 +4159,7 @@ function ui_element.progressBar(t)
         	reactive = true,
 	        extra = {
         	    type = "ProgressBar", 
-        	    set_prog = function(prog)
+        	    set_progress = function(prog)
 	                c_fill.scale = {(p.ui_width-4)*(prog),1}
 					p.progress = prog
         	    end,
@@ -4223,7 +4223,7 @@ Arguments:
     grid_gap    - the number of pixels in between the grid items
     duration_per_tile - how long a particular tile flips for
     cascade_delay     - how long a tile waits to start flipping after its neighbor began flipping
-    tiles       - the uielements that are the tiles, the elements are assumed to be of the size {item_w,item_h} and that there are 'num_rows' by 'columns' elements in a 2 dimensional table 
+    cells       - the uielements that are the cells, the elements are assumed to be of the size {item_w,item_h} and that there are 'num_rows' by 'columns' elements in a 2 dimensional table 
 
 Return:
     Group - Group containing the grid
@@ -4237,13 +4237,13 @@ function ui_element.layoutManager(t)
     local p = {
         rows    	= 1,
         columns    	= 5,
-        cell_w      = 300,
-        cell_h      = 200,
-        cell_spacing_w = 40, --grid_gap
-        cell_spacing_h = 40, --grid_gap
+        cell_width      = 300,
+        cell_height      = 200,
+        cell_spacing_width = 40, --grid_gap
+        cell_spacing_height = 40, --grid_gap
 		cell_timing = 300, -- duration_per_time
 		cell_timing_offset = 200,
-        tiles       = {},
+        cells       = {},
         cells_focusable = false, --focus_visible
         skin="Custom",
         cell_size="fixed",
@@ -4266,18 +4266,18 @@ function ui_element.layoutManager(t)
 	
     local x_y_from_index = function(r,c)
         if p.cell_size == "fixed" then
-		    return (p.cell_w+p.cell_spacing_w)*(c-1)+p.cell_w/2,
-		           (p.cell_h+p.cell_spacing_h)*(r-1)+p.cell_h/2
+		    return (p.cell_width+p.cell_spacing_width)*(c-1)+p.cell_width/2,
+		           (p.cell_height+p.cell_spacing_height)*(r-1)+p.cell_height/2
         end
         
-        local x = (col_ws[1] or p.cell_w)/2
-        local y = (row_hs[1] or p.cell_h)/2
-        for i = 1, c-1 do x = x + (col_ws[i] or p.cell_w)/2 + (col_ws[i+1] or p.cell_w)/2 + p.cell_spacing_w end
-        for i = 1, r-1 do y = y + (row_hs[i] or p.cell_h)/2 + (row_hs[i+1] or p.cell_h)/2 + p.cell_spacing_h end
+        local x = (col_ws[1] or p.cell_width)/2
+        local y = (row_hs[1] or p.cell_height)/2
+        for i = 1, c-1 do x = x + (col_ws[i] or p.cell_width)/2 + (col_ws[i+1] or p.cell_width)/2 + p.cell_spacing_width end
+        for i = 1, r-1 do y = y + (row_hs[i] or p.cell_height)/2 + (row_hs[i+1] or p.cell_height)/2 + p.cell_spacing_height end
         return x,y
 	end
 
-    --the umbrella Group, containing the full slate of tiles
+    --the umbrella Group, containing the full slate of cells
     local slate = Group{ 
         name     = "layoutManager",
         position = p.ui_position, 
@@ -4286,10 +4286,10 @@ function ui_element.layoutManager(t)
 	    type = "LayoutManager",
             reactive = true,
             replace = function(self,r,c,obj)
-                if p.tiles[r][c] ~= nil then
-                    p.tiles[r][c]:unparent()
+                if p.cells[r][c] ~= nil then
+                    p.cells[r][c]:unparent()
                 end
-                p.tiles[r][c] = obj
+                p.cells[r][c] = obj
                	if obj then  
                 	if obj.parent ~= nil then obj:unparent() end
 				end 
@@ -4297,33 +4297,33 @@ function ui_element.layoutManager(t)
                 make_grid()
 			end,
             remove_row = function(self,r)
-                if r > 0 and r <= #p.tiles then
-                    table.remove(p.tiles,r)
+                if r > 0 and r <= #p.cells then
+                    table.remove(p.cells,r)
                     p.rows = p.rows - 1
                     make_grid()
                 end
             end,
             remove_col = function(self,c)
-                if c > 0 and c <= #p.tiles[1] then
-                    for r = 1,#p.tiles do
-                        table.remove(p.tiles[r],c)
+                if c > 0 and c <= #p.cells[1] then
+                    for r = 1,#p.cells do
+                        table.remove(p.cells[r],c)
                     end
                     p.columns = p.columns - 1
                     make_grid()
                 end
             end,
             add_row = function(self,r)
-                if r > 0 and r <= #p.tiles then
-                    table.insert(p.tiles,r,{})
+                if r > 0 and r <= #p.cells then
+                    table.insert(p.cells,r,{})
                     p.rows = p.rows + 1
                     make_grid()
                 end
             end,
             add_col = function(self,c)
-                if c > 0 and c <= #p.tiles[1] then
-                    for r = 1,#p.tiles do
-                        table.insert(p.tiles[r],c,c)
-                        p.tiles[r][c] = nil
+                if c > 0 and c <= #p.cells[1] then
+                    for r = 1,#p.cells do
+                        table.insert(p.cells[r],c,c)
+                        p.cells[r][c] = nil
                     end
                     p.columns = p.columns + 1
                     make_grid()
@@ -4358,9 +4358,9 @@ function ui_element.layoutManager(t)
 					current_focus.clear_focus()
 				end
 
-				if p.tiles[r][c].set_focus then 
-					 p.tiles[r][c].set_focus()
-					 current_focus = p.tiles[r][c]
+				if p.cells[r][c].set_focus then 
+					 p.cells[r][c].set_focus()
+					 current_focus = p.cells[r][c]
 					 focus_i[1] = r
 					 focus_i[2] = c 
 			    end 
@@ -4375,8 +4375,8 @@ function ui_element.layoutManager(t)
 				function tl:on_started()
 					for r = 1, p.rows  do
 						for c = 1, p.columns do
-							p.tiles[r][c].y_rotation={90,0,0}
-							p.tiles[r][c].opacity = 0
+							p.cells[r][c].y_rotation={90,0,0}
+							p.cells[r][c].opacity = 0
 						end
 					end
 				end
@@ -4385,7 +4385,7 @@ function ui_element.layoutManager(t)
 					local item
 					for r = 1, p.rows  do
 						for c = 1, p.columns do
-							item = p.tiles[r][c] 
+							item = p.cells[r][c] 
 							if msecs > item.delay and msecs < (item.delay+p.cell_timing) then
 								prog = (msecs-item.delay) / p.cell_timing
 								item.y_rotation = {90*(1-prog),0,0}
@@ -4400,8 +4400,8 @@ function ui_element.layoutManager(t)
 				function tl:on_completed()
 					for r = 1, p.rows  do
 						for c = 1, p.columns do
-							p.tiles[r][c].y_rotation={0,0,0}
-							p.tiles[r][c].opacity = 255
+							p.cells[r][c].y_rotation={0,0,0}
+							p.cells[r][c].opacity = 255
 						end
 					end
 				end
@@ -4411,20 +4411,20 @@ function ui_element.layoutManager(t)
                 x = x - self.transformed_position[1]/screen.scale[1]
                 y = y - self.transformed_position[2]/screen.scale[2]
                 if p.cell_size == "fixed" then
-	        	    return math.floor(x/(p.cell_w+p.cell_spacing_w))+1,
-                           math.floor(y/(p.cell_h+p.cell_spacing_h))+1
+	        	    return math.floor(x/(p.cell_width+p.cell_spacing_width))+1,
+                           math.floor(y/(p.cell_height+p.cell_spacing_height))+1
                 end
                 
                 local r = 1
                 local c = 1
                 for i = 1, p.columns do
-                    if x < (col_ws[i] or p.cell_w) then break end
-                    x = x - (col_ws[i] or p.cell_w) - p.cell_spacing_w
+                    if x < (col_ws[i] or p.cell_width) then break end
+                    x = x - (col_ws[i] or p.cell_width) - p.cell_spacing_width
                     r = r + 1
                 end
                 for i = 1, p.rows do
-                    if y < (row_hs[i] or p.cell_h) then break end
-                    y = y - (row_hs[i] or p.cell_h) - p.cell_spacing_h
+                    if y < (row_hs[i] or p.cell_height) then break end
+                    y = y - (row_hs[i] or p.cell_height) - p.cell_spacing_height
                     c = c + 1
                 end
                 return  r,c
@@ -4432,10 +4432,10 @@ function ui_element.layoutManager(t)
             cell_x_y_w_h = function(self,r,c)
                 if p.cell_size == "fixed" then
                     
-                    return  (p.cell_w+p.cell_spacing_w)*(c-1),
-                            (p.cell_h+p.cell_spacing_h)*(r-1),
-                            p.cell_w,
-                            p.cell_h
+                    return  (p.cell_width+p.cell_spacing_width)*(c-1),
+                            (p.cell_height+p.cell_spacing_height)*(r-1),
+                            p.cell_width,
+                            p.cell_height
                     
                 else
                     
@@ -4443,17 +4443,17 @@ function ui_element.layoutManager(t)
                     
                     for i = 1,c-1 do
                         
-                        x = x + (col_ws[i] or p.cell_w) + p.cell_spacing_w
+                        x = x + (col_ws[i] or p.cell_width) + p.cell_spacing_width
                         
                     end
                     
                     for i = 1,r-1 do
                         
-                        y = y + (row_hs[i] or p.cell_h) + p.cell_spacing_h
+                        y = y + (row_hs[i] or p.cell_height) + p.cell_spacing_height
                         
                     end
                     
-                    return x, y, (col_ws[c] or p.cell_w), (row_hs[r] or p.cell_h)
+                    return x, y, (col_ws[c] or p.cell_width), (row_hs[r] or p.cell_height)
                 end
             end,
         }
@@ -4495,13 +4495,13 @@ function ui_element.layoutManager(t)
         if p.cell_size == "variable" then
             for r = 1, p.rows  do
                 for c = 1, p.columns do
-                    if p.tiles[r]    == nil then break end
-                    if p.tiles[r][c] ~= nil and p.tiles[r][c].name ~= "placeholder" then 
-                        if row_hs[r] == nil or row_hs[r] < p.tiles[r][c].h then
-                            row_hs[r] = p.tiles[r][c].h
+                    if p.cells[r]    == nil then break end
+                    if p.cells[r][c] ~= nil and p.cells[r][c].name ~= "placeholder" then 
+                        if row_hs[r] == nil or row_hs[r] < p.cells[r][c].h then
+                            row_hs[r] = p.cells[r][c].h
                         end
-                        if col_ws[c] == nil or col_ws[c] < p.tiles[r][c].w then
-                            col_ws[c] = p.tiles[r][c].w
+                        if col_ws[c] == nil or col_ws[c] < p.cells[r][c].w then
+                            col_ws[c] = p.cells[r][c].w
                         end
                     end
                 end
@@ -4509,23 +4509,23 @@ function ui_element.layoutManager(t)
         end
         
 		for r = 1, p.rows  do
-            if p.tiles[r] == nil then
-                p.tiles[r]   = {}
+            if p.cells[r] == nil then
+                p.cells[r]   = {}
                 functions[r] = {}
             end
 			for c = 1, p.columns do
-                if p.tiles[r][c] == nil then
+                if p.cells[r][c] == nil then
                     if p.cell_size == "variable" then
-						key = string.format("cell:%d:%d",col_ws[c] or p.cell_w, row_hs[r] or p.cell_h) 
+						key = string.format("cell:%d:%d",col_ws[c] or p.cell_width, row_hs[r] or p.cell_height) 
 
-                        cell = assets(key, my_make_tile, col_ws[c] or p.cell_w, row_hs[r] or p.cell_h)
+                        cell = assets(key, my_make_tile, col_ws[c] or p.cell_width, row_hs[r] or p.cell_height)
 
                     else
-						key = string.format("cell:%d:%d",p.cell_w,p.cell_h)
-                        cell = assets(key, my_make_tile, p.cell_w,p.cell_h)
+						key = string.format("cell:%d:%d",p.cell_width,p.cell_height)
+                        cell = assets(key, my_make_tile, p.cell_width,p.cell_height)
                     end
                 else
-                    cell = p.tiles[r][c]
+                    cell = p.cells[r][c]
                     if cell.parent ~= nil then
                         cell:unparent()
                     end
@@ -4538,26 +4538,26 @@ function ui_element.layoutManager(t)
 		end
         
         slate.w, slate.h = x_y_from_index(p.rows,p.columns)
-        slate.w = slate.w + (col_ws[p.columns] or p.cell_w)/2
-        slate.h = slate.h + (row_hs[p.rows]    or p.cell_h)/2
+        slate.w = slate.w + (col_ws[p.columns] or p.cell_width)/2
+        slate.h = slate.h + (row_hs[p.rows]    or p.cell_height)/2
         
-        if p.rows < #p.tiles then
-            for r = p.rows + 1, #p.tiles do
-                for c = 1, #p.tiles[r] do
-                    p.tiles[r][c]:unparent()
-                    p.tiles[r][c] = nil
+        if p.rows < #p.cells then
+            for r = p.rows + 1, #p.cells do
+                for c = 1, #p.cells[r] do
+                    p.cells[r][c]:unparent()
+                    p.cells[r][c] = nil
                 end
-                p.tiles[r]     = nil
+                p.cells[r]     = nil
                 functions[r] = nil
             end
         end
         
-        if p.tiles[1] then 
-            if p.columns < #p.tiles[1] then
-                for c = p.columns + 1, #p.tiles[r] do
-                    for r = 1, #p.tiles do
-                        p.tiles[r][c]:unparent()
-                        p.tiles[r][c]   = nil
+        if p.cells[1] then 
+            if p.columns < #p.cells[1] then
+                for c = p.columns + 1, #p.cells[r] do
+                    for r = 1, #p.cells do
+                        p.cells[r][c]:unparent()
+                        p.cells[r][c]   = nil
                         functions[r][c] = nil
                     end
                 end
@@ -4588,8 +4588,8 @@ function ui_element.layoutManager(t)
 	local keys={
 		[keys.Return] = function()
 			if 1 <= focus_i[1] and focus_i[1] <= p.rows and 1 <= focus_i[2] and focus_i[2] <= p.columns then
-				if p.tiles[focus_i[1]][focus_i[2]].on_press then 
-					p.tiles[focus_i[1]][focus_i[2]].on_press()
+				if p.cells[focus_i[1]][focus_i[2]].on_press then 
+					p.cells[focus_i[1]][focus_i[2]].on_press()
 				end
 		    end 
 		end,
@@ -4679,7 +4679,7 @@ Arguments:
     content_h - height of the group that holds the content being scrolled
     content_w - width of the group that holds the content being scrolled
     arrow_clone_source - a Trickplay object that is to be cloned to replace the scroll arrows
-    arrow_sz  - size of the scroll arrows
+    arrow_size  - size of the scroll arrows
     arrows_in_box - a flag, setting to true positions the arrows inside the border
     arrows_centered - a flag, setting to true positions the arrows along the center axises
     grip_is_visible - a flag that either makes the grips of the scroll bars visible or invisible
@@ -4698,11 +4698,11 @@ function ui_element.scrollPane(t)
 
     --default parameters
     local p = {
-        visible_w    =  600,
-        visible_h    =  600,
+        visible_width    =  600,
+        visible_height    =  600,
         content   = Group{},
-        virtual_h = 1000,
-        virtual_w = 1000,
+        virtual_height = 1000,
+        virtual_width = 1000,
         bar_color_inner       = {180,180,180,255},
         bar_color_outer       = { 30, 30, 30,255},
         focus_bar_color_inner = {180,255,180,255},
@@ -4742,7 +4742,7 @@ function ui_element.scrollPane(t)
 	local track_h, grip_vert, track_vert, unfocus_grip_vert,focus_grip_vert
 	
 
-    --the umbrella Group, containing the full slate of tiles
+    --the umbrella Group, containing the full slate of cells
     local scroll_group = Group { 
         name     = "scrollPane",
         position = p.ui_position, 
@@ -4751,24 +4751,24 @@ function ui_element.scrollPane(t)
 			type = "ScrollPane",
             seek_to_middle = function(x,y)
                 local new_x, new_y
-                if p.virtual_w > p.visible_w then
-                    if x > p.virtual_w - p.visible_w/2 then
-                        new_x = -p.virtual_w + p.visible_w
-                    elseif x < p.visible_w/2 then
+                if p.virtual_width > p.visible_width then
+                    if x > p.virtual_width - p.visible_width/2 then
+                        new_x = -p.virtual_width + p.visible_width
+                    elseif x < p.visible_width/2 then
                         new_x = 0
                     else
-                        new_x = -x + p.visible_w/2
+                        new_x = -x + p.visible_width/2
                     end
                 else
                     new_x =0
                 end
-                if p.virtual_h > p.visible_h then
-                    if y > p.virtual_h - p.visible_h/2 then
-                        new_y = -p.virtual_h + p.visible_h
-                    elseif y < p.visible_h/2 then
+                if p.virtual_height > p.visible_height then
+                    if y > p.virtual_height - p.visible_height/2 then
+                        new_y = -p.virtual_height + p.visible_height
+                    elseif y < p.visible_height/2 then
                         new_y = 0
                     else
-                        new_y = -y + p.visible_h/2
+                        new_y = -y + p.visible_height/2
                     end
                 else
                     new_y =0
@@ -4785,7 +4785,7 @@ function ui_element.scrollPane(t)
                     }
                 
                     if grip_vert ~= nil then
-                    if new_y < -(p.virtual_h - p.visible_h) then
+                    if new_y < -(p.virtual_height - p.visible_height) then
                         grip_vert.y = track_h-grip_vert.h
                     elseif new_y > 0 then
                         grip_vert.y = 0
@@ -4793,12 +4793,12 @@ function ui_element.scrollPane(t)
                         grip_vert:complete_animation()
                         grip_vert:animate{
                             duration= 200,
-                            y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_h - p.visible_h)
+                            y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_height - p.visible_height)
                         }
                     end
                     end
                     if grip_hor ~= nil then
-                    if new_x < -(p.virtual_w - p.visible_w) then
+                    if new_x < -(p.virtual_width - p.visible_width) then
                         grip_hor.x = track_w-grip_hor.w
                     elseif new_x > 0 then
                         grip_hor.x = 0
@@ -4806,7 +4806,7 @@ function ui_element.scrollPane(t)
                         grip_hor:complete_animation()
                         grip_hor:animate{
                             duration= 200,
-                            x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
+                            x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_width - p.visible_width)
                         }
                     end
                     end
@@ -4820,28 +4820,28 @@ function ui_element.scrollPane(t)
     }
 
     scroll_group.extra.seek_to = function(x,y)
-        scroll_group.extra.seek_to_middle(x+p.visible_w/2,y+p.visible_h/2)
+        scroll_group.extra.seek_to_middle(x+p.visible_width/2,y+p.visible_height/2)
     end
 	
 	--Key Handler
 	local keys={
 		[keys.Left] = function()
-			if p.visible_w < p.virtual_w then
+			if p.visible_width < p.virtual_width then
 				scroll_x(1)
 			end
 		end,
 		[keys.Right] = function()
-			if p.visible_w < p.virtual_w then
+			if p.visible_width < p.virtual_width then
 				scroll_x(-1)
 			end
 		end,
 		[keys.Up] = function()
-			if p.visible_h < p.virtual_h then
+			if p.visible_height < p.virtual_height then
 				scroll_y(1)
 			end
 		end,
 		[keys.Down] = function()
-			if p.visible_h < p.virtual_h then
+			if p.visible_height < p.virtual_height then
 				scroll_y(-1)
 			end
 		end,
@@ -4868,10 +4868,10 @@ function ui_element.scrollPane(t)
 			duration = 200,
 			y = new_y,
 			on_completed = function()
-				if p.content.y < -(p.virtual_h - p.visible_h) then
+				if p.content.y < -(p.virtual_height - p.visible_height) then
 					p.content:animate{
 						duration = 200,
-						y = -(p.virtual_h - p.visible_h),
+						y = -(p.virtual_height - p.visible_height),
 						on_completed = function()
 							animating = false
 						end
@@ -4890,7 +4890,7 @@ function ui_element.scrollPane(t)
 			end
 		}
 		
-		if new_y < -(p.virtual_h - p.visible_h) then
+		if new_y < -(p.virtual_height - p.visible_height) then
 			grip_vert.y = track_h-grip_vert.h
 		elseif new_y > 0 then
 			grip_vert.y = 0
@@ -4898,7 +4898,7 @@ function ui_element.scrollPane(t)
 			grip_vert:complete_animation()
 			grip_vert:animate{
 				duration= 200,
-				y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_h - p.visible_h)
+				y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_height - p.visible_height)
 			}
 		end
 	end
@@ -4911,10 +4911,10 @@ function ui_element.scrollPane(t)
 			duration = 200,
 			x = new_x,
 			on_completed = function()
-				if p.content.x < -(p.virtual_w - p.visible_w) then
+				if p.content.x < -(p.virtual_width - p.visible_width) then
 					p.content:animate{
 						duration = 200,
-						y = -(p.virtual_w - p.visible_w),
+						y = -(p.virtual_width - p.visible_width),
 						on_completed = function()
 							animating = false
 						end
@@ -4933,7 +4933,7 @@ function ui_element.scrollPane(t)
 			end
 		}
 		
-		if new_x < -(p.virtual_w - p.visible_h) then
+		if new_x < -(p.virtual_width - p.visible_height) then
 			grip_hor.x = track_w-grip_hor.w
 		elseif new_x > 0 then
 			grip_hor.x = 0
@@ -4941,7 +4941,7 @@ function ui_element.scrollPane(t)
 			grip_hor:complete_animation()
 			grip_hor:animate{
 				duration= 200,
-				x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
+				x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_width - p.visible_width)
 			}
 		end
 	end
@@ -5291,10 +5291,10 @@ function ui_element.scrollPane(t)
 	local function create()
         scroll_group:clear()
         window.position={ p.box_border_width, p.box_border_width }
-		window.clip = { 0,0, p.visible_w, p.visible_h }
+		window.clip = { 0,0, p.visible_width, p.visible_height }
         border:set{
-            w = p.visible_w+2*p.box_border_width,
-            h = p.visible_h+2*p.box_border_width,
+            w = p.visible_width+2*p.box_border_width,
+            h = p.visible_height+2*p.box_border_width,
             border_width =    p.box_border_width,
             border_color =    p.box_color,
         }
@@ -5308,21 +5308,21 @@ function ui_element.scrollPane(t)
         end
         
         if p.bar_offset < 0 then
-            track_w = p.visible_w+p.bar_offset
-            track_h = p.visible_h+p.bar_offset
+            track_w = p.visible_width+p.bar_offset
+            track_h = p.visible_height+p.bar_offset
         else
-            track_w = p.visible_w
-            track_h = p.visible_h
+            track_w = p.visible_width
+            track_h = p.visible_height
         end
         
-        if p.horz_bar_visible and p.visible_w/p.virtual_w < 1 then
-            hor_s_bar = make_hor_bar(track_w, p.bar_thickness, track_w/p.virtual_w)
+        if p.horz_bar_visible and p.visible_width/p.virtual_width < 1 then
+            hor_s_bar = make_hor_bar(track_w, p.bar_thickness, track_w/p.virtual_width)
             hor_s_bar.name = "Horizontal Scroll Bar"
 
             
             hor_s_bar.position={
                 p.box_border_width,
-                p.box_border_width*2+p.visible_h+p.bar_offset
+                p.box_border_width*2+p.visible_height+p.bar_offset
             }
             
             scroll_group:add(hor_s_bar)
@@ -5346,7 +5346,7 @@ function ui_element.scrollPane(t)
 	   				           grip_hor.x = track_w-grip_hor.w
 	   			        end
 	   			
-	   			        p.content.x = -(grip_hor.x ) * p.virtual_w/track_w
+	   			        p.content.x = -(grip_hor.x ) * p.virtual_width/track_w
 	   			
 	   		        end 
 	   	        }
@@ -5370,7 +5370,7 @@ function ui_element.scrollPane(t)
 					end
 				end
 
-                p.content.x = -(grip_hor.x) * p.virtual_w/track_w
+                p.content.x = -(grip_hor.x) * p.virtual_width/track_w
                 
                 return true
             end
@@ -5380,12 +5380,12 @@ function ui_element.scrollPane(t)
 			focus_grip_hor=nil
 			unfocus_grip_hor=nil
         end
-        if p.vert_bar_visible and p.visible_h/p.virtual_h < 1 then
-            vert_s_bar = make_vert_bar( p.bar_thickness, track_h, track_h/p.virtual_h)
+        if p.vert_bar_visible and p.visible_height/p.virtual_height < 1 then
+            vert_s_bar = make_vert_bar( p.bar_thickness, track_h, track_h/p.virtual_height)
             vert_s_bar.name = "Vertical Scroll Bar"
             
             vert_s_bar.position={
-                p.box_border_width*2+p.visible_w+p.bar_offset,
+                p.box_border_width*2+p.visible_width+p.bar_offset,
                 p.box_border_width
             }
             
@@ -5413,7 +5413,7 @@ function ui_element.scrollPane(t)
 	   				           grip_vert.y = track_h-grip_vert.h
 	   			        end
                         
-	   			        p.content.y = -(grip_vert.y) * p.virtual_h/track_h
+	   			        p.content.y = -(grip_vert.y) * p.virtual_height/track_h
                         
 	   		        end 
 	   	        }
@@ -5435,7 +5435,7 @@ function ui_element.scrollPane(t)
 					end
 				end
 
-                p.content.y = -(grip_vert.y) * p.virtual_h/track_h
+                p.content.y = -(grip_vert.y) * p.virtual_height/track_h
                 
                 return true
             end
@@ -5446,7 +5446,7 @@ function ui_element.scrollPane(t)
 			unfocus_grip_vert=nil
         end
         
-		scroll_group.size = {p.visible_w + 2*p.box_border_width, p.visible_h + 2*p.box_border_width}
+		scroll_group.size = {p.visible_width + 2*p.box_border_width, p.visible_height + 2*p.box_border_width}
 	
 		scroll_group:add(border,window)
 	end
@@ -6371,7 +6371,7 @@ function ui_element.tabBar(t)
         label_color  = {255,255,255,255},
         unsel_color  = { 60, 60, 60,255},
 		
-		arrow_sz     = 15,
+		arrow_size     = 15,
 		arrow_dist_to_frame = 5,
 --		arrow_image = nil,
 
@@ -6580,25 +6580,25 @@ function ui_element.tabBar(t)
         end
 		--ap = nil
 		
-		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
+		if p.arrow_image then p.arrow_size = assets(p.arrow_image).w end
 		
 		if p.tab_position == "top" and
-			(buttons[# buttons].w + buttons[# buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+			(buttons[# buttons].w + buttons[# buttons].x) > (p.display_width - 2*(p.arrow_size+p.arrow_dist_to_frame)) then
 			
 			ap = ui_element.arrowPane{
-				visible_w=p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame),
-				visible_h=buttons[# buttons].h,
-				virtual_w=buttons[# buttons].w + buttons[# buttons].x,
-				virtual_h=buttons[# buttons].h,
+				visible_width=p.display_width - 2*(p.arrow_size+p.arrow_dist_to_frame),
+				visible_height=buttons[# buttons].h,
+				virtual_width=buttons[# buttons].w + buttons[# buttons].x,
+				virtual_height=buttons[# buttons].h,
 				arrow_color=p.label_color,
 				box_border_width=0,
-				dist_per_press=buttons[# buttons].w,
-				arrow_sz = p.arrow_sz,
+				scroll_distance=buttons[# buttons].w,
+				arrow_size = p.arrow_size,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
 				arrow_src = p.arrow_image,
 			}
 			
-			ap.x = p.arrow_sz+p.arrow_dist_to_frame
+			ap.x = p.arrow_size+p.arrow_dist_to_frame
 			ap.y = 0
 			
 			for _,b in ipairs(buttons) do
@@ -6610,23 +6610,23 @@ function ui_element.tabBar(t)
 			
 			umbrella:add(ap)
 			
-		elseif (buttons[# buttons].h + buttons[# buttons].y) > (p.display_height - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+		elseif (buttons[# buttons].h + buttons[# buttons].y) > (p.display_height - 2*(p.arrow_size+p.arrow_dist_to_frame)) then
 			
 			ap = ui_element.arrowPane{
-				visible_w=buttons[# buttons].w,
-				visible_h=p.display_height - 2*(p.arrow_sz+p.arrow_dist_to_frame),
-				virtual_w=buttons[# buttons].w,
-				virtual_h=buttons[# buttons].h + buttons[# buttons].y,
+				visible_width=buttons[# buttons].w,
+				visible_height=p.display_height - 2*(p.arrow_size+p.arrow_dist_to_frame),
+				virtual_width=buttons[# buttons].w,
+				virtual_height=buttons[# buttons].h + buttons[# buttons].y,
 				arrow_color=p.label_color,
 				box_border_width=0,
-				dist_per_press=buttons[# buttons].h,
-				arrow_sz = p.arrow_sz,
+				scroll_distance=buttons[# buttons].h,
+				arrow_size = p.arrow_size,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
 				arrow_src = p.arrow_image,
 			}
 			
 			ap.x = 0
-			ap.y = p.arrow_sz+p.arrow_dist_to_frame
+			ap.y = p.arrow_size+p.arrow_dist_to_frame
 			
 			for _,b in ipairs(buttons) do
 				
@@ -6838,14 +6838,14 @@ function ui_element.arrowPane(t)
     --default parameters
     local p = {
         
-		visible_w =     600,
-        visible_h =     600,
+		visible_width =     600,
+        visible_height =     600,
         content   = 	Group{},
-        virtual_h =    1000,
-		virtual_w =    1000,
-        arrow_sz  =      15,
+        virtual_height =    1000,
+		virtual_width =    1000,
+        arrow_size  =      15,
 		
-		dist_per_press      = 10,
+		scroll_distance      = 10,
         arrow_dist_to_frame = 5,
         arrows_visible =   true,
         arrow_color       = {160,160,160,255},
@@ -6933,7 +6933,7 @@ function ui_element.arrowPane(t)
 	
 	local track_h, track_w, grip_hor, grip_vert, track_hor, track_vert
 	
-    --the umbrella Group, containing the full slate of tiles
+    --the umbrella Group, containing the full slate of cells
     local umbrella = Group{ 
         name     = "arrowPane",
         position = p.ui_position, 
@@ -6945,27 +6945,27 @@ function ui_element.arrowPane(t)
 				
 				if animating then return end
 				if top_left == true then
-					x = x + p.visible_w/2
-					y = y + p.visible_h/2
+					x = x + p.visible_width/2
+					y = y + p.visible_height/2
 				end
 				
 				local new_x, new_y
                 
-				if x > p.virtual_w - p.visible_w/2 then
-                    new_x = -p.virtual_w + p.visible_w - 11
-                elseif x < p.visible_w/2 then
+				if x > p.virtual_width - p.visible_width/2 then
+                    new_x = -p.virtual_width + p.visible_width - 11
+                elseif x < p.visible_width/2 then
                     new_x = 0
                 else
-                    new_x = -x + p.visible_w/2
+                    new_x = -x + p.visible_width/2
                 end
 				
                 
-                if y > p.virtual_h - p.visible_h/2 then
-                    new_y = -p.virtual_h + p.visible_h
-                elseif y < p.visible_h/2 then
+                if y > p.virtual_height - p.visible_height/2 then
+                    new_y = -p.virtual_height + p.visible_height
+                elseif y < p.visible_height/2 then
                     new_y = 0
                 else
-                    new_y = -y + p.visible_h/2
+                    new_y = -y + p.visible_height/2
                 end
 				if new_x ~= p.content.x or new_y ~= p.content.y then
 					if p.tab_buttons == nil then 
@@ -6996,24 +6996,24 @@ function ui_element.arrowPane(t)
 			end,
 			seek_to_middle = function(x,y)
 				local new_x, new_y
-                if p.virtual_w > p.visible_w then
-                    if x > p.virtual_w - p.visible_w/2 then
-                        new_x = -p.virtual_w + p.visible_w
-                    elseif x < p.visible_w/2 then
+                if p.virtual_width > p.visible_width then
+                    if x > p.virtual_width - p.visible_width/2 then
+                        new_x = -p.virtual_width + p.visible_width
+                    elseif x < p.visible_width/2 then
                         new_x = 0
                     else
-                        new_x = -x + p.visible_w/2
+                        new_x = -x + p.visible_width/2
                     end
                 else
                     new_x =0
                 end
-                if p.virtual_h > p.visible_h then
-                    if y > p.virtual_h - p.visible_h/2 then
-                        new_y = -p.virtual_h + p.visible_h
-                    elseif y < p.visible_h/2 then
+                if p.virtual_height > p.visible_height then
+                    if y > p.virtual_height - p.visible_height/2 then
+                        new_y = -p.virtual_height + p.visible_height
+                    elseif y < p.visible_height/2 then
                         new_y = 0
                     else
-                        new_y = -y + p.visible_h/2
+                        new_y = -y + p.visible_height/2
                     end
                 else
                     new_y =0
@@ -7030,7 +7030,7 @@ function ui_element.arrowPane(t)
                     }
                 
                     if grip_vert ~= nil then
-                    if new_y < -(p.virtual_h - p.visible_h) then
+                    if new_y < -(p.virtual_height - p.visible_height) then
                         grip_vert.y = track_h-grip_vert.h
                     elseif new_y > 0 then
                         grip_vert.y = 0
@@ -7038,12 +7038,12 @@ function ui_element.arrowPane(t)
                         grip_vert:complete_animation()
                         grip_vert:animate{
                             duration= 200,
-                            y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_h - p.visible_h)
+                            y = 0-(track_h-grip_vert.h)*new_y/(p.virtual_height - p.visible_height)
                         }
                     end
                     end
                     if grip_hor ~= nil then
-                    if new_x < -(p.virtual_w - p.visible_w) then
+                    if new_x < -(p.virtual_width - p.visible_width) then
                         grip_hor.x = track_w-grip_hor.w
                     elseif new_x > 0 then
                         grip_hor.x = 0
@@ -7051,7 +7051,7 @@ function ui_element.arrowPane(t)
                         grip_hor:complete_animation()
                         grip_hor:animate{
                             duration= 200,
-                            x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_w - p.visible_w)
+                            x = 0-(track_w-grip_hor.w)*new_x/(p.virtual_width - p.visible_width)
                         }
                     end
                     end
@@ -7125,9 +7125,9 @@ function ui_element.arrowPane(t)
 			end
 			
 		else
-			--key = string.format ("arrow:%d:%s",  p.arrow_sz, color_to_string(p.arrow_color))
-			--arrow_src = assets(key, my_make_arrow,  p.arrow_sz, p.arrow_color )
-			arrow_src   = make_arrow( p.arrow_sz, p.arrow_color )
+			--key = string.format ("arrow:%d:%s",  p.arrow_size, color_to_string(p.arrow_color))
+			--arrow_src = assets(key, my_make_arrow,  p.arrow_size, p.arrow_color )
+			arrow_src   = make_arrow( p.arrow_size, p.arrow_color )
 			umbrella:add(arrow_src)
 			arrow_src:hide()
 		end
@@ -7146,22 +7146,22 @@ function ui_element.arrowPane(t)
 			end
 			
 		else
-			focus_arrow_src   = make_arrow( p.arrow_sz, p.focus_arrow_color )
+			focus_arrow_src   = make_arrow( p.arrow_size, p.focus_arrow_color )
 			umbrella:add(focus_arrow_src)
 			focus_arrow_src:hide()
 		end
 
         window.position={ p.box_border_width, p.box_border_width }
-		window.clip = { 0,0, p.visible_w, p.visible_h }
+		window.clip = { 0,0, p.visible_width, p.visible_height }
         border:set {
-            w = p.visible_w+2*p.box_border_width,
-            h = p.visible_h+2*p.box_border_width,
+            w = p.visible_width+2*p.box_border_width,
+            h = p.visible_height+2*p.box_border_width,
             border_width =    p.box_border_width,
             border_color =    p.box_color,
         }
         
         if p.arrows_visible then
-			if p.visible_h < p.virtual_h then
+			if p.visible_height < p.virtual_height then
 				do
 				f_arrow = Clone{
 					source       =  focus_arrow_src,
@@ -7187,7 +7187,7 @@ function ui_element.arrowPane(t)
 						--self.focus:show()
 					end,
 					on_button_up = function(self)
-						umbrella:pan_by(0,-p.dist_per_press,self.focus)
+						umbrella:pan_by(0,-p.scroll_distance,self.focus)
 						--self.focus:hide()
 					end,
 					extra = {
@@ -7226,7 +7226,7 @@ function ui_element.arrowPane(t)
 						--self.focus:show()
 					end,
 					on_button_up = function(self)
-						umbrella:pan_by(0,p.dist_per_press,self.focus)
+						umbrella:pan_by(0,p.scroll_distance,self.focus)
 						--self.focus:hide()
 					end,
 					extra = {
@@ -7240,7 +7240,7 @@ function ui_element.arrowPane(t)
 				end
 			end
 
-			if p.visible_w < p.virtual_w then
+			if p.visible_width < p.virtual_width then
 				-- [[ Right Arrow ]]-- 
 				if p.tab_buttons then 
 					f_arrow = Clone{
@@ -7263,7 +7263,7 @@ function ui_element.arrowPane(t)
 						y = border.h/2 - 10,
 						reactive=true,
 						on_button_down = function()
-							umbrella:pan_by(p.dist_per_press,0)
+							umbrella:pan_by(p.scroll_distance,0)
 							if p.tab then 
 								local current_tab = p.tab.current_tab
 								if umbrella:find_child("right").src == "/lib/assets/tab-arrow-right-on.png" then
@@ -7293,7 +7293,7 @@ function ui_element.arrowPane(t)
 						y = border.h/2 - 10,
 						reactive=true,
 						on_button_down = function()
-							umbrella:pan_by(p.dist_per_press,0)
+							umbrella:pan_by(p.scroll_distance,0)
 							if p.tab then 
 								local current_tab = p.tab.current_tab
 								if umbrella:find_child("right").src == "/lib/assets/tab-arrow-right-on.png" then
@@ -7344,7 +7344,7 @@ function ui_element.arrowPane(t)
 							--self.focus:show()
 						end,
 						on_button_up = function(self)
-							umbrella:pan_by(p.dist_per_press,0,self.focus)
+							umbrella:pan_by(p.scroll_distance,0,self.focus)
 							--self.focus:hide()
 						end,
 						extra = {
@@ -7367,7 +7367,7 @@ function ui_element.arrowPane(t)
 						x = - 20,
 						reactive = true,
 						on_button_down = function()
-							umbrella:pan_by(-p.dist_per_press,0)
+							umbrella:pan_by(-p.scroll_distance,0)
 							if p.tab then 
 								local current_tab = p.tab.current_tab
 								if umbrella:find_child("left").src == "/lib/assets/tab-arrow-left-on.png" then 
@@ -7394,7 +7394,7 @@ function ui_element.arrowPane(t)
 						x = - 20,
 						reactive = true,
 						on_button_down = function()
-							umbrella:pan_by(-p.dist_per_press,0)
+							umbrella:pan_by(-p.scroll_distance,0)
 							if p.tab then 
 								local current_tab = p.tab.current_tab
 								if umbrella:find_child("left").src == "/lib/assets/tab-arrow-left-on.png" then 
@@ -7442,7 +7442,7 @@ function ui_element.arrowPane(t)
 							--self.focus:show()
 						end,
 						on_button_up = function(self)
-							umbrella:pan_by(-p.dist_per_press,0,self.focus)
+							umbrella:pan_by(-p.scroll_distance,0,self.focus)
 							--self.focus:hide()
 						end,
 						extra = {
@@ -7469,7 +7469,7 @@ function ui_element.arrowPane(t)
 			
 		end
         
-		umbrella.size = {p.visible_w + 2*p.box_border_width, p.visible_h + 2*p.box_border_width}
+		umbrella.size = {p.visible_width + 2*p.box_border_width, p.visible_height + 2*p.box_border_width}
 		umbrella:add(border,window)
 	end
 	
