@@ -794,10 +794,16 @@ function util.make_attr_t(v)
   local obj_type = v.type
 
   local function stringTotitle(str)
+	  
+	  if str == "arrow_dist_to_frame" then 
+			 return "Arrow Dist To Frame"
+	  end 
+
       local i,j = string.find(str,"_")
       if i then str = string.upper(str:sub(1,1))..str:sub(2,i-1).." "..string.upper(str:sub(i+1, i+1))..str:sub(i+2,-1)
       else str = string.upper(str:sub(1,1))..str:sub(2,-1)
       end
+
 
       i,j = string.find(str,"_") 
       if i then 

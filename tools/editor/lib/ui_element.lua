@@ -1646,6 +1646,7 @@ function ui_element.button(t)
 				p.on_press()
 				if b_group.is_in_menu == true and b_group.fade_in == false then 
 					b_group.fade_in = true 
+					menu_bar_hover = true 
 				end
 	    	end 
 		end 
@@ -1797,6 +1798,7 @@ function ui_element.button(t)
 		local focus = b_group:find_child("button_focus") 
 
      	function b_group:on_button_down(x,y,b,n)
+
 			if b_group.tab_button == true and b_group.parent.buttons ~= nil then 
 				for q,w in pairs (b_group.parent.buttons) do
 					if w.label ~= b_group.label then 
@@ -5684,8 +5686,8 @@ button
 		separator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
 
-        align = "middle",
-        show_ring     = true,
+        align = "left",
+        show_ring = true,
 
 		ui_position = {300,300},
 		----------------------------
@@ -7298,7 +7300,7 @@ function ui_element.arrowPane(t)
 					}
 	]]
 
-					local arrow = assets ("/lib/assets/tab-arrow-right-on.png")
+					local arrow = Image{src = "/lib/assets/tab-arrow-right-on.png"}
 					arrow:set{
 						name = "right",
 						x = border.w+p.arrow_dist_to_frame  - 15,
@@ -7400,7 +7402,7 @@ function ui_element.arrowPane(t)
 
 ]]
 
-					arrow = assets ("/lib/assets/tab-arrow-left-off.png")
+					arrow = Image{ src = "/lib/assets/tab-arrow-left-off.png"}
 					arrow:set{
 						name = "left",
 						x = - 20,

@@ -471,10 +471,10 @@ function editor_ui.scrollPane(t)
     local make_arrow = function(dir)
 		local arrow
 		if dir == "up" then 
-			arrow = assets("lib/assets/scrollbar-btn-up.png")
+			arrow = Image{src = "lib/assets/scrollbar-btn-up.png"}
 			arrow.anchor_point={arrow.w/2,arrow.h}
 		else 
-			arrow = assets("lib/assets/scrollbar-btn-down.png")
+			arrow = Image{src = "lib/assets/scrollbar-btn-down.png"}
 			arrow.anchor_point={arrow.w/2,0}
 		end 
 		return arrow

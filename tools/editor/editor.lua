@@ -787,10 +787,8 @@ local function open_files(input_purpose, bg_image, inspector)
 
 				local key_focus_obj
 
-				if h_rect.focus[key] then 
+				if h_rect.focus[key] and type(h_rect.focus[key]) ~= "function" then 
 					key_focus_obj = msgw:find_child(h_rect.focus[key]) 
-				else 
-					return true
 				end 
 
 				if h_rect.focus[key] then
@@ -1664,6 +1662,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	end
 
 	local tab_func = function()
+	print("mm")
 		text_input.clear_focus()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
@@ -3228,6 +3227,7 @@ function editor.ui_elements()
 
 
 	local tab_func = function()
+	print("moioim")
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
