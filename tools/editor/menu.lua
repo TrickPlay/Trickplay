@@ -371,6 +371,7 @@ local menu_text_shadow = Text
 	}
 
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
+
 menu_items = {["menu_item"]=menu_item, 
 			  ["menu_bar"]=menu_bar, 
 			  ["menuButton_file"]=menuButton_file,
@@ -414,14 +415,16 @@ menu_items = {["menu_item"]=menu_item,
 -- Deactivate Menu 
 ----------------------------------------------------------------------------
 function menu.deactivate_menu()
+
 	local menu_hide = Rectangle{name = "menu_hide_rect", color = {0,0,0,0}, position = {0,0,0}, size = {menu_bar.w, menu_bar.h}, reactive = true} 
 
 	function menu_hide.on_button_down()
 		return true
 	end 
 
-	screen:add(menu_hide)
-
+	if screen:find_child("menu_hide_rect") == nil then 
+		screen:add(menu_hide)
+	end
 end 
 
 ----------------------------------------------------------------------------
