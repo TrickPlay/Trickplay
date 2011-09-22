@@ -1678,8 +1678,6 @@ function ui_element.button(t)
 		end 
         b_group:find_child("text").color = p.text_color
 
-
-
 		if b_group.is_in_menu == true then 
 			if b_group.fade_in == false then 
 				return 
@@ -5680,19 +5678,19 @@ button
         background_color     = {255,0,0,255},
         
         menu_width = 250,   -- bg_w 
-
-        horz_padding  = 0, -- padding 
-        
-		separator_thickness    = 2, --divider_h
+        horz_padding  = 5, -- padding 
+        separator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
 
         align = "left",
         show_ring = true,
-
 		ui_position = {300,300},
 		----------------------------
         text_has_shadow = true,
+		button_name = "button",
     }
+
+
     --overwrite defaults
     if t ~= nil then
         for k, v in pairs (t) do
@@ -5735,7 +5733,6 @@ button
     local dropDownMenu = Group{}
 
     local button       = ui_element.button{
-		name = "button",
         text_font=p.text_font,
     	text_color=p.text_color,
     	focus_text_color=p.text_focus_color,
@@ -5753,6 +5750,8 @@ button
 		is_in_menu = true, 
 		ui_position = p.ui_position,
     }
+
+	button.name = p.button_name
 
     local umbrella
 
@@ -6057,14 +6056,14 @@ button
                         	y     = curr_y - 1,
                     }
                     s_txt.anchor_point={0,s_txt.h/2}
-					if item.icon then
-						local icon_img = item.icon
-						if icon_img.type ~= "Text" then
-                    		s_txt.y = s_txt.y+s_txt.h/2
-						end 
-					else 
+                    if item.icon then
+                    	local icon_img = item.icon
+                    	if icon_img.type ~= "Text" then
+                    	    s_txt.y = s_txt.y+s_txt.h/2
+                    	end 
+                    else 
                     	s_txt.y = s_txt.y+s_txt.h/2
-					end 
+                    end 
                     dropDownMenu:add(s_txt)
                 end
                 txt = Text{
@@ -6073,9 +6072,9 @@ button
                         color = p.item_text_color,
                         x     = p.horz_padding+p.horz_spacing,
                         y     = curr_y,
-                    }
-                    txt.anchor_point={0,txt.h/2}
-                    txt.y = txt.y+txt.h/2
+                }
+                txt.anchor_point={0,txt.h/2}
+                txt.y = txt.y+txt.h/2
                 if item.mstring then 
                     txt.use_markup =true
                     txt.markup = item.mstring
@@ -6109,11 +6108,17 @@ button
                         ui_ele.reactive=true
                     end
                 elseif p.show_ring then
-					key = string.format("item_ring:%d, %d", p.menu_width-2*p.horz_spacing,txt.h+10)
-                    ui_ele = assets (key, my_make_item_ring, p.menu_width-2*p.horz_spacing,txt.h+10,7)
+                    key = string.format("item_ring:%d, %d", p.menu_width-2*p.horz_spacing,txt.h+10)
+                    ui_ele = assets (
+			key, 
+			my_make_item_ring, 
+			p.menu_width-2*p.horz_spacing+7*2,
+			txt.h+10,
+			7
+                    )
                     --ui_ele = make_item_ring (p.menu_width-2*p.horz_spacing,txt.h+10,7)
-                    ui_ele.anchor_point = { 0,     ui_ele.h/2 }
-                    ui_ele.position     = { 0, 	   txt.y }
+                    ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
+                    ui_ele.position     = { p.menu_width/2, 	   txt.y }
                     dropDownMenu:add(ui_ele)
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
