@@ -16,9 +16,9 @@ local icon_vc = assets("assets/align-vertically-center.png"):set{opacity = 175}
 local icon_dhc = assets("assets/distribute-horizontal-center.png"):set{opacity = 185}
 local icon_dvc = assets("assets/distribute-vertical-center.png"):set{opacity = 185}
 
-local info_attr_t_idx = {"name","label","left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "ui_width", "ui_height", "bw", "bh", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","style","border_colorr", "border_colorg", "border_colorb", "border_colora","colorr", "colorg", "colorb", "colora","fr","fg","fb","fa","border_width","scale","clip","cx", "cy", "cw", "ch","font","wrap_mode","x_angle", "y_angle", "z_angle","opacity", "reactive",}
+local info_attr_t_idx = {"name","label","progress","left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "ui_width", "ui_height", "bw", "bh", "skin","visible_width", "visible_height",  "virtual_width", "virtual_height","style","border_colorr", "border_colorg", "border_colorb", "border_colora","colorr", "colorg", "colorb", "colora","fr","fg","fb","fa","border_width","scale","clip","cx", "cy", "cw", "ch","font","wrap_mode","x_angle", "y_angle", "z_angle","opacity", "reactive",}
 
-local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","focus_colorr","focus_colorg","focus_colorb","focus_colora", "label_colorr", "label_colorg", "label_colorb", "label_colora", "unsel_colorr", "unsel_colorg", "unsel_colorb", "unsel_colora", "colorr", "colorg", "colorb", "colora","title", "title_colorr","title_colorg","title_colorb","title_colora","title_font", "message","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera","focus_bar_color_innerr", "focus_bar_color_innerg","focus_bar_color_innerb","focus_bar_color_innera", "focus_bar_color_outerr","focus_bar_color_outerg","focus_bar_color_outerb","focus_bar_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora", "focus_arrow_colorr", "focus_arrow_colorg", "focus_arrow_colorb", "focus_arrow_colora",  "check_width", "check_height",  "rows","columns","cell_size", "cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","border_colorr", "border_colorg", "border_colorb", "border_colora", "focus_border_colorr","focus_border_colorg","focus_border_colorb","focus_border_colora", "box_colorr","box_colorg","box_colorb","box_colora", "focus_box_colorr","focus_box_colorg","focus_box_colorb","focus_box_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","button_colorr","button_colorg","button_colorb","button_colora", "focus_button_colorr","focus_button_colorg","focus_button_colorb","focus_button_colora", "cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","text_colorr","text_colorg","text_colorb","text_colora","select_colorr",  "select_colorg",  "select_colorb",  "select_colora","text_font","padding", "border_width","border_corner_radius", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "label_padding", "tab_position", "display_width", "display_height", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","alignment","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","box_border_width","box_height","selected_items","items","reactive", "focus"} 
+local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","focus_colorr","focus_colorg","focus_colorb","focus_colora",  "colorr", "colorg", "colorb", "colora","title", "title_colorr","title_colorg","title_colorb","title_colora","title_font", "message","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_width", "visible_height",  "virtual_width", "virtual_height", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera","focus_bar_color_innerr", "focus_bar_color_innerg","focus_bar_color_innerb","focus_bar_color_innera", "focus_bar_color_outerr","focus_bar_color_outerg","focus_bar_color_outerb","focus_bar_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora", "focus_arrow_colorr", "focus_arrow_colorg", "focus_arrow_colorb", "focus_arrow_colora",  "check_width", "check_height",  "rows","columns","cell_size", "cell_width","cell_height","cell_spacing_width","cell_spacing_height", "cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","border_colorr", "border_colorg", "border_colorb", "border_colora", "focus_border_colorr","focus_border_colorg","focus_border_colorb","focus_border_colora", "box_colorr","box_colorg","box_colorb","box_colora", "focus_box_colorr","focus_box_colorg","focus_box_colorb","focus_box_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","button_colorr","button_colorg","button_colorb","button_colora", "focus_button_colorr","focus_button_colorg","focus_button_colorb","focus_button_colora", "cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","text_colorr","text_colorg","text_colorb","text_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "unsel_colorr", "unsel_colorg", "unsel_colorb", "unsel_colora", "text_font","padding", "border_width","border_corner_radius", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "label_padding", "tab_position", "display_width", "display_height", "arrow_size", "arrow_dist_to_frame", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","alignment","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","box_border_width","box_height","selected_items","items","reactive", "focus"} 
 
 --"focus_box_colorr","focus_box_colorg","focus_box_colorb","focus_box_colora", cursor_color 
 
@@ -380,7 +380,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={255,25,25,255}, }
-	local items_list = ui_element.layoutManager{rows = rows, columns = 4, cell_w = 100, cell_h = 40, cell_spacing_w=5, cell_spacing_h=5, cell_size="variable", cells_focusable=false}
+	local items_list = ui_element.layoutManager{rows = rows, columns = 4, cell_width = 100, cell_height = 40, cell_spacing_width=5, cell_spacing_height=5, cell_size="variable", cells_focusable=false}
 	if text then 
     	items_list.position = {0, text.y + text.h + 7}
 	else 
@@ -734,7 +734,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	end
 	function group.extra.set_focus()
 		current_focus = group 
-		a = items_list.tiles[1][1]
+		a = items_list.cells[1][1]
 		a.set_focus()
 		a:grab_key_focus()
     end
@@ -1153,7 +1153,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
     local LINE_COLOR    = {255,255,255,255}  
     local BORDER_RADIUS = 0
     local LINE_WIDTH    = 1
-    local input_box_width     
+    local input_box_border_width     
     local item_group 
 
 	local non_textInput_items = {"ui_title","line", "button", "focus", "tab_labels", "items", "skin", "wrap_mode", 
@@ -1201,25 +1201,25 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 	    if item_n == "name" or item_n == "text" or item_n == "message" or item_n == "label" or item_n == "title" then 
 			-- no property name text, long textInput Box
-	     	input_box_width = WIDTH + 5
+	     	input_box_border_width = WIDTH + 5
         else  
 			-- properties' name 
     	    text = Text {name = "attr", text = item_s}:set(STYLE)
             text.position  = {0, 4.5}
     	    group:add(text)
 
-	     	input_box_width = 39 
+	     	input_box_border_width = 39 
             if item_n:find("font") then 
-	          input_box_width = WIDTH + 5
+	          input_box_border_width = WIDTH + 5
 			  group:remove(text)
 			  text = nil
             elseif string.find(item_n,"duration") or string.find(item_n,"time") then 
-	          input_box_width = 49 
+	          input_box_border_width = 49 
 	     	end
         end 
 
-		key = string.format("ring:%d:%d", input_box_width, HEIGHT + 5)
-		ring = assets (key, my_make_ring, input_box_width, HEIGHT + 5)
+		key = string.format("ring:%d:%d", input_box_border_width, HEIGHT + 5)
+		ring = assets (key, my_make_ring, input_box_border_width, HEIGHT + 5)
 
 		ring.name = "ring"
 		if text then 
@@ -1234,10 +1234,10 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
         ring.opacity = 255
         group:add(ring)
 
-		key = string.format("focus_ring:%d%d", input_box_width, HEIGHT + 5)
-		focus = assets (key, my_make_focus_ring, input_box_width, HEIGHT + 5)
+		key = string.format("focus_ring:%d%d", input_box_border_width, HEIGHT + 5)
+		focus = assets (key, my_make_focus_ring, input_box_border_width, HEIGHT + 5)
 
-        -- focus = make_focus_ring(input_box_width, HEIGHT + 5)
+        -- focus = make_focus_ring(input_box_border_width, HEIGHT + 5)
         focus.name = "focus"
 		if (text) then 
 	     	focus.position = {text.x+text.w+5, 0}
@@ -1251,7 +1251,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 
     	input_text = Text {name = "input_text", text =item_v, editable=true,
-        reactive = true, wants_enter = true, cursor_visible = false,single_line = true, width = input_box_width - 10}:set(STYLE)
+        reactive = true, wants_enter = true, cursor_visible = false,single_line = true, width = input_box_border_width - 10}:set(STYLE)
 
 		if (text) then 
 			if item_n == "menu_width" then 
@@ -1392,7 +1392,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 	if item_n == "z" then 
 		group.w = group.w + 50
-	elseif item_n == "h" or item_n == "virtual_h" then 
+	elseif item_n == "h" or item_n == "virtual_height" then 
 		group.w = group.w + 100
 	elseif item_n == "cell_timing" then 
 		group.w = group.w + 200

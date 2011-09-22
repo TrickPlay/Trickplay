@@ -248,7 +248,7 @@ function editor_ui.scrollPane(t)
         horz_bar_visible     = true,
         
         box_color = {160,160,160,255},
-        box_width = 0,
+        box_border_width = 0,
         skin="default",
     }
 
@@ -516,12 +516,12 @@ function editor_ui.scrollPane(t)
 	--this function creates the whole scroll bar box
         local hold = false
 		local function create()
-        window.position={ p.box_width, p.box_width }
+        window.position={ p.box_border_width, p.box_border_width }
 		window.clip = { 0,0, p.visible_w, p.visible_h }
         border:set{
-            w = p.visible_w+2*p.box_width,
-            h = p.visible_h+2*p.box_width,
-            border_width =    p.box_width,
+            w = p.visible_w+2*p.box_border_width,
+            h = p.visible_h+2*p.box_border_width,
+            border_width =    p.box_border_width,
             border_color =    p.box_color,
         }
 		
@@ -554,27 +554,27 @@ function editor_ui.scrollPane(t)
             if p.arrows_visible then
                 local l = make_arrow()
                 l.name="L"
-                l.x = p.box_width+p.bar_thickness
-                l.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
+                l.x = p.box_border_width+p.bar_thickness
+                l.y = p.box_border_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
                 scroll_group:add(l)
                 l.reactive=true
                 function l:on_button_down()
                     scroll_x(1)
                 end
                 hor_s_bar.position={
-                    p.box_width+p.bar_thickness,
-                    p.box_width*2+p.visible_h+p.bar_offset
+                    p.box_border_width+p.bar_thickness,
+                    p.box_border_width*2+p.visible_h+p.bar_offset
                 }
                 local r = make_arrow()
                 r.name="R"
-                r.x = p.box_width+p.bar_thickness+hor_s_bar.w
-                r.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
+                r.x = p.box_border_width+p.bar_thickness+hor_s_bar.w
+                r.y = p.box_border_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
                 scroll_group:add(r)
                 r.reactive=true
             else
                 hor_s_bar.position={
-                    p.box_width,
-                    p.box_width*2+p.visible_h+p.bar_offset
+                    p.box_border_width,
+                    p.box_border_width*2+p.visible_h+p.bar_offset
                 }
             end
             scroll_group:add(hor_s_bar)
@@ -634,21 +634,21 @@ function editor_ui.scrollPane(t)
             if p.arrows_visible then
                 local up = make_arrow("up")
                 up.name="UP"
-                up.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
-                up.y = p.box_width+p.bar_thickness
+                up.x = p.box_border_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
+                up.y = p.box_border_width+p.bar_thickness
                 scroll_group:add(up)
                 up.reactive=true
                 function up:on_button_down()
                     scroll_y(1)
                 end
                 vert_s_bar.position={
-                    p.box_width*2+p.visible_w+p.bar_offset,
-                    p.box_width+p.bar_thickness
+                    p.box_border_width*2+p.visible_w+p.bar_offset,
+                    p.box_border_width+p.bar_thickness
                 }
                 local dn = make_arrow("down")
                 dn.name="DN"
-                dn.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
-                dn.y = p.box_width+p.bar_thickness+vert_s_bar.h
+                dn.x = p.box_border_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
+                dn.y = p.box_border_width+p.bar_thickness+vert_s_bar.h
                 --dn.z_rotation = {180,0,0}
                 scroll_group:add(dn)
                 dn.reactive=true
@@ -657,8 +657,8 @@ function editor_ui.scrollPane(t)
                 end
             else
                 vert_s_bar.position={
-                    p.box_width*2+p.visible_w+p.bar_offset,
-                    p.box_width
+                    p.box_border_width*2+p.visible_w+p.bar_offset,
+                    p.box_border_width
                 }
             end
             scroll_group:add(vert_s_bar)
@@ -780,7 +780,7 @@ function editor_ui.tabBar(t)
 		current_tab = 1,
 		current_tab_focus = nil, 
 		--------------------------------
-		arrow_sz = 15,
+		arrow_size = 15,
 		arrow_dist_to_frame = 2,
 		arrow_image = "lib/assets/tab-arrow-left-off.png" --nil,
 
@@ -946,36 +946,19 @@ function editor_ui.tabBar(t)
 
 		ap = nil
 		
-		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
+		if p.arrow_image then p.arrow_size = assets(p.arrow_image).w end
 		
 		if p.tab_position == "TOP" and
-		(p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+		(p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) > (p.display_width - 2*(p.arrow_size+p.arrow_dist_to_frame)) then
 			
 			ap = ui_element.arrowPane{
-				visible_w=p.display_width - (p.arrow_sz+p.arrow_dist_to_frame),
-				visible_h=p.buttons[# p.buttons].h,
-				virtual_w=p.buttons[# p.buttons].w + p.buttons[# p.buttons].x,
-				virtual_h=p.buttons[# p.buttons].h,
-				arrow_color=p.label_color,
-				dist_per_press=p.buttons[# p.buttons].w + 20, 
-				arrow_sz = p.arrow_sz,
-				arrow_dist_to_frame = p.arrow_dist_to_frame,
-				arrow_src = p.arrow_image,
-				tab = umbrella, -- p.current_tab, -- 1
-				tab_buttons = p.buttons,
-				box_border_width = 0,
-				tab_arrow_left_on = "lib/assets/tab-arrow-left-off.png",  
-				tab_arrow_right_on = "lib/assets/tab-arrow-left-off.png",  
-				tab_arrow_left_off = "lib/assets/tab-arrow-left-off.png",  
-				tab_arrow_right_off = "lib/assets/tab-arrow-left-off.png",  
-					--[[
-				visible_width=p.display_width - (p.arrow_sz+p.arrow_dist_to_frame),
+				visible_width=p.display_width - (p.arrow_size+p.arrow_dist_to_frame),
 				visible_height=p.buttons[# p.buttons].h,
 				virtual_width=p.buttons[# p.buttons].w + p.buttons[# p.buttons].x,
 				virtual_height=p.buttons[# p.buttons].h,
 				arrow_color=p.label_color,
 				scroll_distance=p.buttons[# p.buttons].w + 20, 
-				arrow_size = p.arrow_sz,
+				arrow_size = p.arrow_size,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
 				arrow_src = p.arrow_image,
 				tab = umbrella, -- p.current_tab, -- 1
@@ -985,10 +968,9 @@ function editor_ui.tabBar(t)
 				tab_arrow_right_on = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_left_off = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_right_off = "lib/assets/tab-arrow-left-off.png",  
-				]]
 			}
 			
-			ap.x = p.arrow_sz+p.arrow_dist_to_frame
+			ap.x = p.arrow_size+p.arrow_dist_to_frame
 			ap.y = 0
 			
 			for _,b in ipairs(p.buttons) do
@@ -1000,7 +982,7 @@ function editor_ui.tabBar(t)
 			
 			umbrella:add(ap)
 			
-		elseif (p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) <= (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+		elseif (p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) <= (p.display_width - 2*(p.arrow_size+p.arrow_dist_to_frame)) then
 			
 			for _,b in ipairs(p.buttons) do
 				b.x = b.x +8
@@ -1063,7 +1045,7 @@ function editor_ui.checkBoxGroup(t)
 	fill_color = {255,255,255,0},
 	focus_color = {0,255,0,255},
 	focus_fill_color = {0,50,0,0},
-	box_width = 2,
+	box_border_width = 2,
 	box_size = {25,25},
 	check_size = {25,25},
 	line_space = 40,   
@@ -1160,9 +1142,9 @@ function editor_ui.checkBoxGroup(t)
 
 	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
 	      	if p.skin == "custom" then 
-		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_width, 
+		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_border_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 0}
-		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
+		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_border_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 255}
     	        boxes:add(box, focus) 
 	     	else
