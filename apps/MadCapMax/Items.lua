@@ -10,7 +10,6 @@ local item_type = {
             
             if obj.hit then return end
             
-            mediaplayer:play_sound("audio/crunch.wav")
             
             initial_impact()
             
@@ -68,6 +67,7 @@ local item_type = {
             
             initial_impact()
             
+            mediaplayer:play_sound("audio/knocked over "..math.random(1,3)..".mp3")
             
             obj.hit = true
             

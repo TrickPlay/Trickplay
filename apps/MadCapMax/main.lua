@@ -16,6 +16,45 @@ local function main()
     -- Utility Functions                                                      --
     ----------------------------------------------------------------------------
     
+    function mediaplayer:on_loaded()
+        
+        mediaplayer:play()
+        
+    end
+    
+    
+    local fade_out = {
+        
+        duration = 1,
+        
+        on_step  = function(s,p)
+            
+            mediaplayer.volume = (1-p)
+            
+        end,
+        on_completed = function()
+            
+            mediaplayer:pause()
+            
+        end
+    }
+    
+    function fade_out_mediaplayer(dur)
+        
+        fade_out.duration =
+            (mediaplayer.duration - mediaplayer.position  <  dur) and
+            (mediaplayer.duration - mediaplayer.position) or dur
+        
+        if Animation_Loop:has_animation(fade_out) then
+            
+            error("already fading out",2)
+            
+        end
+        
+        Animation_Loop:add_animation(fade_out)
+        
+    end
+    
     --calculates a pararbola that the 2 points (x1,y1), (x2,y2), (x3,y3) lie on
     function calc_parabola(
             x1, y1,
@@ -158,10 +197,11 @@ local function main()
         background   = Group{  name  =  "Background Objects layer" },
         items        = Group{  name  =  "Collidables layer"        },
         player       = Group{  name  =  "Player layer"             },
+        btw_p_n_e    = Group{  name  =  "btw p n e layer"          },
         enemy        = Group{  name  =  "Enemy layer"              },
         foreground   = Group{  name  =  "Foreground layer"         },
         
-        hud          = Group{  name  =  "HUD layer"              },
+        hud          = Group{  name  =  "HUD layer"                },
         menus        = Group{  name  =  "Menus layer"              },
     }
     
@@ -173,6 +213,7 @@ local function main()
         layers.background,
         layers.items,     
         layers.player,    
+        layers.btw_p_n_e,    
         layers.enemy,     
         layers.foreground
     )
@@ -459,7 +500,6 @@ local function main()
     
     gamestate:change_state_to("SPLASH")
     
-    mediaplayer:play_sound("audio/start.wav")
 end
 
 dolater( main )
