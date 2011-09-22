@@ -5648,7 +5648,7 @@ button
     	item_text_color = nil,
     	item_text_focus_color = nil,
 --]]
-	text_font = "FreeSans Medium 30px",
+		text_font = "FreeSans Medium 30px",
     	text_color = {255,255,255,255}, --"FFFFFF",
     	skin = "CarbonCandy", 
     	ui_width = 250,
@@ -5657,7 +5657,7 @@ button
     	label = "Menu Button", 
     	focus_border_color = {27,145,27,255}, 	  --"1b911b", 
     	focus_fill_color = {27,145,27,0}, --"1b911b", 
-	focus_text_color =  {255,255,255,255},   
+		focus_text_color =  {255,255,255,255},   
     	border_color = {255,255,255,255}, --"FFFFFF"
     	fill_color = {255,255,255,0},     --"FFFFFF"
     	border_width = 1,
@@ -5669,21 +5669,27 @@ button
             {type="separator"},
             {type="item",  string="Item", f=nil},
         },
+
         vert_spacing = 5, --item_spacing
         horz_spacing = 5, -- new 
         vert_offset  = 40, --item_start_y
         horz_offset  = 0,
-        text_has_shadow = true,
         
         background_color     = {255,0,0,255},
         
         menu_width = 250,   -- bg_w 
+
         horz_padding  = 0, -- padding 
-        separator_thickness    = 2, --divider_h
+        
+		separator_thickness    = 2, --divider_h
         expansion_location   = "below", --bg_goes_up -> true => "above" / false == below
-        align = "left",
+
+        align = "middle",
         show_ring     = true,
+
 		ui_position = {300,300},
+		----------------------------
+        text_has_shadow = true,
     }
     --overwrite defaults
     if t ~= nil then
@@ -6296,7 +6302,7 @@ button
         button.anchor_point = {button.w/2,button.h/2}
         if p.align=="left" then
               dropDownMenu.x = p.menu_width/2
-        elseif p.aligh == "middle" then
+        elseif p.align == "middle" then
               dropDownMenu.x = button.w/2
         elseif p.align == "right" then
               dropDownMenu.x = button.w
@@ -6338,42 +6344,46 @@ function ui_element.tabBar(t)
     
     --default parameters
     local p = {
-        font  = "FreeSans Medium 26px",
-        
+
+        --> font -> deleted because it is duplicated with text_font   
         text_font = "FreeSans Medium 26px",
-    	text_color = {255,255,255,255}, 
         
     	skin = "CarbonCandy", 
-    	ui_width = 150,
-    	ui_height = 60, 
+    	button_width = 150, 			--> ui_width -> button_width
+    	button_height = 60, 			--> ui_height -> button_height 
         
-    	focus_border_color      = { 27,145, 27,255}, --"1b911b", 
-    	focus_fill_color = { 27,145, 27,255}, --"1b911b", 
-    	focus_text_color = {255,255,255,255}, --"1b911b", 
-    	border_color     = {255,255,255,255}, --"FFFFFF"
+    	border_color     = {255,255,255,255},
+    	focus_border_color = { 27,145, 27,255},
+    	focus_fill_color = { 27,145, 27,255},
+        fill_color  = { 60, 60, 60,255}, --> unsel_color -> fill_color 
+    	focus_text_color = {255,255,255,255},
+    	text_color = {255,255,255,255}, 
     	border_width = 1,
     	border_corner_radius = 12,
+		--border_width = 2, -> duplicated ! 
         
         tab_labels = {
             "Label",
             "Label",
             "Label",
         },
+
         tabs = {},
-        label_padding = 10,
         tab_position = "top",
-        
+        tab_spacing = 0,
+		
+		--> label_padding -> deleted because it is not used 
+
         display_width  = 600,
         display_height = 500,
-        tab_spacing = 0,--10,
-        border_width =  2,
-        fill_color   = {  0,  0,  0,255},
-        label_color  = {255,255,255,255},
-        unsel_color  = { 60, 60, 60,255},
+        display_fill_color   = { 0,  0,  0,255}, --> fill_color -> display_fill_color 
+        display_border_color = {255,255,255,255}, --> border_color
+        display_border_width = 2, --> border_width
+
+        arrow_color  = {255,255,255,255}, --> label_color -> arrow_color  
 		
 		arrow_size     = 15,
 		arrow_dist_to_frame = 5,
---		arrow_image = nil,
 
 		ui_position = {200,200},
     }
@@ -6520,9 +6530,9 @@ function ui_element.tabBar(t)
         tab_focus = {}
         
         local bg = Rectangle {
-            color        = p.fill_color,
-            border_color = p.border_color,
-            border_width = p.border_width,
+            color        = p.display_fill_color,
+            border_color = p.display_border_color, --> border_color
+            border_width = p.display_border_width, --> border_width
             w = p.display_width,
             h = p.display_height,
         }
@@ -6542,15 +6552,17 @@ function ui_element.tabBar(t)
 				
 				ui_position          = { 0, 0 },
 				skin                 = p.skin,
-				ui_width             = p.ui_width,
-				ui_height            = p.ui_height,
-				focus_border_color          = p.focus_border_color,
+				ui_width             = p.button_width,
+				ui_height            = p.button_height,
+				focus_border_color   = p.focus_border_color,
 				border_width         = p.border_width,
 				border_corner_radius = p.border_corner_radius,
 				label                = p.tab_labels[i],
-				text_font            = p.font,
-				fill_color           = p.unsel_color,
-				focus_fill_color     = p.fill_color,
+				border_color         = p.border_color, 
+				text_color           = p.text_color,
+				text_font            = p.text_font,
+				fill_color           = p.fill_color,
+				focus_fill_color     = p.focus_fill_color,
 				focus_text_color     = p.focus_text_color,
 				on_press              = function () umbrella:display_tab(i) end,
 				
@@ -6590,7 +6602,7 @@ function ui_element.tabBar(t)
 				visible_height=buttons[# buttons].h,
 				virtual_width=buttons[# buttons].w + buttons[# buttons].x,
 				virtual_height=buttons[# buttons].h,
-				arrow_color=p.label_color,
+				arrow_color=p.arrow_color,
 				box_border_width=0,
 				scroll_distance=buttons[# buttons].w,
 				arrow_size = p.arrow_size,
@@ -6617,7 +6629,7 @@ function ui_element.tabBar(t)
 				visible_height=p.display_height - 2*(p.arrow_size+p.arrow_dist_to_frame),
 				virtual_width=buttons[# buttons].w,
 				virtual_height=buttons[# buttons].h + buttons[# buttons].y,
-				arrow_color=p.label_color,
+				arrow_color=p.arrow_color,
 				box_border_width=0,
 				scroll_distance=buttons[# buttons].h,
 				arrow_size = p.arrow_size,
