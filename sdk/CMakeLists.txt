@@ -84,8 +84,16 @@ if (UNIX AND NOT APPLE)
         
         set(CPACK_SYSTEM_NAME "Linux-${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
         
-        set(CPACK_PACKAGE_FILE_NAME "trickplay-sdk_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}_${BUILD_TYPE}")
+        if ( ${BUILD_TYPE} STREQUAL "relwithdebinfo" )
         
+            set(CPACK_PACKAGE_FILE_NAME "trickplay-sdk_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+            
+        else ( ${BUILD_TYPE} STREQUAL "relwithdebinfo" )             
+        
+            set(CPACK_PACKAGE_FILE_NAME "trickplay-sdk_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}_${BUILD_TYPE}")
+            
+        endif (${BUILD_TYPE} STREQUAL "relwithdebinfo" )
+                    
         set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Pablo Pissanetzky <pablo@trickplay.com>")
         
         set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "TrickPlay SDK\n The TrickPlay SDK allows you to build and test TrickPlay apps.")
