@@ -102,6 +102,9 @@ if (UNIX AND NOT APPLE)
             COMMAND sed s/%TRICKPLAY_VERSION%/${CPACK_PACKAGE_VERSION}/ ${CMAKE_CURRENT_SOURCE_DIR}/changelog | gzip --best > changelog.gz
             )
             
+        add_dependencies( debian rte-docs )
+                    
+            
         set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "trickplay.1.gz;changelog.gz") 
 
         # Documentation
