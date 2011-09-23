@@ -12,9 +12,9 @@ function editor_ui.button(table)
     	text_color = {255,255,255,255}, --"FFFFFF",
     	focus_text_color = {255,255,255,255},
 
-		focused=nil, 
-		pressed = nil, 
-		released = nil, 
+		on_focus=nil, 
+		on_press = nil, 
+		on_release = nil, 
 
 		button_image = nil,
 		focus_image  = nil,
@@ -42,11 +42,11 @@ function editor_ui.button(table)
         extra = {type = "EditorButton"}
     } 
     
-    function b_group.extra.on_focus_in(key) 
+    function b_group.extra.set_focus(key) 
 
 		if current_focus ~= nil then 
-			if current_focus.on_focus_out then 
-				current_focus.on_focus_out()
+			if current_focus.clear_focus then 
+				current_focus.clear_focus()
 			end 
 		end 
 
@@ -63,21 +63,21 @@ function editor_ui.button(table)
 	
 		current_focus = b_group
 
-	    if p.focused ~= nil then 
-			p.focused()
+	    if p.on_focus ~= nil then 
+			p.on_focus()
 		end 
 
 		b_group:grab_key_focus(b_group)
 
 		if key then 
-	    	if p.pressed and key == keys.Return then
-				p.pressed()
+	    	if p.on_press and key == keys.Return then
+				p.on_press()
 	    	end 
 		end 
 	
     end
     
-    function b_group.extra.on_focus_out(key) 
+    function b_group.extra.clear_focus(key) 
 		if key == "active" then 
         	active.opacity = 255
 	    	button.opacity = 0
@@ -89,8 +89,8 @@ function editor_ui.button(table)
         b_group:find_child("text").color = p.text_color
 		current_focus = nil 
 
-		if p.released then 
-			p.released()
+		if p.on_release then 
+			p.on_release()
 		end 
     end
 
@@ -144,40 +144,40 @@ function editor_ui.button(table)
 	    function b_group:on_button_down(x,y,b,n)
 			if current_focus ~= b_group then 
 				if current_focus then 
-		     		current_focus.on_focus_out()
+		     		current_focus.clear_focus()
 				end
 			end 
-		    b_group.extra.on_focus_in("focus")
+		    b_group.extra.set_focus("focus")
 			return true
 	  	end 
 		function b_group:on_button_up(x,y,b,n)
 				if current_focus ~= b_group then 
 					if current_focus then 
-		     			current_focus.on_focus_out()
+		     			current_focus.clear_focus()
 					end
 				end 
-				b_group.extra.on_focus_in(keys.Return)
+				b_group.extra.set_focus(keys.Return)
 				return true
 	     end 
 	     function b_group:on_enter()
 		 		if current_focus ~= b_group then 
 					if current_focus then 
-		     			current_focus.on_focus_out()
+		     			current_focus.clear_focus()
 					end
 				end 
-				b_group.extra.on_focus_in("focus")
+				b_group.extra.set_focus("focus")
 		 end 
 
 	     function b_group:on_leave()
 			if b_group.active_button == true then 
-				b_group.on_focus_out("active")
+				b_group.clear_focus("active")
 			else 
-				b_group.on_focus_out()
+				b_group.clear_focus()
 			end 
 
 			if p.focus_object ~= nil then 
-				if 	p.focus_object.on_focus_in then
-					p.focus_object.on_focus_in()
+				if 	p.focus_object.set_focus then
+					p.focus_object.set_focus()
 				end
 			end 
 		 end 
@@ -187,12 +187,12 @@ function editor_ui.button(table)
 					if type(b_group.focus[key]) == "function" then
 							b_group.focus[key]()
 					elseif screen:find_child(b_group.focus[key]) then
-						if b_group.on_focus_out then
-							b_group.on_focus_out()
+						if b_group.clear_focus then
+							b_group.clear_focus()
 						end
 						screen:find_child(b_group.focus[key]):grab_key_focus()
-						if screen:find_child(b_group.focus[key]).on_focus_in then
-							screen:find_child(b_group.focus[key]).on_focus_in(key)
+						if screen:find_child(b_group.focus[key]).set_focus then
+							screen:find_child(b_group.focus[key]).set_focus(key)
 						end
 					else 
 					   b_group:grab_key_focus()
@@ -248,7 +248,7 @@ function editor_ui.scrollPane(t)
         horz_bar_visible     = true,
         
         box_color = {160,160,160,255},
-        box_width = 0,
+        box_border_width = 0,
         skin="default",
     }
 
@@ -348,7 +348,7 @@ function editor_ui.scrollPane(t)
     }
 
 
-	 function scroll_group.extra.on_focus_in(key) 
+	 function scroll_group.extra.set_focus(key) 
 		for i,j in pairs (scroll_group.content.children) do 
 			if j.name then 
 			if string.find(j.name, "h_rect") ~= nil then 
@@ -360,7 +360,7 @@ function editor_ui.scrollPane(t)
 		end 
     end
     
-    function scroll_group.extra.on_focus_out(key) 
+    function scroll_group.extra.clear_focus(key) 
     end
 
     scroll_group.extra.seek_to = function(x,y)
@@ -381,7 +381,7 @@ function editor_ui.scrollPane(t)
 		end,
 	}
 	scroll_group.on_key_down = function(self,key)
-		scroll_group.extra.on_focus_in()
+		scroll_group.extra.set_focus()
 	end
 	
 	scroll_y = function(dir)
@@ -471,10 +471,10 @@ function editor_ui.scrollPane(t)
     local make_arrow = function(dir)
 		local arrow
 		if dir == "up" then 
-			arrow = assets("lib/assets/scrollbar-btn-up.png")
+			arrow = Image{src = "lib/assets/scrollbar-btn-up.png"}
 			arrow.anchor_point={arrow.w/2,arrow.h}
 		else 
-			arrow = assets("lib/assets/scrollbar-btn-down.png")
+			arrow = Image{src = "lib/assets/scrollbar-btn-down.png"}
 			arrow.anchor_point={arrow.w/2,0}
 		end 
 		return arrow
@@ -516,12 +516,12 @@ function editor_ui.scrollPane(t)
 	--this function creates the whole scroll bar box
         local hold = false
 		local function create()
-        window.position={ p.box_width, p.box_width }
+        window.position={ p.box_border_width, p.box_border_width }
 		window.clip = { 0,0, p.visible_w, p.visible_h }
         border:set{
-            w = p.visible_w+2*p.box_width,
-            h = p.visible_h+2*p.box_width,
-            border_width =    p.box_width,
+            w = p.visible_w+2*p.box_border_width,
+            h = p.visible_h+2*p.box_border_width,
+            border_width =    p.box_border_width,
             border_color =    p.box_color,
         }
 		
@@ -554,27 +554,27 @@ function editor_ui.scrollPane(t)
             if p.arrows_visible then
                 local l = make_arrow()
                 l.name="L"
-                l.x = p.box_width+p.bar_thickness
-                l.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
+                l.x = p.box_border_width+p.bar_thickness
+                l.y = p.box_border_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
                 scroll_group:add(l)
                 l.reactive=true
                 function l:on_button_down()
                     scroll_x(1)
                 end
                 hor_s_bar.position={
-                    p.box_width+p.bar_thickness,
-                    p.box_width*2+p.visible_h+p.bar_offset
+                    p.box_border_width+p.bar_thickness,
+                    p.box_border_width*2+p.visible_h+p.bar_offset
                 }
                 local r = make_arrow()
                 r.name="R"
-                r.x = p.box_width+p.bar_thickness+hor_s_bar.w
-                r.y = p.box_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
+                r.x = p.box_border_width+p.bar_thickness+hor_s_bar.w
+                r.y = p.box_border_width*2+p.visible_h+p.bar_offset+p.bar_thickness/2
                 scroll_group:add(r)
                 r.reactive=true
             else
                 hor_s_bar.position={
-                    p.box_width,
-                    p.box_width*2+p.visible_h+p.bar_offset
+                    p.box_border_width,
+                    p.box_border_width*2+p.visible_h+p.bar_offset
                 }
             end
             scroll_group:add(hor_s_bar)
@@ -634,21 +634,21 @@ function editor_ui.scrollPane(t)
             if p.arrows_visible then
                 local up = make_arrow("up")
                 up.name="UP"
-                up.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
-                up.y = p.box_width+p.bar_thickness
+                up.x = p.box_border_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
+                up.y = p.box_border_width+p.bar_thickness
                 scroll_group:add(up)
                 up.reactive=true
                 function up:on_button_down()
                     scroll_y(1)
                 end
                 vert_s_bar.position={
-                    p.box_width*2+p.visible_w+p.bar_offset,
-                    p.box_width+p.bar_thickness
+                    p.box_border_width*2+p.visible_w+p.bar_offset,
+                    p.box_border_width+p.bar_thickness
                 }
                 local dn = make_arrow("down")
                 dn.name="DN"
-                dn.x = p.box_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
-                dn.y = p.box_width+p.bar_thickness+vert_s_bar.h
+                dn.x = p.box_border_width*2+p.visible_w+p.bar_offset+p.bar_thickness/2
+                dn.y = p.box_border_width+p.bar_thickness+vert_s_bar.h
                 --dn.z_rotation = {180,0,0}
                 scroll_group:add(dn)
                 dn.reactive=true
@@ -657,8 +657,8 @@ function editor_ui.scrollPane(t)
                 end
             else
                 vert_s_bar.position={
-                    p.box_width*2+p.visible_w+p.bar_offset,
-                    p.box_width
+                    p.box_border_width*2+p.visible_w+p.bar_offset,
+                    p.box_border_width
                 }
             end
             scroll_group:add(vert_s_bar)
@@ -780,7 +780,7 @@ function editor_ui.tabBar(t)
 		current_tab = 1,
 		current_tab_focus = nil, 
 		--------------------------------
-		arrow_sz = 15,
+		arrow_size = 15,
 		arrow_dist_to_frame = 2,
 		arrow_image = "lib/assets/tab-arrow-left-off.png" --nil,
 
@@ -864,11 +864,11 @@ function editor_ui.tabBar(t)
             display_tab = function(self,index)
                 if index < 1 or index > #p.tab_labels then return end
                 p.tabs[current_index]:hide()
-                p.buttons[current_index].on_focus_out()
+                p.buttons[current_index].clear_focus()
                 current_index = index
                 p.tabs[current_index]:show()
                 p.buttons[current_index]:raise_to_top()
-                p.buttons[current_index].on_focus_in()
+                p.buttons[current_index].set_focus()
             end,
             previous_tab = function(self)
                 if current_index == 1 then return end
@@ -920,14 +920,14 @@ function editor_ui.tabBar(t)
             end
 
 			p.buttons[i] = ui_element.button{ skin=p.skin, ui_width=p.ui_width, ui_height=p.ui_height, 
-						 focus_color=p.focus_color, border_width=p.border_width, border_corner_radius=p.border_corner_radius,
+						 focus_border_color=p.focus_color, border_width=p.border_width, border_corner_radius=p.border_corner_radius,
 						 label= b_indent..p.tab_labels[i], text_font=p.font, text_color=p.text_color, fill_color=p.unsel_color, 
 						 focus_fill_color=p.fill_color, focus_text_color=p.focus_text_color, 
-						 pressed=function() umbrella:display_tab(i) p.current_tab = i end, label_align = "left", tab_button=true} 
+						 on_press=function() umbrella:display_tab(i) p.current_tab = i end, label_align = "left", tab_button=true} 
 
 			p.tabs[i]:hide()
             p.buttons[i].position = {0,0}
-            p.buttons[i].on_focus_out()
+            p.buttons[i].clear_focus()
 
             if p.tab_position == "TOP" then
                 p.buttons[i].x = (p.tab_spacing+p.buttons[i].w)*(i-1)
@@ -946,32 +946,31 @@ function editor_ui.tabBar(t)
 
 		ap = nil
 		
-		if p.arrow_image then p.arrow_sz = assets(p.arrow_image).w end
+		if p.arrow_image then p.arrow_size = assets(p.arrow_image).w end
 		
 		if p.tab_position == "TOP" and
-		(p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) > (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+		(p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) > (p.display_width - 2*(p.arrow_size+p.arrow_dist_to_frame)) then
 			
 			ap = ui_element.arrowPane{
-				visible_w=p.display_width - (p.arrow_sz+p.arrow_dist_to_frame),
-				visible_h=p.buttons[# p.buttons].h,
-				virtual_w=p.buttons[# p.buttons].w + p.buttons[# p.buttons].x,
-				virtual_h=p.buttons[# p.buttons].h,
+				visible_width=p.display_width - (p.arrow_size+p.arrow_dist_to_frame),
+				visible_height=p.buttons[# p.buttons].h,
+				virtual_width=p.buttons[# p.buttons].w + p.buttons[# p.buttons].x,
+				virtual_height=p.buttons[# p.buttons].h,
 				arrow_color=p.label_color,
-				dist_per_press=p.buttons[# p.buttons].w + 20, 
-				arrow_sz = p.arrow_sz,
+				scroll_distance=p.buttons[# p.buttons].w + 20, 
+				arrow_size = p.arrow_size,
 				arrow_dist_to_frame = p.arrow_dist_to_frame,
 				arrow_src = p.arrow_image,
 				tab = umbrella, -- p.current_tab, -- 1
 				tab_buttons = p.buttons,
-				box_width = 0,
+				box_border_width = 0,
 				tab_arrow_left_on = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_right_on = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_left_off = "lib/assets/tab-arrow-left-off.png",  
 				tab_arrow_right_off = "lib/assets/tab-arrow-left-off.png",  
 			}
 			
-
-			ap.x = p.arrow_sz+p.arrow_dist_to_frame
+			ap.x = p.arrow_size+p.arrow_dist_to_frame
 			ap.y = 0
 			
 			for _,b in ipairs(p.buttons) do
@@ -983,7 +982,7 @@ function editor_ui.tabBar(t)
 			
 			umbrella:add(ap)
 			
-		elseif (p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) <= (p.display_width - 2*(p.arrow_sz+p.arrow_dist_to_frame)) then
+		elseif (p.buttons[# p.buttons].w + p.buttons[# p.buttons].x) <= (p.display_width - 2*(p.arrow_size+p.arrow_dist_to_frame)) then
 			
 			for _,b in ipairs(p.buttons) do
 				b.x = b.x +8
@@ -1046,7 +1045,7 @@ function editor_ui.checkBoxGroup(t)
 	fill_color = {255,255,255,0},
 	focus_color = {0,255,0,255},
 	focus_fill_color = {0,50,0,0},
-	box_width = 2,
+	box_border_width = 2,
 	box_size = {25,25},
 	check_size = {25,25},
 	line_space = 40,   
@@ -1054,7 +1053,7 @@ function editor_ui.checkBoxGroup(t)
 	item_pos = {50,-5},  
 	selected_items = {1},  
 	direction = "vertical",  -- 1:vertical 2:horizontal
-	rotate_func = nil,  
+	on_selection_change = nil,  
 	ui_position = {200, 200, 0}, 
     } 
 
@@ -1079,7 +1078,7 @@ function editor_ui.checkBoxGroup(t)
           extra = {type = "CheckBoxGroup"}
     }
 
-	function cb_group.extra.on_focus_in()
+	function cb_group.extra.set_focus()
 	  	current_focus = cb_group
         if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 	    	boxes:find_child("box"..1).opacity = 0 
@@ -1088,7 +1087,7 @@ function editor_ui.checkBoxGroup(t)
 		boxes:find_child("box"..1):grab_key_focus() 
     end
 
-    function cb_group.extra.on_focus_out()
+    function cb_group.extra.clear_focus()
         if (p.skin == "CarbonCandy") or p.skin == "custom" then 
 			for i=1, table.getn(boxes.children)/2 do 
 	    		boxes:find_child("box"..i).opacity = 255 
@@ -1097,10 +1096,10 @@ function editor_ui.checkBoxGroup(t)
         end 
     end 
 
-    function cb_group.extra.select_button(items) 
+    function cb_group.extra.set_selection(items) 
 	    p.selected_items = items
-        if p.rotate_func then
-	       p.rotate_func(p.selected_items)
+        if p.on_selection_change then
+	       p.on_selection_change(p.selected_items)
 	    end
     end 
 
@@ -1143,9 +1142,9 @@ function editor_ui.checkBoxGroup(t)
 
 	      	items:add(Text{name="item"..tostring(i), text = j, font=p.text_font, color = p.text_color, position = pos})     
 	      	if p.skin == "custom" then 
-		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_width, 
+		   		focus = Rectangle{name="focus"..tostring(i),  color= p.focus_fill_color, border_color= p.focus_color, border_width= p.box_border_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 0}
-		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_width, 
+		   		box = Rectangle{name="box"..tostring(i),  color= p.fill_color, border_color= p.box_color, border_width= p.box_border_width, 
 				size = p.box_size, position = pos, reactive = true, opacity = 255}
     	        boxes:add(box, focus) 
 	     	else
@@ -1195,11 +1194,11 @@ function editor_ui.checkBoxGroup(t)
 							p.selected_items = util.table_remove_val(p.selected_items, box_num)
 							cb_group:find_child("check"..tostring(box_num)).opacity = 0 
 							cb_group:find_child("check"..tostring(box_num)).reactive = true 
-    						cb_group.extra.select_button(p.selected_items) 
+    						cb_group.extra.set_selection(p.selected_items) 
 						else 
 							table.insert(p.selected_items, box_num)
 							cb_group:find_child("check"..tostring(box_num)).opacity = 255 
-    						cb_group.extra.select_button(p.selected_items) 
+    						cb_group.extra.set_selection(p.selected_items) 
 						end 
 						return true 
 					end 
@@ -1210,7 +1209,7 @@ function editor_ui.checkBoxGroup(t)
 					table.insert(p.selected_items, box_num)
 					cb_group:find_child("check"..tostring(box_num)).opacity = 255
 					cb_group:find_child("check"..tostring(box_num)).reactive = true
-    				cb_group.extra.select_button(p.selected_items) 
+    				cb_group.extra.set_selection(p.selected_items) 
 					return true
 	     		end 
 
@@ -1220,13 +1219,13 @@ function editor_ui.checkBoxGroup(t)
 						p.selected_items = util.table_remove_val(p.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 0 
 						cb_group:find_child("check"..tostring(check_num)).reactive = true 
-    					cb_group.extra.select_button(p.selected_items) 
+    					cb_group.extra.set_selection(p.selected_items) 
 					else 
 						table.insert(p.selected_items, check_num)
 						cb_group:find_child("check"..tostring(check_num)).opacity = 255 
-    					cb_group.extra.select_button(p.selected_items) 
+    					cb_group.extra.set_selection(p.selected_items) 
 					end 
-    				cb_group.extra.select_button(p.selected_items) 
+    				cb_group.extra.set_selection(p.selected_items) 
 					return true
 	     		end 
 	     	end
