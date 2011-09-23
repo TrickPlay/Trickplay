@@ -1678,13 +1678,14 @@ function ui_element.button(t)
 		end 
         b_group:find_child("text").color = p.text_color
 
+		current_focus = nil 
+
 		if b_group.is_in_menu == true then 
 			if b_group.fade_in == false then 
 				return 
 			end
 	    end 
 
-		current_focus = nil 
 
 		if p.on_unfocus then  
 			if p.is_in_menu then 
@@ -1796,7 +1797,7 @@ function ui_element.button(t)
 		local focus = b_group:find_child("button_focus") 
 
      	function b_group:on_button_down(x,y,b,n)
-
+			
 			if b_group.tab_button == true and b_group.parent.buttons ~= nil then 
 				for q,w in pairs (b_group.parent.buttons) do
 					if w.label ~= b_group.label then 
@@ -6160,21 +6161,37 @@ button
                 else
 					if skin_list[p.skin]["button_focus"] ~= nil then 
                     	ui_ele = assets(skin_list[p.skin]["button_focus"])
-                    	ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
+						if p.skin == "editor" then 
+                    		ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
+						else 
+							ui_ele.size = {p.menu_width-2*p.horz_spacing+7*2,txt_h+15}	
+						end 
                     	item.focus  = ui_ele
 					end
                 end
                 
                 ui_ele.name="focus"
-                if i == #p.items and prev_item ~= nil and
-                    prev_item.focus ~= nil then
-                     
-                    ui_ele.anchor_point = {  0, prev_item.focus.h/2 }
-                    ui_ele.position     = {  0, txt.y }
-                else 
-                    ui_ele.anchor_point = {  0, ui_ele.h/2 }
-                    ui_ele.position     = {  0, txt.y }
-                end 
+
+				if p.skin == "editor" then 
+                	if i == #p.items and prev_item ~= nil and
+                    	prev_item.focus ~= nil then
+                    	ui_ele.anchor_point = {  0, prev_item.focus.h/2 }
+                    	ui_ele.position     = {  0, txt.y }
+                	else 
+                    	ui_ele.anchor_point = {  0, ui_ele.h/2 }
+                    	ui_ele.position     = {  0, txt.y }
+                	end 
+				else 
+					if i == #p.items and prev_item ~= nil and
+                    	prev_item.focus ~= nil then
+						ui_ele.anchor_point = {  prev_item.focus.w/2, prev_item.focus.h/2 }
+                    	ui_ele.position     = {  p.menu_width/2, txt.y }
+                	else 
+						ui_ele.anchor_point = {  ui_ele.w/2, ui_ele.h/2 }
+                    	ui_ele.position     = {  p.menu_width/2, txt.y }
+                	end 
+				end 
+
                 ui_ele.opacity      = 0
                 if ui_ele.parent then ui_ele:unparent() end
                 dropDownMenu:add(ui_ele)
