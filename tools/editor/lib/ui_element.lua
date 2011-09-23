@@ -6160,7 +6160,7 @@ button
                 else
 					if skin_list[p.skin]["button_focus"] ~= nil then 
                     	ui_ele = assets(skin_list[p.skin]["button_focus"])
-                    	ui_ele.size = {p.menu_width-2*p.horz_spacing,txt_h+15}
+                    	ui_ele.size = {p.menu_width-2*p.horz_spacing+7*2,txt_h+15}
                     	item.focus  = ui_ele
 					end
                 end
@@ -6169,11 +6169,11 @@ button
                 if i == #p.items and prev_item ~= nil and
                     prev_item.focus ~= nil then
                      
-                    ui_ele.anchor_point = {  0, prev_item.focus.h/2 }
-                    ui_ele.position     = {  0, txt.y }
+                    ui_ele.anchor_point = {  prev_item.focus.w/2, prev_item.focus.h/2 }
+                    ui_ele.position     = {  p.menu_width/2, txt.y }
                 else 
-                    ui_ele.anchor_point = {  0, ui_ele.h/2 }
-                    ui_ele.position     = {  0, txt.y }
+                    ui_ele.anchor_point = {  ui_ele.w/2, ui_ele.h/2 }
+                    ui_ele.position     = {  p.menu_width/2, txt.y }
                 end 
                 ui_ele.opacity      = 0
                 if ui_ele.parent then ui_ele:unparent() end
