@@ -81,7 +81,9 @@ endif (CMAKE_TOOLCHAIN_FILE)
 # Docs, you have to tell us where the NaturalDocs script is, like this:
 # cmake -DNATURAL_DOCS=/path/to/NaturalDocs
 
-add_subdirectory( engine/docs )
+add_subdirectory( engine/docs EXCLUDE_FROM_ALL )
+
+add_subdirectory ( apps EXCLUDE_FROM_ALL )
 
 add_subdirectory( plugins )
 

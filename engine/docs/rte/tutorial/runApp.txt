@@ -1,0 +1,30 @@
+Topic: Running a TrickPlay Application
+
+TrickPlay applications are run by the TrickPlay Engine. The Engine is run from a terminal command prompt. The format of the command line is shown below.
+
+	(code)
+	trickplay [TrickPlayApplicationPath]
+	(end)
+	
+	where the optional TrickPlayApplicationPath is the path specification of the application's bundle directory containing its app metadata and main.lua files. If a path is not specified, the Engine runs without loading an application. Some sample Engine command lines are shown below.
+	
+	(code)
+	trickplay .
+	trickplay /TpApps/tutorial
+	trickplay
+	(end)
+	
+	The first command line runs the TrickPlay Engine and loads and runs the TrickPlay application found in the current directory. The second command line runs the TrickPlay application stored in the /TpApps/tutorial application bundle directory. For both of these commands, the specified directory must contain app metadata and main.lua files. The final command runs the Engine without running any TrickPlay application; in this case, the TrickPlay console is available to accept additional commands.
+	
+	Run the TrickPlay Engine so it loads the TrickPlay application created earlier. The Engine will output a stream of configuration and status information before eventually running the application. When the application runs, it outputs its print() message to the console and terminates. The Engine console then waits for additional input. At the bottom of the Engine console screen, you should see our application's "TrickPlay SDK Tutorial" message along with other output.
+	
+(see images/consoleOutput.png)
+
+	To terminate the Engine, enter the /exit command, as shown below.
+	
+	(code)
+	/exit
+	(end)
+	
+	Our program is a complete TrickPlay application, but it doesn't do much. Let's start building it up by having it open its own display window.
+	
