@@ -2253,17 +2253,25 @@ function editor.delete()
 
 		if util.need_stub_code(del_obj) == true then 
 			if current_fn then 
-	   			local fileUpper= string.upper(string.sub(current_fn, 1, -5))
-	   		    local fileLower= string.lower(string.sub(current_fn, 1, -5))
+				local a, b = string.find(current_fn,"screens") 
+				local current_fn_without_screen 
+	   			if a then 
+					current_fn_without_screen = string.sub(current_fn, 9, -1)
+	   			end 
+
+	   			local fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
+	   		    local fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+
 			    local main = readfile("main.lua")
 			    if main then 
 			    	if string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") ~= nil then  			
 			        	local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") 
 				  		local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n\n")
 				  		local main_first = string.sub(main, 1, q-1)
+						local main_delete = string.sub(main, q, r-1) 
 				  		local main_last = string.sub(main, r+1, -1)
 				  		main = ""
-				  		main = main_first..main_last
+				  		main = main_first.."--[[\n"..main_delete.."]]\n\n"..main_last
 				  		editor_lb:writefile("main.lua",main, true)
 	       		    end 
 			     end 
