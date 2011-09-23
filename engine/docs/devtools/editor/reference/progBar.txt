@@ -6,7 +6,7 @@ The ProgressBar class implements a visual graphic indicating the amount of progr
 
 Constructor: progressBar( properties )
 
-The progressBar() constructor creates a new ProgressBar UI element object. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+The progressBar() constructor creates a new ProgressBar UI element object. Property settings can be set by the properties argument; default settings are used for properties not set explicitly.
 
 *Prototype:*
 
@@ -135,7 +135,7 @@ Property: progress
 
 The progress property is a floating point value between 0.0 and 1.0, inclusive, specifying the percentage of the progress bar that the filled or "completed" portion should cover. Typically, at the start of an operation, the progress property will be 0.0 and gradually increase until the operation is finished, at which point the progress will be 1.0. When the progress property is modified, the display of the progress bar is automatically updated to reflect the change.
 
-An alternative and equivalent method of updating the progress bar's display is to call the object's <set_prog> function.
+An alternative and equivalent method of updating the progress bar's display is to call the object's <set_progress> function.
 
 *Default Setting:* 0.0
 
@@ -151,7 +151,7 @@ An alternative and equivalent method of updating the progress bar's display is t
 	-- Don't display the progress bar until later
 	progBar:hide()
 
-	-- Somewhere later in the program, perhaps in a StartButton.pressed() event handler
+	-- Somewhere later in the program, perhaps in a StartButton.on_press() event handler
 		-- Initialize the progress bar and show it
 		progBar.progress = 0.0
 		progBar:show()
@@ -169,7 +169,7 @@ An alternative and equivalent method of updating the progress bar's display is t
 		progBar:hide()           -- Immediately hide the progress bar, we're finished
 	(end)
 
-*See Also:* the <set_prog> function
+*See Also:* the <set_progress> function
 
 
 
@@ -185,14 +185,14 @@ The skin property is a string specifying the display appearance of the ProgressB
 
 
 
-Function: set_prog
+Function: set_progress
 
-The set_prog() function sets the object's <progress> property and updates the display of the progress bar to reflect the change.
+The set_progress() function sets the object's <progress> property and updates the display of the progress bar to reflect the change.
 
 *Prototype:*
 
 	(code)
-	set_prog( progress )
+	set_progress( progress )
 	(end)
 	
 *Arguments:*
