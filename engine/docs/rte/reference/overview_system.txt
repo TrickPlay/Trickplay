@@ -1,5 +1,5 @@
 
-Title: System and App Components Overview
+Title: System Settings Overview
 
-This is a placeholder for the System and App Components:Overview section of the TrickPlay Runtime Engine Reference
+This is a placeholder for the System Settings:Overview section of the TrickPlay Runtime Engine Reference
 
