@@ -1,0 +1,44 @@
+Topic: Basic Screen Layout
+
+As we've just seen, the Rectangle class can be used to create a background for an application's window. In addition, the class can also be used to layout the screen's design by organizing sections of the display for varying purposes. For our Tutorial application, we'll use the Rectangle class to define two sections of the display and label each section with a text header that describes its purpose.
+
+The Tutorial application will ultimately create two animations, with each animation demonstrating a different method of implementation. We'll allocate two portions of the screen to position the animations, and a third at the very top of the screen to act as a title holder. Each of these three sections are created in the same manner, so after the first is created, the two remaining sections will be simple repetition.
+
+Let's start with the top header. We'll create a Rectangle object that covers the entire width of the display. To delineate this Rectangle from the backGround Rectangle, we'll make the header a different color. We'll also create a nice visual effect by making the header semi-opaque so that the underlying backGround color will still be partially viewable. The code statements shown below achieve these goals.
+
+	(code)
+	-- Create the window's header area
+	header = Rectangle( {
+				size     = { 1920, 200 },
+				position = { 0, 0 },
+				color    = { 118, 136, 131, 150 }
+	         }
+	         
+	-- Add the header area to the screen
+	screen:add( header )
+	(end)
+	
+The statements above are basically the same operation we performed earlier to create the backGround. The additions here are (1) a different intention, i.e., to section off a portion of the display and (2) the use of transparency to create a visual effect. If you don't care for the current background and header colors, go ahead and play with the object's RGB values to get colors you prefer. You can also modify the alpha value in the header object to see how different values affect the final visual result.
+
+A text label can be placed in the header area by using the SDK library's <Text> class. As its name suggests, the Text class provides a method for displaying and editing text on the screen. For our header text, we'll only display text, not enable editing of it. The string to display is defined by setting a Text object's text property (<Text.text>). Other characteristics that can be set include the string's font, color, and position. The <Text.font> property can specify a font family (such as TimesRoman) , various styles (including italic and bold), and size.
+
+The code shown below creates and displays the header's text string. Add it to the Tutorial's main.lua file and run it to see the header area and label.
+
+	(code)
+	-- Create header label
+	headerLabel = Text( {
+					text = "TrickPlay SDK Tutorial Animations",
+					font = "'DejaVu Sans' Bold 80px",
+					color = { 225, 225, 225, 255 },
+					position = { 75, 50 }
+				  } )
+				 
+	-- Add the header label to the screen
+	screen:add( headerLabel )
+	(end)
+
+(see images/scrHeader.png)
+
+When writing code that creates and positions new objects, a cycle of trial-and-adjustment is common as you gradually find the object characteristics and screen location you are most satisfied with. This cycle can be made less tedious by using the Engine console command /reload.
+
+--- Discuss localization ---
