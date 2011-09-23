@@ -45,7 +45,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 			   	if j.extra.type == "Button" then 
 	            	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_focus = function() -- Handler for "..j.name.."\.on_focus in this screen\nend\n"
 	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_press = function() -- Handler for "..j.name.."\.on_press in this screen\nend\n"
-	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_release = function() -- Handler for "..j.name.."\.on_release in this screen\nend\n"
+	                new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_unfocus = function() -- Handler for "..j.name.."\.on_unfocus in this screen\nend\n"
 			    elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
 	            	new_contents = new_contents.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_item) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
 			   	elseif j.extra.type == "CheckBoxGroup" then 

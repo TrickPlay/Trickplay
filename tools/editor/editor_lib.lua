@@ -14,7 +14,7 @@ function editor_ui.button(table)
 
 		on_focus=nil, 
 		on_press = nil, 
-		on_release = nil, 
+		on_unfocus = nil, 
 
 		button_image = nil,
 		focus_image  = nil,
@@ -89,8 +89,8 @@ function editor_ui.button(table)
         b_group:find_child("text").color = p.text_color
 		current_focus = nil 
 
-		if p.on_release then 
-			p.on_release()
+		if p.on_unfocus then 
+			p.on_unfocus()
 		end 
     end
 

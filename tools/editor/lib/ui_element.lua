@@ -1551,7 +1551,7 @@ Arguments:
     padding_y - Padding of the button image on the Y axis
     border_corner_radius - Radius of the border for the button
 	on_press - Function that is called by set_focus() or on_key_down() event
-	on_release - Function that is called by clear_focus()
+	on_unfocus - Function that is called by clear_focus()
 Return:
  	b_group - The group containing the button 
 
@@ -1581,7 +1581,7 @@ function ui_element.button(t)
 
 		on_focus = nil, 
 		on_press = nil, 
-		on_release = nil, 
+		on_unfocus = nil, 
 
 		text_has_shadow = true,
 		ui_position = {100,100,0},
@@ -1686,16 +1686,16 @@ function ui_element.button(t)
 
 		current_focus = nil 
 
-		if p.on_release then  
+		if p.on_unfocus then  
 			if p.is_in_menu then 
 				if key ~= keys.Return and b_group.single_button == false then
-					p.on_release()
+					p.on_unfocus()
 					if b_group.is_in_menu == true and b_group.fade_in == true then 
 						b_group.fade_in = false 
 					end
 				end 
 			elseif b_group.single_button == false then 
-				p.on_release()
+				p.on_unfocus()
 			end
 		end 
     end
@@ -6302,7 +6302,7 @@ button
        
 	if editor_lb == nil or editor_use then  
 		button.on_press = function() umbrella.fade_in() menu_bar_hover = true end 
-		button.on_release = function() umbrella.fade_out() menu_bar_hover = false end 
+		button.on_unfocus = function() umbrella.fade_out() menu_bar_hover = false end 
  	end 
         
         button.position = {button.w/2,button.h/2}
