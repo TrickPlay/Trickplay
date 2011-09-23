@@ -33,7 +33,8 @@
  */
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
 UITableViewDataSource> {
-    @private
+
+@protected
     /*
     UIBarButtonItem *appShopButton;
     UIBarButtonItem *showcaseButton;

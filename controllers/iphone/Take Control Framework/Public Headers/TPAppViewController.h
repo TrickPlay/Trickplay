@@ -14,6 +14,23 @@
 @class TPAppViewController;
 
 /**
+ * The TPAppViewControllerSocketDelegate recieves messages delegated
+ * originally from the SocketManager which inform of either a socket
+ * error or socket stream ending. The delegate is assumed to depend
+ * on the socket in some way and must respond to these messages.
+ *
+ * The AppBrowserViewController and RootViewController both apply this protocol.
+ */
+
+@protocol TPAppViewControllerDelegate <NSObject>
+
+@required
+- (void)tpAppViewControllerNoLongerFunctional:(TPAppViewController *)tpAppViewController;
+
+@end
+
+
+/**
  * The AdvancedUIDelegate protocol implemented by AdvancedUIObjectManager
  * registers a delegate which is passed asyncronous calls made for AdvancedUI.
  * (Given that the TPAppViewController is the only object which utilizes
@@ -37,21 +54,6 @@
 @end
 
 
-/**
- * The TPAppViewControllerSocketDelegate recieves messages delegated
- * originally from the SocketManager which inform of either a socket
- * error or socket stream ending. The delegate is assumed to depend
- * on the socket in some way and must respond to these messages.
- *
- * The AppBrowserViewController and RootViewController both apply this protocol.
- */
-
-@protocol TPAppViewControllerDelegate <NSObject>
-
-@required
-- (void)tpAppViewControllerNoLongerFunctional:(TPAppViewController *)tpAppViewController;
-
-@end
 
 
 /**
@@ -139,95 +141,12 @@
 #define CAMERA_BUTTON_TITLE "Camera"
 #define PHOTO_LIBRARY_BUTTON_TITLE "Photo Library"
 
-@interface TPAppViewController : UIViewController <SocketManagerDelegate, 
-CommandInterpreterAppDelegate, CameraViewControllerDelegate,
-UITextFieldDelegate, UIActionSheetDelegate,
-UINavigationControllerDelegate, VirtualRemoteDelegate> {
-    @private
+@interface TPAppViewController : UIViewController <UITextFieldDelegate,
+UIActionSheetDelegate, UINavigationControllerDelegate> {
     
-    BOOL viewDidAppear;
-    
-    // Manages the asynchronous socket the TPAppViewController communicates
-    // to Trickplay with
-    SocketManager *socketManager;
-    // The Connection
-    TVConnection *tvConnection;
-    // Current version of the app
-    NSString *version;
-    
-    // A timer that when firing calls timerFiredMethod:
-    NSTimer *socketTimer;
-    
-    // Displays itself and spins when the TPAppViewController first loads.
-    // This is rarely seen on anything but the oldest iPods.
-    UIActivityIndicatorView *loadingIndicator;
-    // TextField for entering text; used when Trickplay requests text input
-    // with controller:enter_text(string label, string text) call from Trickplay.
-    UITextField *theTextField;
-    NSString *currentText;
-    UILabel *theLabel;
-    // Black border around theTextField
-    UIView *textView;
-    // Displays the background which the developer may change with the
-    // controller:set_ui_background(string resource, string mode) call
-    // from Trickplay. Also has foregroundView as the top subview.
-    UIImageView *backgroundView;
-    // The Root view tree for all graphics added via the
-    // controller:set_ui_image(string resource, int x, int y, int width,
-    // int height) call from Trickplay.
-    UIImageView *foregroundView;
-    // The usable height of the screen; screen size - navigation bar height
-    CGFloat backgroundHeight;
-    // The usable width of the screen; currently the whole screen width
-    CGFloat backgroundWidth;
-    
-    // Holds choices for the styleAlert UIActionSheet.
-    NSMutableArray *multipleChoiceArray;
-    // An action sheet that may be prompted via the
-    // controller:show_multiple_choice(string label, ...) call from Trickplay
-    UIActionSheet *styleAlert;
-    
-    // If the iOS Device has a camera then when Trickplay requests an image
-    // the device will prompt the user with this action sheet first asking
-    // if the user wishes to select on image from their Picture Library or
-    // use the Camera to take a new photo.
-    UIActionSheet *cameraActionSheet;
-    
-    // The root view for the view tree which contains all AdvancedUI Objects
-    // (i.e. any object which is a subclass of TrickplayUIElement).
-    TrickplayScreen *advancedView;
-    
-    // Manages all cached resources such as images and audio clips sent from
-    // Trickplay to Take Control.
-    ResourceManager *resourceManager;
-    
-    // Used to play and pause audio clips sent from Trickplay to Take Control.
-    AudioController *audioController;
-    
-    // The over-arching view controller for all camera functionality including
-    // selecting images from the photo library, taking images with the camera,
-    // and editing the images to be sent Trickplay.
-    CameraViewController *camera;
-    
-    // The UIViewController for the virtual remote used to control the Television.
-    VirtualRemoteViewController *virtualRemote;
-    
-    // YES if static graphics have been added to Take Control's views, NO otherwise.
-    BOOL graphics;
-    
-    // The TouchController. All touch events sent to this delegate
-    // for proper handling.
-    id <ViewControllerTouchDelegate> touchDelegate;
-    // The AccelerometerController. All accelerometer events sent to this delegate
-    // for proper handling.
-    id <ViewControllerAccelerometerDelegate> accelDelegate;
-    // Used to inform of a non-functional TPAppViewController.
-    // Generally this happens when the connection breaks.
+@protected    
     id <TPAppViewControllerDelegate> delegate;
-    // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
-    // that refer to the AdvancedUIObjectManager are sent there via this
-    // delegate's protocol.
-    id <AdvancedUIDelegate> advancedUIDelegate;
+    //id context;
 }
 
 @property (readonly) NSString *version;
@@ -240,7 +159,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 - (void)clean;
 - (void)exitTrickplayApp:(id)sender;
 - (BOOL)hasConnection;
-- (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
+- (void)sendKeyToTrickplay:(NSString *)key count:(NSInteger)count;
 
 @end
 

@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "SocketManager.h"
 
 @class TVConnection;
 @class TVBrowser;
@@ -20,23 +19,14 @@
 
 @end
 
-@interface TVConnection : NSObject <SocketManagerDelegate> {
-    @private
-    NSUInteger port;
-    NSUInteger http_port;
-    NSString *hostName;
-    NSString *TVName;
-    
-    NSNetService *connectedService;
-    
-    BOOL isConnected;
-    
+
+
+
+@interface TVConnection : NSObject {
+
+@protected
     id <TVConnectionDelegate> delegate;
-    
-    SocketManager *socketManager;
-    
-    TVBrowser *tvBrowser;
-    AppBrowser *appBrowser;
+    id context;
 }
 
 @property (readonly) BOOL isConnected;

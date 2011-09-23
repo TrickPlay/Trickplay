@@ -58,6 +58,9 @@
 - (void)addViewController:(AppBrowserViewController *)viewController;
 - (void)invalidateViewController:(AppBrowserViewController *)viewController;
 
+- (void)setCurrentApp:(AppInfo *)_currentApp;
+- (void)setAvailableApps:(NSMutableArray *)_availableApps;
+
 @end
 
 #pragma mark -
@@ -65,23 +68,7 @@
 
 @interface TPAppViewController()
 
-@property (retain) SocketManager *socketManager;
-
-@property (nonatomic, assign) BOOL graphics;
-
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
-@property (nonatomic, retain) IBOutlet UITextField *theTextField;
-@property (nonatomic, retain) IBOutlet UILabel *theLabel;
-@property (nonatomic, retain) IBOutlet UIView *textView;
-@property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
-
-@property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
-@property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
-@property (retain) id <AdvancedUIDelegate> advancedUIDelegate;
-
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
-
-- (void)startService;
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
 
@@ -90,6 +77,12 @@
 - (void)advancedUIObjectAdded;
 - (void)advancedUIObjectDeleted;
 - (void)checkShowVirtualRemote;
+
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
+@property (nonatomic, retain) IBOutlet UITextField *theTextField;
+@property (nonatomic, retain) IBOutlet UILabel *theLabel;
+@property (nonatomic, retain) IBOutlet UIView *textView;
+@property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
 
 @end
 
