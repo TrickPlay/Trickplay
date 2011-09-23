@@ -11,7 +11,40 @@
 
 #import <uuid/uuid.h>
 
-@implementation TVConnection
+
+@interface TVConnectionContext : NSObject <SocketManagerDelegate> {
+    
+@private
+    TVConnection *tvConnection;
+    SocketManager *socketManager;
+    TVBrowser *tvBrowser;
+    AppBrowser *appBrowser;
+    
+    BOOL isConnected;
+    
+    NSUInteger port;
+    NSUInteger http_port;
+    NSString *hostName;
+    NSString *TVName;
+    
+    NSNetService *connectedService;
+}
+
+@property (readonly) BOOL isConnected;
+@property (readonly) NSUInteger port;
+@property (readonly) NSUInteger http_port;
+@property (readonly) NSString *hostName;
+@property (readonly) NSString *TVName;
+@property (readonly) NSNetService *connectedService;
+
+@property (nonatomic, readonly) SocketManager *socketManager;
+
+- (id)initWithTVConnection:(TVConnection *)tvConnection service:(NSNetService *)service;
+
+@end
+
+
+@implementation TVConnectionContext
 
 @synthesize isConnected;
 @synthesize port;
@@ -20,18 +53,14 @@
 @synthesize TVName;
 @synthesize connectedService;
 
-@synthesize delegate;
+@synthesize socketManager;
 
-// TODO: test this init
-- (id)init
-{
-    return [self initWithService:nil delegate:nil];
+- (id)init {
+    return [self initWithTVConnection:nil service:nil];
 }
 
-- (id)initWithService:(NSNetService *)service
-             delegate:(id<TVConnectionDelegate>)_delegate {
-    
-    if (!service) {
+- (id)initWithTVConnection:(TVConnection *)_tvConnection service:(NSNetService *)service{
+    if (!_tvConnection) {
         [self release];
         return nil;
     }
@@ -58,7 +87,6 @@
         port = [service port];
         TVName = [[service name] retain];
         connectedService = [service retain];
-        self.delegate = _delegate;
         
         // Made a connection, let the service know!
         // Get the actual width and height of the available area
@@ -94,10 +122,18 @@
         [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
         
         isConnected = YES;
+        
+        tvBrowser = nil;
+        appBrowser = nil;
+        
+        tvConnection = _tvConnection;
     }
     
     return self;
 }
+
+#pragma mark -
+#pragma mark SocketManagerDelegate methods
 
 - (void)handleSocketDisconnectAbruptly:(BOOL)abruptly {
     
@@ -114,7 +150,7 @@
     }
     
     if (tvBrowser) {
-        [tvBrowser invalidateTVConnection:self];
+        [tvBrowser invalidateTVConnection:tvConnection];
         tvBrowser = nil;
     }
     
@@ -133,8 +169,8 @@
         [socketManager release];
         socketManager = nil;
     }
-        
-    [delegate tvConnectionDidDisconnect:self abruptly:abruptly];
+    
+    [tvConnection.delegate tvConnectionDidDisconnect:tvConnection abruptly:abruptly];
 }
 
 - (void)socketErrorOccurred {
@@ -150,11 +186,7 @@
 }
 
 #pragma mark -
-#pragma mark Private Methods
-
-- (SocketManager *)socketManager {
-    return [[socketManager retain] autorelease];
-}
+#pragma mark Getters/Setters
 
 - (void)setHttp_port:(NSUInteger)_port {
     http_port = _port;
@@ -175,10 +207,7 @@
 #pragma mark Deallocation
 
 - (void)dealloc {
-    NSLog(@"TVConnection Dealloc");
-    
     isConnected = NO;
-    self.delegate = nil;
     
     if (hostName) {
         [hostName release];
@@ -190,7 +219,7 @@
     }
     
     if (tvBrowser) {
-        [tvBrowser invalidateTVConnection:self];
+        [tvBrowser invalidateTVConnection:tvConnection];
         tvBrowser = nil;
     }
     
@@ -210,6 +239,107 @@
         [socketManager release];
         socketManager = nil;
     }
+    
+    tvConnection = nil;
+    
+    [super dealloc];
+}
+
+@end
+
+
+
+
+
+
+@implementation TVConnection
+
+@synthesize delegate;
+
+// TODO: test this init
+- (id)init
+{
+    return [self initWithService:nil delegate:nil];
+}
+
+- (id)initWithService:(NSNetService *)service
+             delegate:(id<TVConnectionDelegate>)_delegate {
+    
+    if (!service) {
+        [self release];
+        return nil;
+    }
+    
+    self = [super init];
+    if (self) {
+        context = [[TVConnectionContext alloc] initWithTVConnection:self service:service];
+        if (!context) {
+            [self release];
+            return nil;
+        }
+        
+        self.delegate = _delegate;
+    }
+    
+    return self;
+}
+
+#pragma mark -
+#pragma mark Private Methods
+
+- (SocketManager *)socketManager {
+    return [[((TVConnectionContext *)context).socketManager retain] autorelease];
+}
+
+- (void)setHttp_port:(NSUInteger)_port {
+    [(TVConnectionContext *)context setHttp_port:_port];
+}
+
+- (void)setAppBrowser:(AppBrowser *)_appBrowser {
+    [(TVConnectionContext *)context setAppBrowser:_appBrowser];
+}
+
+- (void)setTVBrowser:(TVBrowser *)_tvBrowser {
+    [(TVConnectionContext *)context setTVBrowser:_tvBrowser];
+}
+
+- (BOOL)isConnected {
+    return ((TVConnectionContext *)context).isConnected;
+}
+
+- (NSUInteger)port {
+    return ((TVConnectionContext *)context).port;
+}
+
+- (NSUInteger)http_port {
+    return ((TVConnectionContext *)context).http_port;
+}
+
+- (NSString *)hostName {
+    return ((TVConnectionContext *)context).hostName;
+}
+
+- (NSString *)TVName {
+    return ((TVConnectionContext *)context).TVName;
+}
+
+- (NSNetService *)connectedService {
+    return ((TVConnectionContext *)context).connectedService;
+}
+
+#pragma mark -
+#pragma mark Deallocation
+
+- (void)disconnect {
+    [(TVConnectionContext *)context disconnect];
+}
+
+- (void)dealloc {
+    NSLog(@"TVConnection Dealloc");
+    
+    self.delegate = nil;
+    [(TVConnectionContext *)context release];
+    context = nil;
     
     [super dealloc];
 }

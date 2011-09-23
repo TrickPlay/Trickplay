@@ -12,16 +12,134 @@
 #import "AdvancedUIObjectManager.h"
 #import "Extensions.h"
 
-@implementation TPAppViewController
+@interface TPAppViewControllerContext : TPAppViewController <SocketManagerDelegate, 
+CommandInterpreterAppDelegate, CameraViewControllerDelegate,
+UITextFieldDelegate, UIActionSheetDelegate,
+UINavigationControllerDelegate, VirtualRemoteDelegate> {
+
+@private
+    BOOL viewDidAppear;
+    
+    // Manages the asynchronous socket the TPAppViewController communicates
+    // to Trickplay with
+    SocketManager *socketManager;
+    // The Connection
+    TVConnection *tvConnection;
+    // Current version of the app
+    NSString *version;
+    
+    // A timer that when firing calls timerFiredMethod:
+    NSTimer *socketTimer;
+    
+    // Displays itself and spins when the TPAppViewController first loads.
+    // This is rarely seen on anything but the oldest iPods.
+    UIActivityIndicatorView *loadingIndicator;
+    // TextField for entering text; used when Trickplay requests text input
+    // with controller:enter_text(string label, string text) call from Trickplay.
+    UITextField *theTextField;
+    NSString *currentText;
+    UILabel *theLabel;
+    // Black border around theTextField
+    UIView *textView;
+    // Displays the background which the developer may change with the
+    // controller:set_ui_background(string resource, string mode) call
+    // from Trickplay. Also has foregroundView as the top subview.
+    UIImageView *backgroundView;
+    // The Root view tree for all graphics added via the
+    // controller:set_ui_image(string resource, int x, int y, int width,
+    // int height) call from Trickplay.
+    UIImageView *foregroundView;
+    // The usable height of the screen; screen size - navigation bar height
+    CGFloat backgroundHeight;
+    // The usable width of the screen; currently the whole screen width
+    CGFloat backgroundWidth;
+    
+    // Holds choices for the styleAlert UIActionSheet.
+    NSMutableArray *multipleChoiceArray;
+    // An action sheet that may be prompted via the
+    // controller:show_multiple_choice(string label, ...) call from Trickplay
+    UIActionSheet *styleAlert;
+    
+    // If the iOS Device has a camera then when Trickplay requests an image
+    // the device will prompt the user with this action sheet first asking
+    // if the user wishes to select on image from their Picture Library or
+    // use the Camera to take a new photo.
+    UIActionSheet *cameraActionSheet;
+    
+    // The root view for the view tree which contains all AdvancedUI Objects
+    // (i.e. any object which is a subclass of TrickplayUIElement).
+    TrickplayScreen *advancedView;
+    
+    // Manages all cached resources such as images and audio clips sent from
+    // Trickplay to Take Control.
+    ResourceManager *resourceManager;
+    
+    // Used to play and pause audio clips sent from Trickplay to Take Control.
+    AudioController *audioController;
+    
+    // The over-arching view controller for all camera functionality including
+    // selecting images from the photo library, taking images with the camera,
+    // and editing the images to be sent Trickplay.
+    CameraViewController *camera;
+    
+    // The UIViewController for the virtual remote used to control the Television.
+    VirtualRemoteViewController *virtualRemote;
+    
+    // YES if static graphics have been added to Take Control's views, NO otherwise.
+    BOOL graphics;
+    
+    // The TouchController. All touch events sent to this delegate
+    // for proper handling.
+    id <ViewControllerTouchDelegate> touchDelegate;
+    
+    // The AccelerometerController. All accelerometer events sent to this delegate
+    // for proper handling.
+    id <ViewControllerAccelerometerDelegate> accelDelegate;
+    
+    // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
+    // that refer to the AdvancedUIObjectManager are sent there via this
+    // delegate's protocol.
+    id <AdvancedUIDelegate> advancedUIDelegate;
+}
+
+@property (retain) SocketManager *socketManager;
+
+@property (nonatomic, assign) BOOL graphics;
+
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
+@property (nonatomic, retain) IBOutlet UITextField *theTextField;
+@property (nonatomic, retain) IBOutlet UILabel *theLabel;
+@property (nonatomic, retain) IBOutlet UIView *textView;
+@property (nonatomic, retain) IBOutlet UIImageView *backgroundView;
+
+@property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
+@property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
+@property (retain) id <AdvancedUIDelegate> advancedUIDelegate;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
+
+- (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
+
+- (IBAction)hideTextBox:(id)sender;
+
+- (void)checkShowVirtualRemote;
+
+- (void)clean;
+- (void)clearUI;
+
+@end
+
+
+
+
+@implementation TPAppViewControllerContext
+
 
 @synthesize version;
 @synthesize tvConnection;
-@synthesize delegate;
-
-@synthesize graphics;
-
 @synthesize socketManager;
 
+@synthesize graphics;
 @synthesize loadingIndicator;
 @synthesize theTextField;
 @synthesize theLabel;
@@ -32,16 +150,8 @@
 @synthesize accelDelegate;
 @synthesize advancedUIDelegate;
 
-- (void)setTvConnection:(TVConnection *)_tvConnection {
-    @synchronized (self) {
-        [_tvConnection retain];
-        [tvConnection release];
-        tvConnection = _tvConnection;
-    }
-}
-
 #pragma mark -
-#pragma mark init methods
+#pragma mark Initialization
 
 - (id)init {
     return [self initWithNibName:nil bundle:nil tvConnection:nil delegate:nil];
@@ -75,10 +185,62 @@
     
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        self.tvConnection = _tvConnection;
-        self.delegate = _delegate;
+        NSLog(@"TPAppView Start Service");
         
-        [self startService];
+        self.delegate = _delegate;
+        tvConnection = [_tvConnection retain];
+        
+        self.socketManager = tvConnection.socketManager;
+        [socketManager setCommandInterpreterDelegate:self withProtocol:APP_PROTOCOL];
+        socketManager.appViewController = self;
+                
+        socketTimer = nil;
+        
+        viewDidAppear = NO;
+        
+        // Made a connection, let the service know!
+        // Get the actual width and height of the available area
+        CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
+        backgroundHeight = mainframe.size.height;
+        backgroundHeight = backgroundHeight - 44;  //subtract the height of navbar
+        backgroundWidth = mainframe.size.width;
+        
+        // Manages resources created with declare_resource
+        resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
+        
+        camera = nil;
+        
+        // For audio playback
+        audioController = [[AudioController alloc] initWithResourceManager:resourceManager tvConnection:tvConnection];
+        // Controls touches
+        touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
+        // Controls Acceleration
+        accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
+        
+        // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
+        // from Trickplay
+        advancedView = [[TrickplayScreen alloc] initWithID:@"0" args:nil objectManager:nil];
+        advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
+        advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+        [self.view addSubview:advancedView];
+        
+        advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
+        advancedView.manager = (AdvancedUIObjectManager *)advancedUIDelegate;
+        ((AdvancedUIObjectManager *)advancedUIDelegate).appViewController = self;
+        
+        // This is where the elements from UG (add_ui_image call) go
+        CGRect frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+        foregroundView = [[UIImageView alloc] initWithFrame:frame];
+        [backgroundView addSubview:foregroundView];
+        
+        // the virtual remote for controlling the Television
+        virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
+        virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight + 44);
+        [self.view addSubview:virtualRemote.view];
+        virtualRemote.delegate = self;
+        
+        graphics = NO;
+        [touchDelegate setSwipe:graphics];
     }
     
     return self;
@@ -104,69 +266,6 @@
     socketTimer = [NSTimer timerWithTimeInterval:(NSTimeInterval).1 target:self selector:@selector(timerFireMethod:) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:socketTimer forMode:NSDefaultRunLoopMode];
     [socketTimer retain];
-}
-
-/**
- * This method begins by creating the SocketManager which handles communication
- * asynchronously with Trickplay. If the socket is successfully created and
- * the connection established then all the remaining managers and modules
- * for TakeControl are allocated and initialized to be used by the app.
- */
-- (void)startService {
-    NSLog(@"TPAppView Start Service");
-    self.socketManager = tvConnection.socketManager;
-    [socketManager setCommandInterpreterDelegate:self withProtocol:APP_PROTOCOL];
-    socketManager.appViewController = self;
-    
-    assert(socketManager);
-    
-    socketTimer = nil;
-    
-    viewDidAppear = NO;
-    
-    // Made a connection, let the service know!
-	// Get the actual width and height of the available area
-	CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
-	backgroundHeight = mainframe.size.height;
-	backgroundHeight = backgroundHeight - 44;  //subtract the height of navbar
-	backgroundWidth = mainframe.size.width;
-    
-    // Manages resources created with declare_resource
-    resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
-    
-    camera = nil;
-	
-    // For audio playback
-    audioController = [[AudioController alloc] initWithResourceManager:resourceManager tvConnection:tvConnection];
-    // Controls touches
-    touchDelegate = [[TouchController alloc] initWithView:self.view socketManager:socketManager];
-    // Controls Acceleration
-    accelDelegate = [[AccelerometerController alloc] initWithSocketManager:socketManager];
-    
-    // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
-    // from Trickplay
-    advancedView = [[TrickplayScreen alloc] initWithID:@"0" args:nil objectManager:nil];
-    advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
-    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    [self.view addSubview:advancedView];
-    
-    advancedUIDelegate = [[AdvancedUIObjectManager alloc] initWithView:advancedView resourceManager:resourceManager];
-    advancedView.manager = (AdvancedUIObjectManager *)advancedUIDelegate;
-    ((AdvancedUIObjectManager *)advancedUIDelegate).appViewController = self;
-    
-    // This is where the elements from UG (add_ui_image call) go
-    CGRect frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    foregroundView = [[UIImageView alloc] initWithFrame:frame];
-    [backgroundView addSubview:foregroundView];
-    
-    // the virtual remote for controlling the Television
-    virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
-    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight + 44);
-    [self.view addSubview:virtualRemote.view];
-    virtualRemote.delegate = self;
-    
-    graphics = NO;
-    [touchDelegate setSwipe:graphics];    
 }
 
 #pragma mark -
@@ -198,8 +297,8 @@
     NSLog(@"Socket Error Occurred in TPAppView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
-    if (delegate) {
-        [delegate tpAppViewControllerNoLongerFunctional:self];
+    if (self.delegate) {
+        [self.delegate tpAppViewControllerNoLongerFunctional:self];
     }
 }
 
@@ -211,8 +310,8 @@
     NSLog(@"Socket End Encountered in TPAppView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
-    if (delegate) {
-        [delegate tpAppViewControllerNoLongerFunctional:self];
+    if (self.delegate) {
+        [self.delegate tpAppViewControllerNoLongerFunctional:self];
     }
 }
 
@@ -952,6 +1051,8 @@
     
     currentText = nil;
     
+    
+    NSLog(@"background: %@", backgroundView);
     /*
      CATransform3D transform = CATransform3DIdentity;
      transform.m34 = 1.0/-2000;
@@ -990,6 +1091,8 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    NSLog(@"background: %@", backgroundView);
     
     if (!socketManager) {
         [self.navigationController popToRootViewControllerAnimated:YES];
@@ -1059,7 +1162,10 @@
         [socketManager setCommandInterpreterDelegate:nil withProtocol:APP_PROTOCOL];
         [socketManager release];
     }
-    self.tvConnection = nil;
+    if (tvConnection) {
+        [tvConnection release];
+        tvConnection = nil;
+    }
     if (touchDelegate) {
         [(TouchController *)touchDelegate release];
     }
@@ -1093,6 +1199,252 @@
     [textView release];
     [foregroundView release];
     [backgroundView release];
+    
+    [super dealloc];
+}
+
+@end
+
+
+
+
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+/*
+@interface TPAppViewControllerPlaceHolder : TPAppViewController
+@end
+
+@implementation TPAppViewControllerPlaceHolder
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    
+    NSZone *temp = [self zone];
+    [self release];
+    return [[TPAppViewControllerContext allocWithZone:temp] initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:_tvConnection delegate:_delegate];
+}
+
+@end
+*/
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+
+
+
+
+@implementation TPAppViewController
+
+@synthesize delegate;
+
+#pragma mark -
+#pragma mark Allocation
+
++ (id)alloc {
+    if ([self isEqual:[TPAppViewController class]]) {
+        NSZone *temp = [self zone];
+        [self release];
+        return [TPAppViewControllerContext allocWithZone:temp];
+    } else {
+        return [super alloc];
+    }
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    if ([self isEqual:[TPAppViewController class]]) {
+        return [TPAppViewControllerContext allocWithZone:zone];
+    } else {
+        return [super allocWithZone:zone];
+    }
+}
+
+#pragma mark -
+#pragma mark Getters/Setters
+
+- (void)setTvConnection:(TVConnection *)_tvConnection {
+    if ([self isKindOfClass:[TPAppViewControllerContext class]]) {
+        ((TPAppViewControllerContext *)self).tvConnection = _tvConnection;
+    }
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSString *)version {
+    if ([self isKindOfClass:[TPAppViewControllerContext class]]) {
+        return ((TPAppViewControllerContext *)self).version;
+    }
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (TVConnection *)tvConnection {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+    //return ((TPAppViewControllerContext *)context).tvConnection;
+}
+
+#pragma mark -
+#pragma mark init methods
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    [self release];
+    return nil;
+}
+
+- (id)initWithTVConnection:(TVConnection *)_tvConnection {
+    return [self initWithTVConnection:_tvConnection delegate:nil];
+}
+
+- (id)initWithTVConnection:(TVConnection *)_tvConnection
+                  delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection delegate:_delegate];
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    return [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+}
+
+// TODO: Clean up all this
+
+#pragma mark -
+#pragma mark Forwarded Methods
+
+- (void)clearUI {
+    [(TPAppViewControllerContext *)self clearUI];
+}
+
+- (void)clean {
+    [(TPAppViewControllerContext *)self clean];
+}
+
+- (void)exitTrickplayApp:(id)sender {
+    [(TPAppViewControllerContext *)self exitTrickplayApp:sender];
+}
+
+- (BOOL)hasConnection {
+    return [(TPAppViewControllerContext *)self hasConnection];
+}
+
+- (void)sendKeyToTrickplay:(NSString *)key count:(NSInteger)count {
+    [(TPAppViewControllerContext *)self sendKeyToTrickplay:key thecount:count];
+}
+
+#pragma mark -
+#pragma mark Hidden Forwarded methods
+
+- (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string {
+    [(TPAppViewControllerContext *)self sendEvent:name JSON:JSON_string];
+}
+
+- (IBAction)hideTextBox:(id)sender {
+    [(TPAppViewControllerContext *)self hideTextBox:sender];
+}
+
+- (void)advancedUIObjectAdded {
+    [(TPAppViewControllerContext *)self advancedUIObjectAdded];
+}
+- (void)advancedUIObjectDeleted {
+    [(TPAppViewControllerContext *)self advancedUIObjectDeleted];
+}
+- (void)checkShowVirtualRemote {
+    [(TPAppViewControllerContext *)self checkShowVirtualRemote];
+}
+
+#pragma mark -
+#pragma mark Hidden Forwarded Properties
+
+- (UIActivityIndicatorView *)loadingIndicator {
+    return ((TPAppViewControllerContext *)self).loadingIndicator;
+}
+
+- (void)setLoadingIndicator:(UIActivityIndicatorView *)loadingIndicator {
+    ((TPAppViewControllerContext *)self).loadingIndicator = loadingIndicator;
+}
+
+- (UITextField *)theTextField {
+    return ((TPAppViewControllerContext *)self).theTextField;
+}
+
+- (void)setTheTextField:(UITextField *)theTextField {
+    ((TPAppViewControllerContext *)self).theTextField = theTextField;
+}
+
+- (UILabel *)theLabel {
+    return ((TPAppViewControllerContext *)self).theLabel;
+}
+
+- (void)setTheLabel:(UILabel *)theLabel {
+    ((TPAppViewControllerContext *)self).theLabel = theLabel;
+}
+
+- (UIView *)textView {
+    return ((TPAppViewControllerContext *)self).textView;
+}
+
+- (void)setTextView:(UIView *)textView {
+    ((TPAppViewControllerContext *)self).textView = textView;
+}
+
+- (UIImageView *)backgroundView {
+    return ((TPAppViewControllerContext *)self).backgroundView;
+}
+
+- (void)setBackgroundView:(UIImageView *)backgroundView {
+    ((TPAppViewControllerContext *)self).backgroundView = backgroundView;
+}
+
+#pragma mark -
+#pragma mark View Handling
+
+//*
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+/**
+- (void)viewDidLoad {
+    [(TPAppViewControllerContext *)self viewDidLoad];
+}
+
+- (void)viewDidUnload {
+    [(TPAppViewControllerContext *)self viewDidUnload];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [(TPAppViewControllerContext *)self viewDidAppear:animated];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [(TPAppViewControllerContext *)self viewWillDisappear:animated];
+}
+ */
+//*/
+
+/*
+ // Override to allow orientations other than the default portrait orientation.
+ - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+ // Return YES for supported orientations.
+ return (interfaceOrientation == UIInterfaceOrientationPortrait);
+ }
+ */
+
+- (void)didReceiveMemoryWarning {
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+    
+    // Release any cached data, images, etc. that aren't in use.
+}
+
+#pragma mark -
+#pragma mark Deallocation
+
+- (void)dealloc {
+    NSLog(@"TPAppViewController dealloc");
+    //self.delegate = nil;
+    //[context release];
+    //context = nil;
     
     [super dealloc];
 }

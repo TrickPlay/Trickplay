@@ -385,7 +385,7 @@
 - (void)dealloc {
     NSLog(@"TVBrowser Dealloc");
     
-    [context release];
+    [(TVBrowserContext *)context release];
     context = nil;
     self.delegate = nil;
     

@@ -15,14 +15,17 @@
 
 @interface AppInfo : NSObject {
 
-    // TODO: Remember to add all the variables
-    @private
+@private
     NSString *name;
     NSString *appID;
+    NSNumber *version;
+    NSNumber *releaseNumber;
 }
 
 @property (readonly) NSString *name;
 @property (readonly) NSString *appID;
+@property (readonly) NSNumber *version;
+@property (readonly) NSNumber *releaseNumber; 
 
 @end
 
@@ -40,27 +43,10 @@
 
 
 @interface AppBrowser : NSObject {
-    @protected
-    id <AppBrowserDelegate> delegate;
-    
-    TVConnection *tvConnection;
-    
-    // TODO: this var needs an immutable copy to be passed to the client
-    NSMutableArray *availableApps;
-    // The current app running on Trickplay
-    AppInfo *currentApp;
 
-    NSMutableArray *viewControllers;
-    
-    // Asynchronous URL connections for populating the table with
-    // available apps and fetching information on the current
-    // running app
-    NSURLConnection *fetchAppsConnection;
-    NSURLConnection *currentAppInfoConnection;
-    
-    // The data buffers for the connections
-    NSMutableData *fetchAppsData;
-    NSMutableData *currentAppData;
+@protected
+    id <AppBrowserDelegate> delegate;
+    id context;
 }
 
 // Exposed instance variables
