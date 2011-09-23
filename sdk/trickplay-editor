@@ -3,7 +3,11 @@
 export TP_first_app_exits=0
 export TP_app_path="/usr/share/trickplay/apps/editor"
 export TP_console_enabled=0
+export TP_screen_width=1366
+export TP_screen_height=768
+
 export CLUTTER_DISABLE_MIPMAPPED_TEXT=1
+
 
 trickplay &
 
