@@ -83,5 +83,7 @@ endif (CMAKE_TOOLCHAIN_FILE)
 
 add_subdirectory( engine/docs EXCLUDE_FROM_ALL )
 
+add_subdirectory ( apps EXCLUDE_FROM_ALL )
+
 add_subdirectory( plugins )
 
