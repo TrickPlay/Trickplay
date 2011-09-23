@@ -1,0 +1,41 @@
+Topic: The app MetaData and main.lua Files
+
+Every TrickPlay application consists of at least the following two text files that contain Lua source code. Both files must be stored in your application's top-level, application bundle directory.
+
+	app - a short file containing information about the application, such as its name, version and ID.
+	main.lua - the application's entry point. Program execution begins at the top of the file.
+
+*The app Metadata File*
+	
+The app file contains a Lua table called "app" that specifies various properties of the application. The sample table defined below includes all the required properties that every TrickPlay application must include. The property's settings are
+
+	(code)
+	-- TrickPlay SDK Tutorial's app Metadata File
+	app = {
+		name = "SDK Tutorial",
+		version = "1.0",
+		release = "1",
+		id = "com.trickplay.sdk.tutorial"
+	}
+	(end)
+
+Each property in the app table is a string surrounded by double quotation marks and a comma separating each table entry. The name and version properties simply specify the application's name and version number. Both of these properties may be displayed to the user during the application's execution. The release property specifies the application's internal release number; it is similar to the version property, but is never shown to the user. The id property uniquely identifies the application. One method to generate a unique identifier is to use reverse-DNS notation, such as that used in the sample. The URL does not actually need to exist. The string may contain the alphanumeric ASCII characters A-Z, a-z, 0-9, period, minus, and underscore.
+
+When a TrickPlay application is run, the app file is read by the TrickPlay Engine before the application begins executing.
+
+Additional information about the app metadata file, including optional properties that may be defined, can be found in the <Programmer's Guide at file:../progguide/app_metafile-txt.html>.
+
+Create the sample app metadata file shown above using any text editor. Name the file "app" (without quotation marks) and store it in its own directory. This directory will be the application's top-level application bundle directory. All the application's source files and resources, such as image files, will be stored in either the application bundle directory or subdirectories below the bundle directory.
+
+*The main.lua File*
+
+The application's entry point is the main.lua file. Every application must have a main.lua file, and it must be located in the program's top-level, application bundle directory. The file contains valid Lua source code, and program execution begins at the first line of the main.lua file.
+
+The simplest TrickPlay application is the single-line program shown below. The print() statement outputs a string to the TrickPlay Engine's console.
+
+	(code)
+	print( "TrickPlay SDK Tutorial" )
+	(end)
+	
+Using a text editor, create a main.lua file that contains the single code statement shown above. Save the file in the Tutorial's application bundle directory with the app metadata file created earlier. These two files comprise a complete TrickPlay application. Next, we'll run the application in the TrickPlay Engine.
+
