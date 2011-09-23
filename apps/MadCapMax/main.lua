@@ -319,20 +319,28 @@ local function main()
     }
     
     --MadCapMax specific
+
     Max             = dofile("Max.lua")
     Make_Cat        = dofile("Jazz.lua")
     Frog            = dofile("Frog.lua")
     Crawfish        = dofile("Crawfish.lua")
     Tuffy           = dofile("Tuffy.lua")
-    
+
+    Effects         = dofile("Effects.lua")
+
     Item            = dofile("Items.lua")
+    
+    LVL_Object      = dofile("Level_Object.lua")
+    
     Hud             = dofile("Hud.lua")
+
     LVL_Object      = dofile("Level_Object.lua")
     ScoreKeeper     = dofile("Score_Keeper.lua")
     
     Splash_Menu     = dofile("Splash_Menu.lua")
     Transition_Menu = dofile("Transition_Menu.lua")
     HS_Menu         = dofile("High_Score_Menu.lua")
+    
     
     ----------------------------------------------------------------------------
     -- Link them up - removes circular dependencies                           --
@@ -359,6 +367,7 @@ local function main()
         end
     )
     
+    Effects:init{}
     Transition_Menu:init{
         player  = Max,
         sk      = ScoreKeeper,
@@ -368,6 +377,7 @@ local function main()
     LVL_Object:init{
         layers        = layers,
         physics_world = physics_world,
+        fx            = Effects,
     }
     Jazz:init{
         target = Max,
