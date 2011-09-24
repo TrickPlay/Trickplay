@@ -3718,20 +3718,15 @@ function ui_element.checkBoxGroup(t)
 							return true 
 						end
 					elseif key == keys.Return then 
-    					cb_group.extra.set_selection(p.selected_items) 
 						if cb_group:find_child("check"..tostring(box_num)).opacity == 255 then 
 							cb_group.selected_items = table_remove_val(cb_group.selected_items, box_num)
-							cb_group:find_child("check"..tostring(box_num)).opacity = 0 
-							cb_group:find_child("check"..tostring(box_num)).reactive = true 
-	    					cb_group:find_child("box"..box_num).opacity = 0 
-	    					cb_group:find_child("focus"..box_num).opacity = 255 
 						else 
 							table.insert(cb_group.selected_items, box_num)
-							cb_group:find_child("check"..tostring(box_num)).opacity = 255 
-	    					cb_group:find_child("box"..box_num).opacity = 0 
-	    					cb_group:find_child("focus"..box_num).opacity = 255 
-
 						end 
+						cb_group.set_selection(p.selected_items)
+						cb_group:find_child("check"..tostring(box_num)).reactive = true 
+	    				cb_group:find_child("box"..box_num).opacity = 0 
+	    				cb_group:find_child("focus"..box_num).opacity = 255 
 						boxes:find_child("box"..box_num):grab_key_focus() 
 						return true 
 					end 
