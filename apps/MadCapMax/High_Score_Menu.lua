@@ -96,7 +96,7 @@ end
 
 
 
-local base_y = 400
+local base_y = 380
 local y_interval = 65
 
 for i = 1,list_len do
