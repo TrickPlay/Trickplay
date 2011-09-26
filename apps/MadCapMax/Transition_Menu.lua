@@ -232,8 +232,8 @@ for i,c in pairs(categories) do
     )
 end
 
-total_score = Text{font = font.." 50px",color="000000", x = 920+155, y = 958}
-lvl_txt     = Text{font = font.." 70px",color="000000", x = screen_w/2+40, y = 397, text = "0"}
+total_score = Text{font = font.." 50px",color="000000", x = 920+155, y = 943}
+lvl_txt     = Text{font = font.." 70px",color="000000", x = screen_w/2+40, y = 382-6, text = "0"}
 
 text_layer:add(lvl_txt,total_score)
 
