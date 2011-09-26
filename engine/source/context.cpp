@@ -963,6 +963,22 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                     tp_controller_key_down( ( TPController * )controller, keyval, unicode , modifiers );
                     return TRUE;
                 }
+                else
+                {
+                	// This was synthetic.  Check if it's IME (ie keyval is 0)...
+                	guint keyval;
+                	gunichar unicode;
+                	
+                	map_key(event, &keyval, &unicode);
+
+					if( 0 == keyval )
+					{
+						unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+	
+						tp_controller_key_down( ( TPController * )controller, keyval, unicode , modifiers );
+						return TRUE;
+					}
+                }
 
                 break;
             }
@@ -980,6 +996,22 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
 
                     tp_controller_key_up( ( TPController * )controller, keyval, unicode , modifiers );
                     return TRUE;
+                }
+                else
+                {
+                	// This was synthetic.  Check if it's IME (ie keyval is 0)...
+                	guint keyval;
+                	gunichar unicode;
+                	
+                	map_key(event, &keyval, &unicode);
+
+					if( 0 == keyval )
+					{
+						unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+	
+						tp_controller_key_up( ( TPController * )controller, keyval, unicode , modifiers );
+						return TRUE;
+					}
                 }
                 break;
             }
