@@ -918,6 +918,17 @@
     
     NSLog(@"TPAppView loaded!");
     
+	// Get the actual width and height of the available area
+	CGRect mainframe = self.view.frame;
+	backgroundHeight = mainframe.size.height;
+	backgroundWidth = mainframe.size.width;
+    
+    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    // This is where the elements from UG (add_ui_image call) go
+    foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    
+    
     textView.layer.cornerRadius = 10.0;
     textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
     textView.layer.borderWidth = 7.0;
@@ -990,6 +1001,16 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    // Get the actual width and height of the available area
+	CGRect mainframe = self.view.frame;
+	backgroundHeight = mainframe.size.height;
+	backgroundWidth = mainframe.size.width;
+    
+    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    // This is where the elements from UG (add_ui_image call) go
+    foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     
     if (!socketManager) {
         [self.navigationController popToRootViewControllerAnimated:YES];
