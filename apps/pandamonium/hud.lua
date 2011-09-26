@@ -8,14 +8,14 @@ local green_digits  = {}
 for i = 0,9 do
 	yellow_digits[i] = make_text(
 		Text{
-			font = "Baveuse 80px",
+			font = "Sigmar 80px",
 			text = i,
 		},
 		"yellow"
 	)
 	green_digits[i]  = make_text(
 		Text{
-			font = "Baveuse 50px",
+			font = "Sigmar 50px",
 			text = i,
 		},
 		"green"
@@ -36,7 +36,7 @@ local coin  = Clone{
 local h_h = 1030
 local height = make_text(
 	Text{
-		font = "Baveuse 50px",
+		font = "Sigmar 50px",
 		text = "Height:",
 		y    = h_h,
 	},
@@ -55,7 +55,7 @@ local multiplier_g   = Group{
 }
 local multiplier_txt = make_text(
 	Text{
-		font = "Baveuse 50px",
+		font = "Sigmar 50px",
 		text = "(   x)",
 		
 	},
