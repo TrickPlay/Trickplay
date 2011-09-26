@@ -204,7 +204,7 @@ lvls = {
                 y      = 527-80,
                 m      = .5,
                 floor_func = function()
-                    mediaplayer:play_sound("audio/dailtone.mp3")
+                    mediaplayer:play_sound("audio/dial tone.mp3")
                 end
             },
             
@@ -1522,6 +1522,7 @@ lvls = {
                 y = 600,
                 source  = "deck-table-drink1",
                 m       = 2,
+                w       = 800,
                 floor_y = 1000,
                 floor_func = function(self)
                     mediaplayer:play_sound("audio/glass_break.mp3")
@@ -1534,6 +1535,7 @@ lvls = {
                 y = 600,
                 source  = "deck-table-drink2",
                 m       = 2,
+                w       = 800,
                 floor_y = 1000,
                 floor_func = function(self)
                     mediaplayer:play_sound("audio/glass_break.mp3")
@@ -1900,7 +1902,7 @@ lvls = {
             },
             {
                 x = 10150-100+893,
-                y =   870,
+                y =   900,
                 w =   200,
                 h =    30,
                 can_jump_through = true,

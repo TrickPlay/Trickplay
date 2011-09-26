@@ -166,7 +166,7 @@ gamestate:add_state_change_function(
     "LVL_TRANSITION","SPLASH"
 )
 
-local font = "Gladatur Rum"
+local font = "Andika"
 
 function Transition_Menu:init(t)
     
@@ -195,15 +195,15 @@ for i,c in pairs(categories) do
     
     lvl_total[i] = Text{
         name  = c.." pre_lvl_total",
-        font  = font.." 60px",
+        font  = font.." 40px",
         color = "000000",
-        x     = 900,
+        x     = 870,
         y     = base_y + y_interval * (i-1),
     }
     
     multipliers[i] = Text{
         name  = c.." multiplier",
-        font  = font.." 60px",
+        font  = font.." 40px",
         text  = categor_multipliers[i],
         color = "000000",
         x     = 1000,
@@ -212,7 +212,7 @@ for i,c in pairs(categories) do
     
     totals[i] = Text{
         name  = c.." total",
-        font  = font.." 60px",
+        font  = font.." 40px",
         color = "000000",
         x     = 1070,
         y     = base_y + y_interval * (i-1),
@@ -225,15 +225,15 @@ for i,c in pairs(categories) do
             text  = "x",
             color = "000000",
             x     = 965,
-            y     = base_y + y_interval * (i-1)+15,
+            y     = base_y + y_interval * (i-1),
         },
         multipliers[i],
         totals[i]
     )
 end
 
-total_score = Text{font = font.." 70px",color="000000", x = 920+155, y = 950}
-lvl_txt     = Text{font = font.." bold 110px",color="000000", x = screen_w/2+30, y = 380, text = "0"}
+total_score = Text{font = font.." bold 50px",color="000000", x = 920+155, y = 958}
+lvl_txt     = Text{font = font.." bold 70px",color="000000", x = screen_w/2+40, y = 397, text = "0"}
 
 text_layer:add(lvl_txt,total_score)
 
