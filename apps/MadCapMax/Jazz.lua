@@ -1207,7 +1207,7 @@ local make_cat = function(cat_name)
                 
                 return
             elseif cat.x > stop_point then
-                cat.x = stop_point
+                --cat.x = stop_point
                 cat.source = imgs.default[1]
                 
                 if math.random(1,5) == 1 then
