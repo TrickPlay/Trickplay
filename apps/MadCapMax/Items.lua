@@ -3,6 +3,32 @@ local make_item
 local g  = 4000
 local vy = - 500
 
+local shatter = function(obj,vx)
+    
+    mediaplayer:play_sound("audio/glass_break.mp3")
+    
+    for i,c in pairs(obj.children) do
+        local dt = math.random(5,15)/10/3
+        local dist = vx*math.random(5,20)/10*dt/4
+        
+        local dx = dist*math.cos(math.pi/180*obj.z_rotation[1])
+        local dy = dist*math.sin(math.pi/180*obj.z_rotation[1])
+        
+        local start_x = c.x
+        local start_y = c.y
+        print(dt,dx)
+        Animation_Loop:add_animation{
+            duration = dt,
+            on_step = function(s,p)
+                c.x = start_x+dx*p
+                c.y = start_y+dy*p
+                
+            end
+        }
+    end
+    
+end
+
 local item_type = {
     collectable = function(pieces,initial_impact)
         
@@ -94,7 +120,13 @@ local item_type = {
                     obj.z_rotation = {180/m*p,0,0}
                 end,
                 
-                on_completed = floor_func
+                on_completed = function()
+                    
+                    if floor_func then floor_func(obj) end
+                    
+                    if obj.children then shatter(obj,vx) end
+                    
+                end
                 
             }
             

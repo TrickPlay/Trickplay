@@ -8,7 +8,7 @@ local enter_press = {
     function() --[[DOES NOTHING]] end,
     function()
        
-        launch_lvl(2,Splash_Menu)
+        launch_lvl(1,Splash_Menu)
         
     end,
 }
@@ -17,12 +17,13 @@ local focus_on, help_focused
 
 gamestate:add_state_change_function(
     
-    function()
+    function(old,new)
         
         Splash_Menu:load_assets(layers.menus)
         
-        mediaplayer:load("audio/opening theme.mp3")
-        
+        if old == "OFFLINE" then
+            mediaplayer:load("audio/opening theme.mp3")
+        end
     end,
     
     nil,"SPLASH"
@@ -256,6 +257,8 @@ local Splash_keys = {
             
             --focus_out[index]()
             
+            mediaplayer:play_sound("audio/wing-flap-4.mp3")
+            
             index = index - 1
             
             focus_on[index]()
@@ -276,6 +279,8 @@ local Splash_keys = {
         elseif index ~= # focus_on then
             
             --focus_out[index]()
+            
+            mediaplayer:play_sound("audio/wing-flap-4.mp3")
             
             index = index + 1
             
@@ -309,7 +314,9 @@ local Splash_keys = {
             
         else
             
-            fade_out_mediaplayer(.5)
+            mediaplayer:play_sound("audio/start.wav")
+            
+            fade_out_mediaplayer(2)
             
             enter_press[index]()
             

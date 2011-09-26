@@ -18,15 +18,15 @@ function fx:launch_heart(start_x,start_y,dur,angle, dist)
         y      = start_y,
     }
     
-    local dx = dist*math.cos(math.pi/180*angle)
-    local dy = dist*math.sin(math.pi/180*angle)
+    local dx = dist*math.sin(math.pi/180*angle)
+    local dy = dist*math.cos(math.pi/180*angle)
     
     Animation_Loop:add_animation{
         duration = dur,
         on_step  = function(s,p)
             
-            h.x = start_x + dx*p
-            h.y = start_y - dy*p + 10*math.sin(math.pi*2*p)
+            h.x = start_x + dx*p + 5*math.sin(math.pi*4*p)
+            h.y = start_y - dy*p
             
             if p > 3/4 then
                 
@@ -40,13 +40,17 @@ function fx:launch_heart(start_x,start_y,dur,angle, dist)
         end
     }
     
+    local scale = math.random(30,50)/10
+    print(s)
     Animation_Loop:add_animation{
         duration = dur/3,
         on_step  = function(s,p)
             
-            h.scale = {.25*p,.25*p}
+            h.scale = {p/scale,p/scale}
         end,
     }
+    clone_counter[h] = "heart"
+    layers.background:add(h)
     
 end
 
@@ -57,7 +61,7 @@ function fx:heart_barrage(start_x,start_y, num)
         
         Animation_Loop:add_animation{
             
-            duration = i/20,
+            duration = i/4 - .2,
             
             on_step = function() end,
             
@@ -66,9 +70,9 @@ function fx:heart_barrage(start_x,start_y, num)
                 fx:launch_heart(
                     start_x,
                     start_y,
-                    1,
+                    1.5,
                     math.random(-20,20),
-                    dist
+                    200
                 )
                 
             end,

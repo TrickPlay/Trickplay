@@ -22,36 +22,36 @@ local function main()
         
     end
     
-    
+    mediaplayer.volume = .1
     local fade_out = {
         
         duration = 1,
         
         on_step  = function(s,p)
-            
-            mediaplayer.volume = (1-p)
+            print(p)
+            mediaplayer.volume = .1*(1-p)
             
         end,
         on_completed = function()
             
-            mediaplayer:pause()
-            
+            mediaplayer:reset()
+            mediaplayer.volume = .1
         end
     }
     
-    function fade_out_mediaplayer(dur)
+    function fade_out_mediaplayer(dur, state)
         
-        fade_out.duration =
-            (mediaplayer.duration - mediaplayer.position  <  dur) and
-            (mediaplayer.duration - mediaplayer.position) or dur
+        fade_out.duration = dur
+        --    (mediaplayer.duration - mediaplayer.position  <  dur) and
+        --    (mediaplayer.duration - mediaplayer.position) or dur
         
         if Animation_Loop:has_animation(fade_out) then
             
             error("already fading out",2)
             
         end
-        
-        Animation_Loop:add_animation(fade_out)
+        --print("herp a durrrrr",fade_out.duration)
+        Animation_Loop:add_animation(fade_out, state or "ACTIVE")
         
     end
     
@@ -376,7 +376,7 @@ local function main()
     }
     
     LVL_Object:init{
-        layers        = layers,
+        --layers        = layers,
         physics_world = physics_world,
         fx            = Effects,
     }
@@ -434,18 +434,10 @@ local function main()
                     [2] = { --in stage 2
                         "maxina-eyelids"
                     },
-                    
-                    [4] = { --in stage 4
-                        "heart"
-                    },
-                    
-                    [6] = { --in stage 6
-                        "heart1"
-                    }
                 },
                 call_before_outro = {
                     
-                    [Max.fly_to] = {d = 1,x = 13060-100, y=800}
+                    [Max.fly_to] = {d = 1,x = 13060-50, y=730}
                     
                 }
             },
@@ -504,6 +496,8 @@ local function main()
         Max:grab_key_focus()
         
         --gamestate:change_state_to("ACTIVE")
+        
+        Max.invincible = true
         
     end
     

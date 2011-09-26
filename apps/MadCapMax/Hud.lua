@@ -4,10 +4,10 @@ local hud = {}
 
 local hud_path = "hud/"
 
-local poop_meter_bg    = Image{src = assets_path_dir..hud_path.."poop-o-meter.png",x = 7, y = 1030 }
-local poop_meter_txt   = Image{src = assets_path_dir..hud_path.."poop-o-meter-text.png", x = 50,  y = 1056  }
-local poop             = Image{ src = "assets/max/poop-splat.png", x = -10, y = 1025}
-local shade            = Rectangle{y_rotation={180,0,0},color="000000",opacity = 255*.7,y=1030,h =poop_meter_bg.h}
+local poop_meter_bg    = Image{src = assets_path_dir..hud_path.."poop-o-meter.png",x = 37, y = 1000 }
+local poop_meter_txt   = Image{src = assets_path_dir..hud_path.."poop-o-meter-text.png", x = 80,  y = 1026  }
+local poop             = Image{ src = "assets/max/poop-splat.png", x = 20, y = 995}
+local shade            = Rectangle{y_rotation={180,0,0},color="000000",opacity = 255*.7,x=30,y=1000,h =poop_meter_bg.h}
 
 local pause_screen = Group{
     opacity  = 0,
@@ -17,7 +17,7 @@ local pause_screen = Group{
     }
 }
 
-local life_meter = Image{src = assets_path_dir..hud_path.."life-meter.png",x = 270,y = 1024}
+local life_meter = Image{src = assets_path_dir..hud_path.."life-meter.png",x = 300,y = 994}
 local life_gone  = Image{src = assets_path_dir..hud_path.."life-gone.png"}
 
 poop:move_anchor_point(poop.w/2,0)
@@ -27,7 +27,7 @@ layers.hud:add(pause_screen,poop_meter_bg,poop_meter_txt,shade,poop,life_meter,l
 life_gone:hide()
 
 local empty_x = poop.x
-local full_x  = 258
+local full_x  = 288
 shade.x = full_x
 local poo_capacity 
 local curr_poo

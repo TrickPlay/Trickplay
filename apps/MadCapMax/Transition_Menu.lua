@@ -22,6 +22,8 @@ local enter_press = {
         
         sk:reset_lvl()
         
+        fade_out_mediaplayer(2)
+        
         launch_lvl(prev_lvl,Transition_Menu)
         
     end,
@@ -30,6 +32,8 @@ local enter_press = {
         if lvl_params[prev_lvl+1] then
             
             sk:new_lvl()
+            
+            fade_out_mediaplayer(2)
             
             launch_lvl(prev_lvl+1,Transition_Menu)
             
@@ -235,6 +239,8 @@ text_layer:add(lvl_txt,total_score)
 
 function Transition_Menu:load_assets(parent,prev_level)
     
+    mediaplayer:load("audio/opening theme quiet.mp3")
+    
     prev_lvl = prev_level
     
     index   = player.dead and 1 or 2
@@ -325,6 +331,8 @@ local keys = {
         
         if index ~= 1 then
             
+            mediaplayer:play_sound("audio/wing-flap-4.mp3")
+            
             index = index - 1
             
             focus_on[index]()
@@ -336,6 +344,8 @@ local keys = {
         
         if index ~= right_i then
             
+            mediaplayer:play_sound("audio/wing-flap-4.mp3")
+            
             index = index + 1
             
             focus_on[index]()
@@ -344,6 +354,8 @@ local keys = {
         
     end,
     [keys.OK] = function()
+        
+        mediaplayer:play_sound("audio/start.mp3")
         
         enter_press[index]()
         

@@ -288,6 +288,7 @@ local keys = {
         
         if index == 1 and text_input_i ~= 1 then
             
+            mediaplayer:play_sound("audio/wing-flap-4.mp3")
             text_input_i = text_input_i - 1
             
             names_txt[insert_at_i].text =
@@ -309,6 +310,7 @@ local keys = {
         
         if index == 1 and text_input_i ~= max_name_len then
             
+            mediaplayer:play_sound("audio/wing-flap-4.mp3")
             text_input_i = text_input_i + 1
             
             names_txt[insert_at_i].text = names_txt[insert_at_i].text..curr_letter.text
@@ -323,6 +325,7 @@ local keys = {
     end,
     [keys.OK] = function()
         
+        mediaplayer:play_sound("audio/start.mp3")
         enter_press[index]()
         
     end,

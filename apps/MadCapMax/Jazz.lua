@@ -64,7 +64,7 @@ local asset_loaders = {
         }
         t.tall_splash = Image{src ="assets/lvl2/swamp-splash-back.png"}
         t.wide_splash = Image{src ="assets/lvl2/swamp-splash-front.png"}
-        t.swamp = Image{src ="assets/lvl2/swamp-splash-btm-cutout.jpg"}
+        t.swamp = Image{src ="assets/lvl2/swamp-splash-btm-cutout2.jpg"}
     end,
 }
 
@@ -195,9 +195,19 @@ local make_cat = function(cat_name)
         jump, show_arm, wait_check, attack
         
         --sequences
-        local run_sequence, jump_up_sequence, jump_down_sequence,
-        to_swat_sequence, swat_sequence, swat_blink_sequence, swat_to_run_sequence,
-        swat_wait, attack_sequence, pos_wait, poop_shake_sequence
+        local
+            run_sequence,
+            jump_up_sequence,
+            jump_down_sequence,
+            to_swat_sequence,
+            swat_sequence,
+            swat_blink_sequence,
+            swat_to_run_sequence,
+            swat_wait,
+            attack_sequence,
+            pos_wait,
+            poop_shake_sequence,
+            silent_wait_sequence
         
         
         local next_obst_x, next_obst_y, o_x, o_y
@@ -354,6 +364,7 @@ local make_cat = function(cat_name)
                 imgs.jump_up[2],
                 flip_interval*2,
                 imgs.jump_up[1],
+                function() if math.random(1,5) == 1 then mediaplayer:play_sound("audio/cat growl.mp3") end end,
                 imgs.run[2],
                 attack,
                 imgs.run[3],
@@ -361,9 +372,12 @@ local make_cat = function(cat_name)
                 imgs.jump_down[1],
                 imgs.run[6],
             }
+            silent_wait_sequence = {
+                100,
+            }
             wait_sequence = {
                 100,
-                function() if math.random(1,5) == 1 then mediaplayer:play_sound("audio/cat sad growl "..math.random(1,3)..".mp3") end end,
+                function() if math.random(1,10) == 1 then mediaplayer:play_sound("audio/cat sad growl "..math.random(1,3)..".mp3") end end,
                 100,
             }
         end
@@ -444,12 +458,16 @@ local make_cat = function(cat_name)
                 end
             end,
             on_completed = function()
+                
                 marker_i = 1
-                print("attack done",cat.y)
                 
                 mediaplayer:play_sound("audio/cat landing"..math.random(1,2)..".mp3")
                 
+                if will_be_on and will_be_on.f then will_be_on.f() end
+                
                 cat.on_obstacle = will_be_on
+                
+                will_be_on = nil
                 
                 Animation_Loop:add_animation(cat_animation)
                 --[[
@@ -468,15 +486,13 @@ local make_cat = function(cat_name)
                         
                         obstacle_i = i
                         
-                        --print("BEHIND",obstacles[i].source)
-                        
                         break
                         
                     end
                 end
                 
                 if on_complete then on_complete() end
-                --print("attack_done_end\n\n")
+                
             end,
         }
         
@@ -563,7 +579,9 @@ local make_cat = function(cat_name)
             
             for i, o in pairs( obstacles ) do
                 
-                
+                if o.post_exit ~= true and o.pre_exit  ~= true then
+                    
+                    
                 if  land_x   > o.x           and
                     land_x   < o.x + o.w     and
                     land_y   > o.y - cat.h/2 and
@@ -607,6 +625,7 @@ local make_cat = function(cat_name)
                     ret_lend_x = o.x + o.w - cat.w/2
                     
                 end
+                end
                 
             end
             
@@ -632,7 +651,7 @@ local make_cat = function(cat_name)
                     
                     if no_floor and target.right_obstacle == nil then
                         
-                        land_x = death_spot and death_spot.x or 11350
+                        land_x = death_spot and death_spot.x or 11786+150
                         land_y = death_spot and death_spot.y or start_y
                         
                         on_c = function()
@@ -647,20 +666,22 @@ local make_cat = function(cat_name)
                             )
                             cat.tall_splash = Clone{
                                 source = imgs.tall_splash,
-                                anchor_point = {imgs.tall_splash.w/2,imgs.tall_splash.h}
+                                anchor_point = {imgs.tall_splash.w/2,imgs.tall_splash.h},
+                                scale = {0,0},
                             }
                             cat.wide_splash = Clone{
                                 source = imgs.wide_splash,
-                                anchor_point = {imgs.wide_splash.w/2,imgs.wide_splash.h}
+                                anchor_point = {imgs.wide_splash.w/2,imgs.wide_splash.h},
+                                scale = {0,0},
                             }
                             cat.swamp = Clone{
                                 source = imgs.swamp,
                                 anchor_point = {imgs.wide_splash.w/2,0},
                                 --scale = {4/3,4/3}
                             }
-                            clone_counter[cat.tall_splash] = true
-                            clone_counter[cat.wide_splash] = true
-                            clone_counter[cat.swamp] = true
+                            clone_counter[cat.tall_splash] = "cat_tall_splash"
+                            clone_counter[cat.wide_splash] = "cat_wide_splash"
+                            clone_counter[cat.swamp] = "cat_swamp"
                             cat.parent:add(
                                 cat.tall_splash,
                                 cat.swamp,
@@ -672,8 +693,8 @@ local make_cat = function(cat_name)
                             cat.tall_splash.y = cat.y2
                             cat.wide_splash.x = cat.x1+(cat.x2-cat.x1)/2
                             cat.wide_splash.y = cat.y2
-                            cat.swamp.x = 11366--cat.x1+(cat.x2-cat.x1)/2-40
-                            cat.swamp.y = 792--cat.y2 - 68
+                            cat.swamp.x = 11786--cat.x1+(cat.x2-cat.x1)/2-40
+                            cat.swamp.y = 790--cat.y2 - 68
                             
                             Animation_Loop:add_animation(big_splash_phase_1)
                         end
@@ -769,125 +790,6 @@ local make_cat = function(cat_name)
             
         end
         
-        --[[
-        local function attack_prep(position)
-            error("why")
-            start_x = cat.x
-            start_y = cat.y
-            
-            local vx = (position.x - cat.x)*3
-            
-            vx = clamp_mag(vx,min_vx,max_vx)
-            
-            cat_x_func = function(t)
-                
-                return start_x + vx * t --x_t = x_0 + v_x_0 * t
-                
-            end
-            
-            cat_rev_x_func = function(x)
-                
-                return (x - start_x) / vx
-                
-            end
-            
-            local t = cat_rev_x_func(position.x)
-            
-            local vy = (position.y - cat.y - .5 * g * t * t) / t
-            --print("vy",vy,t)
-            if position.land == nil then vy = clamp(vy,max_vy,min_vy) end
-            
-            cat_y_func = function(t)
-                --print(start_y,vy,start_y   +   vy * t   +   .5 * g * t * t)
-                
-                -- y_t = y_0 + y_t_0 * t + .5*a*t^2
-                return start_y   +   vy * t   +   .5 * g * t * t
-                
-            end
-            
-            land_y = floor_y
-            will_be_on = false
-            
-            if position.land ~= nil then
-                
-                land_y = position.y
-                
-                --aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
-                will_be_on = position.land
-                attack_animation.duration = t
-                
-                if position.x < cat.x then
-                    cat.y_rotation = {180,0,0}
-                    attack_z_rot.from =  position.y < cat.y and  z_rot_mag or 0
-                    attack_z_rot.to   =  land_y+150 > cat.y and -z_rot_mag or 0
-                else
-                    cat.y_rotation = {0,0,0}
-                    attack_z_rot.to   = land_y+150 > cat.y and  z_rot_mag or 0
-                    attack_z_rot.from = position.y < cat.y and -z_rot_mag or 0
-                end
-                
-            elseif position.x < cat.x then
-                
-                cat.y_rotation = {180,0,0}
-                print("jumping to the left")
-                for i, o in pairs( obstacles ) do
-                    --print(o.source)
-                    
-                    o_x = o.x + ( o.x_off or 0 )
-                    o_y = o.y + ( o.y_off or 0 ) - cat.h/2
-                    
-                    if  o_y < cat_y_func(cat_rev_x_func(o_x)) and
-                        o_y > cat_y_func(cat_rev_x_func(o_x+obstacles[i].w)) and
-                        o_y < land_y then
-                        --print("gah",o_y,o.source)
-                        will_be_on = o
-                        
-                        land_y = o_y
-                    end
-                    
-                end
-                
-                
-                attack_z_rot.from =  position.y < cat.y and  z_rot_mag or 0
-                attack_z_rot.to   =  land_y+150 > cat.y and -z_rot_mag or 0
-                
-                aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
-                
-                attack_animation.duration = aaa
-                
-            else
-                
-                cat.y_rotation = {0,0,0}
-                
-                for i, o in pairs( obstacles ) do
-                    
-                    o_x = o.x + ( o.x_off or 0 )
-                    o_y = o.y + ( o.y_off or 0 ) - cat.h/2
-                    --print(o_y , cat_y_func(cat_rev_x_func(o_x)),cat_y_func(cat_rev_x_func(o_x+obstacles[i].w)))
-                    if  o_y > cat_y_func(cat_rev_x_func(o_x)) and
-                        o_y < cat_y_func(cat_rev_x_func(o_x+obstacles[i].w)) and
-                        o_y < land_y - cat.h then
-                        
-                    --print("gah",o_y,o.source)
-                        will_be_on = o
-                        
-                        land_y = o_y
-                    end
-                    
-                end
-                attack_z_rot.to   = land_y+150 > cat.y and  z_rot_mag or 0
-                attack_z_rot.from = position.y < cat.y and -z_rot_mag or 0
-                
-                aaa, bbb = quadratic( .5 * g, vy, start_y - (land_y) )
-                
-                attack_animation.duration = aaa
-                
-            end
-            
-            --print("LAND_Y",land_y)
-            
-        end
-        --]]
         function attack()
             --print("attack")
             
@@ -928,13 +830,9 @@ local make_cat = function(cat_name)
                     obstacles[cat.right_obstacle].x or no_floor then
                     
                     print("run("..dir.."), jump to next")
-                    --[[
-                    attack_prep{
-                        x    = obstacles[cat.right_obstacle].x+cat.w/2,
-                        y    = obstacles[cat.right_obstacle].y-cat.h/2,
-                        land = obstacles[cat.right_obstacle]
-                    }
-                    --]]
+                    
+                    will_be_on = obstacles[cat.right_obstacle]
+                    
                     leap_prep(
                         obstacles[cat.right_obstacle].x+cat.w/2,
                         obstacles[cat.right_obstacle].y-cat.h/2
@@ -946,9 +844,9 @@ local make_cat = function(cat_name)
                     obstacles[cat.under_obstacle].x + obstacles[cat.under_obstacle].w then
                     
                     print("run("..dir.."), jump down")
-                    --[[
-                    attack_prep{x=cat.x + 300,y=floor_y,land=false}
-                    --]]
+                    
+                    will_be_on = nil
+                    
                     leap_prep(
                         cat.x + 400,
                         floor_y
@@ -957,6 +855,8 @@ local make_cat = function(cat_name)
                     frames = attack_sequence
                     
                 else
+                    
+                    will_be_on = nil
                     
                     print("run("..dir.."), run")
                     frames  = run_sequence
@@ -970,13 +870,9 @@ local make_cat = function(cat_name)
                     obstacles[cat.left_obstacle].w or no_floor then
                     
                     print("run("..dir.."), jump to next")
-                    --[[
-                    attack_prep{
-                        x    = obstacles[cat.left_obstacle].x+obstacles[cat.left_obstacle].w-cat.w/2,
-                        y    = obstacles[cat.left_obstacle].y-cat.h/2,
-                        land = obstacles[cat.left_obstacle]
-                    }
-                    --]]
+                    
+                    will_be_on = obstacles[cat.left_obstacle]
+                    
                     leap_prep(
                         obstacles[cat.left_obstacle].x+obstacles[cat.left_obstacle].w-cat.w/2,
                         obstacles[cat.left_obstacle].y-cat.h/2
@@ -988,9 +884,9 @@ local make_cat = function(cat_name)
                     obstacles[cat.under_obstacle].x then
                     
                     print("run("..dir.."), jump down")
-                    --[[
-                    attack_prep{x=cat.x - 300,y=floor_y,land=false}
-                    --]]
+                    
+                    will_be_on = nil
+                    
                     leap_prep(
                         cat.x - 400,
                         floor_y
@@ -999,6 +895,8 @@ local make_cat = function(cat_name)
                     frames = attack_sequence
                     
                 else
+                    
+                    will_be_on = nil
                     
                     frames  = run_sequence
                     
@@ -1018,20 +916,20 @@ local make_cat = function(cat_name)
                 print("cat left of target")
                 --if cat is in jumping range
                 if cat.x + cat.w/2 > o.x - 400 then
+                    
                     print("jump to it")
-                    --[[
-                    attack_prep{
-                        x    = o.x+cat.w/2,
-                        y    = o.y-cat.h/2,
-                        land = o
-                    }
-                    --]]
+                    
+                    will_be_on = o
+                    
                     leap_prep(o.x+cat.w/2,o.y-cat.h/2)
                     
                     frames = attack_sequence
                     
                 else
                     print("run to it")
+                    
+                    will_be_on = nil
+                    
                     run(1)
                     
                 end
@@ -1042,20 +940,19 @@ local make_cat = function(cat_name)
                 
                 --if cat is in jumping range
                 if cat.x - cat.w/2 < o.x + o.w + 400 then
+                    
                     print("jump to it",o.x + o.w - cat.w/2, cat.x)
-                    --[[
-                    attack_prep{
-                        x    = o.x + o.w - cat.w/2,
-                        y    = o.y-cat.h/2,
-                        land = o
-                    }
-                    --]]
+                    
+                    will_be_on = o
+                    
                     leap_prep(o.x+cat.w/2,o.y-cat.h/2)
                     
                     frames = attack_sequence
                     
                 else
                     print("run to it")
+                    
+                    will_be_on = nil
                     
                     run(-1)
                 end
@@ -1066,28 +963,17 @@ local make_cat = function(cat_name)
                 print("cat under target")
                 
                 if o.can_jump_through then
+                    
                     print("can jump through")
+                    
+                    will_be_on = o
+                    
                     if target.x < cat.x then
-                        --[[
-                        attack_prep{
-                            x    = cat.x-400 > o.x and cat.x-400 or o.x + cat.w/2,
-                            y    = o.y-cat.h/2,
-                            land = o
-                        }
-                        --]]
-                        print(2222222)
+                        
                         leap_prep(cat.x-400 > o.x and cat.x-400 or o.x + cat.w/2,o.y-cat.h/2)
                         
                     else
-                        --[[
-                        attack_prep{
-                            x    = cat.x+400 < o.x + o.w and
-                                cat.x+400 or o.x + o.w - cat.w/2,
-                            y    = o.y-cat.h/2,
-                            land = o
-                        }
-                    --]]
-                        print(3333)
+                        
                         leap_prep(
                             cat.x+400 < o.x + o.w and
                             cat.x+400 or o.x + o.w - cat.w/2,
@@ -1100,11 +986,12 @@ local make_cat = function(cat_name)
                     
                 else
                     print("run")
+                    
+                    will_be_on = nil
+                    
                     run(1)
                     
                 end
-                
-                
                 
             else    error("IMPOSSIBLE",2)    end
             
@@ -1129,7 +1016,7 @@ local make_cat = function(cat_name)
                         locked_post_exit = obstacles[ i+1 ]
                         
                         assert(
-                            locked_pre_exit ~= nil and
+                            locked_pre_exit  ~= nil and
                             locked_post_exit ~= nil,
                             "Something went wrong"
                         )
@@ -1213,6 +1100,9 @@ local make_cat = function(cat_name)
             if obstacles[cat.under_obstacle] == locked_pre_exit and cat.y ~= floor_y then
                 print("on pre, jumping to post")
                 cat.harmless = true
+                
+                will_be_on = locked_post_exit
+                
                 leap_prep(
                     locked_post_exit.x + cat.w/2,
                     locked_post_exit.y - cat.h/2,
@@ -1221,7 +1111,7 @@ local make_cat = function(cat_name)
                         --if reentry then wait for it
                         if locked_reentry then
                             print("on post, waiting for reentry")
-                            frames = wait_sequence
+                            frames = silent_wait_sequence
                             
                             next_move = reentry_wait
                             
@@ -1285,7 +1175,7 @@ local make_cat = function(cat_name)
             --if ready to die, level2 hardcoding...
             elseif no_floor and cat.right_obstacle == nil and target.right_obstacle == nil then
                 
-                if -physics_world.x < 9300 then
+                if -physics_world.x < 9300+893 then
                     
                     cat.scale = {1,1}
                     
