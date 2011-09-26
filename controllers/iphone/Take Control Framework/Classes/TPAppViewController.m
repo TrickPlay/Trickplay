@@ -12,6 +12,20 @@
 #import "AdvancedUIObjectManager.h"
 #import "Extensions.h"
 
+#import "ResourceManager.h"
+#import "SocketManager.h"
+#import "Protocols.h"
+
+
+
+#import "TouchController.h"
+#import "AccelerometerController.h"
+#import "AudioController.h"
+#import "CameraViewController.h"
+#import "VirtualRemoteViewController.h"
+#import "GestureImageView.h"
+#import "TVConnection.h"
+
 @interface TPAppViewControllerContext : TPAppViewController <SocketManagerDelegate, 
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
 UITextFieldDelegate, UIActionSheetDelegate,
@@ -100,6 +114,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // that refer to the AdvancedUIObjectManager are sent there via this
     // delegate's protocol.
     id <AdvancedUIDelegate> advancedUIDelegate;
+    
+    id <TPAppViewControllerDelegate> delegate;
 }
 
 @property (retain) SocketManager *socketManager;
@@ -135,6 +151,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @implementation TPAppViewControllerContext
 
 
+@synthesize delegate;
 @synthesize version;
 @synthesize tvConnection;
 @synthesize socketManager;
@@ -198,11 +215,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         
         viewDidAppear = NO;
         
-        // Made a connection, let the service know!
         // Get the actual width and height of the available area
         CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
         backgroundHeight = mainframe.size.height;
-        backgroundHeight = backgroundHeight - 44;  //subtract the height of navbar
         backgroundWidth = mainframe.size.width;
         
         // Manages resources created with declare_resource
@@ -235,12 +250,14 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         
         // the virtual remote for controlling the Television
         virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
-        virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight + 44);
+        virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight + 44.0);
         [self.view addSubview:virtualRemote.view];
         virtualRemote.delegate = self;
         
         graphics = NO;
         [touchDelegate setSwipe:graphics];
+        
+        self.title = tvConnection.connectedService.name;
     }
     
     return self;
@@ -1017,6 +1034,15 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     
     NSLog(@"TPAppView loaded!");
     
+    // Get the actual width and height of the available area
+    CGRect mainframe = self.view.frame;
+    backgroundHeight = mainframe.size.height;
+    backgroundWidth = mainframe.size.width;
+    
+    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    
     textView.layer.cornerRadius = 10.0;
     textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
     textView.layer.borderWidth = 7.0;
@@ -1093,6 +1119,14 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     [super viewDidAppear:animated];
     
     NSLog(@"background: %@", backgroundView);
+    // Get the actual width and height of the available area
+    CGRect mainframe = self.view.frame;
+    backgroundHeight = mainframe.size.height;
+    backgroundWidth = mainframe.size.width;
+    
+    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     
     if (!socketManager) {
         [self.navigationController popToRootViewControllerAnimated:YES];
@@ -1237,8 +1271,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 @implementation TPAppViewController
 
-@synthesize delegate;
-
 #pragma mark -
 #pragma mark Allocation
 
@@ -1285,7 +1317,18 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
-    //return ((TPAppViewControllerContext *)context).tvConnection;
+}
+
+- (id <TPAppViewControllerDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setDelegate:(id <TPAppViewControllerDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
@@ -1297,16 +1340,24 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 - (id)initWithTVConnection:(TVConnection *)_tvConnection {
-    return [self initWithTVConnection:_tvConnection delegate:nil];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (id)initWithTVConnection:(TVConnection *)_tvConnection
                   delegate:(id<TPAppViewControllerDelegate>)_delegate {
-    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection delegate:_delegate];
+    
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
-    return [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 // TODO: Clean up all this
@@ -1315,87 +1366,127 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 #pragma mark Forwarded Methods
 
 - (void)clearUI {
-    [(TPAppViewControllerContext *)self clearUI];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)clean {
-    [(TPAppViewControllerContext *)self clean];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)exitTrickplayApp:(id)sender {
-    [(TPAppViewControllerContext *)self exitTrickplayApp:sender];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (BOOL)hasConnection {
-    return [(TPAppViewControllerContext *)self hasConnection];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)sendKeyToTrickplay:(NSString *)key count:(NSInteger)count {
-    [(TPAppViewControllerContext *)self sendKeyToTrickplay:key thecount:count];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
 #pragma mark Hidden Forwarded methods
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string {
-    [(TPAppViewControllerContext *)self sendEvent:name JSON:JSON_string];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (IBAction)hideTextBox:(id)sender {
-    [(TPAppViewControllerContext *)self hideTextBox:sender];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)advancedUIObjectAdded {
-    [(TPAppViewControllerContext *)self advancedUIObjectAdded];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 - (void)advancedUIObjectDeleted {
-    [(TPAppViewControllerContext *)self advancedUIObjectDeleted];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 - (void)checkShowVirtualRemote {
-    [(TPAppViewControllerContext *)self checkShowVirtualRemote];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
 #pragma mark Hidden Forwarded Properties
 
 - (UIActivityIndicatorView *)loadingIndicator {
-    return ((TPAppViewControllerContext *)self).loadingIndicator;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setLoadingIndicator:(UIActivityIndicatorView *)loadingIndicator {
-    ((TPAppViewControllerContext *)self).loadingIndicator = loadingIndicator;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (UITextField *)theTextField {
-    return ((TPAppViewControllerContext *)self).theTextField;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setTheTextField:(UITextField *)theTextField {
-    ((TPAppViewControllerContext *)self).theTextField = theTextField;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (UILabel *)theLabel {
-    return ((TPAppViewControllerContext *)self).theLabel;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setTheLabel:(UILabel *)theLabel {
-    ((TPAppViewControllerContext *)self).theLabel = theLabel;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (UIView *)textView {
-    return ((TPAppViewControllerContext *)self).textView;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setTextView:(UIView *)textView {
-    ((TPAppViewControllerContext *)self).textView = textView;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (UIImageView *)backgroundView {
-    return ((TPAppViewControllerContext *)self).backgroundView;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setBackgroundView:(UIImageView *)backgroundView {
-    ((TPAppViewControllerContext *)self).backgroundView = backgroundView;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
@@ -1430,16 +1521,18 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  }
  */
 
+/*
 - (void)didReceiveMemoryWarning {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
     
     // Release any cached data, images, etc. that aren't in use.
 }
+*/
 
 #pragma mark -
 #pragma mark Deallocation
-
+/*
 - (void)dealloc {
     NSLog(@"TPAppViewController dealloc");
     //self.delegate = nil;
@@ -1448,6 +1541,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     
     [super dealloc];
 }
+*/
 
 
 @end

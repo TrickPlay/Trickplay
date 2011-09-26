@@ -7,10 +7,18 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <YAJLiOS/YAJL.h>
-#import "AppBrowser.h"
 
-@protocol AppBrowserViewControllerDelegate <AppBrowserDelegate>
+@class AppBrowser;
+@class AppBrowserViewController;
+@class AppInfo;
+
+/**
+ * The AppBrowserViewControllerDelegate Protocol informs the delegate
+ * when the user selects a cell from the AppBrowserViewController which
+ * refereces the delegate.
+ */
+
+@protocol AppBrowserViewControllerDelegate <NSObject>
 
 - (void)appBrowserViewController:(AppBrowserViewController *)appBrowserViewController
                     didSelectApp:(AppInfo *)app
@@ -18,57 +26,44 @@
 
 @end
 
+
 /**
- * The AppBrowserViewController lists apps available from a service.
+ * The AppBrowserViewController extends the UIViewController class, adding
+ * functionality where the cells list apps available on a TV the user
+ * is connected to. The cells of the AppBrowserViewController are updated
+ * by its appBrowser instance.
  *
- * Queries Trickplay for its available apps via a URL Request using an
- * HTTP port (the port number is received from a welcome message which 
- * Trickplay sends to the App Browser's associated TPAppViewController).
- * The data received from the URL Request is a JSON string containing a
- * list of apps avaible for the connected service. The AppBrowser then
- * lists these available apps in a UITableView so the user may select them;
- * starting the selected app on the television.
+ * An object of this class may be created by sending the
+ * 
+ * - (AppBrowserViewController *)createAppBrowserViewController message
  *
- * Refer to AppBrowserViewController.xib for the AppBrowser's view.
+ * to an AppBrowser object or may be created using alloc and initialized using
+ *
+ * - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+ *
+ * with nibNameOrNil equaling @"AppBrowserViewController. In the former case the
+ * AppBrowser which created the AppBrowserViewController will be retained by
+ * AppBrowserViewController. In the later case the AppBrowserViewController
+ * will retain an internally created AppBrowser.
  */
+
 @interface AppBrowserViewController : UIViewController <UITableViewDelegate, 
-UITableViewDataSource> {
+UITableViewDataSource>
 
-@protected
-    /*
-    UIBarButtonItem *appShopButton;
-    UIBarButtonItem *showcaseButton;
-    UIToolbar *toolBar;
-    */
-     
-    UITableView *tableView;
-    // Spins while a app data is loading; disappears otherwise.
-    UIActivityIndicatorView *loadingSpinner;
-    
-    // Refreshes the list of apps
-    UIBarButtonItem *refreshButton;
-    
-    // Orange dot indicating which app is the current app
-    UIImageView *currentAppIndicator;
-    
-    AppBrowser *appBrowser;
-    
-    id <AppBrowserViewControllerDelegate> delegate;
-}
-
-// Exposed properties
-/*
-@property (nonatomic, retain) IBOutlet UIBarButtonItem *appShopButton;
-@property (nonatomic, retain) IBOutlet UIBarButtonItem *showcaseButton;
-@property (nonatomic, retain) IBOutlet UIToolbar *toolBar;
-*/
+// References the AppBrowserViewController's UITableView for displaying
+// possible apps.
 @property (retain) IBOutlet UITableView *tableView;
+// This object's AppBrowser.
 @property (readonly) AppBrowser *appBrowser;
+// The object's delegeate.
 @property (assign) id <AppBrowserViewControllerDelegate> delegate;
 
 // Exposed methods
+// Currently inactive.
 - (IBAction) appShopButtonClick;
+// Currently inactive.
 - (IBAction) showcaseButtonClick;
+// Calls - (void)refresh on the objects appBrowser instantiation.
 - (void)refresh;
 
 @end

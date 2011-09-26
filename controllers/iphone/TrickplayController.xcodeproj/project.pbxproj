@@ -136,6 +136,7 @@
 		CD91EAF31427D6790043C8BF /* CommandInterpreterApp.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */; };
 		CD91EAF71427D6990043C8BF /* ResourceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAF51427D6980043C8BF /* ResourceManager.m */; };
 		CD91EAFC1427E2DE0043C8BF /* RootViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EAFB1427E2DE0043C8BF /* RootViewController.xib */; };
+		CD9A6390142D246300017EDF /* Protocols.h in Headers */ = {isa = PBXBuildFile; fileRef = CD9A638F142D246300017EDF /* Protocols.h */; };
 		CDFB6D9014294F45002557A3 /* YAJLiOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDFEC56F1320608400A14307 /* YAJLiOS.framework */; };
 		CDFB6D9114295424002557A3 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDF509C813469721009870EC /* QuartzCore.framework */; };
 		CDFB6D9214295433002557A3 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */; };
@@ -289,6 +290,7 @@
 		CD91EAF41427D6980043C8BF /* ResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ResourceManager.h; path = "Take Control Framework/Classes/ResourceManager.h"; sourceTree = SOURCE_ROOT; };
 		CD91EAF51427D6980043C8BF /* ResourceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ResourceManager.m; path = "Take Control Framework/Classes/ResourceManager.m"; sourceTree = SOURCE_ROOT; };
 		CD91EAFB1427E2DE0043C8BF /* RootViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
+		CD9A638F142D246300017EDF /* Protocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Protocols.h; path = TrickplayController.xcodeproj/Protocols.h; sourceTree = SOURCE_ROOT; };
 		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewPad.xib; path = ../ImageEditorHelpViewPad.xib; sourceTree = "<group>"; };
 		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
@@ -426,9 +428,9 @@
 		CD4CA69E13B50AD700B5A7A3 /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				CD91EA741427D4E50043C8BF /* TVBrowserViewController.m */,
 				CD91EA721427D4E50043C8BF /* AppBrowserViewController.m */,
 				CD91EA731427D4E50043C8BF /* TPAppViewController.m */,
-				CD91EA741427D4E50043C8BF /* TVBrowserViewController.m */,
 				CD91EA751427D4E50043C8BF /* VirtualRemoteViewController.h */,
 				CD91EA761427D4E50043C8BF /* VirtualRemoteViewController.m */,
 			);
@@ -452,6 +454,7 @@
 			isa = PBXGroup;
 			children = (
 				CD91EA8C1427D53E0043C8BF /* Extensions.h */,
+				CD9A638F142D246300017EDF /* Protocols.h */,
 			);
 			name = PrivateMethods;
 			path = ../Classes;
@@ -721,6 +724,7 @@
 				CD91EA591427D3600043C8BF /* TVBrowser.h in Headers */,
 				CD91EA561427D3600043C8BF /* AppBrowser.h in Headers */,
 				CDFB6D981429636D002557A3 /* NetServiceManager.h in Headers */,
+				CD9A6390142D246300017EDF /* Protocols.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

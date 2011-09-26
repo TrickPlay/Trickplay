@@ -29,12 +29,7 @@
 
 
 
-@interface TVBrowser : NSObject {
-
-@protected
-    id <TVBrowserDelegate> delegate;
-    id context;
-}
+@interface TVBrowser : NSObject
 
 // Exposed instance variables
 @property (assign) id <TVBrowserDelegate> delegate;

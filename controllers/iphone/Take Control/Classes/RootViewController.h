@@ -7,11 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "NetServiceManager.h"
 #import "TPAppViewController.h"
 #import "AppBrowserViewController.h"
+#import "AppBrowser.h"
 #import "TVBrowserViewController.h"
 #import "TVBrowser.h"
+#import "TVConnection.h"
 
 /**
  * The RootViewController controls the root view of the over-arching

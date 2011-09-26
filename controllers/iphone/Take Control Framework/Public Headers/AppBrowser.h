@@ -7,11 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "TVConnection.h"
 
 @class AppBrowser;
 @class AppBrowserViewController;
-
+@class TVConnection;
 
 @interface AppInfo : NSObject {
 
@@ -42,12 +41,7 @@
 
 
 
-@interface AppBrowser : NSObject {
-
-@protected
-    id <AppBrowserDelegate> delegate;
-    id context;
-}
+@interface AppBrowser : NSObject
 
 // Exposed instance variables
 @property (assign) id <AppBrowserDelegate> delegate;

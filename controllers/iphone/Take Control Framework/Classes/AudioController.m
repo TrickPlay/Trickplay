@@ -7,6 +7,7 @@
 //
 
 #import "AudioController.h"
+#import "SocketManager.h"
 #import "Extensions.h"
 
 @implementation AudioController

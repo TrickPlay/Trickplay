@@ -33,8 +33,29 @@
 
 
 
+@interface TVBrowserViewControllerContext : TVBrowserViewController  {
+@private
+    // Orange dot that displays next to the current service
+    // UIView *currentTVIndicator;
+    // Spins while a service is loading; disappears otherwise.
+    UIActivityIndicatorView *loadingSpinner;
+    
+    // Refreshes the list of services
+    UIBarButtonItem *refreshButton;
+    
+    TVBrowser *tvBrowser;
+    
+    id <TVBrowserViewControllerDelegate> delegate;
+}
 
-@implementation TVBrowserViewController
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvBrowser:(TVBrowser *)browser;
+
+
+@end
+
+
+
+@implementation TVBrowserViewControllerContext
 
 @synthesize tvBrowser;
 @synthesize delegate;
@@ -117,13 +138,13 @@
     
     // Initialize the currentTVIndicator if it does not exist
     /*
-    if (!currentTVIndicator) {
-        currentTVIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
-        currentTVIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
-        currentTVIndicator.layer.borderWidth = 3.0;
-        currentTVIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
-        currentTVIndicator.layer.cornerRadius = currentTVIndicator.frame.size.height/2.0;
-    }
+     if (!currentTVIndicator) {
+     currentTVIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
+     currentTVIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
+     currentTVIndicator.layer.borderWidth = 3.0;
+     currentTVIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
+     currentTVIndicator.layer.cornerRadius = currentTVIndicator.frame.size.height/2.0;
+     }
      */
     
     // Initialize the loadingSpinner if it does not exist
@@ -138,10 +159,10 @@
     // Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
     // For example: self.myOutlet = nil;
     /*
-    if (currentTVIndicator) {
-        [currentTVIndicator release];
-        currentTVIndicator = nil;
-    }
+     if (currentTVIndicator) {
+     [currentTVIndicator release];
+     currentTVIndicator = nil;
+     }
      */
     if (loadingSpinner) {
         [loadingSpinner stopAnimating];
@@ -389,7 +410,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     } else {
         if (tvBrowser && ![[tvBrowser getConnectingServices] containsObject:[services objectAtIndex:indexPath.row]]) {
             [delegate tvBrowserViewController:self didSelectService:[services objectAtIndex:indexPath.row]];
-        
+            
             [tvBrowser connectToService:[services objectAtIndex:indexPath.row]];
         }
     }
@@ -428,10 +449,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [self invalidate];
     
     /*
-    if (currentTVIndicator) {
-        [currentTVIndicator release];
-        currentTVIndicator = nil;
-    }
+     if (currentTVIndicator) {
+     [currentTVIndicator release];
+     currentTVIndicator = nil;
+     }
      */
     if (loadingSpinner) {
         [loadingSpinner stopAnimating];
@@ -441,5 +462,185 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     [super dealloc];
 }
+
+@end
+
+
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+
+
+@implementation TVBrowserViewController
+
+#pragma mark -
+#pragma mark Allocation
+
++ (id)alloc {
+    if ([self isEqual:[TVBrowserViewController class]]) {
+        NSZone *temp = [self zone];
+        [self release];
+        return [TVBrowserViewControllerContext allocWithZone:temp];
+    } else {
+        return [super alloc];
+    }
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    if ([self isEqual:[TVBrowserViewController class]]) {
+        return [TVBrowserViewControllerContext allocWithZone:zone];
+    } else {
+        return [super allocWithZone:zone];
+    }
+}
+
+#pragma mark -
+#pragma mark Initialization
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvBrowser:(TVBrowser *)browser {
+    
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma Virtual Getters/Setters
+
+- (id <TVBrowserViewControllerDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setDelegate:(id <TVBrowserViewControllerDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (TVBrowser *)tvBrowser {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark View lifecycle
+
+- (void)refresh {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark - Managing Broadcasted Services
+
+/**
+ * Reloads the data in the UITableView which lists the advertised services.
+ */
+- (void)reloadData {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)invalidate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark Table view data source
+
+/**
+ * Customize the number of sections in the table view. Currently only the single
+ * section which displays the advertised services.
+ */
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+
+/**
+ * Customize the number of rows in the table view. Either matches the number of
+ * services or if 0 services there is one table which will state "Searching
+ * for services..."
+ */
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+	@throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+/**
+ * Customize the appearance of table view cells. Cells will display the services
+ * advertised over the network. If a service is currently connected to the
+ * controller then this service will have an orange dot next to the service
+ * name. If a service is loading and/or trying to establish a connection
+ * to the controller then this service will have a spinner as an indicator.
+ */
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark Table View delegate
+
+/**
+ * UITableViewDelegate callback called when a user selects a cell in the table.
+ *
+ * A cell selection from the RootViewController's UITableView would indicate
+ * the user wants to establish a connection to the service listed in the
+ * corresponding cell.
+ *
+ * This function checks to see if a service exists in that
+ * cell. If so then it checks to see if a connection has already been established
+ * which it would then push the AppBrowser for that service to the top of the
+ * UINavigationViewController view controller stack.
+ *
+ * Otherwise, the method deallocates view controllers associated with any other
+ * service that may have a connection established (in effect, destroying that
+ * connection), creates a new AppBrowserViewController, and sends this new
+ * AppBrowser connection information to connect to the new service.
+ */
+- (void)tableView:(UITableView *)tableView
+didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark Memory management
+
+
+/*
+- (void)didReceiveMemoryWarning {
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+    
+    // Relinquish ownership any cached data, images, etc that aren't in use.
+}
+
+- (void)dealloc {
+    NSLog(@"TVBrowserViewController dealloc");
+    
+    [super dealloc];
+}
+*/
 
 @end

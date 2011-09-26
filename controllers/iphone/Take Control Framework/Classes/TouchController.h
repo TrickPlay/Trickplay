@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "SocketManager.h"
 #import "TPAppViewController.h"
+#import "Protocols.h"
+
 
 #define HORIZ_SWIPE_DRAG_MIN  30
 #define VERT_SWIPE_DRAG_MIN    30
