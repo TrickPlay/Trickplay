@@ -2,7 +2,7 @@ Format: 1.4
 
 
 Title: TrickPlay
-SubTitle: Programmer's Guide, Reference and DevTools
+SubTitle: Application Development: Tutorials, Guides and References
 Footer: v__REPLACE_ME_VERSION_TAG__
 
 # You can add a footer to your documentation like this:
@@ -40,6 +40,18 @@ Timestamp: mm.d.yyyy
 # 
 # --------------------------------------------------------------------------
 
+Group: Development Options {
+	File: TrickPlay SDK and Visual Editor (no auto-title, docs/rte/AppDevEntrance.txt)
+}
+
+Group: SDK Tutorial {
+	File: Introduction (no auto-title, docs/rte/tutorial/introduction.txt)
+	File: The app MetaData and main.lua Files (no auto-title, docs/rte/tutorial/appMainLua.txt)
+	File: Running a TrickPlay Application (no auto-title, docs/rte/tutorial/runApp.txt)
+	File: Create the Main Window (no auto-title, docs/rte/tutorial/mainWindow.txt)
+	File: Add a Colored Background (no auto-title, docs/rte/tutorial/addBkgnd.txt)
+	File: Basic Screen Layout (no auto-title, docs/rte/tutorial/scrLayout.txt)
+}
 
 Group: Programmer's Guide  {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
@@ -48,7 +60,7 @@ Group: Programmer's Guide  {
    	File: User Interface*  (no auto-title, docs/rte/progguide/user_interface.txt)
 }
 
-Group: Reference  {
+Group: Engine Reference  {
 	File: Overview* (no auto-title, docs/rte/reference/overview_rte.txt)
 	
 	Group: Animation {
@@ -126,7 +138,7 @@ Group: Reference  {
 		}
 	}
 	
-	Group: System and App Components {
+	Group: System Settings {
 		File: Overview* (no auto-title, docs/rte/reference/overview_system.txt)
 		
 		Group: Globals {
