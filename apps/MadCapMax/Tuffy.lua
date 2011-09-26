@@ -179,7 +179,7 @@ do
         }
         blink_sequence = {
             function()
-                if math.random(1,10) == 1 then
+                if math.random(1,12) == 7 then
                     
                     dog.lids.x = dog.x +  28
                     dog.lids.y = dog.y - 124

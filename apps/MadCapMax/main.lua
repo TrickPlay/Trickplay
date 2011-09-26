@@ -495,9 +495,7 @@ local function main()
         
         Max:grab_key_focus()
         
-        --gamestate:change_state_to("ACTIVE")
-        
-        Max.invincible = true
+        --Max.invincible = true
         
     end
     

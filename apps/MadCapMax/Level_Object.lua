@@ -204,7 +204,7 @@ lvls = {
                 y      = 527-80,
                 m      = .5,
                 floor_func = function()
-                    mediaplayer:play_sound("audio/ringtone.mp3")
+                    mediaplayer:play_sound("audio/dailtone.mp3")
                 end
             },
             
@@ -366,6 +366,7 @@ lvls = {
                 x      = 5760+1526,
                 y      = 302,
                 m      = 1,
+                w      = 900,
                 floor_y = 1060,
                 pieces = {
                     
@@ -594,6 +595,7 @@ lvls = {
                 x      = 9600+1324+270,
                 y      = 410,
                 m      = 1,
+                w      = 900,
                 floor_y = 1050,
                 pieces = {
                     {
@@ -1522,6 +1524,7 @@ lvls = {
                 m       = 2,
                 floor_y = 1000,
                 floor_func = function(self)
+                    mediaplayer:play_sound("audio/glass_break.mp3")
                     self.source = lvl_objs[ "deck-table-glass-break1" ]
                 end
             },
@@ -1533,6 +1536,7 @@ lvls = {
                 m       = 2,
                 floor_y = 1000,
                 floor_func = function(self)
+                    mediaplayer:play_sound("audio/glass_break.mp3")
                     self.source = lvl_objs[ "deck-table-glass-break2" ]
                 end
             },
@@ -1746,7 +1750,7 @@ lvls = {
                 end,
                 on_completed = function()
                     Animation_Loop:add_animation(  lvls[2].outro[4]  )
-                    fx:heart_barrage(13090,660,4)
+                    fx:heart_barrage(13090,700,4)
                 end,
             },
             {
