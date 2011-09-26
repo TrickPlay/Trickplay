@@ -22,12 +22,7 @@
 
 
 
-@interface TVConnection : NSObject {
-
-@protected
-    id <TVConnectionDelegate> delegate;
-    id context;
-}
+@interface TVConnection : NSObject
 
 @property (readonly) BOOL isConnected;
 @property (readonly) NSUInteger port;

@@ -202,13 +202,14 @@
     if (!appViewController) {
         return;
     }
-        
+    /*
     CGFloat
     x = self.view.frame.origin.x,
     y = self.view.frame.origin.y,
     width = self.view.frame.size.width,
     height = self.view.frame.size.height;
     appViewController.view.frame = CGRectMake(x, y, width, height);
+    */
 }
 
 - (void)destroyTPAppViewController {

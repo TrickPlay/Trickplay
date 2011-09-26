@@ -7,20 +7,53 @@
 //
 
 #import "AppBrowserViewController.h"
+#import "AppBrowser.h"
+#import <YAJLiOS/YAJL.h>
 #import "Extensions.h"
 
-@implementation AppBrowserViewController
+
+@interface AppBrowserViewControllerContext : AppBrowserViewController {
+    
+@protected
+    /*
+     UIBarButtonItem *appShopButton;
+     UIBarButtonItem *showcaseButton;
+     UIToolbar *toolBar;
+     */
+    
+    UITableView *tableView;
+    // Spins while a app data is loading; disappears otherwise.
+    UIActivityIndicatorView *loadingSpinner;
+    
+    // Refreshes the list of apps
+    UIBarButtonItem *refreshButton;
+    
+    // Orange dot indicating which app is the current app
+    UIImageView *currentAppIndicator;
+    
+    AppBrowser *appBrowser;
+    
+    id <AppBrowserViewControllerDelegate> delegate;
+}
+
+
+@end
+
+
+
+
+@implementation AppBrowserViewControllerContext
 
 @synthesize tableView;
 @synthesize appBrowser;
 @synthesize delegate;
 
 /*
-@synthesize appShopButton;
-@synthesize showcaseButton;
-@synthesize toolBar;
-*/
- 
+ @synthesize appShopButton;
+ @synthesize showcaseButton;
+ @synthesize toolBar;
+ */
+
 
 - (IBAction)showcaseButtonClick {
 }
@@ -86,6 +119,8 @@
     // services.
     refreshButton = [[UIBarButtonItem alloc] initWithTitle: @"Refresh" style:UIBarButtonItemStylePlain target:self action:@selector(refresh)];
     [[self navigationItem] setRightBarButtonItem:refreshButton];
+    
+    self.title = @"TV Apps";
     
     // Initialize the loadingSpinner if it does not exist
     if (!loadingSpinner) {
@@ -163,7 +198,7 @@
 	if (cell == nil) {
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:tableCellIdentifier] autorelease];
 	}
-
+    
     if (!appBrowser.availableApps || [appBrowser.availableApps count] == 0) {
         cell.textLabel.text = @"Loading Data...";
         [currentAppIndicator removeFromSuperview];
@@ -183,7 +218,7 @@
     AppInfo *app = [appBrowser.availableApps objectAtIndex:indexPath.row];
     cell.textLabel.text = app.name;
     cell.textLabel.textColor = [UIColor blackColor];
-
+    
     if (appBrowser.currentApp && appBrowser.currentApp.name && [cell.textLabel.text compare:appBrowser.currentApp.name] == NSOrderedSame) {
         [cell addSubview:currentAppIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
@@ -254,7 +289,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSLog(@"Selected row %@\n", indexPath);
     
     if (appBrowser.availableApps && appBrowser.availableApps.count > 0 && indexPath.row < appBrowser.availableApps.count) {
-    
+        
         AppInfo *app = [appBrowser.availableApps objectAtIndex:indexPath.row];
         
         if (appBrowser.currentApp != app) {
@@ -309,6 +344,178 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     [super dealloc];
 }
+
+
+@end
+
+
+
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+
+
+
+
+@implementation AppBrowserViewController
+
+#pragma mark -
+#pragma mark Allocation
+
++ (id)alloc {
+    if ([self isEqual:[AppBrowserViewController class]]) {
+        NSZone *temp = [self zone];
+        [self release];
+        return [AppBrowserViewControllerContext allocWithZone:temp];
+    } else {
+        return [super alloc];
+    }
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    if ([self isEqual:[AppBrowserViewController class]]) {
+        return [AppBrowserViewControllerContext allocWithZone:zone];
+    } else {
+        return [super allocWithZone:zone];
+    }
+}
+
+#pragma mark -
+#pragma mark Initialization
+
+- (IBAction)showcaseButtonClick {
+}
+
+- (IBAction)appShopButtonClick {
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil appBrowser:(AppBrowser *)browser {
+    
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark Forwarded Getters/Setters
+
+- (UITableView *)tableView {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setTableView:(UITableView *)tableView {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (AppBrowser *)appBrowser {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setAppBrowser:(AppBrowser *)appBrowser {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (id <AppBrowserViewControllerDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setDelegate:(id <AppBrowserViewControllerDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark Forwarded Methods
+
+- (void)refresh {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark Table view data source
+
+// Customize the number of sections in the table view.
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+/**
+ * Customize the number of rows in the table view. The number of rows is equlivalent
+ * to the number of apps available. If Trickplay has no apps then one row is
+ * still created which will be populated with a string informing the user there
+ * are no available apps.
+ */
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+	@throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+/**
+ * Customize the appearance of table view cells. Each cell will contain the name
+ * of an app available on Trickplay. Selecting an app will launch the app on
+ * Trickplay.
+ */
+- (UITableViewCell *)tableView:(UITableView *)_tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark Table view delegate
+
+/**
+ * Override to support row selection in the table view. Selecting a row tells
+ * Trickplay to launch the app populated by that row.
+ */
+- (void)tableView:(UITableView *)_tableView
+didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma mark Memory Management
+
+/*
+- (void)didReceiveMemoryWarning {
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+    
+    // Release any cached data, images, etc. that aren't in use.
+}
+*/
+
+/*
+- (void)dealloc {
+    NSLog(@"AppBrowserViewController dealloc");
+    
+    [super dealloc];
+}
+ */
 
 
 @end

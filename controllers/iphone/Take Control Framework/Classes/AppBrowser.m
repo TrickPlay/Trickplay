@@ -8,6 +8,8 @@
 
 #import "AppBrowser.h"
 #import "AppBrowserViewController.h"
+#import <YAJLiOS/YAJL.h>
+#import "TVConnection.h"
 #import "Extensions.h"
 
 
@@ -41,6 +43,8 @@
 }
 
 - (void)dealloc {
+    NSLog(@"AppBrowser Dealloc");
+    
     [name release];
     name = nil;
     [appID release];
@@ -58,10 +62,9 @@
 
 
 
-@interface AppBrowserContext : NSObject {
+@interface AppBrowserContext : AppBrowser {
     
 @private
-    AppBrowser *appBrowser;
     NSMutableArray *viewControllers;
     
     TVConnection *tvConnection;
@@ -79,13 +82,9 @@
     // The data buffers for the connections
     NSMutableData *fetchAppsData;
     NSMutableData *currentAppData;
+    
+    id <AppBrowserDelegate> delegate;
 }
-
-@property (retain) NSArray *availableApps;
-@property (retain) AppInfo *currentApp;
-@property (retain) TVConnection *tvConnection;
-
-- (id)initWithAppBrowser:(AppBrowser *)appBrowser tvConnection:(TVConnection *)connection;
 
 - (void)addViewController:(AppBrowserViewController *)viewController;
 - (void)invalidateViewController:(AppBrowserViewController *)viewController;
@@ -106,24 +105,47 @@
 @synthesize availableApps;
 @synthesize currentApp;
 @synthesize tvConnection;
+@synthesize delegate;
 
-- (id)init {
-    return [self initWithAppBrowser:nil tvConnection:nil];
+#pragma mark -
+#pragma Setters/Getters
+
+- (void)setCurrentApp:(AppInfo *)_currentApp {
+    @synchronized (self) {
+        [_currentApp retain];
+        [currentApp release];
+        currentApp = _currentApp;
+    }
 }
 
-- (id)initWithAppBrowser:(AppBrowser *)_appBrowser tvConnection:(TVConnection *)_connection {
-    if (!_appBrowser) {
-        [self release];
-        return nil;
+- (void)setAvailableApps:(NSMutableArray *)_availableApps {
+    @synchronized (self) {
+        [_availableApps retain];
+        [availableApps release];
+        availableApps = _availableApps;
     }
+}
+
+#pragma mark -
+#pragma mark Initialization
+
+- (id)init {
+    return [self initWithConnection:nil delegate:nil];
+}
+
+- (id)initWithDelegate:(id <AppBrowserDelegate>)_delegate {
+    return [self initWithConnection:nil delegate:_delegate];
+}
+
+- (id)initWithConnection:(TVConnection *)_connection delegate:(id<AppBrowserDelegate>)_delegate {
     
     self = [super init];
     if (self) {
-        appBrowser = _appBrowser;
+        
         viewControllers = [[NSMutableArray alloc] initWithCapacity:5];
         
         self.tvConnection = _connection;
-        [self.tvConnection setAppBrowser:appBrowser];
+        [self.tvConnection setAppBrowser:self];
         
         availableApps = [[NSMutableArray alloc] initWithCapacity:10];
         currentApp = nil;
@@ -137,6 +159,16 @@
         // The data buffers for the connections
         fetchAppsData = nil;
         currentAppData = nil;
+        
+        self.delegate = _delegate;
+        
+        /**
+         // Can't do this automatically for now
+         if (self.delegate) {
+         [self refreshCurrentApp];
+         [self refreshAvailableApps];
+         }
+         **/
     }
     
     return self;
@@ -144,6 +176,12 @@
 
 #pragma mark -
 #pragma mark AppBrowserViewController
+
+- (AppBrowserViewController *)createAppBrowserViewController {
+    AppBrowserViewController *viewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil appBrowser:self];
+    
+    return viewController;
+}
 
 - (void)addViewController:(AppBrowserViewController *)viewController {
     [viewControllers addObject:[NSValue valueWithPointer:viewController]];
@@ -173,6 +211,11 @@
 
 #pragma mark -
 #pragma Retrieving App Info from Network
+
+- (void)refresh {
+    [self refreshAvailableApps];
+    [self refreshCurrentApp];
+}
 
 - (void)matchCurrentAppToAvailableApps {
     if (currentApp && availableApps) {
@@ -213,7 +256,7 @@
         [self matchCurrentAppToAvailableApps];
     }
     NSLog(@"current app: %@", self.currentApp);
-    [appBrowser.delegate appBrowser:appBrowser didReceiveCurrentApp:self.currentApp];
+    [delegate appBrowser:self didReceiveCurrentApp:self.currentApp];
     [self viewControllersRefresh];
 }
 
@@ -227,15 +270,15 @@
         }
         [self matchAvailableAppsToCurrentApp];
     }
-    [appBrowser.delegate appBrowser:appBrowser didReceiveAvailableApps:self.availableApps];
+    [delegate appBrowser:self didReceiveAvailableApps:self.availableApps];
     [self viewControllersRefresh];
 }
 
 - (void)refreshCurrentApp {
     NSLog(@"Fetching Current App");
     
-    if (!appBrowser.tvConnection || !appBrowser.tvConnection.hostName) {
-        appBrowser.currentApp = nil;
+    if (!self.tvConnection || !self.tvConnection.hostName) {
+        self.currentApp = nil;
         return;
     }
     
@@ -250,7 +293,7 @@
     }
     
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", appBrowser.tvConnection.hostName, appBrowser.tvConnection.http_port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/current_app", self.tvConnection.hostName, self.tvConnection.http_port];
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:50.0];
     currentAppInfoConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
@@ -263,8 +306,8 @@
 - (void)refreshAvailableApps {
     NSLog(@"Fetching Available Apps");
     
-    if (!appBrowser.tvConnection || !appBrowser.tvConnection.hostName) {
-        [(NSMutableArray *)appBrowser.availableApps removeAllObjects];
+    if (!self.tvConnection || !self.tvConnection.hostName) {
+        [(NSMutableArray *)self.availableApps removeAllObjects];
         return;
     }
     
@@ -279,7 +322,7 @@
     }
     
     // grab json data and put it into an array
-    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", appBrowser.tvConnection.hostName, appBrowser.tvConnection.http_port];
+    NSString *JSONString = [NSString stringWithFormat:@"http://%@:%d/api/apps", self.tvConnection.hostName, self.tvConnection.http_port];
     
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:JSONString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:50.0];
     fetchAppsConnection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
@@ -399,14 +442,14 @@
         // Failure to launch
         if (response.statusCode != 200) {
             dispatch_async(dispatch_get_main_queue(), ^(void){
-                [appBrowser.delegate appBrowser:appBrowser newAppLaunched:app successfully:NO];
+                [self.delegate appBrowser:self newAppLaunched:app successfully:NO];
                 [self viewControllersRefresh];
             });
         } else {  // Successful launch
             self.currentApp = app;
             
             dispatch_async(dispatch_get_main_queue(), ^(void){
-                [appBrowser.delegate appBrowser:appBrowser newAppLaunched:app successfully:YES];
+                [self.delegate appBrowser:self newAppLaunched:app successfully:YES];
                 [self viewControllersRefresh];
             });
         }
@@ -428,7 +471,7 @@
     self.currentApp = nil;
     self.availableApps = nil;
     
-    appBrowser = nil;
+    delegate = nil;
     
     [super dealloc];
 }
@@ -436,47 +479,55 @@
 @end
 
 
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
 
 
 
 @implementation AppBrowser
 
-@synthesize delegate;
+#pragma mark -
+#pragma mark Allocation
+
++ (id)alloc {
+    if ([self isEqual:[AppBrowser class]]) {
+        NSZone *temp = [self zone];
+        [self release];
+        return [AppBrowserContext allocWithZone:temp];
+    } else {
+        return [super alloc];
+    }
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    if ([self isEqual:[AppBrowser class]]) {
+        return [AppBrowserContext allocWithZone:zone];
+    } else {
+        return [super allocWithZone:zone];
+    }
+}
 
 #pragma mark -
 #pragma mark Initialization
 
-- (id)init
-{
-    return [self initWithConnection:nil delegate:nil];
-}
-
 - (id)initWithDelegate:(id <AppBrowserDelegate>)_delegate {
-    return [self initWithConnection:nil delegate:_delegate];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (id)initWithConnection:(TVConnection *)_connection delegate:(id<AppBrowserDelegate>)_delegate {
     
-    self = [super init];
-    if (self) {
-        context = [[AppBrowserContext alloc] initWithAppBrowser:self tvConnection:_connection];
-        if (!context) {
-            [self release];
-            return nil;
-        }
-        
-        self.delegate = _delegate;
-        
-        /**
-        // Can't do this automatically for now
-        if (self.delegate) {
-            [self refreshCurrentApp];
-            [self refreshAvailableApps];
-        }
-        **/
-    }
-    
-    return self;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 
@@ -484,64 +535,99 @@
 #pragma Setters/Getters
 
 - (void)setCurrentApp:(AppInfo *)_currentApp {
-    ((AppBrowserContext *)context).currentApp = _currentApp;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setAvailableApps:(NSMutableArray *)_availableApps {
-    ((AppBrowserContext *)context).availableApps = _availableApps;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (NSArray *)availableApps {
-    return ((AppBrowserContext *)context).availableApps;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (AppInfo *)currentApp {
-    return ((AppBrowserContext *)context).currentApp;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setTvConnection:(TVConnection *)tvConnection {
-    ((AppBrowserContext *)context).tvConnection = tvConnection;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (TVConnection *)tvConnection {
-    return ((AppBrowserContext *)context).tvConnection;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (id <AppBrowserDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setDelegate:(id <AppBrowserDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
 #pragma mark AppBrowserViewController
 
 - (AppBrowserViewController *)createAppBrowserViewController {
-    AppBrowserViewController *viewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil appBrowser:self];
-    
-    return viewController;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)addViewController:(AppBrowserViewController *)viewController {
-    [((AppBrowserContext *)context) addViewController:viewController];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)invalidateViewController:(AppBrowserViewController *)viewController {
-    [((AppBrowserContext *)context) invalidateViewController:viewController];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)viewControllersRefresh {
-    [((AppBrowserContext *)context) viewControllersRefresh];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
 #pragma mark Retrieving App Info From Network
 
 - (void)refresh {
-    [self refreshAvailableApps];
-    [self refreshCurrentApp];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)refreshCurrentApp {
-    [((AppBrowserContext *)context) refreshCurrentApp];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)refreshAvailableApps {
-    [((AppBrowserContext *)context) refreshAvailableApps];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
@@ -552,27 +638,26 @@
  * app.
  */
 - (void)launchApp:(AppInfo *)app {
-    [(AppBrowserContext *)context launchApp:app];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
 #pragma mark Deallocation
 
 - (void)cancelRefresh {
-    [((AppBrowserContext *)context) cancelRefresh];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
+/*
 - (void)dealloc {
     NSLog(@"AppBrowser Dealloc");
-    
-    self.delegate = nil;
-    
-    [self cancelRefresh];
-    
-    [context release];
-    context = nil;
         
     [super dealloc];
 }
+*/
 
 @end

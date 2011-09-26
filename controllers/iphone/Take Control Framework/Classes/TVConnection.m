@@ -8,14 +8,14 @@
 
 #import "TVConnection.h"
 #import "Extensions.h"
+#import "SocketManager.h"
 
 #import <uuid/uuid.h>
 
 
-@interface TVConnectionContext : NSObject <SocketManagerDelegate> {
+@interface TVConnectionContext : TVConnection <SocketManagerDelegate> {
     
 @private
-    TVConnection *tvConnection;
     SocketManager *socketManager;
     TVBrowser *tvBrowser;
     AppBrowser *appBrowser;
@@ -28,6 +28,8 @@
     NSString *TVName;
     
     NSNetService *connectedService;
+    
+    id <TVConnectionDelegate> delegate;
 }
 
 @property (readonly) BOOL isConnected;
@@ -39,7 +41,7 @@
 
 @property (nonatomic, readonly) SocketManager *socketManager;
 
-- (id)initWithTVConnection:(TVConnection *)tvConnection service:(NSNetService *)service;
+- (id)initWithService:(NSNetService *)service delegate:(id<TVConnectionDelegate>)delegate;
 
 @end
 
@@ -52,15 +54,19 @@
 @synthesize hostName;
 @synthesize TVName;
 @synthesize connectedService;
-
+@synthesize delegate;
 @synthesize socketManager;
 
+#pragma mark -
+#pragma mark Initialization
+
 - (id)init {
-    return [self initWithTVConnection:nil service:nil];
+    return [self initWithService:nil delegate:nil];
 }
 
-- (id)initWithTVConnection:(TVConnection *)_tvConnection service:(NSNetService *)service{
-    if (!_tvConnection) {
+- (id)initWithService:(NSNetService *)service delegate:(id<TVConnectionDelegate>)_delegate {
+    
+    if (!service) {
         [self release];
         return nil;
     }
@@ -124,9 +130,7 @@
         isConnected = YES;
         
         tvBrowser = nil;
-        appBrowser = nil;
-        
-        tvConnection = _tvConnection;
+        appBrowser = nil;        
     }
     
     return self;
@@ -150,7 +154,7 @@
     }
     
     if (tvBrowser) {
-        [tvBrowser invalidateTVConnection:tvConnection];
+        [tvBrowser invalidateTVConnection:self];
         tvBrowser = nil;
     }
     
@@ -170,7 +174,7 @@
         socketManager = nil;
     }
     
-    [tvConnection.delegate tvConnectionDidDisconnect:tvConnection abruptly:abruptly];
+    [self.delegate tvConnectionDidDisconnect:self abruptly:abruptly];
 }
 
 - (void)socketErrorOccurred {
@@ -219,7 +223,7 @@
     }
     
     if (tvBrowser) {
-        [tvBrowser invalidateTVConnection:tvConnection];
+        [tvBrowser invalidateTVConnection:self];
         tvBrowser = nil;
     }
     
@@ -239,109 +243,147 @@
         [socketManager release];
         socketManager = nil;
     }
-    
-    tvConnection = nil;
-    
+        
     [super dealloc];
 }
 
 @end
 
 
-
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
 
 
 
 @implementation TVConnection
 
-@synthesize delegate;
+#pragma mark -
+#pragma mark Allocation
 
-// TODO: test this init
-- (id)init
-{
-    return [self initWithService:nil delegate:nil];
++ (id)alloc {
+    if ([self isEqual:[TVConnection class]]) {
+        NSZone *temp = [self zone];
+        [self release];
+        return [TVConnectionContext allocWithZone:temp];
+    } else {
+        return [super alloc];
+    }
 }
 
-- (id)initWithService:(NSNetService *)service
-             delegate:(id<TVConnectionDelegate>)_delegate {
-    
-    if (!service) {
-        [self release];
-        return nil;
++ (id)allocWithZone:(NSZone *)zone {
+    if ([self isEqual:[TVConnection class]]) {
+        return [TVConnectionContext allocWithZone:zone];
+    } else {
+        return [super allocWithZone:zone];
     }
-    
-    self = [super init];
-    if (self) {
-        context = [[TVConnectionContext alloc] initWithTVConnection:self service:service];
-        if (!context) {
-            [self release];
-            return nil;
-        }
-        
-        self.delegate = _delegate;
-    }
-    
-    return self;
+}
+
+#pragma mark -
+#pragma mark Initialization
+
+- (id)initWithService:(NSNetService *)service delegate:(id<TVConnectionDelegate>)_delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
 #pragma mark Private Methods
 
+- (id <TVConnectionDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setDelegate:(id <TVConnectionDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
 - (SocketManager *)socketManager {
-    return [[((TVConnectionContext *)context).socketManager retain] autorelease];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setHttp_port:(NSUInteger)_port {
-    [(TVConnectionContext *)context setHttp_port:_port];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setAppBrowser:(AppBrowser *)_appBrowser {
-    [(TVConnectionContext *)context setAppBrowser:_appBrowser];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (void)setTVBrowser:(TVBrowser *)_tvBrowser {
-    [(TVConnectionContext *)context setTVBrowser:_tvBrowser];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (BOOL)isConnected {
-    return ((TVConnectionContext *)context).isConnected;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (NSUInteger)port {
-    return ((TVConnectionContext *)context).port;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (NSUInteger)http_port {
-    return ((TVConnectionContext *)context).http_port;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (NSString *)hostName {
-    return ((TVConnectionContext *)context).hostName;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (NSString *)TVName {
-    return ((TVConnectionContext *)context).TVName;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 - (NSNetService *)connectedService {
-    return ((TVConnectionContext *)context).connectedService;
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
 #pragma mark Deallocation
 
 - (void)disconnect {
-    [(TVConnectionContext *)context disconnect];
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
+/*
 - (void)dealloc {
     NSLog(@"TVConnection Dealloc");
     
-    self.delegate = nil;
-    [(TVConnectionContext *)context release];
-    context = nil;
-    
     [super dealloc];
 }
+*/
 
 @end

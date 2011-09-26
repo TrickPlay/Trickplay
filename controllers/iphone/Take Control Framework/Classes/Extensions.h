@@ -10,7 +10,11 @@
 #import "TVBrowserViewController.h"
 #import "TVBrowser.h"
 #import "AppBrowserViewController.h"
+#import "AppBrowser.h"
 #import "TPAppViewController.h"
+#import "TVConnection.h"
+
+@class SocketManager;
 
 
 // Hidden Methods
@@ -38,14 +42,14 @@
 
 @end
 
+#pragma mark -
+#pragma mark AppBrowser Extensions
+
 @interface AppInfo()
 
 - (id)initWithAppDictionary:(NSDictionary *)dictionary;
 
 @end
-
-#pragma mark -
-#pragma mark AppBrowser Extensions
 
 @interface AppBrowserViewController()
 

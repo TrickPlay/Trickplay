@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "TPAppViewController.h"
+#import "SocketManager.h"
+#import "Protocols.h"
 
 // Constant for the number of times per second (Hertz) to sample acceleration.
 #define ACCEL_FREQ_LOW          40
