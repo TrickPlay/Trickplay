@@ -207,6 +207,7 @@ local make_cat = function(cat_name)
             attack_sequence,
             pos_wait,
             poop_shake_sequence,
+            wait_sequence,
             silent_wait_sequence
         
         
@@ -379,6 +380,13 @@ local make_cat = function(cat_name)
                 100,
                 function() if math.random(1,10) == 1 then mediaplayer:play_sound("audio/cat sad growl "..math.random(1,3)..".mp3") end end,
                 100,
+            }
+            blink_sequence = {
+                imgs.default[1],
+                imgs.default[2],
+                imgs.default[3],
+                imgs.default[2],
+                imgs.default[1],
             }
         end
         
@@ -1111,7 +1119,9 @@ local make_cat = function(cat_name)
                         --if reentry then wait for it
                         if locked_reentry then
                             print("on post, waiting for reentry")
+                            
                             frames = silent_wait_sequence
+                            
                             
                             next_move = reentry_wait
                             
@@ -1181,7 +1191,11 @@ local make_cat = function(cat_name)
                     
                     cat.source = imgs.default[1]
                     
-                    frames = wait_sequence
+                    if math.random(1,5) == 1 then
+                        frames = blink_sequence
+                    else
+                        frames = wait_sequence
+                    end
                     
                 else
                     
@@ -1196,7 +1210,11 @@ local make_cat = function(cat_name)
                 cat.x = stop_point
                 cat.source = imgs.default[1]
                 
-                frames = wait_sequence
+                if math.random(1,5) == 1 then
+                    frames = blink_sequence
+                else
+                    frames = wait_sequence
+                end
                 
                 return
                 
@@ -1219,7 +1237,11 @@ local make_cat = function(cat_name)
                 
                 cat.source = imgs.default[1]
                 
-                frames = wait_sequence
+                if math.random(1,5) == 1 then
+                    frames = blink_sequence
+                else
+                    frames = wait_sequence
+                end
                 
             --if Max is over an obstacle, I'm not on it, then run to it
             elseif target.under_obstacle and target.under_obstacle ~= cat.under_obstacle then
@@ -1251,7 +1273,11 @@ local make_cat = function(cat_name)
                 
                 cat.source = imgs.default[1]
                 
-                frames = wait_sequence
+                if math.random(1,5) == 1 then
+                    frames = blink_sequence
+                else
+                    frames = wait_sequence
+                end
                 
             end
             

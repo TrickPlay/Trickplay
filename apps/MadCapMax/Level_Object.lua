@@ -372,7 +372,7 @@ lvls = {
                     
                     {
                         source  = "snowglobe-top-left",
-                        x      = 11,
+                        x      = 12,
                         y      = 0,
                     },
 	
@@ -384,7 +384,7 @@ lvls = {
 	
                     {
                         source  = "snowglobe-btm-left",
-                        x      = 0,
+                        x      = 2,
                         y      = 11,
                     },
 	
@@ -396,8 +396,8 @@ lvls = {
 	
                     {
                         source  = "snowglobe_base",
-                        x      = 4,
-                        y      = 40,
+                        x      = 3,
+                        y      = 38,
                     },
                 },
                 floor_func = function(self)
@@ -576,7 +576,7 @@ lvls = {
                 x      = 9600+904+230,
                 y      = 550+30,
                 enemy  = true,
-            },--[[
+            },
             {
                 type   = "static",
                 source = "bar-stool",
@@ -588,7 +588,7 @@ lvls = {
                 source = "bar-stool",
                 x      = 9600+1309+270,
                 y      = 706+30,
-            },--]]
+            },
             {
                 
                 type   = "dynamic",
