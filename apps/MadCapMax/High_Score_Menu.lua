@@ -5,7 +5,7 @@ local max_name_len = 15
 
 local list_len = 8
 
-local font = "Gladatur Rum"
+local font = "Andika"
 
 local hs_path_dir = "menus/highscore/"
 
@@ -14,7 +14,7 @@ local bg, continue, continue_hl, arrow_src, blue_box
 
 local text_layer = Group{}
 
-local curr_letter = Text{font =font.." 70px",color="333333",text = "a" }
+local curr_letter = Text{font =font.." 50px",color="333333",text = "a" }
 
 --indexing
 local index, insert_at_i, text_input_i = 1,1,1
@@ -96,26 +96,26 @@ end
 
 
 
-local base_y = 450
+local base_y = 400
 local y_interval = 65
 
 for i = 1,list_len do
     
     scores_txt[i] = Text{
         name  = i.." score",
-        font  = font.." 90px",
+        font  = font.." 50px",
         text  = scores[i],
         color = "000000",
-        x     = 950,
-        y     = base_y + y_interval * (i-1)-15,
+        x     = 1180,
+        y     = base_y + y_interval * (i-1),
     }
     
     names_txt[i] = Text{
         name  = i.." name",
         text  = names[i],
-        font  = font.." 70px",
+        font  = font.." 50px",
         color = "000000",
-        x     = 350,
+        x     = 420,
         y     = base_y + y_interval * (i-1),
     }
     text_layer:add(scores_txt[i],names_txt[i])
@@ -145,8 +145,8 @@ function High_Score_Menu:load_assets(parent, score)
     index =  (new_score > scores[# scores]) and 1 or 2
     
     bg          = Image{src = assets_path_dir..hs_path_dir.."high-score-01.jpg", scale = {4/3,4/3} }
-    continue    = Image{src = assets_path_dir..hs_path_dir.."continue.png",    x = 1400,y=800}
-    continue_hl = Image{src = assets_path_dir..hs_path_dir.."continue-hl.png", x = 1400,y=800,opacity=0}
+    continue    = Image{src = assets_path_dir..hs_path_dir.."continue.png",    x = 1450,y=800}
+    continue_hl = Image{src = assets_path_dir..hs_path_dir.."continue-hl.png", x = 1450,y=800,opacity=0}
     
     arrow_src   = Image{src = assets_path_dir..hs_path_dir.."arrow.png"}
     

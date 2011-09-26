@@ -97,14 +97,14 @@ function Splash_Menu:load_assets(parent)
     index = 2
     
     bg   = Image{src = assets_path_dir..splash_path_dir.."splash.jpg",scale = {4/3,4/3}}
-    help = Image{src = assets_path_dir..splash_path_dir.."how-to-card.png", x=screen_w/2, y=970}
+    help = Image{src = assets_path_dir..splash_path_dir.."how-to-card.png", x=screen_w/2+10, y=970}
     help.anchor_point = {help.w/2,0}
     --play = Image{src = assets_path_dir..splash_path_dir.."splash-arrow-highlight.png",scale = {4/3,4/3}, x=1064,y=568}
     continue     = Image{src = assets_path_dir..splash_path_dir.."splash-continue-btn-yellow.png", x=  50, y=300}
     continue_hl  = Image{src = assets_path_dir..splash_path_dir.."splash-continue-btn-orange.png", x=  50, y=300,opacity = 0}
     start_new    = Image{src = assets_path_dir..splash_path_dir.."splash-new-btn-yellow.png",      x=1400, y=300}
     start_new_hl = Image{src = assets_path_dir..splash_path_dir.."splash-new-btn-orange.png",      x=1400, y=300,opacity = 0}
-    how_to_tips  = Image{src = assets_path_dir..splash_path_dir.."how-to-tips.png",                x=-350, y=500-85}
+    how_to_tips  = Image{src = assets_path_dir..splash_path_dir.."how-to-tips.png",                x=-500, y=500-85}
     how_to_tips2 = Image{src = assets_path_dir..splash_path_dir.."how-to-tips2.png",               x=screen.w+350, y=500-85}
     
     continue_hl.flash  = make_flash_anim(    continue_hl,  function() return index ~= 1 or help_focused end )
@@ -118,17 +118,17 @@ function Splash_Menu:load_assets(parent)
         
     end
     
-    local help_y_up = Interval(  970,  400-65 )
-    local tips_in   = Interval( -350,  170 )
-    local help_y_dn = Interval(  400-65,  970 )
-    local tips_out  = Interval(  170, -350 )
+    local help_y_up = Interval(  970,  100 )
+    local tips_in   = Interval( -500,  50 )
+    local help_y_dn = Interval(  100,  970 )
+    local tips_out  = Interval(  50, -500 )
     local slide_up_help = {
         duration = .3,
         on_step = function(s,p)
             continue.opacity  = continue.o_max*(1-p)
             start_new.opacity = 255*(1-p)
             how_to_tips.x = tips_in:get_value(p)
-            how_to_tips2.x = screen_w-tips_in:get_value(p)-300
+            how_to_tips2.x = screen_w-tips_in:get_value(p)-450
             help.y        = help_y_up:get_value(p)
         end
     }
@@ -137,7 +137,7 @@ function Splash_Menu:load_assets(parent)
         on_step = function(s,p)
             continue.opacity  = continue.o_max*(p)
             start_new.opacity = 255*(p)
-            how_to_tips2.x = screen_w-tips_out:get_value(p)-300
+            how_to_tips2.x = screen_w-tips_out:get_value(p)-450
             how_to_tips.x = tips_out:get_value(p)
             help.y        = help_y_dn:get_value(p)
         end
