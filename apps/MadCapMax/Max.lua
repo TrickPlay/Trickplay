@@ -139,12 +139,12 @@ end
 
 function bird:collect_seed()
     sk:inc("seeds")
-    mediaplayer:play_sound("audio/crunch.wav")
+    mediaplayer:play_sound("audio/crunch3.mp3")
     hud:inc_poop()
 end
 function bird:collect_cracker()
     sk:inc("crackers")
-    mediaplayer:play_sound("audio/crunch.wav")
+    mediaplayer:play_sound("audio/crunch2.mp3")
     hud:inc_poop()
 end
 function bird:get_vx()
@@ -165,7 +165,7 @@ function bird:collect_cherry()
     end
     
     sk:inc("cherries")
-    mediaplayer:play_sound("audio/collect2.WAV")
+    mediaplayer:play_sound("audio/crunch1.mp3")
     
 end
 
@@ -847,14 +847,22 @@ do
         end
     }
     
+    local fly_to_x
+    local fly_to_y
+    local fly_to_bl
+    
     local stop_fly_to = Timer{
         interval = 1000,
         on_timer = function(self)
             
+            bird.x = fly_to_x
+            bird.y = fly_to_y
+            
             self:stop()
             
             Animation_Loop:delete_animation(bird.on_idle)
-            
+            set_wings_to(4)
+            bottom_limit = fly_to_bl
         end
     }
     
@@ -872,8 +880,14 @@ do
         
         flap_speed = flap_speeds.reg
         
+        fly_to_x = t.x
+        fly_to_y = t.y
+        
         vx = (t.x - bird.x)/t.d
         vy = (t.y - bird.y)/t.d
+        
+        fly_to_bl = bottom_limit
+        bottom_limit = 1080
         
         stop_fly_to.duration = t.d * 1000
         
@@ -1151,11 +1165,29 @@ do
         end,
         [keys.RED] = function()
             
+            print("mediaplayer",mediaplayer.state)
+            
             if gamestate:current_state() == "PAUSED" then
+                
+                if mediaplayer.state == mediaplayer.PAUSED then
+                    
+                    mediaplayer:play()
+                    
+                end
+                
+                mediaplayer:play_sound("audio/start.wav")
                 
                 hud:unpause()
                 
             else
+                
+                if mediaplayer.state == mediaplayer.PLAYING then
+                    
+                    mediaplayer:pause()
+                    
+                end
+                
+                mediaplayer:play_sound("audio/start.wav")
                 
                 hud:pause()
                 

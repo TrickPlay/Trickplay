@@ -1,4 +1,8 @@
 
+-- inited globals
+local physics_world, fx
+
+local lvl_objs        = {} --contains the Image{}'s from lvls[i].clone_srcs
 local generic_srcs = {
     "seed.png",
     "seed-back.png",
@@ -186,6 +190,23 @@ lvls = {
                 y      = 527+5,
                 m      = .5,
             },
+            {
+                type   = "dynamic",
+                source = "phone-stand",
+                x      = 1920+1596-20,
+                y      = 527+25,
+                m      = .5,
+            },
+            {
+                type   = "dynamic",
+                source = "phone",
+                x      = 1920+1596+6,
+                y      = 527-80,
+                m      = .5,
+                floor_func = function()
+                    mediaplayer:play_sound("audio/ringtone.mp3")
+                end
+            },
             
 
             {
@@ -301,13 +322,13 @@ lvls = {
                 m      = 1,
             },
             {
-                type   = "foreground",
+                type   = "static",
                 source = "dining-table-leg",
                 x      = 5760+388+120+80,
                 y      = 787+31,
             },
             {
-                type   = "foreground",
+                type   = "static",
                 source = "dining-table-leg",
                 x      = 5760+900+220,
                 y      = 787+30,
@@ -334,8 +355,8 @@ lvls = {
             {
                 type   = "static",
                 source = "living-chair",
-                x      = 5760+1387+40,
-                y      = 549+70,
+                x      = 5760+1387+40+100,
+                y      = 549+70-50,
                 enemy  = true,
                 player = true,
             },
@@ -344,7 +365,8 @@ lvls = {
                 type   = "dynamic",
                 x      = 5760+1526,
                 y      = 302,
-                m      = .7,
+                m      = 1,
+                floor_y = 1060,
                 pieces = {
                     
                     {
@@ -376,7 +398,28 @@ lvls = {
                         x      = 4,
                         y      = 40,
                     },
-                }
+                },
+                floor_func = function(self)
+                    
+                    local spill = Clone{
+                        source = lvl_objs["snowglobe_water"],
+                        anchor_point = {lvl_objs["snowglobe_water"].w/2,lvl_objs["snowglobe_water"].h/2},
+                        y  = 70 ,
+                        z_roation = {-self.z_rotation[1],0,0},
+                        scale = {0,0},
+                    }
+                    
+                    self:add(spill)
+                    
+                    Animation_Loop:add_animation{
+                        duration = 1,
+                        on_step = function(s,p)
+                            
+                            spill.scale = {1.2*p,1.2*p}
+                            
+                        end
+                    }
+                end
             },
             --[[
             {
@@ -455,9 +498,10 @@ lvls = {
 
             {
                 type   = "foreground",
-                source = "living-tv-pic1",
+                source = "living-tv-static",
                 x      = 7680+1543+150,
                 y      = 453+40,
+                opacity = 0,
             },
 
             {
@@ -488,6 +532,13 @@ lvls = {
                 source = "bar-bookshelf",
                 x      = 9600+33+265,
                 y      = 181+100,
+            },
+            {
+                type   = "dynamic",
+                source = "bar-shelf-candle",
+                x      = 9600+33+265+200,
+                y      = 181+100+2,
+                m      = .5,
             },
 
             {
@@ -543,6 +594,7 @@ lvls = {
                 x      = 9600+1324+270,
                 y      = 410,
                 m      = 1,
+                floor_y = 1050,
                 pieces = {
                     {
                         source = "scotch-top",
@@ -572,7 +624,28 @@ lvls = {
                         x      = 0,
                         y      = 82,
                     },
-                }
+                },
+                floor_func = function(self)
+                    
+                    local spill = Clone{
+                        source = lvl_objs["scotch-spill"],
+                        anchor_point = {lvl_objs["scotch-spill"].w/2,lvl_objs["scotch-spill"].h/2},
+                        y  = 70 ,
+                        z_roation = {-self.z_rotation[1],0,0},
+                        scale = {0,0},
+                    }
+                    
+                    self:add(spill)
+                    
+                    Animation_Loop:add_animation{
+                        duration = 1,
+                        on_step = function(s,p)
+                            
+                            spill.scale = {1.2*p,1.2*p}
+                            
+                        end
+                    }
+                end
             },
 
             {
@@ -1014,8 +1087,8 @@ lvls = {
                 h = 40 ,
             },
             {
-                x = 7287-100, 
-                y = 819 ,
+                x = 7287, 
+                y = 819 -50,
                 w = 200 ,
                 h = 50 ,
             },
@@ -1030,6 +1103,23 @@ lvls = {
                 y = 881 ,
                 w = 293 ,
                 h = 170 ,
+                f = function()
+                    
+                    if screen:find_child("living-tv-static").opacity == 255 then
+                        
+                        screen:find_child("living-tv-static").opacity = 0
+                        
+                        mediaplayer:pause()
+                        
+                    else
+                        
+                        screen:find_child("living-tv-static").opacity = 255
+                        
+                        mediaplayer:load("audio/tv on static.mp3")
+                        
+                    end
+                    
+                end,
             },
             {
                 x = 10734, 
@@ -1297,14 +1387,6 @@ lvls = {
             },
         },
         clone_srcs = {
-            --"bdrm-left.jpg",
-            --"bdrm-rt.png",
-            --"livingrm-left.jpg",
-            --"livingrm-middle.jpg",
-            --"livingrm-right.jpg",
-            --"kitchen_left.jpg",
-            --"kitchen_middle.jpg",
-            --"kitchen_right.png",
             "bar.png",
             "bar-bookshelf.png",
             "bar-glass.png",
@@ -1384,14 +1466,14 @@ lvls = {
             "living-light-behind-couch.png",
             "living-ottoman.png",
             "living-tv.png",
-            "living-tv-pic1.png",
-            "living-tv-pic2.png",
-            "living-tv-pic3.png",
+            "living-tv-static.png",
             "living-window.png",
             "lvl1_candle_table.png",
             "lvl1_lamp.png",
             "lvl1_laundry.png",
             "plant-fern.png",
+            "phone.png",
+            "phone-stand.png",
             "scotch-base.png",
             "scotch-left-btm.png",
             "scotch-mid-stem.png",
@@ -1431,6 +1513,28 @@ lvls = {
                 x      = 1300-100,
                 y      = 335,
                 --scale = {3/4,3/4},
+            },
+            {
+                type   = "dynamic",
+                x = 830-100,
+                y = 600,
+                source  = "deck-table-drink1",
+                m       = 2,
+                floor_y = 1000,
+                floor_func = function(self)
+                    self.source = lvl_objs[ "deck-table-glass-break1" ]
+                end
+            },
+            {
+                type   = "dynamic",
+                x = 830-30,
+                y = 600,
+                source  = "deck-table-drink2",
+                m       = 2,
+                floor_y = 1000,
+                floor_func = function(self)
+                    self.source = lvl_objs[ "deck-table-glass-break2" ]
+                end
             },
             {
                 type   = "background",
@@ -1513,7 +1617,7 @@ lvls = {
             {
                 type   = "foreground",
                 source = "cattail-2",
-                x      = screen_w*6-1803-1110-100+200,
+                x      = screen_w*6-1803-1110+200,
                 y      = 500,
                 --scale = {3/4,3/4},
             },
@@ -1537,7 +1641,7 @@ lvls = {
                 x      = screen_w*8-1803-1110-1313+210-7-100,
                 y      = 135,
                 w      = 2048+340,
-                media  = {file = "audio/birds chirping 29sec.mp3",delay = 18},
+                media  = {file = "audio/end mix.mp3",delay = 18},
                 --scale = {3/4,3/4},
                 stop_scroll = true,
                 enemy_stop = true,
@@ -1546,7 +1650,7 @@ lvls = {
                 type   = "foreground",
                 source = "cattail-3",
                 x      = screen_w*7-1803-1110-100+600,
-                y      = 500+140,
+                y      = 500+280,
                 --scale = {3/4,3/4},
             },
             {
@@ -1595,7 +1699,7 @@ lvls = {
                     print(1)
                     Animation_Loop:add_animation(  lvls[2].outro[2]  )
                     
-                    mediaplayer:play_sound("audio/birds-meet-greet.wav")
+                    --mediaplayer:play_sound("audio/birds-meet-greet.wav")
                     
                 end,
             },
@@ -1614,7 +1718,7 @@ lvls = {
                 on_loop = function()
                     
                     lvls[2].outro[2].count = (lvls[2].outro[2].count or 1) + 1
-                    print(2)
+                    
                     if lvls[2].outro[2].count > 3 then
                         
                         lvls[2].outro[2].count = 0
@@ -1641,47 +1745,23 @@ lvls = {
                 on_step = function()
                 end,
                 on_completed = function()
-                    lvls[2].outro[4].actors[1].opacity = 255
-                    lvls[2].outro[4].actors[1].scale = {0,0}
                     Animation_Loop:add_animation(  lvls[2].outro[4]  )
-                    
+                    fx:heart_barrage(13090,660,4)
                 end,
             },
             {
                 duration = .5,
                 on_step = function(s,p)
                     
-                    lvls[2].outro[4].actors[1].scale = {.5*p,.5*p}
                 end,
                 on_completed = function()
                     Animation_Loop:add_animation(  lvls[2].outro[5]  )
+                    fx:heart_barrage(13290,700,4)
                     
                 end,
             },
             {
-                duration = .5,
-                on_step = function()
-                end,
-                on_completed = function()
-                    lvls[2].outro[6].actors[1].opacity = 255
-                    lvls[2].outro[6].actors[1].scale = {0,0}
-                    Animation_Loop:add_animation(  lvls[2].outro[6]  )
-                    
-                end,
-            },
-            {
-                duration = .5,
-                on_step = function(s,p)
-                    
-                    lvls[2].outro[6].actors[1].scale = {.5*p,.5*p}
-                end,
-                on_completed = function()
-                    Animation_Loop:add_animation(  lvls[2].outro[7]  )
-                    
-                end,
-            },
-            {
-                duration = 1,
+                duration = 2,
                 on_step = function(s,p)
                 end,
                 on_completed = function()
@@ -1808,6 +1888,14 @@ lvls = {
             },
             {
                 x = 10150-100,
+                y =   870,
+                w =   200,
+                h =    30,
+                can_jump_through = true,
+                --cat_exit = true,
+            },
+            {
+                x = 10150-100+893,
                 y =   870,
                 w =   200,
                 h =    30,
@@ -2051,6 +2139,10 @@ lvls = {
             "cattail-1.png",
             "cattail-3.png",
             "cattail-2.png",
+            "deck-table-drink1.png",
+            "deck-table-drink2.png",
+            "deck-table-glass-break1.png",
+            "deck-table-glass-break2.png",
             "plant-2.png",
             "grass-1.png",
             "heart.png",
@@ -2115,8 +2207,6 @@ local LVL_Object  = {}
 local has_been_initialized = false
 
 local lvl_srcs    = Group{}
--- inited globals
-local layers, physics_world
 
 local generic_imgs = {}
 local generic_imgs_g = Group{name="generic assets"}
@@ -2132,18 +2222,19 @@ function LVL_Object:init(t)
     has_been_initialized = true
     
     --assert that everything that needs to be initialized is being initialized
-    if type(t.layers) ~= "table" then
+    --[[if type(t.layers) ~= "table" then
         
         error("LVL_Object:init() did not receive proper layers",2)
         
-    elseif type(t.physics_world) ~= "userdata" then
+    else]]if type(t.physics_world) ~= "userdata" then
         
         error("LVL_Object:init() did not receive proper physics_world",2)
         
     end
     
-    layers        = t.layers
+    --layers        = t.layers
     physics_world = t.physics_world
+    fx            = t.fx
     
     layers.srcs:add(lvl_srcs)
     
@@ -2180,7 +2271,6 @@ end
 --local curr_lvl    = Group{}
 local curr_lvl_i  = 1
 
-local lvl_objs        = {} --contains the Image{}'s from lvls[i].clone_srcs
 local on_screen_items = {}
 
 local tiling_i      = 1
@@ -2454,9 +2544,10 @@ local function make_obj(item)
         Item{
                 source         = obj,
                 item_type      = "knockdownable",
-                targ_y         = 1200,
+                targ_y         = items[item_i].floor_y or 1200,
                 initial_impact = function() end,
-                m              = items[item_i].m
+                m              = items[item_i].m,
+                floor_func     = items[item_i].floor_func,
             }
         collides_with_max[obj]   = obj
         collides_with_enemy[obj] = obj
@@ -2744,12 +2835,14 @@ function LVL_Object:scroll_by(dx,need_actors)
             if items[item_i].media.delay == 0 then
                 mediaplayer:load(items[item_i].media.file)
             else
-                dolater(
-                    items[item_i].media.delay*1000,
-                    mediaplayer.load,
-                    mediaplayer,
-                    items[item_i].media.file
-                )
+                local sound = items[item_i].media.file
+                Animation_Loop:add_animation{
+                    duration = items[item_i].media.delay,
+                    on_step = function() end,
+                    on_completed = function()
+                        mediaplayer:load(sound)
+                    end
+                }
             end
         end
         
@@ -2839,6 +2932,13 @@ end
 
 gamestate:add_state_change_function(
     function()
+        
+        if mediaplayer.state == "PLAYING" then
+            
+            fade_out_mediaplayer( 1, "LVL_TRANSITION")
+            
+        end
+        
         LVL_Object:unload_lvl()
     end,
     "ACTIVE","LVL_TRANSITION"

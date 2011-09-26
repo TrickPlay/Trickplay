@@ -116,7 +116,7 @@ do
     
     local run_dir = 1
     
-    local run_sequence, attack_sequence, wait_sequence, poop_shake_sequence
+    local run_sequence, attack_sequence, wait_sequence, poop_shake_sequence, blink_sequence
     
     local next_move
     
@@ -128,7 +128,7 @@ do
             function() dog.x = dog.x + run_dir*60 end,
             imgs.run[1],
             function() dog.x = dog.x + run_dir*80 end,
-            function() if math.random(1,10) == 1 then mediaplayer:play_sound("audio/dog bark"..math.random(1,2)..".mp3") end end,
+            function() if math.random(1,5) == 1 then mediaplayer:play_sound("audio/dog bark"..math.random(1,2)..".mp3") end end,
             imgs.run[2],
             function() dog.x = dog.x + run_dir*60 end,
             imgs.run[3],
@@ -163,6 +163,7 @@ do
             imgs.poop[2],
             imgs.poop[3],
             imgs.poop[4],
+            function()  mediaplayer:play_sound("audio/dog whine "..math.random(1,2)..".mp3") end,
             imgs.poop[3],
             imgs.poop[2],
             imgs.poop[3],
@@ -192,6 +193,7 @@ do
                     )
                 end
             end,
+            function() if math.random(1,15) == 1 then mediaplayer:play_sound("audio/dog whine "..math.random(1,2)..".mp3") end end,
             100,
             next_move,
         }
@@ -319,6 +321,8 @@ do
                     Animation_Loop,
                     wait_to_start
                 )
+                mediaplayer:play_sound("audio/dog bark2.mp3")
+                
                 Animation_Loop:add_animation(dog_animation)
                 if call_on_start then call_on_start() end
             end
