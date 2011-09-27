@@ -547,6 +547,25 @@ for THIS in ${ALL}; do
     
 done
 
+#------------------------------------------------------------------------------
+# Fetch NaturalDocs
+
+ND_DIST="NaturalDocs-1.52.zip"
+
+if [[ ! -d ${SOURCE}/nd ]]
+then
+
+    cd ${SOURCE} 
+    if [[ ! -f "./${ND_DIST}" ]]
+    then
+        wget "http://developer.trickplay.com/sources/${ND_DIST}"
+    fi
+    mkdir nd
+    unzip "${ND_DIST}" -d ./nd/
+    chmod +x ./nd/NaturalDocs
+    cd ${HERE}
+    
+fi
 
 #------------------------------------------------------------------------------
 # Trickplay
@@ -569,6 +588,7 @@ then
         cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
                 -DTP_CLUTTER_BACKEND_EGL=1 \
+                -DNATURAL_DOCS=${SOURCE}/nd/NaturalDocs \
                 $TP_CORE_SHARED \
 	            $TP_PROFILING \
                 "${THERE}/../"   
@@ -579,7 +599,7 @@ then
     echo "================================================================="
 
     make -C ${HERE}/tp-build ${NUM_MAKE_JOBS} --no-print-directory 
-    make -C ${HERE}/tp-build --no-print-directory install
+    make -C ${HERE}/tp-build --no-print-directory oem-docs install
 
 fi
    
