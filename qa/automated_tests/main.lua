@@ -22,7 +22,7 @@ local test_to_run = 1 -- if automation_option == 2
 -- the package file. 
 -- It contains the generated checksum so  ensure that all tests pass before using this as a baseline.
 local console_display_option_choices = { test_results = 1, dump_screensum = 2 } 
-local console_display_option = 1
+local console_display_option = 2
 
 -- Time interval between tests
 local test_interval = 0.3
@@ -142,7 +142,7 @@ function do_test (tests)
 
 
 		-- do a checksum and compare to master then save results in a table.
-		if total >= test_interval + last_total then
+		if total >= test_interval + last_total + 0.1 then
 			--print (total)
 			print ("do checksum compare")
 			if test_active == "true" then	
