@@ -34,13 +34,9 @@
  * by its appBrowser instance.
  *
  * An object of this class may be created by sending the
- * 
  * - (AppBrowserViewController *)createAppBrowserViewController message
- *
  * to an AppBrowser object or may be created using alloc and initialized using
- *
  * - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
- *
  * with nibNameOrNil equaling @"AppBrowserViewController. In the former case the
  * AppBrowser which created the AppBrowserViewController will be retained by
  * AppBrowserViewController. In the later case the AppBrowserViewController

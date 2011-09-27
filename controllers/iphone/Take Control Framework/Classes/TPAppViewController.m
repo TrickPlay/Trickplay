@@ -132,7 +132,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
 @property (retain) id <AdvancedUIDelegate> advancedUIDelegate;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id <TPAppViewControllerDelegate>)delegate;
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
 
@@ -140,8 +140,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 - (void)checkShowVirtualRemote;
 
-- (void)clean;
 - (void)clearUI;
+- (void)cleanViewController;
+- (void)resetViewController;
 
 @end
 
@@ -171,7 +172,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 #pragma mark Initialization
 
 - (id)init {
-    return [self initWithNibName:nil bundle:nil tvConnection:nil delegate:nil];
+    return [self initWithNibName:nil bundle:nil tvConnection:nil frame:CGRectNull delegate:nil];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
@@ -180,19 +181,18 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 - (id)initWithTVConnection:(TVConnection *)_tvConnection {
-    return [self initWithTVConnection:_tvConnection delegate:nil];
+    return [self initWithTVConnection:_tvConnection frame:CGRectNull delegate:nil];
 }
 
-- (id)initWithTVConnection:(TVConnection *)_tvConnection
-                  delegate:(id<TPAppViewControllerDelegate>)_delegate {
-    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection delegate:_delegate];
+- (id)initWithTVConnection:(TVConnection *)_tvConnection frame:(CGRect)_frame delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection frame:_frame delegate:_delegate];
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil delegate:nil];
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil frame:CGRectNull delegate:nil];
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection frame:(CGRect)_frame delegate:(id <TPAppViewControllerDelegate>)_delegate {
     
     if (!_tvConnection || !_tvConnection.isConnected || !nibNameOrNil || [nibNameOrNil compare:@"TPAppViewController"] != NSOrderedSame || nibBundleOrNil) {
         
@@ -215,10 +215,25 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         
         viewDidAppear = NO;
         
+        // TODO: this _frame does not work without NSLog printing its
+        // values for some retarded reason
+        
         // Get the actual width and height of the available area
-        CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
-        backgroundHeight = mainframe.size.height;
-        backgroundWidth = mainframe.size.width;
+        if (!CGRectIsNull(_frame)) {
+            //NSLog(@"width: %f, height: %f", self.view.frame.size.width, self.view.frame.size.height);
+            //NSLog(@"width: %f, height: %f", _frame.size.width, _frame.size.height);
+            backgroundHeight = _frame.size.height;
+            backgroundWidth = _frame.size.width;
+            self.view.frame = _frame;
+            backgroundView.frame = _frame;
+        } else {
+            CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
+            backgroundHeight = mainframe.size.height;
+            backgroundHeight = backgroundWidth - 44;
+            backgroundWidth = mainframe.size.width;
+            self.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+            backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+        }
         
         // Manages resources created with declare_resource
         resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
@@ -809,16 +824,16 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         height = [args objectAtIndex:2] ? [[args objectAtIndex:2] floatValue] : 0.0;
         editable = [args objectAtIndex:3] ? [[args objectAtIndex:3] boolValue] : NO;
         
-        if ([args objectAtIndex:4] && ([args objectAtIndex:4] != @"")) {
+        if ([args objectAtIndex:4] && ([(NSString *)[args objectAtIndex:4] compare:@""] != NSOrderedSame)) {
             mask = [resourceManager fetchImageViewUsingResource:[args objectAtIndex:4] frame:CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height)];
         }
         
-        if ([args objectAtIndex:5] && ([args objectAtIndex:5] != @"")) {
+        if ([args objectAtIndex:5] && ([(NSString *)[args objectAtIndex:5] compare:@""] != NSOrderedSame)) {
             cameraLabel = [args objectAtIndex:5];
         } else {
             cameraLabel = @"Send Image to TV";
         }
-        if ([args objectAtIndex:6] && ([args objectAtIndex:6] != @"")) {
+        if ([args objectAtIndex:6] && ([(NSString *)[args objectAtIndex:6] compare:@""] != NSOrderedSame)) {
             cameraCancelLabel = [args objectAtIndex:6];
         } else {
             cameraCancelLabel = @"Cancel";
@@ -930,7 +945,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     [touchDelegate reset];
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
     [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
-    [self clean];
+    [self cleanViewController];
     [self dismissModalViewControllerAnimated:NO];
     [self do_HV];
     [self.view addSubview:virtualRemote.view];
@@ -940,6 +955,10 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
     [JSON_dic setObject:@"reset_hard" forKey:@"event"];
     [self sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+}
+
+- (void)resetViewController {
+    [self do_RT:nil];
 }
 
 /**
@@ -953,7 +972,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     [self clearUI];
 }
 
-- (void)clean {
+- (void)cleanViewController {
     [self clearUI];
     [advancedUIDelegate clean];
     [resourceManager clean];
@@ -1035,10 +1054,15 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     NSLog(@"TPAppView loaded!");
     
     // Get the actual width and height of the available area
+    
     CGRect mainframe = self.view.frame;
     backgroundHeight = mainframe.size.height;
     backgroundWidth = mainframe.size.width;
     
+    backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    for (UIView *view in backgroundView.subviews) {
+        view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    }
     advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
@@ -1078,7 +1102,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     currentText = nil;
     
     
-    NSLog(@"background: %@", backgroundView);
+    //NSLog(@"background: %@", backgroundView);
     /*
      CATransform3D transform = CATransform3DIdentity;
      transform.m34 = 1.0/-2000;
@@ -1118,12 +1142,15 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
-    NSLog(@"background: %@", backgroundView);
     // Get the actual width and height of the available area
     CGRect mainframe = self.view.frame;
     backgroundHeight = mainframe.size.height;
     backgroundWidth = mainframe.size.width;
     
+    backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    for (UIView *view in backgroundView.subviews) {
+        view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    }
     advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
@@ -1140,6 +1167,20 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [theTextField selectAll:theTextField];
         [UIMenuController sharedMenuController].menuVisible = NO;
     }
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    CGRect mainframe = self.view.frame;
+    backgroundHeight = mainframe.size.height;
+    backgroundWidth = mainframe.size.width;
+    
+    backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    for (UIView *view in backgroundView.subviews) {
+        view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    }
+    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -1353,14 +1394,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
                                  userInfo:nil];
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
+- (id)initWithTVConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id<TPAppViewControllerDelegate>)delegate {
     
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];
 }
-
-// TODO: Clean up all this
 
 #pragma mark -
 #pragma mark Forwarded Methods
@@ -1371,7 +1410,13 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
                                  userInfo:nil];
 }
 
-- (void)clean {
+- (void)cleanViewController {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)resetViewController {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];

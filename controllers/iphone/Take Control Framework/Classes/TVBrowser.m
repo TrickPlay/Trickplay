@@ -94,8 +94,10 @@
         }
     }
     
-    if (viewController == [[viewControllers objectAtIndex:i] pointerValue]) {
+    if (viewControllers.count > i && viewController == [[viewControllers objectAtIndex:i] pointerValue]) {
         [viewControllers removeObjectAtIndex:i];
+    } else {
+        NSLog(@"WARNING: invalidated a TVBrowserViewController that is not registered");
     }
 }
 
@@ -134,9 +136,11 @@
         }
     }
     
-    if (tvConnection == [[tvConnections objectAtIndex:i] pointerValue]) {
+    if (tvConnections.count > i && tvConnection == [[tvConnections objectAtIndex:i] pointerValue]) {
         [tvConnections removeObjectAtIndex:i];
         [self viewControllersRefresh];
+    } else {
+        NSLog(@"WARNING: invalidated a TVConnection that is not registered");
     }
 }
 

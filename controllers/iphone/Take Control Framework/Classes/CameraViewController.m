@@ -152,9 +152,10 @@
         [popOverController presentPopoverFromRect:frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
    
     } else {
-        // TODO: try this ((UIViewController *)delegate).parentViewController
-        // TODO: if (navigationController) then do stuff else figure something else
-        [((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
+        // TODO: Need thorough testing for camera in different environments from
+        // different ViewController trees.
+        [self.view.window.rootViewController presentModalViewController:imagePickerController animated:YES];
+        //[((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
     }
     if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
         imagePickerController.navigationBar.topItem.title = titleLabel;

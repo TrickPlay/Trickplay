@@ -183,7 +183,7 @@
                     isCurrentApp:(BOOL)isCurrentApp {
     
     if (!isCurrentApp) {
-        [appViewController clean];
+        [appViewController cleanViewController];
     }
     [self pushTPAppViewController];
 }
@@ -196,7 +196,8 @@
  * a connection to a service, and tells it to establish this connection.
  */
 - (void)createTPAppViewControllerWithConnection:(TVConnection *)tvConnection {
-    appViewController = [[TPAppViewController alloc] initWithTVConnection:tvConnection delegate:self];
+    CGRect frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height - 44.0);
+    appViewController = [[TPAppViewController alloc] initWithTVConnection:tvConnection frame:frame delegate:self];
     
     assert(appViewController);
     if (!appViewController) {
