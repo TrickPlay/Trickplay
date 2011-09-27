@@ -1084,6 +1084,7 @@ do
     reset_y:stop()
     
     function bird:halt_reset_timers()
+        
         reset_x:stop()
         reset_y:stop()
         
@@ -1198,6 +1199,14 @@ do
         
         [keys.OK] = bird.poop,
     }
+    
+    
+    --accepts values between -1 and 1
+    function bird:set_vx(new_vx)
+        
+        vx = 6*scroll_speed*new_vx + scroll_speed
+        
+    end
     
     function bird:on_key_down(k)
         
