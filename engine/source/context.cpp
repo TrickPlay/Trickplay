@@ -309,13 +309,14 @@ static void dump_actors( ClutterActor * actor, gpointer dump_info )
 		details += " HIDDEN";
 	}
 
-    g_info( "%s%s%s%s:%s%u : (%d,%d %ux%u)%s%s\033[0m",
+    g_info( "%s%s%s%s:%s%u [%p]: (%d,%d %ux%u)%s%s\033[0m",
     		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : "\33[37m",
             clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
             String( info->indent, ' ' ).c_str(),
             type,
             name ? String( " \033[33m" + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "\33[0m" : "\33[37m" ) + " : " ).c_str()  : " ",
             clutter_actor_get_gid( actor ),
+            actor,
             g.x,
             g.y,
             g.width,
@@ -578,16 +579,35 @@ int TPContext::console_command_handler( const char * command, const char * param
     {
         DumpInfo info;
 
-        dump_actors( clutter_stage_get_default(), &info );
+        ClutterActor * first = clutter_stage_get_default();
 
-        g_info( "" );
-        g_info( "SUMMARY" );
-
-        std::map< String, std::list< ClutterActor * > >::const_iterator it;
-
-        for ( it = info.actors_by_type.begin(); it != info.actors_by_type.end(); ++it )
+        if ( parameters )
         {
-            g_info( "%15s %5u", it->first.c_str(), it->second.size() );
+    		first = clutter_container_find_child_by_name( CLUTTER_CONTAINER( clutter_stage_get_default() ) , parameters );
+
+        	if ( ! first )
+        	{
+            	first = clutter_get_actor_by_gid( atoi( parameters ) );
+        	}
+        }
+
+        if ( ! first )
+        {
+        	g_info( "NO SUCH ACTOR" );
+        }
+        else
+        {
+			dump_actors( first , &info );
+
+			g_info( "" );
+			g_info( "SUMMARY" );
+
+			std::map< String, std::list< ClutterActor * > >::const_iterator it;
+
+			for ( it = info.actors_by_type.begin(); it != info.actors_by_type.end(); ++it )
+			{
+				g_info( "%15s %5u", it->first.c_str(), it->second.size() );
+			}
         }
     }
     else if ( !strcmp( command, "prof" ) )
@@ -1334,6 +1354,8 @@ int TPContext::run()
     spec.capabilities = TP_CONTROLLER_HAS_KEYS | TP_CONTROLLER_HAS_POINTER;
 
     spec.execute_command = controller_execute_command;
+
+    spec.id = "d6a59106-8879-4748-bcfe-e3c976f82556";
 
     // This controller won't leak because the controller list will free it
 

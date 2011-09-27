@@ -7,7 +7,7 @@
 //
 
 #import "TrickplayImage.h"
-
+#import "Extensions.h"
 
 @implementation TrickplayImage
 

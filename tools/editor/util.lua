@@ -5,13 +5,16 @@ local util = {}
 
 
 function util.color_to_string( color )
+
         if type( color ) == "string" then
             return color
         end
-        if type( color ) == "table" then
+        
+		if type( color ) == "table" then
             return serialize( color )
         end
         return tostring( color )
+
 end
 
 function util.table_copy(t)
@@ -73,6 +76,10 @@ function util.table_move_down(t, itemNum)
 end 
 
 function util.table_remove_val(t, val)
+
+	if t == nil then 
+		return 
+	end 
 
 	for i,j in pairs (t) do
 		if j == val then 
@@ -239,6 +246,18 @@ function util.need_stub_code(v)
 
 end 
 
+function util.is_this_selected(v)
+	local b_name = v.name.."border"
+
+	for i, j in pairs (selected_objs) do
+		if j == b_name then 
+			return true
+		end 
+	end 
+
+	return false
+end 
+
 function util.is_this_widget(v)
 
     if v.extra then 
@@ -367,23 +386,24 @@ function util.create_on_button_down_f(v)
 
 	function v:on_button_down(x,y,button,num_clicks, m)
 
-		if m then 
-			if m.control then 
-				control = true 
-			else 
-				control = false 
-			end 
+		if m and m.control then 
+			control = true 
+		else 
+			control = false 
 		end 
 
 	   	if (input_mode ~= hdr.S_RECTANGLE) then 
 	   		if(v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw") then 
 	     		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
-
-	       			if (v.extra.is_in_group == true and control == false ) then 
+					if (v.extra.is_in_group == true and control == false ) then 
 
 		    			local p_obj = v.parent 
-                		if(button == 3) then 	-- imsi : num_clicks is not correct ! 
-                							 	--if(button == 3 or num_clicks >= 2) then
+
+						while p_obj.extra.is_in_group == true do
+								p_obj = p_obj.parent
+					    end 
+
+                		if(button == 3) then 
                 			editor.inspector(p_obj, x, y)
                     		return true
                 		end 
@@ -396,15 +416,14 @@ function util.create_on_button_down_f(v)
 
 	            		org_object = util.copy_obj(p_obj)
 
-		    			if v.extra.lock == false then -- or  v.name =="inspector" then 
+		    			if v.extra.lock == false then 
            	    			dragging = {p_obj, x - p_obj.x, y - p_obj.y }
 		    			end 
 
            	    		return true
 	      			else 
 
-                		if(button == 3) then	-- imsi : num_clicks is not correct ! 
-								    			--if(button == 3 or num_clicks >= 2) then
+                		if(button == 3) then	
                  			editor.inspector(v, x, y)
                     		return true
                 		end 
@@ -480,7 +499,7 @@ function util.create_on_button_down_f(v)
 	        				end 
 	    				end 
 	    				org_object = util.copy_obj(v)
-						if v.extra.lock == false then -- or v.name == "inspector" then 
+						if v.extra.lock == false then 
         					dragging = {v, x - v.x, y - v.y }
 						end
         				return true
@@ -511,7 +530,7 @@ function util.create_on_button_down_f(v)
            			return true
             	end
 	   	elseif( input_mode ~= hdr.S_RECTANGLE ) then 
-				if v.extra.lock == false then --or v.name == inspector  then  
+				if v.extra.lock == false then 
 					dragging = {v, x - v.x, y - v.y }
            			return true
 				end 
@@ -521,22 +540,21 @@ function util.create_on_button_down_f(v)
 	
 	function v:on_button_up(x,y,button,num_clicks, m)
 
-		if m then 
-			if m.control then 
-				control = true 
-			else 
-				control = false 
-			end 
+		if m  and m.control then 
+			control = true 
+		else 
+			control = false 
 		end 
 
-		if shift == true then 
+		if screen:find_child("multi_select_border") then
 			return 
 		end 
+
 		if (input_mode ~= hdr.S_RECTANGLE) then 
 	   		if( v.name ~= "ui_element_insert" and v.name ~= "inspector" and v.name ~= "msgw" ) then 
 	    		if(input_mode == hdr.S_SELECT) and (screen:find_child("msgw") == nil) then
 	    			if (v.extra.is_in_group == true) then 
-						local p_obj = v.parent --find_parent(v)
+						local p_obj = v.parent 
 						new_object = util.copy_obj(p_obj)
 					    if(dragging ~= nil) then 
 	            			local actor , dx , dy = unpack( dragging )
@@ -560,7 +578,7 @@ function util.create_on_button_down_f(v)
 				elseif( input_mode ~= hdr.S_RECTANGLE) then  
 	      	    	if(dragging ~= nil) then 
 	       	       		local actor = unpack(dragging) 
-		       			if (actor.name == "grip") then  -- scroll_window -> grip
+		       			if (actor.name == "grip") then  
 							dragging = nil 
 							return true 
 		       			end 
@@ -594,13 +612,14 @@ function util.create_on_button_down_f(v)
 				     							c:replace(row,col,v) 
 			        						elseif t == "TabBar" then 
 												local x_off, y_off = c:get_offset()
-												local t_index = c:get_index()
 
+												local t_index = c:get_index()
+												
 												if t_index then 
 													v.x = v.x - x_off	
 													v.y = v.y - y_off	
 			            							c.tabs[t_index]:add(v) 
-												end 
+												end
 											elseif t == "Group" then 
 												c:add(v)
 			        						end 
@@ -731,24 +750,42 @@ function util.set_obj (f, v)
 
 end 
 
+local new_map = {
+	["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
+	["Text"] = function() new_obj = Text{} return new_obj end, 
+	["Image"] = function() new_obj = Image{} return new_obj end, 
+	["Clone"] = function() new_obj = Clone{} return new_obj end, 
+	["Group"] = function() new_obj = Group{} return new_obj end, 
+	["Video"] = function() new_obj = {} return new_obj end, 
+	["ArrowPane"] = function() new_obj = ui_element.arrowPane() return new_obj end, 
+	["Button"] = function() new_obj = ui_element.button() return new_obj end, 
+	["ButtonPicker"] = function() new_obj = ui_element.buttonPicker() return new_obj end, 
+	["CheckBoxGroup"] = function() new_obj = ui_element.checkBoxGroup() return new_obj end, 
+	["DialogBox"] = function() new_obj = ui_element.dialogBox() return new_obj end, 
+	["LayoutManager"] = function() new_obj = ui_element.layoutManager() return new_obj end, 
+	["MenuButton"] = function() new_obj = ui_element.menuButton() return new_obj end, 
+	["ProgressBar"] = function() new_obj = ui_element.progressBar() return new_obj end, 
+	["ProgressSpinner"] = function() new_obj = ui_element.progressSpinner() return new_obj end, 
+	["RadioButtonGroup"] = function() new_obj = ui_element.radioButtonGroup() return new_obj end, 
+	["ScrollPane"] = function() new_obj = ui_element.scrollPane() return new_obj end, 
+	["TabBar"] = function() new_obj = ui_element.tabBar() return new_obj end, 
+	["TextInput"] = function() new_obj = ui_element.textInput() return new_obj end, 
+	["ToastAlert"] = function() new_obj = ui_element.toastAlert() return new_obj end, 
+}
 
 function util.copy_obj (v)
 
-      local new_map = {
-		["Rectangle"] = function() new_obj = Rectangle{} return new_obj end, 
-		["Text"] = function() new_obj = Text{} return new_obj end, 
-		["Image"] = function() new_obj = Image{} return new_obj end, 
-		["Clone"] = function() new_obj = Clone{} return new_obj end, 
-		["Group"] = function() new_obj = Group{} return new_obj end, 
-		["Video"] = function() new_obj = {} return new_obj end, 
-      }
-	
-      local new_object = new_map[v.type]()
+      local new_object 
+
+	  if util.is_this_widget(v) == true then 
+      	new_object = new_map[v.extra.type]()
+	  else 
+      	new_object = new_map[v.type]()
+	  end 
 
       util.set_obj(new_object, v)
 
       return new_object
-
 end	
 
 function util.make_attr_t(v)
@@ -757,10 +794,16 @@ function util.make_attr_t(v)
   local obj_type = v.type
 
   local function stringTotitle(str)
+	  
+	  if str == "arrow_dist_to_frame" then 
+			 return "Arrow Dist To Frame"
+	  end 
+
       local i,j = string.find(str,"_")
       if i then str = string.upper(str:sub(1,1))..str:sub(2,i-1).." "..string.upper(str:sub(i+1, i+1))..str:sub(i+2,-1)
       else str = string.upper(str:sub(1,1))..str:sub(2,-1)
       end
+
 
       i,j = string.find(str,"_") 
       if i then 
@@ -807,7 +850,6 @@ function util.make_attr_t(v)
 		if v.extra.type == "ButtonPicker" then 
 		    table.insert(attr_t, {"items", v.items, "Items"})
 		else 
-		    --table.insert(attr_t, {"caption", "Menu Contents"}) --0714
 		    table.insert(attr_t, {"items", v.items, "Items"})
 		end 
 		end,
@@ -895,13 +937,13 @@ function util.make_attr_t(v)
  		     	table.insert(attr_t, {"focus", {"1","2","3","4","5"}, "Focus"})
  			end 
  		end, 
+	["title"]= function ()
+		     table.insert(attr_t, {"caption", "Title"})
+        	 table.insert(attr_t, {"title", v.title,"Title"})
+		end,
 	["label"]= function()
-			if v.extra.type == "ToastAlert" then 
-		     	table.insert(attr_t, {"caption", "Title"})
-			else 
-		     	table.insert(attr_t, {"caption", "Label"})
-			end 
-        	table.insert(attr_t, {"label", v.label,"Label"})
+		     table.insert(attr_t, {"caption", "Label"})
+        	 table.insert(attr_t, {"label", v.label,"Label"})
 		end,
 	["empty_top_color"] = function()
 		    table.insert(attr_t, {"caption", "Empty Bar"})
@@ -952,19 +994,19 @@ function util.make_attr_t(v)
 	["rows"] = function() 
              table.insert(attr_t, {"rows", v.rows, "Rows"})
 		 end,  	
-	["visible_w"] = function ()
+	["visible_width"] = function ()
 		     table.insert(attr_t, {"caption", "Visible"})
-        	 table.insert(attr_t, {"visible_w", v.visible_w,"W"})
+        	 table.insert(attr_t, {"visible_width", v.visible_width,"W"})
 		 end, 
-	["visible_h"] = function ()
-        	 table.insert(attr_t, {"visible_h", v.visible_h,"H"})
+	["visible_height"] = function ()
+        	 table.insert(attr_t, {"visible_height", v.visible_height,"H"})
 		  end, 
-	["virtual_w"] = function ()
+	["virtual_width"] = function ()
 		     table.insert(attr_t, {"caption", "Virtual"})
-        	 table.insert(attr_t, {"virtual_w", v.virtual_w,"W"})
+        	 table.insert(attr_t, {"virtual_width", v.virtual_width,"W"})
 		  end, 
-	["virtual_h"] = function ()
-        	 table.insert(attr_t, {"virtual_h", v.virtual_h,"H"})
+	["virtual_height"] = function ()
+        	 table.insert(attr_t, {"virtual_height", v.virtual_height,"H"})
 		  end, 
 	["lock"]  = function ()
 		     table.insert(attr_t, {"lock", v.extra.lock, "Lock"})
@@ -988,26 +1030,25 @@ function util.make_attr_t(v)
   }
   
   local obj_map = {
-       ["Rectangle"] = function() return {"border_color", "color", "border_width", "lock","x_rotation", "anchor_point", "opacity", "reactive", "focus"} end,
-       ["Text"] = function() return {"color", "font", "wrap_mode", "lock", "x_rotation","anchor_point","opacity","reactive", "focus", } end,
+       ["Rectangle"] = function() return {"border_color", "color", "border_width", "lock", "x_rotation", "anchor_point", "opacity", "reactive", "focus"} end,
+       ["Text"] = function() return {"color", "font", "wrap_mode", "lock", "x_rotation", "anchor_point", "opacity", "reactive", "focus",} end,
        ["Image"] = function() return {"src", "clip","lock",  "x_rotation","anchor_point","opacity", "reactive", "focus",} end,
        ["Group"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
        ["Clone"] = function() return {"lock", "scale","x_rotation","anchor_point","opacity", "reactive", "focus"} end,
-       ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","border_color","fill_color", "focus_color","focus_fill_color","focus_text_color","text_color","text_font","border_width","border_corner_radius"} end,
-       ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","border_color","fill_color", "focus_color","focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "justify","single_line", "alignment", "wrap_mode"} end,
-       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive","focus","border_color","fill_color","focus_color","focus_fill_color","focus_text_color","text_color","text_font","direction","selected_item","items",} end,
-       ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus", "border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items"} end,
-	   ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","fill_color","focus_color","focus_fill_color","text_color","text_font","box_color","box_width","direction","box_size","check_size","line_space", "box_position", "item_position","items", "selected_items"} end,
-       ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","button_position", "item_position","items","selected_item"} end,
-
-       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","focus","border_color","fill_color","focus_color","focus_fill_color", "focus_text_color","text_color", "label_color", "unsel_color","text_font","border_width","border_corner_radius", "font", "label_padding",  "tab_position", "display_width", "display_height",  "tab_labels", "arrow_sz", "arrow_dist_to_frame",} end,  
-       ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","label", "title_font", "title_color", "message", "message_font", "message_color", "border_color","fill_color",  "border_width","border_corner_radius","on_screen_duration","fade_duration",} end,
+       ["Button"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","border_color", "focus_border_color", "fill_color", "focus_fill_color","text_color","focus_text_color","text_font","border_width","border_corner_radius"} end,
+       ["TextInput"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus","border_color","focus_border_color", "fill_color", "focus_fill_color","cursor_color","text_color","text_font","padding","border_width","border_corner_radius", "justify","single_line", "alignment", "wrap_mode"} end,
+       ["ButtonPicker"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive","focus","border_color","focus_border_color","fill_color","focus_fill_color","text_color","focus_text_color","text_font","direction","selected_item","items",} end,
+	   ["CheckBoxGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","reactive", "focus","box_color","focus_box_color","fill_color","focus_fill_color","text_color","text_font","direction","box_size","check_size","line_space", "box_position", "item_position","items", "box_border_width", "selected_items"} end,
+       ["RadioButtonGroup"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive", "focus", "button_color","focus_button_color","text_color","select_color","text_font","direction","button_radius","select_radius","line_space","button_position", "item_position","items","selected_item"} end,
+       ["ToastAlert"] = function() return {"lock", "skin","x_rotation", "anchor_point","opacity","icon","title",  "title_color","title_font", "message","message_color", "message_font", "border_color","fill_color", "border_width","border_corner_radius", "on_screen_duration","fade_duration",} end,
        ["DialogBox"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","border_color","fill_color","title_color","title_font","border_width","border_corner_radius","title_separator_color","title_separator_thickness",} end,
        ["ProgressSpinner"] = function() return {"lock", "skin","style","x_rotation","anchor_point","opacity","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", } end,
-       ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","border_color","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color",} end,
-       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","focus","rows","columns","cell_size","cell_w","cell_h", "cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset",} end,
-       ["ScrollPane"] = function() return {"lock", "skin", "visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "bar_color_inner", "bar_color_outer", "bar_focus_color_inner", "bar_focus_color_outer","empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_focus_color", "box_width"} end,  
-       ["ArrowPane"] = function() return {"lock", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","opacity", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color","arrow_focus_color","box_color", "box_focus_color", "box_width"} end,  
+       ["ProgressBar"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color",} end,
+       ["LayoutManager"] = function() return {"lock", "skin","x_rotation","anchor_point", "opacity","focus","rows","columns","cell_size","cell_width","cell_height", "cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset",} end,
+       ["ScrollPane"] = function() return {"lock", "skin", "visible_width", "visible_height",  "virtual_width", "virtual_height","opacity", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer","empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "focus_box_color", "box_border_width"} end,  
+       ["ArrowPane"] = function() return {"lock", "skin","visible_width", "visible_height",  "virtual_width", "virtual_height","opacity",  "arrow_color","focus_arrow_color","box_color", "focus_box_color", "arrow_size", "arrow_dist_to_frame", "arrows_visible", "box_border_width",} end,
+       ["MenuButton"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity", "reactive","focus", "border_color","focus_border_color","fill_color","focus_fill_color","text_color", "focus_text_color","text_font","border_width","border_corner_radius","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","items"} end,
+       ["TabBar"] = function() return {"lock", "skin","x_rotation","anchor_point","opacity","focus", "arrow_color", "border_color","focus_border_color","fill_color","focus_fill_color", "text_color", "focus_text_color", "text_font","border_width","border_corner_radius", "button_width", "button_height", "tab_position", "display_width", "display_height", "display_border_width", "display_border_color","display_fill_color", "tab_labels", "arrow_size", "arrow_dist_to_frame",} end,  
    }
   
   if util.is_this_widget(v) == true  then
@@ -1015,7 +1056,7 @@ function util.make_attr_t(v)
 		if v.extra.type == "Button" or v.extra.type ==  "MenuButton" or v.extra.type == "DialogBox" then 
 			attr_t =
       		{
-             	{"title", "Inspector : "..(v.extra.type)},
+             	{"ui_title", "Inspector : "..(v.extra.type)},
              	{"caption", "Object Name"},
              	{"name", v.name, "name"},
              	{"caption", "Label"},
@@ -1028,10 +1069,10 @@ function util.make_attr_t(v)
 	  	elseif v.extra.type == "ProgressBar" then 
 			attr_t =
       		{
-             	{"title", "Inspector : "..(v.extra.type)},
+             	{"ui_title", "Inspector : "..(v.extra.type)},
              	{"caption", "Object Name"},
              	{"name", v.name,"name"},
-             	{"progress", math.floor(v.progress) , "Progress"},
+             	{"progress", v.progress , "Progress"},
              	{"caption", "Position"},
              	{"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
              	{"y", math.floor(v.y + g.extra.scroll_y + g.extra.canvas_f), "Y"},
@@ -1040,7 +1081,7 @@ function util.make_attr_t(v)
 	  	else 
 			attr_t =
       		{
-             	{"title", "Inspector : "..(v.extra.type)},
+             	{"ui_title", "Inspector : "..(v.extra.type)},
              	{"caption", "Object Name"},
              	{"name", v.name,"name"},
              	{"caption", "Position"},
@@ -1049,7 +1090,7 @@ function util.make_attr_t(v)
              	{"z", math.floor(v.z), "Z"},
       		}
 	  	end 
-       	 if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" ) and v.extra.type ~= "ArrowPane" and  v.extra.type ~= "CheckBoxGroup" and  v.extra.type ~= "RadioButtonGroup" then 
+       	 if (v.extra.type ~= "ProgressSpinner" and v.extra.type ~= "LayoutManager" and v.extra.type ~= "ScrollPane" and v.extra.type ~= "MenuBar" ) and v.extra.type ~= "TabBar" and v.extra.type ~= "ArrowPane" and  v.extra.type ~= "CheckBoxGroup" and  v.extra.type ~= "RadioButtonGroup" then 
              table.insert(attr_t, {"caption", "Size"})
              table.insert(attr_t, {"ui_width", math.floor(v.ui_width), "W"})
              table.insert(attr_t, {"ui_height", math.floor(v.ui_height), "H"})
@@ -1058,7 +1099,7 @@ function util.make_attr_t(v)
   elseif v.type ~= "Video" then  --Rectangle, Image, Text, Group, Clone
 	attr_t =
       {
-             {"title", "Inspector : "..(v.type)},
+             {"ui_title", "Inspector : "..(v.type)},
              {"caption", "Object Name"},
              {"name", v.name,"name"},
              {"x", math.floor(v.x + g.extra.scroll_x + g.extra.canvas_xf) , "X"},
@@ -1071,7 +1112,7 @@ function util.make_attr_t(v)
   else -- Video 
       attr_t =
       {
-             {"title", "Inspector : "..(v.type)},
+             {"ui_title", "Inspector : "..(v.type)},
              {"caption", "Object Name"},
              {"name", v.name,"name"},
              {"caption", "Source"},
@@ -1093,7 +1134,6 @@ function util.make_attr_t(v)
   for i,j in pairs(obj_map[obj_type]()) do 
 		
 	if (j == "message") then 
-	--print (j)
 	end 
        	if attr_map[j] then
              attr_map[j](j)
@@ -1140,7 +1180,6 @@ function util.make_attr_t(v)
 	end 
    end 
  
-   --table.insert(attr_t, {"opacity", v.opacity, "Opacity"})
    table.insert(attr_t, {"button", "view code", "View code"})
    table.insert(attr_t, {"button", "apply", "OK"})
    table.insert(attr_t, {"button", "cancel", "Cancel"})
@@ -1156,7 +1195,7 @@ function util.itemTostring(v, d_list, t_list)
     local indent   = "\n\t\t"
     local b_indent = "\n\t"
 
-    local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "bar_focus_color_inner", "bar_focus_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "box_focus_color", "box_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space", "button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "label_padding", "tab_position", "display_width", "display_height", "tab_spacing", "label_color", "unsel_color", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_color", "arrow_focus_color", "tab_labels", "tabs", "wrap_mode", "wrap", "justify", "alignment", "single_line" }
+    local w_attr_list =  { "ui_width","ui_height","skin","style","label","title","button_color","focus_color","focus_border_color", "focus_button_color", "focus_box_color", "text_color","text_font","border_width","border_corner_radius","button_width", "button_height", "reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","progress","rows","columns","cell_size","cell_width","cell_height","cell_spacing_width","cell_spacing_height", "cell_timing","cell_timing_offset","cells_focusable","visible_width", "visible_height",  "virtual_width", "virtual_height", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "focus_box_color", "box_border_width","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space", "button_position", "box_position", "item_position","select_color","button_radius","select_radius","cells","content","text", "focus_fill_color", "focus_text_color","cursor_color", "ellipsize", "tab_position", "display_width", "display_height", "tab_spacing", "label_color","display_border_color", "display_fill_color", "display_border_width", "arrow_size", "arrow_dist_to_frame", "arrows_visible", "arrow_color", "focus_arrow_color", "tab_labels", "tabs", "wrap_mode", "wrap", "justify", "alignment", "single_line" }
 
     local nw_attr_list = {"color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive","cursor_visible"}
 
@@ -1183,8 +1222,6 @@ function util.itemTostring(v, d_list, t_list)
        local item_string =""
        for i,j in pairs(list) do 
           if v[j] ~= nil then 
-	      --if j == "src" and v.type == "Image" then 
-		  --item_string = item_string..head..j.." = \"assets\/images\/"..v[j].."\""..tail
 	      if j == "position" then 
 		  item_string = item_string..head..j.." = {"..math.floor(v.x+g.extra.scroll_x + g.extra.canvas_xf)..","..math.floor(v.y+g.extra.scroll_y + g.extra.canvas_f)..","..v.z.."}"..tail
 	      elseif j == "children" then 
@@ -1254,7 +1291,7 @@ function util.itemTostring(v, d_list, t_list)
 					for m=1, v.rows, 1 do -- rows
 						local tile_name_table = {}
 						for i= 1,v.columns,1 do  --cols 
-				   			local element = v.tiles[m][i]
+				   			local element = v.cells[m][i]
 				   			if element then 
 				     			table.insert(tile_name_table, element.name)
 				   			else 
@@ -1284,7 +1321,9 @@ function util.itemTostring(v, d_list, t_list)
 					item_string = item_string.."} }"..tail
 				end 
 	      elseif type(v[j]) == "userdata" then 
-		  item_string = item_string..head..j.." = "..v[j].name..tail 
+		  		if v[j].name then 
+		  			item_string = item_string..head..j.." = "..v[j].name..tail 
+				end 
 	      else
 	          print("--", j, " 처리해 주세용 ~")
 	      end 
@@ -1297,7 +1336,6 @@ function util.itemTostring(v, d_list, t_list)
     if (v.type == "Text") then
 		v.cursor_visible = false
     elseif (v.type == "Image") then
-		--if (v.clip == nil) then v.clip = {0, 0,v.w, v.h} end 
     elseif (v.type == "Clone") then
 	 	src = v.source 
 		if src ~= nil then 
@@ -1358,8 +1396,8 @@ function util.itemTostring(v, d_list, t_list)
 				itm_str= util.itemTostring(n) .. itm_str
 	    	end 
 	 	end 
-	 	if v.tiles then 
-	    	for m,n in pairs(v.tiles) do 
+	 	if v.cells then 
+	    	for m,n in pairs(v.cells) do 
 	          	for q,r in pairs(n) do 
 					if r.name ~= "nil" then
 		            	itm_str= util.itemTostring(r)..itm_str
@@ -1456,11 +1494,11 @@ function util.itemTostring(v, d_list, t_list)
 			.."if type("..v.name..".focus[key]) == \"function\" then\n\t\t\t"
 			..v.name..".focus[key]()\n\t\t"
 			.."elseif screen:find_child("..v.name..".focus[key]) then\n\t\t\t"
-			.."if "..v.name..".on_focus_out then\n\t\t\t\t"
-			..v.name..".on_focus_out(key)\n\t\t\t".."end\n\t\t\t" -- on_focus_out
+			.."if "..v.name..".clear_focus then\n\t\t\t\t"
+			..v.name..".clear_focus(key)\n\t\t\t".."end\n\t\t\t" -- clear_focus
 			.."screen:find_child("..v.name..".focus[key]):grab_key_focus()\n\t\t\t"
-			.."if ".."screen:find_child("..v.name..".focus[key]).on_focus_in then\n\t\t\t\t"
-        	.."screen:find_child("..v.name..".focus[key]).on_focus_in(key)\n\t\t\t"..scroll_seek_to_line.."end\n\t\t"
+			.."if ".."screen:find_child("..v.name..".focus[key]).set_focus then\n\t\t\t\t"
+        	.."screen:find_child("..v.name..".focus[key]).set_focus(key)\n\t\t\t"..scroll_seek_to_line.."end\n\t\t"
 			.."end\n\t"
 			.."end\n\t"
 			.."return true\n"
@@ -1469,8 +1507,12 @@ function util.itemTostring(v, d_list, t_list)
     end 
 
     if v.extra.reactive ~= nil then 
-	itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
+		itm_str = itm_str..v.name.."\.extra\.reactive = "..tostring(v.extra.reactive).."\n\n" 
     end 
+	if v.extra.type == "Group" then 
+		itm_str = itm_str..v.name.."\.extra\.type= \"Group\"".."\n\n"
+	end 
+
 
     if v.extra.timeline then 
 	    itm_str = itm_str..v.name.."\.extra\.timeline = {" 

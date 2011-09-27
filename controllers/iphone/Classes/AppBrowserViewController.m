@@ -7,11 +7,12 @@
 //
 
 #import "AppBrowserViewController.h"
-
+#import "Extensions.h"
 
 @implementation AppBrowserViewController
 
-@synthesize theTableView;
+@synthesize tableView;
+@synthesize appBrowser;
 @synthesize delegate;
 
 /*
@@ -27,28 +28,42 @@
 - (IBAction)appShopButtonClick {
 }
 
-// The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
+- (id)init {
+    return [self initWithNibName:@"AppBrowserViewController" bundle:nil];
+}
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
     if (self) {
-        // Custom initialization.
         appBrowser = [[AppBrowser alloc] init];
+        [appBrowser addViewController:self];
     }
+    
     return self;
 }
 
-/**
- * Called by RootViewController after a service is resolved. Creates a
- * TPAppViewController and sends TPAppViewController the host and port
- * it will use for establishing the socket it will use for an initial
- * connection with Trickplay and communicating with Trickplay asynchronously.
- */
-- (void)setupService:(NSUInteger)port
-            hostName:(NSString *)hostName
-         serviceName:(NSString *)serviceName {
+// The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil appBrowser:[[[AppBrowser alloc] init] autorelease]];
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil appBrowser:(AppBrowser *)browser {
+    
+    if (!nibNameOrNil || [nibNameOrNil compare:@"AppBrowserViewController"] != NSOrderedSame || nibBundleOrNil || !browser || ![browser isKindOfClass:[AppBrowser class]]) {
         
-    [appBrowser setupService:port hostName:hostName serviceName:serviceName];
+        [self release];
+        return nil;
+    }
+    
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        delegate = nil;
+        appBrowser = [browser retain];
+        [appBrowser addViewController:self];
+    }
+    
+    return self;
 }
 
 #pragma mark -
@@ -67,12 +82,17 @@
         currentAppIndicator.layer.cornerRadius = currentAppIndicator.frame.size.height/2.0;
     }
     
+    // Add a button to the navigation bar that refreshes the list of advertised
+    // services.
+    refreshButton = [[UIBarButtonItem alloc] initWithTitle: @"Refresh" style:UIBarButtonItemStylePlain target:self action:@selector(refresh)];
+    [[self navigationItem] setRightBarButtonItem:refreshButton];
+    
     // Initialize the loadingSpinner if it does not exist
     if (!loadingSpinner) {
         loadingSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     }
     // Set the delegate for the table which holds the app info
-    [theTableView setDelegate:self];
+    [tableView setDelegate:self];
 }
 
 - (void)viewDidUnload {
@@ -80,14 +100,18 @@
     NSLog(@"AppBrowserController Unload");
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
-    if (theTableView) {
-        [theTableView release];
-        theTableView = nil;
+    if (tableView) {
+        [tableView release];
+        tableView = nil;
     }
     if (loadingSpinner) {
         [loadingSpinner stopAnimating];
         [loadingSpinner release];
         loadingSpinner = nil;
+    }
+    if (refreshButton) {
+        [refreshButton release];
+        refreshButton = nil;
     }
 }
 
@@ -102,143 +126,8 @@
 #pragma mark -
 #pragma mark Retrieving App Info From Network
 
-/**
- * Returns true if the AppBrowserViewController can confirm an app is running
- * on Trickplay by asking it over the network.
- */
-- (BOOL)hasRunningApp {
-    if (!appBrowser) {
-        return NO;
-    }
-    /*
-    if (![appViewController hasConnection]) {
-        return NO;
-    }
-    */
-    
-    NSLog(@"\n\appBrowser: %@\n\n", appBrowser);
-    return [appBrowser hasRunningApp];
-}
-
-/**
- * Asks Trickplay for the currently running app and any information pertaining
- * to this app assembled in a JSON string. The method takes this JSON string reply
- * and returns it as an NSDictionary or nil on error.
- */
-- (NSDictionary *)getCurrentAppInfo {
-    if (!appBrowser) {
-        return nil;
-    }
-    /*
-    if (![appViewController hasConnection]) {
-        return nil;
-    }
-    */
-    
-    return [appBrowser getCurrentAppInfo];
-}
-
-- (void)getCurrentAppInfoWithDelegate:(id <AppBrowserDelegate>)theDelegate {
-    NSLog(@"Fetching Apps");
-    
-    if (!theDelegate) {
-        theDelegate = delegate;
-    }
-    if (!appBrowser) {
-        if (theDelegate) {
-            [theDelegate didReceiveCurrentAppInfo:nil];
-        }
-        return;
-    }
-    /*
-    if (![appViewController hasConnection]) {
-        appBrowser.currentAppName = nil;
-        if (theDelegate) {
-            [theDelegate didReceiveCurrentAppInfo:nil];
-        }
-        return;
-    }
-    */
-    
-    [appBrowser getCurrentAppInfoWithDelegate:theDelegate];
-}
-
-/**
- * Asks Trickplay for the most up-to-date information of apps it has available.
- * Trickplay replies with a JSON string of up-to-date apps. The method then
- * composes an NSArray of NSDictioanry Objects with information on each app
- * available to the user on the TV, each individual NSDictionary Object referring
- * to one app, and returns this NSArray to the caller. The method also sets
- * appsAvailable to this NSArray which is later used to populate the TableView.
- *
- * Returns the NSArray passed to appsAvailable or nil on error.
- */
-- (NSArray *)fetchApps {
-    NSLog(@"Fetching Apps");
-    
-    if (!appBrowser) {
-        return nil;
-    }
-    /*
-    if (![appViewController hasConnection]) {
-        return nil;
-    }
-    */
-    
-    return [appBrowser fetchApps];
-}
-
-- (void)getAvailableAppsInfoWithDelegate:(id <AppBrowserDelegate>)theDelegate {
-    NSLog(@"Fetching Apps");
-    
-    if (!theDelegate) {
-        theDelegate = delegate;
-    }
-    
-    if (!appBrowser) {
-        if (theDelegate) {
-            [theDelegate didReceiveAvailableAppsInfo:nil];
-        }
-        return;
-    }
-    
-    /*
-    if (![appViewController hasConnection]) {
-        appBrowser.currentAppName = nil;
-        if (theDelegate) {
-            [theDelegate didReceiveAvailableAppsInfo:nil];
-        }
-        return;
-    }
-    */
-    
-    [appBrowser getAvailableAppsInfoWithDelegate:theDelegate];
-}
-
-- (void)didReceiveAvailableAppsInfo:(NSArray *)info {
-    if (delegate) {
-        [delegate didReceiveAvailableAppsInfo:info];
-    }
-}
-- (void)didReceiveCurrentAppInfo:(NSDictionary *)info {
-    if (delegate) {
-        [delegate didReceiveCurrentAppInfo:info];
-    }
-}
-
-#pragma mark -
-#pragma mark Launching App View
-
-/**
- * Tells Trickplay to launch a selected app and sets this app as the current
- * app.
- */
-- (void)launchApp:(NSDictionary *)appInfo {
-    if (!appBrowser) {
-        return;
-    }
-    
-    [appBrowser launchApp:appInfo];
+- (void)refresh {
+    [appBrowser refresh];
 }
 
 #pragma mark -
@@ -256,10 +145,10 @@
  * are no available apps.
  */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	if (!appBrowser || !appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0) {
+	if (!appBrowser.availableApps || [appBrowser.availableApps count] == 0) {
         return 1;
     }
-    return [appBrowser.appsAvailable count];
+    return [appBrowser.availableApps count];
 }
 
 /**
@@ -267,16 +156,17 @@
  * of an app available on Trickplay. Selecting an app will launch the app on
  * Trickplay.
  */
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (UITableViewCell *)tableView:(UITableView *)_tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     static NSString *tableCellIdentifier = @"UITableViewCell";
-	UITableViewCell *cell = (UITableViewCell *)[tableView dequeueReusableCellWithIdentifier:tableCellIdentifier];
+	UITableViewCell *cell = (UITableViewCell *)[_tableView dequeueReusableCellWithIdentifier:tableCellIdentifier];
 	if (cell == nil) {
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:tableCellIdentifier] autorelease];
 	}
 
-    if (!appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0) {
+    if (!appBrowser.availableApps || [appBrowser.availableApps count] == 0) {
         cell.textLabel.text = @"Loading Data...";
+        [currentAppIndicator removeFromSuperview];
         cell.accessoryView = loadingSpinner;
         [loadingSpinner startAnimating];
         cell.userInteractionEnabled = NO;
@@ -290,12 +180,21 @@
     [loadingSpinner removeFromSuperview];
     cell.accessoryView = nil;
     
-    cell.textLabel.text = (NSString *)[(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"];
+    AppInfo *app = [appBrowser.availableApps objectAtIndex:indexPath.row];
+    cell.textLabel.text = app.name;
     cell.textLabel.textColor = [UIColor blackColor];
-    if (appBrowser.currentAppName && [cell.textLabel.text compare:appBrowser.currentAppName] == NSOrderedSame) {
+
+    if (appBrowser.currentApp && appBrowser.currentApp.name && [cell.textLabel.text compare:appBrowser.currentApp.name] == NSOrderedSame) {
         [cell addSubview:currentAppIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
+    } else {
+        for (UIImageView *view in cell.subviews) {
+            if (view == currentAppIndicator) {
+                [currentAppIndicator removeFromSuperview];
+            }
+        }
     }
+    
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     
 	return cell;
@@ -349,25 +248,29 @@
  * Override to support row selection in the table view. Selecting a row tells
  * Trickplay to launch the app populated by that row.
  */
-- (void)tableView:(UITableView *)tableView
+- (void)tableView:(UITableView *)_tableView
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSLog(@"Selected row %@\n", indexPath);
+    
+    if (appBrowser.availableApps && appBrowser.availableApps.count > 0 && indexPath.row < appBrowser.availableApps.count) {
+    
+        AppInfo *app = [appBrowser.availableApps objectAtIndex:indexPath.row];
         
-    if (!appBrowser.appsAvailable || [appBrowser.appsAvailable count] == 0) {// TODO: || pushingViewController) {
-        // just don't do anything
-    } else if (!appBrowser.currentAppName || [(NSString *)[(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] objectForKey:@"name"] compare:appBrowser.currentAppName] !=  NSOrderedSame) {
-        
-        [self launchApp:(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row]];
-        [delegate didSelectAppWithInfo:(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] isCurrentApp:NO];
+        if (appBrowser.currentApp != app) {
+            [appBrowser launchApp:[appBrowser.availableApps objectAtIndex:indexPath.row]];
+            [self.delegate appBrowserViewController:self didSelectApp:app isCurrentApp:NO];
+        } else {
+            [self.delegate appBrowserViewController:self didSelectApp:app isCurrentApp:YES];
+        }
     } else {
-        [delegate didSelectAppWithInfo:(NSDictionary *)[appBrowser.appsAvailable objectAtIndex:indexPath.row] isCurrentApp:YES];
+        [self refresh];
     }
     
-	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
+	NSIndexPath *indexPath2 = [_tableView indexPathForSelectedRow];
 	if (indexPath2 != nil)
 	{
-		[tableView deselectRowAtIndexPath:indexPath2 animated:YES];
+		[_tableView deselectRowAtIndexPath:indexPath2 animated:YES];
 	}
 	
 }
@@ -384,9 +287,11 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)dealloc {
     NSLog(@"AppBrowserViewController dealloc");
-    if (theTableView) {
-        [theTableView release];
-        theTableView = nil;
+    self.delegate = nil;
+    
+    if (tableView) {
+        [tableView release];
+        tableView = nil;
     }
     if (loadingSpinner) {
         [loadingSpinner stopAnimating];
@@ -396,7 +301,9 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (currentAppIndicator) {
         [currentAppIndicator release];
     }
-    appBrowser.delegate = nil;
+    
+    [appBrowser invalidateViewController:self];
+    [appBrowser cancelRefresh];
     [appBrowser release];
     appBrowser = nil;
     

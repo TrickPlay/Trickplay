@@ -66,7 +66,7 @@ local function set_new_project (pname, replace)
 			for i, j in pairs (projects) do 
 				if j == pname then 
 					if replace == nil then 
-						if j ~= "unsaved_temp" then 
+						if j ~= "unsaved_project" then 
 							editor.error_message("001", pname, set_new_project)  
 							return 
 					    end
@@ -114,7 +114,7 @@ local function set_new_project (pname, replace)
 	local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
     editor_lb:mkdir( lib_skins_default_path ) 
     
-	local menu_text = menu_items.menu_text -- screen:find_child("menu_text")
+	local menu_text = menu_items.menu_text 
 
 	menu_text.text = project .. " "
 	menu_text.extra.project = project .. " "
@@ -167,7 +167,7 @@ function project_mng.new_project(fname, from_new_project)
 	editor_use = true
 	-- Text Input Field 	
 	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
-		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
+		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_border_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
     	  border_corner_radius = 0,}
 
@@ -179,8 +179,8 @@ function project_mng.new_project(fname, from_new_project)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_ok.pressed = function() 
+	button_cancel.on_press = function() xbox:on_button_down() end 
+	button_ok.on_press = function() 
 							set_new_project(text_input.text) 
 							xbox:on_button_down()
 							undo_list = {}
@@ -189,23 +189,23 @@ function project_mng.new_project(fname, from_new_project)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 
 		button_ok.extra.active.opacity = 255
 		button_ok.extra.dim.opacity = 0
 
-		text_input.on_focus_in()
+		text_input.set_focus()
 	end
 
 	local tab_func = function()
-		text_input.on_focus_out()
+		text_input.clear_focus()
 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
 
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	-- Focus Destination 
@@ -254,12 +254,12 @@ function project_mng.new_project(fname, from_new_project)
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
 			elseif screen:find_child(text_input.focus[key]) then
-				if text_input.on_focus_out then
-					text_input.on_focus_out()
+				if text_input.clear_focus then
+					text_input.clear_focus()
 				end
 				screen:find_child(text_input.focus[key]):grab_key_focus()
-				if screen:find_child(text_input.focus[key]).on_focus_in then
-					screen:find_child(text_input.focus[key]).on_focus_in(key)
+				if screen:find_child(text_input.focus[key]).set_focus then
+					screen:find_child(text_input.focus[key]).set_focus(key)
 				end
 			end
 		end
@@ -290,11 +290,20 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     local SSTYLE = {font = "FreeSans Medium 14px" , color = {0,0,0,255}}
     local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
 
-    local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", name = "open_project", position = {0,0}}
+	local msgw_bg 
+
+    --msgw_bg = Image{src = "/assets/panel-no-tabs.png", name = "open_project", position = {0,0}}
+    msgw_bg = assets("/assets/panel-no-tabs.png")
+	if msgw_bg == nil then 
+    	msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name = "open_project", position = {0,0}}
+	else 
+		msgw_bg:set{name = "open_project", position = {0,0}}
+	end 
+
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title = Text{name = "title", text = "Open Project"}:set(STYLE)
 	local title_shadow = Text {name = "title", text = "Open Project"}:set(SSTYLE)
-	local selected_project
+	local selected_project, ss, nn
 	
 	local func_ok = function() 
 		editor.save(true,nil,project_mng.open_project,{nil,nil,nil,true})
@@ -320,19 +329,23 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     
     base = editor_lb:build_path( home , "trickplay-editor"  )
 
+    if editor_lb:readdir( base ) == nil then 
+		settings.project = nil
+	end 
+
     assert( editor_lb:mkdir( base ) )
     
     -- The list of files and directories there. We go through it and look for
     -- directories.
     local list = editor_lb:readdir( base )
     
-    if table.getn(projects) == 0 then 
-    	for i = 1 , # list do
-        	if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
+    for i = 1 , #list do
+        if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
+			if util.is_in_list(list[ i ], projects) == false then 
             	table.insert( projects , list[ i ])
-        	end
-    	end
-    end 
+			end 
+        end
+    end
     
     input_mode = hdr.S_POPUP
 
@@ -349,6 +362,12 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
         end   
 	
         app_path = editor_lb:build_path( base , project )
+
+    	if editor_lb:readdir( app_path ) == nil or #editor_lb:readdir( app_path ) == 0 then 
+			set_new_project("unsaved_project")
+			return  
+		end 
+
         if not editor_lb:mkdir( app_path ) then
         -- Tell the user we were not able to create it
    	     	print("couldn't create ",app_path)  
@@ -376,19 +395,22 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
 		local dir = editor_lb:readdir(current_dir.."/screens")
 
+		if dir == nil then return end 
+
 		for i, v in pairs(dir) do
-				if v == "unsaved_temp.lua" then 
-					if readfile("screens/"..v) ~= "" then 
-						msg_window.inputMsgWindow_openfile(v) 
-						editor_lb:writefile("screens/"..v, "", true)
-						current_fn = "" 
-					end 
+			if v == "unsaved_temp.lua" then 
+				if readfile("screens/"..v) ~= "" then 
+					msg_window.inputMsgWindow_openfile(v) 
+					editor_lb:writefile("screens/"..v, "", true)
+					current_fn = "" 
 				end 
+			end 
 		end 
 		return 
+
 	elseif from_main then 
 
-		set_new_project("unsaved_temp")
+		set_new_project("unsaved_project")
 		editor.close(true)
 
 		return 
@@ -409,24 +431,24 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_new.pressed = function() xbox:on_button_down(1)  project_mng.new_project() end
-	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() load_project(selected_project) end
+	button_new.on_press = function() xbox:on_button_down(1)  project_mng.new_project() end
+	button_cancel.on_press = function() xbox:on_button_down(1) end
+	button_ok.on_press = function() if selected_project == ss then selected_project = nn end load_project(selected_project) end
 	
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		scroll.on_focus_in()
+		scroll.set_focus()
 	end
 
 	local tab_func = function()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_new:grab_key_focus()
-		button_new.on_focus_in()
+		button_new.set_focus()
 	end
 
 	--Focus Destination
@@ -473,7 +495,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
     for i, v in pairs(projects) do 
 
-		virtual_hieght = virtual_hieght + 22
+		virtual_hieght = virtual_hieght + 22 
 
 		local project_t, project_ts = make_msgw_project_item(v)
 		local h_rect = Rectangle{border_width = 1, border_color = {0,0,0,255}, name="h_rect", color="#a20000", size = {298, 22}, reactive = true, opacity=0}
@@ -490,7 +512,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		project_t.extra.rect = h_rect.name
 		project_ts.position =  {cur_w-1, cur_h-1}
 		project_ts.extra.rect = h_rect.name
-		h_rect.position =  {cur_w - 12, cur_h-1}
+		h_rect.position =  {cur_w - 12, cur_h-3}
 
     	project_t.name = v
     	project_t.reactive = true
@@ -510,11 +532,11 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 			project_t:on_button_down()
 			return true
 		end
-		function h_rect.extra.on_focus_in()
+		function h_rect.extra.set_focus()
 			h_rect.opacity = 255
 			h_rect:grab_key_focus()
 		end
-		function h_rect.extra.on_focus_out()
+		function h_rect.extra.clear_focus()
 			h_rect.opacity = 0
 		end
 		function h_rect:on_button_down(x,y,button,num_click)
@@ -537,13 +559,19 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 				if type(h_rect.focus[key]) == "function" then
 					h_rect.focus[key]()
 				elseif screen:find_child(h_rect.focus[key]) then
-					if h_rect.on_focus_out then
-						h_rect.on_focus_out()
+					if h_rect.clear_focus then
+						h_rect.clear_focus()
 					end
 					--screen:find_child(h_rect.focus[key]):grab_key_focus()
-					if screen:find_child(h_rect.focus[key]).on_focus_in then
+					if screen:find_child(h_rect.focus[key]).set_focus then
 						selected_project = v
-						screen:find_child(h_rect.focus[key]).on_focus_in(key)
+						ss = v
+						nn = projects[ i + 1] 
+						if key == keys.Return then 
+							ss = nil 
+						end 
+
+						screen:find_child(h_rect.focus[key]).set_focus(key)
 						if h_rect.focus[key] ~= "button_ok" then 
 							scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
 						end
@@ -554,7 +582,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		end
 	end
 	
-	scroll.virtual_h = virtual_hieght
+	scroll.virtual_h = virtual_hieght + 25
 	if scroll.virtual_h <= scroll.visible_h then 
 			scroll.visible_w = 300
 	end 
@@ -567,7 +595,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	--Focus
 	button_ok.active.opacity = 255
 	button_ok.dim.opacity = 0
-	scroll.on_focus_in()
+	scroll.set_focus()
 
 	function xbox:on_button_down(x,y,button,num_clicks)
 		screen:remove(msgw)

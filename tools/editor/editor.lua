@@ -4,14 +4,15 @@ local rect_init_x = 0
 local rect_init_y = 0
 local g_init_x = 0
 local g_init_y = 0
+local next_position 
 
 local menuButtonView 
 
-local allUiElements     = { 
-						 	"Rectangle", "Text", "Image", "Video", "Button", "TextInput", "DialogBox", "ToastAlert", 
-						 	"CheckBoxGroup", "RadioButtonGroup", "ButtonPicker", "ProgressSpinner", "ProgressBar", 
-						 	"MenuButton", "TabBar", "LayoutManager", "ScrollPane", "ArrowPane"
-					      }
+local allUiElements     = {
+							"ArrowPane", "Button", "ButtonPicker", "CheckBoxGroup","DialogBox","Image", "LayoutManager",
+							"MenuButton", "ProgressBar","ProgressSpinner", "RadioButtonGroup", "Rectangle", "ScrollPane", 
+							"TabBar",  "Text",  "TextInput", "ToastAlert", "Video"
+						  }
 
 local engineUiElements  = { 
 							"Rectangle", "Text", "Image", "Video" 
@@ -80,7 +81,7 @@ local function guideline_inspector(v)
     local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
     local MSSTYLE = {font = "FreeSans Medium 12px" , color = "000000", opacity=50}
 
-    local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
+    local msgw_bg = assets("lib/assets/panel-new.png"):set{name = "save_file_bg", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
 	local title = Text {name = "title", text = "Guideline" }:set(TSTYLE)
 	local title_shadow = Text {name = "title", text = "Guideline"}:set(TSSTYLE)
@@ -105,28 +106,30 @@ local function guideline_inspector(v)
 	end 
 
 	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = org_position, padding = 5 , border_width  = 1,
-		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
+		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_border_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px", text_color =  {255,255,255,255},
     	  border_corner_radius = 0,}
 
 	--Buttons 
    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
  		  skin = "default", ui_width = 80, ui_height = 27, label = "Cancel", focus_color = {27,145,27,255}, focus_object = text_input}
-   	local button_delete = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
+		  button_cancel.name = "button_cancel"
+   	local button_delete = editor_ui.button{ text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
  		  skin = "default", ui_width = 80, ui_height = 27, label = "Delete", focus_color = {27,145,27,255}, focus_object = text_input}
+		  button_delete.name = "button_delete"
 	local button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
     	  skin = "default", ui_width = 80, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button= true, focus_object = text_input} 
+		  button_ok.name = "button_ok"
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_delete.pressed = function() screen:remove(screen:find_child(v.name))
+	button_cancel.on_press = function() xbox:on_button_down() end 
+	button_delete.on_press = function() screen:remove(screen:find_child(v.name))
  									   xbox:on_button_down() 
 							end 
 
-	button_ok.pressed = function() 
+	button_ok.on_press = function() 
 		if text_input.text == "" then 
 			xbox:on_button_down() 
-			return
    		end    
 		if(util.guideline_type(v.name) == "v_guideline") then
 				v.x = tonumber(text_input.text)
@@ -138,19 +141,19 @@ local function guideline_inspector(v)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
-		text_input.on_focus_in()
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
+		text_input.set_focus()
 	end
 
 	local tab_func = function()
-		text_input.on_focus_out()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+		text_input.clear_focus()
+		button_ok.active.opacity = 0
+		button_ok.dim.opacity = 255
+		button_cancel.set_focus()
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
 	end
 
 	-- Focus Destination 
@@ -197,18 +200,25 @@ local function guideline_inspector(v)
 
 	function text_input:on_key_down(key)
 
-		local key_focus_obj = screen:find_child(text_input.focus[key]) 
+		local key_focus_obj 
+
+		if text_input.focus[key] == nil then return end 
 
 		if text_input.focus[key] then
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
-			elseif key_focus_obj then
-				if text_input.on_focus_out then
-					text_input.on_focus_out()
+				return true
+			else
+				local key_focus_obj = screen:find_child(text_input.focus[key]) 
+
+				if key_focus_obj == nil then return end 
+
+				if text_input.clear_focus then
+					text_input.clear_focus()
 				end
 				key_focus_obj:grab_key_focus()
-				if key_focus_obj.on_focus_in then
-					key_focus_obj.on_focus_in(key)
+				if key_focus_obj.set_focus then
+					key_focus_obj.set_focus(key)
 				end
 			end
 		end
@@ -280,7 +290,6 @@ function editor.show_guides()
 			end
 		end 
 	else 
-		--if screen:find_child("h_guideline1") or  screen:find_child("h_guideline1") then 
 		if util.is_there_guideline() then 
 			menuButtonView.items[11]["icon"].opacity = 0
 			guideline_show = false
@@ -320,7 +329,6 @@ local function create_on_line_down_f(v)
 
         function v:on_button_down(x,y,button,num_clicks)
             dragging = {v, x - v.x, y - v.y }
-	     	--if(button == 3 or num_clicks >= 2) then
 	     	if(button == 3) then
 		  		guideline_inspector(v)
                 return true
@@ -458,7 +466,7 @@ function editor.close(new, next_func, next_f_param, from_close)
 
 	undo_list = {}
 	redo_list  = {}
-    
+
 	item_num = 0
     current_fn = ""
     screen.grab_key_focus(screen)
@@ -502,44 +510,7 @@ function editor.close(new, next_func, next_f_param, from_close)
 	return
 end 
 
-local function open_files(input_purpose, bg_image, inspector)
-	local WIDTH = 300
-  	local HEIGHT = 400
-    local PADDING = 13
-
-	local L_PADDING = 20
-    local R_PADDING = 50
-
-	local TOP_BAR = 30
-    local MSG_BAR = 530
-    local BOTTOM_BAR = 40
-
-	local Y_PADDING = 22
-    local X_PADDING = 10
-
-	local STYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
-    local WSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
-    local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
-    local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
-
-    local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", "open_file", position = {0,0}}
-    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
-	local title = Text{name = "title", text = "Open File"}:set(STYLE)
-	local title_shadow = Text {name = "title", text = "Open File"}:set(SSTYLE)
-
-	local selected_file 
-	local virtual_hieght = 0
-	local dir 
-	
-	if input_purpose == "open_luafile" then 
-		dir = editor_lb:readdir(current_dir.."/screens")
-	elseif input_purpose == "open_imagefile" then 
-		dir = editor_lb:readdir(current_dir.."/assets/images")
-	elseif input_purpose =="open_videofile" then  
-		dir = editor_lb:readdir(current_dir.."/assets/videos")
-	end 
-
-	local function load_file(v)
+function editor.load_file(v,input_purpose,bg_image)
 		if v == nil then 
 			return
 		end
@@ -586,14 +557,51 @@ local function open_files(input_purpose, bg_image, inspector)
 		elseif input_purpose == "open_videofile" then 
         	msg_window.inputMsgWindow_openvideo("open_videofile", v)
 		end
-	end
+end
 
+
+local function open_files(input_purpose, bg_image, inspector)
+	local WIDTH = 300
+  	local HEIGHT = 400
+    local PADDING = 13
+
+	local L_PADDING = 20
+    local R_PADDING = 50
+
+	local TOP_BAR = 30
+    local MSG_BAR = 530
+    local BOTTOM_BAR = 40
+
+	local Y_PADDING = 22
+    local X_PADDING = 10
+
+	local STYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local WSTYLE = {font = "FreeSans Medium 14px" , color = {255,255,255,255}}
+    local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
+    local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
+
+    local msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name="open_file", position = {0,0}}
+    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
+	local title = Text{name = "title", text = "Open File"}:set(STYLE)
+	local title_shadow = Text {name = "title", text = "Open File"}:set(SSTYLE)
+
+	local selected_file, ss, nn 
+	local virtual_hieght = 0
+	local dir 
+	
+	if input_purpose == "open_luafile" then 
+		dir = editor_lb:readdir(current_dir.."/screens")
+	elseif input_purpose == "open_imagefile" then 
+		dir = editor_lb:readdir(current_dir.."/assets/images")
+	elseif input_purpose =="open_videofile" then  
+		dir = editor_lb:readdir(current_dir.."/assets/videos")
+	end 
 	local inspector_activate = function ()
 		inspector:remove(inspector:find_child("deactivate_rect"))
 	end 
 
 	-- Scroll	
-	local scroll = editor_ui.scrollPane{virtual_h = virtual_hieght}
+	local scroll = editor_ui.scrollPane{virtual_h = virtual_hieght }
 
 	editor_use = true
 	-- Buttons 
@@ -605,11 +613,12 @@ local function open_files(input_purpose, bg_image, inspector)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) if inspector then inspector_activate() end end
-	--button_ok.pressed = function() load_file(selected_file)  xbox:on_button_down(1) end
+	button_cancel.on_press = function() xbox:on_button_down(1) if inspector then inspector_activate() end end
 	
 	if inspector then 
-		button_ok.pressed = function() 
+		button_ok.on_press = function() 
+			if ss == selected_file then selected_file = nn end 
+
 			local f_name = screen:find_child("file_name") 
 			if f_name then 
 				if selected_file then 
@@ -619,28 +628,26 @@ local function open_files(input_purpose, bg_image, inspector)
 			-- clip 
 			local tmpImage 
 			if selected_file then 
-				tmpImage = Image{src = "assets/images/"..selected_file}
+				tmpImage = assets("assets/images/"..selected_file)
 			end
-			if inspector:find_child("cw") then 
-				inspector:find_child("cw"):find_child("input_text").text = tostring(tmpImage.w)
-				inspector:find_child("ch"):find_child("input_text").text = tostring(tmpImage.h)
-			end 
 			xbox:on_button_down(1) 
 			inspector_activate() 
 		end
 	else 
-		button_ok.pressed = function() 
+		button_ok.on_press = function() 
+
+			if ss == selected_file then selected_file = nn end 
+
 			if input_purpose == "open_luafile" then
 				undo_list = {} 
-				if editor.close(true) ~= "-1" then --, load_file, selected_file) == nil then --0802
-					load_file(selected_file) 
+				if editor.close(true) ~= -1 then -- "-1" 
+					editor.load_file(selected_file,input_purpose,bg_image) 
 				end 
 			else 
-				load_file(selected_file) 
+				editor.load_file(selected_file,input_purpose,bg_image) 
 			end 
 			xbox:on_button_down(1) 
 
-			-- 0802		
 			local dir = editor_lb:readdir(current_dir.."/screens")
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
@@ -649,25 +656,24 @@ local function open_files(input_purpose, bg_image, inspector)
 					end 
 				end 
 			end 
-			--0802
 		end 
 	end 
 
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
-		scroll.on_focus_in()
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
+		scroll.set_focus()
 	end
 	
 	
 	local tab_func = function()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+		button_ok.active.opacity = 0
+		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	
@@ -675,7 +681,6 @@ local function open_files(input_purpose, bg_image, inspector)
 	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
 
-	--editor_use = false
 	
 	local msgw = Group {
 		name = "msgw", 
@@ -730,13 +735,14 @@ local function open_files(input_purpose, bg_image, inspector)
 				selected_file = v
 			end
 
-			h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() selected_file = v tab_func() end }
+			h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() end }
+			--h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() selected_file = v tab_func() end }
 	
 			item_t.position =  {cur_w, cur_h}
 			item_t.extra.rect = h_rect.name
 			item_ts.position =  {cur_w-1, cur_h-1}
 			item_ts.extra.rect = h_rect.name
-			h_rect.position =  {cur_w - 12, cur_h-1}
+			h_rect.position =  {cur_w - 12, cur_h-3}
 	
     		item_t.name = v
     		item_t.reactive = true
@@ -756,11 +762,11 @@ local function open_files(input_purpose, bg_image, inspector)
 				item_t:on_button_down()
 				return true
 			end
-			function h_rect.extra.on_focus_in()
+			function h_rect.extra.set_focus()
 				h_rect.opacity = 255
 				h_rect:grab_key_focus()
 			end
-			function h_rect.extra.on_focus_out()
+			function h_rect.extra.clear_focus()
 				h_rect.opacity = 0
 			end
 			function h_rect:on_button_down(x,y,button,num_click)
@@ -774,23 +780,36 @@ local function open_files(input_purpose, bg_image, inspector)
 				h_rect:grab_key_focus()
 				selected_file = item_t.name 
 				if button == 3 and inspector == nil then 
-					load_file(selected_file)
+					editor.load_file(selected_file,input_purpose,bg_image)
 				end
 				return true
         	end 
 			function h_rect:on_key_down(key)
 
-				local key_focus_obj = msgw:find_child(h_rect.focus[key]) 
+				local key_focus_obj
+
+				if h_rect.focus[key] and type(h_rect.focus[key]) ~= "function" then 
+					key_focus_obj = msgw:find_child(h_rect.focus[key]) 
+				end 
+
 				if h_rect.focus[key] then
 					if type(h_rect.focus[key]) == "function" then
 						h_rect.focus[key]()
 					elseif key_focus_obj then
-						if h_rect.on_focus_out then
-							h_rect.on_focus_out()
+						if h_rect.clear_focus then
+							h_rect.clear_focus()
 						end
-						if key_focus_obj.on_focus_in then
+						if key_focus_obj.set_focus then
 							selected_file = v
-							key_focus_obj.on_focus_in(key)
+
+							ss = v
+							nn = dir[ i + 1 ] 
+
+							if key == keys.Return then 
+								ss = nil 
+							end 
+
+							key_focus_obj.set_focus(key)
 							if h_rect.focus[key] ~= "button_ok" then 
 								scroll.seek_to_middle(0,key_focus_obj.y) 
 							end
@@ -803,7 +822,7 @@ local function open_files(input_purpose, bg_image, inspector)
 	end 
 
 	end
-	scroll.virtual_h = virtual_hieght
+	scroll.virtual_h = virtual_hieght + 25
 	if scroll.virtual_h <= scroll.visible_h then 
 		scroll.visible_w = 300
 	end 
@@ -816,9 +835,9 @@ local function open_files(input_purpose, bg_image, inspector)
 	util.create_on_button_down_f(msgw)	
 	
 	--Focus
-	button_ok:find_child("active").opacity = 255
-	button_ok:find_child("dim").opacity = 0
-	scroll.on_focus_in()
+	button_ok.active.opacity = 255
+	button_ok.dim.opacity = 0
+	scroll.set_focus()
 
 	function xbox:on_button_down(x,y,button,num_clicks)
 		if screen:find_child(msgw.name) then 
@@ -870,7 +889,7 @@ function editor.video(inspector)
 	return open_files("open_videofile",nil,inspector)
 end
 
-function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
+function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 
 	local save_items 
 
@@ -904,7 +923,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title, title_shadow 
-	local inspector_bg = Image{src = "lib/assets/panel-tabs.png", name = "open_project", position = {0,0}}
+	local inspector_bg = assets("lib/assets/panel-tabs.png"):set{name = "open_project", position = {0,0}}
 	local inspector_items = {}
 	
 
@@ -926,12 +945,11 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		title = Text{name = "title", text = "Inspector: "..v.type}:set(STYLE)
 		title_shadow = Text {name = "title", text = "Inspector: "..v.type}:set(SSTYLE)
 	end 
-	----------------------------------------------------------------------------
+	-------------------------------------------------------------
 	local INSPECTOR_OFFSET = 30 
     local TOP_PADDING = 12
     local BOTTOM_PADDING = 12
 	-------------------------------------------------------------
-
 	if(current_inspector ~= nil) then 
 		return 
     end 
@@ -959,7 +977,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	local labels_t= {}
 
  	if util.is_this_widget(v) == true then 
- 		if v.extra.type == "ToastAlert" or v.extra.type == "DialogBox" or       -- 2 Tabs 
+ 		if v.extra.type == "ToastAlert" or v.extra.type == "DialogBox" or   -- 2 Tabs 
  		   v.extra.type == "ProgressSpinner" or v.extra.type == "ProgressBar" or 
  		   v.extra.type == "ScrollPane" or v.extra.type == "ArrowPane" then 
  		   table.insert (labels_t, "Info")
@@ -992,18 +1010,15 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
 	end
 
 	--Focus Destination
-	--button_viewcode.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel",  [keys.Return] = "button_viewcode", [keys.Up] = s_func}
 	button_cancel.extra.focus = {[keys.Right] = "button_ok", [keys.Tab] = "button_ok",  [keys.Return] = "button_cancel", [keys.Up] = s_func}
 	button_ok.extra.focus = {[keys.Left] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_ok", [keys.Up] = s_func}
-	--editor_use = false
-	
 	-- inspector group 
 	local inspector = Group {
 		name = "inspector", --msgw
@@ -1016,7 +1031,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			title_shadow:set{position = {X_PADDING, 5}, opacity=50}, 
 			title:set{position = {X_PADDING + 1, 6}}, 
 			tabs:set{name = "tabs", position = {0, TOP_BAR}, reactive=true},
-			--button_viewcode:set{name = "button_viewcode", position = { WIDTH - button_viewcode.w - button_cancel.w - button_ok.w - 3*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
 			button_cancel:set{name = "button_cancel", position = { WIDTH - button_cancel.w - button_ok.w - 2*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}, 
 			button_ok:set{name = "button_ok", position = { WIDTH - button_ok.w - 1*PADDING,HEIGHT - BOTTOM_BAR + PADDING}}
 		},
@@ -1024,9 +1038,19 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	}
 
 	-- Button Event Handlers
-	--button_viewcode.pressed = function() editor.view_code(v)  xbox:on_button_down(1) end
-	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1)  end end
+	button_cancel.on_press = function() xbox:on_button_down(1) 
+	
+		if org_items then 
+			if v.tab_labels then 
+				v.tab_labels = org_items 
+			else 
+				v.items = org_items  
+			end 
+		end 
+	
+	end
+
+	button_ok.on_press = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1) end end
 
 	local function inspector_position() 
 		inspector.x = x_pos
@@ -1119,7 +1143,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 					if space == 261 then 
          				item.x = GUTTER
 					else
-         				item.x = used + PADDING  -- PADDING, 6
+         				item.x = used + PADDING  
 					end 
 
 					if used_y == 0 then 
@@ -1130,11 +1154,10 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 					prev_y = item.y 
 	    		else 
 		 			if (attr_n == "ui_width" or attr_n == "w") then 
-						--items_height = items_height - 12 -- imsi !! 
  		 			end 
          			item.x = GUTTER
 		 			item.y = used_y +  7
-		 			space = 261 --WIDTH - item.w
+		 			space = 261 
 		 			items_height = item.h 
 					prev_y = item.y
         		end 
@@ -1155,13 +1178,13 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		end 
    	end 
 
-	scroll_info.virtual_h = item_group_info.h --+ 35
+	scroll_info.virtual_h = item_group_info.h 
    	scroll_info.content:add(item_group_info)
 	scroll_info.position = {0, 0}
 	scroll_info.reactive = true
 	tabs.tabs[1]:add(scroll_info) 
 
-	scroll_more.virtual_h = item_group_more.h --+ 35
+	scroll_more.virtual_h = item_group_more.h 
 	local tab_n = table.getn(tabs.tab_labels) 
 	if item_group_more.h ~= 0 then 
    		scroll_more.content:add(item_group_more)
@@ -1176,9 +1199,9 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
    	util.create_on_button_down_f(inspector)	
 
 	--Focus
-	button_ok:find_child("active").opacity = 255
-	button_ok:find_child("dim").opacity = 0
-	scroll_info.on_focus_in()
+	button_ok.active.opacity = 255
+	button_ok.dim.opacity = 0
+	scroll_info.set_focus()
 
 	local var_i = 1 
 
@@ -1196,6 +1219,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			end 
 		end 
 		screen.grab_key_focus(screen) 
+		menu.reactivate_menu()
 		return true
 	end 
 
@@ -1216,10 +1240,11 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	function inspector_xbox:on_button_down(x,y,button,num_clicks)
 		screen_ui.n_selected(v)
-		screen:remove(inspector)
+		if screen:find_child("inspector") then 
+			screen:remove(inspector)
+		end 
 		inspector:clear() 
 		current_inspector = nil
-			
        	for i, c in pairs(g.children) do
 		    if(c.type == "Text") then 
 				c.reactive = true
@@ -1238,6 +1263,17 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	    	end 
 	    end 
 		menu.reactivate_menu()
+
+		if x and y and button and num_clicks then 
+			if org_items then 
+				if v.tab_labels then 
+					v.tab_labels = org_items 
+				else 
+					v.items = org_items  
+				end 
+			end 
+		end 
+
 		return true
 	end 
 
@@ -1254,11 +1290,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	end 
 
 	if scroll_y_pos then 
-		 if v.extra.type == "TabBar" then 
-		 	tabs.buttons[2].on_button_down()
-		 else 
-		 	tabs.buttons[3].on_button_down()
-		 end 
+		 tabs.buttons[3].on_button_down()
 		 if screen:find_child("si_items") then 
 	     	screen:find_child("si_items").extra.seek_to(0, math.floor(math.abs(scroll_y_pos)))
 		 end 
@@ -1292,7 +1324,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	for i, v in pairs(g.children) do
 		if v.extra then 
 			if v.extra.focus == nil then 
-				editor.inspector(v, "touch") --0701
+				editor.inspector(v, "touch") 
 			end 
 		end
 
@@ -1307,7 +1339,6 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	    done_list = d_list
 	    todo_list = t_list
 	end
-
 	if(g.extra.video ~= nil) then
 		contents = contents..util.itemTostring(g.extra.video)
 	end 
@@ -1421,13 +1452,13 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 								-- object의 코드가 없을경우에 새로히 추가해 주어야 한다.
 					 			added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
 					    		if j.extra.type == "Button" then 
-					     			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
-					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
-					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
+					     			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_focus = function() -- Handler for "..j.name.."\.on_focus in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_press = function() -- Handler for "..j.name.."\.on_press in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_unfocus = function() -- Handler for "..j.name.."\.on_unfocus in this screen\nend\n"
 			   		     		elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
-	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_item) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
 			   		     		elseif j.extra.type == "CheckBoxGroup" then 
-	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_items) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
 			   		     		elseif j.extra.type == "MenuButton" then 
 			   						for k,l in pairs (j.items) do 
 			   	     		     		if l["type"] == "item" then 
@@ -1448,7 +1479,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 			    				elseif j.extra.type == "LayoutManager" then 
 									local content_num = 0 
 									local lm_name = j.name
-			        				for k,l in pairs (j.tiles) do 
+			        				for k,l in pairs (j.cells) do 
 										for n,m in pairs (l) do 
 											if m then 
 												j = m 
@@ -1456,7 +1487,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 											end 
 										end 
 									end 
-									added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add on_focus_in and on_focus_out function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.tiles[r][c]\n\t\t\t\tif cell_obj.extra.on_focus_in == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_in ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.on_focus_out == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_out ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
+									added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add set_focus and clear_focus function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.cells[r][c]\n\t\t\t\tif cell_obj.extra.set_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.set_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.clear_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.clear_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
 
 								elseif j.extra.type == "Group" then  
 									gen_added_stub_code(j)
@@ -1491,23 +1522,18 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 						main = ""
 						main = main_first..added_stub_code..main_last
 						editor_lb:writefile("main.lua",main, true)
-			   			--print("main.lua 안에 해당 부분을 찾아서 수정이 필요하면 해줘여..") 
 					end 
 			   	end 
-     	  	else	-- if string.find(main, "-- "..fileUpper.." SECTION") == nil then 
-			   	--print("main.lua 안에 딱히 해당 될 내용이 없으면 새로 구성해 줘야지..") 
+     	  	else	
 				msg_window.inputMsgWindow_savefile(fname, current_fn, save_current_f)
 	      	end	
-		elseif (current_fn ~= "" and main == nil) then  -- if(current_fn ~= "" and main ) then 
-			 --print("main.lua 자체가 없어서 만들라고 ? ") 
+		elseif (current_fn ~= "" and main == nil) then  
 			 msg_window.inputMsgWindow_savefile(fname, current_fn, save_current_f)
 		else
-			 --print("이건 무슨 경우랴 ?") 
 			 editor.save(false)
 			 return
 		end 
     else -- save_current_file == false, "Save As"   
-		--print("Save As 경우") 
 		msg_window.inputMsgWindow_savefile(fname, current_fn)
 	end 	
 end 
@@ -1526,14 +1552,13 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
     local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
     local MSSTYLE = {font = "FreeSans Medium 12px" , color = "000000", opacity=50}
 
-    local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
+    local msgw_bg = assets("lib/assets/panel-new.png"):set{name = "save_file_bg", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
 	local title = Text {name = "title", text = "Save " }:set(TSTYLE)
 	local title_shadow = Text {name = "title", text = "Save "}:set(TSSTYLE)
 	local message = Text {text = "File Name:"}:set(MSTYLE)
 	local message_shadow = Text {text = "File Name:"}:set(MSSTYLE)
 
-		
 	if restore_fn ~= "" then 
 		current_fn = "screens/"..restore_fn
 	end 
@@ -1554,7 +1579,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
     end 
 
     if current_time_focus then 
-		current_time_focus.on_focus_out()
+		current_time_focus.clear_focus()
 		current_time_focus = nil
     end 
 	
@@ -1586,10 +1611,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	-- No current file or save as command 
 	editor_use = true
 	-- Text Input Field 	
-	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
-		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
-		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
-    	  border_corner_radius = 0, readonly="screen/" }
+	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1, border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_border_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255}, border_corner_radius = 0, readonly="screen/" }
 
 	--Buttons 
    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
@@ -1599,8 +1621,8 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_ok.pressed = function() 
+	button_cancel.on_press = function() xbox:on_button_down() end 
+	button_ok.on_press = function() 
 		local file_name 
 		if text_input.text == "" then 
 			xbox:on_button_down() 
@@ -1632,19 +1654,20 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
-		text_input.on_focus_in()
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
+		text_input.set_focus()
 	end
 
 	local tab_func = function()
-		text_input.on_focus_out()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+	print("mm")
+		text_input.clear_focus()
+		button_ok.active.opacity = 0
+		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	-- Focus Destination 
@@ -1692,12 +1715,12 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
 			elseif screen:find_child(text_input.focus[key]) then
-				if text_input.on_focus_out then
-					text_input.on_focus_out()
+				if text_input.clear_focus then
+					text_input.clear_focus()
 				end
 				screen:find_child(text_input.focus[key]):grab_key_focus()
-				if screen:find_child(text_input.focus[key]).on_focus_in then
-					screen:find_child(text_input.focus[key]).on_focus_in(key)
+				if screen:find_child(text_input.focus[key]).set_focus then
+					screen:find_child(text_input.focus[key]).set_focus(key)
 				end
 			end
 		end
@@ -1708,6 +1731,7 @@ end
 function editor.rectangle(x, y)
     rect_init_x = x 
     rect_init_y = y 
+
     if (ui.rect ~= nil and "rectangle"..tostring(item_num) == ui.rect.name) then
     	return 0
     end
@@ -1715,21 +1739,21 @@ function editor.rectangle(x, y)
 	while (util.is_available("rectangle"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	end 
-    ui.rect = Rectangle{
-    name="rectangle"..tostring(item_num),
-    border_color= hdr.DEFAULT_COLOR,
-    border_width=0,
-    color= hdr.DEFAULT_COLOR,
-    size = {1,1},
-    position = {x,y,0}, 
-	extra = {org_x = x, org_y = y}
+    
+	ui.rect = Rectangle{
+    	name="rectangle"..tostring(item_num),
+    	border_color= hdr.DEFAULT_COLOR,
+    	border_width=0,
+    	color= hdr.DEFAULT_COLOR,
+    	size = {1,1},
+    	position = {x,y,0}, 
+		extra = {org_x = x, org_y = y}
     }
     ui.rect.reactive = true
-    table.insert(undo_list, {ui.rect.name, hdr.ADD, ui.rect})
-    g:add(ui.rect)
-	
 	ui.rect.extra.lock = false
+    g:add(ui.rect)
     util.create_on_button_down_f(ui.rect) 
+    table.insert(undo_list, {ui.rect.name, hdr.ADD, ui.rect})
 end 
 
 function editor.rectangle_done(x,y)
@@ -1773,6 +1797,7 @@ function editor.rectangle_done(x,y)
 end 
 
 function editor.rectangle_move(x,y)
+
 	if ui.rect then 
         ui.rect.size = { math.abs(x-rect_init_x), math.abs(y-rect_init_y) }
         if(x- rect_init_x < 0) then
@@ -1782,69 +1807,58 @@ function editor.rectangle_move(x,y)
             ui.rect.y = y
         end
 	end
+
 end
 
 local function ungroup(v)
-     v.extra.children = {}
-     screen_ui.n_selected(v)
-     for i,c in pairs(v.children) do 
-     	table.insert(v.extra.children, c.name) 
-		c.extra.is_in_group = false
-		v:remove(c)
-		c.x = c.x + v.x 
-		c.y = c.y + v.y 
-		g:add(c)
-		if(c.type == "Text") then
-	   		function c:on_key_down(key)
-        		if key == keys.Return then
-	        		c:set{cursor_visible = false}
-        	  		screen.grab_key_focus(screen)
-		  			return true
-	     		end 
-	   		end 
-		end 
-     end
-     g:remove(v)
+
+	screen_ui.n_selected_all()
+	screen_ui.selected(v)
+	editor.ugroup(v)
+
 end 
 
 function editor.undo()
-	  if( undo_list == nil) then return true end 
-      local undo_item= table.remove(undo_list)
+	  
+	if( undo_list == nil) then 
+		return true 
+	end 
+    
+	local undo_item= table.remove(undo_list)
 
-	  if(undo_item == nill) then return true end
-	  if undo_item[2] == hdr.CHG then 
-	  	screen_ui.n_selected(undo_item[1])
+	if(undo_item == nil) then 
+		return true 
+	end
+
+	if undo_item[2] == hdr.CHG then 
+		screen_ui.n_selected(undo_item[1])
 		util.set_obj(g:find_child(undo_item[1]), undo_item[3])
-	    table.insert(redo_list , undo_item)
-	  elseif undo_item[2] == ADD then 
+	elseif undo_item[2] == hdr.ADD then 
 	    screen_ui.n_selected(undo_item[3])
-	    if((undo_item[3]).type == "Group") then 
+		if util.is_this_group(undo_item[3]) == true then 
 			ungroup(undo_item[3])
-	    else
+		else
 			g:remove(g:find_child(undo_item[1]))
 	    end 
-        table.insert(redo_list , undo_item)
-	  elseif undo_item[2] == hdr.DEL then 
-	    screen_ui.n_selected(undo_item[3])
-	    if((undo_item[3]).type == "Group") then 
-			if util.is_in_list(undo_item[3].extra.type, editorUiElements) == false then 
-		        for i, c in pairs(undo_item[3].extra.children) do
-					local c_tmp = g:find_child(c)
-					screen_ui.n_selected(c_tmp)
-					g:remove(g:find_child(c))
-					c_tmp.extra.is_in_group = true
-					c_tmp.x = c_tmp.x - undo_item[3].x
-					c_tmp.y = c_tmp.y - undo_item[3].y
-					undo_item[3]:add(c_tmp)
-		    	end 
+	elseif undo_item[2] == hdr.DEL then 
+		screen_ui.n_selected(undo_item[3])
+		if util.is_this_group(undo_item[3]) == true then 
+		    for i, c in pairs(undo_item[3].extra.children) do
+				local c_tmp = g:find_child(c)
+				screen_ui.n_selected(c_tmp)
+				g:remove(g:find_child(c))
+				c_tmp.extra.is_in_group = true
+				c_tmp.x = c_tmp.x - undo_item[3].x
+				c_tmp.y = c_tmp.y - undo_item[3].y
+				undo_item[3]:add(c_tmp)
 		    end 
 		    g:add(undo_item[3])
 	    else 
 	    	g:add(undo_item[3])
 	    end
-        table.insert(redo_list , undo_item)
- 	  end 
-	  screen:grab_key_focus() --1115
+ 	end 
+	table.insert(redo_list, undo_item)
+	screen:grab_key_focus() 
 end
 	
 function editor.redo()
@@ -1853,23 +1867,24 @@ function editor.redo()
 	  if(redo_item == nill) then return true end
  	  
       if redo_item[2] == hdr.CHG then 
-	  	util.set_obj(g:find_child(redo_item[1]),  redo_item[4])
-	    table.insert(undo_list, redo_item)
-      elseif redo_item[2] == ADD then 
-	  	if(redo_item[3].type == "Group") then 
-	    	for i, c in pairs(redo_item[3].extra.children) do
-				local c_tmp = g:find_child(c)
-				g:remove(g:find_child(c))
-				c_tmp.extra.is_in_group = true
-				c_tmp.x = c_tmp.x - redo_item[3].x
-				c_tmp.y = c_tmp.y - redo_item[3].y
-				redo_item[3]:add(c_tmp)
-		   	end 
-		   	g:add(redo_item[3])
-	    else 
-        	g:add(redo_item[3])
-	    end 
-        table.insert(undo_list, redo_item)
+	  		util.set_obj(g:find_child(redo_item[1]),  redo_item[4])
+	    	table.insert(undo_list, redo_item)
+      elseif redo_item[2] == hdr.ADD then 
+			if util.is_this_group(redo_item[3]) then 
+	  		--if(redo_item[3].type == "Group") then 
+	    		for i, c in pairs(redo_item[3].extra.children) do
+					local c_tmp = g:find_child(c)
+					g:remove(g:find_child(c))
+					c_tmp.extra.is_in_group = true
+					c_tmp.x = c_tmp.x - redo_item[3].x
+					c_tmp.y = c_tmp.y - redo_item[3].y
+					redo_item[3]:add(c_tmp)
+		   		end 
+		   		g:add(redo_item[3])
+	    	else 
+        		g:add(redo_item[3])
+	    	end 
+        	table.insert(undo_list, redo_item)
       elseif redo_item[2] == hdr.DEL then 
 	  	if(redo_item[3].type == "Group") then 
 			ungroup(redo_item[3])
@@ -1878,7 +1893,7 @@ function editor.redo()
 	    end 
         table.insert(undo_list, redo_item)
       end 
-	  screen:grab_key_focus() --1115
+	  screen:grab_key_focus() 
 end
 
 function editor.undo_history()
@@ -1902,15 +1917,13 @@ function editor.text()
     ui.text = Text{
     name="text"..tostring(item_num),
 	text = strings[""], font= "FreeSans Medium 30px",
-	-- 0111 text = "", font= "FreeSans Medium 40px",
     color = hdr.DEFAULT_COLOR, 
 	position ={200, 200, 0}, 
-	editable = true , reactive = true, --ellipsize = "END", 
-	--wants_enter = true, size = {300, 100},wrap=true, wrap_mode="CHAR", 
+	editable = true , reactive = true, 
 	wants_enter = true, wrap=true, wrap_mode="CHAR", 
 	extra = {org_x = 200, org_y = 200}
 	} 
-    table.insert(undo_list, {ui.text.name, ADD, ui.text})
+    table.insert(undo_list, {ui.text.name, hdr.ADD, ui.text})
     g:add(ui.text)
 
 	local timeline = screen:find_child("timeline")
@@ -1940,19 +1953,12 @@ function editor.text()
 	    end 
 	end 
 
-	if(screen:find_child("screen_objects") == nil) then 
-             --screen:add(g)
-	end
     ui.text.grab_key_focus(ui.text)
     local n = table.getn(g.children)
 
     function ui.text:on_key_down(key,u,t,m)
 
-		if m and m.shift then 
-			return true
-		end 
-
-    	if key == keys.Return then -- and shift == false then
+    	if key == keys.Return then 
 			ui.text:set{cursor_visible = false}
         	screen.grab_key_focus(screen)
 			ui.text:set{editable= false}
@@ -1966,6 +1972,7 @@ function editor.text()
 			item_num = item_num + 1
 			return true
 	    end 
+
 	end 
 
 	function ui.text:on_button_down()
@@ -1975,6 +1982,11 @@ function editor.text()
 
 		return true
 	end 
+
+	--if ui.text.w == 1 then 
+		--ui.text.w = 500
+		--ui.text:set{cursor_visible = true}
+	--end 
 
 	ui.text.reactive = true
 	ui.text.extra.lock = false
@@ -2002,7 +2014,7 @@ function editor.clone()
 		     	source = v,
                 position = {v.x + 20, v.y +20}
         	    }
-        	    table.insert(undo_list, {ui.clone.name, ADD, ui.clone})
+        	    table.insert(undo_list, {ui.clone.name, hdr.ADD, ui.clone})
         	    g:add(ui.clone)
 
 				if v.extra.clone then 
@@ -2038,10 +2050,6 @@ function editor.clone()
 	    	        end 
 		     	end 
  
-		     
-	           	if(screen:find_child("screen_objects") == nil) then 
-        	          --screen:add(g)        
-		     	end 
         	    ui.clone.reactive = true
 		     	ui.clone.extra.lock = false
 		     	util.create_on_button_down_f(ui.clone)
@@ -2055,11 +2063,114 @@ function editor.clone()
 	screen:grab_key_focus()
 end
 	
+local w_attr_list =  {"ui_width","ui_height","skin","style","label","title","button_color","focus_color","focus_border_color", "focus_button_color", "focus_box_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_width","cell_height","cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset","cells_focusable","visible_width", "visible_height",  "virtual_width", "virtual_height", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "focus_box_color", "box_border_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","cells","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive", "arrow_color", "focus_arrow_color", "tabs"}
+
+
+local function copy_content(n)
+	local content, t_name 
+
+	if n.extra.type then 
+		t_name = n.extra.type
+	else
+		t_name = n.type
+	end 
+
+	while(util.is_available(string.lower(t_name)..tostring(item_num))== false) do
+		item_num = item_num + 1
+	end 
+	content = util.copy_obj(n) 
+
+	content.name = string.lower(t_name)..tostring(item_num)
+	content.extra.is_in_group = true
+	content.reactive = true
+	content.extra.lock = false
+	util.create_on_button_down_f(content)
+
+	item_num = item_num + 1
+	return content 
+end 
+		
+function dup_function (v, from_dup_f)
+
+	local dup_obj 
+
+	screen_ui.n_selected(v)
+
+	if util.is_this_widget(v) == true  then	
+   		dup_obj = widget_f_map[v.extra.type]() 
+	else
+        dup_obj = util.copy_obj(v)  
+		dup_obj.name = string.lower(v.type)
+	end 
+
+    while(util.is_available(dup_obj.name..tostring(item_num))== false) do
+		item_num = item_num + 1
+    end 
+
+
+    dup_obj.name = dup_obj.name..tostring(item_num)
+
+	if util.is_this_widget(v) == true and from_dup_f ~= nil then 
+       	dup_obj.position = {v.x, v.y}
+	elseif next_position and from_dup_f == nil then  
+        dup_obj.position = next_position
+	elseif from_dup_f == nil then 
+        dup_obj.position = {v.x + 20, v.y +20}
+	end 
+    dup_obj.extra.position = {v.x, v.y}
+				
+	if util.is_this_widget(v) == false then	
+        if v.type == "Group" then 
+        	for i,j in pairs(v.children) do 
+				local nn = copy_content(dup_function(j, true))
+				dup_obj.extra.type = "Group"
+				dup_obj:add(nn)
+           	end 
+    	end 
+    else --util.is_this_widget == true
+     	for i,j in pairs(w_attr_list) do 
+        	if v[j] ~= nil and j ~= "name" and j ~= "position" then  
+            	if j == "content" then  
+					local temp_g = util.copy_obj(v[j])
+					for m,n in pairs(v.content.children) do 
+						temp_g:add(copy_content(n))
+        	     	    temp_g:add(temp_g_c)
+			     	end 
+					dup_obj[j] = temp_g
+                elseif j == "cells" then 
+					for k,l in pairs (v[j]) do 
+						if type(l) == "table" then 
+							for o,p in pairs(l) do 
+				     			dup_obj:replace(k,o,copy_content(p)) 
+							end  
+						end 
+					end
+				elseif j == "tabs" then
+					for k, l in pairs(v[j]) do  -- j, c
+						for o, p in pairs (l.children) do -- k,d 
+							dup_obj[j][k]:add(copy_content(p))
+						end 
+		    		end 
+                elseif type(v[j]) == "table" then  
+					if j ~= "children" then 
+						local temp_t = {}
+						for k,l in pairs (v[j]) do 
+							temp_t[k] = l
+						end
+				    	dup_obj[j] = temp_t
+					end 
+                else
+					dup_obj[j] = v[j] 
+                end 
+           end 
+       	end --for
+	end
+
+	return dup_obj 
+end 
+
 function editor.duplicate()
-	local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "bar_focus_color_inner", "bar_focus_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_focus_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive", "arrow_color", "arrow_focus_color"}
-
-	local next_position 
-
+	-- no selected object 
 	if(table.getn(selected_objs) == 0 )then 
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
@@ -2068,346 +2179,54 @@ function editor.duplicate()
    	end 
 
 	for i, v in pairs(g.children) do
-    	if g:find_child(v.name) then
-	    	if(v.extra.selected == true) then
-		     	if ui.dup then
-		          	if ui.dup.name == v.name then 
-						next_position = {2 * v.x - ui.dup.extra.position[1], 2 * v.y - ui.dup.extra.position[2]}
-			  		end 
-		     	end 
-		     
-			 	local function copy_widget(org)
-					local cpy = widget_f_map[org.extra.type]() 
-        			while(util.is_available(cpy.name..tostring(item_num))== false) do
-    					item_num = item_num + 1
-        			end 
-        			cpy.name = cpy.name..tostring(item_num)
-					if next_position then 
-                    	cpy.extra.position = {v.x, v.y}
-                        cpy.position = next_position
-                    else 
-                        cpy.extra.position = {v.x, v.y}
-                        cpy.position = {v.x + 50, v.y +50}
+		if util.is_this_selected(v) == true then 
+		    if ui.dup then
+		    	if ui.dup.name == v.name then 
+					next_position = {2 * v.x - ui.dup.extra.position[1], 2 * v.y - ui.dup.extra.position[2]}
+				else 
+					ui.dup = nil 
+					next_position = nil 
+			  	end 
+		    end 
+			 
+            ui.dup = dup_function(v)
+
+			if ui.dup then 
+            	table.insert(undo_list, {ui.dup.name, hdr.ADD, ui.dup})
+                g:add(ui.dup)
+
+                local timeline = screen:find_child("timeline")
+                if timeline then 
+                	ui.dup.extra.timeline = {}
+                    ui.dup.extra.timeline[0] = {}
+                    local prev_point = 0
+                    local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
+                    for l,k in pairs (attr_map["Clone"]()) do 
+                    	ui.dup.extra.timeline[0][k] = ui.dup[k]
+                    end
+                    if cur_focus_n ~= 0 then 
+                    	ui.dup.extra.timeline[0]["hide"] = true  
                     end 
-
-					for i,j in pairs(w_attr_list) do 
-        				if org[j] ~= nil then 
-                			if j == "content" then  
-								local temp_g = util.copy_obj(org[j])
-								for m,n in pairs(org.content.children) do 
-			     					if n.name then 
-										local temp_g_c
-										while(util.is_available(string.lower(n.type)..tostring(item_num))== false) do
-		         							item_num = item_num + 1
-	             						end 
-										if util.is_this_widget(n) == true then 
-											temp_g_c.name=string.lower(n.extra.type)..tostring(item_num)
-						    				temp_g_c = copy_widget(n) 
-										else 
-											temp_g_c.name=string.lower(n.type)..tostring(item_num)
-						    				temp_g_c = util.copy_obj(n) 
-										end
-										temp_g_c.extra.is_in_group = true
-										temp_g_c.extra.lock = false
-										temp_g_c.reactive = true
-		     							util.create_on_button_down_f(temp_g_c)
-						
-										if screen:find_child(temp_g_c.name.."border") then 
-			             					screen:find_child(temp_g_c.name.."border").position = temp_g_c.position
-						    			end
-										if screen:find_child(temp_g_c.name.."a_m") then 
-			             					screen:find_child(temp_g_c.name.."a_m").position = temp_g_c.position 
-			        					end 
-
-        	     	        			temp_g:add(temp_g_c)
-		     							item_num = item_num + 1
-			     	   	 			end 
-			   					end 
-								cpy[j] = temp_g
-                			elseif j == "tiles" then 
-								for k,l in pairs (org[j]) do 
-									if type(l) == "table" then 
-										for o,p in pairs(l) do 
-											local t_obj
-											while(util.is_available(string.lower(p.type)..tostring(item_num))== false) do
-		         								item_num = item_num + 1
-	             							end 
-											if util.is_this_widget(p) == true then 
-												t_obj.name=string.lower(p.extra.type)..tostring(item_num)
-						    					t_obj = copy_widget(p) 
-											else 
-												t_obj = util.copy_obj(p)
-												t_obj.name = string.lower(p.type)..tostring(item_num)
-											end 
-											t_obj.extra.is_in_group = true
-											t_obj.reactive = true
-		     								t_obj.extra.lock = false
-		     								util.create_on_button_down_f(t_obj)
-				    						cpy:replace(k,o,t_obj) 
-		     								item_num = item_num + 1
-										end  
-									end 
-								end
-                 			elseif type(org[j]) == "table" then  
-								local temp_t = {}
-								for k,l in pairs (org[j]) do 
-									temp_t[k] = l
-								end
-								cpy[j] = temp_t
-                			else
-								cpy[j] = org[j] 
-        					end 
-    					end 
-					end --for
-					return cpy
-				end
-			
-                function dup_function ()
-		        	if util.is_this_widget(v) == false  then	
-                    	while(util.is_available(string.lower(v.type)..tostring(item_num))== false) do
-                        	item_num = item_num + 1
+                    for i, j in util.orderedPairs(timeline.points) do 
+                    	if not ui.dup.extra.timeline[i] then 
+                        	ui.dup.extra.timeline[i] = {} 
+                            for l,k in pairs (attr_map["Clone"]()) do 
+                            	ui.dup.extra.timeline[i][k] = ui.dup.extra.timeline[prev_point][k] 
+                            end 
+                            prev_point = i 
                         end 
-                        screen_ui.n_selected(v)
-                        ui.dup = util.copy_obj(v)  
-                        ui.dup.name=string.lower(v.type)..tostring(item_num)
-                        if next_position then 
-                        	ui.dup.extra.position = {v.x, v.y}
-                        	ui.dup.position = next_position
-                        else 
-                        	ui.dup.extra.position = {v.x, v.y}
-                        	ui.dup.position = {v.x + 20, v.y +20}
+                        if i < cur_focus_n  then 
+                        	ui.dup.extra.timeline[i]["hide"] = true  
                         end 
+                    end 
+                 end 
 
-                        if v.type == "Group" then 
-                        	for i,j in pairs(v.children) do 
-                        		if j.name then 
-                        			while(util.is_available(string.lower(j.type)..tostring(item_num))== false) do
-                        				item_num = item_num + 1
-                        			end 
-									if util.is_this_widget(j) == false then 
-                        				ui.dup_c = util.copy_obj(j) 
-                        				ui.dup_c.name=string.lower(j.type)..tostring(item_num)
-                        				ui.dup_c.extra.lock = false
-                        				util.create_on_button_down_f(ui.dup_c)
-                        				ui.dup:add(ui.dup_c)
-                        				item_num = item_num + 1
-									else 
-										---[[
-										ui.dup_c = copy_widget(j)
-										ui.dup:add(ui.dup_c)
-                        				ui.dup_c.extra.lock = false
-                        				util.create_on_button_down_f(ui.dup_c)
-                        				item_num = item_num + 1
-										---]]
-										-- group's child is widget 
-									---[[	
-										 for a,b in pairs(w_attr_list) do 
-                        				 	if j[b] ~= nil then 
-                            					if b ~= "name" and b ~= "position" then  
-                                 					if b == "content" then  
-														--print("1 : content")
-														local temp_g
-														if util.is_this_widget(j) == false then 
-															temp_g = util.copy_obj(j[b])
-														else 
-															temp_g = copy_wiget_obj(j[b])
-														end 
-														for m,n in pairs(j.content.children) do 
-			     	   		     								if n.name then 
-																	while(util.is_available(string.lower(n.type)..tostring(item_num))== false) do
-		         														item_num = item_num + 1
-	             													end 
-						        									temp_g_c = util.copy_obj(n) 
-																	temp_g_c.name=string.lower(n.type)..tostring(item_num)
-																	temp_g_c.extra.is_in_group = true
-																	temp_g_c.reactive = true
-						
-																	if screen:find_child(temp_g_c.name.."border") then 
-			             												screen:find_child(temp_g_c.name.."border").position = temp_g_c.position
-						        									end
-																	if screen:find_child(temp_g_c.name.."a_m") then 
-			             												screen:find_child(temp_g_c.name.."a_m").position = temp_g_c.position 
-			        												end 
-
-        	     	        										temp_g:add(temp_g_c)
-		     														temp_g_c.extra.lock = false
-		     														util.create_on_button_down_f(temp_g_c)
-		     														item_num = item_num + 1
-			     	   	   	     								end 
-			     	   	   								end 
-														ui.dup_c[b] = temp_g
-                                    				elseif b == "tiles" then 
-														--print("2 : tiles")
-						   								for k,l in pairs (j[b]) do 
-															if type(l) == "table" then 
-							     								for o,p in pairs(l) do 
-								  									while(util.is_available(string.lower(p.type)..tostring(item_num))== false) do
-		         														item_num = item_num + 1
-	             						  							end 
-								  									t_obj = util.copy_obj(p)
-								  									t_obj.name = string.lower(p.type)..tostring(item_num)
-								  									t_obj.extra.is_in_group = true
-								  									t_obj.reactive = true
-				     			          							ui.dup_c:replace(k,o,t_obj) 
-		     						  								t_obj.extra.lock = false
-		     						  								util.create_on_button_down_f(t_obj)
-							     								end  
-															end 
-						   								end
-                                    				elseif type(j[b]) == "table" then  
-														--print("3 : table", b)
-														if b ~= "children" then 
-						   									local temp_t = {}
-						   									for k,l in pairs (j[b]) do 
-																temp_t[k] = l
-																--ui.dup[b][k] = l
-						   									end
-															if ui.dup_c then 
-					           									ui.dup_c[b] = temp_t
-															end 
-														end 
-                                   					else --elseif ui.dup_c[b] ~= j[b]  then  
-														--print("-->", b, ":", j[b])
-														if ui.dup_c then 
-					           								ui.dup_c[b] = j[b] 
-														end
-                                   					end 
-                                 				end 
-                             				end 
-											if ui.dup_c then 
-                        						ui.dup:add(ui.dup_c)
-                        						ui.dup_c.extra.lock = false
-                        						util.create_on_button_down_f(ui.dup_c)
-											end
-                        					item_num = item_num + 1
-                          					end 
-										--	]]
-										end 
-                        			end 
-                        		end 
-                        	end 
-                   	else --util.is_this_widget == true
-                   			
-					--	ui.dup = copy_widget(v)
-
-						----[[
-                       	ui.dup = widget_f_map[v.extra.type]() 
-
-                        while(util.is_available(ui.dup.name..tostring(item_num))== false) do
-		         			item_num = item_num + 1
-                        end 
-
-                        ui.dup.name = ui.dup.name..tostring(item_num)
-                        if next_position then 
-                        	ui.dup.extra.position = {v.x, v.y}
-                            ui.dup.position = next_position
-                        else 
-                        	ui.dup.extra.position = {v.x, v.y}
-                            ui.dup.position = {v.x + 50, v.y +50}
-                        end 
-				
-                        for i,j in pairs(w_attr_list) do 
-                        	if v[j] ~= nil then 
-                            	if j ~= "name" and j ~= "position" then  
-                                 	if j == "content" then  
-												--print("1 : content")
-										local temp_g = util.copy_obj(v[j])
-										for m,n in pairs(v.content.children) do 
-			     	   		     			if n.name then 
-												while(util.is_available(string.lower(n.type)..tostring(item_num))== false) do
-		         									item_num = item_num + 1
-	             								end 
-						        				temp_g_c = util.copy_obj(n) 
-												temp_g_c.name=string.lower(n.type)..tostring(item_num)
-												temp_g_c.extra.is_in_group = true
-												temp_g_c.reactive = true
-						
-												if screen:find_child(temp_g_c.name.."border") then 
-			             							screen:find_child(temp_g_c.name.."border").position = temp_g_c.position
-						        				end
-												if screen:find_child(temp_g_c.name.."a_m") then 
-			             							screen:find_child(temp_g_c.name.."a_m").position = temp_g_c.position 
-			        							end 
-
-        	     	        					temp_g:add(temp_g_c)
-		     									temp_g_c.extra.lock = false
-		     									util.create_on_button_down_f(temp_g_c)
-		     									item_num = item_num + 1
-			     	   	   	     			end 
-			     	   	   				end 
-										ui.dup[j] = temp_g
-                                    elseif j == "tiles" then 
-										--print("2 : tiles")
-						   				for k,l in pairs (v[j]) do 
-											if type(l) == "table" then 
-							     				for o,p in pairs(l) do 
-								  					while(util.is_available(string.lower(p.type)..tostring(item_num))== false) do
-		         										item_num = item_num + 1
-	             						  			end 
-								  					t_obj = util.copy_obj(p)
-								  					t_obj.name = string.lower(p.type)..tostring(item_num)
-								  					t_obj.extra.is_in_group = true
-								  					t_obj.reactive = true
-				     			          			ui.dup:replace(k,o,t_obj) 
-		     						  				t_obj.extra.lock = false
-		     						  				util.create_on_button_down_f(t_obj)
-							     				end  
-											end 
-						   				end
-                                    elseif type(v[j]) == "table" then  
-										if j ~= "children" then 
-							   				local temp_t = {}
-						   					for k,l in pairs (v[j]) do 
-												temp_t[k] = l
-						   					end
-					           				ui.dup[j] = temp_t
-										end 
-                                   else--elseif ui.dup[j] ~= v[j]  then  
-					           			ui.dup[j] = v[j] 
-                                   end 
-                                 end -- not position, name 
-                             end 
-                          end --for
-					end
-				end 
-
-                dup_function()
-
-				if ui.dup then 
-                	table.insert(undo_list, {ui.dup.name, ADD, ui.dup})
-                	g:add(ui.dup)
-                	local timeline = screen:find_child("timeline")
-                	if timeline then 
-                		ui.dup.extra.timeline = {}
-                    	ui.dup.extra.timeline[0] = {}
-                    	local prev_point = 0
-                    	local cur_focus_n = tonumber(current_time_focus.name:sub(8,-1))
-                    	for l,k in pairs (attr_map["Clone"]()) do 
-                    		ui.dup.extra.timeline[0][k] = ui.dup[k]
-                    	end
-                    	if cur_focus_n ~= 0 then 
-                    		ui.dup.extra.timeline[0]["hide"] = true  
-                    	end 
-                    	for i, j in util.orderedPairs(timeline.points) do 
-                    		if not ui.dup.extra.timeline[i] then 
-                        		ui.dup.extra.timeline[i] = {} 
-                            	for l,k in pairs (attr_map["Clone"]()) do 
-                            		ui.dup.extra.timeline[i][k] = ui.dup.extra.timeline[prev_point][k] 
-                            	end 
-                            	prev_point = i 
-                        	end 
-                        	if i < cur_focus_n  then 
-                        		ui.dup.extra.timeline[i]["hide"] = true  
-                        	end 
-                    	end 
-                 	end 
-                 	ui.dup.reactive = true
-                 	ui.dup.extra.lock = false
-                 	util.create_on_button_down_f(ui.dup)
-                 	item_num = item_num + 1
-				end --ui.dup
-			end --if selected == true
-    	end -- if  
+                 ui.dup.reactive = true
+                 ui.dup.extra.lock = false
+                 util.create_on_button_down_f(ui.dup)
+                 item_num = item_num + 1
+			end --ui.dup
+		end --if selected == true
     end -- for 
 
 	input_mode = hdr.S_SELECT
@@ -2415,7 +2234,6 @@ function editor.duplicate()
 end
 
 function editor.delete()
-
 	if(table.getn(selected_objs) == 0 )then 
 		editor.error_message("016","",nil,nil,nil)
         screen:grab_key_focus()
@@ -2424,9 +2242,10 @@ function editor.delete()
    	end 
 
 	local delete_f = function(del_obj)
+
 		screen_ui.n_selected(del_obj)
 
-        table.insert(undo_list, {del_obj.name, DEL, del_obj})
+        table.insert(undo_list, {del_obj.name, hdr.DEL, del_obj})
 
         if (screen:find_child(del_obj.name.."a_m") ~= nil) then 
 	     		screen:remove(screen:find_child(del_obj.name.."a_m"))
@@ -2434,17 +2253,25 @@ function editor.delete()
 
 		if util.need_stub_code(del_obj) == true then 
 			if current_fn then 
-	   			local fileUpper= string.upper(string.sub(current_fn, 1, -5))
-	   		    local fileLower= string.lower(string.sub(current_fn, 1, -5))
+				local a, b = string.find(current_fn,"screens") 
+				local current_fn_without_screen 
+	   			if a then 
+					current_fn_without_screen = string.sub(current_fn, 9, -1)
+	   			end 
+
+	   			local fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
+	   		    local fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+
 			    local main = readfile("main.lua")
 			    if main then 
 			    	if string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") ~= nil then  			
 			        	local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") 
 				  		local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n\n")
 				  		local main_first = string.sub(main, 1, q-1)
+						local main_delete = string.sub(main, q, r-1) 
 				  		local main_last = string.sub(main, r+1, -1)
 				  		main = ""
-				  		main = main_first..main_last
+				  		main = main_first.."--[[\n"..main_delete.."]]\n\n"..main_last
 				  		editor_lb:writefile("main.lua",main, true)
 	       		    end 
 			     end 
@@ -2453,7 +2280,6 @@ function editor.delete()
     end 
 
 	for i, v in pairs(g.children) do
-
 		if(v.extra.selected == true) then
 			if v.extra.clone then 
 				if #v.extra.clone > 0 then
@@ -2475,10 +2301,17 @@ function editor.delete()
 		end 
 	end 
 	
+
 	for i, j in pairs(selected_objs) do 
 		j = string.sub(j, 1,-7)
+		local bumo
 		local s_obj = g:find_child(j)
-		local bumo = s_obj.parent 
+
+		if s_obj then 
+			bumo = s_obj.parent 
+		else 
+			return 
+		end 
 
 		if bumo.name == nil then 
 				if (bumo.parent.name == "window") then -- AP, SP 
@@ -2506,7 +2339,7 @@ function editor.delete()
 					end 
 				end 
 		elseif bumo.extra.type == "LayoutManager" then  
-				for e, r in pairs (bumo.tiles) do 
+				for e, r in pairs (bumo.cells) do 
 					if r then 
 						for x, c in pairs (r) do 
 							if c.name == s_obj.name then 
@@ -2524,12 +2357,11 @@ function editor.delete()
 					end 
 				end 
 		end 
-
 	end 
 
 	if table.getn(g.children) == 0 then 
 	    if screen:find_child("timeline") then 
-		screen:remove(screen:find_child("timeline"))
+			screen:remove(screen:find_child("timeline"))
 	    end 
 	end 
 
@@ -2572,40 +2404,32 @@ function editor.group()
 	while (util.is_available("group"..tostring(item_num)) == false) do  
 		item_num = item_num + 1
 	end 
-        ui.group = Group{
-                name="group"..tostring(item_num),
-        	position = {min_x, min_y}
-        }
-        ui.group.reactive = false
-        ui.group.extra.selected = false
-        ui.group.extra.type = "Group" -- uiContainer
-        table.insert(undo_list, {ui.group.name, ADD, ui.group})
+    ui.group = Group{
+    	name="group"..tostring(item_num),
+        position = {min_x, min_y}
+    }
+
+    ui.group.reactive = true
+    ui.group.extra.selected = false
+    ui.group.extra.type = "Group" -- uiContainer
+
+    table.insert(undo_list, {ui.group.name, hdr.ADD, ui.group})
 
 	for i, v in pairs(g.children) do
-             if g:find_child(v.name) then
-		  if(v.extra.selected == true) then
+		if(v.extra.selected == true) then
 			screen_ui.n_selected(v)
-
-			g:remove(v)
-        		ui.group:add(v)
-		  end 
-             end
-        end
-
-	for i, v in pairs (ui.group.children) do 
-		if ui.group:find_child(v.name) then 
+			v:unparent()
+        	ui.group:add(v)
 			v.extra.is_in_group = true
 			v.extra.group_position = ui.group.position
 			v.x = v.x - min_x
 			v.y = v.y - min_y
 		end 
-	end 
+        --end
+    end
 
-        g:add(ui.group)
-	if(screen:find_child("screen_objects") == nil) then 
-             --screen:add(g)
-	end 
-	
+    g:add(ui.group)
+
 	local timeline = screen:find_child("timeline")
 	if timeline then 
 	     ui.group.extra.timeline = {}
@@ -2632,12 +2456,14 @@ function editor.group()
 	     end 
 	end 
 
-        item_num = item_num + 1
+    item_num = item_num + 1
 	ui.group.extra.lock = false
-        --util.create_on_button_down_f(ui.group) 
-        screen.grab_key_focus(screen)
+    --util.create_on_button_down_f(ui.group) 
+    screen.grab_key_focus(screen)
 	input_mode = hdr.S_SELECT
 end
+
+
 
 function editor.ugroup()
 	if table.getn(selected_objs) == 0 then 
@@ -2648,52 +2474,25 @@ function editor.ugroup()
    	end 
 
 	for i, v in pairs(g.children) do
-    	if g:find_child(v.name) then
+    	--if g:find_child(v.name) then
 		  	if(v.extra.selected == true) then
-				if(v.type == "Group") then 
+				if util.is_this_group(v) == true then
 			     	screen_ui.n_selected(v)
 			     	v.extra.children = {}
 			     	for i,c in pairs(v.children) do 
 				     	table.insert(v.extra.children, c.name) 
-					---[[ 0128 : added for nested group 
-        				if(c.type == "Group") then 
-	       				   for j, cc in pairs (c.children) do
-								if util.is_in_list(c.extra.type, editorUiElements) == false then 
-                    				cc.reactive = true
-		    						cc.extra.is_in_group = true
-									cc.extra.lock = false
-                    				util.create_on_button_down_f(cc)
-								end 
-	       				   end 
-						end 
-					--]]
-				     	v:remove(c)
+						c:unparent()
 				     	c.extra.is_in_group = false
 				     	c.x = c.x + v.x 
 				     	c.y = c.y + v.y 
+						c.reactive = true	
 		     		    g:add(c)
-				     -- 0328 
-				     	if not c.reactive then 
-							c.reactive = true	
-				     	end 
-				     -- 0328 
-				     --c.reactive = true
-        			     --util.create_on_button_down_f(c)
-				     	if(c.type == "Text") then
-							function c:on_key_down(key)
-             				    if key == keys.Return then
-									c:set{cursor_visible = false}
-        							screen.grab_key_focus(screen)
-									return true
-	     				    	end 
-							end 
-	  			     	end 
 			     	end
 			     	g:remove(v)
         		    table.insert(undo_list, {v.name, hdr.DEL, v})
 		        end 
 		   end 
-		end
+		--end
 	end
     screen.grab_key_focus(screen)
 	input_mode = hdr.S_SELECT
@@ -3064,13 +2863,15 @@ function editor.hspace()
     x_sort_t = get_x_sort_t()
     reverse_t = get_reverse_t(x_sort_t)
 
+--[[
     for i, v in pairs(g.children) do
           if g:find_child(v.name) then
 	        if(v.extra.selected == true) then
 			--screen_ui.n_selected(v)
-		end 
+			end 
           end
     end
+]]
 
     f = table.remove(reverse_t)
     while(table.getn(reverse_t) ~= 0) do  
@@ -3374,11 +3175,11 @@ function editor.ui_elements()
     local SSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
     local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
 
-    local msgw_bg = Image{src = "lib/assets/panel-no-tabs.png", name = "ui_elements_insert", position = {0,0}}
+    local msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name = "ui_elements_insert", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
 	local title = Text{name = "title", text = "UI Elements"}:set(STYLE)
 	local title_shadow = Text {name = "title", text = "UI Elements"}:set(SSTYLE)
-	local selected_ui_element 
+	local selected_ui_element, ss, nn
 
 	local function load_ui_element(v)
 		if v == nil then 
@@ -3393,7 +3194,7 @@ function editor.ui_elements()
 		     		item_num = item_num + 1
 	           	end 
 	           	new_widget.name = new_widget.name..tostring(item_num)
-                table.insert(undo_list, {new_widget.name, ADD, new_widget})
+                table.insert(undo_list, {new_widget.name, hdr.ADD, new_widget})
 	           	g:add(new_widget)
 		   		new_widget.extra.lock = false
                 util.create_on_button_down_f(new_widget)
@@ -3407,9 +3208,7 @@ function editor.ui_elements()
 	end 
 
 	-- Scroll	
-	local scroll = editor_ui.scrollPane{virtual_h = 380}
-
-	
+	local scroll = editor_ui.scrollPane{virtual_h = 407}
 
 	-- Buttons 
     local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
@@ -3418,16 +3217,16 @@ function editor.ui_elements()
     					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button =true, focus_object = scroll} 
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() load_ui_element(selected_ui_element) end
+	button_cancel.on_press = function() xbox:on_button_down(1) end
+	button_ok.on_press = function() if ss == selected_ui_element then selected_ui_element = nn end load_ui_element(selected_ui_element) end
 	
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
-		scroll.on_focus_in()
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
+		scroll.set_focus()
 	end
 
 	--Focus Destination
@@ -3436,10 +3235,11 @@ function editor.ui_elements()
 
 
 	local tab_func = function()
-		button_ok:find_child("active").opacity = 0
-		button_ok:find_child("dim").opacity = 255
+	print("moioim")
+		button_ok.active.opacity = 0
+		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	local msgw = Group {
@@ -3482,13 +3282,14 @@ function editor.ui_elements()
 			selected_ui_element = v
 		end
 
-		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() selected_ui_element = v tab_func() end}
+		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() end}
+		--h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() selected_ui_element = v tab_func() end}
 
 		widget_t.position =  {cur_w, cur_h}
 		widget_t.extra.rect = h_rect.name
 		widget_ts.position =  {cur_w-1, cur_h-1}
 		widget_ts.extra.rect = h_rect.name
-		h_rect.position =  {cur_w - 12, cur_h-1}
+		h_rect.position =  {cur_w - 12, cur_h-3}
 
     	widget_t.name = v
     	widget_t.reactive = true
@@ -3502,17 +3303,17 @@ function editor.ui_elements()
        function widget_t:on_button_down(x,y,button,num_click)
 			selected_ui_element = widget_t.name 
 			scroll:find_child(widget_t.extra.rect):on_button_down(x,y,button,num_click)
-			return true
+			--return true
         end 
         function widget_ts:on_button_down()
 			widget_t:on_button_down()
-			return true
+			--return true
 		end
-		function h_rect.extra.on_focus_in()
+		function h_rect.extra.set_focus()
 			h_rect.opacity = 255
 			h_rect:grab_key_focus()
 		end
-		function h_rect.extra.on_focus_out()
+		function h_rect.extra.clear_focus()
 			h_rect.opacity = 0
 		end
 		function h_rect:on_button_down(x,y,button,num_click)
@@ -3535,13 +3336,18 @@ function editor.ui_elements()
 				if type(h_rect.focus[key]) == "function" then
 					h_rect.focus[key]()
 				elseif screen:find_child(h_rect.focus[key]) then
-					if h_rect.on_focus_out then
-						h_rect.on_focus_out()
+					if h_rect.clear_focus then
+						h_rect.clear_focus()
 					end
 					--screen:find_child(h_rect.focus[key]):grab_key_focus()
-					if screen:find_child(h_rect.focus[key]).on_focus_in then
+					if screen:find_child(h_rect.focus[key]).set_focus then
 						selected_ui_element = v
-						screen:find_child(h_rect.focus[key]).on_focus_in(key)
+						ss = v
+						nn = allUiElements[i+1]
+						if key == keys.Return then 
+								ss = nil 
+						end 
+						screen:find_child(h_rect.focus[key]).set_focus(key)
 						if h_rect.focus[key] ~= "button_ok" then 
 							scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
 						end
@@ -3559,9 +3365,9 @@ function editor.ui_elements()
 	util.create_on_button_down_f(msgw)	
 
 	--Focus
-	button_ok:find_child("active").opacity = 255
-	button_ok:find_child("dim").opacity = 0
-	scroll.on_focus_in()
+	button_ok.active.opacity = 255
+	button_ok.dim.opacity = 0
+	scroll.set_focus()
 
 
 	function xbox:on_button_down(x,y,button,num_clicks,textUIElement)
@@ -3581,7 +3387,7 @@ function editor.ui_elements()
 end 
 
 local error_msg_map = {
-	["001"] = function(str) return "Open", "Cancel", "", "","A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
+	["001"] = function(str) return "Open", "Cancel", "Error", "","A project named \" "..str.." \" already exists.\nWould you like to open it?" end, 
  	["002"] = function(str) return "OK", "Cancel", "", "", "Before saving the screen, a project must be open." end,
  	["003"] = function(str) return "Save","Cancel", "", "", "You have unsaved changes. Save the file before closing?" end, 					
  	["004"] = function(str) return "Overwrite","Cancel", "", "", "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
@@ -3599,6 +3405,7 @@ local error_msg_map = {
 	-- new error messages 
 	["016"] = function(str) return "OK", "Cancel", "Error", "Error", "There is no selected object." end, 
 	["017"] = function(str) return "OK", "Cancel", "Error", "Error", "Can't delete this object. Clone exists." end, 
+ 	["018"] = function(str) return "OK", "Cancel", "Error", "Error", "This UI Element can have maximum of "..str.." items." end, 
 }
 
 
@@ -3615,7 +3422,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
     local TSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
     local MSSTYLE = {font = "FreeSans Medium 14px" , color = "000000", opacity=50}
 
-    local msgw_bg = Image{src = "lib/assets/panel-new.png", name = "save_file_bg", position = {0,0}}
+    local msgw_bg = assets("lib/assets/panel-new.png"):set{name = "save_file_bg", position = {0,0}}
     local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={30, 30}, reactive = true}
 	local title = Text {name = "title", text = "Save " }:set(TSTYLE)
 	local title_shadow = Text {name = "title", text = "Save "}:set(TSSTYLE)
@@ -3641,7 +3448,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
      				skin = "default", ui_width = 75, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
  		-- Button Event Handlers
- 		button_nok.pressed = function() func_nok(1) xbox:on_button_down() end
+ 		button_nok.on_press = function() func_nok(1) xbox:on_button_down() end
  	else
     	button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
   					skin = "default", ui_width = 100, ui_height = 27, label = Cancel_label, focus_color = {27,145,27,255}, focus_object = nil}
@@ -3650,14 +3457,12 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 	editor_use = false
 	
-	button_ok:grab_key_focus() 
-
 
 	-- Button Event Handlers
 	if Cancel_label ~= "" then 
-		button_cancel.pressed = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
+		button_cancel.on_press = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
 	end 
-	button_ok.pressed = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
+	button_ok.on_press = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
 
 	if func_nok then 
 		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok"}
@@ -3681,15 +3486,15 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 
 	local tab_func = function()
 		if button_nok or button_cancel then 
-			button_ok:find_child("active").opacity = 0
-			button_ok:find_child("dim").opacity = 255
+			button_ok.active.opacity = 0
+			button_ok.dim.opacity = 255
 		end 
 		if button_nok then 
 			button_nok:grab_key_focus()
-			button_nok.on_focus_in()
+			button_nok.set_focus()
 		else 
 			button_cancel:grab_key_focus()
-			button_cancel.on_focus_in()
+			button_cancel.set_focus()
 		end 
 	end
 
@@ -3712,10 +3517,10 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
-		button_ok:find_child("active").opacity = 255
-		button_ok:find_child("dim").opacity = 0
+		button_ok.active.opacity = 255
+		button_ok.dim.opacity = 0
 		button_ok:grab_key_focus() 
 	end
 
@@ -3727,11 +3532,39 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		msgw:add(button_nok) 
  	end 
 
+	button_ok:grab_key_focus() 
+	function button_cancel:on_key_down(key)
+		if key == keys.Return then 
+			button_cancel.on_press()
+		elseif (key == hdr.Tab and shift == false) or key == keys.Right then 
+			button_cancel.clear_focus()
+			button_ok.set_focus()
+		elseif (key == hdr.TabLeft and shift == true) or key == keys.Left then 
+			if button_nok then 
+				button_cancel.clear_focus()
+				button_nok.set_focus()
+			end
+		end 
+		return true
+	end 
+
+	function button_ok:on_key_down(key)
+		if key == keys.Return then 
+			button_ok.on_press()
+		elseif (key == hdr.TabLeft and shift == true) or key == keys.Left then 
+			button_ok.clear_focus()
+			button_cancel.set_focus()
+		end 
+		return true
+	end 
+
 	msgw.extra.lock = false
  	screen:add(msgw)
+
+	button_ok:grab_key_focus() 
+
 	util.create_on_button_down_f(msgw)	
 
-	
 	-- Focus 
 	ti_func()
 
@@ -3748,7 +3581,6 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		return true
 	end 
 
-	button_ok:grab_key_focus() 
 	return msgw
 end
 

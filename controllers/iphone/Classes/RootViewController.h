@@ -10,7 +10,7 @@
 #import "NetServiceManager.h"
 #import "TPAppViewController.h"
 #import "AppBrowserViewController.h"
-#import "TVBrowserViewController.h"
+#import "TVBrowser.h"
 
 /**
  * The RootViewController controls the root view of the over-arching
@@ -24,8 +24,12 @@
  */
 
 @interface RootViewController : UIViewController <UINavigationControllerDelegate,
-TPAppViewControllerSocketDelegate, AppBrowserViewControllerDelegate, TVBrowserViewControllerDelegate> {
+TPAppViewControllerDelegate, TVConnectionDelegate,
+TVBrowserViewControllerDelegate, TVBrowserDelegate,
+AppBrowserViewControllerDelegate, AppBrowserDelegate> {
     UIWindow *window;
+    
+    NSUInteger refreshCount;
 
     // Initialized to NO. Set to YES while the AppBrowser is in the course
     // of being pushed to the top of the navigation stack
@@ -47,10 +51,9 @@ TPAppViewControllerSocketDelegate, AppBrowserViewControllerDelegate, TVBrowserVi
 // Exposed methods
 - (void)pushAppBrowser:(NSNotification *)notification;
 - (void)destroyAppBrowserViewController;
-- (void)createTPAppViewControllerWithPort:(NSInteger)port hostName:(NSString *)hostName;
+- (void)createTPAppViewControllerWithConnection:(TVConnection *)connection;
 - (void)pushTPAppViewController;
 - (void)destroyTPAppViewController;
-- (void)serviceResolved:(NSNetService *)service;
 
 // Exposed properties
 @property (retain)IBOutlet UINavigationController *navigationController;

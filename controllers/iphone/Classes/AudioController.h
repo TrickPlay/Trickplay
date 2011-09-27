@@ -8,21 +8,20 @@
 
 #import <Foundation/Foundation.h>
 #import "AudioStreamer.h"
-#import "SocketManager.h"
 #import "ResourceManager.h"
 
 
 @interface AudioController : NSObject {
     ResourceManager *resourceManager;
-    SocketManager *socketManager;
+    TVConnection *tvConnection;
     
     AudioStreamer *audioStreamer;
     NSString *soundLoopName;
 }
 
 - (id)initWithResourceManager:(ResourceManager *)resman
-               socketManager:(SocketManager *)sockman;
-
+                 tvConnection:(TVConnection *)tvConnection;
+    
 - (void)sendSoundStatusMessage:(NSString *)resource message:(NSString *)message;
 - (void)playSoundFile:(NSString *)resourcename filename:(NSString *)filename;
 - (void)playbackStateChanged:(NSNotification *)aNotification;

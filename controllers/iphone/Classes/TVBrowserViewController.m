@@ -7,24 +7,87 @@
 //
 
 #import "TVBrowserViewController.h"
+#import "TVBrowser.h"
+#import "Extensions.h"
+
+@interface ConnectedTVIndicator : UIImageView
+
+@end
+
+@implementation ConnectedTVIndicator
+
+- (id)initWithFrame:(CGRect)frame {
+    
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
+        self.layer.borderWidth = 3.0;
+        self.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
+        self.layer.cornerRadius = self.frame.size.height/2.0;
+    }
+    
+    return self;
+}
+
+@end
+
+
+
 
 @implementation TVBrowserViewController
 
 @synthesize tvBrowser;
 @synthesize delegate;
 
+- (id)init {
+    return [self initWithNibName:@"TVBrowserViewController" bundle:nil];
+}
+
 - (id)initWithStyle:(UITableViewStyle)style
 {
-    self = [super initWithStyle:style];
+    return [self init];
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
     if (self) {
-        // Custom initialization
+        delegate = nil;
+        tvBrowser = [[TVBrowser alloc] initWithDelegate:nil];
+        [tvBrowser addViewController:self];
     }
+    
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvBrowser:[[[TVBrowser alloc] initWithDelegate:nil] autorelease]];
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvBrowser:(TVBrowser *)browser {
+    if (!browser || ![browser isKindOfClass:[TVBrowser class]] || !nibNameOrNil || [nibNameOrNil compare:@"TVBrowserViewController"] != NSOrderedSame || nibBundleOrNil) {
+        
+        [self release];
+        return nil;
+    }
+    
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        delegate = nil;
+        tvBrowser = [browser retain];
+        [tvBrowser addViewController:self];
+    }
+    
     return self;
 }
 
 #pragma mark -
 #pragma mark View lifecycle
 
+- (void)refresh {
+    if (tvBrowser) {
+        [tvBrowser refreshServices];
+    }
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];   
@@ -46,24 +109,14 @@
     
     // Customize the View
     self.title = @"TV";
-    self.view.tag = 1;
-        
-    // After selecting a service the controller will try to make a connection
-    // to the said service. Once the service is connected this notification is
-    // called to RootViewController to push the AppBrowserController
-    // to the UINavigationController
-    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushAppBrowser:) name:@"ConnectionEstablishedNotification" object:nil];
     
     // Add a button to the navigation bar that refreshes the list of advertised
     // services.
     refreshButton = [[UIBarButtonItem alloc] initWithTitle: @"Refresh" style:UIBarButtonItemStylePlain target:self action:@selector(refresh)];
     [[self navigationItem] setRightBarButtonItem:refreshButton];
     
-    if (!tvBrowser) {
-        tvBrowser = [[TVBrowser alloc] initWithDelegate:self];
-    }
-    
     // Initialize the currentTVIndicator if it does not exist
+    /*
     if (!currentTVIndicator) {
         currentTVIndicator = [[UIImageView alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)];
         currentTVIndicator.backgroundColor = [UIColor colorWithRed:1.0 green:168.0/255.0 blue:18.0/255.0 alpha:1.0];
@@ -71,6 +124,7 @@
         currentTVIndicator.layer.borderColor = [UIColor colorWithRed:1.0 green:200.0/255.0 blue:0.0 alpha:1.0].CGColor;
         currentTVIndicator.layer.cornerRadius = currentTVIndicator.frame.size.height/2.0;
     }
+     */
     
     // Initialize the loadingSpinner if it does not exist
     if (!loadingSpinner) {
@@ -83,10 +137,12 @@
     NSLog(@"RootViewController Unload");
     // Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
     // For example: self.myOutlet = nil;
+    /*
     if (currentTVIndicator) {
         [currentTVIndicator release];
         currentTVIndicator = nil;
     }
+     */
     if (loadingSpinner) {
         [loadingSpinner stopAnimating];
         [loadingSpinner release];
@@ -97,49 +153,7 @@
         refreshButton = nil;
     }
     
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
     self.tableView.tableFooterView = nil;
-}
-
-#pragma mark -
-#pragma mark Current TV Name Getter/Setter
-
-- (NSString *)currentTVName {
-    NSString *_currentTVName = nil;
-    @synchronized(self) {
-        if (tvBrowser) {
-            _currentTVName = [[tvBrowser.currentTVName retain] autorelease];
-        } else {
-            _currentTVName = [[currentTVName retain] autorelease];
-        }
-    }
-    NSLog(@"_currentTVName: %@", _currentTVName);
-    return _currentTVName;
-}
-
-// TODO: Check that this is being called properly
-- (void)setCurrentTVName:(NSString *)_currentTVName {
-    @synchronized(self) {
-        [_currentTVName retain];
-        [currentTVName release];
-        currentTVName = _currentTVName;
-    }
-    
-    if (tvBrowser) {
-        tvBrowser.currentTVName = currentTVName;
-    }
-    NSLog(@"_currentTVName: %@, currentTVName: %@", _currentTVName, tvBrowser.currentTVName);
-}
-
-#pragma mark -
-#pragma mark - AppBrowserDelegate methods
-
-- (void)didReceiveCurrentAppInfo:(NSDictionary *)info {
-    
-}
-
-- (void)didReceiveAvailableAppsInfo:(NSArray *)info {
-    
 }
 
 #pragma mark -
@@ -152,54 +166,10 @@
     [(UITableView *)self.view reloadData];
 }
 
-/**
- * Refreshes the list of advertised services.
- */
-- (void)refresh {
-    [tvBrowser refreshServices]; [self reloadData];
-}
-
-- (void)startSearchForServices {
-    [tvBrowser startSearchForServices];
-}
-- (void)stopSearchForServices {
-    [tvBrowser stopSearchForServices];
-}
-
-/**
- * NetServiceManager delegate callback. Called when a connection may be established
- * to a service after the user selects a service they wish to connect to. Sends
- * the connection information to the AppBrowser which will pass said information
- * to classes to create a stream socket. Additionally, stores the service name
- * to the currentTVName.
- */
-- (void)serviceResolved:(NSNetService *)service {
-    NSLog(@"TVBrowserViewController serviceResolved");
-    [tvBrowser stopSearchForServices];
-    self.currentTVName = [[service name] retain];
-    if (delegate) {
-        [delegate serviceResolved:service];
-    }
-}
-
-/**
- * NetServiceManager delegate callback. Called when establishing a stream
- * socket to the service the user selected fails. Based on which ViewController
- * is at the top of the UINavigationController view controller stack it will
- * properly pop and deallocate these resources as the system regresses back
- * to the RootViewController.
- */
-- (void)didNotResolveService {
-    NSLog(@"TVBrowserViewController didNotResolveService");
-    
-    [self refresh];
-    if (delegate) {
-        [delegate didNotResolveService];
-    }
-}
-
-- (void)didFindServices {
-    [self reloadData];
+- (void)invalidate {
+    [tvBrowser invalidateViewController:self];
+    [tvBrowser release];
+    tvBrowser = nil;
 }
 
 /*
@@ -250,7 +220,7 @@
  */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	
-	NSUInteger count = [[tvBrowser getServices] count];
+	NSUInteger count = [[tvBrowser getAllServices] count];
 	if (count == 0) {
 		return 1;
 	}
@@ -273,22 +243,25 @@
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:tableCellIdentifier] autorelease];
 	}
     
-    NSArray *services = [tvBrowser getServices];
-	NSUInteger count = [services count];
+    for (UIView *subview in cell.subviews) {
+        if ([subview isKindOfClass:[ConnectedTVIndicator class]]) {
+            [subview removeFromSuperview];
+        }
+    }
+    
+    NSArray *services = [tvBrowser getAllServices];
+	NSUInteger count = services.count;
     NSLog(@"number of services = %d", count);
     // If no service advertisements have been received then a single cell will
     // display "Searching for services..."
 	if (count == 0) {
-        [currentTVIndicator removeFromSuperview];
+        //[currentTVIndicator removeFromSuperview];
         [loadingSpinner removeFromSuperview];
-        if ([self.navigationController visibleViewController] == self) {
-            self.currentTVName = nil;
-        }
         cell.textLabel.text = @"Searching for services...";
-		cell.accessoryType = UITableViewCellAccessoryNone;
-		// Remove a lingering activity indicator from a previously active
+        // Remove a lingering activity indicator from a previously active
         // service.
         cell.accessoryView = nil;
+		cell.accessoryType = UITableViewCellAccessoryNone;
         
 		return cell;
 	}
@@ -297,19 +270,24 @@
 	NSNetService *service = [services objectAtIndex:indexPath.row];
 	cell.textLabel.text = [service name];
 	cell.textLabel.textColor = [UIColor blackColor];
+    
+    NSArray *connectedServices = [tvBrowser getConnectedServices];
     // If the controller is currently connected to this service then
     // display an orange indicator dot. (Be sure to remove the loadingSpinner
     // in case the service had only just loaded)
-    NSLog(@"currentTVName: %@", currentTVName);
-    if ([cell.textLabel.text compare:currentTVName] == NSOrderedSame) {
+    if ([connectedServices containsObject:service]) {
         [loadingSpinner removeFromSuperview];
         [loadingSpinner stopAnimating];
-        [cell addSubview:currentTVIndicator];
+        
+        ConnectedTVIndicator *connectedTVIndicator = [[[ConnectedTVIndicator alloc] initWithFrame:CGRectMake(10.0, 10.0, 20.0, 20.0)] autorelease];
+        
+        [cell addSubview:connectedTVIndicator];
         cell.textLabel.text = [NSString stringWithFormat:@"     %@", cell.textLabel.text];
     } else {
         // Remove the current TV indicator
-        if (currentTVIndicator.superview == cell) {
-            [currentTVIndicator removeFromSuperview];
+        if (cell.accessoryView != loadingSpinner) {
+            cell.accessoryView = nil;
+            cell.accessoryType = UITableViewCellAccessoryNone;
         }
     }
     
@@ -317,7 +295,8 @@
     // service selected by the user display a loadingSpinner for the indicator
     // and disable the user from selecting the service a second time (this
     // would unnecessarily restart the connection process).
-    if ([tvBrowser getCurrentService] == service) {
+    NSArray *connectingServices = [tvBrowser getConnectingServices];
+    if ([connectingServices containsObject:service]) {
         cell.accessoryView = loadingSpinner;
         [loadingSpinner startAnimating];
         cell.userInteractionEnabled = NO;
@@ -398,23 +377,23 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSLog(@"Selected row %@\n", indexPath);
     
-    NSArray *services = [tvBrowser getServices];
+    NSArray *services = [tvBrowser getAllServices];
+	NSUInteger count = services ? [services count] : 0;
     NSLog(@"services %@\n", services);
-    NSLog(@"number of services %d\n", [services count]);
+    NSLog(@"number of services %d\n", count);
     
-    if ([services count] == 0 || indexPath.row >= [services count]) {
-        [self refresh];
-    } else if (!currentTVName || ([currentTVName compare:[[services objectAtIndex:indexPath.row] name]] != NSOrderedSame)) {
-        self.currentTVName = nil;
-        
-        [delegate didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:NO];
-        
-        [tvBrowser resolveServiceAtIndex:indexPath.row];
+    if (count == 0 || indexPath.row >= count) {
+        if (tvBrowser) {
+            [tvBrowser refreshServices];
+        }
     } else {
-        [delegate didSelectService:[services objectAtIndex:indexPath.row] isCurrentService:YES];
+        if (tvBrowser && ![[tvBrowser getConnectingServices] containsObject:[services objectAtIndex:indexPath.row]]) {
+            [delegate tvBrowserViewController:self didSelectService:[services objectAtIndex:indexPath.row]];
+        
+            [tvBrowser connectToService:[services objectAtIndex:indexPath.row]];
+        }
     }
     
-	
 	NSIndexPath *indexPath2 = [tableView indexPathForSelectedRow];
 	if (indexPath2 != nil)
 	{
@@ -445,21 +424,20 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 - (void)dealloc {
     NSLog(@"TVBrowserViewController dealloc");
+    
+    [self invalidate];
+    
+    /*
     if (currentTVIndicator) {
         [currentTVIndicator release];
         currentTVIndicator = nil;
     }
-    if (currentTVName) {
-        [currentTVName release];
-        currentTVName = nil;
-    }
+     */
     if (loadingSpinner) {
         [loadingSpinner stopAnimating];
         [loadingSpinner release];
         loadingSpinner = nil;
     }
-    // Remove the "PushAppBrowserNotification" from the default NSNotificationCenter.
-    //[[NSNotificationCenter defaultCenter] removeObserver:self];
     
     [super dealloc];
 }

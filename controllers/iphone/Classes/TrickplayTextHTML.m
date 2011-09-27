@@ -7,7 +7,7 @@
 //
 
 #import "TrickplayTextHTML.h"
-
+#import "Extensions.h"
 
 @implementation TrickplayTextHTML
 
