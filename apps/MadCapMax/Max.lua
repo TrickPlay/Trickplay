@@ -368,7 +368,7 @@ function bird:death()
     start_y = bird.y
     
     e = 0
-    
+    print("dolater kill bird")
     dolater(Animation_Loop.delete_animation,Animation_Loop,bird.on_idle)
     
     if Animation_Loop:has_animation(bird.death_sequence) then error("already dieing",2) end

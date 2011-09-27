@@ -35,7 +35,13 @@ local function main()
         on_completed = function()
             
             mediaplayer:reset()
-            mediaplayer.volume = .1
+            dolater(
+                10,
+                function()
+                    mediaplayer.volume = .1
+                end
+            )
+            
         end
     }
     
@@ -285,8 +291,15 @@ local function main()
                         
                         if collided(e,item) then
                             
-                            item:collision(e)
+                            if item.ignore or item.x1 >  LVL_Object.right_screen_edge then
+                                item.ignore = true
+                            else
+                                item:collision(e)
+                            end
                             
+                        else
+                            
+                            item.ignore = false
                         end
                         
                     end
