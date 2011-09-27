@@ -198,7 +198,7 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 *Default Setting:* {0, 255, 0, 0} (green and transparent)
 
-*See Also:* the <focus_color> and <focus_text_color> properties
+*See Also:* the <focus_border_color> and <focus_text_color> properties
 
 
 
@@ -210,13 +210,13 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
-*See Also:* the <focus_color> property
+*See Also:* the <focus_border_color> property
 
 
 
-Property: focus_color
+Property: focus_border_color
 
-The focus_color is a table of integer RGB and alpha settings specifying the ButtonPicker's border color when the object has the input focus.
+The focus_border_color is a table of integer RGB and alpha settings specifying the ButtonPicker's border color when the object has the input focus.
 
 The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
@@ -326,43 +326,43 @@ The scrolling operation occurs asynchronously. If a second scrolling operation i
 
 
 
-Function: on_focus_in
+Function: set_focus
 
-The on_focus_in() function forces the key focus to the ButtonPicker. To accurately understand what this function does, think of it as get_focus().
+The set_focus() function forces the key focus to the ButtonPicker.
 
-*Prototype:* on_focus_in()
+*Prototype:* set_focus()
 
 *Return Value:* None.
 
-*See Also:* the <on_focus_out> function
+*See Also:* the <clear_focus> function
 
 
 
-Function: on_focus_out
+Function: clear_focus
 
-The on_focus_out() function releases the key focus from the ButtonPicker. To accurately understand what this function does, think of it as remove_focus().
+The clear_focus() function releases the key focus from the ButtonPicker.
 
-After calling on_focus_out(), no screen element has the input focus.
+After calling clear_focus(), no screen element has the input focus.
 
-*Prototype:* on_focus_out()
+*Prototype:* clear_focus()
 
 *Arguments:* None.
 
 *Return Value:* None.
 
-*See Also:* the <on_focus_in> function
+*See Also:* the <set_focus> function
 
 
 
-Event Handler: rotate_func
+Event Handler: on_selection_change
 
-The rotate_func() event handler is called whenever the current item in the ButtonPicker changes. The item may change due to either a user having scrolled the button or because a program had set the <selected_item> property or called the directional <press_left>, <press_right>, <press_up> or <press_down> functions. Based upon the list's current item, the program can perform appropriate operations, such as displaying or hiding display elements.
+The on_selection_change() event handler is called whenever the current item in the ButtonPicker changes. The item may change due to either a user having scrolled the button or because a program had set the <selected_item> property or called the directional <press_left>, <press_right>, <press_up> or <press_down> functions. Based upon the list's current item, the program can perform appropriate operations, such as displaying or hiding display elements.
 
 If the user presses the button or if a program calls one of the directional press_xxx() functions, the ButtonPicker scrolls to the new item. If a program explicitly sets the selected_item property, the ButtonPicker jumps directly to the new item, without scrolling.
 
-The scrolling operation occurs asynchronously. It is possible for a user or program to change the current item a second time before the first scrolling operation completes.  If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, which includes invoking the rotate_func. Thus, the rotate_func is guaranteed to be called, even if the scrolling operation is aborted early.
+The scrolling operation occurs asynchronously. It is possible for a user or program to change the current item a second time before the first scrolling operation completes.  If a second scrolling operation is invoked before the first scroll operation has finished, the first operation jumps immediately to its final state, which includes invoking the on_selection_change() handler. Thus, on_selection_change() is guaranteed to be called, even if the scrolling operation is aborted early.
 
-*Prototype:* rotate_func( current_item_index )
+*Prototype:* on_selection_change( current_item_index )
 
 *Argument:*
 

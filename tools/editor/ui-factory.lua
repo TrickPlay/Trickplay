@@ -16,10 +16,11 @@ local icon_vc = assets("assets/align-vertically-center.png"):set{opacity = 175}
 local icon_dhc = assets("assets/distribute-horizontal-center.png"):set{opacity = 185}
 local icon_dvc = assets("assets/distribute-vertical-center.png"):set{opacity = 185}
 
-local info_attr_t_idx = {"name","label","left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "ui_width", "ui_height", "bw", "bh", "skin","visible_w", "visible_h",  "virtual_w", "virtual_h","style","border_colorr", "border_colorg", "border_colorb", "border_colora","colorr", "colorg", "colorb", "colora","fr","fg","fb","fa","border_width","scale","clip","cx", "cy", "cw", "ch","font","wrap_mode","x_angle", "y_angle", "z_angle","opacity", "reactive",}
+local info_attr_t_idx = {"name","label","progress","left", "top", "width", "height", "volume", "loop", "x", "y", "z", "w", "h", "ui_width", "ui_height", "bw", "bh", "skin","visible_width", "visible_height",  "virtual_width", "virtual_height","style","border_colorr", "border_colorg", "border_colorb", "border_colora","colorr", "colorg", "colorb", "colora","fr","fg","fb","fa","border_width","scale","clip","cx", "cy", "cw", "ch","font","wrap_mode","x_angle", "y_angle", "z_angle","opacity", "reactive",}
 
-local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","message", "button_colorr","button_colorg","button_colorb","button_colora","border_colorr", "border_colorg", "border_colorb", "border_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_colorr","focus_colorg","focus_colorb","focus_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","text_colorr","text_colorg","text_colorb","text_colora", "select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "unsel_colorr", "unsel_colorg", "unsel_colorb", "unsel_colora", "text_font","colorr", "colorg", "colorb", "colora","title_colorr","title_colorg","title_colorb","title_colora","title_font","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera","bar_focus_color_innerr", "bar_focus_color_innerg","bar_focus_color_innerb","bar_focus_color_innera", "bar_focus_color_outerr","bar_focus_color_outerg","bar_focus_color_outerb","bar_focus_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_sz", "arrow_dist_to_frame", "arrows_visible", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora", "arrow_focus_colorr", "arrow_focus_colorg", "arrow_focus_colorb", "arrow_focus_colora", "box_colorr","box_colorg","box_colorb","box_colora", "box_focus_colorr","box_focus_colorg","box_focus_colorb","box_focus_colora", "box_width", "box_height", "check_width", "check_height",  "rows","columns","cell_size", "cell_w","cell_h","cell_spacing_w","cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","padding", "border_width","border_corner_radius", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "label_padding", "tab_position", "display_width", "display_height", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","items","reactive", "focus"} 
+local more_attr_t_idx = {"r", "g", "b", "a","fr","fg","fb","fa","label","focus_colorr","focus_colorg","focus_colorb","focus_colora",  "colorr", "colorg", "colorb", "colora","title", "title_colorr","title_colorg","title_colorb","title_colora","title_font", "message","message_colorr","message_colorg","message_colorb","message_colora","message_font", "visible_width", "visible_height",  "virtual_width", "virtual_height", "bar_color_innerr", "bar_color_innerg","bar_color_innerb","bar_color_innera", "bar_color_outerr","bar_color_outerg","bar_color_outerb","bar_color_outera","focus_bar_color_innerr", "focus_bar_color_innerg","focus_bar_color_innerb","focus_bar_color_innera", "focus_bar_color_outerr","focus_bar_color_outerg","focus_bar_color_outerb","focus_bar_color_outera", "empty_color_innerr", "empty_color_innerg", "empty_color_innerb","empty_color_innera","empty_color_outerr","empty_color_outerg", "empty_color_outerb", "empty_color_outera", "frame_thickness", "frame_colorr","frame_colorg", "frame_colorb", "frame_colora",  "bar_thickness", "bar_offset", "arrow_colorr", "arrow_colorg", "arrow_colorb", "arrow_colora", "focus_arrow_colorr", "focus_arrow_colorg", "focus_arrow_colorb", "focus_arrow_colora",  "check_width", "check_height",  "rows","columns","cell_size", "cell_width","cell_height","cell_spacing_width","cell_spacing_height", "cell_timing","cell_timing_offset","cells_focusable","empty_top_colorr","empty_top_colorg","empty_top_colorb","empty_top_colora","empty_bottom_colorr","empty_bottom_colorg","empty_bottom_colorb","empty_bottom_colora","filled_top_colorr","filled_top_colorg","filled_top_colorb","filled_top_colora","filled_bottom_colorr","filled_bottom_colorg","filled_bottom_colorb","filled_bottom_colora","stroke_colorr","progress","overall_diameter","dot_diameter","dot_colorr","dot_colorg","dot_colorb","dot_colora","number_of_dots","cycle_time","border_colorr", "border_colorg", "border_colorb", "border_colora", "focus_border_colorr","focus_border_colorg","focus_border_colorb","focus_border_colora", "box_colorr","box_colorg","box_colorb","box_colora", "focus_box_colorr","focus_box_colorg","focus_box_colorb","focus_box_colora","fill_colorr","fill_colorg","fill_colorb","fill_colora","focus_fill_colorr","focus_fill_colorg","focus_fill_colorb","focus_fill_colora","button_colorr","button_colorg","button_colorb","button_colora", "focus_button_colorr","focus_button_colorg","focus_button_colorb","focus_button_colora", "cursor_colorr", "cursor_colorg", "cursor_colorb", "cursor_colora","text_colorr","text_colorg","text_colorb","text_colora","focus_text_colorr","focus_text_colorg","focus_text_colorb","focus_text_colora","select_colorr",  "select_colorg",  "select_colorb",  "select_colora","label_colorr", "label_colorg", "label_colorb", "label_colora", "text_font","padding", "border_width","border_corner_radius",  "button_width", "button_height", "tab_position", "display_width", "display_height", "title_separator_colorr","title_separator_colorg","title_separator_colorb","title_separator_colora","color","font", "display_border_width", "display_border_colorr", "display_border_colorg", "display_border_colorb", "display_border_colora", "display_fill_colorr",  "display_fill_colorg",  "display_fill_colorb",  "display_fill_colora", "arrow_size", "arrow_dist_to_frame", "direction", "box_size", "bw", "bh", "check_size", "cw", "ch", "button_radius","select_radius", "line_space", "b_pos", "bx", "by", "item_pos", "ix", "iy", "br", "bg", "bb", "ba", "fr", "fg", "fb", "fa","menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_colorr","background_colorg","background_colorb","background_colora","separator_thickness","on_screen_duration","fade_duration","alignment","wrap_mode","rect_r", "rect_g", "rect_b", "rect_a", "bord_r", "bord_g", "bord_b", "bwidth","title_separator_thickness","expansion_location","selected_item","box_border_width","box_height","selected_items","items","reactive", "focus"} 
 
+--"focus_box_colorr","focus_box_colorg","focus_box_colorb","focus_box_colora", cursor_color 
 
 local attr_t_idx 
 
@@ -161,9 +162,9 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
 	end 
 
 	if v.type == "Video" then 
-		filechooser.pressed = function() editor.video(inspector) inspector_deactivate() end 
+		filechooser.on_press = function() editor.video(inspector) inspector_deactivate() end 
 	else 
-		filechooser.pressed = function() 
+		filechooser.on_press = function() 
 				local msgw_img = editor.image(nil,inspector) 
 				inspector_deactivate() 
 		end
@@ -173,12 +174,14 @@ function factory.make_filechooser(assets, inspector, v, item_n, item_v, item_s, 
 	return group
 end 
 
+local org_items = nil 
+
 function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, save_items)
 	local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
 	local group = Group{}
 	local PADDING_X     = 7 -- The focus ring has this much padding around it
     local PADDING_Y     = 7
-	local plus, item_plus, label_plus, separator_plus, rows, org_items
+	local plus, item_plus, label_plus, separator_plus, rows 
 
 	if item_n == "tab_labels" then 
 		rows = table.getn(v.tab_labels)
@@ -199,10 +202,10 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	group.reactive = true
 
 	local function text_reactive()
-	for i, c in pairs(g.children) do
-	     if(c.type == "Text") then 
+		for i, c in pairs(g.children) do
+	     	if(c.type == "Text") then 
 	          c.reactive = true
-	     end 
+	     	end 
         end
     end 
 
@@ -216,12 +219,13 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
 		group:add(plus)
+
 		function plus:on_button_down(x,y)
 			plus.src="lib/assets/li-btn-red-plus.png"
 		end 
 		function plus:on_button_up(x,y)
 			table.insert(v.items, "item")
-			--inspector_apply (v, inspector)
+			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -232,7 +236,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -249,9 +253,11 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		plus.position = {text.x + text.w + PADDING_X, 0}
 		plus.reactive = true
 		group:add(plus)
+
 		function plus:on_button_down(x,y)
 			plus.src="lib/assets/li-btn-red-plus.png"
 		end 
+
 		function plus:on_button_up(x,y)
 
 			if #v.tab_labels == 6 then 
@@ -261,9 +267,6 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			end 
 
 			v:insert_tab(#v.tab_labels + 1)
-
-			--inspector_apply (v, inspector)
-
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -274,7 +277,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -301,21 +304,21 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		group:add(item_plus, label_plus, separator_plus) 
 
 		function separator_plus:on_button_down(x,y)
-			separator_plus.on_focus_in()
+			separator_plus.set_focus()
 			return true 
 
 		end 
 		function item_plus:on_button_down(x,y)
-			item_plus.on_focus_in()
+			item_plus.set_focus()
 			return true 
 		end 
 		function label_plus:on_button_down(x,y)
-			label_plus.on_focus_in()
+			label_plus.set_focus()
 			return true 
 		end 
 	    function separator_plus:on_button_up(x,y)
 			table.insert(v.items, {type="separator"})
-			--inspector_apply (v, inspector)
+			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -326,7 +329,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -335,7 +338,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	    function item_plus:on_button_up(x,y)
 			table.insert(v.items, {type="item", string="Item", f=nil})
-			--inspector_apply (v, inspector)
+			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -346,7 +349,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -355,7 +358,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	    function label_plus:on_button_up(x,y)
 			table.insert(v.items, {type="label", string="Label"})
-			--inspector_apply (v, inspector)
+			inspector_apply (v, inspector)
 			local siy = inspector:find_child("si_items").content.y
 			local ix = inspector.x
 			local iy = inspector.y
@@ -367,7 +370,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			text_reactive()
 			screen_ui.n_selected(v)
 			inspector:clear()
-			editor.inspector(v, ix, iy, siy) --scroll position !!
+			editor.inspector(v, ix, iy, siy, org_items) --scroll position !!
 			if v.extra.last then 
 				v.extra.last = nil
 			end 
@@ -377,7 +380,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 
 	
 	local list_focus = Rectangle{ name="Focus", size={ 355, 45}, color={0,255,0,0}, anchor_point = { 355/2, 45/2}, border_width=5, border_color={255,25,25,255}, }
-	local items_list = ui_element.layoutManager{rows = rows, columns = 4, cell_w = 100, cell_h = 40, cell_spacing_w=5, cell_spacing_h=5, cell_size="variable", cells_focusable=false}
+	local items_list = ui_element.layoutManager{rows = rows, columns = 4, cell_width = 100, cell_height = 40, cell_spacing_width=5, cell_spacing_height=5, cell_size="variable", cells_focusable=false}
 	if text then 
     	items_list.position = {0, text.y + text.h + 7}
 	else 
@@ -409,7 +412,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		 	input_txt = j 
 	    end  
 
-        local item = ui_element.textInput{ui_width = 175, ui_height = 24, text = input_txt, text_font = "FreeSans Medium 12px", border_width = 1, border_corner_radius = 0, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, fill_color = {0,0,0,255}} 
+        local item = ui_element.textInput{ui_width = 175, ui_height = 24, text = input_txt, text_font = "FreeSans Medium 12px", border_width = 1, border_corner_radius = 0, focus_border_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, fill_color = {0,0,0,255}} 
 	    item.name = "item_text"..tostring(i)
 
 		if item_type then 
@@ -468,10 +471,26 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 				return 
 			end 
 
-			if v.tab_labels then 
+			if v.extra.type == "TabBar" then 
+				for i, j in pairs (v.tab_labels) do
+					v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	end 
 				v:remove_tab(tonumber(string.sub(minus.name, 11,-1)))
-			else 
+			elseif v.extra.type == "ButtonPicker" or v.extra.type == "RadioButtonGroup" or v.extra.type == "CheckBoxGroup" then 
+				for i, j in pairs (v.items) do
+					v.items[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	end 
 				v.items = util.table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+			else 
+				for i, j in pairs (v.items) do
+					if j["type"] == "label" then 
+		    			j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		  			elseif j["type"] == "item" then 
+		     			j["string"] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+					end
+		     	end 
+				v.items = util.table_removekey(v.items, tonumber(string.sub(minus.name, 11,-1)))
+
 			end 
 
 			local siy = inspector:find_child("si_items").content.y
@@ -486,7 +505,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		    screen_ui.n_selected(v)
 
 			inspector:clear()
-		    editor.inspector(v, ix, iy, siy)
+		    editor.inspector(v, ix, iy, siy, org_items)
 		    return true 
 	    end 
 
@@ -514,6 +533,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			end
 
 			if v.extra.type == "TabBar" then 
+		    	for i, j in pairs (v.tab_labels) do
+					v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	end 
 				if tonumber(string.sub(up.name, 8,-1))-1 >= 1 then 
 					v:move_tab_down(tonumber(string.sub(up.name, 8,-1))-1)
 				end 
@@ -545,7 +567,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		   screen_ui.n_selected(v)
 
 		   inspector:clear()
-		   editor.inspector(v, ix, iy, siy)
+		   editor.inspector(v, ix, iy, siy, org_items)
 		   return true 
 	     end 
 
@@ -572,6 +594,9 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			 end 
 
 			 if v.extra.type == "TabBar" then 
+		    	for i, j in pairs (v.tab_labels) do
+					v.tab_labels[i] = items_list:find_child("item_text"..tostring(i)):find_child("textInput").text
+		     	end 
 				 if tonumber(string.sub(up.name, 8,-1))+1 <= #v.tab_labels then 
 					v:move_tab_up(tonumber(string.sub(up.name, 8,-1))+1)
 				 end 
@@ -603,17 +628,17 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		     screen_ui.n_selected(v)
 
 			 inspector:clear()
-		     editor.inspector(v, ix, iy, siy)
+		     editor.inspector(v, ix, iy, siy, org_items)
 		     return true 
 	      end 
 
 	      function item:on_button_down()
 		 	 if current_focus then 
-   			 	current_focus.extra.on_focus_out()
+   			 	current_focus.extra.clear_focus()
 			 else
 			 end 
 	         current_focus = group
-		     item.on_focus_in()
+		     item.set_focus()
 			 if item_type then 
                    item:find_child("textInput").extra.item_type = item_type
 	         end 
@@ -641,10 +666,10 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			si = inspector:find_child(si_name)
 
 	       	if (key == keys.Tab and shift == false) then
-		  	     item.on_focus_out()
+		  	     item.clear_focus()
 		  		 local next_i = tonumber(string.sub(item.name, 10, -1)) + 1
 		  		 if (item_group:find_child("item_text"..tostring(next_i))) then
-					 item_group:find_child("item_text"..tostring(next_i)).extra.on_focus_in()
+					 item_group:find_child("item_text"..tostring(next_i)).extra.set_focus()
 		  			 si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 		  		 else 	
 		     		 for i, v in pairs(attr_t_idx) do
@@ -656,8 +681,8 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 		          			    end 
 		          			    if(item_group:find_child(attr_t_idx[i+1])) then
 		               			  local n_item = attr_t_idx[i+1]
-			       				  if item_group:find_child(n_item).extra.on_focus_in then 
-			           				item_group:find_child(n_item).extra.on_focus_in()	
+			       				  if item_group:find_child(n_item).extra.set_focus then 
+			           				item_group:find_child(n_item).extra.set_focus()	
 	       							current_focus = item_group:find_child(n_item)
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 			       				  else
@@ -670,10 +695,10 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
     		     	  end
 		  		 end
 	       	elseif (key == hdr.LeftTab and shift == true) then 
-		     	item.on_focus_out()
+		     	item.clear_focus()
 		     	local prev_i = tonumber(string.sub(item.name, 10, -1)) - 1
 		     	if (item_group:find_child("item_text"..tostring(prev_i))) then
-					item_group:find_child("item_text"..tostring(prev_i)).extra.on_focus_in()
+					item_group:find_child("item_text"..tostring(prev_i)).extra.set_focus()
 		  			si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 		     	else 	
 		      		for i, v in pairs(attr_t_idx) do
@@ -684,7 +709,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 			     				end 
 			     				if(item_group:find_child(attr_t_idx[i-1])) then
 			     					local p_item = attr_t_idx[i-1]
-									item_group:find_child(p_item).extra.on_focus_in()	
+									item_group:find_child(p_item).extra.set_focus()	
 	       							current_focus = item_group:find_child(p_item)
 		  			        		si.seek_to_middle(0,item_group:find_child("itemsList").y) 
 									break
@@ -707,17 +732,17 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 	    	items_list:replace(i,3,up)
 	    	items_list:replace(i,4,down)
 	end
-	function group.extra.on_focus_in()
+	function group.extra.set_focus()
 		current_focus = group 
-		a = items_list.tiles[1][1]
-		a.on_focus_in()
+		a = items_list.cells[1][1]
+		a.set_focus()
 		a:grab_key_focus()
     end
 
-    function group.extra.on_focus_out()
+    function group.extra.clear_focus()
 		for i,j in pairs(items_list.children) do 
-			if j.on_focus_out then 
-				j.on_focus_out()
+			if j.clear_focus then 
+				j.clear_focus()
 		    end 
 		end 
 		return true
@@ -729,6 +754,7 @@ function factory.make_itemslist(assets, inspector, v, item_n, item_v, item_s, sa
 end 
 
 function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s, save_items)
+
 
 		local STYLE = {font = "FreeSans Medium 12px", color = {255,255,255,255}}
 		local group = Group{}
@@ -777,11 +803,14 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		editor_use = true
         local item_picker = ui_element.buttonPicker{skin = "inspector", items = itemLists, text_font = "FreeSans Medium 12px", selected_item = selected, inspector  = 5}
 		item_picker.ui_height = 45
-		if item_n == "expansion_location" or "cell_size" then 
+		if item_n == "expansion_location" or item_n == "cell_size" then 
 			item_picker.ui_width = 110
+		elseif item_n == "skin" then 
+			item_picker.ui_width = 130 
 		else 
 			item_picker.ui_width = 150
 		end
+
 		if item_n == "style" then 
         	item_picker.position = {text.x + text.w + 17 , -5}
 		else 
@@ -793,10 +822,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		unfocus = item_picker:find_child("unfocus")
 		function unfocus:on_button_down (x,y,b,n)
 			if current_focus then 
-   				current_focus.extra.on_focus_out()
+   				current_focus.extra.clear_focus()
 			end 
 	        current_focus = group
-			item_picker.on_focus_in()
+			item_picker.set_focus()
 	        item_picker:grab_key_focus()
 			return true
 		end 
@@ -805,10 +834,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		left_arrow.reactive = true 
 		function left_arrow:on_button_down(x, y, b, n)
 			if current_focus then 
-				current_focus.extra.on_focus_out()
+				current_focus.extra.clear_focus()
 			end 
 	        current_focus = group
-			item_picker.on_focus_in()
+			item_picker.set_focus()
 	        item_picker:grab_key_focus()
 			item_picker.press_left()
 			return true 
@@ -818,10 +847,10 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		right_arrow.reactive = true 
 		function right_arrow:on_button_down(x, y, b, n)
 			if current_focus then 
-				current_focus.extra.on_focus_out()
+				current_focus.extra.clear_focus()
 			end 
 	        current_focus = group
-			item_picker.on_focus_in()
+			item_picker.set_focus()
 	        item_picker:grab_key_focus()
 			item_picker.press_right()
 			return true 
@@ -852,7 +881,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 	       	elseif key == keys.Right then  
 		     	item_picker.press_right()
 	       	elseif (key == keys.Tab and shift == false) then
-		     	item_picker.on_focus_out()
+		     	item_picker.clear_focus()
 		     	for i, v in pairs(attr_t_idx) do
 		     		if(item_n == v or item_v == v) then 
 		          		while(item_group:find_child(attr_t_idx[i+1]) == nil) do 
@@ -861,8 +890,8 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		          		end 
 		          		if(item_group:find_child(attr_t_idx[i+1])) then
 		               		local n_item = attr_t_idx[i+1]
-							if item_group:find_child(n_item).extra.on_focus_in then 
-			       				item_group:find_child(n_item).extra.on_focus_in()	
+							if item_group:find_child(n_item).extra.set_focus then 
+			       				item_group:find_child(n_item).extra.set_focus()	
 	       						current_focus = item_group:find_child(n_item)
 			       				si.seek_to_middle(0, item_group:find_child(n_item).y)
 							end 
@@ -871,7 +900,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 		     		end 
     		     end
 	       elseif (key == keys.Tab and shift == true )then 
-		     item_picker.on_focus_out()
+		     item_picker.clear_focus()
 		      for i, v in pairs(attr_t_idx) do
 			if(item_n == v or item_v == v) then 
 			     if(attr_t_idx[i-1] == nil) then return true end 
@@ -880,7 +909,7 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 			     end 
 			     if(item_group:find_child(attr_t_idx[i-1])) then
 			     	local p_item = attr_t_idx[i-1]
-				item_group:find_child(p_item).extra.on_focus_in()	
+				item_group:find_child(p_item).extra.set_focus()	
 	       		current_focus = item_group:find_child(p_item)
 				si.seek_to_middle(0, item_group:find_child(p_item).y)
 				break
@@ -890,13 +919,13 @@ function factory.make_buttonpicker(assets, inspector, v, item_n, item_v, item_s,
 	       end 
 		end 
 
-        function group.extra.on_focus_in()
-		 group:find_child("item_picker").extra.on_focus_in()
+        function group.extra.set_focus()
+		 group:find_child("item_picker").extra.set_focus()
 	         group:find_child("item_picker"):grab_key_focus()
         end
 
-        function group.extra.on_focus_out()
-		 group:find_child("item_picker").extra.on_focus_out()
+        function group.extra.clear_focus()
+		 group:find_child("item_picker").extra.clear_focus()
         end 
 		group:add(item_picker)
 		group.h = 23
@@ -1124,10 +1153,10 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
     local LINE_COLOR    = {255,255,255,255}  
     local BORDER_RADIUS = 0
     local LINE_WIDTH    = 1
-    local input_box_width     
+    local input_box_border_width     
     local item_group 
 
-	local non_textInput_items = {"title", "line", "button", "focus", "tab_labels", "items", "skin", "wrap_mode", 
+	local non_textInput_items = {"ui_title","line", "button", "focus", "tab_labels", "items", "skin", "wrap_mode", 
 		"expansion_location", "cell_size", "style", "direction", "reactive", "loop", "vert_bar_visible", "horz_bar_visible", 
 		"cells_focusable", "lock", "icon", "source", "src", "anchor_point", }
 
@@ -1170,27 +1199,27 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 		local text
 
-	    if item_n == "name" or item_n == "text" or item_n == "message" or item_n == "label" then 
+	    if item_n == "name" or item_n == "text" or item_n == "message" or item_n == "label" or item_n == "title" then 
 			-- no property name text, long textInput Box
-	     	input_box_width = WIDTH + 5
+	     	input_box_border_width = WIDTH + 5
         else  
 			-- properties' name 
     	    text = Text {name = "attr", text = item_s}:set(STYLE)
             text.position  = {0, 4.5}
     	    group:add(text)
 
-	     	input_box_width = 39 
+	     	input_box_border_width = 39 
             if item_n:find("font") then 
-	          input_box_width = WIDTH + 5
+	          input_box_border_width = WIDTH + 5
 			  group:remove(text)
 			  text = nil
             elseif string.find(item_n,"duration") or string.find(item_n,"time") then 
-	          input_box_width = 49 
+	          input_box_border_width = 49 
 	     	end
         end 
 
-		key = string.format("ring:%d:%d", input_box_width, HEIGHT + 5)
-		ring = assets (key, my_make_ring, input_box_width, HEIGHT + 5)
+		key = string.format("ring:%d:%d", input_box_border_width, HEIGHT + 5)
+		ring = assets (key, my_make_ring, input_box_border_width, HEIGHT + 5)
 
 		ring.name = "ring"
 		if text then 
@@ -1205,10 +1234,10 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
         ring.opacity = 255
         group:add(ring)
 
-		key = string.format("focus_ring:%d%d", input_box_width, HEIGHT + 5)
-		focus = assets (key, my_make_focus_ring, input_box_width, HEIGHT + 5)
+		key = string.format("focus_ring:%d%d", input_box_border_width, HEIGHT + 5)
+		focus = assets (key, my_make_focus_ring, input_box_border_width, HEIGHT + 5)
 
-        -- focus = make_focus_ring(input_box_width, HEIGHT + 5)
+        -- focus = make_focus_ring(input_box_border_width, HEIGHT + 5)
         focus.name = "focus"
 		if (text) then 
 	     	focus.position = {text.x+text.w+5, 0}
@@ -1222,7 +1251,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 
     	input_text = Text {name = "input_text", text =item_v, editable=true,
-        reactive = true, wants_enter = true, cursor_visible = false,single_line = true, width = input_box_width - 10}:set(STYLE)
+        reactive = true, wants_enter = true, cursor_visible = false,single_line = true, width = input_box_border_width - 10}:set(STYLE)
 
 		if (text) then 
 			if item_n == "menu_width" then 
@@ -1242,24 +1271,24 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 						 local pt = current_focus.parent
 						 pt = pt.extra.type
 						 if pt ~= "TabBar" then 
-							current_focus.extra.on_focus_out()
+							current_focus.extra.clear_focus()
 		   				end 
 					else 
-						current_focus.extra.on_focus_out()
+						current_focus.extra.clear_focus()
 					end
 				end
 			end 
 	       	current_focus = group
-	       	group.extra.on_focus_in()
+	       	group.extra.set_focus()
            	return true
         end
 
 		function group:on_button_down(x,y,button,num_clicks)
 			if current_focus then 
- 	       		current_focus.extra.on_focus_out()
+ 	       		current_focus.extra.clear_focus()
 			end 
 	        current_focus = group
-	        group.extra.on_focus_in()
+	        group.extra.set_focus()
             return true
         end
 
@@ -1286,7 +1315,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 			si = inspector:find_child(si_name)
 
 	    	if key == keys.Return or (key == keys.Tab and shift == false)  then
-	       		group.extra.on_focus_out()
+	       		group.extra.clear_focus()
 		 		for i, j in pairs(attr_t_idx) do
 		    		if(item_n == j or item_v == j) then 
 		          		while(item_group:find_child(attr_t_idx[i+1]) == nil ) do 
@@ -1296,8 +1325,8 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		          		if item_group:find_child("skin") then end 	
 		          		if(item_group:find_child(attr_t_idx[i+1])) then
 		               		local n_item = attr_t_idx[i+1]
-			       			if item_group:find_child(n_item).extra.on_focus_in then 
-			       				item_group:find_child(n_item).extra.on_focus_in()	
+			       			if item_group:find_child(n_item).extra.set_focus then 
+			       				item_group:find_child(n_item).extra.set_focus()	
 	       						current_focus = item_group:find_child(n_item)
 			       			if (si) then 
 				    			si.seek_to_middle(0, item_group:find_child(n_item).y)
@@ -1311,7 +1340,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 		     		end 
     			end
 	     elseif (key == hdr.LeftTab and shift == true )then 
-		    group.extra.on_focus_out()
+		    group.extra.clear_focus()
  		    for i, v in pairs(attr_t_idx) do
 				if(item_n == v or item_v == v) then 
 			     	if(attr_t_idx[i-1] == nil) then return true end  
@@ -1322,8 +1351,8 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 			     			end 
 			     			if(item_group:find_child(attr_t_idx[i-1])) then
 			     				local p_item = attr_t_idx[i-1]
-								if item_group:find_child(p_item).extra.on_focus_in then 	
-				     				item_group:find_child(p_item).extra.on_focus_in()	
+								if item_group:find_child(p_item).extra.set_focus then 	
+				     				item_group:find_child(p_item).extra.set_focus()	
 	       							current_focus = item_group:find_child(p_item)
 			             			if (si) then 
 				          				si.seek_to_middle(0, item_group:find_child(p_item).y)
@@ -1347,14 +1376,14 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
    		end 
 
     	group:add(input_text)
-        function group.extra.on_focus_in()
+        function group.extra.set_focus()
 	         current_focus = group 
              ring.opacity = 0
              input_text.cursor_visible = true
              focus.opacity = 255
 	         input_text:grab_key_focus(input_text)
         end
-        function group.extra.on_focus_out()
+        function group.extra.clear_focus()
              focus.opacity = 0
              input_text.cursor_visible = false
              ring.opacity = 255
@@ -1363,7 +1392,7 @@ function factory.make_text_input_item(assets, inspector, v, item_n, item_v, item
 
 	if item_n == "z" then 
 		group.w = group.w + 50
-	elseif item_n == "h" or item_n == "virtual_h" then 
+	elseif item_n == "h" or item_n == "virtual_height" then 
 		group.w = group.w + 100
 	elseif item_n == "cell_timing" then 
 		group.w = group.w + 200
@@ -1733,9 +1762,9 @@ function factory.draw_focus_changer(v)
 		focus:add(text11, focus_changer_bgU, focus_changer_bgD, focus_changer_bgL, focus_changer_bgR, focus_changer_bgE, textU, gU, textL, gL, textE, gE, textR, gR, textD, gD)
 	end 
 	
-	function focus.extra.on_focus_in()
+	function focus.extra.set_focus()
 	 	if current_focus then 
-	 		current_focus.extra.on_focus_out()
+	 		current_focus.extra.clear_focus()
 	 	end 
 	 	current_focus = focus
 	 	for i,j in pairs(focus.children) do
@@ -1746,7 +1775,7 @@ function factory.draw_focus_changer(v)
 	 	end 
 	end 
 
-	function focus.extra.on_focus_out(call_by_inspector)
+	function focus.extra.clear_focus(call_by_inspector)
 		focus_type = ""
 		input_mode = hdr.S_POPUP
         for i,j in pairs(focus.children) do
@@ -1760,8 +1789,8 @@ function factory.draw_focus_changer(v)
 	function make_on_button_down_f(r)
      	function r:on_button_down(x,y,b,n)
 	 		if focus then 
-				if focus.extra.on_focus_in then 
-        			focus.extra.on_focus_in()
+				if focus.extra.set_focus then 
+        			focus.extra.set_focus()
 				end 
 			end
 	   		focus_type = r.name:sub(2,-1)
