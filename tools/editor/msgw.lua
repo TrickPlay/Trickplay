@@ -12,7 +12,11 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
      local screen_dir = editor_lb:readdir(current_dir.."/screens/")
+	 if screen_dir == nil then screen_dir = {} end 
+
      local main_dir = editor_lb:readdir(current_dir)
+	 if main_dir == nil then main_dir = {} end 
+
      local enter_gen_stub_code = false
 
 	 if cfn ~= "OK" and save_current_file == nil then 
@@ -160,6 +164,8 @@ end -- end of msg_window.inputMsgWindow_savefile
 
 function msg_window.inputMsgWindow_openfile(input_text, ret)
     local dir = editor_lb:readdir(current_dir.."/screens")
+	if dir == nil then dir = {} end 
+
 	local back_fn = input_text..".back"
 
     if(input_text == nil) then
@@ -358,6 +364,8 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 
      local file_not_exists = true
      local dir = editor_lb:readdir(current_dir.."/assets/images")
+	 if dir == nil then dir = {} end 
+
      for i, v in pairs(dir) do
           if(input_text == v)then
                file_not_exists = false

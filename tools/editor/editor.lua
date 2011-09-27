@@ -129,7 +129,9 @@ local function guideline_inspector(v)
 
 	button_ok.on_press = function() 
 		if text_input.text == "" then 
+			editor.error_message("006", nil, nil) 
 			xbox:on_button_down() 
+			return 
    		end    
 		if(util.guideline_type(v.name) == "v_guideline") then
 				v.x = tonumber(text_input.text)
@@ -596,6 +598,9 @@ local function open_files(input_purpose, bg_image, inspector)
 	elseif input_purpose =="open_videofile" then  
 		dir = editor_lb:readdir(current_dir.."/assets/videos")
 	end 
+
+	if dir == nil then dir = {} end
+
 	local inspector_activate = function ()
 		inspector:remove(inspector:find_child("deactivate_rect"))
 	end 
@@ -649,6 +654,7 @@ local function open_files(input_purpose, bg_image, inspector)
 			xbox:on_button_down(1) 
 
 			local dir = editor_lb:readdir(current_dir.."/screens")
+			if dir == nil then dir = {} end
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
 					if readfile("/screens/"..v) ~= "" then 
@@ -1059,14 +1065,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 		local display_x = WIDTH * screen.width/screen.display_size[1]
 		local display_y = HEIGHT * screen.height /screen.display_size[2]
 
-		if inspector.y + display_y  > screen.h and inspector.x + display_x > screen.w then 
-			inspector.y = y_pos - display_y - 20
-			inspector.x = x_pos - display_x - 20
-		elseif inspector.y + display_y  > screen.h then 
+		if inspector.y + display_y  > screen.h then 
 			inspector.y = screen.h - display_y - 10
-		elseif inspector.x + display_x > screen.w then 
+		end 
+		if inspector.x + display_x > screen.w then 
 			inspector.x = screen.w - display_x - 10
-		end
+		end 
 	end 
 
 	-- set the inspector location 
@@ -1402,6 +1406,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
     if (save_current_f == true) then 
 
 		local screen_dir = editor_lb:readdir(current_dir.."/screens/")
+		if screen_dir == nil then screen_dir = {} end
 
 		for i, v in pairs(screen_dir) do
           	if(fname == v)then
@@ -3391,23 +3396,28 @@ local error_msg_map = {
  	["002"] = function(str) return "OK", "Cancel", "", "", "Before saving the screen, a project must be open." end,
  	["003"] = function(str) return "Save","Cancel", "", "", "You have unsaved changes. Save the file before closing?" end, 					
  	["004"] = function(str) return "Overwrite","Cancel", "", "", "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
- 	["005"] = function(str) return "OK", "Cancel", "Error", "Error", "A file name is required." end, 
- 	["006"] = function(str) return "OK", "Cancel", "Error", "Error", "A guideline position is required." end, 
- 	["007"] = function(str) return "OK", "Cancel", "Error", "Error", "Field \""..str.."\" is required." end, 
- 	["008"] = function(str) return "OK", "Cancel", "Error", "Error", "There are no guidelines."  end, 
+ 	["005"] = function(str) return "OK", "", "Error", "Error", "A file name is required." end, 
+ 	["006"] = function(str) return "OK", "", "Error", "Error", "A guideline position is required." end, 
+ 	["007"] = function(str) return "OK", "", "Error", "Error", "Field \""..str.."\" is required." end, 
+ 	["008"] = function(str) return "OK", "", "Error", "Error", "There are no guidelines."  end, 
  	["009"] = function(str) return "Restore", "Ignore", "", "", "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
- 	["010"] = function(str) return "OK", "Cancel", "Error", "Error", "This UI Element requires a minimum of "..str.." item(s)." end, 
- 	["011"] = function(str) return "OK", "Cancel", "Error", "Error", "Field \""..str.."\" requires a numeric value." end, 		 
-	["012"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid value for \""..str.."\" field." end,
- 	["013"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
- 	["014"] = function(str) return "OK", "Cancel", "Error", "Error", "A project name is required." end, 
- 	["015"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid file name. \n File extention must be .lua" end, 
+ 	["010"] = function(str) return "OK", "", "Error", "Error", "This UI Element requires a minimum of "..str.." item(s)." end, 
+ 	["011"] = function(str) return "OK", "", "Error", "Error", "Field \""..str.."\" requires a numeric value." end, 		 
+	["012"] = function(str) return "OK", "", "Error", "Error", "Invalid value for \""..str.."\" field." end,
+ 	["013"] = function(str) return "OK", "", "Error", "Error", "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
+ 	["014"] = function(str) return "OK", "", "Error", "Error", "A project name is required." end, 
+ 	["015"] = function(str) return "OK", "", "Error", "Error", "Invalid file name. \nFile extention must be .lua" end, 
 	-- new error messages 
-	["016"] = function(str) return "OK", "Cancel", "Error", "Error", "There is no selected object." end, 
-	["017"] = function(str) return "OK", "Cancel", "Error", "Error", "Can't delete this object. Clone exists." end, 
- 	["018"] = function(str) return "OK", "Cancel", "Error", "Error", "This UI Element can have maximum of "..str.." items." end, 
+	["016"] = function(str) return "OK", "", "Error", "Error", "There is no selected object." end, 
+	["017"] = function(str) return "OK", "", "Error", "Error", "Can't delete this object. Clone exists." end, 
+ 	["018"] = function(str) return "OK", "", "Error", "Error", "This UI Element can have maximum of "..str.." items." end, 
+	-- after second release
+ 	["019"] = function(str) local i,j = string.find(str, ",") 
+							local pname = string.sub(str, 1, i-1) 
+							local missing_dir = string.sub(str, i+1, -1)
+							return "OK", "", "Error", "Error", "Project \""..pname.."\" is not valid. \""..missing_dir.."\" directory is missing." 
+			  end, 
 }
-
 
 function editor.error_message(error_num, str, func_ok, func_nok, inspector)
   	local WIDTH = 300
@@ -3515,6 +3525,11 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
 	}
 
+	if inspector then 
+		msgw.x = inspector.x + 200 
+		msgw.y = inspector.y + 200 
+	end 
+
 	local ti_func = function()
 		if current_focus then 
 			current_focus.clear_focus()
@@ -3533,6 +3548,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 
 	button_ok:grab_key_focus() 
+
+	if button_cancel then 
 	function button_cancel:on_key_down(key)
 		if key == keys.Return then 
 			button_cancel.on_press()
@@ -3546,6 +3563,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 			end
 		end 
 		return true
+	end 
 	end 
 
 	function button_ok:on_key_down(key)
@@ -3561,12 +3579,12 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	msgw.extra.lock = false
  	screen:add(msgw)
 
-	button_ok:grab_key_focus() 
-
 	util.create_on_button_down_f(msgw)	
 
 	-- Focus 
 	ti_func()
+
+	button_ok:grab_key_focus() 
 
 	function xbox:on_button_down()
 		screen:remove(msgw)
