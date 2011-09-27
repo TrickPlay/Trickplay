@@ -72,7 +72,7 @@
 
 @interface TPAppViewController()
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
+- (id)initWithTVConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id<TPAppViewControllerDelegate>)delegate;
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
 

@@ -196,8 +196,10 @@
         }
     }
     
-    if (viewController == [[viewControllers objectAtIndex:i] pointerValue]) {
+    if (viewControllers.count > i && viewController == [[viewControllers objectAtIndex:i] pointerValue]) {
         [viewControllers removeObjectAtIndex:i];
+    } else {
+        NSLog(@"WARNING: invalidated an AppBrowserViewController that was not registered");
     }
 }
 
@@ -240,7 +242,7 @@
             }
         }
         
-        if (currentApp.name == ((AppInfo *)[availableApps objectAtIndex:i]).name) {
+        if (availableApps.count > i && currentApp.name == ((AppInfo *)[availableApps objectAtIndex:i]).name) {
             [availableApps replaceObjectAtIndex:i withObject:currentApp];
         }
     }
