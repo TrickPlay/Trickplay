@@ -1,4 +1,10 @@
 
+--------------------------------------------------------------------------------
+----  The Level Loader
+--------------------------------------------------------------------------------
+local LVL_Object  = {}
+
+
 -- inited globals
 local physics_world, fx
 
@@ -1118,6 +1124,8 @@ lvls = {
                 w = 293 ,
                 h = 170 ,
                 f = function()
+                    
+                    if LVL_Object.right_screen_edge < 7680+1506+160 then return end
                     
                     if screen:find_child("living-tv-static").opacity == 255 then
                         
@@ -2246,10 +2254,6 @@ lvls = {
 }
 
 
---------------------------------------------------------------------------------
-----  The Level Loader
---------------------------------------------------------------------------------
-local LVL_Object  = {}
 
 local has_been_initialized = false
 
