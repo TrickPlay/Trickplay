@@ -16,7 +16,7 @@ local Death_Screen = Group{name = "Death Screen",opacity = 0}
 
 --general
 local title      = Text{
-	font         = "Baveuse 130px",
+	font         = "Sigmar 130px",
 	text         = "high scores",
 	color        = "ffffff",
 	position     = {screen.w/2, 120}
@@ -39,7 +39,7 @@ for i,s in pairs(highscores) do
 	scores[i].name = make_text(
 		Text{
 			text = s.name,
-			font = "Baveuse 55px",
+			font = "Sigmar 55px",
 			x    = 2*screen_w/5,
 			y    = screen_h/2 + (i-(#highscores+1)/2)*70
 		},"green"
@@ -48,7 +48,7 @@ for i,s in pairs(highscores) do
 	scores[i].score = make_text(
 		Text{
 			text = s.score,
-			font = "Baveuse 55px",
+			font = "Sigmar 55px",
 			x    = 3*screen_w/5,
 			y    = screen_h/2 + (i-(#highscores+1)/2)*70
 		},"green"
@@ -72,7 +72,7 @@ local initials = {}
 for i = 1,3 do
 	initials[i] = Text{
 		text    = "a",
-		font    = "Baveuse 55px",
+		font    = "Sigmar 55px",
 		color   = "e2e92c",
 		x       = 2*screen_w/5-60 + 60*(i-1),
 		y       = screen_h - title.y
@@ -94,7 +94,7 @@ for i = 1,3 do
 			( z - a + 1 ) + a
 			
 		)
-		
+		self.anchor_point = {self.w/2,self.h/2}
 	end
 	initials[i].dn = function(self)
 		
@@ -105,6 +105,7 @@ for i = 1,3 do
 			( z - a + 1 ) + a
 			
 		)
+		self.anchor_point = {self.w/2,self.h/2}
 	end
 end
 
@@ -112,7 +113,7 @@ local up_arrow   = Clone{
 	source       = assets.arrow,
 	anchor_point = {assets.arrow.w, assets.arrow.h/2},
 	x            = initials[1].x,
-	y            = initials[1].y-60,
+	y            = initials[1].y-50,
 	z_rotation   = {-90,0,0}
 }
 
@@ -120,13 +121,13 @@ local dn_arrow   = Clone{
 	source       = assets.arrow,
 	anchor_point = {assets.arrow.w, assets.arrow.h/2},
 	x            = initials[1].x,
-	y            = initials[1].y+60,
+	y            = initials[1].y+65,
 	z_rotation   = {90,0,0}
 }
 
 
 local submit = Text{
-	font         = "Baveuse 60px",
+	font         = "Sigmar 60px",
 	text         = "Submit",
 	color        = "ffffff",
 	position     = {initials[3].x+300, screen_h - title.y}
@@ -147,7 +148,7 @@ Death_Screen:add(Save_Score_Group)
 local View_Scores_Group = Group{opacity = 0}
 
 local help       = Text{
-	font         = "Baveuse 70px",
+	font         = "Sigmar 70px",
 	text         = "help",
 	color        = "ffffff",
 	position     = {screen.w/4, 920}
@@ -155,7 +156,7 @@ local help       = Text{
 }
 help = make_text(help,"green")
 local play_again = Text{
-	font         = "Baveuse 70px",
+	font         = "Sigmar 70px",
 	text         = "Play",
 	color        = "ffffff",
 	position     = {screen.w/2, 920}
@@ -163,7 +164,7 @@ local play_again = Text{
 }
 play_again = make_text(play_again,"green")
 local quit       = Text{
-	font         = "Baveuse 70px",
+	font         = "Sigmar 70px",
 	text         = "QUIT",
 	color        = "ffffff",
 	position     = {screen.w*3/4, 920}
@@ -633,7 +634,7 @@ do
 			scores[new_entry_i].name = make_text(
 				Text{
 					text = highscores[new_entry_i].name,
-					font = "Baveuse 55px",
+					font = "Sigmar 55px",
 					x    = 2*screen_w/5,
 					y    = screen_h/2 + (new_entry_i-(#highscores+1)/2)*70
 				},"yellow"
@@ -709,7 +710,7 @@ do
 					scores[i].name = make_text(
 						Text{
 							text = highscores[i].name,
-							font = "Baveuse 55px",
+							font = "Sigmar 55px",
 							x    = 2*screen_w/5,
 							y    = screen_h/2 + (i-(#highscores+1)/2)*70
 						},"green"
@@ -718,7 +719,7 @@ do
 					scores[i].score = make_text(
 						Text{
 							text = highscores[i].score,
-							font = "Baveuse 55px",
+							font = "Sigmar 55px",
 							x    = 3*screen_w/5,
 							y    = screen_h/2 + (i-(#highscores+1)/2)*70
 						},"green"
@@ -745,7 +746,7 @@ do
 							name = make_text(
 								Text{
 									text = highscores[i].name,
-									font = "Baveuse 55px",
+									font = "Sigmar 55px",
 									x    = 2*screen_w/5,
 									y    = screen_h/2 + (i-(#highscores+1)/2)*70
 								},"yellow"
@@ -753,7 +754,7 @@ do
 							score = make_text(
 								Text{
 									text = highscores[i].score,
-									font = "Baveuse 55px",
+									font = "Sigmar 55px",
 									x    = 3*screen_w/5,
 									y    = screen_h/2 + (i-(#highscores+1)/2)*70
 								},"yellow"
@@ -778,7 +779,7 @@ do
 							scores[j].name = make_text(
 								Text{
 									text = highscores[j].name,
-									font = "Baveuse 55px",
+									font = "Sigmar 55px",
 									x    = 2*screen_w/5,
 									y    = screen_h/2 + (j-(#highscores+1)/2+1)*70
 								},"green"
@@ -787,7 +788,7 @@ do
 							scores[j].score = make_text(
 								Text{
 									text = highscores[j].score,
-									font = "Baveuse 55px",
+									font = "Sigmar 55px",
 									x    = 3*screen_w/5,
 									y    = screen_h/2 + (j-(#highscores+1)/2+1)*70
 								},"green"

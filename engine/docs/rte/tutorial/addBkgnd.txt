@@ -1,0 +1,65 @@
+Topic: Add a Colored Background
+
+We'll create a colored background by creating an object of the desired color and sizing it so it fills the entire display.
+
+The SDK libraries provide the <Rectangle> class to create rectangular-shaped objects. A new Rectangle object can be created by simply defining a variable of its type, as shown below.
+
+	(code)
+	backGround = Rectangle()
+	(end)
+
+Note: The Rectangle and other objects in the SDK libraries are referred to as "classes," but, if you are familiar with programming languages like C++ or Java, the SDK classes are not the same type of classes you may be accustomed to. The SDK classes are actually a kind of hybrid between a class and a complex data type in that they have properties and methods/functions like a typical class, but it is not possible to derive new classes based on them.
+
+A Rectangle object can define its size by setting its size property to the desired width and height. It can also be positioned anywhere on the screen.
+
+A Rectangle object can be positioned anywhere on the screen.
+
+The screen is a three-dimensional grid divided into X, Y and Z-axes. Each point along each axis references a single pixel on the display screen. The X axis specifies horizontal locations, the Y axis describes vertical locations, and the Z axis references positions in depth. The top-left corner of the display is considered the origin. At this location, the X, Y and Z axes all have values of zero. The particular values of the axes are typically referred to as a table of X, Y, and Z coordinate/point values in the format shown below.
+
+	(diagram)
+	{ X coordinate, Y coordinate, Z coordinate }
+	(end)
+	
+From the origin, positive X values move horizontally toward the right and positive Y values move vertically down. Positive Z values place an object closer to the viewer, while negative Z values position it farther away. An object's screen location is defined by specifying its X, Y and Z coordinates.
+
+A Rectangle object's location can be specified by setting its size property (explained in detail at <UIElement.position>). An object's size is also configurable and can be defined by setting its size property (<UIElement.size>) to the desired width and height. Both properties accept Lua tables when being set.
+
+We want our background rectangle to fill the entire screen, so it should be the same size as the screen (1920x1080). It should also be positioned at the screen's origin at location {0,0,0}. The following code statements define our background rectangle's size and location.
+
+	(code)
+	backGround.size = { 1920, 1080 }
+	backGround.position = { 0, 0, 0 }
+	(end)
+	
+	The rectangle's color is defined by setting its color property (<Rectangle.color>). The color is specified using RGB (Red/Green/Blue) and Alpha transparency values. For complete details about RGB values and the supported data formats the TrickPlay SDK libraries recognize, refer to the <RGB/Alpha Color Formats> section. For the background color of our tutorial program, we'll use a blue with RGB values of {36,101,135}. We also want the background to be opaque, so we'll set the alpha value to 255. The code statement below achieves this.
+	
+	(code)
+	backGround.color = { 36, 101, 135, 255 }
+	(end)
+	
+	Our background is now ready to be shown. In order to display any item on the display, it must be added to the screen global variable by calling the screen's add() function, as shown below.
+	
+	(code)
+	-- Add the background to the display
+	screen:add( backGround)
+	(end)
+	
+	Add to the tutorial's main.lua file the code statements that create the background rectangle, define its size, position, and color, and add it to the screen. Save the file and run the new application in the TrickPlay Engine. The display window opens as before, but instead of a black background, we now have a nice blue background.
+	
+(see images/blueScreen.png)
+
+	As an alternative to setting the properties of the Rectangle class with individual code statements as we have done, it is possible to accomplish the same purpose by using a shortcut syntax when the Rectangle is created. When calling the object's constructor, a single argument consisting of a table of properties and settings can be specified which will be used to initialize the new object. Instead of setting our background rectangle's size, position, and color properties individually, an equivalent definition could have been used when the object was first created. The appropriate code statement is shown below.
+	
+	(code)
+	-- Define colored background
+	backGround = Rectangle( {
+	                size     = { 1920, 1080 },
+	                position = { 0, 0, 0 },
+	                color    = { 36, 101, 135, 255 }
+	             } )
+	(end)
+	
+	Notice that the entire constructor argument is an unnamed table and each table entry is separated by a comma. (A comma following the last entry is optional.) This shortcut syntax is supported not only for the Rectangle class, but for nearly all the SDK classes, and will be used regularly throughout the remainder of this tutorial.
+	
+	Our application is now better than an empty black screen, but only by a little. Next we'll organize the display into different sections with descriptive headings for each section.
+	

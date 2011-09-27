@@ -135,7 +135,7 @@ function screen_ui.selected(obj)
 
 	local group_pos
 	local bumo	
-	local tab_extra
+	local tab_extra_h, tab_extra_w
 
    	if(obj.extra.is_in_group == true)then 
 		for i, c in pairs(g.children) do
@@ -153,7 +153,13 @@ function screen_ui.selected(obj)
 						for h,q in pairs (c.tabs) do 
 							for k,w in pairs (q.children) do 
 								if w.name == obj.name then 
-									tab_extra = c.ui_height
+									if c.tab_position == "top" then 
+										tab_extra_h = c.ui_height
+										tab_extra_w = nil
+									else
+										tab_extra_w = c.ui_width
+										tab_extra_h = nil
+									end
 								end
 							end
 						end 	
@@ -201,9 +207,14 @@ function screen_ui.selected(obj)
    		anchor_mark.position = {obj.x, obj.y, obj.z}
     end
 	
-	if tab_extra then 
-		anchor_mark.y = anchor_mark.y + tab_extra 
-		obj_border.y = obj_border.y + tab_extra
+	if tab_extra_h then 
+		anchor_mark.y = anchor_mark.y + tab_extra_h 
+		obj_border.y = obj_border.y + tab_extra_h
+	end 
+
+	if tab_extra_w then 
+		anchor_mark.x = anchor_mark.x + tab_extra_w
+		obj_border.x = obj_border.x + tab_extra_w
 	end 
 	
     anchor_mark.name = obj.name.."a_m"
@@ -383,8 +394,8 @@ function screen_ui.dragging_up(x,y)
 
 	if current_focus ~= nil and  current_focus.extra.type == "EditorButton" then 
 		local temp_focus = current_focus 
-		current_focus.on_focus_out()
-		temp_focus.on_focus_in()
+		current_focus.clear_focus()
+		temp_focus.set_focus()
 		return true
 	end 
 
@@ -402,7 +413,7 @@ end
 function screen_ui.dragging(x,y)
 
 		local actor, dx, dy 
-		local bumo, border, tab_extra
+		local bumo, border, tab_extra_w, tab_extra_h
 
         if dragging then
 
@@ -474,7 +485,13 @@ function screen_ui.dragging(x,y)
 								for h,q in pairs (c.tabs) do 
 									for k,w in pairs (q.children) do 
 										if w.name == actor.name then 
-											tab_extra = c.ui_height
+											if c.tab_position == "top" then 
+												tab_extra_h = c.ui_height
+												tab_extra_w = nil
+											else
+												tab_extra_w = c.ui_width
+												tab_extra_h = nil
+											end
 										end
 									end
 								end 
@@ -494,8 +511,10 @@ function screen_ui.dragging(x,y)
 	             border.position = {x -dx, y -dy}
 		    end 
 
-			if tab_extra then 
-				border.y = border.y + tab_extra
+			if tab_extra_h then 
+				border.y = border.y + tab_extra_h
+			elseif tab_extra_w then 
+				border.x = border.x + tab_extra_w
 			end 
 		else 
 			screen_ui.n_select_all()
@@ -523,8 +542,10 @@ function screen_ui.dragging(x,y)
         end
 	end
 
-	if tab_extra then
-		anchor_mark.y = anchor_mark.y + tab_extra
+	if tab_extra_h then
+		anchor_mark.y = anchor_mark.y + tab_extra_h
+	elseif tab_extra_w then 
+		anchor_mark.x = anchor_mark.x + tab_extra_w
 	end 
 end 
 

@@ -1,7 +1,7 @@
 
 local Help = Group{name = "Help",y=600,x_rotation = {-100,0,0}}
 Help:hide()
-local help_font = "Baveuse 45px"
+local help_font = "Sigmar 45px"
 
 local done
 
@@ -85,7 +85,7 @@ do
 	
 	local dont_fall       = Text{--Clone{
 		--source       = assets.title,
-		font         = "Baveuse 60px",
+		font         = "Sigmar 60px",
 		text         = "...and Don't Fall!",
 		alignment    = "CENTER",
 		position     = {screen.w/2, item_line+120}
@@ -95,7 +95,7 @@ do
 	
 	done       = Text{--Clone{
 		--source       = assets.title,
-		font         = "Baveuse 70px",
+		font         = "Sigmar 70px",
 		text         = "Done",
 		alignment    = "CENTER",
 		position     = {screen.w/2, dont_fall.y+120}

@@ -1,24 +1,24 @@
 -- Unit Test Framework
-dofile( "packages/controller_unit_tests/unit_test.lua" )
+dofile( "packages/controller_unit_tests/harness/unit_test.lua" )
 
 -- Unit Tests Package 
 
-dofile( "packages/controller_unit_tests/ui_input1.lua" ) 
-dofile( "packages/controller_unit_tests/set_ui_background1.lua" )
-dofile( "packages/controller_unit_tests/set_ui_image1.lua" )
-dofile( "packages/controller_unit_tests/supported_functionality1.lua" ) 
-dofile( "packages/controller_unit_tests/accelerometer1.lua" )
-dofile( "packages/controller_unit_tests/multiple_choice1.lua" )
-dofile( "packages/controller_unit_tests/play_stop_sound1.lua" )
-dofile( "packages/controller_unit_tests/declare_resource1.lua" )
-dofile( "packages/controller_unit_tests/enter_text1.lua" )
-dofile( "packages/controller_unit_tests/reset1.lua" )
-dofile( "packages/controller_unit_tests/clear_ui1.lua" )
-dofile( "packages/controller_unit_tests/advanced_ui_01.lua" )
-dofile( "packages/controller_unit_tests/advanced_ui_02.lua" ) 
-dofile( "packages/controller_unit_tests/advanced_ui_03.lua" )
-dofile( "packages/controller_unit_tests/advanced_ui_04.lua" )
-dofile( "packages/controller_unit_tests/advanced_ui_05.lua" )
+dofile( "packages/controller_unit_tests/tests/ui_input1.lua" ) 
+dofile( "packages/controller_unit_tests/tests/set_ui_background1.lua" )
+dofile( "packages/controller_unit_tests/tests/set_ui_image1.lua" )
+dofile( "packages/controller_unit_tests/tests/supported_functionality1.lua" ) 
+dofile( "packages/controller_unit_tests/tests/accelerometer1.lua" )
+dofile( "packages/controller_unit_tests/tests/multiple_choice1.lua" )
+dofile( "packages/controller_unit_tests/tests/play_stop_sound1.lua" )
+dofile( "packages/controller_unit_tests/tests/declare_resource1.lua" )
+dofile( "packages/controller_unit_tests/tests/enter_text1.lua" )
+dofile( "packages/controller_unit_tests/tests/reset1.lua" )
+dofile( "packages/controller_unit_tests/tests/clear_ui1.lua" )
+dofile( "packages/controller_unit_tests/tests/advanced_ui_01.lua" )
+dofile( "packages/controller_unit_tests/tests/advanced_ui_02.lua" ) 
+dofile( "packages/controller_unit_tests/tests/advanced_ui_03.lua" )
+dofile( "packages/controller_unit_tests/tests/advanced_ui_04.lua" )
+dofile( "packages/controller_unit_tests/tests/advanced_ui_05.lua" )
 
 
 device_is_connected = false
@@ -37,8 +37,8 @@ function controllers:on_controller_connected(controller)
 	end
 
 	-- Load some testing assets
-	controller:declare_resource("jack", "packages/controller_unit_tests/assets/jack.jpg")
-	controller:declare_resource("glee", "packages/controller_unit_tests/assets/glee-1.mp4")
+	controller:declare_resource("jack", "packages/controller_unit_tests/tests/assets/jack.jpg")
+	controller:declare_resource("glee", "packages/controller_unit_tests/tests/assets/glee-1.mp4")
 
 	-- support_functionality1.lua	[start]
 	device_app_connected = true
@@ -98,7 +98,7 @@ function controllers:on_controller_connected(controller)
 	reset_status = controller:reset()
 
 	-- declare_resource1.lua 		test_controllers_declare_resource_status
-	declare_resource_status = controller:declare_resource("logo", "packages/controller_unit_tests/assets/logo.png")
+	declare_resource_status = controller:declare_resource("logo", "packages/controller_unit_tests/tests/assets/logo.png")
 
 	-- Using on_idle to delay calling controller.factory as it takes time to load it.
 	local total = 0
