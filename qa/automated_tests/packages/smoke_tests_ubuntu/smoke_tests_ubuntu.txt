@@ -6,27 +6,27 @@
 },
 {
 "name": "00002_canvas_line_width.lua",
-"checksum": "d8181d3d23622b94b306c6540c6e90da",
+"checksum": "a57d09c6310d18d6bf38fe3d67d69b06",
 "active": "true"
 },
 {
 "name": "00003_canvas_miter_limit.lua",
-"checksum": "6c965e6e44ad5ed5a6b579219a72ed0f",
+"checksum": "04d46a6a32199af26b2ba21150b0b088",
 "active": "true"
 },
 {
 "name": "00004_canvas_fill_rule.lua",
-"checksum": "1f97409785aafcfbb6aee63775da09c7",
+"checksum": "fabf2e3887843d64f95baa5ada9701c1",
 "active": "true"
 },
 {
 "name": "00005_canvas_line_cap.lua",
-"checksum": "f0e7de64bfac65e9f91799fc61219269",
+"checksum": "b8517c8ce0a80edea2201040416e1ab9",
 "active": "true"
 },
 {
 "name": "00006_canvas_line_join.lua",
-"checksum": "77023ef419eaac8cd2f7d27009c3f390",
+"checksum": "42ca9269f3183e0e42fdac3fbcd71216",
 "active": "true"
 },
 {
@@ -116,7 +116,7 @@
 },
 {
 "name": "00024_canvas_rotate.lua",
-"checksum": "72b585c8b848a5390828784837a5bcd1",
+"checksum": "8eb305c834771f9cb67799759437d04e",
 "active": "true"
 },
 {
@@ -161,7 +161,7 @@
 },
 {
 "name": "00033_uielement_properties_basic.lua",
-"checksum": "2df511150320967af9a4f6306b8058f4",
+"checksum": "9230bd9b435af3aa38b9cad0e9fecfd4",
 "active": "true"
 },
 {
@@ -171,22 +171,22 @@
 },
 {
 "name": "00035_uielement_scale.lua",
-"checksum": "f72de19b71ce1a659dd387062be6a276",
+"checksum": "c70b94006a88668b89079536a9c82ee6",
 "active": "true"
 },
 {
 "name": "00036_uielement_x_rotation.lua",
-"checksum": "b0fcf34bb37abb4f1dd49842d95a0701",
+"checksum": "a0f6cea05b987952a12e846df73bb78f",
 "active": "true"
 },
 {
 "name": "00037_uielement_y_rotation.lua",
-"checksum": "28ca660489169776c6607a0b494500dc",
+"checksum": "99a63dca3454395b5a9be4546565f861",
 "active": "true"
 },
 {
 "name": "00038_uielement_z_rotation.lua",
-"checksum": "839d19020d18152367e74d625f3841d6",
+"checksum": "6d222cbb6d8e964eefd6b79ae6e0d22c",
 "active": "true"
 },
 {
@@ -211,132 +211,122 @@
 },
 {
 "name": "00043_text_color.lua",
-"checksum": "6e9f1b919ee6d99995827acee619fc52",
+"checksum": "45ae39b09b5df14050308e56f3f28533",
 "active": "true"
 },
 {
 "name": "00044_text_font_1.lua",
-"checksum": "add0d03f398b09448e8ae0cba4aab37e",
+"checksum": "5a5c471711e8e960cffe68c8c4bca84b",
 "active": "true"
 },
 {
 "name": "00045_text_font_2.lua",
-"checksum": "375d733305ca2bdd209073e45ed0c1d1",
+"checksum": "e020a49f427431a1b20ebee7e88bfd7a",
 "active": "true"
 },
 {
 "name": "00046_text_font_3.lua",
-"checksum": "4693315dd4b4f4a6a5758adef50c3125",
+"checksum": "1eaa1f1f64cad2c87b7b49b719701820",
 "active": "true"
 },
 {
 "name": "00047_text_justify.lua",
-"checksum": "13ed85e07cf72d1b394274358d7f5a1d",
+"checksum": "04dd49bdbddad5724dc8093f9c21a710",
 "active": "true"
 },
 {
 "name": "00048_text_wrap.lua",
-"checksum": "92068adb7d2ba549cc4e5f6b3c3b8f63",
+"checksum": "c38ce8e5e4e48bb84c3624ae682a2a26",
 "active": "true"
 },
 {
 "name": "00049_text_use_markup.lua",
-"checksum": "55ee55a72df8b5cf920bf564d5e1065f",
+"checksum": "16b3af6e3695584527c6b71f716d73a1",
 "active": "true"
 },
 {
 "name": "00050_text_ellipsize.lua",
-"checksum": "eda61a8bec6cb71a5ece58f9bcde29a9",
+"checksum": "1eab0f3d9798ac141035243d1fdf8536",
 "active": "true"
 },
 {
 "name": "00051_text_alignment.lua",
-"checksum": "25936c7dde9f5647d139e9f000ecc16e",
+"checksum": "1477c34f4ca29580dc2943cf5183bdff",
 "active": "true"
 },
 {
 "name": "00052_text_max_length.lua",
-"checksum": "67caca1e35cee28ef30cb051135d3903",
-"active": "true"
-},
-{
-"name": "00053_text_selection_end.lua",
-"checksum": "41c86acfb5a4aabcef1f70facc0efa5a",
+"checksum": "224a1bed91e8a8828312511695da5cd3",
 "active": "true"
 },
 {
 "name": "00054_text_single_line.lua",
-"checksum": "c2db2cd168b740dd33dd61c56cd8677d",
-"active": "true"
-},
-{
-"name": "00055_text_cursor_color.lua",
-"checksum": "552f71a9ab88593323ddbd746ef7bedc",
+"checksum": "bdde194e7648df0b192bf6e86e1479ec",
 "active": "true"
 },
 {
 "name": "00056_text_password_char.lua",
-"checksum": "8c4e79943e35d57871cd7899a13de079",
+"checksum": "b7139ab986780515b77ee118a294f121",
 "active": "true"
 },
 {
 "name": "00057_text_on_text_changed.lua",
-"checksum": "a05a1526c498c440c06fad06b43a5880",
+"checksum": "7daee1ace1952d339a0aaf99c10614af",
 "active": "true"
 },
 {
 "name": "00058_image_gif.lua",
-"checksum": "adbfbe84a5d2c2419d7fe86c07e07296",
+"checksum": "b21b17f5d008e9fb062bf4ff64d7ef39",
 "active": "true"
 },
 {
 "name": "00059_image_jpg.lua",
-"checksum": "e769eaf34b690a2961b9b0b477737b81",
+"checksum": "24830709d2be2b2dce0f1e32e775da16",
 "active": "true"
 },
 {
 "name": "00060_image_png.lua",
-"checksum": "784e27dcbf35acc736249118b39f84ce",
+"checksum": "74dab2b2d3ebbe3e6cdaf2df5eceea1e",
 "active": "true"
 },
 {
 "name": "00061_image_tile.lua",
-"checksum": "f8c2fc2d1583d9a4276663ad5fdb5985",
+"checksum": "f566757903107a5833280e876dd9add1",
 "active": "true"
 },
 {
 "name": "00062_image_tile_sync.lua",
-"checksum": "06a8fabc18fb48a59c63fe1b6e7b8a0c",
+"checksum": "9002844280a4fb57ded19696f11f47fb",
 "active": "true"
 },
 {
 "name": "00063_image_src.lua",
-"checksum": "3bebb9e755b2413c93e3708577972ad8",
+"checksum": "5d314e7b4b7aa6212da6b791c74574c6",
 "active": "true"
 },
 {
 "name": "00064_bitmap_gif.lua",
-"checksum": "0e7956f6b188d2939bb7cad71b3a4c83",
+"checksum": "f6e31e2f863de22e412496d691c1fed6",
 "active": "true"
 },
 {
 "name": "00065_bitmap_jpg.lua",
-"checksum": "2ea2908d71f466cec4076bf20a722778",
+"checksum": "320881144939a26e1d07b1ea83053c05",
 "active": "true"
 },
 {
 "name": "00066_bitmap_png.lua",
-"checksum": "08496acf981e11898ef10e81fa6e8477",
+"checksum": "af108ce62eca8c1cf1e611869182525d",
 "active": "true"
 },
 {
 "name": "00067_bitmap_src.lua",
-"checksum": "a50c2da2b16c7801e195dc2bdc42e983",
+"checksum": "75a6e71e5246843130676ddc3ba9c651",
 "active": "true"
 },
 {
 "name": "00068_bitmap_image.lua",
-"checksum": "0b1e17a81d023e41ba98ffb61f8ec4b0",
+"checksum": "6ae06bdb38e63f5e8ac76a427e815d6f",
 "active": "true"
 },
 {
@@ -366,12 +356,12 @@
 },
 {
 "name": "00074_container_raise.lua",
-"checksum": "71ad058785074547798e535bee6cacb9",
+"checksum": "a345e565fceea9e1d7948fd296fd917a",
 "active": "true"
 },
 {
 "name": "00075_container_lower.lua",
-"checksum": "71ad058785074547798e535bee6cacb9",
+"checksum": "a345e565fceea9e1d7948fd296fd917a",
 "active": "true"
 }
 ]

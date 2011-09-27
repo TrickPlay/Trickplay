@@ -9,7 +9,7 @@ function generate_test_image ()
 
 	local myText_markup = Text ()
 	myText_markup.font = "DejaVu Sans 38px"
-	myText_markup.color = "FFFFFFAA"
+	myText_markup.color = "FF00FFAA"
 	textString = "\<span foreground\=\"blue\" size\=\"x\-large\"\>Trickplay\<\/span> rizzocks the \<i\>hizzouse\<\/i\>\!" 
 	local myText_no_markup = Text ()	
 myText_markup.text = string.format( "%s" , textString ) 
@@ -19,7 +19,7 @@ myText_markup.text = string.format( "%s" , textString )
 
 	local myText_no_markup = Text ()
 	myText_no_markup.font = "DejaVu Sans 38px"
-	myText_no_markup.color = "FFFFFFAA"
+	myText_no_markup.color = "FF00FFAA"
 	textString = "\<span foreground\=\"blue\" size\=\"x\-large\"\>Trickplay\<\/span> rizzocks the \<i\>hizzouse\<\/i\>\!" 
 	myText_no_markup.text = string.format( "%s" , textString ) 
 	myText_no_markup.use_markup = false

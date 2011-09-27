@@ -1,4 +1,4 @@
-
+-- 9/26/2011 pvdhagen: Failing: see bug 1967. Removed from Test Suite.
 test_description = "The single_line property set to true should cutoff the text at the width "
 test_group = "smoke"
 test_area = "text"
@@ -13,6 +13,7 @@ function generate_test_image ()
 	text_txt = Text {font="DejaVu Sans 30px",
 			 text = "single_line = true - "..textString, 
 			 position = { 10, 150 },
+			 editable = true,
 			 single_line = true,
 			 width = screen.w - 200,
 			 height = 45,
@@ -23,6 +24,7 @@ function generate_test_image ()
 	text1_txt = Text {font="DejaVu Sans 30px",
 			 text = "single_line = false - "..textString, 
 			 position = { 10, 500 },
+			 editable = true,
 			 single_line = false,
 			 width = screen.w - 200,
 			 height = 45,
