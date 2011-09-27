@@ -16,16 +16,16 @@ local test_file = "smoke_tests_ubuntu.txt"
 -- Options to run one test, all tests or just the last 2
 local automation_option_choices = { all_tests = 1, specific_test = 2, last_two_tests = 3 }
 local automation_option = 1
-local test_to_run = 54-- if automation_option == 2
+local test_to_run = 1 -- if automation_option == 2
 
 -- if option 2 then it prints test results in a JSON formatted table to be copied and pasted into
 -- the package file. 
 -- It contains the generated checksum so  ensure that all tests pass before using this as a baseline.
 local console_display_option_choices = { test_results = 1, dump_screensum = 2 } 
-local console_display_option = 2
+local console_display_option = 1
 
 -- Time interval between tests
-local test_interval = 0.1
+local test_interval = 0.3
 
 -- Globals --
 local test_list
@@ -103,7 +103,7 @@ function do_test (tests)
 
 
 		-- Generate the view
-		if total >= test_interval + last_total - 0.01 and checksum_done == false and view_generated == false   then
+		if total >= test_interval + last_total - 0.01 and checksum_done == false and view_generated == false  then
 			--print (total)	
 			print ("generate view")
 			filename = tests [i]["name"]
@@ -132,10 +132,10 @@ function do_test (tests)
 
 			-- Load the generated test image
 			g = generate_test_image()
-			print (g)
 			screen:add(g)
-			local screenshot = devtools:screenshot(string.sub(filename,1, (string.len(filename)-4)))
 			screen:show()
+			print (g)
+			
 			view_generated = true
 
 		end
@@ -146,6 +146,7 @@ function do_test (tests)
 			--print (total)
 			print ("do checksum compare")
 			if test_active == "true" then	
+				local screenshot = devtools:screenshot(string.sub(filename,1, (string.len(filename)-4)))
 				checksumValue = devtools:screensum()
 				print (checksumValue)
 				print (master_screensum)
