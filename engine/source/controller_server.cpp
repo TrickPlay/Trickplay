@@ -31,7 +31,7 @@
 
 //-----------------------------------------------------------------------------
 
-#define CONTROLLER_PROTOCOL_VERSION		"42"
+#define CONTROLLER_PROTOCOL_VERSION		"43"
 
 //-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
@@ -698,6 +698,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 else if ( cmp2( cap, "US" ) )
                 {
                     sscanf( cap, "US=%ux%u", &spec.ui_width, &spec.ui_height );
+                }
+                else if ( cmp2( cap , "ID" ) )
+                {
+                	spec.id = cap + 3;
                 }
                 else
                 {

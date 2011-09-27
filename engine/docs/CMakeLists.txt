@@ -26,9 +26,11 @@ if (NATURAL_DOCS)
 		VERBATIM
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/docs/rte
         COMMAND ${NATURAL_DOCS}
-			-r
+			--rebuild
+			--highlight Off
             -i ${PROJECT_SOURCE_DIR}/engine
 			-img ${PROJECT_SOURCE_DIR}/engine/docs/rte/reference/images
+			-img ${PROJECT_SOURCE_DIR}/engine/docs/rte/progguide/images
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/oem
             -xi ${PROJECT_SOURCE_DIR}/engine/3rd_party
             -xi ${PROJECT_SOURCE_DIR}/engine/lb

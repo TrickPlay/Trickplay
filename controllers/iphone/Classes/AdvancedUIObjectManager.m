@@ -13,6 +13,7 @@
 #import "TrickplayTextHTML.h"
 #import "TrickplayGroup.h"
 #import "TrickplayScreen.h"
+#import "Extensions.h"
 
 @implementation AdvancedUIObjectManager
 
@@ -454,6 +455,7 @@
     
     if (socketManager) {
         socketManager.delegate = nil;
+        socketManager.appViewController = nil;
         [socketManager release];
         socketManager = nil;
     }

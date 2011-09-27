@@ -11,6 +11,8 @@
 #import "ResourceManager.h"
 #import "SocketManager.h"
 
+@class TPAppViewController;
+
 /**
  * The AdvancedUIDelegate protocol implemented by AdvancedUIObjectManager
  * registers a delegate which is passed asyncronous calls made for AdvancedUI.
@@ -44,11 +46,10 @@
  * The AppBrowserViewController and RootViewController both apply this protocol.
  */
 
-@protocol TPAppViewControllerSocketDelegate <NSObject>
+@protocol TPAppViewControllerDelegate <NSObject>
 
 @required
-- (void)socketErrorOccurred;
-- (void)streamEndEncountered;
+- (void)tpAppViewControllerNoLongerFunctional:(TPAppViewController *)tpAppViewController;
 
 @end
 
@@ -103,6 +104,7 @@
 #import "CameraViewController.h"
 #import "VirtualRemoteViewController.h"
 #import "GestureImageView.h"
+#import "TVConnection.h"
 
 /**
  * The TPAppViewController class is the core component of the Take Control app.
@@ -141,19 +143,15 @@
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
 UITextFieldDelegate, UIActionSheetDelegate,
 UINavigationControllerDelegate, VirtualRemoteDelegate> {
+    @private
+    
     BOOL viewDidAppear;
     
     // Manages the asynchronous socket the TPAppViewController communicates
     // to Trickplay with
     SocketManager *socketManager;
-    // Current host name for asynchronous communication with Trickplay
-    NSString *hostName;
-    // Current port number for asynchronous communication with Trickplay
-    NSUInteger port;
-    // HTTP port number used for http requests. Utilized for gathering lists
-    // of app data from Trickplay and pulling resources such as images and
-    // audio from Trickplay
-    NSString *http_port;
+    // The Connection
+    TVConnection *tvConnection;
     // Current version of the app
     NSString *version;
     
@@ -166,6 +164,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // TextField for entering text; used when Trickplay requests text input
     // with controller:enter_text(string label, string text) call from Trickplay.
     UITextField *theTextField;
+    NSString *currentText;
     UILabel *theLabel;
     // Black border around theTextField
     UIView *textView;
@@ -222,51 +221,28 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // The AccelerometerController. All accelerometer events sent to this delegate
     // for proper handling.
     id <ViewControllerAccelerometerDelegate> accelDelegate;
-    // The AppBrowserViewController. Used to inform view controllers lower on
-    // the navigation stack when the socket connection breaks or ends.
-    id <TPAppViewControllerSocketDelegate> socketDelegate;
+    // Used to inform of a non-functional TPAppViewController.
+    // Generally this happens when the connection breaks.
+    id <TPAppViewControllerDelegate> delegate;
     // The AdvancedUIObjectManager. Any asynchronous messages sent from Trickplay
     // that refer to the AdvancedUIObjectManager are sent there via this
     // delegate's protocol.
     id <AdvancedUIDelegate> advancedUIDelegate;
 }
 
-@property (nonatomic, retain) NSString *version;
-@property (nonatomic, assign) SocketManager *socketManager;
+@property (readonly) NSString *version;
+@property (readonly) TVConnection *tvConnection;
+@property (assign) id <TPAppViewControllerDelegate> delegate;
 
-@property (assign) BOOL graphics;
-
-@property (retain) IBOutlet UIActivityIndicatorView *loadingIndicator;
-@property (nonatomic, retain) IBOutlet UITextField *theTextField;
-@property (nonatomic, retain) IBOutlet UILabel *theLabel;
-@property (nonatomic, retain) IBOutlet UIView *textView;
-@property (retain) IBOutlet UIImageView *backgroundView;
-
-@property (nonatomic, retain) id <ViewControllerTouchDelegate> touchDelegate;
-@property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
-@property (nonatomic, assign) id <TPAppViewControllerSocketDelegate> socketDelegate;
-@property (nonatomic, retain) id <AdvancedUIDelegate> advancedUIDelegate;
-
-
-- (void)setupService:(NSUInteger)port
-            hostname:(NSString *)hostName
-            serviceName:(NSString *)name;
-
-- (BOOL)startService;
+- (id)initWithTVConnection:(TVConnection *)tvConnection;
+- (id)initWithTVConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
+- (void)clearUI;
+- (void)clean;
+- (void)exitTrickplayApp:(id)sender;
 - (BOOL)hasConnection;
 - (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
 
-- (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
-
-- (IBAction)hideTextBox:(id)sender;
-
-- (void)clearUI;
-- (void)clean;
-
-- (void)advancedUIObjectAdded;
-- (void)advancedUIObjectDeleted;
-- (void)checkShowVirtualRemote;
-
-- (void)exitTrickplayApp:(id)sender;
-
 @end
+
+
+

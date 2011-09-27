@@ -1,4 +1,5 @@
 editor_use = true
+
 local menu = {}
 local menu_items
 local menu_bar = Image
@@ -18,7 +19,7 @@ local menuButton_file = ui_element.menuButton
 		ui_height = 61,
 		skin = "editor",
 		label = "File",
-		focus_color = {27,145,27,255},
+		focus_border_color = {27,145,27,255},
 		text_color = "#cccccc",
 		text_font = "FreeSans Bold 28px",
 		focus_text_color = "#cccccc", 
@@ -41,7 +42,8 @@ local menuButton_file = ui_element.menuButton
     	label_text_color = "#808080",
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
-		ui_position = {249,28,0}
+		ui_position = {249,28,0}, 
+		button_name = "menuButton_file", 
 	}
 
 
@@ -57,34 +59,27 @@ menuButton_file.name = "menuButton_file"
 menuButton_file.anchor_point = {71,30.5}
 menuButton_file.extra.focus = {[65293] = "menuButton_file", [65363] = "menuButton_edit",  [65364]=menuButton_file.press_down, [65362]=menuButton_file.press_up}
 
-function menuButton_file:on_key_down(key)
-	if menuButton_file.focus[key] then
-		if type(menuButton_file.focus[key]) == "function" then
-			menuButton_file.focus[key]()
-		elseif screen:find_child(menuButton_file.focus[key]) then
-			if screen:find_child(menuButton_file.focus[key]) ~= menuButton_file then
-				if menuButton_file.on_focus_out then 
-					menuButton_file.on_focus_out()
-				end
-				if screen:find_child(menuButton_file.focus[key]).on_focus_in then
-					screen:find_child(menuButton_file.focus[key]).on_focus_in()
-				end
-				screen:find_child(menuButton_file.focus[key]):grab_key_focus()
-			else 
-
-				if menuButton_file.get_index() ~= 0 then 
-				    menuButton_file.press_enter()
-			    end
-
-				menuButton_file.on_focus_out()
-				screen:grab_key_focus()
-			end 
-		end
-	end
-	return true
-end
-
 menuButton_file.extra.reactive = true
+
+function menuButton_file:on_enter()
+
+  	if menu_bar_hover == false then return true end 
+
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_file" then 
+		local temp_focus = current_focus
+	   	current_focus.clear_focus(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_file" ) then 
+		menuButton_file.extra.set_focus(keys.Return)
+		current_focus.name = "menuButton_file"
+    end 
+
+	return true
+end 
 
 local menuButton_edit = ui_element.menuButton
 	{
@@ -92,7 +87,7 @@ local menuButton_edit = ui_element.menuButton
 		ui_height = 61,
 		skin = "editor",
 		label = "Edit",
-		focus_color = {27,145,27,255},
+		focus_border_color = {27,145,27,255},
 		text_color = "#cccccc",
 		text_font = "FreeSans Bold 28px",
 		border_width = 1,
@@ -117,56 +112,50 @@ local menuButton_edit = ui_element.menuButton
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 		ui_position = {489,28,0}, 
+		button_name = "menuButton_edit", 
 	}
 
-menuButton_edit.insert_item(1,{type="item", string="Undo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="Z"}})
+--menuButton_edit.insert_item(1,{type="item", string="Undo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="Z"}})
 
-menuButton_edit.insert_item(2,{type="item", string="Redo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="E"}})
+--menuButton_edit.insert_item(2,{type="item", string="Redo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="E"}})
 
-menuButton_edit.insert_item(3,{type="item", string="Insert UI Element", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements,  icon=Text{text="I"}})
+menuButton_edit.insert_item(1,{type="item", string="Insert UI Element", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.ui_elements,  icon=Text{text="I"}})
 
---menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=screen_ui.timeline_show,  icon=Text{text="J"}})
-menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="J"}})
+--menuButton_edit.insert_item(4,{type="item", string="Timeline...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="J"}})
 
-menuButton_edit.insert_item(5,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete, icon=assets("assets/delete-menu-icon.png")})
-menuButton_edit.insert_item(6,{type="item", string="Duplicate", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate,  icon=Text{text="D"}})
+menuButton_edit.insert_item(2,{type="item", string="Delete", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.delete, icon=assets("assets/delete-menu-icon.png")})
+menuButton_edit.insert_item(3,{type="item", string="Duplicate", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.duplicate,  icon=Text{text="D"}})
 
-menuButton_edit.insert_item(7,{type="item", string="Clone", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone,   icon=Text{text="C"}})
+menuButton_edit.insert_item(4,{type="item", string="Clone", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.clone,   icon=Text{text="C"}})
 
-menuButton_edit.insert_item(8,{type="item", string="Group", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group,   icon=Text{text="G"}})
+menuButton_edit.insert_item(5,{type="item", string="Group", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.group,   icon=Text{text="G"}})
 
-menuButton_edit.insert_item(9,{type="item", string="UnGroup", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.ugroup,  icon=Text{text="U"}})
+menuButton_edit.insert_item(6,{type="item", string="UnGroup", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.ugroup,  icon=Text{text="U"}})
 
 menuButton_edit.name = "menuButton_edit"
 menuButton_edit.anchor_point = {71,30.5}
 menuButton_edit.extra.focus = {[65363] = "menuButton_arrange", [65293] = "menuButton_edit", [65361] = "menuButton_file", [65364]=menuButton_edit.press_down, [65362]=menuButton_edit.press_up}
 
-function menuButton_edit:on_key_down(key)
-	if menuButton_edit.focus[key] then
-		if type(menuButton_edit.focus[key]) == "function" then
-			menuButton_edit.focus[key]()
-		elseif screen:find_child(menuButton_edit.focus[key]) then
-			if screen:find_child(menuButton_edit.focus[key]) ~= menuButton_edit then
-				if menuButton_edit.on_focus_out then 
-					menuButton_edit.on_focus_out()
-				end
-				if screen:find_child(menuButton_edit.focus[key]).on_focus_in then
-					screen:find_child(menuButton_edit.focus[key]).on_focus_in()
-				end
-				screen:find_child(menuButton_edit.focus[key]):grab_key_focus()
-			else 
-				if menuButton_edit.get_index() ~= 0 then 
-				    menuButton_edit.press_enter()
-			    end
-				menuButton_edit.on_focus_out()
-				screen:grab_key_focus()
-			end 
-		end
-	end
-	return true
-end
-
 menuButton_edit.extra.reactive = true
+
+ function menuButton_edit:on_enter()
+ 	
+  	if menu_bar_hover == false then return true end 
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_edit" then 
+		local temp_focus = current_focus
+	   	current_focus.clear_focus(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_edit") then 
+		menuButton_edit.extra.set_focus(keys.Return)
+		current_focus.name = "menuButton_edit"
+    end 
+
+	return true
+ end 
 
 
 local menuButton_arrange = ui_element.menuButton
@@ -175,7 +164,7 @@ local menuButton_arrange = ui_element.menuButton
 		ui_height = 61,
 		skin = "editor",
 		label = "Arrange",
-		focus_color = {27,145,27,255},
+		focus_border_color = {27,145,27,255},
 		text_color = "#cccccc",
 		text_font = "FreeSans Bold 28px",
 		border_width = 1,
@@ -200,6 +189,7 @@ local menuButton_arrange = ui_element.menuButton
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 		ui_position = {729,28,0}, 
+		button_name = "menuButton_arrange", 
 	}
 
 menuButton_arrange.insert_item(1,{type="label", string="  Align:", bg=assets("assets/menu-item-label.png")} )
@@ -221,33 +211,27 @@ menuButton_arrange.name = "menuButton_arrange"
 menuButton_arrange.anchor_point = {71,30.5}
 menuButton_arrange.extra.focus = {[65363] = "menuButton_view", [65293] = "menuButton_arrange", [65361] = "menuButton_edit", [65364]=menuButton_arrange.press_down, [65362]=menuButton_arrange.press_up }
 
-function menuButton_arrange:on_key_down(key)
-	if menuButton_arrange.focus[key] then
-		if type(menuButton_arrange.focus[key]) == "function" then
-			menuButton_arrange.focus[key]()
-		elseif screen:find_child(menuButton_arrange.focus[key]) then
-			if screen:find_child(menuButton_arrange.focus[key]) ~= menuButton_arrange then
-				if menuButton_arrange.on_focus_out then 
-					menuButton_arrange.on_focus_out()
-				end
-				if screen:find_child(menuButton_arrange.focus[key]).on_focus_in then
-					screen:find_child(menuButton_arrange.focus[key]).on_focus_in()
-				end
-				screen:find_child(menuButton_arrange.focus[key]):grab_key_focus()
-			else 
-				if menuButton_arrange.get_index() ~= 0 then 
-				    menuButton_arrange.press_enter()
-			        end
-				menuButton_arrange.on_focus_out()
-				screen:grab_key_focus()
-			end
-		end
-	end
-	return true
-end
-
 menuButton_arrange.extra.reactive = true
 
+ function menuButton_arrange:on_enter()
+
+  	if menu_bar_hover == false then return true end 
+
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_arrange" then 
+		local temp_focus = current_focus
+	   	current_focus.clear_focus(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_arrange") then 
+		menuButton_arrange.extra.set_focus(keys.Return)
+		current_focus.name = "menuButton_arrange"
+    end 
+
+	return true
+ end 
 
 local menuButton_view = ui_element.menuButton
 	{
@@ -255,7 +239,7 @@ local menuButton_view = ui_element.menuButton
 		ui_height = 61,
 		skin = "editor",
 		label = "View",
-		focus_color = {27,145,27,255},
+		focus_border_color = {27,145,27,255},
 		text_color = "#cccccc",
 		text_font = "FreeSans Bold 28px",
 		border_width = 1,
@@ -280,6 +264,7 @@ local menuButton_view = ui_element.menuButton
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 		ui_position = {971,28,0}, 
+		button_name = "menuButton_view", 
 	}
 
 menuButton_view.insert_item(1,{type="label", string="  Background:", bg=assets("assets/menu-item-label.png")} )
@@ -295,7 +280,6 @@ menuButton_view.items[6]["icon"].opacity = 0
 menuButton_view.insert_item(7,{type="item", string="Black", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.black_bg, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.items[7]["icon"].opacity = 0
 
-
 function menu.clearMenuButtonView_BGIcons() 
 	menuButton_view.items[2]["icon"].opacity = 0
 	menuButton_view.items[3]["icon"].opacity = 0
@@ -306,8 +290,10 @@ function menu.clearMenuButtonView_BGIcons()
 end 
 
 menuButton_view.insert_item(8,{type="label", string="  Guides:", bg=assets("assets/menu-item-label.png")} )
-menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline, icon=Text{text="H"}})
-menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline, icon=Text{text="V"}})
+menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline})
+--menuButton_view.insert_item(9,{type="item", string="Add Horizontal Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.h_guideline, icon=Text{text="H"}})
+menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline})
+--menuButton_view.insert_item(10,{type="item", string="Add Vertical Guide", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.v_guideline, icon=Text{text="V"}})
 menuButton_view.insert_item(11,{type="item", string="Show Guides", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.show_guides, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.insert_item(12,{type="item", string="Snap to Guides", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=editor.snap_guides, icon=assets("assets/menu-checkmark.png")}) 
 
@@ -315,34 +301,27 @@ menuButton_view.name = "menuButton_view"
 menuButton_view.anchor_point = {71,30.5}
 menuButton_view.extra.focus = {[65293] = "menuButton_view", [65361] = "menuButton_arrange", [65364]=menuButton_view.press_down, [65362]=menuButton_view.press_up }
 
-function menuButton_view:on_key_down(key)
-	if menuButton_view.focus[key] then
-		if type(menuButton_view.focus[key]) == "function" then
-			menuButton_view.focus[key]()
-		elseif screen:find_child(menuButton_view.focus[key]) then
-			if screen:find_child(menuButton_view.focus[key]) ~= menuButton_view then
-				if menuButton_view.on_focus_out then
-					menuButton_view.on_focus_out()
-				end
-				if screen:find_child(menuButton_view.focus[key]).on_focus_in then
-					screen:find_child(menuButton_view.focus[key]).on_focus_in()
-				end
-				screen:find_child(menuButton_view.focus[key]):grab_key_focus()
-			else
-
-			      if menuButton_view.get_index() ~= 0 then 
-				    menuButton_view.press_enter()
-			      end
-			      menuButton_view.on_focus_out()
-				  screen:grab_key_focus()
-			end
-		end
-	end
-	return true
-end
-
 menuButton_view.extra.reactive = true
 
+ function menuButton_view:on_enter()
+  	
+	if menu_bar_hover == false then return true end 
+	
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_view" then 
+		local temp_focus = current_focus
+	   	current_focus.clear_focus(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_view") then 
+		menuButton_view.extra.set_focus(keys.Return)
+		current_focus.name = "menuButton_view"
+    end 
+
+	return true
+ end 
 
 local menu_text = Text
 	{
@@ -392,6 +371,7 @@ local menu_text_shadow = Text
 	}
 
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
+
 menu_items = {["menu_item"]=menu_item, 
 			  ["menu_bar"]=menu_bar, 
 			  ["menuButton_file"]=menuButton_file,
@@ -435,14 +415,16 @@ menu_items = {["menu_item"]=menu_item,
 -- Deactivate Menu 
 ----------------------------------------------------------------------------
 function menu.deactivate_menu()
+
 	local menu_hide = Rectangle{name = "menu_hide_rect", color = {0,0,0,0}, position = {0,0,0}, size = {menu_bar.w, menu_bar.h}, reactive = true} 
 
 	function menu_hide.on_button_down()
 		return true
 	end 
 
-	screen:add(menu_hide)
-
+	if screen:find_child("menu_hide_rect") == nil then 
+		screen:add(menu_hide)
+	end
 end 
 
 ----------------------------------------------------------------------------

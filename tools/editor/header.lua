@@ -38,7 +38,8 @@ hdr.uiElements = {"Button", "TextInput", "DialogBox", "ToastAlert", "CheckBoxGro
 
 hdr.uiContainers = {"DialogBox", "LayoutManager", "ScrollPane", "Group", "ArrowPane", "TabBar"} 
 
-hdr.attr_name_list = {"color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text_font","title_font", "message_font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "ui_width", "ui_height", "f_color", "border_color", "border_width", "border_corner_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src", "empty_top_color", "empty_bottom_color", "stroke_color", "progress"}
+hdr.attr_name_list = {"lock", "visible_width", "visible_height", "virtual_height", "virtual_width", "arror_color", "arrow_visible", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness","frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "horz_bar_visible", "box_color", "focus_box_color", "box_border_width", "color", "border_color", "border_width", "color", "border_color", "border_width", "font", "text_font","title_font", "message_font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "scale", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "x", "y", "z", "w", "h", "opacity", "ui_width", "ui_height", "f_color", "border_color", "border_width", "border_corner_radius", "text_indent", "fill_color", "title", "message", "duration", "fade_duration", "items", "item_func", "selected_item", "button_color", "select_color", "button_radius", "select_radius", "p_pos", "item_pos", "line_space", "dot_diameter", "dot_color", "number_of_dots", "overall_diameter", "cycle_time", "clone_src", "empty_top_color", "empty_bottom_color", "stroke_color", "progress", "arrow_size", "skin", "reactive", "focus_color", "focus_border_color", "focus_button_color", "focus_box_color", "focus_fill_color", "cursor_color","text_color", "justify", "single_line", "alignment", "wrap_mode", "direction", "selected_item", "focus_text_color", "menu_width","horz_padding","vert_spacing","horz_spacing","vert_offset","background_color","separator_thickness","expansion_location", "box_size","check_size","line_space", "box_position", "item_position", "selected_items", "items", "select_color", "button_radius","select_radius", "label_color", "button_width", "button_height", "display_border_color","display_fill_color","display_border_width", "tab_position", "display_width", "display_height",  "tab_labels", "arrow_dist_to_frame","icon","label","title","title_font", "title_color", "message", "message_font", "message_color", "on_screen_duration","fade_duration","title_separator_color","title_separator_thickness","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time", "empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","rows","columns","cell_size","cell_width","cell_height", "cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset","arrows_visible", "arrow_color","focus_arrow_color" }
+
 
 hdr.AUTO_SAVE_DURATION = 60000  
 hdr.AUTO_SAVE = true
@@ -86,6 +87,7 @@ cursor_type 	  = 68
 shift 		      = false
 control 	      = false
 
+menu_bar_hover 	  = false
 
 -- table for skin 
 skins = {}
@@ -139,20 +141,15 @@ setmetatable( strings , { __index = missing_localized_string } )
 	screen_ui 		= dofile("screen_ui")
 
 -- background images 
---BG_IMAGE_20 = Image{src = "assets/transparency-grid-20-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
 BG_IMAGE_20 = assets("assets/transparency-grid-20-2.png")
 BG_IMAGE_20:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 255}
---BG_IMAGE_40 = Image{src = "assets/transparency-grid-40-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_40 = assets("assets/transparency-grid-40-2.png")
 BG_IMAGE_40:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
---BG_IMAGE_80 = Image{src = "assets/transparency-grid-80-2.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_80 = assets("assets/transparency-grid-80-2.png")
 BG_IMAGE_80:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
---BG_IMAGE_white = Image{src = "assets/white.png", tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 BG_IMAGE_white = assets("assets/white.png")
 BG_IMAGE_white:set{tile = {true, true}, position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
---BG_IMAGE_import = Image{src = "assets/white.png", position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
-BG_IMAGE_import = assets("assets/white.png")
+BG_IMAGE_import = Image{src = "assets/white.png"}
 BG_IMAGE_import:set{position = {0,0}, size = {screen.w, screen.h}, opacity = 0}
 
 return hdr
