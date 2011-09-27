@@ -245,11 +245,9 @@ function Animation_Loop:delete_animation(t)
         
     else -- dump everything before throwing the error
         
-        dumptable( terminating_animations     )
-        dumptable( looping_animations         )
-        dumptable( non_terminating_animations )
+        Animation_Loop:dump_states()
         
-        print( "Animation_Loop:delete_animation(", t ,")" )
+        print( "Animation_Loop:delete_animation(", t ,") while in state "..curr_state.name )
         error( "tried to delete an animation that wasn't animating", 2 )
     end
     

@@ -178,22 +178,16 @@ do
             next_move
         }
         blink_sequence = {
-            function()
-                if math.random(1,12) == 7 then
-                    
-                    dog.lids.x = dog.x +  28
-                    dog.lids.y = dog.y - 124
-                    
-                    dog.lids:show()
-                    
-                    dolater(
-                        100,
-                        dog.lids.hide,
-                        dog.lids
-                    )
-                end
-            end,
+            imgs.sit[1],
+            imgs.sit[2],
             function() if math.random(1,15) == 1 then mediaplayer:play_sound("audio/dog whine "..math.random(1,2)..".mp3") end end,
+            imgs.sit[3],
+            imgs.sit[2],
+            imgs.sit[1],
+            imgs.sit[2],
+            imgs.sit[3],
+            imgs.sit[2],
+            imgs.sit[1],
             100,
             next_move,
         }
@@ -251,8 +245,14 @@ do
                 Animation_Loop:delete_animation(dog_animation)
                 
             else
+                
                 dog.source = imgs.poop[1]
-                frames = blink_sequence
+                
+                if math.random(1,10) == 1 then
+                    frames = blink_sequence
+                else
+                    frames = wait_sequence
+                end
                 
             end
             

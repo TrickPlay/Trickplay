@@ -325,7 +325,7 @@ local keys = {
     end,
     [keys.OK] = function()
         
-        mediaplayer:play_sound("audio/start.mp3")
+        mediaplayer:play_sound("audio/start.wav")
         enter_press[index]()
         
     end,

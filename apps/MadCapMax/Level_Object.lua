@@ -503,6 +503,15 @@ lvls = {
                 x      = 7680+1543+150,
                 y      = 453+40,
                 opacity = 0,
+                on_remove =  function()
+                    print("going to fade out")
+                    if  mediaplayer.state == mediaplayer.PLAYING or
+                        mediaplayer.state == mediaplayer.LOADING then
+                        
+                        fade_out_mediaplayer(1)
+                    end
+                    
+                end,
             },
 
             {
@@ -912,6 +921,9 @@ lvls = {
                 x      = 11520+3870+505-90,
                 y      = 300+160-240,
                 m      = 2.5,
+                floor_func = function(self)
+                    mediaplayer:play_sound("audio/glass_break.mp3")
+                end
             },
             {
                 type   = "wall_objs",
@@ -1771,6 +1783,35 @@ lvls = {
                 on_step = function(s,p)
                 end,
                 on_completed = function()
+                    Animation_Loop:add_animation(  lvls[2].outro[6]  )
+                    
+                end,
+            },
+            {
+                duration = .5,
+                on_step = function()
+                end,
+                on_completed = function()
+                    Animation_Loop:add_animation(  lvls[2].outro[7]  )
+                    fx:heart_barrage(13090,700,4)
+                end,
+            },
+            {
+                duration = .5,
+                on_step = function(s,p)
+                    
+                end,
+                on_completed = function()
+                    Animation_Loop:add_animation(  lvls[2].outro[8]  )
+                    fx:heart_barrage(13290,700,4)
+                    
+                end,
+            },
+            {
+                duration = 2,
+                on_step = function(s,p)
+                end,
+                on_completed = function()
                     gamestate:change_state_to("LVL_TRANSITION")
                     
                 end,
@@ -2577,6 +2618,14 @@ local function make_obj(item)
     
     clone_counter[obj] = obj.source and obj.source.src or true
     
+    obj.on_remove = item.on_remove
+    
+    if obj.on_remove then
+        
+        print("we got one!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        
+    end
+    
     return obj
     
 end
@@ -2648,7 +2697,7 @@ function LVL_Object:scroll_by(dx,need_actors)
     for obj,right_edge in pairs(on_screen_items) do
         
         if right_edge < -physics_world.x then
-            print("delete")
+            print("delete ".. (obj.name or "<no name>"))
             if obj.parent then obj:unparent() end
             
             if obj.on_idle then
@@ -2660,6 +2709,8 @@ function LVL_Object:scroll_by(dx,need_actors)
                 obj.on_idle = nil
                 
             end
+            
+            if obj.on_remove then obj.on_remove() end
             
             on_screen_items[     obj ] = nil
             collides_with_max[   obj ] = nil

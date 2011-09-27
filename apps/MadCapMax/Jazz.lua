@@ -1426,7 +1426,7 @@ local make_cat = function(cat_name)
             cat.scale = {1,1}
             cat.opacity = 255
             
-            
+            cat.pooped_on = false
             deleting_self = false
             cat.left_obstacle  = nil
             cat.under_obstacle = nil
