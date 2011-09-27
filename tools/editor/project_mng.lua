@@ -9,6 +9,11 @@ local projects = {}
 local copy_dirs = {"/assets/"}
 local copy_files = {"/.trickplay", "/lib/ui_element.lua", "/lib/ui_element_header.lua", "/lib/strings.lua", "/assets-cache.lua"} 
 
+local project_window_deactivate = function (w)
+		local rect = Rectangle {name = "deactivate_rect", color = {10,10,10,100}, size = {300,400}, position = {0,0}, reactive = true}
+		w:add(rect)
+	end 
+
 local function copy_widget_imgs ()
 	-- this function copys the UI Element library file, header file, 
 	-- all the editor asset files including skins to the newly created 
@@ -18,11 +23,14 @@ local function copy_widget_imgs ()
 
 	for a, b in pairs (copy_dirs) do 
 		source_files = editor_lb:readdir(trickplay.config.app_path..b)
+		if source_files == nil then source_files = {} end 
+
 		local k,l = string.find(b, "/assets/") 
 	    dest_dir = "/lib/skins/"..string.sub(b,l+1, -1)
 		if a == 1 then 
 			dest_dir = "/lib"..b
 		end 
+
 		for i, j in pairs(source_files) do 
 	     	source_file = trickplay.config.app_path..b..j 
 			dest_file = current_dir..dest_dir..j 
@@ -42,8 +50,6 @@ local function set_new_project (pname, replace)
 
 	home = editor_lb:get_home_dir()
     assert( home )
-	local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "default" )
-    
     -- The base directory where the editor will store its files, make sure
     -- we are able to create it (or it already exists )
     
@@ -52,7 +58,8 @@ local function set_new_project (pname, replace)
     
     -- The list of files and directories there. We go through it and look for
     -- directories.
-    local list = editor_lb:readdir( base )
+    local list = editor_lb:readdir( base ) 
+	if list == nil then list = {} end 
     
     for i = 1 , #list do
       	if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
@@ -75,11 +82,13 @@ local function set_new_project (pname, replace)
 			end 
 		end 
 	else 
+		editor.error_message("014", pname, nil)  
 		return
    	end   
 	
    	app_path = editor_lb:build_path( base , project )
-    if not editor_lb:mkdir( app_path ) then
+   
+	if not editor_lb:mkdir( app_path ) then
         -- Tell the user we were not able to create it
    	     print("couldn't create ",app_path)  
     else
@@ -87,7 +96,7 @@ local function set_new_project (pname, replace)
 	    current_dir = app_path
     end
 
-    local screens_path = editor_lb:build_path( app_path, "screens" )
+  	local screens_path = editor_lb:build_path( app_path, "screens" )
     editor_lb:mkdir( screens_path ) 
 
     local asset_path = editor_lb:build_path( app_path, "assets" )
@@ -96,7 +105,7 @@ local function set_new_project (pname, replace)
     local asset_images_path = editor_lb:build_path( asset_path, "images" )
     editor_lb:mkdir( asset_images_path ) 
 
-    local asset_sounds_path = editor_lb:build_path( asset_path, "sounds" )
+	local asset_sounds_path = editor_lb:build_path( asset_path, "sounds" )
     editor_lb:mkdir( asset_sounds_path ) 
     
 	local asset_videos_path = editor_lb:build_path( asset_path, "videos" )
@@ -114,12 +123,13 @@ local function set_new_project (pname, replace)
 	local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
     editor_lb:mkdir( lib_skins_default_path ) 
     
+	copy_widget_imgs()
+    
 	local menu_text = menu_items.menu_text 
 
 	menu_text.text = project .. " "
 	menu_text.extra.project = project .. " "
 
-	copy_widget_imgs()
 	settings.project = project
 
 end 
@@ -181,10 +191,16 @@ function project_mng.new_project(fname, from_new_project)
 	-- Button Event Handlers
 	button_cancel.on_press = function() xbox:on_button_down() end 
 	button_ok.on_press = function() 
-							set_new_project(text_input.text) 
-							xbox:on_button_down()
-							undo_list = {}
-							editor.close(true)
+							if text_input.text == "" or text_input.text == nil then 
+								xbox:on_button_down() 
+								editor.error_message("014", fname, project_mng.new_project)  
+								return -1
+							else 
+								set_new_project(text_input.text) 
+								xbox:on_button_down()
+								undo_list = {}
+								editor.close(true)
+							end 
 						end
 
 	local ti_func = function()
@@ -290,7 +306,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     local SSTYLE = {font = "FreeSans Medium 14px" , color = {0,0,0,255}}
     local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
 
-	local msgw_bg 
+	local msgw, msgw_bg 
 
     --msgw_bg = Image{src = "/assets/panel-no-tabs.png", name = "open_project", position = {0,0}}
     msgw_bg = assets("/assets/panel-no-tabs.png")
@@ -329,11 +345,11 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     
     base = editor_lb:build_path( home , "trickplay-editor"  )
 
+    assert( editor_lb:mkdir( base ) )
+
     if editor_lb:readdir( base ) == nil then 
 		settings.project = nil
 	end 
-
-    assert( editor_lb:mkdir( base ) )
     
     -- The list of files and directories there. We go through it and look for
     -- directories.
@@ -353,33 +369,61 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
 	local function load_project(selected_prj)
 
-		if selected_prj == nil then 
+		if selected_prj == nil or selected_prj == "" then 
+			set_new_project("unsaved_project")
 			return
 		end
 
-        if(selected_prj ~= "") then                      
-           project = selected_prj
-        end   
+        project = selected_prj
 	
         app_path = editor_lb:build_path( base , project )
 
-    	if editor_lb:readdir( app_path ) == nil or #editor_lb:readdir( app_path ) == 0 then 
-			set_new_project("unsaved_project")
-			return  
+		--project sub dir checking 
+
+		local sub_dir_table = {}
+
+		local screens_path = editor_lb:build_path( app_path, "screens" )
+		table.insert(sub_dir_table,screens_path)
+    	local asset_path = editor_lb:build_path( app_path, "assets" )
+		table.insert(sub_dir_table,asset_path)
+
+		local asset_images_path = editor_lb:build_path( asset_path, "images" )
+		table.insert(sub_dir_table,asset_images_path)
+    	local asset_sounds_path = editor_lb:build_path( asset_path, "sounds" )
+		table.insert(sub_dir_table,asset_sounds_path)
+		local asset_videos_path = editor_lb:build_path( asset_path, "videos" )
+		table.insert(sub_dir_table,asset_videos_path)
+
+    	local lib_path = editor_lb:build_path( app_path, "lib" )
+		table.insert(sub_dir_table,lib_path)
+		local lib_assets_path = editor_lb:build_path( lib_path, "assets" )
+		table.insert(sub_dir_table,lib_assets_path)
+		local lib_skins_path = editor_lb:build_path( lib_path, "skins" )
+		table.insert(sub_dir_table,lib_skins_path)
+		local lib_skins_default_path = editor_lb:build_path( lib_skins_path, "CarbonCandy" )
+		table.insert(sub_dir_table,lib_skins_default_path)
+
+		for i, j in pairs (sub_dir_table) do 
+			if not editor_lb:dir_exists(j) then 
+				local temp_project = project 
+				if current_dir == "" then 
+					set_new_project("unsaved_project")
+				end 
+				editor.error_message("019", temp_project..","..j, nil, nil, msgw)  
+				if msgw then 
+					project_window_deactivate(msgw)
+				end 
+				return -1
+			end 
 		end 
 
-        if not editor_lb:mkdir( app_path ) then
-        -- Tell the user we were not able to create it
-   	     	print("couldn't create ",app_path)  
-        else
-            editor_lb:change_app_path( app_path )
-	     	current_dir = app_path
-        end
-
+        editor_lb:change_app_path( app_path )
+	    current_dir = app_path
+		
 		screen:find_child("menu_text").text = project .. " "
 		screen:find_child("menu_text").extra.project = project .. " "
 
-		editor.close(true)
+		--editor.close(true)
 
 		if not (from_main and settings.project) then 
 			settings.project = project
@@ -392,6 +436,8 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	if from_main and settings.project then 
 
 		load_project(settings.project)
+		undo_list = {}
+		editor.close(true)
 
 		local dir = editor_lb:readdir(current_dir.."/screens")
 
@@ -406,6 +452,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 				end 
 			end 
 		end 
+
 		return 
 
 	elseif from_main then 
@@ -458,7 +505,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
 	--editor_use = false
 	
-	local msgw = Group {
+	msgw = Group {
 		name = "msgw", 
 		position ={650, 250},
 	 	anchor_point = {0,0},
