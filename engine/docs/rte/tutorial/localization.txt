@@ -1,0 +1,39 @@
+Topic: Localizing a TrickPlay Application
+
+Creating applications that are capable of displaying text and images in multiple languages is a common practice. The TrickPlay SDK provides a convenient method to ease the localization process so that an application automatically uses the appropriate localized versions. Support for additional languages can be added at any time without having to generate a new version of the program.
+
+The key requirement for an application to support multiple languages is to organize all displayed text strings, images and other resources into separate files. The files are then stored in directories based upon their language and country.
+
+As an example, say two files, each with the name strings.lua, contain all the application's displayed text, one file using the French language, the other, Spanish. By storing the French strings.lua in one directory and the Spanish strings.lua in another directory, the application can load the correct string.lua file based upon the current language and country configuration.
+
+Complete details about localizing a TrickPlay application are described in the <Localization> section of the SDK Programmer's Guide. For the Tutorial application, we'll create only English-based resources. Further, English will be the app's default language, meaning it will be used if dedicated language support is not implemented for the current language/country configuration. Localized files for an application's default language should be stored in either its top-level application bundle directory or in a subdirectory called /localized. Refer to the Programmer's Guide section on Localization for details.
+
+To localize our Tutorial application, we'll place all displayed text strings in a file called strings.lua and store the file in the same directory as the app metadata and main.lua files. The strings.lua file will contain a Lua table of strings. We'll start localizing the Tutorial application by removing the header string from the Text constructor. Using a text editor, create a new file called strings.lua with the following contents.
+
+	(code)
+	-- *** strings.lua ***
+	
+	return{
+		header = "TrickPlay SDK Tutorial Animations",
+	}
+	(end)
+
+	Notice that the strings.lua file contains valid Lua code that simply returns a table of strings. An application can load and run this file by calling the Lua dofile() function, which will load the table into a variable. An individual entry from the table can be accessed by using the "dot" syntax of variable.entry, as in strVar.header. A complete explanation of the process is contained in the <Localization> section of the SDK Programmer's Guide.
+	
+	The updated Tutorial application's main.lua file to load the localized version of its header text and access it in the Text constructor is shown below.
+	
+	(code)
+	-- Load localized text strings into a table called localStr
+	localStr = dofile( "localized:strings.lua" )
+		
+	-- Create header label, using localized header text
+	headerLabel = Text( {
+					text     = localStr.header,
+					font     = "DejaVu Sans Bold 80px",
+					color    = { 245, 245, 220, 255 },
+					position = { 190, 50 }
+				  } )
+	(end)
+	
+With our Tutorial application structured for localization, we can now finish laying out its main window.
+

@@ -1,0 +1,107 @@
+Topic: Loading an Image
+
+Images are a common resource, so the TrickPlay SDK provides an <Image> class to load and process bitmapped image files, such as PNG and JPEG. Image files can be loaded synchronously or asynchronously from the file system or from a URL.
+
+The Tutorial application will load two images from the TrickPlay Developer website and place them in the two demo areas.
+
+We'll place the code for the image loading and positioning in a new file called loadImages.txt and have the main.lua file process the file using dofile(). The code shown below loads the TrickPlay logo file from the TrickPlay website. It verifies that the load succeeded and aborts if an error occurred. A new global variable called "logoImage" is defined to hold the loaded image file. This variable will be accessible from main.lua and other source files. Additional global variables will be defined when the second image is loaded later in this section.
+
+	(code)
+	-- *** loadImages.lua ***
+	
+	--[[ Creates the following global variables
+	
+			logoImage   - Image object with loaded TrickPlay logo image
+			sphereImage - Image object with loaded Red Sphere image
+			sphereClone - Clone object of Red Sphere image
+	--]]
+	
+	-- Synchronously load the TrickPlay logo image from the TrickPlay website
+	logoImage = Image( { src = "https://developer.trickplay.com/sites/default/files/tpLogo.png" } )
+	if( logoImage.loaded == false ) then
+		print( "Could not load TrickPlay logo" )
+		return
+	end
+	(end)
+
+It is often convenient to manipulate an object from its center. The object's location at which manipulations such as positioning and rotation occur is called its "anchor point." By default, an object's anchor point is its upper-left corner. To relocate the anchor point, the object's <anchor_point> property can be set or its <move_anchor_point> function can be called. The code shown below sets the logoImage's anchor point to the center of the image.
+
+	(code)
+	-- Set the image's anchor point to its center
+	logoImage.anchor_point = { logoImage.width / 2, logoImage.height / 2 }
+	(end)
+
+The image will be added to the demoArea1 group and positioned in the center of the demoSpace1 Rectangle. As a member of a group, the image's position coordinates should be relative to the Group's position, not the absolute coordinates of the screen. The code shown below performs the desired operation. (Note: Some tweaking is performed on the Y coordinate to achieve a more centered appearance.)
+
+	(code)
+	-- Set the image's position in the middle of demoArea1's display space (demoSpace1)
+	logoImage.position = { (demoSpace1.width  / 2) + demoSpace1.x,
+	                       (demoSpace1.height / 2) + demoSpace1.y - 20 }
+	
+	-- Add the image to the demoArea1 group
+	demoArea1:add( logoImage )
+	(end)
+
+For the second demo area, an image of a red sphere will be loaded from the TrickPlay website. The operation here is identical as that performed for the logoImage. In addition, the image is scaled to twice its original size. The reason for this will become apparent when we animate the sphere. The code is shown below.
+
+	(code)
+	-- Load the red sphere image
+	sphereImage = Image( { src = "https://developer.trickplay.com/sites/default/files/sphereRed.png" } )
+	if( sphereImage.loaded == false ) then
+		print( "Could not load sphere image" )
+		return
+	end
+	
+	-- Set the image's anchor point to its center
+	sphereImage.anchor_point = { sphereImage.width / 2, sphereImage.height / 2 }
+	
+	-- Position the image in the middle of the demoArea2's display space (demoSpace2)
+	sphereImage.position = { (demoSpace2.width  / 2) + demoSpace2.x,
+	                         (demoSpace2.height / 2) + demoSpace2.y }
+
+	-- Scale the image to twice its original size
+	sphereImage.scale = { 2, 2 }
+	(end)
+
+In the second demo area, the Tutorial application will animate two spheres. It's possible to reload the same sphere image into another variable, but then the image would be loaded twice, using twice the amount of memory. If an application needed to load large image files many times, available memory could be filled quickly, not to mention the execution time required to for each reload.
+
+To provide efficient use of memory and time, the TrickPlay SDK libraries provide a <Clone> class. Most of the classes in the SDK libraries can be "cloned," including the Image, Rectangle, Text and Group classes. (When a Group is cloned, all objects in the Group are also cloned.) By cloning an Image object, the image file is loaded a single time with a single instance stored in memory. A single Image object may cloned any number of times. Each Clone object can be positioned anywhere on the screen and rotated and scaled without affecting the original Image or other Clone objects. On the other hand, any change to the Image object is immediately reflected in all its Clone objects. For example, if a new image is loaded into the Image object, all related Clones would immediately display the new image.
+
+To clone an object, a new Clone object is created with a reference to the existing object being cloned. Afterward, the Clone object can be treated like any other object.
+
+The code shown below clones the Red Sphere Image and then sets its anchor point and positions it in the center of the second demo area using the same properties and calculations as the original Image object. In addition, the cloned sphere is scaled so it is half the size of the original Image.
+
+	(code)
+	-- Create a clone of the sphere
+	sphereClone = Clone( { source = sphereImage } )
+	
+	-- Set Clone's anchor point and position and scale it to half its size
+	sphereClone.anchor_point = { sphereClone.width  / 2, sphereClone.height / 2 }
+	sphereClone.position     = { (demoSpace2.width  / 2) + demoSpace2.x,
+	                             (demoSpace2.height / 2) + demoSpace2.y }
+	sphereClone.scale        = { 0.5, 0.5 }
+	(end)
+
+Finally, the two spheres are added to the demoArea2 group. When adding objects to a Group. the order they are added determines which object is "in front of" the other (assuming both objects occupy the same position on the Z-axis). The first added object will be behind any subsequently added objects. An equivalent description is that the last added object will be ahead of any previously added objects. The code shown below that adds the two spheres to the demoArea2 group places the cloned sphere behind the original sphere.
+
+	(code)
+	-- Add the two images to the demoArea2 group
+	demoArea2:add( sphereClone, sphereImage )
+	(end)
+
+To load and run the loadImages.lua source file, the main.lua file processes it with the Lua dofile() function, as shown below.
+
+	(code)
+	-- *** main.lua ***
+	
+	-- Load images
+	-- Creates global variables called logoImage, sphereImage, and sphereClone
+	dofile( "loadImage.lua" )
+	(end)
+
+If you run the Tutorial application, the loaded images will display in the demo areas, as shown below. (Note: The sphereClone is hidden behind the larger sphereImage.)
+
+(see images/scrImages.png)
+
+At this point, the Tutorial application is looking pretty good, and we've covered a lot of territory getting here. It's time now to add some pepper to the objects and get them moving around the screen.
+
