@@ -207,7 +207,7 @@ class Text [[ClutterActor*]] actor
 		
 		(code)
 		"Sans 38px"
-		"'Century Schoolbook',Garamond,Serif 72px"
+		"Century Schoolbook,Garamond,Serif 72px"
 		"Sans Italic Bold 30"
 		(end)
 		
