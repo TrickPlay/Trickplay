@@ -34,7 +34,7 @@ We want our background rectangle to fill the entire screen, so it should be the 
 	The rectangle's color is defined by setting its color property (<Rectangle.color>). The color is specified using RGB (Red/Green/Blue) and Alpha transparency values. For complete details about RGB values and the supported data formats the TrickPlay SDK libraries recognize, refer to the <RGB/Alpha Color Formats> section. For the background color of our tutorial program, we'll use a blue with RGB values of {36,101,135}. We also want the background to be opaque, so we'll set the alpha value to 255. The code statement below achieves this.
 	
 	(code)
-	backGround.color = { 36, 101, 135, 255 }
+	backGround.color = { 70, 100, 130, 255 }
 	(end)
 	
 	Our background is now ready to be shown. In order to display any item on the display, it must be added to the screen global variable by calling the screen's add() function, as shown below.
@@ -55,7 +55,7 @@ We want our background rectangle to fill the entire screen, so it should be the 
 	backGround = Rectangle( {
 	                size     = { 1920, 1080 },
 	                position = { 0, 0, 0 },
-	                color    = { 36, 101, 135, 255 }
+	                color    = { 70, 100, 130, 255 }
 	             } )
 	(end)
 	

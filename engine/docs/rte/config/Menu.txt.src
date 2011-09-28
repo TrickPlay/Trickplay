@@ -51,6 +51,10 @@ Group: SDK Tutorial {
 	File: Create the Main Window (no auto-title, docs/rte/tutorial/mainWindow.txt)
 	File: Add a Colored Background (no auto-title, docs/rte/tutorial/addBkgnd.txt)
 	File: Basic Screen Layout (no auto-title, docs/rte/tutorial/scrLayout.txt)
+	File: Localization (no auto-title, docs/rte/tutorial/localization.txt)
+	File: Screen Layout with Groups (no auto-title, docs/rte/tutorial/scrGroup.txt)
+	File: Multiple Source Files (no auto-title, docs/rte/tutorial/multFiles.txt)
+	File: Load an Image (no auto-title, docs/rte/tutorial/loadImage.txt)
 }
 
 Group: Programmer's Guide  {
