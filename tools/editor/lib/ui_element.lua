@@ -2484,6 +2484,7 @@ function ui_element.toastAlert(t)
      end 
 
      function tb_group.extra.popup() 
+		tb_group.scale = {1.0, 1.0}
 	 	tb_group:show()
 		tb_group_timer:start()
      end 
