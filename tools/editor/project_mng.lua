@@ -287,6 +287,7 @@ end
 ------------------------------------
 
 function project_mng.open_project(t, msg, from_main, from_open_project)
+
   	local WIDTH = 300
   	local HEIGHT = 400
     local PADDING = 13
@@ -306,31 +307,19 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     local SSTYLE = {font = "FreeSans Medium 14px" , color = {0,0,0,255}}
     local WSSTYLE = {font = "FreeSans Medium 14px" , color = "000000"}
 
-	local msgw, msgw_bg 
-
-    --msgw_bg = Image{src = "/assets/panel-no-tabs.png", name = "open_project", position = {0,0}}
-    msgw_bg = assets("/assets/panel-no-tabs.png")
-	if msgw_bg == nil then 
-    	msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name = "open_project", position = {0,0}}
-	else 
-		msgw_bg:set{name = "open_project", position = {0,0}}
-	end 
-
-    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
-	local title = Text{name = "title", text = "Open Project"}:set(STYLE)
-	local title_shadow = Text {name = "title", text = "Open Project"}:set(SSTYLE)
-	local selected_project, ss, nn
+	local msgw
 	
 	local func_ok = function() 
 		editor.save(true,nil,project_mng.open_project,{nil,nil,nil,true})
 		return
  	end 
+
 	local func_nok = function() 
 		project_mng.open_project(nil,nil,nil,true)
 		return
 	end 
 
-	if #undo_list ~= 0 and from_open_project == nil then  -- 마지막 저장한 이후로 달라 진게 있으면 
+	if #undo_list ~= 0 and from_open_project == nil then  
 		editor.error_message("003", true, func_ok, func_nok) 
 		return 
 	end
@@ -354,6 +343,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
     -- The list of files and directories there. We go through it and look for
     -- directories.
     local list = editor_lb:readdir( base )
+	if list == nil then list = {} end 
     
     for i = 1 , #list do
         if editor_lb:dir_exists( editor_lb:build_path( base , list[ i ] ) ) then
@@ -363,9 +353,6 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
         end
     end
     
-    input_mode = hdr.S_POPUP
-
-	local virtual_hieght = 0
 
 	local function load_project(selected_prj)
 
@@ -423,13 +410,13 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		screen:find_child("menu_text").text = project .. " "
 		screen:find_child("menu_text").extra.project = project .. " "
 
-		--editor.close(true)
-
+		editor.close()
+--[[
 		if not (from_main and settings.project) then 
 			settings.project = project
 			xbox:on_button_down()
 		end 
-	
+]]
 		return true
 	end 
 
@@ -437,11 +424,10 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
 		load_project(settings.project)
 		undo_list = {}
-		editor.close(true)
 
 		local dir = editor_lb:readdir(current_dir.."/screens")
 
-		if dir == nil then return end 
+		if dir == nil then dir = {} end 
 
 		for i, v in pairs(dir) do
 			if v == "unsaved_temp.lua" then 
@@ -463,6 +449,14 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		return 
 	end 
 
+	local virtual_height = 0
+	
+    --local msgw_bg = assets("/assets/panel-no-tabs.png")
+    local msgw_bg = assets("lib/assets/panel-no-tabs.png"):set{name = "open_project", position = {0,0}}
+    local xbox = Rectangle{name = "xbox", color = {255, 255, 255, 0}, size={25, 25}, reactive = true}
+	local title = Text{name = "title", text = "Open Project"}:set(STYLE)
+	local title_shadow = Text {name = "title", text = "Open Project"}:set(SSTYLE)
+	local selected_project, ss, nn
 	-- Scroll	
 	local scroll = editor_ui.scrollPane{}
 
@@ -480,7 +474,16 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	-- Button Event Handlers
 	button_new.on_press = function() xbox:on_button_down(1)  project_mng.new_project() end
 	button_cancel.on_press = function() xbox:on_button_down(1) end
-	button_ok.on_press = function() if selected_project == ss then selected_project = nn end load_project(selected_project) end
+	button_ok.on_press = function() 
+		if selected_project == ss then 
+			selected_project = nn 
+		end 
+		if load_project(selected_project) ~= -1 then 
+			settings.project = project
+			xbox:on_button_down(1)
+			editor.close()
+		end 
+	end
 	
 	local s_func = function()
 		if current_focus then 
@@ -542,7 +545,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 
     for i, v in pairs(projects) do 
 
-		virtual_hieght = virtual_hieght + 22 
+		virtual_height = virtual_height + 22 
 
 		local project_t, project_ts = make_msgw_project_item(v)
 		local h_rect = Rectangle{border_width = 1, border_color = {0,0,0,255}, name="h_rect", color="#a20000", size = {298, 22}, reactive = true, opacity=0}
@@ -597,7 +600,11 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 			h_rect:grab_key_focus()
 			selected_project = project_t.name 
 			if button == 3 then 
-				load_project(selected_project)
+				if load_project(selected_project) ~= -1 then 
+					settings.project = project
+					xbox:on_button_down(1)
+					editor.close()
+				end 
 			end
 			return true
         end 
@@ -606,8 +613,10 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 				if type(h_rect.focus[key]) == "function" then
 					h_rect.focus[key]()
 				elseif screen:find_child(h_rect.focus[key]) then
-					if h_rect.clear_focus then
+					if h_rect.clear_focus and h_rect.focus[key] ~= "button_ok"then
 						h_rect.clear_focus()
+					elseif  h_rect.focus[key] == "button_ok" then 
+						msgw.extra.cur_f = h_rect
 					end
 					--screen:find_child(h_rect.focus[key]):grab_key_focus()
 					if screen:find_child(h_rect.focus[key]).set_focus then
@@ -629,7 +638,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 		end
 	end
 	
-	scroll.virtual_h = virtual_hieght + 25
+	scroll.virtual_h = virtual_height + 25
 	if scroll.virtual_h <= scroll.visible_h then 
 			scroll.visible_w = 300
 	end 
@@ -637,6 +646,8 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 	scroll.extra.focus = {[keys.Tab] = "button_cancel"}
 	msgw.extra.lock = false
  	screen:add(msgw)
+    input_mode = hdr.S_POPUP
+
 	util.create_on_button_down_f(msgw)	
 
 	--Focus

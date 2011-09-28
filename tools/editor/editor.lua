@@ -3595,6 +3595,9 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	    input_mode = hdr.S_SELECT
 		if inspector then 
 			inspector:remove(inspector:find_child("deactivate_rect"))
+			if inspector.extra.cur_f and inspector.extra.cur_f.set_focus then 
+				inspector.extra.cur_f.set_focus()
+			end 
 		end 
 		return true
 	end 
