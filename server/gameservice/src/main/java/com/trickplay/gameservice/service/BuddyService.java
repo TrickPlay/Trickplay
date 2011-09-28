@@ -13,9 +13,9 @@ import com.trickplay.gameservice.exception.GameServiceException;
 @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
 public interface BuddyService {
 	
-	public BuddyListInvitation sendInvitation(Long requestorId, String recipientName) throws GameServiceException;
+	public BuddyListInvitation sendInvitation(String recipientName) throws GameServiceException;
 	
-	public BuddyListInvitation updateInvitationStatus(Long userId, Long invitationId, InvitationStatus newStatus);
+	public BuddyListInvitation updateInvitationStatus(Long invitationId, InvitationStatus newStatus);
 
 	//@PreAuthorize("principal.username == #buddy.owner.username")
 	public void removeBuddy(Buddy buddy);

@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import com.trickplay.gameservice.domain.BuddyListInvitation;
 import com.trickplay.gameservice.domain.GameStepId;
 import com.trickplay.gameservice.domain.InvitationStatus;
+import com.trickplay.gameservice.transferObj.BooleanResponse;
 import com.trickplay.gameservice.transferObj.BuddyInvitationListTO;
 import com.trickplay.gameservice.transferObj.BuddyInvitationRequestTO;
 import com.trickplay.gameservice.transferObj.BuddyInvitationTO;
@@ -44,14 +45,16 @@ import com.trickplay.gameservice.transferObj.VendorTO;
 
 public class GameServiceClient {
 
-	private static final String GS_ENDPOINT = "http://localhost:8081/gameservice/rest";
-
+	private static final String GS_ENDPOINT = "http://localhost:9081/gameservice/rest";
 
 
 		public static void main(String[] args) {
 			
 			RestTemplate restTemplate = getTemplate();
 			
+			checkUserExists(restTemplate, "u1");
+			checkUserExists(restTemplate, "u2");
+			checkUserExists(restTemplate, "u3");
 			/* create users [u1, u2, u3]*/
 			Map<String, UserTO> umap = new HashMap<String, UserTO>();
 			umap.put("u1", postUser(restTemplate, new UserRequestTO("u1", "u1@u1.com", "u1")));
@@ -75,6 +78,8 @@ public class GameServiceClient {
 			for(UserTO buddy:buddies.getBuddies()){
 				System.out.println("buddy:"+buddy.getUsername());
 			}
+			
+			checkVendorExists(restTemplate, "v1", "u1", "u1");
 			/* create vendors [(v1,u1), (v2,u1), (v3,u3)]*/
 			Map<String, VendorTO> vmap = new HashMap<String, VendorTO>();
 			vmap.put("v1-u1", postVendor(restTemplate, new VendorRequestTO("v1-u1"), "u1", "u1"));			
@@ -84,10 +89,12 @@ public class GameServiceClient {
 			/* create games [(g10-g12,v1,u1)(g20-g22,v2,u1)(g30-g32,v3,u3)] */
 			Map<String, GameTO> gmap = new HashMap<String, GameTO>();
 			for(int i=0; i<3; i++) {
-				gmap.put("g1"+i+"-v1-u1", postGame(restTemplate, 
+			    String name = "g1"+i+"-v1-u1";
+			    checkGameExists(restTemplate, name, "u1", "u1");
+				gmap.put(name, postGame(restTemplate, 
 					new GameRequestTO( 
-							"g1"+i+"-v1-u1", 
-							"g1"+i+"-v1-u1.us.world",
+							name, 
+							name+".us.world",
 							vmap.get("v1-u1").getId(),
 							1,
 							3,
@@ -246,6 +253,17 @@ public class GameServiceClient {
 		
 		
 		
+        public static BooleanResponse checkUserExists(RestTemplate rest, String username) {
+            HttpEntity<String> entity = prepareJsonGet();
+            ResponseEntity<BooleanResponse> response = rest.exchange(
+                    GS_ENDPOINT+"/user/exists?username={username}", HttpMethod.GET, 
+                    entity, BooleanResponse.class, username);
+            
+            BooleanResponse output = response.getBody();
+            System.out.println("user: " + username + ", exists:" + output.isValue());
+            return output;
+        }
+        
 		public static UserTO postUser(RestTemplate rest, UserRequestTO input) {
 			HttpEntity<UserRequestTO> entity = prepareJsonRequest(input);//new HttpEntity<UserTO>(input);
 			ResponseEntity<UserTO> response = rest.postForEntity(
@@ -261,7 +279,7 @@ public class GameServiceClient {
 			HttpEntity<BuddyInvitationRequestTO> entity = prepareJsonRequest(input, true, username, password);
 			//	entity.
 				ResponseEntity<BuddyInvitationTO> response = rest.postForEntity(
-						GS_ENDPOINT+"/user/"+userId+"/invitation", 
+						GS_ENDPOINT+"/user/invitation", 
 						entity, BuddyInvitationTO.class);
 				
 				BuddyInvitationTO output = response.getBody();
@@ -270,9 +288,9 @@ public class GameServiceClient {
 		}
 		
 		public static BuddyInvitationListTO getBuddyListReceivedInvitations(RestTemplate rest, Long userId, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<BuddyInvitationListTO> response = rest.exchange(
-					GS_ENDPOINT+"/user/"+userId+"/invitation?type=RECEIVED", HttpMethod.GET, entity, BuddyInvitationListTO.class);
+					GS_ENDPOINT+"/user/invitation?type=RECEIVED", HttpMethod.GET, entity, BuddyInvitationListTO.class);
 			
 			BuddyInvitationListTO output = response.getBody();
 			System.out.println("Number of Buddy List invitations received: " + output.getInvitations().size());
@@ -285,7 +303,7 @@ public class GameServiceClient {
 			HttpEntity<UpdateInvitationStatusRequestTO> entity = prepareJsonRequest(input, true, username, password);
 			//	entity.
 				ResponseEntity<BuddyInvitationTO> response = rest.exchange(
-						GS_ENDPOINT+"/user/"+userId+"/invitation/"+invitationId, HttpMethod.PUT,
+						GS_ENDPOINT+"/user/invitation/"+invitationId, HttpMethod.PUT,
 						entity, BuddyInvitationTO.class);
 				
 				BuddyInvitationTO output = response.getBody();
@@ -295,9 +313,9 @@ public class GameServiceClient {
 		
 		//
 		public static UserBuddiesTO getBuddyList(RestTemplate rest, Long userId, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<UserBuddiesTO> response = rest.exchange(
-					GS_ENDPOINT+"/user/"+userId+"/buddy-list", HttpMethod.GET, entity, UserBuddiesTO.class);
+					GS_ENDPOINT+"/user/buddy-list", HttpMethod.GET, entity, UserBuddiesTO.class);
 			
 			UserBuddiesTO output = response.getBody();
 			System.out.println("Got Buddy List for user:" + output.getUser().getUsername()+". size:"+output.getBuddies().size());
@@ -305,6 +323,17 @@ public class GameServiceClient {
 			
 		}
 		
+        public static BooleanResponse checkVendorExists(RestTemplate rest, String name, String username, String password) {
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            ResponseEntity<BooleanResponse> response = rest.exchange(
+                    GS_ENDPOINT+"/vendor/exists?name={name}", HttpMethod.GET,
+                    entity, BooleanResponse.class, name);
+            
+            BooleanResponse output = response.getBody();
+            System.out.println("vendor: " + name + ", exists:" + output.isValue());
+            return output;
+        }
+        
 		public static VendorTO postVendor(RestTemplate rest, VendorRequestTO input, String username, String password) {
 			HttpEntity<VendorRequestTO> entity = prepareJsonRequest(input, true, username, password);
 		//	entity.
@@ -318,6 +347,17 @@ public class GameServiceClient {
 			
 		}
 		
+        public static BooleanResponse checkGameExists(RestTemplate rest, String name, String username, String password) {
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            ResponseEntity<BooleanResponse> response = rest.exchange(
+                    GS_ENDPOINT+"/game/exists?name={name}", HttpMethod.GET,
+                    entity, BooleanResponse.class, name);
+            
+            BooleanResponse output = response.getBody();
+            System.out.println("game: " + name + ", exists:" + output.isValue());
+            return output;
+        }
+        
 		public static GameTO postGame(RestTemplate rest, GameRequestTO input, String username, String password) {
 			HttpEntity<GameRequestTO> entity = prepareJsonRequest(input, true, username, password);
 		//	entity.
@@ -409,7 +449,7 @@ public class GameServiceClient {
 		}
 
 		public static EventListTO getGameServiceEvents(RestTemplate rest, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<EventListTO> response = rest.exchange(
 					GS_ENDPOINT+"/gameplay/events", HttpMethod.GET, entity, EventListTO.class);
 			
@@ -420,7 +460,7 @@ public class GameServiceClient {
 		}
 		
 		public static GamePlayStateTO getGamePlayState(RestTemplate rest, Long sessionId, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<GamePlayStateTO> response = rest.exchange(
 					GS_ENDPOINT+"/gameplay/"+sessionId+"/state", HttpMethod.GET, entity, GamePlayStateTO.class);
 			
@@ -443,7 +483,7 @@ public class GameServiceClient {
 		}
 		
 		public static ScoreListTO getScore(RestTemplate rest, Long gameId, ScoreType st, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<ScoreListTO> response = rest.exchange(
 					GS_ENDPOINT+"/game/"+gameId+"/score?type={type}", HttpMethod.GET, entity, ScoreListTO.class, st.name());
 			
@@ -469,10 +509,16 @@ public class GameServiceClient {
 			return entity;
 		}
 		
-		private static HttpEntity<String> prepareJsonGet(boolean useBasicAuth, String username, String password) {
-            return new HttpEntity<String>(prepareJsonHeaders(useBasicAuth, username, password));
+		private static HttpEntity<String> prepareJsonGet() {
+            return new HttpEntity<String>(prepareJsonHeaders());
+        }
+		private static HttpEntity<String> prepareJsonGet(String username, String password) {
+            return new HttpEntity<String>(prepareJsonHeaders(true, username, password));
 		}
 		
+		private static HttpHeaders prepareJsonHeaders() {
+            return prepareJsonHeaders(false, null, null);
+        }
 		private static HttpHeaders prepareJsonHeaders(boolean useBasicAuth, String username, String password) {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);

@@ -36,8 +36,10 @@ import com.trickplay.gameservice.domain.BuddyListInvitation;
 import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.exception.GameServiceException;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.BuddyService;
 import com.trickplay.gameservice.service.UserService;
+import com.trickplay.gameservice.transferObj.BooleanResponse;
 import com.trickplay.gameservice.transferObj.BuddyInvitationListTO;
 import com.trickplay.gameservice.transferObj.BuddyInvitationRequestTO;
 import com.trickplay.gameservice.transferObj.BuddyInvitationTO;
@@ -152,30 +154,37 @@ public class UserController extends BaseController {
 		return SHOW_USER_VIEW;
 	}
 
-	@RequestMapping(value = { "/user/{id}/buddy-list" }, method = RequestMethod.GET)
+    @RequestMapping(value = { "/rest/user/exists" }, method = RequestMethod.GET)
+    public @ResponseBody BooleanResponse checkUserExists(@RequestParam(value="username", required=true) String username) {
+        if (null != userService.findByName(username))
+            return BooleanResponse.TRUE;
+        else
+            return BooleanResponse.FALSE;
+    }
+    
+	@RequestMapping(value = { "/user/buddy-list" }, method = RequestMethod.GET)
 	public String getBuddyList(@PathVariable("id") Long userid, Model model) {
 		model.addAttribute("invitation", new BuddyInvitationTO());
 		
-		return retrieveBuddyList(userid, model);
+		return retrieveBuddyList(model);
 	}
 	
-	public String retrieveBuddyList(Long userId, Model m) {
-		User u = userService.find(userId);
+	public String retrieveBuddyList(Model m) {
+		User u = userService.find(SecurityUtil.getPrincipal().getId());
 		m.addAttribute("buddies", new UserBuddiesTO(u));
 		return BUDDY_VIEW;
 	}
 
-	@RequestMapping(value = { "/rest/user/{id}/buddy-list" }, method = RequestMethod.GET)
-	public @ResponseBody UserBuddiesTO getBuddyListGeneric(@PathVariable("id") Long userid) {
-		User u = userService.find(userid);
+	@RequestMapping(value = { "/rest/user/buddy-list" }, method = RequestMethod.GET)
+	public @ResponseBody UserBuddiesTO getBuddyListGeneric() {
+		User u = userService.find(SecurityUtil.getPrincipal().getId());
 
 		return new UserBuddiesTO(u);
 	}
 	
-	@RequestMapping(value = { "/rest/user/{id}/invitation" }, method = RequestMethod.GET)
-	public @ResponseBody BuddyInvitationListTO getBuddyInvitationsGeneric(@PathVariable("id") Long userid, 
-			@RequestParam(value="type", required=false) String type) {
-		User u = userService.find(userid);
+	@RequestMapping(value = { "/rest/user/invitation" }, method = RequestMethod.GET)
+	public @ResponseBody BuddyInvitationListTO getBuddyInvitationsGeneric(@RequestParam(value="type", required=false) String type) {
+		User u = userService.find(SecurityUtil.getPrincipal().getId());
 		if ("RECEIVED".equalsIgnoreCase(type))
 			return new BuddyInvitationListTO(u.getInvitationsReceived());
 		else {
@@ -186,10 +195,9 @@ public class UserController extends BaseController {
 		}
 	}
 
-	@RequestMapping(value = { "/rest/user/{id}/invitation" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/rest/user/invitation" }, method = RequestMethod.POST)
 	public @ResponseBody
 	BuddyInvitationTO sendBuddyInvitationGeneric(
-			@PathVariable("id") Long userid,
 			@RequestBody BuddyInvitationRequestTO invitation) {
 
 		StringBuilder err = new StringBuilder();
@@ -211,26 +219,24 @@ public class UserController extends BaseController {
 		}
 
 		try {
-			return new BuddyInvitationTO(buddyService.sendInvitation(userid,
-					invitation.getRecipient()));
+			return new BuddyInvitationTO(buddyService.sendInvitation(invitation.getRecipient()));
 		} catch (Exception ex) {
 			throw new BaseControllerException(ex);
 		}
 
 	}
 
-	@RequestMapping(value = { "/user/{id}/invitation" }, method = RequestMethod.POST)
-	public String sendBuddyInvitation(@PathVariable("id") Long userid,
-			@ModelAttribute("invitation") @Valid BuddyInvitationRequestTO invitation,
+	@RequestMapping(value = { "/user/invitation" }, method = RequestMethod.POST)
+	public String sendBuddyInvitation(@ModelAttribute("invitation") @Valid BuddyInvitationRequestTO invitation,
 			BindingResult rs, Model model) {
 
 		if (rs.hasErrors()) {
-			retrieveBuddyList(userid, model);
+			retrieveBuddyList(model);
 			return BUDDY_VIEW;
 		}
 
 		try {
-			buddyService.sendInvitation(userid, invitation.getRecipient());
+			buddyService.sendInvitation(invitation.getRecipient());
 		} catch (GameServiceException ex) {
 			if (ex.getReason() == Reason.ALREADY_BUDDY) {
 				rs.reject("recipientAlreadyBuddy",
@@ -246,17 +252,16 @@ public class UserController extends BaseController {
 		}
 
 		if (rs.hasErrors()) {
-			retrieveBuddyList(userid, model);
+			retrieveBuddyList(model);
 			return BUDDY_VIEW;
 		}
 
-		return "redirect:/user/" + userid + "/buddy-list";
+		return "redirect:/user/buddy-list";
 	}
 
-	@RequestMapping(value = { "/rest/user/{id}/invitation/{invitationId}" }, method = RequestMethod.PUT)
+	@RequestMapping(value = { "/rest/user/invitation/{invitationId}" }, method = RequestMethod.PUT)
 	public @ResponseBody
-	BuddyInvitationTO processInvitationGeneric(@PathVariable("id") Long userid,
-			@PathVariable("invitationId") Long invitationId,
+	BuddyInvitationTO processInvitationGeneric(@PathVariable("invitationId") Long invitationId,
 			@RequestBody UpdateInvitationStatusRequestTO invitation, Model m) {
 
 		StringBuilder err = new StringBuilder();
@@ -275,21 +280,20 @@ public class UserController extends BaseController {
 		}
 
 		try {
-			return new BuddyInvitationTO(buddyService.updateInvitationStatus(userid, invitationId,
+			return new BuddyInvitationTO(buddyService.updateInvitationStatus(invitationId,
 					invitation.getStatus()));
 		} catch (Exception ex) {
 			throw new BaseControllerException(ex);
 		}
 	}
 
-	@RequestMapping(value = { "/user/{id}/invitation/{invitationId}" }, method = RequestMethod.POST)
-	public String processInvitation(@PathVariable("id") Long userid,
-			@PathVariable("invitationId") Long invitationId,
+	@RequestMapping(value = { "/user/invitation/{invitationId}" }, method = RequestMethod.POST)
+	public String processInvitation(@PathVariable("invitationId") Long invitationId,
 			@ModelAttribute("invitation") BuddyInvitationTO invitation,
 			BindingResult rs, Model model) {
 
 		try {
-			buddyService.updateInvitationStatus(userid, invitationId,
+			buddyService.updateInvitationStatus(invitationId,
 					invitation.getStatus());
 		} catch (Exception ex) {
 			rs.reject("processInvitationFailed",
@@ -297,10 +301,10 @@ public class UserController extends BaseController {
 		}
 
 		if (rs.hasErrors()) {
-			retrieveBuddyList(userid, model);
+			retrieveBuddyList(model);
 			return BUDDY_VIEW;
 		}
-		return "redirect:/user/" + userid + "/buddy-list";
+		return "redirect:/user/buddy-list";
 	}
 
 	private void autoLogin(HttpServletRequest request,
@@ -322,21 +326,19 @@ public class UserController extends BaseController {
 		}
 	}
 
-	@RequestMapping(value = { "/user/{id}/device" }, method = RequestMethod.POST)
-	public String registerDevice(@PathVariable("id") Long userId,
-			@ModelAttribute("device") @Valid DeviceRequestTO deviceRequest, BindingResult rs) {
+	@RequestMapping(value = { "/user/device" }, method = RequestMethod.POST)
+	public String registerDevice(@ModelAttribute("device") @Valid DeviceRequestTO deviceRequest, BindingResult rs) {
 
 		if (rs.hasErrors()) {
 			return "device/create";
 		}
 		userService.registerDevice(deviceRequest.toDevice());
-		return "redirect:/user/" + userId + "/device";
+		return "redirect:/user/device";
 	}
 
-	@RequestMapping(value = { "/rest/user/{id}/device" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/rest/user/device" }, method = RequestMethod.POST)
 	public @ResponseBody
-	DeviceTO registerDeviceGeneric(@PathVariable("id") Long userId,
-			@RequestBody DeviceRequestTO deviceRequest) {
+	DeviceTO registerDeviceGeneric(@RequestBody DeviceRequestTO deviceRequest) {
 		boolean hasErrors = false;
 		StringBuilder err = new StringBuilder();
 		for (ConstraintViolation<DeviceRequestTO> constraint : validator

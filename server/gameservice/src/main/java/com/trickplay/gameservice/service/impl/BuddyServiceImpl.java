@@ -40,12 +40,12 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 	}
 	
 	@Transactional
-	public BuddyListInvitation sendInvitation(Long requestorId, String recipientName)
+	public BuddyListInvitation sendInvitation(String recipientName)
 			throws GameServiceException {
 
 		// check if recipient is already a buddy
 		try {
-			User requestor = userService.find(requestorId);
+			User requestor = userService.find(SecurityUtil.getPrincipal().getId());
 			authorizeSendInvitation(requestor);
 			
 			User recipient = userService.findByName(recipientName);
@@ -112,7 +112,7 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 	}
 
 	@Transactional
-	public BuddyListInvitation updateInvitationStatus(Long userId, Long invitationId,
+	public BuddyListInvitation updateInvitationStatus(Long invitationId,
 			InvitationStatus newStatus) {
 		if (invitationId == null) {
 			throw new IllegalArgumentException(

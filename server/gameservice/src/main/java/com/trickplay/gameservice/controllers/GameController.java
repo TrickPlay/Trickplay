@@ -32,6 +32,7 @@ import com.trickplay.gameservice.transferObj.GameRequestTO;
 import com.trickplay.gameservice.transferObj.GameTO;
 import com.trickplay.gameservice.transferObj.ScoreFilterTO;
 import com.trickplay.gameservice.transferObj.ScoreFilterTO.ScoreType;
+import com.trickplay.gameservice.transferObj.BooleanResponse;
 import com.trickplay.gameservice.transferObj.ScoreListTO;
 import com.trickplay.gameservice.transferObj.ScoreRequestTO;
 import com.trickplay.gameservice.transferObj.ScoreTO;
@@ -91,6 +92,14 @@ public class GameController extends BaseController {
 		return "game/list";
 	}
 
+	@RequestMapping(value = {"/rest/game/exists"}, method = RequestMethod.GET)
+    public @ResponseBody BooleanResponse checkGameExists(@RequestParam(value="name", required=true) String name) {
+        if (null != gameService.findByName(name))
+            return BooleanResponse.TRUE;
+        else
+            return BooleanResponse.FALSE;
+    }
+	
 	@RequestMapping(value = {"/vendor/{vid}/game", "/rest/vendor/{vid}/game"}, method = RequestMethod.GET)
 	public String getVendorGames(@PathVariable("vid") Long vid, Model model) {
 		Vendor v = vendorService.find(vid);

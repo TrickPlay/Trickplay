@@ -191,6 +191,8 @@
 					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
 				<security:intercept-url pattern="/rest/user"
 					method="POST" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_ADMIN" />
+				<security:intercept-url pattern="/rest/user/exists"
+                    method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
 				<security:intercept-url pattern="/user"
 					method="POST" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_ADMIN" />
 				<security:intercept-url pattern="/user/form"
