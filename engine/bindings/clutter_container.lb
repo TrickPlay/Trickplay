@@ -58,7 +58,7 @@ interface container [[ClutterActor*]]
 		
 		When setting the children property, any UIElements already in the Container are first removed. To clear all objects from the Container, set the children property to an empty table or call the <clear> function. (Note: Calling the clear() function will provide the best performance.)  To add UIElements to the Container without clearing it, use the <add> function.
 		
-		The order of the UIElements in the table defines their Z-order, i.e., their order along the Z-axis, within the Container.
+		The order of the UIElements in the table defines their Z-order, i.e., their order along the Z-axis, within the Container. The first entry in the table will be behind the other elements; the last table entry will be in the very front.
 		
 		When iterating through a Container's children, best performance will be achieved by retrieving the property's table a single time, storing the returned table in a local variable, and then accessing individual UIElement objects from the local variable. This technique is preferred over accessing each object from the children table directly. The two techniques are demonstrated in the Code Example below.
 		
@@ -122,7 +122,7 @@ interface container [[ClutterActor*]]
     /*
 		Function: add
 	
-		The add() function adds one or more UIElement objects to the Container; the add() function accepts any number of arguments. The order that UIElements are added to a Container defines their Z-order, i.e., their order along the Z-axis, within the Container.
+		The add() function adds one or more UIElement objects to the Container; the add() function accepts any number of arguments. The order that UIElements are added to a Container defines their Z-order, i.e., their order along the Z-axis, within the Container. When multiple elements occupy the same position on the Z-axis, their order is determined by when they were added to the Container; between any two elements, the more-recently-added element is placed in front.
 		
 		When a UIElement is stored in a Container, the Container is the parent of the element.
 		
