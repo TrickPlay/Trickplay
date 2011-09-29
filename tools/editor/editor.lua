@@ -3467,12 +3467,83 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 	editor_use = false
 	
+	local prev_file_info 
+
+	local correct_main = function (str) 
+
+		local main = readfile("main.lua")
+		if not main then return end 
+
+		local fileUpper= string.upper(string.sub(str, 1, -5))
+
+
+		--[=[ check if there is prev backup 
+
+		local x,y = string.find(main, "--[[\n\n"..fileUpper.." SECTION") 
+		local n,m = string.find(main, "-- END "..fileUpper.." SECTION\n\n]]--\n\n")
+		if x and m then 
+			local main_first, main_last
+			main_first = string.sub(main, 1, x-1)
+			main_last = string.sub(main, m+1, -1)
+			main = ""
+			main = main_first..main_last
+			editor_lb:writefile("main.lua",main, true)
+		end 
+
+		]=]--
+
+		local a, b = string.find(main, "-- "..fileUpper.." SECTION") 
+		local q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+
+		if a and w then 
+			local main_first, main_last
+			main_first = string.sub(main, 1, a-1)
+			main_last = string.sub(main, w+1, -1)
+			--prev_file_info = string.sub(main, a, w)
+
+			main = ""
+
+			main = main_first..main_last
+			editor_lb:writefile("main.lua",main, true)
+		else 
+			return 
+		end 
+	end 
+
+		
+	local correct_main2 = function (str) 
+
+		local main = readfile("main.lua")
+		if not main then return end 
+
+	   	local fileUpper= string.upper(string.sub(str, 1, -5))
+
+		local a, b = string.find(main, "-- "..fileUpper.." SECTION") 
+		local q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+
+		if a and w then 
+			local main_first, main_last
+			main_first = string.sub(main, 1, w)
+			main_last = string.sub(main, w+1, -1)
+
+			main = ""
+
+			main = main_first.."--[[\n\n"..prev_file_info.."]]--\n\n"..main_last
+
+			editor_lb:writefile("main.lua",main, true)
+		else 
+			return 
+		end 
+
+	end 
+
 
 	-- Button Event Handlers
 	if Cancel_label ~= "" then 
 		button_cancel.on_press = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
 	end 
-	button_ok.on_press = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
+	button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  xbox:on_button_down() end
+	--button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  if error_num == "004" then correct_main2(str) end xbox:on_button_down() end
 
 	if func_nok then 
 		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok"}
