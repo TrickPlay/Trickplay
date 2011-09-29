@@ -93,7 +93,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   	gen_stub_code = function(grp) 
 	 
 			if new_contents == nil then 	
-				new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
+				new_contents="-- "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
 			end
 
 			for i, j in pairs (grp.children) do 
