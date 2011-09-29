@@ -3467,7 +3467,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 	editor_use = false
 	
-	local prev_file_info 
+	local prev_file_info = ""
+	local prev_backup_info = ""
 
 	local correct_main = function (str) 
 
@@ -3477,20 +3478,24 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		local fileUpper= string.upper(string.sub(str, 1, -5))
 
 
-		--[=[ check if there is prev backup 
+		local x,y = string.find(main, "--[=[\n\n-- "..fileUpper.." SECTION", 1,true) 
+		local n,m = string.find(main, "-- END "..fileUpper.." SECTION\n\n]=]--\n\n", 1, true)
 
-		local x,y = string.find(main, "--[[\n\n"..fileUpper.." SECTION") 
-		local n,m = string.find(main, "-- END "..fileUpper.." SECTION\n\n]]--\n\n")
-		if x and m then 
+		while x and m do 
+
 			local main_first, main_last
 			main_first = string.sub(main, 1, x-1)
+			prev_backup_info = prev_backup_info..string.sub(main, x, m)
 			main_last = string.sub(main, m+1, -1)
+
 			main = ""
 			main = main_first..main_last
-			editor_lb:writefile("main.lua",main, true)
+
+			x,y = string.find(main, "--[=[\n\n-- "..fileUpper.." SECTION", 1,true) 
+			n,m = string.find(main, "-- END "..fileUpper.." SECTION\n\n]=]--\n\n", 1, true)
 		end 
 
-		]=]--
+		editor_lb:writefile("main.lua",main, true)
 
 		local a, b = string.find(main, "-- "..fileUpper.." SECTION") 
 		local q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
@@ -3498,8 +3503,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		if a and w then 
 			local main_first, main_last
 			main_first = string.sub(main, 1, a-1)
+			prev_file_info = string.sub(main, a, w)
 			main_last = string.sub(main, w+1, -1)
-			--prev_file_info = string.sub(main, a, w)
 
 			main = ""
 
@@ -3528,7 +3533,13 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 
 			main = ""
 
-			main = main_first.."--[[\n\n"..prev_file_info.."]]--\n\n"..main_last
+			main = main_first.."--[=[\n\n"..prev_file_info.."]=]--\n\n"..prev_backup_info..main_last
+
+			--print("PREV FILE\n", prev_file_info, "\n-------------")
+			--print("PREV BACKUP\n", prev_backup_info, "\n-------------")
+			
+			prev_file_info = ""
+			prev_backup_info = ""
 
 			editor_lb:writefile("main.lua",main, true)
 		else 
@@ -3542,8 +3553,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	if Cancel_label ~= "" then 
 		button_cancel.on_press = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
 	end 
-	button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  xbox:on_button_down() end
-	--button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  if error_num == "004" then correct_main2(str) end xbox:on_button_down() end
+	--button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  xbox:on_button_down() end
+	button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  if error_num == "004" then correct_main2(str) end xbox:on_button_down() end
 
 	if func_nok then 
 		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok"}
