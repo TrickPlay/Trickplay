@@ -202,7 +202,6 @@ end
 
 -- main --
 test_list = load_test_list ()
-dumptable(test_list)
 do_test (test_list)
 
 
