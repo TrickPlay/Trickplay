@@ -12,13 +12,13 @@
 -- Test package location
 local test_resolution = screen.display_size[2]
 print ("test_resolution =", test_resolution)
-local test_folder = "smoke_tests_ubuntu"
-local test_list_file = "smoke_tests_ubuntu_"..test_resolution..".txt"
+local test_folder = "all_tests_ubuntu"
+local test_list_file = "all_tests_ubuntu_"..test_resolution..".txt"
 
 -- Options to run one test, all tests or just the last 2
 local automation_option_choices = { all_tests = 1, specific_test = 2, last_two_tests = 3 }
 local automation_option = 1
-local test_to_run = 1 -- if automation_option == 2
+local test_to_run = 68 -- if automation_option == 2
 
 -- if option 2 then it prints test results in a JSON formatted table to be copied and pasted into
 -- the package file. 
@@ -40,8 +40,9 @@ local dump_screensum = {}
 -- load and parse the test file into a table.
 function load_test_list ()
 	local loaded_test_list = {}
-	
+	print (test_list_file)
 	local tests_file_string = readfile ("packages/test_package_lists/"..test_list_file)
+	
 	local all_tests = json:parse(tests_file_string)
 
 
@@ -84,7 +85,7 @@ function do_test (tests)
 		total = total + seconds
 		
 		-- clean up all objects and garbage collect
-		if total >= test_interval + last_total - 0.015 and view_generated == true and checksum_done == true  then
+		if total >= test_interval + last_total - 0.15 and view_generated == true and checksum_done == true  then
 			--print (total)
 			--print ("clean up")
 			screen:remove(g)
@@ -145,7 +146,7 @@ function do_test (tests)
 
 
 		-- do a checksum and compare to master then save results in a table.
-		if total >= test_interval + last_total + 0.1 then
+		if total >= test_interval + last_total + 0.2 then
 			--print (total)
 			--print ("do checksum compare")
 			if test_active == "true" then	

@@ -211,67 +211,67 @@
 },
 {
 "name": "00043_text_color.lua",
-"checksum": "7f1609ede5da7a61102a6177406a2f6f",
+"checksum": "98aab605336ca45d4eeeab4900cce7bd",
 "active": "true"
 },
 {
 "name": "00044_text_font_1.lua",
-"checksum": "1ee0dbb4ae50546b15e038a177a127b6",
+"checksum": "208a9f5ffee5e83e8cbccbfb618653a1",
 "active": "true"
 },
 {
 "name": "00045_text_font_2.lua",
-"checksum": "fa03dea0ad917656d5e78d86a476717b",
+"checksum": "d4f0bd2c938f24c86fa062c71a0ea319",
 "active": "true"
 },
 {
 "name": "00046_text_font_3.lua",
-"checksum": "006d79cdc85ca3022203b709b5001b6f",
+"checksum": "be47181456bd1a38a6da27f87caf4442",
 "active": "true"
 },
 {
 "name": "00047_text_justify.lua",
-"checksum": "501bc0c6dce1d8d304cdb12201e92e41",
+"checksum": "3920f2bd893cd6e18f4f3455ec04d389",
 "active": "true"
 },
 {
 "name": "00048_text_wrap.lua",
-"checksum": "36b3b7d283fc28acf0305c90c8f34130",
+"checksum": "079f8ad6b4545016392b41106591b174",
 "active": "true"
 },
 {
 "name": "00049_text_use_markup.lua",
-"checksum": "a6f756986204ff6b08865f52152aadb6",
+"checksum": "78247f4ad4dd1123442b9a739bd2cda0",
 "active": "true"
 },
 {
 "name": "00050_text_ellipsize.lua",
-"checksum": "90e8ef83fc9546a761dae545e541467e",
+"checksum": "c56c1f48092942169f9db7c8a90f43c5",
 "active": "true"
 },
 {
 "name": "00051_text_alignment.lua",
-"checksum": "41827ad6595662d714774e3d89f026db",
+"checksum": "99127908c2547ca0b8b133d063674059",
 "active": "true"
 },
 {
 "name": "00052_text_max_length.lua",
-"checksum": "b688ff224b8f73f541ac569db3662a29",
+"checksum": "3fd7d29d638e289a137200e899c9d49a",
 "active": "true"
 },
 {
 "name": "00054_text_single_line.lua",
-"checksum": "ea1df17c5b8a95875074b27288f3ba5c",
+"checksum": "ad1f4821df350fc3093da47de7e80cd1",
 "active": "true"
 },
 {
 "name": "00056_text_password_char.lua",
-"checksum": "6b51e9b87e79693bd8980eef18a3ae78",
+"checksum": "df0c6c9a92957ede8ca6398694c0aa4a",
 "active": "true"
 },
 {
 "name": "00057_text_on_text_changed.lua",
-"checksum": "4a40666c7e3f8cb172c48f3fd1a44bc2",
+"checksum": "65b391a799f51b739bffe7526fc315e1",
 "active": "true"
 },
 {
@@ -362,6 +362,81 @@
 {
 "name": "00075_container_lower.lua",
 "checksum": "cf811e65d46a85d96ba188cccb1240ca",
+"active": "true"
+},
+{
+"name": "00076_text_font_3_jp_fonts.lua",
+"checksum": "18fc8be084de639d586c2491ddb59204",
+"active": "true"
+},
+{
+"name": "00077_html_markup.lua",
+"checksum": "c423b830c7e55f3c865d8018d7f2ee70",
+"active": "true"
+},
+{
+"name": "10001_rectangle_border_width.lua",
+"checksum": "113901a06a36db30aafe879dad2718d7",
+"active": "true"
+},
+{
+"name": "10002_rectangle_border_color.lua",
+"checksum": "132662f31a98909292adc93eb3439428",
+"active": "true"
+},
+{
+"name": "10003_canvas_line_width.lua",
+"checksum": "bab9edfc0d53addb9c57c04cc62a31be",
+"active": "true"
+},
+{
+"name": "10004_canvas_translate.lua",
+"checksum": "966f20decaa36da43b035397bdb6fc85",
+"active": "true"
+},
+{
+"name": "10005_canvas_translate.lua",
+"checksum": "6c93dcd2bc7396e8483db413c2ce116a",
+"active": "true"
+},
+{
+"name": "10006_canvas_rotate.lua",
+"checksum": "73d9da14823daea7bc6d5cacd9c50e44",
+"active": "true"
+},
+{
+"name": "10007_canvas_rotate.lua",
+"checksum": "6bc338f1af55124fd8ef982ddf9b8fb4",
+"active": "true"
+},
+{
+"name": "10008_canvas_arc.lua",
+"checksum": "39d013d3b7912c26fcfdfbc6966191b8",
+"active": "true"
+},
+{
+"name": "10009_canvas_curve_to.lua",
+"checksum": "b479720a7c8f2cb11367efb334ba71aa",
+"active": "true"
+},
+{
+"name": "10010_canvas_round_rectangle.lua",
+"checksum": "1a32d5ff2948676337ff04339fdc0834",
+"active": "true"
+},
+{
+"name": "10011_canvas_set_source_radial_pattern.lua",
+"checksum": "07059236b2db6fcf8bc67d08bb190a0d",
+"active": "true"
+},
+{
+"name": "10012_canvas_set_source_linear_pattern.lua",
+"checksum": "2dc2f3cfde6cef5e2009fdef5cb7473f",
+"active": "true"
+},
+{
+"name": "10013_canvas_arc_negative.lua",
+"checksum": "bb77d9475a8f6b2cec031e4a49434c20",
 "active": "true"
 }
 ]
