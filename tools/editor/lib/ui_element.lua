@@ -2473,7 +2473,7 @@ function ui_element.toastAlert(t)
      end  
 
      function tb_group_timeline.on_completed()
-		tb_group.scale = {0.8, 0.8}
+		tb_group.scale = {1.0, 1.0} 
 		tb_group.opacity = 255
 		tb_group:hide()
      end 
@@ -2484,7 +2484,6 @@ function ui_element.toastAlert(t)
      end 
 
      function tb_group.extra.popup() 
-		tb_group.scale = {1.0, 1.0}
 	 	tb_group:show()
 		tb_group_timer:start()
      end 
