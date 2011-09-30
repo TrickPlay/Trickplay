@@ -16,7 +16,7 @@ function generate_test_image ()
 			position = { 30, screen.h/6},
 		   },
 		   Text {
-			text = "Small jpg\n240x160",
+		--	text = "Small jpg\n240x160",
 			position = { 30, screen.h/6 + 180},
 			color = "000000",
 			font = "DejaVu Sans 40px"
@@ -26,7 +26,7 @@ function generate_test_image ()
 			position = { 300, screen.h/6},
 		   },
 		   Text {
-			text = "Medium progressive jpg\n640x420",
+		--	text = "Medium progressive jpg\n640x420",
 			position = { 300, screen.h/6 + 460},
 			color = "000000",
 			font = "DejaVu Sans 40px"
@@ -37,7 +37,7 @@ function generate_test_image ()
 			scale = {0.3, 0.3 }
 		   },
 		   Text {
-			text = "Large jpg scaled down\n3000x2000",
+		--	text = "Large jpg scaled down\n3000x2000",
 			position = { screen.w/8 * 4, screen.h/6 + 600},
 			color = "000000",
 			font = "DejaVu Sans 40px"

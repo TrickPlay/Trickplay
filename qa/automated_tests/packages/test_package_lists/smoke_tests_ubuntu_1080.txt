@@ -1,0 +1,368 @@
+[
+{
+"name": "00001_rectangle_basic.lua",
+"checksum": "4fd609a17f9b5347952e76051b2a9394",
+"active": "true"
+},
+{
+"name": "00002_canvas_line_width.lua",
+"checksum": "45a45b24a00b12d0036ab977ed31e7e9",
+"active": "true"
+},
+{
+"name": "00003_canvas_miter_limit.lua",
+"checksum": "fa1ed21292d681e23c35341dedf620a4",
+"active": "true"
+},
+{
+"name": "00004_canvas_fill_rule.lua",
+"checksum": "e4341fa3c2c787e9065b467e15e24cae",
+"active": "true"
+},
+{
+"name": "00005_canvas_line_cap.lua",
+"checksum": "9ebd6636e0102af0f69b50b699138911",
+"active": "true"
+},
+{
+"name": "00006_canvas_line_join.lua",
+"checksum": "f7cd93baa3d2a0ee678c8360bc3a9474",
+"active": "true"
+},
+{
+"name": "00007_canvas_op_clear.lua",
+"checksum": "c49c790ad2c393c2c30c484efb936b72",
+"active": "true"
+},
+{
+"name": "00008_canvas_op_source.lua",
+"checksum": "e1860b6f8fa437282485e455858644a7",
+"active": "true"
+},
+{
+"name": "00009_canvas_op_over.lua",
+"checksum": "1f9d72e985f18a26324e99adbcad212f",
+"active": "true"
+},
+{
+"name": "00010_canvas_op_in.lua",
+"checksum": "cef349a19e49aa42bd05c3a652d87002",
+"active": "true"
+},
+{
+"name": "00011_canvas_op_out.lua",
+"checksum": "541f86a16152035233fe682a937d5e2e",
+"active": "true"
+},
+{
+"name": "00012_canvas_op_atop.lua",
+"checksum": "93b1bd1692fdce431ab40a876157e582",
+"active": "true"
+},
+{
+"name": "00013_canvas_op_dest.lua",
+"checksum": "28b1ee7754aa666aacb20ce0316f9cd4",
+"active": "true"
+},
+{
+"name": "00014_canvas_op_dest_over.lua",
+"checksum": "85770e1cf3b8b8da48314fc9229bbd63",
+"active": "true"
+},
+{
+"name": "00015_canvas_op_dest_in.lua",
+"checksum": "a449f68c688ff196b427de32824e757d",
+"active": "true"
+},
+{
+"name": "00016_canvas_op_dest_out.lua",
+"checksum": "03872f222d5175eab4fed23772192c37",
+"active": "true"
+},
+{
+"name": "00017_canvas_op_dest_atop.lua",
+"checksum": "49f44f1c4fe0fbca4d16cafa46ceec00",
+"active": "true"
+},
+{
+"name": "00018_canvas_op_xor.lua",
+"checksum": "b047de6ae434204768b8bb1a12f580b9",
+"active": "true"
+},
+{
+"name": "00019_canvas_op_add.lua",
+"checksum": "3f4ac1241d7067dadb34d8ceb95f8989",
+"active": "true"
+},
+{
+"name": "00020_canvas_op_saturate.lua",
+"checksum": "69917a3b5d2998e9252f318eb850996d",
+"active": "true"
+},
+{
+"name": "00021_canvas_set_dash.lua",
+"checksum": "b1b887f0740acfa47a17a0dba740b53f",
+"active": "true"
+},
+{
+"name": "00022_canvas_save_restore.lua",
+"checksum": "28b1ee7754aa666aacb20ce0316f9cd4",
+"active": "true"
+},
+{
+"name": "00023_canvas_translate.lua",
+"checksum": "0ad559a32e47d8dad6a3047a6146a7cd",
+"active": "true"
+},
+{
+"name": "00024_canvas_rotate.lua",
+"checksum": "b44e5beb0b7f7276ffc977ada2ae74ca",
+"active": "true"
+},
+{
+"name": "00025_canvas_arc.lua",
+"checksum": "8436326af97903a89850ab0836981563",
+"active": "true"
+},
+{
+"name": "00026_canvas_arc.lua",
+"checksum": "1c5c27ad69fc69fdcfaea562d7af3e9b",
+"active": "true"
+},
+{
+"name": "00027_canvas_clip.lua",
+"checksum": "83350b43343789f91bb2c0e57ff6c792",
+"active": "true"
+},
+{
+"name": "00028_canvas_curve_to.lua",
+"checksum": "7364c38f314a3999567a18c6642917b5",
+"active": "true"
+},
+{
+"name": "00029_canvas_reset_clip.lua",
+"checksum": "0b80d897056bb350c74525083ae4a553",
+"active": "true"
+},
+{
+"name": "00030_canvas_round_rectangle.lua",
+"checksum": "9b707f7610793d3f87c1a19edd9ee66d",
+"active": "true"
+},
+{
+"name": "00031_canvas_set_source_linear_pattern.lua",
+"checksum": "37844cb0fc5300d940c6e784b7aeb4ef",
+"active": "true"
+},
+{
+"name": "00032_canvas_set_source_radial_pattern.lua",
+"checksum": "025ce0dd00486dae83dc03b2cf247d84",
+"active": "true"
+},
+{
+"name": "00033_uielement_properties_basic.lua",
+"checksum": "b3d447729e9e747c920a2de3775ab6d1",
+"active": "true"
+},
+{
+"name": "00034_uielement_anchor_point.lua",
+"checksum": "e5eee7873d8bc190c14a850090d2bba2",
+"active": "true"
+},
+{
+"name": "00035_uielement_scale.lua",
+"checksum": "a1ab554eb078ae852fffd95ec7f0f95d",
+"active": "true"
+},
+{
+"name": "00036_uielement_x_rotation.lua",
+"checksum": "228b5b4d1801ed00b43528d33381fdb7",
+"active": "true"
+},
+{
+"name": "00037_uielement_y_rotation.lua",
+"checksum": "08d71d2547bf775dd963477ac0bd4bf0",
+"active": "true"
+},
+{
+"name": "00038_uielement_z_rotation.lua",
+"checksum": "72473e1c9ee06e9918a3b44c11a7d512",
+"active": "true"
+},
+{
+"name": "00039_uielement_opacity.lua",
+"checksum": "1d2329d7e07a633456b4aebcb5012668",
+"active": "true"
+},
+{
+"name": "00040_uielement_clip.lua",
+"checksum": "a3051042291758f833f0e8e67807a173",
+"active": "true"
+},
+{
+"name": "00041_uielement_set_source_bitmap.lua",
+"checksum": "2c97f81a4d6cab26523f55f2642b5e29",
+"active": "true"
+},
+{
+"name": "00042_canvas_gradients.lua",
+"checksum": "efde17e217efa4dee4f7cb9aa699fbbd",
+"active": "true"
+},
+{
+"name": "00043_text_color.lua",
+"checksum": "d2b6b48333d646e54c2dd15b4c351106",
+"active": "true"
+},
+{
+"name": "00044_text_font_1.lua",
+"checksum": "cb2641fbb15b13cb504ff4c39c75ed79",
+"active": "true"
+},
+{
+"name": "00045_text_font_2.lua",
+"checksum": "834168a3b0c758629f8dc3fd99ba7325",
+"active": "true"
+},
+{
+"name": "00046_text_font_3.lua",
+"checksum": "d4cc7408d97afee497f7e319d1c5a15b",
+"active": "true"
+},
+{
+"name": "00047_text_justify.lua",
+"checksum": "429d27ae288d97098ae743f320cede61",
+"active": "true"
+},
+{
+"name": "00048_text_wrap.lua",
+"checksum": "036aed7c90c74d3e9fcde79732d05853",
+"active": "true"
+},
+{
+"name": "00049_text_use_markup.lua",
+"checksum": "e30a1a068aefd26692e5d73f6c2264ce",
+"active": "true"
+},
+{
+"name": "00050_text_ellipsize.lua",
+"checksum": "69e37ec5f227fbc76c156e2d00f1d602",
+"active": "true"
+},
+{
+"name": "00051_text_alignment.lua",
+"checksum": "b947802047750f208e7575a57658b50b",
+"active": "true"
+},
+{
+"name": "00052_text_max_length.lua",
+"checksum": "b624aa0eeb910ff5b4589c9e069f2942",
+"active": "true"
+},
+{
+"name": "00054_text_single_line.lua",
+"checksum": "1e406da9e88ef77e20a6061fcaf5366b",
+"active": "true"
+},
+{
+"name": "00056_text_password_char.lua",
+"checksum": "838a00ed038445412f903d6e00f0abbc",
+"active": "true"
+},
+{
+"name": "00057_text_on_text_changed.lua",
+"checksum": "4ac0763e1eaf21ba12d27df17e857ece",
+"active": "true"
+},
+{
+"name": "00058_image_gif.lua",
+"checksum": "1f9b4ddfdc7f2f6026ba89739c281583",
+"active": "true"
+},
+{
+"name": "00059_image_jpg.lua",
+"checksum": "673bcd7de77a4ca5b2c958399e1f7769",
+"active": "true"
+},
+{
+"name": "00060_image_png.lua",
+"checksum": "d5919d3ed76224fd516b845077479388",
+"active": "true"
+},
+{
+"name": "00061_image_tile.lua",
+"checksum": "c754d49fd55aa42561a0829ec5510fa7",
+"active": "true"
+},
+{
+"name": "00062_image_tile_sync.lua",
+"checksum": "54e139df3072d45b549812b32b56a15a",
+"active": "true"
+},
+{
+"name": "00063_image_src.lua",
+"checksum": "8c2a95770cd3330c65f8d292f2e9ae08",
+"active": "true"
+},
+{
+"name": "00064_bitmap_gif.lua",
+"checksum": "d7b721b1288324316129c046d3fc5e00",
+"active": "true"
+},
+{
+"name": "00065_bitmap_jpg.lua",
+"checksum": "19e8676bcf6d26ee83400abd95c65e79",
+"active": "true"
+},
+{
+"name": "00066_bitmap_png.lua",
+"checksum": "b90dc0157abd7c159bf7a1926c3763ec",
+"active": "true"
+},
+{
+"name": "00067_bitmap_src.lua",
+"checksum": "e196685aabaa684309cd87105254eac9",
+"active": "true"
+},
+{
+"name": "00068_bitmap_image.lua",
+"checksum": "3763da8c26f1783e5e2bc4bb8fc8a456",
+"active": "true"
+},
+{
+"name": "00069_container_add.lua",
+"checksum": "930cc5295da9eb90902a70be4983d8e9",
+"active": "true"
+},
+{
+"name": "00070_container_remove.lua",
+"checksum": "b679c18a58b5d8447a4a68e52dde875e",
+"active": "true"
+},
+{
+"name": "00071_container_clear.lua",
+"checksum": "c25c25ff361fb24fc35f6b120d2f252d",
+"active": "true"
+},
+{
+"name": "00072_container_for_each.lua",
+"checksum": "c25c25ff361fb24fc35f6b120d2f252d",
+"active": "true"
+},
+{
+"name": "00073_container_find_child.lua",
+"checksum": "39c6453312025e3f9964204092445e5a",
+"active": "true"
+},
+{
+"name": "00074_container_raise.lua",
+"checksum": "9259c90d24eb643efd9565cb2c00d656",
+"active": "true"
+},
+{
+"name": "00075_container_lower.lua",
+"checksum": "9259c90d24eb643efd9565cb2c00d656",
+"active": "true"
+}
+]
+

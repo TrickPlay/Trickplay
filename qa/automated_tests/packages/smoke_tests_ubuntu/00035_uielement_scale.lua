@@ -25,7 +25,7 @@ function generate_test_image ()
 			scale = {0.5, 0.5}
 		   },
 		Text {
-			text = "scale = { 0.5, 0.5 }",
+		--	text = "scale = { 0.5, 0.5 }",
 			font = "DejaVu Sans 30px",
 			position = {screen.w/6, 100},
 			color = "000000"
@@ -52,7 +52,7 @@ function generate_test_image ()
 			scale = {1, 0.5}
 		   },
 		Text {
-			text = "scale = {0.1, 0.1}",
+		--	text = "scale = {0.1, 0.1}",
 			x = screen.w/6 - 100,
 			y = screen.h/6 - 50,
 			font = "DejaVu Sans 40px"
@@ -72,7 +72,7 @@ function generate_test_image ()
 	local is_scaled_txt = Text()
 	is_scaled_txt.font="DejaVu Sans 30px"
 	is_scaled_txt.position={screen.w - 300, 100}
-	is_scaled_txt.text = "is_scaled ="..result
+	--is_scaled_txt.text = "is_scaled ="..result
 	is_scaled_txt.color = "000000"
 	g:add(is_scaled_txt)
 

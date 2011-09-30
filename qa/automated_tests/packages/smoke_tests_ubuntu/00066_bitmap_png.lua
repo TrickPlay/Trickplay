@@ -25,14 +25,14 @@ function generate_test_image ()
 	        children = {
 	           image1,
 		   Text {
-			text = "Small png\n240x320",
+		--	text = "Small png\n240x320",
 			position = { 30, screen.h/6 + 340},
 			color = "000000",
 			font = "DejaVu Sans 40px"
 		   },
 		   image2,
 		   Text {
-			text = "Medium layers png\n480x640",
+		--	text = "Medium layers png\n480x640",
 			position = { 300, screen.h/6 + 660},
 			color = "000000",
 			font = "DejaVu Sans 40px"

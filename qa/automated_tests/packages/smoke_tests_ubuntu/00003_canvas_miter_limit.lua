@@ -9,7 +9,7 @@ function generate_test_image ()
 	local test_image = Canvas (screen.w, screen.h)
 	 -- Text description
 	test_image:move_to (screen.w/5 - 100,screen.h/5 * 3)
-	test_image:text_path ("DejaVu 30px","Miter: Miter_limit = 1")
+	--test_image:text_path ("DejaVu 30px","Miter: Miter_limit = 1")
 	test_image:set_source_color ("FF0000")
 	test_image:fill()
 	-- Draw graphic
@@ -24,7 +24,7 @@ function generate_test_image ()
 	
 		 -- Text description
 	test_image:move_to (screen.w/5 * 3 - 100,screen.h/5 * 3)
-	test_image:text_path ("DejaVu 30px","Bevel: Miter_limit = 0")
+	--test_image:text_path ("DejaVu 30px","Bevel: Miter_limit = 0")
 	test_image:set_source_color ("FF0000")
 	test_image:fill()
 	-- Draw graphic

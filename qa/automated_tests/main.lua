@@ -10,8 +10,10 @@
 --
 
 -- Test package location
+local test_resolution = screen.display_size[2]
+print ("test_resolution =", test_resolution)
 local test_folder = "smoke_tests_ubuntu"
-local test_file = "smoke_tests_ubuntu.txt"
+local test_list_file = "smoke_tests_ubuntu_"..test_resolution..".txt"
 
 -- Options to run one test, all tests or just the last 2
 local automation_option_choices = { all_tests = 1, specific_test = 2, last_two_tests = 3 }
@@ -25,7 +27,7 @@ local console_display_option_choices = { test_results = 1, dump_screensum = 2 }
 local console_display_option = 2
 
 -- Time interval between tests
-local test_interval = 0.3
+local test_interval = 0.5
 
 -- Globals --
 local test_list
@@ -39,9 +41,9 @@ local dump_screensum = {}
 function load_test_list ()
 	local loaded_test_list = {}
 	
-	local tests_file_string = readfile ("packages/"..test_folder.."/"..test_file)
-	
+	local tests_file_string = readfile ("packages/test_package_lists/"..test_list_file)
 	local all_tests = json:parse(tests_file_string)
+
 
 	if automation_option == automation_option_choices["last_two_tests"] then
 		print ("Only running the last 2 tests...")
@@ -84,7 +86,7 @@ function do_test (tests)
 		-- clean up all objects and garbage collect
 		if total >= test_interval + last_total - 0.015 and view_generated == true and checksum_done == true  then
 			--print (total)
-			print ("clean up")
+			--print ("clean up")
 			screen:remove(g)
 			g = nil
 			screen:remove(image)
@@ -105,7 +107,7 @@ function do_test (tests)
 		-- Generate the view
 		if total >= test_interval + last_total - 0.01 and checksum_done == false and view_generated == false  then
 			--print (total)	
-			print ("generate view")
+			--print ("generate view")
 			filename = tests [i]["name"]
 			master_screensum = tests[i]["checksum"]
 			test_active = tests[i]["active"]
@@ -116,6 +118,7 @@ function do_test (tests)
 			background:rectangle (0, 0, screen.w, screen.h)
 			background:set_source_color ("FFFFFF")
 			background:fill()
+			-- Taking this text out as it's causing a lot of failures in the compare utility
 	--[[		background:move_to (screen.w/2 - 500, 50)
 			background:text_path ("DejaVu Sans 30px","Description: "..test_description)
 			background:move_to (100, 10)
@@ -134,7 +137,7 @@ function do_test (tests)
 			g = generate_test_image()
 			screen:add(g)
 			screen:show()
-			print (g)
+			--print (g)
 			
 			view_generated = true
 
@@ -144,23 +147,26 @@ function do_test (tests)
 		-- do a checksum and compare to master then save results in a table.
 		if total >= test_interval + last_total + 0.1 then
 			--print (total)
-			print ("do checksum compare")
+			--print ("do checksum compare")
 			if test_active == "true" then	
 				local screenshot = devtools:screenshot(string.sub(filename,1, (string.len(filename)-4)))
 				checksumValue = devtools:screensum()
-				print (checksumValue)
-				print (master_screensum)
+				
 				if checksumValue == master_screensum then
 					test_results[i] = "Pass"
 					pass_count = pass_count + 1
 				else
 					test_results[i] = "Fail"
 					fail_count = fail_count + 1
+					print (filename..": "..test_results[i])
+					print ("Generated checksum = \t",checksumValue)
+					print ("Master checksum = \t", master_screensum)					
+					print ("---------------------------------------------")
 				end
 			else
 				disabled_count = disabled_count + 1
 			end
-			print (filename..": "..test_results[i])
+			
 			table.insert (dump_screensum, {filename, checksumValue, test_active})
 			i = i + 1
 			last_total = total
@@ -188,7 +194,7 @@ function do_test (tests)
 			print( string.format( "NOT TESTED   %4d (%d%%)" , disabled_count , ( disabled_count / #test_list ) * 100 ) )
 			print( string.format( "TOTAL    	   %4d" , #test_list ) )
 			print( "" )
-			--exit()
+			exit()
 		end
 	end
 end
@@ -196,6 +202,7 @@ end
 
 -- main --
 test_list = load_test_list ()
+dumptable(test_list)
 do_test (test_list)
 
 

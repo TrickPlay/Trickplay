@@ -19,7 +19,7 @@ function generate_test_image ()
 			tile = { true, true }
 		   },
 		   Text {
-			text = "Small gif tiled",
+		--	text = "Small gif tiled",
 			position = { 980, screen.h - 50},
 			color = "000000",
 			font = "DejaVu Sans 40px"
@@ -32,7 +32,7 @@ function generate_test_image ()
 			tile = { true, true }
 		   },
 		   Text {
-			text = "Small png tiled",
+		--	text = "Small png tiled",
 			position = { 50, screen.h - 50},
 			color = "000000",
 			font = "DejaVu Sans 40px"
@@ -45,7 +45,7 @@ function generate_test_image ()
 			tile = { true, true }
 		   },
 		   Text {
-			text = "Small jpg tiled",
+		--	text = "Small jpg tiled",
 			position = { 980, screen.h/2 + 50},
 			color = "000000",
 			font = "DejaVu Sans 40px"
