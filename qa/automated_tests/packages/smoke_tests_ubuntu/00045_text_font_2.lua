@@ -17,18 +17,18 @@ function generate_test_image ()
 		"DejaVu Sans Condensed Oblique",
 		"DejaVu Sans Extra Light",
 		"DejaVu Sans Oblique",
-		"Dejavu Sans Mono",
-		"Dejavu Sans Mono Bold",
-		"Dejavu Sans Mono Bold Oblique",
-		"Dejavu Sans Mono Oblique",
-		"Dejavu Serif",
-		"Dejavu Serif Bold",
-		"Dejavu Serif Bold Italic",
-		"Dejavu Serif Condensed",
-		"Dejavu Serif Condensed Bold",
-		"Dejavu Serif Condensed Bold Italic",
-		"Dejavu Serif Condensed Italic",
-		"Dejavu Serif Italic"
+		"DejaVu Sans Mono",
+		"DejaVu Sans Mono Bold",
+		"DejaVu Sans Mono Bold Oblique",
+		"DejaVu Sans Mono Oblique",
+		"DejaVu Serif",
+		"DejaVu Serif Bold",
+		"DejaVu Serif Bold Italic",
+		"DejaVu Serif Condensed",
+		"DejaVu Serif Condensed Bold",
+		"DejaVu Serif Condensed Bold Italic",
+		"DejaVu Serif Condensed Italic",
+		"DejaVu Serif Italic"
 	}
 
 	local g = Group ()

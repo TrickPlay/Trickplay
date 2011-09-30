@@ -9,7 +9,7 @@ function generate_test_image ()
 	local test_image = Canvas (screen.w, screen.h)
 	-- Text description
 	test_image:move_to (screen.w/5 - 200,screen.h/5 * 3)
-	test_image:text_path ("DejaVu 30px","DEFAULT")
+	--test_image:text_path ("DejaVu 30px","DEFAULT")
 	test_image:set_source_color ("FF0000")
 	test_image:fill()
 	-- Draw graphic
@@ -22,7 +22,7 @@ function generate_test_image ()
 	
 		-- Text description
 	test_image:move_to (screen.w/5 * 2 - 100,screen.h/5 * 3)
-	test_image:text_path ("DejaVu 30px","ROUND")
+	--test_image:text_path ("DejaVu 30px","ROUND")
 	test_image:set_source_color ("FF0000")
 	test_image:fill()
 	-- Draw graphic
@@ -36,7 +36,7 @@ function generate_test_image ()
 	
 		-- Text description
 	test_image:move_to (screen.w/5 * 3 - 100,screen.h/5 * 3)
-	test_image:text_path ("DejaVu 30px","BEVEL")
+	--test_image:text_path ("DejaVu 30px","BEVEL")
 	test_image:set_source_color ("FF0000")
 	test_image:fill()
 	-- Draw graphic
@@ -50,7 +50,7 @@ function generate_test_image ()
 
 		-- Text description
 	test_image:move_to (screen.w/5 * 4 - 100,screen.h/5 * 3)
-	test_image:text_path ("DejaVu 30px","MITER")
+--	test_image:text_path ("DejaVu 30px","MITER")
 	test_image:set_source_color ("FF0000")
 	test_image:fill()
 	-- Draw graphic

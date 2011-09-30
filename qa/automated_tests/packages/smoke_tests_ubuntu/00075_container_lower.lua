@@ -24,7 +24,7 @@ function generate_test_image ()
 			     },
 			     Text {
 				font = "DejaVu Sans 60px",
-				text = "Text 1",
+			--	text = "Text 1",
 			    	color = "000000",
 			    	position = { 250, 350 }
 			    }
@@ -43,7 +43,7 @@ function generate_test_image ()
 			     },
 			     Text {
 				font = "DejaVu Sans 60px",
-				text = "Text 2",
+			--	text = "Text 2",
 			    	color = "000000",
 			    	position = { 250, 350 }
 			    }
@@ -62,7 +62,7 @@ function generate_test_image ()
 			     },
 			     Text {
 				font = "DejaVu Sans 60px",
-				text = "Text 3",
+			--	text = "Text 3",
 			    	color = "000000",
 			    	position = { 250, 350 }
 			    }

@@ -29,21 +29,21 @@ function generate_test_image ()
 	        children = {
 	           image1,
 		   Text {
-			text = "Small gif\n120x90",
+		--	text = "Small gif\n120x90",
 			position = { 30, screen.h/6 + 100},
 			color = "000000",
 			font = "DejaVu Sans 40px"
 		   },
 		   image2,
 		   Text {
-			text = "Medium gif with compression\n640x480",
+		--	text = "Medium gif with compression\n640x480",
 			position = { screen.w/8, screen.h/6 + 500},
 			color = "000000",
 			font = "DejaVu Sans 40px"
 		   },
 		   image3,
 		   Text {
-			text = "Large gif scaled down\n1920x1440",
+		--	text = "Large gif scaled down\n1920x1440",
 			position = { screen.w/8 * 4, screen.h/6 + 730},
 			color = "000000",
 			font = "DejaVu Sans 40px"
