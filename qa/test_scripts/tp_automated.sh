@@ -12,7 +12,7 @@ pass=0
 # find the location of the automated_tests
 TP_AUTOMATED_TESTS=${TP_AUTOMATED_TESTS:-0}
 if [ ${TP_AUTOMATED_TESTS} = "0" ]; then
-    echo "Required environment variable TP_AUTOMATED_TESTS not set. Exiting"
+    echo "Required environment variable TP_AUTOMATED_TESTS not set. Exiting script..."
     exit 1
 else
     echo $TP_AUTOMATED_TESTS
@@ -21,7 +21,7 @@ fi
 trickplay_loc=`which trickplay`
 found_trickplay=$?
 if [ $found_trickplay -ne 0 ]; then
-    echo "cannot find executable trickplay. exiting"
+    echo "cannot find executable trickplay. Exiting script..."
     exit 1
 else
     echo "executing `which trickplay`"
@@ -91,7 +91,7 @@ for f in $PWD/baselines/$test_resolution/*.png; do
 
     if test -e $PWD/$results_folder/generated_pngs/$pngfile ; then
 	    compare_cmd="compare -metric AE -fuzz 95% $f $PWD/$results_folder/generated_pngs/$pngfile /dev/null 2>&1"
-	    # echo "$compare_cmd"
+	   # echo "$compare_cmd"
 	    imgdiff=`compare -metric AE -fuzz 95% $f $PWD/$results_folder/generated_pngs/$pngfile /dev/null 2>&1`
 	    if [ $imgdiff -eq 0 ]; then {
 		pass=$(($pass+1))
