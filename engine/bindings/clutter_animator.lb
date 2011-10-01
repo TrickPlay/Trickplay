@@ -380,7 +380,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 /*
     Class: Animator
     
-    The Animator class provides a method for creating complex animations. Unlike animations based on the Timeline class or the UIElement animate() function, an Animator animation can animate two or more objects. Animator animations can also modify multiple properties and each property's value can change at varying rates during the course of the animation. An Animator animation can be used in conjunction with a Timeline to combine the advantages of both methods in a single animation.
+    The Animator class provides a method for creating complex animations. Unlike animations based on the UIElement animate() function, an Animator animation can animate two or more objects. Animator animations can also modify multiple properties and each property's value can change at varying rates during the course of the animation. Animations that would be overly complex and awkward when implemented with a Timeline can be clean and simple using an Animator. An Animator animation can also be used in conjunction with a Timeline to combine the advantages of both methods in a single animation.
     
     In many cases, the same animation can be created using either an Animator or one or more Timelines, perhaps combined with Path, Interval and/or Score objects. It is the responsibility of the programmer to decide on the best method of implementation.
     
