@@ -42,7 +42,7 @@ The image will be added to the demoArea1 group and positioned in the center of t
 	demoArea1:add( logoImage )
 	(end)
 
-For the second demo area, an image of a red sphere will be loaded from the TrickPlay website. The operation here is identical as that performed for the logoImage. In addition, the image is scaled to twice its original size. The reason for this will become apparent when we animate the sphere. The code is shown below.
+For the second demo area, an image of a red sphere will be loaded from the TrickPlay website. The operation here is identical as that performed for the logoImage. The code is shown below.
 
 	(code)
 	-- Load the red sphere image
@@ -58,9 +58,6 @@ For the second demo area, an image of a red sphere will be loaded from the Trick
 	-- Position the image in the middle of the demoArea2's display space (demoSpace2)
 	sphereImage.position = { (demoSpace2.width  / 2) + demoSpace2.x,
 	                         (demoSpace2.height / 2) + demoSpace2.y }
-
-	-- Scale the image to twice its original size
-	sphereImage.scale = { 2, 2 }
 	(end)
 
 In the second demo area, the Tutorial application will animate two spheres. It's possible to reload the same sphere image into another variable, but then the image would be loaded twice, using twice the amount of memory. If an application needed to load large image files many times, available memory could be filled quickly, not to mention the execution time required to for each reload.
@@ -69,7 +66,7 @@ To provide efficient use of memory and time, the TrickPlay SDK libraries provide
 
 To clone an object, a new Clone object is created with a reference to the existing object being cloned. Afterward, the Clone object can be treated like any other object.
 
-The code shown below clones the Red Sphere Image and then sets its anchor point and positions it in the center of the second demo area using the same properties and calculations as the original Image object. In addition, the cloned sphere is scaled so it is half the size of the original Image.
+The code shown below clones the Red Sphere Image and then sets its anchor point and positions it in the center of the second demo area using the same properties and calculations as the original Image object.
 
 	(code)
 	-- Create a clone of the sphere
@@ -79,7 +76,6 @@ The code shown below clones the Red Sphere Image and then sets its anchor point 
 	sphereClone.anchor_point = { sphereClone.width  / 2, sphereClone.height / 2 }
 	sphereClone.position     = { (demoSpace2.width  / 2) + demoSpace2.x,
 	                             (demoSpace2.height / 2) + demoSpace2.y }
-	sphereClone.scale        = { 0.5, 0.5 }
 	(end)
 
 Finally, the two spheres are added to the demoArea2 group. When adding objects to a Group. the order they are added determines which object is "in front of" the other (assuming both objects occupy the same position on the Z-axis). The first added object will be behind any subsequently added objects. An equivalent description is that the last added object will be ahead of any previously added objects. The code shown below that adds the two spheres to the demoArea2 group places the cloned sphere behind the original sphere.
@@ -99,7 +95,7 @@ To load and run the loadImages.lua source file, the main.lua file processes it w
 	dofile( "loadImage.lua" )
 	(end)
 
-If you run the Tutorial application, the loaded images will display in the demo areas, as shown below. (Note: The sphereClone is hidden behind the larger sphereImage.)
+If you run the Tutorial application, the loaded images will display in the demo areas, as shown below. (Note: The sphereClone is hidden behind the sphereImage.)
 
 (see images/scrImages.png)
 
