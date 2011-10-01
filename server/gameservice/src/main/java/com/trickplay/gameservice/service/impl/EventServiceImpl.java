@@ -299,4 +299,8 @@ public class EventServiceImpl extends GenericDAOWithJPA<Event, Long> implements
 
 	}
 
+    public void create(Event entity) {
+        persist(entity);
+    }
+
 }

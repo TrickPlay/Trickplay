@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.codec.Base64;
 import org.springframework.web.client.RestTemplate;
 
-import com.trickplay.gameservice.domain.BuddyListInvitation;
 import com.trickplay.gameservice.domain.GameStepId;
 import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.transferObj.BooleanResponse;

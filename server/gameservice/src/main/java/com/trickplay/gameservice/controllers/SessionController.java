@@ -37,7 +37,7 @@ public class SessionController extends BaseController {
 	
     @RequestMapping(value = {"/session", "/rest/session"}, method = RequestMethod.GET)
     public String getSessions(Model model) {
-        List<SessionTO> allSessions = sessionService.getActiveSessions();
+        List<StatelessHttpSession> allSessions = sessionService.getActiveSessions();
         model.addAttribute("sessions", allSessions);
         return "session/list";
     }
@@ -62,9 +62,9 @@ public class SessionController extends BaseController {
             return "session/create";
         }
         
-    	SessionTO session = sessionService.create(sessionTO.getDeviceKey());
+    	sessionService.create(sessionTO.getDeviceKey());
         
-        return "redirect:/user/" + SecurityUtil.getPrincipal().getId();
+        return "user/show";
     }
 
     @RequestMapping(value = {"/rest/session"}, method = RequestMethod.POST)
@@ -84,7 +84,7 @@ public class SessionController extends BaseController {
 			throw new BaseControllerException(400, null, "Invalid parameters. "
 					+ err.toString());
 		}
-		return sessionService.create(sessionTO.getDeviceKey());
+		return new SessionTO(sessionService.create(sessionTO.getDeviceKey()));
     }
 
 }

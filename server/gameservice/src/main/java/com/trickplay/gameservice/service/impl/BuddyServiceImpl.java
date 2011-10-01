@@ -261,4 +261,29 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 
 	}
 
+    public void removeBuddy(Long buddyId) {
+        Buddy existing = find(buddyId);
+        if (existing == null) {
+            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Buddy.id", buddyId));
+        }
+        entityManager.refresh(existing);
+    }
+
+    public void create(Buddy entity) {
+        persist(entity);       
+    }
+
+    @Transactional
+    public Buddy update(Buddy entity) {
+        if (entity == null) {
+            throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, ExceptionContext.make("Buddy", null));
+        }
+        Buddy existing = find(entity.getId());
+        if (existing == null) {
+            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Buddy.id", entity.getId()));
+        }
+        existing.setStatus(entity.getStatus());
+        return existing;
+    }
+
 }

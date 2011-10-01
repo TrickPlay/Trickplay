@@ -2,6 +2,8 @@ package com.trickplay.gameservice.service;
 
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import com.trickplay.gameservice.domain.RecordedScore;
 
 public interface LeaderboardService {
@@ -16,5 +18,6 @@ public interface LeaderboardService {
 	public List<RecordedScore> findBuddyScores(Long gameId);
 	public List<RecordedScore> findScoreByUserId(Long gameId);
 	
+	@Transactional
 	public RecordedScore recordScore(Long gameId, long points);	
 }

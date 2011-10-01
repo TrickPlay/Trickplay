@@ -33,9 +33,10 @@ public class SessionServiceImpl extends
 	@Autowired
 	DeviceService deviceService;
 
-	public SessionTO findByToken(String token) {
+	public StatelessHttpSession findByToken(String token) {
 		StatelessHttpSession session = findSessionByToken(token);
-		return session != null ? new SessionTO(session) : null;
+		return session;
+		//return session != null ? new SessionTO(session) : null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -47,7 +48,7 @@ public class SessionServiceImpl extends
 		return SpringUtils.getFirst(list);
 	}
 
-	public SessionTO create(String deviceKey) {
+	public StatelessHttpSession create(String deviceKey) {
 		Device d = deviceService.findByKey(deviceKey);
 		if (d == null) {
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null,
@@ -62,7 +63,8 @@ public class SessionServiceImpl extends
 		session.setOwner(owner);
 
 		persist(session);
-		return new SessionTO(session);
+		return session;
+	//	return new SessionTO(session);
 	}
 
 	public static String generateToken() {
@@ -83,7 +85,7 @@ public class SessionServiceImpl extends
 	}
 
 	@Transactional
-	public SessionTO touchSession(String token) {
+	public StatelessHttpSession touchSession(String token) {
 		StatelessHttpSession httpSession = findSessionByToken(token);
 		if (httpSession == null)
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null,
@@ -93,14 +95,15 @@ public class SessionServiceImpl extends
 					ExceptionContext.make("Session.token", token));
 		else 
 			httpSession.setExpires(computeTokenExpirationTime());
-		return new SessionTO(httpSession);
+		return httpSession;
+		//return new SessionTO(httpSession);
 	}
 
 	public void remove(String token) {
 
 	}
 
-	public List<SessionTO> getActiveSessions() {
+	public List<StatelessHttpSession> getActiveSessions() {
 		return null;
 	}
 

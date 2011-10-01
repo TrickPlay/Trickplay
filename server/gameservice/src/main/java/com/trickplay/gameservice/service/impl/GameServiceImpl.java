@@ -71,4 +71,11 @@ public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements Ga
 		return existing;
 	}
 
+    public void remove(Long id) {
+        Game existing = find(id);
+        if (existing == null)
+            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.id", id));
+        entityManager.remove(existing);        
+    }
+
 }
