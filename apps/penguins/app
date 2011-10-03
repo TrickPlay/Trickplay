@@ -1,0 +1,7 @@
+app=
+{	id = "com.trickplay.editor",
+	release = "1",
+	version = "1.0",
+	name = "TrickPlay",
+	copyright = "Trickplay Inc."
+}
