@@ -7,6 +7,6 @@ void* tp_egl_get_native_window(void)
 
 void* tp_egl_get_native_display(void)
 {
-    return (void*)1;
+    return (void*)2;
 }
 
