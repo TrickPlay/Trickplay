@@ -38,25 +38,17 @@ function generate_test_image ()
 
 
 	--Animator
-	ani0 = Animator 
+	local ani0 = Animator 
 	{
 			duration = 5000, 
 			properties = 
 			{			
 		   		{
 				source = rect1, 
-				name = "x", 
+				name = "position", 
 				ease_in = true, 
 				keys = {
-					{0.1, "LINEAR", 900}
-						}
-				},
-				{
-				source = rect1, 
-				name = "y", 
-				ease_in = true, 
-				keys = {
-					{0.1, "LINEAR", 650}
+					{0.1, "LINEAR", {900, 650, 100} }
 						}
 				}
 			}
