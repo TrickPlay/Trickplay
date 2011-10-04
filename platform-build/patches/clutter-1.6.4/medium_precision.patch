@@ -1,0 +1,17 @@
+Index: clutter-1.6.4/clutter/cogl/cogl/cogl-shader-boilerplate.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/cogl/cogl/cogl-shader-boilerplate.h	2011-09-28 12:05:00.254521501 -0700
++++ clutter-1.6.4/clutter/cogl/cogl/cogl-shader-boilerplate.h	2011-09-28 12:07:32.334521593 -0700
+@@ -106,10 +106,10 @@
+   "attribute vec3 cogl_normal_in;\n"
+ 
+ #define _COGL_FRAGMENT_SHADER_BOILERPLATE \
+-  _COGL_COMMON_SHADER_BOILERPLATE \
+   "#if __VERSION__ == 100\n" \
+-  "precision highp float;\n" \
++  "precision mediump float;\n" \
+   "#endif\n" \
++  _COGL_COMMON_SHADER_BOILERPLATE \
+   "\n" \
+   "varying vec4 _cogl_color;\n" \
+   "\n" \
