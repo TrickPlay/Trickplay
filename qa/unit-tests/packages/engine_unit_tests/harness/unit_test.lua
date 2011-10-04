@@ -195,7 +195,14 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
 		col_results[current_column] = col_results[current_column]..string.format( "TOTAL    %4d" , #engine_results ).. "\n"
 
         -- You can generate XML output by running with TP_app_allowed="com.trickplay.unit-tests=editor" set in the environment
-        if(editor) then editor:writefile("results.xml",xml_output_string,true) end
+        if(editor) then
+            -- Set XML_OUTPUT_PATH global variable from the console to change output path
+            if(XML_OUTPUT_PATH) then
+                editor:change_app_path(XML_OUTPUT_PATH)
+            end
+            print("Writing to file:",XML_OUTPUT_PATH,"unit-tests.xml")
+            editor:writefile("unit-tests.xml",xml_output_string,true)
+        end
 
     end
 	
