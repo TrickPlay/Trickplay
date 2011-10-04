@@ -57,6 +57,7 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
             for k , v in pairs( tests ) do
                 local ok
                 local message
+                local stopwatch = Stopwatch()
             
                 if type( v ) == "function" then
                 
@@ -68,6 +69,8 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
                     
                 end
                 
+                stopwatch:stop()
+
                 if negative then
                 
                     ok = not ok
@@ -75,7 +78,7 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
                     message = nil
                 
                 end
-                table.insert( engine_results , { name = k , passed = ok , message = message } )
+                table.insert( engine_results , { name = k , passed = ok , message = message, time = stopwatch.elapsed_seconds } )
     
             end
         
@@ -105,9 +108,12 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
         end
     
     end
-    
+
+    local stopwatch = Stopwatch()
+
     run_tests( engine_global_tests , false )
-    
+
+    stopwatch:stop()
     -- Run all the ones passed in 
     
    -- run_tests( positive_tests , false )
@@ -135,8 +141,6 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
         print( "UNIT TESTS" )
         print( "" )
 
-        xml_output_string = "<testsuite>"
-        
         for i , t in ipairs( engine_results ) do
 
         	if line_count > column_line_max then
@@ -151,7 +155,7 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
             if t.passed then
         		col_results[current_column] = col_results[current_column]..string.format( "PASS [%s]" , t.name ).."\n"
                 print( string.format( "PASS [%s]" , t.name ) )
-                xml_output_string = string.format("%s<testcase classname='engine_unit_tests' name='%s' />",xml_output_string,t.name)
+                xml_output_string = string.format("%s<testcase classname='com.trickplay.unit-test.engine' name='%s' time='%f'/>",xml_output_string,t.name, t.time)
                     
                 passed = passed + 1
                 
@@ -174,15 +178,14 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
                     print( string.format( "FAIL [%s] %s" , t.name , t.message or "" ) )
                         		line_count = line_count + 2
 
-                    xml_output_string = string.format("%s<testcase classname='engine_unit_tests' name='%s'><failure type='failure'>%s</failure></testcase>",xml_output_string,t.name,t.message or "")
+                    xml_output_string = string.format("%s<testcase classname='com.trickplay.unit-test.engine' name='%s' time='%f'><failure type='failure'>%s</failure></testcase>",xml_output_string,t.name,t.time,t.message or "")
 
                 end
             
             end
         end
 
-
-        xml_output_string = string.format("%s</testsuite>",xml_output_string)
+        xml_output_string = string.format("<testsuite name='com.trickplay.unit-test.engine' errors='%d' failures='%d' tests='%d' time='%f'><properties><property name='trickplay.version' value='%s' /></properties>%s</testsuite>",0,failed,#engine_results,stopwatch.elapsed_seconds,trickplay.version,xml_output_string)
         
         print( "" )
         print( string.format( "PASSED   %4d (%d%%)" , passed , ( passed / #engine_results ) * 100 ) )
