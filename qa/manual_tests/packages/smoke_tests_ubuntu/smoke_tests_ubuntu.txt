@@ -20,7 +20,7 @@
 "active": "true"
 },
 {
-"name": "0006_animator_position.lua", 
+"name": "0006_animator_x_y.lua", 
 "active": "true"
 }
 ,
@@ -39,7 +39,24 @@
 {
 "name": "0010_animator_state_position.lua", 
 "active": "true"
+},
+{
+"name": "0011_animator_position.lua", 
+"active": "true"
+},
+{
+"name": "0012_animator_opacity.lua", 
+"active": "true"
+},
+{
+"name": "0013_animator_color.lua", 
+"active": "true"
+},
+{
+"name": "0014_animator_events.lua", 
+"active": "true"
 }
+
 ]
 
 

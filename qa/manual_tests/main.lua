@@ -17,6 +17,7 @@ test_file = "smoke_tests_ubuntu.txt"
 
 -- start test ordinal number
 local start_no = 1 
+local start_at_first_test = true
 
 -- Global variables
 local test_list
@@ -585,7 +586,10 @@ end
 test_list = load_test_list ()
 load_initial_ui()
 create_test_results_table ()
-load_test (test_list, current_test) 
+if start_at_first_test == false then
+	current_test = #test_list
+end
+	load_test (test_list, current_test)
 screen:show()
 
 
