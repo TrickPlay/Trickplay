@@ -3,12 +3,39 @@ local make_item
 local g  = 4000
 local vy = - 500
 
-local item_type = {
-    collectable = function(obj,pieces,initial_impact)
+local shatter = function(obj,vx)
+    
+    mediaplayer:play_sound("audio/glass_break.mp3")
+    
+    for i,c in pairs(obj.children) do
+        local dt = math.random(5,15)/10/3
+        local dist = vx*math.random(5,20)/10*dt/4
         
-        return function()
+        local dx = dist*math.cos(math.pi/180*obj.z_rotation[1])
+        local dy = dist*math.sin(math.pi/180*obj.z_rotation[1])
+        
+        local start_x = c.x
+        local start_y = c.y
+        print(dt,dx)
+        Animation_Loop:add_animation{
+            duration = dt,
+            on_step = function(s,p)
+                c.x = start_x+dx*p
+                c.y = start_y+dy*p
+                
+            end
+        }
+    end
+    
+end
+
+local item_type = {
+    collectable = function(pieces,initial_impact)
+        
+        return function(obj)
             
             if obj.hit then return end
+            
             
             initial_impact()
             
@@ -27,7 +54,7 @@ local item_type = {
                     x      = obj.x-obj.anchor_point[1],
                     y      = obj.y-obj.anchor_point[2],
                 }
-                
+                clone_counter[piece] = true
                 layers.items:add(piece)
                 
                 local vx = math.random(-1,1)*200
@@ -48,6 +75,7 @@ local item_type = {
                     end,
                     on_completed = function()
                         piece:unparent()
+                        piece = nil
                     end
                 }
                 
@@ -57,20 +85,24 @@ local item_type = {
         
     end,
     
-    knockdownable = function(obj,targ_y,initial_impact,floor_func)
+    knockdownable = function(targ_y,m,initial_impact,floor_func)
         
-        return function(_,vx)
+        return function(obj,creature)
             
             if obj.hit then return end
             
             initial_impact()
             
-            obj:hide()
+            mediaplayer:play_sound("audio/knocked over "..math.random(1,3)..".mp3")
             
             obj.hit = true
             
             local start_x = obj.x
             local start_y = obj.y
+            
+            local vx = creature:get_vx()*1.1
+            
+            local vy = -800*(.5+m/2)
             
             aaa, bbb = quadratic( .5 * g, vy, start_y - targ_y )
             
@@ -84,9 +116,17 @@ local item_type = {
                         x = start_x   +   vx * s,
                         y = start_y   +   vy * s   +   .5 * g * s * s,
                     }
+                    
+                    obj.z_rotation = {180/m*p,0,0}
                 end,
                 
-                on_completed = floor_func
+                on_completed = function()
+                    
+                    if floor_func then floor_func(obj) end
+                    
+                    if obj.children then shatter(obj,vx) end
+                    
+                end
                 
             }
             
@@ -141,9 +181,9 @@ make_item = function(t)
     end
     
     
-    if t.type == "knockdownable" then
+    if t.item_type == "knockdownable" then
         
-        t.source.collision = item_type[t.item_type](t.source,t.targ_y,t.initial_impact,t.floor_func)
+        t.source.collision = item_type[t.item_type](t.targ_y,t.m,t.initial_impact,t.floor_func)
         
     else
         
@@ -154,11 +194,13 @@ make_item = function(t)
         end
         
         
-        t.source.collision = item_type[t.item_type](t.source,t.pieces,t.initial_impact)
+        t.source.collision = item_type[t.item_type](t.pieces,t.initial_impact)
         
         t.source.on_idle = rock_back_and_forth(t.source)
         
-        Animation_Loop:add_animation(t.source.on_idle)
+        
+        Animation_Loop:add_animation(t.source.on_idle,"ACTIVE")
+        
     end
     
     

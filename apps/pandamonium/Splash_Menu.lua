@@ -13,7 +13,7 @@ local scrim = Rectangle{size = screen.size,color="000000",opacity = 0}
 do
 	local title      = Text{--Clone{
 		--source       = assets.title,
-		font         = "Baveuse 160px",
+		font         = "Sigmar 160px",
 		text         = "Pandamonium",
 		color        = "ffffff",
 		position     = {screen.w/2, 110}
@@ -24,7 +24,7 @@ do
 	
 	local start     = Text{--Clone{
 		--source       = assets.title,
-		font         = "Baveuse 70px",
+		font         = "Sigmar 70px",
 		text         = "Play",
 		position     = {screen.w/2, 300}
 		
@@ -33,7 +33,7 @@ do
 	
 	local h_score     = Text{--Clone{
 		--source       = assets.title,
-		font         = "Baveuse 70px",
+		font         = "Sigmar 70px",
 		text         = "highscores",
 		position     = {screen.w/2, start.y+100}
 		
@@ -42,7 +42,7 @@ do
 	
 	local help       = Text{--Clone{
 		--source       = assets.title,
-		font         = "Baveuse 70px",
+		font         = "Sigmar 70px",
 		text         = "help",
 		position     = {screen.w/2, h_score.y+100}
 		
@@ -51,7 +51,7 @@ do
 	
 	local quit       = Text{--Clone{
 		--source       = assets.title,
-		font         = "Baveuse 70px",
+		font         = "Sigmar 70px",
 		text         = "QUIT",
 		position     = {screen.w/2, help.y+100}
 		
