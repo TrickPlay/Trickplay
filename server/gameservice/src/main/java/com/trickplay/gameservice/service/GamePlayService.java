@@ -23,7 +23,7 @@ public interface GamePlayService {
 	public GameSession find(Long sessionId);
 	
 	@Transactional
-	public GamePlayInvitation sendGamePlayInvitation(Long gameId, Long recipientId);
+	public GamePlayInvitation sendGamePlayInvitation(Long gameSessionId, Long recipientId);
 	
 	@Transactional
 	public GamePlayInvitation updateGamePlayInvitation(Long invitationId, InvitationStatus status);

@@ -12,6 +12,8 @@ public class GameTO {
 	private int maxPlayers=1;
 	private boolean leaderboardFlag=true;
 	private boolean achievementsFlag=true;
+	private boolean enforceTurns=false;
+	private boolean allowWildCardInvitation=false;
 	
 	public GameTO() {
 		
@@ -19,7 +21,7 @@ public class GameTO {
 		
 	public GameTO(Long id, String name, String appId, Long vendorId,
 			String vendorName, int minPlayers, int maxPlayers,
-			boolean leaderboardFlag, boolean achievementsFlag) {
+			boolean leaderboardFlag, boolean achievementsFlag, boolean allowWildCardInvitation, boolean enforceTurns) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -30,6 +32,8 @@ public class GameTO {
 		this.maxPlayers = maxPlayers;
 		this.leaderboardFlag = leaderboardFlag;
 		this.achievementsFlag = achievementsFlag;
+		this.allowWildCardInvitation = allowWildCardInvitation;
+		this.enforceTurns = enforceTurns;
 	}
 
 	public GameTO(Game game) {
@@ -44,6 +48,8 @@ public class GameTO {
 		maxPlayers = game.getMaxPlayers();
 		leaderboardFlag = game.isLeaderboardFlag();
 		achievementsFlag = game.isAchievementsFlag();
+		enforceTurns = game.isEnforceTurns();
+		allowWildCardInvitation = game.isAllowWildCardInvitation();
 	}
 
 	public String getVendorName() {
@@ -55,10 +61,18 @@ public class GameTO {
 	}
 
 	public Game toGame() {
-		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag);
+		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag, allowWildCardInvitation, enforceTurns);
 	}
 	
-	public String getName() {
+	public boolean isAllowWildCardInvitation() {
+        return allowWildCardInvitation;
+    }
+
+    public void setAllowWildCardInvitation(boolean allowWildCardInvitation) {
+        this.allowWildCardInvitation = allowWildCardInvitation;
+    }
+
+    public String getName() {
 		return name;
 	}
 
@@ -121,5 +135,13 @@ public class GameTO {
 	public Long getId() {
 		return id;
 	}
+
+    public boolean isEnforceTurns() {
+        return enforceTurns;
+    }
+
+    public void setEnforceTurns(boolean enforceTurns) {
+        this.enforceTurns = enforceTurns;
+    }
 	
 }

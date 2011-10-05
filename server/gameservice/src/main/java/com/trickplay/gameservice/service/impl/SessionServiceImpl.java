@@ -13,42 +13,41 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
 import com.trickplay.gameservice.dao.impl.SpringUtils;
-import com.trickplay.gameservice.domain.Device;
+import com.trickplay.gameservice.domain.SessionToken;
 import com.trickplay.gameservice.domain.StatelessHttpSession;
-import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.exception.GameServiceException;
 import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.DeviceService;
 import com.trickplay.gameservice.service.SessionService;
-import com.trickplay.gameservice.transferObj.SessionTO;
 
 @Service("sessionService")
 @Repository
 public class SessionServiceImpl extends
-		GenericDAOWithJPA<StatelessHttpSession, Long> implements SessionService {
+		GenericDAOWithJPA<SessionToken, Long> implements SessionService {
 	private static final long MAX_SESSION_DURATION = 12 * 60 * 60 * 1000;
 
 	@Autowired
 	DeviceService deviceService;
 
-	public StatelessHttpSession findByToken(String token) {
-		StatelessHttpSession session = findSessionByToken(token);
+	public SessionToken findByToken(String token) {
+	    SessionToken session = findSessionByToken(token);
 		return session;
 		//return session != null ? new SessionTO(session) : null;
 	}
 
 	@SuppressWarnings("unchecked")
-	private StatelessHttpSession findSessionByToken(String token) {
-		List<StatelessHttpSession> list = super.entityManager
+	private SessionToken findSessionByToken(String token) {
+		List<SessionToken> list = super.entityManager
 				.createQuery(
-						"Select skey from SessionKey skey where skey.token = :token")
+						"Select session from SessionToken session where session.token = :token")
 				.setParameter("token", token).getResultList();
 		return SpringUtils.getFirst(list);
 	}
 
-	public StatelessHttpSession create(String deviceKey) {
+	public void create(SessionToken token) {
+	    /*
 		Device d = deviceService.findByKey(deviceKey);
 		if (d == null) {
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null,
@@ -61,9 +60,9 @@ public class SessionServiceImpl extends
 		User owner = super.entityManager.find(User.class, SecurityUtil
 				.getPrincipal().getId());
 		session.setOwner(owner);
-
-		persist(session);
-		return session;
+		*/
+		persist(token);
+	//	return session;
 	//	return new SessionTO(session);
 	}
 
@@ -79,32 +78,43 @@ public class SessionServiceImpl extends
 		}
 	}
 	
-	private Date computeTokenExpirationTime() {
-		return new Date(System.currentTimeMillis()
-				+ MAX_SESSION_DURATION);
-	}
 
 	@Transactional
-	public StatelessHttpSession touchSession(String token) {
-		StatelessHttpSession httpSession = findSessionByToken(token);
+	public SessionToken touchSession(String tokenId) {
+		SessionToken httpSession = findByToken(tokenId);
 		if (httpSession == null)
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null,
-					ExceptionContext.make("Session.token", token));
+					ExceptionContext.make("Session.token", tokenId));
 		if (httpSession.isExpired())
 			throw new GameServiceException(Reason.SESSION_EXPIRED, null,
-					ExceptionContext.make("Session.token", token));
+					ExceptionContext.make("Session.token", tokenId));
 		else 
-			httpSession.setExpires(computeTokenExpirationTime());
+			httpSession.setLastUsed(new Date());
 		return httpSession;
-		//return new SessionTO(httpSession);
 	}
+	
+	@Transactional
+    public SessionToken expireToken(Long tokenId) {
+        SessionToken httpSession = find(tokenId);
+        if (httpSession == null)
+            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null,
+                    ExceptionContext.make("Session.token", tokenId));
+        if (!httpSession.isExpired())
+            httpSession.setExpired(true);
+        return httpSession;
+    }
 
 	public void remove(String token) {
 
 	}
 
-	public List<StatelessHttpSession> getActiveSessions() {
-		return null;
+	public List<Long> pickPlayersRandom(int count) {
+	    // get distinct users from session table whose sessions have not expired
+	    String pickPlayersQuery = "select distinct t.userId from SessionToken t where t.expired=false AND t.userId!=:currentUserId order by t.lastUsed DESC"; 
+		return entityManager.createQuery(pickPlayersQuery)
+		.setParameter("currentUserId", SecurityUtil.getPrincipal().getId())
+		.setMaxResults(count)
+		.getResultList();
 	}
 
 }

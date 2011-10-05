@@ -1,8 +1,5 @@
 package com.trickplay.gameservice.service.impl;
 
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -104,21 +101,34 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 					);
 			
 		}
-		User recipient = userService.find(recipientId);
-		
-		if (recipient == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientId", recipientId));
 		
 		GameSession gs = super.find(gameSessionId);
 		if (gs==null)
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GameSession.sessionId", gameSessionId));
 
-		if (gs.getGame().getMaxPlayers() <= gs.getPlayers().size())
+		User recipient=null;
+        if (recipientId == null) {
+            if (!gs.getGame().isAllowWildCardInvitation()) {
+                throw new GameServiceException(Reason.WILDCARD_INVITATION_NOT_ALLOWED, null, ExceptionContext.make("gameId", gs.getGame().getName()));
+            }
+            // this is a valid case for games which allow wild card invitations
+        } else {
+            recipient = userService.find(recipientId);
+        
+            if (recipient == null)
+                throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientId", recipientId));
+        }
+        
+        if (gs.getStartTime() != null) {
+            throw new GameServiceException(Reason.GAME_ALREADY_STARTED);
+        }
+        
+        if (gs.getGame().getMaxPlayers() <= gs.getPlayers().size())
 			throw new GameServiceException(Reason.GP_EXCEEDS_MAX_PLAYERS_ALLOWED, null, 
 					ExceptionContext.make("maxPlayersAllowed", gs.getGame().getMaxPlayers()));
 		
 		for(GamePlayInvitation gpi : gs.getInvitations()) {
-			if (gpi.getRecipient().getId() == recipient.getId()) {
+			if (recipient != null && gpi.getRecipient().getId() == recipient.getId()) {
 				throw new GameServiceException(Reason.INVITATION_PREVIOUSLY_SENT);
 			}
 		}
@@ -126,7 +136,9 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		gs.addInvitation(gpi);
 		entityManager.persist(gpi);
 
-		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, recipientId, "Game play request from "+requestor.getUsername(), gpi));
+		if (recipientId != null) {
+		    entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, recipientId, "Game play request from "+requestor.getUsername(), gpi));
+		}
 		return gpi;
 	}
 	
@@ -155,14 +167,24 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientId", recipientId));
 		
 		ServiceUtil.checkAuthority(recipient);
-		
+
 		if (gpi.getStatus()!=InvitationStatus.PENDING)
 			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
+        if (!gpi.getRecipient().getId().equals(recipientId))
+            throw new GameServiceException(Reason.NOT_INVITATION_RECIPIENT);
+        
 		gpi.setStatus(InvitationStatus.REJECTED);
 		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, recipient, gpi.getRequestor().getId(), "Game play request declined by "+recipient.getUsername(), gpi));
 		return gpi;
 	}
 
+	/*
+	 * only allow accept invitation if the following is true:
+	 * 1. valid recipient
+	 * 2. recipient reserved the invitation (in case of wildcard invitation) or recipient is the invitation's recipient.
+	 * 3. invitation is in PENDING or RESERVED status
+	 * 
+	 */
 	private GamePlayInvitation acceptGamePlayInvitation(Long invitationId,
 			Long recipientId) throws GameServiceException {
 
@@ -181,8 +203,13 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			throw new GameServiceException(Reason.GP_EXCEEDS_MAX_PLAYERS_ALLOWED, null, 
 					ExceptionContext.make("maxPlayersAllowed", gs.getGame().getMaxPlayers()));
 		
-		if (gpi.getStatus()!=InvitationStatus.PENDING)
+		if (gpi.getStatus()!=InvitationStatus.PENDING && gpi.getStatus()!=InvitationStatus.RESERVED)
 			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
+		if (gpi.getStatus()==InvitationStatus.RESERVED && gpi.getReservedBy().getId().equals(recipientId)) {
+		    throw new GameServiceException(Reason.INVITATION_RESERVED);
+		} else if (!gpi.isWildCard() && gpi.getRecipient().getId().equals(recipientId)) {
+		    throw new GameServiceException(Reason.NOT_INVITATION_RECIPIENT);
+		}
 		gpi.setStatus(InvitationStatus.ACCEPTED);
 		gs.getPlayers().add(recipient);
 		
@@ -191,6 +218,9 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		return gpi;
 	}
 
+	/*
+	 * TODO: who can cancel an invitation? the owner of the game session ? or the creator of the invitation ???
+	 */
 	private GamePlayInvitation cancelGamePlayInvitation(Long invitationId,
 			Long requestorId) {
 		GamePlayInvitation gpi = entityManager.find(GamePlayInvitation.class, invitationId);
@@ -202,8 +232,9 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.requestorId", requestorId));
 
 		ServiceUtil.checkAuthority(requestor);
-		
-		if (gpi.getStatus()!=InvitationStatus.PENDING)
+		//if (!gpi.getRequestor().getId().equals(requestorId))
+		  //  throw new GameServiceException()
+		if (gpi.getStatus()!=InvitationStatus.PENDING && gpi.getStatus()!=InvitationStatus.RESERVED)
 			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
 		gpi.setStatus(InvitationStatus.CANCELLED);
 		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, gpi.getRecipient().getId(), "Game play request withdrawn", gpi));

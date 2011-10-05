@@ -32,13 +32,25 @@ public class Game extends BaseEntity implements Serializable {
     private int maxPlayers;
     private boolean leaderboardFlag;
     private boolean achievementsFlag;
+    private boolean enforceTurns;
+    private boolean allowWildCardInvitation;
+    //private boolean allow
     @NotNull
     private Vendor vendor;
 
     public Game() {        
     }
 
-    public Game(Vendor vendor, String name, String appId, int minPlayers, int maxPlayers, boolean leaderboardFlag, boolean achievementsFlag) {
+    public Game(Vendor vendor, 
+            String name, 
+            String appId, 
+            int minPlayers, 
+            int maxPlayers, 
+            boolean leaderboardFlag, 
+            boolean achievementsFlag,
+            boolean allowWildCardInvitation,
+            boolean enforceTurns
+            ) {
       this.vendor = vendor;
       this.setName(name);
       this.appId = appId;
@@ -46,17 +58,9 @@ public class Game extends BaseEntity implements Serializable {
       this.maxPlayers = maxPlayers;
       this.leaderboardFlag = leaderboardFlag;
       this.achievementsFlag = achievementsFlag;
+      this.enforceTurns = enforceTurns;
+      this.allowWildCardInvitation = allowWildCardInvitation;
     }
-
-//    @Id
-//    @GeneratedValue
-//    public Long getId() {
-//      return id;
-//    }
-//
-//    public void setId(Long id) {
-//      this.id = id;
-//    }
     
     @Column(unique=true)
     public String getAppId() {
@@ -117,6 +121,22 @@ public class Game extends BaseEntity implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isEnforceTurns() {
+        return enforceTurns;
+    }
+
+    public void setEnforceTurns(boolean enforceTurns) {
+        this.enforceTurns = enforceTurns;
+    }
+
+    public boolean isAllowWildCardInvitation() {
+        return allowWildCardInvitation;
+    }
+
+    public void setAllowWildCardInvitation(boolean allowWildCardInvitation) {
+        this.allowWildCardInvitation = allowWildCardInvitation;
     }
     
     

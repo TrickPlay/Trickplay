@@ -98,6 +98,8 @@ public class GameServiceClient {
 							1,
 							3,
 							true,
+							true,
+							true,
 							true), "u1", "u1"));
 			}
 			
@@ -111,6 +113,8 @@ public class GameServiceClient {
 							1,
 							3,
 							true,
+							true,
+							true,
 							true), "u1", "u1"));
 			}
 			
@@ -123,6 +127,8 @@ public class GameServiceClient {
 							vmap.get("v3-u3").getId(),
 							1,
 							3,
+							true,
+							true,
 							true,
 							true), "u3", "u3"));
 			}
