@@ -207,7 +207,7 @@ class Text [[ClutterActor*]] actor
 		
 		(code)
 		"Sans 38px"
-		"'Century Schoolbook',Garamond,Serif 72px"
+		"Century Schoolbook,Garamond,Serif 72px"
 		"Sans Italic Bold 30"
 		(end)
 		
@@ -235,7 +235,11 @@ class Text [[ClutterActor*]] actor
         [[clutter_text_set_justify(CLUTTER_TEXT(self),justify);]];
     
     /*
-    	Property: wrap
+    	UndocumentedProperty: wrap
+    	
+    	Note: There is a bug in Clutter that prevents the wrap property from
+    	working. Until this bug is fixed, the wrap property should not be
+    	documented.
     	
 		The wrap property is a boolean flag to toggle text wrapping. If the 
 		property is true, wrapping will occur if the text extends beyond the 
@@ -264,7 +268,8 @@ class Text [[ClutterActor*]] actor
 
 		The wrap_mode property specifies the type of text wrapping to perform.
 		
-		For wrapping to occur, the object's <wrap> property must be set to true.
+		For wrapping to occur, the object's <UIElement.width> property should 
+		be set. Once wrapping is enabled, it cannot be disabled.
 		
 		*Supported wrap_mode Settings:*
 		
@@ -276,7 +281,7 @@ class Text [[ClutterActor*]] actor
 		
 		*Default Setting:* WORD
 		
-		*See Also:* the <wrap> property, the <alignment> property
+		*See Also:* the <UIElement.width> property, the <alignment> property
 		
     */    
 
