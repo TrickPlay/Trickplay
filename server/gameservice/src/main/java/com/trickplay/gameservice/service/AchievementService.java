@@ -2,26 +2,26 @@ package com.trickplay.gameservice.service;
 
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import com.trickplay.gameservice.domain.Achievement;
-import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.RecordedAchievement;
-import com.trickplay.gameservice.domain.User;
 
 public interface AchievementService {
 
-	public List<RecordedAchievement> findBuddyRecordedAchievement(Game game, User user);
+	public List<RecordedAchievement> findBuddyRecordedAchievement(Long gameId, Long buddyId);
+
+	public List<RecordedAchievement> findAllRecordedAchievementsByGameId(Long id);
 	
-	public List<RecordedAchievement> findRecordedAchievement(Game game, User user);
-	
-	public void persist(RecordedAchievement score);
+	@Transactional
+	public void create(RecordedAchievement score);
 	
 	public RecordedAchievement findRecordedAchievement(Long id);
 	
-	public List<Achievement> find(Game game);
+	public List<Achievement> findAchievementsByGameId(Long gameId);
 	
 	public Achievement find(Long id);
 	
-	public void merge(Achievement entity);
-	
-	public void persist(Achievement entity);
+	@Transactional
+	public void create(Achievement entity);
 }

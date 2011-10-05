@@ -67,7 +67,7 @@ public class UserServiceTest {
 		User person = DataSeeder.generateUser();
 		userService.create(person);
 		person.setEmail("homer@blah.com");
-		userService.merge(person);
+		userService.update(person);
 		assertEquals("homer@blah.com", userService.find(person.getId()).getEmail());
 	}
 

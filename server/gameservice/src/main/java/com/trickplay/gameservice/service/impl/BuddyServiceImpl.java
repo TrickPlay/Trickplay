@@ -40,12 +40,12 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 	}
 	
 	@Transactional
-	public BuddyListInvitation sendInvitation(Long requestorId, String recipientName)
+	public BuddyListInvitation sendInvitation(String recipientName)
 			throws GameServiceException {
 
 		// check if recipient is already a buddy
 		try {
-			User requestor = userService.find(requestorId);
+			User requestor = userService.find(SecurityUtil.getPrincipal().getId());
 			authorizeSendInvitation(requestor);
 			
 			User recipient = userService.findByName(recipientName);
@@ -112,7 +112,7 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 	}
 
 	@Transactional
-	public BuddyListInvitation updateInvitationStatus(Long userId, Long invitationId,
+	public BuddyListInvitation updateInvitationStatus(Long invitationId,
 			InvitationStatus newStatus) {
 		if (invitationId == null) {
 			throw new IllegalArgumentException(
@@ -260,5 +260,30 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 				.setParameter("targetId", targetId).getResultList();
 
 	}
+
+    public void removeBuddy(Long buddyId) {
+        Buddy existing = find(buddyId);
+        if (existing == null) {
+            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Buddy.id", buddyId));
+        }
+        entityManager.refresh(existing);
+    }
+
+    public void create(Buddy entity) {
+        persist(entity);       
+    }
+
+    @Transactional
+    public Buddy update(Buddy entity) {
+        if (entity == null) {
+            throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, ExceptionContext.make("Buddy", null));
+        }
+        Buddy existing = find(entity.getId());
+        if (existing == null) {
+            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Buddy.id", entity.getId()));
+        }
+        existing.setStatus(entity.getStatus());
+        return existing;
+    }
 
 }
