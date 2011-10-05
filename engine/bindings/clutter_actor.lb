@@ -602,7 +602,7 @@ interface actor [[ClutterActor*]]
     /*
 	Property: x_rotation
 	
-	The x_rotation property is a table containing the rotation angle and Y and Z coordinates, respectively; the table's contents specify the object's rotation around the X axis. The rotation angle is specified in degrees; positive degrees rotate in a counter-clockwise direction, negative degrees rotate clockwise. The Y and Z coordinates specify the center of the rotation; the coordinates are relative to the object's anchor point.
+	The x_rotation property is a table containing the rotation angle and Y and Z coordinates, respectively; the table's contents specify the object's rotation around the X axis. The rotation angle is specified in degrees; positive degrees rotate in a clockwise direction, negative degrees rotate counter-clockwise. The Y and Z coordinates specify the center of the rotation; the coordinates are relative to the object's anchor point.
 	
 	*Format:* { rotation_angle, y-coordinate, z-coordinate }
 	
@@ -643,7 +643,7 @@ interface actor [[ClutterActor*]]
     /*
 	Property: y_rotation
 
-	The y_rotation property is a table containing the rotation angle and X and Z coordinates, respectively; the table's contents specify the object's rotation around the Y axis. The rotation angle is specified in degrees; positive degrees rotate in a counter-clockwise direction, negative degrees rotate clockwise. The X and Z coordinates specify the center of the rotation; the coordinates are relative to the object's anchor point.
+	The y_rotation property is a table containing the rotation angle and X and Z coordinates, respectively; the table's contents specify the object's rotation around the Y axis. The rotation angle is specified in degrees; positive degrees rotate in a clockwise direction, negative degrees rotate counter-clockwise. The X and Z coordinates specify the center of the rotation; the coordinates are relative to the object's anchor point.
 	
 	*Format:* { rotation_angle, x-coordinate, z-coordinate }
 	
@@ -684,7 +684,7 @@ interface actor [[ClutterActor*]]
     /*
 	Property: z_rotation
 	
-	The z_rotation property is a table containing the rotation angle and X and Y coordinates, respectively; the table's contents specify the object's rotation around the Z axis. The rotation angle is specified in degrees; positive degrees rotate in a counter-clockwise direction, negative degrees rotate clockwise. The X and Y coordinates specify the center of the rotation; the coordinates are relative to the object's anchor point.
+	The z_rotation property is a table containing the rotation angle and X and Y coordinates, respectively; the table's contents specify the object's rotation around the Z axis. The rotation angle is specified in degrees; positive degrees rotate in a clockwise direction, negative degrees rotate counter-clockwise. The X and Y coordinates specify the center of the rotation; the coordinates are relative to the object's anchor point.
 	
 	*Format:* { rotation_angle, x-coordinate, y-coordinate }
 	
@@ -1725,7 +1725,7 @@ interface actor [[ClutterActor*]]
 	
 	If the object's animate() function is called while an animation is already in progress, the running animation is terminated immediately, all its animating properties are set to their ending values, and the new animation begins.
 	
-	A program can be notified when the animation completes by specifying a function name for the on_completed argument.
+	A program can be notified when the animation completes by specifying a function name for the on_completed property.
 	
 	The animation provides no notifications while it is running. For an animation that requires in-progress notifications, consider basing the animation on the <Timeline> class.
 	
@@ -1737,8 +1737,8 @@ interface actor [[ClutterActor*]]
 	
 	duration - length of animation in milliseconds. Required.
 	mode - string specifying the Alpha mode to apply to the animated property. For descriptions of the supported modes, refer to the <Alpha.mode> section. Default = "LINEAR"
-	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called.
-	on_completed - function to call when the animation is finished
+	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called. To terminate a looping animation, call the <complete_animation> function.
+	on_completed - function to call when the animation is finished. The function should accept no arguments and have no return value.
 	x - X coordinate at end of animation
 	y - Y coordinate at end of animation
 	z - Z coordinate at end of animation

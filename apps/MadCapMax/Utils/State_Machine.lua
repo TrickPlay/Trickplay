@@ -73,7 +73,7 @@ local make_enum = function(array_of_states)
     end
 
     enum.change_state_to = function(self, new_state)
-		
+		print("changing to",new_state)
         if current_state == new_state then
 			
             print("warning changing state to current state: ", new_state)
