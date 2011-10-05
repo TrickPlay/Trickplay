@@ -208,7 +208,7 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		{
 			GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_double(&gvalue,lua_tonumber(L, -1));
+			g_value_set_double(&gvalue,lua_tonumber(L, index));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-x", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-x", ease_in);
             g_value_unset(&gvalue);
@@ -224,7 +224,7 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		{
 			GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_double(&gvalue,lua_tonumber(L, -1));
+			g_value_set_double(&gvalue,lua_tonumber(L, index));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-y", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-y", ease_in);
             g_value_unset(&gvalue);
@@ -238,9 +238,10 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		}
 		else
 		{
+
 		    GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_double(&gvalue,lua_tonumber(L, -1));
+			g_value_set_double(&gvalue,lua_tonumber(L, index));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-z", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-z", ease_in);
             g_value_unset(&gvalue);
@@ -394,6 +395,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 
 			progress = lua_tonumber(L,-3);
 
+
 			if (!lua_isnil(L, -1) && lua_isstring(L, -2))
 			{
 				mode = lua_tostring(L, -2); 
@@ -402,7 +404,6 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 			else 
 			{
 				set_animator_value(L, -2, animator, source, name , mode, progress, ease_in);
-				
 			}
 			lua_pop(L,4);
 		 }
