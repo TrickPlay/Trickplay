@@ -11,8 +11,8 @@ Let's start with the top header. We'll create a Rectangle object that covers the
 	header = Rectangle( {
 				size     = { 1920, 200 },
 				position = { 0, 0 },
-				color    = { 118, 136, 131, 150 }
-	         }
+				color    = { 211, 211, 211, 128 }
+	         } )
 	         
 	-- Add the header area to the screen
 	screen:add( header )
@@ -28,9 +28,9 @@ The code shown below creates and displays the header's text string. Add it to th
 	-- Create header label
 	headerLabel = Text( {
 					text = "TrickPlay SDK Tutorial Animations",
-					font = "'DejaVu Sans' Bold 80px",
-					color = { 225, 225, 225, 255 },
-					position = { 75, 50 }
+					font = "DejaVu Sans Bold 80px",
+					color    = { 245, 245, 220, 255 },
+					position = { 190, 50 }
 				  } )
 				 
 	-- Add the header label to the screen
@@ -39,6 +39,7 @@ The code shown below creates and displays the header's text string. Add it to th
 
 (see images/scrHeader.png)
 
-When writing code that creates and positions new objects, a cycle of trial-and-adjustment is common as you gradually find the object characteristics and screen location you are most satisfied with. This cycle can be made less tedious by using the Engine console command /reload.
+When writing code that creates and positions new objects, a cycle of trial-and-adjustment is common as you gradually find the object characteristics and screen location you are most satisfied with. This cycle can be made less tedious by using the Engine console command /reload which reloads and runs the current application from its beginning. By saving changes to your source files and entering /reload in the Engine console's command prompt, you can quickly bounce between modifying the source and running the updated app without having to close and restart your editor and the TrickPlay Engine on each iteration.
 
---- Discuss localization ---
+Our application now includes a text header in the English language. If we wanted to translate the program so users of other languages could understand it, the conversion would not be very pleasant, especially as the number of text strings increases. Before continuing laying out the rest of our screen, we should pause to consider program localization.
+

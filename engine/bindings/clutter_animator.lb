@@ -64,21 +64,14 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 	const char *k = name.c_str();
 	gulong nmode=ClutterUtil::to_clutter_animation_mode(mode.c_str());
 
-	if (!strcmp("x",k)||!strcmp("y",k)||!strcmp("w",k)||!strcmp("width",k)||!strcmp("h",k)||!strcmp("height",k)||
-		!strcmp("z",k)||!strcmp("depth",k)||!strcmp("opacity",k))
+	if (!strcmp("x",k)||!strcmp("y",k)||!strcmp("width",k)||!strcmp("height",k)||!strcmp("depth",k))
 	{
 		if (lua_type(L, index) == LUA_TNUMBER)
 		{
             GValue gvalue={0};
 
-            if(strcmp("opacity",k))
-            {
-                g_value_init(&gvalue,G_TYPE_FLOAT);
-                g_value_set_float(&gvalue,lua_tonumber(L, index));
-            } else {
-                g_value_init(&gvalue,G_TYPE_UINT);
-                g_value_set_uint(&gvalue,lua_tonumber(L, index));
-            }
+            g_value_init(&gvalue,G_TYPE_FLOAT);
+            g_value_set_float(&gvalue,lua_tonumber(L, index));
 
 			clutter_animator_set_key(animator, G_OBJECT(source), name.c_str(), nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), name.c_str(), ease_in);
@@ -89,6 +82,58 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		{
 		    return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : number expected");
 		}
+	}
+	else if (!strcmp("z",k)||!strcmp("w",k)||!strcmp("h",k))
+	{
+
+		if (lua_type(L, index) == LUA_TNUMBER)
+		{
+            GValue gvalue={0};
+
+            g_value_init(&gvalue,G_TYPE_FLOAT);
+            g_value_set_float(&gvalue,lua_tonumber(L, index));
+
+			if(!strcmp("z",k))
+			{
+				clutter_animator_set_key(animator, G_OBJECT(source), "depth", nmode, progress, &gvalue);
+				clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "depth", ease_in);
+			}
+			else if (!strcmp("w",k))
+			{
+				clutter_animator_set_key(animator, G_OBJECT(source), "width", nmode, progress, &gvalue);
+				clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "width", ease_in);
+			}
+			else if (!strcmp("h",k))
+			{	
+				clutter_animator_set_key(animator, G_OBJECT(source), "height", nmode, progress, &gvalue);
+				clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "height", ease_in);
+			}
+
+			g_value_unset(&gvalue);
+		}
+		else
+		{
+		    return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : number expected");
+		}
+	}
+	else if (!strcmp("opacity", k))
+	{
+		if (lua_type(L, index) == LUA_TNUMBER)
+		{
+            GValue gvalue={0};
+
+            g_value_init(&gvalue,G_TYPE_UINT);
+            g_value_set_uint(&gvalue,lua_tonumber(L, index));
+
+			clutter_animator_set_key(animator, G_OBJECT(source), name.c_str(), nmode, progress, &gvalue);
+			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), name.c_str(), ease_in);
+
+			g_value_unset(&gvalue);
+		}
+		else
+		{
+		    return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : number expected");
+		}		
 	}
 	else if (!strcmp("position",k))
 	{
@@ -203,10 +248,15 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 	}
 	else if (!strcmp("color",k))
 	{
+			g_debug(" color kkkk"); 
+
 		if ((lua_type(L,index)==LUA_TTABLE) || (lua_type(L, index) == LUA_TSTRING))
 		{
 			ClutterColor color;
 			ClutterUtil::to_clutter_color(L, index, &color);
+			
+			g_debug(" color :: %d %d %d %d ", color.red, color.green, color.blue, color.alpha);
+
 
 			//ClutterColor color = ClutterUtil::string_to_color(lua_tostring(L, index));
 
@@ -344,28 +394,16 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 
 			progress = lua_tonumber(L,-3);
 
-			// mode, value
-			if ((lua_type(L, -2) == LUA_TNUMBER)||(lua_type(L, -2) == LUA_TTABLE))
+			if (!lua_isnil(L, -1) && lua_isstring(L, -2))
+			{
+				mode = lua_tostring(L, -2); 
+				set_animator_value(L, -1, animator, source, name , mode, progress, ease_in);
+			}
+			else 
 			{
 				set_animator_value(L, -2, animator, source, name , mode, progress, ease_in);
+				
 			}
-			else if(lua_isstring(L, -2))
-			{
-				const char* cmode = lua_tostring(L,-2);
-				if (cmode)
-				{
-					mode  = cmode;
-				}
-			    if((lua_isnumber(L, -1))||(lua_istable(L, -1)))
-				{
-					set_animator_value(L, -1, animator, source, name , mode, progress, ease_in);
-				}
-			}
-			else
-			{
-				return luaL_error (L, "Incorrect argument, failed to set keys value");
-			}
-
 			lua_pop(L,4);
 		 }
 	     lua_pop(L,2);
@@ -380,7 +418,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 /*
     Class: Animator
     
-    The Animator class provides a method for creating complex animations. Unlike animations based on the Timeline class or the UIElement animate() function, an Animator animation can animate two or more objects. Animator animations can also modify multiple properties and each property's value can change at varying rates during the course of the animation. An Animator animation can be used in conjunction with a Timeline to combine the advantages of both methods in a single animation.
+    The Animator class provides a method for creating complex animations. Unlike animations based on the UIElement animate() function, an Animator animation can animate two or more objects. Animator animations can also modify multiple properties and each property's value can change at varying rates during the course of the animation. Animations that would be overly complex and awkward when implemented with a Timeline can be clean and simple using an Animator. An Animator animation can also be used in conjunction with a Timeline to combine the advantages of both methods in a single animation.
     
     In many cases, the same animation can be created using either an Animator or one or more Timelines, perhaps combined with Path, Interval and/or Score objects. It is the responsibility of the programmer to decide on the best method of implementation.
     
