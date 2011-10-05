@@ -11,7 +11,6 @@ public class GameRequestTO {
 	private boolean leaderboardFlag=true;
 	private boolean achievementsFlag=true;
 	private boolean turnBasedFlag;
-	private boolean enforceTurns=false;
 	private boolean allowWildCardInvitation = false;
 
     public GameRequestTO() {
@@ -21,8 +20,7 @@ public class GameRequestTO {
 	public GameRequestTO(String name, String appId, Long vendorId,
 			int minPlayers, int maxPlayers,
 			boolean leaderboardFlag, boolean achievementsFlag, 
-			boolean turnBasedFlag, boolean enforceTurns,
-			boolean allowWildCardInvitation) {
+			boolean turnBasedFlag, boolean allowWildCardInvitation) {
 		super();
 		this.name = name;
 		this.appId = appId;
@@ -32,7 +30,6 @@ public class GameRequestTO {
 		this.leaderboardFlag = leaderboardFlag;
 		this.achievementsFlag = achievementsFlag;
 		this.turnBasedFlag = turnBasedFlag;
-		this.enforceTurns = enforceTurns;
 		this.allowWildCardInvitation = allowWildCardInvitation;
 	}
 
@@ -47,12 +44,11 @@ public class GameRequestTO {
 		leaderboardFlag = game.isLeaderboardFlag();
 		achievementsFlag = game.isAchievementsFlag();
 		turnBasedFlag = game.isTurnBasedFlag();
-		enforceTurns = game.isEnforceTurns();
 		allowWildCardInvitation = game.isAllowWildCardInvitation();
 	}
 
 	public Game toGame() {
-		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag, turnBasedFlag, enforceTurns, allowWildCardInvitation);
+		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag, turnBasedFlag, allowWildCardInvitation);
 	}
 	
 	public String getName() {
@@ -112,14 +108,6 @@ public class GameRequestTO {
 	}
 
     
-    public boolean isEnforceTurns() {
-        return enforceTurns;
-    }
-
-    public void setEnforceTurns(boolean enforceTurns) {
-        this.enforceTurns = enforceTurns;
-    }
-
     public boolean isAllowWildCardInvitation() {
         return allowWildCardInvitation;
     }

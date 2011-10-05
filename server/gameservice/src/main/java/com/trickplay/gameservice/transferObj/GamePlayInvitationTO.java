@@ -30,6 +30,7 @@ public class GamePlayInvitationTO {
 		this.requestorId = gpi.getRequestor().getId();
 		this.recipientId = gpi.getRecipient()!=null ? gpi.getRecipient().getId() : null;
 		this.gameSessionId = gpi.getGameSession().getId();
+		this.gameId = gpi.getGameSession().getGame().getId();
 		this.status = gpi.getStatus();
 		this.created = gpi.getCreated();
 		this.updated = gpi.getUpdated();

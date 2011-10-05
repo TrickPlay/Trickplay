@@ -33,7 +33,6 @@ public class Game extends BaseEntity implements Serializable {
     private boolean leaderboardFlag;
     private boolean achievementsFlag;
     private boolean turnBasedFlag;
-    private boolean enforceTurns;
     private boolean allowWildCardInvitation;
     //private boolean allow
     @NotNull
@@ -50,8 +49,7 @@ public class Game extends BaseEntity implements Serializable {
             boolean leaderboardFlag,
             boolean achievementsFlag,
             boolean turnBasedFlag,
-            boolean allowWildCardInvitation,
-            boolean enforceTurns
+            boolean allowWildCardInvitation
             ) {
       this.vendor = vendor;
       this.setName(name);
@@ -61,7 +59,6 @@ public class Game extends BaseEntity implements Serializable {
       this.leaderboardFlag = leaderboardFlag;
       this.achievementsFlag = achievementsFlag;
       this.turnBasedFlag = turnBasedFlag;
-      this.enforceTurns = enforceTurns;
       this.allowWildCardInvitation = allowWildCardInvitation;
     }
     
@@ -124,14 +121,6 @@ public class Game extends BaseEntity implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isEnforceTurns() {
-        return enforceTurns;
-    }
-
-    public void setEnforceTurns(boolean enforceTurns) {
-        this.enforceTurns = enforceTurns;
     }
 
     public boolean isAllowWildCardInvitation() {

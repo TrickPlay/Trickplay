@@ -99,8 +99,9 @@ public class GameController extends BaseController {
         else
             return BooleanResponse.FALSE;
     }
-	
-	@RequestMapping(value = {"/vendor/{vid}/game", "/rest/vendor/{vid}/game"}, method = RequestMethod.GET)
+
+
+    @RequestMapping(value = {"/vendor/{vid}/game", "/rest/vendor/{vid}/game"}, method = RequestMethod.GET)
 	public String getVendorGames(@PathVariable("vid") Long vid, Model model) {
 		Vendor v = vendorService.find(vid);
 		model.addAttribute("games", toGameTO(v.getGames()));

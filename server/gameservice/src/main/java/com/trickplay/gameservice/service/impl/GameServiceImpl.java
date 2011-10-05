@@ -70,7 +70,6 @@ public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements Ga
 		existing.setName(g.getName());
 		existing.setMaxPlayers(g.getMaxPlayers());
 		existing.setMinPlayers(g.getMinPlayers());
-		existing.setEnforceTurns(g.isEnforceTurns());
 		existing.setVendor(v);
 		
 		return existing;
