@@ -9,9 +9,9 @@
 #import <Foundation/Foundation.h>
 #import <QuartzCore/CALayer.h>
 #import <QuartzCore/CATransform3D.h>
-#import <YAJLiOS/YAJL.h>
 #import "AdvancedUIObjectManager.h"
 #import "TrickplayAnimation.h"
+#import "JSONKit.h"
 
 
 @class AdvancedUIObjectManager;

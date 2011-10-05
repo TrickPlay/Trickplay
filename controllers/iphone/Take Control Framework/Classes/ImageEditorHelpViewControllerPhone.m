@@ -60,7 +60,6 @@
 }
 
 - (IBAction)donePressed:(id)sender {
-    NSLog(@"WTF");
     if (self.parentViewController) {
         [self.parentViewController dismissModalViewControllerAnimated:YES];
     }

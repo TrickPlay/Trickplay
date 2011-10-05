@@ -75,8 +75,8 @@
 #pragma mark -
 #pragma mark TVBrowserViewController
 
-- (TVBrowserViewController *)createTVBrowserViewController {
-    TVBrowserViewController *viewController = [[TVBrowserViewController alloc] initWithNibName:@"TVBrowserViewController" bundle:nil tvBrowser:self];
+- (TVBrowserViewController *)getNewTVBrowserViewController {
+    TVBrowserViewController *viewController = [[[TVBrowserViewController alloc] initWithNibName:@"TVBrowserViewController" bundle:nil tvBrowser:self] autorelease];
     
     return viewController;
 }
@@ -343,7 +343,7 @@
 #pragma mark -
 #pragma mark TVBrowserViewController
 
-- (TVBrowserViewController *)createTVBrowserViewController {
+- (TVBrowserViewController *)getNewTVBrowserViewController {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];

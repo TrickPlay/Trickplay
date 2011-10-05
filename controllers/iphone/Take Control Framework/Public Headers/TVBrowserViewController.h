@@ -29,16 +29,23 @@
 
 
 /**
+ * Summary:
+ *
  * The TVBrowserViewController is an extension of the UITableViewController class.
  * This class lists TVs on the local network that the user may connect to in a
- * UITableView. This class sends a message to its delegate when the user touches a
- * cell referencing a possible connection to a Trickplay enabled TV over the
- * local network.
+ * UITableView. Selecting a TV in the UITableView sends an NSNetService to this class'
+ * delegate referencing a possible connection to a Trickplay enabled TV over the
+ * local network. Additionally, the TVBrowserViewController will inform its TVBrowser
+ * instantiation of the selection and the TVBrowser will subsequently begin attempting
+ * to connect to the TV.
  *
- * An object of this class may be created from a TVBrowser via the
- * createTVBrowserViewController message, where the created TVBrowserViewController
+ *
+ * How To Use:
+ *
+ * An autoreleased object of this class may be created from a TVBrowser via the
+ * - getNewTVBrowserViewController message, where the new TVBrowserViewController
  * will reference and retain the TVBrowser which created it. If a TVBrowserViewController
- * is created by itself it must be initialized using:
+ * is created using +alloc it must be initialized using:
  * - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
  * with nibNameOrNil equaling @"TVBrowserViewController" and it will retain
  * its own TVBrowser.
@@ -49,15 +56,15 @@
 @interface TVBrowserViewController : UITableViewController <UITableViewDelegate, 
 UITableViewDataSource, UINavigationControllerDelegate>
 
+// The objects delegate.
+@property (assign) id <TVBrowserViewControllerDelegate> delegate;
+// The objects TVBrowser.
+@property (readonly) TVBrowser *tvBrowser;
+
 // Calls - (void)reloadData on its own UITableView which repopulates the
 // TVBrowserViewController with data aquired by the tvBrowser insantiation.
 - (void)reloadData;
 // Calls - (void)refreshServices on the objects tvBrowser instantiation.
 - (void)refresh;
-
-// The objects delegate.
-@property (assign) id <TVBrowserViewControllerDelegate> delegate;
-// The objects TVBrowser.
-@property (readonly) TVBrowser *tvBrowser;
 
 @end

@@ -47,7 +47,7 @@
         [JSON_dic setObject:[NSArray arrayWithObjects:[NSNumber numberWithBool:failed], nil] forKey:@"args"];
         [JSON_dic setObject:[NSNumber numberWithBool:failed] forKey:@"failed"];
         
-        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic JSONString]];
         
         [JSON_dic release];
     }

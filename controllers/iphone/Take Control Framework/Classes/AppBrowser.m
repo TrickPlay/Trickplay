@@ -8,8 +8,8 @@
 
 #import "AppBrowser.h"
 #import "AppBrowserViewController.h"
-#import <YAJLiOS/YAJL.h>
 #import "TVConnection.h"
+#import "JSONKit.h"
 #import "Extensions.h"
 
 
@@ -43,7 +43,7 @@
 }
 
 - (void)dealloc {
-    NSLog(@"AppBrowser Dealloc");
+    NSLog(@"AppInfo Dealloc");
     
     [name release];
     name = nil;
@@ -130,14 +130,10 @@
 #pragma mark Initialization
 
 - (id)init {
-    return [self initWithConnection:nil delegate:nil];
+    return [self initWithTVConnection:nil delegate:nil];
 }
 
-- (id)initWithDelegate:(id <AppBrowserDelegate>)_delegate {
-    return [self initWithConnection:nil delegate:_delegate];
-}
-
-- (id)initWithConnection:(TVConnection *)_connection delegate:(id<AppBrowserDelegate>)_delegate {
+- (id)initWithTVConnection:(TVConnection *)_connection delegate:(id<AppBrowserDelegate>)_delegate {
     
     self = [super init];
     if (self) {
@@ -177,8 +173,8 @@
 #pragma mark -
 #pragma mark AppBrowserViewController
 
-- (AppBrowserViewController *)createAppBrowserViewController {
-    AppBrowserViewController *viewController = [[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil appBrowser:self];
+- (AppBrowserViewController *)getNewAppBrowserViewController {
+    AppBrowserViewController *viewController = [[[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil appBrowser:self] autorelease];
     
     return viewController;
 }
@@ -359,7 +355,8 @@
         [fetchAppsConnection release];
         fetchAppsConnection = nil;
         
-        NSMutableArray *apps = [fetchAppsData yajl_JSON];
+        JSONDecoder *decoder = [JSONDecoder decoder];
+        NSMutableArray *apps = [decoder mutableObjectWithData:fetchAppsData];
         NSLog(@"Received JSON array available apps = %@", apps);
         
         [self informOfAvailableApps:apps];
@@ -368,8 +365,9 @@
         [currentAppInfoConnection release];
         currentAppInfoConnection = nil;
         
-        NSLog(@"Current app: %@", [currentAppData yajl_JSON]);
-        AppInfo *app = [[[AppInfo alloc] initWithAppDictionary:[currentAppData yajl_JSON]] autorelease];
+        JSONDecoder *decoder = [JSONDecoder decoder];
+        NSLog(@"Current app: %@", [decoder objectWithData:currentAppData]);
+        AppInfo *app = [[[AppInfo alloc] initWithAppDictionary:[decoder objectWithData:currentAppData]] autorelease];
         
         [self informOfCurrentApp:app];
     }
@@ -426,7 +424,7 @@
  * app.
  */
 - (void)launchApp:(AppInfo *)app {
-    if (!tvConnection || !tvConnection.hostName || !app || ![app isKindOfClass:[AppBrowser class]]) {
+    if (!tvConnection || !tvConnection.hostName || !app || ![app isKindOfClass:[AppBrowser class]] || !availableApps || ![availableApps containsObject:app]) {
         return;
     }
     
@@ -463,6 +461,8 @@
 #pragma mark Deallocation
 
 - (void)dealloc {
+    NSLog(@"AppBrowser dealloc");
+    
     [viewControllers release];
     
     [self.tvConnection setAppBrowser:nil];
@@ -519,13 +519,7 @@
 #pragma mark -
 #pragma mark Initialization
 
-- (id)initWithDelegate:(id <AppBrowserDelegate>)_delegate {
-    @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
-                                 userInfo:nil];
-}
-
-- (id)initWithConnection:(TVConnection *)_connection delegate:(id<AppBrowserDelegate>)_delegate {
+- (id)initWithTVConnection:(TVConnection *)_connection delegate:(id<AppBrowserDelegate>)_delegate {
     
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
@@ -587,7 +581,7 @@
 #pragma mark -
 #pragma mark AppBrowserViewController
 
-- (AppBrowserViewController *)createAppBrowserViewController {
+- (AppBrowserViewController *)getNewAppBrowserViewController {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];

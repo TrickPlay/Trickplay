@@ -66,7 +66,7 @@
 
 - (id)initWithService:(NSNetService *)service delegate:(id<TVConnectionDelegate>)_delegate {
     
-    if (!service) {
+    if (!service || !service.hostName) {
         [self release];
         return nil;
     }
@@ -110,17 +110,21 @@
         }
         
         // Retrieve the UUID or make a new one and save it
-        NSString *deviceID;
+        NSData *deviceID;
         NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
         NSData *savedData = [userDefaults dataForKey:@"TakeControlID"];
         if (savedData) {
-            deviceID = [[[NSString alloc] initWithBytes:[savedData bytes] length:[savedData length] encoding:NSUTF8StringEncoding] autorelease];
+            deviceID = [NSData dataWithBytes:[savedData bytes] length:[savedData length]];
+            NSLog(@"deviceID: %@", deviceID);
         } else {
             uuid_t generated_id;
             uuid_generate(generated_id);
-            deviceID = [[[NSString alloc] initWithBytes:generated_id length:16 encoding:NSUTF8StringEncoding] autorelease];
+            NSLog(@"generated: %s", generated_id);
+            deviceID = [NSData dataWithBytes:generated_id length:16];
             [userDefaults setObject:deviceID forKey:@"TakeControlID"];
+            NSLog(@"deviceID: %@", deviceID);
         }
+        NSLog(@"deviceID: %@", deviceID);
         
         // Tell the service what this device is capable of
         NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
@@ -142,6 +146,9 @@
 - (void)handleSocketDisconnectAbruptly:(BOOL)abruptly {
     
     isConnected = NO;
+    
+    http_port = 0;
+    port = 0;
     
     if (hostName) {
         [hostName release];
@@ -212,6 +219,9 @@
 
 - (void)dealloc {
     isConnected = NO;
+    
+    http_port = 0;
+    port = 0;
     
     if (hostName) {
         [hostName release];

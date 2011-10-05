@@ -12,7 +12,7 @@
 @protocol VirtualRemoteDelegate <NSObject>
 
 @required
-- (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount;
+- (void)sendKeyToTrickplay:(NSString *)key count:(NSInteger)count;
 
 @end
 

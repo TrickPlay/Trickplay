@@ -50,61 +50,61 @@
 - (IBAction)rightPressed:(id)sender {
     NSLog(@"right button press");
     [self playClick];
-    [delegate sendKeyToTrickplay:@"FF53" thecount:1];
+    [delegate sendKeyToTrickplay:@"FF53" count:1];
 }
 
 - (IBAction)leftPressed:(id)sender {
     NSLog(@"left button press");
     [self playClick];
-    [delegate sendKeyToTrickplay:@"FF51" thecount:1];
+    [delegate sendKeyToTrickplay:@"FF51" count:1];
 }
 
 - (IBAction)downPressed:(id)sender {
     NSLog(@"down button press");
     [self playClick];
-    [delegate sendKeyToTrickplay:@"FF54" thecount:1];
+    [delegate sendKeyToTrickplay:@"FF54" count:1];
 }
 
 - (IBAction)upPressed:(id)sender {
     NSLog(@"up button press");
     [self playClick];
-    [delegate sendKeyToTrickplay:@"FF52" thecount:1];
+    [delegate sendKeyToTrickplay:@"FF52" count:1];
 }
 
 - (IBAction)OKPressed:(id)sender {
     NSLog(@"OK button press");
     [self playClick];
-    [delegate sendKeyToTrickplay:@"FF0D" thecount:1];
+    [delegate sendKeyToTrickplay:@"FF0D" count:1];
 }
 
 - (IBAction)backPressed:(id)sender {
     [self playClick];
-    [delegate sendKeyToTrickplay:@"10000014" thecount:1];
+    [delegate sendKeyToTrickplay:@"10000014" count:1];
 }
 
 - (IBAction)exitPressed:(id)sender {
     [self playClick];
-    [delegate sendKeyToTrickplay:@"FF1B" thecount:1];
+    [delegate sendKeyToTrickplay:@"FF1B" count:1];
 }
 
 - (IBAction)redPressed:(id)sender {
     [self playClick];
-    [delegate sendKeyToTrickplay:@"10000001" thecount:1];
+    [delegate sendKeyToTrickplay:@"10000001" count:1];
 }
 
 - (IBAction)greenPressed:(id)sender {
     [self playClick];
-    [delegate sendKeyToTrickplay:@"10000002" thecount:1];
+    [delegate sendKeyToTrickplay:@"10000002" count:1];
 }
 
 - (IBAction)bluePressed:(id)sender {
     [self playClick];
-    [delegate sendKeyToTrickplay:@"10000004" thecount:1];
+    [delegate sendKeyToTrickplay:@"10000004" count:1];
 }
 
 - (IBAction)yellowPressed:(id)sender {
     [self playClick];
-    [delegate sendKeyToTrickplay:@"10000003" thecount:1];
+    [delegate sendKeyToTrickplay:@"10000003" count:1];
 }
 
 #pragma mark -

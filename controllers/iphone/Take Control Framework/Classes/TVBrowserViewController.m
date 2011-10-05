@@ -196,13 +196,15 @@
 /*
  - (void)viewWillAppear:(BOOL)animated {
  [super viewWillAppear:animated];
+     NSLog(@"TVBrowserWillAppear");
  }
- */
+// */
 /*
  - (void)viewDidAppear:(BOOL)animated {
  [super viewDidAppear:animated];
+     NSLog(@"TVBrowserDidAppear");
  }
- */
+ //*/
 /*
  - (void)viewWillDisappear:(BOOL)animated {
  [super viewWillDisappear:animated];
@@ -214,13 +216,13 @@
  }
  */
 
-/*
+//*
  // Override to allow orientations other than the default portrait orientation.
- - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
- // Return YES for supported orientations.
- return (interfaceOrientation == UIInterfaceOrientationPortrait);
- }
- */
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations.
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+//*/
 
 #pragma mark -
 #pragma mark Table view data source
@@ -425,15 +427,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 }
 
 #pragma mark -
-#pragma mark AutoRotation
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-
-#pragma mark -
 #pragma mark Memory management
 
 - (void)didReceiveMemoryWarning {
@@ -599,23 +592,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 #pragma mark -
 #pragma mark Table View delegate
 
-/**
- * UITableViewDelegate callback called when a user selects a cell in the table.
- *
- * A cell selection from the RootViewController's UITableView would indicate
- * the user wants to establish a connection to the service listed in the
- * corresponding cell.
- *
- * This function checks to see if a service exists in that
- * cell. If so then it checks to see if a connection has already been established
- * which it would then push the AppBrowser for that service to the top of the
- * UINavigationViewController view controller stack.
- *
- * Otherwise, the method deallocates view controllers associated with any other
- * service that may have a connection established (in effect, destroying that
- * connection), creates a new AppBrowserViewController, and sends this new
- * AppBrowser connection information to connect to the new service.
- */
 - (void)tableView:(UITableView *)tableView
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     

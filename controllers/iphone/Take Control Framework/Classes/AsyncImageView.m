@@ -160,7 +160,7 @@
     }
     if (otherDelegate) {
         [otherDelegate dataReceived:theData resourcekey:resourceKey];
-        if (data) {
+        if (theData) {
             [otherDelegate on_loadedFailed:NO];
         } else {
             [otherDelegate on_loadedFailed:YES];

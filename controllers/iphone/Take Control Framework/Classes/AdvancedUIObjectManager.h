@@ -7,12 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <YAJLiOS/YAJL.h>
 #import "TPAppViewController.h"
 #import "TrickplayTimeline.h"
 #import "SocketManager.h"
 #import "CommandInterpreter.h"
 #import "ResourceManager.h"
+#import "JSONKit.h"
 #import "Protocols.h"
 
 @class TrickplayUIElement;

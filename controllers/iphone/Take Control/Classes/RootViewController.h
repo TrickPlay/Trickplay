@@ -51,7 +51,7 @@ AppBrowserViewControllerDelegate, AppBrowserDelegate> {
 }
 
 // Exposed methods
-- (void)pushAppBrowser:(NSNotification *)notification;
+- (void)pushAppBrowser;
 - (void)destroyAppBrowserViewController;
 - (void)createTPAppViewControllerWithConnection:(TVConnection *)connection;
 - (void)pushTPAppViewController;
