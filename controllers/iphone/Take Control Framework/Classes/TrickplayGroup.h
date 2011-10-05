@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <YAJLiOS/YAJL.h>
 #import "TrickplayUIElement.h"
+#import "JSONKit.h"
 
 @protocol AdvancedUIScreenDelegate <NSObject>
 

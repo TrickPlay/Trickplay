@@ -122,7 +122,7 @@
         [JSON_dic setObject:[NSArray arrayWithObjects:touchNumbers, state, nil] forKey:@"args"];
         [JSON_dic setObject:@"on_touches" forKey:@"event"];
     
-        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic JSONString]];
     }
     [touchNumbers release];
     [JSON_dic release];
@@ -940,7 +940,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_hide" forKey:@"event"];
-        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic JSONString]];
     }
     // hide the object
     self.hidden = YES;
@@ -954,7 +954,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_hide" forKey:@"event"];
-        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic JSONString]];
     }
     // hide the object
     self.hidden = YES;
@@ -972,7 +972,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_show" forKey:@"event"];
-        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic JSONString]];
     }
     // show the object
     self.hidden = NO;
@@ -986,7 +986,7 @@
         NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
         [JSON_dic setObject:ID forKey:@"id"];
         [JSON_dic setObject:@"on_show" forKey:@"event"];
-        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic JSONString]];
     }
     //show the object
     self.hidden = NO;
@@ -1129,7 +1129,7 @@
         [completion setObject:ID forKey:@"id"];
         [completion setObject:@"on_completed" forKey:@"event"];
         if (manager && manager.appViewController) {
-            [manager.appViewController sendEvent:@"UX" JSON:[completion yajl_JSONString]];
+            [manager.appViewController sendEvent:@"UX" JSON:[completion JSONString]];
         }
     }
     

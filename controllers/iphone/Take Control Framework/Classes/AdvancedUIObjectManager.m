@@ -228,13 +228,12 @@
 #pragma mark -
 #pragma mark New Protocol
 
-- (void)reply:(NSString *)JSON_String {
-    if (!JSON_String) {
-        JSON_String = @"[null]";
+- (void)reply:(NSMutableData *)JSON_Data {
+    if (!JSON_Data) {
+        JSON_Data = [NSMutableData dataWithBytes:"[null]" length:6];
     }
-    JSON_String = [NSString stringWithFormat:@"%@\n", JSON_String];
-    NSData *data = [JSON_String dataUsingEncoding:NSUTF8StringEncoding];
-    [socketManager sendData:[data bytes] numberOfBytes:[data length]];
+    [JSON_Data appendData:[NSData dataWithBytes:"\n" length:1]];
+    [socketManager sendData:[JSON_Data bytes] numberOfBytes:[JSON_Data length]];
 }
 
 - (void)createObjectReply:(NSString *)ID {
@@ -243,8 +242,8 @@
     }
     
     NSDictionary *object = [NSDictionary dictionaryWithObject:ID forKey:@"id"];
-    NSString *JSON_String = [object yajl_JSONString];
-    [self reply:JSON_String];
+    NSMutableData *JSON_Data = [NSMutableData dataWithData:[object JSONData]];
+    [self reply:JSON_Data];
 }
 
 - (void)destroyObjectReply:(NSString *)ID absolute:(BOOL)absolute {
@@ -253,8 +252,8 @@
     }
     
     NSDictionary *object = [NSDictionary dictionaryWithObjectsAndKeys:ID, @"id", [NSNumber numberWithBool:absolute], @"destroyed", nil];
-    NSString *JSON_String = [object yajl_JSONString];
-    [self reply:JSON_String];
+    NSMutableData *JSON_Data = [NSMutableData dataWithData:[object JSONData]];
+    [self reply:JSON_Data];
 }
 
 - (void)createObject:(NSDictionary *)object {
@@ -347,7 +346,7 @@
     }
     [object setValuesFromArgs:args];
     
-    [self reply:@"[true]"];
+    [self reply:[NSMutableData dataWithBytes:"[true]" length:6]];
 }
 
 - (void)getValuesForObject:(NSDictionary *)JSON_object {
@@ -364,7 +363,7 @@
     // Set the properties to this dictionary
     [JSON_dictionary setObject:[object getValuesFromArgs:properties] forKey:@"properties"];
     // Convert dictionary to JSON string and send over the socket
-    [self reply:[JSON_dictionary yajl_JSONString]];
+    [self reply:[NSMutableData dataWithData:[JSON_dictionary JSONData]]];
 }
 
 - (void)deleteValuesForObject:(NSDictionary *)JSON_object {
@@ -377,7 +376,7 @@
         return;
     }
     [object deleteValuesFromArgs:args];    // TODO: finish this
-    [self reply:@"[false]"];
+    [self reply:[NSMutableData dataWithBytes:"[false]" length:7]];
 }
 
 - (TrickplayUIElement *)findObjectForID:(NSString *)ID {
@@ -420,7 +419,7 @@
     }
     
     if (result) {
-        [self reply:[[NSDictionary dictionaryWithObject:result forKey:@"result"] yajl_JSONString]];
+        [self reply:[NSMutableData dataWithData:[[NSDictionary dictionaryWithObject:result forKey:@"result"] JSONData]]];
     } else {
         [self reply:nil];
     }

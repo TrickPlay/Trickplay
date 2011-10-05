@@ -206,7 +206,7 @@
         [JSON_dic setObject:[NSArray arrayWithObjects:theText, nil] forKey:@"args"];
         [JSON_dic setObject:theText forKey:@"text"];
         
-        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+        [manager.appViewController sendEvent:@"UX" JSON:[JSON_dic JSONString]];
         [JSON_dic release];
     }
 }

@@ -154,7 +154,8 @@
     } else {
         // TODO: Need thorough testing for camera in different environments from
         // different ViewController trees.
-        [self.view.window.rootViewController presentModalViewController:imagePickerController animated:YES];
+        [delegate wantsToPresentCamera:imagePickerController];
+        //[self.view.window.rootViewController presentModalViewController:imagePickerController animated:YES];
         //[((UIViewController *)delegate).navigationController presentModalViewController:imagePickerController animated:YES];
     }
     if (imagePickerController.sourceType == UIImagePickerControllerSourceTypePhotoLibrary) {
@@ -174,7 +175,7 @@
             popOverController = nil;
         }
     } else if (picker.parentViewController) {
-        [picker.parentViewController dismissModalViewControllerAnimated:NO];
+        [picker.parentViewController dismissModalViewControllerAnimated:YES];
     }
 }
 
@@ -193,6 +194,7 @@
 
 - (void)doneEditing:(UIImage *)imageToUse {
     [self dismissImageEditor];
+    [self dismissTheCamera:imagePickerController];
     [self sendImage:imageToUse];
     //[delegate finishedPickingImage:imageToUse];
 
@@ -201,6 +203,7 @@
 
 - (void)cancelEditing {
     [self dismissImageEditor];
+    [self dismissTheCamera:imagePickerController];
     [self.delegate canceledPickingImage];
     //[self dismissTheCamera:nil];
 }
@@ -218,9 +221,10 @@
     imageEditor.targetHeight = targetHeight;
     imageEditor.mask = mask;
     
+    imageEditor.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
     // TODO: try this ((UIViewController *)delegate).parentViewController
     // TODO: if (navigationController) then do stuff else figure something else
-    [((UIViewController *)delegate).navigationController presentModalViewController:imageEditor animated:NO];
+    [imagePickerController presentModalViewController:imageEditor animated:YES];
 
     
     /*
@@ -263,7 +267,7 @@
         }
         
         if (editable) {
-            [self dismissTheCamera:picker];
+            //[self dismissTheCamera:picker];
             [self editImage:imageToUse];
         } else {
             [self sendImage:imageToUse];

@@ -132,6 +132,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @property (nonatomic, retain) id <ViewControllerAccelerometerDelegate> accelDelegate;
 @property (retain) id <AdvancedUIDelegate> advancedUIDelegate;
 
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id <TPAppViewControllerDelegate>)delegate;
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
@@ -184,12 +186,20 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     return [self initWithTVConnection:_tvConnection frame:CGRectNull delegate:nil];
 }
 
+- (id)initWithTVConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection frame:CGRectNull delegate:_delegate];
+}
+
 - (id)initWithTVConnection:(TVConnection *)_tvConnection frame:(CGRect)_frame delegate:(id<TPAppViewControllerDelegate>)_delegate {
     return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection frame:_frame delegate:_delegate];
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil frame:CGRectNull delegate:nil];
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id <TPAppViewControllerDelegate>)_delegate {
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:_tvConnection frame:CGRectNull delegate:_delegate];
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection frame:(CGRect)_frame delegate:(id <TPAppViewControllerDelegate>)_delegate {
@@ -203,6 +213,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         NSLog(@"TPAppView Start Service");
+        
+        self.view.autoresizesSubviews = YES;
         
         self.delegate = _delegate;
         tvConnection = [_tvConnection retain];
@@ -219,22 +231,31 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         // values for some retarded reason
         
         // Get the actual width and height of the available area
+        /*
         if (!CGRectIsNull(_frame)) {
             //NSLog(@"width: %f, height: %f", self.view.frame.size.width, self.view.frame.size.height);
             //NSLog(@"width: %f, height: %f", _frame.size.width, _frame.size.height);
             backgroundHeight = _frame.size.height;
             backgroundWidth = _frame.size.width;
-            self.view.frame = _frame;
-            backgroundView.frame = _frame;
+            self.view.layer.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+            backgroundView.layer.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+            NSLog(@"frame not null");
         } else {
             CGRect mainframe = [[UIScreen mainScreen] applicationFrame];
             backgroundHeight = mainframe.size.height;
-            backgroundHeight = backgroundWidth - 44;
+            backgroundHeight = backgroundHeight - 44;
             backgroundWidth = mainframe.size.width;
-            self.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-            backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+            self.view.layer.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+            backgroundView.layer.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+            NSLog(@"frame is null");
         }
-        
+        NSLog(@"view: %@", self.view);
+        NSLog(@"background: %@", backgroundView);
+        NSLog(@"backgroundWidth, backgroundHeight: %f, %f", backgroundWidth, backgroundHeight);
+        //*/
+        backgroundWidth = self.view.bounds.size.width;
+        backgroundHeight = self.view.bounds.size.height;
+
         // Manages resources created with declare_resource
         resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
         
@@ -265,7 +286,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         
         // the virtual remote for controlling the Television
         virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
-        virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight + 44.0);
+        virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
         [self.view addSubview:virtualRemote.view];
         virtualRemote.delegate = self;
         
@@ -329,6 +350,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     NSLog(@"Socket Error Occurred in TPAppView");
     [self handleDroppedConnection];
     // everything will get released from the navigation controller's delegate call
+    // TODO: make sure this tpappviewcontroller is now inactive.
     if (self.delegate) {
         [self.delegate tpAppViewControllerNoLongerFunctional:self];
     }
@@ -362,14 +384,14 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * Sends a key press over the asynch connection to Trickplay
  * (i.e. up key, down key, exit key)
  */
-- (void)sendKeyToTrickplay:(NSString *)thekey thecount:(NSInteger)thecount
+- (void)sendKeyToTrickplay:(NSString *)key count:(NSInteger)count
 {
 	if (socketManager)
 	{
 	    int index;	
-		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", thekey];
+		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", key];
         
-		for (index = 1; index <= thecount; index++) {
+		for (index = 1; index <= count; index++) {
 			[socketManager sendData:[sentData UTF8String]  numberOfBytes:[sentData length]];
 		}
     }
@@ -379,9 +401,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * Sends the 'escape' key keycode to Trickplay which should call exit() on
  * Trickplay's side.
  */
-- (void)exitTrickplayApp:(id)sender {
-    //Send Escape key to exit whatever app is currently running
-	[self sendKeyToTrickplay:@"FF1B" thecount:1];
+- (void)exitTrickplayApp {
+    [self sendKeyToTrickplay:@"FF1B" count:1];
 }
 
 
@@ -572,7 +593,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * Then hides text field.
  */
 - (IBAction)hideTextBox:(id)sender {
-    NSLog(@"textbox hidden");
     NSString *sentData = [NSString stringWithFormat:@"UI\tET\t%@\n", theTextField.text];
     [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 }
@@ -890,6 +910,17 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     }
 }
 
+- (void)wantsToPresentCamera:(UIViewController *)_camera {
+    if (!delegate) {
+        [camera release];
+        camera = nil;
+        [self canceledPickingImage];
+        
+        return;
+    }
+    [delegate tpAppViewController:self wantsToPresentCamera:_camera];
+}
+
 #pragma mark -
 #pragma mark - Modal Virtual Remote
 
@@ -954,7 +985,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     
     NSMutableDictionary *JSON_dic = [NSMutableDictionary dictionaryWithCapacity:2];
     [JSON_dic setObject:@"reset_hard" forKey:@"event"];
-    [self sendEvent:@"UX" JSON:[JSON_dic yajl_JSONString]];
+    [self sendEvent:@"UX" JSON:[JSON_dic JSONString]];
 }
 
 - (void)resetViewController {
@@ -1054,19 +1085,20 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     NSLog(@"TPAppView loaded!");
     
     // Get the actual width and height of the available area
-    
+    /*
     CGRect mainframe = self.view.frame;
     backgroundHeight = mainframe.size.height;
     backgroundWidth = mainframe.size.width;
-    
-    backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    */
+    /*
+    backgroundView.layer.bounds = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     for (UIView *view in backgroundView.subviews) {
-        view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+        view.layer.bounds = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     }
-    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    
+    advancedView.layer.bounds = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    foregroundView.layer.bounds = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    virtualRemote.view.layer.bounds = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight + 144.0);
+    */
     textView.layer.cornerRadius = 10.0;
     textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
     textView.layer.borderWidth = 7.0;
@@ -1094,7 +1126,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc] 
                                   initWithTitle:NSLocalizedString(@"Exit", @"")
                                   style:UIBarButtonItemStyleBordered
-								  target:self action:@selector(exitTrickplayApp:)] autorelease]; 
+								  target:self action:@selector(exitTrickplayApp)] autorelease]; 
 	self.navigationItem.rightBarButtonItem = exitItem;
     
     [loadingIndicator stopAnimating];
@@ -1143,22 +1175,22 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     [super viewDidAppear:animated];
     
     // Get the actual width and height of the available area
+    /*
     CGRect mainframe = self.view.frame;
     backgroundHeight = mainframe.size.height;
     backgroundWidth = mainframe.size.width;
-    
+    */
+    /*
     backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     for (UIView *view in backgroundView.subviews) {
         view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     }
     advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth+140, backgroundHeight);
+    */
     
-    if (!socketManager) {
-        [self.navigationController popToRootViewControllerAnimated:YES];
-    }
-    
+    [loadingIndicator stopAnimating];
     viewDidAppear = YES;
     [self performSelectorOnMainThread:@selector(createTimer) withObject:nil waitUntilDone:YES];
     
@@ -1170,10 +1202,14 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    // TODO: SHOULD NOT USE MAINFRAME!!!
+    //*
     CGRect mainframe = self.view.frame;
     backgroundHeight = mainframe.size.height;
     backgroundWidth = mainframe.size.width;
-    
+    //*/
+    //*
     backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     for (UIView *view in backgroundView.subviews) {
         view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
@@ -1181,6 +1217,15 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    //*/
+    textView.layer.cornerRadius = 10.0;
+    textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
+    textView.layer.borderWidth = 7.0;
+    
+    loadingIndicator.hidesWhenStopped = YES;
+    //loadingIndicator.bounds = self.view.frame;
+    loadingIndicator.center = CGPointMake(self.view.frame.size.width/2, self.view.frame.size.height/3);
+    [loadingIndicator startAnimating];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -1194,13 +1239,13 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 //*/
 
-/*
+//*
  // Override to allow orientations other than the default portrait orientation.
  - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
  // Return YES for supported orientations.
  return (interfaceOrientation == UIInterfaceOrientationPortrait);
  }
- */
+//*/
 
 - (void)didReceiveMemoryWarning {
     // Releases the view if it doesn't have a superview.
@@ -1422,7 +1467,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
                                  userInfo:nil];
 }
 
-- (void)exitTrickplayApp:(id)sender {
+- (void)exitTrickplayApp {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];

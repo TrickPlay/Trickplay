@@ -14,10 +14,10 @@
 
 
 /**
- * The TVBrowserDelegate Protocol informs the delegate of a TVBrowser object
- * of when TVs post their connection information in the form of an mDNS broadcast
- * to the network and informs the delegate when a connection between the iOS
- * device and the TV is made.
+ * The TVBrowserDelegate Protocol informs the TVBrowser's delegate when TVs
+ * post their connection information in the form of an NSNetService
+ * to the local network and informs the delegate when a connection
+ * between the iOS device and the TV is made.
  */
 
 @protocol TVBrowserDelegate <NSObject>
@@ -34,29 +34,30 @@
 
 /**
  * The TVBrowser class automatically searches for possible TVs to connect to.
- * The TVBrowser's delegate recieves calls when TVs advertise their connection
- * information over the local network. Calling:
+ * The TVs are represented by NSNetService objects. The TVBrowser's delegate
+ * receives calls when TVs advertise their connection information over the
+ * local network. Calling:
  * - (void)connectToService:(NSNetService *)service will tell the TVBrowser
- * to attempt to connect to the NSNetService object "service" provided that it is
- * broadcasted from at Trickplay enabled TV. Whether or not the connection
- * is established is passed back to the delegate as a message containing either
- * the TVConnection (that was established) or the NSNetService that the TVBrowser
- * failed to connect to.
+ * to attempt to connect to the NSNetService object "service" provided that the
+ * the service is broadcasted from a Trickplay enabled TV. If the connection is
+ * established a TVConnection object is passed back to the delegate in a message,
+ * else, the same NSNetService that the TVBrowser failed to connect to is passed to
+ * the delegate.
  *
  * The TVBrowser automatically begins searching for TVs when initialized.
  *
- * The TVBrowser does allow the owner to call - connectToService: multiple times
+ * The TVBrowser allows the owner to call - connectToService: multiple times
  * for multiple different connections. It is up to the owner to manage the 
  * TVConnection objects passed to the delegate. Releasing TVConnection objects
- * automatically disconnects the connection when the TVConnection object calls
- * dealloc on itself.
+ * automatically disconnects the connection when - dealloc is called on
+ * the TVConnection object.
  *
  * The owner of the TVBrowser may create a TVBrowserViewController which
  * provides an automatically updated UI for its host TVBrowser.
  * The TVBrowserViewController retains its TVBrowser, so the owner may release
- * the TVBrowser after creation. The caller to - createTVBrowserViewController
- * owns the returned TVBrowserViewController; the owner must release the returned
- * TVBrowserViewController when it is no longer in use.
+ * the TVBrowser after creation. However, The caller to - getNewTVBrowserViewController
+ * does not own the returned TVBrowserViewController; the caller must retain
+ * the returned TVBrowserViewController if it is intended for long term use.
  *
  * When the TVBrowser is searching for TVs it may slow down all connected
  * TVConnection objects, thus slowing down communication between already established
@@ -72,14 +73,13 @@
 
 // initialization
 - (id)initWithDelegate:(id <TVBrowserDelegate>)delegate;
-// Creates and returns a TVBrowserViewController with a retain count of 1.
-// The caller owns the returned TVBrowserViewController.
-- (TVBrowserViewController *)createTVBrowserViewController;
+// Creates and returns an autorelased TVBrowserViewController.
+- (TVBrowserViewController *)getNewTVBrowserViewController;
 // Returns an array of all NSNetServices that represent possible connections
 // to TVs over the local network.
 - (NSArray *)getAllServices;
-// Returns all NSNetService objects that there are currently active connections
-// to. This implies a TVConnection object exists for each one of the
+// Returns all NSNetService objects that an active TVConnection object
+// maintains a conneciton to. This implies a TVConnection object exists for each one of the
 // NSNetService objects in this array.
 - (NSArray *)getConnectedServices;
 // Returns an array of all NSNetService objects the TVBrowser is attempting
@@ -89,6 +89,7 @@
 - (void)startSearchForServices;
 // Stops the TVBrowser.
 - (void)stopSearchForServices;
+// Clears the cashe of TV services and attempts to reload available TVs.
 // Re-Starts the TVBrowser if already started, else starts the TVBrowser
 - (void)refreshServices;
 // The TVBrowser attempts to connect to the NSNetService object provided

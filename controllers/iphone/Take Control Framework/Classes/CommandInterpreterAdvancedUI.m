@@ -38,7 +38,7 @@
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
 
     fprintf(stderr, "\n\nAdvancedUI Command received: %s\n\n", [command UTF8String]);
-    NSDictionary *JSON_Object = [command yajl_JSON];
+    NSDictionary *JSON_Object = [command objectFromJSONString];
     //NSLog(@"object: %@", JSON_Object);
     
     CFAbsoluteTime beforecalltime = CFAbsoluteTimeGetCurrent();

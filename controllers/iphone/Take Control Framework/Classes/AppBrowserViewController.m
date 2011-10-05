@@ -8,7 +8,6 @@
 
 #import "AppBrowserViewController.h"
 #import "AppBrowser.h"
-#import <YAJLiOS/YAJL.h>
 #import "Extensions.h"
 
 
@@ -132,7 +131,7 @@
 
 - (void)viewDidUnload {
     [super viewDidUnload];
-    NSLog(@"AppBrowserController Unload");
+    NSLog(@"AppBrowserViewController didUnload");
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
     if (tableView) {
@@ -151,12 +150,17 @@
 }
 
 /*
+- (void)viewDidAppear:(BOOL)animated {
+    NSLog(@"AppBrowserViewController did appear");
+}
+//*/
+//*
  // Override to allow orientations other than the default portrait orientation.
  - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
  // Return YES for supported orientations.
  return (interfaceOrientation == UIInterfaceOrientationPortrait);
  }
- */
+//*/
 
 #pragma mark -
 #pragma mark Retrieving App Info From Network

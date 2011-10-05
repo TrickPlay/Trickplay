@@ -39,6 +39,7 @@
 - (void)setHttp_port:(NSUInteger)_port;
 - (void)setTVBrowser:(TVBrowser *)tvBrowser;
 - (void)setAppBrowser:(AppBrowser *)appBrowser;
+- (id)initWithService:(NSNetService *)service delegate:(id<TVConnectionDelegate>)_delegate;
 
 @end
 

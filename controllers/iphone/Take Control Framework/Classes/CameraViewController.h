@@ -14,6 +14,7 @@
 
 @required
 - (void)finishedPickingImage:(UIImage *)image;
+- (void)wantsToPresentCamera:(UIViewController *)camera;
 - (void)finishedSendingImage;
 - (void)canceledPickingImage;
 

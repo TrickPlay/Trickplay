@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CommandInterpreter.h"
-#import <YAJLiOS/YAJL.h>
+#import "JSONKit.h"
 
 
 @protocol CommandInterpreterAdvancedUIDelegate <NSObject>

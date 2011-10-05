@@ -36,12 +36,6 @@
 
     self.navigationController.delegate = self;
     
-    // After selecting a service the controller will try to make a connection
-    // to the said service. Once the service is connected this notification is
-    // called to RootViewController to push the AppBrowserController
-    // to the UINavigationController
-    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushAppBrowser:) name:@"ConnectionEstablishedNotification" object:nil];
-    
     tvBrowserViewController.delegate = self;
     tvBrowserViewController.tvBrowser.delegate = self;
     
@@ -74,8 +68,6 @@
         tvBrowserViewController.delegate = nil;
         self.tvBrowserViewController = nil;
     }
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -105,8 +97,8 @@
         connection.delegate = self;
     
         [self destroyAppBrowserViewController];
-        AppBrowser *appBrowser = [[[AppBrowser alloc] initWithConnection:connection delegate:self] autorelease];
-        appBrowserViewController = [appBrowser createAppBrowserViewController];
+        AppBrowser *appBrowser = [[[AppBrowser alloc] initWithTVConnection:connection delegate:self] autorelease];
+        appBrowserViewController = [[appBrowser getNewAppBrowserViewController] retain];
         appBrowserViewController.delegate = self;
     
         [self createTPAppViewControllerWithConnection:connection];
@@ -157,14 +149,14 @@
 - (void)appBrowser:(AppBrowser *)appBrowser didReceiveAvailableApps:(NSArray *)apps {
     refreshCount++;
     if (navigationController.visibleViewController == tvBrowserViewController && refreshCount > 1) {
-        [self pushAppBrowser:nil];
+        [self pushAppBrowser];
     }
 }
 
 - (void)appBrowser:(AppBrowser *)appBrowser didReceiveCurrentApp:(AppInfo *)app {
     refreshCount++;
     if (navigationController.visibleViewController == tvBrowserViewController && refreshCount > 1) {
-        [self pushAppBrowser:nil];
+        [self pushAppBrowser];
     }
 }
 
@@ -197,9 +189,8 @@
  */
 - (void)createTPAppViewControllerWithConnection:(TVConnection *)tvConnection {
     CGRect frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height - 44.0);
-    appViewController = [[TPAppViewController alloc] initWithTVConnection:tvConnection frame:frame delegate:self];
+    appViewController = [[TPAppViewController alloc] initWithTVConnection:tvConnection delegate:self];
     
-    assert(appViewController);
     if (!appViewController) {
         return;
     }
@@ -239,7 +230,7 @@
  * that a connection to a service has been established. (Connections managed
  * in classes other than this one).
  */
-- (void)pushAppBrowser:(NSNotification *)notification {
+- (void)pushAppBrowser {
     NSLog(@"Pushing App Browser");
     // If self is not the visible view controller then it has no authority
     // to push another view controller to the top of the view controller stack.
@@ -406,6 +397,10 @@
     [self resetViewControllers];
 }
 
+- (void)tpAppViewController:(TPAppViewController *)tpAppViewController wantsToPresentCamera:(UIViewController *)camera {
+    [self presentModalViewController:camera animated:YES];
+}
+
 #pragma mark -
 #pragma mark TVConnectionDelegate stuff
 
@@ -483,9 +478,6 @@
     }
     
     self.navigationController = nil;
-    
-    // Remove the "PushAppBrowserNotification" from the default NSNotificationCenter.
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 
     [super dealloc];
 }
