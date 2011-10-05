@@ -10,6 +10,7 @@ public class GameRequestTO {
 	private int maxPlayers=1;
 	private boolean leaderboardFlag=true;
 	private boolean achievementsFlag=true;
+	private boolean turnBasedFlag;
 	private boolean enforceTurns=false;
 	private boolean allowWildCardInvitation = false;
 
@@ -19,7 +20,9 @@ public class GameRequestTO {
 		
 	public GameRequestTO(String name, String appId, Long vendorId,
 			int minPlayers, int maxPlayers,
-			boolean leaderboardFlag, boolean achievementsFlag, boolean allowWildCardInvitation, boolean enforceTurns) {
+			boolean leaderboardFlag, boolean achievementsFlag, 
+			boolean turnBasedFlag, boolean enforceTurns,
+			boolean allowWildCardInvitation) {
 		super();
 		this.name = name;
 		this.appId = appId;
@@ -28,6 +31,7 @@ public class GameRequestTO {
 		this.maxPlayers = maxPlayers;
 		this.leaderboardFlag = leaderboardFlag;
 		this.achievementsFlag = achievementsFlag;
+		this.turnBasedFlag = turnBasedFlag;
 		this.enforceTurns = enforceTurns;
 		this.allowWildCardInvitation = allowWildCardInvitation;
 	}
@@ -42,12 +46,13 @@ public class GameRequestTO {
 		maxPlayers = game.getMaxPlayers();
 		leaderboardFlag = game.isLeaderboardFlag();
 		achievementsFlag = game.isAchievementsFlag();
+		turnBasedFlag = game.isTurnBasedFlag();
 		enforceTurns = game.isEnforceTurns();
 		allowWildCardInvitation = game.isAllowWildCardInvitation();
 	}
 
 	public Game toGame() {
-		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag, enforceTurns, allowWildCardInvitation);
+		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag, turnBasedFlag, enforceTurns, allowWildCardInvitation);
 	}
 	
 	public String getName() {
@@ -122,5 +127,13 @@ public class GameRequestTO {
     public void setAllowWildCardInvitation(boolean allowWildCardInvitation) {
         this.allowWildCardInvitation = allowWildCardInvitation;
     }
+
+	public boolean isTurnBasedFlag() {
+		return turnBasedFlag;
+	}
+
+	public void setTurnBasedFlag(boolean turnBasedFlag) {
+		this.turnBasedFlag = turnBasedFlag;
+	}
 	
 }

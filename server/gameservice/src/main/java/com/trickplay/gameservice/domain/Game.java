@@ -32,6 +32,7 @@ public class Game extends BaseEntity implements Serializable {
     private int maxPlayers;
     private boolean leaderboardFlag;
     private boolean achievementsFlag;
+    private boolean turnBasedFlag;
     private boolean enforceTurns;
     private boolean allowWildCardInvitation;
     //private boolean allow
@@ -46,8 +47,9 @@ public class Game extends BaseEntity implements Serializable {
             String appId, 
             int minPlayers, 
             int maxPlayers, 
-            boolean leaderboardFlag, 
+            boolean leaderboardFlag,
             boolean achievementsFlag,
+            boolean turnBasedFlag,
             boolean allowWildCardInvitation,
             boolean enforceTurns
             ) {
@@ -58,11 +60,12 @@ public class Game extends BaseEntity implements Serializable {
       this.maxPlayers = maxPlayers;
       this.leaderboardFlag = leaderboardFlag;
       this.achievementsFlag = achievementsFlag;
+      this.turnBasedFlag = turnBasedFlag;
       this.enforceTurns = enforceTurns;
       this.allowWildCardInvitation = allowWildCardInvitation;
     }
     
-    @Column(unique=true)
+	@Column(unique=true)
     public String getAppId() {
         return appId;
     }
@@ -139,5 +142,14 @@ public class Game extends BaseEntity implements Serializable {
         this.allowWildCardInvitation = allowWildCardInvitation;
     }
     
+    public boolean isTurnBasedFlag() {
+		return turnBasedFlag;
+	}
+
+	public void setTurnBasedFlag(boolean turnBasedFlag) {
+		this.turnBasedFlag = turnBasedFlag;
+	}
+
+
     
 }

@@ -9,6 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -35,6 +37,7 @@ public class GamePlayInvitation extends BaseEntity implements Serializable {
     
     private User reservedBy;
     private Date reservedAt;
+    private Date reservedUntil;
     
     public GamePlayInvitation() {
         super();
@@ -70,12 +73,12 @@ public class GamePlayInvitation extends BaseEntity implements Serializable {
         this.requestor = requestor;
     }
 
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="recipient_id")
     public User getRecipient() {
         return recipient;
     }
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="recipient_id")
     public void setRecipient(User recipient) {
         this.recipient = recipient;
     }
@@ -94,6 +97,8 @@ public class GamePlayInvitation extends BaseEntity implements Serializable {
         return recipient == null;
     }
     
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="reserved_by")
     public User getReservedBy() {
         return reservedBy;
     }
@@ -102,6 +107,7 @@ public class GamePlayInvitation extends BaseEntity implements Serializable {
         this.reservedBy = reservedBy;
     }
     
+    @Temporal(TemporalType.TIMESTAMP)
     public Date getReservedAt() {
         return reservedAt;
     }
@@ -109,5 +115,15 @@ public class GamePlayInvitation extends BaseEntity implements Serializable {
     public void setReservedAt(Date reservedAt) {
         this.reservedAt = reservedAt;
     }
+
+    @Temporal(TemporalType.TIMESTAMP)
+	public void setReservedUntil(Date reservedUntil) {
+		this.reservedUntil = reservedUntil;
+	}
+
+
+	public Date getReservedUntil() {
+		return reservedUntil;
+	}
 
 }
