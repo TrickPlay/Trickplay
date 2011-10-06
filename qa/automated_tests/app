@@ -1,0 +1,9 @@
+app=
+{
+	id		= "com.trickplay.tests.apps.automated-gui",
+	release		= "1",
+	version		= "1.0",
+	name 		= "Automated GUI Tests",
+	author		= "Trickplay QA",
+	copyright	= "Trickplay Inc."
+}

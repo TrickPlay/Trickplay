@@ -1,0 +1,74 @@
+pws_xml = {
+    current_observation = {
+        temp_f = "55",
+        location={
+            city="Palo Alto",
+            state="CA"
+        }
+    }
+}
+fcast_xml={
+    forecast={
+        txt_forecast={
+            forecastday={
+                {
+                    fcttext="Mostly cloudy. A chance of showers. Highs in the upper 50s. South winds 10 to 20 mph. ",
+                    title="Today",
+                },
+            }
+        },
+        simpleforecast={
+            forecastday={
+                {
+                    conditions="Partly Cloudy",
+                    date={
+                        weekday="Tuesday",
+                    },
+                    high={fahrenheit="57"},
+                    low={fahrenheit="40"},
+                    icon="rain"
+                },
+                {
+                    date={
+                        weekday="Wednesday",
+                    },
+                    high={fahrenheit="60"},
+                    low={fahrenheit="42"},
+                    icon="chancerain"
+                },
+                {
+                    date={
+                        weekday="Thursday",
+                    },
+                    high={fahrenheit="62"},
+                    low={fahrenheit="44"},
+                    icon="mostlycloudy"
+                },
+                {
+                    date={
+                        weekday="Friday",
+                    },
+                    high={fahrenheit="59"},
+                    low={fahrenheit="40"},
+                    icon="partlycloudy"
+                },
+                {
+                    date={
+                        weekday="Saturday",
+                    },
+                    high={fahrenheit="64"},
+                    low={fahrenheit="45"},
+                    icon="clear"
+                },
+                {
+                    date={
+                        weekday="Sunday",
+                    },
+                    high={fahrenheit="61"},
+                    low={fahrenheit="47"},
+                    icon="fog"
+                },
+            }
+        },
+    }
+}
