@@ -58,6 +58,9 @@ Group: SDK Tutorial {
 	File: The animate() Function (no auto-title, docs/rte/tutorial/animate.txt)
 	File: The Timeline Class (no auto-title, docs/rte/tutorial/timeline.txt)
 	File: The Path Class (no auto-title, docs/rte/tutorial/path.txt)
+	File: An Animation Trick (no auto-title, docs/rte/tutorial/scale.txt)
+	File: Onward and Outward (no auto-title, docs/rte/tutorial/onward.txt)
+	File: Tutorial Source Code (no auto-title, docs/rte/tutorial/code.txt)
 }
 
 Group: Programmer's Guide  {
