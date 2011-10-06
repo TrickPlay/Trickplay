@@ -1,0 +1,12 @@
+frost : at (0,680) if temp < 32, unless raining
+
+=Snowing===
+snow : at (0,680) above frost
+snowflakes : blow along l-2-r at various sizes and speeds (*wind speed) behind the frost/snow, fading out. Blurrier set should be lowest, smaller, move slower.
+snowflakes2 : blow around faster than large set
+
+=Rain======
+clouds in front and behind, rain alpha-falls onto screen + sometimes animates a little downward, if it hits another raindrop, they combine + might fall down
+
+=Sun=======
+flare3 is behind, 1+2 in front, animating with rotation/alpha/size

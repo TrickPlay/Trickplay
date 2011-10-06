@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.cannon",
+    release     = "3",
+    version     = "1.1",
+    name        = "Zombie Blaster",
+    author      = "James Rex Fenley",
+    copyright   = "© Trickplay Inc."
+}
+

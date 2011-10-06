@@ -1,0 +1,107 @@
+Topic: Using Groups for Screen Layout
+
+In addition to our application's header area, we will define two demo areas. Each demo area will consist of multiple rectangles and some footer text. Rather than handle each element individually, we'll combine them into a single Group object to simplify their handling requirements.
+
+As its name suggests, a <Group> object contains multiple elements. The Group can be positioned on the display, and each of the Group's elements can specify its position relative to the Group. Manipulations performed on the Group object--such as moving, rotating, and scaling it--automatically affect all the elements in the Group, thereby simplifying the coding process.
+
+For the Tutorial's demo area, we'll first create a Group object and add it to the screen. Add the following code to the Tutorial's main.lua file.
+
+	(code)
+	-- Create DemoArea1 Group and add it to the screen
+	demoArea1 = Group( { position = { 200, 300 } } )
+	screen:add( demoArea1 )
+	(end)
+
+	Like the Rectangle constructor, the Group constructor can accept a table of property settings, which we use to define the demo area's position on the display. The positions of all elements added to the Group will be offsets, relative to the Group's position.
+
+	Next, create two Rectangles to form the demo area. The only difference from previous Rectangle creations is that their positions are relative to their Group, instead of the screen. We're also defining a border for the inner Rectangle.
+
+	(code)
+	-- Create DemoArea1's base
+	demoBase1 = Rectangle( {
+					size     = { 650, 600 },
+					position = { 0, 0 },
+					color    = { 211, 211, 211, 128 }
+	         	} )
+	         	
+	-- Create DemoArea1's display space
+	demoSpace1 = Rectangle( {
+					size     = { 550, 450 },
+					position = { 50, 50 },
+					color    = { 220, 220, 220, 128 },
+					border_width = 4,
+					border_color = { 139, 69, 19, 128 }
+				 } )
+	(end)
+	
+	Finally, we add the two Rectangles to the demoArea1 Group. Because the Group has been added to the screen, all elements contained in the Group will be considered part of the screen automatically.
+	
+	(code)
+	-- Add base and display space rectangles to demoArea group
+	demoArea1:add( demoBase1, demoSpace1 )
+	(end)
+	
+	Creation of a second demo area simply repeats the previous steps, changing only the variable names and the position of the Group.
+	
+	(code)
+	-- Create a second demo area, repeating the previous steps
+	demoArea2 = Group( { position = { 1050, 300 } } )
+	screen:add( demoArea2 )
+	
+	-- Create DemoArea2's base and display space
+	demoBase2  = Rectangle( {
+					size     = { 650, 600 },
+					position = { 0, 0 },
+					color    = { 211, 211, 211, 128 }
+				 } )
+	demoSpace2 = Rectangle( {
+					size     = { 550, 450 },
+					position = { 50, 50 },
+					color    = { 220, 220, 220, 128 },
+					border_width = 4,
+					border_color = { 139, 69, 19, 128 }
+				 } )
+				 
+    -- Add base and display space rectangles to demoArea group
+	demoArea2:add( demoBase2, demoSpace2 )
+	(end)
+	
+	The final screen layout we'll do is add a descriptive footer to each demo area. These are simply additional instances of the Text object described earlier when the header was created. Because the Tutorial application is world-ready, the text strings are defined in the localized strings.lua file.
+	
+	(code)
+	-- *** strings.lua ***
+	
+	return{
+		header = "TrickPlay SDK Tutorial Animations",
+		demoFooter1 = "animate()",
+		demoFooter2 = "Timeline",
+	}
+	(end)
+
+	(code)
+	-- *** main.lua ***
+	
+	-- Create footers for demo areas
+	demoFooter1 = Text( {
+					text     = localStr.demoFooter1,
+					font     = "DejaVu Serif Bold 40px",
+					color    = { 50, 50, 50, 255 },
+					position = { 225, 520 }
+				  } )
+	demoArea1:add( demoFooter1 )
+	
+	demoFooter2 = Text( {
+					text     = localStr.demoFooter2,
+					font     = "DejaVu Serif Bold 40px",
+					color    = { 50, 50, 50, 255 },
+					position = { 225, 520 }
+				  } )
+	demoArea2:add( demoFooter2 )
+	(end)
+	
+	Update the Tutorial's main.lua and strings.lua files with the code to create the two demo areas. Run the application and you will see the program's screen layout as shown below.
+	
+(see images/scrLayout.png)
+
+	Our main.lua file is getting a bit large. All nontrivial and well-structured programs are organized in multiple source files. Before we add any more logic to our program, we'll create a new source file and attach the new file to our application.
+

@@ -1,0 +1,11 @@
+Start of the game = startup.wav  (when Start button is "pushed")
+
+Cars pass by (random between these two) = passby.wav, horngoby.wav
+
+Crash = inditch.wav
+
+Gear changing when accelerating = loud01.wav  (repeat over and over to mimic gear changes)
+
+Engine sound after gear changes = car_idle.wav  
+
+Occasional horn beep when other cars are present = beepbeep.wav

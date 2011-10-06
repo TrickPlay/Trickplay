@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.tests.video_tester",
+    release     = "1",
+    version     = "1.0",
+    name        = "Video Tester",
+    author      = "Trickplay QA",
+    copyright   = "© Trickplay Inc."
+}
+

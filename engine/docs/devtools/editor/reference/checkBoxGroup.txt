@@ -84,7 +84,7 @@ You can assign values to the selected_items property to set a checkbox's checked
 	checkBox.name = "MyCheckBox"
 	checkBox.position = { 700, 500, 0 }
 	
-	-- This code can be placed in an event handler, such as a button.pressed() handler,
+	-- This code can be placed in an event handler, such as a button.on_press() handler,
 	-- to toggle the checkbox's checked/unchecked state.
 	if checkBox.selected_items[ 1 ] == 1 then
 		-- Box is currently checked; uncheck it
@@ -119,9 +119,9 @@ You can assign values to the selected_items property to set a checkbox's checked
 						-- Uncheck it (Note: x == index of checkbox in selected_items table)
 						table.remove( cbox.selected_items, x )
 						
-						-- If rotate_func() is defined, call it
-						if( cbox.rotate_func ~= nil ) then
-							cbox.rotate_func( cbox.selected_items )
+						-- If on_selection_change() is defined, call it
+						if( cbox.on_selection_change ~= nil ) then
+							cbox.on_selection_change( cbox.selected_items )
 						end
 						
 						-- Done
@@ -130,13 +130,13 @@ You can assign values to the selected_items property to set a checkbox's checked
 				end
 
 				-- We searched the entire selected_items table and our checkbox was not in it
-				-- Thus, the checkbox is not checked. Uncheck it.
+				-- Thus, the checkbox is not checked. Check it.
 				-- Note: i == index of checkbox in items table
 				table.insert( cbox.selected_items, i )
 				
-				-- If rotate_func() is defined, call it
-				if( cbox.rotate_func ~= nil ) then
-					cbox.rotate_func( cbox.selected_items )
+				-- If on_selection_change() is defined, call it
+				if( cbox.on_selection_change ~= nil ) then
+					cbox.on_selection_change( cbox.selected_items )
 				end
 				
 				-- Done
@@ -186,7 +186,7 @@ You can assign values to the selected_items property to set a checkbox's checked
 	end
 	(end)
 	
-*See Also:* the <items> and <rotate_func> properties
+*See Also:* the <items> property and <on_selection_change> event handler
 
 
 
@@ -211,7 +211,7 @@ The check_size property is a table of integers specifying the pixel width and he
 
 *Default Setting:* { 25, 25 }
 
-*See Also:* the <box_size> and <box_width> properties
+*See Also:* the <box_size> and <box_border_width> properties
 
 
 
@@ -261,7 +261,7 @@ Property: text_font
 
 The text_font property is a text string describing the font to use for the CheckBox's descriptive text. The font string's format is described in the <Text.font> section.
 
-*Default Setting:* "DejaVu Sans 30px"
+*Default Setting:* "FreeSans Medium 30px"
 
 *See Also:* the <text_color> property
 
@@ -291,7 +291,7 @@ Predefined skins are provided, and the developer may define a custom skin. The f
 "CarbonCandy" - an alternative skin. Flashy, attracts attention
 "custom" - the skin is defined by the developer
 
-When the "custom" skin is selected, the developer must define the object's <box_width>, <box_size>, <box_color>, <fill_color>, <focus_fill_color> and <focus_color> properties.
+When the "custom" skin is selected, the developer must define the object's <box_border_width>, <box_size>, <box_color>, <fill_color>, <focus_fill_color> and <focus_box_color> properties.
 
 *Default Setting:* "default"
 
@@ -299,17 +299,17 @@ When the "custom" skin is selected, the developer must define the object's <box_
 
 Property: box_size
 
-The box_size property is a table of integers specifying the pixel width and height, respectively, of the checkbox's box. The box may define a border with the <box_width> property.
+The box_size property is a table of integers specifying the pixel width and height, respectively, of the checkbox's box. The box may define a border with the <box_border_width> property.
 
 *Default Setting:* { 25, 25 }
 
-*See Also:* the <check_size> and <box_width> properties
+*See Also:* the <check_size> and <box_border_width> properties
 
 
 
-Property: box_width
+Property: box_border_width
 
-The box_width property is an integer value specifying the checkbox's border width in pixels.
+The box_border_width property is an integer value specifying the checkbox's border width in pixels.
 
 *Default Setting:* 2
 
@@ -327,6 +327,18 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
 *See Also:* the <text_color> and <fill_color> properties
+
+
+
+Property: focus_box_color
+
+The focus_box_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's border when the object has the input focus.
+
+The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+
+*Default Setting:* { 0, 255, 0, 255 } (green and completely opaque)
+
+*See Also:* the <box_color> property
 
 
 
@@ -354,27 +366,15 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 
 
-Property: focus_color
+Function: set_selection
 
-The focus_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's border when the object has the input focus.
+The set_selection() function updates the CheckBox object's selected_items property and calls the object's on_selection_change() event handler.
 
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
-
-*Default Setting:* { 0, 255, 0, 255 } (green and completely opaque)
-
-*See Also:* the <box_color> property
-
-
-
-Function: select_button
-
-The select_button() function updates the CheckBox object's selected_items property and calls the object's rotate_func() event handler.
-
-*Prototype:* select_button( new_selected )
+*Prototype:* set_selection( new_selection )
 
 *Argument:*
 
-new_selected - table of integer indexes into the <items> property table specifying the checked checkboxes in the CheckBox object. The first item in the items table is at index 1.
+new_selection - table of integer indexes into the <items> property table specifying the checked checkboxes in the CheckBox object. The first item in the items table is at index 1.
 
 *Return Value:* None
 
@@ -409,37 +409,39 @@ The remove_item() function removes the last item in the CheckBox object's <items
 
 
 
-Function: on_focus_in
+Function: set_focus
 
-The on_focus_in() function forces the input focus to the CheckBox. To accurately understand what this function does, think of it as get_focus().
+The set_focus() function forces the input focus to the CheckBox.
 
-*Prototype:* on_focus_in()
+*Prototype:* set_focus()
 
 *Return Value:* None
 
-*See Also:* the <on_focus_out> function
+*See Also:* the <clear_focus> function
 
 
 
-Function: on_focus_out
+Function: clear_focus
 
-The on_focus_out() function releases the input focus from the CheckBox object. To accurately understand what this function does, think of it as remove_focus().
+The clear_focus() function releases the input focus from the CheckBox object.
 
-After calling on_focus_out(), no screen element has the input focus.
+After calling clear_focus(), no screen element has the input focus.
 
-*Prototype:* on_focus_out()
+*Prototype:* clear_focus()
 
 *Arguments:* None.
 
 *Return Value:* None.
 
+*See Also:* the <set_focus> function
 
 
-Event Handler: rotate_func
 
-The rotate_func() event handler is called after any checkbox in the CheckBox object has changed its checked/unchecked state. Based upon the checked/unchecked state, the program can perform appropriate operations, such as displaying or hiding display elements.
+Event Handler: on_selection_change
 
-*Prototype:* rotate_func( selected_items )
+The on_selection_change() event handler is called after any checkbox in the CheckBox object has changed its checked/unchecked state. Based upon the checked/unchecked state, the program can perform appropriate operations, such as displaying or hiding display elements.
+
+*Prototype:* on_selection_change( selected_items )
 
 *Argument:*
 

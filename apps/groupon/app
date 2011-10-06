@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.groupon",
+    release     = "2",
+    version     = "1.0",
+    name        = "Groupon",
+    author      = "Francesco Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}
