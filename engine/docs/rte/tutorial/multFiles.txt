@@ -1,0 +1,12 @@
+Topic: Dividing a Program Into Multiple Source Files
+
+Developing a substantial program in a single gargantuan source file is not a good practice. Professional TrickPlay applications can be organized into multiple source files by using the Lua programming language's dofile() and loadfile() functions. (Note: The Lua require() function is not supported in the TrickPlay Engine for security reasons.)
+
+We used dofile() earlier to process our localized text strings. The dofile() function loads and runs a specified Lua source file. Any return values and errors are handled appropriately. Each time dofile() is called, the Lua source file is "compiled" to an intermediate form.
+
+The loadfile() function loads a specified Lua source file, but does not run it. Instead, it compiles the file to an intermediate form and returns the compiled code as a function. If an error occurs, the returned function is nil and an error code is also returned. The loadfile() function is useful for code that is executed multiple times because the compilation occurs only when the file is loaded and not every time it is run.
+
+For both dofile() and loadfile(), the specified filename may include a subdirectory located in the application bundle's directory structure; files located outside the application bundle are not accessible.
+
+The Tutorial application will place the remainder of its code in files separate from main.lua and have main.lua load and run them using dofile().
+

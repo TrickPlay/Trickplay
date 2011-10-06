@@ -12,17 +12,9 @@ public class GamePlayInvitationTO {
 	private Long id;
 	@NotNull
 	private Long requestorId;
-	@NotNull
 	private Long recipientId;
 	private Long gameId;
 	private Long gameSessionId;
-	public Long getGameId() {
-		return gameId;
-	}
-
-	public void setGameId(Long gameId) {
-		this.gameId = gameId;
-	}
 	private InvitationStatus status;
 	private Date created;
 	private Date updated;
@@ -36,8 +28,9 @@ public class GamePlayInvitationTO {
 			throw new IllegalArgumentException("GamePlayInvitation is null");
 		this.id = gpi.getId();
 		this.requestorId = gpi.getRequestor().getId();
-		this.recipientId = gpi.getRecipient().getId();
+		this.recipientId = gpi.getRecipient()!=null ? gpi.getRecipient().getId() : null;
 		this.gameSessionId = gpi.getGameSession().getId();
+		this.gameId = gpi.getGameSession().getGame().getId();
 		this.status = gpi.getStatus();
 		this.created = gpi.getCreated();
 		this.updated = gpi.getUpdated();
@@ -61,6 +54,13 @@ public class GamePlayInvitationTO {
 	public void setRecipientId(Long recipientId) {
 		this.recipientId = recipientId;
 	}
+    public Long getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(Long gameId) {
+        this.gameId = gameId;
+    }
 	
 	public Long getGameSessionId() {
 		return gameSessionId;

@@ -95,7 +95,7 @@ public class GamePlayState extends BaseEntity implements Serializable {
 	}
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="turn_id", updatable=false)
+	@JoinColumn(name="turn_id")
 	public User getTurn() {
 		return turn;
 	}

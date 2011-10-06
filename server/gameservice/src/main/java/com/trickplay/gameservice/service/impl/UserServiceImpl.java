@@ -79,7 +79,7 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 		if (d == null) {
 			device.setOwner(u);
 			device.setId(null);
-			deviceService.persist(device);
+			deviceService.create(device);
 			d = device;
 		} else {
 			// implicitly unregistering previous owner
@@ -99,8 +99,34 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 		Vendor v = new Vendor();
 		v.setName(vendorName);
 		v.setPrimaryContact(u);
-		vendorService.persist(v);
+		vendorService.create(v);
 		return v;
 	}
+
+	@Transactional
+    public void update(User entity) {
+        if (entity==null)
+            throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, ExceptionContext.make("User", null));
+        User existing;
+        if (entity.getId()!=null) {
+            existing = find(entity.getId());
+            if (existing == null) {
+                throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.id", entity.getId()));
+            }
+        } else {
+            existing = findByName(entity.getUsername());
+            if (existing == null) {
+                throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.username", entity.getUsername()));
+            }
+        }
+        
+        existing.setAllowHighScoreMessages(entity.isAllowHighScoreMessages());
+        existing.setAllowAchievementMessages(entity.isAllowAchievementMessages());
+        if (entity.getEmail()!=null && !entity.getEmail().equals(existing.getEmail()))
+            existing.setEmail(entity.getEmail());
+        //existing.setPassword(entity.getPassword());
+        //= find(entity.getId());
+        
+    }
 
 }

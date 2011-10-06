@@ -11,6 +11,11 @@ import com.trickplay.gameservice.service.AuthorityService;
 @Service("authorityService")
 @Repository
 public class AuthorityServiceImpl extends GenericDAOWithJPA<Authority, Long> implements AuthorityService {
+
+    public void create(Authority entity) {
+        persist(entity);
+        
+    }
 /*
 	@PostConstruct
 	public void initialize() throws Exception {
