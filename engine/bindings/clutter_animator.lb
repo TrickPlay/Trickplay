@@ -268,8 +268,6 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 			ClutterColor color;
 			ClutterUtil::to_clutter_color(L, index, &color);
 			
-			//ClutterColor color = ClutterUtil::string_to_color(lua_tostring(L, index));
-
             GValue gvalue={0};
 			g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
 			clutter_value_set_color(&gvalue, &color);
