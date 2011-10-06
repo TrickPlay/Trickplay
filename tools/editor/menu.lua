@@ -1,4 +1,5 @@
 editor_use = true
+
 local menu = {}
 local menu_items
 local menu_bar = Image
@@ -18,7 +19,7 @@ local menuButton_file = ui_element.menuButton
 		ui_height = 61,
 		skin = "editor",
 		label = "File",
-		focus_color = {27,145,27,255},
+		focus_border_color = {27,145,27,255},
 		text_color = "#cccccc",
 		text_font = "FreeSans Bold 28px",
 		focus_text_color = "#cccccc", 
@@ -41,7 +42,8 @@ local menuButton_file = ui_element.menuButton
     	label_text_color = "#808080",
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
-		ui_position = {249,28,0}
+		ui_position = {249,28,0}, 
+		button_name = "menuButton_file", 
 	}
 
 
@@ -59,13 +61,33 @@ menuButton_file.extra.focus = {[65293] = "menuButton_file", [65363] = "menuButto
 
 menuButton_file.extra.reactive = true
 
+function menuButton_file:on_enter()
+
+  	if menu_bar_hover == false then return true end 
+
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_file" then 
+		local temp_focus = current_focus
+	   	current_focus.clear_focus(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_file" ) then 
+		menuButton_file.extra.set_focus(keys.Return)
+		current_focus.name = "menuButton_file"
+    end 
+
+	return true
+end 
+
 local menuButton_edit = ui_element.menuButton
 	{
 		ui_width = 142,
 		ui_height = 61,
 		skin = "editor",
 		label = "Edit",
-		focus_color = {27,145,27,255},
+		focus_border_color = {27,145,27,255},
 		text_color = "#cccccc",
 		text_font = "FreeSans Bold 28px",
 		border_width = 1,
@@ -90,6 +112,7 @@ local menuButton_edit = ui_element.menuButton
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 		ui_position = {489,28,0}, 
+		button_name = "menuButton_edit", 
 	}
 
 --menuButton_edit.insert_item(1,{type="item", string="Undo", bg=assets("assets/menu-item.png"), focus=assets("assets/menu-item-focus.png"), f=function() screen:grab_key_focus() end,  icon=Text{text="Z"}})
@@ -115,6 +138,25 @@ menuButton_edit.extra.focus = {[65363] = "menuButton_arrange", [65293] = "menuBu
 
 menuButton_edit.extra.reactive = true
 
+ function menuButton_edit:on_enter()
+ 	
+  	if menu_bar_hover == false then return true end 
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_edit" then 
+		local temp_focus = current_focus
+	   	current_focus.clear_focus(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_edit") then 
+		menuButton_edit.extra.set_focus(keys.Return)
+		current_focus.name = "menuButton_edit"
+    end 
+
+	return true
+ end 
+
 
 local menuButton_arrange = ui_element.menuButton
 	{
@@ -122,7 +164,7 @@ local menuButton_arrange = ui_element.menuButton
 		ui_height = 61,
 		skin = "editor",
 		label = "Arrange",
-		focus_color = {27,145,27,255},
+		focus_border_color = {27,145,27,255},
 		text_color = "#cccccc",
 		text_font = "FreeSans Bold 28px",
 		border_width = 1,
@@ -147,6 +189,7 @@ local menuButton_arrange = ui_element.menuButton
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 		ui_position = {729,28,0}, 
+		button_name = "menuButton_arrange", 
 	}
 
 menuButton_arrange.insert_item(1,{type="label", string="  Align:", bg=assets("assets/menu-item-label.png")} )
@@ -170,6 +213,25 @@ menuButton_arrange.extra.focus = {[65363] = "menuButton_view", [65293] = "menuBu
 
 menuButton_arrange.extra.reactive = true
 
+ function menuButton_arrange:on_enter()
+
+  	if menu_bar_hover == false then return true end 
+
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_arrange" then 
+		local temp_focus = current_focus
+	   	current_focus.clear_focus(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_arrange") then 
+		menuButton_arrange.extra.set_focus(keys.Return)
+		current_focus.name = "menuButton_arrange"
+    end 
+
+	return true
+ end 
 
 local menuButton_view = ui_element.menuButton
 	{
@@ -177,7 +239,7 @@ local menuButton_view = ui_element.menuButton
 		ui_height = 61,
 		skin = "editor",
 		label = "View",
-		focus_color = {27,145,27,255},
+		focus_border_color = {27,145,27,255},
 		text_color = "#cccccc",
 		text_font = "FreeSans Bold 28px",
 		border_width = 1,
@@ -202,6 +264,7 @@ local menuButton_view = ui_element.menuButton
         item_text_font = "FreeSans Bold 20px",
     	item_text_color = "#ffffff",
 		ui_position = {971,28,0}, 
+		button_name = "menuButton_view", 
 	}
 
 menuButton_view.insert_item(1,{type="label", string="  Background:", bg=assets("assets/menu-item-label.png")} )
@@ -216,7 +279,6 @@ menuButton_view.insert_item(6,{type="item", string="White", bg=assets("assets/me
 menuButton_view.items[6]["icon"].opacity = 0
 menuButton_view.insert_item(7,{type="item", string="Black", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.black_bg, icon=assets("assets/menu-checkmark.png")}) 
 menuButton_view.items[7]["icon"].opacity = 0
-
 
 function menu.clearMenuButtonView_BGIcons() 
 	menuButton_view.items[2]["icon"].opacity = 0
@@ -241,6 +303,25 @@ menuButton_view.extra.focus = {[65293] = "menuButton_view", [65361] = "menuButto
 
 menuButton_view.extra.reactive = true
 
+ function menuButton_view:on_enter()
+  	
+	if menu_bar_hover == false then return true end 
+	
+	if current_focus and current_focus ~= menuButton_file and current_focus.name ~= "menuButton_view" then 
+		local temp_focus = current_focus
+	   	current_focus.clear_focus(nil,true)
+		if temp_focus.is_in_menu == true then 
+			temp_focus.fade_in = false
+		end 
+	end 
+	
+	if current_focus == nil or (current_focus and current_focus.name ~= "menuButton_view") then 
+		menuButton_view.extra.set_focus(keys.Return)
+		current_focus.name = "menuButton_view"
+    end 
+
+	return true
+ end 
 
 local menu_text = Text
 	{
@@ -290,6 +371,7 @@ local menu_text_shadow = Text
 	}
 
 screen:add(menu_bar,menuButton_file,menuButton_edit,menuButton_arrange,menuButton_view,menu_text,menu_text_shadow)
+
 menu_items = {["menu_item"]=menu_item, 
 			  ["menu_bar"]=menu_bar, 
 			  ["menuButton_file"]=menuButton_file,
@@ -333,14 +415,16 @@ menu_items = {["menu_item"]=menu_item,
 -- Deactivate Menu 
 ----------------------------------------------------------------------------
 function menu.deactivate_menu()
+
 	local menu_hide = Rectangle{name = "menu_hide_rect", color = {0,0,0,0}, position = {0,0,0}, size = {menu_bar.w, menu_bar.h}, reactive = true} 
 
 	function menu_hide.on_button_down()
 		return true
 	end 
 
-	screen:add(menu_hide)
-
+	if screen:find_child("menu_hide_rect") == nil then 
+		screen:add(menu_hide)
+	end
 end 
 
 ----------------------------------------------------------------------------

@@ -1,0 +1,14 @@
+Topic: TrickPlay Application Development
+
+TrickPlay applications are written using the <Lua programming language at http://www.lua.org/>. The TrickPlay SDK provides a library of classes and functions that can be called from Lua code statements to generate programs that are subsequently run by the TrickPlay Engine. In addition, the SDK includes the TrickPlay Visual Editor which enables an application's user interface to be quickly and precisely laid out without requiring any coding. TrickPlay applications can be generated without using the Visual Editor, but the Editor can significantly decrease the time required to construct an application's user interface.
+
+By taking advantage of the capabilities of the Visual Editor and SDK libraries and combining them with Lua program logic, a TrickPlay application is generated.
+
+(see applicationComponents.png)
+
+Tutorials are available that illustrate the main approaches to developing a TrickPlay application.
+
+The <Visual Editor Tutorial at file:../devtools/editor/tutorial/introduction-txt.html> explains how to use the Editor to quickly lay out your application's user interface.
+
+The <SDK Tutorial at file:tutorial/introduction-txt.html> walks through the generation of a nontrivial TrickPlay application, describing the elements that every TrickPlay program requires and introducing several useful classes and capabilities of the SDK libraries.
+
