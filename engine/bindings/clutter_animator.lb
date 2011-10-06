@@ -249,18 +249,11 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 	}
 	else if (!strcmp("color",k))
 	{
-			g_debug(" color kkkk"); 
-
 		if ((lua_type(L,index)==LUA_TTABLE) || (lua_type(L, index) == LUA_TSTRING))
 		{
 			ClutterColor color;
 			ClutterUtil::to_clutter_color(L, index, &color);
 			
-			g_debug(" color :: %d %d %d %d ", color.red, color.green, color.blue, color.alpha);
-
-
-			//ClutterColor color = ClutterUtil::string_to_color(lua_tostring(L, index));
-
             GValue gvalue={0};
 			g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
 			clutter_value_set_color(&gvalue, &color);
