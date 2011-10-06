@@ -1,6 +1,6 @@
 app=
 {
-    id          = "com.trickplay.ddr",
+    id          = "com.trickplay.dance-dance-robot",
     release     = "1",
     version     = "1.0",
     name        = "Dance Dance Robot",
