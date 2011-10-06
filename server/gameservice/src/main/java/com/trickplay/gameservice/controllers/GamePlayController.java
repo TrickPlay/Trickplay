@@ -286,5 +286,10 @@ public class GamePlayController extends BaseController {
 	public @ResponseBody GamePlaySessionListTO getGamePlaySessions() {
 		return new GamePlaySessionListTO(gamePlayService.findAllSessions());
 	}
+	
+	@RequestMapping(value="/rest/game/{id}/gameplay", method = RequestMethod.GET)
+    public @ResponseBody GamePlaySessionListTO getGamePlaySessions(@PathVariable("id") Long gameId) {
+        return new GamePlaySessionListTO(gamePlayService.findAllGameSessions(gameId));
+    }
 
 }

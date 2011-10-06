@@ -331,14 +331,14 @@ public class GameServiceClient {
 			
 		}
 		
-        public static BooleanResponse checkVendorExists(RestTemplate rest, String name, String username, String password) {
+        public static VendorTO checkVendorExists(RestTemplate rest, String name, String username, String password) {
             HttpEntity<String> entity = prepareJsonGet(username, password);
-            ResponseEntity<BooleanResponse> response = rest.exchange(
+            ResponseEntity<VendorTO> response = rest.exchange(
                     GS_ENDPOINT+"/vendor/exists?name={name}", HttpMethod.GET,
-                    entity, BooleanResponse.class, name);
+                    entity, VendorTO.class, name);
             
-            BooleanResponse output = response.getBody();
-            System.out.println("vendor: " + name + ", exists:" + output.isValue());
+            VendorTO output = response.getBody();
+            System.out.println("vendor: " + name + ", exists:" + output.getId()==null);
             return output;
         }
         
@@ -355,14 +355,14 @@ public class GameServiceClient {
 			
 		}
 		
-        public static BooleanResponse checkGameExists(RestTemplate rest, String name, String username, String password) {
+        public static GameTO checkGameExists(RestTemplate rest, String name, String username, String password) {
             HttpEntity<String> entity = prepareJsonGet(username, password);
-            ResponseEntity<BooleanResponse> response = rest.exchange(
+            ResponseEntity<GameTO> response = rest.exchange(
                     GS_ENDPOINT+"/game/exists?name={name}", HttpMethod.GET,
-                    entity, BooleanResponse.class, name);
+                    entity, GameTO.class, name);
             
-            BooleanResponse output = response.getBody();
-            System.out.println("game: " + name + ", exists:" + output.isValue());
+            GameTO output = response.getBody();
+            System.out.println("game: " + name + ", exists:" + output.getId()==null);
             return output;
         }
         

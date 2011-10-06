@@ -43,13 +43,22 @@
 		<property name="password" value="admin" />
 	</bean>
 
-
+<!-- 
+            <security:filter-chain pattern="/rest/**"
+                filters="
+                securityContextPersistenceFilterWithASCFalse,
+                rememberMeFilter,
+                logoutFilter,
+                basicAuthenticationFilter,
+                anonymousAuthenticationFilter,
+                basicExceptionTranslationFilter,
+                filterSecurityInterceptor" />
+                 -->
 	<bean id="springSecurityFilterChain" class="org.springframework.security.web.FilterChainProxy">
 		<security:filter-chain-map path-type="ant">
 			<security:filter-chain pattern="/rest/**"
 				filters="
 				securityContextPersistenceFilterWithASCFalse,
-				rememberMeFilter,
 				logoutFilter,
 				basicAuthenticationFilter,
 				anonymousAuthenticationFilter,

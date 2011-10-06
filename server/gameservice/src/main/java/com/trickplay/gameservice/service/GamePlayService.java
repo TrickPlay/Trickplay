@@ -16,9 +16,7 @@ public interface GamePlayService {
 	@Transactional
 	public GameSession createGameSession(Long gameId);
 	
-	public List<GameSession> findAllSessions(Long gameId, Long participantId);
-	
-	public List<GameSession> findAllSessions(Long participantId);
+	public List<GameSession> findAllGameSessions(Long gameId);
 	
 	public List<GameSession> findAllSessions();
 	

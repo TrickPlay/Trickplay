@@ -60,10 +60,12 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<GameSession> findAllSessions(Long gameId, Long participantId) {
+	public List<GameSession> findAllGameSessions(Long gameId) {
+	    Long participantId = SecurityUtil.getCurrentUserId();
 		return entityManager.createQuery
 		(
-				"select GS from GameSession as GS join G.game as G join GS.players as where G.id=:gid and P.id=:pid"
+				"select GS from GameSession GS join GS.game G join GS.players P"
+		        + " where GS.endTime is null AND G.id=:gid and P.id=:pid"
 				)
 				.setParameter("gid", gameId)
 				.setParameter("pid", participantId)
@@ -77,10 +79,10 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 
 	
 	@SuppressWarnings("unchecked")
-	public List<GameSession> findAllSessions(Long participantId) {
+	private List<GameSession> findAllSessions(Long participantId) {
 		return entityManager.createQuery
 		(
-				"select G from GameSession as G join G.players as where P.id=:pid"
+				"select GS from GameSession GS join GS.players P where GS.endTime is null AND P.id=:pid"
 				)
 				.setParameter("pid", participantId)
 				.getResultList();

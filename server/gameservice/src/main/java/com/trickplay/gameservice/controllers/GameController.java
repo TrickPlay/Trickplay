@@ -93,11 +93,15 @@ public class GameController extends BaseController {
 	}
 
 	@RequestMapping(value = {"/rest/game/exists"}, method = RequestMethod.GET)
-    public @ResponseBody BooleanResponse checkGameExists(@RequestParam(value="name", required=true) String name) {
-        if (null != gameService.findByName(name))
-            return BooleanResponse.TRUE;
-        else
-            return BooleanResponse.FALSE;
+    public @ResponseBody GameTO checkGameExists(@RequestParam(value="name", required=true) String name) {
+        Game g = null;
+	    if (null != (g = gameService.findByName(name)))
+            return new GameTO(g);
+        else {
+            GameTO to = new GameTO();
+            to.setName(name);
+            return to;
+        }
     }
 
 
