@@ -1,7 +1,11 @@
 app=
-{	id = "com.trickplay.editor",
-	release = "1",
-	version = "1.0",
-	name = "TrickPlay",
-	copyright = "Trickplay Inc."
+{
+    id          = "com.trickplay.unit-tests",
+    release     = 1,
+    version     = "1.0",
+    name        = "Trickplay Unit Tests",
+    author      = "Trickplay QA",
+    copyright   = "© Trickplay Inc.",
+    description = "Unit tests for the Trickplay engine."
 }
+

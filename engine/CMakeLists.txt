@@ -376,6 +376,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/stopwatch.lb
     ${BINDINGS_SRC}/restricted.lb
     ${BINDINGS_SRC}/apps.lb
+    ${BINDINGS_SRC}/controller.lb
     ${BINDINGS_SRC}/controllers.lb
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
@@ -528,6 +529,7 @@ list( APPEND
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp
     ${ENGINE_SRC}/source/controller_lirc.cpp
+    ${ENGINE_SRC}/source/controller_delegates.cpp
     ${ENGINE_SRC}/source/profiler.cpp
     ${ENGINE_SRC}/source/downloads.cpp
     ${ENGINE_SRC}/source/event_group.cpp
