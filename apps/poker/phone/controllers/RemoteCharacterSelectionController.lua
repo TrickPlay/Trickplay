@@ -46,7 +46,11 @@ function(ctrl, router, controller, ...)
 
     function ctrl:update_character_selection(player)
         local pos = player.dog_number
-        dog_buttons[pos]:hide()
+        if not player.marked_for_deletion then
+            dog_buttons[pos]:hide()
+        else
+            dog_buttons[pos]:show()
+        end
     end
 
     function ctrl:on_touch(event)
