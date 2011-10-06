@@ -81,7 +81,7 @@ public class BuddyServiceTest {
 		b.setOwner(u1);
 		b.setTarget(u2);
 		b.setStatus(BuddyStatus.CURRENT);
-		buddyService.persist(b);
+		buddyService.create(b);
 		Buddy n = buddyService.find(b.getId());
 		Assert.assertTrue(
 				b.getId() == n.getId() 

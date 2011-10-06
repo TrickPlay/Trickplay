@@ -3,6 +3,7 @@ package com.trickplay.gameservice.service;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.domain.Buddy;
 import com.trickplay.gameservice.domain.BuddyListInvitation;
@@ -13,20 +14,25 @@ import com.trickplay.gameservice.exception.GameServiceException;
 @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
 public interface BuddyService {
 	
-	public BuddyListInvitation sendInvitation(Long requestorId, String recipientName) throws GameServiceException;
+    @Transactional
+	public BuddyListInvitation sendInvitation(String recipientName) throws GameServiceException;
 	
-	public BuddyListInvitation updateInvitationStatus(Long userId, Long invitationId, InvitationStatus newStatus);
+	@Transactional
+	public BuddyListInvitation updateInvitationStatus(Long invitationId, InvitationStatus newStatus);
 
 	//@PreAuthorize("principal.username == #buddy.owner.username")
-	public void removeBuddy(Buddy buddy);
+	@Transactional
+	public void removeBuddy(Long buddyId);
 
 	//@PreAuthorize("hasRole('ROLE_ADMIN') or ")
 	public List<Buddy> findAll(Long ownerId);
 
 	//@PreAuthorize("principal.username == #buddy.owner.username")
-	public void persist(Buddy entity);
+	@Transactional
+	public void create(Buddy entity);
 
-	public void merge(Buddy entity);
+	@Transactional
+	public Buddy update(Buddy entity);
 
 	public Buddy find(Long id);
 	

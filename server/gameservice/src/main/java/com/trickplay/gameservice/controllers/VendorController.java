@@ -19,12 +19,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.Vendor;
 import com.trickplay.gameservice.service.UserService;
 import com.trickplay.gameservice.service.VendorService;
+import com.trickplay.gameservice.transferObj.BooleanResponse;
 import com.trickplay.gameservice.transferObj.VendorRequestTO;
 import com.trickplay.gameservice.transferObj.VendorTO;
 
@@ -48,6 +50,14 @@ public class VendorController extends BaseController {
         return "vendor/list";
     }
 
+    @RequestMapping(value = {"/rest/vendor/exists"}, method = RequestMethod.GET)
+    public @ResponseBody BooleanResponse checkVendorExists(@RequestParam(value="name", required=true) String name) {
+        if (null != vendorService.findByName(name))
+            return BooleanResponse.TRUE;
+        else
+            return BooleanResponse.FALSE;
+    }
+    
     @RequestMapping(value = {"/vendor/{id}", "/rest/vendor/{id}"}, method = RequestMethod.GET)
     public String getVendor(@PathVariable("id") Long vendorId, Model model) {
     	Assert.notNull(vendorId, "Identifier must be provided.");
