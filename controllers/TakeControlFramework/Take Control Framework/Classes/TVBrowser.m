@@ -50,7 +50,7 @@
 @synthesize delegate;
 
 - (id)init {
-    [self initWithDelegate:nil];
+    return [self initWithDelegate:nil];
 }
 
 - (id)initWithDelegate:(id <TVBrowserDelegate>)_delegate {
