@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		446B2EC9143F7FCA00629B54 /* TVBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA741427D4E50043C8BF /* TVBrowserViewController.m */; };
+		446B2ECA143F7FCA00629B54 /* AppBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA721427D4E50043C8BF /* AppBrowserViewController.m */; };
+		446B2ECB143F7FCA00629B54 /* TPAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA731427D4E50043C8BF /* TPAppViewController.m */; };
+		446B2ECD143F7FCA00629B54 /* VirtualRemoteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA761427D4E50043C8BF /* VirtualRemoteViewController.m */; };
 		44D2D081143F6FBE00E54755 /* TakeControl-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */; };
 		44D2D084143F6FCB00E54755 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 44D2D082143F6FCB00E54755 /* InfoPlist.strings */; };
 		44D2D086143F71DD00E54755 /* Protocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 44D2D085143F71DD00E54755 /* Protocols.h */; };
@@ -620,6 +624,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				446B2EC9143F7FCA00629B54 /* TVBrowserViewController.m in Sources */,
+				446B2ECA143F7FCA00629B54 /* AppBrowserViewController.m in Sources */,
+				446B2ECB143F7FCA00629B54 /* TPAppViewController.m in Sources */,
+				446B2ECD143F7FCA00629B54 /* VirtualRemoteViewController.m in Sources */,
 				44D2D087143F723700E54755 /* JSONKit.m in Sources */,
 				44D2D088143F723700E54755 /* TVBrowser.m in Sources */,
 				44D2D089143F723700E54755 /* AppBrowser.m in Sources */,
