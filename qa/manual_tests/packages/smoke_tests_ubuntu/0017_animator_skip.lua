@@ -2,10 +2,10 @@
 -- Test Set up --
 local test_description = "Change the color of a UI element"
 local test_group = "acceptance"
-local test_area = "timeline"
-local test_api = "duration"
+local test_area = "animator"
+local test_api = "skip"
 
-test_question = "Does the blue rectangle reduce in opacity until it is invisible at the red square?"
+test_question = "Does the white rectangle skip to the end at halfway between the upper left and lower right rectangle?"
 
 function generate_test_image ()
 
@@ -73,32 +73,28 @@ function generate_test_image ()
 	
 	}
 
-	local results_txt = Text {
-		position = { 500, 250 },
-		size = { 300, 400 },
-		font="Sans 30px",
-		color = "FFFFFF",
-		text = "Test"
-	}
-	screen:add (results_txt)
-	
 
+	
 	ani0:start()
-	
-	function ani0.timeline.on_new_frame()
-		print ("new frame")
+	total = 0
+	function idle.on_idle( idle, seconds )
+		total = total + seconds
+		if total > 2 and total <= 3 then
+			ani0.timeline:skip(2000)
+			total = 3
+		end
+		if total > 4.9 then
+			idle.on_idle = nil
+			screen:remove(rect1)
+			screen:remove(start_rect)
+			screen:remove(end_rect)
+			rect1 = nil
+			start_rect = nil
+			end_rect = nil
+			ani0 = nil
+		end 
 	end
 	
-	function ani0.timeline.on_completed()
-		screen:remove(rect1)
-		screen:remove(start_rect)
-		screen:remove(end_rect)
-		rect1 = nil
-		start_rect = nil
-		end_rect = nil
-		ani0 = nil
-	end
-
 	return nil
 end
 

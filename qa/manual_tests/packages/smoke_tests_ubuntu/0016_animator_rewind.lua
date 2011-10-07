@@ -1,11 +1,11 @@
 
 -- Test Set up --
-local test_description = "Change the color of a UI element"
+local test_description = "Rewind the animation of a UI element"
 local test_group = "acceptance"
 local test_area = "animator"
-local test_api = "color"
+local test_api = "rewind"
 
-test_question = "Does the white rectangle gradually change to blue color as it approaches the red square?"
+test_question = "Does the white rectangle reach halfway between the upper left and lower right rectangle then rewind to the upper left rectangle and continue animating?"
 
 function generate_test_image ()
 
@@ -73,18 +73,28 @@ function generate_test_image ()
 	
 	}
 
-	ani0:start()
 	
-	function ani0.timeline.on_completed()
-		screen:remove(rect1)
-		screen:remove(start_rect)
-		screen:remove(end_rect)
-		rect1 = nil
-		start_rect = nil
-		end_rect = nil
-		ani0 = nil
+	ani0:start()
+	local stage1 = false
+	local total = 0
+	function idle.on_idle( idle, seconds )
+		total = total + seconds
+		if total > 3 and stage1 == false then
+			ani0.timeline:rewind()
+			stage1 = true
+		end
+		if total > 9 then
+			idle.on_idle = nil
+			screen:remove(rect1)
+			screen:remove(start_rect)
+			screen:remove(end_rect)
+			rect1 = nil
+			start_rect = nil
+			end_rect = nil
+			ani0 = nil 
+		end 
 	end
-
+	
 	return nil
 end
 
