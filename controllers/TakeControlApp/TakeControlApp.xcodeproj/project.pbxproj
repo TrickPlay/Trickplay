@@ -546,7 +546,6 @@
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
-				HEADER_SEARCH_PATHS = /Library/Frameworks/TakeControl.framework/Headers;
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_LDFLAGS = (
@@ -565,7 +564,6 @@
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
-				HEADER_SEARCH_PATHS = /Library/Frameworks/TakeControl.framework/Headers;
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_LDFLAGS = (
