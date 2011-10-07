@@ -1,6 +1,6 @@
 //
-//  TakeControlAgainViewController.h
-//  TakeControlAgain
+//  TakeControlAppViewController.h
+//  TakeControlApp
 //
 //  Created by Rex Fenley on 10/3/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
@@ -8,12 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-#import "TPAppViewController.h"
-#import "AppBrowserViewController.h"
-#import "AppBrowser.h"
-#import "TVBrowserViewController.h"
-#import "TVBrowser.h"
-#import "TVConnection.h"
+#import <TakeControl/TPAppViewController.h>
+#import <TakeControl/AppBrowserViewController.h>
+#import <TakeControl/AppBrowser.h>
+#import <TakeControl/TVBrowserViewController.h>
+#import <TakeControl/TVBrowser.h>
+#import <TakeControl/TVConnection.h>
 
 /**
  * The RootViewController controls the root view of the over-arching
@@ -26,7 +26,7 @@
  * Refer to RootViewController.xib for the Controller's View.
  */
 
-@interface TakeControlAgainViewController : UIViewController <UINavigationControllerDelegate,
+@interface TakeControlAppViewController : UIViewController <UINavigationControllerDelegate,
 TPAppViewControllerDelegate, TVConnectionDelegate,
 TVBrowserViewControllerDelegate, TVBrowserDelegate,
 AppBrowserViewControllerDelegate, AppBrowserDelegate> {

@@ -1,16 +1,16 @@
 //
-//  TakeControlAgainAppDelegate.m
-//  TakeControlAgain
+//  TakeControlAppAppDelegate.m
+//  TakeControlApp
 //
 //  Created by Rex Fenley on 10/3/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "TakeControlAgainAppDelegate.h"
+#import "TakeControlAppDelegate.h"
 
-#import "TakeControlAgainViewController.h"
+#import "TakeControlAppViewController.h"
 
-@implementation TakeControlAgainAppDelegate
+@implementation TakeControlAppAppDelegate
 
 @synthesize window = _window;
 @synthesize viewController = _viewController;
@@ -20,9 +20,9 @@
     // Override point for customization after application launch.
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        self.viewController = [[TakeControlAgainViewController alloc] initWithNibName:@"TakeControlAgainViewController_iPhone" bundle:nil]; 
+        self.viewController = [[TakeControlAppViewController alloc] initWithNibName:@"TakeControlAppViewController_iPhone" bundle:nil]; 
     } else {
-        self.viewController = [[TakeControlAgainViewController alloc] initWithNibName:@"TakeControlAgainViewController_iPad" bundle:nil]; 
+        self.viewController = [[TakeControlAppViewController alloc] initWithNibName:@"TakeControlAppViewController_iPad" bundle:nil]; 
     }
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];

@@ -1,14 +1,14 @@
 //
-//  TakeControlAgainViewController.m
-//  TakeControlAgain
+//  TakeControlAppViewController.m
+//  TakeControlApp
 //
 //  Created by Rex Fenley on 10/3/11.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "TakeControlAgainViewController.h"
+#import "TakeControlAppViewController.h"
 
-@implementation TakeControlAgainViewController
+@implementation TakeControlAppViewController
 
 @synthesize navController;
 @synthesize tvBrowserViewController;
