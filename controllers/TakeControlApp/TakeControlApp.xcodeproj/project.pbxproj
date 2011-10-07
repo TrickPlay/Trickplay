@@ -325,6 +325,7 @@
 				CD4B2E8D143A74890073BB88 /* Sources */,
 				CD4B2E8E143A74890073BB88 /* Frameworks */,
 				CD4B2E8F143A74890073BB88 /* Resources */,
+				4465E8B1143F89CC0015E4B5 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -415,6 +416,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4465E8B1143F89CC0015E4B5 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "GIT_REVISION=`git --git-dir=\\\"${PROJECT_DIR}/../../.git\\\" --work-tree=\\\"${PROJECT_DIR}/../..\\\" describe --tags --dirty`\n\nINFO_PLIST=\\\"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Info\\\"\n\ndefaults write \\\"${INFO_PLIST}\\\" CFBundleShortVersionString \\\"${GIT_REVISION}\\\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		CD4B2E8D143A74890073BB88 /* Sources */ = {
