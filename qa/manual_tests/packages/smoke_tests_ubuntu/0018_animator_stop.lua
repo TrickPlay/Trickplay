@@ -83,7 +83,7 @@ function generate_test_image ()
 		if total > 3 and stage1 == false then
 			ani0.timeline:stop()
 			stage1 = true
-		elseif total > 4.9 then
+		elseif total > 3.3 then
 			print ("alksdfjaklsdjf asd")
 			idle.on_idle = nil
 			screen:remove(rect1)

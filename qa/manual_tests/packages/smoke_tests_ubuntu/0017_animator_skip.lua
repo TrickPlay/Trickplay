@@ -83,7 +83,7 @@ function generate_test_image ()
 			ani0.timeline:skip(2000)
 			total = 3
 		end
-		if total > 4.9 then
+		if total > 3.5 then
 			idle.on_idle = nil
 			screen:remove(rect1)
 			screen:remove(start_rect)
