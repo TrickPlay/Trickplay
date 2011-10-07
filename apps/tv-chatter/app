@@ -1,6 +1,6 @@
 app=
 {
-    id          = "com.trickplay.TV-Chatter",
+    id          = "com.trickplay.tv-chatter",
     release     = "5",
     version     = "0.2",
     name        = "TV Chatter",

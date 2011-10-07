@@ -19,10 +19,25 @@ Player = Class(function(player, players, args, ...)
     --[[
         If User disconnects controller the player becomes an AI.
     --]]
-    if player.controller then
-        local temp_func = player.controller.on_disconnected
+    function player:add_controller(controller)
+        if controller and player.old_controller_id == controller.id then
+            player.controller = controller
+        end
+        if player.status then
+            player.status:dealloc()
+        end
+        if player.controller then
+            player.is_human = true
+        end
+        player.status = PlayerStatusView(player)
+        player.status:display()
+        player.status:update_text()
+        if not player.controller then
+            return
+        end
+        local temp_func_disconn = player.controller.on_disconnected
         function player.controller:on_disconnected()
-            temp_func(player.controller)
+            temp_func_disconn(player.controller)
             -- prevents a crash caused by disconnecting after player deallocs
             if not player.controller then return end
 
@@ -49,10 +64,12 @@ Player = Class(function(player, players, args, ...)
             screen:add(text)
             Popup:new{group = text, time = 2000}
 
+            player.old_controller_id = player.controller.id
             router:get_active_controller():on_controller_disconnected(player.controller)
             player.controller = nil
         end
     end
+    player:add_controller(player.controller)
 
     function player:dim()
         self.dog_view:dim()
@@ -449,9 +466,11 @@ Player = Class(function(player, players, args, ...)
 
     end
 
+    --[[
     player.status = PlayerStatusView(player)
     player.status:display()
     assert(player.status)
+    --]]
 
     function player:dealloc()
         player.controller = nil

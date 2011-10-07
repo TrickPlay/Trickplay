@@ -1,18 +1,18 @@
 Topic: Animations Using the Timeline Class
 
-For complex animations, the SDK library's Timeline class may be an appropriate choice. It supports the animation of multiple objects and property values can change directions and change at varying rates as the animation progresses. But unlike the animate() function which runs to completion with no intervention from the program, a Timeline-based animation requires periodic maintenance while the animation is running. The Tutorial will use a Timeline class to animate the two red spheres in the second demo area.
+For complex animations, the SDK library's Timeline class may be an appropriate choice. It supports the animation of multiple objects, and property values can change direction and rate of speed as the animation progresses. But unlike the animate() function which runs to completion with no intervention from the program, a Timeline-based animation requires periodic maintenance while the animation is running. To understand this process, the Tutorial will use a Timeline class to animate the two red spheres.
 
-The <Timeline> class shares some functionality with the animate() function. For example, a Timeline object accepts a length duration specified in milliseconds and the loop property instructs the animation to loop infinitely. But Timeline is a class, not a function, and so a Timeline object must be created. In the Timeline constructor, a table of property settings can be specified to initialize the animation. The code statement shown below creates a Timeline object and defines the animation's duration and loop properties. (Do not introduce this code into the Tutorial yet; we'll make some changes and additions to it first.)
+The <Timeline> class shares some functionality with the animate() function. For example, a Timeline object accepts a duration specified in milliseconds and the loop property instructs the animation to loop infinitely. But Timeline is a class, not a function, and so a Timeline object must be created. In the Timeline constructor, a table of property settings can be specified to initialize the animation. The code statement shown below creates a Timeline object and defines the animation's duration and loop properties. (Do not introduce this code into the Tutorial yet; we'll make some changes to it first.)
 
 	(code)
 	-- Creation of a Timeline object
 	sphereTimeline = Timeline( {
-						duration = 2000,
+						duration = 1000,
 						loop     = true,
 					 } )
 	(end)
 
-While a Timeline-based animation is running, it receives periodic notifications in the form of calls to an event handler. The event handler is responsible for determining the values of each animated property based upon the animation's current position in its total running time. This is not as daunting of a task as it may sound because the SDK libraries provide some classes that ease the work required in calculating a property's current value. The event handler is specified in the Timeline constructor's on_new_frame property. An updated Timeline constructor with skeleton event handler is shown below.
+While a Timeline-based animation is running, it receives periodic notifications in the form of calls to an event handler. The event handler is responsible for determining the values of each animated property based upon the animation's current position in its running time. This is not as daunting of a task as it may sound because the SDK libraries provide some classes that ease the work required in calculating a property's current value. The event handler is specified in the Timeline constructor's on_new_frame property. An updated Timeline constructor with skeleton event handler is shown below.
 
 	(code)
 	-- Event handler called to update animated properties
@@ -23,7 +23,7 @@ While a Timeline-based animation is running, it receives periodic notifications 
 	-- Timeline-based animation of spheres
 	local
 	sphereTimeline = Timeline( {
-						duration     = 2000,
+						duration     = 1000,
 						loop         = true,
 						on_new_frame = sphereFrame,  -- event handler responsible for updating animated property settings
 					 } )
@@ -31,35 +31,39 @@ While a Timeline-based animation is running, it receives periodic notifications 
 
 Notice that the event handler receives three arguments: the Timeline object itself, the number of milliseconds that have elapsed from the animation's start, and a progress value between 0 and 1 indicating the percentage of the animation that has completed. The progress argument is the most useful for calculating each animated property's current values.
 
-We'll start building up the Timeline animation by implementing a simple movement of the two spheres. First, each sphere is repositioned from the center of the demo area to the upper and lower left corners. From these positions, each sphere will move diagonally to its opposite corner. The starting and ending positions are determined for each sphere, and then the spheres are positioned to their starting locations. The code is shown below.
+We'll start building up the Timeline animation by implementing a simple movement of the two spheres. The sphere in the left of the display will move horizontally to the right; the sphere in the center will move vertically to the bottom of the display. The starting and ending X and Y coordinates for each sphere are calculated one time and stored in variables for later access.
 
 	(code)
 	-- Calculate sphere starting and ending positions
-	local sphere1StartX = demoSpace2.x + 40
-	local sphere1StartY = demoSpace2.y + 40
-	local sphere1EndX   = demoSpace2.x + demoSpace2.width - 40
-	local sphere1EndY   = demoSpace2.y + demoSpace2.height - 40
+	-- sphereImage positions
+	local sphere1StartX  = demoSpace2.x + 75                       -- left-center X
+	local sphere1StartY  = (demoSpace2.height / 2) + demoSpace2.y  -- left-center Y
+	local sphere1EndX    = demoSpace2.x + demoSpace2.width - 75    -- right-center X
+	local sphere1EndY    = sphere1StartY                           -- right-center Y
 	
-	local sphere2StartX = demoSpace2.x + 40
-	local sphere2StartY = demoSpace2.y + demoSpace2.height - 40
-	local sphere2EndX   = demoSpace2.x + demoSpace2.width - 40
-	local sphere2EndY   = demoSpace2.y + 40
-	
-	-- Position spheres to starting locations
-	sphereImage.position = { sphere1StartX, sphere1StartY }
-	sphereClone.position = { sphere2StartX, sphere2StartY }
+	-- sphereClone positions
+	-- Note: This sphere starts in the center, but to maintain naming consistency,
+	--       we apply Start and End names to the sphere's outer travel boundaries.
+	local sphere2StartX  = (demoSpace2.width / 2) + demoSpace2.x   -- top-center X
+	local sphere2StartY  = demoSpace2.y + 75                       -- top-center Y
+	local sphere2EndX    = sphere2StartX                           -- bottom-center X
+	local sphere2EndY    = demoSpace2.y + demoSpace2.height - 75   -- bottom-center Y
+	local sphere2CenterX = sphere2StartX                           -- display-center X
+	local sphere2CenterY = (demoSpace2.height / 2) + demoSpace2.y  -- display-center Y
 	(end)
 
-With the animate() function we used earlier, we simply passed the ending property values to animate(), and animate() calculated the intermediate, or "in-between," values for us. With Timeline, we have to calculate the in-between values ourself each time the event handler is called. It's possible to construct the equation to calculate the correct in-between X and Y coordinates, but there is no need to. Instead, the SDK library's Interval class will do the work for us.
+With the animate() function we used earlier, we passed the ending property values to animate(), and animate() calculated the property's intermediate, or "in-between," values for us. With Timeline, we have to specify the in-between values ourself each time the on_new_frame() event handler is called. While it's possible to construct an equation to calculate the in-between values, there is no need to because the SDK library's Interval class will do the work for us.
 
-An <Interval> object is initialized with a range of values. Whenever an intermediate, in-between value is needed by the Timeline event handler, it simply calls the Interval object's get_value() function, passing it the progress argument (containing the percentage of elapsed animation time). The Interval's get_value() function performs all the necessary calculations and returns the appropriate property setting. The code shown below initializes the Interval objects and also shows the event handler code that uses the objects to update the animated X and Y coordinates.
+An <Interval> object is initialized with a range of values, such as the starting and ending values of an animated property. Then whenever an in-between value is needed by the Timeline event handler, the handler can call the Interval object's get_value() function, passing it the progress argument containing the percentage of elapsed animation time. The Interval's get_value() function, having the property's starting and ending values and the percentage of the animation completed, calculates and returns the in-between property value.
+
+The code shown below initializes the Interval objects for the X and Y coordinates for the two spheres. It also shows the event handler code that uses the objects to update the animated coordinates. As you can see, the maintenance of each property's in-between values requires no complex calculations.
 
 	(code)
 	-- Define Interval objects for spheres
-	local sphere1RangeX = Interval( sphere1StartX, sphere1EndX )
-	local sphere1RangeY = Interval( sphere1StartY, sphere1EndY )
-	local sphere2RangeX = Interval( sphere2StartX, sphere2EndX )
-	local sphere2RangeY = Interval( sphere2StartY, sphere2EndY )
+	local sphere1RangeX = Interval( sphere1StartX,  sphere1EndX )
+	local sphere1RangeY = Interval( sphere1StartY,  sphere1EndY )
+	local sphere2RangeX = Interval( sphere2CenterX, sphere2EndX )
+	local sphere2RangeY = Interval( sphere2CenterY, sphere2EndY )
 
 	-- Event handler called to update animated properties
 	function sphereFrame( sphereTimeline, msecs, progress )
@@ -71,15 +75,25 @@ An <Interval> object is initialized with a range of values. Whenever an intermed
 	end
 	(end)
 
-All that remains is to start the animation, which is done by calling the Timeline object's start() function, as shown below.
+The animation is started by calling the Timeline object's start() function, as shown below.
 
 	(code)
 	-- Start the animation
 	sphereTimeline:start()
 	(end)
 
-The resulting animation is not complex, but it's a start. Next, we'll animate the spheres back to their starting position to make the loop seamless.
+Finally, the sphereAnimation.lua file must be "linked" with main.lua by running it using the dofile() function.
+
+	(code)
+	-- *** main.lua ***
+
+	-- Animate the two spheres
+	dofile( "sphereAnimation.lua" )
+	(end)
+
+With the addition above, the Tutorial's main.lua file will require no further changes. The complete <main.lua> source file can be seen in the <Complete Tutorial Source Code> section.
+
+The resulting sphere animation is not complex, but it's a start. Next, we'll animate the spheres back to their starting position to make the loop seamless.
 
 (see images/sphereAnimation1.gif)
-
 
