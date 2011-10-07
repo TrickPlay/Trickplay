@@ -30,6 +30,15 @@ global trickplay [[void*]]
 
             version = v.c_str();
         ]];
+        
+    /*
+        Property: build
+    */        
+
+    readonly string build
+        [[
+            build = TP_GIT_VERSION;
+        ]];
 
     /*
        Property: production
