@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.trickplay.gameservice.domain.Event;
@@ -20,6 +21,7 @@ import com.trickplay.gameservice.service.EventService;
 import com.trickplay.gameservice.service.GamePlayService;
 import com.trickplay.gameservice.transferObj.ChatMessageTO;
 import com.trickplay.gameservice.transferObj.EventListTO;
+import com.trickplay.gameservice.transferObj.GamePlayInvitationListTO;
 import com.trickplay.gameservice.transferObj.GamePlayInvitationRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlayInvitationTO;
 import com.trickplay.gameservice.transferObj.GamePlayRequestTO;
@@ -64,6 +66,7 @@ public class GamePlayController extends BaseController {
 		}
 	}
 	
+	   
 	@RequestMapping(value={"/rest/gameplay/{id}/invitation"},  method = RequestMethod.POST )
 	public @ResponseBody GamePlayInvitationTO sendGamePlayInvitation(@PathVariable("id") Long gameSessionId, @RequestBody GamePlayInvitationRequestTO input) {
 		StringBuilder err = new StringBuilder();
@@ -91,8 +94,8 @@ public class GamePlayController extends BaseController {
 		}
 	}
 	
-	@RequestMapping(value={"/rest/gameplay/{sessionId}/invitation/{invitationId}/update"},  method = RequestMethod.POST )
-	public @ResponseBody GamePlayInvitationTO processGamePlayInvitation(@PathVariable("sessionId") Long gameSessionId, @PathVariable("invitationId") Long invitationId, @RequestBody UpdateInvitationStatusRequestTO input) {
+	@RequestMapping(value={"/rest/gameplay/invitation/{invitationId}/update"},  method = RequestMethod.POST )
+	public @ResponseBody GamePlayInvitationTO processGamePlayInvitation(@PathVariable("invitationId") Long invitationId, @RequestBody UpdateInvitationStatusRequestTO input) {
 		StringBuilder err = new StringBuilder();
 		if (input == null) {
 			throw new BaseControllerException(400, null, "Received GamePlayInvitation is null");
@@ -139,6 +142,11 @@ public class GamePlayController extends BaseController {
 		}
 	}
 
+    @RequestMapping(value = {"/rest/game/{id}/invitations"}, method = RequestMethod.GET)
+    public @ResponseBody GamePlayInvitationListTO getInvitations(@PathVariable("id") Long gameId, @RequestParam(value="max", required=true) int max) {
+        return new GamePlayInvitationListTO(gamePlayService.getInvitations(gameId, max));
+    }
+    
 	@RequestMapping(value={"/rest/gameplay/invitation/{id}"},  method = RequestMethod.GET )
 	public @ResponseBody GamePlayInvitationTO getGPInvitation(@PathVariable("id") Long invitationId) {
 		

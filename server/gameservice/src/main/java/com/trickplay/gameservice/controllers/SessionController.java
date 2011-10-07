@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.trickplay.gameservice.domain.SessionToken;
 import com.trickplay.gameservice.domain.StatelessHttpSession;
-import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.SessionService;
 import com.trickplay.gameservice.transferObj.SessionRequestTO;
 import com.trickplay.gameservice.transferObj.SessionTO;
@@ -35,12 +35,6 @@ public class SessionController extends BaseController {
 	Validator validator;
 
 	
-    @RequestMapping(value = {"/session", "/rest/session"}, method = RequestMethod.GET)
-    public String getSessions(Model model) {
-        List<SessionTO> allSessions = sessionService.getActiveSessions();
-        model.addAttribute("sessions", allSessions);
-        return "session/list";
-    }
 
     @RequestMapping(value = {"/session/{token}", "/rest/session/{token}"}, method = RequestMethod.GET)
     public String getSession(@PathVariable("token") String token, Model model) {
@@ -62,9 +56,9 @@ public class SessionController extends BaseController {
             return "session/create";
         }
         
-    	SessionTO session = sessionService.create(sessionTO.getDeviceKey());
+    	//sessionService.create(sessionTO.getDeviceKey());
         
-        return "redirect:/user/" + SecurityUtil.getPrincipal().getId();
+        return "user/show";
     }
 
     @RequestMapping(value = {"/rest/session"}, method = RequestMethod.POST)
@@ -84,7 +78,7 @@ public class SessionController extends BaseController {
 			throw new BaseControllerException(400, null, "Invalid parameters. "
 					+ err.toString());
 		}
-		return sessionService.create(sessionTO.getDeviceKey());
+		return new SessionTO(/*sessionService.create(sessionTO.getDeviceKey())*/);
     }
 
 }

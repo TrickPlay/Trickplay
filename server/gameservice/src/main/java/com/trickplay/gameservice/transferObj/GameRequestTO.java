@@ -10,14 +10,17 @@ public class GameRequestTO {
 	private int maxPlayers=1;
 	private boolean leaderboardFlag=true;
 	private boolean achievementsFlag=true;
-	
-	public GameRequestTO() {
+	private boolean turnBasedFlag;
+	private boolean allowWildCardInvitation = false;
+
+    public GameRequestTO() {
 		
 	}
 		
 	public GameRequestTO(String name, String appId, Long vendorId,
 			int minPlayers, int maxPlayers,
-			boolean leaderboardFlag, boolean achievementsFlag) {
+			boolean leaderboardFlag, boolean achievementsFlag, 
+			boolean turnBasedFlag, boolean allowWildCardInvitation) {
 		super();
 		this.name = name;
 		this.appId = appId;
@@ -26,6 +29,8 @@ public class GameRequestTO {
 		this.maxPlayers = maxPlayers;
 		this.leaderboardFlag = leaderboardFlag;
 		this.achievementsFlag = achievementsFlag;
+		this.turnBasedFlag = turnBasedFlag;
+		this.allowWildCardInvitation = allowWildCardInvitation;
 	}
 
 	public GameRequestTO(Game game) {
@@ -38,10 +43,12 @@ public class GameRequestTO {
 		maxPlayers = game.getMaxPlayers();
 		leaderboardFlag = game.isLeaderboardFlag();
 		achievementsFlag = game.isAchievementsFlag();
+		turnBasedFlag = game.isTurnBasedFlag();
+		allowWildCardInvitation = game.isAllowWildCardInvitation();
 	}
 
 	public Game toGame() {
-		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag);
+		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag, turnBasedFlag, allowWildCardInvitation);
 	}
 	
 	public String getName() {
@@ -100,5 +107,21 @@ public class GameRequestTO {
 		this.achievementsFlag = achievementsFlag;
 	}
 
+    
+    public boolean isAllowWildCardInvitation() {
+        return allowWildCardInvitation;
+    }
+
+    public void setAllowWildCardInvitation(boolean allowWildCardInvitation) {
+        this.allowWildCardInvitation = allowWildCardInvitation;
+    }
+
+	public boolean isTurnBasedFlag() {
+		return turnBasedFlag;
+	}
+
+	public void setTurnBasedFlag(boolean turnBasedFlag) {
+		this.turnBasedFlag = turnBasedFlag;
+	}
 	
 }

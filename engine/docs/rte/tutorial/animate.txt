@@ -2,11 +2,11 @@ Topic: The UIElement animate() Function
 
 The TrickPlay SDK libraries provide several ways to produce animations, from simple, single-object animations to complex animations that choreograph the movements of multiple objects. The Tutorial application will explore two different animation methods: the simple animate() function and the more complex Timeline class.
 
-The animate() function is provided by the SDK library's <UIElement> class. Most of the TrickPlay SDK classes are derived from UIElement and so they recognize the properties and functions UIElement provides. All the classes used in the Tutorial application (Rectangle, Text, Image and Group) support the UIElement properties and functions.  The Tutorial application has already used some of UIElement's properties, such as position, anchor_point, and scale. In this section, we'll look at the animate() function.
+The animate() function is provided by the SDK library's <UIElement> class. Most of the TrickPlay SDK classes are derived from UIElement and so they recognize the properties and functions that UIElement provides. All the classes used in the Tutorial application (Rectangle, Text, Image and Group) support the UIElement properties and functions.  The Tutorial application has already used some of UIElement's properties, such as position and anchor_point. In this section, we'll look at the animate() function.
 
-The animate() function creates simple animations that modify one or more properties of a single object. The animation is initialized by setting its duration and the ending values for each animated property. The animation begins with the call to animate() and runs asynchronously and nonstop until it completes. If desired, the animation can loop back to its beginning and run again.
+The animate() function creates simple animations that modify one or more properties of a single object. The animation is initialized by setting its duration and the ending values for each animated property. Each animated property's starting value is their current value at the time the animation begins. The animation starts with the call to animate() and runs asynchronously and nonstop until it completes. If desired, the animation can loop back to its beginning and run again.
 
-The Tutorial application will use animate() to perform a simple animation on the TrickPlay logo image. Two properties of the image, scale and z_rotation, will be animated. Finally, the animation will loop infinitely. All of this is accomplished in the single code statement shown below.
+The Tutorial application will use animate() to perform a simple animation on the TrickPlay logo image. Two properties will be animated--scale and z_rotation--and the animation will loop infinitely. All this is accomplished in the single code statement shown below.
 
 	(code)
 	-- *** logoAnimation.lua ***
@@ -26,7 +26,7 @@ The animate() function accepts one table argument containing comma-separated pro
 
 By setting the loop property to true, the animation will repeat infinitely. A looping animation can be terminated by calling the UIElement's complete_animation() function.
 
-The Tutorial animation modifies the logo image's scale and z_rotation properties. Additional properties can be animated; the complete list is described in the <UIElement.animate> section of the Engine Reference.
+The Tutorial animation animates the logo's scale and z_rotation properties. Other properties of an object can also be animated; the complete list is described in the <UIElement.animate> section of the TrickPlay Engine Reference.
 
 Following good programming practices, we'll organize the Tutorial animations in separate source files. The TrickPlay logo animation will be implemented in a file called "logoAnimation.lua". Add the code shown above to the file and then update the main.lua file to run the file's code by calling dofile() as shown below.
 
@@ -41,11 +41,11 @@ If you run the application, you'll see the TrickPlay logo animated.
 
 (see images/logoAnimation.gif)
 
-Considering the animation was produced by a single code statement, it's pretty impressive, but it could use some improvements. First, the animation seems to start pretty abruptly and, second, scaling the logo back up to its original size would make the loop more seamless. Performing each of these enhancements will also expose us to other useful components of the SDK libraries.
+Considering that a single code statement produced the animation, it's pretty impressive, but it could still use some improvements. First, the animation seems to start pretty abruptly and, second, scaling the logo back up to its original size would make the loop seamless. Performing each of these enhancements will also expose us to other useful components of the SDK libraries.
 
-As the animation proceeds, each of the animated properties changes its value in an unchanging, linear progression by default. In real life, objects often slowly advance to their natural speed and gradually slow down before stopping. These characteristics are called "easing in" and "easing out" or simply ease in and ease out. The SDK libraries support ease in and ease out through its <Alpha> class. Different Alpha "modes" implement various rates of ease in/out and whether only ease in is applied, only ease out, or both ease in and out. Animated demos and graphic depictions of each available mode are included in the <Alpha.mode> section of the Engine Reference.
+As the animation proceeds, each of the animated properties updates its value in an unchanging, linear progression by default. However, in real life, objects usually start slowly when beginning to move and gradually slow down just before stopping. These characteristics are called "easing in" and "easing out" or simply ease in and ease out. The SDK libraries support ease in and ease out through its <Alpha> class. Different Alpha "modes" implement various rates of ease in/out and whether only ease in is applied, only ease out, or both ease in and out. Animated demos and graphic depictions of each available mode are included in the <Alpha.mode> section of the Engine Reference.
 
-The animate() function accepts a mode property that specifies the Alpha mode to apply on the animation's properties. The mode affects all the animated properties; it is not possible to apply the mode to only a single property using the animate() function. If you need to apply different Alpha modes to properties, one of the other SDK animation techniques should be used. For the Tutorial's animated logo, we'll apply an ease-in mode so that the logo doesn't start rotating so quickly. This can be accomplished by adding a single mode property to the original animate() call. The complete function call is shown below.
+The animate() function accepts an optional mode argument that specifies the Alpha mode to apply to the animated properties. The mode affects all the properties being animated; with the animate() function, it is not possible to apply the mode to only a single property. If you need to apply different Alpha modes to individual properties, one of the other SDK animation techniques should be used. For the Tutorial's animated logo, we'll apply an ease-in mode so that the logo doesn't start rotating so quickly. This can be accomplished by adding a single mode property to the original animate() call. The complete function call is shown below.
 
 	(code)
 	logoImage:animate( {
@@ -58,13 +58,15 @@ The animate() function accepts a mode property that specifies the Alpha mode to 
 
 	(end)
 
-If you add the mode property to the animate() call in the logoAnimation.lua file and run the application, you'll see the logo gradually eases into its rotation and scaling movements. The resulting animation is less frenetic. If you want, try setting some of the other Alpha modes to see their effect.
+If you add the mode property to the animate() call in the logoAnimation.lua file and run the application, you'll see the logo gradually eases into its rotation and scaling movements. The resulting animation is less frenetic. You can try setting some of the other Alpha modes to see the effect they have on the animation.
 
-To make the loop seamless, it needs to scale the logo back up to its original size. This won't be so easy to do with the animate() function. In cases like this where a property's value goes back and forth in a cyclical manner, it is easier to use one of the other SDK library animation methods. But, while awkward, it is possible to do with animate(), and doing so will get us better acquainted with the animate() function.
+To make the loop seamless, it needs to scale the logo back up to its original size. This won't be so easy to do with the animate() function. In cases like this where a property's value goes back and forth in a cyclical manner, it is easier to use one of the other SDK library animation methods. But, although awkward, it is still possible to do with animate(), and doing so will get us better acquainted with the animate() function.
 
-The animate() function is limited to property values going in one direction: from their starting values to their ending values. To go back to their starting values, another animation is needed, so we'll have to make two calls to animate(), with one starting immediately after the completion of the other. The animate() function supports a property called "on_completed" that accepts a function that will be called when the animation finishes. That function can then call the other animation to complete the loop.
+The animate() function is limited to property values going in one direction--from their starting values to their ending values. To animate properties back to their starting values, a second animation is required. To provide a seamless loop from starting values to ending values and back again, each animation will begin immediately after the other has finished. To notify the program that the animation has completed, the animate() function supports an optional argument called "on_completed" that accepts a function that will be called when the animation finishes. We will write that function so it starts the other animation.
 
-The final logoAnimation.lua file is shown in its entirety below.
+The required code is a bit more involved than our original single-line animation. The complete logoAnimation.lua source file and the resulting logo animation are shown below. The <logoAnimation.lua> source file is also listed in the <Complete Tutorial Source Code> section.
+
+(see images/logoAnimationFinal.gif)
 
 	(code)
 	-- *** logoAnimation.lua ***
@@ -130,11 +132,9 @@ The final logoAnimation.lua file is shown in its entirety below.
 
 There are threee minor things to point out in the final code. First, notice that the loop property has been removed from the animate() table. Instead, the code simulates a loop by cycling through the two separate animations.
 
-Second, when the logo animation scales down, it spins clockwise. If we simply reversed the rotation when scaling back up (by moving in a negative direction from 360 to zero), the logo would spin counter-clockwise. To maintain a clockwise motion, the logoScaleUp() function resets the z_rotation before starting the animation. By moving in a positive direction (from -360 to 0), the logo continues to spin clockwise.
+Second, when the logo animation scales down, it spins clockwise. If we simply reversed the rotation when scaling back up (by moving in a negative direction from 360 degrees to zero), the logo would spin counter-clockwise. To maintain a clockwise motion, the logoScaleUp() function resets the z_rotation before starting the animation. By moving in a positive direction (from -360 to 0), the logo continues to spin clockwise.
 
 Finally, the functions logoScaleDown() and logoScaleUp() and the boolean variable scaling_down are defined as local elements. They are not called from outside the source file, so they are defined as local to eliminate any possible naming conflicts in other source files. The logoCompleted() function, however, cannot be local because it is called from outside the source file when the animation completes.
 
-The final TrickPlay logo animation is shown below. Next, the two spheres will be animated using the Timeline class.
-
-(see images/logoAnimationFinal.gif)
+In the next section, the two spheres will be animated using an alternative animation technique.
 

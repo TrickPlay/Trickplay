@@ -421,21 +421,18 @@ class Text [[ClutterActor*]] actor
 		The alignment property is a string indicating how lines of wrapped text
 		should align with each other.
 		
-		If text wrapping is turned off (as specified in the <wrap> property)
-		then the alignment property has no effect.
+		If text wrapping is turned off (i.e., the Text object's width property 
+		has not been set) then the alignment property has no effect.
 		
-		*Supported Settings:*
+		*Supported Settings:* Note: The string setting is case-sensitive.
 		
-		LEFT - (default) lines are left-aligned
+		LEFT - lines are left-aligned (default)
 		CENTER - lines are center-aligned
 		RIGHT - lines are right-aligned
-		
-		*Note:* The alignment string is case-sensitive; all the 
-		characters must be uppercase.
 
 		*Default Setting:* "LEFT"
 		
-		*See Also:* the <wrap> property, the <wrap_mode> property
+		*See Also:* the <UIElement.width> property, the <wrap_mode> property
 		
 	*/	
 	

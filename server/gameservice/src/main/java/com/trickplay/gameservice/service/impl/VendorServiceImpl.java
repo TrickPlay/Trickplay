@@ -2,7 +2,6 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +10,10 @@ import com.trickplay.gameservice.dao.impl.SpringUtils;
 import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.domain.Vendor;
 import com.trickplay.gameservice.exception.GameServiceException;
+import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.security.UserAdapter;
-import com.trickplay.gameservice.service.UserService;
 import com.trickplay.gameservice.service.VendorService;
 
 
@@ -42,5 +41,14 @@ public class VendorServiceImpl extends GenericDAOWithJPA<Vendor, Long> implement
 			throw new GameServiceException(Reason.FORBIDDEN);
 		}
 	}
+
+
+    public void remove(Long vendorId) {
+        throw new UnsupportedOperationException("Vendor.remove not yet implemented");
+    }
+
+    public void create(Vendor entity) {
+        super.persist(entity);      
+    }
 
 }

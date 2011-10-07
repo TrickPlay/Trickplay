@@ -1,7 +1,5 @@
 package com.trickplay.gameservice.service.impl;
 
-import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -104,21 +102,34 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 					);
 			
 		}
-		User recipient = userService.find(recipientId);
-		
-		if (recipient == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientId", recipientId));
 		
 		GameSession gs = super.find(gameSessionId);
 		if (gs==null)
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GameSession.sessionId", gameSessionId));
 
-		if (gs.getGame().getMaxPlayers() <= gs.getPlayers().size())
+		User recipient=null;
+        if (recipientId == null) {
+            if (!gs.getGame().isAllowWildCardInvitation()) {
+                throw new GameServiceException(Reason.WILDCARD_INVITATION_NOT_ALLOWED, null, ExceptionContext.make("gameId", gs.getGame().getName()));
+            }
+            // this is a valid case for games which allow wild card invitations
+        } else {
+            recipient = userService.find(recipientId);
+        
+            if (recipient == null)
+                throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientId", recipientId));
+        }
+        
+        if (gs.getStartTime() != null) {
+            throw new GameServiceException(Reason.GAME_ALREADY_STARTED);
+        }
+        
+        if (gs.getGame().getMaxPlayers() <= gs.getPlayers().size())
 			throw new GameServiceException(Reason.GP_EXCEEDS_MAX_PLAYERS_ALLOWED, null, 
 					ExceptionContext.make("maxPlayersAllowed", gs.getGame().getMaxPlayers()));
 		
 		for(GamePlayInvitation gpi : gs.getInvitations()) {
-			if (gpi.getRecipient().getId() == recipient.getId()) {
+			if (recipient != null && gpi.getRecipient().getId().equals(recipient.getId())) {
 				throw new GameServiceException(Reason.INVITATION_PREVIOUSLY_SENT);
 			}
 		}
@@ -126,7 +137,9 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		gs.addInvitation(gpi);
 		entityManager.persist(gpi);
 
-		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, recipientId, "Game play request from "+requestor.getUsername(), gpi));
+		if (recipientId != null) {
+		    entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, recipientId, "Game play request from "+requestor.getUsername(), gpi));
+		}
 		return gpi;
 	}
 	
@@ -155,14 +168,24 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientId", recipientId));
 		
 		ServiceUtil.checkAuthority(recipient);
-		
+
 		if (gpi.getStatus()!=InvitationStatus.PENDING)
 			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
+        if (!gpi.getRecipient().getId().equals(recipientId))
+            throw new GameServiceException(Reason.NOT_INVITATION_RECIPIENT);
+        
 		gpi.setStatus(InvitationStatus.REJECTED);
 		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, recipient, gpi.getRequestor().getId(), "Game play request declined by "+recipient.getUsername(), gpi));
 		return gpi;
 	}
 
+	/*
+	 * only allow accept invitation if the following is true:
+	 * 1. valid recipient
+	 * 2. recipient reserved the invitation (in case of wildcard invitation) or recipient is the invitation's recipient.
+	 * 3. invitation is in PENDING or RESERVED status
+	 * 
+	 */
 	private GamePlayInvitation acceptGamePlayInvitation(Long invitationId,
 			Long recipientId) throws GameServiceException {
 
@@ -175,22 +198,58 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		GamePlayInvitation gpi = entityManager.find(GamePlayInvitation.class, invitationId);
 		if (gpi == null)
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GamePlayInvitation.invitationId", invitationId));
+        if (gpi.getStatus()!=InvitationStatus.PENDING)
+            throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
+
 
 		GameSession gs = gpi.getGameSession();
-		if (gs.getGame().getMaxPlayers() <= gs.getPlayers().size())
-			throw new GameServiceException(Reason.GP_EXCEEDS_MAX_PLAYERS_ALLOWED, null, 
-					ExceptionContext.make("maxPlayersAllowed", gs.getGame().getMaxPlayers()));
+		if (!gs.isOpen()) {
+		    throw new GameServiceException(Reason.GP_EXCEEDS_MAX_PLAYERS_ALLOWED);
+		}
 		
-		if (gpi.getStatus()!=InvitationStatus.PENDING)
-			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
+		
+		if (isReservedBySomeoneElse(gpi, recipientId)) {
+		    throw new GameServiceException(Reason.INVITATION_RESERVED);
+		} else if (!gpi.isWildCard() && !gpi.getRecipient().getId().equals(recipientId)) {
+		    throw new GameServiceException(Reason.NOT_INVITATION_RECIPIENT);
+		}
+		
 		gpi.setStatus(InvitationStatus.ACCEPTED);
+		if (gpi.isWildCard())
+		    gpi.setRecipient(recipient);
 		gs.getPlayers().add(recipient);
+		
+		if (gs.getPlayers().size() >= gs.getGame().getMaxPlayers()) {
+            expireGamePlayInvitations(gs);
+            gs.setOpen(false);
+        }
 		
 		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, recipient, gpi.getRequestor().getId(), "Game play request accepted by "+recipient.getUsername(), gpi));
 		
+		if (gs.getGame().isTurnBasedFlag() 
+	//			&& gs.getGame().isEnforceTurns()
+				&& gs.getStartTime()!=null 
+				&& gs.getState() != null
+				&& gs.getState().getTurn() == null
+				) {
+			gs.getState().setTurn(recipient);
+		}
 		return gpi;
 	}
+	
+	private boolean isReservedBySomeoneElse(GamePlayInvitation gpi, Long recipientId) {
+	   return  isValidReservation(gpi)
+        && !gpi.getReservedBy().getId().equals(recipientId);
+	}
 
+	private boolean isValidReservation(GamePlayInvitation gpi) {
+	    return gpi.isWildCard() 
+        && gpi.getReservedUntil()!=null 
+        && gpi.getReservedUntil().after(new Date());
+	}
+	/*
+	 * TODO: who can cancel an invitation? the owner of the game session ? or the creator of the invitation ???
+	 */
 	private GamePlayInvitation cancelGamePlayInvitation(Long invitationId,
 			Long requestorId) {
 		GamePlayInvitation gpi = entityManager.find(GamePlayInvitation.class, invitationId);
@@ -202,7 +261,8 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.requestorId", requestorId));
 
 		ServiceUtil.checkAuthority(requestor);
-		
+		//if (!gpi.getRequestor().getId().equals(requestorId))
+		  //  throw new GameServiceException()
 		if (gpi.getStatus()!=InvitationStatus.PENDING)
 			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
 		gpi.setStatus(InvitationStatus.CANCELLED);
@@ -239,15 +299,12 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		if (attached_gs.getStartTime()!=null)
 			throw new GameServiceException(Reason.GAME_ALREADY_STARTED);
 		
-		if (attached_gs.getPlayers().size() < attached_gs.getGame().getMinPlayers())
-			throw new GameServiceException(Reason.GP_BELOW_MIN_PLAYERS_REQUIRED, null,
-					new ExceptionContext("minPlayersRequired", attached_gs.getGame().getMinPlayers())
-			);
 		
 		attached_gs.setStartTime(new Date());
-		for(GamePlayInvitation gpi: attached_gs.getInvitations()) {
-			if (gpi.getStatus()==InvitationStatus.PENDING)
-				gpi.setStatus(InvitationStatus.EXPIRED);
+
+		if (attached_gs.getPlayers().size() >= attached_gs.getGame().getMaxPlayers()) {
+            expireGamePlayInvitations(attached_gs);
+		    attached_gs.setOpen(false);
 		}
 		
 		GamePlayState gps = new GamePlayState(requestor, nextTurn, attached_gs, state, generateGameStepId());
@@ -257,7 +314,15 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		entityManager.persist(new Event(EventType.GAME_SESSION_START, requestor, attached_gs.getId(), "Game started by "+requestor.getUsername(), gps));
 		return gps.getGameStepId();
 	}
+	
+	private void expireGamePlayInvitations(GameSession s) {
+		for(GamePlayInvitation gpi: s.getInvitations()) {
+			if (gpi.getStatus()==InvitationStatus.PENDING)
+				gpi.setStatus(InvitationStatus.EXPIRED);
+		}
+	}
 
+	@Transactional
 	public GameStepId updateGamePlay(Long sessionId, String state, Long nextTurnId) {
 		GameSession attached_gs = super.find(sessionId);
 		if (attached_gs == null)
@@ -295,6 +360,7 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		return gps.getGameStepId();
 	}
 
+	@Transactional
 	public GameStepId endGamePlay(Long sessionId, String state) {
 		GameSession attached_gs = super.find(sessionId);
 		if (attached_gs == null)
@@ -350,5 +416,83 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		return new GameStepId(SessionServiceImpl.generateToken());
 	}
 	
+	@Transactional
+	public List<GamePlayInvitation> getInvitations(Long gameId, int max) {
+		if (max<=0 || max>10)
+			max=10;
+		Long userId = SecurityUtil.getCurrentUserId();
+		User user = null;
+		if (userId == null || (user=userService.find(userId)) == null)
+			throw new GameServiceException(Reason.FORBIDDEN);
+		
+		/*
+		Game gm = gameService.find(gameId);
+		if (gm == null)
+			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.id", gameId));
+			*/
+
+		String invitationForUserQuery = "select I from GamePlayInvitation I join I.gameSession GS join GS.game G"
+			+ " WHERE G.id = :gameId"
+			+ " AND GS.open = true"
+			+ " AND I.recipient.id = :userId"
+			+ " AND I.status=:pendingStatus"
+			+ " ORDER BY I.created";
+		
+		List<GamePlayInvitation> userInvitations = entityManager
+		.createQuery(invitationForUserQuery)
+		.setParameter("gameId", gameId)
+		.setParameter("userId", userId)
+		.setParameter("pendingStatus", InvitationStatus.PENDING)
+		.setMaxResults(max)
+		.getResultList();
+		
+		if (userInvitations!=null && userInvitations.size()>=max)
+			return userInvitations;
+
+		List<GamePlayInvitation> resultList;
+		resultList = userInvitations != null ? 
+				new ArrayList<GamePlayInvitation>(userInvitations) 
+				: 
+					new ArrayList<GamePlayInvitation>();
+		
+		max = max - resultList.size();
+		String wildCardInvitationQuery = "select I from GamePlayInvitation I join I.gameSession GS join GS.game G"
+				+ " WHERE G.id = :gameId"
+				+ " AND GS.open = true"
+				+ " AND I.recipient is null"
+				+ " AND I.status=:pendingStatus"
+				+ " AND (I.reservedUntil is null OR I.reservedUntil < :currentTime) "
+				+ " ORDER BY GS.id, I.created";
+		
+		List<GamePlayInvitation> wildCardInvitations = entityManager
+		.createQuery(wildCardInvitationQuery)
+		.setParameter("gameId", gameId)
+		.setParameter("pendingStatus", InvitationStatus.PENDING)
+		.setParameter("currentTime", new Date())
+		.getResultList();
+		
+		if (wildCardInvitations==null)
+		    return resultList;
+
+		Long sessionId=null;
+		for(GamePlayInvitation invitation: wildCardInvitations) {
+		    if (!invitation.getGameSession().getId().equals(sessionId)) {
+		        invitation.setReservedBy(user);
+		        long now = System.currentTimeMillis();
+		        invitation.setReservedAt(new Date(now));
+		        invitation.setReservedUntil(new Date(now+RESERVATION_VALID_INTERVAL_IN_SECONDS*1000));
+		        resultList.add(invitation);
+		        max--;
+		        sessionId = invitation.getGameSession().getId();
+		    } else {
+		        continue;
+		    }
+		    if (max<1) {
+		        break;
+		    }
+		}
+		
+		return resultList;
+	}
 	
 }

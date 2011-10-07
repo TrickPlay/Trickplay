@@ -46,6 +46,12 @@ public class DeviceServiceImpl extends GenericDAOWithJPA<Device, Long> implement
 		d.addGame(g);
 		return d;
 	}
+
+    public void create(Device entity) {
+        persist(entity);
+        
+    }
+
 	
 
 }
