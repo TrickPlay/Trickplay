@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4452F75A143F8368002809DB /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F758143F8368002809DB /* background@2x~iphone.png */; };
+		4452F75B143F8368002809DB /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F759143F8368002809DB /* background~iphone.png */; };
+		4452F75E143F836E002809DB /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F75D143F836E002809DB /* background.png */; };
 		446B2EA3143F7F1800629B54 /* TakeControl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 446B2EA2143F7F1800629B54 /* TakeControl.framework */; };
 		446B2EF9143F827B00629B54 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 446B2EF7143F827B00629B54 /* Default.png */; };
 		446B2EFA143F827B00629B54 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 446B2EF8143F827B00629B54 /* Default@2x.png */; };
@@ -33,6 +36,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4452F758143F8368002809DB /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "background@2x~iphone.png"; path = "Backgrounds/background@2x~iphone.png"; sourceTree = "<group>"; };
+		4452F759143F8368002809DB /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "background~iphone.png"; path = "Backgrounds/background~iphone.png"; sourceTree = "<group>"; };
+		4452F75D143F836E002809DB /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = background.png; path = Backgrounds/background.png; sourceTree = "<group>"; };
 		446B2EA2143F7F1800629B54 /* TakeControl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TakeControl.framework; path = Library/Frameworks/TakeControl.framework; sourceTree = SDKROOT; };
 		446B2EF7143F827B00629B54 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = "Splash Screens/Default.png"; sourceTree = "<group>"; };
 		446B2EF8143F827B00629B54 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "Splash Screens/Default@2x.png"; sourceTree = "<group>"; };
@@ -153,6 +159,8 @@
 		CD4B2EB6143A74A20073BB88 /* iPhone */ = {
 			isa = PBXGroup;
 			children = (
+				4452F758143F8368002809DB /* background@2x~iphone.png */,
+				4452F759143F8368002809DB /* background~iphone.png */,
 				446B2EF7143F827B00629B54 /* Default.png */,
 				446B2EF8143F827B00629B54 /* Default@2x.png */,
 				446C2151143F7823007A2FE9 /* iOS-logo-57x57.png */,
@@ -165,6 +173,7 @@
 		CD4B2EB7143A74AD0073BB88 /* iPad */ = {
 			isa = PBXGroup;
 			children = (
+				4452F75D143F836E002809DB /* background.png */,
 				446B2EFB143F828400629B54 /* Default-Portrait~ipad.png */,
 				446C2156143F782D007A2FE9 /* iOS-logo-72x72.png */,
 				CD4B2EAE143A748A0073BB88 /* TakeControlAppViewController_iPad.xib */,
@@ -232,6 +241,9 @@
 				446B2EF9143F827B00629B54 /* Default.png in Resources */,
 				446B2EFA143F827B00629B54 /* Default@2x.png in Resources */,
 				446B2EFC143F828400629B54 /* Default-Portrait~ipad.png in Resources */,
+				4452F75A143F8368002809DB /* background@2x~iphone.png in Resources */,
+				4452F75B143F8368002809DB /* background~iphone.png in Resources */,
+				4452F75E143F836E002809DB /* background.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
