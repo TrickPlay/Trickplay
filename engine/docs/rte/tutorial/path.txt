@@ -1,0 +1,38 @@
+Topic: Animating an Object Along a Path
+
+It's possible to have the spheres return to their starting positions by using the same technique shown earlier with the animate() function, i.e., create a second Timeline animation for the return trip and cycle between the two animations. But that solution is a bit awkward, and, with Timeline, unnecessary. A Timeline animation can define a non-linear route for an object to follow by using the SDK library's Path class.
+
+With the <Path> class, the animated object's route is defined by specifying a series of nodes that connect via lines or Bezier curves. When the animation is running, the object's current location along the path is calculated by the Path object's get_position() function. Because the Path object calculates the property's X and Y coordinates, the Interval class, which performed that operation earlier, will no longer be necessary.
+
+Each sphere follows a simple back and forth route, so defining the route's nodes will be a simple matter of calling a few functions provided by the Path class. More complicated routes can call the same functions, but would benefit from defining the route using the alternative SVG-style string syntax that is also supported. Refer to the <Path> documentation in the Engine Reference for complete details.
+
+The sphere traveling from left-to-right has a route consisting of three nodes: Start, End, and back to Start. The sphere traveling up and down begins in the center, so it's route has an extra node: Center, Start, End, Center. Each route definition is started by setting the first node with a call to the Path class's move_to() function. The remaining nodes are straight lines defined by calls to line_to(). Because the Path class takes care of calculating the in-between positions during the animation, the Interval class is no longer needed. The code statements shown below set up the Path object and should replace the Interval code used earlier in the sphereAnimation.lua source file.
+
+	(code)
+	-- Define sphere animated paths
+	sphere1Path = Path()
+	sphere1Path:move_to( sphere1StartX, sphere1StartY )
+	sphere1Path:line_to( sphere1EndX,   sphere1EndY   )
+	sphere1Path:line_to( sphere1StartX, sphere1StartY )
+	
+	sphere2Path = Path()
+	sphere2Path:move_to( sphere2CenterX, sphere2CenterY )
+	sphere2Path:line_to( sphere2StartX,  sphere2StartY  )
+	sphere2Path:line_to( sphere2EndX,    sphere2EndY    )
+	sphere2Path:line_to( sphere2CenterX, sphere2CenterY )
+	(end)
+
+The event handler code is a bit more streamlined with Path than with Interval because the Path's get_position() function returns both the X and Y coordinates in a single call. The new event handler code is shown below.
+
+	(code)
+	function sphereFrame( sphereTimeline, msecs, progress )
+		-- Update each sphere's X and Y coordinates
+		sphereImage.position = sphere1Path:get_position( progress )
+		sphereClone.position = sphere2Path:get_position( progress )
+	end
+	(end)
+
+The animation is a bit more complex now. However, we'll give it a final tweak to simulate an illusion of depth.
+
+(see images/sphereAnimation2.gif)
+

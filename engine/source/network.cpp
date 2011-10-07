@@ -911,7 +911,9 @@ public:
 
             if ( closure->request.timeout_s > 0 )
             {
-                cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, closure->request.timeout_s * 1000 ) );
+            	int t = closure->request.timeout_s * 1000;
+
+                cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, t ) );
             }
 
             if ( closure->cookie_jar )

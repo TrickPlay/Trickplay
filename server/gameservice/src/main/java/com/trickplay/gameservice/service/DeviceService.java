@@ -7,10 +7,7 @@ import com.trickplay.gameservice.domain.Device;
 public interface DeviceService {
 	
 	@Transactional
-	public void persist(Device entity);
-
-	@Transactional
-	public void merge(Device entity);
+	public void create(Device entity);
 
 	public Device find(Long id);
 	

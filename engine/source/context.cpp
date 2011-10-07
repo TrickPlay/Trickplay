@@ -1312,6 +1312,8 @@ int TPContext::run()
         clutter_actor_set_size( stage , display_width , display_height );
     }
 
+    clutter_actor_set_name( stage , "stage" );
+
 #ifndef TP_CLUTTER_BACKEND_EGL
 
     clutter_stage_set_title( CLUTTER_STAGE( stage ) , "TrickPlay" );

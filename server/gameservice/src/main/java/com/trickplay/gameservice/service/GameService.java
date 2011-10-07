@@ -20,7 +20,7 @@ public interface GameService {
 
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@Transactional
-	public void remove(Game game);
+	public void remove(Long id);
 
 	public Game find(Long id);
 	

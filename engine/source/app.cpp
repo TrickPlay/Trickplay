@@ -61,7 +61,8 @@ extern int luaopen_system( lua_State * L );
 extern int luaopen_settings( lua_State * L );
 extern int luaopen_profile( lua_State * L );
 extern int luaopen_xml( lua_State * L );
-extern int luaopen_controllers_module( lua_State * L );
+extern int luaopen_controllers( lua_State * L );
+extern int luaopen_controller( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
@@ -949,7 +950,8 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_profile( L );
     luaopen_stopwatch( L );
     luaopen_json( L );
-    luaopen_controllers_module( L );
+    luaopen_controller( L );
+    luaopen_controllers( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
     luaopen_url_request( L );
@@ -1182,7 +1184,10 @@ void App::secure_lua_state( const StringSet & allowed_names )
     const char * global_nuke[] =
     {
         "require",
-        NULL
+        "load",
+        "loadstring",
+        "module",
+        0
     };
 
     for( const char * * name = global_nuke; * name; ++name )

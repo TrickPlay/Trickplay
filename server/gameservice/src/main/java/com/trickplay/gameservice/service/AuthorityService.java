@@ -9,5 +9,5 @@ import com.trickplay.gameservice.domain.Authority;
 public interface AuthorityService {
 
 	@Transactional
-	public void persist(Authority entity);
+	public void create(Authority entity);
 }

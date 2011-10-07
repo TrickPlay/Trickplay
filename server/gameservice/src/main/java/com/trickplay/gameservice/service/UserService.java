@@ -27,7 +27,7 @@ public interface UserService {
 
 	@PreFilter("filterObject.username == principal.username")
 	@Transactional
-	public void merge(User entity);
+	public void update(User entity);
 
 	public User find(Long id);
 	

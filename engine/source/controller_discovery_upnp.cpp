@@ -196,7 +196,9 @@ ControllerDiscoveryUPnP::ControllerDiscoveryUPnP( TPContext * context, const Str
 :
     controller_name( name ),
     controller_port( port ),
-    device_handle( 0 )
+    device_handle( 0 ),
+    device6_handle( 0 ),
+    device6ulagua_handle ( 0 )
 {
     prepare_device_xml( context , name );
 
@@ -206,7 +208,12 @@ ControllerDiscoveryUPnP::ControllerDiscoveryUPnP( TPContext * context, const Str
 
     if ( ! init )
     {
+#if UPNP_ENABLE_IPV6
+        if ( UPNP_E_SUCCESS != UpnpInit2( 0, 0 ) )
+#else
+#warning Old version of libUPnP has no IPv6 support.  Use at least version 1.6.7 for IPv6
         if ( UPNP_E_SUCCESS != UpnpInit( 0 , 0 ) )
+#endif
         {
             g_warning( "FAILED TO INITIALIZE UPnP" );
 
@@ -218,6 +225,7 @@ ControllerDiscoveryUPnP::ControllerDiscoveryUPnP( TPContext * context, const Str
         }
     }
 
+#if UPNP_VERSION < ((1 * 100 + 6) * 100 + 7)
     UpnpVirtualDirCallbacks callbacks;
 
 
@@ -229,6 +237,14 @@ ControllerDiscoveryUPnP::ControllerDiscoveryUPnP( TPContext * context, const Str
     callbacks.close = upnp_virtual_close;
 
     UpnpSetVirtualDirCallbacks( & callbacks );
+#else
+    UpnpVirtualDir_set_GetInfoCallback(upnp_virtual_get_info);
+    UpnpVirtualDir_set_OpenCallback(upnp_virtual_open);
+    UpnpVirtualDir_set_ReadCallback(upnp_virtual_read);
+    UpnpVirtualDir_set_WriteCallback(upnp_virtual_write);
+    UpnpVirtualDir_set_SeekCallback(upnp_virtual_seek);
+    UpnpVirtualDir_set_CloseCallback(upnp_virtual_close);
+#endif
 
     if ( UPNP_E_SUCCESS != UpnpAddVirtualDir( "/" ) )
     {
@@ -269,6 +285,60 @@ ControllerDiscoveryUPnP::ControllerDiscoveryUPnP( TPContext * context, const Str
 
     g_info( "UPnP CONTROLLER DISCOVERY READY AT %s:%u" , UpnpGetServerIpAddress() , UpnpGetServerPort() );
 
+#if UPNP_ENABLE_IPV6
+
+    if(strlen(UpnpGetServerIp6Address())>0)
+    {
+        std::stringstream url6;
+        
+        url6 << "http://[" << UpnpGetServerIp6Address() << "]:" << UpnpGetServerPort6() << "/device.xml";
+
+        if ( UPNP_E_SUCCESS != UpnpRegisterRootDevice3(
+                url6.str().c_str(),
+                upnp_device_callback,
+                this,
+                & device6_handle,
+                AF_INET6 ) )
+        {
+            g_warning( "FAILED TO REGISTER IPv6 UPnP ROOT DEVICE AT [%s]:%u" , UpnpGetServerIp6Address() , UpnpGetServerPort6() );
+    
+            return;
+        }
+    
+        if ( UPNP_E_SUCCESS != UpnpSendAdvertisement( device6_handle , 10 ) )
+        {
+            g_warning( "FAILED TO SEND IPv6 UPnP ADVERTISEMENT" );
+        }
+    
+        g_info( "UPnP IPv6 CONTROLLER DISCOVERY READY AT [%s]:%u" , UpnpGetServerIp6Address() , UpnpGetServerPort6() );
+    }
+
+    if(strlen(UpnpGetServerUlaGuaIp6Address())>0)
+    {
+        std::stringstream urlulagua6;
+        
+        urlulagua6 << "http://[" << UpnpGetServerUlaGuaIp6Address() << "]:" << UpnpGetServerPort6() << "/device.xml";
+
+        if ( UPNP_E_SUCCESS != UpnpRegisterRootDevice3(
+                urlulagua6.str().c_str(),
+                upnp_device_callback,
+                this,
+                & device6ulagua_handle,
+                AF_INET6 ) )
+        {
+            g_warning( "FAILED TO REGISTER IPv6 ULA/GUA UPnP ROOT DEVICE AT [%s]:%u" , UpnpGetServerUlaGuaIp6Address() , UpnpGetServerPort6() );
+    
+            return;
+        }
+    
+        if ( UPNP_E_SUCCESS != UpnpSendAdvertisement( device6ulagua_handle , 10 ) )
+        {
+            g_warning( "FAILED TO SEND IPv6 ULA/GUA UPnP ADVERTISEMENT" );
+        }
+    
+        g_info( "UPnP IPv6 ULA/GUA CONTROLLER DISCOVERY READY AT [%s]:%u" , UpnpGetServerUlaGuaIp6Address() , UpnpGetServerPort6() );
+    }
+#endif
 }
 
 ControllerDiscoveryUPnP::~ControllerDiscoveryUPnP()
@@ -276,6 +346,9 @@ ControllerDiscoveryUPnP::~ControllerDiscoveryUPnP()
     if ( device_handle )
     {
         UpnpUnRegisterRootDevice( device_handle );
+
+        if( device6_handle ) UpnpUnRegisterRootDevice ( device6_handle );
+        if( device6ulagua_handle ) UpnpUnRegisterRootDevice ( device6ulagua_handle );
 
         UpnpEnableWebserver( 0 );
     }
@@ -285,7 +358,7 @@ ControllerDiscoveryUPnP::~ControllerDiscoveryUPnP()
 
 bool ControllerDiscoveryUPnP::is_ready() const
 {
-    return device_handle != 0;
+    return device_handle != 0 || device6_handle != 0 || device6ulagua_handle != 0;
 }
 
 int ControllerDiscoveryUPnP::upnp_device_callback( Upnp_EventType type , void * event , void * user )

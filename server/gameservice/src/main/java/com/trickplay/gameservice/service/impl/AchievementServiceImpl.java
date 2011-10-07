@@ -14,6 +14,7 @@ import com.trickplay.gameservice.domain.Event.EventType;
 import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.RecordedAchievement;
 import com.trickplay.gameservice.domain.User;
+import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.AchievementService;
 import com.trickplay.gameservice.service.EventService;
 
@@ -29,20 +30,19 @@ public class AchievementServiceImpl extends GenericDAOWithJPA<Achievement, Long>
 	 * (non-Javadoc)
 	 * @see com.trickplay.gameservice.service.AchievementService#findBuddyRecordedAchievement(com.trickplay.gameservice.domain.Game, com.trickplay.gameservice.domain.User)
 	 */
-	public List<RecordedAchievement> findBuddyRecordedAchievement(Game game,
-			User user) {
+	public List<RecordedAchievement> findBuddyRecordedAchievement(Long gameId, Long buddyId) {
 		return null;
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<RecordedAchievement> findRecordedAchievement(Game game,
-			User user) {
+	public List<RecordedAchievement> findAllRecordedAchievementsByGameId(Long gameId) {
+	    Long userId = SecurityUtil.getPrincipal().getId();
 		return super.entityManager.createQuery
 		(
 				"select R from RecordedAchievment as R join R.game as G join R.user as U where G.id=:gId and U.id=:uId"
 				)
-				.setParameter("gId", game.getId())
-				.setParameter("uId", user.getId())
+				.setParameter("gId", gameId)
+				.setParameter("uId", userId)
 				.getResultList();
 	}
 
@@ -51,20 +51,25 @@ public class AchievementServiceImpl extends GenericDAOWithJPA<Achievement, Long>
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Achievement> find(Game game) {
+	public List<Achievement> findAchievementsByGameId(Long gameId) {
 		return super.entityManager.createQuery
 		(
 				"select A from Achievment as A join A.game as G where G.id=:gId"
 				)
-				.setParameter("gId", game.getId())
+				.setParameter("gId", gameId)
 				.getResultList();
 	}
 
 	@Transactional
-	public void persist(RecordedAchievement entity) {
+	public void create(RecordedAchievement entity) {
 		super.entityManager.persist(entity);
 		super.entityManager.persist(new Event(EventType.ACHIEVEMENT_EVENT, entity.getUser(), null, getMessage(entity), entity));
 	}
+	
+	@Transactional
+    public void create(Achievement entity) {
+        super.entityManager.persist(entity);
+    }
 	
 	public String getMessage(RecordedAchievement ra) {
 		return 
