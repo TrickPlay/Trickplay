@@ -715,7 +715,7 @@
 					"\"Take Control Framework/Public Headers\"",
 				);
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
@@ -735,7 +735,7 @@
 					"\"Take Control Framework/Public Headers\"",
 				);
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
@@ -755,7 +755,7 @@
 					"\"Take Control Framework/Public Headers\"",
 				);
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
