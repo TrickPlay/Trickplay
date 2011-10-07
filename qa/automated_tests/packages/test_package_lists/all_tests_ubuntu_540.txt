@@ -211,27 +211,27 @@
 },
 {
 "name": "00043_text_color.lua",
-"checksum": "98aab605336ca45d4eeeab4900cce7bd",
+"checksum": "7f1609ede5da7a61102a6177406a2f6f",
 "active": "true"
 },
 {
 "name": "00044_text_font_1.lua",
-"checksum": "208a9f5ffee5e83e8cbccbfb618653a1",
+"checksum": "1ee0dbb4ae50546b15e038a177a127b6",
 "active": "true"
 },
 {
 "name": "00045_text_font_2.lua",
-"checksum": "d4f0bd2c938f24c86fa062c71a0ea319",
+"checksum": "fa03dea0ad917656d5e78d86a476717b",
 "active": "true"
 },
 {
 "name": "00046_text_font_3.lua",
-"checksum": "be47181456bd1a38a6da27f87caf4442",
+"checksum": "006d79cdc85ca3022203b709b5001b6f",
 "active": "true"
 },
 {
 "name": "00047_text_justify.lua",
-"checksum": "3920f2bd893cd6e18f4f3455ec04d389",
+"checksum": "501bc0c6dce1d8d304cdb12201e92e41",
 "active": "true"
 },
 {
@@ -241,37 +241,37 @@
 },
 {
 "name": "00049_text_use_markup.lua",
-"checksum": "78247f4ad4dd1123442b9a739bd2cda0",
+"checksum": "9ca547ae84ed4b45b99ac722a0082dce",
 "active": "true"
 },
 {
 "name": "00050_text_ellipsize.lua",
-"checksum": "c56c1f48092942169f9db7c8a90f43c5",
+"checksum": "00dba63ae77927d3f17354e3f75fd7a9",
 "active": "true"
 },
 {
 "name": "00051_text_alignment.lua",
-"checksum": "99127908c2547ca0b8b133d063674059",
+"checksum": "8302be8777b98b234b43da1873564784",
 "active": "true"
 },
 {
 "name": "00052_text_max_length.lua",
-"checksum": "3fd7d29d638e289a137200e899c9d49a",
+"checksum": "ddc42ace04903af7dd9f75f270a0e53f",
 "active": "true"
 },
 {
 "name": "00054_text_single_line.lua",
-"checksum": "ad1f4821df350fc3093da47de7e80cd1",
+"checksum": "2ff83856834c656a1e0d28df0f4d1efa",
 "active": "true"
 },
 {
 "name": "00056_text_password_char.lua",
-"checksum": "df0c6c9a92957ede8ca6398694c0aa4a",
+"checksum": "6b51e9b87e79693bd8980eef18a3ae78",
 "active": "true"
 },
 {
 "name": "00057_text_on_text_changed.lua",
-"checksum": "65b391a799f51b739bffe7526fc315e1",
+"checksum": "c5b8978ee4d647a4bbcec922cb575675",
 "active": "true"
 },
 {
@@ -366,12 +366,12 @@
 },
 {
 "name": "00076_text_font_3_jp_fonts.lua",
-"checksum": "18fc8be084de639d586c2491ddb59204",
+"checksum": "31ac549b2451cdc810b51209744b4e4d",
 "active": "true"
 },
 {
 "name": "00077_html_markup.lua",
-"checksum": "c423b830c7e55f3c865d8018d7f2ee70",
+"checksum": "caa2de5006ca7f08c3e91175d417bf0c",
 "active": "true"
 },
 {
