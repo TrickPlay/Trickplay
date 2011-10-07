@@ -197,7 +197,7 @@
 		CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CommandInterpreterApp.m; path = "Take Control Framework/Classes/CommandInterpreterApp.m"; sourceTree = SOURCE_ROOT; };
 		CD91EAF41427D6980043C8BF /* ResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ResourceManager.h; path = "Take Control Framework/Classes/ResourceManager.h"; sourceTree = SOURCE_ROOT; };
 		CD91EAF51427D6980043C8BF /* ResourceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ResourceManager.m; path = "Take Control Framework/Classes/ResourceManager.m"; sourceTree = SOURCE_ROOT; };
-		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewPad.xib; path = ../ImageEditorHelpViewPad.xib; sourceTree = "<group>"; };
+		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewPad.xib; path = "Take Control Framework/Classes/ImageEditorHelpViewPad.xib"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
