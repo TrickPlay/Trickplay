@@ -121,12 +121,12 @@
 		CD63B45313B9895300158169 /* up-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "up-touch.png"; sourceTree = "<group>"; };
 		CD63B45413B9895300158169 /* up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = up.png; sourceTree = "<group>"; };
 		CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "ios-generic-background.jpg"; sourceTree = "<group>"; };
-		CD91EA501427D3600043C8BF /* AppBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowser.h; path = "../Take Control Framework/Public Headers/AppBrowser.h"; sourceTree = "<group>"; };
-		CD91EA511427D3600043C8BF /* AppBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowserViewController.h; path = "../Take Control Framework/Public Headers/AppBrowserViewController.h"; sourceTree = "<group>"; };
-		CD91EA521427D3600043C8BF /* TPAppViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TPAppViewController.h; path = "../Take Control Framework/Public Headers/TPAppViewController.h"; sourceTree = "<group>"; };
-		CD91EA531427D3600043C8BF /* TVBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowser.h; path = "../Take Control Framework/Public Headers/TVBrowser.h"; sourceTree = "<group>"; };
-		CD91EA541427D3600043C8BF /* TVBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowserViewController.h; path = "../Take Control Framework/Public Headers/TVBrowserViewController.h"; sourceTree = "<group>"; };
-		CD91EA551427D3600043C8BF /* TVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVConnection.h; path = "../Take Control Framework/Public Headers/TVConnection.h"; sourceTree = "<group>"; };
+		CD91EA501427D3600043C8BF /* AppBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowser.h; path = "Public Headers/AppBrowser.h"; sourceTree = "<group>"; };
+		CD91EA511427D3600043C8BF /* AppBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowserViewController.h; path = "Public Headers/AppBrowserViewController.h"; sourceTree = "<group>"; };
+		CD91EA521427D3600043C8BF /* TPAppViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TPAppViewController.h; path = "Public Headers/TPAppViewController.h"; sourceTree = "<group>"; };
+		CD91EA531427D3600043C8BF /* TVBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowser.h; path = "Public Headers/TVBrowser.h"; sourceTree = "<group>"; };
+		CD91EA541427D3600043C8BF /* TVBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowserViewController.h; path = "Public Headers/TVBrowserViewController.h"; sourceTree = "<group>"; };
+		CD91EA551427D3600043C8BF /* TVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVConnection.h; path = "Public Headers/TVConnection.h"; sourceTree = "<group>"; };
 		CD91EA621427D4800043C8BF /* AppBrowserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AppBrowserViewController.xib; path = Classes/AppBrowserViewController.xib; sourceTree = "<group>"; };
 		CD91EA631427D4800043C8BF /* AudioRecordingViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AudioRecordingViewController.xib; path = Classes/AudioRecordingViewController.xib; sourceTree = "<group>"; };
 		CD91EA651427D4800043C8BF /* ImageEditorHelpViewControllerPhone.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewControllerPhone.xib; path = Classes/ImageEditorHelpViewControllerPhone.xib; sourceTree = "<group>"; };
@@ -276,12 +276,6 @@
 			children = (
 				CD4E17A714353B5F00356032 /* JSON */,
 				CD91EA181427CB5B0043C8BF /* PublicHeaderFiles */,
-				CD91EA541427D3600043C8BF /* TVBrowserViewController.h */,
-				CD91EA511427D3600043C8BF /* AppBrowserViewController.h */,
-				CD91EA521427D3600043C8BF /* TPAppViewController.h */,
-				CD91EA531427D3600043C8BF /* TVBrowser.h */,
-				CD91EA501427D3600043C8BF /* AppBrowser.h */,
-				CD91EA551427D3600043C8BF /* TVConnection.h */,
 				CD54637D14203CBF00965577 /* PrivateMethods */,
 				CDFEBBA1130A4B8700A14307 /* Modules */,
 				CDFEBBB8130A4CD100A14307 /* ViewControllers */,
@@ -408,6 +402,12 @@
 		CD91EA181427CB5B0043C8BF /* PublicHeaderFiles */ = {
 			isa = PBXGroup;
 			children = (
+				CD91EA541427D3600043C8BF /* TVBrowserViewController.h */,
+				CD91EA511427D3600043C8BF /* AppBrowserViewController.h */,
+				CD91EA521427D3600043C8BF /* TPAppViewController.h */,
+				CD91EA531427D3600043C8BF /* TVBrowser.h */,
+				CD91EA501427D3600043C8BF /* AppBrowser.h */,
+				CD91EA551427D3600043C8BF /* TVConnection.h */,
 			);
 			name = PublicHeaderFiles;
 			path = "../Take Control Framework";
