@@ -7,6 +7,40 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		440BA9DD143F88680072E361 /* AppBrowserViewController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCE8143F860E003CF13C /* AppBrowserViewController.nib */; };
+		440BA9DE143F88680072E361 /* AudioRecordingViewController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCEA143F860E003CF13C /* AudioRecordingViewController.nib */; };
+		440BA9DF143F88680072E361 /* ImageEditorHelpViewControllerPhone.nib in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCFD143F860E003CF13C /* ImageEditorHelpViewControllerPhone.nib */; };
+		440BA9E0143F88680072E361 /* ImageEditorHelpViewPad.nib in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCFE143F860E003CF13C /* ImageEditorHelpViewPad.nib */; };
+		440BA9E1143F88680072E361 /* ImageEditorViewController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCFF143F860E003CF13C /* ImageEditorViewController.nib */; };
+		440BA9E2143F88680072E361 /* TPAppViewController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD07143F860E003CF13C /* TPAppViewController.nib */; };
+		440BA9E3143F88680072E361 /* TVBrowserViewController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD08143F860E003CF13C /* TVBrowserViewController.nib */; };
+		440BA9E4143F88680072E361 /* VirtualRemoteViewController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD0B143F860E003CF13C /* VirtualRemoteViewController.nib */; };
+		440BA9E5143F88680072E361 /* arrows-generic-controls-comp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCE9143F860E003CF13C /* arrows-generic-controls-comp.jpg */; };
+		440BA9E6143F88680072E361 /* back-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCEB143F860E003CF13C /* back-touch.png */; };
+		440BA9E7143F88680072E361 /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCEC143F860E003CF13C /* back.png */; };
+		440BA9E8143F88680072E361 /* button-blue-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCED143F860E003CF13C /* button-blue-touch.png */; };
+		440BA9E9143F88680072E361 /* button-blue.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCEE143F860E003CF13C /* button-blue.png */; };
+		440BA9EA143F88680072E361 /* button-green-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCEF143F860E003CF13C /* button-green-touch.png */; };
+		440BA9EB143F88680072E361 /* button-green.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCF0143F860E003CF13C /* button-green.png */; };
+		440BA9EC143F88680072E361 /* button-red-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCF1143F860E003CF13C /* button-red-touch.png */; };
+		440BA9ED143F88680072E361 /* button-red.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCF2143F860E003CF13C /* button-red.png */; };
+		440BA9EE143F88680072E361 /* button-yellow-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCF3143F860E003CF13C /* button-yellow-touch.png */; };
+		440BA9EF143F88680072E361 /* button-yellow.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCF4143F860E003CF13C /* button-yellow.png */; };
+		440BA9F0143F88680072E361 /* click.wav in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCF5143F860E003CF13C /* click.wav */; };
+		440BA9F1143F88680072E361 /* down-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCF6143F860E003CF13C /* down-touch.png */; };
+		440BA9F2143F88680072E361 /* down.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCF7143F860E003CF13C /* down.png */; };
+		440BA9F3143F88680072E361 /* exit-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCFB143F860E003CF13C /* exit-touch.png */; };
+		440BA9F4143F88680072E361 /* exit.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BCFC143F860E003CF13C /* exit.png */; };
+		440BA9F5143F88680072E361 /* ios-generic-background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD00143F860E003CF13C /* ios-generic-background.jpg */; };
+		440BA9F6143F88680072E361 /* left-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD01143F860E003CF13C /* left-touch.png */; };
+		440BA9F7143F88680072E361 /* left.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD02143F860E003CF13C /* left.png */; };
+		440BA9F8143F88680072E361 /* ok-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD03143F860E003CF13C /* ok-touch.png */; };
+		440BA9F9143F88680072E361 /* ok.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD04143F860E003CF13C /* ok.png */; };
+		440BA9FA143F88680072E361 /* right-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD05143F860E003CF13C /* right-touch.png */; };
+		440BA9FB143F88680072E361 /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD06143F860E003CF13C /* right.png */; };
+		440BA9FC143F88680072E361 /* up-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD09143F860E003CF13C /* up-touch.png */; };
+		440BA9FD143F88680072E361 /* up.png in Resources */ = {isa = PBXBuildFile; fileRef = 4427BD0A143F860E003CF13C /* up.png */; };
+		440BA9FE143F88680072E361 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 440BA9DA143F882E0072E361 /* InfoPlist.strings */; };
 		4452F75A143F8368002809DB /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F758143F8368002809DB /* background@2x~iphone.png */; };
 		4452F75B143F8368002809DB /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F759143F8368002809DB /* background~iphone.png */; };
 		4452F75E143F836E002809DB /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F75D143F836E002809DB /* background.png */; };
@@ -23,7 +57,6 @@
 		CD4B2EA0143A748A0073BB88 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CD4B2E9E143A748A0073BB88 /* InfoPlist.strings */; };
 		CD4B2EA2143A748A0073BB88 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4B2EA1143A748A0073BB88 /* main.m */; };
 		CD4B2EA6143A748A0073BB88 /* TakeControlAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4B2EA5143A748A0073BB88 /* TakeControlAppDelegate.m */; };
-		CD4B2EA8143A748A0073BB88 /* TakeControlAppViewController.h in Resources */ = {isa = PBXBuildFile; fileRef = CD4B2EA7143A748A0073BB88 /* TakeControlAppViewController.h */; };
 		CD4B2EAA143A748A0073BB88 /* TakeControlAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4B2EA9143A748A0073BB88 /* TakeControlAppViewController.m */; };
 		CD4B2EAD143A748A0073BB88 /* TakeControlAppViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD4B2EAB143A748A0073BB88 /* TakeControlAppViewController_iPhone.xib */; };
 		CD4B2EB0143A748A0073BB88 /* TakeControlAppViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD4B2EAE143A748A0073BB88 /* TakeControlAppViewController_iPad.xib */; };
@@ -36,6 +69,40 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		440BA9DB143F882E0072E361 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = InfoPlist.strings; sourceTree = "<group>"; };
+		4427BCE8143F860E003CF13C /* AppBrowserViewController.nib */ = {isa = PBXFileReference; lastKnownFileType = file; name = AppBrowserViewController.nib; path = Library/Frameworks/TakeControl.framework/AppBrowserViewController.nib; sourceTree = SDKROOT; };
+		4427BCE9143F860E003CF13C /* arrows-generic-controls-comp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "arrows-generic-controls-comp.jpg"; path = "Library/Frameworks/TakeControl.framework/arrows-generic-controls-comp.jpg"; sourceTree = SDKROOT; };
+		4427BCEA143F860E003CF13C /* AudioRecordingViewController.nib */ = {isa = PBXFileReference; lastKnownFileType = file; name = AudioRecordingViewController.nib; path = Library/Frameworks/TakeControl.framework/AudioRecordingViewController.nib; sourceTree = SDKROOT; };
+		4427BCEB143F860E003CF13C /* back-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "back-touch.png"; path = "Library/Frameworks/TakeControl.framework/back-touch.png"; sourceTree = SDKROOT; };
+		4427BCEC143F860E003CF13C /* back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = back.png; path = Library/Frameworks/TakeControl.framework/back.png; sourceTree = SDKROOT; };
+		4427BCED143F860E003CF13C /* button-blue-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "button-blue-touch.png"; path = "Library/Frameworks/TakeControl.framework/button-blue-touch.png"; sourceTree = SDKROOT; };
+		4427BCEE143F860E003CF13C /* button-blue.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "button-blue.png"; path = "Library/Frameworks/TakeControl.framework/button-blue.png"; sourceTree = SDKROOT; };
+		4427BCEF143F860E003CF13C /* button-green-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "button-green-touch.png"; path = "Library/Frameworks/TakeControl.framework/button-green-touch.png"; sourceTree = SDKROOT; };
+		4427BCF0143F860E003CF13C /* button-green.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "button-green.png"; path = "Library/Frameworks/TakeControl.framework/button-green.png"; sourceTree = SDKROOT; };
+		4427BCF1143F860E003CF13C /* button-red-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "button-red-touch.png"; path = "Library/Frameworks/TakeControl.framework/button-red-touch.png"; sourceTree = SDKROOT; };
+		4427BCF2143F860E003CF13C /* button-red.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "button-red.png"; path = "Library/Frameworks/TakeControl.framework/button-red.png"; sourceTree = SDKROOT; };
+		4427BCF3143F860E003CF13C /* button-yellow-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "button-yellow-touch.png"; path = "Library/Frameworks/TakeControl.framework/button-yellow-touch.png"; sourceTree = SDKROOT; };
+		4427BCF4143F860E003CF13C /* button-yellow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "button-yellow.png"; path = "Library/Frameworks/TakeControl.framework/button-yellow.png"; sourceTree = SDKROOT; };
+		4427BCF5143F860E003CF13C /* click.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = click.wav; path = Library/Frameworks/TakeControl.framework/click.wav; sourceTree = SDKROOT; };
+		4427BCF6143F860E003CF13C /* down-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "down-touch.png"; path = "Library/Frameworks/TakeControl.framework/down-touch.png"; sourceTree = SDKROOT; };
+		4427BCF7143F860E003CF13C /* down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = down.png; path = Library/Frameworks/TakeControl.framework/down.png; sourceTree = SDKROOT; };
+		4427BCFB143F860E003CF13C /* exit-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "exit-touch.png"; path = "Library/Frameworks/TakeControl.framework/exit-touch.png"; sourceTree = SDKROOT; };
+		4427BCFC143F860E003CF13C /* exit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = exit.png; path = Library/Frameworks/TakeControl.framework/exit.png; sourceTree = SDKROOT; };
+		4427BCFD143F860E003CF13C /* ImageEditorHelpViewControllerPhone.nib */ = {isa = PBXFileReference; lastKnownFileType = file; name = ImageEditorHelpViewControllerPhone.nib; path = Library/Frameworks/TakeControl.framework/ImageEditorHelpViewControllerPhone.nib; sourceTree = SDKROOT; };
+		4427BCFE143F860E003CF13C /* ImageEditorHelpViewPad.nib */ = {isa = PBXFileReference; lastKnownFileType = file; name = ImageEditorHelpViewPad.nib; path = Library/Frameworks/TakeControl.framework/ImageEditorHelpViewPad.nib; sourceTree = SDKROOT; };
+		4427BCFF143F860E003CF13C /* ImageEditorViewController.nib */ = {isa = PBXFileReference; lastKnownFileType = file; name = ImageEditorViewController.nib; path = Library/Frameworks/TakeControl.framework/ImageEditorViewController.nib; sourceTree = SDKROOT; };
+		4427BD00143F860E003CF13C /* ios-generic-background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = "ios-generic-background.jpg"; path = "Library/Frameworks/TakeControl.framework/ios-generic-background.jpg"; sourceTree = SDKROOT; };
+		4427BD01143F860E003CF13C /* left-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "left-touch.png"; path = "Library/Frameworks/TakeControl.framework/left-touch.png"; sourceTree = SDKROOT; };
+		4427BD02143F860E003CF13C /* left.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = left.png; path = Library/Frameworks/TakeControl.framework/left.png; sourceTree = SDKROOT; };
+		4427BD03143F860E003CF13C /* ok-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ok-touch.png"; path = "Library/Frameworks/TakeControl.framework/ok-touch.png"; sourceTree = SDKROOT; };
+		4427BD04143F860E003CF13C /* ok.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ok.png; path = Library/Frameworks/TakeControl.framework/ok.png; sourceTree = SDKROOT; };
+		4427BD05143F860E003CF13C /* right-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "right-touch.png"; path = "Library/Frameworks/TakeControl.framework/right-touch.png"; sourceTree = SDKROOT; };
+		4427BD06143F860E003CF13C /* right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = right.png; path = Library/Frameworks/TakeControl.framework/right.png; sourceTree = SDKROOT; };
+		4427BD07143F860E003CF13C /* TPAppViewController.nib */ = {isa = PBXFileReference; lastKnownFileType = file; name = TPAppViewController.nib; path = Library/Frameworks/TakeControl.framework/TPAppViewController.nib; sourceTree = SDKROOT; };
+		4427BD08143F860E003CF13C /* TVBrowserViewController.nib */ = {isa = PBXFileReference; lastKnownFileType = file; name = TVBrowserViewController.nib; path = Library/Frameworks/TakeControl.framework/TVBrowserViewController.nib; sourceTree = SDKROOT; };
+		4427BD09143F860E003CF13C /* up-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "up-touch.png"; path = "Library/Frameworks/TakeControl.framework/up-touch.png"; sourceTree = SDKROOT; };
+		4427BD0A143F860E003CF13C /* up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = up.png; path = Library/Frameworks/TakeControl.framework/up.png; sourceTree = SDKROOT; };
+		4427BD0B143F860E003CF13C /* VirtualRemoteViewController.nib */ = {isa = PBXFileReference; lastKnownFileType = file; name = VirtualRemoteViewController.nib; path = Library/Frameworks/TakeControl.framework/VirtualRemoteViewController.nib; sourceTree = SDKROOT; };
 		4452F758143F8368002809DB /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "background@2x~iphone.png"; path = "Backgrounds/background@2x~iphone.png"; sourceTree = "<group>"; };
 		4452F759143F8368002809DB /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "background~iphone.png"; path = "Backgrounds/background~iphone.png"; sourceTree = "<group>"; };
 		4452F75D143F836E002809DB /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = background.png; path = Backgrounds/background.png; sourceTree = "<group>"; };
@@ -89,6 +156,72 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		440BA9D7143F87E40072E361 /* NIBs */ = {
+			isa = PBXGroup;
+			children = (
+				4427BCE8143F860E003CF13C /* AppBrowserViewController.nib */,
+				4427BCEA143F860E003CF13C /* AudioRecordingViewController.nib */,
+				4427BCFD143F860E003CF13C /* ImageEditorHelpViewControllerPhone.nib */,
+				4427BCFE143F860E003CF13C /* ImageEditorHelpViewPad.nib */,
+				4427BCFF143F860E003CF13C /* ImageEditorViewController.nib */,
+				4427BD07143F860E003CF13C /* TPAppViewController.nib */,
+				4427BD08143F860E003CF13C /* TVBrowserViewController.nib */,
+				4427BD0B143F860E003CF13C /* VirtualRemoteViewController.nib */,
+			);
+			name = NIBs;
+			sourceTree = "<group>";
+		};
+		440BA9D9143F88030072E361 /* Virtual Remote Assets */ = {
+			isa = PBXGroup;
+			children = (
+				4427BCE9143F860E003CF13C /* arrows-generic-controls-comp.jpg */,
+				4427BCEB143F860E003CF13C /* back-touch.png */,
+				4427BCEC143F860E003CF13C /* back.png */,
+				4427BCED143F860E003CF13C /* button-blue-touch.png */,
+				4427BCEE143F860E003CF13C /* button-blue.png */,
+				4427BCEF143F860E003CF13C /* button-green-touch.png */,
+				4427BCF0143F860E003CF13C /* button-green.png */,
+				4427BCF1143F860E003CF13C /* button-red-touch.png */,
+				4427BCF2143F860E003CF13C /* button-red.png */,
+				4427BCF3143F860E003CF13C /* button-yellow-touch.png */,
+				4427BCF4143F860E003CF13C /* button-yellow.png */,
+				4427BCF5143F860E003CF13C /* click.wav */,
+				4427BCF6143F860E003CF13C /* down-touch.png */,
+				4427BCF7143F860E003CF13C /* down.png */,
+				4427BCFB143F860E003CF13C /* exit-touch.png */,
+				4427BCFC143F860E003CF13C /* exit.png */,
+				4427BD00143F860E003CF13C /* ios-generic-background.jpg */,
+				4427BD01143F860E003CF13C /* left-touch.png */,
+				4427BD02143F860E003CF13C /* left.png */,
+				4427BD03143F860E003CF13C /* ok-touch.png */,
+				4427BD04143F860E003CF13C /* ok.png */,
+				4427BD05143F860E003CF13C /* right-touch.png */,
+				4427BD06143F860E003CF13C /* right.png */,
+				4427BD09143F860E003CF13C /* up-touch.png */,
+				4427BD0A143F860E003CF13C /* up.png */,
+			);
+			name = "Virtual Remote Assets";
+			sourceTree = "<group>";
+		};
+		4427BCF8143F860E003CF13C /* en.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				440BA9DA143F882E0072E361 /* InfoPlist.strings */,
+			);
+			name = en.lproj;
+			path = Library/Frameworks/TakeControl.framework/en.lproj;
+			sourceTree = SDKROOT;
+		};
+		4427BD10143F86B3003CF13C /* Resources From Framework */ = {
+			isa = PBXGroup;
+			children = (
+				440BA9D7143F87E40072E361 /* NIBs */,
+				440BA9D9143F88030072E361 /* Virtual Remote Assets */,
+				4427BCF8143F860E003CF13C /* en.lproj */,
+			);
+			name = "Resources From Framework";
+			sourceTree = "<group>";
+		};
 		446C2158143F7871007A2FE9 /* Code */ = {
 			isa = PBXGroup;
 			children = (
@@ -103,6 +236,7 @@
 		CD4B2E86143A74890073BB88 = {
 			isa = PBXGroup;
 			children = (
+				4427BD10143F86B3003CF13C /* Resources From Framework */,
 				CD4B2E9B143A748A0073BB88 /* TakeControlApp */,
 				CD4B2E94143A748A0073BB88 /* Frameworks */,
 				CD4B2E92143A748A0073BB88 /* Products */,
@@ -231,8 +365,41 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				440BA9DD143F88680072E361 /* AppBrowserViewController.nib in Resources */,
+				440BA9DE143F88680072E361 /* AudioRecordingViewController.nib in Resources */,
+				440BA9DF143F88680072E361 /* ImageEditorHelpViewControllerPhone.nib in Resources */,
+				440BA9E0143F88680072E361 /* ImageEditorHelpViewPad.nib in Resources */,
+				440BA9E1143F88680072E361 /* ImageEditorViewController.nib in Resources */,
+				440BA9E2143F88680072E361 /* TPAppViewController.nib in Resources */,
+				440BA9E3143F88680072E361 /* TVBrowserViewController.nib in Resources */,
+				440BA9E4143F88680072E361 /* VirtualRemoteViewController.nib in Resources */,
+				440BA9E5143F88680072E361 /* arrows-generic-controls-comp.jpg in Resources */,
+				440BA9E6143F88680072E361 /* back-touch.png in Resources */,
+				440BA9E7143F88680072E361 /* back.png in Resources */,
+				440BA9E8143F88680072E361 /* button-blue-touch.png in Resources */,
+				440BA9E9143F88680072E361 /* button-blue.png in Resources */,
+				440BA9EA143F88680072E361 /* button-green-touch.png in Resources */,
+				440BA9EB143F88680072E361 /* button-green.png in Resources */,
+				440BA9EC143F88680072E361 /* button-red-touch.png in Resources */,
+				440BA9ED143F88680072E361 /* button-red.png in Resources */,
+				440BA9EE143F88680072E361 /* button-yellow-touch.png in Resources */,
+				440BA9EF143F88680072E361 /* button-yellow.png in Resources */,
+				440BA9F0143F88680072E361 /* click.wav in Resources */,
+				440BA9F1143F88680072E361 /* down-touch.png in Resources */,
+				440BA9F2143F88680072E361 /* down.png in Resources */,
+				440BA9F3143F88680072E361 /* exit-touch.png in Resources */,
+				440BA9F4143F88680072E361 /* exit.png in Resources */,
+				440BA9F5143F88680072E361 /* ios-generic-background.jpg in Resources */,
+				440BA9F6143F88680072E361 /* left-touch.png in Resources */,
+				440BA9F7143F88680072E361 /* left.png in Resources */,
+				440BA9F8143F88680072E361 /* ok-touch.png in Resources */,
+				440BA9F9143F88680072E361 /* ok.png in Resources */,
+				440BA9FA143F88680072E361 /* right-touch.png in Resources */,
+				440BA9FB143F88680072E361 /* right.png in Resources */,
+				440BA9FC143F88680072E361 /* up-touch.png in Resources */,
+				440BA9FD143F88680072E361 /* up.png in Resources */,
+				440BA9FE143F88680072E361 /* InfoPlist.strings in Resources */,
 				CD4B2EA0143A748A0073BB88 /* InfoPlist.strings in Resources */,
-				CD4B2EA8143A748A0073BB88 /* TakeControlAppViewController.h in Resources */,
 				CD4B2EAD143A748A0073BB88 /* TakeControlAppViewController_iPhone.xib in Resources */,
 				CD4B2EB0143A748A0073BB88 /* TakeControlAppViewController_iPad.xib in Resources */,
 				446C2153143F7823007A2FE9 /* iOS-logo-57x57.png in Resources */,
@@ -263,6 +430,14 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		440BA9DA143F882E0072E361 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				440BA9DB143F882E0072E361 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
 		CD4B2E9E143A748A0073BB88 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
