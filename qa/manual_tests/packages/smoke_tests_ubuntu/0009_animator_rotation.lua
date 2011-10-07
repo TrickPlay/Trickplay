@@ -4,7 +4,7 @@ local test_group = "acceptance"
 local test_area = "animator"
 local test_api = "rotation"
 
-test_question = "Do the red rectangle rotate 45 degrees for 4 secs then rotate negative 90 degrees in the final 4 secs (red = x, light green = y & dark green = z)"
+test_question = "Do the rectangles rotate 45 degrees for 4 secs then rotate negative 90 degrees in the final 4 secs (red = x, light green = y & dark green = z)"
 
 function generate_test_image ()
 

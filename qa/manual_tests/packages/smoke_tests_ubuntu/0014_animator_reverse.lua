@@ -3,9 +3,9 @@
 local test_description = "Change the color of a UI element"
 local test_group = "acceptance"
 local test_area = "animator"
-local test_api = "color"
+local test_api = "reverse"
 
-test_question = "Does the white rectangle gradually change to blue color as it approaches the red square?"
+test_question = "Does the white rectangle move from lower right to upper left?"
 
 function generate_test_image ()
 
@@ -73,7 +73,11 @@ function generate_test_image ()
 	
 	}
 
+
+	ani0.timeline:reverse()
 	ani0:start()
+	
+
 	
 	function ani0.timeline.on_completed()
 		screen:remove(rect1)
