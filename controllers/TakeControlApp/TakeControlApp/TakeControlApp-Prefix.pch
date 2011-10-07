@@ -1,5 +1,5 @@
 //
-// Prefix header for all source files of the 'TakeControlAgain' target in the 'TakeControlAgain' project
+// Prefix header for all source files of the 'TakeControlApp' target in the 'TakeControlApp' project
 //
 
 #import <Availability.h>
