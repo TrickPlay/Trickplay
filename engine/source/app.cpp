@@ -1184,7 +1184,10 @@ void App::secure_lua_state( const StringSet & allowed_names )
     const char * global_nuke[] =
     {
         "require",
-        NULL
+        "load",
+        "loadstring",
+        "module",
+        0
     };
 
     for( const char * * name = global_nuke; * name; ++name )
