@@ -7,8 +7,42 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CD4977A4143E79DD00387911 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CD4977A2143E79DD00387911 /* InfoPlist.strings */; };
-		CD4977AB143E7A2900387911 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4E17A914353B7500356032 /* JSONKit.m */; };
+		44D2D081143F6FBE00E54755 /* TakeControl-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */; };
+		44D2D084143F6FCB00E54755 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 44D2D082143F6FCB00E54755 /* InfoPlist.strings */; };
+		44D2D086143F71DD00E54755 /* Protocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 44D2D085143F71DD00E54755 /* Protocols.h */; };
+		44D2D087143F723700E54755 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4E17A914353B7500356032 /* JSONKit.m */; };
+		44D2D088143F723700E54755 /* TVBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA8F1427D55E0043C8BF /* TVBrowser.m */; };
+		44D2D089143F723700E54755 /* AppBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA8E1427D55E0043C8BF /* AppBrowser.m */; };
+		44D2D08A143F723700E54755 /* TrickplayAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA931427D5840043C8BF /* TrickplayAnimation.m */; };
+		44D2D08B143F723700E54755 /* TrickplayTimeline.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA951427D5840043C8BF /* TrickplayTimeline.m */; };
+		44D2D08C143F723700E54755 /* AdvancedUIObjectManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA9B1427D5AC0043C8BF /* AdvancedUIObjectManager.m */; };
+		44D2D08D143F723700E54755 /* TrickplayUIElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA91427D5AC0043C8BF /* TrickplayUIElement.m */; };
+		44D2D08E143F723700E54755 /* TrickplayScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA31427D5AC0043C8BF /* TrickplayScreen.m */; };
+		44D2D08F143F723700E54755 /* TrickplayRectangle.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA11427D5AC0043C8BF /* TrickplayRectangle.m */; };
+		44D2D090143F723700E54755 /* TrickplayGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA9D1427D5AC0043C8BF /* TrickplayGroup.m */; };
+		44D2D091143F723700E54755 /* TrickplayImage.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA9F1427D5AC0043C8BF /* TrickplayImage.m */; };
+		44D2D092143F723700E54755 /* TrickplayText.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA51427D5AC0043C8BF /* TrickplayText.m */; };
+		44D2D093143F723700E54755 /* TrickplayTextHTML.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA71427D5AC0043C8BF /* TrickplayTextHTML.m */; };
+		44D2D094143F723700E54755 /* AsyncImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABD1427D6090043C8BF /* AsyncImageView.m */; };
+		44D2D095143F723700E54755 /* EditableTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC51427D6090043C8BF /* EditableTextView.m */; };
+		44D2D096143F723700E54755 /* GestureImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC71427D6090043C8BF /* GestureImageView.m */; };
+		44D2D097143F723700E54755 /* AccelerometerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABB1427D6090043C8BF /* AccelerometerController.m */; };
+		44D2D098143F723700E54755 /* TouchController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACF1427D6090043C8BF /* TouchController.m */; };
+		44D2D099143F723700E54755 /* TVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAE61427D66D0043C8BF /* TVConnection.m */; };
+		44D2D09A143F723700E54755 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAE91427D6780043C8BF /* CommandInterpreter.m */; };
+		44D2D09B143F723700E54755 /* CommandInterpreterAdvancedUI.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAEB1427D6780043C8BF /* CommandInterpreterAdvancedUI.m */; };
+		44D2D09C143F723700E54755 /* CommandInterpreterApp.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */; };
+		44D2D09D143F723700E54755 /* NetServiceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC91427D6090043C8BF /* NetServiceManager.m */; };
+		44D2D09E143F723700E54755 /* NSStreamAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACB1427D6090043C8BF /* NSStreamAdditions.m */; };
+		44D2D09F143F723700E54755 /* SocketManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACD1427D6090043C8BF /* SocketManager.m */; };
+		44D2D0A0143F723700E54755 /* AudioController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABF1427D6090043C8BF /* AudioController.m */; };
+		44D2D0A1143F723700E54755 /* AudioPlayback.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC11427D6090043C8BF /* AudioPlayback.m */; };
+		44D2D0A2143F723700E54755 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC31427D6090043C8BF /* AudioStreamer.m */; };
+		44D2D0A3143F723700E54755 /* ResourceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAF51427D6980043C8BF /* ResourceManager.m */; };
+		44D2D0A4143F723700E54755 /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA7D1427D50F0043C8BF /* CameraViewController.m */; };
+		44D2D0A5143F723700E54755 /* ImageEditorHelpViewControllerPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA7F1427D50F0043C8BF /* ImageEditorHelpViewControllerPhone.m */; };
+		44D2D0A6143F723700E54755 /* ImageEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA811427D50F0043C8BF /* ImageEditorViewController.m */; };
+		44D2D0A7143F723700E54755 /* AudioRecordingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA891427D5260043C8BF /* AudioRecordingViewController.m */; };
 		CD4977AC143E7A3A00387911 /* click.wav in Resources */ = {isa = PBXBuildFile; fileRef = CD5CFD6613D50F01002334E7 /* click.wav */; };
 		CD4977AD143E7A3A00387911 /* arrows-generic-controls-comp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */; };
 		CD4977AE143E7A3A00387911 /* ios-generic-background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */; };
@@ -40,42 +74,6 @@
 		CD4977CA143E7A6900387911 /* TVBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA531427D3600043C8BF /* TVBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CB143E7A6900387911 /* AppBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA501427D3600043C8BF /* AppBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CC143E7A6900387911 /* TVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA551427D3600043C8BF /* TVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		CD4977D6143E7AA100387911 /* TVBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA8F1427D55E0043C8BF /* TVBrowser.m */; };
-		CD4977D7143E7AA100387911 /* AppBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA8E1427D55E0043C8BF /* AppBrowser.m */; };
-		CD4977D8143E7AA100387911 /* TrickplayAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA931427D5840043C8BF /* TrickplayAnimation.m */; };
-		CD4977D9143E7AA100387911 /* TrickplayTimeline.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA951427D5840043C8BF /* TrickplayTimeline.m */; };
-		CD4977DA143E7AA100387911 /* AdvancedUIObjectManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA9B1427D5AC0043C8BF /* AdvancedUIObjectManager.m */; };
-		CD4977DB143E7AA100387911 /* TrickplayUIElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA91427D5AC0043C8BF /* TrickplayUIElement.m */; };
-		CD4977DC143E7AA100387911 /* TrickplayScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA31427D5AC0043C8BF /* TrickplayScreen.m */; };
-		CD4977DD143E7AA100387911 /* TrickplayRectangle.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA11427D5AC0043C8BF /* TrickplayRectangle.m */; };
-		CD4977DE143E7AA100387911 /* TrickplayGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA9D1427D5AC0043C8BF /* TrickplayGroup.m */; };
-		CD4977DF143E7AA100387911 /* TrickplayImage.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA9F1427D5AC0043C8BF /* TrickplayImage.m */; };
-		CD4977E0143E7AA100387911 /* TrickplayText.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA51427D5AC0043C8BF /* TrickplayText.m */; };
-		CD4977E1143E7AA100387911 /* TrickplayTextHTML.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA71427D5AC0043C8BF /* TrickplayTextHTML.m */; };
-		CD4977E2143E7AA100387911 /* AsyncImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABD1427D6090043C8BF /* AsyncImageView.m */; };
-		CD4977E3143E7AA100387911 /* EditableTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC51427D6090043C8BF /* EditableTextView.m */; };
-		CD4977E4143E7AA100387911 /* GestureImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC71427D6090043C8BF /* GestureImageView.m */; };
-		CD4977E5143E7AA100387911 /* AccelerometerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABB1427D6090043C8BF /* AccelerometerController.m */; };
-		CD4977E6143E7AA100387911 /* TouchController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACF1427D6090043C8BF /* TouchController.m */; };
-		CD4977E7143E7AA100387911 /* TVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAE61427D66D0043C8BF /* TVConnection.m */; };
-		CD4977E8143E7AA100387911 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAE91427D6780043C8BF /* CommandInterpreter.m */; };
-		CD4977E9143E7AA100387911 /* CommandInterpreterAdvancedUI.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAEB1427D6780043C8BF /* CommandInterpreterAdvancedUI.m */; };
-		CD4977EA143E7AA100387911 /* CommandInterpreterApp.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */; };
-		CD4977EB143E7AA100387911 /* NetServiceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC91427D6090043C8BF /* NetServiceManager.m */; };
-		CD4977EC143E7AA100387911 /* NSStreamAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACB1427D6090043C8BF /* NSStreamAdditions.m */; };
-		CD4977ED143E7AA100387911 /* SocketManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACD1427D6090043C8BF /* SocketManager.m */; };
-		CD4977EE143E7AA100387911 /* AudioController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABF1427D6090043C8BF /* AudioController.m */; };
-		CD4977EF143E7AA100387911 /* AudioPlayback.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC11427D6090043C8BF /* AudioPlayback.m */; };
-		CD4977F0143E7AA100387911 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC31427D6090043C8BF /* AudioStreamer.m */; };
-		CD4977F1143E7AA100387911 /* ResourceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAF51427D6980043C8BF /* ResourceManager.m */; };
-		CD4977F2143E7AA100387911 /* TVBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA741427D4E50043C8BF /* TVBrowserViewController.m */; };
-		CD4977F3143E7AA100387911 /* AppBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA721427D4E50043C8BF /* AppBrowserViewController.m */; };
-		CD4977F4143E7AA100387911 /* TPAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA731427D4E50043C8BF /* TPAppViewController.m */; };
-		CD4977F5143E7AA100387911 /* VirtualRemoteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA761427D4E50043C8BF /* VirtualRemoteViewController.m */; };
-		CD4977F6143E7AA100387911 /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA7D1427D50F0043C8BF /* CameraViewController.m */; };
-		CD4977F7143E7AA100387911 /* ImageEditorHelpViewControllerPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA7F1427D50F0043C8BF /* ImageEditorHelpViewControllerPhone.m */; };
-		CD4977F8143E7AA100387911 /* ImageEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA811427D50F0043C8BF /* ImageEditorViewController.m */; };
-		CD4977F9143E7AA100387911 /* AudioRecordingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA891427D5260043C8BF /* AudioRecordingViewController.m */; };
 		CD4977FA143E7AD100387911 /* AppBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA621427D4800043C8BF /* AppBrowserViewController.xib */; };
 		CD4977FB143E7AD100387911 /* AudioRecordingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA631427D4800043C8BF /* AudioRecordingViewController.xib */; };
 		CD4977FC143E7AD100387911 /* ImageEditorHelpViewControllerPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA651427D4800043C8BF /* ImageEditorHelpViewControllerPhone.xib */; };
@@ -84,32 +82,17 @@
 		CD4977FF143E7AD200387911 /* TVBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA681427D4800043C8BF /* TVBrowserViewController.xib */; };
 		CD497800143E7AD200387911 /* VirtualRemoteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA701427D49F0043C8BF /* VirtualRemoteViewController.xib */; };
 		CD497801143E7AD200387911 /* ImageEditorHelpViewPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */; };
-		CD497806143E7AE400387911 /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB61130A498600A14307 /* background@2x~iphone.png */; };
-		CD497807143E7AE400387911 /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = CDFEBB62130A498600A14307 /* background~iphone.png */; };
-		CD497808143E7AFC00387911 /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = CD62293C1326BCBC003AB721 /* background.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		441321321355335600009206 /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Entitlements.plist; path = ../Entitlements.plist; sourceTree = "<group>"; };
-		44AE7A4D133C2073000D7EE2 /* iOS-logo-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-57x57.png"; path = "../iOS-logo-57x57.png"; sourceTree = "<group>"; };
-		44AE7A50133C207C000D7EE2 /* iOS-logo-114x114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-114x114.png"; path = "../iOS-logo-114x114.png"; sourceTree = "<group>"; };
-		44AE7A52133C20AE000D7EE2 /* iOS-logo-72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-72x72.png"; path = "../iOS-logo-72x72.png"; sourceTree = "<group>"; };
-		44AE7A54133C20E4000D7EE2 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = ../Default.png; sourceTree = "<group>"; };
-		44AE7A56133C20F0000D7EE2 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "../Default@2x.png"; sourceTree = "<group>"; };
-		44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait~ipad.png"; path = "../Default-Portrait~ipad.png"; sourceTree = "<group>"; };
-		8D1107310486CEB800E47090 /* Take Control-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Take Control-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
-		CD404C291353E18D0021D36C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
-		CD49779C143E79DD00387911 /* TakeControlBundle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TakeControlBundle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CD4977A1143E79DD00387911 /* TakeControlBundle-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TakeControlBundle-Info.plist"; sourceTree = "<group>"; };
-		CD4977A3143E79DD00387911 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		CD4977A5143E79DD00387911 /* TakeControlBundle-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TakeControlBundle-Prefix.pch"; sourceTree = "<group>"; };
+		44D2D07E143F6FBE00E54755 /* TakeControl-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "TakeControl-Info.plist"; path = "Take Control Framework/TakeControl-Info.plist"; sourceTree = SOURCE_ROOT; };
+		44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "TakeControl-Prefix.pch"; path = "Take Control Framework/TakeControl-Prefix.pch"; sourceTree = SOURCE_ROOT; };
+		44D2D083143F6FCB00E54755 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "Take Control Framework/en.lproj/InfoPlist.strings"; sourceTree = SOURCE_ROOT; };
+		44D2D085143F71DD00E54755 /* Protocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Protocols.h; path = "Take Control Framework/Classes/Protocols.h"; sourceTree = SOURCE_ROOT; };
+		CD49779C143E79DD00387911 /* TakeControl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TakeControl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD4E17A814353B7500356032 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
 		CD4E17A914353B7500356032 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
 		CD5CFD6613D50F01002334E7 /* click.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = click.wav; sourceTree = "<group>"; };
-		CD62293C1326BCBC003AB721 /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "arrows-generic-controls-comp.jpg"; sourceTree = "<group>"; };
 		CD63B43F13B9895300158169 /* back-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-touch.png"; sourceTree = "<group>"; };
 		CD63B44013B9895300158169 /* back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = back.png; sourceTree = "<group>"; };
@@ -133,23 +116,13 @@
 		CD63B45213B9895300158169 /* right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = right.png; sourceTree = "<group>"; };
 		CD63B45313B9895300158169 /* up-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "up-touch.png"; sourceTree = "<group>"; };
 		CD63B45413B9895300158169 /* up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = up.png; sourceTree = "<group>"; };
-		CD6705EE13CE44940001C6E4 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
-		CD6BC36E136794CD00CF1973 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		CD6BC370136794EA00CF1973 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
-		CD6BC3721367950700CF1973 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "ios-generic-background.jpg"; sourceTree = "<group>"; };
-		CD91EA071427C8B60043C8BF /* Take Control App.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Take Control App.pch"; sourceTree = "<group>"; };
-		CD91EA4E1427D10A0043C8BF /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		CD91EA501427D3600043C8BF /* AppBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowser.h; path = "Public Headers/AppBrowser.h"; sourceTree = "<group>"; };
-		CD91EA511427D3600043C8BF /* AppBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowserViewController.h; path = "Public Headers/AppBrowserViewController.h"; sourceTree = "<group>"; };
-		CD91EA521427D3600043C8BF /* TPAppViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TPAppViewController.h; path = "Public Headers/TPAppViewController.h"; sourceTree = "<group>"; };
-		CD91EA531427D3600043C8BF /* TVBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowser.h; path = "Public Headers/TVBrowser.h"; sourceTree = "<group>"; };
-		CD91EA541427D3600043C8BF /* TVBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowserViewController.h; path = "Public Headers/TVBrowserViewController.h"; sourceTree = "<group>"; };
-		CD91EA551427D3600043C8BF /* TVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVConnection.h; path = "Public Headers/TVConnection.h"; sourceTree = "<group>"; };
-		CD91EA5C1427D4230043C8BF /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Classes/AppDelegate.h; sourceTree = "<group>"; };
-		CD91EA5D1427D4230043C8BF /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Classes/AppDelegate.m; sourceTree = "<group>"; };
-		CD91EA5E1427D4230043C8BF /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RootViewController.h; path = Classes/RootViewController.h; sourceTree = "<group>"; };
-		CD91EA5F1427D4230043C8BF /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RootViewController.m; path = Classes/RootViewController.m; sourceTree = "<group>"; };
+		CD91EA501427D3600043C8BF /* AppBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowser.h; path = "../Take Control Framework/Public Headers/AppBrowser.h"; sourceTree = "<group>"; };
+		CD91EA511427D3600043C8BF /* AppBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowserViewController.h; path = "../Take Control Framework/Public Headers/AppBrowserViewController.h"; sourceTree = "<group>"; };
+		CD91EA521427D3600043C8BF /* TPAppViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TPAppViewController.h; path = "../Take Control Framework/Public Headers/TPAppViewController.h"; sourceTree = "<group>"; };
+		CD91EA531427D3600043C8BF /* TVBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowser.h; path = "../Take Control Framework/Public Headers/TVBrowser.h"; sourceTree = "<group>"; };
+		CD91EA541427D3600043C8BF /* TVBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowserViewController.h; path = "../Take Control Framework/Public Headers/TVBrowserViewController.h"; sourceTree = "<group>"; };
+		CD91EA551427D3600043C8BF /* TVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVConnection.h; path = "../Take Control Framework/Public Headers/TVConnection.h"; sourceTree = "<group>"; };
 		CD91EA621427D4800043C8BF /* AppBrowserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AppBrowserViewController.xib; path = Classes/AppBrowserViewController.xib; sourceTree = "<group>"; };
 		CD91EA631427D4800043C8BF /* AudioRecordingViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AudioRecordingViewController.xib; path = Classes/AudioRecordingViewController.xib; sourceTree = "<group>"; };
 		CD91EA651427D4800043C8BF /* ImageEditorHelpViewControllerPhone.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewControllerPhone.xib; path = Classes/ImageEditorHelpViewControllerPhone.xib; sourceTree = "<group>"; };
@@ -224,21 +197,14 @@
 		CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CommandInterpreterApp.m; path = "Take Control Framework/Classes/CommandInterpreterApp.m"; sourceTree = SOURCE_ROOT; };
 		CD91EAF41427D6980043C8BF /* ResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ResourceManager.h; path = "Take Control Framework/Classes/ResourceManager.h"; sourceTree = SOURCE_ROOT; };
 		CD91EAF51427D6980043C8BF /* ResourceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ResourceManager.m; path = "Take Control Framework/Classes/ResourceManager.m"; sourceTree = SOURCE_ROOT; };
-		CD91EAFB1427E2DE0043C8BF /* RootViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RootViewController.xib; sourceTree = "<group>"; };
-		CD9A638F142D246300017EDF /* Protocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Protocols.h; path = TrickplayController.xcodeproj/Protocols.h; sourceTree = SOURCE_ROOT; };
 		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewPad.xib; path = ../ImageEditorHelpViewPad.xib; sourceTree = "<group>"; };
-		CDF509C813469721009870EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		CDFEBB61130A498600A14307 /* background@2x~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background@2x~iphone.png"; sourceTree = "<group>"; };
-		CDFEBB62130A498600A14307 /* background~iphone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "background~iphone.png"; sourceTree = "<group>"; };
-		CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "MainWindow-iPhone.xib"; sourceTree = "<group>"; };
-		CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "MainWindow-iPad.xib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CD49779C143E79DD00387911 /* TakeControlBundle.framework */,
+				CD49779C143E79DD00387911 /* TakeControl.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -246,29 +212,10 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				CD91E8BE1427B50C0043C8BF /* TakeControlLibrary */,
-				CD91E9FF1427C8B60043C8BF /* TakeControlApp */,
-				CD49779F143E79DD00387911 /* TakeControlBundle */,
+				CD49779F143E79DD00387911 /* TakeControl */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
 			name = CustomTemplate;
-			sourceTree = "<group>";
-		};
-		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				CD6705EE13CE44940001C6E4 /* AssetsLibrary.framework */,
-				CD6BC36E136794CD00CF1973 /* AudioToolbox.framework */,
-				CD6BC370136794EA00CF1973 /* MediaPlayer.framework */,
-				CD6BC3721367950700CF1973 /* CFNetwork.framework */,
-				CD404C291353E18D0021D36C /* MobileCoreServices.framework */,
-				CDF509C813469721009870EC /* QuartzCore.framework */,
-				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
-				1D30AB110D05D00D00671497 /* Foundation.framework */,
-				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
-			);
-			name = Frameworks;
-			path = ..;
 			sourceTree = "<group>";
 		};
 		CD279D0B137B122C00A707D7 /* AdvancedUI */ = {
@@ -320,20 +267,34 @@
 			name = UserInterface;
 			sourceTree = "<group>";
 		};
-		CD49779F143E79DD00387911 /* TakeControlBundle */ = {
+		CD49779F143E79DD00387911 /* TakeControl */ = {
 			isa = PBXGroup;
 			children = (
+				CD4E17A714353B5F00356032 /* JSON */,
+				CD91EA181427CB5B0043C8BF /* PublicHeaderFiles */,
+				CD91EA541427D3600043C8BF /* TVBrowserViewController.h */,
+				CD91EA511427D3600043C8BF /* AppBrowserViewController.h */,
+				CD91EA521427D3600043C8BF /* TPAppViewController.h */,
+				CD91EA531427D3600043C8BF /* TVBrowser.h */,
+				CD91EA501427D3600043C8BF /* AppBrowser.h */,
+				CD91EA551427D3600043C8BF /* TVConnection.h */,
+				CD54637D14203CBF00965577 /* PrivateMethods */,
+				CDFEBBA1130A4B8700A14307 /* Modules */,
+				CDFEBBB8130A4CD100A14307 /* ViewControllers */,
+				CD91EA141427C9DC0043C8BF /* Resources */,
+				CD63B43D13B9895300158169 /* VirtualRemoteAssets */,
 				CD4977A0143E79DD00387911 /* Supporting Files */,
 			);
-			path = TakeControlBundle;
+			name = TakeControl;
+			path = "Take Control Framework";
 			sourceTree = "<group>";
 		};
 		CD4977A0143E79DD00387911 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				CD4977A1143E79DD00387911 /* TakeControlBundle-Info.plist */,
-				CD4977A2143E79DD00387911 /* InfoPlist.strings */,
-				CD4977A5143E79DD00387911 /* TakeControlBundle-Prefix.pch */,
+				44D2D082143F6FCB00E54755 /* InfoPlist.strings */,
+				44D2D07E143F6FBE00E54755 /* TakeControl-Info.plist */,
+				44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -370,13 +331,14 @@
 				CD4E17A914353B7500356032 /* JSONKit.m */,
 			);
 			name = JSON;
+			path = "../Take Control Framework";
 			sourceTree = "<group>";
 		};
 		CD54637D14203CBF00965577 /* PrivateMethods */ = {
 			isa = PBXGroup;
 			children = (
+				44D2D085143F71DD00E54755 /* Protocols.h */,
 				CD91EA8C1427D53E0043C8BF /* Extensions.h */,
-				CD9A638F142D246300017EDF /* Protocols.h */,
 			);
 			name = PrivateMethods;
 			path = ../Classes;
@@ -423,48 +385,6 @@
 			path = ../VirtualRemoteAssets;
 			sourceTree = "<group>";
 		};
-		CD91E8BE1427B50C0043C8BF /* TakeControlLibrary */ = {
-			isa = PBXGroup;
-			children = (
-				CD4E17A714353B5F00356032 /* JSON */,
-				CD63B43D13B9895300158169 /* VirtualRemoteAssets */,
-				CD91EA181427CB5B0043C8BF /* PublicHeaderFiles */,
-				CD54637D14203CBF00965577 /* PrivateMethods */,
-				CD91EA151427C9FF0043C8BF /* Classes */,
-				CD91EA141427C9DC0043C8BF /* Resources */,
-				29B97323FDCFA39411CA2CEA /* Frameworks */,
-			);
-			name = TakeControlLibrary;
-			path = "Take Control Framework";
-			sourceTree = "<group>";
-		};
-		CD91E9FF1427C8B60043C8BF /* TakeControlApp */ = {
-			isa = PBXGroup;
-			children = (
-				441321321355335600009206 /* Entitlements.plist */,
-				CDFEBB5E130A498600A14307 /* iPhone */,
-				CDFEBB6D130A498C00A14307 /* iPad */,
-				CD91EA001427C8B60043C8BF /* Supporting Files */,
-			);
-			name = TakeControlApp;
-			path = "Take Control";
-			sourceTree = "<group>";
-		};
-		CD91EA001427C8B60043C8BF /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				CD91EA5C1427D4230043C8BF /* AppDelegate.h */,
-				CD91EA5D1427D4230043C8BF /* AppDelegate.m */,
-				CD91EA5E1427D4230043C8BF /* RootViewController.h */,
-				CD91EA5F1427D4230043C8BF /* RootViewController.m */,
-				CD91EAFB1427E2DE0043C8BF /* RootViewController.xib */,
-				8D1107310486CEB800E47090 /* Take Control-Info.plist */,
-				CD91EA071427C8B60043C8BF /* Take Control App.pch */,
-				CD91EA4E1427D10A0043C8BF /* main.m */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
 		CD91EA141427C9DC0043C8BF /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -478,28 +398,15 @@
 				CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */,
 			);
 			name = Resources;
-			sourceTree = "<group>";
-		};
-		CD91EA151427C9FF0043C8BF /* Classes */ = {
-			isa = PBXGroup;
-			children = (
-				CDFEBBA1130A4B8700A14307 /* Modules */,
-				CDFEBBB8130A4CD100A14307 /* ViewControllers */,
-			);
-			name = Classes;
+			path = "../Take Control Framework";
 			sourceTree = "<group>";
 		};
 		CD91EA181427CB5B0043C8BF /* PublicHeaderFiles */ = {
 			isa = PBXGroup;
 			children = (
-				CD91EA541427D3600043C8BF /* TVBrowserViewController.h */,
-				CD91EA511427D3600043C8BF /* AppBrowserViewController.h */,
-				CD91EA521427D3600043C8BF /* TPAppViewController.h */,
-				CD91EA531427D3600043C8BF /* TVBrowser.h */,
-				CD91EA501427D3600043C8BF /* AppBrowser.h */,
-				CD91EA551427D3600043C8BF /* TVConnection.h */,
 			);
 			name = PublicHeaderFiles;
+			path = "../Take Control Framework";
 			sourceTree = "<group>";
 		};
 		CDECA31014072849007C58ED /* Main */ = {
@@ -531,33 +438,6 @@
 				CD91EA891427D5260043C8BF /* AudioRecordingViewController.m */,
 			);
 			name = Audio;
-			sourceTree = "<group>";
-		};
-		CDFEBB5E130A498600A14307 /* iPhone */ = {
-			isa = PBXGroup;
-			children = (
-				44AE7A56133C20F0000D7EE2 /* Default@2x.png */,
-				44AE7A54133C20E4000D7EE2 /* Default.png */,
-				44AE7A50133C207C000D7EE2 /* iOS-logo-114x114.png */,
-				44AE7A4D133C2073000D7EE2 /* iOS-logo-57x57.png */,
-				CDFEBB61130A498600A14307 /* background@2x~iphone.png */,
-				CDFEBB62130A498600A14307 /* background~iphone.png */,
-				CDFEBB65130A498600A14307 /* MainWindow-iPhone.xib */,
-			);
-			name = iPhone;
-			path = ../iPhone;
-			sourceTree = "<group>";
-		};
-		CDFEBB6D130A498C00A14307 /* iPad */ = {
-			isa = PBXGroup;
-			children = (
-				44AE7A58133C210D000D7EE2 /* Default-Portrait~ipad.png */,
-				44AE7A52133C20AE000D7EE2 /* iOS-logo-72x72.png */,
-				CD62293C1326BCBC003AB721 /* background.png */,
-				CDFEBB70130A498C00A14307 /* MainWindow-iPad.xib */,
-			);
-			name = iPad;
-			path = ../iPad;
 			sourceTree = "<group>";
 		};
 		CDFEBBA1130A4B8700A14307 /* Modules */ = {
@@ -638,15 +518,17 @@
 				CD4977CA143E7A6900387911 /* TVBrowser.h in Headers */,
 				CD4977CB143E7A6900387911 /* AppBrowser.h in Headers */,
 				CD4977CC143E7A6900387911 /* TVConnection.h in Headers */,
+				44D2D081143F6FBE00E54755 /* TakeControl-Prefix.pch in Headers */,
+				44D2D086143F71DD00E54755 /* Protocols.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		CD49779B143E79DD00387911 /* TakeControlBundle */ = {
+		CD49779B143E79DD00387911 /* TakeControl */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CD4977A9143E79DD00387911 /* Build configuration list for PBXNativeTarget "TakeControlBundle" */;
+			buildConfigurationList = CD4977A9143E79DD00387911 /* Build configuration list for PBXNativeTarget "TakeControl" */;
 			buildPhases = (
 				CD497798143E79DD00387911 /* Sources */,
 				CD4977C6143E7A5600387911 /* Headers */,
@@ -656,9 +538,9 @@
 			);
 			dependencies = (
 			);
-			name = TakeControlBundle;
-			productName = TakeControlBundle;
-			productReference = CD49779C143E79DD00387911 /* TakeControlBundle.framework */;
+			name = TakeControl;
+			productName = TakeControl;
+			productReference = CD49779C143E79DD00387911 /* TakeControl.framework */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -669,7 +551,7 @@
 			attributes = {
 				LastUpgradeCheck = 0420;
 			};
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TrickplayController" */;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TakeControl" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -684,7 +566,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				CD49779B143E79DD00387911 /* TakeControlBundle */,
+				CD49779B143E79DD00387911 /* TakeControl */,
 			);
 		};
 /* End PBXProject section */
@@ -727,10 +609,7 @@
 				CD4977FF143E7AD200387911 /* TVBrowserViewController.xib in Resources */,
 				CD497800143E7AD200387911 /* VirtualRemoteViewController.xib in Resources */,
 				CD497801143E7AD200387911 /* ImageEditorHelpViewPad.xib in Resources */,
-				CD497806143E7AE400387911 /* background@2x~iphone.png in Resources */,
-				CD497807143E7AE400387911 /* background~iphone.png in Resources */,
-				CD497808143E7AFC00387911 /* background.png in Resources */,
-				CD4977A4143E79DD00387911 /* InfoPlist.strings in Resources */,
+				44D2D084143F6FCB00E54755 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -741,53 +620,49 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD4977D6143E7AA100387911 /* TVBrowser.m in Sources */,
-				CD4977D7143E7AA100387911 /* AppBrowser.m in Sources */,
-				CD4977D8143E7AA100387911 /* TrickplayAnimation.m in Sources */,
-				CD4977D9143E7AA100387911 /* TrickplayTimeline.m in Sources */,
-				CD4977DA143E7AA100387911 /* AdvancedUIObjectManager.m in Sources */,
-				CD4977DB143E7AA100387911 /* TrickplayUIElement.m in Sources */,
-				CD4977DC143E7AA100387911 /* TrickplayScreen.m in Sources */,
-				CD4977DD143E7AA100387911 /* TrickplayRectangle.m in Sources */,
-				CD4977DE143E7AA100387911 /* TrickplayGroup.m in Sources */,
-				CD4977DF143E7AA100387911 /* TrickplayImage.m in Sources */,
-				CD4977E0143E7AA100387911 /* TrickplayText.m in Sources */,
-				CD4977E1143E7AA100387911 /* TrickplayTextHTML.m in Sources */,
-				CD4977E2143E7AA100387911 /* AsyncImageView.m in Sources */,
-				CD4977E3143E7AA100387911 /* EditableTextView.m in Sources */,
-				CD4977E4143E7AA100387911 /* GestureImageView.m in Sources */,
-				CD4977E5143E7AA100387911 /* AccelerometerController.m in Sources */,
-				CD4977E6143E7AA100387911 /* TouchController.m in Sources */,
-				CD4977E7143E7AA100387911 /* TVConnection.m in Sources */,
-				CD4977E8143E7AA100387911 /* CommandInterpreter.m in Sources */,
-				CD4977E9143E7AA100387911 /* CommandInterpreterAdvancedUI.m in Sources */,
-				CD4977EA143E7AA100387911 /* CommandInterpreterApp.m in Sources */,
-				CD4977EB143E7AA100387911 /* NetServiceManager.m in Sources */,
-				CD4977EC143E7AA100387911 /* NSStreamAdditions.m in Sources */,
-				CD4977ED143E7AA100387911 /* SocketManager.m in Sources */,
-				CD4977EE143E7AA100387911 /* AudioController.m in Sources */,
-				CD4977EF143E7AA100387911 /* AudioPlayback.m in Sources */,
-				CD4977F0143E7AA100387911 /* AudioStreamer.m in Sources */,
-				CD4977F1143E7AA100387911 /* ResourceManager.m in Sources */,
-				CD4977F2143E7AA100387911 /* TVBrowserViewController.m in Sources */,
-				CD4977F3143E7AA100387911 /* AppBrowserViewController.m in Sources */,
-				CD4977F4143E7AA100387911 /* TPAppViewController.m in Sources */,
-				CD4977F5143E7AA100387911 /* VirtualRemoteViewController.m in Sources */,
-				CD4977F6143E7AA100387911 /* CameraViewController.m in Sources */,
-				CD4977F7143E7AA100387911 /* ImageEditorHelpViewControllerPhone.m in Sources */,
-				CD4977F8143E7AA100387911 /* ImageEditorViewController.m in Sources */,
-				CD4977F9143E7AA100387911 /* AudioRecordingViewController.m in Sources */,
-				CD4977AB143E7A2900387911 /* JSONKit.m in Sources */,
+				44D2D087143F723700E54755 /* JSONKit.m in Sources */,
+				44D2D088143F723700E54755 /* TVBrowser.m in Sources */,
+				44D2D089143F723700E54755 /* AppBrowser.m in Sources */,
+				44D2D08A143F723700E54755 /* TrickplayAnimation.m in Sources */,
+				44D2D08B143F723700E54755 /* TrickplayTimeline.m in Sources */,
+				44D2D08C143F723700E54755 /* AdvancedUIObjectManager.m in Sources */,
+				44D2D08D143F723700E54755 /* TrickplayUIElement.m in Sources */,
+				44D2D08E143F723700E54755 /* TrickplayScreen.m in Sources */,
+				44D2D08F143F723700E54755 /* TrickplayRectangle.m in Sources */,
+				44D2D090143F723700E54755 /* TrickplayGroup.m in Sources */,
+				44D2D091143F723700E54755 /* TrickplayImage.m in Sources */,
+				44D2D092143F723700E54755 /* TrickplayText.m in Sources */,
+				44D2D093143F723700E54755 /* TrickplayTextHTML.m in Sources */,
+				44D2D094143F723700E54755 /* AsyncImageView.m in Sources */,
+				44D2D095143F723700E54755 /* EditableTextView.m in Sources */,
+				44D2D096143F723700E54755 /* GestureImageView.m in Sources */,
+				44D2D097143F723700E54755 /* AccelerometerController.m in Sources */,
+				44D2D098143F723700E54755 /* TouchController.m in Sources */,
+				44D2D099143F723700E54755 /* TVConnection.m in Sources */,
+				44D2D09A143F723700E54755 /* CommandInterpreter.m in Sources */,
+				44D2D09B143F723700E54755 /* CommandInterpreterAdvancedUI.m in Sources */,
+				44D2D09C143F723700E54755 /* CommandInterpreterApp.m in Sources */,
+				44D2D09D143F723700E54755 /* NetServiceManager.m in Sources */,
+				44D2D09E143F723700E54755 /* NSStreamAdditions.m in Sources */,
+				44D2D09F143F723700E54755 /* SocketManager.m in Sources */,
+				44D2D0A0143F723700E54755 /* AudioController.m in Sources */,
+				44D2D0A1143F723700E54755 /* AudioPlayback.m in Sources */,
+				44D2D0A2143F723700E54755 /* AudioStreamer.m in Sources */,
+				44D2D0A3143F723700E54755 /* ResourceManager.m in Sources */,
+				44D2D0A4143F723700E54755 /* CameraViewController.m in Sources */,
+				44D2D0A5143F723700E54755 /* ImageEditorHelpViewControllerPhone.m in Sources */,
+				44D2D0A6143F723700E54755 /* ImageEditorViewController.m in Sources */,
+				44D2D0A7143F723700E54755 /* AudioRecordingViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		CD4977A2143E79DD00387911 /* InfoPlist.strings */ = {
+		44D2D082143F6FCB00E54755 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				CD4977A3143E79DD00387911 /* en */,
+				44D2D083143F6FCB00E54755 /* en */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -819,21 +694,19 @@
 		CD4977A6143E79DD00387911 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEAD_CODE_STRIPPING = NO;
-				EXECUTABLE_EXTENSION = .library;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "TakeControlBundle/TakeControlBundle-Prefix.pch";
+				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				INFOPLIST_FILE = "TakeControlBundle/TakeControlBundle-Info.plist";
+				HEADER_SEARCH_PATHS = (
+					"\"Take Control Framework\"",
+					"\"Take Control Framework/Public Headers\"",
+				);
+				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
@@ -846,14 +719,14 @@
 		CD4977A7143E79DD00387911 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEAD_CODE_STRIPPING = NO;
-				EXECUTABLE_EXTENSION = .library;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "TakeControlBundle/TakeControlBundle-Prefix.pch";
-				INFOPLIST_FILE = "TakeControlBundle/TakeControlBundle-Info.plist";
+				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"Take Control Framework\"",
+					"\"Take Control Framework/Public Headers\"",
+				);
+				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
@@ -866,14 +739,14 @@
 		CD4977A8143E79DD00387911 /* Distribution */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEAD_CODE_STRIPPING = NO;
-				EXECUTABLE_EXTENSION = .library;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "TakeControlBundle/TakeControlBundle-Prefix.pch";
-				INFOPLIST_FILE = "TakeControlBundle/TakeControlBundle-Info.plist";
+				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"Take Control Framework\"",
+					"\"Take Control Framework/Public Headers\"",
+				);
+				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
@@ -896,7 +769,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TrickplayController" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TakeControl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
@@ -906,7 +779,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Distribution;
 		};
-		CD4977A9143E79DD00387911 /* Build configuration list for PBXNativeTarget "TakeControlBundle" */ = {
+		CD4977A9143E79DD00387911 /* Build configuration list for PBXNativeTarget "TakeControl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CD4977A6143E79DD00387911 /* Debug */,
@@ -914,6 +787,7 @@
 				CD4977A8143E79DD00387911 /* Distribution */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Distribution;
 		};
 /* End XCConfigurationList section */
 	};
