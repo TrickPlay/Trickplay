@@ -2180,8 +2180,9 @@ class Canvas [[ cairo_t * ]]
         
         x - X coordinate of rectangle's top left corner
         y - Y coordinate of rectangle's top left corner
-        width - rectangle's width in pixels
-        height - rectangle's height in pixels
+        w - rectangle's width in pixels
+        h - rectangle's height in pixels
+        r - radius in pixels of rounded corner. Lower values produce sharper corners; higher values produce more rounded corners.
         
         *Return Value:* None
 
@@ -2194,7 +2195,7 @@ class Canvas [[ cairo_t * ]]
         canvas.line_width = 75
         
         -- Draw a rounded rectangle
-        canvas:round_rectangle( 100, 100, 200, 200, canvas.line_width/2 )
+        canvas:round_rectangle( 100, 100, 200, 200, 35 )
         
         -- Draw a rectangle with rounded line joins
         canvas.line_join = "ROUND"
