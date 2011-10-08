@@ -202,7 +202,8 @@
         [helpPopover presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionDown animated:YES];
         [popoverContent release];
     } else {
-        UIViewController *helpModal = [[ImageEditorHelpViewControllerPhone alloc] initWithNibName:@"ImageEditorHelpViewControllerPhone" bundle:nil];
+        NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+        UIViewController *helpModal = [[ImageEditorHelpViewControllerPhone alloc] initWithNibName:@"ImageEditorHelpViewControllerPhone" bundle:myBundle];
         [self presentModalViewController:helpModal animated:YES];
         [helpModal release];
     }

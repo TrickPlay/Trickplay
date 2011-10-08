@@ -61,7 +61,8 @@
 }
 
 - (id)init {
-    return [self initWithNibName:@"AppBrowserViewController" bundle:nil];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    return [self initWithNibName:@"AppBrowserViewController" bundle:myBundle];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
@@ -82,7 +83,7 @@
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil appBrowser:(AppBrowser *)browser {
     
-    if (!nibNameOrNil || [nibNameOrNil compare:@"AppBrowserViewController"] != NSOrderedSame || nibBundleOrNil || !browser || ![browser isKindOfClass:[AppBrowser class]]) {
+    if (!nibNameOrNil || [nibNameOrNil compare:@"AppBrowserViewController"] != NSOrderedSame || !nibBundleOrNil || !browser || ![browser isKindOfClass:[AppBrowser class]]) {
         
         [self release];
         return nil;
@@ -386,6 +387,15 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     } else {
         return [super allocWithZone:zone];
     }
+}
+
+#pragma mark -
+#pragma mark Initialization
+
+- (id)init {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
