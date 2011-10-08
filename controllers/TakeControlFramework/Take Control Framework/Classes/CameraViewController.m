@@ -213,7 +213,8 @@
         [imageEditor release];
     }
     
-    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:nil title:self.titleLabel cancelLabel:self.cancelLabel];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:myBundle title:self.titleLabel cancelLabel:self.cancelLabel];
     imageEditor.imageEditorDelegate = self;
     
     imageEditor.imageToEdit = image;

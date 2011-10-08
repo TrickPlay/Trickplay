@@ -204,7 +204,11 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection frame:(CGRect)_frame delegate:(id <TPAppViewControllerDelegate>)_delegate {
     
-    if (!_tvConnection || !_tvConnection.isConnected || !nibNameOrNil || [nibNameOrNil compare:@"TPAppViewController"] != NSOrderedSame || nibBundleOrNil) {
+    if (!nibBundleOrNil) {
+        nibBundleOrNil = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    }
+    
+    if (!_tvConnection || !_tvConnection.isConnected || !nibNameOrNil || [nibNameOrNil compare:@"TPAppViewController"] != NSOrderedSame || !nibBundleOrNil) {
         
         [self release];
         return nil;
@@ -285,7 +289,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [backgroundView addSubview:foregroundView];
         
         // the virtual remote for controlling the Television
-        virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
+        NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+        virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:myBundle];
         virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
         [self.view addSubview:virtualRemote.view];
         virtualRemote.delegate = self;
@@ -1061,18 +1066,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     [self checkShowVirtualRemote];
     //*/
 }
-
-
-// The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
-/*
- - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
- self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
- if (self) {
- // Custom initialization.
- }
- return self;
- }
- */
 
 #pragma mark -
 #pragma mark View Handling
