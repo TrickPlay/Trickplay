@@ -586,6 +586,7 @@ class Text [[ClutterActor*]] actor
             {
                 pango_layout_set_spacing( p , line_spacing * PANGO_SCALE );
                 clutter_actor_queue_redraw( self );
+                clutter_actor_queue_relayout( self );
             }
         ]];
 
