@@ -1398,7 +1398,9 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 	if current_fn then 
 		if current_fn ~= "unsaved_temp.lua" and current_fn ~= "screens/unsaved_temp.lua" and current_fn ~= "/screens/unsaved_temp.lua"then
 			local back_file = current_fn.."\.back"
-			editor_lb:writefile(back_file, contents, true)	
+			if editor_lb:writefile(back_file, contents, true) == false then 
+				editor.error_message("019", current_dir, nil, nil, msgw) 
+			end 
 		end
 	end 
 
@@ -1421,8 +1423,6 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 		if editor_lb:writefile(current_fn, contents, true)	== false then 
 			editor.error_message("019", current_dir, nil, nil, msgw) 
 			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
-
-
 		end 
 		
 		if current_fn == "unsaved_temp.lua" or current_fn == "/screens/unsaved_temp.lua"then
@@ -1457,7 +1457,9 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 				  					main_temp = string.gsub(main_temp,j.extra.prev_name,tostring(j.name))
 				  					main = ""
 				  					main = main_first..main_temp..main_last
-				  					editor_lb:writefile("main.lua",main, true)
+				  					if editor_lb:writefile("main.lua",main, true) == false then 
+										editor.error_message("019", current_dir, nil, nil, msgw) 
+									end 
 	       		     			end 
 							end 
 							
@@ -1534,7 +1536,9 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 					if added_stub_code ~= "" then 
 						main = ""
 						main = main_first..added_stub_code..main_last
-						editor_lb:writefile("main.lua",main, true)
+						if editor_lb:writefile("main.lua",main, true) == false then 
+							editor.error_message("019", current_dir, nil, nil, msgw) 
+						end 
 					end 
 			   	end 
      	  	else	
@@ -2284,7 +2288,9 @@ function editor.delete()
 				  		local main_last = string.sub(main, r+1, -1)
 				  		main = ""
 				  		main = main_first.."--[[\n"..main_delete.."]]\n\n"..main_last
-				  		editor_lb:writefile("main.lua",main, true)
+				  		if editor_lb:writefile("main.lua",main, true) == false then 				
+							editor.error_message("019", current_dir, nil, nil, msgw) 
+						end 
 	       		    end 
 			     end 
 	       	end 
@@ -3511,7 +3517,9 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 			n,m = string.find(main, "-- END "..fileUpper.." SECTION\n\n]=]--\n\n", 1, true)
 		end 
 
-		editor_lb:writefile("main.lua",main, true)
+		if editor_lb:writefile("main.lua",main, true) == false then 
+			editor.error_message("019", current_dir, nil, nil, msgw) 
+		end 
 
 		local a, b = string.find(main, "-- "..fileUpper.." SECTION") 
 		local q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
@@ -3525,7 +3533,9 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 			main = ""
 
 			main = main_first..main_last
-			editor_lb:writefile("main.lua",main, true)
+			if editor_lb:writefile("main.lua",main, true) == false then 
+				editor.error_message("019", current_dir, nil, nil, msgw) 
+			end 
 		else 
 			return 
 		end 
@@ -3554,7 +3564,9 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 			prev_file_info = ""
 			prev_backup_info = ""
 
-			editor_lb:writefile("main.lua",main, true)
+			if editor_lb:writefile("main.lua",main, true) == false then 
+				editor.error_message("019", current_dir, nil, nil, msgw) 
+			end 
 		else 
 			return 
 		end 
