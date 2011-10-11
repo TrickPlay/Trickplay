@@ -118,7 +118,10 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 					main = ""
 					new_contents = new_contents.."-- END "..fileUpper.." SECTION\n\n"
 					main = main_first..new_contents..main_last
-					editor_lb:writefile("main.lua",main, true)
+					if editor_lb:writefile("main.lua",main, true) == false then 
+						editor.error_message("019", current_dir)
+						return 
+					end 
 				end 
 			end 
 		    main_exist = true
@@ -132,21 +135,33 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   if main_exist == false then 
 		-- main.lua 생성해서 
 
-		global_section_contents = "function main()\n-- GLOBAL SECTION\nui_element = dofile(\"\/lib\/ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
+			global_section_contents = "function main()\n-- GLOBAL SECTION\nui_element = dofile(\"\/lib\/ui_element.lua\") --Load widget helper library\nlayout = {} --Table containing all the UIElements that make up each screen\ngroups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed\n-- END GLOBAL SECTION\n\n"
 	        gen_stub_code(g)
 
-		local screen_mouse_code = "\n-- SCREEN ON_MOTION SECTION\nfunction screen:on_motion(x,y)\n\tif dragging then\n\t\tlocal actor = unpack(dragging)\n\t\tif (actor.name == \"grip\") then\n\t\t\tlocal actor,s_on_motion = unpack(dragging)\n\t\t\ts_on_motion(x, y)\n\t\t\treturn true\n\t\tend\n\t\treturn true\n\tend\nend\n-- END SCREEN ON_MOTION SECTION\n\n-- SCREEN ON_BUTTON_UP SECTION\nfunction screen:on_button_up()\n\tif dragging then\n\t\tdragging = nil\n\tend\nend\n-- END SCREEN ON_BUTTON_UP SECTION\n"
+			local screen_mouse_code = "\n-- SCREEN ON_MOTION SECTION\nfunction screen:on_motion(x,y)\n\tif dragging then\n\t\tlocal actor = unpack(dragging)\n\t\tif (actor.name == \"grip\") then\n\t\t\tlocal actor,s_on_motion = unpack(dragging)\n\t\t\ts_on_motion(x, y)\n\t\t\treturn true\n\t\tend\n\t\treturn true\n\tend\nend\n-- END SCREEN ON_MOTION SECTION\n\n-- SCREEN ON_BUTTON_UP SECTION\nfunction screen:on_button_up()\n\tif dragging then\n\t\tdragging = nil\n\tend\nend\n-- END SCREEN ON_BUTTON_UP SECTION\n"
 
-		global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n\nui_element.screen_add(groups[\""..fileLower.."\"])\n\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n"..screen_mouse_code.."\n-- END GLOBAL SECTION FOOTER \nend\n\ndolater( main )\n"
+			global_section_footer_contents="-- GLOBAL SECTION FOOTER \nscreen:grab_key_focus()\nscreen:show()\nscreen.reactive = true\n\nui_element.screen_add(groups[\""..fileLower.."\"])\n\n-- SCREEN ON_KEY_DOWN SECTION\nfunction screen:on_key_down(key)\nend\n-- END SCREEN ON_KEY_DOWN SECTION\n"..screen_mouse_code.."\n-- END GLOBAL SECTION FOOTER \nend\n\ndolater( main )\n"
 
-		editor_lb:writefile("main.lua", global_section_contents, true)
-		new_contents = new_contents.."-- END "..fileUpper.." SECTION\n\n"
-		editor_lb:writefile("main.lua", new_contents, false)
-		editor_lb:writefile("main.lua", global_section_footer_contents, false)
+			if editor_lb:writefile("main.lua", global_section_contents, true) == false then 
+				editor.error_message("019", current_dir)
+				return 
+			end 
+			new_contents = new_contents.."-- END "..fileUpper.." SECTION\n\n"
+			if editor_lb:writefile("main.lua", new_contents, false) == false then 
+				editor.error_message("019", current_dir)
+				return 
+			end 
+			if editor_lb:writefile("main.lua", global_section_footer_contents, false) == false then 
+				editor.error_message("019", current_dir)
+				return 
+			end 
 	   end 
 	   if app_exist == false then 
-		local app_contents = "app=\n{\tid = \"com.trickplay.editor\",\n\trelease = \"1\",\n\tversion = \"1.0\",\n\tname = \"TrickPlay\",\n\tcopyright = \"Trickplay Inc.\"\n}"
-		editor_lb:writefile("app", app_contents, true)
+			local app_contents = "app=\n{\tid = \"com.trickplay.editor\",\n\trelease = \"1\",\n\tversion = \"1.0\",\n\tname = \"TrickPlay\",\n\tcopyright = \"Trickplay Inc.\"\n}"
+			if editor_lb:writefile("app", app_contents, true) == false then 
+				editor.error_message("019", current_dir)
+				return 
+			end 
 	   end 
 	 
             current_fn = "screens/"..input_text
@@ -200,7 +215,10 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 			-- restore
 			bfc = readfile(back_fn)
 			if bfc then 
-				editor_lb:writefile("screens/unsaved_temp.lua", bfc, true)
+				if editor_lb:writefile("screens/unsaved_temp.lua", bfc, true) == false then 
+					editor.error_message("019", current_dir)
+					return 
+				end 
 				current_fn = "screens/unsaved_temp.lua"
 			end 
 			restore_fn = input_text
@@ -211,10 +229,17 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
 
 		if current_fn == "screens/unsaved_temp.lua" then 
 			current_fn = ""
-			editor_lb:writefile("screens/unsaved_temp.lua", "", true)
+			if editor_lb:writefile("screens/unsaved_temp.lua", "", true) == false then 
+				editor.error_message("019", current_dir)
+				return 
+			end 
 		else 
 			local back_file = current_fn.."\.back"
-			editor_lb:writefile(back_file, cfc, true)	
+			if editor_lb:writefile(back_file, cfc, true) == false then 
+				editor.error_message("019", current_dir)
+				return 
+			end 
+
 		end 
 
 	   	if screen:find_child("timeline") then 
@@ -325,7 +350,10 @@ function msg_window.inputMsgWindow_yn(txt)
      if(txt == "no") then
           editor.save(false)
      elseif(txt =="yes") then 
-          editor_lb:writefile(current_fn, contents, true)
+          if editor_lb:writefile(current_fn, contents, true) == false then 
+				editor.error_message("019", current_dir)
+				return 
+		  end 
           contents = ""
      end
      screen:grab_key_focus(screen) 
