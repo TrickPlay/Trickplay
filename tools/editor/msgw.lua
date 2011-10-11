@@ -150,11 +150,15 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   end 
 	 
             current_fn = "screens/"..input_text
-            editor_lb:writefile(current_fn, contents, true)
-			local fa, fb = string.find(current_fn, "unsaved_temp") 
-	   		if fa == nil then 
-	   			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
-	   		end 
+            if editor_lb:writefile(current_fn, contents, true) == false then 
+				screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+			else 
+
+				local fa, fb = string.find(current_fn, "unsaved_temp") 
+	   			if fa == nil then 
+	   				screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
+	   			end 
+			end 
             contents = ""
             --screen:grab_key_focus(screen) 
       end
@@ -205,7 +209,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
         local f = loadfile(current_fn)
         f(g) 
 
-		 if current_fn == "screens/unsaved_temp.lua" then 
+		if current_fn == "screens/unsaved_temp.lua" then 
 			current_fn = ""
 			editor_lb:writefile("screens/unsaved_temp.lua", "", true)
 		else 
