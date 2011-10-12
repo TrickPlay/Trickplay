@@ -1,0 +1,803 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		446B2EC9143F7FCA00629B54 /* TVBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA741427D4E50043C8BF /* TVBrowserViewController.m */; };
+		446B2ECA143F7FCA00629B54 /* AppBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA721427D4E50043C8BF /* AppBrowserViewController.m */; };
+		446B2ECB143F7FCA00629B54 /* TPAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA731427D4E50043C8BF /* TPAppViewController.m */; };
+		446B2ECD143F7FCA00629B54 /* VirtualRemoteViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA761427D4E50043C8BF /* VirtualRemoteViewController.m */; };
+		44D2D081143F6FBE00E54755 /* TakeControl-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */; };
+		44D2D084143F6FCB00E54755 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 44D2D082143F6FCB00E54755 /* InfoPlist.strings */; };
+		44D2D086143F71DD00E54755 /* Protocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 44D2D085143F71DD00E54755 /* Protocols.h */; };
+		44D2D087143F723700E54755 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4E17A914353B7500356032 /* JSONKit.m */; };
+		44D2D088143F723700E54755 /* TVBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA8F1427D55E0043C8BF /* TVBrowser.m */; };
+		44D2D089143F723700E54755 /* AppBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA8E1427D55E0043C8BF /* AppBrowser.m */; };
+		44D2D08A143F723700E54755 /* TrickplayAnimation.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA931427D5840043C8BF /* TrickplayAnimation.m */; };
+		44D2D08B143F723700E54755 /* TrickplayTimeline.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA951427D5840043C8BF /* TrickplayTimeline.m */; };
+		44D2D08C143F723700E54755 /* AdvancedUIObjectManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA9B1427D5AC0043C8BF /* AdvancedUIObjectManager.m */; };
+		44D2D08D143F723700E54755 /* TrickplayUIElement.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA91427D5AC0043C8BF /* TrickplayUIElement.m */; };
+		44D2D08E143F723700E54755 /* TrickplayScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA31427D5AC0043C8BF /* TrickplayScreen.m */; };
+		44D2D08F143F723700E54755 /* TrickplayRectangle.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA11427D5AC0043C8BF /* TrickplayRectangle.m */; };
+		44D2D090143F723700E54755 /* TrickplayGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA9D1427D5AC0043C8BF /* TrickplayGroup.m */; };
+		44D2D091143F723700E54755 /* TrickplayImage.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA9F1427D5AC0043C8BF /* TrickplayImage.m */; };
+		44D2D092143F723700E54755 /* TrickplayText.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA51427D5AC0043C8BF /* TrickplayText.m */; };
+		44D2D093143F723700E54755 /* TrickplayTextHTML.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAA71427D5AC0043C8BF /* TrickplayTextHTML.m */; };
+		44D2D094143F723700E54755 /* AsyncImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABD1427D6090043C8BF /* AsyncImageView.m */; };
+		44D2D095143F723700E54755 /* EditableTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC51427D6090043C8BF /* EditableTextView.m */; };
+		44D2D096143F723700E54755 /* GestureImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC71427D6090043C8BF /* GestureImageView.m */; };
+		44D2D097143F723700E54755 /* AccelerometerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABB1427D6090043C8BF /* AccelerometerController.m */; };
+		44D2D098143F723700E54755 /* TouchController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACF1427D6090043C8BF /* TouchController.m */; };
+		44D2D099143F723700E54755 /* TVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAE61427D66D0043C8BF /* TVConnection.m */; };
+		44D2D09A143F723700E54755 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAE91427D6780043C8BF /* CommandInterpreter.m */; };
+		44D2D09B143F723700E54755 /* CommandInterpreterAdvancedUI.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAEB1427D6780043C8BF /* CommandInterpreterAdvancedUI.m */; };
+		44D2D09C143F723700E54755 /* CommandInterpreterApp.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */; };
+		44D2D09D143F723700E54755 /* NetServiceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC91427D6090043C8BF /* NetServiceManager.m */; };
+		44D2D09E143F723700E54755 /* NSStreamAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACB1427D6090043C8BF /* NSStreamAdditions.m */; };
+		44D2D09F143F723700E54755 /* SocketManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACD1427D6090043C8BF /* SocketManager.m */; };
+		44D2D0A0143F723700E54755 /* AudioController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABF1427D6090043C8BF /* AudioController.m */; };
+		44D2D0A1143F723700E54755 /* AudioPlayback.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC11427D6090043C8BF /* AudioPlayback.m */; };
+		44D2D0A2143F723700E54755 /* AudioStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC31427D6090043C8BF /* AudioStreamer.m */; };
+		44D2D0A3143F723700E54755 /* ResourceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAF51427D6980043C8BF /* ResourceManager.m */; };
+		44D2D0A4143F723700E54755 /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA7D1427D50F0043C8BF /* CameraViewController.m */; };
+		44D2D0A5143F723700E54755 /* ImageEditorHelpViewControllerPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA7F1427D50F0043C8BF /* ImageEditorHelpViewControllerPhone.m */; };
+		44D2D0A6143F723700E54755 /* ImageEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA811427D50F0043C8BF /* ImageEditorViewController.m */; };
+		44D2D0A7143F723700E54755 /* AudioRecordingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA891427D5260043C8BF /* AudioRecordingViewController.m */; };
+		CD4977AC143E7A3A00387911 /* click.wav in Resources */ = {isa = PBXBuildFile; fileRef = CD5CFD6613D50F01002334E7 /* click.wav */; };
+		CD4977AD143E7A3A00387911 /* arrows-generic-controls-comp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */; };
+		CD4977AE143E7A3A00387911 /* ios-generic-background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */; };
+		CD4977AF143E7A3A00387911 /* back-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43F13B9895300158169 /* back-touch.png */; };
+		CD4977B0143E7A3A00387911 /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44013B9895300158169 /* back.png */; };
+		CD4977B1143E7A3A00387911 /* button-blue-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44113B9895300158169 /* button-blue-touch.png */; };
+		CD4977B2143E7A3A00387911 /* button-blue.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44213B9895300158169 /* button-blue.png */; };
+		CD4977B3143E7A3A00387911 /* button-green-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44313B9895300158169 /* button-green-touch.png */; };
+		CD4977B4143E7A3A00387911 /* button-green.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44413B9895300158169 /* button-green.png */; };
+		CD4977B5143E7A3A00387911 /* button-red-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44513B9895300158169 /* button-red-touch.png */; };
+		CD4977B6143E7A3A00387911 /* button-red.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44613B9895300158169 /* button-red.png */; };
+		CD4977B7143E7A3A00387911 /* button-yellow-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44713B9895300158169 /* button-yellow-touch.png */; };
+		CD4977B8143E7A3A00387911 /* button-yellow.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44813B9895300158169 /* button-yellow.png */; };
+		CD4977B9143E7A3A00387911 /* down-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44913B9895300158169 /* down-touch.png */; };
+		CD4977BA143E7A3A00387911 /* down.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44A13B9895300158169 /* down.png */; };
+		CD4977BB143E7A3A00387911 /* exit-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44B13B9895300158169 /* exit-touch.png */; };
+		CD4977BC143E7A3A00387911 /* exit.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44C13B9895300158169 /* exit.png */; };
+		CD4977BD143E7A3A00387911 /* left-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44D13B9895300158169 /* left-touch.png */; };
+		CD4977BE143E7A3A00387911 /* left.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44E13B9895300158169 /* left.png */; };
+		CD4977BF143E7A3A00387911 /* ok-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44F13B9895300158169 /* ok-touch.png */; };
+		CD4977C0143E7A3A00387911 /* ok.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45013B9895300158169 /* ok.png */; };
+		CD4977C1143E7A3A00387911 /* right-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45113B9895300158169 /* right-touch.png */; };
+		CD4977C2143E7A3A00387911 /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45213B9895300158169 /* right.png */; };
+		CD4977C3143E7A3A00387911 /* up-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45313B9895300158169 /* up-touch.png */; };
+		CD4977C4143E7A3A00387911 /* up.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45413B9895300158169 /* up.png */; };
+		CD4977C7143E7A6900387911 /* TVBrowserViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA541427D3600043C8BF /* TVBrowserViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CD4977C8143E7A6900387911 /* AppBrowserViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA511427D3600043C8BF /* AppBrowserViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CD4977C9143E7A6900387911 /* TPAppViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA521427D3600043C8BF /* TPAppViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CD4977CA143E7A6900387911 /* TVBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA531427D3600043C8BF /* TVBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CD4977CB143E7A6900387911 /* AppBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA501427D3600043C8BF /* AppBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CD4977CC143E7A6900387911 /* TVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA551427D3600043C8BF /* TVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CD4977FA143E7AD100387911 /* AppBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA621427D4800043C8BF /* AppBrowserViewController.xib */; };
+		CD4977FB143E7AD100387911 /* AudioRecordingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA631427D4800043C8BF /* AudioRecordingViewController.xib */; };
+		CD4977FC143E7AD100387911 /* ImageEditorHelpViewControllerPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA651427D4800043C8BF /* ImageEditorHelpViewControllerPhone.xib */; };
+		CD4977FD143E7AD200387911 /* ImageEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA661427D4800043C8BF /* ImageEditorViewController.xib */; };
+		CD4977FE143E7AD200387911 /* TPAppViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA671427D4800043C8BF /* TPAppViewController.xib */; };
+		CD4977FF143E7AD200387911 /* TVBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA681427D4800043C8BF /* TVBrowserViewController.xib */; };
+		CD497800143E7AD200387911 /* VirtualRemoteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA701427D49F0043C8BF /* VirtualRemoteViewController.xib */; };
+		CD497801143E7AD200387911 /* ImageEditorHelpViewPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		44D2D07E143F6FBE00E54755 /* TakeControl-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "TakeControl-Info.plist"; path = "Take Control Framework/TakeControl-Info.plist"; sourceTree = SOURCE_ROOT; };
+		44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "TakeControl-Prefix.pch"; path = "Take Control Framework/TakeControl-Prefix.pch"; sourceTree = SOURCE_ROOT; };
+		44D2D083143F6FCB00E54755 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "Take Control Framework/en.lproj/InfoPlist.strings"; sourceTree = SOURCE_ROOT; };
+		44D2D085143F71DD00E54755 /* Protocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Protocols.h; path = "Take Control Framework/Classes/Protocols.h"; sourceTree = SOURCE_ROOT; };
+		CD49779C143E79DD00387911 /* TakeControl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TakeControl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD4E17A814353B7500356032 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
+		CD4E17A914353B7500356032 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
+		CD5CFD6613D50F01002334E7 /* click.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = click.wav; sourceTree = "<group>"; };
+		CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "arrows-generic-controls-comp.jpg"; sourceTree = "<group>"; };
+		CD63B43F13B9895300158169 /* back-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-touch.png"; sourceTree = "<group>"; };
+		CD63B44013B9895300158169 /* back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = back.png; sourceTree = "<group>"; };
+		CD63B44113B9895300158169 /* button-blue-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-blue-touch.png"; sourceTree = "<group>"; };
+		CD63B44213B9895300158169 /* button-blue.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-blue.png"; sourceTree = "<group>"; };
+		CD63B44313B9895300158169 /* button-green-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-green-touch.png"; sourceTree = "<group>"; };
+		CD63B44413B9895300158169 /* button-green.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-green.png"; sourceTree = "<group>"; };
+		CD63B44513B9895300158169 /* button-red-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-red-touch.png"; sourceTree = "<group>"; };
+		CD63B44613B9895300158169 /* button-red.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-red.png"; sourceTree = "<group>"; };
+		CD63B44713B9895300158169 /* button-yellow-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-yellow-touch.png"; sourceTree = "<group>"; };
+		CD63B44813B9895300158169 /* button-yellow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button-yellow.png"; sourceTree = "<group>"; };
+		CD63B44913B9895300158169 /* down-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "down-touch.png"; sourceTree = "<group>"; };
+		CD63B44A13B9895300158169 /* down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = down.png; sourceTree = "<group>"; };
+		CD63B44B13B9895300158169 /* exit-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "exit-touch.png"; sourceTree = "<group>"; };
+		CD63B44C13B9895300158169 /* exit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = exit.png; sourceTree = "<group>"; };
+		CD63B44D13B9895300158169 /* left-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "left-touch.png"; sourceTree = "<group>"; };
+		CD63B44E13B9895300158169 /* left.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = left.png; sourceTree = "<group>"; };
+		CD63B44F13B9895300158169 /* ok-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ok-touch.png"; sourceTree = "<group>"; };
+		CD63B45013B9895300158169 /* ok.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ok.png; sourceTree = "<group>"; };
+		CD63B45113B9895300158169 /* right-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "right-touch.png"; sourceTree = "<group>"; };
+		CD63B45213B9895300158169 /* right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = right.png; sourceTree = "<group>"; };
+		CD63B45313B9895300158169 /* up-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "up-touch.png"; sourceTree = "<group>"; };
+		CD63B45413B9895300158169 /* up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = up.png; sourceTree = "<group>"; };
+		CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "ios-generic-background.jpg"; sourceTree = "<group>"; };
+		CD91EA501427D3600043C8BF /* AppBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowser.h; path = "Public Headers/AppBrowser.h"; sourceTree = "<group>"; };
+		CD91EA511427D3600043C8BF /* AppBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowserViewController.h; path = "Public Headers/AppBrowserViewController.h"; sourceTree = "<group>"; };
+		CD91EA521427D3600043C8BF /* TPAppViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TPAppViewController.h; path = "Public Headers/TPAppViewController.h"; sourceTree = "<group>"; };
+		CD91EA531427D3600043C8BF /* TVBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowser.h; path = "Public Headers/TVBrowser.h"; sourceTree = "<group>"; };
+		CD91EA541427D3600043C8BF /* TVBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVBrowserViewController.h; path = "Public Headers/TVBrowserViewController.h"; sourceTree = "<group>"; };
+		CD91EA551427D3600043C8BF /* TVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TVConnection.h; path = "Public Headers/TVConnection.h"; sourceTree = "<group>"; };
+		CD91EA621427D4800043C8BF /* AppBrowserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AppBrowserViewController.xib; path = Classes/AppBrowserViewController.xib; sourceTree = "<group>"; };
+		CD91EA631427D4800043C8BF /* AudioRecordingViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AudioRecordingViewController.xib; path = Classes/AudioRecordingViewController.xib; sourceTree = "<group>"; };
+		CD91EA651427D4800043C8BF /* ImageEditorHelpViewControllerPhone.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewControllerPhone.xib; path = Classes/ImageEditorHelpViewControllerPhone.xib; sourceTree = "<group>"; };
+		CD91EA661427D4800043C8BF /* ImageEditorViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorViewController.xib; path = Classes/ImageEditorViewController.xib; sourceTree = "<group>"; };
+		CD91EA671427D4800043C8BF /* TPAppViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = TPAppViewController.xib; path = Classes/TPAppViewController.xib; sourceTree = "<group>"; };
+		CD91EA681427D4800043C8BF /* TVBrowserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = TVBrowserViewController.xib; path = Classes/TVBrowserViewController.xib; sourceTree = "<group>"; };
+		CD91EA701427D49F0043C8BF /* VirtualRemoteViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = VirtualRemoteViewController.xib; path = Classes/VirtualRemoteViewController.xib; sourceTree = "<group>"; };
+		CD91EA721427D4E50043C8BF /* AppBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppBrowserViewController.m; path = "Take Control Framework/Classes/AppBrowserViewController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA731427D4E50043C8BF /* TPAppViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TPAppViewController.m; path = "Take Control Framework/Classes/TPAppViewController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA741427D4E50043C8BF /* TVBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TVBrowserViewController.m; path = "Take Control Framework/Classes/TVBrowserViewController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA751427D4E50043C8BF /* VirtualRemoteViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VirtualRemoteViewController.h; path = "Take Control Framework/Classes/VirtualRemoteViewController.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA761427D4E50043C8BF /* VirtualRemoteViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VirtualRemoteViewController.m; path = "Take Control Framework/Classes/VirtualRemoteViewController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA7C1427D50F0043C8BF /* CameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CameraViewController.h; path = "Take Control Framework/Classes/CameraViewController.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA7D1427D50F0043C8BF /* CameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CameraViewController.m; path = "Take Control Framework/Classes/CameraViewController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA7E1427D50F0043C8BF /* ImageEditorHelpViewControllerPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImageEditorHelpViewControllerPhone.h; path = "Take Control Framework/Classes/ImageEditorHelpViewControllerPhone.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA7F1427D50F0043C8BF /* ImageEditorHelpViewControllerPhone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ImageEditorHelpViewControllerPhone.m; path = "Take Control Framework/Classes/ImageEditorHelpViewControllerPhone.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA801427D50F0043C8BF /* ImageEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImageEditorViewController.h; path = "Take Control Framework/Classes/ImageEditorViewController.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA811427D50F0043C8BF /* ImageEditorViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ImageEditorViewController.m; path = "Take Control Framework/Classes/ImageEditorViewController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA881427D5260043C8BF /* AudioRecordingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioRecordingViewController.h; path = "Take Control Framework/Classes/AudioRecordingViewController.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA891427D5260043C8BF /* AudioRecordingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioRecordingViewController.m; path = "Take Control Framework/Classes/AudioRecordingViewController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA8C1427D53E0043C8BF /* Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Extensions.h; path = "Take Control Framework/Classes/Extensions.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA8E1427D55E0043C8BF /* AppBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppBrowser.m; path = "Take Control Framework/Classes/AppBrowser.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA8F1427D55E0043C8BF /* TVBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TVBrowser.m; path = "Take Control Framework/Classes/TVBrowser.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA921427D5840043C8BF /* TrickplayAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayAnimation.h; path = "Take Control Framework/Classes/TrickplayAnimation.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA931427D5840043C8BF /* TrickplayAnimation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayAnimation.m; path = "Take Control Framework/Classes/TrickplayAnimation.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA941427D5840043C8BF /* TrickplayTimeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayTimeline.h; path = "Take Control Framework/Classes/TrickplayTimeline.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA951427D5840043C8BF /* TrickplayTimeline.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayTimeline.m; path = "Take Control Framework/Classes/TrickplayTimeline.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA9A1427D5AC0043C8BF /* AdvancedUIObjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AdvancedUIObjectManager.h; path = "Take Control Framework/Classes/AdvancedUIObjectManager.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA9B1427D5AC0043C8BF /* AdvancedUIObjectManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AdvancedUIObjectManager.m; path = "Take Control Framework/Classes/AdvancedUIObjectManager.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA9C1427D5AC0043C8BF /* TrickplayGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayGroup.h; path = "Take Control Framework/Classes/TrickplayGroup.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA9D1427D5AC0043C8BF /* TrickplayGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayGroup.m; path = "Take Control Framework/Classes/TrickplayGroup.m"; sourceTree = SOURCE_ROOT; };
+		CD91EA9E1427D5AC0043C8BF /* TrickplayImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayImage.h; path = "Take Control Framework/Classes/TrickplayImage.h"; sourceTree = SOURCE_ROOT; };
+		CD91EA9F1427D5AC0043C8BF /* TrickplayImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayImage.m; path = "Take Control Framework/Classes/TrickplayImage.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAA01427D5AC0043C8BF /* TrickplayRectangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayRectangle.h; path = "Take Control Framework/Classes/TrickplayRectangle.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAA11427D5AC0043C8BF /* TrickplayRectangle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayRectangle.m; path = "Take Control Framework/Classes/TrickplayRectangle.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAA21427D5AC0043C8BF /* TrickplayScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayScreen.h; path = "Take Control Framework/Classes/TrickplayScreen.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAA31427D5AC0043C8BF /* TrickplayScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayScreen.m; path = "Take Control Framework/Classes/TrickplayScreen.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAA41427D5AC0043C8BF /* TrickplayText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayText.h; path = "Take Control Framework/Classes/TrickplayText.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAA51427D5AC0043C8BF /* TrickplayText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayText.m; path = "Take Control Framework/Classes/TrickplayText.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAA61427D5AC0043C8BF /* TrickplayTextHTML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayTextHTML.h; path = "Take Control Framework/Classes/TrickplayTextHTML.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAA71427D5AC0043C8BF /* TrickplayTextHTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayTextHTML.m; path = "Take Control Framework/Classes/TrickplayTextHTML.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAA81427D5AC0043C8BF /* TrickplayUIElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayUIElement.h; path = "Take Control Framework/Classes/TrickplayUIElement.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAA91427D5AC0043C8BF /* TrickplayUIElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayUIElement.m; path = "Take Control Framework/Classes/TrickplayUIElement.m"; sourceTree = SOURCE_ROOT; };
+		CD91EABA1427D6090043C8BF /* AccelerometerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccelerometerController.h; path = "Take Control Framework/Classes/AccelerometerController.h"; sourceTree = SOURCE_ROOT; };
+		CD91EABB1427D6090043C8BF /* AccelerometerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AccelerometerController.m; path = "Take Control Framework/Classes/AccelerometerController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EABC1427D6090043C8BF /* AsyncImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AsyncImageView.h; path = "Take Control Framework/Classes/AsyncImageView.h"; sourceTree = SOURCE_ROOT; };
+		CD91EABD1427D6090043C8BF /* AsyncImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AsyncImageView.m; path = "Take Control Framework/Classes/AsyncImageView.m"; sourceTree = SOURCE_ROOT; };
+		CD91EABE1427D6090043C8BF /* AudioController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioController.h; path = "Take Control Framework/Classes/AudioController.h"; sourceTree = SOURCE_ROOT; };
+		CD91EABF1427D6090043C8BF /* AudioController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioController.m; path = "Take Control Framework/Classes/AudioController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAC01427D6090043C8BF /* AudioPlayback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioPlayback.h; path = "Take Control Framework/Classes/AudioPlayback.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAC11427D6090043C8BF /* AudioPlayback.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioPlayback.m; path = "Take Control Framework/Classes/AudioPlayback.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAC21427D6090043C8BF /* AudioStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioStreamer.h; path = "Take Control Framework/Classes/AudioStreamer.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAC31427D6090043C8BF /* AudioStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AudioStreamer.m; path = "Take Control Framework/Classes/AudioStreamer.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAC41427D6090043C8BF /* EditableTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditableTextView.h; path = "Take Control Framework/Classes/EditableTextView.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAC51427D6090043C8BF /* EditableTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EditableTextView.m; path = "Take Control Framework/Classes/EditableTextView.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAC61427D6090043C8BF /* GestureImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GestureImageView.h; path = "Take Control Framework/Classes/GestureImageView.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAC71427D6090043C8BF /* GestureImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GestureImageView.m; path = "Take Control Framework/Classes/GestureImageView.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAC81427D6090043C8BF /* NetServiceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NetServiceManager.h; path = "Take Control Framework/Classes/NetServiceManager.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAC91427D6090043C8BF /* NetServiceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NetServiceManager.m; path = "Take Control Framework/Classes/NetServiceManager.m"; sourceTree = SOURCE_ROOT; };
+		CD91EACA1427D6090043C8BF /* NSStreamAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStreamAdditions.h; path = "Take Control Framework/Classes/NSStreamAdditions.h"; sourceTree = SOURCE_ROOT; };
+		CD91EACB1427D6090043C8BF /* NSStreamAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStreamAdditions.m; path = "Take Control Framework/Classes/NSStreamAdditions.m"; sourceTree = SOURCE_ROOT; };
+		CD91EACC1427D6090043C8BF /* SocketManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SocketManager.h; path = "Take Control Framework/Classes/SocketManager.h"; sourceTree = SOURCE_ROOT; };
+		CD91EACD1427D6090043C8BF /* SocketManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SocketManager.m; path = "Take Control Framework/Classes/SocketManager.m"; sourceTree = SOURCE_ROOT; };
+		CD91EACE1427D6090043C8BF /* TouchController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TouchController.h; path = "Take Control Framework/Classes/TouchController.h"; sourceTree = SOURCE_ROOT; };
+		CD91EACF1427D6090043C8BF /* TouchController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TouchController.m; path = "Take Control Framework/Classes/TouchController.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAE61427D66D0043C8BF /* TVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TVConnection.m; path = "Take Control Framework/Classes/TVConnection.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAE81427D6780043C8BF /* CommandInterpreter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CommandInterpreter.h; path = "Take Control Framework/Classes/CommandInterpreter.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAE91427D6780043C8BF /* CommandInterpreter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CommandInterpreter.m; path = "Take Control Framework/Classes/CommandInterpreter.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAEA1427D6780043C8BF /* CommandInterpreterAdvancedUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CommandInterpreterAdvancedUI.h; path = "Take Control Framework/Classes/CommandInterpreterAdvancedUI.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAEB1427D6780043C8BF /* CommandInterpreterAdvancedUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CommandInterpreterAdvancedUI.m; path = "Take Control Framework/Classes/CommandInterpreterAdvancedUI.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAEC1427D6790043C8BF /* CommandInterpreterApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CommandInterpreterApp.h; path = "Take Control Framework/Classes/CommandInterpreterApp.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CommandInterpreterApp.m; path = "Take Control Framework/Classes/CommandInterpreterApp.m"; sourceTree = SOURCE_ROOT; };
+		CD91EAF41427D6980043C8BF /* ResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ResourceManager.h; path = "Take Control Framework/Classes/ResourceManager.h"; sourceTree = SOURCE_ROOT; };
+		CD91EAF51427D6980043C8BF /* ResourceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ResourceManager.m; path = "Take Control Framework/Classes/ResourceManager.m"; sourceTree = SOURCE_ROOT; };
+		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewPad.xib; path = "Take Control Framework/Classes/ImageEditorHelpViewPad.xib"; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CD49779C143E79DD00387911 /* TakeControl.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+			isa = PBXGroup;
+			children = (
+				CD49779F143E79DD00387911 /* TakeControl */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = CustomTemplate;
+			sourceTree = "<group>";
+		};
+		CD279D0B137B122C00A707D7 /* AdvancedUI */ = {
+			isa = PBXGroup;
+			children = (
+				CD2F80C213ECA8C2001EACEA /* Animations */,
+				CD91EA9A1427D5AC0043C8BF /* AdvancedUIObjectManager.h */,
+				CD91EA9B1427D5AC0043C8BF /* AdvancedUIObjectManager.m */,
+				CD91EAA81427D5AC0043C8BF /* TrickplayUIElement.h */,
+				CD91EAA91427D5AC0043C8BF /* TrickplayUIElement.m */,
+				CD91EAA21427D5AC0043C8BF /* TrickplayScreen.h */,
+				CD91EAA31427D5AC0043C8BF /* TrickplayScreen.m */,
+				CD91EAA01427D5AC0043C8BF /* TrickplayRectangle.h */,
+				CD91EAA11427D5AC0043C8BF /* TrickplayRectangle.m */,
+				CD91EA9C1427D5AC0043C8BF /* TrickplayGroup.h */,
+				CD91EA9D1427D5AC0043C8BF /* TrickplayGroup.m */,
+				CD91EA9E1427D5AC0043C8BF /* TrickplayImage.h */,
+				CD91EA9F1427D5AC0043C8BF /* TrickplayImage.m */,
+				CD91EAA41427D5AC0043C8BF /* TrickplayText.h */,
+				CD91EAA51427D5AC0043C8BF /* TrickplayText.m */,
+				CD91EAA61427D5AC0043C8BF /* TrickplayTextHTML.h */,
+				CD91EAA71427D5AC0043C8BF /* TrickplayTextHTML.m */,
+			);
+			name = AdvancedUI;
+			sourceTree = "<group>";
+		};
+		CD2F80C213ECA8C2001EACEA /* Animations */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EA921427D5840043C8BF /* TrickplayAnimation.h */,
+				CD91EA931427D5840043C8BF /* TrickplayAnimation.m */,
+				CD91EA941427D5840043C8BF /* TrickplayTimeline.h */,
+				CD91EA951427D5840043C8BF /* TrickplayTimeline.m */,
+			);
+			name = Animations;
+			sourceTree = "<group>";
+		};
+		CD404C09134A74CD0021D36C /* UserInterface */ = {
+			isa = PBXGroup;
+			children = (
+				CD279D0B137B122C00A707D7 /* AdvancedUI */,
+				CD91EABC1427D6090043C8BF /* AsyncImageView.h */,
+				CD91EABD1427D6090043C8BF /* AsyncImageView.m */,
+				CD91EAC41427D6090043C8BF /* EditableTextView.h */,
+				CD91EAC51427D6090043C8BF /* EditableTextView.m */,
+				CD91EAC61427D6090043C8BF /* GestureImageView.h */,
+				CD91EAC71427D6090043C8BF /* GestureImageView.m */,
+			);
+			name = UserInterface;
+			sourceTree = "<group>";
+		};
+		CD49779F143E79DD00387911 /* TakeControl */ = {
+			isa = PBXGroup;
+			children = (
+				CD4E17A714353B5F00356032 /* JSON */,
+				CD91EA181427CB5B0043C8BF /* PublicHeaderFiles */,
+				CD54637D14203CBF00965577 /* PrivateMethods */,
+				CDFEBBA1130A4B8700A14307 /* Modules */,
+				CDFEBBB8130A4CD100A14307 /* ViewControllers */,
+				CD91EA141427C9DC0043C8BF /* Resources */,
+				CD63B43D13B9895300158169 /* VirtualRemoteAssets */,
+				CD4977A0143E79DD00387911 /* Supporting Files */,
+			);
+			name = TakeControl;
+			path = "Take Control Framework";
+			sourceTree = "<group>";
+		};
+		CD4977A0143E79DD00387911 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				44D2D082143F6FCB00E54755 /* InfoPlist.strings */,
+				44D2D07E143F6FBE00E54755 /* TakeControl-Info.plist */,
+				44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		CD4CA69E13B50AD700B5A7A3 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EA741427D4E50043C8BF /* TVBrowserViewController.m */,
+				CD91EA721427D4E50043C8BF /* AppBrowserViewController.m */,
+				CD91EA731427D4E50043C8BF /* TPAppViewController.m */,
+				CD91EA751427D4E50043C8BF /* VirtualRemoteViewController.h */,
+				CD91EA761427D4E50043C8BF /* VirtualRemoteViewController.m */,
+			);
+			name = Main;
+			sourceTree = "<group>";
+		};
+		CD4CA69F13B50AF000B5A7A3 /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EA7C1427D50F0043C8BF /* CameraViewController.h */,
+				CD91EA7D1427D50F0043C8BF /* CameraViewController.m */,
+				CD91EA7E1427D50F0043C8BF /* ImageEditorHelpViewControllerPhone.h */,
+				CD91EA7F1427D50F0043C8BF /* ImageEditorHelpViewControllerPhone.m */,
+				CD91EA801427D50F0043C8BF /* ImageEditorViewController.h */,
+				CD91EA811427D50F0043C8BF /* ImageEditorViewController.m */,
+			);
+			name = Camera;
+			sourceTree = "<group>";
+		};
+		CD4E17A714353B5F00356032 /* JSON */ = {
+			isa = PBXGroup;
+			children = (
+				CD4E17A814353B7500356032 /* JSONKit.h */,
+				CD4E17A914353B7500356032 /* JSONKit.m */,
+			);
+			name = JSON;
+			path = "../Take Control Framework";
+			sourceTree = "<group>";
+		};
+		CD54637D14203CBF00965577 /* PrivateMethods */ = {
+			isa = PBXGroup;
+			children = (
+				44D2D085143F71DD00E54755 /* Protocols.h */,
+				CD91EA8C1427D53E0043C8BF /* Extensions.h */,
+			);
+			name = PrivateMethods;
+			path = ../Classes;
+			sourceTree = "<group>";
+		};
+		CD5B5925141E917C0048819E /* TVConnection */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EAE61427D66D0043C8BF /* TVConnection.m */,
+			);
+			name = TVConnection;
+			sourceTree = "<group>";
+		};
+		CD63B43D13B9895300158169 /* VirtualRemoteAssets */ = {
+			isa = PBXGroup;
+			children = (
+				CD5CFD6613D50F01002334E7 /* click.wav */,
+				CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */,
+				CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */,
+				CD63B43F13B9895300158169 /* back-touch.png */,
+				CD63B44013B9895300158169 /* back.png */,
+				CD63B44113B9895300158169 /* button-blue-touch.png */,
+				CD63B44213B9895300158169 /* button-blue.png */,
+				CD63B44313B9895300158169 /* button-green-touch.png */,
+				CD63B44413B9895300158169 /* button-green.png */,
+				CD63B44513B9895300158169 /* button-red-touch.png */,
+				CD63B44613B9895300158169 /* button-red.png */,
+				CD63B44713B9895300158169 /* button-yellow-touch.png */,
+				CD63B44813B9895300158169 /* button-yellow.png */,
+				CD63B44913B9895300158169 /* down-touch.png */,
+				CD63B44A13B9895300158169 /* down.png */,
+				CD63B44B13B9895300158169 /* exit-touch.png */,
+				CD63B44C13B9895300158169 /* exit.png */,
+				CD63B44D13B9895300158169 /* left-touch.png */,
+				CD63B44E13B9895300158169 /* left.png */,
+				CD63B44F13B9895300158169 /* ok-touch.png */,
+				CD63B45013B9895300158169 /* ok.png */,
+				CD63B45113B9895300158169 /* right-touch.png */,
+				CD63B45213B9895300158169 /* right.png */,
+				CD63B45313B9895300158169 /* up-touch.png */,
+				CD63B45413B9895300158169 /* up.png */,
+			);
+			name = VirtualRemoteAssets;
+			path = ../VirtualRemoteAssets;
+			sourceTree = "<group>";
+		};
+		CD91EA141427C9DC0043C8BF /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EA621427D4800043C8BF /* AppBrowserViewController.xib */,
+				CD91EA631427D4800043C8BF /* AudioRecordingViewController.xib */,
+				CD91EA651427D4800043C8BF /* ImageEditorHelpViewControllerPhone.xib */,
+				CD91EA661427D4800043C8BF /* ImageEditorViewController.xib */,
+				CD91EA671427D4800043C8BF /* TPAppViewController.xib */,
+				CD91EA681427D4800043C8BF /* TVBrowserViewController.xib */,
+				CD91EA701427D49F0043C8BF /* VirtualRemoteViewController.xib */,
+				CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */,
+			);
+			name = Resources;
+			path = "../Take Control Framework";
+			sourceTree = "<group>";
+		};
+		CD91EA181427CB5B0043C8BF /* PublicHeaderFiles */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EA541427D3600043C8BF /* TVBrowserViewController.h */,
+				CD91EA511427D3600043C8BF /* AppBrowserViewController.h */,
+				CD91EA521427D3600043C8BF /* TPAppViewController.h */,
+				CD91EA531427D3600043C8BF /* TVBrowser.h */,
+				CD91EA501427D3600043C8BF /* AppBrowser.h */,
+				CD91EA551427D3600043C8BF /* TVConnection.h */,
+			);
+			name = PublicHeaderFiles;
+			path = "../Take Control Framework";
+			sourceTree = "<group>";
+		};
+		CDECA31014072849007C58ED /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EA8F1427D55E0043C8BF /* TVBrowser.m */,
+				CD91EA8E1427D55E0043C8BF /* AppBrowser.m */,
+			);
+			name = Main;
+			sourceTree = "<group>";
+		};
+		CDEE44AA137CC42400A4B5E2 /* CommandInterpreters */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EAE81427D6780043C8BF /* CommandInterpreter.h */,
+				CD91EAE91427D6780043C8BF /* CommandInterpreter.m */,
+				CD91EAEA1427D6780043C8BF /* CommandInterpreterAdvancedUI.h */,
+				CD91EAEB1427D6780043C8BF /* CommandInterpreterAdvancedUI.m */,
+				CD91EAEC1427D6790043C8BF /* CommandInterpreterApp.h */,
+				CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */,
+			);
+			name = CommandInterpreters;
+			sourceTree = "<group>";
+		};
+		CDFDCB0A13DE49DF0025768E /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EA881427D5260043C8BF /* AudioRecordingViewController.h */,
+				CD91EA891427D5260043C8BF /* AudioRecordingViewController.m */,
+			);
+			name = Audio;
+			sourceTree = "<group>";
+		};
+		CDFEBBA1130A4B8700A14307 /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				CDECA31014072849007C58ED /* Main */,
+				CD404C09134A74CD0021D36C /* UserInterface */,
+				CDFEBEBA130C704800A14307 /* UserInput */,
+				CDFEBEB9130C6F9A00A14307 /* Networking */,
+				CDFEC0FD13147E6400A14307 /* Audio */,
+				CD91EAF41427D6980043C8BF /* ResourceManager.h */,
+				CD91EAF51427D6980043C8BF /* ResourceManager.m */,
+			);
+			name = Modules;
+			path = ../Classes;
+			sourceTree = "<group>";
+		};
+		CDFEBBB8130A4CD100A14307 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				CD4CA69E13B50AD700B5A7A3 /* Main */,
+				CD4CA69F13B50AF000B5A7A3 /* Camera */,
+				CDFDCB0A13DE49DF0025768E /* Audio */,
+			);
+			name = ViewControllers;
+			path = ../Classes;
+			sourceTree = "<group>";
+		};
+		CDFEBEB9130C6F9A00A14307 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				CD5B5925141E917C0048819E /* TVConnection */,
+				CDEE44AA137CC42400A4B5E2 /* CommandInterpreters */,
+				CD91EAC81427D6090043C8BF /* NetServiceManager.h */,
+				CD91EAC91427D6090043C8BF /* NetServiceManager.m */,
+				CD91EACA1427D6090043C8BF /* NSStreamAdditions.h */,
+				CD91EACB1427D6090043C8BF /* NSStreamAdditions.m */,
+				CD91EACC1427D6090043C8BF /* SocketManager.h */,
+				CD91EACD1427D6090043C8BF /* SocketManager.m */,
+			);
+			name = Networking;
+			sourceTree = "<group>";
+		};
+		CDFEBEBA130C704800A14307 /* UserInput */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EABA1427D6090043C8BF /* AccelerometerController.h */,
+				CD91EABB1427D6090043C8BF /* AccelerometerController.m */,
+				CD91EACE1427D6090043C8BF /* TouchController.h */,
+				CD91EACF1427D6090043C8BF /* TouchController.m */,
+			);
+			name = UserInput;
+			sourceTree = "<group>";
+		};
+		CDFEC0FD13147E6400A14307 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				CD91EABE1427D6090043C8BF /* AudioController.h */,
+				CD91EABF1427D6090043C8BF /* AudioController.m */,
+				CD91EAC01427D6090043C8BF /* AudioPlayback.h */,
+				CD91EAC11427D6090043C8BF /* AudioPlayback.m */,
+				CD91EAC21427D6090043C8BF /* AudioStreamer.h */,
+				CD91EAC31427D6090043C8BF /* AudioStreamer.m */,
+			);
+			name = Audio;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		CD4977C6143E7A5600387911 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD4977C7143E7A6900387911 /* TVBrowserViewController.h in Headers */,
+				CD4977C8143E7A6900387911 /* AppBrowserViewController.h in Headers */,
+				CD4977C9143E7A6900387911 /* TPAppViewController.h in Headers */,
+				CD4977CA143E7A6900387911 /* TVBrowser.h in Headers */,
+				CD4977CB143E7A6900387911 /* AppBrowser.h in Headers */,
+				CD4977CC143E7A6900387911 /* TVConnection.h in Headers */,
+				44D2D081143F6FBE00E54755 /* TakeControl-Prefix.pch in Headers */,
+				44D2D086143F71DD00E54755 /* Protocols.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		CD49779B143E79DD00387911 /* TakeControl */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CD4977A9143E79DD00387911 /* Build configuration list for PBXNativeTarget "TakeControl" */;
+			buildPhases = (
+				CD497798143E79DD00387911 /* Sources */,
+				CD4977C6143E7A5600387911 /* Headers */,
+				CD49779A143E79DD00387911 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TakeControl;
+			productName = TakeControl;
+			productReference = CD49779C143E79DD00387911 /* TakeControl.framework */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TakeControl" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+				en,
+			);
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CD49779B143E79DD00387911 /* TakeControl */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CD49779A143E79DD00387911 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD4977AC143E7A3A00387911 /* click.wav in Resources */,
+				CD4977AD143E7A3A00387911 /* arrows-generic-controls-comp.jpg in Resources */,
+				CD4977AE143E7A3A00387911 /* ios-generic-background.jpg in Resources */,
+				CD4977AF143E7A3A00387911 /* back-touch.png in Resources */,
+				CD4977B0143E7A3A00387911 /* back.png in Resources */,
+				CD4977B1143E7A3A00387911 /* button-blue-touch.png in Resources */,
+				CD4977B2143E7A3A00387911 /* button-blue.png in Resources */,
+				CD4977B3143E7A3A00387911 /* button-green-touch.png in Resources */,
+				CD4977B4143E7A3A00387911 /* button-green.png in Resources */,
+				CD4977B5143E7A3A00387911 /* button-red-touch.png in Resources */,
+				CD4977B6143E7A3A00387911 /* button-red.png in Resources */,
+				CD4977B7143E7A3A00387911 /* button-yellow-touch.png in Resources */,
+				CD4977B8143E7A3A00387911 /* button-yellow.png in Resources */,
+				CD4977B9143E7A3A00387911 /* down-touch.png in Resources */,
+				CD4977BA143E7A3A00387911 /* down.png in Resources */,
+				CD4977BB143E7A3A00387911 /* exit-touch.png in Resources */,
+				CD4977BC143E7A3A00387911 /* exit.png in Resources */,
+				CD4977BD143E7A3A00387911 /* left-touch.png in Resources */,
+				CD4977BE143E7A3A00387911 /* left.png in Resources */,
+				CD4977BF143E7A3A00387911 /* ok-touch.png in Resources */,
+				CD4977C0143E7A3A00387911 /* ok.png in Resources */,
+				CD4977C1143E7A3A00387911 /* right-touch.png in Resources */,
+				CD4977C2143E7A3A00387911 /* right.png in Resources */,
+				CD4977C3143E7A3A00387911 /* up-touch.png in Resources */,
+				CD4977C4143E7A3A00387911 /* up.png in Resources */,
+				CD4977FA143E7AD100387911 /* AppBrowserViewController.xib in Resources */,
+				CD4977FB143E7AD100387911 /* AudioRecordingViewController.xib in Resources */,
+				CD4977FC143E7AD100387911 /* ImageEditorHelpViewControllerPhone.xib in Resources */,
+				CD4977FD143E7AD200387911 /* ImageEditorViewController.xib in Resources */,
+				CD4977FE143E7AD200387911 /* TPAppViewController.xib in Resources */,
+				CD4977FF143E7AD200387911 /* TVBrowserViewController.xib in Resources */,
+				CD497800143E7AD200387911 /* VirtualRemoteViewController.xib in Resources */,
+				CD497801143E7AD200387911 /* ImageEditorHelpViewPad.xib in Resources */,
+				44D2D084143F6FCB00E54755 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CD497798143E79DD00387911 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				446B2EC9143F7FCA00629B54 /* TVBrowserViewController.m in Sources */,
+				446B2ECA143F7FCA00629B54 /* AppBrowserViewController.m in Sources */,
+				446B2ECB143F7FCA00629B54 /* TPAppViewController.m in Sources */,
+				446B2ECD143F7FCA00629B54 /* VirtualRemoteViewController.m in Sources */,
+				44D2D087143F723700E54755 /* JSONKit.m in Sources */,
+				44D2D088143F723700E54755 /* TVBrowser.m in Sources */,
+				44D2D089143F723700E54755 /* AppBrowser.m in Sources */,
+				44D2D08A143F723700E54755 /* TrickplayAnimation.m in Sources */,
+				44D2D08B143F723700E54755 /* TrickplayTimeline.m in Sources */,
+				44D2D08C143F723700E54755 /* AdvancedUIObjectManager.m in Sources */,
+				44D2D08D143F723700E54755 /* TrickplayUIElement.m in Sources */,
+				44D2D08E143F723700E54755 /* TrickplayScreen.m in Sources */,
+				44D2D08F143F723700E54755 /* TrickplayRectangle.m in Sources */,
+				44D2D090143F723700E54755 /* TrickplayGroup.m in Sources */,
+				44D2D091143F723700E54755 /* TrickplayImage.m in Sources */,
+				44D2D092143F723700E54755 /* TrickplayText.m in Sources */,
+				44D2D093143F723700E54755 /* TrickplayTextHTML.m in Sources */,
+				44D2D094143F723700E54755 /* AsyncImageView.m in Sources */,
+				44D2D095143F723700E54755 /* EditableTextView.m in Sources */,
+				44D2D096143F723700E54755 /* GestureImageView.m in Sources */,
+				44D2D097143F723700E54755 /* AccelerometerController.m in Sources */,
+				44D2D098143F723700E54755 /* TouchController.m in Sources */,
+				44D2D099143F723700E54755 /* TVConnection.m in Sources */,
+				44D2D09A143F723700E54755 /* CommandInterpreter.m in Sources */,
+				44D2D09B143F723700E54755 /* CommandInterpreterAdvancedUI.m in Sources */,
+				44D2D09C143F723700E54755 /* CommandInterpreterApp.m in Sources */,
+				44D2D09D143F723700E54755 /* NetServiceManager.m in Sources */,
+				44D2D09E143F723700E54755 /* NSStreamAdditions.m in Sources */,
+				44D2D09F143F723700E54755 /* SocketManager.m in Sources */,
+				44D2D0A0143F723700E54755 /* AudioController.m in Sources */,
+				44D2D0A1143F723700E54755 /* AudioPlayback.m in Sources */,
+				44D2D0A2143F723700E54755 /* AudioStreamer.m in Sources */,
+				44D2D0A3143F723700E54755 /* ResourceManager.m in Sources */,
+				44D2D0A4143F723700E54755 /* CameraViewController.m in Sources */,
+				44D2D0A5143F723700E54755 /* ImageEditorHelpViewControllerPhone.m in Sources */,
+				44D2D0A6143F723700E54755 /* ImageEditorViewController.m in Sources */,
+				44D2D0A7143F723700E54755 /* AudioRecordingViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		44D2D082143F6FCB00E54755 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				44D2D083143F6FCB00E54755 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CD4977A6143E79DD00387911 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEAD_CODE_STRIPPING = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				HEADER_SEARCH_PATHS = (
+					"\"Take Control Framework\"",
+					"\"Take Control Framework/Public Headers\"",
+				);
+				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = mh_object;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Debug;
+		};
+		CD4977A7143E79DD00387911 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEAD_CODE_STRIPPING = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"Take Control Framework\"",
+					"\"Take Control Framework/Public Headers\"",
+				);
+				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = mh_object;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
+		CD4977A8143E79DD00387911 /* Distribution */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEAD_CODE_STRIPPING = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"Take Control Framework\"",
+					"\"Take Control Framework/Public Headers\"",
+				);
+				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = mh_object;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Distribution;
+		};
+		CD91EA4A1427CCD00043C8BF /* Distribution */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Distribution;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TakeControl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+				CD91EA4A1427CCD00043C8BF /* Distribution */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Distribution;
+		};
+		CD4977A9143E79DD00387911 /* Build configuration list for PBXNativeTarget "TakeControl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CD4977A6143E79DD00387911 /* Debug */,
+				CD4977A7143E79DD00387911 /* Release */,
+				CD4977A8143E79DD00387911 /* Distribution */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Distribution;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}
