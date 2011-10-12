@@ -562,11 +562,13 @@ class Text [[ClutterActor*]] actor
 
 		The line_spacing property specifies the amount of spacing in pixels between lines of displayed text.
 		
-		If the Text object's <UIElement.width> property is not set, the line_spacing property is ignored.
+		The line_spacing property is applicable only when line wrapping is enabled. (Wrapping is enabled by setting the Text object's <UIElement.width> property.)
 		
-		*Default Setting:* 0
+		Note: The line_spacing property should be set *after* the Text object has been added to the global <screen> variable; the property has no effect if set before being added to the screen.
 		
-		*See Also:* the <UIElement.width> property
+		*Default Setting:* 0, i.e., use default line spacing based upon font size
+		
+		*See Also:* the <UIElement.width> property and the <screen> global variable
 
     */
 

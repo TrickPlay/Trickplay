@@ -77,6 +77,8 @@ void Timeline_completed( ClutterTimeline * timeline , gpointer )
 	movingRect_tl:start()
     (end)
 
+	*Code Example:* The source code for an <Expanded Timeline Demo> is listed at the end of this page. The program uses a single Timeline object to animate multiple properties of three rectangles.
+	
 */
 
 class Timeline [[ClutterTimeline*]]
@@ -677,3 +679,228 @@ void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint
 }
 
 ]]
+
+/*
+	Routine: Expanded Timeline Demo
+	
+	The following source listing demonstrates a Timeline object that animates multiple properties of three rectangles. In addition to the Timeline class, the program uses the <Interval> utility class to ease the calculation of each property's in-between value during the animation. Finally, each rectangle's starting and ending positions change randomly for each iteration through the animation, so the resulting animation will be different each time it is run. A sample of the animation is shown below.
+	
+(see expandedTimeline.gif)
+
+	(code)
+
+	-- Timeline Demo Animation
+
+	-- ********************************
+	-- Globals
+
+	-- Constants
+	DEMO_SIZE = 300		-- size of demoArea
+	SIZE      = 30		-- size of animated rectangle
+	
+	-- ********************************
+	function
+	rectNewFrameEvent( animationTL, msecs, progress )
+		-- Determine each rectangle's current position
+		rectRed.position   = { rectRedRangeX:get_value( progress ),   rectRedRangeY:get_value( progress ) }
+		rectGreen.position = { rectGreenRangeX:get_value( progress ), rectGreenRangeY:get_value( progress ) }
+		rectBlue.position  = { rectBlueRangeX:get_value( progress ),  rectBlueRangeY:get_value( progress ) }
+		
+		-- Rotate each rectangle
+		local zRotation = rectRangeRotation:get_value( progress )
+		rectRed.z_rotation   = { zRotation, 0, 0 }
+		rectGreen.z_rotation = { zRotation, 0, 0 }
+		rectBlue.z_rotation  = { zRotation, 0, 0 }
+
+	end  -- rectNewFrameEvent
+
+	-- ********************************
+	function
+	rectCompletedEvent( animationTL )
+		-- Determine new starting and ending animation positions
+		rectRedAnimationPositions   = getAnimationPositions()
+		rectGreenAnimationPositions = getAnimationPositions()
+		rectBlueAnimationPositions  = getAnimationPositions()
+	
+		-- Update Interval objects with new animated X and Y coordinates
+		rectRedRangeX.from   = rectRedAnimationPositions[ 1 ]
+		rectRedRangeX.to     = rectRedAnimationPositions[ 3 ]
+		rectRedRangeY.from   = rectRedAnimationPositions[ 2 ]
+		rectRedRangeY.to     = rectRedAnimationPositions[ 4 ]
+		rectGreenRangeX.from = rectGreenAnimationPositions[ 1 ]
+		rectGreenRangeX.to   = rectGreenAnimationPositions[ 3 ]
+		rectGreenRangeY.from = rectGreenAnimationPositions[ 2 ]
+		rectGreenRangeY.to   = rectGreenAnimationPositions[ 4 ]
+		rectBlueRangeX.from  = rectBlueAnimationPositions[ 1 ]
+		rectBlueRangeX.to    = rectBlueAnimationPositions[ 3 ]
+		rectBlueRangeY.from  = rectBlueAnimationPositions[ 2 ]
+		rectBlueRangeY.to    = rectBlueAnimationPositions[ 4 ]
+
+		-- Place rectangles in their starting positions
+		positionRects()
+	
+		-- Start animation again
+		animationTL:start()
+
+	end  -- rectCompletedEvent
+	
+	-- ********************************
+	function
+	getAnimationPositions()
+		-- Generate random starting and ending positions for animated rectangles
+		-- Positions always are just outside of the demoArea space
+		-- Positions will start from any side and end on any different side
+		-- Returns table of { startX, startY, endX, endY }
+		
+		-- Constants representing the four sides of the demoArea
+		local TOP, RIGHT, BOTTOM, LEFT = 1, 2, 3, 4
+	
+		-- Determine starting and ending sides (each must be a different side)
+		local startSide, endSide = 1, 1
+		while( startSide == endSide ) do
+			startSide = math.random( 4 )
+			endSide   = math.random( 4 )
+		end
+		
+		-- Determine starting and ending X and Y coordinates
+		local rangeLower = SIZE / 2
+		local rangeUpper = DEMO_SIZE - (SIZE / 2)
+		local startX = math.random( rangeLower, rangeUpper )
+		local startY = math.random( rangeLower, rangeUpper )
+		local endX   = math.random( rangeLower, rangeUpper )
+		local endY   = math.random( rangeLower, rangeUpper )
+		
+		-- Massage starting and ending coordinates
+		if( startSide == TOP ) then
+			-- Force Y coordinate
+			startY = -(SIZE / 2)
+		end
+		if( endSide == TOP ) then
+			-- Force Y coordinate
+			endY = -(SIZE / 2)
+		end
+		if( startSide == LEFT ) then
+			-- Force X coordinate
+			startX = -(SIZE / 2)
+		end
+		if( endSide == LEFT ) then
+			-- Force X coordinate
+			endX = -(SIZE / 2)
+		end
+		if( startSide == RIGHT ) then
+			-- Force X coordinate
+			startX = DEMO_SIZE + (SIZE / 2)
+		end
+		if( endSide == RIGHT ) then
+			-- Force X coordinate
+			endX = DEMO_SIZE + (SIZE / 2)
+		end
+		if( startSide == BOTTOM ) then
+			-- Force Y coordinate
+			startY = DEMO_SIZE + (SIZE / 2)
+		end
+		if( endSide == BOTTOM ) then
+			-- Force Y coordinate
+			endY = DEMO_SIZE + (SIZE / 2)
+		end
+		
+		-- Return "calculated" positions
+		return { startX, startY, endX, endY }
+
+	end  -- getAnimationPositions()
+	
+	-- ********************************
+	function
+	positionRects()
+		-- Position the three rectangles to their starting animation positions
+		rectRed.position   = { rectRedAnimationPositions[ 1 ],   rectRedAnimationPositions[ 2 ] }
+		rectGreen.position = { rectGreenAnimationPositions[ 1 ], rectGreenAnimationPositions[ 2 ] }
+		rectBlue.position  = { rectBlueAnimationPositions[ 1 ],  rectBlueAnimationPositions[ 2 ] }
+		
+	end  -- positionRects()
+
+	-- ********************************
+	-- Program entry point
+	
+	-- Create a screen background
+	bckgnd = Canvas( 1920, 1080 )
+	--bckgnd:set_source_color( { 70, 100, 130, 255 } )  -- nice blue
+	bckgnd:set_source_color( { 255, 255, 255, 255 } )   -- ice white
+	bckgnd:paint()
+	bckgndImage = bckgnd:Image()
+	bckgndImage.name = "Background"
+	screen:add( bckgndImage )
+
+	-- Create a rectangular demo area and add to screen
+	demoArea = Rectangle( {
+    	            color = { 100, 100, 100, 255 },
+    	            border_color = { 0, 0, 0, 255 },
+    	            border_width = 4,
+    	            name = "demoArea",
+    	            position = { 800, 300, 0 },
+    	            size = { DEMO_SIZE + 8, DEMO_SIZE + 8 }, -- add 8 for borders
+    	            opacity = 255,
+    	                } )
+	screen:add( demoArea )
+
+	-- Create a Group for the demo area for clipping purposes and add it to the screen
+	demoGroup = Group( { position = { 800, 300 },    -- near screen center
+	                     size = { 308, 308 },        -- rectangle size, including borders
+	                     clip = { 4, 4, 300, 300 },  -- clip area within borders
+	                     name = "demoGroup",
+	                 } )
+	screen:add( demoGroup )
+
+	-- Define three rectangles to animate and add to demoGroup
+	rectRed   = Rectangle( { size = { SIZE, SIZE },
+	                         color = { 250, 0, 0, 255 },
+	                         anchor_point = { SIZE / 2, SIZE / 2 },
+	                         name = "rectRed",
+	                     } )
+	rectGreen = Rectangle( { size = { SIZE, SIZE },
+							 color = { 0, 250, 0, 255 },
+							 anchor_point = { SIZE / 2, SIZE / 2 },
+							 name = "rectGreen",
+	                     } )
+	rectBlue  = Rectangle( { size = { SIZE, SIZE },
+	                         color = { 0, 0, 250, 255 },
+	                         anchor_point = { SIZE / 2, SIZE / 2 },
+	                         name = "rectBlue",
+	                     } )
+	demoGroup:add( rectRed, rectGreen, rectBlue )
+
+	-- Determine starting and ending positions for each rectangle
+	-- xxxAnimationPositions = { startX, startY, endX, endY }
+	rectRedAnimationPositions   = getAnimationPositions()
+	rectGreenAnimationPositions = getAnimationPositions()
+	rectBlueAnimationPositions  = getAnimationPositions()
+	
+	-- Create Interval objects for all the animated X and Y coordinates
+	-- Note: These objects are reused and reset for each iteration through the animation
+	rectRedRangeX   = Interval( rectRedAnimationPositions[ 1 ],   rectRedAnimationPositions[ 3 ] )
+	rectRedRangeY   = Interval( rectRedAnimationPositions[ 2 ],   rectRedAnimationPositions[ 4 ] )
+	rectGreenRangeX = Interval( rectGreenAnimationPositions[ 1 ], rectGreenAnimationPositions[ 3 ] )
+	rectGreenRangeY = Interval( rectGreenAnimationPositions[ 2 ], rectGreenAnimationPositions[ 4 ] )
+	rectBlueRangeX  = Interval( rectBlueAnimationPositions[ 1 ],  rectBlueAnimationPositions[ 3 ] )
+	rectBlueRangeY  = Interval( rectBlueAnimationPositions[ 2 ],  rectBlueAnimationPositions[ 4 ] )
+	
+	-- Create Interval object for the rectangle's Z-rotation
+	rectRangeRotation = Interval( 0, 1080 )  -- rotate three times (360x3)
+	
+	-- Place rectangles in their starting positions
+	positionRects()
+	
+	-- Show the screen
+	screen:show()
+	
+	-- Create the animation Timeline object
+	animationTL = Timeline( { duration     = 2000,
+	                          on_new_frame = rectNewFrameEvent,
+	                          on_completed = rectCompletedEvent,
+	                    } )
+	                    
+	-- Start the animation
+	animationTL:start()
+	
+	-- ********************************
+	(end)
