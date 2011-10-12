@@ -904,3 +904,6 @@ void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint
 	
 	-- ********************************
 	(end)
+	
+*/
+
