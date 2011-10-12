@@ -17,6 +17,7 @@ test_file = "smoke_tests_ubuntu.txt"
 
 -- start test ordinal number
 local start_no = 1 
+local start_at_first_test = true
 
 -- Global variables
 local test_list
@@ -332,6 +333,9 @@ function load_test ( test_list, test_no )
 	-- check if the test has been created and clear for next test info.
 	local old_test_ui = screen:find_child("test_ui")
 	if old_test_ui ~= nil then old_test_ui:unparent() end
+
+	local old_compare_image = screen:find_child("compare_image")
+	if old_compare_image ~= nil then old_compare_image:unparent() end
 	
 	local old_code_image = screen:find_child("code_image")
 	if old_code_image ~= nil then old_code_image:unparent() end
@@ -353,6 +357,7 @@ function load_test ( test_list, test_no )
 		 		Rectangle 
 		 		{
 					color = "FFFFFF",
+
 					size = { 1920, 1080 },
 					position = { 0, 0 }
 				},
@@ -370,13 +375,6 @@ end
 		name = "test_ui",
 		children = 
 		{
-
-			Image
-			{
-				name = "base_image",
-				src = "packages/"..test_folder.."/".."test_pngs/"..filename,
-				position = { screen.w/2, 200 }
-			},
         		Text {
 					font="san 30px",
 					color = "F5B800", 
@@ -396,8 +394,8 @@ end
 					text = #test_list
 			},
 			Text {
-					font="san 30px",
-					color = "F5B800", 
+					font="san 35px",
+					color = "87cefa", 
 					position = {10,screen.h - 90},
 					size = {1200, 60},
 					text = test_question
@@ -424,6 +422,28 @@ end
 	}
 	
 	screen:add (test_ui)
+
+-- Add compare image if it exists
+
+	local compare_image = Image ()
+	compare_image.async = true
+
+	function add_image_handler (loaded_image, failed)
+		if failed then 
+			screen:remove (compare_image)
+		else
+			screen:add (compare_image)
+		end
+		compare_image.on_loaded = nil
+	end
+
+	compare_image.on_loaded = add_image_handler
+
+	compare_image.name = "compare_image"
+	
+	compare_image.src = "packages/"..test_folder.."/".."test_pngs/"..filename
+	compare_image.position = { screen.w/2, 200 }
+
 	
 	draw_separator_line ()	
 end
@@ -585,7 +605,10 @@ end
 test_list = load_test_list ()
 load_initial_ui()
 create_test_results_table ()
-load_test (test_list, current_test) 
+if start_at_first_test == false then
+	current_test = #test_list
+end
+	load_test (test_list, current_test)
 screen:show()
 
 
