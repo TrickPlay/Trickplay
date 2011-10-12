@@ -37,11 +37,11 @@ static const char * device_xml_template =
     "        <UDN>uuid:%s</UDN>"
     "        <serviceList>"
     "            <service>"
-    "                <serviceType>urn:schemas-trickplay-com:service:Controller:1</serviceType>"
+    "                <serviceType>urn:schemas-trickplay-com:service:TrickPlayHTTP:1</serviceType>"
     "                <serviceId>urn:upnp-org:serviceId:1</serviceId>"
-    "                <SCPDURL>/controller-scpd.xml</SCPDURL>"
-    "                <controlURL>/controller/control</controlURL>"
-    "                <eventSubURL>/controller/events</eventSubURL>"
+    "                <SCPDURL>/trickplay-http-scpd.xml</SCPDURL>"
+    "                <controlURL>/trickplay-http/control</controlURL>"
+    "                <eventSubURL>/trickplay-http/events</eventSubURL>"
     "            </service>"
     "        </serviceList>"
     "    </device>"
@@ -113,7 +113,7 @@ static int upnp_virtual_get_info( const char *filename , File_Info * info )
         info->is_readable = 1;
         return 0;
     }
-    else if ( ! strcmp( filename , "/controller-scpd.xml" ) )
+    else if ( ! strcmp( filename , "/trickplay-http-scpd.xml" ) )
     {
         info->file_length = strlen( controller_scpd_xml );
         info->content_type = ixmlCloneDOMString( "text/xml" );
@@ -135,7 +135,7 @@ static UpnpWebFileHandle upnp_virtual_open( const char * filename, enum UpnpOpen
         {
             result = ( UpnpWebFileHandle ) new std::istringstream( device_xml );
         }
-        else if ( ! strcmp( filename , "/controller-scpd.xml" ) )
+        else if ( ! strcmp( filename , "/trickplay-http-scpd.xml" ) )
         {
             result = ( UpnpWebFileHandle ) new std::istringstream( controller_scpd_xml );
         }
@@ -381,7 +381,7 @@ int ControllerDiscoveryUPnP::upnp_device_callback( Upnp_EventType type , void * 
 
                     IXML_Document * response = UpnpMakeActionResponse(
                             "getport" ,
-                            "urn:schemas-trickplay-com:service:Controller:1",
+                            "urn:schemas-trickplay-com:service:TrickPlayHTTP:1",
                             1,
                             "port",
                             port.str().c_str() );

@@ -658,7 +658,10 @@ local function open_files(input_purpose, bg_image, inspector)
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
 					if readfile("/screens/"..v) ~= "" then 
-						editor_lb:writefile("/screens/"..v, "", true)
+						if editor_lb:writefile("/screens/"..v, "", true) == false then 
+							editor.error_message("019", current_dir, nil, nil, msgw) 
+							screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+						end
 					end 
 				end 
 			end 
@@ -1415,7 +1418,12 @@ local function save_new_file (fname, save_current_f, save_backup_f)
           	end
 		end
 
-		editor_lb:writefile(current_fn, contents, true)	
+		if editor_lb:writefile(current_fn, contents, true)	== false then 
+			editor.error_message("019", current_dir, nil, nil, msgw) 
+			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+
+
+		end 
 		
 		if current_fn == "unsaved_temp.lua" or current_fn == "/screens/unsaved_temp.lua"then
 				return 
@@ -1539,7 +1547,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 			 return
 		end 
     else -- save_current_file == false, "Save As"   
-		msg_window.inputMsgWindow_savefile(fname, current_fn)
+		msg_window.inputMsgWindow_savefile(fname, current_fn, save_current_f)
 	end 	
 end 
 
@@ -1667,7 +1675,6 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	end
 
 	local tab_func = function()
-	print("mm")
 		text_input.clear_focus()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
@@ -3240,7 +3247,6 @@ function editor.ui_elements()
 
 
 	local tab_func = function()
-	print("moioim")
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
@@ -3413,9 +3419,19 @@ local error_msg_map = {
  	["018"] = function(str) return "OK", "", "Error", "Error", "This UI Element can have maximum of "..str.." items." end, 
 	-- after second release
  	["019"] = function(str) local i,j = string.find(str, ",") 
-							local pname = string.sub(str, 1, i-1) 
-							local missing_dir = string.sub(str, i+1, -1)
-							return "OK", "", "Error", "Error", "Project \""..pname.."\" is not valid. \""..missing_dir.."\" directory is missing." 
+							local pname, missing_dir 
+							if i and j then 
+								pname = string.sub(str, 1, i-1) 
+								missing_dir = string.sub(str, i+1, -1)
+							else 
+								pname = str
+							end 
+
+							if missing_dir then 
+								return "OK", "", "Error", "Error", "Project \""..pname.."\" is not valid. \""..missing_dir.."\" directory is missing." 
+							else 
+								return "OK", "", "Error", "Error", "Project \""..pname.."\" is not valid." 
+							end 
 			  end, 
 }
 
@@ -3535,9 +3551,6 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 
 			main = main_first.."--[=[\n\n"..prev_file_info.."]=]--\n\n"..prev_backup_info..main_last
 
-			--print("PREV FILE\n", prev_file_info, "\n-------------")
-			--print("PREV BACKUP\n", prev_backup_info, "\n-------------")
-			
 			prev_file_info = ""
 			prev_backup_info = ""
 
@@ -3605,6 +3618,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 			button_ok, 
 		}
 		, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
+		, extra = { error = 0 } 
 	}
 
 	if inspector then 
