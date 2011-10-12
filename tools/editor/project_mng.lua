@@ -433,10 +433,7 @@ function project_mng.open_project(t, msg, from_main, from_open_project)
 			if v == "unsaved_temp.lua" then 
 				if readfile("screens/"..v) ~= "" then 
 					msg_window.inputMsgWindow_openfile(v) 
-					if editor_lb:writefile("screens/"..v, "", true) == false then 
-						editor.error_message("019", current_dir) 
-						return
-					end 
+					editor_lb:writefile("screens/"..v, "", true)
 					current_fn = "" 
 				end 
 			end 
