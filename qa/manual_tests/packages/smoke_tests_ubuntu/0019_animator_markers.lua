@@ -59,14 +59,11 @@ function generate_test_image ()
 					{0.1, "LINEAR", 650}
 						}
 				}
-				}
 			}
-	
-	}
-
+}
 
 	ani0.timeline:add_marker("four", 4000)
-	
+
 
 	ani0:start()
 	total = 0
