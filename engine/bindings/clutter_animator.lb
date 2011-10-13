@@ -377,7 +377,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 				return luaL_error(L, "Incorrect argument, failed to set \'interpolation\' : string expected");
 			}
 			static const char * interpolations[3] = { "LINEAR" , "CUBIC" , NULL };
-	    	ClutterInterpolation interpolation = luaL_checkoption(L,-1,interpolations[0],interpolations)==0?CLUTTER_INTERPOLATION_LINEAR:CLUTTER_INTERPOLATION_CUBIC;
+	    	interpolation = luaL_checkoption(L,-1,interpolations[0],interpolations)==0?CLUTTER_INTERPOLATION_LINEAR:CLUTTER_INTERPOLATION_CUBIC;
 		}
 	    lua_pop(L,1);
 
