@@ -424,7 +424,7 @@
  * app.
  */
 - (void)launchApp:(AppInfo *)app {
-    if (!tvConnection || !tvConnection.hostName || !app || ![app isKindOfClass:[AppBrowser class]] || !availableApps || ![availableApps containsObject:app]) {
+    if (!tvConnection || !tvConnection.hostName || !app || ![app isKindOfClass:[AppInfo class]] || !availableApps || ![availableApps containsObject:app]) {
         return;
     }
     
