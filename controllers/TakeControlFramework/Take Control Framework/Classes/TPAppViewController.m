@@ -220,6 +220,11 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         
         self.view.autoresizesSubviews = YES;
         
+        // Load UIWebView initially so that Text objects which depend on it will
+        // load faster
+        UIWebView *tempWebView = [[UIWebView alloc] init];
+        [tempWebView autorelease];
+        
         self.delegate = _delegate;
         tvConnection = [_tvConnection retain];
         
@@ -506,8 +511,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     //<id>,<text> pairs
     unsigned theindex = 1;
     
-    if (styleAlert != nil)
-    {
+    if (styleAlert != nil) {
+        [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:YES];
         [styleAlert release];
         styleAlert = nil;
     }
@@ -521,11 +526,17 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [styleAlert addButtonWithTitle:[args objectAtIndex:theindex+1]];
         theindex += 2;
     }
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        [styleAlert addButtonWithTitle:@"Cancel"];
+        styleAlert.cancelButtonIndex = styleAlert.numberOfButtons - 1;
+    }
+    
     styleAlert.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
     //[styleAlert addButtonWithTitle:@"Cancel"]; 
     //[styleAlert showInView:self.view.superview];
-    [styleAlert showInView:self.view];
-    //[styleAlert release];    
+    if (self.view.window && viewDidAppear) {
+        [styleAlert showInView:self.view];
+    }    
 }
 
 /**
@@ -539,11 +550,17 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if (actionSheet == styleAlert) {
         //NSLog(@"object: %@", [multipleChoiceArray objectAtIndex:buttonIndex]);
-        if (buttonIndex < 5 && buttonIndex >= 0) {
+        if (buttonIndex < actionSheet.numberOfButtons && buttonIndex != actionSheet.cancelButtonIndex) {
             NSString *sentData = [NSString stringWithFormat:@"UI\tMC\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
             [socketManager sendData:[sentData UTF8String]
                       numberOfBytes:[sentData length]];
+        } else if (buttonIndex == actionSheet.cancelButtonIndex) {
+            NSString *sentData = @"UI\tMC\tCancel\n";
+            [socketManager sendData:[sentData UTF8String]
+                      numberOfBytes:[sentData length]];
         }
+        [styleAlert release];
+        styleAlert = nil;
     } else if (actionSheet == cameraActionSheet) {
         if ([[cameraActionSheet buttonTitleAtIndex:buttonIndex] compare:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE]] == NSOrderedSame) {
             
@@ -980,6 +997,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     [accelDelegate pauseAccelerometer];
     [touchDelegate reset];
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+    [styleAlert release];
+    styleAlert = nil;
     [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     [self cleanViewController];
     [self dismissModalViewControllerAnimated:NO];
@@ -1032,6 +1051,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     textView.hidden = YES;
     
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+    [styleAlert release];
+    styleAlert = nil;
+    
     [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     
     if (camera) {
@@ -1103,14 +1125,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     
     //backgroundView.image = [UIImage imageNamed:@"background.png"];
     
-    if (!styleAlert) {
-        styleAlert = [[UIActionSheet alloc]
-                      initWithTitle:@"TrickPlay Multiple Choice"
-                      delegate:self cancelButtonTitle:nil
-                      destructiveButtonTitle:nil
-                      otherButtonTitles:nil];
-    }
-    
     if (!multipleChoiceArray) {
         multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
     }
@@ -1145,6 +1159,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     self.loadingIndicator = nil;
     
     if (styleAlert) {
+        [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
         [styleAlert release];
         styleAlert = nil;
     }
@@ -1192,6 +1207,10 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [theTextField selectAll:theTextField];
         [UIMenuController sharedMenuController].menuVisible = NO;
     }
+    
+    if (styleAlert) {
+        [styleAlert showInView:self.view];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -1223,6 +1242,13 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    
+    viewDidAppear = NO;
+    if (styleAlert) {
+        [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+        [styleAlert release];
+        styleAlert = nil;
+    }
     
     if (socketTimer) {
         [socketTimer invalidate];
@@ -1286,6 +1312,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [(AccelerometerController *)accelDelegate release];
     }
     if (styleAlert) {
+        [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
         [styleAlert release];
     }
     if (cameraActionSheet) {
