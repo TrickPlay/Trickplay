@@ -66,6 +66,7 @@ Group: SDK Tutorial {
 Group: Programmer's Guide  {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
 	File: Localization (no auto-title, docs/rte/progguide/localization.txt)
+	File: Lua and TrickPlay (no auto-title, docs/rte/progguide/lua_and_trickplay.txt)
    	File: User Interface* (no auto-title, docs/rte/progguide/user_interface.txt)
 }
 
@@ -106,7 +107,7 @@ Group: Engine Reference  {
 		}
 		
 		Group: Classes {
-			File: Controller* (no auto-title, docs/rte/reference/controller_ph.txt)
+			File: Controller* (no auto-title, bindings/controller.lb)
 			File: Stopwatch* (no auto-title, bindings/stopwatch.lb)
 			File: Timer* (no auto-title, bindings/timer.lb)
 		}
