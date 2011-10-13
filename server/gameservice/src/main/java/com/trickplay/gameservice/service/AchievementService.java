@@ -13,7 +13,6 @@ public interface AchievementService {
 
 	public List<RecordedAchievement> findAllRecordedAchievementsByGameId(Long id);
 	
-	@Transactional
 	public void create(RecordedAchievement score);
 	
 	public RecordedAchievement findRecordedAchievement(Long id);
@@ -22,6 +21,5 @@ public interface AchievementService {
 	
 	public Achievement find(Long id);
 	
-	@Transactional
 	public void create(Achievement entity);
 }

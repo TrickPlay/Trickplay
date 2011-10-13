@@ -9,9 +9,7 @@ import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
 import com.trickplay.gameservice.dao.impl.SpringUtils;
 import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.domain.Vendor;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.security.UserAdapter;
 import com.trickplay.gameservice.service.VendorService;
@@ -38,7 +36,7 @@ public class VendorServiceImpl extends GenericDAOWithJPA<Vendor, Long> implement
 	public void authorizeCreateVendor(User u) {
 		UserAdapter principal = SecurityUtil.getPrincipal();
 		if (principal == null || u == null || !principal.getId().equals(u.getId())) {
-			throw new GameServiceException(Reason.FORBIDDEN);
+			throw ExceptionUtil.newForbiddenException();
 		}
 	}
 

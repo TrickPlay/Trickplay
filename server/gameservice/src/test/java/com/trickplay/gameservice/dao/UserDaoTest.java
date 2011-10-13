@@ -35,7 +35,7 @@ public class UserDaoTest {
 
     @Test
     public void testFindByIdUserExists() {
-        User user = userDao.findById(1L, false);
+        User user = userDao.find(1L);
         assertNotNull(user);
         assertEquals("u1", user.getUsername());
     }

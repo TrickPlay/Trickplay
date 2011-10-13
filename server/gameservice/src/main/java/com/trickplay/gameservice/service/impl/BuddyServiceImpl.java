@@ -16,9 +16,8 @@ import com.trickplay.gameservice.domain.Event;
 import com.trickplay.gameservice.domain.Event.EventType;
 import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.domain.User;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.security.UserAdapter;
 import com.trickplay.gameservice.service.BuddyService;
@@ -35,7 +34,7 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 	public void authorizeSendInvitation(User requestor) {
 		UserAdapter principal = (UserAdapter)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (requestor == null || !principal.getId().equals(requestor.getId())) {
-			throw new GameServiceException(Reason.FORBIDDEN);
+			throw ExceptionUtil.newForbiddenException();
 		}
 	}
 	
@@ -50,7 +49,7 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 			
 			User recipient = userService.findByName(recipientName);
 			if (recipient == null) {
-				throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientName", recipientName));
+				throw ExceptionUtil.newEntityNotFoundException(User.class, "recipientName", recipientName);
 			}
 			
 			List<Buddy> requestBuddy = findByOwnerIdTargetId(requestor.getId(),
@@ -85,17 +84,10 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 
 				return bli;
 			} else {
-				// if requestor is recipient's buddy and recipient is
-				// requestor's throw an exception
-				throw new GameServiceException(Reason.ALREADY_BUDDY);
-
+				throw ExceptionUtil.newAlreadyBuddyException(recipientName);
 			}
 		} catch (Exception ex) {
-			if (ex instanceof GameServiceException)
-				throw (GameServiceException)ex;
-			else {
-				throw new GameServiceException(Reason.SEND_INVITATION_FAILED, ex);
-			}
+			throw ExceptionUtil.newWrapperException(ex);
 		}
 
 	}
@@ -123,14 +115,13 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 
 		BuddyListInvitation bli = entityManager.find(BuddyListInvitation.class, invitationId);
 		if (bli == null) {
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("BuddyListInvitation.invitationId", invitationId));
-		}
+		    throw ExceptionUtil.newEntityNotFoundException(BuddyListInvitation.class, "invitationId", invitationId); 
+        }
 		
 		authorizeRequest(bli, newStatus);
 
 		if (bli.getStatus() != InvitationStatus.PENDING) {
-			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS, null,
-					ExceptionContext.make("invitationStatus", bli.getStatus()));
+			throw ExceptionUtil.newUpdateBLInvitationStatusFailedException(bli.getId(), newStatus, bli.getStatus());
 		}
 		if (bli.getStatus() == newStatus)
 			return bli;
@@ -150,27 +141,25 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 	public void authorizeRemoveBuddyRequest(Buddy b) {
 		UserAdapter principal = SecurityUtil.getPrincipal();
 		if (principal == null || b == null || b.getOwner() == null || (!principal.getId().equals(b.getOwner().getId()))) {
-			throw new GameServiceException(Reason.FORBIDDEN);
+			throw ExceptionUtil.newForbiddenException();
 		}
 	}
 	
 	public void authorizeRequest(BuddyListInvitation bli, InvitationStatus status) {
 		UserAdapter principal = SecurityUtil.getPrincipal();
 		if (principal==null) {
-			throw new GameServiceException(Reason.FORBIDDEN);
-		} else if (bli==null || bli.getRequestor()==null || bli.getRecipient()==null) {
-			throw new GameServiceException(Reason.UNKNOWN);
-		}
+		    throw ExceptionUtil.newForbiddenException();
+		} 
 		if (principal.getId().equals(bli.getRequestor().getId())) {
 			if (status != InvitationStatus.CANCELLED) {
-				throw new GameServiceException(Reason.INVITATION_INVALID_STATUS, null, ExceptionContext.make("invitationStatus", status));
+				throw ExceptionUtil.newForbiddenException();
 			}
 		} else if (principal.getId().equals(bli.getRecipient().getId())) {
 			if (status != InvitationStatus.ACCEPTED && status != InvitationStatus.REJECTED) {
-				throw new GameServiceException(Reason.INVITATION_INVALID_STATUS, null, ExceptionContext.make("invitationStatus", status));
+			    throw ExceptionUtil.newForbiddenException();
 			}
 		} else {
-			throw new GameServiceException(Reason.FORBIDDEN);
+		    throw ExceptionUtil.newForbiddenException();
 		}
 	}
 	
@@ -264,7 +253,7 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
     public void removeBuddy(Long buddyId) {
         Buddy existing = find(buddyId);
         if (existing == null) {
-            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Buddy.id", buddyId));
+            throw ExceptionUtil.newEntityNotFoundException(Buddy.class, "id", buddyId);
         }
         entityManager.refresh(existing);
     }
@@ -276,11 +265,11 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
     @Transactional
     public Buddy update(Buddy entity) {
         if (entity == null) {
-            throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, ExceptionContext.make("Buddy", null));
+            throw ExceptionUtil.newIllegalArgumentException("Buddy", null, "!= null");
         }
         Buddy existing = find(entity.getId());
         if (existing == null) {
-            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Buddy.id", entity.getId()));
+            throw ExceptionUtil.newEntityNotFoundException(Buddy.class, "id", entity.getId());
         }
         existing.setStatus(entity.getStatus());
         return existing;

@@ -11,9 +11,7 @@ import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
 import com.trickplay.gameservice.dao.impl.SpringUtils;
 import com.trickplay.gameservice.domain.Device;
 import com.trickplay.gameservice.domain.Game;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.service.DeviceService;
 import com.trickplay.gameservice.service.GameService;
 
@@ -37,12 +35,13 @@ public class DeviceServiceImpl extends GenericDAOWithJPA<Device, Long> implement
 	@Transactional
 	public Device addGame(String deviceKey, String name) {
 		Device d = findByKey(deviceKey);
-		if (d == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Device.deviceKey", deviceKey));
+		if (d == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(Device.class, "deviceKey", deviceKey);
+		}
 		Game g = gameService.findByName(name);
-		if (g == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.name", name));
-		
+		if (g == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(Game.class, "name", name);
+		}
 		d.addGame(g);
 		return d;
 	}

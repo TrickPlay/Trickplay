@@ -20,9 +20,8 @@ import com.trickplay.gameservice.domain.GameSession;
 import com.trickplay.gameservice.domain.GameStepId;
 import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.domain.User;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.GamePlayService;
 import com.trickplay.gameservice.service.GameService;
@@ -41,15 +40,15 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 	public GameSession createGameSession(Long gameId) {
 		Game g = gameService.find(gameId);
 		
-		if (g == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.id", gameId));
-		
+		if (g == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(Game.class, "id", gameId);
+		}
 		Long initiatorId = SecurityUtil.getPrincipal().getId();
 		User initiator = userService.find(initiatorId);
 		
-		if (initiator == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.initiatorId", initiatorId));
-		
+		if (initiator == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", initiatorId);
+		}
 		ServiceUtil.checkAuthority(initiator);
 		
 		GameSession gs = new GameSession(g, initiator);
@@ -93,46 +92,44 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		Long requestorId = SecurityUtil.getPrincipal().getId();
 		User requestor = userService.find(SecurityUtil.getPrincipal().getId());
 		
-		if (requestor == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.requestorId", requestorId));
+		if (requestor == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
+		}
 		ServiceUtil.checkAuthority(requestor);
 		
 		if (recipientId == requestorId) {
-			throw new GameServiceException(Reason.GP_RECIPIENT_SAME_AS_REQUESTOR, null, 
-					ExceptionContext.make("User.recipientId", recipientId),
-					ExceptionContext.make("User.requestorId", requestorId)
-					);
-			
+			throw ExceptionUtil.newRequestorAndRecipientMatchException(requestorId, recipientId);
 		}
 		
 		GameSession gs = super.find(gameSessionId);
-		if (gs==null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GameSession.sessionId", gameSessionId));
-
+		if (gs==null) {
+		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", gameSessionId);
+		}
 		User recipient=null;
         if (recipientId == null) {
             if (!gs.getGame().isAllowWildCardInvitation()) {
-                throw new GameServiceException(Reason.WILDCARD_INVITATION_NOT_ALLOWED, null, ExceptionContext.make("gameId", gs.getGame().getName()));
+                throw ExceptionUtil.newWildcardInvitationNotAllowedException(gs.getGame().getName());
             }
             // this is a valid case for games which allow wild card invitations
         } else {
             recipient = userService.find(recipientId);
         
-            if (recipient == null)
-                throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientId", recipientId));
+            if (recipient == null) {
+                throw ExceptionUtil.newEntityNotFoundException(User.class, "id", recipientId);
+            }
         }
         
         if (gs.getStartTime() != null) {
-            throw new GameServiceException(Reason.GAME_ALREADY_STARTED);
+            throw ExceptionUtil.newGameAlreadyStartedException(gs.getGame().getName(), gameSessionId);
         }
         
-        if (gs.getGame().getMaxPlayers() <= gs.getPlayers().size())
-			throw new GameServiceException(Reason.GP_EXCEEDS_MAX_PLAYERS_ALLOWED, null, 
-					ExceptionContext.make("maxPlayersAllowed", gs.getGame().getMaxPlayers()));
-		
+        if (gs.getGame().getMaxPlayers() <= gs.getPlayers().size()) {
+			throw ExceptionUtil.newExceedsMaxPlayersLimitException(gs.getGame().getName(), gs.getGame().getMaxPlayers());
+        }
+        
 		for(GamePlayInvitation gpi : gs.getInvitations()) {
 			if (recipient != null && gpi.getRecipient().getId().equals(recipient.getId())) {
-				throw new GameServiceException(Reason.INVITATION_PREVIOUSLY_SENT);
+				throw ExceptionUtil.newInvitationPreviouslySentException(recipientId);
 			}
 		}
 		GamePlayInvitation gpi = new GamePlayInvitation(gs, requestor, recipient, InvitationStatus.PENDING);
@@ -155,26 +152,27 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		case REJECTED:
 			return declineGamePlayInvitation(invitationId, SecurityUtil.getPrincipal().getId());			
 		}
-		throw new GameServiceException(Reason.UNSUPPORTED_OPERATION_EXCEPTION, null,
-				ExceptionContext.make("status", status));
+		throw ExceptionUtil.newUnsupportedOperationException("updateGamePlayInvitation(status="+status+")");
 	}
 
 	private GamePlayInvitation declineGamePlayInvitation(Long invitationId,
 			Long recipientId) {
 		GamePlayInvitation gpi = entityManager.find(GamePlayInvitation.class, invitationId);
-		if (gpi == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GamePlayInvitation.invitationId", invitationId));
-		
+		if (gpi == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(GamePlayInvitation.class, "id", invitationId);
+		}
 		User recipient = userService.find(recipientId);
-		if (recipient == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientId", recipientId));
-		
+		if (recipient == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", recipientId);
+		}
 		ServiceUtil.checkAuthority(recipient);
 
-		if (gpi.getStatus()!=InvitationStatus.PENDING)
-			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
-        if (!gpi.getRecipient().getId().equals(recipientId))
-            throw new GameServiceException(Reason.NOT_INVITATION_RECIPIENT);
+		if (gpi.getStatus()!=InvitationStatus.PENDING) {
+			throw ExceptionUtil.newGPInvitationInvalidStatusException(invitationId, InvitationStatus.PENDING, gpi.getStatus());
+		}
+        if (!gpi.getRecipient().getId().equals(recipientId)) {
+            throw ExceptionUtil.newNotInvitationRecipientException(invitationId);
+        }
         
 		gpi.setStatus(InvitationStatus.REJECTED);
 		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, recipient, gpi.getRequestor().getId(), "Game play request declined by "+recipient.getUsername(), gpi));
@@ -192,28 +190,30 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			Long recipientId) throws GameServiceException {
 
 		User recipient = userService.find(recipientId);
-		if (recipient == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientId", recipientId));
+		if (recipient == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", recipientId);
+		}
 
 		ServiceUtil.checkAuthority(recipient);
 		
 		GamePlayInvitation gpi = entityManager.find(GamePlayInvitation.class, invitationId);
-		if (gpi == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GamePlayInvitation.invitationId", invitationId));
-        if (gpi.getStatus()!=InvitationStatus.PENDING)
-            throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
+		if (gpi == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(GamePlayInvitation.class, "id", invitationId);
+		}
+		if (gpi.getStatus()!=InvitationStatus.PENDING)
+            throw ExceptionUtil.newGPInvitationInvalidStatusException(invitationId, InvitationStatus.PENDING, gpi.getStatus());
 
 
 		GameSession gs = gpi.getGameSession();
 		if (!gs.isOpen()) {
-		    throw new GameServiceException(Reason.GP_EXCEEDS_MAX_PLAYERS_ALLOWED);
+		    throw ExceptionUtil.newExceedsMaxPlayersLimitException(gs.getGame().getName(), gs.getGame().getMaxPlayers());
 		}
 		
 		
 		if (isReservedBySomeoneElse(gpi, recipientId)) {
-		    throw new GameServiceException(Reason.INVITATION_RESERVED);
+		    throw ExceptionUtil.newInvitationReservedException(invitationId);
 		} else if (!gpi.isWildCard() && !gpi.getRecipient().getId().equals(recipientId)) {
-		    throw new GameServiceException(Reason.NOT_INVITATION_RECIPIENT);
+		    throw ExceptionUtil.newNotInvitationRecipientException(invitationId);
 		}
 		
 		gpi.setStatus(InvitationStatus.ACCEPTED);
@@ -255,18 +255,19 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 	private GamePlayInvitation cancelGamePlayInvitation(Long invitationId,
 			Long requestorId) {
 		GamePlayInvitation gpi = entityManager.find(GamePlayInvitation.class, invitationId);
-		if (gpi == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GamePlayInvitation.invitationId", invitationId));
-		
+		if (gpi == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(GamePlayInvitation.class, "id", invitationId);
+		}
 		User requestor = userService.find(requestorId);
-		if (requestor == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.requestorId", requestorId));
-
+		if (requestor == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
+		}
 		ServiceUtil.checkAuthority(requestor);
 		//if (!gpi.getRequestor().getId().equals(requestorId))
 		  //  throw new GameServiceException()
-		if (gpi.getStatus()!=InvitationStatus.PENDING)
-			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS);
+		if (gpi.getStatus()!=InvitationStatus.PENDING) {
+			throw ExceptionUtil.newGPInvitationInvalidStatusException(invitationId, InvitationStatus.PENDING, gpi.getStatus());
+		}
 		gpi.setStatus(InvitationStatus.CANCELLED);
 		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, gpi.getRecipient().getId(), "Game play request withdrawn", gpi));
 		return gpi;
@@ -277,30 +278,32 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		
 		Long requestorId = SecurityUtil.getPrincipal().getId();
 		User requestor = userService.find(requestorId);
-		if (requestor == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.requestor", requestorId));
+		if (requestor == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
+		}
 		ServiceUtil.checkAuthority(requestor);
 		
 		GameSession attached_gs = super.find(sessionId);
-		if (attached_gs == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GameSession.sessionId", sessionId));
+		if (attached_gs == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", sessionId);
+		}
 		
-		if (state == null) 
-			throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, ExceptionContext.make("state", null));
-			
+		if (state == null) {
+		    throw ExceptionUtil.newIllegalArgumentException("gameState", null, " != null");
+		}
+		
 		User nextTurn = null;
 		if (nextTurnId != null) {
 			nextTurn = userService.find(nextTurnId);
-			if (nextTurn == null)
-				throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, 
-						ExceptionContext.make("User.nextTurnId", nextTurnId)
-						);
+			if (nextTurn == null) {
+			    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", nextTurnId);
+			}
 		}
 		
 		
-		if (attached_gs.getStartTime()!=null)
-			throw new GameServiceException(Reason.GAME_ALREADY_STARTED);
-		
+		if (attached_gs.getStartTime()!=null) {
+		    throw ExceptionUtil.newGameAlreadyStartedException(attached_gs.getGame().getName(), sessionId);
+		}
 		
 		attached_gs.setStartTime(new Date());
 
@@ -327,32 +330,33 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 	@Transactional
 	public GameStepId updateGamePlay(Long sessionId, String state, Long nextTurnId) {
 		GameSession attached_gs = super.find(sessionId);
-		if (attached_gs == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GameSession.sessionId", sessionId));
-		
+		if (attached_gs == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", sessionId);
+		}
 		Long requestorId = SecurityUtil.getPrincipal().getId();
 		User requestor = userService.find(requestorId);
-		if (requestor == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.requestorId", requestorId));
-		
-		if (state == null) 
-			throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, ExceptionContext.make("state", null));
-			
+		if (requestor == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
+		}
+		if (state == null) {
+		    throw ExceptionUtil.newIllegalArgumentException("gameState", null, " != null");
+		}
 		User nextTurn = null;
 		if (nextTurnId != null) {
 			nextTurn = userService.find(nextTurnId);
-			if (nextTurn == null)
-				throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.nextTurnId", nextTurnId));
+			if (nextTurn == null) {
+			    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", nextTurnId);
+			}
 		}
 		ServiceUtil.checkAuthority(requestor);
 		
 		
-		if (attached_gs.getStartTime()==null)
-			throw new GameServiceException(Reason.GAME_NOT_STARTED);
-		
-		if (attached_gs.getEndTime()!=null)
-			throw new GameServiceException(Reason.GAME_ALREADY_ENDED);
-		
+		if (attached_gs.getStartTime()==null) {
+		    throw ExceptionUtil.newGameNotStartedException(attached_gs.getGame().getName(), sessionId);
+		}
+		if (attached_gs.getEndTime()!=null) {
+		    throw ExceptionUtil.newGameAlreadyEndedException(attached_gs.getGame().getName(), sessionId);
+		}
 		
 		GamePlayState gps = new GamePlayState(requestor, nextTurn, attached_gs, state, generateGameStepId());
 		
@@ -365,25 +369,26 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 	@Transactional
 	public GameStepId endGamePlay(Long sessionId, String state) {
 		GameSession attached_gs = super.find(sessionId);
-		if (attached_gs == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GameSession.sessionId", sessionId));
-		
+		if (attached_gs == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", sessionId);
+		}
 		Long requestorId = SecurityUtil.getPrincipal().getId();
 		User requestor = userService.find(requestorId);
-		if (requestor == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.requestorId", requestorId));
-		
-		if (state == null) 
-			throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, ExceptionContext.make("state", null));
-			
+		if (requestor == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
+		}
+		if (state == null) {
+			throw ExceptionUtil.newIllegalArgumentException("gameState", null, " != null");
+		}
 		ServiceUtil.checkAuthority(requestor);
 		
 		
-		if (attached_gs.getStartTime()==null)
-			throw new GameServiceException(Reason.GAME_NOT_STARTED);
-		
-		if (attached_gs.getEndTime()!=null)
-			throw new GameServiceException(Reason.GAME_ALREADY_ENDED);
+		if (attached_gs.getStartTime()==null) {
+		    throw ExceptionUtil.newGameNotStartedException(attached_gs.getGame().getName(), sessionId);
+		}
+		if (attached_gs.getEndTime()!=null) {
+			throw ExceptionUtil.newGameAlreadyEndedException(attached_gs.getGame().getName(), sessionId);
+		}
 		attached_gs.setEndTime(new Date());
 		
 		
@@ -397,13 +402,14 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 
 	public void postMessage(Long sessionId, String msg) {
 		GameSession gs = super.find(sessionId);
-		if (gs == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("GameSession.sessionId", sessionId));
+		if (gs == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", sessionId);
+		}
 		Long senderId = SecurityUtil.getPrincipal().getId();
 		User sender = userService.find(senderId);
-		if (sender == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.senderId", senderId));
-		
+		if (sender == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", senderId);
+		}
 		ChatMessage chatMsg = new ChatMessage(sender, gs, msg);
 		super.entityManager.persist(chatMsg);
 		entityManager.persist(new Event(EventType.GAME_SESSION_MESSAGE, sender, gs.getId(), "In game message sent by "+sender.getUsername(), chatMsg));
@@ -424,8 +430,9 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			max=10;
 		Long userId = SecurityUtil.getCurrentUserId();
 		User user = null;
-		if (userId == null || (user=userService.find(userId)) == null)
-			throw new GameServiceException(Reason.FORBIDDEN);
+		if (userId == null || (user=userService.find(userId)) == null) {
+			throw ExceptionUtil.newForbiddenException();
+		}
 		
 		/*
 		Game gm = gameService.find(gameId);

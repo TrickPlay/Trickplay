@@ -14,9 +14,7 @@ import com.trickplay.gameservice.domain.Event.EventType;
 import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.RecordedScore;
 import com.trickplay.gameservice.domain.User;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.LeaderboardService;
 
@@ -67,12 +65,13 @@ public class LeaderboardServiceImpl extends
 	public RecordedScore recordScore(Long gameId, long points) {
 	//	findTopScoreBy
 		User user = entityManager.find(User.class, SecurityUtil.getPrincipal().getId());
-		if (user == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.id", SecurityUtil.getPrincipal().getId()));
-		
+		if (user == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", SecurityUtil.getPrincipal().getId());
+		}
 		Game game = entityManager.find(Game.class, gameId);
-		if (game == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.id", gameId));
+		if (game == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(Game.class, "id", gameId);
+		}
 		
 		boolean recordingDecision = false;
 

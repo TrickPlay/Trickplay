@@ -3,6 +3,7 @@ package com.trickplay.gameservice.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,7 @@ import com.trickplay.gameservice.domain.Device;
 import com.trickplay.gameservice.domain.Role;
 import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.domain.Vendor;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.DeviceService;
 import com.trickplay.gameservice.service.UserService;
@@ -31,6 +30,8 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 	@Autowired
 	private DeviceService deviceService;
 	@Autowired VendorService vendorService;
+	
+	@Autowired MessageSource messageSource;
 	
 	@SuppressWarnings("unchecked")
 	public User findByName(String username, boolean detached) {
@@ -72,7 +73,7 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 		Long userId = SecurityUtil.getPrincipal().getId();
 		User u = find(userId);
 		if (u == null) {
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.id", userId));
+			throw ExceptionUtil.newEntityNotFoundException(User.class, "id", userId);
 		}
 
 		Device d = deviceService.findByKey(device.getDeviceKey());
@@ -92,10 +93,9 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 	public Vendor createVendor(String vendorName) {
 		Long userId = SecurityUtil.getPrincipal().getId();
 		User u = find(userId);
-		if (u == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.id", userId));
+		if (u == null) 
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", userId); 
 		
-		//authorizeCreateVendor(u);
 		Vendor v = new Vendor();
 		v.setName(vendorName);
 		v.setPrimaryContact(u);
@@ -105,28 +105,28 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 
 	@Transactional
     public void update(User entity) {
-        if (entity==null)
-            throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, ExceptionContext.make("User", null));
+        if (entity==null) {
+            throw ExceptionUtil.newIllegalArgumentException("User", null, "!= null");
+        }
         User existing;
         if (entity.getId()!=null) {
             existing = find(entity.getId());
             if (existing == null) {
-                throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.id", entity.getId()));
+                throw ExceptionUtil.newEntityNotFoundException(User.class,"id", entity.getId());
             }
         } else {
             existing = findByName(entity.getUsername());
             if (existing == null) {
-                throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.username", entity.getUsername()));
+                throw ExceptionUtil.newEntityNotFoundException(User.class,"username", entity.getUsername()); 
             }
+               
         }
         
         existing.setAllowHighScoreMessages(entity.isAllowHighScoreMessages());
         existing.setAllowAchievementMessages(entity.isAllowAchievementMessages());
-        if (entity.getEmail()!=null && !entity.getEmail().equals(existing.getEmail()))
+        if (entity.getEmail()!=null && !entity.getEmail().equals(existing.getEmail())) {
             existing.setEmail(entity.getEmail());
-        //existing.setPassword(entity.getPassword());
-        //= find(entity.getId());
-        
+        }
     }
 
 }

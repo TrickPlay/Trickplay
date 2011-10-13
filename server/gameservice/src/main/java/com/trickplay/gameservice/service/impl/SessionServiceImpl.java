@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
 import com.trickplay.gameservice.dao.impl.SpringUtils;
+import com.trickplay.gameservice.domain.Device;
 import com.trickplay.gameservice.domain.SessionToken;
-import com.trickplay.gameservice.domain.StatelessHttpSession;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.DeviceService;
@@ -26,7 +26,7 @@ import com.trickplay.gameservice.service.SessionService;
 @Repository
 public class SessionServiceImpl extends
 		GenericDAOWithJPA<SessionToken, Long> implements SessionService {
-	private static final long MAX_SESSION_DURATION = 12 * 60 * 60 * 1000;
+	//private static final long MAX_SESSION_DURATION = 12 * 60 * 60 * 1000;
 
 	@Autowired
 	DeviceService deviceService;
@@ -74,7 +74,7 @@ public class SessionServiceImpl extends
 			random.nextBytes(bytes);
 			return new String(Base64.encode(bytes), Charset.forName("US-ASCII"));
 		} catch (Exception e) {
-			throw new GameServiceException(Reason.FAILED_TO_CREATE_SESSION, e);
+			throw ExceptionUtil.newFailedToCreateSessionException(e);
 		}
 	}
 	
@@ -82,23 +82,24 @@ public class SessionServiceImpl extends
 	@Transactional
 	public SessionToken touchSession(String tokenId) {
 		SessionToken httpSession = findByToken(tokenId);
-		if (httpSession == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null,
-					ExceptionContext.make("Session.token", tokenId));
-		if (httpSession.isExpired())
-			throw new GameServiceException(Reason.SESSION_EXPIRED, null,
-					ExceptionContext.make("Session.token", tokenId));
-		else 
+		if (httpSession == null) {
+			throw ExceptionUtil.newEntityNotFoundException(SessionToken.class, "token", tokenId);
+		}
+		if (httpSession.isExpired()) {
+			throw ExceptionUtil.newSessionExpiredException(tokenId);
+		} 
+		else { 
 			httpSession.setLastUsed(new Date());
+		}
 		return httpSession;
 	}
 	
 	@Transactional
     public SessionToken expireToken(Long tokenId) {
         SessionToken httpSession = find(tokenId);
-        if (httpSession == null)
-            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null,
-                    ExceptionContext.make("Session.token", tokenId));
+        if (httpSession == null) {
+            throw ExceptionUtil.newEntityNotFoundException(SessionToken.class, "token", tokenId);
+        }
         if (!httpSession.isExpired())
             httpSession.setExpired(true);
         return httpSession;
