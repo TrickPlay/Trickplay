@@ -622,6 +622,11 @@ target_link_libraries(
     ${ENGINE_LIBRARIES}
     m
     dl
+    
+    BulletSoftBody
+    BulletCollision
+    BulletDynamics
+    LinearMath
 )
 
 

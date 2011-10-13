@@ -64,3 +64,16 @@ list( APPEND 3RD_PARTY_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/json/J
 # when we update code from a 3rd party.
 
 set_source_files_properties( ${3RD_PARTY_SOURCE_FILES} COMPILE_FLAGS "-w" )
+
+set( BUILD_DEMOS OFF )
+set( USE_GLUT OFF )
+set( INSTALL_LIBS OFF )
+set( BUILD_MINICL_OPENCL_DEMOS OFF )
+set( BUILD_NVIDIA_OPENCL_DEMOS OFF )
+set( BUILD_EXTRAS OFF )
+
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/bullet-2.79 )
+
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/bullet-2.79/src )
+
+
