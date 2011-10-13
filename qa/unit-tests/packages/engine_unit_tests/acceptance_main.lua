@@ -5,7 +5,6 @@ dofile( "packages/engine_unit_tests/harness/unit_test.lua" )
 
 -- Unit Tests
 --dofile( "urlRequest2.lua" )  -- Failing because can't fail url request due to URL redirect.
-
 dofile( "packages/engine_unit_tests/tests/Alpha1.lua" ) 
 
 dofile( "packages/engine_unit_tests/tests/xmlParser1.lua" ) 
@@ -30,6 +29,7 @@ dofile( "packages/engine_unit_tests/tests/screen1.lua" )
 dofile( "packages/engine_unit_tests/tests/clone1.lua" )
 dofile( "packages/engine_unit_tests/tests/image1.lua")
 dofile( "packages/engine_unit_tests/tests/image2.lua")
+dofile( "packages/engine_unit_tests/tests/image3.lua" )
 dofile( "packages/engine_unit_tests/tests/Rectangle1.lua")
 dofile( "packages/engine_unit_tests/tests/text1.lua" )
 dofile( "packages/engine_unit_tests/tests/text2.lua" )
@@ -65,7 +65,10 @@ dofile( "packages/engine_unit_tests/tests/Alpha2.lua" )
 dofile( "packages/engine_unit_tests/tests/app1.lua" )
 
 
+
+
 screen:add (test_group)
+
 
 -- Timer to give sometime for any tests to complete before calling unit_test
 local total = 0
@@ -79,6 +82,9 @@ function idle.on_idle( idle , seconds )
 	   logo_image:grab_key_focus()
 	   globe_image:grab_key_focus()
 	end
+
+	
+	
 
 	-- run unit test
         local engine_results = engine_unit_test() 
