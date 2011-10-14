@@ -64,6 +64,7 @@ dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
 dofile( "packages/engine_unit_tests/tests/Alpha2.lua" )
 dofile( "packages/engine_unit_tests/tests/app1.lua" )
 
+dofile( "packages/engine_unit_tests/tests/animator1.lua" )
 
 
 
