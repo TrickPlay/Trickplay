@@ -438,6 +438,12 @@
 "name": "10013_canvas_arc_negative.lua",
 "checksum": "7f9d329c3b1d89cda10408a8c1f4f265",
 "active": "true"
+},
+{
+"name": "10014_image_exif_orientation.lua",
+"checksum": "7f9d329c3b1d89cda10408a8c1f4f265",
+"active": "true"
 }
 ]
+
 
