@@ -3,29 +3,28 @@ package com.trickplay.gameservice.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
-import com.trickplay.gameservice.dao.impl.SpringUtils;
+import com.trickplay.gameservice.dao.GameDAO;
+import com.trickplay.gameservice.dao.VendorDAO;
 import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.Vendor;
 import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.service.GameService;
-import com.trickplay.gameservice.service.VendorService;
 
 
 @Service("gameService")
-@Repository
-public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements GameService {
+public class GameServiceImpl implements GameService {
 
 	@Autowired
-	VendorService vendorService;
-	@SuppressWarnings("unchecked")
+	VendorDAO vendorDAO;
+
+	@Autowired
+    GameDAO gameDAO;
+	
 	public Game findByName(String name) {
-		List<Game> list = super.entityManager.createQuery("Select g from Game g where g.name = :name").setParameter("name", name).getResultList();
-		return SpringUtils.getFirst(list);
+		return gameDAO.findByName(name);
 	}
 
 	private void validate(Game g) {
@@ -36,15 +35,16 @@ public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements Ga
             throw ExceptionUtil.newIllegalArgumentException("maxPlayers", g.getMaxPlayers(), ">= minPlayers. minPlayers = "+g.getMinPlayers());
         }
 	}
+	
 	@Transactional
 	public Game create(Long vendorId, Game g) {
-		Vendor v = vendorService.find(vendorId);
+		Vendor v = vendorDAO.find(vendorId);
 		if (v == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(Vendor.class, "id", vendorId);
 		}
 		validate(g);
 		g.setVendor(v);
-		super.persist(g);
+		gameDAO.persist(g);
 		return g;
 	}
 
@@ -55,7 +55,7 @@ public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements Ga
 		if (existing == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(Game.class, "id", g.getId());
 		}
-		Vendor v = vendorService.find(vendorId);
+		Vendor v = vendorDAO.find(vendorId);
 		if (v == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(Vendor.class, "id", vendorId);
 		}
@@ -70,12 +70,21 @@ public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements Ga
 		return existing;
 	}
 
+	@Transactional
     public void remove(Long id) {
         Game existing = find(id);
         if (existing == null) {
             throw ExceptionUtil.newEntityNotFoundException(Game.class, "id", id);
         }
-        entityManager.remove(existing);        
+        gameDAO.remove(existing);        
+    }
+
+    public List<Game> findAll() {
+        return gameDAO.findAll();
+    }
+
+    public Game find(Long id) {
+        return gameDAO.find(id);
     }
 
 }

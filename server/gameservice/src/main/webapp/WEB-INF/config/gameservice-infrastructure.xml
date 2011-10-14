@@ -49,10 +49,10 @@
 			</props>
 		</property>
 	</bean>
-<!-- 
+
 	<bean
 		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
-		 -->
+
 		
 		<!-- Application Message Bundle -->
     <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">

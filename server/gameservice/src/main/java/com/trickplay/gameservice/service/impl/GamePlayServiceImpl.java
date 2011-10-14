@@ -9,7 +9,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
+import com.trickplay.gameservice.dao.ChatMessageDAO;
+import com.trickplay.gameservice.dao.EventDAO;
+import com.trickplay.gameservice.dao.GameDAO;
+import com.trickplay.gameservice.dao.GamePlayInvitationDAO;
+import com.trickplay.gameservice.dao.GamePlayStateDAO;
+import com.trickplay.gameservice.dao.GameSessionDAO;
+import com.trickplay.gameservice.dao.UserDAO;
 import com.trickplay.gameservice.domain.ChatMessage;
 import com.trickplay.gameservice.domain.Event;
 import com.trickplay.gameservice.domain.Event.EventType;
@@ -24,27 +30,40 @@ import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.exception.GameServiceException;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.GamePlayService;
-import com.trickplay.gameservice.service.GameService;
-import com.trickplay.gameservice.service.UserService;
 
 @Service("gamePlayService")
-@Repository
-public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> implements GamePlayService {
+public class GamePlayServiceImpl implements GamePlayService {
 
 	@Autowired
-	GameService gameService;
+	GameDAO gameDAO;
+	
 	@Autowired
-	UserService userService;
+	UserDAO userDAO;
+	
+	@Autowired
+	GameSessionDAO gameSessionDAO;
+	
+	@Autowired
+	EventDAO eventDAO;
+	
+	@Autowired
+	GamePlayStateDAO gamePlayStateDAO;
+	
+	@Autowired
+	GamePlayInvitationDAO gamePlayInvitationDAO;
+	
+	@Autowired
+	ChatMessageDAO chatMessageDAO;
 	
 	@Transactional
 	public GameSession createGameSession(Long gameId) {
-		Game g = gameService.find(gameId);
+		Game g = gameDAO.find(gameId);
 		
 		if (g == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(Game.class, "id", gameId);
 		}
 		Long initiatorId = SecurityUtil.getPrincipal().getId();
-		User initiator = userService.find(initiatorId);
+		User initiator = userDAO.find(initiatorId);
 		
 		if (initiator == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", initiatorId);
@@ -53,44 +72,28 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		
 		GameSession gs = new GameSession(g, initiator);
 		gs.getPlayers().add(initiator);
-		super.entityManager.persist(gs);
+		gameSessionDAO.persist(gs);
 		
 		return gs;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<GameSession> findAllGameSessions(Long gameId) {
 	    Long participantId = SecurityUtil.getCurrentUserId();
-		return entityManager.createQuery
-		(
-				"select GS from GameSession GS join GS.game G join GS.players P"
-		        + " where GS.endTime is null AND G.id=:gid and P.id=:pid"
-				)
-				.setParameter("gid", gameId)
-				.setParameter("pid", participantId)
-				.getResultList();
+		return gameSessionDAO.findAllGameSessions(gameId, participantId);
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<GameSession> findAllSessions() {
 		return findAllSessions(SecurityUtil.getPrincipal().getId());
 	}
 
-	
-	@SuppressWarnings("unchecked")
 	private List<GameSession> findAllSessions(Long participantId) {
-		return entityManager.createQuery
-		(
-				"select GS from GameSession GS join GS.players P where GS.endTime is null AND P.id=:pid"
-				)
-				.setParameter("pid", participantId)
-				.getResultList();
+		return gameSessionDAO.findAllSessions(participantId);
 	}
 
 	@Transactional
 	public GamePlayInvitation sendGamePlayInvitation(Long gameSessionId, Long recipientId) throws GameServiceException {
 		Long requestorId = SecurityUtil.getPrincipal().getId();
-		User requestor = userService.find(SecurityUtil.getPrincipal().getId());
+		User requestor = userDAO.find(SecurityUtil.getPrincipal().getId());
 		
 		if (requestor == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
@@ -101,7 +104,7 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			throw ExceptionUtil.newRequestorAndRecipientMatchException(requestorId, recipientId);
 		}
 		
-		GameSession gs = super.find(gameSessionId);
+		GameSession gs = gameSessionDAO.find(gameSessionId);
 		if (gs==null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", gameSessionId);
 		}
@@ -112,7 +115,7 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
             }
             // this is a valid case for games which allow wild card invitations
         } else {
-            recipient = userService.find(recipientId);
+            recipient = userDAO.find(recipientId);
         
             if (recipient == null) {
                 throw ExceptionUtil.newEntityNotFoundException(User.class, "id", recipientId);
@@ -134,10 +137,10 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		}
 		GamePlayInvitation gpi = new GamePlayInvitation(gs, requestor, recipient, InvitationStatus.PENDING);
 		gs.addInvitation(gpi);
-		entityManager.persist(gpi);
+		gamePlayInvitationDAO.persist(gpi);
 
 		if (recipientId != null) {
-		    entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, recipientId, "Game play request from "+requestor.getUsername(), gpi));
+		    eventDAO.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, recipientId, "Game play request from "+requestor.getUsername(), gpi));
 		}
 		return gpi;
 	}
@@ -157,11 +160,11 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 
 	private GamePlayInvitation declineGamePlayInvitation(Long invitationId,
 			Long recipientId) {
-		GamePlayInvitation gpi = entityManager.find(GamePlayInvitation.class, invitationId);
+		GamePlayInvitation gpi = gamePlayInvitationDAO.find(invitationId);
 		if (gpi == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GamePlayInvitation.class, "id", invitationId);
 		}
-		User recipient = userService.find(recipientId);
+		User recipient = userDAO.find(recipientId);
 		if (recipient == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", recipientId);
 		}
@@ -175,7 +178,7 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
         }
         
 		gpi.setStatus(InvitationStatus.REJECTED);
-		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, recipient, gpi.getRequestor().getId(), "Game play request declined by "+recipient.getUsername(), gpi));
+		eventDAO.persist(new Event(EventType.GAME_PLAY_INVITATION, recipient, gpi.getRequestor().getId(), "Game play request declined by "+recipient.getUsername(), gpi));
 		return gpi;
 	}
 
@@ -189,14 +192,14 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 	private GamePlayInvitation acceptGamePlayInvitation(Long invitationId,
 			Long recipientId) throws GameServiceException {
 
-		User recipient = userService.find(recipientId);
+		User recipient = userDAO.find(recipientId);
 		if (recipient == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", recipientId);
 		}
 
 		ServiceUtil.checkAuthority(recipient);
 		
-		GamePlayInvitation gpi = entityManager.find(GamePlayInvitation.class, invitationId);
+		GamePlayInvitation gpi = gamePlayInvitationDAO.find(invitationId);
 		if (gpi == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GamePlayInvitation.class, "id", invitationId);
 		}
@@ -226,7 +229,7 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
             gs.setOpen(false);
         }
 		
-		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, recipient, gpi.getRequestor().getId(), "Game play request accepted by "+recipient.getUsername(), gpi));
+		eventDAO.persist(new Event(EventType.GAME_PLAY_INVITATION, recipient, gpi.getRequestor().getId(), "Game play request accepted by "+recipient.getUsername(), gpi));
 		
 		if (gs.getGame().isTurnBasedFlag() 
 	//			&& gs.getGame().isEnforceTurns()
@@ -254,11 +257,11 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 	 */
 	private GamePlayInvitation cancelGamePlayInvitation(Long invitationId,
 			Long requestorId) {
-		GamePlayInvitation gpi = entityManager.find(GamePlayInvitation.class, invitationId);
+		GamePlayInvitation gpi = gamePlayInvitationDAO.find(invitationId);
 		if (gpi == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GamePlayInvitation.class, "id", invitationId);
 		}
-		User requestor = userService.find(requestorId);
+		User requestor = userDAO.find(requestorId);
 		if (requestor == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
 		}
@@ -269,7 +272,7 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			throw ExceptionUtil.newGPInvitationInvalidStatusException(invitationId, InvitationStatus.PENDING, gpi.getStatus());
 		}
 		gpi.setStatus(InvitationStatus.CANCELLED);
-		entityManager.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, gpi.getRecipient().getId(), "Game play request withdrawn", gpi));
+		eventDAO.persist(new Event(EventType.GAME_PLAY_INVITATION, requestor, gpi.getRecipient().getId(), "Game play request withdrawn", gpi));
 		return gpi;
 	}
 
@@ -277,13 +280,13 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 	public GameStepId startGamePlay(Long sessionId, String state, Long nextTurnId) {
 		
 		Long requestorId = SecurityUtil.getPrincipal().getId();
-		User requestor = userService.find(requestorId);
+		User requestor = userDAO.find(requestorId);
 		if (requestor == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
 		}
 		ServiceUtil.checkAuthority(requestor);
 		
-		GameSession attached_gs = super.find(sessionId);
+		GameSession attached_gs = gameSessionDAO.find(sessionId);
 		if (attached_gs == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", sessionId);
 		}
@@ -294,7 +297,7 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		
 		User nextTurn = null;
 		if (nextTurnId != null) {
-			nextTurn = userService.find(nextTurnId);
+			nextTurn = userDAO.find(nextTurnId);
 			if (nextTurn == null) {
 			    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", nextTurnId);
 			}
@@ -314,9 +317,9 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		
 		GamePlayState gps = new GamePlayState(requestor, nextTurn, attached_gs, state, generateGameStepId());
 		
-		entityManager.persist(gps);
+		gamePlayStateDAO.persist(gps);
 		attached_gs.setState(gps);	
-		entityManager.persist(new Event(EventType.GAME_SESSION_START, requestor, attached_gs.getId(), "Game started by "+requestor.getUsername(), gps));
+		eventDAO.persist(new Event(EventType.GAME_SESSION_START, requestor, attached_gs.getId(), "Game started by "+requestor.getUsername(), gps));
 		return gps.getGameStepId();
 	}
 	
@@ -329,12 +332,12 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 
 	@Transactional
 	public GameStepId updateGamePlay(Long sessionId, String state, Long nextTurnId) {
-		GameSession attached_gs = super.find(sessionId);
+		GameSession attached_gs = gameSessionDAO.find(sessionId);
 		if (attached_gs == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", sessionId);
 		}
 		Long requestorId = SecurityUtil.getPrincipal().getId();
-		User requestor = userService.find(requestorId);
+		User requestor = userDAO.find(requestorId);
 		if (requestor == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
 		}
@@ -343,7 +346,7 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		}
 		User nextTurn = null;
 		if (nextTurnId != null) {
-			nextTurn = userService.find(nextTurnId);
+			nextTurn = userDAO.find(nextTurnId);
 			if (nextTurn == null) {
 			    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", nextTurnId);
 			}
@@ -360,20 +363,20 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		
 		GamePlayState gps = new GamePlayState(requestor, nextTurn, attached_gs, state, generateGameStepId());
 		
-		entityManager.persist(gps);
+		gamePlayStateDAO.persist(gps);
 		attached_gs.setState(gps);
-		entityManager.persist(new Event(EventType.GAME_SESSION_STATE_CHANGE, requestor, attached_gs.getId(), "Game state updated by "+requestor.getUsername(), gps));
+		eventDAO.persist(new Event(EventType.GAME_SESSION_STATE_CHANGE, requestor, attached_gs.getId(), "Game state updated by "+requestor.getUsername(), gps));
 		return gps.getGameStepId();
 	}
 
 	@Transactional
 	public GameStepId endGamePlay(Long sessionId, String state) {
-		GameSession attached_gs = super.find(sessionId);
+		GameSession attached_gs = gameSessionDAO.find(sessionId);
 		if (attached_gs == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", sessionId);
 		}
 		Long requestorId = SecurityUtil.getPrincipal().getId();
-		User requestor = userService.find(requestorId);
+		User requestor = userDAO.find(requestorId);
 		if (requestor == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
 		}
@@ -394,29 +397,30 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		
 		GamePlayState gps = new GamePlayState(requestor, null, attached_gs, state, generateGameStepId());
 		
-		entityManager.persist(gps);
+		gamePlayStateDAO.persist(gps);
 		attached_gs.setState(gps);
-		entityManager.persist(new Event(EventType.GAME_SESSION_END, requestor, attached_gs.getId(), "Game play ended.", gps));
+		eventDAO.persist(new Event(EventType.GAME_SESSION_END, requestor, attached_gs.getId(), "Game play ended.", gps));
 		return gps.getGameStepId();
 	}
 
+	@Transactional
 	public void postMessage(Long sessionId, String msg) {
-		GameSession gs = super.find(sessionId);
+		GameSession gs = gameSessionDAO.find(sessionId);
 		if (gs == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", sessionId);
 		}
 		Long senderId = SecurityUtil.getPrincipal().getId();
-		User sender = userService.find(senderId);
+		User sender = userDAO.find(senderId);
 		if (sender == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", senderId);
 		}
 		ChatMessage chatMsg = new ChatMessage(sender, gs, msg);
-		super.entityManager.persist(chatMsg);
-		entityManager.persist(new Event(EventType.GAME_SESSION_MESSAGE, sender, gs.getId(), "In game message sent by "+sender.getUsername(), chatMsg));
+		chatMessageDAO.persist(chatMsg);
+		eventDAO.persist(new Event(EventType.GAME_SESSION_MESSAGE, sender, gs.getId(), "In game message sent by "+sender.getUsername(), chatMsg));
 	}
 	
 	public GamePlayInvitation findGamePlayInvitation(Long gamePlayInvitationId) {
-		return super.entityManager.find(GamePlayInvitation.class, gamePlayInvitationId);
+		return gamePlayInvitationDAO.find(gamePlayInvitationId);
 	}
 	
 	private GameStepId generateGameStepId() {
@@ -430,30 +434,11 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 			max=10;
 		Long userId = SecurityUtil.getCurrentUserId();
 		User user = null;
-		if (userId == null || (user=userService.find(userId)) == null) {
+		if (userId == null || (user=userDAO.find(userId)) == null) {
 			throw ExceptionUtil.newForbiddenException();
 		}
 		
-		/*
-		Game gm = gameService.find(gameId);
-		if (gm == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.id", gameId));
-			*/
-
-		String invitationForUserQuery = "select I from GamePlayInvitation I join I.gameSession GS join GS.game G"
-			+ " WHERE G.id = :gameId"
-			+ " AND GS.open = true"
-			+ " AND I.recipient.id = :userId"
-			+ " AND I.status=:pendingStatus"
-			+ " ORDER BY I.created";
-		
-		List<GamePlayInvitation> userInvitations = entityManager
-		.createQuery(invitationForUserQuery)
-		.setParameter("gameId", gameId)
-		.setParameter("userId", userId)
-		.setParameter("pendingStatus", InvitationStatus.PENDING)
-		.setMaxResults(max)
-		.getResultList();
+		List<GamePlayInvitation> userInvitations = gamePlayInvitationDAO.getPendingInvitationsForUser(gameId, userId, max);
 		
 		if (userInvitations!=null && userInvitations.size()>=max)
 			return userInvitations;
@@ -465,20 +450,8 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 					new ArrayList<GamePlayInvitation>();
 		
 		max = max - resultList.size();
-		String wildCardInvitationQuery = "select I from GamePlayInvitation I join I.gameSession GS join GS.game G"
-				+ " WHERE G.id = :gameId"
-				+ " AND GS.open = true"
-				+ " AND I.recipient is null"
-				+ " AND I.status=:pendingStatus"
-				+ " AND (I.reservedUntil is null OR I.reservedUntil < :currentTime) "
-				+ " ORDER BY GS.id, I.created";
 		
-		List<GamePlayInvitation> wildCardInvitations = entityManager
-		.createQuery(wildCardInvitationQuery)
-		.setParameter("gameId", gameId)
-		.setParameter("pendingStatus", InvitationStatus.PENDING)
-		.setParameter("currentTime", new Date())
-		.getResultList();
+		List<GamePlayInvitation> wildCardInvitations = gamePlayInvitationDAO.getPendingWildCardInvitations(gameId);
 		
 		if (wildCardInvitations==null)
 		    return resultList;
@@ -503,5 +476,9 @@ public class GamePlayServiceImpl extends GenericDAOWithJPA<GameSession, Long> im
 		
 		return resultList;
 	}
+
+    public GameSession find(Long sessionId) {
+        return gameSessionDAO.find(sessionId);
+    }
 	
 }

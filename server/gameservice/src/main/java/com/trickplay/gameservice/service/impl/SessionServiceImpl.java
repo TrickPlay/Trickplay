@@ -7,45 +7,31 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.codec.Base64;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
-import com.trickplay.gameservice.dao.impl.SpringUtils;
-import com.trickplay.gameservice.domain.Device;
+import com.trickplay.gameservice.dao.DeviceDAO;
+import com.trickplay.gameservice.dao.SessionTokenDAO;
 import com.trickplay.gameservice.domain.SessionToken;
 import com.trickplay.gameservice.exception.ExceptionUtil;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.SecurityUtil;
-import com.trickplay.gameservice.service.DeviceService;
 import com.trickplay.gameservice.service.SessionService;
 
 @Service("sessionService")
-@Repository
-public class SessionServiceImpl extends
-		GenericDAOWithJPA<SessionToken, Long> implements SessionService {
-	//private static final long MAX_SESSION_DURATION = 12 * 60 * 60 * 1000;
+public class SessionServiceImpl implements SessionService {
 
 	@Autowired
-	DeviceService deviceService;
+	DeviceDAO deviceDAO;
+	
+	@Autowired
+    SessionTokenDAO sessionTokenDAO;
 
 	public SessionToken findByToken(String token) {
-	    SessionToken session = findSessionByToken(token);
-		return session;
-		//return session != null ? new SessionTO(session) : null;
+	    return sessionTokenDAO.findByToken(token);
 	}
 
-	@SuppressWarnings("unchecked")
-	private SessionToken findSessionByToken(String token) {
-		List<SessionToken> list = super.entityManager
-				.createQuery(
-						"Select session from SessionToken session where session.token = :token")
-				.setParameter("token", token).getResultList();
-		return SpringUtils.getFirst(list);
-	}
 
+	@Transactional
 	public void create(SessionToken token) {
 	    /*
 		Device d = deviceService.findByKey(deviceKey);
@@ -61,7 +47,7 @@ public class SessionServiceImpl extends
 				.getPrincipal().getId());
 		session.setOwner(owner);
 		*/
-		persist(token);
+	    sessionTokenDAO.persist(token);
 	//	return session;
 	//	return new SessionTO(session);
 	}
@@ -96,7 +82,7 @@ public class SessionServiceImpl extends
 	
 	@Transactional
     public SessionToken expireToken(Long tokenId) {
-        SessionToken httpSession = find(tokenId);
+        SessionToken httpSession = sessionTokenDAO.find(tokenId);
         if (httpSession == null) {
             throw ExceptionUtil.newEntityNotFoundException(SessionToken.class, "token", tokenId);
         }
@@ -110,12 +96,7 @@ public class SessionServiceImpl extends
 	}
 
 	public List<Long> pickPlayersRandom(int count) {
-	    // get distinct users from session table whose sessions have not expired
-	    String pickPlayersQuery = "select distinct t.userId from SessionToken t where t.expired=false AND t.userId!=:currentUserId order by t.lastUsed DESC"; 
-		return entityManager.createQuery(pickPlayersQuery)
-		.setParameter("currentUserId", SecurityUtil.getPrincipal().getId())
-		.setMaxResults(count)
-		.getResultList();
+	    return sessionTokenDAO.pickPlayersRandom(SecurityUtil.getCurrentUserId(), count);
 	}
 
 }

@@ -20,7 +20,6 @@ import com.trickplay.gameservice.service.VendorService;
 
 
 @Service("vendorService")
-@Repository
 public class VendorServiceImpl implements VendorService {
 
     private static Logger logger = LoggerFactory.getLogger(VendorServiceImpl.class);

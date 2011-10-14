@@ -2,13 +2,15 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
-import javax.persistence.Query;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
+import com.trickplay.gameservice.dao.EventDAO;
+import com.trickplay.gameservice.dao.GameDAO;
+import com.trickplay.gameservice.dao.RecordedScoreDAO;
+import com.trickplay.gameservice.dao.UserDAO;
 import com.trickplay.gameservice.domain.Event;
 import com.trickplay.gameservice.domain.Event.EventType;
 import com.trickplay.gameservice.domain.Game;
@@ -19,56 +21,43 @@ import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.LeaderboardService;
 
 @Service("leaderboardService")
-@Repository
-public class LeaderboardServiceImpl extends
-		GenericDAOWithJPA<RecordedScore, Long> implements LeaderboardService {
-/*
- *
- */
-	private static final String BUDDY_SCORES_NATIVE_QUERY = 
-		"select R.* from recorded_score R join game G on R.game_id = G.id join buddy B ON R.user_id = B.target_id join User U on U.id = B.owner_id"
-		+ " where U.id=:userId AND G.id=:gameId ORDER BY R.points DESC";
+public class LeaderboardServiceImpl implements LeaderboardService {
 
-	@SuppressWarnings(value = "unchecked")
+    @Autowired
+    RecordedScoreDAO recordedScoreDAO;
+    
+    @Autowired
+    GameDAO gameDAO;
+    
+    @Autowired
+    UserDAO userDAO;
+    
+    @Autowired
+    EventDAO eventDAO;
+    
 	public List<RecordedScore> findTopScores(Long gameId, int limit) {
 		if (limit<=0)
 			limit = 100;
-		return super.entityManager
-		.createQuery(
-				"Select S from RecordedScore as S join S.game as G  where g.id=:gameId  order by S.points desc")
-		.setParameter("gameId", gameId)
-		.setMaxResults(limit).getResultList();
+		return recordedScoreDAO.findTopScores(gameId, limit);
 	}
 
-	@SuppressWarnings(value = "unchecked")
 	public List<RecordedScore> findBuddyScores(Long gameId) {
-		Query q = super.entityManager
-		.createNativeQuery(BUDDY_SCORES_NATIVE_QUERY, RecordedScore.class);
-		
-		return q.setParameter("userId", SecurityUtil.getPrincipal().getId())
-		.setParameter("gameId", gameId)
-		.getResultList();
+		return recordedScoreDAO.findBuddyScores(gameId, SecurityUtil.getPrincipal().getId());
 	}
 
-	@SuppressWarnings(value = "unchecked")
 	public List<RecordedScore> findScoreByUserId(Long gameId) {
-		return super.entityManager
-				.createQuery(
-						"Select S from RecordedScore as S join S.game as G join S.user as U where G.id=:gameId and U.id=:userId ORDER by S.points DESC")
-				.setParameter("gameId", gameId)
-				.setParameter("userId", SecurityUtil.getPrincipal().getId())
-				.getResultList();
+		return recordedScoreDAO.findScoreByUserId(gameId, SecurityUtil.getPrincipal().getId());
 	}
 
 	
 	@Transactional
 	public RecordedScore recordScore(Long gameId, long points) {
 	//	findTopScoreBy
-		User user = entityManager.find(User.class, SecurityUtil.getPrincipal().getId());
+		User user = userDAO.find(SecurityUtil.getPrincipal().getId());
 		if (user == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", SecurityUtil.getPrincipal().getId());
 		}
-		Game game = entityManager.find(Game.class, gameId);
+		Game game = gameDAO.find(gameId);
 		if (game == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(Game.class, "id", gameId);
 		}
@@ -89,7 +78,7 @@ public class LeaderboardServiceImpl extends
 		}
 		if (cutoffScoreLoc!=null) {
 			for(int i=numscores-1; i>=MAX_TOP_SCORES_PER_GAME-1; i--) {
-				entityManager.remove(existingScores.get(i));
+			    recordedScoreDAO.remove(existingScores.get(i));
 				existingScores.remove(i);
 			}
 			numscores = existingScores.size();
@@ -104,10 +93,10 @@ public class LeaderboardServiceImpl extends
 			newScore.setUser(user);
 			newScore.setGame(game);
 			newScore.setPoints(points);
-			super.entityManager.persist(newScore);
+			recordedScoreDAO.persist(newScore);
 			
 			if (isTopScore) {
-				entityManager.persist(new Event(EventType.HIGH_SCORE_EVENT, user, null, getMessage(newScore), newScore));
+				eventDAO.persist(new Event(EventType.HIGH_SCORE_EVENT, user, null, getMessage(newScore), newScore));
 			}
 			return newScore;
 		}

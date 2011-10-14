@@ -9,7 +9,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
+import com.trickplay.gameservice.dao.DeviceDAO;
+import com.trickplay.gameservice.dao.RoleDAO;
+import com.trickplay.gameservice.dao.UserDAO;
+import com.trickplay.gameservice.dao.VendorDAO;
 import com.trickplay.gameservice.dao.impl.SpringUtils;
 import com.trickplay.gameservice.domain.Device;
 import com.trickplay.gameservice.domain.Role;
@@ -17,29 +20,31 @@ import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.domain.Vendor;
 import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.security.SecurityUtil;
-import com.trickplay.gameservice.service.DeviceService;
 import com.trickplay.gameservice.service.UserService;
-import com.trickplay.gameservice.service.VendorService;
 
 @Service("userService")
-@Repository
-public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements UserService {
+public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
 	@Autowired
-	private DeviceService deviceService;
-	@Autowired VendorService vendorService;
+	private DeviceDAO deviceDAO;
 	
-	@Autowired MessageSource messageSource;
+	@Autowired
+	private VendorDAO vendorDAO;
 	
-	@SuppressWarnings("unchecked")
+	@Autowired
+    private RoleDAO roleDAO;
+	
+	@Autowired
+    private UserDAO userDAO;	
+	
+	@Autowired 
+	MessageSource messageSource;
+	
 	public User findByName(String username, boolean detached) {
-		List<User> list = super.entityManager.createQuery("Select u from User as u where u.username = :username").setParameter("username", username).getResultList();
-		User u = SpringUtils.getFirst(list);
-		if (detached) 
-			entityManager.detach(u);
-		return u;
+		return userDAO.findByName(username);
 	}
 	
 	public User findByName(String username) {
@@ -49,23 +54,19 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 	@Transactional
 	public Role createRole(String rolename) {
 		Role r = new Role(rolename);
-		entityManager.persist(r);
+		roleDAO.persist(r);
 		return r;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Role findRole(String rolename) {
-		List<Role> list = super.entityManager
-		.createQuery("Select r from Role as r where r.name = :name")
-		.setParameter("name", rolename).getResultList();
-		return SpringUtils.getFirst(list);
+		return roleDAO.findRole(rolename);
 	}
 	
 	@Transactional
 	public void create(User entity) {
 		entity.addAuthority(findRole(Role.ROLE_USER));
 		entity.setPassword(passwordEncoder.encodePassword(entity.getPassword(), null));
-		super.persist(entity);
+		userDAO.persist(entity);
 	}
 
 	@Transactional
@@ -76,11 +77,11 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 			throw ExceptionUtil.newEntityNotFoundException(User.class, "id", userId);
 		}
 
-		Device d = deviceService.findByKey(device.getDeviceKey());
+		Device d = deviceDAO.findByKey(device.getDeviceKey());
 		if (d == null) {
 			device.setOwner(u);
 			device.setId(null);
-			deviceService.create(device);
+			deviceDAO.persist(device);
 			d = device;
 		} else {
 			// implicitly unregistering previous owner
@@ -99,7 +100,7 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 		Vendor v = new Vendor();
 		v.setName(vendorName);
 		v.setPrimaryContact(u);
-		vendorService.create(v);
+		vendorDAO.persist(v);
 		return v;
 	}
 
@@ -127,6 +128,14 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
         if (entity.getEmail()!=null && !entity.getEmail().equals(existing.getEmail())) {
             existing.setEmail(entity.getEmail());
         }
+    }
+
+    public List<User> findAll() {
+        return userDAO.findAll();
+    }
+
+    public User find(Long id) {
+        return userDAO.find(id);
     }
 
 }
