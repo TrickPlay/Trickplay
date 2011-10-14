@@ -3,8 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
- 	xmlns:mvc="http://www.springframework.org/schema/mvc" 
- 	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:security="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="
 			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
@@ -14,13 +13,47 @@
  			http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
 			http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
-	<mvc:annotation-driven/>
+	<mvc:annotation-driven />
 	<!-- Scans for application @Components to deploy -->
 	<context:component-scan base-package="com.trickplay.gameservice" />
-	
+
 	<tx:annotation-driven />
 
-	<context:property-placeholder location="classpath:database.properties" />
+	<context:property-placeholder location="classpath:hsql-database.properties" />
+
+	<security:global-method-security
+		pre-post-annotations="enabled" />
+
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider
+			user-service-ref="tpUserDetailsService">
+			<security:password-encoder ref="passwordEncoder" />
+		</security:authentication-provider>
+		<security:authentication-provider
+			ref="anonymousAuthenticationProvider" />
+	</security:authentication-manager>
+
+	<bean id="tpUserDetailsService"
+		class="com.trickplay.gameservice.security.CustomUserDetailsService">
+		<property name="dataSource" ref="dataSource" />
+		<property name="usersByUsernameQuery"
+			value="select id, username, password, true from user where username = ?" />
+		<property name="authoritiesByUsernameQuery"
+			value="select U.username, R.name authorities from user U, USER_ROLE UR, role R where (U.id=UR.user_id) and (R.id=UR.role_id) and (u.username=?)" />
+	</bean>
+	<!-- <security:jdbc-user-service data-source-ref="dataSource" users-by-username-query="select 
+		username, password, true from user where username = ?" authorities-by-username-query="select 
+		U.username, R.name authorities from user U, USER_ROLE UR, role R where (U.id=UR.user_id) 
+		and (R.id=UR.role_id) and (u.username=?)" /> -->
+
+	<!-- These beans are only created to pre-populate an admin user -->
+	<bean id="adminUser" class="com.trickplay.gameservice.domain.User">
+		<property name="username" value="admin" />
+		<!-- this is the login email for the admin user -->
+		<property name="email" value="admin@trickplay.com" />
+		<!-- and this is the password -->
+		<property name="password" value="admin" />
+	</bean>
 
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
@@ -53,22 +86,16 @@
 		</property>
 	</bean>
 	
-	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
-	
-    <security:authentication-manager alias="am">
-    	<security:authentication-provider>
-    		<security:jdbc-user-service data-source-ref="dataSource" users-by-username-query="select username, password, true from user where username = ?"/>
-    	</security:authentication-provider>
-    </security:authentication-manager>
+	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" 
+		/> 
 
-	<!-- These beans are only created to pre-populate an admin user -->
-	<bean id="adminUser" class="com.trickplay.gameservice.domain.User">
-		<property name="username" value="admin" />		
-		<!-- this is the login email for the admin user -->
-		<property name="email" value="admin@trickplay.com" />
-		<!-- and this is the password -->
-		<property name="password" value="admin" />
+	<bean
+		class="org.springframework.security.authentication.encoding.ShaPasswordEncoder"
+		id="passwordEncoder" />
+
+	<bean id="anonymousAuthenticationProvider"
+		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
+		<property name="key" value="BF93JFJ091N00Q7HF" />
 	</bean>
-  
 
 </beans>

@@ -2,12 +2,10 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +22,7 @@ import com.trickplay.gameservice.service.AchievementService;
 
 @Service("achievementService")
 public class AchievementServiceImpl implements AchievementService {
+    Logger logger = LoggerFactory.getLogger(AchievementServiceImpl.class);
     @Autowired
     private EventDAO eventDAO;
 
@@ -33,12 +32,6 @@ public class AchievementServiceImpl implements AchievementService {
     @Autowired
     private RecordedAchievementDAO recordedAchievementDAO;
 
-    private EntityManager entityManager;
-
-    @PersistenceContext
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
 
     /*
      * TODO: implement findBuddyRecordedAchievement (non-Javadoc)
@@ -75,7 +68,21 @@ public class AchievementServiceImpl implements AchievementService {
          */
         if (entity == null) {
             throw ExceptionUtil.newIllegalArgumentException("RecordedAchievement", null, "!= null");
-        } else if (entity.getUser().getId() != SecurityUtil.getCurrentUserId()) {
+        } 
+        else if (entity.getAchievement() == null) {
+            throw ExceptionUtil.newIllegalArgumentException("RecordedAchievement.achievement", null, "!= null");
+        }
+        else if (entity.getUser() == null) {
+            throw ExceptionUtil.newIllegalArgumentException("RecordedAchievement.user", null, "!= null");
+        }
+        else if (entity.getUser().getId() != SecurityUtil.getCurrentUserId()) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Create RecordedAchievement failed. Security exception. RecordedAchievement.user[id="
+                        + entity.getUser().getId()
+                        + "] is different from logged in user[id="
+                        + SecurityUtil.getCurrentUserId()
+                        + "]");
+            }
             throw ExceptionUtil.newForbiddenException();
         }
         
@@ -89,17 +96,16 @@ public class AchievementServiceImpl implements AchievementService {
                             entity
                             )
                     );
-        } catch (EntityExistsException ex) {
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Caught exception in create RecordedAchievement", ex);
             throw ExceptionUtil.newEntityExistsException(RecordedAchievement.class, 
                     "userName", entity.getUser().getUsername(),
                     "game", entity.getAchievement().getGame().getName(),
                     "achievement", entity.getAchievement().getName());
-        } /*catch (PersistenceException ex) {
-            throw ExceptionUtil.
-        }*/
-        /*
-         * return null; } });
-         */
+        } catch (RuntimeException ex) {
+            logger.error("Caught exception in create RecordedAchievement", ex);
+            throw ExceptionUtil.newUnknownException(ex.getMessage());
+        }
     }
 
     public Achievement find(Long id) {
@@ -109,11 +115,25 @@ public class AchievementServiceImpl implements AchievementService {
     /* 
      * TODO: Security check. make sure an authorized user is requesting this operation
      */
+    @Transactional
     public void create(Achievement entity) {
         if (entity == null) {
             throw ExceptionUtil.newIllegalArgumentException("Achievement", null, "!= null");
         } 
-        achievementDAO.persist(entity);
+        else if (entity.getGame()==null) {
+            throw ExceptionUtil.newIllegalArgumentException("Achievement.game", null, "!= null");
+        }
+        try {
+            achievementDAO.persist(entity);
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Caught exception in create Achievement", ex);
+            throw ExceptionUtil.newEntityExistsException(Achievement.class,
+                    "game", entity.getGame().getName(),
+                    "achievement", entity.getName());
+        } catch (RuntimeException ex) {
+            logger.error("Caught exception in create Achievement", ex);
+            throw ExceptionUtil.newUnknownException(ex.getMessage());
+        }
     }
 
     public String getMessage(RecordedAchievement ra) {

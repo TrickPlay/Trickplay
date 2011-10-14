@@ -40,7 +40,7 @@ public class ExceptionUtil {
      */
     public static GameServiceException newEntityExistsException(Class<?> entityClass,
             Object... args) {
-        return new GameServiceException(Reason.ENTITY_NOT_FOUND,
+        return new GameServiceException(Reason.ENTITY_EXISTS_EXCEPTION,
                 entityClass.getSimpleName(), convertToMap(args));
     }
 

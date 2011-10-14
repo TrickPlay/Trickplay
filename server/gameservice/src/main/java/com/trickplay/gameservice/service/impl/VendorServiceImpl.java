@@ -2,11 +2,15 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
-import com.trickplay.gameservice.dao.impl.SpringUtils;
+import com.trickplay.gameservice.dao.VendorDAO;
 import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.domain.Vendor;
 import com.trickplay.gameservice.exception.ExceptionUtil;
@@ -17,19 +21,26 @@ import com.trickplay.gameservice.service.VendorService;
 
 @Service("vendorService")
 @Repository
-public class VendorServiceImpl extends GenericDAOWithJPA<Vendor, Long> implements VendorService {
+public class VendorServiceImpl implements VendorService {
 
-
-	@SuppressWarnings("unchecked")
+    private static Logger logger = LoggerFactory.getLogger(VendorServiceImpl.class);
+    @Autowired
+    VendorDAO vendorDAO;
+    
+    public List<Vendor> findAll() {
+        return vendorDAO.findAll();
+    }
+    
+    public Vendor find(Long id) {
+        return vendorDAO.find(id);
+    }
+    
 	public Vendor findByName(String name) {
-		List<Vendor> list = super.entityManager.createQuery("Select v from Vendor v where v.name = :name").setParameter("name", name).getResultList();
-		return SpringUtils.getFirst(list);
+		return vendorDAO.findByName(name);
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Vendor> findByContactName(String contactName) {
-		return super.entityManager.createQuery("Select v from Vendor as v join v.primaryContact as u where u.username = :name")
-		.setParameter("name", contactName).getResultList();
+		return vendorDAO.findByContactName(contactName);
 	}
 
 	
@@ -45,8 +56,21 @@ public class VendorServiceImpl extends GenericDAOWithJPA<Vendor, Long> implement
         throw new UnsupportedOperationException("Vendor.remove not yet implemented");
     }
 
+    @Transactional
     public void create(Vendor entity) {
-        super.persist(entity);      
+        if (entity == null) {
+            throw ExceptionUtil.newIllegalArgumentException("Vendor", null, "!= null");
+        }
+        authorizeCreateVendor(entity.getPrimaryContact());
+        try {
+            vendorDAO.persist(entity);
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Failed to create Vendor.", ex);
+            throw ExceptionUtil.newEntityExistsException(Vendor.class, "name", entity.getName());
+        } catch (RuntimeException ex) {
+            logger.error("Failed to create Vendor.", ex);
+            throw ExceptionUtil.newUnknownException(ex.getMessage());
+        }
     }
 
 }
