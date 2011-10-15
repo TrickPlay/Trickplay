@@ -2,7 +2,10 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +31,8 @@ import com.trickplay.gameservice.service.BuddyService;
 public class BuddyServiceImpl implements
 		BuddyService {
 
+    private static final Logger logger = LoggerFactory.getLogger(BuddyServiceImpl.class);
+    
 	@Autowired
 	UserDAO userDAO;
 	
@@ -256,7 +261,25 @@ public class BuddyServiceImpl implements
 
     @Transactional
     public void create(Buddy entity) {
-        buddyDAO.persist(entity);       
+        if (entity == null) {
+            throw ExceptionUtil.newIllegalArgumentException("Buddy", "null", "!= null");
+        } else if (entity.getOwner() == null) {
+            throw ExceptionUtil.newIllegalArgumentException("Buddy.owner", null, "!= null");
+        } else if (entity.getTarget() == null) {
+            throw ExceptionUtil.newIllegalArgumentException("Buddy.target", null, "!= null");
+        }
+        
+        try {
+            buddyDAO.persist(entity);
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Failed to create Buddy.", ex);
+            throw ExceptionUtil.newEntityExistsException(Buddy.class, 
+                    "owner", entity.getOwner().getUsername(),
+                    "target", entity.getTarget().getUsername());
+        } catch (RuntimeException ex) {
+            logger.error("Failed to create Buddy.", ex);
+            throw ExceptionUtil.newUnknownException(ex.getMessage());
+        }
     }
 
     @Transactional

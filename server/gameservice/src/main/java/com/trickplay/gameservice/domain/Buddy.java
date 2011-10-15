@@ -8,10 +8,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames={"owner_id","target_id"})})
 @XmlRootElement(name = "buddy")
 public class Buddy extends BaseEntity implements Serializable {
     private static final long serialVersionUID = 1L;

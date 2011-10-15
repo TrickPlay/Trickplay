@@ -3,7 +3,6 @@ package com.trickplay.gameservice.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +52,11 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 	@Transactional
 	public RecordedScore recordScore(Long gameId, long points) {
 	//	findTopScoreBy
-		User user = userDAO.find(SecurityUtil.getPrincipal().getId());
+	    Long userId = SecurityUtil.getCurrentUserId();
+	    if (userId == null) {
+	        throw ExceptionUtil.newForbiddenException();
+	    }
+		User user = userDAO.find(userId);
 		if (user == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", SecurityUtil.getPrincipal().getId());
 		}

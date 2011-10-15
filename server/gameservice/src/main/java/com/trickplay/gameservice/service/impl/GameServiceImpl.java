@@ -2,7 +2,10 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,12 +14,14 @@ import com.trickplay.gameservice.dao.VendorDAO;
 import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.Vendor;
 import com.trickplay.gameservice.exception.ExceptionUtil;
+import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.GameService;
 
 
 @Service("gameService")
 public class GameServiceImpl implements GameService {
 
+    private static final Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
 	@Autowired
 	VendorDAO vendorDAO;
 
@@ -36,20 +41,49 @@ public class GameServiceImpl implements GameService {
         }
 	}
 	
+	/*
+	 * TODO: ensure only authorized users are allowed to create a Game
+	 */
 	@Transactional
 	public Game create(Long vendorId, Game g) {
+	    Long userId = SecurityUtil.getCurrentUserId();
+	    if (userId == null) {
+	        throw ExceptionUtil.newForbiddenException();
+	    }
+	    if (vendorId == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("Vendor", null, "!= null");
+	    } else if (g == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("Game", null, "!= null");
+	    }
 		Vendor v = vendorDAO.find(vendorId);
 		if (v == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(Vendor.class, "id", vendorId);
-		}
+		} 
 		validate(g);
 		g.setVendor(v);
-		gameDAO.persist(g);
+		try {
+		    gameDAO.persist(g);
+		} catch (DataIntegrityViolationException ex) {
+		    logger.error("Failed to create Game.", ex);
+		    throw ExceptionUtil.newEntityExistsException(Game.class, 
+		            "name", g.getName(),
+		            "appId", g.getAppId());
+		} catch (RuntimeException ex) {
+		    logger.error("Failed to create Game.", ex);
+		    throw ExceptionUtil.newUnknownException(ex.getMessage());
+		}
 		return g;
 	}
 
+    /*
+     * TODO: ensure only authorized users are allowed to update a Game
+     */
 	@Transactional
 	public Game update(Long vendorId, Game g) {
+	    Long userId = SecurityUtil.getCurrentUserId();
+	    if (userId == null) {
+	        throw ExceptionUtil.newForbiddenException();
+	    }
 	    validate(g);
 		Game existing = find(g.getId());
 		if (existing == null) {
@@ -72,6 +106,10 @@ public class GameServiceImpl implements GameService {
 
 	@Transactional
     public void remove(Long id) {
+	    Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            throw ExceptionUtil.newForbiddenException();
+        }
         Game existing = find(id);
         if (existing == null) {
             throw ExceptionUtil.newEntityNotFoundException(Game.class, "id", id);

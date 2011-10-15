@@ -22,7 +22,7 @@ import com.trickplay.gameservice.service.AchievementService;
 
 @Service("achievementService")
 public class AchievementServiceImpl implements AchievementService {
-    Logger logger = LoggerFactory.getLogger(AchievementServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(AchievementServiceImpl.class);
     @Autowired
     private EventDAO eventDAO;
 

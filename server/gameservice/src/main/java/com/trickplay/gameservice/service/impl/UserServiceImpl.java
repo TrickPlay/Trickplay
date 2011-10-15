@@ -2,10 +2,12 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +15,6 @@ import com.trickplay.gameservice.dao.DeviceDAO;
 import com.trickplay.gameservice.dao.RoleDAO;
 import com.trickplay.gameservice.dao.UserDAO;
 import com.trickplay.gameservice.dao.VendorDAO;
-import com.trickplay.gameservice.dao.impl.SpringUtils;
 import com.trickplay.gameservice.domain.Device;
 import com.trickplay.gameservice.domain.Role;
 import com.trickplay.gameservice.domain.User;
@@ -25,6 +26,7 @@ import com.trickplay.gameservice.service.UserService;
 @Service("userService")
 public class UserServiceImpl implements UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
@@ -53,8 +55,22 @@ public class UserServiceImpl implements UserService {
 	
 	@Transactional
 	public Role createRole(String rolename) {
+	    if (rolename == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("rolename", null, "!= null");
+	    }
+	    rolename = rolename.trim();
+	    if (rolename.isEmpty()) {
+	        throw ExceptionUtil.newIllegalArgumentException("rolename", "", "length(rolename) > 0");
+	    }
+	        
 		Role r = new Role(rolename);
-		roleDAO.persist(r);
+		
+		try {
+		    roleDAO.persist(r);
+		} catch (DataIntegrityViolationException ex) {
+		    logger.error("Failed to create Role.", ex);
+		    throw ExceptionUtil.newEntityExistsException(Role.class, "rolename", rolename);
+		}
 		return r;
 	}
 
@@ -64,9 +80,25 @@ public class UserServiceImpl implements UserService {
 	
 	@Transactional
 	public void create(User entity) {
+	    if (entity == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("User", null, "!= null");
+	    } else if (entity.getUsername() == null || entity.getUsername().trim().isEmpty()) {
+	        throw ExceptionUtil.newIllegalArgumentException("User.username", "", "length(username) > 0");
+	    } else if (entity.getPassword() == null || entity.getPassword().trim().isEmpty()) {
+	        throw ExceptionUtil.newIllegalArgumentException("User.password", "", "length(password) > 0");
+	    }
 		entity.addAuthority(findRole(Role.ROLE_USER));
 		entity.setPassword(passwordEncoder.encodePassword(entity.getPassword(), null));
-		userDAO.persist(entity);
+		try {
+		    userDAO.persist(entity);
+		} catch (DataIntegrityViolationException ex) {
+		    logger.error("Failed to create User", ex);
+		    throw ExceptionUtil.newEntityExistsException(User.class, 
+		            "username", entity.getUsername());
+		} catch (RuntimeException ex) {
+		    logger.error("Failed to create User", ex);
+            throw ExceptionUtil.newUnknownException(ex.getMessage());
+		}
 	}
 
 	@Transactional

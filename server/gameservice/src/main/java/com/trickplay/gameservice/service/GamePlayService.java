@@ -2,6 +2,7 @@ package com.trickplay.gameservice.service;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.domain.GamePlayInvitation;
@@ -9,6 +10,7 @@ import com.trickplay.gameservice.domain.GameSession;
 import com.trickplay.gameservice.domain.GameStepId;
 import com.trickplay.gameservice.domain.InvitationStatus;
 
+@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
 public interface GamePlayService {
 
     public static final int RESERVATION_VALID_INTERVAL_IN_SECONDS = 120;

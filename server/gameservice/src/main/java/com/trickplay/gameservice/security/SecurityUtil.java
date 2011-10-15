@@ -28,8 +28,9 @@ public final class SecurityUtil {
 			UserDetails user = (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			if (user instanceof UserAdapter)
 				return (UserAdapter)user;
-			else
-				throw ExceptionUtil.newForbiddenException();
+			else if (user != null) {
+			    return new UserAdapter(null, user);
+			}
 		}
 		return null;
 	}

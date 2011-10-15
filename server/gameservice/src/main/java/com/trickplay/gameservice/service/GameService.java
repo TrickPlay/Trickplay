@@ -12,13 +12,12 @@ import com.trickplay.gameservice.domain.Game;
 @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
 public interface GameService {
 
-	@PostFilter("hasRole('ROLE_ADMIN') OR filterObject.vendor.primaryContact.username == principal.username")
+    @PostFilter("hasRole('ROLE_ADMIN') or filterObject.primaryContact.username == principal.username")
 	public List<Game> findAll();
 
 	@Transactional
 	public Game update(Long vendorId, Game entity);
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@Transactional
 	public void remove(Long id);
 
