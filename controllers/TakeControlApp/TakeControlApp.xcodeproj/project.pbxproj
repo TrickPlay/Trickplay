@@ -16,8 +16,6 @@
 		446C2153143F7823007A2FE9 /* iOS-logo-57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = 446C2151143F7823007A2FE9 /* iOS-logo-57x57.png */; };
 		446C2154143F7823007A2FE9 /* iOS-logo-114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = 446C2152143F7823007A2FE9 /* iOS-logo-114x114.png */; };
 		446C2157143F782D007A2FE9 /* iOS-logo-72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = 446C2156143F782D007A2FE9 /* iOS-logo-72x72.png */; };
-		CD358570143FEA6A003A9406 /* TakeControl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD35856F143FEA6A003A9406 /* TakeControl.framework */; };
-		CD358571143FEAA2003A9406 /* TakeControl.framework in Resources */ = {isa = PBXBuildFile; fileRef = CD35856F143FEA6A003A9406 /* TakeControl.framework */; };
 		CD4B2E96143A748A0073BB88 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E95143A748A0073BB88 /* UIKit.framework */; };
 		CD4B2E98143A748A0073BB88 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E97143A748A0073BB88 /* Foundation.framework */; };
 		CD4B2E9A143A748A0073BB88 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E99143A748A0073BB88 /* CoreGraphics.framework */; };
@@ -33,6 +31,7 @@
 		CD4B2F2E143A76B30073BB88 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F23143A76500073BB88 /* AudioToolbox.framework */; };
 		CD4B2F2F143A76B30073BB88 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F21143A76450073BB88 /* QuartzCore.framework */; };
 		CD4B2F30143A76B30073BB88 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F1F143A76290073BB88 /* AssetsLibrary.framework */; };
+		CD66806314479AEA00232938 /* TakeControl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD66806214479AEA00232938 /* TakeControl.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,7 +44,6 @@
 		446C2151143F7823007A2FE9 /* iOS-logo-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-57x57.png"; path = "Icons/iOS-logo-57x57.png"; sourceTree = "<group>"; };
 		446C2152143F7823007A2FE9 /* iOS-logo-114x114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-114x114.png"; path = "Icons/iOS-logo-114x114.png"; sourceTree = "<group>"; };
 		446C2156143F782D007A2FE9 /* iOS-logo-72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-72x72.png"; path = "Icons/iOS-logo-72x72.png"; sourceTree = "<group>"; };
-		CD35856F143FEA6A003A9406 /* TakeControl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TakeControl.framework; path = Library/Frameworks/TakeControl.framework; sourceTree = SDKROOT; };
 		CD4B2E91143A74890073BB88 /* TakeControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TakeControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD4B2E95143A748A0073BB88 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		CD4B2E97143A748A0073BB88 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -66,6 +64,7 @@
 		CD4B2F25143A76590073BB88 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		CD4B2F27143A76650073BB88 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		CD4B2F29143A76710073BB88 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		CD66806214479AEA00232938 /* TakeControl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TakeControl.framework; path = Library/TakeControl.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,7 +81,7 @@
 				CD4B2E96143A748A0073BB88 /* UIKit.framework in Frameworks */,
 				CD4B2E98143A748A0073BB88 /* Foundation.framework in Frameworks */,
 				CD4B2E9A143A748A0073BB88 /* CoreGraphics.framework in Frameworks */,
-				CD358570143FEA6A003A9406 /* TakeControl.framework in Frameworks */,
+				CD66806314479AEA00232938 /* TakeControl.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -120,7 +119,7 @@
 		CD4B2E94143A748A0073BB88 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				CD35856F143FEA6A003A9406 /* TakeControl.framework */,
+				CD66806214479AEA00232938 /* TakeControl.framework */,
 				CD4B2F29143A76710073BB88 /* MobileCoreServices.framework */,
 				CD4B2F27143A76650073BB88 /* MediaPlayer.framework */,
 				CD4B2F25143A76590073BB88 /* CFNetwork.framework */,
@@ -232,7 +231,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD358571143FEAA2003A9406 /* TakeControl.framework in Resources */,
 				CD4B2EA0143A748A0073BB88 /* InfoPlist.strings in Resources */,
 				CD4B2EAD143A748A0073BB88 /* TakeControlAppViewController_iPhone.xib in Resources */,
 				CD4B2EB0143A748A0073BB88 /* TakeControlAppViewController_iPad.xib in Resources */,
@@ -338,6 +336,10 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
@@ -414,6 +416,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
@@ -436,6 +439,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";

@@ -219,6 +219,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         NSLog(@"TPAppView Start Service");
         
         self.view.autoresizesSubviews = YES;
+        self.view.backgroundColor = [UIColor clearColor];
         
         // Load UIWebView initially so that Text objects which depend on it will
         // load faster
@@ -536,7 +537,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     //[styleAlert showInView:self.view.superview];
     if (self.view.window && viewDidAppear) {
         [styleAlert showInView:self.view];
-    }    
+    }
 }
 
 /**
@@ -692,8 +693,16 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     NSString *key = [args objectAtIndex:0];
     
     if ([resourceManager getResourceInfo:key]) {
+        NSString *mode = nil;
+        if (args.count > 1) {
+            mode = [args objectAtIndex:1];
+        }
         CGRect frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-        UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
+        if (mode && [mode compare:@"C"] == NSOrderedSame) {
+            
+            frame = CGRectMake(0.0, 0.0, 0.0, 0.0);
+        }
+        AsyncImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
         for (UIView *subview in [backgroundView subviews]) {
             if (subview != foregroundView) {
@@ -709,6 +718,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
             [virtualRemote.view removeFromSuperview];
         }
         [touchDelegate setSwipe:YES];
+        
+        if (mode && [mode compare:@"C"] == NSOrderedSame) {
+            newImageView.centerToSuperview = YES;
+        } else if (mode && [mode compare:@"T"] == NSOrderedSame) {
+            [newImageView setTileWidth:YES height:YES];
+        }
     }
 }
 
@@ -1213,22 +1228,30 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     }
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    // TODO: SHOULD NOT USE MAINFRAME!!!
-    //*
-    CGRect mainframe = self.view.frame;
-    backgroundHeight = mainframe.size.height;
-    backgroundWidth = mainframe.size.width;
-    //*/
-    //*
+- (void)setSize:(CGSize)size {
+    backgroundWidth = size.width;
+    backgroundHeight = size.height;
+    
     backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     for (UIView *view in backgroundView.subviews) {
-        view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+        if ([view isKindOfClass:[AsyncImageView class]] && ((AsyncImageView *)view).centerToSuperview) {
+            UIImage *image = ((AsyncImageView *)view).image;
+            view.frame = CGRectMake(0.0, 0.0, image.size.width, image.size.height);
+            view.center = CGPointMake(fabsf(view.superview.center.x), fabsf(view.superview.center.y));
+        } else {
+            view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+        }
     }
+     
     advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+
+    [self setSize:CGSizeMake(backgroundWidth, backgroundHeight)];
     //*/
     textView.layer.cornerRadius = 10.0;
     textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
@@ -1262,7 +1285,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  // Override to allow orientations other than the default portrait orientation.
  - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
  // Return YES for supported orientations.
- return (interfaceOrientation == UIInterfaceOrientationPortrait);
+ return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
  }
 //*/
 
@@ -1400,6 +1423,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 #pragma mark -
 #pragma mark Getters/Setters
+
+- (void)setSize:(CGSize)size {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
 
 - (void)setTvConnection:(TVConnection *)_tvConnection {
     if ([self isKindOfClass:[TPAppViewControllerContext class]]) {

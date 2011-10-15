@@ -113,6 +113,8 @@ UIActionSheetDelegate, UINavigationControllerDelegate>
 // Returns YES if this TPAppViewController has a TVConnection and
 // the TVConnection is connected to a TV.
 - (BOOL)hasConnection;
+// Set the size of the View
+- (void)setSize:(CGSize)size;
 // Send any keypress to the TV any number of times. Must use
 // key codes provided by Trickplay.
 - (void)sendKeyToTrickplay:(NSString *)key count:(NSInteger)count;

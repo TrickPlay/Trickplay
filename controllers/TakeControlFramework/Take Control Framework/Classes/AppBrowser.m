@@ -174,7 +174,9 @@
 #pragma mark AppBrowserViewController
 
 - (AppBrowserViewController *)getNewAppBrowserViewController {
-    AppBrowserViewController *viewController = [[[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil appBrowser:self] autorelease];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    
+    AppBrowserViewController *viewController = [[[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:myBundle appBrowser:self] autorelease];
     
     return viewController;
 }
