@@ -104,6 +104,9 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public Device registerDevice(Device device) {
 		Long userId = SecurityUtil.getPrincipal().getId();
+		if (userId == null) {
+		    throw ExceptionUtil.newForbiddenException();
+		}
 		User u = find(userId);
 		if (u == null) {
 			throw ExceptionUtil.newEntityNotFoundException(User.class, "id", userId);
@@ -124,6 +127,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Transactional
 	public Vendor createVendor(String vendorName) {
+	    if (vendorName == null || vendorName.trim().isEmpty()) {
+	        throw ExceptionUtil.newIllegalArgumentException("vendorName", "", "length(vendorName) != null");
+	    }
 		Long userId = SecurityUtil.getPrincipal().getId();
 		User u = find(userId);
 		if (u == null) 
@@ -132,7 +138,16 @@ public class UserServiceImpl implements UserService {
 		Vendor v = new Vendor();
 		v.setName(vendorName);
 		v.setPrimaryContact(u);
-		vendorDAO.persist(v);
+		try {
+		    vendorDAO.persist(v);
+		} catch (DataIntegrityViolationException ex) {
+		    logger.error("Failed to create Vendor.", ex);
+		    throw ExceptionUtil.newEntityExistsException(Vendor.class,
+		            "vendorName", vendorName);
+		} catch (RuntimeException ex) {
+		    logger.error("Failed to create Vendor.", ex);
+            throw ExceptionUtil.newUnknownException(ex.getMessage());
+		}
 		return v;
 	}
 
@@ -145,12 +160,12 @@ public class UserServiceImpl implements UserService {
         if (entity.getId()!=null) {
             existing = find(entity.getId());
             if (existing == null) {
-                throw ExceptionUtil.newEntityNotFoundException(User.class,"id", entity.getId());
+                throw ExceptionUtil.newEntityNotFoundException(User.class, "id", entity.getId());
             }
         } else {
             existing = findByName(entity.getUsername());
             if (existing == null) {
-                throw ExceptionUtil.newEntityNotFoundException(User.class,"username", entity.getUsername()); 
+                throw ExceptionUtil.newEntityNotFoundException(User.class, "username", entity.getUsername()); 
             }
                
         }
