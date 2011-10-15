@@ -36,6 +36,9 @@
     tvBrowserViewController = [[TVBrowserViewController alloc] init];
     navController = [[UINavigationController alloc] initWithRootViewController:tvBrowserViewController];
     
+    self.view.window.backgroundColor = [UIColor clearColor];
+    self.view.backgroundColor = [UIColor clearColor];
+    
     self.navController.delegate = self;
     
     tvBrowserViewController.delegate = self;
@@ -101,11 +104,7 @@
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
-    } else {
-        return YES;
-    }
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 #pragma mark -
@@ -213,14 +212,12 @@
     if (!appViewController) {
         return;
     }
-    /*
+    //*
     CGFloat
-    x = self.view.frame.origin.x,
-    y = self.view.frame.origin.y,
     width = self.view.frame.size.width,
     height = self.view.frame.size.height;
-    appViewController.view.layer.frame = CGRectMake(x, y, width, height);
-     */
+    [appViewController setSize:CGSizeMake(width, height - 44.0)];
+    //*/
 }
 
 - (void)destroyTPAppViewController {
