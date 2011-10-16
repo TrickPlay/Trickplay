@@ -1648,12 +1648,21 @@ gboolean App::animate_out_callback( gpointer s )
 
         clutter_actor_set_clip( screen, 0, 0, 1920, 1080 );
 
-        clutter_actor_animate( screen, CLUTTER_EASE_IN_CUBIC, 250,
-                               "opacity", 0,
-                               "scale-x", ( gdouble ) 0,
-                               "scale-y", ( gdouble ) 0,
-                               "signal::completed", animate_out_completed, screen,
-                               NULL );
+        ClutterAnimator *animator = clutter_animator_new();
+        clutter_animator_set_duration(animator, 750);
+        clutter_animator_set(animator,
+                                screen, "scale-x", CLUTTER_LINEAR, 0.0, 1.0,
+                                screen, "scale-y", CLUTTER_LINEAR, 0.0, 1.0,
+                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 0.2, 0.3,
+                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 0.2, 0.005,
+                                screen, "scale-x", CLUTTER_LINEAR, 0.5, 0.4,
+                                screen, "scale-y", CLUTTER_LINEAR, 0.5, 0.002,
+                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+                                NULL
+                            );
+        ClutterTimeline *timeline = clutter_animator_start(animator);
+        g_signal_connect_after( timeline, "completed", G_CALLBACK(animate_out_completed), screen );
     }
 
     g_object_unref( G_OBJECT( screen ) );
