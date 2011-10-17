@@ -154,7 +154,7 @@ player.extra.reactive = true
 
 local image3 = Image
 	{
-		src = "/assets/images/igloo.png",
+		src = "/assets/igloo.png",
 		clip = {0,0,151,88},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -266,7 +266,7 @@ clone6.extra.reactive = true
 
 local drop12 = Image
 	{
-		src = "/assets/images/obstacle_1.png",
+		src = "/assets/obstacle_1.png",
 		clip = {0,0,65,62},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},

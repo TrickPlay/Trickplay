@@ -155,7 +155,7 @@ player.extra.reactive = true
 
 local image3 = Image
 	{
-		src = "/assets/images/igloo.png",
+		src = "/assets/igloo.png",
 		clip = {0,0,151,88},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -267,7 +267,7 @@ clone6.extra.reactive = true
 
 local image5 = Image
 	{
-		src = "/assets/images/lvl1_ice.png",
+		src = "/assets/lvl1_ice.png",
 		clip = {0,0,65,62},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -749,7 +749,7 @@ clone18.extra.reactive = true
 
 local head1 = Image
 	{
-		src = "/assets/images/lvl2_head_1.png",
+		src = "/assets/lvl2_head_1.png",
 		clip = {0,0,746,48},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -787,7 +787,7 @@ head1.extra.reactive = true
 
 local head2 = Image
 	{
-		src = "/assets/images/lvl2_head_2.png",
+		src = "/assets/lvl2_head_2.png",
 		clip = {0,0,532,48},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -825,7 +825,7 @@ head2.extra.reactive = true
 
 local head3 = Image
 	{
-		src = "/assets/images/lvl2_head_3.png",
+		src = "/assets/lvl2_head_3.png",
 		clip = {0,0,752,48},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},

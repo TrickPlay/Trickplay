@@ -154,7 +154,7 @@ player.extra.reactive = true
 
 local image3 = Image
 	{
-		src = "/assets/images/igloo.png",
+		src = "/assets/igloo.png",
 		clip = {0,0,151,88},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -266,7 +266,7 @@ clone6.extra.reactive = true
 
 local image7 = Image
 	{
-		src = "/assets/images/obstacle_1.png",
+		src = "/assets/obstacle_1.png",
 		clip = {0,0,65,62},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -489,7 +489,7 @@ clone23.extra.reactive = true
 
 local grav1 = Image
 	{
-		src = "/assets/images/collect_red.png",
+		src = "/assets/collect_red.png",
 		clip = {0,0,64,49},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -860,7 +860,7 @@ clone25.extra.reactive = true
 
 local grav3 = Image
 	{
-		src = "/assets/images/collect_green.png",
+		src = "/assets/collect_green.png",
 		clip = {0,0,64,49},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -1453,7 +1453,7 @@ rgrav3.extra.reactive = true
 
 local hat = Image
 	{
-		src = "/assets/images/player_jump_hat.png",
+		src = "/assets/player_jump_hat.png",
 		clip = {0,0,63,63},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -1491,7 +1491,7 @@ hat.extra.reactive = true
 
 local jump = Image
 	{
-		src = "/assets/images/jump.png",
+		src = "/assets/jump.png",
 		clip = {0,0,188,124},
 		scale = {0.5,0.5,0,0},
 		x_rotation = {0,0,0},
@@ -1529,7 +1529,7 @@ jump.extra.reactive = true
 
 local head3 = Image
 	{
-		src = "/assets/images/zon_head_9.png",
+		src = "/assets/zon_head_9.png",
 		clip = {0,0,1007,48},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -1567,7 +1567,7 @@ head3.extra.reactive = true
 
 local head2 = Image
 	{
-		src = "/assets/images/zon_head_8.png",
+		src = "/assets/zon_head_8.png",
 		clip = {0,0,925,48},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -1605,7 +1605,7 @@ head2.extra.reactive = true
 
 local head1 = Image
 	{
-		src = "/assets/images/zon_head_7.png",
+		src = "/assets/zon_head_7.png",
 		clip = {0,0,855,48},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},

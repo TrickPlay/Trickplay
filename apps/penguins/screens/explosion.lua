@@ -3,7 +3,7 @@ local g = ...
 
 local image5 = Image
 	{
-		src = "/assets/images/explosion_1.png",
+		src = "/assets/explosion_1.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -41,7 +41,7 @@ image5.extra.reactive = true
 
 local image6 = Image
 	{
-		src = "/assets/images/explosion_2.png",
+		src = "/assets/explosion_2.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -79,7 +79,7 @@ image6.extra.reactive = true
 
 local image7 = Image
 	{
-		src = "/assets/images/explosion_3.png",
+		src = "/assets/explosion_3.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -117,7 +117,7 @@ image7.extra.reactive = true
 
 local image8 = Image
 	{
-		src = "/assets/images/explosion_4.png",
+		src = "/assets/explosion_4.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -155,7 +155,7 @@ image8.extra.reactive = true
 
 local image9 = Image
 	{
-		src = "/assets/images/explosion_5.png",
+		src = "/assets/explosion_5.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -193,7 +193,7 @@ image9.extra.reactive = true
 
 local image10 = Image
 	{
-		src = "/assets/images/explosion_6.png",
+		src = "/assets/explosion_6.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -231,7 +231,7 @@ image10.extra.reactive = true
 
 local image11 = Image
 	{
-		src = "/assets/images/explosion_7.png",
+		src = "/assets/explosion_7.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -269,7 +269,7 @@ image11.extra.reactive = true
 
 local image12 = Image
 	{
-		src = "/assets/images/explosion_8.png",
+		src = "/assets/explosion_8.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -307,7 +307,7 @@ image12.extra.reactive = true
 
 local image13 = Image
 	{
-		src = "/assets/images/explosion_9.png",
+		src = "/assets/explosion_9.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -345,7 +345,7 @@ image13.extra.reactive = true
 
 local image14 = Image
 	{
-		src = "/assets/images/explosion_10.png",
+		src = "/assets/explosion_10.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -383,7 +383,7 @@ image14.extra.reactive = true
 
 local image15 = Image
 	{
-		src = "/assets/images/explosion_11.png",
+		src = "/assets/explosion_11.png",
 		clip = {0,0,412,301},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},

@@ -153,7 +153,7 @@ player.extra.reactive = true
 
 local image3 = Image
 	{
-		src = "/assets/images/igloo.png",
+		src = "/assets/igloo.png",
 		clip = {0,0,151,88},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -265,7 +265,7 @@ clone6.extra.reactive = true
 
 local fish1 = Image
 	{
-		src = "/assets/images/collect_white.png",
+		src = "/assets/collect_white.png",
 		clip = {0,0,64,49},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -340,7 +340,7 @@ fish2.extra.reactive = true
 
 local image9 = Image
 	{
-		src = "/assets/images/obstacle_1.png",
+		src = "/assets/obstacle_1.png",
 		clip = {0,0,65,62},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -1053,6 +1053,7 @@ clone16,clone17,fish2,fish5,fish4,lift3,clone23,clone24,lift2,lift1,fish6,deaths
 local colliders = {fish1,image9,gate,clone11,door2,fish3,door1,clone14,clone15,clone16,
 clone17,fish2,fish5,fish4,lift3,clone23,clone24,lift2,lift1,fish6}
 
+
 fish1.extra.event = {event_type = "move", ui = gate, position = {1366,120}, original = {1366, 174},}
 
 fish2.extra.event = {event_type = "move", ui = door1, position = {655,365}, original = {836, 475},}
@@ -1065,4 +1066,4 @@ fish5.extra.event = {event_type = "move", ui = lift2, position = {1432,733}, ori
 
 fish6.extra.event = {event_type = "move", ui = lift3, position = {1494,798}, original = {1494, 958},}
 
-return colliders
+return colliders, {}

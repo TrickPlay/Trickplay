@@ -3,7 +3,7 @@ local g = ...
 
 local image8 = Image
 	{
-		src = "/assets/images/bg_2_3.png",
+		src = "/assets/bg_2_3.png",
 		clip = {0,0,1920,360},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -41,7 +41,7 @@ image8.extra.reactive = true
 
 local bg2 = Image
 	{
-		src = "/assets/images/bg_2_2.png",
+		src = "/assets/bg_2_2.png",
 		clip = {0,0,1920,360},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -79,7 +79,7 @@ bg2.extra.reactive = true
 
 local bg1 = Image
 	{
-		src = "/assets/images/bg_2_1.png",
+		src = "/assets/bg_2_1.png",
 		clip = {0,0,1920,360},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -117,7 +117,7 @@ bg1.extra.reactive = true
 
 local player = Image
 	{
-		src = "assets/images/player_speed_2.png",
+		src = "assets/player_speed_2.png",
 		clip = {0,0,45,45},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -155,7 +155,7 @@ player.extra.reactive = true
 
 local image3 = Image
 	{
-		src = "/assets/images/igloo.png",
+		src = "/assets/igloo.png",
 		clip = {0,0,151,88},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -267,7 +267,7 @@ clone6.extra.reactive = true
 
 local hat = Image
 	{
-		src = "/assets/images/player_jump_hat.png",
+		src = "/assets/player_jump_hat.png",
 		clip = {0,0,63,63},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},

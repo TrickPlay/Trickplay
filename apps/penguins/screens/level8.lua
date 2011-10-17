@@ -154,7 +154,7 @@ player.extra.reactive = true
 
 local hat = Image
 	{
-		src = "/assets/images/player_jump_hat.png",
+		src = "/assets/player_jump_hat.png",
 		clip = {0,0,63,63},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -192,7 +192,7 @@ hat.extra.reactive = true
 
 local image3 = Image
 	{
-		src = "/assets/images/igloo.png",
+		src = "/assets/igloo.png",
 		clip = {0,0,151,88},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -304,7 +304,7 @@ clone6.extra.reactive = true
 
 local fish1 = Image
 	{
-		src = "/assets/images/collect_black.png",
+		src = "/assets/collect_black.png",
 		clip = {0,0,64,49},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -342,7 +342,7 @@ fish1.extra.reactive = true
 
 local image10 = Image
 	{
-		src = "/assets/images/obstacle_1.png",
+		src = "/assets/obstacle_1.png",
 		clip = {0,0,65,62},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -1823,7 +1823,7 @@ fish10.extra.reactive = true
 
 local rfish1 = Image
 	{
-		src = "/assets/images/collect_red.png",
+		src = "/assets/collect_red.png",
 		clip = {0,0,64,49},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -1972,7 +1972,7 @@ clone53.extra.reactive = true
 
 local gfish1 = Image
 	{
-		src = "/assets/images/collect_green.png",
+		src = "/assets/collect_green.png",
 		clip = {0,0,64,49},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -2447,4 +2447,4 @@ gfish1.extra.event = {event_type = "gravity down"}
 gfish2.extra.event = {event_type = "gravity down"}
 
 
-return colliders
+return colliders, {}
