@@ -56,7 +56,7 @@ function main()
         mm_focus  = Image{ src = assets_path .. "general_menu/focus-list.png"},
         
         --Guess a Word
-        check      = Image{ src = assets_path .. "make or guess word/√.png"},
+        check      = Image{ src = assets_path .. "make or guess word/checkmark.png"},
         x          = Image{ src = assets_path .. "make or guess word/x.png"},
         lose_match = Image{ src = assets_path .. "alerts/alert-you-lose-match.png"},
         lose_round = Image{ src = assets_path .. "alerts/alert-you-lose-round.png"},
@@ -66,7 +66,7 @@ function main()
         --Letter Slots
         letter_bg_off = Image{ src = assets_path .. "make or guess word/letter-well-off.png"},
         letter_bg_on  = Image{ src = assets_path .. "make or guess word/letter-well-on.png"},
-        q_mark        = Image{ src = assets_path .. "make or guess word/?.png"},
+        q_mark        = Image{ src = assets_path .. "make or guess word/qmark.png"},
         
         --Score Keeper
         x_on       = Image{ src = assets_path .. "score_keeper/X-on.png" },
