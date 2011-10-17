@@ -194,13 +194,13 @@ local gallow_y = AnimationState{
     duration = 300,
     transitions = {
         {
-            source = "*",          target = "VISIBLE",
+            source = "*",          target = "VISIBLE", duration = 300,
             keys = {
                 {gallows, "y", 0},
             }
         },
         {
-            source = "*",        target = "HIDDEN",
+            source = "*",        target = "HIDDEN", duration = 300,
             keys = {
                 {gallows, "y", screen_h},
             }
@@ -223,13 +223,13 @@ local hangman_x = AnimationState{
     duration = 700,
     transitions = {
         {
-            source = "*",          target = "VISIBLE",
+            source = "*",          target = "VISIBLE", duration = 300,
             keys = {
                 {hangman, "x", 1463},
             }
         },
         {
-            source = "*",        target = "HIDDEN",
+            source = "*",        target = "HIDDEN", duration = 300,
             keys = {
                 {hangman, "x", screen_w},
             }

@@ -306,14 +306,14 @@ function main()
         duration = 300,
         transitions = {
             {
-                source = "*",          target = "LOADING",
+                source = "*",          target = "LOADING", duration = 300,
                 keys   = {
                     {bg,             "opacity", 255},
                     {Splash_Buttons, "opacity", 255},
                 },
             },
             {
-                source = "*",          target = "MAIN_PAGE",
+                source = "*",          target = "MAIN_PAGE", duration = 300,
                 keys   = {
                     {bg,                 "opacity", 255},
                     {logo,               "opacity", 255},
@@ -327,7 +327,7 @@ function main()
                 },
             },
             {
-                source = "*",        target = "MAKE_WORD",
+                source = "*",        target = "MAKE_WORD", duration = 300,
                 keys = {
                     {bg,                 "opacity", 255},
                     {logo,               "opacity", 255},
@@ -340,7 +340,7 @@ function main()
                 },
             },
             {
-                source = "*",        target = "GUESS_WORD",
+                source = "*",        target = "GUESS_WORD", duration = 300,
                 keys   = {
                     {bg,                 "opacity", 255},
                     {logo,               "opacity",   0},
