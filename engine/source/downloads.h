@@ -28,7 +28,7 @@ public:
 
     struct Info
     {
-        enum Status { RUNNING, FAILED, FINISHED };
+        enum InfoStatus { RUNNING, FAILED, FINISHED };
 
         Info()
         :
@@ -102,7 +102,7 @@ public:
         unsigned int    id;
         String          owner;
         String          file_name;
-        Status          status;
+        InfoStatus      status;
         guint64         content_length;
         guint64         written;
         gdouble         elapsed_seconds;
