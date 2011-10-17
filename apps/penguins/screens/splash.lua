@@ -3,7 +3,7 @@ local g = ...
 
 local image0 = Image
 	{
-		src = "/assets/images/splash_bg.png",
+		src = "/assets/splash_bg.png",
 		clip = {0,0,1920,1080},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -41,7 +41,7 @@ image0.extra.reactive = true
 
 local focus = Image
 	{
-		src = "/assets/images/focus.png",
+		src = "/assets/focus.png",
 		clip = {0,0,523,220},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -78,7 +78,7 @@ focus.extra.reactive = true
 
 local player = Image
 	{
-		src = "/assets/images/splash_player.png",
+		src = "/assets/splash_player.png",
 		clip = {0,0,155,155},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -115,7 +115,7 @@ player.extra.reactive = true
 
 local button2down = Image
 	{
-		src = "/assets/images/button_2_down.png",
+		src = "/assets/button_2_down.png",
 		clip = {0,0,420,120},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -153,7 +153,7 @@ button2down.extra.reactive = true
 
 local button1down = Image
 	{
-		src = "/assets/images/button_1_down.png",
+		src = "/assets/button_1_down.png",
 		clip = {0,0,420,120},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -201,12 +201,13 @@ end
 function button1press:on_completed()
 	next_level()
 	screen:grab_key_focus()
-	row1:start()
+	row = 1
+	skating:start()
 end
 
 local button1 = Image
 	{
-		src = "/assets/images/button_1.png",
+		src = "/assets/button_1.png",
 		clip = {0,0,420,120},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -260,7 +261,7 @@ end
 
 local button2 = Image
 	{
-		src = "/assets/images/button_2.png",
+		src = "/assets/button_2.png",
 		clip = {0,0,420,120},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -313,7 +314,7 @@ end
 
 local image3 = Image
 	{
-		src = "/assets/images/splash_finish.png",
+		src = "/assets/splash_finish.png",
 		clip = {0,0,492,287},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},

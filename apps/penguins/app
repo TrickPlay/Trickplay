@@ -1,7 +1,7 @@
-app=
-{	id = "com.trickplay.editor",
+app = {
+	id = "com.trickplay.penguins",
 	release = "1",
 	version = "1.0",
-	name = "TrickPlay",
+	name = "Penguins",
 	copyright = "Trickplay Inc."
 }

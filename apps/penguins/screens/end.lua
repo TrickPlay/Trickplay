@@ -3,7 +3,7 @@ local g = ...
 
 local bg = Image
 	{
-		src = "/assets/images/bg_gameover_half.png",
+		src = "/assets/bg_gameover_half.png",
 		clip = {0,0,960,540},
 		scale = {2,2,0,0},
 		x_rotation = {0,0,0},
@@ -41,7 +41,7 @@ bg.extra.reactive = true
 
 local ice = Image
 	{
-		src = "/assets/images/ice.png",
+		src = "/assets/ice.png",
 		clip = {0,0,413,309},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -79,7 +79,7 @@ ice.extra.reactive = true
 
 local player = Image
 	{
-		src = "/assets/images/end_penguin.png",
+		src = "/assets/end_penguin.png",
 		clip = {0,0,192,211},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -117,7 +117,7 @@ player.extra.reactive = true
 
 local image5 = Image
 	{
-		src = "/assets/images/wave.png",
+		src = "/assets/wave.png",
 		clip = {0,0,1261,184},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -155,7 +155,7 @@ image5.extra.reactive = true
 
 local image6 = Image
 	{
-		src = "/assets/images/back.png",
+		src = "/assets/back.png",
 		clip = {0,0,481,80},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -193,7 +193,7 @@ image6.extra.reactive = true
 
 local image7 = Image
 	{
-		src = "/assets/images/button_again_glow.png",
+		src = "/assets/button_again_glow.png",
 		clip = {0,0,786,400},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
@@ -231,7 +231,7 @@ image7.extra.reactive = true
 
 local image8 = Image
 	{
-		src = "/assets/images/button_again.png",
+		src = "/assets/button_again.png",
 		clip = {0,0,424,93},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
