@@ -30,17 +30,25 @@ public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements Ga
 		return SpringUtils.getFirst(list);
 	}
 
+	private void validate(Game g) {
+	    if (g.getMinPlayers()<=0) {
+            throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null,
+                    ExceptionContext.make("minPlayer", g.getMaxPlayers()),
+                    ExceptionContext.make("message", "minPlayers should be greater than zero"));
+        }
+        if (g.getMaxPlayers() < g.getMinPlayers()) {
+            throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, 
+                    ExceptionContext.make("minPlayers", g.getMinPlayers()),
+                    ExceptionContext.make("maxPlayers", g.getMaxPlayers()),
+                    ExceptionContext.make("message", "minPlayers exceeds maxPlayers"));
+        }
+	}
 	@Transactional
 	public Game create(Long vendorId, Game g) {
 		Vendor v = vendorService.find(vendorId);
 		if (v == null)
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Vendor.id", vendorId));
-		if (g.getMaxPlayers() < g.getMinPlayers()) {
-			throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, 
-					ExceptionContext.make("minPlayers", g.getMinPlayers()),
-					ExceptionContext.make("maxPlayers", g.getMaxPlayers()),
-					ExceptionContext.make("message", "minPlayers exceeds maxPlayers"));
-		}
+		validate(g);
 		g.setVendor(v);
 		super.persist(g);
 		return g;
@@ -48,15 +56,11 @@ public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements Ga
 
 	@Transactional
 	public Game update(Long vendorId, Game g) {
+	    validate(g);
 		Game existing = find(g.getId());
 		if (existing == null)
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.id", g.getId()));
-		if (g.getMaxPlayers() < g.getMinPlayers()) {
-			throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, 
-					ExceptionContext.make("minPlayers", g.getMinPlayers()),
-					ExceptionContext.make("maxPlayers", g.getMaxPlayers()),
-					ExceptionContext.make("message", "minPlayers exceeds maxPlayers"));
-		}
+
 		Vendor v = vendorService.find(vendorId);
 		if (v == null)
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Vendor.id", vendorId));
@@ -70,5 +74,12 @@ public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements Ga
 		
 		return existing;
 	}
+
+    public void remove(Long id) {
+        Game existing = find(id);
+        if (existing == null)
+            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.id", id));
+        entityManager.remove(existing);        
+    }
 
 }

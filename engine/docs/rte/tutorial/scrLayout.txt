@@ -1,8 +1,8 @@
 Topic: Basic Screen Layout
 
-As we've just seen, the Rectangle class can be used to create a background for an application's window. In addition, the class can also be used to layout the screen's design by organizing sections of the display for varying purposes. For our Tutorial application, we'll use the Rectangle class to define two sections of the display and label each section with a text header that describes its purpose.
+As we've just seen, the Rectangle class can be used to create a background for an application's window. In addition, the class can be used to lay out the screen's design by organizing sections of the display for varying purposes. For our Tutorial application, we'll use the Rectangle class to define three sections of the display and label each section with a text header or footer that describes its purpose.
 
-The Tutorial application will ultimately create two animations, with each animation demonstrating a different method of implementation. We'll allocate two portions of the screen to position the animations, and a third at the very top of the screen to act as a title holder. Each of these three sections are created in the same manner, so after the first is created, the two remaining sections will be simple repetition.
+The Tutorial application will create two animations, so we'll allocate two portions of the screen to position the animations, and a third at the very top of the screen to act as a title holder. Each of these three sections are created in the same manner, so after the first is created, the two remaining sections will be simple repetition.
 
 Let's start with the top header. We'll create a Rectangle object that covers the entire width of the display. To delineate this Rectangle from the backGround Rectangle, we'll make the header a different color. We'll also create a nice visual effect by making the header semi-opaque so that the underlying backGround color will still be partially viewable. The code statements shown below achieve these goals.
 
@@ -11,8 +11,8 @@ Let's start with the top header. We'll create a Rectangle object that covers the
 	header = Rectangle( {
 				size     = { 1920, 200 },
 				position = { 0, 0 },
-				color    = { 118, 136, 131, 150 }
-	         }
+				color    = { 211, 211, 211, 128 }
+	         } )
 	         
 	-- Add the header area to the screen
 	screen:add( header )
@@ -28,9 +28,9 @@ The code shown below creates and displays the header's text string. Add it to th
 	-- Create header label
 	headerLabel = Text( {
 					text = "TrickPlay SDK Tutorial Animations",
-					font = "'DejaVu Sans' Bold 80px",
-					color = { 225, 225, 225, 255 },
-					position = { 75, 50 }
+					font = "DejaVu Sans Bold 80px",
+					color    = { 245, 245, 220, 255 },
+					position = { 190, 50 }
 				  } )
 				 
 	-- Add the header label to the screen
@@ -39,6 +39,7 @@ The code shown below creates and displays the header's text string. Add it to th
 
 (see images/scrHeader.png)
 
-When writing code that creates and positions new objects, a cycle of trial-and-adjustment is common as you gradually find the object characteristics and screen location you are most satisfied with. This cycle can be made less tedious by using the Engine console command /reload.
+When writing code that creates and positions new objects, a cycle of trial-and-adjustment is common as you gradually find the property settings and screen location you are most satisfied with. This cycle can be made less tedious by using the Engine console command /reload which reloads and runs the current application from its beginning. By saving changes to your source files and entering /reload in the Engine console's command prompt, you can quickly bounce between modifying the source and running the updated app without having to close and restart your editor and the TrickPlay Engine on each iteration.
 
---- Discuss localization ---
+Our application now includes a text header in the English language. If we wanted to translate the program so users of other languages could understand it, the conversion would not be very pleasant, especially as the number of text strings increases. Before continuing laying out the rest of our screen, we should pause to consider program localization.
+

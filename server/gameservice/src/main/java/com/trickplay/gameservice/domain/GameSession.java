@@ -32,6 +32,7 @@ public class GameSession extends BaseEntity implements Serializable {
     private Game game;
     private Date startTime;
     private Date endTime;
+    private boolean open=true;
     private List<User> players = new ArrayList<User>();
     private List<GamePlayInvitation> invitations = new ArrayList<GamePlayInvitation>();
 
@@ -125,6 +126,14 @@ public class GameSession extends BaseEntity implements Serializable {
 	
 	public void setState(GamePlayState state) {
 		this.state = state;
+	}
+
+	public void setOpen(boolean open) {
+		this.open = open;
+	}
+
+	public boolean isOpen() {
+		return open;
 	}
 
 }

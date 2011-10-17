@@ -28,12 +28,14 @@
 extern "C" {
 #endif 
 
+#include <stddef.h>
+
 /*-----------------------------------------------------------------------------
     TrickPlay version
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    22
+#define TP_MINOR_VERSION    23
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
@@ -393,7 +395,18 @@ typedef struct TPContext TPContext;
 #define TP_RUN_APP_PREPARE_FAILED       4
 #define TP_RUN_APP_ERROR                5
 #define TP_RUN_ALREADY_RUNNING          6
-    
+
+/*-----------------------------------------------------------------------------
+    Constants: Resource types
+
+    TP_RESOURCE_TYPE_LUA_SOURCE - Lua code files.
+
+*/
+
+
+#define TP_RESOURCE_TYPE_LUA_SOURCE 0
+
+
 /*-----------------------------------------------------------------------------
     Function: tp_init_version
     
@@ -778,6 +791,55 @@ typedef struct TPContext TPContext;
         TPLogHandler handler,
         void * data);
 
+    typedef struct TPResource TPResource;
+
+/*-----------------------------------------------------------------------------
+    Function: TPResourceReader
+    
+    Function prototype used in calls to <tp_context_set_resource_reader>.
+    
+    Arguments:
+    
+        context -   The Trickplay context.
+
+        filename -   The resource filename to be loaded
+        
+        resource -  The <TPResource> structure to fill
+
+        data -      Opaque user data passed to <tp_context_set_resource_reader>.
+*/
+
+    typedef
+    void
+    (*TPResourceReader)(
+    
+        TPContext * context,
+        const char * filename,
+        TPResource *resource,
+        void * data);
+
+/*-----------------------------------------------------------------------------
+    Function: tp_context_set_resource_reader
+
+    Specify the function used to read resources.
+
+    Arguments:
+
+        context - A valid TPContext.
+        type - An indicator of what type of resource this reader should be used for.  See <Resource types>.
+        reader - A pointer to a <TPResourceReader> function.
+        data - An opaque pointer that is passed to the reader.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_context_set_resource_reader(
+
+        TPContext * context,
+        unsigned int type,
+        TPResourceReader reader,
+        void * data);
+
 /*-----------------------------------------------------------------------------
     Function: tp_context_run
     
@@ -836,6 +898,58 @@ typedef struct TPContext TPContext;
 
 /*-----------------------------------------------------------------------------
 */
+
+/*-----------------------------------------------------------------------------
+    Struct: TPResource
+    
+    Holds information about a resource being loaded
+*/
+
+    
+    struct TPResource
+    {
+        /*
+            Field: buffer
+            
+            Buffer containing resource data which has been loaded into memory
+        */
+        void       *buffer;
+        
+        /*
+            Field: length
+            
+            Length in bytes of the buffer
+        */
+        size_t      length;
+
+        /*
+            Field: free_resource
+            
+            Function to call back when the buffer is no longer needed.
+        */
+        void 		(*free_resource)( TPResource * resource );
+
+
+        /*
+            Field: read_more
+            
+            Function to read the next chunk of data if there is more data in the resource then
+            was in the buffer.  If this function is not NULL, then it will be called after
+            free_resource above to fetch the next chunk of data.
+        */
+        void        (*read_mode)( TPResource * resource );
+        
+        /*
+            Field: user_data
+            
+            An opaque pointer that TrickPlay ignores. You can use this pointer
+            when free_resource or read_more is invoked.
+        */
+
+        void *				user_data;
+    };
+
+
 
 #ifdef __cplusplus
 }

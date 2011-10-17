@@ -1312,6 +1312,8 @@ int TPContext::run()
         clutter_actor_set_size( stage , display_width , display_height );
     }
 
+    clutter_actor_set_name( stage , "stage" );
+
 #ifndef TP_CLUTTER_BACKEND_EGL
 
     clutter_stage_set_title( CLUTTER_STAGE( stage ) , "TrickPlay" );
@@ -2008,6 +2010,38 @@ void TPContext::set_log_handler( TPLogHandler handler, void * data )
 
     external_log_handler = handler;
     external_log_handler_data = data;
+}
+
+//-----------------------------------------------------------------------------
+
+void TPContext::set_resource_reader( unsigned int type, TPResourceReader reader, void * data )
+{
+	g_assert( !running() );
+	
+	if( NULL == reader )
+	{
+		resource_readers.erase(type);
+		resource_reader_user_datas.erase(type);
+	}
+	else
+	{
+		resource_readers [ type ] = reader;
+		resource_reader_user_datas [ type ] = data;
+	}
+}
+
+void TPContext::get_resource_reader( unsigned int type, TPResourceReader *reader, void **data )
+{
+	if(resource_readers.count(type))
+	{
+		*reader = resource_readers[type];
+		*data = resource_reader_user_datas[type];
+	}
+	else
+	{
+		*reader = NULL;
+		*data = NULL;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -3087,6 +3121,15 @@ void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void
     g_assert( context );
 
     context->set_log_handler( handler, data );
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_resource_reader( TPContext * context, unsigned int type, TPResourceReader reader, void * data)
+{
+	g_assert( context );
+	
+	context->set_resource_reader( type, reader, data );
 }
 
 //-----------------------------------------------------------------------------

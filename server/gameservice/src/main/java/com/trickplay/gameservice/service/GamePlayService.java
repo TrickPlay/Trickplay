@@ -11,6 +11,8 @@ import com.trickplay.gameservice.domain.InvitationStatus;
 
 public interface GamePlayService {
 
+    public static final int RESERVATION_VALID_INTERVAL_IN_SECONDS = 120;
+    
 	@Transactional
 	public GameSession createGameSession(Long gameId);
 	
@@ -23,7 +25,7 @@ public interface GamePlayService {
 	public GameSession find(Long sessionId);
 	
 	@Transactional
-	public GamePlayInvitation sendGamePlayInvitation(Long gameId, Long recipientId);
+	public GamePlayInvitation sendGamePlayInvitation(Long gameSessionId, Long recipientId);
 	
 	@Transactional
 	public GamePlayInvitation updateGamePlayInvitation(Long invitationId, InvitationStatus status);
@@ -41,5 +43,8 @@ public interface GamePlayService {
 
 	@Transactional
 	public void postMessage(Long gameSessionId, String msg);
+	
+	@Transactional
+	public List<GamePlayInvitation> getInvitations(Long gameId, int max);
 		
 }
