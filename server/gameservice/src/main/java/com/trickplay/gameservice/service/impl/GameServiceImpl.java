@@ -48,7 +48,7 @@ public class GameServiceImpl implements GameService {
 	public Game create(Long vendorId, Game g) {
 	    Long userId = SecurityUtil.getCurrentUserId();
 	    if (userId == null) {
-	        throw ExceptionUtil.newForbiddenException();
+	        throw ExceptionUtil.newUnauthorizedException();
 	    }
 	    if (vendorId == null) {
 	        throw ExceptionUtil.newIllegalArgumentException("Vendor", null, "!= null");
@@ -82,7 +82,7 @@ public class GameServiceImpl implements GameService {
 	public Game update(Long vendorId, Game g) {
 	    Long userId = SecurityUtil.getCurrentUserId();
 	    if (userId == null) {
-	        throw ExceptionUtil.newForbiddenException();
+	        throw ExceptionUtil.newUnauthorizedException();
 	    }
 	    validate(g);
 		Game existing = find(g.getId());
@@ -108,7 +108,7 @@ public class GameServiceImpl implements GameService {
     public void remove(Long id) {
 	    Long userId = SecurityUtil.getCurrentUserId();
         if (userId == null) {
-            throw ExceptionUtil.newForbiddenException();
+            throw ExceptionUtil.newUnauthorizedException();
         }
         Game existing = find(id);
         if (existing == null) {

@@ -56,6 +56,9 @@ public class GamePlayServiceImpl implements GamePlayService {
 	
 	@Transactional
 	public GameSession createGameSession(Long gameId) {
+	    if (gameId == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("gameId", "null", "!= null");
+	    }
 		Game g = gameDAO.find(gameId);
 		
 		if (g == null) {
@@ -434,7 +437,7 @@ public class GamePlayServiceImpl implements GamePlayService {
 		Long userId = SecurityUtil.getCurrentUserId();
 		User user = null;
 		if (userId == null || (user=userDAO.find(userId)) == null) {
-			throw ExceptionUtil.newForbiddenException();
+			throw ExceptionUtil.newUnauthorizedException();
 		}
 		
 		List<GamePlayInvitation> userInvitations = gamePlayInvitationDAO.getPendingInvitationsForUser(gameId, userId, max);

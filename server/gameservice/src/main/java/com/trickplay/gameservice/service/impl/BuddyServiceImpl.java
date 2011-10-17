@@ -48,7 +48,7 @@ public class BuddyServiceImpl implements
 	public void authorizeSendInvitation(User requestor) {
 		UserAdapter principal = (UserAdapter)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (requestor == null || !principal.getId().equals(requestor.getId())) {
-			throw ExceptionUtil.newForbiddenException();
+			throw ExceptionUtil.newUnauthorizedException();
 		}
 	}
 	
@@ -155,25 +155,25 @@ public class BuddyServiceImpl implements
 	public void authorizeRemoveBuddyRequest(Buddy b) {
 		UserAdapter principal = SecurityUtil.getPrincipal();
 		if (principal == null || b == null || b.getOwner() == null || (!principal.getId().equals(b.getOwner().getId()))) {
-			throw ExceptionUtil.newForbiddenException();
+			throw ExceptionUtil.newUnauthorizedException();
 		}
 	}
 	
 	public void authorizeRequest(BuddyListInvitation bli, InvitationStatus status) {
 		UserAdapter principal = SecurityUtil.getPrincipal();
 		if (principal==null) {
-		    throw ExceptionUtil.newForbiddenException();
+		    throw ExceptionUtil.newUnauthorizedException();
 		} 
 		if (principal.getId().equals(bli.getRequestor().getId())) {
 			if (status != InvitationStatus.CANCELLED) {
-				throw ExceptionUtil.newForbiddenException();
+				throw ExceptionUtil.newUnauthorizedException();
 			}
 		} else if (principal.getId().equals(bli.getRecipient().getId())) {
 			if (status != InvitationStatus.ACCEPTED && status != InvitationStatus.REJECTED) {
-			    throw ExceptionUtil.newForbiddenException();
+			    throw ExceptionUtil.newUnauthorizedException();
 			}
 		} else {
-		    throw ExceptionUtil.newForbiddenException();
+		    throw ExceptionUtil.newUnauthorizedException();
 		}
 	}
 	

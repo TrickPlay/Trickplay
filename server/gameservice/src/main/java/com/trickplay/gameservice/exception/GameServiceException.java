@@ -1,47 +1,56 @@
 package com.trickplay.gameservice.exception;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
 
 @SuppressWarnings("serial")
 public class GameServiceException extends RuntimeException {
 
  	public enum Reason {
-		ENTITY_NOT_FOUND("entityNotFound"),
-		ENTITY_EXISTS_EXCEPTION("entityExists"),
-		ALREADY_BUDDY("alreadyBuddy"),
-        BL_INVITATION_CANCEL_FAILED("cancelBuddyListInvitationFailed"),
-        BL_INVITATION_ACCEPT_FAILED("acceptBuddyListInvitationFailed"),
-        BL_INVITATION_DECLINE_FAILED("declineBuddyListInvitationFailed"),
-        BL_INVITATION_STATUS_UPDATE_FAILED("updateBuddyListInvitationFailed"),
-		INVITATION_PREVIOUSLY_SENT("invitationPreviouslySent"),
-		GAME_ALREADY_STARTED("gameAlreadyStarted"),
-		GAME_ALREADY_ENDED("gameAlreadyEnded"),
-		GAME_NOT_STARTED("gameNotStarted"),
-		SEND_INVITATION_FAILED("sendInvitationFailed"),
-		FORBIDDEN("forbidden"),
-		FAILED_TO_CREATE_SESSION("failedToCreateSession"),
-		SESSION_EXPIRED("sessionExpired"),
-		ILLEGAL_ARGUMENT("illegalArgument"),
-        GP_INVITATION_INVALID_STATUS("gamePlayInvitationInvalidStatus"),
-		GP_RECIPIENT_SAME_AS_REQUESTOR("recipientSameAsRequestor"),
-		GP_VIOLATES_MAX_PLAYERS_LIMIT("exceedsMaxPlayersAllowed"),
-		UNSUPPORTED_OPERATION_EXCEPTION("unsupportedOperationException"),
-		WILDCARD_INVITATION_NOT_ALLOWED("wildcardInvitationNotAllowed"),
-		INVITATION_RESERVED("invitationReserved"),
-		NOT_INVITATION_RECIPIENT("notInvitationRecipient"),
-		UNKNOWN("unknown");
+		ENTITY_NOT_FOUND("entityNotFound", HttpStatus.BAD_REQUEST),
+		ENTITY_EXISTS_EXCEPTION("entityExists", HttpStatus.BAD_REQUEST),
+		ALREADY_BUDDY("alreadyBuddy", HttpStatus.BAD_REQUEST),
+        BL_INVITATION_CANCEL_FAILED("cancelBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
+        BL_INVITATION_ACCEPT_FAILED("acceptBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
+        BL_INVITATION_DECLINE_FAILED("declineBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
+        BL_INVITATION_STATUS_UPDATE_FAILED("updateBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
+		INVITATION_PREVIOUSLY_SENT("invitationPreviouslySent",  HttpStatus.BAD_REQUEST),
+		GAME_ALREADY_STARTED("gameAlreadyStarted", HttpStatus.BAD_REQUEST),
+		GAME_ALREADY_ENDED("gameAlreadyEnded", HttpStatus.BAD_REQUEST),
+		GAME_NOT_STARTED("gameNotStarted", HttpStatus.BAD_REQUEST),
+		SEND_INVITATION_FAILED("sendInvitationFailed", HttpStatus.INTERNAL_SERVER_ERROR),
+		UNAUTHORIZED("unauthorized", HttpStatus.UNAUTHORIZED),
+		FAILED_TO_CREATE_SESSION("failedToCreateSession", HttpStatus.INTERNAL_SERVER_ERROR),
+		SESSION_EXPIRED("sessionExpired", HttpStatus.FORBIDDEN),
+		ILLEGAL_ARGUMENT("illegalArgument", HttpStatus.BAD_REQUEST),
+        GP_INVITATION_INVALID_STATUS("gamePlayInvitationInvalidStatus", HttpStatus.BAD_REQUEST),
+		GP_RECIPIENT_SAME_AS_REQUESTOR("recipientSameAsRequestor", HttpStatus.BAD_REQUEST),
+		GP_VIOLATES_MAX_PLAYERS_LIMIT("exceedsMaxPlayersAllowed", HttpStatus.BAD_REQUEST),
+		UNSUPPORTED_OPERATION_EXCEPTION("unsupportedOperationException", HttpStatus.NOT_IMPLEMENTED),
+		WILDCARD_INVITATION_NOT_ALLOWED("wildcardInvitationNotAllowed", HttpStatus.BAD_REQUEST),
+		INVITATION_RESERVED("invitationReserved", HttpStatus.BAD_REQUEST),
+		NOT_INVITATION_RECIPIENT("notInvitationRecipient", HttpStatus.BAD_REQUEST),
+		UNKNOWN("unknown", HttpStatus.INTERNAL_SERVER_ERROR);
 		
-        private String messageKey;
-		private Reason(String messageKey) {
+        private final String messageKey;
+        private final HttpStatus httpStatus;
+		private Reason(String messageKey, HttpStatus httpStatus) {
 		    this.messageKey = messageKey;
+		    this.httpStatus = httpStatus;
 		}
 		
 		public String getMessageKey() {
 		    return messageKey;
+		}
+		
+		public HttpStatus getHttpStatus() {
+		    return httpStatus;
 		}
 		
 	};
@@ -98,4 +107,11 @@ public class GameServiceException extends RuntimeException {
 				+ (getCause()!=null ? getCause().getMessage() : "null") + "]";
 	}
 	
+	public Map<String, Object> toMapError() {
+	    Map<String, Object> retval = new HashMap<String, Object>();
+	    retval.put("httpStatus", reason.getHttpStatus().value());
+	    retval.put("errorCode", null);
+	    retval.put("errorMessage", getMessage());
+	    return retval;
+	}
 }

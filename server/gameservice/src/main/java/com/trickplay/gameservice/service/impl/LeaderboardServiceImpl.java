@@ -2,6 +2,8 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ import com.trickplay.gameservice.service.LeaderboardService;
 
 @Service("leaderboardService")
 public class LeaderboardServiceImpl implements LeaderboardService {
+    private static final Logger logger = LoggerFactory.getLogger(LeaderboardServiceImpl.class);
 
     @Autowired
     RecordedScoreDAO recordedScoreDAO;
@@ -54,7 +57,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 	//	findTopScoreBy
 	    Long userId = SecurityUtil.getCurrentUserId();
 	    if (userId == null) {
-	        throw ExceptionUtil.newForbiddenException();
+	        throw ExceptionUtil.newUnauthorizedException();
 	    }
 		User user = userDAO.find(userId);
 		if (user == null) {
@@ -96,8 +99,12 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 			newScore.setUser(user);
 			newScore.setGame(game);
 			newScore.setPoints(points);
-			recordedScoreDAO.persist(newScore);
-			
+			try {
+			    recordedScoreDAO.persist(newScore);
+			} catch (RuntimeException ex) {
+			    logger.error("Failed to create RecordedScore.", ex);
+			    throw ExceptionUtil.newUnknownException(ex.getMessage());
+			}
 			if (isTopScore) {
 				eventDAO.persist(new Event(EventType.HIGH_SCORE_EVENT, user, null, getMessage(newScore), newScore));
 			}

@@ -12,6 +12,6 @@ public class ServiceUtil {
 	public static void checkAuthority(User requestor) {
 		UserAdapter principal = SecurityUtil.getPrincipal();
 		if (requestor == null || principal == null || !requestor.getId().equals(principal.getId()))
-			throw ExceptionUtil.newForbiddenException();
+			throw ExceptionUtil.newUnauthorizedException();
 	}
 }

@@ -127,10 +127,10 @@ Can only decline invitation when its status is 'PENDING', but invitation's statu
     }
     
     /*
-     * forbidden=User doesn't have the necessary privileges to carry out this operation.
+     * unauthorized=User doesn't have the necessary privileges to carry out this operation.
      */
-    public static GameServiceException newForbiddenException() {
-        return new GameServiceException(Reason.FORBIDDEN);
+    public static GameServiceException newUnauthorizedException() {
+        return new GameServiceException(Reason.UNAUTHORIZED);
     }
     
     /*

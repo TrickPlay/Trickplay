@@ -46,7 +46,7 @@ public class VendorServiceImpl implements VendorService {
 	public void authorizeCreateVendor(User u) {
 		UserAdapter principal = SecurityUtil.getPrincipal();
 		if (principal == null || u == null || !principal.getId().equals(u.getId())) {
-			throw ExceptionUtil.newForbiddenException();
+			throw ExceptionUtil.newUnauthorizedException();
 		}
 	}
 

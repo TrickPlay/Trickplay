@@ -83,7 +83,7 @@ public class AchievementServiceImpl implements AchievementService {
                         + SecurityUtil.getCurrentUserId()
                         + "]");
             }
-            throw ExceptionUtil.newForbiddenException();
+            throw ExceptionUtil.newUnauthorizedException();
         }
         
         try {

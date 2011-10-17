@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService {
 	public Device registerDevice(Device device) {
 		Long userId = SecurityUtil.getPrincipal().getId();
 		if (userId == null) {
-		    throw ExceptionUtil.newForbiddenException();
+		    throw ExceptionUtil.newUnauthorizedException();
 		}
 		User u = find(userId);
 		if (u == null) {
