@@ -295,7 +295,7 @@ endforeach( LIB )
 # all warnings
 #------------------------------------------------------------------------------
 
-set(CMAKE_CXX_FLAGS "-Wall -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS "-Wall")
 
 #------------------------------------------------------------------------------
 # log domain for glib log functions
