@@ -263,6 +263,13 @@ private:
     static void log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self );
 
     //.........................................................................
+    // Resource readers
+    void set_resource_reader( unsigned int type, TPResourceReader reader, void * data );
+
+    // You'll have to be a friend to find out if a reader is registered
+    void get_resource_reader( unsigned int type, TPResourceReader *reader, void **data );
+
+    //.........................................................................
     // Request handlers
 
     void set_request_handler( const char * subject, TPRequestHandler handler, void * data );
@@ -286,6 +293,7 @@ private:
     friend void tp_context_set_request_handler( TPContext * context, const char * subject, TPRequestHandler handler, void * data );
     friend void tp_context_add_console_command_handler( TPContext * context, const char * command, TPConsoleCommandHandler handler, void * data );
     friend void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void * data );
+    friend void tp_context_set_resource_reader( TPContext * context, unsigned int type, TPResourceReader reader, void * user);
     friend void tp_context_key_event( TPContext * context, const char * key );
     friend int tp_context_run( TPContext * context );
     friend void tp_context_quit( TPContext * context );
@@ -368,6 +376,12 @@ private:
     typedef std::map<gpointer,InternalPair>                     InternalMap;
 
     InternalMap                                                 internals;
+    
+    typedef std::map<unsigned int, TPResourceReader>            ResourceReaderMap;
+    typedef std::map<unsigned int, void *>                      ResourceReaderUserDataMap;
+    
+    ResourceReaderMap                                           resource_readers;
+    ResourceReaderUserDataMap                                   resource_reader_user_datas;
 };
 
 
