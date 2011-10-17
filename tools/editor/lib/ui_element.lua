@@ -2473,7 +2473,7 @@ function ui_element.toastAlert(t)
      end  
 
      function tb_group_timeline.on_completed()
-		tb_group.scale = {0.8, 0.8}
+		tb_group.scale = {1.0, 1.0} 
 		tb_group.opacity = 255
 		tb_group:hide()
      end 
@@ -6405,6 +6405,8 @@ function ui_element.tabBar(t)
 		arrow_dist_to_frame = 5,
 
 		ui_position = {200,200},
+		ui_width = 150,
+		ui_height = 60, 
     }
     
 	local offset = {}
@@ -6557,6 +6559,10 @@ function ui_element.tabBar(t)
         }
         
         umbrella:add(bg)
+
+		-- added these two lines for selected rectangle of contents
+		p.ui_width = p.button_width
+		p.ui_height = p.button_height
 
         for i = 1, #p.tab_labels do
             

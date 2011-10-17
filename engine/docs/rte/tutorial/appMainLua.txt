@@ -1,13 +1,13 @@
 Topic: The app MetaData and main.lua Files
 
-Every TrickPlay application consists of at least the following two text files that contain Lua source code. Both files must be stored in your application's top-level, application bundle directory.
+Every TrickPlay application consists of at least two text files: app and main.lua. Both files contain Lua source code and must be stored in your application's top-level, application bundle directory.
 
-	app - a short file containing information about the application, such as its name, version and ID.
+	app - a short file containing general information about the application, such as its name, version and ID.
 	main.lua - the application's entry point. Program execution begins at the top of the file.
 
 *The app Metadata File*
 	
-The app file contains a Lua table called "app" that specifies various properties of the application. The sample table defined below includes all the required properties that every TrickPlay application must include. The property's settings are
+The app file contains a Lua table called "app" that specifies various properties of the application. The sample table defined below includes all the required properties that every TrickPlay application must include.
 
 	(code)
 	-- TrickPlay SDK Tutorial's app Metadata File
@@ -19,13 +19,15 @@ The app file contains a Lua table called "app" that specifies various properties
 	}
 	(end)
 
-Each property in the app table is a string surrounded by double quotation marks and a comma separating each table entry. The name and version properties simply specify the application's name and version number. Both of these properties may be displayed to the user during the application's execution. The release property specifies the application's internal release number; it is similar to the version property, but is never shown to the user. The id property uniquely identifies the application. One method to generate a unique identifier is to use reverse-DNS notation, such as that used in the sample. The URL does not actually need to exist. The string may contain the alphanumeric ASCII characters A-Z, a-z, 0-9, period, minus, and underscore.
+Each property's value in the app table is a string surrounded by double quotation marks and a comma separating each table entry. The name and version properties simply specify the application's name and version number. Both of these properties may be displayed to the user during the application's execution. The release property specifies the application's internal release number; it is similar to the version property, but is never shown to the user. The id property uniquely identifies the application. One method to generate a unique identifier is to use reverse-DNS notation, such as that used in the sample. The URL does not actually need to exist. The string may contain the alphanumeric ASCII characters A-Z, a-z, 0-9, period, minus, and underscore.
 
 When a TrickPlay application is run, the app file is read by the TrickPlay Engine before the application begins executing.
 
 Additional information about the app metadata file, including optional properties that may be defined, can be found in the <Programmer's Guide at file:../progguide/app_metafile-txt.html>.
 
 Create the sample app metadata file shown above using any text editor. Name the file "app" (without quotation marks) and store it in its own directory. This directory will be the application's top-level application bundle directory. All the application's source files and resources, such as image files, will be stored in either the application bundle directory or subdirectories below the bundle directory.
+
+The complete <app> source file can be seen in the <Complete Tutorial Source Code> section.
 
 *The main.lua File*
 

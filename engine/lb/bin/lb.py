@@ -490,7 +490,7 @@ def emit( stuff , f ):
 
 
 
-            result += "%s %s(" % ( ctype[ type ] , param[ "name" ] )
+            result += "MIGHT_BE_UNUSED %s %s(" % ( ctype[ type ] , param[ "name" ] )
 
             if param.get( "default" ) is not None:
 
@@ -690,7 +690,7 @@ def emit( stuff , f ):
                     "{\n"
                     "%s"
                     "  luaL_checktype(L,1,LUA_TUSERDATA);\n"
-                    "  %s self(lb_get_self(L,%s));\n"
+                    "  MIGHT_BE_UNUSED %s self(lb_get_self(L,%s));\n"
                     %
                     ( bind_name , func[ "name" ] , profiling_header("%s_%s"%(bind_name,func["name"])) , udata_type , udata_type )
                 )
@@ -782,7 +782,7 @@ def emit( stuff , f ):
                     '  UserData * __ud__ = UserData::make( L , "%s" );\n'
                     "  luaL_getmetatable(L,%s);\n"
                     "  lua_setmetatable(L,-2);\n"
-		            "  %s self=0;\n"
+		            "  MIGHT_BE_UNUSED %s self=0;\n"
                     "\n"
                     %
                     ( bind_name , metatable_name, udata_type )
@@ -834,7 +834,7 @@ def emit( stuff , f ):
                     "int delete_%s(lua_State*L)\n"
                     "{\n"
                     "%s"
-                    "  %s self(lb_get_self(L,%s));\n"
+                    "MIGHT_BE_UNUSED %s self(lb_get_self(L,%s));\n"
                     %
                     ( bind_name , profiling_header("delete_%s"%bind_name) , udata_type , udata_type )
                 )
@@ -882,7 +882,7 @@ def emit( stuff , f ):
                     "int get_%s_%s(lua_State*L)\n"
                     "{\n"
                     "%s"
-                    "  %s self(lb_get_self(L,%s));\n"
+                    "MIGHT_BE_UNUSED %s self(lb_get_self(L,%s));\n"
                     %
                     ( bind_name , prop[ "name" ] , profiling_header("get_%s_%s"%(bind_name,prop["name"])) , udata_type , udata_type )
                 )
@@ -942,7 +942,7 @@ def emit( stuff , f ):
                         "int set_%s_%s(lua_State*L)\n"
                         "{\n"
                         "%s"
-                        "  %s self(lb_get_self(L,%s));\n"
+                        "MIGHT_BE_UNUSED %s self(lb_get_self(L,%s));\n"
                         %
                         ( bind_name , prop[ "name" ] , profiling_header("set_%s_%s"%(bind_name,prop["name"])) , udata_type , udata_type )
                     )
@@ -990,8 +990,8 @@ def emit( stuff , f ):
                     "\n"
                     "int set_%s_%s(lua_State*L)\n"
                     "{\n"
-                    "  %s self(lb_get_self(L,%s));\n"
-                    '  int %s(!lb_set_callback(L,"%s"));\n'
+                    "MIGHT_BE_UNUSED %s self(lb_get_self(L,%s));\n"
+                    'MIGHT_BE_UNUSED int %s(!lb_set_callback(L,"%s"));\n'
                     %
                     ( bind_name , cb[ "name" ] , udata_type , udata_type , cb[ "name" ] , cb[ "name" ] )
                 )
