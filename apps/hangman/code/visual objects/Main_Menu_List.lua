@@ -83,11 +83,11 @@ function MML:init(t)
         duration = 300,
         transitions = {
             {
-                source = "*", target = "UNFOCUSED",
+                source = "*", target = "UNFOCUSED", duration = 300,
                 keys = { {hl, "opacity",   0} }
             },
             {
-                source = "*", target = "FOCUSED",
+                source = "*", target = "FOCUSED",  duration = 300,
                 keys = { {hl, "opacity", 255} }
             }
         }

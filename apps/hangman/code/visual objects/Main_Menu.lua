@@ -65,41 +65,6 @@ function main_menu:init(t)
     box_h             = t.box_h             or 275
     entry_h           = t.entry_h           or  48
     
-    --[[
-    vis_range = math.floor(box_h/entry_h)
-    
-    mid_align = (box_h - vis_range*entry_h)/2
-    
-    frame = Canvas( box_w, box_h )
-    frame:set_source_color( "#ffffffff" )
-    frame.line_width = 2
-    frame:round_rectangle( 1, 1, frame.w-2, frame.h-2, 8 )
-    frame:stroke()
-    frame = frame:Image()
-    
-    frame.position = {400,750}
-    
-    hl = Clone{ source = img_srcs.mm_focus, x = 2, }--y = mid_align }
-    
-    clip.clip = { 2,2,box_w - 4,box_h - 4}
-    
-    clip:add( hl )
-    
-    clip.position = frame.position
-    
-    no_sessions_text = Text{
-        text    = "No Active Sessions",
-        font    = font .. " 30px",
-        color   = awaiting_reply,
-        x       = frame.x + frame.w/2,
-        y       = 800,
-        opacity = 0 ,
-    }
-    no_sessions_text.anchor_point = {
-        no_sessions_text.w/2, 0
-    }
-    
-    --]]
     
     local right_side_txt = {}
     right_side_bar = {}

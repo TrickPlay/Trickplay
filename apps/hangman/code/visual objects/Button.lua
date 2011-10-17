@@ -7,7 +7,7 @@ local function make_button_animations(unfocus_fades,unfocused,focused,passive)
             duration = 300,
             transitions = {
                 {
-                    source = "*",          target = "UNFOCUSED",
+                    source = "*",          target = "UNFOCUSED", duration = 300,
                     keys = unfocus_fades and
                         {
                             {focused,   "opacity",   0},
@@ -19,7 +19,7 @@ local function make_button_animations(unfocus_fades,unfocused,focused,passive)
                         }
                 },
                 {
-                    source = "*",        target = "FOCUSED",
+                    source = "*",        target = "FOCUSED", duration = 300,
                     keys = unfocus_fades and
                         {
                             {focused,   "opacity", 255},
@@ -31,7 +31,7 @@ local function make_button_animations(unfocus_fades,unfocused,focused,passive)
                         }
                 },
                 {
-                    source = "*",        target = "PASSIVE_FOCUSED",
+                    source = "*",        target = "PASSIVE_FOCUSED", duration = 300,
                     keys = unfocus_fades and
                         {
                             {focused,   "opacity",   0},
@@ -51,7 +51,7 @@ local function make_button_animations(unfocus_fades,unfocused,focused,passive)
             duration = 300,
             transitions = {
                 {
-                    source = "*",          target = "UNFOCUSED",
+                    source = "*",          target = "UNFOCUSED", duration = 300,
                     keys = unfocus_fades and
                         {
                             {focused,   "opacity",   0},
@@ -61,7 +61,7 @@ local function make_button_animations(unfocus_fades,unfocused,focused,passive)
                         }
                 },
                 {
-                    source = "*",        target = "FOCUSED",
+                    source = "*",        target = "FOCUSED", duration = 300,
                     keys = unfocus_fades and
                         {
                             {focused,   "opacity", 255},
@@ -71,7 +71,7 @@ local function make_button_animations(unfocus_fades,unfocused,focused,passive)
                         }
                 },
                 {
-                    source = "*",        target = "PASSIVE_FOCUSED",
+                    source = "*",        target = "PASSIVE_FOCUSED", duration = 300,
                     keys = unfocus_fades and
                         {
                             {focused,   "opacity", passive*255},
@@ -89,7 +89,7 @@ local function make_button_animations(unfocus_fades,unfocused,focused,passive)
             duration = 300,
             transitions = {
                 {
-                    source = "FOCUSED",          target = "UNFOCUSED",
+                    source = "FOCUSED",          target = "UNFOCUSED", duration = 300,
                     keys = unfocus_fades and
                         {
                             {focused,   "opacity",   0},
@@ -99,7 +99,7 @@ local function make_button_animations(unfocus_fades,unfocused,focused,passive)
                         }
                 },
                 {
-                    source = "UNFOCUSED",        target = "FOCUSED",
+                    source = "UNFOCUSED",        target = "FOCUSED", duration = 300,
                     keys = unfocus_fades and
                         {
                             {focused,   "opacity", 255},
