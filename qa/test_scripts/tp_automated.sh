@@ -6,45 +6,30 @@ minor_fail=0
 major_fail=0
 pass=0
 
+## Check for location of Trickplay generated files
 
-## Run trickplay
-
-# find the location of the automated_tests
+echo
+echo "* Starting fuzzy compare script for Trickplay Automated Test results * "
+echo
 TP_AUTOMATED_TESTS=${TP_AUTOMATED_TESTS:-0}
-if [ ${TP_AUTOMATED_TESTS} = "0" ]; then
-    echo "Required environment variable TP_AUTOMATED_TESTS not set. Exiting script..."
-    exit 1
+if [ ! ${TP_AUTOMATED_TESTS} = "0" ]; then
+  echo "Environment variable TP_AUTOMATED_TESTS set."
+  echo "Using $TP_AUTOMATED_TESTS folder for generated png files."
+elif [ -d "generated_pngs" ]; then 
+  echo "Using existing generated_png folder for generated png files."
+  TP_AUTOMATED_TESTS=$PWD/generated_pngs
+elif [ -L "automated_tests" ]; then
+  echo "Using symbolic link to automated_tests folder for generated png files."
+  TP_AUTOMATED_TESTS=$PWD/automated_tests
 else
-    echo $TP_AUTOMATED_TESTS
+  echo "Could not find location of ATS result pngs files."
+  echo "Please set environment variable TP_AUTOMATED_TESTS to location of png files or "
+  echo "create a folder on this level called generated_pngs and copy generated files to it."
+  echo
+  echo "Exiting script..."
+  echo
+  exit 1
 fi
-
-trickplay_loc=`which trickplay`
-found_trickplay=$?
-if [ $found_trickplay -ne 0 ]; then
-    echo "cannot find executable trickplay. Exiting script..."
-    exit 1
-else
-    echo "executing `which trickplay`"
-fi
-echo
-echo "** ATS using Trickplay. Screensums comparison results will be displayed **"
-echo
-trickplay $TP_AUTOMATED_TESTS
-
-status=$?
-
-# echo $status
-
-if [ $status -eq 0 ]; then {
-    echo "Trickplay completed successfully"
-    echo
-}
-else {
-    echo "Trickplay failed to run the Automated Tests. (status: $status). Exiting script..."
-    exit 1
-}
-fi
-
 
 ## Check what resolution the test files are
 
