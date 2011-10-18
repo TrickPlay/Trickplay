@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.hangman",
+    release     = "1",
+    version     = "0.1",
+    name        = "The Hangman's Challenge",
+    author      = "Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}

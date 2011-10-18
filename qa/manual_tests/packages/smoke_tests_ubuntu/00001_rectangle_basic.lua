@@ -28,10 +28,6 @@ function generate_test_image ()
 	            	color = "F5B800",
 	            	size = { 100, 100 },
 	            	position = { 100,100 }
-	            },
-	            Text {
-	            	font = "sans 40px",
-	            	text = "0001"
 	            }
 	         }
 		}
