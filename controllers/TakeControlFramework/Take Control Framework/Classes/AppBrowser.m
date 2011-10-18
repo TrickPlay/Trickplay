@@ -158,13 +158,13 @@
         
         self.delegate = _delegate;
         
-        /**
-         // Can't do this automatically for now
-         if (self.delegate) {
-         [self refreshCurrentApp];
-         [self refreshAvailableApps];
-         }
-         **/
+        //*
+        // Can't do this automatically for now
+        if (self.delegate) {
+            [self refreshCurrentApp];
+            [self refreshAvailableApps];
+        }
+        //*/
     }
     
     return self;
@@ -432,25 +432,24 @@
     
     NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", tvConnection.hostName, tvConnection.http_port, app.appID];
     dispatch_queue_t launchApp_queue = dispatch_queue_create("launchAppQueue", NULL);
-    dispatch_async(launchApp_queue, ^(void){
+    dispatch_async(launchApp_queue, ^(void) {
         
         NSLog(@"Launching app via url '%@'", launchString);
         
         NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:launchString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
         NSHTTPURLResponse *response;
         NSData *launchData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:NULL];
-        NSLog(@"launch data = %@", launchData);
         
         // Failure to launch
         if (response.statusCode != 200) {
-            dispatch_async(dispatch_get_main_queue(), ^(void){
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
                 [self.delegate appBrowser:self newAppLaunched:app successfully:NO];
                 [self viewControllersRefresh];
             });
         } else {  // Successful launch
             self.currentApp = app;
             
-            dispatch_async(dispatch_get_main_queue(), ^(void){
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
                 [self.delegate appBrowser:self newAppLaunched:app successfully:YES];
                 [self viewControllersRefresh];
             });
