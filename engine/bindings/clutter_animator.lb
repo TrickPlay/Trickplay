@@ -127,7 +127,7 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
             GValue gvalue={0};
 
             g_value_init(&gvalue,G_TYPE_UINT);
-            g_value_set_uint(&gvalue,lua_tonumber(L, index));
+            g_value_set_uint(&gvalue,lua_tointeger(L, index));
 
 			clutter_animator_set_key(animator, G_OBJECT(source), name.c_str(), nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), name.c_str(), ease_in);
@@ -293,7 +293,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 		return luaL_error(L, "Incorrect argument, table expected");
 	}
 
-	int duration = 2000;
+	guint duration = 2000;
 
 	lua_getfield(L, index, "duration");
 
@@ -303,11 +303,11 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 		{
 			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : number expected");
 		}
-		duration =  lua_tonumber(L, -1);
-		if (!(duration > 0 ))
+		if ( lua_tointeger(L, -1) < 0 )
 		{
 			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive number expected");
 		}
+		duration =  lua_tointeger(L, -1);
 	}
     lua_pop(L, 1);
 
@@ -579,16 +579,14 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
     
     --- The duration Property ---
     
-    The duration property can specify the animation's length in milliseconds. The duration property, if set, is not part of the "properties" property; it should be defined as its own property, separate from properties. A sample is shown below.
+    The duration property can specify the animation's length in milliseconds. If not set, duration defaults to 2000 milliseconds. A sample is shown below.
     
     (code)
-    myAnimation = Animator( { duration = 2000,
+    myAnimation = Animator( { duration = 1000,
                               properties = { ... }
                             }
                           )
     (end)
-    
-    Specifying the animation's duration in the object's constructor is optional, but an animation *must* have a duration. If not specified in the constructor, the duration must be specified in either the Animator object's <duration> property or the duration property of an attached Timeline object.
 
 	--- The timeline Property ---
 
@@ -795,7 +793,7 @@ class Animator [[ClutterAnimator*]]
 		
 		The animation's duration can also be set in the Animator object's constructor or in the duration property of an attached Timeline.
 		
-		*Default Value:* 0
+		*Default Value:* 2000
 		
 		*See Also:* the <Timeline.duration> property
 	*/
