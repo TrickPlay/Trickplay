@@ -559,6 +559,8 @@ list( APPEND
     ${ENGINE_SRC}/source/log.cpp
     ${ENGINE_SRC}/source/keyboard.cpp
     ${ENGINE_SRC}/source/jpeg_utils.cpp
+    
+    ${ENGINE_SRC}/source/physics_bullet.cpp
 )
 
 #------------------------------------------------------------------------------
