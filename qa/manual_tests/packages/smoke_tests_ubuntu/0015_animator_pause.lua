@@ -59,16 +59,6 @@ function generate_test_image ()
 					{0.1, "LINEAR", 650}
 						}
 				}
-,
-				{
-				source = rect1, 
-				name = "color", 
-				ease_in = true, 
-				keys = {
-					{0.1, "LINEAR", "FFFFFF" },					
-					{0.8, "LINEAR", "FF0033" }
-						}
-				}
 			}
 	
 	}
@@ -85,7 +75,7 @@ function generate_test_image ()
 			ani0.timeline:pause()
 			stage1 = true
 		end 
-		if total > 3 and stage2 == false then
+		if total > 4 and stage2 == false then
 			ani0.timeline:start ()
 			stage2 = true
 		end 

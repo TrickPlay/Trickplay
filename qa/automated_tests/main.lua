@@ -24,7 +24,7 @@ local test_to_run = 68 -- if automation_option == 2
 -- the package file. 
 -- It contains the generated checksum so  ensure that all tests pass before using this as a baseline.
 local console_display_option_choices = { test_results = 1, dump_screensum = 2 } 
-local console_display_option = 2
+local console_display_option = 1
 
 -- Time interval between tests
 local test_interval = 0.5
