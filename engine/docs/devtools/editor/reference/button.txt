@@ -168,13 +168,13 @@ The border's color when the button has key focus is specified in the <focus_colo
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
-*See Also:* the <focus_color> and <fill_color> properties
+*See Also:* the <focus_border_color> and <fill_color> properties
 
 
 
-Property: focus_color
+Property: focus_border_color
 
-The focus_color is a table of integer RGB and alpha settings specifying the button's border color when it has focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The focus_border_color is a table of integer RGB and alpha settings specifying the button's border color when it has focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {27, 145, 27, 255}
 
@@ -182,73 +182,73 @@ The focus_color is a table of integer RGB and alpha settings specifying the butt
 
 
 
-Function: on_focus_in
+Function: set_focus
 
-The on_focus_in() function forces the key focus to the button. To accurately understand what this function does, think of it as get_focus().
+The set_focus() function forces the key focus to the button.
 
-Calling on_focus_in() also causes the <focused> event handler to be called.
+Calling set_focus() also causes the <on_focus> event handler to be called.
 
-If the function's key argument is set to keys.Return then the button's <pressed> event handler is also called.
+If the function's key argument is set to keys.Return then the button's <on_press> event handler is also called.
 
-*Prototype:* on_focus_in( key )
+*Prototype:* set_focus( key )
 
 *Arguments:*
 
-key - Optional argument. If equal to keys.Return, the pressed() event handler is called. Other values have no effect.
+key - Optional argument. If equal to keys.Return, the on_press() event handler is called. Other values have no effect.
 
 *Return Value:* None.
 
-*See Also:* the <focused> and <pressed> event handlers
+*See Also:* the <on_focus> and <on_press> event handlers
 
 
 
-Function: on_focus_out
+Function: clear_focus
 
-The on_focus_out() function releases the key focus from the button. To accurately understand what this function does, think of it as remove_focus().
+The clear_focus() function releases the key focus from the button.
 
-Calling on_focus_out() also causes the <released> event handler to be called.
+Calling clear_focus() also causes the <on_unfocus> event handler to be called.
 
-After calling on_focus_out(), no screen element has the input focus.
+After calling clear_focus(), no screen element has the input focus.
 
-*Prototype:* on_focus_out()
+*Prototype:* clear_focus()
 
 *Arguments:* None.
 
 *Return Value:* None.
 
-*See Also:* the <released> event handler
+*See Also:* the <on_unfocus> event handler
 
 
 
-Event Handler: focused
+Event Handler: on_focus
 
-The focused() event handler is called whenever the button receives the key focus.
+The on_focus() event handler is called whenever the button receives the key focus.
 
-The TrickPlay Visual Editor generates an empty focused() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button receives the key focus.
+The TrickPlay Visual Editor generates an empty skeleton on_focus() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button receives the key focus.
 
 *Default Setting:* nil or references an empty skeleton handler, i.e., focus-in events are ignored.
 
-*See Also:* the <on_focus_in> function and the <released> event handler
+*See Also:* the <set_focus> function and the <on_unfocus> event handler
 
 
 
-Event Handler: released
+Event Handler: on_unfocus
 
-The released() event handler is called whenever the button loses the key focus.
+The on_unfocus() event handler is called whenever the button loses the key focus.
 
-The TrickPlay Visual Editor generates an empty released() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button loses the key focus.
+The TrickPlay Visual Editor generates an empty skeleton on_unfocus() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button loses the key focus.
 
 *Default Setting:* nil or references an empty skeleton handler, i.e., focus-out events are ignored.
 
-*See Also:* the <on_focus_out> function and the <focused> event handler
+*See Also:* the <clear_focus> function and the <on_focus> event handler
 
 
 
-Event Handler: pressed
+Event Handler: on_press
 
-The pressed() event handler is called whenever the button is pressed.
+The on_press() event handler is called whenever the button is pressed.
 
-The TrickPlay Visual Editor generates an empty pressed() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button is pressed.
+The TrickPlay Visual Editor generates an empty skeleton on_press() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button is pressed.
 
 *Default Setting:* nil or references an empty skeleton handler, i.e., button-press events are ignored.
 
@@ -257,11 +257,11 @@ The TrickPlay Visual Editor generates an empty pressed() event handler in the pr
 (code)
 -- Assume we have two screens: FirstScreen and NextScreen.
 -- We are currently in the FirstScreen, which contains a button with its name property set to "GoToNextScreen".
--- When the GoToNextScreen button is pressed, its pressed() event handler below is called.
+-- When the GoToNextScreen button is pressed, its on_press() event handler below is called.
 
 -- The TrickPlay Visual Editor automatically generates the handler skeleton and saves it in the
 -- project's main.lua file. You can also write the handler definition yourself if you don't use the Editor.
-layout["FirstScreen"].GoToNextScreen.pressed = function() -- Handler for GoToNextScreen.pressed in this screen
+layout["FirstScreen"].GoToNextScreen.on_press = function() -- Handler for GoToNextScreen.on_press in this screen
   -- We add this code...
   -- Transition to NextScreen using a fade-out/fade-in effect
   ui_element.transit_to( groups["FirstScreen"], groups["NextScreen"], "fade" )

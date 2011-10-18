@@ -33,7 +33,7 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    22
+#define TP_MINOR_VERSION    23
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
@@ -393,7 +393,7 @@ typedef struct TPContext TPContext;
 #define TP_RUN_APP_PREPARE_FAILED       4
 #define TP_RUN_APP_ERROR                5
 #define TP_RUN_ALREADY_RUNNING          6
-    
+
 /*-----------------------------------------------------------------------------
     Function: tp_init_version
     
@@ -778,6 +778,7 @@ typedef struct TPContext TPContext;
         TPLogHandler handler,
         void * data);
 
+
 /*-----------------------------------------------------------------------------
     Function: tp_context_run
     
@@ -834,8 +835,7 @@ typedef struct TPContext TPContext;
                     
         TPContext * context);
 
-/*-----------------------------------------------------------------------------
-*/
+/*---------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 }
