@@ -3,6 +3,7 @@
 
 //-----------------------------------------------------------------------------
 #include "trickplay/audio-sampler.h"
+#include "trickplay/resource.h"
 #include "common.h"
 #include "notify.h"
 #include "mediaplayers.h"
@@ -193,6 +194,11 @@ public:
 
     void audio_detection_match( const gchar * json );
 
+    //.........................................................................
+    // Get a resource loader
+
+    bool get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const;
+
 private:
 
     TPContext();
@@ -264,10 +270,7 @@ private:
 
     //.........................................................................
     // Resource readers
-    void set_resource_reader( unsigned int type, TPResourceReader reader, void * data );
-
-    // You'll have to be a friend to find out if a reader is registered
-    void get_resource_reader( unsigned int type, TPResourceReader *reader, void **data );
+    void set_resource_loader( unsigned int resource_type , TPResourceLoader loader , void * user_data );
 
     //.........................................................................
     // Request handlers
@@ -293,7 +296,7 @@ private:
     friend void tp_context_set_request_handler( TPContext * context, const char * subject, TPRequestHandler handler, void * data );
     friend void tp_context_add_console_command_handler( TPContext * context, const char * command, TPConsoleCommandHandler handler, void * data );
     friend void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void * data );
-    friend void tp_context_set_resource_reader( TPContext * context, unsigned int type, TPResourceReader reader, void * user);
+    friend void tp_context_set_resource_loader( TPContext * context, unsigned int type, TPResourceLoader loader, void * data);
     friend void tp_context_key_event( TPContext * context, const char * key );
     friend int tp_context_run( TPContext * context );
     friend void tp_context_quit( TPContext * context );
@@ -377,11 +380,10 @@ private:
 
     InternalMap                                                 internals;
     
-    typedef std::map<unsigned int, TPResourceReader>            ResourceReaderMap;
-    typedef std::map<unsigned int, void *>                      ResourceReaderUserDataMap;
+    typedef std::pair<TPResourceLoader,void *>					ResourceLoaderClosure;
+    typedef std::map<unsigned int, ResourceLoaderClosure> 		ResourceLoaderMap;
     
-    ResourceReaderMap                                           resource_readers;
-    ResourceReaderUserDataMap                                   resource_reader_user_datas;
+    ResourceLoaderMap                                           resource_loaders;
 };
 
 
