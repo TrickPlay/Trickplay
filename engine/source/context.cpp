@@ -2014,34 +2014,29 @@ void TPContext::set_log_handler( TPLogHandler handler, void * data )
 
 //-----------------------------------------------------------------------------
 
-void TPContext::set_resource_reader( unsigned int type, TPResourceReader reader, void * data )
+void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader , void * data )
 {
 	g_assert( !running() );
+	g_assert( loader );
 	
-	if( NULL == reader )
-	{
-		resource_readers.erase(type);
-		resource_reader_user_datas.erase(type);
-	}
-	else
-	{
-		resource_readers [ type ] = reader;
-		resource_reader_user_datas [ type ] = data;
-	}
+	resource_loaders[ type ] = ResourceLoaderClosure( loader , data );
 }
 
-void TPContext::get_resource_reader( unsigned int type, TPResourceReader *reader, void **data )
+//-----------------------------------------------------------------------------
+
+bool TPContext::get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const
 {
-	if(resource_readers.count(type))
+	ResourceLoaderMap::const_iterator it = resource_loaders.find( resource_type );
+
+	if ( it == resource_loaders.end() )
 	{
-		*reader = resource_readers[type];
-		*data = resource_reader_user_datas[type];
+		return false;
 	}
-	else
-	{
-		*reader = NULL;
-		*data = NULL;
-	}
+
+	* loader = it->second.first;
+	* user_data = it->second.second;
+
+	return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -2849,8 +2844,6 @@ gpointer TPContext::get_internal( gpointer key )
 {
     InternalMap::const_iterator it( internals.find( key ) );
 
-    // If it already exists, call its destroy notify
-
     if ( it != internals.end() )
     {
         return it->second.first;
@@ -3125,11 +3118,11 @@ void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void
 
 //-----------------------------------------------------------------------------
 
-void tp_context_set_resource_reader( TPContext * context, unsigned int type, TPResourceReader reader, void * data)
+void tp_context_set_resource_loader( TPContext * context , unsigned int type , TPResourceLoader loader, void * data)
 {
 	g_assert( context );
 	
-	context->set_resource_reader( type, reader, data );
+	context->set_resource_loader( type , loader , data );
 }
 
 //-----------------------------------------------------------------------------
