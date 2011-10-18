@@ -15,8 +15,8 @@ The following Lua libraries, functions and package elements are not supported in
 	os.execute()
 	os.exit()
 	os.getenv()
-	os.rename()
 	os.remove()
+	os.rename()
 	os.setlocale()
 	os.tmpname()
 	package.cpath
