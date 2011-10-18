@@ -104,7 +104,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 	{
 		if (lua_type(L, index) == LUA_TNUMBER) 
 		{
-			value = lua_tonumber(L, index);
+			value = lua_tointeger(L, index);
 
             g_value_init(&gvalue,G_TYPE_UINT);
             g_value_set_uint(&gvalue,value);
@@ -268,7 +268,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
     if (lua_type(L, index) != LUA_TTABLE) 
 		return luaL_error(L, "Incorrect argument, table expected");
 
-	int duration=1000;
+	guint duration=1000;
 
     // Default mode for the whole ClutterState
 	String source_mode = "LINEAR";
@@ -281,11 +281,11 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		{
 			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : number expected");
 		}
-		duration =  lua_tointeger(L, -1);
-		if ( !(duration > 0) )
+		if ( lua_tointeger(L, -1) < 0 )
 		{	
 			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive number expected");
 		} 
+		duration =  lua_tointeger(L, -1);
 	}
     lua_pop(L, 1);
 
@@ -366,7 +366,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		// duration 
 		lua_getfield(L, -1, "duration");
 		
-		int sduration = 1000;
+		int sduration = 0;
 
 		if(!lua_isnil(L, -1))
 		{
@@ -374,11 +374,11 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			{
 				return luaL_error(L, "Incorrect argument, failed to set \'duration\' : number expected");
 			}
-			sduration =  lua_tonumber(L, -1);
-			if (!( sduration > 0 ))
+			if ( lua_tointeger(L, -1) < 0 )
 			{
 				return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive number expected");
 			}
+			sduration =  lua_tointeger(L, -1);
 		}
     	lua_pop(L, 1);
 
