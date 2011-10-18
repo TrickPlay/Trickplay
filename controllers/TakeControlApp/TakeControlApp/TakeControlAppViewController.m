@@ -207,17 +207,15 @@
  * a connection to a service, and tells it to establish this connection.
  */
 - (void)createTPAppViewControllerWithConnection:(TVConnection *)tvConnection {
-    appViewController = [[TPAppViewController alloc] initWithTVConnection:tvConnection  delegate:self];
+    CGFloat
+    width = self.view.frame.size.width,
+    height = self.view.frame.size.height;
+    
+    appViewController = [[TPAppViewController alloc] initWithTVConnection:tvConnection size:CGSizeMake(width, height - 44.0) delegate:self];
     
     if (!appViewController) {
         return;
     }
-    //*
-    CGFloat
-    width = self.view.frame.size.width,
-    height = self.view.frame.size.height;
-    [appViewController setSize:CGSizeMake(width, height - 44.0)];
-    //*/
 }
 
 - (void)destroyTPAppViewController {

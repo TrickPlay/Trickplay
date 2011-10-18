@@ -97,7 +97,7 @@ UIActionSheetDelegate, UINavigationControllerDelegate>
 // The designated initialization method for this class. Must
 // provide an active TVConnection object. The
 // delegate may be set to nil. Returns nil on failure.
-- (id)initWithTVConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
+- (id)initWithTVConnection:(TVConnection *)tvConnection size:(CGSize)size delegate:(id <TPAppViewControllerDelegate>)delegate;
 // Clears all UI objects from this TPAppViewController's view, but
 // not any AdvancedUI objects. UI objects are created asynchronously.
 - (void)clearUI;
