@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Global variables
-
+test_count=0
 minor_fail=0
 major_fail=0
 pass=0
@@ -78,13 +78,19 @@ cp $TP_AUTOMATED_TESTS/*.png $PWD/$results_folder/generated_pngs
 
 echo "** Comparing generated images to baseline images using Compare **"
 for f in $PWD/baselines/$test_resolution/*.png; do
+    test_count=$((test_count+1))
     pngfile=${f##*/}
 
     if test -e $PWD/$results_folder/generated_pngs/$pngfile ; then
 	    compare_cmd="compare -metric AE -fuzz 85% $f $PWD/$results_folder/generated_pngs/$pngfile /dev/null 2>&1"
-	   # echo "$compare_cmd"
+#	    echo "$compare_cmd"
 	    imgdiff=`compare -metric AE -fuzz 85% $f $PWD/$results_folder/generated_pngs/$pngfile /dev/null 2>&1`
 	    status2=$?
+#        echo "original imgdiff = $imgdiff"
+        imgdiff=`echo $imgdiff|awk '{print($1)}'`
+#        echo "new imgdiff = $imgdiff"
+        #echo `expr "$imgdiff" : ''`
+#        echo "compare status: $status2"
 	    if [ $status2 -eq 0 ]; then {
 		    if [ $imgdiff -eq 0 ]; then {
 			pass=$(($pass+1))
@@ -118,6 +124,6 @@ echo -e "\t\tTests Results"
 echo -e "Pass = \t\t\t$pass"
 echo -e "Minor Fail = \t\t$minor_fail"
 echo -e "Major Fail = \t\t$major_fail"
-
+echo -e "Total tests = \t\t$test_count"
 #cd ..
 exit 0
