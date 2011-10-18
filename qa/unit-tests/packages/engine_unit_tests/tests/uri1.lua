@@ -7,8 +7,6 @@ Description:  Verify that the uri parse and parse_query apis parse a string as e
 --]]
 
 
-
-
 -- Test Set up --
 
 local t = uri:parse( "http://foo:bar@trickplay.com:80/hello/goodbye.php?a=1%3D&2=a+b" )
@@ -48,7 +46,7 @@ end
 
 -- Unescape a string
 function test_global_uri_parse_unescape ()
-	print ("unescapes string = "..unescaped_string)
+	print ("unescaped string = "..unescaped_string)
 	assert_equal( unescaped_string, "a=1 b=a+b c=big ", "uri not unescaped properly")
 end
 
