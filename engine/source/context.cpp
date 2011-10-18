@@ -2014,6 +2014,33 @@ void TPContext::set_log_handler( TPLogHandler handler, void * data )
 
 //-----------------------------------------------------------------------------
 
+void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader , void * data )
+{
+	g_assert( !running() );
+	g_assert( loader );
+	
+	resource_loaders[ type ] = ResourceLoaderClosure( loader , data );
+}
+
+//-----------------------------------------------------------------------------
+
+bool TPContext::get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const
+{
+	ResourceLoaderMap::const_iterator it = resource_loaders.find( resource_type );
+
+	if ( it == resource_loaders.end() )
+	{
+		return false;
+	}
+
+	* loader = it->second.first;
+	* user_data = it->second.second;
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+
 void TPContext::set_request_handler( const char * subject, TPRequestHandler handler, void * data )
 {
     request_handlers[String( subject )] = RequestHandlerClosure( handler, data );
@@ -2827,8 +2854,6 @@ gpointer TPContext::get_internal( gpointer key )
 {
     InternalMap::const_iterator it( internals.find( key ) );
 
-    // If it already exists, call its destroy notify
-
     if ( it != internals.end() )
     {
         return it->second.first;
@@ -3099,6 +3124,15 @@ void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void
     g_assert( context );
 
     context->set_log_handler( handler, data );
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_resource_loader( TPContext * context , unsigned int type , TPResourceLoader loader, void * data)
+{
+	g_assert( context );
+	
+	context->set_resource_loader( type , loader , data );
 }
 
 //-----------------------------------------------------------------------------

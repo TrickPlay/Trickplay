@@ -1,6 +1,6 @@
 app=
 {
-    id          = "com.trickplay.crittertwins",
+    id          = "com.trickplay.critter-twins",
     release     = "3",
     version     = "1.0",
     name        = "Critter Twins",

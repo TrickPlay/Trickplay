@@ -1,6 +1,12 @@
 #ifndef _TRICKPLAY_LB_H
 #define _TRICKPLAY_LB_H
 
+#if defined(__GNUC__)
+#define MIGHT_BE_UNUSED __attribute__((unused))
+#else
+#define MIGHT_BE_UNUSED
+#endif
+
 #include "user_data.h"
 #include "assert.h"
 

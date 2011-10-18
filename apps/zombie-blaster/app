@@ -1,6 +1,6 @@
 app=
 {
-    id          = "com.trickplay.cannon",
+    id          = "com.trickplay.zombie-blaster",
     release     = "3",
     version     = "1.1",
     name        = "Zombie Blaster",
