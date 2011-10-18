@@ -1790,9 +1790,9 @@ interface actor [[ClutterActor*]]
 			{
 				return luaL_error(L, "Call to animate has invalid duration: must be a number");
 			}
-			if ( lua_tointeger(L, -1) < 0 )
+			if ( lua_tointeger(L, -1) <= 0 )
 			{
-				return luaL_error(L, "Call to animate has invalid duration: must be positive number");
+				return luaL_error(L, "Call to animate has invalid duration: must be positive non-zero number");
 			}
             duration=lua_tointeger(L,-1);
 		}
