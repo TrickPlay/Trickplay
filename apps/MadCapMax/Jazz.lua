@@ -1366,7 +1366,7 @@ local make_cat = function(cat_name)
                 
             end
             
-            cat.harmless = false
+            cat.harmless = true
             
             cat:load_assets(layers.srcs, layers.enemy)
             
