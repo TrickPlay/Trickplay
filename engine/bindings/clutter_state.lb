@@ -281,9 +281,9 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		{
 			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : number expected");
 		}
-		if ( lua_tointeger(L, -1) < 0 )
+		if ( lua_tointeger(L, -1) <= 0 )
 		{	
-			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive number expected");
+			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive non-zero number expected");
 		} 
 		duration =  lua_tointeger(L, -1);
 	}
@@ -374,9 +374,9 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			{
 				return luaL_error(L, "Incorrect argument, failed to set \'duration\' : number expected");
 			}
-			if ( lua_tointeger(L, -1) < 0 )
+			if ( lua_tointeger(L, -1) <= 0 )
 			{
-				return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive number expected");
+				return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive non-zero number expected");
 			}
 			sduration =  lua_tointeger(L, -1);
 		}
