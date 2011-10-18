@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import com.trickplay.gameservice.dao.EventDAO;
 import com.trickplay.gameservice.dao.GameDAO;
 import com.trickplay.gameservice.dao.GamePlayInvitationDAO;
 import com.trickplay.gameservice.dao.GamePlayStateDAO;
+import com.trickplay.gameservice.dao.GamePlaySummaryDAO;
 import com.trickplay.gameservice.dao.GameSessionDAO;
 import com.trickplay.gameservice.dao.UserDAO;
 import com.trickplay.gameservice.domain.ChatMessage;
@@ -21,6 +23,7 @@ import com.trickplay.gameservice.domain.Event.EventType;
 import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.GamePlayInvitation;
 import com.trickplay.gameservice.domain.GamePlayState;
+import com.trickplay.gameservice.domain.GamePlaySummary;
 import com.trickplay.gameservice.domain.GameSession;
 import com.trickplay.gameservice.domain.GameStepId;
 import com.trickplay.gameservice.domain.InvitationStatus;
@@ -53,6 +56,9 @@ public class GamePlayServiceImpl implements GamePlayService {
 	
 	@Autowired
 	ChatMessageDAO chatMessageDAO;
+	
+	@Autowired
+    GamePlaySummaryDAO gamePlaySummaryDAO;
 	
 	@Transactional
 	public GameSession createGameSession(Long gameId) {
@@ -102,7 +108,7 @@ public class GamePlayServiceImpl implements GamePlayService {
 		}
 		ServiceUtil.checkAuthority(requestor);
 		
-		if (recipientId == requestorId) {
+		if (requestorId.equals(recipientId)) {
 			throw ExceptionUtil.newRequestorAndRecipientMatchException(requestorId, recipientId);
 		}
 		
@@ -121,6 +127,12 @@ public class GamePlayServiceImpl implements GamePlayService {
         
             if (recipient == null) {
                 throw ExceptionUtil.newEntityNotFoundException(User.class, "id", recipientId);
+            } else {
+                // only one active game session is allowed per recipient
+                /*
+                if (gamePlayInvitationDAO.isPairInSameGamePlaySession(gs.getGame().getId(), requestorId, recipientId)) {
+                    throw ExceptionUtil.newPairAlreadyInGamePlaySessionException(recipientId);
+                }*/
             }
         }
         
@@ -460,6 +472,9 @@ public class GamePlayServiceImpl implements GamePlayService {
 
 		Long sessionId=null;
 		for(GamePlayInvitation invitation: wildCardInvitations) {
+		    if (invitation.getRequestor().getId().equals(userId)) {
+		        continue;
+		    } 
 		    if (!invitation.getGameSession().getId().equals(sessionId)) {
 		        invitation.setReservedBy(user);
 		        long now = System.currentTimeMillis();
@@ -481,6 +496,39 @@ public class GamePlayServiceImpl implements GamePlayService {
 
     public GameSession find(Long sessionId) {
         return gameSessionDAO.find(sessionId);
+    }
+
+    public GamePlaySummary getGamePlaySummary(Long gameId) {
+        return getGamePlaySummary(gameId, SecurityUtil.getCurrentUserId());
+    }
+    
+    public GamePlaySummary getGamePlaySummary(Long gameId, Long userId) {
+        if (gameId == null) {
+            throw ExceptionUtil.newIllegalArgumentException("gameId", null, "!= null");
+        } else if (userId == null) {
+            throw ExceptionUtil.newIllegalArgumentException("userId", null, "!= null");
+        }
+        try {
+            return gamePlaySummaryDAO.findByGameAndUser(gameId, userId);
+        } catch (EmptyResultDataAccessException ex) {
+            return null;
+        }
+    }
+
+    @Transactional
+    public GamePlaySummary saveGamePlaySummary(Long gameId, String summaryDetail) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        GamePlaySummary summary = getGamePlaySummary(gameId, userId);
+        if (summary == null) {
+            summary = new GamePlaySummary();
+            summary.setGame(gameDAO.find(gameId));
+            summary.setUser(userDAO.find(userId));
+            summary.setDetail(summaryDetail);
+            gamePlaySummaryDAO.persist(summary);
+        } else {
+            summary.setDetail(summaryDetail);
+        }
+        return summary;        
     }
 	
 }

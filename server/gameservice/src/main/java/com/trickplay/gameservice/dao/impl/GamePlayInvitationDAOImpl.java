@@ -15,14 +15,14 @@ public class GamePlayInvitationDAOImpl extends
         GenericDAOWithJPA<GamePlayInvitation, Long> implements
         GamePlayInvitationDAO {
 
-    public static final String invitationForUserQuery = "select I from GamePlayInvitation I join I.gameSession GS join GS.game G"
+    private static final String invitationForUserQuery = "select I from GamePlayInvitation I join I.gameSession GS join GS.game G"
             + " WHERE G.id = :gameId"
             + " AND GS.open = true"
             + " AND I.recipient.id = :userId"
             + " AND I.status=:pendingStatus"
             + " ORDER BY I.created";
     
-    public static final String wildCardInvitationQuery = 
+    private static final String wildCardInvitationQuery = 
             "select I from GamePlayInvitation I join I.gameSession GS join GS.game G"
             + " WHERE G.id = :gameId"
             + " AND GS.open = true"
@@ -31,6 +31,16 @@ public class GamePlayInvitationDAOImpl extends
             + " AND (I.reservedUntil is null OR I.reservedUntil < :currentTime) "
             + " ORDER BY GS.id, I.created";
 
+    private static final String pairInSameGamePlaySessionQuery = 
+            "select count(I) from GamePlayInvitation I"
+            + " where I.gameSession.game.id=:gameId AND I.gameSession.endTime is null"
+            + " I.status NOT IN (:expiredStatus, :rejectedStatus, :cancelledStatus)"
+            + " AND "
+            + " ("
+            + "   (I.requestor.id = :userId1 AND I.recipient.id = :userId2)"
+            + "   OR "
+            + "   (I.requestor.id = :userId2 AND I.recipient.id = :userId1)"
+            + " )";
     
     public List<GamePlayInvitation> getPendingWildCardInvitations(Long gameId) {
         return entityManager.createQuery(wildCardInvitationQuery)
@@ -47,5 +57,17 @@ public class GamePlayInvitationDAOImpl extends
             .setParameter("pendingStatus", InvitationStatus.PENDING)
             .setMaxResults(max)
             .getResultList();
+    }
+    
+    public boolean isPairInSameGamePlaySession(Long gameId, Long userId1, Long userId2) {
+        return new Long(0).compareTo( 
+                (Long)(entityManager.createQuery(pairInSameGamePlaySessionQuery)
+                .setParameter("gameId", gameId)
+                .setParameter("expiredStatus", InvitationStatus.EXPIRED)
+                .setParameter("rejectedStatus", InvitationStatus.REJECTED)
+                .setParameter("cancelledStatus", InvitationStatus.CANCELLED)
+                .setParameter("userId1", userId1)
+                .setParameter("userId2", userId2)
+                .getSingleResult())) < 0;             
     }
 }

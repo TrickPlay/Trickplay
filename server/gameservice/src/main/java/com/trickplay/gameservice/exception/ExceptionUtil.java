@@ -127,6 +127,12 @@ Can only decline invitation when its status is 'PENDING', but invitation's statu
     }
     
     /*
+     * sendInvitationFailed=Failed to send invitation. Error is '{0}'
+     */
+    public static GameServiceException newPairAlreadyInGamePlaySessionException(Long recipientId) {
+        return new GameServiceException(Reason.PAIR_ALREADY_IN_GAME_PLAY_SESSION, recipientId);
+    }
+    /*
      * unauthorized=User doesn't have the necessary privileges to carry out this operation.
      */
     public static GameServiceException newUnauthorizedException() {

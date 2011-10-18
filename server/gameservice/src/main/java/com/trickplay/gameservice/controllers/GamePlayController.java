@@ -29,6 +29,8 @@ import com.trickplay.gameservice.transferObj.GamePlaySessionListTO;
 import com.trickplay.gameservice.transferObj.GamePlaySessionRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlaySessionTO;
 import com.trickplay.gameservice.transferObj.GamePlayStateTO;
+import com.trickplay.gameservice.transferObj.GamePlaySummaryRequestTO;
+import com.trickplay.gameservice.transferObj.GamePlaySummaryTO;
 import com.trickplay.gameservice.transferObj.UpdateInvitationStatusRequestTO;
 
 @Controller
@@ -291,5 +293,14 @@ public class GamePlayController extends BaseController {
     public @ResponseBody GamePlaySessionListTO getGamePlaySessions(@PathVariable("id") Long gameId) {
         return new GamePlaySessionListTO(gamePlayService.findAllGameSessions(gameId));
     }
+	
+	@RequestMapping(value="/rest/game/{id}/summary", method = RequestMethod.GET)
+    public @ResponseBody GamePlaySummaryTO getGamePlaySummary(@PathVariable("id") Long gameId) {
+        return new GamePlaySummaryTO(gamePlayService.getGamePlaySummary(gameId));
+    }
 
+    @RequestMapping(value="/rest/game/{id}/summary", method = RequestMethod.POST)
+    public @ResponseBody GamePlaySummaryTO saveGamePlaySummary(@PathVariable("id") Long gameId, @RequestBody GamePlaySummaryRequestTO request) {
+        return new GamePlaySummaryTO(gamePlayService.saveGamePlaySummary(gameId, request.getDetail()));
+    }
 }

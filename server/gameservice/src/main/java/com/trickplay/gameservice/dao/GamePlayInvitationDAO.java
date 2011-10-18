@@ -16,4 +16,6 @@ public interface GamePlayInvitationDAO extends GenericDAO<GamePlayInvitation, Lo
      * returns list of PENDING invitations for the given User
      */
     public List<GamePlayInvitation> getPendingInvitationsForUser(Long gameId, Long userId, int max);
+    
+    public boolean isPairInSameGamePlaySession(Long gameId, Long userId1, Long userId2);
 }

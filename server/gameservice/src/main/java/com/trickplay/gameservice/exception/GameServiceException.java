@@ -24,6 +24,7 @@ public class GameServiceException extends RuntimeException {
 		GAME_ALREADY_STARTED("gameAlreadyStarted", HttpStatus.BAD_REQUEST),
 		GAME_ALREADY_ENDED("gameAlreadyEnded", HttpStatus.BAD_REQUEST),
 		GAME_NOT_STARTED("gameNotStarted", HttpStatus.BAD_REQUEST),
+		PAIR_ALREADY_IN_GAME_PLAY_SESSION("pairAlreadyInGamePlaySession", HttpStatus.BAD_REQUEST),
 		SEND_INVITATION_FAILED("sendInvitationFailed", HttpStatus.INTERNAL_SERVER_ERROR),
 		UNAUTHORIZED("unauthorized", HttpStatus.UNAUTHORIZED),
 		FAILED_TO_CREATE_SESSION("failedToCreateSession", HttpStatus.INTERNAL_SERVER_ERROR),
