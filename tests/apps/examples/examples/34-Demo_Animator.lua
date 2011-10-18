@@ -32,17 +32,23 @@
 	sphereImage.name = "Sphere"
 	sphereImage.anchor_point = { 20, 20 },
 	screen:add( sphereImage )
+	screen:show()
 
-	-- Define an Animator for sphere
+	-- Attach a Timeline to the Animator's animation to have it loop
+	sphereTL = Timeline { duration = 1500, loop = true }
+
+	-- Define an Animator for the sphere
 	sphereAnimator = Animator( {
+		timeline = sphereTL,
 		properties = {
 			-- Object-Property #1
 			-- Animate along the X-axis. The sphere simply moves back and forth along the X-axis.
 			-- When moving from left to right, it moves faster than when moving from right to left.
 			-- When combined with the scale key frames below, this gives the appearance of the sphere
-			-- moving faster when it is closer to us.
-			{ source = sphereImage,   -- object to animate
-			  name = "x",             -- property to animate
+			-- moving faster when it is closer to us, and slower when farther away.
+			{ source = sphereImage,     -- object to animate
+			  name = "x",               -- property to animate
+			  interpolation = "CUBIC",  -- smooth interpolation
 			  -- X-axis key frames
 			  keys = {
 			  	{ 0.000, "LINEAR", 770 },
@@ -68,10 +74,6 @@
 			}
 		}
 	} )
-	
-	-- Attach a Timeline to the Animator's animation to have it loop
-	sphereTL = Timeline { duration = 1500, loop = true }
-	sphereAnimator.timeline = sphereTL
 
 	-- Start the Animator animation
 	sphereAnimator:start()
