@@ -61,7 +61,8 @@ extern int luaopen_system( lua_State * L );
 extern int luaopen_settings( lua_State * L );
 extern int luaopen_profile( lua_State * L );
 extern int luaopen_xml( lua_State * L );
-extern int luaopen_controllers_module( lua_State * L );
+extern int luaopen_controllers( lua_State * L );
+extern int luaopen_controller( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
@@ -949,7 +950,8 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_profile( L );
     luaopen_stopwatch( L );
     luaopen_json( L );
-    luaopen_controllers_module( L );
+    luaopen_controller( L );
+    luaopen_controllers( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
     luaopen_url_request( L );
@@ -1182,7 +1184,10 @@ void App::secure_lua_state( const StringSet & allowed_names )
     const char * global_nuke[] =
     {
         "require",
-        NULL
+        "load",
+        "loadstring",
+        "module",
+        0
     };
 
     for( const char * * name = global_nuke; * name; ++name )
@@ -1643,12 +1648,21 @@ gboolean App::animate_out_callback( gpointer s )
 
         clutter_actor_set_clip( screen, 0, 0, 1920, 1080 );
 
-        clutter_actor_animate( screen, CLUTTER_EASE_IN_CUBIC, 250,
-                               "opacity", 0,
-                               "scale-x", ( gdouble ) 0,
-                               "scale-y", ( gdouble ) 0,
-                               "signal::completed", animate_out_completed, screen,
-                               NULL );
+        ClutterAnimator *animator = clutter_animator_new();
+        clutter_animator_set_duration(animator, 750);
+        clutter_animator_set(animator,
+                                screen, "scale-x", CLUTTER_LINEAR, 0.0, 1.0,
+                                screen, "scale-y", CLUTTER_LINEAR, 0.0, 1.0,
+                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 0.2, 0.3,
+                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 0.2, 0.005,
+                                screen, "scale-x", CLUTTER_LINEAR, 0.5, 0.4,
+                                screen, "scale-y", CLUTTER_LINEAR, 0.5, 0.002,
+                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+                                NULL
+                            );
+        ClutterTimeline *timeline = clutter_animator_start(animator);
+        g_signal_connect_after( timeline, "completed", G_CALLBACK(animate_out_completed), screen );
     }
 
     g_object_unref( G_OBJECT( screen ) );

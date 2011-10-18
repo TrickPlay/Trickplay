@@ -136,29 +136,3 @@ The skin property is a string specifying the display appearance of the ProgressS
 
 
 
-Function: speed_up
-
-The speed_up() function decreases the <cycle_time> property by 50 milliseconds, thereby increasing the speed of the spinner by 1/20th of a second. Note: It is also possible to set the cycle_time property directly to any desired value.
-
-*Prototype:* speed_up()
-
-*Arguments:* None
-
-*Return Value:* None
-
-*See Also:* the <speed_down> function and the <cycle_time> property
-
-
-
-Function: speed_down
-
-The speed_down() function increases the <cycle_time> property by 50 milliseconds, thereby decreasing the speed of the spinner by 1/20th of a second. Note: It is also possible to set the cycle_time property directly to any desired value.
-
-*Prototype:* speed_down()
-
-*Arguments:* None
-
-*Return Value:* None
-
-*See Also:* the <speed_up> function and the <cycle_time> property
-

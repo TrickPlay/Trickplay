@@ -1,0 +1,21 @@
+Topic: Create the Main Window
+
+A TrickPlay application can have one or more display windows with multiple items shown in each window. The TrickPlay SDK libraries include a global variable called <screen> that organizes all the application's windows and their contents. The screen variable is basically a container that holds all of an application's display items, including windows and other displayed objects, such as images and user-interface elements. Before an object can be shown on the display, it first must be added to the screen container variable. Also, the screen itself must be shown.
+
+When a TrickPlay application starts, the screen container variable is empty. Although it's empty, the screen can still be shown by calling the variable's show() function, as in the code statement below.
+
+	(code)
+	-- Show the display
+	screen:show()
+	(end)
+	
+Open the tutorial's main.lua file and add the code statement shown above to display the empty screen. Save the file and run the application. An empty display window will open.
+
+(see images/emptyScreen.png)
+
+The screen has a fixed size of 1920x1080 pixels. The fixed size is scaled automatically, however, to fit the actual display dimensions.
+
+The application and TrickPlay Engine can both be terminated by either entering /exit in the Engine console's command prompt or by clicking the display window's Close icon.
+
+As you can see, an empty screen is solid black. Let's liven it up by adding a colored background.
+

@@ -6,14 +6,15 @@
 #include "controller_discovery_mdns.h"
 #include "util.h"
 
-ControllerDiscoveryMDNS::ControllerDiscoveryMDNS( TPContext * context, const String & n, int p )
+ControllerDiscoveryMDNS::ControllerDiscoveryMDNS( TPContext * context, const String & n, int _port , int _http_port )
     :
     poll( NULL ),
     server( NULL ),
     group( NULL ),
     name( n ),
     ready( false ),
-    port( p )
+    port( _port ),
+    http_port( _http_port )
 {
     avahi_set_allocator( avahi_glib_allocator() );
 
@@ -103,11 +104,36 @@ void ControllerDiscoveryMDNS::create_service( AvahiServer * server )
             }
             else
             {
-                ret = avahi_s_entry_group_commit( group );
+                while ( true )
+                {
+                    // TODO: this could loop forever...maybe we should bail at some stage
+
+                    ret = avahi_server_add_service( server, group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
+                                                    AvahiPublishFlags( 0 ), name.c_str(), "_trickplay-http._tcp", NULL, NULL, http_port, NULL );
+
+                    if ( ret == AVAHI_ERR_COLLISION )
+                    {
+                        rename();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
 
                 if ( ret != AVAHI_OK )
                 {
-                    g_warning( "FAILED TO COMMIT AVAHI SERVICE : %s", avahi_strerror( ret ) );
+                    g_warning( "FAILED TO ADD AVAHI SERVICE : %s", avahi_strerror( ret ) );
+                }
+                else
+                {
+					ret = avahi_s_entry_group_commit( group );
+
+					if ( ret != AVAHI_OK )
+					{
+						g_warning( "FAILED TO COMMIT AVAHI SERVICE : %s", avahi_strerror( ret ) );
+					}
                 }
             }
         }
@@ -130,7 +156,7 @@ void ControllerDiscoveryMDNS::avahi_server_callback( AvahiServer * server, Avahi
         {
             char * new_name = avahi_alternative_host_name( avahi_server_get_host_name( server ) );
 
-            int ret = avahi_server_set_host_name( server, new_name );
+            (void)avahi_server_set_host_name( server, new_name );
             avahi_free( new_name );
 
             // TODO : check ret

@@ -106,7 +106,7 @@ local function guideline_inspector(v)
 	end 
 
 	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = org_position, padding = 5 , border_width  = 1,
-		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
+		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_border_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
 		  text_font = "FreeSans Medium 12px", text_color =  {255,255,255,255},
     	  border_corner_radius = 0,}
 
@@ -122,14 +122,16 @@ local function guideline_inspector(v)
 		  button_ok.name = "button_ok"
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_delete.pressed = function() screen:remove(screen:find_child(v.name))
+	button_cancel.on_press = function() xbox:on_button_down() end 
+	button_delete.on_press = function() screen:remove(screen:find_child(v.name))
  									   xbox:on_button_down() 
 							end 
 
-	button_ok.pressed = function() 
+	button_ok.on_press = function() 
 		if text_input.text == "" then 
+			editor.error_message("006", nil, nil) 
 			xbox:on_button_down() 
+			return 
    		end    
 		if(util.guideline_type(v.name) == "v_guideline") then
 				v.x = tonumber(text_input.text)
@@ -141,18 +143,18 @@ local function guideline_inspector(v)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		text_input.on_focus_in()
+		text_input.set_focus()
 	end
 
 	local tab_func = function()
-		text_input.on_focus_out()
+		text_input.clear_focus()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 		button_cancel:grab_key_focus()
 	end
 
@@ -213,12 +215,12 @@ local function guideline_inspector(v)
 
 				if key_focus_obj == nil then return end 
 
-				if text_input.on_focus_out then
-					text_input.on_focus_out()
+				if text_input.clear_focus then
+					text_input.clear_focus()
 				end
 				key_focus_obj:grab_key_focus()
-				if key_focus_obj.on_focus_in then
-					key_focus_obj.on_focus_in(key)
+				if key_focus_obj.set_focus then
+					key_focus_obj.set_focus(key)
 				end
 			end
 		end
@@ -596,6 +598,9 @@ local function open_files(input_purpose, bg_image, inspector)
 	elseif input_purpose =="open_videofile" then  
 		dir = editor_lb:readdir(current_dir.."/assets/videos")
 	end 
+
+	if dir == nil then dir = {} end
+
 	local inspector_activate = function ()
 		inspector:remove(inspector:find_child("deactivate_rect"))
 	end 
@@ -613,10 +618,10 @@ local function open_files(input_purpose, bg_image, inspector)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) if inspector then inspector_activate() end end
+	button_cancel.on_press = function() xbox:on_button_down(1) if inspector then inspector_activate() end end
 	
 	if inspector then 
-		button_ok.pressed = function() 
+		button_ok.on_press = function() 
 			if ss == selected_file then selected_file = nn end 
 
 			local f_name = screen:find_child("file_name") 
@@ -630,15 +635,11 @@ local function open_files(input_purpose, bg_image, inspector)
 			if selected_file then 
 				tmpImage = assets("assets/images/"..selected_file)
 			end
-			if inspector:find_child("cw") then 
-				inspector:find_child("cw"):find_child("input_text").text = tostring(tmpImage.w)
-				inspector:find_child("ch"):find_child("input_text").text = tostring(tmpImage.h)
-			end 
 			xbox:on_button_down(1) 
 			inspector_activate() 
 		end
 	else 
-		button_ok.pressed = function() 
+		button_ok.on_press = function() 
 
 			if ss == selected_file then selected_file = nn end 
 
@@ -653,10 +654,14 @@ local function open_files(input_purpose, bg_image, inspector)
 			xbox:on_button_down(1) 
 
 			local dir = editor_lb:readdir(current_dir.."/screens")
+			if dir == nil then dir = {} end
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
 					if readfile("/screens/"..v) ~= "" then 
-						editor_lb:writefile("/screens/"..v, "", true)
+						if editor_lb:writefile("/screens/"..v, "", true) == false then 
+							editor.error_message("019", current_dir, nil, nil, msgw) 
+							screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+						end
 					end 
 				end 
 			end 
@@ -665,11 +670,11 @@ local function open_files(input_purpose, bg_image, inspector)
 
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		scroll.on_focus_in()
+		scroll.set_focus()
 	end
 	
 	
@@ -677,7 +682,7 @@ local function open_files(input_purpose, bg_image, inspector)
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	
@@ -739,7 +744,8 @@ local function open_files(input_purpose, bg_image, inspector)
 				selected_file = v
 			end
 
-			h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() selected_file = v tab_func() end }
+			h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() end }
+			--h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(index-1), [keys.Down]="h_rect"..(index+1), [keys.Tab] = function() selected_file = v tab_func() end }
 	
 			item_t.position =  {cur_w, cur_h}
 			item_t.extra.rect = h_rect.name
@@ -765,11 +771,11 @@ local function open_files(input_purpose, bg_image, inspector)
 				item_t:on_button_down()
 				return true
 			end
-			function h_rect.extra.on_focus_in()
+			function h_rect.extra.set_focus()
 				h_rect.opacity = 255
 				h_rect:grab_key_focus()
 			end
-			function h_rect.extra.on_focus_out()
+			function h_rect.extra.clear_focus()
 				h_rect.opacity = 0
 			end
 			function h_rect:on_button_down(x,y,button,num_click)
@@ -791,20 +797,18 @@ local function open_files(input_purpose, bg_image, inspector)
 
 				local key_focus_obj
 
-				if h_rect.focus[key] then 
+				if h_rect.focus[key] and type(h_rect.focus[key]) ~= "function" then 
 					key_focus_obj = msgw:find_child(h_rect.focus[key]) 
-				else 
-					return true
 				end 
 
 				if h_rect.focus[key] then
 					if type(h_rect.focus[key]) == "function" then
 						h_rect.focus[key]()
 					elseif key_focus_obj then
-						if h_rect.on_focus_out then
-							h_rect.on_focus_out()
+						if h_rect.clear_focus then
+							h_rect.clear_focus()
 						end
-						if key_focus_obj.on_focus_in then
+						if key_focus_obj.set_focus then
 							selected_file = v
 
 							ss = v
@@ -814,7 +818,7 @@ local function open_files(input_purpose, bg_image, inspector)
 								ss = nil 
 							end 
 
-							key_focus_obj.on_focus_in(key)
+							key_focus_obj.set_focus(key)
 							if h_rect.focus[key] ~= "button_ok" then 
 								scroll.seek_to_middle(0,key_focus_obj.y) 
 							end
@@ -842,7 +846,7 @@ local function open_files(input_purpose, bg_image, inspector)
 	--Focus
 	button_ok.active.opacity = 255
 	button_ok.dim.opacity = 0
-	scroll.on_focus_in()
+	scroll.set_focus()
 
 	function xbox:on_button_down(x,y,button,num_clicks)
 		if screen:find_child(msgw.name) then 
@@ -894,7 +898,7 @@ function editor.video(inspector)
 	return open_files("open_videofile",nil,inspector)
 end
 
-function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
+function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 
 	local save_items 
 
@@ -1015,7 +1019,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
@@ -1043,8 +1047,19 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	}
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1)  print(v.progress) end end
+	button_cancel.on_press = function() xbox:on_button_down(1) 
+	
+		if org_items then 
+			if v.tab_labels then 
+				v.tab_labels = org_items 
+			else 
+				v.items = org_items  
+			end 
+		end 
+	
+	end
+
+	button_ok.on_press = function() if inspector_apply(v, inspector) ~= -1 then  xbox:on_button_down(1) end end
 
 	local function inspector_position() 
 		inspector.x = x_pos
@@ -1053,14 +1068,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 		local display_x = WIDTH * screen.width/screen.display_size[1]
 		local display_y = HEIGHT * screen.height /screen.display_size[2]
 
-		if inspector.y + display_y  > screen.h and inspector.x + display_x > screen.w then 
-			inspector.y = y_pos - display_y - 20
-			inspector.x = x_pos - display_x - 20
-		elseif inspector.y + display_y  > screen.h then 
+		if inspector.y + display_y  > screen.h then 
 			inspector.y = screen.h - display_y - 10
-		elseif inspector.x + display_x > screen.w then 
+		end 
+		if inspector.x + display_x > screen.w then 
 			inspector.x = screen.w - display_x - 10
-		end
+		end 
 	end 
 
 	-- set the inspector location 
@@ -1195,7 +1208,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	--Focus
 	button_ok.active.opacity = 255
 	button_ok.dim.opacity = 0
-	scroll_info.on_focus_in()
+	scroll_info.set_focus()
 
 	local var_i = 1 
 
@@ -1213,6 +1226,7 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			end 
 		end 
 		screen.grab_key_focus(screen) 
+		menu.reactivate_menu()
 		return true
 	end 
 
@@ -1256,6 +1270,17 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 	    	end 
 	    end 
 		menu.reactivate_menu()
+
+		if x and y and button and num_clicks then 
+			if org_items then 
+				if v.tab_labels then 
+					v.tab_labels = org_items 
+				else 
+					v.items = org_items  
+				end 
+			end 
+		end 
+
 		return true
 	end 
 
@@ -1264,7 +1289,6 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos)
 			screen:add(inspector)
 		else 
 			if inspector_apply (v, inspector) ~= -1 then 
-					print("2", v.progress)
 				inspector_xbox:on_button_down()
 			end 
 		end 
@@ -1385,6 +1409,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
     if (save_current_f == true) then 
 
 		local screen_dir = editor_lb:readdir(current_dir.."/screens/")
+		if screen_dir == nil then screen_dir = {} end
 
 		for i, v in pairs(screen_dir) do
           	if(fname == v)then
@@ -1393,7 +1418,12 @@ local function save_new_file (fname, save_current_f, save_backup_f)
           	end
 		end
 
-		editor_lb:writefile(current_fn, contents, true)	
+		if editor_lb:writefile(current_fn, contents, true)	== false then 
+			editor.error_message("019", current_dir, nil, nil, msgw) 
+			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+
+
+		end 
 		
 		if current_fn == "unsaved_temp.lua" or current_fn == "/screens/unsaved_temp.lua"then
 				return 
@@ -1435,13 +1465,13 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 								-- object의 코드가 없을경우에 새로히 추가해 주어야 한다.
 					 			added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(j.name).." SECTION\n"
 					    		if j.extra.type == "Button" then 
-					     			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.focused = function() -- Handler for "..j.name.."\.focused in this screen\nend\n"
-					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.pressed = function() -- Handler for "..j.name.."\.pressed in this screen\nend\n"
-					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.released = function() -- Handler for "..j.name.."\.released in this screen\nend\n"
+					     			added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_focus = function() -- Handler for "..j.name.."\.on_focus in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_press = function() -- Handler for "..j.name.."\.on_press in this screen\nend\n"
+					     	   		added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_unfocus = function() -- Handler for "..j.name.."\.on_unfocus in this screen\nend\n"
 			   		     		elseif j.extra.type == "ButtonPicker" or j.extra.type == "RadioButtonGroup" then 
-	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_item) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_item) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
 			   		     		elseif j.extra.type == "CheckBoxGroup" then 
-	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.rotate_func = function(selected_items) -- Handler for "..j.name.."\.rotate_func in this screen\nend\n"
+	                   				added_stub_code = added_stub_code.."layout[\""..fileLower.."\"]\."..j.name.."\.on_selection_change = function(selected_items) -- Handler for "..j.name.."\.on_selection_change in this screen\nend\n"
 			   		     		elseif j.extra.type == "MenuButton" then 
 			   						for k,l in pairs (j.items) do 
 			   	     		     		if l["type"] == "item" then 
@@ -1462,7 +1492,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 			    				elseif j.extra.type == "LayoutManager" then 
 									local content_num = 0 
 									local lm_name = j.name
-			        				for k,l in pairs (j.tiles) do 
+			        				for k,l in pairs (j.cells) do 
 										for n,m in pairs (l) do 
 											if m then 
 												j = m 
@@ -1470,7 +1500,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 											end 
 										end 
 									end 
-									added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add on_focus_in and on_focus_out function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.tiles[r][c]\n\t\t\t\tif cell_obj.extra.on_focus_in == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_in ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.on_focus_out == nil then\n\t\t\t\t\tfunction cell_obj.extra.on_focus_out ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
+									added_stub_code = added_stub_code.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add set_focus and clear_focus function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.cells[r][c]\n\t\t\t\tif cell_obj.extra.set_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.set_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.clear_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.clear_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
 
 								elseif j.extra.type == "Group" then  
 									gen_added_stub_code(j)
@@ -1517,7 +1547,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 			 return
 		end 
     else -- save_current_file == false, "Save As"   
-		msg_window.inputMsgWindow_savefile(fname, current_fn)
+		msg_window.inputMsgWindow_savefile(fname, current_fn, save_current_f)
 	end 	
 end 
 
@@ -1562,7 +1592,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
     end 
 
     if current_time_focus then 
-		current_time_focus.on_focus_out()
+		current_time_focus.clear_focus()
 		current_time_focus = nil
     end 
 	
@@ -1594,10 +1624,7 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	-- No current file or save as command 
 	editor_use = true
 	-- Text Input Field 	
-	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1,
-		  border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, 
-		  text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255},
-    	  border_corner_radius = 0, readonly="screen/" }
+	local text_input = ui_element.textInput{skin = "Custom", ui_width = WIDTH - 2 * PADDING , ui_height = 22 , text = "", padding = 5 , border_width  = 1, border_color  = {255,255,255,255}, fill_color = {0,0,0,255}, focus_border_color = {255,0,0,255}, focus_fill_color = {50,0,0,255}, cursor_color = {255,255,255,255}, text_font = "FreeSans Medium 12px"  , text_color =  {255,255,255,255}, border_corner_radius = 0, readonly="screen/" }
 
 	--Buttons 
    	local button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
@@ -1607,8 +1634,8 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	editor_use = false
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down() end 
-	button_ok.pressed = function() 
+	button_cancel.on_press = function() xbox:on_button_down() end 
+	button_ok.on_press = function() 
 		local file_name 
 		if text_input.text == "" then 
 			xbox:on_button_down() 
@@ -1640,19 +1667,19 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		text_input.on_focus_in()
+		text_input.set_focus()
 	end
 
 	local tab_func = function()
-		text_input.on_focus_out()
+		text_input.clear_focus()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	-- Focus Destination 
@@ -1700,12 +1727,12 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 			if type(text_input.focus[key]) == "function" then
 				text_input.focus[key]()
 			elseif screen:find_child(text_input.focus[key]) then
-				if text_input.on_focus_out then
-					text_input.on_focus_out()
+				if text_input.clear_focus then
+					text_input.clear_focus()
 				end
 				screen:find_child(text_input.focus[key]):grab_key_focus()
-				if screen:find_child(text_input.focus[key]).on_focus_in then
-					screen:find_child(text_input.focus[key]).on_focus_in(key)
+				if screen:find_child(text_input.focus[key]).set_focus then
+					screen:find_child(text_input.focus[key]).set_focus(key)
 				end
 			end
 		end
@@ -2048,7 +2075,7 @@ function editor.clone()
 	screen:grab_key_focus()
 end
 	
-local w_attr_list =  {"ui_width","ui_height","skin","style","label","button_color","focus_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_w","cell_h","cell_spacing_w", "cell_spacing_h", "cell_timing","cell_timing_offset","cells_focusable","visible_w", "visible_h",  "virtual_w", "virtual_h", "bar_color_inner", "bar_color_outer", "bar_focus_color_inner", "bar_focus_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "box_focus_color", "box_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","tiles","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive", "arrow_color", "arrow_focus_color", "tabs"}
+local w_attr_list =  {"ui_width","ui_height","skin","style","label","title","button_color","focus_color","focus_border_color", "focus_button_color", "focus_box_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_width","cell_height","cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset","cells_focusable","visible_width", "visible_height",  "virtual_width", "virtual_height", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "focus_box_color", "box_border_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","cells","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive", "arrow_color", "focus_arrow_color", "tabs"}
 
 
 local function copy_content(n)
@@ -2122,7 +2149,7 @@ function dup_function (v, from_dup_f)
         	     	    temp_g:add(temp_g_c)
 			     	end 
 					dup_obj[j] = temp_g
-                elseif j == "tiles" then 
+                elseif j == "cells" then 
 					for k,l in pairs (v[j]) do 
 						if type(l) == "table" then 
 							for o,p in pairs(l) do 
@@ -2164,8 +2191,7 @@ function editor.duplicate()
    	end 
 
 	for i, v in pairs(g.children) do
-	    if(v.extra.selected == true) then
-			
+		if util.is_this_selected(v) == true then 
 		    if ui.dup then
 		    	if ui.dup.name == v.name then 
 					next_position = {2 * v.x - ui.dup.extra.position[1], 2 * v.y - ui.dup.extra.position[2]}
@@ -2239,17 +2265,25 @@ function editor.delete()
 
 		if util.need_stub_code(del_obj) == true then 
 			if current_fn then 
-	   			local fileUpper= string.upper(string.sub(current_fn, 1, -5))
-	   		    local fileLower= string.lower(string.sub(current_fn, 1, -5))
+				local a, b = string.find(current_fn,"screens") 
+				local current_fn_without_screen 
+	   			if a then 
+					current_fn_without_screen = string.sub(current_fn, 9, -1)
+	   			end 
+
+	   			local fileUpper= string.upper(string.sub(current_fn_without_screen, 1, -5))
+	   		    local fileLower= string.lower(string.sub(current_fn_without_screen, 1, -5))
+
 			    local main = readfile("main.lua")
 			    if main then 
 			    	if string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") ~= nil then  			
 			        	local q, w = string.find(main, "-- "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n") 
 				  		local e, r = string.find(main, "-- END "..fileUpper.."\."..string.upper(del_obj.name).." SECTION\n\n")
 				  		local main_first = string.sub(main, 1, q-1)
+						local main_delete = string.sub(main, q, r-1) 
 				  		local main_last = string.sub(main, r+1, -1)
 				  		main = ""
-				  		main = main_first..main_last
+				  		main = main_first.."--[[\n"..main_delete.."]]\n\n"..main_last
 				  		editor_lb:writefile("main.lua",main, true)
 	       		    end 
 			     end 
@@ -2317,7 +2351,7 @@ function editor.delete()
 					end 
 				end 
 		elseif bumo.extra.type == "LayoutManager" then  
-				for e, r in pairs (bumo.tiles) do 
+				for e, r in pairs (bumo.cells) do 
 					if r then 
 						for x, c in pairs (r) do 
 							if c.name == s_obj.name then 
@@ -3195,16 +3229,16 @@ function editor.ui_elements()
     					  skin = "default", ui_width = 100, ui_height = 27, label = "OK", focus_color = {27,145,27,255}, active_button =true, focus_object = scroll} 
 
 	-- Button Event Handlers
-	button_cancel.pressed = function() xbox:on_button_down(1) end
-	button_ok.pressed = function() if ss == selected_ui_element then selected_ui_element = nn end load_ui_element(selected_ui_element) end
+	button_cancel.on_press = function() xbox:on_button_down(1) end
+	button_ok.on_press = function() if ss == selected_ui_element then selected_ui_element = nn end load_ui_element(selected_ui_element) end
 	
 	local s_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
-		scroll.on_focus_in()
+		scroll.set_focus()
 	end
 
 	--Focus Destination
@@ -3216,7 +3250,7 @@ function editor.ui_elements()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
-		button_cancel.on_focus_in()
+		button_cancel.set_focus()
 	end
 
 	local msgw = Group {
@@ -3259,7 +3293,8 @@ function editor.ui_elements()
 			selected_ui_element = v
 		end
 
-		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() selected_ui_element = v tab_func() end}
+		h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() end}
+		--h_rect.extra.focus = {[keys.Return] = "button_ok", [keys.Up]="h_rect"..(i-1), [keys.Down]="h_rect"..(i+1), [keys.Tab]=function() selected_ui_element = v tab_func() end}
 
 		widget_t.position =  {cur_w, cur_h}
 		widget_t.extra.rect = h_rect.name
@@ -3285,11 +3320,11 @@ function editor.ui_elements()
 			widget_t:on_button_down()
 			--return true
 		end
-		function h_rect.extra.on_focus_in()
+		function h_rect.extra.set_focus()
 			h_rect.opacity = 255
 			h_rect:grab_key_focus()
 		end
-		function h_rect.extra.on_focus_out()
+		function h_rect.extra.clear_focus()
 			h_rect.opacity = 0
 		end
 		function h_rect:on_button_down(x,y,button,num_click)
@@ -3312,18 +3347,18 @@ function editor.ui_elements()
 				if type(h_rect.focus[key]) == "function" then
 					h_rect.focus[key]()
 				elseif screen:find_child(h_rect.focus[key]) then
-					if h_rect.on_focus_out then
-						h_rect.on_focus_out()
+					if h_rect.clear_focus then
+						h_rect.clear_focus()
 					end
 					--screen:find_child(h_rect.focus[key]):grab_key_focus()
-					if screen:find_child(h_rect.focus[key]).on_focus_in then
+					if screen:find_child(h_rect.focus[key]).set_focus then
 						selected_ui_element = v
 						ss = v
 						nn = allUiElements[i+1]
 						if key == keys.Return then 
 								ss = nil 
 						end 
-						screen:find_child(h_rect.focus[key]).on_focus_in(key)
+						screen:find_child(h_rect.focus[key]).set_focus(key)
 						if h_rect.focus[key] ~= "button_ok" then 
 							scroll.seek_to_middle(0,screen:find_child(h_rect.focus[key]).y) 
 						end
@@ -3343,7 +3378,7 @@ function editor.ui_elements()
 	--Focus
 	button_ok.active.opacity = 255
 	button_ok.dim.opacity = 0
-	scroll.on_focus_in()
+	scroll.set_focus()
 
 
 	function xbox:on_button_down(x,y,button,num_clicks,textUIElement)
@@ -3367,23 +3402,38 @@ local error_msg_map = {
  	["002"] = function(str) return "OK", "Cancel", "", "", "Before saving the screen, a project must be open." end,
  	["003"] = function(str) return "Save","Cancel", "", "", "You have unsaved changes. Save the file before closing?" end, 					
  	["004"] = function(str) return "Overwrite","Cancel", "", "", "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
- 	["005"] = function(str) return "OK", "Cancel", "Error", "Error", "A file name is required." end, 
- 	["006"] = function(str) return "OK", "Cancel", "Error", "Error", "A guideline position is required." end, 
- 	["007"] = function(str) return "OK", "Cancel", "Error", "Error", "Field \""..str.."\" is required." end, 
- 	["008"] = function(str) return "OK", "Cancel", "Error", "Error", "There are no guidelines."  end, 
+ 	["005"] = function(str) return "OK", "", "Error", "Error", "A file name is required." end, 
+ 	["006"] = function(str) return "OK", "", "Error", "Error", "A guideline position is required." end, 
+ 	["007"] = function(str) return "OK", "", "Error", "Error", "Field \""..str.."\" is required." end, 
+ 	["008"] = function(str) return "OK", "", "Error", "Error", "There are no guidelines."  end, 
  	["009"] = function(str) return "Restore", "Ignore", "", "", "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
- 	["010"] = function(str) return "OK", "Cancel", "Error", "Error", "This UI Element requires a minimum of "..str.." item(s)." end, 
- 	["011"] = function(str) return "OK", "Cancel", "Error", "Error", "Field \""..str.."\" requires a numeric value." end, 		 
-	["012"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid value for \""..str.."\" field." end,
- 	["013"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
- 	["014"] = function(str) return "OK", "Cancel", "Error", "Error", "A project name is required." end, 
- 	["015"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid file name. \n File extention must be .lua" end, 
+ 	["010"] = function(str) return "OK", "", "Error", "Error", "This UI Element requires a minimum of "..str.." item(s)." end, 
+ 	["011"] = function(str) return "OK", "", "Error", "Error", "Field \""..str.."\" requires a numeric value." end, 		 
+	["012"] = function(str) return "OK", "", "Error", "Error", "Invalid value for \""..str.."\" field." end,
+ 	["013"] = function(str) return "OK", "", "Error", "Error", "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
+ 	["014"] = function(str) return "OK", "", "Error", "Error", "A project name is required." end, 
+ 	["015"] = function(str) return "OK", "", "Error", "Error", "Invalid file name. \nFile extention must be .lua" end, 
 	-- new error messages 
-	["016"] = function(str) return "OK", "Cancel", "Error", "Error", "There is no selected object." end, 
-	["017"] = function(str) return "OK", "Cancel", "Error", "Error", "Can't delete this object. Clone exists." end, 
- 	["018"] = function(str) return "OK", "Cancel", "Error", "Error", "This UI Element can have maximum of "..str.." items." end, 
-}
+	["016"] = function(str) return "OK", "", "Error", "Error", "There is no selected object." end, 
+	["017"] = function(str) return "OK", "", "Error", "Error", "Can't delete this object. Clone exists." end, 
+ 	["018"] = function(str) return "OK", "", "Error", "Error", "This UI Element can have maximum of "..str.." items." end, 
+	-- after second release
+ 	["019"] = function(str) local i,j = string.find(str, ",") 
+							local pname, missing_dir 
+							if i and j then 
+								pname = string.sub(str, 1, i-1) 
+								missing_dir = string.sub(str, i+1, -1)
+							else 
+								pname = str
+							end 
 
+							if missing_dir then 
+								return "OK", "", "Error", "Error", "Project \""..pname.."\" is not valid. \""..missing_dir.."\" directory is missing." 
+							else 
+								return "OK", "", "Error", "Error", "Project \""..pname.."\" is not valid." 
+							end 
+			  end, 
+}
 
 function editor.error_message(error_num, str, func_ok, func_nok, inspector)
   	local WIDTH = 300
@@ -3424,7 +3474,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  		button_ok = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
      				skin = "default", ui_width = 75, ui_height = 27, label = OK_label, focus_color = {27,145,27,255}, active_button= true, focus_object = nil} 
  		-- Button Event Handlers
- 		button_nok.pressed = function() func_nok(1) xbox:on_button_down() end
+ 		button_nok.on_press = function() func_nok(1) xbox:on_button_down() end
  	else
     	button_cancel = editor_ui.button{text_font = "FreeSans Medium 13px", text_color = {255,255,255,255},
   					skin = "default", ui_width = 100, ui_height = 27, label = Cancel_label, focus_color = {27,145,27,255}, focus_object = nil}
@@ -3433,12 +3483,91 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 	editor_use = false
 	
+	local prev_file_info = ""
+	local prev_backup_info = ""
+
+	local correct_main = function (str) 
+
+		local main = readfile("main.lua")
+		if not main then return end 
+
+		local fileUpper= string.upper(string.sub(str, 1, -5))
+
+
+		local x,y = string.find(main, "--[=[\n\n-- "..fileUpper.." SECTION", 1,true) 
+		local n,m = string.find(main, "-- END "..fileUpper.." SECTION\n\n]=]--\n\n", 1, true)
+
+		while x and m do 
+
+			local main_first, main_last
+			main_first = string.sub(main, 1, x-1)
+			prev_backup_info = prev_backup_info..string.sub(main, x, m)
+			main_last = string.sub(main, m+1, -1)
+
+			main = ""
+			main = main_first..main_last
+
+			x,y = string.find(main, "--[=[\n\n-- "..fileUpper.." SECTION", 1,true) 
+			n,m = string.find(main, "-- END "..fileUpper.." SECTION\n\n]=]--\n\n", 1, true)
+		end 
+
+		editor_lb:writefile("main.lua",main, true)
+
+		local a, b = string.find(main, "-- "..fileUpper.." SECTION") 
+		local q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+
+		if a and w then 
+			local main_first, main_last
+			main_first = string.sub(main, 1, a-1)
+			prev_file_info = string.sub(main, a, w)
+			main_last = string.sub(main, w+1, -1)
+
+			main = ""
+
+			main = main_first..main_last
+			editor_lb:writefile("main.lua",main, true)
+		else 
+			return 
+		end 
+	end 
+
+		
+	local correct_main2 = function (str) 
+
+		local main = readfile("main.lua")
+		if not main then return end 
+
+	   	local fileUpper= string.upper(string.sub(str, 1, -5))
+
+		local a, b = string.find(main, "-- "..fileUpper.." SECTION") 
+		local q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+
+		if a and w then 
+			local main_first, main_last
+			main_first = string.sub(main, 1, w)
+			main_last = string.sub(main, w+1, -1)
+
+			main = ""
+
+			main = main_first.."--[=[\n\n"..prev_file_info.."]=]--\n\n"..prev_backup_info..main_last
+
+			prev_file_info = ""
+			prev_backup_info = ""
+
+			editor_lb:writefile("main.lua",main, true)
+		else 
+			return 
+		end 
+
+	end 
+
 
 	-- Button Event Handlers
 	if Cancel_label ~= "" then 
-		button_cancel.pressed = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
+		button_cancel.on_press = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
 	end 
-	button_ok.pressed = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
+	--button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  xbox:on_button_down() end
+	button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  if error_num == "004" then correct_main2(str) end xbox:on_button_down() end
 
 	if func_nok then 
 		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok"}
@@ -3467,10 +3596,10 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 		end 
 		if button_nok then 
 			button_nok:grab_key_focus()
-			button_nok.on_focus_in()
+			button_nok.set_focus()
 		else 
 			button_cancel:grab_key_focus()
-			button_cancel.on_focus_in()
+			button_cancel.set_focus()
 		end 
 	end
 
@@ -3489,11 +3618,17 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 			button_ok, 
 		}
 		, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
+		, extra = { error = 0 } 
 	}
+
+	if inspector then 
+		msgw.x = inspector.x + 200 
+		msgw.y = inspector.y + 200 
+	end 
 
 	local ti_func = function()
 		if current_focus then 
-			current_focus.on_focus_out()
+			current_focus.clear_focus()
 		end 
 		button_ok.active.opacity = 255
 		button_ok.dim.opacity = 0
@@ -3509,27 +3644,30 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 
 	button_ok:grab_key_focus() 
+
+	if button_cancel then 
 	function button_cancel:on_key_down(key)
 		if key == keys.Return then 
-			button_cancel.pressed()
+			button_cancel.on_press()
 		elseif (key == hdr.Tab and shift == false) or key == keys.Right then 
-			button_cancel.on_focus_out()
-			button_ok.on_focus_in()
+			button_cancel.clear_focus()
+			button_ok.set_focus()
 		elseif (key == hdr.TabLeft and shift == true) or key == keys.Left then 
 			if button_nok then 
-				button_cancel.on_focus_out()
-				button_nok.on_focus_in()
+				button_cancel.clear_focus()
+				button_nok.set_focus()
 			end
 		end 
 		return true
 	end 
+	end 
 
 	function button_ok:on_key_down(key)
 		if key == keys.Return then 
-			button_ok.pressed()
+			button_ok.on_press()
 		elseif (key == hdr.TabLeft and shift == true) or key == keys.Left then 
-			button_ok.on_focus_out()
-			button_cancel.on_focus_in()
+			button_ok.clear_focus()
+			button_cancel.set_focus()
 		end 
 		return true
 	end 
@@ -3537,12 +3675,12 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	msgw.extra.lock = false
  	screen:add(msgw)
 
-	button_ok:grab_key_focus() 
-
 	util.create_on_button_down_f(msgw)	
 
 	-- Focus 
 	ti_func()
+
+	button_ok:grab_key_focus() 
 
 	function xbox:on_button_down()
 		screen:remove(msgw)
@@ -3553,6 +3691,9 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	    input_mode = hdr.S_SELECT
 		if inspector then 
 			inspector:remove(inspector:find_child("deactivate_rect"))
+			if inspector.extra.cur_f and inspector.extra.cur_f.set_focus then 
+				inspector.extra.cur_f.set_focus()
+			end 
 		end 
 		return true
 	end 
