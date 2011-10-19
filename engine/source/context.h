@@ -72,9 +72,9 @@ public:
     //.........................................................................
     // Getting context configuration variables
 
-    const char * get( const char * key, const char * def = NULL , bool default_if_empty = false );
-    bool get_bool( const char * key, bool def = false );
-    int get_int( const char * key, int def = 0 );
+    const char * get( const char * key, const char * def = NULL , bool default_if_empty = false ) const;
+    bool get_bool( const char * key, bool def = false ) const;
+    int get_int( const char * key, int def = 0 ) const;
 
     //.........................................................................
     // Console command handlers
@@ -385,8 +385,5 @@ private:
     
     ResourceLoaderMap                                           resource_loaders;
 };
-
-
-
 
 #endif // _TICKPLAY_CONTEXT_H
