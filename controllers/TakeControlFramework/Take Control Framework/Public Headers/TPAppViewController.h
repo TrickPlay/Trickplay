@@ -34,6 +34,15 @@
  *
  * It is important to properly present the camera from a UIViewController
  * or risk stalling the app.
+ *
+ * All TPAppViewController objects depend on their view life-cycle methods
+ * (viewDidAppear, viewDidDisapper, viewWillAppear, viewWillDisappear) being
+ * called in order to function properly. The TPAppViewControllerDelegate
+ * protocol provides some courtesy method calls that inform the receiver
+ * that the TPAppViewController object's view life-cycle methods are being
+ * called. The receiver can use these methods as an insurance that a
+ * TPAppViewController is operating properly and to provide custom behavior
+ * specific to the TPAppViewController's view life-cycle.
  */
 
 @protocol TPAppViewControllerDelegate <NSObject>
@@ -41,6 +50,12 @@
 @required
 - (void)tpAppViewControllerNoLongerFunctional:(TPAppViewController *)tpAppViewController;
 - (void)tpAppViewController:(TPAppViewController *)tpAppViewController wantsToPresentCamera:(UIViewController *)camera;
+
+@optional
+- (void)tpAppViewControllerWillAppear:(TPAppViewController *)tpAppViewController;
+- (void)tpAppViewControllerDidAppear:(TPAppViewController *)tpAppViewController;
+- (void)tpAppViewControllerWillDisappear:(TPAppViewController *)tpAppViewController;
+- (void)tpAppViewControllerDidDisappear:(TPAppViewController *)tpAppViewController;
 
 @end
 
