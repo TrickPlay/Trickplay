@@ -117,7 +117,7 @@ void TPContext::set( const char * key, const String & value )
 }
 //-----------------------------------------------------------------------------
 
-const char * TPContext::get( const char * key, const char * def , bool default_if_empty )
+const char * TPContext::get( const char * key, const char * def , bool default_if_empty ) const
 {
     g_assert( key );
 
@@ -138,7 +138,7 @@ const char * TPContext::get( const char * key, const char * def , bool default_i
 
 //-----------------------------------------------------------------------------
 
-bool TPContext::get_bool( const char * key, bool def )
+bool TPContext::get_bool( const char * key, bool def ) const
 {
     const char * value = get( key );
 
@@ -158,7 +158,7 @@ bool TPContext::get_bool( const char * key, bool def )
 
 //-----------------------------------------------------------------------------
 
-int TPContext::get_int( const char * key, int def )
+int TPContext::get_int( const char * key, int def ) const
 {
     const char * value = get( key );
 
@@ -2026,6 +2026,11 @@ void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader
 
 bool TPContext::get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const
 {
+	if ( ! get_bool( TP_RESOURCE_LOADER_ENABLED , true ) )
+	{
+		return false;
+	}
+
 	ResourceLoaderMap::const_iterator it = resource_loaders.find( resource_type );
 
 	if ( it == resource_loaders.end() )
@@ -2279,6 +2284,7 @@ void TPContext::load_external_configuration()
         TP_HTTP_PORT,
         TP_RESOURCES_PATH,
         TP_TEXTURE_CACHE_LIMIT,
+        TP_RESOURCE_LOADER_ENABLED,
 
         NULL
     };
