@@ -507,6 +507,34 @@ protected:
 int MemReporter::peak = 0;
 int MemReporter::last = 0;
 
+static void
+list_fonts (PangoFontMap *fontmap)
+{
+    int i;
+    PangoFontFamily ** families;
+    int n_families;
+
+    pango_font_map_list_families (fontmap, & families, & n_families);
+    g_info ("PANGO KNOWS ABOUT %d FAMILIES", n_families);
+    for (i = 0; i < n_families; i++) {
+        PangoFontFamily * family = families[i];
+        const char * family_name;
+        int n_faces=0;
+        PangoFontFace **faces;
+
+        family_name = pango_font_family_get_name (family);
+        pango_font_family_list_faces( family, &faces, &n_faces );
+        g_info ("FAMILY %d: %s HAS %d FACES", i, family_name, n_faces);
+        for(int face=0; face<n_faces; face++)
+        {
+        	g_info("     FACE %d: %s", face, pango_font_face_get_face_name(faces[face]) );
+        }
+        g_free(faces);
+    }
+    g_free (families);
+}
+
+
 //-----------------------------------------------------------------------------
 
 int TPContext::console_command_handler( const char * command, const char * parameters, void * self )
@@ -632,6 +660,10 @@ int TPContext::console_command_handler( const char * command, const char * param
     else if ( !strcmp( command , "images" ) )
     {
         Images::dump();
+    }
+    else if ( !strcmp( command, "fonts" ) )
+    {
+    	list_fonts(clutter_get_font_map());
     }
     else if ( !strcmp( command, "cache" ) )
     {
