@@ -857,6 +857,7 @@ void TPContext::setup_fonts()
     }
 
     // Create a new configuration
+    (void) FcInitLoadConfig();
 
     FcConfig * config = FcConfigCreate();
 
