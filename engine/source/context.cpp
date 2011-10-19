@@ -507,6 +507,16 @@ protected:
 int MemReporter::peak = 0;
 int MemReporter::last = 0;
 
+static int font_family_sort_comparator ( const void * elem1, const void * elem2 )
+{
+	return strcmp(pango_font_family_get_name(*(PangoFontFamily **)elem1), pango_font_family_get_name(*(PangoFontFamily **)elem2));
+}
+
+static int font_face_sort_comparator ( const void * elem1, const void * elem2 )
+{
+	return strcmp(pango_font_face_get_face_name(*(PangoFontFace **)elem1), pango_font_face_get_face_name(*(PangoFontFace **)elem2));
+}
+
 static void
 list_fonts (PangoFontMap *fontmap)
 {
@@ -515,7 +525,8 @@ list_fonts (PangoFontMap *fontmap)
     int n_families;
 
     pango_font_map_list_families (fontmap, & families, & n_families);
-    g_info ("PANGO KNOWS ABOUT %d FAMILIES", n_families);
+    g_info ("%d KNOWN FONT FAMILIES:", n_families);
+    qsort(families, n_families, sizeof(PangoFontFamily*), font_family_sort_comparator);
     for (i = 0; i < n_families; i++) {
         PangoFontFamily * family = families[i];
         const char * family_name;
@@ -524,11 +535,17 @@ list_fonts (PangoFontMap *fontmap)
 
         family_name = pango_font_family_get_name (family);
         pango_font_family_list_faces( family, &faces, &n_faces );
-        g_info ("FAMILY %d: %s HAS %d FACES", i, family_name, n_faces);
-        for(int face=0; face<n_faces; face++)
+        if(n_faces > 0)
         {
-        	g_info("     FACE %d: %s", face, pango_font_face_get_face_name(faces[face]) );
-        }
+			qsort(faces, n_faces, sizeof(PangoFontFace*), font_face_sort_comparator);
+			GString *faces_string = g_string_new( pango_font_face_get_face_name( faces[0] ) );
+			for(int face=1; face<n_faces; face++)
+			{
+				g_string_append_printf( faces_string, ", %s", pango_font_face_get_face_name( faces[face] ) );
+			}
+			g_info ("%32s HAS %2d FACES: (%s)", family_name, n_faces, faces_string->str);
+			g_string_free(faces_string, TRUE);
+		}
         g_free(faces);
     }
     g_free (families);
@@ -840,6 +857,7 @@ void TPContext::setup_fonts()
     }
 
     // Create a new configuration
+    (void) FcInitLoadConfig();
 
     FcConfig * config = FcConfigCreate();
 
