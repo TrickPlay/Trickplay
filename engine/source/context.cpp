@@ -2414,6 +2414,8 @@ void TPContext::validate_configuration()
 
     set( TP_DATA_PATH, full_data_path );
 
+    g_debug( "USING DATA PATH: '%s'", full_data_path );
+
     g_free( full_data_path );
 
     // DOWNLOADS PATH
