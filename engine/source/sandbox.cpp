@@ -7,86 +7,167 @@
 
 #define TP_LOG_DOMAIN   "SANDBOX"
 #define TP_LOG_ON       true
-#define TP_LOG2_ON      false
+#define TP_LOG2_ON      true
 
 #include "log.h"
 
 //=============================================================================
-// Reader
 
-Sandbox::Reader::Reader()
+class LuaLoader
 {
-	g_assert( false );
-}
+public:
 
-//.............................................................................
-// Ownership of the GFile is transferred to the reader. That is, this
-// constructor does not ref the file - it assumes ownership of the
-// current ref.
-
-Sandbox::Reader::Reader( GFile * _file )
-:
-    file( _file ),
-    contents( 0 )
-{
-	g_assert( file );
-}
-
-//.............................................................................
-
-Sandbox::Reader::Reader( const Reader & )
-{
-	g_assert( false );
-}
-
-//.............................................................................
-
-Sandbox::Reader::~Reader()
-{
-	g_object_unref( G_OBJECT( file ) );
-
-	g_free( contents );
-}
-
-//.............................................................................
-// Lua will call us as many times as we return something. It also expects the
-// results to survive between calls. So, on the first call, we load the contents
-// of the file, keep them and return them. On the second call, we return 0.
-
-const char * Sandbox::Reader::lua_Reader( lua_State * , void * me , size_t * size )
-{
-	g_assert( me );
-	g_assert( size );
-
-	Reader * self = ( Reader * ) me;
-
-	// If we have already read, we return 0
-
-	if ( self->contents )
+	virtual ~LuaLoader()
 	{
-		g_free( self->contents );
-
-		self->contents = 0;
-
-		* size = 0;
-
-		return 0;
 	}
 
-	gsize length = 0;
+	int load( lua_State * L , const String & chunk_name )
+	{
+		return lua_load( L , LuaLoader::lua_Reader , this , chunk_name.c_str() );
+	}
 
-	self->contents = Sandbox::get_contents( self->file , length );
+protected:
 
-	* size = length;
+	virtual const char * lua_read( lua_State * L , size_t * size ) = 0;
 
-	// If we fail to read the contents, self->contents and length will be 0.
-	// This is what Lua expects. get_contents will have printed out an error
-	// message.
-	//
-	// If it succeeds, we now own the contents and Lua will call us again.
+private:
 
-	return self->contents;
-}
+	static const char * lua_Reader( lua_State * L , void * data , size_t * size )
+	{
+		return ( ( LuaLoader * ) data )->lua_read( L , size );
+	}
+};
+
+//=============================================================================
+
+class LuaLoaderGFile : public LuaLoader
+{
+public:
+
+	//.........................................................................
+	// Ownership of the GFile is transferred to the reader. That is, this
+	// constructor does not ref the file - it assumes ownership of the
+	// current ref.
+
+	LuaLoaderGFile( GFile * _file )
+	:
+		file( _file ),
+		contents( 0 )
+	{
+		g_assert( file );
+	}
+
+	~LuaLoaderGFile()
+	{
+		g_object_unref( G_OBJECT( file ) );
+
+		g_free( contents );
+	}
+
+protected:
+
+	//.........................................................................
+	// Lua will call us as many times as we return something. It also expects
+	// the results to survive between calls. So, on the first call, we load
+	// the contents of the file, keep them and return them. On the second call,
+	// we return 0.
+
+	virtual const char * lua_read( lua_State * , size_t * size )
+	{
+		g_assert( size );
+
+		// If we have already read, we return 0
+
+		if ( contents )
+		{
+			g_free( contents );
+
+			contents = 0;
+
+			* size = 0;
+
+			return 0;
+		}
+
+		gsize length = 0;
+
+		contents = Sandbox::get_contents( file , length );
+
+		* size = length;
+
+		// If we fail to read the contents, self->contents and length will be 0.
+		// This is what Lua expects. get_contents will have printed out an error
+		// message.
+		//
+		// If it succeeds, we now own the contents and Lua will call us again.
+
+		return contents;
+	}
+
+private:
+
+	GFile *	file;
+	gchar * contents;
+};
+
+//=============================================================================
+
+#define TP_LUA_LOADER_RESOURCE_READER_BUFFER_SIZE	8192
+
+class LuaLoaderResourceReader : public LuaLoader
+{
+public:
+
+	LuaLoaderResourceReader( const TPResourceReader & _reader )
+	:
+		finished( false ),
+		reader( _reader )
+	{
+		g_assert( reader.read );
+
+		buffer = g_new( char , TP_LUA_LOADER_RESOURCE_READER_BUFFER_SIZE );
+	}
+
+	~LuaLoaderResourceReader()
+	{
+		g_free( buffer );
+	}
+
+	virtual const char * lua_read( lua_State * , size_t * size )
+	{
+		if ( finished )
+		{
+			* size = 0;
+
+			return 0;
+		}
+
+		unsigned long int bytes_read = reader.read(
+					buffer ,
+					TP_LUA_LOADER_RESOURCE_READER_BUFFER_SIZE ,
+					reader.user_data );
+
+		g_assert( bytes_read <= TP_LUA_LOADER_RESOURCE_READER_BUFFER_SIZE );
+
+		* size = bytes_read;
+
+		if ( bytes_read < TP_LUA_LOADER_RESOURCE_READER_BUFFER_SIZE )
+		{
+			finished = true;
+		}
+
+		return buffer;
+	}
+
+
+private:
+
+	char * 				buffer;
+	bool				finished;
+	TPResourceReader 	reader;
+};
+
+#undef TP_LUA_LOADER_RESOURCE_READER_BUFFER_SIZE
 
 //=============================================================================
 // Sandbox
@@ -436,50 +517,106 @@ gchar * Sandbox::get_contents( GFile * file , gsize & length )
 
 //.............................................................................
 
-Sandbox::Reader * Sandbox::get_native_child_reader( const String & native_path ) const
-{
-	GFile * file = get_native_child( native_path );
-
-	if ( file && ! g_file_query_exists( file , 0 ) )
-	{
-		g_object_unref( G_OBJECT( file ) );
-		return 0;
-	}
-
-	return file ? new Reader( file ) : 0;
-}
-
-//.............................................................................
-
-Sandbox::Reader * Sandbox::get_pi_child_reader( const String & pi_path ) const
-{
-	GFile * file = get_pi_child( pi_path );
-
-	if ( file && ! g_file_query_exists( file , 0 ) )
-	{
-		g_object_unref( G_OBJECT( file ) );
-		return 0;
-	}
-
-	return file ? new Reader( file ) : 0;
-}
-
-//.............................................................................
-
 int Sandbox::lua_load_pi_child( lua_State * L , const String & pi_path ) const
 {
-	Reader * reader = get_pi_child_reader( pi_path );
+	// Get GFile for a PI child path
 
-	if ( ! reader )
+	GFile * file = get_pi_child( pi_path );
+
+	// Could not get the GFile for it
+
+	if ( ! file )
 	{
 		lua_pushfstring( L , "FAILED TO OPEN '%s'" , pi_path.c_str() );
 
 		return LUA_ERRFILE;
 	}
 
-	int result = lua_load( L , Reader::lua_Reader , reader , pi_path.c_str() );
+	// It doesn't exist
 
-	delete reader;
+	if ( ! g_file_query_exists( file , 0 ) )
+	{
+		g_object_unref( file );
+
+		lua_pushfstring( L , "FAILED TO OPEN '%s'" , pi_path.c_str() );
+
+		return LUA_ERRFILE;
+	}
+
+	LuaLoader * lua_loader = 0;
+
+	// If we have a context and this is a native file (not a URL), we check to
+	// see if the context has an external resource loader for Lua files.
+
+	if ( context && g_file_is_native( file ) )
+	{
+		TPResourceLoader 	loader = 0;
+		void * 				user_data = 0;
+
+		if ( context->get_resource_loader( TP_RESOURCE_TYPE_LUA_SOURCE , & loader , & user_data ) )
+		{
+			g_assert( loader );
+
+			// There is an external resource loader, so we have to get the
+			// native path of the file.
+
+			char * native_path = g_file_get_path( file );
+
+			if ( ! native_path )
+			{
+				g_object_unref( file );
+
+				lua_pushfstring( L , "FAILED TO OPEN '%s'" , pi_path.c_str() );
+
+				return LUA_ERRFILE;
+			}
+
+			// We call the external loader to give us a reader. If it does not,
+			// we assume it could not open the file.
+
+			TPResourceReader resource_reader;
+
+			memset( & resource_reader , 0 , sizeof( resource_reader ) );
+
+			int load_result = loader( context , TP_RESOURCE_TYPE_LUA_SOURCE , native_path , & resource_reader , user_data );
+
+			if ( 0 != load_result )
+			{
+				// The loader failed
+
+				tpwarn( "EXTERNAL LOADER FAILED WITH %d FOR '%s'" , load_result , native_path );
+
+				g_object_unref( file );
+
+				g_free( native_path );
+
+				lua_pushfstring( L , "FAILED TO OPEN '%s'" , pi_path.c_str() );
+
+				return LUA_ERRFILE;
+			}
+
+			tplog2( "USING EXTERNAL RESOURCE LOADER FOR '%s'" , native_path );
+
+			// We no longer need the GFile or the native path
+
+			g_object_unref( file );
+
+			g_free( native_path );
+
+			// Create a LuaLoader to do the rest
+
+			lua_loader = new LuaLoaderResourceReader( resource_reader );
+		}
+	}
+
+	if ( 0 == lua_loader )
+	{
+		lua_loader = new LuaLoaderGFile( file );
+	}
+
+	int result = lua_loader->load( L , pi_path );
+
+	delete lua_loader;
 
 	return result;
 }
