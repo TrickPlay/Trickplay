@@ -252,6 +252,9 @@ typedef struct TPContext TPContext;
     							the cache altogether.
                                 Defaults to "0".
 
+    TP_RESOURCE_LOADER_ENABLED - 	Whether external resource loaders are enabled.
+                                    Defaults to "true".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -299,6 +302,7 @@ typedef struct TPContext TPContext;
 #define TP_HTTP_PORT                    "http_port"
 #define TP_RESOURCES_PATH               "resources_path"
 #define TP_TEXTURE_CACHE_LIMIT			"texture_cache_limit"
+#define TP_RESOURCE_LOADER_ENABLED		"resource_loader_enabled"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
