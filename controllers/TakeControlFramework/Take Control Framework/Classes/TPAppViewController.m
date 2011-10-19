@@ -1257,12 +1257,17 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [styleAlert showInView:self.view];
     }
     
-    [delegate tpAppViewControllerDidAppear:self];
+    if ([delegate respondsToSelector:@selector(tpAppViewControllerDidAppear:)]) {
+        [delegate tpAppViewControllerDidAppear:self];
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
-    [delegate tpAppViewControllerDidDisappear:self];
+    
+    if ([delegate respondsToSelector:@selector(tpAppViewControllerDidDisappear:)]) {
+        [delegate tpAppViewControllerDidDisappear:self];
+    }
 }
 
 - (void)setSize:(CGSize)size {
@@ -1299,7 +1304,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     loadingIndicator.center = CGPointMake(self.view.frame.size.width/2, self.view.frame.size.height/3);
     [loadingIndicator startAnimating];
     
-    [delegate tpAppViewControllerWillAppear:self];
+    if ([delegate respondsToSelector:@selector(tpAppViewControllerWillAppear:)]) {
+        [delegate tpAppViewControllerWillAppear:self];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -1318,7 +1325,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         socketTimer = nil;
     }
     
-    [delegate tpAppViewControllerWillDisappear:self];
+    if ([delegate respondsToSelector:@selector(tpAppViewControllerWillDisappear:)]) {
+        [delegate tpAppViewControllerWillDisappear:self];
+    }
 }
 //*/
 
