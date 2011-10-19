@@ -250,28 +250,44 @@ return function(response_table)
         
         d = response_table.deals[i]
         
+        local lowest_price   = d.options[1].price.amount
+        local lowest_price_i = 1
+        for i,option in ipairs(d.options) do
+            
+            if lowest_price > option.price.amount then
+                
+                lowest_price = option.price.amount
+                
+                lowest_price_i = i
+                
+            end
+            
+        end
+        
+        
         --pass the card constructor all of the important aspects of the deal information
         c = Card_Constructor{
             --Card Data
             title         = d.title,
             division      = d.division.name,
             --Pricing
-            price         = "$"..d.options[1].price.amount/100,
-            msrp          = "$"..d.options[1].value.amount/100,
-            percentage    =      d.options[1].discountPercent,
-            saved         = "$"..d.options[1].discount.amount/100,
+            price         = "$"..d.options[lowest_price_i].price.amount/100,
+            msrp          = "$"..d.options[lowest_price_i].value.amount/100,
+            percentage    =      d.options[lowest_price_i].discountPercent,
+            saved         = "$"..d.options[lowest_price_i].discount.amount/100,
             --Timer
             expiration    = d.endAt,
             tz            = d.division.timezoneOffsetInSeconds,
             --Amount Sold
-            amount_sold   = d.options[1].soldQuantity,
-            remaining     = d.options[1].remainingQuantity,
+            amount_sold   = d.soldQuantity      or d.options[1].soldQuantity,
+            sold_out      = choose(d.isSoldOut         ~= nil, d.isSoldOut, d.options[lowest_price_i].isSoldOut),
+            limit         = choose(d.isLimitedQuantity ~= nil, d.isLimitedQuantity, d.options[lowest_price_i].isLimitedQuantity),
             
             picture_url   = d.largeImageUrl,
             id            = d.id,
             
             --SMS Menu needs these
-            fine_print    = d.options[1].details[1].description,
+            fine_print    = d.options[lowest_price_i].details[1].description,
             highlights    = d.highlightsHtml,
             merchant      = d.merchant.name,
             deal_url      = d.dealUrl,
