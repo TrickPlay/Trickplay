@@ -21,6 +21,9 @@ local dot = "•"
 local function gen_highlight(s)
 	local ret_val = ""
 	local i,j,k = 1,1,1
+    
+    if string.find(s,"<li>") == nil then    return s    end
+    
 	while i ~= nil do
 		i,j = string.find(s,"<li>",k)
 		if i == nil then
@@ -487,19 +490,19 @@ local make_card = function(input)
 	txt_to_canvas(bg,bought)
 	
 	local str
-	if type(input.remaining) == "userdata" then
-		str = "No Limit"
-	elseif input.remaining <= 0 then
+    
+    if input.sold_out then
+		tltb_rem.text = "SOLD OUT"
 		str = "SOLD OUT"
 		na.opacity = 255
 		card.throb = empty
 		card.update_time = empty
 		card.glow.opacity = 0
 		card.hourglass.source = assets.hourglass_soldout
-		tltb_rem.text = "SOLD OUT"
-	else
-		str = input.remaining.." remaning"
-	end
+    else
+		str = input.limit and "Limited quantity" or "No Limit"
+    end
+    
 	local lim_quantity = Text{
 		text=str,
 		font=font.." 20px",
@@ -641,7 +644,9 @@ local make_card = function(input)
 		
 	--Values for the SMS Entry Object to pull
 	card.fine_print = decode(input.fine_print)
+    
 	card.highlights = decode(gen_highlight(input.highlights))
+    
 	card.deal_url   = input.deal_url
 	card.merchant   = input.merchant
 	

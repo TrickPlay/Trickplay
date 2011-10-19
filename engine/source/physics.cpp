@@ -276,7 +276,7 @@ int World::create_body( int element , int properties , const char * metatable )
     // Create the body wrapper for it. This sets up all the relationships and
     // user data pointers.
 
-    Body * bw = new Body( this , body , actor );
+    (void)new Body( this , body , actor );
 
     //.........................................................................
     // The body is attached to the actor and is ready to go. We get the actor
