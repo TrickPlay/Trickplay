@@ -402,7 +402,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 	    int index;	
 		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", key];
         
-		for (index = 1; index <= count; index++) {
+		for (index = 0; index < count; index++) {
 			[socketManager sendData:[sentData UTF8String]  numberOfBytes:[sentData length]];
 		}
     }
@@ -1226,6 +1226,13 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     if (styleAlert) {
         [styleAlert showInView:self.view];
     }
+    
+    [delegate tpAppViewControllerDidAppear:self];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [delegate tpAppViewControllerDidDisappear:self];
 }
 
 - (void)setSize:(CGSize)size {
@@ -1261,6 +1268,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     //loadingIndicator.bounds = self.view.frame;
     loadingIndicator.center = CGPointMake(self.view.frame.size.width/2, self.view.frame.size.height/3);
     [loadingIndicator startAnimating];
+    
+    [delegate tpAppViewControllerWillAppear:self];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -1278,6 +1287,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [socketTimer release];
         socketTimer = nil;
     }
+    
+    [delegate tpAppViewControllerWillDisappear:self];
 }
 //*/
 
