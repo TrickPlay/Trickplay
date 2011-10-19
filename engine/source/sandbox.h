@@ -79,6 +79,11 @@ public:
 
 	bool native_child_exists( const String & native_path ) const;
 
+	// Returns the contents of the file or 0 if something went wrong.
+	// The result has to be deallocated with g_free.
+
+	static gchar * get_contents( GFile * file , gsize & length );
+
 private:
 
 	// Get a child GFile with a platform-independent path. Returns 0 if
@@ -99,49 +104,9 @@ private:
 
 	GFile * resolve_relative_native_child( const String & native_path , Scheme scheme ) const;
 
-	// Returns the contents of the file or 0 if something went wrong.
-	// The result has to be deallocated with g_free.
-
-	static gchar * get_contents( GFile * file , gsize & length );
-
 	// Climbs up the parents of file to ensure one is our root.
 
 	bool is_in_sandbox( GFile * file ) const;
-
-	// Internal reader class. Haven't decided whether to expose it to
-	// the outside world.
-
-	class Reader
-	{
-	public:
-
-		virtual ~Reader();
-
-		static const char * lua_Reader( lua_State * L , void * data , size_t * size );
-
-	private:
-
-		friend class Sandbox;
-
-		Reader();
-		Reader( GFile * file );
-		Reader( const Reader & other );
-
-		GFile * file;
-		gchar * contents;
-	};
-
-	friend class Reader;
-
-	// Returns a reader to a native child path. If it goes wrong, returns
-	// 0. Caller must delete the result.
-
-	Reader * get_native_child_reader( const String & native_path ) const;
-
-	// Returns a reader to a platform independent child path.
-	// If it goes wrong, returns 0. Caller must delete the result.
-
-	Reader * get_pi_child_reader( const String & pi_path ) const;
 
 	// The GFile pointing to the sandbox's root. It can be 0.
 
