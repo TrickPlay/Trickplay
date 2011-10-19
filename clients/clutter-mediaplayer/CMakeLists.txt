@@ -13,7 +13,6 @@ IF( PKG_CONFIG_FOUND )
     pkg_check_modules(CLUTTER REQUIRED clutter-1.0)
     pkg_check_modules(PANGO REQUIRED pango)
     pkg_check_modules(CAIRO REQUIRED cairo)
-    pkg_check_modules(GL gl)
     pkg_check_modules(ATK REQUIRED atk)
 
     list( APPEND        TPCMP_INCLUDE_DIRS
@@ -29,7 +28,6 @@ IF( PKG_CONFIG_FOUND )
             ${CLUTTER_INCLUDE_DIRS}
             ${PANGO_INCLUDE_DIRS}
             ${CAIRO_INCLUDE_DIRS}
-            ${GL_INCLUDE_DIRS}
             ${ATK_INCLUDE_DIRS}
     )
     list( APPEND        TPCMP_LIBRARY_NAMES
@@ -45,7 +43,6 @@ IF( PKG_CONFIG_FOUND )
             ${CLUTTER_LIBRARIES}
             ${PANGO_LIBRARIES}
             ${CAIRO_LIBRARIES}
-            ${GL_LIBRARIES}
             ${ATK_LIBRARIES}
     )
 ELSE( PKG_CONFIG_FOUND )
@@ -58,7 +55,6 @@ ELSE( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( pango-1.0 pango/pango.h		TPCMP_INCLUDE_DIRS )
     TP_FIND_INCLUDE( cairo cairo.h				TPCMP_INCLUDE_DIRS )
     TP_FIND_INCLUDE( libxml2 libxml/parser.h       		TPCMP_INCLUDE_DIRS )
-    TP_FIND_INCLUDE( GL/gl.h                                TPCMP_INCLUDE_DIRS )
     TP_FIND_INCLUDE( atk-1.0 atk/atk.h 			            TPCMP_INCLUDE_DIRS )
 
     list( APPEND                        TPCMP_LIBRARY_NAMES
