@@ -180,7 +180,7 @@ global trickplay [[void*]]
 
                 const char * family_name = pango_font_family_get_name ( family );
 
-                names.insert( ( char * ) family_name );
+                names.insert( family_name );
             }
 
             g_free( families );
