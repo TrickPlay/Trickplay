@@ -59,23 +59,11 @@ function generate_test_image ()
 					{0.1, "LINEAR", 650}
 						}
 				}
-,
-				{
-				source = rect1, 
-				name = "color", 
-				ease_in = true, 
-				keys = {
-					{0.1, "LINEAR", "FFFFFF" },					
-					{0.8, "LINEAR", "FF0033" }
-						}
-				}
 			}
-	
-	}
-
+}
 
 	ani0.timeline:add_marker("four", 4000)
-	
+
 
 	ani0:start()
 	total = 0

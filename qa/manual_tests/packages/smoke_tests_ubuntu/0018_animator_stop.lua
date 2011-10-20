@@ -59,16 +59,6 @@ function generate_test_image ()
 					{0.1, "LINEAR", 650}
 						}
 				}
-,
-				{
-				source = rect1, 
-				name = "color", 
-				ease_in = true, 
-				keys = {
-					{0.1, "LINEAR", "FFFFFF" },					
-					{0.8, "LINEAR", "FF0033" }
-						}
-				}
 			}
 	
 	}
@@ -84,7 +74,6 @@ function generate_test_image ()
 			ani0.timeline:stop()
 			stage1 = true
 		elseif total > 3.3 then
-			print ("alksdfjaklsdjf asd")
 			idle.on_idle = nil
 			screen:remove(rect1)
 			screen:remove(start_rect)

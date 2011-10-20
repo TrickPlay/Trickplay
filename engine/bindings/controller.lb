@@ -495,15 +495,15 @@ interface controller [[ControllerDelegate*]]
             false - Otherwise.
     */
     
-    bool set_ui_background(string resource,string mode="CENTER")
+    bool set_ui_background(string resource,string mode="STRETCH")
         [[
-            Controller::UIBackgroundMode m=Controller::CENTER;
+            Controller::UIBackgroundMode m = Controller::STRETCH;
             
             if (mode)
             {
-                if (*mode=='S'||*mode=='s')
+                if (*mode=='C'||*mode=='c')
                 {
-                    m=Controller::STRETCH;
+                    m=Controller::CENTER;
                 }
                 else if (*mode=='T'||*mode=='t')
                 {
