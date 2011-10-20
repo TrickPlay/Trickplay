@@ -3,14 +3,16 @@
 
 #include <sys/stat.h>
 
-#include <addon_types.h>
-#include <addon_hoa.h>
+//#include <addon_types.h>
+//#include <addon_hoa.h>
+#include <appfrwk_openapi_types.h>
+#include <appfrwk_openapi.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-BOOLEAN				TP_System_Initialize(void);
+BOOLEAN				TP_System_Initialize(int argc, char **argv);
 void				TP_System_Finalize(void);
 
 void				TP_System_EnableFullDisplay(void);

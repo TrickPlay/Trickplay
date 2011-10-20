@@ -1,7 +1,7 @@
 #ifndef __TP_PLAYSTREAM_H__
 #define __TP_PLAYSTREAM_H__
 
-#include <addon_types.h>
+#include <appfrwk_openapi_types.h>
 
 #include <trickplay/trickplay.h>
 

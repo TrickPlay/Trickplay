@@ -3,7 +3,7 @@
 
 #include <sys/stat.h>
 
-#include <addon_types.h>
+#include <appfrwk_openapi_types.h>
 
 #include <trickplay/trickplay.h>
 
@@ -14,10 +14,10 @@ extern "C" {
 BOOLEAN	TP_Controller_Initialize(TPContext* pContext);
 void	TP_Controller_Finalize(TPContext* pContext);
 
-BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, ADDON_KEY_COND_T keyCond);
+BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, PM_KEY_COND_T keyCond);
 #ifdef MOUSE_SUPPORTED
 BOOLEAN	TP_Controller_MouseEventCallback(
-		SINT32 posX, SINT32 posY, UINT32 keyCode, ADDON_KEY_COND_T keyCond);
+		SINT32 posX, SINT32 posY, UINT32 keyCode, PM_KEY_COND_T keyCond, struct input_event event);
 #  ifdef USE_MOUSE_RAW_DATA
 BOOLEAN	TP_Controller_MouseDirectEventCallback(
 		float fRelX, float fRelY, float fAbsX, float fAbsY,

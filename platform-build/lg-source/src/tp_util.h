@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#include <addon_types.h>
+#include <appfrwk_openapi_types.h>
 
 typedef struct timeval	TP_TIMESTAMP_T;
 

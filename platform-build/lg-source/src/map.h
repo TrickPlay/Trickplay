@@ -1,7 +1,7 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
-#include <addon_types.h>
+#include <appfrwk_openapi_types.h>
 
 #ifdef __cplusplus
 extern "C" {

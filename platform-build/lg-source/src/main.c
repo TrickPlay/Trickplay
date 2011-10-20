@@ -97,10 +97,14 @@ static BOOLEAN _TP_InitContext(int argc, char* argv[])
 	if (access(_gszAppPath, F_OK) == 0)
 		_TP_RemovePathRecursive(_gszAppPath);
 
-	if (!TP_DRM_DecryptAppToPath(appID, argv[argc - 1], _gszAppPath))
+	// TODO sanggi0.lee - assign app path to the first argument
+	//if (!TP_DRM_DecryptAppToPath(appID, argv[argc - 1], _gszAppPath))
+	if (!TP_DRM_DecryptAppToPath(appID, argv[1], _gszAppPath))
 		return FALSE;
 #else
-	strcpy(_gszAppPath, argv[argc - 1]);
+	// TODO sanggi0.lee - assign app path to the first argument
+	//strcpy(_gszAppPath, argv[argc - 1]);
+	strcpy(_gszAppPath, argv[1]);
 #endif
 
 	/* Initialize TrickPlay */
@@ -119,7 +123,9 @@ static BOOLEAN _TP_InitContext(int argc, char* argv[])
 
 	char szAppDirectory[PATH_MAX] = { '\0', };
 
-	if (_TP_GetAppDirectory(szAppDirectory, argv[argc - 1]))
+	// TODO sanggi0.lee - assign app path to the first argument
+	//if (_TP_GetAppDirectory(szAppDirectory, argv[argc - 1]))
+	if (_TP_GetAppDirectory(szAppDirectory, argv[1]))
 	{
 		tp_context_set(pContext, TP_APP_SOURCES, szAppDirectory);
 		tp_context_set(pContext, TP_SCAN_APP_SOURCES, TRICKPLAY_SCAN_APP_SOURCES);
@@ -198,7 +204,7 @@ int main(int argc, char* argv[])
 {
 	int result = 1;
 
-	if (!TP_System_Initialize())
+	if (!TP_System_Initialize(argc, argv))
 		goto done;
 
 	_TP_SetRuntimeEnvs();

@@ -1,8 +1,23 @@
 #ifndef	_NCG_AGENT_H
 #define _NCG_AGENT_H
 
+#ifdef	_WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
+
 #include "NCG_Def.h"
+
+#ifdef	DLL_EXPORT
+#define DLLFUNC __declspec(dllexport)
+#else
+	#ifdef	DLL_IMPORT
+	#define DLLFUNC __declspec(dllimport)
+	#else
+	#define DLLFUNC
+	#endif
+#endif
 
 #ifdef  __cplusplus
 extern "C" {
@@ -15,6 +30,15 @@ extern "C" {
 	// NCG Agent Core System
 	//
 	//////////////////////////////////////////////////////////////////
+
+	/*****************************************************************
+	기능: NCG Agent의 버전을 출력한다.
+			NCG_Init()을 호출하지 않아도 사용 가능하며,
+			반환된 값은 free()해줘야 한다.
+	반환: 버전 문자열
+	인자: 없음
+	*****************************************************************/
+	DLLFUNC OUT_ALLOC char* NCG_GetVersion(void);
 
 	/*****************************************************************
 	기능: NCG Agent를 초기화한다.
@@ -36,7 +60,7 @@ extern "C" {
 							이를 사용하지 않으면 횟수제는 공격당할 수 있다.
 							자세한 사항은 별도 문서 참고.
 	*****************************************************************/
-	int		NCG_Init(	OUT_HANDLE	NCG_Core_Handle	*hCore,	// do not free(), please NCG_Clear()
+	DLLFUNC int		NCG_Init(	OUT_HANDLE	NCG_Core_Handle	*hCore,	// do not free(), please NCG_Clear()
 						const		char	*szDeviceID,
 						const		char	*szDeviceModel,
 						const		char	*szLicenseDBPath,
@@ -47,7 +71,37 @@ extern "C" {
 	반환: 없음
 	인자:	hCore			- NCG_Agent 핸들.
 	*****************************************************************/
-	void	NCG_Clear(IN_OUT	NCG_Core_Handle	*hCore);
+	DLLFUNC void	NCG_Clear(IN_OUT	NCG_Core_Handle	*hCore);
+
+
+	/*****************************************************************
+	기능: 라이센스 요청시 서버로 전송되는 Device ID 값을 보호할지
+			여부를 결정한다.
+			기본값은 Device ID를 보호하도록 되어 있으므로,
+			NCG_GetDeviceIDSecret(1)은 굳이 호출하지 않아도 된다.
+			Device ID를 변환하지 않고 의도적으로 수집해야 하는 경우에
+			NCG_GetDeviceIDSecret(0)을 호출한다
+	반환: 없음.
+	인자:	hCore					- NCG_Agent 핸들.
+			nEnableSecureDeviceID	- 1 (DeviceID 보호) 또는 0 (보호 X)
+	*****************************************************************/
+	DLLFUNC int		NCG_EnableSecretDeviceID(	const NCG_Core_Handle	hCore,
+											const int	nEnableSecureDeviceID);
+
+	/*****************************************************************
+	기능: 라이센스 요청시 서버로 전송되는 Device ID 값을 구한다.
+			Device ID 직접 노출을 막기 위하여
+			NCG_Init() 에서 입력한 Device ID를
+			one-way 함수를 사용하여 변환한다.
+			서버에서는 이 값으로 기기를 식별한다.
+	반환: NCGERR_SUCCEED(0x00) 또는 에러코드.
+	인자:	hCore			- NCG_Agent 핸들.
+			szDeviceIDSecret_MIN40	- 전송(및 식별)용 Device ID.
+			nDeviceIDSecretLen		- 전송(및 식별)용 Device ID 길이
+	*****************************************************************/
+	DLLFUNC int		NCG_GetDeviceIDSecret(	const NCG_Core_Handle	hCore,
+									OUT_REF	char	*szDeviceIDSecret_MIN40,
+						OPTIONAL	OUT_REF	int		*nDeviceIDSecretLen);
 
 
 	//////////////////////////////////////////////////////////////////
@@ -65,7 +119,7 @@ extern "C" {
 			szReqMsgBuf_MIN2048	- RO 요청 메세지.
 			nReqMsgLen			- RO 요청 메시지 길이.
 	*****************************************************************/
-	int		NCG_MakeLoginRequestMsg(const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_MakeLoginRequestMsg(const NCG_Core_Handle	hCore,
 									const	char	*szUserID,
 									const	char	*szPassword,
 									OUT_REF	char	*szReqMsgBuf_MIN2048,
@@ -93,7 +147,7 @@ extern "C" {
 			szAcquisitionURL_MIN256	- RO 요청 URL.
 			nAcquisitionURLLen		- RO 요청 URL 길이.
 	*****************************************************************/
-	int		NCG_MakeContentsRORequestMsg(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_MakeContentsRORequestMsg(	const NCG_Core_Handle	hCore,
 											const NCG_File_Handle	hFile,
 											const char		*szUserID,
 								OPTIONAL	const char		*szOrderID,
@@ -115,7 +169,7 @@ extern "C" {
 			szReqMsgBuf_MIN2048	- RO 요청 메세지.
 			nReqMsgLen			- RO 요청 메시지 길이.
 	*****************************************************************/
-	int		NCG_MakeContentsRORequestMsgWithCID(const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_MakeContentsRORequestMsgWithCID(const NCG_Core_Handle	hCore,
 												const char		*szUserID,
 												const char		*szContentsID,
 									OPTIONAL	const char		*szOrderID,
@@ -138,7 +192,7 @@ extern "C" {
 			szAcquisitionURL_MIN256	- RO 요청 URL.
 			nAcquisitionURLLen		- RO 요청 URL 길이.
 	*****************************************************************/
-	int		NCG_MakeSiteRORequestMsg(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_MakeSiteRORequestMsg(	const NCG_Core_Handle	hCore,
 										const NCG_File_Handle	hFile,
 										const char		*szUserID,
 							OPTIONAL	const char		*szOrderID,
@@ -160,7 +214,7 @@ extern "C" {
 			szReqMsgBuf_MIN2048	- RO 요청 메세지.
 			nReqMsgLen			- RO 요청 메시지 길이.
 	*****************************************************************/
-	int		NCG_MakeSiteRORequestMsgWithSID(	NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_MakeSiteRORequestMsgWithSID(	NCG_Core_Handle	hCore,
 												const char		*szUserID,
 												const char		*szSiteID,
 									OPTIONAL	const char		*szOrderID,
@@ -178,7 +232,7 @@ extern "C" {
 			szReqMsgBuf_MIN2048	- RO 요청 메세지.
 			nReqMsgLen			- RO 요청 메시지 길이.
 	*****************************************************************/
-	int		NCG_MakeRORequestMsgWithSSID(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_MakeRORequestMsgWithSSID(	const NCG_Core_Handle	hCore,
 											const char		*szSessionID,
 											OUT_REF	char	*szReqMsgBuf_MIN2048,
 								OPTIONAL	OUT_REF	int		*nReqMsgLen);
@@ -195,8 +249,21 @@ extern "C" {
 	인자:	szROResMsg		- 수신한 RO 메세지
 			nResponseCode	- 수신한 RO 응답 코드
 	*****************************************************************/
-	int		NCG_RecognizeResponseMsgType(	const char		*szResponseMsg,
+	DLLFUNC int		NCG_RecognizeResponseMsgType(	const char		*szResponseMsg,
 											OUT_REF int		*nResponseCode);
+
+	/*****************************************************************
+	기능: NCG_SaveROResponseMsg() 에서 파싱한 RO를 Log로 출력할지 결정한다.
+			bFlag을 1로 설정한 이후에 호출되는 함수에 영향을 미친다.
+			NCG_Log() 자체가 활성화 되어 있어야만 출력된다.
+			기본값은 0이다.
+			파싱된 결과에는 CEK가 노출되므로
+			디버깅시에만 1로 사용하고 제품 릴리즈 할때에는
+			반드시 0을 설정하거나 이 함수 자체를 호출하지 않아야 한다.
+	반환:	없음.
+	인자:	bFlag		- 파싱된 RO 출력 여부 (1 / 0)
+	*****************************************************************/
+	DLLFUNC void	NCG_EnableLogParsedXML( const int	bFlag);
 
 	/*****************************************************************
 	기능: 서버로부터 수신한 메시지가 RO인 경우 이를 검증, 파싱, 저장한다.
@@ -206,7 +273,7 @@ extern "C" {
 	인자:	hCore			- NCG_Agent 핸들.
 			szResMsg		- 수신한 메세지
 	*****************************************************************/
-	int		NCG_SaveROResponseMsg(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_SaveROResponseMsg(	const NCG_Core_Handle	hCore,
 									const char		*szResMsg);
 
 	/*****************************************************************
@@ -219,7 +286,7 @@ extern "C" {
 			szTitle			- 구매 URL 제목.
 			nTitleLen		- 구매 URL 제목 길이.
 	*****************************************************************/
-	int		NCG_GetPurchaseURL(	const char		*szResMsg,
+	DLLFUNC int		NCG_GetPurchaseURL(	const char		*szResMsg,
 								OUT_ALLOC char	*szPurchaseURL,	// please free() after use
 					OPTIONAL	OUT_REF	int		*nPurchaseURLLen,
 								OUT_ALLOC char	*szTitle,		// please free() after use
@@ -234,7 +301,7 @@ extern "C" {
 			hOIDs			- 주문 ID 목록 핸들.
 			nOIDCount		- 주문 ID 갯수.
 	*****************************************************************/
-	int		NCG_GetOrderIDHandle(	const char		*szOIDsResMsg,
+	DLLFUNC int		NCG_GetOrderIDHandle(	const char		*szOIDsResMsg,
 									OUT_HANDLE	NCG_OIDs_Handle	*hOIDs,	// do not free(), please NCG_ClearOrderIDHandle()
 						OPTIONAL	OUT_REF	int		*nOIDCount);
 
@@ -243,7 +310,7 @@ extern "C" {
 	반환: 주문 ID 갯수(0, 양수) 또는 에러코드(음수).
 	인자:	hOIDs			- 주문 ID 목록 핸들.
 	*****************************************************************/
-	int		NCG_GetOrderIDCount(	const NCG_OIDs_Handle	hOIDs);
+	DLLFUNC int		NCG_GetOrderIDCount(	const NCG_OIDs_Handle	hOIDs);
 
 	/*****************************************************************
 	기능: 주문 ID 목록 핸들에 저장된 주문 ID 및 설명을 가져온다.
@@ -255,7 +322,7 @@ extern "C" {
 			szDescription	- 주문 ID에 대한 부가 설명.
 			nDescriptionLen - 주문 ID에 대한 부가 설명 길이.
 	*****************************************************************/
-	int		NCG_GetOrderIDInfo(	const NCG_OIDs_Handle	hOIDs,
+	DLLFUNC int		NCG_GetOrderIDInfo(	const NCG_OIDs_Handle	hOIDs,
 								const int			nIndex,
 								OUT_RESOURCE char	*szOrderID,		// do not free()
 					OPTIONAL	OUT_REF int			*nOrderIDLen,
@@ -267,7 +334,7 @@ extern "C" {
 	반환: 없음.
 	인자:	hOIDs			- 주문 ID 목록 핸들.
 	*****************************************************************/
-	void	NCG_ClearOrderIDHandle(	IN_OUT	NCG_OIDs_Handle	*hOIDs);
+	DLLFUNC void	NCG_ClearOrderIDHandle(	IN_OUT	NCG_OIDs_Handle	*hOIDs);
 
 
 	//////////////////////////////////////////////////////////////////
@@ -285,7 +352,7 @@ extern "C" {
 	반환: NCGERR_SUCCEED(0x00) 또는 에러코드.
 	인자:	hCore	- NCG_Agent 핸들.
 	*****************************************************************/
-	int		NCG_ReadDB(	const NCG_Core_Handle	hCore);
+	DLLFUNC int		NCG_ReadDB(	const NCG_Core_Handle	hCore);
 
 	/*****************************************************************
 	기능: 현재 CID/SID 상태를 로컬 관련 DB에 기록한다.
@@ -294,7 +361,7 @@ extern "C" {
 	반환: NCGERR_SUCCEED(0x00) 또는 에러코드.
 	인자:	hCore	- NCG_Agent 핸들.
 	*****************************************************************/
-	int		NCG_WriteDB(	const NCG_Core_Handle	hCore);
+	DLLFUNC int		NCG_WriteDB(	const NCG_Core_Handle	hCore);
 
 	/*****************************************************************
 	기능: 로컬에 저장된 CID 관련 DB를 삭제한다.
@@ -303,7 +370,7 @@ extern "C" {
 	반환: NCGERR_SUCCEED(0x00) 또는 에러코드.
 	인자:	hCore	- NCG_Agent 핸들.
 	*****************************************************************/
-	int		NCG_ClearCIDDB(const NCG_Core_Handle	hCore);
+	DLLFUNC int		NCG_ClearCIDDB(const NCG_Core_Handle	hCore);
 
 	/*****************************************************************
 	기능: 로컬에 저장된 SID 관련 DB를 삭제한다.
@@ -312,7 +379,7 @@ extern "C" {
 	반환: NCGERR_SUCCEED(0x00) 또는 에러코드.
 	인자:	hCore	- NCG_Agent 핸들.
 	*****************************************************************/
-	int		NCG_ClearSIDDB(const NCG_Core_Handle	hCore);
+	DLLFUNC int		NCG_ClearSIDDB(const NCG_Core_Handle	hCore);
 
 	/*****************************************************************
 	기능: 로컬에 저장된 CID 라이센스 중 만료된 내용을 삭제한다.
@@ -326,7 +393,7 @@ extern "C" {
 								여기에 0보다 큰 값이 들어오면,
 								szCurrentGMT 대신 이 값을 사용한다.
 	*****************************************************************/
-	int		NCG_TrimCIDDB(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_TrimCIDDB(	const NCG_Core_Handle	hCore,
 							const char				*szGMTTime,
 							const unsigned long		nCurrentGMT);
 
@@ -341,9 +408,25 @@ extern "C" {
 								여기에 0보다 큰 값이 들어오면,
 								szCurrentGMT 대신 이 값을 사용한다.
 	*****************************************************************/
-	int		NCG_TrimSIDDB(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_TrimSIDDB(	const NCG_Core_Handle	hCore,
 							const char				*szGMTTime,
 							const unsigned long		nCurrentGMT);
+
+	/*****************************************************************
+	기능: DB내용이 변경될 때 바로 스토리지에 저장할지 결정한다.
+			NCG_WriteDB()는 여기서 입력한 값과 관계 없이 DB에 기록한다.
+			0을 입력한 경우, 다음 함수들은 NCG_WriteDB()를 호출하기
+			전까지는 스토리지에 기록하지 않는다.
+			NCG_SaveROResponseMsg()
+			NCG_DecreaseRemainPlayCount()
+			NCG_RemoveContentsLicense() / NCG_RemoveContentsLicenseWithCID()
+			NCG_RemoveSiteLicense() / NCG_RemoveSiteLicenseWithSID()
+			NCG_ClearCIDDB() / NCG_ClearSIDDB()
+			NCG_TrimCIDDB() / NCG_TrimSIDDB()
+	반환: 없음.
+	인자:	bFlag			- 1이면 즉각 기록, 0이면 기록하지 않음.
+	*****************************************************************/
+	DLLFUNC void	NCG_SetImmediatelyWriteDB(	const int	bFlag );
 
 	/*****************************************************************
 	기능: 로컬에 저장된 CID, SID DB를 텍스트파일로 쓴다.
@@ -352,7 +435,7 @@ extern "C" {
 	인자:	hCore			- NCG_Agent 핸들.
 			szFilename		- 덤프파일을 쓸 파일 경로.
 	*****************************************************************/
-	int		NCG_DumpDB(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_DumpDB(	const NCG_Core_Handle	hCore,
 						const char				*szFilename);
 
 
@@ -399,7 +482,7 @@ extern "C" {
 				자세한 설명은 각 함수의 설명을 참고한다.
 				NCG_Read(), NCG_Seek(), NCG_Tell()는 사용할 수 없다.
 	*****************************************************************/
-	int		NCG_OpenAndVerifyFile(	const char	*szFilename,
+	DLLFUNC int		NCG_OpenAndVerifyFile(	const char	*szFilename,
 									const int	nEnableRead,
 									const int	bUsePOSIX,
 									const int	nFlag,
@@ -432,7 +515,7 @@ extern "C" {
 								nFilesize 이 입력되었을 때에만 반환할 수 있다.
 								nFilesize 가 0이라면 헤더 크기를 반환한다.
 	*****************************************************************/
-	int		NCG_OpenAndVerifyHeader(const unsigned char	*bszHeader_MIN2048,
+	DLLFUNC int		NCG_OpenAndVerifyHeader(const unsigned char	*bszHeader_MIN2048,
 									IN_OUT int	*nHeaderLen,
 									OUT_HANDLE	NCG_File_Handle*	hFile,
 						OPTIONAL	const int	nFilesize,
@@ -445,7 +528,7 @@ extern "C" {
 	인자:	hFile		- NCG 파일 핸들.
 			bszCEK		- 컨텐츠 복호 키.
 	*****************************************************************/
-	void	NCG_SetCEKForce(	const NCG_File_Handle	hFile,
+	DLLFUNC void	NCG_SetCEKForce(	const NCG_File_Handle	hFile,
 								const unsigned char		*bszCEK);
 
 	/*****************************************************************
@@ -453,7 +536,7 @@ extern "C" {
 	반환: true(1) 또는 false(0) 또는 에러코드.
 	인자:	szFilename		- NCG 파일 이름. 절대 경로를 입력해야 한다.
 	*****************************************************************/
-	int		NCG_IsNCGFile(	const char	*szFilename );
+	DLLFUNC int		NCG_IsNCGFile(	const char	*szFilename );
 
 	/*****************************************************************
 	기능: NCG 파일의 헤더인지 판단한다.
@@ -461,7 +544,7 @@ extern "C" {
 	인자:	bszHeader		- NCG 파일의 헤더 버퍼.
 								16바이트 이상이면 NCG 헤더인지 판단할 수 있다.
 	*****************************************************************/
-	int		NCG_IsNCGHeader(	const unsigned char	*bszHeader_MIN16 );
+	DLLFUNC int		NCG_IsNCGHeader(	const unsigned char	*bszHeader_MIN16 );
 
 	/*****************************************************************
 	기능: NCG 파일 헤더 정보를 반환한다.
@@ -469,7 +552,7 @@ extern "C" {
 	인자:	hFile			- NCG 파일 핸들.
 			ncgHeaderInfo	- NCG 컨텐츠의 헤더 정보.
 	*****************************************************************/
-	int		NCG_GetHeaderInfo(	const NCG_File_Handle			hFile,
+	DLLFUNC int		NCG_GetHeaderInfo(	const NCG_File_Handle			hFile,
 								OUT_RESOURCE NCG_Header_Info	**ncgHeaderInfo);
 	
 	/*****************************************************************
@@ -478,9 +561,9 @@ extern "C" {
 	반환: 해당 값에 대한 포인터 또는 NULL.
 	인자:	hFile			- NCG 파일 핸들.
 	*****************************************************************/
-	OUT_RESOURCE	char*	NCG_GetContentsID	(const NCG_File_Handle	hFile);
-	OUT_RESOURCE	char*	NCG_GetSiteID		(const NCG_File_Handle	hFile);
-	OUT_RESOURCE	char*	NCG_AcquisitionURL	(const NCG_File_Handle	hFile);
+	DLLFUNC OUT_RESOURCE	char*	NCG_GetContentsID	(const NCG_File_Handle	hFile);
+	DLLFUNC OUT_RESOURCE	char*	NCG_GetSiteID		(const NCG_File_Handle	hFile);
+	DLLFUNC OUT_RESOURCE	char*	NCG_AcquisitionURL	(const NCG_File_Handle	hFile);
 	
 	/*****************************************************************
 	기능: NCG 파일에 대한 라이센스를 찾아 라이센스 핸들을 반환한다.
@@ -490,7 +573,7 @@ extern "C" {
 			hLic		- NCG 파일에 관련된 라이센스 핸들
 			nLicCount	- 라이센스 갯수.
 	*****************************************************************/
-	int		NCG_GetLicensesHandle(	const NCG_Core_Handle			hCore,
+	DLLFUNC int		NCG_GetLicensesHandle(	const NCG_Core_Handle			hCore,
 									const NCG_File_Handle			hFile,
 									OUT_HANDLE	NCG_License_Handle	*hLic,
 						OPTIONAL	OUT_REF int				*nLicCount);
@@ -502,7 +585,7 @@ extern "C" {
 			nIndex			- 조회할 라이센스 정보의 인덱스.
 			ncgLicenseInfo	- 라이센스 정보
 	*****************************************************************/
-	int		NCG_GetLicensesInfo(const NCG_License_Handle		*hLic,
+	DLLFUNC int		NCG_GetLicensesInfo(const NCG_License_Handle		*hLic,
 								const int						nIndex,
 								OUT_RESOURCE NCG_License_Info	**ncgLicenseInfo);	
 	
@@ -530,7 +613,7 @@ extern "C" {
 								szCurrentGMT 대신 이 값을 사용한다.
 			bszCEK_MIN32	- 복호 키.
 	*****************************************************************/
-	int		NCG_SetLicense(	const NCG_File_Handle		hFile,
+	DLLFUNC int		NCG_SetLicense(	const NCG_File_Handle		hFile,
 							const NCG_License_Handle	hLic,
 							const int					nIndex,
 							const char					*szCurrentGMT,
@@ -544,13 +627,13 @@ extern "C" {
 	인자:	hFile			- NCG 파일 핸들.
 			ncgLicenseInfo	- 라이센스 정보
 	*****************************************************************/
-	int		NCG_GetLicensesInfoOfFile(const NCG_File_Handle			*hFile,
+	DLLFUNC int		NCG_GetLicensesInfoOfFile(const NCG_File_Handle			hFile,
 									  OUT_RESOURCE NCG_License_Info	**ncgLicenseInfo);	
 	
 	/*****************************************************************
 	기능: NCG 라이센스 핸들을 정리한다.
 	*****************************************************************/
-	void	NCG_ClearLicenseHandle(IN_OUT NCG_License_Handle	*hLic);
+	DLLFUNC void	NCG_ClearLicenseHandle(IN_OUT NCG_License_Handle	*hLic);
 
 	/*****************************************************************
 	기능: NCG 파일 재생횟수를 1 차감한다.
@@ -560,7 +643,7 @@ extern "C" {
 			hFile			- NCG 파일 핸들.
 			nRemainCount	- 차감함 후 남은 재생 횟수.
 	*****************************************************************/
-	int		NCG_DecreaseRemainPlayCount(const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_DecreaseRemainPlayCount(const NCG_Core_Handle	hCore,
 										const NCG_File_Handle	hFile,
 							OPTIONAL	OUT_REF int				*nRemainPlayCount);
 
@@ -571,7 +654,7 @@ extern "C" {
 	 인자:	hCore	- NCG_Agent 핸들.
 			hFile	- NCG 파일 핸들.
 	 *****************************************************************/
-	int		NCG_RemoveContentsLicense(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_RemoveContentsLicense(	const NCG_Core_Handle	hCore,
 										const NCG_File_Handle	hFile);
 	
 	/*****************************************************************
@@ -581,7 +664,7 @@ extern "C" {
 	인자:	hCore	- NCG_Agent 핸들.
 			szCID	- Contents ID.
 	*****************************************************************/
-	int		NCG_RemoveContentsLicenseWithCID(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_RemoveContentsLicenseWithCID(	const NCG_Core_Handle	hCore,
 												const char				*szCID);
 	
 	/*****************************************************************
@@ -593,7 +676,7 @@ extern "C" {
 	인자:	hCore	- NCG_Agent 핸들.
 			hFile	- NCG 파일 핸들.
 	 *****************************************************************/
-	int		NCG_RemoveSiteLicense(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_RemoveSiteLicense(	const NCG_Core_Handle	hCore,
 									  const NCG_File_Handle	hFile);
 	
 	/*****************************************************************
@@ -605,7 +688,7 @@ extern "C" {
 	인자:	hCore	- NCG_Agent 핸들.
 			szSID	- Site ID.
 	*****************************************************************/
-	int		NCG_RemoveSiteLicenseWithSID(	const NCG_Core_Handle	hCore,
+	DLLFUNC int		NCG_RemoveSiteLicenseWithSID(	const NCG_Core_Handle	hCore,
 											const char				*szSID);
 	
 	/*****************************************************************
@@ -621,7 +704,7 @@ extern "C" {
 		NCG_OpenAndVerifyFile() 호출 시 nEnableRead = false
 		NCG_OpenAndVerifyHeader() 호출 시
 	*****************************************************************/
-	int		NCG_Read(	const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_Read(	const NCG_File_Handle	hFile,
 						const unsigned long		nToReadLen,
 						OUT_REF unsigned char	*bszBuff,
 						OUT_REF	unsigned long	*nReadedLen);
@@ -640,7 +723,7 @@ extern "C" {
 		NCG_OpenAndVerifyFile() 호출 시 nEnableRead = false
 		NCG_OpenAndVerifyHeader() 호출 시
 	*****************************************************************/
-	int		NCG_Seek(	const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_Seek(	const NCG_File_Handle	hFile,
 						const long				nOffset,
 						const int				nMethod);
 
@@ -659,7 +742,7 @@ extern "C" {
 		NCG_OpenAndVerifyFile() 호출 시 nEnableRead = false
 		NCG_OpenAndVerifyHeader() 호출 시
 	*****************************************************************/
-	int		NCG_Lseek(	const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_Lseek(	const NCG_File_Handle	hFile,
 						const long				nOffset,
 						const int				nMethod);
 
@@ -675,7 +758,7 @@ extern "C" {
 		NCG_OpenAndVerifyFile() 호출 시 nEnableRead = false
 		NCG_OpenAndVerifyHeader() 호출 시
 	*****************************************************************/
-	int		NCG_Tell(	const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_Tell(	const NCG_File_Handle	hFile,
 						OUT_REF	unsigned int	*nOffset);
 
 	/*****************************************************************
@@ -692,7 +775,7 @@ extern "C" {
 		NCG_OpenAndVerifyFile() 호출 시 nEnableRead = false
 		NCG_OpenAndVerifyHeader() 호출 시
 	*****************************************************************/
-	int		NCG_Write(	const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_Write(	const NCG_File_Handle	hFile,
 								const unsigned char	*bszBuff,
 								const unsigned long	nToWriteLen);
 
@@ -702,7 +785,7 @@ extern "C" {
 	인자:	szFilename		- 파일 이름.
 			statBuf			- 파일 정보.
 	*****************************************************************/
-	int		NCG_Stat(const char *szFilename,
+	DLLFUNC int		NCG_Stat(const char *szFilename,
 							OUT_REF	struct stat *statBuf);
 
 	/*****************************************************************
@@ -717,7 +800,7 @@ extern "C" {
 		NCG_OpenAndVerifyFile() 호출 시 nEnableRead = false
 		NCG_OpenAndVerifyHeader() 호출 시
 	*****************************************************************/
-	int		NCG_Fstat(	const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_Fstat(	const NCG_File_Handle	hFile,
 							OUT_REF	struct stat *statBuf);
 
 	/*****************************************************************
@@ -727,7 +810,7 @@ extern "C" {
 	인자:	hFile			- NCG 파일 핸들.
 			nContentsSize	- NCG 파일내 컨텐츠 크기.
 	*****************************************************************/
-	int		NCG_GetContentsSize(const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_GetContentsSize(const NCG_File_Handle	hFile,
 								OUT_REF	unsigned int	*nContentsSize);
 
 	/*****************************************************************
@@ -736,7 +819,7 @@ extern "C" {
 	인자:	hFile			- NCG 파일 핸들.
 			nHeaderSize		- NCG 파일 헤더 크기.
 	 *****************************************************************/
-	int		NCG_GetHeaderSize(	const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_GetHeaderSize(	const NCG_File_Handle	hFile,
 								OUT_REF	unsigned int	*nHeaderSize);
 
 	/*****************************************************************
@@ -783,7 +866,7 @@ extern "C" {
 	호출불가(에러코드 반환):
 		NCG_OpenAndVerifyFile() 호출 시 nEnableRead = true
 	*****************************************************************/
-	int		NCG_GetNewOffsetAndSize(const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_GetNewOffsetAndSize(const NCG_File_Handle	hFile,
 									const unsigned long		nWantedStartOffset,
 									const unsigned long		nWantedSize,
 									OUT_REF	unsigned long	*nActualStartOffset,
@@ -809,7 +892,7 @@ extern "C" {
 	호출불가(에러코드 반환):
 		NCG_OpenAndVerifyFile() 호출 시 nEnableRead = true
 	*****************************************************************/
-	int		NCG_Decrypt(const NCG_File_Handle	hFile,
+	DLLFUNC int		NCG_Decrypt(const NCG_File_Handle	hFile,
 						IN_OUT unsigned char	*bszData,
 						const unsigned int		nDataLen);
 
@@ -818,7 +901,7 @@ extern "C" {
 	반환: 없음
 	인자:	hFile		- NCG 파일 핸들.
 	*****************************************************************/
-	void	NCG_ClearFileHandle(IN_OUT	NCG_File_Handle	*hFile);
+	DLLFUNC void	NCG_ClearFileHandle(IN_OUT	NCG_File_Handle	*hFile);
 	
 	/*****************************************************************
 	 기능: 입력받은 GMT 형태 시간 문자열을 숫자로 변환한다.
@@ -830,7 +913,7 @@ extern "C" {
 	 반환:	변환한 초 (Sec)
 	 인자:	szGMTTime	- GMT 형태 시간 문자열.
 	 *****************************************************************/
-	unsigned long	NCG_ConvertGMTtoCount(const char	*szGMTTime);
+	DLLFUNC unsigned long	NCG_ConvertGMTtoCount(const char	*szGMTTime);
 	
 	
 

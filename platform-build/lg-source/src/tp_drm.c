@@ -9,10 +9,11 @@
 #include "tp_util.h"
 #include "tp_drm.h"
 
-#include <addon_hoa.h>
+//#include <addon_hoa.h>
+#include <appfrwk_openapi.h>
 
-#include <NCG/NCG_Core.h>
-#include <NCG/NCG_Error.h>
+#include <NCG_Core.h>
+#include <NCG_Error.h>
 
 #define BUFFER_SIZE		(1024 * 4)		// 4 KB
 
@@ -41,11 +42,14 @@ static BOOLEAN _DRM_DecryptFileDRM(
 	}
 
 	/* 2. Get CEK from App ID and source file path. */
+	// TODO sanggi0.lee - new function
+	/*
 	if (HOA_SECCHK_GetCEK(appID, (char*)szSrcPath, bszKey) != HOA_UC_OK)
 	{
 		DBG_PRINT_TP("HOA_SECCHK_GetCEK() failed.");
 		goto clear_and_return;
 	}
+	*/
 
 	/* 3. Set CEK to the file handle. */
 	NCG_SetCEKForce(hNCGFile, bszKey);

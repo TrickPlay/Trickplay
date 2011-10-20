@@ -2,8 +2,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include <addon_types.h>
-#include <addon_hoa.h>
+#include <appfrwk_openapi.h>
+
 
 #include <trickplay/mediaplayer.h>
 
@@ -46,10 +46,10 @@ static const char* _PlayClip_RemoveFileURIPrefix(const char* szURI)
 	return szURI;
 }
 
-static MEDIA_BUFFER_HANDLE_T* _PlayClip_BufferingMedia(const char* szURI)
+static AF_BUFFER_HNDL_T* _PlayClip_BufferingMedia(const char* szURI)
 {
 	HOA_STATUS_T res;
-	MEDIA_BUFFER_HANDLE_T* pBuffer = NULL;
+	AF_BUFFER_HNDL_T* pBuffer = NULL;
 
 	FILE*	pfURI;
 	UINT32	uFileSize = 0;
@@ -102,7 +102,7 @@ static MEDIA_BUFFER_HANDLE_T* _PlayClip_BufferingMedia(const char* szURI)
 		return NULL;
 	}
 
-	pBuffer->nBuffSize = uRead;
+	pBuffer->size = uRead;
 	return pBuffer;
 }
 
@@ -255,7 +255,7 @@ int TP_PlayClip_PlaySound(TPMediaPlayer* pMP, const char* szURI)
 	DBG_PRINT_TP(NULL);
 
 	HOA_STATUS_T res;
-	MEDIA_BUFFER_HANDLE_T* pBufHandle;
+	AF_BUFFER_HNDL_T* pBufHandle;
 	MEDIA_CHANNEL_T	ch;
 
 	assert(pMP != NULL);
@@ -278,7 +278,7 @@ int TP_PlayClip_PlaySound(TPMediaPlayer* pMP, const char* szURI)
 		return -1;
 	}
 
-	pBufHandle = (MEDIA_BUFFER_HANDLE_T*)API_Map_Find(_ghEffectMap, szURI);
+	pBufHandle = (AF_BUFFER_HNDL_T*)API_Map_Find(_ghEffectMap, szURI);
 
 	if (pBufHandle == NULL)
 	{

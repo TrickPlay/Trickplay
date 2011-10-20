@@ -132,23 +132,29 @@ typedef char JOCTET;
 
 /* UINT8 must hold at least the values 0..255. */
 
+#ifndef UINT8
 #ifdef HAVE_UNSIGNED_CHAR
-typedef unsigned char UINT8;
+typedef unsigned char __UINT8;
 #else /* not HAVE_UNSIGNED_CHAR */
 #ifdef CHAR_IS_UNSIGNED
-typedef char UINT8;
+typedef char __UINT8;
 #else /* not CHAR_IS_UNSIGNED */
-typedef short UINT8;
+typedef short __UINT8;
 #endif /* CHAR_IS_UNSIGNED */
 #endif /* HAVE_UNSIGNED_CHAR */
+#define UINT8	__UINT8
+#endif
 
 /* UINT16 must hold at least the values 0..65535. */
 
+#ifndef UINT16
 #ifdef HAVE_UNSIGNED_SHORT
-typedef unsigned short UINT16;
+typedef unsigned short __UINT16;
 #else /* not HAVE_UNSIGNED_SHORT */
-typedef unsigned int UINT16;
+typedef unsigned int __UINT16;
 #endif /* HAVE_UNSIGNED_SHORT */
+#define UINT16	__UINT16
+#endif
 
 /* INT16 must hold at least the values -32768..32767. */
 

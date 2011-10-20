@@ -20,6 +20,8 @@ TARGET			= $(BIN_DIR)/trickplay
 THIS_DEFINES	=
 THIS_DEFINES	+= _REENTRANT
 THIS_DEFINES	+= _GNU_SOURCE
+THIS_DEFINES	+= INCLUDE_HOA_2ND
+THIS_DEFINES	+= DTV_HOST
 ifeq ($(DEBUG_MODE), YES)
 THIS_DEFINES	+= _TP_DEBUG
 endif
@@ -42,11 +44,12 @@ endif
 THIS_INCLUDES	=
 THIS_INCLUDES	+= $(TP_DIR)/include
 THIS_INCLUDES	+= $(TP_DIR)/include/opengles	# for OpenGL ES headers
-THIS_INCLUDES	+= $(TP_DIR)/include/addon/
+THIS_INCLUDES	+= $(TP_DIR)/include/NCG
 THIS_INCLUDES	+= $(TP_DIR)/include/opensource/zlib
 THIS_INCLUDES	+= $(TP_DIR)/include/opensource/libpng
 THIS_INCLUDES	+= $(TP_DIR)/include/opensource/libjpeg
 THIS_INCLUDES	+= $(TP_DIR)/include/opensource/giflib
+THIS_INCLUDES	+= $(TP_DIR)/include/lglib
 THIS_INCLUDES	+= ${TRICKPLAY_INCLUDE}
 
 C_NAMES			=
@@ -73,6 +76,7 @@ INCLUDE_MODULE	+= tpcore
 
 # OpenGL ES
 INCLUDE_MODULE	+= EGL
+INCLUDE_MODULE	+= UMP
 INCLUDE_MODULE	+= GLESv2
 INCLUDE_MODULE	+= Mali
 
@@ -121,7 +125,15 @@ INCLUDE_MODULE	+= resolv
 INCLUDE_MODULE	+= rt
 
 # LG supported libraries
-INCLUDE_MODULE	+= openapi
+INCLUDE_MODULE	+= dbgfrwk
+INCLUDE_MODULE	+= dbus-1
+INCLUDE_MODULE	+= scf
+INCLUDE_MODULE	+= afopenapi
+INCLUDE_MODULE	+= mfopenapi
+INCLUDE_MODULE	+= lginputopenapi
+INCLUDE_MODULE	+= lgopenapi
+INCLUDE_MODULE	+= fxopenapi
+INCLUDE_MODULE	+= bcopenapi
 ifeq ($(USE_DRM_ENCRYPTED_APP), YES)
 INCLUDE_MODULE	+= ncg_agent
 endif

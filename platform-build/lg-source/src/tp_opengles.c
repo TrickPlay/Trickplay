@@ -4,6 +4,8 @@
 #include "tp_settings.h"
 #include "tp_opengles.h"
 
+#include "appfrwk_openapi.h"
+
 
 static fbdev_window* _OpenGLES_CreateWindow(UINT16 x, UINT16 y, UINT16 width, UINT16 height, BOOLEAN bStretchToDisplay)
 {
@@ -12,21 +14,11 @@ static fbdev_window* _OpenGLES_CreateWindow(UINT16 x, UINT16 y, UINT16 width, UI
 	if (pWindow != NULL)
 	{
 		/* following code is available after fbdev_window structure is extended. */
-#if 0
-		if (bStretchToDisplay)
-		{
-			pWindow->x		= 0;
-			pWindow->y		= 0;
-		}
-		else
-		{
-			pWindow->x		= x;
-			pWindow->y		= y;
-		}
-		pWindow->width	= width;
-		pWindow->height	= height;
+//#if (PLATFORM_TYPE == MTK_PLATFORM || PLATFORM_TYPE == LG_PLATFORM)
+		pWindow->x		= x;
+		pWindow->y		= y;
 		pWindow->bStretchToDisplay = bStretchToDisplay;
-#endif
+//#endif
 		pWindow->width	= width;
 		pWindow->height	= height;
 	}
@@ -108,5 +100,27 @@ EGLNativeWindowType TP_OpenGLES_GetEGLNativeWindow(void)
 		DBG_PRINT_TP("EGLNativeWindow is NULL. You must call TP_OpenGLES_Initialize() first.");
 
 	return (EGLNativeWindowType)_gpWindow;
+}
+
+NativeDisplayType tp_egl_get_native_display(void)
+{
+// TODO sanggi0.lee
+#if 1
+	SINT32 id = 0;
+	HOA_STATUS_T ret = HOA_OK;
+
+	ret = HOA_PROC_GetDisplayID(&id);
+	DBG_PRINT_TP("display id = %d", ((NativeDisplayType)id));
+	if(ret == HOA_OK)
+	{
+		return ((NativeDisplayType)id);
+	}
+	else
+	{
+		return ((NativeDisplayType)-1);
+	}
+#else
+	return 0;
+#endif
 }
 

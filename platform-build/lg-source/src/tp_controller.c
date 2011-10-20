@@ -3,7 +3,8 @@
 #include "tp_common.h"
 #include "tp_controller.h"
 
-#include <addon_key.h>
+//#include <addon_key.h>
+#include <appfrwk_common_key.h>
 
 #include <trickplay/keys.h>
 #include <trickplay/controller.h>
@@ -14,66 +15,66 @@ static TPControllerKeyMap _gRemoteKeyMap[] =
 	/*----------------------------------------------
 	  General buttons
 	 */
-	{ AO_IR_KEY_LEFT_ARROW,		TP_KEY_LEFT },
-	{ AO_IR_KEY_UP_ARROW,		TP_KEY_UP },
-	{ AO_IR_KEY_RIGHT_ARROW,	TP_KEY_RIGHT },
-	{ AO_IR_KEY_DOWN_ARROW,		TP_KEY_DOWN },
-	{ AO_IR_KEY_ENTER,			TP_KEY_RETURN },
-	{ AO_IR_KEY_EXIT,			TP_KEY_ESCAPE },
+	{ IR_KEY_LEFT_ARROW,	TP_KEY_LEFT },
+	{ IR_KEY_UP_ARROW,		TP_KEY_UP },
+	{ IR_KEY_RIGHT_ARROW,	TP_KEY_RIGHT },
+	{ IR_KEY_DOWN_ARROW,	TP_KEY_DOWN },
+	{ IR_KEY_ENTER,			TP_KEY_RETURN },
+	{ IR_KEY_EXIT,			TP_KEY_ESCAPE },
 
-	{ AO_IR_KEY_0,				TP_KEY_0 },
-	{ AO_IR_KEY_1,				TP_KEY_1 },
-	{ AO_IR_KEY_2,				TP_KEY_2 },
-	{ AO_IR_KEY_3,				TP_KEY_3 },
-	{ AO_IR_KEY_4,				TP_KEY_4 },
-	{ AO_IR_KEY_5,				TP_KEY_5 },
-	{ AO_IR_KEY_6,				TP_KEY_6 },
-	{ AO_IR_KEY_7,				TP_KEY_7 },
-	{ AO_IR_KEY_8,				TP_KEY_8 },
-	{ AO_IR_KEY_9,				TP_KEY_9 },
+	{ IR_KEY_0,				TP_KEY_0 },
+	{ IR_KEY_1,				TP_KEY_1 },
+	{ IR_KEY_2,				TP_KEY_2 },
+	{ IR_KEY_3,				TP_KEY_3 },
+	{ IR_KEY_4,				TP_KEY_4 },
+	{ IR_KEY_5,				TP_KEY_5 },
+	{ IR_KEY_6,				TP_KEY_6 },
+	{ IR_KEY_7,				TP_KEY_7 },
+	{ IR_KEY_8,				TP_KEY_8 },
+	{ IR_KEY_9,				TP_KEY_9 },
 
 	/*----------------------------------------------
 	  Vendor extensions
 	 */
 
 	/* Color buttons */
-	{ AO_IR_KEY_RED,			TP_KEY_RED },
-	{ AO_IR_KEY_GREEN,			TP_KEY_GREEN },
-	{ AO_IR_KEY_YELLOW,			TP_KEY_YELLOW },
-	{ AO_IR_KEY_BLUE,			TP_KEY_BLUE },
+	{ IR_KEY_RED,			TP_KEY_RED },
+	{ IR_KEY_GREEN,			TP_KEY_GREEN },
+	{ IR_KEY_YELLOW,		TP_KEY_YELLOW },
+	{ IR_KEY_BLUE,			TP_KEY_BLUE },
 
 	/* Transport control */
-	{ AO_IR_KEY_STOP,			TP_KEY_STOP },
-	{ AO_IR_KEY_PLAY,			TP_KEY_PLAY },
-	{ AO_IR_KEY_PAUSE,			TP_KEY_PAUSE },
-	{ AO_IR_KEY_REW,			TP_KEY_REW },
-	{ AO_IR_KEY_FF,				TP_KEY_FFWD },
-	{ AO_IR_KEY_GOTOPREV,		TP_KEY_PREV },
-	{ AO_IR_KEY_GOTONEXT,		TP_KEY_NEXT },
-	{ AO_IR_KEY_REC,			TP_KEY_REC },
+	{ IR_KEY_STOP,			TP_KEY_STOP },
+	{ IR_KEY_PLAY,			TP_KEY_PLAY },
+	{ IR_KEY_PAUSE,			TP_KEY_PAUSE },
+	{ IR_KEY_REW,			TP_KEY_REW },
+	{ IR_KEY_FF,			TP_KEY_FFWD },
+	{ IR_KEY_GOTOPREV,		TP_KEY_PREV },
+	{ IR_KEY_GOTONEXT,		TP_KEY_NEXT },
+	{ IR_KEY_REC,			TP_KEY_REC },
 
 	/* Navigation */
-	{ AO_IR_KEY_MENU,			TP_KEY_MENU },
-	{ AO_IR_KEY_GRIDGUIDE,		TP_KEY_GUIDE },
-	{ AO_IR_KEY_BACK,			TP_KEY_BACK },
-	{ AO_IR_KEY_EXIT,			TP_KEY_EXIT },
-	{ AO_IR_KEY_INFO,			TP_KEY_INFO },
+	{ IR_KEY_MENU,			TP_KEY_MENU },
+	{ IR_KEY_GRIDGUIDE,		TP_KEY_GUIDE },
+	{ IR_KEY_BACK,			TP_KEY_BACK },
+	{ IR_KEY_EXIT,			TP_KEY_EXIT },
+	{ IR_KEY_INFO,			TP_KEY_INFO },
 /*	{ 0,						TP_KEY_TOOLS },*/
 
 	/* Channels */
-	{ AO_IR_KEY_CH_UP,			TP_KEY_CHAN_UP },
-	{ AO_IR_KEY_CH_DOWN,		TP_KEY_CHAN_DOWN },
-	{ AO_IR_KEY_FLASHBACK,		TP_KEY_CHAN_LAST },
-	{ AO_IR_KEY_PRLIST,			TP_KEY_CHAN_LIST },
-	{ AO_IR_KEY_FAVORITE,		TP_KEY_CHAN_FAV },
+	{ IR_KEY_CH_UP,			TP_KEY_CHAN_UP },
+	{ IR_KEY_CH_DOWN,		TP_KEY_CHAN_DOWN },
+	{ IR_KEY_FLASHBACK,		TP_KEY_CHAN_LAST },
+	{ IR_KEY_PRLIST,		TP_KEY_CHAN_LIST },
+	{ IR_KEY_FAVORITE,		TP_KEY_CHAN_FAV },
 
 	/* Audio */
-	{ AO_IR_KEY_VOL_UP,			TP_KEY_VOL_UP },
-	{ AO_IR_KEY_VOL_DOWN,		TP_KEY_VOL_DOWN },
-	{ AO_IR_KEY_MUTE,			TP_KEY_MUTE },
+	{ IR_KEY_VOL_UP,		TP_KEY_VOL_UP },
+	{ IR_KEY_VOL_DOWN,		TP_KEY_VOL_DOWN },
+	{ IR_KEY_MUTE,			TP_KEY_MUTE },
 
 	/* Captions */
-	{ AO_IR_KEY_CC,				TP_KEY_CC },
+	{ IR_KEY_CC,				TP_KEY_CC },
 
 	{ 0,						0 }
 };
@@ -222,23 +223,23 @@ void TP_Controller_Finalize(TPContext* pContext)
 #endif
 }
 
-BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, ADDON_KEY_COND_T keyCond)
+BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, PM_KEY_COND_T keyCond)
 {
-	if ((_gpRemoteController == NULL) || (keyCond >= ADDON_KEY_COND_LAST))
+	if ((_gpRemoteController == NULL) || (keyCond >= PM_KEY_COND_LAST))
 		return FALSE;
 
 	DBG_PRINT_TP("KeyEvent: Key(%#4x) / KeyCond(%u)", key, keyCond);
 
 	switch (keyCond)
 	{
-		case ADDON_KEY_PRESS:
-			tp_controller_key_down(_gpRemoteController, key, 0,0);
+		case PM_KEY_PRESS:
+			tp_controller_key_down(_gpRemoteController, key, 0, 0);
 			break;
-		case ADDON_KEY_RELEASE:
-			tp_controller_key_up(_gpRemoteController, key, 0,0);
+		case PM_KEY_RELEASE:
+			tp_controller_key_up(_gpRemoteController, key, 0, 0);
 			break;
-		case ADDON_KEY_REPEAT:
-			tp_controller_key_down(_gpRemoteController, key, 0,0);
+		case PM_KEY_REPEAT:
+			tp_controller_key_down(_gpRemoteController, key, 0, 0);
 			break;
 		default:
 			return FALSE;
@@ -251,14 +252,15 @@ BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, ADDON_KEY_COND_T keyCond)
 
 BOOLEAN	TP_Controller_MouseEventCallback(
 		SINT32 posX, SINT32 posY,
-		UINT32 keyCode, ADDON_KEY_COND_T keyCond)
+		UINT32 keyCode, PM_KEY_COND_T keyCond,
+		struct input_event event)
 {
 	if (!_gbMouseEnabled)
 		return FALSE;
 
-	if ((keyCode == AO_RF_KEY_NONE) || (keyCond == ADDON_KEY_COND_LAST))
+	if ((keyCode == RF_KEY_NONE) || (keyCond == PM_KEY_COND_LAST))
 	{
-		tp_controller_pointer_move(_gpMouseController, posX, posY,0);
+		tp_controller_pointer_move(_gpMouseController, posX, posY, 0);
 		return TRUE;
 	}
 
@@ -269,19 +271,19 @@ BOOLEAN	TP_Controller_MouseEventCallback(
 
 	/* Currently just the OK key of MotionRemote can be handled in mouse event callback.
 	   Other key events of MotionRemote are sent to key event callback. */
-	if (keyCode == AO_RF_KEY_OK)
+	if (keyCode == RF_KEY_OK)
 		tpButton = 1;
 
 	switch (keyCond)
 	{
-		case ADDON_KEY_PRESS:
-			tp_controller_pointer_button_down(_gpMouseController, tpButton, posX, posY,0);
+		case PM_KEY_PRESS:
+			tp_controller_pointer_button_down(_gpMouseController, tpButton, posX, posY, 0);
 			break;
-		case ADDON_KEY_RELEASE:
-			tp_controller_pointer_button_up(_gpMouseController, tpButton, posX, posY,0);
+		case PM_KEY_RELEASE:
+			tp_controller_pointer_button_up(_gpMouseController, tpButton, posX, posY, 0);
 			break;
-		case ADDON_KEY_REPEAT:
-			tp_controller_pointer_button_down(_gpMouseController, tpButton, posX, posY,0);
+		case PM_KEY_REPEAT:
+			tp_controller_pointer_button_down(_gpMouseController, tpButton, posX, posY, 0);
 			break;
 		default:
 			return FALSE;

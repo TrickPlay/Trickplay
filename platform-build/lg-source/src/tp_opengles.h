@@ -3,8 +3,10 @@
 
 #include <EGL/eglplatform.h>
 
-#include <addon_types.h>
-#include <addon_hoa.h>
+//#include <addon_types.h>
+//#include <addon_hoa.h>
+#include <appfrwk_openapi_types.h>
+#include <appfrwk_openapi.h>
 
 #define OPENGLES_WINDOW_ATTRIB_X			0x1000
 #define OPENGLES_WINDOW_ATTRIB_Y			0x1001
@@ -22,6 +24,8 @@ BOOLEAN				TP_OpenGLES_Initialize(const UINT32* pAttrList);
 void				TP_OpenGLES_Finalize(void);
 
 EGLNativeWindowType	TP_OpenGLES_GetEGLNativeWindow(void);
+
+NativeDisplayType 	tp_egl_get_native_display(void);
 
 #ifdef __cplusplus
 }

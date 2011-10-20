@@ -2,8 +2,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include <addon_types.h>
-#include <addon_hoa.h>
+#include <appfrwk_openapi_types.h>
+#include <appfrwk_openapi.h>
 
 #include <trickplay/mediaplayer.h>
 
@@ -356,10 +356,10 @@ static int _MediaPlayer_GetAudioVolume(TPMediaPlayer* pMP, double* pVolume)
 	if (pVolume == NULL)
 		return -1;
 
-	res = HOA_TV_GetCurrentVolume(HOA_APP_HOST, &volume);
+	res = HOA_CTRL_GetCurrentVolume(HOA_APP_HOST, &volume);
 	if (res != HOA_OK)
 	{
-		DBG_PRINT_TP("HOA_TV_GetCurrentVolume() failed. (%d)", res);
+		DBG_PRINT_TP("HOA_CTRL_GetCurrentVolume() failed. (%d)", res);
 		return -1;
 	}
 
@@ -375,10 +375,10 @@ static int _MediaPlayer_SetAudioVolume(TPMediaPlayer* pMP, double volume)
 
 	assert(pMP != NULL);
 
-	res = HOA_TV_SetVolume(FALSE, HOA_APP_HOST, FALSE, (SINT8)volume, NULL);
+	res = HOA_CTRL_SetVolume(FALSE, HOA_APP_HOST, FALSE, (SINT8)volume, NULL);
 	if (res != HOA_OK)
 	{
-		DBG_PRINT_TP("HOA_TV_SetVolume() failed. (%d)", res);
+		DBG_PRINT_TP("HOA_CTRL_SetVolume() failed. (%d)", res);
 		return -1;
 	}
 
@@ -397,10 +397,10 @@ static int _MediaPlayer_GetAudioMute(TPMediaPlayer* pMP, int* pMute)
 	if (pMute == NULL)
 		return -1;
 
-	res = HOA_TV_GetMute(&bMute);
+	res = HOA_CTRL_GetMute(&bMute);
 	if (res != HOA_OK)
 	{
-		DBG_PRINT_TP("HOA_TV_GetMute() failed. (%d)", res);
+		DBG_PRINT_TP("HOA_CTRL_GetMute() failed. (%d)", res);
 		return -1;
 	}
 
@@ -416,10 +416,10 @@ static int _MediaPlayer_SetAudioMute(TPMediaPlayer* pMP, int mute)
 
 	assert(pMP != NULL);
 
-	res = HOA_TV_SetMute(FALSE, mute);
+	res = HOA_CTRL_SetMute(FALSE, mute);
 	if (res != HOA_OK)
 	{
-		DBG_PRINT_TP("HOA_TV_SetMute() failed. (%d)", res);
+		DBG_PRINT_TP("HOA_CTRL_SetMute() failed. (%d)", res);
 		return -1;
 	}
 
