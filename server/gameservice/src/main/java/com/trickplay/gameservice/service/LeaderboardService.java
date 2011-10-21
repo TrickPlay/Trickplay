@@ -20,7 +20,7 @@ public interface LeaderboardService {
 	public List<RecordedScore> findBuddyScores(Long gameId);
 	public List<RecordedScore> findScoreByUserId(Long gameId);
 	
-	@PreAuthorize("hasRole('ROLE_ADMIN') OR hasRole('ROLE_USER')")
+	@PreAuthorize("isAuthenticated()")
 	@Transactional
 	public RecordedScore recordScore(Long gameId, long points);	
 }

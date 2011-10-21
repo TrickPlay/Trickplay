@@ -11,7 +11,7 @@ import com.trickplay.gameservice.domain.GameSession;
 import com.trickplay.gameservice.domain.GameStepId;
 import com.trickplay.gameservice.domain.InvitationStatus;
 
-@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+@PreAuthorize("isAuthenticated()")
 public interface GamePlayService {
 
     public static final int RESERVATION_VALID_INTERVAL_IN_SECONDS = 120;

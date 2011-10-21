@@ -23,6 +23,12 @@ public class UserDAOImpl extends GenericDAOWithJPA<User, Long> implements UserDA
             */
         return u;
     }
-    
 
+    public List<String> getRoles(String username) {
+        return  super.entityManager
+                .createQuery("Select R.name from User U join U.authorities R where U.username = :username")
+                .setParameter("username", username)
+                .getResultList();
+    }
+    
 }

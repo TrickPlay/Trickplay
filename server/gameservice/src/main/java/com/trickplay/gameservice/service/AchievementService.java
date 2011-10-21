@@ -13,7 +13,7 @@ public interface AchievementService {
 
 	public List<RecordedAchievement> findAllRecordedAchievementsByGameId(Long id);
 	
-	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+	@PreAuthorize("isAuthenticated()")
 	public void create(RecordedAchievement score);
 	
 	public RecordedAchievement findRecordedAchievement(Long id);
@@ -22,6 +22,6 @@ public interface AchievementService {
 	
 	public Achievement find(Long id);
 	
-	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+	@PreAuthorize("isAuthenticated()")
 	public void create(Achievement entity);
 }

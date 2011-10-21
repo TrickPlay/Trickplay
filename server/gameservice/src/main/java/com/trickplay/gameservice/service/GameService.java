@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.trickplay.gameservice.domain.Game;
 
 
-@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+@PreAuthorize("isAuthenticated()")
 public interface GameService {
 
     @PostFilter("hasRole('ROLE_ADMIN') or filterObject.primaryContact.username == principal.username")

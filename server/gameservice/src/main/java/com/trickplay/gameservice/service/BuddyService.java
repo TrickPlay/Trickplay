@@ -10,7 +10,7 @@ import com.trickplay.gameservice.domain.BuddyListInvitation;
 import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.exception.GameServiceException;
 
-@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+@PreAuthorize("isAuthenticated()")
 public interface BuddyService {
 	
     @Transactional

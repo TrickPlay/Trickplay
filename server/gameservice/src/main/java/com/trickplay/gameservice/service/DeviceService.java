@@ -7,7 +7,7 @@ import com.trickplay.gameservice.domain.Device;
 
 public interface DeviceService {
 	
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    @PreAuthorize("isAuthenticated()")
 	@Transactional
 	public void create(Device entity);
 
@@ -15,7 +15,7 @@ public interface DeviceService {
 	
 	public Device findByKey(String deviceKey);
 	
-	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+	@PreAuthorize("isAuthenticated()")
 	@Transactional
 	public Device addGame(String deviceKey, String appId);
 

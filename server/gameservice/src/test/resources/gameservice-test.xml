@@ -33,14 +33,14 @@
 			ref="anonymousAuthenticationProvider" />
 	</security:authentication-manager>
 
-	<bean id="tpUserDetailsService"
-		class="com.trickplay.gameservice.security.CustomUserDetailsService">
-		<property name="dataSource" ref="dataSource" />
-		<property name="usersByUsernameQuery"
-			value="select id, username, password, true from user where username = ?" />
-		<property name="authoritiesByUsernameQuery"
-			value="select U.username, R.name authorities from user U, USER_ROLE UR, role R where (U.id=UR.user_id) and (R.id=UR.role_id) and (u.username=?)" />
-	</bean>
+    <bean id="tpUserDetailsService"
+        class="com.trickplay.gameservice.security.CustomUserDetailsService">
+        <property name="dataSource" ref="dataSource" />
+        <property name="usersByUsernameQuery"
+            value="select id, username, password, true from user where username = ?" />
+        <property name="authoritiesByUsernameQuery"
+            value="select U.username, R.name authorities from user U, USER_ROLE UR, role R where (U.id=UR.user_id) and (R.id=UR.role_id) and (u.username=?)" />
+    </bean>
 	<!-- <security:jdbc-user-service data-source-ref="dataSource" users-by-username-query="select 
 		username, password, true from user where username = ?" authorities-by-username-query="select 
 		U.username, R.name authorities from user U, USER_ROLE UR, role R where (U.id=UR.user_id) 
