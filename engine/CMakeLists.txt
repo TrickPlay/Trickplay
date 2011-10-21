@@ -295,7 +295,7 @@ endforeach( LIB )
 # all warnings
 #------------------------------------------------------------------------------
 
-set(CMAKE_CXX_FLAGS "-Wall -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS "-Wall")
 
 #------------------------------------------------------------------------------
 # log domain for glib log functions
@@ -559,6 +559,8 @@ list( APPEND
     ${ENGINE_SRC}/source/log.cpp
     ${ENGINE_SRC}/source/keyboard.cpp
     ${ENGINE_SRC}/source/jpeg_utils.cpp
+    ${ENGINE_SRC}/source/sandbox.cpp
+    ${ENGINE_SRC}/source/console_commands.cpp
 )
 
 #------------------------------------------------------------------------------

@@ -87,67 +87,77 @@ global app [[App*]]
 
     readonly table contents
         [[
-            lua_newtable( L );
-            int t = lua_gettop( L );
-            int index = 1;
-
-            String root = self->get_metadata().path.c_str();
-
-            StringList stack;
-
-            stack.push_back( String() );
-
-            while ( ! stack.empty() )
+            // TODO: THIS WON'T WORK FOR APPS LAUNCHED FROM A REMOTE URI.
+            
+            String root = self->get_metadata().sandbox.get_root_native_path();
+            
+            if ( root.empty() )
             {
-                String base( stack.front() );
+                g_warning( "CANNOT GET APP CONTENTS" );
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_newtable( L );
+                int t = lua_gettop( L );
+                int index = 1;
 
-                stack.pop_front();
-
-                gchar * path = g_build_filename( root.c_str() , base.empty() ? NULL : base.c_str() , NULL );
-
-                GDir * d = g_dir_open( path , 0 , NULL );
-
-                if ( d )
+                StringList stack;
+    
+                stack.push_back( String() );
+    
+                while ( ! stack.empty() )
                 {
-                    for ( const gchar * name = g_dir_read_name( d ); name ; name = g_dir_read_name( d ) )
+                    String base( stack.front() );
+    
+                    stack.pop_front();
+    
+                    gchar * path = g_build_filename( root.c_str() , base.empty() ? NULL : base.c_str() , NULL );
+    
+                    GDir * d = g_dir_open( path , 0 , NULL );
+    
+                    if ( d )
                     {
-                        gchar * sub = g_build_filename( path , name , NULL );
-
-                        if ( g_file_test( sub , G_FILE_TEST_IS_DIR ) )
+                        for ( const gchar * name = g_dir_read_name( d ); name ; name = g_dir_read_name( d ) )
                         {
-                            if ( base.empty() )
+                            gchar * sub = g_build_filename( path , name , NULL );
+    
+                            if ( g_file_test( sub , G_FILE_TEST_IS_DIR ) )
                             {
-                                stack.push_back( name );
+                                if ( base.empty() )
+                                {
+                                    stack.push_back( name );
+                                }
+                                else
+                                {
+                                    gchar * sub_base = g_build_filename( base.c_str() , name , NULL );
+                                    stack.push_back( sub_base );
+                                    g_free( sub_base );
+                                }
                             }
-                            else
+                            else if ( g_file_test( sub , G_FILE_TEST_IS_REGULAR ) )
                             {
-                                gchar * sub_base = g_build_filename( base.c_str() , name , NULL );
-                                stack.push_back( sub_base );
-                                g_free( sub_base );
+                                if ( base.empty() )
+                                {
+                                    lua_pushstring( L , name );
+                                    lua_rawseti( L , t , index );
+                                }
+                                else
+                                {
+                                    gchar * sub_base = g_build_filename( base.c_str() , name , NULL );
+                                    lua_pushstring( L , sub_base );
+                                    lua_rawseti( L , t , index );
+                                    g_free( sub_base );
+                                }
+    
+                                ++index;
                             }
+                            g_free( sub );
                         }
-                        else if ( g_file_test( sub , G_FILE_TEST_IS_REGULAR ) )
-                        {
-                            if ( base.empty() )
-                            {
-                                lua_pushstring( L , name );
-                                lua_rawseti( L , t , index );
-                            }
-                            else
-                            {
-                                gchar * sub_base = g_build_filename( base.c_str() , name , NULL );
-                                lua_pushstring( L , sub_base );
-                                lua_rawseti( L , t , index );
-                                g_free( sub_base );
-                            }
-
-                            ++index;
-                        }
-                        g_free( sub );
+                        g_dir_close( d );
                     }
-                    g_dir_close( d );
+                    g_free( path );
                 }
-                g_free( path );
             }
         ]]
         
