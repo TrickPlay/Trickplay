@@ -712,6 +712,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         
         [backgroundView addSubview:newImageView];
         [backgroundView sendSubviewToBack:newImageView];
+        backgroundView.image = nil;
+        backgroundView.backgroundColor = [UIColor blackColor];
         
         graphics = YES;
         if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {
