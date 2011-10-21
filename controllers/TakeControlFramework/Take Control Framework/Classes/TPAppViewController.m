@@ -14,7 +14,6 @@
 
 #import "ResourceManager.h"
 #import "SocketManager.h"
-#import "Protocols.h"
 
 
 
@@ -25,6 +24,10 @@
 #import "VirtualRemoteViewController.h"
 #import "GestureImageView.h"
 #import "TVConnection.h"
+
+#import "Protocols.h"
+
+#import <uuid/uuid.h>
 
 @interface TPAppViewControllerContext : TPAppViewController <SocketManagerDelegate, 
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
@@ -134,7 +137,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id <TPAppViewControllerDelegate>)delegate;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection size:(CGSize)size delegate:(id <TPAppViewControllerDelegate>)delegate;
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
 
@@ -174,7 +177,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 #pragma mark Initialization
 
 - (id)init {
-    return [self initWithNibName:nil bundle:nil tvConnection:nil frame:CGRectNull delegate:nil];
+    return [self initWithNibName:nil bundle:nil tvConnection:nil size:CGSizeZero delegate:nil];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
@@ -183,26 +186,26 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 - (id)initWithTVConnection:(TVConnection *)_tvConnection {
-    return [self initWithTVConnection:_tvConnection frame:CGRectNull delegate:nil];
+    return [self initWithTVConnection:_tvConnection size:CGSizeZero delegate:nil];
 }
 
 - (id)initWithTVConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
-    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection frame:CGRectNull delegate:_delegate];
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection size:CGSizeZero delegate:_delegate];
 }
 
-- (id)initWithTVConnection:(TVConnection *)_tvConnection frame:(CGRect)_frame delegate:(id<TPAppViewControllerDelegate>)_delegate {
-    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection frame:_frame delegate:_delegate];
+- (id)initWithTVConnection:(TVConnection *)_tvConnection size:(CGSize)size delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection size:size delegate:_delegate];
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil frame:CGRectNull delegate:nil];
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil size:CGSizeZero delegate:nil];
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id <TPAppViewControllerDelegate>)_delegate {
-    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:_tvConnection frame:CGRectNull delegate:_delegate];
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:_tvConnection size:CGSizeZero delegate:_delegate];
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection frame:(CGRect)_frame delegate:(id <TPAppViewControllerDelegate>)_delegate {
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection size:(CGSize)size delegate:(id <TPAppViewControllerDelegate>)_delegate {
     
     if (!nibBundleOrNil) {
         nibBundleOrNil = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
@@ -263,8 +266,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         NSLog(@"background: %@", backgroundView);
         NSLog(@"backgroundWidth, backgroundHeight: %f, %f", backgroundWidth, backgroundHeight);
         //*/
-        backgroundWidth = self.view.bounds.size.width;
-        backgroundHeight = self.view.bounds.size.height;
+        backgroundWidth = size.width;
+        backgroundHeight = size.height;
 
         // Manages resources created with declare_resource
         resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
@@ -281,6 +284,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
         // from Trickplay
         advancedView = [[TrickplayScreen alloc] initWithID:@"0" args:nil objectManager:nil];
+        advancedView.nextTouchResponder = self;
         advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
         advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
         [self.view addSubview:advancedView];
@@ -1146,7 +1150,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
     }
     
-    
     UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc] 
                                   initWithTitle:NSLocalizedString(@"Exit", @"")
                                   style:UIBarButtonItemStyleBordered
@@ -1256,7 +1259,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
             view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
         }
     }
-     
+    
     advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
     virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
@@ -1304,11 +1307,11 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 //*/
 
 //*
- // Override to allow orientations other than the default portrait orientation.
- - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
- // Return YES for supported orientations.
- return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
- }
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations.
+    return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
+}
 //*/
 
 - (void)didReceiveMemoryWarning {
@@ -1510,7 +1513,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
                                  userInfo:nil];
 }
 
-- (id)initWithTVConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id<TPAppViewControllerDelegate>)delegate {
+- (id)initWithTVConnection:(TVConnection *)tvConnection size:(CGSize)size delegate:(id<TPAppViewControllerDelegate>)delegate {
     
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]

@@ -19,8 +19,10 @@
     if (self) {
         // Custom initialization
         NSURL *clickSound = [[NSBundle mainBundle] URLForResource:@"click" withExtension:@"wav"];
-        clickSoundRef = (CFURLRef)[clickSound retain];
-        AudioServicesCreateSystemSoundID(clickSoundRef, &audioClick);
+        if (clickSound) {
+            clickSoundRef = (CFURLRef)[clickSound retain];
+            AudioServicesCreateSystemSoundID(clickSoundRef, &audioClick);
+        }
     }
     return self;
 }
@@ -133,8 +135,12 @@
 - (void)dealloc {
     NSLog(@"VirtualRemote dealloc");
     
-    AudioServicesDisposeSystemSoundID(audioClick);
-    CFRelease(clickSoundRef);
+    if (audioClick) {
+        AudioServicesDisposeSystemSoundID(audioClick);
+    }
+    if (clickSoundRef) {
+        CFRelease(clickSoundRef);
+    }
     delegate = nil;
     self.background = nil;
     
