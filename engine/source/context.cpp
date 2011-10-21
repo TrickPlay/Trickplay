@@ -574,6 +574,41 @@ void stage_unfullscreen( ClutterStage * stage , gpointer user_data )
 
 //-----------------------------------------------------------------------------
 
+#ifdef TP_FORCE_VERIFICATION
+const gchar HANDSHAKE_PREFIX[4] = TP_VERIFICATION_CODE;
+#define RANDOM_CHAR ((char)g_random_int_range( 'A', 'Z' ))
+
+static void do_handshake()
+{
+	gchar code[4] = { RANDOM_CHAR, RANDOM_CHAR, RANDOM_CHAR, '\0' };
+	gchar suffix[4];
+	for(int i=0; i<3; i++)
+	{
+		suffix[i] = code[i] + HANDSHAKE_PREFIX[i] - 'A';
+		if(suffix[i] > 'Z') suffix[i] -= 26;
+	}
+	suffix[3] = '\0';
+	
+	g_info("Visit the URL: http://trickplay.com/DONTSTEALSOFTWARE/?CODE=%s%s", HANDSHAKE_PREFIX, suffix);
+
+	g_info("Now please type the code it gives back: ");
+	
+	gchar response[7];
+	fgets(response, 7, stdin);
+
+	for(int i=0; i<3; i++)
+	{
+		char result = response[3+i] - response[i];
+		if(result < 0) result += 26;
+		if((result + 'A') != code[i])
+		{
+			g_critical("YOUR CHECK CODE FAILED (%c,%c).  PLEASE CONTACT TRICKPLAY SUPPORT.",code[i],response[3+i]);
+			abort();
+		}
+	}
+}
+#endif
+
 int TPContext::run()
 {
     //.........................................................................
@@ -587,6 +622,10 @@ int TPContext::run()
     is_running = true;
 
     int result = TP_RUN_OK;
+
+#ifdef TP_FORCE_VERIFICATION
+	do_handshake();
+#endif
 
     //.........................................................................
     // Load external configuration variables (from the environment or a file)
