@@ -60,9 +60,7 @@
 }
 
 - (IBAction)donePressed:(id)sender {
-    if (self.parentViewController) {
-        [self.parentViewController dismissModalViewControllerAnimated:YES];
-    }
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 - (void)dealloc {

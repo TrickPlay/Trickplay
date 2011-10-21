@@ -73,7 +73,7 @@
 
 @interface TPAppViewController()
 
-- (id)initWithTVConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id<TPAppViewControllerDelegate>)delegate;
+- (id)initWithTVConnection:(TVConnection *)tvConnection size:(CGSize)size delegate:(id<TPAppViewControllerDelegate>)delegate;
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
 

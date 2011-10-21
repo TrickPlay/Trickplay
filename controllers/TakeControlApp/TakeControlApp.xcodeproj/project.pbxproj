@@ -32,6 +32,7 @@
 		CD4B2F2F143A76B30073BB88 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F21143A76450073BB88 /* QuartzCore.framework */; };
 		CD4B2F30143A76B30073BB88 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F1F143A76290073BB88 /* AssetsLibrary.framework */; };
 		CD66806314479AEA00232938 /* TakeControl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD66806214479AEA00232938 /* TakeControl.framework */; };
+		CDEA0CFE1452143400532126 /* TakeControl.framework in Resources */ = {isa = PBXBuildFile; fileRef = CD66806214479AEA00232938 /* TakeControl.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -231,6 +232,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CDEA0CFE1452143400532126 /* TakeControl.framework in Resources */,
 				CD4B2EA0143A748A0073BB88 /* InfoPlist.strings in Resources */,
 				CD4B2EAD143A748A0073BB88 /* TakeControlAppViewController_iPhone.xib in Resources */,
 				CD4B2EB0143A748A0073BB88 /* TakeControlAppViewController_iPad.xib in Resources */,
@@ -343,7 +345,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
@@ -421,7 +423,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
@@ -444,7 +446,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
