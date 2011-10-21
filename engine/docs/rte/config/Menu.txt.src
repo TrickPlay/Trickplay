@@ -110,7 +110,7 @@ Group: Engine Reference  {
 		
 		Group: Classes {
 			File: Stopwatch (no auto-title, bindings/stopwatch.lb)
-			File: Timer* (no auto-title, bindings/timer.lb)
+			File: Timer (no auto-title, bindings/timer.lb)
 		}
 	}
 	
