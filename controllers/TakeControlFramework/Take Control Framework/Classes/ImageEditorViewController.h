@@ -17,7 +17,7 @@
 
 @end
 
-@interface ImageEditorViewController : UIViewController <UINavigationControllerDelegate> {
+@interface ImageEditorViewController : UIViewController <UINavigationControllerDelegate, GestureImageViewDelegate> {
     UIImage *imageToEdit;
     CGFloat targetWidth;
     CGFloat targetHeight;
@@ -27,6 +27,7 @@
     UINavigationBar *navBar;
     UIToolbar *toolbar;
     UIBarButtonItem *cancelButton;
+    UIBarButtonItem *helpButton;
     NSString *cancelButtonTitle;
     
     UIPopoverController *helpPopover;
@@ -42,6 +43,7 @@
 @property (retain) IBOutlet UINavigationBar *navBar;
 @property (retain) IBOutlet UIToolbar *toolbar;
 @property (retain) IBOutlet UIBarButtonItem *cancelButton;
+@property (retain) IBOutlet UIBarButtonItem *helpButton;
 
 @property (assign) id <ImageEditorDelegate> imageEditorDelegate;
 
@@ -49,6 +51,8 @@
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil title:(NSString *)title cancelLabel:(NSString *)cancelLabel;
 
 - (void)editImage:(UIImage *)image;
+
+- (void)adjustImageOrientation;
 
 - (IBAction)doneEditing;
 - (IBAction)cancelEditing;
