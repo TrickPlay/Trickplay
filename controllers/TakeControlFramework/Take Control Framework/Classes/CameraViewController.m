@@ -28,6 +28,7 @@
 
         if (aMask) {
             mask = [aMask retain];
+            mask.contentMode = UIViewContentModeCenter;
         } else {
             mask = nil;
         }
@@ -296,7 +297,10 @@
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-    //NSLog(@"mask: %@", mask);
+    
+    if (mask) {
+        mask.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+    }
     imagePickerController.cameraOverlayView = mask;
     mask.userInteractionEnabled = NO;
     
@@ -340,6 +344,11 @@
 - (void)setMask:(UIImageView *)aMask {
     mask = aMask;
     [self.view addSubview:mask];
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations.
+    return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
 }
 
 - (void)dealloc {
