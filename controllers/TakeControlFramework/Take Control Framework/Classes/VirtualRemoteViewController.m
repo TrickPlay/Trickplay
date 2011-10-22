@@ -18,7 +18,9 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        NSURL *clickSound = [[NSBundle mainBundle] URLForResource:@"click" withExtension:@"wav"];
+        NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+        
+        NSURL *clickSound = [myBundle URLForResource:@"click" withExtension:@"wav"];
         if (clickSound) {
             clickSoundRef = (CFURLRef)[clickSound retain];
             AudioServicesCreateSystemSoundID(clickSoundRef, &audioClick);
