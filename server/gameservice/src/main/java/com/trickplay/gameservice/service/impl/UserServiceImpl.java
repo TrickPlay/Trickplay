@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
 		            "username", entity.getUsername());
 		} catch (RuntimeException ex) {
 		    logger.error("Failed to create User", ex);
-            throw ExceptionUtil.newUnknownException(ex.getMessage());
+            throw ExceptionUtil.convertToSupportedException(ex);
 		}
 	}
 
@@ -146,7 +146,7 @@ public class UserServiceImpl implements UserService {
 		            "vendorName", vendorName);
 		} catch (RuntimeException ex) {
 		    logger.error("Failed to create Vendor.", ex);
-            throw ExceptionUtil.newUnknownException(ex.getMessage());
+		    throw ExceptionUtil.convertToSupportedException(ex);
 		}
 		return v;
 	}

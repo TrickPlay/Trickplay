@@ -3,6 +3,9 @@ package com.trickplay.gameservice.exception;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+
 import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;
 
@@ -199,16 +202,26 @@ Can only decline invitation when its status is 'PENDING', but invitation's statu
     }
     
     /*
+     * invitationToSelf=Cannot send invitation to self.
+     */
+    public static GameServiceException newInvitationToSelfException() {
+        return new GameServiceException(Reason.INVITATION_TO_SELF);
+    }
+    /*
      * unknown=Unknown error. Error info '{0}'
      */
     public static GameServiceException newUnknownException(String error) {
         return new GameServiceException(Reason.UNKNOWN, error);
     }
     
-    public static GameServiceException newWrapperException(Exception e) {
+    public static RuntimeException convertToSupportedException(Exception e) {
         if (e instanceof GameServiceException)
             return (GameServiceException)e;
-        
+        else if (e instanceof ConstraintViolationException)
+            return new GameServiceException(e, Reason.CONSTRAINT_VIOLATION);
+        else if (e instanceof IllegalArgumentException)
+            return (IllegalArgumentException)e;
         return new GameServiceException(e, Reason.UNKNOWN, e.getMessage());
     }
+    
 }

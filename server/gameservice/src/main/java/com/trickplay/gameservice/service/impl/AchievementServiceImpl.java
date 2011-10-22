@@ -75,7 +75,7 @@ public class AchievementServiceImpl implements AchievementService {
         else if (entity.getUser() == null) {
             throw ExceptionUtil.newIllegalArgumentException("RecordedAchievement.user", null, "!= null");
         }
-        else if (entity.getUser().getId() != SecurityUtil.getCurrentUserId()) {
+        else if (!entity.getUser().getId().equals(SecurityUtil.getCurrentUserId())) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Create RecordedAchievement failed. Security exception. RecordedAchievement.user[id="
                         + entity.getUser().getId()
@@ -104,7 +104,7 @@ public class AchievementServiceImpl implements AchievementService {
                     "achievement", entity.getAchievement().getName());
         } catch (RuntimeException ex) {
             logger.error("Caught exception in create RecordedAchievement", ex);
-            throw ExceptionUtil.newUnknownException(ex.getMessage());
+            throw ExceptionUtil.convertToSupportedException(ex);
         }
     }
 
@@ -132,7 +132,7 @@ public class AchievementServiceImpl implements AchievementService {
                     "achievement", entity.getName());
         } catch (RuntimeException ex) {
             logger.error("Caught exception in create Achievement", ex);
-            throw ExceptionUtil.newUnknownException(ex.getMessage());
+            throw ExceptionUtil.convertToSupportedException(ex);
         }
     }
 

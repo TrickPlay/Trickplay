@@ -24,6 +24,7 @@ import com.trickplay.gameservice.domain.Vendor;
 import com.trickplay.gameservice.exception.GameServiceException;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.UserAdapter;
+import com.trickplay.gameservice.test.TestUtil;
 
 /**
  * A simple integration test for UserService.
@@ -46,14 +47,16 @@ public class AchievementServiceTest {
 	@Autowired
 	private AchievementService achievementService;
 
+	@Autowired
+	private TestUtil testUtil;
+	
 	@Before
 	public void setup() {
         
 	}
 
 	private User createUser(String username, String password, String email) {
-        Authentication authRequest = new UsernamePasswordAuthenticationToken("anonymous", "anonymous", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
-        SecurityContextHolder.getContext().setAuthentication(authRequest);
+        testUtil.setAnonymousSecurityContext();
 
         final User newUser = new User();
         newUser.setUsername(username);
@@ -61,24 +64,13 @@ public class AchievementServiceTest {
         newUser.setPassword(password);
         userService.create(newUser);
         
-        UserAdapter ua = new UserAdapter(newUser.getId(),
-                new org.springframework.security.core.userdetails.User(
-                        newUser.getUsername(), 
-                        newUser.getPassword(),
-                        true, 
-                        true, 
-                        true, 
-                        true, 
-                        AuthorityUtils.createAuthorityList("ROLE_USER")));
-        
-        authRequest = new UsernamePasswordAuthenticationToken(ua, newUser.getPassword(), AuthorityUtils.createAuthorityList("ROLE_USER"));
-        SecurityContextHolder.getContext().setAuthentication(authRequest);
+        testUtil.setSecurityContext(newUser.getUsername(), newUser.getPassword(), false);
         return newUser;
 	}
 	
 	/* seed some data */
 	private Game createHangman() {
-	    final User gameOwner = createUser("developer", "developer", "developer@trickplay.com");
+	    createUser("developer", "developer", "developer@trickplay.com");
         
         // create a vendor
         Vendor v = userService.createVendor("Trickplay");

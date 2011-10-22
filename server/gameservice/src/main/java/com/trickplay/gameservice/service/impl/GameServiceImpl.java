@@ -70,7 +70,7 @@ public class GameServiceImpl implements GameService {
 		            "appId", g.getAppId());
 		} catch (RuntimeException ex) {
 		    logger.error("Failed to create Game.", ex);
-		    throw ExceptionUtil.newUnknownException(ex.getMessage());
+		    throw ExceptionUtil.convertToSupportedException(ex);
 		}
 		return g;
 	}

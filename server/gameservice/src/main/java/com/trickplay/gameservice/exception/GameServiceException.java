@@ -16,6 +16,8 @@ public class GameServiceException extends RuntimeException {
 		ENTITY_NOT_FOUND("entityNotFound", HttpStatus.BAD_REQUEST),
 		ENTITY_EXISTS_EXCEPTION("entityExists", HttpStatus.BAD_REQUEST),
 		ALREADY_BUDDY("alreadyBuddy", HttpStatus.BAD_REQUEST),
+		INVITATION_TO_SELF("invitationToSelf", HttpStatus.BAD_REQUEST),
+		CONSTRAINT_VIOLATION("constraintViolation", HttpStatus.BAD_REQUEST),
         BL_INVITATION_CANCEL_FAILED("cancelBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
         BL_INVITATION_ACCEPT_FAILED("acceptBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
         BL_INVITATION_DECLINE_FAILED("declineBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),

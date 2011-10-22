@@ -62,6 +62,9 @@ public class SessionServiceImpl implements SessionService {
 	        logger.error("Failed to create SessionToken.", ex);
 	        throw ExceptionUtil.newEntityExistsException(SessionToken.class,
 	                "token", sessionToken.getToken());
+	    } catch (RuntimeException ex) {
+	        logger.error("Failed to create SessionToken.", ex);
+	        throw ExceptionUtil.convertToSupportedException(ex);
 	    }
 	//	return session;
 	//	return new SessionTO(session);

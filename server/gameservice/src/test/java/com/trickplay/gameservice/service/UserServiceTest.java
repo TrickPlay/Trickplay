@@ -88,11 +88,9 @@ public class UserServiceTest {
             assertTrue(false);
         } catch (GameServiceException ex) {
             ex.printStackTrace();
-            assertTrue(ex.getReason()==Reason.ILLEGAL_ARGUMENT);
+            assertTrue(ex.getReason()==Reason.CONSTRAINT_VIOLATION);
         }
     }
-    
-
 	   
 	@Test
 	public void testUpdate() {

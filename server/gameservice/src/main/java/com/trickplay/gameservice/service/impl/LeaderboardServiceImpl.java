@@ -103,7 +103,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 			    recordedScoreDAO.persist(newScore);
 			} catch (RuntimeException ex) {
 			    logger.error("Failed to create RecordedScore.", ex);
-			    throw ExceptionUtil.newUnknownException(ex.getMessage());
+			    throw ExceptionUtil.convertToSupportedException(ex);
 			}
 			if (isTopScore) {
 				eventDAO.persist(new Event(EventType.HIGH_SCORE_EVENT, user, null, getMessage(newScore), newScore));

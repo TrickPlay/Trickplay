@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,7 +67,7 @@ public class VendorServiceImpl implements VendorService {
             throw ExceptionUtil.newEntityExistsException(Vendor.class, "name", entity.getName());
         } catch (RuntimeException ex) {
             logger.error("Failed to create Vendor.", ex);
-            throw ExceptionUtil.newUnknownException(ex.getMessage());
+            throw ExceptionUtil.convertToSupportedException(ex);
         }
     }
 

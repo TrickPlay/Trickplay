@@ -61,7 +61,7 @@ public class DeviceServiceImpl implements DeviceService {
 	        throw ExceptionUtil.newEntityExistsException(Device.class, "deviceKey", entity.getDeviceKey());
 	    } catch (RuntimeException ex) {
 	        logger.error("Failed to create Device.", ex);
-	        throw ExceptionUtil.newUnknownException(ex.getMessage());
+	        throw ExceptionUtil.convertToSupportedException(ex);
 	    }
         
     }

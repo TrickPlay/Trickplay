@@ -65,6 +65,9 @@ public class BuddyServiceImpl implements
 			if (recipient == null) {
 				throw ExceptionUtil.newEntityNotFoundException(User.class, "recipientName", recipientName);
 			}
+			if (requestor.getId().equals(recipient.getId())) {
+			    throw ExceptionUtil.newInvitationToSelfException();
+			}
 			
 			List<Buddy> requestBuddy = findByOwnerIdTargetId(requestor.getId(),
 					recipient.getId());
@@ -73,7 +76,12 @@ public class BuddyServiceImpl implements
 
 			if (recipientBuddy == null || recipientBuddy.size() == 0) {
 				// if recipient's buddyList doesn't include requestor
-				BuddyListInvitation bli = new BuddyListInvitation(requestor,
+			    
+			    List<BuddyListInvitation> pendingInvitations = buddyListInvitationDAO.getInvitations(requestor.getId(), recipient.getId(), InvitationStatus.PENDING); 
+				if (pendingInvitations!=null && pendingInvitations.size() > 0) {
+				    return pendingInvitations.get(0);
+				}
+			    BuddyListInvitation bli = new BuddyListInvitation(requestor,
 						recipient, InvitationStatus.PENDING);
 				buddyListInvitationDAO.persist(bli);
 				eventDAO.persist(new Event(
@@ -101,7 +109,7 @@ public class BuddyServiceImpl implements
 				throw ExceptionUtil.newAlreadyBuddyException(recipientName);
 			}
 		} catch (Exception ex) {
-			throw ExceptionUtil.newWrapperException(ex);
+			throw ExceptionUtil.convertToSupportedException(ex);
 		}
 
 	}
@@ -223,14 +231,23 @@ public class BuddyServiceImpl implements
 			Buddy b = new Buddy(bli.getRequestor(), bli.getRecipient(),
 					BuddyStatus.CURRENT);
 			buddyDAO.persist(b);
+			if (logger.isDebugEnabled()) {
+			    logger.debug("added "+bli.getRecipient().getUsername()+" to "
+			            + bli.getRequestor().getUsername()+"'s buddy list. buddyId="+b.getId());
+			}
 		} else {
 			requestBuddy.get(0).setStatus(BuddyStatus.CURRENT);
 		}
 
 		if (recipientBuddy == null || recipientBuddy.size() == 0) {
+
 			Buddy b = new Buddy(bli.getRecipient(), bli.getRequestor(),
 					BuddyStatus.CURRENT);
 			buddyDAO.persist(b);
+	         if (logger.isDebugEnabled()) {
+	                logger.debug("added "+bli.getRequestor().getUsername()+" to "
+	                        + bli.getRecipient().getUsername()+"'s buddy list. buddyId="+b.getId());
+	         }
 		} else {
 			recipientBuddy.get(0).setStatus(BuddyStatus.CURRENT);
 		}
@@ -278,7 +295,7 @@ public class BuddyServiceImpl implements
                     "target", entity.getTarget().getUsername());
         } catch (RuntimeException ex) {
             logger.error("Failed to create Buddy.", ex);
-            throw ExceptionUtil.newUnknownException(ex.getMessage());
+            throw ExceptionUtil.convertToSupportedException(ex);
         }
     }
 
@@ -297,6 +314,11 @@ public class BuddyServiceImpl implements
 
     public Buddy find(Long id) {
         return buddyDAO.find(id);
+    }
+
+    public List<BuddyListInvitation> getPendingInvitations() {
+        Long recipientId = SecurityUtil.getCurrentUserId();
+        return buddyListInvitationDAO.getPendingInvitations(recipientId);
     }
 
 }

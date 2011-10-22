@@ -1,26 +1,27 @@
 package com.trickplay.gameservice.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.domain.Buddy;
-import com.trickplay.gameservice.domain.BuddyStatus;
+import com.trickplay.gameservice.domain.BuddyListInvitation;
+import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.domain.User;
+import com.trickplay.gameservice.exception.GameServiceException;
+import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.test.TestUtil;
 
 /**
  * A simple integration test for UserService.
@@ -41,111 +42,135 @@ public class BuddyServiceTest {
 	private BuddyService buddyService;
 	User u1;
 	User u2;
+	
+	@Autowired
+	private TestUtil testUtil;
+	
 	@Before
 	public void setup(){
-		Authentication authRequest = new UsernamePasswordAuthenticationToken("ignored", "ignored", AuthorityUtils.createAuthorityList("ROLE_ADMIN"));
-	    SecurityContextHolder.getContext().setAuthentication(authRequest);
+		testUtil.setAnonymousSecurityContext();
 		
 	    u1 = new User();
 	    u1.setUsername("u1");
 	    u1.setEmail("u1@tp.com");
 	    u1.setPassword("u1");
-	    
 	    userService.create(u1);
+	    
 
 	    u2 = new User();
 	    u2.setUsername("u2");
-	    u2.setEmail("u1@tp.com");
+	    u2.setEmail("u2@tp.com");
 	    u2.setPassword("u2");
 	    userService.create(u2);
 
 	}
 	
 	/*
-	public void persist(Buddy entity);
+	 *  @Transactional
+    public BuddyListInvitation sendInvitation(String recipientName) throws GameServiceException;
+    */
 	@Test
-	@Rollback
-	public void testPersist() {
-		User homer = DataSeeder.generateUser();
-		//homer.setEmail(null);
-		userService.persist(homer);
-		assertEquals("homer", userService.find(homer.getId()).getUsername());
+	public void testSendInvitation() {
+	    testUtil.setSecurityContext("u1", "u1");
+	    
+	    BuddyListInvitation bli = buddyService.sendInvitation("u2");
+	    assertTrue(
+	            bli!=null 
+	            && bli.getId()!=null 
+	            && bli.getRequestor().getUsername().equals("u1")
+	            && bli.getRecipient().getUsername().equals("u2"));
 	}
-
-	*/
-	@Test
-	@Rollback
-	public void testPersist()
-	{
-		Buddy b = new Buddy();
-		b.setOwner(u1);
-		b.setTarget(u2);
-		b.setStatus(BuddyStatus.CURRENT);
-		buddyService.create(b);
-		Buddy n = buddyService.find(b.getId());
-		Assert.assertTrue(
-				b.getId() == n.getId() 
-				&& b.getOwner().getId() == n.getOwner().getId()
-				&& b.getTarget().getId() == n.getTarget().getId());
-	}
-	/*
-	 * public BuddyListInvitation newBuddyInvitation(User requestor, User recipient);
-	public void handleBuddyListInvitation(BuddyListInvitation bli);
 	
-	public void removeBuddy(Buddy buddy);
-
-	public List<Buddy> findAll(Long ownerId);
-
-	
-
-	public void merge(Buddy entity);
-
-	public Buddy find(Long id);
-	
-	public List<Buddy> findByOwnerName(String ownerName);
-	
-	public List<Buddy> findByOwnerIdTargetId(Long ownerId, Long targetId);
-	*/
-	
-	/*
 	@Test
-	@Rollback
-	public void testUpdate() {
-		User person = DataSeeder.generateUser();
-		userService.persist(person);
-		person.setEmail("homer@blah.com");
-		userService.merge(person);
-		assertEquals("homer@blah.com", userService.find(person.getId()).getEmail());
-	}
-
-	/*
+    public void testSendInvitationInvalidUser() {
+        testUtil.setSecurityContext("u1", "u1");
+        try {
+            buddyService.sendInvitation("nonExistent");
+            assertTrue(false);
+        } catch (GameServiceException ex) {
+            assertTrue(ex.getReason()==Reason.ENTITY_NOT_FOUND);
+        }
+    }
+	
 	@Test
-	@Rollback
-	public void testDelete() {
-		User homer = DataSeeder.generateUser();
-		userService.persist(homer);
-		userService.(homer);
-		assertEquals(1l, userService.findAll().size());
-	}
-
+    public void testSendInvitationToSelf() {
+        testUtil.setSecurityContext("u1", "u1");
+        try {
+            buddyService.sendInvitation("u1");
+            assertTrue(false);
+        } catch (GameServiceException ex) {
+            assertTrue(ex.getReason()==Reason.INVITATION_TO_SELF);
+        }
+    }
+	
 	@Test
-	@Rollback
-	public void testRead() {
-		User homer = DataSeeder.generateUser();
-		userService.persist(homer);
-		User result = userService.find(homer.getId());
-		assertEquals("homer", result.getUsername());
-		assertEquals("homer@simpsons.com", result.getEmail());
-		assertEquals("homer", result.getPassword());
-	}
-
+    public void testSendInvitationDuplicate() {
+        testUtil.setSecurityContext("u1", "u1");
+        
+        BuddyListInvitation bli_1 = buddyService.sendInvitation("u2");
+        BuddyListInvitation bli_2 = buddyService.sendInvitation("u2");
+        assertTrue(
+                bli_1.getId().equals(bli_2.getId()));
+    }
+	
 	@Test
-	@Rollback
-	public void testFindByUsername() {
-		userService.persist(DataSeeder.generateUser());
-		assertEquals("homer", userService.findByName("homer").getUsername());
-	}
-	*/
+    public void testAcceptInvitation() {
+        testUtil.setSecurityContext("u1", "u1");
+        
+        BuddyListInvitation bli_1 = buddyService.sendInvitation("u2");
+        
+        testUtil.setSecurityContext("u2", "u2");
+        List<BuddyListInvitation> bliList = buddyService.getPendingInvitations();
+        BuddyListInvitation bli_2 = buddyService.updateInvitationStatus(bliList.get(0).getId(), InvitationStatus.ACCEPTED);
+        
+        assertTrue(
+                bli_1.getId().equals(bli_2.getId())
+                && bli_2.getStatus() == InvitationStatus.ACCEPTED);
+        
+        // make sure u2 is in u1's buddylist and vice-versa
+        User u1 = userService.findByName("u1");
+        User u2 = userService.findByName("u2");
+        boolean u1BuddyFound = false;
+        for(Buddy b : u2.getBuddies()) {
+            if (b.getTarget().getId().equals(u1.getId())) {
+                u1BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(u1BuddyFound);
+        
+        boolean u2BuddyFound = false;
+        for(Buddy b : u1.getBuddies()) {
+            if (b.getTarget().getId().equals(u2.getId())) {
+                u2BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(u2BuddyFound);
+    }
+	
+    /*
+    @Transactional
+    public BuddyListInvitation updateInvitationStatus(Long invitationId, InvitationStatus newStatus);
+
+    @Transactional
+    public void removeBuddy(Long buddyId);
+
+    public List<Buddy> findAll(Long ownerId);
+
+    @Transactional
+    public void create(Buddy entity);
+
+    @Transactional
+    public Buddy update(Buddy entity);
+
+    public Buddy find(Long id);
+    
+    public List<Buddy> findByOwnerName(String ownerName);
+    
+    public List<Buddy> findByOwnerIdTargetId(Long ownerId, Long targetId);
+	 */
+
 	@After
 	public void tearDown(){
 		SecurityContextHolder.clearContext();

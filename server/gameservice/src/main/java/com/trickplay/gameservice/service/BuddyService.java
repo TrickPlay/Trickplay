@@ -35,4 +35,7 @@ public interface BuddyService {
 	public List<Buddy> findByOwnerName(String ownerName);
 	
 	public List<Buddy> findByOwnerIdTargetId(Long ownerId, Long targetId);
+	
+	public List<BuddyListInvitation> getPendingInvitations();
+	
 }

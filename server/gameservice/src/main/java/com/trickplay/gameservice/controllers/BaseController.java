@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.exception.GameServiceException;
 
 public class BaseController {
@@ -40,10 +42,11 @@ public class BaseController {
 	*/
 	
 	@ExceptionHandler(RuntimeException.class)
-    public ModelAndView handleException(final RuntimeException ex,
+    public ModelAndView handleException(RuntimeException ex,
             final HttpServletRequest request, HttpServletResponse response) {
 	    if (!(ex instanceof GameServiceException) && !(ex instanceof BaseControllerException)) {
 	        logger.error("Caught RuntimeException while processing request.", ex);
+	        ex = ExceptionUtil.convertToSupportedException(ex);
 	    }
 	    int httpStatus = exceptionToHttpStatus(ex);
         response.setStatus(httpStatus);
@@ -62,10 +65,11 @@ public class BaseController {
 	        return ((GameServiceException)ex).getReason().getHttpStatus().value();
 	    else if (ex instanceof BaseControllerException)
 	        return ((BaseControllerException)ex).getHttpStatus();
-	    else if (ex instanceof HttpMessageConversionException)
+	    else if (ex instanceof HttpMessageConversionException ||
+	            ex instanceof ConstraintViolationException ||
+	            ex instanceof IllegalArgumentException)
 	        return HttpStatus.BAD_REQUEST.value();
-	    else if (ex instanceof IllegalArgumentException)
-            return HttpStatus.BAD_REQUEST.value();
+
 	    return HttpStatus.INTERNAL_SERVER_ERROR.value();
 	}
 
