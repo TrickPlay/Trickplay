@@ -103,7 +103,7 @@ Group: Engine Reference  {
 		File: Overview* (no auto-title, docs/rte/reference/overview_events.txt)
 		
 		Group: Globals {
-      		File: idle* (no auto-title, bindings/idle.lb)
+      		File: idle (no auto-title, bindings/idle.lb)
 			File: keyboard* (no auto-title, bindings/keyboard.lb)
 			File: keys (no auto-title, docs/rte/reference/key_codes.txt)
 		}
