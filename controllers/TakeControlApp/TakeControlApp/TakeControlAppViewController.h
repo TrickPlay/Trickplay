@@ -30,7 +30,8 @@
 TPAppViewControllerDelegate, TVConnectionDelegate,
 TVBrowserViewControllerDelegate, TVBrowserDelegate,
 AppBrowserViewControllerDelegate, AppBrowserDelegate> {
-    NSUInteger refreshCount;
+    BOOL appsRefresh;
+    BOOL currentAppRefresh;
     
     // Initialized to NO. Set to YES while the AppBrowser is in the course
     // of being pushed to the top of the navigation stack

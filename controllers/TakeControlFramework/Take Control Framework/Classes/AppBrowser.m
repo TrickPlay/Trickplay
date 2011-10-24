@@ -35,11 +35,15 @@
     if (self) {
         name = [(NSString *)[dictionary objectForKey:@"name"] retain];
         appID = [(NSString *)[dictionary objectForKey:@"id"] retain];
-        version = [(NSNumber *)[dictionary objectForKey:@"version"] retain];
-        releaseNumber = [(NSNumber *)[dictionary objectForKey:@"release"] retain];
+        version = [(NSString *)[dictionary objectForKey:@"version"] retain];
+        releaseNumber = [(NSString *)[dictionary objectForKey:@"release"] retain];
     }
     
     return self;
+}
+
+- (BOOL)equals:(AppInfo *)appInfo {
+    return ([self.name compare:appInfo.name] == NSOrderedSame) && ([self.appID compare:appInfo.appID] == NSOrderedSame) && ([self.version compare:appInfo.version] == NSOrderedSame) && ([self.releaseNumber compare:appInfo.releaseNumber] == NSOrderedSame);
 }
 
 - (void)dealloc {
