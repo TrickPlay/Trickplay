@@ -262,7 +262,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "GIT_REVISION=`git --git-dir=\\\"${PROJECT_DIR}/../../.git\\\" --work-tree=\\\"${PROJECT_DIR}/../..\\\" describe --tags --dirty`\n\nINFO_PLIST=\\\"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Info\\\"\n\ndefaults write \\\"${INFO_PLIST}\\\" CFBundleShortVersionString \\\"${GIT_REVISION}\\\"";
+			shellScript = "rm -f \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/TakeControl.Framework/TakeControl\"\n\n\nGIT_REVISION=`git --git-dir=\"${PROJECT_DIR}/../../.git\" --work-tree=\"${PROJECT_DIR}/../..\" describe --tags --dirty`\n\nINFO_PLIST=\"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Info\"\n\ndefaults write \"${INFO_PLIST}\" CFBundleShortVersionString \"${GIT_REVISION}\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
