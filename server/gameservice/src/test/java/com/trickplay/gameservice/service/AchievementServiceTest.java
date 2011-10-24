@@ -27,7 +27,6 @@ import com.trickplay.gameservice.security.UserAdapter;
 import com.trickplay.gameservice.test.TestUtil;
 
 /**
- * A simple integration test for UserService.
  *
  * @since 0.1
  * 
