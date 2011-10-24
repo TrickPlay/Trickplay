@@ -271,6 +271,21 @@ endif ( TP_WITH_WEBGL )
 
 #------------------------------------------------------------------------------
 
+if ( TP_FORCE_VERIFICATION )
+
+    add_definitions( -DTP_FORCE_VERIFICATION=1 )
+    add_definitions( -DTP_VERIFICATION_CODE="${TP_FORCE_VERIFICATION}" )
+    
+    string( LENGTH "${TP_FORCE_VERIFICATION}" CODE_LENGTH )
+    
+    if ( NOT CODE_LENGTH EQUAL 3 )
+        message( FATAL_ERROR "VERIFICATION CODE MUST BE 3 CHARACTERS LONG" )
+    endif( NOT CODE_LENGTH EQUAL 3 )
+
+endif( TP_FORCE_VERIFICATION )
+
+#------------------------------------------------------------------------------
+
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
 list(REMOVE_DUPLICATES ENGINE_INCLUDE_DIRS)

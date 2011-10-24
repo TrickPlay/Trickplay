@@ -61,7 +61,9 @@
 @synthesize delegate;
 
 - (id)init {
-    return [self initWithNibName:@"TVBrowserViewController" bundle:nil];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    
+    return [self initWithNibName:@"TVBrowserViewController" bundle:myBundle];
 }
 
 - (id)initWithStyle:(UITableViewStyle)style
@@ -85,7 +87,7 @@
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvBrowser:(TVBrowser *)browser {
-    if (!browser || ![browser isKindOfClass:[TVBrowser class]] || !nibNameOrNil || [nibNameOrNil compare:@"TVBrowserViewController"] != NSOrderedSame || nibBundleOrNil) {
+    if (!browser || ![browser isKindOfClass:[TVBrowser class]] || !nibNameOrNil || [nibNameOrNil compare:@"TVBrowserViewController"] != NSOrderedSame) {
         
         [self release];
         return nil;
@@ -220,7 +222,7 @@
  // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations.
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+    return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
 }
 //*/
 
@@ -494,6 +496,12 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
 #pragma mark -
 #pragma mark Initialization
+
+- (id)init {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvBrowser:(TVBrowser *)browser {
     
