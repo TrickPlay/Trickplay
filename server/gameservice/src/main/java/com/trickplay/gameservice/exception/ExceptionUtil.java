@@ -76,15 +76,15 @@ public class ExceptionUtil {
 Can only cancel invitation when its status is 'PENDING', but invitation's status is '{1}'
 acceptBuddyListInvitationFailed=Failed to accept BuddyList invitation '{0}'. \
 Can only accept invitation when its status is 'PENDING', but invitation's status is '{1}'
-declineBuddyListInvitationFailed=Failed to decline BuddyList invitation '{0}'. \
-Can only decline invitation when its status is 'PENDING', but invitation's status is '{1}'
+rejectBuddyListInvitationFailed=Failed to decline BuddyList invitation '{0}'. \
+Can only reject invitation when its status is 'PENDING', but invitation's status is '{1}'
      */
     public static GameServiceException newUpdateBLInvitationStatusFailedException(Long invitationId, InvitationStatus toStatus, InvitationStatus currentStatus) {
         switch (toStatus) {
         case ACCEPTED:
             return new GameServiceException(Reason.BL_INVITATION_ACCEPT_FAILED, invitationId, currentStatus.name());
         case REJECTED:
-            return new GameServiceException(Reason.BL_INVITATION_DECLINE_FAILED, invitationId, currentStatus.name());
+            return new GameServiceException(Reason.BL_INVITATION_REJECT_FAILED, invitationId, currentStatus.name());
         case CANCELLED:
             return new GameServiceException(Reason.BL_INVITATION_CANCEL_FAILED, invitationId, currentStatus.name());
         }

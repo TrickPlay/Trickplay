@@ -20,7 +20,7 @@ public class GameServiceException extends RuntimeException {
 		CONSTRAINT_VIOLATION("constraintViolation", HttpStatus.BAD_REQUEST),
         BL_INVITATION_CANCEL_FAILED("cancelBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
         BL_INVITATION_ACCEPT_FAILED("acceptBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
-        BL_INVITATION_DECLINE_FAILED("declineBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
+        BL_INVITATION_REJECT_FAILED("rejectBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
         BL_INVITATION_STATUS_UPDATE_FAILED("updateBuddyListInvitationFailed",  HttpStatus.BAD_REQUEST),
 		INVITATION_PREVIOUSLY_SENT("invitationPreviouslySent",  HttpStatus.BAD_REQUEST),
 		GAME_ALREADY_STARTED("gameAlreadyStarted", HttpStatus.BAD_REQUEST),

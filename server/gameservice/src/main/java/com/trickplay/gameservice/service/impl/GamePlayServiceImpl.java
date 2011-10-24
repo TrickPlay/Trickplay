@@ -2,7 +2,9 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -128,11 +130,11 @@ public class GamePlayServiceImpl implements GamePlayService {
             if (recipient == null) {
                 throw ExceptionUtil.newEntityNotFoundException(User.class, "id", recipientId);
             } else {
-                // only one active game session is allowed per recipient
-                /*
-                if (gamePlayInvitationDAO.isPairInSameGamePlaySession(gs.getGame().getId(), requestorId, recipientId)) {
-                    throw ExceptionUtil.newPairAlreadyInGamePlaySessionException(recipientId);
-                }*/
+                for(User player: gs.getPlayers()) {
+                    if (player.getId().equals(recipientId)) {
+                        throw ExceptionUtil.newInvitationPreviouslySentException(recipientId);
+                    }
+                }
             }
         }
         
@@ -145,7 +147,9 @@ public class GamePlayServiceImpl implements GamePlayService {
         }
         
 		for(GamePlayInvitation gpi : gs.getInvitations()) {
-			if (recipient != null && gpi.getRecipient().getId().equals(recipient.getId())) {
+			if (recipient != null 
+			        && gpi.getRecipient().getId().equals(recipient.getId())
+			        && (gpi.getStatus() == InvitationStatus.PENDING || gpi.getStatus() == InvitationStatus.ACCEPTED)) {
 				throw ExceptionUtil.newInvitationPreviouslySentException(recipientId);
 			}
 		}
@@ -454,6 +458,11 @@ public class GamePlayServiceImpl implements GamePlayService {
 		
 		List<GamePlayInvitation> userInvitations = gamePlayInvitationDAO.getPendingInvitationsForUser(gameId, userId, max);
 		
+		Set<Long> selectedGS = new HashSet<Long>();
+		for(GamePlayInvitation gpi : userInvitations) {
+		        selectedGS.add(gpi.getGameSession().getId());
+		}
+		
 		if (userInvitations!=null && userInvitations.size()>=max)
 			return userInvitations;
 
@@ -470,19 +479,18 @@ public class GamePlayServiceImpl implements GamePlayService {
 		if (wildCardInvitations==null)
 		    return resultList;
 
-		Long sessionId=null;
 		for(GamePlayInvitation invitation: wildCardInvitations) {
 		    if (invitation.getRequestor().getId().equals(userId)) {
 		        continue;
 		    } 
-		    if (!invitation.getGameSession().getId().equals(sessionId)) {
+		    if (!selectedGS.contains(invitation.getGameSession().getId())) {
 		        invitation.setReservedBy(user);
 		        long now = System.currentTimeMillis();
 		        invitation.setReservedAt(new Date(now));
 		        invitation.setReservedUntil(new Date(now+RESERVATION_VALID_INTERVAL_IN_SECONDS*1000));
 		        resultList.add(invitation);
 		        max--;
-		        sessionId = invitation.getGameSession().getId();
+		        selectedGS.add(invitation.getGameSession().getId());
 		    } else {
 		        continue;
 		    }

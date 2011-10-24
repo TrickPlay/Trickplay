@@ -231,6 +231,7 @@ public class BuddyServiceImpl implements
 			Buddy b = new Buddy(bli.getRequestor(), bli.getRecipient(),
 					BuddyStatus.CURRENT);
 			buddyDAO.persist(b);
+			bli.getRequestor().getBuddies().add(b);
 			if (logger.isDebugEnabled()) {
 			    logger.debug("added "+bli.getRecipient().getUsername()+" to "
 			            + bli.getRequestor().getUsername()+"'s buddy list. buddyId="+b.getId());
@@ -244,6 +245,7 @@ public class BuddyServiceImpl implements
 			Buddy b = new Buddy(bli.getRecipient(), bli.getRequestor(),
 					BuddyStatus.CURRENT);
 			buddyDAO.persist(b);
+			bli.getRecipient().getBuddies().add(b);
 	         if (logger.isDebugEnabled()) {
 	                logger.debug("added "+bli.getRequestor().getUsername()+" to "
 	                        + bli.getRecipient().getUsername()+"'s buddy list. buddyId="+b.getId());

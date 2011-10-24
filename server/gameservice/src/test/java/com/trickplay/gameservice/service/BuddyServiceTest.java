@@ -149,28 +149,166 @@ public class BuddyServiceTest {
         assertTrue(u2BuddyFound);
     }
 	
-    /*
-    @Transactional
-    public BuddyListInvitation updateInvitationStatus(Long invitationId, InvitationStatus newStatus);
 
-    @Transactional
-    public void removeBuddy(Long buddyId);
-
-    public List<Buddy> findAll(Long ownerId);
-
-    @Transactional
-    public void create(Buddy entity);
-
-    @Transactional
-    public Buddy update(Buddy entity);
-
-    public Buddy find(Long id);
-    
-    public List<Buddy> findByOwnerName(String ownerName);
-    
-    public List<Buddy> findByOwnerIdTargetId(Long ownerId, Long targetId);
-	 */
-
+	@Test
+	public void testRejectInvitation() {
+        testUtil.setSecurityContext("u1", "u1");
+        
+        BuddyListInvitation bli_1 = buddyService.sendInvitation("u2");
+        
+        testUtil.setSecurityContext("u2", "u2");
+        List<BuddyListInvitation> bliList = buddyService.getPendingInvitations();
+        BuddyListInvitation bli_2 = buddyService.updateInvitationStatus(bliList.get(0).getId(), InvitationStatus.REJECTED);
+        
+        assertTrue(
+                bli_1.getId().equals(bli_2.getId())
+                && bli_2.getStatus() == InvitationStatus.REJECTED);
+        
+        // make sure u2 is not in u1's buddylist and vice-versa
+        User u1 = userService.findByName("u1");
+        User u2 = userService.findByName("u2");
+        boolean u1BuddyFound = false;
+        for(Buddy b : u2.getBuddies()) {
+            if (b.getTarget().getId().equals(u1.getId())) {
+                u1BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(!u1BuddyFound);
+        
+        boolean u2BuddyFound = false;
+        for(Buddy b : u1.getBuddies()) {
+            if (b.getTarget().getId().equals(u2.getId())) {
+                u2BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(!u2BuddyFound);	    
+	}
+	
+	
+	@Test
+    public void testCancelInvitation() {
+        testUtil.setSecurityContext("u1", "u1");
+        
+        BuddyListInvitation bli_1 = buddyService.sendInvitation("u2");
+        
+        
+        BuddyListInvitation bli_2 = buddyService.updateInvitationStatus(bli_1.getId(), InvitationStatus.CANCELLED);
+        
+        assertTrue(bli_1.getId().equals(bli_2.getId())
+                && bli_1.getStatus() == InvitationStatus.CANCELLED);       
+        
+        
+        // make sure u2 is not in u1's buddylist and vice-versa
+        User u1 = userService.findByName("u1");
+        User u2 = userService.findByName("u2");
+        boolean u1BuddyFound = false;
+        for(Buddy b : u2.getBuddies()) {
+            if (b.getTarget().getId().equals(u1.getId())) {
+                u1BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(!u1BuddyFound);
+        
+        boolean u2BuddyFound = false;
+        for(Buddy b : u1.getBuddies()) {
+            if (b.getTarget().getId().equals(u2.getId())) {
+                u2BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(!u2BuddyFound);      
+    }
+	
+	@Test
+    public void testCancelInvitationAfterAccept() {
+        testUtil.setSecurityContext("u1", "u1");
+        
+        BuddyListInvitation bli_1 = buddyService.sendInvitation("u2");
+        
+        testUtil.setSecurityContext("u2", "u2");
+        List<BuddyListInvitation> bliList = buddyService.getPendingInvitations();
+        BuddyListInvitation bli_2 = buddyService.updateInvitationStatus(bliList.get(0).getId(), InvitationStatus.ACCEPTED);
+        
+        assertTrue(bli_1.getId().equals(bli_2.getId())
+                && bli_1.getStatus() == InvitationStatus.ACCEPTED);
+        
+        testUtil.setSecurityContext("u1", "u1");
+        try {
+            buddyService.updateInvitationStatus(bli_1.getId(), InvitationStatus.CANCELLED);
+            assertTrue(false);
+        } catch (GameServiceException ex) {
+            assertTrue(ex.getReason()==Reason.BL_INVITATION_CANCEL_FAILED);
+        }
+        
+        
+        // make sure u2 is in u1's buddylist and vice-versa
+        User u1 = userService.findByName("u1");
+        User u2 = userService.findByName("u2");
+        boolean u1BuddyFound = false;
+        for(Buddy b : u2.getBuddies()) {
+            if (b.getTarget().getId().equals(u1.getId())) {
+                u1BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(u1BuddyFound);
+        
+        boolean u2BuddyFound = false;
+        for(Buddy b : u1.getBuddies()) {
+            if (b.getTarget().getId().equals(u2.getId())) {
+                u2BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(u2BuddyFound);      
+    }
+	
+	@Test
+    public void testRejectInvitationAfterAccept() {
+	    testUtil.setSecurityContext("u1", "u1");
+        
+        BuddyListInvitation bli_1 = buddyService.sendInvitation("u2");
+        
+        testUtil.setSecurityContext("u2", "u2");
+        List<BuddyListInvitation> bliList = buddyService.getPendingInvitations();
+        BuddyListInvitation bli_2 = buddyService.updateInvitationStatus(bliList.get(0).getId(), InvitationStatus.ACCEPTED);
+        
+        assertTrue(bli_1.getId().equals(bli_2.getId())
+                && bli_1.getStatus() == InvitationStatus.ACCEPTED);
+        
+        try {
+            buddyService.updateInvitationStatus(bli_2.getId(), InvitationStatus.REJECTED);
+            assertTrue(false);
+        } catch (GameServiceException ex) {
+            assertTrue(ex.getReason()==Reason.BL_INVITATION_REJECT_FAILED);
+        }
+        
+        
+        // make sure u2 is in u1's buddylist and vice-versa
+        User u1 = userService.findByName("u1");
+        User u2 = userService.findByName("u2");
+        boolean u1BuddyFound = false;
+        for(Buddy b : u2.getBuddies()) {
+            if (b.getTarget().getId().equals(u1.getId())) {
+                u1BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(u1BuddyFound);
+        
+        boolean u2BuddyFound = false;
+        for(Buddy b : u1.getBuddies()) {
+            if (b.getTarget().getId().equals(u2.getId())) {
+                u2BuddyFound = true;
+                break;
+            }
+        }
+        assertTrue(u2BuddyFound);      
+    }
+	
 	@After
 	public void tearDown(){
 		SecurityContextHolder.clearContext();

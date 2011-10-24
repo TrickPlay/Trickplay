@@ -95,6 +95,8 @@ public class GameServiceImpl implements GameService {
 		}
 		existing.setLeaderboardFlag(g.isLeaderboardFlag());
 		existing.setAchievementsFlag(g.isAchievementsFlag());
+		existing.setAllowWildCardInvitation(g.isAllowWildCardInvitation());
+		existing.setTurnBasedFlag(g.isTurnBasedFlag());
 		existing.setAppId(g.getAppId());
 		existing.setName(g.getName());
 		existing.setMaxPlayers(g.getMaxPlayers());

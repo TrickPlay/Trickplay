@@ -2,12 +2,14 @@ package com.trickplay.gameservice.domain;
 
 import java.io.Serializable;
 
+import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -59,7 +61,7 @@ public class Buddy extends BaseEntity implements Serializable {
         this.status = s;
     }
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name="target_id", nullable=false)
     public User getTarget() {
         return target;

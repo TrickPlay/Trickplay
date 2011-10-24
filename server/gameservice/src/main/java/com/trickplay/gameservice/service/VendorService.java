@@ -26,5 +26,5 @@ public interface VendorService {
 	public List<Vendor> findByContactName(String contactName);
 
 	@Transactional
-	public void create(Vendor entity);
+	public Vendor create(String vendorName);
 }
