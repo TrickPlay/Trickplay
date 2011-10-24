@@ -17,7 +17,8 @@
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
         pushingAppBrowser = NO;
         pushingAppViewController = NO;
-        refreshCount = 0;
+        appsRefresh = NO;
+        currentAppRefresh = NO;
         // TODO: check if this is needed: [TVBrowserViewController class];
     }
     
@@ -44,7 +45,8 @@
     tvBrowserViewController.delegate = self;
     tvBrowserViewController.tvBrowser.delegate = self;
     
-    refreshCount = 0;
+    appsRefresh = NO;
+    currentAppRefresh = NO;
     
     [self.view addSubview:navController.view];
 }
@@ -166,15 +168,15 @@
 #pragma mark AppBrowserDelegate methods
 
 - (void)appBrowser:(AppBrowser *)appBrowser didReceiveAvailableApps:(NSArray *)apps {
-    refreshCount++;
-    if (navController.visibleViewController == tvBrowserViewController && refreshCount > 1) {
+    appsRefresh = YES;
+    if (navController.visibleViewController == tvBrowserViewController && currentAppRefresh) {
         [self pushAppBrowser];
     }
 }
 
 - (void)appBrowser:(AppBrowser *)appBrowser didReceiveCurrentApp:(AppInfo *)app {
-    refreshCount++;
-    if (navController.visibleViewController == tvBrowserViewController && refreshCount > 1) {
+    currentAppRefresh = YES;
+    if (navController.visibleViewController == tvBrowserViewController && appsRefresh) {
         [self pushAppBrowser];
     }
 }
@@ -287,7 +289,8 @@
             [self destroyAppBrowserViewController];
             [self destroyTPAppViewController];
             [tvBrowserViewController refresh];
-            refreshCount = 0;
+            appsRefresh = NO;
+            currentAppRefresh = NO;
         }
     }
 }
@@ -342,7 +345,8 @@
     }
     
     [tvBrowserViewController.tableView reloadData];
-    refreshCount = 0;
+    currentAppRefresh = NO;
+    appsRefresh = NO;
 }
 
 /**
@@ -389,7 +393,8 @@
     }
     
     [tvBrowserViewController.tableView reloadData];
-    refreshCount = 0;
+    appsRefresh = NO;
+    currentAppRefresh = NO;
 }
 
 - (void)navigationController:(UINavigationController *)navigationController
@@ -400,6 +405,8 @@
     pushingAppViewController = YES;
     if (viewController == tvBrowserViewController) {
         [tvBrowserViewController.tvBrowser startSearchForServices];
+    } else if (viewController == appBrowserViewController) {
+        [appBrowserViewController refresh];
     } else {
         [tvBrowserViewController.tvBrowser stopSearchForServices];
     }
