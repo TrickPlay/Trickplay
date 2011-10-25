@@ -237,8 +237,14 @@ void TPContext::setup_fonts()
         g_free( conf );
     }
 
-    // Create a new configuration
+#ifdef TP_FONT_DEBUG
+
+    // This is here ONLY so that FC_DEBUG will work; so we can troubleshoot
+    // font problems
+
     (void) FcInitLoadConfig();
+
+#endif
 
     FcConfig * config = FcConfigCreate();
 
