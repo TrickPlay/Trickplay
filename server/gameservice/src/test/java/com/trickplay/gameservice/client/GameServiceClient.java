@@ -30,6 +30,8 @@ import com.trickplay.gameservice.transferObj.GamePlayRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlaySessionRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlaySessionTO;
 import com.trickplay.gameservice.transferObj.GamePlayStateTO;
+import com.trickplay.gameservice.transferObj.GamePlaySummaryRequestTO;
+import com.trickplay.gameservice.transferObj.GamePlaySummaryTO;
 import com.trickplay.gameservice.transferObj.GameRequestTO;
 import com.trickplay.gameservice.transferObj.GameTO;
 import com.trickplay.gameservice.transferObj.ScoreFilterTO.ScoreType;
@@ -163,6 +165,7 @@ public class GameServiceClient {
 			startGamePlay(restTemplate, gsRequestTO, "u1", "u1");
 			long u1points = 0;
 			long u2points = 0;
+			String winner = null;
 			
 			boolean gameOver = false;
 			while(!gameOver) {
@@ -185,6 +188,7 @@ public class GameServiceClient {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), null);
 							endGamePlay(restTemplate, gsRequestTO, "u1", "u1");
 							u1points += 100;
+							winner = "u1";
 							break;
 						} else {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), umap.get("u2").getId());
@@ -219,6 +223,7 @@ public class GameServiceClient {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), null);
 							endGamePlay(restTemplate, gsRequestTO, "u2", "u2");
 							u2points = 100;
+							winner = "u2";
 						} else {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), umap.get("u1").getId());
 							updateGamePlay(restTemplate, gsRequestTO, "u2", "u2");
@@ -257,9 +262,44 @@ public class GameServiceClient {
 				System.out.println("user:"+score.getUserName()+", game="+score.getGameName()+", points="+score.getPoints());
 			}
 			
+			Long u1Id = umap.get("u1").getId();
+			GamePlaySummaryTO summaryTO = getGamePlaySummary(restTemplate, gameId, "u1", "u1");
+			
+			GamePlaySummaryRequestTO winnerSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"1:0\"}");
+			GamePlaySummaryRequestTO loserSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"0:1\"}");
+			if ("u1".equals(winner)) {
+			    postGamePlaySummary(restTemplate, gameId, winnerSummaryTO, "u1", "u1");
+			    postGamePlaySummary(restTemplate, gameId, loserSummaryTO, "u2", "u2");
+			} else {
+			    postGamePlaySummary(restTemplate, gameId, winnerSummaryTO, "u2", "u2");
+                postGamePlaySummary(restTemplate, gameId, loserSummaryTO, "u1", "u1");
+			}
+			
+			
 		}
 		
 		
+		public static GamePlaySummaryTO getGamePlaySummary(RestTemplate rest, Long gameId, String username, String password) {
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            ResponseEntity<GamePlaySummaryTO> response = rest.exchange(
+                    GS_ENDPOINT+"/game/{id}/summary", HttpMethod.GET, 
+                    entity, GamePlaySummaryTO.class, gameId);
+            
+            GamePlaySummaryTO output = response.getBody();
+            System.out.println("GamePlaySummary for gameId: " + gameId + ", username:" + username + " is: " + output.getDetail());
+            return output;
+        }
+		
+		public static GamePlaySummaryTO postGamePlaySummary(RestTemplate rest, Long gameId, GamePlaySummaryRequestTO summaryRequestTO, String username, String password) {
+            HttpEntity<GamePlaySummaryRequestTO> entity = prepareJsonRequest(summaryRequestTO, true, username, password);
+            ResponseEntity<GamePlaySummaryTO> response = rest.postForEntity(
+                    GS_ENDPOINT+"/game/{id}/summary", 
+                    entity, GamePlaySummaryTO.class, gameId);
+            
+            GamePlaySummaryTO output = response.getBody();
+            System.out.println("GamePlaySummary for gameId: " + gameId + ", username:" + username + " is: " + output.getDetail());
+            return output;
+        }
 		
         public static BooleanResponse checkUserExists(RestTemplate rest, String username) {
             HttpEntity<String> entity = prepareJsonGet();
@@ -331,14 +371,14 @@ public class GameServiceClient {
 			
 		}
 		
-        public static BooleanResponse checkVendorExists(RestTemplate rest, String name, String username, String password) {
+        public static VendorTO checkVendorExists(RestTemplate rest, String name, String username, String password) {
             HttpEntity<String> entity = prepareJsonGet(username, password);
-            ResponseEntity<BooleanResponse> response = rest.exchange(
+            ResponseEntity<VendorTO> response = rest.exchange(
                     GS_ENDPOINT+"/vendor/exists?name={name}", HttpMethod.GET,
-                    entity, BooleanResponse.class, name);
+                    entity, VendorTO.class, name);
             
-            BooleanResponse output = response.getBody();
-            System.out.println("vendor: " + name + ", exists:" + output.isValue());
+            VendorTO output = response.getBody();
+            System.out.println("vendor: " + name + ", exists:" + output.getId()==null);
             return output;
         }
         
@@ -355,14 +395,14 @@ public class GameServiceClient {
 			
 		}
 		
-        public static BooleanResponse checkGameExists(RestTemplate rest, String name, String username, String password) {
+        public static GameTO checkGameExists(RestTemplate rest, String name, String username, String password) {
             HttpEntity<String> entity = prepareJsonGet(username, password);
-            ResponseEntity<BooleanResponse> response = rest.exchange(
+            ResponseEntity<GameTO> response = rest.exchange(
                     GS_ENDPOINT+"/game/exists?name={name}", HttpMethod.GET,
-                    entity, BooleanResponse.class, name);
+                    entity, GameTO.class, name);
             
-            BooleanResponse output = response.getBody();
-            System.out.println("game: " + name + ", exists:" + output.isValue());
+            GameTO output = response.getBody();
+            System.out.println("game: " + name + ", exists:" + output.getId()==null);
             return output;
         }
         

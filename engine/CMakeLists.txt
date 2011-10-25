@@ -213,6 +213,13 @@ if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
 
 endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
 
+# -----------------------------------------------------------------------------
+
+if ( TP_FONT_DEBUG )
+
+    add_definitions( -DTP_FONT_DEBUG=1 )
+    
+endif( TP_FONT_DEBUG )    
 
 # -----------------------------------------------------------------------------
 # These packages aren't in pkg-config

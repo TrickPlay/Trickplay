@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.trickplay.gameservice.domain.Role;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.exception.GameServiceException;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;
 
@@ -27,8 +28,9 @@ public final class SecurityUtil {
 			UserDetails user = (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			if (user instanceof UserAdapter)
 				return (UserAdapter)user;
-			else
-				throw new GameServiceException(Reason.FORBIDDEN);
+			else if (user != null) {
+			    return new UserAdapter(null, user);
+			}
 		}
 		return null;
 	}
