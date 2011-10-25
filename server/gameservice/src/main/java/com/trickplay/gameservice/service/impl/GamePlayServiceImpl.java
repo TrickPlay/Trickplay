@@ -333,6 +333,17 @@ public class GamePlayServiceImpl implements GamePlayService {
 		    attached_gs.setOpen(false);
 		}
 		
+		if (nextTurn == null
+		        && attached_gs.getGame().isTurnBasedFlag() 
+		        && attached_gs.getPlayers() != null
+		        && attached_gs.getPlayers().size() > 1) {
+		    for(User u : attached_gs.getPlayers()) {
+		        if (!u.getId().equals(requestorId)) {
+		            nextTurn = u;
+		            break;
+		        }
+		    }
+		}
 		GamePlayState gps = new GamePlayState(requestor, nextTurn, attached_gs, state, generateGameStepId());
 		
 		gamePlayStateDAO.persist(gps);
@@ -474,7 +485,7 @@ public class GamePlayServiceImpl implements GamePlayService {
 		
 		max = max - resultList.size();
 		
-		List<GamePlayInvitation> wildCardInvitations = gamePlayInvitationDAO.getPendingWildCardInvitations(gameId);
+		List<GamePlayInvitation> wildCardInvitations = gamePlayInvitationDAO.getPendingWildCardInvitations(gameId, userId);
 		
 		if (wildCardInvitations==null)
 		    return resultList;

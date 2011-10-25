@@ -10,7 +10,7 @@ public interface GamePlayInvitationDAO extends GenericDAO<GamePlayInvitation, Lo
     /*
      * returns list of PENDING and unreserved wild card invitations
      */
-    public List<GamePlayInvitation> getPendingWildCardInvitations(Long gameId);
+    public List<GamePlayInvitation> getPendingWildCardInvitations(Long gameId, Long userId);
     
     /*
      * returns list of PENDING invitations for the given User

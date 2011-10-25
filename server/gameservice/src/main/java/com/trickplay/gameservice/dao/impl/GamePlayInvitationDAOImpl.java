@@ -27,8 +27,9 @@ public class GamePlayInvitationDAOImpl extends
             + " WHERE G.id = :gameId"
             + " AND GS.open = true"
             + " AND I.recipient is null"
-            + " AND I.status=:status"
-            + " AND (I.reservedUntil is null OR I.reservedUntil < :currentTime) "
+            + " AND I.status=:pendingStatus"
+            + " AND :userId NOT IN (select P.id from GS.players P)"
+            + " AND (I.reservedUntil is null OR I.reservedUntil < :currentTime OR I.reservedBy.id = :userId) "
             + " ORDER BY GS.id, I.created";
 
     private static final String pairInSameGamePlaySessionQuery = 
@@ -42,10 +43,11 @@ public class GamePlayInvitationDAOImpl extends
             + "   (I.requestor.id = :userId2 AND I.recipient.id = :userId1)"
             + " )";
     
-    public List<GamePlayInvitation> getPendingWildCardInvitations(Long gameId) {
+    public List<GamePlayInvitation> getPendingWildCardInvitations(Long gameId, Long userId) {
         return entityManager.createQuery(wildCardInvitationQuery)
                 .setParameter("gameId", gameId)
-                .setParameter("status", InvitationStatus.PENDING)
+                .setParameter("pendingStatus", InvitationStatus.PENDING)
+                .setParameter("userId", userId)
                 .setParameter("currentTime", new Date()).getResultList();
     }
     
