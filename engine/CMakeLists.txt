@@ -213,6 +213,13 @@ if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
 
 endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
 
+# -----------------------------------------------------------------------------
+
+if ( TP_FONT_DEBUG )
+
+    add_definitions( -DTP_FONT_DEBUG=1 )
+    
+endif( TP_FONT_DEBUG )    
 
 # -----------------------------------------------------------------------------
 # These packages aren't in pkg-config
@@ -275,6 +282,12 @@ if ( TP_FORCE_VERIFICATION )
 
     add_definitions( -DTP_FORCE_VERIFICATION=1 )
     add_definitions( -DTP_VERIFICATION_CODE="${TP_FORCE_VERIFICATION}" )
+    
+    string( LENGTH "${TP_FORCE_VERIFICATION}" CODE_LENGTH )
+    
+    if ( NOT CODE_LENGTH EQUAL 3 )
+        message( FATAL_ERROR "VERIFICATION CODE MUST BE 3 CHARACTERS LONG" )
+    endif( NOT CODE_LENGTH EQUAL 3 )
 
 endif( TP_FORCE_VERIFICATION )
 

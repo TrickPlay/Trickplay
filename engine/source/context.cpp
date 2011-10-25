@@ -237,8 +237,14 @@ void TPContext::setup_fonts()
         g_free( conf );
     }
 
-    // Create a new configuration
+#ifdef TP_FONT_DEBUG
+
+    // This is here ONLY so that FC_DEBUG will work; so we can troubleshoot
+    // font problems
+
     (void) FcInitLoadConfig();
+
+#endif
 
     FcConfig * config = FcConfigCreate();
 
@@ -575,34 +581,48 @@ void stage_unfullscreen( ClutterStage * stage , gpointer user_data )
 //-----------------------------------------------------------------------------
 
 #ifdef TP_FORCE_VERIFICATION
-const gchar HANDSHAKE_PREFIX[4] = TP_VERIFICATION_CODE;
-#define RANDOM_CHAR ((char)g_random_int_range( 'A', 'Z' ))
 
 static void do_handshake()
 {
-	gchar code[4] = { RANDOM_CHAR, RANDOM_CHAR, RANDOM_CHAR, '\0' };
+	static const gchar HANDSHAKE_PREFIX[4] = TP_VERIFICATION_CODE;
+
+	gchar code[4];
 	gchar suffix[4];
+
 	for(int i=0; i<3; i++)
 	{
+		code[i] = g_random_int_range( 'A', 'Z' );
 		suffix[i] = code[i] + HANDSHAKE_PREFIX[i] - 'A';
-		if(suffix[i] > 'Z') suffix[i] -= 26;
+		if(suffix[i] > 'Z')
+		{
+			suffix[i] -= 26;
+		}
 	}
+
+	code[3] = '\0';
 	suffix[3] = '\0';
-	
+
 	g_info("Visit the URL: http://trickplay.com/DONTSTEALSOFTWARE/?CODE=%s%s", HANDSHAKE_PREFIX, suffix);
 
 	g_info("Now please type the code it gives back: ");
 	
 	gchar response[7];
+
 	fgets(response, 7, stdin);
 
 	for(int i=0; i<3; i++)
 	{
 		char result = response[3+i] - response[i];
-		if(result < 0) result += 26;
+		if(result < 0)
+		{
+			result += 26;
+		}
+
 		if((result + 'A') != code[i])
 		{
 			g_critical("YOUR CHECK CODE FAILED (%c,%c).  PLEASE CONTACT TRICKPLAY SUPPORT.",code[i],response[3+i]);
+			fflush(stdout);
+			fflush(stderr);
 			abort();
 		}
 	}
