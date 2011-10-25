@@ -55,7 +55,10 @@ function test_mediaplayer_has_video ()
 end
 
 function test_mediaplayer_volume ()
- 	assert_equal ( string.sub(mediaplayer.volume, 1, 5) , "0.500",  "mediaplayer.volume failed" )
+	
+    local relative_error = math.abs((mediaplayer.volume - 0.5) / math.max(mediaplayer.volume, 0.5))
+    local epsilon = 0.000001
+    assert_less_than( relative_error, epsilon, "mediaplayer.volume failed")
 end
 
 function test_mediaplayer_mute ()

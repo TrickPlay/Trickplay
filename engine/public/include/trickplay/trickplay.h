@@ -33,7 +33,7 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    22
+#define TP_MINOR_VERSION    23
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
@@ -252,6 +252,9 @@ typedef struct TPContext TPContext;
     							the cache altogether.
                                 Defaults to "0".
 
+    TP_RESOURCE_LOADER_ENABLED - 	Whether external resource loaders are enabled.
+                                    Defaults to "true".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -299,6 +302,7 @@ typedef struct TPContext TPContext;
 #define TP_HTTP_PORT                    "http_port"
 #define TP_RESOURCES_PATH               "resources_path"
 #define TP_TEXTURE_CACHE_LIMIT			"texture_cache_limit"
+#define TP_RESOURCE_LOADER_ENABLED		"resource_loader_enabled"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
@@ -393,7 +397,7 @@ typedef struct TPContext TPContext;
 #define TP_RUN_APP_PREPARE_FAILED       4
 #define TP_RUN_APP_ERROR                5
 #define TP_RUN_ALREADY_RUNNING          6
-    
+
 /*-----------------------------------------------------------------------------
     Function: tp_init_version
     
@@ -778,6 +782,7 @@ typedef struct TPContext TPContext;
         TPLogHandler handler,
         void * data);
 
+
 /*-----------------------------------------------------------------------------
     Function: tp_context_run
     
@@ -834,8 +839,7 @@ typedef struct TPContext TPContext;
                     
         TPContext * context);
 
-/*-----------------------------------------------------------------------------
-*/
+/*---------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 }

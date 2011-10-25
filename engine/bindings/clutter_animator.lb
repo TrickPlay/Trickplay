@@ -59,7 +59,7 @@ bool get_two_floats_from_table( lua_State * L , int index , GValue * a , GValue 
 }
 
 int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, ClutterActor * source,
-				  	   const String & name , const String & mode, double progress, bool ease_in)
+				  	   const String & name , const String & mode, double progress, bool ease_in, ClutterInterpolation interpolation)
 {
 	const char *k = name.c_str();
 	gulong nmode=ClutterUtil::to_clutter_animation_mode(mode.c_str());
@@ -75,6 +75,7 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 
 			clutter_animator_set_key(animator, G_OBJECT(source), name.c_str(), nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), name.c_str(), ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), name.c_str(), interpolation);
 
 			g_value_unset(&gvalue);
 		}
@@ -97,16 +98,19 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 			{
 				clutter_animator_set_key(animator, G_OBJECT(source), "depth", nmode, progress, &gvalue);
 				clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "depth", ease_in);
+				clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "depth", interpolation);
 			}
 			else if (!strcmp("w",k))
 			{
 				clutter_animator_set_key(animator, G_OBJECT(source), "width", nmode, progress, &gvalue);
 				clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "width", ease_in);
+				clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "width", interpolation);
 			}
 			else if (!strcmp("h",k))
 			{	
 				clutter_animator_set_key(animator, G_OBJECT(source), "height", nmode, progress, &gvalue);
 				clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "height", ease_in);
+				clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "height", interpolation);
 			}
 
 			g_value_unset(&gvalue);
@@ -123,10 +127,11 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
             GValue gvalue={0};
 
             g_value_init(&gvalue,G_TYPE_UINT);
-            g_value_set_uint(&gvalue,lua_tonumber(L, index));
+            g_value_set_uint(&gvalue,lua_tointeger(L, index));
 
 			clutter_animator_set_key(animator, G_OBJECT(source), name.c_str(), nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), name.c_str(), ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), name.c_str(), interpolation);
 
 			g_value_unset(&gvalue);
 		}
@@ -144,9 +149,11 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 	    {
             clutter_animator_set_key(animator, G_OBJECT(source), "x", nmode, progress, &x);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "x", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "x", interpolation);
 
             clutter_animator_set_key(animator, G_OBJECT(source), "y", nmode, progress, &y);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "y", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "y", interpolation);
 
             g_value_unset(&x);
             g_value_unset(&y);
@@ -165,9 +172,11 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
         {
             clutter_animator_set_key(animator, G_OBJECT(source), "width", nmode, progress, &width);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "width", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "width", interpolation);
 
             clutter_animator_set_key(animator, G_OBJECT(source), "height", nmode, progress, &height);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "height", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "height", interpolation);
 
             g_value_unset(&width);
             g_value_unset(&height);
@@ -186,9 +195,11 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
         {
             clutter_animator_set_key(animator, G_OBJECT(source), "scale-x", nmode, progress, &scalex);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "scale-x", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "scale-x", interpolation);
 
             clutter_animator_set_key(animator, G_OBJECT(source), "scale-y", nmode, progress, &scaley);
             clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "scale-y", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "scale-y", interpolation);
 
             g_value_unset(&scalex);
             g_value_unset(&scaley);
@@ -208,9 +219,10 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		{
 			GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_double(&gvalue,lua_tonumber(L, -1));
+			g_value_set_double(&gvalue,lua_tonumber(L, index));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-x", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-x", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "rotation-angle-x", interpolation);
             g_value_unset(&gvalue);
 		}
 	}
@@ -224,9 +236,10 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		{
 			GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_double(&gvalue,lua_tonumber(L, -1));
+			g_value_set_double(&gvalue,lua_tonumber(L, index));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-y", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-y", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "rotation-angle-y", interpolation);
             g_value_unset(&gvalue);
 		}
 	}
@@ -238,34 +251,30 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		}
 		else
 		{
+
 		    GValue gvalue={0};
 			g_value_init(&gvalue,G_TYPE_DOUBLE);
-			g_value_set_double(&gvalue,lua_tonumber(L, -1));
+			g_value_set_double(&gvalue,lua_tonumber(L, index));
 			clutter_animator_set_key(animator, G_OBJECT(source), "rotation-angle-z", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "rotation-angle-z", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "rotation-angle-z", interpolation);
             g_value_unset(&gvalue);
 		}
 	}
 	else if (!strcmp("color",k))
 	{
-			g_debug(" color kkkk"); 
-
 		if ((lua_type(L,index)==LUA_TTABLE) || (lua_type(L, index) == LUA_TSTRING))
 		{
 			ClutterColor color;
 			ClutterUtil::to_clutter_color(L, index, &color);
 			
-			g_debug(" color :: %d %d %d %d ", color.red, color.green, color.blue, color.alpha);
-
-
-			//ClutterColor color = ClutterUtil::string_to_color(lua_tostring(L, index));
-
             GValue gvalue={0};
 			g_value_init(&gvalue,CLUTTER_TYPE_COLOR);
 			clutter_value_set_color(&gvalue, &color);
 
 			clutter_animator_set_key(animator, G_OBJECT(source), "color", nmode, progress, &gvalue);
 			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "color", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "color", interpolation);
             g_value_unset(&gvalue);
 		}
 		else
@@ -284,7 +293,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 		return luaL_error(L, "Incorrect argument, table expected");
 	}
 
-	int duration = 2000;
+	guint duration = 2000;
 
 	lua_getfield(L, index, "duration");
 
@@ -294,11 +303,11 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 		{
 			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : number expected");
 		}
-		duration =  lua_tonumber(L, -1);
-		if (!(duration > 0 ))
+		if ( lua_tointeger(L, -1) <= 0 )
 		{
-			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive number expected");
+			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive non-zero number expected");
 		}
+		duration =  lua_tointeger(L, -1);
 	}
     lua_pop(L, 1);
 
@@ -356,6 +365,22 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 	    lua_pop(L,1);
 
 
+    	// default parameter
+		ClutterInterpolation  interpolation = CLUTTER_INTERPOLATION_LINEAR;
+
+		// interpolation 
+		lua_getfield(L, -1, "interpolation");
+		if (!lua_isnil(L, -1))
+		{
+			if (!lua_isstring(L, -1))
+			{
+				return luaL_error(L, "Incorrect argument, failed to set \'interpolation\' : string expected");
+			}
+			static const char * interpolations[3] = { "LINEAR" , "CUBIC" , NULL };
+	    	interpolation = luaL_checkoption(L,-1,interpolations[0],interpolations)==0?CLUTTER_INTERPOLATION_LINEAR:CLUTTER_INTERPOLATION_CUBIC;
+		}
+	    lua_pop(L,1);
+
 		 // keys
 		lua_getfield(L, -1, "keys");
 		if (!lua_istable(L,-1))
@@ -394,15 +419,15 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 
 			progress = lua_tonumber(L,-3);
 
+
 			if (!lua_isnil(L, -1) && lua_isstring(L, -2))
 			{
 				mode = lua_tostring(L, -2); 
-				set_animator_value(L, -1, animator, source, name , mode, progress, ease_in);
+				set_animator_value(L, -1, animator, source, name , mode, progress, ease_in, interpolation);
 			}
 			else 
 			{
-				set_animator_value(L, -2, animator, source, name , mode, progress, ease_in);
-				
+				set_animator_value(L, -2, animator, source, name , mode, progress, ease_in, interpolation);
 			}
 			lua_pop(L,4);
 		 }
@@ -550,18 +575,71 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 
 	*Defining the Animator Animation: Optional Properties*
 	
-    Two optional properties may be set if desired in the Animator object's constructor. First, the duration property can specify the animation's length in milliseconds. The duration property, if set, is not part of the "properties" property; it should be defined as its own property, separate from properties. A sample is shown below.
+    Several optional properties may be set in the Animator object's constructor.
+    
+    --- The duration Property ---
+    
+    The duration property can specify the animation's length in milliseconds. If not set, duration defaults to 2000 milliseconds. A sample is shown below.
     
     (code)
-    myAnimation = Animator( { duration = 2000,
+    myAnimation = Animator( { duration = 1000,
                               properties = { ... }
                             }
                           )
     (end)
-    
-    Specifying the animation's duration in the object's constructor is optional, but an animation *must* have a duration. If not specified in the constructor, the duration must be specified in either the Animator object's <duration> property or the duration property of an attached Timeline object.
-    
-	The second optional property is called "ease_in". It is a boolean value indicating whether or not the animation should gradually move the object from its current location to the location specified in the first key frame. If ease_in is false, the object will jump instantly from its current location to the first key frame's location without inserting any intermediate steps; if ease_in is true, the object will move gradually to the first frame's location. By default, ease_in is true.
+
+	--- The timeline Property ---
+
+	An Animator object can define and run an animation by itself, but it can also work in conjunction with a Timeline object. When a Timeline object is attached to an Animator, the properties of the Timeline provide additional characteristics to the animation that are not available in an Animator alone. For example, a Timeline animation can loop infinitely, define an initial delay, or play in reverse; an Animator by itself cannot perform these operations.
+	
+	To attach a Timeline object to the Animator, define the timeline property in the Animator's constructor, as shown below. Notice that the timeline field is defined outside the properties table.
+	
+	(code)
+	animationTL = Timeline( { loop = true } )
+	
+	myAnimation = Animator( { timeline = animationTL,
+	                          properties = { ... }
+	                        }
+	                      )
+	(end)
+
+	An alternative method of attaching a Timeline to an Animator is by setting the Animator's <timeline> property after the object has been constructed.
+	
+	(code)
+	-- Construct Animator object
+	myAnimation = Animator( { ... } )
+	
+	-- Construct Timeline object and attach to Animator
+	animationTL = Timeline( { loop = true } )
+	myAnimation.timeline = animationTL
+	(end)
+	
+	--- The interpolation Property ---
+	
+	By default, an animated property's in-between values are calculated in a straight, linear manner. This linear type of interpolation is appropriate when the property progresses along a straight, non-swerving path. However, when a property's in-between values change in a non-linear fashion--such as when following a twisting X,Y path--a linear interpolation may produce a slightly choppy or abrupt motion. To produce a smoother animation in such cases, the optional interpolation property can be set to "CUBIC" to calculate in-between values using cubic interpolation instead of the default linear interpolation. Cubic interpolation will produce smoothly curving in-between values for a property.
+	
+	The interpolation property can be applied on an individual-property basis, so some animated properties can use linear interpolation and others cubic, depending on which method is most appropriate for each property. In the example shown below, the position property is defined to use cubic interpolation, and the scale property is explicitly defined to use linear interpolation. Because linear interpolation is the default, the scale property's interpolation setting is not required, but is shown for demonstration purposes.
+	
+	(code)
+	myAnimation = Animator( { properties = {
+								{ source = rect,
+								  name   = "position",
+								  interpolation = "CUBIC",  -- produce smoothly curving in-between values
+								  keys = { ... }
+							    },
+							
+							    { source = rect,
+							      name   = "scale",
+							      interpolation = "LINEAR", -- produce straight, linear in-between values
+							      keys = { ... }
+							    }
+							 }
+						  } )
+	(end)
+
+	--- The ease_in Property ---
+	
+	Another optional property is called "ease_in". It is a boolean value indicating whether or not the animation should gradually move the object from its current location to the location specified in the first key frame. If ease_in is false, the object will jump instantly from its current location to the first key frame's location without inserting any intermediate steps; if ease_in is true, the object will move gradually to the first frame's location. By default, ease_in is true.
 	
 	The ease_in property is associated with an Object-Property pair, so it is defined within the Object-Property table, as shown in the example below.
 	
@@ -580,13 +658,8 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 								  ease_in = false,
 								  keys = { ... }
 								}
-							}
-						  )
+							} )
 	(end)
-	
-	An Animator object can define and run an animation by itself, but it can also work in conjunction with a Timeline object. When a Timeline object is attached to an Animator, the properties of the Timeline provide additional characteristics to the animation that are not available in an Animator alone. For example, a Timeline animation can loop infinitely, define an initial delay, or play in reverse; an Animator by itself cannot perform these operations.
-	
-	To attach a Timeline object to the Animator animation, set the Animator's <timeline> property.
 	
 	*Complete Animator Code Example*
 	
@@ -627,17 +700,23 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 	sphereImage.name = "Sphere"
 	sphereImage.anchor_point = { 20, 20 },
 	screen:add( sphereImage )
+	screen:show()
+
+	-- Attach a Timeline to the Animator's animation to have it loop
+	sphereTL = Timeline { duration = 1500, loop = true }
 
 	-- Define an Animator for the sphere
 	sphereAnimator = Animator( {
+		timeline = sphereTL,
 		properties = {
 			-- Object-Property #1
 			-- Animate along the X-axis. The sphere simply moves back and forth along the X-axis.
 			-- When moving from left to right, it moves faster than when moving from right to left.
 			-- When combined with the scale key frames below, this gives the appearance of the sphere
 			-- moving faster when it is closer to us, and slower when farther away.
-			{ source = sphereImage,   -- object to animate
-			  name = "x",             -- property to animate
+			{ source = sphereImage,     -- object to animate
+			  name = "x",               -- property to animate
+			  interpolation = "CUBIC",  -- smooth interpolation
 			  -- X-axis key frames
 			  keys = {
 			  	{ 0.000, "LINEAR", 770 },
@@ -663,10 +742,6 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 			}
 		}
 	} )
-	
-	-- Attach a Timeline to the Animator's animation to have it loop
-	sphereTL = Timeline { duration = 1500, loop = true }
-	sphereAnimator.timeline = sphereTL
 
 	-- Start the Animator animation
 	sphereAnimator:start()
@@ -703,7 +778,41 @@ class Animator [[ClutterAnimator*]]
 			g_object_ref(self);
 			self=lb_construct_gobject(ClutterAnimator,self);
 			populate_animator(L, props, self);
+			ClutterUtil::set_props_from_table(L,props);
 	    	g_object_unref(self);
+	    	
+#if 0
+	    	
+	    	GList * keys = clutter_animator_get_keys(CLUTTER_ANIMATOR(self),0,0,-1);
+	    	
+	    	g_debug( "KEYS:" );
+	    	for ( GList * i = keys; i; i = i->next )
+	    	{
+	    	  ClutterAnimatorKey * k = (ClutterAnimatorKey*) i->data;
+	    	  
+	    	  ClutterActor * a = CLUTTER_ACTOR( clutter_animator_key_get_object( k ) );
+	    	  
+	    	  GType t = clutter_animator_key_get_property_type( k );
+	    	  GValue v = {0};
+	    	  g_value_init( & v , t );
+	    	  
+	    	  clutter_animator_key_get_value( k , & v );
+	    	  
+	    	  gchar * vs = g_strdup_value_contents( & v );
+	    	  
+	    	  g_debug( "\t'%s' (%d) : '%s' : mode %lu : progress %f : value %s (%s)" ,
+	    	      clutter_actor_get_name( a ), 
+	    	      clutter_actor_get_gid( a ),
+	    	      clutter_animator_key_get_property_name( k ),
+	    	      clutter_animator_key_get_mode( k ),
+	    	      clutter_animator_key_get_progress( k ),
+	    	      vs , g_type_name( t ) ); 
+	    	      
+	    	  g_free( vs );
+	    	}
+	    	g_list_free( keys );
+	    	
+#endif	    	
 		]];
 
     ~Animator()
@@ -717,7 +826,7 @@ class Animator [[ClutterAnimator*]]
 		
 		The animation's duration can also be set in the Animator object's constructor or in the duration property of an attached Timeline.
 		
-		*Default Value:* 0
+		*Default Value:* 2000
 		
 		*See Also:* the <Timeline.duration> property
 	*/
@@ -730,6 +839,8 @@ class Animator [[ClutterAnimator*]]
 		Property: timeline
 		
 		The timeline property specifies a Timeline object whose characteristics are used to drive the animation. For example, the Timeline's loop property can be set to have the animation loop infinitely.
+		
+		The timeline property can also be set in the Animator object's constructor.
 		
 		*Default Value:* nil
 		

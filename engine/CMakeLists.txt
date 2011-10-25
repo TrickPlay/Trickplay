@@ -213,6 +213,13 @@ if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
 
 endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
 
+# -----------------------------------------------------------------------------
+
+if ( TP_FONT_DEBUG )
+
+    add_definitions( -DTP_FONT_DEBUG=1 )
+    
+endif( TP_FONT_DEBUG )    
 
 # -----------------------------------------------------------------------------
 # These packages aren't in pkg-config
@@ -271,6 +278,21 @@ endif ( TP_WITH_WEBGL )
 
 #------------------------------------------------------------------------------
 
+if ( TP_FORCE_VERIFICATION )
+
+    add_definitions( -DTP_FORCE_VERIFICATION=1 )
+    add_definitions( -DTP_VERIFICATION_CODE="${TP_FORCE_VERIFICATION}" )
+    
+    string( LENGTH "${TP_FORCE_VERIFICATION}" CODE_LENGTH )
+    
+    if ( NOT CODE_LENGTH EQUAL 3 )
+        message( FATAL_ERROR "VERIFICATION CODE MUST BE 3 CHARACTERS LONG" )
+    endif( NOT CODE_LENGTH EQUAL 3 )
+
+endif( TP_FORCE_VERIFICATION )
+
+#------------------------------------------------------------------------------
+
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
 list(REMOVE_DUPLICATES ENGINE_INCLUDE_DIRS)
@@ -295,7 +317,7 @@ endforeach( LIB )
 # all warnings
 #------------------------------------------------------------------------------
 
-set(CMAKE_CXX_FLAGS "-Wall -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS "-Wall")
 
 #------------------------------------------------------------------------------
 # log domain for glib log functions
@@ -559,6 +581,8 @@ list( APPEND
     ${ENGINE_SRC}/source/log.cpp
     ${ENGINE_SRC}/source/keyboard.cpp
     ${ENGINE_SRC}/source/jpeg_utils.cpp
+    ${ENGINE_SRC}/source/sandbox.cpp
+    ${ENGINE_SRC}/source/console_commands.cpp
 )
 
 #------------------------------------------------------------------------------
