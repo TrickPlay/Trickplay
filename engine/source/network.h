@@ -85,6 +85,8 @@ public:
 
     //.........................................................................
 
+    Network();
+
     Network( const Settings & settings, EventGroup * event_group );
 
     ~Network();

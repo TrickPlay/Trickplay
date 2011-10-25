@@ -1,6 +1,6 @@
 app=
 {
-    id          = "com.trickplay.tests.video_tester",
+    id          = "com.trickplay.video_tester",
     release     = "1",
     version     = "1.0",
     name        = "Video Tester",
