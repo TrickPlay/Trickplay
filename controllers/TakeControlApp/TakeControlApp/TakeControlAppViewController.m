@@ -117,6 +117,7 @@
     if (new) {
         connection.delegate = self;
         
+        [self destroyTPAppViewController];
         [self destroyAppBrowserViewController];
         AppBrowser *appBrowser = [[[AppBrowser alloc] initWithTVConnection:connection delegate:self] autorelease];
         appBrowserViewController = [[appBrowser getNewAppBrowserViewController] retain];

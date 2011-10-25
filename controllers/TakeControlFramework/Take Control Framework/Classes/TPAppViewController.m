@@ -157,9 +157,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @implementation TPAppViewControllerContext
 
 
-@synthesize delegate;
-@synthesize version;
-@synthesize tvConnection;
+//@synthesize delegate;
+//@synthesize version;
+//@synthesize tvConnection;
 @synthesize socketManager;
 
 @synthesize graphics;
@@ -172,6 +172,39 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @synthesize touchDelegate;
 @synthesize accelDelegate;
 @synthesize advancedUIDelegate;
+
+#pragma mark -
+#pragma mark Property Getters/Setters
+
+- (NSString *)version {
+    NSString *retval = nil;
+    @synchronized(self) {
+        retval = [[version retain] autorelease];
+    }
+    return retval;
+}
+
+- (TVConnection *)tvConnection {
+    TVConnection *retval = nil;
+    @synchronized(self) {
+        retval = [[tvConnection retain] autorelease];
+    }
+    return retval;
+}
+
+- (id <TPAppViewControllerDelegate>)delegate {
+    id <TPAppViewControllerDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <TPAppViewControllerDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
 
 #pragma mark -
 #pragma mark Initialization
