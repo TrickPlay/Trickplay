@@ -780,6 +780,39 @@ class Animator [[ClutterAnimator*]]
 			populate_animator(L, props, self);
 			ClutterUtil::set_props_from_table(L,props);
 	    	g_object_unref(self);
+	    	
+#if 0
+	    	
+	    	GList * keys = clutter_animator_get_keys(CLUTTER_ANIMATOR(self),0,0,-1);
+	    	
+	    	g_debug( "KEYS:" );
+	    	for ( GList * i = keys; i; i = i->next )
+	    	{
+	    	  ClutterAnimatorKey * k = (ClutterAnimatorKey*) i->data;
+	    	  
+	    	  ClutterActor * a = CLUTTER_ACTOR( clutter_animator_key_get_object( k ) );
+	    	  
+	    	  GType t = clutter_animator_key_get_property_type( k );
+	    	  GValue v = {0};
+	    	  g_value_init( & v , t );
+	    	  
+	    	  clutter_animator_key_get_value( k , & v );
+	    	  
+	    	  gchar * vs = g_strdup_value_contents( & v );
+	    	  
+	    	  g_debug( "\t'%s' (%d) : '%s' : mode %lu : progress %f : value %s (%s)" ,
+	    	      clutter_actor_get_name( a ), 
+	    	      clutter_actor_get_gid( a ),
+	    	      clutter_animator_key_get_property_name( k ),
+	    	      clutter_animator_key_get_mode( k ),
+	    	      clutter_animator_key_get_progress( k ),
+	    	      vs , g_type_name( t ) ); 
+	    	      
+	    	  g_free( vs );
+	    	}
+	    	g_list_free( keys );
+	    	
+#endif	    	
 		]];
 
     ~Animator()
