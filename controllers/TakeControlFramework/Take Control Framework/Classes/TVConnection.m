@@ -48,14 +48,79 @@
 
 @implementation TVConnectionContext
 
-@synthesize isConnected;
-@synthesize port;
-@synthesize http_port;
-@synthesize hostName;
-@synthesize TVName;
-@synthesize connectedService;
-@synthesize delegate;
+//@synthesize isConnected;
+//@synthesize port;
+//@synthesize http_port;
+//@synthesize hostName;
+//@synthesize TVName;
+//@synthesize connectedService;
+//@synthesize delegate;
 @synthesize socketManager;
+
+#pragma mark -
+#pragma mark Property Getters/Setters
+
+- (BOOL)isConnected {
+    BOOL val = NO;
+    @synchronized(self) {
+        val = isConnected;
+    }
+    return val;
+}
+
+- (NSUInteger)port {
+    NSUInteger val = 0;
+    @synchronized(self) {
+        val = port;
+    }
+    return val;
+}
+
+- (NSUInteger)http_port {
+    NSUInteger val = 0;
+    @synchronized(self) {
+        val = http_port;
+    }
+    return val;
+}
+
+- (NSString *)hostName {
+    NSString *retval = nil;
+    @synchronized(self) {
+        retval = [[hostName retain] autorelease];
+    }
+    return retval;
+}
+
+- (NSString *)TVName {
+    NSString *retval = nil;
+    @synchronized(self) {
+        retval = [[TVName retain] autorelease];
+    }
+    return retval;
+}
+
+- (NSNetService *)connectedService {
+    NSNetService *retval = nil;
+    @synchronized(self) {
+        retval = [[connectedService retain] autorelease];
+    }
+    return retval;
+}
+
+- (id <TVConnectionDelegate>)delegate {
+    id <TVConnectionDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <TVConnectionDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
 
 #pragma mark -
 #pragma mark Initialization

@@ -47,7 +47,27 @@
 @synthesize tvConnections;
 @synthesize connectedServices;
 @synthesize viewControllers;
-@synthesize delegate;
+//@synthesize delegate;
+
+#pragma mark -
+#pragma mark Property Getters/Setters
+
+- (id <TVBrowserDelegate>)delegate {
+    id <TVBrowserDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <TVBrowserDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
+
+#pragma mark -
+#pragma mark Initialization
 
 - (id)init {
     return [self initWithDelegate:nil];

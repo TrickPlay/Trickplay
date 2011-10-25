@@ -106,14 +106,39 @@
 
 @implementation AppBrowserContext
 
-@synthesize availableApps;
-@synthesize currentApp;
-@synthesize tvConnection;
-@synthesize delegate;
+//@synthesize availableApps;
+//@synthesize currentApp;
+//@synthesize tvConnection;
+//@synthesize delegate;
 
 #pragma mark -
 #pragma Setters/Getters
 
+- (TVConnection *)tvConnection {
+    TVConnection *retval = nil;
+    @synchronized(self) {
+        retval = [[tvConnection retain] autorelease];
+    }
+    return retval;
+}
+
+- (void)setTvConnection:(TVConnection *)_tvConnection {
+    @synchronized(self) {
+        [_tvConnection retain];
+        [tvConnection release];
+        tvConnection = _tvConnection;
+    }
+}
+
+- (AppInfo *)currentApp {
+    AppInfo *retval = nil;
+    @synchronized(self) {
+        retval = [[currentApp retain] autorelease];
+    }
+    return retval;
+}
+
+// hidden method prototype
 - (void)setCurrentApp:(AppInfo *)_currentApp {
     @synchronized (self) {
         [_currentApp retain];
@@ -122,11 +147,34 @@
     }
 }
 
+- (NSArray *)availableApps {
+    NSArray *retval = nil;
+    @synchronized(self) {
+        retval = [[availableApps retain] autorelease];
+    }
+    return retval;
+}
+
+// hidden method prototype
 - (void)setAvailableApps:(NSMutableArray *)_availableApps {
     @synchronized (self) {
         [_availableApps retain];
         [availableApps release];
         availableApps = _availableApps;
+    }
+}
+
+- (id <AppBrowserDelegate>)delegate {
+    id <AppBrowserDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <AppBrowserDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
     }
 }
 
