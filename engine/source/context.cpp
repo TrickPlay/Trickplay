@@ -602,13 +602,41 @@ static void do_handshake()
 	code[3] = '\0';
 	suffix[3] = '\0';
 
-	g_info("Visit the URL: http://trickplay.com/DONTSTEALSOFTWARE/?CODE=%s%s", HANDSHAKE_PREFIX, suffix);
-
-	g_info("Now please type the code it gives back: ");
-	
 	gchar response[7];
 
-	fgets(response, 7, stdin);
+	memset( response , 0 , sizeof( response ) );
+
+	gchar * url = g_strdup_printf( "http://trickplay.com/verify/?CODE=%s%s", HANDSHAKE_PREFIX , suffix );
+
+	{
+		Network::Request  rq;
+
+		rq.url = url;
+		rq.timeout_s = 10;
+		rq.redirect = true;
+
+		Network::Response r( Network().perform_request( rq , 0 ) );
+
+		if ( ! r.failed && r.code == 200 && r.body && r.body->len >= 6 )
+		{
+			memmove( response , r.body->data , 6 );
+		}
+	}
+
+	if ( 6 != strlen( response ) )
+	{
+		memset( response , 0 , sizeof( response ) );
+
+		g_warning("Network auto-verification failed.  Please use manual verification below.");
+
+		g_info("Visit the URL: %s" , url );
+
+		g_info("Now please type the code it gives back: ");
+
+		fgets(response, 7, stdin);
+	}
+
+	g_free( url );
 
 	for(int i=0; i<3; i++)
 	{
