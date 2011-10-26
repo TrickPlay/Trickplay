@@ -45,11 +45,6 @@ function test_Timeline_has_marker ()
     assert_false ( myTimeline:has_marker("xxx") , "timeline.has_marker(xxx) == true" )
 end
 
--- add and then remove a marker. has_marker should return false
-function test_Timeline_remove_marker ()
-	myTimeline:remove_marker("end")
-    assert_false ( myTimeline:has_marker("end"), "timeline.has_marker(end) == true" )
-end
 
 -- Create 2 markers then call list_markers and verify they exist
 function test_Timeline_list_markers ()
@@ -64,7 +59,8 @@ end
 
 -- Check that 3 markers are remaining after 4 were created and 1 was removed
 function test_Timeline_markers ()
-	dumptable (myTimeline.markers)
+    myTimeline:remove_marker("end")
+    assert_false ( myTimeline:has_marker("end"), "timeline.has_marker(end) == true" )
     assert_equal ( myTimeline.markers[1], "start",  "timeline.markers[2] ~= start" )
     assert_equal ( myTimeline.markers[2], "middle",  "timeline.markers[3] ~= middle" )
     assert_equal ( myTimeline.markers[3], "middle2",  "timeline.markers[4] ~= middle2" )

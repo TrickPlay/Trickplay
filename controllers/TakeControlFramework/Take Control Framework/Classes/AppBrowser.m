@@ -174,7 +174,9 @@
 #pragma mark AppBrowserViewController
 
 - (AppBrowserViewController *)getNewAppBrowserViewController {
-    AppBrowserViewController *viewController = [[[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil appBrowser:self] autorelease];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    
+    AppBrowserViewController *viewController = [[[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:myBundle appBrowser:self] autorelease];
     
     return viewController;
 }
@@ -424,7 +426,7 @@
  * app.
  */
 - (void)launchApp:(AppInfo *)app {
-    if (!tvConnection || !tvConnection.hostName || !app || ![app isKindOfClass:[AppBrowser class]] || !availableApps || ![availableApps containsObject:app]) {
+    if (!tvConnection || !tvConnection.hostName || !app || ![app isKindOfClass:[AppInfo class]] || !availableApps || ![availableApps containsObject:app]) {
         return;
     }
     
