@@ -46,7 +46,6 @@ end
 
 -- Unescape a string
 function test_global_uri_parse_unescape ()
-	print ("unescaped string = "..unescaped_string)
 	assert_equal( unescaped_string, "a=1 b=a+b c=big ", "uri not unescaped properly")
 end
 
