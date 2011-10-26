@@ -714,6 +714,7 @@
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
 				);
+				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
@@ -734,6 +735,7 @@
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
 				);
+				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
@@ -754,6 +756,7 @@
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
 				);
+				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
