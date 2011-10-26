@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class ChatMessage extends BaseEntity implements Serializable {
+public class GameSessionMessage extends BaseEntity implements Serializable {
 
 	/**
 	 * 
@@ -21,8 +21,11 @@ public class ChatMessage extends BaseEntity implements Serializable {
 	private GameSession session;
 	private String message;
 	
+	public GameSessionMessage() {
+	    super();
+	}
 	
-	public ChatMessage(User sender, GameSession session, String message) {
+	public GameSessionMessage(User sender, GameSession session, String message) {
 		super();
 		this.sender = sender;
 		this.session = session;

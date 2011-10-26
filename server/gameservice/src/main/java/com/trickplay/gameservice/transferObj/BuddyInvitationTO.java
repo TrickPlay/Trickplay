@@ -2,8 +2,6 @@ package com.trickplay.gameservice.transferObj;
 
 import java.util.Date;
 
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.trickplay.gameservice.domain.BuddyListInvitation;

@@ -1,7 +1,5 @@
 package com.trickplay.gameservice.controllers;
 
-import java.util.List;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validator;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.trickplay.gameservice.domain.SessionToken;
 import com.trickplay.gameservice.domain.StatelessHttpSession;
 import com.trickplay.gameservice.service.SessionService;
 import com.trickplay.gameservice.transferObj.SessionRequestTO;

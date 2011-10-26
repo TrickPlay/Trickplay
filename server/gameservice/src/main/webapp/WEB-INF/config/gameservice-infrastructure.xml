@@ -52,4 +52,11 @@
 
 	<bean
 		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+		
+		<!-- Application Message Bundle -->
+    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="basename" value="/WEB-INF/messages/messages" />
+        <property name="cacheSeconds" value="0" />
+    </bean>
 </beans>
