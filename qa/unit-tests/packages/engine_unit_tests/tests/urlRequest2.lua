@@ -9,6 +9,7 @@
 -- Test Set up --
 local responseStatus2
 local responseCode2
+urlrequest2_on_complete_called = false
 
 -- NOTE: Can't test invalid URLs as they get redirected to a valid URL --
 
@@ -17,6 +18,7 @@ request2:send()
 
 
 function request2.on_complete ( request , response )
+	urlrequest2_on_complete_called = true
 	responseCode = response.code
 	responseStatus = response.status
 end

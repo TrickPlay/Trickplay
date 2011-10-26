@@ -30,7 +30,7 @@ test_group:add(image2)
 
 -- Test callback for a failed load
 function image3_on_loaded(image,failed)
-	image3_callback_called = true
+	image2_callback_called = true
 end
 
 image3.on_loaded = image3_on_loaded
@@ -56,7 +56,7 @@ function test_Image_loaded ()
 end
 
 function test_Image_failed_to_load ()
-	assert_equal( image3_callback_called, true, "no callback on a failed load" )
+	assert_equal( image2_callback_called, true, "no callback on a failed load" )
 	assert_false ( image3.loaded, "non-existent image loaded ~= false" )
 end
 
