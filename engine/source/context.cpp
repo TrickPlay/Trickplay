@@ -609,8 +609,9 @@ static void do_handshake()
 	gchar * url = g_strdup_printf( "http://trickplay.com/verify/?CODE=%s%s", HANDSHAKE_PREFIX , suffix );
 
 	{
-		Network::Request  rq( String() , url );
+		Network::Request  rq;
 
+		rq.url = url;
 		rq.timeout_s = 10;
 		rq.redirect = true;
 
