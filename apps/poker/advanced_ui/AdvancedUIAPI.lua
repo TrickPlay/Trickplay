@@ -315,6 +315,9 @@ end
 local function create_local( id , T , proxy_metatable , property_cache )
 
     -- If it already exists, return it
+    if not id or not T then
+        return nil
+    end
     
     local proxy = rawget( proxies , id )
     
@@ -435,7 +438,10 @@ function mt:create_remote( T , properties )
 
     local payload = { type = T , properties = bulk_properties }
     
-    local id = send_request( "create" , payload ).id
+    local id = send_request( "create" , payload )
+    if id then
+        id = id.id
+    end
     
     -- Create the local proxy
     
