@@ -681,9 +681,14 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -692,8 +697,13 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -716,7 +726,6 @@
 				);
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -736,7 +745,6 @@
 				);
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -756,7 +764,6 @@
 				);
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -767,8 +774,13 @@
 		CD91EA4A1427CCD00043C8BF /* Distribution */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

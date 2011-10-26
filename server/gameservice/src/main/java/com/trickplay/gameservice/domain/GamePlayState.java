@@ -2,7 +2,6 @@ package com.trickplay.gameservice.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -75,7 +74,7 @@ public class GamePlayState extends BaseEntity implements Serializable {
 		this.gameSession = gameSession;
 	}
 
-	@Lob @Basic(fetch=FetchType.LAZY)
+	@Lob /*@Basic(fetch=FetchType.LAZY)*/
 	@Column(updatable=false)
 	public String getState() {
 		return state;

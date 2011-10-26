@@ -16,6 +16,7 @@
 		446C2153143F7823007A2FE9 /* iOS-logo-57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = 446C2151143F7823007A2FE9 /* iOS-logo-57x57.png */; };
 		446C2154143F7823007A2FE9 /* iOS-logo-114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = 446C2152143F7823007A2FE9 /* iOS-logo-114x114.png */; };
 		446C2157143F782D007A2FE9 /* iOS-logo-72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = 446C2156143F782D007A2FE9 /* iOS-logo-72x72.png */; };
+		44B48F821457335F00C14A7D /* libTestFlight.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 44B48F801457335F00C14A7D /* libTestFlight.a */; };
 		CD4B2E96143A748A0073BB88 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E95143A748A0073BB88 /* UIKit.framework */; };
 		CD4B2E98143A748A0073BB88 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E97143A748A0073BB88 /* Foundation.framework */; };
 		CD4B2E9A143A748A0073BB88 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E99143A748A0073BB88 /* CoreGraphics.framework */; };
@@ -32,6 +33,7 @@
 		CD4B2F2F143A76B30073BB88 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F21143A76450073BB88 /* QuartzCore.framework */; };
 		CD4B2F30143A76B30073BB88 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2F1F143A76290073BB88 /* AssetsLibrary.framework */; };
 		CD66806314479AEA00232938 /* TakeControl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD66806214479AEA00232938 /* TakeControl.framework */; };
+		CDEA0CFE1452143400532126 /* TakeControl.framework in Resources */ = {isa = PBXBuildFile; fileRef = CD66806214479AEA00232938 /* TakeControl.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +46,8 @@
 		446C2151143F7823007A2FE9 /* iOS-logo-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-57x57.png"; path = "Icons/iOS-logo-57x57.png"; sourceTree = "<group>"; };
 		446C2152143F7823007A2FE9 /* iOS-logo-114x114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-114x114.png"; path = "Icons/iOS-logo-114x114.png"; sourceTree = "<group>"; };
 		446C2156143F782D007A2FE9 /* iOS-logo-72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-72x72.png"; path = "Icons/iOS-logo-72x72.png"; sourceTree = "<group>"; };
+		44B48F801457335F00C14A7D /* libTestFlight.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libTestFlight.a; path = TestFlight/libTestFlight.a; sourceTree = SOURCE_ROOT; };
+		44B48F811457335F00C14A7D /* TestFlight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestFlight.h; path = TestFlight/TestFlight.h; sourceTree = SOURCE_ROOT; };
 		CD4B2E91143A74890073BB88 /* TakeControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TakeControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD4B2E95143A748A0073BB88 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		CD4B2E97143A748A0073BB88 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -82,6 +86,7 @@
 				CD4B2E98143A748A0073BB88 /* Foundation.framework in Frameworks */,
 				CD4B2E9A143A748A0073BB88 /* CoreGraphics.framework in Frameworks */,
 				CD66806314479AEA00232938 /* TakeControl.framework in Frameworks */,
+				44B48F821457335F00C14A7D /* libTestFlight.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,6 +102,15 @@
 				CD4B2EA9143A748A0073BB88 /* TakeControlAppViewController.m */,
 			);
 			name = Code;
+			sourceTree = "<group>";
+		};
+		44B48F7E1457333900C14A7D /* TestFlight */ = {
+			isa = PBXGroup;
+			children = (
+				44B48F801457335F00C14A7D /* libTestFlight.a */,
+				44B48F811457335F00C14A7D /* TestFlight.h */,
+			);
+			name = TestFlight;
 			sourceTree = "<group>";
 		};
 		CD4B2E86143A74890073BB88 = {
@@ -140,6 +154,7 @@
 				CD4B2EB6143A74A20073BB88 /* iPhone */,
 				CD4B2EB7143A74AD0073BB88 /* iPad */,
 				CD4B2E9C143A748A0073BB88 /* Supporting Files */,
+				44B48F7E1457333900C14A7D /* TestFlight */,
 			);
 			path = TakeControlApp;
 			sourceTree = "<group>";
@@ -231,6 +246,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CDEA0CFE1452143400532126 /* TakeControl.framework in Resources */,
 				CD4B2EA0143A748A0073BB88 /* InfoPlist.strings in Resources */,
 				CD4B2EAD143A748A0073BB88 /* TakeControlAppViewController_iPhone.xib in Resources */,
 				CD4B2EB0143A748A0073BB88 /* TakeControlAppViewController_iPad.xib in Resources */,
@@ -260,7 +276,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "GIT_REVISION=`git --git-dir=\\\"${PROJECT_DIR}/../../.git\\\" --work-tree=\\\"${PROJECT_DIR}/../..\\\" describe --tags --dirty`\n\nINFO_PLIST=\\\"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Info\\\"\n\ndefaults write \\\"${INFO_PLIST}\\\" CFBundleShortVersionString \\\"${GIT_REVISION}\\\"";
+			shellScript = "rm -f \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/TakeControl.Framework/TakeControl\"\n\n\nGIT_REVISION=`git --git-dir=\"${PROJECT_DIR}/../../.git\" --work-tree=\"${PROJECT_DIR}/../..\" describe --tags --dirty`\n\nINFO_PLIST=\"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Info\"\n\ndefaults write \"${INFO_PLIST}\" CFBundleShortVersionString \"${GIT_REVISION}\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -309,16 +325,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				COPY_PHASE_STRIP = YES;
+				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -326,6 +346,7 @@
 				);
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
+				STRIP_INSTALLED_PRODUCT = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -343,7 +364,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TestFlight\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
@@ -357,6 +381,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -373,12 +401,13 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
 				);
 				SDKROOT = iphoneos;
+				STRIP_INSTALLED_PRODUCT = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -387,22 +416,27 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = YES;
+				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
 				);
 				SDKROOT = iphoneos;
+				STRIP_INSTALLED_PRODUCT = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -421,7 +455,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TestFlight\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
@@ -444,7 +481,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
 				INFOPLIST_FILE = "TakeControlApp/TakeControlApp-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TestFlight\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",

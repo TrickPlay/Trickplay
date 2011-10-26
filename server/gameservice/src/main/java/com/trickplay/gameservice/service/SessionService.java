@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.trickplay.gameservice.domain.SessionToken;
 
 
-@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+@PreAuthorize("isAuthenticated()")
 public interface SessionService {
 
 	public List<Long> pickPlayersRandom(int count);

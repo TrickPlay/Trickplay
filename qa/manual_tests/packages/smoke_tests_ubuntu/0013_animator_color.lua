@@ -5,7 +5,7 @@ local test_group = "acceptance"
 local test_area = "animator"
 local test_api = "color"
 
-test_question = "Does the white rectangle gradually change to blue color as it approaches the red square?"
+test_question = "Does the white rectangle gradually change to green color as it approaches the red square?"
 
 function generate_test_image ()
 
@@ -66,7 +66,7 @@ function generate_test_image ()
 				ease_in = true, 
 				keys = {
 					{0.1, "LINEAR", "FFFFFF" },					
-					{0.8, "LINEAR", "FF0033" }
+					{0.8, "LINEAR", "448844" }
 						}
 				}
 			}

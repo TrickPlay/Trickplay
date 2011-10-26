@@ -312,6 +312,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
         // from Trickplay
         advancedView = [[TrickplayScreen alloc] initWithID:@"0" args:nil objectManager:nil];
+        advancedView.nextTouchResponder = self;
         advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
         advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
         [self.view addSubview:advancedView];
@@ -743,6 +744,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         
         [backgroundView addSubview:newImageView];
         [backgroundView sendSubviewToBack:newImageView];
+        backgroundView.image = nil;
+        backgroundView.backgroundColor = [UIColor blackColor];
         
         graphics = YES;
         if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {

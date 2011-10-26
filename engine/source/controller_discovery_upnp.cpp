@@ -202,8 +202,6 @@ ControllerDiscoveryUPnP::ControllerDiscoveryUPnP( TPContext * context, const Str
 {
     prepare_device_xml( context , name );
 
-    int result;
-
     static bool init = false;
 
     if ( ! init )
