@@ -179,5 +179,4 @@ public class User extends BaseEntity implements Serializable {
 				+ password + ", email=" + email + "]";
 	}
 
-
 }

@@ -100,11 +100,11 @@ Group: Engine Reference  {
     }
 	
 	Group: Event Handling {
-		File: Overview* (no auto-title, docs/rte/reference/overview_events.txt)
+		File: Overview (no auto-title, docs/rte/reference/overview_events.txt)
 		
 		Group: Globals {
       		File: idle (no auto-title, bindings/idle.lb)
-			File: keyboard* (no auto-title, bindings/keyboard.lb)
+			File: keyboard (no auto-title, bindings/keyboard.lb)
 			File: keys (no auto-title, docs/rte/reference/key_codes.txt)
 		}
 		
@@ -122,7 +122,7 @@ Group: Engine Reference  {
 		}
 	}
 	
-	Group: Networking {
+	Group: External Connections {
 		File: Overview* (no auto-title, docs/rte/reference/overview_network.txt)
 		
 		Group: Globals {

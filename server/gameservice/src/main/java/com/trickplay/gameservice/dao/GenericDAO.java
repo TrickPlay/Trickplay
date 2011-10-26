@@ -3,8 +3,6 @@ package com.trickplay.gameservice.dao;
 import java.io.Serializable;
 import java.util.List;
 
-import org.springframework.transaction.annotation.Transactional;
-
 /**
  *
  */

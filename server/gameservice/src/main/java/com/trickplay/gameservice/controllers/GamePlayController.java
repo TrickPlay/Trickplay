@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.trickplay.gameservice.domain.Event;
 import com.trickplay.gameservice.domain.EventSelectionCriteria;
+import com.trickplay.gameservice.domain.GameSessionMessage;
 import com.trickplay.gameservice.domain.GameStepId;
 import com.trickplay.gameservice.service.EventService;
 import com.trickplay.gameservice.service.GamePlayService;
-import com.trickplay.gameservice.transferObj.ChatMessageTO;
 import com.trickplay.gameservice.transferObj.EventListTO;
 import com.trickplay.gameservice.transferObj.GamePlayInvitationListTO;
 import com.trickplay.gameservice.transferObj.GamePlayInvitationRequestTO;
@@ -31,6 +31,9 @@ import com.trickplay.gameservice.transferObj.GamePlaySessionTO;
 import com.trickplay.gameservice.transferObj.GamePlayStateTO;
 import com.trickplay.gameservice.transferObj.GamePlaySummaryRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlaySummaryTO;
+import com.trickplay.gameservice.transferObj.GameSessionMessageListTO;
+import com.trickplay.gameservice.transferObj.GameSessionMessageRequestTO;
+import com.trickplay.gameservice.transferObj.GameSessionMessageTO;
 import com.trickplay.gameservice.transferObj.UpdateInvitationStatusRequestTO;
 
 @Controller
@@ -257,15 +260,15 @@ public class GamePlayController extends BaseController {
 		}
 	}
 	
-	@RequestMapping(value={"/rest/gameplay/{id}/send-message"},  method = RequestMethod.POST )
-	public @ResponseBody String sendMessage(@RequestBody ChatMessageTO input) {
+	@RequestMapping(value={"/rest/gameplay/{id}/message"},  method = RequestMethod.POST )
+	public @ResponseBody GameSessionMessageTO postMessage(@PathVariable("id") Long gameSessionId, @RequestBody GameSessionMessageRequestTO input) {
 		StringBuilder err = new StringBuilder();
 		if (input == null) {
 			throw new BaseControllerException(400, null, "Received GamePlayRequestTO is null");
 		}
 		
 		boolean hasErrors = false;
-		for (ConstraintViolation<ChatMessageTO> constraint : validator.validate(input)) {
+		for (ConstraintViolation<GameSessionMessageRequestTO> constraint : validator.validate(input)) {
 			if (hasErrors)
 				err.append(",");
 			err.append("[").append(constraint.getMessage()).append("]");
@@ -277,12 +280,17 @@ public class GamePlayController extends BaseController {
 		}
 		
 		try {
-			gamePlayService.postMessage(input.getGameSessionId(), input.getMessage());
-			return "SUCCESS";
+			GameSessionMessage msg = gamePlayService.postMessage(gameSessionId, input.getMessage());
+			return new GameSessionMessageTO(msg);
 		} catch (Exception e) {
 			throw new BaseControllerException(e);
 		}
 	}
+	
+	@RequestMapping(value={"/rest/gameplay/{id}/message"},  method = RequestMethod.GET )
+    public @ResponseBody GameSessionMessageListTO getMessages(@PathVariable("id") Long gameSessionId, @RequestParam(value="lastMessageId", required=false) Long lastMessageId) {        
+            return new GameSessionMessageListTO(gamePlayService.getMessages(gameSessionId, lastMessageId));
+    }
 	
 	@RequestMapping(value="/rest/gameplay", method = RequestMethod.GET)
 	public @ResponseBody GamePlaySessionListTO getGamePlaySessions() {

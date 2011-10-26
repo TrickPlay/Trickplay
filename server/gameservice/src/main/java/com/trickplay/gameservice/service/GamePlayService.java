@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.trickplay.gameservice.domain.GameSessionMessage;
 import com.trickplay.gameservice.domain.GamePlayInvitation;
 import com.trickplay.gameservice.domain.GamePlaySummary;
 import com.trickplay.gameservice.domain.GameSession;
@@ -43,7 +44,9 @@ public interface GamePlayService {
 	public GameStepId endGamePlay(Long gameSessionId, String gameState);
 
 	@Transactional
-	public void postMessage(Long gameSessionId, String msg);
+	public GameSessionMessage postMessage(Long gameSessionId, String msg);
+	
+	public List<GameSessionMessage> getMessages(Long gameSessionId, Long lastMessageId);
 	
 	@Transactional
 	public List<GamePlayInvitation> getInvitations(Long gameId, int max);

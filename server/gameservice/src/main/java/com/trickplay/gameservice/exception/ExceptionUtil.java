@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
 
 import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;

@@ -2,7 +2,6 @@ package com.trickplay.gameservice.service;
 
 import java.util.List;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.domain.Event;

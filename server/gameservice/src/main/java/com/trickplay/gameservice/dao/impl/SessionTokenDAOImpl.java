@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import com.trickplay.gameservice.dao.SessionTokenDAO;
 import com.trickplay.gameservice.domain.SessionToken;
-import com.trickplay.gameservice.security.SecurityUtil;
 
 @Repository
 @SuppressWarnings("unchecked")
