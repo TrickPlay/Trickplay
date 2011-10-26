@@ -11,7 +11,7 @@ local image2 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image2",
-		position = {666,456,0},
+		position = {1351,451,0},
 		size = {131,129},
 		opacity = 255,
 		reactive = true,
@@ -48,7 +48,7 @@ local clone4 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone4",
-		position = {768,447,0},
+		position = {717,449,0},
 		size = {131,129},
 		opacity = 255,
 		reactive = true,
@@ -85,7 +85,7 @@ local clone5 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone5",
-		position = {1353,444,0},
+		position = {1357,355,0},
 		size = {131,129},
 		opacity = 255,
 		reactive = true,
@@ -113,42 +113,4 @@ end
 clone5.extra.reactive = true
 
 
-local image6 = Image
-	{
-		src = "/assets/images/cube-64.png",
-		clip = {0,0,64,64},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "image6",
-		position = {1366,402,0},
-		size = {64,64},
-		opacity = 255,
-		reactive = true,
-	}
-
-image6.extra.focus = {}
-
-function image6:on_key_down(key)
-	if image6.focus[key] then
-		if type(image6.focus[key]) == "function" then
-			image6.focus[key]()
-		elseif screen:find_child(image6.focus[key]) then
-			if image6.clear_focus then
-				image6.clear_focus(key)
-			end
-			screen:find_child(image6.focus[key]):grab_key_focus()
-			if screen:find_child(image6.focus[key]).set_focus then
-				screen:find_child(image6.focus[key]).set_focus(key)
-			end
-		end
-	end
-	return true
-end
-
-image6.extra.reactive = true
-
-
-g:add(clone4,image2,clone5,image6)
+g:add(clone4,image2,clone5)
