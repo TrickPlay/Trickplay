@@ -55,6 +55,8 @@ UITableViewDataSource, UINavigationControllerDelegate>
 // The object's delegeate.
 @property (assign) id <AppBrowserViewControllerDelegate> delegate;
 
+// Use this to initialize
+- (id)init;
 // Exposed methods
 // Currently inactive.
 - (IBAction) appShopButtonClick;

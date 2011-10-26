@@ -28,6 +28,7 @@
 
         if (aMask) {
             mask = [aMask retain];
+            mask.contentMode = UIViewContentModeCenter;
         } else {
             mask = nil;
         }
@@ -174,16 +175,14 @@
             [popOverController release];
             popOverController = nil;
         }
-    } else if (picker.parentViewController) {
-        [picker.parentViewController dismissModalViewControllerAnimated:YES];
+    } else {
+        [picker dismissModalViewControllerAnimated:YES];
     }
 }
 
 - (void)dismissImageEditor {
     if (imageEditor) {
-        if (imageEditor.parentViewController) {
-            [imageEditor.parentViewController dismissModalViewControllerAnimated:NO];
-        }
+        [imageEditor dismissModalViewControllerAnimated:NO];
         [imageEditor release];
         imageEditor = nil;
     }
@@ -213,7 +212,8 @@
         [imageEditor release];
     }
     
-    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:nil title:self.titleLabel cancelLabel:self.cancelLabel];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:myBundle title:self.titleLabel cancelLabel:self.cancelLabel];
     imageEditor.imageEditorDelegate = self;
     
     imageEditor.imageToEdit = image;
@@ -295,7 +295,10 @@
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-    //NSLog(@"mask: %@", mask);
+    
+    if (mask) {
+        mask.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+    }
     imagePickerController.cameraOverlayView = mask;
     mask.userInteractionEnabled = NO;
     
@@ -339,6 +342,11 @@
 - (void)setMask:(UIImageView *)aMask {
     mask = aMask;
     [self.view addSubview:mask];
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations.
+    return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
 }
 
 - (void)dealloc {

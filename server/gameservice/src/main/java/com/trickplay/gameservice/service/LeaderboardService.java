@@ -2,9 +2,11 @@ package com.trickplay.gameservice.service;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.domain.RecordedScore;
+
 
 public interface LeaderboardService {
 
@@ -18,6 +20,7 @@ public interface LeaderboardService {
 	public List<RecordedScore> findBuddyScores(Long gameId);
 	public List<RecordedScore> findScoreByUserId(Long gameId);
 	
+	@PreAuthorize("isAuthenticated()")
 	@Transactional
 	public RecordedScore recordScore(Long gameId, long points);	
 }

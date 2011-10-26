@@ -76,7 +76,9 @@
 #pragma mark TVBrowserViewController
 
 - (TVBrowserViewController *)getNewTVBrowserViewController {
-    TVBrowserViewController *viewController = [[[TVBrowserViewController alloc] initWithNibName:@"TVBrowserViewController" bundle:nil tvBrowser:self] autorelease];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    
+    TVBrowserViewController *viewController = [[[TVBrowserViewController alloc] initWithNibName:@"TVBrowserViewController" bundle:myBundle tvBrowser:self] autorelease];
     
     return viewController;
 }

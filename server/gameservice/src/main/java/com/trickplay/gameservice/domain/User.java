@@ -88,7 +88,7 @@ public class User extends BaseEntity implements Serializable {
 		this.password = password;
 	}
 	
-	@OneToMany(mappedBy="owner", fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="owner" , fetch=FetchType.LAZY)
 	public List<Buddy> getBuddies() {
 		return buddies;
 	}

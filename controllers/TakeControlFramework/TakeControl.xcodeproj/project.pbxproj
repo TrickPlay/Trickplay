@@ -47,45 +47,45 @@
 		44D2D0A5143F723700E54755 /* ImageEditorHelpViewControllerPhone.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA7F1427D50F0043C8BF /* ImageEditorHelpViewControllerPhone.m */; };
 		44D2D0A6143F723700E54755 /* ImageEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA811427D50F0043C8BF /* ImageEditorViewController.m */; };
 		44D2D0A7143F723700E54755 /* AudioRecordingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA891427D5260043C8BF /* AudioRecordingViewController.m */; };
-		CD4977AC143E7A3A00387911 /* click.wav in Resources */ = {isa = PBXBuildFile; fileRef = CD5CFD6613D50F01002334E7 /* click.wav */; };
-		CD4977AD143E7A3A00387911 /* arrows-generic-controls-comp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */; };
-		CD4977AE143E7A3A00387911 /* ios-generic-background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */; };
-		CD4977AF143E7A3A00387911 /* back-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43F13B9895300158169 /* back-touch.png */; };
-		CD4977B0143E7A3A00387911 /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44013B9895300158169 /* back.png */; };
-		CD4977B1143E7A3A00387911 /* button-blue-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44113B9895300158169 /* button-blue-touch.png */; };
-		CD4977B2143E7A3A00387911 /* button-blue.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44213B9895300158169 /* button-blue.png */; };
-		CD4977B3143E7A3A00387911 /* button-green-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44313B9895300158169 /* button-green-touch.png */; };
-		CD4977B4143E7A3A00387911 /* button-green.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44413B9895300158169 /* button-green.png */; };
-		CD4977B5143E7A3A00387911 /* button-red-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44513B9895300158169 /* button-red-touch.png */; };
-		CD4977B6143E7A3A00387911 /* button-red.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44613B9895300158169 /* button-red.png */; };
-		CD4977B7143E7A3A00387911 /* button-yellow-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44713B9895300158169 /* button-yellow-touch.png */; };
-		CD4977B8143E7A3A00387911 /* button-yellow.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44813B9895300158169 /* button-yellow.png */; };
-		CD4977B9143E7A3A00387911 /* down-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44913B9895300158169 /* down-touch.png */; };
-		CD4977BA143E7A3A00387911 /* down.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44A13B9895300158169 /* down.png */; };
-		CD4977BB143E7A3A00387911 /* exit-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44B13B9895300158169 /* exit-touch.png */; };
-		CD4977BC143E7A3A00387911 /* exit.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44C13B9895300158169 /* exit.png */; };
-		CD4977BD143E7A3A00387911 /* left-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44D13B9895300158169 /* left-touch.png */; };
-		CD4977BE143E7A3A00387911 /* left.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44E13B9895300158169 /* left.png */; };
-		CD4977BF143E7A3A00387911 /* ok-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44F13B9895300158169 /* ok-touch.png */; };
-		CD4977C0143E7A3A00387911 /* ok.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45013B9895300158169 /* ok.png */; };
-		CD4977C1143E7A3A00387911 /* right-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45113B9895300158169 /* right-touch.png */; };
-		CD4977C2143E7A3A00387911 /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45213B9895300158169 /* right.png */; };
-		CD4977C3143E7A3A00387911 /* up-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45313B9895300158169 /* up-touch.png */; };
-		CD4977C4143E7A3A00387911 /* up.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45413B9895300158169 /* up.png */; };
+		CD165811143FE11900FEB2DC /* AppBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA621427D4800043C8BF /* AppBrowserViewController.xib */; };
+		CD165812143FE11900FEB2DC /* AudioRecordingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA631427D4800043C8BF /* AudioRecordingViewController.xib */; };
+		CD165813143FE11900FEB2DC /* ImageEditorHelpViewControllerPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA651427D4800043C8BF /* ImageEditorHelpViewControllerPhone.xib */; };
+		CD165814143FE11900FEB2DC /* ImageEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA661427D4800043C8BF /* ImageEditorViewController.xib */; };
+		CD165815143FE11900FEB2DC /* TPAppViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA671427D4800043C8BF /* TPAppViewController.xib */; };
+		CD165816143FE11900FEB2DC /* TVBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA681427D4800043C8BF /* TVBrowserViewController.xib */; };
+		CD165817143FE11900FEB2DC /* VirtualRemoteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA701427D49F0043C8BF /* VirtualRemoteViewController.xib */; };
+		CD165818143FE11900FEB2DC /* ImageEditorHelpViewPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */; };
+		CD165819143FE12500FEB2DC /* click.wav in Resources */ = {isa = PBXBuildFile; fileRef = CD5CFD6613D50F01002334E7 /* click.wav */; };
+		CD16581A143FE12500FEB2DC /* arrows-generic-controls-comp.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */; };
+		CD16581B143FE12500FEB2DC /* ios-generic-background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */; };
+		CD16581C143FE12500FEB2DC /* back-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B43F13B9895300158169 /* back-touch.png */; };
+		CD16581D143FE12500FEB2DC /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44013B9895300158169 /* back.png */; };
+		CD16581E143FE12500FEB2DC /* button-blue-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44113B9895300158169 /* button-blue-touch.png */; };
+		CD16581F143FE12500FEB2DC /* button-blue.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44213B9895300158169 /* button-blue.png */; };
+		CD165820143FE12500FEB2DC /* button-green-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44313B9895300158169 /* button-green-touch.png */; };
+		CD165821143FE12500FEB2DC /* button-green.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44413B9895300158169 /* button-green.png */; };
+		CD165822143FE12500FEB2DC /* button-red-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44513B9895300158169 /* button-red-touch.png */; };
+		CD165823143FE12500FEB2DC /* button-red.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44613B9895300158169 /* button-red.png */; };
+		CD165824143FE12500FEB2DC /* button-yellow-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44713B9895300158169 /* button-yellow-touch.png */; };
+		CD165825143FE12500FEB2DC /* button-yellow.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44813B9895300158169 /* button-yellow.png */; };
+		CD165826143FE12500FEB2DC /* down-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44913B9895300158169 /* down-touch.png */; };
+		CD165827143FE12500FEB2DC /* down.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44A13B9895300158169 /* down.png */; };
+		CD165828143FE12500FEB2DC /* exit-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44B13B9895300158169 /* exit-touch.png */; };
+		CD165829143FE12500FEB2DC /* exit.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44C13B9895300158169 /* exit.png */; };
+		CD16582A143FE12500FEB2DC /* left-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44D13B9895300158169 /* left-touch.png */; };
+		CD16582B143FE12500FEB2DC /* left.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44E13B9895300158169 /* left.png */; };
+		CD16582C143FE12500FEB2DC /* ok-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B44F13B9895300158169 /* ok-touch.png */; };
+		CD16582D143FE12500FEB2DC /* ok.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45013B9895300158169 /* ok.png */; };
+		CD16582E143FE12500FEB2DC /* right-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45113B9895300158169 /* right-touch.png */; };
+		CD16582F143FE12500FEB2DC /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45213B9895300158169 /* right.png */; };
+		CD165830143FE12500FEB2DC /* up-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45313B9895300158169 /* up-touch.png */; };
+		CD165831143FE12500FEB2DC /* up.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45413B9895300158169 /* up.png */; };
 		CD4977C7143E7A6900387911 /* TVBrowserViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA541427D3600043C8BF /* TVBrowserViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977C8143E7A6900387911 /* AppBrowserViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA511427D3600043C8BF /* AppBrowserViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977C9143E7A6900387911 /* TPAppViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA521427D3600043C8BF /* TPAppViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CA143E7A6900387911 /* TVBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA531427D3600043C8BF /* TVBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CB143E7A6900387911 /* AppBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA501427D3600043C8BF /* AppBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CC143E7A6900387911 /* TVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA551427D3600043C8BF /* TVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		CD4977FA143E7AD100387911 /* AppBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA621427D4800043C8BF /* AppBrowserViewController.xib */; };
-		CD4977FB143E7AD100387911 /* AudioRecordingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA631427D4800043C8BF /* AudioRecordingViewController.xib */; };
-		CD4977FC143E7AD100387911 /* ImageEditorHelpViewControllerPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA651427D4800043C8BF /* ImageEditorHelpViewControllerPhone.xib */; };
-		CD4977FD143E7AD200387911 /* ImageEditorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA661427D4800043C8BF /* ImageEditorViewController.xib */; };
-		CD4977FE143E7AD200387911 /* TPAppViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA671427D4800043C8BF /* TPAppViewController.xib */; };
-		CD4977FF143E7AD200387911 /* TVBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA681427D4800043C8BF /* TVBrowserViewController.xib */; };
-		CD497800143E7AD200387911 /* VirtualRemoteViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD91EA701427D49F0043C8BF /* VirtualRemoteViewController.xib */; };
-		CD497801143E7AD200387911 /* ImageEditorHelpViewPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -201,7 +201,7 @@
 		CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CommandInterpreterApp.m; path = "Take Control Framework/Classes/CommandInterpreterApp.m"; sourceTree = SOURCE_ROOT; };
 		CD91EAF41427D6980043C8BF /* ResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ResourceManager.h; path = "Take Control Framework/Classes/ResourceManager.h"; sourceTree = SOURCE_ROOT; };
 		CD91EAF51427D6980043C8BF /* ResourceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ResourceManager.m; path = "Take Control Framework/Classes/ResourceManager.m"; sourceTree = SOURCE_ROOT; };
-		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewPad.xib; path = "Take Control Framework/Classes/ImageEditorHelpViewPad.xib"; sourceTree = SOURCE_ROOT; };
+		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewPad.xib; path = Classes/ImageEditorHelpViewPad.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -580,39 +580,39 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD4977AC143E7A3A00387911 /* click.wav in Resources */,
-				CD4977AD143E7A3A00387911 /* arrows-generic-controls-comp.jpg in Resources */,
-				CD4977AE143E7A3A00387911 /* ios-generic-background.jpg in Resources */,
-				CD4977AF143E7A3A00387911 /* back-touch.png in Resources */,
-				CD4977B0143E7A3A00387911 /* back.png in Resources */,
-				CD4977B1143E7A3A00387911 /* button-blue-touch.png in Resources */,
-				CD4977B2143E7A3A00387911 /* button-blue.png in Resources */,
-				CD4977B3143E7A3A00387911 /* button-green-touch.png in Resources */,
-				CD4977B4143E7A3A00387911 /* button-green.png in Resources */,
-				CD4977B5143E7A3A00387911 /* button-red-touch.png in Resources */,
-				CD4977B6143E7A3A00387911 /* button-red.png in Resources */,
-				CD4977B7143E7A3A00387911 /* button-yellow-touch.png in Resources */,
-				CD4977B8143E7A3A00387911 /* button-yellow.png in Resources */,
-				CD4977B9143E7A3A00387911 /* down-touch.png in Resources */,
-				CD4977BA143E7A3A00387911 /* down.png in Resources */,
-				CD4977BB143E7A3A00387911 /* exit-touch.png in Resources */,
-				CD4977BC143E7A3A00387911 /* exit.png in Resources */,
-				CD4977BD143E7A3A00387911 /* left-touch.png in Resources */,
-				CD4977BE143E7A3A00387911 /* left.png in Resources */,
-				CD4977BF143E7A3A00387911 /* ok-touch.png in Resources */,
-				CD4977C0143E7A3A00387911 /* ok.png in Resources */,
-				CD4977C1143E7A3A00387911 /* right-touch.png in Resources */,
-				CD4977C2143E7A3A00387911 /* right.png in Resources */,
-				CD4977C3143E7A3A00387911 /* up-touch.png in Resources */,
-				CD4977C4143E7A3A00387911 /* up.png in Resources */,
-				CD4977FA143E7AD100387911 /* AppBrowserViewController.xib in Resources */,
-				CD4977FB143E7AD100387911 /* AudioRecordingViewController.xib in Resources */,
-				CD4977FC143E7AD100387911 /* ImageEditorHelpViewControllerPhone.xib in Resources */,
-				CD4977FD143E7AD200387911 /* ImageEditorViewController.xib in Resources */,
-				CD4977FE143E7AD200387911 /* TPAppViewController.xib in Resources */,
-				CD4977FF143E7AD200387911 /* TVBrowserViewController.xib in Resources */,
-				CD497800143E7AD200387911 /* VirtualRemoteViewController.xib in Resources */,
-				CD497801143E7AD200387911 /* ImageEditorHelpViewPad.xib in Resources */,
+				CD165819143FE12500FEB2DC /* click.wav in Resources */,
+				CD16581A143FE12500FEB2DC /* arrows-generic-controls-comp.jpg in Resources */,
+				CD16581B143FE12500FEB2DC /* ios-generic-background.jpg in Resources */,
+				CD16581C143FE12500FEB2DC /* back-touch.png in Resources */,
+				CD16581D143FE12500FEB2DC /* back.png in Resources */,
+				CD16581E143FE12500FEB2DC /* button-blue-touch.png in Resources */,
+				CD16581F143FE12500FEB2DC /* button-blue.png in Resources */,
+				CD165820143FE12500FEB2DC /* button-green-touch.png in Resources */,
+				CD165821143FE12500FEB2DC /* button-green.png in Resources */,
+				CD165822143FE12500FEB2DC /* button-red-touch.png in Resources */,
+				CD165823143FE12500FEB2DC /* button-red.png in Resources */,
+				CD165824143FE12500FEB2DC /* button-yellow-touch.png in Resources */,
+				CD165825143FE12500FEB2DC /* button-yellow.png in Resources */,
+				CD165826143FE12500FEB2DC /* down-touch.png in Resources */,
+				CD165827143FE12500FEB2DC /* down.png in Resources */,
+				CD165828143FE12500FEB2DC /* exit-touch.png in Resources */,
+				CD165829143FE12500FEB2DC /* exit.png in Resources */,
+				CD16582A143FE12500FEB2DC /* left-touch.png in Resources */,
+				CD16582B143FE12500FEB2DC /* left.png in Resources */,
+				CD16582C143FE12500FEB2DC /* ok-touch.png in Resources */,
+				CD16582D143FE12500FEB2DC /* ok.png in Resources */,
+				CD16582E143FE12500FEB2DC /* right-touch.png in Resources */,
+				CD16582F143FE12500FEB2DC /* right.png in Resources */,
+				CD165830143FE12500FEB2DC /* up-touch.png in Resources */,
+				CD165831143FE12500FEB2DC /* up.png in Resources */,
+				CD165811143FE11900FEB2DC /* AppBrowserViewController.xib in Resources */,
+				CD165812143FE11900FEB2DC /* AudioRecordingViewController.xib in Resources */,
+				CD165813143FE11900FEB2DC /* ImageEditorHelpViewControllerPhone.xib in Resources */,
+				CD165814143FE11900FEB2DC /* ImageEditorViewController.xib in Resources */,
+				CD165815143FE11900FEB2DC /* TPAppViewController.xib in Resources */,
+				CD165816143FE11900FEB2DC /* TVBrowserViewController.xib in Resources */,
+				CD165817143FE11900FEB2DC /* VirtualRemoteViewController.xib in Resources */,
+				CD165818143FE11900FEB2DC /* ImageEditorHelpViewPad.xib in Resources */,
 				44D2D084143F6FCB00E54755 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -681,9 +681,14 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -692,8 +697,13 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -716,7 +726,6 @@
 				);
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -736,7 +745,6 @@
 				);
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -756,7 +764,6 @@
 				);
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -767,8 +774,13 @@
 		CD91EA4A1427CCD00043C8BF /* Distribution */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

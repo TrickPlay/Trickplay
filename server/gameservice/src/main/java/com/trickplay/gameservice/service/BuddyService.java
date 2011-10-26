@@ -8,10 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.trickplay.gameservice.domain.Buddy;
 import com.trickplay.gameservice.domain.BuddyListInvitation;
 import com.trickplay.gameservice.domain.InvitationStatus;
-import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.exception.GameServiceException;
 
-@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+@PreAuthorize("isAuthenticated()")
 public interface BuddyService {
 	
     @Transactional
@@ -20,14 +19,11 @@ public interface BuddyService {
 	@Transactional
 	public BuddyListInvitation updateInvitationStatus(Long invitationId, InvitationStatus newStatus);
 
-	//@PreAuthorize("principal.username == #buddy.owner.username")
 	@Transactional
 	public void removeBuddy(Long buddyId);
 
-	//@PreAuthorize("hasRole('ROLE_ADMIN') or ")
 	public List<Buddy> findAll(Long ownerId);
 
-	//@PreAuthorize("principal.username == #buddy.owner.username")
 	@Transactional
 	public void create(Buddy entity);
 
@@ -39,4 +35,7 @@ public interface BuddyService {
 	public List<Buddy> findByOwnerName(String ownerName);
 	
 	public List<Buddy> findByOwnerIdTargetId(Long ownerId, Long targetId);
+	
+	public List<BuddyListInvitation> getPendingInvitations();
+	
 }

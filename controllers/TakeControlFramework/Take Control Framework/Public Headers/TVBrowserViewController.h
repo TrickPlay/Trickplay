@@ -61,6 +61,8 @@ UITableViewDataSource, UINavigationControllerDelegate>
 // The objects TVBrowser.
 @property (readonly) TVBrowser *tvBrowser;
 
+// Use this to initialize
+- (id)init;
 // Calls - (void)reloadData on its own UITableView which repopulates the
 // TVBrowserViewController with data aquired by the tvBrowser insantiation.
 - (void)reloadData;
