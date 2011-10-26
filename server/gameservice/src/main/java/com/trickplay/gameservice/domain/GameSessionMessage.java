@@ -21,6 +21,9 @@ public class GameSessionMessage extends BaseEntity implements Serializable {
 	private GameSession session;
 	private String message;
 	
+	public GameSessionMessage() {
+	    super();
+	}
 	
 	public GameSessionMessage(User sender, GameSession session, String message) {
 		super();

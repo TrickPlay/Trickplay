@@ -33,6 +33,9 @@ import com.trickplay.gameservice.transferObj.GamePlayStateTO;
 import com.trickplay.gameservice.transferObj.GamePlaySummaryRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlaySummaryTO;
 import com.trickplay.gameservice.transferObj.GameRequestTO;
+import com.trickplay.gameservice.transferObj.GameSessionMessageListTO;
+import com.trickplay.gameservice.transferObj.GameSessionMessageRequestTO;
+import com.trickplay.gameservice.transferObj.GameSessionMessageTO;
 import com.trickplay.gameservice.transferObj.GameTO;
 import com.trickplay.gameservice.transferObj.ScoreFilterTO.ScoreType;
 import com.trickplay.gameservice.transferObj.ScoreListTO;
@@ -178,6 +181,7 @@ public class GameServiceClient {
 				}
 				if (gpsTO.getTurnId().equals(umap.get("u1").getId())) {
 					/******** u1's turn ********/
+				    postGameSessionMessage(restTemplate, gsTO.getId(), "my (u1's) turn", "u1", "u1");
 					String state = decodeState(gpsTO.getState());
 					int counter = Integer.parseInt(state);
 					if (counter<10) {
@@ -189,11 +193,13 @@ public class GameServiceClient {
 							endGamePlay(restTemplate, gsRequestTO, "u1", "u1");
 							u1points += 100;
 							winner = "u1";
+							postGameSessionMessage(restTemplate, gsTO.getId(), "I (u1) am the winner. You (u2) suck", "u1", "u1");
 							break;
 						} else {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), umap.get("u2").getId());
 							updateGamePlay(restTemplate, gsRequestTO, "u1", "u1");
 							u1points += 10;
+                            postGameSessionMessage(restTemplate, gsTO.getId(), "I ( u1 ) incremented the counter. Your ( u2's ) turn", "u1", "u1");
 						}
 					}
 					else {
@@ -212,6 +218,7 @@ public class GameServiceClient {
 				
 				if (gpsTO.getTurnId().equals(umap.get("u2").getId())) {
 					/*** u2's turn ********/
+                    postGameSessionMessage(restTemplate, gsTO.getId(), "my (u2's) turn", "u2", "u2");
 					String state = decodeState(gpsTO.getState());
 					int counter = Integer.parseInt(state);
 					if (counter<10) {
@@ -224,10 +231,12 @@ public class GameServiceClient {
 							endGamePlay(restTemplate, gsRequestTO, "u2", "u2");
 							u2points = 100;
 							winner = "u2";
+                            postGameSessionMessage(restTemplate, gsTO.getId(), "I (u2) am the winner. You (u1) suck", "u2", "u2");
 						} else {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), umap.get("u1").getId());
 							updateGamePlay(restTemplate, gsRequestTO, "u2", "u2");
 							u2points += 10;
+                            postGameSessionMessage(restTemplate, gsTO.getId(), "I ( u2 ) incremented the counter. Your ( u1's ) turn", "u2", "u2");
 						}
 					}
 					else {
@@ -274,6 +283,8 @@ public class GameServiceClient {
 			    postGamePlaySummary(restTemplate, gameId, winnerSummaryTO, "u2", "u2");
                 postGamePlaySummary(restTemplate, gameId, loserSummaryTO, "u1", "u1");
 			}
+			
+			getGameSessionMessages(restTemplate, gsTO.getId(), "u1", "u1");
 			
 			
 		}
@@ -507,7 +518,42 @@ public class GameServiceClient {
 			
 		}
 
-		public static EventListTO getGameServiceEvents(RestTemplate rest, String username, String password) {
+        public static GameSessionMessageTO postGameSessionMessage(RestTemplate rest, Long sessionId, String message, String username, String password) {
+            HttpEntity<GameSessionMessageRequestTO> entity = prepareJsonRequest(new GameSessionMessageRequestTO(message), true, username, password);
+        //  entity.
+            ResponseEntity<GameSessionMessageTO> response = rest.postForEntity(
+                    GS_ENDPOINT+"/gameplay/"+sessionId+"/message", 
+                    entity, GameSessionMessageTO.class);
+            
+            GameSessionMessageTO output = response.getBody();
+            System.out.println("Posted a message. game session id: " + output.getGameSessionId() + ", message: '" + output.getMessage() + "'" );
+            return output;
+            
+        }
+        
+        public static GameSessionMessageListTO getGameSessionMessages(
+                RestTemplate rest, Long sessionId, String username, String password) {
+            
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            
+            ResponseEntity<GameSessionMessageListTO> response = rest.exchange(
+                    GS_ENDPOINT + "/gameplay/" + sessionId + "/message",
+                    HttpMethod.GET, entity, GameSessionMessageListTO.class);
+    
+            GameSessionMessageListTO output = response.getBody();
+            
+            System.out.println("Got game session messages in game session:"
+                    + sessionId);
+            
+            for (GameSessionMessageTO message : output.getMessages()) {
+                System.out.println("message info [ id : " + message.getId()
+                        + ", from : " + message.getSenderName() + ", message: '"
+                        + message.getMessage() + "']");
+            }
+            return output;
+        }
+
+        public static EventListTO getGameServiceEvents(RestTemplate rest, String username, String password) {
 			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<EventListTO> response = rest.exchange(
 					GS_ENDPOINT+"/gameplay/events", HttpMethod.GET, entity, EventListTO.class);
