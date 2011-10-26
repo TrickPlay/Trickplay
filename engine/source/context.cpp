@@ -627,6 +627,8 @@ static void do_handshake()
 	{
 		memset( response , 0 , sizeof( response ) );
 
+		g_warning("Network auto-verification failed.  Please use manual verification below.");
+
 		g_info("Visit the URL: %s" , url );
 
 		g_info("Now please type the code it gives back: ");
