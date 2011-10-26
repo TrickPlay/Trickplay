@@ -70,7 +70,7 @@
     [self.view addSubview:imageView];
     
     if (mask) {
-        mask.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height);
+        //mask.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height);
         [self.view addSubview:mask];
         mask.userInteractionEnabled = NO;
     }
