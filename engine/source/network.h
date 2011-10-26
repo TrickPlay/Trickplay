@@ -22,6 +22,8 @@ public:
     {
     public:
 
+    	Request();
+
         Request( const String & user_agent, const String & url = String() );
 
         String      url;
@@ -38,8 +40,8 @@ public:
 
     private:
 
-        Request()
-        {}
+        void set_default_user_agent();
+
     };
 
     //.........................................................................
