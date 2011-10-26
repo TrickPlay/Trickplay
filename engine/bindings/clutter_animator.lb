@@ -703,7 +703,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 	screen:show()
 
 	-- Attach a Timeline to the Animator's animation to have it loop
-	sphereTL = Timeline { duration = 1500, loop = true }
+	sphereTL = Timeline( { duration = 1500, loop = true } )
 
 	-- Define an Animator for the sphere
 	sphereAnimator = Animator( {
@@ -824,7 +824,7 @@ class Animator [[ClutterAnimator*]]
 		
 		The duration property is an integer value specifying the length of the animation in milliseconds.
 		
-		The animation's duration can also be set in the Animator object's constructor or in the duration property of an attached Timeline.
+		The animation's duration can also be set in the Animator object's constructor or in the duration property of an attached Timeline. If the Animator and Timeline objects each specify a different duration, the duration setting most-recently assigned is used.
 		
 		*Default Value:* 2000
 		

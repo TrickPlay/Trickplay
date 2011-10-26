@@ -30,4 +30,4 @@ Title: The Engine Console
 		/ui [gid || actorName] - Display information about all user-interface objects in a running TrickPlay application. If the optional gid or actorName is specified then the displayed information is limited to the referenced object.
 		/ver - Display version information for the Engine and Engine libraries.
 
-	The Console can be controlled remotely via a Telnet connection. The default Telnet port is 7777, but the port number can be changed by setting the telnet_console_port configuration key. Refer to the <TrickPlay Configuration Keys> section of the Programmer's Guide for further details.
+	The Console can be controlled remotely via a Telnet connection. The default Telnet port is 7777, but the port number can be changed by setting the console_port configuration key. Refer to the <TrickPlay Configuration Keys> section of the Programmer's Guide for further details.
