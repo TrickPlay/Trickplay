@@ -7,8 +7,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import com.trickplay.gameservice.dao.GenericDAO;
 
 public abstract class GenericDAOWithJPA<T, ID extends Serializable> implements GenericDAO<T, ID> {

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.GamePlayInvitation;
 import com.trickplay.gameservice.domain.GameSession;
+import com.trickplay.gameservice.domain.GameSessionMessage;
 import com.trickplay.gameservice.domain.GameStepId;
 import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.domain.User;
@@ -627,7 +628,52 @@ public class GamePlayServiceTest {
                      
     }
     
+
+    @Test
+    public void testPostMessage() {
+        testUtil.setSecurityContext("u2", "u2");
+        
+        GameSession gs = gamePlayService.createGameSession(turnBasedGame.getId());
+        String msg_str = "Test Message";
+        GameSessionMessage msg = gamePlayService.postMessage(gs.getId(), msg_str);
+        
+        assertTrue(msg != null 
+                && msg.getId() != null
+                && msg.getMessage().equals(msg_str));
+    }
     
+    @Test
+    public void testGetAllMessages() {
+        testUtil.setSecurityContext("u2", "u2");
+        
+        GameSession gs = gamePlayService.createGameSession(turnBasedGame.getId());
+        String msg_str = "Test Message";
+        GameSessionMessage msg = gamePlayService.postMessage(gs.getId(), msg_str);
+        
+        List<GameSessionMessage> msg_list = gamePlayService.getMessages(gs.getId(), null);
+        
+        assertTrue(msg_list != null
+                && msg_list.size() == 1
+                && msg_list.get(0).getMessage().equals(msg_str));
+    }
+    
+    @Test
+    public void testGetMessagesSinceLastMessage() {
+        testUtil.setSecurityContext("u2", "u2");
+        
+        GameSession gs = gamePlayService.createGameSession(turnBasedGame.getId());
+        String msg_str = "First Message";
+        GameSessionMessage first_msg = gamePlayService.postMessage(gs.getId(), msg_str);
+        
+        msg_str = "Second Message";
+        gamePlayService.postMessage(gs.getId(), msg_str);
+        
+        List<GameSessionMessage> msg_list = gamePlayService.getMessages(gs.getId(), first_msg.getId());
+        
+        assertTrue(msg_list != null
+                && msg_list.size() == 1
+                && msg_list.get(0).getMessage().equals(msg_str));
+    }
     
 	@After
 	public void tearDown(){

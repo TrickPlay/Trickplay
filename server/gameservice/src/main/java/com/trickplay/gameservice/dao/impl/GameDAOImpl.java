@@ -15,7 +15,8 @@ public class GameDAOImpl extends GenericDAOWithJPA<Game, Long> implements GameDA
         List<Game> list = 
                 super.entityManager
                 .createQuery("Select g from Game g where g.name = :name")
-                .setParameter("name", name).getResultList();
+                .setParameter("name", name)
+                .getResultList();
         return SpringUtils.getFirst(list);
     }
     

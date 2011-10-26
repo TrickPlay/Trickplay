@@ -7,9 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -23,7 +20,6 @@ import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.domain.Vendor;
 import com.trickplay.gameservice.exception.GameServiceException;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;
-import com.trickplay.gameservice.security.UserAdapter;
 import com.trickplay.gameservice.test.TestUtil;
 
 /**

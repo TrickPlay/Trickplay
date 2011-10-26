@@ -2,7 +2,6 @@ package com.trickplay.gameservice.security;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.dao.UserDAO;
-import com.trickplay.gameservice.domain.Role;
 
 //@Repository
 public class CustomUserDetailsService extends JdbcDaoImpl {

@@ -2,8 +2,6 @@ package com.trickplay.gameservice.service.impl;
 
 import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.exception.ExceptionUtil;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.security.UserAdapter;
 
