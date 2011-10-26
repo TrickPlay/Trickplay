@@ -5,14 +5,14 @@ local image0 = Image
 	{
 		src = "/assets/images/splash.jpg",
 		clip = {0,0,1920,1080},
-		scale = {1,1,0,0},
+		scale = {2,2,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image0",
 		position = {0,0,0},
-		size = {1920,1080},
+		size = {960,540},
 		opacity = 255,
 		reactive = false,
 	}
