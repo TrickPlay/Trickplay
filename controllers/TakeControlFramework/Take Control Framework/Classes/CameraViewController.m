@@ -175,16 +175,14 @@
             [popOverController release];
             popOverController = nil;
         }
-    } else if (picker.parentViewController) {
-        [picker.parentViewController dismissModalViewControllerAnimated:YES];
+    } else {
+        [picker dismissModalViewControllerAnimated:YES];
     }
 }
 
 - (void)dismissImageEditor {
     if (imageEditor) {
-        if (imageEditor.parentViewController) {
-            [imageEditor.parentViewController dismissModalViewControllerAnimated:NO];
-        }
+        [imageEditor dismissModalViewControllerAnimated:NO];
         [imageEditor release];
         imageEditor = nil;
     }

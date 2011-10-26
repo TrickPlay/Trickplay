@@ -9,6 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "TrickplayGroup.h"
 
-@interface TrickplayScreen : TrickplayGroup
+@interface TrickplayScreen : TrickplayGroup {
+    UIResponder *nextTouchResponder;
+}
+
+@property (assign) UIResponder *nextTouchResponder;
 
 @end
