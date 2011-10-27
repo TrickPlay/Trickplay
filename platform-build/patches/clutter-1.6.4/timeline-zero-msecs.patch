@@ -1,0 +1,17 @@
+Index: clutter-1.6.4/clutter/clutter-timeline.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-timeline.c	2011-10-26 17:39:49.281366039 -0700
++++ clutter-1.6.4/clutter/clutter-timeline.c	2011-10-26 17:40:18.011366057 -0700
+@@ -549,9 +549,11 @@
+ emit_frame_signal (ClutterTimeline *timeline)
+ {
+   ClutterTimelinePrivate *priv = timeline->priv;
++  
++  gint elapsed_time = priv->elapsed_time;
+ 
+   g_signal_emit (timeline, timeline_signals[NEW_FRAME], 0,
+-                 priv->elapsed_time);
++                 elapsed_time);
+ }
+ 
+ static gboolean

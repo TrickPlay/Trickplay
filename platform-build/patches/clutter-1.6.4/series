@@ -5,3 +5,4 @@ dispose-crash.patch
 egl_config_alpha.patch
 get_egl_config.patch
 medium_precision.patch
+timeline-zero-msecs.patch
