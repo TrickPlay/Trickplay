@@ -10,7 +10,6 @@ test_api = "enter_text"
 function generate_test_image (controller, factory)
 	local result
 	function controller.on_ui_event (controller, text)
-		print ("text = ", test)
 		if text == "ABC123" then
 			result = "Pass"
 		else

@@ -32,6 +32,7 @@ sphereImage.position = { 900, 220 }
 sphereImage.name = "Sphere"
 sphereImage.anchor_point = { 20, 20 }
 screen:add( sphereImage )
+screen:show()
 
 -- Define an AnimationState for the sphere
 sphereAnimationState = AnimationState( {

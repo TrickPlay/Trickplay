@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.trickplay.gameservice.domain.Vendor;
 
 
-@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+@PreAuthorize("isAuthenticated()")
 public interface VendorService {
 
 	@PostFilter("hasRole('ROLE_ADMIN') or filterObject.primaryContact.username == principal.username")
@@ -26,5 +26,5 @@ public interface VendorService {
 	public List<Vendor> findByContactName(String contactName);
 
 	@Transactional
-	public void create(Vendor entity);
+	public Vendor create(String vendorName);
 }

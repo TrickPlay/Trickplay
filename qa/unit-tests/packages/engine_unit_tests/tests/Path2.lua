@@ -43,7 +43,6 @@ end
 
 -- Create a path then use clear to remove it. Verify the final position is 0,0
 function test_Path_clear ()
-	dumptable (myText2.position)
     assert_equal( myText2.position[1] , 0 , "path.clear x failed" )
     assert_equal( myText2.position[2] , 0 , "path.clear y failed" )
 end

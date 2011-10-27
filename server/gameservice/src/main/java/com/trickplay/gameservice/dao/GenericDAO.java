@@ -1,30 +1,23 @@
 package com.trickplay.gameservice.dao;
 
-import java.util.List;
 import java.io.Serializable;
+import java.util.List;
 
 /**
- * An interface shared by all business data access objects.
- * <p>
- * All CRUD (create, read, update, delete) basic data access operations are
- * isolated in this interface and shared accross all DAO implementations.
- * The current design is for a state-management oriented persistence layer
- * (for example, there is no UDPATE statement function) that provides
- * automatic transactional dirty checking of business objects in persistent
- * state.
  *
- * @author Christian Bauer
  */
 public interface GenericDAO<T, ID extends Serializable> {
+    
+    public T find(ID id);
 
-    T findById(ID id, boolean lock);
+    public void persist(T entity);
 
-    List<T> findAll();
+    public void merge(T entity);
 
-    List<T> findByExample(T exampleInstance, String... excludeProperty);
+    public void remove(T entity);
 
-    T makePersistent(T entity);
+    public List<T> findAll();
 
-    void makeTransient(T entity);
+    public List<T> findInRange(int firstResult, int maxResults);
 
 }

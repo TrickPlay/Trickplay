@@ -18,9 +18,13 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        NSURL *clickSound = [[NSBundle mainBundle] URLForResource:@"click" withExtension:@"wav"];
-        clickSoundRef = (CFURLRef)[clickSound retain];
-        AudioServicesCreateSystemSoundID(clickSoundRef, &audioClick);
+        NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+        
+        NSURL *clickSound = [myBundle URLForResource:@"click" withExtension:@"wav"];
+        if (clickSound) {
+            clickSoundRef = (CFURLRef)[clickSound retain];
+            AudioServicesCreateSystemSoundID(clickSoundRef, &audioClick);
+        }
     }
     return self;
 }
@@ -127,14 +131,18 @@
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+    return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
 }
 
 - (void)dealloc {
     NSLog(@"VirtualRemote dealloc");
     
-    AudioServicesDisposeSystemSoundID(audioClick);
-    CFRelease(clickSoundRef);
+    if (audioClick) {
+        AudioServicesDisposeSystemSoundID(audioClick);
+    }
+    if (clickSoundRef) {
+        CFRelease(clickSoundRef);
+    }
     delegate = nil;
     self.background = nil;
     

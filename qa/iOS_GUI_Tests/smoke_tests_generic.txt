@@ -130,5 +130,9 @@
 {
 "name": "00033_group.lua",
 "active": "true"
+},
+{
+"name": "00034_ellipsize.lua",
+"active": "true"
 }
 ]

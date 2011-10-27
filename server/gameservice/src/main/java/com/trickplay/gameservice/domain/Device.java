@@ -57,7 +57,7 @@ public class Device extends BaseEntity implements Serializable {
 	}
 
 	@ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="owner_id", nullable=false)
+    @JoinColumn(name="owner_id")
 	public User getOwner() {
 		return owner;
 	}
