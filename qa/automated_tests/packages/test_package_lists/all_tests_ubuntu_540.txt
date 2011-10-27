@@ -236,7 +236,7 @@
 },
 {
 "name": "00048_text_wrap.lua",
-"checksum": "079f8ad6b4545016392b41106591b174",
+"checksum": "29c43c785ed07b0cdc7dcc8d8885f1fc",
 "active": "true"
 },
 {
@@ -441,8 +441,8 @@
 },
 {
 "name": "10014_image_exif_orientation.lua",
-"checksum": "bb77d9475a8f6b2cec031e4a49434c20",
-"active": "true"
+"checksum": "ca44ccf156a88767ecac1968343edcff",
+"active": "false"
 }
 ]
 
