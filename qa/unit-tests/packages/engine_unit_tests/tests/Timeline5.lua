@@ -19,6 +19,7 @@ test_group:add(image1)
 
 local myTimeline = Timeline ()
 local on_marker_reached_called = 0
+timeline5_on_completed_called = false
 myTimeline.duration = 1000
 myTimeline.loop = false
 myTimeline:add_marker ("start", 1)
@@ -32,6 +33,10 @@ end
 
 myTimeline.on_marker_reached = function (timeline, name, msecs)
 	on_marker_reached_called = on_marker_reached_called + 1
+end
+
+myTimeline.on_completed = function ()
+	timeline5_on_completed_called = true
 end
 
 myTimeline:start()

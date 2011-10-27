@@ -237,8 +237,14 @@ void TPContext::setup_fonts()
         g_free( conf );
     }
 
-    // Create a new configuration
+#ifdef TP_FONT_DEBUG
+
+    // This is here ONLY so that FC_DEBUG will work; so we can troubleshoot
+    // font problems
+
     (void) FcInitLoadConfig();
+
+#endif
 
     FcConfig * config = FcConfigCreate();
 
@@ -574,6 +580,83 @@ void stage_unfullscreen( ClutterStage * stage , gpointer user_data )
 
 //-----------------------------------------------------------------------------
 
+#ifdef TP_FORCE_VERIFICATION
+
+static void do_handshake()
+{
+	static const gchar HANDSHAKE_PREFIX[4] = TP_VERIFICATION_CODE;
+
+	gchar code[4];
+	gchar suffix[4];
+
+	for(int i=0; i<3; i++)
+	{
+		code[i] = g_random_int_range( 'A', 'Z' );
+		suffix[i] = code[i] + HANDSHAKE_PREFIX[i] - 'A';
+		if(suffix[i] > 'Z')
+		{
+			suffix[i] -= 26;
+		}
+	}
+
+	code[3] = '\0';
+	suffix[3] = '\0';
+
+	gchar response[7];
+
+	memset( response , 0 , sizeof( response ) );
+
+	gchar * url = g_strdup_printf( "http://trickplay.com/verify/?CODE=%s%s", HANDSHAKE_PREFIX , suffix );
+
+	{
+		Network::Request  rq;
+
+		rq.url = url;
+		rq.timeout_s = 10;
+		rq.redirect = true;
+
+		Network::Response r( Network().perform_request( rq , 0 ) );
+
+		if ( ! r.failed && r.code == 200 && r.body && r.body->len >= 6 )
+		{
+			memmove( response , r.body->data , 6 );
+		}
+	}
+
+	if ( 6 != strlen( response ) )
+	{
+		memset( response , 0 , sizeof( response ) );
+
+		g_warning("Network auto-verification failed.  Please use manual verification below.");
+
+		g_info("Visit the URL: %s" , url );
+
+		g_info("Now please type the code it gives back: ");
+
+		fgets(response, 7, stdin);
+	}
+
+	g_free( url );
+
+	for(int i=0; i<3; i++)
+	{
+		char result = response[3+i] - response[i];
+		if(result < 0)
+		{
+			result += 26;
+		}
+
+		if((result + 'A') != code[i])
+		{
+			g_critical("YOUR CHECK CODE FAILED (%c,%c).  PLEASE CONTACT TRICKPLAY SUPPORT.",code[i],response[3+i]);
+			fflush(stdout);
+			fflush(stderr);
+			abort();
+		}
+	}
+}
+#endif
+
 int TPContext::run()
 {
     //.........................................................................
@@ -587,6 +670,10 @@ int TPContext::run()
     is_running = true;
 
     int result = TP_RUN_OK;
+
+#ifdef TP_FORCE_VERIFICATION
+	do_handshake();
+#endif
 
     //.........................................................................
     // Load external configuration variables (from the environment or a file)

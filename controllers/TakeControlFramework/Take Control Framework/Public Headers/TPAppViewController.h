@@ -34,6 +34,15 @@
  *
  * It is important to properly present the camera from a UIViewController
  * or risk stalling the app.
+ *
+ * All TPAppViewController objects depend on their view life-cycle methods
+ * (viewDidAppear, viewDidDisapper, viewWillAppear, viewWillDisappear) being
+ * called in order to function properly. The TPAppViewControllerDelegate
+ * protocol provides some courtesy method calls that inform the receiver
+ * that the TPAppViewController object's view life-cycle methods are being
+ * called. The receiver can use these methods as an insurance that a
+ * TPAppViewController is operating properly and to provide custom behavior
+ * specific to the TPAppViewController's view life-cycle.
  */
 
 @protocol TPAppViewControllerDelegate <NSObject>
@@ -41,6 +50,12 @@
 @required
 - (void)tpAppViewControllerNoLongerFunctional:(TPAppViewController *)tpAppViewController;
 - (void)tpAppViewController:(TPAppViewController *)tpAppViewController wantsToPresentCamera:(UIViewController *)camera;
+
+@optional
+- (void)tpAppViewControllerWillAppear:(TPAppViewController *)tpAppViewController;
+- (void)tpAppViewControllerDidAppear:(TPAppViewController *)tpAppViewController;
+- (void)tpAppViewControllerWillDisappear:(TPAppViewController *)tpAppViewController;
+- (void)tpAppViewControllerDidDisappear:(TPAppViewController *)tpAppViewController;
 
 @end
 
@@ -97,7 +112,7 @@ UIActionSheetDelegate, UINavigationControllerDelegate>
 // The designated initialization method for this class. Must
 // provide an active TVConnection object. The
 // delegate may be set to nil. Returns nil on failure.
-- (id)initWithTVConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
+- (id)initWithTVConnection:(TVConnection *)tvConnection size:(CGSize)size delegate:(id <TPAppViewControllerDelegate>)delegate;
 // Clears all UI objects from this TPAppViewController's view, but
 // not any AdvancedUI objects. UI objects are created asynchronously.
 - (void)clearUI;
@@ -113,6 +128,8 @@ UIActionSheetDelegate, UINavigationControllerDelegate>
 // Returns YES if this TPAppViewController has a TVConnection and
 // the TVConnection is connected to a TV.
 - (BOOL)hasConnection;
+// Set the size of the View
+- (void)setSize:(CGSize)size;
 // Send any keypress to the TV any number of times. Must use
 // key codes provided by Trickplay.
 - (void)sendKeyToTrickplay:(NSString *)key count:(NSInteger)count;

@@ -28,6 +28,7 @@
 
         if (aMask) {
             mask = [aMask retain];
+            mask.contentMode = UIViewContentModeCenter;
         } else {
             mask = nil;
         }
@@ -97,22 +98,7 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
-    NSLog(@"Received Data: %@", incrementalData);
-    /** the data isn't necessary for now
-    BOOL dataCreated = NO;
-    int i;
-    for (i = 0; [connections count]; i++) {
-        if ([connections objectAtIndex:i] == connection) {
-            dataCreated = YES;
-        }
-    }
-    if (!dataCreated) {
-        NSMutableData *data = [[[NSMutableData alloc] initWithCapacity:10000] autorelease];
-        [connections setObject:data forKey:connection];
-    }
     
-    [(NSMutableData *)[connections objectForKey:connection] appendData:incrementalData];
-     //*/
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
@@ -174,16 +160,14 @@
             [popOverController release];
             popOverController = nil;
         }
-    } else if (picker.parentViewController) {
-        [picker.parentViewController dismissModalViewControllerAnimated:YES];
+    } else {
+        [picker dismissModalViewControllerAnimated:YES];
     }
 }
 
 - (void)dismissImageEditor {
     if (imageEditor) {
-        if (imageEditor.parentViewController) {
-            [imageEditor.parentViewController dismissModalViewControllerAnimated:NO];
-        }
+        [imageEditor dismissModalViewControllerAnimated:NO];
         [imageEditor release];
         imageEditor = nil;
     }
@@ -213,7 +197,8 @@
         [imageEditor release];
     }
     
-    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:nil title:self.titleLabel cancelLabel:self.cancelLabel];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    imageEditor = [[ImageEditorViewController alloc] initWithNibName:@"ImageEditorViewController" bundle:myBundle title:self.titleLabel cancelLabel:self.cancelLabel];
     imageEditor.imageEditorDelegate = self;
     
     imageEditor.imageToEdit = image;
@@ -295,7 +280,10 @@
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
-    //NSLog(@"mask: %@", mask);
+    
+    if (mask) {
+        mask.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+    }
     imagePickerController.cameraOverlayView = mask;
     mask.userInteractionEnabled = NO;
     
@@ -315,6 +303,11 @@
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    
+    if (mask) {
+        mask.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+    }
+    mask.userInteractionEnabled = NO;
         
     // Displays saved pictures and movies, if both are available
     //imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
@@ -339,6 +332,11 @@
 - (void)setMask:(UIImageView *)aMask {
     mask = aMask;
     [self.view addSubview:mask];
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations.
+    return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
 }
 
 - (void)dealloc {
