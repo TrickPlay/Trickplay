@@ -2,13 +2,18 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
+import com.trickplay.gameservice.dao.BuddyDAO;
+import com.trickplay.gameservice.dao.BuddyListInvitationDAO;
+import com.trickplay.gameservice.dao.EventDAO;
+import com.trickplay.gameservice.dao.UserDAO;
 import com.trickplay.gameservice.domain.Buddy;
 import com.trickplay.gameservice.domain.BuddyListInvitation;
 import com.trickplay.gameservice.domain.BuddyStatus;
@@ -16,26 +21,34 @@ import com.trickplay.gameservice.domain.Event;
 import com.trickplay.gameservice.domain.Event.EventType;
 import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.domain.User;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.security.UserAdapter;
 import com.trickplay.gameservice.service.BuddyService;
-import com.trickplay.gameservice.service.UserService;
 
 @Service("buddyService")
-@Repository
-public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
+public class BuddyServiceImpl implements
 		BuddyService {
 
+    private static final Logger logger = LoggerFactory.getLogger(BuddyServiceImpl.class);
+    
 	@Autowired
-	UserService userService;
+	UserDAO userDAO;
+	
+	@Autowired
+	BuddyDAO buddyDAO;
+	
+	@Autowired
+    BuddyListInvitationDAO buddyListInvitationDAO;
+	
+	@Autowired
+    EventDAO eventDAO;
 	
 	public void authorizeSendInvitation(User requestor) {
 		UserAdapter principal = (UserAdapter)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if (requestor == null || !principal.getId().equals(requestor.getId())) {
-			throw new GameServiceException(Reason.FORBIDDEN);
+			throw ExceptionUtil.newUnauthorizedException();
 		}
 	}
 	
@@ -45,12 +58,15 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 
 		// check if recipient is already a buddy
 		try {
-			User requestor = userService.find(SecurityUtil.getPrincipal().getId());
+			User requestor = userDAO.find(SecurityUtil.getPrincipal().getId());
 			authorizeSendInvitation(requestor);
 			
-			User recipient = userService.findByName(recipientName);
+			User recipient = userDAO.findByName(recipientName);
 			if (recipient == null) {
-				throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.recipientName", recipientName));
+				throw ExceptionUtil.newEntityNotFoundException(User.class, "recipientName", recipientName);
+			}
+			if (requestor.getId().equals(recipient.getId())) {
+			    throw ExceptionUtil.newInvitationToSelfException();
 			}
 			
 			List<Buddy> requestBuddy = findByOwnerIdTargetId(requestor.getId(),
@@ -60,10 +76,15 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 
 			if (recipientBuddy == null || recipientBuddy.size() == 0) {
 				// if recipient's buddyList doesn't include requestor
-				BuddyListInvitation bli = new BuddyListInvitation(requestor,
+			    
+			    List<BuddyListInvitation> pendingInvitations = buddyListInvitationDAO.getInvitations(requestor.getId(), recipient.getId(), InvitationStatus.PENDING); 
+				if (pendingInvitations!=null && pendingInvitations.size() > 0) {
+				    return pendingInvitations.get(0);
+				}
+			    BuddyListInvitation bli = new BuddyListInvitation(requestor,
 						recipient, InvitationStatus.PENDING);
-				entityManager.persist(bli);
-				entityManager.persist(new Event(
+				buddyListInvitationDAO.persist(bli);
+				eventDAO.persist(new Event(
 						EventType.BUDDY_LIST_INVITATION, requestor, recipient.getId(), "Buddy Invitation from "+requestor.getUsername(), bli));
 				return bli;
 			} else if (requestBuddy == null || requestBuddy.size() == 0) {
@@ -72,30 +93,23 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 				recipientBuddy.get(0).setStatus(BuddyStatus.CURRENT);
 				Buddy buddy = new Buddy(requestor, recipient,
 						BuddyStatus.CURRENT);
-				entityManager.persist(buddy);
+				buddyDAO.persist(buddy);
 				BuddyListInvitation bli = new BuddyListInvitation(requestor,
 						recipient, InvitationStatus.ACCEPTED);
-				entityManager.persist(bli);
+				buddyListInvitationDAO.persist(bli);
 /*
 				entityManager.persist(new Event(
 						EventType.BUDDY_LIST_INVITATION, requestor, recipient.getId(), "Buddy Invitation from "+requestor.getUsername(),bli));
 						*/
-				entityManager.persist(new Event(
+				eventDAO.persist(new Event(
 						EventType.BUDDY_LIST_INVITATION, recipient, requestor.getId(), "Buddy Invitation accepted by "+recipient.getUsername(), bli));
 
 				return bli;
 			} else {
-				// if requestor is recipient's buddy and recipient is
-				// requestor's throw an exception
-				throw new GameServiceException(Reason.ALREADY_BUDDY);
-
+				throw ExceptionUtil.newAlreadyBuddyException(recipientName);
 			}
 		} catch (Exception ex) {
-			if (ex instanceof GameServiceException)
-				throw (GameServiceException)ex;
-			else {
-				throw new GameServiceException(Reason.SEND_INVITATION_FAILED, ex);
-			}
+			throw ExceptionUtil.convertToSupportedException(ex);
 		}
 
 	}
@@ -108,7 +122,7 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 		if (recipientBuddy != null && recipientBuddy.size() != 0) {
 			recipientBuddy.get(0).setStatus(BuddyStatus.INACTIVE);
 		}
-		entityManager.remove(buddy);
+		buddyDAO.remove(buddy);
 	}
 
 	@Transactional
@@ -121,16 +135,15 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 			throw new IllegalArgumentException("InvitationStatus is null");
 		}
 
-		BuddyListInvitation bli = entityManager.find(BuddyListInvitation.class, invitationId);
+		BuddyListInvitation bli = buddyListInvitationDAO.find(invitationId);
 		if (bli == null) {
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("BuddyListInvitation.invitationId", invitationId));
-		}
+		    throw ExceptionUtil.newEntityNotFoundException(BuddyListInvitation.class, "invitationId", invitationId); 
+        }
 		
 		authorizeRequest(bli, newStatus);
 
 		if (bli.getStatus() != InvitationStatus.PENDING) {
-			throw new GameServiceException(Reason.INVITATION_INVALID_STATUS, null,
-					ExceptionContext.make("invitationStatus", bli.getStatus()));
+			throw ExceptionUtil.newUpdateBLInvitationStatusFailedException(bli.getId(), newStatus, bli.getStatus());
 		}
 		if (bli.getStatus() == newStatus)
 			return bli;
@@ -150,34 +163,32 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 	public void authorizeRemoveBuddyRequest(Buddy b) {
 		UserAdapter principal = SecurityUtil.getPrincipal();
 		if (principal == null || b == null || b.getOwner() == null || (!principal.getId().equals(b.getOwner().getId()))) {
-			throw new GameServiceException(Reason.FORBIDDEN);
+			throw ExceptionUtil.newUnauthorizedException();
 		}
 	}
 	
 	public void authorizeRequest(BuddyListInvitation bli, InvitationStatus status) {
 		UserAdapter principal = SecurityUtil.getPrincipal();
 		if (principal==null) {
-			throw new GameServiceException(Reason.FORBIDDEN);
-		} else if (bli==null || bli.getRequestor()==null || bli.getRecipient()==null) {
-			throw new GameServiceException(Reason.UNKNOWN);
-		}
+		    throw ExceptionUtil.newUnauthorizedException();
+		} 
 		if (principal.getId().equals(bli.getRequestor().getId())) {
 			if (status != InvitationStatus.CANCELLED) {
-				throw new GameServiceException(Reason.INVITATION_INVALID_STATUS, null, ExceptionContext.make("invitationStatus", status));
+				throw ExceptionUtil.newUnauthorizedException();
 			}
 		} else if (principal.getId().equals(bli.getRecipient().getId())) {
 			if (status != InvitationStatus.ACCEPTED && status != InvitationStatus.REJECTED) {
-				throw new GameServiceException(Reason.INVITATION_INVALID_STATUS, null, ExceptionContext.make("invitationStatus", status));
+			    throw ExceptionUtil.newUnauthorizedException();
 			}
 		} else {
-			throw new GameServiceException(Reason.FORBIDDEN);
+		    throw ExceptionUtil.newUnauthorizedException();
 		}
 	}
 	
 	public void cancelInvitation(BuddyListInvitation bli) {
 
 		bli.setStatus(InvitationStatus.CANCELLED);
-		entityManager.persist(new Event(EventType.BUDDY_LIST_INVITATION, bli
+		eventDAO.persist(new Event(EventType.BUDDY_LIST_INVITATION, bli
 				.getRequestor(), bli.getRecipient().getId(), "Buddy invitation withdrawn", bli));
 	}
 
@@ -204,7 +215,7 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 	public void declineInvitation(BuddyListInvitation bli) {
 		// entityManager.
 		bli.setStatus(InvitationStatus.REJECTED);
-		entityManager.persist(new Event(EventType.BUDDY_LIST_INVITATION, bli
+		eventDAO.persist(new Event(EventType.BUDDY_LIST_INVITATION, bli
 				.getRecipient(), bli.getRequestor().getId(), "Buddy Invitation declined by "+bli.getRecipient().getUsername(), bli));
 	}
 
@@ -219,71 +230,97 @@ public class BuddyServiceImpl extends GenericDAOWithJPA<Buddy, Long> implements
 		if (requestBuddy == null || requestBuddy.size() == 0) {
 			Buddy b = new Buddy(bli.getRequestor(), bli.getRecipient(),
 					BuddyStatus.CURRENT);
-			entityManager.persist(b);
+			buddyDAO.persist(b);
+			bli.getRequestor().getBuddies().add(b);
+			if (logger.isDebugEnabled()) {
+			    logger.debug("added "+bli.getRecipient().getUsername()+" to "
+			            + bli.getRequestor().getUsername()+"'s buddy list. buddyId="+b.getId());
+			}
 		} else {
 			requestBuddy.get(0).setStatus(BuddyStatus.CURRENT);
 		}
 
 		if (recipientBuddy == null || recipientBuddy.size() == 0) {
+
 			Buddy b = new Buddy(bli.getRecipient(), bli.getRequestor(),
 					BuddyStatus.CURRENT);
-			entityManager.persist(b);
+			buddyDAO.persist(b);
+			bli.getRecipient().getBuddies().add(b);
+	         if (logger.isDebugEnabled()) {
+	                logger.debug("added "+bli.getRequestor().getUsername()+" to "
+	                        + bli.getRecipient().getUsername()+"'s buddy list. buddyId="+b.getId());
+	         }
 		} else {
 			recipientBuddy.get(0).setStatus(BuddyStatus.CURRENT);
 		}
-		entityManager.persist(new Event(EventType.BUDDY_LIST_INVITATION, bli
+		eventDAO.persist(new Event(EventType.BUDDY_LIST_INVITATION, bli
 				.getRecipient(), bli.getRequestor().getId(), "Buddy invitation accepted by "+bli.getRecipient().getUsername(), bli));
 	}
 
-	@SuppressWarnings(value = "unchecked")
 	public List<Buddy> findAll(Long ownerId) {
-		return super.entityManager
-				.createQuery(
-						"Select b from Buddy as b join b.owner as o where o.id = :ownerId")
-				.setParameter("ownerId", ownerId).getResultList();
+		return buddyDAO.findAll(ownerId);
 	}
 
-	@SuppressWarnings(value = "unchecked")
 	public List<Buddy> findByOwnerName(String ownerName) {
-		return super.entityManager
-				.createQuery(
-						"Select b from Buddy as b join b.owner as o where o.username = :ownerName")
-				.setParameter("ownerName", ownerName).getResultList();
+		return buddyDAO.findByOwnerName(ownerName);
 	}
 
-	@SuppressWarnings(value = "unchecked")
 	public List<Buddy> findByOwnerIdTargetId(Long ownerId, Long targetId) {
-		return super.entityManager
-				.createQuery(
-						"Select b from Buddy as b join b.owner as o join b.target as t where o.id = :ownerId and t.id = :targetId")
-				.setParameter("ownerId", ownerId)
-				.setParameter("targetId", targetId).getResultList();
+		return buddyDAO.findByOwnerIdTargetId(ownerId, targetId);
 
 	}
 
     public void removeBuddy(Long buddyId) {
         Buddy existing = find(buddyId);
         if (existing == null) {
-            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Buddy.id", buddyId));
+            throw ExceptionUtil.newEntityNotFoundException(Buddy.class, "id", buddyId);
         }
-        entityManager.refresh(existing);
+        buddyDAO.remove(existing);
     }
 
+    @Transactional
     public void create(Buddy entity) {
-        persist(entity);       
+        if (entity == null) {
+            throw ExceptionUtil.newIllegalArgumentException("Buddy", "null", "!= null");
+        } else if (entity.getOwner() == null) {
+            throw ExceptionUtil.newIllegalArgumentException("Buddy.owner", null, "!= null");
+        } else if (entity.getTarget() == null) {
+            throw ExceptionUtil.newIllegalArgumentException("Buddy.target", null, "!= null");
+        }
+        
+        try {
+            buddyDAO.persist(entity);
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Failed to create Buddy.", ex);
+            throw ExceptionUtil.newEntityExistsException(Buddy.class, 
+                    "owner", entity.getOwner().getUsername(),
+                    "target", entity.getTarget().getUsername());
+        } catch (RuntimeException ex) {
+            logger.error("Failed to create Buddy.", ex);
+            throw ExceptionUtil.convertToSupportedException(ex);
+        }
     }
 
     @Transactional
     public Buddy update(Buddy entity) {
         if (entity == null) {
-            throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, ExceptionContext.make("Buddy", null));
+            throw ExceptionUtil.newIllegalArgumentException("Buddy", null, "!= null");
         }
         Buddy existing = find(entity.getId());
         if (existing == null) {
-            throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Buddy.id", entity.getId()));
+            throw ExceptionUtil.newEntityNotFoundException(Buddy.class, "id", entity.getId());
         }
         existing.setStatus(entity.getStatus());
         return existing;
+    }
+
+    public Buddy find(Long id) {
+        return buddyDAO.find(id);
+    }
+
+    public List<BuddyListInvitation> getPendingInvitations() {
+        Long recipientId = SecurityUtil.getCurrentUserId();
+        return buddyListInvitationDAO.getPendingInvitations(recipientId);
     }
 
 }

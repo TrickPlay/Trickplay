@@ -1,8 +1,6 @@
 [[
 #include <cstdlib>
 
-#include "fontconfig/fontconfig.h"
-
 #include "util.h"
 #include "versions.h"
 #include "app.h"
@@ -170,21 +168,23 @@ global trickplay [[void*]]
     readonly table fonts
         [[
             StringSet names;
-            
-            if ( FcFontSet * fs = FcConfigGetFonts( 0 , FcSetApplication ) )
+            PangoFontFamily ** families;
+            int n_families;
+            PangoFontMap *fontmap = clutter_get_font_map();
+
+            pango_font_map_list_families ( fontmap, & families, & n_families );
+
+            for ( int i = 0; i < n_families; ++i )
             {
-                for ( int i = 0; i < fs->nfont; ++i )
-                {
-                    FcPattern * p = fs->fonts[ i ];
-        
-                    if ( FcChar8 * family = FcPatternFormat( p , ( const FcChar8 * ) "%{family[0]}" ) )
-                    {
-                        names.insert( ( char * ) family );
-                        free( family );
-                    }
-                }
+                PangoFontFamily * family = families[i];
+
+                const char * family_name = pango_font_family_get_name ( family );
+
+                names.insert( family_name );
             }
-            
+
+            g_free( families );
+
             lua_newtable( L );
             
             int i = 1;

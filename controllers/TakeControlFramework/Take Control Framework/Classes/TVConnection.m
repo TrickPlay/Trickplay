@@ -8,7 +8,9 @@
 
 #import "TVConnection.h"
 #import "Extensions.h"
+#import "Protocols.h"
 #import "SocketManager.h"
+#import "JSONKit.h"
 
 #import <uuid/uuid.h>
 
@@ -29,6 +31,7 @@
     
     NSNetService *connectedService;
     
+    id <TVConnectionDidConnectDelegate> connectionDelegate;
     id <TVConnectionDelegate> delegate;
 }
 
@@ -40,22 +43,120 @@
 @property (readonly) NSNetService *connectedService;
 
 @property (nonatomic, readonly) SocketManager *socketManager;
+@property (assign) id <TVConnectionDidConnectDelegate> connectionDelegate;
 
 - (id)initWithService:(NSNetService *)service delegate:(id<TVConnectionDelegate>)delegate;
+
+- (void)invalidateConnection;
 
 @end
 
 
 @implementation TVConnectionContext
 
-@synthesize isConnected;
-@synthesize port;
-@synthesize http_port;
-@synthesize hostName;
-@synthesize TVName;
-@synthesize connectedService;
-@synthesize delegate;
+//@synthesize isConnected;
+//@synthesize port;
+//@synthesize http_port;
+//@synthesize hostName;
+//@synthesize TVName;
+//@synthesize connectedService;
+//@synthesize delegate;
 @synthesize socketManager;
+@synthesize connectionDelegate;
+
+
+- (void)establishSocketConnection:(NSNetService *)service {
+    // Tell socket manager to create a socket and connect to the service selected
+    socketManager = [[SocketManager alloc] initSocketStream:hostName
+                                                       port:port
+                                                   delegate:self
+                                                   protocol:APP_PROTOCOL];
+    
+    if (![socketManager isFunctional]) {
+        NSLog(@"Could Not Establish Connection");
+        socketManager.delegate = nil;
+        [socketManager release];
+        socketManager = nil;
+        
+        [self invalidateConnection];
+        
+        if (connectionDelegate) {
+            [self.connectionDelegate tvConnection:self didNotConnectToService:service];
+        }
+        
+        return;
+    }
+    
+    isConnected = YES;
+    if (connectionDelegate) {
+        [self.connectionDelegate tvConnection:self didConnectToService:service];
+    }
+}
+
+#pragma mark -
+#pragma mark Property Getters/Setters
+
+- (BOOL)isConnected {
+    BOOL val = NO;
+    @synchronized(self) {
+        val = isConnected;
+    }
+    return val;
+}
+
+- (NSUInteger)port {
+    NSUInteger val = 0;
+    @synchronized(self) {
+        val = port;
+    }
+    return val;
+}
+
+- (NSUInteger)http_port {
+    NSUInteger val = 0;
+    @synchronized(self) {
+        val = http_port;
+    }
+    return val;
+}
+
+- (NSString *)hostName {
+    NSString *retval = nil;
+    @synchronized(self) {
+        retval = [[hostName retain] autorelease];
+    }
+    return retval;
+}
+
+- (NSString *)TVName {
+    NSString *retval = nil;
+    @synchronized(self) {
+        retval = [[TVName retain] autorelease];
+    }
+    return retval;
+}
+
+- (NSNetService *)connectedService {
+    NSNetService *retval = nil;
+    @synchronized(self) {
+        retval = [[connectedService retain] autorelease];
+    }
+    return retval;
+}
+
+- (id <TVConnectionDelegate>)delegate {
+    id <TVConnectionDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <TVConnectionDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
 
 #pragma mark -
 #pragma mark Initialization
@@ -64,7 +165,7 @@
     return [self initWithService:nil delegate:nil];
 }
 
-- (id)initWithService:(NSNetService *)service delegate:(id<TVConnectionDelegate>)_delegate {
+- (id)initWithService:(NSNetService *)service delegate:(id <TVConnectionDelegate>)_delegate {
     
     if (!service || !service.hostName) {
         [self release];
@@ -73,6 +174,49 @@
     
     self = [super init];
     if (self) {
+        hostName = [[service hostName] retain];
+        http_port = [service port];
+        port = 0;
+        TVName = [[service name] retain];
+        connectedService = [service retain];
+        self.delegate = _delegate;
+        self.connectionDelegate = nil;
+        isConnected = NO;
+        
+        tvBrowser = nil;
+        appBrowser = nil;
+        
+        NSString *URLString = [NSString stringWithFormat:@"http://%@:%d/controllers", hostName, http_port];
+        dispatch_queue_t get_port_queue = dispatch_queue_create("getPortQueue", NULL);
+        
+        dispatch_async(get_port_queue, ^(void) {
+            
+            NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:URLString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
+            NSHTTPURLResponse *response;
+            NSData *JSONData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:NULL];
+            
+            // Failure to retrieve port number
+            NSLog(@"response: %@; status code: %d", response, response.statusCode);
+            if (response.statusCode != 200 || !JSONData) {
+                if (self.connectionDelegate) {
+                    dispatch_async(dispatch_get_main_queue(), ^(void) {
+                        [self.connectionDelegate tvConnection:self didNotConnectToService:service];
+                    });
+                }
+            } else {  // Successfully retrieved port number
+                NSDictionary *JSONDictionary = [JSONData objectFromJSONData];
+                port = [(NSNumber *)[JSONDictionary objectForKey:@"port"] unsignedIntegerValue];
+                [self performSelectorOnMainThread:@selector(establishSocketConnection:) withObject:service waitUntilDone:NO];
+            }
+        });
+        
+        dispatch_release(get_port_queue);
+    }
+    
+    return self;
+}
+
+/*
         // Tell socket manager to create a socket and connect to the service selected
         socketManager = [[SocketManager alloc] initSocketStream:service.hostName
                                                            port:service.port
@@ -93,6 +237,7 @@
         port = [service port];
         TVName = [[service name] retain];
         connectedService = [service retain];
+        self.delegate = _delegate;
         
         // Made a connection, let the service know!
         // Get the actual width and height of the available area
@@ -103,7 +248,7 @@
         backgroundHeight = backgroundHeight - 44;  //subtract the height of navbar
         backgroundWidth = mainframe.size.width;
         
-        // Figure out if the device can use pcitures
+        // Figure out if the device can use pictures
         NSString *hasPictures = @"";
         if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
             hasPictures = @"\tPS";
@@ -139,6 +284,7 @@
     
     return self;
 }
+//*/
 
 #pragma mark -
 #pragma mark SocketManagerDelegate methods
@@ -217,7 +363,7 @@
 #pragma mark -
 #pragma mark Deallocation
 
-- (void)dealloc {
+- (void)invalidateConnection {
     isConnected = NO;
     
     http_port = 0;
@@ -253,7 +399,15 @@
         [socketManager release];
         socketManager = nil;
     }
-        
+    
+    if (connectionDelegate) {
+        connectionDelegate = nil;
+    }
+}
+
+- (void)dealloc {
+    [self invalidateConnection];
+    
     [super dealloc];
 }
 
@@ -314,6 +468,18 @@
 }
 
 - (void)setDelegate:(id <TVConnectionDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (id <TVConnectionDidConnectDelegate>)connectionDelegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setConnectionDelegate:(id<TVConnectionDidConnectDelegate>)connectionDelegate {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
                                  userInfo:nil];

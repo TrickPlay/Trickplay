@@ -18,6 +18,7 @@
 @synthesize navBar;
 @synthesize toolbar;
 @synthesize cancelButton;
+@synthesize helpButton;
 @synthesize imageEditorDelegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil title:(NSString *)title cancelLabel:(NSString *)cancelLabel
@@ -64,73 +65,63 @@
     }
 
     imageView = [[GestureImageView alloc] initWithImage:image];
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        CGRect screenFrame = [[UIScreen mainScreen] applicationFrame];
-        [self.view addSubview:imageView];
-        //[imageView sizeToFit];
-        imageView.frame = CGRectMake(0.0, 0.0, screenFrame.size.width, screenFrame.size.height - toolbar.frame.size.height);
-        /*
-        if (imageView.frame.size.width > screenFrame.size.width) {
-            CGFloat w_ratio = screenFrame.size.width/imageView.frame.size.width;
-            imageView.frame = CGRectMake(0.0, 0.0, screenFrame.size.width, imageView.frame.size.height*w_ratio);
-        }
-        if (imageView.frame.size.height > screenFrame.size.height) {
-            CGFloat h_ratio = (screenFrame.size.height - toolbar.frame.size.height - 24.0)/imageView.frame.size.height;
-            imageView.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width*h_ratio, screenFrame.size.height - toolbar.frame.size.height - 24.0);
-        }
-        NSLog(@"height = %f", toolbar.frame.size.height);
-        //*/
-        //imageView.center = CGPointMake([[UIScreen mainScreen] applicationFrame].size.width/2, [[UIScreen mainScreen] applicationFrame].size.height/2 - toolbar.frame.size.height/2);
-        if (mask) {
-            mask.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width, imageView.frame.size.height);
-            [self.view addSubview:mask];
-            mask.userInteractionEnabled = NO;
-        }
-    } else {
-        CGRect screenFrame = [[UIScreen mainScreen] applicationFrame];
-        [self.view addSubview:imageView];
-        //[imageView sizeToFit];
-        imageView.frame = CGRectMake(0.0, 0.0, screenFrame.size.width, screenFrame.size.height - toolbar.frame.size.height);
-        /*
-        // This is a real hacked way of correctly sizing the photo
-        // but after trying it about 50 different ways this is all
-        // i can figure out that actually works !
-        imageView.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width, imageView.frame.size.height - 2.0*toolbar.frame.size.height + 4.0);
-        //*/
-        //imageView.center = CGPointMake([[UIScreen mainScreen] applicationFrame].size.width/2, [[UIScreen mainScreen] applicationFrame].size.height/2 - toolbar.frame.size.height/2);
-        if (mask) {
-            mask.frame = CGRectMake(0.0, 0.0, imageView.frame.size.width, imageView.frame.size.height);
-            [self.view addSubview:mask];
-            
-            mask.userInteractionEnabled = NO;
-        }
+    imageView.delegate = self;
+    
+    [self.view addSubview:imageView];
+    
+    if (mask) {
+        //mask.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height);
+        [self.view addSubview:mask];
+        mask.userInteractionEnabled = NO;
     }
+    
     [toolbar.superview bringSubviewToFront:toolbar];
     [navBar.superview bringSubviewToFront:navBar];
+    
+    [self adjustImageOrientation];
 }
 
 - (UIImage*)imageByCropping:(GestureImageView *)imageViewToCrop toRect:(CGRect)rect {
-    NSLog(@"targetwidth, width, targetheight, height: %f, %f, %f, %f", targetWidth, rect.size.width, targetHeight, rect.size.height);
     
+    // Begin context and fill the cropping rectangle with black
     UIImage *imageToCrop = imageViewToCrop.image;
     UIGraphicsBeginImageContext(rect.size);
     
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSetFillColorWithColor(context, [[UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:1.0] CGColor]);
     CGContextFillRect(context, rect);
+    
+    
     //*
+    // Find normalization factors for scaling
+    CGFloat imageAspectRatio = imageView.image.size.width / imageView.image.size.height;
+    
+    CGFloat viewAspectRatio = rect.size.width / rect.size.height;
+    
+    CGFloat widthScaleFactor = 1.0;
+    CGFloat heightScaleFactor = 1.0;
+    if (imageAspectRatio > viewAspectRatio) {  // width restricted
+        CGFloat scaleFactor = rect.size.width / imageView.image.size.width;
+        heightScaleFactor = scaleFactor * imageView.image.size.height / rect.size.height;
+    } else {
+        CGFloat scaleFactor = rect.size.height / imageView.image.size.height;
+        widthScaleFactor = scaleFactor * imageView.image.size.width / rect.size.width;
+    }
+    ///////////////////////////////////////
+    
+    
+    // Translate so center of image is at upper corner, Rotate, and Scale
+    // then translate back.
     CGContextTranslateCTM(context, rect.size.width/2, rect.size.height/2);
     CGContextRotateCTM(context, imageViewToCrop.totalRotation);
-    CGContextScaleCTM(context, imageViewToCrop.xScale, imageViewToCrop.yScale);
-    //CGContextConcatCTM(context, imageToCrop.transform);
+    CGContextScaleCTM(context, imageViewToCrop.xScale * widthScaleFactor, imageViewToCrop.yScale * heightScaleFactor);
     CGContextTranslateCTM(context, -rect.size.width/2, -rect.size.height/2);
     
+    
+    // Translate the image
     CGFloat x = imageViewToCrop.xTranslation * rect.size.width/imageViewToCrop.frame.size.width;
     CGFloat y = imageViewToCrop.yTranslation * rect.size.height/imageViewToCrop.frame.size.height;
-    //NSLog(@"x Translation: %f", imageViewToCrop.xTranslation);
-    //NSLog(@"y Translation: %f", imageViewToCrop.yTranslation);
-    //NSLog(@"translation before: %f, %f", x, y);
-    //*
+    
     // Correct for change of basis caused by a rotation if translating
     if (x || y) {
         CGFloat xScale = imageViewToCrop.xScale;
@@ -163,12 +154,11 @@
         y *= xScale/fabs(xScale);
     }
     //*/
-    //NSLog(@"translation after: %f, %f", x, y);
     
     CGContextTranslateCTM(context, x, y);
     
     [imageToCrop drawInRect:rect];
-     //*/
+    //*/
     
     UIImage *retImage = UIGraphicsGetImageFromCurrentImageContext();
     
@@ -178,7 +168,13 @@
 }
 
 - (IBAction)doneEditing {
-    UIImage *croppedImage = [self imageByCropping:imageView toRect:CGRectMake(0.0, 0.0, (targetWidth > 0.0 ? targetWidth : imageView.image.size.width), (targetHeight > 0.0 ? targetHeight : imageView.image.size.height))];
+    //UIImage *croppedImage = [self imageByCropping:imageView toRect:CGRectMake(0.0, 0.0, (targetWidth > 0.0 ? targetWidth : imageView.image.size.width), (targetHeight > 0.0 ? targetHeight : imageView.image.size.height))];
+    CGRect screenFrame = [[UIScreen mainScreen] applicationFrame];
+    CGFloat viewWidth = screenFrame.size.width;
+    CGFloat viewHeight = screenFrame.size.height;
+    
+    UIImage *croppedImage = [self imageByCropping:imageView toRect:CGRectMake(0.0, 0.0, (targetWidth > 0.0 ? targetWidth : viewWidth), (targetHeight > 0.0 ? targetHeight : viewHeight))];
+    
     [imageEditorDelegate doneEditing:croppedImage];
 }
 
@@ -190,19 +186,20 @@
 #pragma mark Help
 
 - (IBAction)help:(id)sender {
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         if (helpPopover) {
             [helpPopover dismissPopoverAnimated:NO];
             [helpPopover release];
             helpPopover = nil;
         }
-        UIViewController *popoverContent = [[UIViewController alloc] initWithNibName:@"ImageEditorHelpViewPad" bundle:nil];
+        UIViewController *popoverContent = [[UIViewController alloc] initWithNibName:@"ImageEditorHelpViewPad" bundle:myBundle];
         popoverContent.contentSizeForViewInPopover = CGSizeMake(250, 180);
         helpPopover = [[UIPopoverController alloc] initWithContentViewController:popoverContent];
         [helpPopover presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionDown animated:YES];
         [popoverContent release];
     } else {
-        UIViewController *helpModal = [[ImageEditorHelpViewControllerPhone alloc] initWithNibName:@"ImageEditorHelpViewControllerPhone" bundle:nil];
+        UIViewController *helpModal = [[ImageEditorHelpViewControllerPhone alloc] initWithNibName:@"ImageEditorHelpViewControllerPhone" bundle:myBundle];
         [self presentModalViewController:helpModal animated:YES];
         [helpModal release];
     }
@@ -238,26 +235,81 @@
     if (self.modalViewController) {
         [self dismissModalViewControllerAnimated:NO];
     }
-    if (toolbar) {
-        [toolbar release];
-        toolbar = nil;
-    }
-    if (cancelButton) {
-        [cancelButton release];
-        cancelButton = nil;
-    }
-    if (navBar) {
-        [navBar release];
-        navBar = nil;
-    }
+    self.toolbar = nil;
+    self.cancelButton = nil;
+    self.helpButton = nil;
+    self.navBar = nil;
     self.mask = nil;
+}
+
+#pragma mark -
+#pragma mark Orientation and Auto-Rotation
+
+- (void)adjustImageOrientation {
+    BOOL imageWasFlipped = (imageView.xScale < 0);
+    [imageView resetImage];
+    if (imageWasFlipped) {
+        [imageView flipImage];
+    }
+    
+    CGRect screenFrame = [[UIScreen mainScreen] applicationFrame];
+    CGFloat viewWidth = screenFrame.size.width;
+    CGFloat viewHeight = screenFrame.size.height;// - toolbar.frame.size.height;
+    
+    if (self.interfaceOrientation == UIInterfaceOrientationLandscapeLeft || self.interfaceOrientation == UIInterfaceOrientationLandscapeRight) {
+        
+        viewWidth = screenFrame.size.height;
+        viewHeight = screenFrame.size.width;// - toolbar.frame.size.height;
+    }
+    
+    CGFloat imageAspectRatio = imageView.image.size.width / imageView.image.size.height;
+    
+    CGFloat viewAspectRatio = viewWidth / viewHeight;
+    
+    CGFloat scaleFactor = 1.0;
+    if (imageAspectRatio > viewAspectRatio) {  // height restricted
+        scaleFactor = viewWidth / imageView.image.size.width;
+    } else {
+        scaleFactor = viewHeight / imageView.image.size.height;
+    }
+    
+    [imageView scaleImageTo:scaleFactor];
+    [imageView setPositionTo:CGPointMake(viewWidth/2.0 - imageView.image.size.width/2.0, viewHeight/2.0 - imageView.image.size.height/2.0)];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+    return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
 }
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    
+}
+
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    [self adjustImageOrientation];
+    
+    //////////
+    // Help menu text alignment fix
+    if (helpPopover) {
+        [helpPopover dismissPopoverAnimated:NO];
+        [self help:helpButton];
+    }
+}
+
+#pragma mark -
+#pragma mark GestureImageViewDelegate methods
+
+- (void)gestureImageViewDidTripleTap:(GestureImageView *)gestureImageView {
+    [self adjustImageOrientation];
+}
+
+#pragma mark -
+#pragma mark Deallocation
 
 - (void)dealloc {
     if (self.modalViewController) {

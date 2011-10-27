@@ -16,6 +16,7 @@ public class GamePlaySessionTO {
     private String gameName;
     private Date startTime;
     private Date endTime;
+    private GamePlayStateTO gameState;
     
     private Long ownerId;
     private String ownerName;
@@ -66,6 +67,8 @@ public class GamePlaySessionTO {
 		
 		ownerId = session.getOwner() != null ? session.getOwner().getId() : null;
 		ownerName = session.getOwner() != null ? session.getOwner().getUsername() : null;
+
+		setGameState(new GamePlayStateTO(session));
 		
 		if (session.getPlayers()!=null) {
 			for(User u: session.getPlayers())
@@ -152,5 +155,13 @@ public class GamePlaySessionTO {
 	public void setOwnerName(String ownerName) {
 		this.ownerName = ownerName;
 	}
+
+    public GamePlayStateTO getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(GamePlayStateTO gameState) {
+        this.gameState = gameState;
+    }
 
 }
