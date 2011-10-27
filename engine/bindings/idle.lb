@@ -52,11 +52,10 @@ struct idle
 /*
     Global: idle
     
-    Idle lets you set a function that will be called as often as possible, leaving
-    time for rendering. It can be used to implement a game loop or animations.
+    The idle global variable supports a callback function that is invoked as often as possible when the system is otherwise idle. To enable the callback, simply set the variable's <on_idle> function; depending upon the system's workload, the function may be invoked immediately. To disable the callback function, set the variable's on_idle() function to nil.
     
-    Note that idle may be rate limited (to 60 invocations per second, for example), 
-    and can slow down when TrickPlay receives events. 
+    Unlike the <Timer> class, the on_idle() function is called on an irregular basis. During times when the system has little to do, the on_idle() function will be called often; when the system is busy performing other tasks, the function will seldom be called. It is not possible to schedule regular invocations of the on_idle() function. For operations that need to be performed on a predictable schedule, use a Timer object.
+    
 */
 
 global idle [[idle*]]
@@ -74,8 +73,13 @@ global idle [[idle*]]
     /*
         Property: limit
 
-        Throttles the number of <on_idle> calls to the given number of seconds between calls.
-        The smallest valid value is one millisecond (0.001).
+		The limit property specifies the minimum number of seconds that must elapse between invocations of the on_idle() function. For example, if limit is set to 1, then 1 second *or more* must elapse between invocations of the on_idle() function. Note: This does not mean that the on_idle() function will be invoked every second; it only means that the function will be invoked a *maximum* of once every second. The actual time between invocations will depend upon the other tasks the system must perform.
+		
+		The smallest value for the limit property is 0.001 seconds (1 millisecond).
+		
+		*Default Setting:* 0.001 (1 millisecond)
+		
+		*See Also:* the <on_idle> function
     */
 
     double limit
@@ -87,30 +91,53 @@ global idle [[idle*]]
     ]];
 	
 	/*
-		Event: on_idle
+		Event Handler: on_idle
 		
-		When this is set to a function, it will be called as often as possible, until
-		you set it back to nil.
+		The on_idle() event handler is a function that is invoked as often as possible (within the restriction of the variable's <limit> property) when the system is idle.
 		
-		This example, will set a function that sums up the elapsed seconds and stops
-		after it reaches six.
+		The on_idle() function will start to be invoked as soon as it is set. To stop the function from being called, reset the variable's on_idle() handler to nil.
+		
+		*Prototype:*
+		
+			(code)
+			void on_idle( idle, double elapsed_seconds )
+			(end)
+			
+		*Arguments:*
+		
+			idle - the idle global variable
+			elapsed_seconds - a double value indicating the fractional number of seconds elapsed since the last on_idle() invocation. This value will be greater than or equal to the variable's limit property.
+			
+		*Return Value:* None
+		
+		*Code Example:* Define and run an on_idle() function that is invoked for a maximum of 10 seconds and is called no more than once per half-second.
 		
 		(code)
-		local total = 0
-		function idle.on_idle( idle , seconds )
-		  total = total + seconds 
-		  if total >= 6 then
-		  	idle.on_idle = nil
-		  end 
+		MAX_SECONDS  = 10.0
+		totalSeconds = 0
+
+		-- Define the on_idle() function
+		function whileIdle( idle, numSeconds )
+			print( "In on_idle() function" )
+
+			-- Maintain total elapsed time since start
+			totalSeconds = totalSeconds + numSeconds
+
+			-- Have we run for the maximum length?
+			if( totalSeconds >= MAX_SECONDS ) then
+				-- Yes, stop invocations
+				idle.on_idle = nil
+			end
 		end
+
+		-- Invoke on_idle() no more than once per half-second
+		idle.limit = 0.5
+
+		-- Set the on_idle() function. The function will begin to be invoked immediately.
+		idle.on_idle = whileIdle
 		(end)
-		
-		Arguments:
-		
-			idle - The idle.
-			
-			elapsed_seconds - The fractional seconds elapsed since the function was called
-							  the last time.
+
+		*See Also:* the <limit> property
 	*/
 	
     callback on_idle( idle idle , double elapsed_seconds )

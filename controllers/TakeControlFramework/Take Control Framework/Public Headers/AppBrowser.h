@@ -26,15 +26,18 @@
     // The unique ID of the app.
     NSString *appID;
     // The app version number.
-    NSNumber *version;
+    NSString *version;
     // The app release number.
-    NSNumber *releaseNumber;
+    NSString *releaseNumber;
 }
 
 @property (readonly) NSString *name;
 @property (readonly) NSString *appID;
-@property (readonly) NSNumber *version;
-@property (readonly) NSNumber *releaseNumber; 
+@property (readonly) NSString *version;
+@property (readonly) NSString *releaseNumber; 
+
+// Compare two AppInfo objects
+- (BOOL)equals:(AppInfo *)appInfo;
 
 @end
 
@@ -66,8 +69,8 @@
  *
  * An AppBrowser may be initialized with or without a delegate or
  * a TVConnection object. However, an AppBrowser will only provide
- * usable information given that it has a TVConnection object that
- * has an active connection.
+ * usable information if its tvConnection property is set to a
+ * TVConnection object that has an active connection.
  *
  * AppBrowser objects are NOT automatically updated. Calls must be
  * made to - refresh to guarentee up-to-date information. However,

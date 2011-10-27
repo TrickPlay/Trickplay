@@ -26,7 +26,7 @@
 - (void)tvBrowser:(TVBrowser *)browser didFindService:(NSNetService *)service;
 - (void)tvBrowser:(TVBrowser *)browser didRemoveService:(NSNetService *)service;
 
-- (void)tvBrowser:(TVBrowser *)browser didEstablishConnection:(TVConnection *)connection newConnection:(BOOL)new;
+- (void)tvBrowser:(TVBrowser *)browser didEstablishConnection:(TVConnection *)connection newConnection:(BOOL)isNewConnection;
 - (void)tvBrowser:(TVBrowser *)browser didNotEstablishConnectionToService:(NSNetService *)service;
 
 @end

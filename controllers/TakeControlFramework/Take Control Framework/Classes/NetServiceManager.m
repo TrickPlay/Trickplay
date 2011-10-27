@@ -52,7 +52,8 @@
 
 - (void)start {
     [self stop];
-    [netServiceBrowser searchForServicesOfType:@"_tp-remote._tcp" inDomain:@""];
+    //[netServiceBrowser searchForServicesOfType:@"_tp-remote._tcp." inDomain:@""];
+    [netServiceBrowser searchForServicesOfType:@"_trickplay-http._tcp" inDomain:@""];
 }
 
 #pragma mark -
