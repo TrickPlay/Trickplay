@@ -1,5 +1,5 @@
 
-test_description = "Display the possible style options with the DejaVu font"
+test_description = "Display Japanese text using the defualt Korean font. Note there is a bug in this font with japanese text."
 test_group = "smoke"
 test_area = "Text"
 test_api = "font"
