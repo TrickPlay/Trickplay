@@ -1,5 +1,5 @@
 --[[
-Filename: Timeline1.lua
+Filename: template.lua
 Author: Peter von dem Hagen
 Date: January 20, 2011
 Description:  
@@ -11,13 +11,11 @@ Description:
 -- Test Set up --
 
 
-screen.show()
-
 
 -- Tests --
 
 
-function test_ ()
+function test_template_ignore ()
     assert_equal( "1" , "1", "test failed" )
 end
 
