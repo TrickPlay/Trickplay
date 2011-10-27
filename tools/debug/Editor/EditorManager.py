@@ -44,6 +44,7 @@ class EditorManager(QWidget):
         
         self.editorGroups = []
         self.editors = {}
+        self.app = parent
         
     def getEditorTabs(self):
         return self.editorGroups
@@ -62,10 +63,12 @@ class EditorManager(QWidget):
     def save(self):
         editor = self.app.focusWidget()
         if isinstance(editor, Editor):
-            editor.save(self.statusBar())
+            editor.save()
+            #editor.save(self.statusBar())
         else:
-            self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
-        
+        	#self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
+        	print 'Failed to save because no text editor is currently selected.'                
+
     def newEditor(self, path, tabGroup = None):
         """
         Create a tab group if both don't exist,
@@ -85,20 +88,15 @@ class EditorManager(QWidget):
         
         nTabGroups = len(self.editorGroups)
         
-        # If there is already one tab group, create a new one in split view and open the file there  
-        if 1 == nTabGroups:
-            self.editorGroups.append(self.EditorTabWidget(self.splitter))
-            tabGroup = 1
-        
-        # If there are no tab groups, create the first one
-        elif 0 == nTabGroups:
+		# If there is already one tab group, create a new one in split view and open the file there  
+        if 0 == nTabGroups:
             self.editorGroups.append(self.EditorTabWidget(self.splitter))
             tabGroup = 0
             
         # Default to opening in the first tab group
-        elif not tabGroup:
+        else:
             tabGroup = 0
-        
+		 
         index = self.editorGroups[tabGroup].addTab(editor, name)
         
         if not self.editors.has_key(path):

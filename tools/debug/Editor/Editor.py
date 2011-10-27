@@ -93,18 +93,22 @@ class Editor(QsciScintilla):
     def readFile(self, path):
         self.setText(open(path).read())
         
-    def save(self, statusBar):
+    #def save(self, statusBar):
+    def save(self):
         path = self.path
+        print path 
         try:
             f = open(path,'w+')
         except:
-            statusBar.message('Could not write to %s' % (path),2000)
+            #statusBar.message('Could not write to %s' % (path),2000)
+            print 'Could not write to path'
             return
         
         f.write(self.text())
         f.close()
         
-        statusBar.showMessage('File %s saved' % (path), 2000)
+        #statusBar.showMessage('File %s saved' % (path), 2000)
+        print 'File saved'
         
     def charAdded(self, c):
         """
