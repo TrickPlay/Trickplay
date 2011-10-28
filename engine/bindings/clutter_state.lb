@@ -617,7 +617,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	"x_rotation" - double specifying rotation angle
 	"y_rotation" - double specifying rotation angle
 	"z_rotation" - double specifying rotation angle
-	"color" - table or string specifying color. The format is described in <RGB/Alpha Color Formats>.
+	"color" - table or string specifying color. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 	
 	An AnimatedObject may modify any particular property exactly one time in a keys table. For example, the following AnimatedObject-AnimatedProperty definition is valid.
 	
