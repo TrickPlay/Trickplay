@@ -1220,22 +1220,22 @@ class Canvas [[ cairo_t * ]]
         canvas = Canvas( 1920, 1080 )
         
 		-- Create blue rectangle
-		new_rectangle( canvas, "0000ffFF" )
+		new_rectangle( canvas, "#0000ffFF" )
 		
 		-- Be a good code neighbor and save the current drawing context
 		canvas:save()
 		
 		-- Translate origin to 100, 100 and create red rectangle
 		canvas:translate( 100, 100 )
-		new_rectangle( canvas, "ff0000FF" )
+		new_rectangle( canvas, "#ff0000FF" )
 		
 		-- Translate origin to 400, 400 and create green rectangle
 		canvas:translate( 400, 400 )
-		new_rectangle( canvas, "00ff00FF" )
+		new_rectangle( canvas, "#00ff00FF" )
 		
 		-- Translate origin to -100, -100 and create gray rectangle
 		canvas:translate( -100, -100 )
-		new_rectangle( canvas, "d0d0d0FF" )
+		new_rectangle( canvas, "#d0d0d0FF" )
 		
 		-- Restore original drawing context
 		canvas:restore()
@@ -1288,7 +1288,7 @@ class Canvas [[ cairo_t * ]]
         canvas = Canvas( 1920, 1080 )
         
 		-- Create blue rectangle
-		new_rectangle( canvas, "0000ffFF" )
+		new_rectangle( canvas, "#0000ffFF" )
 		
 		-- Be a good code neighbor and save the current drawing context
 		canvas:save()
@@ -1296,17 +1296,17 @@ class Canvas [[ cairo_t * ]]
 		-- Translate origin to 100, 100, rotate surface 30 degrees, and create red rectangle
 		canvas:translate( 100, 100 )
 		canvas:rotate( 30 )
-		new_rectangle( canvas, "ff0000FF" )
+		new_rectangle( canvas, "#ff0000FF" )
 		
 		-- Translate origin to 400, 400, rotate surface an additional 30 degrees, and create green rectangle
 		canvas:translate( 400, 400 )
 		canvas:rotate( 30 )
-		new_rectangle( canvas, "00ff00FF" )
+		new_rectangle( canvas, "#00ff00FF" )
 		
 		-- Translate origin to -100, -100, rotate surface 45 degrees, and create gray rectangle
 		canvas:translate( -100, -100 )
 		canvas:rotate( 45 )
-		new_rectangle( canvas, "d0d0d0FF" )
+		new_rectangle( canvas, "#d0d0d0FF" )
 		
 		-- Restore original drawing context
 		canvas:restore()
@@ -1360,7 +1360,7 @@ class Canvas [[ cairo_t * ]]
         canvas = Canvas( 1920, 1080 )
         
 		-- Create blue rectangle
-		new_rectangle( canvas, "0000ffFF" )
+		new_rectangle( canvas, "#0000ffFF" )
 		
 		-- Be a good code neighbor and save the current drawing context
 		canvas:save()
@@ -1368,7 +1368,7 @@ class Canvas [[ cairo_t * ]]
 		-- Translate origin to 100, 100, scale to 2:2, and create red rectangle
 		canvas:translate( 100, 100 )
 		canvas:scale( 2, 2 )
-		new_rectangle( canvas, "ff0000FF" )
+		new_rectangle( canvas, "#ff0000FF" )
 		
 		-- Translate origin to 200, 200, scale to 2:1, and create green rectangle
 		-- Note: The X, Y arguments to translate() are themselves scaled according to 
@@ -1377,12 +1377,12 @@ class Canvas [[ cairo_t * ]]
 		-- scale to be 400, 400.
 		canvas:translate( 200, 200 )
 		canvas:scale( 2, 1 )
-		new_rectangle( canvas, "00ff00FF" )
+		new_rectangle( canvas, "#00ff00FF" )
 		
 		-- Translate origin to -100, -100, scale to 3:1, and create light-gray rectangle
 		canvas:translate( -100, -100 )
 		canvas:scale( 3, 1 )
-		new_rectangle( canvas, "d0d0d0FF" )
+		new_rectangle( canvas, "#d0d0d0FF" )
 		
 		-- Restore original drawing context
 		canvas:restore()
@@ -2566,18 +2566,17 @@ class Canvas [[ cairo_t * ]]
 
         *Arguments:*
 
-        color - color and alpha/transparency specified as three RGB (Red/Green/Blue) integer values and an optional alpha/transparency integer value. The format of the color argument is described in <RGB/Alpha Color Formats>.
+        color - color and optional alpha/transparency values. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
         
         *Return Value:* None
         
-        *Code Example:* Demonstrate various methods of setting the color and alpha
+        *Code Example:* Demonstrate methods of setting the color and alpha
         
         (code)
         -- Specify color and alpha in a table
         canvas.set_source_color( { 0, 255, 0, 255 } )
         
         -- Equivalent settings using a string
-        canvas.set_source_color( "00ff00ff" )
         canvas.set_source_color( "#00ff00ff" )
         (end)
         
@@ -2614,16 +2613,16 @@ class Canvas [[ cairo_t * ]]
         
 		-- Create a rectangle and draw gray outline around it
 		canvas:rectangle( 100, 100, 300, 600 )
-		canvas:set_source_color( "d0d0d0ff" )
+		canvas:set_source_color( "#d0d0d0ff" )
 		canvas:stroke( true )   -- save the rectangle for subsequent fill()
 		
 		-- Define a vertical gradient pattern line from rectangle's top to bottom
 		canvas:set_source_linear_pattern( 0, 100, 0, 700 )
 		
 		-- Define 3 gradient color-stops from black to red and back to black
-		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- TOP,    From black/transparent to...
-		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
-		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- BOTTOM, ...black/transparent
+		canvas:add_source_pattern_color_stop( 0.0, "#00000000" )   -- TOP,    From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "#FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "#00000000" )   -- BOTTOM, ...black/transparent
 
 		-- Fill the rectangle with our linear gradient pattern
 		canvas:fill()
@@ -2636,9 +2635,9 @@ class Canvas [[ cairo_t * ]]
 		-- Define a horizontal gradient pattern line from rectangle's left to right
 		-- Note: We use the same color-stop values
 		canvas:set_source_linear_pattern( 500, 0, 800, 0 )
-		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- LEFT,   From black/transparent to...
-		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
-		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- RIGHT,  ...black/transparent
+		canvas:add_source_pattern_color_stop( 0.0, "#00000000" )   -- LEFT,   From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "#FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "#00000000" )   -- RIGHT,  ...black/transparent
 		canvas:fill()
 
         -- Convert Canvas to Image for display and show onscreen
@@ -2686,7 +2685,7 @@ class Canvas [[ cairo_t * ]]
         
 		-- Create a rectangle and draw gray outline around it
 		canvas:rectangle( 100, 100, 600, 600 )
-		canvas:set_source_color( "d0d0d0ff" )
+		canvas:set_source_color( "#d0d0d0ff" )
 		canvas:stroke( true )   -- save the rectangle for subsequent fill()
 		
 		-- Define a radial gradient pattern using two circles. Both circles share the same
@@ -2695,28 +2694,28 @@ class Canvas [[ cairo_t * ]]
 		canvas:set_source_radial_pattern( 400, 400, 50, 400, 400, 300 )
 		
 		-- Define 3 gradient color-stops from black to red and back to black
-		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- START,  From black/transparent to...
-		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
-		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- END,    ...black/transparent
+		canvas:add_source_pattern_color_stop( 0.0, "#00000000" )   -- START,  From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "#FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "#00000000" )   -- END,    ...black/transparent
 
 		-- Fill the rectangle with our radial gradient pattern
 		canvas:fill()
 		
 		-- Draw the two circles used for the radial gradient
 		canvas:set_dash( 0, { 16.0, 4.0 } )
-		canvas:set_source_color( "00ff00ff" )  -- green start circle
+		canvas:set_source_color( "#00ff00ff" )  -- green start circle
 
 		canvas:arc( 400, 400, 50, 0, 360 )
 		canvas:stroke()
 		
-		canvas:set_source_color( "0000ffff" )  -- blue end circle
+		canvas:set_source_color( "#0000ffff" )  -- blue end circle
 		canvas:arc( 400, 400, 300, 0, 360 )
 		canvas:stroke()
 		canvas:clear_dash() -- return to a solid line
 		
 		-- Create a second rectangle
 		canvas:rectangle( 800, 100, 600, 600 )
-		canvas:set_source_color( "d0d0d0ff" )
+		canvas:set_source_color( "#d0d0d0ff" )
 		canvas:stroke( true )   -- save the rectangle for subsequent fill()
 
 		-- Define a second radial gradient pattern. This time the smaller start circle
@@ -2724,18 +2723,18 @@ class Canvas [[ cairo_t * ]]
 		-- asymmetrical radial pattern.
 		-- Note: Both radial patterns use the same color-stop values.
 		canvas:set_source_radial_pattern( 950, 400, 50, 1100, 400, 300 )
-		canvas:add_source_pattern_color_stop( 0.0, "00000000" )   -- START,  From black/transparent to...
-		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
-		canvas:add_source_pattern_color_stop( 1.0, "00000000" )   -- END,    ...black/transparent
+		canvas:add_source_pattern_color_stop( 0.0, "#00000000" )   -- START,  From black/transparent to...
+		canvas:add_source_pattern_color_stop( 0.5, "#FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "#00000000" )   -- END,    ...black/transparent
 		canvas:fill()
 
 		-- Draw the two circles used for the radial gradient
 		canvas:set_dash( 0, { 16.0, 4.0 } )
-		canvas:set_source_color( "00ff00ff" )  -- green start circle
+		canvas:set_source_color( "#00ff00ff" )  -- green start circle
 		canvas:arc( 950, 400, 50, 0, 360 )
 		canvas:stroke()
 		
-		canvas:set_source_color( "0000ffff" )  -- blue end circle
+		canvas:set_source_color( "#0000ffff" )  -- blue end circle
 		canvas:arc( 1100, 400, 300, 0, 360 )
 		canvas:stroke()
 		
@@ -2758,8 +2757,8 @@ class Canvas [[ cairo_t * ]]
 		-- Draw a sphere with a radial gradient
 		canvas:scale( 3.0, 3.0 )
 		canvas:set_source_radial_pattern( 115.2, 102.4, 25.6, 102.4, 102.4, 128.0 )
-		canvas:add_source_pattern_color_stop( 0.0, "FFFFFFFF" )
-		canvas:add_source_pattern_color_stop( 1.0, "000000FF" )
+		canvas:add_source_pattern_color_stop( 0.0, "#FFFFFFFF" )
+		canvas:add_source_pattern_color_stop( 1.0, "#000000FF" )
 		canvas:arc( 128.0, 128.0, 76.8, 0, 360 )
 		canvas:fill()
 
@@ -2798,7 +2797,7 @@ class Canvas [[ cairo_t * ]]
 		*Arguments:*
 		
 		offset - double value between 0.0 and 1.0, inclusive, specifying a position along the gradient. The start of the gradient is at 0.0, the gradient's end is at 1.0, and all other positions along the gradient lie within those values.
-        color - color and alpha/transparency specified as three RGB (Red/Green/Blue) integer values and an optional alpha/transparency integer value. The format of the color argument is described in <RGB/Alpha Color Formats>.
+        color - color and optional alpha/transparency values. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
         
         *Return Value:* None
         
@@ -2847,7 +2846,7 @@ class Canvas [[ cairo_t * ]]
 
 		-- Create a rectangle and draw a gray outline around it
 		canvas:rectangle( 100, 100, 400, 400 )
-		canvas:set_source_color( "d0d0d0ff" )
+		canvas:set_source_color( "#d0d0d0ff" )
 		canvas:stroke( true )   -- save rectangle for fill()
 
 		-- Set drawing source to bitmap
@@ -2899,7 +2898,7 @@ class Canvas [[ cairo_t * ]]
 		
 		-- Create a rectangle and draw a gray outline around it
 		canvas:rectangle( 100, 100, 400, 400 )
-		canvas:set_source_color( "d0d0d0ff" )
+		canvas:set_source_color( "#d0d0d0ff" )
 		canvas:stroke()
 
         -- Convert Canvas to Image for display and show onscreen
@@ -2972,9 +2971,9 @@ class Canvas [[ cairo_t * ]]
 		canvas:set_source_linear_pattern( 960, 0, 960, 1080 )
 		
 		-- Define 3 gradient color-stops from blue to red to green
-		canvas:add_source_pattern_color_stop( 0.0, "0000FFFF" )   -- TOP,    From blue/opaque to...
-		canvas:add_source_pattern_color_stop( 0.5, "FF0000FF" )   -- CENTER, ...red/opaque to...
-		canvas:add_source_pattern_color_stop( 1.0, "00FF00FF" )   -- BOTTOM, ...green/opaque
+		canvas:add_source_pattern_color_stop( 0.0, "#0000FFFF" )   -- TOP,    From blue/opaque to...
+		canvas:add_source_pattern_color_stop( 0.5, "#FF0000FF" )   -- CENTER, ...red/opaque to...
+		canvas:add_source_pattern_color_stop( 1.0, "#00FF00FF" )   -- BOTTOM, ...green/opaque
 
 		-- Create a rectangle that covers the entire Canvas
 		canvas:rectangle( 0, 0, 1920, 1080 )
