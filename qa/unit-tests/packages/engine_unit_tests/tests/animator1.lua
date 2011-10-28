@@ -165,7 +165,7 @@ local ani0 = Animator
 ani0:start()
 
 function ani0.timeline.on_completed()
-	timeline_completed_called = true
+	animator_timeline_completed_called = true
 end
 
 
@@ -201,7 +201,7 @@ function test_animator_end_state ()
 end
 
 function test_animator_timeline_completed ()
-   	assert_true ( timeline_completed_called, "ani0.timeline.completed failed" )
+   	assert_true ( animator_timeline_completed_called, "ani0.timeline.completed failed" )
 end
 
 

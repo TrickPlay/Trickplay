@@ -617,7 +617,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	"x_rotation" - double specifying rotation angle
 	"y_rotation" - double specifying rotation angle
 	"z_rotation" - double specifying rotation angle
-	"color" - table or string specifying color. The format is described in <RGB/Alpha Color Formats>.
+	"color" - table or string specifying color. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 	
 	An AnimatedObject may modify any particular property exactly one time in a keys table. For example, the following AnimatedObject-AnimatedProperty definition is valid.
 	
@@ -715,6 +715,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	sphereImage.name = "Sphere"
 	sphereImage.anchor_point = { 20, 20 }
 	screen:add( sphereImage )
+	screen:show()
 
 	-- Define an AnimationState for the sphere
 	sphereAnimationState = AnimationState( {
@@ -793,9 +794,9 @@ class AnimationState [[ClutterState*]]
 	/*
 		Property: duration
 		
-		The duration property contains the default duration value specified in the AnimationState object's constructor. The duration is an integer value specifying the length of time in milliseconds. If no default duration is specified in the constructor, a default value of 1000 milliseconds (1 second) is used.
-		
-		Note: All durations for transitions must be defined in the object's constructor. Setting the duration property after the constructor has completed has no effect.
+		The duration property specifies the default duration for transitions that have not explicitly defined a duration in the object's constructor. The duration is an integer value specifying the length of time in milliseconds. If no default duration is specified in the constructor, a value of 1000 milliseconds (1 second) is used.
+
+		Note: The duration property is equivalent to the constructor's duration setting that is specified *outside* of the transitions table. Duration settings made for individual transitions must be defined in the constructor's transitions table and cannot be accessed or modified outside of the constructor.
 		
 		*Default Value:* 1000
 		

@@ -31,6 +31,7 @@
     
     BOOL tileWidth;
     BOOL tileHeight;
+    BOOL centerToSuperview;
     
     UIImage *image;
     
@@ -45,6 +46,7 @@
 @property (retain) id resourceKey;
 @property (assign) BOOL tileWidth;
 @property (assign) BOOL tileHeight;
+@property (assign) BOOL centerToSuperview;
 @property (assign) id <AsyncImageViewDelegate> otherDelegate;
 @property (retain) id <AsyncImageViewDelegate> dataCacheDelegate;
 

@@ -12,12 +12,13 @@ local image1 = Image ()
 image1.src = "packages/engine_unit_tests/tests/assets/logo.png"
 image1.position = { 100, 300 }
 test_group:add (image1)
+timeline6_on_completed_called = false
 
 
 local myTimeline = Timeline ()
 local on_middle_marker_reached_called = false
 myTimeline.duration = 1000
-myTimeline.loop = true
+myTimeline.loop = false
 
 myTimeline:add_marker ("start", 100)
 myTimeline:add_marker ("middle", 500)
@@ -34,6 +35,10 @@ myTimeline.on_marker_reached = function (timeline, name, msecs)
 	if name == "middle" then
 		on_middle_marker_reached_called = true
 	end 
+end
+
+myTimeline.on_completed = function ()
+	timeline6_on_completed_called = true
 end
 
 myTimeline:start()

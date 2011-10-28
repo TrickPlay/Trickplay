@@ -15,12 +15,12 @@ local profile_id_changing = false
 -- The following 2 events cannot be tested at this time. [4/19/2011] 
 profile.on_changed = function ()
 	profile_id_changed = true
-	print ("profile changed")
+	--print ("profile changed")
 end
 
 profile.on_changing = function ()
 	profile_id_changing = true
-	print ("profile changing")
+	--print ("profile changing")
 end
 
 

@@ -182,7 +182,8 @@
         }
         html = [NSString stringWithFormat:@"%@</div></body></html>", html];
     } else {
-        html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@<p style='opacity:0;'>a</p></div></body></html>", html, text];
+        html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@</div></body></html>", html, text];
+        // html = [NSString stringWithFormat:@"%@overflow:hidden;background-color:transparent;'>%@<p style='opacity:0;'>a</p></div></body></html>", html, text];
     }
     
     NSLog(@"html: %@", html);
@@ -602,7 +603,7 @@
 
 - (void)get_ellipsize:(NSMutableDictionary *)dictionary {
     if (ellipsize) {
-        [dictionary setObject:@"START" forKey:@"ellipsize"];
+        [dictionary setObject:@"END" forKey:@"ellipsize"];
     } else {
         [dictionary setObject:@"NONE" forKey:@"ellipsize"];
     }

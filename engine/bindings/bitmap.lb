@@ -359,7 +359,7 @@ class Bitmap [[ Bitmap * ]]
         
         *Return Value:*
         
-        color_info - table of color and alpha/transparency values specified as three RGB (Red/Green/Blue) integer values and an alpha/transparency integer value. If the bitmap does not have an alpha channel, the returned alpha value will be 255 (opaque). The format of the color_info table is described in <RGB/Alpha Color Formats>. If a bitmap had not yet been loaded or if invalid X, Y coordinates were specified, returns nil.
+        color_info - table of color and alpha/transparency values specified as three RGB (Red/Green/Blue) integer values and an alpha/transparency integer value. If the bitmap does not have an alpha channel, the returned alpha value will be 255 (opaque). For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. If a bitmap had not yet been loaded or if invalid X, Y coordinates were specified, returns nil.
 
     */
     
