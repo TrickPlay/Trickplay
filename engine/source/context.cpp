@@ -1806,6 +1806,7 @@ void TPContext::load_external_configuration()
         TP_TEXTURE_CACHE_LIMIT,
         TP_RESOURCE_LOADER_ENABLED,
         TP_APP_ARGS,
+        TP_APP_ANIMATIONS_ENABLED,
 
         NULL
     };
