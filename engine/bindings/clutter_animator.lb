@@ -460,7 +460,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
     x_rotation - double specifying rotation angle
     y_rotation - double specifying rotation angle
     z_rotation - double specifying rotation angle
-    color - table or string specifying color. The format of the color is described in <RGB/Alpha Color Formats>.
+    color - table or string specifying color. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
     
     *Defining the Animator Animation: Object-Property Pairs*
     
