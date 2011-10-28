@@ -156,9 +156,7 @@ When the "custom" skin is selected, the developer must define the <text_color>, 
 
 Property: text_color 
 
-The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the ButtonPicker's text color when the object does not have the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The text_color property specifies the color of the ButtonPicker's text when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The text_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -168,9 +166,7 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: focus_text_color
 
-The focus_text_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's text color when the object has the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The focus_text_color property specifies the color of the ButtonPicker's text when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_text_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -180,9 +176,7 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: fill_color
 
-The fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color when the object does not have the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The fill_color property specifies the fill color of the ButtonPicker when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The fill_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {255, 255, 255, 0} (white and transparent)
 
@@ -192,9 +186,7 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: focus_fill_color
 
-The focus_fill_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's fill color when the object has the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The focus_fill_color property specifies the fill color of the ButtonPicker when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_fill_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {0, 255, 0, 0} (green and transparent)
 
@@ -204,9 +196,7 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: border_color
 
-The border_color property is a table of integer RGB and alpha settings specifying the ButtonPicker's border color when the object does not have the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The border_color property specifies the ButtonPicker's border color when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The border_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
@@ -216,9 +206,7 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: focus_border_color
 
-The focus_border_color is a table of integer RGB and alpha settings specifying the ButtonPicker's border color when the object has the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The focus_border_color property specifies the ButtonPicker's border color when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_border_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {0, 255, 0, 255} (green and opaque)
 
