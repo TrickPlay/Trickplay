@@ -259,6 +259,9 @@ typedef struct TPContext TPContext;
                                 in app.args.
                                 Defaults to "".
 
+    TP_APP_ANIMATIONS_ENABLED - Whether apps animate when they close and launch.
+                                Defaults to "true".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -308,6 +311,7 @@ typedef struct TPContext TPContext;
 #define TP_TEXTURE_CACHE_LIMIT			"texture_cache_limit"
 #define TP_RESOURCE_LOADER_ENABLED		"resource_loader_enabled"
 #define TP_APP_ARGS						"app_args"
+#define TP_APP_ANIMATIONS_ENABLED		"app_animations_enabled"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
