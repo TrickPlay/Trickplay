@@ -332,6 +332,16 @@ global devtools [[ void * ]]
         [[
             Graph::toggle( App::get( L )->get_context() );    
         ]];
+        
+    bool gctag( udata udata , string comment )
+        [[
+            result = false;
+            
+            if ( UserData * u = UserData::get_check( L , udata ) )
+            {
+                result = u->gc_tag( comment );
+            } 
+        ]];        
                     
 }
 
