@@ -71,7 +71,6 @@ Group: Programmer's Guide  {
 	File: Localization (no auto-title, docs/rte/progguide/localization.txt)
 	File: Lua and TrickPlay (no auto-title, docs/rte/progguide/lua_and_trickplay.txt)
 	File: TrickPlay Configuration Keys (no auto-title, docs/rte/progguide/config_keys.txt)
-   	File: User Interface* (no auto-title, docs/rte/progguide/user_interface.txt)
 }
 
 Group: Engine Reference  {
