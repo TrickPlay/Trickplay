@@ -13,6 +13,7 @@
 #import "AppBrowser.h"
 #import "TPAppViewController.h"
 #import "TVConnection.h"
+#import "Protocols.h"
 
 @class SocketManager;
 
@@ -34,6 +35,8 @@
 @end
 
 @interface TVConnection()
+
+@property (assign) id <TVConnectionDidConnectDelegate> connectionDelegate;
 
 - (SocketManager *)socketManager;
 - (void)setHttp_port:(NSUInteger)_port;
@@ -73,7 +76,7 @@
 
 @interface TPAppViewController()
 
-- (id)initWithTVConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id<TPAppViewControllerDelegate>)delegate;
+- (id)initWithTVConnection:(TVConnection *)tvConnection size:(CGSize)size delegate:(id<TPAppViewControllerDelegate>)delegate;
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
 

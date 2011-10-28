@@ -76,7 +76,7 @@
 		accelerationY = acceleration.y * filterConstant + accelerationY * (1.0 - filterConstant);
 		accelerationZ = acceleration.z * filterConstant + accelerationZ * (1.0 - filterConstant);
 		NSString *sentData = [NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", accelerationX,accelerationY,accelerationZ];
-        NSLog(@"low pass data: %@", sentData);
+        //NSLog(@"low pass data: %@", sentData);
 		[socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 	}
     // keep the raw reading, to use during calibrations
@@ -92,7 +92,7 @@
         myAcceleration[2] = filterConstant * (myAcceleration[2] + acceleration.z - lastZ);
 
 		NSString *sentData = [NSString stringWithFormat:@"AX\t%f\t%f\t%f\n", myAcceleration[0],myAcceleration[1],myAcceleration[2]];
-        NSLog(@"high pass data: %@", sentData);
+        //NSLog(@"high pass data: %@", sentData);
 		[socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
 		
         //Compute the intensity of the current acceleration 

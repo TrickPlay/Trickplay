@@ -99,7 +99,7 @@ void lb_allow(lua_State*L,const char*name);
 // These macros help to ensure the Lua stack is in order when
 // we leave a function
 
-#define LSG             int _lsg_=lua_gettop(L)
+#define LSG             MIGHT_BE_UNUSED int _lsg_=lua_gettop(L)
 #define LSG_CHECK(i)    (assert(_lsg_+(i)==lua_gettop(L)))
 #define LSG_END(i)      (LSG_CHECK(i),(i))
 

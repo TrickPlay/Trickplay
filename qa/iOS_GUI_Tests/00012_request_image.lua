@@ -26,7 +26,6 @@ function generate_test_image (controller, factory)
  	function idle.on_idle( idle , seconds )
       total = total + seconds
       if total >= 10 then
-		print ("aaa")
         idle.on_idle = nil
 		screen:remove(photo)
 		photo = nil
