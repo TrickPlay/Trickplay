@@ -70,7 +70,7 @@
     [self.view addSubview:imageView];
     
     if (mask) {
-        mask.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height);
+        //mask.frame = CGRectMake(0.0, 0.0, self.view.frame.size.width, self.view.frame.size.height);
         [self.view addSubview:mask];
         mask.userInteractionEnabled = NO;
     }
@@ -186,19 +186,19 @@
 #pragma mark Help
 
 - (IBAction)help:(id)sender {
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         if (helpPopover) {
             [helpPopover dismissPopoverAnimated:NO];
             [helpPopover release];
             helpPopover = nil;
         }
-        UIViewController *popoverContent = [[UIViewController alloc] initWithNibName:@"ImageEditorHelpViewPad" bundle:nil];
+        UIViewController *popoverContent = [[UIViewController alloc] initWithNibName:@"ImageEditorHelpViewPad" bundle:myBundle];
         popoverContent.contentSizeForViewInPopover = CGSizeMake(250, 180);
         helpPopover = [[UIPopoverController alloc] initWithContentViewController:popoverContent];
         [helpPopover presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionDown animated:YES];
         [popoverContent release];
     } else {
-        NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
         UIViewController *helpModal = [[ImageEditorHelpViewControllerPhone alloc] initWithNibName:@"ImageEditorHelpViewControllerPhone" bundle:myBundle];
         [self presentModalViewController:helpModal animated:YES];
         [helpModal release];

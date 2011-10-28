@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import com.trickplay.gameservice.dao.RecordedAchievementDAO;
 import com.trickplay.gameservice.domain.RecordedAchievement;
-import com.trickplay.gameservice.security.SecurityUtil;
 
 @Repository
 @SuppressWarnings("unchecked")

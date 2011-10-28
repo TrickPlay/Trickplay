@@ -66,11 +66,11 @@ Group: SDK Tutorial {
 Group: Programmer's Guide  {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
 	File: The Engine Console (no auto-title, docs/rte/progguide/console_cmds.txt)
+	File: Specifying Colors (no auto-title, docs/rte/progguide/color_specs.txt)
 	File: Understanding the Z-Axis (no auto-title, docs/rte/progguide/z_axis.txt)
 	File: Localization (no auto-title, docs/rte/progguide/localization.txt)
 	File: Lua and TrickPlay (no auto-title, docs/rte/progguide/lua_and_trickplay.txt)
 	File: TrickPlay Configuration Keys (no auto-title, docs/rte/progguide/config_keys.txt)
-   	File: User Interface* (no auto-title, docs/rte/progguide/user_interface.txt)
 }
 
 Group: Engine Reference  {
@@ -99,21 +99,6 @@ Group: Engine Reference  {
       	}
     }
 	
-	Group: Event Handling {
-		File: Overview* (no auto-title, docs/rte/reference/overview_events.txt)
-		
-		Group: Globals {
-      		File: idle (no auto-title, bindings/idle.lb)
-			File: keyboard* (no auto-title, bindings/keyboard.lb)
-			File: keys (no auto-title, docs/rte/reference/key_codes.txt)
-		}
-		
-		Group: Classes {
-			File: Stopwatch (no auto-title, bindings/stopwatch.lb)
-			File: Timer (no auto-title, bindings/timer.lb)
-		}
-	}
-	
 	Group: Media Playback {
 		File: Overview* (no auto-title, docs/rte/reference/overview_media.txt)
 		
@@ -122,7 +107,7 @@ Group: Engine Reference  {
 		}
 	}
 	
-	Group: Networking {
+	Group: External Connections {
 		File: Overview* (no auto-title, docs/rte/reference/overview_network.txt)
 		
 		Group: Globals {
@@ -158,6 +143,28 @@ Group: Engine Reference  {
 			File: app* (no auto-title, bindings/app.lb)
 			File: system* (no auto-title, bindings/system.lb)
 			File: trickplay* (no auto-title, bindings/trickplay.lb)
+		}
+	}
+	
+	Group: Timers {
+		File: Overview (no auto-title, docs/rte/reference/overview_timers.txt)
+		
+		Group: Globals {
+      		File: idle (no auto-title, bindings/idle.lb)
+      	}
+      	
+      	Group: Classes {
+			File: Stopwatch (no auto-title, bindings/stopwatch.lb)
+			File: Timer (no auto-title, bindings/timer.lb)
+		}
+	}
+	
+	Group: User Input {
+		File: Overview (no auto-title, docs/rte/reference/overview_input.txt)
+		
+		Group: Globals {
+			File: keyboard (no auto-title, bindings/keyboard.lb)
+			File: keys (no auto-title, docs/rte/reference/key_codes.txt)
 		}
 	}
 	

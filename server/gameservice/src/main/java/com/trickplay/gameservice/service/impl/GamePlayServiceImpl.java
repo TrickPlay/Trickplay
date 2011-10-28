@@ -11,7 +11,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.ChatMessageDAO;
+import com.trickplay.gameservice.dao.GameSessionMessageDAO;
 import com.trickplay.gameservice.dao.EventDAO;
 import com.trickplay.gameservice.dao.GameDAO;
 import com.trickplay.gameservice.dao.GamePlayInvitationDAO;
@@ -19,7 +19,7 @@ import com.trickplay.gameservice.dao.GamePlayStateDAO;
 import com.trickplay.gameservice.dao.GamePlaySummaryDAO;
 import com.trickplay.gameservice.dao.GameSessionDAO;
 import com.trickplay.gameservice.dao.UserDAO;
-import com.trickplay.gameservice.domain.ChatMessage;
+import com.trickplay.gameservice.domain.GameSessionMessage;
 import com.trickplay.gameservice.domain.Event;
 import com.trickplay.gameservice.domain.Event.EventType;
 import com.trickplay.gameservice.domain.Game;
@@ -57,11 +57,27 @@ public class GamePlayServiceImpl implements GamePlayService {
 	GamePlayInvitationDAO gamePlayInvitationDAO;
 	
 	@Autowired
-	ChatMessageDAO chatMessageDAO;
+	GameSessionMessageDAO gameSessionMessageDAO;
 	
 	@Autowired
     GamePlaySummaryDAO gamePlaySummaryDAO;
 	
+    private void authorizeGameSessionAccess(GameSession gs, Long userId) {
+        if (userId == null) {
+            throw ExceptionUtil.newUnauthorizedException();
+        }
+        boolean allowAccess = false;
+        for (User u : gs.getPlayers()) {
+            if (u.getId().equals(userId)) {
+                allowAccess = true;
+                break;
+            }
+        }
+        if (!allowAccess) {
+            throw ExceptionUtil.newUnauthorizedException();
+        }
+    }
+
 	@Transactional
 	public GameSession createGameSession(Long gameId) {
 	    if (gameId == null) {
@@ -103,21 +119,24 @@ public class GamePlayServiceImpl implements GamePlayService {
 	@Transactional
 	public GamePlayInvitation sendGamePlayInvitation(Long gameSessionId, Long recipientId) throws GameServiceException {
 		Long requestorId = SecurityUtil.getPrincipal().getId();
-		User requestor = userDAO.find(SecurityUtil.getPrincipal().getId());
-		
-		if (requestor == null) {
-		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
-		}
-		ServiceUtil.checkAuthority(requestor);
-		
-		if (requestorId.equals(recipientId)) {
-			throw ExceptionUtil.newRequestorAndRecipientMatchException(requestorId, recipientId);
-		}
 		
 		GameSession gs = gameSessionDAO.find(gameSessionId);
 		if (gs==null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", gameSessionId);
 		}
+		
+	    authorizeGameSessionAccess(gs, requestorId);
+
+        User requestor = userDAO.find(SecurityUtil.getPrincipal().getId());
+        
+        if (requestor == null) {
+            throw ExceptionUtil.newEntityNotFoundException(User.class, "id", requestorId);
+        }
+        
+        if (requestorId.equals(recipientId)) {
+            throw ExceptionUtil.newRequestorAndRecipientMatchException(requestorId, recipientId);
+        }
+        
 		User recipient=null;
         if (recipientId == null) {
             if (!gs.getGame().isAllowWildCardInvitation()) {
@@ -433,21 +452,39 @@ public class GamePlayServiceImpl implements GamePlayService {
 	}
 
 	@Transactional
-	public void postMessage(Long sessionId, String msg) {
+	public GameSessionMessage postMessage(Long sessionId, String msg) {
 		GameSession gs = gameSessionDAO.find(sessionId);
 		if (gs == null) {
 		    throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", sessionId);
 		}
-		Long senderId = SecurityUtil.getPrincipal().getId();
+		Long senderId = SecurityUtil.getCurrentUserId();
+		
+		authorizeGameSessionAccess(gs, senderId);
+		
 		User sender = userDAO.find(senderId);
 		if (sender == null) {
-		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", senderId);
+		    throw ExceptionUtil.newUnauthorizedException();
 		}
-		ChatMessage chatMsg = new ChatMessage(sender, gs, msg);
-		chatMessageDAO.persist(chatMsg);
-		eventDAO.persist(new Event(EventType.GAME_SESSION_MESSAGE, sender, gs.getId(), "In game message sent by "+sender.getUsername(), chatMsg));
+		
+		GameSessionMessage chatMsg = new GameSessionMessage(sender, gs, msg);
+		gameSessionMessageDAO.persist(chatMsg);
+	//	eventDAO.persist(new Event(EventType.GAME_SESSION_MESSAGE, sender, gs.getId(), "In game message sent by "+sender.getUsername(), chatMsg));
+		return chatMsg;
 	}
 	
+    public List<GameSessionMessage> getMessages(Long gameSessionId, Long lastMessageId) {
+        GameSession gs = gameSessionDAO.find(gameSessionId);
+        if (gs == null) {
+            throw ExceptionUtil.newEntityNotFoundException(GameSession.class, "id", gameSessionId);
+        }
+        
+        authorizeGameSessionAccess(gs, SecurityUtil.getCurrentUserId());
+        
+        if (lastMessageId == null)
+            lastMessageId = -1L;
+        return gameSessionMessageDAO.getMessages(gameSessionId, lastMessageId);
+    }
+    
 	public GamePlayInvitation findGamePlayInvitation(Long gamePlayInvitationId) {
 		return gamePlayInvitationDAO.find(gamePlayInvitationId);
 	}
@@ -549,5 +586,5 @@ public class GamePlayServiceImpl implements GamePlayService {
         }
         return summary;        
     }
-	
+
 }

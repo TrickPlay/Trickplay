@@ -16,32 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.codec.Base64;
 import org.springframework.web.client.RestTemplate;
 
-import com.trickplay.gameservice.domain.GameStepId;
-import com.trickplay.gameservice.domain.InvitationStatus;
 import com.trickplay.gameservice.transferObj.BooleanResponse;
-import com.trickplay.gameservice.transferObj.BuddyInvitationListTO;
-import com.trickplay.gameservice.transferObj.BuddyInvitationRequestTO;
-import com.trickplay.gameservice.transferObj.BuddyInvitationTO;
-import com.trickplay.gameservice.transferObj.EventListTO;
-import com.trickplay.gameservice.transferObj.GamePlayInvitationListTO;
-import com.trickplay.gameservice.transferObj.GamePlayInvitationRequestTO;
-import com.trickplay.gameservice.transferObj.GamePlayInvitationTO;
-import com.trickplay.gameservice.transferObj.GamePlayRequestTO;
-import com.trickplay.gameservice.transferObj.GamePlaySessionRequestTO;
-import com.trickplay.gameservice.transferObj.GamePlaySessionTO;
-import com.trickplay.gameservice.transferObj.GamePlayStateTO;
-import com.trickplay.gameservice.transferObj.GameRequestTO;
-import com.trickplay.gameservice.transferObj.GameTO;
-import com.trickplay.gameservice.transferObj.ScoreFilterTO.ScoreType;
-import com.trickplay.gameservice.transferObj.ScoreListTO;
-import com.trickplay.gameservice.transferObj.ScoreRequestTO;
-import com.trickplay.gameservice.transferObj.ScoreTO;
-import com.trickplay.gameservice.transferObj.UpdateInvitationStatusRequestTO;
-import com.trickplay.gameservice.transferObj.UserBuddiesTO;
 import com.trickplay.gameservice.transferObj.UserRequestTO;
 import com.trickplay.gameservice.transferObj.UserTO;
-import com.trickplay.gameservice.transferObj.VendorRequestTO;
-import com.trickplay.gameservice.transferObj.VendorTO;
 
 public class GameServiceJSONErrorsTest {
 

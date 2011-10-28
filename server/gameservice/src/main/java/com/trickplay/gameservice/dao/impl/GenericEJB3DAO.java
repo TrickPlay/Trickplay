@@ -1,7 +1,6 @@
 package com.trickplay.gameservice.dao.impl;
 
 import java.io.Serializable;
-import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 import javax.persistence.EntityManager;

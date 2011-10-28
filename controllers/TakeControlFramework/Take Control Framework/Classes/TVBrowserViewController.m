@@ -57,8 +57,36 @@
 
 @implementation TVBrowserViewControllerContext
 
-@synthesize tvBrowser;
-@synthesize delegate;
+//@synthesize tvBrowser;
+//@synthesize delegate;
+
+#pragma mark -
+#pragma mark Property Getters/Setters
+
+- (TVBrowser *)tvBrowser {
+    TVBrowser *retval = nil;
+    @synchronized(self) {
+        retval = [[tvBrowser retain] autorelease];
+    }
+    return retval;
+}
+
+- (id <TVBrowserViewControllerDelegate>)delegate {
+    id <TVBrowserViewControllerDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <TVBrowserViewControllerDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
+
+#pragma mark -
+#pragma mark Initialization
 
 - (id)init {
     NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];

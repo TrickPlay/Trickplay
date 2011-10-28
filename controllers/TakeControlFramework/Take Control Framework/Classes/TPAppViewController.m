@@ -157,9 +157,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @implementation TPAppViewControllerContext
 
 
-@synthesize delegate;
-@synthesize version;
-@synthesize tvConnection;
+//@synthesize delegate;
+//@synthesize version;
+//@synthesize tvConnection;
 @synthesize socketManager;
 
 @synthesize graphics;
@@ -172,6 +172,39 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @synthesize touchDelegate;
 @synthesize accelDelegate;
 @synthesize advancedUIDelegate;
+
+#pragma mark -
+#pragma mark Property Getters/Setters
+
+- (NSString *)version {
+    NSString *retval = nil;
+    @synchronized(self) {
+        retval = [[version retain] autorelease];
+    }
+    return retval;
+}
+
+- (TVConnection *)tvConnection {
+    TVConnection *retval = nil;
+    @synchronized(self) {
+        retval = [[tvConnection retain] autorelease];
+    }
+    return retval;
+}
+
+- (id <TPAppViewControllerDelegate>)delegate {
+    id <TPAppViewControllerDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <TPAppViewControllerDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
 
 #pragma mark -
 #pragma mark Initialization
@@ -268,7 +301,35 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         //*/
         backgroundWidth = size.width;
         backgroundHeight = size.height;
-
+        
+        // Figure out if the device can use pictures
+        NSString *hasPictures = @"";
+        if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
+            hasPictures = @"\tPS";
+        }
+        
+        // Retrieve the UUID or make a new one and save it
+        NSData *deviceID;
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        NSData *savedData = [userDefaults dataForKey:@"TakeControlID"];
+        if (savedData) {
+            deviceID = [NSData dataWithBytes:[savedData bytes] length:[savedData length]];
+            NSLog(@"deviceID: %@", deviceID);
+        } else {
+            uuid_t generated_id;
+            uuid_generate(generated_id);
+            NSLog(@"generated: %s", generated_id);
+            deviceID = [NSData dataWithBytes:generated_id length:16];
+            [userDefaults setObject:deviceID forKey:@"TakeControlID"];
+            NSLog(@"deviceID: %@", deviceID);
+        }
+        NSLog(@"deviceID: %@", deviceID);
+        
+        // Tell the service what this device is capable of
+        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
+        
+        [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
+        
         // Manages resources created with declare_resource
         resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
         
@@ -1309,8 +1370,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 //*
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    // Return YES for supported orientations.
-    return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
+     // Return YES for supported orientations.
+     return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
 }
 //*/
 

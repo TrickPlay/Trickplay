@@ -10,6 +10,7 @@ Description: Mediaplayer  test
  local video_playing
  local video_paused
  local video_idle
+ media_player_loaded = false
 
  mediaplayer:load("packages/engine_unit_tests/tests/assets/glee-1.mp4")
  mediaplayer:set_viewport_geometry (750,10,200,200)
@@ -17,6 +18,7 @@ Description: Mediaplayer  test
  
 
  function mediaplayer:on_loaded()
+ 	media_player_loaded = true
 	mediaplayer:play()
 	video_playing = mediaplayer.state
 	bitrate = mediaplayer.tags["bitrate"]

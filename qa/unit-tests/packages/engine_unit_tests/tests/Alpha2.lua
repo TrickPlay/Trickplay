@@ -13,7 +13,7 @@ test_group:add (image1)
 local myTimeline = Timeline ()
 myTimeline.duration = 1000
 
-local on_alpha_called = false
+on_alpha_called = false
 
 local alpha5 = Alpha ()
 alpha5.timeline = myTimeline
