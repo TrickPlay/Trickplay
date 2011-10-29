@@ -212,13 +212,24 @@ int MediaPlayer::load( const char * uri, const char * extra )
         return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
     }
 
-    g_debug( "MP[%p] <- load('%s','%s')", mp, uri, extra );
+    gchar * unescaped_uri = g_uri_unescape_string( uri , 0 );
 
-    if ( int result = mp->load( mp, uri, extra ) )
+    if ( ! unescaped_uri )
+    {
+    	g_warning( "MP[%p] INVALID URI '%s'" , mp , uri );
+        return TP_MEDIAPLAYER_ERROR_INVALID_URI;
+    }
+
+    g_debug( "MP[%p] <- load('%s','%s')", mp, unescaped_uri , extra );
+
+    if ( int result = mp->load( mp, unescaped_uri, extra ) )
     {
         g_warning( "MP[%p]    FAILED %d", mp, result );
+        g_free( unescaped_uri );
         return result;
     }
+
+    g_free( unescaped_uri );
 
     state = TP_MEDIAPLAYER_LOADING;
 

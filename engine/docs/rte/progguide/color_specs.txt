@@ -1,0 +1,57 @@
+
+Title: Specifying Colors in the TrickPlay SDK
+
+	When specifying a particular color, the TrickPlay SDK libraries recognize several formats.
+	
+	Colors are specified using either an RGB (Red/Green/Blue) or an HSL (Hue/Saturation/Luminance) value. An optional Alpha transparency value can also be included. If an Alpha value is not specified, a default value of completely opaque is used. The range of an Alpha value varies between formats, but the relationship between the Low/High range is always Transparent/Opaque.
+	
+	Unless noted otherwise, any of the supported formats can be used when setting a color value to a property or passing a color as a function argument; use whichever format is most convenient. When getting a color from a property or when a color is returned from a function, the color is always returned as a Lua table in the format { R, G, B, A }.
+	
+	The supported color formats for setting properties or passing function arguments are described below. All the formats, except for the Lua table, are Lua strings that must be surrounded by single or double quotation marks.
+	
+	*Lua Table of RGB Values*
+	
+	A color specification can be a Lua table in the format { R, G, B } or { R, G, B, A }. The RGB and optional Alpha values can range from 0-255, inclusive. Examples are shown below.
+	
+	(code)
+	{ 255, 0, 0 }
+	{ 230, 230, 0, 127 }
+	(end)
+	
+	When getting a color value from a property or when a color is returned from a function, the color is always formatted as a table of { R, G, B, A }.
+
+	*Hexadecimal #RGB Values*
+	
+	A color can be specified as a series of hexadecimal RGB values, with an optional Alpha. Supported formats are: #RGB, #RGBA, #RRGGBB, #RRGGBBAA. The RGB and optional Alpha values can range from 00-FF, inclusive.
+	
+	(code)
+	"#FF0000"
+	"#F0F0007F"
+	(end)
+
+	*Decimal or Percentage RGB Values*
+	
+	A color can be specified as a series of decimal RGB values, with an optional Alpha. The color is in the form "rgb(R,G,B)" or "rgba(R,G,B,A)". The RGB values can range from either 0-255 or 0%-100%, inclusive. If the percentage form is used, the '%' character must be specified. The optional Alpha value is a floating-point number ranging between 0.0 and 1.0, inclusive. No whitespace is allowed within the string.
+	
+	(code)
+	"rgb(255,0,0)"
+	"rgb(100%,0%,0%)"
+	"rgba(230,230,0,0.5)"
+	"rgba(90%,90%,0%,0.5)"
+	(end)
+
+	*HSL Values*
+	
+	A color may be specified as a series of Hue, Saturation, and Luminance (HSL) values, with an optional Alpha. The color is in the form "hsl(H,S,L)" or "hsla(H,S,L,A)". The H (hue) value is the color's angle on the color circle; the angle can range between 0-360 degrees, inclusive. The S (saturation) and L (luminance) values are percentages ranging between 0%-100%, inclusive. The '%' character must be specified. The optional Alpha value is a floating-point number ranging between 0.0 and 1.0, inclusive. No whitespace is allowed within the string.
+	
+	(code)
+	"hsl(20,84%,72%)"
+	"hsla(20,84%,72%,0.2)"
+	(end)
+
+	*Color Name from X11 rgb.txt File*
+	
+	The X11 rgb.txt file defines standard string names for a large number of colors, such as "CadetBlue" and "DarkRed". Any of these names can be specified for a color.
+	
+	For a complete list of recognized names, look through the rgb.txt file contained on your Ubuntu system, usually in the /etc/X11 directory. Also, many Internet pages display a list of X11 names alongside samples of the color.
+
