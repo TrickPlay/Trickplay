@@ -11,9 +11,22 @@ myText1.text = "Fun with Dick and Jane"
 myText1.font = "DejaVu Sans 20px"
 myText1.color = "33FF22AA"
 myText1.position = { 700, 100 }
+
+local myText1_changed = false
+
+myText1.on_text_changed = function ()
+	myText1_changed = true
+end
+
 myText1:set_selection(0, 4)
 myText1:delete_selection()
 
+-- Does on_text_changed event handler get called during delete_selection
+function test_Text_delete_selection_event_handler ()
+	assert_true (myText1_changed, "delete_selection did not fire a text changed event.")
+end
+
+-- Basic test of set_selection and the delete_selection
 function test_Text_set_selection_delete_basic ()
 	assert_equal( myText1.text, "with Dick and Jane", "delete_selection did not remove the first 4 characters of the string.")
 end
@@ -59,10 +72,23 @@ myText4.text = "Fun with Dick and Jane"
 myText4.font = "DejaVu Sans 20px"
 myText4.color = "33FF22AA"
 myText4.position = { 700, 190 }
+
+local myText4_changed = false
+
+myText4.on_text_changed = function ()
+	myText4_changed = true
+end
+
 myText4:delete_text (0, 4)
 
+-- simple text removal using delete_text
 function test_Text_delete_text_basic()
 	assert_equal( myText4.text, "with Dick and Jane", "delete_text did not remove the first 4 characters of the string.")
+end
+
+-- verify that the on_text_changed event handler gets called during delete_text --
+function test_Text_delete_text_event_handler ()
+	assert_true (myText4_changed, "insert_chars did not fire a text changed event.")
 end
 
 

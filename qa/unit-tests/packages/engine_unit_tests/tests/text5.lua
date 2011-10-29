@@ -2,7 +2,7 @@
 Filename: Text5.lua
 Author: Name
 Date: October 28, 2011
-Description:   Test the text manipulation functions - selected_text
+Description:   Test the text manipulation functions - selected_text/selection_end
 --]]
 
 -- Set a selection area of text and verify it is returned by the selected_text api  --
@@ -15,7 +15,6 @@ myText1.cursor_position = 0
 myText1.selection_end = 9
 
 function test_Text_selected_text_basic ()
-	print ("myText1.selected_text = ", myText1.selected_text)
 	assert_equal (myText1.selected_text, "Fun with ", "myText1.selected_text returned: "..myText1.selected_text..". Expected: Fun with")
 end
 
@@ -30,7 +29,6 @@ myText2.cursor_position = 0
 myText2.selection_end = 0
 
 function test_Text_selected_text_nil ()
-	print ("myText2.selected_text = ", myText2.selected_text)
 	assert_equal (myText2.selected_text, "", "myText2.selected_text returned: "..myText2.selected_text..". Expected is nil")
 end
 
@@ -44,10 +42,8 @@ myText3.cursor_position = 0
 myText3.selection_end = 100
 
 function test_Text_selected_text_beyond_text_size ()
-	print ("myText3.selected_text = ", myText3.selected_text)
 	assert_equal (myText3.selected_text, "Fun with Dick and Jane", "myText3.selected_text returned: "..myText3.selected_text..". Expected: Fun with Dick and Jane")
 end
-
 
 
 test_group:add (myText1, myText2, myText3 )
