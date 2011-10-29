@@ -18,16 +18,16 @@ local test_list_file = "all_tests_ubuntu_"..test_resolution..".txt"
 -- Options to run one test, all tests or just the last 2
 local automation_option_choices = { all_tests = 1, specific_test = 2, last_two_tests = 3 }
 local automation_option = 1
-local test_to_run = 4 -- if automation_option == 2
+local test_to_run = 53 -- if automation_option == 2
 
 -- if option 2 then it prints test results in a JSON formatted table to be copied and pasted into
 -- the package file. 
 -- It contains the generated checksum so  ensure that all tests pass before using this as a baseline.
 local console_display_option_choices = { test_results = 1, dump_screensum = 2 } 
-local console_display_option = 2
+local console_display_option = 1
 
 -- Time interval between tests
-local test_interval = 0.1
+local test_interval = 0.5
 
 -- Globals --
 local test_list
@@ -200,7 +200,7 @@ function do_test (tests)
 			print( string.format( "NOT TESTED   %4d (%d%%)" , disabled_count , ( disabled_count / #test_list ) * 100 ) )
 			print( string.format( "TOTAL    	   %4d" , #test_list ) )
 			print( "" )
-			--exit()
+			exit()
 		end
 	end
 end
