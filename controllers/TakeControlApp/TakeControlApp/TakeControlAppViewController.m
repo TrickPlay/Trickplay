@@ -423,6 +423,10 @@
     [self presentModalViewController:camera animated:YES];
 }
 
+- (void)tpAppViewControllerWillAppear:(TPAppViewController *)tpAppViewController {
+    
+}
+
 #pragma mark -
 #pragma mark TVConnectionDelegate stuff
 

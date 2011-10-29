@@ -335,8 +335,8 @@
 		CD54637D14203CBF00965577 /* PrivateMethods */ = {
 			isa = PBXGroup;
 			children = (
-				44D2D085143F71DD00E54755 /* Protocols.h */,
 				CD91EA8C1427D53E0043C8BF /* Extensions.h */,
+				44D2D085143F71DD00E54755 /* Protocols.h */,
 			);
 			name = PrivateMethods;
 			path = ../Classes;
@@ -727,6 +727,7 @@
 				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -747,6 +748,7 @@
 				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -767,6 +769,7 @@
 				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -19,6 +19,7 @@
         resourceManager = [resman retain];
         tvConnection = [_tvConnection retain];
         soundLoopName = nil;
+        audioPlayer = nil;
     }
     
     return self;
@@ -30,25 +31,34 @@
 }
 
 - (void)playSoundFile:(NSString *)resourcename filename:(NSString *)filename {
-	if ([filename hasPrefix:@"http:"] || [filename hasPrefix:@"https:"])
-	{
-		//NSString *soundFilePath = [[NSBundle mainBundle] pathForResource:filename ofType: @"mp3"];
-		//NSURL *fileURL = [[NSURL alloc] initFileURLWithPath:soundFilePath];
-		//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
-        //**
+    if ([resourceManager.resources objectForKey:resourcename]) {
+        if (audioPlayer) {
+            [audioPlayer stop];
+            [audioPlayer release];
+        }
+        
+        NSError *error = nil;
+        audioPlayer = [[AVAudioPlayer alloc] initWithData:[resourceManager.resources objectForKey:resourcename] error:&error];
+        if (error) {
+            NSLog(@"Could not play data: %@ ; with error: %@", [resourceManager.resources objectForKey:resourcename], error);
+            return;
+        }
+        
+        NSMutableDictionary *resourceInfo = [resourceManager getResourceInfo:resourcename];
+        NSInteger loopValue = [[resourceInfo objectForKey:@"loop"] intValue];
+        audioPlayer.numberOfLoops = loopValue - 1;
+        
+        [audioPlayer play];
+        
+        return;
+        
+    } else if ([filename hasPrefix:@"http:"] || [filename hasPrefix:@"https:"]) {
 		[self createAudioStreamer:filename];
-        //*/
-	}
-	else
-	{
-        //**
+        [resourceManager loadResource:resourcename];
+	} else {
 		[self createAudioStreamer:[NSString stringWithFormat:@"http://%@:%d/%@", tvConnection.hostName, tvConnection.http_port, filename]];
-        //*/
-		//NSURL *fileURL = [NSURL URLWithString:];
-		//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
-		//NSLog([fileURL absoluteString]);
+        [resourceManager loadResource:resourcename];
 	}
-	//self.mAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:[NSURL URLWithString:[itemAtIndex objectForKey:@"link"]] error:nil]; 
     
     if (soundLoopName) {
         [soundLoopName release];
@@ -56,18 +66,17 @@
     soundLoopName = [resourcename retain];
 }
 
+- (void)stopAudioPlayer {
+    [audioPlayer stop];
+}
+
 - (void)playbackStateChanged:(NSNotification *)aNotification {
     //**
-	if ([audioStreamer isWaiting]) // not sure why this is here
-	{
+	if ([audioStreamer isWaiting]) { // not sure why this is here
 		
-	}
-	else if ([audioStreamer isPlaying]) // ditto
-	{
+	} else if ([audioStreamer isPlaying]) { // ditto
 		
-	}
-	else if ([audioStreamer isIdle])
-	{
+	} else if ([audioStreamer isIdle]) {
         NSMutableDictionary *resourceInfo = [resourceManager getResourceInfo:soundLoopName];
         if (resourceInfo) {
             NSInteger loopValue = [[resourceInfo objectForKey:@"loop"] intValue];
@@ -128,6 +137,10 @@
 - (void)dealloc {
     NSLog(@"AudioController dealloc");
     [self destroyAudioStreamer];
+    if (audioPlayer) {
+        [audioPlayer stop];
+        [audioPlayer release];
+    }
     if (resourceManager) {
         [resourceManager release];
     }
