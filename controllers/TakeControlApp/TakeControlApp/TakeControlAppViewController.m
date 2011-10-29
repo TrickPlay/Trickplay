@@ -404,7 +404,7 @@
     
     pushingAppViewController = YES;
     if (viewController == tvBrowserViewController) {
-        [tvBrowserViewController.tvBrowser startSearchForServices];
+        //[tvBrowserViewController.tvBrowser startSearchForServices];
     } else if (viewController == appBrowserViewController) {
         [appBrowserViewController refresh];
     } else {
