@@ -1,37 +1,34 @@
 --[[
-Filename: Text7.lua
+Filename: Text8.lua
 Author: Name
 Date: October 29, 2011
-Description:   Test the text manipulation functions - insert text
+Description:   Test the text manipulation functions - position_to_coordinates
 --]]
 
--- Insert text into the center of the string and at the end using -1 argument --
+-- Get the position_to_coordinates values --
+
 local myText1 = Text ()
 myText1.text = "Fun with Dick and Jane"
-myText1.font = "DejaVu Sans 20px"
+myText1.font = "DejaVu Sans 40px"
 myText1.color = "33FF22AA"
 myText1.position = { 1400, 100 }
-myText1:insert_text(9, "Spot, ")
-myText1:insert_text(-1,"!")
+local ptc1 = myText1:position_to_coordinates(1)
+local ptc2 = myText1:position_to_coordinates(50)
 
-function test_Text_insert_chars_basic ()
-	assert_equal (myText1.text, "Fun with Spot, Dick and Jane!", "insert_text did not insert text as expected.")
+-- Verify that requesting position_to_coordinates returns values --
+function test_Text_position_to_coordinates_basic ()
+	assert_equal (ptc1[1], 21, "myText1:position_to_coordinates[1] returned :"..ptc1[1]..". Expected: 21")
+assert_equal (ptc1[2], 0, "myText1:postion_to_coordinates[2] returned :"..ptc1[2]..". Expected: 0")
+assert_equal (ptc1[3], 48, "myText1:position_to_coordinates[3] returned :"..ptc1[3]..". Expected: 48")
+
 end
 
--- Edge case - Insert text at the end using a number larger than the length of the string and a negative number  --
-local myText2 = Text ()
-myText2.text = "Fun with Dick and Jane"
-myText2.font = "DejaVu Sans 20px"
-myText2.color = "33FF22AA"
-myText2.position = { 1400, 130 }
-myText2:insert_text(60, "Spot")
-myText2:insert_text(-4,"!")
+-- Requesting a call for a character out of range returns nil --
+function test_Text_position_to_coordinates_out_of_range ()
+	assert_nil (ptc2,  "Out of range text:position_to_coordinates argument did not return nil")
 
-function test_Text_insert_text_before_start_of_text ()
-	assert_equal (myText2.text, "Fun with Dick and JaneSpot!", "insert_text did not insert text as expected.")
 end
 
-test_group:add ( myText1, myText2 )
 
 
 

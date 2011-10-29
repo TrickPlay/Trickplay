@@ -11,8 +11,20 @@ myText1.text = "Fun with Dick and Jane"
 myText1.font = "DejaVu Sans 20px"
 myText1.color = "33FF22AA"
 myText1.position = { 1200, 100 }
+local myText1_changed = false
+
+myText1.on_text_changed = function ()
+	myText1_changed = true
+end
+
 myText1:delete_chars(4)
 
+-- Did the on_text_changed event handler get called during delete_chars --
+function test_Text_delete_chars_event_handler ()
+	assert_true (myText1_changed, "insert_chars did not fire a text changed event.")
+end
+
+-- Basic delete chars test --
 function test_Text_delete_chars_basic ()
 	assert_equal (myText1.text, "Fun with Dick and ", "delete_chars did not remove the last 4 chars of the line.")
 end
