@@ -77,6 +77,61 @@ int UserData::Handle::invoke_callback( const char * name , int nresults )
 
 //=============================================================================
 
+#ifdef TP_PROFILING
+
+class UserData::GCTag : public RefCounted
+{
+public:
+
+	GCTag( UserData * _ud , const gchar * _comment )
+	:
+		udata( _ud ),
+		master( _ud->get_master() ),
+		client( _ud->get_client() ),
+		comment( _comment )
+	{
+		const gchar * _type = _ud->get_type();
+
+		type = _type ? _type : "<unknown>";
+
+		if ( master )
+		{
+			ref();
+
+			g_object_set_data_full( master , "tp-gctag" , this , master_destroyed );
+		}
+	}
+
+	virtual ~GCTag()
+	{
+//		g_debug( "[GCTAG] TAG DESTROYED %p (%p,%p,%s) : %s" , udata , master , client , type.c_str() , comment.c_str() );
+	}
+
+	static void master_destroyed( gpointer g )
+	{
+		GCTag * self = ( GCTag * ) g;
+
+		g_debug( "[GCTAG] MASTER DESTROYED %p (%p,%p,%s) : %s" , self->udata , self->master , self->client , self->type.c_str() , self->comment.c_str() );
+
+		self->unref();
+	}
+
+	void finalized()
+	{
+		g_debug( "[GCTAG] USER DATA FINALIZED %p (%p,%p,%s) : %s" , udata , master , client , type.c_str() , comment.c_str() );
+	}
+
+	UserData *	udata;
+	GObject *	master;
+	gpointer 	client;
+	String 		type;
+	String		comment;
+};
+
+#endif
+
+//=============================================================================
+
 UserData * UserData::make( lua_State * L , const gchar * type )
 {
     LSG;
@@ -94,6 +149,10 @@ UserData * UserData::make( lua_State * L , const gchar * type )
     result->initialized = false;
     result->callbacks_ref = LUA_NOREF;
     result->signals = 0;
+
+#ifdef TP_PROFILING
+    result->gctag = 0;
+#endif
 
     // Duplicate the user data that is already on top of the stack and take a
     // strong reference to it.
@@ -337,6 +396,17 @@ void UserData::finalize( lua_State * L , int index )
     self->weak_ref = LUA_NOREF;
     self->strong_ref = LUA_NOREF;
     self->callbacks_ref = LUA_NOREF;
+
+#ifdef TP_PROFILING
+
+    if ( self->gctag )
+    {
+    	self->gctag->finalized();
+    	self->gctag->unref();
+    	self->gctag = 0;
+    }
+
+#endif
 
     tplog2( "FINALIZED" );
 }
@@ -852,4 +922,21 @@ void UserData::dump()
 		g_info( "%p : %p : %s" , master , client , ud->type );
 	}
 #endif
+}
+
+bool UserData::gc_tag( const gchar * comment )
+{
+
+#ifdef TP_PROFILING
+
+	if ( 0 == gctag )
+	{
+		gctag = new GCTag( this , comment );
+
+		return true;
+	}
+
+#endif
+
+	return false;
 }
