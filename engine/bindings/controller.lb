@@ -14,14 +14,14 @@
     connect.
 */
 
-interface controller [[ControllerDelegate*]]
+interface Controller [[ControllerDelegate*]]
 {
-    controller()
+    Controller()
         [[
             self=lb_construct( ControllerDelegate , lua_touserdata(L,-2) );
         ]];
         
-    ~controller()
+    ~Controller()
         [[
             delete self;    
         ]];
