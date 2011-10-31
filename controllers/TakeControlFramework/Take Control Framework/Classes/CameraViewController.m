@@ -98,22 +98,7 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)incrementalData {
-    NSLog(@"Received Data: %@", incrementalData);
-    /** the data isn't necessary for now
-    BOOL dataCreated = NO;
-    int i;
-    for (i = 0; [connections count]; i++) {
-        if ([connections objectAtIndex:i] == connection) {
-            dataCreated = YES;
-        }
-    }
-    if (!dataCreated) {
-        NSMutableData *data = [[[NSMutableData alloc] initWithCapacity:10000] autorelease];
-        [connections setObject:data forKey:connection];
-    }
     
-    [(NSMutableData *)[connections objectForKey:connection] appendData:incrementalData];
-     //*/
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
@@ -318,6 +303,11 @@
     }
     
     imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    
+    if (mask) {
+        mask.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+    }
+    mask.userInteractionEnabled = NO;
         
     // Displays saved pictures and movies, if both are available
     //imagePickerController.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];

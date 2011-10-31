@@ -10,7 +10,7 @@ Description:  Verify that the iphone returns the correct api calls for supported
 
 -- Tests --
 function test_controller_ui_size ()
-print ("*****************************************************")
+--print ("*****************************************************")
 	--dumptable (ui_size)
 	assert_equal ( ui_size[1], 320,  "ui_size not returning the correct width")
 	assert_equal ( ui_size[2], 435, "ui_size not returning the correct heigth")

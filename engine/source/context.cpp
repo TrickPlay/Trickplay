@@ -627,6 +627,8 @@ static void do_handshake()
 	{
 		memset( response , 0 , sizeof( response ) );
 
+		g_warning("Network auto-verification failed.  Please use manual verification below.");
+
 		g_info("Visit the URL: %s" , url );
 
 		g_info("Now please type the code it gives back: ");
@@ -1803,6 +1805,8 @@ void TPContext::load_external_configuration()
         TP_RESOURCES_PATH,
         TP_TEXTURE_CACHE_LIMIT,
         TP_RESOURCE_LOADER_ENABLED,
+        TP_APP_ARGS,
+        TP_APP_ANIMATIONS_ENABLED,
 
         NULL
     };

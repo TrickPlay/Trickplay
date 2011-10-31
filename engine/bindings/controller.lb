@@ -7,21 +7,21 @@
 #==============================================================================
 
 /*
-    Class: controller
+    Interface: Controller
     
-    This class represents a controller that is connected to TrickPlay. You cannot
-    create new controllers, they are created automatically by TrickPlay when they
+    This interface represents a controller that is connected to TrickPlay. You cannot
+    create new Controllers, they are created automatically by TrickPlay when they
     connect.
 */
 
-interface controller [[ControllerDelegate*]]
+interface Controller [[ControllerDelegate*]]
 {
-    controller()
+    Controller()
         [[
             self=lb_construct( ControllerDelegate , lua_touserdata(L,-2) );
         ]];
         
-    ~controller()
+    ~Controller()
         [[
             delete self;    
         ]];

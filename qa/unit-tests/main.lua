@@ -4,6 +4,13 @@ layout = {} --Table containing all the UIElements that make up each screen
 groups = {} --Table of groups of the UIElements of each screen, each of which can then be ui_element.screen_add()ed
 -- END GLOBAL SECTION
 
+-- ENGINE UNIT TEST SECTION
+app.on_loaded = function ()    -- This api can only be called on startup so running it for test check later
+	appOnLoadedCalled = true
+end
+-- END UNIT TEST SECTION
+
+
 --  UI3 SECTION
 groups["ui3"] = Group() -- Create a Group for this screen
 layout["ui3"] = {}
@@ -149,3 +156,5 @@ end
 -- END SCREEN ON_BUTTON_UP SECTION
 
 -- END GLOBAL SECTION FOOTER 
+
+

@@ -33,6 +33,7 @@ dofile( "packages/engine_unit_tests/tests/image3.lua" )
 dofile( "packages/engine_unit_tests/tests/Rectangle1.lua")
 dofile( "packages/engine_unit_tests/tests/text1.lua" )
 dofile( "packages/engine_unit_tests/tests/text2.lua" )
+dofile( "packages/engine_unit_tests/tests/text3.lua" )
 dofile( "packages/engine_unit_tests/tests/Timeline1.lua" )
 dofile( "packages/engine_unit_tests/tests/Timeline2.lua" )
 dofile( "packages/engine_unit_tests/tests/Timeline3.lua" )
@@ -60,39 +61,70 @@ dofile( "packages/engine_unit_tests/tests/canvas1.lua" )
 dofile( "packages/engine_unit_tests/tests/profile1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/UIElement12.lua" )  
 dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
-dofile( "packages/engine_unit_tests/tests/app1.lua" )
 dofile( "packages/engine_unit_tests/tests/animator1.lua" )
 dofile( "packages/engine_unit_tests/tests/animationState1.lua" )
+dofile( "packages/engine_unit_tests/tests/app1.lua" )
+dofile( "packages/engine_unit_tests/tests/text3.lua" )
+dofile( "packages/engine_unit_tests/tests/text4.lua" )
+dofile( "packages/engine_unit_tests/tests/text5.lua" )
+dofile( "packages/engine_unit_tests/tests/text6.lua" )
+dofile( "packages/engine_unit_tests/tests/text7.lua" )
+dofile( "packages/engine_unit_tests/tests/text8.lua" )
+dofile( "packages/engine_unit_tests/tests/text9.lua" )
+dofile( "packages/engine_unit_tests/tests/all_callbacks.lua" )
+
+
 
 screen:add (test_group)
+
+-- setup steps
+if logo_image ~= nil then	
+   logo_image:grab_key_focus()
+   globe_image:grab_key_focus()
+end
+mediaplayer:set_viewport_geometry (750,10,0,0)
+layout["ui2"].button0.on_focus_in()
+
+
 
 
 -- Timer to give sometime for any tests to complete before calling unit_test
 local total = 0
 
+idle.limit = 1.0
+
 function idle.on_idle( idle , seconds )
-      total = total + seconds
-      if total >= 3 then
+       total = total + seconds
+		
+	if total > 3 or (
+		animator_timeline_completed_called == true and
+		appOnLoadedCalled == true and
+		bitmap1_async_loaded_called == true and
+		image1Loaded == true and
+		image2_callback_called == true and 
+		on_alpha_called == true and
+		media_player_loaded == true and
+		timeline1_on_completed_called == true and
+		timeline5_on_completed_called == true and
+		timeline6_on_completed_called == true and 
+		urlrequest1_on_complete_called == true and
+		tag_img_loaded == true and
+		animation_state2_completed == true
+		)  then
 
-	-- Enter any setup steps that need to be executed before the unit tests run here
-	if logo_image ~= nil then	
-	   logo_image:grab_key_focus()
-	   globe_image:grab_key_focus()
-	end
+			if  total < 10 then
+		 		all_callbacks_fired = true
+			end
 
-	
-	
+			-- run unit tests
+			local engine_results = engine_unit_test() 
+		
+			idle.on_idle = nil
 
-	-- run unit test
-        local engine_results = engine_unit_test() 
-		screen:remove (test_group)
-		mediaplayer:set_viewport_geometry (750,10,0,0)
-        idle.on_idle = nil
-		layout["ui2"].button0.on_focus_in()
+			-- clean up
+			screen:remove (test_group)
+			test_group = nil
+
       end
 end
-
-
-
-
 
