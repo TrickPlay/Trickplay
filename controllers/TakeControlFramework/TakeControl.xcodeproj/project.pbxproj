@@ -724,6 +724,7 @@
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
 				);
+				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
 				LINK_WITH_STANDARD_LIBRARIES = NO;
@@ -743,6 +744,7 @@
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
 				);
+				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
 				LINK_WITH_STANDARD_LIBRARIES = NO;
@@ -762,6 +764,7 @@
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
 				);
+				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
 				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
 				LINK_WITH_STANDARD_LIBRARIES = NO;

@@ -159,7 +159,17 @@ global app [[App*]]
                     g_free( path );
                 }
             }
-        ]]
+        ]];
+        
+    # Property: args
+    # Returns arguments passed to the app via TP_APP_ARGS
+    
+    readonly string args
+        [[
+            TPContext * context = App::get( L )->get_context();
+            
+            args = context->is_first_app() ? context->get( TP_APP_ARGS , "" ) : "";
+        ]];        
         
     # Property: launch
     # Returns information about how this app was launched. The

@@ -10,6 +10,24 @@
 
 
 /**
+ * TVConnection Delegate Protocol for TVBrowser informing of successful
+ * or unsuccessful connection.
+ */
+
+@protocol TVConnectionDidConnectDelegate <NSObject>
+
+@required
+- (void)tvConnection:(TVConnection *)tvConnection didConnectToService:(NSNetService *)service;
+- (void)tvConnection:(TVConnection *)tvConnection didNotConnectToService:(NSNetService *)service;
+
+@end
+
+
+
+#pragma mark -
+#pragma mark TPAppViewController related protocols
+
+/**
  * The AdvancedUIDelegate protocol implemented by AdvancedUIObjectManager
  * registers a delegate which is passed asyncronous calls made for AdvancedUI.
  * (Given that the TPAppViewController is the only object which utilizes

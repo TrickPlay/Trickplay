@@ -10,8 +10,9 @@
 #import "NetServiceManager.h"
 #import "TVConnection.h"
 #import "Extensions.h"
+#import "Protocols.h"
 
-@interface TVBrowserContext : TVBrowser <NetServiceManagerDelegate> {
+@interface TVBrowserContext : TVBrowser <NetServiceManagerDelegate, TVConnectionDidConnectDelegate> {
     @protected
     // The netServiceManager informs the TVBrowser of mDNS broadcasts
     NetServiceManager *netServiceManager;
@@ -47,7 +48,27 @@
 @synthesize tvConnections;
 @synthesize connectedServices;
 @synthesize viewControllers;
-@synthesize delegate;
+//@synthesize delegate;
+
+#pragma mark -
+#pragma mark Property Getters/Setters
+
+- (id <TVBrowserDelegate>)delegate {
+    id <TVBrowserDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <TVBrowserDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
+
+#pragma mark -
+#pragma mark Initialization
 
 - (id)init {
     return [self initWithDelegate:nil];
@@ -112,6 +133,29 @@
 }
 
 #pragma mark -
+#pragma mark TVConnection Connection Delegate
+
+- (void)tvConnection:(TVConnection *)tvConnection didConnectToService:(NSNetService *)service {
+    [tvConnection setTVBrowser:self];
+    [connectedServices addObject:service];
+    [tvConnections addObject:[NSValue valueWithPointer:tvConnection]];
+    
+    if (delegate) {
+        [delegate tvBrowser:self didEstablishConnection:tvConnection newConnection:YES];
+    }
+    
+    [self viewControllersRefresh];
+}
+
+- (void)tvConnection:(TVConnection *)tvConnection didNotConnectToService:(NSNetService *)service {
+    if (delegate) {
+        [delegate tvBrowser:self didNotEstablishConnectionToService:service];
+    }
+    
+    [self viewControllersRefresh];
+}
+
+#pragma mark -
 #pragma mark Managing TVConnections
 
 // TODO: more secure method will prevent from 1 phone having 10+ connections to the same
@@ -162,7 +206,8 @@
     
     NSLog(@"Connect to service: %@ ; type: %@", service, service.type);
     
-    if ([service.type compare:@"_tp-remote._tcp."] != NSOrderedSame || ![netServiceManager.services containsObject:service]) {
+    //if ([service.type compare:@"_tp-remote._tcp."] != NSOrderedSame || ![netServiceManager.services containsObject:service]) {
+    if ([service.type compare:@"_trickplay-http._tcp."] != NSOrderedSame || ![netServiceManager.services containsObject:service]) {
         [self performSelectorOnMainThread:@selector(informOfFailedService:) withObject:service waitUntilDone:NO];
         
         return;
@@ -196,7 +241,8 @@
     NSLog(@"TVBrowser service resolved");
     
     TVConnection *connection = [[[TVConnection alloc] initWithService:service delegate:nil] autorelease];
-    
+    connection.connectionDelegate = self;
+    /*
     if (connection) {
         [connection setTVBrowser:self];
         [connectedServices addObject:service];
@@ -212,6 +258,7 @@
     }
     
     [self viewControllersRefresh];
+    //*/
 }
 
 /**

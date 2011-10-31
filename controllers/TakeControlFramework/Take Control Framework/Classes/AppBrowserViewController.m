@@ -43,22 +43,68 @@
 
 @implementation AppBrowserViewControllerContext
 
-@synthesize tableView;
-@synthesize appBrowser;
-@synthesize delegate;
+//@synthesize tableView;
+//@synthesize appBrowser;
+//@synthesize delegate;
 
 /*
- @synthesize appShopButton;
- @synthesize showcaseButton;
- @synthesize toolBar;
- */
+@synthesize appShopButton;
+@synthesize showcaseButton;
+@synthesize toolBar;
+*/
 
+#pragma mark -
+#pragma mark IBAction methods
 
 - (IBAction)showcaseButtonClick {
 }
 
 - (IBAction)appShopButtonClick {
 }
+
+#pragma mark -
+#pragma mark Forwarded Getters/Setters
+
+- (UITableView *)tableView {
+    UITableView *retval = nil;
+    @synchronized(self) {
+        retval = [[tableView retain] autorelease];
+    }
+    return retval;
+}
+
+- (void)setTableView:(UITableView *)_tableView {
+    @synchronized(self) {
+        [_tableView retain];
+        [tableView release];
+        tableView = _tableView;
+    }
+}
+
+- (AppBrowser *)appBrowser {
+    AppBrowser *retval = nil;
+    @synchronized(self) {
+        retval = [[appBrowser retain] autorelease];
+    }
+    return retval;
+}
+
+- (id <AppBrowserViewControllerDelegate>)delegate {
+    id <AppBrowserViewControllerDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <AppBrowserViewControllerDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
+
+#pragma mark -
+#pragma mark Initialization
 
 - (id)init {
     NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
