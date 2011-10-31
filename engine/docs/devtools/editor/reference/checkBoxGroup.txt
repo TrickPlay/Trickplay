@@ -269,9 +269,7 @@ The text_font property is a text string describing the font to use for the Check
 
 Property: text_color
 
-The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the CheckBox object's text.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The text_color property specifies the color of the object's text. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The text_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* { 255, 255, 255, 255 } (white and completely opaque)
 
@@ -320,9 +318,7 @@ The box_border_width property is an integer value specifying the checkbox's bord
 
 Property: box_color
 
-The box_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's border when the object does not have the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The box_color property specifies the color of the checkbox's border when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The box_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
@@ -332,9 +328,7 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: focus_box_color
 
-The focus_box_color property is a table of integer RGB and alpha settings specifying the color of the checkbox's border when the object has the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The focus_box_color property specifies the color of the checkbox's border when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_box_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* { 0, 255, 0, 255 } (green and completely opaque)
 
@@ -344,9 +338,7 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: fill_color
 
-The fill_color property is a table of integer RGB and alpha settings specifying the CheckBox's fill color when the object does not have the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The fill_color property specifies the object's fill color when it does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The fill_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {255, 255, 255, 0} (white and transparent)
 
@@ -356,9 +348,7 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: focus_fill_color
 
-The focus_fill_color property is a table of integer RGB and alpha settings specifying the CheckBox's fill color when the object has the input focus.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The focus_fill_color property specifies the object's fill color when it has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_fill_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {0, 50, 0, 0} (dark green and transparent)
 

@@ -16,20 +16,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.codec.Base64;
 import org.springframework.web.client.RestTemplate;
 
-import com.trickplay.gameservice.domain.BuddyListInvitation;
 import com.trickplay.gameservice.domain.GameStepId;
 import com.trickplay.gameservice.domain.InvitationStatus;
+import com.trickplay.gameservice.transferObj.BooleanResponse;
 import com.trickplay.gameservice.transferObj.BuddyInvitationListTO;
 import com.trickplay.gameservice.transferObj.BuddyInvitationRequestTO;
 import com.trickplay.gameservice.transferObj.BuddyInvitationTO;
 import com.trickplay.gameservice.transferObj.EventListTO;
+import com.trickplay.gameservice.transferObj.GamePlayInvitationListTO;
 import com.trickplay.gameservice.transferObj.GamePlayInvitationRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlayInvitationTO;
 import com.trickplay.gameservice.transferObj.GamePlayRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlaySessionRequestTO;
 import com.trickplay.gameservice.transferObj.GamePlaySessionTO;
 import com.trickplay.gameservice.transferObj.GamePlayStateTO;
+import com.trickplay.gameservice.transferObj.GamePlaySummaryRequestTO;
+import com.trickplay.gameservice.transferObj.GamePlaySummaryTO;
 import com.trickplay.gameservice.transferObj.GameRequestTO;
+import com.trickplay.gameservice.transferObj.GameSessionMessageListTO;
+import com.trickplay.gameservice.transferObj.GameSessionMessageRequestTO;
+import com.trickplay.gameservice.transferObj.GameSessionMessageTO;
 import com.trickplay.gameservice.transferObj.GameTO;
 import com.trickplay.gameservice.transferObj.ScoreFilterTO.ScoreType;
 import com.trickplay.gameservice.transferObj.ScoreListTO;
@@ -44,14 +50,16 @@ import com.trickplay.gameservice.transferObj.VendorTO;
 
 public class GameServiceClient {
 
-	private static final String GS_ENDPOINT = "http://localhost:8081/gameservice/rest";
-
+	private static final String GS_ENDPOINT = "http://localhost:9081/gameservice/rest";
 
 
 		public static void main(String[] args) {
 			
 			RestTemplate restTemplate = getTemplate();
 			
+			checkUserExists(restTemplate, "u1");
+			checkUserExists(restTemplate, "u2");
+			checkUserExists(restTemplate, "u3");
 			/* create users [u1, u2, u3]*/
 			Map<String, UserTO> umap = new HashMap<String, UserTO>();
 			umap.put("u1", postUser(restTemplate, new UserRequestTO("u1", "u1@u1.com", "u1")));
@@ -75,6 +83,8 @@ public class GameServiceClient {
 			for(UserTO buddy:buddies.getBuddies()){
 				System.out.println("buddy:"+buddy.getUsername());
 			}
+			
+			checkVendorExists(restTemplate, "v1", "u1", "u1");
 			/* create vendors [(v1,u1), (v2,u1), (v3,u3)]*/
 			Map<String, VendorTO> vmap = new HashMap<String, VendorTO>();
 			vmap.put("v1-u1", postVendor(restTemplate, new VendorRequestTO("v1-u1"), "u1", "u1"));			
@@ -84,13 +94,17 @@ public class GameServiceClient {
 			/* create games [(g10-g12,v1,u1)(g20-g22,v2,u1)(g30-g32,v3,u3)] */
 			Map<String, GameTO> gmap = new HashMap<String, GameTO>();
 			for(int i=0; i<3; i++) {
-				gmap.put("g1"+i+"-v1-u1", postGame(restTemplate, 
+			    String name = "g1"+i+"-v1-u1";
+			    checkGameExists(restTemplate, name, "u1", "u1");
+				gmap.put(name, postGame(restTemplate, 
 					new GameRequestTO( 
-							"g1"+i+"-v1-u1", 
-							"g1"+i+"-v1-u1.us.world",
+							name, 
+							name+".us.world",
 							vmap.get("v1-u1").getId(),
 							1,
 							3,
+							true,
+							true,
 							true,
 							true), "u1", "u1"));
 			}
@@ -105,6 +119,8 @@ public class GameServiceClient {
 							1,
 							3,
 							true,
+							true,
+							true,
 							true), "u1", "u1"));
 			}
 			
@@ -118,6 +134,8 @@ public class GameServiceClient {
 							1,
 							3,
 							true,
+							true,
+							true,
 							true), "u3", "u3"));
 			}
 			
@@ -128,9 +146,9 @@ public class GameServiceClient {
 			GamePlaySessionRequestTO gpTO = new GamePlaySessionRequestTO(gameId);
 			GamePlaySessionTO gsTO = postCreateGameSession(restTemplate, gpTO, "u1", "u1");
 			/*
-			 * send a game invitation
+			 * send a wild card game invitation
 			 */
-			GamePlayInvitationRequestTO gpiTO = new GamePlayInvitationRequestTO(umap.get("u2").getId());
+			GamePlayInvitationRequestTO gpiTO = new GamePlayInvitationRequestTO(/*umap.get("u2").getId()*/);
 			
 			GamePlayInvitationTO gpInvitationTO = postGamePlayInvitation(restTemplate, gsTO, gpiTO, "u1", "u1");
 			
@@ -138,7 +156,9 @@ public class GameServiceClient {
 			
 			EventListTO elist = getGameServiceEvents(restTemplate, "u2", "u2");
 		//	ProcessGamePlayInvitationRequestTO gpi = new ProcessGamePlayInvitationRequestTO(InvitationStatus.ACCEPTED);
-			updateGamePlayInvitation(restTemplate, gsTO.getId(), gpInvitationTO.getId(), InvitationStatus.ACCEPTED, "u2", "u2");
+			GamePlayInvitationListTO invitationList = getGamePlayInvitations(restTemplate, gameId, 10, "u2", "u2");
+			gpInvitationTO = invitationList.getInvitations().get(0);
+			updateGamePlayInvitation(restTemplate, gpInvitationTO.getId(), InvitationStatus.ACCEPTED, "u2", "u2");
 			
 			elist = getGameServiceEvents(restTemplate, "u2", "u2");
 		
@@ -148,6 +168,7 @@ public class GameServiceClient {
 			startGamePlay(restTemplate, gsRequestTO, "u1", "u1");
 			long u1points = 0;
 			long u2points = 0;
+			String winner = null;
 			
 			boolean gameOver = false;
 			while(!gameOver) {
@@ -160,6 +181,7 @@ public class GameServiceClient {
 				}
 				if (gpsTO.getTurnId().equals(umap.get("u1").getId())) {
 					/******** u1's turn ********/
+				    postGameSessionMessage(restTemplate, gsTO.getId(), "my (u1's) turn", "u1", "u1");
 					String state = decodeState(gpsTO.getState());
 					int counter = Integer.parseInt(state);
 					if (counter<10) {
@@ -170,11 +192,14 @@ public class GameServiceClient {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), null);
 							endGamePlay(restTemplate, gsRequestTO, "u1", "u1");
 							u1points += 100;
+							winner = "u1";
+							postGameSessionMessage(restTemplate, gsTO.getId(), "I (u1) am the winner. You (u2) suck", "u1", "u1");
 							break;
 						} else {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), umap.get("u2").getId());
 							updateGamePlay(restTemplate, gsRequestTO, "u1", "u1");
 							u1points += 10;
+                            postGameSessionMessage(restTemplate, gsTO.getId(), "I ( u1 ) incremented the counter. Your ( u2's ) turn", "u1", "u1");
 						}
 					}
 					else {
@@ -193,6 +218,7 @@ public class GameServiceClient {
 				
 				if (gpsTO.getTurnId().equals(umap.get("u2").getId())) {
 					/*** u2's turn ********/
+                    postGameSessionMessage(restTemplate, gsTO.getId(), "my (u2's) turn", "u2", "u2");
 					String state = decodeState(gpsTO.getState());
 					int counter = Integer.parseInt(state);
 					if (counter<10) {
@@ -204,10 +230,13 @@ public class GameServiceClient {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), null);
 							endGamePlay(restTemplate, gsRequestTO, "u2", "u2");
 							u2points = 100;
+							winner = "u2";
+                            postGameSessionMessage(restTemplate, gsTO.getId(), "I (u2) am the winner. You (u1) suck", "u2", "u2");
 						} else {
 							gsRequestTO = new GamePlayRequestTO(gsTO.getId(), encodeState(Integer.toString(counter)), umap.get("u1").getId());
 							updateGamePlay(restTemplate, gsRequestTO, "u2", "u2");
 							u2points += 10;
+                            postGameSessionMessage(restTemplate, gsTO.getId(), "I ( u2 ) incremented the counter. Your ( u1's ) turn", "u2", "u2");
 						}
 					}
 					else {
@@ -242,10 +271,58 @@ public class GameServiceClient {
 				System.out.println("user:"+score.getUserName()+", game="+score.getGameName()+", points="+score.getPoints());
 			}
 			
+			Long u1Id = umap.get("u1").getId();
+			GamePlaySummaryTO summaryTO = getGamePlaySummary(restTemplate, gameId, "u1", "u1");
+			
+			GamePlaySummaryRequestTO winnerSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"1:0\"}");
+			GamePlaySummaryRequestTO loserSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"0:1\"}");
+			if ("u1".equals(winner)) {
+			    postGamePlaySummary(restTemplate, gameId, winnerSummaryTO, "u1", "u1");
+			    postGamePlaySummary(restTemplate, gameId, loserSummaryTO, "u2", "u2");
+			} else {
+			    postGamePlaySummary(restTemplate, gameId, winnerSummaryTO, "u2", "u2");
+                postGamePlaySummary(restTemplate, gameId, loserSummaryTO, "u1", "u1");
+			}
+			
+			getGameSessionMessages(restTemplate, gsTO.getId(), "u1", "u1");
+			
+			
 		}
 		
 		
+		public static GamePlaySummaryTO getGamePlaySummary(RestTemplate rest, Long gameId, String username, String password) {
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            ResponseEntity<GamePlaySummaryTO> response = rest.exchange(
+                    GS_ENDPOINT+"/game/{id}/summary", HttpMethod.GET, 
+                    entity, GamePlaySummaryTO.class, gameId);
+            
+            GamePlaySummaryTO output = response.getBody();
+            System.out.println("GamePlaySummary for gameId: " + gameId + ", username:" + username + " is: " + output.getDetail());
+            return output;
+        }
 		
+		public static GamePlaySummaryTO postGamePlaySummary(RestTemplate rest, Long gameId, GamePlaySummaryRequestTO summaryRequestTO, String username, String password) {
+            HttpEntity<GamePlaySummaryRequestTO> entity = prepareJsonRequest(summaryRequestTO, true, username, password);
+            ResponseEntity<GamePlaySummaryTO> response = rest.postForEntity(
+                    GS_ENDPOINT+"/game/{id}/summary", 
+                    entity, GamePlaySummaryTO.class, gameId);
+            
+            GamePlaySummaryTO output = response.getBody();
+            System.out.println("GamePlaySummary for gameId: " + gameId + ", username:" + username + " is: " + output.getDetail());
+            return output;
+        }
+		
+        public static BooleanResponse checkUserExists(RestTemplate rest, String username) {
+            HttpEntity<String> entity = prepareJsonGet();
+            ResponseEntity<BooleanResponse> response = rest.exchange(
+                    GS_ENDPOINT+"/user/exists?username={username}", HttpMethod.GET, 
+                    entity, BooleanResponse.class, username);
+            
+            BooleanResponse output = response.getBody();
+            System.out.println("user: " + username + ", exists:" + output.isValue());
+            return output;
+        }
+        
 		public static UserTO postUser(RestTemplate rest, UserRequestTO input) {
 			HttpEntity<UserRequestTO> entity = prepareJsonRequest(input);//new HttpEntity<UserTO>(input);
 			ResponseEntity<UserTO> response = rest.postForEntity(
@@ -261,7 +338,7 @@ public class GameServiceClient {
 			HttpEntity<BuddyInvitationRequestTO> entity = prepareJsonRequest(input, true, username, password);
 			//	entity.
 				ResponseEntity<BuddyInvitationTO> response = rest.postForEntity(
-						GS_ENDPOINT+"/user/"+userId+"/invitation", 
+						GS_ENDPOINT+"/user/invitation", 
 						entity, BuddyInvitationTO.class);
 				
 				BuddyInvitationTO output = response.getBody();
@@ -270,9 +347,9 @@ public class GameServiceClient {
 		}
 		
 		public static BuddyInvitationListTO getBuddyListReceivedInvitations(RestTemplate rest, Long userId, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<BuddyInvitationListTO> response = rest.exchange(
-					GS_ENDPOINT+"/user/"+userId+"/invitation?type=RECEIVED", HttpMethod.GET, entity, BuddyInvitationListTO.class);
+					GS_ENDPOINT+"/user/invitation?type=RECEIVED", HttpMethod.GET, entity, BuddyInvitationListTO.class);
 			
 			BuddyInvitationListTO output = response.getBody();
 			System.out.println("Number of Buddy List invitations received: " + output.getInvitations().size());
@@ -285,7 +362,7 @@ public class GameServiceClient {
 			HttpEntity<UpdateInvitationStatusRequestTO> entity = prepareJsonRequest(input, true, username, password);
 			//	entity.
 				ResponseEntity<BuddyInvitationTO> response = rest.exchange(
-						GS_ENDPOINT+"/user/"+userId+"/invitation/"+invitationId, HttpMethod.PUT,
+						GS_ENDPOINT+"/user/invitation/"+invitationId, HttpMethod.PUT,
 						entity, BuddyInvitationTO.class);
 				
 				BuddyInvitationTO output = response.getBody();
@@ -295,9 +372,9 @@ public class GameServiceClient {
 		
 		//
 		public static UserBuddiesTO getBuddyList(RestTemplate rest, Long userId, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<UserBuddiesTO> response = rest.exchange(
-					GS_ENDPOINT+"/user/"+userId+"/buddy-list", HttpMethod.GET, entity, UserBuddiesTO.class);
+					GS_ENDPOINT+"/user/buddy-list", HttpMethod.GET, entity, UserBuddiesTO.class);
 			
 			UserBuddiesTO output = response.getBody();
 			System.out.println("Got Buddy List for user:" + output.getUser().getUsername()+". size:"+output.getBuddies().size());
@@ -305,6 +382,17 @@ public class GameServiceClient {
 			
 		}
 		
+        public static VendorTO checkVendorExists(RestTemplate rest, String name, String username, String password) {
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            ResponseEntity<VendorTO> response = rest.exchange(
+                    GS_ENDPOINT+"/vendor/exists?name={name}", HttpMethod.GET,
+                    entity, VendorTO.class, name);
+            
+            VendorTO output = response.getBody();
+            System.out.println("vendor: " + name + ", exists:" + output.getId()==null);
+            return output;
+        }
+        
 		public static VendorTO postVendor(RestTemplate rest, VendorRequestTO input, String username, String password) {
 			HttpEntity<VendorRequestTO> entity = prepareJsonRequest(input, true, username, password);
 		//	entity.
@@ -318,6 +406,17 @@ public class GameServiceClient {
 			
 		}
 		
+        public static GameTO checkGameExists(RestTemplate rest, String name, String username, String password) {
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            ResponseEntity<GameTO> response = rest.exchange(
+                    GS_ENDPOINT+"/game/exists?name={name}", HttpMethod.GET,
+                    entity, GameTO.class, name);
+            
+            GameTO output = response.getBody();
+            System.out.println("game: " + name + ", exists:" + output.getId()==null);
+            return output;
+        }
+        
 		public static GameTO postGame(RestTemplate rest, GameRequestTO input, String username, String password) {
 			HttpEntity<GameRequestTO> entity = prepareJsonRequest(input, true, username, password);
 		//	entity.
@@ -355,12 +454,12 @@ public class GameServiceClient {
 			return output;			
 		}
 		
-		public static GamePlayInvitationTO updateGamePlayInvitation(RestTemplate rest, Long gameSessionId, Long invitationId, InvitationStatus status, String username, String password) {
+		public static GamePlayInvitationTO updateGamePlayInvitation(RestTemplate rest, Long invitationId, InvitationStatus status, String username, String password) {
 			UpdateInvitationStatusRequestTO input = new UpdateInvitationStatusRequestTO(status);
 			HttpEntity<UpdateInvitationStatusRequestTO> entity = prepareJsonRequest(input, true, username, password);
 		//	entity.
 			ResponseEntity<GamePlayInvitationTO> response = rest.postForEntity(
-					GS_ENDPOINT+"/gameplay/"+gameSessionId+"/invitation/"+invitationId+"/update", 
+					GS_ENDPOINT+"/gameplay/invitation/"+invitationId+"/update", 
 					entity, GamePlayInvitationTO.class);
 			
 			GamePlayInvitationTO output = response.getBody();
@@ -369,6 +468,17 @@ public class GameServiceClient {
 			
 		}
 		
+	      public static GamePlayInvitationListTO getGamePlayInvitations(RestTemplate rest, Long gameId, int max, String username, String password) {
+	            HttpEntity<String> entity = prepareJsonGet(username, password);
+	            ResponseEntity<GamePlayInvitationListTO> response = rest.exchange(
+	                    GS_ENDPOINT+"/game/"+gameId+"/invitations?max="+max, HttpMethod.GET, entity, GamePlayInvitationListTO.class);
+	            
+	            GamePlayInvitationListTO output = response.getBody();
+	            System.out.println("Number of Game Play invitations received: " + output.getInvitations().size());
+	            return output;
+	            
+	        }
+
 		public static GameStepId startGamePlay(RestTemplate rest, GamePlayRequestTO gamePlayTO, String username, String password) {
 			HttpEntity<GamePlayRequestTO> entity = prepareJsonRequest(gamePlayTO, true, username, password);
 		//	entity.
@@ -408,8 +518,43 @@ public class GameServiceClient {
 			
 		}
 
-		public static EventListTO getGameServiceEvents(RestTemplate rest, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+        public static GameSessionMessageTO postGameSessionMessage(RestTemplate rest, Long sessionId, String message, String username, String password) {
+            HttpEntity<GameSessionMessageRequestTO> entity = prepareJsonRequest(new GameSessionMessageRequestTO(message), true, username, password);
+        //  entity.
+            ResponseEntity<GameSessionMessageTO> response = rest.postForEntity(
+                    GS_ENDPOINT+"/gameplay/"+sessionId+"/message", 
+                    entity, GameSessionMessageTO.class);
+            
+            GameSessionMessageTO output = response.getBody();
+            System.out.println("Posted a message. game session id: " + output.getGameSessionId() + ", message: '" + output.getMessage() + "'" );
+            return output;
+            
+        }
+        
+        public static GameSessionMessageListTO getGameSessionMessages(
+                RestTemplate rest, Long sessionId, String username, String password) {
+            
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            
+            ResponseEntity<GameSessionMessageListTO> response = rest.exchange(
+                    GS_ENDPOINT + "/gameplay/" + sessionId + "/message",
+                    HttpMethod.GET, entity, GameSessionMessageListTO.class);
+    
+            GameSessionMessageListTO output = response.getBody();
+            
+            System.out.println("Got game session messages in game session:"
+                    + sessionId);
+            
+            for (GameSessionMessageTO message : output.getMessages()) {
+                System.out.println("message info [ id : " + message.getId()
+                        + ", from : " + message.getSenderName() + ", message: '"
+                        + message.getMessage() + "']");
+            }
+            return output;
+        }
+
+        public static EventListTO getGameServiceEvents(RestTemplate rest, String username, String password) {
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<EventListTO> response = rest.exchange(
 					GS_ENDPOINT+"/gameplay/events", HttpMethod.GET, entity, EventListTO.class);
 			
@@ -420,7 +565,7 @@ public class GameServiceClient {
 		}
 		
 		public static GamePlayStateTO getGamePlayState(RestTemplate rest, Long sessionId, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<GamePlayStateTO> response = rest.exchange(
 					GS_ENDPOINT+"/gameplay/"+sessionId+"/state", HttpMethod.GET, entity, GamePlayStateTO.class);
 			
@@ -443,7 +588,7 @@ public class GameServiceClient {
 		}
 		
 		public static ScoreListTO getScore(RestTemplate rest, Long gameId, ScoreType st, String username, String password) {
-			HttpEntity<String> entity = prepareJsonGet(true, username, password);
+			HttpEntity<String> entity = prepareJsonGet(username, password);
 			ResponseEntity<ScoreListTO> response = rest.exchange(
 					GS_ENDPOINT+"/game/"+gameId+"/score?type={type}", HttpMethod.GET, entity, ScoreListTO.class, st.name());
 			
@@ -469,10 +614,16 @@ public class GameServiceClient {
 			return entity;
 		}
 		
-		private static HttpEntity<String> prepareJsonGet(boolean useBasicAuth, String username, String password) {
-            return new HttpEntity<String>(prepareJsonHeaders(useBasicAuth, username, password));
+		private static HttpEntity<String> prepareJsonGet() {
+            return new HttpEntity<String>(prepareJsonHeaders());
+        }
+		private static HttpEntity<String> prepareJsonGet(String username, String password) {
+            return new HttpEntity<String>(prepareJsonHeaders(true, username, password));
 		}
 		
+		private static HttpHeaders prepareJsonHeaders() {
+            return prepareJsonHeaders(false, null, null);
+        }
 		private static HttpHeaders prepareJsonHeaders(boolean useBasicAuth, String username, String password) {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);

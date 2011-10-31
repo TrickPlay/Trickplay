@@ -5,49 +5,39 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.codec.Base64;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
-import com.trickplay.gameservice.dao.impl.SpringUtils;
-import com.trickplay.gameservice.domain.Device;
-import com.trickplay.gameservice.domain.StatelessHttpSession;
-import com.trickplay.gameservice.domain.User;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.dao.DeviceDAO;
+import com.trickplay.gameservice.dao.SessionTokenDAO;
+import com.trickplay.gameservice.domain.SessionToken;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.security.SecurityUtil;
-import com.trickplay.gameservice.service.DeviceService;
 import com.trickplay.gameservice.service.SessionService;
-import com.trickplay.gameservice.transferObj.SessionTO;
 
 @Service("sessionService")
-@Repository
-public class SessionServiceImpl extends
-		GenericDAOWithJPA<StatelessHttpSession, Long> implements SessionService {
-	private static final long MAX_SESSION_DURATION = 12 * 60 * 60 * 1000;
+public class SessionServiceImpl implements SessionService {
+    private static final Logger logger = LoggerFactory.getLogger(SessionServiceImpl.class);
 
 	@Autowired
-	DeviceService deviceService;
+	DeviceDAO deviceDAO;
+	
+	@Autowired
+    SessionTokenDAO sessionTokenDAO;
 
-	public SessionTO findByToken(String token) {
-		StatelessHttpSession session = findSessionByToken(token);
-		return session != null ? new SessionTO(session) : null;
+	public SessionToken findByToken(String token) {
+	    return sessionTokenDAO.findByToken(token);
 	}
 
-	@SuppressWarnings("unchecked")
-	private StatelessHttpSession findSessionByToken(String token) {
-		List<StatelessHttpSession> list = super.entityManager
-				.createQuery(
-						"Select skey from SessionKey skey where skey.token = :token")
-				.setParameter("token", token).getResultList();
-		return SpringUtils.getFirst(list);
-	}
 
-	public SessionTO create(String deviceKey) {
+	@Transactional
+	public void create(SessionToken sessionToken) {
+	    /*
 		Device d = deviceService.findByKey(deviceKey);
 		if (d == null) {
 			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null,
@@ -60,9 +50,24 @@ public class SessionServiceImpl extends
 		User owner = super.entityManager.find(User.class, SecurityUtil
 				.getPrincipal().getId());
 		session.setOwner(owner);
-
-		persist(session);
-		return new SessionTO(session);
+		*/
+	    if (sessionToken == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("SessionToken", null, "!= null");
+	    } else if (sessionToken.getToken() == null || sessionToken.getToken().trim().isEmpty()) {
+	        throw ExceptionUtil.newIllegalArgumentException("SessionToken.token", "", "length(SessionToken.token) > 0");
+	    }
+	    try {
+	        sessionTokenDAO.persist(sessionToken);
+	    } catch (DataIntegrityViolationException ex) {
+	        logger.error("Failed to create SessionToken.", ex);
+	        throw ExceptionUtil.newEntityExistsException(SessionToken.class,
+	                "token", sessionToken.getToken());
+	    } catch (RuntimeException ex) {
+	        logger.error("Failed to create SessionToken.", ex);
+	        throw ExceptionUtil.convertToSupportedException(ex);
+	    }
+	//	return session;
+	//	return new SessionTO(session);
 	}
 
 	public static String generateToken() {
@@ -73,35 +78,43 @@ public class SessionServiceImpl extends
 			random.nextBytes(bytes);
 			return new String(Base64.encode(bytes), Charset.forName("US-ASCII"));
 		} catch (Exception e) {
-			throw new GameServiceException(Reason.FAILED_TO_CREATE_SESSION, e);
+			throw ExceptionUtil.newFailedToCreateSessionException(e);
 		}
 	}
 	
-	private Date computeTokenExpirationTime() {
-		return new Date(System.currentTimeMillis()
-				+ MAX_SESSION_DURATION);
-	}
 
 	@Transactional
-	public SessionTO touchSession(String token) {
-		StatelessHttpSession httpSession = findSessionByToken(token);
-		if (httpSession == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null,
-					ExceptionContext.make("Session.token", token));
-		if (httpSession.isExpired())
-			throw new GameServiceException(Reason.SESSION_EXPIRED, null,
-					ExceptionContext.make("Session.token", token));
-		else 
-			httpSession.setExpires(computeTokenExpirationTime());
-		return new SessionTO(httpSession);
+	public SessionToken touchSession(String tokenId) {
+		SessionToken httpSession = findByToken(tokenId);
+		if (httpSession == null) {
+			throw ExceptionUtil.newEntityNotFoundException(SessionToken.class, "token", tokenId);
+		}
+		if (httpSession.isExpired()) {
+			throw ExceptionUtil.newSessionExpiredException(tokenId);
+		} 
+		else { 
+			httpSession.setLastUsed(new Date());
+		}
+		return httpSession;
 	}
+	
+	@Transactional
+    public SessionToken expireToken(Long tokenId) {
+        SessionToken httpSession = sessionTokenDAO.find(tokenId);
+        if (httpSession == null) {
+            throw ExceptionUtil.newEntityNotFoundException(SessionToken.class, "token", tokenId);
+        }
+        if (!httpSession.isExpired())
+            httpSession.setExpired(true);
+        return httpSession;
+    }
 
 	public void remove(String token) {
-
+	    throw ExceptionUtil.newUnsupportedOperationException("remove(Session)");
 	}
 
-	public List<SessionTO> getActiveSessions() {
-		return null;
+	public List<Long> pickPlayersRandom(int count) {
+	    return sessionTokenDAO.pickPlayersRandom(SecurityUtil.getCurrentUserId(), count);
 	}
 
 }

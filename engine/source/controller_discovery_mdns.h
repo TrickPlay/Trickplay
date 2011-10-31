@@ -12,7 +12,7 @@ class ControllerDiscoveryMDNS : public ControllerServer::Discovery
 {
 public:
 
-    ControllerDiscoveryMDNS( TPContext * context, const String & name, int port );
+    ControllerDiscoveryMDNS( TPContext * context, const String & name, int port , int http_port );
 
     ~ControllerDiscoveryMDNS();
 
@@ -33,6 +33,7 @@ private:
     String              name;
     bool                ready;
     int                 port;
+    int					http_port;
 };
 
 #endif // _TRICKPLAY_CONTROLLER_DISCOVERY_MDNS_H

@@ -16,7 +16,7 @@ test_group:add (image1)
 local myTimeline = Timeline ()
 local frameCount = 0
 local on_new_frame_called = false
-local on_completed_called = false
+timeline1_on_completed_called = false
 local on_started_called = false
 local looped = 0
 myTimeline.duration = 1000
@@ -30,7 +30,7 @@ myTimeline.on_new_frame = function (self, timeline_ms, progress)
 end
 
 myTimeline.on_completed = function ()
-	on_completed_called = true
+	timeline1_on_completed_called = true
 end
 
 myTimeline.on_started = function ()
@@ -49,7 +49,7 @@ end
 
 -- verify that on_completed was completed
 function test_Timeline_on_completed ()
-    assert_equal( on_completed_called , true , "on_completed not called" )
+    assert_equal( timeline1_on_completed_called , true , "on_completed not called" )
 end
 
 -- verify that on_started was called

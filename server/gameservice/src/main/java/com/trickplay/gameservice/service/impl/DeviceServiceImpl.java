@@ -1,51 +1,75 @@
 package com.trickplay.gameservice.service.impl;
 
-import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
-import com.trickplay.gameservice.dao.impl.SpringUtils;
+import com.trickplay.gameservice.dao.DeviceDAO;
+import com.trickplay.gameservice.dao.GameDAO;
 import com.trickplay.gameservice.domain.Device;
 import com.trickplay.gameservice.domain.Game;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.service.DeviceService;
-import com.trickplay.gameservice.service.GameService;
 
 @Service("deviceService")
-@Repository
-public class DeviceServiceImpl extends GenericDAOWithJPA<Device, Long> implements
-		DeviceService {
+public class DeviceServiceImpl implements DeviceService {
+    private static final Logger logger = LoggerFactory.getLogger(DeviceServiceImpl.class);
 	@Autowired
-	GameService gameService;
-
-	@SuppressWarnings("unchecked")
+	GameDAO gameDAO;
+	
+	@Autowired
+	DeviceDAO deviceDAO;
+	
+	
 	public Device findByKey(String deviceKey) {
 
-		List<Device> list = super.entityManager.createQuery("Select d from Device as d where d.deviceKey = :key").
-		setParameter("key", deviceKey).getResultList();
-		Device d = SpringUtils.getFirst(list);
-		
-		return d;
+		return deviceDAO.findByKey(deviceKey);
 	}
 	
+	/*
+	 * TODO: handle the condition of adding the same game more than once to a device.
+	 * 
+	 * (non-Javadoc)
+	 * @see com.trickplay.gameservice.service.DeviceService#addGame(java.lang.String, java.lang.String)
+	 */
 	@Transactional
 	public Device addGame(String deviceKey, String name) {
 		Device d = findByKey(deviceKey);
-		if (d == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Device.deviceKey", deviceKey));
-		Game g = gameService.findByName(name);
-		if (g == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.name", name));
-		
+		if (d == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(Device.class, "deviceKey", deviceKey);
+		}
+		Game g = gameDAO.findByName(name);
+		if (g == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(Game.class, "name", name);
+		}
 		d.addGame(g);
 		return d;
 	}
+
+	@Transactional
+    public void create(Device entity) {
+	    if (entity == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("Device", null, "!= null");
+	    } 
+	    try {
+	        deviceDAO.persist(entity);
+	    }  catch (DataIntegrityViolationException ex) {
+	        logger.error("Failed to create Device.", ex);
+	        throw ExceptionUtil.newEntityExistsException(Device.class, "deviceKey", entity.getDeviceKey());
+	    } catch (RuntimeException ex) {
+	        logger.error("Failed to create Device.", ex);
+	        throw ExceptionUtil.convertToSupportedException(ex);
+	    }
+        
+    }
+
+    public Device find(Long id) {
+        return deviceDAO.find(id);
+    }
+
 	
 
 }

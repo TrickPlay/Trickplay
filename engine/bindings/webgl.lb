@@ -1866,7 +1866,6 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
 
             GLsizei width = 0;
             GLsizei height = 0;
-            GLint border = 0;
             GLenum format = internalformat;
             GLenum type = 0;
             const void * pixels = 0;
