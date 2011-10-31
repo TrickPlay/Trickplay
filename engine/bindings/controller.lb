@@ -7,10 +7,10 @@
 #==============================================================================
 
 /*
-    Class: controller
+    Interface: Controller
     
-    This class represents a controller that is connected to TrickPlay. You cannot
-    create new controllers, they are created automatically by TrickPlay when they
+    This interface represents a controller that is connected to TrickPlay. You cannot
+    create new Controllers, they are created automatically by TrickPlay when they
     connect.
 */
 
