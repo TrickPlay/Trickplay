@@ -582,7 +582,9 @@ public class GamePlayServiceImpl implements GamePlayService {
             summary.setDetail(summaryDetail);
             gamePlaySummaryDAO.persist(summary);
         } else {
+           // GamePlaySummary updatable = gamePlaySummaryDAO.find(summary.getId());
             summary.setDetail(summaryDetail);
+            //gamePlaySummaryDAO.merge(summary);
         }
         return summary;        
     }
