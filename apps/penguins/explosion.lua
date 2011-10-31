@@ -12,10 +12,10 @@ pieces:add(puff,snow[1],snow[2],snow[3])
 local clones = {index = 1}
 clones.new = function(num)
 	local ret = {}
-    local c
-    local cs = 0
+    local i = 0
 	
-	for i=1,math.min(#clones,num) do
+    while #ret < num and i < #clones do
+        i = i + 1
 		if not clones[i].parent then
 			ret[#ret+1] = clones[i]
 		end
@@ -23,12 +23,9 @@ clones.new = function(num)
     
 	while #ret < num do
 		clones[#clones+1] = Clone{source = snow[1 + #clones%#snow]}
-        clones[#clones].ot = 2000
+        clones[#clones].vo = -255/2000
 		ret[#ret+1] = clones[#clones]
-        cs = cs + 1
 	end
-    
-    print('of ' .. #clones .. ', cloned ' .. cs .. ', returned ' .. #ret .. '/' .. num)
     
 	return ret
 end
@@ -45,7 +42,7 @@ puffs.new = function()
         p = Clone{source = puff}
         puffs[#puffs+1] = p
         p.anchor_point = {64,64}
-        p.ot = 800
+        p.vo = -255/800
     end
     
     p.scale = scale1
@@ -67,7 +64,7 @@ function anim:on_new_frame(ms,t)
     m2 = ms/2^(ms/1000)
     mz1 = ms*ms/8000
 	for k,v in ipairs(show.children) do
-        v.opacity = math.max(0,v.oo-255*ms/v.ot)
+        v.opacity = math.max(0,v.oo+v.vo*ms)
         if v.opacity == 0 then
             show:remove(v)
         else
@@ -86,16 +83,16 @@ return function(vx,vy)
     if anim.is_playing then
         local ms = anim.elapsed
         local t = ms/anim.duration
+        m2 = ms/2^(ms/1000)
         
         for k,v in ipairs(show.children) do
             v.ox, v.oy = v.x, v.y
-            v.vx, v.vy = v.vx + t*600, v.vy + t*100
-            v.oo = v.opacity
-            v.z1 = v.z_rotation[1]
-            v.os = v.scale[1]
-            if v.opacity == 0 then
-                show:remove(v)
+            v.vx, v.vy = v.vx*m2 + t*1200, v.vy*m2 + t*200
+            if v.z1 then
+                v.z1 = v.z_rotation[1]
             end
+            v.os = v.scale[1]
+            v.oo = v.opacity
         end
     end
     
