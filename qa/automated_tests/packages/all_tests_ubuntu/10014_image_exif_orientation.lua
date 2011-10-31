@@ -16,7 +16,7 @@ function generate_test_image ()
 	image1.on_loaded = function ( loaded_image, failed )
 	   if failed == false then
 	   	image1_loaded = true
-	  	print ("image1 loaded")
+	  	--print ("image1 loaded")
 	  end
 	end
 
@@ -30,7 +30,7 @@ function generate_test_image ()
 	image2.on_loaded = function ( loaded_image, failed )
 	   if failed == false then
 	   	image2_loaded = true
-	  	print ("image2 loaded")
+	  	--print ("image2 loaded")
 	  end
 	end
 

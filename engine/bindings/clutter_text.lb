@@ -134,10 +134,8 @@ class Text [[ClutterActor*]] actor
     /*
     	Property: color
     	
-    	The color property specifies the color of the text string when displayed.
-    	
-    	The format of the color property is described in <RGB/Alpha Color Formats>.
-    	
+    	The color property specifies the color of the text string when displayed. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
+
     	*See Also:* the <font> property
     */
     
@@ -670,7 +668,7 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: selection_color
 		
-		The selection_color property is a series of RGB (Red/Green/Blue) and alpha (transparency) values that define the color of selected text. The format of the RGB and alpha values is described in <RGB/Alpha Color Formats>.
+		The selection_color property specifies the color of selected text. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 		
 		The selection_color property is applicable to editable Text objects only.
 
@@ -712,11 +710,11 @@ class Text [[ClutterActor*]] actor
 	/*
 		Property: cursor_color
 
-		The cursor_color property is a series of RGB (Red/Green/Blue) and alpha (transparency) values that define the color of the cursor. The format of the RGB and alpha values is described in <RGB/Alpha Color Formats>.
-
+		The cursor_color property specifies the color of the cursor. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
+	
 		The cursor_color property is applicable to editable Text objects only.
 
-		*Default Setting:* RGB( 255, 255, 255 )/white with an alpha of 255/opaque
+		*Default Setting:* rgba(255,255,255,255)
 		
 		*See Also:* the <editable>, <cursor_position>, <cursor_visible> and <cursor_size> properties
 	*/
@@ -780,11 +778,11 @@ class Text [[ClutterActor*]] actor
 	/*
 		Function: delete_selection
 		
-		The delete_selection() function removes a previously-defined text selection from the object's <text> string. The selection can be defined by calling the the <set_selection> function or by setting the object's <cursor_position> and <selection_end> properties.
+		The delete_selection() function removes a previously-defined text selection from the object's <text> string. The selection can be defined by calling the <set_selection> function or by setting the object's <cursor_position> and <selection_end> properties.
 		
 		*Arguments:* None
 		
-		*Return Value:* None. After the selection is deleted, the selection_end property will have the same value as the cursor_position property.
+		*Return Value:* Boolean flag indicating success or failure of the deletion (true=success). After the selection is deleted, the selection_end property will have the same value as the cursor_position property.
 		
 		*See Also:* the <cursor_position> and <selection_end> properties and the <set_selection> function
 	*/

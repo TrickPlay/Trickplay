@@ -250,67 +250,72 @@ return function(response_table)
         
         d = response_table.deals[i]
         
-        local lowest_price   = d.options[1].price.amount
-        local lowest_price_i = 1
-        for i,option in ipairs(d.options) do
+        if d.status ~= "closed" then 
             
-            if lowest_price > option.price.amount then
+            local lowest_price   = d.options[1].price.amount
+            local lowest_price_i = 1
+            
+            for i,option in ipairs(d.options) do
                 
-                lowest_price = option.price.amount
-                
-                lowest_price_i = i
+                if lowest_price > option.price.amount then
+                    
+                    lowest_price = option.price.amount
+                    
+                    lowest_price_i = i
+                    
+                end
                 
             end
             
+            --pass the card constructor all of the important aspects of the deal information
+            c = Card_Constructor{
+                --Card Data
+                title         = d.title,
+                division      = d.division.name,
+                --Pricing
+                price         = "$"..d.options[lowest_price_i].price.amount/100,
+                msrp          = "$"..d.options[lowest_price_i].value.amount/100,
+                percentage    =      d.options[lowest_price_i].discountPercent,
+                saved         = "$"..d.options[lowest_price_i].discount.amount/100,
+                --Timer
+                expiration    = d.endAt ~= json.null and d.endAt or d.options[lowest_price_i].expiresAt,
+                tz            = d.division.timezoneOffsetInSeconds,
+                --Amount Sold
+                amount_sold   = d.soldQuantity      or d.options[lowest_price_i].soldQuantity,
+                sold_out      = choose(d.isSoldOut         ~= nil, d.isSoldOut, d.options[lowest_price_i].isSoldOut),
+                limit         = choose(d.isLimitedQuantity ~= nil, d.isLimitedQuantity, d.options[lowest_price_i].isLimitedQuantity),
+                
+                picture_url   = d.largeImageUrl,
+                id            = d.id,
+                
+                --SMS Menu needs these
+                fine_print    = d.options[lowest_price_i].details[1].description,
+                highlights    = d.highlightsHtml,
+                merchant      = d.merchant.name,
+                deal_url      = d.dealUrl,
+            }
+            table.insert( App_State.rolodex.cards, c )
+            
+            if divs[d.division.name] then
+                
+                divs[d.division.name] = divs[d.division.name] + 1
+                
+            else
+                
+                divs[d.division.name] = 1
+                
+            end
+            
+            c.anchor_point={c.w/2,c.h}
+            
+            c.x_rotation={270*(i-1)/tot,0,0}
+            
+            App_State.rolodex:add(c)
+            
+            c:lower_to_bottom()
+            
         end
         
-        
-        --pass the card constructor all of the important aspects of the deal information
-        c = Card_Constructor{
-            --Card Data
-            title         = d.title,
-            division      = d.division.name,
-            --Pricing
-            price         = "$"..d.options[lowest_price_i].price.amount/100,
-            msrp          = "$"..d.options[lowest_price_i].value.amount/100,
-            percentage    =      d.options[lowest_price_i].discountPercent,
-            saved         = "$"..d.options[lowest_price_i].discount.amount/100,
-            --Timer
-            expiration    = d.endAt,
-            tz            = d.division.timezoneOffsetInSeconds,
-            --Amount Sold
-            amount_sold   = d.soldQuantity      or d.options[1].soldQuantity,
-            sold_out      = choose(d.isSoldOut         ~= nil, d.isSoldOut, d.options[lowest_price_i].isSoldOut),
-            limit         = choose(d.isLimitedQuantity ~= nil, d.isLimitedQuantity, d.options[lowest_price_i].isLimitedQuantity),
-            
-            picture_url   = d.largeImageUrl,
-            id            = d.id,
-            
-            --SMS Menu needs these
-            fine_print    = d.options[lowest_price_i].details[1].description,
-            highlights    = d.highlightsHtml,
-            merchant      = d.merchant.name,
-            deal_url      = d.dealUrl,
-        }
-        table.insert( App_State.rolodex.cards, c )
-        
-        if divs[d.division.name] then
-            
-            divs[d.division.name] = divs[d.division.name] + 1
-            
-        else
-            
-            divs[d.division.name] = 1
-            
-        end
-        
-        c.anchor_point={c.w/2,c.h}
-		
-		c.x_rotation={270*(i-1)/tot,0,0}
-        
-        App_State.rolodex:add(c)
-        
-        c:lower_to_bottom()
     end
     
     if not using_keys then App_State.rolodex.to_mouse() end

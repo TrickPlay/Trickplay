@@ -62,7 +62,7 @@ extern int luaopen_settings( lua_State * L );
 extern int luaopen_profile( lua_State * L );
 extern int luaopen_xml( lua_State * L );
 extern int luaopen_controllers( lua_State * L );
-extern int luaopen_controller( lua_State * L );
+extern int luaopen_Controller( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
@@ -920,7 +920,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_profile( L );
     luaopen_stopwatch( L );
     luaopen_json( L );
-    luaopen_controller( L );
+    luaopen_Controller( L );
     luaopen_controllers( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
@@ -1456,6 +1456,7 @@ void App::animate_in()
     // TODO
     // Here, we should ref the screen, create a timeline that animates the
     // screen and unref it when the timeline completes.
+    // unless TP_APP_ANIMATIONS_ENABLED is false
 
     clutter_actor_raise_top( screen );
 
@@ -1465,6 +1466,16 @@ void App::animate_in()
 }
 
 //-----------------------------------------------------------------------------
+
+static void animate_out_completed( ClutterAnimation * , ClutterActor * actor )
+{
+    ClutterActor * parent = clutter_actor_get_parent( actor );
+
+    if ( parent )
+    {
+        clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), actor );
+    }
+}
 
 void App::animate_out()
 {
@@ -1480,25 +1491,21 @@ void App::animate_out()
         return;
     }
 
-    // So we can hold on to it until we are done
+	if ( ! context->get_bool( TP_APP_ANIMATIONS_ENABLED , true ) )
+	{
+		animate_out_completed( 0 , screen );
+	}
+	else
+	{
+		// So we can hold on to it until we are done
 
-    g_object_ref( G_OBJECT( screen ) );
+		g_object_ref( G_OBJECT( screen ) );
 
-    g_idle_add_full( G_PRIORITY_HIGH, animate_out_callback, screen, NULL );
+		g_idle_add_full( G_PRIORITY_HIGH, animate_out_callback, screen, NULL );
+	}
 }
 
 //-----------------------------------------------------------------------------
-
-static void animate_out_completed( ClutterAnimation * animation, ClutterActor * actor )
-{
-    ClutterActor * parent = clutter_actor_get_parent( actor );
-
-    if ( parent )
-    {
-        clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), actor );
-    }
-}
-
 
 gboolean App::animate_out_callback( gpointer s )
 {
@@ -1515,32 +1522,33 @@ gboolean App::animate_out_callback( gpointer s )
 
         //clutter_container_remove_actor( CLUTTER_CONTAINER( parent ), screen );
 
-        gfloat width;
-        gfloat height;
+		gfloat width;
+		gfloat height;
 
-        clutter_actor_get_size( parent, &width, &height );
+		clutter_actor_get_size( parent, &width, &height );
 
-        clutter_actor_set_anchor_point( screen, 960, 540 );
+		clutter_actor_set_anchor_point( screen, 960, 540 );
 
-        clutter_actor_set_position( screen, width / 2, height / 2 );
+		clutter_actor_set_position( screen, width / 2, height / 2 );
 
-        clutter_actor_set_clip( screen, 0, 0, 1920, 1080 );
+		clutter_actor_set_clip( screen, 0, 0, 1920, 1080 );
 
-        ClutterAnimator *animator = clutter_animator_new();
-        clutter_animator_set_duration(animator, 750);
-        clutter_animator_set(animator,
-                                screen, "scale-x", CLUTTER_LINEAR, 0.0, 1.0,
-                                screen, "scale-y", CLUTTER_LINEAR, 0.0, 1.0,
-                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 0.2, 0.3,
-                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 0.2, 0.005,
-                                screen, "scale-x", CLUTTER_LINEAR, 0.5, 0.4,
-                                screen, "scale-y", CLUTTER_LINEAR, 0.5, 0.002,
-                                screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
-                                screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
-                                NULL
-                            );
-        ClutterTimeline *timeline = clutter_animator_start(animator);
-        g_signal_connect_after( timeline, "completed", G_CALLBACK(animate_out_completed), screen );
+		ClutterAnimator *animator = clutter_animator_new();
+		clutter_animator_set_duration(animator, 750);
+		clutter_animator_set(animator,
+								screen, "scale-x", CLUTTER_LINEAR, 0.0, 1.0,
+								screen, "scale-y", CLUTTER_LINEAR, 0.0, 1.0,
+								screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 0.2, 0.3,
+								screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 0.2, 0.005,
+								screen, "scale-x", CLUTTER_LINEAR, 0.5, 0.4,
+								screen, "scale-y", CLUTTER_LINEAR, 0.5, 0.002,
+								screen, "scale-x", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+								screen, "scale-y", CLUTTER_EASE_OUT_EXPO, 1.0, 0.002,
+								NULL
+							);
+		ClutterTimeline *timeline = clutter_animator_start(animator);
+
+		g_signal_connect_after( timeline, "completed", G_CALLBACK(animate_out_completed), screen );
     }
 
     g_object_unref( G_OBJECT( screen ) );
