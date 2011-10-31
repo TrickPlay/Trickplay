@@ -12,12 +12,16 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
      local global_section_contents, new_contents, global_section_footer_contents
      local file_not_exists = true
      local screen_dir = editor_lb:readdir(current_dir.."/screens/")
+	 if screen_dir == nil then screen_dir = {} end 
+
      local main_dir = editor_lb:readdir(current_dir)
+	 if main_dir == nil then main_dir = {} end 
+
      local enter_gen_stub_code = false
 
 	 if cfn ~= "OK" and save_current_file == nil then 
      	for i, v in pairs(screen_dir) do
-          if(input_text == v)then
+          if input_text == v then
 			editor.error_message("004",input_text,msg_window.inputMsgWindow_savefile)
 			return 
           end
@@ -78,7 +82,6 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 							end 
 						end 
 						new_contents = new_contents.."-- "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n\t--[[\n\t\tHere is how you might add set_focus and clear_focus function to the each cell item\n\t]]\n\n\t--[[\n\t\tfor r=1, layout[\""..fileLower.."\"]\."..lm_name.."\.rows do\n\t\t\tfor c=1, layout[\""..fileLower.."\"]\."..lm_name.."\.columns do\n\t\t\t\t".."local cell_obj = layout[\""..fileLower.."\"]\."..lm_name.."\.cells[r][c]\n\t\t\t\tif cell_obj.extra.set_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.set_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\t\tif cell_obj.extra.clear_focus == nil then\n\t\t\t\t\tfunction cell_obj.extra.clear_focus ()\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\t]]\n\n-- END "..fileUpper.."\."..string.upper(lm_name).." SECTION\n\n"
-
 					elseif j.extra.type == "Group" then  
 						gen_stub_code(j)
 					end
@@ -89,7 +92,7 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   	gen_stub_code = function(grp) 
 	 
 			if new_contents == nil then 	
-				new_contents="--  "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
+				new_contents="-- "..fileUpper.." SECTION\ngroups[\""..fileLower.."\"] = Group() -- Create a Group for this screen\nlayout[\""..fileLower.."\"] = {}\nloadfile(\"\/screens\/"..input_text.."\")(groups[\""..fileLower.."\"]) -- Load all the elements for this screen\nui_element.populate_to(groups[\""..fileLower.."\"],layout[\""..fileLower.."\"]) -- Populate the elements into the Group\n\n"
 			end
 
 			for i, j in pairs (grp.children) do 
@@ -146,11 +149,18 @@ function msg_window.inputMsgWindow_savefile(input_text, cfn, save_current_file)
 	   end 
 	 
             current_fn = "screens/"..input_text
-            editor_lb:writefile(current_fn, contents, true)
-			local fa, fb = string.find(current_fn, "unsaved_temp") 
-	   		if fa == nil then 
-	   			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
-	   		end 
+            if editor_lb:writefile(current_fn, contents, true) == false then 
+				if save_current_file == false then 
+					editor.error_message("019", current_dir) 
+				end 
+				screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+			else 
+
+				local fa, fb = string.find(current_fn, "unsaved_temp") 
+	   			if fa == nil then 
+	   				screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project .. "/" ..current_fn
+	   			end 
+			end 
             contents = ""
             --screen:grab_key_focus(screen) 
       end
@@ -160,6 +170,8 @@ end -- end of msg_window.inputMsgWindow_savefile
 
 function msg_window.inputMsgWindow_openfile(input_text, ret)
     local dir = editor_lb:readdir(current_dir.."/screens")
+	if dir == nil then dir = {} end 
+
 	local back_fn = input_text..".back"
 
     if(input_text == nil) then
@@ -199,7 +211,7 @@ function msg_window.inputMsgWindow_openfile(input_text, ret)
         local f = loadfile(current_fn)
         f(g) 
 
-		 if current_fn == "screens/unsaved_temp.lua" then 
+		if current_fn == "screens/unsaved_temp.lua" then 
 			current_fn = ""
 			editor_lb:writefile("screens/unsaved_temp.lua", "", true)
 		else 
@@ -315,7 +327,9 @@ function msg_window.inputMsgWindow_yn(txt)
      if(txt == "no") then
           editor.save(false)
      elseif(txt =="yes") then 
-          editor_lb:writefile(current_fn, contents, true)
+          if editor_lb:writefile(current_fn, contents, true) == false then 
+			   print("yugi")
+		  end 
           contents = ""
      end
      screen:grab_key_focus(screen) 
@@ -358,6 +372,8 @@ function msg_window.inputMsgWindow_openimage(input_purpose, input_text)
 
      local file_not_exists = true
      local dir = editor_lb:readdir(current_dir.."/assets/images")
+	 if dir == nil then dir = {} end 
+
      for i, v in pairs(dir) do
           if(input_text == v)then
                file_not_exists = false

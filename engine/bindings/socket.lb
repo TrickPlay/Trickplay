@@ -3,7 +3,7 @@ module socket;
 [[
 #include "socket.h"
 
-class SocketDelegate : public Socket::Delegate
+class SocketDelegate : public TrickPlay::Socket::Delegate
 {
 public:
 
@@ -14,7 +14,7 @@ public:
 		socket.set_delegate( this );
 	}
 	
-	Socket socket;
+	TrickPlay::Socket socket;
 	
     virtual void on_connected();
     

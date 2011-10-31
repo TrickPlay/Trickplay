@@ -1,5 +1,3 @@
-#include <cstdio>
-#include <cstring>
 #include <cstdlib>
 #include <sstream>
 
@@ -7,7 +5,6 @@
 #include "clutter/clutter-keysyms.h"
 #include "curl/curl.h"
 #include "fontconfig/fontconfig.h"
-#include "sndfile.h"
 
 #include "trickplay/keys.h"
 #include "lb.h"
@@ -23,12 +20,12 @@
 #include "images.h"
 #include "downloads.h"
 #include "installer.h"
-#include "versions.h"
 #include "controller_lirc.h"
 #include "app_push_server.h"
 #include "http_server.h"
 #include "http_trickplay_api_support.h"
 #include "clutter_util.h"
+#include "console_commands.h"
 
 //-----------------------------------------------------------------------------
 #ifndef TP_DEFAULT_RESOURCES_PATH
@@ -117,7 +114,7 @@ void TPContext::set( const char * key, const String & value )
 }
 //-----------------------------------------------------------------------------
 
-const char * TPContext::get( const char * key, const char * def , bool default_if_empty )
+const char * TPContext::get( const char * key, const char * def , bool default_if_empty ) const
 {
     g_assert( key );
 
@@ -138,7 +135,7 @@ const char * TPContext::get( const char * key, const char * def , bool default_i
 
 //-----------------------------------------------------------------------------
 
-bool TPContext::get_bool( const char * key, bool def )
+bool TPContext::get_bool( const char * key, bool def ) const
 {
     const char * value = get( key );
 
@@ -158,7 +155,7 @@ bool TPContext::get_bool( const char * key, bool def )
 
 //-----------------------------------------------------------------------------
 
-int TPContext::get_int( const char * key, int def )
+int TPContext::get_int( const char * key, int def ) const
 {
     const char * value = get( key );
 
@@ -171,576 +168,9 @@ int TPContext::get_int( const char * key, int def )
 
 //-----------------------------------------------------------------------------
 
-struct DumpInfo
-{
-    DumpInfo()
-    :
-        indent( 0 )
-    {}
-
-    guint indent;
-
-    std::map< String, std::list<ClutterActor*> > actors_by_type;
-};
-
-static void dump_actors( ClutterActor * actor, gpointer dump_info )
-{
-    if ( !actor )
-    {
-        return;
-    }
-
-    DumpInfo * info = ( DumpInfo * )dump_info;
-
-    ClutterGeometry g;
-
-    clutter_actor_get_geometry( actor, & g );
-
-    const gchar * name = clutter_actor_get_name( actor );
-    const gchar * type = g_type_name( G_TYPE_FROM_INSTANCE( actor ) );
-
-    if ( g_str_has_prefix( type, "Clutter" ) )
-    {
-        type += 7;
-    }
-
-    info->actors_by_type[type].push_back(actor);
-
-    // Get extra info about the actor
-
-    String extra;
-
-    if ( CLUTTER_IS_TEXT( actor ) )
-    {
-        extra = String( "[text='" ) + clutter_text_get_text( CLUTTER_TEXT( actor ) ) + "'";
-
-        ClutterColor color;
-
-        clutter_text_get_color( CLUTTER_TEXT( actor ), &color );
-
-        gchar * c = g_strdup_printf( "color=(%u,%u,%u,%u)", color.red, color.green, color.blue, color.alpha );
-
-        extra = extra + "," + c + "]";
-
-        g_free( c );
-
-    }
-    else if ( CLUTTER_IS_TEXTURE( actor ) )
-    {
-        const gchar * src = ( const gchar * )g_object_get_data( G_OBJECT( actor ) , "tp-src" );
-
-        if ( src )
-        {
-            extra = String( "[src='" ) + src + "']";
-        }
-    }
-    else if ( CLUTTER_IS_RECTANGLE( actor ) )
-    {
-        ClutterColor color;
-
-        clutter_rectangle_get_color( CLUTTER_RECTANGLE( actor ), &color );
-
-        gchar * c = g_strdup_printf( "[color=(%u,%u,%u,%u)]", color.red, color.green, color.blue, color.alpha );
-
-        extra = c;
-
-        g_free( c );
-    }
-    else if ( CLUTTER_IS_CLONE( actor ) )
-    {
-        ClutterActor * other = clutter_clone_get_source( CLUTTER_CLONE( actor ) );
-
-        if ( other )
-        {
-            gchar * c = g_strdup_printf( "[source=%u]" , clutter_actor_get_gid( other ) );
-
-            extra = c;
-
-            g_free( c );
-        }
-    }
-
-    String details;
-
-    gdouble sx;
-    gdouble sy;
-
-    clutter_actor_get_scale( actor, &sx, &sy );
-
-    if ( sx != 1 || sy != 1 )
-    {
-        gchar * c = g_strdup_printf( " scale(%1.2f,%1.2f)", sx, sy );
-
-        details = c;
-
-        g_free( c );
-    }
-
-    gfloat ax;
-    gfloat ay;
-
-    clutter_actor_get_anchor_point( actor, &ax, &ay );
-
-    if ( ax != 0 || ay != 0 )
-    {
-        gchar * c = g_strdup_printf( " anchor(%1.0f,%1.0f)", ax, ay );
-
-        details += c;
-
-        g_free( c );
-    }
-
-    guint8 o = clutter_actor_get_opacity( actor );
-
-    if ( o < 255 )
-    {
-        gchar * c = g_strdup_printf( "  opacity(%u)" , o );
-        details += c;
-        g_free( c );
-    }
-
-    if ( !extra.empty() )
-    {
-        extra = String( " : " ) + extra;
-    }
-
-	if( !CLUTTER_ACTOR_IS_VISIBLE( actor ) )
-	{
-		details += " HIDDEN";
-	}
-
-    g_info( "%s%s%s%s:%s%u [%p]: (%d,%d %ux%u)%s%s\033[0m",
-    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : "\33[37m",
-            clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
-            String( info->indent, ' ' ).c_str(),
-            type,
-            name ? String( " \033[33m" + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "\33[0m" : "\33[37m" ) + " : " ).c_str()  : " ",
-            clutter_actor_get_gid( actor ),
-            actor,
-            g.x,
-            g.y,
-            g.width,
-            g.height,
-            details.empty() ? "" : details.c_str(),
-            extra.empty() ? "" : extra.c_str() );
-
-    if ( CLUTTER_IS_CONTAINER( actor ) )
-    {
-        info->indent += 2;
-        clutter_container_foreach( CLUTTER_CONTAINER( actor ), dump_actors, info );
-        info->indent -= 2;
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-class AudioFeeder : private Action
-{
-public:
-
-    static bool post( TPContext * context , const char * file_name , guint interval_s )
-    {
-        SF_INFO info;
-
-        memset( & info , 0 , sizeof( info ) );
-
-        SNDFILE * f = sf_open( file_name , SFM_READ , & info );
-
-        if ( ! f )
-        {
-            return false;
-        }
-
-        g_info( "FEEDING AUDIO FROM %s EVERY %u s" , file_name , interval_s );
-        g_info( "  frames      = %u"   , info.frames );
-        g_info( "  sample_rate = %d"   , info.samplerate );
-        g_info( "  channels    = %d"   , info.channels );
-        g_info( "  format      = 0x%x" , info.format );
-        g_info( "  duration    = %d s" , info.frames / info.samplerate );
-
-        TPAudioSampler * sampler = tp_context_get_audio_sampler( context );
-
-        tp_audio_sampler_source_changed( sampler );
-
-        Action::post( new AudioFeeder( sampler , f , info ) , interval_s * 1000 );
-
-        return true;
-    }
-
-private:
-
-    AudioFeeder( TPAudioSampler * _sampler , SNDFILE * _f , const SF_INFO & _info )
-    :
-        sampler( _sampler ),
-        f( _f ),
-        info( _info ),
-        timer( g_timer_new() )
-    {
-    }
-
-    virtual ~AudioFeeder()
-    {
-        sf_close( f );
-        g_timer_destroy( timer );
-        g_debug( "DESTROYED AUDIO FEEDER" );
-    }
-
-    virtual bool run()
-    {
-        sf_count_t frames = g_timer_elapsed( timer , 0 ) * info.samplerate;
-
-        g_timer_start( timer );
-
-        float * samples = g_new( float , frames * info.channels );
-
-        sf_count_t read = sf_readf_float( f , samples , frames );
-
-        if ( read == 0 )
-        {
-            g_free( samples );
-            return false;
-        }
-
-        TPAudioBuffer buffer;
-
-        memset( & buffer , 0 , sizeof( buffer ) );
-
-        buffer.format = TP_AUDIO_FORMAT_FLOAT;
-        buffer.channels = info.channels;
-        buffer.sample_rate = info.samplerate;
-        buffer.copy_samples = 1;
-        buffer.free_samples = 0;
-        buffer.samples = samples;
-        buffer.size = read * info.channels * sizeof( float );
-
-        tp_audio_sampler_submit_buffer( sampler , & buffer );
-
-        g_free( samples );
-
-        return true;
-    }
-
-    TPAudioSampler *    sampler;
-    SNDFILE *           f;
-    SF_INFO             info;
-    GTimer *            timer;
-};
-
-//-----------------------------------------------------------------------------
-
-class MemReporter : public Action
-{
-public:
-
-	MemReporter( bool _once )
-	:
-		once( _once )
-	{
-		gchar * fn = g_build_filename( G_DIR_SEPARATOR_S "proc" , "self" , "status" , NULL );
-
-		filename = fn;
-
-		g_free( fn );
-
-		regex = g_regex_new( "^VmRSS:[^0-9]*([0-9]+).*$" , G_REGEX_MULTILINE , ( GRegexMatchFlags ) 0 , 0 );
-	}
-
-	~MemReporter()
-	{
-		g_regex_unref( regex );
-	}
-
-protected:
-
-	virtual bool run()
-	{
-		bool ok = false;
-
-		gchar * contents = 0;
-
-		if ( g_file_get_contents( filename.c_str() , & contents , 0 , 0 ) )
-		{
-			GMatchInfo * mi = 0;
-
-			if ( g_regex_match( regex , contents , ( GRegexMatchFlags ) 0 , & mi ) )
-			{
-				if ( gchar * n = g_match_info_fetch( mi , 1 ) )
-				{
-					int rss = atoi( n );
-
-					if ( rss > peak )
-					{
-						peak = rss;
-					}
-
-					g_info( "RSS = %d : %+d : peak %d " , rss , last ? rss - last : 0 , peak );
-
-					last = rss;
-
-					g_free( n );
-
-					ok = true;
-				}
-			}
-
-			g_match_info_free( mi );
-
-			g_free( contents );
-		}
-
-		if ( ! ok )
-		{
-			g_info( "FAILED TO GET MEMORY INFORMATION" );
-			return false;
-		}
-
-		return ! once;
-	}
-
-	bool		once;
-	String 		filename;
-	GRegex *	regex;
-	static int	peak;
-	static int 	last;
-};
-
-int MemReporter::peak = 0;
-int MemReporter::last = 0;
-
-//-----------------------------------------------------------------------------
-
 int TPContext::console_command_handler( const char * command, const char * parameters, void * self )
 {
-    TPContext * context = ( TPContext * )self;
-
-    if ( !strcmp( command, "exit" ) || !strcmp( command, "quit" ) )
-    {
-        context->quit();
-        return TRUE;
-    }
-    else if ( !strcmp( command, "config" ) )
-    {
-        for ( StringMap::const_iterator it = context->config.begin(); it != context->config.end(); ++it )
-        {
-            g_info( "%-25.25s %s", it->first.c_str(), it->second.c_str() );
-        }
-    }
-    else if ( !strcmp( command, "profile" ) )
-    {
-        if ( !parameters )
-        {
-            SystemDatabase::Profile p = context->get_db()->get_current_profile();
-            g_info( "%d '%s' '%s'", p.id, p.name.c_str(), p.pin.c_str() );
-        }
-        else
-        {
-            gchar ** parts = g_strsplit( parameters, " ", 2 );
-            guint count = g_strv_length( parts );
-            if ( count == 2 && !strcmp( parts[0], "new" ) )
-            {
-                int id = context->get_db()->create_profile( parts[1], "" );
-                g_info( "Created profile %d", id );
-            }
-            else if ( count == 2 && !strcmp( parts[0], "switch" ) )
-            {
-                int id = atoi( parts[1] );
-                if ( context->profile_switch( id ) )
-                {
-                    g_info( "Switched to profile %d", id );
-                }
-                else
-                {
-                    g_info( "No such profile" );
-                }
-            }
-            else
-            {
-                g_info( "Usage: '/profile new <name>' or '/profile switch <id>'" );
-            }
-            g_strfreev( parts );
-        }
-    }
-    else if ( !strcmp( command, "reload" ) )
-    {
-        context->reload_app();
-    }
-    else if ( !strcmp( command, "close" ) )
-    {
-        if ( !context->current_app )
-        {
-            g_info( "No app loaded" );
-        }
-        else
-        {
-            context->close_current_app();
-        }
-    }
-    else if ( !strcmp( command, "ui" ) )
-    {
-        DumpInfo info;
-
-        ClutterActor * first = clutter_stage_get_default();
-
-        if ( parameters )
-        {
-    		first = clutter_container_find_child_by_name( CLUTTER_CONTAINER( clutter_stage_get_default() ) , parameters );
-
-        	if ( ! first )
-        	{
-            	first = clutter_get_actor_by_gid( atoi( parameters ) );
-        	}
-        }
-
-        if ( ! first )
-        {
-        	g_info( "NO SUCH ACTOR" );
-        }
-        else
-        {
-			dump_actors( first , &info );
-
-			g_info( "" );
-			g_info( "SUMMARY" );
-
-			std::map< String, std::list< ClutterActor * > >::const_iterator it;
-
-			for ( it = info.actors_by_type.begin(); it != info.actors_by_type.end(); ++it )
-			{
-				g_info( "%15s %5u", it->first.c_str(), it->second.size() );
-			}
-        }
-    }
-    else if ( !strcmp( command, "prof" ) )
-    {
-        if ( parameters && !strcmp( parameters, "reset" ) )
-        {
-            PROFILER_RESET;
-        }
-        else
-        {
-            PROFILER_DUMP;
-        }
-    }
-    else if ( !strcmp( command, "obj" ) )
-    {
-        PROFILER_OBJECTS;
-    }
-    else if ( !strcmp( command, "ver" ) )
-    {
-        dump_versions();
-    }
-    else if ( !strcmp( command , "images" ) )
-    {
-        Images::dump();
-    }
-    else if ( !strcmp( command, "cache" ) )
-    {
-        Images::dump_cache();
-    }
-    else if ( !strcmp( command , "gc" ) )
-    {
-        if ( context->current_app )
-        {
-            if ( lua_State * L = context->current_app->get_lua_state() )
-            {
-                int old_kb = lua_gc( L , LUA_GCCOUNT , 0 );
-                lua_gc( L , LUA_GCCOLLECT , 0 );
-                int new_kb = lua_gc( L , LUA_GCCOUNT , 0 );
-                g_info( "GC : %d KB - %d KB = %d KB" , new_kb , old_kb , new_kb - old_kb );
-            }
-        }
-    }
-    else if ( ! strcmp( command , "ss" ) )
-    {
-        // Screenshot
-
-        const gchar * home = g_getenv( "HOME" );
-
-        if ( ! home )
-        {
-            home = g_get_home_dir();
-
-            if ( ! home )
-            {
-                home = g_get_tmp_dir();
-            }
-        }
-
-        if ( ! home )
-        {
-            g_warning( "FAILED TO FIND HOME OR TEMP DIR" );
-        }
-        else
-        {
-            Image * image = Image::screenshot();
-
-            if ( ! image )
-            {
-                g_warning( "FAILED TO TAKE SCREENSHOT" );
-            }
-            else
-            {
-                String checksum( image->checksum() );
-
-                GTimeVal t;
-
-                g_get_current_time( & t );
-
-                gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
-
-                gchar * fn = g_build_filename( home , ts , NULL );
-
-                g_free( ts );
-
-                if ( ! image->write_to_png( fn ) )
-                {
-                    g_warning( "FAILED TO WRITE SCREENSHOT TO %s" , fn );
-                }
-                else
-                {
-                    g_info( "%s" , fn );
-                    g_info( "%s" , checksum.c_str() );
-                }
-
-                g_free( fn );
-
-                delete image;
-            }
-        }
-    }
-    else if ( ! strcmp( command , "as" ) )
-    {
-        if ( parameters )
-        {
-            if ( ! strcmp( parameters , "pause" ) )
-            {
-                tp_audio_sampler_pause( tp_context_get_audio_sampler( context ) );
-            }
-            else if ( ! strcmp( parameters , "resume" ) )
-            {
-                tp_audio_sampler_resume( tp_context_get_audio_sampler( context ) );
-            }
-            else if ( ! strcmp( parameters , "changed" ) )
-            {
-                tp_audio_sampler_source_changed( tp_context_get_audio_sampler( context ) );
-            }
-            else if ( ! AudioFeeder::post( context , parameters , 15 ) )
-            {
-                g_info( "FAILED TO OPEN '%s'" , parameters );
-            }
-        }
-    }
-    else if ( ! strcmp( command , "mem" ) )
-    {
-    	int interval = -1;
-
-    	if ( parameters )
-    	{
-    		interval = atoi( parameters ) * 1000;
-    	}
-
-    	Action::post( new MemReporter( interval == -1 ? true : false ) , interval );
-    }
+    TPContext * context = ( TPContext * ) self;
 
     std::pair<ConsoleCommandHandlerMultiMap::const_iterator, ConsoleCommandHandlerMultiMap::const_iterator>
     range = context->console_command_handlers.equal_range( String( command ) );
@@ -807,7 +237,14 @@ void TPContext::setup_fonts()
         g_free( conf );
     }
 
-    // Create a new configuration
+#ifdef TP_FONT_DEBUG
+
+    // This is here ONLY so that FC_DEBUG will work; so we can troubleshoot
+    // font problems
+
+    (void) FcInitLoadConfig();
+
+#endif
 
     FcConfig * config = FcConfigCreate();
 
@@ -1143,6 +580,83 @@ void stage_unfullscreen( ClutterStage * stage , gpointer user_data )
 
 //-----------------------------------------------------------------------------
 
+#ifdef TP_FORCE_VERIFICATION
+
+static void do_handshake()
+{
+	static const gchar HANDSHAKE_PREFIX[4] = TP_VERIFICATION_CODE;
+
+	gchar code[4];
+	gchar suffix[4];
+
+	for(int i=0; i<3; i++)
+	{
+		code[i] = g_random_int_range( 'A', 'Z' );
+		suffix[i] = code[i] + HANDSHAKE_PREFIX[i] - 'A';
+		if(suffix[i] > 'Z')
+		{
+			suffix[i] -= 26;
+		}
+	}
+
+	code[3] = '\0';
+	suffix[3] = '\0';
+
+	gchar response[7];
+
+	memset( response , 0 , sizeof( response ) );
+
+	gchar * url = g_strdup_printf( "http://trickplay.com/verify/?CODE=%s%s", HANDSHAKE_PREFIX , suffix );
+
+	{
+		Network::Request  rq;
+
+		rq.url = url;
+		rq.timeout_s = 10;
+		rq.redirect = true;
+
+		Network::Response r( Network().perform_request( rq , 0 ) );
+
+		if ( ! r.failed && r.code == 200 && r.body && r.body->len >= 6 )
+		{
+			memmove( response , r.body->data , 6 );
+		}
+	}
+
+	if ( 6 != strlen( response ) )
+	{
+		memset( response , 0 , sizeof( response ) );
+
+		g_warning("Network auto-verification failed.  Please use manual verification below.");
+
+		g_info("Visit the URL: %s" , url );
+
+		g_info("Now please type the code it gives back: ");
+
+		fgets(response, 7, stdin);
+	}
+
+	g_free( url );
+
+	for(int i=0; i<3; i++)
+	{
+		char result = response[3+i] - response[i];
+		if(result < 0)
+		{
+			result += 26;
+		}
+
+		if((result + 'A') != code[i])
+		{
+			g_critical("YOUR CHECK CODE FAILED (%c,%c).  PLEASE CONTACT TRICKPLAY SUPPORT.",code[i],response[3+i]);
+			fflush(stdout);
+			fflush(stderr);
+			abort();
+		}
+	}
+}
+#endif
+
 int TPContext::run()
 {
     //.........................................................................
@@ -1156,6 +670,10 @@ int TPContext::run()
     is_running = true;
 
     int result = TP_RUN_OK;
+
+#ifdef TP_FORCE_VERIFICATION
+	do_handshake();
+#endif
 
     //.........................................................................
     // Load external configuration variables (from the environment or a file)
@@ -1289,6 +807,8 @@ int TPContext::run()
     if ( console )
     {
         console->add_command_handler( console_command_handler, this );
+
+        ConsoleCommands::add_all( this );
     }
 
     //.........................................................................
@@ -1311,6 +831,8 @@ int TPContext::run()
     {
         clutter_actor_set_size( stage , display_width , display_height );
     }
+
+    clutter_actor_set_name( stage , "stage" );
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 
@@ -2012,6 +1534,38 @@ void TPContext::set_log_handler( TPLogHandler handler, void * data )
 
 //-----------------------------------------------------------------------------
 
+void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader , void * data )
+{
+	g_assert( !running() );
+	g_assert( loader );
+	
+	resource_loaders[ type ] = ResourceLoaderClosure( loader , data );
+}
+
+//-----------------------------------------------------------------------------
+
+bool TPContext::get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const
+{
+	if ( ! get_bool( TP_RESOURCE_LOADER_ENABLED , true ) )
+	{
+		return false;
+	}
+
+	ResourceLoaderMap::const_iterator it = resource_loaders.find( resource_type );
+
+	if ( it == resource_loaders.end() )
+	{
+		return false;
+	}
+
+	* loader = it->second.first;
+	* user_data = it->second.second;
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+
 void TPContext::set_request_handler( const char * subject, TPRequestHandler handler, void * data )
 {
     request_handlers[String( subject )] = RequestHandlerClosure( handler, data );
@@ -2250,6 +1804,9 @@ void TPContext::load_external_configuration()
         TP_HTTP_PORT,
         TP_RESOURCES_PATH,
         TP_TEXTURE_CACHE_LIMIT,
+        TP_RESOURCE_LOADER_ENABLED,
+        TP_APP_ARGS,
+        TP_APP_ANIMATIONS_ENABLED,
 
         NULL
     };
@@ -2298,9 +1855,12 @@ void TPContext::validate_configuration()
 
     if ( app_path )
     {
-    	String app_path_s = Util::canonical_external_path( app_path );
+    	String app_path_s = Util::canonical_external_path( app_path , false );
 
-    	set( TP_APP_PATH , app_path_s );
+    	if ( ! app_path_s.empty() )
+    	{
+    		set( TP_APP_PATH , app_path_s );
+    	}
     }
 
     // TP_SYSTEM_LANGUAGE
@@ -2375,6 +1935,8 @@ void TPContext::validate_configuration()
     }
 
     set( TP_DATA_PATH, full_data_path );
+
+    g_debug( "USING DATA PATH: '%s'", full_data_path );
 
     g_free( full_data_path );
 
@@ -2653,12 +2215,19 @@ Image * TPContext::load_icon( const gchar * path )
     gchar * contents = NULL;
     gsize content_length = 0;
 
-    if ( !g_file_get_contents( path, &contents, &content_length, NULL ) )
+    GFile * file = g_file_new_for_commandline_arg( path );
+
+    if ( ! g_file_load_contents( file , 0 , & contents , & content_length , 0 , 0 ) )
     {
-        return NULL;
+    	g_object_unref( G_OBJECT( file ) );
+
+        return 0;
     }
 
+    g_object_unref( G_OBJECT( file ) );
+
     free_later( contents );
+
 
     //.........................................................................
     // Now, we compute an md5 hash of the contents
@@ -2814,8 +2383,6 @@ void TPContext::add_internal( gpointer key , gpointer value , GDestroyNotify des
 gpointer TPContext::get_internal( gpointer key )
 {
     InternalMap::const_iterator it( internals.find( key ) );
-
-    // If it already exists, call its destroy notify
 
     if ( it != internals.end() )
     {
@@ -3087,6 +2654,15 @@ void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void
     g_assert( context );
 
     context->set_log_handler( handler, data );
+}
+
+//-----------------------------------------------------------------------------
+
+void tp_context_set_resource_loader( TPContext * context , unsigned int type , TPResourceLoader loader, void * data)
+{
+	g_assert( context );
+	
+	context->set_resource_loader( type , loader , data );
 }
 
 //-----------------------------------------------------------------------------
