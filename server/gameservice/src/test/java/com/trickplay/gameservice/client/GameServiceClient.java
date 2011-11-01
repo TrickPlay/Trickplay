@@ -274,6 +274,10 @@ public class GameServiceClient {
 			Long u1Id = umap.get("u1").getId();
 			GamePlaySummaryTO summaryTO = getGamePlaySummary(restTemplate, gameId, "u1", "u1");
 			
+			GamePlaySummaryRequestTO initSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"0:0\"}");
+            postGamePlaySummary(restTemplate, gameId, initSummaryTO, "u1", "u1");
+            postGamePlaySummary(restTemplate, gameId, initSummaryTO, "u2", "u2");
+            
 			GamePlaySummaryRequestTO winnerSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"1:0\"}");
 			GamePlaySummaryRequestTO loserSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"0:1\"}");
 			if ("u1".equals(winner)) {
@@ -283,6 +287,9 @@ public class GameServiceClient {
 			    postGamePlaySummary(restTemplate, gameId, winnerSummaryTO, "u2", "u2");
                 postGamePlaySummary(restTemplate, gameId, loserSummaryTO, "u1", "u1");
 			}
+			
+			GamePlaySummaryTO u1Summary = getGamePlaySummary(restTemplate, gameId, "u1", "u1");
+			GamePlaySummaryTO u2Summary = getGamePlaySummary(restTemplate, gameId, "u2", "u2");
 			
 			getGameSessionMessages(restTemplate, gsTO.getId(), "u1", "u1");
 			
