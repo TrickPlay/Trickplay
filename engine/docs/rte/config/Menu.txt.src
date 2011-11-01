@@ -111,7 +111,7 @@ Group: Engine Reference  {
 		File: Overview* (no auto-title, docs/rte/reference/overview_network.txt)
 		
 		Group: Globals {
-			File: controllers* (no auto-title, bindings/controllers.lb)
+			File: controllers (no auto-title, bindings/controllers.lb)
 			File: json* (no auto-title, bindings/json.lb)
 			File: uri* (no auto-title, bindings/uri.lb)
 		}
