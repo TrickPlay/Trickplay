@@ -7,24 +7,24 @@
 
 //=============================================================================
 
-extern int new_controller( lua_State * );
+extern int new_Controller( lua_State * );
 
-extern int invoke_controller_on_accelerometer( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_advanced_ui_event( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_advanced_ui_ready( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_audio_clip_cancelled( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_disconnected( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_image_cancelled( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_image( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_key_down( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_key_up( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_pointer_button_down( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_pointer_button_up( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_pointer_move( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_touch_down( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_touch_move( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_touch_up( lua_State * , ControllerDelegate * , int , int );
-extern int invoke_controller_on_ui_event( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_accelerometer( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_advanced_ui_event( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_advanced_ui_ready( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_audio_clip_cancelled( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_disconnected( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_image_cancelled( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_image( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_key_down( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_key_up( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_pointer_button_down( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_pointer_button_up( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_pointer_move( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_touch_down( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_touch_move( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_touch_up( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_ui_event( lua_State * , ControllerDelegate * , int , int );
 
 extern int invoke_controllers_on_controller_connected( lua_State * , ControllerListDelegate * , int , int );
 
@@ -58,7 +58,7 @@ ControllerDelegate::~ControllerDelegate()
 
 void ControllerDelegate::disconnected()
 {
-    invoke_controller_on_disconnected(L,this,0,0);
+    invoke_Controller_on_disconnected(L,this,0,0);
 
     list->proxy_disconnected(this);
 }
@@ -73,7 +73,7 @@ bool ControllerDelegate::key_down(unsigned int key_code,unsigned long int unicod
 
     bool result = true;
 
-    if ( invoke_controller_on_key_down(L,this,3,1) )
+    if ( invoke_Controller_on_key_down(L,this,3,1) )
     {
 	    if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
 	    {
@@ -96,7 +96,7 @@ bool ControllerDelegate::key_up(unsigned int key_code,unsigned long int unicode,
 
     bool result = true;
 
-    if ( invoke_controller_on_key_up(L,this,3,1) )
+    if ( invoke_Controller_on_key_up(L,this,3,1) )
     {
 
     	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
@@ -118,7 +118,7 @@ void ControllerDelegate::accelerometer(double x,double y,double z,unsigned long 
     lua_pushnumber(L,y);
     lua_pushnumber(L,z);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_controller_on_accelerometer(L,this,4,0);
+    invoke_Controller_on_accelerometer(L,this,4,0);
 }
 
 //.........................................................................
@@ -131,7 +131,7 @@ bool ControllerDelegate::pointer_move(int x,int y,unsigned long int modifiers)
 
     bool result = true;
 
-    if ( invoke_controller_on_pointer_move(L,this,3,1) )
+    if ( invoke_Controller_on_pointer_move(L,this,3,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -154,7 +154,7 @@ bool ControllerDelegate::pointer_button_down(int button,int x,int y,unsigned lon
 
     bool result = true;
 
-    if ( invoke_controller_on_pointer_button_down(L,this,4,1) )
+    if ( invoke_Controller_on_pointer_button_down(L,this,4,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -177,7 +177,7 @@ bool ControllerDelegate::pointer_button_up(int button,int x,int y,unsigned long 
 
     bool result = true;
 
-    if ( invoke_controller_on_pointer_button_up(L,this,4,1) )
+    if ( invoke_Controller_on_pointer_button_up(L,this,4,1) )
     {
         if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
         {
@@ -197,7 +197,7 @@ void ControllerDelegate::touch_down(int finger,int x,int y,unsigned long int mod
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_controller_on_touch_down(L,this,4,0);
+    invoke_Controller_on_touch_down(L,this,4,0);
 }
 
 //.........................................................................
@@ -208,7 +208,7 @@ void ControllerDelegate::touch_move(int finger, int x,int y,unsigned long int mo
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_controller_on_touch_move(L,this,4,0);
+    invoke_Controller_on_touch_move(L,this,4,0);
 }
 
 //.........................................................................
@@ -219,7 +219,7 @@ void ControllerDelegate::touch_up(int finger, int x,int y,unsigned long int modi
     lua_pushnumber(L,x);
     lua_pushnumber(L,y);
     ClutterUtil::push_event_modifiers(L,modifiers);
-    invoke_controller_on_touch_up(L,this,4,0);
+    invoke_Controller_on_touch_up(L,this,4,0);
 }
 
 //.........................................................................
@@ -227,7 +227,7 @@ void ControllerDelegate::touch_up(int finger, int x,int y,unsigned long int modi
 void ControllerDelegate::ui_event(const String & parameters)
 {
     lua_pushstring(L,parameters.c_str());
-    invoke_controller_on_ui_event(L,this,1,0);
+    invoke_Controller_on_ui_event(L,this,1,0);
 }
 
 //.........................................................................
@@ -249,7 +249,7 @@ void ControllerDelegate::submit_image( void * data, unsigned int size, const cha
     {
         bitmap->set_image( image );
 
-        invoke_controller_on_image( L , this , 1 , 0 );
+        invoke_Controller_on_image( L , this , 1 , 0 );
     }
     else
     {
@@ -263,14 +263,14 @@ void ControllerDelegate::submit_image( void * data, unsigned int size, const cha
 
 void ControllerDelegate::cancel_image( void )
 {
-	invoke_controller_on_image_cancelled( L, this, 0, 0 );
+	invoke_Controller_on_image_cancelled( L, this, 0, 0 );
 }
 
 //.........................................................................
 
 void ControllerDelegate::cancel_audio_clip( void )
 {
-	invoke_controller_on_audio_clip_cancelled( L, this, 0, 0 );
+	invoke_Controller_on_audio_clip_cancelled( L, this, 0, 0 );
 }
 
 //.........................................................................
@@ -295,7 +295,7 @@ bool ControllerDelegate::declare_resource( const String & name , const String & 
 
 void ControllerDelegate::advanced_ui_ready( void )
 {
-    invoke_controller_on_advanced_ui_ready( L, this, 0, 0 );
+    invoke_Controller_on_advanced_ui_ready( L, this, 0, 0 );
 }
 
 //.........................................................................
@@ -304,7 +304,7 @@ void ControllerDelegate::advanced_ui_event( const char * json )
 {
     JSON::parse( L , json );
 
-    invoke_controller_on_advanced_ui_event( L , this , 1 , 0 );
+    invoke_Controller_on_advanced_ui_event( L , this , 1 , 0 );
 }
 
 //=============================================================================
@@ -338,7 +338,7 @@ void ControllerListDelegate::connected(Controller * controller)
 
     lua_pushlightuserdata(L,d);
 
-    new_controller(L);
+    new_Controller(L);
 
     lua_remove(L,-2);
 
@@ -409,7 +409,7 @@ void ControllerListDelegate::push_connected()
 
         lua_pushlightuserdata(L,d);
 
-        new_controller(L);
+        new_Controller(L);
 
         lua_remove(L,-2);
 

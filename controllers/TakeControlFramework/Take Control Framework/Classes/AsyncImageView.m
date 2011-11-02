@@ -16,6 +16,7 @@
 @synthesize resourceKey;
 @synthesize tileWidth;
 @synthesize tileHeight;
+@synthesize centerToSuperview;
 @synthesize image;
 @synthesize loaded;
 
@@ -171,6 +172,10 @@
     [loadingIndicator removeFromSuperview];
     
     loaded = YES;
+    
+    if (centerToSuperview) {
+        self.center = CGPointMake(fabs(self.superview.center.x), fabs(self.superview.center.y));
+    }
 }
 
 #pragma mark -

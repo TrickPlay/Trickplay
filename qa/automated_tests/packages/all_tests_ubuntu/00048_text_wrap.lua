@@ -14,8 +14,7 @@ function generate_test_image ()
 	--wrap - false
 	text_txt = Text {font="DejaVu Sans 30px",
 			 text = textString, 
-			 color = "FFFFFF",
-			 position = { 10, 0 },
+			 position = { 100, 50 },
 			 width = screen.w - 210,
 			 height = 300,
 			 wrap = false
@@ -25,8 +24,7 @@ function generate_test_image ()
 	-- wrap = true, word_wrap = CHAR
 	text1_txt = Text {font="DejaVu Sans 30px",
 			 text = textString, 
-			 position = { 10, 250 },
-			 color = "FFFFFF",
+			 position = { 100, 300 },
 			 width = screen.w - 210,
 			 height = 300,
 			 wrap = true,
@@ -38,8 +36,7 @@ function generate_test_image ()
 	-- wrap = true, word_wrap = WORD
 	text2_txt = Text {font="DejaVu Sans 30px",
 			 text = textString, 
-			 position = { 10, 500 },
-			 color = "FFFFFF",
+			 position = { 100, 550 },
 			 width = screen.w - 210,
 			 height = 400,
 			 wrap = true,
@@ -50,8 +47,7 @@ function generate_test_image ()
 	-- wrap = true, word_wrap = WORD_CHAR
 	text3_txt = Text {font="DejaVu Sans 30px",
 			 text = textString, 
-			 position = { 10, 750 },
-			 color = "FFFFFF",
+			 position = { 100, 800 },
 			 width = screen.w - 210,
 			 height = 400,
 			 wrap = true,

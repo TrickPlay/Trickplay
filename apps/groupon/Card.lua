@@ -21,6 +21,9 @@ local dot = "•"
 local function gen_highlight(s)
 	local ret_val = ""
 	local i,j,k = 1,1,1
+    
+    if string.find(s,"<li>") == nil then    return s    end
+    
 	while i ~= nil do
 		i,j = string.find(s,"<li>",k)
 		if i == nil then
@@ -66,6 +69,7 @@ local delta = {}
 local src = assets.hourglass[11]
 local update_time = function(self,curr_time)
 	
+    if self.exp == nil then return end
 	--os.date("!*t") 
 	
 	delta.day, delta.hour, delta.min, delta.sec =
@@ -487,19 +491,19 @@ local make_card = function(input)
 	txt_to_canvas(bg,bought)
 	
 	local str
-	if type(input.remaining) == "userdata" then
-		str = "No Limit"
-	elseif input.remaining <= 0 then
+    
+    if input.sold_out then
+		tltb_rem.text = "SOLD OUT"
 		str = "SOLD OUT"
 		na.opacity = 255
 		card.throb = empty
 		card.update_time = empty
 		card.glow.opacity = 0
 		card.hourglass.source = assets.hourglass_soldout
-		tltb_rem.text = "SOLD OUT"
-	else
-		str = input.remaining.." remaning"
-	end
+    else
+		str = input.limit and "Limited quantity" or "No Limit"
+    end
+    
 	local lim_quantity = Text{
 		text=str,
 		font=font.." 20px",
@@ -587,16 +591,28 @@ local make_card = function(input)
 	card.deal_img = deal_img
 	
 	
-	
-	card.exp = {isdst = "false"}
-	card.exp.year,card.exp.month,card.exp.day,card.exp.hour,card.exp.min,card.exp.sec =
-		string.match(input.expiration,"(%d*)-(%d*)-(%d*)T(%d*):(%d*):(%d*)")
-	
-	card.exp_secs = os.time(card.exp)
-	--print(card.exp_secs)
-	
-	card.tz = input.tz/60/60
-	
+	if input.expiration ~= json.null then
+        
+        card.exp = {isdst = "false"}
+        
+        card.exp.year,
+        card.exp.month,
+        card.exp.day,
+        card.exp.hour,
+        card.exp.min,
+        card.exp.sec =
+            string.match(input.expiration,"(%d*)-(%d*)-(%d*)T(%d*):(%d*):(%d*)")
+        
+        card.exp_secs = os.time(card.exp)
+        --print(card.exp_secs)
+        
+        card.tz = input.tz/60/60
+        
+    else
+        
+        tltb_rem.text = "No Expiration"
+        
+	end
 	--tltb_rem.anchor_point = {tltb_rem.w/2,0}
 	
 	
@@ -641,7 +657,9 @@ local make_card = function(input)
 		
 	--Values for the SMS Entry Object to pull
 	card.fine_print = decode(input.fine_print)
+    
 	card.highlights = decode(gen_highlight(input.highlights))
+    
 	card.deal_url   = input.deal_url
 	card.merchant   = input.merchant
 	

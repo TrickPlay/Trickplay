@@ -16,6 +16,7 @@
 @synthesize yScale;
 @synthesize xTranslation;
 @synthesize yTranslation;
+@synthesize delegate;
 
 - (id)initWithImage:(UIImage *)image {
     if ((self = [super initWithImage:image])) {
@@ -48,11 +49,26 @@
         yScale = 1.0;
         xTranslation = 0;
         yTranslation = 0;
+        
+        extraXTranslation = 0;
+        extraYTranslation = 0;
+        extraXScale = 1.0;
+        extraYScale = 1.0;
     }
-
+    
     return self;
 }
 
+- (BOOL)defaultOrientation {
+    return totalRotation == 0 && xScale == 1.0 && yScale == 1.0 && xTranslation == 0.0 && yTranslation == 0.0;
+}
+
+- (void)setPositionTo:(CGPoint)point {
+    // reset panning
+    self.center = CGPointMake(self.center.x - xTranslation - extraXTranslation + point.x, self.center.y - yTranslation - extraYTranslation + point.y);
+    extraXTranslation = point.x;
+    extraYTranslation = point.y;
+}
 
 - (void)panImage:(UIPanGestureRecognizer *)gestureRecognizer {
     if ([gestureRecognizer state] == UIGestureRecognizerStateBegan || [gestureRecognizer state] == UIGestureRecognizerStateChanged) {
@@ -65,6 +81,10 @@
     }
 }
 
+- (void)rotateImageTo:(CGFloat)radians {
+    self.transform = CGAffineTransformRotate(self.transform, (radians - totalRotation) * xScale/fabs(xScale));
+    //totalRotation = radians;
+}
 
 - (void)rotateImage:(UIRotationGestureRecognizer *)gestureRecognizer {
     if ([gestureRecognizer state] == UIGestureRecognizerStateBegan || [gestureRecognizer state] == UIGestureRecognizerStateChanged) {
@@ -75,9 +95,19 @@
     }
 }
 
+- (void)scaleImageTo:(CGFloat)scale {
+    self.transform = CGAffineTransformScale(self.transform, fabs(scale/xScale), scale/yScale);
+    
+    extraXScale = scale;
+    extraYScale = scale;
+}
 
 - (void)scaleImage:(UIPinchGestureRecognizer *)gestureRecognizer {
     if ([gestureRecognizer state] == UIGestureRecognizerStateBegan || [gestureRecognizer state] == UIGestureRecognizerStateChanged) {
+        if (gestureRecognizer.scale < .3) {
+            return;
+        }
+        
         self.transform = CGAffineTransformScale(self.transform, gestureRecognizer.scale, gestureRecognizer.scale);
         xScale *= gestureRecognizer.scale;
         yScale *= gestureRecognizer.scale;
@@ -86,34 +116,43 @@
     }
 }
 
+- (void)flipImage {
+    self.transform = CGAffineTransformScale(self.transform, -1.0, 1.0);
+    
+    xScale *= -1.0;
+}
 
 - (void)doubleTapImage:(UITapGestureRecognizer *)gestureRecognizer {
     if ([gestureRecognizer state] == UIGestureRecognizerStateEnded) {
-        self.transform = CGAffineTransformScale(self.transform, -1.0, 1.0);
-        
-        xScale *= -1.0;
+        [self flipImage];
     }
 }
 
+- (void)resetImage {
+    // reset panning
+    self.center = CGPointMake(self.center.x - xTranslation, self.center.y - yTranslation);
+    xTranslation = 0;
+    yTranslation = 0;
+    
+    // reset scale
+    self.transform = CGAffineTransformScale(self.transform, fabs(1.0/xScale), 1.0/yScale);
+    xScale = 1.0;
+    yScale = 1.0;
+    
+    // reset rotation
+    self.transform = CGAffineTransformRotate(self.transform, -totalRotation);
+    totalRotation = 0;
+    
+    self.transform = CGAffineTransformIdentity;
+}
 
--(void)tripleTapImage:(UITapGestureRecognizer *)gestureRecognizer {
+- (void)tripleTapImage:(UITapGestureRecognizer *)gestureRecognizer {
     if ([gestureRecognizer state] == UIGestureRecognizerStateEnded) {
+        [self resetImage];
         
-        // reset panning
-        self.center = CGPointMake(self.center.x - xTranslation, self.center.y - yTranslation);
-        xTranslation = 0;
-        yTranslation = 0;
-        
-        // reset scale
-        self.transform = CGAffineTransformScale(self.transform, fabs(1.0/xScale), 1.0/yScale);
-        xScale = 1.0;
-        yScale = 1.0;
-        
-        // reset rotation
-        self.transform = CGAffineTransformRotate(self.transform, -totalRotation);
-        totalRotation = 0;
-        
-        self.transform = CGAffineTransformIdentity;
+        if (delegate) {
+            [delegate gestureImageViewDidTripleTap:self];
+        }
     }
 }
 

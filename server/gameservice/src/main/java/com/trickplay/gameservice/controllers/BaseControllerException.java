@@ -39,7 +39,7 @@ public class BaseControllerException extends RuntimeException {
     	super(ex);
     	if (ex instanceof GameServiceException) {
     		GameServiceException gex = (GameServiceException)ex;
-    		if (gex.getReason() == Reason.FORBIDDEN) {
+    		if (gex.getReason() == Reason.UNAUTHORIZED) {
     			httpStatus = HttpStatus.FORBIDDEN.value();
     		} else {
     			httpStatus = HttpStatus.BAD_REQUEST.value();

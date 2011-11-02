@@ -599,7 +599,7 @@ public:
     }
 
 
-    void set_status( HttpServer::Status status , const String & msg = String() )
+    void set_status( HttpServer::ServerStatus status , const String & msg = String() )
     {
         if ( msg.empty() )
         {
