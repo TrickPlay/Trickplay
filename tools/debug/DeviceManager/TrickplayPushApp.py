@@ -140,6 +140,5 @@ class TrickplayPushApp():
         print( response[ "msg" ] )
         
         return not response[ "failed" ]
-
         
         #-----------------------------------------------------------------------

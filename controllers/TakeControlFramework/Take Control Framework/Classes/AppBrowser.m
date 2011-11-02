@@ -35,11 +35,15 @@
     if (self) {
         name = [(NSString *)[dictionary objectForKey:@"name"] retain];
         appID = [(NSString *)[dictionary objectForKey:@"id"] retain];
-        version = [(NSNumber *)[dictionary objectForKey:@"version"] retain];
-        releaseNumber = [(NSNumber *)[dictionary objectForKey:@"release"] retain];
+        version = [(NSString *)[dictionary objectForKey:@"version"] retain];
+        releaseNumber = [(NSString *)[dictionary objectForKey:@"release"] retain];
     }
     
     return self;
+}
+
+- (BOOL)equals:(AppInfo *)appInfo {
+    return ([self.name compare:appInfo.name] == NSOrderedSame) && ([self.appID compare:appInfo.appID] == NSOrderedSame) && ([self.version compare:appInfo.version] == NSOrderedSame) && ([self.releaseNumber compare:appInfo.releaseNumber] == NSOrderedSame);
 }
 
 - (void)dealloc {
@@ -102,14 +106,39 @@
 
 @implementation AppBrowserContext
 
-@synthesize availableApps;
-@synthesize currentApp;
-@synthesize tvConnection;
-@synthesize delegate;
+//@synthesize availableApps;
+//@synthesize currentApp;
+//@synthesize tvConnection;
+//@synthesize delegate;
 
 #pragma mark -
 #pragma Setters/Getters
 
+- (TVConnection *)tvConnection {
+    TVConnection *retval = nil;
+    @synchronized(self) {
+        retval = [[tvConnection retain] autorelease];
+    }
+    return retval;
+}
+
+- (void)setTvConnection:(TVConnection *)_tvConnection {
+    @synchronized(self) {
+        [_tvConnection retain];
+        [tvConnection release];
+        tvConnection = _tvConnection;
+    }
+}
+
+- (AppInfo *)currentApp {
+    AppInfo *retval = nil;
+    @synchronized(self) {
+        retval = [[currentApp retain] autorelease];
+    }
+    return retval;
+}
+
+// hidden method prototype
 - (void)setCurrentApp:(AppInfo *)_currentApp {
     @synchronized (self) {
         [_currentApp retain];
@@ -118,11 +147,34 @@
     }
 }
 
+- (NSArray *)availableApps {
+    NSArray *retval = nil;
+    @synchronized(self) {
+        retval = [[availableApps retain] autorelease];
+    }
+    return retval;
+}
+
+// hidden method prototype
 - (void)setAvailableApps:(NSMutableArray *)_availableApps {
     @synchronized (self) {
         [_availableApps retain];
         [availableApps release];
         availableApps = _availableApps;
+    }
+}
+
+- (id <AppBrowserDelegate>)delegate {
+    id <AppBrowserDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <AppBrowserDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
     }
 }
 
@@ -158,13 +210,13 @@
         
         self.delegate = _delegate;
         
-        /**
-         // Can't do this automatically for now
-         if (self.delegate) {
-         [self refreshCurrentApp];
-         [self refreshAvailableApps];
-         }
-         **/
+        //*
+        // Can't do this automatically for now
+        if (self.delegate) {
+            [self refreshCurrentApp];
+            [self refreshAvailableApps];
+        }
+        //*/
     }
     
     return self;
@@ -174,7 +226,9 @@
 #pragma mark AppBrowserViewController
 
 - (AppBrowserViewController *)getNewAppBrowserViewController {
-    AppBrowserViewController *viewController = [[[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:nil appBrowser:self] autorelease];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    
+    AppBrowserViewController *viewController = [[[AppBrowserViewController alloc] initWithNibName:@"AppBrowserViewController" bundle:myBundle appBrowser:self] autorelease];
     
     return viewController;
 }
@@ -424,31 +478,30 @@
  * app.
  */
 - (void)launchApp:(AppInfo *)app {
-    if (!tvConnection || !tvConnection.hostName || !app || ![app isKindOfClass:[AppBrowser class]] || !availableApps || ![availableApps containsObject:app]) {
+    if (!tvConnection || !tvConnection.hostName || !app || ![app isKindOfClass:[AppInfo class]] || !availableApps || ![availableApps containsObject:app]) {
         return;
     }
     
     NSString *launchString = [NSString stringWithFormat:@"http://%@:%d/api/launch?id=%@", tvConnection.hostName, tvConnection.http_port, app.appID];
     dispatch_queue_t launchApp_queue = dispatch_queue_create("launchAppQueue", NULL);
-    dispatch_async(launchApp_queue, ^(void){
+    dispatch_async(launchApp_queue, ^(void) {
         
         NSLog(@"Launching app via url '%@'", launchString);
         
         NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:launchString] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:5.0];
         NSHTTPURLResponse *response;
         NSData *launchData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:NULL];
-        NSLog(@"launch data = %@", launchData);
         
         // Failure to launch
         if (response.statusCode != 200) {
-            dispatch_async(dispatch_get_main_queue(), ^(void){
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
                 [self.delegate appBrowser:self newAppLaunched:app successfully:NO];
                 [self viewControllersRefresh];
             });
         } else {  // Successful launch
             self.currentApp = app;
             
-            dispatch_async(dispatch_get_main_queue(), ^(void){
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
                 [self.delegate appBrowser:self newAppLaunched:app successfully:YES];
                 [self viewControllersRefresh];
             });

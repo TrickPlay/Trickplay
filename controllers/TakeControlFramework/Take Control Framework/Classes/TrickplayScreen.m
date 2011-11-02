@@ -11,6 +11,8 @@
 
 @implementation TrickplayScreen
 
+@synthesize nextTouchResponder;
+
 - (id)init
 {
     self = [super initWithID:@"0" args:nil objectManager:nil];
@@ -27,7 +29,7 @@
     for (TrickplayUIElement *element in view.subviews) {
         [element handleTouchesBegan:touches];
     }
-    [self.nextResponder touchesBegan:touches withEvent:event];
+    [self.nextTouchResponder touchesBegan:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -35,7 +37,7 @@
     for (TrickplayUIElement *element in view.subviews) {
         [element handleTouchesMoved:touches];
     }
-    [self.nextResponder touchesMoved:touches withEvent:event];
+    [self.nextTouchResponder touchesMoved:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -43,7 +45,7 @@
     for (TrickplayUIElement *element in view.subviews) {
         [element handleTouchesEnded:touches];
     }
-    [self.nextResponder touchesEnded:touches withEvent:event];
+    [self.nextTouchResponder touchesEnded:touches withEvent:event];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -51,7 +53,7 @@
     for (TrickplayUIElement *element in view.subviews) {
         [element handleTouchesCancelled:touches];
     }
-    [self.nextResponder touchesCancelled:touches withEvent:event];
+    [self.nextTouchResponder touchesCancelled:touches withEvent:event];
 }
 
 - (void)handleTouchesBegan:(NSSet *)touches {
@@ -65,6 +67,12 @@
 }
 - (void)handleTouchesCancelled:(NSSet *)touches {
     
+}
+
+- (void)dealloc {
+    self.nextTouchResponder = nil;
+    
+    [super dealloc];
 }
 
 @end

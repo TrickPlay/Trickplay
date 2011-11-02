@@ -22,9 +22,9 @@ function test_advanced_ui_name ()
 end
 
 function test_advanced_ui_center ()
-	--dumptable (r1["center"])
-	assert_equal ( r1.center[1], 100,  "r1.center[1] not returning the correct value.\n ** Bug 1957 **\n")
-	assert_equal ( r1.center[2], 125, "r1.center[2] not returning the correct value")
+	-- Note that the center values are offset by setting the anchor point to 10 ,10.
+	assert_equal ( r1.center[1], 190,  "r1.center[1] not returning the correct value.\n ** Bug 1957 **\n")
+	assert_equal ( r1.center[2], 215, "r1.center[2] not returning the correct value")
 end
 
 function test_advanced_ui_anchor_point ()	

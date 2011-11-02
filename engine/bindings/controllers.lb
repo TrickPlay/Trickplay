@@ -7,13 +7,10 @@
 /*
 	Global: controllers
 	
-	Controllers are human interface devices. The simple examples are the keyboard
-	on the TrickPlay emulator or the remote control on a TV. TrickPlay also supports
-	clients that run on other devices and connect to TrickPlay to act as controllers.
+	The TrickPlay SDK libraries enable a program to access external devices, such as a TV remote control and keyboard. Access to a connected iPhone and iPad is also available.
 	
-	The controllers global lets you enumerate all the controllers that are currently
-	connected, using the <connected> property. You can also be notified when a new 
-	controller is connected by using the <on_controller_connected> event.
+	Access to connected devices is provided by the controllers global variable. A program can have the controllers variable notify the program when a new device connects to the system by hooking the controller's <on_controller_connected> event handler. The controllers variable also enables a program to enumerate the list of all connected devices by accessing its <connected> property.
+	
 */
 
 global controllers [[ControllerListDelegate*]]
@@ -31,8 +28,19 @@ global controllers [[ControllerListDelegate*]]
     /*
     	Property: connected
     	
-    	This property returns a table of <controller> objects containing all the 
-    	controllers that are currently connected.
+    	The connected property maintains a table of connected external devices. Each entry in the table is a <Controller> object. The connected table can be retrieved, but entries cannot be added or removed from it.
+    	
+    	*Code Example:* Output the name of each connected device
+    	
+    	(code)
+    	-- Iterate through each connected external device
+    	print( "Connected devices:" )
+    	for i, device in ipairs( controllers.connected ) do 
+    		print( "   ", device.name )
+    	end
+    	(end)
+    	
+    	*See Also:* the <Controller> interface
     */
     
     readonly table connected
@@ -42,9 +50,54 @@ global controllers [[ControllerListDelegate*]]
     
     /*
        Function: start_pointer
+       
+       The start_pointer() function instructs all connected devices to start sending pointer events if such events are applicable to the device, such as with a mouse. Events will be directed to objects, such as a Rectangle or Image, provided the object has its <UIElement.reactive> property set to true. Pointer events include <UIElement.on_button_down>, <UIElement.on_motion>, <UIElement.on_enter> and many others. Refer to the event handlers described in the <UIElement> section for complete details.
 
-       A convenience function that tells all connected controllers to start
-       sending pointer events.
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*Code Example:* Instruct connected devices to send pointer events. Handle the on_enter() and on_leave() events to output a simple message.
+		
+		(code)
+		-- Define on_enter() event handler
+		-- Both rectangles will use this handler
+		function hookOnEnter( self, x, y )
+			-- Device pointer has entered the object's display space
+			print( "Pointer is over ", self.name )
+		end
+		
+		-- Define on_leave() event handler; used by both rectangles
+		function hookOnLeave( self, x, y )
+			-- Device pointer has left the object's display space
+			print( "Pointer has left ", self.name )
+		end
+		
+		-- Define two rectangles of different colors
+		goldRect = Rectangle( { name = "GoldRect",
+		                        position = { 100, 100 },
+		                        color = "Gold",
+		                        size = { 100, 100 },
+		                        reactive = true,
+		                        on_enter = hookOnEnter,   -- hooks into the event handlers
+		                        on_leave = hookOnLeave,
+		                      } )
+		blueRect = Rectangle( { name = "BlueRect",
+		                        position = { 400, 100 },
+		                        color = "DodgerBlue",
+		                        size = { 100, 100 },
+		                        reactive = true,
+		                        on_enter = hookOnEnter,
+		                        on_leave = hookOnLeave,
+		                      } )
+		                      
+		-- Add the rectangles to the screen and show the screen
+		screen:add( goldRect, blueRect )
+		screen:show()
+				
+		-- Enable pointer events
+		controllers:start_pointer()
+		(end)
     */
 
     start_pointer()
@@ -53,15 +106,36 @@ global controllers [[ControllerListDelegate*]]
         ]];
 
     /*
-    	Event: on_controller_connected
+    	Event Handler: on_controller_connected
     	
-    	This event happens any time a new controller connects to TrickPlay.
+    	The on_controller_connected event handler is invoked whenever a new device connects to the system.
     	
-    	Arguments:
+    	*Prototype:*
     	
-    		controllers - The <controllers> global.
+    		(code)
+    		void on_controller_connected( controllers, controller )
+    		(end)
+    	
+    	*Arguments:*
+    	
+    		controllers - the <controllers> global variable
+    		controller - the connected <Controller> object
     		
-    		controller - The <controller> that connected.
+    	*Return Value:* None
+    	
+    	*Code Example:* Print a message whenever a new device connects to the system
+    	
+    		(code)
+    		-- Define the event handler
+    		function hookOnConnected( controllers, controller )
+    			print( "The ", controller.name, " controller has connected." )
+    		end
+    		
+    		-- Hook the handler into controllers
+    		controllers.on_controller_connected = hookOnConnected()
+    		(end)
+    		
+    	*See Also:* the <Controller> interface
     */    
     
     callback on_controller_connected;    

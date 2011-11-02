@@ -156,7 +156,7 @@ void ControllerDiscoveryMDNS::avahi_server_callback( AvahiServer * server, Avahi
         {
             char * new_name = avahi_alternative_host_name( avahi_server_get_host_name( server ) );
 
-            int ret = avahi_server_set_host_name( server, new_name );
+            (void)avahi_server_set_host_name( server, new_name );
             avahi_free( new_name );
 
             // TODO : check ret

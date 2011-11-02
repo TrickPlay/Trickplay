@@ -14,11 +14,11 @@ Description:  Verify that:
 -- Test Set up --
 local image1
 
-local bitmap_async_loaded_called = false
+bitmap1_async_loaded_called = false
 local bitmap1 = Bitmap( "packages/engine_unit_tests/tests/assets/logo.png",true)
 
 bitmap1.on_loaded = function()
-	bitmap_async_loaded_called = true
+	bitmap1_async_loaded_called = true
 	image1 = bitmap1:Image()
 	image1.position = { 400, 400}
 	test_group:add(image1)
@@ -38,7 +38,7 @@ function test_bitmap_w_h ()
 end
     
 function test_bitmap_on_loaded ()
-    assert_equal( bitmap_async_loaded_called , true , "bitmap.on_loaded failed" )
+    assert_equal( bitmap1_async_loaded_called , true , "bitmap.on_loaded failed" )
 end
 
 function test_bitmap_rendered ()

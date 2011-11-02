@@ -9,9 +9,14 @@ function test_advanced_ui_scale ()
 end
 
 function test_advanced_ui_rotation ()
-	assert_equal ( r1.x_rotation, 20,  "r1.x_rotation not returning the correct value")
-	assert_equal ( r1.y_rotation, 30,  "r1.y_rotation not returning the correct value")
-	assert_equal ( r1.z_rotation, 40,  "r1.z_rotation not returning the correct value")
+	-- As iOs controller often returns float values, using float compare code
+    	local relative_error_x = math.abs((r1.x_rotation - 20) / math.max(r1.x_rotation, 20))
+ 	local relative_error_y = math.abs((r1.y_rotation - 30) / math.max(r1.y_rotation, 30))
+  	local relative_error_z = math.abs((r1.z_rotation - 40) / math.max(r1.z_rotation, 40))
+    	local epsilon = 0.000001
+    	assert_less_than( relative_error_x, epsilon, "r1.x_rotation failed")
+    	assert_less_than( relative_error_y, epsilon, "r1.y_rotation failed")
+    	assert_less_than( relative_error_z, epsilon, "r1.z_rotation failed")
 	
 end
 

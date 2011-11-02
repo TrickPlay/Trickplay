@@ -3,16 +3,12 @@ Filename: app1.lua
 Author: Peter von dem Hagen
 Date: January 24, 2011
 Description:  Test the basic values of the app api. 
-   			  Verify that app.on_load gets called.
+   	      Verify that app.on_load gets called.
+
+Note: app.on_load is called in main.lua and set as a global variable
 --]]
 
 -- Test Set up --
-
-local appOnLoadedCalled = false
-
-app.on_loaded = function ()
-	appOnLoadedCalled = true
-end
 
 -- Tests --
 
@@ -26,7 +22,7 @@ function test_app_basic ()
  	assert_equal( app.description, "Unit tests for the Trickplay engine.", "app.description failed" )
  	assert_table( app.contents, "app.contents failed" )
  	is_nil (app.launch, "app.launch is not nil" )
- --	assert_equal( appOnLoadedCalled, true, "app.on_loaded not called" )
+ 	assert_equal( appOnLoadedCalled, true, "app.on_loaded not called" )
 end
 
 

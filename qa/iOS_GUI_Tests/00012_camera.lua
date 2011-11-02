@@ -26,7 +26,6 @@ function generate_test_image (controller, factory)
  	function idle.on_idle( idle , seconds )
       total = total + seconds
       if total >= 10 then
-		print ("aaa")
         idle.on_idle = nil
 		screen:remove(photo)
 		photo = nil
@@ -39,16 +38,15 @@ end
 
 --[[
  key_handler[keys.p] = function()
-        print("submit picture")
         controller:request_image()
     end
     size = {640, 960}
     key_handler[keys.q] = function()
-        print("submit picture with size and mask but no labels")
+     --   print("submit picture with size and mask but no labels")
         controller:request_image(size, true, "chip")
     end
     key_handler[keys.w] = function()
-        print("submit picture with size and lables but no mask")
+     --   print("submit picture with size and lables but no mask")
         controller:request_image(size, true, "", "i am your title label", "cancel label")
     end
 --]]

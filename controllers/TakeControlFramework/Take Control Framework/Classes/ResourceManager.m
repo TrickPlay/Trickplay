@@ -121,7 +121,10 @@
     NSData *tempData;
     if ((tempData = [resources objectForKey:name])) {
         // image data already cached, set it to the view
-        imageView.image = [UIImage imageWithData:tempData];
+        //imageView.image = [UIImage imageWithData:tempData];
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+            [imageView loadImageFromData:tempData];
+        });
     } else if ([loadingResources objectForKey:name]) {
         NSMutableArray *dependentImages = [loadingResources objectForKey:name];
         [dependentImages addObject:imageView];
