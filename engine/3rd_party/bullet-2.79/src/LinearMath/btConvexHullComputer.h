@@ -88,13 +88,17 @@ class btConvexHullComputer
 		*/
 		btScalar compute(const float* coords, int stride, int count, btScalar shrink, btScalar shrinkClamp)
 		{
-			return compute(coords, false, stride, count, shrink, shrinkClamp);
+		    // TODO: pablo Inexplicable linker errors with these
+			//return compute(coords, false, stride, count, shrink, shrinkClamp);
+			return 0;
 		}
 
 		// same as above, but double precision
 		btScalar compute(const double* coords, int stride, int count, btScalar shrink, btScalar shrinkClamp)
 		{
-			return compute(coords, true, stride, count, shrink, shrinkClamp);
+		    // TODO: pablo Inexplicable linker errors with these
+			//return compute(coords, true, stride, count, shrink, shrinkClamp);
+			return 0;
 		}
 };
 
