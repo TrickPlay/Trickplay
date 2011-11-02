@@ -30,9 +30,9 @@ self.check_server = Timer{
                         print("ignoring a gamesession")
                         
                     else
-                    
-                    all_seshs[sesh.gameState.gameSessionId]:sync_callback(sesh.gameState)
-                    
+                        
+                        all_seshs[sesh.gameState.gameSessionId]:sync_callback(sesh.gameState)
+                        
                     end
                 end
                 
