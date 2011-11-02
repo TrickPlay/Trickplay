@@ -61,13 +61,17 @@ function mme:make(sesh)
     }
     
     local time_remaining = Text{
-        text  = "7 days",
+        text  = "",
         font  = g_font .. " Medium 28px",
         color = "aaaa00",
         x     = box_w - 10,
         y     = 5,
+        function(self)
+            
+            self.anchor_point = {self.w,0}
+            
+        end,
     }
-    time_remaining.anchor_point = {time_remaining.w,0}
     
     local whore_line = Rectangle{
         w = box_w-6,

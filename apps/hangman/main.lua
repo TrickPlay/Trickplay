@@ -137,7 +137,7 @@ function main()
     -------------------------------------
     --    sub-components
     Main_Menu_Entry    = dofile( code_path .. "visual objects/Main_Menu_Entry.lua" )
-    Main_Menu_List     = dofile( code_path .. "visual objects/Main_Menu_List.lua"  )
+    --Main_Menu_List     = dofile( code_path .. "visual objects/Main_Menu_List.lua"  )
     Clipped_List       = dofile( code_path .. "visual objects/Clipped_List.lua"    )
     Game_History       = dofile( code_path .. "visual objects/Game_History.lua"    )
     --    main pieces
