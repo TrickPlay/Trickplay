@@ -111,6 +111,14 @@
 {
 "name": "0028_animator_state_postdelay.lua", 
 "active": "true"
+},
+{
+"name": "0029_localization.lua", 
+"active": "true"
+},
+{
+"name": "0030_localization.lua", 
+"active": "true"
 }
 ]
 
