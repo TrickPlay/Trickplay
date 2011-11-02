@@ -94,9 +94,9 @@ int compare_func(const ColorEntry* ce_a, const ColorEntry* ce_b)
     rgb_to_hsl(ce_b->red, ce_b->green, ce_b->blue, &h_b, &s_b, &l_b);
 
     // Sort by hue then by brightness
-    return -((fabs(h_a - h_b) > 0.001) ? ((h_a < h_b) ? -1 : 1)
-    : ((fabs(y_a - y_b) > 0.001) ? (( y_a < y_b ) ? -1 : 1)
-    : (fabs(s_a - s_b) > 0.001) ? (( s_a < s_b ) ? -1 : 1) : 0 ));
+    return -((fabs(h_a - h_b) > 0.01) ? ((h_a < h_b) ? -1 : 1)
+    : ((fabs(s_a - s_b) > 0.001) ? (( s_a < s_b ) ? -1 : 1)
+    : (fabs(y_a - y_b) > 0.001) ? (( y_a < y_b ) ? -1 : 1) : 0 ));
 }
 
 int main(int argc, char **argv)
