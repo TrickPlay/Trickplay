@@ -21,7 +21,7 @@ if (NATURAL_DOCS)
 	)
 
 	add_custom_target(
-		rte-docs
+		rte-docs-main
 		COMMENT "Generating RTE docs"
 		VERBATIM
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/docs/rte
@@ -42,7 +42,20 @@ if (NATURAL_DOCS)
             -s Default Trickplay
         COMMAND cat ${PROJECT_SOURCE_DIR}/engine/docs/expand-subsections.js >> ${PROJECT_BINARY_DIR}/docs/rte/javascript/main.js
 	)
-	add_dependencies(rte-docs git-tag-menu-txt)
+	add_dependencies(rte-docs-main git-tag-menu-txt)
+
+	add_custom_target(
+		insert-color-table
+		COMMENT "Inserting color table into RTE docs"
+		VERBATIM
+		COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/engine/docs/rte/progguide/color_table_for_insertion.html ${CMAKE_CURRENT_BINARY_DIR}/color_table_for_insertion.html
+		COMMAND sed -i ${PROJECT_BINARY_DIR}/docs/rte/files/docs/rte/progguide/color_names-txt.html
+			        -f ${PROJECT_SOURCE_DIR}/engine/docs/rte/progguide/insert-color-table.sed
+		COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/color_table_for_insertion.html
+	)
+	add_dependencies(insert-color-table rte-docs-main)
+	add_custom_target( rte-docs ALL )
+	add_dependencies(rte-docs insert-color-table)
 
 	add_custom_target(
 		oem-docs
