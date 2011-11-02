@@ -36,6 +36,6 @@ class TrickplayConsole(QWidget):
         QWidget.__init__(self, parent)
         self.ui = Ui_Console()
         self.ui.setupUi(self)
-        #sys.stdout = OutLog( self.ui.textEdit, sys.stdout)
-        #sys.stderr = OutLog( self.ui.textEdit, sys.stderr, QtGui.QColor(255,0,0) )
+        sys.stdout = OutLog( self.ui.textEdit, sys.stdout)
+        sys.stderr = OutLog( self.ui.textEdit, sys.stderr, QtGui.QColor(255,0,0) )
 
