@@ -72,6 +72,8 @@ set( BUILD_MINICL_OPENCL_DEMOS OFF )
 set( BUILD_NVIDIA_OPENCL_DEMOS OFF )
 set( BUILD_EXTRAS OFF )
 
+add_definitions( -DBT_NO_PROFILE=1 )
+
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/bullet-2.79 )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/bullet-2.79/src )

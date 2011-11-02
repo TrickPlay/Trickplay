@@ -432,6 +432,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/http.lb
     ${BINDINGS_SRC}/keyboard.lb
 
+    ${BINDINGS_SRC}/physics_bullet.lb
 )
 
 #------------------------------------------------------------------------------
@@ -648,10 +649,10 @@ target_link_libraries(
     m
     dl
     
-    BulletSoftBody
-    BulletCollision
-    BulletDynamics
     LinearMath
+    BulletDynamics
+    BulletCollision
+    BulletSoftBody
 )
 
 
