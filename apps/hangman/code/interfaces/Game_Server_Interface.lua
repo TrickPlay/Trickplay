@@ -50,11 +50,11 @@ local response_check = function(request_object,response_object,callback)
 			print("json was nil")
 			print(response_object.code.." - "..response_object.status)
 			
-			callback(response_object.code)
+			if callback then callback(response_object.code) end
 			
         else
             
-            callback(json_response)
+            if callback then callback(json_response) end
             
 		end
         
@@ -723,7 +723,7 @@ function Game_Server:get_gameplay_invitation(user,pwd,game_id,max_num,callback)
         headers = make_headers(user,pwd),
         
         on_complete = function(self,response_object)
-			print(self.url)
+			
 			response_check(self,response_object,callback)
 			
 		end,
@@ -731,6 +731,48 @@ function Game_Server:get_gameplay_invitation(user,pwd,game_id,max_num,callback)
     }:send()
     
 end
+function Game_Server:get_gameplay_summary(user,pwd,game_id,callback)
+    
+    URLRequest{
+        
+        url    = base_url.."/gameservice/rest/game/"..game_id.."/summary",
+        
+        method = "GET",
+        
+        headers = make_headers(user,pwd),
+        
+        on_complete = function(self,response_object)
+			
+			response_check(self,response_object,callback)
+			
+		end,
+        
+    }:send()
+    
+end
+function Game_Server:set_gameplay_summary(user,pwd,game_id,detail,callback)
+    
+    URLRequest{
+        
+        url    = base_url.."/gameservice/rest/game/"..game_id.."/summary",
+        
+        method = "POST",
+        
+        headers = make_headers(user,pwd),
+		
+		body = '{"detail":"'..detail..'"}',
+        
+        on_complete = function(self,response_object)
+			
+			response_check(self,response_object,callback)
+			
+		end,
+        
+    }:send()
+    
+end
+ 
+ 
  
 --[[
  
@@ -1064,11 +1106,11 @@ Response
 
 {"key":"pyNemr4+pphXKd1+Nvcl6bFubLMWAqnt/BYsWzTMKAQ="}
 --]]
-function Game_Server:end_gameplay_session(gameSessionId,gameState)
+function Game_Server:end_gameplay_session(user,pwd,gameSessionId,gameState,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/1/end",
+        url    = base_url.."/gameservice/rest/gameplay/"..gameSessionId.."/end",
         
         method = "POST",
         
@@ -1077,6 +1119,10 @@ function Game_Server:end_gameplay_session(gameSessionId,gameState)
         body = '{"turnId":null,"gameSessionId":'..gameSessionId..',"gameState":"'..gameState..'"}',
         
         on_complete = function(self,response_object)
+			print("ENDING A SESSION")
+			print(self.url)
+			print(self.body)
+			print(response_object.body)
 			
 			response_check(self,response_object,callback)
 			

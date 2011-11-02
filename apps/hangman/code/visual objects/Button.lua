@@ -167,6 +167,8 @@ local function make_button(t)
             
             animation.state = "FOCUSED"
             
+            return true
+            
         elseif new_state == "UNFOCUSED" then
             
             animation.state = "UNFOCUSED"
