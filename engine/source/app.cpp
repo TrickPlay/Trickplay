@@ -71,6 +71,7 @@ extern int luaopen_socket( lua_State * L );
 
 extern int luaopen_uri( lua_State * L );
 extern int luaopen_physics_module( lua_State * L );
+extern int luaopen_physics_bullet( lua_State * L );
 extern int luaopen_editor( lua_State * L );
 extern int luaopen_trickplay( lua_State * L );
 extern int luaopen_bitmap( lua_State * L );
@@ -927,6 +928,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_url_request( L );
     luaopen_uri( L );
     luaopen_physics_module( L );
+    luaopen_physics_bullet( L );
     luaopen_editor( L );
     luaopen_trickplay( L );
     luaopen_bitmap( L );

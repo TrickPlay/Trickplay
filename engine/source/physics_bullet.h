@@ -16,19 +16,46 @@ namespace Bullet
 
 		~World();
 
+        inline float world_to_screen( float coordinate ) const
+        {
+            return coordinate * ppm;
+        }
+
+        inline float screen_to_world( float coordinate ) const
+        {
+            return coordinate / ppm;
+        }
+
+        inline float get_ppm() const
+        {
+        	return ppm;
+        }
+
+        btDynamicsWorld * get_world() const
+        {
+        	return world;
+        }
+
+        int create_body( int element , int properties , const char * metatable );
+
+        void step( float time_step , int max_sub_steps , float fixed_time_step );
+
 	private:
 
-		LuaStateProxy *	lsp;
+		LuaStateProxy *				lsp;
 
-		float 			pixels_per_meter;
+		float 						ppm;
 
-		btDispatcher *				dispatcher;
+		btCollisionDispatcher *		dispatcher;
 		btBroadphaseInterface *		pair_cache;
 		btConstraintSolver *		solver;
 		btCollisionConfiguration * 	collision_configuration;
 
 		btDynamicsWorld *			world;
 
+		typedef btAlignedObjectArray< btCollisionShape * > ShapeArray;
+
+		ShapeArray					shapes;
 	};
 };
 
