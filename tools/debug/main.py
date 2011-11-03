@@ -14,6 +14,7 @@ from Inspector.TrickplayInspector import TrickplayInspector
 from DeviceManager.TrickplayDeviceManager import TrickplayDeviceManager
 from Editor.EditorManager import EditorManager
 from FileSystem.FileSystem import FileSystem
+from Console.TrickplayConsole import TrickplayConsole
 
 class MainWindow(QMainWindow):
     
@@ -29,6 +30,9 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         
         # Create FileSystem
+        self.ui.FileSystemDock.toggleViewAction().setText("&File System")
+        self.ui.menuView.addAction(self.ui.FileSystemDock.toggleViewAction())
+        #self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fs)
         self._fileSystem = FileSystem()
         self.ui.FileSystemLayout.addWidget(self._fileSystem)
         
@@ -36,19 +40,33 @@ class MainWindow(QMainWindow):
         self._editorManager = EditorManager(self._fileSystem, self.ui.centralwidget)
         
         # Create Inspector
+        self.ui.InspectorDock.toggleViewAction().setText("&Inspector")
+        self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
+        #self.ui.InspectorDock.toggleViewAction().triggered.connect(self.isptr)
         self._inspector = TrickplayInspector()
         self.ui.InspectorLayout.addWidget(self._inspector)
         
         # Create DeviceManager
+        self.ui.DeviceManagerDock.toggleViewAction().setText("&Device Manager")
+        self.ui.menuView.addAction(self.ui.DeviceManagerDock.toggleViewAction())
+        #self.ui.DeviceManagerDock.toggleViewAction().triggered.connect(self.dm)
         self._deviceManager = TrickplayDeviceManager(self._inspector)
         self.ui.DeviceManagerLayout.addWidget(self._deviceManager)
         
+        # Create Console
+        self.ui.ConsoleDock.toggleViewAction().setText("&Console")
+        self.ui.menuView.addAction(self.ui.ConsoleDock.toggleViewAction())
+        #self.ui.DeviceManagerDock.toggleViewAction().triggered.connect(self.dm)
+        self._console = TrickplayConsole()
+        self.ui.ConsoleLayout.addWidget(self._console)
+	
+		## make them aware of one another
         # Toolbar
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
         
         # Restore sizes/positions of docks
-        self.restoreState(settings.value("mainWindowState").toByteArray());
+        #self.restoreState(settings.value("mainWindowState").toByteArray());
         
         self.path = None
         
@@ -72,7 +90,6 @@ class MainWindow(QMainWindow):
     def inspector(self):
         return self._inspector
 
-    
     def cleanUp(self):
         """
         End running Trickplay process
@@ -122,5 +139,14 @@ class MainWindow(QMainWindow):
         """
         
         self.close()
+
+    def dm(self):
+		print "dm"
+
+    def fs(self):
+		print "fs"
+
+    def isptr(self):
+		print "inptr"
         
         
