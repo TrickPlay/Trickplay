@@ -137,13 +137,12 @@ function main()
     -------------------------------------
     --    sub-components
     Main_Menu_Entry    = dofile( code_path .. "visual objects/Main_Menu_Entry.lua" )
-    --Main_Menu_List     = dofile( code_path .. "visual objects/Main_Menu_List.lua"  )
     Clipped_List       = dofile( code_path .. "visual objects/Clipped_List.lua"    )
     Game_History       = dofile( code_path .. "visual objects/Game_History.lua"    )
     --    main pieces
     bg, logo           = dofile( code_path .. "visual objects/Background.lua"      )
     Splash_Buttons     = dofile( code_path .. "visual objects/Splash_Buttons.lua"  )
-    Main_Menu          = dofile( code_path .. "visual objects/Front_Page__Main.lua")--Main_Menu.lua"       )
+    Main_Menu          = dofile( code_path .. "visual objects/Front_Page__Main.lua")
     
     -- logic pieces
     -------------------------------------
@@ -175,7 +174,10 @@ function main()
     ----------------------------------------------------------------------------
     -- Link components together                                               --
     ----------------------------------------------------------------------------
-    
+    gsi:init{
+        on_lose_internet   = function() end,--Modal_Menu:animate{duration = 200, opacity = 0} end,
+        on_regain_internet = function() end,--Modal_Menu:animate{duration = 200, opacity = 0} end,
+    }
     gsm:init{ interface = gsi }
     
     Game_State:init{game_server   = gsm}

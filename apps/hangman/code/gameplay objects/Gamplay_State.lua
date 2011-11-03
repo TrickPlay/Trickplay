@@ -34,6 +34,7 @@ self.check_server = Timer{
                         all_seshs[sesh.gameState.gameSessionId]:sync_callback(sesh.gameState)
                         
                     end
+                    
                 end
                 
             end
@@ -97,6 +98,7 @@ local make_from_existing = function(p_data)
     
     local synching = false -- TODO refactor this in/out
     local time_rem
+    local pause_time = data.state.expires - os.time()
     
     -- if this is not a game started by me
     if data.state.players[1].name ~= g_user.name then
@@ -185,7 +187,7 @@ local make_from_existing = function(p_data)
         data.state.phase = self.phase == "GUESSING" and "MAKING" or "GUESSING"
         
         data.state.expires = reset_expiration()
-        
+        if pause_time then pause_time = data.state.expires - os.time() end
     end
     
     function session:opponents_turn()
@@ -264,6 +266,17 @@ local make_from_existing = function(p_data)
         
     end
     function session:update_time(curr_time)
+        
+        if session.opponent_name == false then
+            time_rem = ""
+            self:update_views()
+            return
+        end
+        if session.viewing then
+            time_rem = "Viewing"
+            self:update_views()
+            return
+        end
         
         delta = os.difftime(
             data.state.expires,
@@ -353,9 +366,13 @@ local make_from_existing = function(p_data)
                 
                 time_rem = "1 hour"
                 
+            elseif delta.min > 1 then
+                
+                time_rem = delta.min .. " mins"
+                
             else
                 
-                time_rem = string.format("%02d",delta.min)..":"..string.format("%02d",delta.sec)
+                time_rem = "1 min"
                 
             end
             
@@ -390,13 +407,23 @@ local make_from_existing = function(p_data)
             
         end
     end
-    
     local meta_set = {
         i_counted_score = function(v) me().counted_score = v end,
         my_score        = function(v) me().score         = v end,
         word            = function(v) data.state.word    = v end,
         id              = function(v) all_seshs[v] = session; data.gameSessionId = v end,
         opponent_score  = function(v) opponent().score = v  end,
+        viewing         = function(v)
+            
+            data.state.viewing = v
+            
+            if v then
+                pause_time = data.state.expires - os.time()
+            else
+                data.state.expires = os.time() + (pause_time or 0)
+                pause_time = nil
+            end
+        end,
     }
     local meta_get = {
         i_counted_score = function() return me().counted_score end,
@@ -409,6 +436,7 @@ local make_from_existing = function(p_data)
         letters         = function() return data.state.letters end,
         phase           = function() return data.state.phase   end,
         id              = function() return data.gameSessionId end,
+        viewing         = function() return data.state.viewing end,
         
         my_turn                 = function() return data.state.turn == g_user.name end,
         state                   = function() return base64_encode(json:stringify(data.state)) end,
@@ -453,7 +481,7 @@ function self:make(t)
                 },
                 turn    = g_user.name, --waiting for wildcard opponent
                 word    = false,
-                
+                viewing = false,
                 phase   = "MAKING",
                 letters = {},
                 expires = reset_expiration(),

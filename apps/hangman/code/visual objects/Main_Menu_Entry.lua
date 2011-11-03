@@ -14,6 +14,8 @@ local function update_times()
         
     end
     
+    if app_state.state == "MAIN_PAGE" then logic:report_win_loss() end
+    
 end
 
 local clock = Timer{
@@ -66,7 +68,7 @@ function mme:make(sesh)
         color = "aaaa00",
         x     = box_w - 10,
         y     = 5,
-        function(self)
+        on_text_changed = function(self)
             
             self.anchor_point = {self.w,0}
             

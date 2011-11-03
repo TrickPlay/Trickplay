@@ -133,6 +133,8 @@ function controller:init(t)
                         
                         win_lose_txt:animate{duration = 300, opacity = 255, scale = {1,1}}
                         
+                        mediaplayer:play_sound("audio/you-win.mp3")
+                        
                         print("you win")
                         
                     end
@@ -168,6 +170,8 @@ function controller:init(t)
                         bg:slide_in_hangman()
                         
                         ls:fill_in(guess_word)
+                        
+                        mediaplayer:play_sound("audio/you-lose.mp3")
                         
                         print("you lose")
                         --exit()
@@ -246,7 +250,22 @@ function controller:init(t)
             ls:light_down()
             make_word:set_session(session)
             if session.my_score == 3 then
-                app_state.state = "MAIN_PAGE"
+                
+                session.viewing = false
+                
+                screen:grab_key_focus()
+                controller:change_message("Saving...")
+                game_server:update(
+                    session,
+                    function(t)
+                        session = nil
+                        controller:change_message("")
+                        print("successfully updated")
+                        
+                        app_state.state = "MAIN_PAGE"
+                    end
+                )
+                
             else
                 app_state.state = "MAKE_WORD"
             end
@@ -329,26 +348,27 @@ function controller:init(t)
             screen:grab_key_focus()
             session:remove_view(sk)
             session:update_views()
+            session.viewing = false
             
             bg:fade_out_vic()
-            if not guessing then 
-                bg:slide_out_hangman()
-                app_state.state = "MAIN_PAGE"
-            else
-                controller:change_message("Saving...")
-                
-                
-                game_server:update(
-                    session,
-                    function(t)
-                        session = nil
-                        print("successfully updated")
-                        controller:change_message("")
-                        app_state.state = "MAIN_PAGE"
+            
+            controller:change_message("Saving...")
+            game_server:update(
+                session,
+                function(t)
+                    session = nil
+                    controller:change_message("")
+                    print("successfully updated")
+                    if not guessing then 
+                        
+                        bg:slide_out_hangman()
                         
                     end
-                )
-            end
+                    
+                    app_state.state = "MAIN_PAGE"
+                end
+            )
+            
         end,
         unfocused_image = img_srcs.button_y,
         focused_image   = img_srcs.button_f,
@@ -364,13 +384,14 @@ function controller:init(t)
     }
     right_side_bar[3]:add(right_side_txt[3])
     
-    right_side_bar[4] =make_button{
+    right_side_bar[4]   = make_button{
         clone           = true,
         unfocus_fades   = false,
         select_function = function()
             list:set_state("UNFOCUSED")
             screen:grab_key_focus()
             controller:change_message("Saving...")
+            session.viewing = false
             game_server:update(
                 session,
                 function(t)
@@ -459,6 +480,10 @@ function controller:guess_word(s)
     
     session = s
     
+    session.viewing = true
+    
+    game_server:update(session,function() print("Updated server - Guess Word Vieiwing session") end)
+    
     session:add_view(sk)
     
     guess_word = session.word
@@ -534,7 +559,6 @@ function controller:gain_focus()
     
     --give that hint to the user
     ls:put_letter(l:upper(),i)
-    
     
     local letters = session.letters
     

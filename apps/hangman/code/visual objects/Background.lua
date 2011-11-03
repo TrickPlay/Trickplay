@@ -222,9 +222,9 @@ function bg:reset()
     sway_tl:stop()
     
     victim.opacity = 255
-    print(victim.y)
+    
     victim.y = victim.anchor_point[2]
-    print(victim.y)
+    
     rope_top.y = 0
     rope_mid.y = rope_top.y + rope_top.h
     rope_mid.h = 200
@@ -244,7 +244,15 @@ function bg:fade_out_vic()
 end
 
 function bg:kill()
+    
     print("kill")
+    
+    if victim.opacity ~= 0 and victim_pieces[1].opacity ~= 0 then
+        
+        mediaplayer:play_sound("audio/hanging.mp3")
+        
+    end
+    
     hangman_kill:start()
     
 end

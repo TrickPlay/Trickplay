@@ -155,6 +155,8 @@ local function make_list(t)
 		
 		if index <= 1 and not t.wrap then return false  end
 		
+        mediaplayer:play_sound("audio/key-arrows.mp3")
+		
 		items[index]:set_state("UNFOCUSED")
 		
 		orig_index = index
@@ -199,6 +201,8 @@ local function make_list(t)
 		
 		if index >= #items and not t.wrap then return false end
 		
+        mediaplayer:play_sound("audio/key-arrows.mp3")
+        
 		items[index]:set_state("UNFOCUSED")
 		
 		orig_index = index
@@ -246,14 +250,22 @@ local function make_list(t)
 		{
 			[keys.Up]    = move_to_lower_index,
 			[keys.Down]  = move_to_higher_index,
-			[keys.OK]    = function() items[index]:select() end,
+			[keys.OK]    = function()
+                mediaplayer:play_sound("audio/key-buttonpress.mp3")
+                
+                if items[index].select then  items[index]:select() end
+            end,
 		} or
 		
 		t.orientation == "HORIZONTAL" and
 		{
 			[keys.Left]  = move_to_lower_index,
 			[keys.Right] = move_to_higher_index,
-			[keys.OK]    = function() if items[index].select then  items[index]:select() end end,
+			[keys.OK]    = function()
+                mediaplayer:play_sound("audio/key-buttonpress.mp3")
+                
+                if items[index].select then  items[index]:select() end
+            end,
 		} or
 		
 		error("Your logic is flawed!",2)

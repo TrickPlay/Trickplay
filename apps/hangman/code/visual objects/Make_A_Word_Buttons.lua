@@ -155,7 +155,7 @@ function controller:init(t)
                 controller:change_message("Sending...")
                 
                 list:set_state("UNFOCUSED")
-                
+                session.viewing = false
                 if session.opponent_name == false then
                     
                     main_menu:add_entry(session,"MAKE_A_WORD")
@@ -247,8 +247,15 @@ function controller:init(t)
             screen:grab_key_focus()
             session:remove_view(sk)
             session:update_views()
+            
+            session.viewing = false
+            game_server:update(
+                session,
+                function(t)
+                    app_state.state = "MAIN_PAGE"
+                end
+            )
             session = nil
-            app_state.state = "MAIN_PAGE"
         end,
         unfocused_image = img_srcs.button_y,
         focused_image   = img_srcs.button_f,
@@ -270,10 +277,20 @@ function controller:init(t)
             
             print("quit")
             screen:grab_key_focus()
-                game_server:update_game_history(function()
-                    exit()
-                end)
             
+            controller:change_message("Saving...")
+            session.viewing = false
+            game_server:update(
+                session,
+                function(t)
+                    game_server:update_game_history(function()
+                        exit()
+                        
+                        print("successfully updated")
+                    end)
+                    
+                end
+            )
         end,
         unfocused_image = img_srcs.button_b,
         focused_image   = img_srcs.button_f,
@@ -367,7 +384,9 @@ function controller:gain_focus(num)
 end
 function controller:set_session(s)
     session = s
+    session.viewing = true
     
+    if session.opponent_name then game_server:update(session,function() print("Updated server - Make Word Vieiwing session") end) end
     if s.opponent_name then
         
         sk:animate{
