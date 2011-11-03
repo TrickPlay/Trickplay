@@ -1,4 +1,7 @@
 
+local on_lose_internet, on_regain_internet
+local re_connecting = false
+
 local try_again = Timer{
 	
 	interval = 10*1000,
@@ -18,7 +21,10 @@ try_again:stop()
 
 local response_check = function(request_object,response_object,callback)
 	
-	if response_object.failed then
+	if response_object.failed or response_object.body == nil then
+		
+		re_connecting = true
+		
         print(
 			
 			"URLRequest FAILED, receiving the reponse code: "..
@@ -33,15 +39,17 @@ local response_check = function(request_object,response_object,callback)
 		
 		try_again:start()
 		
-    elseif response_object.body == nil then
-		
-		error(
-			"\n\nReceived a nil Response body\n"..
-            
-            "Status: "..response_object.code.." - "..response_object.status.."\n",2
-		)
+		on_lose_internet()
 		
 	else
+		
+		if re_connecting then
+			
+			re_connecting = false
+			
+			on_regain_internet()
+			
+		end
 		
 		local json_response = json:parse(response_object.body)
 		
@@ -98,6 +106,14 @@ end
 
 local Game_Server = {}
 
+function Game_Server:init(t)
+	
+	if type(t) ~= "table" then error("must pass a table as the parameter",2) end
+	
+	on_lose_internet = t.on_lose_internet or error("must pass on_lose_internet",2)
+	on_regain_internet = t.on_lose_internet or error("must pass on_lose_internet",2)
+	
+end
 
 --------------------------------------------------------------------------------
 -- User Services                                                              --

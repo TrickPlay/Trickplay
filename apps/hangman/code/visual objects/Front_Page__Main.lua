@@ -1,6 +1,6 @@
 local self = Group{}
 
-local my_turn_list, their_turn_list, list_of_lists, status, report_win_loss, entry_info
+local my_turn_list, their_turn_list, list_of_lists, status, win_loss_text, entry_info
 local list_entry, game_state,guess_word,make_word, ls, game_history
 
 local loaded = false
@@ -183,12 +183,12 @@ function self:init(t)
         end
     }
     
-    report_win_loss = Text{
+    win_loss_text = Text{
         x              = screen.w/2,
         y              = 80,
-        font           = g_font .. " 40px",
+        font           = g_font .. " bold 40px",
         color          = "ffffff",
-        on_text_change = function(self)
+        on_text_changed = function(self)
             
             self.anchor_point = {self.w/2,self.h/2}
             
@@ -207,7 +207,99 @@ function self:init(t)
         end,
     }
     
-    self:add(status,report_win_loss,entry_info,list_of_lists)
+    self:add(status,win_loss_text,entry_info,list_of_lists)
+    
+end
+
+
+do
+    
+    local wins   = {}
+    local losses = {}
+    
+    local  win_text = "You've won against: "
+    local lose_text = "\nYou've lost against: "
+    
+    local animating = false
+    
+    local function setup_text()
+        
+        local text = ""
+        
+        animating = true
+        
+        if #wins ~= 0 then text = text..win_text end
+        
+        for i = 1, #wins do
+            if i == #wins then
+                text = text..wins[i]
+            elseif i == 3 then
+                text = text.. ((#wins-i) == 1 and "and 1 other." or "and "..(#wins-i).." others.")
+                break
+            else
+                text = text..wins[i]..", "
+            end
+        end
+        
+        if #losses ~= 0 then text = text..lose_text end
+        
+        for i = 1, #losses do
+            if i == #losses then
+                text = text..losses[i]
+            elseif i == 3 then
+                text = text.. ((#losses-i) == 1 and "and 1 other." or "and "..(#losses-i).." others.")
+                break
+            else
+                text = text..losses[i]..", "
+            end
+        end
+        
+        return text
+    end
+    
+    local wl_tl = Timeline{
+        duration = 10000,
+        mode         = "EASE_IN_QUINT",
+        on_new_frame = function(tl,ms,p)
+            win_loss_text.opacity = 255*(1-p)
+        end,
+        on_completed = function(self)
+            if #wins ~= 0 or #losses ~= 0 then
+                
+                win_loss_text.text    = setup_text()
+                win_loss_text.opacity = 255
+                
+                wins   = {}
+                losses = {}
+                
+                self:start()
+                
+            else
+                animating = false
+            end
+        end
+    }
+    
+    function self:add_win(name)
+        table.insert(   wins,  name   )
+    end
+    
+    function self:add_loss(name)
+        table.insert(   losses,  name   )
+    end
+    
+    
+    function self:report_win_loss()
+        
+        if not animating then
+            
+            animating = true
+            
+            wl_tl:on_completed()
+            
+        end
+        
+    end
     
 end
 
@@ -215,8 +307,10 @@ end
 function self:won_against(entry)
     
     their_turn_list:remove_entry(entry,function()
-        print("winner")
+        
         g_user.wins = g_user.wins + 1
+        
+        self:add_win(entry:get_session().opponent_name)
         
         game_history:set_wins( g_user.wins )
         
@@ -227,9 +321,10 @@ end
 function self:lost_against(entry)
     
     my_turn_list:remove_entry(entry,function()
-        print("loser",g_user.losses)
+        
         g_user.losses = g_user.losses + 1
-        print("loser",g_user.losses)
+        
+        self:add_loss(entry:get_session().opponent_name)
         
         game_history:set_losses( g_user.losses )
         
@@ -314,9 +409,11 @@ function self:setup_lists()
                         sesh.i_counted_score = true
                         
                         if sesh.opponent_score == 3 then
+                            self:add_win(sesh.opponent_name)
                             g_user.wins = g_user.wins + 1
                             game_history:set_wins( g_user.wins )
                         else
+                            self:add_loss(sesh.opponent_name)
                             g_user.losses = g_user.losses + 1
                             game_history:set_wins( g_user.losses )
                         end
