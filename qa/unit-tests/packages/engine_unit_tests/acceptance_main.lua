@@ -73,6 +73,10 @@ dofile( "packages/engine_unit_tests/tests/text8.lua" )
 dofile( "packages/engine_unit_tests/tests/text9.lua" )
 dofile( "packages/engine_unit_tests/tests/all_callbacks.lua" )
 
+dofile( "packages/engine_unit_tests/tests/Score1.lua" )
+dofile( "packages/engine_unit_tests/tests/Score2.lua" )
+dofile( "packages/engine_unit_tests/tests/Score3.lua" )
+dofile( "packages/engine_unit_tests/tests/Score4.lua" )
 
 
 screen:add (test_group)
