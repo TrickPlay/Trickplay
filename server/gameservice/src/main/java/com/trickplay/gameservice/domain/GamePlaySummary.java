@@ -52,7 +52,6 @@ public class GamePlaySummary extends BaseEntity implements Serializable {
     }
 
     @Lob /*@Basic(fetch=FetchType.LAZY)*/
-    @Column(updatable=false)
     public String getDetail() {
         return detail;
     }

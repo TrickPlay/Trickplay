@@ -62,7 +62,7 @@ extern int luaopen_settings( lua_State * L );
 extern int luaopen_profile( lua_State * L );
 extern int luaopen_xml( lua_State * L );
 extern int luaopen_controllers( lua_State * L );
-extern int luaopen_controller( lua_State * L );
+extern int luaopen_Controller( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
@@ -920,7 +920,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_profile( L );
     luaopen_stopwatch( L );
     luaopen_json( L );
-    luaopen_controller( L );
+    luaopen_Controller( L );
     luaopen_controllers( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
