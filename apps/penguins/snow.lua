@@ -1,7 +1,10 @@
-local wind = 0
-local layers = {Image{name = "snow-far", src = "/assets/images/snow-far.png",	  opacity = 0, size = {960+256,540+256}, tile = {true,true}, scale = {2,2}},
-				Image{name = "snow-mid", src = "/assets/images/snow-mid.png",	  opacity = 0, size = {960+256,540+256}, tile = {true,true}, scale = {2,2}},
-				Image{name = "snow-close", src = "/assets/images/snow-close.png", opacity = 0, size = {960+256,540+256}, tile = {true,true}, scale = {2,2}}}
+local t = {opacity = 0, size = {960+256,540+256}, tile = {true,true}, scale = {2,2}}
+t.src = "assets/snow-far.png"
+local layers = {Image(t)}
+t.src = "assets/snow-mid.png"
+layers[2] = Image(t)
+t.src = "assets/snow-close.png"
+layers[3] = Image(t)
 screen:add(layers[1],layers[2],layers[3])
 
 local anim = Timeline{ duration = 2000, loop = true,
@@ -13,11 +16,13 @@ local anim = Timeline{ duration = 2000, loop = true,
 		end
 	end
 }
-	
-local set = function(w)
-	wind = w
+
+return function(wind)
 	if wind < 1 then
 		anim:stop()
+		for i=1,#layers do
+			layers[i].opacity = 0
+		end
 	else
 		if not anim.is_playing then
 			anim:start()
@@ -26,9 +31,7 @@ local set = function(w)
 			layers[i]:animate{opacity = i > wind and 0 or 255, duration = 1000}
 		end
 	end
-end
-
-local raise = function()
+	
 	layers[3]:raise(overlay)
 	layers[2]:raise(overlay)
 	
@@ -38,5 +41,3 @@ local raise = function()
 		layers[1]:raise(overlay)
 	end
 end
-
-return {set = set, raise = raise}
