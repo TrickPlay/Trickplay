@@ -1,5 +1,4 @@
 if assets == nil then 
-	print("new assets")
 	assets = dofile( "assets-cache.lua" )
 end 
 
