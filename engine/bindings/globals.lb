@@ -823,7 +823,7 @@ globals
         replacement - text to replace each match with
         start_pos - optional starting index (0 based) of the string to match.  Defaults to 0.
 
-        Returns :
+        Returns:
 
         A new string containing the replacements, or the original string if some error occurred.
     */
