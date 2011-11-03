@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Wed Nov  2 15:37:06 2011
+# Created: Thu Nov  3 09:41:40 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -128,7 +128,7 @@ class Ui_MainWindow(object):
         self.InspectorDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Inspector", None, QtGui.QApplication.UnicodeUTF8))
         self.DeviceManagerDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Device Manager", None, QtGui.QApplication.UnicodeUTF8))
         self.FileSystemDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  File System", "texty7", QtGui.QApplication.UnicodeUTF8))
-        self.ConsoleDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Console", None, QtGui.QApplication.UnicodeUTF8))
+        self.ConsoleDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Console", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "&Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
