@@ -38,7 +38,7 @@ class TrickplayDeviceManager(QWidget):
         Add combo box from running app locally. This always exists.
         """
         name = 'Local device'
-        port = '8888'
+        port = '6789'
         address = 'localhost'
         
         self.ui.comboBox.addItem(name)
@@ -69,6 +69,10 @@ class TrickplayDeviceManager(QWidget):
             if self.trickplay.state() == QProcess.Running:
                 self.trickplay.close()
                 #print('exit status', self.trickplay.exitStatus())
+            
+            env = self.trickplay.systemEnvironment()
+            env.append("TP_http_port=6789")
+            self.trickplay.setEnvironment(env)
             self.trickplay.start('trickplay', [self.path()])
         
         # Push to foreign device
