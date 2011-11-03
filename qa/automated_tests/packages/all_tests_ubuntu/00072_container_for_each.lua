@@ -39,7 +39,7 @@ function generate_test_image ()
 
 	local children = test_image.children
 	for _,child in ipairs (children) do
-		print (child)
+		--print (child)
 		test_image:remove (child)
 	end
 	return test_image

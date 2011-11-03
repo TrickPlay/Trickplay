@@ -9,12 +9,11 @@ Description: Load and resize an image. Then verify on_loaded and on_size_changed
 -- Test Set up --
 
 local my_image = Image()
-local imageLoaded
 local sizeChanged
 
 
 function my_image_on_loaded(image,failed)
-	imageLoaded = true
+	image1Loaded = true
     --print("LOADED",failed)
 end
 
@@ -36,7 +35,7 @@ test_group:add(my_image)
 
 -- Tests --
 function test_Image_loaded_callback()
-	assert_equal( imageLoaded , true, "image load callback failed" )
+	assert_equal( image1Loaded , true, "image load callback failed" )
 end
 
 function test_Image_size_changed_callback ()

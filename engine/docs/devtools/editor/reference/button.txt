@@ -84,7 +84,7 @@ The text_font property is a string specifying the Button's font. The font string
 
 Property: text_color 
 
-The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The text_color property specifies the color of the Button's text when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The text_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -94,7 +94,7 @@ The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(tra
 
 Property: focus_text_color
 
-The focus_text_color property is a table of integer RGB and alpha settings specifying the button's text color when it has input focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The focus_text_color property specifies the color of the Button's text when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_text_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {255, 255, 255, 255} (white and completely opaque)
 
@@ -120,7 +120,7 @@ The skin property is a string specifying the button's skin. The skin functionali
 
 Property: fill_color
 
-The fill_color property is a table of integer RGB and alpha settings specifying the button's fill color. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The fill_color property specifies the Button's fill color when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The fill_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* { 255, 255, 255, 0 } (white and transparent)
 
@@ -130,7 +130,7 @@ The fill_color property is a table of integer RGB and alpha settings specifying 
 
 Property: focus_fill_color
 
-The focus_fill_color property is a table of integer RGB and alpha settings specifying the button's fill color when it has focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The focus_fill_color property specifies the Button's fill color when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_fill_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {27, 145, 27, 0}
 
@@ -162,9 +162,7 @@ A radius of 0 will produce square, 90-degree corners. As values increase, the co
 
 Property: border_color
 
-The border_color property is a table of integer RGB and alpha settings specifying the button's border color. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
-
-The border's color when the button has key focus is specified in the <focus_color> property.
+The border_color property specifies the color of the Button's border when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The border_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
@@ -174,7 +172,7 @@ The border's color when the button has key focus is specified in the <focus_colo
 
 Property: focus_border_color
 
-The focus_border_color is a table of integer RGB and alpha settings specifying the button's border color when it has focus. The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The focus_border_color property specifies the color of the Button's border when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_border_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* {27, 145, 27, 255}
 

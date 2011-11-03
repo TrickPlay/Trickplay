@@ -10,6 +10,7 @@ Description: Mediaplayer  test
  local video_playing
  local video_paused
  local video_idle
+ media_player_loaded = false
 
  mediaplayer:load("packages/engine_unit_tests/tests/assets/glee-1.mp4")
  mediaplayer:set_viewport_geometry (750,10,200,200)
@@ -17,6 +18,7 @@ Description: Mediaplayer  test
  
 
  function mediaplayer:on_loaded()
+ 	media_player_loaded = true
 	mediaplayer:play()
 	video_playing = mediaplayer.state
 	bitrate = mediaplayer.tags["bitrate"]
@@ -55,7 +57,10 @@ function test_mediaplayer_has_video ()
 end
 
 function test_mediaplayer_volume ()
- 	assert_equal ( string.sub(mediaplayer.volume, 1, 5) , "0.500",  "mediaplayer.volume failed" )
+	
+    local relative_error = math.abs((mediaplayer.volume - 0.5) / math.max(mediaplayer.volume, 0.5))
+    local epsilon = 0.000001
+    assert_less_than( relative_error, epsilon, "mediaplayer.volume failed")
 end
 
 function test_mediaplayer_mute ()

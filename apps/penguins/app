@@ -1,0 +1,7 @@
+app = {
+	id = "com.trickplay.penguins",
+	release = "3",
+	version = "3.0",
+	name = "Penguins",
+	copyright = "Trickplay Inc."
+}

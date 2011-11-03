@@ -14,7 +14,6 @@
 
 #import "ResourceManager.h"
 #import "SocketManager.h"
-#import "Protocols.h"
 
 
 
@@ -25,6 +24,10 @@
 #import "VirtualRemoteViewController.h"
 #import "GestureImageView.h"
 #import "TVConnection.h"
+
+#import "Protocols.h"
+
+#import <uuid/uuid.h>
 
 @interface TPAppViewControllerContext : TPAppViewController <SocketManagerDelegate, 
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
@@ -134,7 +137,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection delegate:(id <TPAppViewControllerDelegate>)delegate;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id <TPAppViewControllerDelegate>)delegate;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)tvConnection size:(CGSize)size delegate:(id <TPAppViewControllerDelegate>)delegate;
 
 - (void)sendEvent:(NSString *)name JSON:(NSString *)JSON_string;
 
@@ -154,9 +157,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @implementation TPAppViewControllerContext
 
 
-@synthesize delegate;
-@synthesize version;
-@synthesize tvConnection;
+//@synthesize delegate;
+//@synthesize version;
+//@synthesize tvConnection;
 @synthesize socketManager;
 
 @synthesize graphics;
@@ -171,10 +174,43 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 @synthesize advancedUIDelegate;
 
 #pragma mark -
+#pragma mark Property Getters/Setters
+
+- (NSString *)version {
+    NSString *retval = nil;
+    @synchronized(self) {
+        retval = [[version retain] autorelease];
+    }
+    return retval;
+}
+
+- (TVConnection *)tvConnection {
+    TVConnection *retval = nil;
+    @synchronized(self) {
+        retval = [[tvConnection retain] autorelease];
+    }
+    return retval;
+}
+
+- (id <TPAppViewControllerDelegate>)delegate {
+    id <TPAppViewControllerDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <TPAppViewControllerDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
+
+#pragma mark -
 #pragma mark Initialization
 
 - (id)init {
-    return [self initWithNibName:nil bundle:nil tvConnection:nil frame:CGRectNull delegate:nil];
+    return [self initWithNibName:nil bundle:nil tvConnection:nil size:CGSizeZero delegate:nil];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
@@ -183,28 +219,32 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 - (id)initWithTVConnection:(TVConnection *)_tvConnection {
-    return [self initWithTVConnection:_tvConnection frame:CGRectNull delegate:nil];
+    return [self initWithTVConnection:_tvConnection size:CGSizeZero delegate:nil];
 }
 
 - (id)initWithTVConnection:(TVConnection *)_tvConnection delegate:(id<TPAppViewControllerDelegate>)_delegate {
-    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection frame:CGRectNull delegate:_delegate];
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection size:CGSizeZero delegate:_delegate];
 }
 
-- (id)initWithTVConnection:(TVConnection *)_tvConnection frame:(CGRect)_frame delegate:(id<TPAppViewControllerDelegate>)_delegate {
-    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection frame:_frame delegate:_delegate];
+- (id)initWithTVConnection:(TVConnection *)_tvConnection size:(CGSize)size delegate:(id<TPAppViewControllerDelegate>)_delegate {
+    return [self initWithNibName:@"TPAppViewController" bundle:nil tvConnection:_tvConnection size:size delegate:_delegate];
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil frame:CGRectNull delegate:nil];
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:nil size:CGSizeZero delegate:nil];
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection delegate:(id <TPAppViewControllerDelegate>)_delegate {
-    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:_tvConnection frame:CGRectNull delegate:_delegate];
+    return [self initWithNibName:nibNameOrNil bundle:nibBundleOrNil tvConnection:_tvConnection size:CGSizeZero delegate:_delegate];
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection frame:(CGRect)_frame delegate:(id <TPAppViewControllerDelegate>)_delegate {
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil tvConnection:(TVConnection *)_tvConnection size:(CGSize)size delegate:(id <TPAppViewControllerDelegate>)_delegate {
     
-    if (!_tvConnection || !_tvConnection.isConnected || !nibNameOrNil || [nibNameOrNil compare:@"TPAppViewController"] != NSOrderedSame || nibBundleOrNil) {
+    if (!nibBundleOrNil) {
+        nibBundleOrNil = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    }
+    
+    if (!_tvConnection || !_tvConnection.isConnected || !nibNameOrNil || [nibNameOrNil compare:@"TPAppViewController"] != NSOrderedSame || !nibBundleOrNil) {
         
         [self release];
         return nil;
@@ -215,6 +255,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         NSLog(@"TPAppView Start Service");
         
         self.view.autoresizesSubviews = YES;
+        self.view.backgroundColor = [UIColor clearColor];
+        
+        // Load UIWebView initially so that Text objects which depend on it will
+        // load faster
+        UIWebView *tempWebView = [[UIWebView alloc] init];
+        [tempWebView autorelease];
         
         self.delegate = _delegate;
         tvConnection = [_tvConnection retain];
@@ -253,9 +299,37 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         NSLog(@"background: %@", backgroundView);
         NSLog(@"backgroundWidth, backgroundHeight: %f, %f", backgroundWidth, backgroundHeight);
         //*/
-        backgroundWidth = self.view.bounds.size.width;
-        backgroundHeight = self.view.bounds.size.height;
-
+        backgroundWidth = size.width;
+        backgroundHeight = size.height;
+        
+        // Figure out if the device can use pictures
+        NSString *hasPictures = @"";
+        if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] || [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {
+            hasPictures = @"\tPS";
+        }
+        
+        // Retrieve the UUID or make a new one and save it
+        NSData *deviceID;
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        NSData *savedData = [userDefaults dataForKey:@"TakeControlID"];
+        if (savedData) {
+            deviceID = [NSData dataWithBytes:[savedData bytes] length:[savedData length]];
+            NSLog(@"deviceID: %@", deviceID);
+        } else {
+            uuid_t generated_id;
+            uuid_generate(generated_id);
+            NSLog(@"generated: %s", generated_id);
+            deviceID = [NSData dataWithBytes:generated_id length:16];
+            [userDefaults setObject:deviceID forKey:@"TakeControlID"];
+            NSLog(@"deviceID: %@", deviceID);
+        }
+        NSLog(@"deviceID: %@", deviceID);
+        
+        // Tell the service what this device is capable of
+        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
+        
+        [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
+        
         // Manages resources created with declare_resource
         resourceManager = [[ResourceManager alloc] initWithTVConnection:tvConnection];
         
@@ -271,6 +345,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         // Viewport for AdvancedUI. This is actually a TrickplayGroup (emulates 'screen')
         // from Trickplay
         advancedView = [[TrickplayScreen alloc] initWithID:@"0" args:nil objectManager:nil];
+        advancedView.nextTouchResponder = self;
         advancedView.delegate = (id <AdvancedUIScreenDelegate>)self;
         advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
         [self.view addSubview:advancedView];
@@ -285,7 +360,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [backgroundView addSubview:foregroundView];
         
         // the virtual remote for controlling the Television
-        virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:nil];
+        NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+        virtualRemote = [[VirtualRemoteViewController alloc] initWithNibName:@"VirtualRemoteViewController" bundle:myBundle];
         virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
         [self.view addSubview:virtualRemote.view];
         virtualRemote.delegate = self;
@@ -391,7 +467,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 	    int index;	
 		NSString *sentData = [NSString stringWithFormat:@"KP\t%@\n", key];
         
-		for (index = 1; index <= count; index++) {
+		for (index = 0; index < count; index++) {
 			[socketManager sendData:[sentData UTF8String]  numberOfBytes:[sentData length]];
 		}
     }
@@ -501,8 +577,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     //<id>,<text> pairs
     unsigned theindex = 1;
     
-    if (styleAlert != nil)
-    {
+    if (styleAlert != nil) {
+        [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:YES];
         [styleAlert release];
         styleAlert = nil;
     }
@@ -516,11 +592,17 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [styleAlert addButtonWithTitle:[args objectAtIndex:theindex+1]];
         theindex += 2;
     }
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        [styleAlert addButtonWithTitle:@"Cancel"];
+        styleAlert.cancelButtonIndex = styleAlert.numberOfButtons - 1;
+    }
+    
     styleAlert.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
     //[styleAlert addButtonWithTitle:@"Cancel"]; 
     //[styleAlert showInView:self.view.superview];
-    [styleAlert showInView:self.view];
-    //[styleAlert release];    
+    if (self.view.window && viewDidAppear) {
+        [styleAlert showInView:self.view];
+    }
 }
 
 /**
@@ -534,11 +616,17 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if (actionSheet == styleAlert) {
         //NSLog(@"object: %@", [multipleChoiceArray objectAtIndex:buttonIndex]);
-        if (buttonIndex < 5 && buttonIndex >= 0) {
+        if (buttonIndex < actionSheet.numberOfButtons && buttonIndex != actionSheet.cancelButtonIndex) {
             NSString *sentData = [NSString stringWithFormat:@"UI\tMC\t%@\n", [multipleChoiceArray objectAtIndex:buttonIndex]];
             [socketManager sendData:[sentData UTF8String]
                       numberOfBytes:[sentData length]];
+        } else if (buttonIndex == actionSheet.cancelButtonIndex) {
+            NSString *sentData = @"UI\tMC\tCancel\n";
+            [socketManager sendData:[sentData UTF8String]
+                      numberOfBytes:[sentData length]];
         }
+        [styleAlert release];
+        styleAlert = nil;
     } else if (actionSheet == cameraActionSheet) {
         if ([[cameraActionSheet buttonTitleAtIndex:buttonIndex] compare:[NSString stringWithUTF8String:CAMERA_BUTTON_TITLE]] == NSOrderedSame) {
             
@@ -670,8 +758,16 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     NSString *key = [args objectAtIndex:0];
     
     if ([resourceManager getResourceInfo:key]) {
+        NSString *mode = nil;
+        if (args.count > 1) {
+            mode = [args objectAtIndex:1];
+        }
         CGRect frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-        UIView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
+        if (mode && [mode compare:@"C"] == NSOrderedSame) {
+            
+            frame = CGRectMake(0.0, 0.0, 0.0, 0.0);
+        }
+        AsyncImageView *newImageView = [resourceManager fetchImageViewUsingResource:key frame:frame];
         
         for (UIView *subview in [backgroundView subviews]) {
             if (subview != foregroundView) {
@@ -681,12 +777,20 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         
         [backgroundView addSubview:newImageView];
         [backgroundView sendSubviewToBack:newImageView];
+        backgroundView.image = nil;
+        backgroundView.backgroundColor = [UIColor blackColor];
         
         graphics = YES;
         if ([virtualRemote.view superview] && !virtualRemote.background.isHidden) {
             [virtualRemote.view removeFromSuperview];
         }
         [touchDelegate setSwipe:YES];
+        
+        if (mode && [mode compare:@"C"] == NSOrderedSame) {
+            newImageView.centerToSuperview = YES;
+        } else if (mode && [mode compare:@"T"] == NSOrderedSame) {
+            [newImageView setTileWidth:YES height:YES];
+        }
     }
 }
 
@@ -975,6 +1079,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     [accelDelegate pauseAccelerometer];
     [touchDelegate reset];
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+    [styleAlert release];
+    styleAlert = nil;
     [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     [self cleanViewController];
     [self dismissModalViewControllerAnimated:NO];
@@ -1027,6 +1133,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     textView.hidden = YES;
     
     [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+    [styleAlert release];
+    styleAlert = nil;
+    
     [cameraActionSheet dismissWithClickedButtonIndex:[cameraActionSheet cancelButtonIndex] animated:NO];
     
     if (camera) {
@@ -1061,18 +1170,6 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     [self checkShowVirtualRemote];
     //*/
 }
-
-
-// The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
-/*
- - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
- self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
- if (self) {
- // Custom initialization.
- }
- return self;
- }
- */
 
 #pragma mark -
 #pragma mark View Handling
@@ -1110,18 +1207,9 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     
     //backgroundView.image = [UIImage imageNamed:@"background.png"];
     
-    if (!styleAlert) {
-        styleAlert = [[UIActionSheet alloc]
-                      initWithTitle:@"TrickPlay Multiple Choice"
-                      delegate:self cancelButtonTitle:nil
-                      destructiveButtonTitle:nil
-                      otherButtonTitles:nil];
-    }
-    
     if (!multipleChoiceArray) {
         multipleChoiceArray = [[NSMutableArray alloc] initWithCapacity:4];
     }
-    
     
     UIBarButtonItem *exitItem = [[[UIBarButtonItem alloc] 
                                   initWithTitle:NSLocalizedString(@"Exit", @"")
@@ -1152,6 +1240,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     self.loadingIndicator = nil;
     
     if (styleAlert) {
+        [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
         [styleAlert release];
         styleAlert = nil;
     }
@@ -1199,24 +1288,48 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [theTextField selectAll:theTextField];
         [UIMenuController sharedMenuController].menuVisible = NO;
     }
+    
+    if (styleAlert) {
+        [styleAlert showInView:self.view];
+    }
+    
+    if ([delegate respondsToSelector:@selector(tpAppViewControllerDidAppear:)]) {
+        [delegate tpAppViewControllerDidAppear:self];
+    }
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    
+    if ([delegate respondsToSelector:@selector(tpAppViewControllerDidDisappear:)]) {
+        [delegate tpAppViewControllerDidDisappear:self];
+    }
+}
+
+- (void)setSize:(CGSize)size {
+    backgroundWidth = size.width;
+    backgroundHeight = size.height;
+    
+    backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    for (UIView *view in backgroundView.subviews) {
+        if ([view isKindOfClass:[AsyncImageView class]] && ((AsyncImageView *)view).centerToSuperview) {
+            UIImage *image = ((AsyncImageView *)view).image;
+            view.frame = CGRectMake(0.0, 0.0, image.size.width, image.size.height);
+            view.center = CGPointMake(fabsf(view.superview.center.x), fabsf(view.superview.center.y));
+        } else {
+            view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+        }
+    }
+    
+    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    // TODO: SHOULD NOT USE MAINFRAME!!!
-    //*
-    CGRect mainframe = self.view.frame;
-    backgroundHeight = mainframe.size.height;
-    backgroundWidth = mainframe.size.width;
-    //*/
-    //*
-    backgroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    for (UIView *view in backgroundView.subviews) {
-        view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    }
-    advancedView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    foregroundView.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
-    virtualRemote.view.frame = CGRectMake(0.0, 0.0, backgroundWidth, backgroundHeight);
+
+    [self setSize:CGSizeMake(backgroundWidth, backgroundHeight)];
     //*/
     textView.layer.cornerRadius = 10.0;
     textView.layer.borderColor = [UIColor colorWithRed:80.0/255.0 green:80.0/255.0 blue:100.0/255.0 alpha:1.0].CGColor;
@@ -1226,25 +1339,40 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     //loadingIndicator.bounds = self.view.frame;
     loadingIndicator.center = CGPointMake(self.view.frame.size.width/2, self.view.frame.size.height/3);
     [loadingIndicator startAnimating];
+    
+    if ([delegate respondsToSelector:@selector(tpAppViewControllerWillAppear:)]) {
+        [delegate tpAppViewControllerWillAppear:self];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    
+    viewDidAppear = NO;
+    if (styleAlert) {
+        [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
+        [styleAlert release];
+        styleAlert = nil;
+    }
     
     if (socketTimer) {
         [socketTimer invalidate];
         [socketTimer release];
         socketTimer = nil;
     }
+    
+    if ([delegate respondsToSelector:@selector(tpAppViewControllerWillDisappear:)]) {
+        [delegate tpAppViewControllerWillDisappear:self];
+    }
 }
 //*/
 
 //*
- // Override to allow orientations other than the default portrait orientation.
- - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
- // Return YES for supported orientations.
- return (interfaceOrientation == UIInterfaceOrientationPortrait);
- }
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+     // Return YES for supported orientations.
+     return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
+}
 //*/
 
 - (void)didReceiveMemoryWarning {
@@ -1293,6 +1421,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         [(AccelerometerController *)accelDelegate release];
     }
     if (styleAlert) {
+        [styleAlert dismissWithClickedButtonIndex:[styleAlert cancelButtonIndex] animated:NO];
         [styleAlert release];
     }
     if (cameraActionSheet) {
@@ -1381,6 +1510,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 #pragma mark -
 #pragma mark Getters/Setters
 
+- (void)setSize:(CGSize)size {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
 - (void)setTvConnection:(TVConnection *)_tvConnection {
     if ([self isKindOfClass:[TPAppViewControllerContext class]]) {
         ((TPAppViewControllerContext *)self).tvConnection = _tvConnection;
@@ -1439,7 +1574,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
                                  userInfo:nil];
 }
 
-- (id)initWithTVConnection:(TVConnection *)tvConnection frame:(CGRect)frame delegate:(id<TPAppViewControllerDelegate>)delegate {
+- (id)initWithTVConnection:(TVConnection *)tvConnection size:(CGSize)size delegate:(id<TPAppViewControllerDelegate>)delegate {
     
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                    reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]

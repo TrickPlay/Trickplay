@@ -43,16 +43,18 @@
 
 @implementation AppBrowserViewControllerContext
 
-@synthesize tableView;
-@synthesize appBrowser;
-@synthesize delegate;
+//@synthesize tableView;
+//@synthesize appBrowser;
+//@synthesize delegate;
 
 /*
- @synthesize appShopButton;
- @synthesize showcaseButton;
- @synthesize toolBar;
- */
+@synthesize appShopButton;
+@synthesize showcaseButton;
+@synthesize toolBar;
+*/
 
+#pragma mark -
+#pragma mark IBAction methods
 
 - (IBAction)showcaseButtonClick {
 }
@@ -60,8 +62,53 @@
 - (IBAction)appShopButtonClick {
 }
 
+#pragma mark -
+#pragma mark Forwarded Getters/Setters
+
+- (UITableView *)tableView {
+    UITableView *retval = nil;
+    @synchronized(self) {
+        retval = [[tableView retain] autorelease];
+    }
+    return retval;
+}
+
+- (void)setTableView:(UITableView *)_tableView {
+    @synchronized(self) {
+        [_tableView retain];
+        [tableView release];
+        tableView = _tableView;
+    }
+}
+
+- (AppBrowser *)appBrowser {
+    AppBrowser *retval = nil;
+    @synchronized(self) {
+        retval = [[appBrowser retain] autorelease];
+    }
+    return retval;
+}
+
+- (id <AppBrowserViewControllerDelegate>)delegate {
+    id <AppBrowserViewControllerDelegate> val = nil;
+    @synchronized(self) {
+        val = delegate;
+    }
+    return val;
+}
+
+- (void)setDelegate:(id <AppBrowserViewControllerDelegate>)_delegate {
+    @synchronized(self) {
+        delegate = _delegate;
+    }
+}
+
+#pragma mark -
+#pragma mark Initialization
+
 - (id)init {
-    return [self initWithNibName:@"AppBrowserViewController" bundle:nil];
+    NSBundle *myBundle = [NSBundle bundleWithPath:[NSString stringWithFormat:@"%@%@", [NSBundle mainBundle].bundlePath, @"/TakeControl.framework"]];
+    return [self initWithNibName:@"AppBrowserViewController" bundle:myBundle];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
@@ -82,7 +129,7 @@
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil appBrowser:(AppBrowser *)browser {
     
-    if (!nibNameOrNil || [nibNameOrNil compare:@"AppBrowserViewController"] != NSOrderedSame || nibBundleOrNil || !browser || ![browser isKindOfClass:[AppBrowser class]]) {
+    if (!nibNameOrNil || [nibNameOrNil compare:@"AppBrowserViewController"] != NSOrderedSame || !nibBundleOrNil || !browser || ![browser isKindOfClass:[AppBrowser class]]) {
         
         [self release];
         return nil;
@@ -158,7 +205,7 @@
  // Override to allow orientations other than the default portrait orientation.
  - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
  // Return YES for supported orientations.
- return (interfaceOrientation == UIInterfaceOrientationPortrait);
+ return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
  }
 //*/
 
@@ -386,6 +433,15 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     } else {
         return [super allocWithZone:zone];
     }
+}
+
+#pragma mark -
+#pragma mark Initialization
+
+- (id)init {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 #pragma mark -
