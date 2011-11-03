@@ -16,7 +16,7 @@ test_folder = "smoke_tests_ubuntu"
 test_file = "smoke_tests_ubuntu.txt" 
 
 -- start test ordinal number
-local start_no = 25
+local start_no = 30
 local start_at_first_test = true
 
 -- Global variables
@@ -443,6 +443,7 @@ end
 	
 	compare_image.src = "packages/"..test_folder.."/".."test_pngs/"..filename
 	compare_image.position = { screen.w/2, 200 }
+	compare_image.size = { 960, 540 }
 
 	
 	draw_separator_line ()	
