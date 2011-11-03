@@ -119,6 +119,46 @@
 {
 "name": "0030_localization.lua", 
 "active": "true"
+},
+{
+"name": "0031_alpha_cubic.lua", 
+"active": "true"
+},
+{
+"name": "0032_alpha_quad.lua", 
+"active": "true"
+},
+{
+"name": "0033_alpha_quint.lua", 
+"active": "true"
+},
+{
+"name": "0034_alpha_sine.lua", 
+"active": "true"
+},
+{
+"name": "0035_alpha_expo.lua", 
+"active": "true"
+},
+{
+"name": "0036_alpha_circ.lua", 
+"active": "true"
+},
+{
+"name": "0037_alpha_elastic.lua", 
+"active": "true"
+},
+{
+"name": "0038_alpha_back.lua", 
+"active": "true"
+},
+{
+"name": "0039_alpha_bounce.lua", 
+"active": "true"
+},
+{
+"name": "0040_alpha_quart.lua", 
+"active": "true"
 }
 ]
 
