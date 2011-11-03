@@ -35,13 +35,17 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<skipTests>${skipTests}</skipTests>
+					<excludes>
+					   <exclude>**/GameServiceJSONErrorsTest.java</exclude>
+					   <exclude>**/TestUtil.java</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
 	<properties>
-		<skipTests>true</skipTests>
+		<skipTests>false</skipTests>
 		<spring.framework.version>3.1.0.M2</spring.framework.version>
 		<org.slf4j.version>1.5.2</org.slf4j.version>
 		<org.hibernate.version>3.5.1-Final</org.hibernate.version>

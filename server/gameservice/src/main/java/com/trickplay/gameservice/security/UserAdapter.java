@@ -7,7 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class UserAdapter implements UserDetails {
 
-	private Long id;
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private Long id;
 	private UserDetails adaptee;
 	public UserAdapter(Long id, UserDetails u) {
 		this.id = id;

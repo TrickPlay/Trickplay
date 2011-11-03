@@ -29,7 +29,7 @@ We want our background rectangle to fill the entire screen, so it should be the 
 	backGround.position = { 0, 0, 0 }
 	(end)
 	
-	The rectangle's color is defined by setting its color property (<Rectangle.color>). The color is specified using RGB (Red/Green/Blue) and Alpha transparency values. For complete details about RGB values and the supported data formats the TrickPlay SDK libraries recognize, refer to the <RGB/Alpha Color Formats> section. The background color of the Tutorial program uses a blue of RGB values {70, 100, 130}. We also want the background to be opaque, so we'll set the alpha value to 255. The code statement below achieves all this.
+	The rectangle's color is defined by setting its color property (<Rectangle.color>). Several formats for specifying colors are recognized by the TrickPlay libraries, including RGB and HSL formats. For information about all the supported formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. The background color of the Tutorial program defines a blue color by specifying its RGB values in a Lua table. We also want the background to be opaque, so we'll set the alpha value in the table to 255. The code statement below achieves all this.
 	
 	(code)
 	backGround.color = { 70, 100, 130, 255 }

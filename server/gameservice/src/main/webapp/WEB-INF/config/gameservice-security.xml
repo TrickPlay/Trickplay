@@ -43,13 +43,22 @@
 		<property name="password" value="admin" />
 	</bean>
 
-
+<!-- 
+            <security:filter-chain pattern="/rest/**"
+                filters="
+                securityContextPersistenceFilterWithASCFalse,
+                rememberMeFilter,
+                logoutFilter,
+                basicAuthenticationFilter,
+                anonymousAuthenticationFilter,
+                basicExceptionTranslationFilter,
+                filterSecurityInterceptor" />
+                 -->
 	<bean id="springSecurityFilterChain" class="org.springframework.security.web.FilterChainProxy">
 		<security:filter-chain-map path-type="ant">
 			<security:filter-chain pattern="/rest/**"
 				filters="
 				securityContextPersistenceFilterWithASCFalse,
-				rememberMeFilter,
 				logoutFilter,
 				basicAuthenticationFilter,
 				anonymousAuthenticationFilter,
@@ -200,29 +209,29 @@
 		<property name="accessDecisionManager" ref="accessDecisionManager" />
 
 		<property name="securityMetadataSource">
-			<security:filter-security-metadata-source>
+			<security:filter-security-metadata-source use-expressions="true">
 				<security:intercept-url pattern="/images/**"
-					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					access="permitAll()" />
 				<security:intercept-url pattern="/resources/**"
-					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					access="permitAll()" />
 				<security:intercept-url pattern="/styles/**"
-					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					access="permitAll()" />
 				<security:intercept-url pattern="/rest/user"
-					method="POST" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_ADMIN" />
+					method="POST" access="hasAnyRole('ROLE_ANONYMOUS','ROLE_ADMIN')" />
 				<security:intercept-url pattern="/rest/user/exists"
-					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					method="GET" access="permitAll()" />
 				<security:intercept-url pattern="/user"
-					method="POST" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_ADMIN" />
+					method="POST" access="hasAnyRole('ROLE_ANONYMOUS','ROLE_ADMIN')" />
 				<security:intercept-url pattern="/user/form"
-					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					method="GET" access="permitAll()" />
 				<security:intercept-url pattern="/login.jsp"
-					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					method="GET" access="permitAll()" />
 				<security:intercept-url pattern="/index.jsp"
-					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					method="GET" access="permitAll()" />
 				<security:intercept-url pattern="/rest/**"
-					access="ROLE_USER,ROLE_ADMIN" />
+					access="isAuthenticated()" />
 				<security:intercept-url pattern="/**"
-					access="ROLE_USER,ROLE_ADMIN" />
+					access="isAuthenticated()" />
 			</security:filter-security-metadata-source>
 		</property>
 	</bean>
@@ -234,6 +243,7 @@
 			<list>
 				<ref bean="roleVoter" />
 				<ref bean="authenticatedVoter" />
+				<bean class="org.springframework.security.web.access.expression.WebExpressionVoter"/>
 			</list>
 		</property>
 	</bean>

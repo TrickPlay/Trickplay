@@ -41,6 +41,18 @@ public class Game extends BaseEntity implements Serializable {
     public Game() {        
     }
 
+    public Game(String name, 
+            String appId, 
+            int minPlayers, 
+            int maxPlayers, 
+            boolean leaderboardFlag,
+            boolean achievementsFlag,
+            boolean turnBasedFlag,
+            boolean allowWildCardInvitation
+            ) {
+        this(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag, turnBasedFlag, allowWildCardInvitation);
+    }
+    
     public Game(Vendor vendor, 
             String name, 
             String appId, 

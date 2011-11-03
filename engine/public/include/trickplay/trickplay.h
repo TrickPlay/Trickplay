@@ -28,8 +28,6 @@
 extern "C" {
 #endif 
 
-#include <stddef.h>
-
 /*-----------------------------------------------------------------------------
     TrickPlay version
 */
@@ -239,20 +237,30 @@ typedef struct TPContext TPContext;
                                 Default is not set.
 
     TP_FIRST_APP_EXITS -        If set to true, when you press the EXIT key within the
-                                first app launched by Trickplay, tp_context_run will return.
+                                first app launched by TrickPlay, tp_context_run will return.
                                 Otherwise, the first app launched will remain running and the
                                 EXIT key will be passed to it.
                                 Defaults is true.
 
-    TP_HTTP_PORT -              The port for Trickplay's HTTP server.
+    TP_HTTP_PORT -              The port for TrickPlay's HTTP server.
                                 Defaults to "0".
 
-    TP_RESOURCES_PATH -         The path to various Trickplay resources.
+    TP_RESOURCES_PATH -         The path to various TrickPlay resources.
                                 Defaults to "resources" (in the current working directory).
 
     TP_TEXTURE_CACHE_LIMIT	 -	The size of the texture cache (in MB). A value <= 0 will disable
     							the cache altogether.
                                 Defaults to "0".
+
+    TP_RESOURCE_LOADER_ENABLED - 	Whether external resource loaders are enabled.
+                                    Defaults to "true".
+
+    TP_APP_ARGS - 				A string that is passed to the first app launched by TrickPlay
+                                in app.args.
+                                Defaults to "".
+
+    TP_APP_ANIMATIONS_ENABLED - Whether apps animate when they close and launch.
+                                Defaults to "true".
 
 */
 
@@ -301,6 +309,9 @@ typedef struct TPContext TPContext;
 #define TP_HTTP_PORT                    "http_port"
 #define TP_RESOURCES_PATH               "resources_path"
 #define TP_TEXTURE_CACHE_LIMIT			"texture_cache_limit"
+#define TP_RESOURCE_LOADER_ENABLED		"resource_loader_enabled"
+#define TP_APP_ARGS						"app_args"
+#define TP_APP_ANIMATIONS_ENABLED		"app_animations_enabled"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
@@ -338,8 +349,8 @@ typedef struct TPContext TPContext;
     TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD -            The app no longer needs to use the numeric keypad.
     TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS -    The app no longer needs the transport control keys.
     TP_NOTIFICATION_RELEASE_KEYBOARD -                  The app no longer needs the keyboard.
-    TP_NOTIFICATION_RUNNING -                           Trickplay is running and has entered its main loop.
-    TP_NOTIFICATION_EXITING -                           Trickplay has exited its main loop and <tp_context_run> will return soon.
+    TP_NOTIFICATION_RUNNING -                           TrickPlay is running and has entered its main loop.
+    TP_NOTIFICATION_EXITING -                           TrickPlay has exited its main loop and <tp_context_run> will return soon.
 */
 
 #define TP_NOTIFICATION_PROFILE_CHANGING                "profile-changing"
@@ -395,17 +406,6 @@ typedef struct TPContext TPContext;
 #define TP_RUN_APP_PREPARE_FAILED       4
 #define TP_RUN_APP_ERROR                5
 #define TP_RUN_ALREADY_RUNNING          6
-
-/*-----------------------------------------------------------------------------
-    Constants: Resource types
-
-    TP_RESOURCE_TYPE_LUA_SOURCE - Lua code files.
-
-*/
-
-
-#define TP_RESOURCE_TYPE_LUA_SOURCE 0
-
 
 /*-----------------------------------------------------------------------------
     Function: tp_init_version
@@ -469,7 +469,7 @@ typedef struct TPContext TPContext;
 
         key -       A configuration key.
 
-        value -     The value for the key. Trickplay will make a copy.
+        value -     The value for the key. TrickPlay will make a copy.
 */
                 
     TP_API_EXPORT
@@ -530,7 +530,7 @@ typedef struct TPContext TPContext;
 /*-----------------------------------------------------------------------------
     Function: tp_context_set_user_data
 
-    Associate an opaque pointer with the Trickplay context.
+    Associate an opaque pointer with the TrickPlay context.
 
     Arguments:
 
@@ -549,7 +549,7 @@ typedef struct TPContext TPContext;
 /*-----------------------------------------------------------------------------
     Function: tp_context_get_user_data
 
-    Get user data associated with the Trickplay context with <tp_context_set_user_data>.
+    Get user data associated with the TrickPlay context with <tp_context_set_user_data>.
 
     Arguments:
 
@@ -575,7 +575,7 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
-        context -   The Trickplay context.
+        context -   The TrickPlay context.
 
         subject -   A string describing the nature of the request.
 
@@ -634,7 +634,7 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
-        context -   The Trickplay context.
+        context -   The TrickPlay context.
 
         subject -   A string describing the specific notification.
 
@@ -687,7 +687,7 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
-        context -       The Trickplay context.
+        context -       The TrickPlay context.
 
         command -       A string describing the command. It does not include the initial
                         / and will never be NULL.
@@ -745,7 +745,7 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
-        context -   The Trickplay context.
+        context -   The TrickPlay context.
 
         level -     An integer describing the information level of the log message,
                     such as DEBUG, INFO, WARNING, etc.
@@ -791,54 +791,6 @@ typedef struct TPContext TPContext;
         TPLogHandler handler,
         void * data);
 
-    typedef struct TPResource TPResource;
-
-/*-----------------------------------------------------------------------------
-    Function: TPResourceReader
-    
-    Function prototype used in calls to <tp_context_set_resource_reader>.
-    
-    Arguments:
-    
-        context -   The Trickplay context.
-
-        filename -   The resource filename to be loaded
-        
-        resource -  The <TPResource> structure to fill
-
-        data -      Opaque user data passed to <tp_context_set_resource_reader>.
-*/
-
-    typedef
-    void
-    (*TPResourceReader)(
-    
-        TPContext * context,
-        const char * filename,
-        TPResource *resource,
-        void * data);
-
-/*-----------------------------------------------------------------------------
-    Function: tp_context_set_resource_reader
-
-    Specify the function used to read resources.
-
-    Arguments:
-
-        context - A valid TPContext.
-        type - An indicator of what type of resource this reader should be used for.  See <Resource types>.
-        reader - A pointer to a <TPResourceReader> function.
-        data - An opaque pointer that is passed to the reader.
-*/
-
-    TP_API_EXPORT
-    void
-    tp_context_set_resource_reader(
-
-        TPContext * context,
-        unsigned int type,
-        TPResourceReader reader,
-        void * data);
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_run
@@ -896,60 +848,7 @@ typedef struct TPContext TPContext;
                     
         TPContext * context);
 
-/*-----------------------------------------------------------------------------
-*/
-
-/*-----------------------------------------------------------------------------
-    Struct: TPResource
-    
-    Holds information about a resource being loaded
-*/
-
-    
-    struct TPResource
-    {
-        /*
-            Field: buffer
-            
-            Buffer containing resource data which has been loaded into memory
-        */
-        void       *buffer;
-        
-        /*
-            Field: length
-            
-            Length in bytes of the buffer
-        */
-        size_t      length;
-
-        /*
-            Field: free_resource
-            
-            Function to call back when the buffer is no longer needed.
-        */
-        void 		(*free_resource)( TPResource * resource );
-
-
-        /*
-            Field: read_more
-            
-            Function to read the next chunk of data if there is more data in the resource then
-            was in the buffer.  If this function is not NULL, then it will be called after
-            free_resource above to fetch the next chunk of data.
-        */
-        void        (*read_mode)( TPResource * resource );
-        
-        /*
-            Field: user_data
-            
-            An opaque pointer that TrickPlay ignores. You can use this pointer
-            when free_resource or read_more is invoked.
-        */
-
-        void *				user_data;
-    };
-
-
+/*---------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 }

@@ -1,0 +1,7 @@
+Title: TrickPlay SDK Color Names
+
+Any of the color names listed in the table below can be used when specifying a color to the TrickPlay SDK libraries. The color name must be surrounded by single or double quotation marks.
+
+For information on additional color formats, refer to <Specifying Colors in the TrickPlay SDK>.
+
+INSERT_COLOR_TABLE_HERE

@@ -2,7 +2,7 @@ package com.trickplay.gameservice.service;
 
 import java.util.List;
 
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.trickplay.gameservice.domain.Achievement;
 import com.trickplay.gameservice.domain.RecordedAchievement;
@@ -13,7 +13,7 @@ public interface AchievementService {
 
 	public List<RecordedAchievement> findAllRecordedAchievementsByGameId(Long id);
 	
-	@Transactional
+	@PreAuthorize("isAuthenticated()")
 	public void create(RecordedAchievement score);
 	
 	public RecordedAchievement findRecordedAchievement(Long id);
@@ -22,6 +22,6 @@ public interface AchievementService {
 	
 	public Achievement find(Long id);
 	
-	@Transactional
+	@PreAuthorize("isAuthenticated()")
 	public void create(Achievement entity);
 }

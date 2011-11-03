@@ -1,44 +1,34 @@
 package com.trickplay.gameservice.dao.impl;
 
-import static java.lang.String.format;
-
 import java.util.List;
 
-import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.trickplay.gameservice.dao.UserDAO;
 import com.trickplay.gameservice.domain.User;
-import com.trickplay.gameservice.exception.AuthenticationException;
 
 @Repository
 @SuppressWarnings("unchecked")
-public class UserDAOImpl extends GenericEJB3DAO<User, Long> implements UserDAO {
+public class UserDAOImpl extends GenericDAOWithJPA<User, Long> implements UserDAO {
 
-    public UserDAOImpl() {
-        super();
-    }
-    
-    public Class<User> getEntityBeanType() {
-        return User.class;
-    }
-    
     public User findByName(String username) {
-        return SpringUtils.getFirst(findByCriteria(Restrictions.eq("username", username)));
+        
+        List<User> list = 
+                super.entityManager
+                .createQuery("Select u from User as u where u.username = :username")
+                .setParameter("username", username).getResultList();
+        User u = SpringUtils.getFirst(list);
+     /*   if (detached) 
+            entityManager.detach(u);
+            */
+        return u;
     }
 
-    public User authenticateUser(String username, String password)
-            throws AuthenticationException {
-        List<User> validUsers = findByCriteria(
-                Restrictions.conjunction()
-            .add(Restrictions.eq("username", username))
-            .add(Restrictions.eq("password", password))
-            );
-
-        if (validUsers.isEmpty())
-            throw new AuthenticationException(format(
-                    "Could not authenticate %s", username));
-        return SpringUtils.getFirst(validUsers);
+    public List<String> getRoles(String username) {
+        return  super.entityManager
+                .createQuery("Select R.name from User U join U.authorities R where U.username = :username")
+                .setParameter("username", username)
+                .getResultList();
     }
-
+    
 }

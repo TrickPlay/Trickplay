@@ -13,7 +13,7 @@ function generate_test_image ()
 	local g = Group ()
 
 	function text_changed (text)
-		print ("text changed")
+		--print ("text changed")
 		local text1_txt = Text {
 			font="DejaVu Sans 80px",
 			color = "002eb8",

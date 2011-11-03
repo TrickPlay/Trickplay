@@ -258,7 +258,10 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
             end
             function controller:on_touch_move(finger, x, y)
             end
-            function controller:on_key_down()
+            function controller:on_key_down(key)
+                if key == keys.Escape or key == keys.EXIT then
+                    return true
+                end
                 return false
             end
             controller:start_touches()

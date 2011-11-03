@@ -178,9 +178,7 @@ The text_font property is a text string describing the font to use for the Radio
 
 Property: text_color
 
-The text_color property is a table of integer RGB (Red/Green/Blue) and alpha(transparent/opaque) settings specifying the color of the RadioBoxGroup's text.
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
+The text_color property specifies the color of the RadioBoxGroup's text. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The text_color property supports only the "Lua Table of RGB Values" format.
 
 *Default Setting:* { 255, 255, 255, 255 } (white and completely opaque)
 
@@ -190,11 +188,9 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: button_color
 
-The button_color property is a table of integer RGB and alpha settings specifying the color of the radio button's outer-circle when the object does not have the input focus.
+The button_color property specifies the color of the radio button's outer-circle when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The button_color property supports only the "Lua Table of RGB Values" format.
 
 The button_color property is used only if the object's <skin> property is set to "custom".
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 
@@ -204,11 +200,9 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: focus_button_color
 
-The focus_button_color property is a table of integer RGB and alpha settings specifying the color of the radio button's outer-circle when the object has the input focus.
+The focus_button_color property specifies the color of the radio button's outer-circle when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_button_color property supports only the "Lua Table of RGB Values" format.
 
 The focus_button_color property is used only if the object's <skin> property is set to "custom".
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* { 0, 255, 0, 255 } (green and completely opaque)
 
@@ -218,11 +212,9 @@ The format of the RGB and alpha settings is described in <RGB/Alpha Color Format
 
 Property: select_color
 
-The select_color property is a table of integer RGB and alpha settings specifying the color of the radio button's inner-circle which is displayed only when the radio button is selected.
+The select_color property specifies the color of the radio button's inner-circle which is displayed when the radio button is selected. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The select_color property supports only the "Lua Table of RGB Values" format.
 
 The select_color property is used only if the object's <skin> property is set to "custom".
-
-The format of the RGB and alpha settings is described in <RGB/Alpha Color Formats>.
 
 *Default Setting:* {255, 255, 255, 255} (white and opaque)
 

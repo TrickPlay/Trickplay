@@ -89,7 +89,7 @@ function controllers:on_controller_connected(controller)
 	enter_text_status = controller:enter_text ("label", "text")
 
 	-- multiple_choice1.lua				test_controllers_show_multiple_choice
-	--multiple_choice_status = controller:show_multiple_choice ( "logo", "1", "pick me", "2", "no, pick me")
+	multiple_choice_status = controller:show_multiple_choice ( "logo", "1", "pick me", "2", "no, pick me")
 
 	-- clear_ui1.lua				test_controllers_clear_ui 
 	clear_ui_status = controller:clear_ui()
