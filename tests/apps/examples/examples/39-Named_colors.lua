@@ -814,25 +814,25 @@ screen:add(Rectangle { color = "red", size = { NUM_COLS*SQUARE_LENGTH+5, NUM_ROW
 screen:add(color_grid)
 screen:show()
 
-local info_color_label = Text { name = "label", font = "48px", text = "Color name:", x = 0, y = 0, color = "white" }
-local info_color_name = Text { name = "color_name", font = "90px", text = '"'..colors_array[1]..'"', x = 0, y = 40, color = "white" }
+local info_color_label = Text { name = "label", font = "Blue Highway 48px", text = "Color name:", x = 0, y = 0, color = "white" }
+local info_color_name = Text { name = "color_name", font = "Blue Highway 90px", text = '"'..colors_array[1]..'"', x = 0, y = 40, color = "white" }
 
-local info_color_r_label = Text { name = "label", font = "48px", text = "Red", x = 0, y = 140, color = "white" }
-local info_color_g_label = Text { name = "label", font = "48px", text = "Green", x = 180, y = 140, color = "white" }
-local info_color_b_label = Text { name = "label", font = "48px", text = "Blue", x = 360, y = 140, color = "white" }
-local info_color_r = Text { name = "color_r", font = "90px", text = "123", x = 0, y = 170, color = "white" }
-local info_color_g = Text { name = "color_g", font = "90px", text = "123", x = 180, y = 170, color = "white" }
-local info_color_b = Text { name = "color_b", font = "90px", text = "123", x = 360, y = 170, color = "white" }
+local info_color_r_label = Text { name = "label", font = "Blue Highway 48px", text = "Red", x = 0, y = 140, color = "white" }
+local info_color_g_label = Text { name = "label", font = "Blue Highway 48px", text = "Green", x = 180, y = 140, color = "white" }
+local info_color_b_label = Text { name = "label", font = "Blue Highway 48px", text = "Blue", x = 360, y = 140, color = "white" }
+local info_color_r = Text { name = "color_r", font = "Blue Highway 90px", text = "123", x = 0, y = 170, color = "white" }
+local info_color_g = Text { name = "color_g", font = "Blue Highway 90px", text = "123", x = 180, y = 170, color = "white" }
+local info_color_b = Text { name = "color_b", font = "Blue Highway 90px", text = "123", x = 360, y = 170, color = "white" }
 
-local info_color_h_label = Text { name = "label", font = "48px", text = "Hue", x = 0, y = 270, color = "white" }
-local info_color_s_label = Text { name = "label", font = "48px", text = "Saturation", x = 180, y = 270, color = "white" }
-local info_color_l_label = Text { name = "label", font = "48px", text = "Luminance", x = 360, y = 270, color = "white" }
-local info_color_h = Text { name = "color_h", font = "90px", text = "123", x = 0, y = 300, color = "white" }
-local info_color_s = Text { name = "color_s", font = "90px", text = "123", x = 180, y = 300, color = "white" }
-local info_color_l = Text { name = "color_l", font = "90px", text = "123", x = 360, y = 300, color = "white" }
+local info_color_h_label = Text { name = "label", font = "Blue Highway 48px", text = "Hue", x = 0, y = 270, color = "white" }
+local info_color_s_label = Text { name = "label", font = "Blue Highway 48px", text = "Saturation", x = 180, y = 270, color = "white" }
+local info_color_l_label = Text { name = "label", font = "Blue Highway 48px", text = "Luminance", x = 360, y = 270, color = "white" }
+local info_color_h = Text { name = "color_h", font = "Blue Highway 90px", text = "123", x = 0, y = 300, color = "white" }
+local info_color_s = Text { name = "color_s", font = "Blue Highway 90px", text = "123", x = 180, y = 300, color = "white" }
+local info_color_l = Text { name = "color_l", font = "Blue Highway 90px", text = "123", x = 360, y = 300, color = "white" }
 
-local info_color_rgb_label = Text { name = "label", font = "48px", text = "RGB Hex", x = 0, y = 400, color = "white" }
-local info_color_rgb = Text { name = "color_rgb", font = "90px", text = "#aabbcc", x = 0, y = 430, color = "white" }
+local info_color_rgb_label = Text { name = "label", font = "Blue Highway 48px", text = "RGB Hex", x = 0, y = 400, color = "white" }
+local info_color_rgb = Text { name = "color_rgb", font = "Blue Highway 90px", text = "#aabbcc", x = 0, y = 430, color = "white" }
 
 local info_display = Group {
                                 name = "Info display",
