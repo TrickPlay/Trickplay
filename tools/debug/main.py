@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
         
         # Restore sizes/positions of docks
-        #self.restoreState(settings.value("mainWindowState").toByteArray());
+        self.restoreState(settings.value("mainWindowState").toByteArray());
         
         self.path = None
         
