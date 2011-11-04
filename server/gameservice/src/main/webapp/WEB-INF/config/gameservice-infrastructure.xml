@@ -20,7 +20,7 @@
 		     <context:property-placeholder location="classpath:hsql-database.properties" /> this one uses transient in-memory database  
 	         <context:property-placeholder location="classpath:mysql-database.properties" /> this one uses persistent mysql database
 	    -->
-	<context:property-placeholder location="classpath:hsql-database.properties" />
+	<context:property-placeholder location="classpath:mysql-database.properties" />
 
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
