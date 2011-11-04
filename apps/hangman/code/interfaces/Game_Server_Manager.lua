@@ -17,7 +17,7 @@ print("vendor name: '"..vendor_name.."'")
 local game_name   = app.name --yeilds 'The Hangman's Challenge'
 print("game name:   '"..game_name.."'")
 
-local user_id, vendorId, game_id
+local vendorId, game_id
 
 function Game_Server:init(t)
     
@@ -41,13 +41,6 @@ function Game_Server:init(t)
     initialized = true
     
 end
-
-
-function Game_Server:user_id()
-    
-    return user_id
-    
-end
 function Game_Server:login(t)
     
     if type(t) ~= "table" then
@@ -60,23 +53,31 @@ function Game_Server:login(t)
     pswd        = t.pswd        or error("Must pass in a password,       this requirement will be deprecated once the app is able to grab the trickplay user_id",2)
     email       = t.email       or error("Must pass in a email,          this requirement will be deprecated once the app is able to grab the trickplay user_id",2)
     game_def    = t.game_definition or error("Must pass in a game_definition,    this requirement will be deprecated once the app is able to grab the trickplay user_id",2)
-    local callback = t.callback or error("Must pass in a callback,    this requirement will be deprecated once the app is able to grab the trickplay user_id",2)
+    local login_callback = t.login_callback or error("Must pass in a login_callback,    this requirement will be deprecated once the app is able to grab the trickplay user_id",2)
+    local session_callback = t.session_callback or error("Must pass in a session_callback,    this requirement will be deprecated once the app is able to grab the trickplay user_id",2)
     
     print("Checking if user exists")
     interface:check_user_exists(  user,  function(t)
         
         local f = function(t)
             
+            if t == 401 then
+                login_callback( false )
+                return
+            end
+            
+            login_callback( true )
+            
             t = t.users and t.users[1] or t
             
-            user_id = t.id or error("unexpected interaction with the Gameserver, user_id is nil")
+            g_user.id = t.id or error("unexpected interaction with the Gameserver, user_id is nil")
             
-            assert(type(user_id) == "number", "user_id is not a number, is type "..type(user_id) )
+            assert(type(g_user.id) == "number", "user_id is not a number, is type "..type(user_id) )
             
             dumptable(t)
             
             print("checking if vendor exists")
-            interface:check_vendor_exists(user,pswd,vendor_name, function(t)
+            interface:check_vendor_exists( user,pswd,vendor_name, function(t)
                 
                 local f = function(t)
                     
@@ -93,9 +94,37 @@ function Game_Server:login(t)
                             
                             game_id = t.id or error("unexpected interaction with the Gameserver, game_id is nil")
                             
-                            dumptable(t)
+                            interface:get_gameplay_summary(
+                                user,pswd,game_id, function(t)
+                                    
+                                    if t.detail == json.null then
+                                        print("set")
+                                        interface:set_gameplay_summary(
+                                            user,pswd,game_id, base64_encode(json:stringify{wins = 0, losses = 0}), function(t)
+                                                
+                                                g_user.wins   = 0
+                                                g_user.losses = 0
+                                                
+                                                session_callback()
+                                                
+                                            end
+                                        )
+                                        
+                                    else
+                                        print("get")
+                                        t = json:parse(base64_decode(t.detail))
+                                        dumptable(t)
+                                        g_user.wins   = t.wins
+                                        g_user.losses = t.losses
+                                        session_callback()
+                                        
+                                        
+                                    end
+                                    
+                                end
+                            )
                             
-                            callback(t)
+                            
                             
                             return true
                             
@@ -161,7 +190,9 @@ end
 
 
 function Game_Server:launch_wildcard_session(session,callback)
-        
+    
+    if session == nil then error("must pass session",2) end
+    
     interface:create_gameplay_session(user,pswd,game_id,function(t)
         
         
@@ -186,12 +217,36 @@ function Game_Server:launch_wildcard_session(session,callback)
     
 end
 
+function Game_Server:update_game_history(callback)
+    
+    interface:set_gameplay_summary(
+        user,pswd,game_id, base64_encode(json:stringify{wins = g_user.wins, losses = g_user.losses}), callback
+    )
+    
+end
+
 function Game_Server:update(session,callback)
+    
+    if session == nil then error("must pass session",2) end
     
     interface:update_gameplay_session(
         user,
         pswd,
-        user_id,
+        g_user.id,
+        session.id,
+        session.state,
+        callback
+    )
+    
+end
+
+function Game_Server:end_session(session,callback)
+    
+    if session == nil then error("must pass session",2) end
+    
+    interface:end_gameplay_session(
+        user,
+        pswd,
         session.id,
         session.state,
         callback
@@ -200,6 +255,8 @@ function Game_Server:update(session,callback)
 end
 
 function Game_Server:respond(session,callback)
+    
+    if session == nil then error("must pass session",2) end
     
     interface:update_gameplay_session(
         user,
@@ -213,6 +270,8 @@ function Game_Server:respond(session,callback)
 end
 
 function Game_Server:get_session_state(session,callback)
+    
+    if session == nil then error("must pass session",2) end
     
     interface:get_gameplay_session(
         user,
@@ -236,6 +295,8 @@ function Game_Server:get_a_wild_card_invite(callback)
 end
 function Game_Server:accept_invite(invite_id,callback)
     
+    if invite_id == nil then error("must pass invite_id",2) end
+    
     interface:accept_gameplay_invitation(
         user,
         pswd,
@@ -244,61 +305,12 @@ function Game_Server:accept_invite(invite_id,callback)
     )
     
 end
+
 function Game_Server:get_list_of_sessions(callback)
     
     interface:get_all_gameplay_sessions( user, pswd, function(t)
         
-        local gamesessions = {}
-        
-        local total_num = # t.gameSessionList
-        local curr_num  = 0
-        
-        if total_num == 0 then
-            
-            callback{}
-            
-            return
-            
-        end
-        
-        --for now I need to call get_session_state for each session in the list
-        for i,sesh in pairs(t.gameSessionList) do
-            
-            --if it has state data, then change the code to stop being wasteful
-            if sesh.state ~= nil or sesh.gamePlayState ~= nil  then 
-                
-                print("got session_state! ",sesh.state,sesh.gamePlayState )
-                error("gameserver changed and you don't have to do this anymore",2)
-                
-            -- otherwise call get session for each
-            else
-                
-                self:get_session_state( sesh, function(t)
-                    
-                    --build the table
-                    table.insert(gamesessions,t)
-                    
-                    curr_num = curr_num + 1
-                    
-                    print("received: "..curr_num/total_num .."   session: "..i)
-                    
-                    --once the total number of sessions have been collected, return
-                    if curr_num == total_num then
-                        
-                        callback(gamesessions)
-                        
-                    --if somehow there were more callbacks then calls...
-                    elseif curr_num > total_num then
-                        
-                        error("impossibru!!!")
-                        
-                    end
-                    
-                end)
-                
-            end
-            
-        end
+        callback(t.gameSessionList)
         
     end)
     

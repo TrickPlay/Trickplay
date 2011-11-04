@@ -176,6 +176,8 @@ namespace JSON
 
         Map::size_type size() const;
 
+        void clear();
+
     private:
 
         Map map;
@@ -201,6 +203,8 @@ namespace JSON
 
         Value & append( const Value & value = Value() );
 
+        template < typename T > T & append();
+
         typedef std::vector< Value > Vector;
 
         Vector::iterator begin();
@@ -217,6 +221,9 @@ namespace JSON
 
         Vector vector;
     };
+
+    template <> Object &    Array::append< Object       >();
+    template <> Array &     Array::append< Array        >();
 
     //=============================================================================
 

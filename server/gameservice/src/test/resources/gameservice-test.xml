@@ -98,4 +98,9 @@
 		<property name="key" value="BF93JFJ091N00Q7HF" />
 	</bean>
 
+    <bean id="dbPurgeService"
+        class="com.trickplay.gameservice.service.impl.DBPurgeServiceImpl">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
 </beans>

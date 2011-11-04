@@ -385,6 +385,8 @@ GFile * Sandbox::resolve_relative_native_child( const String & native_path , Sch
 		return g_file_resolve_relative_path( root , native_path.c_str() );
 	}
 	}
+
+	return 0;
 }
 
 //.............................................................................

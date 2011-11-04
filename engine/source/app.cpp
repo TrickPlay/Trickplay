@@ -956,6 +956,15 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
     luaopen_keys( L );
 
+#ifndef TP_PRODUCTION
+
+    if ( context->get_bool( TP_START_DEBUGGER , false ) )
+    {
+    	debugger.break_next_line();
+    }
+
+#endif
+
     // Run the script
 
     FreeLater free_later;

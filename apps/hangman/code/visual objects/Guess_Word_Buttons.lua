@@ -4,18 +4,20 @@ local controller = Group{ name = "Guess Word", x = 90, y = 510,  }
 
 local keybd_bgs      = {}
 local keybd_letters  = {}
-local letter_scores = {}
-
+local letter_scores  = {}
+local right_side_txt = {}
 local chex_n_x_s = {}
 
 local img_srcs,
     get_letters,
+    right_side_list,
     num_remaining,
     letter_values,
     win_lose_txt,
     game_server,
     make_button,
     guess_word,
+    keybd_list,
     make_list,
     make_word,
     guessing,
@@ -37,13 +39,25 @@ local function end_guessing()
     session:remove_view(sk)
     
     controller:change_message("Saving...")
+    right_side_txt[2].color = "000000"
+    screen:grab_key_focus()
+    keybd_list:animate{
+        duration = 300,
+        opacity  = 0,
+        on_completed = function()
+            
+            keybd_list:hide()
+            
+        end
+    }
     
-    game_server:update(session,function()
-        print("updated")
-        controller:change_message("")
-        dolater(bg:killing()+100,function() list:set_state("FOCUSED") end)
-    end)
-    bg:slide_in_hangman()
+    for i,o in pairs(chex_n_x_s) do
+        o:unparent()
+    end
+    
+    chex_n_x_s = {}
+    
+    
 end
 
 function controller:init(t)
@@ -103,13 +117,23 @@ function controller:init(t)
                         
                         end_guessing()
                         
+                        game_server:update(session,function()
+                            print("updated")
+                            controller:change_message("")
+                            right_side_list:set_state("FOCUSED")
+                        end)
+                        
+                        
                         list:set_state("UNFOCUSED")
                         
                         win_lose_txt.source = img_srcs.win_round
                         
                         win_lose_txt.anchor_point = {win_lose_txt.w/2,win_lose_txt.h/2}
+                        win_lose_txt.scale = {2,2}
                         
-                        win_lose_txt:animate{duration = 300, opacity = 255}
+                        win_lose_txt:animate{duration = 300, opacity = 255, scale = {1,1}}
+                        
+                        mediaplayer:play_sound("audio/you-win.mp3")
                         
                         print("you win")
                         
@@ -130,14 +154,24 @@ function controller:init(t)
                         end
                         
                         win_lose_txt.anchor_point = {win_lose_txt.w/2,win_lose_txt.h/2}
+                        win_lose_txt.scale = {2,2}
                         
-                        win_lose_txt:animate{duration = 300, opacity = 255}
+                        win_lose_txt:animate{duration = 300, opacity = 255, scale = {1,1}}
                         
                         session:update_views()
                         
                         end_guessing()
                         
+                        game_server:update(session,function()
+                            print("updated")
+                            controller:change_message("")
+                            dolater(bg:killing()+100,function() right_side_list:set_state("FOCUSED") end)
+                        end)
+                        bg:slide_in_hangman()
+                        
                         ls:fill_in(guess_word)
+                        
+                        mediaplayer:play_sound("audio/you-lose.mp3")
                         
                         print("you lose")
                         --exit()
@@ -178,6 +212,18 @@ function controller:init(t)
         
     end
     
+    keybd_list = t.make_list{
+        orientation = "HORIZONTAL",
+        elements = keybd_bgs,
+        display_passive_focus = false,
+    }
+    keybd_list:add(unpack(keybd_letters))
+    
+    
+    
+    
+    
+    
     mesg = Text{
         font    = t.font.." 30px",
         text    = "",
@@ -192,7 +238,7 @@ function controller:init(t)
         opacity = 0
     }
     
-    local right_side_txt = {}
+    
     right_side_bar = {}
     right_side_bar[1] =make_button{
         clone           = true,
@@ -204,12 +250,28 @@ function controller:init(t)
             ls:light_down()
             make_word:set_session(session)
             if session.my_score == 3 then
-                app_state.state = "MAIN_PAGE"
+                
+                session.viewing = false
+                
+                screen:grab_key_focus()
+                controller:change_message("Saving...")
+                game_server:update(
+                    session,
+                    function(t)
+                        session = nil
+                        controller:change_message("")
+                        print("successfully updated")
+                        
+                        app_state.state = "MAIN_PAGE"
+                    end
+                )
+                
             else
                 app_state.state = "MAKE_WORD"
             end
             bg:fade_out_vic()
             bg:slide_out_hangman()
+            session = nil
         end,
         unfocused_image = img_srcs.button_r,
         focused_image   = img_srcs.button_f,
@@ -241,12 +303,20 @@ function controller:init(t)
             end
             
             win_lose_txt.anchor_point = {win_lose_txt.w/2,win_lose_txt.h/2}
+            win_lose_txt.scale = {2,2}
             
-            win_lose_txt:animate{duration = 300, opacity = 255}
+            win_lose_txt:animate{duration = 300, opacity = 255, scale = {1,1}}
             
             session:update_views()
             
             end_guessing()
+            game_server:update(session,function()
+                print("updated")
+                controller:change_message("")
+                dolater(bg:killing()+100,function() right_side_list:set_state("FOCUSED") end)
+            end)
+            bg:fill_in_victim()
+            bg:slide_in_hangman()
             
             ls:fill_in(guess_word)
             
@@ -278,25 +348,27 @@ function controller:init(t)
             screen:grab_key_focus()
             session:remove_view(sk)
             session:update_views()
-            if not guessing then 
-                bg:fade_out_vic()
-                bg:slide_out_hangman()
-                app_state.state = "MAIN_PAGE"
-            else
-                controller:change_message("Saving...")
-                
-                
-                game_server:update(
-                    session,
-                    function(t)
+            session.viewing = false
+            
+            bg:fade_out_vic()
+            
+            controller:change_message("Saving...")
+            game_server:update(
+                session,
+                function(t)
+                    session = nil
+                    controller:change_message("")
+                    print("successfully updated")
+                    if not guessing then 
                         
-                        print("successfully updated")
-                        controller:change_message("")
-                        app_state.state = "MAIN_PAGE"
+                        bg:slide_out_hangman()
                         
                     end
-                )
-            end
+                    
+                    app_state.state = "MAIN_PAGE"
+                end
+            )
+            
         end,
         unfocused_image = img_srcs.button_y,
         focused_image   = img_srcs.button_f,
@@ -312,20 +384,22 @@ function controller:init(t)
     }
     right_side_bar[3]:add(right_side_txt[3])
     
-    right_side_bar[4] =make_button{
+    right_side_bar[4]   = make_button{
         clone           = true,
         unfocus_fades   = false,
         select_function = function()
             list:set_state("UNFOCUSED")
             screen:grab_key_focus()
             controller:change_message("Saving...")
+            session.viewing = false
             game_server:update(
                 session,
                 function(t)
-                    
-                    exit()
-                    
-                    print("successfully updated")
+                    game_server:update_game_history(function()
+                        exit()
+                        
+                        print("successfully updated")
+                    end)
                     
                 end
             )
@@ -346,31 +420,31 @@ function controller:init(t)
     
     local continue = right_side_bar[1]
     function controller:hide_continue()
-        
+        print("goddbye")
         continue:hide()
         
     end
     
     function controller:show_continue()
-        
+        print("oh herro prease")
         continue:show()
         
     end
     
-    local right_side_list = t.make_list{
+    right_side_list = t.make_list{
         orientation = "VERTICAL",
         elements = right_side_bar,
         display_passive_focus = false,
-        resets_focus_to = 2,
+        resets_focus_to = 1,
+        resets_focus_secondary = 2,
     }
-    
-    keybd_bgs[# keybd_bgs + 1] = right_side_list
     
     list = t.make_list{
         orientation = "HORIZONTAL",
-        elements = keybd_bgs,
+        elements = {keybd_list, right_side_list},
         display_passive_focus = false,
         resets_focus_to = 1,
+        wrap = true,
     }
     
     list:define_key_event(keys.RED,    right_side_bar[1].select)
@@ -379,7 +453,6 @@ function controller:init(t)
     list:define_key_event(keys.BLUE,   right_side_bar[4].select)
     
     controller:add(list,mesg,win_lose_txt)
-    controller:add(unpack(keybd_letters))
     controller:add(unpack(letter_scores))
     
 end
@@ -406,6 +479,10 @@ end
 function controller:guess_word(s)
     
     session = s
+    
+    session.viewing = true
+    
+    game_server:update(session,function() print("Updated server - Guess Word Vieiwing session") end)
     
     session:add_view(sk)
     
@@ -463,25 +540,25 @@ function controller:get_gain_focus()
         --focus in the keyboard
         list:set_state("FOCUSED")
         
-        local i,l
-        
-        --find the last vowel in the word
-        i,_,l = guess_word:lower():find( "([aeiouy])[^aeiouy]-$" )
-        
-        --give that hint to the user
-        ls:put_letter(l:upper(),i)
-        
     end
     
 end
 
 function controller:gain_focus()
     
-    ls:light_up(# guess_word)
+    
     
     sb:num_strikes(0)
     
     guessing = true
+    
+    local i,l
+    
+    --find the last vowel in the word
+    i,_,l = guess_word:lower():find( "([aeiouy])[^aeiouy]-$" )
+    
+    --give that hint to the user
+    ls:put_letter(l:upper(),i)
     
     local letters = session.letters
     
@@ -492,11 +569,15 @@ function controller:gain_focus()
         keybd_bgs[l:upper():byte() - A:byte()+1]:select()
         
     end
+    ls:light_up(# guess_word)
     bg:reset()
     screen:grab_key_focus()
     
-    win_lose_txt.opacity = 0
+    keybd_list:show()
+    keybd_list.opacity = 255
     
+    win_lose_txt.opacity = 0
+    right_side_txt[2].color = "ffffff"
 end
 
 
