@@ -1,7 +1,8 @@
 
 local contents = app.contents
 
-local H = 44
+local H = 46
+local COLS = 3
 local top = 10
 local left = 10
 
@@ -12,8 +13,20 @@ local last_run = settings.last
 
 local focused = nil
 
+local files = {}
+
 for i = 1 , #contents do
     local file = contents[ i ]
+    local name = string.match( file , "examples/(.*)%.lua" )
+    if name then
+        table.insert( files , file )
+    end
+end
+
+table.sort( files )
+
+for i = 1 , #files do
+    local file = files[ i ]
     local name = string.match( file , "examples/(.*)%.lua" )
     if name then
         name = string.gsub( name , "_" , " " )
@@ -34,9 +47,9 @@ for i = 1 , #contents do
         top = top + H
         if top + H > screen.h then
             tests_per_column = #tests-1
-            print("tests_per_column",tests_per_column)
+            --print("tests_per_column",tests_per_column)
             top = 10
-            left = left + screen.w / 4
+            left = left + screen.w / COLS
         end
         
         if last_run == file then
@@ -53,8 +66,8 @@ if # tests > 0 then
     local focus = Rectangle
     {
         color = "964e20" ,
-        size = { screen.w / 4 , H } ,
-        position = tests[ focused ].position
+        size = { screen.w / COLS , H } ,
+        position = tests[ focused ].position 
     }
     
     screen:add( focus )

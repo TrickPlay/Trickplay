@@ -13,9 +13,8 @@ test_group:add (image1)
 
 
 local myTimeline = Timeline ()
-local on_completed_called = false
 local frameCount = 0
-myTimeline.duration = 2000
+myTimeline.duration = 1000
 myTimeline.loop = true
 
 myTimeline.on_new_frame = function (self, timeline_ms, progress) 

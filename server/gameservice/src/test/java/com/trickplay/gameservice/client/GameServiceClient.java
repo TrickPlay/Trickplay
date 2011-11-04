@@ -57,6 +57,9 @@ public class GameServiceClient {
 			
 			RestTemplate restTemplate = getTemplate();
 			
+			// reset database
+			resetDB(restTemplate, "admin", "admin");
+			
 			checkUserExists(restTemplate, "u1");
 			checkUserExists(restTemplate, "u2");
 			checkUserExists(restTemplate, "u3");
@@ -274,6 +277,10 @@ public class GameServiceClient {
 			Long u1Id = umap.get("u1").getId();
 			GamePlaySummaryTO summaryTO = getGamePlaySummary(restTemplate, gameId, "u1", "u1");
 			
+			GamePlaySummaryRequestTO initSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"0:0\"}");
+            postGamePlaySummary(restTemplate, gameId, initSummaryTO, "u1", "u1");
+            postGamePlaySummary(restTemplate, gameId, initSummaryTO, "u2", "u2");
+            
 			GamePlaySummaryRequestTO winnerSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"1:0\"}");
 			GamePlaySummaryRequestTO loserSummaryTO = new GamePlaySummaryRequestTO("{\"record\":\"0:1\"}");
 			if ("u1".equals(winner)) {
@@ -284,11 +291,24 @@ public class GameServiceClient {
                 postGamePlaySummary(restTemplate, gameId, loserSummaryTO, "u1", "u1");
 			}
 			
+			GamePlaySummaryTO u1Summary = getGamePlaySummary(restTemplate, gameId, "u1", "u1");
+			GamePlaySummaryTO u2Summary = getGamePlaySummary(restTemplate, gameId, "u2", "u2");
+			
 			getGameSessionMessages(restTemplate, gsTO.getId(), "u1", "u1");
 			
 			
 		}
 		
+		public static BooleanResponse resetDB(RestTemplate rest, String username, String password) {
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            ResponseEntity<BooleanResponse> response = rest.exchange(
+                    GS_ENDPOINT+"/user/resetDB", HttpMethod.GET, 
+                    entity, BooleanResponse.class);
+            
+            BooleanResponse output = response.getBody();
+            System.out.println("user/resetDB returned " + output.isValue());
+            return output;
+        }
 		
 		public static GamePlaySummaryTO getGamePlaySummary(RestTemplate rest, Long gameId, String username, String password) {
             HttpEntity<String> entity = prepareJsonGet(username, password);

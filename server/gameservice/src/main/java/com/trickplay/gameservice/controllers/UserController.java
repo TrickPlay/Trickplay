@@ -38,6 +38,7 @@ import com.trickplay.gameservice.exception.GameServiceException;
 import com.trickplay.gameservice.exception.GameServiceException.Reason;
 import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.BuddyService;
+import com.trickplay.gameservice.service.DBPurgeService;
 import com.trickplay.gameservice.service.UserService;
 import com.trickplay.gameservice.transferObj.BooleanResponse;
 import com.trickplay.gameservice.transferObj.BuddyInvitationListTO;
@@ -57,6 +58,9 @@ public class UserController extends BaseController {
 			.getLogger(UserController.class);
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+    private DBPurgeService dbPurgeService;
 
 	@Autowired
 	Validator validator;
@@ -361,4 +365,9 @@ public class UserController extends BaseController {
 	}
 
 
+	@RequestMapping(value = { "/rest/user/resetDB" }, method = RequestMethod.GET)
+    public @ResponseBody BooleanResponse resetDB() {
+        dbPurgeService.resetDB();
+        return BooleanResponse.TRUE;
+    }
 }

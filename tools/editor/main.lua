@@ -25,6 +25,7 @@
         [ keys.h	] = function() editor.h_guideline() input_mode = hdr.S_SELECT end,
         [ keys.i	] = function() editor.ui_elements() input_mode = hdr.S_SELECT end,
         --[ keys.j	] = function() screen_ui.timeline_show() input_mode = hdr.S_SELECT end,
+        [ keys.k	] = function() editor_lb:execute("~/code/trickplay/sdk/trickplay-debugger "..current_dir) end,
         [ keys.m	] = function() screen_ui.menu_hide() input_mode = hdr.S_SELECT end,
         [ keys.n	] = function() editor.close(true) input_mode = hdr.S_SELECT end,
         [ keys.o	] = function() editor.open() input_mode = hdr.S_SELECT   end,

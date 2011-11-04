@@ -7,7 +7,7 @@ Description:  Create an animator and test verify its setters.
 
 
 -- Test Set up --
-local state1_completed = false
+animation_state2_completed = false
 
 local rect1 = Rectangle {
 		size = {100, 100}, 
@@ -65,6 +65,13 @@ local state1 = AnimationState {
 		 { rect3, "scale", "LINEAR", { 2, 0.5}},
 		 { rect2, "color", "LINEAR", "FFAA00AA"}
 	 	  }
+	}, 
+	{
+       source = "second", 
+       target = "third",
+   		duration = 1000,
+	  	keys = {
+	 	  }
 	}
 }
 }
@@ -78,7 +85,8 @@ local state1 = AnimationState {
 		if state1.state == "first" then 
 			state1.state = "second"
 		elseif state1.state == "second" then 
-			state1_completed = true
+			--state1.state = "third"
+			animation_state2_completed = true
 		end
 	end 
 
@@ -116,7 +124,7 @@ function test_animationState_end_state ()
 end
 
 function test_animationState_completed ()
-   assert_true ( state1_completed, "state1.on_completed failed" )
+   assert_true ( animation_state2_completed, "state2.on_completed failed" )
 end
 
 -- Test Tear down --

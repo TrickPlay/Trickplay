@@ -81,15 +81,29 @@ function letter_slots:light_up(num)
                 {  1.0,          "LINEAR",  255 },
             },
         }
-        lights_up.properties[i+num] = {
-            source = q_marks[i],
-            name   = "opacity",
-            keys   = {
-                {  0.0,            "LINEAR",    0 },
-                { (num+1)/(num+2), "LINEAR",    0 },
-                {  1.0,            "LINEAR",  255 },
-            },
-        }
+        if letters[i].text == "" then
+            lights_up.properties[i+num] = {
+                source = q_marks[i],
+                name   = "opacity",
+                keys   = {
+                    {  0.0,            "LINEAR",    0 },
+                    { (num+1)/(num+2), "LINEAR",    0 },
+                    {  1.0,            "LINEAR",  255 },
+                },
+            }
+        else
+        --[[
+            lights_up.properties[i+num] = {
+                source = letters[i],
+                name   = "opacity",
+                keys   = {
+                    {  0.0,            "LINEAR",    0 },
+                    { (num+1)/(num+2), "LINEAR",    0 },
+                    {  1.0,            "LINEAR",  255 },
+                },
+            }
+            --]]
+        end
         
     end
     

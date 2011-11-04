@@ -9,12 +9,14 @@ Description: This test verifies that there is a URL request callback and that it
 
 local responseStatus
 local responseCode
+urlrequest1_on_complete_called = false
 
 local request1 = URLRequest( "http://www.trickplay.com" )
 request1:send()
 
 
 function request1.on_complete ( request , response )	
+	urlrequest1_on_complete_called = true
 	responseCode = response.code
 	responseStatus = response.status
 end
