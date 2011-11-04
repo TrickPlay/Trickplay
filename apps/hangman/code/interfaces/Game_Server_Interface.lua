@@ -1,4 +1,7 @@
 
+local on_lose_internet, on_regain_internet
+local re_connecting = false
+
 local try_again = Timer{
 	
 	interval = 10*1000,
@@ -18,7 +21,10 @@ try_again:stop()
 
 local response_check = function(request_object,response_object,callback)
 	
-	if response_object.failed then
+	if response_object.failed or response_object.body == nil then
+		
+		re_connecting = true
+		
         print(
 			
 			"URLRequest FAILED, receiving the reponse code: "..
@@ -33,15 +39,17 @@ local response_check = function(request_object,response_object,callback)
 		
 		try_again:start()
 		
-    elseif response_object.body == nil then
-		
-		error(
-			"\n\nReceived a nil Response body\n"..
-            
-            "Status: "..response_object.code.." - "..response_object.status.."\n",2
-		)
+		on_lose_internet()
 		
 	else
+		
+		if re_connecting then
+			
+			re_connecting = false
+			
+			on_regain_internet()
+			
+		end
 		
 		local json_response = json:parse(response_object.body)
 		
@@ -50,11 +58,11 @@ local response_check = function(request_object,response_object,callback)
 			print("json was nil")
 			print(response_object.code.." - "..response_object.status)
 			
-			callback(response_object.code)
+			if callback then callback(response_object.code) end
 			
         else
             
-            callback(json_response)
+            if callback then callback(json_response) end
             
 		end
         
@@ -98,6 +106,14 @@ end
 
 local Game_Server = {}
 
+function Game_Server:init(t)
+	
+	if type(t) ~= "table" then error("must pass a table as the parameter",2) end
+	
+	on_lose_internet = t.on_lose_internet or error("must pass on_lose_internet",2)
+	on_regain_internet = t.on_lose_internet or error("must pass on_lose_internet",2)
+	
+end
 
 --------------------------------------------------------------------------------
 -- User Services                                                              --
@@ -723,7 +739,7 @@ function Game_Server:get_gameplay_invitation(user,pwd,game_id,max_num,callback)
         headers = make_headers(user,pwd),
         
         on_complete = function(self,response_object)
-			print(self.url)
+			
 			response_check(self,response_object,callback)
 			
 		end,
@@ -731,6 +747,48 @@ function Game_Server:get_gameplay_invitation(user,pwd,game_id,max_num,callback)
     }:send()
     
 end
+function Game_Server:get_gameplay_summary(user,pwd,game_id,callback)
+    
+    URLRequest{
+        
+        url    = base_url.."/gameservice/rest/game/"..game_id.."/summary",
+        
+        method = "GET",
+        
+        headers = make_headers(user,pwd),
+        
+        on_complete = function(self,response_object)
+			
+			response_check(self,response_object,callback)
+			
+		end,
+        
+    }:send()
+    
+end
+function Game_Server:set_gameplay_summary(user,pwd,game_id,detail,callback)
+    
+    URLRequest{
+        
+        url    = base_url.."/gameservice/rest/game/"..game_id.."/summary",
+        
+        method = "POST",
+        
+        headers = make_headers(user,pwd),
+		
+		body = '{"detail":"'..detail..'"}',
+        
+        on_complete = function(self,response_object)
+			
+			response_check(self,response_object,callback)
+			
+		end,
+        
+    }:send()
+    
+end
+ 
+ 
  
 --[[
  
@@ -1064,11 +1122,11 @@ Response
 
 {"key":"pyNemr4+pphXKd1+Nvcl6bFubLMWAqnt/BYsWzTMKAQ="}
 --]]
-function Game_Server:end_gameplay_session(gameSessionId,gameState)
+function Game_Server:end_gameplay_session(user,pwd,gameSessionId,gameState,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/1/end",
+        url    = base_url.."/gameservice/rest/gameplay/"..gameSessionId.."/end",
         
         method = "POST",
         
@@ -1077,6 +1135,10 @@ function Game_Server:end_gameplay_session(gameSessionId,gameState)
         body = '{"turnId":null,"gameSessionId":'..gameSessionId..',"gameState":"'..gameState..'"}',
         
         on_complete = function(self,response_object)
+			print("ENDING A SESSION")
+			print(self.url)
+			print(self.body)
+			print(response_object.body)
 			
 			response_check(self,response_object,callback)
 			

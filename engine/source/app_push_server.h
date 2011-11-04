@@ -48,11 +48,11 @@ private:
 
     PushInfo compare_files( const String & app_contents , const FileInfo::List & source_files );
 
-    void set_response( HttpServer::Response & response , bool done , const String & msg , const String & file = String() , const String & url = String() );
+    void set_response( HttpServer::Response & response , bool done , bool failed , const String & msg , const String & file = String() , const String & url = String() );
 
     void write_file( const TargetInfo & target_info , const HttpServer::Request::Body & body );
 
-    void launch_it();
+    bool launch_it();
 
     TPContext *         context;
 

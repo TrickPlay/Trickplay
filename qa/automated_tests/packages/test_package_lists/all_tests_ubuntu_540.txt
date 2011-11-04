@@ -236,7 +236,7 @@
 },
 {
 "name": "00048_text_wrap.lua",
-"checksum": "079f8ad6b4545016392b41106591b174",
+"checksum": "29c43c785ed07b0cdc7dcc8d8885f1fc",
 "active": "true"
 },
 {
@@ -261,7 +261,7 @@
 },
 {
 "name": "00054_text_single_line.lua",
-"checksum": "2ff83856834c656a1e0d28df0f4d1efa",
+"checksum": "0be199b378ba704f7bf49e65ceb59335",
 "active": "true"
 },
 {
@@ -401,12 +401,12 @@
 },
 {
 "name": "10006_canvas_rotate.lua",
-"checksum": "73d9da14823daea7bc6d5cacd9c50e44",
+"checksum": "1ddd1b94711df4fb56cb6a94e9d93197",
 "active": "true"
 },
 {
 "name": "10007_canvas_rotate.lua",
-"checksum": "6bc338f1af55124fd8ef982ddf9b8fb4",
+"checksum": "f87bd54b94281d7a7ecc75e8f89148fe",
 "active": "true"
 },
 {
@@ -442,7 +442,7 @@
 {
 "name": "10014_image_exif_orientation.lua",
 "checksum": "bb77d9475a8f6b2cec031e4a49434c20",
-"active": "true"
+"active": "false"
 }
 ]
 

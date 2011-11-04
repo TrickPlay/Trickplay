@@ -69,6 +69,7 @@ local delta = {}
 local src = assets.hourglass[11]
 local update_time = function(self,curr_time)
 	
+    if self.exp == nil then return end
 	--os.date("!*t") 
 	
 	delta.day, delta.hour, delta.min, delta.sec =
@@ -590,16 +591,28 @@ local make_card = function(input)
 	card.deal_img = deal_img
 	
 	
-	
-	card.exp = {isdst = "false"}
-	card.exp.year,card.exp.month,card.exp.day,card.exp.hour,card.exp.min,card.exp.sec =
-		string.match(input.expiration,"(%d*)-(%d*)-(%d*)T(%d*):(%d*):(%d*)")
-	
-	card.exp_secs = os.time(card.exp)
-	--print(card.exp_secs)
-	
-	card.tz = input.tz/60/60
-	
+	if input.expiration ~= json.null then
+        
+        card.exp = {isdst = "false"}
+        
+        card.exp.year,
+        card.exp.month,
+        card.exp.day,
+        card.exp.hour,
+        card.exp.min,
+        card.exp.sec =
+            string.match(input.expiration,"(%d*)-(%d*)-(%d*)T(%d*):(%d*):(%d*)")
+        
+        card.exp_secs = os.time(card.exp)
+        --print(card.exp_secs)
+        
+        card.tz = input.tz/60/60
+        
+    else
+        
+        tltb_rem.text = "No Expiration"
+        
+	end
 	--tltb_rem.anchor_point = {tltb_rem.w/2,0}
 	
 	
