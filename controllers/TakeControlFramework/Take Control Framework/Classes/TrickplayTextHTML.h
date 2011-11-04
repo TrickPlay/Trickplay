@@ -51,6 +51,7 @@
     
     // .markup TODO: (could be security risk)
     NSString *markup;
+    BOOL use_markup;
 }
 
 @property (retain) UIWebView *webview;
