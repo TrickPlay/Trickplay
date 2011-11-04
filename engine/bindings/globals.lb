@@ -831,9 +831,11 @@ globals
 
     string regex_replace( lstring origin, string pattern, string replacement, int start_pos = 0 )
         [[
-            GError *error = NULL;
+            FreeLater free_later;
 
-            GRegex *re_pat = g_regex_new( pattern, (GRegexCompileFlags) (G_REGEX_MULTILINE | G_REGEX_DOTALL), (GRegexMatchFlags) 0, &error );
+            GError * error = 0;
+
+            GRegex * re_pat = g_regex_new( pattern, (GRegexCompileFlags) (G_REGEX_MULTILINE | G_REGEX_DOTALL), (GRegexMatchFlags) 0, &error );
 
             if (error)
             {
@@ -843,8 +845,8 @@ globals
             }
             else
             {
-                g_info("REGEX MADE");
                 gchar * replaced = g_regex_replace( re_pat, origin, origin_len, start_pos, replacement, (GRegexMatchFlags) 0, &error );
+
                 if (error)
                 {
                     g_warning("FAILED TO EXECUTE REGEX REPLACE '%s' : %s",pattern,error->message);
@@ -853,13 +855,16 @@ globals
                 }
                 else
                 {
-                    g_info("REGEX REPLACED: %s",replaced);
-                    FreeLater free_later( replaced );
+                    free_later( replaced );
                     
-                    result = ( const char * ) replaced;
+                    result = replaced;
                 }
             }
 
+            if ( re_pat )
+            {            
+                g_regex_unref( re_pat );
+            }
         ]];
 
 	lstring uint32_to_be( int n )
