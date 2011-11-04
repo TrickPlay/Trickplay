@@ -14,6 +14,7 @@ class EditorTabWidget(QTabWidget):
         self.setAcceptDrops(True)
         
         self.main = main
+        self.tabs = []
         
         QObject.connect(self, SIGNAL('tabCloseRequested(int)'), self.closeTab)
         
@@ -24,7 +25,7 @@ class EditorTabWidget(QTabWidget):
         self.main.dropFileEvent(event, 'tab', self)
         
     def closeTab(self, index):
-        print('closing', index)
+        self.tabs.pop(index)
         self.removeTab(index)
         if 0 == self.count():
             self.close()
@@ -38,9 +39,10 @@ class EditorDock(QDockWidget):
     def __init__(self, main, parent = None):
         QDockWidget.__init__(self, parent)
         self.setAcceptDrops(True)
-        self.setFeatures(QDockWidget.DockWidgetClosable)
+        #self.setFeatures(QDockWidget.DockWidgetClosable)
+        self.setFeatures(QDockWidget.DockWidgetMovable)
         self.setObjectName("editorDock")
-        self.setWindowTitle("Text Editor")
+        #self.setWindowTitle("Text Editor")
         
         self.main = main
         

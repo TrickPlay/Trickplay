@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri Aug 19 14:32:17 2011
+# Created: Wed Nov  2 15:37:06 2011
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.setEnabled(True)
-        MainWindow.resize(1121, 811)
+        MainWindow.resize(1000, 834)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -29,10 +29,12 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1121, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 27))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
+        self.menuView = QtGui.QMenu(self.menubar)
+        self.menuView.setObjectName(_fromUtf8("menuView"))
         MainWindow.setMenuBar(self.menubar)
         self.InspectorDock = QtGui.QDockWidget(MainWindow)
         self.InspectorDock.setEnabled(True)
@@ -87,6 +89,23 @@ class Ui_MainWindow(object):
         self.gridLayout_3.addLayout(self.FileSystemLayout, 0, 0, 1, 1)
         self.FileSystemDock.setWidget(self.FileSystemContainer)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.FileSystemDock)
+        self.ConsoleDock = QtGui.QDockWidget(MainWindow)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.ConsoleDock.sizePolicy().hasHeightForWidth())
+        self.ConsoleDock.setSizePolicy(sizePolicy)
+        self.ConsoleDock.setFloating(False)
+        self.ConsoleDock.setObjectName(_fromUtf8("ConsoleDock"))
+        self.ConsoleContainer = QtGui.QWidget()
+        self.ConsoleContainer.setObjectName(_fromUtf8("ConsoleContainer"))
+        self.gridLayout = QtGui.QGridLayout(self.ConsoleContainer)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.ConsoleLayout = QtGui.QGridLayout()
+        self.ConsoleLayout.setObjectName(_fromUtf8("ConsoleLayout"))
+        self.gridLayout.addLayout(self.ConsoleLayout, 0, 0, 1, 1)
+        self.ConsoleDock.setWidget(self.ConsoleContainer)
+        MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(8), self.ConsoleDock)
         self.actionExit = QtGui.QAction(MainWindow)
         self.actionExit.setObjectName(_fromUtf8("actionExit"))
         self.action_Exit = QtGui.QAction(MainWindow)
@@ -97,6 +116,7 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.action_Save)
         self.menuFile.addAction(self.action_Exit)
         self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuView.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -104,9 +124,11 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "View", None, QtGui.QApplication.UnicodeUTF8))
         self.InspectorDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Inspector", None, QtGui.QApplication.UnicodeUTF8))
         self.DeviceManagerDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  Device Manager", None, QtGui.QApplication.UnicodeUTF8))
         self.FileSystemDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "  File System", "texty7", QtGui.QApplication.UnicodeUTF8))
+        self.ConsoleDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Console", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "&Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))

@@ -30,7 +30,6 @@ test_group:add ( myText1 )
 myText1.line_spacing = 10
 
 function test_Text_properties_basic ()
-	print ("myText1.selected_text = ", myText1.selected_text)
 	assert_equal (myText1.text, "Fun with Dick and Jane", "myText1.text returned: "..myText1.text..". Expected: Fun with Dick and Jane.")
 	assert_equal (myText1.font, "DejaVu Sans 20px", "myText1.font returned: "..myText1.font..". Expected: DejaVu Sans 20px.")
 	assert_equal (myText1.color[1], 51, "myText1.color returned: "..myText1.color[1]..". Expected: 51")

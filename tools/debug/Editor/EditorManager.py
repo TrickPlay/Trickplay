@@ -44,6 +44,7 @@ class EditorManager(QWidget):
         
         self.editorGroups = []
         self.editors = {}
+        self.app = parent
         
     def getEditorTabs(self):
         return self.editorGroups
@@ -62,10 +63,12 @@ class EditorManager(QWidget):
     def save(self):
         editor = self.app.focusWidget()
         if isinstance(editor, Editor):
-            editor.save(self.statusBar())
+            editor.save()
+            #editor.save(self.statusBar())
         else:
-            self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
-        
+        	#self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
+        	print 'Failed to save because no text editor is currently selected.'                
+
     def newEditor(self, path, tabGroup = None):
         """
         Create a tab group if both don't exist,
@@ -76,33 +79,47 @@ class EditorManager(QWidget):
         name = os.path.basename(str(path))
             
         editor = Editor()
-        
-        # If the file is already open, just use the open document
-        if self.editors.has_key(path):
-            editor.setDocument(self.editors[path].document())
-        else:
-            editor.readFile(path)
-        
+        closedTab = None
+
         nTabGroups = len(self.editorGroups)
         
-        # If there is already one tab group, create a new one in split view and open the file there  
-        if 1 == nTabGroups:
-            self.editorGroups.append(self.EditorTabWidget(self.splitter))
-            tabGroup = 1
-        
-        # If there are no tab groups, create the first one
-        elif 0 == nTabGroups:
-            self.editorGroups.append(self.EditorTabWidget(self.splitter))
+		# If there is already one tab group, create a new one in split view and open the file there  
+        if 0 == nTabGroups:
+            self.tab = self.EditorTabWidget(self.splitter)
+            self.editorGroups.append(self.tab)
             tabGroup = 0
             
         # Default to opening in the first tab group
-        elif not tabGroup:
+        else:
             tabGroup = 0
+		 
+        # If the file is already open, just use the open document
+        if self.editors.has_key(path):
+            for k in self.editors:
+				if not k in self.tab.tabs:
+					closedTab = k
+
+            if closedTab != None:
+        		self.editors.pop(closedTab)
+        		for k in self.tab.tabs:
+					self.editors[k][1] = self.tab.tabs.index(k) 
+
+        		editor.readFile(path)
+
+            if closedTab != path:
+            	for k in self.editors:
+					if path == k:
+						self.editorGroups[tabGroup].setCurrentIndex(self.editors[k][1])
+            	return
+        else:
+            editor.readFile(path)
         
         index = self.editorGroups[tabGroup].addTab(editor, name)
+
         
         if not self.editors.has_key(path):
-            self.editors[path] = editor
+            self.editors[path] = [editor, index]
+            self.tab.tabs.append(path)
         
         self.editorGroups[tabGroup].setCurrentIndex(index)
         editor.setFocus()

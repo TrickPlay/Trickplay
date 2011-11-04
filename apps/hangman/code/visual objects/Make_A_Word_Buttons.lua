@@ -1,12 +1,13 @@
 
 local keybd_bgs      = {}
 local keybd_letters  = {}
-local letter_scores = {}
+local letter_scores  = {}
+local right_side_txt = {}
+
 
 local controller = Group{ name = "Make Word", x = 490, y = 700, }
 
 local img_srcs,
-    create_game_state,
     main_menu_list,
     letter_values,
     word_count_n,
@@ -38,10 +39,7 @@ function controller:init(t)
     check_word     = t.check_word     or error("must pass check_word",     2)
     guess_word     = t.guess_word     or error("must pass guess_word",     2)
     main_menu      = t.main_menu      or error("must pass main_menu",      2)
-    main_menu_list = t.main_menu_list or error("must pass main_menu_list", 2)
     sk             = t.sk             or error("must pass sk",             2)
-    
-    create_game_state = t.create_game_state or error("must pass create_game_state", 2)
     
     
     --Key board
@@ -57,6 +55,8 @@ function controller:init(t)
                 if letter_slot_i > ls:num_slots() then return end
                 
                 if keybd_letters[i].used then return end
+                
+                right_side_txt[1].color = "ffffff"
                 
                 ls:put_letter( keybd_letters[i].text, letter_slot_i )
                 
@@ -109,7 +109,7 @@ function controller:init(t)
     
     mesg = Text{
         font  = t.font.." 30px",
-        text  = "Create a word for Player_2 to guess",
+        text  = "Create a word for the other player to guess",
         color = "999999",
         x     = (5 + img_srcs.keybd_off.w)*(t.num_letters/2),
         y     = 20,
@@ -130,7 +130,7 @@ function controller:init(t)
     
     
     
-    local right_side_txt = {}
+    
     local right_side_bar = {}
     right_side_bar[1] =make_button{
         clone           = true,
@@ -139,6 +139,8 @@ function controller:init(t)
             
             print("play word")
             local s = string.lower(ls:get_word())
+            
+            if s:len() == 0 then return end
             
             if check_word(s) then
                 
@@ -153,10 +155,10 @@ function controller:init(t)
                 controller:change_message("Sending...")
                 
                 list:set_state("UNFOCUSED")
-                
+                session.viewing = false
                 if session.opponent_name == false then
                     
-                    main_menu_list:add_entry(session,"MAKE_A_WORD")
+                    main_menu:add_entry(session,"MAKE_A_WORD")
                     
                     game_server:launch_wildcard_session(session,function(id)
                         
@@ -165,6 +167,7 @@ function controller:init(t)
                         app_state.state = "MAIN_PAGE"
                         
                         session.id = id
+                        session = nil
                         
                     end)
                     
@@ -173,8 +176,8 @@ function controller:init(t)
                     session:update_views()
                     
                     game_server:respond(session,function()
-                        
                         app_state.state = "MAIN_PAGE"
+                        session = nil
                         
                         
                     end)
@@ -184,7 +187,7 @@ function controller:init(t)
                 
             else
                 
-                controller:change_message("'"..s.."' is not a vaild word")
+                controller:change_message(s:upper().." is not in the dictionary. Please try something else.")
                 
             end
             
@@ -207,7 +210,7 @@ function controller:init(t)
         unfocus_fades   = false,
         select_function = function()     
             print("reset")
-            
+            right_side_txt[1].color = "000000"
             for i,l in pairs(keybd_letters) do
                 
                 l.color = "ffffff"
@@ -244,7 +247,15 @@ function controller:init(t)
             screen:grab_key_focus()
             session:remove_view(sk)
             session:update_views()
-            app_state.state = "MAIN_PAGE"
+            
+            session.viewing = false
+            game_server:update(
+                session,
+                function(t)
+                    app_state.state = "MAIN_PAGE"
+                end
+            )
+            session = nil
         end,
         unfocused_image = img_srcs.button_y,
         focused_image   = img_srcs.button_f,
@@ -265,9 +276,21 @@ function controller:init(t)
         select_function = function()
             
             print("quit")
+            screen:grab_key_focus()
             
-            exit()
-            
+            controller:change_message("Saving...")
+            session.viewing = false
+            game_server:update(
+                session,
+                function(t)
+                    game_server:update_game_history(function()
+                        exit()
+                        
+                        print("successfully updated")
+                    end)
+                    
+                end
+            )
         end,
         unfocused_image = img_srcs.button_b,
         focused_image   = img_srcs.button_f,
@@ -297,6 +320,7 @@ function controller:init(t)
         elements = keybd_bgs,
         display_passive_focus = false,
         resets_focus_to = 1,
+        wrap = true,
     }
     
     list:define_key_event(keys.RED,    right_side_bar[1].select)
@@ -304,9 +328,9 @@ function controller:init(t)
     list:define_key_event(keys.YELLOW, right_side_bar[3].select)
     list:define_key_event(keys.BLUE,   right_side_bar[4].select)
     
-    controller:add(word_count_t,list,mesg)
+    controller:add(--[[word_count_t,--]]list,mesg)
     controller:add(unpack(keybd_letters))
-    controller:add(unpack(letter_scores))
+    --controller:add(unpack(letter_scores))
     controller:add(unpack(right_side_txt))
     
 end
@@ -351,17 +375,35 @@ function controller:new_letters()
     
     word_count_t.text = "Word Count: "..word_count_n
     
-    controller:change_message("Create a word for '"..(session.opponent_name or 'Player_2').."' to guess")
+    controller:change_message("Create a word for "..(session.opponent_name or "the other player").." to guess")
 end
 
 function controller:gain_focus(num)
     list:set_state("FOCUSED")
+    bg:slide_out_hangman()
 end
 function controller:set_session(s)
     session = s
+    session.viewing = true
     
+    if session.opponent_name then game_server:update(session,function() print("Updated server - Make Word Vieiwing session") end) end
+    if s.opponent_name then
+        
+        sk:animate{
+            duration = 300,
+            opacity  = 255,
+        }
+        
+    else
+        
+        sk:animate{
+            duration = 300,
+            opacity  = 0,
+        }
+        
+    end
     session:add_view(sk)
-    
+    right_side_txt[1].color = "000000"
 end
 
 return controller
