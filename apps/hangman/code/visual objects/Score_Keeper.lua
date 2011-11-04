@@ -67,21 +67,25 @@ function score_keeper:init(t)
     vs.x = screen_w/2 - vs.w/2
     vs.y = 15
     
-    player_1_txt = Text{
-        text  = "Player_1",
-        font  = t.font.." 35px",
-        color = "b1bcbe",
-        x     = player_1_box.x - player_1_box.w/2,
-        y     = 10,
+    player_1_txt  = Text{
+        text      = "Player_1",
+        font      = t.font.." 35px",
+        color     = "b1bcbe",
+        x         = player_1_box.x - player_1_box.w/2,
+        y         = 10,
+        ellipsize = "END",
+        w         = player_1_box.w-30,
     }
     player_1_txt.anchor_point = {player_1_txt.w/2,0}
     
-    player_2_txt = Text{
-        text  = "Player_2",
-        font  = t.font.." 35px",
-        color = "b1bcbe",
-        x     = player_2_box.x + player_2_box.w/2,
-        y     = 10,
+    player_2_txt  = Text{
+        text      = "Player_2",
+        font      = t.font.." 35px",
+        color     = "b1bcbe",
+        x         = player_2_box.x + player_2_box.w/2,
+        y         = 10,
+        ellipsize = "END",
+        w         = player_2_box.w-30,
     }
     player_2_txt.anchor_point = {player_2_txt.w/2,0}
     
@@ -118,7 +122,7 @@ function score_keeper:update(t)
         
     end
     
-    player_1_txt.text = g_username      or ""
+    player_1_txt.text = g_user.name      or ""
     player_2_txt.text = t.opponent_name or ""
     
     player_1_txt.anchor_point = {player_1_txt.w/2,0}
