@@ -262,6 +262,10 @@ typedef struct TPContext TPContext;
     TP_APP_ANIMATIONS_ENABLED - Whether apps animate when they close and launch.
                                 Defaults to "true".
 
+    TP_DEBUGGER_PORT - 			The port used to remotely debug apps. If set to 0,
+                                a port will be chosen.
+                                Defaults to "0".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -312,6 +316,7 @@ typedef struct TPContext TPContext;
 #define TP_RESOURCE_LOADER_ENABLED		"resource_loader_enabled"
 #define TP_APP_ARGS						"app_args"
 #define TP_APP_ANIMATIONS_ENABLED		"app_animations_enabled"
+#define TP_DEBUGGER_PORT				"debugger_port"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
