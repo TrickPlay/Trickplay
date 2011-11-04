@@ -910,6 +910,16 @@ namespace JSON
         return os.str();
     }
 
+    template <> Object & Array::append< Object > ()
+	{
+    	return append().as<Object>();
+	}
+
+    template <> Array & Array::append< Array >( )
+	{
+    	return append().as<Array>();
+	}
+
     //=============================================================================
 
     Parser::Parser()
