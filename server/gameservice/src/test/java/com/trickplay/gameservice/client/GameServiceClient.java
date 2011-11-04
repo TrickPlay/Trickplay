@@ -57,6 +57,9 @@ public class GameServiceClient {
 			
 			RestTemplate restTemplate = getTemplate();
 			
+			// reset database
+			resetDB(restTemplate, "admin", "admin");
+			
 			checkUserExists(restTemplate, "u1");
 			checkUserExists(restTemplate, "u2");
 			checkUserExists(restTemplate, "u3");
@@ -296,6 +299,16 @@ public class GameServiceClient {
 			
 		}
 		
+		public static BooleanResponse resetDB(RestTemplate rest, String username, String password) {
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            ResponseEntity<BooleanResponse> response = rest.exchange(
+                    GS_ENDPOINT+"/user/resetDB", HttpMethod.GET, 
+                    entity, BooleanResponse.class);
+            
+            BooleanResponse output = response.getBody();
+            System.out.println("user/resetDB returned " + output.isValue());
+            return output;
+        }
 		
 		public static GamePlaySummaryTO getGamePlaySummary(RestTemplate rest, Long gameId, String username, String password) {
             HttpEntity<String> entity = prepareJsonGet(username, password);
