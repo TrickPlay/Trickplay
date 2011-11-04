@@ -176,6 +176,8 @@ namespace JSON
 
         Map::size_type size() const;
 
+        void clear();
+
     private:
 
         Map map;
