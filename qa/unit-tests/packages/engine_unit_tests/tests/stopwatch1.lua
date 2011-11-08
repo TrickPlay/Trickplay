@@ -22,8 +22,8 @@ stopwatch:continue()
 -- Stop the stopwatch when the unit tests kicks off. elapsed should be over 2 seconds.
 function test_stopwatch_basic ()
 	stopwatch:stop()
-    assert_greater_than ( stopwatch.elapsed_seconds , 1, "stopwatch.elapsed_seconds failed" )
-    assert_greater_than ( stopwatch.elapsed , 2000, "stopwatch.elapsed failed" )
+    assert_greater_than ( stopwatch.elapsed_seconds , 1, "stopwatch.elapsed_seconds returned: "..stopwatch.elapsed_seconds.." Expected greater than 1" )
+    assert_greater_than ( stopwatch.elapsed , 2000,  "stopwatch.elapsed returned: "..stopwatch.elapsed.." Expected greater than 2000" )
 end
 
 
