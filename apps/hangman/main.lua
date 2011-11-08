@@ -76,8 +76,18 @@ function main()
         button_y = Image{ src = assets_path .. "general_menu/button-yellow.png"},
         button_b = Image{ src = assets_path .. "general_menu/button-blue.png"},
         button_f = Image{ src = assets_path .. "general_menu/button-focus.png"},
+        button = {
+            Image{ src = assets_path .. "general_menu/button1.png"},
+            Image{ src = assets_path .. "general_menu/button2.png"},
+            Image{ src = assets_path .. "general_menu/button3.png"},
+        },
         
         mm_focus  = Image{ src = assets_path .. "general_menu/focus-list.png"},
+        
+        --Main Menu
+        game_hist_bg  = Image{ src = assets_path.. "main menu/grave-score.png"      },
+        my_move_bg    = Image{ src = assets_path.. "main menu/grave-your-move.png"  },
+        their_move_bg = Image{ src = assets_path.. "main menu/grave-their-move.png" },
         
         --Guess a Word
         check      = Image{ src = assets_path .. "make or guess word/checkmark.png"},
@@ -104,7 +114,7 @@ function main()
         strikes_txt = Image{ src = assets_path .. "make or guess word/strikes.png"    },
     }
     
-    for k,v in pairs(img_srcs) do     clone_srcs:add(v)    end
+    for k,v in pairs(img_srcs) do   if type(v) == "table" then for kk,vv in pairs(v) do clone_srcs:add(vv) end else  clone_srcs:add(v) end  end
     
     ----------------------------------------------------------------------------
     -- DoFiles                                                                --
@@ -214,6 +224,7 @@ function main()
         
         make_list     = make_list,
         make_button   = make_button,
+        side_buttons = Side_Buttons,
         
         get_letters   = get_letters,
         letter_values = letter_values,
@@ -236,6 +247,7 @@ function main()
         
         make_list     = make_list,
         make_button   = make_button,
+        side_buttons = Side_Buttons,
         
         get_letters   = get_letters,
         letter_values = letter_values,
@@ -258,6 +270,7 @@ function main()
         img_srcs       = img_srcs,
         game_server    = gsm,
         front_page     = Main_Menu,
+        side_buttons = Side_Buttons,
         
         game_definition = hangman_game_definition,
         
@@ -269,7 +282,7 @@ function main()
     
     Main_Menu_Entry:init{
         logic       = Main_Menu,
-        box_w       = 400,
+        box_w       = 350,
         entry_h     = 48,
         score_limit = 3,
         guess_word  = Guess_Word_Buttons,
@@ -288,7 +301,8 @@ function main()
         make_word    = Make_Word_Buttons,
         game_server  = gsm,
         make_list    = make_list,
-        game_history = Game_History
+        game_history = Game_History,
+        img_srcs       = img_srcs,
     }
     
     --[[
@@ -326,6 +340,7 @@ function main()
     --]]
     Game_History:init{
         make_frame   = make_frame,
+        img_srcs       = img_srcs,
     }
     
     Clipped_List:init{

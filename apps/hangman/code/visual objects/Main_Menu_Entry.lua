@@ -57,17 +57,17 @@ function mme:make(sesh)
     local their_name = Text{
         text  = "Invite Pending",
         font  = g_font .. " Medium 28px",
-        color = "ffffff",
+        color = "a7a7a7",
         x     = 10,
         y     = 5,
     }
     
     local time_remaining = Text{
         text  = "",
-        font  = g_font .. " Medium 28px",
+        font  = g_font .. " Medium 20px",
         color = "aaaa00",
         x     = box_w - 10,
-        y     = 5,
+        y     = 15,
         on_text_changed = function(self)
             
             self.anchor_point = {self.w,0}
@@ -75,15 +75,22 @@ function mme:make(sesh)
         end,
     }
     
-    local whore_line = Rectangle{
+    local top_line = Rectangle{
         w = box_w-6,
         h = 2,
         x = 3,
-        y = entry_h - 2,
-        color = "ffffff",
+        y = -1,
+        color = "a7a7a7",
+    }
+    local btm_line = Rectangle{
+        w = box_w-6,
+        h = 2,
+        x = 3,
+        y = entry_h -1,
+        color = "a7a7a7",
     }
     
-    entry:add(their_name,whore_line,time_remaining)
+    entry:add(their_name,top_line,btm_line,time_remaining)
     
     
     --methods

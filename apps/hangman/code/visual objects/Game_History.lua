@@ -1,5 +1,5 @@
 
-local game_hist = Group{name = "Game History", x = 100, y = 750}
+local game_hist = Group{name = "Game History", x = 49, y = 756}
 
 local make_frame
 local loaded = false
@@ -110,23 +110,23 @@ function game_hist:init(t)
     if type(t) ~= "table" then error("must pass a table as the parameter",2) end
     
     make_frame        = t.make_frame        or error( "must pass make_frame",        2 )
-    box_w             = t.box_w             or 180
-    box_h             = t.box_h             or 275
+    box_w             = t.box_w             or 208
+    box_h             = t.box_h             or 324
     
-    local f = make_frame(0,0,box_w,box_h)
+    local f = Clone{source = t.img_srcs.game_hist_bg }
     
     wins = Text{
         text  = "",
         color = { 60,204, 72},
         font  = g_font .. " bold 48px",
         x     = box_w/2,
-        y     = box_h/5,
+        y     = box_h/4,
     }
     
     wins_caption = Text{
         text  = "Wins",
-        color = "ffffff",
-        font  = g_font .. " Medium 30px",
+        color = "a7a7a7",
+        font  = g_font .. " Medium 32px",
         x     = box_w/2,
         y     = box_h*2/5,
     }
@@ -136,15 +136,15 @@ function game_hist:init(t)
         color = {252,6,6},
         font  = g_font .. " bold 48px",
         x     = box_w/2,
-        y     = box_h/5 + box_h/2,
+        y     = box_h*3/5,
     }
     
     losses_caption = Text{
         text  = "Losses",
-        color = "ffffff",
-        font  = g_font .. " Medium 30px",
+        color = "a7a7a7",
+        font  = g_font .. " Medium 32px",
         x     = box_w/2,
-        y     = box_h*2/5 + box_h/2,
+        y     = losses.y+losses.h-20,
     }
     
     wins.anchor_point           = {           wins.w/2,           wins.h/2 }
