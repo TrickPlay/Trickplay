@@ -22,29 +22,85 @@ function self:init(t)
     ls            = t.ls           or error("must pass ls",            2)
     
     
-    self:add(  t.make_frame(400,750,400,275)  )
-    self:add(  t.make_frame(850,750,400,275)  )
+    self:add(  Clone{source=t.img_srcs.their_move_bg, x = 319, y= 675}  )
+    self:add(  Clone{source=t.img_srcs.my_move_bg,    x = 729, y= 675}  )
     
     self:add( Text{
         text = "Their Move",
         font = g_font .. " bold 35px",
-        color = "ffffff",
-        x     = 515,
-        y     = 700,
+        color = {0,0,0},
+        x     = 405-2,
+        y     = 720-2,
+    }, Text{
+        text = "Their Move",
+        font = g_font .. " bold 35px",
+        color = {167,167,167},
+        x     = 405,
+        y     = 720,
     })
     self:add( Text{
         text = "My Move",
         font = g_font .. " bold 35px",
-        color = "ffffff",
-        x     = 980,
-        y     = 700,
+        color = {0,0,0},
+        x     = 832-2,
+        y     = 720-2,
+    }, Text{
+        text = "My Move",
+        font = g_font .. " bold 35px",
+        color = {167,167,167},
+        x     = 832,
+        y     = 720,
     })
     --Components
-    their_turn_list = t.clipped_list:make{x = 400+2, y = 750+2, w = 400-4, h = 275-4, empty_string = "No Active Sessions", name = "'Their Turn'", on_focus = function(entry) entry_info.text = entry:status() end}
-    my_turn_list    = t.clipped_list:make{x = 850+2, y = 750+2, w = 400-4, h = 275-4, empty_string = "No Active Sessions", name = "'My Turn'",    on_focus = function(entry) entry_info.text = entry:status() end}
+    their_turn_list = t.clipped_list:make{
+        x = 319,
+        y = 780,
+        w = 350,
+        h = 270,
+        empty_string = "No Active Sessions",
+        name = "'Their Turn'",
+        on_focus = function(entry)
+            
+            if entry == nil then
+                
+                return false
+                
+            else
+                
+                entry_info.text = entry:status()
+                
+                return true
+                
+            end
+            
+        end
+    }
+    my_turn_list    = t.clipped_list:make{
+        x = 729,
+        y = 780,
+        w = 350,
+        h = 300,
+        empty_string = "No Active Sessions",
+        name = "'My Turn'",
+        on_focus = function(entry)
+            
+            if entry == nil then
+                
+                return false
+                
+            else
+                
+                entry_info.text = entry:status()
+                
+                return true
+                
+            end
+            
+        end
+    }
     side_buttons    = t.side_buttons:make{
         on_focus = function() entry_info.text = "" end,
-        x = 1300, y = 750, spacing = 20, buttons = {
+        x = 1120, y = 784, spacing = 874-784-66, buttons = {
             {name = "New Game", color = "r", select = function()
                     
                     print("New Game")
@@ -137,9 +193,9 @@ function self:init(t)
         resets_focus_to = 3,
     }
     
-    list_of_lists:define_key_event(keys.RED,    side_buttons.buttons[1].select)
-    list_of_lists:define_key_event(keys.GREEN,  side_buttons.buttons[2].select)
-    list_of_lists:define_key_event(keys.BLUE,   side_buttons.buttons[3].select)
+    --list_of_lists:define_key_event(keys.RED,    side_buttons.buttons[1].select)
+    --list_of_lists:define_key_event(keys.GREEN,  side_buttons.buttons[2].select)
+    --list_of_lists:define_key_event(keys.BLUE,   side_buttons.buttons[3].select)
     
     status = Text{
         x            = screen_w - 50,

@@ -82,7 +82,11 @@ function clipped_list:make(t)
                 
                 list:grab_key_focus()
                 
-                t.on_focus(list_data[curr_i])
+                if not t.on_focus(list_data[curr_i]) then
+                    
+                    print(curr_i.. "is a bad index")
+                    
+                end
                 
             end
             
@@ -150,7 +154,7 @@ function clipped_list:make(t)
     
     local move_hl = Timeline{
         
-        duration = 300,
+        duration = 200,
         
         on_completed = end_of_animation
         
@@ -210,7 +214,7 @@ function clipped_list:make(t)
                 table.insert(list_data,1,entry)
                 
                 entry:animate{
-                    duration = 200,
+                    duration = 100,
                     opacity  = 255,
                     on_completed = end_of_animation
                 }
@@ -227,7 +231,7 @@ function clipped_list:make(t)
                     
                 end
                 
-                curr_i = curr_i + 1
+                --curr_i = curr_i + 1
                 
                 if list_data[curr_i] == nil then curr_i = #list_data end
                 
@@ -629,7 +633,7 @@ function clipped_list:make(t)
                 move_hl.on_new_frame = on_new_frame_all
                 
                 clip_y.from = list.y-y
-                clip_y.to   = -entry_h*(top_vis_i-1)--clip.y - entry_h
+                clip_y.to   = -entry_h*(top_vis_i-1)-10--clip.y - entry_h
                 
                 if top_vis_i == 1 then
                 elseif (top_vis_i + vis_range - 1) == # list_data then
