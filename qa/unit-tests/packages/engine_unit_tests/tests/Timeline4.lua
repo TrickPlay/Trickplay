@@ -32,7 +32,7 @@ myTimeline:start()
 
 -- Verify that rewind is starting the timeline from 0 and is always less then 350.
 function test_Timeline_rewind ()
-    assert_less_than ( image1.x , 350,  "Returned: ", image1.x, " Expected: <350")
+    assert_less_than ( image1.x , 350,  "Returned: "..image1.x.." Expected: <350")
 end
 
 
