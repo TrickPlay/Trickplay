@@ -23,7 +23,7 @@
    <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>Trickplay Editor</string>
+   <string>Trickplay Visual Debugger</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
@@ -146,7 +146,7 @@
     <bool>false</bool>
    </property>
    <property name="windowTitle">
-    <string>Console</string>
+    <string>  Console</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>

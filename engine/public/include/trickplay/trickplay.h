@@ -266,6 +266,10 @@ typedef struct TPContext TPContext;
                                 a port will be chosen.
                                 Defaults to "0".
 
+    TP_START_DEBUGGER - 		If set to true, when trickplay launches an app, it will
+                                do so with the debugger started.
+                                Defaults to "0".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -317,6 +321,7 @@ typedef struct TPContext TPContext;
 #define TP_APP_ARGS						"app_args"
 #define TP_APP_ANIMATIONS_ENABLED		"app_animations_enabled"
 #define TP_DEBUGGER_PORT				"debugger_port"
+#define TP_START_DEBUGGER				"start_debugger"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects

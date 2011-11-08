@@ -11,6 +11,185 @@
 
 //.............................................................................
 
+#define TP_LOG_DOMAIN   "DEBUGGER"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      true
+
+#include "log.h"
+
+//.............................................................................
+
+class Debugger::Server
+{
+public:
+
+	Server( TPContext * context )
+	:
+		listener( g_socket_listener_new() ),
+		port( 0 ),
+		stream( 0 )
+	{
+		GError * error = 0;
+
+		port = context->get_int( TP_DEBUGGER_PORT , 0 );
+
+		if ( 0 == port )
+		{
+			port = g_socket_listener_add_any_inet_port( listener , 0 , & error );
+		}
+		else
+		{
+			g_socket_listener_add_inet_port( listener , port , 0 , & error );
+		}
+
+		if ( error )
+		{
+			port = 0;
+			tpwarn( "FAILED TO START SERVER : %s" , error->message );
+			g_clear_error( & error );
+		}
+		else
+		{
+			tpinfo( "READY ON PORT %u" , port );
+		}
+	}
+
+	static void destroy( gpointer me )
+	{
+		delete ( Server * ) me;
+	}
+
+	virtual bool wait_for_connection()
+	{
+		if ( 0 == port )
+		{
+			return false;
+		}
+
+		if ( 0 == stream )
+		{
+			// This will block forever waiting for a connection
+
+			tplog( "WAITING FOR REMOTE CONNECTION ON PORT %u" , port );
+
+			GSocketConnection * client = g_socket_listener_accept( listener , 0 , 0 , 0 );
+
+			tplog( "ACCEPTED CONNECTION" );
+
+			if ( client )
+			{
+				stream = g_data_input_stream_new( g_io_stream_get_input_stream( G_IO_STREAM( client ) ) );
+
+				if ( stream )
+				{
+					// We attach the client to the stream so that the former will get destroyed with the latter.
+
+					g_object_set_data_full( G_OBJECT( stream ) , "tp-socket-connection" , client , g_object_unref );
+				}
+				else
+				{
+					g_object_unref( client );
+				}
+			}
+		}
+
+		return 0 != stream;
+	}
+
+	virtual bool read_line( String & result )
+	{
+		if ( 0 == port || 0 == stream )
+		{
+			return false;
+		}
+
+		gsize length = 0;
+
+		char * line = g_data_input_stream_read_line( stream , & length , 0 , 0 );
+
+		if ( line )
+		{
+			if ( length > 1 )
+			{
+				result = String( line , length - 1 );
+			}
+
+			g_free( line );
+
+			return true;
+		}
+
+		tpwarn( "CLIENT DISCONNECTED" );
+
+		g_object_unref( stream );
+
+		stream = 0;
+
+		return false;
+	}
+
+	virtual bool write( const JSON::Object & obj )
+	{
+		if ( 0 == port || 0 == stream )
+		{
+			return false;
+		}
+
+		String line( obj.stringify() );
+
+		line += "\n";
+
+		GIOStream * iostream = G_IO_STREAM( g_object_get_data( G_OBJECT( stream ) , "tp-socket-connection" ) );
+
+		if ( 0 == iostream )
+		{
+			return false;
+		}
+
+		GOutputStream * os = g_io_stream_get_output_stream( iostream );
+
+		if ( 0 == os )
+		{
+			return false;
+		}
+
+		if ( ! g_output_stream_write_all( os , line.c_str() , line.size() , 0 , 0 , 0 ) )
+		{
+			g_object_unref( stream );
+
+			stream = 0;
+
+			return false;
+		}
+
+		return true;
+	}
+
+private:
+
+	virtual ~Server()
+	{
+		tplog( "CLOSING SERVER" );
+
+		if ( stream )
+		{
+			g_object_unref( stream );
+		}
+
+		g_object_unref( listener );
+	}
+
+	GSocketListener * 	listener;
+	guint16 			port;
+	GDataInputStream * 	stream;
+};
+
+//.............................................................................
+
+Debugger::Server * Debugger::server = 0;
+
+//.............................................................................
+
 Debugger::Debugger( App * _app )
 :
     app( _app ),
@@ -19,6 +198,15 @@ Debugger::Debugger( App * _app )
     tracing( false )
 {
     app->get_context()->add_console_command_handler( "debug", command_handler, this );
+
+    if ( 0 == server )
+    {
+    	server = new Debugger::Server( app->get_context() );
+
+		static char key = 0;
+
+		app->get_context()->add_internal( & key , server , Server::destroy );
+    }
 }
 
 //.............................................................................
@@ -192,6 +380,84 @@ void Debugger::break_next_line()
 
 //.............................................................................
 
+JSON::Array Debugger::get_back_trace( lua_State * L , lua_Debug * ar )
+{
+	JSON::Array array;
+
+    lua_Debug stack;
+
+    for( int i = 0; lua_getstack( L , i, & stack ); ++i )
+    {
+        if ( lua_getinfo( L, "nSl", & stack ) )
+        {
+            String source;
+
+            if ( g_str_has_prefix( stack.source, "@" ) )
+            {
+                gchar * basename = g_path_get_basename( stack.source + 1 );
+
+                source = basename;
+
+                g_free( basename );
+            }
+            else
+            {
+                source = ar->source;
+            }
+
+            JSON::Object & frame( array.append<JSON::Object>() );
+
+            frame[ "file" ] = source;
+            frame[ "line" ] = stack.currentline;
+
+            if ( stack.name && stack.namewhat )
+            {
+            	frame[ "name" ] = stack.name;
+            	frame[ "type" ] = stack.namewhat;
+            }
+        }
+    }
+
+    return array;
+}
+
+//.............................................................................
+
+JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
+{
+	JSON::Array array;
+
+    for( int i = 1; ; ++i )
+    {
+        const char * name = lua_getlocal( L , ar , i );
+
+        if ( ! name )
+        {
+            break;
+        }
+
+        JSON::Object & local( array.append<JSON::Object>() );
+
+		local[ "type"  ] = lua_typename( L , lua_type( L , -1 ) );
+
+		const char * value = lua_tostring( L , -1 );
+
+
+		local[ "name"  ] = name;
+
+		if ( value )
+		{
+			local[ "value" ] = value;
+		}
+
+		lua_pop( L , 1 );
+    }
+
+    return array;
+}
+
+//.............................................................................
+
 void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 {
     bool should_break = tracing;
@@ -201,11 +467,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     switch( ar->event )
     {
         case LUA_HOOKCALL:
-            break;
-
         case LUA_HOOKRET:
-            break;
-
         case LUA_HOOKTAILRET:
             break;
 
@@ -237,6 +499,9 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
         return;
     }
 
+	//.....................................................................
+    // Disable the console, because it interferes with stdin
+
     Console * console = app->get_context()->get_console();
 
     if ( console )
@@ -244,7 +509,8 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
         console->disable();
     }
 
-    // Print where we are
+	//.....................................................................
+    // Figure out where we are
 
     String source;
 
@@ -265,9 +531,9 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
         source = ar->source;
     }
 
-    std::cout << source << ":" << ar->currentline;
+#if 0
 
-    if ( lines && tracing )
+	if ( lines && tracing )
     {
     	if ( ( ar->currentline - 1 ) >= 0 && ( ar->currentline - 1 ) < int( lines->size() ) )
     	{
@@ -275,7 +541,6 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     	}
     }
 
-    std::cout << std::endl;
 
     if ( lines && ! tracing )
 	{
@@ -286,8 +551,9 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 		{
 			std::cout << ( ( i == ar->currentline ) ? ">" : " " ) << (*lines)[i-1] << std::endl;
 		}
-
 	}
+
+#endif
 
     while ( true )
     {
@@ -296,58 +562,70 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     		break;
     	}
 
-        std::cout << "(debug) ";
+    	tpinfo( "BREAK AT %s:%d" , source.c_str() , ar->currentline );
+
+    	//.....................................................................
+    	// Wait for a client to connect
+
+        if ( ! server->wait_for_connection() )
+        {
+        	break;
+        }
+
+    	//.....................................................................
+        // Tell the client where we are - this is a cue to the client that
+        // we will be waiting for its response.
+
+        JSON::Object response;
+
+        response[ "type"   ] = "break";
+        response[ "file"   ] = source;
+        response[ "line"   ] = ar->currentline;
+        response[ "stack"  ] = get_back_trace( L , ar );
+        response[ "locals" ] = get_locals( L , ar );
+
+        if ( ! server->write( response ) )
+        {
+        	continue;
+        }
+
+    	//.....................................................................
+        // Now wait for the client to respond. If something goes wrong, the
+        // client is disconnected and we wait for a new connection.
 
         String command;
 
-        std::getline( std::cin, command );
-
-        // Show backtrace
-
-        if ( command == "bt")
+        if ( ! server->read_line( command ) )
         {
-            lua_Debug stack;
+        	// The client disconnected, we go back to waiting for a connection
 
-            for( int i = 0; lua_getstack( L , i, & stack ); ++i )
-            {
-                if ( lua_getinfo( L, "nSl", & stack ) )
-                {
-                    String source;
-
-                    if ( g_str_has_prefix( stack.source, "@" ) )
-                    {
-                        gchar * basename = g_path_get_basename( stack.source + 1 );
-
-                        source = basename;
-
-                        g_free( basename );
-                    }
-                    else
-                    {
-                        source = ar->source;
-                    }
-
-                    std::cout << i << ") " << source << ":" << stack.currentline;
-
-                    if ( stack.name && stack.namewhat )
-                    {
-                        std::cout << " " << stack.name << " (" << stack.namewhat << ")";
-                    }
-
-                    std::cout << std::endl;
-                }
-            }
+        	continue;
         }
 
+    	//.....................................................................
+        // The client sent an empty command, do nothing.
+
+        if ( command.empty() )
+        {
+        	continue;
+        }
+
+    	//.....................................................................
+        // Reset our response object
+
+        response.clear();
+
+    	//.....................................................................
         // Quit
 
-        else if ( command == "q" )
+        if ( command == "q" )
         {
             tp_context_quit( app->get_context() );
             break_next = false;
             break;
         }
 
+    	//.....................................................................
         // Continue
 
         else if ( command == "c" )
@@ -356,6 +634,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
             break;
         }
 
+    	//.....................................................................
         // Step or next
 
         else if ( command == "s" || command == "n" )
@@ -364,38 +643,15 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
             break;
         }
 
-        // Print out locals
 
-        else if ( command == "l" )
-        {
-            std::cout << "Locals:" << std::endl;
-
-            for( int i = 1; ; ++i )
-            {
-                const char * name = lua_getlocal( L, ar, i );
-
-                if ( ! name )
-                {
-                    break;
-                }
-                else
-                {
-                    const char * value = lua_tostring( L , -1 );
-
-                    if ( value )
-                    {
-                        std::cout << name << " = " << value << std::endl;
-                    }
-
-                    lua_pop( L , 1 );
-                }
-            }
-        }
+#if 0
 
         else if ( command == "t" )
         {
-        	tracing = true;
+        	// tracing = true;
         }
+
+#endif
 
         // Run some Lua
 
@@ -417,6 +673,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
             }
         }
 
+#if 0
         // Help
 
         else if ( command == "help" || command == "h" || command == "?" )
@@ -441,6 +698,13 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
         {
             handle_command( command.c_str() );
         }
+#endif
+
+        if ( response.size() > 0 )
+        {
+        	server->write( response );
+        }
+
     }
 
     if ( console )
@@ -478,3 +742,5 @@ StringVector * Debugger::load_source_file( const char * file_name )
 
 	return & lines;
 }
+
+
