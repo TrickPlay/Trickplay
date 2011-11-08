@@ -404,7 +404,7 @@
     
     pushingAppViewController = YES;
     if (viewController == tvBrowserViewController) {
-        [tvBrowserViewController.tvBrowser startSearchForServices];
+        //[tvBrowserViewController.tvBrowser startSearchForServices];
     } else if (viewController == appBrowserViewController) {
         [appBrowserViewController refresh];
     } else {
@@ -421,6 +421,10 @@
 
 - (void)tpAppViewController:(TPAppViewController *)tpAppViewController wantsToPresentCamera:(UIViewController *)camera {
     [self presentModalViewController:camera animated:YES];
+}
+
+- (void)tpAppViewControllerWillAppear:(TPAppViewController *)tpAppViewController {
+    
 }
 
 #pragma mark -

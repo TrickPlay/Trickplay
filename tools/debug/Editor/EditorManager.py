@@ -63,10 +63,26 @@ class EditorManager(QWidget):
     def save(self):
         editor = self.app.focusWidget()
         if isinstance(editor, Editor):
-            editor.save()
-            #editor.save(self.statusBar())
+			currentText = open(editor.path).read()
+			index = self.tab.currentIndex()
+			if self.tab.textBefores[index] != currentText:
+				if editor.text_status == 2: #TEXT_CHANGED
+					msg = QMessageBox()
+					msg.setText('The file "' + editor.path + '" changed on disk.')
+					msg.setInformativeText('If you save it external changes could be lost.')
+					msg.setStandardButtons(QMessageBox.Save | QMessageBox.Cancel)
+					msg.setDefaultButton(QMessageBox.Cancel)
+					msg.setWindowTitle("Warning")
+					ret = msg.exec_()
+
+					if ret == QMessageBox.Save:
+						self.tab.textBefores[index] = editor.text()
+						editor.text_status = 1 #TEXT_READ
+						editor.save()
+					else:
+						return None
+			editor.save()
         else:
-        	#self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
         	print 'Failed to save because no text editor is currently selected.'                
 
     def newEditor(self, path, tabGroup = None):
@@ -96,13 +112,13 @@ class EditorManager(QWidget):
         # If the file is already open, just use the open document
         if self.editors.has_key(path):
             for k in self.editors:
-				if not k in self.tab.tabs:
+				if not k in self.tab.paths:
 					closedTab = k
 
             if closedTab != None:
         		self.editors.pop(closedTab)
-        		for k in self.tab.tabs:
-					self.editors[k][1] = self.tab.tabs.index(k) 
+        		for k in self.tab.paths:
+					self.editors[k][1] = self.tab.paths.index(k) 
 
         		editor.readFile(path)
 
@@ -114,17 +130,20 @@ class EditorManager(QWidget):
         else:
             editor.readFile(path)
         
+        if not self.editors.has_key(path):
+            self.tab.paths.append(path)
+            self.tab.textBefores.append(editor.text())
+            self.tab.editors.append(editor)
+
         index = self.editorGroups[tabGroup].addTab(editor, name)
 
-        
         if not self.editors.has_key(path):
             self.editors[path] = [editor, index]
-            self.tab.tabs.append(path)
         
         self.editorGroups[tabGroup].setCurrentIndex(index)
         editor.setFocus()
         editor.path = path
-        
+
     def dropFileEvent(self, event, src, w = None):
         """
         Accept a file either by dragging onto the editor dock or into one of the
