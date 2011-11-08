@@ -25,6 +25,7 @@ IF( PKG_CONFIG_FOUND )
     pkg_check_modules(GIO_UNIX      REQUIRED    gio-unix-2.0)
     pkg_check_modules(CAIRO         REQUIRED    cairo)
     pkg_check_modules(PANGO         REQUIRED    pango)
+    pkg_check_modules(COGL                      cogl-1.0)
     pkg_check_modules(CLUTTER       REQUIRED    clutter-1.0)
     pkg_check_modules(FONTCONFIG    REQUIRED    fontconfig)
     pkg_check_modules(FREETYPE2     REQUIRED    freetype2)
@@ -55,6 +56,7 @@ IF( PKG_CONFIG_FOUND )
         ${GIO_UNIX_INCLUDE_DIRS}
         ${CAIRO_INCLUDE_DIRS}
         ${PANGO_INCLUDE_DIRS}
+        ${COGL_INCLUDE_DIRS}
         ${CLUTTER_INCLUDE_DIRS}
         ${FONTCONFIG_INCLUDE_DIRS}
         ${FREETYPE2_INCLUDE_DIRS}
@@ -77,6 +79,7 @@ IF( PKG_CONFIG_FOUND )
         ${GIO_UNIX_LIBRARIES}
         ${CAIRO_LIBRARIES}
         ${PANGO_LIBRARIES}
+        ${COGL_LIBRARIES}
         ${CLUTTER_LIBRARIES}
         ${FONTCONFIG_LIBRARIES}
         ${FREETYPE2_LIBRARIES}
@@ -93,6 +96,7 @@ IF( PKG_CONFIG_FOUND )
         ${EXIF_LIBRARIES}
     )
 
+
 ELSE ( PKG_CONFIG_FOUND )
 
     TP_FIND_INCLUDE( curl/curl.h                            ENGINE_INCLUDE_DIRS )
@@ -102,6 +106,7 @@ ELSE ( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( cairo cairo.h                          ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( pango-1.0 pango/pango.h                ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h          ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( cogl-1.0 cogl/cogl.h                   ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( fontconfig fontconfig/fontconfig.h     ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( freetype2 freetype/freetype.h          ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( png.h                                  ENGINE_INCLUDE_DIRS )
@@ -162,7 +167,7 @@ ELSE ( PKG_CONFIG_FOUND )
 
         if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-            list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 clutter-glx-1.0 )
+            list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 clutter-glx-1.0 cogl )
 
         else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
