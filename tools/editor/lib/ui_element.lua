@@ -2473,7 +2473,7 @@ function ui_element.toastAlert(t)
      end  
 
      function tb_group_timeline.on_completed()
-		tb_group.scale = {0.8, 0.8}
+		tb_group.scale = {1.0, 1.0} 
 		tb_group.opacity = 255
 		tb_group:hide()
      end 
@@ -4243,6 +4243,7 @@ function ui_element.layoutManager(t)
         cells_focusable = false, --focus_visible
         skin="Custom",
         cell_size="fixed",
+		variable_cell_size = false, 
  		ui_position = {200,100},
     }
     
@@ -4261,7 +4262,8 @@ function ui_element.layoutManager(t)
     local col_ws = {}
 	
     local x_y_from_index = function(r,c)
-        if p.cell_size == "fixed" then
+        --if p.cell_size == "fixed" then
+        if p.variable_cell_size == false then
 		    return (p.cell_width+p.cell_spacing_width)*(c-1)+p.cell_width/2,
 		           (p.cell_height+p.cell_spacing_height)*(r-1)+p.cell_height/2
         end
@@ -4406,7 +4408,8 @@ function ui_element.layoutManager(t)
             r_c_from_abs_position = function(self,x,y)
                 x = x - self.transformed_position[1]/screen.scale[1]
                 y = y - self.transformed_position[2]/screen.scale[2]
-                if p.cell_size == "fixed" then
+                --if p.cell_size == "fixed" then
+                if p.variable_cell_size == false then
 	        	    return math.floor(x/(p.cell_width+p.cell_spacing_width))+1,
                            math.floor(y/(p.cell_height+p.cell_spacing_height))+1
                 end
@@ -4426,7 +4429,8 @@ function ui_element.layoutManager(t)
                 return  r,c
 	        end,
             cell_x_y_w_h = function(self,r,c)
-                if p.cell_size == "fixed" then
+                --if p.cell_size == "fixed" then
+                if p.variable_cell_size == false then
                     
                     return  (p.cell_width+p.cell_spacing_width)*(c-1),
                             (p.cell_height+p.cell_spacing_height)*(r-1),
@@ -4488,7 +4492,8 @@ function ui_element.layoutManager(t)
         focus_i[1] = 1
         focus_i[2] = 1
         
-        if p.cell_size == "variable" then
+        --if p.cell_size == "variable" then
+        if p.variable_cell_size == true then
             for r = 1, p.rows  do
                 for c = 1, p.columns do
                     if p.cells[r]    == nil then break end
@@ -4511,7 +4516,8 @@ function ui_element.layoutManager(t)
             end
 			for c = 1, p.columns do
                 if p.cells[r][c] == nil then
-                    if p.cell_size == "variable" then
+                    --if p.cell_size == "variable" then
+                    if p.variable_cell_size == true then
 						key = string.format("cell:%d:%d",col_ws[c] or p.cell_width, row_hs[r] or p.cell_height) 
 
                         cell = assets(key, my_make_tile, col_ws[c] or p.cell_width, row_hs[r] or p.cell_height)
@@ -6106,15 +6112,15 @@ button
                 elseif p.show_ring then
                     key = string.format("item_ring:%d, %d", p.menu_width-2*p.horz_spacing,txt.h+10)
                     ui_ele = assets (
-			key, 
-			my_make_item_ring, 
-			p.menu_width-2*p.horz_spacing+7*2,
-			txt.h+10,
-			7
+						key, 
+						my_make_item_ring, 
+						p.menu_width-2*p.horz_spacing+7*2,
+						txt.h+10,
+						7
                     )
                     --ui_ele = make_item_ring (p.menu_width-2*p.horz_spacing,txt.h+10,7)
-                    ui_ele.anchor_point = { ui_ele.w/2,     ui_ele.h/2 }
-                    ui_ele.position     = { p.menu_width/2, 	   txt.y }
+                    ui_ele.anchor_point = { ui_ele.w/2, ui_ele.h/2 }
+                    ui_ele.position     = { p.menu_width/2, txt.y }
                     dropDownMenu:add(ui_ele)
                     if editor_lb == nil or editor_use then  
                         function ui_ele:on_button_down()
@@ -6405,6 +6411,8 @@ function ui_element.tabBar(t)
 		arrow_dist_to_frame = 5,
 
 		ui_position = {200,200},
+		ui_width = 150,
+		ui_height = 60, 
     }
     
 	local offset = {}
@@ -6557,6 +6565,10 @@ function ui_element.tabBar(t)
         }
         
         umbrella:add(bg)
+
+		-- added these two lines for selected rectangle of contents
+		p.ui_width = p.button_width
+		p.ui_height = p.button_height
 
         for i = 1, #p.tab_labels do
             
@@ -6876,16 +6888,16 @@ function ui_element.arrowPane(t)
 		virtual_width =    1000,
         arrow_size  =      15,
 		
-		scroll_distance      = 10,
+		scroll_distance     = 10,
         arrow_dist_to_frame = 5,
-        arrows_visible =   true,
-        arrow_color       = {160,160,160,255},
-        focus_arrow_color = {160,255,160,255},
-        box_color         = {160,160,160,255},
-        focus_box_color   = {160,255,160,255},
-        box_border_width =    2,
-        skin = "Custom",
-		ui_position = {200,100},
+        arrows_visible 		= true,
+        arrow_color       	= {160,160,160,255},
+        focus_arrow_color 	= {160,255,160,255},
+        box_color         	= {160,160,160,255},
+        focus_box_color   	= {160,255,160,255},
+        box_border_width 	= 2,
+        skin 				= "Custom",
+		ui_position 		= {200,100},
 		--------------------------
 		tab = nil, 
 		tab_buttons = nil 

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.domain.Device;
@@ -12,22 +11,19 @@ import com.trickplay.gameservice.domain.Role;
 import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.domain.Vendor;
 
-@PreAuthorize("hasRole('ROLE_ANONYMOUS') or hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
 public interface UserService {
 
 	@PostFilter("filterObject.username == principal.username or hasRole('ROLE_ADMIN')")
 	public List<User> findAll();
 
 //	@PreAuthorize("principal.username == #username or hasRole('ROLE_ADMIN')")
-	public User findByName(String username, boolean detached);
+	//public User findByName(String username, boolean detached);
 	
 	public User findByName(String username);
 
-	//TODO: role anonymous should not be allowed to create users maybe ????
-
-	@PreFilter("filterObject.username == principal.username")
+	@PreAuthorize("isAuthenticated()")
 	@Transactional
-	public void merge(User entity);
+	public void update(User entity);
 
 	public User find(Long id);
 	
@@ -36,9 +32,10 @@ public interface UserService {
 	
 	public Role findRole(String rolename);
 	
-	public Device registerDevice(Device device);
+	@PreAuthorize("isAuthenticated()")
+	public Device registerDevice(Device device);	
 	
-	
+	@PreAuthorize("isAuthenticated()")
 	@Transactional
 	public Vendor createVendor(String vendorName);
 	

@@ -28,8 +28,8 @@ test_group:add(myText_no_markup)
 
 
 function test_Text_use_markup ()
-    assert_equal( myText_markup.use_markup , true, "use market ~= true" )
-    assert_false( myText_no_markup.use_markup , "use market ~= false" )
+    assert_equal( myText_markup.use_markup , true, "myText_markup.use_markup returned: ", myText_markup.use_markup, " Expected: true")
+    assert_false( myText_no_markup.use_markup , "myText_no_markup.use_markup returned: ", myText_no_markup.use_markup, " Expected: false")
 end
 
 

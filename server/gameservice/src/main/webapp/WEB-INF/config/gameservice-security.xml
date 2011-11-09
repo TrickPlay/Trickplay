@@ -43,12 +43,23 @@
 		<property name="password" value="admin" />
 	</bean>
 
-
+<!-- 
+            <security:filter-chain pattern="/rest/**"
+                filters="
+                securityContextPersistenceFilterWithASCFalse,
+                rememberMeFilter,
+                logoutFilter,
+                basicAuthenticationFilter,
+                anonymousAuthenticationFilter,
+                basicExceptionTranslationFilter,
+                filterSecurityInterceptor" />
+                 -->
 	<bean id="springSecurityFilterChain" class="org.springframework.security.web.FilterChainProxy">
 		<security:filter-chain-map path-type="ant">
 			<security:filter-chain pattern="/rest/**"
 				filters="
 				securityContextPersistenceFilterWithASCFalse,
+				logoutFilter,
 				basicAuthenticationFilter,
 				anonymousAuthenticationFilter,
 				basicExceptionTranslationFilter,
@@ -66,6 +77,21 @@
 		</security:filter-chain-map>
 	</bean>
 
+    <bean id="rememberMeFilter"
+        class="org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter">
+        <property name="rememberMeServices" ref="tpRememberMeServices" />
+        <property name="authenticationManager" ref="authenticationManager" />
+    </bean>
+    
+	<bean id="tpRememberMeServices"
+		class="com.trickplay.gameservice.security.GameServiceSessionTokenService">
+		<property name="userDetailsService" ref="tpUserDetailsService" />
+		<property name="tokenValiditySeconds" value="3600" />
+		<property name="key" value="notUsed" />
+		<property name="alwaysRemember" value="true" />
+		<property name="cookieName" value="TP-GAMESERVICE-SESSION-ID" />
+	</bean>
+	
 	<!-- Don't seem to be able to create one without session?? -->
 	<bean id="securityContextPersistenceFilterWithASCFalse"
 		class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
@@ -140,11 +166,12 @@
 		class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
 		<property name="authenticationEntryPoint" ref="basicAuthenticationEntryPoint" />
+		<property name="rememberMeServices" ref="tpRememberMeServices" />
 	</bean>
 
 	<bean id="basicAuthenticationEntryPoint"
 		class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
-		<property name="realmName" value="trickplay.com" />
+		<property name="realmName" value="gameservice.trickplay.com" />
 	</bean>
 
 	<bean id="basicExceptionTranslationFilter"
@@ -182,27 +209,29 @@
 		<property name="accessDecisionManager" ref="accessDecisionManager" />
 
 		<property name="securityMetadataSource">
-			<security:filter-security-metadata-source>
+			<security:filter-security-metadata-source use-expressions="true">
 				<security:intercept-url pattern="/images/**"
-					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					access="permitAll()" />
 				<security:intercept-url pattern="/resources/**"
-					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					access="permitAll()" />
 				<security:intercept-url pattern="/styles/**"
-					access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					access="permitAll()" />
 				<security:intercept-url pattern="/rest/user"
-					method="POST" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_ADMIN" />
+					method="POST" access="hasAnyRole('ROLE_ANONYMOUS','ROLE_ADMIN')" />
+				<security:intercept-url pattern="/rest/user/exists"
+					method="GET" access="permitAll()" />
 				<security:intercept-url pattern="/user"
-					method="POST" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_ADMIN" />
+					method="POST" access="hasAnyRole('ROLE_ANONYMOUS','ROLE_ADMIN')" />
 				<security:intercept-url pattern="/user/form"
-					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					method="GET" access="permitAll()" />
 				<security:intercept-url pattern="/login.jsp"
-					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					method="GET" access="permitAll()" />
 				<security:intercept-url pattern="/index.jsp"
-					method="GET" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER,ROLE_ADMIN" />
+					method="GET" access="permitAll()" />
 				<security:intercept-url pattern="/rest/**"
-					access="ROLE_USER,ROLE_ADMIN" />
+					access="isAuthenticated()" />
 				<security:intercept-url pattern="/**"
-					access="ROLE_USER,ROLE_ADMIN" />
+					access="isAuthenticated()" />
 			</security:filter-security-metadata-source>
 		</property>
 	</bean>
@@ -214,6 +243,7 @@
 			<list>
 				<ref bean="roleVoter" />
 				<ref bean="authenticatedVoter" />
+				<bean class="org.springframework.security.web.access.expression.WebExpressionVoter"/>
 			</list>
 		</property>
 	</bean>

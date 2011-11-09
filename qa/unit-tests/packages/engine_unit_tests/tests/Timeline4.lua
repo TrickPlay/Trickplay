@@ -13,9 +13,8 @@ test_group:add (image1)
 
 
 local myTimeline = Timeline ()
-local on_completed_called = false
 local frameCount = 0
-myTimeline.duration = 2000
+myTimeline.duration = 200
 myTimeline.loop = true
 
 myTimeline.on_new_frame = function (self, timeline_ms, progress) 
@@ -33,7 +32,7 @@ myTimeline:start()
 
 -- Verify that rewind is starting the timeline from 0 and is always less then 350.
 function test_Timeline_rewind ()
-    assert_less_than ( image1.x , 350,  "timeline.rewind not restarting" )
+    assert_less_than ( image1.x , 350,  "Returned: "..image1.x.." Expected: <350")
 end
 
 

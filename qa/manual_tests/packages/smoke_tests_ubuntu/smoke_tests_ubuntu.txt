@@ -20,7 +20,7 @@
 "active": "true"
 },
 {
-"name": "0006_animator_position.lua", 
+"name": "0006_animator_x_y.lua", 
 "active": "true"
 }
 ,
@@ -38,6 +38,126 @@
 },
 {
 "name": "0010_animator_state_position.lua", 
+"active": "true"
+},
+{
+"name": "0011_animator_position.lua", 
+"active": "true"
+},
+{
+"name": "0012_animator_opacity.lua", 
+"active": "true"
+},
+{
+"name": "0013_animator_color.lua", 
+"active": "true"
+},
+{
+"name": "0014_animator_reverse.lua", 
+"active": "true"
+},
+{
+"name": "0015_animator_pause.lua", 
+"active": "true"
+},
+{
+"name": "0016_animator_rewind.lua", 
+"active": "true"
+},
+{
+"name": "0017_animator_skip.lua", 
+"active": "true"
+},
+{
+"name": "0018_animator_stop.lua", 
+"active": "true"
+},
+{
+"name": "0019_animator_markers.lua", 
+"active": "true"
+},
+{
+"name": "0020_animator_state_x_y_z.lua", 
+"active": "true"
+},
+{
+"name": "0021_animator_state_opacity.lua", 
+"active": "true"
+},
+{
+"name": "0022_animator_state_size.lua", 
+"active": "true"
+},
+{
+"name": "0023_animator_state_scale.lua", 
+"active": "true"
+},
+{
+"name": "0024_animator_state_rotation.lua", 
+"active": "true"
+},
+{
+"name": "0025_animator_state_color.lua", 
+"active": "true"
+},
+{
+"name": "0026_animator_state_depth.lua", 
+"active": "true"
+},
+{
+"name": "0027_animator_state_predelay.lua", 
+"active": "true"
+},
+{
+"name": "0028_animator_state_postdelay.lua", 
+"active": "true"
+},
+{
+"name": "0029_localization.lua", 
+"active": "true"
+},
+{
+"name": "0030_localization.lua", 
+"active": "true"
+},
+{
+"name": "0031_alpha_cubic.lua", 
+"active": "true"
+},
+{
+"name": "0032_alpha_quad.lua", 
+"active": "true"
+},
+{
+"name": "0033_alpha_quint.lua", 
+"active": "true"
+},
+{
+"name": "0034_alpha_sine.lua", 
+"active": "true"
+},
+{
+"name": "0035_alpha_expo.lua", 
+"active": "true"
+},
+{
+"name": "0036_alpha_circ.lua", 
+"active": "true"
+},
+{
+"name": "0037_alpha_elastic.lua", 
+"active": "true"
+},
+{
+"name": "0038_alpha_back.lua", 
+"active": "true"
+},
+{
+"name": "0039_alpha_bounce.lua", 
+"active": "true"
+},
+{
+"name": "0040_alpha_quart.lua", 
 "active": "true"
 }
 ]

@@ -3,6 +3,7 @@
 
 //-----------------------------------------------------------------------------
 #include "trickplay/audio-sampler.h"
+#include "trickplay/resource.h"
 #include "common.h"
 #include "notify.h"
 #include "mediaplayers.h"
@@ -71,9 +72,9 @@ public:
     //.........................................................................
     // Getting context configuration variables
 
-    const char * get( const char * key, const char * def = NULL , bool default_if_empty = false );
-    bool get_bool( const char * key, bool def = false );
-    int get_int( const char * key, int def = 0 );
+    const char * get( const char * key, const char * def = NULL , bool default_if_empty = false ) const;
+    bool get_bool( const char * key, bool def = false ) const;
+    int get_int( const char * key, int def = 0 ) const;
 
     //.........................................................................
     // Console command handlers
@@ -193,6 +194,11 @@ public:
 
     void audio_detection_match( const gchar * json );
 
+    //.........................................................................
+    // Get a resource loader
+
+    bool get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const;
+
 private:
 
     TPContext();
@@ -263,6 +269,10 @@ private:
     static void log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self );
 
     //.........................................................................
+    // Resource readers
+    void set_resource_loader( unsigned int resource_type , TPResourceLoader loader , void * user_data );
+
+    //.........................................................................
     // Request handlers
 
     void set_request_handler( const char * subject, TPRequestHandler handler, void * data );
@@ -286,6 +296,7 @@ private:
     friend void tp_context_set_request_handler( TPContext * context, const char * subject, TPRequestHandler handler, void * data );
     friend void tp_context_add_console_command_handler( TPContext * context, const char * command, TPConsoleCommandHandler handler, void * data );
     friend void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void * data );
+    friend void tp_context_set_resource_loader( TPContext * context, unsigned int type, TPResourceLoader loader, void * data);
     friend void tp_context_key_event( TPContext * context, const char * key );
     friend int tp_context_run( TPContext * context );
     friend void tp_context_quit( TPContext * context );
@@ -368,9 +379,11 @@ private:
     typedef std::map<gpointer,InternalPair>                     InternalMap;
 
     InternalMap                                                 internals;
+    
+    typedef std::pair<TPResourceLoader,void *>					ResourceLoaderClosure;
+    typedef std::map<unsigned int, ResourceLoaderClosure> 		ResourceLoaderMap;
+    
+    ResourceLoaderMap                                           resource_loaders;
 };
-
-
-
 
 #endif // _TICKPLAY_CONTEXT_H

@@ -24,7 +24,7 @@ image1:animate{duration=6000, loop=true, x=500, y=500,}
 -- Verify that animation was stopped.
 function test_UIElement_image_complete_animation ()
 	image1:complete_animation()
-	assert_false(image1.is_animating, "image1.is_animating ~= false")
+	assert_false(image1.is_animating, "image1.is_animating returned: ", image1.is_animating, " Expected: false")
 end
 
 

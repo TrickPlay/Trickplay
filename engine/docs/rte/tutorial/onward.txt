@@ -1,0 +1,8 @@
+Topic: Onward and Outward
+
+The Tutorial application is now complete.
+
+At this point, you have a good foundation for creating your own TrickPlay applications. To build upon this foundation further, you can browse through the <TrickPlay SDK Engine Reference> which contains detailed information about all the classes, properties and functions provided by the TrickPlay SDK libraries. Good starting points in the Reference would be the <Animation Overview> and <User Interface Overview> sections.
+
+Good luck.
+

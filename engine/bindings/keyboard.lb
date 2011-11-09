@@ -4,13 +4,142 @@
 ]]
 /*
     Global: keyboard
+    
+    The keyboard global variable provides a simple method to display a form and accept user input.
+    
+    Some sample forms are shown below. The form on the left shows a standard text field being edited with the on-screen keyboard. The form on the right enables the field's setting to be selected from a list of possible settings.
 
-    The keyboard lets you bring up an on-screen-keyboard, so that
-    users may enter data using their remote control.
+(see keyboard.png)
 
-    Unlike most on-screen-keyboards, this one has built-in form
-    functionality, so your app can pass it an entire form for the
-    user to fill in.
+	*Basic Operation*
+	
+	A form is defined by specifying its fields. Afterward, it is displayed by calling the keyboard variable's <show> function. The user can fill in the form by using the remote control and the form's on-screen keyboard. Upon completion, the user can exit the form by pressing either the Cancel button or the Submit button. If Cancel is pressed, the keyboard variable's <on_cancel> event handler is called. If Submit is pressed, the <on_submit> handler is invoked. Whenever the current field's value changes, the program receives notification via the keyboard variable's <on_field_changed> event handler.
+
+	*Defining a Form*
+	
+	A form is a Lua table of fields. Each field is itself another Lua table. A field table consists of properties and settings. A property's setting is always a string, so it must be surrounded by single or double quotation marks. The order the fields are defined in the form is the order they will be displayed.
+	
+	Every form must have the following fields.
+	
+	id - a unique string identifying the field, such as "A", "1", "Name", etc.
+	caption - label displayed before the field. It cannot be an empty string.
+	
+	Some simple forms are shown below.
+	
+	(code)
+	-- Form with one field
+	minimalForm  = { { id = "01", caption = "Name" } }
+	
+	-- Form with two fields
+	expandedForm = { { id = "01", caption = "Name" },
+	                 { id = "02", caption = "Address" }
+	               }
+	(end)
+
+	A form may also include the following optional fields.
+	
+	type - the field's type. Supported types are described below. The default type is "text".
+	value - the field's starting value specified as a string. The default starting value is an empty field.
+	placeholder - a string displayed in the field area of the on-screen keyboard when the field is empty. The placeholder can be used to suggest to the user the kind of input expected, such as "Enter a number between 1-10". The placeholder field applies to fields of type "text" and "password" only. A field's default placeholder is an empty string.
+
+	The supported field types are described below.
+	
+    "text" - a standard text field. An on-screen keyboard is displayed beneath the form. The user can enter input by using the remote control. If no field type is explicitly defined, the field defaults to a type of "text".
+    "password" - same as a Text field, but all input characters are displayed as ASCII 0xB7 (centered dot) characters, by default. The displayed password character can be redefined by the password_char property described below.
+    "list" - a field whose value is selected from a list of possible values. The field's possible values are defined in a table called "choices". If a field is of type "list", it must define a choices table. When a field of type "list" becomes active, the list of possible values is displayed beneath the form. The user can use the remote control to select a value from the list.
+    
+    A field of type "password" can specify the character displayed for each input character by defining the password_char property.
+    
+    password_char - character to display for each input character. The character should be surrounded by single or double quotation marks.
+    
+    A field of type "list" must define a choices table. Each entry in the choices table is another table that defines one possible value for the field. The list of possible values are shown in the order they are defined in the choices table. Each possible value must specify the following two strings.
+    
+    id - a unique string identifying the choice. This ID string must be unique within the choices table containing it; an ID used in one choices table may be used again in a different choices table. If the field specifies a starting value in the value property, the starting value should reference an ID from the choices table.
+    choice - a possible value for the field. This string is shown in the field's list of possible values.
+
+    A sample form using various field types is defined below.
+    
+    (code)
+    sampleForm = { 
+	    -- Define a standard text field where the user enters his name    
+    	{ id          = "01", 
+    	  caption     = "Name:", 
+    	  placeholder = "Enter your user name",
+        },
+    
+    	-- Define a password field; use an asterisk as the password char
+    	{ id            = "02", 
+    	  caption       = "Password:", 
+    	  type          = "password", 
+    	  password_char = "*", 
+    	  placeholder   = "Enter a password",
+        },
+    	
+    	-- Define a list field, including possible values
+    	{ id      = "03", 
+    	  caption = "Access Type:", 
+    	  type    = "list",
+    	  choices = {
+    	  	  { "01", "Global access" },
+    	  	  { "02", "Local access" },
+    	  	  { "03", "Temporary access" },
+    	  	  { "04", "Private access" },
+    	  	  { "05", "VIP access" },
+    	  },
+    	  value   = "05"  -- Make "VIP access" the starting value
+    	},
+    }
+    (end)
+	
+	*Processing a Form*
+		
+	To display the form and get user input, pass the form to the keyboard's show() function.
+	
+	(code)
+	keyboard:show( sampleForm )
+	(end)
+	
+	For the program to receive notifications whenever a field's value has changed, it can hook into the <on_field_changed> event handler. An example hook function is shown below.
+	
+	(code)
+	-- Define the event handler
+	function hookOnFieldChanged( keybrd, id, value )
+		-- Output a message to the TrickPlay Console
+		print( "Field ID:", id, ", New Value:", value )
+	end
+	
+	-- Attach handler to keyboard variable
+	keyboard.on_field_changed = hookOnFieldChanged
+	(end)
+	
+	For the program to receive notification when the user exits the form by pressing the Cancel button, it can hook into the <on_cancel> event handler, as shown below.
+	
+	(code)
+	-- Define the event handler
+	function hookOnCancel( keybrd )
+		print( "User cancelled the form" )
+	end
+	
+	-- Attach handler to keyboard variable
+	keyboard.on_cancel = hookOnCancel
+	(end)
+	
+	For the program to receive notification when the user exits the form by pressing the Submit button, it can hook into the <on_submit> event handler.
+	
+	(code)
+	-- Define the event handler
+	function hookOnSubmit( keybrd, results )
+		-- Print the final settings of each field
+		print( "User accepted the form" )
+		for id, setting in pairs( results ) do
+			print( "Field ID:", id, ", Setting:", setting )
+		end
+	end
+	
+	-- Attach handler to keyboard variable
+	keyboard.on_submit = hookOnSubmit
+	(end)
+
 */
 
 global keyboard [[ void * ]]
@@ -23,107 +152,17 @@ global keyboard [[ void * ]]
     /*
         Function: show
 
-        To use the keyboard, you first prepare a form and then call
-        the keyboard's show function.
-
-        *Form:*
-
-        A form is a Lua table of fields. The keyboard displays the fields in the order that they
-        are provided.
-
-        Each field is a Lua table with some pre-defined properties.
-
-        There are only two mandatory properties for each field, its id and its caption.
-        The id of a field should be a unique string. It will never be displayed to the user;
-        it is only used in the <on_submit> event as the key for the resulting value.
-
-        The caption of a field is the name for the field that is shown to the user, it cannot
-        be empty.
-
-        *A very simple form would look like this:*
-
-        (code)
-        {
-            { id = "A" , caption = "Name" }
-        }
-        (end)
-
-        This form has a single field, with the id "A" and the caption "Name".
-
-        *Optional Field Properties:*
-
-        placeholder -   If provided, this string is shown to the user when the field
-                        is empty, to provide a hint as to what is expected.
-
-        value -         If you wish to provide an initial value for the field, use
-                        the value property.
-
-        type -          This is the type of field. If this property is omitted or not
-                        recognized, the field will be a standard text entry field.
-                        Only two other types of fields are recognized: "list" and "password".
-
-        *Password Fields:*
-
-        If the field type is "password", the user will be able to edit it just like any
-        other text field, but the characters entered by the user will be masked by a password
-        character.
-
-        password_char - This property lets you change the default character that is used to
-                        mask the text entered by the user.
-
-        *List Fields:*
-
-        List fields let the user choose the value for a field from a list of choices that you
-        provide. Therefore, if you set the type to "list", you must also provide the choices.
-
-        choices -   This is a Lua table of Lua tables. Each inner table should have two items, an
-                    identifier for the choice and the caption for the choice that is shown to
-                    the user. The choices are displayed in the order you provide them.
-
-        When using a list field, the field value should always be the id of a valid choice,
-        not its caption.
-
-        For example, this is how you chould let the user choose a state, with "Alaska" set
-        as the existing value,
-
-        (code)
-        local form =
-        {
-            {
-                id = "STATE",
-                caption = "State",
-                type = "list",
-                value = "AK",
-                choices =
-                {
-                    { "AL" , "Alabama" },
-                    { "AK" , "Alaska" },
-                    { "AS" , "American Samoa" },
-                    -- etc...
-                }
-            }
-        }
-
-        keyboard:show( form )
-        (end)
-
-
-        The keyboard can only be dismissed by the user, by pressing either the
-        'Cancel' or 'Submit' button. If the user presses 'Cancel', you will get
-        the <on_cancel> event with no results.
-
-        If the user presses 'Submit', you will get the <on_submit> event with a table
-        of results. This table has the field id as the key and the text that the
-        user typed in as the value.
+		The show() function displays a form and accepts user input.
+		
+		Refer to the discussion at the beginning of this page for complete information about processing forms with the keyboard variable.
 
         *Arguments:*
 
-            form - A table of form fields as described above.
+            form - A table of fields
 
-        *Return Values:*
+        *Return Value:* Boolean flag indicating the success or failure of presenting the form (true=success)
 
-            true - If the keyboard was shown, or
-            false - if there was a problem with the form.
+		*See Also:* the <on_cancel> and <on_submit> event handlers
     */
 
     bool show( table form )
@@ -132,49 +171,71 @@ global keyboard [[ void * ]]
         ]];
 
     /*
-        Event: on_field_changed
-
-        As the user edits a field, this event lets you know its current value.
+        Event Handler: on_field_changed
+        
+        The on_field_changed() event handler notifies the program whenever a field's value changes.
+        
+        *Prototype:*
+        
+        	(code)
+        	void on_field_changed( keyboard, id, value )
+        	(end)
 
         *Arguments:*
 
-            keyboard - The keyboard.
+            keyboard - the keyboard global variable
+            id - string id of the changed field
+            value - field's current string value. For fields of type "list", the value will be the string ID of the possible value contained within the field's choices table.
 
-            id - The id of the field that has changed.
-
-            value - The new value of the field. If it is a list field, this will be the id of
-                    one of the choices.
+		*Return Value:* None
+		
+		*See Also:* the <on_cancel> and <on_submit> event handlers
     */
 
-    callback on_field_changed( Keyboard keyboard , string id , string value );
+    callback on_field_changed( Keyboard keyboard, string id, string value );
 
     /*
-        Event: on_cancel
+        Event Handler: on_cancel
 
-        This event lets you know that the user canceled the keyboard, and it will be hidden soon.
-
-        *Arguments:*
-
-            keyboard - The keyboard.
+		The on_cancel() event handler notifies the program that the user has pressed the form's Cancel button.
+		
+		*Prototype:*
+		
+			(code)
+			void on_cancel( keyboard )
+			(end)
+		
+		*Arguments:*
+		
+			keyboard - the keyboard global variable
+			
+		*Return Value:* None
+		
+		*See Also:* the <on_submit> event handler
     */
 
     callback on_cancel( Keyboard keyboard );
 
     /*
-        Event: on_submit
-
-        This event happens when the user presses the 'Submit' button on the keyboard.
-
+        Event Handler: on_submit
+        
+        The on_submit() event handler notifies the program that the user has pressed the form's Submit button.
+        
+        *Prototype:*
+        
+        	(code)
+        	void on_submit( keyboard, results )
+        	(end)
+        
         *Arguments:*
+        
+        	keyboard - the keyboard global variable
+        	results - table of key-value pairs for each field in the form. The key will contain the field's string ID and the value will contain the field's final string setting. For fields of type "list," the value will be the string ID of a possible value contained in the field's choices table. For any blank field, the value will be an empty string.
 
-        keyboard - The keyboard.
-
-        results - A table of results. This table will contain a key-value pair for
-                  each field in the form. The key will be field's id and its value
-                  will be the value entered by the user. For list fields, the value
-                  will be the id of one of the choices. If a field is blank, this table
-                  will contain an entry for it, and the value will be an empty string.
+		*Return Value:* None
+		
+		*See Also:* the <on_cancel> event handler
     */
 
-    callback on_submit( Keyboard keyboard , table results );
+    callback on_submit( Keyboard keyboard, table results );
 }

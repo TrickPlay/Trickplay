@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
+import com.trickplay.gameservice.dao.EventDAO;
 import com.trickplay.gameservice.domain.Event;
 import com.trickplay.gameservice.domain.Event.EventType;
 import com.trickplay.gameservice.domain.EventSelectionCriteria;
@@ -19,9 +22,19 @@ import com.trickplay.gameservice.service.EventCollector;
 import com.trickplay.gameservice.service.EventService;
 
 @Service("eventService")
-@Repository
-public class EventServiceImpl extends GenericDAOWithJPA<Event, Long> implements
+public class EventServiceImpl implements
 		EventService {
+    
+    private EntityManager entityManager;
+    
+    @Autowired
+    private EventDAO eventDAO;
+    
+    @PersistenceContext
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
 
 	private class BuddyListInvitationEventsCollector implements EventCollector {
 		public List<Event> collect(Long requestorId) {
@@ -298,5 +311,10 @@ public class EventServiceImpl extends GenericDAOWithJPA<Event, Long> implements
 		}
 
 	}
+
+	@Transactional
+    public void create(Event entity) {
+        eventDAO.persist(entity);
+    }
 
 }

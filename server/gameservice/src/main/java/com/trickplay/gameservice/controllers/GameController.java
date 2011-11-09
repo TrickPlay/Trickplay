@@ -30,7 +30,6 @@ import com.trickplay.gameservice.service.LeaderboardService;
 import com.trickplay.gameservice.service.VendorService;
 import com.trickplay.gameservice.transferObj.GameRequestTO;
 import com.trickplay.gameservice.transferObj.GameTO;
-import com.trickplay.gameservice.transferObj.ScoreFilterTO;
 import com.trickplay.gameservice.transferObj.ScoreFilterTO.ScoreType;
 import com.trickplay.gameservice.transferObj.ScoreListTO;
 import com.trickplay.gameservice.transferObj.ScoreRequestTO;
@@ -91,7 +90,20 @@ public class GameController extends BaseController {
 		return "game/list";
 	}
 
-	@RequestMapping(value = {"/vendor/{vid}/game", "/rest/vendor/{vid}/game"}, method = RequestMethod.GET)
+	@RequestMapping(value = {"/rest/game/exists"}, method = RequestMethod.GET)
+    public @ResponseBody GameTO checkGameExists(@RequestParam(value="name", required=true) String name) {
+        Game g = null;
+	    if (null != (g = gameService.findByName(name)))
+            return new GameTO(g);
+        else {
+            GameTO to = new GameTO();
+            to.setName(name);
+            return to;
+        }
+    }
+
+
+    @RequestMapping(value = {"/vendor/{vid}/game", "/rest/vendor/{vid}/game"}, method = RequestMethod.GET)
 	public String getVendorGames(@PathVariable("vid") Long vid, Model model) {
 		Vendor v = vendorService.find(vid);
 		model.addAttribute("games", toGameTO(v.getGames()));

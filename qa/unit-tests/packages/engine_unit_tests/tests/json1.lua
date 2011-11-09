@@ -23,12 +23,12 @@ local j = json:parse("[null]")
 
 -- Verify that a table converted to a json object and then back to a table matches the original
 function test_globals_json_parse_stringify ()
-    assert_equal( new_table[1] , "blue" , "json conversion failed" )
-    assert_equal( new_table[2][1] , "green" , "json conversion failed" )
-    assert_equal( new_table[2][2] , "red" , "json conversion failed" )
-    assert_equal( new_table[2][3] , "yellow" , "json conversion failed" )
-    assert_equal( new_table[3] , "aqua" , "json conversion failed" )
-    assert_equal( new_table[4] , "purple" , "json conversion failed" )
+    assert_equal( new_table[1] , "blue", "Returned: "..new_table[1].." Expected: blue" )
+    assert_equal( new_table[2][1] , "green",  "Returned: "..new_table[2][1].." Expected: green" )
+    assert_equal( new_table[2][2] , "red" ,  "Returned: "..new_table[2][2].." Expected: red" )
+    assert_equal( new_table[2][3] , "yellow" , "Returned: "..new_table[2][3].." Expected: yellow" )
+    assert_equal( new_table[3] , "aqua" ,  "Returned: "..new_table[3].." Expected: aqua" )
+    assert_equal( new_table[4] , "purple" ,  "Returned: "..new_table[4].." Expected: purple" )
 end
 
 function test_globals_jason_null ()

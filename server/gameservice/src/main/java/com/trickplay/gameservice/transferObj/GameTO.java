@@ -12,6 +12,8 @@ public class GameTO {
 	private int maxPlayers=1;
 	private boolean leaderboardFlag=true;
 	private boolean achievementsFlag=true;
+	private boolean turnBasedFlag = false;
+	private boolean allowWildCardInvitation=false;
 	
 	public GameTO() {
 		
@@ -19,7 +21,8 @@ public class GameTO {
 		
 	public GameTO(Long id, String name, String appId, Long vendorId,
 			String vendorName, int minPlayers, int maxPlayers,
-			boolean leaderboardFlag, boolean achievementsFlag) {
+			boolean leaderboardFlag, boolean achievementsFlag, 
+			boolean turnBasedFlag, boolean allowWildCardInvitation) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -30,6 +33,8 @@ public class GameTO {
 		this.maxPlayers = maxPlayers;
 		this.leaderboardFlag = leaderboardFlag;
 		this.achievementsFlag = achievementsFlag;
+		this.turnBasedFlag = turnBasedFlag;
+		this.allowWildCardInvitation = allowWildCardInvitation;
 	}
 
 	public GameTO(Game game) {
@@ -44,6 +49,8 @@ public class GameTO {
 		maxPlayers = game.getMaxPlayers();
 		leaderboardFlag = game.isLeaderboardFlag();
 		achievementsFlag = game.isAchievementsFlag();
+		turnBasedFlag = game.isTurnBasedFlag();
+		allowWildCardInvitation = game.isAllowWildCardInvitation();
 	}
 
 	public String getVendorName() {
@@ -55,10 +62,11 @@ public class GameTO {
 	}
 
 	public Game toGame() {
-		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag);
+		return new Game(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag, 
+				turnBasedFlag, allowWildCardInvitation);
 	}
 	
-	public String getName() {
+    public String getName() {
 		return name;
 	}
 
@@ -121,5 +129,21 @@ public class GameTO {
 	public Long getId() {
 		return id;
 	}
+
+	public boolean isTurnBasedFlag() {
+		return turnBasedFlag;
+	}
+
+	public void setTurnBasedFlag(boolean turnBasedFlag) {
+		this.turnBasedFlag = turnBasedFlag;
+	}
 	
+	public boolean isAllowWildCardInvitation() {
+        return allowWildCardInvitation;
+    }
+
+    public void setAllowWildCardInvitation(boolean allowWildCardInvitation) {
+        this.allowWildCardInvitation = allowWildCardInvitation;
+    }
+
 }

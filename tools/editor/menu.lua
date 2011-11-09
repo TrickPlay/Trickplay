@@ -53,7 +53,8 @@ menuButton_file.insert_item(3,{type="item", string="Save", bg=assets("assets/men
 menuButton_file.insert_item(4,{type="item", string="Save As...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=editor.save, parameter=false,  icon=Text{text="A"}})
 menuButton_file.insert_item(5,{type="item", string="New Project...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=project_mng.new_project, icon=Text{text="F"}})
 menuButton_file.insert_item(6,{type="item", string="Open Project...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=project_mng.open_project, parameter=false,  icon=Text{text="P"}})
-menuButton_file.insert_item(7,{type="item", string="Quit", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=function() if editor.close(nil,exit) == nil then exit() end end, icon=Text{text="Q"}})
+menuButton_file.insert_item(7,{type="item", string="Open Debugger...", bg=assets("assets/menu-item.png"), focus= assets("assets/menu-item-focus.png"), f=project_mng.open_debugger, icon=Text{text="K"}})
+menuButton_file.insert_item(8,{type="item", string="Quit", bg=assets("assets/menu-item-bottom.png"), focus= assets("assets/menu-item-bottom-focus.png"), f=function() if editor.close(nil,exit) == nil then exit() end end, icon=Text{text="Q"}})
 
 menuButton_file.name = "menuButton_file"
 menuButton_file.anchor_point = {71,30.5}
