@@ -52,9 +52,18 @@ HttpServer::RequestHandler::~RequestHandler()
 
 //=============================================================================
 
-HttpServer::HttpServer( guint16 port ) : server( NULL )
+HttpServer::HttpServer( guint16 port , GMainContext * context )
+:
+	server( NULL )
 {
-	server = soup_server_new( SOUP_SERVER_PORT, port , NULL );
+	if ( context )
+    {
+        server = soup_server_new( SOUP_SERVER_PORT, port , SOUP_SERVER_ASYNC_CONTEXT , context , NULL );
+    }
+    else
+    {
+        server = soup_server_new( SOUP_SERVER_PORT, port , NULL );
+    }
 
 	if ( ! server )
 	{
@@ -62,9 +71,12 @@ HttpServer::HttpServer( guint16 port ) : server( NULL )
 	}
 	else
 	{
-	    tplog( "READY ON PORT %u" , soup_server_get_port( server ) );
+		if ( ! context )
+		{
+			tplog( "READY ON PORT %u" , soup_server_get_port( server ) );
 
-	    soup_server_run_async( server );
+			soup_server_run_async( server );
+		}
 	}
 }
 
@@ -124,10 +136,33 @@ void HttpServer::unregister_handler( const String & path )
     tplog2( "REMOVED HANDLER FOR %s" , path.c_str() );
 }
 
+//-----------------------------------------------------------------------------
+
+void HttpServer::run()
+{
+	if ( server )
+	{
+		soup_server_run( server );
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void HttpServer::quit()
+{
+	if ( server )
+	{
+		soup_server_quit( server );
+	}
+}
+
 //=============================================================================
 
-struct HttpMessageContext
+class HttpMessageContext : public RefCounted
 {
+
+public:
+
 	SoupServer * server;
 	SoupMessage * message;
 	String path;
@@ -142,7 +177,30 @@ struct HttpMessageContext
 	    query( q ),
 	    client( c )
 	{
+		g_object_ref( server );
+		g_object_ref( message );
+		if ( query )
+		{
+			g_hash_table_ref( query );
+		}
 
+		tplog2( "CREATED HTTP MESSAGE CONTEXT %p" , this );
+	}
+
+protected:
+
+	virtual ~HttpMessageContext()
+	{
+		g_object_unref( message );
+
+		if ( query )
+		{
+			g_hash_table_unref( query );
+		}
+
+		g_object_unref( server );
+
+		tplog2( "DESTROYED HTTP MESSAGE CONTEXT %p" , this );
 	}
 };
 
@@ -196,6 +254,16 @@ public:
 	    message_context( ctx ),
 	    body( ctx->message->request_body )
 	{
+		message_context->ref();
+
+		tplog2( "CREATED HTTP REQUEST %p" , this );
+	}
+
+	~HttpRequest()
+	{
+		message_context->unref();
+
+		tplog2( "DESTROYED HTTP REQUEST %p" , this );
 	}
 
 	Method get_method( ) const
@@ -413,21 +481,21 @@ class StreamBody : public HttpServer::Response::StreamBody
 {
 public:
 
-    StreamBody( const HttpMessageContext & _ctx , HttpServer::Response::StreamWriter * _stream_writer )
+    StreamBody( HttpMessageContext * _ctx , HttpServer::Response::StreamWriter * _stream_writer )
     :
         ctx( _ctx ),
         stream_writer( _stream_writer )
     {
-        g_assert( ctx.message );
+        g_assert( ctx->message );
         g_assert( stream_writer );
 
-        g_object_ref( ctx.message );
+        ctx->ref();
 
-        soup_message_body_set_accumulate( ctx.message->response_body , FALSE );
+        soup_message_body_set_accumulate( ctx->message->response_body , FALSE );
 
-        wrote_headers_handler = g_signal_connect( ctx.message , "wrote_headers", G_CALLBACK( message_wrote_chunk ) , this );
-        wrote_chunk_handler = g_signal_connect( ctx.message , "wrote_chunk", G_CALLBACK( message_wrote_chunk ) , this );
-        finished_handler = g_signal_connect( ctx.message , "finished", G_CALLBACK( message_finished ) , this );
+        wrote_headers_handler = g_signal_connect( ctx->message , "wrote_headers", G_CALLBACK( message_wrote_chunk ) , this );
+        wrote_chunk_handler = g_signal_connect( ctx->message , "wrote_chunk", G_CALLBACK( message_wrote_chunk ) , this );
+        finished_handler = g_signal_connect( ctx->message , "finished", G_CALLBACK( message_finished ) , this );
 
         tplog2( "CREATED RESPONSE BODY %p" , this );
     }
@@ -436,17 +504,17 @@ public:
     {
         if ( wrote_headers_handler )
         {
-            g_signal_handler_disconnect( ctx.message , wrote_headers_handler );
+            g_signal_handler_disconnect( ctx->message , wrote_headers_handler );
         }
 
         if ( wrote_chunk_handler )
         {
-            g_signal_handler_disconnect( ctx.message , wrote_chunk_handler );
+            g_signal_handler_disconnect( ctx->message , wrote_chunk_handler );
         }
 
-        g_signal_handler_disconnect( ctx.message , finished_handler );
+        g_signal_handler_disconnect( ctx->message , finished_handler );
 
-        g_object_unref( ctx.message );
+        ctx->unref();
 
         delete stream_writer;
 
@@ -460,17 +528,17 @@ public:
 
         tplog2( "RESPONSE BODY %p APPEND %" G_GSIZE_FORMAT " b" , this , size );
 
-        soup_message_body_append( ctx.message->response_body , SOUP_MEMORY_COPY , data , size );
+        soup_message_body_append( ctx->message->response_body , SOUP_MEMORY_COPY , data , size );
     }
 
     void complete()
     {
         tplog2( "RESPONSE BODY %p COMPLETE" , this );
 
-        soup_message_body_complete( ctx.message->response_body );
+        soup_message_body_complete( ctx->message->response_body );
 
-        g_signal_handler_disconnect( ctx.message , wrote_headers_handler );
-        g_signal_handler_disconnect( ctx.message , wrote_chunk_handler );
+        g_signal_handler_disconnect( ctx->message , wrote_headers_handler );
+        g_signal_handler_disconnect( ctx->message , wrote_chunk_handler );
 
         wrote_headers_handler = 0;
         wrote_chunk_handler = 0;
@@ -480,7 +548,7 @@ public:
     {
         tplog2( "RESPONSE BODY %p CANCEL" , this );
 
-        soup_socket_disconnect( soup_client_context_get_socket( ctx.client ) );
+        soup_socket_disconnect( soup_client_context_get_socket( ctx->client ) );
     }
 
 
@@ -499,7 +567,7 @@ private:
         delete self;
     }
 
-    HttpMessageContext                      ctx;
+    HttpMessageContext *                    ctx;
     HttpServer::Response::StreamWriter *    stream_writer;
 
     gulong                                  wrote_headers_handler;
@@ -574,6 +642,9 @@ public:
 	:
 	    message_context( ctx )
 	{
+		message_context->ref();
+
+		tplog2( "CREATED HTTP RESPONSE %p" , this );
 	}
 
 	void set_header( const String& name, const String& value )
@@ -635,7 +706,7 @@ public:
 
     void set_stream_writer( StreamWriter * stream_writer )
     {
-        new ::StreamBody( * message_context , stream_writer );
+        new ::StreamBody( message_context , stream_writer );
     }
 
     virtual bool respond_with_file_contents( const String & file_name , const String & content_type )
@@ -678,12 +749,37 @@ public:
 
         set_status( HttpServer::HTTP_STATUS_OK );
 
-        new ::StreamBody( * message_context , new FileStreamWriter( file ) );
+        new ::StreamBody( message_context , new FileStreamWriter( file ) );
 
         g_object_unref( file );
 
         return true;
     }
+
+    Response * pause()
+    {
+    	soup_server_pause_message( message_context->server , message_context->message );
+
+    	ref();
+
+    	return this;
+    }
+
+    void resume()
+    {
+    	soup_server_unpause_message( message_context->server , message_context->message );
+
+    	unref();
+    }
+
+protected:
+
+	virtual ~HttpResponse()
+	{
+		message_context->unref();
+
+		tplog2( "DESTROYED HTTP RESPONSE %p" , this );
+	}
 
 };
 
@@ -704,31 +800,36 @@ void HttpServer::soup_server_callback(
 
     HandlerUserData * ud = ( HandlerUserData * ) user_data;
 
-    HttpMessageContext message_context( server , msg , path , query , client );
+    HttpMessageContext * message_context = new HttpMessageContext( server , msg , path , query , client );
 
-    HttpRequest request( & message_context );
-    HttpResponse response( & message_context );
+    HttpRequest request( message_context );
+
+    HttpResponse * response = new HttpResponse( message_context );
 
     if ( msg->method == SOUP_METHOD_GET )
     {
-        ud->handler->handle_http_get( request , response );
+        ud->handler->handle_http_get( request , * response );
     }
     else if ( msg->method == SOUP_METHOD_POST )
     {
-        ud->handler->handle_http_post( request , response );
+        ud->handler->handle_http_post( request , * response );
     }
     else if ( msg->method == SOUP_METHOD_PUT )
     {
-        ud->handler->handle_http_put( request , response );
+        ud->handler->handle_http_put( request , * response );
     }
     else if ( msg->method ==  SOUP_METHOD_HEAD )
     {
-        ud->handler->handle_http_head( request , response );
+        ud->handler->handle_http_head( request , * response );
     }
     else if ( msg->method ==  SOUP_METHOD_DELETE )
     {
-        ud->handler->handle_http_delete( request , response );
+        ud->handler->handle_http_delete( request , * response );
     }
 
     tplog( ">> %u %s" , msg->status_code , msg->reason_phrase );
+
+    message_context->unref();
+
+    response->unref();
 }
