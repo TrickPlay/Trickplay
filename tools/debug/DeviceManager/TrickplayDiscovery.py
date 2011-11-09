@@ -41,47 +41,9 @@ class TrickplayDiscovery(ServiceDiscovery):
         self.inspector.clearTree()
         
         print(index,address,port)
-        
-        # This is the local device
-        if index == 0:
-            print('Local device selected')
-            CON.port = port
-            CON.address = address
-            return
-        
-        # Echo client program
-        # http://docs.python.org/release/2.5.2/lib/socket-example.html
-        
-        s = None
-        for res in socket.getaddrinfo(address, port, socket.AF_UNSPEC, socket.SOCK_STREAM):
-            
-            af, socktype, proto, canonname, sa = res
-            try:
-                s = socket.socket(af, socktype, proto)
-            except socket.error, msg:
-                s = None
-                continue
-            
-            try:
-                s.connect(sa)
-            except socket.error, msg:
-                s.close()
-                s = None
-                continue
-            break
-        
-        if s is None:
-            print 'could not open socket'
-        else:
-            s.send('ID\t40\tDEBUGGER\n')
-            data = s.recv(1024)
-            s.close()
-            msg = data.rstrip().split('\t')
-                
-            print 'Received', repr(msg)
-            
-            CON.port = msg[2]
-            CON.address = address
+
+        CON.port = port
+        CON.address = address
         
     def new_service(
         self,

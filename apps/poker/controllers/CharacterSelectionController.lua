@@ -108,6 +108,25 @@ function(ctrl, router, ...)
         return true
     end
 
+    function ctrl:delete_player(player)
+        player.controller = nil
+        ctrl.number_of_players = ctrl.number_of_players - 1
+
+        mediaplayer:play_sound(BUSTOUT_WAV)
+
+        if ctrl.number_of_players < 2 then
+            ctrl:hide_start_button()
+        end
+        player.marked_for_deletion = true
+        ctrlman:update_choose_dog(player)
+        ctrlman:update_waiting_room(player)
+        dog_selectors[player.dog_number].dog_view:reset()
+        dog_selectors[player.dog_number].seat_button_view:reset()
+        find_next_dog(player.dog_number)
+        players[player.dog_number] = nil
+        player:dealloc()
+    end
+
 --------------- Here lies the model for the ui ------------------
     
     local help_button_selector = {
@@ -278,6 +297,14 @@ function(ctrl, router, ...)
 
     function ctrl:add_controller(controller)
         controller:choose_dog(players)
+    end
+
+    function ctrl:on_controller_disconnected(controller)
+        for _,player in pairs(players) do
+            if player.controller == controller then
+                ctrl:delete_player(player)
+            end
+        end
     end
 
     function ctrl:handle_click(controller, x, y)

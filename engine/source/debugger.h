@@ -2,6 +2,7 @@
 #define _TRICKPLAY_DEBUGGER_H
 
 #include "common.h"
+#include "json.h"
 
 class App;
 
@@ -31,6 +32,10 @@ private:
 
     StringVector * load_source_file( const char * file_name );
 
+    JSON::Array get_back_trace( lua_State * L , lua_Debug * ar );
+
+    JSON::Array get_locals( lua_State * L , lua_Debug * ar );
+
     App *           app;
     bool            installed;
 
@@ -47,6 +52,10 @@ private:
     typedef std::map< String , StringVector > SourceMap;
 
     SourceMap		source;
+
+    class Server;
+
+    static Server *		server;
 };
 
 #endif // _TRICKPLAY_DEBUGGER_H

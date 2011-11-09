@@ -23,15 +23,15 @@ test_group:add(rect1)
 
 -- Verify the rectangle setters.
 function test_Rectangle_setters ()
-	assert_equal(rect1.border_width, 3 , "rectangle.border_width failed")
-	assert_equal(rect1.border_color[1], 136 , "rectangle.border_color failed")
-	assert_equal(rect1.border_color[2], 255 , "rectangle.border_color failed")
-	assert_equal(rect1.border_color[3], 255 , "rectangle.border_color failed")
-	assert_equal(rect1.border_color[4], 255 , "rectangle.border_color failed")
-	assert_equal(rect1.color[1],  153 , "rectangle.color failed")
-	assert_equal(rect1.color[2],  51 , "rectangle.color failed")
-	assert_equal(rect1.color[3],  85 , "rectangle.color failed")
-	assert_equal(rect1.color[4],  255 , "rectangle.color failed")
+	assert_equal(rect1.border_width, 3 , "Result: ", rect1.border_width, " Expected: 3" )
+	assert_equal(rect1.border_color[1], 136 , "Result: ", rect1.border_color[1], " Expected: 136" )
+	assert_equal(rect1.border_color[2], 255 , "Result: ", rect1.border_color[2], " Expected: 255" )
+	assert_equal(rect1.border_color[3], 255 , "Result: ", rect1.border_color[3], " Expected: 255" )
+	assert_equal(rect1.border_color[4], 255 , "Result: ", rect1.border_color[4], " Expected: 255" )
+	assert_equal(rect1.color[1],  153 , "Result: ", rect1.color[1], " Expected: 153" )
+	assert_equal(rect1.color[2],  51 , "Result: ", rect1.color[2], " Expected: 51" )
+	assert_equal(rect1.color[3],  85 , "Result: ", rect1.color[3], " Expected: 85" )
+	assert_equal(rect1.color[4],  255 , "Result: ", rect1.color[4], " Expected: 255" )
 end
 
 

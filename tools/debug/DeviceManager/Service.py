@@ -7,6 +7,7 @@ try:
     import gobject
     import avahi
     import dbus
+    import gtk
     import avahi.ServiceTypeDatabase
 except ImportError, e:
     print 'A required python module is missing!\n%s' % e
@@ -29,7 +30,6 @@ class ServiceTypeDatabase:
             return self.pretty_name[type]
         else:
             return type
-
 
 class ServiceDiscovery:
 
@@ -233,7 +233,8 @@ class ServiceDiscovery:
         self.interface = avahi.IF_UNSPEC
         self.protocol = avahi.PROTO_INET
 
-        service_type = '_tp-remote._tcp'
+        #service_type = '_tp-remote._tcp'
+        service_type = '_trickplay-http._tcp'
         self.add_service_type(self.interface, self.protocol,
                               service_type, self.domain)
 

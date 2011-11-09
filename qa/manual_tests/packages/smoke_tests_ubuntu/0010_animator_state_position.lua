@@ -34,7 +34,7 @@ function generate_test_image ()
 	screen:add (end_rect)
 
 
-	state1 = AnimationState {
+	local state1 = AnimationState {
 	duration  = 5000, 
 	transitions = {
 	{

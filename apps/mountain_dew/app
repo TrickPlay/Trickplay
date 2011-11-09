@@ -1,6 +1,6 @@
 app=
 {
-    id          = "com.trickplay.mountain_dew",
+    id          = "com.trickplay.mountain-dew",
     release     = "2",
     version     = "0.2",
     name        = "Mountain Dew",
