@@ -258,7 +258,7 @@ local function main()
                     
                     e:update_coll_box()
                     
-                    if not Max.hit and not e.harmless and collided(Max,e) then
+                    if not Max.hit and not e.harmless and not e.pooped_on and collided(Max,e) then
                         
                         Max:recieve_impact(-1200,-1200)
                         
