@@ -290,7 +290,7 @@ class Text [[ClutterActor*]] actor
 
 		The wrap_mode property specifies the type of text wrapping to perform.
 		
-		By default, text wrapping is disabled. To enable wrapping, set the <UIElement.width> property. To display multiple lines of text, the <UIElement.height> property should also be set to an appropriate value.  Note: After wrapping is enabled, it cannot be disabled.
+		By default, text wrapping is disabled. To enable wrapping, set the <UIElement.width> property. To display multiple lines of text, the <UIElement.height> property should also be set to an appropriate value. To disable wrapping after it has been enabled, set the width property to -1.
 		
 		*Supported wrap_mode Settings:* The wrap_mode settings are case-sensitive.
 		
