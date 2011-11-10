@@ -912,13 +912,17 @@ function controllers.on_controller_connected(controllers,controller)
     	controller:start_accelerometer("L",0.01)
     end
 
+    local tracking_finger = nil
     if(controller.has_touches) then
         function controller.on_touch_down(controller, finger, x, y)
+            if tracking_finger then return end
+            tracking_finger = finger
             -- Record where this finger went down
             finger_places[controller][finger] = { x=x, y=y }
         end
 
         function controller.on_touch_move(controller, finger, x, y)
+            if finger ~= tracking_finger then return end
             -- d = sqrt(dx^2 + dy^2)
             local dx = x - finger_places[controller][finger].x
             local dy = y - finger_places[controller][finger].y
@@ -934,6 +938,7 @@ function controllers.on_controller_connected(controllers,controller)
         end
 
         function controller.on_touch_up(controller, finger, x, y)
+            if finger ~= tracking_finger then return end
             -- d = sqrt(dx^2 + dy^2)
             local dx = x - finger_places[controller][finger].x
             local dy = y - finger_places[controller][finger].y
@@ -941,6 +946,7 @@ function controllers.on_controller_connected(controllers,controller)
 
             -- Forget where the finger went down
             finger_places[controller][finger] = nil
+            tracking_finger = nil
 
             if(delta < 100) then
                 -- This is a tap not a swipe

@@ -62,6 +62,8 @@ local values = {
 
 local get_letters = function(num_letters)
     
+    math.randomseed(os.time())
+    
     --return val
     local letters = {}
     
