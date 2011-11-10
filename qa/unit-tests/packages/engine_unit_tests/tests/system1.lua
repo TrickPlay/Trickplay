@@ -19,7 +19,7 @@ print (system:release_keyboard())
 -- Tests --
 
 function test_global_system_basic ()
-    assert_equal( system:acquire_numeric_keypad() , true, "test failed" )
+    assert_equal( system:acquire_numeric_keypad() , true, "system:acquire_numeric_keypad() returned: ",system:acquire_numeric_keypad(), "Expected: true")
 end
 
 

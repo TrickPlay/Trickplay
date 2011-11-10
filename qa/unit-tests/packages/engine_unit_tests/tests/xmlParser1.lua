@@ -51,33 +51,33 @@ local success = p:parse( xml, true)
 
 function test_XMLParser_parse ()
     -- Does parse return true when it should succeeds -- 
-    assert_equal( success , true , "parse returned false instead of true")
+    assert_equal( success , true , "success returned: ", success, " Expected: true")
 end
 
 function test_XMLParser_onStartElements()
-    assert_equal( values[1] , "note", "onStartElements value 1 failed" )
-    assert_equal( values[2] , "to", "onStartElements value 2 failed" )
-    assert_equal( values[6] , "from", "onStartElements value 6 failed" )
-    assert_equal( values[9] , "heading", "onStartElements value 9 failed" )
-    assert_equal( values[12] , "body", "onStartElements value 11 failed" )
+    assert_equal( values[1] , "note", "values[1] returned: "..values[1].." Expected: note")
+    assert_equal( values[2] , "to",  "values[2] returned: "..values[2].." Expected: to")
+    assert_equal( values[6] , "from",  "values[6] returned: "..values[6].." Expected: from")
+    assert_equal( values[9] , "heading",  "values[9] returned: "..values[9].." Expected: heading")
+    assert_equal( values[12] , "body",  "values[12] returned: "..values[12].." Expected: body")
 end
 
 function test_XMLParser_onEndElements()
-    assert_equal( values[15] , "note", "onStartElements value 14 failed" )
-    assert_equal( values[14] , "body", "onStartElements value 13 failed" )
-    assert_equal( values[11] , "heading", "onStartElements value 10 failed" )
-    assert_equal( values[8] , "from", "onStartElements value 7 failed" )
-    assert_equal( values[5] , "to", "onStartElements value 4 failed" )
+    assert_equal( values[15] , "note",  "values[15] returned: "..values[15].." Expected: note")
+    assert_equal( values[14] , "body", "values[14] returned: "..values[14].." Expected: body")
+    assert_equal( values[11] , "heading", "values[11] returned: "..values[11].." Expected: heading")
+    assert_equal( values[8] , "from", "values[8] returned: "..values[8].." Expected: from")
+    assert_equal( values[5] , "to", "values[5] returned: "..values[5].." Expected: to")
 end
 
 function test_XMLParser_onStartElementsAttributes()
-    assert_equal( values[3] , "test", "onStartElements - attributes value 3 failed" )
+    assert_equal( values[3] , "test", "values[3] returned: "..values[3].." Expected: test")
 end
 
 function test_XMLParser_namespaceFound()
-    assert_equal( namespaceFound , true , "namespace not found" )
-    assert_equal( namespaceValue, "http://www.w3.org/TR/html4/" )
-    assert_equal( namespacePrefix, "h" )
+    assert_true ( namespaceFound, "namespaceFound returned: ", namespaceFound, " Expected: true")
+   	assert_equal( namespaceValue, "http://www.w3.org/TR/html4/", "namespaceValue returned: "..namespaceValue.." Expected: http://www.w3.org/TR/html4/" )
+    assert_equal( namespacePrefix, "h", "namespacePrefix returned: "..namespacePrefix.." Expected: h")
 end
 
  

@@ -22,13 +22,13 @@ test_group:add(canvas:Image() )
 
 
 function test_canvas_size ()
-    assert_equal( canvas.size[1] , 500, "canvas_size failed" )
-    assert_equal( canvas.size[2] , 100, "canvas_size failed" )
+    assert_equal( canvas.size[1] , 500, "canvas.size[1] returned: ", canvas.size[1], " Expected 500")
+    assert_equal( canvas.size[2] , 100, "canvas.size[2] returned: ", canvas.size[2], " Expected 100")
 end
 
 function test_canvas_current_point ()
-    assert_equal( canvas.current_point[1] , 0, "canvas.current_point failed" )
-    assert_equal( canvas.current_point[2] , 0, "canvas.current_point failed" )
+    assert_equal( canvas.current_point[1] , 0,"canvas.current_point[1] returned: ", canvas.current_point[1], " Expected 0")
+    assert_equal( canvas.current_point[2] , 0,"canvas.current_point[1] returned: ", canvas.current_point[2], " Expected 0")
 end
 
 

@@ -14,8 +14,8 @@ local myScreen = screen.display_size
 -- Tests --
 
 function test_screen_display_size ()
-    assert_equal( myScreen[1] , 960 , "display_size x failed" )
-    assert_equal( myScreen[2] , 540 , "display_size y failed" )
+    assert_equal( myScreen[1] , 960 , "myScreen[1] returned: "..myScreen[1].." Expected: 960")
+    assert_equal( myScreen[2] , 540 , "myScreen[2] returned: "..myScreen[2].."Expected: 540" )
 end
 
 
