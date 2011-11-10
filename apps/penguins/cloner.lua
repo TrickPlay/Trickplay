@@ -3,7 +3,7 @@ _Clone = Clone
 
 local src = ""
 local cubes = {"cube-128.png","cube-128-4.png"}
-local factory = Group()
+factory = Group()
 factory:hide()
 screen:add(factory)
 
@@ -142,7 +142,7 @@ local make = {
 	end),
 	["seal-ball"]			= f("beach-ball.png", function (obj)
 		local fx, fy, w2, h2 = obj.x, obj.y, obj.w/2, obj.h/2
-		local ox, oy, oz, vx, vy, vz = fx, fy, 0, 0, -2, 0
+		local ox, oy, oz, vx, vy, vz = fx, fy, 0, 0, -1.6, 0
 		obj.moves = true
 		obj.reactive = true
 		obj.collides = true
@@ -174,7 +174,7 @@ local make = {
 				obj.opacity = 255
 				obj.z_rotation = {0,0,0}
 				obj.x, obj.y = fx, fy-600
-				ox, oy, oz, vx, vy, vz = fx, fy, 0, 0, -2, 0
+				ox, oy, oz, vx, vy, vz = fx, fy, 0, 0, -1.6, 0
 				bouncing.duration = -3*vy/gravity
 				bouncing:start()
 				bouncing:advance(bouncing.duration/2)
@@ -185,6 +185,17 @@ local make = {
 			ox, oy, oz = fx, obj.y, obj.z_rotation[1]
 			vx, vy, vz = _vx, _vy, _vz
 			falling:start()
+		end
+		
+		obj.collision = function()
+			if penguin.y + penguin.h/2 > obj.y then
+				penguin.kill(obj,penguin.skating.elapsed)
+			elseif penguin.vy > 0 then
+				a = math.atan2(obj.y-penguin.y,obj.x-penguin.x)
+				a = -2*math.max(penguin.vy,0.8)*math.sin(a + math.sin(4*a-math.pi)/4)
+				penguin.jump(a)
+				obj.fall(penguin.vx/2,math.max(vy,-a),-penguin.vx)
+			end
 		end
 		
 		obj.free = function(self)
@@ -216,13 +227,13 @@ local make = {
 		end
 		
 		local timer = Timer{interval = 200, on_timer = function(self)
-				obj.source = factory:find_child('seal-down.png')
+				obj.source = factory:find_child('seal-down.png\t')
 				self:stop()
 			end}
 		timer:stop()
 		
-		obj.switch = function(vy)
-			obj.source = factory:find_child('seal-up.png')
+		obj.switch = function()
+			obj.source = factory:find_child('seal-up.png\t')
 			timer:start()
 		end
 		

@@ -125,6 +125,7 @@ function skating:on_new_frame(ms,t)
 	-- update jump
 	img.xp = img.x
 	img.x = (row == 2 and 1920-2020*t or -80+2020*t)
+	img.vx = (img.x-img.xp)/self.delta
 	
 	a = gravity > 0
 
@@ -197,11 +198,16 @@ function skating:on_completed()
 end
 
 function screen:on_key_down(key)
-	if (key == keys["OK"]) then
+	if key == keys["OK"] then
 		jump()
-	elseif (key == keys["0"]) then
+	elseif key == keys["0"] then
 		kill()
-	elseif (key == keys["5"]) then
+	elseif key == keys["4"] then
+		skating:stop()
+		skating:rewind()
+		levels.next(-1)
+		row = 1
+	elseif key == keys["5"] then
 		skating:stop()
 		if row == 1 and levels.this.id > 1 then
 			row = 2
@@ -223,6 +229,7 @@ img.skating = skating
 img.kill = kill
 img.sink = sink
 img.jump = jump
+img.vx = 0
 img.vy = 0
 
 return img

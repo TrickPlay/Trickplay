@@ -131,9 +131,9 @@ dolater(function()
    levels.this:find_child("image0"):grab_key_focus()
 end)
 
-levels.next = function()
+levels.next = function(arg)
 	local oldlevel = levels.this
-	levels.this = levels[(levels.this.id) % #levels + 1]
+	levels.this = levels[(levels.this.id) % #levels + (arg or 1)]
 	
 	levels.this:load()
 	overlay.level:animate{opacity = 0, duration = 570, on_completed = function()
