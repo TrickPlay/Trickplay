@@ -681,11 +681,28 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     	return;
     }
 
+	//.........................................................................
+
+    in_break = true;
+
+	//.........................................................................
+    // Disable the console
+
+    Console * console = app->get_context()->get_console();
+
+    if ( console )
+    {
+    	console->disable();
+    }
+
+	//.........................................................................
+
     JSON::Object location( get_location( L , ar ) );
 
 	tpinfo( "BREAK AT %s:%lld" , location[ "file" ].as< String >().c_str() , location[ "line" ].as< long long >() );
 
-	in_break = true;
+
+	//.........................................................................
 
 	while ( true )
     {
@@ -710,6 +727,13 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     	}
 
     }
+
+	//.........................................................................
+
+	if ( console )
+	{
+		console->enable();
+	}
 
 	in_break = false;
 }
