@@ -46,7 +46,7 @@ score1:start()
 
 -- Test that myTimeline2 never started because score:remove_all was called when Timeline1 completed --
 function test_score_remove_all ()
-    assert_false ( MyTimeline2_started , "myTimeline2_called returned ", myTimeline2_on_started, ". Expected false" )
+    assert_false ( MyTimeline2_started , "myTimeline2_called returned "..tostring(myTimeline2_on_started)..". Expected false" )
 end
 
 

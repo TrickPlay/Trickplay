@@ -20,7 +20,7 @@ local success = p:parse( xml, true)
 
 function test_XMLParser_parseFail ()
     -- Does parse return true when it should succeeds -- 
-    assert_false ( success , true , "success returned: ", success, "Expected: true")
+    assert_false ( success , true , "success returned: "..tostring(success).."Expected: true")
 end
 
 
