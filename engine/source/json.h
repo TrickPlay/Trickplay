@@ -159,11 +159,15 @@ namespace JSON
         virtual ~Object();
 
         Value & operator [] ( const String & key );
+
         Value & at( const String & key );
 
         typedef std::map< String , Value > Map;
 
         bool has( const String & key ) const;
+
+        Map::iterator find( const String & key );
+        Map::const_iterator find( const String & key ) const;
 
         Map::iterator begin();
         Map::const_iterator begin() const;
