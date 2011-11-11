@@ -14,46 +14,47 @@ public:
 
     ~Debugger();
 
-    void install();
+    void install( bool break_next_line = false );
 
     void uninstall();
 
     void break_next_line();
 
+    bool is_in_break() const
+    {
+    	return in_break;
+    }
+
+    guint16 get_server_port() const;
+
+    class Server;
+
+    class Command;
+
 private:
-
-    static void command_handler( TPContext * context , const char * command, const char * parameters, void * me );
-
-    void handle_command( const char * parameters );
 
     static void lua_hook( lua_State * L, lua_Debug * ar );
 
     void debug_break( lua_State * L, lua_Debug * ar );
 
-    StringVector * load_source_file( const char * file_name );
-
+    JSON::Object get_location( lua_State * L , lua_Debug * ar );
     JSON::Array get_back_trace( lua_State * L , lua_Debug * ar );
-
     JSON::Array get_locals( lua_State * L , lua_Debug * ar );
+    JSON::Array get_breakpoints( lua_State * L , lua_Debug * ar );
+    JSON::Object get_app_info();
 
-    App *           app;
-    bool            installed;
+    bool handle_command( lua_State * L , lua_Debug * ar , Command * command );
 
-    bool            break_next;
-
-    bool 			tracing;
+    App *	app;
+    bool    installed;
+    bool    break_next;
+    bool	in_break;
 
     typedef std::pair< String, int > Breakpoint;
 
-    typedef std::list< Breakpoint > BreakpointList;
+    typedef std::vector< Breakpoint > BreakpointList;
 
     BreakpointList  breakpoints;
-
-    typedef std::map< String , StringVector > SourceMap;
-
-    SourceMap		source;
-
-    class Server;
 
     static Server *		server;
 };

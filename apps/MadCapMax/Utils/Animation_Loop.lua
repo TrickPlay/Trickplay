@@ -244,11 +244,13 @@ function Animation_Loop:delete_animation(t)
         non_terminating_animations[t] = nil
         
     else -- dump everything before throwing the error
-        
+        --[[
         Animation_Loop:dump_states()
         
         print( "Animation_Loop:delete_animation(", t ,") while in state "..curr_state.name )
         error( "tried to delete an animation that wasn't animating", 2 )
+        --]]
+        print("WARNING, tried to delete and animation that wasn't animating")
     end
     
 end

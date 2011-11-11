@@ -178,7 +178,7 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
                     print( string.format( "FAIL [%s] %s" , t.name , t.message or "" ) )
                         		line_count = line_count + 2
 
-                    xml_output_string = string.format("%s<testcase classname='com.trickplay.unit-test.engine' name='%s' time='%f'><failure type='failure'>%s</failure></testcase>",xml_output_string,t.name,t.time,t.message or "")
+                    xml_output_string = string.format("%s<testcase classname='com.trickplay.unit-test.engine' name='%s' time='%f'><failure type='failure'>%s</failure></testcase>",xml_output_string,t.name,t.time,xml_escape(t.message) or "")
 
                 end
             
