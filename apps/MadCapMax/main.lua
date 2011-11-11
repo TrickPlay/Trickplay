@@ -258,7 +258,7 @@ local function main()
                     
                     e:update_coll_box()
                     
-                    if not Max.hit and not e.harmless and collided(Max,e) then
+                    if not Max.hit and not e.harmless and not e.pooped_on and collided(Max,e) then
                         
                         Max:recieve_impact(-1200,-1200)
                         
@@ -415,6 +415,16 @@ local function main()
     -- Init                                                                   --
     ----------------------------------------------------------------------------
     
+    local activate_enemies = function()
+        
+        for e,p in pairs(curr_enemies) do
+            
+            e.harmless = false
+            
+        end
+        
+    end
+    
     lvl_params = {
         {
             [Max] = {
@@ -432,7 +442,7 @@ local function main()
                     }
                 },
                 --call_before_intro = {Jazz.attack}
-                call_after_intro = {Max.launch}--,Jazz.launch}
+                call_after_intro = {Max.launch,activate_enemies}--,Jazz.launch}
             },
             enemies = {
                 [Jazz] = { launch = true}
@@ -452,7 +462,8 @@ local function main()
                     
                     [Max.fly_to] = {d = 1,x = 13060-50, y=730}
                     
-                }
+                },
+                call_after_intro = {activate_enemies}
             },
             enemies = {
                 [Frank] = {start_x = 2500, launch = true },
@@ -500,6 +511,8 @@ local function main()
         for e,p in pairs(curr_enemies) do
             
             e:setup_for_level(p)
+            
+            e.harmless = true
             
         end
         

@@ -11,7 +11,7 @@ return
     {
         title       = "Mountain Dew",
         dropdown    = "showcase/mountain-dew/dropdown.png",
-        enter       = function( ui ) apps:launch( "com.trickplay.mountain_dew" ) end
+        enter       = function( ui ) apps:launch( "com.trickplay.mountain-dew" ) end
 
     },
     
