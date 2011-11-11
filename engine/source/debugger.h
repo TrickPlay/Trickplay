@@ -29,6 +29,8 @@ public:
 
     class Server;
 
+    class Command;
+
 private:
 
     static void lua_hook( lua_State * L, lua_Debug * ar );
@@ -41,7 +43,7 @@ private:
     JSON::Array get_breakpoints( lua_State * L , lua_Debug * ar );
     JSON::Object get_app_info();
 
-    bool handle_command( lua_State * L , lua_Debug * ar , void * command );
+    bool handle_command( lua_State * L , lua_Debug * ar , Command * command );
 
     App *	app;
     bool    installed;
