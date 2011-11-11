@@ -48,12 +48,12 @@ score1:start()
 
 -- score.loop returns true --
 function test_score_loop_true ()
-    assert_true ( score1.loop , "score.loop returned ", score1.loop, ". Expected false" )
+    assert_true ( score1.loop , "score.loop returned "..tostring(score1.loop), "..Expected false" )
 end
 
 -- score.is_playing returns true and loop is set to true --
 function test_score_is_playing_true ()
-    assert_true ( score1.is_playing , "score.is_playing returned ", score1.is_playing, ". Expected false" )
+    assert_true ( score1.is_playing , "score.is_playing returned "..tostring(score1.is_playing), "..Expected false" )
 end
 
 

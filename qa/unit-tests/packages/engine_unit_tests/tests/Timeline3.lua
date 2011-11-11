@@ -34,12 +34,12 @@ myTimeline:start()
 
 -- on_completed should not be called if the timeline is stopped.
 function test_Timeline_stop_on_completed ()
-    assert_false ( timeline3_on_completed_called ,"Returned: ",  timeline3_on_completed_called, " Expected: 0")
+    assert_false ( timeline3_on_completed_called ,"Returned: "..tostring(timeline3_on_completed_called).." Expected: 0")
 end
 
 -- is playing should return false when stop is called
 function test_Timeline_stop ()
-	assert_false ( myTimeline.is_playing, "Returned: ", myTimeline.is_playing, " Expected: false")
+	assert_false ( myTimeline.is_playing, "Returned: "..tostring(myTimeline.is_playing).." Expected: false")
 end
 
 -- Test Tear down --
