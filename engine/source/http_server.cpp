@@ -14,7 +14,7 @@
 //=============================================================================
 
 #define TP_LOG_DOMAIN   "HTTP-SERVER"
-#define TP_LOG_ON       true
+#define TP_LOG_ON       false
 #define TP_LOG2_ON      false
 
 #include "log.h"
