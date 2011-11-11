@@ -59,27 +59,27 @@ end
 
 -- verify that loop set to true actually looped.
 function test_Timeline_looped ()
-    assert_greater_than ( looped , 2 , "Returned: ", looped, " Expected: >2")
+    assert_greater_than ( looped , 2 , "Returned: "..looped.." Expected: >2")
 end
 
 -- verify that a value for elapsed was set
 function test_Timeline_elapsed ()
-	assert_greater_than ( myTimeline.elapsed, 0, "Returned: ", myTimeline.elapsed, " Expected: >0")
+	assert_greater_than ( myTimeline.elapsed, 0, "Returned: "..myTimeline.elapsed.." Expected: >0")
 end
 
 -- verify that a value for delta was set
 function test_Timeline_delta ()
-	assert_greater_than ( myTimeline.delta, 0,  "Returned: ", myTimeline.delta, " Expected: >0")
+	assert_greater_than ( myTimeline.delta, 0,  "Returned: "..myTimeline.delta.." Expected: >0")
 end
 
 -- verify that a value for progressed was set
 function test_Timeline_progress ()
-	assert_greater_than ( myTimeline.progress, 0, "Returned: ", myTimeline.progress, " Expected: >0")
+	assert_greater_than ( myTimeline.progress, 0, "Returned: "..myTimeline.progress.." Expected: >0")
 end
 
 -- verify that a value for is_playing
 function test_Timeline_is_playing ()
-	assert_true ( myTimeline.is_playing, true, "Returned: ", myTimeline.is_playing, " Expected: true")
+	assert_true ( myTimeline.is_playing, true, "Returned: "..tostring(myTimeline.is_playing).." Expected: true")
 end
 
 -- Test Tear down --

@@ -53,7 +53,7 @@ function test_mediaplayer_video_size ()
 end
 
 function test_mediaplayer_has_video ()
-    assert_equal ( mediaplayer.has_video , true,  "mediaplayer.has_video returned: ", mediaplayer.has_video, " Expected true" )
+    assert_equal ( mediaplayer.has_video , true,  "mediaplayer.has_video returned: "..tostring(mediaplayer.has_video).." Expected true" )
 end
 
 function test_mediaplayer_volume ()
@@ -64,11 +64,11 @@ function test_mediaplayer_volume ()
 end
 
 function test_mediaplayer_mute ()
-    assert_equal ( mediaplayer.mute , false,  "mediaplayer.mute returned: ",mediaplayer.mute," Expected false" )
+    assert_equal ( mediaplayer.mute , false,  "mediaplayer.mute returned: "..tostring(mediaplayer.mute).." Expected false" )
 end
 
 function test_mediaplayer_has_audio ()
-    assert_equal ( mediaplayer.has_audio , true, "mediaplayer.has_audio returned: ",mediaplayer.has_audio," Expected true" )
+    assert_equal ( mediaplayer.has_audio , true, "mediaplayer.has_audio returned:" ..tostring(mediaplayer.has_audio).." Expected true" )
 end
 
 function test_mediaplayer_tags ()
