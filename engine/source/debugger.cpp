@@ -20,20 +20,31 @@
 
 //.............................................................................
 
-class Debugger::Server
+class Debugger::Command
 {
 public:
 
-	class Command
+	Command() {}
+
+	virtual ~Command() {}
+
+	virtual String get() const = 0;
+
+	virtual bool reply( const JSON::Object & obj ) = 0;
+
+	static void destroy( gpointer me )
 	{
-	public:
+		delete ( Command * ) me;
+	}
 
-		virtual ~Command() {}
+private:
 
-		virtual String get() const = 0;
+	Command( const Command & ) {}
+};
 
-		virtual bool reply( const JSON::Object & obj ) = 0;
-	};
+class Debugger::Server
+{
+public:
 
 	Server( TPContext * context )
 	{
@@ -47,6 +58,10 @@ public:
 	virtual Command * get_next_command( bool wait ) = 0;
 
 	virtual guint16 get_port() const = 0;
+
+	virtual void enable_console() = 0;
+
+	virtual void disable_console() = 0;
 
 protected:
 
@@ -64,6 +79,50 @@ private:
 
 //.............................................................................
 
+class HCommand : public Debugger::Command
+{
+public:
+
+	HCommand( const HttpServer::Request::Body & body , HttpServer::Response & _response )
+	{
+		line = String( body.get_data() , body.get_length() );
+
+		response = _response.pause();
+	}
+
+	virtual ~HCommand()
+	{
+		if ( response )
+		{
+			response->resume();
+		}
+	}
+
+	virtual String get() const
+	{
+		return line;
+	}
+
+	virtual bool reply( const JSON::Object & obj )
+	{
+		response->set_status( HttpServer::HTTP_STATUS_OK );
+		response->set_response( "application/json" , obj.stringify() );
+		response->resume();
+
+		response = 0;
+
+		return true;
+	}
+
+private:
+
+	String 					line;
+	HttpServer::Response * 	response;
+
+};
+
+//.............................................................................
+
 class HServer : public Debugger::Server , public HttpServer::RequestHandler
 {
 public:
@@ -71,10 +130,12 @@ public:
 	HServer( TPContext * context )
 	:
 		Debugger::Server( context ),
-		queue( g_async_queue_new_full( HCommand::destroy ) ),
+		queue( g_async_queue_new_full( Debugger::Command::destroy ) ),
 		gctx(  g_main_context_new() ),
 		server( 0 ),
-		thread( 0 )
+		thread( 0 ),
+		channel( 0 ),
+		console_enabled( 0 )
 	{
 		server = new HttpServer( context->get_int( TP_DEBUGGER_PORT , 0 ) , gctx );
 
@@ -92,18 +153,43 @@ public:
 
 			server->register_handler( "/debugger" , this );
 
+			//.................................................................
+			// Set up machinery to read from stdin
+
+			int fd = fileno( stdin );
+
+			if ( fd > -1 )
+			{
+				channel = g_io_channel_unix_new( fd );
+
+				if ( channel )
+				{
+					if ( GSource * source = g_io_create_watch( channel , G_IO_IN ) )
+					{
+						g_source_set_callback( source , ( GSourceFunc ) console_read , this , 0 );
+
+						g_source_attach( source , gctx );
+
+						g_source_unref( source );
+					}
+				}
+			}
+
+			//.................................................................
+			// Create and start the thread that will run the HTTP server
+
 			thread = g_thread_create( process , this , TRUE , 0 );
 		}
 	}
 
-	virtual Debugger::Server::Command * get_next_command( bool wait )
+	virtual Debugger::Command * get_next_command( bool wait )
 	{
 		if ( wait )
 		{
-			return ( Debugger::Server::Command * ) g_async_queue_pop( queue );
+			return ( Debugger::Command * ) g_async_queue_pop( queue );
 		}
 
-		return ( Debugger::Server::Command * ) g_async_queue_try_pop( queue );
+		return ( Debugger::Command * ) g_async_queue_try_pop( queue );
 	}
 
 	virtual guint16 get_port() const
@@ -111,10 +197,25 @@ public:
 		return server ? server->get_port() : 0;
 	}
 
+	virtual void enable_console()
+	{
+		g_atomic_int_set( & console_enabled , 1 );
+	}
+
+	virtual void disable_console()
+	{
+		g_atomic_int_set( & console_enabled , 0 );
+	}
+
 protected:
 
 	virtual ~HServer()
 	{
+		if ( channel )
+		{
+			g_io_channel_unref( channel );
+		}
+
 		if ( server )
 		{
 			tplog2( "STOPPING HTTP SERVER" );
@@ -138,52 +239,6 @@ protected:
 		tplog2( "HTTP SERVER DESTROYED" );
 	}
 
-	class HCommand : public Debugger::Server::Command
-	{
-	public:
-
-		HCommand( const HttpServer::Request::Body & body , HttpServer::Response & _response )
-		{
-			line = String( body.get_data() , body.get_length() );
-
-			response = _response.pause();
-		}
-
-		virtual ~HCommand()
-		{
-			if ( response )
-			{
-				response->resume();
-			}
-		}
-
-		virtual String get() const
-		{
-			return line;
-		}
-
-		virtual bool reply( const JSON::Object & obj )
-		{
-			response->set_status( HttpServer::HTTP_STATUS_OK );
-			response->set_response( "application/json" , obj.stringify() );
-			response->resume();
-
-			response = 0;
-
-			return true;
-		}
-
-		static void destroy( gpointer me )
-		{
-			delete ( HCommand * ) me;
-		}
-
-	private:
-
-		String 					line;
-		HttpServer::Response * 	response;
-
-	};
 	//-------------------------------------------------------------------------
 	// Happens in other thread
 
@@ -217,12 +272,66 @@ protected:
     	return 0;
     }
 
+    class ConsoleCommand : public Debugger::Command
+    {
+    public:
+
+    	ConsoleCommand( const gchar * _line )
+    	:
+    		line( _line )
+    	{
+    	}
+
+    	virtual String get() const
+    	{
+    		return line;
+    	}
+
+    	virtual bool reply( const JSON::Object & obj )
+    	{
+    		// TODO : Here we could interpret the response and
+    		// print out some information.
+
+    		return true;
+    	}
+
+    private:
+
+    	String line;
+    };
+
+    static gboolean console_read( GIOChannel * channel , GIOCondition condition , gpointer me )
+    {
+    	HServer * server = ( HServer * ) me;
+
+    	if ( 1 == g_atomic_int_get( & server->console_enabled ) )
+    	{
+			GString * line = g_string_new( 0 );
+
+			if ( G_IO_STATUS_NORMAL == g_io_channel_read_line_string( channel , line , 0 , 0 ) )
+			{
+				gchar * command = g_strstrip( line->str );
+
+				if ( strlen( command ) )
+				{
+					g_async_queue_push( server->queue , new ConsoleCommand( command ) );
+				}
+			}
+
+			g_string_free( line , TRUE );
+    	}
+
+    	return TRUE;
+    }
+
 private:
 
 	GAsyncQueue * 	queue;
 	GMainContext *	gctx;
 	HttpServer  *	server;
 	GThread *		thread;
+	GIOChannel * 	channel;
+	gint			console_enabled;
 };
 
 //.............................................................................
@@ -455,11 +564,9 @@ JSON::Object Debugger::get_app_info()
 
 //.............................................................................
 
-bool Debugger::handle_command( lua_State * L , lua_Debug * ar , void * cmd )
+bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server_command )
 {
 	bool result = false;
-
-	Server::Command * server_command = ( Server::Command * ) cmd;
 
 	String command( server_command->get() );
 
@@ -634,7 +741,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     //.........................................................................
 	// Process any pending debugger commands here
 
-	for ( Server::Command * server_command = server->get_next_command( false ); server_command; server_command = server->get_next_command( false ) )
+	for ( Command * server_command = server->get_next_command( false ); server_command; server_command = server->get_next_command( false ) )
 	{
 		( void ) handle_command( L , ar , server_command );
 	}
@@ -701,15 +808,16 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 
 	tpinfo( "BREAK AT %s:%lld" , location[ "file" ].as< String >().c_str() , location[ "line" ].as< long long >() );
 
-
 	//.........................................................................
+
+	server->enable_console();
 
 	while ( true )
     {
     	//.....................................................................
     	// Wait for a command from the server, this will pause indefinitely
 
-    	Server::Command * server_command = server->get_next_command( true );
+    	Command * server_command = server->get_next_command( true );
 
     	if ( ! server_command )
     	{
@@ -727,6 +835,8 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     	}
 
     }
+
+	server->disable_console();
 
 	//.........................................................................
 
