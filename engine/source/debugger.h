@@ -50,6 +50,7 @@ private:
     App *	app;
     bool    installed;
     bool    break_next;
+    int 	returns;
     bool	in_break;
 
     typedef std::pair< String, int > Breakpoint;
