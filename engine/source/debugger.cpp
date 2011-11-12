@@ -15,7 +15,7 @@
 
 #define TP_LOG_DOMAIN   "DEBUGGER"
 #define TP_LOG_ON       true
-#define TP_LOG2_ON      true
+#define TP_LOG2_ON      false
 
 #include "log.h"
 
@@ -496,6 +496,7 @@ Debugger::Debugger( App * _app )
     app( _app ),
     installed( false ),
     break_next( false ),
+    returns( 0 ),
     in_break( false )
 {
     if ( 0 == server )
@@ -532,7 +533,7 @@ void Debugger::install( bool break_next_line )
         return;
     }
 
-    lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET | */ LUA_MASKLINE, 0 );
+    lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET |*/ LUA_MASKLINE, 0 );
 
     installed = true;
 }
@@ -877,7 +878,17 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	else if ( command == "n" )
 	{
-		break_next = true;
+		// To step over, we change the hook to watch for function calls.
+		// If, during the next iteration, a function call happens, it
+		// will increment the number of returns, start watching for
+		// returns and stopping watching for lines.
+
+		// When a return happens, the number of returns is
+		// decremented until it reaches zero. When it does, it means
+		// we are done stepping over, so we reset the hook to only
+		// watch for lines and break on the next one.
+
+	    lua_sethook( L , lua_hook, LUA_MASKCALL | LUA_MASKLINE , 0 );
 		result = true;
 	}
 
@@ -1002,17 +1013,36 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 
 	//.........................................................................
 
+    JSON::Object location( get_location( L , ar ) );
+
+    String at = Util::format( "%s:%lld" , location[ "file" ].as<String>().c_str() , location[ "line" ].as<long long>() );
+
+	//.........................................................................
+
     bool should_break = false;
 
 	switch( ar->event )
 	{
 		case LUA_HOOKCALL:
+			++returns;
+			tplog2( "HOOK CALL %s RETURNS %d" , at.c_str() , returns );
+		    lua_sethook( L , lua_hook , LUA_MASKCALL | LUA_MASKRET , 0 );
+			break;
+
 		case LUA_HOOKRET:
 		case LUA_HOOKTAILRET:
+			--returns;
+			tplog2( "HOOK RET %s RETURNS %d" , at.c_str() , returns );
+			if ( returns <= 0 )
+			{
+				lua_sethook( L , lua_hook, LUA_MASKLINE, 0 );
+				break_next = true;
+			}
 			break;
 
 		case LUA_HOOKLINE:
 
+			tplog2( "HOOK LINE %s" , at.c_str()  );
 			if ( break_next )
 			{
 				should_break = true;
@@ -1058,16 +1088,15 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 
 	//.........................................................................
 
-    JSON::Object location( get_location( L , ar ) );
-
-	//.........................................................................
-
 	server->enable_console();
 
-	fprintf( stdout , "(%s:%lld) " , location[ "file" ].as< String >().c_str() , location[ "line" ].as< long long >() );
+	fprintf( stdout , "(%s) " , at.c_str() );
 	fflush( stdout );
 
-	while ( true )
+    lua_sethook( L , lua_hook, LUA_MASKLINE , 0 );
+    returns = 0;
+
+    while ( true )
     {
     	//.....................................................................
     	// Wait for a command from the server, this will pause indefinitely
@@ -1089,7 +1118,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     		break;
     	}
 
-		fprintf( stdout , "(%s:%lld) " , location[ "file" ].as< String >().c_str() , location[ "line" ].as< long long >() );
+		fprintf( stdout , "(%s) " , at.c_str() );
 		fflush( stdout );
     }
 
