@@ -506,7 +506,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     if ([version floatValue] < 4.3) {
         NSLog(@"WARNING: Protocol Version is less than 4.3, please update Trickplay.");
     }
-    [tvConnection setHttp_port:[[args objectAtIndex:1] unsignedIntValue]];
+    
+    //[tvConnection setHttp_port:[[args objectAtIndex:1] unsignedIntValue]];
     // if controller ID then open a new socket for advanced UI
     if ([args count] > 2 && [args objectAtIndex:2]) {
         [advancedUIDelegate setupServiceWithPort:tvConnection.port hostname:tvConnection.hostName];
@@ -547,6 +548,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * No arguments.
  */
 - (void)do_PS:(NSArray *)args {
+    [audioController stopAudioPlayer];
     [audioController destroyAudioStreamer];
     NSString *sentData = [NSString stringWithFormat:@"UI\tCA"];
     [socketManager sendData:[sentData UTF8String] 
@@ -1370,8 +1372,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 //*
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-     // Return YES for supported orientations.
-     return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
+    // Return YES for supported orientations.
+    return (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown);
 }
 //*/
 

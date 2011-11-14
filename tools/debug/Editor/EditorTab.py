@@ -1,3 +1,4 @@
+
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
@@ -14,9 +15,12 @@ class EditorTabWidget(QTabWidget):
         self.setAcceptDrops(True)
         
         self.main = main
-        self.tabs = []
+        self.paths = []
+        self.editors = []
+        self.textBefores = []
         
         QObject.connect(self, SIGNAL('tabCloseRequested(int)'), self.closeTab)
+        QObject.connect(self, SIGNAL('currentChanged(int)'), self.changeTab)
         
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
@@ -25,11 +29,31 @@ class EditorTabWidget(QTabWidget):
         self.main.dropFileEvent(event, 'tab', self)
         
     def closeTab(self, index):
-        self.tabs.pop(index)
+        self.paths.pop(index)
         self.removeTab(index)
         if 0 == self.count():
             self.close()
             self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
+
+    def changeTab(self, index):
+		currentText = open(self.paths[index]).read()
+		if self.textBefores[index] != currentText:
+			msg = QMessageBox()
+			msg.setText('The file "' + self.paths[index] + '" changed on disk.')
+			if self.editors[index].text_status == 2: #TEXT_CHANGED
+				msg.setInformativeText('Do you want to drop your changes and reload the file ?')
+			else:
+				msg.setInformativeText('Do you want to reload the file ?')
+			msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+			msg.setDefaultButton(QMessageBox.Cancel)
+			msg.setWindowTitle("Warning")
+			ret = msg.exec_()
+
+			if ret == QMessageBox.Ok:
+    			# Reload 
+				self.editors[index].readFile(self.paths[index])
+				self.textBefores[index] = self.editors[index].text()
+				self.editors[index].text_status = 1 #TEXT_READ
 
 """
 Subclass of dock to handle drag/drop events

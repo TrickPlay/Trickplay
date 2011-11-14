@@ -37,15 +37,14 @@ local g = Group
 local children = g.children
 local initial_children = #children
 g:add(image1)
-test_group:add(g)
 local children = g.children
-
+test_group:add(g)
 
 -- Tests --
 
 -- Verify that unparent adds one item from the group.
 function test_Container_group_adds ()
-	assert_equal(#children, initial_children+1 , "container.remove failed")
+	assert_equal(#children, initial_children+1 , "Returned: "..#children..". Expected: "..(initial_children+1))
 end
 
 
