@@ -16,6 +16,7 @@ local img_srcs,
     get_letters,
     make_button,
     game_server,
+    keybd_list,
     check_word,
     make_list,
     session,
@@ -131,6 +132,7 @@ function controller:init(t)
     
     
     right_side_list = t.side_buttons:make{
+        resets_focus_to = 1, 
         x = keybd_bgs[#keybd_bgs].x+480, y = 0, spacing = 874-784-66, buttons = {
             {name = "Play Word", select = function()
                 
@@ -244,17 +246,24 @@ function controller:init(t)
         }
     }
     
-    keybd_bgs[# keybd_bgs + 1] = right_side_list
+    --keybd_bgs[# keybd_bgs + 1] = right_side_list
     
-    list = t.make_list{
+    keybd_list = t.make_list{
         orientation = "HORIZONTAL",
         elements = keybd_bgs,
+        display_passive_focus = false,
+        --resets_focus_to = 1,
+        --wrap = true,
+    }
+    list = t.make_list{
+        orientation = "HORIZONTAL",
+        elements = {keybd_list,right_side_list},
         display_passive_focus = false,
         resets_focus_to = 1,
         wrap = true,
     }
     
-    --list:define_key_event(keys.RED,    right_side_bar[1].select)
+    keybd_list:define_key_event(keys.Up,    function() list:on_key_down(keys.Right) end )
     --list:define_key_event(keys.GREEN,  right_side_bar[2].select)
     --list:define_key_event(keys.YELLOW, right_side_bar[3].select)
     --list:define_key_event(keys.BLUE,   right_side_bar[4].select)

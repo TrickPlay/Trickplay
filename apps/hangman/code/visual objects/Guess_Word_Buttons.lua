@@ -243,7 +243,7 @@ function controller:init(t)
         x = keybd_bgs[#keybd_bgs].x+82, y = 192, spacing = 874-784-66, buttons = {
             {name = "Continue", select = function()
                 
-                if not right_side_bar[1].is_visible then return end
+                --if not right_side_bar[1].is_visible then return end
                 print("continue")
                 ls:light_down()
                 make_word:set_session(session)
@@ -354,6 +354,7 @@ function controller:init(t)
         }
     } 
     
+    
     list = t.make_list{
         orientation = "HORIZONTAL",
         elements = {keybd_list, right_side_list},
@@ -361,6 +362,8 @@ function controller:init(t)
         resets_focus_to = 1,
         wrap = true,
     }
+    
+    keybd_list:define_key_event(keys.Up, function() list:on_key_down(keys.Right) end )
     
     function controller:hide_continue()
         right_side_list:hide_button(1)

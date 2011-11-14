@@ -1,7 +1,7 @@
 local self = Group{}
 
 local my_turn_list, their_turn_list, list_of_lists, status, win_loss_text, entry_info
-local list_entry, game_state,guess_word,make_word, ls, game_history
+local list_entry, game_state, guess_word, make_word, ls, game_history, swing_sign
 
 local loaded = false
 
@@ -19,6 +19,7 @@ function self:init(t)
     guess_word    = t.guess_word   or error("must pass guess_word",    2)
     make_word     = t.make_word    or error("must pass make_word",     2)
     game_history  = t.game_history or error("must pass game_history",  2)
+    swing_sign    = t.swing_sign   or error("must pass swing_sign",    2)
     ls            = t.ls           or error("must pass ls",            2)
     
     
@@ -27,28 +28,36 @@ function self:init(t)
     
     self:add( Text{
         text = "Their Move",
-        font = g_font .. " bold 35px",
+        font = g_font.." 42px",
         color = {0,0,0},
-        x     = 405-2,
+        w     = t.img_srcs.their_move_bg.w,
+        alignment = "CENTER",
+        x     = 319-2,
         y     = 720-2,
     }, Text{
         text = "Their Move",
-        font = g_font .. " bold 35px",
-        color = {167,167,167},
-        x     = 405,
+        font = g_font.." 42px",
+        color = "b7b7b7",
+        w     = t.img_srcs.their_move_bg.w,
+        alignment = "CENTER",
+        x     = 319,
         y     = 720,
     })
     self:add( Text{
         text = "My Move",
-        font = g_font .. " bold 35px",
+        font = g_font.." bold 42px",
         color = {0,0,0},
-        x     = 832-2,
+        w     = t.img_srcs.their_move_bg.w,
+        alignment = "CENTER",
+        x     = 729-2,
         y     = 720-2,
     }, Text{
         text = "My Move",
-        font = g_font .. " bold 35px",
-        color = {167,167,167},
-        x     = 832,
+        font = g_font.." bold 42px",
+        color = "b7b7b7",
+        w     = t.img_srcs.their_move_bg.w,
+        alignment = "CENTER",
+        x     = 729,
         y     = 720,
     })
     --Components
@@ -67,7 +76,7 @@ function self:init(t)
                 
             else
                 
-                entry_info.text = entry:status()
+                swing_sign:new_text(entry:status())
                 
                 return true
                 
@@ -90,7 +99,7 @@ function self:init(t)
                 
             else
                 
-                entry_info.text = entry:status()
+                swing_sign:new_text(entry:status())
                 
                 return true
                 
@@ -99,7 +108,7 @@ function self:init(t)
         end
     }
     side_buttons    = t.side_buttons:make{
-        on_focus = function() entry_info.text = "" end,
+        on_focus = function() swing_sign:new_text(false) end,
         x = 1120, y = 784, spacing = 874-784-66, buttons = {
             {name = "New Game", color = "r", select = function()
                     
@@ -347,11 +356,15 @@ do
     
     function self:report_win_loss()
         
-        if not animating then
+        local t = setup_text()
+        
+        if not swing_sign:holding() and t ~= "" then
             
-            animating = true
+            --wl_tl:on_completed()
+            swing_sign:new_text(t,6000)
             
-            wl_tl:on_completed()
+            wins   = {}
+            losses = {}
             
         end
         

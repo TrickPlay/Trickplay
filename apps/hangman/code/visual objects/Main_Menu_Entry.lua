@@ -4,7 +4,7 @@ setmetatable(all_mmes,{__mode = "k"})
 
 local mme = {}
 
-local logic, box_w, entry_h, score_limit, guess_word, make_word
+local logic, box_w, entry_h, score_limit, guess_word, make_word, img_srcs
 
 local function update_times()
     
@@ -34,6 +34,7 @@ function mme:init(t)
     score_limit  = t.score_limit or error( "must pass score_limit", 2 )
     guess_word   = t.guess_word  or error( "must pass guess_word",  2 )
     make_word    = t.make_word   or error( "must pass make_word",   2 )
+    img_srcs     = t.img_srcs    or error( "must pass img_srcs",    2 )
     ls           = t.ls          or error( "must pass ls",          2 )
     
 end
@@ -55,16 +56,23 @@ function mme:make(sesh)
     ----------------------------------------------------------------------------
     
     local their_name = Text{
-        text  = "Invite Pending",
-        font  = g_font .. " Medium 28px",
-        color = "a7a7a7",
-        x     = 10,
+        text  = "invite pending",
+        font  = g_font .. " Medium 36px",
+        color = "b7b7b7",
+        x     = 20,
         y     = 5,
+    }
+    local their_name_s = Text{
+        text  = "invite pending",
+        font  = g_font .. " Medium 36px",
+        color = "000000",
+        x     = 20-2,
+        y     = 5-2,
     }
     
     local time_remaining = Text{
         text  = "",
-        font  = g_font .. " Medium 20px",
+        font  = g_font .. " Medium 28px",
         color = "aaaa00",
         x     = box_w - 10,
         y     = 15,
@@ -75,22 +83,22 @@ function mme:make(sesh)
         end,
     }
     
-    local top_line = Rectangle{
+    local top_line = Clone{source = img_srcs.hr, y = -1}--[[Rectangle{
         w = box_w-6,
         h = 2,
         x = 3,
         y = -1,
         color = "a7a7a7",
-    }
-    local btm_line = Rectangle{
+    }]]
+    local btm_line = Clone{source = img_srcs.hr, y = entry_h-1}--[[Rectangle{
         w = box_w-6,
         h = 2,
         x = 3,
         y = entry_h -1,
         color = "a7a7a7",
-    }
+    }]]
     
-    entry:add(their_name,top_line,btm_line,time_remaining)
+    entry:add(their_name_s,their_name,top_line,btm_line,time_remaining)
     
     
     --methods
@@ -116,6 +124,7 @@ function mme:make(sesh)
         
         
         their_name.text     = sesh_ref.opponent_name or "Invite Pending"
+        their_name_s.text     = sesh_ref.opponent_name or "Invite Pending"
         time_remaining.text = sesh_ref.time_rem      or ""
         
         if sesh_ref.my_score == score_limit then
@@ -189,11 +198,11 @@ function mme:make(sesh)
             
             if sesh_ref.phase == "MAKING" then
                 
-                return "Waiting on "..sesh_ref.opponent_name.." to make a word."
+                return "Waiting for "..sesh_ref.opponent_name.." to make a word."
                 
             else
                 
-                return "Waiting on "..sesh_ref.opponent_name.." to guess the word '"..sesh_ref.word.."'."
+                return "Waiting for "..sesh_ref.opponent_name.." to guess '"..sesh_ref.word.."'."
                 
             end
             
