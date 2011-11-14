@@ -35,8 +35,8 @@ timeline:start()
 
 -- Tests --
 
--- Create a path using curve_to then verify it finishes at the last position.
-function test_Path_curve_to ()
+-- Create a string path then verify it finishes at the last position.
+function test_Path_add_string_path ()
     assert_equal( myText1.position[1] , 1675 , "Result: "..myText1.position[1].." Expected: 1675" )
     assert_equal( myText1.position[2] , 700 ,  "Result: "..myText1.position[2].." Expected: 700" )
 end
