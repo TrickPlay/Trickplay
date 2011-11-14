@@ -9,7 +9,7 @@ function clipped_list:init(t)
     
 end
 
-
+local function hl_to_index(i) return entry_h*(i-1)+2 end
 function clipped_list:make(t)
     
     if type(t) ~= "table" then error("must pass a table as the parameter", 2) end
@@ -35,10 +35,21 @@ function clipped_list:make(t)
     ----------------------------------------------------------------------------
     local hl = Clone{source = hl, opacity = 0}
     
+    local no_sessions_text_s = Text{
+        text    = t.empty_string or error("must pass empty_string",2),
+        alignment = "CENTER",
+        font    = g_font.." 30px",
+        color   = "000000",
+        x       = 10,--w/2,
+        wrap    = true,
+        w       = w - 20-2,
+        y       = 10-2,
+    }
+    
     local no_sessions_text = Text{
         text    = t.empty_string or error("must pass empty_string",2),
         alignment = "CENTER",
-        font    = g_font .. " 30px",
+        font    = g_font.." 30px",
         color   = "aaaaaa",
         x       = 10,--w/2,
         wrap    = true,
@@ -46,7 +57,7 @@ function clipped_list:make(t)
         y       = 10,
     }
     --no_sessions_text.anchor_point = {no_sessions_text.w/2,no_sessions_text.h/2}
-    list:add(hl,no_sessions_text)
+    list:add(hl,no_sessions_text_s,no_sessions_text)
     
     --attributes
     ----------------------------------------------------------------------------
@@ -112,8 +123,13 @@ function clipped_list:make(t)
             
         end
         no_sessions_text.opacity = 255
+        no_sessions_text_s.opacity = 255
         curr_i    = 1
         top_vis_i = 1
+        hl_to_index(curr_i)
+        clip_table[2] = 0
+        list.y    = y
+        list.clip = clip_table 
         animating = false
         
     end
@@ -133,7 +149,7 @@ function clipped_list:make(t)
     local on_new_frame_all = function(self,ms,p)
         
         clip_table[2] = -clip_y:get_value(p)
-        print(clip_table[2])
+        --print(clip_table[2])
         list.y    = clip_y:get_value(p) +y
         list.clip = clip_table 
         hl.y      = hl_y:get_value(p)
@@ -182,6 +198,7 @@ function clipped_list:make(t)
     function list:add_entry(entry,animate)
         
         no_sessions_text.opacity = 0
+        no_sessions_text_s.opacity = 0
         
         if app_state.state == "MAIN_PAGE" and top_vis_i <= 2 then
             
@@ -198,7 +215,7 @@ function clipped_list:make(t)
             end
             animating = true
             dumptable(list.clip)
-            print(list.clip[2] - entry_h)
+            --print(list.clip[2] - entry_h)
             
             clip_y.from = list.y-y
             clip_y.to   = list.clip[2] + entry_h
@@ -220,9 +237,9 @@ function clipped_list:make(t)
                 }
                 
                 list.y    = list.y - entry_h
-                dumptable(list.clip)
+                --dumptable(list.clip)
                 list.clip = { 0,list.clip[2] + entry_h,w,h}
-                dumptable(list.clip)
+                --dumptable(list.clip)
                 
                 
                 for i = 1, # list_data do
@@ -235,7 +252,7 @@ function clipped_list:make(t)
                 
                 if list_data[curr_i] == nil then curr_i = #list_data end
                 
-                hl.y = list_data[curr_i].y
+                hl.y =  hl_to_index(curr_i)--list_data[curr_i].y
             end
             move_hl:start()
             
@@ -248,7 +265,7 @@ function clipped_list:make(t)
             for i = 1, # list_data do
                 
                 list_data[i].y = entry_h * (i - 1)
-                print(i,entry_h)
+                --print(i,entry_h)
             end
             
             --[[
@@ -312,6 +329,7 @@ function clipped_list:make(t)
                     end_of_animation()
                     if #list_data == 0 then
                         no_sessions_text:animate{duration = 100, opacity = 255}
+                        no_sessions_text_s:animate{duration = 100, opacity = 255}
                     end
                     curr_i = curr_i - 1
                     if curr_i < 1 then curr_i = 1 end
@@ -332,7 +350,7 @@ function clipped_list:make(t)
                         
                         tl.on_new_frame = function(self,ms,p)
                             
-                            hl.y = entry_h * (curr_i - 1 - p)
+                            hl.y = hl_to_index(curr_i-p)--entry_h * (curr_i - 1 - p)
                             
                             entry.opacity = 255*(1-p)
                             
@@ -391,7 +409,7 @@ function clipped_list:make(t)
                             
                         end
                         
-                        hl.y = entry_h * (curr_i - 1 - p)
+                        hl.y = hl_to_index(curr_i-p)--entry_h * (curr_i - 1 - p)
                         
                         entry.opacity = 255*(1-p)
                         
@@ -411,7 +429,7 @@ function clipped_list:make(t)
                     end
                     
                     --if curr_i > remove_i, then the hl doesn't move
-                    hl.y = list_data[curr_i].y
+                    hl.y = hl_to_index(curr_i)--list_data[curr_i].y
                     
                     entry.opacity = 255*(1-p)
                     
@@ -547,7 +565,8 @@ function clipped_list:make(t)
             
             entry:unparent()
             curr_i = curr_i - 1
-            hl.y = list_data[curr_i] ~= nil and list_data[curr_i].y or  1
+            if curr_i < 1 then curr_i = 1 end
+            hl.y = list_data[curr_i] ~= nil and hl_to_index(curr_i)--[[list_data[curr_i].y]] or  1
             if remove_i < curr_i then
                 
                 list.y = list.y + entry_h
@@ -560,6 +579,7 @@ function clipped_list:make(t)
             end
             if #list_data == 0 then
                 no_sessions_text.opacity = 255
+                no_sessions_text_s.opacity = 255
             end
             
             if callback then callback() end
@@ -613,7 +633,7 @@ function clipped_list:make(t)
             curr_i = curr_i - 1
             
             hl_y.from = hl.y
-            hl_y.to   = entry_h*(curr_i-1)
+            hl_y.to   = hl_to_index(curr_i)--entry_h*(curr_i-1)+2
             
             move_hl:start()
             t.on_focus(list_data[curr_i])
@@ -654,7 +674,7 @@ function clipped_list:make(t)
             curr_i = curr_i +1
             
             hl_y.from = hl.y
-            hl_y.to   = entry_h*(curr_i-1)
+            hl_y.to   = hl_to_index(curr_i)--entry_h*(curr_i-1)+2
             
             move_hl:start()
             t.on_focus(list_data[curr_i])
