@@ -13,18 +13,23 @@
 
 @interface ResourceManager : NSObject <AsyncImageViewDelegate> {
     TVConnection *tvConnection;
-
+    
     NSMutableDictionary *resourceNames;
     NSMutableDictionary *resources;
     
     NSMutableDictionary *loadingResources;
 }
 
+@property (readonly) NSMutableDictionary *resources;
+
 - (id)initWithTVConnection:(TVConnection *)tvConnection;
 
 - (void)declareResourceWithObject:(id)Object forKey:(id)key;
 - (void)loadImageDataForImageView:(AsyncImageView *)imageView withResource:(NSString *)name;
+
+- (void)loadResource:(NSString *)name;
 - (NSData *)fetchResource:(NSString *)name;
+
 - (AsyncImageView *)fetchImageViewUsingResource:(NSString *)name frame:(CGRect)frame;
 - (NSMutableDictionary *)getResourceInfo:(NSString *)name;
 

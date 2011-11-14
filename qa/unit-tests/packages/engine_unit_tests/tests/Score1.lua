@@ -72,27 +72,27 @@ score1:start()
 
 --  Did all timelines in the score complete? --
 function test_score_basic ()
-    assert_equal( score_loop_count , 3 , "Score looped ",score_loop_count," times. Expected: 3" )
+    assert_equal( score_loop_count , 3 , "Score looped "..score_loop_count.." times. Expected: 3" )
 end
 
 -- Did score_on_started get called?  --
 function test_score_on_started ()
-    assert_true ( score_on_started_called, "score.on_started returned", score_on_started_called, ". Expected true" )
+    assert_true ( score_on_started_called, "score.on_started returned"..tostring(score_on_started_called)..". Expected true" )
 end
 
 -- Did score_on_completed get called?  --
 function test_score_on_completed ()
-    assert_true ( score_on_completed_called, "score.on_completed returned", score_on_completed_called, ". Expected true" )
+    assert_true ( score_on_completed_called, "score.on_completed returned"..tostring(score_on_completed_called)..". Expected true" )
 end
 
 --  Verify score.loop returns false as expected --
 function test_score_loop_false ()
-    assert_false ( score1.loop , "score.loop returned ", score1.loop, ". Expected false" )
+    assert_false ( score1.loop , "score.loop returned "..tostring(score1.loop).."..Expected false" )
 end
 
 --   score.is_playing should return false as score.loop was set to false.
 function test_score_is_playing_false ()
-    assert_false ( score1.is_playing , "score.is_playing returned ", score1.is_playing, ". Expected false" )
+    assert_false ( score1.is_playing , "score.is_playing returned "..tostring(score1.is_playing)..". Expected false" )
 end
 
 

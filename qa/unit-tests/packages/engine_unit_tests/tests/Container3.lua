@@ -40,7 +40,7 @@ local children = g.children
 
 -- Verify that container:clear removes all child elements.
 function test_Container_group_clear ()
-	assert_equal (#children, 0,  "container.clear failed")
+	assert_equal (#children, 0,  "Returned: "..#children.." Expected: 0")
 end
 
 
