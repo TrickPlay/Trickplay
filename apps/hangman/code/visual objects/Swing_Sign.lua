@@ -78,7 +78,7 @@ new_text_tl_1 = Timeline{
             sign_g.x_rotation = {-sway_interval.from*math.cos(math.pi/2*p),0,0}
         end
         sign_g.x_rotation   = {-sway_interval.from*math.cos(math.pi/2*p),0,0}
-        fade_in_txt.scale   = {1+.3*(1-p),1+.3*(1-p)}
+        fade_in_txt.scale   = {1+.5*(1-p),1+.5*(1-p)}
         fade_in_txt.opacity =   155+100*p
     end,
     on_completed = function(self)
@@ -90,8 +90,10 @@ new_text_tl_1 = Timeline{
 new_text_tl_2 = Timeline{
     duration  = sway.duration / 4,
     on_started = function()
-        sign_text.markup = fade_in_txt.txt
+        sign_text.markup   = fade_in_txt.txt
         sign_text_s.markup = fade_in_txt.txt
+        fade_in_txt.markup = ""
+        fade_in_txt.txt = ""
         fade_in_txt.opacity = 0
     end,
     on_new_frame = function(self,ms,p)
@@ -138,9 +140,11 @@ drop = Timeline{
     duration  = sway.duration / 2,
     mode = "EASE_OUT_BACK",
     on_started = function()
-        sign_text.markup   = new_text
-        sign_text_s.markup = new_text
-        new_text = nil
+        if new_text then
+            sign_text.markup   = new_text
+            sign_text_s.markup = new_text
+            new_text = nil
+        end
         sign_y_interval.from = self.y
         sign_y_interval.to   = -5
     end,
@@ -233,7 +237,18 @@ function self:new_text(text,lock_message)
         
     end
     print("Swing_Sign:new_text(",text,",",lock_message,")")
-    new_text = text
+    
+    if  new_text == text or
+        (fade_in_txt.markup == "" and sign_text.markup   == text) or
+        (fade_in_txt.markup ~= "" and fade_in_txt.markup == text) then
+        print("matched to:",fade_in_txt.markup)
+        print("matched to:",sign_text.markup)
+        
+    else
+        new_text = text
+    end
+    
+    
     
     if lock_message then
         
@@ -243,17 +258,12 @@ function self:new_text(text,lock_message)
         
     end
     
-    if  sway.is_playing or
+    if not( sway.is_playing or
         new_text_tl_1.is_playing or
         new_text_tl_2.is_playing or
         pull_up.is_playing or
-        drop.is_playing then
+        drop.is_playing) and text then
         
-        new_text = text
-        
-    elseif text then
-        print("dahhhh")
-        new_text = text
         drop:start()
         
     end
