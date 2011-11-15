@@ -2,7 +2,7 @@ local Spash_Page = Group{ name = "Splash Page", opacity = 0}
 
 local right_side_bar, right_side_list, game_server, set_GS_username, front_page, game_definition
 
-
+local keybd_w = 410
 
 local launch_key_board = function()
     
@@ -14,7 +14,7 @@ local launch_key_board = function()
     screen:animate{
         duration = 500,
         mode = "EASE_OUT_QUAD",
-        x    = -450,
+        x    = -keybd_w,
     }
     function keyboard:on_submit( results )
         assert( type(results)          == "table" )
@@ -40,7 +40,7 @@ local launch_key_board = function()
                     screen:animate{
                         duration = 500,
                         mode = "EASE_OUT_QUAD",
-                        x    = -450,
+                        x    = -keybd_w,
                     }
                     
                     keyboard:show{
@@ -64,7 +64,7 @@ local launch_key_board = function()
                     screen:animate{
                         duration = 500,
                         mode = "EASE_OUT_QUAD",
-                        x    = -450,
+                        x    = -keybd_w,
                     }
                     
                     keyboard:show{
@@ -88,7 +88,7 @@ local launch_key_board = function()
                     screen:animate{
                         duration = 500,
                         mode = "EASE_OUT_QUAD",
-                        x    = -450,
+                        x    = -keybd_w,
                     }
                     
                     keyboard:show{
@@ -112,7 +112,7 @@ local launch_key_board = function()
                     screen:animate{
                         duration = 500,
                         mode = "EASE_OUT_QUAD",
-                        x    = -450,
+                        x    = -keybd_w,
                     }
                     
                     keyboard:show{
@@ -165,7 +165,7 @@ local launch_key_board = function()
                                 screen:animate{
                                     duration = 500,
                                     mode = "EASE_OUT_QUAD",
-                                    x    = -450,
+                                    x    = -keybd_w,
                                 }
                                 
                                 keyboard:show{
