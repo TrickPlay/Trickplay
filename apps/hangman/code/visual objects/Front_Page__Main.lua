@@ -207,16 +207,25 @@ function self:init(t)
     --list_of_lists:define_key_event(keys.BLUE,   side_buttons.buttons[3].select)
     
     status = Text{
-        x            = screen_w - 250,
+        x            = screen_w - 50,
         y            = screen_h - 50,
         w            = 400,
         font         = g_font .. " 40px",
         color        = "ffffff",
         ellipsize    = "END",
         alignment    = "RIGHT",
-        anchor_point = {300,40},
+        on_text_changed = function(self)
+            
+            self.w = -1
+            
+            if self.w > 500 then self.w = 500 end
+            
+            status.anchor_point = { status.w, status.h/2 }
+            status.position = {screen_w - 50,screen_h - 50}
+            status:move_anchor_point( status.w/2, status.h/2 )
+        end
     }
-    status:move_anchor_point( status.w/2, status.h/2 )
+    status:move_anchor_point( status.w, status.h/2 )
     
     local scale_t = {}
     status.wobble = Timeline{
