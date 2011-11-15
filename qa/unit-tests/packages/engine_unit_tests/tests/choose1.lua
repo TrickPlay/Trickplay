@@ -15,10 +15,10 @@ choose_nil = choose (nil, 2, 3)
 -- Tests --
 
 function test_global_choose ()
-    assert_equal(choose_pass, 2, "choose failed" )
-    assert_equal(choose_fail, 3, "choose failed" )
-    assert_equal(choose_true, 2, "choose failed" )
-    assert_equal(choose_nil, 3, "choose failed" )
+    assert_equal(choose_pass, 2, "choose_pass returned "..choose_pass.." Expected: 2")
+    assert_equal(choose_fail, 3, "choose_fail returned "..choose_fail.." Expected: 3")
+    assert_equal(choose_true, 2, "choose_true returned "..choose_true.." Expected: 2")
+    assert_equal(choose_nil, 3,  "choose_nil returned "..choose_nil.." Expected: 3")
 end
 
 

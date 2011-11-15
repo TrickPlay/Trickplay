@@ -84,6 +84,21 @@ public:
 
 	static gchar * get_contents( GFile * file , gsize & length );
 
+	// Returns a list of native paths for all files under the root.
+	// The first item in the pair is the full absolute path, the
+	// second is the path relative to the root. Note that it does
+	// not return anything for empty directories. An empty list means
+	// there was an error.
+
+	StringPairList get_native_children() const;
+
+	// Returns a list of platform independent relative paths to
+	// all children (files). Note that it does not return anything
+	// for empty directories. An empty list means there was a
+	// problem.
+
+	StringList get_pi_children() const;
+
 private:
 
 	// Get a child GFile with a platform-independent path. Returns 0 if

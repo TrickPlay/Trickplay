@@ -2,8 +2,8 @@ test_group = Group ()
 
 -- Unit Test Framework
 dofile( "packages/engine_unit_tests/harness/unit_test.lua" )
-
 -- Unit Tests
+
 --dofile( "urlRequest2.lua" )  -- Failing because can't fail url request due to URL redirect.
 dofile( "packages/engine_unit_tests/tests/Alpha1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/Alpha2.lua" )
@@ -78,6 +78,7 @@ dofile( "packages/engine_unit_tests/tests/Score2.lua" )
 dofile( "packages/engine_unit_tests/tests/Score3.lua" )
 dofile( "packages/engine_unit_tests/tests/Score4.lua" )
 
+dofile( "packages/engine_unit_tests/tests/Timeline7.lua" )
 
 screen:add (test_group)
 

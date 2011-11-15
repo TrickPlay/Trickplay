@@ -402,6 +402,63 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
+
+class StartDebuggerRequestHandler: public Handler
+{
+public:
+
+    StartDebuggerRequestHandler( TPContext * ctx )
+	:
+	    Handler( ctx , "/debug/start" )
+	{
+	}
+
+	void handle_http_get( const HttpServer::Request& request, HttpServer::Response& response )
+	{
+		response.set_status( HttpServer::HTTP_STATUS_OK );
+
+		String result = JSON::Object().stringify();
+
+		App * current_app = context->get_current_app();
+
+        {
+		    using namespace JSON;
+
+            if( current_app )
+            {
+                if ( Debugger * debugger = current_app->get_debugger() )
+                {
+                	// This makes sure the debugger is up and running and will
+                	// not break on the next line for the current app.
+
+                	debugger->install( false );
+
+                	// This makes sure that if a new app is launched, the debugger
+                	// will get installed and will break on the first line.
+
+                	tp_context_set_int( context , TP_START_DEBUGGER , 1 );
+
+                    Object object;
+
+                    object[ "port" ] = debugger->get_server_port();
+
+                    result = object.stringify();
+                }
+            }
+        }
+
+		if ( ! result.empty() )
+		{
+			response.set_response( "application/json", result );
+		}
+		else
+		{
+			response.set_status( HttpServer::HTTP_STATUS_NOT_FOUND );
+		}
+	}
+};
+
 #endif // TP_PRODUCTION
 
 //-----------------------------------------------------------------------------
@@ -606,6 +663,7 @@ HttpTrickplayApiSupport::HttpTrickplayApiSupport( TPContext * ctx )
 #ifndef TP_PRODUCTION
 
 	handlers.push_back( new DebugUIRequestHandler( context ) );
+	handlers.push_back( new StartDebuggerRequestHandler( context ) );
 
 #endif
 }

@@ -217,56 +217,20 @@ function Spash_Page:init(t)
     game_definition = t.game_definition or error( "must pass game_definition", 2 )
     
     
-    right_side_bar = {}
-    right_side_bar[1] =make_button{
-        clone           = true,
-        unfocus_fades   = false,
-        select_function = function()
-            print("'Start Game' Pressed")
-            launch_key_board()
-        end,
-        unfocused_image = img_srcs.button_r,
-        focused_image   = img_srcs.button_f,
-    }
-    right_side_bar[1].x = 1190
-    right_side_bar[1].y = 750
-    right_side_bar[1]:add(Text{
-        color = "ffffff",
-        text  = "Log In",
-        font  = t.font .. " Bold 28px",
-        x     = 30,
-        y     = 15,
-    })
     
-    right_side_bar[2] =make_button{
-        clone           = true,
-        unfocus_fades   = false,
-        select_function = function()
-            print("quit")
-            exit()
-        end,
-        unfocused_image = img_srcs.button_b,
-        focused_image   = img_srcs.button_f,
-    }
-    right_side_bar[2].x = right_side_bar[1].x
-    right_side_bar[2].y = right_side_bar[1].y + img_srcs.button_f.h + 20
-    right_side_bar[2]:add(Text{
-        color = "ffffff",
-        text  = "Quit",
-        font  = t.font .. " Bold 28px",
-        x     = 30,
-        y     = 15,
-    })
-    
-    right_side_list = t.make_list{
-        orientation = "VERTICAL",
-        elements = right_side_bar,
-        display_passive_focus = false,
-        resets_focus_to = 1,
+    right_side_list = t.side_buttons:make{
+        x = 1120, y = 784, spacing = 874-784-66, buttons = {
+            {name = "Log In", select = function()
+                print("'Start Game' Pressed")
+                launch_key_board()
+            end},
+            {name = "Quit", select = function()
+                print("quit")
+                exit()
+            end},
+        }
     }
     
-    right_side_list:define_key_event(keys.RED,  right_side_bar[1].select)
-    right_side_list:define_key_event(keys.BLUE, right_side_bar[2].select)
     
     Spash_Page:add( right_side_list )
     

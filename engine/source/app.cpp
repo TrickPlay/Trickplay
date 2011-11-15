@@ -1433,9 +1433,25 @@ Debugger * App::get_debugger()
 
 #else
 
-    return NULL;
+    return 0;
 
 #endif
+}
+
+//-----------------------------------------------------------------------------
+
+guint16 App::get_debugger_port()
+{
+#ifndef TP_PRODUCTION
+
+    return debugger.get_server_port();
+
+#else
+
+    return 0;
+
+#endif
+
 }
 
 //-----------------------------------------------------------------------------

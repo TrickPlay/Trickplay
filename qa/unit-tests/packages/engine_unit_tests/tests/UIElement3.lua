@@ -24,7 +24,7 @@ image1:animate{duration=20000, loop=false, x=400, y=400, h=400, w=400, opacity=1
 
 -- Default properties of loading a simple image.
 function test_UIElement_image_is_animating ()
-    assert_equal(image1.is_animating, true, "new image1.is_animating ~= false")
+    assert_equal(image1.is_animating, true, "image1.is_animating returned: ", image1.is_animating, " Expected: true")
 end
 
 
