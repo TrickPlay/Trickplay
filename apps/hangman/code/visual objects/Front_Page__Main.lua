@@ -207,9 +207,9 @@ function self:init(t)
     --list_of_lists:define_key_event(keys.BLUE,   side_buttons.buttons[3].select)
     
     status = Text{
-        x            = screen_w - 50,
+        x            = screen_w - 250,
         y            = screen_h - 50,
-        w            = 300,
+        w            = 400,
         font         = g_font .. " 40px",
         color        = "ffffff",
         ellipsize    = "END",
