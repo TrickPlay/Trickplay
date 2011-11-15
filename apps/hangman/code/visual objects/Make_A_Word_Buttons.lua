@@ -59,6 +59,7 @@ function controller:init(t)
                 if keybd_letters[i].used then return end
                 
                 right_side_list:whiten_text(1)
+                right_side_list:whiten_text(2)
                 --right_side_txt[1].color = "ffffff"
                 
                 ls:put_letter( keybd_letters[i].text, letter_slot_i )
@@ -196,7 +197,9 @@ function controller:init(t)
             end},
             {name = "Reset", select = function()     
                 print("reset")
+                if ls:get_word():len() == 0 then return end
                 right_side_list:blacken_text(1)
+                right_side_list:blacken_text(2)
                 for i,l in pairs(keybd_letters) do
                     
                     l.color = "ffffff"
@@ -363,6 +366,7 @@ function controller:set_session(s)
     end
     session:add_view(sk)
     right_side_list:blacken_text(1)
+    right_side_list:blacken_text(2)
 end
 
 return controller
