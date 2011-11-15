@@ -216,12 +216,16 @@ function controller:init(t)
                 session:update_views()
                 
                 session.viewing = false
-                game_server:update(
-                    session,
-                    function(t)
-                        app_state.state = "MAIN_PAGE"
-                    end
-                )
+                if session.opponent_name then
+                    game_server:update(
+                        session,
+                        function(t)
+                            app_state.state = "MAIN_PAGE"
+                        end
+                    )
+                else
+                    app_state.state = "MAIN_PAGE"
+                end
                 session = nil
             end},
             {name = "Quit", select = function()
