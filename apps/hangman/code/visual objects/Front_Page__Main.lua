@@ -175,7 +175,7 @@ function self:init(t)
                         app_state.state   = "LOADING"
                     end)
                     
-                    g_user.name        = nil
+                    g_user.name = ""
                     
                     self:reset()
                     
@@ -379,6 +379,8 @@ function self:won_against(entry)
         
         g_user.wins = g_user.wins + 1
         
+        if g_user.wins > 9999 then g_user.wins = 9999 end
+        
         self:add_win(entry:get_session().opponent_name)
         
         game_history:set_wins( g_user.wins )
@@ -392,6 +394,8 @@ function self:lost_against(entry)
     my_turn_list:remove_entry(entry,function()
         
         g_user.losses = g_user.losses + 1
+        
+        if g_user.losses > 9999 then g_user.losses = 9999 end
         
         self:add_loss(entry:get_session().opponent_name)
         
