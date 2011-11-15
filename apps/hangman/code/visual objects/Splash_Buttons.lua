@@ -189,11 +189,6 @@ local launch_key_board = function()
     
     function keyboard:on_cancel( results )
         
-        dolater(
-            800,
-            exit
-        )
-        
         screen:animate{
             duration = 500,
             mode = "EASE_IN_QUAD",
