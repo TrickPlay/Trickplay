@@ -154,7 +154,10 @@ function controller:init(t)
                     controller:change_message("Sending...")
                     
                     list:set_state("UNFOCUSED")
+                    screen:grab_key_focus()
+                    
                     session.viewing = false
+                    
                     if session.opponent_name == false then
                         
                         main_menu:add_entry(session,"MAKE_A_WORD")

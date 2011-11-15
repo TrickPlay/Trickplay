@@ -61,8 +61,6 @@ function mme:make(sesh)
         color = "b7b7b7",
         x     = 20,
         y     = 5,
-        w     = 210,
-        ellipsize    = "END",
     }
     local their_name_s = Text{
         text  = "invite pending",
@@ -70,8 +68,6 @@ function mme:make(sesh)
         color = "000000",
         x     = 20-2,
         y     = 5-2,
-        w     = 210,
-        ellipsize    = "END",
     }
     
     local time_remaining = Text{
@@ -126,9 +122,22 @@ function mme:make(sesh)
         
         assert(sesh_ref ~= nil)
         
-        
-        their_name.text     = sesh_ref.opponent_name or "Invite Pending"
-        their_name_s.text     = sesh_ref.opponent_name or "Invite Pending"
+        if not sesh_ref.opponent_name then
+            their_name.text     = "Invite Pending"
+            their_name_s.text   = "Invite Pending"
+            
+            their_name.w           = -1
+            their_name.ellipsize   = "NONE"
+            their_name_s.w         = -1
+            their_name_s.ellipsize = "NONE"
+        else
+            their_name.text     = sesh_ref.opponent_name
+            their_name_s.text   = sesh_ref.opponent_name
+            their_name.w           = 210
+            their_name.ellipsize   = "END"
+            their_name_s.w         = 210
+            their_name_s.ellipsize = "END"
+        end
         time_remaining.text = sesh_ref.time_rem      or ""
         
         if sesh_ref.my_score == score_limit then
