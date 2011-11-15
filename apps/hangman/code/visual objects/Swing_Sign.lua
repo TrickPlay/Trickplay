@@ -7,13 +7,23 @@ sway_interval = Interval(0,0);
 local sway, new_text_tl_1, new_text_tl_2, pull_up, drop
 --visual pieces
 local sign_g, fade_in_txt, sign_text
+local new_text, waiting_text
 
+local lock_queue = {}
 local hold = false
 local hold_timer = Timer{
     on_timer = function(self_timer)
         assert(hold,"something went wrong")
-        hold = false
-        self_timer:stop()
+        
+        if #lock_queue == 0 then
+            hold = false
+            self_timer:stop()
+            new_text = waiting_text
+        else
+            local t = table.remove(lock_queue)
+            self_timer.interval = t.lock_message
+            new_text            = t.text
+        end
     end
 }
 hold_timer:stop()
@@ -229,9 +239,20 @@ end
 function self:holding() return hold end
 function self:new_text(text,lock_message)
     
+    if text == "" then return false end
+    
     if hold then
         
-        print("Swing_Sign:new_text(",text,",",lock_message,"): can't... holding")
+        if lock_message then
+            print("Swing_Sign:new_text(",text,",",lock_message,"): queuing")
+            
+            table.insert(lock_queue,{text=text,lock_message=lock_message})
+            
+        else
+            
+            waiting_text = text
+            print("Swing_Sign:new_text(",text,",",lock_message,"): can't... holding")
+        end
         
         return false
         

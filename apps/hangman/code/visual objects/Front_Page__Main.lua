@@ -292,11 +292,11 @@ do
     local losses = {}
     
     local  win_text = "You've won against: "
-    local lose_text = "\nYou've lost against: "
+    local lose_text = "You've lost against: "
     
     local animating = false
     
-    local function setup_text()
+    local function setup_win_text()
         
         local text = ""
         
@@ -315,6 +315,15 @@ do
             end
         end
         
+        return text
+    end
+    
+    local function setup_lose_text()
+        
+        local text = ""
+        
+        animating = true
+        
         if #losses ~= 0 then text = text..lose_text end
         
         for i = 1, #losses do
@@ -330,7 +339,6 @@ do
         
         return text
     end
-    
     local wl_tl = Timeline{
         duration = 10000,
         mode         = "EASE_IN_QUINT",
@@ -365,12 +373,11 @@ do
     
     function self:report_win_loss()
         
-        local t = setup_text()
-        
-        if not swing_sign:holding() and t ~= "" then
+        if not swing_sign:holding() then
             
             --wl_tl:on_completed()
-            swing_sign:new_text(t,6000)
+            swing_sign:new_text(setup_win_text(),6000)
+            swing_sign:new_text(setup_lose_text(),6000)
             
             wins   = {}
             losses = {}
