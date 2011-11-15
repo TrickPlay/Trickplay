@@ -60,14 +60,14 @@ function mme:make(sesh)
         font  = g_font .. " Medium 36px",
         color = "b7b7b7",
         x     = 20,
-        y     = 5,
+        y     = 3,
     }
     local their_name_s = Text{
         text  = "invite pending",
         font  = g_font .. " Medium 36px",
         color = "000000",
         x     = 20-2,
-        y     = 5-2,
+        y     = 3-2,
     }
     
     local time_remaining = Text{
@@ -75,7 +75,7 @@ function mme:make(sesh)
         font  = g_font .. " Medium 28px",
         color = "aaaa00",
         x     = box_w - 10,
-        y     = 15,
+        y     = 12,
         on_text_changed = function(self)
             
             self.anchor_point = {self.w,0}
@@ -133,9 +133,9 @@ function mme:make(sesh)
         else
             their_name.text     = sesh_ref.opponent_name
             their_name_s.text   = sesh_ref.opponent_name
-            their_name.w           = 210
+            their_name.w           = 190
             their_name.ellipsize   = "END"
-            their_name_s.w         = 210
+            their_name_s.w         = 190
             their_name_s.ellipsize = "END"
         end
         time_remaining.text = sesh_ref.time_rem      or ""

@@ -168,7 +168,7 @@ function controller:init(t)
                             print("got id back")
                             
                             app_state.state = "MAIN_PAGE"
-                            
+                            bg:slide_in_hangman()
                             session.id = id
                             session = nil
                             
@@ -181,7 +181,7 @@ function controller:init(t)
                         game_server:respond(session,function()
                             app_state.state = "MAIN_PAGE"
                             session = nil
-                            
+                            bg:slide_in_hangman()
                             
                         end)
                         
@@ -239,19 +239,24 @@ function controller:init(t)
                 print("quit")
                 screen:grab_key_focus()
                 
-                controller:change_message("Saving...")
+                
                 session.viewing = false
-                game_server:update(
-                    session,
-                    function(t)
-                        game_server:update_game_history(function()
-                            exit()
+                if session.opponent_name ~= false then
+                    controller:change_message("Saving...")
+                    game_server:update(
+                        session,
+                        function(t)
+                            game_server:update_game_history(function()
+                                exit()
+                                
+                                print("successfully updated")
+                            end)
                             
-                            print("successfully updated")
-                        end)
-                        
-                    end
-                )
+                        end
+                    )
+                else
+                    exit()
+                end
             end},
         }
     }
