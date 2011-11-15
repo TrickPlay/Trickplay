@@ -211,11 +211,11 @@ function mme:make(sesh)
             
             if sesh_ref.phase == "MAKING" then
                 
-                return "Waiting for "..sesh_ref.opponent_name.." to make a word."
+                return "Waiting for player to make a word."--"..sesh_ref.opponent_name.."
                 
             else
                 
-                return "Waiting for "..sesh_ref.opponent_name.." to guess '"..sesh_ref.word.."'."
+                return "Waiting for player to guess '"..sesh_ref.word.."'."--"..sesh_ref.opponent_name.."
                 
             end
             
