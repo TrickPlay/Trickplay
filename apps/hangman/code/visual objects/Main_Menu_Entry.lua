@@ -61,6 +61,8 @@ function mme:make(sesh)
         color = "b7b7b7",
         x     = 20,
         y     = 5,
+        w     = 210,
+        ellipsize    = "END",
     }
     local their_name_s = Text{
         text  = "invite pending",
@@ -68,6 +70,8 @@ function mme:make(sesh)
         color = "000000",
         x     = 20-2,
         y     = 5-2,
+        w     = 210,
+        ellipsize    = "END",
     }
     
     local time_remaining = Text{
