@@ -183,7 +183,7 @@ function game_hist:init(t)
         font  = g_font .. " Medium 40px",
         alignment = "CENTER",
         w     = t.img_srcs.game_hist_bg.w,
-        y     = losses.y+losses.h,
+        y     = losses.y+losses.h-10,
     }
     
     wins:move_anchor_point(        wins.w/2,    wins.h/2)    
