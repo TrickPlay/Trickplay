@@ -3,7 +3,7 @@
 local score_keeper = Group{ name = "Score Keeper", y = 20}
 
 
-local make_button, player_1_txt, player_2_txt,max_x_s
+local make_button, player_1_txt, player_2_txt, player_1_s, player_2_s, max_x_s
 local player_1_x_s = {}
 local player_2_x_s = {}
 
@@ -54,7 +54,7 @@ function score_keeper:init(t)
     vs.y = 15
     
     player_1_txt  = Text{
-        font      = t.font.." 35px",
+        font      = t.font.." Bold 35px",
         color     = "b1bcbe",
         y         = 10,
         on_text_changed = function(self)
@@ -72,11 +72,13 @@ function score_keeper:init(t)
             for i = 1,t.max_x_s do
                 player_1_x_s[i].x = self.x  - 47*(i-1) - 10 - t.img_srcs.x_off.w - 8 -- minus '8' for the stupid shadow
             end
+            
+            player_1_s.text = self.text
         end,
     }
     
     player_2_txt  = Text{
-        font      = t.font.." 35px",
+        font      = t.font.." Bold 35px",
         color     = "b1bcbe",
         y         = 10,
         on_text_changed = function(self)
@@ -94,13 +96,41 @@ function score_keeper:init(t)
             for i = 1,t.max_x_s do
                 player_2_x_s[i].x = self.x + self.w + 47*(i-1) + 10
             end
+            
+            player_2_s.text = self.text
+        end,
+    }
+    
+    player_1_s  = Text{
+        font      = t.font.." Bold 35px",
+        color     = "000000",
+        y         = player_1_txt.y+2,
+        on_text_changed = function(self)
+            
+            self.w = player_1_txt.w
+            self.x = player_1_txt.x+2
+            self.ellipsize = player_1_txt.ellipsize
+            
+        end,
+    }
+    
+    player_2_s  = Text{
+        font      = t.font.." Bold 35px",
+        color     = "000000",
+        y         = player_2_txt.y+2,
+        on_text_changed = function(self)
+            
+            self.w = player_2_txt.w
+            self.x = player_2_txt.x+2
+            self.ellipsize = player_2_txt.ellipsize
+            
         end,
     }
     
     player_1_txt.text = "Player_1"
     player_2_txt.text = "Player_2"
     
-    score_keeper:add(player_1_txt,player_2_txt,vs)
+    score_keeper:add(player_1_s,player_2_s,player_1_txt,player_2_txt,vs)
     
 end
 

@@ -85,9 +85,9 @@ function self:init(t)
         end
     }
     my_turn_list    = t.clipped_list:make{
-        x = 729,
+        x = 728,
         y = 780,
-        w = 350,
+        w = 351,
         h = 300,
         empty_string = "No Active Sessions",
         name = "'My Turn'",
