@@ -330,7 +330,19 @@ function controller:set_session(s)
     session = s
     session.viewing = true
     
-    if session.opponent_name then game_server:update(session,function() print("Updated server - Make Word Vieiwing session") end) end
+    if session.opponent_name then
+        
+        game_server:update(
+            session,
+            function()
+                
+                print("Updated server - Make Word Vieiwing session")
+                
+            end
+        )
+        
+    end
+    
     if s.opponent_name then
         
         sk:animate{

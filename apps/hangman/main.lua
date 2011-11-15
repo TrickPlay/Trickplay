@@ -29,12 +29,37 @@ function main()
     g_font     = "IM FELL English SC"
     app_state  = nil
     
-    g_user = {
-        name   = "",
-        id     = nil,
-        wins   = nil,
-        losses = nil
-    }
+    do
+        
+        local wins, losses
+        local local_t = {
+            wins   = 0,
+            losses = 0
+        }
+        g_user = {
+            name   = "",
+            id     = 0,
+        }
+        
+        g_user = setmetatable(
+            g_user,
+            {
+                __index = function(t,k)
+                    return local_t[k]
+                end,
+                __newindex = function(t,k,v)
+                    dumptable(g_user)
+                    if local_t[k] then
+                        
+                        local_t[k] = v > 9999 and 9999 or v
+                        
+                    end
+                    
+                end,
+            }
+        )
+    end
+    
     
     ----------------------------------------------------------------------------
     -- Generic functions                                                      --
