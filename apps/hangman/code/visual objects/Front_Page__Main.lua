@@ -153,7 +153,7 @@ function self:init(t)
                                 
                                 if t.state == json.null or t.state == nil then
                                     
-                                    game_server:get_session_state(t,f)
+                                    game_server:get_session_state(t.gameSessionId,f)
                                     
                                 else
                                     
