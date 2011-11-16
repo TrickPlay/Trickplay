@@ -60,14 +60,14 @@ function mme:make(sesh)
         font  = g_font .. " Medium 36px",
         color = "b7b7b7",
         x     = 20,
-        y     = 5,
+        y     = 3,
     }
     local their_name_s = Text{
         text  = "invite pending",
         font  = g_font .. " Medium 36px",
         color = "000000",
         x     = 20-2,
-        y     = 5-2,
+        y     = 3-2,
     }
     
     local time_remaining = Text{
@@ -75,7 +75,7 @@ function mme:make(sesh)
         font  = g_font .. " Medium 28px",
         color = "aaaa00",
         x     = box_w - 10,
-        y     = 15,
+        y     = 12,
         on_text_changed = function(self)
             
             self.anchor_point = {self.w,0}
@@ -122,9 +122,22 @@ function mme:make(sesh)
         
         assert(sesh_ref ~= nil)
         
-        
-        their_name.text     = sesh_ref.opponent_name or "Invite Pending"
-        their_name_s.text     = sesh_ref.opponent_name or "Invite Pending"
+        if not sesh_ref.opponent_name then
+            their_name.text     = "Invite Pending"
+            their_name_s.text   = "Invite Pending"
+            
+            their_name.w           = -1
+            their_name.ellipsize   = "NONE"
+            their_name_s.w         = -1
+            their_name_s.ellipsize = "NONE"
+        else
+            their_name.text     = sesh_ref.opponent_name
+            their_name_s.text   = sesh_ref.opponent_name
+            their_name.w           = 190
+            their_name.ellipsize   = "END"
+            their_name_s.w         = 190
+            their_name_s.ellipsize = "END"
+        end
         time_remaining.text = sesh_ref.time_rem      or ""
         
         if sesh_ref.my_score == score_limit then
@@ -192,17 +205,17 @@ function mme:make(sesh)
             
         elseif sesh_ref.opponent_name == false then
             
-            return "Waiting for an opponent."
+            return "Waiting for an opponent to join the game."
             
         else
             
             if sesh_ref.phase == "MAKING" then
                 
-                return "Waiting for "..sesh_ref.opponent_name.." to make a word."
+                return "Waiting for opponent to make a word."--"..sesh_ref.opponent_name.."
                 
             else
                 
-                return "Waiting for "..sesh_ref.opponent_name.." to guess '"..sesh_ref.word.."'."
+                return "Waiting for opponent to guess '"..sesh_ref.word.."'."--"..sesh_ref.opponent_name.."
                 
             end
             

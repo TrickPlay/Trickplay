@@ -85,9 +85,9 @@ function self:init(t)
         end
     }
     my_turn_list    = t.clipped_list:make{
-        x = 729,
+        x = 728,
         y = 780,
-        w = 350,
+        w = 351,
         h = 300,
         empty_string = "No Active Sessions",
         name = "'My Turn'",
@@ -175,7 +175,7 @@ function self:init(t)
                         app_state.state   = "LOADING"
                     end)
                     
-                    g_user.name        = nil
+                    g_user.name = ""
                     
                     self:reset()
                     
@@ -209,14 +209,23 @@ function self:init(t)
     status = Text{
         x            = screen_w - 50,
         y            = screen_h - 50,
-        w            = 300,
+        w            = 400,
         font         = g_font .. " 40px",
         color        = "ffffff",
         ellipsize    = "END",
         alignment    = "RIGHT",
-        anchor_point = {300,40},
+        on_text_changed = function(self)
+            
+            self.w = -1
+            
+            if self.w > 500 then self.w = 500 end
+            
+            status.anchor_point = { status.w, status.h/2 }
+            status.position = {screen_w - 50,screen_h - 50}
+            status:move_anchor_point( status.w/2, status.h/2 )
+        end
     }
-    status:move_anchor_point( status.w/2, status.h/2 )
+    status:move_anchor_point( status.w, status.h/2 )
     
     local scale_t = {}
     status.wobble = Timeline{
@@ -283,11 +292,11 @@ do
     local losses = {}
     
     local  win_text = "You've won against: "
-    local lose_text = "\nYou've lost against: "
+    local lose_text = "You've lost against: "
     
     local animating = false
     
-    local function setup_text()
+    local function setup_win_text()
         
         local text = ""
         
@@ -306,6 +315,15 @@ do
             end
         end
         
+        return text
+    end
+    
+    local function setup_lose_text()
+        
+        local text = ""
+        
+        animating = true
+        
         if #losses ~= 0 then text = text..lose_text end
         
         for i = 1, #losses do
@@ -321,7 +339,6 @@ do
         
         return text
     end
-    
     local wl_tl = Timeline{
         duration = 10000,
         mode         = "EASE_IN_QUINT",
@@ -356,12 +373,11 @@ do
     
     function self:report_win_loss()
         
-        local t = setup_text()
-        
-        if not swing_sign:holding() and t ~= "" then
+        if not swing_sign:holding() then
             
             --wl_tl:on_completed()
-            swing_sign:new_text(t,6000)
+            swing_sign:new_text(setup_win_text(),6000)
+            swing_sign:new_text(setup_lose_text(),6000)
             
             wins   = {}
             losses = {}
@@ -379,6 +395,8 @@ function self:won_against(entry)
         
         g_user.wins = g_user.wins + 1
         
+        if g_user.wins > 9999 then g_user.wins = 9999 end
+        
         self:add_win(entry:get_session().opponent_name)
         
         game_history:set_wins( g_user.wins )
@@ -392,6 +410,8 @@ function self:lost_against(entry)
     my_turn_list:remove_entry(entry,function()
         
         g_user.losses = g_user.losses + 1
+        
+        if g_user.losses > 9999 then g_user.losses = 9999 end
         
         self:add_loss(entry:get_session().opponent_name)
         

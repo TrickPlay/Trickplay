@@ -4,6 +4,7 @@ local keybd_letters  = {}
 local letter_scores  = {}
 local right_side_txt = {}
 
+local min_word_length = 2
 
 local controller = Group{ name = "Make Word", x = 490, y = 700, }
 
@@ -58,7 +59,10 @@ function controller:init(t)
                 
                 if keybd_letters[i].used then return end
                 
-                right_side_list:whiten_text(1)
+                if letter_slot_i > min_word_length then
+                    right_side_list:whiten_text(1)
+                end
+                right_side_list:whiten_text(2)
                 --right_side_txt[1].color = "ffffff"
                 
                 ls:put_letter( keybd_letters[i].text, letter_slot_i )
@@ -139,7 +143,7 @@ function controller:init(t)
                 print("play word")
                 local s = string.lower(ls:get_word())
                 
-                if s:len() == 0 then return end
+                if s:len() <= min_word_length then return end
                 
                 if check_word(s) then
                     
@@ -154,7 +158,10 @@ function controller:init(t)
                     controller:change_message("Sending...")
                     
                     list:set_state("UNFOCUSED")
+                    screen:grab_key_focus()
+                    
                     session.viewing = false
+                    
                     if session.opponent_name == false then
                         
                         main_menu:add_entry(session,"MAKE_A_WORD")
@@ -164,7 +171,7 @@ function controller:init(t)
                             print("got id back")
                             
                             app_state.state = "MAIN_PAGE"
-                            
+                            bg:slide_in_hangman()
                             session.id = id
                             session = nil
                             
@@ -177,7 +184,7 @@ function controller:init(t)
                         game_server:respond(session,function()
                             app_state.state = "MAIN_PAGE"
                             session = nil
-                            
+                            bg:slide_in_hangman()
                             
                         end)
                         
@@ -193,7 +200,9 @@ function controller:init(t)
             end},
             {name = "Reset", select = function()     
                 print("reset")
+                if ls:get_word():len() == 0 then return end
                 right_side_list:blacken_text(1)
+                right_side_list:blacken_text(2)
                 for i,l in pairs(keybd_letters) do
                     
                     l.color = "ffffff"
@@ -216,12 +225,16 @@ function controller:init(t)
                 session:update_views()
                 
                 session.viewing = false
-                game_server:update(
-                    session,
-                    function(t)
-                        app_state.state = "MAIN_PAGE"
-                    end
-                )
+                if session.opponent_name then
+                    game_server:update(
+                        session,
+                        function(t)
+                            app_state.state = "MAIN_PAGE"
+                        end
+                    )
+                else
+                    app_state.state = "MAIN_PAGE"
+                end
                 session = nil
             end},
             {name = "Quit", select = function()
@@ -229,19 +242,24 @@ function controller:init(t)
                 print("quit")
                 screen:grab_key_focus()
                 
-                controller:change_message("Saving...")
+                
                 session.viewing = false
-                game_server:update(
-                    session,
-                    function(t)
-                        game_server:update_game_history(function()
-                            exit()
+                if session.opponent_name ~= false then
+                    controller:change_message("Saving...")
+                    game_server:update(
+                        session,
+                        function(t)
+                            game_server:update_game_history(function()
+                                exit()
+                                
+                                print("successfully updated")
+                            end)
                             
-                            print("successfully updated")
-                        end)
-                        
-                    end
-                )
+                        end
+                    )
+                else
+                    exit()
+                end
             end},
         }
     }
@@ -326,7 +344,19 @@ function controller:set_session(s)
     session = s
     session.viewing = true
     
-    if session.opponent_name then game_server:update(session,function() print("Updated server - Make Word Vieiwing session") end) end
+    if session.opponent_name then
+        
+        game_server:update(
+            session,
+            function()
+                
+                print("Updated server - Make Word Vieiwing session")
+                
+            end
+        )
+        
+    end
+    
     if s.opponent_name then
         
         sk:animate{
@@ -344,6 +374,7 @@ function controller:set_session(s)
     end
     session:add_view(sk)
     right_side_list:blacken_text(1)
+    right_side_list:blacken_text(2)
 end
 
 return controller
