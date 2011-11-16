@@ -33,7 +33,7 @@ function clipped_list:make(t)
     
     --visual pieces
     ----------------------------------------------------------------------------
-    local hl = Clone{source = hl, opacity = 0}
+    local hl = Clone{source = hl, opacity = 0, x = -1}
     
     local no_sessions_text_s = Text{
         text    = t.empty_string or error("must pass empty_string",2),

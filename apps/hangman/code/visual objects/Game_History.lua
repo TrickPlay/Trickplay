@@ -136,7 +136,8 @@ function game_hist:init(t)
         font  = g_font .. " bold 80px",
         alignment = "CENTER",
         w     = t.img_srcs.game_hist_bg.w,
-        y     = box_h/20,
+        y     = 12,
+        x     = -2,
     }
     
     wins_s = Text{
@@ -155,7 +156,7 @@ function game_hist:init(t)
         alignment = "CENTER",
         w     = t.img_srcs.game_hist_bg.w,
         font  = g_font .. " Medium 40px",
-        y     = wins.y+wins.h,
+        y     = wins.y+wins.h-7,
     }
     
     losses = Text{
@@ -164,7 +165,8 @@ function game_hist:init(t)
         font  = g_font .. " bold 80px",
         alignment = "CENTER",
         w     = t.img_srcs.game_hist_bg.w,
-        y     = box_h/2,
+        y     = 140,
+        x     = -2,
     }
     
     losses_s = Text{
@@ -183,7 +185,7 @@ function game_hist:init(t)
         font  = g_font .. " Medium 40px",
         alignment = "CENTER",
         w     = t.img_srcs.game_hist_bg.w,
-        y     = losses.y+losses.h,
+        y     = losses.y+losses.h-12,
     }
     
     wins:move_anchor_point(        wins.w/2,    wins.h/2)    
