@@ -8,11 +8,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 //@Table(uniqueConstraints=@UniqueConstraint(columnNames={"requestor_id", "recipient_id"}))
+@Table(name="buddy_list_invitation")
 @XmlRootElement
 public class BuddyListInvitation extends BaseEntity implements Serializable {
 
