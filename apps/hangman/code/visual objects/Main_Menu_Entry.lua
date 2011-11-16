@@ -205,17 +205,17 @@ function mme:make(sesh)
             
         elseif sesh_ref.opponent_name == false then
             
-            return "Waiting for an opponent."
+            return "Waiting for an opponent to join the game."
             
         else
             
             if sesh_ref.phase == "MAKING" then
                 
-                return "Waiting for player to make a word."--"..sesh_ref.opponent_name.."
+                return "Waiting for opponent to make a word."--"..sesh_ref.opponent_name.."
                 
             else
                 
-                return "Waiting for player to guess '"..sesh_ref.word.."'."--"..sesh_ref.opponent_name.."
+                return "Waiting for opponent to guess '"..sesh_ref.word.."'."--"..sesh_ref.opponent_name.."
                 
             end
             

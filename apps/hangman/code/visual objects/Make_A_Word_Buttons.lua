@@ -4,6 +4,7 @@ local keybd_letters  = {}
 local letter_scores  = {}
 local right_side_txt = {}
 
+local min_word_length = 2
 
 local controller = Group{ name = "Make Word", x = 490, y = 700, }
 
@@ -58,7 +59,9 @@ function controller:init(t)
                 
                 if keybd_letters[i].used then return end
                 
-                right_side_list:whiten_text(1)
+                if letter_slot_i > min_word_length then
+                    right_side_list:whiten_text(1)
+                end
                 right_side_list:whiten_text(2)
                 --right_side_txt[1].color = "ffffff"
                 
@@ -140,7 +143,7 @@ function controller:init(t)
                 print("play word")
                 local s = string.lower(ls:get_word())
                 
-                if s:len() == 0 then return end
+                if s:len() <= min_word_length then return end
                 
                 if check_word(s) then
                     
