@@ -153,39 +153,46 @@ function controllers.on_controller_connected( controllers , controller )
                 end
             end
         )
-        
+        controller.on_accelerometer = Game_State.states[Game_State:current_state()].on_accelerometer
         
         controller:start_accelerometer( "L" , 20/1000 )
     end
     
     if controller.has_touches then
         
+		Game_State.states[STATES.SPLASH].on_touch_down = function( controller, finger, x, y )
+            print("wee")
+			splash:press()
+			
+        end
         Game_State.states[STATES.PLAYING].on_touch_down = function( controller, finger, x, y )
             
 			if x > controller.ui_size[1]*2/3 then
+				Game_State:change_state_to(STATES.PAUSED)
 			else
 				io.throttle_position = -10
 			end
+        end
+		Game_State.states[STATES.PAUSED].on_touch_down = function( controller, finger, x, y )
+            
+			if x > controller.ui_size[1]*2/3 then
+				Game_State:change_state_to(STATES.PLAYING)
+			end
+			
         end
         Game_State.states[STATES.PLAYING].on_touch_move = function( controller, finger, x, y )
             io.throttle_position = -10
         end
         Game_State:add_state_change_function(
             function(old_state,new_state)
-                if Game_State.states[new_state].on_touch_down then
-                    controller.on_touch_down = Game_State.states[new_state].on_touch_down
-                else
-                    controller.on_touch_down = nil
-                end
+				
+                controller.on_touch_down = Game_State.states[new_state].on_touch_down
                 
-                if Game_State.states[new_state].on_touch_down then
-                    controller.on_touch_move = Game_State.states[new_state].on_touch_move
-                else
-                    controller.on_touch_move =  nil
-                end
+                controller.on_touch_move = Game_State.states[new_state].on_touch_move
+                
             end
         )
-        
+        controller.on_touch_down = Game_State.states[Game_State:current_state()].on_touch_down
         
         controller:start_touches()
     end
