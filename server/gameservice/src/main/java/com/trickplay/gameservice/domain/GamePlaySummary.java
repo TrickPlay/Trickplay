@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
-@Table(uniqueConstraints=@UniqueConstraint(columnNames={"user_id", "game_id"}))
+@Table(name="game_play_summary", uniqueConstraints=@UniqueConstraint(columnNames={"user_id", "game_id"}))
 @XmlRootElement
 public class GamePlaySummary extends BaseEntity implements Serializable {
 

@@ -9,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
@@ -17,6 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @PrimaryKeyJoinColumn(name="id")
+@Table(name="stateless_http_session")
 @XmlRootElement
 public class StatelessHttpSession extends Session implements Serializable {
 
