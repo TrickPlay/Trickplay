@@ -268,7 +268,7 @@ local make_from_existing = function(p_data)
     end
     function session:sync(callback)
         
-        game_server:get_session_state(self,function(t)
+        game_server:get_session_state(self.id,function(t)
             
             callback(  self:sync_callback(t)  )
             
