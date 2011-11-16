@@ -26,7 +26,11 @@ class CLDebuger():
 
 			if m:
 				cmd = m.group(1)
-				arg = m.group(2)
+				#arg = m.group(2)
+				cmd_temp= re.match('\s*(\w+)\s+', command).group()
+				cmd_i = len(cmd_temp)
+				arg = command[cmd_i:]
+
 		
 			if re.search('ld', command):
 
@@ -61,7 +65,7 @@ class CLDebuger():
 
 					elif not arg in discovery.devices:
 						
-						print '\t'+re.search('\w+', re.search('\s\w+', command).group()).group()+' is not available.'
+						print '\t'+arg+' is not available.'
 						print '\t'+'Try "ld" to get a list of available remote devices.'
 
 					else:
@@ -109,8 +113,8 @@ class CLDebuger():
 					CON.set("", "")
 					self.device_name = ""
 					self.debug_port = ""
-				elif command == 'r' or command == 'c':
-					self.printResp(sendTrickplayDebugCommand(self.debug_port, "bn", True), "bn")
+				#elif command == 'r' or command == 'c':
+					#self.printResp(sendTrickplayDebugCommand(self.debug_port, "bn", True), "bn")
 				
 	def disconnect(self):
 
