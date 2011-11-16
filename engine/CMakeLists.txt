@@ -243,7 +243,11 @@ list( APPEND  ENGINE_LIBRARY_NAMES expat jpeg png tiff tiffxx gif uriparser )
 
 if (TP_CONTROLLER_DISCOVERY_MDNS)
     add_definitions( -DTP_CONTROLLER_DISCOVERY_MDNS=1 )
-    list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.mm )
+    else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+    endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif (TP_CONTROLLER_DISCOVERY_MDNS)
 
 #------------------------------------------------------------------------------
@@ -603,6 +607,8 @@ list( APPEND
 
 FIND_LIBRARY (APPKIT_LIBRARY AppKit)
 MARK_AS_ADVANCED (APPKIT_LIBRARY)
+FIND_LIBRARY (CORESERVICES_LIBRARY CoreServices)
+MARK_AS_ADVANCED (CORESERVICES_LIBRARY)
 FIND_LIBRARY (OSX_GL_LIBRARY OpenGL)
 MARK_AS_ADVANCED (OSX_GL_LIBRARY)
 
@@ -611,6 +617,7 @@ list( APPEND
     ENGINE_LIBRARIES
 
     ${APPKIT_LIBRARY}
+    ${CORESERVICES_LIBRARY}
     ${OSX_GL_LIBRARY}
     objc
 )
