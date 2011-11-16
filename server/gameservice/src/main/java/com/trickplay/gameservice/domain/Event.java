@@ -9,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -18,6 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @Entity
+@Table(name="event")
 @XmlRootElement
 public class Event extends BaseEntity implements Serializable {
     /**

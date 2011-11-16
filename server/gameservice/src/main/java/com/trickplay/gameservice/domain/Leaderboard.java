@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlRootElement;
 
 //@Entity
-//@Table(name="LEADERBOARD")
+//@Table(name="leaderboard")
 @XmlRootElement(name="leaderboard")
 public class Leaderboard implements Serializable {
     /**
