@@ -83,6 +83,8 @@ dofile( "packages/engine_unit_tests/tests/Timeline8.lua" )
 dofile( "packages/engine_unit_tests/tests/Path3.lua" )
 dofile( "packages/engine_unit_tests/tests/Path4.lua" )
 dofile( "packages/engine_unit_tests/tests/Path5.lua")
+dofile( "packages/engine_unit_tests/tests/bitmap1.lua")
+dofile( "packages/engine_unit_tests/tests/bitmap2.lua")
 
 screen:add (test_group)
 
