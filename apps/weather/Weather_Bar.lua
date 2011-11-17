@@ -133,18 +133,35 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     
     
     
+    local city_name = curr_temp_tbl.current_observation.location.city
+    
+    print("PRINTTT",city_name)
+    local regexed_name = ""
+    for i = 1, # city_name do
+        
+        if i == 1 or city_name:sub(i-1,i-1) == " " then
+            
+            regexed_name = regexed_name .. city_name:sub(i,i):upper()
+            
+        else
+            
+            regexed_name = regexed_name .. city_name:sub(i,i):lower()
+            
+        end
+        
+    end
     
     --Location
     c:new_path()
     c:move_to(LOCATION_X-CURR_TEMP_X+2,LOCATION_Y-10+2)
-    c:text_path(FONT..LOCATION_SZ,curr_temp_tbl.current_observation.location.city..
+    c:text_path(FONT..LOCATION_SZ,regexed_name..
                     ", "..curr_temp_tbl.current_observation.location.state)
     c:set_source_color({0,0,0,255*.4})
     c:fill(true)
     
     c:new_path()
     c:move_to(LOCATION_X-CURR_TEMP_X,LOCATION_Y-10)
-    c:text_path(FONT..LOCATION_SZ,curr_temp_tbl.current_observation.location.city..
+    c:text_path(FONT..LOCATION_SZ,regexed_name..
                     ", "..curr_temp_tbl.current_observation.location.state)
     c:set_source_color(TEXT_COLOR)
     c:fill(true)
