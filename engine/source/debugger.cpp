@@ -9,12 +9,13 @@
 #include "console.h"
 #include "util.h"
 #include "http_server.h"
+#include "user_data.h"
 
 //.............................................................................
 
 #define TP_LOG_DOMAIN   "DEBUGGER"
 #define TP_LOG_ON       true
-#define TP_LOG2_ON      true
+#define TP_LOG2_ON      false
 
 #include "log.h"
 
@@ -110,6 +111,9 @@ public:
 		response->resume();
 
 		response = 0;
+
+		fprintf( stdout , "\n" );
+		fflush( stdout );
 
 		return true;
 	}
@@ -276,7 +280,7 @@ protected:
     {
     public:
 
-    	ConsoleCommand( const gchar * _line )
+    	ConsoleCommand( const String & _line )
     	:
     		line( _line )
     	{
@@ -289,8 +293,160 @@ protected:
 
     	virtual bool reply( const JSON::Object & obj )
     	{
-    		// TODO : Here we could interpret the response and
-    		// print out some information.
+    		JSON::Object::Map::const_iterator key;
+
+    		//.................................................................
+    		// An error
+
+    		key = obj.find( "error" );
+
+    		if ( key != obj.end() )
+    		{
+    			fprintf( stdout , "%s\n" , key->second.as<String>().c_str() );
+    			fflush( stdout );
+    			return true;
+    		}
+
+    		//.................................................................
+    		// List locals
+
+    		key = obj.find( "locals" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+        		JSON::Array::Vector::iterator it;
+
+    			for ( it = array.begin(); it != array.end(); ++it )
+    			{
+    				JSON::Object & local( (*it).as<JSON::Object>() );
+
+    				const String & name = local[ "name" ].as<String>();
+
+    				if ( name != "(*temporary)" )
+    				{
+						fprintf( stdout , "%s (%s) = %s\n" ,
+								name.c_str(),
+								local[ "type" ].as<String>().c_str(),
+								local[ "value"].as<String>().c_str());
+    				}
+    			}
+
+    			fflush( stdout );
+    		}
+
+    		//.................................................................
+    		// Back trace
+
+    		key = obj.find( "stack" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+        		JSON::Array::Vector::iterator it;
+
+        		int i = 0;
+
+    			for ( it = array.begin(); it != array.end(); ++it , ++i )
+    			{
+    				JSON::Object & local( (*it).as<JSON::Object>() );
+
+    				String func = local[ "name" ].as<String>();
+
+    				if ( ! func.empty() )
+    				{
+    					func += "()";
+    				}
+
+    				fprintf( stdout , "[%d] %s:%lld %s\n" ,
+    						i,
+    						local[ "file" ].as<String>().c_str(),
+    						local[ "line" ].as< long long >(),
+    						func.c_str() );
+    			}
+
+    			fflush( stdout );
+    		}
+
+    		//.................................................................
+    		// List breakpoints
+
+    		key = obj.find( "breakpoints" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+    			if ( array.empty() )
+    			{
+    				fprintf( stdout , "No breakpoints set\n" );
+    			}
+    			else
+    			{
+					JSON::Array::Vector::iterator it;
+
+					int i = 0;
+
+					for ( it = array.begin(); it != array.end(); ++it , ++i )
+					{
+						JSON::Object & bp( (*it).as<JSON::Object>() );
+
+						fprintf( stdout , "[%d] %s:%lld\n" ,
+								i,
+								bp[ "file" ].as<String>().c_str(),
+								bp[ "line" ].as< long long >());
+					}
+    			}
+
+    			fflush( stdout );
+    		}
+
+    		//.................................................................
+    		// Source listing
+
+    		key = obj.find( "source" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+        		JSON::Array::Vector::iterator it;
+
+        		long long current_line = -1;
+
+        		key = obj.find( "line" );
+
+        		if ( key != obj.end() )
+        		{
+        			current_line = key->second.as<long long>();
+        		}
+
+    			for ( it = array.begin(); it != array.end(); ++it )
+    			{
+    				JSON::Object & src( (*it).as<JSON::Object>() );
+
+    				long long line = src[ "line" ].as< long long >();
+    				const char * marker = ( line == current_line ) ?  " >>" : "   ";
+
+    				fprintf( stdout , "%4.4lld%s %s\n" ,
+    						line,
+    						marker,
+    						src[ "text" ].as<String>().c_str());
+    			}
+
+    			fflush( stdout );
+    		}
+
+    		//.................................................................
+    		// List app info
+
+    		key = obj.find( "app" );
+
+    		if ( key != obj.end() )
+    		{
+    		}
 
     		return true;
     	}
@@ -310,12 +466,7 @@ protected:
 
 			if ( G_IO_STATUS_NORMAL == g_io_channel_read_line_string( channel , line , 0 , 0 ) )
 			{
-				gchar * command = g_strstrip( line->str );
-
-				if ( strlen( command ) )
-				{
-					g_async_queue_push( server->queue , new ConsoleCommand( command ) );
-				}
+				g_async_queue_push( server->queue , new ConsoleCommand( g_strstrip( line->str ) ) );
 			}
 
 			g_string_free( line , TRUE );
@@ -345,6 +496,7 @@ Debugger::Debugger( App * _app )
     app( _app ),
     installed( false ),
     break_next( false ),
+    returns( 0 ),
     in_break( false )
 {
     if ( 0 == server )
@@ -381,7 +533,7 @@ void Debugger::install( bool break_next_line )
         return;
     }
 
-    lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET | */ LUA_MASKLINE, 0 );
+    lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET |*/ LUA_MASKLINE, 0 );
 
     installed = true;
 }
@@ -417,41 +569,70 @@ JSON::Array Debugger::get_back_trace( lua_State * L , lua_Debug * ar )
 {
 	JSON::Array array;
 
-    lua_Debug stack;
-
-    for( int i = 0; lua_getstack( L , i, & stack ); ++i )
+    for( int i = 0; true; ++i )
     {
+    	lua_Debug stack;
+
+    	memset( & stack , 0 , sizeof( stack ) );
+
+    	if ( 0 == lua_getstack( L , i, & stack ) )
+    	{
+    		break;
+    	}
+
         if ( lua_getinfo( L, "nSl", & stack ) )
         {
-            String source;
+        	if ( strcmp( stack.what , "C" ) && stack.currentline >= 0 )
+        	{
+				String source;
 
-            if ( g_str_has_prefix( stack.source, "@" ) )
-            {
-                gchar * basename = g_path_get_basename( stack.source + 1 );
+				if ( g_str_has_prefix( stack.source, "@" ) )
+				{
+					gchar * basename = g_path_get_basename( stack.source + 1 );
 
-                source = basename;
+					source = basename;
 
-                g_free( basename );
-            }
-            else
-            {
-                source = ar->source;
-            }
+					g_free( basename );
+				}
+				else
+				{
+					source = stack.source;
+				}
 
-            JSON::Object & frame( array.append<JSON::Object>() );
+				JSON::Object & frame = array.append<JSON::Object>();
 
-            frame[ "file" ] = source;
-            frame[ "line" ] = stack.currentline;
+				frame[ "file" ] = source;
+				frame[ "line" ] = stack.currentline;
 
-            if ( stack.name && stack.namewhat )
-            {
-            	frame[ "name" ] = stack.name;
-            	frame[ "type" ] = stack.namewhat;
-            }
+				if ( stack.name && stack.namewhat )
+				{
+					frame[ "name" ] = stack.name;
+					frame[ "type" ] = stack.namewhat;
+				}
+        	}
         }
     }
 
     return array;
+}
+
+//.............................................................................
+
+static String get_value( lua_State * L , int index )
+{
+	switch( lua_type( L , index ) )
+	{
+	case LUA_TNUMBER:
+		return lua_tostring( L , index );
+	case LUA_TSTRING:
+		return Util::format( "\"%s\"" , lua_tostring( L , index ) );
+	case LUA_TBOOLEAN:
+		return lua_toboolean( L , index ) ? "true" : "false";
+	case LUA_TNIL:
+		return "nil";
+	default:
+		return UserData::describe( L , index );
+	}
 }
 
 //.............................................................................
@@ -471,20 +652,48 @@ JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
 
         JSON::Object & local( array.append<JSON::Object>() );
 
-		local[ "type"  ] = lua_typename( L , lua_type( L , -1 ) );
-
-		const char * value = lua_tostring( L , -1 );
-
-
 		local[ "name"  ] = name;
 
-		if ( value )
-		{
-			local[ "value" ] = value;
-		}
+		int type = lua_type( L , -1 );
+
+		local[ "type"  ] = lua_typename( L , type );
+		local[ "value" ] = get_value( L , -1 );
 
 		lua_pop( L , 1 );
     }
+
+    // Get the function that is currently executing and
+    // then go through all of is upvalues.
+
+    lua_getinfo( L , "f" , ar );
+
+    int f = lua_gettop( L );
+
+    if ( ! lua_isnil( L , f ) )
+    {
+		for( int i = 1; ; ++i )
+		{
+			const char * name = lua_getupvalue( L , f , i );
+
+			if ( ! name )
+			{
+				break;
+			}
+
+			JSON::Object & local( array.append<JSON::Object>() );
+
+			local[ "name"  ] = name;
+
+			int type = lua_type( L , -1 );
+
+			local[ "type"  ] = lua_typename( L , type );
+			local[ "value" ] = get_value( L , -1 );
+
+			lua_pop( L , 1 );
+		}
+    }
+
+    lua_pop( L , 1 );
 
     return array;
 }
@@ -502,8 +711,6 @@ JSON::Object Debugger::get_location( lua_State * L , lua_Debug * ar )
         result[ "file" ] = basename;
 
         g_free( basename );
-
-		// lines = load_source_file( ar->source + 1 );
     }
     else
     {
@@ -579,10 +786,42 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		reply[ "locals" ] = get_locals( L , ar );
 	}
 
-	// Where? Just sends the location
+	// Where
 
 	else if ( command == "w" )
 	{
+		StringVector * lines = get_source( reply[ "file" ].as<String>() );
+
+		if ( lines )
+		{
+			int line = reply[ "line" ].as<long long>();
+
+			int start_line = line - 4;
+			int end_line = line + 5;
+
+			if ( start_line < 0 )
+			{
+				start_line = 0;
+			}
+
+			if ( end_line >= int( lines->size() ) )
+			{
+				end_line = lines->size() - 1;
+			}
+
+			if ( end_line > start_line )
+			{
+				JSON::Array & array = reply[ "source" ].as<JSON::Array>();
+
+				for ( line = start_line; line <= end_line; ++line )
+				{
+					JSON::Object & l = array.append<JSON::Object>();
+
+					l[ "line" ] = line + 1;
+					l[ "text" ] = (*lines)[ line ];
+				}
+			}
+		}
 	}
 
 	// Reset - delete all breakpoints and continue
@@ -639,7 +878,17 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	else if ( command == "n" )
 	{
-		break_next = true;
+		// To step over, we change the hook to watch for function calls.
+		// If, during the next iteration, a function call happens, it
+		// will increment the number of returns, start watching for
+		// returns and stopping watching for lines.
+
+		// When a return happens, the number of returns is
+		// decremented until it reaches zero. When it does, it means
+		// we are done stepping over, so we reset the hook to only
+		// watch for lines and break on the next one.
+
+	    lua_sethook( L , lua_hook, LUA_MASKCALL | LUA_MASKLINE , 0 );
 		result = true;
 	}
 
@@ -657,70 +906,86 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		reply[ "app" ] = get_app_info();
 	}
 
-	// Commands with parameters are submitted as JSON
+	// Set a breakpoint
 
-	else
+	else if ( 0 == command.find( "b " ) )
 	{
-		JSON::Object co = JSON::Parser::parse( command ).as<JSON::Object>();
+		StringVector parts = split_string( command , " " , 2 );
 
-		command = co[ "command" ].as<String>();
-
-		// Set a new breakpoint
-
-		if ( command == "b" )
+		if ( parts.size() != 2 )
 		{
-			String file = co[ "file" ].as<String>();
-
-			int line = co[ "line" ].as<long long>();
-
-			if ( line > 0 && ! file.empty() )
-			{
-				bool is_native = false;
-
-				if ( ! app->get_metadata().sandbox.get_pi_child_uri( file , is_native ).empty() )
-				{
-					breakpoints.push_back( Breakpoint( file , line ) );
-				}
-			}
+			reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>'";
 		}
-
-		// Delete a breakpoint
-
-		else if ( command == "d" )
+		else
 		{
-			if ( co.has( "all" ) )
+			parts = split_string( parts[ 1 ] , ":" , 2 );
+
+			if ( parts.size() != 2 )
 			{
-				breakpoints.clear();
+				reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>'";
 			}
 			else
 			{
-				unsigned int index = co[ "breakpoint" ].as<long long>();
-
-				if ( index >= 0 && index < breakpoints.size() )
-				{
-					breakpoints.erase( breakpoints.begin() + index );
-				}
+				breakpoints.push_back( Breakpoint( parts[ 0 ] , atoi( parts[ 1 ].c_str() ) ) );
 			}
 		}
+	}
 
-		// Fetch a file
+	// Delete a breakpoint
 
-		else if ( command == "f" )
+	else if ( 0 == command.find( "d " ) )
+	{
+		StringVector parts = split_string( command , " " , 2 );
+
+		if ( parts.size() != 2 )
 		{
-			String file = co[ "file" ].as<String>();
+			reply[ "error" ] = "To delete a breakpoint, enter 'd <breakpoint index>' or 'd all'";
+		}
+		else if ( parts[ 1 ] == "all" )
+		{
+			breakpoints.clear();
+		}
+		else
+		{
+			unsigned int index = atoi( parts[ 1 ].c_str() );
 
-			if ( ! file.empty() )
+			if ( index >= 0 && index < breakpoints.size() )
 			{
-				gsize length = 0;
+				breakpoints.erase( breakpoints.begin() + index );
+			}
+			else
+			{
+				reply[ "error" ] = "Invalid breakpoint index";
+			}
+		}
+	}
 
-				gchar * contents = app->get_metadata().sandbox.get_pi_child_contents( file , length );
+	// Fetch a file
 
-				if ( contents && length )
+	else if ( 0 == command.find( "f " ) )
+	{
+		StringVector parts = split_string( command , " " , 2 );
+
+		if ( parts.size() != 2 )
+		{
+			reply[ "error" ] = "To fetch a file, enter 'f <file name>'";
+		}
+		else
+		{
+			StringVector * lines = get_source( parts[ 1 ] );
+
+			if ( 0 == lines )
+			{
+				reply[ "error" ] = Util::format( "Failed to fetch '%s'" , parts[ 1 ].c_str() );
+			}
+			else
+			{
+				JSON::Array & array = reply[ "lines" ].as<JSON::Array>();
+
+				for ( StringVector::const_iterator it = lines->begin(); it != lines->end(); ++it )
 				{
-					reply[ "contents" ] = String( contents , length );
+					array.append( *it );
 				}
-
-				g_free( contents );
 			}
 		}
 	}
@@ -748,17 +1013,36 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 
 	//.........................................................................
 
+    JSON::Object location( get_location( L , ar ) );
+
+    String at = Util::format( "%s:%lld" , location[ "file" ].as<String>().c_str() , location[ "line" ].as<long long>() );
+
+	//.........................................................................
+
     bool should_break = false;
 
 	switch( ar->event )
 	{
 		case LUA_HOOKCALL:
+			++returns;
+			tplog2( "HOOK CALL %s RETURNS %d" , at.c_str() , returns );
+		    lua_sethook( L , lua_hook , LUA_MASKCALL | LUA_MASKRET , 0 );
+			break;
+
 		case LUA_HOOKRET:
 		case LUA_HOOKTAILRET:
+			--returns;
+			tplog2( "HOOK RET %s RETURNS %d" , at.c_str() , returns );
+			if ( returns <= 0 )
+			{
+				lua_sethook( L , lua_hook, LUA_MASKLINE, 0 );
+				break_next = true;
+			}
 			break;
 
 		case LUA_HOOKLINE:
 
+			tplog2( "HOOK LINE %s" , at.c_str()  );
 			if ( break_next )
 			{
 				should_break = true;
@@ -804,15 +1088,15 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 
 	//.........................................................................
 
-    JSON::Object location( get_location( L , ar ) );
-
-	tpinfo( "BREAK AT %s:%lld" , location[ "file" ].as< String >().c_str() , location[ "line" ].as< long long >() );
-
-	//.........................................................................
-
 	server->enable_console();
 
-	while ( true )
+	fprintf( stdout , "(%s) " , at.c_str() );
+	fflush( stdout );
+
+    lua_sethook( L , lua_hook, LUA_MASKLINE , 0 );
+    returns = 0;
+
+    while ( true )
     {
     	//.....................................................................
     	// Wait for a command from the server, this will pause indefinitely
@@ -834,6 +1118,8 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     		break;
     	}
 
+		fprintf( stdout , "(%s) " , at.c_str() );
+		fflush( stdout );
     }
 
 	server->disable_console();
@@ -848,36 +1134,38 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 	in_break = false;
 }
 
-#if 0
-
-//.............................................................................
-
-StringVector * Debugger::load_source_file( const char * file_name )
+StringVector * Debugger::get_source( const String & pi_path )
 {
-	SourceMap::iterator it = source.find( file_name );
+	SourceMap::iterator it = source.find( pi_path );
 
 	if ( it != source.end() )
 	{
 		return & it->second;
 	}
 
-	std::ifstream stream( file_name , std::ios_base::in );
+	StringVector * result = 0;
 
-	if ( ! stream )
+	gsize length = 0;
+
+	gchar * contents = app->get_metadata().sandbox.get_pi_child_contents( pi_path , length );
+
+	if ( contents && length )
 	{
-		return 0;
+		imstream stream( contents , length );
+
+		StringVector & lines = source[ pi_path ];
+
+		String line;
+
+		while ( std::getline( stream , line ) )
+		{
+			lines.push_back( line );
+		}
+
+		result = & lines;
 	}
 
-	String line;
+	g_free( contents );
 
-	StringVector & lines( source[ file_name ] );
-
-	while ( std::getline( stream , line ) )
-	{
-		lines.push_back( line );
-	}
-
-	return & lines;
+	return result;
 }
-
-#endif

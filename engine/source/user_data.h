@@ -151,6 +151,10 @@ struct UserData
     }
 
     //.........................................................................
+
+    static std::string describe( lua_State * L , int index );
+
+    //.........................................................................
     // Gets the user data from the Lua stack given the index.
 
     inline static UserData * get( lua_State * L , int index = 1 )

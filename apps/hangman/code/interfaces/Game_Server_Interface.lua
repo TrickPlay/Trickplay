@@ -77,7 +77,7 @@ end
 
 --private methods
 
-local base_url = "http://10.0.190.158:8080"
+local base_url = "http://10.0.190.158:8080/gameservice/rest"
 
 local base_header = {
     
@@ -140,7 +140,7 @@ function Game_Server:create_user(user,email,pwd,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user",
+        url    = base_url.."/user",
         
         method = "POST",
         
@@ -179,7 +179,7 @@ function Game_Server:check_user_exists(user,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/exists?username="..user,
+        url    = base_url.."/user/exists?username="..user,
         
         method = "GET",
         
@@ -216,7 +216,7 @@ function Game_Server:user_info(user,pwd, callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user",
+        url    = base_url.."/user",
         
         method = "GET",
         
@@ -252,7 +252,7 @@ function Game_Server:get_buddy_list(user,pwd, callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/1/buddy-list",
+        url    = base_url.."/user/1/buddy-list",
         
         method = "GET",
         
@@ -290,7 +290,7 @@ function Game_Server:create_buddy_invitation(to)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/2/invitation",
+        url    = base_url.."/user/2/invitation",
         
         method = "POST",
         
@@ -329,7 +329,7 @@ function Game_Server:get_buddy_invitation()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/3/invitation?type=RECEIVED",
+        url    = base_url.."/user/3/invitation?type=RECEIVED",
         
         method = "GET",
         
@@ -365,7 +365,7 @@ function Game_Server:accept_buddy_invitation()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/3/invitation/1",
+        url    = base_url.."/user/3/invitation/1",
         
         method = "PUT",
         
@@ -417,7 +417,7 @@ function Game_Server:create_vendor(user,pwd,vendor,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/vendor",
+        url    = base_url.."/vendor",
         
         method = "POST",
         
@@ -459,7 +459,7 @@ function Game_Server:check_vendor_exists(user,pwd,vendor,callback)
     
     URLRequest{
         
-        url    = base_url..'/gameservice/rest/vendor/exists?name='..uri:escape(vendor),
+        url    = base_url..'/vendor/exists?name='..uri:escape(vendor),
         
         method = "GET",
         
@@ -530,7 +530,7 @@ function Game_Server:create_game(user,pwd,t,callback)
 
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game",
+        url    = base_url.."/game",
         
         method = "POST",
         
@@ -582,7 +582,7 @@ function Game_Server:check_game_exists(user,pwd,game_name,callback)
     
     URLRequest{
         
-        url    = base_url..'/gameservice/rest/game/exists?name='..uri:escape(game_name),
+        url    = base_url..'/game/exists?name='..uri:escape(game_name),
         
         method = "GET",
         
@@ -627,7 +627,7 @@ function Game_Server:create_gameplay_session(user,pwd,game_id,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay",
+        url    = base_url.."/gameplay",
         
         method = "POST",
         
@@ -675,7 +675,7 @@ function Game_Server:send_gameplay_invitation(to)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/1/invitation",
+        url    = base_url.."/gameplay/1/invitation",
         
         method = "POST",
         
@@ -732,7 +732,7 @@ function Game_Server:get_gameplay_invitation(user,pwd,game_id,max_num,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/"..game_id.."/invitations?max="..max_num,
+        url    = base_url.."/game/"..game_id.."/invitations?max="..max_num,
         
         method = "GET",
         
@@ -751,7 +751,7 @@ function Game_Server:get_gameplay_summary(user,pwd,game_id,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/"..game_id.."/summary",
+        url    = base_url.."/game/"..game_id.."/summary",
         
         method = "GET",
         
@@ -770,7 +770,7 @@ function Game_Server:set_gameplay_summary(user,pwd,game_id,detail,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/"..game_id.."/summary",
+        url    = base_url.."/game/"..game_id.."/summary",
         
         method = "POST",
         
@@ -829,7 +829,7 @@ function Game_Server:get_gameplay_events(user,pwd,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/events",
+        url    = base_url.."/events",
         
         method = "GET",
         
@@ -869,7 +869,7 @@ function Game_Server:accept_gameplay_invitation(user,pwd,invite_id,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/invitation/"..invite_id.."/update",
+        url    = base_url.."/gameplay/invitation/"..invite_id.."/update",
         
         method = "POST",
         
@@ -912,7 +912,7 @@ function Game_Server:start_gameplay_session(user,pwd,turnId,gameSessionId,gameSt
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/"..gameSessionId.."/start",
+        url    = base_url.."/gameplay/"..gameSessionId.."/start",
         
         method = "POST",
         
@@ -954,7 +954,7 @@ function Game_Server:send_invitation(user,pwd,session_id,recipientId,callback)
 	
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/"..session_id.."/invitation",
+        url    = base_url.."/gameplay/"..session_id.."/invitation",
         
         method = "POST",
         
@@ -1002,7 +1002,7 @@ function Game_Server:get_gameplay_session(user,pwd,session_id,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/"..session_id.."/state",
+        url    = base_url.."/gameplay/"..session_id.."/state",
         
         method = "GET",
         
@@ -1040,7 +1040,7 @@ function Game_Server:get_all_gameplay_sessions(user,pwd,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay",
+        url    = base_url.."/gameplay",
         
         method = "GET",
         
@@ -1080,7 +1080,7 @@ function Game_Server:update_gameplay_session(user,pwd,turnId,gameSessionId,gameS
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/"..gameSessionId.."/update",
+        url    = base_url.."/gameplay/"..gameSessionId.."/update",
         
         method = "POST",
         
@@ -1126,7 +1126,7 @@ function Game_Server:end_gameplay_session(user,pwd,gameSessionId,gameState,callb
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/"..gameSessionId.."/end",
+        url    = base_url.."/gameplay/"..gameSessionId.."/end",
         
         method = "POST",
         
@@ -1182,7 +1182,7 @@ function Game_Server:post_game_score(score)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/1/score",
+        url    = base_url.."/game/1/score",
         
         method = "POST",
         
@@ -1223,7 +1223,7 @@ function Game_Server:get_user_scores()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/1/score?type=USER_TOP_SCORES",
+        url    = base_url.."/game/1/score?type=USER_TOP_SCORES",
         
         method = "GET",
         
@@ -1263,7 +1263,7 @@ function Game_Server:get_buddy_scores()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/1/score?type=BUDDY_TOP_SCORES",
+        url    = base_url.."/game/1/score?type=BUDDY_TOP_SCORES",
         
         method = "GET",
         
@@ -1321,7 +1321,7 @@ function Game_Server:get_top_scores()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/1/score?type=TOP_SCORES",
+        url    = base_url.."/game/1/score?type=TOP_SCORES",
         
         method = "GET",
         

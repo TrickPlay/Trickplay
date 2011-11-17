@@ -44,10 +44,10 @@ IF( PKG_CONFIG_FOUND )
         pkg_check_modules(UUID      REQUIRED    ossp-uuid)
     endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_CLUTTER_BACKEND_EGL)
 
-    if (TP_CONTROLLER_DISCOVERY_MDNS)
+    if (TP_CONTROLLER_DISCOVERY_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
         pkg_check_modules(AVAHI_CORE REQUIRED avahi-core)
         pkg_check_modules(AVAHI_GLIB REQUIRED avahi-glib)
-    endif (TP_CONTROLLER_DISCOVERY_MDNS)
+    endif (TP_CONTROLLER_DISCOVERY_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 
     list(APPEND ENGINE_INCLUDE_DIRS
 
@@ -117,12 +117,12 @@ ELSE ( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( libsoup-2.4 libsoup/soup.h             ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( libexif/exif-data.h                    ENGINE_INCLUDE_DIRS )
 
-    if (TP_CONTROLLER_DISCOVERY_MDNS)
+    if (TP_CONTROLLER_DISCOVERY_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
         TP_FIND_INCLUDE( avahi-core core.h                  ENGINE_INCLUDE_DIRS )
         TP_FIND_INCLUDE( avahi-glib glib-watch.h            ENGINE_INCLUDE_DIRS )
         TP_FIND_INCLUDE( avahi-common watch.h               ENGINE_INCLUDE_DIRS )
         list( APPEND ENGINE_LIBRARY_NAMES avahi-core avahi-common avahi-glib )
-    endif (TP_CONTROLLER_DISCOVER_MDNS)
+    endif (TP_CONTROLLER_DISCOVER_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 
 
 #------------------------------------------------------------------------------
@@ -243,7 +243,11 @@ list( APPEND  ENGINE_LIBRARY_NAMES expat jpeg png tiff tiffxx gif uriparser )
 
 if (TP_CONTROLLER_DISCOVERY_MDNS)
     add_definitions( -DTP_CONTROLLER_DISCOVERY_MDNS=1 )
-    list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.mm )
+    else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+    endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif (TP_CONTROLLER_DISCOVERY_MDNS)
 
 #------------------------------------------------------------------------------
@@ -603,6 +607,8 @@ list( APPEND
 
 FIND_LIBRARY (APPKIT_LIBRARY AppKit)
 MARK_AS_ADVANCED (APPKIT_LIBRARY)
+FIND_LIBRARY (CORESERVICES_LIBRARY CoreServices)
+MARK_AS_ADVANCED (CORESERVICES_LIBRARY)
 FIND_LIBRARY (OSX_GL_LIBRARY OpenGL)
 MARK_AS_ADVANCED (OSX_GL_LIBRARY)
 
@@ -611,6 +617,7 @@ list( APPEND
     ENGINE_LIBRARIES
 
     ${APPKIT_LIBRARY}
+    ${CORESERVICES_LIBRARY}
     ${OSX_GL_LIBRARY}
     objc
 )
