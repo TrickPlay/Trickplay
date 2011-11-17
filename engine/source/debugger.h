@@ -43,18 +43,25 @@ private:
     JSON::Array get_breakpoints( lua_State * L , lua_Debug * ar );
     JSON::Object get_app_info();
 
+    StringVector * get_source( const String & pi_path );
+
     bool handle_command( lua_State * L , lua_Debug * ar , Command * command );
 
     App *	app;
     bool    installed;
     bool    break_next;
+    int 	returns;
     bool	in_break;
 
     typedef std::pair< String, int > Breakpoint;
 
     typedef std::vector< Breakpoint > BreakpointList;
 
-    BreakpointList  breakpoints;
+    BreakpointList  	breakpoints;
+
+    typedef std::map< String , StringVector > SourceMap;
+
+    SourceMap			source;
 
     static Server *		server;
 };

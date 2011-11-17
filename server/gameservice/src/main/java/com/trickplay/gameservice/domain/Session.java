@@ -11,9 +11,11 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@Table(name="session")
 @Inheritance(strategy=InheritanceType.JOINED)
 public class Session extends BaseEntity implements Serializable {
 
