@@ -596,10 +596,13 @@ protected:
 	        clutter_text_get_color( CLUTTER_TEXT( actor ), &color );
 
 	        gchar * c = g_strdup_printf( "color=(%u,%u,%u,%u)", color.red, color.green, color.blue, color.alpha );
+	        
+	        gchar * f = g_strdup_printf( "font=(%s)", clutter_text_get_font_name( CLUTTER_TEXT( actor ) ) );
 
-	        extra = extra + "," + c + "]";
+	        extra = extra + "," + c + "," + f + "]";
 
 	        g_free( c );
+	        g_free( f );
 
 	    }
 	    else if ( CLUTTER_IS_TEXTURE( actor ) )
