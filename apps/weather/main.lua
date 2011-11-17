@@ -1,5 +1,5 @@
 
-
+g_app_is_running = true
 
 screen_w = screen.w
 screen_h = screen.h
@@ -108,6 +108,8 @@ function post_main()
 		settings.locations = locations
 		
 		settings.bar_state = bar_state:current_state()
+		
+		g_app_is_running = false
 		
 	end
 	

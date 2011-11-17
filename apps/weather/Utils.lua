@@ -242,6 +242,8 @@ Clone = function(t)
 	
 	getmetatable( deletion_spy ).__gc = function()
 		
+		if not g_app_is_running then return end
+		
 		clone_sources_table[sauce].count = clone_sources_table[sauce].count - 1
 		
 		--print("DECREMENTTTTTT",clone_sources_table[sauce].count)
