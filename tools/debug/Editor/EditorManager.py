@@ -2,10 +2,11 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 import os
+import re
 
 from EditorTab import EditorTabWidget, EditorDock
 from Editor import Editor
-
+from UI.SaveAsDialog import Ui_saveAsDialog
 
 
 class EditorManager(QWidget):    
@@ -61,8 +62,8 @@ class EditorManager(QWidget):
         return None
 
     def save(self):
-        editor = self.app.focusWidget()
-        if isinstance(editor, Editor):
+		editor = self.app.focusWidget()
+		if isinstance(editor, Editor):
 			currentText = open(editor.path).read()
 			index = self.tab.currentIndex()
 			if self.tab.textBefores[index] != currentText:
@@ -82,8 +83,83 @@ class EditorManager(QWidget):
 					else:
 						return None
 			editor.save()
+		else:
+			print 'Failed to save because no text editor is currently selected.'                
+		
+
+	       
+    def scan(self, path):
+        """
+        Scan the path given:
+        If path is not valid dir return 0 
+		Otherwise, it returns 1
+        """
+        
+        if os.path.isdir(path):
+            files = os.listdir(path)
+            return 1
         else:
-        	print 'Failed to save because no text editor is currently selected.'                
+			return 0
+            
+                  
+    def adjustDialog(self, path):
+        
+        result = self.scan(str(path))
+        
+        # If the path is a directory...
+        if 0 == result:
+            msg = QMessageBox()
+            msg.setText(path+'is not a valid directory.') 
+            msg.setInformativeText('Please select a directory to save the file.')
+            msg.setWindowTitle("Warning")
+            msg.exec_()
+        elif 1 == result:
+        	return result
+
+    def chooseDirectoryDialog(self):
+		dir = self.ui.directory.text()
+		path = QFileDialog.getExistingDirectory(None, 'Select app directory', dir)
+		result = self.adjustDialog(path)
+		if result > 0:
+			self.ui.directory.setText(path)
+
+    def close(self):
+		print "EDITOR MANAGER CLOSE"
+		# find current index tab 
+		# try to save 
+		index = self.tab.currentIndex()
+		self.editorGroups[0].removeTab(index)
+
+
+    def saveas(self):
+		self.dialog = QDialog()
+		self.ui = Ui_saveAsDialog()
+		self.ui.setupUi(self.dialog)
+
+		editor = self.app.focusWidget()
+
+		cur_file = re.search('(\w+)[.](\w+)', editor.path).group()
+		cur_dir = editor.path[:re.search('(\w+)[.](\w+)', editor.path).start()-1]
+
+		self.ui.filename.setText(cur_file)
+		self.ui.directory.setText(cur_dir)
+
+		QObject.connect(self.ui.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
+
+		if self.dialog.exec_():
+			
+			cur_dir = self.ui.directory.text() 
+			cur_file = self.ui.filename.text() 
+
+			new_path = cur_dir+'/'+cur_file
+			print "Save As .. "+new_path
+
+			currentText = open(editor.path).read()
+			index = self.tab.currentIndex()
+			self.tab.textBefores[index] = editor.text()
+			editor.text_status = 1 
+			editor.path = new_path
+			editor.save()
 
     def newEditor(self, path, tabGroup = None):
         """
