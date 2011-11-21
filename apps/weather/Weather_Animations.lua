@@ -754,6 +754,7 @@ falling_snow = function(speed_x,speed_y,x,y) return{
                 --this_obj.img.scale = {this_obj.img.scale[1] + 4*secs,this_obj.img.scale[1] + 4*secs}
                 if this_obj.img.y > screen_h then
                     animate_list[this_func_tbl]=nil
+                    animate_list[this_obj.func_tbls.seesaw]=nil
                     this_obj.img:unparent()
                     --this_obj.img = nil
                 end
