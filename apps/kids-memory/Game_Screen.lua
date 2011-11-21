@@ -250,9 +250,15 @@ local board_key_handler = {
         if focus_i[2] > 1 then
             focus_i[2] = focus_i[2] - 1
             --anim_focus( x_y_from_index(focus_i[1],focus_i[2]) )
+			
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
-            animate_list[anim_focus]=anim_focus
+			if animate_list[anim_focus] then
+				anim_focus:setup()
+				anim_focus.elapsed = 0
+			else
+				animate_list[anim_focus]=anim_focus
+			end
             --focus.y    = 200*focus_i[2]
             back_sel   = false
             play_sound_wrapper(audio.move_focus)
@@ -265,7 +271,12 @@ local board_key_handler = {
             --anim_focus( x_y_from_index(focus_i[1],focus_i[2])
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
-            animate_list[anim_focus]=anim_focus
+            if animate_list[anim_focus] then
+				anim_focus:setup()
+				anim_focus.elapsed = 0
+			else
+				animate_list[anim_focus]=anim_focus
+			end
             play_sound_wrapper(audio.move_focus)
             --)
         end
@@ -276,7 +287,12 @@ local board_key_handler = {
             --anim_focus( x_y_from_index(focus_i[1],focus_i[2]))
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
-            animate_list[anim_focus]=anim_focus
+            if animate_list[anim_focus] then
+				anim_focus:setup()
+				anim_focus.elapsed = 0
+			else
+				animate_list[anim_focus]=anim_focus
+			end
             play_sound_wrapper(audio.move_focus)
             --focus.x = 200*focus_i[1]
         end
@@ -288,7 +304,12 @@ local board_key_handler = {
             --anim_focus( x_y_from_index(focus_i[1],focus_i[2]))
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
-            animate_list[anim_focus]=anim_focus
+            if animate_list[anim_focus] then
+				anim_focus:setup()
+				anim_focus.elapsed = 0
+			else
+				animate_list[anim_focus]=anim_focus
+			end
             --focus.x = 200*focus_i[1]
         else
             --table.insert(animate_list,corner_get_focus)
