@@ -250,6 +250,12 @@
         
         if (atext) {
             self.origText = atext;
+            NSError *error = NULL;
+            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"<" options:NSRegularExpressionAnchorsMatchLines error:NULL];
+            self.origText = [regex stringByReplacingMatchesInString:self.origText options:NSMatchingWithTransparentBounds range:NSMakeRange(0, [self.origText length]) withTemplate:@"&lt;"];
+            regex = [NSRegularExpression regularExpressionWithPattern:@">" options:NSRegularExpressionAnchorsMatchLines error:NULL];
+            self.origText = [regex stringByReplacingMatchesInString:self.origText options:NSMatchingWithTransparentBounds range:NSMakeRange(0, [self.origText length]) withTemplate:@"&gt;"];
+            atext = self.origText;
             if (maxLength) {
                 atext = [atext substringToIndex:maxLength];
             }
