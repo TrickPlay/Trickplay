@@ -62,8 +62,12 @@ class MainWindow(QMainWindow):
 	
 		## make them aware of one another
         # Toolbar
-        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
+        QObject.connect(self.ui.action_New, SIGNAL("triggered()"),  self.new)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
+        QObject.connect(self.ui.action_Save_As, SIGNAL('triggered()'),  self.editorManager.saveas)
+        QObject.connect(self.ui.action_Close, SIGNAL('triggered()'),  self.editorManager.close)
+        #QObject.connect(self.ui.action_Close, SIGNAL('triggered()'),  self.close_file)
+        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         
         # Restore sizes/positions of docks
         self.restoreState(settings.value("mainWindowState").toByteArray());
@@ -113,6 +117,7 @@ class MainWindow(QMainWindow):
         Initialize widgets on the main window with a given app path
         """
         
+        print("main.start")
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
@@ -132,12 +137,20 @@ class MainWindow(QMainWindow):
         settings.setValue("mainWindowGeometry", self.saveGeometry());
         settings.setValue("mainWindowState", self.saveState());
         
+	
+    def new(self):
+		print "New project"
+
+    def close_file(self):
+		print "Close file"
+
     def exit(self):
         """
         Close in a clean way... but still Trickplay closes too soon and the
         Avahi service stays alive
         """
-        
+		#try to close current index tab and then, do that for every other tabs too
+
         self.close()
 
     def dm(self):
@@ -148,5 +161,4 @@ class MainWindow(QMainWindow):
 
     def isptr(self):
 		print "inptr"
-        
         
