@@ -759,6 +759,16 @@ namespace JSON
         return map.find( key ) != map.end();
     }
 
+    Object::Map::iterator Object::find( const String & key )
+    {
+    	return map.find( key );
+    }
+
+    Object::Map::const_iterator Object::find( const String & key ) const
+    {
+    	return map.find( key );
+    }
+
     Object::Map::iterator Object::begin()
     {
         return map.begin();

@@ -330,6 +330,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
+					i386,
 					armv6,
 					armv7,
 				);
@@ -387,6 +388,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
+					i386,
 					armv6,
 					armv7,
 				);
@@ -422,6 +424,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
+					i386,
 					armv6,
 					armv7,
 				);

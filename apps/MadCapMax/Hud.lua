@@ -56,9 +56,9 @@ end
 
 function hud:setup_lvl(t)
     
-    poo_capacity = t and t.poo_capacity or 15
-    poop_cost    = t and t.poo_capacity or 3
-    curr_poo     = t and t.starting_poo or 0
+    poo_capacity = t and t.poo_capacity or 20
+    poop_cost    = t and t.poo_capacity or 1
+    curr_poo     = t and t.starting_poo or 15
     
     live_i       = 1
     

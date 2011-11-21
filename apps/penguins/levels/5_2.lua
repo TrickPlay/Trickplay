@@ -520,4 +520,42 @@ end
 clone22.extra.reactive = true
 
 
-g:add(image2,clone5,clone12,clone8,clone11,clone20,clone13,clone14,clone15,clone16,clone10,clone17,clone18,clone22)
+local image14 = Image
+	{
+		src = "/assets/images/icicles.png",
+		clip = {0,0,161,131},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "image14",
+		position = {313,-13,0},
+		size = {161,131},
+		opacity = 255,
+		reactive = true,
+	}
+
+image14.extra.focus = {}
+
+function image14:on_key_down(key)
+	if image14.focus[key] then
+		if type(image14.focus[key]) == "function" then
+			image14.focus[key]()
+		elseif screen:find_child(image14.focus[key]) then
+			if image14.clear_focus then
+				image14.clear_focus(key)
+			end
+			screen:find_child(image14.focus[key]):grab_key_focus()
+			if screen:find_child(image14.focus[key]).set_focus then
+				screen:find_child(image14.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+image14.extra.reactive = true
+
+
+g:add(image2,clone5,clone12,clone8,clone11,clone20,clone13,clone14,clone15,clone16,clone10,clone17,clone18,clone22,image14)

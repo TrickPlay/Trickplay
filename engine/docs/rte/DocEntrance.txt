@@ -8,7 +8,7 @@ By taking advantage of the capabilities of the Visual Editor and SDK libraries a
 
 Tutorials are available that illustrate the main approaches to developing a TrickPlay application.
 
-The <Visual Editor Tutorial at file:../devtools/editor/tutorial/introduction-txt.html> explains how to use the Editor to quickly lay out your application's user interface.
+The <Visual Editor Tutorial> explains how to use the Editor to quickly lay out your application's user interface.
 
-The <SDK Tutorial at file:tutorial/introduction-txt.html> walks through the generation of a nontrivial TrickPlay application, describing the elements that every TrickPlay program requires and introducing several useful classes and capabilities of the SDK libraries.
+The <TrickPlay SDK Tutorial> walks through the generation of a nontrivial TrickPlay application, describing the elements that every TrickPlay program requires and introducing several useful classes and capabilities of the SDK libraries.
 

@@ -17,9 +17,9 @@ end
 
 -- verify that the serialize apis turns various data structures into a string.
 function test_Global_serialize_basic ()
-    is_string( serialize (lua_table), "serialize table failed" )
-    is_string( serialize (serialize_function (2)), "serialize function failed" )
-    is_string( serialize (true), "serialize boolean failed" )
+    is_string( serialize (lua_table), "serialize table didn't return a string." )
+    is_string( serialize (serialize_function (2)), "serialize function didn't return a string. " )
+    is_string( serialize (true), "serialize (true) didn't return a string." )
     
 end
 

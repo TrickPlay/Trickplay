@@ -24,8 +24,8 @@ end
 -- Tests --
 
 function test_URLRequest_on_complete_called ()
-	assert_equal( responseCode , 200, "URLRequest response code ~= 200" )
-	assert_equal( responseStatus , "OK", "URLRequest response status ~= ok" )
+	assert_equal( responseCode , 200, "responseCode returned: "..responseCode.." Expected: 200")
+	assert_equal( responseStatus , "OK", "responseStatus returned: "..responseStatus.." Expected: OK")
 end
 
 -- Test Tear down --

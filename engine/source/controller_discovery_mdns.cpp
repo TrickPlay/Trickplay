@@ -86,7 +86,7 @@ void ControllerDiscoveryMDNS::create_service( AvahiServer * server )
                 // TODO: this could loop forever...maybe we should bail at some stage
 
                 ret = avahi_server_add_service( server, group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
-                                                AvahiPublishFlags( 0 ), name.c_str(), "_tp-remote._tcp", NULL, NULL, port, NULL );
+                                                AvahiPublishFlags( 0 ), name.c_str(), TP_REMOTE_MDNS_SERVICE, NULL, NULL, port, NULL );
 
                 if ( ret == AVAHI_ERR_COLLISION )
                 {
@@ -109,7 +109,7 @@ void ControllerDiscoveryMDNS::create_service( AvahiServer * server )
                     // TODO: this could loop forever...maybe we should bail at some stage
 
                     ret = avahi_server_add_service( server, group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC,
-                                                    AvahiPublishFlags( 0 ), name.c_str(), "_trickplay-http._tcp", NULL, NULL, http_port, NULL );
+                                                    AvahiPublishFlags( 0 ), name.c_str(), TP_HTTP_MDNS_SERVICE, NULL, NULL, http_port, NULL );
 
                     if ( ret == AVAHI_ERR_COLLISION )
                     {
