@@ -26,15 +26,40 @@ function main()
     
     local font = "Free Sans"
     
-    g_font     = "Free Sans"
+    g_font     = "IM FELL English SC"
     app_state  = nil
     
-    g_user = {
-        name   = "",
-        id     = nil,
-        wins   = nil,
-        losses = nil
-    }
+    do
+        
+        local wins, losses
+        local local_t = {
+            wins   = 0,
+            losses = 0
+        }
+        g_user = {
+            name   = "",
+            id     = 0,
+        }
+        
+        g_user = setmetatable(
+            g_user,
+            {
+                __index = function(t,k)
+                    return local_t[k]
+                end,
+                __newindex = function(t,k,v)
+                    dumptable(g_user)
+                    if local_t[k] then
+                        
+                        local_t[k] = v > 9999 and 9999 or v
+                        
+                    end
+                    
+                end,
+            }
+        )
+    end
+    
     
     ----------------------------------------------------------------------------
     -- Generic functions                                                      --
@@ -76,8 +101,20 @@ function main()
         button_y = Image{ src = assets_path .. "general_menu/button-yellow.png"},
         button_b = Image{ src = assets_path .. "general_menu/button-blue.png"},
         button_f = Image{ src = assets_path .. "general_menu/button-focus.png"},
+        button = {
+            Image{ src = assets_path .. "general_menu/button1.png"},
+            Image{ src = assets_path .. "general_menu/button2.png"},
+            Image{ src = assets_path .. "general_menu/button3.png"},
+        },
         
         mm_focus  = Image{ src = assets_path .. "general_menu/focus-list.png"},
+        
+        --Main Menu
+        game_hist_bg  = Image{ src = assets_path.. "main menu/grave-score.png"      },
+        my_move_bg    = Image{ src = assets_path.. "main menu/grave-your-move.png"  },
+        their_move_bg = Image{ src = assets_path.. "main menu/grave-their-move.png" },
+        hr            = Image{ src = assets_path.. "main menu/grave-hr.png"         },
+        sign          = Image{ src = assets_path.. "main menu/sign.png"             },
         
         --Guess a Word
         check      = Image{ src = assets_path .. "make or guess word/checkmark.png"},
@@ -104,7 +141,15 @@ function main()
         strikes_txt = Image{ src = assets_path .. "make or guess word/strikes.png"    },
     }
     
-    for k,v in pairs(img_srcs) do     clone_srcs:add(v)    end
+    for k,v in pairs(img_srcs) do
+        
+        if type(v) == "table" then
+            
+            for kk,vv in pairs(v) do clone_srcs:add(vv) end
+            
+        else  clone_srcs:add(v) end
+        
+    end
     
     ----------------------------------------------------------------------------
     -- DoFiles                                                                --
@@ -139,6 +184,7 @@ function main()
     Main_Menu_Entry    = dofile( code_path .. "visual objects/Main_Menu_Entry.lua" )
     Clipped_List       = dofile( code_path .. "visual objects/Clipped_List.lua"    )
     Game_History       = dofile( code_path .. "visual objects/Game_History.lua"    )
+    Swing_Sign         = dofile( code_path .. "visual objects/Swing_Sign.lua"      )
     --    main pieces
     bg, logo           = dofile( code_path .. "visual objects/Background.lua"      )
     Splash_Buttons     = dofile( code_path .. "visual objects/Splash_Buttons.lua"  )
@@ -158,6 +204,7 @@ function main()
     Guess_Word_Buttons.opacity = 0
     Make_Word_Buttons.opacity  = 0
     Game_History.opacity  = 0
+    Swing_Sign.opacity    = 0
     
     screen:add(
         bg,
@@ -168,7 +215,8 @@ function main()
         Make_Word_Buttons,
         Splash_Buttons,
         Main_Menu,
-        Game_History
+        Game_History,
+        Swing_Sign
     )
     
     ----------------------------------------------------------------------------
@@ -214,6 +262,7 @@ function main()
         
         make_list     = make_list,
         make_button   = make_button,
+        side_buttons = Side_Buttons,
         
         get_letters   = get_letters,
         letter_values = letter_values,
@@ -236,6 +285,7 @@ function main()
         
         make_list     = make_list,
         make_button   = make_button,
+        side_buttons = Side_Buttons,
         
         get_letters   = get_letters,
         letter_values = letter_values,
@@ -258,6 +308,7 @@ function main()
         img_srcs       = img_srcs,
         game_server    = gsm,
         front_page     = Main_Menu,
+        side_buttons = Side_Buttons,
         
         game_definition = hangman_game_definition,
         
@@ -269,9 +320,10 @@ function main()
     
     Main_Menu_Entry:init{
         logic       = Main_Menu,
-        box_w       = 400,
+        box_w       = 350,
         entry_h     = 48,
         score_limit = 3,
+        img_srcs    = img_srcs,
         guess_word  = Guess_Word_Buttons,
         make_word   = Make_Word_Buttons,
         ls          = Letter_Slots,
@@ -288,7 +340,13 @@ function main()
         make_word    = Make_Word_Buttons,
         game_server  = gsm,
         make_list    = make_list,
-        game_history = Game_History
+        game_history = Game_History,
+        img_srcs     = img_srcs,
+        swing_sign   = Swing_Sign,
+    }
+    
+    Swing_Sign:init{
+        img_srcs     = img_srcs,
     }
     
     --[[
@@ -326,6 +384,7 @@ function main()
     --]]
     Game_History:init{
         make_frame   = make_frame,
+        img_srcs       = img_srcs,
     }
     
     Clipped_List:init{
@@ -396,6 +455,7 @@ function main()
                     {Splash_Buttons,     "opacity",   0},
                     {Letter_Slots,       "opacity",   0},
                     {Strike_Bar,         "opacity",   0},
+                    {Swing_Sign,         "opacity",   0},
                     {Score_Keeper,       "opacity",   0},
                     {Guess_Word_Buttons, "opacity",   0},
                     {Make_Word_Buttons,  "opacity",   0},
@@ -410,6 +470,7 @@ function main()
                     {Splash_Buttons,     "opacity", 255},
                     {Letter_Slots,       "opacity",   0},
                     {Strike_Bar,         "opacity",   0},
+                    {Swing_Sign,         "opacity",   0},
                     {Score_Keeper,       "opacity",   0},
                     {Guess_Word_Buttons, "opacity",   0},
                     {Make_Word_Buttons,  "opacity",   0},
@@ -424,6 +485,7 @@ function main()
                     {logo,               "opacity", 255},
                     {Letter_Slots,       "opacity",   0},
                     {Strike_Bar,         "opacity",   0},
+                    {Swing_Sign,         "opacity", 255},
                     {Score_Keeper,       "opacity",   0},
                     {Guess_Word_Buttons, "opacity",   0},
                     {Make_Word_Buttons,  "opacity",   0},
@@ -439,6 +501,7 @@ function main()
                     {logo,               "opacity",   0},
                     {Letter_Slots,       "opacity", 255},
                     {Strike_Bar,         "opacity",   0},
+                    {Swing_Sign,         "opacity",   0},
                     {Score_Keeper,       "opacity", 255},
                     {Guess_Word_Buttons, "opacity",   0},
                     {Make_Word_Buttons,  "opacity", 255},
@@ -453,6 +516,7 @@ function main()
                     {logo,               "opacity",   0},
                     {Letter_Slots,       "opacity", 255},
                     {Strike_Bar,         "opacity", 255},
+                    {Swing_Sign,         "opacity",   0},
                     {Score_Keeper,       "opacity", 255},
                     {Guess_Word_Buttons, "opacity", 255},
                     {Make_Word_Buttons,  "opacity",   0},
@@ -520,7 +584,7 @@ function main()
     collectgarbage("collect")
     
     
-    --mediaplayer:load("glee-1.mp4")
+    mediaplayer:load("glee-1.mp4")
     
     function mediaplayer:on_loaded()
         

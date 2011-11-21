@@ -26,7 +26,7 @@ function self:make(t)
             clone           = true,
             unfocus_fades   = false,
             select_function = t.buttons[i].select,
-            unfocused_image = img_srcs["button_"..t.buttons[i].color],
+            unfocused_image = img_srcs.button[(i-1)%3+1],
             focused_image   = img_srcs.button_f,
         }
         
@@ -34,14 +34,27 @@ function self:make(t)
         buttons[i].y = t.y + (img_srcs.button_f.h + t.spacing)*(i-1)
         
         text[i]   = Text{
-            color = "ffffff",
+            color = "f1e6d4",
             text  = t.buttons[i].name,
-            font  = g_font .. " Bold 28px",
-            x     = 30,
+            font  = g_font .. " 36px",
+            x     = 0,
             y     = 15,
+            w= buttons[i].w,
+            alignment = "CENTER",
         }
         
-        buttons[i]:add(text[i])
+        buttons[i]:add(
+            Text{
+                color = "000000",
+                text  = t.buttons[i].name,
+                font  = g_font .. " 36px",
+                x     = -2,
+                y     = 15-2,
+            w= buttons[i].w,
+            alignment = "CENTER",
+            },
+            text[i]
+        )
         
     end
     
@@ -50,6 +63,9 @@ function self:make(t)
         elements = buttons,
         on_focus = t.on_focus,
         display_passive_focus = false,
+        resets_focus_to = t.resets_focus_to,
+        resets_focus_secondary = t.resets_focus_secondary,
+        ignore_override = true,
     }
     
     side_bar.buttons = buttons
@@ -74,7 +90,7 @@ function self:make(t)
     
     function side_bar:whiten_text(i)
         
-        text[i].color = "ffffff"
+        text[i].color = "d1c6b4"
         
     end
     

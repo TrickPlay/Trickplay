@@ -18,7 +18,7 @@ test_group:add(image1)
 
 -- Default properties of loading a simple image.
 function test_UIElementImageProperties ()
-    assert_equal(image1.is_animating, true, "new image1.is_animating ~= false")
+    assert_equal(image1.is_animating, true, "image1.is_animating returned: ".. tostring(image1.is_animating).." Expected: true")
 end
 
 

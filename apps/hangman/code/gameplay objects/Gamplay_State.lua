@@ -73,7 +73,12 @@ local make_from_existing = function(p_data)
     
     
     --sanity check on its state
-    if p_data.state == json.null then error("got a sesssion with no data",2) end
+    if p_data.state == json.null then
+        
+        dumptable(p_data)
+        
+        error("got a sesssion with no data",2)
+    end
     
     if type(p_data.state) == "string" then
         
@@ -219,7 +224,12 @@ local make_from_existing = function(p_data)
             data = t
             
             --sanity check on its state
-            if data.state == json.null then error("got a sesssion with no data",2) end
+            if data.state == json.null then 
+                
+                dumptable(data)
+                
+                error("got a sesssion with no data",2)
+            end
             
             if type(data.state) == "string" then
                 
