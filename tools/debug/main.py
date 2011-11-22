@@ -16,6 +16,8 @@ from Editor.EditorManager import EditorManager
 from FileSystem.FileSystem import FileSystem
 from Console.TrickplayConsole import TrickplayConsole
 
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
 class MainWindow(QMainWindow):
     
     def __init__(self, app, parent = None):
@@ -150,7 +152,7 @@ class MainWindow(QMainWindow):
         Avahi service stays alive
         """
 		#try to close current index tab and then, do that for every other tabs too
-
+        self._deviceManager.stop()
         self.close()
 
     def dm(self):

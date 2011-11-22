@@ -33,6 +33,9 @@ class TrickplayDeviceManager(QWidget):
         self._path = ''
         self.trickplay = QProcess()
         
+    def stop(self):
+		self.discovery.stop()
+
     def addLocalComboItem(self):
         """
         Add combo box from running app locally. This always exists.
