@@ -153,9 +153,9 @@ public:
 		}
 		else
 		{
-            set( TP_DEBUGGER_PORT, server->get_port() );
+            tp_context_set( context , TP_DEBUGGER_PORT , Util::format( "%u" , server->get_port() ).c_str() );
 
-			tplog2( "HTTP SERVER READY ON PORT %u" , server->get_port() );
+			tplog( "HTTP SERVER READY ON PORT %u" , server->get_port() );
 
 			server->register_handler( "/debugger" , this );
 
