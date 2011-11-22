@@ -9,12 +9,12 @@
 /*
     Interface: Controller
     
-    The Controller interface provides access to external devices connected to the TrickPlay Engine. Typical external devices include TV remote controls, keyboards, and pointer-type devices, such as mice. It is also possible to connect to an Apple iPad or iPhone.
+    The Controller interface provides access to external devices connected to the TrickPlay Engine. Typical external devices include TV remote controls, keyboards, and pointer-type devices, such as mice. It is also possible to connect to smart devices, such as Apple iPads and iPhones, Android devices, and other smart devices.
     
     Devices connect to the TrickPlay Engine automatically if: (1) the Engine has enabled external connections and (2) the external device searches for other devices to connect to. By default, external connections are disabled. The Engine can enable external connections by performing either of the following tasks.
     
-    - Set the controllers_enabled configuration key in the application's .trickplay file to "TRUE"
-    - Define the system's TP_controllers_enabled environment variable to "TRUE"
+    - Set the controllers_enabled configuration key in the application's .trickplay file to "TRUE". This will enable external connections to the current application only.
+    - Define the system's TP_controllers_enabled environment variable to "TRUE". This will enable external connections to any TrickPlay application.
     
     The connection is performed by using either the mDNS (multicast DNS) or UPnP (Universal Plug and Play) protocol. By default, mDNS is enabled and UPnP is disabled. Each protocol can be enabled/disabled by setting their respective TrickPlay configuration key (controllers_mdns_enabled and controllers_upnp_enabled). 
     
@@ -317,16 +317,15 @@ interface Controller [[ControllerDelegate*]]
         ]];
     
     /*
-        InternalProperty: has_advanced_ui
+        Property: has_advanced_ui
         
-        *** This property is used by the "Advanced UI" Lua library to communicate with the TakeControl framework. It should never be accessed directly by a TrickPlay application. Therefore, it will remain undocumented to the public.
-
-        The has_advanced_ui property is a Boolean flag indicating whether or not the device supports "Advanced UI" functions (true=supports "Advanced UI").
+        The has_advanced_ui property is a Boolean flag indicating whether or not the device or application running on the device provides dedicated TrickPlay support (true=supports TrickPlay).
         
-        *Possible Settings:* true=device supports "Advanced UI" functions, else false
+        *Possible Settings:* true=device supports TrickPlay, else false
         
-        *See Also:* the <is_advanced_ui_ready> property, <advanced_ui> function and <on_advanced_ui_event> event handler
+        *See Also:* the <on_advanced_ui_ready> event handler
     */
+    /* Possible new names for "AdvancedUI": has_trickplay_support
 
     readonly bool has_advanced_ui
         [[
@@ -712,14 +711,16 @@ interface Controller [[ControllerDelegate*]]
     /*
         Function: declare_resource
         
-        The declare_resource() function loads a resource, such as an image or an audio file, for future processing. A resource can be loaded from either a file or a URL address.
+        The declare_resource() function associates a resource, such as an image or an audio file, with a descriptive string. This string is used in subsequent calls that load the resource. A resource can be loaded from either a file or a URL address.
         
+        When handing the declare_resource() function, the device may optionally pre-load and cache the referenced resource to eliminate latency issues that may occur when attempting to simultaneously load and process the resource. Alternatively, the device may decide to only link the resource to the specified name at this time, and perform no other processing until it receives a subsequent operation with the resource.
+
         *Arguments:*
-        
+
         	resource - string name to associate with the resource. This string is used in subsequent function calls that accept a resource argument, such as the <play_sound>, <set_ui_background>, <set_ui_image> and <request_image> functions.
         	url - string filename or URL address of the resource
         	
-        *Return Value:* true if the resource was succesfully loaded, else false
+        *Return Value:* true if the resource was succesfully processed, else false
         
         *See Also:* the <play_sound>, <set_ui_background>, <set_ui_image> and <request_image> functions
     */
@@ -1261,11 +1262,9 @@ interface Controller [[ControllerDelegate*]]
     callback on_audio_clip_cancelled;
 
     /*
-        InternalEvent Handler: on_advanced_ui_ready
+        Event Handler: on_advanced_ui_ready
         
-        *** This event handler is used by the "Advanced UI" Lua library to communicate with the TakeControl framework. It should never be called directly by a TrickPlay application. Therefore, it will remain undocumented to the public.
-        
-        The on_advanced_ui_ready() event handler is invoked when the device's Advance UI capabilities are available.
+        The on_advanced_ui_ready() event handler is invoked when a TrickPlay-enabled device is prepared to connect to a TrickPlay application. At this point, the application can load the necessary libraries to make the connection. Refer to <Interacting with an External Smart Device> for further information.
         
         *Prototype:*
 
@@ -1279,7 +1278,7 @@ interface Controller [[ControllerDelegate*]]
 			
 		*Return Value:* None
 		
-		*See Also:* the <has_advanced_ui> and <is_advanced_ui_ready> properties
+		*See Also:* the <has_advanced_ui> property
     */
 
     callback on_advanced_ui_ready;

@@ -153,7 +153,9 @@ public:
 		}
 		else
 		{
-			tplog2( "HTTP SERVER READY ON PORT %u" , server->get_port() );
+            tp_context_set( context , TP_DEBUGGER_PORT , Util::format( "%u" , server->get_port() ).c_str() );
+
+			tplog( "HTTP SERVER READY ON PORT %u" , server->get_port() );
 
 			server->register_handler( "/debugger" , this );
 
@@ -949,7 +951,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		{
 			unsigned int index = atoi( parts[ 1 ].c_str() );
 
-			if ( index >= 0 && index < breakpoints.size() )
+			if ( index < breakpoints.size() )
 			{
 				breakpoints.erase( breakpoints.begin() + index );
 			}
