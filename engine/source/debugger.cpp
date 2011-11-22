@@ -153,6 +153,8 @@ public:
 		}
 		else
 		{
+            set( TP_DEBUGGER_PORT, server->get_port() );
+
 			tplog2( "HTTP SERVER READY ON PORT %u" , server->get_port() );
 
 			server->register_handler( "/debugger" , this );
