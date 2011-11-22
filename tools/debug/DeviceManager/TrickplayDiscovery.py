@@ -53,20 +53,20 @@ class TrickPlayListener(object):
 			print "Service", name, "added"
 			address =  str(socket.inet_ntoa(info.getAddress()))
 			port = info.getPort()
-			if port != 6789:
-				name = self.getDeviceName(name)
-				self.devices[str(name)] = {}
-				self.devices[str(name)][0] = str(address)
-				self.devices[str(name)][1] = str(port)
-				# Add item to ComboBox
-				self.combo.addItem(name)
-				index = self.combo.findText(name)
-				self.combo.setItemData(index, address, ADDRESS)
-				self.combo.setItemData(index, port, PORT)
-				self.combo.setItemData(index, address, NAME)
-        		# Automatically select a service if only one exists
-        		if 1 == self.combo.count():
-        			self.service_selected(1) # index -> 1 
+			name = self.getDeviceName(name)
+			print (name, address, port)
+			self.devices[str(name)] = {}
+			self.devices[str(name)][0] = str(address)
+			self.devices[str(name)][1] = str(port)
+			# Add item to ComboBox
+			self.combo.addItem(name)
+			index = self.combo.findText(name)
+			self.combo.setItemData(index, address, ADDRESS)
+			self.combo.setItemData(index, port, PORT)
+			self.combo.setItemData(index, address, NAME)
+        	# Automatically select a service if only one exists
+        	if 1 == self.combo.count():
+        		self.service_selected(1) # index -> 1 
 			return True
 		else:
 			return False
