@@ -124,11 +124,14 @@ class EditorManager(QWidget):
 			self.ui.directory.setText(path)
 
     def close(self):
-		print "EDITOR MANAGER CLOSE"
 		# find current index tab 
-		# try to save 
 		index = self.tab.currentIndex()
+		
+		# TODO : try to save 
+
+		#close current index tab
 		self.editorGroups[0].removeTab(index)
+		self.tab.closeTab(index)
 
 
     def saveas(self):
