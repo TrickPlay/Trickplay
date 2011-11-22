@@ -70,6 +70,7 @@ Group: Programmer's Guide  {
 	File: TrickPlay SDK Color Names (no auto-title, docs/rte/progguide/color_names.txt)
 	File: Extending TrickPlay Objects (no auto-title, docs/rte/progguide/extra.txt)
 	File: Understanding the Z-Axis (no auto-title, docs/rte/progguide/z_axis.txt)
+	File: Interacting with Smart Devices (no auto-title, docs/rte/progguide/externalConnect.txt)
 	File: Localization (no auto-title, docs/rte/progguide/localization.txt)
 	File: Lua and TrickPlay (no auto-title, docs/rte/progguide/lua_and_trickplay.txt)
 	File: TrickPlay Configuration Keys (no auto-title, docs/rte/progguide/config_keys.txt)
