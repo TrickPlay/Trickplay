@@ -113,8 +113,6 @@ function post_main()
 		
 	end
 	
-	if settings.bar_state then bar_state:change_state_to(settings.bar_state) end
-	
 	bar_state:add_state_change_function(
         function() current_bar:launch_full_to_mini() end,
         nil,
@@ -157,6 +155,8 @@ function post_main()
         "ZIP_ENTRY"
     )
 	
+	if settings.bar_state then bar_state:change_state_to(settings.bar_state) end
+	
 	--make the weather bars for each location
 	for i,location in pairs(locations) do
 		
@@ -168,9 +168,7 @@ function post_main()
 		end
 		
 	end
-	current_bar = bars[1]
 	
-	current_bar.go_to_state(bar_state:current_state())
 	
 	--moon:setup()
 	--animate_list[moon.func_tbls.rise]  = moon
@@ -190,6 +188,11 @@ function post_main()
 	bars[1].opacity=255
 	
 	bars[1]:show()
-	dolater(bars[1].grab_key_focus,bars[1])
+	bars[1]:grab_key_focus()
+	
+	current_bar = bars[1]
+	current_bar.go_to_state("1_DAY")
+	current_bar.go_to_state(bar_state:current_state())
+	
 end
 dolater(post_main)

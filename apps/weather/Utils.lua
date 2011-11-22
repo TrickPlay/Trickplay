@@ -232,10 +232,10 @@ Clone = function(t)
 	end
 	
 	
-	clone_sources_table[t.source].count = clone_sources_table[t.source].count+1
+	--clone_sources_table[t.source].count = clone_sources_table[t.source].count+1
 	
 	--print("I HAVE THIS MANY",clone_sources_table[t.source].count)
-	
+	--[[
 	local deletion_spy = newproxy(true)
 	
 	local sauce = t.source
@@ -256,7 +256,7 @@ Clone = function(t)
 			
 		end
 	end
-	
+	--]]
 	--replace the string with the UI_Element
 	t.source = clone_sources_table[t.source]
 	
@@ -264,7 +264,7 @@ Clone = function(t)
 	--return a Clone
 	t= TP_Clone(t)
 	
-	t.deletion_spy = deletion_spy
+	--t.deletion_spy = deletion_spy
 
 	return t
 end
