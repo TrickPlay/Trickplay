@@ -57,6 +57,7 @@ class TrickplayDeviceManager(QWidget):
         print('Pushing app to', CON.get())
         tp = TrickplayPushApp(str(self.path()))
         tp.push(address = CON.get())
+        print "push"+CON.get()
         
     def setPath(self, p):
         self._path = p
@@ -73,9 +74,9 @@ class TrickplayDeviceManager(QWidget):
                 self.trickplay.close()
                 #print('exit status', self.trickplay.exitStatus())
             
-            env = self.trickplay.systemEnvironment()
-            env.append("TP_http_port=6789")
-            self.trickplay.setEnvironment(env)
+            #env = self.trickplay.systemEnvironment()
+            #env.append("TP_http_port=6789")
+            #self.trickplay.setEnvironment(env)
             self.trickplay.start('trickplay', [self.path()])
         
         # Push to foreign device
