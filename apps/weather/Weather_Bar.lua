@@ -172,7 +172,7 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
 end
 
 function Make_Bar(loc,index, master)
-    
+    local curr_state = "1_DAY"
     local bar_index = index
     local mini_width = MINI_BAR_MIN_W
     local master_i = nil
@@ -305,7 +305,7 @@ function Make_Bar(loc,index, master)
     loading_sun:add(flare_d,sun_b,flare_l)
     
     mini_width = mesg.x+mesg.w-bar.x+75
-    if mini then
+    if curr_state == "MINI" then
         --bar:find_child("mid").scale={mini_width,1}
         bar:find_child("mid").w=mini_width
         bar:find_child("right").x=bar_side_w + mini_width
@@ -392,9 +392,9 @@ function Make_Bar(loc,index, master)
         end
         
         if fcast_tbl ~= nil then
-            f_tbl = fcast_tbl.forecast.simpleforecast.forecastday[1]
-            local fday = fcast_tbl.forecast.simpleforecast.forecastday[1]
-            blurb_txt.text      = fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
+            f_tbl          = fcast_tbl.forecast.simpleforecast.forecastday[1]
+            local fday     = fcast_tbl.forecast.simpleforecast.forecastday[1]
+            blurb_txt.text = fcast_tbl.forecast.txt_forecast.forecastday[1].fcttext
             
             
             
@@ -451,13 +451,17 @@ function Make_Bar(loc,index, master)
             mesg:unparent()
             mesg=nil
             bar:add(make_curr_temps(pws_tbl,f_tbl,mini_width))
-            if mini then
+            if curr_state == "MINI" then
+                print("MINIIIIII")
                 --bar:find_child("mid").scale = {mini_width,1}
                 bar:find_child("mid").w   = mini_width
                 bar:find_child("right").x = bar_side_w + mini_width
+                
+                arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
+            else
+                arrow_r.x = MINI_BAR_X + FULL_BAR_W -bar_side_w/2+1
             end
             green_button_mini.x = MINI_BAR_X+mini_width -83
-            arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
             
             if bar_i == bar_index then
                 time_of_day = bar.local_time_of_day
@@ -833,7 +837,7 @@ function Make_Bar(loc,index, master)
                 animate_list[bar.func_tbls.wait_500]=bar
                 
                 mini_width = mesg.w + mesg.x - MINI_BAR_X + 100
-                if mini then
+                if curr_state == "MINI" then
                     --bar:find_child("mid").scale = {mini_width,1}
                     bar:find_child("mid").w   = mini_width
                     bar:find_child("right").x = bar_side_w + mini_width
@@ -856,7 +860,7 @@ function Make_Bar(loc,index, master)
                 animate_list[bar.func_tbls.wait_500]=bar
                 
                 mini_width = mesg.w + mesg.x - MINI_BAR_X + 100
-                if mini then
+                if curr_state == "MINI" then
                     --bar:find_child("mid").scale = {mini_width,1}
                     bar:find_child("mid").w   = mini_width
                     bar:find_child("right").x = bar_side_w + mini_width
@@ -1353,6 +1357,7 @@ function Make_Bar(loc,index, master)
         end
         print(state)
         set_bar_to_state[state]()
+        curr_state = state
     end
     ----------------------------------------------------------------------------
     
