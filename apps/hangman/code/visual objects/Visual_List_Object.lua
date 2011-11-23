@@ -1,4 +1,13 @@
 
+local override_index = {
+    ["FROM_LOWER"] = function(items)
+        return items[1]:set_state("FOCUSED")
+    end,
+    ["FROM_HIGHER"] = function(items)
+        return items[ # items ]:set_state("FOCUSED")
+    end,
+}
+
 local function make_list(t)
 --[[
 		orientation,
@@ -38,80 +47,56 @@ local function make_list(t)
 		table.remove(items,i)
 		
 	end
-	local function gains_focus()
+    local new_i
+	local function gains_focus(overriding_index)
 		
 		if items[index] == nil then return end
 		
 		
 		list:grab_key_focus()
-		
-		--if the list displays a passive focus while unfocused
-		if t.display_passive_focus then
-			
-			--if reseting the index from the passively focused item
-			if t.resets_focus_to and t.resets_focus_to ~= index then
-				
-				--unfocus the passive item
-				items[index]:set_state("UNFOCUSED")
-				
-				--reset the index
-				index = t.resets_focus_to
-				print(1)
-                if not items[index]:set_state("FOCUSED") and t.resets_focus_secondary then
-                    print(2)
-                    index = t.resets_focus_secondary
-                    
-                    items[index]:set_state("FOCUSED")
-                    
-                end
-                
-			else
-                
-                --focus the new index, or change to maintained index from passive to active
-                items[index]:set_state("FOCUSED")
-                
-			end
-		--if the list does not displays a passive focus while unfocused
-		else
-			
-			--reset the index if necessary
-			if t.resets_focus_to and t.resets_focus_to ~= index then
-				
-				--unfocus the passive item
-				items[index]:set_state("UNFOCUSED")
-				
-				index = t.resets_focus_to
-				print(3)
-                if not items[index]:set_state("FOCUSED") and t.resets_focus_secondary then
-                    print(4)
-                    index = t.resets_focus_secondary
-                    
-                    items[index]:set_state("FOCUSED")
-                    
-                end
-                
-				
-			else
-                local l = items[index]:set_state("FOCUSED")
-                --focus the new index, or change to maintained index from passive to active
-                if not l and t.resets_focus_secondary then
-                    print(6,l,index,items[index].is_visible,items[index])
-                    index = t.resets_focus_secondary
-                    
-                    items[index]:set_state("FOCUSED")
-                    
-                end
-                
+        print(list,"list grabbed key")
+        if overriding_index and not t.ignore_override and override_index[overriding_index](items) then --items[overriding_index]:set_state("FOCUSED") then
+            
+            new_i = overriding_index == "FROM_LOWER" and 1 or (# items)
+            if new_i ~= index then
+                items[index]:set_state("UNFOCUSED")
+                index = new_i
             end
-		end
-		
+            
+        elseif t.resets_focus_to and items[t.resets_focus_to]:set_state("FOCUSED") then
+            print("resets_focus_to",t.resets_focus_to,list)
+            if t.resets_focus_to ~= index then
+                items[index]:set_state("UNFOCUSED")
+                index = t.resets_focus_to
+            end
+            
+        elseif t.resets_focus_secondary and items[t.resets_focus_secondary]:set_state("FOCUSED") then
+            
+            if t.resets_focus_secondary ~= index then
+                items[index]:set_state("UNFOCUSED")
+                index = t.resets_focus_secondary
+            end
+            
+        elseif
+            index ~= overriding_index  and
+            index ~= t.resets_focus_to and
+            index ~= t.resets_focus_secondary then
+            
+            print(items[index]:set_state("FOCUSED"))
+            
+        else
+            
+            print("nothing to focus")
+            
+        end
+        print("end gain_focus",list)
 		
 	end
 	
 	local function loses_focus()
 		
-		list.parent:grab_key_focus()
-		
+		--list.parent:grab_key_focus()
+		print(list,"list gave up key")
 		--if the list displays a passive focus while unfocused
 		if t.display_passive_focus then
 			
@@ -128,13 +113,13 @@ local function make_list(t)
 	end
 	
 	
-	function list:set_state(new_state)
+	function list:set_state(new_state,overriding_index)
 		
 		if     new_state == "FOCUSED" then
 			
             if self.is_visible == false then return false end
-            print(5)
-			gains_focus()
+            --print(5)
+			gains_focus(overriding_index)
             if t.on_focus then t.on_focus() end
 			return true
 		elseif new_state == "UNFOCUSED" --[[or new_state == "PASSIVE_FOCUSED"]] then
@@ -165,7 +150,7 @@ local function make_list(t)
         
         if t.wrap and index == 0 then index = #items end
 		
-		while items[index]:set_state("FOCUSED") == false do
+		while items[index]:set_state("FOCUSED","FROM_HIGHER") == false do
 			
 			index = index - 1
 			
@@ -185,7 +170,7 @@ local function make_list(t)
 				
 				index = orig_index
 				
-				items[index]:set_state("FOCUSED")
+				items[index]:set_state("FOCUSED","FROM_HIGHER")
 				
                 return false
 				
@@ -211,7 +196,7 @@ local function make_list(t)
         
         if t.wrap and index == #items + 1 then index = 1 end
 		
-		while items[index]:set_state("FOCUSED") == false do
+		while items[index]:set_state("FOCUSED","FROM_LOWER") == false do
 			index = index + 1
 			print("up",orig_index,index)
 			
@@ -231,7 +216,7 @@ local function make_list(t)
 				
 				index = orig_index
 				
-				items[index]:set_state("FOCUSED")
+				items[index]:set_state("FOCUSED","FROM_LOWER")
 				
                 return false
 				

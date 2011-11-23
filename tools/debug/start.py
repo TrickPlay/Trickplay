@@ -47,7 +47,7 @@ def main(argv):
     
     # TODO, better way of doing this for 'clean' exit...
     except KeyboardInterrupt:
-        pass
+		exit("Exited")
 
 
 if __name__ == '__main__':

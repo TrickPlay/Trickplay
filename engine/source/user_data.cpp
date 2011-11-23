@@ -940,3 +940,13 @@ bool UserData::gc_tag( const gchar * comment )
 
 	return false;
 }
+
+std::string UserData::describe( lua_State * L , int index )
+{
+	if ( UserData * ud = get_check( L , index ) )
+	{
+		return Util::format( "%s (m:%p,c:%p,l:%p)" , ud->type , ud->master , ud->client , lua_topointer( L , index ) );
+	}
+
+	return Util::format( "%p" , lua_topointer( L , index ) );
+}

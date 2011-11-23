@@ -15,7 +15,9 @@ function generate_test_image (controller, factory)
 
 	local t2 = factory:Text{x = 10, y = 100, w = 310, h = 200, text = "That Sam-I-Am\nThat Sam-I-Am\nI do not like that Sam-I-Am", color = "00FFFF", font = "DeJa Vu 20px"}
 
-	g:add(t1, t2)
+	local t3 = factory:Text{x = 10, y = 200, w = 510, h = 200, text = "<span foreground=\"blue\" size=\"x-large\">This text</span> should display several tags and <i>have no italicizations.</i>!", font = "DeJa Vu 20px"}
+
+	g:add(t1, t2, t3)
 
 	return g
 end
