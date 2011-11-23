@@ -1,7 +1,7 @@
 local self = Group{}
 
 local my_turn_list, their_turn_list, list_of_lists, status, win_loss_text, entry_info
-local list_entry, game_state,guess_word,make_word, ls, game_history
+local list_entry, game_state, guess_word, make_word, ls, game_history, swing_sign
 
 local loaded = false
 
@@ -19,32 +19,97 @@ function self:init(t)
     guess_word    = t.guess_word   or error("must pass guess_word",    2)
     make_word     = t.make_word    or error("must pass make_word",     2)
     game_history  = t.game_history or error("must pass game_history",  2)
+    swing_sign    = t.swing_sign   or error("must pass swing_sign",    2)
     ls            = t.ls           or error("must pass ls",            2)
     
     
-    self:add(  t.make_frame(400,750,400,275)  )
-    self:add(  t.make_frame(850,750,400,275)  )
+    self:add(  Clone{source=t.img_srcs.their_move_bg, x = 319, y= 675}  )
+    self:add(  Clone{source=t.img_srcs.my_move_bg,    x = 729, y= 675}  )
     
     self:add( Text{
         text = "Their Move",
-        font = g_font .. " bold 35px",
-        color = "ffffff",
-        x     = 515,
-        y     = 700,
+        font = g_font.." 42px",
+        color = {0,0,0},
+        w     = t.img_srcs.their_move_bg.w,
+        alignment = "CENTER",
+        x     = 319-2,
+        y     = 720-2,
+    }, Text{
+        text = "Their Move",
+        font = g_font.." 42px",
+        color = "b7b7b7",
+        w     = t.img_srcs.their_move_bg.w,
+        alignment = "CENTER",
+        x     = 319,
+        y     = 720,
     })
     self:add( Text{
         text = "My Move",
-        font = g_font .. " bold 35px",
-        color = "ffffff",
-        x     = 980,
-        y     = 700,
+        font = g_font.." bold 42px",
+        color = {0,0,0},
+        w     = t.img_srcs.their_move_bg.w,
+        alignment = "CENTER",
+        x     = 729-2,
+        y     = 720-2,
+    }, Text{
+        text = "My Move",
+        font = g_font.." bold 42px",
+        color = "b7b7b7",
+        w     = t.img_srcs.their_move_bg.w,
+        alignment = "CENTER",
+        x     = 729,
+        y     = 720,
     })
     --Components
-    their_turn_list = t.clipped_list:make{x = 400+2, y = 750+2, w = 400-4, h = 275-4, empty_string = "No Active Sessions", name = "'Their Turn'", on_focus = function(entry) entry_info.text = entry:status() end}
-    my_turn_list    = t.clipped_list:make{x = 850+2, y = 750+2, w = 400-4, h = 275-4, empty_string = "No Active Sessions", name = "'My Turn'",    on_focus = function(entry) entry_info.text = entry:status() end}
+    their_turn_list = t.clipped_list:make{
+        x = 319,
+        y = 780,
+        w = 350,
+        h = 270,
+        empty_string = "No Active Sessions",
+        name = "'Their Turn'",
+        on_focus = function(entry)
+            
+            if entry == nil then
+                
+                return false
+                
+            else
+                
+                swing_sign:new_text(entry:status())
+                
+                return true
+                
+            end
+            
+        end
+    }
+    my_turn_list    = t.clipped_list:make{
+        x = 728,
+        y = 780,
+        w = 351,
+        h = 300,
+        empty_string = "No Active Sessions",
+        name = "'My Turn'",
+        on_focus = function(entry)
+            
+            if entry == nil then
+                
+                return false
+                
+            else
+                
+                swing_sign:new_text(entry:status())
+                
+                return true
+                
+            end
+            
+        end
+    }
     side_buttons    = t.side_buttons:make{
-        on_focus = function() entry_info.text = "" end,
-        x = 1300, y = 750, spacing = 20, buttons = {
+        on_focus = function() swing_sign:new_text(false) end,
+        x = 1120, y = 784, spacing = 874-784-66, buttons = {
             {name = "New Game", color = "r", select = function()
                     
                     print("New Game")
@@ -88,7 +153,7 @@ function self:init(t)
                                 
                                 if t.state == json.null or t.state == nil then
                                     
-                                    game_server:get_session_state(t,f)
+                                    game_server:get_session_state(t.gameSessionId,f)
                                     
                                 else
                                     
@@ -110,7 +175,7 @@ function self:init(t)
                         app_state.state   = "LOADING"
                     end)
                     
-                    g_user.name        = nil
+                    g_user.name = ""
                     
                     self:reset()
                     
@@ -137,21 +202,30 @@ function self:init(t)
         resets_focus_to = 3,
     }
     
-    list_of_lists:define_key_event(keys.RED,    side_buttons.buttons[1].select)
-    list_of_lists:define_key_event(keys.GREEN,  side_buttons.buttons[2].select)
-    list_of_lists:define_key_event(keys.BLUE,   side_buttons.buttons[3].select)
+    --list_of_lists:define_key_event(keys.RED,    side_buttons.buttons[1].select)
+    --list_of_lists:define_key_event(keys.GREEN,  side_buttons.buttons[2].select)
+    --list_of_lists:define_key_event(keys.BLUE,   side_buttons.buttons[3].select)
     
     status = Text{
         x            = screen_w - 50,
         y            = screen_h - 50,
-        w            = 300,
+        w            = 400,
         font         = g_font .. " 40px",
         color        = "ffffff",
         ellipsize    = "END",
         alignment    = "RIGHT",
-        anchor_point = {300,40},
+        on_text_changed = function(self)
+            
+            self.w = -1
+            
+            if self.w > 500 then self.w = 500 end
+            
+            status.anchor_point = { status.w, status.h/2 }
+            status.position = {screen_w - 50,screen_h - 50}
+            status:move_anchor_point( status.w/2, status.h/2 )
+        end
     }
-    status:move_anchor_point( status.w/2, status.h/2 )
+    status:move_anchor_point( status.w, status.h/2 )
     
     local scale_t = {}
     status.wobble = Timeline{
@@ -218,11 +292,11 @@ do
     local losses = {}
     
     local  win_text = "You've won against: "
-    local lose_text = "\nYou've lost against: "
+    local lose_text = "You've lost against: "
     
     local animating = false
     
-    local function setup_text()
+    local function setup_win_text()
         
         local text = ""
         
@@ -241,6 +315,15 @@ do
             end
         end
         
+        return text
+    end
+    
+    local function setup_lose_text()
+        
+        local text = ""
+        
+        animating = true
+        
         if #losses ~= 0 then text = text..lose_text end
         
         for i = 1, #losses do
@@ -256,7 +339,6 @@ do
         
         return text
     end
-    
     local wl_tl = Timeline{
         duration = 10000,
         mode         = "EASE_IN_QUINT",
@@ -291,11 +373,14 @@ do
     
     function self:report_win_loss()
         
-        if not animating then
+        if not swing_sign:holding() then
             
-            animating = true
+            --wl_tl:on_completed()
+            swing_sign:new_text(setup_win_text(),6000)
+            swing_sign:new_text(setup_lose_text(),6000)
             
-            wl_tl:on_completed()
+            wins   = {}
+            losses = {}
             
         end
         
@@ -310,6 +395,8 @@ function self:won_against(entry)
         
         g_user.wins = g_user.wins + 1
         
+        if g_user.wins > 9999 then g_user.wins = 9999 end
+        
         self:add_win(entry:get_session().opponent_name)
         
         game_history:set_wins( g_user.wins )
@@ -323,6 +410,8 @@ function self:lost_against(entry)
     my_turn_list:remove_entry(entry,function()
         
         g_user.losses = g_user.losses + 1
+        
+        if g_user.losses > 9999 then g_user.losses = 9999 end
         
         self:add_loss(entry:get_session().opponent_name)
         

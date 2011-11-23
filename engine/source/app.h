@@ -252,6 +252,8 @@ public:
 
     class Debugger * get_debugger();
 
+    guint16 get_debugger_port();
+
     //.........................................................................
 
     Image * load_image( const gchar * source , bool read_tags );
