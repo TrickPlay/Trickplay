@@ -51,14 +51,20 @@ import com.trickplay.gameservice.transferObj.VendorTO;
 public class GameServiceClient {
 
 	private static final String GS_ENDPOINT = "http://localhost:9081/gameservice/rest";
-
+    //private static final String GS_ENDPOINT = "http://localhost:8091/rest";
 
 		public static void main(String[] args) {
 			
 			RestTemplate restTemplate = getTemplate();
 			
 			// reset database
-			resetDB(restTemplate, "admin", "admin");
+			try { 
+			
+			    resetDB(restTemplate, "admin", "admin");
+			} catch (Exception ex) {
+			    System.out.println("Got exception will reseting GameService database. Ignoring exception and continuing. exception message: " + ex.getMessage());
+			    ex.printStackTrace();
+			}
 			
 			checkUserExists(restTemplate, "u1");
 			checkUserExists(restTemplate, "u2");

@@ -33,8 +33,11 @@ sun = {
             self.sun.position={self.sun.w/2,self.sun.h/2}
             --self.state="SET"
         end
+        if self.group.parent == nil then
+            curr_condition:add(self.group)
+        end
         animate_list[self.func_tbls.shine] = self
-        curr_condition:add(self.group)
+        
     end,
     
     
@@ -109,16 +112,19 @@ moon = {
             self.stars = Clone{source=imgs.stars,opacity=0}
             self.star  = Clone{name="SHTAR",source=imgs.star, opacity=0,x=10,y=100}
             self.moon  = Clone{
-                    source=imgs.moon,
-                    x=38,
-                    y=63 + (screen_h-709)
+                source=imgs.moon,
+                x=38,
+                y=63 + (screen_h-709)
             }
             self.group:add(self.stars,self.star,self.moon)
-            --self.state="SET"
-            curr_condition:add(self.group)
+            
         end
         
-        self.group:lower_to_bottom()
+        if self.group.parent == nil then
+            curr_condition:add(self.group)
+            
+            self.group:lower_to_bottom()
+        end
     end,
 
     func_tbls = {
@@ -141,6 +147,7 @@ moon = {
                 if p == 1 then
                     this_obj.state="SET"
                     animate_list[this_obj.func_tbls.twinkle] = nil
+                    this_obj:remove()
                 end
             end
         },
@@ -163,7 +170,7 @@ moon = {
             end
         }
     },
-    on_remove = function(self)
+    remove = function(self)
         self.group:unparent()
     end,
 }
@@ -285,7 +292,7 @@ cloud_spawner = {
                 
                 this_obj.lg_elapsed_1 = this_obj.lg_elapsed_1 + secs*1000
                 this_obj.lg_elapsed_2 = this_obj.lg_elapsed_2 + secs*1000
-                this_obj.sm_elapsed   = this_obj.sm_elapsed + secs*1000
+                this_obj.sm_elapsed   = this_obj.sm_elapsed   + secs*1000
                 
                 
                 if this_obj.lg_elapsed_1 > this_obj.lg_thresh then
@@ -384,44 +391,17 @@ window_snow = function(x,y,deg) return{
             --anchor_point = {imgs.snow_flake.lg[r].w/2,imgs.snow_flake.lg[r].h/2},
             scale = {0,0}
         }
-        self.anchor_point = {self.img.w/2,self.img.h/2}
+        self.img.anchor_point = {self.img.w/2,self.img.h/2}
         curr_condition:add(self.img)
     end,
-    check_wipe_down = function(self,deg_2,deg_1)
-        if self.deg < deg_1 and self.deg > deg_2 then
-            --animate_list[self.func_tbls.fade_out] = self
-            --self.img.opacity=0
-            self.img:unparent()
-            
-        end
-    end,
-    check_wipe_up = function(self,deg_1,deg_2)
-        if self.deg < deg_1 and self.deg > deg_2 then
+    check_wipe = function(self,deg_1,deg_2)
+        if deg_2 < self.deg and self.deg < deg_1 then
             --animate_list[self.func_tbls.fade_out] = self
             --self.img.opacity=0
             self.img:unparent()
         end
     end,
     func_tbls={
-        drop={
-            func=function(this_obj,this_func_tbl,secs,p)
-                this_obj.img.y = this_obj.img.y + this_obj.speed*secs
-                if this_obj.img.y > screen_h then
-                    animate_list[this_func_tbl]=nil
-                    this_obj.img:unparent()
-                    --this_obj.img = nil
-                end
-            end
-        },
-        fade_out = {
-            duration = 200,
-            func     = function(this_obj,this_func_tbl,secs,p)
-                this_obj.img.opacity=255*.4*(1-p)
-                if p == 1 then
-                    this_obj.img:unparent()
-                end
-            end
-        },
         stick = {
             duration = 100,
             func=function(this_obj,this_func_tbl,secs,p)
@@ -430,17 +410,6 @@ window_snow = function(x,y,deg) return{
                 --this_obj.img.y = this_obj.img.y + this_obj.speed*secs
                 if p == 1 then
                     --animate_list[this_obj.func_tbls.wobble]=this_obj
-                end
-            end
-        },
-        wobble = {
-            duration = math.random(200,1000),
-            func=function(this_obj,this_func_tbl,secs,p)
-                local s = 1 + .05*math.cos(1/2*math.pi*p)
-                this_obj.img.scale={s,s}
-                --this_obj.img.y = this_obj.img.y + this_obj.speed*secs
-                if p == 1 then
-                    --animate_list[this_obj.func_tbls.drop]=this_obj
                 end
             end
         },
@@ -459,98 +428,49 @@ window_drops = function(x,y,deg)
             self.img.scale={0,0}
             self.img.opacity=255*.75
             if self.img.parent == nil then
-            curr_condition:add(self.img)
+                curr_condition:add(self.img)
             end
+            self.func_tbls.stick.elapsed = 0
         end
         return drop
     end
     return{
-    
-    setup = function(self)
-        self.deg = deg
-        local r = math.random(1,#imgs.rain.drops)
-        self.img = Clone{
-            name="small",
-            source=imgs.rain.drops[r],
-            x=x,--+math.random(0,10)*10,
-            y=y,
-            opacity=255*.75,
-            --anchor_point = {imgs.rain.drops[r].w/2,imgs.rain.drops[r].h/2},
-            scale = {0,0}
-        }
-        self.anchor_point = {self.img.w/2,self.img.h/2}
-        curr_condition:add(self.img)
-    end,
-    check_wipe_down = function(self,deg_2,deg_1)
-        if self.deg < deg_1 and self.deg > deg_2 then
-            --animate_list[self.func_tbls.fade_out] = self
-            --self.img.opacity=0
-            self.img:unparent()
-            table.insert(prev_drops,self)
-            animate_list[self.func_tbls.drop]=nil
-            animate_list[self.func_tbls.stick]=nil
-            animate_list[self.func_tbls.wobble]=nil
-        end
-    end,
-    check_wipe_up = function(self,deg_1,deg_2)
-        if self.deg < deg_1 and self.deg > deg_2 then
-            --animate_list[self.func_tbls.fade_out] = self
-            --self.img.opacity=0
-            self.img:unparent()
-            table.insert(prev_drops,self)
-            animate_list[self.func_tbls.drop]=nil
-            animate_list[self.func_tbls.stick]=nil
-            animate_list[self.func_tbls.wobble]=nil
-        end
-    end,
-    func_tbls={
-        drop={
-            func=function(this_obj,this_func_tbl,secs,p)
-                this_obj.img.y = this_obj.img.y + this_obj.speed*secs
-                if this_obj.img.y > screen_h then
-                    animate_list[this_func_tbl]=nil
-                    this_obj.img:unparent()
-                    --this_obj.img = nil
-                end
+        
+        setup = function(self)
+            self.deg = deg
+            local r = math.random(1,#imgs.rain.drops)
+            self.img = Clone{
+                name="small",
+                source=imgs.rain.drops[r],
+                x=x,--+math.random(0,10)*10,
+                y=y,
+                opacity=255*.75,
+                --anchor_point = {imgs.rain.drops[r].w/2,imgs.rain.drops[r].h/2},
+                scale = {0,0}
+            }
+            self.img.anchor_point = {self.img.w/2,self.img.h/2}
+            curr_condition:add(self.img)
+        end,
+        check_wipe = function(self,deg_1,deg_2)
+            if deg_2 < self.deg and self.deg < deg_1 then
+                self.img:unparent()
+                table.insert(prev_drops,self)
+                animate_list[self.func_tbls.stick] =nil
+                return true
             end
-        },
-        fade_out = {
-            duration = 100,
-            func     = function(this_obj,this_func_tbl,secs,p)
-                this_obj.img.opacity=255*.75*(1-p)
-                if p == 1 then
-                    this_obj.img:unparent()
-                    animate_list[self.func_tbls.drop]=nil
-                    animate_list[self.func_tbls.stick]=nil
-                    animate_list[self.func_tbls.wobble]=nil
+            return false
+        end,
+        func_tbls={
+            stick = {
+                duration = 100,
+                func=function(this_obj,this_func_tbl,secs,p)
+                    this_func_tbl.s = .75*math.sin(math.pi/2*p)
+                    this_obj.img.scale={this_func_tbl.s,this_func_tbl.s}
                 end
-            end
+            },
         },
-        stick = {
-            duration = 100,
-            func=function(this_obj,this_func_tbl,secs,p)
-                this_func_tbl.s = .75*math.sin(math.pi/2*p)
-                this_obj.img.scale={this_func_tbl.s,this_func_tbl.s}
-                --this_obj.img.y = this_obj.img.y + this_obj.speed*secs
-                if p == 1 then
-                    --animate_list[this_obj.func_tbls.wobble]=this_obj
-                end
-            end
-        },
-        wobble = {
-            duration = math.random(200,1000),
-            func=function(this_obj,this_func_tbl,secs,p)
-                this_func_tbl.s = 1 + .05*math.cos(1/2*math.pi*p)
-                this_obj.img.scale={this_func_tbl.s,this_func_tbl.s}
-                --this_obj.img.y = this_obj.img.y + this_obj.speed*secs
-                if p == 1 then
-                    --animate_list[this_obj.func_tbls.drop]=this_obj
-                end
-            end
-        },
-    },
-
-}end
+    }
+end
 
 wiper = {
     drops    = {},
@@ -566,46 +486,51 @@ wiper = {
         self.wiper_blade:unparent()
         self.snow_blade:unparent()
         
-        self.wiper_rain   = nil
-        self.wiper_freeze = nil
-        self.wiper_blade  = nil
-        self.snow_blade   = nil
+        --self.wiper_rain   = nil
+        --self.wiper_freeze = nil
+        --self.wiper_blade  = nil
+        --self.snow_blade   = nil
         
         animate_list[self.func_tbls.rain_loop] = nil
         animate_list[self.func_tbls.snow_loop] = nil
     end,
     
     setup    = function(self)
-        self.snow_blade   = Clone{
-            source=imgs.wiper.snow_blade,
-            x=-124+50,
-            y=screen_h+30,
-            opacity=0
-        }
-        self.wiper_blade  = Clone{
-            source=imgs.wiper.blade,
-            x=-124+50,
-            y=screen_h+30,
-            opacity=0
-        }
-        self.wiper_rain   = Clone{
-            source=imgs.wiper.corner,
-            y=573,
-            opacity=0
-        }
-        self.wiper_freeze = Clone{
-            source=imgs.wiper.freezing,
-            y=760,
-            opacity=0
-        }
-        self.snow_blade.anchor_point = {50,self.snow_blade.h}
-        self.snow_blade.anchor_point = {50,self.wiper_blade.h}
-        curr_condition:add(
-            self.wiper_rain,
-            self.wiper_freeze,
-            self.wiper_blade,
-            self.snow_blade
-        )
+        if self.wiper_blade == nil then
+            self.snow_blade   = Clone{
+                source=imgs.wiper.snow_blade,
+                x=-124+50,
+                y=screen_h+30,
+                opacity=0
+            }
+            self.wiper_blade  = Clone{
+                source=imgs.wiper.blade,
+                x=-124+50,
+                y=screen_h+30,
+                opacity=0
+            }
+            self.wiper_rain   = Clone{
+                source=imgs.wiper.corner,
+                y=573,
+                opacity=0
+            }
+            self.wiper_freeze = Clone{
+                source=imgs.wiper.freezing,
+                y=760,
+                opacity=0
+            }
+            self.snow_blade.anchor_point = {50,self.snow_blade.h}
+            self.snow_blade.anchor_point = {50,self.wiper_blade.h}
+        end
+        
+        if self.wiper_blade.parent == nil then
+            curr_condition:add(
+                self.wiper_rain,
+                self.wiper_freeze,
+                self.wiper_blade,
+                self.snow_blade
+            )
+        end
     end,
     
     func_tbls = {
@@ -634,17 +559,33 @@ wiper = {
                 
                 --Wiper Code
                 if p < 1/4 then
+                    p = p*4 -- 0 - 1/4 goes to 0 - 1
                     for k,v in pairs(this_obj.drops) do
-                        k:check_wipe_up(this_obj.wiper_blade.z_rotation[1],(p)*-400-5)
+                        
+                        if k:check_wipe(
+                                this_obj.wiper_blade.z_rotation[1],
+                                p*-100-5
+                            ) then
+                            
+                            this_obj.drops[k] = nil
+                        end
                     end
                     --this_obj.func_tbls.wipe_up(this_obj,p*4)
-                    this_obj.wiper_blade.z_rotation={-100*p*4,0,0}
+                    this_obj.wiper_blade.z_rotation={-100*p,0,0}
                 elseif p < 2/4 then
+                    p = 2-p*4 -- 1/4 - 2/4 goes to 1 - 0
                     for k,v in pairs(this_obj.drops) do
-                        k:check_wipe_down(this_obj.wiper_blade.z_rotation[1],-(2-p*4)*100)
+                        
+                        if k:check_wipe(
+                                p*-100+5,
+                                this_obj.wiper_blade.z_rotation[1]
+                            ) then
+                            
+                            this_obj.drops[k] = nil
+                        end
                     end
                     --this_obj.func_tbls.wipe_up(this_obj,2-p*4)
-                    this_obj.wiper_blade.z_rotation={-100*(2-p*4),0,0}
+                    this_obj.wiper_blade.z_rotation={-100*p,0,0}
                 end
             end
         },
@@ -707,6 +648,7 @@ wiper = {
                         k.img:unparent()
                     end
                     this_obj.drops = {}
+                    this_obj:remove()
                 end
             end,
         },
@@ -714,6 +656,9 @@ wiper = {
             duration = 500,
             func = function(this_obj,this_func_tbl,secs,p)
                 this_obj.wiper_freeze.opacity=255*(1-p)
+                if p == 1 then
+                    this_obj:remove()
+                end
             end,
         },
         sleet_fade_out = {
@@ -722,7 +667,9 @@ wiper = {
                 this_obj.snow_blade.opacity=255*(1-p)
                 if p == 1 then
                     animate_list[this_obj.func_tbls.snow_loop]=nil
+                    this_obj:remove()
                 end
+                
             end,
         },
     }
@@ -754,6 +701,7 @@ falling_snow = function(speed_x,speed_y,x,y) return{
                 --this_obj.img.scale = {this_obj.img.scale[1] + 4*secs,this_obj.img.scale[1] + 4*secs}
                 if this_obj.img.y > screen_h then
                     animate_list[this_func_tbl]=nil
+                    animate_list[this_obj.func_tbls.seesaw]=nil
                     this_obj.img:unparent()
                     --this_obj.img = nil
                 end
@@ -792,17 +740,22 @@ chance_of = {
     
     setup = function(self)
         
-        self.cloud_1   = Clone{source=imgs.reg_clouds.lg[2],y=802,}
-        self.cloud_2   = Clone{source=imgs.reg_clouds.lg[1],y=812,}
-        self.wiper_freeze   = Clone{name="wiper freeze",source=imgs.wiper.freezing, y=760,opacity=0}
-        for i = 1,#imgs.lightning do
-            self.lightning[i]   = Clone{source=imgs.lightning[i],opacity=0,y=850}
+        if self.cloud_1 == nil then
+            self.cloud_1   = Clone{source=imgs.reg_clouds.lg[2],y=802,}
+            self.cloud_2   = Clone{source=imgs.reg_clouds.lg[1],y=812,}
+            self.wiper_freeze   = Clone{name="wiper freeze",source=imgs.wiper.freezing, y=760,opacity=0}
+            for i = 1,#imgs.lightning do
+                self.lightning[i]   = Clone{source=imgs.lightning[i],opacity=0,y=850}
+            end
+            
+            self.cloud_1.x=-self.cloud_1.w-50
+            self.cloud_2.x=-self.cloud_2.w-20
         end
         
-        curr_condition:add(unpack(self.lightning))
-        self.cloud_1.x=-self.cloud_1.w-50
-        self.cloud_2.x=-self.cloud_2.w-20
-        curr_condition:add(self.wiper_freeze,self.cloud_1,self.cloud_2)
+        if self.cloud_1.parent == nil then
+            curr_condition:add(unpack(self.lightning))
+            curr_condition:add(self.wiper_freeze,self.cloud_1,self.cloud_2)
+        end
         self.wiper_freeze:lower_to_bottom()
         animate_list[self.func_tbls.fade_in] = self
     end,
@@ -812,12 +765,12 @@ chance_of = {
         self.cloud_2:unparent()
         self.wiper_freeze:unparent()
         
-        self.cloud_1 = nil
-        self.cloud_2 = nil
-        self.wiper_freeze = nil
+        --self.cloud_1 = nil
+        --self.cloud_2 = nil
+        --self.wiper_freeze = nil
         for i = 1, #self.lightning do
             self.lightning[i]:unparent()
-            self.lightning[i] = nil
+            --self.lightning[i] = nil
         end
         
     end,
@@ -983,16 +936,19 @@ tstorm = {
 
 
     setup = function(self)
-        self.glow_cloud = Clone{source=imgs.glow_cloud,y=650,opacity=0}
-        self.base_cloud = Clone{source=imgs.rain_clouds.lg[1],y=650}
-        self.base_cloud.x = -self.base_cloud.w
-        for i = 1,#imgs.lightning do
-            self.lightning[i]   = Clone{source=imgs.lightning[i],opacity=0}
-            self.lightning[i].y = screen_h - self.lightning[i].h*2/3
+        if self.glow_cloud == nil then
+            self.glow_cloud = Clone{source=imgs.glow_cloud,y=650,opacity=0}
+            self.base_cloud = Clone{source=imgs.rain_clouds.lg[1],y=650}
+            self.base_cloud.x = -self.base_cloud.w
+            for i = 1,#imgs.lightning do
+                self.lightning[i]   = Clone{source=imgs.lightning[i],opacity=0}
+                self.lightning[i].y = screen_h - self.lightning[i].h*2/3
+            end
         end
-        
-        curr_condition:add(unpack(self.lightning))
-        curr_condition:add(self.base_cloud,self.glow_cloud)
+        if self.glow_cloud.parent == nil then
+            curr_condition:add(unpack(self.lightning))
+            curr_condition:add(self.base_cloud,self.glow_cloud)
+        end
     end,
     
     func_tbls = {
@@ -1057,6 +1013,9 @@ tstorm = {
                 --]]
                 this_obj.lightning[this_obj.l_index].opacity = 255*(1-p)
                 this_obj.glow_cloud.opacity= 255*(1-p)
+                if p == 1 then
+                    this_obj:remove()
+                end
             end
         },
         fade_in = {
@@ -1075,12 +1034,12 @@ tstorm = {
         self.glow_cloud:unparent()
         self.base_cloud:unparent()
         
-        self.glow_cloud = nil
-        self.base_cloud = nil
+        --self.glow_cloud = nil
+        --self.base_cloud = nil
         
         for i = 1, #self.lightning do
             self.lightning[i]:unparent()
-            self.lightning[i] = nil
+            --self.lightning[i] = nil
         end
     end
 }
@@ -1211,12 +1170,17 @@ snow = {
     state="NONE",
     remove=function(self)
         self.snow_corner:unparent()
-        self.snow_corner = nil
+        --self.snow_corner = nil
     end,
     setup = function(self)
-        self.snow_corner = Clone{source=imgs.snow_corner,x=-10,opacity=0}
-        self.snow_corner.y=screen_h-self.snow_corner.h+30
-        curr_condition:add(self.snow_corner)
+        if self.snow_corner == nil then
+            self.snow_corner = Clone{source=imgs.snow_corner,x=-10,opacity=0}
+            self.snow_corner.y=screen_h-self.snow_corner.h+30
+        end
+        
+        if self.snow_corner.parent == nil then
+            curr_condition:add(self.snow_corner)
+        end
     end,
     hurry_out_flakes = function(self)
         for k,v in pairs(self.flakes) do
@@ -1257,6 +1221,9 @@ snow = {
             duration = 500,
             func = function(this_obj,this_func_tbl,secs,p)
                 this_obj.snow_corner.opacity=255*(1-p)
+                if p == 1 then
+                    this_obj:remove()
+                end
             end
         },
         snow_loop = {
@@ -1292,9 +1259,14 @@ snow = {
 fog = {
     state="NONE",
     setup = function(self)
-        self.img = Clone{source=imgs.fog,opacity=0}
-        self.img.y=screen_h-self.img.h
-        curr_condition:add(self.img)
+        if self.img == nil then
+            self.img = Clone{source=imgs.fog,opacity=0}
+            self.img.y=screen_h-self.img.h
+        end
+        
+        if self.img.parent == nil then
+            curr_condition:add(self.img)
+        end
     end,
     func_tbls ={
         fade_in = {
@@ -1316,7 +1288,7 @@ fog = {
                 if p == 1 then
                     this_obj.state="NONE"
                     this_obj.img:unparent()
-                    this_obj.img=nil
+                    --this_obj.img=nil
                 end
             end
         },
@@ -1462,6 +1434,11 @@ local set_states = function(t)
     end
     
     if t.fog ~= nil and t.fog ~= fog.state then
+        
+        animate_list[fog.func_tbls.fade_out] = nil
+        animate_list[fog.func_tbls.fade_in]  = nil
+        animate_list[fog.func_tbls.full_to_half_opacity] = nil
+        animate_list[fog.func_tbls.half_to_full_opacity] = nil
         
         if t.fog == "NONE" then
             animate_list[fog.func_tbls.fade_out]=fog

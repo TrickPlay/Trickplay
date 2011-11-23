@@ -3,6 +3,7 @@ local snow   = {"explode-16","explode-24","explode-32"}
 
 local group = Group{name = "explosion"}
 overlay:add(group)
+group:raise(penguin)
 
 local anim = Timeline{duration = 2300}
 

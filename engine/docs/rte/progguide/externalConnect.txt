@@ -1,0 +1,275 @@
+
+Title: Interacting with an External Smart Device
+
+The TrickPlay SDK libraries enable a TrickPlay application to connect to and interact with external smart devices, including iOS (iPhone, iPad, etc.), Android, and other smart devices. Commands and data can be passed in either direction between a TV-based TrickPlay application and an application running on the smart device.
+
+In addition, TrickPlay user-interface elements, such as Images and Text, can be displayed on the external device by calling the same TrickPlay SDK library functions used to display objects on the TV. No special iOS or Android API calls are required to output to the device. The code statements below compare the creation and display of a simple Rectangle on a TV and external smart device.
+
+	(code)
+	-- ********* Display an object on the TV
+	
+	-- Create Rectangle object
+	blueRect = Rectangle( { size     = { 100, 100 },
+	                        position = { 100, 100 },
+	                        color    = "RoyalBlue",
+	                      } )
+	                      
+	-- Display the Rectangle on the TV display
+	screen:add( blueRect )
+	
+	-- ********* Display an object on the external smart device (iPhone, iPad, Android-based device, etc.)
+	
+	-- Create Rectangle object
+	blueRectExtern = smartDevice.factory:Rectangle( { size     = { 100, 100 },
+	                                                  position = { 100, 100 },
+	                                                  color    = "RoyalBlue",
+	                                                } )
+	                                         
+	-- Display the Rectangle on the external device
+	smartDevice.screen:add( blueRectExtern )
+	(end)
+	
+This topic will describe the steps necessary for a TrickPlay application to connect to an external smart device, display and animate user-interface elements on the device, and receive information from the device, such as key-presses, touches, and other user input.
+
+Group: Connecting to an External Smart Device
+
+For a TrickPlay application to interact with an external device, the following connections must be made.
+
+	- The external device must search for other devices to connect to, such as the TrickPlay Engine
+	- Connections to external devices must be enabled in the TrickPlay Engine
+	- The TrickPlay application must initialize its own connection to the external device
+	
+Header: Activating an External Device to Search for the TrickPlay Engine
+	
+The free TrickPlay "Take Control" application will run on external smart devices and search for other devices to connect to, including the TrickPlay Engine. To receive the "Take Control" application, send a request to support@trickplay.com. Alternatively, the developer can write his own application to run on the device and perform the connection. For technical details to accomplish this task, contact support@trickplay.com.
+
+Header: Enabling External Connections in the TrickPlay Engine
+
+The TrickPlay Engine disables external connections by default. To enable connections, perform either of the following tasks.
+
+    - Define the system environment variable TP_controllers_enabled to "TRUE". This will enable external connections for all TrickPlay applications.
+    - In an application's .trickplay file, set the controllers_enabled configuration key to "TRUE". This will enable external connections for the current application only.
+    
+Additional information about the [TP_]controllers_enabled configuration key can be found in <TrickPlay Configuration Keys>.
+
+Connections between an external device and the TrickPlay Engine and application are performed by using either the mDNS (multicast DNS) or UPnP (Universal Plug and Play) protocol. By default, mDNS is enabled and UPnP is disabled. Each protocol can be enabled/disabled by setting their respective TrickPlay configuration key (controllers_mdns_enabled and controllers_upnp_enabled). Refer to <TrickPlay Configuration Keys> for further details concerning these keys.
+
+Header: Connect a TrickPlay Application to an External Device
+
+When a TrickPlay application wishes to connect to an external device, it must load two Lua libraries: AdvancedUIAPI.lua and AdvancedUIClasses.lua. Both these files must be located within the application's app bundle directory. Both files must be loaded for each TrickPlay-enabled device.
+
+A TrickPlay application loads the Lua libraries and initializes a connection to an external device by using one of two methods. One connection method is employed if the external device is already connected to the TrickPlay Engine when the application starts. The other method is used if the external device connects to the TrickPlay Engine while the application is running. A TrickPlay application must support both these methods because it cannot control when the external device will connect.
+
+*Connecting a TrickPlay Application to an Existing Device*
+
+The TrickPlay Engine supports a <controllers> global variable that provides a property called "connected" (see <controllers.connected>). The connected property maintains a table of external devices that are currently connected to the Engine. When a TrickPlay application starts running, it should iterate through the connected table to find any devices it wishes to connect to. A skeleton iteration loop is shown below.
+
+	(code)
+	-- Iterate through list of connected devices
+	for i, device in ipairs( controllers.connected ) do
+		
+	end
+	(end)
+
+Each entry in the connected table is a <Controller> object. A Controller object contains information about its own capabilities, such as whether or not it supports touch events or has a display. Smart devices will indicate their ability to interact with a TrickPlay application by setting their has_advanced_ui property to "TRUE" (see <Controller.has_advanced_ui>). The expanded code statement below shows the discovery of a connected TrickPlay-enabled device.
+
+	(code)
+	-- Iterate through list of connected devices
+	for i, device in ipairs( controllers.connected ) do
+		-- Is this device TrickPlay-enabled?
+		if( device.has_advanced_ui )then
+			
+		end
+	end
+	(end)
+
+At this point, the TrickPlay-enabled device is connected to the TrickPlay Engine. To connect the device to the application, the AdvancedUIAPI.lua Lua library is loaded via the Lua loadfile() function. The Controller object for the external device is passed to the library as an argument of the loadfile() call. The AdvancedUIAPI.lua library will automatically load the other required library, AdvancedUIClasses.lua. With the loading of the Lua libraries complete, the application is connected to the external device. An application will probably want to save a reference to the device in a variable; future interactions with the device will go through this variable. The complete connection code segment is shown below.
+
+	(code)
+	-- Iterate through list of connected devices
+	for i, device in ipairs( controllers.connected ) do
+		-- Is this device TrickPlay-enabled?
+		if( device.has_advanced_ui )then
+			-- Yes, connect the device to this application
+			loadfile( "AdvancedUIAPI.lua" )( device )
+			
+			-- Save this TrickPlay-enabled device for future operations
+			smartDevice = device
+		end
+	end
+	(end)
+
+*Connecting a TrickPlay Application to a New Device*
+
+While an application is running, new devices may attempt to connect to the TrickPlay Engine. The application should monitor for new connections by hooking into the on_controller_connected() event handler. This handler is accessible through the <controllers> global variable (see <controllers.on_controller_connected>). The code skeleton below hooks into the handler which is invoked whenever a new device connects to the TrickPlay Engine.
+
+	(code)
+	-- Monitor new device connections
+	function controllers:on_controller_connected( device )
+		
+	end
+	(end)
+
+After a new device has been detected, the application should hook into the device's on_advanced_ui_ready() event handler (see <Controller.on_advanced_ui_ready>). If the device is TrickPlay-enabled, it will broadcast this ready-event when it is prepared to accept a connection from an application. The code to hook into the event is shown below.
+
+	(code)
+	-- Monitor new device connections
+	function controllers:on_controller_connected( device )
+		-- Hook new TrickPlay-enabled devices
+		function device:on_advanced_ui_ready()
+			
+		end
+	end
+	(end)
+
+If the on_advanced_ui_ready() event handler is invoked, we know the new device is TrickPlay-enabled, so the application can load the AdvancedUIAPI.lua library file to make the connection. A reference to the connected device is saved in a variable for future interactions. The complete connection code segment is shown below.
+
+	(code)
+	-- Monitor new device connections
+	function controllers:on_controller_connected( device )
+		-- Hook new TrickPlay-enabled devices
+		function device:on_advanced_ui_ready()
+			-- Connect to TrickPlay-enable device
+			loadfile( "AdvancedUIAPI.lua" )( device )
+			
+			-- Save this TrickPlay-enabled device for future operations
+			smartDevice = device
+		end
+	end
+	(end)
+
+Note: A TrickPlay application should support both methods of device connection, i.e., devices that are already connected when the application starts and devices that connect while the application is running.
+
+After a TrickPlay-enabled device is connected, the application can begin interacting with it.
+    
+Group: Displaying TrickPlay User-Interface Objects on the External Device
+
+Several TrickPlay SDK user-interface elements can be displayed on a connected device. These objects will also generate events to enable the acceptance of user input.
+
+The following TrickPlay SDK elements can be displayed on a connected device.
+
+	- <Image>
+	- <Text>
+	- <Rectangle>
+	- <Group>
+	
+Each of the above elements supports the same properties, functions, and event handlers as their TV-based versions. Any differences between the TV-based and device-based versions are described in a later section.
+
+When a TrickPlay-enabled device connects to an application, its associated Controller object acquires two new properties: factory and screen.
+
+The factory property is used to create new SDK objects, such as Image and Text. For example, the following code statement uses the factory property to create a new Rectangle object on a device referenced by the smartDevice variable.
+
+	(code)
+	greenRect = smartDevice.factory:Rectangle( { size     = { 300, 300 },
+	                                             position = { 100, 100 },
+	                                             color    = "LimeGreen",
+	                                             name     = "LimeRect",
+	                                           } )
+	(end)
+
+The screen property is the device's equivalent to the TV's <screen> global variable. It supports all the properties and functions available to the TV screen variable. To display an object on the device, add the object to the device's screen property, as shown below.
+
+	(code)
+	smartDevice.screen:add( limeRect )
+	(end)
+
+Group: Receiving Events from the External Device
+
+Events generated on the external device are received by the application in the same manner as events generated on the TV. Events generated by user input and other system occurrences are processed by hooking the associated event handler. The code statements below hook into an object's on_key_down() event handler.
+
+	(code)
+	-- Define the event handler
+	function handler_key_down( self, key_value, unicode, time, key_modifiers )
+		-- User pressed key when object had the input focus
+		print( "User pressed a key when the objec had the input focus" )
+	end
+	
+	-- Hook the handler to the object
+	greenRect.on_key_down = handler_key_down;
+	(end)
+
+Group: Differences Between TV-Based and Device-Based SDK Objects
+
+In most cases, using the device-based SDK objects is identical to using the TV-based versions. This section describes any differences between TV-based and device-based versions.
+
+
+Header: The Image Class
+
+Creating an Image object on a TrickPlay-enabled device must perform an additional step: The file or URL specification of the image's location must be processed by the device object's declare_resource() function (see <Controller.declare_resource>). The following code segment creates an Image object that can be displayed on an external device.
+
+	(code)
+	-- Create a device-based Image object
+	smartDevice:declare_resource( "Bckgnd", "http://trickplay.com/images/stdBackground.jpg" )
+	bckgndImage = smartDevice.factory:Image( { src = "Bckgnd" } )
+	(end)
+
+*The <Image.src> property*
+
+The src property can be set only when the Image object is constructed. Setting the src property has no effect on when the image is loaded; all image loading for external devices is performed asynchronously.
+
+*The <Image.async> property*
+
+The async property has no effect with device-based Image objects. All image loading is performed asynchronously.
+
+*The <Image.loaded> property*
+
+The loaded property has no meaning with device-based Image objects. All image loading is performed asynchronously.
+
+*The <Image.tile> property*
+
+The default tile setting for device-based Image objects is {true,true}, i.e., both horizontal and vertical tiling are enabled. (The default for TV-based objects is {false,false}.)
+
+
+Header: The Text Class
+
+*The <Text.font> property*
+
+If any StyleList attributes are specified, they must be in the following order: font-style, font-variant, font-weight, font-stretch.
+
+*The <Text.wrap_mode> property*
+
+The "WORD_CHAR" setting is not supported.
+
+*The <Text.ellipsize> property*
+
+The "START" and "MIDDLE" settings are not supported.
+
+
+Header: The UIElement Interface
+
+*The <UIElement.animate> function*
+
+The animation of a Text object's width, w, height, h, and size properties is not supported.
+
+*The on_touches() Event Handler*
+
+The on_touches() event handler is supported only for external devices. The device must support touch events and should indicate this capability by setting its has_touches property to true (see <Controller.has_touches>). Touch events occur while the user touches the device.
+
+*Prototype:*
+
+	(code)
+	void on_touches( table touches, string state )
+	(end)
+
+*Arguments:*
+
+	touches - table of Touch IDs. When a new touch occurs, it is assigned a unique Touch ID. This ID is used in subsequent event invocations until the finger is lifted from the device. If multiple touches occur on the object, they are grouped together in the touches table.
+	state - string specifying the type of touch event. The possible states are described below.
+	
+*Event States:* The supported state argument values are described below.
+
+	"down" - occurs when a finger is initially placed on the object. Note: Other fingers may already be placed on the object, in which case the touches table will contain multiple Touch IDs.
+	"moved_inside" - occurs when one or more fingers touching the object have moved, but still remain within the boundary of the object. Note: No positional information is returned by this event.
+	"moved_outside" - occurs when one or more fingers touching the object have moved outside the boundary of the object. Note: No positional information is returned by this event.
+	"ended_inside" - occurs when one or more fingers lifts from the device while positioned within the boundary of the object.
+	"ended_outside" - occurs when one or more fingers lifts from the device while positioned outside the boundary of the object.
+	
+The boundary of an object is defined by its X,Y coordinate location and its width and height. If a clipping region is defined for the object, the clipped area is considered to be outside the boundary of the object and will not generate touch events.
+
+Objects can be touched even if they are hidden or have an opacity value of 0 (completely transparent).
+
+*Return Value:* None
+
+*See Also:* the <Controller.on_touch_down>, <Controller.on_touch_move> and <Controller.on_touch_up> event handlers
+
+

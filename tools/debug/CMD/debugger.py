@@ -1,48 +1,54 @@
-import sys, re
+import re
 from connection import *
 from discovery import *
 
-	
 class CLDebuger():
 
 	def __init__(self):
 	
 		self.device_name = ""
 		self.debug_port = ""
+		self.file_name = ""
+		self.line_no = ""
 
 	def start(self, discovery):
 
-		command_list = ['bn', 'r', 'w', 'l', 'bt', 'q', 'c', 's', 'n', 'b', 'a', 'd' ,'f']
+		command_list = ['bn', 'r', 'w', 'l', 'bt', 'q', 'c', 's', 'n', 'a' ]
+		command_list_b = ['bn', 'r', 'w', 'l', 'bt', 'q', 'c', 's', 'n', 'b', 'a', 'f', 'd' ]
 
 		while 1:
 
 			data = None
 			cmd = None
 			arg = None
-			command = raw_input("(db) ")
+
+			if CON.get() == ":":
+				command = raw_input("(db) ")
+			else:
+				prompt = "("+self.file_name+":"+self.line_no+")"
+				command = raw_input(prompt)
 
 			m = re.match('\s*(\w+)\s+(\S+)\s*', command)
 
 			if m:
 				cmd = m.group(1)
-				arg = m.group(2)
-		
+				cmd_temp= re.match('\s*(\w+)\s+', command).group()
+				cmd_i = len(cmd_temp)
+				arg = command[cmd_i:]
+
 			if re.search('ld', command):
 
-				for k in discovery.devices:
+				for k in discovery.devices():
 					if self.device_name == k:
-						print '\t'+k+":"+discovery.devices[k][0]+":"+discovery.devices[k][1]+" (connected)"
+						#print '\t'+k+":"+discovery.devices()[k][0]+":"+discovery.devices()[k][1]+" (connected)"
+						print '\t'+k+" (connected)"
 					else:
-						print '\t'+k+":"+discovery.devices[k][0]+":"+discovery.devices[k][1]
+						#print '\t'+k+":"+discovery.devices()[k][0]+":"+discovery.devices()[k][1]
+						print '\t'+k
 
 			elif re.search('help', command):
 
 				print '\t'+'help is not ready. '
-
-			elif re.search('quit', command) or re.search('exit', command):
-
-				self.disconnect()
-				sys.exit()
 
 			elif re.search('cn',command) or re.search('connect',command): 
 
@@ -58,51 +64,74 @@ class CLDebuger():
 						print "\tArgument required.(device name)"
 						print '\t'+'Try ld" to get a list of available remote devices.'
 
-					elif not arg in discovery.devices:
-						
-						print '\t'+re.search('\w+', re.search('\s\w+', command).group()).group()+' is not available.'
-						print '\t'+'Try "ld" to get a list of available remote devices.'
+					elif not arg in discovery.devices():
+						if discovery.force_lookup(arg) :
 
+							data, command = self.connect(discovery, arg)
+							
+						else:
+							print '\t'+arg+' is not available.'
+							print '\t'+'Try "ld" to get a list of available remote devices.'
 					else:
-						self.device_name = arg
-						discovery.service_selected(self.device_name)
-						self.debug_port = str(getTrickplayDebug()['port'])
-						data = sendTrickplayDebugCommand(self.debug_port, "bn", True)
+						data, command = self.connect(discovery, arg)
 
 			elif command != "":
-	
-				if not command in command_list and not re.search('f\s',command) and not re.search('d\s', command): 
-					print '\t'+'Undefined command: '+command+'. '+'Try \"help\".'
 
-				elif CON.get() == ":":
-
-					print '\t'+'Please connect the debugger to a remote device to send debug command.'
-					print '\t'+'Try "connect" or "cn" followed by device name.'
-					print '\t'+'Try "ld" to get a list of available remote devices.'
-
-				elif ( re.search('d', command) or re.search('f', command) ) and not arg:
-					print "\tArgument required."
-					if re.search('d', command): 
-						print "\tTry \"d\" <breakpoint index> or \"d\" all."
-					elif re.search('f', command):
-						print "\tTry \"f\" <file name>."
-				else:
-					data = sendTrickplayDebugCommand(self.debug_port, command, False)
+				if not arg :
+					if re.search('\s*\w+\s*', command):
+						command = re.search('\w+', command).group()
+						if not command in command_list_b : 
+							print '\t'+'Undefined command: '+command+'. '+'Try \"help\".'
+						elif ( re.search('d', command) or re.search('f', command) ) :
+							print "\tArgument required."
+							if re.search('d', command): 
+								print "\tTry \"d\" <breakpoint index> or \"d\" all."
+							elif re.search('f', command):
+								print "\tTry \"f\" <file name>."
+						elif CON.get() == ":":
+							print '\t'+'Please connect the debugger to a remote device to send debug command.'
+							print '\t'+'Try "connect" or "cn" followed by device name.'
+							print '\t'+'Try "ld" to get a list of available remote devices.'
+						else:
+							data = sendTrickplayDebugCommand(self.debug_port, command, False)
+				elif arg : 
+					if cmd in command_list : 
+						print '\t'+cmd+' does not require argument'
+					elif not cmd in ['b', 'd', 'f']:
+						print '\t'+'Undefined command: '+cmd+'. '+'Try \"help\".'
+					elif CON.get() == ":":
+						print '\t'+'Please connect the debugger to a remote device to send debug command.'
+						print '\t'+'Try "connect" or "cn" followed by device name.'
+						print '\t'+'Try "ld" to get a list of available remote devices.'
+					else: 
+						data = sendTrickplayDebugCommand(self.debug_port, cmd+' '+arg, False)
 
 			if data:
 
 				self.printResp(data, command)
+				if command == 'r' or command == 'c':
+					self.printResp(sendTrickplayDebugCommand(self.debug_port, "bn", False), "bn")
 
-				if command == 'q':
-					CON.set("", "")
-					self.device_name = ""
-					self.debug_port = ""
+			if command == 'q':
+					self.disconnect(discovery)
+	
+	def connect(self, discovery, arg):
 
-				
-	def disconnect(self):
+		self.device_name = arg
+		discovery.service_selected(self.device_name)
+		self.debug_port = str(getTrickplayDebug()['port'])
+		data = sendTrickplayDebugCommand(self.debug_port, "bn", True)
+		return data, 'cn'
 
-		if CON.get() != ":":
-			sendTrickplayDebugCommand(self.debug_port, 'q', False)
+	def disconnect(self, discovery):
+
+		if str(self.device_name) in discovery.listener.devices:
+			del discovery.listener.devices[str(self.device_name)] 
+		CON.set("", "")
+		self.device_name = ""
+		self.debug_port = ""
+		self.file_name = ""
+		self.line_no = ""
 
 	def printResp(self, data, command):
 
@@ -111,6 +140,9 @@ class CLDebuger():
 		file_name = pdata["file"] 
 		tp_id = pdata["id"] 
 		line_num = pdata["line"]
+
+		self.line_no = str(line_num)
+		self.file_name = str(file_name)
 
 		if "locals" in pdata:
 			local_vars = ""
@@ -186,7 +218,7 @@ class CLDebuger():
 					app_info = app_info+"\n\t"					
 			print "\t"+app_info
 
-		if command in ['n','s','bn']:
+		if command in ['n','s','bn', 'cn']:
 			print "\t"+"Break at "+file_name+":"+str(line_num)
 
 

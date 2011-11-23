@@ -6,9 +6,11 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
+@Table(name="game_session_message")
 @XmlRootElement
 public class GameSessionMessage extends BaseEntity implements Serializable {
 

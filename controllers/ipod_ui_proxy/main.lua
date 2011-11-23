@@ -51,10 +51,17 @@ function controllers:on_controller_connected(controller)
     -- create a Rectangle
     key_handler[keys.r] = function()
         r = controller.factory:Rectangle{color = "FF00FFFF", x = 10, size = { 40 , 80 }}
+        r1 = controller.factory:Rectangle{color = "F0000FFF", x = 20, size = { 40 , 80 }}
+        r2 = controller.factory:Rectangle{color = "0F00FFFF", x = 30, size = { 40 , 80 }}
+        r3 = controller.factory:Rectangle{color = "F000FFFF", x = 40, size = { 40 , 80 }}
+        r4 = controller.factory:Rectangle{color = "FF0000FF", x = 50, size = { 40 , 80 }}
+        r5 = controller.factory:Rectangle{color = "F000F0FF", x = 60, size = { 40 , 80 }}
+        r6 = controller.factory:Rectangle{color = "0F000FFF", x = 70, size = { 40 , 80 }}
         function r:on_touches(touches, state)
             print("touched my rectangle with state:", state)
             dumptable(touches)
         end
+        all_r = {r, r1, r2, r3, r4, r5, r6}
         dumptable(r)
     end
     -- create a Group
@@ -67,12 +74,18 @@ function controllers:on_controller_connected(controller)
         dumptable(g)
     end
     -- create an Image using the 'chip' image
+    controller:declare_resource("bkgd", "assets/bkgd-blank.jpg")
     key_handler[keys.i] = function()
         controller:declare_resource("chip", "assets/chip1.png")
-        i = controller.factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip"}
+        i = controller.factory:Image{x = 100, y = 100, w = 100, h = 100, src = "chip", tile = {true, true}}
+        ctrl.screen:add(i)
+        k = controller.factory:Image{x = 200, y = 200, w = 100, h = 100, src = "chip"}
         j = controller.factory:Image{x = 200, y = 500, w = 100, h = 100, src = "chip"}
         function i:on_loaded(failed)
             print("i image loaded?: "..tostring(not failed))
+        end
+        function k:on_loaded(failed)
+            print("k image loaded?: "..tostring(not failed))
         end
         function j:on_loaded(failed)
             print("j image loaded?: "..tostring(not failed))
@@ -94,7 +107,7 @@ function controllers:on_controller_connected(controller)
     -- add the Rectangle to the Group if both exist
     key_handler[keys.a] = function()
         if r and g then
-            g:add(r)
+            g:add(r, r1, r2, r3, r4, r5, r6)
         end
     end
     -- hide and show the Rectangle

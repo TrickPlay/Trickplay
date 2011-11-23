@@ -13,7 +13,7 @@ import com.trickplay.gameservice.domain.RecordedScore;
 @SuppressWarnings("unchecked")
 public class RecordedScoreDAOImpl extends GenericDAOWithJPA<RecordedScore, Long> implements RecordedScoreDAO {
     private static final String BUDDY_SCORES_NATIVE_QUERY = 
-            "select R.* from recorded_score R join game G on R.game_id = G.id join buddy B ON R.user_id = B.target_id join User U on U.id = B.owner_id"
+            "select R.* from recorded_score R join game G on R.game_id = G.id join buddy B ON R.user_id = B.target_id join user U on U.id = B.owner_id"
             + " where U.id=:userId AND G.id=:gameId ORDER BY R.points DESC";
     
     public List<RecordedScore> findTopScores(Long gameId, int limit) {
