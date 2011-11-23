@@ -40,6 +40,11 @@ ClutterColor ClutterUtil::string_to_color( const char * s )
 
     if ( s )
     {
+    	if ( clutter_color_from_string( & result , s ) )
+    	{
+    		return result;
+    	}
+
         int colors[4] = {0, 0, 0, 255};
         char buffer[3] = {0, 0, 0};
 
@@ -51,24 +56,27 @@ ClutterColor ClutterUtil::string_to_color( const char * s )
         int len = strlen( s );
         int i = 0;
 
-        while ( len >= 2 )
+        while ( len >= 2 && i < 4 )
         {
             buffer[0] = *( s++ );
             buffer[1] = *( s++ );
 
-            sscanf( buffer, "%x", &colors[i] );
+            if ( 1 != sscanf( buffer, "%x", &colors[i] ) )
+            {
+            	break;
+            }
 
-            if ( colors[i] < 0 )
-            {
-                colors[i] = 0;
-            }
-            else if ( colors[i] > 255 )
-            {
-                colors[i] = 255;
-            }
+			if ( colors[i] < 0 )
+			{
+				colors[i] = 0;
+			}
+			else if ( colors[i] > 255 )
+			{
+				colors[i] = 255;
+			}
 
             len -= 2;
-            i++;
+            ++i;
         }
 
         result.red   = colors[0];

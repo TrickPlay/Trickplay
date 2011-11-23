@@ -213,8 +213,10 @@ do
         --since initial seconds value will be way larger than usual
         for i = #to_be_added, 1, -1 do
             
-            iterated_list[to_be_added[i]] = parameters[to_be_added[i]].object
-            to_be_added[i] = nil
+			if parameters[to_be_added[i]] then
+				iterated_list[to_be_added[i]] = parameters[to_be_added[i]].object
+				to_be_added[i] = nil
+			end
             
         end
         

@@ -2,77 +2,144 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
+import com.trickplay.gameservice.dao.AchievementDAO;
+import com.trickplay.gameservice.dao.EventDAO;
+import com.trickplay.gameservice.dao.RecordedAchievementDAO;
 import com.trickplay.gameservice.domain.Achievement;
 import com.trickplay.gameservice.domain.Event;
 import com.trickplay.gameservice.domain.Event.EventType;
-import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.RecordedAchievement;
-import com.trickplay.gameservice.domain.User;
+import com.trickplay.gameservice.exception.ExceptionUtil;
+import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.AchievementService;
-import com.trickplay.gameservice.service.EventService;
 
 @Service("achievementService")
-@Repository
-public class AchievementServiceImpl extends GenericDAOWithJPA<Achievement, Long> implements
-		AchievementService {
-	@Autowired
-	EventService eventService;
+public class AchievementServiceImpl implements AchievementService {
+    private static final Logger logger = LoggerFactory.getLogger(AchievementServiceImpl.class);
+    @Autowired
+    private EventDAO eventDAO;
 
-	/*
-	 * TODO: implement findBuddyRecordedAchievement
-	 * (non-Javadoc)
-	 * @see com.trickplay.gameservice.service.AchievementService#findBuddyRecordedAchievement(com.trickplay.gameservice.domain.Game, com.trickplay.gameservice.domain.User)
-	 */
-	public List<RecordedAchievement> findBuddyRecordedAchievement(Game game,
-			User user) {
-		return null;
-	}
+    @Autowired
+    private AchievementDAO achievementDAO;
 
-	@SuppressWarnings("unchecked")
-	public List<RecordedAchievement> findRecordedAchievement(Game game,
-			User user) {
-		return super.entityManager.createQuery
-		(
-				"select R from RecordedAchievment as R join R.game as G join R.user as U where G.id=:gId and U.id=:uId"
-				)
-				.setParameter("gId", game.getId())
-				.setParameter("uId", user.getId())
-				.getResultList();
-	}
+    @Autowired
+    private RecordedAchievementDAO recordedAchievementDAO;
 
-	public RecordedAchievement findRecordedAchievement(Long id) {
-		return entityManager.find(RecordedAchievement.class, id);
-	}
 
-	@SuppressWarnings("unchecked")
-	public List<Achievement> find(Game game) {
-		return super.entityManager.createQuery
-		(
-				"select A from Achievment as A join A.game as G where G.id=:gId"
-				)
-				.setParameter("gId", game.getId())
-				.getResultList();
-	}
+    /*
+     * TODO: implement findBuddyRecordedAchievement (non-Javadoc)
+     * 
+     * @see com.trickplay.gameservice.service.AchievementService#
+     * findBuddyRecordedAchievement(com.trickplay.gameservice.domain.Game,
+     * com.trickplay.gameservice.domain.User)
+     */
+    public List<RecordedAchievement> findBuddyRecordedAchievement(Long gameId,
+            Long buddyId) {
+        return null;
+    }
 
-	@Transactional
-	public void persist(RecordedAchievement entity) {
-		super.entityManager.persist(entity);
-		super.entityManager.persist(new Event(EventType.ACHIEVEMENT_EVENT, entity.getUser(), null, getMessage(entity), entity));
-	}
-	
-	public String getMessage(RecordedAchievement ra) {
-		return 
-		ra.getUser().getUsername() 
-		+ " obtained "
-		+ ra.getAchievement().getName()
-		+ " in "
-		+ ra.getAchievement().getGame().getName();		
-	}
+    public List<RecordedAchievement> findAllRecordedAchievementsByGameId(
+            Long gameId) {
+        Long userId = SecurityUtil.getPrincipal().getId();
+        return recordedAchievementDAO.findAllByGameId(userId, gameId);
+    }
+
+    public RecordedAchievement findRecordedAchievement(Long id) {
+        return recordedAchievementDAO.find(id);
+    }
+
+    public List<Achievement> findAchievementsByGameId(Long gameId) {
+        return achievementDAO.findAllByGameId(gameId);
+    }
+
+    @Transactional
+    public void create(final RecordedAchievement entity) {
+        /*
+         * TransactionTemplate transactionTemplate = new TransactionTemplate();
+         * transactionTemplate.execute(new TransactionCallback<Void>() { public
+         * Void doInTransaction(TransactionStatus status) {
+         */
+        if (entity == null) {
+            throw ExceptionUtil.newIllegalArgumentException("RecordedAchievement", null, "!= null");
+        } 
+        else if (entity.getAchievement() == null) {
+            throw ExceptionUtil.newIllegalArgumentException("RecordedAchievement.achievement", null, "!= null");
+        }
+        else if (entity.getUser() == null) {
+            throw ExceptionUtil.newIllegalArgumentException("RecordedAchievement.user", null, "!= null");
+        }
+        else if (!entity.getUser().getId().equals(SecurityUtil.getCurrentUserId())) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Create RecordedAchievement failed. Security exception. RecordedAchievement.user[id="
+                        + entity.getUser().getId()
+                        + "] is different from logged in user[id="
+                        + SecurityUtil.getCurrentUserId()
+                        + "]");
+            }
+            throw ExceptionUtil.newUnauthorizedException();
+        }
+        
+        try {
+            recordedAchievementDAO.persist(entity);
+            eventDAO.persist(
+                    new Event(EventType.ACHIEVEMENT_EVENT, 
+                            entity.getUser(), 
+                            null, 
+                            getMessage(entity), 
+                            entity
+                            )
+                    );
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Caught exception in create RecordedAchievement", ex);
+            throw ExceptionUtil.newEntityExistsException(RecordedAchievement.class, 
+                    "userName", entity.getUser().getUsername(),
+                    "game", entity.getAchievement().getGame().getName(),
+                    "achievement", entity.getAchievement().getName());
+        } catch (RuntimeException ex) {
+            logger.error("Caught exception in create RecordedAchievement", ex);
+            throw ExceptionUtil.convertToSupportedException(ex);
+        }
+    }
+
+    public Achievement find(Long id) {
+        return achievementDAO.find(id);
+    }
+
+    /* 
+     * TODO: Security check. make sure an authorized user is requesting this operation
+     */
+    @Transactional
+    public void create(Achievement entity) {
+        if (entity == null) {
+            throw ExceptionUtil.newIllegalArgumentException("Achievement", null, "!= null");
+        } 
+        else if (entity.getGame()==null) {
+            throw ExceptionUtil.newIllegalArgumentException("Achievement.game", null, "!= null");
+        }
+        try {
+            achievementDAO.persist(entity);
+        } catch (DataIntegrityViolationException ex) {
+            logger.error("Caught exception in create Achievement", ex);
+            throw ExceptionUtil.newEntityExistsException(Achievement.class,
+                    "game", entity.getGame().getName(),
+                    "achievement", entity.getName());
+        } catch (RuntimeException ex) {
+            logger.error("Caught exception in create Achievement", ex);
+            throw ExceptionUtil.convertToSupportedException(ex);
+        }
+    }
+
+    public String getMessage(RecordedAchievement ra) {
+        return ra.getUser().getUsername() + " obtained "
+                + ra.getAchievement().getName() + " in "
+                + ra.getAchievement().getGame().getName();
+    }
 
 }

@@ -9,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -18,6 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @Entity
+@Table(name="event")
 @XmlRootElement
 public class Event extends BaseEntity implements Serializable {
     /**
@@ -28,7 +30,7 @@ public class Event extends BaseEntity implements Serializable {
 	public enum EventType { 
 		BUDDY_LIST_INVITATION(BuddyListInvitation.class),
 		GAME_PLAY_INVITATION(GamePlayInvitation.class),
-		GAME_SESSION_MESSAGE(ChatMessage.class),
+		GAME_SESSION_MESSAGE(GameSessionMessage.class),
 		GAME_SESSION_STATE_CHANGE(GamePlayState.class),
 		GAME_SESSION_START(GamePlayState.class),
 		GAME_SESSION_END(GamePlayState.class),

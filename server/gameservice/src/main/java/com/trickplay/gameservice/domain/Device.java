@@ -11,10 +11,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
+@Table(name="device")
 public class Device extends BaseEntity implements Serializable {
 	/**
 	 * 
@@ -57,7 +59,7 @@ public class Device extends BaseEntity implements Serializable {
 	}
 
 	@ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="owner_id", nullable=false)
+    @JoinColumn(name="owner_id")
 	public User getOwner() {
 		return owner;
 	}
@@ -68,7 +70,7 @@ public class Device extends BaseEntity implements Serializable {
 
 	@ManyToMany(targetEntity = Game.class)
 	@JoinTable(
-			name = "DEVICE_GAME", 
+			name = "device_game", 
 			joinColumns = 
 				@JoinColumn(
 						name = "device_id"), 

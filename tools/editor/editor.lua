@@ -129,7 +129,9 @@ local function guideline_inspector(v)
 
 	button_ok.on_press = function() 
 		if text_input.text == "" then 
+			editor.error_message("006", nil, nil) 
 			xbox:on_button_down() 
+			return 
    		end    
 		if(util.guideline_type(v.name) == "v_guideline") then
 				v.x = tonumber(text_input.text)
@@ -596,6 +598,9 @@ local function open_files(input_purpose, bg_image, inspector)
 	elseif input_purpose =="open_videofile" then  
 		dir = editor_lb:readdir(current_dir.."/assets/videos")
 	end 
+
+	if dir == nil then dir = {} end
+
 	local inspector_activate = function ()
 		inspector:remove(inspector:find_child("deactivate_rect"))
 	end 
@@ -649,10 +654,14 @@ local function open_files(input_purpose, bg_image, inspector)
 			xbox:on_button_down(1) 
 
 			local dir = editor_lb:readdir(current_dir.."/screens")
+			if dir == nil then dir = {} end
 			for i, v in pairs(dir) do
 				if v == "unsaved_temp.lua" then 
 					if readfile("/screens/"..v) ~= "" then 
-						editor_lb:writefile("/screens/"..v, "", true)
+						if editor_lb:writefile("/screens/"..v, "", true) == false then 
+							editor.error_message("019", current_dir, nil, nil, msgw) 
+							screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+						end
 					end 
 				end 
 			end 
@@ -1059,14 +1068,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 		local display_x = WIDTH * screen.width/screen.display_size[1]
 		local display_y = HEIGHT * screen.height /screen.display_size[2]
 
-		if inspector.y + display_y  > screen.h and inspector.x + display_x > screen.w then 
-			inspector.y = y_pos - display_y - 20
-			inspector.x = x_pos - display_x - 20
-		elseif inspector.y + display_y  > screen.h then 
+		if inspector.y + display_y  > screen.h then 
 			inspector.y = screen.h - display_y - 10
-		elseif inspector.x + display_x > screen.w then 
+		end 
+		if inspector.x + display_x > screen.w then 
 			inspector.x = screen.w - display_x - 10
-		end
+		end 
 	end 
 
 	-- set the inspector location 
@@ -1124,12 +1131,12 @@ function editor.inspector(v, x_pos, y_pos, scroll_y_pos, org_items)
 			local item
 			if attr_n == "icon" or attr_n =="source"  or attr_n == "src" then -- File Chooser Button 
 				item = factory.make_filechooser(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
-			elseif attr_n == "reactive" or attr_n == "loop" or attr_n == "vert_bar_visible" or attr_n == "horz_bar_visible" or attr_n == "cells_focusable"  or attr_n == "lock" or attr_n == "justify" or attr_n == "single_line" or attr_n == "arrows_visible" then  -- Attribute with single checkbox
+			elseif attr_n == "reactive" or attr_n == "loop" or attr_n == "vert_bar_visible" or attr_n == "horz_bar_visible" or attr_n == "cells_focusable"  or attr_n == "lock" or attr_n == "show_ring" or attr_n == "variable_cell_size" or attr_n == "justify" or attr_n == "single_line" or attr_n == "arrows_visible" then  -- Attribute with single checkbox
 				item = factory.make_onecheckbox(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true)
 			elseif attr_n == "anchor_point" then 
 				item = factory.make_anchorpoint(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			elseif attr_n == "skin" or attr_n == "wrap_mode" or attr_n == "alignment" 
-			or attr_n == "expansion_location" or attr_n == "cell_size" or attr_n == "style" or attr_n == "direction" or attr_n == "tab_position" then 
+			or attr_n == "expansion_location" or attr_n == "style" or attr_n == "direction" or attr_n == "tab_position" then 
 				item = factory.make_buttonpicker(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
 			else 
 	    		item = factory.make_text_input_item(assets, inspector, v, attr_n, attr_v, attr_s, save_items, true) 
@@ -1402,6 +1409,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
     if (save_current_f == true) then 
 
 		local screen_dir = editor_lb:readdir(current_dir.."/screens/")
+		if screen_dir == nil then screen_dir = {} end
 
 		for i, v in pairs(screen_dir) do
           	if(fname == v)then
@@ -1410,7 +1418,12 @@ local function save_new_file (fname, save_current_f, save_backup_f)
           	end
 		end
 
-		editor_lb:writefile(current_fn, contents, true)	
+		if editor_lb:writefile(current_fn, contents, true)	== false then 
+			editor.error_message("019", current_dir, nil, nil, msgw) 
+			screen:find_child("menu_text").text = screen:find_child("menu_text").extra.project
+
+
+		end 
 		
 		if current_fn == "unsaved_temp.lua" or current_fn == "/screens/unsaved_temp.lua"then
 				return 
@@ -1534,7 +1547,7 @@ local function save_new_file (fname, save_current_f, save_backup_f)
 			 return
 		end 
     else -- save_current_file == false, "Save As"   
-		msg_window.inputMsgWindow_savefile(fname, current_fn)
+		msg_window.inputMsgWindow_savefile(fname, current_fn, save_current_f)
 	end 	
 end 
 
@@ -1662,7 +1675,6 @@ function editor.save(save_current_f, save_backup_f, next_func, next_f_param)
 	end
 
 	local tab_func = function()
-	print("mm")
 		text_input.clear_focus()
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
@@ -2063,7 +2075,7 @@ function editor.clone()
 	screen:grab_key_focus()
 end
 	
-local w_attr_list =  {"ui_width","ui_height","skin","style","label","title","button_color","focus_color","focus_border_color", "focus_button_color", "focus_box_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","cell_size","cell_width","cell_height","cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset","cells_focusable","visible_width", "visible_height",  "virtual_width", "virtual_height", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "focus_box_color", "box_border_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location","direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","cells","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive", "arrow_color", "focus_arrow_color", "tabs"}
+local w_attr_list =  {"ui_width","ui_height","skin","style","label","title","button_color","focus_color","focus_border_color", "focus_button_color", "focus_box_color","text_color","text_font","border_width","border_corner_radius","reactive","border_color","padding","fill_color","title_color","title_font","title_separator_color","title_separator_thickness","icon","message","message_color","message_font","on_screen_duration","fade_duration","items","selected_item","selected_items","overall_diameter","dot_diameter","dot_color","number_of_dots","cycle_time","empty_top_color","empty_bottom_color","filled_top_color","filled_bottom_color","border_color","progress","rows","columns","variable_cell_size","cell_width","cell_height","cell_spacing_width", "cell_spacing_height", "cell_timing","cell_timing_offset","cells_focusable","visible_width", "visible_height",  "virtual_width", "virtual_height", "bar_color_inner", "bar_color_outer", "focus_bar_color_inner", "focus_bar_color_outer", "empty_color_inner", "empty_color_outer", "frame_thickness", "frame_color", "bar_thickness", "bar_offset", "vert_bar_visible", "hor_bar_visible", "box_color", "focus_box_color", "box_border_width","menu_width","hor_padding","vert_spacing","hor_spacing","vert_offset","background_color","separator_thickness","expansion_location", "show_ring", "direction", "f_color","box_size","check_size","line_space","button_position", "box_position", "item_position","select_color","button_radius","select_radius","cells","content","text", "color", "border_color", "border_width", "font", "text", "editable", "wants_enter", "wrap", "wrap_mode", "src", "clip", "scale", "source", "x_rotation", "y_rotation", "z_rotation", "anchor_point", "name", "position", "size", "opacity", "children","reactive", "arrow_color", "focus_arrow_color", "tabs"}
 
 
 local function copy_content(n)
@@ -3235,7 +3247,6 @@ function editor.ui_elements()
 
 
 	local tab_func = function()
-	print("moioim")
 		button_ok.active.opacity = 0
 		button_ok.dim.opacity = 255
 		button_cancel:grab_key_focus()
@@ -3391,23 +3402,38 @@ local error_msg_map = {
  	["002"] = function(str) return "OK", "Cancel", "", "", "Before saving the screen, a project must be open." end,
  	["003"] = function(str) return "Save","Cancel", "", "", "You have unsaved changes. Save the file before closing?" end, 					
  	["004"] = function(str) return "Overwrite","Cancel", "", "", "A file named \" "..str.." \" already exists. Do you wish to overwrite it?" end, 
- 	["005"] = function(str) return "OK", "Cancel", "Error", "Error", "A file name is required." end, 
- 	["006"] = function(str) return "OK", "Cancel", "Error", "Error", "A guideline position is required." end, 
- 	["007"] = function(str) return "OK", "Cancel", "Error", "Error", "Field \""..str.."\" is required." end, 
- 	["008"] = function(str) return "OK", "Cancel", "Error", "Error", "There are no guidelines."  end, 
+ 	["005"] = function(str) return "OK", "", "Error", "Error", "A file name is required." end, 
+ 	["006"] = function(str) return "OK", "", "Error", "Error", "A guideline position is required." end, 
+ 	["007"] = function(str) return "OK", "", "Error", "Error", "Field \""..str.."\" is required." end, 
+ 	["008"] = function(str) return "OK", "", "Error", "Error", "There are no guidelines."  end, 
  	["009"] = function(str) return "Restore", "Ignore", "", "", "You have an auto-recover file for \""..str.."\". Would you like to restore the changes from that file?" end,
- 	["010"] = function(str) return "OK", "Cancel", "Error", "Error", "This UI Element requires a minimum of "..str.." item(s)." end, 
- 	["011"] = function(str) return "OK", "Cancel", "Error", "Error", "Field \""..str.."\" requires a numeric value." end, 		 
-	["012"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid value for \""..str.."\" field." end,
- 	["013"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
- 	["014"] = function(str) return "OK", "Cancel", "Error", "Error", "A project name is required." end, 
- 	["015"] = function(str) return "OK", "Cancel", "Error", "Error", "Invalid file name. \n File extention must be .lua" end, 
+ 	["010"] = function(str) return "OK", "", "Error", "Error", "This UI Element requires a minimum of "..str.." item(s)." end, 
+ 	["011"] = function(str) return "OK", "", "Error", "Error", "Field \""..str.."\" requires a numeric value." end, 		 
+	["012"] = function(str) return "OK", "", "Error", "Error", "Invalid value for \""..str.."\" field." end,
+ 	["013"] = function(str) return "OK", "", "Error", "Error", "Invalid file name. \nFile name may contain alphanumeric and underscore characters only." end, 
+ 	["014"] = function(str) return "OK", "", "Error", "Error", "A project name is required." end, 
+ 	["015"] = function(str) return "OK", "", "Error", "Error", "Invalid file name. \nFile extention must be .lua" end, 
 	-- new error messages 
-	["016"] = function(str) return "OK", "Cancel", "Error", "Error", "There is no selected object." end, 
-	["017"] = function(str) return "OK", "Cancel", "Error", "Error", "Can't delete this object. Clone exists." end, 
- 	["018"] = function(str) return "OK", "Cancel", "Error", "Error", "This UI Element can have maximum of "..str.." items." end, 
-}
+	["016"] = function(str) return "OK", "", "Error", "Error", "There is no selected object." end, 
+	["017"] = function(str) return "OK", "", "Error", "Error", "Can't delete this object. Clone exists." end, 
+ 	["018"] = function(str) return "OK", "", "Error", "Error", "This UI Element can have maximum of "..str.." items." end, 
+	-- after second release
+ 	["019"] = function(str) local i,j = string.find(str, ",") 
+							local pname, missing_dir 
+							if i and j then 
+								pname = string.sub(str, 1, i-1) 
+								missing_dir = string.sub(str, i+1, -1)
+							else 
+								pname = str
+							end 
 
+							if missing_dir then 
+								return "OK", "", "Error", "Error", "Project \""..pname.."\" is not valid. \""..missing_dir.."\" directory is missing." 
+							else 
+								return "OK", "", "Error", "Error", "Project \""..pname.."\" is not valid." 
+							end 
+			  end, 
+}
 
 function editor.error_message(error_num, str, func_ok, func_nok, inspector)
   	local WIDTH = 300
@@ -3457,12 +3483,91 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 	editor_use = false
 	
+	local prev_file_info = ""
+	local prev_backup_info = ""
+
+	local correct_main = function (str) 
+
+		local main = readfile("main.lua")
+		if not main then return end 
+
+		local fileUpper= string.upper(string.sub(str, 1, -5))
+
+
+		local x,y = string.find(main, "--[=[\n\n-- "..fileUpper.." SECTION", 1,true) 
+		local n,m = string.find(main, "-- END "..fileUpper.." SECTION\n\n]=]--\n\n", 1, true)
+
+		while x and m do 
+
+			local main_first, main_last
+			main_first = string.sub(main, 1, x-1)
+			prev_backup_info = prev_backup_info..string.sub(main, x, m)
+			main_last = string.sub(main, m+1, -1)
+
+			main = ""
+			main = main_first..main_last
+
+			x,y = string.find(main, "--[=[\n\n-- "..fileUpper.." SECTION", 1,true) 
+			n,m = string.find(main, "-- END "..fileUpper.." SECTION\n\n]=]--\n\n", 1, true)
+		end 
+
+		editor_lb:writefile("main.lua",main, true)
+
+		local a, b = string.find(main, "-- "..fileUpper.." SECTION") 
+		local q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+
+		if a and w then 
+			local main_first, main_last
+			main_first = string.sub(main, 1, a-1)
+			prev_file_info = string.sub(main, a, w)
+			main_last = string.sub(main, w+1, -1)
+
+			main = ""
+
+			main = main_first..main_last
+			editor_lb:writefile("main.lua",main, true)
+		else 
+			return 
+		end 
+	end 
+
+		
+	local correct_main2 = function (str) 
+
+		local main = readfile("main.lua")
+		if not main then return end 
+
+	   	local fileUpper= string.upper(string.sub(str, 1, -5))
+
+		local a, b = string.find(main, "-- "..fileUpper.." SECTION") 
+		local q, w = string.find(main, "-- END "..fileUpper.." SECTION\n\n")
+
+		if a and w then 
+			local main_first, main_last
+			main_first = string.sub(main, 1, w)
+			main_last = string.sub(main, w+1, -1)
+
+			main = ""
+
+			main = main_first.."--[=[\n\n"..prev_file_info.."]=]--\n\n"..prev_backup_info..main_last
+
+			prev_file_info = ""
+			prev_backup_info = ""
+
+			editor_lb:writefile("main.lua",main, true)
+		else 
+			return 
+		end 
+
+	end 
+
 
 	-- Button Event Handlers
 	if Cancel_label ~= "" then 
 		button_cancel.on_press = function() if error_num == "009" then if func_ok then func_ok(str, "NOK") end end xbox:on_button_down() end 
 	end 
-	button_ok.on_press = function() if func_ok then func_ok(str, "OK") end xbox:on_button_down() end
+	--button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  xbox:on_button_down() end
+	button_ok.on_press = function() if error_num == "004" then correct_main(str) end if func_ok then func_ok(str, "OK") end  if error_num == "004" then correct_main2(str) end xbox:on_button_down() end
 
 	if func_nok then 
 		button_nok.extra.focus = {[keys.Right] = "button_cancel", [keys.Tab] = "button_cancel", [keys.Return] = "button_nok"}
@@ -3513,7 +3618,13 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 			button_ok, 
 		}
 		, scale = { screen.width/screen.display_size[1], screen.height /screen.display_size[2]}
+		, extra = { error = 0 } 
 	}
+
+	if inspector then 
+		msgw.x = inspector.x + 200 
+		msgw.y = inspector.y + 200 
+	end 
 
 	local ti_func = function()
 		if current_focus then 
@@ -3533,6 +3644,8 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
  	end 
 
 	button_ok:grab_key_focus() 
+
+	if button_cancel then 
 	function button_cancel:on_key_down(key)
 		if key == keys.Return then 
 			button_cancel.on_press()
@@ -3546,6 +3659,7 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 			end
 		end 
 		return true
+	end 
 	end 
 
 	function button_ok:on_key_down(key)
@@ -3561,12 +3675,12 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	msgw.extra.lock = false
  	screen:add(msgw)
 
-	button_ok:grab_key_focus() 
-
 	util.create_on_button_down_f(msgw)	
 
 	-- Focus 
 	ti_func()
+
+	button_ok:grab_key_focus() 
 
 	function xbox:on_button_down()
 		screen:remove(msgw)
@@ -3577,6 +3691,9 @@ function editor.error_message(error_num, str, func_ok, func_nok, inspector)
 	    input_mode = hdr.S_SELECT
 		if inspector then 
 			inspector:remove(inspector:find_child("deactivate_rect"))
+			if inspector.extra.cur_f and inspector.extra.cur_f.set_focus then 
+				inspector.extra.cur_f.set_focus()
+			end 
 		end 
 		return true
 	end 

@@ -2,7 +2,6 @@ package com.trickplay.gameservice.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -10,10 +9,12 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
+@Table(name="game_play_state")
 @XmlRootElement
 public class GamePlayState extends BaseEntity implements Serializable {
 	
@@ -45,15 +46,6 @@ public class GamePlayState extends BaseEntity implements Serializable {
 		this.stepId = stepId;
 	}
 
-//	@Id
-//	@GeneratedValue
-//	public Long getId() {
-//		return id;
-//	}
-//
-//	public void setId(Long id) {
-//		this.id = id;
-//	}
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="creator_id", updatable=false, nullable=false)
@@ -75,7 +67,7 @@ public class GamePlayState extends BaseEntity implements Serializable {
 		this.gameSession = gameSession;
 	}
 
-	@Lob @Basic(fetch=FetchType.LAZY)
+	@Lob /*@Basic(fetch=FetchType.LAZY)*/
 	@Column(updatable=false)
 	public String getState() {
 		return state;
@@ -95,7 +87,7 @@ public class GamePlayState extends BaseEntity implements Serializable {
 	}
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="turn_id", updatable=false)
+	@JoinColumn(name="turn_id")
 	public User getTurn() {
 		return turn;
 	}

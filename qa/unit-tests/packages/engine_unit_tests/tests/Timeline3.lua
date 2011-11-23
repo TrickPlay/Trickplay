@@ -14,9 +14,8 @@ test_group:add (image1)
 
 
 local myTimeline = Timeline ()
-local on_completed_called = false
 local frameCount = 0
-myTimeline.duration = 2000
+myTimeline.duration = 1000
 myTimeline.loop = true
 
 myTimeline.on_new_frame = function (self, timeline_ms, progress) 
@@ -28,10 +27,6 @@ myTimeline.on_new_frame = function (self, timeline_ms, progress)
 	end
 end
 
-myTimeline.on_completed = function ()
-	on_completed_called = true
-end
-
 myTimeline:start()
 
 
@@ -39,12 +34,12 @@ myTimeline:start()
 
 -- on_completed should not be called if the timeline is stopped.
 function test_Timeline_stop_on_completed ()
-    assert_false ( on_completed_called , "on_completed called" )
+    assert_false ( timeline3_on_completed_called ,"Returned: "..tostring(timeline3_on_completed_called).." Expected: 0")
 end
 
 -- is playing should return false when stop is called
 function test_Timeline_stop ()
-	assert_false ( myTimeline.is_playing, "is_playing returning true")
+	assert_false ( myTimeline.is_playing, "Returned: "..tostring(myTimeline.is_playing).." Expected: false")
 end
 
 -- Test Tear down --

@@ -45,7 +45,7 @@ end
 
 -- verify that timeline is going backwards by ensuring that image.x never goes below 700.
 function test_Timeline_Backward ()
-    assert_equal( image1.x < 700 , true , "Backward failed" )
+    assert_equal( image1.x < 700 , true , "Returned: "..image1.x.." Expected: <700")
 end
 
 -- Test Tear down --

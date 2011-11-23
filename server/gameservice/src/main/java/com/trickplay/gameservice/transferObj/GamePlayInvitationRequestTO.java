@@ -1,10 +1,8 @@
 package com.trickplay.gameservice.transferObj;
 
-import javax.validation.constraints.NotNull;
 
 public class GamePlayInvitationRequestTO {
 
-	@NotNull
 	private Long recipientId;
 
 	public GamePlayInvitationRequestTO() {

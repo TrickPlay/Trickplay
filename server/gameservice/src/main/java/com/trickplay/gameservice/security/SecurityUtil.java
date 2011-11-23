@@ -5,10 +5,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.trickplay.gameservice.domain.Role;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
 
-public class SecurityUtil {
+public final class SecurityUtil {
 
 	public static boolean isAdmin() {
 		UserAdapter principal = getPrincipal();
@@ -27,9 +25,14 @@ public class SecurityUtil {
 			UserDetails user = (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			if (user instanceof UserAdapter)
 				return (UserAdapter)user;
-			else
-				throw new GameServiceException(Reason.FORBIDDEN);
+			else if (user != null) {
+			    return new UserAdapter(null, user);
+			}
 		}
 		return null;
+	}
+	
+	public static Long getCurrentUserId() {
+		return getPrincipal() != null ? getPrincipal().getId() : null;
 	}
 }

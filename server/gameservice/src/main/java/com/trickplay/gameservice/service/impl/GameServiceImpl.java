@@ -2,66 +2,101 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
-import com.trickplay.gameservice.dao.impl.SpringUtils;
+import com.trickplay.gameservice.dao.GameDAO;
+import com.trickplay.gameservice.dao.VendorDAO;
 import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.Vendor;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.exception.ExceptionUtil;
+import com.trickplay.gameservice.security.SecurityUtil;
 import com.trickplay.gameservice.service.GameService;
-import com.trickplay.gameservice.service.VendorService;
 
 
 @Service("gameService")
-@Repository
-public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements GameService {
+public class GameServiceImpl implements GameService {
+
+    private static final Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
+	@Autowired
+	VendorDAO vendorDAO;
 
 	@Autowired
-	VendorService vendorService;
-	@SuppressWarnings("unchecked")
+    GameDAO gameDAO;
+	
 	public Game findByName(String name) {
-		List<Game> list = super.entityManager.createQuery("Select g from Game g where g.name = :name").setParameter("name", name).getResultList();
-		return SpringUtils.getFirst(list);
+		return gameDAO.findByName(name);
 	}
 
+	private void validate(Game g) {
+	    if (g.getMinPlayers()<=0) {
+            throw ExceptionUtil.newIllegalArgumentException("minPlayers", g.getMinPlayers(), "> 0");
+        }
+        if (g.getMaxPlayers() < g.getMinPlayers()) {
+            throw ExceptionUtil.newIllegalArgumentException("maxPlayers", g.getMaxPlayers(), ">= minPlayers. minPlayers = "+g.getMinPlayers());
+        }
+	}
+	
+	/*
+	 * TODO: ensure only authorized users are allowed to create a Game
+	 */
 	@Transactional
 	public Game create(Long vendorId, Game g) {
-		Vendor v = vendorService.find(vendorId);
-		if (v == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Vendor.id", vendorId));
-		if (g.getMaxPlayers() < g.getMinPlayers()) {
-			throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, 
-					ExceptionContext.make("minPlayers", g.getMinPlayers()),
-					ExceptionContext.make("maxPlayers", g.getMaxPlayers()),
-					ExceptionContext.make("message", "minPlayers exceeds maxPlayers"));
-		}
+	    Long userId = SecurityUtil.getCurrentUserId();
+	    if (userId == null) {
+	        throw ExceptionUtil.newUnauthorizedException();
+	    }
+	    if (vendorId == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("Vendor", null, "!= null");
+	    } else if (g == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("Game", null, "!= null");
+	    }
+		Vendor v = vendorDAO.find(vendorId);
+		if (v == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(Vendor.class, "id", vendorId);
+		} 
+		validate(g);
 		g.setVendor(v);
-		super.persist(g);
+		try {
+		    gameDAO.persist(g);
+		} catch (DataIntegrityViolationException ex) {
+		    logger.error("Failed to create Game.", ex);
+		    throw ExceptionUtil.newEntityExistsException(Game.class, 
+		            "name", g.getName(),
+		            "appId", g.getAppId());
+		} catch (RuntimeException ex) {
+		    logger.error("Failed to create Game.", ex);
+		    throw ExceptionUtil.convertToSupportedException(ex);
+		}
 		return g;
 	}
 
+    /*
+     * TODO: ensure only authorized users are allowed to update a Game
+     */
 	@Transactional
 	public Game update(Long vendorId, Game g) {
+	    Long userId = SecurityUtil.getCurrentUserId();
+	    if (userId == null) {
+	        throw ExceptionUtil.newUnauthorizedException();
+	    }
+	    validate(g);
 		Game existing = find(g.getId());
-		if (existing == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Game.id", g.getId()));
-		if (g.getMaxPlayers() < g.getMinPlayers()) {
-			throw new GameServiceException(Reason.ILLEGAL_ARGUMENT, null, 
-					ExceptionContext.make("minPlayers", g.getMinPlayers()),
-					ExceptionContext.make("maxPlayers", g.getMaxPlayers()),
-					ExceptionContext.make("message", "minPlayers exceeds maxPlayers"));
+		if (existing == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(Game.class, "id", g.getId());
 		}
-		Vendor v = vendorService.find(vendorId);
-		if (v == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("Vendor.id", vendorId));
+		Vendor v = vendorDAO.find(vendorId);
+		if (v == null) {
+		    throw ExceptionUtil.newEntityNotFoundException(Vendor.class, "id", vendorId);
+		}
 		existing.setLeaderboardFlag(g.isLeaderboardFlag());
 		existing.setAchievementsFlag(g.isAchievementsFlag());
+		existing.setAllowWildCardInvitation(g.isAllowWildCardInvitation());
+		existing.setTurnBasedFlag(g.isTurnBasedFlag());
 		existing.setAppId(g.getAppId());
 		existing.setName(g.getName());
 		existing.setMaxPlayers(g.getMaxPlayers());
@@ -70,5 +105,26 @@ public class GameServiceImpl extends GenericDAOWithJPA<Game, Long> implements Ga
 		
 		return existing;
 	}
+
+	@Transactional
+    public void remove(Long id) {
+	    Long userId = SecurityUtil.getCurrentUserId();
+        if (userId == null) {
+            throw ExceptionUtil.newUnauthorizedException();
+        }
+        Game existing = find(id);
+        if (existing == null) {
+            throw ExceptionUtil.newEntityNotFoundException(Game.class, "id", id);
+        }
+        gameDAO.remove(existing);        
+    }
+
+    public List<Game> findAll() {
+        return gameDAO.findAll();
+    }
+
+    public Game find(Long id) {
+        return gameDAO.find(id);
+    }
 
 }

@@ -34,7 +34,8 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
         } 
         else 
         {
-            return luaL_error(L, "incorrect argument, failed to set the fifth argument of keys : number expected");
+			pre_delay = 0;
+            /*return luaL_error(L, "Incorrect argument, failed to set the fifth argument of keys : number expected");*/
         }
     
         if (lua_type(L, index+2) == LUA_TNUMBER) 
@@ -43,7 +44,8 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
         }
         else 
         {
-            return luaL_error(L, "incorrect argument, failed to set the sixth argument of keys : number expected");
+			post_delay = 0;
+            /*return luaL_error(L, "Incorrect argument, failed to set the sixth argument of keys : number expected");*/
         }
     }
     else
@@ -53,28 +55,66 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
         post_delay = 0.0;
     }
 
-	if (!strcmp("x",k)||!strcmp("y",k)||!strcmp("w",k)||!strcmp("width",k)||!strcmp("h",k)||!strcmp("height",k)||
-		!strcmp("z",k)||!strcmp("depth",k)||!strcmp("opacity",k))
+	if (!strcmp("x",k)||!strcmp("y",k)||!strcmp("width",k)||!strcmp("height",k)||!strcmp("depth",k))
 	{
 		if (lua_type(L, index) == LUA_TNUMBER) 
 		{
 			value = lua_tonumber(L, index);
-
-            if(strcmp("opacity",k))
-            {
-                g_value_init(&gvalue,G_TYPE_FLOAT);
-                g_value_set_float(&gvalue,value);
-            } else {
-                g_value_init(&gvalue,G_TYPE_UINT);
-                g_value_set_uint(&gvalue,value);
-            }
+            g_value_init(&gvalue,G_TYPE_FLOAT);
+            g_value_set_float(&gvalue,value);
 
 			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
             g_value_unset(&gvalue);
 		} 
 		else 
 		{
-		    return luaL_error(L, "incorrect argument, failed to set the fourth argument of keys : number expected");
+		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : number expected");
+		}
+	}
+	else if (!strcmp("z",k)||!strcmp("w",k)||!strcmp("h",k))
+	{
+		if (lua_type(L, index) == LUA_TNUMBER) 
+		{
+			value = lua_tonumber(L, index);
+            g_value_init(&gvalue,G_TYPE_FLOAT);
+            g_value_set_float(&gvalue,value);
+
+
+			if(!strcmp("z",k))
+			{
+				clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "depth", nmode, &gvalue, pre_delay, post_delay);
+			}
+			else if (!strcmp("w",k))
+			{
+				clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "width", nmode, &gvalue, pre_delay, post_delay);
+			}
+			else if (!strcmp("h",k))
+			{	
+				clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "height", nmode, &gvalue, pre_delay, post_delay);
+			}
+
+            g_value_unset(&gvalue);
+		} 
+		else 
+		{
+		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : number expected");
+		}
+	}
+	else if (!strcmp("opacity", k))
+	{
+		if (lua_type(L, index) == LUA_TNUMBER) 
+		{
+			value = lua_tointeger(L, index);
+
+            g_value_init(&gvalue,G_TYPE_UINT);
+            g_value_set_uint(&gvalue,value);
+
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), name.c_str(), nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
+		} 
+		else 
+		{
+		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : number expected");
 		}
 	}
 	else if (!strcmp("position",k))
@@ -100,7 +140,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}
 		else 
 		{
-		    return luaL_error(L, "incorrect argument, failed to set the fourth argument of keys : table expected");
+		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
 		}
 	} 
 	else if (!strcmp("size",k))
@@ -126,7 +166,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}			
 		else 
 		{
-		    return luaL_error(L, "incorrect argument, failed to set the fourth argument of keys : table expected");
+		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
 		}
 	}
 	else if (!strcmp("scale",k))
@@ -152,7 +192,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}			
 		else 
 		{
-		    return luaL_error(L, "incorrect argument, failed to set the third argument of keys : table expected");
+		    return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : table expected");
 		}
 	}
 	else if (!strcmp("x_rotation",k))
@@ -216,7 +256,7 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		}
 		else 
 		{
-		    return luaL_error(L, "incorrect argument, failed to set the fourth argument of keys : table expected");
+		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
 		}
 	}
 	return 0;
@@ -226,24 +266,26 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 {
 
     if (lua_type(L, index) != LUA_TTABLE) 
-		return luaL_error(L, "incorrect argument, table expected");
+		return luaL_error(L, "Incorrect argument, table expected");
 
-	guint duration=0;
+	guint duration=1000;
+
     // Default mode for the whole ClutterState
 	String source_mode = "LINEAR";
 
 	lua_getfield(L, index, "duration");
+
 	if(!lua_isnil(L, -1)) 
 	{
 		if(!lua_isnumber(L, -1))
 		{
-			return luaL_error(L, "incorrect argument, failed to set \'duration\' : number expected");
+			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : number expected");
 		}
-		duration =  lua_tointeger(L, -1);
-		if (!(duration > 0 ))
+		if ( lua_tointeger(L, -1) <= 0 )
 		{	
-			return luaL_error(L, "incorrect argument, failed to set \'duration\' : positive number expected");
-		}
+			return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive non-zero number expected");
+		} 
+		duration =  lua_tointeger(L, -1);
 	}
     lua_pop(L, 1);
 
@@ -254,7 +296,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
         const char * smode = lua_tostring(L, -1);
         if(!smode)
         {
-            return luaL_error(L, "incorrect argument, failed to set 'mode' : string expected");
+            return luaL_error(L, "Incorrect argument, failed to set 'mode' : string expected");
         }
         source_mode = smode;
     }
@@ -264,7 +306,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	lua_getfield(L, index, "transitions");
 	if (!lua_istable(L, -1))
 	{
-		return luaL_error(L, "incorrect argument, fail to set \'transitions\' : table expected");
+		return luaL_error(L, "Incorrect argument, fail to set \'transitions\' : table expected");
 	}
 			
 	int pt = lua_gettop(L);
@@ -273,7 +315,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	while(lua_next(L, pt) != 0) {
 		if (!lua_istable(L, -1)) 
 		{
-			return luaL_error(L, "incorrect argument, fail to set \'transitions\' elements : table expected");
+			return luaL_error(L, "Incorrect argument, fail to set \'transitions\' elements : table expected");
 		}
 
         // Transition's default mode -- default to source mode
@@ -285,7 +327,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
             const char * tmode = lua_tostring(L, -1);
             if(!tmode)
             {
-                return luaL_error(L, "incorrect argument, failed to set 'mode' : string expected");
+                return luaL_error(L, "Incorrect argument, failed to set 'mode' : string expected");
             }
             transition_mode = tmode;
         }
@@ -296,7 +338,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		const char * csource = lua_tostring(L,-1);
 		if (!csource) 
 		{
-			return luaL_error(L, "incorrect argument, fail to set \'source\' : string expected");
+			return luaL_error(L, "Incorrect argument, fail to set \'source\' : string expected");
 		}
 		String source = csource;
 
@@ -316,16 +358,29 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		const char * ctarget = lua_tostring(L,-1);
 		if (!ctarget) 
 		{
-			return luaL_error(L, "incorrect argument, fail to set \'target\' : string expected");
+			return luaL_error(L, "Incorrect argument, fail to set \'target\' : string expected");
 		}
 		String target = ctarget; 
 	    lua_pop(L,1);
 
 		// duration 
 		lua_getfield(L, -1, "duration");
-		guint sduration = lua_tointeger(L,-1);
+		
+		int sduration = 0;
 
-	    lua_pop(L,1);
+		if(!lua_isnil(L, -1))
+		{
+			if(!lua_isnumber(L, -1))
+			{
+				return luaL_error(L, "Incorrect argument, failed to set \'duration\' : number expected");
+			}
+			if ( lua_tointeger(L, -1) <= 0 )
+			{
+				return luaL_error(L, "Incorrect argument, failed to set \'duration\' : positive non-zero number expected");
+			}
+			sduration =  lua_tointeger(L, -1);
+		}
+    	lua_pop(L, 1);
 
 		// keys 
 		lua_getfield(L, -1, "keys");
@@ -333,7 +388,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 		{
 			if (!lua_istable(L,-1))
 			{
-				return luaL_error(L, "incorrect argument, failed to set \'keys\' : table expected");
+				return luaL_error(L, "Incorrect argument, failed to set \'keys\' : table expected");
 			}
 
 			int kt = lua_gettop(L);
@@ -343,7 +398,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			{
 				if (!lua_istable(L,-1))
 				{
-					return luaL_error(L, "incorrect argument, failed to set \'keys\' element : table expected");
+					return luaL_error(L, "Incorrect argument, failed to set \'keys\' element : table expected");
 				}
 
 				// default parameter
@@ -360,17 +415,75 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 				ClutterActor * object = ClutterUtil::user_data_to_actor(L, -6);
 				if(!object)
 				{
-					return luaL_error(L, "incorrect argument, failed to set the first argument of keys : userdata expected");
+					return luaL_error(L, "Incorrect argument, failed to set the first argument of keys : userdata expected");
 				}
 
 				// property-name 
 				const char * cname = lua_tostring(L,-5);
 				if (!cname) 
 				{
-					return luaL_error(L, "incorrect argument, failed to set the second argument of keys: string expected");
+					return luaL_error(L, "Incorrect argument, failed to set the second argument of keys: string expected");
 				}
 				String name = cname; 
+				
+				if (!lua_isnil(L, -3))
+				{
+					if (lua_isstring(L, -4) &&  lua_isnumber(L, -3))
+					{
+						if (!lua_isnil(L, -1)) 
+						{
+							// object, property-name, mode(string), value(number), value(number), value (number)
+							const char* cmode = lua_tostring(L,-4); 
+							if (cmode)
+							{
+								mode  = cmode;
+							}
+							set_state_value(L, -3, state, source, target, object, name , mode);
+						}
+						else if (!strcmp(name.c_str(), "color"))
+						{
+							// object, property-name, value(string), pre-delay(number) , post-delay(number), null 
+							set_state_value(L, -4, state, source, target, object, name , mode);
+						}
+						else  
+						{
+							// object, property-name, mode(string), value(number), pre-delay, null 
+							const char* cmode = lua_tostring(L,-4); 
+							if (cmode)
+							{
+								mode  = cmode;
+							}
+							set_state_value(L, -3, state, source, target, object, name , mode);
+						} 
+					}
+					else if ((lua_isstring(L, -4) && lua_isstring(L, -3)) || (lua_isstring(L, -4) && (lua_type(L, -3) == LUA_TTABLE)))
+					{
+						// object, property-name, mode, value 
+						const char* cmode = lua_tostring(L,-4); 
+						if (cmode)
+						{
+							mode  = cmode;
+						}
+						set_state_value(L, -3, state, source, target, object, name , mode);
+					}
+					else if (((lua_type(L, -4) == LUA_TNUMBER) && (lua_type(L, -3) == LUA_TNUMBER)) || 
+							((lua_type(L, -4) == LUA_TTABLE) && (lua_type(L, -3) == LUA_TNUMBER)))
+					{
+						// object, property-name, value, pre-delay
+						set_state_value(L, -4, state, source, target, object, name , mode);
+					}
+					else 
+					{
+						return luaL_error (L, "Incorrect argument, failed to set keys value"); 
+					}
+				}
+				else 
+				{
+					// object, property-name, value 
+					set_state_value(L, -4, state, source, target, object, name , mode);
+				}
 
+/*
 				// mode, value  
 				if ((lua_type(L, -4) == LUA_TNUMBER)||(lua_type(L, -4) == LUA_TTABLE))
 				{
@@ -390,8 +503,9 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 				} 
 				else 
 				{
-					return luaL_error (L, "incorrect argument, failed to set keys value"); 
+					return luaL_error (L, "Incorrect argument, failed to set keys value"); 
 				}
+*/
 				lua_pop(L,7);
 		 	}
 		 }
@@ -403,7 +517,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 			ClutterAnimator* animator = ClutterUtil::user_data_to_animator(L, -1);
 			if(!animator)
 			{
-				return luaL_error(L, "incorrect argument, failed to set \'animator\' : Animator expected");
+				return luaL_error(L, "Incorrect argument, failed to set \'animator\' : Animator expected");
 			}
 			clutter_state_set_animator (state, source_name, target.c_str(), animator);  
 		 }
@@ -503,7 +617,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	"x_rotation" - double specifying rotation angle
 	"y_rotation" - double specifying rotation angle
 	"z_rotation" - double specifying rotation angle
-	"color" - table or string specifying color. The format is described in <RGB/Alpha Color Formats>.
+	"color" - table or string specifying color. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide.
 	
 	An AnimatedObject may modify any particular property exactly one time in a keys table. For example, the following AnimatedObject-AnimatedProperty definition is valid.
 	
@@ -601,6 +715,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	sphereImage.name = "Sphere"
 	sphereImage.anchor_point = { 20, 20 }
 	screen:add( sphereImage )
+	screen:show()
 
 	-- Define an AnimationState for the sphere
 	sphereAnimationState = AnimationState( {
@@ -679,9 +794,9 @@ class AnimationState [[ClutterState*]]
 	/*
 		Property: duration
 		
-		The duration property contains the default duration value specified in the AnimationState object's constructor. The duration is an integer value specifying the length of time in milliseconds. If no default duration is specified in the constructor, a default value of 1000 milliseconds (1 second) is used.
-		
-		Note: All durations for transitions must be defined in the object's constructor. Setting the duration property after the constructor has completed has no effect.
+		The duration property specifies the default duration for transitions that have not explicitly defined a duration in the object's constructor. The duration is an integer value specifying the length of time in milliseconds. If no default duration is specified in the constructor, a value of 1000 milliseconds (1 second) is used.
+
+		Note: The duration property is equivalent to the constructor's duration setting that is specified *outside* of the transitions table. Duration settings made for individual transitions must be defined in the constructor's transitions table and cannot be accessed or modified outside of the constructor.
 		
 		*Default Value:* 1000
 		

@@ -2,10 +2,11 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 import os
+import re
 
 from EditorTab import EditorTabWidget, EditorDock
 from Editor import Editor
-
+from UI.SaveAsDialog import Ui_saveAsDialog
 
 
 class EditorManager(QWidget):    
@@ -44,6 +45,7 @@ class EditorManager(QWidget):
         
         self.editorGroups = []
         self.editors = {}
+        self.app = parent
         
     def getEditorTabs(self):
         return self.editorGroups
@@ -60,12 +62,108 @@ class EditorManager(QWidget):
         return None
 
     def save(self):
-        editor = self.app.focusWidget()
-        if isinstance(editor, Editor):
-            editor.save(self.statusBar())
-        else:
-            self.statusBar().showMessage('Failed to save because no text editor is currently selected.', 2000)                
+		editor = self.app.focusWidget()
+		if isinstance(editor, Editor):
+			currentText = open(editor.path).read()
+			index = self.tab.currentIndex()
+			if self.tab.textBefores[index] != currentText:
+				if editor.text_status == 2: #TEXT_CHANGED
+					msg = QMessageBox()
+					msg.setText('The file "' + editor.path + '" changed on disk.')
+					msg.setInformativeText('If you save it external changes could be lost.')
+					msg.setStandardButtons(QMessageBox.Save | QMessageBox.Cancel)
+					msg.setDefaultButton(QMessageBox.Cancel)
+					msg.setWindowTitle("Warning")
+					ret = msg.exec_()
+
+					if ret == QMessageBox.Save:
+						self.tab.textBefores[index] = editor.text()
+						editor.text_status = 1 #TEXT_READ
+						editor.save()
+					else:
+						return None
+			editor.save()
+		else:
+			print 'Failed to save because no text editor is currently selected.'                
+		
+
+	       
+    def scan(self, path):
+        """
+        Scan the path given:
+        If path is not valid dir return 0 
+		Otherwise, it returns 1
+        """
         
+        if os.path.isdir(path):
+            files = os.listdir(path)
+            return 1
+        else:
+			return 0
+            
+                  
+    def adjustDialog(self, path):
+        
+        result = self.scan(str(path))
+        
+        # If the path is a directory...
+        if 0 == result:
+            msg = QMessageBox()
+            msg.setText(path+'is not a valid directory.') 
+            msg.setInformativeText('Please select a directory to save the file.')
+            msg.setWindowTitle("Warning")
+            msg.exec_()
+        elif 1 == result:
+        	return result
+
+    def chooseDirectoryDialog(self):
+		dir = self.ui.directory.text()
+		path = QFileDialog.getExistingDirectory(None, 'Select app directory', dir)
+		result = self.adjustDialog(path)
+		if result > 0:
+			self.ui.directory.setText(path)
+
+    def close(self):
+		# find current index tab 
+		index = self.tab.currentIndex()
+		
+		# TODO : try to save 
+
+		#close current index tab
+		self.editorGroups[0].removeTab(index)
+		self.tab.closeTab(index)
+
+
+    def saveas(self):
+		self.dialog = QDialog()
+		self.ui = Ui_saveAsDialog()
+		self.ui.setupUi(self.dialog)
+
+		editor = self.app.focusWidget()
+
+		cur_file = re.search('(\w+)[.](\w+)', editor.path).group()
+		cur_dir = editor.path[:re.search('(\w+)[.](\w+)', editor.path).start()-1]
+
+		self.ui.filename.setText(cur_file)
+		self.ui.directory.setText(cur_dir)
+
+		QObject.connect(self.ui.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
+
+		if self.dialog.exec_():
+			
+			cur_dir = self.ui.directory.text() 
+			cur_file = self.ui.filename.text() 
+
+			new_path = cur_dir+'/'+cur_file
+			print "Save As .. "+new_path
+
+			currentText = open(editor.path).read()
+			index = self.tab.currentIndex()
+			self.tab.textBefores[index] = editor.text()
+			editor.text_status = 1 
+			editor.path = new_path
+			editor.save()
+
     def newEditor(self, path, tabGroup = None):
         """
         Create a tab group if both don't exist,
@@ -76,38 +174,55 @@ class EditorManager(QWidget):
         name = os.path.basename(str(path))
             
         editor = Editor()
-        
-        # If the file is already open, just use the open document
-        if self.editors.has_key(path):
-            editor.setDocument(self.editors[path].document())
-        else:
-            editor.readFile(path)
-        
+        closedTab = None
+
         nTabGroups = len(self.editorGroups)
         
-        # If there is already one tab group, create a new one in split view and open the file there  
-        if 1 == nTabGroups:
-            self.editorGroups.append(self.EditorTabWidget(self.splitter))
-            tabGroup = 1
-        
-        # If there are no tab groups, create the first one
-        elif 0 == nTabGroups:
-            self.editorGroups.append(self.EditorTabWidget(self.splitter))
+		# If there is already one tab group, create a new one in split view and open the file there  
+        if 0 == nTabGroups:
+            self.tab = self.EditorTabWidget(self.splitter)
+            self.editorGroups.append(self.tab)
             tabGroup = 0
             
         # Default to opening in the first tab group
-        elif not tabGroup:
+        else:
             tabGroup = 0
-        
-        index = self.editorGroups[tabGroup].addTab(editor, name)
+		 
+        # If the file is already open, just use the open document
+        if self.editors.has_key(path):
+            for k in self.editors:
+				if not k in self.tab.paths:
+					closedTab = k
+
+            if closedTab != None:
+        		self.editors.pop(closedTab)
+        		for k in self.tab.paths:
+					self.editors[k][1] = self.tab.paths.index(k) 
+
+        		editor.readFile(path)
+
+            if closedTab != path:
+            	for k in self.editors:
+					if path == k:
+						self.editorGroups[tabGroup].setCurrentIndex(self.editors[k][1])
+            	return
+        else:
+            editor.readFile(path)
         
         if not self.editors.has_key(path):
-            self.editors[path] = editor
+            self.tab.paths.append(path)
+            self.tab.textBefores.append(editor.text())
+            self.tab.editors.append(editor)
+
+        index = self.editorGroups[tabGroup].addTab(editor, name)
+
+        if not self.editors.has_key(path):
+            self.editors[path] = [editor, index]
         
         self.editorGroups[tabGroup].setCurrentIndex(index)
         editor.setFocus()
         editor.path = path
-        
+
     def dropFileEvent(self, event, src, w = None):
         """
         Accept a file either by dragging onto the editor dock or into one of the

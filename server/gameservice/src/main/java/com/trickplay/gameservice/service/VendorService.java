@@ -4,34 +4,27 @@ import java.util.List;
 
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.domain.Vendor;
 
 
-@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+@PreAuthorize("isAuthenticated()")
 public interface VendorService {
 
 	@PostFilter("hasRole('ROLE_ADMIN') or filterObject.primaryContact.username == principal.username")
-	List<Vendor> findAll();
-
-
-	@PreFilter("filterObject.primaryContact.username == principal.username")
-	@Transactional
-	void merge(Vendor entity);
+	public List<Vendor> findAll();
 
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@Transactional
-	void remove(Vendor vendor);
+	public void remove(Long vendorId);
 
-	Vendor find(Long id);
+	public Vendor find(Long id);
 	
-	Vendor findByName(String name);
+	public Vendor findByName(String name);
 	
-	List<Vendor> findByContactName(String contactName);
+	public List<Vendor> findByContactName(String contactName);
 
-	
 	@Transactional
-	public void persist(Vendor entity);
+	public Vendor create(String vendorName);
 }

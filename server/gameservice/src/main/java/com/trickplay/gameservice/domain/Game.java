@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -14,6 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
+@Table(name="game")
 @XmlRootElement(name="game")
 public class Game extends BaseEntity implements Serializable {
     
@@ -32,13 +34,37 @@ public class Game extends BaseEntity implements Serializable {
     private int maxPlayers;
     private boolean leaderboardFlag;
     private boolean achievementsFlag;
+    private boolean turnBasedFlag;
+    private boolean allowWildCardInvitation;
+    //private boolean allow
     @NotNull
     private Vendor vendor;
 
     public Game() {        
     }
 
-    public Game(Vendor vendor, String name, String appId, int minPlayers, int maxPlayers, boolean leaderboardFlag, boolean achievementsFlag) {
+    public Game(String name, 
+            String appId, 
+            int minPlayers, 
+            int maxPlayers, 
+            boolean leaderboardFlag,
+            boolean achievementsFlag,
+            boolean turnBasedFlag,
+            boolean allowWildCardInvitation
+            ) {
+        this(null, name, appId, minPlayers, maxPlayers, leaderboardFlag, achievementsFlag, turnBasedFlag, allowWildCardInvitation);
+    }
+    
+    public Game(Vendor vendor, 
+            String name, 
+            String appId, 
+            int minPlayers, 
+            int maxPlayers, 
+            boolean leaderboardFlag,
+            boolean achievementsFlag,
+            boolean turnBasedFlag,
+            boolean allowWildCardInvitation
+            ) {
       this.vendor = vendor;
       this.setName(name);
       this.appId = appId;
@@ -46,19 +72,11 @@ public class Game extends BaseEntity implements Serializable {
       this.maxPlayers = maxPlayers;
       this.leaderboardFlag = leaderboardFlag;
       this.achievementsFlag = achievementsFlag;
+      this.turnBasedFlag = turnBasedFlag;
+      this.allowWildCardInvitation = allowWildCardInvitation;
     }
-
-//    @Id
-//    @GeneratedValue
-//    public Long getId() {
-//      return id;
-//    }
-//
-//    public void setId(Long id) {
-//      this.id = id;
-//    }
     
-    @Column(unique=true)
+	@Column(unique=true)
     public String getAppId() {
         return appId;
     }
@@ -118,6 +136,23 @@ public class Game extends BaseEntity implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
+    public boolean isAllowWildCardInvitation() {
+        return allowWildCardInvitation;
+    }
+
+    public void setAllowWildCardInvitation(boolean allowWildCardInvitation) {
+        this.allowWildCardInvitation = allowWildCardInvitation;
+    }
     
+    public boolean isTurnBasedFlag() {
+		return turnBasedFlag;
+	}
+
+	public void setTurnBasedFlag(boolean turnBasedFlag) {
+		this.turnBasedFlag = turnBasedFlag;
+	}
+
+
     
 }

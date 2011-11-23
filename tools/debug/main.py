@@ -14,6 +14,9 @@ from Inspector.TrickplayInspector import TrickplayInspector
 from DeviceManager.TrickplayDeviceManager import TrickplayDeviceManager
 from Editor.EditorManager import EditorManager
 from FileSystem.FileSystem import FileSystem
+from Console.TrickplayConsole import TrickplayConsole
+
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 class MainWindow(QMainWindow):
     
@@ -29,6 +32,9 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         
         # Create FileSystem
+        self.ui.FileSystemDock.toggleViewAction().setText("&File System")
+        self.ui.menuView.addAction(self.ui.FileSystemDock.toggleViewAction())
+        #self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fs)
         self._fileSystem = FileSystem()
         self.ui.FileSystemLayout.addWidget(self._fileSystem)
         
@@ -36,16 +42,34 @@ class MainWindow(QMainWindow):
         self._editorManager = EditorManager(self._fileSystem, self.ui.centralwidget)
         
         # Create Inspector
+        self.ui.InspectorDock.toggleViewAction().setText("&Inspector")
+        self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
+        #self.ui.InspectorDock.toggleViewAction().triggered.connect(self.isptr)
         self._inspector = TrickplayInspector()
         self.ui.InspectorLayout.addWidget(self._inspector)
         
         # Create DeviceManager
+        self.ui.DeviceManagerDock.toggleViewAction().setText("&Device Manager")
+        self.ui.menuView.addAction(self.ui.DeviceManagerDock.toggleViewAction())
+        #self.ui.DeviceManagerDock.toggleViewAction().triggered.connect(self.dm)
         self._deviceManager = TrickplayDeviceManager(self._inspector)
         self.ui.DeviceManagerLayout.addWidget(self._deviceManager)
         
+        # Create Console
+        self.ui.ConsoleDock.toggleViewAction().setText("&Console")
+        self.ui.menuView.addAction(self.ui.ConsoleDock.toggleViewAction())
+        #self.ui.DeviceManagerDock.toggleViewAction().triggered.connect(self.dm)
+        self._console = TrickplayConsole()
+        self.ui.ConsoleLayout.addWidget(self._console)
+	
+		## make them aware of one another
         # Toolbar
-        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
+        QObject.connect(self.ui.action_New, SIGNAL("triggered()"),  self.new)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
+        QObject.connect(self.ui.action_Save_As, SIGNAL('triggered()'),  self.editorManager.saveas)
+        QObject.connect(self.ui.action_Close, SIGNAL('triggered()'),  self.editorManager.close)
+        #QObject.connect(self.ui.action_Close, SIGNAL('triggered()'),  self.close_file)
+        QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         
         # Restore sizes/positions of docks
         self.restoreState(settings.value("mainWindowState").toByteArray());
@@ -72,7 +96,6 @@ class MainWindow(QMainWindow):
     def inspector(self):
         return self._inspector
 
-    
     def cleanUp(self):
         """
         End running Trickplay process
@@ -96,6 +119,7 @@ class MainWindow(QMainWindow):
         Initialize widgets on the main window with a given app path
         """
         
+        print("main.start")
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
@@ -115,12 +139,28 @@ class MainWindow(QMainWindow):
         settings.setValue("mainWindowGeometry", self.saveGeometry());
         settings.setValue("mainWindowState", self.saveState());
         
+	
+    def new(self):
+		print "New project"
+
+    def close_file(self):
+		print "Close file"
+
     def exit(self):
         """
         Close in a clean way... but still Trickplay closes too soon and the
         Avahi service stays alive
         """
-        
+		#try to close current index tab and then, do that for every other tabs too
+        self._deviceManager.stop()
         self.close()
-        
+
+    def dm(self):
+		print "dm"
+
+    def fs(self):
+		print "fs"
+
+    def isptr(self):
+		print "inptr"
         

@@ -1,0 +1,96 @@
+
+Title: Extending TrickPlay Objects
+
+
+Although components in the TrickPlay SDK libraries are sometimes referred to as "classes," it is not possible to use them as a base from which to derive new classes. However, every TrickPlay object can be extended with new properties and functions by using the .extra capability.
+
+An object is extended by specifying ".extra" followed by the name of the new property or function. Some example statements that add new properties to objects are shown below.
+
+	(code)
+	-- Define new object properties
+	textLabel.extra.emphasized = true
+	imageBkgnd.extra.mode      = "GRAYSCALE"
+	screen.extra.layout        = "MainLayout"
+	(end)
+	
+In the examples above, textLabel and imageBkgnd are variables based on classes in the SDK libraries (the Text and Image classes, respectively). The last example shows that even SDK global variables, such as screen, can be extended with .extra.
+
+Actually, explicitly specifying .extra is optional; objects can also be extended by simply specifying the new property or function name. Equivalent versions of the original examples are shown below.
+
+	(code)
+	-- Equivalent definitions without .extra
+	textLabel.emphasized = true
+	imageBkgnd.mode      = "GRAYSCALE"
+	screen.layout        = "MainLayout"
+	(end)
+
+Multiple extensions for an object can be defined within a table, as the examples below demonstrate.
+
+	(code)
+	-- Define multiple new properties for an object
+	myRect = { userArea    = true,
+	           isClickable = false,
+	           maxZDepth   = -100 }
+	
+	-- Note: Using an explicit .extra is equivalent
+	myRect.extra = { userArea = true, isClickable = false, maxZDepth = -100 }
+	(end)
+
+After extending an object's properties, the new properties can be set and accessed using the same Lua syntax used for normal properties. As when defining properties, specifying the .extra is optional.
+
+	(code)
+	-- Getting and setting the new properties
+	textLabel.emphasized = false
+	if imageBkgnd.mode == "16BITCOLOR" then ...
+	currentLayout = screen.extra.layout
+	(end)
+
+Functions are added to objects in the same manner. Two equivalent examples using different Lua syntax to define functions are shown below.
+
+	(code)
+	-- ******* Example One
+	
+	-- Define in-line function
+	myRect.extra.spin = function( rect, direction )
+		-- Implement function here
+	end
+	
+	-- ******* Example Two
+	
+	-- Define stand-alone function
+	function spin( rect, direction )
+		-- Implement function here
+	end
+	
+	-- Extend myRect object with spin function
+	myRect.spin = spin
+	
+	-- With a stand-alone function, other objects can be extended with the same function
+	yourRect.spin       = spin
+	theirRect.spin      = spin
+	everybodysRect.spin = spin
+	(end)
+
+To invoke an object's extended function, use the normal Lua syntax to call a function.
+
+	(code)
+	myRect:spin( "CLOCKWISE" )
+	yourRect.extra:spin( "COUNTER-CLOCKWISE" )  -- the .extra reference is optional
+	everybodysRect:spin( "REVERSE" )
+	(end)
+
+Extending objects with .extra adds new elements to an object, but it is not possible to use .extra to override or replace the properties and functions provided by the SDK libraries. For example, every TrickPlay object has a property called x (see <UIElement.x>). The following statements demonstrate what happens when an object is extended with a new property called x.
+
+	(code)
+	myRect.x       = 100
+	myRect.extra.x = 200
+	
+	print( myRect.x )
+		-- Prints 100
+		
+	print( myRect.extra.x )
+		-- Prints 200
+	(end)
+
+As the example shows, the new x property is created, but it does not replace the original x property. The new property can be accessed (and set) only by explicitly specifying .extra. The same behavior applies to extended functions.
+

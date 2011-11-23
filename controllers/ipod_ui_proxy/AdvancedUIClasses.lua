@@ -1,3 +1,185 @@
+local function pango_to_html(pango_string)
+    
+    local html_string = pango_string
+    html_string = string.gsub(html_string, "<b>", "\\<b\\>")
+    html_string = string.gsub(html_string, "</b>", "\\</b\\>")
+
+    html_string = string.gsub(html_string, "<big>", "\\<big\\>")
+    html_string = string.gsub(html_string, "</big>", "\\</big\\>")
+
+    html_string = string.gsub(html_string, "<i>", "\\<i\\>")
+    html_string = string.gsub(html_string, "</i>", "\\</i\\>")
+
+    html_string = string.gsub(html_string, "<s>", "\\<s\\>")
+    html_string = string.gsub(html_string, "</s>", "\\</s\\>")
+
+    html_string = string.gsub(html_string, "<sub>", "\\<sub\\>")
+    html_string = string.gsub(html_string, "</sub>", "\\</sub\\>")
+
+    html_string = string.gsub(html_string, "<sup>", "\\<sup\\>")
+    html_string = string.gsub(html_string, "</sup>", "\\</sup\\>")
+
+    html_string = string.gsub(html_string, "<small>", "\\<small\\>")
+    html_string = string.gsub(html_string, "</small>", "\\</small\\>")
+
+    html_string = string.gsub(html_string, "<tt>", "\\<tt\\>")
+    html_string = string.gsub(html_string, "</tt>", "\\</tt\\>")
+
+    html_string = string.gsub(html_string, "<u>", "\\<u\\>")
+    html_string = string.gsub(html_string, "</u>", "\\</u\\>")
+
+    html_string = string.gsub(html_string, "<span(.-)>", "\\<div%1\\>")
+    html_string = string.gsub(html_string, "</span>", "\\</div\\>")
+
+    -- font_desc, font
+    --[[
+    html_string = regex_replace(html_string,
+        "\\<div\\s+font_desc\\s*=\\s*[\"']\\s*([\a,]*)\\s+([\\a\\s]*)(\\d*)(\\a*)\\s*[\"'](.*?)\\>",
+        "\\<div font:\\2 \\3\\4 \\1; \\5>")
+    --]]
+    ---[[
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sfont_desc%s-=%s-[\"']%s-([%a,]-)%s+([%a%s]-)(%d-)(%a-)%s-[\"'](.-)\\>",
+        "\\<div%1 font:%3 %4%5 %2; %6\\>")
+    --]]
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sfont%s-=%s-[\"']%s-([%a,]-)%s+([%a%s]-)(%d-)(%a-)%s-[\"'](.-)\\>",
+        "\\<div%1 font:%3 %4%5 %2; %6\\>")
+
+    -- font_family, face
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sfont_family%s-=%s-[\"']%s-([%a,]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-family:%2; %3\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sface%s-=%s-[\"']%s-([%a,]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-family:%2; %3\\>")
+
+    -- font_size, size
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sfont_size%s-=%s-[\"']%s-([%d%a]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-size:%2; %3\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%ssize%s-=%s-[\"']%s-([%d%a]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-size:%2; %3\\>")
+
+    -- font_style, style
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sfont_style%s-=%s-[\"']%s-([%a]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-style:%2; %3\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sstyle%s-=%s-[\"']%s-([%a]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-style:%2; %3\\>")
+
+    -- font_weight, weight
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sfont_weight%s-=%s-[\"']%s-([%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-weight:%2; %3\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sweight%s-=%s-[\"']%s-([%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-weight:%2; %3\\>")
+
+    -- font_variant, variant
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sfont_variant%s-=%s-[\"']%s-([%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-variant:%2; %3\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%svariant%s-=%s-[\"']%s-([%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-variant:%2; %3\\>")
+
+    -- font_stretch, stretch
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sfont_stretch%s-=%s-[\"']%s-([%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-stretch:%2; %3\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sstretch%s-=%s-[\"']%s-([%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 font-stretch:%2; %3\\>")
+
+    -- foreground, fgcolor, color
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sforeground%s-=%s-[\"']%s-([%#%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 color:%2; %3\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sfgcolor%s-=%s-[\"']%s-([%#%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 color:%2; %3\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%scolor%s-=%s-[\"']%s-([%#%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 color:%2; %3\\>")
+
+    -- background, bgcolor
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sbackground%s-=%s-[\"']%s-([%#%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 background-color:%2; %3\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sbgcolor%s-=%s-[\"']%s-([%#%a%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 background-color:%2; %3\\>")
+
+    -- underline
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sunderline%s-=%s-[\"']%s-single%s-[\"'](.-)\\>",
+        "\\<div%1 text-decoration:underline; %2\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sunderline%s-=%s[\"']%s-[%d%a]-%s-[\"'](.-)\\>",
+        "\\<div%1 %2\\>")
+
+    -- rise
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%srise%s-=%s-[\"']%s-([%%%d%a%-]-)%s-[\"'](.-)\\>",
+        "\\<div%1 vertical-align:%2; %3\\>")
+
+    -- letter_spacing
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sletter_spacing%s-=%s-[\"']%s-([%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 letter_spacing:%2; %3\\>")
+    local start,finish = string.find(html_string,
+        "\\<div.-%sletter_spacing:%d+;")
+    while(start and finish) do
+        local start1,finish1 = string.find(string.sub(html_string, start, finish),
+            "letter_spacing:%d+;")
+        local start2,finish2 = string.find(string.sub(html_string, start+start1-1,
+            start+finish1), "%d+")
+        local spacing = tonumber(string.sub(html_string, start+start1+start2-2,
+            start+start1+finish2-2)) / 1024
+        html_string = string.sub(html_string, 1, start+start1-2)..
+            "letter-spacing:"..tostring(spacing)..
+            string.sub(html_string, start+start1+finish2-1)
+        start,finish = string.find(html_string,
+            "\\<div.-%sletter_spacing:%d+;")
+    end
+
+    -- strikethrough
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sstrikethrough%s-=%s-[\"']%s-true%s-[\"'](.-)\\>",
+        "\\<div%1 text-decoration:line-through; %2\\>")
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sstrikethrough%s-=%s-[\"']%s-false%s-[\"'](.-)\\>",
+        "\\<div%1 %2\\>")
+
+    -- convert to html entities
+    html_string = regex_replace(html_string, "(?<!\\\\)<", "&lt;")
+    html_string = regex_replace(html_string, "(?<!\\\\)>", "&gt;")
+    --html_string = string.gsub(html_string, "<", "&lt;")
+    --html_string = string.gsub(html_string, ">", "&rt;")
+
+    -- convert {/} to </>
+    --[[
+    html_string = string.gsub(html_string, "([^{]){([^{])", "%1<%2")
+    html_string = string.gsub(html_string, "^{([^{])", "<%1")
+    html_string = string.gsub(html_string, "([^}])}([^}])", "%1>%2")
+    html_string = string.gsub(html_string, "([^}])}$", "%1>")
+    --]]
+
+    -- finishing touches
+    html_string = string.gsub(html_string, "\\<", "<")
+    html_string = string.gsub(html_string, "\\>", ">")
+
+    ---[[
+    html_string = string.gsub(html_string, "<div(.-)>", "<span style=\"%1\">")
+    html_string = string.gsub(html_string, "</div>", "</span>")
+    --]]
+
+    return html_string
+end
+
 local function handle_set_children(self, children)
     local __children = rawget(self, "__children")
     local result = {}
@@ -185,6 +367,19 @@ end
 local function TextClass()
     
     local get , set , call , event = UIElement()
+
+    function set:markup( pango )
+        if type(pango) ~= "string" then
+            return nil
+        end
+
+        rawset(self, "__markup", pango)
+        self("set_markup", pango_to_html(pango))
+    end
+
+    function get:markup()
+        return rawget(self, "__markup")
+    end
 
     function get:cursor_size()
         return -1

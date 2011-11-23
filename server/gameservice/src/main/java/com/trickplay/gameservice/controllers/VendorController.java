@@ -3,6 +3,7 @@ package com.trickplay.gameservice.controllers;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validator;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.trickplay.gameservice.domain.Game;
@@ -48,6 +50,19 @@ public class VendorController extends BaseController {
         return "vendor/list";
     }
 
+    @RequestMapping(value = {"/rest/vendor/exists"}, method = RequestMethod.GET)
+    public @ResponseBody VendorTO checkVendorExists(@RequestParam(value="name", required=true) String name, HttpServletResponse response) {
+      //  System.out.println("response.status_code="+response.get)
+        Vendor v = null;
+        if (null != (v = vendorService.findByName(name)))
+            return new VendorTO(v);
+        else {
+           VendorTO to = new VendorTO();
+           to.setName(name);
+           return to;
+        }
+    }
+    
     @RequestMapping(value = {"/vendor/{id}", "/rest/vendor/{id}"}, method = RequestMethod.GET)
     public String getVendor(@PathVariable("id") Long vendorId, Model model) {
     	Assert.notNull(vendorId, "Identifier must be provided.");

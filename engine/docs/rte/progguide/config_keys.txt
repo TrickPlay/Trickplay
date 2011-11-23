@@ -1,0 +1,37 @@
+
+Title: TrickPlay Configuration Keys
+
+The TrickPlay Engine can be set up for a particular development environment by defining various configuration keys. Configuration keys can be defined either in a text file called .trickplay or as system environment variables. The .trickplay file must be stored in the operating system's home directory.
+
+All configuration key values are specified as strings surrounded by double quotation marks.
+
+When defining a key as an environment variable, the key name should add a TP_ prefix. An example is shown below.
+
+	(table)
+	system_language="en"              <--- key defined in .trickplay file
+	
+	export TP_system_language="en"    <--- key defined as environment variable (must add prefix of TP_)
+	(end)
+
+The .trickplay file recognizes the configuration keys described below.
+
+	console_port - Specifies the port number at which to connect to the TrickPlay Engine Console via Telnet. If set to "0", connecting to the Console via Telnet will be disabled. The default port number is "7777". Further information about the Console can be found in <The Engine Console> section of the Programmer's Guide.
+	controllers_enabled - Enables/disables support for remote controllers. If set to "TRUE", remote controllers will be enabled by creating a listener and establishing an mDNS service for discovery. The default setting is "FALSE" to disable remote controllers.
+	controllers_mdns_enabled - Enables/disables remote controller discovery via mDNS. Set to "FALSE" to disable mDNS discovery. The default setting is "TRUE" to enable mDNS discovery.
+	controllers_name - Specifies the service name shown to the user when remote controllers discover the mDNS service. The default service name is "TrickPlay".
+	controllers_port - Specifies a fixed port number on which to run the remote controller's listener. The default port number is "0", specifying the listener port number is not fixed.
+	controllers_upnp_enabled - Enables/disables remote controller discovery via UPnP. Set to "TRUE" to enable UPnP discovery. The default setting is "FALSE" to disable UPnP discovery.
+	data_path - Specifies a path specification where the TrickPlay Engine can create files and subdirectories. The Engine will create a subdirectory at this location called "trickplay" and store temporary data files in it. The default data_path is a temporary system subdirectory.
+	http_port - Specifies the port for TrickPlay's HTTP server. The default setting is "0" which specifies no fixed port.
+	lirc_repeat - Specifies the minimum number of milliseconds between button presses. Any presses that arrive before this time expires are ignored. The default setting is "150" milliseconds.
+	lirc_uds - Specifies the path to the LIRC daemon for UNIX domain sockets. The default path is "/var/run/lirc/lircd".
+	log_app_only - Specifies whether or not to filter all Console messages except those sent by a TrickPlay application via Lua print() statements. Set to "1" to enable filtering. The default setting is "0" which performs no filtering of messages. Note: If the log_debug key is set to display Engine DEBUG messages, but the log_app_only key is set to filter all messages except those from the application, then the log_app_only key overrides log_debug, and DEBUG messages are not displayed.
+	log_debug - Specifies whether or not to filter DEBUG-level messages from the Engine. Set to "0" to prevent Engine DEBUG messages from displaying on the Console. The default setting of "1" sends DEBUG messages to the Console. 
+	network_debug - Specifies whether or not to display debug information on the Console for URL requests. Set to "1" to display debug information. The default setting is "0" so debug information is not displayed.
+	random_seed - Specifies the global seed value for random number generation for all TrickPlay applications. When the random_seed key is set, the Lua math.randomseed() function becomes equivalent to a no-op. The default setting is "0" which specifies no global seed value.
+	screen_height - Specifies the maximum height of the graphics plane. Defaults to "540".
+	screen_width - Specifies the maximum width of the graphics plane. Defaults to "960".
+	ssl_verifypeer - Specifies whether or not server certificates are verified for SSL connections. Set to "0" to disable certificate verification. The default setting is "1" so certificates are verified. Note: There is no underscore character in "verifypeer".
+	system_country - Specifies the system country. The value must be a two-character uppercase <ISO-3166-1 country code at http://userpage.chemie.fu-berlin.de/diverse/doc/ISO_3166.html>. The default setting is "US" (United States). The system_country and system_language keys are used to support the localization of a TrickPlay application. Additional information is described in the <Localization> section of the Programmer's Guide.
+	system_language - Specifies the system language. The value must be a two-character lowercase <ISO-639-1 language code at http://www.loc.gov/standards/iso639-2/php/code_list.php>. The default setting is "en" (English). The system_language and system_country keys are used to support the localization of a TrickPlay application. Additional information is described in the <Localization> section of the Programmer's Guide.
+

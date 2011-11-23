@@ -2,43 +2,51 @@ package com.trickplay.gameservice.service.impl;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trickplay.gameservice.dao.impl.GenericDAOWithJPA;
-import com.trickplay.gameservice.dao.impl.SpringUtils;
+import com.trickplay.gameservice.dao.DeviceDAO;
+import com.trickplay.gameservice.dao.RoleDAO;
+import com.trickplay.gameservice.dao.UserDAO;
+import com.trickplay.gameservice.dao.VendorDAO;
 import com.trickplay.gameservice.domain.Device;
 import com.trickplay.gameservice.domain.Role;
 import com.trickplay.gameservice.domain.User;
 import com.trickplay.gameservice.domain.Vendor;
-import com.trickplay.gameservice.exception.GameServiceException;
-import com.trickplay.gameservice.exception.GameServiceException.ExceptionContext;
-import com.trickplay.gameservice.exception.GameServiceException.Reason;
+import com.trickplay.gameservice.exception.ExceptionUtil;
 import com.trickplay.gameservice.security.SecurityUtil;
-import com.trickplay.gameservice.service.DeviceService;
 import com.trickplay.gameservice.service.UserService;
-import com.trickplay.gameservice.service.VendorService;
 
 @Service("userService")
-@Repository
-public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements UserService {
+public class UserServiceImpl implements UserService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	@Autowired
-	private DeviceService deviceService;
-	@Autowired VendorService vendorService;
 	
-	@SuppressWarnings("unchecked")
+	@Autowired
+	private DeviceDAO deviceDAO;
+	
+	@Autowired
+	private VendorDAO vendorDAO;
+	
+	@Autowired
+    private RoleDAO roleDAO;
+	
+	@Autowired
+    private UserDAO userDAO;	
+	
+	@Autowired 
+	MessageSource messageSource;
+	
 	public User findByName(String username, boolean detached) {
-		List<User> list = super.entityManager.createQuery("Select u from User as u where u.username = :username").setParameter("username", username).getResultList();
-		User u = SpringUtils.getFirst(list);
-		if (detached) 
-			entityManager.detach(u);
-		return u;
+		return userDAO.findByName(username);
 	}
 	
 	public User findByName(String username) {
@@ -47,39 +55,68 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 	
 	@Transactional
 	public Role createRole(String rolename) {
+	    if (rolename == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("rolename", null, "!= null");
+	    }
+	    rolename = rolename.trim();
+	    if (rolename.isEmpty()) {
+	        throw ExceptionUtil.newIllegalArgumentException("rolename", "", "length(rolename) > 0");
+	    }
+	        
 		Role r = new Role(rolename);
-		entityManager.persist(r);
+		
+		try {
+		    roleDAO.persist(r);
+		} catch (DataIntegrityViolationException ex) {
+		    logger.error("Failed to create Role.", ex);
+		    throw ExceptionUtil.newEntityExistsException(Role.class, "rolename", rolename);
+		}
 		return r;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Role findRole(String rolename) {
-		List<Role> list = super.entityManager
-		.createQuery("Select r from Role as r where r.name = :name")
-		.setParameter("name", rolename).getResultList();
-		return SpringUtils.getFirst(list);
+		return roleDAO.findRole(rolename);
 	}
 	
 	@Transactional
 	public void create(User entity) {
+	    if (entity == null) {
+	        throw ExceptionUtil.newIllegalArgumentException("User", null, "!= null");
+	    } else if (entity.getUsername() == null || entity.getUsername().trim().isEmpty()) {
+	        throw ExceptionUtil.newIllegalArgumentException("User.username", "", "length(username) > 0");
+	    } else if (entity.getPassword() == null || entity.getPassword().trim().isEmpty()) {
+	        throw ExceptionUtil.newIllegalArgumentException("User.password", "", "length(password) > 0");
+	    }
 		entity.addAuthority(findRole(Role.ROLE_USER));
 		entity.setPassword(passwordEncoder.encodePassword(entity.getPassword(), null));
-		super.persist(entity);
+		try {
+		    userDAO.persist(entity);
+		} catch (DataIntegrityViolationException ex) {
+		    logger.error("Failed to create User", ex);
+		    throw ExceptionUtil.newEntityExistsException(User.class, 
+		            "username", entity.getUsername());
+		} catch (RuntimeException ex) {
+		    logger.error("Failed to create User", ex);
+            throw ExceptionUtil.convertToSupportedException(ex);
+		}
 	}
 
 	@Transactional
 	public Device registerDevice(Device device) {
 		Long userId = SecurityUtil.getPrincipal().getId();
+		if (userId == null) {
+		    throw ExceptionUtil.newUnauthorizedException();
+		}
 		User u = find(userId);
 		if (u == null) {
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.id", userId));
+			throw ExceptionUtil.newEntityNotFoundException(User.class, "id", userId);
 		}
 
-		Device d = deviceService.findByKey(device.getDeviceKey());
+		Device d = deviceDAO.findByKey(device.getDeviceKey());
 		if (d == null) {
 			device.setOwner(u);
 			device.setId(null);
-			deviceService.persist(device);
+			deviceDAO.persist(device);
 			d = device;
 		} else {
 			// implicitly unregistering previous owner
@@ -90,17 +127,62 @@ public class UserServiceImpl extends GenericDAOWithJPA<User, Long>implements Use
 	
 	@Transactional
 	public Vendor createVendor(String vendorName) {
+	    if (vendorName == null || vendorName.trim().isEmpty()) {
+	        throw ExceptionUtil.newIllegalArgumentException("vendorName", "", "length(vendorName) != null");
+	    }
 		Long userId = SecurityUtil.getPrincipal().getId();
 		User u = find(userId);
-		if (u == null)
-			throw new GameServiceException(Reason.ENTITY_NOT_FOUND, null, ExceptionContext.make("User.id", userId));
+		if (u == null) 
+		    throw ExceptionUtil.newEntityNotFoundException(User.class, "id", userId); 
 		
-		//authorizeCreateVendor(u);
 		Vendor v = new Vendor();
 		v.setName(vendorName);
 		v.setPrimaryContact(u);
-		vendorService.persist(v);
+		try {
+		    vendorDAO.persist(v);
+		} catch (DataIntegrityViolationException ex) {
+		    logger.error("Failed to create Vendor.", ex);
+		    throw ExceptionUtil.newEntityExistsException(Vendor.class,
+		            "vendorName", vendorName);
+		} catch (RuntimeException ex) {
+		    logger.error("Failed to create Vendor.", ex);
+		    throw ExceptionUtil.convertToSupportedException(ex);
+		}
 		return v;
 	}
+
+	@Transactional
+    public void update(User entity) {
+        if (entity==null) {
+            throw ExceptionUtil.newIllegalArgumentException("User", null, "!= null");
+        }
+        User existing;
+        if (entity.getId()!=null) {
+            existing = find(entity.getId());
+            if (existing == null) {
+                throw ExceptionUtil.newEntityNotFoundException(User.class, "id", entity.getId());
+            }
+        } else {
+            existing = findByName(entity.getUsername());
+            if (existing == null) {
+                throw ExceptionUtil.newEntityNotFoundException(User.class, "username", entity.getUsername()); 
+            }
+               
+        }
+        
+        existing.setAllowHighScoreMessages(entity.isAllowHighScoreMessages());
+        existing.setAllowAchievementMessages(entity.isAllowAchievementMessages());
+        if (entity.getEmail()!=null && !entity.getEmail().equals(existing.getEmail())) {
+            existing.setEmail(entity.getEmail());
+        }
+    }
+
+    public List<User> findAll() {
+        return userDAO.findAll();
+    }
+
+    public User find(Long id) {
+        return userDAO.find(id);
+    }
 
 }
