@@ -126,6 +126,26 @@ local function pango_to_html(pango_string)
         "\\<div(.-)%srise%s-=%s-[\"']%s-([%%%d%a%-]-)%s-[\"'](.-)\\>",
         "\\<div%1 vertical-align:%2; %3\\>")
 
+    -- letter_spacing
+    html_string = string.gsub(html_string,
+        "\\<div(.-)%sletter_spacing%s-=%s-[\"']%s-([%d]-)%s-[\"'](.-)\\>",
+        "\\<div%1 letter_spacing:%2; %3\\>")
+    local start,finish = string.find(html_string,
+        "\\<div.-%sletter_spacing:%d+;")
+    while(start and finish) do
+        local start1,finish1 = string.find(string.sub(html_string, start, finish),
+            "letter_spacing:%d+;")
+        local start2,finish2 = string.find(string.sub(html_string, start+start1-1,
+            start+finish1), "%d+")
+        local spacing = tonumber(string.sub(html_string, start+start1+start2-2,
+            start+start1+finish2-2)) / 1024
+        html_string = string.sub(html_string, 1, start+start1-2)..
+            "letter-spacing:"..tostring(spacing)..
+            string.sub(html_string, start+start1+finish2-1)
+        start,finish = string.find(html_string,
+            "\\<div.-%sletter_spacing:%d+;")
+    end
+
     -- strikethrough
     html_string = string.gsub(html_string,
         "\\<div(.-)%sstrikethrough%s-=%s-[\"']%s-true%s-[\"'](.-)\\>",
@@ -136,7 +156,7 @@ local function pango_to_html(pango_string)
 
     -- convert to html entities
     html_string = regex_replace(html_string, "(?<!\\\\)<", "&lt;")
-    html_string = regex_replace(html_string, "(?<!\\\\)>", "&rt;")
+    html_string = regex_replace(html_string, "(?<!\\\\)>", "&gt;")
     --html_string = string.gsub(html_string, "<", "&lt;")
     --html_string = string.gsub(html_string, ">", "&rt;")
 

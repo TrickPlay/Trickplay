@@ -739,6 +739,8 @@ int TPContext::run()
 
     http_server = new HttpServer( get_int( TP_HTTP_PORT , 0 ) );
 
+	set( TP_HTTP_PORT, http_server->get_port() );
+
     http_trickplay_api_support = new HttpTrickplayApiSupport( this );
 
     //.........................................................................

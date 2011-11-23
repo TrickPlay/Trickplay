@@ -1,8 +1,10 @@
-import os, sys, re
+import os, sys, re, signal
 from connection import *
 from discovery import *
 from debugger import *
 from PyQt4.QtCore import QCoreApplication, QSettings
+
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 def main(argv):
 
@@ -11,13 +13,10 @@ def main(argv):
 	debugger = CLDebuger()
 
 	try:
-
-		debugger.start(discovery)
-		sys.exit(app.exec_())
+		debugger.start(discovery) 
 
 	except (KeyboardInterrupt, EOFError):
-
-		debugger.disconnect()
+		sys.exit()
 
 if __name__ == '__main__':
 	main(sys.argv)

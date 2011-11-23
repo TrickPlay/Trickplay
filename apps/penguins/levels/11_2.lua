@@ -42,15 +42,14 @@ image8.extra.reactive = true
 local image2 = Image
 	{
 		src = "/assets/images/seal-down.png",
-		clip = {0,0,110,135},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {55,0},
 		name = "image2",
-		position = {1017,441,0},
-		size = {110,135},
+		position = {1017,440,0},
+		size = {131,151},
 		opacity = 255,
 		reactive = false,
 	}

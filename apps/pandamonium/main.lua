@@ -299,3 +299,7 @@ function controllers.on_controller_connected( controllers , controller )
 		controller:start_accelerometer("L",.1)
 	end
 end
+
+for _,controller in pairs(controllers.connected) do
+	controllers:on_controller_connected( controller )
+end

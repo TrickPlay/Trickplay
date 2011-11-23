@@ -77,12 +77,6 @@ local new = function (def)
 			end
 			
 			generate(group,true)
-			--[[group.text1 = Text{text = def[4], font = "Sigmar 52px",
-							x = 30,  y = -140,		color = "036BB4", opacity = 0}
-			group.text2 = Text{text = def[6], font = "Sigmar 52px",
-							x = 900, y = 640-130,	color = "036BB4", opacity = 0,
-							alignment = "RIGHT", w = 990}
-			group:add(group.text1,group.text2)]]
 		else
 			group:loader1()
 		end
@@ -95,7 +89,6 @@ local new = function (def)
 			a = v.anchor_point
 			v.bb = {l = v.x - a[1], r = v.x - a[1] + v.w*v.scale[1],
 					t = v.y - a[2], b = v.y - a[2] + v.h*v.scale[2]}
-			v.collides = v.reactive
 			v.reactive = false
 		end
 	end
@@ -115,7 +108,17 @@ local toload = {
 	{8,	1,"Pool Party"},
 	{9,	3,"A Brief Exercise in Futility"},
 	{10,2,"Blocks Stop for No Penguin"},
-	{11,2,"The Incorrigible Mr. Seal"}}
+	{11,2,"The Mysterious Mr. Seal"},
+	{12,1,"And Now Bounce Me Lower"},
+	{13,2,"Dangerous Airspace"},
+	{14,2,"Return of Mr. Seal"},
+	{15,2,"Go the Distance"},
+	{16,2,"Slide Across"},
+	{17,2,"Double Bridges"},
+	{18,3,"Bridge Over Cold Water"},
+	{19,2,"A Good Swift Kick"},
+	{20,1,"Stick the Landing"}
+	}
 
 for k,v in ipairs(toload) do
 	levels[#levels+1] = new(v)
@@ -126,14 +129,10 @@ levels.this:load()
 
 screen:show()
 screen:add(levels.this)
-dolater(function() 
-   snow(levels.this.snow)
-   levels.this:find_child("image0"):grab_key_focus()
-end)
 
 levels.next = function(arg)
 	local oldlevel = levels.this
-	levels.this = levels[(levels.this.id) % #levels + (arg or 1)]
+	levels.this = levels[(levels.this.id) % #levels + (levels.this.id > 1 and arg or 1)]
 	
 	levels.this:load()
 	overlay.level:animate{opacity = 0, duration = 570, on_completed = function()
@@ -158,13 +157,9 @@ levels.next = function(arg)
 		oldlevel:free()
 		if levels.this.id ~= 1 then
 			overlay.clone:unparent()
-			--levels.this.text1:animate{y = 20, opacity = 255, duration = 500, mode = "EASE_IN_OUT_QUAD"}
 			overlay.position = {0,0}
 			row = 1
 			penguin.skating:start()
-			screen:grab_key_focus()
-		else
-			levels.this:find_child("image0"):grab_key_focus()
 		end
 		collectgarbage("collect")
 	end}
