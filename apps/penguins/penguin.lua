@@ -109,7 +109,7 @@ local boost = function()
 	if jstate == 0 then
 		--
 	else
-		--jstate = 2
+		jstate = 2
 		img.vy = math.min(-0.3,img.vy)
 		a = (g == (row ~= 2) and 1 or -1)
 		b = img.z_rotation[1] % (a*360)

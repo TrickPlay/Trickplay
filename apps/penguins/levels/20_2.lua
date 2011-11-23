@@ -375,42 +375,4 @@ end
 clone10.extra.reactive = true
 
 
-local image11 = Image
-	{
-		src = "/assets/images/snow-ramp.png",
-		clip = {0,0,494.00012207031,153},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "image11",
-		position = {1496,441,0},
-		size = {494,153},
-		opacity = 255,
-		reactive = true,
-	}
-
-image11.extra.focus = {}
-
-function image11:on_key_down(key)
-	if image11.focus[key] then
-		if type(image11.focus[key]) == "function" then
-			image11.focus[key]()
-		elseif screen:find_child(image11.focus[key]) then
-			if image11.clear_focus then
-				image11.clear_focus(key)
-			end
-			screen:find_child(image11.focus[key]):grab_key_focus()
-			if screen:find_child(image11.focus[key]).set_focus then
-				screen:find_child(image11.focus[key]).set_focus(key)
-			end
-		end
-	end
-	return true
-end
-
-image11.extra.reactive = true
-
-
-g:add(image0,image3,clone4,image5,clone6,clone7,clone8,clone9,image12,clone10,image11)
+g:add(image0,image3,clone4,image5,clone6,clone7,clone8,clone9,image12,clone10)
