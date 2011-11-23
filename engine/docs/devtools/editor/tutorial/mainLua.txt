@@ -52,11 +52,11 @@ Also in the main.lua file, you will find empty event handlers defined for each o
 
 (code)
 -- LANGUAGE.BUTTONENGLISH SECTION
-layout["language"].ButtonEnglish.focused = function() -- Handler for ButtonEnglish.focused in this screen
+layout["language"].ButtonEnglish.on_focus = function() -- Handler for ButtonEnglish.on_focus in this screen
 end
-layout["language"].ButtonEnglish.pressed = function() -- Handler for ButtonEnglish.pressed in this screen
+layout["language"].ButtonEnglish.on_unfocus = function() -- Handler for ButtonEnglish.on_unfocus in this screen
 end
-layout["language"].ButtonEnglish.released = function() -- Handler for ButtonEnglish.released in this screen
+layout["language"].ButtonEnglish.on_press = function() -- Handler for ButtonEnglish.on_press in this screen
 end
 -- END LANGUAGE.BUTTONENGLISH SECTION
 (end)
@@ -78,11 +78,11 @@ The ui_element.screen_add(groups["language"]) function copies the UI elements fo
 
 At the very beginning of this topic, we asked which element would have the input focus when a screen was first entered. After examining the main.lua file, we are finally prepared to answer that question.
 
-Button objects support a function called on_focus_in() that sets the screen's input focus to the Button upon entry to the screen. Calling this function is the same as accessing any of the object's properties, as was shown earlier when we accessed the ButtonEnglish's text property. Thus, the following code statement will set our screen's initial input focus to the ButtonEnglish.
+Button objects support a function called set_focus() that sets the screen's input focus to the Button upon entry to the screen. Calling this function is the same as accessing any of the object's properties, as was shown earlier when we accessed the ButtonEnglish's text property. Thus, the following code statement will set our screen's initial input focus to the ButtonEnglish.
 
 (code)
-layout["language"].ButtonEnglish.on_focus_in()
+layout["language"].ButtonEnglish.set_focus()
 (end)
 
-To incorporate this operation into our tutorial application, you must add such a code statement to the main.lua file. Using a text editor of your choice, open the main.lua file stored in the ~/trickplay-editor/Tutorial directory. Near the end of the file and following the call to ui_element.screen_add(), insert a new code statement to set the initial input focus. Use the on_focus_in() statement shown above to set the focus to the ButtonEnglish. Save the modified main.lua file. Now when the TrickPlay Engine runs our Tutorial application and displays the Language screen, the ButtonEnglish button will have the initial focus.
+To incorporate this operation into our tutorial application, you must add such a code statement to the main.lua file. Using a text editor of your choice, open the main.lua file stored in the ~/trickplay-editor/Tutorial directory. Near the end of the file and following the call to ui_element.screen_add(), insert a new code statement to set the initial input focus. Use the set_focus() statement shown above to set the focus to the ButtonEnglish. Save the modified main.lua file. Now when the TrickPlay Engine runs our Tutorial application and displays the Language screen, the ButtonEnglish button will have the initial focus.
 

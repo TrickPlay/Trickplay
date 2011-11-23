@@ -1,0 +1,34 @@
+Title: Understanding the Z-Axis
+	
+	It is valuable to understand the relationship between an object's location along the Z-axis and the effect that location has on how the object is shown within the display's viewing area.
+	
+	The Z-axis moves perpendicular to the X and Y-axes. At any given X,Y point, the Z-axis is a perpendicular line extending straight back and forward in the third dimension. Given two different X,Y points, two perpendicular Z-axis lines extend forward and back. These Z-axis lines are *parallel* to each other. This is an important point to remember when dealing with the Z-axis because, as will be explained later, it is the reason why objects located farther back on the Z-axis appear smaller, while objects closer on the Z-axis appear larger. When projecting lines extend in parallel, the process is called "orthographic projection."
+	
+(see images/zDisplayBoxes.png)
+	
+	Each point on a display can be thought of as extending back in orthographic projection along the Z-axis, perpendicular to the flat plane of the display. Think of the display as one end of a shoebox and the Z-axis as extending back in space, forming the rectangular sides of the box. Each X,Y point on the display will extend a unique line through the shoebox along its Z-axis.
+	
+(see images/zShoebox.png)
+	
+	In addition to orthographic projection, there exists another process called "perspective projection." Unlike orthographic projection which extends along parallel lines, perspective projection extends along lines that converge and eventually intersect at a vanishing point. The traditional example is two railroad tracks extending toward the horizon, converging until they eventually appear to touch each other.
+	
+	The expanding projection lines also work in reverse and can be thought of as starting at a single, common point and expanding outward as they project farther away. As an example, consider the view from a camera; it starts at a single point (the camera lens) and its field of vision expands outward like a megaphone as it moves farther away in distance. The view displayed on the screen works in the same manner as a camera, expanding wider and wider as it extends back in depth.
+	
+	A megaphone is typically shaped like a circular cone, but the display view is that of a rectangular cone. The megaphone's narrow end is placed in front of the viewer's eyes, and expands wider and wider as it projects farther away.
+	
+(see images/zCameraView.png)
+	
+	The relationship between the parallel shoebox/Z-axis and the expanding megaphone/display view is the key to understanding how an object's location on the Z-axis affects how it is shown on the display. At the location where Z=0, the four corners of the parallel shoebox intersect with the expanding lines of the rectangular megaphone. As an object moves back in depth along the Z-axis, it moves back along a parallel line, perpendicular to the X,Y plane. Meanwhile, the view of the camera expands in an ever-widening viewport. At any point of depth, say Z=-100, the camera view will encompass a larger surface area than the unchanging parallel X,Y plane.
+	
+(see images/zCombinedView.png)
+	
+	For a concrete example of how an object's position on the Z-axis affects its display appearance, imagine a checkered graphic that fills the entire display when positioned on the Z-axis at Z=0, as shown in the figure above. Now move that graphic back in depth along the Z-axis until it is located at Z=-100, as depicted below in the far-left diagram. The graphic moves back perpendicular to the X,Y plane in orthographic projection. Meanwhile, the camera-view expands in perspective projection. When the graphic is located at Z=-100, it remains the exact same size as when it was located at Z=0, but the expanding camera view now encompasses a larger viewing area. The middle diagram below shows the effect. When the camera view is displayed on the screen, as shown on the far-right figure, the graphic gives the appearance of being smaller, when, in fact, it is the viewing area that has grown.
+	
+(see images/zCameraScreen.png)
+	
+	A similar effect occurs when objects move closer to the viewer along the Z-axis. The perspective projection of the rectangular megaphone gets narrower as it gets closer to the viewer. Think of a small dot in the center of the display at Z=0  and move it closer to the viewer along the Z-axis. As the dot moves closer and closer, its actual size remains unchanged, but the dot takes up more of the ever-narrowing viewing area. Eventually, the small dot will fill the entire display without having altered its size, but solely by positioning itself closer to the viewer.
+	
+	Finally, think of a circle located in the upper-left corner of the display at Z=0. Move it closer to the viewer along the Z-axis. As the Z-axis extends forward, perpendicular to the X,Y plane, the viewing area narrows. Gradually, the circle moves outside the viewing area, giving the appearance of moving above the viewer. As it continues to advance, the circle eventually moves completely outside the viewing area, even though it still exists along the Z-axis.
+	
+	Thinking of the orthographic X,Y,Z space and the perspective camera-view as a shoebox contained within a rectangular megaphone provides a useful context to understanding depth along the Z-axis.
+

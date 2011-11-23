@@ -240,7 +240,8 @@ global uri [[void*]]
 	
 	lstring unescape( lstring s , bool plus_to_space = true )
 		[[
-			gchar * out = g_new( gchar , s_len );
+			
+			gchar * out = g_new0( gchar , s_len + 1 );
 			
 			memmove( out , s , s_len );
 			

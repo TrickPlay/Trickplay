@@ -147,7 +147,7 @@ private:
 			g_assert( udata );
 			g_assert( action );
 			
-			Action * a = ( Action * ) udata->get_user();
+			MIGHT_BE_UNUSED Action * a = ( Action * ) udata->get_user();
 			
 			tplog2( "ACTION %d FINISHED WITH ERROR CODE %d" , a->id , action->ErrCode );
 			

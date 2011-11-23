@@ -25,6 +25,7 @@ IF( PKG_CONFIG_FOUND )
     pkg_check_modules(GIO_UNIX      REQUIRED    gio-unix-2.0)
     pkg_check_modules(CAIRO         REQUIRED    cairo)
     pkg_check_modules(PANGO         REQUIRED    pango)
+    pkg_check_modules(COGL                      cogl-1.0)
     pkg_check_modules(CLUTTER       REQUIRED    clutter-1.0)
     pkg_check_modules(FONTCONFIG    REQUIRED    fontconfig)
     pkg_check_modules(FREETYPE2     REQUIRED    freetype2)
@@ -43,10 +44,10 @@ IF( PKG_CONFIG_FOUND )
         pkg_check_modules(UUID      REQUIRED    ossp-uuid)
     endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_CLUTTER_BACKEND_EGL)
 
-    if (TP_CONTROLLER_DISCOVERY_MDNS)
+    if (TP_CONTROLLER_DISCOVERY_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
         pkg_check_modules(AVAHI_CORE REQUIRED avahi-core)
         pkg_check_modules(AVAHI_GLIB REQUIRED avahi-glib)
-    endif (TP_CONTROLLER_DISCOVERY_MDNS)
+    endif (TP_CONTROLLER_DISCOVERY_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 
     list(APPEND ENGINE_INCLUDE_DIRS
 
@@ -55,6 +56,7 @@ IF( PKG_CONFIG_FOUND )
         ${GIO_UNIX_INCLUDE_DIRS}
         ${CAIRO_INCLUDE_DIRS}
         ${PANGO_INCLUDE_DIRS}
+        ${COGL_INCLUDE_DIRS}
         ${CLUTTER_INCLUDE_DIRS}
         ${FONTCONFIG_INCLUDE_DIRS}
         ${FREETYPE2_INCLUDE_DIRS}
@@ -77,6 +79,7 @@ IF( PKG_CONFIG_FOUND )
         ${GIO_UNIX_LIBRARIES}
         ${CAIRO_LIBRARIES}
         ${PANGO_LIBRARIES}
+        ${COGL_LIBRARIES}
         ${CLUTTER_LIBRARIES}
         ${FONTCONFIG_LIBRARIES}
         ${FREETYPE2_LIBRARIES}
@@ -93,6 +96,7 @@ IF( PKG_CONFIG_FOUND )
         ${EXIF_LIBRARIES}
     )
 
+
 ELSE ( PKG_CONFIG_FOUND )
 
     TP_FIND_INCLUDE( curl/curl.h                            ENGINE_INCLUDE_DIRS )
@@ -102,6 +106,7 @@ ELSE ( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( cairo cairo.h                          ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( pango-1.0 pango/pango.h                ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h          ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( cogl-1.0 cogl/cogl.h                   ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( fontconfig fontconfig/fontconfig.h     ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( freetype2 freetype/freetype.h          ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( png.h                                  ENGINE_INCLUDE_DIRS )
@@ -112,12 +117,12 @@ ELSE ( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( libsoup-2.4 libsoup/soup.h             ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( libexif/exif-data.h                    ENGINE_INCLUDE_DIRS )
 
-    if (TP_CONTROLLER_DISCOVERY_MDNS)
+    if (TP_CONTROLLER_DISCOVERY_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
         TP_FIND_INCLUDE( avahi-core core.h                  ENGINE_INCLUDE_DIRS )
         TP_FIND_INCLUDE( avahi-glib glib-watch.h            ENGINE_INCLUDE_DIRS )
         TP_FIND_INCLUDE( avahi-common watch.h               ENGINE_INCLUDE_DIRS )
         list( APPEND ENGINE_LIBRARY_NAMES avahi-core avahi-common avahi-glib )
-    endif (TP_CONTROLLER_DISCOVER_MDNS)
+    endif (TP_CONTROLLER_DISCOVER_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 
 
 #------------------------------------------------------------------------------
@@ -162,7 +167,7 @@ ELSE ( PKG_CONFIG_FOUND )
 
         if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-            list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 clutter-glx-1.0 )
+            list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 clutter-glx-1.0 cogl )
 
         else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
@@ -213,6 +218,13 @@ if ( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT)
 
 endif( TP_CONTROLLER_DISCOVERY_UPNP OR TP_UPNP_CLIENT )
 
+# -----------------------------------------------------------------------------
+
+if ( TP_FONT_DEBUG )
+
+    add_definitions( -DTP_FONT_DEBUG=1 )
+    
+endif( TP_FONT_DEBUG )    
 
 # -----------------------------------------------------------------------------
 # These packages aren't in pkg-config
@@ -231,7 +243,11 @@ list( APPEND  ENGINE_LIBRARY_NAMES expat jpeg png tiff tiffxx gif uriparser )
 
 if (TP_CONTROLLER_DISCOVERY_MDNS)
     add_definitions( -DTP_CONTROLLER_DISCOVERY_MDNS=1 )
-    list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.mm )
+    else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+    endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif (TP_CONTROLLER_DISCOVERY_MDNS)
 
 #------------------------------------------------------------------------------
@@ -271,6 +287,21 @@ endif ( TP_WITH_WEBGL )
 
 #------------------------------------------------------------------------------
 
+if ( TP_FORCE_VERIFICATION )
+
+    add_definitions( -DTP_FORCE_VERIFICATION=1 )
+    add_definitions( -DTP_VERIFICATION_CODE="${TP_FORCE_VERIFICATION}" )
+    
+    string( LENGTH "${TP_FORCE_VERIFICATION}" CODE_LENGTH )
+    
+    if ( NOT CODE_LENGTH EQUAL 3 )
+        message( FATAL_ERROR "VERIFICATION CODE MUST BE 3 CHARACTERS LONG" )
+    endif( NOT CODE_LENGTH EQUAL 3 )
+
+endif( TP_FORCE_VERIFICATION )
+
+#------------------------------------------------------------------------------
+
 TP_ORDER_PATHS( ENGINE_INCLUDE_DIRS include )
 
 list(REMOVE_DUPLICATES ENGINE_INCLUDE_DIRS)
@@ -295,7 +326,7 @@ endforeach( LIB )
 # all warnings
 #------------------------------------------------------------------------------
 
-set(CMAKE_CXX_FLAGS "-Wall -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS "-Wall")
 
 #------------------------------------------------------------------------------
 # log domain for glib log functions
@@ -376,6 +407,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/stopwatch.lb
     ${BINDINGS_SRC}/restricted.lb
     ${BINDINGS_SRC}/apps.lb
+    ${BINDINGS_SRC}/controller.lb
     ${BINDINGS_SRC}/controllers.lb
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
@@ -528,6 +560,7 @@ list( APPEND
     ${ENGINE_SRC}/source/controller_server.cpp
     ${ENGINE_SRC}/source/controller_list.cpp
     ${ENGINE_SRC}/source/controller_lirc.cpp
+    ${ENGINE_SRC}/source/controller_delegates.cpp
     ${ENGINE_SRC}/source/profiler.cpp
     ${ENGINE_SRC}/source/downloads.cpp
     ${ENGINE_SRC}/source/event_group.cpp
@@ -557,6 +590,8 @@ list( APPEND
     ${ENGINE_SRC}/source/log.cpp
     ${ENGINE_SRC}/source/keyboard.cpp
     ${ENGINE_SRC}/source/jpeg_utils.cpp
+    ${ENGINE_SRC}/source/sandbox.cpp
+    ${ENGINE_SRC}/source/console_commands.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -572,6 +607,8 @@ list( APPEND
 
 FIND_LIBRARY (APPKIT_LIBRARY AppKit)
 MARK_AS_ADVANCED (APPKIT_LIBRARY)
+FIND_LIBRARY (CORESERVICES_LIBRARY CoreServices)
+MARK_AS_ADVANCED (CORESERVICES_LIBRARY)
 FIND_LIBRARY (OSX_GL_LIBRARY OpenGL)
 MARK_AS_ADVANCED (OSX_GL_LIBRARY)
 
@@ -580,6 +617,7 @@ list( APPEND
     ENGINE_LIBRARIES
 
     ${APPKIT_LIBRARY}
+    ${CORESERVICES_LIBRARY}
     ${OSX_GL_LIBRARY}
     objc
 )

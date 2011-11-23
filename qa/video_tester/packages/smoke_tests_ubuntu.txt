@@ -1,0 +1,77 @@
+[
+{
+"step": "Select an MP4 local video and select play",
+"verify": "It plays with high quality in the viewport box\nVideo Size and Duration return expected values.\nThe State value should start as IDLE then change to PAUSED then to PLAYING in the debug view",
+"active": "true"
+},
+{
+"step": "Select an MOV local video and select play",
+"verify": "It plays with high quality in the viewport box\nVideo Size and Duration return expected values.\nThe State value should start as IDLE then change to PAUSED then to PLAYING in the debug view",
+"active": "true"
+},
+{
+"step": "Select an AVI local video and select play",
+"verify": "It plays with high quality in the viewport box\nVideo Size and Duration return expected values.\nThe State value should start as IDLE then change to PAUSED then to PLAYING in the debug view",
+"active": "true"
+},
+{
+"step": "Select an MP4 local video and select play",
+"verify": "It plays with high quality in the viewport box\nVideo Size and Duration return expected values.\nThe State value should start as IDLE then change to PAUSED then to PLAYING in the debug view",
+"active": "true"
+},
+{
+"step": "Select a WMV streaming file and select play",
+"verify": "It plays with high quality in the viewport box\nVideo Size and Duration return expected values.\nThe State value should start as IDLE then change to PAUSED then to PLAYING in the debug view",
+"active": "true"
+},
+{
+"step": "Select a MOV streaming file and select play",
+"verify": "It plays with high quality in the viewport box\nVideo Size and Duration return expected values.\nThe State value should start as IDLE then change to PAUSED then to PLAYING in the debug view",
+"active": "true"
+},
+{
+"step": "For all movie file types, select the pause button",
+"verify": "Toggling the pause button should immediately pause the video\nThe State value should show Paused in the debug view",
+"active": "true"
+},
+{
+"step": "For all movie file types, select play after pause",
+"verify": "Paused video should begin playing immediately\nThe State value should show Playing in the debug view.",
+"active": "true"
+},
+{
+"step": "For all movie file types, toggle the Green (F6) button",
+"verify": "Viewport should toggle between full screen and original size",
+"active": "true"
+},
+{
+"step": "For all movie file types, select the skip forward 2 seconds button - |>>",
+"verify": "The movie should skip forward 2 seconds along with debug window position value",
+"active": "true"
+},
+{
+"step": "For all movie file types, select the skip back 2 seconds button",
+"verify": "The movie should skip back 2 seconds along with debug window position value",
+"active": "true"
+},
+{
+"step": "For all movie file types, select the fast forward 4 times - >>  ",
+"verify": "The movie play speed should increase by 2X with each press",
+"active": "true"
+},
+{
+"step": "For all movie file types, select the fast backward 4 times",
+"verify": "The movie play speed should decrease by 2X with each press",
+"active": "true"
+},
+{
+"step": "For all movie file types, play the movaie then select the go-to-start button and play",
+"verify": "The movie should return to the beginning and play",
+"active": "true"
+},
+{
+"step": "For all movie file types, play the movie then toggle the mute button several times",
+"verify": "The sound should be muted and unmuted as well as the mute status in the debug view",
+"active": "true"
+}
+]

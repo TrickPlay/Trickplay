@@ -131,9 +131,16 @@ struct UserData
 
     //.........................................................................
 
-    inline GObject * get_master()
+    inline GObject * get_master() const
     {
         return master;
+    }
+
+    //.........................................................................
+
+    inline gpointer get_client( ) const
+    {
+    	return client;
     }
 
     //.........................................................................
@@ -144,11 +151,36 @@ struct UserData
     }
 
     //.........................................................................
+
+    static std::string describe( lua_State * L , int index );
+
+    //.........................................................................
     // Gets the user data from the Lua stack given the index.
 
     inline static UserData * get( lua_State * L , int index = 1 )
     {
         g_assert( L );
+
+        UserData * result = ( UserData * ) lua_touserdata( L , index );
+
+        g_assert( result );
+
+        return result;
+    }
+
+    inline static UserData * get_check( lua_State * L , int index = 1 )
+    {
+        g_assert( L );
+
+        if ( ! lua_isuserdata( L , index ) )
+        {
+        	return 0;
+        }
+
+        if ( sizeof( UserData ) != lua_objlen( L , index ) )
+        {
+        	return 0;
+        }
 
         UserData * result = ( UserData * ) lua_touserdata( L , index );
 
@@ -249,6 +281,8 @@ struct UserData
     static void dump_cb( lua_State * L , int index = 1 );
 
     static void dump();
+
+    bool gc_tag( const gchar * comment );
 
 private:
 
@@ -351,6 +385,16 @@ private:
     typedef std::map< String , gulong > SignalMap;
 
     SignalMap *     signals;
+
+    //.........................................................................
+
+#ifdef TP_PROFILING
+
+    class GCTag;
+
+    GCTag *			gctag;
+
+#endif
 };
 
 

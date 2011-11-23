@@ -4,10 +4,10 @@
 	local prev_skin, new_skin, prev_font_size, new_font_size
 	local prev_ix, prev_iy, new_ix, new_iy, prev_line_space, new_line_space, img_w, img_h
 
-	local non_txt_items = {"arrows_visible", "anchor_point", "reactive", "focusChanger", "src", "source", "loop", "skin", "wrap_mode", "items", "itemsList", "icon", "items", "expansion_location", "tab_position", "style", "cell_size", "vert_bar_visible", "horz_bar_visible", "cells_focusable", "lock", "direction", "justify", "alignment", "single_line", }
+	local non_txt_items = {"arrows_visible", "anchor_point", "reactive", "focusChanger", "src", "source", "loop", "skin", "wrap_mode", "items", "itemsList", "icon", "items", "expansion_location", "show_ring", "tab_position", "tab_spacing", "style", "variable_cell_size", "vert_bar_visible", "horz_bar_visible", "cells_focusable", "lock", "direction", "justify", "alignment", "single_line", }
 
 	local number_attr_t = {"bwidth", "hor_arrow_y", "vert_arrow_x", "cx", "cy", "cw", "ch", "bw", "bh", "bx", "by", "ix", "iy", 
-	"left", "top", "width", "height", "x", "y", "z", "w", "h", "opacity", "button_radius", "select_radius", "line_space", "volume", "ui_width", "ui_height", "border_width", "border_corner_radius", "on_screen_duration", "fade_duration", "padding", "label_padding", "display_width", "display_height", "arrow_sz", "arrow_dist_to_frame", "visible_w", "visible_h", "virtual_w", "virtual_h", "frame_thickness", "bar_thickness", "bar_offset", "box_width", "overall_diameter", "dot_diameter", "number_of_dots", "cycle_time", "progress", "menu_width", "horz_padding", "vert_spacing", "horz_spacing", "vert_offset", "separator_thickness", "rows", "columns", "cell_w", "cell_h", "cell_spacing_w", "cell_spacing_h", "cell_timing", "cell_timing_offset", "title_separator_thickness", "selected_item", 
+	"left", "top", "width", "height", "x", "y", "z", "w", "h", "opacity", "button_radius", "select_radius", "line_space", "volume", "ui_width", "ui_height", "border_width", "border_corner_radius", "on_screen_duration", "fade_duration", "padding", "button_width", "button_height", "display_border_width", "display_width", "display_height", "arrow_size", "arrow_dist_to_frame", "visible_width", "visible_height", "virtual_width", "virtual_height", "frame_thickness", "bar_thickness", "bar_offset", "box_border_width", "scroll_distance", "overall_diameter", "dot_diameter", "number_of_dots", "cycle_time", "progress", "menu_width", "horz_padding", "vert_spacing", "horz_spacing", "vert_offset", "separator_thickness", "rows", "columns", "cell_width", "cell_height", "cell_spacing_width", "cell_spacing_height", "cell_timing", "cell_timing_offset", "title_separator_thickness", "selected_item", 
 } 
 
 	local reserved_words = {"and", "end", "break", "do" ,"else", "elseif", "false", "for", "function", "if", "in",
@@ -167,8 +167,8 @@
         end 
 
 		if items then 
-        	for next, _ in pairs(items.tiles) do 
-		    	item = items.tiles[next][1]
+        	for next, _ in pairs(items.cells) do 
+		    	item = items.cells[next][1]
 				t_item = item:find_child("textInput")
 
 		if v.extra.type == "ButtonPicker" or v.extra.type == "CheckBoxGroup" or v.extra.type == "RadioButtonGroup" then 
@@ -312,6 +312,22 @@
 	       			end
 
 	       		end,
+
+		["variable_cell_size"] = function(j,v,inspector)
+					if item_group:find_child("variable_cell_size"):find_child("check1").opacity > 0 then 
+	            		v.extra.variable_cell_size = true
+	       		   else 
+	            		v.extra.variable_cell_size = false
+	       		   end
+				end, 
+
+		["show_ring"] = function(j,v,inspector)
+					if item_group:find_child("show_ring"):find_child("check1").opacity > 0 then 
+	            		v.extra.show_ring = true
+	       		   else 
+	            		v.extra.show_ring = false
+	       		   end
+				end, 
 		["lock"] = function(j,v,inspector)
 
  	       			if item_group:find_child("lock"):find_child("check1").opacity > 0 then 
@@ -421,14 +437,6 @@
 		["style"] = function(j,v,inspector)
 			  	   local itemLists = {"orbitting", "spinning"}
               	   v["style"] = itemLists[tonumber(item_group:find_child("style"):find_child("item_picker").selected_item)]
-
-				end,
-
-		["cell_size"] = function(j,v,inspector)
-
-
-			  	   local itemLists = {"fixed", "variable"}
-              	   v["cell_size"] = itemLists[tonumber(item_group:find_child("cell_size"):find_child("item_picker").selected_item)]
 
 				end,
 
@@ -742,7 +750,6 @@ local function tab_apply (v, inspector)
 		for i = 1, #v.tab_labels, 1 do
 			if v.tab_position == "top" then 
 				-- item_group.extra.tabs[i] 새로 생성한 텝에 대해서 이게 없는거이 문제구마이.. 
-
  				 v.tabs[i].extra.up_focus = tab_item_apply (item_group.extra.tabs[i].up_focus, v.tabs[i].extra.up_focus, keys.Down, v.name)
  				 v.tabs[i].extra.down_focus = tab_item_apply (item_group.extra.tabs[i].down_focus, v.tabs[i].extra.down_focus, keys.Up, v.name)
 			else 
@@ -834,8 +841,6 @@ function inspector_apply (v, inspector)
     	table.insert(undo_list, {v.name, hdr.CHG, org_object, new_object})
     end 
 		
-	if v.progress then print(v.progress, org_object.progress, new_object.progress) end
-
     return org_object, new_object
 end	
 
