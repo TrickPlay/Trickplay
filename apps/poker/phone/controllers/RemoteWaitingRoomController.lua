@@ -112,12 +112,19 @@ function(ctrl, router, controller, ...)
 
     function ctrl:update_waiting_room(player)
         local pos = player.dog_number
-        click_labels[pos]:hide()
-        ready_labels[pos]:show()
-        if player.is_human then
-            human_labels[pos]:show()
+        if not player.marked_for_deletion then
+            click_labels[pos]:hide()
+            ready_labels[pos]:show()
+            if player.is_human then
+                human_labels[pos]:show()
+            else
+                comp_labels[pos]:show()
+            end
         else
-            comp_labels[pos]:show()
+            click_labels[pos]:show()
+            ready_labels[pos]:hide()
+            human_labels[pos]:hide()
+            comp_labels[pos]:hide()
         end
     end
 

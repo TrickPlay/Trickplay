@@ -1,0 +1,61 @@
+Topic: Applying an Animation Trick
+
+To achieve the illusion that the spheres are spinning in an orbit like electrons around a nucleus, various solutions are available. For example, the sphere's position in depth along the Z axis could be animated. Because the animation already alters each sphere's location on the X and Y axes, adding the Z axis would be a natural extension. Unfortunately, the Path class does not directly support routes along the Z axis, so the animation code would have to handle it a bit differently than it did when processing the X and Y positions.
+
+The Tutorial application will follow a different solution to achieve the illusion of depth. Instead of animating the Z-axis position, each sphere's scale will be modified as it travels along its path. By increasing and decreasing a sphere's size, movement in depth will be simulated. Interestingly, the trick that will be applied to modify the sphere's scale could also be applied to modify the sphere's Z-axis position--same trick, different property.
+
+As we've seen, the intended use of the Path class is to specify a multiple-node route along the X and Y axes. But actually, any animated property can be processed by a Path object. As a general rule, if an animated property proceeds in a straight progression from starting to ending values, use the Interval class; if the property value advances along a multiple-node progression, use a Path. We'll use a Path to modify each sphere's scale property to enlarge and reduce the sphere and give the illusion that the sphere is moving closer and farther away.
+
+We'll have the spheres move so one is approaching, while the other is retreating. The scale "route" for each sphere is shown below. A scale value of 1.0 means the sphere is at its original size; a scale of 1.5 increases the sphere to 1.5 times its original size; a 0.25 scale is one-quarter its original size.
+
+	(code)
+	sphereImage: 1.0  --> 1.5 --> 1.0 --> 0.25 --> 1.0
+	sphereClone: 0.25 --> 1.0 --> 1.5 --> 1.0  --> 0.25
+	(end)
+
+Remember that the Path class is expecting to process coordinate values along the X and Y axes. As such, it interprets the route values it receives as integer coordinates. If we simply define Path nodes using the scale values of 1.0 and 1.5, the Path will think the object is moving from coordinate position 1 to 1.5, a very short distance. Plus, the Path's get_position() function always returns rounded, whole integer values. Thus, the scale values it returns as the animation progresses will not be values that gradually modify the scale from 1.0 to 1.5. To have the Path's get_position() function return appropriate values, we'll give it scale values that it can manipulate as if they were coordinate values. This is accomplished by multiplying each scale value in the Path's nodes by 100. We'll convert them back to appropriate scale values later by dividing the values returned by the get_position() function by 100. Each sphere's modified scale progression is shown below.
+
+	(code)
+	sphereImage: 100 --> 150 --> 100 -->  25 --> 100
+	sphereClone:  25 --> 100 --> 150 --> 100 -->  25
+	(end)
+
+One other consideration: Each Path node takes two values: an X coordinate and a Y coordinate, and the get_position() function also returns two values. But a sphere's scale property is only a single value. Therefore, it's possible to fit the scale properties for both spheres in a single Path object, with each sphere using one of the Path's coordinate slots. We'll define the sphereImage scale values in the Path's X coordinate and the sphereClone scale in the Y coordinate. The code to define the scale "route" for the two spheres is shown below. The X coordinates define the sphereImage scale progression, and the Y coordinates specify the sphereClone's progression.
+
+	(code)
+	-- Define scaling "route" for both spheres
+	-- sphereImage is the X "coordinate," sphereClone is the Y
+	sphereScale = Path()
+	sphereScale:move_to( 100,  25 )
+	sphereScale:line_to( 150, 100 )
+	sphereScale:line_to( 100, 150 )
+	sphereScale:line_to(  25, 100 )
+	sphereScale:line_to( 100,  25 )
+	(end)
+
+In the animation's on_new_frame() event handler, each sphere's scale factor is extracted from the {X,Y}-coordinate table returned from get_position() and divided by 100 to convert it back to floating-point scale values. The final value gets assigned to the sphere's scale property to animate its size. The code statements shown below perform these operations.
+
+	(code)
+	-- Event handler called to update animated properties
+	function sphereFrame( sphereTimeline, msecs, progress )
+		.
+		.
+		.
+		-- Get current scale factors, extract each, and convert back to floating-point scale values
+		-- Note: scaleFactors = table of { ImageScaleFactor, CloneScaleFactor }
+		local scaleFactors     = sphereScale:get_position( progress )
+		local scaleFactorImage = scaleFactors[ 1 ] / 100
+		local scaleFactorClone = scaleFactors[ 2 ] / 100
+		
+		-- Assign each sphere's scale value
+		sphereImage.scale = { scaleFactorImage, scaleFactorImage }
+		sphereClone.scale = { scaleFactorClone, scaleFactorClone }
+
+	(end)
+
+The resulting animation with changing X and Y coordinates and scale values is shown below.
+
+(see images/sphereAnimationFinal.gif)
+
+The complete <sphereAnimation.lua> source file can be seen in the <Complete Tutorial Source Code> section.
+
