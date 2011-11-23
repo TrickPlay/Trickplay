@@ -975,7 +975,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		{
 			unsigned int index = atoi( parts[ 1 ].c_str() );
 
-			if ( index >= 0 && index < breakpoints.size() )
+			if ( index < breakpoints.size() )
 			{
 				breakpoints.erase( breakpoints.begin() + index );
 			}
