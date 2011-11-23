@@ -791,6 +791,109 @@ globals
     		result_len = length;
     	]];
 
+    /*
+        Function: xml_escape
+        
+        Escapes text so that the markup parser will parse it verbatim. Less than, greater than, ampersand, etc. are replaced with the corresponding entities.
+
+        Note that this function doesn't protect whitespace and line endings from being processed according to the XML rules for normalization of line endings and attribute values.
+
+        Note also that this function will produce character references in the range of &x1; ... &x1f; for all control sequences except for tabstop, newline and carriage return. The character references in this range are not valid XML 1.0, but they are valid XML 1.1 and will be accepted by most parsers.
+
+        Arguments:
+        
+            s = The string to escape
+
+        Returns:
+        
+            string = The encoded result, suitable for injecting into XML
+    */
+
+    string xml_escape( lstring s )
+        [[
+            gchar * encoded = g_markup_escape_text( (const gchar *) s, s_len );
+            
+            FreeLater free_later( encoded );
+            
+            result = (const char *)encoded;
+        ]];
+
+    /*
+        Function: regex_replace
+                
+        Replaces all occurrences of the pattern in the <perl-compatible at http://perldoc.perl.org/perlre.html> regex with the replacement text. Backreferences of the form '\number' or '\g<number>' in the replacement text are interpolated by the number-th captured subexpression of the match, '\g<name>' refers to the captured subexpression with the given name. '\0' refers to the complete match, but '\0' followed by a number is the octal representation of a character. Note that to get a '\' into a Lua string, you need to escape it in code as '\\'.
+        
+        Example:
+        
+        > result = regex_replace( "Hello World!", "(.)o", "o\\1" )
+        
+        This would make result contain
+        
+        > Helol oWrld!
+        
+        To include a literal '\' in the replacement, the Lua string needs to contain '\\' [which you'd have to write as '\\\\' since you need to escape them in Lua]. There are also escapes that changes the case of the following text, outlined below.  Results which have embedded NUL characters in them will not work, so don't to that.
+
+        Case shifting:
+
+        \l - Convert to lower case the next character
+        \u - Convert to upper case the next character
+        \L - Convert to lower case till \E
+        \U - Convert to upper case till \E
+        \E - End case modification
+
+        The replacement string must be UTF-8 encoded.
+
+        Arguments:
+        
+        origin - the string to perform matches against. [array length=string_len]
+        pattern - a <perl-compatible regular expression at http://perldoc.perl.org/perlre.html> to match.
+        replacement - text to replace each match with
+        start_pos - optional starting index (0 based) of the string to match.  Defaults to 0.
+
+        Returns:
+
+        A new string containing the replacements, or the original string if some error occurred.
+    */
+
+
+    string regex_replace( lstring origin, string pattern, string replacement, int start_pos = 0 )
+        [[
+            FreeLater free_later;
+
+            GError * error = 0;
+
+            GRegex * re_pat = g_regex_new( pattern, (GRegexCompileFlags) (G_REGEX_MULTILINE | G_REGEX_DOTALL), (GRegexMatchFlags) 0, &error );
+
+            if (error)
+            {
+                g_warning("FAILED TO COMPILE REGEX '%s' : %s",pattern,error->message);
+                g_clear_error(&error);
+                result = origin;
+            }
+            else
+            {
+                gchar * replaced = g_regex_replace( re_pat, origin, origin_len, start_pos, replacement, (GRegexMatchFlags) 0, &error );
+
+                if (error)
+                {
+                    g_warning("FAILED TO EXECUTE REGEX REPLACE '%s' : %s",pattern,error->message);
+                    g_clear_error(&error);
+                    result = origin;
+                }
+                else
+                {
+                    free_later( replaced );
+                    
+                    result = replaced;
+                }
+            }
+
+            if ( re_pat )
+            {            
+                g_regex_unref( re_pat );
+            }
+        ]];
+
 	lstring uint32_to_be( int n )
 		[[
 			guint32 i = GUINT32_TO_BE( n );

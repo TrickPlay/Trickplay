@@ -179,6 +179,12 @@ local make_cat = function(cat_name)
         
     end
     
+    local poop_opacity = {
+        duration = 1,
+        on_step = function(s,p)
+            cat.opacity = 255*(.6+.4*math.cos(math.pi*2*5*p))
+        end,
+    }
     
     --The AI of the cat
     do
@@ -447,7 +453,6 @@ local make_cat = function(cat_name)
                 Animation_Loop:add_animation(big_splash_phase_2)
             end
         }
-        
         
         local attack_animation = {
             duration = 1,
@@ -1366,7 +1371,7 @@ local make_cat = function(cat_name)
                 
             end
             
-            cat.harmless = false
+            cat.harmless = true
             
             cat:load_assets(layers.srcs, layers.enemy)
             
@@ -1449,7 +1454,9 @@ local make_cat = function(cat_name)
     function cat:hit()
         
         cat.pooped_on = true
-        
+        if not Animation_Loop:has_animation(poop_opacity) then
+            Animation_Loop:add_animation(poop_opacity)
+        end
         mediaplayer:play_sound("audio/cat_2.wav")
         
     end

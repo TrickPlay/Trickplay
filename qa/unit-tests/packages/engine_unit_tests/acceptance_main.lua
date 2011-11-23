@@ -2,8 +2,8 @@ test_group = Group ()
 
 -- Unit Test Framework
 dofile( "packages/engine_unit_tests/harness/unit_test.lua" )
-
 -- Unit Tests
+
 --dofile( "urlRequest2.lua" )  -- Failing because can't fail url request due to URL redirect.
 dofile( "packages/engine_unit_tests/tests/Alpha1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/Alpha2.lua" )
@@ -33,6 +33,7 @@ dofile( "packages/engine_unit_tests/tests/image3.lua" )
 dofile( "packages/engine_unit_tests/tests/Rectangle1.lua")
 dofile( "packages/engine_unit_tests/tests/text1.lua" )
 dofile( "packages/engine_unit_tests/tests/text2.lua" )
+dofile( "packages/engine_unit_tests/tests/text3.lua" )
 dofile( "packages/engine_unit_tests/tests/Timeline1.lua" )
 dofile( "packages/engine_unit_tests/tests/Timeline2.lua" )
 dofile( "packages/engine_unit_tests/tests/Timeline3.lua" )
@@ -62,8 +63,28 @@ dofile( "packages/engine_unit_tests/tests/UIElement12.lua" )
 dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
 dofile( "packages/engine_unit_tests/tests/animator1.lua" )
 dofile( "packages/engine_unit_tests/tests/animationState1.lua" )
-dofile( "packages/engine_unit_tests/tests/all_callbacks.lua" )
 dofile( "packages/engine_unit_tests/tests/app1.lua" )
+dofile( "packages/engine_unit_tests/tests/text3.lua" )
+dofile( "packages/engine_unit_tests/tests/text4.lua" )
+dofile( "packages/engine_unit_tests/tests/text5.lua" )
+dofile( "packages/engine_unit_tests/tests/text6.lua" )
+dofile( "packages/engine_unit_tests/tests/text7.lua" )
+dofile( "packages/engine_unit_tests/tests/text8.lua" )
+dofile( "packages/engine_unit_tests/tests/text9.lua" )
+dofile( "packages/engine_unit_tests/tests/all_callbacks.lua" )
+
+dofile( "packages/engine_unit_tests/tests/Score1.lua" )
+dofile( "packages/engine_unit_tests/tests/Score2.lua" )
+dofile( "packages/engine_unit_tests/tests/Score3.lua" )
+dofile( "packages/engine_unit_tests/tests/Score4.lua" )
+
+dofile( "packages/engine_unit_tests/tests/Timeline7.lua" )
+dofile( "packages/engine_unit_tests/tests/Timeline8.lua" )
+dofile( "packages/engine_unit_tests/tests/Path3.lua" )
+dofile( "packages/engine_unit_tests/tests/Path4.lua" )
+dofile( "packages/engine_unit_tests/tests/Path5.lua")
+dofile( "packages/engine_unit_tests/tests/bitmap1.lua")
+dofile( "packages/engine_unit_tests/tests/bitmap2.lua")
 
 screen:add (test_group)
 
@@ -86,7 +107,7 @@ idle.limit = 1.0
 function idle.on_idle( idle , seconds )
        total = total + seconds
 		
-	if total > 10 or (
+	if total > 3 or (
 		animator_timeline_completed_called == true and
 		appOnLoadedCalled == true and
 		bitmap1_async_loaded_called == true and
@@ -117,9 +138,4 @@ function idle.on_idle( idle , seconds )
 
       end
 end
-
-
-
-
-
 
