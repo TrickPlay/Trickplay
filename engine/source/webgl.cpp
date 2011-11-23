@@ -61,8 +61,6 @@ static void trickplay_webgl_canvas_paint (ClutterActor *self)
   cogl_set_source (material);
 
   ClutterActorBox box;
-  float t_w = 1.0;
-  float t_h = 1.0;
 
   clutter_actor_get_allocation_box (self, &box);
 

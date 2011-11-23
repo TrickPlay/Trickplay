@@ -16,7 +16,7 @@ test_group:add (image1)
 local myTimeline = Timeline ()
 local frameCount = 0
 local on_new_frame_called = false
-local on_completed_called = false
+timeline1_on_completed_called = false
 local on_started_called = false
 local looped = 0
 myTimeline.duration = 1000
@@ -30,7 +30,7 @@ myTimeline.on_new_frame = function (self, timeline_ms, progress)
 end
 
 myTimeline.on_completed = function ()
-	on_completed_called = true
+	timeline1_on_completed_called = true
 end
 
 myTimeline.on_started = function ()
@@ -49,7 +49,7 @@ end
 
 -- verify that on_completed was completed
 function test_Timeline_on_completed ()
-    assert_equal( on_completed_called , true , "on_completed not called" )
+    assert_equal( timeline1_on_completed_called , true , "on_completed not called" )
 end
 
 -- verify that on_started was called
@@ -59,27 +59,27 @@ end
 
 -- verify that loop set to true actually looped.
 function test_Timeline_looped ()
-    assert_greater_than ( looped , 2 , "on_started not called" )
+    assert_greater_than ( looped , 2 , "Returned: "..looped.." Expected: >2")
 end
 
 -- verify that a value for elapsed was set
 function test_Timeline_elapsed ()
-	assert_greater_than ( myTimeline.elapsed, 0, "elapsed is not greater than 0 ms")
+	assert_greater_than ( myTimeline.elapsed, 0, "Returned: "..myTimeline.elapsed.." Expected: >0")
 end
 
 -- verify that a value for delta was set
 function test_Timeline_delta ()
-	assert_greater_than ( myTimeline.delta, 0, "delta is not greater than 0 ms")
+	assert_greater_than ( myTimeline.delta, 0,  "Returned: "..myTimeline.delta.." Expected: >0")
 end
 
 -- verify that a value for progressed was set
 function test_Timeline_progress ()
-	assert_greater_than ( myTimeline.progress, 0, "progress is not greater than 0 ms")
+	assert_greater_than ( myTimeline.progress, 0, "Returned: "..myTimeline.progress.." Expected: >0")
 end
 
 -- verify that a value for is_playing
 function test_Timeline_is_playing ()
-	assert_true ( myTimeline.is_playing, true, "is_playing is not returning true")
+	assert_true ( myTimeline.is_playing, true, "Returned: "..tostring(myTimeline.is_playing).." Expected: true")
 end
 
 -- Test Tear down --

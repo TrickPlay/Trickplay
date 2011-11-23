@@ -35,17 +35,16 @@ timeline:start()
 
 -- Tests --
 
--- Create a path using curve_to then verify it finishes at the last position.
-function test_Path_curve_to ()
-    assert_equal( myText1.position[1] , 1675 , "path.curve_to failed" )
-    assert_equal( myText1.position[2] , 700 , "path.curve_to failed" )
+-- Create a string path then verify it finishes at the last position.
+function test_Path_add_string_path ()
+    assert_equal( myText1.position[1] , 1675 , "Result: "..myText1.position[1].." Expected: 1675" )
+    assert_equal( myText1.position[2] , 700 ,  "Result: "..myText1.position[2].." Expected: 700" )
 end
 
 -- Create a path then use clear to remove it. Verify the final position is 0,0
 function test_Path_clear ()
-	dumptable (myText2.position)
-    assert_equal( myText2.position[1] , 0 , "path.clear x failed" )
-    assert_equal( myText2.position[2] , 0 , "path.clear y failed" )
+    assert_equal( myText2.position[1] , 0 , "Result: "..myText2.position[1].." Expected: 0" )
+    assert_equal( myText2.position[2] , 0 , "Result: "..myText2.position[2].." Expected: 0" )
 end
 
 

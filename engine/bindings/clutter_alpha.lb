@@ -8,8 +8,19 @@ module clutter_alpha;
 ]]
 
 [[
-gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp);
-void Alpha_on_alpha_destroy(gpointer lsp);
+static gdouble Alpha_on_alpha(ClutterAlpha*self,gpointer lsp);
+static void Alpha_on_alpha_destroy(gpointer lsp);
+
+static gdouble dummy_alpha( ClutterAlpha * self , gpointer )
+{
+    if ( ClutterTimeline * t = clutter_alpha_get_timeline( self ) )
+    {
+        return clutter_timeline_get_progress( t );
+    }
+    
+    return 0;
+}
+  
 ]]
 
 /*
@@ -250,7 +261,7 @@ class Alpha [[ClutterAlpha*]]
     
     callback on_alpha
 		[[
-		    clutter_alpha_set_func(self,NULL,NULL,NULL);
+		    clutter_alpha_set_func(self,dummy_alpha,0,0);
 		    if (on_alpha)
 		    {
 			clutter_alpha_set_func(

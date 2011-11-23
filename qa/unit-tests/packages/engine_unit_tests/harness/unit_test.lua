@@ -47,6 +47,8 @@ function assert_function    ( f , m ) assert_private( is_function(f) , m ) end
 --
 -------------------------------------------------------------------------------
 
+local xml_output_string = ""
+
 function engine_unit_test( positive_tests , negative_tests , quiet )
     local engine_results = {}
     local function run_tests( tests , negative )
@@ -55,6 +57,7 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
             for k , v in pairs( tests ) do
                 local ok
                 local message
+                local stopwatch = Stopwatch()
             
                 if type( v ) == "function" then
                 
@@ -66,6 +69,8 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
                     
                 end
                 
+                stopwatch:stop()
+
                 if negative then
                 
                     ok = not ok
@@ -73,7 +78,7 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
                     message = nil
                 
                 end
-                table.insert( engine_results , { name = k , passed = ok , message = message } )
+                table.insert( engine_results , { name = k , passed = ok , message = message, time = stopwatch.elapsed_seconds } )
     
             end
         
@@ -103,9 +108,12 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
         end
     
     end
-    
+
+    local stopwatch = Stopwatch()
+
     run_tests( engine_global_tests , false )
-    
+
+    stopwatch:stop()
     -- Run all the ones passed in 
     
    -- run_tests( positive_tests , false )
@@ -132,7 +140,7 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
         print( "" )
         print( "UNIT TESTS" )
         print( "" )
-        
+
         for i , t in ipairs( engine_results ) do
 
         	if line_count > column_line_max then
@@ -147,6 +155,7 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
             if t.passed then
         		col_results[current_column] = col_results[current_column]..string.format( "PASS [%s]" , t.name ).."\n"
                 print( string.format( "PASS [%s]" , t.name ) )
+                xml_output_string = string.format("%s<testcase classname='com.trickplay.unit-test.engine' name='%s' time='%f'/>",xml_output_string,t.name, t.time)
                     
                 passed = passed + 1
                 
@@ -168,12 +177,15 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
             		col_results[current_column] = col_results[current_column]..string.format( "FAIL [%s] %s" , t.name , t.message or "" ).."\n"
                     print( string.format( "FAIL [%s] %s" , t.name , t.message or "" ) )
                         		line_count = line_count + 2
+
+                    xml_output_string = string.format("%s<testcase classname='com.trickplay.unit-test.engine' name='%s' time='%f'><failure type='failure'>%s</failure></testcase>",xml_output_string,t.name,t.time,xml_escape(t.message) or "")
+
                 end
             
             end
         end
 
-
+        xml_output_string = string.format("<testsuite name='com.trickplay.unit-test.engine' errors='%d' failures='%d' tests='%d' time='%f'><properties><property name='trickplay.version' value='%s' /></properties>%s</testsuite>",0,failed,#engine_results,stopwatch.elapsed_seconds,trickplay.version,xml_output_string)
         
         print( "" )
         print( string.format( "PASSED   %4d (%d%%)" , passed , ( passed / #engine_results ) * 100 ) )
@@ -185,7 +197,15 @@ function engine_unit_test( positive_tests , negative_tests , quiet )
         col_results[current_column] = col_results[current_column]..string.format(  "FAILED   %4d (%d%%)" , failed , ( failed / #engine_results ) * 100 ).."\n"
 		col_results[current_column] = col_results[current_column]..string.format( "TOTAL    %4d" , #engine_results ).. "\n"
 
-
+        -- You can generate XML output by running with TP_app_allowed="com.trickplay.unit-tests=editor" set in the environment
+        if(editor) then
+            -- Set XML_OUTPUT_PATH global variable from the console to change output path
+            if(XML_OUTPUT_PATH) then
+                editor:change_app_path(XML_OUTPUT_PATH)
+            end
+            print("Writing to file:",XML_OUTPUT_PATH,"unit-tests.xml")
+            editor:writefile("unit-tests.xml",xml_output_string,true)
+        end
 
     end
 	

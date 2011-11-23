@@ -15,6 +15,15 @@
 
 //.............................................................................
 
+#ifndef TP_PRODUCTION
+
+// Comment in to enable tracing
+//#define TP_SQLITE_TRACE	1
+
+#endif
+
+//.............................................................................
+
 namespace SQLite
 {
     Error::Error()
@@ -94,6 +103,15 @@ namespace SQLite
         return error;
     }
 
+#ifdef TP_SQLITE_TRACE
+
+    static void trace( void * , const char * s )
+    {
+    	g_debug( "[SQLITE] %s" , s );
+    }
+
+#endif
+
     void Error::reset_db( sqlite3 * d )
     {
         db = d;
@@ -107,6 +125,11 @@ namespace SQLite
             error = SQLITE_OK;
             msg = "";
             check();
+
+#ifdef TP_SQLITE_TRACE
+
+            sqlite3_trace( db , trace , 0 );
+#endif
         }
     }
 

@@ -1,0 +1,32 @@
+
+Title: Lua and TrickPlay
+
+TrickPlay applications are written in the Lua programming language. Complete documentation for Lua is available at <http://www.lua.org>.
+
+This section describes Lua-related topics relevant specifically to TrickPlay applications.
+
+Topic: Unsupported Lua Functionality
+
+The following Lua libraries, functions and package elements are not supported in TrickPlay applications for security reasons.
+
+	(table)
+	the entire I/O library
+	the entire Debug library
+	os.execute()
+	os.exit()
+	os.getenv()
+	os.remove()
+	os.rename()
+	os.setlocale()
+	os.tmpname()
+	package.cpath
+	package.loaders
+	package.loadlib()
+	package.path
+	package.preload
+	load()
+	loadstring()
+	module()
+	require()
+	(end)
+	

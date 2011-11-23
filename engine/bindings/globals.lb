@@ -199,7 +199,6 @@ String hmac( GChecksumType type , const void * key , gsize key_len , const void 
 	return result;	
 }
 
-
 ]]
 
 /*
@@ -254,25 +253,26 @@ globals
     
     multi dofile(string file_name)
         [[
-            bool is_uri=false;
-            char * path=App::get(L)->normalize_path(file_name,&is_uri);
-
-            FreeLater free_later(path);
+            String path;
             
-            if (!path || is_uri)
+            if ( g_str_has_suffix( file_name , ".lua" ) )
             {
-                return luaL_error(L,"Invalid path '%s'",file_name);
+                path = file_name;
+            }
+            else
+            {
+                gchar * p = g_strdup_printf( "%s.lua" , file_name );
+                path = p;
+                g_free( p );
             }
             
-            if (!g_str_has_suffix(path,".lua"))
-            {
-            	path = g_strdup_printf( "%s.lua",path);
-            	free_later( path );
-            }
+            App * app = App::get( L );
             
             int n = lua_gettop(L);
-            if (luaL_loadfile(L,path) != 0)
+            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) != 0)
+            {
                 lua_error(L);
+            }
             lua_call(L,0,LUA_MULTRET);
             return lua_gettop(L) - n;            
         ]];
@@ -295,25 +295,22 @@ globals
     
     multi loadfile(string file_name)
         [[
-            bool is_uri=false;
-            char * path=App::get(L)->normalize_path(file_name,&is_uri);
+            String path;
             
-            FreeLater free_later(path);
-                        
-            if (!path || is_uri)
+            if ( g_str_has_suffix( file_name , ".lua" ) )
             {
-                lua_pushnil(L);
-                lua_pushfstring(L,"Invalid path '%s'",file_name);
-                return 2;
+                path = file_name;
             }
-            
-            if (!g_str_has_suffix(path,".lua"))
+            else
             {
-            	path = g_strdup_printf( "%s.lua",path);
-            	free_later( path );
+                gchar * p = g_strdup_printf( "%s.lua" , file_name );
+                path = p;
+                g_free( p );
             }
 
-            if (luaL_loadfile(L,path)==0)
+            App * app = App::get( L );
+            
+            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) == 0)
             {
                 return 1;
             }
@@ -343,29 +340,21 @@ globals
     
 	lstring readfile(string file_name )
 		[[
-			result = NULL;
+			result = 0;
 			result_len = 0;
-			
-            bool is_uri=false;
+
+            gsize length = 0;
+            gchar * contents = App::get( L )->get_metadata().sandbox.get_pi_child_contents( file_name , length );
             
-            char * path=App::get(L)->normalize_path(file_name,&is_uri);
+            FreeLater free_later;
             
-            FreeLater free_later(path);
-            
-            if ( path && ! is_uri )
+            if ( contents )
             {
-            	gsize length = 0;
-            	
-            	gchar * contents = NULL;
-            	
-            	if ( g_file_get_contents( path, & contents, & length, NULL ) )
-            	{
-            		result = contents;
-            		result_len = length;
-            		
-            		free_later( contents );
-            	} 
-            }                        
+                free_later( contents );
+                
+                result = contents;
+                result_len = length;
+            }
 		]];       
         
     /*
@@ -801,6 +790,109 @@ globals
     		result = ( const char * ) decoded;
     		result_len = length;
     	]];
+
+    /*
+        Function: xml_escape
+        
+        Escapes text so that the markup parser will parse it verbatim. Less than, greater than, ampersand, etc. are replaced with the corresponding entities.
+
+        Note that this function doesn't protect whitespace and line endings from being processed according to the XML rules for normalization of line endings and attribute values.
+
+        Note also that this function will produce character references in the range of &x1; ... &x1f; for all control sequences except for tabstop, newline and carriage return. The character references in this range are not valid XML 1.0, but they are valid XML 1.1 and will be accepted by most parsers.
+
+        Arguments:
+        
+            s = The string to escape
+
+        Returns:
+        
+            string = The encoded result, suitable for injecting into XML
+    */
+
+    string xml_escape( lstring s )
+        [[
+            gchar * encoded = g_markup_escape_text( (const gchar *) s, s_len );
+            
+            FreeLater free_later( encoded );
+            
+            result = (const char *)encoded;
+        ]];
+
+    /*
+        Function: regex_replace
+                
+        Replaces all occurrences of the pattern in the <perl-compatible at http://perldoc.perl.org/perlre.html> regex with the replacement text. Backreferences of the form '\number' or '\g<number>' in the replacement text are interpolated by the number-th captured subexpression of the match, '\g<name>' refers to the captured subexpression with the given name. '\0' refers to the complete match, but '\0' followed by a number is the octal representation of a character. Note that to get a '\' into a Lua string, you need to escape it in code as '\\'.
+        
+        Example:
+        
+        > result = regex_replace( "Hello World!", "(.)o", "o\\1" )
+        
+        This would make result contain
+        
+        > Helol oWrld!
+        
+        To include a literal '\' in the replacement, the Lua string needs to contain '\\' [which you'd have to write as '\\\\' since you need to escape them in Lua]. There are also escapes that changes the case of the following text, outlined below.  Results which have embedded NUL characters in them will not work, so don't to that.
+
+        Case shifting:
+
+        \l - Convert to lower case the next character
+        \u - Convert to upper case the next character
+        \L - Convert to lower case till \E
+        \U - Convert to upper case till \E
+        \E - End case modification
+
+        The replacement string must be UTF-8 encoded.
+
+        Arguments:
+        
+        origin - the string to perform matches against. [array length=string_len]
+        pattern - a <perl-compatible regular expression at http://perldoc.perl.org/perlre.html> to match.
+        replacement - text to replace each match with
+        start_pos - optional starting index (0 based) of the string to match.  Defaults to 0.
+
+        Returns:
+
+        A new string containing the replacements, or the original string if some error occurred.
+    */
+
+
+    string regex_replace( lstring origin, string pattern, string replacement, int start_pos = 0 )
+        [[
+            FreeLater free_later;
+
+            GError * error = 0;
+
+            GRegex * re_pat = g_regex_new( pattern, (GRegexCompileFlags) (G_REGEX_MULTILINE | G_REGEX_DOTALL), (GRegexMatchFlags) 0, &error );
+
+            if (error)
+            {
+                g_warning("FAILED TO COMPILE REGEX '%s' : %s",pattern,error->message);
+                g_clear_error(&error);
+                result = origin;
+            }
+            else
+            {
+                gchar * replaced = g_regex_replace( re_pat, origin, origin_len, start_pos, replacement, (GRegexMatchFlags) 0, &error );
+
+                if (error)
+                {
+                    g_warning("FAILED TO EXECUTE REGEX REPLACE '%s' : %s",pattern,error->message);
+                    g_clear_error(&error);
+                    result = origin;
+                }
+                else
+                {
+                    free_later( replaced );
+                    
+                    result = replaced;
+                }
+            }
+
+            if ( re_pat )
+            {            
+                g_regex_unref( re_pat );
+            }
+        ]];
 
 	lstring uint32_to_be( int n )
 		[[

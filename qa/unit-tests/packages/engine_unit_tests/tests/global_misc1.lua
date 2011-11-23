@@ -15,11 +15,7 @@ Description:
 
 
 function test_global_misc_uuid ()
-    assert_string ( uuid(), "uuid not returning a string" )
-end
-
-function test_global_misc_time ()
- 		-- need to add a test here for time
+    assert_string ( uuid(), "uuid returned: ", uuid(), "Expected a string." )
 end
 
 
