@@ -1,12 +1,20 @@
 #ifndef _TRICKPLAY_CONTROLLER_DISCOVERY_MDNS_H
 #define _TRICKPLAY_CONTROLLER_DISCOVERY_MDNS_H
 
+#include "common.h"
+#include "controller_server.h"
+
+#if !defined(CLUTTER_WINDOWING_OSX)
 #include <avahi-core/core.h>
 #include <avahi-core/publish.h>
 #include <avahi-glib/glib-watch.h>
+#else
+#include <CoreServices/CoreServices.h>
+#endif
 
-#include "common.h"
-#include "controller_server.h"
+#define TP_REMOTE_MDNS_SERVICE "_tp-remote._tcp"
+#define TP_HTTP_MDNS_SERVICE "_trickplay-http._tcp"
+
 
 class ControllerDiscoveryMDNS : public ControllerServer::Discovery
 {
@@ -20,6 +28,7 @@ public:
 
 private:
 
+#if !defined(CLUTTER_WINDOWING_OSX)
     void rename();
 
     void create_service( AvahiServer * server );
@@ -30,7 +39,16 @@ private:
     AvahiGLibPoll *     poll;
     AvahiServer *       server;
     AvahiSEntryGroup *  group;
+#else
+    CFNetServiceRef        remote_service;
+    CFNetServiceRef        http_service;
+#endif
+
+#if !defined(CLUTTER_WINDOWING_OSX)
     String              name;
+#else
+    CFStringRef         name;
+#endif
     bool                ready;
     int                 port;
     int					http_port;

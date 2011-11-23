@@ -49,7 +49,7 @@ local children = g.children
 
 -- Verify that unparent removes one item from the group.
 function test_UIElement_image_unparent ()
-	assert_equal(#children, initial_children-1 , "#children returned: ", #children, " Expected: ",initial_children-1)
+	assert_equal(#children, initial_children-1 , "#children returned: ", #children.." Expected: "..initial_children-1)
 end
 
 

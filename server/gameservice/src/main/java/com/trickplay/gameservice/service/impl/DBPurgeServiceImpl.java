@@ -46,7 +46,7 @@ public class DBPurgeServiceImpl extends JdbcDaoSupport implements DBPurgeService
     private static final String deleteGamePlayInvitationQuery = "delete from GamePlayInvitation";
     private static final String deleteGameSessionMessageQuery = "delete from GameSessionMessage";
     private static final String deleteGamePlayStateQuery = "delete from GamePlayState";
-    private static final String deleteGameSessionPlayers = "delete from GAME_SESSION_PLAYER";
+    private static final String deleteGameSessionPlayersNativeQuery = "delete from game_session_player";
     private static final String eraseGameSessionStateQuery = "update GameSession set state = null";
     private static final String deleteGameSessionQuery = "delete from GameSession";
     private static final String deleteGamePlaySummaryQuery = "delete from GamePlaySummary";
@@ -56,8 +56,8 @@ public class DBPurgeServiceImpl extends JdbcDaoSupport implements DBPurgeService
     private static final String deleteBuddyQuery = "delete from Buddy";
     private static final String deleteSessionTokenQuery = "delete from SessionToken";
     private static final String deleteVendorQuery = "delete from Vendor";
-    private static final String deleteUserRoleQuery = "delete from USER_ROLE where user_id != ?";
-    private static final String deleteUserQuery = "delete from User where id != ?";
+    private static final String deleteUserRoleNativeQuery = "delete from user_role where user_id != ?";
+    private static final String deleteUserNativeQuery = "delete from user where id != ?";
     
     @Autowired
     protected UserDAO userDAO;
@@ -83,12 +83,12 @@ public class DBPurgeServiceImpl extends JdbcDaoSupport implements DBPurgeService
     
     @Transactional
     private void deleteUserRoles(Long adminId) {
-        getJdbcTemplate().update(deleteUserRoleQuery, new Object[] {adminId});//.executeUpdate();
+        getJdbcTemplate().update(deleteUserRoleNativeQuery, new Object[] {adminId});//.executeUpdate();
     }
     
     @Transactional
     private void deleteNonAdminUsers(Long adminId) {
-        getJdbcTemplate().update(deleteUserQuery, new Object[] {adminId});
+        getJdbcTemplate().update(deleteUserNativeQuery, new Object[] {adminId});
     }
     
     public void resetDB() {
@@ -100,7 +100,7 @@ public class DBPurgeServiceImpl extends JdbcDaoSupport implements DBPurgeService
      //   executeQuery(deleteLeaderboardQuery);
         executeQuery(deleteGamePlayInvitationQuery);
         executeQuery(deleteGameSessionMessageQuery);
-        executeJdbcQuery(deleteGameSessionPlayers);
+        executeJdbcQuery(deleteGameSessionPlayersNativeQuery);
         executeQuery(eraseGameSessionStateQuery);
         executeQuery(deleteGamePlayStateQuery);
         executeQuery(deleteGameSessionQuery);

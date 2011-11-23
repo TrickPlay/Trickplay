@@ -46,17 +46,17 @@ function test_Image_base_size()
 end
 
 function test_Image_tile_setter()
-	assert_equal( image2.tile[1] , true, "Returned: ", image2.tile[1], " Expected: true" )
-	assert_equal( image2.tile[2] , true, "Returned: ", image2.tile[2], " Expected: true" )
+	assert_equal( image2.tile[1] , true, "Returned: ".. tostring(image2.tile[1]) .." Expected: true" )
+	assert_equal( image2.tile[2] , true, "Returned: ".. tostring(image2.tile[2]).." Expected: true" )
 end
 
 function test_Image_loaded ()
-	assert_equal( image1.loaded , true, "image1.loaded returned ", image1.loaded, " Expected: true")
+	assert_equal( image1.loaded , true, "image1.loaded returned "..tostring(image1.loaded).." Expected: true")
 end
 
 function test_Image_failed_to_load ()
 	assert_equal( image2_callback_called, true, "no callback on a failed load" )
-	assert_false ( image3.loaded, "image3.loaded returned ", image3.loaded, " Expected: false")
+	assert_false ( image3.loaded, "image3.loaded returned "..tostring(image3.loaded).." Expected: false")
 end
 
 -- Test Tear down --

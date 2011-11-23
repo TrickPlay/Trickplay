@@ -126,9 +126,10 @@ function assets:source_from_src(src)
     assert( type( src ) == "string" , "Assets:source_from_src missing src" )
     return group:find_child( src )
 end
-
+--local clone_count = 0
 function assets:Clone( props )
-    
+    --clone_count = clone_count + 1
+    --print("Clone",clone_count,props.src)
     local source =  assets:source_from_src(props.src)
     assert( source ~= nil , string.format( "Assets:Clone could not find '%s'" , props.src ) )
     local clone = Clone{ source = source }

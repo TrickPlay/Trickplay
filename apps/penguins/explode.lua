@@ -1,10 +1,9 @@
 local i, d, t1, s, m2, mz1
-local snow   = {"assets/images/explode-16.png",
-				"assets/images/explode-24.png",
-				"assets/images/explode-32.png"}
+local snow   = {"explode-16","explode-24","explode-32"}
 
 local group = Group{name = "explosion"}
 overlay:add(group)
+group:raise(penguin)
 
 local anim = Timeline{duration = 2300}
 
@@ -49,7 +48,7 @@ return function(vx,vy)
 	
 	local px, py = penguin.x + penguin.w/2, penguin.y + penguin.h/2
 	
-	local p = Image{src = "assets/images/explode-128.png", opacity = 255,
+	local p = Image{src = "explode-128", opacity = 255,
 		anchor_point = {64,64}, scale = {1,1}}
 	group:add(p)
 	p.x, p.y, p.ox, p.oy = px, py, px, py

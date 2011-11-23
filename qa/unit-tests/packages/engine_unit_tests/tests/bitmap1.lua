@@ -27,6 +27,14 @@ end
 
 -- Tests --
 
+function test_bitmap_get_pixel ()
+    assert_equal( bitmap1:get_pixel( 40, 40 )[1], 255 , "bitmap1:get_pixel[1] returned: "..bitmap1:get_pixel( 40, 40 )[1]..". Expected 255")
+end
+
+function test_bitmap_depth ()
+    assert_equal( bitmap1.loaded , true , "bitmap.loaded failed" )
+end
+
 
 function test_bitmap_loaded ()
     assert_equal( bitmap1.loaded , true , "bitmap.loaded failed" )
@@ -37,6 +45,11 @@ function test_bitmap_w_h ()
     assert_equal( bitmap1.h , 61 ,"bitmap.h returned: "..bitmap1.w.." Expected 61")
 end
     
+function test_bitmap_width_height ()
+    assert_equal( bitmap1.width , 150 , "bitmap.width returned: "..bitmap1.width.." Expected 150")
+    assert_equal( bitmap1.height , 61 ,"bitmap.height returned: "..bitmap1.height.." Expected 61")
+end
+
 function test_bitmap_on_loaded ()
     assert_equal( bitmap1_async_loaded_called , true , "bitmap.on_loaded failed" )
 end
