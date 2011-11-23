@@ -1,4 +1,8 @@
 
+#include <stack>
+
+#include "uriparser/Uri.h"
+
 #include "sandbox.h"
 #include "util.h"
 #include "context.h"
@@ -385,6 +389,8 @@ GFile * Sandbox::resolve_relative_native_child( const String & native_path , Sch
 		return g_file_resolve_relative_path( root , native_path.c_str() );
 	}
 	}
+
+	return 0;
 }
 
 //.............................................................................
@@ -712,3 +718,190 @@ bool Sandbox::native_child_exists( const String & native_path ) const
 
 	return result;
 }
+
+//.............................................................................
+
+StringPairList Sandbox::get_native_children() const
+{
+	StringPairList result;
+
+	if ( 0 == root )
+	{
+		return result;
+	}
+
+	typedef std::stack< GFile * > FileStack;
+
+	FileStack stack;
+
+	g_object_ref( root );
+
+	stack.push( root );
+
+	while ( ! stack.empty() )
+	{
+		GFile * r = stack.top();
+
+		stack.pop();
+
+		GFileEnumerator * e = g_file_enumerate_children( r , "standard::*" , G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS , 0 , 0 );
+
+		if ( e )
+		{
+			while ( GFileInfo * info = g_file_enumerator_next_file( e , 0 , 0 ) )
+			{
+				if ( const char * name = g_file_info_get_name( info ) )
+				{
+					if ( GFile * child = g_file_get_child( r , name ) )
+					{
+						if ( g_file_info_get_file_type( info ) == G_FILE_TYPE_DIRECTORY )
+						{
+							stack.push( child );
+						}
+						else
+						{
+							FreeLater free_later;
+
+							char * absolute_path = g_file_get_path( child );
+							char * relative_path = g_file_get_relative_path( root , child );
+
+							free_later( absolute_path );
+							free_later( relative_path );
+
+							if ( relative_path && absolute_path )
+							{
+								result.push_back( StringPair( absolute_path , relative_path ) );
+							}
+
+							g_object_unref( child );
+						}
+					}
+				}
+
+				g_object_unref( info );
+			}
+
+			g_file_enumerator_close( e , 0 , 0 );
+
+			g_object_unref( e );
+		}
+
+		g_object_unref( r );
+	}
+
+	return result;
+}
+
+//.............................................................................
+
+static String build_unescaped_path( const UriUriA & uri )
+{
+	String result;
+
+	for ( UriPathSegmentA * ps = uri.pathHead; ps; ps = ps->next )
+	{
+		if ( ps->text.first && ps->text.afterLast && ( ps->text.afterLast > ps->text.first ) )
+		{
+			// Allocates memory for the given size + 1, copies size characters
+			// from the source and adds a 0 at the end.
+
+			gchar * part = g_strndup( ps->text.first , ps->text.afterLast - ps->text.first );
+
+			// Does it in place and moves the terminating 0.
+
+			( void ) uriUnescapeInPlaceA( part );
+
+			if ( ! result.empty() )
+			{
+				// Always / because this is a pi path.
+
+				result += "/";
+			}
+
+			result += part;
+
+			g_free( part );
+		}
+	}
+
+	return result;
+}
+
+//.............................................................................
+
+StringList Sandbox::get_pi_children() const
+{
+	StringList result;
+
+	StringPairList native_list( get_native_children() );
+
+	if ( native_list.empty() )
+	{
+		return result;
+	}
+
+	FreeLater free_later;
+
+	char * root_uri_string = g_file_get_uri( root );
+
+	if ( ! root_uri_string )
+	{
+		return result;
+	}
+
+	free_later( root_uri_string );
+
+	UriParserStateA state;
+	UriUriA root_uri;
+
+	state.uri = & root_uri;
+
+	if ( URI_SUCCESS != uriParseUriA( & state , root_uri_string ) )
+	{
+		uriFreeUriMembersA( & root_uri );
+		return result;
+	}
+
+	for ( StringPairList::const_iterator it = native_list.begin(); it != native_list.end(); ++it )
+	{
+		GFile * file = g_file_new_for_path( it->first.c_str() );
+
+		char * uri_string = g_file_get_uri( file );
+
+		g_object_unref( file );
+
+		if ( ! uri_string )
+		{
+			continue;
+		}
+
+		UriUriA absolute_child_uri;
+		state.uri = & absolute_child_uri;
+
+		if ( URI_SUCCESS == uriParseUriA( & state , uri_string ) )
+		{
+			UriUriA relative_child_uri;
+
+			if ( URI_SUCCESS == uriRemoveBaseUriA( & relative_child_uri , & absolute_child_uri , & root_uri , URI_FALSE ) )
+			{
+				String path = build_unescaped_path( relative_child_uri );
+
+				if ( ! path.empty() )
+				{
+					result.push_back( path );
+				}
+			}
+
+			uriFreeUriMembersA( & relative_child_uri );
+		}
+
+		uriFreeUriMembersA( & absolute_child_uri );
+
+		g_free( uri_string );
+	}
+
+	uriFreeUriMembersA( & root_uri );
+
+	return result;
+}
+

@@ -13,12 +13,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
+@Table(name="user")
 @XmlRootElement(name = "user")
 public class User extends BaseEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -111,7 +113,7 @@ public class User extends BaseEntity implements Serializable {
 	        targetEntity=Role.class
 	    )
 	    @JoinTable(
-	        name="USER_ROLE",
+	        name="user_role",
 	        joinColumns=@JoinColumn(name="user_id"),
 	        inverseJoinColumns=@JoinColumn(name="role_id")
 	    )

@@ -14,6 +14,9 @@ local to_be_added   = {}
 
 --meta table used to capture new entries and removals
 local mt = {}
+function mt.__index(t,k)
+    return iterated_list[k] or to_be_added[k]
+end
 function mt.__newindex(t,k,v)
     assert(#animate_list == 0, "User added something to the animate list")
     --assert(type(k) == "table")

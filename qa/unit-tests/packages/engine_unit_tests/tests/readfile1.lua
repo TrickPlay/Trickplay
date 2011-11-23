@@ -15,7 +15,7 @@ local readfile_string = readfile ("packages/engine_unit_tests/tests/assets/trick
 -- Tests --
 
 function test_Global_readfile_basic ()
-    assert_equal( readfile_string , "Trickplay Trickplay Trickplay", "readfile failed" )
+    assert_equal( readfile_string , "Trickplay Trickplay Trickplay", "readfile_string returned: "..readfile_string.." Expected Trickplay Trickplay Trickplay")
 end
 
 

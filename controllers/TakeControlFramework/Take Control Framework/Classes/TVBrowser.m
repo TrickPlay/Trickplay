@@ -13,7 +13,8 @@
 #import "Protocols.h"
 
 @interface TVBrowserContext : TVBrowser <NetServiceManagerDelegate, TVConnectionDidConnectDelegate> {
-    @protected
+    
+@protected
     // The netServiceManager informs the TVBrowser of mDNS broadcasts
     NetServiceManager *netServiceManager;
     
@@ -346,7 +347,7 @@
     [netServiceManager stop];
     [netServiceManager release];
     netServiceManager = nil;
-        
+    
     [super dealloc];
 }
 
@@ -502,7 +503,7 @@
     
     [super dealloc];
 }
- */
+*/
 
 @end
 

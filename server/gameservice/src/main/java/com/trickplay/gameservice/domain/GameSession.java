@@ -14,13 +14,14 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
-//@PrimaryKeyJoinColumn(name="id")
+@Table(name="game_session")
 @XmlRootElement
 public class GameSession extends BaseEntity implements Serializable {
 
@@ -93,7 +94,7 @@ public class GameSession extends BaseEntity implements Serializable {
 	        cascade={CascadeType.PERSIST, CascadeType.MERGE}
 	    )
 	    @JoinTable(
-	        name="GAME_SESSION_PLAYER",
+	        name="game_session_player",
 	        joinColumns=@JoinColumn(name="gs_id"),
 	        inverseJoinColumns=@JoinColumn(name="player_id")
 	    )

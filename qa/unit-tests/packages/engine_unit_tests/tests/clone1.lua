@@ -54,7 +54,7 @@ local children = g.children
 
 -- Verify that the 8 elements that were cloned were added to the group g
 function test_Clone_basic ()
-	assert_equal(#children, 8, "clone failed")
+	assert_equal(#children, 8,  "#children returned "..#children.." Expected: 8")
 end
 
 

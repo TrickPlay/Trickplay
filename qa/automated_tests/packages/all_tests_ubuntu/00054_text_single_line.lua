@@ -15,8 +15,9 @@ function generate_test_image ()
 			 position = { 10, 150 },
 			 single_line = true,
 			 width = screen.w - 200,
-			 height = 45,
-			 wrap = true
+			 height = 300,
+			 wrap = true,
+			 editable = true
 			}
 	g:add(text_txt)
 
@@ -25,8 +26,9 @@ function generate_test_image ()
 			 position = { 10, 500 },
 			 single_line = false,
 			 width = screen.w - 200,
-			 height = 45,
-			 wrap = true
+			 height = 300,
+			 wrap = true,
+			 editable = true
 			 }
 	g:add(text1_txt)
 

@@ -739,6 +739,8 @@ int TPContext::run()
 
     http_server = new HttpServer( get_int( TP_HTTP_PORT , 0 ) );
 
+	set( TP_HTTP_PORT, http_server->get_port() );
+
     http_trickplay_api_support = new HttpTrickplayApiSupport( this );
 
     //.........................................................................
@@ -1811,6 +1813,8 @@ void TPContext::load_external_configuration()
         TP_RESOURCE_LOADER_ENABLED,
         TP_APP_ARGS,
         TP_APP_ANIMATIONS_ENABLED,
+        TP_DEBUGGER_PORT,
+        TP_START_DEBUGGER,
 
         NULL
     };

@@ -41,23 +41,22 @@ image3.src = "packages/engine_unit_tests/tests/assets/does_not_exist.png"
 
 -- Tests --
 function test_Image_base_size()
-	assert_equal( image1.base_size[1] , 300, "image load callback failed" )
-	assert_equal( image1.base_size[2] , 300, "image load callback failed" )
+	assert_equal( image1.base_size[1] , 300, "Returned: "..image1.base_size[1].." Expected: 300" )
+	assert_equal( image1.base_size[2] , 300, "Returned: "..image1.base_size[2].." Expected: 300" )
 end
 
 function test_Image_tile_setter()
-	assert_equal( image2.tile[1] , true, "image tile failed" )
-	assert_equal( image2.tile[2] , true, "image tile failed" )
+	assert_equal( image2.tile[1] , true, "Returned: ".. tostring(image2.tile[1]) .." Expected: true" )
+	assert_equal( image2.tile[2] , true, "Returned: ".. tostring(image2.tile[2]).." Expected: true" )
 end
 
 function test_Image_loaded ()
-	assert_equal( image1.loaded , true, "image 1 loaded ~= true" )
-	assert_false ( image3.loaded, "non-existent image loaded ~= false" )
+	assert_equal( image1.loaded , true, "image1.loaded returned "..tostring(image1.loaded).." Expected: true")
 end
 
 function test_Image_failed_to_load ()
 	assert_equal( image2_callback_called, true, "no callback on a failed load" )
-	assert_false ( image3.loaded, "non-existent image loaded ~= false" )
+	assert_false ( image3.loaded, "image3.loaded returned "..tostring(image3.loaded).." Expected: false")
 end
 
 -- Test Tear down --

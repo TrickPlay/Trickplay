@@ -134,13 +134,14 @@ function(pos)
     clone_upval:lower_to_bottom()
     
     clone_upval = Text{
-        font  = "DejaVu Sans Bold 20px",
+        font  = "Highway Gothic Wide 28px",
         text  = "Las Vegas\nThis Way",
         alignment = "CENTER",
         color = "ffffff",
         scale = {4,4},
+        w     = 195,
         x     = -group_upval:find_child("board").w*group_upval:find_child("board").scale[1] + 200,
-        y     = group_upval:find_child("board").y   
+        y     =  group_upval:find_child("board").y   
     }
     group_upval:add(clone_upval)
     
@@ -213,11 +214,12 @@ function(pos)
     group_upval:add(clone_upval)
     
     clone_upval = Text{
-        font  = "DejaVu Sans Bold 30px",
+        font  = "Highway Gothic Wide 30px",
         text  = "Las Vegas\nThis Way",
         alignment = "CENTER",
         color = "ffffff",
         scale = {4,4},
+        w     = 165,
         x     = -clone_upval.w*clone_upval.scale[1]/2 + 50,
         y     = clone_upval.y-clone_upval.h*clone_upval.scale[2]   + 30
     }

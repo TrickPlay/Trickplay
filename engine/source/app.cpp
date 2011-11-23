@@ -62,7 +62,7 @@ extern int luaopen_settings( lua_State * L );
 extern int luaopen_profile( lua_State * L );
 extern int luaopen_xml( lua_State * L );
 extern int luaopen_controllers( lua_State * L );
-extern int luaopen_controller( lua_State * L );
+extern int luaopen_Controller( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
@@ -920,7 +920,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_profile( L );
     luaopen_stopwatch( L );
     luaopen_json( L );
-    luaopen_controller( L );
+    luaopen_Controller( L );
     luaopen_controllers( L );
     luaopen_mediaplayer_module( L );
     luaopen_socket( L );
@@ -955,6 +955,15 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     //.........................................................................
 
     luaopen_keys( L );
+
+#ifndef TP_PRODUCTION
+
+    if ( context->get_bool( TP_START_DEBUGGER , false ) )
+    {
+    	debugger.break_next_line();
+    }
+
+#endif
 
     // Run the script
 
@@ -1424,9 +1433,25 @@ Debugger * App::get_debugger()
 
 #else
 
-    return NULL;
+    return 0;
 
 #endif
+}
+
+//-----------------------------------------------------------------------------
+
+guint16 App::get_debugger_port()
+{
+#ifndef TP_PRODUCTION
+
+    return debugger.get_server_port();
+
+#else
+
+    return 0;
+
+#endif
+
 }
 
 //-----------------------------------------------------------------------------

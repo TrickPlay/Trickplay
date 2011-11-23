@@ -230,7 +230,7 @@ do
         end
         
         sky.x = screen_w/2-sky_w/2*sin(y_rot)
-        
+        ---[[
         doodad_counter = doodad_counter + dy
         
         if doodad_counter > doodad_thresh and Game_State.current_state() ~= STATES.CRASH then
@@ -266,7 +266,7 @@ do
             upval:lower_to_bottom()
             
         end
-        
+        --]]
         
         --print(delta_y)
         
@@ -317,8 +317,12 @@ local setup_road = function()
 end
 
 World.reset = function(self)
-    self.road:clear()
-    self.cars:clear()
+    self.road:foreach_child(function(c)
+		c:remove()
+	end)
+    self.cars:foreach_child(function(c)
+		c:remove()
+	end)
     --for i = 1, NUM_LANES do
     --    world.lanes[i]:clear()
     --end

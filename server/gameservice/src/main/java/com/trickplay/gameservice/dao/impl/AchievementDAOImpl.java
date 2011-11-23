@@ -15,7 +15,7 @@ public class AchievementDAOImpl extends GenericDAOWithJPA<Achievement, Long> imp
         
         return super.entityManager.createQuery
         (
-                "select A from Achievment as A join A.game as G where G.id=:gId"
+                "select A from Achievement as A join A.game as G where G.id=:gId"
                 )
                 .setParameter("gId", gameId)
                 .getResultList();

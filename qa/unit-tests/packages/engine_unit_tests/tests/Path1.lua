@@ -49,19 +49,19 @@ timeline:start()
 
 -- Make one move_to call to an image and then verify its position
 function test_Path_move_to ()
-    assert_equal( globe1.position[1], 1100, "path.move_to.x failed" )
-    assert_equal( globe1.position[2], 610, "path.move_to.y failed" )
+    assert_equal( globe1.position[1], 1100, "Result: "..globe1.position[1].." Expected: 1100" )
+    assert_equal( globe1.position[2], 610, "Result: "..globe1.position[2].." Expected: 610" )
 end
 
 -- Make verify that length returns a value.
 function test_Path_length ()
-    assert_equal( path2.length , 924, "path.length failed" )
+    assert_equal( path2.length , 924, "Result: "..path2.length.." Expected: 924" )
 end
 
 -- Verify that get_position returns position value by saving the last value and checking it.
 function test_Path_get_position ()
-    assert_equal( lastGetPosition[1] , 1100, "path:get_position.x failed" )
-    assert_equal( lastGetPosition[2] , 610, "path:get_position.y failed" )
+    assert_equal( lastGetPosition[1] , 1100, "Result: "..lastGetPosition[1].." Expected: 1100" )
+    assert_equal( lastGetPosition[2] , 610, "Result: "..lastGetPosition[2].." Expected: 610" )
 end
 
 -- Test Tear down --

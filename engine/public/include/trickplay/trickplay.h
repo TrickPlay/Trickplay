@@ -33,7 +33,7 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    23
+#define TP_MINOR_VERSION    24
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
@@ -262,6 +262,14 @@ typedef struct TPContext TPContext;
     TP_APP_ANIMATIONS_ENABLED - Whether apps animate when they close and launch.
                                 Defaults to "true".
 
+    TP_DEBUGGER_PORT - 			The port used to remotely debug apps. If set to 0,
+                                a port will be chosen.
+                                Defaults to "0".
+
+    TP_START_DEBUGGER - 		If set to true, when trickplay launches an app, it will
+                                do so with the debugger started.
+                                Defaults to "0".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -312,6 +320,8 @@ typedef struct TPContext TPContext;
 #define TP_RESOURCE_LOADER_ENABLED		"resource_loader_enabled"
 #define TP_APP_ARGS						"app_args"
 #define TP_APP_ANIMATIONS_ENABLED		"app_animations_enabled"
+#define TP_DEBUGGER_PORT				"debugger_port"
+#define TP_START_DEBUGGER				"start_debugger"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
