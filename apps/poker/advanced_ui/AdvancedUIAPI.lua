@@ -45,6 +45,20 @@ local proxies = {}
 -- the proxies have weak values
 setmetatable(proxies, {__mode = "v"})
 
+local function reset_proxies()
+
+    -- prevent deallocation being sent over the network
+    for id,proxy in pairs(proxies) do
+        if proxy.marker then
+            getmetatable(proxy.marker).__gc = nil
+        end
+    end
+    
+    proxies = {}
+    setmetatable(proxies, {__mode = "v"})
+
+end
+
 ---------------------------------------------------------------------------
 -- This is how we talk to the remote end
 
@@ -301,6 +315,9 @@ end
 local function create_local( id , T , proxy_metatable , property_cache )
 
     -- If it already exists, return it
+    if not id or not T then
+        return nil
+    end
     
     local proxy = rawget( proxies , id )
     
@@ -421,7 +438,10 @@ function mt:create_remote( T , properties )
 
     local payload = { type = T , properties = bulk_properties }
     
-    local id = send_request( "create" , payload ).id
+    local id = send_request( "create" , payload )
+    if id then
+        id = id.id
+    end
     
     -- Create the local proxy
     
@@ -468,6 +488,11 @@ function controller:on_advanced_ui_event(json_object)
         return
     end
 
+    if json_object.event == "reset_hard" then
+        reset_proxies()
+        return
+    end
+
     local proxy = rawget( proxies , json_object.id )
     if not proxy then
         return
@@ -481,6 +506,8 @@ function controller:on_advanced_ui_event(json_object)
         on_show()
         on_hide()
         on_completed()
+
+        reset_hard
     --]]
 
     -- call the right callback for the event

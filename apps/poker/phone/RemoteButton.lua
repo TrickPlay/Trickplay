@@ -31,9 +31,14 @@ function(button, controller, image_src, focus_src, position, size)
     group:add(focus)
 
     function button:press()
-        local button_timer = Timer()
-        button_timer.interval = 200
-        function button_timer:on_timer()
+        if controller.button_timer then
+            return
+        end
+
+        controller.button_timer = Timer()
+        controller.button_timer.interval = 200
+        function controller.button_timer:on_timer()
+            controller.button_timer = nil
             self.on_timer = nil
             self:stop()
             focus:hide()
@@ -41,7 +46,7 @@ function(button, controller, image_src, focus_src, position, size)
         end
         focus:show()
         controller:play_sound("click_sound", 1)
-        button_timer:start()
+        controller.button_timer:start()
     end
 
     function button:hide()
