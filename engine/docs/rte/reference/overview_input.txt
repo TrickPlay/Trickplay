@@ -1,0 +1,5 @@
+
+Title: User Input Overview
+
+User input is supported by the TrickPlay SDK library's keyboard and keys global variables. The <keyboard> variable provides a simple method to define and display a form and accept user input. The <keys> variable is a table of keyname constants mapped to their respective keycodes. By using meaningful keyname constants in your TrickPlay applications, source code becomes more readily understandable.
+

@@ -19,6 +19,17 @@
 #include "log.h"
 
 //****************************************************************************
+// "Mozilla/5.0 (compatible) TrickPlay/1.23.0 (1.23.0-2-ga4240b5)"
+// tp version, tp git version
+
+#define TP_SIMPLE_UA	"Mozilla/5.0 (compatible) TrickPlay/%d.%d.%d (%s)"
+
+// Mozilla/5.0 (compatible; en-US) TrickPlay/1.23.0 (com.trickplay.unit-tests/1; Desktop/0.0.0)
+// system language, system country, tp version, app id, app release, system name, system version
+
+#define TP_APP_UA		"Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)"
+
+//****************************************************************************
 // Internal structure to hold all the things we care about while we are
 // working on a request
 
@@ -339,6 +350,15 @@ private:
 //*****************************************************************************
 // Request
 
+Network::Request::Request()
+    :
+    method( "GET" ),
+    timeout_s( 30 ),
+    redirect( true )
+{
+	set_default_user_agent();
+}
+
 Network::Request::Request( const String & _user_agent, const String & _url )
     :
     url( _url ),
@@ -347,6 +367,7 @@ Network::Request::Request( const String & _user_agent, const String & _url )
     redirect( true ),
     user_agent( _user_agent )
 {
+	set_default_user_agent();
 }
 
 void Network::Request::set_headers( const gchar * _headers )
@@ -367,6 +388,20 @@ void Network::Request::set_headers( const gchar * _headers )
             }
         }
     }
+}
+
+void Network::Request::set_default_user_agent()
+{
+	if ( user_agent.empty() )
+	{
+	    gchar * ua = g_strdup_printf( TP_SIMPLE_UA,
+	                                  TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION,
+	                                  TP_GIT_VERSION );
+
+	    user_agent = ua;
+
+	    g_free( ua );
+	}
 }
 
 //*****************************************************************************
@@ -911,7 +946,9 @@ public:
 
             if ( closure->request.timeout_s > 0 )
             {
-                cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, closure->request.timeout_s * 1000 ) );
+            	int t = closure->request.timeout_s * 1000;
+
+                cc( curl_easy_setopt( eh, CURLOPT_TIMEOUT_MS, t ) );
             }
 
             if ( closure->cookie_jar )
@@ -1204,6 +1241,19 @@ Network::Network( const Settings & _settings, EventGroup * _event_group )
 
 //.............................................................................
 
+Network::Network()
+:
+    event_group( 0 ),
+    queue( g_async_queue_new_full( Event::destroy ) ),
+    thread( 0 )
+{
+    g_assert( queue );
+
+    event_group = new EventGroup();
+}
+
+//.............................................................................
+
 Network::~Network()
 {
     if ( thread )
@@ -1236,9 +1286,7 @@ String Network::format_user_agent( const char * language,
                                    const char * system_name,
                                    const char * system_version )
 {
-    static const char * user_agent_template = "Mozilla/5.0 (compatible; %s-%s) TrickPlay/%d.%d.%d (%s/%d; %s/%s)";
-
-    gchar * ua = g_strdup_printf( user_agent_template,
+    gchar * ua = g_strdup_printf( TP_APP_UA,
                                   language, country,
                                   TP_MAJOR_VERSION, TP_MINOR_VERSION, TP_PATCH_VERSION,
                                   app_id, app_release,

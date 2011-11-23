@@ -15,6 +15,16 @@ The application's language and country are specified in two operating system env
 	export TP_system_country="KR"
 	(end)
 	
+	The language and country can alternatively be specified in the .trickplay configuration file. The .trickplay configuration file is a standard text file stored in the user's home directory. It contains configuration keys to set up the TrickPlay Engine for a particular development environment. Complete details about the .trickplay file are described in the <TrickPlay Configuration Keys> section of the Programmer's Guide.
+	
+	When defined in the .trickplay file, the key names are identical to the environment variable names, but without the TP_ prefix. An example .trickplay file is shown below.
+	
+	(code)
+	-- Configuration keys defined in .trickplay file
+	system_language="ko"
+	system_country="KR"
+	(end)
+	
 	A TrickPlay application should be organized so all its files are grouped within a single top-level directory called its "application bundle." In an application's bundle, TrickPlay recognizes a special subdirectory called "localized." The "localized" directory can be further organized with subdirectories named after each of the supported languages and countries. A sample directory structure for a program called myApp is shown below.
 	
 (see localizationDirStruct.png)	
@@ -51,7 +61,19 @@ The application's language and country are specified in two operating system env
 	myApp
 	(end)
 	
-	This search order enables a generic or default strings.lua file to be stored in upper directory levels. For example, a strings.lua file to handle both US and British English could be stored in the /localized/en directory. For all languages/countries not supported with dedicated localization files, a strings.lua file containing localized string in a default language could be stored in the /localized or the myApp directories.
+	This search order enables a generic or default strings.lua file to be stored in upper directory levels. For example, a strings.lua file to handle both US and British English could be stored in the /localized/en directory. For all languages/countries not supported with dedicated localization files, a strings.lua file containing localized strings in a default language could be stored in the /localized or the myApp directories. In all these situations, the single Lua dofile() statement shown above loads the appropriate file automatically, based upon the current language/country settings.
 	
-	Localized image files and other application resources can be organized and handled in the same manner.
+	Localized image files can be handled using a table in the same manner as strings, but there is a more convenient method available. When referencing the file's name, simply precede the name with the "localized:" prefix. When resolving the file specification, the application bundle's subdirectories are searched in the same order as that shown above for strings. For example, if localized versions of a "splash.png" splash-screen image were stored in each of the supported language/country directories, the following code statement would load the appropriate file based upon the current language/country settings.
+	
+	(code)
+	splashImage = Image( src = "localized:splash.png" )
+	(end)
+	
+	In addition to localized text and images, localized code can also be organized following the described directory structure. As an example, an application may perform special initialization depending upon the language/country. Such code might be stored in files called "init.lua" with each supported language/country directory containing its own init.lua file, each file containing the unique initialization operations necessary for the particular language/country. The code statement shown below would run the appropriate init.lua file based on the current language/country settings.
+	
+	(code)
+	dofile( "localized:init.lua" )
+	(end)
+	
+	
 	

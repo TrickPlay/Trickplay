@@ -159,7 +159,7 @@ public:
 
                 if ( lua_isnumber( L , -1 ) )
                 {
-                    response.set_status( HttpServer::Status( lua_tonumber( L , -1 ) ) );
+                    response.set_status( HttpServer::ServerStatus( lua_tonumber( L , -1 ) ) );
                 }
                 else if ( lua_type( L , -1 ) == LUA_TTABLE )
                 {
@@ -169,7 +169,7 @@ public:
                     int code = lua_tonumber( L , -2 );
                     const char * msg = lua_tostring( L , -1 );
 
-                    response.set_status( HttpServer::Status( code ) , msg ? msg : "" );
+                    response.set_status( HttpServer::ServerStatus( code ) , msg ? msg : "" );
 
                     lua_pop( L , 2 );
                 }

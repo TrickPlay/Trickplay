@@ -1,0 +1,33 @@
+
+Title: The Engine Console
+
+	When the TrickPlay Engine is run in a development environment, the Console is available for performing various operations, including--
+
+		(table)
+		-- Display status and debug messages
+		-- Enter and execute Lua code statements
+		-- Invoke Console commands to control a running TrickPlay application
+		-- Perform the above tasks remotely via a Telnet connection
+		(end)
+		
+	As the TrickPlay Engine initializes and executes, it displays status and debug messages on the Console. An application can output its own messages to the Console by executing a standard Lua print() statement.
+	
+	The Console is also a full Lua interpreter, so Lua code statements can be entered at the Console's command prompt, and they will be executed immediately.
+
+	Console commands to control a running TrickPlay application are entered manually at the Console's command prompt or specified on the Engine's command line. Commands are always preceded by a slash character. The Console recognizes the following commands.
+
+		/config - Display configuration information about the Engine.
+		/exit - Terminate any running TrickPlay application and exit the Console. Pressing the <Esc> key has the same result.
+		/gc - Schedule a garbage collection operation. Note: The operation may not occur immediately.
+		/images - List information about existing Image objects in a running TrickPlay application.
+		/obj - List information about all existing objects in a running TrickPlay application.
+		/prof - Display profiling information for a running TrickPlay application.
+		/profile - List the current profile ID, name and PIN. A default profile is always available if one is not set explicitly. When a TrickPlay application saves its settings, it saves them under the current profile. Also, when a TrickPlay application is installed, the Engine associates the application with the current profile, which enables different applications to be accessible from different profiles.
+		/profile new <name> - Create a new profile with a profile name of <name>. The profile ID is output to the Console when the new profile is created. Specify this ID with the /profile switch command to change to the profile.
+		/profile switch <id> - Set the current profile to the profile with an ID of <id>.
+		/reload - Clear the current TrickPlay application from the Engine and reload and run a fresh instance.
+		/ss - Create a screen shot of the running TrickPlay application. The file is saved in the user's home directory using a filename of trickplay-ss-nnn.png, where nnn is a unique numeric sequence.
+		/ui [gid || actorName] - Display information about all user-interface objects in a running TrickPlay application. If the optional gid or actorName is specified then the displayed information is limited to the referenced object.
+		/ver - Display version information for the Engine and Engine libraries.
+
+	The Console can be controlled remotely via a Telnet connection. The default Telnet port is 7777, but the port number can be changed by setting the console_port configuration key. Refer to the <TrickPlay Configuration Keys> section of the Programmer's Guide for further details.

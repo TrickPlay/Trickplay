@@ -18,6 +18,11 @@ local abort
 
 local has_been_initialized = false
 
+
+
+function Animation_Loop:dump_states()
+    dumptable(states)
+end
 function Animation_Loop:init(t)
     
     if has_been_initialized then
@@ -167,7 +172,7 @@ function Animation_Loop:switch_state_to(state)
     
 end
 
-function Animation_Loop:state_progress(t,p)
+function Animation_Loop:set_progress(t,p)
     
     if not has_been_initialized then
         
@@ -239,19 +244,19 @@ function Animation_Loop:delete_animation(t)
         non_terminating_animations[t] = nil
         
     else -- dump everything before throwing the error
+        --[[
+        Animation_Loop:dump_states()
         
-        dumptable( terminating_animations     )
-        dumptable( looping_animations         )
-        dumptable( non_terminating_animations )
-        
-        print( "Animation_Loop:delete_animation(", t ,")" )
+        print( "Animation_Loop:delete_animation(", t ,") while in state "..curr_state.name )
         error( "tried to delete an animation that wasn't animating", 2 )
+        --]]
+        print("WARNING, tried to delete and animation that wasn't animating")
     end
     
 end
 
 
-function Animation_Loop:add_animation(t)
+function Animation_Loop:add_animation(t,s)
     
     if not has_been_initialized then
         
@@ -278,6 +283,20 @@ function Animation_Loop:add_animation(t)
         
     end
     
+    if s == nil then
+        
+        s = curr_state.name
+        
+    end
+    
+    if states[s] == nil then
+        
+        error(
+            "Passed invalid state: "..s, 2
+        )
+        
+    end
+    
     if self:has_animation(t) then
         
         error("this table is already being animated",2)
@@ -287,20 +306,22 @@ function Animation_Loop:add_animation(t)
     
     --add it to the loop
     if t.loop then
+        print(s)
         
         t.elapsed = 0
         
-        looping_animations[t] = t.on_step
+        states[s].looping_animations[t] = t.on_step
         
     elseif t.duration then
+        print(s)
         
         t.elapsed = 0
         
-        terminating_animations[t] = t.on_step
+        states[s].terminating_animations[t] = t.on_step
         
     else
-        
-        non_terminating_animations[t] = t.on_step
+        print(s)
+        states[s].non_terminating_animations[t] = t.on_step
         
     end
     
