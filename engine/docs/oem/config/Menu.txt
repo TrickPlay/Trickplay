@@ -48,11 +48,17 @@ SubTitle: OEM Integration Reference
 Group: Public  {
 
    File: Introduction*  (no auto-title, docs/oem/text/introduction.txt)
-   File: TrickPlay Context*  (no auto-title, public/include/trickplay/trickplay.h)
-   File: Controller*  (no auto-title, public/include/trickplay/controller.h)
-   File: Media Player*  (no auto-title, public/include/trickplay/mediaplayer.h)
-   File: Image Decoding*  (no auto-title, public/include/trickplay/image.h)
-   File: Audio Sampling*  (no auto-title, public/include/trickplay/audio-sampler.h)
+
+   Group: Public  {
+
+      File: TrickPlay Context*  (no auto-title, public/include/trickplay/trickplay.h)
+      File: Controller*  (no auto-title, public/include/trickplay/controller.h)
+      File: Media Player*  (no auto-title, public/include/trickplay/mediaplayer.h)
+      File: Image Decoding*  (no auto-title, public/include/trickplay/image.h)
+      File: Audio Sampling*  (no auto-title, public/include/trickplay/audio-sampler.h)
+      File: Resource Loading*  (no auto-title, public/include/trickplay/resource.h)
+      }  # Group: Public
+
    }  # Group: Public
 
 Group: Index  {

@@ -1,7 +1,7 @@
 
 Global: keys
 
-When handling input from a keyboard or TV remote control, a program's source code can be more readily understandable if a meaningful keyname is used in place of the key's numeric value or keycode. To encourage the use of keynames, the TrickPlay Runtime Engine provides a global variable called "keys" which is a table of keynames matched to their respective keycodes. Anywhere a keycode is provided, such as in the key-press event handlers found in the global <controller> variable and the Visual Editor's UI Elements, the key's name can be substituted with its associated entry in the keys global variable.
+When handling input from a keyboard or TV remote control, a program's source code can be more readily understandable if a meaningful keyname is used in place of the key's numeric value or keycode. To encourage the use of keynames, the TrickPlay Runtime Engine provides a global variable called "keys" which is a table of keynames matched to their respective keycodes. Anywhere a keycode is provided, such as in the key-press event handlers found in the <Controller> interface and the Visual Editor's UI Elements, the key's name can be substituted with its associated entry in the keys global variable.
 
 Key names can also be used to create function jump tables to provide efficient input handling. A sample jump table implementation is shown below.
 

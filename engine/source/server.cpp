@@ -14,40 +14,39 @@ Server::Server( guint16 p, Delegate * del, char acc, GError ** error )
     delegate( del ),
     accumulate( acc )
 {
-    GInetAddress * ia = g_inet_address_new_any( G_SOCKET_FAMILY_IPV4 );
-
-    GSocketAddress * address = g_inet_socket_address_new( ia, p );
-
-    g_object_unref( G_OBJECT( ia ) );
-
-    GSocketAddress * ea = NULL;
-
-    listener = g_socket_listener_new();
 
     GError * sub_error = NULL;
 
-    g_socket_listener_add_address( listener, address, G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL, &ea, &sub_error );
+    listener = g_socket_listener_new();
 
-    g_object_unref( G_OBJECT( address ) );
+    if( 0 != p )
+    {
+        if(g_socket_listener_add_inet_port( listener, p, NULL, &sub_error ))
+        {
+            port = p;
+        }
+        else
+        {
+            port = 0; // failure
+        }
+    }
+    else
+    {
+        port = g_socket_listener_add_any_inet_port( listener, NULL, &sub_error );
+    }
 
-    if ( sub_error )
+    if ( sub_error || 0 == port )
     {
         g_socket_listener_close( listener );
         g_object_unref( G_OBJECT( listener ) );
         listener = NULL;
+        port = 0;
 
         g_propagate_error( error, sub_error );
     }
     else
     {
-        port = g_inet_socket_address_get_port( G_INET_SOCKET_ADDRESS( ea ) );
-
         g_socket_listener_accept_async( listener, NULL, accept_callback, this );
-    }
-
-    if ( ea )
-    {
-        g_object_unref( G_OBJECT( ea ) );
     }
 }
 
