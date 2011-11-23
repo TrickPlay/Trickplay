@@ -129,6 +129,7 @@ extern int va_rprint0n(const char *format , va_list ap );
 extern int vf_aprint0n(FILE * stream, const char *format , va_list ap );
 extern int va_aprint0n(const char *format , va_list ap );
 
+extern int 	xlibc_displayscreen(char * buf);
 extern int 	xlibc_osdprintf(const char *format, ...);
 extern int 	xlibc_syslog(const char *format , ... );
 extern int 	rawprintf(const char *format, ... );

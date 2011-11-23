@@ -5,12 +5,15 @@
 #include <glob.h>
 #include <limits.h>
 
+#include "trickplay/trickplay.h"
+#include "trickplay/resource.h"
 #include "tp_common.h"
 #include "tp_util.h"
 #include "tp_drm.h"
 
 //#include <addon_hoa.h>
 #include <appfrwk_openapi.h>
+#include <drm_openapi.h>
 
 #include <NCG_Core.h>
 #include <NCG_Error.h>
@@ -18,6 +21,8 @@
 #define BUFFER_SIZE		(1024 * 4)		// 4 KB
 
 
+// TODO sanggi0.lee - remove
+#if 0
 static BOOLEAN _DRM_DecryptFileDRM(
 		const UINT32 appID,
 		const char* szSrcPath, const char* szDstPath)
@@ -148,5 +153,89 @@ BOOLEAN TP_DRM_DecryptAppToPath(
 
 	globfree(&pathList);
 	return res;
+}
+#endif
+
+static unsigned long int _TP_DRM_resource_reader(
+	void * buffer,
+	unsigned long int bytes,
+	void * user_data )
+{
+	FILE * file = ( FILE * ) user_data;
+
+	size_t result = fread( buffer , 1 , bytes , file );
+
+	if ( result < bytes )
+	{
+		fclose( file );
+	}
+
+	DBG_PRINT_TP("bytes = %d, result = %d", bytes, result);
+
+	return result;
+}
+
+static unsigned long int _TP_DRM_resource_decrypt_reader(
+	void * buffer,
+	unsigned long int bytes,
+	void * user_data )
+{
+	int hFile = ( int ) user_data;
+
+	size_t result = HOA_NCG_POSIX_read( hFile , buffer , bytes );
+
+	if ( result < bytes )
+	{
+		HOA_NCG_POSIX_close( hFile );
+	}
+
+	DBG_PRINT_TP("bytes = %d, result = %d", bytes, result);
+
+	return result;
+}
+
+int TP_DRM_resource_loader(
+	TPContext * context ,
+	unsigned int resource_type,
+	const char * filename,
+	TPResourceReader * reader,
+	void * user_data )
+{
+	int result = 0;
+
+	result = HOA_NCG_POSIX_IsEncrypted(filename);
+
+	DBG_PRINT_TP("filename: %s, result=%d", filename, result);
+
+	if ( result != 1)
+	{
+		DBG_PRINT_TP("===== not encrypted =====");
+
+		FILE * file = fopen( filename , "rb" );
+
+		if ( 0 == file )
+		{
+			return 1;
+		}
+
+		reader->read = _TP_DRM_resource_reader;
+		reader->user_data = file;
+	}
+	else
+	{
+		DBG_PRINT_TP("+++++ encrypted +++++");
+
+		int hFile = HOA_NCG_POSIX_open( filename , O_RDONLY , 0);
+
+		if ( hFile < 0 )
+		{
+			return 1;
+		}
+
+		reader->read = _TP_DRM_resource_decrypt_reader;
+		reader->user_data = ( void * ) hFile;
+	}
+
+	return 0;
 }
 

@@ -301,6 +301,9 @@ extern "C" {
 #define IR_KEY_PENTOUCH                LGE_BASE(0xdf)
 #endif
 
+//changwook.joo_111011 - Add Japan Model two byte key code definition.
+// IR_KEY_SET_REGIST를 Virtual key code로 변경.
+#define IR_KEY_SETCHANNEL				LGE_BASE(0xe0)
 
 #define IR_KEY_POWER					KEY_POWER			/* 0x08 전원  */
 #define IR_KEY_TV						KEY_TV				/* 0x0F TV */
@@ -557,6 +560,7 @@ extern "C" {
 
 #define RF_KEY_LAUNCHER				IR_KEY_QMENU
 #define RF_KEY_3D_MODE				IR_KEY_3D_MODE
+#define RF_KEY_HOME						IR_KEY_HOME
 
 
 //#define CURSOR_ON_INIT					(0x8000 | 0x0000)
@@ -574,6 +578,7 @@ extern "C" {
 #define KEY_LGE_MRCU_VOICE_NOINPUTERROR		0x4A6
 #define KEY_LGE_MRCU_VOICE_NETWORKERROR		0x4A7
 #define KEY_LGE_MRCU_VOICE_SERVERERROR		0x4A8
+#define KEY_LGE_MRCU_VOICE_MULTIRECOGSTART	0x4A9
 
 #define KEY_LGE_MRCU_PAIR_START			0x4AA
 #define KEY_LGE_MRCU_PAIR_STOP			0x4AB
@@ -594,7 +599,10 @@ extern "C" {
 #define KEY_LGE_MRCU_DISCONNECTED				0x4B9
 #define KEY_LGE_WIFI_DISCONNECTED				0x4BA
 #define KEY_LGE_MRCU_LOW_BATTERY				0x4BB
+#define KEY_LGE_WIFI_SMARTTEXTEND            0x4BC
 
+#define KEY_LGE_MRCU_VOICE_BUTTONENABLE		0x4C1	
+#define KEY_LGE_MRCU_VOICE_BUTTONDISABLE	0x4C2
 
 #define KEY_LGE_INPUT_FIRST				        0x4F0	// Print input's list
 
@@ -612,7 +620,7 @@ extern "C" {
 #define ABS_LGE_GYRO_Z	 	0x23
 #define ABS_LGE_ACCEL_X	 	0x24
 #define ABS_LGE_ACCEL_Y	 	0x25
-#define ABS_LGE_ACCEL_Z 	0x26 
+#define ABS_LGE_ACCEL_Z 	0x26
 #define ABS_LGE_EULER_ROLL		0x27
 #define ABS_LGE_EULER_PITCH		0x29
 #define ABS_LGE_EULER_YAW		0x3a
@@ -669,6 +677,8 @@ typedef enum
 	KEY_TYPE_REMOTESVC			=   0x0008, /**< KEY TYPE:	for remote service */
 #endif
 	KEY_TYPE_RELEASE				=	0x0009,
+	KEY_TYPE_HID_SINGLE			=	0x000A,
+	KEY_TYPE_HID_REPEAT				=	0x000B,
 	KEY_TYPE_LAST							/**< KEY TYPE:	last value		*/
 
 }	KEY_TYPE_T;

@@ -16,7 +16,18 @@
 
 static HMAP _ghEffectMap = NULL;
 
-static const HOA_RECT_T	_gVideoGeometry = { 0, 0, 1920, 1080 };
+// TODO sanggi0.lee
+//static const HOA_RECT_T	_gVideoGeometry = { 0, 0, 1920, 1080 };
+static const HOA_RECT_T	_gVideoGeometry = { 0, 0, 1280, 720 };
+
+// TODO sanggi0.lee
+/*
+static const HOA_AUDIO_PCM_INFO_T _gPCMInfo = {
+	HOA_AUDIO_16BIT,
+	HOA_AUDIO_SAMPLERATE_BYPASS,
+	HOA_AUDIO_PCM_STEREO
+};
+*/
 static const HOA_AUDIO_PCM_INFO_T _gPCMInfo = {
 	HOA_AUDIO_16BIT,
 	HOA_AUDIO_SAMPLERATE_BYPASS,
@@ -108,7 +119,7 @@ static AF_BUFFER_HNDL_T* _PlayClip_BufferingMedia(const char* szURI)
 
 BOOLEAN TP_PlayClip_Initialize(TPContext* pContext)
 {
-	HOA_STATUS_T res;
+	HOA_STATUS_T res = HOA_OK;
 
 	if (_ghEffectMap != NULL)
 		return TRUE;
@@ -137,6 +148,11 @@ void TP_PlayClip_Finalize(TPContext* pContext)
 
 int TP_PlayClip_Play(TPMediaPlayer* pMP)
 {
+	return TP_PlayClip_PlayEx(MEDIA_CH_A, pMP);
+}
+
+int TP_PlayClip_PlayEx(MEDIA_CHANNEL_T ch, TPMediaPlayer* pMP)
+{
 	DBG_PRINT_TP(NULL);
 
 	HOA_STATUS_T res;
@@ -148,7 +164,7 @@ int TP_PlayClip_Play(TPMediaPlayer* pMP)
 
 	assert(pMP != NULL);
 
-	res = HOA_MEDIA_GetPlayInfo(MEDIA_CH_A, &playInfo);
+	res = HOA_MEDIA_GetPlayInfo(ch, &playInfo);
 	if (res != HOA_OK)
 	{
 		DBG_PRINT_TP("HOA_MEDIA_GetPlayInfo() failed. (%d)", res);
@@ -164,7 +180,7 @@ int TP_PlayClip_Play(TPMediaPlayer* pMP)
 	{
 		DBG_PRINT_TP("Resume clip...");
 
-		res = HOA_MEDIA_ResumeClip(MEDIA_CH_A);
+		res = HOA_MEDIA_ResumeClip(ch);
 		if (res != HOA_OK)
 		{
 			DBG_PRINT_TP("HOA_MEDIA_ResumeClip() failed. (%d)", res);
@@ -188,7 +204,7 @@ int TP_PlayClip_Play(TPMediaPlayer* pMP)
 		playOptionSize	= sizeof(_gVideoGeometry);
 	}
 
-	res = HOA_MEDIA_PlayClipFile(MEDIA_CH_A,
+	res = HOA_MEDIA_PlayClipFile(ch,
 			(char*)_PlayClip_RemoveFileURIPrefix(pMPData->szURI), 1,
 			pMPData->transType, pMPData->formatType, pMPData->codecType,
 			pPlayOption, playOptionSize);
@@ -205,6 +221,11 @@ int TP_PlayClip_Play(TPMediaPlayer* pMP)
 
 int TP_PlayClip_Seek(TPMediaPlayer* pMP, double seconds)
 {
+	return TP_PlayClip_SeekEx(MEDIA_CH_A, pMP, seconds);
+}
+
+int TP_PlayClip_SeekEx(MEDIA_CHANNEL_T ch, TPMediaPlayer* pMP, double seconds)
+{
 	DBG_PRINT_TP(NULL);
 
 	HOA_STATUS_T res;
@@ -213,7 +234,7 @@ int TP_PlayClip_Seek(TPMediaPlayer* pMP, double seconds)
 
 	assert(pMP != NULL);
 
-	res = HOA_MEDIA_GetPlayInfo(MEDIA_CH_A, &playInfo);
+	res = HOA_MEDIA_GetPlayInfo(ch, &playInfo);
 	if (res != HOA_OK)
 	{
 		DBG_PRINT_TP("HOA_MEDIA_GetPlayInfo() failed. (%d)", res);
@@ -222,7 +243,7 @@ int TP_PlayClip_Seek(TPMediaPlayer* pMP, double seconds)
 
 	newPos = playInfo.elapsedMS + ((UINT32)seconds * 100);
 
-	res = HOA_MEDIA_SeekClip(MEDIA_CH_A, newPos);
+	res = HOA_MEDIA_SeekClip(ch, newPos);
 	if (res != HOA_OK)
 	{
 		DBG_PRINT_TP("HOA_MEDIA_SeekClip() failed. (%d)", res);
@@ -234,13 +255,18 @@ int TP_PlayClip_Seek(TPMediaPlayer* pMP, double seconds)
 
 int TP_PlayClip_Pause(TPMediaPlayer* pMP)
 {
+	return TP_PlayClip_PauseEx(MEDIA_CH_A, pMP);
+}
+
+int TP_PlayClip_PauseEx(MEDIA_CHANNEL_T ch, TPMediaPlayer* pMP)
+{
 	DBG_PRINT_TP(NULL);
 
 	HOA_STATUS_T res;
 
 	assert(pMP != NULL);
 
-	res = HOA_MEDIA_PauseClip(MEDIA_CH_A);
+	res = HOA_MEDIA_PauseClip(ch);
 	if (res != HOA_OK)
 	{
 		DBG_PRINT_TP("HOA_MEDIA_PauseClip() failed. (%d)", res);
@@ -257,6 +283,7 @@ int TP_PlayClip_PlaySound(TPMediaPlayer* pMP, const char* szURI)
 	HOA_STATUS_T res;
 	AF_BUFFER_HNDL_T* pBufHandle;
 	MEDIA_CHANNEL_T	ch;
+	MEDIA_FORMAT_T fmt;
 
 	assert(pMP != NULL);
 
@@ -266,9 +293,15 @@ int TP_PlayClip_PlaySound(TPMediaPlayer* pMP, const char* szURI)
 		return -1;
 	}
 
-	if (TP_MediaPlayer_GetCodecType(szURI) != MEDIA_AUDIO_PCM)
+	// TODO sanggi0.lee
+	//if (TP_MediaPlayer_GetCodecType(szURI) != MEDIA_AUDIO_PCM)
+	//{
+	//	DBG_PRINT_TP("Only PCM format is supported for play_sound().");
+	//	return -1;
+	//}
+	if ((fmt = TP_MediaPlayer_GetFormatType(szURI)) == MEDIA_FORMAT_RAW)
 	{
-		DBG_PRINT_TP("Only PCM format is supported for play_sound().");
+		DBG_PRINT_TP("Raw format is not supported for play_sound().");
 		return -1;
 	}
 
@@ -297,30 +330,56 @@ int TP_PlayClip_PlaySound(TPMediaPlayer* pMP, const char* szURI)
 
 	HOA_MEDIA_StopClip(ch);
 
-	if (ch == MEDIA_CH_A)
-	{
-		res = HOA_MEDIA_StartChannel(ch, MEDIA_TRANS_BUFFERCLIP, MEDIA_FORMAT_WAV, MEDIA_AUDIO_PCM);
+	// TODO sanggi0.lee - remove
+	//if (ch == MEDIA_CH_A)
+	//{
+		// TODO sanggi0.lee
+		//res = HOA_MEDIA_StartChannel(ch, MEDIA_TRANS_BUFFERCLIP, MEDIA_FORMAT_WAV, MEDIA_AUDIO_PCM);
+		//res = HOA_MEDIA_StartChannel(ch, MEDIA_TRANS_BUFFERSTREAM, fmt, MEDIA_AUDIO_PCM);
+		res = HOA_MEDIA_StartChannel(ch, MEDIA_TRANS_BUFFERCLIP, fmt, MEDIA_AUDIO_ANY);
 
 		if (res != HOA_OK)
 		{
 			DBG_PRINT_TP("HOA_MEDIA_StartChannel() failed. (%d)", res);
 			return -1;
 		}
-	}
+	// TODO sanggi0.lee - remove
+	//}
 
-	res = HOA_MEDIA_PlayClipBuffer(ch, pBufHandle, 1,
-			MEDIA_TRANS_BUFFERCLIP, MEDIA_FORMAT_WAV, MEDIA_AUDIO_PCM,
+	// TODO sanggi0.lee
+	//res = HOA_MEDIA_PlayClipBuffer(ch, pBufHandle, 1,
+	//		MEDIA_TRANS_BUFFERCLIP, MEDIA_FORMAT_WAV, MEDIA_AUDIO_PCM,
+	//		(UINT8*)&_gPCMInfo, sizeof(_gPCMInfo));
+	//res = HOA_MEDIA_PlayStream(ch, pBufHandle,
+	//		MEDIA_TRANS_BUFFERSTREAM, fmt, MEDIA_AUDIO_PCM,
+	//		(UINT8*)&_gPCMInfo, sizeof(_gPCMInfo));
+	res = HOA_MEDIA_PlayClipBuffer(ch, pBufHandle, 1, 
+			MEDIA_TRANS_BUFFERCLIP, fmt, MEDIA_AUDIO_ANY,
 			(UINT8*)&_gPCMInfo, sizeof(_gPCMInfo));
-
-	if (ch == MEDIA_CH_A)
-		HOA_MEDIA_EndChannel(ch);
 
 	if (res != HOA_OK)
 	{
-		DBG_PRINT_TP("HOA_MEDIA_PlayClipBuffer() failed. (%d)", res);
+		DBG_PRINT_TP("HOA_MEDIA_PlayClipBuffer() failed. (%d, %d)", fmt, res);
 		return -1;
+	}
+
+	/*
+	res = HOA_MEDIA_SendStream(ch, pBufHandle->size, (UINT8 *)0, 0);
+
+	if (res != HOA_OK)
+	{
+		DBG_PRINT_TP("HOA_MEDIA_SendStream() failed. (%d)", res);
+		return -1;
+	}
+	*/
+
+	if (ch == MEDIA_CH_A)
+	{
+		HOA_MEDIA_StopClip(ch);
+		HOA_MEDIA_EndChannel(ch);
 	}
 
 	return 0;
 }
+
 

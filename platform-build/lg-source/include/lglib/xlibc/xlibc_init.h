@@ -55,6 +55,7 @@ typedef struct xlibc_attr_t
 
 	const char* (*print_name_callback)	(void);
 	int 		(*print_osd_callback)	(char *,...);
+	void		(*display_screen)		(char * buf);
 /* input */
 	bool		(*getc_before_callback)(int *ret_key, FILE *fp);
 	bool		(*getc_after_callback)(int *ret_key,FILE *fp);
@@ -77,6 +78,7 @@ typedef struct xlibc_attr_t
 extern int			xlibc_attr_set_print_name	(xlibc_attr_t * attr,	const char * (*getname)(void));
 extern int			xlibc_attr_set_print_osd		(xlibc_attr_t * attr,	int (*osdprint)(char*,...));
 extern int			xlibc_set_print_osd			(int (*osdprintf)(char*,...));
+extern int			xlibc_set_displayscreen		(void (*display_screen)(char*));
 
 /* input attr */
 extern int 			xlibc_attr_set_getc_before(xlibc_attr_t * attr, bool (*callback)(int *ret_key, FILE *fp));

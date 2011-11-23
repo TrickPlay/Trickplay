@@ -62,6 +62,7 @@ extern osa_lock_t 	osa_lock_ssema_init(char *name, int sFlag, int iCount);
 extern void 		osa_lock_destroy( osa_lock_t which );
 extern int 			osa_lock_post( osa_lock_t which );
 extern int 			osa_lock_wait( osa_lock_t which, int wait_ms );
+extern void 		osa_lock_checkdeadlock(int enb);
 
 /*------------------------------------------------------------------------
 *	Private Function Declaration

@@ -136,8 +136,10 @@ INCLUDE_MODULE	+= fxopenapi
 INCLUDE_MODULE	+= bcopenapi
 ifeq ($(USE_DRM_ENCRYPTED_APP), YES)
 INCLUDE_MODULE	+= ncg_agent
+INCLUDE_MODULE	+= drmopenapi
 endif
 INCLUDE_MODULE	+= ncg_agent
+INCLUDE_MODULE	+= drmopenapi
 
 LIB_PATHS		=
 LIB_PATHS		+= $(TP_DIR)/lib/lglib
@@ -157,6 +159,7 @@ LDPATHS			= $(addprefix -L, $(LIB_PATHS))
 
 CFLAGS			= $(INCLUDES) $(DEFINES)
 CFLAGS			+= -Wall -Wstrict-prototypes -fPIC
+CFLAGS			+= -D__ARM__ -D__LINUX_ARM_ARCH__=7 -march=armv7-a -msoft-float -funwind-tables
 ifeq ($(DEBUG_MODE), YES)
 CFLAGS			+= -O0 -g
 else

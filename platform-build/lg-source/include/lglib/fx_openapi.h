@@ -28,29 +28,10 @@
 extern "C" {
 #endif
 
-#if 0
-/* bc_openapi_send2tv.c */
-HOA_STATUS_T	HOA_TV_SetAVBlock(BOOLEAN bBlockAudio, BOOLEAN bBlockVideo);
-HOA_STATUS_T	HOA_TV_ResetAVBlock(void);
-HOA_STATUS_T	HOA_TV_GetCurrentTime(TIME_T	*pTime);
-#if 0
-HOA_STATUS_T 	HOA_TV_GetLanguage(UINT32 *pLanguage);
-#endif
-HOA_STATUS_T 	HOA_TV_CreateAppsInitMsgBox(void);
-HOA_STATUS_T 	HOA_TV_SetVolume(BOOLEAN bShowVolumebar, HOA_APP_TYPE_T appType, BOOLEAN bRelative, SINT8 volumeIn, UINT8 *pVolumeOut);
-HOA_STATUS_T 	HOA_TV_GetCurrentVolume(HOA_APP_TYPE_T appType, SINT8 *pVolume);
-HOA_STATUS_T 	HOA_TV_SetMute(BOOLEAN bShowVolumebar, BOOLEAN bMute);
-HOA_STATUS_T 	HOA_TV_GetMute(BOOLEAN *pbMute);
+#if 1
+/* fx_openapi_send2fxiui.c */
+HOA_STATUS_T HOA_FXUI_RegisterAgreeTermCallback(FXUI_CB_T pfnFXUICB);
 
-HOA_STATUS_T 	HOA_TV_SetAVBlock(BOOLEAN bBlockAudio, BOOLEAN bBlockVideo);
-HOA_STATUS_T	 HOA_TV_ResetAVBlock(void);
-
-HOA_STATUS_T 	HOA_TV_SetAspectRatio(HOA_ASPECT_RATIO_T ratio);
-HOA_STATUS_T 	HOA_TV_ResetAspectRatio(void);
-HOA_STATUS_T 	HOA_TV_SetDefaultPQ(void);
-HOA_STATUS_T 	HOA_TV_SetLocalDimmingOFF(void);
-HOA_STATUS_T 	HOA_TV_GetDisplayResolution(UINT32 *pWidth, UINT32 *pHeight);
-HOA_STATUS_T 	HOA_TV_GetCurrentTime(TIME_T *pTime);
 #endif
 
 #ifdef __cplusplus

@@ -18,6 +18,10 @@ int		TP_PlayClip_Pause(TPMediaPlayer* pMP);
 
 int		TP_PlayClip_PlaySound(TPMediaPlayer* pMp, const char* szURI);
 
+int		TP_PlayClip_PlayEx(MEDIA_CHANNEL_T ch, TPMediaPlayer* pMP);
+int		TP_PlayClip_SeekEx(MEDIA_CHANNEL_T ch, TPMediaPlayer* pMP, double seconds);
+int		TP_PlayClip_PauseEx(MEDIA_CHANNEL_T ch, TPMediaPlayer* pMP);
+
 #ifdef __cplusplus
 }
 #endif

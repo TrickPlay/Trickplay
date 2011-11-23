@@ -45,6 +45,8 @@ extern "C" {
 #include "xcmd/xcmd_keyboard.h"
 #include "xcmd/xcmd_mask.h"
 #include "xcmd/xcmd_builtin.h"
+#include "xcmd/xcmd_timelog.h"
+
 
 
 

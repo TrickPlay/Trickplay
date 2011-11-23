@@ -1,13 +1,13 @@
 
-TOOLCHAIN_ROOT=/opt/toolchains/arm-2009q3
+TOOLCHAIN_ROOT=/opt/toolchains/arm-lg1152-gcc453-vfpv3-linux-gnueabi
 
-ARCH="arm"
+ARCH="armv7-a"
 GLES="2.0"
 #GLIB_ICONV="--with-libiconv"
 GLIB_ICONV=""
 
 PREFIX=${PWD}/output
-HOST=arm-none-linux-gnueabi
+HOST=arm-lg1152-linux-gnueabi
 BUILD=i686-pc-linux-gnu
 
 CC=${HOST}-gcc
@@ -18,7 +18,9 @@ NM=${HOST}-nm
 LD=${HOST}-ld
 RANLIB=${HOST}-ranlib
 
-CFLAGS="-I${PREFIX}/include -fPIC -O2"
+CFLAGS_LG=""
+#CFLAGS_LG="-D__ARM__ -D__LINUX_ARM_ARCH__=7 -march=armv7-a -msoft-float -mfloat -abi=softfp -funwind-tables"
+CFLAGS="${CFLAGS_LG} -I${PREFIX}/include -fPIC -O2"
 CPPFLAGS=${CFLAGS}
 CXXFLAGS=${CFLAGS}
 LDFLAGS="-L${PREFIX}/lib -Wl,-rpath-link,${PREFIX}/lib"

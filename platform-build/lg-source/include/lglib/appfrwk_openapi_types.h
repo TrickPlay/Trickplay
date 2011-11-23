@@ -45,6 +45,8 @@ typedef struct
 
 #define MAXCHANNELNAME	64
 #define MAXCHANNELLISTSIZE 10
+#define  MAX_BLACKOUT_STRING 128
+#define  MAX_INPUT_SOURCE_STRING	64
 
 /**
  *	Time structure.
@@ -73,7 +75,8 @@ typedef struct	API_CHANNEL_NUM
 	UINT16		majorNum;		/**<  Major number(1~9999) : 2bit(TV/Radio/Data flag), 14bit(user number) */
 	UINT16		minorNum;		/**<  Minor number of channel : received LCN	*/
 #ifdef INCLUDE_SYS_ISDB
-	UINT16		tsID;
+	UINT16		tsID;			/**<   ts ID								*/
+	UINT16		svcID;			/**<   service ID(program No)				*/
 #endif
 } __API_CHANNEL_NUM_T;
 #define API_CHANNEL_NUM_T   __API_CHANNEL_NUM_T
@@ -173,6 +176,142 @@ typedef enum HOA_ASPECT_RATIO
 	HOA_ARC_NUMBER
 } HOA_ASPECT_RATIO_T;
 
+
+/**
+ * Main menu List ID
+ *
+ */
+typedef enum TAG_HOA_MENU_LIST_ID {
+
+	/*VIDEO*/
+	HOA_IDMENU_VIDEO = 0x100,
+	HOA_IDMENU_VIDEO_ARC,
+	HOA_IDMENU_VIDEO_TRID,
+	HOA_IDMENU_VIDEO_EZPICTURE,
+	HOA_IDMENU_VIDEO_EZCAL,
+	HOA_IDMENU_VIDEO_EYEQ,
+	HOA_IDMENU_VIDEO_BACKLIGHT,
+	HOA_IDMENU_VIDEO_CONTRAST,
+	HOA_IDMENU_VIDEO_BRIGHTNESS,
+	HOA_IDMENU_VIDEO_SHARPNESS,
+	HOA_IDMENU_VIDEO_HSHARPNESS,
+	HOA_IDMENU_VIDEO_VSHARPNESS,
+	HOA_IDMENU_VIDEO_COLOR,
+	HOA_IDMENU_VIDEO_TINT,
+	HOA_IDMENU_VIDEO_COLORTMEP,
+	HOA_IDMENU_VIDEO_ADVANCED,
+	HOA_IDMENU_VIDEO_PICTURERESET,
+	HOA_IDMENU_VIDEO_SCREEN,
+	HOA_IDMENU_VIDEO_TRUMOTION,
+	HOA_IDMENU_VIDEO_LOCALDIMMING,
+	HOA_IDMENU_VIDEO_MAX,
+
+	/*AUDIO*/
+	HOA_IDMENU_AUDIO = 0x200,
+	HOA_IDMENU_AUDIO_EZSOUND,
+	HOA_IDMENU_AUDIO_EQUALIZER,
+	HOA_IDMENU_AUDIO_VOLUMEMODE,
+	HOA_IDMENU_AUDIO_NATURALSOUND,
+	HOA_IDMENU_AUDIO_SOUNDTYPE,
+	HOA_IDMENU_AUDIO_SRS,
+	HOA_IDMENU_AUDIO_CLEARVOICE,
+	HOA_IDMENU_AUDIO_LIPSYNC,
+	HOA_IDMENU_AUDIO_AUDIOSET,
+	HOA_IDMENU_AUDIO_MAX,
+
+	/*CAHNNEL*/
+	HOA_IDMENU_CHANNEL = 0x300,
+	HOA_IDMENU_CHANNEL_AUTOTUN,
+	HOA_IDMENU_CHANNEL_MANUALTUN,
+	HOA_IDMENU_CHANNEL_CHEDIT,
+	HOA_IDMENU_CHANNEL_REMOTESET,
+	HOA_IDMENU_CHANNEL_BOOSTER,
+	HOA_IDMENU_CHANNEL_CIINFO,
+	HOA_IDMENU_CHANNEL_CABLEOPTION,
+	HOA_IDMENU_CHANNEL_SATELLITESET,
+	HOA_IDMENU_CHANNEL_SATELLITEUPDATE,
+	HOA_IDMENU_CHANNEL_REGIONALPROG,
+	HOA_IDMENU_CHANNEL_CHANNELFREQ,
+	HOA_IDMENU_CHANNEL_SCANOPTION,
+	HOA_IDMENU_CHANNEL_SYSTEMCOLOR,
+	HOA_IDMENU_CHANNEL_ANTENNASET,
+	HOA_IDMENU_CHANNEL_BCAS,
+	HOA_IDMENU_CHANNEL_MAX,
+
+	/*TIME*/
+	HOA_IDMENU_TIME = 0x400,
+	HOA_IDMENU_TIME_CLOCK,
+	HOA_IDMENU_TIME_OFFTIMER,
+	HOA_IDMENU_TIME_ONTIMER,
+	HOA_IDMENU_TIME_SLEEPTIMER,
+	HOA_IDMENU_TIME_AUTOOFF,
+	HOA_IDMENU_TIME_AUTOMATICSTANDBY,
+	HOA_IDMENU_TIME_MAX,
+
+	/*LOCK*/
+	HOA_IDMENU_LOCK = 0x500,
+	HOA_IDMENU_LOCK_SETPASSWORD,
+	HOA_IDMENU_LOCK_LOCKSYSTEM,
+	HOA_IDMENU_LOCK_BLOCKEDIT,
+	HOA_IDMENU_LOCK_PARENTAL,
+	HOA_IDMENU_LOCK_CANRATINGE,
+	HOA_IDMENU_LOCK_CANRATINGF,
+	HOA_IDMENU_LOCK_MOVIER,
+	HOA_IDMENU_LOCK_RATINGCHILD,
+	HOA_IDMENU_LOCK_RATINGGENERAL,
+	HOA_IDMENU_LOCK_BRATING,
+	HOA_IDMENU_LOCK_DRRT,
+	HOA_IDMENU_LOCK_JRATING,
+	HOA_IDMENU_LOCK_INPUTBLOCK,
+	HOA_IDMENU_LOCK_MAX,
+
+	/*OPTION*/
+	HOA_IDMENU_OPTION = 0x600,
+	HOA_IDMENU_OPTION_LANGUAGE,
+	HOA_IDMENU_OPTION_ZIPCODE,
+	HOA_IDMENU_OPTION_ECOSAVING,
+	HOA_IDMENU_OPTION_COUNTRY,
+	HOA_IDMENU_OPTION_CAPTION,
+	HOA_IDMENU_OPTION_ASSISTANCE,
+	HOA_IDMENU_OPTION_HARDHEARING,
+	HOA_IDMENU_OPTION_ADDITIONALAUDIO,
+	HOA_IDMENU_OPTION_POWERBUTTON,
+	HOA_IDMENU_OPTION_ISMTYPE,
+	HOA_IDMENU_OPTION_DATASERVICE,
+	HOA_IDMENU_OPTION_MHPAUTOSTART,
+	HOA_IDMENU_OPTION_HBBTV,
+	HOA_IDMENU_OPTION_MHEGGUIDE,
+	HOA_IDMENU_OPTION_FREEVIEW,
+	HOA_IDMENU_OPTION_POINTING,
+	HOA_IDMENU_OPTION_DIVXOPTION,
+	HOA_IDMENU_OPTION_FACTORYRESET,
+	HOA_IDMENU_OPTION_SETID,
+	HOA_IDMENU_OPTION_LOCATIONMODE,
+	HOA_IDMENU_OPTION_IRBLASTER,
+	HOA_IDMENU_OPTION_MAX,
+
+	/*NETWORK*/
+	HOA_IDMENU_NETWORK = 0x700,
+	HOA_IDMENU_NETWORK_SETTING,
+	HOA_IDMENU_NETWORK_STATUS,
+	HOA_IDMENU_NETWORK_WIFI_DIRECT,
+	HOA_IDMENU_NETWORK_SMART_SHARE,
+	HOA_IDMENU_NETWORK_ESN,
+	HOA_IDMENU_NETWORK_MAX,
+
+	/*SUPPORT*/
+	HOA_IDMENU_SUPPORT = 0x800,
+	HOA_IDMENU_SUPPORT_SWU,
+	HOA_IDMENU_SUPPORT_PICTURETEST,
+	HOA_IDMENU_SUPPORT_SOUNDTEST,
+	HOA_IDMENU_SUPPORT_SIGNALTEST,
+	HOA_IDMENU_SUPPORT_INFO,
+	HOA_IDMENU_SUPPORT_INITPREMIUM,
+	HOA_IDMENU_SUPPORT_EMANUAL,
+	HOA_IDMENU_SUPPORT_MAX,
+} HOA_MENU_LIST_ID_T;
+
+
 /**
  * Audio Mode
  */
@@ -201,7 +340,7 @@ typedef struct ADDON_SMART_TEXT
 {
 	UINT16 positionX;
 	UINT16 positionY;
-	CHAR textString[512];
+	CHAR textString[2048+1];
 } ADDON_SMART_TEXT_T;
 
 /**
@@ -248,7 +387,7 @@ typedef struct ATSC_REGION_LIST
 {
 	UINT8			region;				/**<  0x00: rating region */
 	UINT8			numOfDimensions;	/**<  0x01: number of rating dimensions */
-	ATSC_DIMENSION_L_T 	*pRatingValue;		/**<  0x02: rating value */
+	ATSC_DIMENSION_L_T 	pRatingValue[8];		/**<  0x02: rating value */
 										/**<  0x06: 8 bytes */
 } ATSC_REGION_LIST_T;
 
@@ -259,7 +398,7 @@ typedef struct ATSC_REGION_LIST
 typedef struct ATSC_RATING_LIST
 {
 	UINT8				numOfRegions;		/**<  0x00: number of rating regions */
-	ATSC_REGION_LIST_T 	*pRegionList; 		/**<  0x01: rating region list */
+	ATSC_REGION_LIST_T 	pRegionList[8]; 		/**<  0x01: rating region list */
 											/**<  0x05: 8 bytes */
 } ATSC_RATING_LIST_T;
 
@@ -292,11 +431,11 @@ typedef struct HOA_EVENT_INFO
 
 	UINT32				audioLang;	/**< Audio Language in ISO639 code */
 
-	UINT8				*pGenre;		/**< Genre Information */
+	UINT8				pGenre[2];		/**< Genre Information */
 
 	char				pName[128]; 	/**< Event Name (PSIP:multistring->string) */
-	char				*pDesc;		/**< Event Description (SI:description, PSIP(evContents):multistring->string) */
-	char				*pExtDesc;	/**< Event Extended Description (SI:extended description) */
+	char				pDesc[256];		/**< Event Description (SI:description, PSIP(evContents):multistring->string) */
+	char				pExtDesc[256];	/**< Event Extended Description (SI:extended description) */
 	UINT16				eventID;
 
 	/**
@@ -591,8 +730,8 @@ typedef enum MEDIA_CHANNEL {
 	MEDIA_CH_A = 0,										/**< Channel A */
 	MEDIA_CH_B,											/**< Channel B */
 	MEDIA_CH_C,											/**< Channel C */
+	MEDIA_CH_EX,										/**< Channel for Media Info Extraction, not for Play */
 	MEDIA_CH_NUM, 										/**< Maximum channel number */
-	MEDIA_CH_EX = 10,									/**< Channel for Media Info Extraction, not for Play */
 } MEDIA_CHANNEL_T;
 
 /**
@@ -632,6 +771,9 @@ typedef enum MEDIA_CB_MSG
 	//MEDIA_CB_MSG_3DTVFORMAT_FRAMEPACKING,				/**< 3D Format Framepacking */
 	MEDIA_CB_MSG_CONNECTED			= 0x200,			/**< html 5 */
 	MEDIA_CB_MSG_LOADED_METADATA,						/**< html 5 */
+	MEDIA_CB_MSG_STOPPED,								/**< SMH 정보 추출용 */
+
+    // old error msg //
 	MEDIA_CB_MSG_ERR_PLAYING	= 0xf000,				/**< 재생중 error 발생 */
 	MEDIA_CB_MSG_ERR_BUFFERFULL,						/**< 재생중 buffer full 발생 */
 	MEDIA_CB_MSG_ERR_BUFFERLOW,							/**< 재생중 buffer low 발생 */
@@ -648,6 +790,60 @@ typedef enum MEDIA_CB_MSG
 	MEDIA_CB_MSG_ERR_BUFFER_180MS,						/**< 재생중 buffer data 180msec 남음 */
 	MEDIA_CB_MSG_ERR_BUFFER_200MS,						/**< 재생중 buffer data 200msec 남음 */
 	MEDIA_CB_MSG_ERR_AUDIO_DECODING_FAILED,				/**< 재생 중 audio decoding error 발생 (잘못된 스트림), 재생 중지되지는 않음 */
+    // end old error msg //
+    /* gstrreamer core error msg */
+    MEDIA_CB_MSG_START_GST_MSG, //d16
+	MEDIA_CB_MSG__GST_CORE_ERROR_FAILED, // a general error which doesn't fit in any other category. Make sure you add a custom message to the error call.
+	MEDIA_CB_MSG__GST_CORE_ERROR_TOO_LAZY, // do not use this except as a placeholder for deciding where to go while developing code.
+	MEDIA_CB_MSG__GST_CORE_ERROR_NOT_IMPLEMENTED, // use this when you do not want to implement this functionality yet.
+	MEDIA_CB_MSG__GST_CORE_ERROR_STATE_CHANGE, // used for state change errors.
+	MEDIA_CB_MSG__GST_CORE_ERROR_PAD, // used for pad-related errors.
+	MEDIA_CB_MSG__GST_CORE_ERROR_THREAD, // used for thread-related errors.
+	MEDIA_CB_MSG__GST_CORE_ERROR_NEGOTIATION, // used for negotiation-related errors.
+	MEDIA_CB_MSG__GST_CORE_ERROR_EVENT, //  used for event-related errors.
+	MEDIA_CB_MSG__GST_CORE_ERROR_SEEK, // used for seek-related errors.
+	MEDIA_CB_MSG__GST_CORE_ERROR_CAPS, //  used for caps-related errors.
+	MEDIA_CB_MSG__GST_CORE_ERROR_TAG, //  used for negotiation-related errors.
+	MEDIA_CB_MSG__GST_CORE_ERROR_MISSING_PLUGIN, // used if a plugin is missing.
+	MEDIA_CB_MSG__GST_CORE_ERROR_CLOCK, // used for clock related errors.
+	MEDIA_CB_MSG__GST_CORE_ERROR_DISABLED, //d30 // used if functionality has been disabled at compile time (Since: 0.10.13).
+    /* gstreamer library error msg */
+	MEDIA_CB_MSG__GST_LIBRARY_ERROR_FAILED, // a general error which doesn't fit in any other category. Make sure you add a custom message to the error call.
+	MEDIA_CB_MSG__GST_LIBRARY_ERROR_TOO_LAZY, // do not use this except as a placeholder for deciding where to go while developing code.
+	MEDIA_CB_MSG__GST_LIBRARY_ERROR_INIT, // used when the library could not be opened.
+	MEDIA_CB_MSG__GST_LIBRARY_ERROR_SHUTDOWN, // used when the library could not be closed.
+	MEDIA_CB_MSG__GST_LIBRARY_ERROR_SETTINGS, // used when the library doesn't accept settings.
+	MEDIA_CB_MSG__GST_LIBRARY_ERROR_ENCODE, // used when the library generated an encoding error.
+    /* gstreamer resource error msg */
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_FAILED, // a general error which doesn't fit in any other category. Make sure you add a custom message to the error call.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_TOO_LAZY, // do not use this except as a placeholder for deciding where to go while developing code.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_NOT_FOUND, // used when the resource could not be found.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_BUSY, //d40 // used when resource is busy.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_OPEN_READ, // used when resource fails to open for reading.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_OPEN_WRITE, // used when resource fails to open for writing.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_OPEN_READ_WRITE, // used when resource cannot be opened for both reading and writing, or either (but unspecified which).
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_CLOSE, // used when the resource can't be closed.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_READ, // used when the resource can't be read from.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_WRITE, // used when the resource can't be written to.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_SEEK, // used when a seek on the resource fails.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_SYNC, // used when a synchronize on the resource fails.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_SETTINGS, // used when settings can't be manipulated on.
+	MEDIA_CB_MSG__GST_RESOURCE_ERROR_NO_SPACE_LEFT, //d50 // used when the resource has no space left.
+    /* gstreamer stream error msg */
+	MEDIA_CB_MSG__GST_STREAM_ERROR_FAILED, // a general error which doesn't fit in any other category. Make sure you add a custom message to the error call.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_TOO_LAZY, // do not use this except as a placeholder for deciding where to go while developing code.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_NOT_IMPLEMENTED, // use this when you do not want to implement this functionality yet.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_TYPE_NOT_FOUND, // used when the element doesn't know the stream's type.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_WRONG_TYPE, // used when the element doesn't handle this type of stream.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_CODEC_NOT_FOUND, // used when there's no codec to handle the stream's type.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_DECODE, // used when decoding fails.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_ENCODE, // used when encoding fails.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_DEMUX, // used when demuxing fails.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_MUX, // used when muxing fails.
+	MEDIA_CB_MSG__GST_STREAM_ERROR_FORMAT, // used when the stream is of the wrong format (for example, wrong caps).
+	MEDIA_CB_MSG__GST_STREAM_ERROR_DECRYPT, // used when the stream is encrypted and can't be decrypted because this is not supported by the element. (Since: 0.10.20)
+	MEDIA_CB_MSG__GST_STREAM_ERROR_DECRYPT_NOKEY, // used when the stream is encrypted and can't be decrypted because no suitable key is available. (Since: 0.10.20)
+    MEDIA_CB_MSG_END_GST_MSG,
 
 	MEDIA_CB_MSG_ERR_NET_DISCONNECTED	= 0xff00,		/**< network이 끊김 */
 	MEDIA_CB_MSG_ERR_NET_BUSY,							/**< network이 사용중 */
@@ -661,6 +857,7 @@ typedef enum MEDIA_CB_MSG
 	MEDIA_CB_MSG_ERR_WMDRM_LIC_EXPIRED,					/**< WMDRM license error. 저장된 License가 만료됨. */
 	MEDIA_CB_MSG_REQ_ONLY_PLAY_AGAIN,					/**< Live streaming 중, network 연결 상태 오류로 media play재시도가 요청됨.  */
 	MEDIA_CB_MSG_ERR_VERIMATRIX_DRM_FAILED,				/**< Verimatrix DRM 모듈 API 실행시 error message 처리를 위해 추가. */
+
 	MEDIA_CB_MSG_LAST
 
 } MEDIA_CB_MSG_T;
@@ -675,6 +872,7 @@ typedef enum MEDIA_CB_MSG_EX
 {
 	MEDIA_CB_EX_MSG_NONE			= 0x00,					/**< message 없는 상태 */
     MEDIA_CB_EX_MSG_SUBT_FOUND,
+    MEDIA_CB_EX_MSG_POSITION_UPDATED,
 	MEDIA_CB_EX_MSG_LAST
 
 } MEDIA_CB_EX_MSG_T;
@@ -712,6 +910,7 @@ typedef enum BILLING_CB_MSG
 	BILLING_CB_MSG_RESPOND_PURCHASE,
 	BILLING_CB_MSG_RESPOND_REQUESTLOGIN,
 	BILLING_CB_MSG_RESPOND_REQUESTCONFIRMUSER,
+	BILLING_CB_MSG_RESPOND_CHANGEPWD, /* change password */
 	WEBSNS_CB_XML_DATA 		= 0x100,
 	BILLING_CB_MSG_LAST
 } BILLING_CB_MSG_T;
@@ -731,6 +930,28 @@ typedef struct SDPIF_PURCHASE_IN{
 
 typedef void (*BILLING_CB_T)(BILLING_CB_MSG_T msg, UINT16 dataSize, UINT8 *pData);
 
+/**
+ * Callback Message of Image Processing
+ */
+typedef enum IMAGE_CB_MSG
+{
+	IMAGE_CB_MSG_NONE	= 0x00,
+	IMAGE_CB_MSG_PLAY_SUCCESS,
+	IMAGE_CB_MSG_PLAY_FAIL,
+	IMAGE_CB_MSG_PLAY_ERR_NOT_FOUND,
+	IMAGE_CB_MSG_CACHE_ERR_NOT_FOUND,
+	IMAGE_CB_MSG_CANCEL_CACHE_DONE,
+	IMAGE_CB_MSG_PLAY_DOWNLOAD_SUCCESS,
+	IMAGE_CB_MSG_CACHE_SUCCESS,
+	IMAGE_CB_MSG_PLAY_DOWNLOAD_FAIL,
+	IMAGE_CB_MSG_CACHE_FAIL
+} IMAGE_CB_MSG_T;
+
+/**
+ * Typedef of callback function to get notice about playback end.
+ */
+typedef void (*CTRL_IMAGE_CB_T)(MEDIA_CHANNEL_T ch, IMAGE_CB_MSG_T msg);
+
 typedef enum MEDIA_TRANSPORT
 {
 	/**< gp4 media types >**/
@@ -747,6 +968,8 @@ typedef enum MEDIA_TRANSPORT
 	MEDIA_TRANS_MSIIS			= 0x17,		/**< MS Smooth Streaming시 선택. */
 	MEDIA_TRANS_WFD				= 0x18, 	/**< SmartShare Wifi Display Play시 선택. */
 	MEDIA_TRANS_HLS 			= 0x19, 	/**< Http Live Streaming시 선택. */
+	MEDIA_TRANS_AD 				= 0x20,  	/**< 광고 재생시 선택: FF & Seek disable되고 광고 정보 전달용 함수 호출됨. */
+
 #if 1
 	/**< obsolete >**/
 
@@ -940,6 +1163,16 @@ typedef enum
 #define LMF_EXT_SUBT_SETTINGS_T __LMF_EXT_SUBT_SETTINGS_T
 #endif //EXT_SUBT_SETTINGS_T
 
+
+//inyoung.choi
+typedef enum
+{
+	LMF_INT_SUBT_ENABLE ,         // internal subtitle on/off setting
+	LMF_INT_SUBT_LANGUAGE,        // internal subtitle language setting - language index
+	LMF_INT_SUBT_LANGUAGE_COUNT,   // internal subtitle language count, max number of language
+	LMF_INT_SUBT_MKVINTERNAL_SUBT // MKV internal subtitle setting
+} LMF_INT_SUBT_SETTINGS_T;
+
 /**
  *	External Subtitle Type
  */
@@ -996,6 +1229,23 @@ typedef struct SYNCBLOCK_T {
 } __SYNCBLOCK;
 #define SYNCBLOCK __SYNCBLOCK
 #endif
+
+/**
+* SYNCBLOCK_T2 for bmp subtitle result
+* inyoung.choi
+* @see
+*/
+#ifndef SYNCBLOCK2
+	typedef struct SYNCBLOCK_T2 {
+		int startTime;
+		int endTime;
+		int bmp_width;
+		int bmp_height;
+		unsigned char *bmp;
+	} __SYNCBLOCK2;
+#define SYNCBLOCK2 __SYNCBLOCK2
+#endif
+
 /**
  * Media Audio language Information
  */
@@ -1080,7 +1330,12 @@ typedef struct
 {
 	/* WMA */
 	UINT32	wmaVer;
-	UINT32	wmaFormatTag;
+	UINT16	wmaFormatTag;
+	UINT16  channels;
+	UINT32  samplesPerSec;
+	UINT32  avgBytesPerSec;
+	UINT16  blockAlign;
+	UINT16  bitsPerSample;
 
 	/* to support raw audio es(without header) */
 	char 	*codec_data;		// codec_data : DSI (Decoding Specific Info)	// from CP
@@ -1157,6 +1412,10 @@ typedef enum MEDIA_CODEC_AUDIO
 	MEDIA_AUDIO_AC3PLUS	= 0x0A,		/**< ac3 plus codec */
 	MEDIA_AUDIO_RA		= 0x0B,		/**< ra  plus codec */
 	MEDIA_AUDIO_AMR		= 0x0C,		/**< amr plus codec */
+	MEDIA_AUDIO_HEAAC	= 0x0D,
+	MEDIA_AUDIO_PCMWAV	= 0x0E,
+	MEDIA_AUDIO_WMA_PRO	= 0x0F,
+//	MEDIA_AUDIO_XPCM 	= 0x0F,
 	MEDIA_AUDIO_NOT_SUPPORTED = 0xC0, /** Audio not supported */
 
 	MEDIA_AUDIO_MASK	= 0x0F		/**< Audio codec mask */
@@ -1175,6 +1434,7 @@ typedef struct HOA_ASF_OPT
 	UINT32	dummyWord;
 } __attribute__((packed)) HOA_ASF_OPT_T;
 
+
 /**
  * Structure of Flash ES options
  */
@@ -1191,11 +1451,13 @@ typedef struct HOA_FLASHES_OPT
            AF_BUFFER_HNDL_T              ABuff;
            AF_BUFFER_HNDL_T              VBuff;
            BOOLEAN                   bUseEsSimpleChannelPlay;
+           UINT32 bufferMinLevel; // old
+           UINT32 bufferMaxLevel; // old
 #else
            UINT32 bufferMinLevel;
            UINT32 bufferMaxLevel;
-           AF_BUFFER_HNDL_T handleEsAudio; /* add for flash ES audio case */
-           AF_BUFFER_HNDL_T handleEsVideo; /* add for flash ES video case */
+           //AF_BUFFER_HNDL_T handleEsAudio; /* add for flash ES audio case */
+           //AF_BUFFER_HNDL_T handleEsVideo; /* add for flash ES video case */
 #endif //FLASHES_FOR_LMF
            SINT64 ptsToDecode;
            BOOLEAN pauseAtDecodeTime;
@@ -1218,11 +1480,15 @@ typedef struct MEDIA_STREAMOPT
 	MEDIA_SECURITY_TYPE_T	securityType;	/**< Stream encrypt type */
 	HOA_FLASHES_OPT_T	flashOption;	/**< Flash option */
 
+	SINT64 ptsToDecode;
+
 	MEDIA_VIDEO_ADAPTIVE_INFO_T adaptiveInfo;  /**< to support seamless play for adaptive streaming */
 
 	BOOLEAN	bAdaptiveResolutionStream;			/**< seperated Resolution  */
+	BOOLEAN bRestartStreaming;
 
 	UINT32                  preBufferTime;  /**< Transfer time unit required Pre-Buffering */
+
 } __attribute__((packed)) MEDIA_STREAMOPT_T;
 
 /**
@@ -1277,6 +1543,18 @@ typedef enum HOA_LOCALE
 							 */
 	HOA_LOCALE_GROUP,		/**< Group Info. TV에 설정되어 있는 Group 정보를 얻어온다. Group은 HOA_LOCALE_GROUP_T로 정의되어 있다. */
 } HOA_LOCALE_T;
+
+
+/**
+ * MRCU Info Type
+ */
+typedef enum HOA_MRCU
+{
+	HOA_MRCU_TYPE,		/**< Magic remote type info: (0: M3, 1: M4, 2: M4CI, 3: Dongle)	 */
+	HOA_MRCU_SENSITIVITY,	/**< Magic remote sensitivity for pointing: (0: Normal, 1: Slow, 2: Fast)	 */
+	HOA_MRCU_RECENTER,	/**< Magic remote recentering support: (0: no support, 1: support)	 */
+} HOA_MRCU_T;
+
 
 /**
 * Black out type
@@ -1362,6 +1640,24 @@ typedef struct HOA_STRING
 } HOA_STRING_T;
 
 /**
+ * String structure
+ */
+typedef struct HOA_BLACKOUT_STRING
+{
+	UINT8 blackoutString[MAX_BLACKOUT_STRING];			/**< String. */
+	UINT32 stringLength;								/**< String data size. */
+} HOA_BLACKOUT_STRING_T;
+
+/**
+ * String structure
+ */
+typedef struct HOA_INPUTSOURCE_STRING
+{
+	UINT8 string[MAX_INPUT_SOURCE_STRING];			/**< String. */
+	UINT32 length;								/**< String data size. */
+} HOA_INPUTSOURCE_STRING_T;
+
+/**
  * Structure Verimatrix Service Type
  * See VM_SERVICE_TYPE_T in vm_api.h
  */
@@ -1397,8 +1693,8 @@ typedef enum
 */
 typedef struct HOA_DOWNLOAD_STATUSCONTENTLICENSE
 {
-	UINT8	beginDate[9];
-	UINT8	endDate[9];
+	UINT8	beginDate[18];
+	UINT8	endDate[18];
 
 	/**
 	*  expiration after first use.
@@ -1437,12 +1733,35 @@ typedef struct HOA_CONTENT_ENTTY
 	UINT64	size;
 } HOA_CONTENT_ENTRY_T;
 
+/**
+ * Types for playmode setting: bufferingOnly, playOnly (HTML5 case)
+ */
 typedef enum MEDIA_PLAYMODE
 {
 	BUFFERING_AND_PLAY	= 0,
 	BUFFERING_ONLY,
 	PLAY_ONLY
 } MEDIA_PLAYMODE_T;
+
+/**
+ * Structure of AD info
+ */
+typedef struct HOA_AD_INFO
+{
+	SINT32	appType;
+	SINT32	*timeline;
+	SINT32	numOfTimeline;
+} __attribute__((packed)) HOA_AD_INFO_T;
+
+/**
+ * Structure of DLNA info
+ */
+typedef struct HOA_DLNA_INFO
+{
+	char	pProtocolInfo[2048];
+	UINT64	dContentLength; 	//filesize, in byte
+	UINT32	duration;			//in sec
+} HOA_DLNA_INFO_T;
 
 /**
  * Structure of  media play options
@@ -1460,8 +1779,13 @@ typedef struct MEDIA_CLIPOPT
 	/* bufferingOrPlayOnly &  will be used instead */
 	MEDIA_PLAYMODE_T		bufferingOrPlayOnly;	/**< buffering&play / bufferingOnly / playOnly */
 	UINT8					pauseOnEOS;				/**< don't stop but pause on EOS */
+	UINT8 					pauseOnBackwardTrickEnd;     /**< don't start but pause on Backward Trick playback meed position 0. */
 
 	UINT32					inPort; 				/**< widi display 에서 사용 */
+	HOA_DLNA_INFO_T			DLNAInfo; 				/**< DLNA 재생시 정보 전달 */
+
+	HOA_AD_INFO_T			adInfo;  				/**< TransType == MEDIA_TRANS_AD 인 경우 사용: 광고용 추가 정보 전달 */
+
 } __attribute__((packed)) MEDIA_CLIPOPT_T;
 
 /**
@@ -1534,6 +1858,33 @@ typedef enum
 } HOA_DISC_FORMAT_ERROR_T;
 
 /**
+ * Drive format type.
+ */
+typedef enum	_HOA_IO_DRV_FORMAT
+{
+	HOA_IO_DRV_DVR			= 0x001,
+	HOA_IO_DRV_DB,
+	HOA_IO_DRV_VOD,
+	HOA_IO_DRV_APP,
+	HOA_IO_DRV_NORMAL,
+	HOA_IO_DRV_UNKNOWN
+} HOA_IO_DRV_FORMAT_T;
+
+/**
+ * Drive state.
+ */
+typedef enum	_HOA_IO_MOUNT_STATUS
+{
+	HOA_IO_IS_MOUNTING		= 0,
+	HOA_IO_MOUNT_OK,
+	HOA_IO_MOUNT_NOT_OK,
+	HOA_IO_IS_UMOUNTING,
+	HOA_IO_UMOUNT_OK,
+	HOA_IO_UMOUNT_NOT_OK
+
+} HOA_IO_MOUNT_STATUS_T;
+
+/**
 * Download Possible State of Disc
 */
 typedef enum
@@ -1596,7 +1947,7 @@ typedef enum HOA_IO_USB_STORAGE_TYPE
 } HOA_IO_USB_STORAGE_TYPE_T;
 
 /**
-*  Disc Information
+*  USB device Information
 */
 typedef struct HOA_IO_USB_DEV_INFO
 {
@@ -1604,16 +1955,48 @@ typedef struct HOA_IO_USB_DEV_INFO
 	HOA_IO_USB_DEV_TYPE_T	deviceType;
 	HOA_IO_USB_STORAGE_TYPE_T	storageType;
 	CHAR		mntPath[256];
+	CHAR		fsType[10];
 	CHAR		productName[128];
 	UINT32		bconnectUSB1Port;
-	UINT32		physicalSize;
-	UINT32		usedSize;
+	UINT64		physicalSize;
+	UINT64		usedSize;
 	UINT32		usedRate;
-	UINT32		availableSize;
+	UINT64		availableSize;
 	UINT32		formattingProgress;
 	HOA_DISC_FORMAT_STATE_T 	formattingState;
 	HOA_DISC_FORMAT_ERROR_T		formattingError;
 } HOA_IO_USB_DEV_INFO_T;
+
+/**
+*  General USB Drive Information
+*/
+typedef struct HOA_IO_GENUSB_DRV_INFO
+{
+	UINT16					driveNum;
+	CHAR					mntPath[128];
+	CHAR					fsType[10];
+	HOA_IO_MOUNT_STATUS_T		mountStatus;
+	HOA_IO_DRV_FORMAT_T		drvFormat;
+	UINT64		physicalSize;
+	UINT64		usedSize;
+	UINT32		usedRate;
+	UINT64		availableSize;
+} HOA_IO_GENUSB_DRV_INFO_T;
+
+/**
+*  General USB device Information
+*/
+typedef struct HOA_IO_GENUSB_DEV_INFO
+{
+	UINT16					deviceNum;
+	HOA_IO_USB_DEV_TYPE_T	deviceType;
+	HOA_IO_USB_STORAGE_TYPE_T	storageType;
+	UINT32		totalDriveNum;
+	HOA_IO_GENUSB_DRV_INFO_T	drvInfo[4];
+	CHAR		vendorName[128];
+	CHAR		productName[128];
+	UINT32		bconnectUSB1Port;
+} HOA_IO_GENUSB_DEV_INFO_T;
 
 /*
 *  Disc Information
@@ -1622,10 +2005,10 @@ typedef struct HOA_DISC_INFO
 {
 	UINT8	discId;
 	char	fileSystem[64];
-	UINT32	physicalSize;
-	UINT32	usedSize;
+	UINT64	physicalSize;
+	UINT64	usedSize;
 	UINT16	usedRate;
-	UINT32	availableSize;
+	UINT64	availableSize;
 	UINT32	formattingProgress;
 	char	storageType[64];
 	BOOLEAN	usbPort;
@@ -1920,6 +2303,19 @@ typedef struct HOA_BILLING_PURCHASE_OUT
 
 /*TENNY_NETWORK_HOA */
 
+/**
+*  NSU State Value
+*/
+typedef enum HOA_NSU_STATE
+{
+	HOA_NSU_STATE_IDLE = 0, 				/**< IDLE state	*/
+	HOA_NSU_STATE_CONFIRM_WAIT,  			/**< DSI message arrive */
+	HOA_NSU_STATE_PROGRESS,  				/**< conform ok, img file downloading */
+	HOA_NSU_STATE_DOWNLOAD_SUSPEND,			/**< donwload stop */
+	HOA_NSU_STATE_COMPLETE,					/**< download complete */
+	HOA_NSU_STATE_MAX						/**< enum max value */
+} HOA_NSU_STATE_T;
+
 /*
 * Network Status
  */
@@ -1981,6 +2377,8 @@ typedef enum _SDPIF_CB_TYPE
 	SDPIF_CB_SNSMEMBERSHIP,
 	SDPIF_CB_BILLING,
 	SDPIF_CB_PKG,
+	SDPIF_CB_ADV,
+	SDPIF_CB_HOME,
 
 	SDPIF_CB_TYPE_LAST
 } SDPIF_CB_TYPE_T;
@@ -2004,6 +2402,9 @@ typedef enum _SDPIF_CB_MSG
 	SDPIF_SUCCESS_DEACTIVATE_USER,
 	SDPIF_SUCCESS_CHECK_TERMS,
 	SDPIF_SUCCESS_AGREE_TERMS,
+	SDPIF_SUCCESS_CHANGE_PASSWD,
+	SDPIF_SUCCESS_DELETE_USER,
+	SDPIF_SUCCESS_DEACTIVATE_DEVICE,
 
 	SDPIF_SUCCESS_SNS_REGISTER_USER,
 	SDPIF_SUCCESS_SNS_DEACTIVATE_USER,
@@ -2012,7 +2413,14 @@ typedef enum _SDPIF_CB_MSG
 	SDPIF_SUCCESS_BILLING,
 	SDPIF_SUCCESS_CPN_LIST,
 
+	SDPIF_SUCCESS_AD_INIT,
+	SDPIF_SUCCESS_AD_URL,
+	SDPIF_SUCCESS_AD_CLICKED,
+
 	SDPIF_SUCCESS_DETECT_COUNTRY,
+
+	SDPIF_SUCCESS_SEARCH_MEATA,
+	SDPIF_SUCCESS_DNLD_CERT,
 
 	SDPIF_ERR_UNKNOWN				= 0x2000,
 
@@ -2033,21 +2441,32 @@ typedef enum _SDPIF_CB_MSG
 	SDPIF_ERR_REGISTER_USER_DUPLICATE_USER_ID,		/* M.002.01 */
 	SDPIF_ERR_REGISTER_USER_INVALID_USER_ID,		/* M.002.02 */
 	SDPIF_ERR_REGISTER_USER_INVALID_PASSWD,			/* M.002.03 */
+	SDPIF_ERR_REGISTER_USER_INVALID_TERMS,			/* M.002.04 */
 	SDPIF_ERR_SIGN_IN_WRONG_USER_ID,				/* M.003.01 */
 	SDPIF_ERR_SIGN_IN_WRONG_PASSWD,					/* M.003.02 */
 	SDPIF_ERR_SIGN_IN_WRONG_COUNTRY,				/* M.003.03 */
 	SDPIF_ERR_SIGN_IN_EXCESS_DEVICE,				/* M.003.04 */
+	SDPIF_ERR_SIGN_IN_INVALID_TERMS,				/* M.003.05 */
 	SDPIF_ERR_CANNOT_DEACTIVATE,					/* M.005.01 */
 	SDPIF_ERR_AUTH_USER_WRONG_PASSWD,				/* M.008.01 */
+	SDPIF_ERR_AGREE_INVALID_TERMS,					/* M.010.01 */
 	SDPIF_ERR_CHANGE_PASSWD_WRONG_PASSWD,			/* M.011.01 */
 	SDPIF_ERR_CHANGE_PASSWD_INVALID_PASSWD,			/* M.011.02 */
 	SDPIF_ERR_DELETE_USER_WRONG_PASSWD,				/* M.012.01 */
 	SDPIF_ERR_DELETE_USER_INVALID_USER_RIGHT,		/* M.012.02 */
+	SDPIF_ERR_CHECK_TERMS,
 
 	SDPIF_ERR_BILLING,
 	SDPIF_ERR_CPN_LIST,
 
 	SDPIF_ERR_CANNOT_DETECT_COUNTRY,	/* I.001.01 */
+
+	SDPIF_ERR_SEARCH_META,
+	SDPIF_ERR_DNLD_CERT,
+
+	SDPIF_NOTIFY					= 0x3000,
+	SDPIF_NOTIFY_DNLD_HOME_APP,
+	SDPIF_NOTIFY_DNLD_HOME_APP_DONE,
 
 	SDPIF_CB_MSG_LAST
 } SDPIF_CB_MSG_T;
@@ -2103,8 +2522,7 @@ typedef struct
 	char			*pRating;		// rating ( 관람 등급 )
 	char			*pDirector;	// director
 	char			*pActor;		// actors ( delimeter is , ) ex) 홍길동,
-	UINT32		durationTime;		// unit: sec ( 영화의 원래 시간. 실제 파일이 1분 영상이라도 해당 영화가 2시간 분량이면 2시간으로 나옴 )
-	UINT32		realDuration;		// 해당 파일의 실제 시간 .
+	UINT32		duration;		// unit: sec ( 영화의 원래 시간. 실제 파일이 1분 영상이라도 해당 영화가 2시간 분량이면 2시간으로 나옴 )
 	UINT32		lastPlayPos;		// 이어보기 기능을 위한 , 최근 stop 한 위치 ( sec )
 } HOA_SMTS_VIDEO_METADATA_T;
 
@@ -2117,6 +2535,7 @@ typedef struct
 {
 	UINT32		width;			// photo's width
 	UINT32		height;			// photo's height
+	UINT32		fileSize;			// File Size
 } HOA_SMTS_PHOTO_METADATA_T;
 
 
@@ -2126,6 +2545,7 @@ typedef struct
 */
 typedef struct
 {
+	UINT32		fileNum;			// Music Tap type 일 때 사용
 	UINT32		duration;		// sec
 	char			*pTitle;		// 곡명 , song's name
 	char			*pSinger;		// 가수명
@@ -2171,8 +2591,8 @@ typedef struct TAG_LINKED_DEVICE_INFO_T {
 	char					eachDeviceName[200];
 	BOOLEAN 				bIsLock;
 	BOOLEAN 				bConnect;
-	char					contentsUrl[200];
-	char					metaInfoUrl[200];
+	char					pDeviceId[200];
+	char					rootPath[256];
 	int 					inputLabelIndex;
 } LINKED_DEVICE_INFO_T;
 
@@ -2187,6 +2607,9 @@ enum
 typedef void (*LGINPUT_VOICE_CB_T)(UINT32 dataSize, UINT8 *pData);
 //#endif INCLUDE_VOICE
 
+typedef void (*LGINPUT_VOICE_UI_CB_T)(UINT32 dataSize, UINT8 **pData);
+typedef void (*LGINPUT_CB_T)(UINT32 pktCount, UINT32 per, UINT32 rssiTv, UINT32 rssiDv);
+typedef void (*LGINPUT_BSI_CB_T)(void *data);
 
 /**
  * SmartShare callback func type
@@ -2264,8 +2687,27 @@ typedef enum
 	HOA_SMTS_MEDIA_TYPE_VIDEO,
 	HOA_SMTS_MEDIA_TYPE_DEMO,
 	HOA_SMTS_MEDIA_TYPE_FOLDER,
+	HOA_SMTS_MEDIA_TYPE_MUSIC_TAP,
 	HOA_SMTS_MEDIA_TYPE_MAX
 } HOA_SMTS_MEDIA_TYPE_T;
+
+#ifndef STATIC_STRING_BUFFER_SZ
+#define STATIC_STRING_BUFFER_SZ	512
+#endif
+
+/**
+ *	DVR Free Space Information type definition.
+*/
+typedef struct
+{
+	UINT8 storagebarType;
+	UINT32 pFreeSpace;
+	UINT8 pUsedPercent;
+	UINT8 pHDTimeStr[STATIC_STRING_BUFFER_SZ];
+	UINT8 pSDTimeStr[STATIC_STRING_BUFFER_SZ];
+	UINT16 errStr[STATIC_STRING_BUFFER_SZ];
+	UINT8 pFreeSpaceStr[STATIC_STRING_BUFFER_SZ];
+} HOA_SMTS_DVR_FREE_SPACE_INFO_T;
 
 typedef enum {
 	HOA_DEV_TYPE_NONE 					= 0,
@@ -2293,6 +2735,7 @@ typedef enum {
 	HOA_DEV_TYPE_UTIL_MOTION_DONGLE 	= 22,
 	HOA_DEV_TYPE_UTIL_VOD				= 23,
 	HOA_DEV_TYPE_APP_APPSTORE 			= 24,
+	HOA_DEV_TYPE_EXT_DIIVA				= 25,
 } HOA_LINKED_DEVICE_TYPE_T;
 
 
@@ -2365,6 +2808,112 @@ typedef enum TAG_TIME_OPTION_T
  */
 typedef void (*VCS_CB_T)(VCS_CB_MSG_T msg, UINT32 eventSize, char *pEvent, UINT32 dataSize, char *pData);
 
+#ifndef __MLM_RECENT_TYPE_DEF__
+#define __MLM_RECENT_TYPE_DEF__
+ /*
+  * MLM RECENT Type.
+  *   Warning : You must modified mlm_api.h when this enum changed!.
+  */
+typedef enum
+{
+	MLM_RECENT_EMPTY = 0,
+	MLM_RECENT_TYPE_MOVIE   ,       // 동영상
+	MLM_RECENT_TYPE_PHOTO   ,       // 사진
+	MLM_RECENT_TYPE_AUDIO   ,       // 음악
+	MLM_RECENT_TYPE_RECORDEDTV,     // recorded TV
+	MLM_RECENT_TYPE_APP     ,       // App/CP
+	MLM_RECENT_TYPE_WEB     ,       // Web
+} MLM_RECENT_TYPE_T;
+#endif
+
+/**
+ * GESTURE callback func type
+ */
+typedef void (*GESTURE_CB_T)(int gesture_type, int gesture_time, int key_value, int shmid, int buffer_size);
+
+/**
+ *	Gesture Game에서 사용하는 Enumeration
+ */
+typedef enum GESTURE_DATA_TYPE
+{
+	GESTURE_SKELETON    	,
+	GESTURE_DEPTH       	,
+	GESTURE_SILHOUETTE  	,
+	GESTURE_RGB         	,
+	GESTURE_SKELETON_OFF    ,
+	GESTURE_DEPTH_OFF   	,
+	GESTURE_SILHOUETTE_OFF	,
+	GESTURE_RGB_OFF      	,
+}GESTURE_DATA_TYPE_T;
+/**
+ *	Gesture Game에서 사용하는 HOA함수를 위한 Enumeration
+ */
+typedef enum HOA_GESTURE_MODE_TYPE
+{
+	HOA_GESTURE_HAND_ON = 0,
+	HOA_GESTURE_BODY_ON,
+}HOA_GESTURE_MODE_TYPE_T;
+/**
+ *	Gesture Game에서 사용하는 HOA함수를 위한 Enumeration
+ */
+typedef enum HOA_GESTURE_DATA_RESOLUTION
+{
+	HOA_GESTURE_RESOLUTION_OFF,			//for All data
+	HOA_GESTURE_RESOLUTION_1BIT_QVGA,	//for Silhouette data
+	HOA_GESTURE_RESOLUTION_8BIT_VGA,	//for Depth and RGB data
+	HOA_GESTURE_RESOLUTION_8BIT_QVGA,	//for Depth and RGB data
+	HOA_GESTURE_RESOLUTION_8BIT_QQVGA,	//for Depth and RGB data
+	HOA_GESTURE_RESOLUTION_16BIT_VGA,	//for Depth and RGB data
+	HOA_GESTURE_RESOLUTION_16BIT_QVGA,	//for Depth and RGB data
+	HOA_GESTURE_RESOLUTION_16BIT_QQVGA,	//for Depth and RGB data
+}HOA_GESTURE_DATA_RESOLUTION_T;
+/**
+ *	Gesture Game에서 사용하는 HOA함수를 위한 Enumeration
+ */
+typedef enum HOA_GESTURE_REQUEST_DATA
+{
+	HOA_GESTURE_REQUEST_DEPTH = 0x01,
+	HOA_GESTURE_REQUEST_SILHOUETTE,
+	HOA_GESTURE_REQUEST_RGB,
+}HOA_GESTURE_REQUEST_DATA_T;
+
+typedef struct RECEVIED_GESTURE_HAND_DATA
+{
+	int gestureName;
+	int gestureType;
+	int grip;
+	float x;
+	float y;
+	float z;
+}RECEVIED_GESTURE_HAND_DATA_T;
+
+typedef struct RECEVIED_GESTURE_BODY_JOINT_DATA
+{
+	float x;
+	float y;
+	float z;
+	float confidence;
+	float rotationMatrix[9];
+} RECEVIED_GESTURE_BODY_JOINT_DATA_T;
+
+typedef struct RECEVIED_GESTURE_BODY_DATA
+{
+	int gesture1;
+	int gesture2;
+	int gesture3;
+	int gesture4;
+	int gesture5;
+	struct RECEVIED_GESTURE_BODY_JOINT_DATA jointData[15];
+
+} RECEVIED_GESTURE_BODY_DATA_T;
+
+typedef struct RECEVIED_GESTURE_IMAGE_DATA
+{
+	int resolution;
+	int last;
+	unsigned char *data;
+} RECEVIED_GESTURE_IMAGE_DATA_T;
+
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -2404,6 +2953,22 @@ typedef enum HOA_MCAST_CMD
 	HOA_MCAST_SCMD_CREATEJPGLIST,
 } HOA_MCAST_CMD_T;
 
+/**
+*  Callback Message of FXUI
+*/
+typedef enum FXUI_CB_MSG
+{
+	FXUI_CB_MSG_NONE 	= 0x00,
+	FXUI_CB_MSG_AGREETERM,
+	FXUI_CB_MSG_LAST
+} FXUI_CB_MSG_T;
+
+
+/**
+ * FXUI callback func type
+ */
+typedef void (*FXUI_CB_T)(FXUI_CB_MSG_T msg, UINT32 dataSize, char *pData);
+
 
 /**
  * Structure of MemoCast Flash Setting Info.
@@ -2432,10 +2997,81 @@ typedef enum HOA_MCAST_RET_VAL
 	HOA_MCAST_RET_USB_OK,
 } HOA_MCAST_RET_VAL_T;
 
+/**
+ * Av Setting / EasySetting.
+ */
+typedef enum HOA_EASYSETTING_T
+{
+	HOA_NATIVE_EASYSETTING_NONE,
+	HOA_NATIVE_EASYSETTING_MOVIE,		/**< MOVIE */
+	HOA_NATIVE_EASYSETTING_PHOTO,		/**< PHOTO */
+	HOA_NATIVE_EASYSETTING_MUSIC,		/**< MUSIC */
+	HOA_NATIVE_EASYSETTING_IDLE,		/**< IDLE */
+	HOA_NATIVE_EASYSETTING_AUDIOMENU,	/**< AUDIOMENU */
+	HOA_NATIVE_EASYSETTING_NOT_USE, 	/**< CP에서 사용하지 않는 경우 */
+	HOA_EASYSETTING_MAX,
+} HOA_EASYSETTING_T;
+
+/*
+	HOA Caption TYPE
+*/
+typedef enum HOA_CAPTION_T
+{
+	HOA_NATIVE_CAPTION_NONE,
+	HOA_NATIVE_CAPTION_STOP,
+	HOA_NATIVE_CAPTION_MAX,
+} HOA_CAPTION_T;
+
+
+/**
+ * device connect/disonnect msg box type.
+ */
+typedef enum HOA_MSGBOX_T
+{
+	/** param[0] = type */
+	HOA_MSGBOX_HID_CONNECT = 0,		/**< HID device Connect/Disconnect msg , param[1] = MSG_MFS2UI_DEV_ATTACHED or MSG_MFS2UI_DEV_DETACHED, param[2] = devNum*/
+	HOA_MSGBOX_LAN_CONNECT = 1,		/**< Lan plug-in/plug-out msg, param[1] = EVENT_ETHERNET_PLUGGED or EVENT_ETHERNET_UNPLUGGED */
+	HOA_MSGBOX_WIFI_DONGLE_CONNECT = 2,
+	HOA_MSGBOX_MAX,
+} HOA_MSGBOX_T;
+
+/**
+* home dash board status setting for screen saver(PDP only).
+*/
+typedef enum HOME_STATUS_T
+{
+	HOME_STATUS_NONE 	= 0,
+	HOME_STATUS_NONE_TV = 1,
+	HOME_STATUS_SHOW_TV = 2
+}HOME_STATUS_T;
+
+typedef enum HOA_DRAG_MODE_T{
+	DRAG_MODE_NONE = 0,
+	DRAG_MODE_HORIZONTAL = 1,
+	DRAG_MODE_VERTICAL = 2,
+}HOA_DRAG_MODE_T;
+/**
+ * Dimming 상태를 나타냄.
+ */
+typedef enum
+{
+	DIMMING_OFF 	= 	0,	/* Dimming Off  : 강제로 백라치트 100 세팅됨. (최대밝기)*/
+	DIMMING_LOW 	= 	1,	/* Dimming Low : 강제로 어둡게. */
+	DIMMING_HIGH 	= 	2,	/* Dimming High : 사용자가 선택한 값대로. (백라이트)*/
+
+} HOA_DIMMING_STATE_T;
+
+
+
 //////////////////////////////////////////////////////////////////////////////////
 // Types for MemoCast(PDP Only)
 // End
 //////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Eanbled Display callback func type
+ */
+typedef void (*ENABLED_DISPLAY_CB_T)(SINT32 *pDisplayID);
 
 
 #ifdef __cplusplus

@@ -36,11 +36,11 @@ HOA_STATUS_T 	HOA_CTRL_SetAVBlockEx(BOOLEAN bBlockAudio, BOOLEAN bBlockVideo);
 HOA_STATUS_T	HOA_CTRL_ResetAVBlock(void);
 HOA_STATUS_T 	HOA_CTRL_ChannelDown(BOOLEAN bShowBanner, /*out*/API_CHANNEL_NUM_T *pChannelNum);
 HOA_STATUS_T 	HOA_CTRL_ChannelUp(BOOLEAN bShowBanner, /*out*/API_CHANNEL_NUM_T *pChannelNum);
-HOA_STATUS_T 	HOA_CTRL_GetBlackOutType(/*out*/HOA_BLACKOUT_TYPE_T *tBlackOut,/*out*/HOA_STRING_T* sBlackOut);
-HOA_STATUS_T 	HOA_CTRL_FreeBlackOutType(HOA_STRING_T* sBlackOut);
+HOA_STATUS_T 	HOA_CTRL_GetBlackOutType(/*out*/HOA_BLACKOUT_TYPE_T *tBlackOut,/*out*/HOA_BLACKOUT_STRING_T* sBlackOut);
 HOA_STATUS_T 	HOA_CTRL_GetCurrentAVBlock(/*out*/BOOLEAN *pbBlockAudio, /*out*/BOOLEAN *pbBlockVideo);
 HOA_STATUS_T 	HOA_CTRL_IsDVB(BOOLEAN *pbDVB);
 HOA_STATUS_T 	HOA_CTRL_GetCurrentChannel(/*out*/HOA_CHANNEL_INFO_T *pChannelInfo);
+HOA_STATUS_T 	HOA_CTRL_GetCurrentInputSourceString(HOA_INPUTSOURCE_STRING_T *pInputSourceStr);
 HOA_STATUS_T 	HOA_CTRL_SetChannel(BOOLEAN bShowBanner, API_CHANNEL_NUM_T *pChannelNum);
 HOA_STATUS_T 	HOA_CTRL_SetScreensaverOff(BOOLEAN bOff);
 HOA_STATUS_T	HOA_CTRL_GetCurrentTime(TIME_T	*pTime);
@@ -51,6 +51,9 @@ HOA_STATUS_T 	HOA_CTRL_GetLanguage(UINT32 *pLanguage);
 
 HOA_STATUS_T	HOA_CTRL_Get3DMode(HOA_TV_3D_INPUTMODE_TYPE_T *p3DType, BOOLEAN *pbLRBalance);
 HOA_STATUS_T 	HOA_CTRL_Set3DMaster(BOOLEAN b3DMaster, BOOLEAN b2Dto3DMaster, BOOLEAN bEnter);
+HOA_STATUS_T 	HOA_CTRL_Set3DGraphicPreAct(BOOLEAN bEnter);
+HOA_STATUS_T 	HOA_CTRL_Set3DGraphicMaster(BOOLEAN b3DOnOff, HOA_TV_3D_INPUTMODE_TYPE_T e3DType, BOOLEAN bLRBalance);
+
 
 HOA_STATUS_T 	HOA_CTRL_CreateAppsInitMsgBox(void);
 HOA_STATUS_T 	HOA_CTRL_SetVolume(BOOLEAN bShowVolumebar, HOA_APP_TYPE_T appType, BOOLEAN bRelative, SINT8 volumeIn, /*out*/UINT8 *pVolumeOut);
@@ -63,22 +66,29 @@ HOA_STATUS_T 	HOA_CTRL_ResetAspectRatio(void);
 HOA_STATUS_T 	HOA_CTRL_SetDefaultPQ(void);
 HOA_STATUS_T 	HOA_CTRL_SetLocalDimmingOFF(void);
 HOA_STATUS_T 	HOA_CTRL_GetCurrentTime(TIME_T *pTime);
+HOA_STATUS_T 	HOA_CTRL_CreateSetupByListID(HOA_MENU_LIST_ID_T menuListID);
 HOA_STATUS_T 	HOA_CTRL_SetAudioMode(HOA_AUDIO_MODE_T audioMode);
 HOA_STATUS_T 	HOA_CTRL_GetAudioMode(HOA_AUDIO_MODE_T *pAudioMode);
 HOA_STATUS_T 	HOA_CTRL_GetLanguage(UINT32 *pLanguage);
+HOA_STATUS_T 	HOA_CTRL_GetVoiceLanguage(UINT32 *gCurrLang);
 HOA_STATUS_T 	HOA_CTRL_GetCountry(UINT32 *pCountry);
 HOA_STATUS_T 	HOA_CTRL_GetLocaleInfo(UINT32 localeType, UINT32 *pLocaleInfo);
+HOA_STATUS_T 	HOA_CTRL_GetMRCUInfo(UINT32 mrcuType, UINT32 *pMrcuInfo);
 HOA_STATUS_T	HOA_CTRL_CheckPassword(UINT8 *pPassword, BOOLEAN *pbMatched);
 HOA_STATUS_T	HOA_CTRL_GetParentalGuidanceSettings(HOA_RATING_TYPE_T ratingType, UINT8 settingsSize, /*out*/UINT8 *pSettings);
 HOA_STATUS_T	HOA_CTRL_GetParentalLockOnOff(BOOLEAN *pbOn);
 HOA_STATUS_T	HOA_CTRL_SwitchToOSD(HOA_CTRL_OSD_TYPE_T osdType, HOA_CTRL_OSD_UPDATE_TYPE_T updateType);
 HOA_STATUS_T	HOA_CTRL_SetNSUMenu(void);
+HOA_STATUS_T 	HOA_CTRL_SetVoiceWinRect(int x, int y, int width, int height);
+HOA_STATUS_T 	HOA_CTRL_RequestMsgBox(UINT32 type, UINT32 param1, UINT32 param2, UINT32 param3);
 HOA_STATUS_T 	HOA_CTRL_GetDisplayMode(HOA_DISPLAYMODE_T *pDisplayMode);
 HOA_STATUS_T	HOA_CTRL_GetScheduleList(HOA_SCHEDULE_INFO_LIST_T *pScheduleInfoList);
 HOA_STATUS_T	HOA_CTRL_FreeScheduleList(HOA_SCHEDULE_INFO_LIST_T *pScheduleInfoList);
 HOA_STATUS_T	HOA_CTRL_FreeChannelList(HOA_CHANNEL_LIST_T *pChannelList);
 HOA_STATUS_T	HOA_CTRL_FreeEventInfoList(HOA_EVENT_INFO_LIST_T *pEventInfoList);
 HOA_STATUS_T	HOA_CTRL_GetChannelList(UINT32 attribute, UINT32 startNum, HOA_CHANNEL_LIST_T *pChannelList);
+HOA_STATUS_T	HOA_CTRL_FreeChannelListByType(HOA_CHANNEL_LIST_T *pChannelList);
+HOA_STATUS_T	HOA_CTRL_GetChannelListByType(UINT32 attribute, UINT32 inputMask, UINT32 startNum, HOA_CHANNEL_LIST_T *pChannelList);
 HOA_STATUS_T 	HOA_CTRL_GetSecureSerialNumber(UINT8 serial[256]);
 HOA_STATUS_T 	HOA_CTRL_GetCurrentAspectRatio(HOA_ASPECT_RATIO_T *pRatio);
 HOA_STATUS_T 	HOA_CTRL_GetCurrentDisplayArea(HOA_RECT_T *pInRect, HOA_RECT_T *pOutRect);
@@ -89,17 +99,21 @@ HOA_STATUS_T 	HOA_CTRL_GetNetcastPlatformVer(char** ppVer);
 
 HOA_STATUS_T 	HOA_CTRL_GetMediaServerCount (UINT32 *pCount);
 HOA_STATUS_T 	HOA_CTRL_GetMediaServerList (MEDIA_SERVER_LIST_T *pServerList);
-HOA_STATUS_T 	HOA_CTRL_DoCommand2UI(UINT32 nCmd, UINT32 *param);
-HOA_STATUS_T 	HOA_CTRL_GetPictureValue(UINT32 nitemID, UINT16 *pValue);
+HOA_STATUS_T 	HOA_CTRL_DoCommand2UI(UINT32 nCmd, int *param);
+HOA_STATUS_T 	HOA_CTRL_GetPictureValue(UINT32 nitemID, int *pValue);
 HOA_STATUS_T 	HOA_CTRL_CreateDefaultBanner(void);
 
 HOA_STATUS_T HOA_CTRL_SetVideoResize(HOA_RECT_T resizeRect, BOOLEAN bDirect, BOOLEAN bSetARC);
 HOA_STATUS_T HOA_CTRL_SetResetVideoResize(void);
 
 HOA_STATUS_T 	HOA_CTRL_UpdateErrLog(int module, long result, char *pErrCode);
+
+HOA_STATUS_T HOA_CTRL_PopupPairingWindow (int param);
+
 HOA_STATUS_T 	HOA_CTRL_Is2PartChannelNation(BOOLEAN *pb2PartChannelNation);
 HOA_STATUS_T	HOA_CTRL_IsAllChannelEmpty(BOOLEAN *pbAllChannelEmpty);
 HOA_STATUS_T 	HOA_CTRL_GetGuideCardInfo(HOA_EVENT_INFO_LIST_T* hoaEventInfoList);
+HOA_STATUS_T 	HOA_CTRL_GetEventInfoList(API_CHANNEL_NUM_T *pChannelNum, TIME_T *pStartTime, TIME_T *pEndTime, HOA_EVENT_INFO_T **ppEventInfoList, UINT16 *pNumEvent);
 HOA_STATUS_T 	HOA_CTRL_GetCurrentInputInfo(HOA_MEDIA_PATH_INDEX_T pathIndex, HOA_TV_SOURCE_TYPE_T *sourceType);
 HOA_STATUS_T 	HOA_CTRL_IsReservedEvent(API_CHANNEL_NUM_T *pChannelNum, UINT8 *startTime, UINT8 *endTime, UINT32 eventID,SCHEDULE_TYPE_T *resvType);
 
@@ -107,14 +121,15 @@ HOA_STATUS_T 	HOA_CTRL_IsReservedEvent(API_CHANNEL_NUM_T *pChannelNum, UINT8 *st
 HOA_STATUS_T 	HOA_HBBTV_Call( HBBTV_MALLOC_T funcMAlloc, UINT8 **ppRet, UINT32 *pRetSz, UINT8 *pParam, UINT32 nParamSz );
 
 HOA_STATUS_T	HOA_CTRL_GetHbbTVStatus(BOOLEAN *pbHbbTVStatus);
-HOA_STATUS_T 	HOA_CTRL_CreateSNSMenu(UINT32 *GrWindowId);
 HOA_STATUS_T 	HOA_CTRL_GetAudioLanguage(UINT32 *pAudioLanguage);
 HOA_STATUS_T	HOA_CTRL_GetAudioMode(HOA_AUDIO_MODE_T *pAudioMode);
 HOA_STATUS_T 	HOA_CTRL_SetAudioMode(HOA_AUDIO_MODE_T audioMode);
 HOA_STATUS_T    HOA_CTRL_SmartTextSupport(ADDON_HOST_USER_SMART_MSG_T showSlect, ADDON_SMART_TEXT_T smartText);
+//HOA_STATUS_T    HOA_CTRL_SmartTextSupport(ADDON_HOST_USER_SMART_MSG_T showSlect, ADDON_SMART_TEXT_T* pSmartText);
 HOA_STATUS_T 	HOA_CTRL_GetLocaleInfo(UINT32 localeType, UINT32 *pLocaleInfo);
 HOA_STATUS_T 	HOA_CTRL_GetLocalTimeOffset(BOOLEAN *pbPlus, UINT8 *pOffsetHour, UINT8 *pOffsetMin);
 HOA_STATUS_T 	HOA_CTRL_GetNSUVersion(UINT32 *pVersion);
+HOA_STATUS_T 	HOA_CTRL_GetNSUStatus(HOA_NSU_STATE_T *pState);
 HOA_STATUS_T 	HOA_CTRL_EnterVirtualPath (MEDIA_TRANSPORT_T mediaTransportType,
 MEDIA_FORMAT_T	combinedFormatType, MEDIA_CODEC_T combinedCodecType);
 HOA_STATUS_T 	HOA_CTRL_ExitVirtualPath(void);
@@ -155,26 +170,25 @@ HOA_STATUS_T 	HOA_CTRL_IsSupportSkype(BOOLEAN *pbSupportSkype);
 HOA_STATUS_T 	HOA_CTRL_GetDisplayResolutionMD(UINT32 *pDispResolution);
 HOA_STATUS_T 	HOA_CTRL_GetOsdResolution(UINT32 *pOSDResolution);
 HOA_STATUS_T 	HOA_CTRL_Get3DSupportType(SUPPORT_3D_TYPE_T *p3DMode);
-HOA_STATUS_T 	HOA_CTRL_IsSupportMotionRemocon(MOTION_REMOCON_TYPE_T	*pMCtype);
+HOA_STATUS_T 	HOA_CTRL_IsSupportMotionRemocon(BOOLEAN	*pMCtype);
 HOA_STATUS_T	HOA_CTRL_SetRecentItem( UINT32 recentType, UINT32 iconPathSz, CHAR *iconPath, UINT32 etcDataSz, CHAR *etcData);
 HOA_STATUS_T 	HOA_CTRL_GetPlatformInfo(char** ppInfo);
 HOA_STATUS_T 	HOA_CTRL_ConvTime2UnicodeString( TIME_T time,TIME_OPTION_T option, char *pszData );
-HOA_STATUS_T 	HOA_CTRL_DTV_Action_InDetail(HOA_DTV_DETAIL_ACTION_SPEC_T detail_spec);
+HOA_STATUS_T 	HOA_CTRL_SetDTVProperties(HOA_DTV_DETAIL_ACTION_SPEC_T detail_spec);
+HOA_STATUS_T	HOA_CTRL_DTV_SetAdaptiveDisplay(BOOLEAN bSet);
 
+HOA_STATUS_T 	HOA_CTRL_IsSupportNordic (BOOLEAN *bSupportNordic);
 
 
 /* bc_openapi_send2tv_io.c */
-HOA_STATUS_T 	HOA_IO_GetAvailableStorage(UINT32 *pStorage);
 HOA_STATUS_T 	HOA_IO_GetMountedDevList(HOA_IO_MOUNT_DEV_LIST_T *pusbMount);
-HOA_STATUS_T	HOA_IO_GetUSBDevType(UINT32 *pusbDevType);
 HOA_STATUS_T 	HOA_IO_GetUSBDeviceNum(UINT32 *pusbDevNum, HOA_IO_USB_DEV_TYPE_T usbDevType);
-HOA_STATUS_T 	HOA_IO_SetUSBFormat(CHAR *pDevName, HOA_IO_USB_DEV_TYPE_T deviceType);
 HOA_STATUS_T 	HOA_IO_SetUSBDevFormat(UINT32 usbDevNum, HOA_IO_USB_DEV_TYPE_T deviceType);
 HOA_STATUS_T 	HOA_IO_GetMaxDevNum(UINT32 *pMaxDevNum);
 HOA_STATUS_T 	HOA_IO_GetUSBProductName(UINT32 usbDevNum, CHAR *pusbProductName);
 HOA_STATUS_T 	HOA_IO_GetStoragePath(UINT32 usbDevNum, char *pszPath);
 HOA_STATUS_T 	HOA_IO_GetDeviceInfo(UINT32 usbDevNum, HOA_IO_USB_DEV_INFO_T *pusbDevInfo);
-//HOA_STATUS_T 	HOA_DOWNLOAD_StartFormat1(UINT32 discId);
+HOA_STATUS_T 	HOA_IO_GetGeneralUSBDevInfo(UINT32 usbDevNum, HOA_IO_GENUSB_DEV_INFO_T *pGenUsbDevInfo);
 
 HOA_STATUS_T 	HOA_IO_GetBSIOnOff(BOOLEAN *pbBSIOn);
 HOA_STATUS_T 	HOA_IO_PrintBSI(const char * pcBSIMsg, ...);
@@ -184,12 +198,15 @@ HOA_STATUS_T 	HOA_IO_GetDisplayResolution(UINT32 *pWidth, UINT32 *pHeight);
 HOA_STATUS_T 	HOA_IO_GetInstartSystemInformation(HOA_INSTART_SYSTEM_INFO_T *pInstartsysteminfo);
 HOA_STATUS_T 	HOA_IO_GetSystemInfo(HOA_CTRL_INFO_T *pSystemInfo);
 
-HOA_STATUS_T 	HOA_IO_CheckAppStoreInternal(HOA_TVAPPS_APPSTORE_CHECK_TYPE_T *pCheckAppStore);
 HOA_STATUS_T 	HOA_IO_CheckCPBox(BOOLEAN *pbCPBox);
+HOA_STATUS_T 	HOA_IO_CheckSampleSet(BOOLEAN *pbSampleSet);
+
 HOA_STATUS_T 	HOA_IO_CopyFile(char *pszPathSrc, char *pszPathDest);
 HOA_STATUS_T 	HOA_IO_DeleteFile(char *pszPath, BOOLEAN bRecursive);
 HOA_STATUS_T 	HOA_IO_MoveFile(char *pszPathSrc, char *pszPathDest);
+HOA_STATUS_T 	HOA_IO_SetSystemReboot(void);
 HOA_STATUS_T 	HOA_IO_SetAppStoreInternalFormat(void);
+HOA_STATUS_T	HOA_IO_SetAppStoreInternalMount(void);
 
 HOA_STATUS_T  HOA_IO_GetNetworkStatus(char *pszIpAddress , HOA_NETWORK_TYPE_T *pActivatedNetwork, HOA_NETWORK_STATUS_T *pStatus);
 HOA_STATUS_T  HOA_IO_GetNetworkSettings(HOA_NETWORK_TYPE_T networkType, HOA_NETCONFIG_T *pNetworkSettings);
@@ -215,14 +232,17 @@ HOA_STATUS_T 	HOA_CRYPTO_SFU_GetAESKey(UINT8 *pData);
 
 HOA_STATUS_T 	HOA_CTRL_Request_Login(void);
 HOA_STATUS_T	HOA_CTRL_Request_Signup(void);
-HOA_STATUS_T 	HOA_CTRL_Request_ConfirmUser(HOA_LOGIN_CONFIRM_TYPE_T type);
+HOA_STATUS_T 	HOA_CTRL_Request_ConfirmUser(HOA_LOGIN_CONFIRM_TYPE_T type); /* 구매인증/성인인증/회원탈퇴 */
 HOA_STATUS_T 	HOA_CTRL_Request_Purchase(SDPIF_PURCHASE_IN_T purchaseIn);
+HOA_STATUS_T 	HOA_CTRL_Request_ChangePwd(void);
+HOA_STATUS_T	HOA_CTRL_Request_LoginWithUserID(char *pID);
 HOA_STATUS_T 	HOA_CTRL_SetAgreedTerms(BOOLEAN popup);
 HOA_STATUS_T 	HOA_CTRL_BillingCBRegister(BILLING_CB_T pfnBillingCB);
 HOA_STATUS_T 	HOA_SDPIF_SetShowSelectCountry(BOOLEAN bIsShow);
 HOA_STATUS_T 	HOA_SDPIF_RequestNordicCountryInformation(BOOLEAN *pNordicCountryInfo);
 HOA_STATUS_T 	HOA_SDPIF_NotifyCountryAuto(BOOLEAN bAutoCountry);
 HOA_STATUS_T 	HOA_SDPIF_GetShowSelectCountry (BOOLEAN *bIsShow);
+HOA_STATUS_T    HOA_CTRL_Request_PowerOff(void);
 
 // Smart Share
 HOA_STATUS_T 	HOA_SMTS_GetInitScene(UINT32* pScene);
@@ -230,10 +250,15 @@ HOA_STATUS_T	HOA_SMTS_Initialize(UINT32* pResult);
 HOA_STATUS_T	HOA_SMTS_Finalize(void);
 HOA_STATUS_T	HOA_SMTS_InitList(HOA_SMTS_LIST_TYPE_T hoaListType, HOA_SMTS_SORT_TYPE_T hoaSortType, UINT8 *pFullPath
 											, UINT32 maxPageItemNum, UINT32 *pTotalItemNum);
-HOA_STATUS_T	HOA_SMTS_UpdatePage(UINT32 mode, UINT32 param, UINT32 *pTotalItemNum);
+HOA_STATUS_T	HOA_SMTS_UpdatePage(HOA_SMTS_LIST_TYPE_T hoaListType
+												, UINT8 *pDeviceId
+												, UINT32 maxPageItemNum
+												, UINT32 mode
+												, UINT32 param
+												, UINT32 *pTotalItemNum);
 HOA_STATUS_T	HOA_SMTS_GetLastFocusMediaId(UINT32 *pTotalItemNum, UINT32 *pMediaId);
 HOA_STATUS_T 	HOA_SMTS_SetCurrentListType(UINT32 listType);
-HOA_STATUS_T 	HOA_SMTS_GetListItemArray(UINT32 mediaId, UINT32 count, AF_BUFFER_HNDL_T* pBuffHandler);
+HOA_STATUS_T 	HOA_SMTS_GetListItemArray(HOA_SMTS_LIST_TYPE_T hoaListType, UINT32 mediaId, UINT32 count, UINT32 *pRetCount, AF_BUFFER_HNDL_T* pBuffHandler);
 HOA_STATUS_T 	HOA_SMTS_ClearListItemArray(void);
 HOA_STATUS_T	HOA_SMTS_GetVideoMetaByMediaId(UINT32 mediaId, HOA_SMTS_VIDEO_METADATA_T *pMeta);
 HOA_STATUS_T	HOA_SMTS_GetPhotoMetaByMediaId(UINT32 mediaId, HOA_SMTS_PHOTO_METADATA_T *pMeta);
@@ -241,7 +266,8 @@ HOA_STATUS_T	HOA_SMTS_GetMusicMetaByMediaId(UINT32 mediaId, HOA_SMTS_MUSIC_METAD
 HOA_STATUS_T	HOA_SMTS_GetRecTvMetaByMediaId(UINT32 mediaId, HOA_SMTS_RECTV_METADATA_T *pMeta);
 HOA_STATUS_T	HOA_SMTS_Play(UINT32 type, UINT32 mediaId);
 HOA_STATUS_T	HOA_SMTS_CheckIsRecording(BOOLEAN* pisRecording);
-HOA_STATUS_T 	HOA_SMTS_GetCurrentSortMode(int cType, int *pMode);
+HOA_STATUS_T 	HOA_SMTS_SetCurrentSortMode(HOA_SMTS_SORT_TYPE_T sMode);
+HOA_STATUS_T 	HOA_SMTS_GetCurrentSortMode(HOA_SMTS_LIST_TYPE_T cType, HOA_SMTS_SORT_TYPE_T *pMode);
 HOA_STATUS_T 	HOA_SMTS_GetTotlaLinkedDeviceNum(int *pLength);
 HOA_STATUS_T 	HOA_SMTS_GetLinkedDeviceInfo(AF_BUFFER_HNDL_T* pBuffHandler);
 HOA_STATUS_T	HOA_SMTS_SetExecuteDevice(UINT32 dataId,BOOLEAN bTimer);
@@ -254,9 +280,22 @@ HOA_STATUS_T	HOA_SMTS_SetVideoSize(BOOLEAN bResize);
 HOA_STATUS_T	HOA_SMTS_SetInputLabel(UINT32 dataId,UINT32 inputLabelIndex);
 HOA_STATUS_T 	HOA_SMTS_GetConnectHeadset(BOOLEAN *bConnect);
 HOA_STATUS_T 	HOA_SMTS_CBRegister(SMTS_CB_T pfnSMTSCB);
+HOA_STATUS_T 	HOA_SMTS_HomeSmtsCBRegister(SMTS_CB_T pfnSMTSCB);
 HOA_STATUS_T 	HOA_SMTS_SetInitScene(UINT32 listType);
-HOA_STATUS_T 	HOA_SMTS_GetRegionInfo(int *nRegion);
-HOA_STATUS_T 	HOA_SMTS_StartThumbnail(void);
+HOA_STATUS_T 	HOA_SMTS_StartThumbnail(UINT32 listType);
+HOA_STATUS_T 	HOA_SMTS_CreateNativePopup(int wType, int nStartPage);
+HOA_STATUS_T	HOA_SMTS_GetDVRFreeSpaceInfo(AF_BUFFER_HNDL_T* pBuffHandler);
+HOA_STATUS_T 	HOA_SMTS_SubtitleSetting(MEDIA_CHANNEL_T ch);
+HOA_STATUS_T 	HOA_SMTS_GetUpdateInfo(BOOLEAN* bUpdateState, AF_BUFFER_HNDL_T* pShmBuffer);
+HOA_STATUS_T 	HOA_SMTS_GetText(int index, AF_BUFFER_HNDL_T* pShmBuffer);
+HOA_STATUS_T	HOA_SMTS_DeleteRecTVPrograms(UINT32 *pItemIndexArray, UINT32 nArraySize);
+HOA_STATUS_T	HOA_SMTS_PlayRecTVPrograms(UINT32 *pItemIndexArray, UINT32 nArraySize);
+HOA_STATUS_T	HOA_SMTS_SetDeviceMenuType(UINT32 type);
+HOA_STATUS_T 	HOA_SMTS_GetLinkedDeviceNum_Home(int *pLength);
+HOA_STATUS_T 	HOA_SMTS_GetLinkedDeviceInfo_Home(AF_BUFFER_HNDL_T* pBuffHandler);
+HOA_STATUS_T	HOA_SMTS_SetRecTVProgramTitle(UINT32 nMediaID, UINT32 *pNewTitleString, size_t nStringLength);
+HOA_STATUS_T	HOA_SMTS_RenameRecTVProgram(UINT32 nMediaID);
+HOA_STATUS_T	HOA_SMTS_FreeThumbnail(AF_BUFFER_HNDL_T *pSharedMemHandle);
 
 
 // Mcast
@@ -271,7 +310,18 @@ HOA_STATUS_T HOA_MCAST_ResizeVideoForPR(UINT8 uPRSize, UINT8 uPRPos);
 HOA_STATUS_T HOA_MCAST_ResetResizeVideoForPR(UINT8 uPRSize);
 
 // Photo (temp)
-HOA_STATUS_T HOA_PHOTO_PlayImageFile(UINT32 deviceType, char *pszFilePath, BOOLEAN bDisplayImageDirectly, UINT32 timeStamp);
+HOA_STATUS_T HOA_MEDIA_PlayImageFile(UINT32 deviceType, char *pszFilePath, UINT32 imageType);
+HOA_STATUS_T HOA_MEDIA_PlayImageFileWithID(UINT32 deviceType, UINT32 imageID);
+HOA_STATUS_T HOA_MEDIA_StartImageCache(char *pszFilePath, UINT32 imageType, UINT32 *imageID);
+HOA_STATUS_T HOA_MEDIA_CancelImageCache(UINT32 imageID);
+HOA_STATUS_T HOA_MEDIA_DeleteImageCache(UINT32 imageID);
+HOA_STATUS_T HOA_CTRL_PrintImageCacheList(void);
+HOA_STATUS_T HOA_CTRL_RegisterImageCallback(MEDIA_CHANNEL_T ch, CTRL_IMAGE_CB_T pfnImageCB);
+HOA_STATUS_T HOA_CTRL_StartChannel(void);
+HOA_STATUS_T HOA_CTRL_EndChannel(void);
+
+// home status(PDP only)
+HOA_STATUS_T HOA_CTRL_SetHomeStatus(HOME_STATUS_T homeStatus);
 
 #ifdef __cplusplus
 }

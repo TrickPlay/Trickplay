@@ -223,7 +223,7 @@ void TP_Controller_Finalize(TPContext* pContext)
 #endif
 }
 
-BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, PM_KEY_COND_T keyCond)
+BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, PM_KEY_COND_T keyCond, PM_ADDITIONAL_INPUT_INFO_T event)
 {
 	if ((_gpRemoteController == NULL) || (keyCond >= PM_KEY_COND_LAST))
 		return FALSE;
@@ -253,7 +253,7 @@ BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, PM_KEY_COND_T keyCond)
 BOOLEAN	TP_Controller_MouseEventCallback(
 		SINT32 posX, SINT32 posY,
 		UINT32 keyCode, PM_KEY_COND_T keyCond,
-		struct input_event event)
+		PM_ADDITIONAL_INPUT_INFO_T event)
 {
 	if (!_gbMouseEnabled)
 		return FALSE;

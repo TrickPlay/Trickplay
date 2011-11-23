@@ -59,9 +59,10 @@ extern "C" {
 #define	DEV_FILE_UINPUT					"/dev/uinput"
 
 /*	LGE's event device names */
-#define	DEV_NAME_INPUT_LGE_CTRL 		"LGE CTRL"
-#define	DEV_NAME_INPUT_LGE_RCU  		"LGE RCU"
-#define	DEV_NAME_INPUT_LGE_M_RCU		"LGE M-RCU - Builtin [0]"
+#define	DEV_NAME_INPUT_LGE_KEY_RETURNPATH 		"LGE KEY RETURNPATH" 		/*Return Path of IR, Keyboard */
+#define	DEV_NAME_INPUT_LGE_CURSOR_RETURNPATH 	"LGE CURSOR RETURNPATH" 	/*Return Path of MRCU, mouse*/
+#define	DEV_NAME_INPUT_LGE_RCU  					"LGE RCU"					/*IR*/
+#define	DEV_NAME_INPUT_LGE_M_RCU					"LGE M-RCU - Builtin"	    /*MRCU*/
 
 /*	Max number of inputs(event devices) */
 #define MAX_LINUX_INPUT_DEVICES 		16
@@ -130,7 +131,8 @@ typedef enum {
 	PEID_TYPE_REMOTE       				= 0x00000008,  /* Is a remote control. */
 	PEID_TYPE_VIRTUAL      				= 0x00000010,  /* Is a virtual input device. */
 
-	PEID_TYPE_RETURN      				= 0x00000020,  /* Is a return input device. */
+	PEID_TYPE_KEY_RETURN      			= 0x00000020,  /* Is a key(IR,keyboard)return input device. */
+	PEID_TYPE_CURSOR_RETURN				= 0x00000040,  /* Is a Cursor(MRCU,Mouse)return input device. */
 	PEID_TYPE_LGE          				= 0x00000080,  /* Is a LGE's input device. */
 
 	PEID_TYPE_ALL          				= 0x0000009F   /* All type flags set. */
@@ -190,6 +192,16 @@ typedef	struct	{
 	PM_EVENT_INPUT_FD_T			info;
 	PM_EVENT_INPUT_DEV_DESC_T	desc;
 } PM_EVENT_INPUT_T;
+
+/**
+ * PM_ADDITIONAL_INPUT_INFO_T.
+ */
+
+typedef struct
+{
+	struct input_event event;
+	SINT32 deviceID;
+} PM_ADDITIONAL_INPUT_INFO_T;
 
 #ifdef __cplusplus
 }

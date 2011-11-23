@@ -86,6 +86,9 @@ do {																	\
 		next = NULL;													\
 } while(0)
 
+/* NULL STRING POINTER */
+#define	SCF_NULL_STRING		""
+
 /**
  *	Type of SCF State
  */

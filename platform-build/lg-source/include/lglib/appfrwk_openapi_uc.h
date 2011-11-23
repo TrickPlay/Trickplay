@@ -49,11 +49,14 @@ HOA_STATUS_T		HOA_UC_SetAdultAuth(BOOLEAN bAdultAuth);
 
 HOA_STATUS_T		HOA_UC_GetCEK(const char* pszFilename, /*out*/UINT8* bszCEK, /*in/out*/ UINT32* pnBufferSize);
 
+/* Storage */ 
+HOA_STATUS_T		HOA_UC_MountAppStoreStorage(void);
+HOA_STATUS_T		HOA_UC_CheckAppStoreStorage(BOOLEAN *pMountStatus);
+HOA_STATUS_T		HOA_UC_InitializeAppStoreStorage(void);
+HOA_STATUS_T		HOA_UC_InitializeAppStoreUSBStorage(UINT32 usbDevNum);
 
 
 /* appfrwk_openapi_uc_msg_handler.c */
-HOA_STATUS_T 		UC_HNDL_AppManage(DBusConnection *conn, DBusMessage *msg, void *user_data);
-HOA_STATUS_T 		UC_HNDL_SendMsgToProcess(DBusConnection *conn, DBusMessage *msg, void *user_data);
 HOA_STATUS_T 		UC_HNDL_SendEventToProc(DBusConnection *conn, DBusMessage *msg, void *user_data);
 
 

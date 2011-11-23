@@ -7,12 +7,11 @@
 #include <unistd.h>
 #endif
 
+#include "trickplay/resource.h"
 #include "tp_common.h"
 #include "tp_settings.h"
 #include "tp_system.h"
-#ifdef USE_DRM_ENCRYPTED_APP
 #include "tp_drm.h"
-#endif
 #include "tp_controller.h"
 #include "tp_imagedecoder.h"
 #include "tp_mediaplayer.h"
@@ -21,7 +20,8 @@
 static TPContext* pContext = NULL;
 static char _gszAppPath[PATH_MAX];
 
-#ifdef USE_DRM_ENCRYPTED_APP
+// TODO sanggi0.lee - remove
+#if 0 // def USE_DRM_ENCRYPTED_APP
 static BOOLEAN _TP_GetAppID(int argc, char* argv[], UINT32* pAppID)
 {
 	if (pAppID == NULL)
@@ -81,7 +81,7 @@ static BOOLEAN _TP_InitContext(int argc, char* argv[])
 		return FALSE;
 	}
 
-#ifdef USE_DRM_ENCRYPTED_APP
+#if 0 //def USE_DRM_ENCRYPTED_APP
 	UINT32 appID = 0;
 
 	if (!_TP_GetAppID(argc, argv, &appID))
@@ -148,6 +148,8 @@ static BOOLEAN _TP_InitContext(int argc, char* argv[])
 	tp_context_set(pContext, TP_CONTROLLERS_ENABLED, "TRUE");
 	tp_context_set(pContext, TP_CONTROLLERS_NAME, "LG DTV");
 
+	tp_context_set_resource_loader(pContext, TP_RESOURCE_TYPE_LUA_SOURCE, TP_DRM_resource_loader, 0);
+
 	return TRUE;
 }
 
@@ -161,6 +163,7 @@ static void _TP_SetRuntimeEnvs(void)
 
 	/* temporary for this release (1.16.2) */
 	setenv("COGL_DEBUG", "disable-atlas", 1);
+	setenv("TP_ssl_verifypeer", "0", 1);
 }
 
 static BOOLEAN _TP_RunContext(void)
@@ -217,11 +220,16 @@ int main(int argc, char* argv[])
 			|| !TP_ImageDecoder_Initialize(pContext))
 		goto done;
 
-	TP_System_EnableFullDisplay();
+	// TODO sanggi0.lee - remove
+	//TP_System_EnableFullDisplay();
+	//TP_System_SetDisplayMode(TP_DISP_WIDGET);
+	TP_System_SetDisplayMode(TP_DISP_FULL);
 	result = _TP_RunContext() ? 0 : 1;
-	TP_System_DisableFullDisplay();
 
 done:
+	// TODO sanggi0.lee - remove
+	//TP_System_DisableFullDisplay();
+	TP_System_SetDisplayMode(TP_DISP_NONE);
 	TP_ImageDecoder_Finalize(pContext);
 	TP_MediaPlayer_Finalize(pContext);
 	TP_Controller_Finalize(pContext);

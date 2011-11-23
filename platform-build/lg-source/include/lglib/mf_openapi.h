@@ -91,6 +91,9 @@ HOA_STATUS_T HOA_MEDIA_PauseStream(MEDIA_CHANNEL_T ch);
 HOA_STATUS_T HOA_MEDIA_ResumeStream(MEDIA_CHANNEL_T ch);
 HOA_STATUS_T HOA_MEDIA_StopStream(MEDIA_CHANNEL_T ch);
 HOA_STATUS_T HOA_MEDIA_FlushStream(MEDIA_CHANNEL_T ch);
+HOA_STATUS_T HOA_MEDIA_SetTimeToDecode(MEDIA_CHANNEL_T ch, SINT64 decodedPTS);
+HOA_STATUS_T HOA_MEDIA_SetBufferLevels(MEDIA_CHANNEL_T ch, UINT32 audioMinLevel, UINT32 audioMaxLevel, UINT32 videoMinLevel, UINT32 videoMaxLevel);
+
 HOA_STATUS_T HOA_MEDIA_GetPlayInfo(MEDIA_CHANNEL_T ch, MEDIA_PLAY_INFO_T *pPlayInfo);
 HOA_STATUS_T HOA_MEDIA_RegisterPlayCallback(MEDIA_CHANNEL_T ch, MEDIA_PLAY_CB_T pfnPlayCB);
 HOA_STATUS_T HOA_MEDIA_RegisterPlayCallback_EX(MEDIA_CHANNEL_T ch, MEDIA_PLAY_CB_EX_T pfnPlayCB_ex);
@@ -100,10 +103,12 @@ HOA_STATUS_T HOA_MEDIA_SetPlaySpeed(MEDIA_CHANNEL_T ch, BOOLEAN bForward, UINT8 
 HOA_STATUS_T HOA_MEDIA_GetPlaySpeed(MEDIA_CHANNEL_T ch, BOOLEAN *bForward, UINT8 *speedInt, UINT8 *speedFrac);
 HOA_STATUS_T HOA_MEDIA_GetSourceInfo(MEDIA_CHANNEL_T ch, MEDIA_SOURCE_INFO_T *pSourceInfo);
 HOA_STATUS_T HOA_MEDIA_GetSourceInfoForNewURI(MEDIA_CHANNEL_T ch, char *pUri, MEDIA_SOURCE_INFO_T *pSourceInfo);
-HOA_STATUS_T HOA_MEDIA_GetVideoThumbnail(MEDIA_CHANNEL_T ch, char *pInUri, char *pOutUri);
+HOA_STATUS_T HOA_MEDIA_GetVideoThumbnail(MEDIA_CHANNEL_T ch, char *pPath, char *pUrl, const char *pFilename, UINT16 width, UINT16 height);
 HOA_STATUS_T HOA_MEDIA_SetHttpHeader(MEDIA_CHANNEL_T ch, UINT8* pData, UINT16 dataSize);
+HOA_STATUS_T HOA_MEDIA_SetSoupHttpSrcTimeout(MEDIA_CHANNEL_T ch, UINT32 timeout_sec);
 HOA_STATUS_T HOA_MEDIA_GetMediaType(MEDIA_CHANNEL_T ch, HOA_MEDIA_TYPE_T *pMediaType);
 HOA_STATUS_T HOA_MEDIA_GetInternalSubtitleBlock(MEDIA_CHANNEL_T ch, UINT32 ms, SYNCBLOCK **pSbutBlock);
+HOA_STATUS_T HOA_MEDIA_GetInternalBMPSubtitleBlock(MEDIA_CHANNEL_T ch, UINT32 ms, SYNCBLOCK2 **pSbutBlock);
 HOA_STATUS_T HOA_MEDIA_GetSubtitleBlock(MEDIA_CHANNEL_T ch, UINT32 ms, SYNCBLOCK **pSbutBlock);
 HOA_STATUS_T HOA_MEDIA_SetSubtitleProperty(MEDIA_CHANNEL_T ch,HOA_MEDIA_SUBT_PROP_TYPE_T subtitleProperty,MEDIA_SUBTITLE_INFO_T subtitleInfo);
 HOA_STATUS_T HOA_MEDIA_GetWVDeviceID(MEDIA_CHANNEL_T ch, CHAR *pWVDeviceID, UINT16 *pDeviceIDSize);
@@ -116,17 +121,20 @@ HOA_STATUS_T HOA_MEDIA_GetAudioProperty(MEDIA_CHANNEL_T ch, HOA_MEDIA_AUDIO_PROP
 HOA_STATUS_T HOA_MEDIA_GetSubtitleProperty(MEDIA_CHANNEL_T ch, HOA_MEDIA_SUBT_PROP_TYPE_T subtitleProperty, MEDIA_SUBTITLE_INFO_T *pSubtitleInfo);
 HOA_STATUS_T HOA_MEDIA_GetSubtitleExist(MEDIA_CHANNEL_T ch);
 HOA_STATUS_T HOA_MEDIA_GetExternalSubtitleSettings(MEDIA_CHANNEL_T ch, LMF_EXT_SUBT_SETTINGS_T settingType, UINT8 *pSettingValue);
-HOA_STATUS_T HOA_MEDIA_GetInternalSubtitleSettings(MEDIA_CHANNEL_T ch, LMF_EXT_SUBT_SETTINGS_T settingType, UINT8 *pSettingValue);
+HOA_STATUS_T HOA_MEDIA_GetInternalSubtitleSettings(MEDIA_CHANNEL_T ch, LMF_INT_SUBT_SETTINGS_T settingType, UINT8 *pSettingValue);
 HOA_STATUS_T HOA_MEDIA_SetExternalSubtitleSettings(MEDIA_CHANNEL_T ch, LMF_EXT_SUBT_SETTINGS_T settingType, UINT8 settingValue);
-HOA_STATUS_T HOA_MEDIA_SetInternalSubtitleSettings(MEDIA_CHANNEL_T ch, LMF_EXT_SUBT_SETTINGS_T settingType, UINT8 settingValue);
+HOA_STATUS_T HOA_MEDIA_SetInternalSubtitleSettings(MEDIA_CHANNEL_T ch, LMF_INT_SUBT_SETTINGS_T settingType, UINT8 settingValue);
 
 HOA_STATUS_T HOA_MEDIA_GetSubtitleType(MEDIA_CHANNEL_T ch, LMF_SUBT_FILE_TYPE_T *pSubtitleType);
 HOA_STATUS_T HOA_MEDIA_GetNumLanguage(MEDIA_CHANNEL_T ch, int *pNumLanguage);
 HOA_STATUS_T HOA_MEDIA_IsANSIEncType(MEDIA_CHANNEL_T ch);
+HOA_STATUS_T HOA_MEDIA_GetLanguageType(MEDIA_CHANNEL_T ch, UINT32 retvalue, char* langType);
+
 // for audio multi track playback //
 //HOA_STATUS_T HOA_MEDIA_GetLanguages(MEDIA_CHANNEL_T ch);
 HOA_STATUS_T HOA_MEDIA_GetLanguages(MEDIA_CHANNEL_T ch, char **pLangs, unsigned int *pStrLength, unsigned int *pTotalLangNum);
 HOA_STATUS_T HOA_MEDIA_SetLanguage(MEDIA_CHANNEL_T ch, int language);
+HOA_STATUS_T HOA_MEDIA_SetLanguagePRE(MEDIA_CHANNEL_T ch, unsigned char *language);
 HOA_STATUS_T HOA_MEDIA_GetCurLanguage(MEDIA_CHANNEL_T ch, int *pCurrentLanguageNum);
 // for subtitle multi track playback //
 HOA_STATUS_T HOA_MEDIA_GetSubtitles(MEDIA_CHANNEL_T ch, char **pLangs, unsigned int *pStrLength, unsigned int *pTotalLangNum);

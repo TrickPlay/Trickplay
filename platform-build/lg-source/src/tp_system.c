@@ -95,17 +95,25 @@ void TP_System_Finalize(void)
 {
 	DBG_PRINT_TP(NULL);
 
+	// TODO sanggi0.lee - remove
+	#if 0
 	if (ulInitializedStep > 3)
 	{
 		//HOA_APP_ReleaseFocus(EXITCODE_NORMAL);
-		// TODO sanggi0.lee - parameter AUID
 		HOA_APP_ExitApp(gAuid, AM_EXITCODE_BACK);
 	}
+
 	if (ulInitializedStep > 2)
+	{
 		HOA_PROC_SetTerminate();
+	}
+#endif
+
 	if (ulInitializedStep > 1)
 	{
 		//HOA_APP_DeregisterFromMgr(EXITCODE_NORMAL);
+		HOA_PROC_SetTerminate();
+		HOA_APP_ExitApp(gAuid, AM_EXITCODE_BACK);
 		HOA_PROC_DeregisterFromMgr();
 	}
 	if (ulInitializedStep > 0)
@@ -128,17 +136,48 @@ void TP_System_DisableFullDisplay(void)
 	DBG_PRINT_TP(NULL);
 
 	// TODO sanggi0.lee - new function
+	HOA_CTRL_SetAVBlock(FALSE,FALSE);
 	HOA_CTRL_SetDisplayMode(HOA_DISP_NONE);		/* This API always returns HOA_OK */
+	HOA_CTRL_SetAVBlock(FALSE,FALSE);
+}
+
+void TP_System_SetDisplayMode(TP_DISPLAY_MODE_T mode)
+{
+	HOA_DISPLAYMODE_T disp = HOA_DISP_NONE;
+
+	switch (mode)
+	{
+	case TP_DISP_WIDGET:
+		disp = HOA_DISP_UIWITHTV;
+		break;
+	case TP_DISP_FULL:
+		disp = HOA_DISP_FULLVIDEO;
+		break;
+	case TP_DISP_NONE:
+	default:
+		HOA_CTRL_SetAVBlock(FALSE,FALSE);
+		break;
+	}
+
+	DBG_PRINT_TP("mode=%d, disp=%d", mode, disp);
+
+	HOA_CTRL_SetDisplayMode(disp);
 }
 
 extern void TP_QuitContext(void);
 
 HOA_STATUS_T TP_System_MsgHandler(HOA_MSG_TYPE_T msg, UINT32 submsg, UINT8* pData, UINT16 dataSize)
 {
-	if (msg == HOA_MSG_TERMINATE)
+	switch (msg)
 	{
+	case HOA_MSG_TERMINATE:
+	case HOA_MSG_STOPLOADING:
+	case HOA_MSG_THE_END:
 		DBG_PRINT_TP("msg: HOA_MSG_TERMINATE");
 		TP_QuitContext();
+		break;
+	default:
+		break;
 	}
 
 	return HOA_OK;

@@ -1014,6 +1014,24 @@ gboolean     gst_tag_list_get_buffer_index  (const GstTagList * list,
  * Since: 0.10.30
  */
 #define GST_TAG_IMAGE_ORIENTATION            "image-orientation"
+/**
+ * GST_MATROSKA_TAG_CHAPTER_UID:
+ *
+ * Represents the 'Chapter UID' tag from MatroskaDemuxer.
+ * Defines chapter's UID for Divx HD Plus
+ *
+ * 110803 wonchul86.lee
+ */
+#define GST_TAG_CHAPTER_CHAPSTRING            "chapter-string"
+/**
+ * GST_MATROSKA_TAG_CHAPTER_TIMESTART:
+ *
+ * Represents the 'Chapter start time' tag from MatroskaDemuxer.
+ * Defines chapter's start time for Divx HD Plus
+ *
+ * 110803 wonchul86.lee
+ */
+#define GST_TAG_CHAPTER_TIMESTART            "chapter-timestart"
 
 G_END_DECLS
 

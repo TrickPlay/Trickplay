@@ -8,7 +8,7 @@
  *****************************************************************************/
 
  /**
- *  @file 	lginput_voice_voice.h
+ *  @file 		lginput_openapi_voice.h
  *  @author 	hg.jeong (hg.jeong@lge.com)
  *  @version	0.1
  *  @date	Created    2011.08.
@@ -30,6 +30,9 @@
 /******************************************************************************
 	Macro Definitions
 ******************************************************************************/
+
+#define	VOICE_EXIT		-1
+#define VOICE_RESTART	-2
 
 /******************************************************************************
 	Extern Variables & Function Prototype Declarations
@@ -108,8 +111,15 @@ HOA_STATUS_T	HOA_LGINPUT_VoiceStartRecog(void);
 HOA_STATUS_T	HOA_LGINPUT_VoiceExitRecog(void);
 HOA_STATUS_T	HOA_LGINPUT_VoiceRegistCB(LGINPUT_VOICE_CB_T  pfnCallback );
 HOA_STATUS_T	HOA_LGINPUT_VoiceFinalizeCB(void);
+HOA_STATUS_T	HOA_LGINPUT_VoiceRegisterUIFuncCB(LGINPUT_VOICE_UI_CB_T  pfnCB );
+HOA_STATUS_T	HOA_LGINPUT_VoiceUIFuncFreeCB(void);
+HOA_STATUS_T	HOA_LGINPUT_VoiceSelectMultiResult(int index);
 
 HOA_STATUS_T APP_HNDL_LGINPUT_VoiceSendNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
+
+
+HOA_STATUS_T APP_HNDL_LGINPUT_VoiceSendMultiResult(DBusConnection *conn, DBusMessage *msg, void *user_data);
+
 
 #endif /* _LGINPUT_VOICEOPENAPI_H_ */
 

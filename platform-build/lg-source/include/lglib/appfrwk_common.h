@@ -139,6 +139,9 @@ typedef struct
 	int			shmid;
 	UINT32		size;
 	char		*pBuffer;
+	char		*pAllocbuffer;
+	char		*pProtect;
+	UINT32		protsize;
 
 } AF_BUFFER_HNDL_T;
 
@@ -148,9 +151,9 @@ typedef struct
 typedef struct
 {
 	HOA_STATUS_T 	(*pfnMsgHandler)(HOA_MSG_TYPE_T msg, UINT32 submsg, UINT8 *pData, UINT16 dataSize);
-	BOOLEAN 		(*pfnKeyEventCallback)(UINT32 key, PM_KEY_COND_T keyCond);
+	BOOLEAN 		(*pfnKeyEventCallback)(UINT32 key, PM_KEY_COND_T keyCond,PM_ADDITIONAL_INPUT_INFO_T event);
 	//BOOLEAN 		(*pfnMouseEventCallback)(SINT32 posX, SINT32 posY, UINT32 keyCode, PM_KEY_COND_T keyCond);
-	BOOLEAN 		(*pfnMouseEventCallback)(SINT32 posX, SINT32 posY, UINT32 keyCode, PM_KEY_COND_T keyCond, struct input_event event);
+	BOOLEAN 		(*pfnMouseEventCallback)(SINT32 posX, SINT32 posY, UINT32 keyCode, PM_KEY_COND_T keyCond, PM_ADDITIONAL_INPUT_INFO_T event);
 
 } HOA_PROC_CALLBACKS_T;
 
@@ -244,15 +247,17 @@ void 			AF_PrintStack(void);
 
 /* appfrwk_common_util.c */
 AF_STATE_T 		AF_UTIL_GetServiceName(char *args, char *service);
-int 			AF_UTIL_GetUinputFDForReturn(void);
+int 			AF_UTIL_GetUinputFDForReturn(BOOLEAN bIsKeyReturnPath);
 HOA_STATUS_T	HOA_UTIL_SetProcInfo(HOA_PROC_INFO_E info, void *pData);
 HOA_STATUS_T	HOA_UTIL_GetProcInfo(HOA_PROC_INFO_T *procInfo);
 SINT32 			HOA_UTIL_GetProcPID(void);
 char 			*HOA_UTIL_GetProcServiceName(void);
 DBusConnection 	*HOA_UTIL_GetProcRcvConnection(void);
 DBusConnection 	*HOA_UTIL_GetProcSendConnection(void);
+#ifdef USE_POLLING
 void 			*HOA_UTIL_Task_MsgSender(void *data);
-HOA_STATUS_T	 HOA_UTIL_CheckProcessExistFromProcFs(const char *pProcName, const char *pServiceName, BOOLEAN *bExist);
+#endif
+HOA_STATUS_T	 HOA_UTIL_CheckProcessExistFromProcFs(const char *pProcName, const char *pServiceName, BOOLEAN *bExist, pid_t *pProcPID);
 void 			HOA_UTIL_QuitTask(void);
 UINT32 			HOA_UTIL_GetAlive(void);
 

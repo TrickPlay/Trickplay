@@ -70,8 +70,8 @@ extern "C" {
 #define	AM_PRINT(format, args...) 						cmd_mask_print(PRNT_MOD_APPFRWK,10, "%s: " format, __FUNCTION__, ##args)
 #define	UC_PRINT(format, args...) 						cmd_mask_print(PRNT_MOD_APPFRWK,11, format, ##args)
 #define	AM_XML_PRINT(format, args...) 					cmd_mask_print(PRNT_MOD_APPFRWK,12, format, ##args)
-#define	AF_UNDEF_PRINT_13(format, args...) 				cmd_mask_print(PRNT_MOD_APPFRWK,13, format, ##args)
-#define	AF_UNDEF_PRINT_14(format, args...) 				cmd_mask_print(PRNT_MOD_APPFRWK,14, format, ##args)
+#define	AM_CRIT_PRINT(format, args...) 					cmd_mask_print(PRNT_MOD_APPFRWK,13, format, ##args)
+#define	AM_CMN_PRINT(format, args...) 					cmd_mask_print(PRNT_MOD_APPFRWK,14, format, ##args)
 #define	AF_UNDEF_PRINT_15(format, args...) 				cmd_mask_print(PRNT_MOD_APPFRWK,15, format, ##args)
 #define	AF_UNDEF_PRINT_16(format, args...) 				cmd_mask_print(PRNT_MOD_APPFRWK,16, format, ##args)
 #define	AF_UNDEF_PRINT_17(format, args...) 				cmd_mask_print(PRNT_MOD_APPFRWK,17, format, ##args)
@@ -129,7 +129,7 @@ extern "C" {
 #define	SDP_DNLD_PRINT(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___1, 1, format, ##args)
 #define FXUI_MAIN_PRINT(format, args...)				cmd_mask_print(PRNT_MOD_SVC___1, 2, format, ##args)
 #define	FXUI_PLY_PRINT(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___1, 3, format, ##args)
-#define	S1_UNDEF_PRINT_4(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___1, 4, format, ##args)
+#define	RODP_DBG_PRINT(format, args...)		    		cmd_mask_print(PRNT_MOD_SVC___1, 4, format, ##args)
 #define	S1_UNDEF_PRINT_5(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___1, 5, format, ##args)
 #define S1_UNDEF_PRINT_6(format, args...)				cmd_mask_print(PRNT_MOD_SVC___1, 6, format, ##args)
 #define	S1_UNDEF_PRINT_7(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___1, 7, format, ##args)
@@ -162,13 +162,13 @@ extern "C" {
 #define MF_MSG_PRINT(format, args...)					cmd_mask_print(PRNT_MOD_SVC___2, 0, format, ##args)
 #define	MF_DBG_PRINT(format, args...)					cmd_mask_print(PRNT_MOD_SVC___2, 1, format, ##args)
 #define	MF_ERR_PRINT(format, args...) 					cmd_mask_print(PRNT_MOD_SVC___2, 2, format, ##args)
-#define	LI_PRINT(format, args...) 						cmd_mask_print(PRNT_MOD_SVC___2, 3, format, ##args)
-#define	S2_UNDEF_PRINT_4(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 4, format, ##args)
-#define	S2_UNDEF_PRINT_5(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 5, format, ##args)
-#define S2_UNDEF_PRINT_6(format, args...)				cmd_mask_print(PRNT_MOD_SVC___2, 6, format, ##args)
-#define	S2_UNDEF_PRINT_7(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 7, format, ##args)
-#define	S2_UNDEF_PRINT_8(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 8, format, ##args)
-#define	S2_UNDEF_PRINT_9(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 9, format, ##args)
+#define	MF_PERI_PRINT(format, args...) 					cmd_mask_print(PRNT_MOD_SVC___2, 3, format, ##args)
+#define	MF_PERI_PRINT2(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 4, format, ##args)
+#define	LI_PRINT(format, args...) 						cmd_mask_print(PRNT_MOD_SVC___2, 5, format, ##args)
+#define AE_DBG_PRINT(format, args...)					cmd_mask_print(PRNT_MOD_SVC___2, 6, format, ##args)
+#define	VUDU_DBG_PRINT(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 7, format, ##args)
+#define	NETFLIX_DBG_PRINT(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 8, format, ##args)
+#define	ROVI_DBG_PRINT(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 9, format, ##args)
 #define	S2_UNDEF_PRINT_10(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,10, format, ##args)
 #define	S2_UNDEF_PRINT_11(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,11, format, ##args)
 #define	S2_UNDEF_PRINT_12(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,12, format, ##args)
@@ -198,7 +198,7 @@ extern "C" {
 #define	BR_UNDEF_PRINT_2(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 2, format, ##args)
 #define	BR_UNDEF_PRINT_3(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 3, format, ##args)
 #define	BR_UNDEF_PRINT_4(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 4, format, ##args)
-#define	BR_UNDEF_PRINT_5(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 5, format, ##args)
+#define	BR_FLASH_PLUGIN(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 5, format, ##args)
 #define BR_UNDEF_PRINT_6(format, args...)				cmd_mask_print(PRNT_MOD_BROWSER, 6, format, ##args)
 #define	BR_UNDEF_PRINT_7(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 7, format, ##args)
 #define	BR_UNDEF_PRINT_8(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 8, format, ##args)
@@ -257,7 +257,7 @@ static cmd_mask_group_attr_t	_gAppFrwkAttr =
 		{ "UNDEF_8",   	8, 1, 0 }, 		{ "UNDEF_9",	9, 1, 0 },
 		{ "AM",  		10, 1, 0 },		{ "UC",			11, 1, 0 },
 		{ "AM_XML",		12, 1, 0 },		{ "AM_CRIT",	13, 1, 0 },
-		{ "UNDEF_14",  	14, 1, 0 },		{ "UNDEF_15",	15, 1, 0 },
+		{ "AM_CMN",  	14, 1, 0 },		{ "UNDEF_15",	15, 1, 0 },
 		{ "UNDEF_16",  	16, 1, 0 },		{ "UNDEF_17",	17, 1, 0 },
 		{ "UNDEF_18",  	18, 1, 0 },		{ "UNDEF_19",	19, 1, 0 },
 		{ "SCF",  		20, 1, 0 },		{ "UNDEF_21",	21, 1, 0 },
@@ -295,12 +295,12 @@ static cmd_mask_group_attr_t	_gOpenApiAttr =
 
 static cmd_mask_group_attr_t	_gSvc1Attr =
 {
-	"FX/SDP", PRNT_MOD_SVC___1,
+	"FX/SDP/RODP", PRNT_MOD_SVC___1,
 	{
 		/*pName | num | nm_flag | color*/
 		{ "SDP_MAIN",	0, 1, 0 }, 		{ "SDP_DNLD",	1, 1, 0 },
 		{ "FXUI_MAIN",	2, 1, 0 }, 		{ "FXUI_PLY",	3, 1, 0 },
-		{ "UNDEF_4",	4, 1, 0 }, 		{ "UNDEF_5",	5, 1, 0 },
+		{ "RODP_DBG",	4, 1, 0 }, 		{ "UNDEF_5",	5, 1, 0 },
 		{ "UNDEF_6", 	6, 1, 0 }, 		{ "UNDEF_7",	7, 1, 0 },
 		{ "UNDEF_8",   	8, 1, 0 }, 		{ "UNDEF_9",	9, 1, 0 },
 		{ "UNDEF_10",  	10, 1, 0 },		{ "UNDEF_11",	11, 1, 0 },
@@ -319,14 +319,14 @@ static cmd_mask_group_attr_t	_gSvc1Attr =
 
 static cmd_mask_group_attr_t	_gSvc2Attr =
 {
-	"LI/MF", PRNT_MOD_SVC___2,
+	"LI/MF/AIR", PRNT_MOD_SVC___2,
 	{
 		/*pName | num | nm_flag | color*/
 		{ "MF_MSG",		0, 1, 0 }, 		{ "MF_DBG",		1, 1, 0 },
-		{ "MF_ERR",		2, 1, 0 }, 		{ "LGINPUT",	3, 1, 0 },
-		{ "UNDEF_4",	4, 1, 0 }, 		{ "UNDEF_5",	5, 1, 0 },
-		{ "UNDEF_6", 	6, 1, 0 }, 		{ "UNDEF_7",	7, 1, 0 },
-		{ "UNDEF_8",   	8, 1, 0 }, 		{ "UNDEF_9",	9, 1, 0 },
+		{ "MF_ERR",		2, 1, 0 }, 		{ "MF_PERI",	3, 1, 0 },
+		{ "MF_PERI2",	4, 1, 0 }, 		{ "LGINPUT",	5, 1, 0 },
+		{ "AE_DBG", 	6, 1, 0 }, 		{ "VUDU_DBG",	7, 1, 0 },
+		{ "NETFLIX_DBG",8, 1, 0 }, 		{ "ROVI_DBG",	9, 1, 0 },
 		{ "UNDEF_10",  	10, 1, 0 },		{ "UNDEF_11",	11, 1, 0 },
 		{ "UNDEF_12",	12, 1, 0 },		{ "UNDEF_13",	13, 1, 0 },
 		{ "UNDEF_14",  	14, 1, 0 },		{ "UNDEF_15",	15, 1, 0 },
@@ -348,7 +348,7 @@ static cmd_mask_group_attr_t	_gBrowserAttr =
 		/*pName | num | nm_flag | color*/
 		{ "Interface",	0, 1, 0 }, 		{ "UNDEF_1",	1, 1, 0 },
 		{ "UNDEF_2",	2, 1, 0 }, 		{ "UNDEF_3",	3, 1, 0 },
-		{ "UNDEF_4",	4, 1, 0 }, 		{ "UNDEF_5",	5, 1, 0 },
+		{ "UNDEF_4",	4, 1, 0 }, 		{ "Flash plugin",	5, 1, 0 },
 		{ "UNDEF_6", 	6, 1, 0 }, 		{ "UNDEF_7",	7, 1, 0 },
 		{ "UNDEF_8",   	8, 1, 0 }, 		{ "UNDEF_9",	9, 1, 0 },
 		{ "UNDEF_10",  	10, 1, 0 },		{ "Media plugin",	11, 1, 0 },
