@@ -11,6 +11,7 @@
 #include "controller_server.h"
 #include "util.h"
 #include "sysdb.h"
+#include "json.h"
 
 //-----------------------------------------------------------------------------
 
@@ -67,13 +68,15 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
         tplog( "READY ON PORT %d", server->get_port() );
 
-        context->get_http_server()->register_handler( "/controllers" , this );
+        HttpServer * http_server = context->get_http_server();
+
+        http_server->register_handler( "/controllers" , this );
 
 #ifdef TP_CONTROLLER_DISCOVERY_MDNS
 
         if ( context->get_bool( TP_CONTROLLERS_MDNS_ENABLED , true ) )
         {
-            discovery_mdns.reset( new ControllerDiscoveryMDNS( context , name, server->get_port() ) );
+            discovery_mdns.reset( new ControllerDiscoveryMDNS( context , name, server->get_port() , http_server->get_port() ) );
         }
         else
         {
@@ -86,7 +89,7 @@ ControllerServer::ControllerServer( TPContext * ctx, const String & name, int po
 
         if ( context->get_bool( TP_CONTROLLERS_UPNP_ENABLED , false ) )
         {
-            discovery_upnp.reset( new ControllerDiscoveryUPnP( context , name, server->get_port() ) );
+            discovery_upnp.reset( new ControllerDiscoveryUPnP( context , name, http_server->get_port() ) );
         }
         else
         {
@@ -1037,6 +1040,19 @@ void ControllerServer::drop_resource_group( gpointer connection , const String &
 
 void ControllerServer::handle_http_get( const HttpServer::Request & request , HttpServer::Response & response )
 {
+	if ( request.get_path() == "/controllers" )
+	{
+		JSON::Object result;
+
+		result[ "version" ] = CONTROLLER_PROTOCOL_VERSION;
+		result[ "port" ] = server->get_port();
+
+		response.set_response( "application/json", result.stringify() );
+		response.set_status( HttpServer::HTTP_STATUS_OK );
+
+		return;
+	}
+
     ResourceMap::iterator it = resources.find( request.get_path() );
 
     if ( it == resources.end() )

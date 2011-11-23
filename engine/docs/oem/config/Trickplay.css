@@ -180,3 +180,22 @@ p
 {
     margin-bottom: 1.5em;
 }
+
+/* Make Table of Contents menu wider than default */
+.ContentPage #Menu,
+.IndexPage #Menu {
+    width: 36ex;
+    }
+.ContentPage .Firefox #Menu,
+.IndexPage .Firefox #Menu {
+    width: 32ex;
+    }
+    
+/* Adjust left margin of content to accomodate wider menu */
+.ContentPage #Content {
+    margin-left: 36ex;
+    }
+.ContentPage .Firefox #Content {
+    margin-left: 32ex;
+    }
+

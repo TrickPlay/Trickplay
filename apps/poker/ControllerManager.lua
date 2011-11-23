@@ -258,7 +258,10 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
             end
             function controller:on_touch_move(finger, x, y)
             end
-            function controller:on_key_down()
+            function controller:on_key_down(key)
+                if key == keys.Escape or key == keys.EXIT then
+                    return true
+                end
                 return false
             end
             controller:start_touches()
@@ -280,8 +283,8 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
             controller.state = ControllerStates.CHOOSE_DOG
         end
 
-        function controller:update_choose_dog(player)
-            character_selection:update_character_selection(player)
+        function controller:update_choose_dog(player, cntrl)
+            character_selection:update_character_selection(player, cntrl)
         end
 
         function controller:on_ui_event(text)
@@ -458,6 +461,14 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
                 )
             elseif controller.state == ControllerStates.WAITING then
                 controller:waiting_room()
+                local players = router:get_controller(Components.GAME):get_players()
+                for _,player in pairs(players) do
+                    if player.old_controller_id
+                    and player.old_controller_id == controller.id then
+                        player:add_controller(controller)
+                        return
+                    end
+                end
             end
 
             -- Add a group to disply popups
@@ -497,7 +508,7 @@ function(ctrlman, start_accel, start_touch, resources, max_controllers)
         for i,controller in ipairs(active_ctrls) do
             if controller.state == ControllerStates.CHOOSE_DOG
             and controller ~= cntrllr then
-                controller:update_choose_dog(player)
+                controller:update_choose_dog(player, cntrllr)
             end
         end
     end

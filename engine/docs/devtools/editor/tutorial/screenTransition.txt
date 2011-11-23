@@ -19,21 +19,21 @@ currentScreen - is a Group object containing the UI elements for the current scr
 nextScreen - is a Group object containing the UI elements for the screen to transition to
 effect - is an optional visual effect to perform during the transition. At this time, only one type of effect is supported: the "fade" effect. If "fade" is specified as the third argument, a fade-out/fade-in effect will occur during the transition between screens.
 
-Using transit_to() we can transition between our Mode and Language screens. When the user clicks the Mode screen's Previous button, we wish to transition back to the Language screen. Using the information about event handlers that was described in the <Connect UI Elements to Code> section, we know that the button's pressed() event handler will fire when the user either clicks on the button or presses the <Enter> key when the input focus is set to the button.
+Using transit_to() we can transition between our Mode and Language screens. When the user clicks the Mode screen's Previous button, we wish to transition back to the Language screen. Using the information about event handlers that was described in the <Connect UI Elements to Code> section, we know that the button's on_press() event handler will fire when the user either clicks on the button or presses the <Enter> key when the input focus is set to the button.
 
-Load the Tutorial project's main.lua file into a text editor and locate the Mode screen's ButtonPrevious event handlers and, specifically, the pressed() event handler. Add a call to the ui_element object's transit_to() method to transition from the current Mode screen back to our Language screen. The modified event handler should look like this.
+Load the Tutorial project's main.lua file into a text editor and locate the Mode screen's ButtonPrevious event handlers and, specifically, the on_press() event handler. Add a call to the ui_element object's transit_to() method to transition from the current Mode screen back to our Language screen. The modified event handler should look like this.
 
 (code)
-layout["mode"].ButtonPrevious.pressed = function() -- Handler for ButtonPrevious.pressed in this screen
+layout["mode"].ButtonPrevious.on_press = function() -- Handler for ButtonPrevious.on_press in this screen
 	-- Transition to Language screen
 	ui_element.transit_to( groups["mode"], groups["language"] )
 end
 (end)
 
-In the same main.lua file, locate the Continue button's event handlers for the Language screen. In the pressed() handler, add another call to transit_to(), but this time transition from the Language screen to the Mode screen. You can optionally add a third argument of "fade" if you wish to see this visual effect in action. The updated handler is shown below.
+In the same main.lua file, locate the Continue button's event handlers for the Language screen. In the on_press() handler, add another call to transit_to(), but this time transition from the Language screen to the Mode screen. You can optionally add a third argument of "fade" if you wish to see this visual effect in action. The updated handler is shown below.
 
 (code)
-layout["language"].ButtonContinue.pressed = function() -- Handler for ButtonContinue.pressed in this screen
+layout["language"].ButtonContinue.on_press = function() -- Handler for ButtonContinue.on_press in this screen
    -- Transition to Mode screen
    ui_element.transit_to( groups["language"], groups["mode"], "fade" )
 end
@@ -44,7 +44,7 @@ Save the modified main.lua file.
 Run the updated Tutorial application in the TrickPlay Engine by going to the ~/trickplay-editor/Tutorial directory and running the Engine from the command line as shown below.
 
 (code)
-~/trickplay-editor/Tutorial$ trickplay .
+trickplay .
 (end)
 
 By clicking the appropriate screen buttons, you can transition back and forth between the Language and Mode screens.

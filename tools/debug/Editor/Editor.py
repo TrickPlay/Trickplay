@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------
+0#-------------------------------------------------------------------------
 # qsci_simple_pythoneditor.pyw
 #
 # QScintilla sample with PyQt
@@ -11,8 +11,14 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 
+TEXT_DEFAULT = 0
+TEXT_READ = 1
+TEXT_CHANGED = 2
+
 class Editor(QsciScintilla):
+
     ARROW_MARKER_NUM = 8
+
     
     def __init__(self, parent=None):
         super(Editor, self).__init__(parent)
@@ -82,29 +88,46 @@ class Editor(QsciScintilla):
         #self.setMinimumSize(600, 450)
         
         QObject.connect(self, SIGNAL("SCN_CHARADDED(int)"), self.charAdded)
+        QObject.connect(self, SIGNAL("textChanged()"), self.text_changed)
+        #QObject.connect(self, SIGNAL("selectionChanged()"), self.ss_changed)
+        self.text_status = TEXT_DEFAULT
 
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
-        if self.markersAtLine(nline) != 0:
-            self.markerDelete(nline, self.ARROW_MARKER_NUM)
-        else:
-            self.markerAdd(nline, self.ARROW_MARKER_NUM)
+		print "on_margin_clicked"
+		if self.markersAtLine(nline) != 0:
+			self.markerDelete(nline, self.ARROW_MARKER_NUM)
+		else:
+			self.markerAdd(nline, self.ARROW_MARKER_NUM)
             
     def readFile(self, path):
         self.setText(open(path).read())
         
-    def save(self, statusBar):
+    #def ss_changed(self):
+		#print "SS changed "
+
+    def text_changed(self):
+		if self.text_status == TEXT_DEFAULT:
+			self.text_status = TEXT_READ 
+		else:
+			self.text_status = TEXT_CHANGED
+
+    #def save(self, statusBar):
+    def save(self):
         path = self.path
         try:
             f = open(path,'w+')
         except:
-            statusBar.message('Could not write to %s' % (path),2000)
+            #statusBar.message('Could not write to %s' % (path),2000)
+            print 'Could not write to path'
             return
         
         f.write(self.text())
+        self.text_status = TEXT_READ 
         f.close()
         
-        statusBar.showMessage('File %s saved' % (path), 2000)
+        #statusBar.showMessage('File %s saved' % (path), 2000)
+        print 'File saved'
         
     def charAdded(self, c):
         """
