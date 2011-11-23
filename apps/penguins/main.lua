@@ -1,11 +1,8 @@
 --[[
-
-seal w/ ball
 try to ease up collisions
-consider unlinking penguin speed from timeline
 breakable blocks
-faster fish
-heavy armor
+faster fish adjustments
+armor
 gravity fish
 darkness
 snow tunnel
@@ -23,15 +20,13 @@ splashing
 double jump cues?
 
 
-audio
-
-
-Need:
+Need
 	audio
 	better ice water
+	better seal
 	breakable block
 	"faster" fish
-	armor
+	armor pieces
 	"upside down" fish
 	darkness
 	snow tunnel
@@ -51,6 +46,8 @@ dofile("cloner.lua")
 snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
 levels  = dofile("levels.lua")
-dofile("overlay.lua")
+overlay	= dofile("overlay.lua")
+snow(levels.this.snow)
+explode = dofile("explode.lua")
 
 collectgarbage("collect")
