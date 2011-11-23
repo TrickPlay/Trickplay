@@ -23,7 +23,7 @@ end
 
 
 function test_Global_sha1 ()
-    assert_equal( sha1(my_string), "ac1c646cf12c60fad4ff35ece0a5f1ea7ba0dbca", "sha1 of ", my_string, " returned: ", sha1 (my_string), " Exptected: ac1c646cf12c60fad4ff35ece0a5f1ea7ba0dbca")
+    assert_equal( sha1(my_string), "ac1c646cf12c60fad4ff35ece0a5f1ea7ba0dbca", "sha1 of "..my_string.." returned: "..sha1 (my_string).." Expected: ac1c646cf12c60fad4ff35ece0a5f1ea7ba0dbca")
     assert_not_nil( sha1(my_string, true) , "sha1 encrypt binary returned nil" )
 end
 
