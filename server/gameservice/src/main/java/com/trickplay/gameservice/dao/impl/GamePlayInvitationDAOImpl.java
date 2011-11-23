@@ -48,7 +48,8 @@ public class GamePlayInvitationDAOImpl extends
                 .setParameter("gameId", gameId)
                 .setParameter("pendingStatus", InvitationStatus.PENDING)
                 .setParameter("userId", userId)
-                .setParameter("currentTime", new Date()).getResultList();
+                .setParameter("currentTime", new Date())
+                .getResultList();
     }
     
     public List<GamePlayInvitation> getPendingInvitationsForUser(Long gameId, Long userId, int max) {

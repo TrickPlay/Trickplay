@@ -1,6 +1,6 @@
 [[
 #include <gio/gio.h>
-
+#include <stdlib.h>
 #include "common.h"
 #include "util.h"
 #include "app.h"
@@ -198,5 +198,11 @@ restricted global editor [[ void * ]]
 
 #endif
         ]];
+		
+	execute( string command_str )
+		[[
+			system(command_str);
+		]];
+
 }
 

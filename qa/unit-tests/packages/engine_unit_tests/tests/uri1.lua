@@ -18,35 +18,35 @@ local unescaped_string = uri:unescape( "a%3D1%20b%3Da%2Bb%20c%3Dbig%20" )
 
 -- Parse a URI string and verify the values are put in the correct components
 function test_global_uri_parse ()
-    assert_equal( t["host"], "trickplay.com", "uri:parse host failed" )
-    assert_equal( t["port"], "80", "uri:port host failed" )
-    assert_equal( t["user"], "foo:bar", "uri:user host failed" )
-    assert_equal( t["scheme"], "http", "uri:scheme host failed" )
-    assert_equal( t["path"][1], "hello", "uri:path 1 host failed" )
-    assert_equal( t["path"][2], "goodbye.php", "uri:path 2 host failed" )
-    assert_equal( t["absolute"], false, "uri:absolute host failed" )
-    assert_equal( t["query"], "a=1%3D&2=a+b", "uri:query host failed" )
+    assert_equal( t["host"], "trickplay.com", "t[host] returned: "..t["host"].." Expected: trickplay.com")
+    assert_equal( t["port"], "80", "t[port] returned: "..t["port"].." Expected: 80")
+    assert_equal( t["user"], "foo:bar", "t[user] returned: "..t["user"].." Expected: foo:bar")
+    assert_equal( t["scheme"], "http", "t[scheme] returned: "..t["scheme"].." Expected: http")
+    assert_equal( t["path"][1], "hello", "t[path][1] returned: "..t["path"][1].." Expected: hello")
+    assert_equal( t["path"][2], "goodbye.php", "t[path][2] returned: "..t["path"][2].." Expected: goodbye.php")
+    assert_equal( t["absolute"], false, "t[absolute] returned: ", t["absolute"], " Expected: false")
+    assert_equal( t["query"], "a=1%3D&2=a+b", "t[query] returned: "..t["query"].." Expected: a=1%3D&2=a+b")
 end
 
 -- Parse a query and verify that each element has the corresponding value
 function test_global_uri_parse_query ()
-    assert_equal( tq[1][1], "a", "uri:parse_query[1][1] failed" )
-    assert_equal( tq[1][2], "1", "uri:parse_query[1][2] failed" )
-    assert_equal( tq[2][1], "2", "uri:parse_query[2][1] failed" )
-    assert_equal( tq[2][2], "a+b", "uri:parse_query[2][2] failed" )
-    assert_equal( tq[3][1], "bigFun", "uri:parse_query[3][1] failed" )
-    assert_equal( tq[3][2], "yes", "uri:parse_query[3][2] failed" )
+    assert_equal( tq[1][1], "a", "tq[1][1] returned: "..tq[1][1].." Expected: a")
+    assert_equal( tq[1][2], "1", "tq[1][2] returned: "..tq[1][2].." Expected: 1")
+    assert_equal( tq[2][1], "2", "tq[2][1] returned: "..tq[2][1].." Expected: 2")
+    assert_equal( tq[2][2], "a+b", "tq[2][2] returned: "..tq[1][1].." Expected: a+b")
+    assert_equal( tq[3][1], "bigFun", "tq[3][1] returned: "..tq[1][1].." Expected: bigFun")
+    assert_equal( tq[3][2], "yes", "tq[3][2] returned: "..tq[1][1].." Expected: yes")
 
 end
 
 -- Escape a string
 function test_global_uri_parse_escape ()
-	assert_equal( escaped_string, "a%3D1%20b%3Da%2Bb%20c%3Dbig%20fun", "uri not escaped properly")
+	assert_equal( escaped_string, "a%3D1%20b%3Da%2Bb%20c%3Dbig%20fun", "escaped_string returned: "..escaped_string.." Expected: a%3D1%20b%3Da%2Bb%20c%3Dbig%20fun")
 end
 
 -- Unescape a string
 function test_global_uri_parse_unescape ()
-	assert_equal( unescaped_string, "a=1 b=a+b c=big ", "uri not unescaped properly")
+	assert_equal( unescaped_string, "a=1 b=a+b c=big ", "unescaped_string returned: "..unescaped_string.." Expected: a=1 b=a+b c=big ")
 end
 
 -- Test Tear down --

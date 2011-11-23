@@ -67,11 +67,13 @@ Group: Programmer's Guide  {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
 	File: The Engine Console (no auto-title, docs/rte/progguide/console_cmds.txt)
 	File: Specifying Colors (no auto-title, docs/rte/progguide/color_specs.txt)
+	File: TrickPlay SDK Color Names (no auto-title, docs/rte/progguide/color_names.txt)
+	File: Extending TrickPlay Objects (no auto-title, docs/rte/progguide/extra.txt)
 	File: Understanding the Z-Axis (no auto-title, docs/rte/progguide/z_axis.txt)
+	File: Interacting with Smart Devices (no auto-title, docs/rte/progguide/externalConnect.txt)
 	File: Localization (no auto-title, docs/rte/progguide/localization.txt)
 	File: Lua and TrickPlay (no auto-title, docs/rte/progguide/lua_and_trickplay.txt)
 	File: TrickPlay Configuration Keys (no auto-title, docs/rte/progguide/config_keys.txt)
-   	File: User Interface* (no auto-title, docs/rte/progguide/user_interface.txt)
 }
 
 Group: Engine Reference  {
@@ -112,7 +114,7 @@ Group: Engine Reference  {
 		File: Overview* (no auto-title, docs/rte/reference/overview_network.txt)
 		
 		Group: Globals {
-			File: controllers* (no auto-title, bindings/controllers.lb)
+			File: controllers (no auto-title, bindings/controllers.lb)
 			File: json* (no auto-title, bindings/json.lb)
 			File: uri* (no auto-title, bindings/uri.lb)
 		}
@@ -123,7 +125,7 @@ Group: Engine Reference  {
 		}
 		
 		Group: Interfaces {
-			File: Controller* (no auto-title, bindings/controller.lb)
+			File: Controller (no auto-title, bindings/controller.lb)
 			File: URLRequestCancel* (no auto-title, docs/rte/reference/url_request_cancel_ph.txt)
 			File: URLResponse* (no auto-title, docs/rte/reference/url_response_ph.txt)
 		}

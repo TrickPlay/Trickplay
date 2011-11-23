@@ -704,7 +704,7 @@
 /*
 - (void)dealloc {
     NSLog(@"AppBrowser Dealloc");
-        
+    
     [super dealloc];
 }
 */

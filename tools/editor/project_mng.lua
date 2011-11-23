@@ -283,6 +283,13 @@ function project_mng.new_project(fname, from_new_project)
 end 
 
 ------------------------------------
+-- project_mng.open_debugger 
+------------------------------------
+
+function project_mng.open_debugger()
+	editor_lb:execute("~/code/trickplay/sdk/trickplay-debugger "..current_dir) 
+end 
+------------------------------------
 -- project_mng.open_project 
 ------------------------------------
 

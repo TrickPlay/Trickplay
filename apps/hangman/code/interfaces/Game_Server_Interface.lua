@@ -1,4 +1,7 @@
 
+local on_lose_internet, on_regain_internet
+local re_connecting = false
+
 local try_again = Timer{
 	
 	interval = 10*1000,
@@ -18,7 +21,10 @@ try_again:stop()
 
 local response_check = function(request_object,response_object,callback)
 	
-	if response_object.failed then
+	if response_object.failed or response_object.body == nil then
+		
+		re_connecting = true
+		
         print(
 			
 			"URLRequest FAILED, receiving the reponse code: "..
@@ -33,15 +39,17 @@ local response_check = function(request_object,response_object,callback)
 		
 		try_again:start()
 		
-    elseif response_object.body == nil then
-		
-		error(
-			"\n\nReceived a nil Response body\n"..
-            
-            "Status: "..response_object.code.." - "..response_object.status.."\n",2
-		)
+		on_lose_internet()
 		
 	else
+		
+		if re_connecting then
+			
+			re_connecting = false
+			
+			on_regain_internet()
+			
+		end
 		
 		local json_response = json:parse(response_object.body)
 		
@@ -50,11 +58,11 @@ local response_check = function(request_object,response_object,callback)
 			print("json was nil")
 			print(response_object.code.." - "..response_object.status)
 			
-			callback(response_object.code)
+			if callback then callback(response_object.code) end
 			
         else
             
-            callback(json_response)
+            if callback then callback(json_response) end
             
 		end
         
@@ -69,7 +77,7 @@ end
 
 --private methods
 
-local base_url = "http://10.0.190.158:8080"
+local base_url = "http://10.0.190.158:8080/gameservice/rest"
 
 local base_header = {
     
@@ -98,6 +106,14 @@ end
 
 local Game_Server = {}
 
+function Game_Server:init(t)
+	
+	if type(t) ~= "table" then error("must pass a table as the parameter",2) end
+	
+	on_lose_internet = t.on_lose_internet or error("must pass on_lose_internet",2)
+	on_regain_internet = t.on_lose_internet or error("must pass on_lose_internet",2)
+	
+end
 
 --------------------------------------------------------------------------------
 -- User Services                                                              --
@@ -124,7 +140,7 @@ function Game_Server:create_user(user,email,pwd,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user",
+        url    = base_url.."/user",
         
         method = "POST",
         
@@ -163,7 +179,7 @@ function Game_Server:check_user_exists(user,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/exists?username="..user,
+        url    = base_url.."/user/exists?username="..user,
         
         method = "GET",
         
@@ -200,7 +216,7 @@ function Game_Server:user_info(user,pwd, callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user",
+        url    = base_url.."/user",
         
         method = "GET",
         
@@ -236,7 +252,7 @@ function Game_Server:get_buddy_list(user,pwd, callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/1/buddy-list",
+        url    = base_url.."/user/1/buddy-list",
         
         method = "GET",
         
@@ -274,7 +290,7 @@ function Game_Server:create_buddy_invitation(to)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/2/invitation",
+        url    = base_url.."/user/2/invitation",
         
         method = "POST",
         
@@ -313,7 +329,7 @@ function Game_Server:get_buddy_invitation()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/3/invitation?type=RECEIVED",
+        url    = base_url.."/user/3/invitation?type=RECEIVED",
         
         method = "GET",
         
@@ -349,7 +365,7 @@ function Game_Server:accept_buddy_invitation()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/user/3/invitation/1",
+        url    = base_url.."/user/3/invitation/1",
         
         method = "PUT",
         
@@ -401,7 +417,7 @@ function Game_Server:create_vendor(user,pwd,vendor,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/vendor",
+        url    = base_url.."/vendor",
         
         method = "POST",
         
@@ -443,7 +459,7 @@ function Game_Server:check_vendor_exists(user,pwd,vendor,callback)
     
     URLRequest{
         
-        url    = base_url..'/gameservice/rest/vendor/exists?name='..uri:escape(vendor),
+        url    = base_url..'/vendor/exists?name='..uri:escape(vendor),
         
         method = "GET",
         
@@ -514,7 +530,7 @@ function Game_Server:create_game(user,pwd,t,callback)
 
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game",
+        url    = base_url.."/game",
         
         method = "POST",
         
@@ -566,7 +582,7 @@ function Game_Server:check_game_exists(user,pwd,game_name,callback)
     
     URLRequest{
         
-        url    = base_url..'/gameservice/rest/game/exists?name='..uri:escape(game_name),
+        url    = base_url..'/game/exists?name='..uri:escape(game_name),
         
         method = "GET",
         
@@ -611,7 +627,7 @@ function Game_Server:create_gameplay_session(user,pwd,game_id,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay",
+        url    = base_url.."/gameplay",
         
         method = "POST",
         
@@ -659,7 +675,7 @@ function Game_Server:send_gameplay_invitation(to)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/1/invitation",
+        url    = base_url.."/gameplay/1/invitation",
         
         method = "POST",
         
@@ -716,14 +732,14 @@ function Game_Server:get_gameplay_invitation(user,pwd,game_id,max_num,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/"..game_id.."/invitations?max="..max_num,
+        url    = base_url.."/game/"..game_id.."/invitations?max="..max_num,
         
         method = "GET",
         
         headers = make_headers(user,pwd),
         
         on_complete = function(self,response_object)
-			print(self.url)
+			
 			response_check(self,response_object,callback)
 			
 		end,
@@ -731,6 +747,48 @@ function Game_Server:get_gameplay_invitation(user,pwd,game_id,max_num,callback)
     }:send()
     
 end
+function Game_Server:get_gameplay_summary(user,pwd,game_id,callback)
+    
+    URLRequest{
+        
+        url    = base_url.."/game/"..game_id.."/summary",
+        
+        method = "GET",
+        
+        headers = make_headers(user,pwd),
+        
+        on_complete = function(self,response_object)
+			
+			response_check(self,response_object,callback)
+			
+		end,
+        
+    }:send()
+    
+end
+function Game_Server:set_gameplay_summary(user,pwd,game_id,detail,callback)
+    
+    URLRequest{
+        
+        url    = base_url.."/game/"..game_id.."/summary",
+        
+        method = "POST",
+        
+        headers = make_headers(user,pwd),
+		
+		body = '{"detail":"'..detail..'"}',
+        
+        on_complete = function(self,response_object)
+			
+			response_check(self,response_object,callback)
+			
+		end,
+        
+    }:send()
+    
+end
+ 
+ 
  
 --[[
  
@@ -771,7 +829,7 @@ function Game_Server:get_gameplay_events(user,pwd,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/events",
+        url    = base_url.."/events",
         
         method = "GET",
         
@@ -811,7 +869,7 @@ function Game_Server:accept_gameplay_invitation(user,pwd,invite_id,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/invitation/"..invite_id.."/update",
+        url    = base_url.."/gameplay/invitation/"..invite_id.."/update",
         
         method = "POST",
         
@@ -854,7 +912,7 @@ function Game_Server:start_gameplay_session(user,pwd,turnId,gameSessionId,gameSt
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/"..gameSessionId.."/start",
+        url    = base_url.."/gameplay/"..gameSessionId.."/start",
         
         method = "POST",
         
@@ -896,7 +954,7 @@ function Game_Server:send_invitation(user,pwd,session_id,recipientId,callback)
 	
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/"..session_id.."/invitation",
+        url    = base_url.."/gameplay/"..session_id.."/invitation",
         
         method = "POST",
         
@@ -944,7 +1002,7 @@ function Game_Server:get_gameplay_session(user,pwd,session_id,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/"..session_id.."/state",
+        url    = base_url.."/gameplay/"..session_id.."/state",
         
         method = "GET",
         
@@ -982,7 +1040,7 @@ function Game_Server:get_all_gameplay_sessions(user,pwd,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay",
+        url    = base_url.."/gameplay",
         
         method = "GET",
         
@@ -1022,7 +1080,7 @@ function Game_Server:update_gameplay_session(user,pwd,turnId,gameSessionId,gameS
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/"..gameSessionId.."/update",
+        url    = base_url.."/gameplay/"..gameSessionId.."/update",
         
         method = "POST",
         
@@ -1064,11 +1122,11 @@ Response
 
 {"key":"pyNemr4+pphXKd1+Nvcl6bFubLMWAqnt/BYsWzTMKAQ="}
 --]]
-function Game_Server:end_gameplay_session(gameSessionId,gameState)
+function Game_Server:end_gameplay_session(user,pwd,gameSessionId,gameState,callback)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/gameplay/1/end",
+        url    = base_url.."/gameplay/"..gameSessionId.."/end",
         
         method = "POST",
         
@@ -1077,6 +1135,10 @@ function Game_Server:end_gameplay_session(gameSessionId,gameState)
         body = '{"turnId":null,"gameSessionId":'..gameSessionId..',"gameState":"'..gameState..'"}',
         
         on_complete = function(self,response_object)
+			print("ENDING A SESSION")
+			print(self.url)
+			print(self.body)
+			print(response_object.body)
 			
 			response_check(self,response_object,callback)
 			
@@ -1120,7 +1182,7 @@ function Game_Server:post_game_score(score)
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/1/score",
+        url    = base_url.."/game/1/score",
         
         method = "POST",
         
@@ -1161,7 +1223,7 @@ function Game_Server:get_user_scores()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/1/score?type=USER_TOP_SCORES",
+        url    = base_url.."/game/1/score?type=USER_TOP_SCORES",
         
         method = "GET",
         
@@ -1201,7 +1263,7 @@ function Game_Server:get_buddy_scores()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/1/score?type=BUDDY_TOP_SCORES",
+        url    = base_url.."/game/1/score?type=BUDDY_TOP_SCORES",
         
         method = "GET",
         
@@ -1259,7 +1321,7 @@ function Game_Server:get_top_scores()
     
     URLRequest{
         
-        url    = base_url.."/gameservice/rest/game/1/score?type=TOP_SCORES",
+        url    = base_url.."/game/1/score?type=TOP_SCORES",
         
         method = "GET",
         

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.trickplay.gameservice.domain.Game;
 import com.trickplay.gameservice.domain.GamePlayInvitation;
+import com.trickplay.gameservice.domain.GamePlaySummary;
 import com.trickplay.gameservice.domain.GameSession;
 import com.trickplay.gameservice.domain.GameSessionMessage;
 import com.trickplay.gameservice.domain.GameStepId;
@@ -673,6 +674,71 @@ public class GamePlayServiceTest {
         assertTrue(msg_list != null
                 && msg_list.size() == 1
                 && msg_list.get(0).getMessage().equals(msg_str));
+    }
+    
+    @Test
+    public void testSaveGameSummary() {
+        /* public GamePlaySummary saveGamePlaySummary(Long gameId, String summaryDetail); */
+        
+        testUtil.setSecurityContext("u2", "u2");
+        String summaryStr = "{losses=1, wins=0}";
+        GamePlaySummary gps = gamePlayService.saveGamePlaySummary(turnBasedGame.getId(), summaryStr);     
+        assertTrue(
+                gps != null 
+                && gps.getId() != null
+                && gps.getUser().getUsername().equals("u2")
+                && gps.getDetail().equals(summaryStr));                     
+    }
+    
+    @Test
+    public void testGetGameSummary() {
+        /* public GamePlaySummary saveGamePlaySummary(Long gameId, String summaryDetail); */
+        
+        GamePlaySummary gps = gamePlayService.getGamePlaySummary(turnBasedGame.getId());
+        assert(gps == null);
+        
+        testUtil.setSecurityContext("u2", "u2");
+        String summaryStr = "{losses=1, wins=0}";
+        GamePlaySummary gps_saved = gamePlayService.saveGamePlaySummary(turnBasedGame.getId(), summaryStr);     
+        
+        gps = gamePlayService.getGamePlaySummary(turnBasedGame.getId());
+        
+        assertTrue(
+                gps != null 
+                && gps.getId() != null
+                && gps.getId().equals(gps_saved.getId())
+                && gps.getUser().getUsername().equals("u2")
+                && gps.getDetail().equals(summaryStr));
+    }
+    
+    @Test
+    public void testGetGameSummaryAfterUpdate() {
+        /* public GamePlaySummary saveGamePlaySummary(Long gameId, String summaryDetail); */
+        
+        
+        testUtil.setSecurityContext("u2", "u2");
+        String summaryStr1 = "{losses=0, wins=0}";
+        GamePlaySummary gps_saved = gamePlayService.saveGamePlaySummary(turnBasedGame.getId(), summaryStr1);     
+        
+        GamePlaySummary gps = gamePlayService.getGamePlaySummary(turnBasedGame.getId());
+ 
+        assertTrue(
+                gps != null 
+                && gps.getId() != null
+                && gps.getId().equals(gps_saved.getId())
+                && gps.getUser().getUsername().equals("u2")
+                && gps.getDetail().equals(summaryStr1));
+        
+        String summaryStr2 = "{losses=1, wins=0}";
+        gps_saved = gamePlayService.saveGamePlaySummary(turnBasedGame.getId(), summaryStr2);     
+
+        GamePlaySummary gps2 = gamePlayService.getGamePlaySummary(turnBasedGame.getId());
+        assertTrue(
+                gps2 != null 
+                && gps2.getId() != null
+                && gps2.getId().equals(gps_saved.getId())
+                && gps2.getUser().getUsername().equals("u2")
+                && gps2.getDetail().equals(summaryStr2));
     }
     
 	@After

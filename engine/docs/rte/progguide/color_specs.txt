@@ -3,7 +3,7 @@ Title: Specifying Colors in the TrickPlay SDK
 
 	When specifying a particular color, the TrickPlay SDK libraries recognize several formats.
 	
-	Colors are specified using either an RGB (Red/Green/Blue) or an HSL (Hue/Saturation/Luminance) value. An optional Alpha transparency value can also be included. If an Alpha value is not specified, a default value of completely opaque is used. The range of an Alpha value varies between formats, but the relationship between the Low/High range is always Transparent/Opaque.
+	Colors are specified using either a color name, an RGB (Red/Green/Blue) value or an HSL (Hue/Saturation/Luminance) value. In the RGB and HSL formats, an optional Alpha transparency value can be included. If an Alpha value is not specified, a default value of completely opaque is used. The range of an Alpha value varies between formats, but the relationship between the Low/High range is always Transparent/Opaque.
 	
 	Unless noted otherwise, any of the supported formats can be used when setting a color value to a property or passing a color as a function argument; use whichever format is most convenient. When getting a color from a property or when a color is returned from a function, the color is always returned as a Lua table in the format { R, G, B, A }.
 	
@@ -49,9 +49,13 @@ Title: Specifying Colors in the TrickPlay SDK
 	"hsla(20,84%,72%,0.2)"
 	(end)
 
-	*Color Name from X11 rgb.txt File*
+	*Descriptive Color Name*
 	
-	The X11 rgb.txt file defines standard string names for a large number of colors, such as "CadetBlue" and "DarkRed". Any of these names can be specified for a color.
+	The TrickPlay SDK recognizes hundreds of descriptive color names, such as "CadetBlue" and "DarkRed". Any of the supported names can be specified for a color. The complete list is included in <TrickPlay SDK Color Names>.
 	
-	For a complete list of recognized names, look through the rgb.txt file contained on your Ubuntu system, usually in the /etc/X11 directory. Also, many Internet pages display a list of X11 names alongside samples of the color.
+	(code)
+	"CadetBlue"
+	"white"
+	"gold"
+	(end)
 

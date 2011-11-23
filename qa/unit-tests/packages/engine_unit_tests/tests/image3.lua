@@ -29,7 +29,7 @@ tag_img.on_loaded = tag_img_on_loaded
 
 -- Tests --
 function test_Image_exif_orientation_tag()
-	assert_equal( tag_img_tags["IMAGE/Orientation"] , 6, "image tag exif orientation failed" )
+	assert_equal( tag_img_tags["IMAGE/Orientation"] , 6, "tag_img_tags[IMAGE/Orientation] returned: "..tag_img_tags["IMAGE/Orientation"].." Expected: 6 ")
 end
 
 

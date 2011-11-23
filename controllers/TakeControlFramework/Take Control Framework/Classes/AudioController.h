@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVAudioPlayer.h>
 #import "AudioStreamer.h"
 #import "ResourceManager.h"
 
@@ -17,6 +18,8 @@
     
     AudioStreamer *audioStreamer;
     NSString *soundLoopName;
+    
+    AVAudioPlayer *audioPlayer;
 }
 
 - (id)initWithResourceManager:(ResourceManager *)resman
@@ -24,6 +27,7 @@
     
 - (void)sendSoundStatusMessage:(NSString *)resource message:(NSString *)message;
 - (void)playSoundFile:(NSString *)resourcename filename:(NSString *)filename;
+- (void)stopAudioPlayer;
 - (void)playbackStateChanged:(NSNotification *)aNotification;
 - (void)createAudioStreamer:(NSString *)audioURL;
 - (void)destroyAudioStreamer;
