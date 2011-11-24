@@ -115,7 +115,7 @@ Group: Engine Reference  {
 		
 		Group: Globals {
 			File: controllers (no auto-title, bindings/controllers.lb)
-			File: json* (no auto-title, bindings/json.lb)
+			File: json (no auto-title, bindings/json.lb)
 			File: uri* (no auto-title, bindings/uri.lb)
 		}
 		
