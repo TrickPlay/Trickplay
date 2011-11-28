@@ -606,14 +606,18 @@ function editor_ui.scrollPane(t)
             function track_hor:on_button_down(x,y,button,num_clicks)
                 
                 local rel_x = x - track_hor.transformed_position[1]/screen.scale[1]
-	   	        
-                if rel_x < grip_hor.w/2 then
-                    rel_x = grip_hor.w/2
-                elseif rel_x > (track_hor.w-grip_hor.w/2) then
-                    rel_x = (track_hor.w-grip_hor.w/2)
-                end
-                
-                grip_hor.x = rel_x-grip_hor.w/2
+				
+				if  grip_hor.transformed_position[1] >
+					track_hor.transformed_position[1] then
+					
+					grip_hor.x = grip_hor.x - grip_hor.w
+					if grip_hor.x < 0 then grip_hor.x = 0 end
+				else
+					grip_hor.x = grip_hor.x + grip_hor.w
+					if grip_hor.x > track_hor.w-grip_hor.w then
+						grip_hor.x = track_hor.w-grip_hor.w
+					end
+				end
                 
                 p.content.x = -(grip_hor.x) * p.virtual_w/track_w
                 
@@ -692,18 +696,20 @@ function editor_ui.scrollPane(t)
             function track_vert:on_button_down(x,y,button,num_clicks)
                 
                 local rel_y = y - track_vert.transformed_position[2]/screen.scale[2]
-	   	        
-                if rel_y < grip_vert.h/2 then
-                    rel_y = grip_vert.h/2
-                elseif rel_y > (track_vert.h-grip_vert.h/2) then
-                    rel_y = (track_vert.h-grip_vert.h/2)
-                end
-                
-                grip_vert.y = rel_y-grip_vert.h/2
+				
+				if  grip_vert.transformed_position[2] >
+					track_vert.transformed_position[2] then
+					
+					grip_vert.y = grip_vert.y - grip_vert.h
+					if grip_vert.y < 0 then grip_vert.y = 0 end
+				else
+					grip_vert.y = grip_vert.y + grip_vert.h
+					if grip_vert.y > track_vert.h-grip_vert.h then
+						grip_vert.y = track_vert.h-grip_vert.h
+					end
+				end
                 
                 p.content.y = -(grip_vert.y) * p.virtual_h/track_h
-                
-                return true
             end
         else
             grip_vert=nil
