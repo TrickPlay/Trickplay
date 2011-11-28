@@ -710,6 +710,8 @@ function editor_ui.scrollPane(t)
                 end
                 
                 p.content.y = -(grip_vert.y) * p.virtual_h/track_h
+				
+				return true
             end
         else
             grip_vert=nil
