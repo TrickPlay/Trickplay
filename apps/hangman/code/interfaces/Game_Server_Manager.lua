@@ -269,14 +269,14 @@ function Game_Server:respond(session,callback)
     
 end
 
-function Game_Server:get_session_state(session,callback)
+function Game_Server:get_session_state(id,callback)
     
-    if session == nil then error("must pass session",2) end
+    if id == nil then error("must pass id",2) end
     
     interface:get_gameplay_session(
         user,
         pswd,
-        session.id,
+        id,
         callback
     )
     
