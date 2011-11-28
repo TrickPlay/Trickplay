@@ -1,11 +1,23 @@
 --[[
+wed
+	level 'suck it up and squeeze through'? (after level 3 maybe)
+	inter-level platforms
+	snow ramp thing
+	finish level 20, make 21 ('blue fish ice bridge')
+	insert rolling/bouncing blocks? (3-5 levels)
+	
+mon-wed
+	blue fish adjustments, preferrably w/ burst anim
+	2-3 blue fish levels
+	snow banks (need assets)
+	5-8 snow bank levels
+	
 
-seal w/ ball
-try to ease up collisions
-consider unlinking penguin speed from timeline
+Mon
+refine collisions
 breakable blocks
-faster fish
-heavy armor
+faster fish adjustments
+armor
 gravity fish
 darkness
 snow tunnel
@@ -23,15 +35,13 @@ splashing
 double jump cues?
 
 
-audio
-
-
-Need:
+Need
 	audio
 	better ice water
+	better seal
 	breakable block
 	"faster" fish
-	armor
+	armor pieces
 	"upside down" fish
 	darkness
 	snow tunnel
@@ -51,6 +61,8 @@ dofile("cloner.lua")
 snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
 levels  = dofile("levels.lua")
-dofile("overlay.lua")
+overlay	= dofile("overlay.lua")
+snow(levels.this.snow)
+explode = dofile("explode.lua")
 
 collectgarbage("collect")

@@ -1,14 +1,15 @@
-import sys, re
+import re
 from connection import *
 from discovery import *
 
-	
 class CLDebuger():
 
 	def __init__(self):
 	
 		self.device_name = ""
 		self.debug_port = ""
+		self.file_name = ""
+		self.line_no = ""
 
 	def start(self, discovery):
 
@@ -20,34 +21,34 @@ class CLDebuger():
 			data = None
 			cmd = None
 			arg = None
-			command = raw_input("(db) ")
+
+			if CON.get() == ":":
+				command = raw_input("(db) ")
+			else:
+				prompt = "("+self.file_name+":"+self.line_no+")"
+				command = raw_input(prompt)
 
 			m = re.match('\s*(\w+)\s+(\S+)\s*', command)
 
 			if m:
 				cmd = m.group(1)
-				#arg = m.group(2)
 				cmd_temp= re.match('\s*(\w+)\s+', command).group()
 				cmd_i = len(cmd_temp)
 				arg = command[cmd_i:]
 
-		
 			if re.search('ld', command):
 
-				for k in discovery.devices:
+				for k in discovery.devices():
 					if self.device_name == k:
-						print '\t'+k+":"+discovery.devices[k][0]+":"+discovery.devices[k][1]+" (connected)"
+						#print '\t'+k+":"+discovery.devices()[k][0]+":"+discovery.devices()[k][1]+" (connected)"
+						print '\t'+k+" (connected)"
 					else:
-						print '\t'+k+":"+discovery.devices[k][0]+":"+discovery.devices[k][1]
+						#print '\t'+k+":"+discovery.devices()[k][0]+":"+discovery.devices()[k][1]
+						print '\t'+k
 
 			elif re.search('help', command):
 
 				print '\t'+'help is not ready. '
-
-			elif re.search('quit', command) or re.search('exit', command):
-
-				self.disconnect()
-				sys.exit()
 
 			elif re.search('cn',command) or re.search('connect',command): 
 
@@ -63,16 +64,16 @@ class CLDebuger():
 						print "\tArgument required.(device name)"
 						print '\t'+'Try ld" to get a list of available remote devices.'
 
-					elif not arg in discovery.devices:
-						
-						print '\t'+arg+' is not available.'
-						print '\t'+'Try "ld" to get a list of available remote devices.'
+					elif not arg in discovery.devices():
+						if discovery.force_lookup(arg) :
 
+							data, command = self.connect(discovery, arg)
+							
+						else:
+							print '\t'+arg+' is not available.'
+							print '\t'+'Try "ld" to get a list of available remote devices.'
 					else:
-						self.device_name = arg
-						discovery.service_selected(self.device_name)
-						self.debug_port = str(getTrickplayDebug()['port'])
-						data = sendTrickplayDebugCommand(self.debug_port, "bn", True)
+						data, command = self.connect(discovery, arg)
 
 			elif command != "":
 
@@ -108,18 +109,29 @@ class CLDebuger():
 			if data:
 
 				self.printResp(data, command)
+				if command == 'r' or command == 'c':
+					self.printResp(sendTrickplayDebugCommand(self.debug_port, "bn", False), "bn")
 
-				if command == 'q':
-					CON.set("", "")
-					self.device_name = ""
-					self.debug_port = ""
-				#elif command == 'r' or command == 'c':
-					#self.printResp(sendTrickplayDebugCommand(self.debug_port, "bn", True), "bn")
-				
-	def disconnect(self):
+			if command == 'q':
+					self.disconnect(discovery)
+	
+	def connect(self, discovery, arg):
 
-		if CON.get() != ":":
-			sendTrickplayDebugCommand(self.debug_port, 'q', False)
+		self.device_name = arg
+		discovery.service_selected(self.device_name)
+		self.debug_port = str(getTrickplayDebug()['port'])
+		data = sendTrickplayDebugCommand(self.debug_port, "bn", True)
+		return data, 'cn'
+
+	def disconnect(self, discovery):
+
+		if str(self.device_name) in discovery.listener.devices:
+			del discovery.listener.devices[str(self.device_name)] 
+		CON.set("", "")
+		self.device_name = ""
+		self.debug_port = ""
+		self.file_name = ""
+		self.line_no = ""
 
 	def printResp(self, data, command):
 
@@ -128,6 +140,9 @@ class CLDebuger():
 		file_name = pdata["file"] 
 		tp_id = pdata["id"] 
 		line_num = pdata["line"]
+
+		self.line_no = str(line_num)
+		self.file_name = str(file_name)
 
 		if "locals" in pdata:
 			local_vars = ""
@@ -203,7 +218,7 @@ class CLDebuger():
 					app_info = app_info+"\n\t"					
 			print "\t"+app_info
 
-		if command in ['n','s','bn']:
+		if command in ['n','s','bn', 'cn']:
 			print "\t"+"Break at "+file_name+":"+str(line_num)
 
 
