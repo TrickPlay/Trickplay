@@ -120,7 +120,8 @@ function idle.on_idle( idle , seconds )
 		timeline6_on_completed_called == true and 
 		urlrequest1_on_complete_called == true and
 		tag_img_loaded == true and
-		animation_state2_completed == true
+		animation_state2_completed == true and
+		total > 2
 		)  then
 
 			if  total < 10 then
