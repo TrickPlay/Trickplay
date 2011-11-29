@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.launcher17",
+    release     = "1",
+    version     = "0.1",
+    name        = "Launcher17",
+    author      = "Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}
+
