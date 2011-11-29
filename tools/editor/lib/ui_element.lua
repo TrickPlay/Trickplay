@@ -4074,13 +4074,13 @@ local function draw_c_fill(c_shell_w, c_shell_h, ui_width, ui_height, filled_top
 
     local stroke_width = 2
 	local RAD = 6
-	local top    = math.ceil(stroke_width/2)
-	local left   = math.ceil(stroke_width/2)
+	local top    = math.ceil(stroke_width)
+	local left   = math.ceil(stroke_width)
 
-	local bottom = c_shell_h - math.ceil(stroke_width/2)
-	local right  = c_shell_w - math.ceil(stroke_width/2)
+	local bottom = c_shell_h - math.ceil(stroke_width)
+	local right  = c_shell_w - math.ceil(stroke_width)
         
-	local c_fill  = Canvas{ size = {1,ui_height-stroke_width} }  
+	local c_fill  = Canvas{ size = {1,ui_height} }  
         
 	c_fill:begin_painting()
         
@@ -4104,7 +4104,7 @@ local function draw_c_fill(c_shell_w, c_shell_h, ui_width, ui_height, filled_top
 	end
 
 	c_fill.x=stroke_width
-    c_fill.y=stroke_width/2
+    --c_fill.y=stroke_width/2
     c_fill.scale = {(ui_width-4)*(progress),1}
    
 	return c_fill
