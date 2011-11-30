@@ -28,6 +28,9 @@ namespace ClutterUtil
 
     void push_clutter_color( lua_State * L, ClutterColor * color );
 
+    // Converts the thing at index to a clutter geometry. Accepts a table 
+    void to_clutter_geometry( lua_State * L, int index, ClutterGeometry * geometry );
+
     // Converts the thing at index to a clutter color. Accepts a table or a
     // string
 

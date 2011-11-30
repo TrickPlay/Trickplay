@@ -259,6 +259,25 @@ int set_state_value(lua_State * L, int index, ClutterState* state, const String 
 		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
 		}
 	}
+	else if (!strcmp("clip", k))
+	{
+		if (lua_type(L,index)==LUA_TTABLE)
+		{
+			ClutterGeometry geometry;
+			ClutterUtil::to_clutter_geometry(L, index, &geometry);
+
+			g_value_init(&gvalue, CLUTTER_TYPE_GEOMETRY);
+			g_value_set_boxed (&gvalue, &geometry);
+
+			clutter_state_set_key(state, source_name, target.c_str(), G_OBJECT(object), "clip", nmode, &gvalue, pre_delay, post_delay);
+            g_value_unset(&gvalue);
+
+		}
+		else
+		{
+		    return luaL_error(L, "Incorrect argument, failed to set the fourth argument of keys : table expected");
+		}
+	}
 	return 0;
 }
 
