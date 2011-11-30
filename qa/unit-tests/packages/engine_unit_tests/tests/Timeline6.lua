@@ -21,7 +21,7 @@ myTimeline.duration = 2000
 myTimeline.loop = false
 
 myTimeline:add_marker ("start", 100)
-myTimeline:add_marker ("middle", 999)
+myTimeline:add_marker ("middle", 1700)
 myTimeline:add_marker ("end", 1999)
 
 myTimeline.on_new_frame = function (self, timeline_ms, progress)

@@ -109,7 +109,7 @@ idle.limit = 1.0
 function idle.on_idle( idle , seconds )
        total = total + seconds
 		
-	if total > 3 or (
+	if total > 5 or (
 		animator_timeline_completed_called == true and
 		appOnLoadedCalled == true and
 		bitmap1_async_loaded_called == true and
@@ -123,7 +123,7 @@ function idle.on_idle( idle , seconds )
 		urlrequest1_on_complete_called == true and
 		tag_img_loaded == true and
 		animation_state2_completed == true and
-		total > 2
+		total > 3
 		)  then
 
 			if  total < 10 then
