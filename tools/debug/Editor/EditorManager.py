@@ -131,8 +131,6 @@ class EditorManager(QWidget):
 
 		#close current index tab
 		self.editorGroups[0].removeTab(index)
-		self.tab.closeTab(index)
-
 
     def saveas(self):
 		self.dialog = QDialog()

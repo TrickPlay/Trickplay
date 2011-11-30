@@ -36,6 +36,11 @@ class EditorTabWidget(QTabWidget):
             self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
 
     def changeTab(self, index):
+		print index
+
+		if index == -1:
+			return 
+
 		currentText = open(self.paths[index]).read()
 		if self.textBefores[index] != currentText:
 			msg = QMessageBox()
