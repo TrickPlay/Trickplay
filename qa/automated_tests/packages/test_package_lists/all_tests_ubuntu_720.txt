@@ -443,6 +443,21 @@
 "name": "10014_image_exif_orientation.lua",
 "checksum": "7f9d329c3b1d89cda10408a8c1f4f265",
 "active": "true"
+},
+{
+"name": "10015_container_boundary.lua",
+"checksum": "7f9d329c3b1d89cda10408a8c1f4f265",
+"active": "true"
+},
+{
+"name": "10016_container_raise_lower.lua",
+"checksum": "0a7e80c81fa51388fe7c2357f0f98d5d",
+"active": "true"
+},
+{
+"name": "10017_container_children.lua",
+"checksum": "079f8ad6b4545016392b41106591b174",
+"active": "true"
 }
 ]
 
