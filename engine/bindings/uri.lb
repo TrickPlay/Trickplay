@@ -196,16 +196,16 @@ global uri [[void*]]
 	/*
 		Function: escape
 		
-		The escape() function percent-encodes all unreserved characters in a string, for example, a space " " is percent-encoded to "%20".
+		The escape() function applies URL encoding to a string; for example, a space " " is URL-encoded to "%20".
 
 		*Arguments:*
 
-			s - string to percent-encode
+			s - string to URL encode
 			space_to_plus - boolean flag indicating whether or not space characters should be converted to "+" (true=convert to "+", else convert to "%20"). Default is false/convert to "%20".
 
-		*Return Value:* percent-encoded string. If string could not be converted, returns 0.
+		*Return Value:* URL-encoded string. If string could not be converted, returns 0.
 		
-		*Code Example:* Percent-encode and display a simple string
+		*Code Example:* URL-encode and display a simple string
 		
 		(code)
 		print( uri:escape( "This is my name: John Doe" ) )
@@ -239,16 +239,16 @@ global uri [[void*]]
 	/*
 		Function: unescape
 		
-		The unescape() function converts a percent-encoded string to its ANSI-character equivalent. For example, any "%20" characters are converted to " " (space) characters.
+		The unescape() function converts a URL-encoded string to its ANSI-character equivalent. For example, any "%20" characters are converted to " " (space) characters.
 
 		*Arguments:*
 
-			s - percent-encoded string to convert
+			s - URL-encoded string to convert
 			plus_to_space - boolean flag indicating whether or not to convert "+" characters to " " (space) characters (true=convert "+" to space). Default is true/convert "+" to space.
 			
 		*Return Value:* converted string. If string could not be converted, returns 0.
 		
-		*Code Example:* Convert and display a percent-encoded string to its ANSI-character equivalent
+		*Code Example:* Convert and display a URL-encoded string to its ANSI-character equivalent
 		
 		(code)
 		print( uri:unescape( "This%20is%20my%20name%3A%20John%20Doe" ) )
