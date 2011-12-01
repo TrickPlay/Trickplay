@@ -126,6 +126,7 @@ class EditorManager(QWidget):
     def close(self):
 		# find current index tab 
 		index = self.tab.currentIndex()
+		print index 
 		
 		# TODO : try to save 
 

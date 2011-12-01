@@ -45,13 +45,12 @@ class TrickPlayListener(object):
 
 		name = self.getDeviceName(name)
 		ddict = {}
-		ddict[0] = str(name) 
-		ddict[1] = self.devices[str(name)][0]
-		ddict[2] = self.devices[str(name)][1]
-
-		QApplication.postEvent(self.receiver, MyCustomEvent(REMEVENT, ddict))
 
 		if str(name) in self.devices:
+			ddict[0] = str(name) 
+			ddict[1] = self.devices[str(name)][0]
+			ddict[2] = self.devices[str(name)][1]
+			QApplication.postEvent(self.receiver, MyCustomEvent(REMEVENT, ddict))
 			del self.devices[str(name)] 
 
 	def addService(self, zeroconf, type, name):

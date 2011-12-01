@@ -191,7 +191,12 @@ class MainWindow(QMainWindow):
         
 	
     def new(self):
-		print "New project"
+		wizard = Wizard()
+		path = wizard.start("")
+		if path:
+			settings = QSettings()
+			settings.setValue('path', path)
+			self.start(path, wizard.filesToOpen())
 
     def exit(self):
         """
@@ -201,13 +206,3 @@ class MainWindow(QMainWindow):
 		#try to close current index tab and then, do that for every other tabs too
         self._deviceManager.stop()
         self.close()
-
-    def dm(self):
-		print "dm"
-
-    def fs(self):
-		print "fs"
-
-    def isptr(self):
-		print "inptr"
-        
