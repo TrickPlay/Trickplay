@@ -476,9 +476,10 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
     x, y, z, depth - float
     width, height, w, h - float
     opacity - int
-    position - table of {float x, float y}
+    position - table of { float x, float y }
     size - table of {float width, float height}
-    scale - table of {double x, double y}
+    scale - table of { double x, double y }
+    clip - table of four integers specifying the clipping rectangle { x-origin, y-origin, width, height }
     x_rotation - double specifying rotation angle
     y_rotation - double specifying rotation angle
     z_rotation - double specifying rotation angle
