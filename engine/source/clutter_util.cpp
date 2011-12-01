@@ -90,6 +90,35 @@ ClutterColor ClutterUtil::string_to_color( const char * s )
 
 //.............................................................................
 
+void ClutterUtil::to_clutter_geometry( lua_State * L, int index, ClutterGeometry * geometry )
+{
+    LSG;
+
+	index = abs_index(L, index);
+
+    if ( lua_istable( L, index ) )
+    {
+        lua_rawgeti( L, index, 1 );
+        lua_rawgeti( L, index, 2 );
+        lua_rawgeti( L, index, 3 );
+        lua_rawgeti( L, index, 4 );
+        geometry->x = luaL_optint( L, -4, 0 );
+        geometry->y = luaL_optint( L, -3, 0 );
+        geometry->width = luaL_optint( L, -2, 0 );
+        geometry->height = luaL_optint( L, -1, 0 );
+        lua_pop( L, 4 );
+    }
+    else
+    {
+        luaL_error( L, "Expecting a clip as a table" );
+    }
+
+    LSG_END( 0 );
+}
+
+
+//.............................................................................
+
 void ClutterUtil::to_clutter_color( lua_State * L, int index, ClutterColor * color )
 {
     LSG;

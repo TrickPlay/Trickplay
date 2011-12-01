@@ -13,6 +13,13 @@ Description:  Verify that the trickplay properties all return their expected val
 
 -- Tests --
 
+function test_trickplay_check_version ()
+    assert_true ( trickplay:check_version("1.15.0"), "trickplay:check_version(1.15.0) returned:"..tostring(trickplay:check_version("1.15.0"))..". Expected: true")
+end
+
+function test_trickplay_fonts ()
+    assert_greater_than ( #trickplay.fonts, 20, "#trickplay.fonts returned: "..#trickplay.fonts..". Expected greater than 20" )
+end
 
 function test_trickplay_version_exists ()
     assert_string( trickplay.version , "trickplay.version not returning value" )
