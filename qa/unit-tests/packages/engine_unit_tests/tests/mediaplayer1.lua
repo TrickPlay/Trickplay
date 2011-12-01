@@ -13,7 +13,7 @@ Description: Mediaplayer  test
  media_player_loaded = false
  media_player_stream_completed = false
 
- mediaplayer:load("packages/engine_unit_tests/tests/assets/MVI_3992.AVI")
+ mediaplayer:load("packages/engine_unit_tests/tests/assets/glee-1.mp4")
  mediaplayer:set_viewport_geometry (750,10,200,200)
  video_idle =mediaplayer.state
  
@@ -23,8 +23,10 @@ Description: Mediaplayer  test
 	mediaplayer:play()
 	video_playing = mediaplayer.state
 	bitrate = mediaplayer.tags["bitrate"]
+	print ("-------------"..mediaplayer.tags["bitrate"])
 	mediaplayer.volume = 0.5
 	mediaplayer.mute = false
+	mediaplayer:seek(130)
   end
 
   function mediaplayer:on_end_of_stream()
@@ -78,10 +80,10 @@ end
 
 function test_mediaplayer_tags ()
 -- Commenting out this test as it's returning nil due to the short movie --  
---  assert_string ( mediaplayer.tags["bitrate"] , "mediaplayer.tags[bitrate] returned: "..tostring(mediaplayer.tags["bitrate"]).." Expected a string"  )
+  assert_string ( mediaplayer.tags["bitrate"] , "mediaplayer.tags[bitrate] returned: "..tostring(mediaplayer.tags["bitrate"]).." Expected a string"  )
     assert_string ( mediaplayer.tags["container-format"] , "mediaplayer.tags[container-format] returned: "..mediaplayer.tags["container-format"].." Expected a string"  )
     assert_string ( mediaplayer.tags["video-codec"] , "mediaplayer.tags[video-codec] returned: "..mediaplayer.tags["video-codec"].." Expected a string"  )
-  --  assert_string ( mediaplayer.tags["maximum-bitrate"] , "mediaplayer.tags[maximum-bitrate] returned: "..mediaplayer.tags["maximum-bitrate"].." Expected a string"  )
-  --  assert_string ( mediaplayer.tags["language-code"] , "mediaplayer.tags[language-code] returned: "..mediaplayer.tags["language-code"].." Expected a string"  )
-  --  assert_string ( mediaplayer.tags["audio-codec"] , "mediaplayer.tags[audio-codec] returned: "..mediaplayer.tags["audio-codec"].." Expected a string"  )
+    assert_string ( mediaplayer.tags["maximum-bitrate"] , "mediaplayer.tags[maximum-bitrate] returned: "..mediaplayer.tags["maximum-bitrate"].." Expected a string"  )
+    assert_string ( mediaplayer.tags["language-code"] , "mediaplayer.tags[language-code] returned: "..mediaplayer.tags["language-code"].." Expected a string"  )
+    assert_string ( mediaplayer.tags["audio-codec"] , "mediaplayer.tags[audio-codec] returned: "..mediaplayer.tags["audio-codec"].." Expected a string"  )
 end
