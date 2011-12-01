@@ -21,7 +21,7 @@ static void push_text_range( lua_State * L , const UriTextRangeA & range )
 /*
 	Global: uri
 	
-	Provides some basic URI functions.
+	The uri global variable provides various functions for processing URI (Uniform Resource Identifier) strings.
 */
 
 global uri [[void*]]
@@ -29,46 +29,44 @@ global uri [[void*]]
 	/*
 		Function: parse
 		
-		Parses a URI and returns a table containing its components. If there is a problem
-		parsing the URI, it may return nil.
+		The parse() function parses a URI (Uniform Resource Identifier) string to its component parts. The URI string should conform to the RFC 3986 specification. The string may contain ANSI characters, but not Unicode characters.
 		
-		Arguments:
+		*Argument:*
 		
-			uri_string - The URI to parse.
+			uri_string - URI string to parse
 		
-		Returns:
+		*Return Value:* table of parsed URI components. The table format consists of component/value pairs. The list of recognized components is described below. Some components are optional, such as "query" and "port". If a URI string does not include a particular component, no entry for that component will be in the returned table. If the URI string cannot be successfully parsed, the parse() function returns nil.
 		
-			table - A table of components. Any, none or all of the following components may be present:
-					scheme, user, host, port, query, fragment, absolute and path. Path is a table of strings
-					for each segment of the path. For example, if the path is "wiki/index.php" the path table
-					will be { "wiki" , "index.php" }.
-					
-			nil - If there was a problem parsing the URI.
-					
-		Example:
+		The possible URI components are described below. The descriptions parse the sample URI "http://John:Doe@trickplay.com:80/over/there.php?First=John&Second=Doe#Address" into its components.
+		
+			scheme - scheme name, such as "http"
+			user - user info, such as "John:Doe"
+			host - host text, such as "trickplay.com"
+			port - port number in string format, such as "80"
+			path - path segments formatted as a table of strings. Each table entry contains one segment of the path, such as { "over", "there.php" }
+			query - query, without leading "?", such as "First=John&Second=Doe". The query string can be further parsed by the <parse_query> function.
+			fragment - fragment, without leading "#", such as "Address"
+			absolute - boolean flag indicating whether the path is absolute or relative (true=absolute, false=relative). The sample URI above would return an "absolute" value of false.
+
+		*Code Example:* Parse a sample URI string and display each component
 		
 		(code)		
+		dumptable( uri:parse( "http://foo:bar@trickplay.com:80/hello/goodbye.php?Greeting=Hello+World" ) )
 		
-		dumptable( uri:parse( "http://foo:bar@trickplay.com:80/hello/goodbye.php?a=1%3D&2=a+b") )
-		
-		-- Results in:
+		Displays:
 		
 		{
-			"host" = "trickplay.com"
-		    "port" = "80"
-		    "user" = "foo:bar"
-		    "scheme" = "http"
-		    "path" = 
-		    {
-		    	1 = "hello"
-		     	2 = "goodbye.php"
-		    }
+		    "scheme"   = "http"
+		    "user"     = "foo:bar"
+		    "host"     = "trickplay.com"
+		    "port"     = "80"
+		    "path"     = { "hello", "goodbye.php" }
+		    "query"    = "Greeting=Hello+World"
 		    "absolute" = false
-		    "query" = "a=1%3D&2=a+b"
- 		}	
- 		
+ 		}
  		(end)	
- 
+
+		*See Also:* the <parse_query> function
 	*/
 	
 	table parse( string uri_string )
@@ -138,25 +136,32 @@ global uri [[void*]]
 	/*
 		Function: parse_query
 		
-		Parses a URI query string and returns all the keys and values in order.
+		The parse_query() function parses the query portion of a URI string into its component key/value parts.
 		
-		Arguments:
+		*Arguments:*
 		
-			query_string - The query string to parse.
-			plus_to_space - Whether to convert + to space.
+			query_string - URI query string to parse
+			plus_to_space - boolean flag indicating whether or not to convert "+" characters to " " (space) characters (true=convert). Default=true/convert.
 			
-		Returns:
+		*Return Value:* table of parsed URI query components formatted as key/value pairs. If string could not be successfully parsed, returns nil.
 		
-			table - The resulting table is a list of tables. Each one of these 
-					tables will contain the key as the first element and, if there
-					is a corresponding value, the value as the second element. For example,
-					the query string "a=1&b&c=3" will return the table { { "a" ,"1" } , 
-					{ "b" } , { "c" , "3" } }.
-					
-			nil - If there is a problem.
+		*Code Example:* Parse and display a URI query string
+		
+			(code)
+			dumptable( uri:parse_query( "First=John&Middle&Second=Doe" ) )
+			
+			Displays:
+
+			{  { "First", "John" },
+			   { "Middle"        },
+			   { "Second", "Doe" }
+			}
+			(end)
+		
+		*See Also:* the <parse> function
 	*/
 	
-	table parse_query( lstring query_string , bool plus_to_space = true )
+	table parse_query( lstring query_string, bool plus_to_space = true )
 		[[
 			UriQueryListA * q = 0;
 			
@@ -191,19 +196,27 @@ global uri [[void*]]
 	/*
 		Function: escape
 		
-		Escapes a string.
+		The escape() function percent-encodes all unreserved characters in a string, for example, a space " " is percent-encoded to "%20".
+
+		*Arguments:*
+
+			s - string to percent-encode
+			space_to_plus - boolean flag indicating whether or not space characters should be converted to "+" (true=convert to "+", else convert to "%20"). Default is false/convert to "%20".
+
+		*Return Value:* percent-encoded string. If string could not be converted, returns 0.
 		
-		Arguments:
+		*Code Example:* Percent-encode and display a simple string
 		
-			s - The string to escape.
-			space_to_plus - Whether to convert spaces to +. If not, they will become %20.
-			
-		Returns:
+		(code)
+		print( uri:escape( "This is my name: John Doe" ) )
 		
-			string - The escaped string.
+		Displays: This%20is%20my%20name%3A%20John%20Doe
+		(end)
+		
+		*See Also:* the <unescape> function
 	*/
 	
-	lstring escape( lstring s , bool space_to_plus = false )
+	lstring escape( lstring s, bool space_to_plus = false )
 		[[
 			gchar * out = g_new( gchar , s_len * 3 );
 			
@@ -226,19 +239,27 @@ global uri [[void*]]
 	/*
 		Function: unescape
 		
-		Un-escapes a string.
-		
-		Arguments: 
-		
-			s - The string to un-escape.
-			plus_to_space - Whether to convert + to space.
+		The unescape() function converts a percent-encoded string to its ANSI-character equivalent. For example, any "%20" characters are converted to " " (space) characters.
+
+		*Arguments:*
+
+			s - percent-encoded string to convert
+			plus_to_space - boolean flag indicating whether or not to convert "+" characters to " " (space) characters (true=convert "+" to space). Default is true/convert "+" to space.
 			
-		Returns:
+		*Return Value:* converted string. If string could not be converted, returns 0.
 		
-			string - The unescaped string.
+		*Code Example:* Convert and display a percent-encoded string to its ANSI-character equivalent
+		
+		(code)
+		print( uri:unescape( "This%20is%20my%20name%3A%20John%20Doe" ) )
+		
+		Displays: This is my name: John Doe
+		(end)
+		
+		*See Also:* the <escape> function
 	*/
 	
-	lstring unescape( lstring s , bool plus_to_space = true )
+	lstring unescape( lstring s, bool plus_to_space = true )
 		[[
 			
 			gchar * out = g_new0( gchar , s_len + 1 );
