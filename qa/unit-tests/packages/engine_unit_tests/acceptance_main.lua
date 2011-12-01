@@ -25,6 +25,8 @@ dofile( "packages/engine_unit_tests/tests/Container1.lua" )
 dofile( "packages/engine_unit_tests/tests/Container2.lua" )
 dofile( "packages/engine_unit_tests/tests/Container3.lua" )
 dofile( "packages/engine_unit_tests/tests/Container4.lua" )
+dofile( "packages/engine_unit_tests/tests/Container5.lua" )
+dofile( "packages/engine_unit_tests/tests/Container6.lua" )
 dofile( "packages/engine_unit_tests/tests/screen1.lua" )
 dofile( "packages/engine_unit_tests/tests/clone1.lua" )
 dofile( "packages/engine_unit_tests/tests/image1.lua")
@@ -60,7 +62,7 @@ dofile( "packages/engine_unit_tests/tests/bitmap1.lua")
 dofile( "packages/engine_unit_tests/tests/canvas1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/profile1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/UIElement12.lua" )  
-dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
+
 dofile( "packages/engine_unit_tests/tests/animator1.lua" )
 dofile( "packages/engine_unit_tests/tests/animationState1.lua" )
 dofile( "packages/engine_unit_tests/tests/app1.lua" )
@@ -85,7 +87,7 @@ dofile( "packages/engine_unit_tests/tests/Path4.lua" )
 dofile( "packages/engine_unit_tests/tests/Path5.lua")
 dofile( "packages/engine_unit_tests/tests/bitmap1.lua")
 dofile( "packages/engine_unit_tests/tests/bitmap2.lua")
-
+dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
 screen:add (test_group)
 
 -- setup steps
@@ -107,20 +109,21 @@ idle.limit = 1.0
 function idle.on_idle( idle , seconds )
        total = total + seconds
 		
-	if total > 3 or (
+	if total > 5 or (
 		animator_timeline_completed_called == true and
 		appOnLoadedCalled == true and
 		bitmap1_async_loaded_called == true and
 		image1Loaded == true and
 		image2_callback_called == true and 
 		on_alpha_called == true and
-		media_player_loaded == true and
+		media_player_stream_completed == true and
 		timeline1_on_completed_called == true and
 		timeline5_on_completed_called == true and
 		timeline6_on_completed_called == true and 
 		urlrequest1_on_complete_called == true and
 		tag_img_loaded == true and
-		animation_state2_completed == true
+		animation_state2_completed == true and
+		total > 3
 		)  then
 
 			if  total < 10 then
