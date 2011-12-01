@@ -62,7 +62,7 @@ dofile( "packages/engine_unit_tests/tests/bitmap1.lua")
 dofile( "packages/engine_unit_tests/tests/canvas1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/profile1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/UIElement12.lua" )  
-dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
+
 dofile( "packages/engine_unit_tests/tests/animator1.lua" )
 dofile( "packages/engine_unit_tests/tests/animationState1.lua" )
 dofile( "packages/engine_unit_tests/tests/app1.lua" )
@@ -87,7 +87,7 @@ dofile( "packages/engine_unit_tests/tests/Path4.lua" )
 dofile( "packages/engine_unit_tests/tests/Path5.lua")
 dofile( "packages/engine_unit_tests/tests/bitmap1.lua")
 dofile( "packages/engine_unit_tests/tests/bitmap2.lua")
-
+dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
 screen:add (test_group)
 
 -- setup steps
@@ -116,7 +116,7 @@ function idle.on_idle( idle , seconds )
 		image1Loaded == true and
 		image2_callback_called == true and 
 		on_alpha_called == true and
-		media_player_loaded == true and
+		media_player_stream_completed == true and
 		timeline1_on_completed_called == true and
 		timeline5_on_completed_called == true and
 		timeline6_on_completed_called == true and 
