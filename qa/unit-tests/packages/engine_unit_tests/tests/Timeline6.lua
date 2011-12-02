@@ -17,12 +17,12 @@ timeline6_on_completed_called = false
 
 local myTimeline = Timeline ()
 local on_middle_marker_reached_called = false
-myTimeline.duration = 1000
+myTimeline.duration = 2000
 myTimeline.loop = false
 
 myTimeline:add_marker ("start", 100)
-myTimeline:add_marker ("middle", 500)
-myTimeline:add_marker ("end", 999)
+myTimeline:add_marker ("middle", 1700)
+myTimeline:add_marker ("end", 1999)
 
 myTimeline.on_new_frame = function (self, timeline_ms, progress)
 	image1.x = 1000 * progress

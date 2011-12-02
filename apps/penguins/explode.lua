@@ -1,69 +1,64 @@
-local i, d, t1, s, m2, mz1
+local i, d, dt, d2, s, px, py
 local snow   = {"explode-16","explode-24","explode-32"}
 
 local group = Group{name = "explosion"}
 overlay:add(group)
+group:raise(penguin)
 
 local anim = Timeline{duration = 2300}
 
 function anim:on_new_frame(ms,t)
-	t1 = t*t*100
-	s = 1+t*3
-	m2 = ms/2^(ms/1000)
-	mz1 = ms*ms/8000
+	d = self.delta
+	dt = d/self.duration/2
+	s = 1+dt*6
+	d2 = 4^(d/1000)
 	for k,v in ipairs(group.children) do
-		v.opacity = math.max(0,v.oo+v.vo*ms)
+		v.opacity = math.max(0,v.opacity+v.vo*d)
 		if v.opacity == 0 then
 			v:free()
 		else
-			v.x = v.ox + v.vx*m2 + t1*6
-			v.y = v.oy + v.vy*m2 + t1
-			if v.z1 then
-				v.z_rotation = {v.z1+mz1,v.z2,v.z3}
+			v.vx = v.vx/d2 + dt
+			v.vy = v.vy/d2 + dt/4
+			v.x = v.x + v.vx*d
+			v.y = v.y + v.vy*d
+			if v.z2 then
+				v.vz = v.vz+dt
+				v.z_rotation = {v.z_rotation[1]+v.vz*d,v.z2,v.z3}
 			else
-				v.scale = {v.os*s,v.os*s}
+				v.scale = {v.scale[1]*s,v.scale[2]*s}
 			end
 		end
 	end
 end
 
-return function(vx,vy)
-	if anim.is_playing then
-		local ms = anim.elapsed
-		local t = ms/anim.duration
-		m2 = 1/2^(ms/1000)
-		t1 = t*200/anim.duration
-		
-		for k,v in ipairs(group.children) do
-			v.ox, v.oy = v.x, v.y
-			v.vx, v.vy = v.vx*m2 + t1*6, v.vy*m2 + t1
-			if v.z1 then
-				v.z1 = v.z_rotation[1]
-			end
-			v.os = v.scale[1]
-			v.oo = v.opacity
-		end
+return function(bank)
+	px, py = penguin.x + penguin.w/2, penguin.y + penguin.h/2
+	
+	if not bank or bank > 5 then
+		group:raise(penguin)
+		s = Image{src = "explode-128", opacity = 255,
+			anchor_point = {64,64}, scale = {1,1}}
+		s.x, s.y = px, py - (bank and 20 or 0)
+		s.vx, s.vy = 0, (bank and -0.06 or 0)
+		s.vo = -255/800
+		group:add(s)
+	else
+		group:lower(penguin)
 	end
 	
-	local px, py = penguin.x + penguin.w/2, penguin.y + penguin.h/2
-	
-	local p = Image{src = "explode-128", opacity = 255,
-		anchor_point = {64,64}, scale = {1,1}}
-	group:add(p)
-	p.x, p.y, p.ox, p.oy = px, py, px, py
-	p.vx, p.vy = 0, 0
-	p.oo, p.os, p.vo = 255, 1, -255/800
-	
-	for i=1,rand(15,20) do
-		s = Image{src = snow[rand(#snow)]}
-		group:add(s)
-		s.x, s.y, s.ox, s.oy = px, py, px, py
-		s.vx, s.vy = nrand(0.25), nrand(0.25)
-		s.z1, s.z2, s.z3 = rand(360), s.w*nrand(0.7), s.h*nrand(0.7)
-		s.z_rotation = {s.z1,s.z2,s.z3}
-		s.oo = 127 + rand(128)
-		s.opacity = s.oo
+	py = py - (bank and bank > 5 and 30 or 0)
+	for i=1,(bank or rand(15,20)) do
+		s = Image{src = snow[rand(#snow-(bank and 1 or 0))]}
+		s.x, s.y = px, py
+		s.vx, s.vy = nrand(0.25), bank and nrand(0.2)-0.15 or nrand(0.25)
+		s.z2 = nrand(0.2)+0.9
+		s.scale = {s.z2,s.z2}
+		s.z2, s.z3 = s.w*nrand(0.7), s.h*nrand(0.7)
+		s.z_rotation = {rand(360),s.z2,s.z3}
+		s.vz = 0.1
+		s.opacity = 127 + rand(128)
 		s.vo = -255/2000
+		group:add(s)
 	end
 	
 	anim:rewind()

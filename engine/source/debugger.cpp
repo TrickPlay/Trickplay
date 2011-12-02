@@ -395,10 +395,11 @@ protected:
 					{
 						JSON::Object & bp( (*it).as<JSON::Object>() );
 
-						fprintf( stdout , "[%d] %s:%lld\n" ,
+						fprintf( stdout , "[%d] %s:%lld%s\n" ,
 								i,
 								bp[ "file" ].as<String>().c_str(),
-								bp[ "line" ].as< long long >());
+								bp[ "line" ].as< long long >(),
+								bp[ "on" ].as<bool>() ? "" : " (disabled)" );
 					}
     			}
 
@@ -736,8 +737,9 @@ JSON::Array Debugger::get_breakpoints( lua_State * L , lua_Debug * ar )
 	{
 		JSON::Object & b = result.append<JSON::Object>();
 
-		b[ "file" ] = it->first;
-		b[ "line" ] = it->second;
+		b[ "file" ] = it->file;
+		b[ "line" ] = it->line;
+		b[ "on"   ] = it->enabled;
 	}
 
 	return result;
@@ -909,27 +911,49 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 	}
 
 	// Set a breakpoint
+	// b 57 - set a breakpoint at line 57 of the current file
+	// b main.lua:57 - set a breakpoint at line 57 of main.lua
+	// b 1 on|off - enable/disable breakpoints
 
 	else if ( 0 == command.find( "b " ) )
 	{
-		StringVector parts = split_string( command , " " , 2 );
+		StringVector parts = split_string( command , " " , 3 );
 
-		if ( parts.size() != 2 )
+		if ( parts.size() == 3 )
 		{
-			reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>'";
-		}
-		else
-		{
-			parts = split_string( parts[ 1 ] , ":" , 2 );
+			// This is an enable/disable command
 
-			if ( parts.size() != 2 )
+			unsigned int index = atoi( parts[ 1 ].c_str() );
+
+			if ( index >= breakpoints.size() )
 			{
-				reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>'";
+				reply[ "error" ] = Util::format( "Invalid breakpoint index '%u'" , index );
 			}
 			else
 			{
+				( breakpoints.begin() + index )->enabled = parts[ 2 ] == "on";
+			}
+		}
+		else if ( parts.size() == 2 )
+		{
+			parts = split_string( parts[ 1 ] , ":" , 2 );
+
+			if ( parts.size() == 1 )
+			{
+				// b <line>
+
+				breakpoints.push_back( Breakpoint( reply[ "file" ].as<String>() , atoi( parts[ 0 ].c_str() ) ) );
+			}
+			else if ( parts.size() == 2 )
+			{
+				// b <file>:<line>
+
 				breakpoints.push_back( Breakpoint( parts[ 0 ] , atoi( parts[ 1 ].c_str() ) ) );
 			}
+		}
+		else
+		{
+			reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>' or 'b <line>'. To enable or disable breakpoints, enter 'b <index> on|off'";
 		}
 	}
 
@@ -1055,7 +1079,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 
 				for ( BreakpointList::const_iterator it = breakpoints.begin(); it != breakpoints.end(); ++it )
 				{
-					if ( it->second == ar->currentline && g_str_has_suffix( ar->source, it->first.c_str() ) )
+					if ( it->enabled && it->line == ar->currentline && g_str_has_suffix( ar->source, it->file.c_str() ) )
 					{
 						should_break = true;
 						break;
