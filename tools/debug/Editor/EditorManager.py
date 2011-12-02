@@ -38,9 +38,7 @@ class EditorManager(QWidget):
         grid.addLayout(hbox, 0, 1, 1, 1)
         
         dock.setWidget(frame)
-        
         dock.setWidget(self.splitter)
-        
         mainGrid.addWidget(dock, 0, 0, 1, 1)
         
         self.editorGroups = []
@@ -60,34 +58,6 @@ class EditorManager(QWidget):
             if self.editorGroups[n] == w:
                 return n
         return None
-
-    def save(self):
-		editor = self.app.focusWidget()
-		if isinstance(editor, Editor):
-			currentText = open(editor.path).read()
-			index = self.tab.currentIndex()
-			if self.tab.textBefores[index] != currentText:
-				if editor.text_status == 2: #TEXT_CHANGED
-					msg = QMessageBox()
-					msg.setText('The file "' + editor.path + '" changed on disk.')
-					msg.setInformativeText('If you save it external changes could be lost.')
-					msg.setStandardButtons(QMessageBox.Save | QMessageBox.Cancel)
-					msg.setDefaultButton(QMessageBox.Cancel)
-					msg.setWindowTitle("Warning")
-					ret = msg.exec_()
-
-					if ret == QMessageBox.Save:
-						self.tab.textBefores[index] = editor.text()
-						editor.text_status = 1 #TEXT_READ
-						editor.save()
-					else:
-						return None
-			editor.save()
-		else:
-			print 'Failed to save because no text editor is currently selected.'                
-		
-
-	       
     def scan(self, path):
         """
         Scan the path given:
@@ -123,15 +93,36 @@ class EditorManager(QWidget):
 		if result > 0:
 			self.ui.directory.setText(path)
 
-    def close(self):
-		# find current index tab 
-		index = self.tab.currentIndex()
-		print index 
-		
-		# TODO : try to save 
+    def save(self):
+		editor = self.app.focusWidget()
+		if isinstance(editor, Editor):
+			currentText = open(editor.path).read()
+			index = self.tab.currentIndex()
+			if self.tab.textBefores[index] != currentText:
+				if editor.text_status == 2: #TEXT_CHANGED
+					msg = QMessageBox()
+					msg.setText('The file "' + editor.path + '" changed on disk.')
+					msg.setInformativeText('If you save it external changes could be lost.')
+					msg.setStandardButtons(QMessageBox.Save | QMessageBox.Cancel)
+					msg.setDefaultButton(QMessageBox.Cancel)
+					msg.setWindowTitle("Warning")
+					ret = msg.exec_()
 
-		#close current index tab
-		self.editorGroups[0].removeTab(index)
+					if ret == QMessageBox.Save:
+						self.tab.textBefores[index] = editor.text()
+						editor.text_status = 1 #TEXT_READ
+						editor.save()
+					else:
+						return None
+			editor.save()
+		else:
+			print 'Failed to save because no text editor is currently selected.'                
+		
+
+    def close(self):
+		
+		index = self.tab.currentIndex()
+		self.tab.closeTab(index)
 
     def saveas(self):
 		self.dialog = QDialog()
@@ -162,31 +153,32 @@ class EditorManager(QWidget):
 			editor.text_status = 1 
 			editor.path = new_path
 			editor.save()
+			self.close()
+			self.newEditor(new_path)
+
+		
 
     def newEditor(self, path, tabGroup = None):
         """
         Create a tab group if both don't exist,
         then add an editor in the correct tab widget.
         """
-        
+
         path = str(path)
         name = os.path.basename(str(path))
-            
         editor = Editor()
         closedTab = None
 
-        nTabGroups = len(self.editorGroups)
+        # Default to opening in the first tab group
+        tabGroup = 0
         
+        nTabGroups = len(self.editorGroups)
+
 		# If there is already one tab group, create a new one in split view and open the file there  
         if 0 == nTabGroups:
             self.tab = self.EditorTabWidget(self.splitter)
             self.editorGroups.append(self.tab)
-            tabGroup = 0
             
-        # Default to opening in the first tab group
-        else:
-            tabGroup = 0
-		 
         # If the file is already open, just use the open document
         if self.editors.has_key(path):
             for k in self.editors:
@@ -198,13 +190,13 @@ class EditorManager(QWidget):
         		for k in self.tab.paths:
 					self.editors[k][1] = self.tab.paths.index(k) 
 
-        		editor.readFile(path)
+        		editor.readFile(path) # ????? don't need ?
 
             if closedTab != path:
-            	for k in self.editors:
+				for k in self.editors:
 					if path == k:
 						self.editorGroups[tabGroup].setCurrentIndex(self.editors[k][1])
-            	return
+				return
         else:
             editor.readFile(path)
         
@@ -228,8 +220,6 @@ class EditorManager(QWidget):
         editor tab widgets
         """
         
-        #print('From', event.source(), event.mimeData().hasText())
-            
         n = self.getTabWidgetNumber(w)
         
         # This external file can be opened as plain text
@@ -256,4 +246,3 @@ class EditorManager(QWidget):
             path = model.filePath(fileIndex)
             
             self.newEditor(path, n)       
- 
