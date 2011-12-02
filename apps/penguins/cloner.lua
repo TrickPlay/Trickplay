@@ -2,15 +2,18 @@ _Image = Image
 _Clone = Clone
 
 local src = ""
-local cubes = {"cube-128.png","cube-128-4.png"}
+local cubes = {"cube-128.png"}--,"cube-128-4.png"}
+local a
 factory = Group()
 factory:hide()
 screen:add(factory)
 
-local f = function(src,func)
+local f = function(src,state,func,bbox)
 	local orig = _Image{src = "assets/" .. src, name = src .. "\t"}
 	factory:add(orig)
 	
+	state = state or 0 -- 0 none 1 collides 2 moves 3 breaks
+	bbox = bbox or {l = 0, t = 0, r = 0, b = 0}
 	local clones = {}
 	
 	return function(def)
@@ -25,6 +28,7 @@ local f = function(src,func)
 		if not ret then
 			clones[#clones+1] = _Clone{source = orig}
 			ret = clones[#clones]
+			ret.state = state or 0
 			ret.free = function(self)
 				self.freed = true
 				self:unparent()
@@ -42,24 +46,64 @@ local f = function(src,func)
 			func(ret)
 		end
 		
+		if state > 0 then
+			a = ret.anchor_point
+			ret.bbox = {l = bbox.l-a[1], r = bbox.r-a[1] + ret.w*ret.scale[1],
+						t = bbox.t-a[2], b = bbox.b-a[2] + ret.h*ret.scale[2]}
+		end
+		
 		ret.freed = false
 		
 		return ret
 	end
 end
 
+cubedriver = function (obj)
+	local switch = obj.name:match("s_(%w+)")
+	local move = obj.clip
+	obj.clip = {0,0,obj.w,obj.h}
+	if move and (move[1] ~= 0 or move[2] ~= 0) then
+		if switch then
+			obj.insert = function()
+				switch = level.this:find_child(switch)
+			end
+			-- animate to/from
+			-- obj.reset()
+		else
+			obj.state = 2
+			obj.vx, obj.vy = move[1], move[2]
+			local ox = (obj.vx > 0 and -128 or 1921)
+			
+			local anim = Timeline{duration = 9001, loop = true,
+				on_new_frame = function(self,ms,t)
+					if obj.x == move[3] then
+						obj.x = ox
+					else
+						obj.x = obj.x + obj.vx*self.delta
+						if (obj.x > move[3]) == (obj.vx > 0) then
+							obj.x = move[3]
+						end
+					end
+				end
+			}
+			anim:start()
+			
+			obj.free = function(self)
+				obj.vx = nil
+				obj.vy = nil
+				if anim then
+					anim:stop()
+				end
+				anim = nil
+				self.freed = true
+				self:unparent()
+			end
+		end
+	end
+end
+
 local make = {
-	--["fish-orange.png"]   = f("fish-orange.png"),
-	["cube-64.png"]			= f("cube-64.png"),
-	["cube-128.png"]		= f("cube-128.png"),
-	["cube-128-4.png"]		= f("cube-128-4.png"),
-	["cube-128-move.png"]	= f("cube-128.png", function (obj)
-		local dir = obj.x < 960 and 1 or -1
-		obj.x = obj.x - 960*dir
-		obj.vx, obj.vy = 0.8*dir, 0
-		obj:animate{x = obj.x + 3000*dir, duration = 4000, loop = true}
-		obj.moves = true
-	end),
+	["splash.jpg"]			= f("splash.jpg"),
 	["floor-btm"]			= f("floor-btm.png"),
 	["ice-slice"]			= f("ice-slice.png"),
 	["igloo-back"]			= f("igloo-back.png"),
@@ -70,15 +114,18 @@ local make = {
 	["tree-3"]				= f("tree-3.png"),
 	["tree-4"]				= f("tree-4.png"),
 	["tree-5"]				= f("tree-5.png"),
-	["icicles.png"]			= f("icicles.png"),
 	["explode-16"]			= f("explode-16.png"),
 	["explode-24"]			= f("explode-24.png"),
 	["explode-32"]			= f("explode-32.png"),
 	["explode-128"]			= f("explode-128.png"),
-	["splash.jpg"]			= f("splash.jpg"),
+	["snow-bank"]			= f("snow-bank.png"),
 	["river-left"]			= f("river-left.png"),
 	["river-right"]			= f("river-right.png"),
-	["river-slice.png"]		= f("river-slice.png", function (obj)
+	["icicles.png"]			= f("icicles.png", 3),
+	["cube-64.png"]			= f("cube-64.png", 3, cubedriver),
+	--["cube-128-4.png"]		= f("cube-128-4.png", 3),
+	["cube-128.png"]		= f("cube-128.png", 3, cubedriver),
+	["river-slice.png"]		= f("river-slice.png", 1,function (obj)
 		obj.insert = function(self)
 			local group = self.parent
 			local x, y, w = group.ice.x, group.ice.y, group.ice.w
@@ -96,20 +143,26 @@ local make = {
 			group.ice = img
 		end
 		obj.collision = function()
-			penguin:sink()
+			if (penguin.vx > 0 and penguin.x + penguin.w/2 < obj.bb.r) or
+				(penguin.vx < 0 and penguin.x + penguin.w/2 > obj.bb.l) then
+				penguin:sink()
+			end
 		end
 	end),
-	["beach-ball.png"]	= f("beach-ball.png", function (obj)
+	["beach-ball.png"]	= f("beach-ball.png", 2, function (obj)
+		obj:move_anchor_point(obj.w/2,obj.h/2)
 		local amp = 25
 		local y = obj.y
-		local a
-		obj.z_rotation = {rand(360),obj.w/2,obj.h/2}
-		obj.moves = true
+		local a, s, st = 0, 1, 0
+		obj.z_rotation = {rand(360),0,0}
 		
 		local anim = Timeline{loop = true, duration = 1000,
 			on_new_frame = function(self,ms,t)
-				amp = amp/2^(self.delta/self.duration) + 0.04
+				amp = amp/2^(self.delta/self.duration) + 0.02 + (nrand(0.2)+0.1)^2
 				obj.y = y + math.cos(math.pi*2*t)*amp
+				s = s^(1/(1+self.delta/300))
+				st = st+math.pi*6*(self.delta/self.duration)
+				obj.scale = {s^math.cos(st),s^-math.cos(st)}
 			end}
 			
 		obj.insert = function()
@@ -126,36 +179,42 @@ local make = {
 		end
 		
 		obj.collision = function()
-			if penguin.y + penguin.h/2 > obj.y then
-				penguin.kill(obj,penguin.skating.elapsed)
+			if penguin.y + penguin.h/2 > obj.y-64 then
+				penguin.kill(obj)
 			elseif penguin.vy > 0 then
 				if anim.elapsed > anim.duration/2 then
 					anim:advance(anim.duration-anim.elapsed)
 				end
-				a = math.atan2(obj.y-penguin.y,obj.x-penguin.x)
+				a = math.atan2(obj.y-penguin.y-64,obj.x-penguin.x)
 				a = -2*math.max(penguin.vy,0.8)*math.sin(a + math.sin(4*a-math.pi)/4)
 				penguin.jump(a)
 				amp = amp - 10*a
+				s = s - a/4
+				st = 0
 				anim:advance(math.asin((obj.y-y)/amp)*anim.duration)
 			end
 		end
 	end),
-	["seal-ball"]			= f("beach-ball.png", function (obj)
-		local fx, fy, w2, h2 = obj.x, obj.y, obj.w/2, obj.h/2
+	["seal-ball"]			= f("beach-ball.png", 2, function (obj)
+		obj.anchor_point = {obj.w/2,obj.h/2}
+		local fx, fy = obj.x, obj.y
 		local ox, oy, oz, vx, vy, vz = fx, fy, 0, 0, -1.6, 0
-		obj.moves = true
-		obj.reactive = true
-		obj.collides = true
+		local a, s, st = 0, 1, 0
 		
 		local bouncing = Timeline{duration = -3*vy/gravity,
 			on_new_frame = function(self,ms,t)
 				obj.y = oy + vy*ms + gravity*ms*ms/3
-				obj.z_rotation = {oz+vz*math.log10(ms/500+1),w2,h2}
+				obj.z_rotation = {oz+vz*math.log10(ms/500+1),0,0}
+				s = s^(1/(1+self.delta/250))
+				st = st+math.pi*8*(self.delta/self.duration)
+				obj.scale = {s^math.cos(st),s^-math.cos(st)}
 			end,
 			on_completed = function(self)
 				vy = nrand(0.15)-0.9
 				oz = obj.z_rotation[1]
 				vz = nrand(500)
+				s = s + 0.2
+				st = 0
 				self.duration = -3*vy/gravity
 				self:start()
 				obj.seal.switch(-vy)
@@ -167,8 +226,11 @@ local make = {
 			on_new_frame = function(self,ms,t)
 				obj.x = ox + vx*ms
 				obj.y = oy + vy*ms + gravity*ms*ms/3
-				obj.z_rotation = {oz+vz*ms,w2,h2}
+				obj.z_rotation = {oz+vz*ms,0,0}
 				obj.opacity = 255*(1-t)
+				s = s^(1/(1+self.delta/300))
+				st = st+math.pi*6*(self.delta/self.duration)
+				obj.scale = {s^math.cos(st),s^-math.cos(st)}
 			end,
 			on_completed = function(self)
 				obj.opacity = 255
@@ -188,11 +250,15 @@ local make = {
 		end
 		
 		obj.collision = function()
-			if penguin.y + penguin.h/2 > obj.y then
-				penguin.kill(obj,penguin.skating.elapsed)
+			a = math.atan2(obj.y-penguin.y-64,obj.x-penguin.x)
+			if penguin.y + penguin.h/2 > obj.y-64 then
+				s = s + math.sqrt(penguin.vx^2 + penguin.vy^2)/2
+				st = a
+				penguin.kill(obj)
 			elseif penguin.vy > 0 then
-				a = math.atan2(obj.y-penguin.y,obj.x-penguin.x)
 				a = -2*math.max(penguin.vy,0.8)*math.sin(a + math.sin(4*a-math.pi)/4)
+				s = s - a/6
+				st = 0
 				penguin.jump(a)
 				obj.fall(penguin.vx/2,math.max(vy,-a),-penguin.vx)
 			end
@@ -208,33 +274,101 @@ local make = {
 		end
 	end),
 	["seal-up.png"]			= f("seal-up.png"),
-	["seal-down.png"]		= f("seal-down.png", function (obj)
-		obj.reactive = false
-		obj.collides = false
+	["seal-mid.png"]		= f("seal-mid.png"),
+	["seal-down.png"]		= f("seal-down.png", 1, function (obj)
+		obj:move_anchor_point(obj.w/2,obj.h)
+		local frames = {factory:find_child("seal-down.png\t"),
+						factory:find_child("seal-mid.png\t"),
+						factory:find_child("seal-up.png\t")}
+		local frame = 1
+		local s, st = 1, 0
 		local oy
 		
-		local anim = Timeline{loop = true, duration = 1500,
+		obj.source = frames[1]
+		
+		local anim = Timeline{loop = true, duration = 2500,
 			on_new_frame = function(self,ms,t)
 				obj.y = oy + math.cos(math.pi*2*t)
+				s = s^(1/(1+self.delta/150))
+				st = st+math.pi*10*(self.delta/self.duration)
+				obj.scale = {s^math.cos(st),s^-math.cos(st)}
 			end}
 		
 		obj.insert = function(self)
-			local ball = Image{src = "seal-ball", x = obj.x-64, y = obj.y-96}
+			local ball = Image{src = "seal-ball", y = obj.y-obj.h-32,
+				x = obj.x + (obj.y_rotation[1] == 180 and -30 or 30)}
 			ball.seal = self
 			self.parent:add(ball)
 			oy = obj.y
 			anim:start()
 		end
 		
-		local timer = Timer{interval = 200, on_timer = function(self)
-				obj.source = factory:find_child('seal-down.png\t')
-				self:stop()
+		local timer = Timer{on_timer = function(self)
+				frame = frame + 1
+				if frame == 4 then
+					frame = 5
+				elseif frame == 6 then
+					frame = 1
+					self:stop()
+				end
+				obj.source = frames[(frame-1)%3+1]
 			end}
-		timer:stop()
+		timer.interval = 40
 		
 		obj.switch = function()
-			obj.source = factory:find_child('seal-up.png\t')
+			frame = 2
+			obj.source = frames[2]
 			timer:start()
+		end
+		
+		obj.collision = function()
+			if penguin.y + penguin.h/2 > obj.y-obj.h then
+				penguin.kill(obj)
+			elseif penguin.vy > 0 then
+				a = math.atan2(obj.y-penguin.y-obj.h,obj.x-penguin.x)
+				a = -1.2*math.max(penguin.vy,0.8)*math.sin(a + math.sin(4*a-math.pi)/4)
+				s = s + 0.5
+				st = 0
+				penguin.jump(a)
+			end
+		end
+		
+		obj.free = function(self)
+			anim:stop()
+			anim = nil
+			timer:stop()
+			time = nil
+			self.freed = true
+			self:unparent()
+		end
+	end),
+	["sea-lion.png"]	= f("sea-lion.png", 1, function (obj)
+		obj:move_anchor_point(obj.w/2,obj.h)
+		local s, st = 1, 0
+		local oy
+		local anim = Timeline{loop = true, duration = 2500,
+			on_new_frame = function(self,ms,t)
+				obj.y = oy + math.cos(math.pi*2*t)
+				s = s^(1/(1+self.delta/150))
+				st = st+math.pi*10*(self.delta/self.duration)
+				obj.scale = {s^math.cos(st),s^-math.cos(st)}
+			end}
+		
+		obj.insert = function(self)
+			oy = obj.y
+			anim:start()
+		end
+		
+		obj.collision = function()
+			if penguin.y + penguin.h/2 > obj.y then
+				penguin.kill(obj)
+			elseif penguin.vy > 0 then
+				a = math.atan2(obj.y-penguin.y,obj.x-penguin.x)
+				a = -1.6*math.max(penguin.vy,0.8)*math.sin(a + math.sin(4*a-math.pi)/4)
+				s = s + 0.5
+				st = 0
+				penguin.jump(a)
+			end
 		end
 		
 		obj.free = function(self)
@@ -243,15 +377,82 @@ local make = {
 			self.freed = true
 			self:unparent()
 		end
-	end)
+	end, {l = 20, t = 10, r = -20, b = 0}),
+	["ice-bridge.png"]	= f("ice-bridge.png", 1, function (obj)
+		obj.insert
+		= function(self,top)
+			if not top or self.x+self.w < 1920 then return end
+			for k,v in pairs(self.parent.children) do
+				if v.name and v.source.name == "ice-bridge.png\t" and
+						v.x+v.w > 1920 and v.y == self.y+640 then
+					self.parent.bridges[self.y-110] = v
+					return
+				end
+			end
+		end
+		
+		obj.collision = function()
+			if penguin.bb.b - penguin.dy < obj.bb.t then
+				penguin.land(obj.y-110,obj)
+			else
+				penguin.kill(obj)
+			end
+		end
+	end),
+	["snow-ledge.png"]	= f("snow-ledge.png", 1, function(obj)
+		obj.insert = function(self,top)
+			if not top or self.x+self.w < 1920 then return end
+			for k,v in pairs(self.parent.children) do
+				if v.name and v.source.name == "snow-ramp.png\t" and
+						v.x+v.w >= 1920 and v.y == self.y+640-67 then
+					self.parent.bridges[self.y-120] = v
+					return
+				end
+			end
+		end
+		
+		obj.collision = function()
+			if penguin.bb.b - penguin.dy < obj.bb.t then
+				penguin.land(obj.y-120,obj)
+			else
+				penguin.kill(obj)
+			end
+		end
+	end,{l = 50, t = 0, r = 0, b = 0}),
+	["snow-ramp.png"]	= f("snow-ramp.png", 1, function(obj)
+		obj.flip = true
+		obj.boost = true
+		obj.collision = function()
+			penguin.land(obj.y-53,obj)
+		end
+	end,{l = 180, t = 80, r = 200, b = 0}),
+	["fish-blue.png"]   = f("fish-blue.png", 1, function(obj)
+		obj.collision = function()
+			local streak = Image{src = "penguin-streak", anchor_point = {0,65}, scale = {0.6,1},
+				opacity = 255}
+			local group = Group{x = penguin.x+(row==2 and penguin.w or 0), y = penguin.y+penguin.h*3/5, 
+				y_rotation = {row==2 and 180 or 0,0,0}, z_rotation = {row==2 and 10 or -10,0,0}}
+			group.state = 0
+			group:add(streak)
+			overlay:add(group)
+			--x = streak.x+(row==2 and 120 or -120), --[[y = streak.y+15,]] 
+			streak:animate{scale = {1.5,1}, opacity = 0, duration = 400,
+				mode = "EASE_OUT_QUAD", on_completed = function() streak:free() end}
+			penguin:boost()
+			obj:hide()
+		end
+	end, {l = 50, t =50, r = -50, b = -50}),
+	["fish-streak"]		= f("fish-streak.png"),
+	["penguin-streak"]	= f("penguin-streak-1.png"),
+	["star-circle"]		= f("star-circle.png")
 }
 
 recycle = function(i,src)
 	src = src:sub((src:find('/',10,true) or src:find('/',0,true) or 0)+1,-1)
 	
-	if src == cubes[1] then
-		return make[cubes[rand(#cubes)]](i)
-	end
+	--if src == cubes[1] then
+	--	return make[cubes[rand(#cubes)]](i)
+	--end
 	
 	if make[src] then
 		return make[src](i)

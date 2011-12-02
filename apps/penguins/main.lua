@@ -1,14 +1,19 @@
 --[[
+tues
+	polish boost anim
+	
+wed
+	2-3 blue fish levels
+	internal release?
+	
+level notes
+	12a and 16a and might be too difficult
 
-seal w/ ball
-try to ease up collisions
-consider unlinking penguin speed from timeline
+	
 breakable blocks
-faster fish
-heavy armor
+armor
 gravity fish
 darkness
-snow tunnel
 polar bear
 eskimo
 monster
@@ -20,21 +25,17 @@ submersion of
 	seal
 	penguin
 splashing
-double jump cues?
 
 
-audio
-
-
-Need:
+need
 	audio
 	better ice water
-	breakable block
-	"faster" fish
-	armor
+	splash pieces
+	armor pieces
+	ice pieces
+	switches
 	"upside down" fish
 	darkness
-	snow tunnel
 ]]
 
 math.randomseed(os.time())
@@ -51,6 +52,8 @@ dofile("cloner.lua")
 snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
 levels  = dofile("levels.lua")
-dofile("overlay.lua")
+overlay	= dofile("overlay.lua")
+snow(levels.this.snow,levels.this.bank)
+explode = dofile("explode.lua")
 
 collectgarbage("collect")
