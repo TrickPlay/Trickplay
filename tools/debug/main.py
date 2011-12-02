@@ -204,5 +204,8 @@ class MainWindow(QMainWindow):
         Avahi service stays alive
         """
 		#try to close current index tab and then, do that for every other tabs too
+    	while self.editorManager.tab.count() != 0:
+			self.editorManager.close()
+
         self._deviceManager.stop()
         self.close()
