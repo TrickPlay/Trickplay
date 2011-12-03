@@ -121,7 +121,7 @@ Group: Engine Reference  {
 		
 		Group: Classes {
 			File: URLRequest (no auto-title, bindings/url_request.lb)
-			File: XMLParser* (no auto-title, bindings/xml.lb)
+			File: XMLParser (no auto-title, bindings/xml.lb)
 		}
 		
 		Group: Interfaces {
