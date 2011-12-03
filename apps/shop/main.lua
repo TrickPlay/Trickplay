@@ -755,7 +755,8 @@ local function build_ui( show_it )
         
         if section and section.dropdown then
         
-            animate_out_dropdown( show_new_section )
+            --animate_out_dropdown( show_new_section )
+            show_new_section()
            
         else
             
@@ -774,7 +775,7 @@ local function build_ui( show_it )
         
         ui:on_section_full_screen( section )
         
-        dolater( 500 , section.on_enter , section )
+        dolater( 400 , section.on_enter , section )
         
 --[[        
         print( ui.sections[ SECTION_SHOP ] )
