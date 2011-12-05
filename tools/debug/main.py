@@ -62,15 +62,22 @@ class MainWindow(QMainWindow):
         self._console = TrickplayConsole()
         self.ui.ConsoleLayout.addWidget(self._console)
 	
-		## make them aware of one another
-        # Toolbar
+		#File Menu
         QObject.connect(self.ui.action_New, SIGNAL("triggered()"),  self.new)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
         QObject.connect(self.ui.action_Save_As, SIGNAL('triggered()'),  self.editorManager.saveas)
         QObject.connect(self.ui.action_Close, SIGNAL('triggered()'),  self.editorManager.close)
-        #QObject.connect(self.ui.action_Close, SIGNAL('triggered()'),  self.close_file)
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         
+		#Edit Menu
+        QObject.connect(self.ui.actionUndo, SIGNAL("triggered()"),  self.editor_undo)
+        QObject.connect(self.ui.actionRedo, SIGNAL("triggered()"),  self.editor_redo)
+        QObject.connect(self.ui.action_Cut, SIGNAL("triggered()"),  self.editor_cut)
+        QObject.connect(self.ui.action_Copy, SIGNAL("triggered()"),  self.editor_copy)
+        QObject.connect(self.ui.action_Paste, SIGNAL("triggered()"),  self.editor_paste)
+        QObject.connect(self.ui.action_Delete, SIGNAL("triggered()"),  self.editor_delete)
+        QObject.connect(self.ui.actionSelect_All, SIGNAL("triggered()"),  self.editor_selectall)
+
         # Restore sizes/positions of docks
         self.restoreState(settings.value("mainWindowState").toByteArray());
         
@@ -96,6 +103,49 @@ class MainWindow(QMainWindow):
     def inspector(self):
         return self._inspector
 
+
+    def editor_undo(self):
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.editorManager.tab.editors[index].undo()
+
+    def editor_redo(self):
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.editorManager.tab.editors[index].redo()
+
+    def editor_cut(self):
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.editorManager.tab.editors[index].cut()
+	
+    def editor_copy(self):
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.editorManager.tab.editors[index].copy()
+	
+    def editor_paste(self):
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.editorManager.tab.editors[index].paste()
+	
+    def editor_selectall(self):
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.editorManager.tab.editors[index].selectAll()
+	
+    def editor_delete(self):
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.editorManager.tab.editors[index].removeSelectedText()
+	
     def cleanUp(self):
         """
         End running Trickplay process
@@ -141,10 +191,12 @@ class MainWindow(QMainWindow):
         
 	
     def new(self):
-		print "New project"
-
-    def close_file(self):
-		print "Close file"
+		wizard = Wizard()
+		path = wizard.start("")
+		if path:
+			settings = QSettings()
+			settings.setValue('path', path)
+			self.start(path, wizard.filesToOpen())
 
     def exit(self):
         """
@@ -152,15 +204,8 @@ class MainWindow(QMainWindow):
         Avahi service stays alive
         """
 		#try to close current index tab and then, do that for every other tabs too
+    	while self.editorManager.tab.count() != 0:
+			self.editorManager.close()
+
         self._deviceManager.stop()
         self.close()
-
-    def dm(self):
-		print "dm"
-
-    def fs(self):
-		print "fs"
-
-    def isptr(self):
-		print "inptr"
-        

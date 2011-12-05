@@ -1,0 +1,9 @@
+
+Title: External Connections Overview
+
+A TrickPlay application has many options available to connect to external sources.
+
+An HTTP connection can be achieved by using <URLRequest> and <URLResponse> objects. All external devices connected to the TrickPlay Engine are stored in the <controllers> list. Each <Controller> in the list describes the capabilities the device supports, such as whether it has an accelerometer, a keyboard, or a display screen. Smart devices, including Apple iPhones, iPads, and other smart devices, can connect to the TrickPlay Engine using the Smart API described in <Interacting with an External Smart Device>.
+
+Data can be transferred between an external device and a TrickPlay application using XML or JSON. XML can be parsed using an <XMLParser> object, while JSON data can be processed by the <json> global variable.
+
