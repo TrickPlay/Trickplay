@@ -54,6 +54,8 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
     <addaction name="action_Cut"/>
     <addaction name="action_Copy"/>
     <addaction name="action_Paste"/>
@@ -180,7 +182,7 @@
   </action>
   <action name="action_Exit">
    <property name="text">
-    <string>&amp;Exit</string>
+    <string>Exit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -199,7 +201,7 @@
   </action>
   <action name="action_New">
    <property name="text">
-    <string>&amp;New</string>
+    <string>New  Application</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -207,7 +209,7 @@
   </action>
   <action name="action_Cut">
    <property name="text">
-    <string>&amp;Cut</string>
+    <string>Cut</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
@@ -215,7 +217,7 @@
   </action>
   <action name="action_Copy">
    <property name="text">
-    <string>C&amp;opy</string>
+    <string>&amp;Copy</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -223,7 +225,7 @@
   </action>
   <action name="action_Paste">
    <property name="text">
-    <string>&amp;Paste</string>
+    <string>Paste</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
@@ -232,6 +234,9 @@
   <action name="action_Delete">
    <property name="text">
     <string>&amp;Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
   <action name="actionSelect_All">
@@ -244,7 +249,7 @@
   </action>
   <action name="action_Close">
    <property name="text">
-    <string>&amp;Close</string>
+    <string>Close</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
@@ -253,6 +258,22 @@
   <action name="action_Save_As">
    <property name="text">
     <string>Save &amp;As...</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>&amp;Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
   <zorder>InspectorDock</zorder>
