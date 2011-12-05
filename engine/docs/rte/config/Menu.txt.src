@@ -111,7 +111,7 @@ Group: Engine Reference  {
 	}
 	
 	Group: External Connections {
-		File: Overview* (no auto-title, docs/rte/reference/overview_network.txt)
+		File: Overview (no auto-title, docs/rte/reference/overview_external.txt)
 		
 		Group: Globals {
 			File: controllers (no auto-title, bindings/controllers.lb)
