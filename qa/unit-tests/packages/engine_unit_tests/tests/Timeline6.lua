@@ -17,13 +17,14 @@ timeline6_on_completed_called = false
 
 local myTimeline = Timeline ()
 local on_middle_marker_reached_called = false
-myTimeline.duration = 3000
+myTimeline.duration = 4000
 myTimeline.loop = false
 frame_count = 0
+local marker_calls = ""
 
 myTimeline:add_marker ("start", 200)
-myTimeline:add_marker ("middle", 1900)
-myTimeline:add_marker ("end", 1990)
+myTimeline:add_marker ("middle", 3500)
+myTimeline:add_marker ("end", 3990)
 
 myTimeline.on_new_frame = function (self, timeline_ms, progress)
 	frame_count = frame_count + 1
@@ -31,6 +32,7 @@ myTimeline.on_new_frame = function (self, timeline_ms, progress)
 end
 
 myTimeline.on_marker_reached = function (timeline, name, msecs)
+	marker_calls = marker_calls.." / Name:"..name.." @ "..msecs.." msecs"
 	if name == "start" then
 		myTimeline:advance_to_marker("end")
 	end
@@ -50,7 +52,7 @@ myTimeline:start()
 
 -- Create 3 markers (start, middle & end). When start is hit then advance_to_marker end. Verify middle is never reached.
 function test_Timeline_advance_to_marker ()
-    assert_false ( on_middle_marker_reached_called,  "on_middle_marker_reached_called = true" )
+    assert_false ( on_middle_marker_reached_called,  "on_middle_marker_reached_called = true. Frame count = "..frame_count..". marker_calls = "..marker_calls )
 end
 
 -- Test Tear down --
