@@ -117,11 +117,15 @@ function idle.on_idle( idle , seconds )
 		--on_alpha_called == true  and
 		media_player_stream_completed == true and
 		timeline1_on_completed_called == true and
+		alpha1_completed == true and
+		timeline_4_test_completed == true and
 		timeline5_on_completed_called == true and
 		timeline6_on_completed_called == true and 
+		timeline_8_test_completed == true and
 		urlrequest1_on_complete_called == true and
 		tag_img_loaded == true and
 		animation_state2_completed == true and
+		score_on_completed_called == true and 
 		total > 5 ) 
  		or total > 30 then
 
