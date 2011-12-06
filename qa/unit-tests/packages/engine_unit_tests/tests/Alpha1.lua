@@ -47,15 +47,16 @@ myTimeline1:start()
 function test_Alpha_mode_basic ()
 	-- Compare all the values for both alpha modes
 	local alphaTablesMatch = true
+	local test_result = ""
 	local i = 1
-	while returnedLinearAlphaValues[i] ~= nil do
+	for i = 1, #returnedLinearAlphaValues do
 		if returnedLinearAlphaValues[i] ~= returnedEase_in_bounce_AlphaValues[i] then
 			alphaTablesMatch = false
 		end
-		i = i + 1
+		test_result = test_result.."["..i.."]:"..string.sub(returnedLinearAlphaValues[i],1, 5).."/"..string.sub(returnedEase_in_bounce_AlphaValues[i],1, 5).."  "
 	end
 
-	assert_false ( alphaTablesMatch, "Alpha values for different modes are matching")
+	assert_false ( alphaTablesMatch, "Alpha values are matching."..test_result)
 end
 
 -- Test Tear down --
