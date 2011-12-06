@@ -16,7 +16,7 @@ local myTimeline = Timeline ()
 local frameCount = 0
 local highest_progress
 local last_progress
-myTimeline.duration = 1000
+myTimeline.duration = 10000
 myTimeline.loop = false
 
 myTimeline.on_new_frame = function (self, timeline_ms, progress) 
@@ -28,6 +28,10 @@ myTimeline.on_new_frame = function (self, timeline_ms, progress)
 		
 	end
 	last_progress = progress
+
+	if frameCount > 7 then 
+		timeline_4_test_completed = true
+	end
 end
 
 myTimeline:start()
@@ -37,7 +41,7 @@ myTimeline:start()
 
 -- Verify that reverse is starting the timeline from 0 and is always less then 350.
 function test_Timeline_reverse ()
-    assert_less_than ( last_progress, highest_progress,  "Returned: "..last_progress.." Expected: "..highest_progress)
+    assert_less_than ( last_progress, highest_progress,  "Returned: "..last_progress.." Expected less than: "..highest_progress)
 end
 
 

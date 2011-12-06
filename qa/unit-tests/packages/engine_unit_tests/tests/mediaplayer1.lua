@@ -23,7 +23,6 @@ Description: Mediaplayer  test
 	mediaplayer:play()
 	video_playing = mediaplayer.state
 	bitrate = mediaplayer.tags["bitrate"]
-	print ("-------------"..mediaplayer.tags["bitrate"])
 	mediaplayer.volume = 0.5
 	mediaplayer.mute = false
 	mediaplayer:seek(130)
