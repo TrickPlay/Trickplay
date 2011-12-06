@@ -77,7 +77,7 @@ dofile( "packages/engine_unit_tests/tests/all_callbacks.lua" )
 
 dofile( "packages/engine_unit_tests/tests/Score1.lua" )
 dofile( "packages/engine_unit_tests/tests/Score2.lua" )
-dofile( "packages/engine_unit_tests/tests/Score3.lua" )
+--dofile( "packages/engine_unit_tests/tests/Score3.lua" )
 dofile( "packages/engine_unit_tests/tests/Score4.lua" )
 
 dofile( "packages/engine_unit_tests/tests/Timeline7.lua" )
