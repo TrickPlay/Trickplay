@@ -10,6 +10,7 @@ Description:  Two alpha modes are run and the values are compared to ensure they
 
 local returnedLinearAlphaValues = {}
 local returnedEase_in_bounce_AlphaValues = {}
+local test_result
 
 local image1 = Image ()
 image1.src = "packages/engine_unit_tests/tests/assets/logo.png"
@@ -35,8 +36,22 @@ myTimeline1.on_new_frame = function (self, timeline_ms, progress)
 	 table.insert( returnedEase_in_bounce_AlphaValues , alpha2.alpha )
 end
 
+function do_tables_match ()
+	local alphaTablesMatch = true
+	local test_compares = ""
+	local i = 1
+	for i = 1, #returnedLinearAlphaValues do
+		if returnedLinearAlphaValues[i] ~= returnedEase_in_bounce_AlphaValues[i] then
+			alphaTablesMatch = false
+		end
+		test_compares = test_compares.."["..i.."]:"..string.sub(returnedLinearAlphaValues[i],1, 5).."/"..string.sub(returnedEase_in_bounce_AlphaValues[i],1, 5).."  "
+	end
+	return test_compares
+end
+
 myTimeline1.on_completed = function ()
 	alpha1_completed = true
+	test_result = do_tables_match()
 end
 
 myTimeline1:start()
@@ -45,17 +60,6 @@ myTimeline1:start()
 
 -- verify that a value for is_playing
 function test_Alpha_mode_basic ()
-	-- Compare all the values for both alpha modes
-	local alphaTablesMatch = true
-	local test_result = ""
-	local i = 1
-	for i = 1, #returnedLinearAlphaValues do
-		if returnedLinearAlphaValues[i] ~= returnedEase_in_bounce_AlphaValues[i] then
-			alphaTablesMatch = false
-		end
-		test_result = test_result.."["..i.."]:"..string.sub(returnedLinearAlphaValues[i],1, 5).."/"..string.sub(returnedEase_in_bounce_AlphaValues[i],1, 5).."  "
-	end
-
 	assert_false ( alphaTablesMatch, "Alpha values are matching."..test_result)
 end
 
