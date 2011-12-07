@@ -55,7 +55,7 @@ myTimeline:start()
 -- Verify that calling rewind several times causes a marker to be passed --
 
 function test_Timeline_rewind ()
-    assert_equal ( middle_marker_count , 3,  "middle_marker_count returned: "..middle_marker_count.." Expected: 3. Frame_count: "..frame_count..". Progress: "..progress_track )
+    assert_equal ( middle_marker_count , 3,  "middle_marker_count returned: "..middle_marker_count.." Expected: 3. Frame_count: "..frame_count..". Progress: "..progress_track..". Rewind_loop: "..rewind_loop )
 end
 
 
