@@ -9,18 +9,23 @@ local a, b, d
 local ovx = 2020/4000
 local imgw2, imgh2 = img.w/2, img.h/2
 local ox, oy, oz = 0, 0, 0
+local boosted = false
+img.armor = nil
 
 local reset = function()
 	ovx = 2020*(row == 2 and -1 or 1)/4000
-	img.vx = ovx
+		img.vx = ovx
 	img.vy = 0
 	jstate = 0
 	floor = nil
 	img.opacity = 255
 	img.position = row == 2 and {1920,levels.this.trans} or {-80,ground[1]}
-	if row == 2 and img.y ~= ground[1]+640 then
+	if row == 1 then
+		img.armor = nil
+		boosted = false
+	elseif img.y ~= ground[1]+640 then
 		floor = levels.this.bridges[img.y-640]
-		img.vx = ovx*(floor.boost and 1.3 or 1)
+		img.vx = ovx*(boosted and floor.boost and 1.3 or 1)
 	end
 	img.y_rotation = {row == 2 and 180 or 0,imgw2,0}
 	img.z_rotation = {0,0,0}
@@ -44,7 +49,7 @@ local falling = Timeline{ duration = 500,
 	end,
 	on_completed = function(self)
 		if self.duration == 200 then
-			explode(levels.this.bank > 0 and rand(15,20) or nil)
+			explode(levels.this.bank > 0 and rand(15,20) or nil,nil,true) 
 		end
 		reset()
 		deathcount = deathcount+1
@@ -114,6 +119,7 @@ local jump = function(vy)
 end
 
 local boost = function()
+	boosted = true
 	img.vx = ovx*2
 	if jstate == 0 then
 		--
@@ -188,9 +194,11 @@ function skating:on_new_frame(ms,t)
 				if v.collision then
 					v.collision()
 				else
-					kill(v)
-					if v.state == 3 then 
-						-- armor, blocks breaking
+					if v.state == 3 and img.armor then 
+						v.smash(true)
+						img.armor.drop()
+					else
+						kill(v)
 					end
 				end
 				return
@@ -212,7 +220,7 @@ function skating:on_new_frame(ms,t)
 end
 
 function skating:on_completed()
-	if row == 1 and levels.this.id > 1 then
+	if row == 1 then
 		a = ground[1]
 		for k,v in pairs(levels.this.bridges) do
 			if k >= img.y and k < a then
@@ -251,7 +259,7 @@ function screen:on_key_down(key)
 		skating:rewind()
 		reset()
 	else
-		if skating.is_playing then
+		if skating.is_playing and not img.armor then
 			jump()
 		elseif levels.this.id == 1 then
 			levels.next()
