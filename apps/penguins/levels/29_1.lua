@@ -42,7 +42,7 @@ image0.extra.reactive = true
 local image4 = Image
 	{
 		src = "/assets/images/cube-128.png",
-		clip = {-0.34999999403954,0,595,128},
+		clip = {-0.30000001192093,0,595,128},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
@@ -80,7 +80,7 @@ image4.extra.reactive = true
 local image6 = Image
 	{
 		src = "/assets/images/cube-128.png",
-		clip = {-0.34999999403954,0,595,128},
+		clip = {-0.30000001192093,0,595,128},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
@@ -118,7 +118,7 @@ image6.extra.reactive = true
 local image7 = Image
 	{
 		src = "/assets/images/cube-128.png",
-		clip = {-0.34999999403954,0,595,128},
+		clip = {-0.30000001192093,0,595,128},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},

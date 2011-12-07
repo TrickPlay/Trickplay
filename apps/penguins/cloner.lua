@@ -2,7 +2,7 @@ _Image = Image
 _Clone = Clone
 
 local src = ""
-local cubes = {"cube-128.png"}--,"cube-128-4.png"}
+local cubes = {"cube-128.png","cube-128-4.png"}
 local a
 factory = Group()
 factory:hide()
@@ -28,13 +28,13 @@ local f = function(src,state,func,bbox)
 		if not ret then
 			clones[#clones+1] = _Clone{source = orig}
 			ret = clones[#clones]
-			ret.state = state or 0
 			ret.free = function(self)
 				self.freed = true
 				self:unparent()
 			end
 		end
 		
+		ret.state = state
 		def.source = nil
 		def.src = nil
 		
@@ -53,6 +53,7 @@ local f = function(src,state,func,bbox)
 		end
 		
 		ret.freed = false
+		ret.level = levels.this.id
 		
 		return ret
 	end
@@ -77,6 +78,9 @@ cubedriver = function (obj)
 			local anim = Timeline{duration = 9001, loop = true,
 				on_new_frame = function(self,ms,t)
 					if obj.x == move[3] then
+						if obj.x > 20 and obj.x < 1920 then
+							explode(nil,obj)
+						end
 						obj.x = ox
 					else
 						obj.x = obj.x + obj.vx*self.delta
@@ -99,33 +103,81 @@ cubedriver = function (obj)
 				self:unparent()
 			end
 		end
+	else
+		obj.smash = function(now,block)
+			obj.state = 0
+			obj:move_anchor_point(obj.w/2,obj.h/2)
+			local d, vx, vy, vz, gr
+			
+			if now then
+				explode(nil,obj)
+				obj:free()
+			else
+				vx, vy, vz, gr = nrand(0.4), nrand(0.2)-0.2, nrand(0.8), ground[row]
+				local anim = Timeline{duation = 1000, on_new_frame = function(self,ms,t)
+					d = self.delta
+					vy = vy + gravity*d
+					obj.x = obj.x + vx*d
+					obj.y = obj.y + vy*d
+					obj.z_rotation = {obj.z_rotation[1]+vz*d,0,0}
+					if obj.y - obj.h/2 > gr then
+						explode(nil,obj)
+						self:stop()
+						obj:free()
+					end
+				end}
+				anim:start()
+			end
+			
+			for k,v in ipairs(levels.this.children) do
+				if v.state == 3 and obj.bb.l < v.bb.r and obj.bb.t < v.bb.b
+					and obj.bb.r > v.bb.l and obj.bb.b > v.bb.t then
+					v.smash(false,obj)
+				end
+			end
+		end
+		obj.free = function(self)
+			if anim then
+				anim:stop()
+			end
+			anim = nil
+			self.freed = true
+			self:unparent()
+		end
 	end
 end
 
 local make = {
-	["splash.jpg"]			= f("splash.jpg"),
-	["floor-btm"]			= f("floor-btm.png"),
-	["ice-slice"]			= f("ice-slice.png"),
-	["igloo-back"]			= f("igloo-back.png"),
-	["bg-sun"]				= f("bg-sun.png"),
-	["bg-slice-2"]			= f("bg-slice-2.png"),
-	["tree-1"]				= f("tree-1.png"),
-	["tree-2"]				= f("tree-2.png"),
-	["tree-3"]				= f("tree-3.png"),
-	["tree-4"]				= f("tree-4.png"),
-	["tree-5"]				= f("tree-5.png"),
-	["explode-16"]			= f("explode-16.png"),
-	["explode-24"]			= f("explode-24.png"),
-	["explode-32"]			= f("explode-32.png"),
-	["explode-128"]			= f("explode-128.png"),
-	["snow-bank"]			= f("snow-bank.png"),
-	["river-left"]			= f("river-left.png"),
-	["river-right"]			= f("river-right.png"),
-	["icicles.png"]			= f("icicles.png", 3),
-	["cube-64.png"]			= f("cube-64.png", 3, cubedriver),
-	--["cube-128-4.png"]		= f("cube-128-4.png", 3),
-	["cube-128.png"]		= f("cube-128.png", 3, cubedriver),
-	["river-slice.png"]		= f("river-slice.png", 1,function (obj)
+	["splash.jpg"]		= f("splash.jpg"),
+	["floor-btm"]		= f("floor-btm.png"),
+	["ice-slice"]		= f("ice-slice.png"),
+	["igloo-back"]		= f("igloo-back.png"),
+	["bg-sun"]			= f("bg-sun.png"),
+	["bg-slice-2"]		= f("bg-slice-2.png"),
+	["tree-1"]			= f("tree-1.png"),
+	["tree-2"]			= f("tree-2.png"),
+	["tree-3"]			= f("tree-3.png"),
+	["tree-4"]			= f("tree-4.png"),
+	["tree-5"]			= f("tree-5.png"),
+	["explode-16"]		= f("explode-16.png"),
+	["explode-24"]		= f("explode-24.png"),
+	["explode-32"]		= f("explode-32.png"),
+	["explode-128"]		= f("explode-128.png"),
+	["icechunk-1"]		= f("ice-chunks-32-1.png"),
+	["icechunk-2"]		= f("ice-chunks-32-2.png"),
+	["icechunk-3"]		= f("ice-chunks-64-1.png"),
+	["icechunk-4"]		= f("ice-chunks-64-2.png"),
+	["splash-1"]		= f("splash-1.png"),
+	["splash-2"]		= f("splash-2.png"),
+	["splash-3"]		= f("splash-3.png"),
+	["snow-bank"]		= f("snow-bank.png"),
+	["river-left"]		= f("river-left.png"),
+	["river-right"]		= f("river-right.png"),
+	["icicles.png"]		= f("icicles.png", 3),
+	["cube-64.png"]		= f("cube-64.png", 3, cubedriver),
+	["cube-128-4.png"]	= f("cube-128-4.png", 3, cubedriver),
+	["cube-128.png"]	= f("cube-128.png", 3, cubedriver),
+	["river-slice.png"]	= f("river-slice.png", 1,function (obj)
 		obj.insert = function(self)
 			local group = self.parent
 			local x, y, w = group.ice.x, group.ice.y, group.ice.w
@@ -428,31 +480,78 @@ local make = {
 	end,{l = 180, t = 80, r = 200, b = 0}),
 	["fish-blue.png"]   = f("fish-blue.png", 1, function(obj)
 		obj.collision = function()
-			local streak = Image{src = "penguin-streak", anchor_point = {0,65}, scale = {0.6,1},
-				opacity = 255}
+			local streak = Image{src = "streak", anchor_point = {0,65}, scale = {0.6,1}, opacity = 255}
 			local group = Group{x = penguin.x+(row==2 and penguin.w or 0), y = penguin.y+penguin.h*3/5, 
 				y_rotation = {row==2 and 180 or 0,0,0}, z_rotation = {row==2 and 10 or -10,0,0}}
 			group.state = 0
 			group:add(streak)
 			overlay:add(group)
-			--x = streak.x+(row==2 and 120 or -120), --[[y = streak.y+15,]] 
 			streak:animate{scale = {1.5,1}, opacity = 0, duration = 400,
 				mode = "EASE_OUT_QUAD", on_completed = function() streak:free() end}
 			penguin:boost()
 			obj:hide()
 		end
 	end, {l = 50, t =50, r = -50, b = -50}),
-	["fish-streak"]		= f("fish-streak.png"),
-	["penguin-streak"]	= f("penguin-streak-1.png"),
-	["star-circle"]		= f("star-circle.png")
+	["streak"]			= f("streak.png"),
+	["armor-1"]			= f("armor-1.png"),
+	["armor-2"]			= f("armor-2.png"),
+	["armor-2.png"]		= f("armor-2.png", 1, function(obj)
+		obj:move_anchor_point(-34,-43)
+		local armor, a = 2, {}
+		local b
+		local anim = Timeline{duration = 1000, loop = true,
+			on_new_frame = function(self,ms,t)
+				a[2].position = penguin.position
+				a[2].y_rotation = penguin.y_rotation
+				if armor == 2 then
+					a[1].position = penguin.position
+					a[1].y_rotation = penguin.y_rotation
+				end
+			end}
+		
+		obj.insert = function(self,top)
+			a[1] = Image{src = "armor-1", x = obj.x, y = obj.y, opacity = 0,
+						 scale = {top and 1 or -1,1}, anchor_point = {12,17},
+						 y_rotation = {top and 0 or 180,penguin.w/2,0}, z_rotation = {30,40,60}}
+			a[2] = Image{src = "armor-2", x = obj.x, y = obj.y, opacity = 0,
+						 scale = {top and 1 or -1,1}, anchor_point = {-34,-43},
+						 y_rotation = {top and 0 or 180,penguin.w/2,0}, z_rotation = {0,0,0}}
+			overlay.armor:add(a[2],a[1])
+			obj.opacity = 1
+		end
+		
+		obj.collision = function()
+			anim:start()
+			a[1].z_rotation = {0,0,0}
+			a[2]:raise_to_top()
+			penguin.armor = obj
+		end
+		
+		obj.drop = function()
+			b = a[3-armor]
+			b:move_anchor_point(b.w/2,b.h/2)
+			b.y_rotation = {penguin.y_rotation[1],0,0}
+			b.vx, b.vy, b.vz, b.vo = row == 2 and 0.1 or -0.1, -0.4, row == 2 and 0.3 or -0.3, -0.33
+			b:unparent()
+			overlay.explode:add(b)
+			armor = armor-1
+			if armor == 0 then
+				a = nil
+				anim:stop()
+				anim = nil
+				penguin.armor = nil
+				obj:free()
+			end
+		end
+	end, {l = 24, t = 0, r = -24, b = 0}),
 }
 
 recycle = function(i,src)
 	src = src:sub((src:find('/',10,true) or src:find('/',0,true) or 0)+1,-1)
 	
-	--if src == cubes[1] then
-	--	return make[cubes[rand(#cubes)]](i)
-	--end
+	if src == cubes[1] then
+		return make[cubes[rand(#cubes)]](i)
+	end
 	
 	if make[src] then
 		return make[src](i)
