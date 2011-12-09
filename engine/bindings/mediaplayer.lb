@@ -428,31 +428,37 @@ global mediaplayer [[MP*]]
     
     int load(string uri,string extra="")
         [[
-            String real_uri;
+            result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             
-            GFile * file = g_file_new_for_commandline_arg( uri );
-            
-            if ( g_file_has_uri_scheme( file , "http" ) || g_file_has_uri_scheme( file , "https" ) || g_file_has_uri_scheme( file , "rtsp" ) )
+            if ( MediaPlayer * mp = self->get_player() )
             {
-                gchar * u = g_file_get_uri( file );
-                real_uri = u;
-                g_free( u );
-            }
-            else
-            {
-                bool is_native;
-                real_uri = App::get(L)->get_metadata().sandbox.get_pi_child_uri( uri , is_native );  
-            }
-            
-            g_object_unref( G_OBJECT( file ) );
-            
-            if ( real_uri.empty() )
-            {
-                result=TP_MEDIAPLAYER_ERROR_INVALID_URI;
-            }
-            else
-            {
-                result=self->get_player()?self->get_player()->load(real_uri.c_str(),extra):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                result = TP_MEDIAPLAYER_ERROR_INVALID_URI;
+
+                bool is_uri = false;
+                
+                if ( char * u = App::get( L )->normalize_path( uri , is_uri , mp->get_valid_schemes() ) )
+                {
+                    g_debug( "NORMALIZED TO %s : '%s'" , is_uri ? "URI" : "PATH" , u );
+                    
+                    String real_uri;
+                    
+                    if ( is_uri )
+                    {
+                        real_uri = u;   
+                    }
+                    else
+                    {
+                        bool is_native;
+                        real_uri = App::get( L )->get_metadata().sandbox.get_pi_child_uri( uri , is_native );  
+                    }
+                   
+                    g_free( u );
+                    
+                    if ( ! real_uri.empty() )
+                    {
+                        result = mp->load( real_uri.c_str() , extra );
+                    }
+                }
             }
         ]];
         

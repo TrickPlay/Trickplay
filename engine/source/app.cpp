@@ -1,4 +1,7 @@
 
+#include "uriparser/Uri.h"
+#include "libsoup/soup.h"
+
 #include "app.h"
 #include "sysdb.h"
 #include "util.h"
@@ -1781,3 +1784,268 @@ void App::audio_match( const String & json )
 
     lua_pop( L , 1 );
 }
+
+//=============================================================================
+
+App::Path::Path( App * app , const char * app_path , Usage usage , const StringSet & schemes )
+{
+	g_assert( app );
+
+	if ( 0 == app_path )
+	{
+		g_critical( "INVALID NULL PATH OR URI" );
+		return;
+	}
+
+	size_t length = strlen( app_path );
+
+	if ( 0 == length )
+	{
+		g_critical( "INVALID EMPTY PATH OR URI" );
+		return;
+	}
+
+	FreeLater free_later;
+
+	//.........................................................................
+	// Save the original passed in - mostly for debugging.
+
+	original = app_path;
+
+	//.........................................................................
+	// We start by looking at the scheme. This function does not look at the
+	// rest of the app_path, so it is not too picky about escaping and such
+
+	char * scheme = g_uri_parse_scheme( app_path );
+
+	// NULL is OK here.
+
+	free_later( scheme );
+
+	//.........................................................................
+	// There is no scheme, or the scheme is poorly formatted, so this must be
+	// a plain old UNIX path. We use UriParser to get a URI from a UNIX file
+	// name.
+
+	if ( 0 == scheme )
+	{
+		// We allow absolute paths...since all paths are really just
+		// relative to the app's root. So, we ignore any leading slashes.
+
+		const char * relative_path = app_path;
+
+		for ( ; * relative_path == '/'; ++relative_path )
+		{}
+
+		// There is nothing left - bad path
+
+		if ( 0 == * relative_path )
+		{
+			g_critical( "INVALID EMPTY PATH '%s'" , app_path );
+			return;
+		}
+
+		// Convert the relative path to a relative URI. This will
+		// already be escaped.
+
+		char * relative_child_uri_string = g_new0( char , 7 + 3 * length + 1 );
+
+		free_later( relative_child_uri_string );
+
+		if ( 0 != uriUnixFilenameToUriStringA( relative_path , relative_child_uri_string ) )
+		{
+			g_critical( "INVALID PATH '%s'" , app_path );
+			return;
+		}
+
+		// Get the URI for the app's root
+
+		String root_uri_string = app->get_metadata().sandbox.get_root_uri();
+
+		if ( root_uri_string.empty() )
+		{
+			g_critical( "APP ROOT IS INVALID FOR PATH '%s'" , app_path );
+			return;
+		}
+
+		g_debug( "APP PATH IS             [%s]" , app_path );
+		g_debug( "  ROOT URI IS           [%s]" , root_uri_string.c_str() );
+		g_debug( "  RELATIVE CHILD URI IS [%s]" , relative_child_uri_string );
+
+		// The root URI should be an absolute URI
+
+		// Now, we have to parse both, so we can create a final URI
+
+		UriParserStateA state;
+
+		UriUriA root_uri;
+		memset( & root_uri , 0 , sizeof( root_uri ) );
+		state.uri = & root_uri;
+
+		if ( URI_SUCCESS != uriParseUriA( & state , root_uri_string.c_str() ) )
+		{
+			g_critical( "APP ROOT URI COULD NOT BE PARSED '%s' FOR '%s'" , root_uri_string.c_str() , app_path );
+			uriFreeUriMembersA( & root_uri );
+			return;
+		}
+
+		UriUriA relative_child_uri;
+		memset( & relative_child_uri , 0 , sizeof( relative_child_uri ) );
+		state.uri = & relative_child_uri;
+
+		if ( URI_SUCCESS != uriParseUriA( & state , relative_child_uri_string ) )
+		{
+			g_critical( "PATH URI COULD NOT BE PARSED FOR '%s'" , app_path );
+			uriFreeUriMembersA( & root_uri );
+			uriFreeUriMembersA( & relative_child_uri );
+			return;
+		}
+
+		UriUriA absolute_uri;
+		memset( & absolute_uri , 0 , sizeof( absolute_uri ) );
+
+		if ( URI_SUCCESS != uriAddBaseUriA( & absolute_uri , & relative_child_uri , & root_uri ) )
+		{
+			g_critical( "FAILED TO CREATE ABSOLUTE URI FOR PATH '%s'" , app_path );
+			uriFreeUriMembersA( & root_uri );
+			uriFreeUriMembersA( & relative_child_uri );
+			return;
+		}
+
+		//.....................................................................
+		// Clean these up
+
+		uriFreeUriMembersA( & root_uri );
+		uriFreeUriMembersA( & relative_child_uri );
+
+		//.....................................................................
+
+		int chars_required = 0;
+
+		uriToStringCharsRequiredA( & absolute_uri , & chars_required );
+
+		++chars_required;
+
+		char * absolute_uri_string = g_new0( char , chars_required );
+
+		free_later( absolute_uri_string );
+
+		if ( URI_SUCCESS != uriToStringA( absolute_uri_string , & absolute_uri , chars_required , 0 ) )
+		{
+			g_critical( "FAILED TO STRINGIFY FINAL URI FOR PATH '%s'" , app_path );
+			uriFreeUriMembersA( & absolute_uri );
+			return;
+		}
+
+		uriFreeUriMembersA( & absolute_uri );
+
+		uri = absolute_uri_string;
+	}
+
+	//.........................................................................
+	// The app_path has a scheme. It could be a real URI or a local path
+	// prefixed with one of our schemes, such as "localized".
+
+	else
+	{
+		// Empty scheme, WTF?
+
+		if ( 0 == strlen( scheme ) )
+		{
+			g_critical( "INVALID EMPTY SCHEME FOR URI '%s'" , app_path );
+			return;
+		}
+
+		// The 'file' scheme is NEVER allowed as an input.
+
+		if ( ! strcmp( scheme , "file" ) )
+		{
+			g_critical( "SCHEME 'file' IS NOT ALLOWED" );
+			return;
+		}
+
+		// localized: scheme. We have to handle in a special way
+
+		if ( ! strcmp( scheme , "localized" ) )
+		{
+			// TODO: do it
+			g_error( "SCHEME 'localized' IS NOT HANDLED YET" );
+			g_assert( false );
+		}
+
+		// It is some other kind of scheme, which is not allowed when
+		// usage is USAGE_LUA_EXECUTE.
+
+		// Always include all possible values of usage in the switch
+		// below so that we will get a compiler warning if a new one
+		// is added and is not handled below.
+
+		switch( usage )
+		{
+		case App::Path::USAGE_LUA_EXECUTE:
+			g_critical( "URI NOT ALLOWED '%s'" , app_path );
+			return;
+
+		case App::Path::USAGE_MEDIA:
+			break;
+
+		// No 'default' case...EVER.
+		}
+
+		// Make a copy of the schemes passed in and add http and https
+		// which are always allowed schemes.
+
+		StringSet all_schemes( schemes );
+
+		all_schemes.insert( "http" );
+		all_schemes.insert( "https" );
+
+		// If the scheme is not one of the ones allowed, bail
+
+		if ( all_schemes.find( scheme ) == all_schemes.end() )
+		{
+			g_critical( "SCHEME '%s' NOT ALLOWED FOR '%s'" , scheme , app_path );
+			return;
+		}
+
+		// This helps us troubleshoot the URI and also escapes it.
+
+		SoupURI * uri_uri = soup_uri_new( app_path );
+
+		if ( 0 == uri_uri )
+		{
+			g_critical( "INVALID URI '%s'" , app_path );
+			return;
+		}
+
+		free_later( uri_uri , ( GDestroyNotify ) soup_uri_free );
+
+		char * uri_s = soup_uri_to_string( uri_uri , false );
+
+		// This should never happen, but let's guard against it
+		// anyway. This is sensitive code.
+
+		if ( 0 == uri_s )
+		{
+			g_critical( "INVALID URI '%s'" , app_path );
+			return;
+		}
+
+		free_later( uri_s );
+
+		// Everything is fine. We make this object 'good' by
+		// populating its URI.
+
+		uri = uri_s;
+	}
+}
+
+//.............................................................................
+// This lets you test the path to make sure it is good.
+
+App::Path::operator bool () const
+{
+	return ! uri.empty();
+}
+
+

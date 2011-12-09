@@ -342,6 +342,36 @@ global devtools [[ void * ]]
                 result = u->gc_tag( comment );
             } 
         ]];        
-                    
+
+    multi path_test( string path , int usage , table schemes = 0 )
+        [[
+            StringSet allowed_schemes;
+            
+            if ( schemes )
+            {
+                lua_pushnil( L );
+                while( lua_next( L , schemes ) )
+                {
+                    allowed_schemes.insert( lua_tostring( L , -1 ) );
+                    lua_pop( L , 1 );
+                }
+            }
+            
+            App::Path p ( App::get( L ) , path , App::Path::Usage( usage ) , allowed_schemes );
+            
+            if ( p )
+            {
+                lua_pushboolean( L , true );
+            }
+            else
+            {
+                lua_pushboolean( L , false );
+            }
+            
+            lua_pushstring( L , p.get_native_path().c_str() );
+            lua_pushstring( L , p.get_uri().c_str() );
+            
+            return 3;
+        ]];                     
 }
 
