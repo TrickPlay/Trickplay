@@ -124,6 +124,66 @@ public:
     };
 
     //.........................................................................
+
+
+    class Path
+    {
+    public:
+
+    	//.....................................................................
+    	// What the path is intended for.
+    	//
+    	// USAGE_LUA_EXECUTE - 	These cannot be remote URIs as given. They must
+    	//						be a UNIX path. If the app resides on an HTTP
+    	//						root, then it will end up being a remote URI,
+    	//						but the caller cannot start with a URI.
+    	//						For example: dofile( "http://host/bar/foo.lua" ) is
+    	//						not valid. Whereas dofile( "bar/foo.lua" ) is OK
+    	//						and if the app's root is "http://host/", then then
+    	//						final URI will be "http://host/bar/foo.lua".
+    	//
+    	// USAGE_MEDIA - 		These can be remote URIs or UNIX paths.
+    	//
+
+    	enum Usage { USAGE_LUA_EXECUTE = 0 , USAGE_MEDIA };
+
+    	//.....................................................................
+    	// Construct a path. If something goes wrong, you can use the bool
+    	// operator below to test it. Error messages are printed by this
+    	// function, so you don't need to do it yourself.
+
+    	Path( App * app , const char * app_path , Usage usage , const StringSet & schemes = StringSet() );
+
+    	//.....................................................................
+    	// This lets you test the path to make sure it is good.
+
+    	operator bool () const;
+
+    	//.....................................................................
+
+    	String get_original() const
+    	{
+    		return original;
+    	}
+
+    	String get_native_path() const
+    	{
+    		return native_path;
+    	}
+
+    	String get_uri() const
+    	{
+    		return uri;
+    	}
+
+    private:
+
+    	String	original;
+    	String 	native_path;
+    	String	uri;
+    };
+
+    //.........................................................................
     // Loads metadata for an app
 
     static bool load_metadata( const char * app_path, Metadata & metadata );
