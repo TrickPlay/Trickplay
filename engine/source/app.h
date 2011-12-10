@@ -157,9 +157,17 @@ public:
     	//.....................................................................
     	// This lets you test the path to make sure it is good.
 
-    	operator bool () const;
+    	operator bool () const
+		{
+    		return ! uri.empty();
+		}
 
     	//.....................................................................
+
+    	bool is_native() const
+    	{
+    		return ! native_path.empty();
+    	}
 
     	String get_original() const
     	{
@@ -177,6 +185,8 @@ public:
     	}
 
     private:
+
+    	static bool is_child( const String & root_uri , const String & child_uri );
 
     	String	original;
     	String 	native_path;
