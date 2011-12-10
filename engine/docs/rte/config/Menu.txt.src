@@ -63,7 +63,7 @@ Group: SDK Tutorial {
 	File: Tutorial Source Code (no auto-title, docs/rte/tutorial/code.txt)
 }
 
-Group: Programmer's Guide  {
+Group: Programmer's Guide {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
 	File: The Engine Console (no auto-title, docs/rte/progguide/console_cmds.txt)
 	File: Specifying Colors (no auto-title, docs/rte/progguide/color_specs.txt)
@@ -76,7 +76,7 @@ Group: Programmer's Guide  {
 	File: TrickPlay Configuration Keys (no auto-title, docs/rte/progguide/config_keys.txt)
 }
 
-Group: Engine Reference  {
+Group: Engine Reference {
 	File: Overview* (no auto-title, docs/rte/reference/overview_rte.txt)
 	
 	Group: Animation {
@@ -194,11 +194,11 @@ Group: Engine Reference  {
         }
     }
     
-    Group: Utility {
-    	File: Overview* (no auto-title, docs/rte/reference/overview_util.txt)
+    Group: Utility Functions {
+    	File: Overview (no auto-title, docs/rte/reference/overview_util.txt)
     	
     	Group: Globals {
-			File: Utility Functions* (no auto-title, bindings/globals.lb)
+			File: Utility Functions (no auto-title, bindings/globals.lb)
 		}
 	}
 
