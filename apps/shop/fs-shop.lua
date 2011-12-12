@@ -192,7 +192,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
         
         if not had_background then
         
-            background = assets( "assets/app-shop-bkgd-temp.jpg" )
+            background = assets( "assets/app-shop-olleh-logo_01.png" )
         
             screen:add( background )
             
@@ -243,7 +243,7 @@ function( ui , details_shop_app , featured_apps , all_apps )
         -- for that.
         
         local featured_x        = 113
-        local featured_y        = 89
+        local featured_y        = 89 + 80
         local FEATURED_SPACE    = 34
         
         for _ , shop_app in ipairs( featured_apps.applications ) do
