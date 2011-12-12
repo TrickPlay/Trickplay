@@ -12,7 +12,7 @@ local f = function(src,state,func,bbox)
 	local orig = _Image{src = "assets/" .. src, name = src .. "\t"}
 	factory:add(orig)
 	
-	state = state or 0 -- 0 none 1 collides 2 moves 3 breaks
+	state = state or 0
 	bbox = bbox or {l = 0, t = 0, r = 0, b = 0}
 	local clones = {}
 	
@@ -60,33 +60,37 @@ local f = function(src,state,func,bbox)
 end
 
 cubedriver = function (obj)
-	local switch = obj.name:match("s_(%w+)")
+	--local switch = obj.name:match("s_(%w+)")
 	local move = obj.clip
 	obj.clip = {0,0,obj.w,obj.h}
 	if move and (move[1] ~= 0 or move[2] ~= 0) then
-		if switch then
+		--[[if switch then
 			obj.insert = function()
 				switch = level.this:find_child(switch)
 			end
 			-- animate to/from
 			-- obj.reset()
-		else
+		else]]
 			obj.state = 2
 			obj.vx, obj.vy = move[1], move[2]
 			local ox = (obj.vx > 0 and -128 or 1921)
 			
 			local anim = Timeline{duration = 9001, loop = true,
 				on_new_frame = function(self,ms,t)
-					if obj.x == move[3] then
-						if obj.x > 20 and obj.x < 1920 then
-							explode(nil,obj)
+					if obj.x == move[3] or (obj.x > move[3]) == (obj.vx > 0) then
+						if 20 < obj.x and obj.x < 1920 then
+							if obj.x == move[3] then
+								fx.smash(obj)
+								audio.play("ice-breaking")
+								obj.x = ox
+							else
+								obj.x = move[3]
+							end
+						else
+							obj.x = ox + obj.x - move[3]
 						end
-						obj.x = ox
 					else
 						obj.x = obj.x + obj.vx*self.delta
-						if (obj.x > move[3]) == (obj.vx > 0) then
-							obj.x = move[3]
-						end
 					end
 				end
 			}
@@ -102,45 +106,46 @@ cubedriver = function (obj)
 				self.freed = true
 				self:unparent()
 			end
-		end
+		--end
 	else
-		obj.smash = function(now,block)
+		local touching = {}
+		obj.insert = function()
+			for k,v in ipairs(levels.this.children) do
+				if v.state == 3 and v ~= obj
+					and obj.x + obj.bbox.l < v.x + v.bbox.r
+					and obj.y + obj.bbox.t < v.y + v.bbox.b
+					and obj.x + obj.bbox.r > v.x + v.bbox.l
+					and obj.y + obj.bbox.b > v.y + v.bbox.t then
+					touching[#touching+1] = v
+				end
+			end
+		end
+		
+		obj.smash = function(now)
 			obj.state = 0
 			obj:move_anchor_point(obj.w/2,obj.h/2)
 			local d, vx, vy, vz, gr
 			
 			if now then
-				explode(nil,obj)
+				fx.smash(obj)
+				--audio.play("ice-breaking")
 				obj:free()
 			else
-				vx, vy, vz, gr = nrand(0.4), nrand(0.2)-0.2, nrand(0.8), ground[row]
-				local anim = Timeline{duation = 1000, on_new_frame = function(self,ms,t)
-					d = self.delta
-					vy = vy + gravity*d
-					obj.x = obj.x + vx*d
-					obj.y = obj.y + vy*d
-					obj.z_rotation = {obj.z_rotation[1]+vz*d,0,0}
-					if obj.y - obj.h/2 > gr then
-						explode(nil,obj)
-						self:stop()
-						obj:free()
-					end
-				end}
-				anim:start()
+				obj.vx, obj.vy, obj.vz, obj.vo = nrand(0.4), nrand(0.2)-0.2, nrand(0.8), 0
+				obj:unparent()
+				overlay.effects:add(obj)
 			end
-			
-			for k,v in ipairs(levels.this.children) do
-				if v.state == 3 and obj.bb.l < v.bb.r and obj.bb.t < v.bb.b
-					and obj.bb.r > v.bb.l and obj.bb.b > v.bb.t then
-					v.smash(false,obj)
+			for k,v in ipairs(touching) do
+				if v.parent ~= overlay.effects then
+					v.smash(false)
 				end
 			end
 		end
 		obj.free = function(self)
-			if anim then
-				anim:stop()
+			if obj.parent == overlay.effects then
+				fx.smash(obj)
+				audio.play("ice-breaking")
 			end
-			anim = nil
 			self.freed = true
 			self:unparent()
 		end
@@ -163,10 +168,10 @@ local make = {
 	["explode-24"]		= f("explode-24.png"),
 	["explode-32"]		= f("explode-32.png"),
 	["explode-128"]		= f("explode-128.png"),
-	["icechunk-1"]		= f("ice-chunks-32-1.png"),
-	["icechunk-2"]		= f("ice-chunks-32-2.png"),
-	["icechunk-3"]		= f("ice-chunks-64-1.png"),
-	["icechunk-4"]		= f("ice-chunks-64-2.png"),
+	["icechunk-1"]		= f("icechunk-1.png"),
+	["icechunk-2"]		= f("icechunk-2.png"),
+	["icechunk-3"]		= f("icechunk-3.png"),
+	["icechunk-4"]		= f("icechunk-4.png"),
 	["splash-1"]		= f("splash-1.png"),
 	["splash-2"]		= f("splash-2.png"),
 	["splash-3"]		= f("splash-3.png"),
@@ -244,6 +249,7 @@ local make = {
 				s = s - a/4
 				st = 0
 				anim:advance(math.asin((obj.y-y)/amp)*anim.duration)
+				audio.play("ball")
 			end
 		end
 	end),
@@ -270,6 +276,7 @@ local make = {
 				self.duration = -3*vy/gravity
 				self:start()
 				obj.seal.switch(-vy)
+				audio.play("ball")
 			end}
 		bouncing:start()
 		bouncing:advance(bouncing.duration/2)
@@ -313,6 +320,7 @@ local make = {
 				st = 0
 				penguin.jump(a)
 				obj.fall(penguin.vx/2,math.max(vy,-a),-penguin.vx)
+				audio.play("ball")
 			end
 		end
 		
@@ -382,6 +390,7 @@ local make = {
 				s = s + 0.5
 				st = 0
 				penguin.jump(a)
+				audio.play("seal-2")
 			end
 		end
 		
@@ -420,6 +429,7 @@ local make = {
 				s = s + 0.5
 				st = 0
 				penguin.jump(a)
+				audio.play("seal-1")
 			end
 		end
 		
@@ -431,8 +441,7 @@ local make = {
 		end
 	end, {l = 20, t = 10, r = -20, b = 0}),
 	["ice-bridge.png"]	= f("ice-bridge.png", 1, function (obj)
-		obj.insert
-		= function(self,top)
+		obj.insert = function(self,top)
 			if not top or self.x+self.w < 1920 then return end
 			for k,v in pairs(self.parent.children) do
 				if v.name and v.source.name == "ice-bridge.png\t" and
@@ -525,6 +534,8 @@ local make = {
 			a[1].z_rotation = {0,0,0}
 			a[2]:raise_to_top()
 			penguin.armor = obj
+			audio.play("armor-pickup")
+			obj:free()
 		end
 		
 		obj.drop = function()
@@ -533,7 +544,7 @@ local make = {
 			b.y_rotation = {penguin.y_rotation[1],0,0}
 			b.vx, b.vy, b.vz, b.vo = row == 2 and 0.1 or -0.1, -0.4, row == 2 and 0.3 or -0.3, -0.33
 			b:unparent()
-			overlay.explode:add(b)
+			overlay.effects:add(b)
 			armor = armor-1
 			if armor == 0 then
 				a = nil
@@ -542,6 +553,7 @@ local make = {
 				penguin.armor = nil
 				obj:free()
 			end
+			audio.play("armor-drop")
 		end
 	end, {l = 24, t = 0, r = -24, b = 0}),
 }

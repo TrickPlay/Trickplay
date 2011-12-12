@@ -1,10 +1,10 @@
 local overlay = Group{name = "overlay", y = -1200}
 overlay.deaths = Text{font = "Sigmar 68px", x = 240,  y = 568, color = "8bbbe0", text = "0"}
 overlay.level  = Text{font = "Sigmar 68px", x = 350, y = 568, width = 1400, alignment = "CENTER", color = "ffffff"}
-overlay.explode = Group{name = "explosion"}
+overlay.effects = Group{name = "effects"}
 overlay.armor = Group{name = "armor"}
 
-overlay:add(overlay.explode,penguin,
+overlay:add(overlay.effects,penguin,
 			Image{src = "assets/igloo-front.png", y = 134},
 			Image{src = "assets/death-bug.png", x = 150, y = 591},
 			overlay.armor,overlay.deaths,overlay.level)
@@ -18,7 +18,7 @@ local anim = Animator{properties = {
 	{source = snowbank,		  name = "y", keys = {{0,quad,-1300}}},
 	{source = snowbank.clone, name = "y", keys = {{0,quad,0}}},
 	{source = overlay.level,   name = "opacity", keys = {{0,255},{0.5,0},{1,255}}},
-	{source = overlay.explode, name = "opacity", keys = {{0,255},{0.5,0},{1,255}}},
+	{source = overlay.effects, name = "opacity", keys = {{0,255},{0.5,0},{1,255}}},
 	{source = overlay.armor,   name = "opacity", keys = {{0,255},{0.5,0},{1,255}}} },
 	timeline = Timeline{duration = 1120, on_completed = function(self)
 		if levels.this.id == 1 then return end
@@ -32,8 +32,8 @@ local anim = Animator{properties = {
 	
 local timer = Timer{on_timer = function(self)
 	overlay.level.text = (levels.this.id-1) .. ": " .. levels.this.name
-	overlay.explode.level = levels.this.id
-	for k,v in ipairs(overlay.explode.children) do
+	overlay.effects.level = levels.this.id
+	for k,v in ipairs(overlay.effects.children) do
 		v:free()
 	end
 	for k,v in ipairs(overlay.armor.children) do

@@ -150,6 +150,7 @@ levels.this = levels[1]
 
 screen:show()
 screen:add(levels.this)
+audio.play("theme")--,9000)
 
 levels.next = function(arg)
 	local oldlevel = levels.this
@@ -166,6 +167,7 @@ levels.next = function(arg)
 		if levels.this.id ~= 1 then
 			row = 1
 			penguin.skating:start()
+			audio.play("slide")
 		end
 	end}
 	
