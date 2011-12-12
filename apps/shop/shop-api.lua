@@ -46,6 +46,10 @@ function api:price_to_string( price )
     
     -- TODO : currency
     
+    do
+        return string.format( "₩%d" , price * 1000 )
+    end
+    
     -- Cents
     
     if price < 1 then
