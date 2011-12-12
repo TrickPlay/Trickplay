@@ -1,6 +1,6 @@
 app=
 {
-    id          = "com.trickplay.launcher17",
+    id          = "com.trickplay.launcher",
     release     = "1",
     version     = "0.1",
     name        = "Launcher17",
