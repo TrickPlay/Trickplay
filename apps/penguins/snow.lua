@@ -34,6 +34,7 @@ return function(wind)
 		for i=1,#layers do
 			layers[i]:animate{opacity = i > wind and 0 or 255, duration = 1000}
 		end
+		audio.loop("wind-" .. (wind == 3 and '2' or '1'),(wind == 3 and 4000 or 2000))
 	end
 	
 	layers[3]:raise(overlay)
