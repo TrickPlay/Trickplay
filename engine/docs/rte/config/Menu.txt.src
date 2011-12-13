@@ -139,13 +139,13 @@ Group: Engine Reference {
 		}
 	}
 	
-	Group: System Info {
-		File: Overview* (no auto-title, docs/rte/reference/overview_system.txt)
+	Group: System Information {
+		File: Overview (no auto-title, docs/rte/reference/overview_system.txt)
 		
 		Group: Globals {
 			File: app (no auto-title, bindings/app.lb)
-			File: system* (no auto-title, bindings/system.lb)
-			File: trickplay* (no auto-title, bindings/trickplay.lb)
+#			File: system* (no auto-title, bindings/system.lb)
+			File: trickplay (no auto-title, bindings/trickplay.lb)
 		}
 	}
 	
