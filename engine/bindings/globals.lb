@@ -356,17 +356,18 @@ globals
 			result = 0;
 			result_len = 0;
 
-            gsize length = 0;
-            gchar * contents = App::get( L )->get_metadata().sandbox.get_pi_child_contents( file_name , length );
+            App * app = App::get( L );
             
+            GByteArray * contents = App::Path( app , file_name , App::Path::URI_NOT_ALLOWED ).load_contents( app ); 
+
             FreeLater free_later;
             
             if ( contents )
             {
-                free_later( contents );
+                free_later( contents , ( GDestroyNotify ) g_byte_array_unref );
                 
-                result = contents;
-                result_len = length;
+                result = ( char * ) contents->data;
+                result_len = contents->len;
             }
 		]];       
         

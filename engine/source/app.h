@@ -130,36 +130,34 @@ public:
     {
     public:
 
-    	//.....................................................................
-    	// What the path is intended for.
-    	//
-    	// USAGE_LUA_EXECUTE - 	These cannot be remote URIs as given. They must
-    	//						be a UNIX path. If the app resides on an HTTP
-    	//						root, then it will end up being a remote URI,
-    	//						but the caller cannot start with a URI.
-    	//						For example: dofile( "http://host/bar/foo.lua" ) is
-    	//						not valid. Whereas dofile( "bar/foo.lua" ) is OK
-    	//						and if the app's root is "http://host/", then then
-    	//						final URI will be "http://host/bar/foo.lua".
-    	//
-    	// USAGE_MEDIA - 		These can be remote URIs or UNIX paths.
-    	//
+    	enum Flags
+    	{
+    		URI_NOT_ALLOWED 		= 0x01,
+    		LOCALIZED_NOT_ALLOWED 	= 0x02
+    	};
 
-    	enum Usage { USAGE_LUA_EXECUTE = 0 , USAGE_MEDIA };
+    	Path();
 
     	//.....................................................................
     	// Construct a path. If something goes wrong, you can use the bool
     	// operator below to test it. Error messages are printed by this
     	// function, so you don't need to do it yourself.
 
-    	Path( App * app , const char * app_path , Usage usage , const StringSet & schemes = StringSet() );
+    	Path( App * app , const char * app_path , int flags = 0 , const StringSet & schemes = StringSet() );
+
+    	Path( lua_State * L , const char * app_path , int flags = 0 , const StringSet & schemes = StringSet() );
 
     	//.....................................................................
     	// This lets you test the path to make sure it is good.
 
+    	bool good() const
+    	{
+    		return ! uri.empty();
+    	}
+
     	operator bool () const
 		{
-    		return ! uri.empty();
+    		return good();
 		}
 
     	//.....................................................................
@@ -183,6 +181,23 @@ public:
     	{
     		return uri;
     	}
+
+    	//.....................................................................
+    	// Returns true if the path is valid and is either HTTP or HTTPS.
+
+    	bool is_http() const;
+
+    	//.....................................................................
+    	// If this Path object is valid and the underlying resource exists,
+    	// this will return true. Note that in the case of a remote
+    	// resource, this will require a round trip to the server. In the case
+    	// of HTTP or HTTPS, a HEAD request will be made.
+
+    	bool exists( App * app ) const;
+
+    	//.....................................................................
+
+    	GByteArray * load_contents( App * app ) const;
 
     private:
 

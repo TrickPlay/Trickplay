@@ -343,7 +343,7 @@ global devtools [[ void * ]]
             } 
         ]];        
 
-    multi path_test( string path , int usage , table schemes = 0 )
+    multi path_test( string path , int flags = 0 , table schemes = 0 )
         [[
             StringSet allowed_schemes;
             
@@ -357,7 +357,7 @@ global devtools [[ void * ]]
                 }
             }
             
-            App::Path p ( App::get( L ) , path , App::Path::Usage( usage ) , allowed_schemes );
+            App::Path p ( App::get( L ) , path , flags , allowed_schemes );
             
             if ( p )
             {
