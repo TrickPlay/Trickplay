@@ -428,37 +428,20 @@ global mediaplayer [[MP*]]
     
     int load(string uri,string extra="")
         [[
-            result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
-            
             if ( MediaPlayer * mp = self->get_player() )
             {
-                result = TP_MEDIAPLAYER_ERROR_INVALID_URI;
-
-                bool is_uri = false;
-                
-                if ( char * u = App::get( L )->normalize_path( uri , is_uri , mp->get_valid_schemes() ) )
+                if ( App::Path path = App::Path( L , uri , 0 , mp->get_valid_schemes() ) )
                 {
-                    g_debug( "NORMALIZED TO %s : '%s'" , is_uri ? "URI" : "PATH" , u );
-                    
-                    String real_uri;
-                    
-                    if ( is_uri )
-                    {
-                        real_uri = u;   
-                    }
-                    else
-                    {
-                        bool is_native;
-                        real_uri = App::get( L )->get_metadata().sandbox.get_pi_child_uri( uri , is_native );  
-                    }
-                   
-                    g_free( u );
-                    
-                    if ( ! real_uri.empty() )
-                    {
-                        result = mp->load( real_uri.c_str() , extra );
-                    }
+                    result = mp->load( path.get_uri().c_str() , extra );
                 }
+                else
+                {
+                    result = TP_MEDIAPLAYER_ERROR_INVALID_URI;
+                }
+            }
+            else
+            {
+                result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             }
         ]];
         
