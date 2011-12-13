@@ -211,16 +211,10 @@ The src property can be set only when the Image object is constructed. Setting t
 
 The async property has no effect with device-based Image objects. All image loading is performed asynchronously.
 
-*The <Image.loaded> property*
-
-The loaded property has no meaning with device-based Image objects. All image loading is performed asynchronously.
-
-*The <Image.tile> property*
-
-The default tile setting for device-based Image objects is {true,true}, i.e., both horizontal and vertical tiling are enabled. (The default for TV-based objects is {false,false}.)
-
 
 Header: The Text Class
+
+Text objects displayed on an iOS device are not editable using the SDK library functions. Thus, the Text properties applicable to editable text are not supported. This includes the following Text properties: editable, single_line, wants_enter, selection_color, cursor_visible, cursor_color, and cursor_size.
 
 *The <Text.font> property*
 

@@ -20,7 +20,7 @@ local middle_marker_count = 0
 
 myTimeline.on_new_frame = function (self, timeline_ms, progress) 
 	image1.x = 1000 * progress
-	if progress > 0.4 then
+	if progress > 0.6 then
 		myTimeline:rewind ()
 	end
 

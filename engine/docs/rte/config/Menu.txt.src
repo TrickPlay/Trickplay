@@ -120,14 +120,14 @@ Group: Engine Reference  {
 		}
 		
 		Group: Classes {
-			File: URLRequest* (no auto-title, bindings/url_request.lb)
+			File: URLRequest (no auto-title, bindings/url_request.lb)
 			File: XMLParser* (no auto-title, bindings/xml.lb)
 		}
 		
 		Group: Interfaces {
 			File: Controller (no auto-title, bindings/controller.lb)
-			File: URLRequestCancel* (no auto-title, docs/rte/reference/url_request_cancel_ph.txt)
-			File: URLResponse* (no auto-title, docs/rte/reference/url_response_ph.txt)
+			File: URLRequestCancel (no auto-title, bindings/url_request_cancel.lb)
+			File: URLResponse (no auto-title, bindings/url_response.lb)
 		}
 	}
 

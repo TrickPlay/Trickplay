@@ -1,6 +1,44 @@
 local g = ... 
 
 
+local image13 = Image
+	{
+		src = "/assets/images/snow-ramp.png",
+		clip = {0,0,429,130},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "image13",
+		position = {1491,443,0},
+		size = {429,130},
+		opacity = 255,
+		reactive = true,
+	}
+
+image13.extra.focus = {}
+
+function image13:on_key_down(key)
+	if image13.focus[key] then
+		if type(image13.focus[key]) == "function" then
+			image13.focus[key]()
+		elseif screen:find_child(image13.focus[key]) then
+			if image13.clear_focus then
+				image13.clear_focus(key)
+			end
+			screen:find_child(image13.focus[key]):grab_key_focus()
+			if screen:find_child(image13.focus[key]).set_focus then
+				screen:find_child(image13.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+image13.extra.reactive = true
+
+
 local image0 = Image
 	{
 		src = "/assets/images/cube-128.png",
@@ -161,7 +199,7 @@ local clone6 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone6",
-		position = {618,288,0},
+		position = {618,351,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -198,7 +236,7 @@ local clone7 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone7",
-		position = {517,348,0},
+		position = {517,400,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -235,7 +273,7 @@ local clone8 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone8",
-		position = {375,288,0},
+		position = {375,351,0},
 		size = {127,128},
 		opacity = 255,
 		reactive = true,
@@ -272,7 +310,7 @@ local clone9 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone9",
-		position = {277,341,0},
+		position = {277,393,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -375,4 +413,4 @@ end
 clone10.extra.reactive = true
 
 
-g:add(image0,image3,clone4,image5,clone6,clone7,clone8,clone9,image12,clone10)
+g:add(image13,image0,image3,clone4,image5,clone6,clone7,clone8,clone9,image12,clone10)
