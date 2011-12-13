@@ -1,26 +1,19 @@
 --[[
+tues
+	polish boost anim
+	
 wed
-	level 'suck it up and squeeze through'? (after level 3 maybe)
-	inter-level platforms
-	snow ramp thing
-	finish level 20, make 21 ('blue fish ice bridge')
-	insert rolling/bouncing blocks? (3-5 levels)
-	
-mon-wed
-	blue fish adjustments, preferrably w/ burst anim
 	2-3 blue fish levels
-	snow banks (need assets)
-	5-8 snow bank levels
+	internal release?
 	
+level notes
+	12a and 16a and might be too difficult
 
-Mon
-refine collisions
+	
 breakable blocks
-faster fish adjustments
 armor
 gravity fish
 darkness
-snow tunnel
 polar bear
 eskimo
 monster
@@ -32,19 +25,17 @@ submersion of
 	seal
 	penguin
 splashing
-double jump cues?
 
 
-Need
+need
 	audio
 	better ice water
-	better seal
-	breakable block
-	"faster" fish
+	splash pieces
 	armor pieces
+	ice pieces
+	switches
 	"upside down" fish
 	darkness
-	snow tunnel
 ]]
 
 math.randomseed(os.time())
@@ -62,7 +53,7 @@ snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
 levels  = dofile("levels.lua")
 overlay	= dofile("overlay.lua")
-snow(levels.this.snow)
+snow(levels.this.snow,levels.this.bank)
 explode = dofile("explode.lua")
 
 collectgarbage("collect")
