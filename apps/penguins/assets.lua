@@ -150,7 +150,77 @@ local rubberize = function(obj,s,st,d,spring,damp)
 end
 
 local make = {
-	["splash.jpg"]		= f("splash.jpg"),
+	["splash.jpg"]		= f("splash.jpg", 0, function(obj)
+		local z, zwire = Image{src = "logo-z", y = 800}, Image{src = "logo-z-wire", y = 600, h = 200}
+		local p, pwire = Image{src = "logo-p", y = 700}, Image{src = "logo-p-wire", y = 600, h = 100}
+		local zg, pg = Group{scale = {2,2}, anchor_point = {256,0}, x = 1060, y = -2420},
+					   Group{scale = {2,2}, anchor_point = {188,0}, x = 1040, y = -2400}
+		local za, zt, pa, pt = 0, 0, 0, 0
+		zg:add(z,zwire)
+		pg:add(p,pwire)
+		
+		step[zg] = function(d,ms)
+			zt = (zt+d/2000)%1
+			if za > 0 then
+				zg.z_rotation = {sin(2*pi*zt)*za,0,0}
+				zg.scale = {2,2-sin(2*pi*zt)*za/150}
+				za = za/2^(d/1000)+rand(3)/2000
+			end
+		end
+		step[pg] = function(d,ms)
+			pt = (pt+d/2000)%1
+			if pa > 0 then
+				pg.z_rotation = {-sin(2*pi*pt)*pa,0,0}
+				pg.scale = {2,2+sin(2*pi*pt)*pa/150}
+				pa = pa/2^(d/1000)+rand(3)/2000
+			end
+		end
+		
+		obj.insert = function()
+			t = 0
+			obj.parent:add(zg,pg)
+			
+			zg:animate{y = -1420, duration = 1000, mode = "EASE_IN_QUAD", on_completed = function()
+				zt = 0
+				za = 4
+				zg:animate{y = -1450, duration = 200, mode = "EASE_OUT_QUAD", on_completed = function()
+					zg:animate{y = -1420, duration = 200, mode = "EASE_IN_QUAD", on_completed = function()
+						--zt = asin(zg.z_rotation[1]/4)/pi/2--0.5-
+						--za = 4
+					end}
+				end}
+			end}
+			
+			Timer{interval = 200, on_timer = function(self)
+				pg:animate{y = -1400, duration = 1000, mode = "EASE_IN_QUAD", on_completed = function()
+					pt = 0
+					pa = 4
+					pg:animate{y = -1430, duration = 200, mode = "EASE_OUT_QUAD", on_completed = function()
+						pg:animate{y = -1400, duration = 200, mode = "EASE_IN_QUAD", on_completed = function()
+							--pt = asin(-pg.z_rotation[1]/4)/pi/2
+							--pa = 4
+						end}
+					end}
+				end}
+				self:stop()
+			end}
+		end
+		
+		obj.unload = function()
+			z:free()
+			zwire:free()
+			zg:unparent()
+			step[zg] = nil
+			p:free()
+			pwire:free()
+			pg:unparent()
+			step[pg] = nil
+		end
+	end),
+	["logo-z"]			= f("logo-z.png"),
+	["logo-z-wire"]		= f("logo-z-wire.png"),
+	["logo-p"]			= f("logo-p.png"),
+	["logo-p-wire"]		= f("logo-p-wire.png"),
 	["floor-btm"]		= f("floor-btm.png"),
 	["ice-slice"]		= f("ice-slice.png"),
 	["igloo-back"]		= f("igloo-back.png"),
@@ -203,12 +273,16 @@ local make = {
 			end
 		end
 	end),
+	["river-slice-2"]	= f("river-slice-2.png"),
+	["water-ring"]		= f("water-ring.png"),
 	["beach-ball.png"]	= f("beach-ball.png", 2, function (obj)
 		obj:move_anchor_point(obj.w/2,obj.h/2)
 		local amp = 25
 		local y = obj.y
-		local a, s, st = 0, 1, 0
+		local a, r, s, st = 0, 0, 1, 0
 		local t = 0
+		local fade = Image{src = "river-slice-2", x = obj.x-obj.w*3/4, w = obj.w*1.5}
+		local ring = Image{src = "water-ring", x = obj.x, w = 131*1.5, h = 35*1.5, anchor_point = {105,15}}
 		obj.z_rotation = {rand(360),0,0}
 		
 		step[obj] = function(d,ms)
@@ -216,11 +290,18 @@ local make = {
 			t = (t+d/1000)%1
 			obj.y = y + cos(pi*2*t)*amp
 			s, st = rubberize(obj,s,st,d,6,300)
+			r = sqrt(1-(2*(obj.y-ring.y)/obj.h)^2)
+			ring.scale = {r*obj.scale[1],r*obj.scale[2]}
 		end
 			
-		obj.insert = function()
+		obj.insert = function(self,top)
 			y = obj.y
 			t = rand()
+			obj.parent:add(fade,ring)
+			fade:raise(obj)
+			ring:raise(fade)
+			fade.y = 536 + (top and 0 or 640)
+			ring.y = fade.y+25
 		end
 		
 		obj.collision = function()

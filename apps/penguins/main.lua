@@ -51,6 +51,7 @@ max = math.max
 min = math.min
 sqrt = math.sqrt
 log10 = math.log10
+floor = math.floor
 
 math.randomseed(os.time())
 rand = math.random
@@ -85,6 +86,7 @@ snow    = dofile("snow.lua") -- refactor
 penguin = dofile("penguin.lua")
 overlay	= dofile("overlay.lua")
 snow(levels.this.snow,levels.this.bank)
+audio.play("theme")
 dofile("effects.lua")
 
 collectgarbage("collect")
