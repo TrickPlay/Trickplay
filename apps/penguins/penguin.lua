@@ -82,7 +82,7 @@ local kill = function(obj)
 	t = math.atan2(a.y/obj.scale[2],a.x/obj.scale[1])
 	t = t + math.sin(4*t-math.pi)/4
 	a = {x = math.cos(t), y = math.sin(t)}
-	d = obj.vx and obj.vy and obj.vx*a.x + obj.vy*a.y or 0
+	d = obj.state == 2 and obj.vx and obj.vy and obj.vx*a.x + obj.vy*a.y or 0
 	
 	if img.vy == 0 then
 		img.vz = (img.vx > 0) == g and -0.5 or 0.5

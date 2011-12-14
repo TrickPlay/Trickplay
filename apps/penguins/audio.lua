@@ -4,7 +4,6 @@ local on = true
 
 local play = function(uri)
 	if on and not recent[uri] then
-		--print(uri)
 		mediaplayer:play_sound("audio/" .. uri .. ".mp3")
 		recent[uri] = 1
 	end

@@ -105,7 +105,7 @@ end
 
 local toload = {
 	{0,	2,0,"Splash Screen"},
-	---[[
+	--[[
 	--]]
 	{1,	1,0,"Penguin In Motion"},
 	{2,	1,0,"You're Probably Gonna Die"},
@@ -150,7 +150,7 @@ levels.this = levels[1]
 
 screen:show()
 screen:add(levels.this)
-audio.play("theme")--,9000)
+audio.play("theme")
 
 levels.next = function(arg)
 	local oldlevel = levels.this
