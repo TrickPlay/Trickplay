@@ -1,4 +1,4 @@
-local i, j, d, dt, d2, s, px, py, b
+local i, j, d, dt, d2, s, px, py, b, c
 local snow		= {"explode-16","explode-24","explode-32"}
 local chunks	= {"icechunk-1","icechunk-2","icechunk-3","icechunk-4"}
 local splashes	= {"splash-1","splash-2"}
@@ -16,7 +16,7 @@ step[fx] = function(d,ms)
 	b = levels.this.bank > 0
 	for k,v in ipairs(group.children) do
 		v.opacity = math.max(0,v.opacity+v.vo*d)
-		if v.opacity == 0 or ((b and v.vy > 0 or v.vo == 0) and v.y > ground[row]+50) then -- this could fail after row change
+		if v.opacity == 0 or ((b and v.vy > 0 or v.vo == 0) and v.y > ground[row]+50) then -- this
 			v:free()
 		elseif v.vz or v.vo == -0.25 then
 			if v.vo == -0.125 then
@@ -48,6 +48,7 @@ local init = function(obj)
 	isbank = levels.this.bank > 0 and 1 or 0
 	px, py = obj.x + obj.w/2, obj.y + obj.h/2
 	group:lower(penguin)
+	c = floor(group.count/5)
 end
 
 fx.splash = function()
@@ -56,7 +57,7 @@ fx.splash = function()
 			  anchor_point = {64,120}, scale = {0.5,0.2}, opacity = 255}
 	j.vy, j.vo, j.t = 0.02*(1-isbank), -0.32, 0
 	group:add(j)
-	for i=1,rand(15,20) do
+	for i=1+c,rand(15,20) do
 		j = Image{src = splashes[rand(2)], x = px, y = py-30*isbank, opacity = rand(160,255),
 				  anchor_point = {32,32}, z_rotation = {rand(360),0,0}}
 		j.vx, j.vo = nrand(0.25), -0.25
@@ -70,7 +71,7 @@ end
 fx.smash = function(block)
 	if block.level ~= group.level then return end
 	init(block)
-	for i=1,rand(5,8) do
+	for i=1+floor(c/3),rand(5,8) do
 		j = Image{src = chunks[rand(4)], opacity = 255, x = px+nrand(50),
 				  y = py+(isbank == 1 and nrand(30)-30 or nrand(50)),
 				  scale = {rand(2)*2-3,rand(2)*2-3}, z_rotation = {rand(4)*90,0,0}}
@@ -82,7 +83,9 @@ end
 
 fx.flakes = function(num)
 	init()
-	for i=1,(num or 1) do
+	num = num and num-c or 1
+	if num == 1 and rand(6) < c then return end
+	for i=1,num do
 		j = Image{src = snow[rand(#snow-isbank)], x = px, y = py,
 				  z_rotation = {rand(360),0,0}, opacity = rand(128,255)}
 		j.anchor_point = {j.w*(0.5+nrand(0.7)), j.h*(0.5+nrand(0.7))}

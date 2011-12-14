@@ -42,7 +42,7 @@ local free = function(self)
 		if v.free then
 			v:free()
 		else
-			print('object ' .. v.gid .. ' ' .. (v.source.src or 'n/a') .. ' has no :free()')
+			--print(v.gid .. ' ' .. (v.source and v.source.src or 'n/a') .. ' has no :free()')
 		end
 	end
 end
@@ -150,7 +150,6 @@ levels.this = levels[1]
 
 screen:show()
 screen:add(levels.this)
-audio.play("theme")
 
 levels.next = function(arg)
 	local oldlevel = levels.this

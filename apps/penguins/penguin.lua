@@ -194,7 +194,7 @@ function skating:on_new_frame(ms,t)
 	
 	--object collisions
 	for k,v in pairs(levels.this.children) do
-		if v.state > 0 and v.is_visible then
+		if v.state and v.state > 0 and v.is_visible then
 			if v.state == 2 then
 				v.bb = {l = v.x + v.bbox.l, r = v.x + v.bbox.r,
 						t = v.y + v.bbox.t, b = v.y + v.bbox.b}
