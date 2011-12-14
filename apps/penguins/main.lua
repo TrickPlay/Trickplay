@@ -42,6 +42,16 @@ need
 	darkness
 ]]
 
+sin = math.sin
+cos = math.cos
+asin = math.asin
+atan2 = math.atan2
+pi = math.pi
+max = math.max
+min = math.min
+sqrt = math.sqrt
+log10 = math.log10
+
 math.randomseed(os.time())
 rand = math.random
 function nrand(n)
@@ -54,6 +64,18 @@ end
 gravity = 0.002
 ground = {440,1080}
 row = 1
+
+step = {}
+local d, tms = 0, 0
+local anim = Timeline{duration = 9001, loop = true,
+	on_new_frame = function(self,ms,t)
+		d = self.delta
+		tms = tms+d
+		for k,v in pairs(step) do
+			v(d,tms)
+		end
+	end}
+anim:start()
 
 dofile("assets.lua")
 audio	= dofile("audio.lua")

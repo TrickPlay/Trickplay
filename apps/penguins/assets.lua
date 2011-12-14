@@ -3,6 +3,7 @@ _Clone = Clone
 
 local src = ""
 local cubes = {"cube-128.png","cube-128-4.png"}
+local index = {}
 local a
 factory = Group()
 factory:hide()
@@ -10,6 +11,7 @@ screen:add(factory)
 
 local f = function(src,state,func,bbox)
 	local orig = _Image{src = "assets/" .. src, name = src .. "\t"}
+	index[src] = orig
 	factory:add(orig)
 	
 	state = state or 0
@@ -29,6 +31,10 @@ local f = function(src,state,func,bbox)
 			clones[#clones+1] = _Clone{source = orig}
 			ret = clones[#clones]
 			ret.free = function(self)
+				if self.unload then
+					self.unload()
+				end
+				step[self] = nil
 				self.freed = true
 				self:unparent()
 			end
@@ -59,7 +65,7 @@ local f = function(src,state,func,bbox)
 	end
 end
 
-cubedriver = function (obj)
+local cubedriver = function (obj)
 	--local switch = obj.name:match("s_(%w+)")
 	local move = obj.clip
 	obj.clip = {0,0,obj.w,obj.h}
@@ -75,36 +81,22 @@ cubedriver = function (obj)
 			obj.vx, obj.vy = move[1], move[2]
 			local ox = (obj.vx > 0 and -128 or 1921)
 			
-			local anim = Timeline{duration = 9001, loop = true,
-				on_new_frame = function(self,ms,t)
-					if obj.x == move[3] or (obj.x > move[3]) == (obj.vx > 0) then
-						if 20 < obj.x and obj.x < 1920 then
-							if obj.x == move[3] then
-								fx.smash(obj)
-								audio.play("ice-breaking")
-								obj.x = ox
-							else
-								obj.x = move[3]
-							end
+			step[obj] = function(d,ms)
+				if obj.x == move[3] or (obj.x > move[3]) == (obj.vx > 0) then
+					if 20 < obj.x and obj.x < 1920 then
+						if obj.x == move[3] then
+							fx.smash(obj)
+							audio.play("ice-breaking")
+							obj.x = ox
 						else
-							obj.x = ox + obj.x - move[3]
+							obj.x = move[3]
 						end
 					else
-						obj.x = obj.x + obj.vx*self.delta
+						obj.x = ox + obj.x - move[3]
 					end
+				else
+					obj.x = obj.x + obj.vx*d
 				end
-			}
-			anim:start()
-			
-			obj.free = function(self)
-				obj.vx = nil
-				obj.vy = nil
-				if anim then
-					anim:stop()
-				end
-				anim = nil
-				self.freed = true
-				self:unparent()
 			end
 		--end
 	else
@@ -128,7 +120,6 @@ cubedriver = function (obj)
 			
 			if now then
 				fx.smash(obj)
-				--audio.play("ice-breaking")
 				obj:free()
 			else
 				obj.vx, obj.vy, obj.vz, obj.vo = nrand(0.4), nrand(0.2)-0.2, nrand(0.8), 0
@@ -141,15 +132,21 @@ cubedriver = function (obj)
 				end
 			end
 		end
-		obj.free = function(self)
+		
+		obj.unload = function(self)
 			if obj.parent == overlay.effects then
 				fx.smash(obj)
 				audio.play("ice-breaking")
 			end
-			self.freed = true
-			self:unparent()
 		end
 	end
+end
+
+local rubberize = function(obj,s,st,d,spring,damp)
+	s = s^(1/(1+d/damp))
+	st = st+pi*spring*(d/1000)
+	obj.scale = {s^cos(st),s^-cos(st)}
+	return s, st
 end
 
 local make = {
@@ -211,148 +208,121 @@ local make = {
 		local amp = 25
 		local y = obj.y
 		local a, s, st = 0, 1, 0
+		local t = 0
 		obj.z_rotation = {rand(360),0,0}
 		
-		local anim = Timeline{loop = true, duration = 1000,
-			on_new_frame = function(self,ms,t)
-				amp = amp/2^(self.delta/self.duration) + 0.02 + (nrand(0.2)+0.1)^2
-				obj.y = y + math.cos(math.pi*2*t)*amp
-				s = s^(1/(1+self.delta/300))
-				st = st+math.pi*6*(self.delta/self.duration)
-				obj.scale = {s^math.cos(st),s^-math.cos(st)}
-			end}
+		step[obj] = function(d,ms)
+			amp = amp/2^(d/1000) + 0.02 + (nrand(0.2)+0.1)^2
+			t = (t+d/1000)%1
+			obj.y = y + cos(pi*2*t)*amp
+			s, st = rubberize(obj,s,st,d,6,300)
+		end
 			
 		obj.insert = function()
 			y = obj.y
-			anim:start()
-			anim:advance(rand(anim.duration))
-		end
-		
-		obj.free = function(self)
-			anim:stop()
-			anim = nil
-			self.freed = true
-			self:unparent()
+			t = rand()
 		end
 		
 		obj.collision = function()
 			if penguin.y + penguin.h/2 > obj.y-64 then
 				penguin.kill(obj)
 			elseif penguin.vy > 0 then
-				if anim.elapsed > anim.duration/2 then
-					anim:advance(anim.duration-anim.elapsed)
+				if t > 0.5 then
+					t = 1-t
 				end
-				a = math.atan2(obj.y-penguin.y-64,obj.x-penguin.x)
-				a = -2*math.max(penguin.vy,0.8)*math.sin(a + math.sin(4*a-math.pi)/4)
+				a = atan2(obj.y-penguin.y-64,obj.x-penguin.x)
+				a = -2*max(penguin.vy,0.8)*sin(a + sin(4*a-pi)/4)
 				penguin.jump(a)
 				amp = amp - 10*a
 				s = s - a/4
 				st = 0
-				anim:advance(math.asin((obj.y-y)/amp)*anim.duration)
+				t = asin((obj.y-y)/amp)/pi/2
 				audio.play("ball")
 			end
 		end
 	end),
-	["seal-ball"]			= f("beach-ball.png", 2, function (obj)
+	["seal-ball"]		= f("beach-ball.png", 2, function (obj)
 		obj.anchor_point = {obj.w/2,obj.h/2}
-		local fx, fy = obj.x, obj.y
-		local ox, oy, oz, vx, vy, vz = fx, fy, 0, 0, -1.6, 0
+		local ox, fy, oy, oz, vx, vy, vz = obj.x, obj.y, obj.y, 0, 0, -1.6, 0
 		local a, s, st = 0, 1, 0
+		local falling = false
+		local dur = -3*vy/gravity
+		local t = 0.5
 		
-		local bouncing = Timeline{duration = -3*vy/gravity,
-			on_new_frame = function(self,ms,t)
-				obj.y = oy + vy*ms + gravity*ms*ms/3
-				obj.z_rotation = {oz+vz*math.log10(ms/500+1),0,0}
-				s = s^(1/(1+self.delta/250))
-				st = st+math.pi*8*(self.delta/self.duration)
-				obj.scale = {s^math.cos(st),s^-math.cos(st)}
-			end,
-			on_completed = function(self)
-				vy = nrand(0.15)-0.9
-				oz = obj.z_rotation[1]
-				vz = nrand(500)
-				s = s + 0.2
-				st = 0
-				self.duration = -3*vy/gravity
-				self:start()
-				obj.seal.switch(-vy)
-				audio.play("ball")
-			end}
-		bouncing:start()
-		bouncing:advance(bouncing.duration/2)
-		
-		local falling = Timeline{duration = 500,
-			on_new_frame = function(self,ms,t)
+		step[obj] = function(d,ms)
+			t = min(t+d/dur,1)%1
+			ms = t*dur
+			
+			if falling then
 				obj.x = ox + vx*ms
-				obj.y = oy + vy*ms + gravity*ms*ms/3
-				obj.z_rotation = {oz+vz*ms,0,0}
 				obj.opacity = 255*(1-t)
-				s = s^(1/(1+self.delta/300))
-				st = st+math.pi*6*(self.delta/self.duration)
-				obj.scale = {s^math.cos(st),s^-math.cos(st)}
-			end,
-			on_completed = function(self)
-				obj.opacity = 255
-				obj.z_rotation = {0,0,0}
-				obj.x, obj.y = fx, fy-600
-				ox, oy, oz, vx, vy, vz = fx, fy, 0, 0, -1.6, 0
-				bouncing.duration = -3*vy/gravity
-				bouncing:start()
-				bouncing:advance(bouncing.duration/2)
-			end}
+			end
+			if t == 0 then
+				if falling then
+					falling = false
+					oy, oz, vx, vy, vz = fy, 0, 0, -1.6, 0
+					t = 0.5
+				else
+					obj.seal.switch()
+					oz, vy, vz = obj.z_rotation[1], nrand(0.15)-0.9, nrand(500)
+					s = s + 0.2
+					st = 0
+					t = 0.001
+				end
+				dur = -3*vy/gravity
+				ms = t*dur
+			end
+			obj.y = oy + vy*ms + gravity*ms*ms/3
+			s, st = rubberize(obj,s,st,d,falling and 6 or 8,falling and 300 or 250)
+			obj.z_rotation = {oz+vz*(falling and ms or log10(ms/500+1)),0,0}
+		end
 		
 		obj.fall = function(_vx,_vy,_vz)
-			bouncing:stop()
-			ox, oy, oz = fx, obj.y, obj.z_rotation[1]
+			oy, oz = obj.y, obj.z_rotation[1]
 			vx, vy, vz = _vx, _vy, _vz
-			falling:start()
+			dur = 500
+			falling = true
+			t = 0.001
 		end
 		
 		obj.collision = function()
-			a = math.atan2(obj.y-penguin.y-64,obj.x-penguin.x)
+			a = atan2(obj.y-penguin.y-64,obj.x-penguin.x)
 			if penguin.y + penguin.h/2 > obj.y-64 then
-				s = s + math.sqrt(penguin.vx^2 + penguin.vy^2)/2
+				s = s + sqrt(penguin.vx^2 + penguin.vy^2)/2
 				st = a
 				penguin.kill(obj)
 			elseif penguin.vy > 0 then
-				a = -2*math.max(penguin.vy,0.8)*math.sin(a + math.sin(4*a-math.pi)/4)
+				a = -2*max(penguin.vy,0.8)*sin(a + sin(4*a-pi)/4)
 				s = s - a/6
 				st = 0
 				penguin.jump(a)
-				obj.fall(penguin.vx/2,math.max(vy,-a),-penguin.vx)
+				obj.fall(penguin.vx/2,max(vy,-a),-penguin.vx)
 				audio.play("ball")
 			end
-		end
-		
-		obj.free = function(self)
-			bouncing:stop()
-			bouncing = nil
-			falling:stop()
-			falling = nil
-			self.freed = true
-			self:unparent()
 		end
 	end),
 	["seal-up.png"]			= f("seal-up.png"),
 	["seal-mid.png"]		= f("seal-mid.png"),
 	["seal-down.png"]		= f("seal-down.png", 1, function (obj)
 		obj:move_anchor_point(obj.w/2,obj.h)
-		local frames = {factory:find_child("seal-down.png\t"),
-						factory:find_child("seal-mid.png\t"),
-						factory:find_child("seal-up.png\t")}
-		local frame = 1
+		local frames = {index["seal-mid.png"],
+						index["seal-up.png"],
+						index["seal-mid.png"],
+						index["seal-down.png"]}
+		local frame = 0
 		local s, st = 1, 0
 		local oy
 		
-		obj.source = frames[1]
+		obj.source = frames[4]
 		
-		local anim = Timeline{loop = true, duration = 2500,
-			on_new_frame = function(self,ms,t)
-				obj.y = oy + math.cos(math.pi*2*t)
-				s = s^(1/(1+self.delta/150))
-				st = st+math.pi*10*(self.delta/self.duration)
-				obj.scale = {s^math.cos(st),s^-math.cos(st)}
-			end}
+		step[obj] = function(d,ms)
+			obj.y = oy + cos(pi*2*ms/2500)
+			s, st = rubberize(obj,s,st,d,10,150)
+			if frame < 5 then
+				obj.source = frames[math.floor(frame)]
+				frame = frame+d/40
+			end
+		end
 		
 		obj.insert = function(self)
 			local ball = Image{src = "seal-ball", y = obj.y-obj.h-32,
@@ -360,84 +330,51 @@ local make = {
 			ball.seal = self
 			self.parent:add(ball)
 			oy = obj.y
-			anim:start()
 		end
 		
-		local timer = Timer{on_timer = function(self)
-				frame = frame + 1
-				if frame == 4 then
-					frame = 5
-				elseif frame == 6 then
-					frame = 1
-					self:stop()
-				end
-				obj.source = frames[(frame-1)%3+1]
-			end}
-		timer.interval = 40
-		
 		obj.switch = function()
-			frame = 2
-			obj.source = frames[2]
-			timer:start()
+			frame = 1
+			audio.play("ball")
 		end
 		
 		obj.collision = function()
 			if penguin.y + penguin.h/2 > obj.y-obj.h then
 				penguin.kill(obj)
 			elseif penguin.vy > 0 then
-				a = math.atan2(obj.y-penguin.y-obj.h,obj.x-penguin.x)
-				a = -1.2*math.max(penguin.vy,0.8)*math.sin(a + math.sin(4*a-math.pi)/4)
+				a = atan2(obj.y-penguin.y-obj.h,obj.x-penguin.x)
+				a = -1.2*max(penguin.vy,0.8)*sin(a + sin(4*a-pi)/4)
 				s = s + 0.5
 				st = 0
 				penguin.jump(a)
 				audio.play("seal-2")
 			end
 		end
-		
-		obj.free = function(self)
-			anim:stop()
-			anim = nil
-			timer:stop()
-			time = nil
-			self.freed = true
-			self:unparent()
-		end
 	end),
 	["sea-lion.png"]	= f("sea-lion.png", 1, function (obj)
 		obj:move_anchor_point(obj.w/2,obj.h)
 		local s, st = 1, 0
 		local oy
-		local anim = Timeline{loop = true, duration = 2500,
-			on_new_frame = function(self,ms,t)
-				obj.y = oy + math.cos(math.pi*2*t)
-				s = s^(1/(1+self.delta/150))
-				st = st+math.pi*10*(self.delta/self.duration)
-				obj.scale = {s^math.cos(st),s^-math.cos(st)}
-			end}
+		
+		step[obj] = function(d,ms)
+			obj.y = oy + cos(pi*2*ms/2500)
+			s, st = rubberize(obj,s,st,d,10,150)
+		end
 		
 		obj.insert = function(self)
 			oy = obj.y
-			anim:start()
 		end
 		
 		obj.collision = function()
 			if penguin.y + penguin.h/2 > obj.y then
 				penguin.kill(obj)
 			elseif penguin.vy > 0 then
-				a = math.atan2(obj.y-penguin.y,obj.x-penguin.x)
-				a = -1.6*math.max(penguin.vy,0.8)*math.sin(a + math.sin(4*a-math.pi)/4)
+				a = atan2(obj.y-penguin.y,obj.x-penguin.x)
+				a = -1.6*max(penguin.vy,0.8)*sin(a + sin(4*a-pi)/4)
 				s = s + 0.5
 				st = 0
 				penguin.jump(a)
 				audio.play("seal-1")
 			end
-		end
-		
-		obj.free = function(self)
-			anim:stop()
-			anim = nil
-			self.freed = true
-			self:unparent()
 		end
 	end, {l = 20, t = 10, r = -20, b = 0}),
 	["ice-bridge.png"]	= f("ice-bridge.png", 1, function (obj)
@@ -508,15 +445,6 @@ local make = {
 		obj:move_anchor_point(-34,-43)
 		local armor, a = 2, {}
 		local b
-		local anim = Timeline{duration = 1000, loop = true,
-			on_new_frame = function(self,ms,t)
-				a[2].position = penguin.position
-				a[2].y_rotation = penguin.y_rotation
-				if armor == 2 then
-					a[1].position = penguin.position
-					a[1].y_rotation = penguin.y_rotation
-				end
-			end}
 		
 		obj.insert = function(self,top)
 			a[1] = Image{src = "armor-1", x = obj.x, y = obj.y, opacity = 0,
@@ -530,12 +458,19 @@ local make = {
 		end
 		
 		obj.collision = function()
-			anim:start()
+			step[obj] = function(d,ms)
+				a[2].position = penguin.position
+				a[2].y_rotation = penguin.y_rotation
+				if armor == 2 then
+					a[1].position = penguin.position
+					a[1].y_rotation = penguin.y_rotation
+				end
+			end
 			a[1].z_rotation = {0,0,0}
 			a[2]:raise_to_top()
 			penguin.armor = obj
 			audio.play("armor-pickup")
-			obj:free()
+			obj.y = -200
 		end
 		
 		obj.drop = function()
@@ -548,8 +483,7 @@ local make = {
 			armor = armor-1
 			if armor == 0 then
 				a = nil
-				anim:stop()
-				anim = nil
+				step[obj] = nil
 				penguin.armor = nil
 				obj:free()
 			end

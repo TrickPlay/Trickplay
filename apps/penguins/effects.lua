@@ -9,11 +9,8 @@ group:raise(penguin)
 group.level = levels.this.id
 fx = {}
 
-local anim = Timeline{duration = 2300}
-
-function anim:on_new_frame(ms,t)
-	d = self.delta
-	dt = d/self.duration/2
+step[fx] = function(d,ms)
+	dt = d/2300/2
 	s = 1+dt*6
 	d2 = 4^(d/1000)
 	b = levels.this.bank > 0
@@ -51,8 +48,6 @@ local init = function(obj)
 	isbank = levels.this.bank > 0 and 1 or 0
 	px, py = obj.x + obj.w/2, obj.y + obj.h/2
 	group:lower(penguin)
-	anim:rewind()
-	anim:start()
 end
 
 fx.splash = function()
