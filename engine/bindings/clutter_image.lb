@@ -10,6 +10,7 @@ module clutter_image;
 #include "context.h"
 #include "sysdb.h"
 #include "thread_pool.h"
+#include "app_resource.h"
 ]]
 
 [[
@@ -133,7 +134,7 @@ private:
 
 //-----------------------------------------------------------------------------
 
-bool load_image( lua_State * L, ClutterTexture * texture )
+static bool load_image( lua_State * L, ClutterTexture * texture )
 {
 	g_assert( L );
 	g_assert( texture );
@@ -169,16 +170,12 @@ bool load_image( lua_State * L, ClutterTexture * texture )
     
     App * app = App::get( L );
     
-    bool is_uri = false;
-    
-    char * path = app->normalize_path( src , is_uri );
-    
-    if ( ! path )
+    AppResource resource( app , src );
+
+    if ( ! resource.good() )
     {
         return false;
-    }
-    
-    FreeLater free_later( path );
+    }    
     
     String key;
     
@@ -186,7 +183,7 @@ bool load_image( lua_State * L, ClutterTexture * texture )
     
     JSON::Object cached_tags;
     
-    if ( ! is_uri )
+    if ( resource.is_native() )
     {
         key = app->get_id() + ":" + src;
         
