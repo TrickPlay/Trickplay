@@ -7,3 +7,4 @@ get_egl_config.patch
 medium_precision.patch
 timeline-zero-msecs.patch
 clutterstate-default-durations-fix.patch
+color-parsing-whitespace-bugfix.patch
