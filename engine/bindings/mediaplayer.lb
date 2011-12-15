@@ -8,6 +8,7 @@ module mediaplayer_module;
 #include "mediaplayers.h"
 #include "app.h"
 #include "context.h"
+#include "app_resource.h"
 
 //-----------------------------------------------------------------------------
 // Just a thin shell to hold a real MediaPlayer and act as its delegate. It can
@@ -430,9 +431,9 @@ global mediaplayer [[MP*]]
         [[
             if ( MediaPlayer * mp = self->get_player() )
             {
-                if ( App::Path path = App::Path( L , uri , 0 , mp->get_valid_schemes() ) )
+                if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
                 {
-                    result = mp->load( path.get_uri().c_str() , extra );
+                    result = mp->load( resource.get_uri().c_str() , extra );
                 }
                 else
                 {

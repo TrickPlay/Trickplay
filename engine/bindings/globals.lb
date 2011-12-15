@@ -7,6 +7,7 @@ module globals;
 #include "context.h"
 #include "actions.h"
 #include "images.h"
+#include "app_resource.h"
 
 struct DoLater
 {
@@ -270,23 +271,15 @@ globals
     
     multi dofile(string file_name)
         [[
-            String path;
+            String path( file_name );
             
-            if ( g_str_has_suffix( file_name , ".lua" ) )
+            if ( ! g_str_has_suffix( file_name , ".lua" ) )
             {
-                path = file_name;
+                path += ".lua";
             }
-            else
-            {
-                gchar * p = g_strdup_printf( "%s.lua" , file_name );
-                path = p;
-                g_free( p );
-            }
-            
-            App * app = App::get( L );
             
             int n = lua_gettop(L);
-            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) != 0)
+            if ( AppResource( L , path , AppResource::URI_NOT_ALLOWED ).lua_load( L ) != 0 )
             {
                 lua_error(L);
             }
@@ -310,22 +303,14 @@ globals
     
     multi loadfile(string file_name)
         [[
-            String path;
+            String path( file_name );
             
-            if ( g_str_has_suffix( file_name , ".lua" ) )
+            if ( ! g_str_has_suffix( file_name , ".lua" ) )
             {
-                path = file_name;
-            }
-            else
-            {
-                gchar * p = g_strdup_printf( "%s.lua" , file_name );
-                path = p;
-                g_free( p );
+                path += ".lua";
             }
 
-            App * app = App::get( L );
-            
-            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) == 0)
+            if ( AppResource( L , path , AppResource::URI_NOT_ALLOWED ).lua_load( L ) == 0 )
             {
                 return 1;
             }
@@ -358,7 +343,7 @@ globals
 
             App * app = App::get( L );
             
-            GByteArray * contents = App::Path( app , file_name , App::Path::URI_NOT_ALLOWED ).load_contents( app ); 
+            GByteArray * contents = AppResource( app , file_name , AppResource::URI_NOT_ALLOWED ).load_contents( app ); 
 
             FreeLater free_later;
             

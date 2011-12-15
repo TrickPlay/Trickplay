@@ -1,7 +1,4 @@
 
-#include "uriparser/Uri.h"
-#include "libsoup/soup.h"
-
 #include "app.h"
 #include "sysdb.h"
 #include "util.h"
@@ -12,12 +9,13 @@
 #include "json.h"
 #include "common.h"
 #include "keyboard.h"
+#include "app_resource.h"
 
 //.............................................................................
 
 #define TP_LOG_DOMAIN   "APP"
-#define TP_LOG_ON       true
-#define TP_LOG2_ON      true
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
 
 #include "log.h"
 
@@ -429,27 +427,40 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 {
     g_assert( app_path );
 
-    Sandbox sandbox( app_path );
+    GFile * root = g_file_new_for_commandline_arg( app_path );
 
-    gsize length = 0;
+    char * root_uri = g_file_get_uri( root );
 
-    gchar * contents = sandbox.get_native_child_contents( APP_METADATA_FILENAME , length );
+    g_object_unref( root );
+
+    if ( 0 == root_uri )
+    {
+		g_warning( "FAILED TO LOAD APP METADATA FROM '%s'" , app_path );
+		return false;
+    }
+
+    GByteArray * contents = AppResource( root_uri , APP_METADATA_FILENAME , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED ).load_contents( 0 );
+
+    g_free( root_uri );
 
     if ( ! contents )
     {
 		g_warning( "FAILED TO LOAD APP METADATA FROM '%s'" , app_path );
-
 		return false;
     }
 
-    FreeLater free_later( contents );
+    guint8 terminator = 0;
 
-    bool result = App::load_metadata_from_data( contents, md );
+    g_byte_array_append( contents , & terminator , 1 );
+
+    bool result = App::load_metadata_from_data( ( char * ) contents->data , md );
 
     if ( result )
     {
-        md.sandbox = sandbox;
+        md.sandbox = Sandbox( app_path );
     }
+
+    g_byte_array_unref( contents );
 
     return result;
 }
@@ -976,7 +987,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
 	int top = lua_gettop( L );
 
-	if ( metadata.sandbox.lua_load_pi_child( L , APP_MAIN_FILENAME ) || lua_pcall( L , 0 , LUA_MULTRET , 0 ) )
+	if ( AppResource( this , APP_MAIN_FILENAME , AppResource::URI_NOT_ALLOWED ).lua_load( L ) || lua_pcall( L , 0 , LUA_MULTRET , 0 ) )
 	{
 		g_critical( "%s", String( 60, '=' ).c_str() );
 		g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
@@ -1784,507 +1795,3 @@ void App::audio_match( const String & json )
 
     lua_pop( L , 1 );
 }
-
-//=============================================================================
-// Construct an empty, bad path
-
-App::Path::Path()
-{}
-
-//.............................................................................
-
-App::Path::Path( lua_State * L , const char * app_path , int flags , const StringSet & schemes )
-{
-	g_assert( L );
-
-	* this = App::Path( App::get( L ) , app_path , flags , schemes );
-}
-
-//.............................................................................
-// The workhorse
-
-App::Path::Path( App * app , const char * app_path , int flags , const StringSet & schemes )
-{
-	g_assert( app );
-
-	try
-	{
-		failif( 0 == app_path , "INVALID NULL PATH OR URI" );
-
-		size_t length = strlen( app_path );
-
-		failif ( 0 == length , "INVALID EMPTY PATH OR URI" );
-
-		FreeLater free_later;
-
-		//.........................................................................
-		// Save the original passed in - for debugging.
-
-		original = app_path;
-
-		//.........................................................................
-		// We start by looking at the scheme. This function does not look at the
-		// rest of the app_path, so it is not too picky about escaping and such
-
-		char * scheme = g_uri_parse_scheme( app_path );
-
-		// NULL is OK here.
-
-		free_later( scheme );
-
-		//.........................................................................
-		// There is no scheme, or the scheme is poorly formatted, so this must be
-		// a plain old UNIX path. We use UriParser to get a URI from a UNIX file
-		// name.
-
-		if ( 0 == scheme )
-		{
-			// We allow absolute paths...since all paths are really just
-			// relative to the app's root. So, we ignore any leading slashes.
-
-			const char * relative_path = app_path;
-
-			while ( '/' == * relative_path )
-			{
-				++relative_path;
-			}
-
-			// There is nothing left - bad path
-
-			failif( 0 == * relative_path , "INVALID EMPTY PATH" );
-
-			// Convert the relative path to a relative URI. This will
-			// already be escaped.
-
-			char * relative_child_uri_string = g_new0( char , 7 + 3 * length + 1 );
-
-			free_later( relative_child_uri_string );
-
-			failif( URI_SUCCESS != uriUnixFilenameToUriStringA( relative_path , relative_child_uri_string ) , "INVALID PATH" );
-
-			// Get the URI for the app's root
-
-			String root_uri_string = app->get_metadata().sandbox.get_root_uri();
-
-			failif( root_uri_string.empty() , "APP ROOT IS INVALID" );
-
-			// Add a trailing slash to the root URI if it is missing
-
-			if ( root_uri_string[ root_uri_string.length() - 1 ] != '/' )
-			{
-				root_uri_string += "/";
-			}
-
-			tplog2( "APP PATH IS             [%s]" , app_path );
-			tplog2( "  ROOT URI IS           [%s]" , root_uri_string.c_str() );
-			tplog2( "  RELATIVE CHILD URI IS [%s]" , relative_child_uri_string );
-
-			// The root URI should be an absolute URI
-
-			// Now, we have to parse both, so we can create a final URI
-
-			UriParserStateA state;
-
-			UriUriA root_uri;
-			state.uri = & root_uri;
-
-			if ( URI_SUCCESS != uriParseUriA( & state , root_uri_string.c_str() ) )
-			{
-				uriFreeUriMembersA( & root_uri );
-				failif( true , "APP ROOT URI COULD NOT BE PARSED '%s'" , root_uri_string.c_str() );
-			}
-
-			UriUriA relative_child_uri;
-			state.uri = & relative_child_uri;
-
-			if ( URI_SUCCESS != uriParseUriA( & state , relative_child_uri_string ) )
-			{
-				uriFreeUriMembersA( & root_uri );
-				uriFreeUriMembersA( & relative_child_uri );
-				failif( true , "PATH URI COULD NOT BE PARSED" );
-			}
-
-			UriUriA absolute_uri;
-
-			if ( URI_SUCCESS != uriAddBaseUriA( & absolute_uri , & relative_child_uri , & root_uri ) )
-			{
-				uriFreeUriMembersA( & root_uri );
-				uriFreeUriMembersA( & relative_child_uri );
-				failif( true , "FAILED TO CREATE ABSOLUTE URI FOR PATH" );
-			}
-
-			//.....................................................................
-			// Clean these up
-
-			uriFreeUriMembersA( & root_uri );
-			uriFreeUriMembersA( & relative_child_uri );
-
-			//.....................................................................
-
-			int chars_required = 0;
-
-			uriToStringCharsRequiredA( & absolute_uri , & chars_required );
-
-			++chars_required;
-
-			char * absolute_uri_string = g_new0( char , chars_required );
-
-			free_later( absolute_uri_string );
-
-			if ( URI_SUCCESS != uriToStringA( absolute_uri_string , & absolute_uri , chars_required , 0 ) )
-			{
-				uriFreeUriMembersA( & absolute_uri );
-				failif( true , "FAILED TO STRINGIFY FINAL URI" );
-			}
-
-			//.....................................................................
-
-			uriFreeUriMembersA( & absolute_uri );
-
-			tplog2( "  ABSOLUTE CHILD URI IS [%s]" , absolute_uri_string );
-
-			//.....................................................................
-			// Now we have the final absolute URI, we need to make sure it is
-			// within the root.
-
-			failif( ! is_child( root_uri_string , absolute_uri_string ) , "PATH OUTSIDE APP ROOT" );
-
-			//.....................................................................
-			// If the final URI points to a file system path, we get the native
-			// path and store it in native_path. This is a native path! It will
-			// be different on windows and Unix.
-
-			GFile * file = g_file_new_for_uri( absolute_uri_string );
-
-			free_later( file , g_object_unref );
-
-			if ( g_file_is_native( file ) )
-			{
-				if ( char * path = g_file_get_path( file ) )
-				{
-					native_path = path;
-					g_free( path );
-				}
-			}
-
-			// All is well, we store the uri here to mark this object as 'good'.
-
-			uri = absolute_uri_string;
-		}
-
-		//.........................................................................
-		// The app_path has a scheme. It could be a real URI or a local path
-		// prefixed with one of our schemes, such as "localized".
-
-		else
-		{
-			// Empty scheme, WTF?
-
-			failif( 0 == strlen( scheme ) , "INVALID EMPTY SCHEME" );
-
-			// The 'file' scheme is NEVER allowed as an input.
-
-			failif( ! strcmp( scheme , "file" ) , "SCHEME 'file:' NOT ALLOWED" );
-
-			// localized: scheme. We have to handle in a special way
-			// What follows the scheme is a plain UNIX path that we have to
-			// append to other directories and check for existence in order.
-
-			if ( ! strcmp( scheme , "localized" ) )
-			{
-				failif ( 0 != ( flags & App::Path::LOCALIZED_NOT_ALLOWED ) , "SCHEME 'localized:' NOT ALLOWED" );
-
-				const char * relative_path = app_path;
-
-				// Skip to the first : or the end of the string
-
-				while ( * relative_path != 0 && * relative_path != ':' )
-				{
-					++relative_path;
-				}
-
-				// If we are not at the : something is wrong
-
-				failif( ':' != * relative_path , "INVALID LOCALIZED PATH" );
-
-				// Skip the :
-
-				++relative_path;
-
-				// Now skip any leading slashes
-
-				while( '/' == * relative_path )
-				{
-					++relative_path;
-				}
-
-				// If there is nothing left, bail
-
-				failif( 0 == * relative_path , "EMPTY LOCALIZED PATH" );
-
-				// Now, prepare a list of prefixes to try
-
-				String language( app->get_context()->get( TP_SYSTEM_LANGUAGE ) );
-				String country( app->get_context()->get( TP_SYSTEM_COUNTRY ) );
-
-				StringList prefixes;
-
-				prefixes.push_back( String( "localized/" ) + language + "/" + country );
-				prefixes.push_back( String( "localized/" ) + language );
-				prefixes.push_back( String( "localized" ) );
-
-				for ( StringList::const_iterator it = prefixes.begin(); it != prefixes.end(); ++it )
-				{
-					String try_path( * it + "/" + relative_path );
-
-					App::Path path( app , try_path.c_str() , App::Path::URI_NOT_ALLOWED | App::Path::LOCALIZED_NOT_ALLOWED );
-
-					if ( path.exists( app ) )
-					{
-						* this = path;
-						return;
-					}
-				}
-
-				// If none of those exist, we create a new path with just the relative path,
-				// and assign it to this one. If the path is bad, it will have failed
-				// and reported the issue.
-
-				* this = App::Path( app , relative_path , App::Path::URI_NOT_ALLOWED | App::Path::LOCALIZED_NOT_ALLOWED );
-
-				return;
-			}
-
-			// It is some other kind of scheme. We now check to see
-			// if URI_NOT_ALLOWED is in the flags.
-
-			failif ( 0 != ( flags & App::Path::URI_NOT_ALLOWED ) , "URI NOT ALLOWED" );
-
-			// Make a copy of the schemes passed in and add http and https
-			// which are always allowed schemes.
-
-			StringSet all_schemes( schemes );
-
-			all_schemes.insert( "http" );
-			all_schemes.insert( "https" );
-
-			// If the scheme is not one of the ones allowed, bail
-
-			failif( all_schemes.find( scheme ) == all_schemes.end() , "SCHEME '%s:' NOT ALLOWED" , scheme );
-
-			// This helps us troubleshoot the URI and also escapes it.
-
-			SoupURI * uri_uri = soup_uri_new( app_path );
-
-			failif( 0 == uri_uri , "INVALID URI" );
-
-			free_later( uri_uri , ( GDestroyNotify ) soup_uri_free );
-
-			char * uri_s = soup_uri_to_string( uri_uri , false );
-
-			// This should never happen, but let's guard against it
-			// anyway. This is sensitive code.
-
-			failif( 0 == uri_s , "INVALID URI" );
-
-			free_later( uri_s );
-
-			// Everything is fine. We make this object 'good' by
-			// populating its URI.
-
-			uri = uri_s;
-		}
-	}
-	catch( const String & e )
-	{
-		tpwarn( "%s : '%s'" , e.c_str() , app_path ? app_path : "" );
-		uri.clear();
-	}
-}
-
-//.............................................................................
-
-bool App::Path::is_child( const String & root_uri , const String & child_uri )
-{
-	g_assert( root_uri.length() > 0 );
-
-	bool result = false;
-
-	// In order for the parent checking to work correctly for
-	// URIs, we have to get rid of the trailing slash from the
-	// root URI.
-
-	String slashless_root_uri( root_uri );
-
-	if ( root_uri[ root_uri.length() - 1 ] == '/' )
-	{
-		slashless_root_uri = root_uri.substr( 0 , root_uri.length() - 1 );
-	}
-
-	GFile * root = g_file_new_for_uri( slashless_root_uri.c_str() );
-
-	if ( 0 == root )
-	{
-		return false;
-	}
-
-	GFile * child = g_file_new_for_uri( child_uri.c_str() );
-
-	if ( 0 == child )
-	{
-		g_object_unref( root );
-		return false;
-	}
-
-	while ( ! result )
-	{
-		if ( g_file_has_parent( child , root ) )
-		{
-			g_object_unref( G_OBJECT( child ) );
-			result = true;
-		}
-		else
-		{
-			GFile * parent = g_file_get_parent( child );
-
-			g_object_unref( G_OBJECT( child ) );
-
-			if ( ! parent )
-			{
-				break;
-			}
-
-			child = parent;
-		}
-	}
-
-	return result;
-}
-
-//.....................................................................
-// Returns true if the path is valid and is either HTTP or HTTPS.
-
-bool App::Path::is_http() const
-{
-	if ( ! good() )
-	{
-		return false;
-	}
-
-	bool result = false;
-
-	if ( SoupURI * suri = soup_uri_new( uri.c_str() ) )
-	{
-		const char * scheme = soup_uri_get_scheme( suri );
-
-		result = ( scheme == SOUP_URI_SCHEME_HTTP || scheme == SOUP_URI_SCHEME_HTTPS );
-
-		soup_uri_free( suri );
-	}
-
-	return result;
-}
-
-//.............................................................................
-
-bool App::Path::exists( App * app ) const
-{
-	g_assert( app );
-
-	if ( ! good() )
-	{
-		// This path ain't no good.
-
-		return false;
-	}
-
-	bool result = false;
-
-	if ( is_native() )
-	{
-		GFile * file = g_file_new_for_path( native_path.c_str() );
-
-		result = g_file_query_exists( file , 0 );
-
-		g_object_unref( file );
-	}
-	else if ( is_http() )
-	{
-		if ( Network * network = app->get_network() )
-		{
-			Network::Request request( app->get_user_agent() , uri );
-
-			request.method = "HEAD";
-
-			Network::Response response = network->perform_request( request , app->get_cookie_jar() );
-
-			result = ( response.code == 200 );
-		}
-	}
-
-	return result;
-}
-
-//.............................................................................
-
-GByteArray * App::Path::load_contents( App * app ) const
-{
-	if ( ! good() )
-	{
-		return 0;
-	}
-
-	GByteArray * result = 0;
-
-	if ( is_native() )
-	{
-		GFile * file = g_file_new_for_path( native_path.c_str() );
-
-		gchar * contents = 0;
-		gsize length = 0;
-		GError * error = 0;
-
-		// TODO: The ETag returned by this function could be useful if we start
-		// caching stuff.
-
-		g_file_load_contents( file , 0 , & contents , & length , 0 , & error );
-
-		if ( error )
-		{
-			tpwarn( "FAILED TO READ CONTENTS OF '%s' : %s" , original.c_str() , error->message );
-
-			g_free( contents );
-			g_clear_error( & error );
-		}
-		else
-		{
-			result = g_byte_array_new();
-
-			result->data = ( guint8 * ) contents;
-			result->len = length;
-		}
-
-	}
-	else if ( is_http() )
-	{
-		if ( Network * network = app->get_network() )
-		{
-			Network::Request request( app->get_user_agent() , uri );
-
-			Network::Response response = network->perform_request( request , app->get_cookie_jar() );
-
-			if ( ! response.failed )
-			{
-				result = response.body;
-
-				if ( result )
-				{
-					g_byte_array_ref( result );
-				}
-			}
-		}
-	}
-
-	return result;
-}
-
