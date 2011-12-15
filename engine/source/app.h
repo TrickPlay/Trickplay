@@ -218,17 +218,6 @@ public:
     EventGroup * get_event_group();
 
     //.........................................................................
-    // Processes paths to ensure they are either URIs or valid paths within the
-    // app bundle. Also checks for links and handles custom schemes such as
-    // 'localized:'
-    //
-    // May return NULL if the path is invalid.
-    //
-    // CALLER HAS TO FREE RESULT
-
-    char * normalize_path( const gchar * path_or_uri, bool & is_uri , const StringSet & additional_uri_schemes = StringSet() );
-
-    //.........................................................................
     // ONLY FOR THE EDITOR - apps should not do this
 
     bool change_app_path( const char * path );
