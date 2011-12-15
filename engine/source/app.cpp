@@ -1358,61 +1358,6 @@ EventGroup * App::get_event_group()
 
 //-----------------------------------------------------------------------------
 
-char * App::normalize_path( const gchar * path_or_uri, bool & is_uri, const StringSet & additional_uri_schemes )
-{
-	if ( ! path_or_uri )
-	{
-		return 0;
-	}
-
-	FreeLater free_later;
-
-	char * scheme = g_uri_parse_scheme( path_or_uri );
-
-	if ( scheme )
-	{
-		free_later( scheme );
-
-		if ( ! strcmp( scheme , "http" ) || ! strcmp( scheme , "https" ) )
-		{
-			is_uri = true;
-			return g_strdup( path_or_uri );
-		}
-
-		if ( additional_uri_schemes.find( scheme ) != additional_uri_schemes.end() )
-		{
-			is_uri = true;
-			return g_strdup( path_or_uri );
-		}
-	}
-
-	// There is no recognizable scheme, we assume it is a platform independent path,
-	// which may have a scheme of its own.
-
-	String result;
-
-	if ( metadata.sandbox.is_native() )
-	{
-		is_uri = false;
-		result = metadata.sandbox.get_pi_child_native_path( path_or_uri );
-	}
-	else
-	{
-		is_uri = true;
-		bool is_native = false;
-		result = metadata.sandbox.get_pi_child_uri( path_or_uri , is_native );
-	}
-
-	if ( result.empty() )
-	{
-		return 0;
-	}
-
-	return g_strdup( result.c_str() );
-}
-
-//-----------------------------------------------------------------------------
-
 bool App::change_app_path( const char * path )
 {
     g_assert( path );
@@ -1607,25 +1552,20 @@ Image * App::load_image( const gchar * source , bool read_tags )
         return 0;
     }
 
-    bool is_uri = false;
+    AppResource resource( this , source );
 
-    char * path = normalize_path( source , is_uri );
-
-    if ( ! path )
+    if ( ! resource.good() )
     {
-        tplog( "  INVALID PATH" );
-        return 0;
+    	return 0;
     }
-
-    FreeLater free_later( path );
 
     Image * image = 0;
 
-    if ( is_uri )
+    if ( resource.is_http() )
     {
         tplog( "  STARTING REQUEST" );
 
-        Network::Request request( get_user_agent(), path );
+        Network::Request request( get_user_agent() , resource.get_uri() );
 
         Network::Response response = get_network()->perform_request( request, get_cookie_jar() );
 
@@ -1640,12 +1580,14 @@ Image * App::load_image( const gchar * source , bool read_tags )
             tplog( "  REQUEST FAILED" );
         }
     }
-    else
+    else if ( resource.is_native() )
     {
-        tplog( "  PATH IS '%s'" , path );
+    	String path( resource.get_native_path().c_str() );
+
+        tplog( "  PATH IS '%s'" , path.c_str() );
         tplog( "  DECODING" );
 
-        image = Image::decode( path , read_tags );
+        image = Image::decode( path.c_str() , read_tags );
     }
 
     tplog( "  %s" , image ? "SUCCEEDED" : "FAILED" );
@@ -1725,11 +1667,9 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
         return false;
     }
 
-    bool is_uri = false;
+    AppResource resource( this , source );
 
-    char * path = normalize_path( source , is_uri );
-
-    if ( ! path )
+    if ( ! resource.good() )
     {
         tplog( "  INVALID PATH" );
 
@@ -1741,13 +1681,11 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
         return false;
     }
 
-    FreeLater free_later( path );
-
-    if ( is_uri )
+    if ( resource.is_http() )
     {
         tplog( "  STARTING NETWORK REQUEST" );
 
-        Network::Request request( get_user_agent(), path );
+        Network::Request request( get_user_agent() , resource.get_uri() );
 
         get_network()->perform_request_async(
             request,
@@ -1756,12 +1694,14 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
             new ImageResponseClosure( read_tags , callback , user , destroy_notify ),
             ImageResponseClosure::destroy );
     }
-    else
+    else if ( resource.is_native() )
     {
-        tplog( "  PATH IS '%s'" , path );
+    	String path( resource.get_native_path() );
+
+        tplog( "  PATH IS '%s'" , path.c_str() );
         tplog( "  STARTING DECODE FROM FILE" );
 
-        Image::decode_async( path , read_tags , callback , user , destroy_notify );
+        Image::decode_async( path.c_str() , read_tags , callback , user , destroy_notify );
     }
 
     return true;
