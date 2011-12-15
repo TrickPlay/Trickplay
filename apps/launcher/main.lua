@@ -1,13 +1,4 @@
 
-arrow = Canvas(20,20)
-arrow:move_to(0,0)
-arrow:line_to(arrow.w,arrow.h/2)
-arrow:line_to(0,arrow.h)
-arrow:line_to(0,0)
-
-arrow:set_source_color("#000000")
-arrow:fill()
-arrow = arrow:Image{x=50, y =arrow.h/2 + 5, anchor_point = {0,arrow.h/2}}
 
 
 function mediaplayer:on_loaded()
@@ -29,21 +20,20 @@ mediaplayer:load("glee-1.mp4")
 --]]
 
 local showcase_imgs = {
-    Image{src ="assets/showcase/beauty-product-all-content.jpg" },
-    Image{src ="assets/showcase/main-1.jpg" },
-    Image{src ="assets/showcase/main screen.png" },
-    Image{src ="assets/showcase/mockup.png" },
+    Image{extra = {app_id = "com.trickplay.jyp"},          src ="assets/showcase/jyp.jpg" , w = 803*2,h = 555*2},
+    Image{extra = {app_id = "com.trickplay.burberry"},     src ="assets/showcase/main screen.png" },
+    Image{extra = {app_id = "com.trickplay.mountain-dew"}, src ="assets/showcase/mockup.png" },
 }
 local apps_imgs = {
-    Image{src ="assets/apps/start-background-1E.jpg" },
-    Image{src ="assets/apps/mockup.png" },
-    Image{src ="assets/apps/_reference_main_screen.png" },
+    Image{extra={app_id = "com.trickplay.app-shop"}, src ="assets/apps/start-background-1E.jpg" },
+    Image{extra={app_id = "com.trickplay.app-shop"}, src ="assets/apps/mockup.png" },
+    Image{extra={app_id = "com.trickplay.app-shop"}, src ="assets/apps/_reference_main_screen.png" },
 }
-local src = Group{}
-src:add(unpack(apps_imgs))
-src:add(unpack(showcase_imgs))
-src:hide()
-screen:add(src)
+local srcs = Group{name="Hidden Clone Sources"}
+srcs:add(unpack(apps_imgs))
+srcs:add(unpack(showcase_imgs))
+srcs:hide()
+screen:add(srcs)
 
 
 screen:show()
@@ -79,6 +69,8 @@ canvas_srcs:init{
     my_apps_hl_w        = 300,
     my_apps_hl_h        = 150,
     my_apps_hl_shadow_h = 20,
+    
+    arrow_size = 20,
     
 }
 
@@ -116,14 +108,25 @@ showcase_kb = kb:create{
 showcase_kb:play()
 
 
-myAppsHlFont = "FreeSans Medium 24px"
+myAppsHL = dofile("MyAppsHL.lua")
+
+myAppsHL:init{
+    img_srcs    = srcs,
+    canvas_srcs = canvas_srcs,
+    main_font   = "FreeSans Medium 28px",
+    sub_font    = "FreeSans Medium 24px",
+    icon_size   = {116/270*480,116}
+}
+
+myAppsHL = myAppsHL:create{}
+--[[
 myAppsHL = Group{
     children = {
-        Image{ name = "left", src = "assets/my_apps_slider/focus-left-corner.png", x = - 22, y = 116},
-        Image{ name = "right", src = "assets/my_apps_slider/focus-right-corner.png",x = 597 - 22*2, y = 116, },
-        Image{ src = "assets/my_apps_slider/focus-banner-1.png",    x = - 22 },
+        Image{ name = "left", src = "assets/my_apps_slider/focus-left-corner.png", x = - 22, y = 116-y_off},
+        Image{ name = "right", src = "assets/my_apps_slider/focus-right-corner.png",x = 597 - 22*2, y = 116-y_off, },
+        Image{ src = "assets/my_apps_slider/focus-banner-1.png",    x = - 22,y=-y_off },
         
-        Group{name = "sub_menu", x = 597-22,opacity = 0,y_rotation = {120,0,0},y=-30,
+        Group{name = "sub_menu", x = 597-22,opacity = 0,y_rotation = {120,0,0},y=-30-y_off,
             children = {
                 Image{ name = "sub_menu_bg",src = "assets/my_apps_slider/focus-banner-2flaps.png",},
                 arrow,
@@ -132,9 +135,10 @@ myAppsHL = Group{
                 Text{text = "More", font = myAppsHlFont, x = 100, y = 80},
             }
         },
-        Clone{ name = "prev", w = 116/270*480,h = 116},
-        Clone{ name = "next", w = 116/270*480,h = 116},
-        Text{  name = "text", font = "FreeSans Medium 28px",x = 240,y=35}
+        Clone{ name = "prev",y=-y_off, w = 116/270*480,h = 116},
+        Clone{ name = "next", w = 116/270*480,h = 116,position = {(116/270*480)/2,116/2-y_off},anchor_point = {(116/270*480)/2,116/2} },
+        Clone{source=canvas_srcs.launcher_icon_frame,y=-y_off,size = {116/270*480,116}},
+        Text{  name = "text", font = "FreeSans Medium 28px",x = 240,y=35-y_off},
     },
     on_key_down = function(self,k)
         
@@ -229,11 +233,11 @@ myAppsHL = Group{
             myAppsHL:find_child("text").text = text
             myAppsHL:find_child("prev").source = myAppsHL:find_child("next").source
             myAppsHL:find_child("next").source = icon
-            myAppsHL:find_child("next").opacity = 0
+            myAppsHL:find_child("next").scale = {0,0}
             
             myAppsHL:find_child("next"):animate{
                 duration = 100,
-                opacity  = 255,
+                scale    = {1,1},
             }
             
         end,
@@ -347,9 +351,10 @@ myAppsHL = Group{
     }
 }
 
+--]]
 l = dofile("MyAppsList.lua")
 
-l:init{max_vis_len = 10, slider = myAppsHL}
+l:init{max_vis_len = 10, slider = myAppsHL,frame=canvas_srcs.launcher_icon_frame}
 
 clouds =  dofile("MyAppsBg.lua")
 
@@ -362,8 +367,8 @@ clouds:init{
 vtb:init{
     video_tile = vt,
     tiles = {
-        {text = "My Apps",contents = Group{y=-48,children={clouds,l}, on_key_down = l.on_key_down}, slider = myAppsHL, expanded_h =l.list_h-20 },
-        {text = "Showcase",contents = showcase_kb},
+        {text = "My Apps",  contents = Group{y=-48,children={clouds,l}, on_key_down = l.on_key_down}, slider = myAppsHL, expanded_h =l.list_h-20 },
+        {text = "Showcase", contents = showcase_kb},
         {text = "App Store",contents = apps_kb},
     },
 }
@@ -394,7 +399,7 @@ local screen_keys = {
         vtb:move_anchor_point(screen.w/2,screen.h/2)
         vtb.position = {screen.w/2,screen.h/2}
         vtb:animate{
-            --mode = "EASE_OUT_BACK",
+            mode = "EASE_IN_QUAD",
             duration = 400,
             scale = {1.5,1.5},
             opacity = 0,
@@ -404,7 +409,7 @@ local screen_keys = {
         vtb:move_anchor_point(screen.w/2,screen.h/2)
         vtb.position = {screen.w/2,screen.h/2}
         vtb:animate{
-            --mode = "EASE_IN_BACK",
+            mode = "EASE_OUT_QUAD",
             duration = 400,
             scale = {1,1},
             opacity = 255,
@@ -414,20 +419,20 @@ local screen_keys = {
         vtb:move_anchor_point(screen.w/2,screen.h/2)
         vtb.position = {screen.w/2,screen.h/2}
         vtb:animate{
-            mode = "EASE_OUT_BACK",
-            duration = 400,
-            z=0,
-            --z_rotation = 0,
+            mode = "EASE_IN_BACK",
+            duration = 600,
+            z=600,
+            --z_rotation = 180,
         }
     end,
     [keys["6"]] = function()
         vtb:move_anchor_point(screen.w/2,screen.h/2)
         vtb.position = {screen.w/2,screen.h/2}
         vtb:animate{
-            mode = "EASE_IN_BACK",
-            duration = 400,
-            z=600,
-            --z_rotation = 180,
+            mode = "EASE_OUT_BACK",
+            duration = 600,
+            z=0,
+            --z_rotation = 0,
         }
     end,
 }
