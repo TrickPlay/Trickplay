@@ -1,12 +1,13 @@
 [[
 #include <gio/gio.h>
 #include <stdlib.h>
+#include <cstdio>
 #include "common.h"
 #include "util.h"
 #include "app.h"
 #include "context.h"
 #include "actions.h"
-#include <cstdio>
+#include "app_resource.h"
 
 #ifndef TP_CLUTTER_BACKEND_EGL
 #ifndef __APPLE__
@@ -56,27 +57,15 @@ restricted global editor [[ void * ]]
 
      bool writefile(string file_name, lstring contents, bool overwrite=true)
         [[
-            bool is_uri=false;
-            char * path=App::get(L)->normalize_path(file_name,is_uri);
-
             result = false;              
 
-            if ( path && ! is_uri )
+            AppResource r( L , file_name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED );
+
+            if ( r.good() && r.is_native() )
             {
-                const char *mode;
+                FILE * fp;
 
-                if( overwrite )
-                {
-                    mode = "w";
-                }
-                else
-                {
-                    mode = "a";
-                }
-
-                FILE *fp;
-
-                if( ( fp = fopen( path , mode ) ) )
+                if( ( fp = fopen( r.get_native_path().c_str() , overwrite ? "w" : "a" ) ) )
                 {
                     if( contents_len == fwrite( contents , sizeof( char ) , contents_len , fp ) )
                     {
@@ -84,9 +73,7 @@ restricted global editor [[ void * ]]
                     }
                     fclose( fp );
                 }
-            }
-
-            g_free( path );
+            }            
         ]];
 
      bool change_app_path( string path )

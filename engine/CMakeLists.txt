@@ -592,6 +592,7 @@ list( APPEND
     ${ENGINE_SRC}/source/jpeg_utils.cpp
     ${ENGINE_SRC}/source/sandbox.cpp
     ${ENGINE_SRC}/source/console_commands.cpp
+    ${ENGINE_SRC}/source/app_resource.cpp
 )
 
 #------------------------------------------------------------------------------

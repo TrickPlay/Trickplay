@@ -57,12 +57,6 @@ public:
 
 	gchar * get_pi_child_contents( const String & pi_path , gsize & length ) const;
 
-	// Just like lua_loadfile. Returns 0 if its OK, LUA_ERRFILE or the
-	// result of lua_load. It pushes either an error message, or the
-	// compiled chunk as a function.
-
-	int lua_load_pi_child( lua_State * L , const String & pi_path ) const;
-
 	// Returns a URI to a platform independent child path. It also populates
 	// is_native if the URI points to a native file. If something goes
 	// wrong, it returns an empty string.
@@ -100,6 +94,12 @@ public:
 	StringList get_pi_children() const;
 
 private:
+
+	// Just like lua_loadfile. Returns 0 if its OK, LUA_ERRFILE or the
+	// result of lua_load. It pushes either an error message, or the
+	// compiled chunk as a function.
+
+	int lua_load_pi_child( lua_State * L , const String & pi_path ) const;
 
 	// Get a child GFile with a platform-independent path. Returns 0 if
 	// something is wrong. It does not check whether the child exists.

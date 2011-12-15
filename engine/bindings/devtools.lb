@@ -5,6 +5,7 @@
 #include "context.h"
 #include "clutter_util.h"
 #include "images.h"
+#include "app_resource.h"
 
 //-----------------------------------------------------------------------------
 // __gc metamethod for markers
@@ -357,7 +358,7 @@ global devtools [[ void * ]]
                 }
             }
             
-            App::Path p ( App::get( L ) , path , flags , allowed_schemes );
+            AppResource p( L , path , flags , allowed_schemes );
             
             if ( p )
             {
