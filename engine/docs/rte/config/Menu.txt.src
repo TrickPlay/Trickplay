@@ -93,23 +93,6 @@ Group: Engine Reference {
         }
 	}
 	
-	Group: Data Persistence {
-		File: Overview* (no auto-title, docs/rte/reference/overview_datapers.txt)
-		
-		Group: Globals {
-			File: profile* (no auto-title, bindings/profile.lb)
-      		File: settings* (no auto-title, bindings/settings.lb)
-      	}
-    }
-	
-	Group: Media Playback {
-		File: Overview* (no auto-title, docs/rte/reference/overview_media.txt)
-		
-		Group: Globals {
-			File: mediaplayer* (no auto-title, bindings/mediaplayer.lb)
-		}
-	}
-	
 	Group: External Connections {
 		File: Overview (no auto-title, docs/rte/reference/overview_external.txt)
 		
@@ -131,6 +114,14 @@ Group: Engine Reference {
 		}
 	}
 
+	Group: Media Playback {
+		File: Overview* (no auto-title, docs/rte/reference/overview_media.txt)
+		
+		Group: Globals {
+			File: mediaplayer* (no auto-title, bindings/mediaplayer.lb)
+		}
+	}
+	
 	Group: Physics Engine {
 		File: Overview* (no auto-title, docs/rte/reference/overview_physics.txt)
 		
@@ -139,13 +130,22 @@ Group: Engine Reference {
 		}
 	}
 	
-	Group: System Settings {
-		File: Overview* (no auto-title, docs/rte/reference/overview_system.txt)
+	Group: Profiles {
+		File: Overview (no auto-title, docs/rte/reference/overview_profile.txt)
 		
 		Group: Globals {
-			File: app* (no auto-title, bindings/app.lb)
-			File: system* (no auto-title, bindings/system.lb)
-			File: trickplay* (no auto-title, bindings/trickplay.lb)
+			File: profile (no auto-title, bindings/profile.lb)
+      		File: settings (no auto-title, bindings/settings.lb)
+      	}
+    }
+	
+	Group: System Information {
+		File: Overview (no auto-title, docs/rte/reference/overview_system.txt)
+		
+		Group: Globals {
+			File: app (no auto-title, bindings/app.lb)
+#			File: system* (no auto-title, bindings/system.lb)
+			File: trickplay (no auto-title, bindings/trickplay.lb)
 		}
 	}
 	
