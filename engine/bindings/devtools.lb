@@ -283,7 +283,7 @@ global devtools [[ void * ]]
                 
                 App * app = App::get( L );
                 
-                String app_path = app->get_metadata().sandbox.get_root_native_path();
+                String app_path = app->get_metadata().get_root_native_path();
                 
                 if ( ! app_path.empty() )
                 {

@@ -8,7 +8,6 @@
 #include "event_group.h"
 #include "debugger.h"
 #include "images.h"
-#include "sandbox.h"
 
 #define APP_METADATA_FILENAME   "app"
 #define APP_MAIN_FILENAME		"main.lua"
@@ -81,8 +80,6 @@ public:
 
         Metadata() : release( 0 ) {}
 
-        Sandbox		sandbox;
-
         String      id;
         String      name;
         int         release;
@@ -93,6 +90,23 @@ public:
         StringSet   attributes;
 
         Action::Map actions;
+
+        String get_root_uri() const
+        {
+        	return root_uri;
+        }
+
+        String get_root_native_path() const
+        {
+        	return root_native_path;
+        }
+
+        bool set_root( const String & uri_or_native_path );
+
+    private:
+
+        String		root_uri;
+        String		root_native_path;
     };
 
     //.........................................................................
