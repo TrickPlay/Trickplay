@@ -13,7 +13,7 @@ test_group:add (image1)
 
 local score_loop_count = 0
 local score_on_started_called = false
-local score_on_completed_called = false
+score_on_completed_called = false
 
 local myTimeline1 = Timeline ()
 myTimeline1.duration = 200
