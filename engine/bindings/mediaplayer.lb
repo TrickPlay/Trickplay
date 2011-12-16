@@ -629,31 +629,20 @@ global mediaplayer [[MP*]]
     
     int play_sound(string uri)
         [[
-            String real_uri;
-            
-            GFile * file = g_file_new_for_commandline_arg( uri );
-            
-            if ( g_file_has_uri_scheme( file , "http" ) || g_file_has_uri_scheme( file , "https" ) || g_file_has_uri_scheme( file , "rtsp" ) )
+            if ( MediaPlayer * mp = self->get_player() )
             {
-                gchar * u = g_file_get_uri( file );
-                real_uri = u;
-                g_free( u );
+                if ( AppResource resource = AppResource( L , uri , 0 , mp->get_valid_schemes() ) )
+                {
+                    result = mp->play_sound( resource.get_uri().c_str() );
+                }
+                else
+                {
+                    result = TP_MEDIAPLAYER_ERROR_INVALID_URI;
+                }
             }
             else
             {
-                bool is_native;
-                real_uri = App::get(L)->get_metadata().sandbox.get_pi_child_uri( uri , is_native );  
-            }
-            
-            g_object_unref( G_OBJECT( file ) );
-
-            if ( real_uri.empty() )
-            {
-                result=TP_MEDIAPLAYER_ERROR_INVALID_URI;
-            }
-            else
-            {
-                result=self->get_player()?self->get_player()->play_sound(real_uri.c_str()):TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
+                result = TP_MEDIAPLAYER_ERROR_NO_MEDIAPLAYER;
             }
         ]];
 
