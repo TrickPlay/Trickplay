@@ -100,6 +100,11 @@ public:
 
 	int lua_load( lua_State * L ) const;
 
+	//.....................................................................
+
+	static StringPairList get_native_children( const String & uri_or_native_path );
+
+	static StringList get_pi_children( const String & uri_or_native_path );
 
 private:
 
@@ -114,7 +119,7 @@ private:
 		Args( lua_State * L , const char * _app_path , int _flags , const StringSet & _schemes = StringSet() )
 		:
 			app( App::get( L ) ),
-			root_uri( app->get_metadata().sandbox.get_root_uri() ),
+			root_uri( app->get_metadata().get_root_uri() ),
 			app_path( _app_path ? _app_path : "" ),
 			flags( _flags ),
 			schemes( _schemes )
@@ -123,7 +128,7 @@ private:
 		Args( App * _app , const char * _app_path , int _flags , const StringSet & _schemes = StringSet() )
 		:
 			app( _app ),
-			root_uri( app->get_metadata().sandbox.get_root_uri() ),
+			root_uri( app->get_metadata().get_root_uri() ),
 			app_path( _app_path ? _app_path : "" ),
 			flags( _flags ),
 			schemes( _schemes )

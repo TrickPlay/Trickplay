@@ -137,6 +137,32 @@ bool LuaStateProxy::is_valid()
 
 //=============================================================================
 
+bool App::Metadata::set_root( const String & uri_or_native_path )
+{
+	GFile * file = g_file_new_for_commandline_arg( uri_or_native_path.c_str() );
+
+	char * uri = g_file_get_uri( file );
+
+	char * path = g_file_is_native( file ) ? g_file_get_path( file ) : 0;
+
+	g_object_unref( file );
+
+	bool result = uri != 0;
+
+	if ( result )
+	{
+		root_uri = uri;
+		root_native_path = path ? path : "";
+	}
+
+	g_free( uri );
+	g_free( path );
+
+	return result;
+}
+
+//=============================================================================
+
 class App::RunAction : public ::Action
 {
 public:
@@ -439,13 +465,11 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 
     if ( result )
     {
-        md.sandbox = Sandbox( app_path );
+        md.set_root( app_path );
     }
 
     return result;
 }
-
-
 
 //-----------------------------------------------------------------------------
 
@@ -694,8 +718,6 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
 
 #endif
 {
-	metadata.sandbox.set_context( c );
-
     // Create the user agent
 
     user_agent = Network::format_user_agent(
@@ -806,11 +828,11 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
 	Image * splash_image = 0;
 
-	if ( metadata.sandbox.native_child_exists( "default.jpg" ) )
+	if ( AppResource( this , "default.jpg" ).exists( this ) )
 	{
 		splash_image = load_image( "default.jpg" , false );
 	}
-	else if ( metadata.sandbox.native_child_exists( "default.png" ) )
+	else if ( AppResource( this , "default.png" ).exists( this ) )
 	{
 		splash_image = load_image( "default.png" , false );
 	}
@@ -1347,10 +1369,12 @@ bool App::change_app_path( const char * path )
         return false;
     }
 
-    metadata.sandbox = Sandbox( path );
-    metadata.sandbox.set_context( context );
+    if ( ! metadata.set_root( path ) )
+    {
+    	return false;
+    }
 
-    g_warning( "*** APP SANDBOX CHANGED FOR %s TO '%s'" , metadata.id.c_str() , metadata.sandbox.get_root_uri().c_str() );
+    g_warning( "*** APP SANDBOX CHANGED FOR %s TO '%s'" , metadata.id.c_str() , metadata.get_root_uri().c_str() );
 
     return true;
 }
@@ -1715,3 +1739,4 @@ void App::audio_match( const String & json )
 
     lua_pop( L , 1 );
 }
+
