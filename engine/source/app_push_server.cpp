@@ -6,6 +6,7 @@
 #include "app.h"
 #include "util.h"
 #include "json.h"
+#include "app_resource.h"
 
 //.............................................................................
 
@@ -380,25 +381,25 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
 
         FreeLater free_later;
 
-        gchar * target_path = Util::rebase_path( app_path , it->name.c_str() , false );
+        AppResource resource( app_path , it->name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED );
 
-        if ( ! target_path )
+        if ( ! resource || ! resource.is_native() )
         {
             throw Util::format( "Invalid file path '%s'" , it->name.c_str() );
         }
+
+        String target_path( resource.get_native_path() );
 
         TargetInfo target_info;
 
         target_info.source = * it;
         target_info.path = target_path;
 
-        free_later( target_path );
-
         //.....................................................................
         // If the target file does not exist, mark it as such and add it to the
         // list of changed files.
 
-        if ( ! g_file_test( target_path , G_FILE_TEST_EXISTS ) )
+        if ( ! g_file_test( target_path.c_str() , G_FILE_TEST_EXISTS ) )
         {
             push_info.target_files.push_back( target_info );
 
@@ -408,7 +409,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
         //.....................................................................
         // It exists. Lets get a GFile for it.
 
-        GFile * file = g_file_new_for_path( target_path );
+        GFile * file = g_file_new_for_path( target_path.c_str() );
 
         free_later( file , g_object_unref );
 
