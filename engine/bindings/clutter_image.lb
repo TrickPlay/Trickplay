@@ -642,28 +642,24 @@ class Image [[ClutterActor*]] actor
 
             TPContext * context = App::get( L )->get_context();
 
-            String app_path=context->get_db()->get_app_path(app_id);
+            String root_uri = context->get_db()->get_app_path( app_id );
+            
+            AppResource resource( root_uri.c_str() , file_name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED );
 
-            if ( !app_path.empty() )
+            if ( resource && resource.is_native() )
             {
-                gchar * path=Util::rebase_path( app_path.c_str() , file_name );                
-	            FreeLater free_later( path );
-	
-                if ( path )
+				Image * image = context->load_icon( resource.get_native_path().c_str() );
+				
+                if ( image )
                 {
-					Image * image = context->load_icon( path );
-					
-	                if ( image )
-	                {
-	                	Images::load_texture( CLUTTER_TEXTURE( self ), image );
-	                	
-	                	delete image;
-	
-                        g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup_printf( "[icon:%s]" , app_id ) , g_free);
+                	Images::load_texture( CLUTTER_TEXTURE( self ), image );
+                	
+                	delete image;
 
-	                    result = true;
-	                }
-				}	              
+                    g_object_set_data_full( G_OBJECT( self ), "tp-src", g_strdup_printf( "[icon:%s]" , app_id ) , g_free);
+
+                    result = true;
+                }
             }
 
         ]];
