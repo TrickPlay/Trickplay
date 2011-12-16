@@ -32,9 +32,9 @@ public:
 
 	AppResource( lua_State * L , const String & app_path , int flags = 0 , const StringSet & schemes = StringSet() );
 
-	AppResource( const char * root_uri , const char * app_path , int flags = 0 , const StringSet & schemes = StringSet() );
+	AppResource( const char * root_uri_or_native_path , const char * app_path , int flags = 0 , const StringSet & schemes = StringSet() );
 
-	AppResource( const char * root_uri , const String & app_path , int flags = 0 , const StringSet & schemes = StringSet() );
+	AppResource( const char * root_uri_or_native_path , const String & app_path , int flags = 0 , const StringSet & schemes = StringSet() );
 
 	//.....................................................................
 	// This lets you test the resource to make sure it is good.
@@ -136,7 +136,19 @@ private:
 			app_path( _app_path ? _app_path : "" ),
 			flags( _flags ),
 			schemes( _schemes )
-		{}
+		{
+			// We use GFile to make sure the root is a valid URI. You
+			// can pass in a native path, or a URI.
+
+			if ( ! root_uri.empty() )
+			{
+				GFile * file = g_file_new_for_commandline_arg( root_uri.c_str() );
+				char * uri = g_file_get_uri( file );
+				g_object_unref( file );
+				root_uri = uri ? uri : "";
+				g_free( uri );
+			}
+		}
 
 		App * 		app;
 		String		root_uri;

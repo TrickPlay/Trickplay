@@ -427,21 +427,7 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 {
     g_assert( app_path );
 
-    GFile * root = g_file_new_for_commandline_arg( app_path );
-
-    char * root_uri = g_file_get_uri( root );
-
-    g_object_unref( root );
-
-    if ( 0 == root_uri )
-    {
-		g_warning( "FAILED TO LOAD APP METADATA FROM '%s'" , app_path );
-		return false;
-    }
-
-    Util::Buffer contents( AppResource( root_uri , APP_METADATA_FILENAME , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED ).load_contents( 0 ) );
-
-    g_free( root_uri );
+    Util::Buffer contents( AppResource( app_path , APP_METADATA_FILENAME , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED ).load_contents( 0 ) );
 
     if ( ! contents )
     {
