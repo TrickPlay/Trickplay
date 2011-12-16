@@ -716,11 +716,11 @@ global mediaplayer [[MP*]]
     /*
     	Function: new
     	
-    	The new() function creates a new mediaplayer object on platforms that support multiple media players.
+    	The new() function creates a new MediaPlayer object on platforms that support multiple media players.
     	
     	*Arguments:* None
     	
-    	*Return Value:* new mediaplayer object. If platform does not support multiple media players, returns nil.
+    	*Return Value:* new MediaPlayer object. If the platform does not support multiple media players, returns nil.
     	
     */
     
