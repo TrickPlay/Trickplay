@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "app.h"
+#include "util.h"
 
 //.........................................................................
 
@@ -85,11 +86,12 @@ public:
 
 	//.....................................................................
 	// If it is a valid resource and the contents can be loaded, returns
-	// a byte array with the contents. Otherwise, prints an error message
-	// and returns 0. If the resource is HTTP(S), then it make a network
-	// request.
+	// a buffer with the contents which will always be zero terminated.
+	// If there is a problem, the buffer will be bad - you can test it with
+	// the bool operator. If the resource is HTTP(S), then it will make a
+	// network request.
 
-	GByteArray * load_contents( App * app ) const;
+	Util::Buffer load_contents( App * app ) const;
 
 	//.....................................................................
 	// Just like lua_loadfile. Returns 0 if its OK, LUA_ERRFILE or the

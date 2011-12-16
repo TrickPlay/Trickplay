@@ -509,14 +509,14 @@ bool AppResource::exists( App * app ) const
 
 //.............................................................................
 
-GByteArray * AppResource::load_contents( App * app ) const
+Util::Buffer AppResource::load_contents( App * app ) const
 {
+	Util::Buffer result;
+
 	if ( ! good() )
 	{
-		return 0;
+		return result;
 	}
-
-	GByteArray * result = 0;
 
 	if ( is_native() )
 	{
@@ -540,10 +540,10 @@ GByteArray * AppResource::load_contents( App * app ) const
 		}
 		else
 		{
-			result = g_byte_array_new();
+			// g_file_load_contents always adds a null to the end, but
+			// does not count that zero in the length.
 
-			result->data = ( guint8 * ) contents;
-			result->len = length;
+			result = Util::Buffer( Util::Buffer::MEMORY_USE_TAKE , contents , length );
 		}
 
 	}
@@ -573,12 +573,11 @@ GByteArray * AppResource::load_contents( App * app ) const
 
 		if ( ! response.failed )
 		{
-			result = response.body;
+			// Zero terminator
+			guint8 terminator = 0;
+			g_byte_array_append( response.body , & terminator , 1 );
 
-			if ( result )
-			{
-				g_byte_array_ref( result );
-			}
+			result = Util::Buffer( g_byte_array_set_size( response.body , response.body->len -1 ) );
 		}
 	}
 
@@ -619,17 +618,9 @@ public:
 
 	LuaLoaderAppResource( const AppResource & _resource )
 	:
-		resource( _resource ),
-		contents( 0 )
+		resource( _resource )
 	{}
 
-	~LuaLoaderAppResource()
-	{
-		if ( contents )
-		{
-			g_byte_array_unref( contents );
-		}
-	}
 
 protected:
 
@@ -647,9 +638,7 @@ protected:
 
 		if ( contents )
 		{
-			g_byte_array_unref( contents );
-
-			contents = 0;
+			contents = Util::Buffer();
 
 			* size = 0;
 
@@ -660,8 +649,8 @@ protected:
 
 		if ( contents )
 		{
-			* size = contents->len;
-			return ( const char * ) contents->data;
+			* size = contents.length();
+			return  contents.data();
 		}
 
 		* size = 0;
@@ -671,7 +660,7 @@ protected:
 private:
 
 	AppResource		resource;
-	GByteArray *	contents;
+	Util::Buffer	contents;
 };
 
 //=============================================================================
