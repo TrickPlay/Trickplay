@@ -198,7 +198,7 @@ private:
 
 //=============================================================================
 
-bool App::load_metadata_from_data( const gchar * data, Metadata & md)
+bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
 {
     // To clear the incoming metadata
 
@@ -439,7 +439,7 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 		return false;
     }
 
-    GByteArray * contents = AppResource( root_uri , APP_METADATA_FILENAME , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED ).load_contents( 0 );
+    Util::Buffer contents( AppResource( root_uri , APP_METADATA_FILENAME , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED ).load_contents( 0 ) );
 
     g_free( root_uri );
 
@@ -449,18 +449,12 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 		return false;
     }
 
-    guint8 terminator = 0;
-
-    g_byte_array_append( contents , & terminator , 1 );
-
-    bool result = App::load_metadata_from_data( ( char * ) contents->data , md );
+    bool result = App::load_metadata_from_data( contents.data() , md );
 
     if ( result )
     {
         md.sandbox = Sandbox( app_path );
     }
-
-    g_byte_array_unref( contents );
 
     return result;
 }

@@ -343,16 +343,12 @@ globals
 
             App * app = App::get( L );
             
-            GByteArray * contents = AppResource( app , file_name , AppResource::URI_NOT_ALLOWED ).load_contents( app ); 
+            Util::Buffer contents = AppResource( app , file_name , AppResource::URI_NOT_ALLOWED ).load_contents( app ); 
 
-            FreeLater free_later;
-            
             if ( contents )
             {
-                free_later( contents , ( GDestroyNotify ) g_byte_array_unref );
-                
-                result = ( char * ) contents->data;
-                result_len = contents->len;
+                result = contents.data();
+                result_len = contents.length();
             }
 		]];       
         
