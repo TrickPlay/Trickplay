@@ -115,10 +115,10 @@ Group: Engine Reference {
 	}
 
 	Group: Media Playback {
-		File: Overview* (no auto-title, docs/rte/reference/overview_media.txt)
+		File: Overview (no auto-title, docs/rte/reference/overview_media.txt)
 		
 		Group: Globals {
-			File: mediaplayer* (no auto-title, bindings/mediaplayer.lb)
+			File: mediaplayer (no auto-title, bindings/mediaplayer.lb)
 		}
 	}
 	

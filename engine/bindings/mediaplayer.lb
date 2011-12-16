@@ -104,7 +104,7 @@ interface video_texture [[ClutterActor *]] actor
 /*
     Global: mediaplayer
     
-    Mediaplayer lets you play media...
+    The mediaplayer global variable enables a TrickPlay application to play and manage audio and video files.
 */
 
 global mediaplayer [[MP*]]
@@ -120,22 +120,38 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
-    Constant: States
-    IDLE -      The initial state of the media player.
-    LOADING -   After you call <load>.
-    PAUSED -    Paused.
-    PLAYING -   Playing.
+		Note: These state constants are documented in the state property.
     */
-    
     const int IDLE=TP_MEDIAPLAYER_IDLE;    
     const int LOADING=TP_MEDIAPLAYER_LOADING;    
     const int PAUSED=TP_MEDIAPLAYER_PAUSED;    
     const int PLAYING=TP_MEDIAPLAYER_PLAYING;    
         
     /*
-    Property: state
+    	Property: state
+    	
+    	The state property is an integer value indicating the mediaplayer's current state.
+    	
+    	Possible mediaplayer states are listed below. Note: When referencing a state, it must be referenced through the mediaplayer variable. See the Code Example for a demonstration.
+    	
+    	IDLE - the mediaplayer is performing no operation
+    	LOADING - the mediaplayer is preparing to play a media resource
+    	PAUSED - the mediaplayer has paused playing a media resource
+    	PLAYING - the mediaplayer is playing a media resource
+    	
+    	*Default Setting:* mediaplayer.IDLE
+    	
+    	*Code Example:*
+    	
+    		(code)
+    		-- Is mediaplayer paused?
+    		if( mediaplayer.state == mediaplayer.PAUSED )then
+    			-- Resume playing
+    			mediaplayer:play()
+    		end
+    		(end)
     
-    Returns the current state of the player.
+		*See Also:* the <load>, <pause>, <play> and <reset> functions
     */
     
     readonly int state
@@ -144,9 +160,13 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Property: position
-    
-    Returns the current playback position in seconds.
+    	Property: position
+    	
+    	The position property specifies the current playback position in seconds. If the mediaplayer is not currently playing a resource, the position property contains 0.
+    	
+    	*Default Setting:* 0
+    	
+    	*See Also:* the <duration> property and the <play> function
     */
     
     readonly double position
@@ -158,9 +178,13 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Property: duration
-    
-    Returns the total duration of the loaded stream in seconds.
+	    Property: duration
+	    
+	    The duration property specifies the total length in seconds of the prepared media resource. If no media resource is currently prepared, the duration property contains a 0.
+	    
+	    *Default Setting:* 0
+	    
+	    *See Also:* the <position> property and the <load> function
     */
     
     readonly double duration
@@ -172,14 +196,19 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Property: buffered_duration
-    
-    Returns the amount of the stream that is currently buffered. This property
-    returns a table with two numbers, both in seconds. The first is the start
-    position of the buffer and the second is the end position of the buffer.
-    
-    If there is a problem determining the buffered duration, this property will
-    return nil.
+    	Property: buffered_duration
+    	
+    	The buffered_duration property is a table that contains time indications (in seconds) of the portion of a media resource that is currently loaded.
+    	
+    	The table contains two integer values: the start buffered position and the end buffered position. Both table values are specified as the number of seconds beyond the resource's beginning. For example, a media resource that is 30 minutes long, may perhaps be loaded and buffered in one-minute chunks. The initial buffer of data would contain the first 60 seconds of data, e.g., buffered_duration = { 0, 60 }; the second buffer would contain the next minute's data ({ 61, 120}), and so on.
+    	
+    	Alternatively, as the mediaplayer loads a large media file, the starting position may remain at 0 and the end position may advance as more of the resource is loaded. Using this information, an application can display a progress bar showing the amount of the resource that has loaded. It may also decide to defer playback until a certain amount of resource has been loaded, in an attempt to prevent pausing playback mid-file due to lack of loaded data.
+    	
+    	If no media resource is currently prepared for playback, the buffered_duration property has a value of nil.
+    	
+    	*Default Setting:* nil
+    	
+    	*See Also:* the <duration> property
     */
     
     readonly table buffered_duration
@@ -204,13 +233,13 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Property: video_size
-    
-    Returns the dimensions of the video, if any. This is not the size of the
-    viewport, but the actual resolution of the video.
-    
-    This property returns a table with two numbers, the width and height of the
-    video. If there is a problem getting these values, it will return nil.
+    	Property: video_size
+    	
+    	The video_size property is a table that specifies the original horizontal and vertical resolution in pixels of a prepared video resource. Note: This is the original video resolution of the resource, and not necessarily the resolution of the displayed video; to fit the video into the display viewport, it may need to be scaled to a different resolution.
+    	
+    	The format of the video_size table is { video_width_resolution, video_height_resolution }.
+    	
+    	If no video resource is currently prepared, the video_size property has a value of nil.
     */
     
     readonly table video_size
@@ -235,9 +264,13 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
-    Property: has_video
-    
-    Returns true if the current stream has video. False otherwise.    
+    	Property: has_video
+    	
+    	The has_video property is a boolean flag indicating whether or not the currently-prepared media resource is a video (true=is video resource).
+    	
+    	*Default Setting:* false
+    	
+    	*See Also:* the <has_audio> property
     */
     
     readonly bool has_video
@@ -256,9 +289,13 @@ global mediaplayer [[MP*]]
         ]];
 
     /*
-    Property: has_audio
-    
-    Returns true if the current stream has audio. False otherwise.
+    	Property: has_audio
+    	
+    	The has_audio property is a boolean flag indicating whether or not the currently-prepared media resource is audio (true=is audio resource).
+    	
+    	*Default Setting:* false
+    	
+    	*See Also:* the <has_video> property
     */
     
     readonly bool has_audio
@@ -277,13 +314,11 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
-    Property: tags
-    
-    Returns a table containing any metadata tags found in the stream while it
-    was being loaded. Each key in the table is the name of the tag. Each value
-    is the value of the tag as a string.
-    
-    If there are no tags, an empty table is returned.
+    	Property: tags
+    	
+    	The tags property is a table of key/value pairs, where each entry is a metadata tag contained in the prepared media resource. The key contains the tag name; the value is the tag's value in string format. If the media resource included no metadata tags, the tags table will be empty.
+    	
+    	*Default Setting:* { }, i.e., an empty table
     */
     
     readonly table tags
@@ -305,11 +340,11 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Property: texture
+		UndocumentedProperty: texture
+		
+		The texture property is a super-secret property, used for demo purposes only. It must not get into the wrong hands, and so it will be undocumented.
     
-    If the media player exposes the video texture as a UI element that you can
-    manipulate, this property will return it. Otherwise, this property will be
-    nil.
+	    If the media player exposes the video texture as a UIElement that you can manipulate, this property will return it. Otherwise, this property will be nil.
     */
     
     readonly UIElement texture
@@ -345,10 +380,13 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Property: volume
-    
-    Lets you set and get the volume. The volume is a floating point number where
-    0 is the lowest volume and 1 is the maximum volume.
+    	Property: volume
+    	
+    	The volume property is a value between 0-1, inclusive, that specifies the audio volume. The lowest volume is 0.
+    	
+    	*Default Setting:* 0
+    	
+    	*See Also:* the <mute> property
     */
     
     double volume
@@ -366,11 +404,13 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
-    Property: mute
-    
-    Lets you set and get whether audio is muted. This property expects a boolean
-    value, where true means that audio is or should be muted and false means it
-    is not.
+    	Property: mute
+    	
+    	The mute property is a boolean flag indicating whether or not the audio is muted (true=muted).
+    	
+    	*Default Setting:* false (audio is not muted)
+    	
+    	*See Also:* the <volume> property
     */
     
     bool mute
@@ -394,9 +434,15 @@ global mediaplayer [[MP*]]
         ]];
        
     /*
-    Function: reset
-    
-    Resets the media player to the idle state.    
+    	Function: reset
+    	
+    	The reset() function places the mediaplayer in an IDLE state. If any media resource had been playing, it is stopped.
+    	
+    	*Arguments:* None
+    	
+    	*Return Value:* None
+    	
+    	*See Also:* the <state> property
     */
     
     reset()
@@ -406,26 +452,24 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Function: load
-    
-    Instructs the media player to attempt to load a URI.
-    
-    Arguments:
-    
-    uri -   A string URI. Although the "file:" scheme is not allowed, you can
-            play files included in your app by just passing their path relative
-            to your app bundle.
-            
-    extra - Ignore this.
-    
-    Returns:
-    
-    0 -     Loading the URI started successfully. You will know for sure when either
-            <on_loaded> or <on_error> are invoked.
-            
-    other - There was an immediate failure and the URI cannot be loaded.
+    	Function: load
+    	
+    	The load() function prepares a media resource for playback. The media resource is specified in a string URI. Preparation may include asynchronously loading the entire file or only a portion of the file, or doing nothing at all; the actual preparation performed may vary between mediaplayer implementations.
+    	
+    	When the preparation is finished, the <on_loaded> event handler is invoked. If a loading error occurs, the <on_error> event handler is called.
+    	
+    	Note: A "file:"-type URI is not supported for security reasons. A media file stored in the application's app bundle can be prepared by specifying the file's path within the bundle's directory structure.
+    	
+    	*Arguments:*
+    	
+    		uri - string URI specifying the media resource to prepare
+    		extra - reserved for future enhancements
+    		
+    	*Return Value:* If the load operation began successfully, returns 0. Hook the <on_loaded> and <on_error> event handlers to receive notification when the operation is complete. If the load operation did not begin successfully, a non-zero error value is returned.
+    	
+    	*See Also:* the <on_loaded> and <on_error> event handlers
     */
-    
+
     int load(string uri,string extra="")
         [[
             String real_uri;
@@ -457,16 +501,18 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
-    Function: play
-    
-    Starts playing. Once <load> succeeds, you can call play. You can also call play
-    after it is paused.
-    
-    Returns:
-    
-    0 -     Everything is OK.
-    other - There was a problem playing.
-    */
+    	Function: play
+    	
+    	The play() function begins or resumes playing a media resource.
+    	
+    	A media resource must be properly prepared by the <load> function and the application must receive successful notification from the <on_loaded> event handler before calling the play() function.
+    	
+		*Arguments:* None
+		
+		*Return Value:* If resource started playing, returns 0, else returns a non-zero error value.
+		
+		*See Also:* the <pause> and <seek> functions
+	*/
     
     int play()
         [[
@@ -474,14 +520,15 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Function: pause
-    
-    Pauses the stream.
-    
-    Returns:
-    
-    0 -     Everything is OK.
-    other - There was a problem pausing.
+    	Function: pause
+    	
+    	The pause() function pauses the playback of a media resource. Playback can resume by calling the <play> function.
+    	
+    	*Arguments:* None
+    	
+    	*Return Value:* If the resource was paused, returns 0, else returns a non-zero error value.
+    	
+    	*See Also:* the <play> function
     */
     
     int pause()
@@ -490,19 +537,17 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Function: seek
-    
-    Lets you seek to a position within the stream. The position is specified in
-    seconds and you can seek when the stream is playing or paused.
-    
-    Arguments:
-    
-    seconds - The position to seek to, in seconds.
-    
-    Returns:
-    
-    0 -     Eveyrthing is OK.
-    other - There was a problem seeking, the current playback position did not change.
+    	Function: seek
+    	
+    	The seek() function explicitly sets the playback position within a media resource. The playback position is specified in seconds. The seek() function can be called at any time, including when the resource is playing.
+    	
+    	*Arguments:*
+    	
+    		seconds - the playback position in seconds to jump to
+    		
+    	*Return Value:* If the playback position was set successfully, returns 0, else returns a non-zero error value
+    	
+    	*See Also:* the <play> function
     */
     
     int seek(double seconds)
@@ -511,22 +556,21 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Function: set_playback_rate
-    
-    Attempts to play the stream at different speeds and in different directions.
-    
-    Arguments:
-    
-    rate -  This is an integer speed multiplier that can be positive for forward
-            playback or negative for backward playback. Zero is not a valid rate.
-            A rate of -1, for example, will play backwards at normal speed. -2
-            will play backwards at twice the normal speed and 2 will play forward
-            at twice normal speed.
-            
-    Returns:
-    
-    0 -     Everything is OK
-    other - There was a problem playing back at the new rate.    
+    	Function: set_playback_rate
+    	
+    	The set_playback_rate() function specifies the playback speed of a media resource.
+    	
+    	The playback speed is designated as a numeric value, where positive values advance the resource forward and negative values play in reverse. A playback rate of 1 plays forward at normal speed. A value of 2 plays the resource forward at twice the normal speed. A value of -1 plays the resource at its normal speed, but in reverse. A playback rate of zero is invalid.
+    	
+    	The default playback rate is 1, i.e., forward at normal speed.
+    	
+    	*Arguments:*
+    	
+    		rate - non-zero integer playback rate
+    		
+    	*Return Value:* If the playback rate was set successfully, returns 0, else returns a non-zero error value
+    	
+    	*See Also:* the <play> function
     */
     
     int set_playback_rate(int rate)
@@ -535,16 +579,19 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Function: get_viewport_geometry
-    
-    Returns the size and position of the video viewport. This function returns
-    a table with 4 integers, which are the left and top coordinates followed by
-    the width and height. If there is a problem, it returns nil.
-    
-    Returns:
-    
-    left,top,width and height - Coordinates and dimensions of the video viewport.
-    nil - There was a problem getting the video viewport geometry.
+    	Function: get_viewport_geometry
+    	
+    	The get_viewport_geometry() function retrieves the positon and size of the video viewport. By default, the video viewport fills the entire display.
+    	
+    	*Arguments:* None
+    	
+    	*Return Value:* table containing video viewport information in the format shown below. In case of error, returns nil.
+    	
+    		(code)
+    		{ X-coordinate location, Y-coordinate location, width, height }
+    		(end)
+    		
+    	*See Also:* the <set_viewport_geometry> function
     */
     
     table get_viewport_geometry()
@@ -575,21 +622,20 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
-    Function: set_viewport_geometry
-    
-    Attempts to set the position and size of the video viewport.
-    
-    Arguments:
-    
-    left -      Integer left coordinate.
-    top -       Integer top coordinate.
-    width -     Integer width.
-    height -    Integer height.
-    
-    Returns:
-    
-    0 -     The viewport position and size were set.
-    other - There was a problem setting the viewport position and size.
+    	Function: set_viewport_geometry
+    	
+    	The set_viewport_geometry() function sets the position and size of the video viewport.
+    	
+    	*Arguments:*
+    	
+    		left - viewport's X-coordinate position 
+    		top - viewport's Y-coordinate position
+    		width - viewport's width in pixels
+    		height - viewport's height in pixels
+    		
+    	*Return Value:* Returns 0 if successful, else returns non-zero error value
+    	
+    	*See Also:* the <get_viewport_geometry> function
     */
     
     int set_viewport_geometry(int left,int top,int width,int height)
@@ -603,14 +649,15 @@ global mediaplayer [[MP*]]
         ]];
 
     /*
-    Function: reset_viewport_geometry
-
-    Attempts to set the size and position of the viewport to their default, full screen values.
-
-    Returns:
-
-    0 -     The viewport position and size were set.
-    other - There was a problem setting the viewport position and size.
+    	Function: reset_viewport_geometry
+    	
+    	The reset_viewport_geometry() function resets the video viewport to its default, full-screen size.
+    	
+    	*Arguments:* None
+    	
+    	*Return Value:* Returns 0 if successful, else returns non-zero error value
+    	
+    	*See Also:* the <set_viewport_geometry> function
     */
 
     int reset_viewport_geometry()
@@ -619,22 +666,21 @@ global mediaplayer [[MP*]]
         ]];
         
     /*
-    Function: play_sound
-    
-    Instructs the media player to play a sound.
-    
-    Arguments:
-    
-    uri -   A string URI. Although the "file:" scheme is not allowed, you can
-            play files included in your app by just passing their path relative
-            to your app bundle.
-            
-    Returns:
-    
-    0 -     The sound started playing.
-            
-    other - There was an immediate failure and the sound cannot be played.
-    
+    	Function: play_sound
+    	
+    	The play_sound() function plays the audio sound contained in a specified URI.
+    	
+    	The audio played by play_sound() does not abide by the mediaplayer variable's <volume> or <mute> properties. Also, it is not possible to <pause> playback of the audio, nor does play_sound() invoke any event handlers when the audio has completed or an error occurs. If an application requires any of these characteristics, it should use the <load> and <play> functions, instead.
+    	
+    	Note: A "file:"-type URI is not supported for security reasons. An audio file stored in the application's app bundle can be loaded by specifying the file's path within the bundle's directory structure.
+    	
+    	*Arguments:*
+    	
+    		uri - string URI specifying the audio source to play
+    		
+    	*Return Value:* Returns 0 if successful, else returns non-zero error value
+    	
+    	*See Also:* the <load> and <play> functions
     */
     
     int play_sound(string uri)
@@ -668,15 +714,14 @@ global mediaplayer [[MP*]]
         ]];
 
     /*
-    Function: new
-    
-    If the platform supports multiple media players, this function lets you create
-    a new one.
-    
-    Returns:
-    
-    a new media player -    If supported.
-    nil -                   Otherwise.
+    	Function: new
+    	
+    	The new() function creates a new mediaplayer object on platforms that support multiple media players.
+    	
+    	*Arguments:* None
+    	
+    	*Return Value:* new mediaplayer object. If platform does not support multiple media players, returns nil.
+    	
     */
     
     MediaPlayer new()
@@ -699,42 +744,71 @@ global mediaplayer [[MP*]]
         ]];
     
     /*
-    Event: on_loaded
-    
-    Invoked when a stream is loaded successfully. When you call <load>, you will
-    either get this event or <on_error>.
-    
-    Arguments:
-    
-    mediaplayer - The media player.
-    */
-    
+    	Event Handler: on_loaded
+    	
+    	The on_loaded() event handler is invoked after the successful completion of a media-preparation operation started by the <load> function. If the preparation failed, the <on_error> event handler will be invoked, instead.
+    	
+    	*Prototype:*
+    	
+    		(code)
+    		on_loaded( mediaplayer )
+    		(end)
+    		
+    	*Arguments:*
+    	
+    		mediaplayer - reference to the mediaplayer variable that prepared the media resource
+    		
+    	*Return Value:* None
+    	
+    	*See Also:* the <load> function and the <on_error> event handler
+	*/
+	    
     callback on_loaded;
     
     /*
-    Event: on_error
-    
-    Invoked when there is an error loading or playing a stream.
-    
-    Arguments:
-    
-    mediaplayer -   The media player.
-    code -          An integer error code.
-    message -       The error message.
+    	Event Handler: on_error
+    	
+    	The on_error() event handler is invoked after the failure of a media-preparation operation started by the <load> function. If the preparation completed successfully, the <on_loaded> event handler will be invoked, instead.
+    	
+    	*Prototype:*
+    	
+    		(code)
+    		on_error( mediaplayer, code, message )
+    		(end)
+    		
+    	*Arguments:*
+    	
+    		mediaplayer - reference to the mediaplayer variable that attempted to prepare the media resource
+    		code - integer error code
+    		message - descriptive error message
+    		
+    	*Return Value:* None
+    	
+    	*See Also:* the <load> function and the <on_loaded> event handler
     */
     
     callback on_error;
     
     /*
-    Event: on_end_of_stream
-    
-    Invoked when the stream reaches the end. This is only invoked while the
-    stream is playing. When a stream reaches the end, it is automatically
-    paused there.
-    
-    Arguments:
-    
-    mediaplayer -   The media player.
+    	Event Handler: on_end_of_stream
+    	
+    	The on_end_of_stream() event handler is invoked when a media resource is playing and the end of the resource is reached. Playback is automatically paused.
+    	
+    	Note: The media resource must be playing to invoke the on_end_of_stream() event handler.
+    	
+    	*Prototype:*
+    	
+    		(code)
+    		on_end_of_stream( mediaplayer )
+    		(end)
+    		
+    	*Arguments:*
+    	
+    		mediaplayer - reference to the mediaplayer variable that was playing the resource
+    		
+    	*Return Value:* None
+    	
+    	*See Also:* the <play> function
     */
     
     callback on_end_of_stream;
