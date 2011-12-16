@@ -477,6 +477,40 @@ namespace Util
 
     String make_v4_uuid();
 
+    //-----------------------------------------------------------------------------
+
+    class Buffer
+    {
+    public:
+
+    	enum MemoryUse { MEMORY_USE_TAKE , MEMORY_USE_COPY };
+
+    	Buffer();
+
+    	Buffer( gconstpointer data , guint length );
+
+    	Buffer( MemoryUse memory_use , gpointer data , guint length );
+
+    	Buffer( GByteArray * _bytes );
+
+    	Buffer( const Buffer & other );
+
+    	virtual ~Buffer();
+
+    	const Buffer & operator = ( const Buffer & other );
+
+    	bool good() const;
+
+    	operator bool () const;
+
+    	const char * data() const;
+
+    	guint length() const;
+
+    private:
+
+    	GByteArray * bytes;
+    };
 }
 
 #endif // _TRICKPLAY_UTIL_H
