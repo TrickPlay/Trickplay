@@ -106,7 +106,6 @@ end
 local toload = {
 	{0,	2,0,"Splash Screen"},
 	--[[
-	--]]
 	{1,	1,0,"Penguin In Motion"},
 	{2,	1,0,"You're Probably Gonna Die"},
 	{3,	2,0,"Ice Trios"},
@@ -140,6 +139,8 @@ local toload = {
 	{31,1,0,"That Armor Looks Smashing"},
 	{32,1,0,"Drop Like A Rock"},
 	{33,1,1,"Smashing In the Snow"},
+	--]]
+	{82,1,0,"How About This Weather?"},
 }
 
 for k,v in ipairs(toload) do

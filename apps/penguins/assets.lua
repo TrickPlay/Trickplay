@@ -66,17 +66,33 @@ local f = function(src,state,func,bbox)
 end
 
 local cubedriver = function (obj)
-	--local switch = obj.name:match("s_(%w+)")
+	local switch = obj.name:match("s_(%w+)")
 	local move = obj.clip
 	obj.clip = {0,0,obj.w,obj.h}
 	if move and (move[1] ~= 0 or move[2] ~= 0) then
-		--[[if switch then
-			obj.insert = function()
-				switch = level.this:find_child(switch)
+		if switch then
+			--local on = 1
+			--local ox, oy
+			local anim
+			obj.insert = function(self,top)
+				ox, oy = obj.x, obj.y
+				switch = levels.this:find_child((top and "" or "_") .. switch)
+				switch.moves[#switch.moves] = obj
+				anim = AnimationState{duration = move[3], mode = "EASE_IN_OUT_QUAD", transitions = {
+					{source = "*", target = 0, keys = {{obj,"x",obj.x},{obj,"y",obj.y}}},
+					{source = "*", target = 1, keys = {{obj,"x",obj.x+move[1]},{obj,"y",obj.y+move[2]}}}
+				}}
+				anim:warp(0)
 			end
-			-- animate to/from
-			-- obj.reset()
-		else]]
+			obj.move = function()
+				--obj:animate{x = ox + move[1]*on, y = oy + move[2]*on, duration = move[3], mode = "EASE_IN_OUT_QUAD"}
+				anim.state = 1-tonumber(anim.state)
+				--on = 1-on
+			end
+			obj.unload = function()
+				anim = nil
+			end
+		else
 			obj.state = 2
 			obj.vx, obj.vy = move[1], move[2]
 			local ox = (obj.vx > 0 and -128 or 1921)
@@ -98,7 +114,7 @@ local cubedriver = function (obj)
 					obj.x = obj.x + obj.vx*d
 				end
 			end
-		--end
+		end
 	else
 		local touching = {}
 		obj.insert = function()
@@ -215,6 +231,7 @@ local make = {
 			pwire:free()
 			pg:unparent()
 			step[pg] = nil
+			pg, zg = nil, nil
 		end
 	end),
 	["logo-z"]			= f("logo-z.png"),
@@ -245,6 +262,52 @@ local make = {
 	["snow-bank"]		= f("snow-bank.png"),
 	["river-left"]		= f("river-left.png"),
 	["river-right"]		= f("river-right.png"),
+	["vane-pole.png"]	= f("vane-pole.png", 1, function(obj)
+		obj.moves = {}
+		local bar, top, tg
+		local r, vr = 0, 0
+		
+		step[obj] = function(d,ms)
+			vr = vr*0.95 + sin(-(r+nrand(5))*pi/180)
+			r = r + vr
+			tg.x_rotation = {atan((obj.y+obj.parent.y-540)/1080)*180/pi - 20,0,0}
+			top.y_rotation = {r,0,0}
+		end
+		
+		obj.insert = function()
+			bar = Image{src = "vane-bar.png", x = obj.x-66, y = obj.y+20}
+			top = Image{src = "vane-top.png", anchor_point = {89,42}}
+			tg = Group{x = obj.x+4, y = obj.y}
+			tg:add(top)
+			obj.parent:add(bar,tg)
+			bar:raise(obj)
+			tg:raise(bar)
+		end
+		obj.collision = function()
+			for k,v in pairs(obj.moves) do
+				v.move()
+			end
+			vr = vr + (row == 2 and -25 or 25)
+			obj.state = 0
+		end
+		obj.reset = function()
+			if obj.state == 0 then
+				for k,v in pairs(obj.moves) do
+					v.move()
+				end
+				vr = vr + (row == 2 and 25 or -25)
+				obj.state = 1
+			end
+		end
+		obj.unload = function()
+			tg:unparent()
+			tg = nil
+			bar:free()
+			top:free()
+		end
+	end),
+	["vane-bar.png"]	= f("vane-bar.png"),
+	["vane-top.png"]	= f("vane-top.png"),
 	["icicles.png"]		= f("icicles.png", 3),
 	["cube-64.png"]		= f("cube-64.png", 3, cubedriver),
 	["cube-128-4.png"]	= f("cube-128-4.png", 3, cubedriver),
@@ -517,6 +580,9 @@ local make = {
 				mode = "EASE_OUT_QUAD", on_completed = function() streak:free() end}
 			penguin:boost()
 			obj:hide()
+		end
+		obj.reset = function()
+			obj:show()
 		end
 	end, {l = 50, t =50, r = -50, b = -50}),
 	["streak"]			= f("streak.png"),
