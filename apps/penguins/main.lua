@@ -42,9 +42,12 @@ need
 	darkness
 ]]
 
+--screen.perspective = {60,0.5,0.1,100}
+
 sin = math.sin
 cos = math.cos
 asin = math.asin
+atan = math.atan
 atan2 = math.atan2
 pi = math.pi
 max = math.max

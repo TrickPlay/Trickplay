@@ -31,7 +31,9 @@ local reset = function()
 	img.z_rotation = {0,0,0}
 	gravity = 0.002
 	for k,v in pairs(levels.this.children) do
-		v:show()
+		if v.reset then
+			v:reset()
+		end
 	end
 end
 
