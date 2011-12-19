@@ -1,4 +1,4 @@
-local bar = Group{name = "VideoTileBar"}
+local bar = Group{name = "VideoTileBar", position = {screen.w/2,screen.h/2},anchor_point = {screen.w/2,screen.h/2}}
 
 local wrap_around_tile
 local wrap_around_clone = Clone()
@@ -12,7 +12,9 @@ local function wrap_i(i)
     return ( i - 1 ) % ( # tiles ) + 1
     
 end
-
+local end_x_s = {
+    30-300,30+600,30+600*2+300
+}
 local x_s = {
     30,30+600,30+600*2
 }
@@ -42,6 +44,7 @@ function bar:init(p)
     
     self:add(unpack(tiles))
     
+    local curr_i = 1
     
     local transitions = {}
     
@@ -73,8 +76,9 @@ function bar:init(p)
             
             wrap_around_tile.expanded_h = tiles[i].expanded_h
             
-            wrap_around_clone.source = tiles[i].content
-            wrap_around_clone.position = tiles[i].content.position
+            wrap_around_clone.source    = tiles[i].content
+            
+            wrap_around_clone.position  = tiles[i].content.position
             
             tiles[i].x = x_s[1]
             
@@ -135,7 +139,8 @@ function bar:init(p)
             
             wrap_around_tile.expanded_h = tiles[prev].expanded_h
             
-            wrap_around_clone.source = tiles[prev].content
+            wrap_around_clone.source   = tiles[prev].content
+            
             wrap_around_clone.position = tiles[prev].content.position
             
             wrap_around_tile.y_rotation = {0,0,0}
@@ -174,6 +179,45 @@ function bar:init(p)
         
     end
     
+    local animating = false
+    
+    local animate_out = Timeline{
+        duration = 500,
+        on_new_frame = function(tl,ms,p)
+            
+            self.scale = {1+.3*p,1+.3*p}
+            
+            self.opacity = 255*(1-p)
+            
+            for i = 1,#tiles do
+                
+                --i=wrap_i(i)
+                --print(i)
+                tiles[wrap_i(i+curr_i-1)].x = x_s[i] + (end_x_s[i] - x_s[i])*p
+                
+                tiles[wrap_i(i+curr_i-1)].y =     50 + (      -200 -     50)*p
+                
+            end
+            
+        end,
+        on_completed = function(tl)
+            animating = false
+            tl.direction = dismissed and "BACKWARD" or "FORWARD"
+            
+        end
+        
+    }
+        
+    function self:dismiss()
+        
+        if animating then return false end
+        
+        dismissed = true
+        animating = true
+        animate_out:start()
+        self:grab_key_focus()
+    end
+    
     
     
     state = AnimationState{
@@ -184,40 +228,61 @@ function bar:init(p)
         
     }    
     
-    local animating = false
+    
     
     state.timeline.on_completed = function()
         
         animating = false
         
     end
-    state.state = 1
+    state.state = curr_i
     
-    dolater(function() tiles[state.state+0].state = "EXPAND" end)
+    dolater(function() tiles[curr_i].state = "EXPAND" end)
     --tiles[state.state+0].state = "EXPAND"
     local key_press = {
+        
         [keys.Left] = function()
             
             animating = true
             
-            on_started[state.state+0][wrap_i(state.state - 1)]()
+            on_started[curr_i][wrap_i(state.state - 1)]()
             
-            state.state = wrap_i(state.state - 1)
+            curr_i = wrap_i(curr_i - 1)
+            
+            state.state = curr_i
             
         end,
+        
         [keys.Right] = function()
             
             animating = true
             
-            on_started[state.state+0][wrap_i(state.state + 1)]()
+            on_started[curr_i][wrap_i(state.state + 1)]()
             
-            state.state = wrap_i(state.state + 1)
+            curr_i = wrap_i(curr_i + 1)
+            
+            state.state = curr_i
             
         end,
+        
+        [keys.BACK] = function()
+            
+            self:dismiss()
+            
+        end,
+        
     }
     
     function self:on_key_down(k)
         
+        if dismissed then
+            
+            if k == keys.OK then
+                animate_out:start()
+                dismissed = false
+            end
+            return
+        end
         return not animating and key_press[k] and key_press[k]()
         
     end

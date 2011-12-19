@@ -201,9 +201,13 @@ function self:create(p)
                 
                 p.contents:grab_key_focus()
                 
+                if p.focus then p.focus() end
+                
             elseif v == "CONTRACT" and p.slider then
                 
                 p.slider:animate{duration = 100,opacity = 0}
+                
+                if p.unfocus then p.unfocus() end
                 
             end
             

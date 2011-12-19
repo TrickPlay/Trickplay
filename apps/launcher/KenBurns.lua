@@ -9,7 +9,7 @@ function ken_burns:create(p)
     if type(p) ~= "table" then error("must pass a table",2) end
     
     local instance = Group{
-        --[[
+        ---[[
         clip = {
             0,
             0,
@@ -112,7 +112,7 @@ function ken_burns:create(p)
             end
             
             self:start()
-            
+            self:on_new_frame(0,0)
         end
     }
     

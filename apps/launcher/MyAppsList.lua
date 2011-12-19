@@ -483,7 +483,7 @@ local key_events = {
         if not animating then
             
             hl:show_sub_menu()--selected = true
-            hl:grab_key_focus()
+            --hl:grab_key_focus()
         end
         
         return true
@@ -491,6 +491,8 @@ local key_events = {
 }
 
 function AppList:on_key_down(k)
+    
+    print("AppList:on_key_down("..k..")")
     
     return key_events[k] and key_events[k]()
     
