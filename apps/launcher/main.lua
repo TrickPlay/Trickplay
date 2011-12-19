@@ -1,5 +1,399 @@
 
+local function make_text(title,caption,title_font,caption_font)
+    
+    local title = Text{
+        text = title,
+        font = title_font
+    }
+    local caption = Text{
+        text = caption,
+        font = caption_font
+    }
+    
+    local c = Canvas(
+        title.w > caption.w and title.w or caption.w,
+        title.h + caption.h
+    )
+    
+    c:text_element_path(title)
+    
+    c:set_source_color("000000")
+    c:stroke(true)
+    c:set_source_color("ffffff")
+    c:fill()
+    
+    c:move_to(0,title.h)
+    
+    c:text_element_path(caption)
+    
+    c:set_source_color("000000")
+    c:stroke(true)
+    c:set_source_color("ffffff")
+    c:fill()
+    
+    
+    return c:Image()
+end
 
+
+--dolater...
+local function main()
+    
+    local srcs = Group{name="Hidden Clone Sources"}
+    
+    srcs:hide()
+    screen:add(srcs)
+    
+    
+    
+    
+    
+    
+    do
+        
+        local l = dofile("localized:strings.lua")
+        
+        function _L(s) return l[s] or s end
+        
+    end
+    
+    ----------------------------------------------------------------------------
+    -- dofiles()
+    ----------------------------------------------------------------------------
+    
+    local canvas_srcs = dofile("CanvasCloneSources")
+    
+    local vt = dofile("VideoTile.lua")
+    
+    local vtb = dofile("VideoTileBar.lua")
+    
+    local kb =  dofile("KenBurns.lua")
+    
+    local l = dofile("MyAppsList.lua")
+    
+    local HL = dofile("MyAppsHL.lua")
+    
+    local clouds =  dofile("MyAppsBg.lua")
+    
+    local mkb = dofile("MulitKenBurns.lua")
+    
+    ----------------------------------------------------------------------------
+    -- init()
+    ----------------------------------------------------------------------------
+    
+    canvas_srcs:init{
+        
+        launcher_frame_w               = 4*48,
+        launcher_frame_h               = 4*27,
+        launcher_frame_border          = 2,
+        launcher_frame_border_gradient = 7,
+        
+        video_tile_inner_width   = 547,
+        video_tile_border_width  = 3,
+        video_tile_corner_radius = 20,
+        video_tile_font          = "FreeSans Medium 32px",
+        
+        my_apps_hl_w        = 300,
+        my_apps_hl_h        = 150,
+        my_apps_hl_shadow_h = 20,
+        
+        arrow_size = 20,
+        
+    }
+    
+    vt:init{
+        shrunken_h  = 100,
+        expanded_h  = 900,
+        inner_w     = 547,
+        canvas_srcs = canvas_srcs,
+        max_vis_len = 12,
+        font        = "FreeSans Medium 32px",
+    }
+    tiles = {}
+    
+    kb:init{}
+    
+    
+    HL:init{
+        img_srcs    = srcs,
+        canvas_srcs = canvas_srcs,
+        main_font   = "FreeSans Medium 28px",
+        sub_font    = "FreeSans Medium 24px",
+        icon_size   = {116/270*480,116},
+    }
+    
+    
+    
+    
+    
+    do
+        local icon_size   = {116/270*480,116}
+        local prev  = Clone{
+            size = icon_size
+        }
+        local next  = Clone{
+            size = icon_size,
+            position = {icon_size[1]/2,icon_size[2]/2},
+            anchor_point = {icon_size[1]/2,icon_size[2]/2}
+        }
+        local caption = Text{  name = "caption", font = "FreeSans Medium 28px",x = 240,y=35}
+        
+        myAppsHL = HL:create{
+            logical_parent = l,
+            contents = Group{
+                children = {
+                    prev,
+                    next,
+                    Clone{
+                        source = canvas_srcs.launcher_icon_frame,
+                        size   = icon_size,
+                    },
+                    caption,
+                }
+            },
+            focus = function(self,text,icon,id)
+                self.app_id = id
+                
+                caption.text = text
+                prev.source  = next.source
+                next.source  = icon
+                next.scale   = {0,0}
+                
+                next:animate{
+                    duration = 100,
+                    scale    = {1,1},
+                }
+            end
+        }
+    end
+    
+    do
+        
+        local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=10}
+        local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=50}
+        
+        showcaseHL = HL:create{
+            logical_parent = l,
+            contents = Group{
+                children = {
+                    title,
+                    caption,
+                }
+            },
+            focus = function(self,new_title,new_caption,id)
+                self.app_id = id
+                
+                title.text   = new_title
+                caption.text = new_caption
+            end
+        }
+    end
+    
+    showcase=mkb:create{
+        hl = showcaseHL,
+        w = 547,
+        kb = kb,
+        panes = {
+            {
+                text    = make_text("Burberry","Spring/Summer 2011 Collection.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                title   = "Burberry",
+                caption = "Spring/Summer 2011 Collection.",
+                app_id  = "com.trickplay.burberry",
+                h       = 306,
+                imgs    = {
+                    Image{ src = "assets/showcase/burberry-1.jpg"},
+                    Image{ src = "assets/showcase/burberry-2.jpg"},
+                    Image{ src = "assets/showcase/burberry-3.jpg"},
+                }
+            },
+            {
+                text    = make_text("Mountain Dew","Vote for the new green label bottle art.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                title   = "Mountain Dew",
+                caption = "Vote for the new green label bottle art.",
+                app_id  = "com.trickplay.mountain-dew",
+                h       = 306,
+                imgs    = {
+                    Image{ src = "assets/showcase/dew-1.jpg"},
+                    Image{ src = "assets/showcase/dew-2.jpg"},
+                    Image{ src = "assets/showcase/dew-3.jpg"},
+                }
+            },
+            {
+                text    = make_text("JYPE","Greatest Hits Video Showcase.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                title   = "JYPE",
+                caption = "Greatest Hits Video Showcase.",
+                app_id  = "com.trickplay.jyp",
+                h       = 316,
+                imgs    = {
+                    Image{ src = "assets/showcase/jype-1.jpg"},
+                    Image{ src = "assets/showcase/jype-2.jpg"},
+                    Image{ src = "assets/showcase/jype-3.jpg"},
+                }
+            },
+        },
+        srcs = srcs,
+    }
+    
+    do
+        
+        local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=10}
+        local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=50}
+        
+        shopHL = HL:create{
+            logical_parent = l,
+            contents = Group{
+                children = {
+                    title,
+                    caption,
+                }
+            },
+            focus = function(self,new_title,new_caption,id)
+                self.app_id = id
+                
+                title.text   = new_title
+                caption.text = new_caption
+            end
+        }
+    end
+    
+    shop=mkb:create{
+        hl = shopHL,
+        w = 547,
+        kb = kb,
+        panes = {
+            {
+                text    = make_text("Enter the App Shop","Explore new apps for your smart TV.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                title   = "Enter the App Shop",
+                caption = "Explore new apps for your smart TV.",
+                app_id  = "com.trickplay.app-shop",
+                h       = 306,
+                imgs    = {
+                    Image{ src = "assets/app_shop/appshop-1.jpg"},
+                    Image{ src = "assets/app_shop/appshop-2.jpg"},
+                }
+            },
+            {
+                text    = make_text("HULU","Watch TV shows & movies free online.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                title   = "HULU",
+                caption = "Watch TV shows & movies free online.",
+                app_id  = "com.trickplay.app-shop",
+                h       = 306,
+                imgs    = {
+                    Image{ src = "assets/app_shop/hulu-1.jpg"},
+                    Image{ src = "assets/app_shop/hulu-1.jpg"},
+                }
+            },
+            {
+                text    = make_text("True Blood Comics","The thrills continue in Bon Temp.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                title   = "True Blood Comics",
+                caption = "The thrills continue in Bon Temp.",
+                app_id  = "com.trickplay.app-shop",
+                h       = 316,
+                imgs    = {
+                    Image{ src = "assets/app_shop/truebloodcomics-1.jpg"},
+                    Image{ src = "assets/app_shop/truebloodcomics-1.jpg"},
+                }
+            },
+        },
+        srcs = srcs,
+    }
+    l:init{max_vis_len = 10, slider = myAppsHL,frame=canvas_srcs.launcher_icon_frame}
+    
+    clouds:init{
+        visible_w = 600,
+        visible_h = 1000,
+    }
+    
+    
+    vtb:init{
+        video_tile = vt,
+        tiles = {
+            {text = "My Apps",  contents = Group{y=-48,children={clouds,l}, on_key_down = l.on_key_down}, slider = myAppsHL, expanded_h =l.list_h-20 },
+            {text = "Showcase", contents = showcase,slider = showcaseHL,focus = showcase.focus,unfocus = showcase.unfocus},
+            {text = "App Store",contents = shop,slider = shopHL,focus = shop.focus,unfocus = shop.unfocus},
+        },
+    }
+    
+    
+    screen:add(vtb)
+    
+    ----------------------------------------------------------------------------
+    -- key events()
+    ----------------------------------------------------------------------------
+    
+    local screen_keys = {
+        [keys["1"]] = function()
+            vtb:move_anchor_point(0,0)
+            vtb.position = {0,0}
+            vtb:animate{
+                --mode = "EASE_IN_BACK",
+                duration = 400,
+                x_rotation = -180,
+            }
+        end,
+        [keys["2"]] = function()
+            vtb:move_anchor_point(0,0)
+            vtb.position = {0,0}
+            vtb:animate{
+                --mode = "EASE_OUT_BACK",
+                duration = 400,
+                x_rotation = 0,
+            }
+        end,
+        [keys["3"]] = function()
+            vtb:move_anchor_point(screen.w/2,screen.h/2)
+            vtb.position = {screen.w/2,screen.h/2}
+            vtb:animate{
+                mode = "EASE_IN_QUAD",
+                duration = 400,
+                scale = {1.5,1.5},
+                opacity = 0,
+            }
+        end,
+        [keys["4"]] = function()
+            vtb:move_anchor_point(screen.w/2,screen.h/2)
+            vtb.position = {screen.w/2,screen.h/2}
+            vtb:animate{
+                mode = "EASE_OUT_QUAD",
+                duration = 400,
+                scale = {1,1},
+                opacity = 255,
+            }
+        end,
+        [keys["5"]] = function()
+            vtb:move_anchor_point(screen.w/2,screen.h/2)
+            vtb.position = {screen.w/2,screen.h/2}
+            vtb:animate{
+                mode = "EASE_IN_BACK",
+                duration = 600,
+                z=600,
+                --z_rotation = 180,
+            }
+        end,
+        [keys["6"]] = function()
+            vtb:move_anchor_point(screen.w/2,screen.h/2)
+            vtb.position = {screen.w/2,screen.h/2}
+            vtb:animate{
+                mode = "EASE_OUT_BACK",
+                duration = 600,
+                z=0,
+                --z_rotation = 0,
+            }
+        end,
+    }
+    function screen:on_key_down(k)
+        
+        print("screen:on_key_down("..k..")")
+        
+        return screen_keys[k] and screen_keys[k]()
+        
+    end
+    
+end
+    
+--------------------------------------------------------------------------------
+-- pretend background TV
+--------------------------------------------------------------------------------
 
 function mediaplayer:on_loaded()
     mediaplayer.volume = 0
@@ -17,430 +411,14 @@ end
 
 mediaplayer:load("glee-1.mp4")
 
---]]
+    
+--------------------------------------------------------------------------------
+-- Launch the app
+--------------------------------------------------------------------------------
 
-local showcase_imgs = {
-    Image{extra = {app_id = "com.trickplay.jyp"},          src ="assets/showcase/jyp.jpg" , w = 803*2,h = 555*2},
-    Image{extra = {app_id = "com.trickplay.burberry"},     src ="assets/showcase/main screen.png" },
-    Image{extra = {app_id = "com.trickplay.mountain-dew"}, src ="assets/showcase/mockup.png" },
-}
-local apps_imgs = {
-    Image{extra={app_id = "com.trickplay.app-shop"}, src ="assets/apps/start-background-1E.jpg" },
-    Image{extra={app_id = "com.trickplay.app-shop"}, src ="assets/apps/mockup.png" },
-    Image{extra={app_id = "com.trickplay.app-shop"}, src ="assets/apps/_reference_main_screen.png" },
-}
-local srcs = Group{name="Hidden Clone Sources"}
-srcs:add(unpack(apps_imgs))
-srcs:add(unpack(showcase_imgs))
-srcs:hide()
-screen:add(srcs)
-
+dolater(main)
 
 screen:show()
-
-do
-    
-    local l = dofile("localized:strings.lua")
-    
-    function _L(s) return l[s] or s end
-    
-end
-
-local launcher_icon_resized_w = 4*48
-local launcher_icon_resized_h = 4*27
-local video_tile_inner_width  = 547
-
-
-local canvas_srcs = dofile("CanvasCloneSources")
-local vt = dofile("VideoTile.lua")
-
-canvas_srcs:init{
-    
-    launcher_frame_w               = launcher_icon_resized_w,
-    launcher_frame_h               = launcher_icon_resized_h,
-    launcher_frame_border          = 2,
-    launcher_frame_border_gradient = 7,
-    
-    video_tile_inner_width   = video_tile_inner_width,
-    video_tile_border_width  = 3,
-    video_tile_corner_radius = 20,
-    video_tile_font          = "FreeSans Medium 32px",
-    
-    my_apps_hl_w        = 300,
-    my_apps_hl_h        = 150,
-    my_apps_hl_shadow_h = 20,
-    
-    arrow_size = 20,
-    
-}
-
-vt:init{
-    shrunken_h  = 100,
-    expanded_h  = 900,
-    inner_w     = video_tile_inner_width,
-    canvas_srcs = canvas_srcs,
-    max_vis_len = 12,
-    font        = "FreeSans Medium 32px",
-}
-tiles = {}
-
-
-local vtb = dofile("VideoTileBar.lua")
-
-screen:add(vtb)
-
-kb =  dofile("KenBurns.lua")
-
-kb:init{}
-
-apps_kb = kb:create{
-    visible_w = 600,
-    visible_h = 950,
-    q = apps_imgs,
-}
-apps_kb:play()
-
-showcase_kb = kb:create{
-    visible_w = 600,
-    visible_h = 950,
-    q = showcase_imgs,
-}
-showcase_kb:play()
-
-
-myAppsHL = dofile("MyAppsHL.lua")
-
-myAppsHL:init{
-    img_srcs    = srcs,
-    canvas_srcs = canvas_srcs,
-    main_font   = "FreeSans Medium 28px",
-    sub_font    = "FreeSans Medium 24px",
-    icon_size   = {116/270*480,116}
-}
-
-myAppsHL = myAppsHL:create{}
---[[
-myAppsHL = Group{
-    children = {
-        Image{ name = "left", src = "assets/my_apps_slider/focus-left-corner.png", x = - 22, y = 116-y_off},
-        Image{ name = "right", src = "assets/my_apps_slider/focus-right-corner.png",x = 597 - 22*2, y = 116-y_off, },
-        Image{ src = "assets/my_apps_slider/focus-banner-1.png",    x = - 22,y=-y_off },
-        
-        Group{name = "sub_menu", x = 597-22,opacity = 0,y_rotation = {120,0,0},y=-30-y_off,
-            children = {
-                Image{ name = "sub_menu_bg",src = "assets/my_apps_slider/focus-banner-2flaps.png",},
-                arrow,
-                Text{text = "Play", font = myAppsHlFont, x = 100, y =  0},
-                Text{text = "Info", font = myAppsHlFont, x = 100, y = 40},
-                Text{text = "More", font = myAppsHlFont, x = 100, y = 80},
-            }
-        },
-        Clone{ name = "prev",y=-y_off, w = 116/270*480,h = 116},
-        Clone{ name = "next", w = 116/270*480,h = 116,position = {(116/270*480)/2,116/2-y_off},anchor_point = {(116/270*480)/2,116/2} },
-        Clone{source=canvas_srcs.launcher_icon_frame,y=-y_off,size = {116/270*480,116}},
-        Text{  name = "text", font = "FreeSans Medium 28px",x = 240,y=35-y_off},
-    },
-    on_key_down = function(self,k)
-        
-        return self.key_events[k] and self.key_events[k](self)
-        
-    end,
-    extra = {
-        sub_menu_functions = {
-            function(self)
-                arrow:hide()
-                apps:launch(self.app_id)
-            end,
-            function(self)
-                print("INFO")
-            end,
-            function(self)
-                print("MORE")
-            end,
-        },
-        sub_menu_i = 1,
-        key_events = {
-            [keys.Up] = function(self)
-                
-                if self.sub_menu_i == 1 then
-                    
-                    self:hide_sub_menu()
-                    
-                    self.logical_parent:grab_key_focus()
-                    
-                    self.logical_parent:on_key_down(keys.Up)
-                    
-                else
-                    
-                    self.sub_menu_i = self.sub_menu_i - 1
-                    
-                    arrow.y = 5+arrow.h/2+40*(self.sub_menu_i-1)
-                    
-                    return true
-                    
-                end
-                
-            end,
-            [keys.Down] = function(self)
-                
-                if self.sub_menu_i == #self.sub_menu_functions then
-                    
-                    self:hide_sub_menu()
-                    
-                    self.logical_parent:grab_key_focus()
-                    
-                    self.logical_parent:on_key_down(keys.Down)
-                    
-                else
-                    
-                    self.sub_menu_i = self.sub_menu_i + 1
-                    
-                    arrow.y = 5+arrow.h/2+40*(self.sub_menu_i-1)
-                    
-                    return true
-                    
-                end
-                
-            end,
-            [keys.Left] = function(self)
-                
-                self:hide_sub_menu()
-                
-                self.logical_parent:grab_key_focus()
-                
-                return true
-                
-            end,
-            [keys.Right] = function(self)
-                
-                self:hide_sub_menu()
-                
-            end,
-            [keys.OK] = function(self)
-                
-                self.sub_menu_functions[
-                        self.sub_menu_i
-                    ](self)
-                
-                return true
-            end,
-            
-        },
-        focus = function(self,text,icon,id)
-            print(id)
-            self.app_id = id
-            
-            myAppsHL:find_child("text").text = text
-            myAppsHL:find_child("prev").source = myAppsHL:find_child("next").source
-            myAppsHL:find_child("next").source = icon
-            myAppsHL:find_child("next").scale = {0,0}
-            
-            myAppsHL:find_child("next"):animate{
-                duration = 100,
-                scale    = {1,1},
-            }
-            
-        end,
-        make_sub_menu_animation = function(self)
-            self.sub_menu = AnimationState{
-                duration = 300,
-                transitions = {
-                    {
-                        source = "*", target = "SHOW", duration = 300,
-                        animator = Animator{
-                            duration   = 1000,
-                            properties = {
-                                {
-                                    source = self:find_child("right"),
-                                    name = "opacity",
-                                    
-                                    keys = {
-                                        {0.0, "LINEAR", 255},
-                                        {0.5, "LINEAR",   0},
-                                        {1.0, "LINEAR",   0},
-                                    }
-                                },
-                                {
-                                    source = self:find_child("sub_menu"),
-                                    name = "opacity",
-                                    
-                                    keys = {
-                                        {0.0, "LINEAR",   0},
-                                        {0.5, "LINEAR", 255},
-                                        {1.0, "LINEAR", 255},
-                                    }
-                                },
-                                {
-                                    source = self:find_child("sub_menu"),
-                                    name = "y_rotation",
-                                    
-                                    keys = {
-                                        {0.0, "LINEAR", 120},
-                                        {1.0, "LINEAR",   0},
-                                    }
-                                },
-                            }
-                        },
-                    },
-                    {
-                        source = "*", target = "HIDE", duration = 300,
-                        animator = Animator{
-                            duration   = 1000,
-                            properties = {
-                                {
-                                    source = self:find_child("right"),
-                                    name = "opacity",
-                                    
-                                    keys = {
-                                        {0.0, "LINEAR",   0},
-                                        {0.7, "LINEAR",   0},
-                                        {1.0, "LINEAR", 255},
-                                    }
-                                },
-                                {
-                                    source = self:find_child("sub_menu"),
-                                    name = "opacity",
-                                    
-                                    keys = {
-                                        {0.0, "LINEAR", 255},
-                                        {0.7, "LINEAR", 255},
-                                        {1.0, "LINEAR",   0},
-                                    }
-                                },
-                                {
-                                    source = self:find_child("sub_menu"),
-                                    name = "y_rotation",
-                                    
-                                    keys = {
-                                        {0.0, "LINEAR",   0},
-                                        {1.0, "LINEAR", 120},
-                                    }
-                                },
-                            }
-                        },
-                    },
-                },
-            }
-        end,
-        show_sub_menu = function(self)
-            
-            if self.sub_menu == nil then
-                
-                self:make_sub_menu_animation()
-                
-            end
-            
-            self.parent:raise_to_top()
-            
-            self.sub_menu.state = "SHOW"
-            
-        end,
-        hide_sub_menu = function(self)
-            
-            if self.sub_menu == nil then
-                
-                self:make_sub_menu_animation()
-                
-            end
-            
-            self.parent:raise_to_top()
-            
-            self.sub_menu.state = "HIDE"
-            
-        end,
-    }
-}
-
---]]
-l = dofile("MyAppsList.lua")
-
-l:init{max_vis_len = 10, slider = myAppsHL,frame=canvas_srcs.launcher_icon_frame}
-
-clouds =  dofile("MyAppsBg.lua")
-
-clouds:init{
-    visible_w = 600,
-    visible_h = 1000,
-}
-
-
-vtb:init{
-    video_tile = vt,
-    tiles = {
-        {text = "My Apps",  contents = Group{y=-48,children={clouds,l}, on_key_down = l.on_key_down}, slider = myAppsHL, expanded_h =l.list_h-20 },
-        {text = "Showcase", contents = showcase_kb},
-        {text = "App Store",contents = apps_kb},
-    },
-}
-
-
-screen.z = 100
-
-local screen_keys = {
-    [keys["1"]] = function()
-        vtb:move_anchor_point(0,0)
-        vtb.position = {0,0}
-        vtb:animate{
-            --mode = "EASE_IN_BACK",
-            duration = 400,
-            x_rotation = -180,
-        }
-    end,
-    [keys["2"]] = function()
-        vtb:move_anchor_point(0,0)
-        vtb.position = {0,0}
-        vtb:animate{
-            --mode = "EASE_OUT_BACK",
-            duration = 400,
-            x_rotation = 0,
-        }
-    end,
-    [keys["3"]] = function()
-        vtb:move_anchor_point(screen.w/2,screen.h/2)
-        vtb.position = {screen.w/2,screen.h/2}
-        vtb:animate{
-            mode = "EASE_IN_QUAD",
-            duration = 400,
-            scale = {1.5,1.5},
-            opacity = 0,
-        }
-    end,
-    [keys["4"]] = function()
-        vtb:move_anchor_point(screen.w/2,screen.h/2)
-        vtb.position = {screen.w/2,screen.h/2}
-        vtb:animate{
-            mode = "EASE_OUT_QUAD",
-            duration = 400,
-            scale = {1,1},
-            opacity = 255,
-        }
-    end,
-    [keys["5"]] = function()
-        vtb:move_anchor_point(screen.w/2,screen.h/2)
-        vtb.position = {screen.w/2,screen.h/2}
-        vtb:animate{
-            mode = "EASE_IN_BACK",
-            duration = 600,
-            z=600,
-            --z_rotation = 180,
-        }
-    end,
-    [keys["6"]] = function()
-        vtb:move_anchor_point(screen.w/2,screen.h/2)
-        vtb.position = {screen.w/2,screen.h/2}
-        vtb:animate{
-            mode = "EASE_OUT_BACK",
-            duration = 600,
-            z=0,
-            --z_rotation = 0,
-        }
-    end,
-}
-function screen:on_key_down(k)
-    print("yea",k,keys.BACK,screen_keys[k])
-    return screen_keys[k] and screen_keys[k]()
-end
-
 
 
 
