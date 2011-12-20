@@ -733,7 +733,7 @@ interface Controller [[ControllerDelegate*]]
             
             App * app = App::get(L);
 
-            gchar * path=app->normalize_path(url,&is_uri);
+            gchar * path=app->normalize_path(url,is_uri);
             
             if (path)
             {

@@ -18,7 +18,7 @@ function test_trickplay_check_version ()
 end
 
 function test_trickplay_fonts ()
-    assert_greater_than ( #trickplay.fonts, 20, "#trickplay.fonts returned: "..#trickplay.fonts..". Expected greater than 20" )
+    assert_greater_than ( #trickplay.fonts, 12, "#trickplay.fonts returned: "..#trickplay.fonts..". Expected greater than 12" )
 end
 
 function test_trickplay_version_exists ()

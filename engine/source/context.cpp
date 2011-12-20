@@ -902,7 +902,7 @@ int TPContext::run()
     {
         g_info( "CREATING MEDIA PLAYER..." );
 
-        media_player = MediaPlayer::make( media_player_constructor );
+        media_player = MediaPlayer::make( this , media_player_constructor );
     }
     else
     {
@@ -1799,6 +1799,7 @@ void TPContext::load_external_configuration()
         TP_LIRC_REPEAT,
         TP_APP_PUSH_ENABLED,
         TP_MEDIAPLAYER_ENABLED,
+        TP_MEDIAPLAYER_SCHEMES,
         TP_IMAGE_DECODER_ENABLED,
         TP_RANDOM_SEED,
         TP_PLUGINS_PATH,
@@ -2191,7 +2192,7 @@ MediaPlayer * TPContext::create_new_media_player( MediaPlayer::Delegate * delega
 {
     if ( get_bool( TP_MEDIAPLAYER_ENABLED , true ) )
     {
-        return MediaPlayer::make( media_player_constructor, delegate );
+        return MediaPlayer::make( this , media_player_constructor, delegate );
     }
     else
     {

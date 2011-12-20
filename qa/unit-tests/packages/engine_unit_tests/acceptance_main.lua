@@ -77,7 +77,7 @@ dofile( "packages/engine_unit_tests/tests/all_callbacks.lua" )
 
 dofile( "packages/engine_unit_tests/tests/Score1.lua" )
 dofile( "packages/engine_unit_tests/tests/Score2.lua" )
-dofile( "packages/engine_unit_tests/tests/Score3.lua" )
+--dofile( "packages/engine_unit_tests/tests/Score3.lua" )
 dofile( "packages/engine_unit_tests/tests/Score4.lua" )
 
 dofile( "packages/engine_unit_tests/tests/Timeline7.lua" )
@@ -109,22 +109,25 @@ idle.limit = 1.0
 function idle.on_idle( idle , seconds )
        total = total + seconds
 		
-	if total > 5 or (
-		animator_timeline_completed_called == true and
+	if 	( animator_timeline_completed_called == true  and
 		appOnLoadedCalled == true and
 		bitmap1_async_loaded_called == true and
-		image1Loaded == true and
+		image1Loaded == true  and
 		image2_callback_called == true and 
-		on_alpha_called == true and
+		--on_alpha_called == true  and
 		media_player_stream_completed == true and
 		timeline1_on_completed_called == true and
+		alpha1_completed == true and
+		timeline_4_test_completed == true and
 		timeline5_on_completed_called == true and
 		timeline6_on_completed_called == true and 
+		timeline_8_test_completed == true and
 		urlrequest1_on_complete_called == true and
 		tag_img_loaded == true and
 		animation_state2_completed == true and
-		total > 3
-		)  then
+		score_on_completed_called == true and 
+		total > 5 ) 
+ 		or total > 30 then
 
 			if  total < 10 then
 		 		all_callbacks_fired = true

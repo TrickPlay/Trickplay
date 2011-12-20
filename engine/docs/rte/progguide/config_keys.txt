@@ -15,6 +15,7 @@ When defining a key as an environment variable, the key name should add a TP_ pr
 
 The .trickplay file recognizes the configuration keys described below.
 
+	app_args - Specifies the string to pass from the TrickPlay Engine to the application's args property of the app global variable. The property is set before the application begins execution. Refer to <app.args> for further information.
 	console_port - Specifies the port number at which to connect to the TrickPlay Engine Console via Telnet. If set to "0", connecting to the Console via Telnet will be disabled. The default port number is "7777". Further information about the Console can be found in <The Engine Console> section of the Programmer's Guide.
 	controllers_enabled - Enables/disables support for remote controllers. If set to "TRUE", remote controllers will be enabled by creating a listener and establishing an mDNS service for discovery. The default setting is "FALSE" to disable remote controllers.
 	controllers_mdns_enabled - Enables/disables remote controller discovery via mDNS. Set to "FALSE" to disable mDNS discovery. The default setting is "TRUE" to enable mDNS discovery.
