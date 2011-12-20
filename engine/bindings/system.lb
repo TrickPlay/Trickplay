@@ -3,8 +3,13 @@
 #include "app.h"
 ]]
 
-# Global: system
-# Provides methods for interacting with the device
+/*
+	Global: system
+	
+	The system global variable provides functions to acquire and release various keyboard devices.
+	
+	Currently, these functions are not useful/relevant, so the system global variable is not included in the Engine Reference. When the variable becomes relevant in the future, it can be re-instated in the "System Info" section.
+*/
 
 global system [[TPContext*]]
 {

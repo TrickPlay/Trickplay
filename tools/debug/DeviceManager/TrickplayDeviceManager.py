@@ -10,7 +10,8 @@ from connection import CON
 NAME = Qt.UserRole + 1
 ADDRESS = Qt.UserRole + 2
 PORT = Qt.UserRole + 3
-
+ADDEVENT = QEvent.User + 1
+REMEVENT = QEvent.User + 2
 
 
 class TrickplayDeviceManager(QWidget):
@@ -24,15 +25,58 @@ class TrickplayDeviceManager(QWidget):
         
         self.addLocalComboItem()
         
-        self.discovery = TrickplayDiscovery(self.ui.comboBox, inspector)
-
+        self.discovery = TrickplayDiscovery(self)
+        self.inspector = inspector
+        QObject.connect(self.ui.comboBox, SIGNAL('currentIndexChanged(int)'), self.service_selected)
         QObject.connect(self.ui.run,
                         SIGNAL("clicked()"),
                         self.run)
         
         self._path = ''
         self.trickplay = QProcess()
+
+    def service_selected(self, index):
         
+		if index < 0:
+			return
+        
+		address = self.ui.comboBox.itemData(index, ADDRESS).toPyObject()
+		port = self.ui.comboBox.itemData(index, PORT).toPyObject()
+
+		if not address or not port:
+			return
+        
+		self.inspector.clearTree()
+        
+		print(index,address,port)
+
+		CON.port = port
+		CON.address = address
+
+    def event(self, event):
+		while 1:
+			if event.type() == ADDEVENT:
+				d = event.dict
+				print "Service \'", d[0], "\' added"
+				# Add item to ComboBox
+				self.ui.comboBox.addItem(d[0])
+				index = self.ui.comboBox.findText(d[0])
+				self.ui.comboBox.setItemData(index, d[1], ADDRESS)
+				self.ui.comboBox.setItemData(index, d[2], PORT)
+				self.ui.comboBox.setItemData(index, d[1], NAME)
+        		# Automatically select a service if only one exists
+				if 1 == self.ui.comboBox.count():
+					self.service_selected(1) # index -> 1 
+			elif event.type() == REMEVENT:
+				d = event.dict
+				print "Service \'", d[0], "\' removed"
+				# Remove item from ComboBox
+				index = self.ui.comboBox.findText(d[0])
+				self.ui.comboBox.removeItem(index)
+				self.inspector.clearTree()
+			return True
+
+ 
     def stop(self):
 		self.discovery.stop()
 

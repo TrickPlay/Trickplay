@@ -171,7 +171,7 @@ bool load_image( lua_State * L, ClutterTexture * texture )
     
     bool is_uri = false;
     
-    char * path = app->normalize_path( src , & is_uri );
+    char * path = app->normalize_path( src , is_uri );
     
     if ( ! path )
     {

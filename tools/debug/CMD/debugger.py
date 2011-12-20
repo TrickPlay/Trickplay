@@ -184,8 +184,13 @@ class CLDebuger():
 			else:
 				for b in pdata["breakpoints"]:
 					if "file" in b and "line" in b:
-						breakpoints_info = breakpoints_info+"["+str(index)+"] "+b["file"]+":"+str(b["line"])+"\n\t"
+						breakpoints_info = breakpoints_info+"["+str(index)+"] "+b["file"]+":"+str(b["line"])
 						index = index + 1
+					if "on" in b:
+						if b["on"] == True:
+							breakpoints_info = breakpoints_info+""+"\n\t"
+						else:
+							breakpoints_info = breakpoints_info+" (disabled)"+"\n\t"
 
 			print "\t"+breakpoints_info
 		
