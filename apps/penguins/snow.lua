@@ -5,7 +5,11 @@ t.src = "assets/snow-mid.png"
 layers[2] = Image(t)
 t.src = "assets/snow-close.png"
 layers[3] = Image(t)
-screen:add(layers[1],layers[2],layers[3])
+snowbank = Group{y = -1300}
+snowbank:add(Image{src = "snow-bank", position = {233,455}},
+			 Image{src = "snow-bank", position = {1940,455+640}, scale = {-1.15,1}})
+screen:add(layers[1],layers[2],layers[3],snowbank)
+snowbank.clone = _Clone{source = snowbank}
 
 local anim = Timeline{ duration = 2000, loop = true,
 	on_new_frame = function(self,ms,t)
@@ -34,10 +38,6 @@ return function(wind)
 	
 	layers[3]:raise(overlay)
 	layers[2]:raise(overlay)
-	
-	if wind >= 2 then
-		layers[1]:lower(overlay)
-	else
-		layers[1]:raise(overlay)
-	end
+	layers[1][wind >= 2 and "lower" or "raise"](layers[1],overlay)
+	snowbank:raise(overlay)
 end

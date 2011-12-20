@@ -2,7 +2,7 @@ Title: Complete Tutorial Source Code
 
 The final versions of each source file in the TrickPlay SDK Tutorial application are listed below.
 
-File: app
+File: app Metadata File
 
 	(code)
 	-- TrickPlay SDK Tutorial's app Metadata File

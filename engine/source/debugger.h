@@ -53,7 +53,19 @@ private:
     int 	returns;
     bool	in_break;
 
-    typedef std::pair< String, int > Breakpoint;
+    struct Breakpoint
+    {
+    	Breakpoint( const String & _file , int _line , bool _enabled = true )
+    	:
+    		file( _file ),
+    		line( _line ),
+    		enabled( _enabled )
+    	{}
+
+    	String	file;
+    	int		line;
+    	bool	enabled;
+    };
 
     typedef std::vector< Breakpoint > BreakpointList;
 

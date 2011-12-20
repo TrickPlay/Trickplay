@@ -128,7 +128,7 @@ end
 local end_game = Group{x=screen_w/2,y=screen_h/2}
 do
 	local end_game_text = Text{
-		text="You Crashed\n\nRestarting in 3",
+		text="YOU CRASHED\n\nRESTARTING IN 3",
 		alignment="CENTER",
 		font="Crystal 80px",
 		color="ffd652"
