@@ -1,6 +1,44 @@
 local g = ... 
 
 
+local image7 = Image
+	{
+		src = "/assets/images/cube-64.png",
+		clip = {0,0,64,64},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "image7",
+		position = {1223,179,0},
+		size = {64,64},
+		opacity = 255,
+		reactive = true,
+	}
+
+image7.extra.focus = {}
+
+function image7:on_key_down(key)
+	if image7.focus[key] then
+		if type(image7.focus[key]) == "function" then
+			image7.focus[key]()
+		elseif screen:find_child(image7.focus[key]) then
+			if image7.clear_focus then
+				image7.clear_focus(key)
+			end
+			screen:find_child(image7.focus[key]):grab_key_focus()
+			if screen:find_child(image7.focus[key]).set_focus then
+				screen:find_child(image7.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+image7.extra.reactive = true
+
+
 local image8 = Image
 	{
 		src = "/assets/images/river-slice.png",
@@ -49,7 +87,7 @@ local image17 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image17",
-		position = {1433,430,0},
+		position = {1399,391,0},
 		size = {475,89},
 		opacity = 255,
 		reactive = true,
@@ -87,7 +125,7 @@ local image6 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image6",
-		position = {1255,159,0},
+		position = {1308,113,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -124,7 +162,7 @@ local clone13 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone13",
-		position = {1192,179,0},
+		position = {1244,110,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -161,7 +199,7 @@ local clone8 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone8",
-		position = {601,429,0},
+		position = {601,384,0},
 		size = {475,89},
 		opacity = 255,
 		reactive = true,
@@ -198,7 +236,7 @@ local clone7 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone7",
-		position = {1121,180,0},
+		position = {1173,111,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -264,4 +302,4 @@ end
 image9.extra.reactive = true
 
 
-g:add(image8,image17,image6,clone13,clone8,clone7,image9)
+g:add(image7,image8,image17,image6,clone13,clone8,clone7,image9)

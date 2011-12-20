@@ -6,11 +6,13 @@ t.src = "assets/snow-mid.png"
 layers[2] = Image(t)
 t.src = "assets/snow-close.png"
 layers[3] = Image(t)
-snowbank = Group{y = -1300}
+snowgroup = Group{name = "snow"}
+snowgroup:add(layers[1],layers[2],layers[3])
+snowbank = Group{y = -1300, name = "snowbank"}
 snowbank:add(Image{src = "snow-bank", position = {233,455}},
 			 Image{src = "snow-bank", position = {1940,455+640}, scale = {-1.15,1}})
-screen:add(layers[1],layers[2],layers[3],snowbank)
-snowbank.clone = _Clone{source = snowbank}
+screen:add(snowgroup,snowbank)
+snowbank.clone = _Clone{source = snowbank, name = "snowclone"}
 
 local f = function(t)
 	a = {}
@@ -33,8 +35,6 @@ end
 return function(wind)
 	anim.state = wind
 	snowbank:raise(overlay)
-	layers[3]:raise(overlay)
-	layers[2]:raise(overlay)
-	layers[1][wind >= 2 and "lower" or "raise"](layers[1],overlay)
+	snowgroup:raise(overlay)
 	audio.loop("wind-" .. (wind == 3 and '2' or '1'),(wind == 3 and 4500 or 2000))
 end

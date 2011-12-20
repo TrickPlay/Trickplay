@@ -10,6 +10,7 @@ local ovx = 2020/4000
 local imgw2, imgh2 = img.w/2, img.h/2
 local ox, oy, oz = 0, 0, 0
 local boosted = false
+local landjump = 0
 img.armor = nil
 
 local reset = function()
@@ -118,7 +119,9 @@ local jump = function(vy)
 		a = (g == (row ~= 2) and -1 or 1)
 		b = img.z_rotation[1] % (a*360)
 		img.z_rotation = {b + (b*a < 240 and 360*a or 0), imgw2, imgh2}
-		jstate = jstate + (vy and 0.9 or 1)
+		jstate = min(jstate,1) + (vy and 0.9 or 1)
+	else
+		landjump = 5
 	end
 end
 
@@ -144,6 +147,10 @@ local land = function(y,obj,silent)
 		jstate = 0
 		if not silent then
 			audio.play("land")
+		end
+		if landjump > 0 then
+			jump()
+			landjump = 0
 		end
 	else
 		img.vy = -img.vy/2
@@ -193,6 +200,7 @@ function skating:on_new_frame(ms,t)
 	end
 	
 	--object collisions
+	if row == 1 and img.x < 250 then return end
 	for k,v in pairs(levels.this.children) do
 		if v.state and v.state > 0 and v.is_visible then
 			if v.state == 2 then
@@ -223,6 +231,7 @@ function skating:on_new_frame(ms,t)
 			fx.explode(12)
 		end
 	end
+	landjump = landjump-1
 	
 	if jstate == 0 and levels.this.bank > 0 and rand(4) == 1 then
 		fx.flakes(1)
@@ -266,7 +275,6 @@ function screen:on_key_down(key)
 		else
 			levels.next(5)
 		end
-		row = 1
 	elseif key >= keys["0"] and key <= keys["9"] then
 		skating:rewind()
 		reset()
@@ -274,6 +282,7 @@ function screen:on_key_down(key)
 		if skating.is_playing and not img.armor then
 			jump()
 		elseif levels.this.id == 1 then
+			deathcount = 0
 			levels.next()
 		end
 	end
