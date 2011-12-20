@@ -122,7 +122,9 @@ local function main()
         icon_size   = {116/270*480,116},
     }
     
-    
+    mkb:init{
+        img_srcs    = srcs,
+    }
     
     
     
@@ -166,14 +168,14 @@ local function main()
             end
         }
     end
-    
+    showcase = Group{}
     do
         
         local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=10}
         local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=50}
         
         showcaseHL = HL:create{
-            logical_parent = l,
+            logical_parent = showcase,
             contents = Group{
                 children = {
                     title,
@@ -191,6 +193,7 @@ local function main()
     
     showcase=mkb:create{
         hl = showcaseHL,
+        group = showcase,
         w = 547,
         kb = kb,
         panes = {
@@ -234,13 +237,15 @@ local function main()
         srcs = srcs,
     }
     
+    
+    shop = Group{}
     do
         
         local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=10}
         local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=50}
         
         shopHL = HL:create{
-            logical_parent = l,
+            logical_parent = shop,
             contents = Group{
                 children = {
                     title,
@@ -257,6 +262,7 @@ local function main()
     end
     
     shop=mkb:create{
+        group = shop,
         hl = shopHL,
         w = 547,
         kb = kb,
@@ -297,6 +303,7 @@ local function main()
         },
         srcs = srcs,
     }
+    
     l:init{max_vis_len = 10, slider = myAppsHL,frame=canvas_srcs.launcher_icon_frame}
     
     clouds:init{

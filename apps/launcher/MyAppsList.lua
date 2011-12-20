@@ -41,10 +41,10 @@ local make_entry = function(app_id,app_name)
         
         print("Unfocus "..app_name )
         
-        g:animate{
-            duration = 100,
-            scale    = {1,1}
-        }
+        --g:animate{
+        --    duration = 100,
+        --    scale    = {1,1}
+        --}
         
     end
     
@@ -53,10 +53,10 @@ local make_entry = function(app_id,app_name)
         print("Focus "..app_name )
         
         
-        g:animate{
-            duration = 100,
-            scale    = {1.2,1.2}
-        }
+        --g:animate{
+        --    duration = 100,
+        --    scale    = {1.2,1.2}
+        --}
         
     end
     
@@ -275,7 +275,7 @@ end
 move_up = function()
     
         
-        list[hl_index]:unfocus()
+        --list[hl_index]:unfocus()
         
         if hl_index == wrap_i(top_vis_i+1) then
             
@@ -324,7 +324,7 @@ move_up = function()
             
         end
         
-        list[hl_index]:focus()
+        --list[hl_index]:focus()
         hl:focus(list[hl_index].text.text,list[hl_index].icon,list[hl_index].app_id)
         
         update:start()
@@ -334,7 +334,7 @@ end
 move_dn = function()
     
         
-        list[hl_index]:unfocus()
+        --list[hl_index]:unfocus()
         
         if hl_index == wrap_i( top_vis_i + vis_len - 2 ) then
             
@@ -387,7 +387,7 @@ move_dn = function()
         end
         
         
-        list[hl_index]:focus()
+        --list[hl_index]:focus()
         hl:focus(list[hl_index].text.text,list[hl_index].icon,list[hl_index].app_id)
         print(hl_index,top_vis_i)
         update:start()

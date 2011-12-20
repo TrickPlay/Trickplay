@@ -66,8 +66,8 @@ local function make_sub_menu(p)
                 animator = Animator{
                     duration   = dur,
                     properties = {
-                        {
-                            source = right_triangle,
+                        p.right_triangle and {
+                            source = p.right_triangle,
                             name = "opacity",
                             
                             keys = {
@@ -75,7 +75,7 @@ local function make_sub_menu(p)
                                 {0.5, "LINEAR",   0},
                                 {1.0, "LINEAR",   0},
                             }
-                        },
+                        } or nil,
                         {
                             source = sub_menu_edge,
                             name = "opacity",
@@ -125,8 +125,8 @@ local function make_sub_menu(p)
                 animator = Animator{
                     duration   = dur,
                     properties = {
-                        {
-                            source = right_triangle,
+                        p.right_triangle and {
+                            source = p.right_triangle,
                             name = "opacity",
                             
                             keys = {
@@ -134,7 +134,7 @@ local function make_sub_menu(p)
                                 {0.7, "LINEAR",   0},
                                 {1.0, "LINEAR", 255},
                             }
-                        },
+                        } or nil,
                         {
                             source = contents,
                             name = "opacity",
@@ -420,7 +420,7 @@ function myAppsHL:create(p)
         edge_src       = sub_sub_menu_edge,
         logical_parent = sub_menu,
         inverse_fade_with = sub_menu_shadow,
-        fade_with = sub_sub_menu_shadow,
+        fade_with         = sub_sub_menu_shadow,
         local_close    = function(self)
             
             self:hide_sub_menu()
@@ -488,8 +488,9 @@ function myAppsHL:create(p)
         parent_ref     = instance,
         edge_src       = sub_menu_edge,
         logical_parent = p.logical_parent,
-        inverse_fade_with = {menu_shadow,right_triangle},
-        fade_with = sub_menu_shadow,
+        right_triangle = right_triangle,
+        old_shadow     = menu_shadow,
+        new_shadow     = sub_menu_shadow,
         local_close    = function(self)
             
             self:hide_sub_menu()
