@@ -145,7 +145,7 @@ local function groupon_get_deals(callback,lat,lng,radius)
 			
 			if response_object.code == 400 and lat == nil then
 				
-				groupon_get_deals(callback,33.93,-118.4,50)
+				groupon_get_deals(callback,29.77,-95.4,50)
 				
 			else
 				

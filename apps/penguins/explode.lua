@@ -1,70 +1,105 @@
-local i, d, t1, s, m2, mz1
-local snow   = {"explode-16","explode-24","explode-32"}
+local i, d, dt, d2, s, px, py, b
+local snow		= {"explode-16","explode-24","explode-32"}
+local chunks	= {"icechunk-1","icechunk-2","icechunk-3","icechunk-4"}
+local splashes	= {"splash-1","splash-2"}
 
-local group = Group{name = "explosion"}
-overlay:add(group)
+group = overlay.explode
 group:raise(penguin)
+group.level = levels.this.id
 
 local anim = Timeline{duration = 2300}
 
 function anim:on_new_frame(ms,t)
-	t1 = t*t*100
-	s = 1+t*3
-	m2 = ms/2^(ms/1000)
-	mz1 = ms*ms/8000
+	d = self.delta
+	dt = d/self.duration/2
+	s = 1+dt*6
+	d2 = 4^(d/1000)
+	b = levels.this.bank > 0
 	for k,v in ipairs(group.children) do
-		v.opacity = math.max(0,v.oo+v.vo*ms)
-		if v.opacity == 0 then
+		v.opacity = math.max(0,v.opacity+v.vo*d)
+		if v.opacity == 0 or (b and v.vy > 0 and v.y > ground[row]+50) then
 			v:free()
-		else
-			v.x = v.ox + v.vx*m2 + t1*6
-			v.y = v.oy + v.vy*m2 + t1
-			if v.z1 then
-				v.z_rotation = {v.z1+mz1,v.z2,v.z3}
+		elseif v.vz or v.vo == -0.25 then
+			if v.vo == -0.125 then
+				v.vx = v.vx/d2 + dt
+				v.vy = v.vy/d2 + dt/4
+				v.vz = v.vz+dt
 			else
-				v.scale = {v.os*s,v.os*s}
+				v.vy = v.vy + gravity*d/2
 			end
+			v.x = v.x + v.vx*d
+			v.y = v.y + v.vy*d
+			if v.vo ~= -0.25 then
+				v.z_rotation = {v.z_rotation[1]+v.vz*d,0,0}
+			else
+				v.scale = {v.scale[1]*s,v.scale[2]*s}
+			end
+		elseif v.vx then
+			v.scale = {v.scale[1]*s,v.scale[2]*s}
+		else
+			v.y = v.y + v.vy*d
+			v.t = v.t + d
+			v.scale = {v.scale[1]+d/800,1.5-(2*v.t/800-1)^2}
 		end
 	end
 end
 
-return function(vx,vy)
-	if anim.is_playing then
-		local ms = anim.elapsed
-		local t = ms/anim.duration
-		m2 = 1/2^(ms/1000)
-		t1 = t*200/anim.duration
-		
-		for k,v in ipairs(group.children) do
-			v.ox, v.oy = v.x, v.y
-			v.vx, v.vy = v.vx*m2 + t1*6, v.vy*m2 + t1
-			if v.z1 then
-				v.z1 = v.z_rotation[1]
-			end
-			v.os = v.scale[1]
-			v.oo = v.opacity
+return function(bank,block,splash)
+	if block then
+		if block.level ~= group.level then return end
+		px, py = block.x + block.w/2, block.y + block.h/2
+		for i=1,rand(5,8) do
+			s = Image{src = chunks[rand(4)], opacity = 255, x = px+nrand(50),
+					  y = py+(levels.this.bank > 0 and nrand(30)-30 or nrand(50)),
+					  scale = {rand(2)*2-3,rand(2)*2-3}, z_rotation = {rand(4)*90,0,0}}
+			s.anchor_point = {s.w/2,s.h/2}
+			s.vx, s.vy, s.vz, s.vo = (s.x-px)/160, (s.y-py)/160-0.25, nrand(0.5), -0.2
+			group:add(s)
+		end
+		group:lower(penguin)
+	elseif splash then
+		px, py = penguin.x + penguin.w/2, penguin.y + penguin.h/2
+		s = Image{src = "splash-3", x = px, y = ground[row]+110,
+				  anchor_point = {64,120}, scale = {0.5,0.2}, opacity = 255}
+		s.vy, s.vo, s.t = bank and 0 or 0.02, -0.32, 0
+		group:add(s)
+		group:lower(penguin)
+	else
+		px, py = penguin.x + penguin.w/2, penguin.y + penguin.h/2
+		if not splash and (not bank or bank > 5) then
+			group:raise(penguin)
+			s = Image{src = "explode-128", x = px, y = py - (bank and 20 or 0),
+				opacity = 255, anchor_point = {64,64}, scale = {1,1}}
+			s.vx, s.vy, s.vo = 0, (bank and -0.06 or 0), -0.32
+			group:add(s)
+		else
+			group:lower(penguin)
 		end
 	end
 	
-	local px, py = penguin.x + penguin.w/2, penguin.y + penguin.h/2
+	if bank and bank > 5 then
+		py = py - 30
+	end
 	
-	local p = Image{src = "explode-128", opacity = 255,
-		anchor_point = {64,64}, scale = {1,1}}
-	group:add(p)
-	p.x, p.y, p.ox, p.oy = px, py, px, py
-	p.vx, p.vy = 0, 0
-	p.oo, p.os, p.vo = 255, 1, -255/800
-	
-	for i=1,rand(15,20) do
-		s = Image{src = snow[rand(#snow)]}
-		group:add(s)
-		s.x, s.y, s.ox, s.oy = px, py, px, py
-		s.vx, s.vy = nrand(0.25), nrand(0.25)
-		s.z1, s.z2, s.z3 = rand(360), s.w*nrand(0.7), s.h*nrand(0.7)
-		s.z_rotation = {s.z1,s.z2,s.z3}
-		s.oo = 127 + rand(128)
-		s.opacity = s.oo
-		s.vo = -255/2000
+	if not block then
+		for i=1,(bank or rand(15,20)) do
+			s = splash and splashes[rand(2)] or snow[rand(#snow-(bank and 1 or 0))]
+			s = Image{src = s, x = px, y = py, opacity = 127 + rand(128), z_rotation = {rand(360),0,0}}
+			s.vx = nrand(0.25)
+			if splash then
+				s.anchor_point = {s.w/2, s.h/2}
+				s.vo = -0.25
+				s.vy = nrand(0.15) - (bank and 0.05 or 0) - 0.25 - 4*(0.25-math.abs(s.vx))^2
+				d = nrand(0.2)+0.7
+			else
+				s.anchor_point = {s.w*(0.5+nrand(0.7)), s.h*(0.5+nrand(0.7))}
+				s.vz, s.vo = 0.1, -0.125
+				s.vy = nrand(0.25) - (bank and 0.15 or 0)
+				d = nrand(0.2)+0.9
+			end
+			s.scale = {d,d}
+			group:add(s)
+		end
 	end
 	
 	anim:rewind()
