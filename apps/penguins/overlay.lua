@@ -25,6 +25,9 @@ local anim = Animator{properties = {
 		overlay.y = 0
 		if levels.this.bank > 0 then
 			snowbank.y = 0
+			snowbank:show()
+		else
+			snowbank:hide()
 		end
 		overlay.clone:unparent()
 		snowbank.clone:unparent()

@@ -1,18 +1,20 @@
 local levels = {}
 
 local generate = function(g,top)
-	g:add(Image{src = "bg-slice-2", y = 0, size = {1920,542}, tile = {true,false}})
-	if top then
-		g:add(Image{src = "bg-sun", position = {math.random(300,1600),100}})
-	end
-	for i=15,20 do
-		if rand(2) == 1 then
-			a = Image{src = "tree-" .. rand(5)}
-			a.position = {rand(20,1900),542}
-			a.anchor_point = {a.w/2,a.h}
-			a.scale = {i/rand(18,20)*(rand(2)==1 and 1 or -1),i/rand(18,20)}
-			a.opacity = 255*i/20
-			g:add(a)
+	if usebg then
+		g:add(Image{src = "bg-slice-2", y = 0, size = {1920,542}, tile = {true,false}})
+		if top then
+			g:add(Image{src = "bg-sun", position = {math.random(300,1600),100}})
+		end
+		for i=12,15 do
+			if rand(2) == 1 then
+				a = Image{src = "tree-" .. rand(5)}
+				a.position = {rand(20,1900),542}
+				a.anchor_point = {a.w/2,a.h}
+				a.scale = {i/rand(13,15)*(rand(2)==1 and 1 or -1),i/rand(13,15)}
+				a.opacity = 255*i/15
+				g:add(a)
+			end
 		end
 	end
 	g.ice = Image{src = "ice-slice", position = {0,536}, size = {1920,55}, tile = {true,false}}
@@ -26,8 +28,10 @@ local generate = function(g,top)
 	else
 		g:loader2()
 	end
+	if usebg then
 	g:add(Image{src = "floor-btm", position = {0,591}},
 		  Image{src = "floor-btm", position = {1920,591}, scale = {-1,1}})
+	end
 end
 
 local free = function(self)
@@ -105,7 +109,7 @@ end
 
 local toload = {
 	{0,	2,0,"Splash Screen"},
-	--[[
+	---[[
 	--]]
 	{1,	1,0,"Penguin In Motion"},
 	{2,	1,0,"You're Probably Gonna Die"},
@@ -117,6 +121,7 @@ local toload = {
 	{8,	1,0,"Pool Party"},
 	{9,	3,0,"A Brief Exercise in Futility"},
 	{10,2,0,"Blocks Stop for No Penguin"},
+	--
 	{11,2,0,"Playtime With Mr. Seal"},
 	{12,1,0,"And Now Bounce Me Lower"},
 	{13,2,0,"Dangerous Airspace"},
@@ -127,6 +132,7 @@ local toload = {
 	{17,2,0,"Double Bridges"},
 	{18,3,0,"Bridge Over Cold Water"},
 	{29,3,0,"March Of the Ice"},
+	--
 	{19,2,0,"A Good Swift Kick"},
 	{20,1,0,"Stick the Landing"},
 	{30,3,0,"Fish Hopper"},
@@ -137,6 +143,7 @@ local toload = {
 	{26,2,1,"Over the Top"},
 	{27,3,1,"Can't See Enough"},
 	{28,3,1,"Where's Walrus?"},
+	--
 	{31,1,0,"That Armor Looks Smashing"},
 	{32,1,0,"Drop Like A Rock"},
 	{33,1,1,"Smashing In the Snow"},
@@ -157,7 +164,7 @@ levels.next = function(arg)
 	levels.this:load()
 	levels.this.y = 1120
 	screen:add(levels.this)
-	levels.this:lower_to_bottom()
+	levels.this:lower(oldlevel)
 	
 	levels.this:animate{y = 0, duration = 1120, mode = "EASE_IN_OUT_QUAD"}
 	oldlevel:animate{y = -1300, duration = 1140, mode = "EASE_IN_OUT_QUAD", on_completed = function()
@@ -171,6 +178,7 @@ levels.next = function(arg)
 	end}
 	
 	overlay.next()
+	row = 1
 end
 
 return levels

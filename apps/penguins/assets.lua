@@ -245,11 +245,15 @@ local make = {
 	["snow-bank"]		= f("snow-bank.png"),
 	["river-left"]		= f("river-left.png"),
 	["river-right"]		= f("river-right.png"),
-	["icicles.png"]		= f("icicles.png", 3),
+	["icicles.png"]		= f("icicles.png", 3, function (obj)
+		obj.insert = function()
+			obj:free()
+		end
+	end),
 	["cube-64.png"]		= f("cube-64.png", 3, cubedriver),
 	["cube-128-4.png"]	= f("cube-128-4.png", 3, cubedriver),
 	["cube-128.png"]	= f("cube-128.png", 3, cubedriver),
-	["river-slice.png"]	= f("river-slice.png", 1,function (obj)
+	["river-slice.png"]	= f("river-slice.png", 1, function (obj)
 		obj.insert = function(self)
 			local group = self.parent
 			local x, y, w = group.ice.x, group.ice.y, group.ice.w
@@ -275,7 +279,7 @@ local make = {
 	end),
 	["river-slice-2"]	= f("river-slice-2.png"),
 	["water-ring"]		= f("water-ring.png"),
-	["beach-ball.png"]	= f("beach-ball.png", 2, function (obj)
+	["beach-ball.png"]	= f("beach-ball.png", 1, function (obj)
 		obj:move_anchor_point(obj.w/2,obj.h/2)
 		local amp = 25
 		local y = obj.y
@@ -305,13 +309,13 @@ local make = {
 		end
 		
 		obj.collision = function()
-			if penguin.y + penguin.h/2 > obj.y-64 then
+			if obj.x-96 > penguin.x+penguin.w/2 or penguin.x+penguin.w/2 > obj.x+96 then
 				penguin.kill(obj)
 			elseif penguin.vy > 0 then
 				if t > 0.5 then
 					t = 1-t
 				end
-				a = atan2(obj.y-penguin.y-64,obj.x-penguin.x)
+				a = atan2(y-penguin.y-64,obj.x-penguin.x)
 				a = -2*max(penguin.vy,0.8)*sin(a + sin(4*a-pi)/4)
 				penguin.jump(a)
 				amp = amp - 10*a
@@ -329,6 +333,7 @@ local make = {
 		local falling = false
 		local dur = -3*vy/gravity
 		local t = 0.5
+		local high = true
 		
 		step[obj] = function(d,ms)
 			t = min(t+d/dur,1)%1
@@ -345,7 +350,8 @@ local make = {
 					t = 0.5
 				else
 					obj.seal.switch()
-					oz, vy, vz = obj.z_rotation[1], nrand(0.15)-0.9, nrand(500)
+					oz, vy, vz = obj.z_rotation[1], high and -0.95 or -0.75, nrand(500)
+					high = not high
 					s = s + 0.2
 					st = 0
 					t = 0.001
@@ -518,7 +524,7 @@ local make = {
 			penguin:boost()
 			obj:hide()
 		end
-	end, {l = 50, t =50, r = -50, b = -50}),
+	end, {l = 30, t = 30, r = -30, b = -30}),
 	["streak"]			= f("streak.png"),
 	["armor-1"]			= f("armor-1.png"),
 	["armor-2"]			= f("armor-2.png"),
