@@ -10,13 +10,16 @@ local generate = function(g,top)
 			a = Image{src = "tree-" .. rand(5)}
 			a.position = {rand(20,1900),542}
 			a.anchor_point = {a.w/2,a.h}
-			a.scale = {i/rand(18,20),i/rand(18,20)}
+			a.scale = {i/rand(18,20)*(rand(2)==1 and 1 or -1),i/rand(18,20)}
 			a.opacity = 255*i/20
 			g:add(a)
 		end
 	end
 	g.ice = Image{src = "ice-slice", position = {0,536}, size = {1920,55}, tile = {true,false}}
 	g:add(g.ice)
+	if g.bank > 0 then
+		g:add(Image{src = "snow-bank", position = {top and 1904 or 30,410}, scale = {top and -1.12 or 1.12,1}})
+	end
 	if top then
 		g:add(Image{src = "igloo-back", position = {235,374,0}})
 		g:loader1()
@@ -55,8 +58,11 @@ local new = function (def)
 	
 	group.free = free
 	group.snow = def[2]
-	group.name = def[3]
+	group.bank = def[3]
+	group.name = def[4]
 	group.id = #levels+1
+	group.bridges = {[ground[1]] = 1}
+	group.trans = ground[1]+640
 	
 	group.load = function()
 		if group.loader2 then
@@ -83,12 +89,13 @@ local new = function (def)
 		
 		for k,v in pairs(group.children) do
 			if v.insert then
-				v:insert()
+				v:insert(true)
 				v.insert = nil
 			end
-			a = v.anchor_point
-			v.bb = {l = v.x - a[1], r = v.x - a[1] + v.w*v.scale[1],
-					t = v.y - a[2], b = v.y - a[2] + v.h*v.scale[2]}
+			if v.bbox then
+				v.bb = {l = v.x + v.bbox.l, r = v.x + v.bbox.r,
+						t = v.y + v.bbox.t, b = v.y + v.bbox.b}
+			end
 			v.reactive = false
 		end
 	end
@@ -97,73 +104,72 @@ local new = function (def)
 end
 
 local toload = {
-	{0,	2,"Splash Screen"},
-	{1,	1,"Penguin In Motion"},
-	{2,	1,"You're Probably Gonna Die"},
-	{3,	2,"Ice Trios"},
-	{4,	2,"Double Jump!"},
-	{5,	1,"Great Heights"},
-	{6,	2,"Cold Water"},
-	{7,	3,"Bounce Me Higher"},
-	{8,	1,"Pool Party"},
-	{9,	3,"A Brief Exercise in Futility"},
-	{10,2,"Blocks Stop for No Penguin"},
-	{11,2,"The Mysterious Mr. Seal"},
-	{12,1,"And Now Bounce Me Lower"},
-	{13,2,"Dangerous Airspace"},
-	{14,2,"Return of Mr. Seal"},
-	{15,2,"Go the Distance"},
-	{16,2,"Slide Across"},
-	{17,2,"Double Bridges"},
-	{18,3,"Bridge Over Cold Water"},
-	{19,2,"A Good Swift Kick"},
-	{20,1,"Stick the Landing"}
-	}
+	{0,	2,0,"Splash Screen"},
+	---[[
+	--]]
+	{1,	1,0,"Penguin In Motion"},
+	{2,	1,0,"You're Probably Gonna Die"},
+	{3,	2,0,"Ice Trios"},
+	{4,	2,0,"Double Jump!"},
+	{5,	1,0,"Great Heights"},
+	{6,	2,0,"Cold Water"},
+	{7,	3,0,"Bounce Me Higher"},
+	{8,	1,0,"Pool Party"},
+	{9,	3,0,"A Brief Exercise in Futility"},
+	{10,2,0,"Blocks Stop for No Penguin"},
+	{11,2,0,"Playtime With Mr. Seal"},
+	{12,1,0,"And Now Bounce Me Lower"},
+	{13,2,0,"Dangerous Airspace"},
+	{14,2,0,"Return of Mr. Seal"},
+	{22,2,0,"Squeeze Through"},
+	{15,2,0,"Go the Distance"},
+	{16,2,0,"Slide Across"},
+	{17,2,0,"Double Bridges"},
+	{18,3,0,"Bridge Over Cold Water"},
+	{29,3,0,"March Of the Ice"},
+	{19,2,0,"A Good Swift Kick"},
+	{20,1,0,"Stick the Landing"},
+	{30,3,0,"Fish Hopper"},
+	{21,1,0,"From the Top Now"},
+	{23,1,1,"Penguin the Snowplow"},
+	{24,1,1,"Too Cold For a Swim"},
+	{25,1,1,"Snow Doubles"},
+	{26,2,1,"Over the Top"},
+	{27,3,1,"Can't See Enough"},
+	{28,3,1,"Where's Walrus?"},
+	{31,1,0,"That Armor Looks Smashing"},
+	{32,1,0,"Drop Like A Rock"},
+	{33,1,1,"Smashing In the Snow"},
+}
 
 for k,v in ipairs(toload) do
 	levels[#levels+1] = new(v)
 end
 
 levels.this = levels[1]
-levels.this:load()
 
 screen:show()
 screen:add(levels.this)
 
 levels.next = function(arg)
 	local oldlevel = levels.this
-	levels.this = levels[(levels.this.id) % #levels + (levels.this.id > 1 and arg or 1)]
-	
+	levels.this = levels[oldlevel.id % #levels + (oldlevel.id > 1 and arg or 1)]
 	levels.this:load()
-	overlay.level:animate{opacity = 0, duration = 570, on_completed = function()
-		overlay.level.text = (levels.this.id-1) .. ": " .. levels.this.name
-		overlay.level:animate{opacity = 255, duration = 560}
-	end}
-	
 	levels.this.y = 1120
 	screen:add(levels.this)
 	levels.this:lower_to_bottom()
-	snow(levels.this.snow)
-	
-	if levels.this.id ~= 1 then
-		screen:add(overlay.clone)
-		overlay.clone.y = 1120
-	end
 	
 	levels.this:animate{y = 0, duration = 1120, mode = "EASE_IN_OUT_QUAD"}
-	overlay.clone:animate{y = 0, duration = 1120, mode = "EASE_IN_OUT_QUAD"}
-	
 	oldlevel:animate{y = -1300, duration = 1140, mode = "EASE_IN_OUT_QUAD", on_completed = function()
 		oldlevel:free()
+		collectgarbage("collect")
 		if levels.this.id ~= 1 then
-			overlay.clone:unparent()
-			overlay.position = {0,0}
 			row = 1
 			penguin.skating:start()
 		end
-		collectgarbage("collect")
 	end}
-	overlay:animate{y = -1300, duration = 1140, mode = "EASE_IN_OUT_QUAD"}
+	
+	overlay.next()
 end
 
 return levels
