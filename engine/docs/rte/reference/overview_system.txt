@@ -1,5 +1,5 @@
 
-Title: System Settings Overview
+Title: System Information Overview
 
-This is a placeholder for the System Settings:Overview section of the TrickPlay Runtime Engine Reference
+A TrickPlay application can access information about itself, as well as the TrickPlay Engine. Information related to the application is stored in the <app> global variable, while the <trickplay> variable contains information about the TrickPlay Engine.
 

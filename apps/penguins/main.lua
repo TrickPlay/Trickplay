@@ -1,50 +1,25 @@
 --[[
 wed
-	level 'suck it up and squeeze through'? (after level 3 maybe)
-	inter-level platforms
-	snow ramp thing
-	finish level 20, make 21 ('blue fish ice bridge')
-	insert rolling/bouncing blocks? (3-5 levels)
+	armor levels
+	internal release
+	weather vane
+	moving block levels
+	darkness
 	
-mon-wed
-	blue fish adjustments, preferrably w/ burst anim
-	2-3 blue fish levels
-	snow banks (need assets)
-	5-8 snow bank levels
-	
+level notes
+	12a and 16a and might be too difficult
 
-Mon
-refine collisions
-breakable blocks
-faster fish adjustments
-armor
-gravity fish
+refactor animation, gravity fall systems?
+reduce particle animation
+submersion of ball
 darkness
-snow tunnel
-polar bear
-eskimo
-monster
+monster?
 
-
-submersion of
-	ball
-	ice blocks
-	seal
-	penguin
-splashing
-double jump cues?
-
-
-Need
+need
 	audio
 	better ice water
-	better seal
-	breakable block
-	"faster" fish
-	armor pieces
-	"upside down" fish
+	switches
 	darkness
-	snow tunnel
 ]]
 
 math.randomseed(os.time())
@@ -52,17 +27,21 @@ rand = math.random
 function nrand(n)
     return (2*rand()-1)*n
 end
+function drand(n)
+    return (rand()+rand()-1)*n
+end
 
 gravity = 0.002
 ground = {440,1080}
 row = 1
 
 dofile("cloner.lua")
+levels  = dofile("levels.lua")
+levels.this:load()
 snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
-levels  = dofile("levels.lua")
 overlay	= dofile("overlay.lua")
-snow(levels.this.snow)
+snow(levels.this.snow,levels.this.bank)
 explode = dofile("explode.lua")
 
 collectgarbage("collect")

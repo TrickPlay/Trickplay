@@ -8,7 +8,7 @@ local function main()
 
 
 --display the screen
-screen.perspective = {1,1,screen.perspective[3],100}
+--screen.perspective = {1,1,screen.perspective[3],100}
 
 ---------------------
 ---- Globals
@@ -83,6 +83,13 @@ give_keys = function(new_handler)
 end
 
 
+--size of the board, based on difficulty
+board_spec = {
+    --left_x, top_y, scale of tile, num_rows, num_cols
+    {    534,    88,             1,        3,        4},
+    {    667,    38,           .85,        4,        4},
+    {    438,    56,            .8,        4,        6}
+}
 ---------------------------
 ---- Other Files
 ---------------------------
