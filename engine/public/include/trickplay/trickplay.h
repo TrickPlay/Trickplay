@@ -33,7 +33,7 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    23
+#define TP_MINOR_VERSION    25
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
@@ -207,6 +207,10 @@ typedef struct TPContext TPContext;
                                 will behave as if there is no media player.
                                 Defaults to "true".
 
+    TP_MEDIAPLAYER_SCHEMES - 	A comma separated list of additional URI schemes allowed by
+    							the media player. The media player always allows http and https.
+                                Defaults to "rtsp".
+
     TP_IMAGE_DECODER_ENABLED -  Whether the external image decoder is enabled. If set to false,
                                 only internal decoders will be used.
                                 Defaults to "true".
@@ -306,6 +310,7 @@ typedef struct TPContext TPContext;
 #define TP_LIRC_REPEAT                  "lirc_repeat"
 #define TP_APP_PUSH_ENABLED             "app_push_enabled"
 #define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
+#define TP_MEDIAPLAYER_SCHEMES			"mediaplayer_schemes"
 #define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
 #define TP_RANDOM_SEED                  "random_seed"
 #define TP_PLUGINS_PATH                 "plugins_path"

@@ -36,12 +36,6 @@ function image0:on_key_down(key)
 	return true
 end
 
-function image0:on_key_down(key)
-	if key == keys.OK then
-		levels.next()
-	end
-end
-
 image0.extra.reactive = false
 
 
