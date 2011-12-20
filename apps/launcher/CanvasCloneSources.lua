@@ -52,6 +52,10 @@ local make_launcher_frame = function(p)
     local c = Canvas(p.w,p.h)
     
     c.line_width = 2
+    c:move_to(0,0)
+    c:set_source_bitmap(Bitmap("assets/icon-overlay.png"))
+    c:rectangle(0,0,c.w,c.h)
+    c:fill()
     c.op = "SOURCE"
     for i = 0,p.border do
         
@@ -67,7 +71,6 @@ local make_launcher_frame = function(p)
         c:stroke()
         
     end
-    
     
     return c:Image{x = 500,y=500}
     
@@ -121,7 +124,7 @@ local function make_video_tile_frame(p)
 end
 
 function HL_arrow(sz)
-    local arrow = Canvas(sz,sz)
+    local arrow = Canvas(sz/2,sz)
     arrow:move_to(0,0)
     arrow:line_to(arrow.w,arrow.h/2)
     arrow:line_to(0,arrow.h)
