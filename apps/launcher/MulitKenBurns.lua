@@ -12,14 +12,33 @@ local has_been_initialized = false
 local rule_h = 3
 
 
+local img_srcs, caption_grad
 
+function mkb:init(p)
+    
+    assert(not has_been_initialized)
+    
+    if type(p) ~= "table" then error("must pass a table",2) end
+    
+    img_srcs = p.img_srcs or error("must pass img_srcs")
+    
+    
+    caption_grad = Image{src = "assets/lower-gradient.png"}
+    
+    img_srcs:add(caption_grad)
+    
+    has_been_initialized = true
+end
 
 
 function mkb:create(p)
     
-    local instance = Group{x=3}
+    local instance = p.group or Group{}
+    
+    instance.x = 3
+    
     local kb_s = {}
-    --assert(not has_been_initialized)
+    assert(has_been_initialized)
     
     if type(p) ~= "table" then error("must pass a table",2) end
     
@@ -52,7 +71,7 @@ function mkb:create(p)
         
         curr_y = curr_y + v.h
         
-        instance:add( kb_s[i], v.text )
+        instance:add( kb_s[i], Clone{source =caption_grad, y = curr_y - caption_grad.h} , v.text )
         
         if i < #p.panes then
             
