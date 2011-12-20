@@ -109,7 +109,7 @@ function AppList:init(p)
                 
             end
             
-            --if #list > 1 then break end
+            --if #list > 3 then break end
             
         end
         

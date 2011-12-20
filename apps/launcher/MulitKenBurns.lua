@@ -113,7 +113,7 @@ function mkb:create(p)
             
             duration = 300,
             
-            y        = kb_s[index].y + text_y_off ,
+            y        = kb_s[index].y + text_y_off + 23 ,
             
             on_completed = function()  animating = false  end
             

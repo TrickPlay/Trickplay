@@ -21,7 +21,9 @@ function myAppsHL:init(p)
     sub_font    = p.sub_font    or error("must pass 'sub_font'",    2) -- "FreeSans Medium 24px"
     icon_size   = p.icon_size   or error("must pass 'icon_size'",   2) --{116/270*480,116}
     
-    shadow      = Image{ name = "myAppsHL shadow",  src = "assets/my_apps_slider/focus-shadow-closed.png",  }
+    menu_shadow      = Image{ name = "myAppsHL shadow",  src = "assets/my_apps_slider/focus-shadow-closed.png",  }
+    sub_shadow      = Image{ name = "myAppsHL shadow",  src = "assets/my_apps_slider/focus-shadow-open-1.png",  }
+    sub_sub_shadow      = Image{ name = "myAppsHL shadow",  src = "assets/my_apps_slider/focus-shadow-open-2.png",  }
     left_triangle      = Image{ name = "myAppsHL left triangle",  src = "assets/my_apps_slider/focus-tab-left.png",  }
     right_triangle     = Image{ name = "myAppsHL right triangle", src = "assets/my_apps_slider/focus-tab-right.png", }
     main_bg            = Image{ name = "myAppsHL main_bg",        src = "assets/my_apps_slider/focus-1.png",         }
@@ -30,7 +32,7 @@ function myAppsHL:init(p)
     sub_sub_menu_edge  = Image{ name = "myAppsHL sub_menu_edge",  src = "assets/my_apps_slider/focus-flap-3.png",    }
     sub_sub_menu_bg    = Image{ name = "myAppsHL sub_menu_bg",    src = "assets/my_apps_slider/focus-flap-4.png",    }
     
-    img_srcs:add( shadow, left_triangle, right_triangle, main_bg,sub_menu_edge, sub_menu_bg, sub_sub_menu_edge, sub_sub_menu_bg )
+    img_srcs:add( menu_shadow, sub_shadow, sub_sub_shadow, left_triangle, right_triangle, main_bg,sub_menu_edge, sub_menu_bg, sub_sub_menu_edge, sub_sub_menu_bg )
     
     has_been_initialized = true
     
@@ -58,6 +60,7 @@ local function make_sub_menu(p)
     
     sub_menu:add( sub_menu_edge, contents, arrow )
     
+    
     local dur = 200
     local sub_menu_state = AnimationState{
         transitions = {
@@ -66,6 +69,26 @@ local function make_sub_menu(p)
                 animator = Animator{
                     duration   = dur,
                     properties = {
+                        p.old_shadow and {
+                            source = p.old_shadow,
+                            name = "opacity",
+                            
+                            keys = {
+                                {0.0, "LINEAR", 255},
+                                {0.8, "LINEAR", 255},
+                                {1.0, "LINEAR",   0},
+                            }
+                        } or nil,
+                        p.new_shadow and {
+                            source = p.new_shadow,
+                            name = "opacity",
+                            
+                            keys = {
+                                {0.0, "LINEAR",   0},
+                                {0.8, "LINEAR",   0},
+                                {1.0, "LINEAR", 255},
+                            }
+                        } or nil,
                         p.right_triangle and {
                             source = p.right_triangle,
                             name = "opacity",
@@ -125,6 +148,26 @@ local function make_sub_menu(p)
                 animator = Animator{
                     duration   = dur,
                     properties = {
+                        p.old_shadow and {
+                            source = p.old_shadow,
+                            name = "opacity",
+                            
+                            keys = {
+                                {0.0, "LINEAR",   0},
+                                {0.2, "LINEAR", 255},
+                                {1.0, "LINEAR", 255},
+                            }
+                        } or nil,
+                        p.new_shadow and {
+                            source = p.new_shadow,
+                            name = "opacity",
+                            
+                            keys = {
+                                {0.0, "LINEAR", 255},
+                                {0.2, "LINEAR",   0},
+                                {1.0, "LINEAR",   0},
+                            }
+                        } or nil,
                         p.right_triangle and {
                             source = p.right_triangle,
                             name = "opacity",
@@ -379,7 +422,7 @@ local function make_sub_menu(p)
         sub_menu_state.state = "HIDE"
         
     end
-    
+    sub_menu_state:warp("HIDE")
     return sub_menu
     
 end
@@ -407,20 +450,19 @@ function myAppsHL:create(p)
     local next  = Clone{ size = icon_size,position = {icon_size[1]/2,icon_size[2]/2-y_off},anchor_point = {icon_size[1]/2,icon_size[2]/2} }
     local frame = Clone{source=canvas_srcs.launcher_icon_frame,y=-y_off,size = icon_size}
     
-    local sub_menu_shadow
     
-    --local logical
-    
+    local menu_shadow    = Clone{ source = menu_shadow,y = main_bg.y+main_bg.h}
+    local sub_shadow     = Clone{ source = sub_shadow,y = -25,opacity = 0}
+    local sub_sub_shadow = Clone{ source = sub_sub_shadow,y = -45,opacity = 0}
     local sub_menu = Group{}
-    
     local sub_sub_menu = make_sub_menu{
         direction      = "HORIZONTAL",
         bg_src         = sub_sub_menu_bg,
         parent_ref     = instance,
         edge_src       = sub_sub_menu_edge,
         logical_parent = sub_menu,
-        inverse_fade_with = sub_menu_shadow,
-        fade_with         = sub_sub_menu_shadow,
+        old_shadow     = sub_shadow,
+        new_shadow     = sub_sub_shadow,
         local_close    = function(self)
             
             self:hide_sub_menu()
@@ -490,7 +532,7 @@ function myAppsHL:create(p)
         logical_parent = p.logical_parent,
         right_triangle = right_triangle,
         old_shadow     = menu_shadow,
-        new_shadow     = sub_menu_shadow,
+        new_shadow     = sub_shadow,
         local_close    = function(self)
             
             self:hide_sub_menu()
@@ -574,8 +616,10 @@ function myAppsHL:create(p)
     instance:add(
         left_triangle,
         right_triangle,
+        menu_shadow,
+        sub_shadow,
+        sub_sub_shadow,
         main_bg,
-        Clone{ source = shadow,y = main_bg.y+main_bg.h},
         sub_menu,
         --[[
         prev,

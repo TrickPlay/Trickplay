@@ -46,9 +46,6 @@ local function main()
     
     
     
-    
-    
-    
     do
         
         local l = dofile("localized:strings.lua")
@@ -97,7 +94,7 @@ local function main()
         my_apps_hl_h        = 150,
         my_apps_hl_shadow_h = 20,
         
-        arrow_size = 20,
+        arrow_size = 16,
         
     }
     
@@ -106,6 +103,7 @@ local function main()
         expanded_h  = 900,
         inner_w     = 547,
         canvas_srcs = canvas_srcs,
+        img_srcs    = srcs,
         max_vis_len = 12,
         font        = "FreeSans Medium 32px",
     }
@@ -148,7 +146,8 @@ local function main()
                     next,
                     Clone{
                         source = canvas_srcs.launcher_icon_frame,
-                        size   = icon_size,
+                        w   = icon_size[1]+2, --stupid icons dont match up even though they're the same size...
+                        h   = icon_size[2],
                     },
                     caption,
                 }

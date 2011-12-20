@@ -1,7 +1,7 @@
 local self = {}
 
 
-local shrunken_h,expanded_h,canvas_srcs,inner_w
+local shrunken_h,expanded_h,canvas_srcs,inner_w,img_srcs, drop_shadow
 
 local has_been_initialized = false
 
@@ -16,7 +16,13 @@ function self:init(p)
     expanded_h  = p.expanded_h  or error("must pass expanded_h")
     inner_w     = p.inner_w     or error("must pass inner_w")
     canvas_srcs = p.canvas_srcs or error("must pass canvas_srcs")
+    img_srcs    = p.img_srcs    or error("must pass img_srcs")
     font        = p.font        or error("must pass font")
+    
+    drop_shadow = Image{ src = "assets/drop-shadow-big.png"}
+    
+    img_srcs:add(drop_shadow)
+    
     
     has_been_initialized = true
     
@@ -118,6 +124,8 @@ function self:create(p)
         f = "DejaVu Sans Bold 24px",
     }]]
     
+    local drop_shadow = Clone{ source = drop_shadow,x = 10,y=10}
+    
     mid.y = top.h
     mid.h = shrunken_h
     btm.y = mid.y + mid.h
@@ -132,8 +140,8 @@ function self:create(p)
     
     contents:add(p.contents)
     
-    g:add(contents,top,mid,btm,text,p.slider)
-    
+    g:add(drop_shadow,contents,top,mid,btm,text,p.slider)
+    local drop_shadow_base_h = drop_shadow.h
     
     
     local anim_state = AnimationState{
@@ -146,6 +154,7 @@ function self:create(p)
                     {mid,       "h",     shrunken_h},
                     {btm,       "y",     shrunken_h + mid.y},
                     {contents,  "clip",  {3,0,inner_w,shrunken_h+2*btm.h-2}},
+                    {drop_shadow,  "h",  drop_shadow_base_h*(shrunken_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
                 },
             },
             {
@@ -155,6 +164,7 @@ function self:create(p)
                     {mid,       "h",     l_expanded_h},
                     {btm,       "y",     l_expanded_h + mid.y},
                     {contents,  "clip",  {3,0,inner_w, l_expanded_h+2*btm.h-2}},
+                    {drop_shadow,  "h",  drop_shadow_base_h*(l_expanded_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
                 },
             },
         },
@@ -176,6 +186,7 @@ function self:create(p)
                             {mid,       "h",    shrunken_h},
                             {btm,       "y",    shrunken_h + mid.y},
                             {contents,  "clip", {3,0,inner_w,shrunken_h+2*btm.h-2}},
+                            {drop_shadow,  "h",  drop_shadow_base_h*(shrunken_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
                         },
                     },
                     {
@@ -185,6 +196,7 @@ function self:create(p)
                             {mid,       "h",     l_expanded_h},
                             {btm,       "y",     l_expanded_h + mid.y},
                             {contents,  "clip",  {3,0,inner_w, l_expanded_h+2*btm.h-2}},
+                            {drop_shadow,  "h",  drop_shadow_base_h*(l_expanded_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
                         },
                     },
                 },
