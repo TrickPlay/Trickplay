@@ -2,9 +2,112 @@
 -- This file handles all of the weather fetching from Weather Underground
 
 --http://wiki.wunderground.com/index.php/API_-_XML
+
+
+
+
 local fake_it = false
 dofile("xml.lua")
 
+
+local base_url = "http://api.wunderground.com/api/"
+local api_key  = "8f3d39338b3a4f8e"
+local features = {"forecast7day","conditions"}
+
+local request_url = base_url..api_key
+
+for i,v in ipairs(features) do
+	
+	request_url = request_url .. "/" .. v
+	
+end
+
+request_url = request_url .. "/q/"
+
+
+
+
+
+
+local RATE_LIMIT  = 5 --queries per minute
+--local freq        = 60000/RATE_LIMIT
+
+local queue = {}
+local throttle = Timer{
+	interval=60000/RATE_LIMIT,
+	on_timer=function(self)
+		if #queue == 0 then
+			self:stop()
+			self.is_running = false
+		else
+			table.remove(queue,1):send()
+		end
+	end
+}
+throttle:stop()
+throttle.is_running = false
+do
+	local mt = {}
+	
+	function mt.__newindex(t,k,v)
+		print('gots')
+		if throttle.is_running then
+			rawset(t,k,v)
+		else
+			print("send",v.url)
+			v:send()
+			throttle:start()
+			throttle.is_running = true
+		end
+	end
+	
+	setmetatable(queue, mt)
+end
+
+function lookup_zipcode(zip,callback)
+	
+	if type(zip) ~= "string" and #zip ~= 5 then error("Invalid Zip",2) end
+	
+	print("looking up ",zip)
+	
+	queue[#queue+1] = URLRequest{
+		
+		encoding="UTF-8", url = request_url..zip..".json",
+		
+		
+		on_complete = function(req,response)
+			print("respon")
+			if response == nil or response.failed or response.body == nil then
+				
+				callback("Unable to connect to Weather Underground.")
+				
+				queue[#queue+1]= req
+				
+			else
+				
+				response = json:parse(response.body)
+				
+				if response == nil then
+					
+					callback("Unable to connect to Weather Underground.")
+					
+					queue[#queue+1]= req
+					
+				else
+					
+					callback(response)
+					
+				end
+				
+			end
+			
+		end
+	}
+	
+end
+
+
+--[==[
 local Geo_url      = "http://api.wunderground.com/auto/wui/geo/GeoLookupXML/index.xml?query="
 local Station_url  = "http://api.wunderground.com/weatherstation/WXCurrentObXML.asp?ID="
 local Alerts_url   = "http://api.wunderground.com/auto/wui/geo/AlertsXML/index.xml?query="
@@ -129,7 +232,7 @@ local xml = XMLParser{
 }
 
 --a single 'URLRequest' instance is reused for each request
-local req = URLRequest{encoding="UTF-8"}
+--local req = URLRequest{encoding="UTF-8"}
 
 local err_occur = function(request,response,callback)
 	
@@ -148,86 +251,8 @@ local err_occur = function(request,response,callback)
 	return false
 	
 end
-
-function curr_conditions_query(location,callback)
-	
-	if fake_it then
-		callback(pws_xml,nil)
-		return
-	end
-	
-    local req = URLRequest{
-		
-		
-		
-		encoding="UTF-8",
-		
-		url = Geo_url.."\""..location.."\"",
-		
-		on_complete = function(self,response)
-			
-			if err_occur(self,response,callback) then
-				
-				--dolater(req.send,req)
-				req.url = Geo_url.."\""..location.."\""
-				
-				queue[#queue+1]= req
-				
-				return
-				
-			end
-			
-			xml_tbl = {}
-			
-			xml:parse(response.body,true)
-			
-			if xml_tbl.location ~= nil then
-				local req = URLRequest{
-					
-					encoding="UTF-8",
-					
-					url = Station_url..
-						xml_tbl.location.nearby_weather_stations.pws.station[1].id,
-					
-					on_complete = function(self,response)
-						
-						if err_occur(self,response,callback) then
-							
-							--dolater(req.send,req)
-							req.url = Station_url..
-						xml_tbl.location.nearby_weather_stations.pws.station[1].id
-							
-							queue[#queue+1]= req
-							
-							return
-							
-						end
-						
-						xml_tbl = {}
-						--print(response.body)
-						xml:parse(response.body,true)
-						
-						callback(xml_tbl,nil)
-					end
-				}
-				
-				
-				req:send()
-				--queue[#queue+1]= req
-				
-			else
-				
-				callback(xml_tbl,nil)
-			end
-			
-		end
-	}
-	
-    --req:send()
-	queue[#queue+1]= req
-end
-
-function pws_query(location,callback)
+---[[
+function pws_query(loc_tbl,callback)
 	
 	if fake_it then
 						
@@ -241,15 +266,14 @@ function pws_query(location,callback)
 		encoding="UTF-8",
 		
 		url = Station_url..
-			xml_tbl.location.nearby_weather_stations.pws.station[1].id,
+			loc_tbl.location.nearby_weather_stations.pws.station[1].id,
 		
 		on_complete = function(self,response)
 			
 			if err_occur(self,response,callback) then
 				
 				--dolater(req.send,req)
-				req.url = Station_url..
-			xml_tbl.location.nearby_weather_stations.pws.station[1].id
+				req.url = Station_url.. loc_tbl.location.nearby_weather_stations.pws.station[1].id
 				
 				queue[#queue+1]= req
 				
@@ -266,12 +290,12 @@ function pws_query(location,callback)
 	}
 	
 	
-	req:send()
+	--req:send()
 	
     --req:send()
 	queue[#queue+1]= req
 end
-
+--]]
 function geo_query(location,callback)
 	
 	if fake_it then
@@ -282,8 +306,6 @@ function geo_query(location,callback)
 	end
 	
     local req = URLRequest{
-		
-		
 		
 		encoding="UTF-8",
 		
@@ -311,9 +333,38 @@ function geo_query(location,callback)
 		end
 	}
 	
-    --req:send()
 	queue[#queue+1]= req
 end
+function curr_conditions_query(location,callback)
+	
+	if fake_it then
+		callback(pws_xml,nil)
+		return
+	end
+	
+	if type(location) == "table" then
+		
+		pws_query(location,callback)
+		
+	else
+		
+		geo_query(
+			location,
+			function(loc_tbl)
+				if loc_tbl.location ~= nil then
+					
+					pws_query(loc_tbl,callback)
+				else
+					
+					callback(loc_tbl,nil)
+				end
+				
+			end
+		)
+	end
+	
+end
+
 
 function forecast_query(location,callback)
 	
@@ -322,6 +373,10 @@ function forecast_query(location,callback)
 		callback(nil,fcast_xml)
 		
 		return
+	end
+	
+	if type(location) == "table" then
+		location = location.location.zip
 	end
 	
     local req = URLRequest{
@@ -348,6 +403,7 @@ function forecast_query(location,callback)
 			callback(nil,xml_tbl)
 		end
 	}
-    --req:send()
+	
 	queue[#queue+1]= req
 end
+--]==]
