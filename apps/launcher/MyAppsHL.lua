@@ -434,7 +434,7 @@ end
 
 function myAppsHL:create(p)
     
-    local instance = p.group or Group{name = "Highlight"}
+    local instance = p.group or Group{name = "Highlight",x=5}
     
     p.contents.y = -y_off
     ----------------------------------------------------------------------------
@@ -555,14 +555,15 @@ function myAppsHL:create(p)
         sub_menu_items = {
             Group{
                 x = 5,
-                y = 30,
+                y = 37,
                 children = {
                     Clone{
                         name = "arrow",
                         source = canvas_srcs.arrow,
                         anchor_point = {0,canvas_srcs.arrow.h/2},
+                        x = 4,
                     },
-                    Text{ name="text", text = "Play", font = main_font, x = 25, y=-20},
+                    Text{ name="text", text = "Play", font = sub_font, x = 25, y=-16},
                 },
                 extra = {
                     focus = function(self)
@@ -581,14 +582,15 @@ function myAppsHL:create(p)
             },
             Group{
                 x = 5,
-                y = 90,
+                y = 77,
                 children = {
                     Clone{
                         name = "arrow",
                         source = canvas_srcs.arrow,
-                        anchor_point = {0,canvas_srcs.arrow.h/2}
+                        anchor_point = {0,canvas_srcs.arrow.h/2},
+                        x = 4,
                     },
-                    Text{ name="text", text = "Share", font = main_font, x = 25, y=-20},
+                    Text{ name="text", text = "Share", font = sub_font, x = 25, y=-16},
                 },
                 extra = {
                     focus = function(self)

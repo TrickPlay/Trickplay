@@ -42,6 +42,8 @@ local function main()
     
     local imgs = {
         --
+        overlay = Image{src = "assets/gloss-small.png"},
+        
         tw_focus   = Image{src = "assets/share_menu/icon-twitter-on.png"},
         tw_unfocus = Image{src = "assets/share_menu/icon-twitter-off.png"},
         fb_focus   = Image{src = "assets/share_menu/icon-facebook-on.png"},
@@ -192,7 +194,7 @@ local function main()
         img_srcs    = srcs,
         canvas_srcs = canvas_srcs,
         main_font   = "FreeSans Medium 28px",
-        sub_font    = "FreeSans Medium 24px",
+        sub_font    = "FreeSans Bold 24px",
         icon_size   = {116/270*480,116},
     }
     
@@ -258,8 +260,8 @@ local function main()
     showcase = Group{}
     do
         
-        local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=10}
-        local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=50}
+        local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=26}
+        local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=57}
         
         showcaseHL = HL:create{
             logical_parent = showcase,
@@ -283,7 +285,7 @@ local function main()
         visible_h = 306,
         q = {  imgs.burberry_1,imgs.dew_1,imgs.jype_1  },
     }
-    showcase_closed.x = 3
+    showcase_closed.x = 8
     showcase=mkb:create{
         hl = showcaseHL,
         group = showcase,
@@ -334,8 +336,8 @@ local function main()
     shop = Group{}
     do
         
-        local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=10}
-        local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=50}
+        local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=26}
+        local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=57}
         
         shopHL = HL:create{
             logical_parent = shop,
@@ -402,7 +404,7 @@ local function main()
         app_list=app_list,
         max_vis_len = 10,
         slider = myAppsHL,
-        frame=imgs.icon_overlay,
+        frame=canvas_srcs.launcher_icon_frame,--imgs.icon_overlay,
     }
     
     clouds:init{
@@ -416,7 +418,7 @@ local function main()
         tiles = {
             {
                 text = "My Apps",
-                contents = Group{y=-48,children={clouds,l,my_apps_aic}, on_key_down = l.on_key_down},
+                contents = Group{y=-48,children={clouds,l,Clone{source =imgs.overlay,x=8,y = 48},my_apps_aic}, on_key_down = l.on_key_down},
                 slider = myAppsHL,
                 expanded_h =l.list_h-20,
                 focus    = function() my_apps_aic:pause() end,
@@ -441,7 +443,7 @@ local function main()
     showcase_closed:fade_in()
     app_shop_aic:play()
     
-    screen:add(vtb)
+    screen:add(Rectangle{size = screen.size},vtb)
     
     ----------------------------------------------------------------------------
     -- key events()
@@ -535,7 +537,7 @@ function mediaplayer:on_end_of_stream()
     
 end
 
-mediaplayer:load("glee-1.mp4")
+--mediaplayer:load("glee-1.mp4")
 
     
 --------------------------------------------------------------------------------

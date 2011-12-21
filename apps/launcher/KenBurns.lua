@@ -48,7 +48,7 @@ function ken_burns:create(p)
     
     local scale = Interval(0,0)
     local tl = Timeline{
-        duration = 20000,
+        duration = 16000,
         on_new_frame = function(self,ms,p)
             
             curr_item.x = curr_item.x + vx*(ms-prev_ms)
