@@ -2,7 +2,7 @@
 local AppList = Group{name = "AppList"}
 
 local item_spacing = 102
-local frame_src
+local frame_src,launcher_icons
 local make_entry = function(app_id,app_name)
     
     local g = Group{name = app_name}
@@ -84,12 +84,10 @@ local hl
 --screen:add(hl)
 function AppList:init(p)
     
-    --fill in the list
-    local app_list = apps:get_for_current_profile()
-    
+    launcher_icons = p.launcher_icons or error("must pass 'launcher_icons'",2)
     frame_src = p.frame or error("must pass 'frame'",2)
     ---[[
-    for k,v in pairs(app_list) do
+    for k,v in pairs(p.app_list or error("must pass'app_list'",2)) do
         
         if not v.attributes.nolauncher    and
             k ~= "com.trickplay.launcher" and

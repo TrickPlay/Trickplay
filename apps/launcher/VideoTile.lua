@@ -236,7 +236,16 @@ function self:create(p)
     }
     
     --function g:warp(s) return anim_state:warp(s) end
-    function g:warp(s) if s == "CONTRACT" and p.slider then p.slider.opacity = 0 end return anim_state:warp(s) end
+    function g:warp(s)
+        if s == "CONTRACT" then
+            if p.slider  then p.slider.opacity = 0 end
+            if p.unfocus then p.unfocus() end
+        else
+            if p.focus   then p.focus() end
+        end
+        
+        return anim_state:warp(s)
+    end
     
     setmetatable(
         g.extra,
