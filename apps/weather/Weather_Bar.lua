@@ -133,7 +133,7 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     
     
     
-    local city_name = curr_temp_tbl.current_observation.location.city
+    local city_name = curr_temp_tbl.current_observation.display_location.city
     
     print("PRINTTT",city_name)
     local regexed_name = ""
@@ -155,14 +155,14 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     c:new_path()
     c:move_to(LOCATION_X-CURR_TEMP_X+2,LOCATION_Y-10+2)
     c:text_path(FONT..LOCATION_SZ,regexed_name..
-                    ", "..curr_temp_tbl.current_observation.location.state)
+                    ", "..curr_temp_tbl.current_observation.display_location.state)
     c:set_source_color({0,0,0,255*.4})
     c:fill(true)
     
     c:new_path()
     c:move_to(LOCATION_X-CURR_TEMP_X,LOCATION_Y-10)
     c:text_path(FONT..LOCATION_SZ,regexed_name..
-                    ", "..curr_temp_tbl.current_observation.location.state)
+                    ", "..curr_temp_tbl.current_observation.display_location.state)
     c:set_source_color(TEXT_COLOR)
     c:fill(true)
     
@@ -179,10 +179,10 @@ function Make_Bar(loc,index, master)
     if master then
         master_i = 1
     end
-    
+    print(loc)
     --Visual Components
     local bar = Group{
-        name = loc.." Weather Bar",
+        name = (type(loc) == "string" and loc or loc.current_observation.display_location.zip) .." Weather Bar",
         opacity = 0,
         x = MINI_BAR_X,
         y = BAR_Y,
@@ -368,7 +368,111 @@ function Make_Bar(loc,index, master)
     local pws_tbl
     local f_tbl
     --Callback to the Weather query
-    bar.update = function(curr_temp_tbl,fcast_tbl,error_str)
+    bar.update = function(response)
+        
+        
+        if type(response) == "string" then
+            
+            mesg.text = response
+            
+        elseif type(response) == "table" then
+            
+            dumptable(response)
+            
+            if response.error then
+                
+                mesg.text = "Unable to connect."
+                
+            end
+            
+            
+            local t = {string.match( response.current_observation.observation_time ,
+                "^.* (%d*):%d* (%u%u) .*" )}
+            
+            
+            t[1] = tonumber(t[1])
+            
+            if t[1] >= 7 and t[2] =="PM" and t[1] ~= 12 or (t[1] <= 5 or t[1] == 12) and t[2] =="AM" then
+                
+                bar.local_time_of_day = "NIGHT"
+                
+            else
+                
+                bar.local_time_of_day = "DAY"
+                
+            end
+            
+            blurb_txt.text = response.forecast.txt_forecast.forecastday[1].fcttext
+            if blurb_txt.h > yellow_button.y+yellow_button.h-blurb_txt.y then
+                blurb_txt.clip = {0,0,blurb_txt.w,100}--yellow_button.y+yellow_button.h-blurb_txt.y}
+                --print(yellow_button.y+yellow_button.h-blurb_txt.y)
+                bar.func_tbls.blurb.dy = blurb_txt.h-blurb_txt.clip[4]
+                bar.func_tbls.blurb_up.dy = blurb_txt.h-blurb_txt.clip[4]
+                bar.func_tbls.blurb.duration = bar.func_tbls.blurb.dy/8*1000
+                print(bar.func_tbls.blurb.duration)
+            end
+            
+            bar.curr_condition = response.forecast.simpleforecast.forecastday[1].conditions
+            
+            five_day:unparent()
+            
+            five_day = make_five_day(response.forecast.simpleforecast.forecastday)
+            
+            full_bar:add(five_day)
+            if bar_state:current_state() ~= "5_DAY" then
+                five_day.opacity=0
+                five_day:hide()
+            end
+            
+            mini_width = Text{
+                font=FONT.."Condensed Bold normal "..LOCATION_SZ,
+                text=response.current_observation.display_location.city..
+                    ", "..response.current_observation.display_location.state
+            }.w + LOCATION_X - MINI_BAR_X + 100
+            
+            if mini_width > BLURB_X-40 then
+                response.current_observation.display_location.city =
+                    string.sub(response.current_observation.display_location.city,1,10).."... "
+                mini_width = Text{
+                    font=FONT.."Condensed Bold normal "..LOCATION_SZ,
+                    text=response.current_observation.display_location.city..
+                        ", "..response.current_observation.display_location.state
+                }.w + LOCATION_X - MINI_BAR_X + 100
+            end
+            if mesg then
+                mesg:unparent()
+                mesg=nil
+            end
+            bar:add(make_curr_temps(response,response.forecast.simpleforecast.forecastday[1],mini_width))
+            if curr_state == "MINI" then
+                print("MINIIIIII")
+                --bar:find_child("mid").scale = {mini_width,1}
+                bar:find_child("mid").w   = mini_width
+                bar:find_child("right").x = bar_side_w + mini_width
+                
+                arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
+            else
+                arrow_r.x = MINI_BAR_X + FULL_BAR_W -bar_side_w/2+1
+            end
+            green_button_mini.x = MINI_BAR_X+mini_width -83
+            
+            if bar_i == bar_index then
+                time_of_day = bar.local_time_of_day
+                print(bar.curr_condition)
+                conditions[bar.curr_condition]()
+                
+                if blurb_txt.has_clip and full_bar.opacity ~= 0 and blurb_txt.opacity ~= 0 then
+                    animate_list[bar.func_tbls.blurb] = bar
+                end
+            end
+            
+            animate_list[bar.func_tbls.loading_sun_fade_out] = bar
+            
+        else
+        end
+        
+        --[==[
+        print("ddddddddddddddddddd",curr_temp_tbl,fcast_tbl)
         if curr_temp_tbl ~= nil then
             pws_tbl = curr_temp_tbl
             
@@ -432,7 +536,7 @@ function Make_Bar(loc,index, master)
             
         end
         if f_tbl ~= nil and pws_tbl ~= nil then
-            
+            print("FFFFFFFFFFFFFFFFFF",f_tbl,pws_tbl)
             mini_width = Text{
                 font=FONT.."Condensed Bold normal "..LOCATION_SZ,
                 text=pws_tbl.current_observation.location.city..
@@ -448,8 +552,10 @@ function Make_Bar(loc,index, master)
                         ", "..pws_tbl.current_observation.location.state
                 }.w + LOCATION_X - MINI_BAR_X + 100
             end
-            mesg:unparent()
-            mesg=nil
+            if mesg then
+                mesg:unparent()
+                mesg=nil
+            end
             bar:add(make_curr_temps(pws_tbl,f_tbl,mini_width))
             if curr_state == "MINI" then
                 print("MINIIIIII")
@@ -479,6 +585,7 @@ function Make_Bar(loc,index, master)
             mesg.text=error_str
             
         end
+        --]==]
     end
     
     local bar_dist = 1905-bar_side_w-MINI_BAR_X
@@ -1217,6 +1324,57 @@ function Make_Bar(loc,index, master)
                 --]]
                 --animate_list[bar.func_tbls.full_move_right] = bar
                 bar_i = next_i
+                
+                lookup_zipcode(zip,function(response)
+                    
+                    --Stop animating Zip code ellipsis
+                    animate_list[bar.func_tbls.zip_ellipsis]=nil
+                    
+                    if type(response) == "table" then
+                        
+                        if response.error then
+                            
+                            zip_code_prompt.text = "No Search Result. Try again."
+                            
+                            return
+                            
+                        end
+                        
+                        zip_code_prompt.text = "Success"
+                        
+                        table.insert(locations,zip)
+                        dumptable(locations)
+                        table.insert(bars,Make_Bar(response,#locations))
+                        screen:add(bars[#bars])
+                        bars[#bars].x = MINI_BAR_X + bar_dist
+                        bars[#bars].opacity = 255
+                        
+                        current_bar = bars[#bars]
+                        bar_state:change_state_to("1_DAY")
+                        bars[#bars].go_to_state(bar_state:current_state())
+                        bars[#bars]:show()
+                        right_faux_bar.x = bar_dist
+                        next_i = #bars
+                        bar_i  = #bars
+                        
+                        
+                        zip_entry.opacity = 0
+                        zip_entry:hide()
+                        blurb_txt.opacity = 255
+                        blurb_txt:show()
+                        
+                        animate_list[bar.func_tbls.full_move_right] = bar
+                        print("adding bar "..zip)
+                        
+                    elseif type(response) == "string" then
+                        zip_code_prompt.text = "No Search Result. Try again."
+                    else
+                        zip_code_prompt.text = "No Search Result. Try again."
+                    end
+                    
+                end)
+                
+                --[[
                 geo_query(zip,
                     function(response_tbl)
                         animate_list[bar.func_tbls.zip_ellipsis]=nil
@@ -1226,7 +1384,7 @@ function Make_Bar(loc,index, master)
                             zip_code_prompt.text = "Success"
                             table.insert(locations,zip)
                             dumptable(locations)
-                            table.insert(bars,Make_Bar(zip,#locations))
+                            table.insert(bars,Make_Bar(response_tbl,#locations))
                             screen:add(bars[#bars])
                             bars[#bars].x = MINI_BAR_X + bar_dist
                             bars[#bars].opacity = 255
@@ -1253,6 +1411,7 @@ function Make_Bar(loc,index, master)
                         end
                     end
                 )
+                --]]
                 
                 
             end
@@ -1484,11 +1643,17 @@ function Make_Bar(loc,index, master)
     --send weather query
     if master_i == nil then
         
-        curr_conditions_query(loc, bar.update)
-        
-        forecast_query(loc, bar.update)
-        
-        animate_list[bar.func_tbls.loading_sun] = bar
+        if type(loc) == "table" then
+            
+            bar.update(loc)
+            
+        else
+            
+            lookup_zipcode(loc,bar.update)
+            
+            animate_list[bar.func_tbls.loading_sun] = bar
+            
+        end
         
     else
         
@@ -1497,6 +1662,8 @@ function Make_Bar(loc,index, master)
     end
     
     print("making a bar with parameters:",loc,index)
+    
     bar:hide()
+    
     return bar
 end

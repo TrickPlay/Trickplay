@@ -1,8 +1,7 @@
-local img = Image{ src = "assets/penguin.png", position = {-80,220,0}, opacity = 0, name = "penguin"}
+local img = Image{ src = "penguin", position = {-80,220,0}, opacity = 0, name = "penguin"}
 local jvy = -1
 local g = gravity > 0
 local jstate = 0
-local deathcount = 0
 local skating = Timeline{duration = 8000}
 local floor
 local a, b, d
@@ -10,6 +9,8 @@ local ovx = 2020/4000
 local imgw2, imgh2 = img.w/2, img.h/2
 local ox, oy, oz = 0, 0, 0
 local boosted = false
+local landjump = 0
+img.deaths = 0
 img.armor = nil
 
 local reset = function()
@@ -53,8 +54,8 @@ local falling = Timeline{ duration = 500,
 		if self.duration == 200 then
 			fx.splash()
 		end
-		deathcount = deathcount+1
-		overlay.deaths.text = deathcount
+		img.deaths = img.deaths+1
+		overlay.deaths.text = img.deaths
 		skating:start()
 	end
 }
@@ -120,7 +121,9 @@ local jump = function(vy)
 		a = (g == (row ~= 2) and -1 or 1)
 		b = img.z_rotation[1] % (a*360)
 		img.z_rotation = {b + (b*a < 240 and 360*a or 0), imgw2, imgh2}
-		jstate = jstate + (vy and 0.9 or 1)
+		jstate = min(jstate,1) + (vy and 0.9 or 1)
+	else
+		landjump = 5
 	end
 end
 
@@ -146,6 +149,10 @@ local land = function(y,obj,silent)
 		jstate = 0
 		if not silent then
 			audio.play("land")
+		end
+		if landjump > 0 then
+			jump()
+			landjump = 0
 		end
 	else
 		img.vy = -img.vy/2
@@ -195,6 +202,7 @@ function skating:on_new_frame(ms,t)
 	end
 	
 	--object collisions
+	if row == 1 and img.x < 250 then return end
 	for k,v in pairs(levels.this.children) do
 		if v.state and v.state > 0 and v.is_visible then
 			if v.state == 2 then
@@ -225,6 +233,7 @@ function skating:on_new_frame(ms,t)
 			fx.explode(12)
 		end
 	end
+	landjump = landjump-1
 	
 	if jstate == 0 and levels.this.bank > 0 and rand(4) == 1 then
 		fx.flakes(1)
@@ -233,7 +242,6 @@ end
 
 function skating:on_completed()
 	if row == 1 then
-		audio.play("applause")
 		a = ground[1]
 		for k,v in pairs(levels.this.bridges) do
 			if k >= img.y and k < a then
@@ -256,7 +264,7 @@ function skating:on_completed()
 end
 
 function screen:on_key_down(key)
-	if key >= keys["4"] and key <= keys["7"] then
+	--[[if key >= keys["4"] and key <= keys["7"] then
 		skating:rewind()
 		skating:stop()
 		if key == keys["4"] then
@@ -268,17 +276,23 @@ function screen:on_key_down(key)
 		else
 			levels.next(5)
 		end
-		row = 1
 	elseif key >= keys["0"] and key <= keys["9"] then
 		skating:rewind()
 		reset()
-	else
-		if skating.is_playing and not img.armor then
+	else]]
+		if levels.this.id == 1 then
+			img.deaths = 0
+			overlay.deaths.text = "0"
+			img.x = 0
+			if levels.this.swap then
+				levels.this.swap()
+			else
+				levels.next()
+			end
+		elseif skating.is_playing and not img.armor then
 			jump()
-		elseif levels.this.id == 1 then
-			levels.next()
 		end
-	end
+	--end
 end
 
 img.vx, img.vy, img.vz = 0, 0, 0

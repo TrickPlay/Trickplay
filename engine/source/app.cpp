@@ -1344,8 +1344,13 @@ EventGroup * App::get_event_group()
 
 //-----------------------------------------------------------------------------
 
-char * App::normalize_path( const gchar * path_or_uri, bool * is_uri, const StringSet & additional_uri_schemes )
+char * App::normalize_path( const gchar * path_or_uri, bool & is_uri, const StringSet & additional_uri_schemes )
 {
+	if ( ! path_or_uri )
+	{
+		return 0;
+	}
+
 	FreeLater free_later;
 
 	char * scheme = g_uri_parse_scheme( path_or_uri );
@@ -1356,15 +1361,13 @@ char * App::normalize_path( const gchar * path_or_uri, bool * is_uri, const Stri
 
 		if ( ! strcmp( scheme , "http" ) || ! strcmp( scheme , "https" ) )
 		{
-			* is_uri = true;
-
+			is_uri = true;
 			return g_strdup( path_or_uri );
 		}
 
 		if ( additional_uri_schemes.find( scheme ) != additional_uri_schemes.end() )
 		{
-			* is_uri = true;
-
+			is_uri = true;
 			return g_strdup( path_or_uri );
 		}
 	}
@@ -1376,16 +1379,13 @@ char * App::normalize_path( const gchar * path_or_uri, bool * is_uri, const Stri
 
 	if ( metadata.sandbox.is_native() )
 	{
-		* is_uri = false;
-
+		is_uri = false;
 		result = metadata.sandbox.get_pi_child_native_path( path_or_uri );
 	}
 	else
 	{
-		* is_uri = true;
-
+		is_uri = true;
 		bool is_native = false;
-
 		result = metadata.sandbox.get_pi_child_uri( path_or_uri , is_native );
 	}
 
@@ -1593,9 +1593,9 @@ Image * App::load_image( const gchar * source , bool read_tags )
         return 0;
     }
 
-    bool is_uri;
+    bool is_uri = false;
 
-    char * path = normalize_path( source , & is_uri );
+    char * path = normalize_path( source , is_uri );
 
     if ( ! path )
     {
@@ -1711,9 +1711,9 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
         return false;
     }
 
-    bool is_uri;
+    bool is_uri = false;
 
-    char * path = normalize_path( source , & is_uri );
+    char * path = normalize_path( source , is_uri );
 
     if ( ! path )
     {
