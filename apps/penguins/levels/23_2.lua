@@ -11,7 +11,7 @@ local image0 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image0",
-		position = {1332,453,0},
+		position = {1385,453,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -85,7 +85,7 @@ local clone7 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone7",
-		position = {224,429,0},
+		position = {158,429,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -234,7 +234,7 @@ local clone13 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone13",
-		position = {1349,380,0},
+		position = {1402,380,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -272,7 +272,7 @@ local clone5 = Clone
 		anchor_point = {0,0},
 		name = "clone5",
 		position = {845,50,0},
-		size = {128,127.99999237061},
+		size = {128,128},
 		opacity = 255,
 		reactive = true,
 	}
@@ -299,43 +299,6 @@ end
 clone5.extra.reactive = true
 
 
-local clone14 = Clone
-	{
-		scale = {0.8,0.8,0,0},
-		source = image0,
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "clone14",
-		position = {1343,303,0},
-		size = {128,128},
-		opacity = 255,
-		reactive = true,
-	}
-
-clone14.extra.focus = {}
-
-function clone14:on_key_down(key)
-	if clone14.focus[key] then
-		if type(clone14.focus[key]) == "function" then
-			clone14.focus[key]()
-		elseif screen:find_child(clone14.focus[key]) then
-			if clone14.clear_focus then
-				clone14.clear_focus(key)
-			end
-			screen:find_child(clone14.focus[key]):grab_key_focus()
-			if screen:find_child(clone14.focus[key]).set_focus then
-				screen:find_child(clone14.focus[key]).set_focus(key)
-			end
-		end
-	end
-	return true
-end
-
-clone14.extra.reactive = true
-
-
 local image15 = Image
 	{
 		src = "/assets/images/cube-64.png",
@@ -346,7 +309,7 @@ local image15 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image15",
-		position = {1362,263,0},
+		position = {1419,338,0},
 		size = {64,64},
 		opacity = 255,
 		reactive = true,
@@ -383,7 +346,7 @@ local clone16 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone16",
-		position = {236,362,0},
+		position = {170,362,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -420,7 +383,7 @@ local clone17 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone17",
-		position = {219,290,0},
+		position = {153,289,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -448,4 +411,4 @@ end
 clone17.extra.reactive = true
 
 
-g:add(image0,clone6,clone7,clone8,image9,clone12,clone13,clone5,clone14,image15,clone16,clone17)
+g:add(image0,clone6,clone7,clone8,image9,clone12,clone13,clone5,image15,clone16,clone17)

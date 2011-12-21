@@ -1,44 +1,6 @@
 local g = ... 
 
 
-local image12 = Image
-	{
-		src = "/assets/images/cube-64.png",
-		clip = {0,0,64,63},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "image12",
-		position = {1394,51,0},
-		size = {64,63},
-		opacity = 255,
-		reactive = true,
-	}
-
-image12.extra.focus = {}
-
-function image12:on_key_down(key)
-	if image12.focus[key] then
-		if type(image12.focus[key]) == "function" then
-			image12.focus[key]()
-		elseif screen:find_child(image12.focus[key]) then
-			if image12.clear_focus then
-				image12.clear_focus(key)
-			end
-			screen:find_child(image12.focus[key]):grab_key_focus()
-			if screen:find_child(image12.focus[key]).set_focus then
-				screen:find_child(image12.focus[key]).set_focus(key)
-			end
-		end
-	end
-	return true
-end
-
-image12.extra.reactive = true
-
-
 local image0 = Image
 	{
 		src = "/assets/images/ice-bridge.png",
@@ -273,7 +235,7 @@ local clone11 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone11",
-		position = {1364,-48,0},
+		position = {1621,344,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -414,4 +376,42 @@ end
 clone15.extra.reactive = true
 
 
-g:add(image12,image0,image2,clone5,image8,clone9,clone10,clone11,image13,image14,clone15)
+local image12 = Image
+	{
+		src = "/assets/images/cube-64.png",
+		clip = {0,0,64,63},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "image12",
+		position = {1652,306,0},
+		size = {64,63},
+		opacity = 255,
+		reactive = true,
+	}
+
+image12.extra.focus = {}
+
+function image12:on_key_down(key)
+	if image12.focus[key] then
+		if type(image12.focus[key]) == "function" then
+			image12.focus[key]()
+		elseif screen:find_child(image12.focus[key]) then
+			if image12.clear_focus then
+				image12.clear_focus(key)
+			end
+			screen:find_child(image12.focus[key]):grab_key_focus()
+			if screen:find_child(image12.focus[key]).set_focus then
+				screen:find_child(image12.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+image12.extra.reactive = true
+
+
+g:add(image0,image2,clone5,image8,clone9,clone10,clone11,image13,image14,clone15,image12)
