@@ -45,6 +45,45 @@ local function main()
     screen:add(srcs)
     
     
+    local launcher_icons = {}
+    local app_list = apps:get_for_current_profile()
+    for k,v in pairs(app_list) do
+        
+        local i = Image{}
+        
+        if
+            i:load_app_icon(v.id,"launcher-icon.png") or
+            i:load_app_icon(v.id,"launcher-icon.jpg") then
+            
+            launcher_icons[v.id] = i
+            srcs:add(i)
+        end
+        
+    end
+    
+    shop_icons = {
+        Image{src="assets/app_shop_icons/1945.jpg"},
+        Image{src="assets/app_shop_icons/aquaria.jpg"},
+        Image{src="assets/app_shop_icons/billiards.jpg"},
+        Image{src="assets/app_shop_icons/candyland.jpg"},
+        Image{src="assets/app_shop_icons/carlsberg.jpg"},
+        Image{src="assets/app_shop_icons/cowtipper.jpg"},
+        Image{src="assets/app_shop_icons/hbo.jpg"},
+        Image{src="assets/app_shop_icons/hulu.jpg"},
+        Image{src="assets/app_shop_icons/idol.jpg"},
+        Image{src="assets/app_shop_icons/life.jpg"},
+        Image{src="assets/app_shop_icons/nba.jpg"},
+        Image{src="assets/app_shop_icons/nfl.jpg"},
+        Image{src="assets/app_shop_icons/poker.jpg"},
+        Image{src="assets/app_shop_icons/pvz.jpg"},
+        Image{src="assets/app_shop_icons/solitaire.jpg"},
+        Image{src="assets/app_shop_icons/spirals.jpg"},
+        Image{src="assets/app_shop_icons/trueblood.jpg"},
+    }
+    
+    srcs:add(unpack(shop_icons))
+    
+    
     
     do
         
@@ -73,6 +112,8 @@ local function main()
     local clouds =  dofile("MyAppsBg.lua")
     
     local mkb = dofile("MulitKenBurns.lua")
+    
+    local aic = dofile("AppIconCarousel.lua")
     
     ----------------------------------------------------------------------------
     -- init()
@@ -124,7 +165,19 @@ local function main()
         img_srcs    = srcs,
     }
     
+    my_apps_aic = aic:create{
+        launcher_icons = launcher_icons,
+        icon_w   = 480,
+        vis_w    = 547,
+        duration = 10000,
+    }
     
+    app_shop_aic = aic:create{
+        launcher_icons = shop_icons,
+        icon_w   = 480,
+        vis_w    = 547,
+        duration = 10000,
+    }
     
     do
         local icon_size   = {116/270*480,116}
@@ -303,7 +356,7 @@ local function main()
         srcs = srcs,
     }
     
-    l:init{max_vis_len = 10, slider = myAppsHL,frame=canvas_srcs.launcher_icon_frame}
+    l:init{launcher_icons=launcher_icons,app_list=app_list,max_vis_len = 10, slider = myAppsHL,frame=canvas_srcs.launcher_icon_frame}
     
     clouds:init{
         visible_w = 600,
@@ -314,12 +367,31 @@ local function main()
     vtb:init{
         video_tile = vt,
         tiles = {
-            {text = "My Apps",  contents = Group{y=-48,children={clouds,l}, on_key_down = l.on_key_down}, slider = myAppsHL, expanded_h =l.list_h-20 },
-            {text = "Showcase", contents = showcase,slider = showcaseHL,focus = showcase.focus,unfocus = showcase.unfocus},
-            {text = "App Store",contents = shop,slider = shopHL,focus = shop.focus,unfocus = shop.unfocus},
+            {
+                text = "My Apps",
+                contents = Group{y=-48,children={clouds,l,my_apps_aic}, on_key_down = l.on_key_down},
+                slider = myAppsHL,
+                expanded_h =l.list_h-20,
+                focus    = function() my_apps_aic:pause() end,
+                unfocus  = function() my_apps_aic:play()  end,
+            },
+            {
+                text = "Showcase",
+                contents = showcase,
+                slider = showcaseHL,
+                focus = showcase.focus,
+                unfocus = showcase.unfocus
+            },
+            {
+                text     = "App Store",
+                contents = Group{children={shop,app_shop_aic}, on_key_down = shop.on_key_down},
+                slider   = shopHL,
+                focus    = function() app_shop_aic:pause() shop.focus()   end,
+                unfocus  = function() app_shop_aic:play()  shop.unfocus() end,
+            },
         },
     }
-    
+    app_shop_aic:play()
     
     screen:add(vtb)
     
