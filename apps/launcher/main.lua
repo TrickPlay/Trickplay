@@ -41,6 +41,7 @@ local function main()
     
     
     local imgs = {
+        icon_overlay = Image{src = "assets/icon-overlay.png"},
         --App Shop KB Pieces
         app_shop_1  = Image{ src = "assets/app_shop/appshop-1.jpg"},
         app_shop_2  = Image{ src = "assets/app_shop/appshop-2.jpg"},
@@ -226,7 +227,7 @@ local function main()
                     prev,
                     next,
                     Clone{
-                        source = canvas_srcs.launcher_icon_frame,
+                        source = imgs.icon_overlay,
                         w   = icon_size[1]+2, --stupid icons dont match up even though they're the same size...
                         h   = icon_size[2],
                     },
@@ -390,7 +391,13 @@ local function main()
         srcs = srcs,
     }
     
-    l:init{launcher_icons=launcher_icons,app_list=app_list,max_vis_len = 10, slider = myAppsHL,frame=canvas_srcs.launcher_icon_frame}
+    l:init{
+        launcher_icons=launcher_icons,
+        app_list=app_list,
+        max_vis_len = 10,
+        slider = myAppsHL,
+        frame=imgs.icon_overlay,
+    }
     
     clouds:init{
         visible_w = 600,
