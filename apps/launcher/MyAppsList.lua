@@ -7,13 +7,14 @@ local make_entry = function(app_id,app_name)
     
     local g = Group{name = app_name}
     
-    local i = Image{x=15}
+    local i = Clone{x=15}
     
-    if i:load_app_icon(app_id,"launcher-icon.png") then
-    elseif i:load_app_icon(app_id,"launcher-icon.jpg") then
+    if launcher_icons[app_id] then
+        i.source = launcher_icons[app_id]
     else
-        i.src = "assets/generic-app-icon.jpg"
+        i.source = launcher_icons["generic"]
     end
+    
     
     i.w = 48*3.4
     i.h = 27*3.4

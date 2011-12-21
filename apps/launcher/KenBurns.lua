@@ -9,6 +9,7 @@ function ken_burns:create(p)
     if type(p) ~= "table" then error("must pass a table",2) end
     
     local instance = Group{
+        name = "Ken Burns",
         ---[[
         clip = {
             0,
@@ -163,6 +164,48 @@ function ken_burns:create(p)
         tl:pause()
         
     end
+    
+    
+    local state = AnimationState{
+        duration = 300,
+        transitions = {
+            {
+                source = "*",  target = "SHOW", duration = 300,
+                keys   = {    {instance, "opacity", 255},    },
+            },
+            {
+                source = "*",  target = "HIDE", duration = 300,
+                keys   = {    {instance, "opacity", 0},      },
+            },
+        },
+    }
+    
+    local on_completed = {
+        ["SHOW"] = function() --[[nothin 4 now]]  return true end,
+        ["HIDE"] = function() tl:pause()          return true end,
+    }
+    state.timeline.on_completed = function(tl)
+        
+        return on_completed[state.state] and on_completed[state.state]() or error("IMPOSSIBRUUUU !?!?!?!")
+        
+    end
+    
+    
+    function instance:fade_out()
+        
+        state.state = "HIDE"
+        
+    end
+    
+    function instance:fade_in()
+        
+        tl:start()
+        
+        state.state = "SHOW"
+        
+    end
+    
+    
     
     tl:on_completed()
     

@@ -39,13 +39,41 @@ end
 --dolater...
 local function main()
     
+    
+    local imgs = {
+        --App Shop KB Pieces
+        app_shop_1  = Image{ src = "assets/app_shop/appshop-1.jpg"},
+        app_shop_2  = Image{ src = "assets/app_shop/appshop-2.jpg"},
+        hulu_1      = Image{ src = "assets/app_shop/hulu-1.jpg"},
+        trueblood_1 = Image{ src = "assets/app_shop/truebloodcomics-1.jpg"},
+        
+        --Showcase KB Pieces
+        burberry_1  = Image{ src = "assets/showcase/burberry-1.jpg"},
+        burberry_2  = Image{ src = "assets/showcase/burberry-2.jpg"},
+        burberry_3  = Image{ src = "assets/showcase/burberry-3.jpg"},
+        dew_1       = Image{ src = "assets/showcase/dew-1.jpg"},
+        dew_2       = Image{ src = "assets/showcase/dew-2.jpg"},
+        dew_3       = Image{ src = "assets/showcase/dew-3.jpg"},
+        jype_1      = Image{ src = "assets/showcase/jype-1.jpg"},
+        jype_2      = Image{ src = "assets/showcase/jype-2.jpg"},
+        jype_3      = Image{ src = "assets/showcase/jype-3.jpg"},
+    }
+    
+    
     local srcs = Group{name="Hidden Clone Sources"}
     
     srcs:hide()
     screen:add(srcs)
     
+    for k,v in pairs(imgs) do
+        srcs:add(v)
+    end
+    --srcs:add(unpack(imgs))
+    
     
     local launcher_icons = {}
+    launcher_icons["generic"] = Image{src="assets/generic-app-icon.jpg"}
+    srcs:add( launcher_icons["generic"] )
     local app_list = apps:get_for_current_profile()
     for k,v in pairs(app_list) do
         
@@ -210,7 +238,7 @@ local function main()
                 
                 caption.text = text
                 prev.source  = next.source
-                next.source  = icon
+                next.source  = icon.source
                 next.scale   = {0,0}
                 
                 next:animate{
@@ -243,6 +271,12 @@ local function main()
         }
     end
     
+    showcase_closed = kb:create{
+        visible_w = 547,
+        visible_h = 306,
+        q = {  imgs.burberry_1,imgs.dew_1,imgs.jype_1  },
+    }
+    showcase_closed.x = 3
     showcase=mkb:create{
         hl = showcaseHL,
         group = showcase,
@@ -256,9 +290,9 @@ local function main()
                 app_id  = "com.trickplay.burberry",
                 h       = 306,
                 imgs    = {
-                    Image{ src = "assets/showcase/burberry-1.jpg"},
-                    Image{ src = "assets/showcase/burberry-2.jpg"},
-                    Image{ src = "assets/showcase/burberry-3.jpg"},
+                    imgs.burberry_1,
+                    imgs.burberry_2,
+                    imgs.burberry_3,
                 }
             },
             {
@@ -268,9 +302,9 @@ local function main()
                 app_id  = "com.trickplay.mountain-dew",
                 h       = 306,
                 imgs    = {
-                    Image{ src = "assets/showcase/dew-1.jpg"},
-                    Image{ src = "assets/showcase/dew-2.jpg"},
-                    Image{ src = "assets/showcase/dew-3.jpg"},
+                    imgs.dew_1,
+                    imgs.dew_2,
+                    imgs.dew_3,
                 }
             },
             {
@@ -280,9 +314,9 @@ local function main()
                 app_id  = "com.trickplay.jyp",
                 h       = 316,
                 imgs    = {
-                    Image{ src = "assets/showcase/jype-1.jpg"},
-                    Image{ src = "assets/showcase/jype-2.jpg"},
-                    Image{ src = "assets/showcase/jype-3.jpg"},
+                    imgs.jype_1,
+                    imgs.jype_2,
+                    imgs.jype_3,
                 }
             },
         },
@@ -326,8 +360,8 @@ local function main()
                 app_id  = "com.trickplay.app-shop",
                 h       = 306,
                 imgs    = {
-                    Image{ src = "assets/app_shop/appshop-1.jpg"},
-                    Image{ src = "assets/app_shop/appshop-2.jpg"},
+                    imgs.app_shop_1,
+                    imgs.app_shop_2,
                 }
             },
             {
@@ -337,8 +371,8 @@ local function main()
                 app_id  = "com.trickplay.app-shop",
                 h       = 306,
                 imgs    = {
-                    Image{ src = "assets/app_shop/hulu-1.jpg"},
-                    Image{ src = "assets/app_shop/hulu-1.jpg"},
+                    imgs.hulu_1,
+                    imgs.hulu_1,
                 }
             },
             {
@@ -348,8 +382,8 @@ local function main()
                 app_id  = "com.trickplay.app-shop",
                 h       = 316,
                 imgs    = {
-                    Image{ src = "assets/app_shop/truebloodcomics-1.jpg"},
-                    Image{ src = "assets/app_shop/truebloodcomics-1.jpg"},
+                    imgs.trueblood_1,
+                    imgs.trueblood_1,
                 }
             },
         },
@@ -377,10 +411,10 @@ local function main()
             },
             {
                 text = "Showcase",
-                contents = showcase,
-                slider = showcaseHL,
-                focus = showcase.focus,
-                unfocus = showcase.unfocus
+                contents = Group{children={showcase,showcase_closed}, on_key_down = showcase_closed.on_key_down},
+                slider   = showcaseHL,
+                focus    = function() showcase_closed:fade_out() showcase.focus()   end,
+                unfocus  = function() showcase_closed:fade_in()  showcase.unfocus() end,
             },
             {
                 text     = "App Store",
@@ -391,6 +425,7 @@ local function main()
             },
         },
     }
+    showcase_closed:fade_in()
     app_shop_aic:play()
     
     screen:add(vtb)
