@@ -34,6 +34,8 @@ function IconCarousel:create(p)
     
     for i = 1, num_vis do table.insert( clones, Clone{ x = icon_w*(i-1), size = {480,270} } ) end
     
+    local crossfade = Clone{x = clones[1].x}
+    instance:add(crossfade)
     instance:add(unpack(clones))
     
     local curr_i = 0
@@ -63,7 +65,23 @@ function IconCarousel:create(p)
                 ]
                 
             end
-            
+            clones[1].opacity = 255
+            clones[1]:animate{duration=800,opacity=0}
+            crossfade.source = app_list[
+                    
+                    wrap_i(
+                        
+                        curr_i + math.ceil(#app_list/2)
+                        
+                    )
+                    
+                ]
+                
+                print(wrap_i(
+                        
+                        curr_i + math.ceil(#app_list/2)
+                        
+                    ))
         end,
     }
     

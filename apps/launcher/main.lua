@@ -443,7 +443,7 @@ local function main()
     showcase_closed:fade_in()
     app_shop_aic:play()
     
-    screen:add(Rectangle{size = screen.size},vtb)
+    screen:add(--[[Rectangle{size = screen.size},]]vtb)
     
     ----------------------------------------------------------------------------
     -- key events()
@@ -537,7 +537,7 @@ function mediaplayer:on_end_of_stream()
     
 end
 
---mediaplayer:load("glee-1.mp4")
+mediaplayer:load("glee-1.mp4")
 
     
 --------------------------------------------------------------------------------
