@@ -41,6 +41,11 @@ local function main()
     
     
     local imgs = {
+        --
+        tw_focus   = Image{src = "assets/share_menu/icon-twitter-on.png"},
+        tw_unfocus = Image{src = "assets/share_menu/icon-twitter-off.png"},
+        fb_focus   = Image{src = "assets/share_menu/icon-facebook-on.png"},
+        fb_unfocus = Image{src = "assets/share_menu/icon-facebook-off.png"},
         icon_overlay = Image{src = "assets/icon-overlay.png"},
         --App Shop KB Pieces
         app_shop_1  = Image{ src = "assets/app_shop/appshop-1.jpg"},
@@ -183,6 +188,7 @@ local function main()
     
     
     HL:init{
+        imgs = imgs,
         img_srcs    = srcs,
         canvas_srcs = canvas_srcs,
         main_font   = "FreeSans Medium 28px",
@@ -418,7 +424,7 @@ local function main()
             },
             {
                 text = "Showcase",
-                contents = Group{children={showcase,showcase_closed}, on_key_down = showcase_closed.on_key_down},
+                contents = Group{children={showcase,showcase_closed}, on_key_down = showcase.on_key_down},
                 slider   = showcaseHL,
                 focus    = function() showcase_closed:fade_out() showcase.focus()   end,
                 unfocus  = function() showcase_closed:fade_in()  showcase.unfocus() end,

@@ -477,13 +477,19 @@ local key_events = {
         return true
         
     end,
-    [keys.OK] = function()
+    [keys.YELLOW] = function()
         
         if not animating then
             
             hl:show_sub_menu()--selected = true
             --hl:grab_key_focus()
         end
+        
+        return true
+    end,
+    [keys.OK] = function()
+        
+        apps:launch(list[hl_index].app_id)
         
         return true
     end,

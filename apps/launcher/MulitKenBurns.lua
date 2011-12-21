@@ -161,10 +161,17 @@ function mkb:create(p)
             end
             
         end,
-        [keys.OK] = function(instance)
+        [keys.YELLOW] = function(instance)
             
             p.hl:show_sub_menu()
             --apps:launch(kb_s[index].app_id)
+            
+            return true
+            
+        end,
+        [keys.OK] = function(instance)
+            
+            apps:launch(kb_s[index].app_id)
             
             return true
             
