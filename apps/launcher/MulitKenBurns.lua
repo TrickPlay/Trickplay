@@ -34,7 +34,7 @@ end
 function mkb:create(p)
     
     local instance = p.group or Group{}
-    
+    instance.name = "Multi Ken Burns"
     instance.x = 3
     
     local kb_s = {}
@@ -48,7 +48,7 @@ function mkb:create(p)
     
     for i,v in ipairs(p.panes or error("must pass 'panes'",2)) do
         
-        p.srcs:add(unpack(v.imgs))
+        --p.srcs:add(unpack(v.imgs))
         
         kb_s[i] = kb:create{
             visible_w = p.w or error("must pass 'w'",2),

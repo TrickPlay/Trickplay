@@ -71,14 +71,14 @@ function IconCarousel:create(p)
     
     
     local state = AnimationState{
-        duration = 200,
+        duration = 300,
         transitions = {
             {
-                source = "*",  target = "SHOW", duration = 200,
+                source = "*",  target = "SHOW", duration = 300,
                 keys   = {    {instance, "opacity", 255},    },
             },
             {
-                source = "*",  target = "HIDE", duration = 200,
+                source = "*",  target = "HIDE", duration = 300,
                 keys   = {    {instance, "opacity", 0},      },
             },
         },
