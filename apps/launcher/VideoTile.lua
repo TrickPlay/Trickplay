@@ -19,10 +19,8 @@ function self:init(p)
     img_srcs    = p.img_srcs    or error("must pass img_srcs")
     font        = p.font        or error("must pass font")
     
-    drop_shadow = Image{ src = "assets/drop-shadow-big.png"}
-    
     overlay = Image{src = "assets/gloss-small.png"}
-    img_srcs:add(drop_shadow,overlay)
+    img_srcs:add(overlay)
     
     
     has_been_initialized = true
@@ -57,7 +55,6 @@ function self:create(p)
         f = "DejaVu Sans Bold 24px",
     }]]
     
-    local drop_shadow = Clone{ source = drop_shadow }--,x = 10,y=10}
     
     mid.y = top.h
     mid.h = shrunken_h
@@ -74,7 +71,6 @@ function self:create(p)
     contents:add(p.contents)
     local overlay = Clone{ source = overlay, x = 8, y = top.h - btm.h + 8 }
     g:add(contents,overlay,top,mid,btm,text,p.slider)
-    local drop_shadow_base_h = drop_shadow.h
     
     
     local anim_state = AnimationState{
@@ -87,7 +83,6 @@ function self:create(p)
                     {mid,       "h",     shrunken_h},
                     {btm,       "y",     shrunken_h + mid.y},
                     {contents,  "clip",  {8,0,inner_w,shrunken_h+2*btm.h-8}},
-                    {drop_shadow,  "h",  drop_shadow_base_h*(shrunken_h+5+top.h+btm.h)/(expanded_h+top.h+btm.h)},
                     {overlay,  "opacity",  255},
                 },
             },
@@ -98,7 +93,6 @@ function self:create(p)
                     {mid,       "h",     l_expanded_h},
                     {btm,       "y",     l_expanded_h + mid.y},
                     {contents,  "clip",  {8,0,inner_w, l_expanded_h+2*btm.h-8}},
-                    {drop_shadow,  "h",  drop_shadow_base_h*(l_expanded_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
                     {overlay,  "opacity",  0},
                 },
             },
@@ -121,7 +115,6 @@ function self:create(p)
                             {mid,       "h",    shrunken_h},
                             {btm,       "y",    shrunken_h + mid.y},
                             {contents,  "clip", {8,0,inner_w,shrunken_h+2*btm.h-8}},
-                            {drop_shadow,  "h",  drop_shadow_base_h*(shrunken_h+5+top.h+btm.h)/(expanded_h+top.h+btm.h)},
                             {overlay,  "opacity",  255},
                         },
                     },
@@ -132,7 +125,6 @@ function self:create(p)
                             {mid,       "h",     l_expanded_h},
                             {btm,       "y",     l_expanded_h + mid.y},
                             {contents,  "clip",  {8,0,inner_w, l_expanded_h+2*btm.h-8}},
-                            {drop_shadow,  "h",  drop_shadow_base_h*(l_expanded_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
                             {overlay,  "opacity",  0},
                         },
                     },

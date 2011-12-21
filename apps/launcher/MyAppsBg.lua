@@ -1,4 +1,4 @@
-local cloud = Image{src = "assets/cloud_stars_animation/cloud9.jpg",tile={true,true}}
+local cloud = Image{src = "assets/cloud_stars_animation/clouds.png",tile={true,true},opacity = 150}
 cloud.orig_w = cloud.w
 cloud.orig_h = cloud.h
 --cloud.w = cloud.w*4
@@ -17,8 +17,8 @@ star:set_source_radial_pattern(
 )
 
 star:add_source_pattern_color_stop( 0, "#ffffffff")
-star:add_source_pattern_color_stop(.5, "#cc66ff55")
-star:add_source_pattern_color_stop(.9, "#cc66ff00")
+star:add_source_pattern_color_stop(.5, "#0000ff55")
+star:add_source_pattern_color_stop(.9, "#0000ff00")
 
 star:fill()
 
@@ -55,7 +55,7 @@ function light_up(obj)
     obj.light:animate{
         mode     = "EASE_IN_QUINT",
         duration = 2500,
-        opacity  = 255,
+        opacity  = 180,--255,
     }
     
 end
@@ -77,8 +77,8 @@ end
 function fade_in_star(obj)
     
     obj:animate{
-        duration = 300,
-        opacity  = 255,
+        duration = 1500,
+        opacity  = 180,--255,
         x        = obj.x + 2,
         y        = obj.y + 2,
         on_completed = function()
@@ -94,7 +94,7 @@ function make_star()
     
     local sc = .8+(.4*math.random()-.2)
     
-    local s = Group{x = 300*math.random(),y = 600*math.random(),scale = {sc,sc}}
+    local s = Group{x = 100+300*math.random(),y = 100+750*math.random(),scale = {sc,sc},opacity = 0}
     
     s.light = Clone{source = star,opacity = 0}
     
@@ -118,6 +118,8 @@ function animation:init(p)
     cloud.w = p.visible_w*3
     cloud.h = p.visible_h*3
     
+    
+    --local backing = Rectangle{w=p.visible_w,h=p.visible_h,color = {10,40,45}}
     local color = Rectangle{w=p.visible_w,h=p.visible_h,color = {10,40,45},opacity = 220}
     
     local base_tl = Timeline{
@@ -126,15 +128,21 @@ function animation:init(p)
         on_new_frame = function(tl,ms,prog)
             cloud.x = -cloud.orig_w*prog
             cloud.y = -cloud.orig_h*prog
-            color.opacity = 235+10*math.sin(math.pi*2*prog)
+            color.opacity = 215+10*math.sin(math.pi*2*prog)
         end,
     }
+    
+    local s
     
     local make_star = Timer{
         interval = 600,
         on_timer = function()
             
-            fade_in_star( make_star() )
+            s = make_star()
+            
+            --s:lower_to_bottom()
+            
+            fade_in_star( s )
             
             --color:raise_to_top()
             
