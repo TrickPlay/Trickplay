@@ -280,6 +280,7 @@ function bar:init(p)
             if k == keys.OK then
                 animate_out:start()
                 dismissed = false
+                tiles[curr_i].state = "EXPAND"
             end
             return
         end

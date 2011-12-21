@@ -52,10 +52,6 @@ local make_launcher_frame = function(p)
     local c = Canvas(p.w,p.h)
     
     c.line_width = 2
-    c:move_to(0,0)
-    c:set_source_bitmap(Bitmap("assets/icon-overlay.png"))
-    c:rectangle(0,0,c.w,c.h)
-    c:fill()
     c.op = "SOURCE"
     for i = 0,p.border do
         
@@ -79,17 +75,51 @@ end
 local function make_video_tile_frame(p)
     
     
-    local c = Canvas(p.w+2*p.b,p.r+1+3*p.b+p.t_h)
+    local c = Canvas(
+        p.w+2*p.b+2*p.s_sz,
+        p.r+1+3*p.b+p.t_h+2*p.s_sz
+    )
     
     c.op = "SOURCE"
     
     --background
-    c:round_rectangle(0,0,c.w,c.h,p.r)
+    c:round_rectangle(
+        p.s_sz,
+        p.s_sz,
+        c.w-2*p.s_sz,
+        c.h-2*p.s_sz,
+        p.r
+    )
     c:set_source_color("#ffffff")
     c:fill()
+    for i = 1, p.s_sz do
+        c:set_source_color{0,0,0,(255/p.s_sz*(p.s_sz-i+1))/4}
+        
+        c:round_rectangle(
+            p.s_sz-i,
+            p.s_sz-i,
+            c.w-2*p.s_sz+2*i,
+            c.h-2*p.s_sz+2*i,
+            p.r+2*i
+        )
+        print(
+            p.s_sz-i,
+            p.s_sz-i,
+            c.w-2*p.s_sz+2*i,
+            c.h-2*p.s_sz+2*i,
+            p.r+2*i
+        )
+        c:stroke()
+    end
     
     --punch a hole
-    c:round_rectangle( p.b, 2*p.b + p.t_h, p.w, p.r+1, p.r )
+    c:round_rectangle(
+        p.b+p.s_sz,
+        2*p.b + p.t_h+p.s_sz,
+        p.w,
+        p.r+1,
+        p.r
+    )
     c:set_source_color("#00000000")
     c:fill()
     
@@ -97,7 +127,7 @@ local function make_video_tile_frame(p)
     
     
     --get top piece
-    c = Canvas(p.w+2*p.b, 2*p.b + p.t_h+10)
+    c = Canvas(c.w, 2*p.b + p.t_h+10)
     c:set_source_bitmap(b)
     c:paint()
     
@@ -105,7 +135,7 @@ local function make_video_tile_frame(p)
     
     
     --get middle slice
-    c = Canvas(p.w+2*p.b,1)
+    c = Canvas(c.w,1)
     c:set_source_bitmap(b,0,-top.h)
     c:paint()
     
@@ -113,11 +143,15 @@ local function make_video_tile_frame(p)
     
     
     --get bottom piece
-    c = Canvas(p.w+2*p.b, p.b + 10)
+    c = Canvas(c.w, p.b + 10)
     c:set_source_bitmap(b,0,-b.h+c.h)
     c:paint()
     
     local btm = c:Image{name="Video Tile Frame - Bottom"}
+    
+    top.border = p.b + p.s_sz
+    mid.border = p.b + p.s_sz
+    btm.border = p.b + p.s_sz
     
     return top,mid,btm
     
@@ -158,6 +192,7 @@ function clonesources:init(p)
             b = p.video_tile_border_width,
             r = p.video_tile_corner_radius,
             t_h = Text{text=" ",font=p.video_tile_font}.h,
+            s_sz = 5,
         }
     
     clonesources.my_apps_hl =

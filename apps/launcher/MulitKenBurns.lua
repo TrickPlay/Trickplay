@@ -12,7 +12,7 @@ local has_been_initialized = false
 local rule_h = 3
 
 
-local img_srcs, caption_grad
+local img_srcs, caption_grad, overlay
 
 function mkb:init(p)
     
@@ -23,9 +23,10 @@ function mkb:init(p)
     img_srcs = p.img_srcs or error("must pass img_srcs")
     
     
+    overlay = Image{src = "assets/gloss-medium.png"}
     caption_grad = Image{src = "assets/lower-gradient.png"}
     
-    img_srcs:add(caption_grad)
+    img_srcs:add(caption_grad,overlay)
     
     has_been_initialized = true
 end
@@ -35,7 +36,7 @@ function mkb:create(p)
     
     local instance = p.group or Group{}
     instance.name = "Multi Ken Burns"
-    instance.x = 3
+    instance.x = 8
     
     local kb_s = {}
     assert(has_been_initialized)
@@ -46,6 +47,7 @@ function mkb:create(p)
     
     local kb = p.kb or error("must pass 'kb'",2)
     
+    local hl_y_off = {}
     for i,v in ipairs(p.panes or error("must pass 'panes'",2)) do
         
         --p.srcs:add(unpack(v.imgs))
@@ -71,7 +73,7 @@ function mkb:create(p)
         
         curr_y = curr_y + v.h
         
-        instance:add( kb_s[i], Clone{source =caption_grad, y = curr_y - caption_grad.h} , v.text )
+        instance:add( kb_s[i], Clone{source =overlay, y = curr_y - v.h}, Clone{source =caption_grad, y = curr_y - caption_grad.h} , v.text )
         
         if i < #p.panes then
             
@@ -81,7 +83,11 @@ function mkb:create(p)
             
         end
         
+        hl_y_off[i] = 23
+        
     end
+    
+    hl_y_off[#hl_y_off] = 16
     
     local animating = false
     
@@ -113,7 +119,7 @@ function mkb:create(p)
             
             duration = 300,
             
-            y        = kb_s[index].y + text_y_off + 23 ,
+            y        = kb_s[index].y + text_y_off + hl_y_off[index] ,
             
             on_completed = function()  animating = false  end
             

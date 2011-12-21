@@ -1,7 +1,7 @@
 local self = {}
 
 
-local shrunken_h,expanded_h,canvas_srcs,inner_w,img_srcs, drop_shadow
+local shrunken_h,expanded_h,canvas_srcs,inner_w,img_srcs, drop_shadow,overlay
 
 local has_been_initialized = false
 
@@ -21,7 +21,8 @@ function self:init(p)
     
     drop_shadow = Image{ src = "assets/drop-shadow-big.png"}
     
-    img_srcs:add(drop_shadow)
+    overlay = Image{src = "assets/gloss-small.png"}
+    img_srcs:add(drop_shadow,overlay)
     
     
     has_been_initialized = true
@@ -56,7 +57,7 @@ function self:create(p)
         f = "DejaVu Sans Bold 24px",
     }]]
     
-    local drop_shadow = Clone{ source = drop_shadow,x = 10,y=10}
+    local drop_shadow = Clone{ source = drop_shadow }--,x = 10,y=10}
     
     mid.y = top.h
     mid.h = shrunken_h
@@ -65,14 +66,14 @@ function self:create(p)
     local contents = Group{
         name = "Clipped Contents",
         y    = top.h - btm.h,
-        clip = {3,0,inner_w,shrunken_h+2*btm.h-3},
+        clip = {8,0,inner_w,shrunken_h+2*btm.h-8},
     }
     
     --local r = Rectangle{color="009900",size = screen.size}
     
     contents:add(p.contents)
-    
-    g:add(drop_shadow,contents,top,mid,btm,text,p.slider)
+    local overlay = Clone{ source = overlay, x = 8, y = top.h - btm.h + 8 }
+    g:add(contents,overlay,top,mid,btm,text,p.slider)
     local drop_shadow_base_h = drop_shadow.h
     
     
@@ -85,8 +86,9 @@ function self:create(p)
                     {text,      "color", "999999"},
                     {mid,       "h",     shrunken_h},
                     {btm,       "y",     shrunken_h + mid.y},
-                    {contents,  "clip",  {3,0,inner_w,shrunken_h+2*btm.h-2}},
-                    {drop_shadow,  "h",  drop_shadow_base_h*(shrunken_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
+                    {contents,  "clip",  {8,0,inner_w,shrunken_h+2*btm.h-8}},
+                    {drop_shadow,  "h",  drop_shadow_base_h*(shrunken_h+5+top.h+btm.h)/(expanded_h+top.h+btm.h)},
+                    {overlay,  "opacity",  255},
                 },
             },
             {
@@ -95,8 +97,9 @@ function self:create(p)
                     {text,      "color", "000000"},
                     {mid,       "h",     l_expanded_h},
                     {btm,       "y",     l_expanded_h + mid.y},
-                    {contents,  "clip",  {3,0,inner_w, l_expanded_h+2*btm.h-2}},
+                    {contents,  "clip",  {8,0,inner_w, l_expanded_h+2*btm.h-8}},
                     {drop_shadow,  "h",  drop_shadow_base_h*(l_expanded_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
+                    {overlay,  "opacity",  0},
                 },
             },
         },
@@ -117,8 +120,9 @@ function self:create(p)
                             {text,      "color", "999999"},
                             {mid,       "h",    shrunken_h},
                             {btm,       "y",    shrunken_h + mid.y},
-                            {contents,  "clip", {3,0,inner_w,shrunken_h+2*btm.h-2}},
-                            {drop_shadow,  "h",  drop_shadow_base_h*(shrunken_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
+                            {contents,  "clip", {8,0,inner_w,shrunken_h+2*btm.h-8}},
+                            {drop_shadow,  "h",  drop_shadow_base_h*(shrunken_h+5+top.h+btm.h)/(expanded_h+top.h+btm.h)},
+                            {overlay,  "opacity",  255},
                         },
                     },
                     {
@@ -127,8 +131,9 @@ function self:create(p)
                             {text,      "color", "000000"},
                             {mid,       "h",     l_expanded_h},
                             {btm,       "y",     l_expanded_h + mid.y},
-                            {contents,  "clip",  {3,0,inner_w, l_expanded_h+2*btm.h-2}},
+                            {contents,  "clip",  {8,0,inner_w, l_expanded_h+2*btm.h-8}},
                             {drop_shadow,  "h",  drop_shadow_base_h*(l_expanded_h+top.h+btm.h)/(expanded_h+top.h+btm.h)},
+                            {overlay,  "opacity",  0},
                         },
                     },
                 },
