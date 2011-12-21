@@ -5,13 +5,13 @@ local generate = function(g,top)
 	if top then
 		g:add(Image{src = "bg-sun", position = {math.random(300,1600),100}})
 	end
-	for i=15,20 do
+	for i=12,15 do
 		if rand(2) == 1 then
 			a = Image{src = "tree-" .. rand(5)}
 			a.position = {rand(20,1900),542}
 			a.anchor_point = {a.w/2,a.h}
-			a.scale = {i/rand(18,20)*(rand(2)==1 and 1 or -1),i/rand(18,20)}
-			a.opacity = 255*i/20
+			a.scale = {i/rand(13,15)*(rand(2)==1 and 1 or -1),i/rand(13,15)}
+			a.opacity = 255*i/15
 			g:add(a)
 		end
 	end
@@ -42,7 +42,7 @@ local free = function(self)
 		if v.free then
 			v:free()
 		else
-			print('object ' .. v.gid .. ' ' .. (v.source.src or 'n/a') .. ' has no :free()')
+			--print(v.gid .. ' ' .. (v.source and v.source.src or 'n/a') .. ' has no :free()')
 		end
 	end
 end
@@ -52,7 +52,7 @@ local new = function (def)
 	local a
 	
 	group.loader1 = loadfile("levels/"..def[1].."_1.lua")
-	if def[1] > 0 then
+	if def[1] ~= 0 and def[1] ~= 100 then
 		group.loader2 = loadfile("levels/"..def[1].."_2.lua")
 	end
 	
@@ -104,6 +104,7 @@ local new = function (def)
 end
 
 local toload = {
+	--{100,2,0,"Victory Screen"},
 	{0,	2,0,"Splash Screen"},
 	---[[
 	--]]
@@ -117,6 +118,7 @@ local toload = {
 	{8,	1,0,"Pool Party"},
 	{9,	3,0,"A Brief Exercise in Futility"},
 	{10,2,0,"Blocks Stop for No Penguin"},
+	--
 	{11,2,0,"Playtime With Mr. Seal"},
 	{12,1,0,"And Now Bounce Me Lower"},
 	{13,2,0,"Dangerous Airspace"},
@@ -127,6 +129,7 @@ local toload = {
 	{17,2,0,"Double Bridges"},
 	{18,3,0,"Bridge Over Cold Water"},
 	{29,3,0,"March Of the Ice"},
+	--
 	{19,2,0,"A Good Swift Kick"},
 	{20,1,0,"Stick the Landing"},
 	{30,3,0,"Fish Hopper"},
@@ -137,6 +140,7 @@ local toload = {
 	{26,2,1,"Over the Top"},
 	{27,3,1,"Can't See Enough"},
 	{28,3,1,"Where's Walrus?"},
+	--
 	{31,1,0,"That Armor Looks Smashing"},
 	{32,1,0,"Drop Like A Rock"},
 	{33,1,1,"Smashing In the Snow"},
@@ -151,25 +155,30 @@ levels.this = levels[1]
 screen:show()
 screen:add(levels.this)
 
+levels.cycle = false
 levels.next = function(arg)
+	levels.cycle = true
 	local oldlevel = levels.this
 	levels.this = levels[oldlevel.id % #levels + (oldlevel.id > 1 and arg or 1)]
 	levels.this:load()
-	levels.this.y = 1120
+	levels.this.y = oldlevel.id == 1 and 1070 or 1120
 	screen:add(levels.this)
-	levels.this:lower_to_bottom()
+	levels.this:lower(oldlevel)
 	
 	levels.this:animate{y = 0, duration = 1120, mode = "EASE_IN_OUT_QUAD"}
-	oldlevel:animate{y = -1300, duration = 1140, mode = "EASE_IN_OUT_QUAD", on_completed = function()
+	oldlevel:animate{y = oldlevel.id == 1 and -1080 or -1300, duration = 1120,
+					mode = "EASE_IN_OUT_QUAD", on_completed = function()
 		oldlevel:free()
 		collectgarbage("collect")
-		if levels.this.id ~= 1 then
+		if levels.this.id > 1 then
 			row = 1
 			penguin.skating:start()
+			audio.play("slide")
 		end
 	end}
 	
-	overlay.next()
+	overlay.next(oldlevel.id == 1)
+	row = 1
 end
 
 return levels
