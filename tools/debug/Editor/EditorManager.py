@@ -18,6 +18,8 @@ class EditorManager(QWidget):
         self.setupUi(parent)
         
         self.fileSystem = fileSystem
+
+        self.tab = None
     
     
     def setupUi(self, parent):

@@ -25,6 +25,9 @@ local anim = Animator{properties = {
 		overlay.y = 0
 		if levels.this.bank > 0 then
 			snowbank.y = 0
+			snowbank:show()
+		else
+			snowbank:hide()
 		end
 		overlay.clone:unparent()
 		snowbank.clone:unparent()
@@ -47,14 +50,14 @@ local timer = Timer{on_timer = function(self)
 end}
 timer.interval = 560
 
-overlay.next = function()
+overlay.next = function(first)
 	snow(levels.this.snow)
-	if levels.this.id ~= 1 then
+	if levels.this.id > 1 then
 		screen:add(overlay.clone)
-		overlay.clone.y = 1120
+		overlay.clone.y = first and 1080 or 1120
 		if levels.this.bank > 0 then
 			screen:add(snowbank.clone)
-			snowbank.clone.y = 1120
+			snowbank.clone.y = first and 1080 or 1120
 		end
 	end
 	anim:start()

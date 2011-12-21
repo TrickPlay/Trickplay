@@ -4,6 +4,7 @@ local splash_bg = Image{name="Splash BG", src = "splash.png" }
 
 local function main()
 	
+	screen.perspective = {screen.perspective[1],screen.perspective[2],screen.perspective[3],300}
 	
 	mediaplayer.on_loaded = mediaplayer.play
 

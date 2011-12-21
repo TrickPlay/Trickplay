@@ -7,9 +7,11 @@ void app_loaded_handler(TPContext *,const char *,void * l);
 void app_closing_handler(TPContext *,const char *,void * l);
 ]]
 
-# Global: app
-# This global object represents the current application. It has properties for
-# accessing application metadata and events.
+/*
+	Global: app
+	
+	The app global variable stores information associated with the current TrickPlay application. Many of the properties contain settings defined in the application's app file (see <The app Metadata File> for details). Also provided are event handlers that inform the application when it has been loaded (<on_loaded>) and when it is about to terminate (<on_closing>).
+*/
 
 global app [[App*]]
 {
@@ -21,52 +23,103 @@ global app [[App*]]
             self->add_notification_handler(TP_NOTIFICATION_APP_CLOSING,app_closing_handler,L);
         ]];
     
-    # Property: id
-    # Returns the id of the current application
+    /*
+    	Property: id
+    	
+    	The id property is a string that contains the application's unique identifier. It is set in the app metadata file's id property.
+    	
+    	Every TrickPlay application must define its id property.
+    */
     
     readonly string id
         [[id=self->get_metadata().id.c_str();]];
         
-    # Property: name
-    # Returns the name of the current application
+        
+    /*
+    	Property: name
+    	
+    	The name property is a string that contains the application's name. It is set in the app metadata file's name property.
+    	
+    	Every TrickPlay application must define its name property.
+    */
     
     readonly string name
         [[name=self->get_metadata().name.c_str();]];
-        
-    # Property: author
-    # Returns the author, if any, of the current application
-    
-    readonly string author
-        [[author=self->get_metadata().author.c_str();]];
-    
-    # Property: description
-    # Returns the description, if any, of the current application
-    
-    readonly string description
-        [[description=self->get_metadata().description.c_str();]];
-    
-    # Property: copyright
-    # Returns the copyright information, if any, of the current application
-    
-    readonly string copyright
-        [[copyright=self->get_metadata().copyright.c_str();]];
-    
-    # Property: release
-    # Returns the release number of the current application. This number is for
-    # internal use only and should not be displayed to users.
-    
-    readonly int release
-        [[release=self->get_metadata().release;]];
-    
-    # Property: version
-    # Returns the version string of the current application
+
+
+    /*
+    	Property: version
+    	
+    	The version property is a string containing the application's version number. The version number is typically shown to the user (unlike the <release> number). It is set in the app metadata file's version property.
+    	
+    	Every TrickPlay application must define its version property.
+
+		*See Also:* the <release> property
+	*/
     
     readonly string version
         [[version=self->get_metadata().version.c_str();]];
 
-    # Property: attributes
-    # Returns a table containing any attributes defined in the app file. The
-    # attributes are the keys of the table, and the values are always true.
+
+    /*
+    	Property: release
+    	
+    	The release property is an integer value specifying the application's release number. This value is used for internal purposes only, and is never shown to the user. It is set in the app metadata file's release property.
+    	
+    	Every TrickPlay application must define its release property.
+    	
+    	*See Also:* the <version> property
+    */
+    
+    readonly int release
+        [[release=self->get_metadata().release;]];
+    
+    
+	/*
+		Property: author
+		
+		The author property is a string that identifies the application's author. It is set in the app metadata file's author property.
+		
+		Defining the author property is optional.
+	*/
+    
+    readonly string author
+        [[author=self->get_metadata().author.c_str();]];
+    
+    
+    /*
+    	Property: description
+    	
+    	The description property contains additional descriptive information about the application. It is set in the app metadata file's description property.
+    	
+    	Defining the description property is optional.
+    */
+    
+    readonly string description
+        [[description=self->get_metadata().description.c_str();]];
+
+
+	/*
+		Property: copyright
+		
+		The copyright property is a string containing the application's copyright information. It is set in the app metadata file's copyright property.
+		
+		Defining the copyright property is optional.
+	*/    
+    
+    readonly string copyright
+        [[copyright=self->get_metadata().copyright.c_str();]];
+    
+
+	/*
+		UndocumentedProperty: attributes
+		
+		The attributes property is reserved for future expansion.
+		
+		The attributes property is a table of key/value pairs, where the key is a particular attribute of the application and whose value is always true. The attributes table is set in the app metadata file's attributes property.
+		
+		Defining the attributes table is optional.
+	*/
 
     readonly table attributes
         [[
@@ -81,9 +134,30 @@ global app [[App*]]
             }
         ]];
 
-    # Property: contents
-    # Returns a table containing the names of all files contained
-    # in the app's bundle.
+
+	/*
+		Property: args
+		
+		The args property is a string containing the arguments specified in the app_args configuration key. Refer to <TrickPlay Configuration Keys> for further details.
+		
+		Defining the args property is optional.
+	*/
+
+    readonly string args
+        [[
+            TPContext * context = App::get( L )->get_context();
+            
+            args = context->is_first_app() ? context->get( TP_APP_ARGS , "" ) : "";
+        ]];        
+
+
+	/*
+		Property: contents
+		
+		The contents property is a table that contains the list of all files contained in the application's app bundle directory structure. A file located in a subdirectory will include the subdirectory specification as part of its filename. Files of type subdirectory are not included in the contents table.
+		
+		Note: If the application was launched from a remote URI, the contents property will be nil.
+	*/
 
     readonly table contents
         [[
@@ -109,32 +183,19 @@ global app [[App*]]
                 }
             }
         ]];
-        
-    # Property: args
-    # Returns arguments passed to the app via TP_APP_ARGS
-    
-    readonly string args
-        [[
-            TPContext * context = App::get( L )->get_context();
-            
-            args = context->is_first_app() ? context->get( TP_APP_ARGS , "" ) : "";
-        ]];        
-        
-    # Property: launch
-    # Returns information about how this app was launched. The
-    # result is a table that has the fields below. All of them may
-    # be nil.
-    #
-    # caller - 	The id of the app that launched this one.
-    #
-    # action - 	The name of the action that was invoked. 
-    #
-    # uri -     If the app was invoked by an action, the URI attached 
-    #			to the action.
-    #
-    # type -	The mime type for the URI. 
-    #
-    # parameters - Any parameters that the caller passed.
+
+
+	/*
+		Property: launch
+		
+		The launch property is a table containing information about the manner in which the application was launched. Each table entry is a key/value pair, where key is one of the strings shown below. All keys will be present in the table, but individual keys may have a nil value.
+		
+		caller - the <id> property of the application that launched the current application
+		action - the string name of the action that was invoked, if any
+		uri - the URI attached to the action. If the action key is nil, the uri key will also be nil.
+		type - the mime type specified for the URI
+		parameters - string of parameters passed to the application
+	*/
     
     readonly table launch
     	[[
@@ -184,38 +245,109 @@ global app [[App*]]
 			    }
     		}
     	]];
-    	
-	# Function: set_badge
-	# Sets a badge that will be visible in the app launcher. Badges 
-	# can surface important information to the user.
-	#
-	# Arguments:
-	# style - A named badge style.
-	# text - The text to include in the badge. This should be short.
+
+
+	/*
+		UndocumentedFunction: set_badge
+		
+		The set_badge() function is not fully implemented at this time.
+		
+		The set_badge() function specifies a badge style and associated text label that are displayed in the App Launcher application.
+		
+		*Arguments:*
+		
+			style - string specifying the badge style. The following badge styles are supported.
+		
+				(code)
+				"BADGE_STYLE_1" - a very cool badge guaranteed to make viewers want to run your app until they pass out
+				"DRAGNET_BADGE" - a monotonous, just-the-facts type of badge that includes an image of Jack Webb as Officer Joe Friday
+				"NO_STINKIN_BADGES" - Badges? My app don't need no stinkin' badges!
+				(end)
+
+			text - string label to display alongside the application's badge
+		
+		*Return Value:* None
+		
+		*See Also:* the <clear_badge> function
+	*/
 	
 	set_badge( string style, string text )
 		[[
 			self->get_context()->get_db()->set_app_badge( self->get_id(), style, text );
 		]];    	
 		
-	# Function: clear_badge
-	# Clears the app's badge, if any.
+		
+	/*
+		UndocumentedFunction: clear_badge
+		
+		The clear_badge() function is not fully implemented at this time.
+		
+		The clear_badge() function removes the application's badge from the App Launcher application's database of badges.
+		
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*See Also:* the <set_badge> function
+	*/
 	
 	clear_badge()
 		[[
 			self->get_context()->get_db()->set_app_badge( self->get_id(), "", "" );
 		]];
-        
-    # Event: on_loaded
-    # This callback is invoked after the app has finished loading.
+
+
+	/*
+		Event Handler: on_loaded
+		
+		The on_loaded() event handler is invoked after the application has been loaded, but before its code has begun execution. This provides the application an opportunity to perform any desired initialization operations.
+		
+		*Prototype:*
+		
+			(code)
+			on_loaded( app )
+			(end)
+			
+		*Arguments:*
+		
+			app - reference to the app global variable
+			
+		*Return Value:* None
+		
+		*See Also:* the <on_closing> event handler
+	*/
     
     callback on_loaded;
-    
-    # Event: on_closing
-    # This callback is invoked just before the app is about to close.
+
+
+	/*
+		Event Handler: on_closing
+		
+		The on_closing() event handler is invoked immediately before the application terminates. This provides the application the opportunity to perform any final clean-up operations.
+		
+		*Prototype:*
+		
+			(code)
+			on_closing( app )
+			(end)
+		
+		*Arguments:*
+
+			app - reference to the app global variable
+		
+		*Return Value:* None
+		
+		*See Also:* the <on_loaded> event handler
+	*/    
     
     callback on_closing;
 
+
+	/*
+		UndocumentedEventHandler: on_audio_match
+		
+		The on_audio_match() event handler is undocumented, and appears to do nothing.
+	*/
     callback on_audio_match;
 }
 

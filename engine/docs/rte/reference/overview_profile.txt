@@ -1,0 +1,7 @@
+
+Title: Profiles Overview
+
+The TrickPlay Engine supports the creation of multiple profiles, with any single profile being active at a given time. The <profile> global variable stores information about the active profile. Each profile has an associated database of key/value pairs that can be accessed through the <settings> global variable.
+
+A TrickPlay application can create new entries in the active profile's database and set and access entry values. Profiles are created and switched to by entering TrickPlay Console commands manually. For details on profile creation and switching, refer to the discussion in <The Engine Console>.
+

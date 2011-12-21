@@ -252,7 +252,7 @@ Tile = Class(function(obj, face_source, parent, ...)
         end,
         stages = {
             function(self,delta,p)
-                obj.group.y_rotation={180*p,0,0}
+                obj.group.scale = {board_spec[game_state.difficulty][3]*math.abs(1-2*p),board_spec[game_state.difficulty][3]}--y_rotation={180*p,0,0}
                 obj.backing.z = 1-p
                 obj.face_backing.z = .9*p
                 obj.face.z    = p
@@ -292,7 +292,7 @@ Tile = Class(function(obj, face_source, parent, ...)
         end,
         stages = {
             function(self,delta,p)
-                obj.group.y_rotation={180*(1-p),0,0}
+                obj.group.scale = {board_spec[game_state.difficulty][3]*math.abs(1-2*p),board_spec[game_state.difficulty][3]}--y_rotation={180*(1-p),0,0}
                 obj.backing.z = p
                 obj.face_backing.z = .9*(1-p)
                 obj.face.z    = 1-p

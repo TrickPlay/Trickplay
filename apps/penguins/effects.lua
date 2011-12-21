@@ -16,7 +16,7 @@ step[fx] = function(d,ms)
 	b = levels.this.bank > 0
 	for k,v in ipairs(group.children) do
 		v.opacity = math.max(0,v.opacity+v.vo*d)
-		if v.opacity == 0 or ((b and v.vy > 0 or v.vo == 0) and v.y > ground[row]+50) then -- this
+		if v.opacity == 0 or ((b and v.vy > 0 or v.vo == 0) and v.y > ground[row]+50) then
 			v:free()
 		elseif v.vz or v.vo == -0.25 then
 			if v.vo == -0.125 then
@@ -48,7 +48,7 @@ local init = function(obj)
 	isbank = levels.this.bank > 0 and 1 or 0
 	px, py = obj.x + obj.w/2, obj.y + obj.h/2
 	group:lower(penguin)
-	c = floor(group.count/5)
+	c = floor(group.count/4)
 end
 
 fx.splash = function()
@@ -57,7 +57,7 @@ fx.splash = function()
 			  anchor_point = {64,120}, scale = {0.5,0.2}, opacity = 255}
 	j.vy, j.vo, j.t = 0.02*(1-isbank), -0.32, 0
 	group:add(j)
-	for i=1+c,rand(15,20) do
+	for i=1+c,rand(12,15) do
 		j = Image{src = splashes[rand(2)], x = px, y = py-30*isbank, opacity = rand(160,255),
 				  anchor_point = {32,32}, z_rotation = {rand(360),0,0}}
 		j.vx, j.vo = nrand(0.25), -0.25
@@ -97,7 +97,7 @@ fx.flakes = function(num)
 end
 
 fx.explode = function(num)
-	fx.flakes(num or rand(15,20))
+	fx.flakes(num or rand(12,15))
 	group:raise(penguin)
 	j = Image{src = "explode-128", x = px, y = py-20*isbank,
 		opacity = 255, anchor_point = {64,64}, scale = {1,1}}
