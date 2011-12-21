@@ -4,7 +4,7 @@ local myAppsHL = {}
 local has_been_initialized = false
 
 --init()'s params
-local img_srcs,font, icon_size,canvas_srcs
+local img_srcs,font, icon_size,canvas_srcs, imgs
 
 --vis sources
 local shadow, left_triangle,right_triangle, main_bg, sub_menu_edge, sub_menu_bg, sub_sub_menu_edge, sub_sub_menu_bg
@@ -17,6 +17,7 @@ function myAppsHL:init(p)
     
     canvas_srcs = p.canvas_srcs or error("must pass 'canvas_srcs'", 2)
     img_srcs    = p.img_srcs    or error("must pass 'img_srcs'",    2)
+    imgs        = p.imgs        or error("must pass 'imgs'",        2)
     main_font   = p.main_font   or error("must pass 'main_font'",   2) -- "FreeSans Medium 24px"
     sub_font    = p.sub_font    or error("must pass 'sub_font'",    2) -- "FreeSans Medium 24px"
     icon_size   = p.icon_size   or error("must pass 'icon_size'",   2) --{116/270*480,116}
@@ -484,10 +485,10 @@ function myAppsHL:create(p)
         sub_menu_items = {
             Group{
                 x = 10,
-                y = 20,
+                y = 10,
                 children = {
-                    Rectangle{name = "unfocus",color = "000066", w = 50, h = 50},
-                    Rectangle{name =   "focus",color = "0000ff", w = 50, h = 50},
+                    Clone{ name = "unfocus", source = imgs.fb_unfocus },
+                    Clone{ name =   "focus", source = imgs.fb_focus   },
                 },
                 extra = {
                     focus = function(self)
@@ -502,11 +503,11 @@ function myAppsHL:create(p)
                 },
             },
             Group{
-                x = 70,
-                y = 20,
+                x = 120,
+                y = 10,
                 children = {
-                    Rectangle{name = "unfocus",color = "006600", w = 50, h = 50},
-                    Rectangle{name =   "focus",color = "00ff00", w = 50, h = 50},
+                    Clone{ name = "unfocus", source = imgs.tw_unfocus },
+                    Clone{ name =   "focus", source = imgs.tw_focus   },
                 },
                 extra = {
                     focus = function(self)
