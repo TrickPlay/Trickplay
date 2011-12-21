@@ -1,8 +1,7 @@
-local img = Image{ src = "assets/penguin.png", position = {-80,220,0}, opacity = 0, name = "penguin"}
+local img = Image{ src = "penguin", position = {-80,220,0}, opacity = 0, name = "penguin"}
 local jvy = -1
 local g = gravity > 0
 local jstate = 0
-local deathcount = 0
 local skating = Timeline{duration = 8000}
 local floor
 local a, b, d
@@ -11,6 +10,7 @@ local imgw2, imgh2 = img.w/2, img.h/2
 local ox, oy, oz = 0, 0, 0
 local boosted = false
 local landjump = 0
+img.deaths = 0
 img.armor = nil
 
 local reset = function()
@@ -52,8 +52,8 @@ local falling = Timeline{ duration = 500,
 		if self.duration == 200 then
 			fx.splash()
 		end
-		deathcount = deathcount+1
-		overlay.deaths.text = deathcount
+		img.deaths = img.deaths+1
+		overlay.deaths.text = img.deaths
 		skating:start()
 	end
 }
@@ -240,7 +240,6 @@ end
 
 function skating:on_completed()
 	if row == 1 then
-		audio.play("applause")
 		a = ground[1]
 		for k,v in pairs(levels.this.bridges) do
 			if k >= img.y and k < a then
@@ -263,7 +262,7 @@ function skating:on_completed()
 end
 
 function screen:on_key_down(key)
-	if key >= keys["4"] and key <= keys["7"] then
+	--[[if key >= keys["4"] and key <= keys["7"] then
 		skating:rewind()
 		skating:stop()
 		if key == keys["4"] then
@@ -278,14 +277,20 @@ function screen:on_key_down(key)
 	elseif key >= keys["0"] and key <= keys["9"] then
 		skating:rewind()
 		reset()
-	else
-		if skating.is_playing and not img.armor then
+	else]]
+		if levels.this.id == 1 then
+			img.deaths = 0
+			overlay.deaths.text = "0"
+			img.x = 0
+			if levels.this.swap then
+				levels.this.swap()
+			else
+				levels.next()
+			end
+		elseif skating.is_playing and not img.armor then
 			jump()
-		elseif levels.this.id == 1 then
-			deathcount = 0
-			levels.next()
 		end
-	end
+	--end
 end
 
 img.vx, img.vy, img.vz = 0, 0, 0

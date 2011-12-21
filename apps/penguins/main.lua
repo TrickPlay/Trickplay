@@ -49,7 +49,6 @@ snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
 overlay	= dofile("overlay.lua")
 snow(levels.this.snow,levels.this.bank)
-audio.play("theme")
 dofile("effects.lua")
 
 collectgarbage("collect")

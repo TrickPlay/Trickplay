@@ -150,11 +150,12 @@ local rubberize = function(obj,s,st,d,spring,damp)
 end
 
 local make = {
-	["splash.jpg"]		= f("splash.jpg", 0, function(obj)
+	["splash.png"]		= f("splash.png", 0, function(obj)
+		obj:hide()
 		local z, zwire = Image{src = "logo-z", y = 800}, Image{src = "logo-z-wire", y = 600, h = 200}
 		local p, pwire = Image{src = "logo-p", y = 700}, Image{src = "logo-p-wire", y = 600, h = 100}
-		local zg, pg = Group{scale = {2,2}, anchor_point = {256,0}, x = 1060, y = -2420},
-					   Group{scale = {2,2}, anchor_point = {188,0}, x = 1040, y = -2400}
+		local zg, pg = Group{scale = {2,2}, anchor_point = {256,0}, x = 940, y = -2420},
+					   Group{scale = {2,2}, anchor_point = {188,0}, x = 960, y = -2400}
 		local za, zt, pa, pt = 0, 0, 0, 0
 		zg:add(z,zwire)
 		pg:add(p,pwire)
@@ -176,18 +177,13 @@ local make = {
 			end
 		end
 		
-		obj.insert = function()
-			t = 0
-			obj.parent:add(zg,pg)
-			
+		sign = function()
+			audio.play("theme")
 			zg:animate{y = -1420, duration = 1000, mode = "EASE_IN_QUAD", on_completed = function()
 				zt = 0
 				za = 4
 				zg:animate{y = -1450, duration = 200, mode = "EASE_OUT_QUAD", on_completed = function()
-					zg:animate{y = -1420, duration = 200, mode = "EASE_IN_QUAD", on_completed = function()
-						--zt = asin(zg.z_rotation[1]/4)/pi/2--0.5-
-						--za = 4
-					end}
+					zg:animate{y = -1420, duration = 200, mode = "EASE_IN_QUAD"}
 				end}
 			end}
 			
@@ -196,14 +192,68 @@ local make = {
 					pt = 0
 					pa = 4
 					pg:animate{y = -1430, duration = 200, mode = "EASE_OUT_QUAD", on_completed = function()
-						pg:animate{y = -1400, duration = 200, mode = "EASE_IN_QUAD", on_completed = function()
-							--pt = asin(-pg.z_rotation[1]/4)/pi/2
-							--pa = 4
-						end}
+						pg:animate{y = -1400, duration = 200, mode = "EASE_IN_QUAD"}
 					end}
 				end}
 				self:stop()
 			end}
+		end
+		
+		local moving = Group()
+		for i=20,30 do
+			a = Image{src = "tree-" .. rand(5), position = {rand(20,2200),922}, opacity = 255}
+			a.anchor_point = {a.w/2,a.h}
+			a.scale = {(i-10)/rand(19,20)*(rand(2)==1 and 1 or -1),(i-10)/rand(19,20)}
+			a.vx = -i/200
+			a.nx = nrand(0.02)
+			moving:add(a)
+		end
+		
+		step[moving] = function(d,ms)
+			for k,v in ipairs(moving.children) do
+				v.x = v.x + (v.vx+v.nx)*d
+				if v.x+v.w < 0 then
+					v.x = 2000+rand(400)
+					v.nx = nrand(0.02)
+				end
+			end
+		end
+		
+		local peng = Image{ src = "penguin", position = {-500,820}}
+		local bubble
+		
+		obj.insert = function()
+			local par = obj.parent
+			t = 0
+			par:add(Image{src = "bg-slice-2", y = 0, size = {1920,1080}, tile = {true,false}})
+			par:add(Image{src = "bg-sun", position = {200,100}})
+			par:add(moving)
+			par:add(Image{src = "ice-slice", position = {0,916}, size = {1920,55}, tile = {true,false}})
+			par:add(Image{src = "floor-btm", position = {0,971}},
+				  Image{src = "floor-btm", position = {1920,971}, scale = {-1,1}})
+			par:add(peng)
+			par:add(zg,pg)
+			if levels.cycle then
+				audio.play("applause")
+				peng.x = 760
+				bubble = Group{x = 500, y = 40}
+				bubble:add(Image{src = "thought-bubble", scale = {2,2}},
+						Text{x = 50, y = 70, w = 800, alignment = "CENTER", font = "Sigmar 80px", text = "You Killed Me"},
+						Text{x = 150, y = 110, w = 600, alignment = "CENTER", font = "Sigmar 200px", text = penguin.deaths},
+						Text{x = 150, y = 350, w = 600, alignment = "CENTER", font = "Sigmar 80px",
+							text = "Time" .. (penguin.deaths == 1 and "!" or "s!")})
+				par:add(bubble)
+				par.swap = function()
+					bubble:animate{y = 80, opacity = 0, duration = 300}
+					sign()
+					par.swap = nil
+				end
+			else
+				peng:animate{x = 1040, mode = "EASE_OUT_BACK", duration = 15000}
+				sign()
+			end
+			par:add(Image{src = "start-sign", position = {1470,700}})
+			par:add(Image{src = "snow-bank", position = {2200,940}, scale = {-1.4,1.05}})
 		end
 		
 		obj.unload = function()
@@ -215,8 +265,30 @@ local make = {
 			pwire:free()
 			pg:unparent()
 			step[pg] = nil
+			step[moving] = nil
+			moving:unparent()
+			for k,v in ipairs(moving.children) do
+				if v.free then
+					v:free()
+				end
+			end
+			moving = nil
+			if bubble then
+				bubble:unparent()
+				for k,v in ipairs(bubble.children) do
+					if v.free then
+						v:free()
+					else
+						v:unparent()
+					end
+				end
+				bubble = nil
+			end
 		end
 	end),
+	["start-sign"]		= f("start-sign.png"),
+	["thought-bubble"]	= f("thought-bubble.png"),
+	["penguin"]			= f("penguin.png"),
 	["logo-z"]			= f("logo-z.png"),
 	["logo-z-wire"]		= f("logo-z-wire.png"),
 	["logo-p"]			= f("logo-p.png"),

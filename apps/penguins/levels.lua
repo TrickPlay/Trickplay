@@ -1,20 +1,18 @@
 local levels = {}
 
 local generate = function(g,top)
-	if usebg then
-		g:add(Image{src = "bg-slice-2", y = 0, size = {1920,542}, tile = {true,false}})
-		if top then
-			g:add(Image{src = "bg-sun", position = {math.random(300,1600),100}})
-		end
-		for i=12,15 do
-			if rand(2) == 1 then
-				a = Image{src = "tree-" .. rand(5)}
-				a.position = {rand(20,1900),542}
-				a.anchor_point = {a.w/2,a.h}
-				a.scale = {i/rand(13,15)*(rand(2)==1 and 1 or -1),i/rand(13,15)}
-				a.opacity = 255*i/15
-				g:add(a)
-			end
+	g:add(Image{src = "bg-slice-2", y = 0, size = {1920,542}, tile = {true,false}})
+	if top then
+		g:add(Image{src = "bg-sun", position = {math.random(300,1600),100}})
+	end
+	for i=12,15 do
+		if rand(2) == 1 then
+			a = Image{src = "tree-" .. rand(5)}
+			a.position = {rand(20,1900),542}
+			a.anchor_point = {a.w/2,a.h}
+			a.scale = {i/rand(13,15)*(rand(2)==1 and 1 or -1),i/rand(13,15)}
+			a.opacity = 255*i/15
+			g:add(a)
 		end
 	end
 	g.ice = Image{src = "ice-slice", position = {0,536}, size = {1920,55}, tile = {true,false}}
@@ -28,10 +26,8 @@ local generate = function(g,top)
 	else
 		g:loader2()
 	end
-	if usebg then
 	g:add(Image{src = "floor-btm", position = {0,591}},
 		  Image{src = "floor-btm", position = {1920,591}, scale = {-1,1}})
-	end
 end
 
 local free = function(self)
@@ -56,7 +52,7 @@ local new = function (def)
 	local a
 	
 	group.loader1 = loadfile("levels/"..def[1].."_1.lua")
-	if def[1] > 0 then
+	if def[1] ~= 0 and def[1] ~= 100 then
 		group.loader2 = loadfile("levels/"..def[1].."_2.lua")
 	end
 	
@@ -108,6 +104,7 @@ local new = function (def)
 end
 
 local toload = {
+	--{100,2,0,"Victory Screen"},
 	{0,	2,0,"Splash Screen"},
 	---[[
 	--]]
@@ -158,26 +155,29 @@ levels.this = levels[1]
 screen:show()
 screen:add(levels.this)
 
+levels.cycle = false
 levels.next = function(arg)
+	levels.cycle = true
 	local oldlevel = levels.this
 	levels.this = levels[oldlevel.id % #levels + (oldlevel.id > 1 and arg or 1)]
 	levels.this:load()
-	levels.this.y = 1120
+	levels.this.y = oldlevel.id == 1 and 1070 or 1120
 	screen:add(levels.this)
 	levels.this:lower(oldlevel)
 	
 	levels.this:animate{y = 0, duration = 1120, mode = "EASE_IN_OUT_QUAD"}
-	oldlevel:animate{y = -1300, duration = 1140, mode = "EASE_IN_OUT_QUAD", on_completed = function()
+	oldlevel:animate{y = oldlevel.id == 1 and -1080 or -1300, duration = 1120,
+					mode = "EASE_IN_OUT_QUAD", on_completed = function()
 		oldlevel:free()
 		collectgarbage("collect")
-		if levels.this.id ~= 1 then
+		if levels.this.id > 1 then
 			row = 1
 			penguin.skating:start()
 			audio.play("slide")
 		end
 	end}
 	
-	overlay.next()
+	overlay.next(oldlevel.id == 1)
 	row = 1
 end
 
