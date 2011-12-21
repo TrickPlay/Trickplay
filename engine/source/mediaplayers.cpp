@@ -3,6 +3,7 @@
 
 #include "mediaplayers.h"
 #include "util.h"
+#include "context.h"
 
 //=============================================================================
 
@@ -34,7 +35,7 @@ void MediaPlayer::Event::destroy( Event * event )
 // return NULL. Sets up the wrapper and returns a new MediaPlayer instance.
 
 
-MediaPlayer * MediaPlayer::make( TPMediaPlayerConstructor constructor, Delegate * delegate )
+MediaPlayer * MediaPlayer::make( TPContext * context , TPMediaPlayerConstructor constructor, Delegate * delegate )
 {
     if ( !constructor )
     {
@@ -60,12 +61,12 @@ MediaPlayer * MediaPlayer::make( TPMediaPlayerConstructor constructor, Delegate 
         return NULL;
     }
 
-    return new MediaPlayer( wrapper, delegate );
+    return new MediaPlayer( context , wrapper , delegate );
 }
 
 //-----------------------------------------------------------------------------
 
-MediaPlayer::MediaPlayer( Wrapper * w, Delegate * d )
+MediaPlayer::MediaPlayer( TPContext * context , Wrapper * w, Delegate * d )
     :
     wrapper( w ),
     state( TP_MEDIAPLAYER_IDLE ),
@@ -77,6 +78,10 @@ MediaPlayer::MediaPlayer( Wrapper * w, Delegate * d )
     g_static_rec_mutex_init( &mutex );
 
     add_delegate( d );
+
+    StringVector s = split_string( context->get( TP_MEDIAPLAYER_SCHEMES , TP_MEDIAPLAYER_SCHEMES_DEFAULT ) , "," );
+
+    schemes.insert( s.begin() , s.end() );
 }
 
 //-----------------------------------------------------------------------------
@@ -960,6 +965,7 @@ void MediaPlayer::remove_delegate( Delegate * delegate )
     MPLOCK;
     delegates.erase( delegate );
 }
+
 //=============================================================================
 // External callbacks
 //=============================================================================
