@@ -226,7 +226,7 @@ local function main()
             position = {icon_size[1]/2,icon_size[2]/2},
             anchor_point = {icon_size[1]/2,icon_size[2]/2}
         }
-        local caption = Text{  name = "caption", font = "FreeSans Medium 28px",x = 240,y=35}
+        local caption = Text{  name = "caption", font = "FreeSans Medium 30px",x = 240,y=35, ellipsize = "END", w = 310}
         
         myAppsHL = HL:create{
             logical_parent = l,
@@ -260,7 +260,7 @@ local function main()
     showcase = Group{}
     do
         
-        local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=26}
+        local title   = Text{  name = "title",   font = "FreeSans Bold 26px",  x = 26,y=26}
         local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=57}
         
         showcaseHL = HL:create{
@@ -293,9 +293,9 @@ local function main()
         kb = kb,
         panes = {
             {
-                text    = make_text("Burberry","Spring/Summer 2011 Collection.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                text    = make_text("Burberry","Spring/Summer 2011 Collection","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "Burberry",
-                caption = "Spring/Summer 2011 Collection.",
+                caption = "Spring/Summer 2011 Collection",
                 app_id  = "com.trickplay.burberry",
                 h       = 306,
                 imgs    = {
@@ -305,9 +305,9 @@ local function main()
                 }
             },
             {
-                text    = make_text("Mountain Dew","Vote for the new green label bottle art.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                text    = make_text("Mountain Dew","Vote for the new green label bottle art","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "Mountain Dew",
-                caption = "Vote for the new green label bottle art.",
+                caption = "Vote for the new green label bottle art",
                 app_id  = "com.trickplay.mountain-dew",
                 h       = 306,
                 imgs    = {
@@ -317,9 +317,9 @@ local function main()
                 }
             },
             {
-                text    = make_text("JYPE","Greatest Hits Video Showcase.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                text    = make_text("JYPE","Greatest Hits Video Showcase","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "JYPE",
-                caption = "Greatest Hits Video Showcase.",
+                caption = "Greatest Hits Video Showcase",
                 app_id  = "com.trickplay.jyp",
                 h       = 316,
                 imgs    = {
@@ -336,7 +336,7 @@ local function main()
     shop = Group{}
     do
         
-        local title   = Text{  name = "title",   font = "FreeSans Bold 24px",  x = 26,y=26}
+        local title   = Text{  name = "title",   font = "FreeSans Bold 26px",  x = 26,y=26}
         local caption = Text{  name = "caption", font = "FreeSans Medium 24px",x = 26,y=57}
         
         shopHL = HL:create{
@@ -363,9 +363,9 @@ local function main()
         kb = kb,
         panes = {
             {
-                text    = make_text("Enter the App Shop","Explore new apps for your smart TV.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                text    = make_text("Enter the App Shop","Explore new apps for your smart TV","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "Enter the App Shop",
-                caption = "Explore new apps for your smart TV.",
+                caption = "Explore new apps for your smart TV",
                 app_id  = "com.trickplay.app-shop",
                 h       = 306,
                 imgs    = {
@@ -374,9 +374,9 @@ local function main()
                 }
             },
             {
-                text    = make_text("HULU","Watch TV shows & movies free online.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                text    = make_text("HULU","Watch TV shows & movies free online","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "HULU",
-                caption = "Watch TV shows & movies free online.",
+                caption = "Watch TV shows & movies free online",
                 app_id  = "com.trickplay.app-shop",
                 h       = 306,
                 imgs    = {
@@ -385,9 +385,9 @@ local function main()
                 }
             },
             {
-                text    = make_text("True Blood Comics","The thrills continue in Bon Temp.","FreeSans Bold 24px","FreeSans Medium 24px"),
+                text    = make_text("True Blood Comics","The thrills continue in Bon Temp","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "True Blood Comics",
-                caption = "The thrills continue in Bon Temp.",
+                caption = "The thrills continue in Bon Temp",
                 app_id  = "com.trickplay.app-shop",
                 h       = 316,
                 imgs    = {

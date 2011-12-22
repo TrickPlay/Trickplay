@@ -87,7 +87,7 @@ function mkb:create(p)
         
     end
     
-    hl_y_off[#hl_y_off] = 16
+    hl_y_off[#hl_y_off] = 11
     
     local animating = false
     

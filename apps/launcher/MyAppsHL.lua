@@ -315,6 +315,8 @@ local function make_sub_menu(p)
         end,
         [keys.OK] = function(self)
             
+            sub_menu_items[sub_menu_i]:unfocus()
+            
             return sub_menu_items[sub_menu_i]:press_enter()
             
         end,
@@ -394,6 +396,8 @@ local function make_sub_menu(p)
         end,
         [keys.OK] = function(self)
             
+            sub_menu_items[sub_menu_i]:unfocus()
+            
             return sub_menu_items[sub_menu_i]:press_enter()
             
         end,
@@ -406,7 +410,23 @@ local function make_sub_menu(p)
         
     end
     
-    function sub_menu:show_sub_menu()
+    function sub_menu:show_sub_menu(i)
+        
+        sub_menu_i = i or 1
+        
+        for i,item in ipairs(sub_menu_items) do
+            
+            if i == sub_menu_i then
+                
+                item:focus()
+                
+            else
+                
+                item:unfocus()
+                
+            end
+            
+        end
         
         parent_ref.parent:raise_to_top()
         
@@ -468,7 +488,7 @@ function myAppsHL:create(p)
             
             self:hide_sub_menu()
             
-            sub_menu:grab_key_focus()
+            sub_menu:show_sub_menu(2)
             
         end,
         total_close    = function(self,k)
