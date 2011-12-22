@@ -199,6 +199,7 @@ Group: Engine Reference {
     	
     	Group: Globals {
 			File: Utility Functions (no auto-title, bindings/globals.lb)
+			File: Regular Expression Functions (no auto-title, bindings/regex.lb)
 		}
 	}
 
