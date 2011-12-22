@@ -70,7 +70,7 @@ function self:create(p)
     
     contents:add(p.contents)
     local overlay = Clone{ source = overlay, x = 8, y = top.h - btm.h + 8 }
-    g:add(contents,overlay,top,mid,btm,text,p.slider)
+    g:add(contents,overlay,top,mid,btm,text,p.outer,p.slider)
     
     
     local anim_state = AnimationState{
