@@ -1,44 +1,6 @@
 local g = ... 
 
 
-local image12 = Image
-	{
-		src = "/assets/images/cube-64.png",
-		clip = {0,0,64,63},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "image12",
-		position = {1412,51,0},
-		size = {64,63},
-		opacity = 255,
-		reactive = true,
-	}
-
-image12.extra.focus = {}
-
-function image12:on_key_down(key)
-	if image12.focus[key] then
-		if type(image12.focus[key]) == "function" then
-			image12.focus[key]()
-		elseif screen:find_child(image12.focus[key]) then
-			if image12.clear_focus then
-				image12.clear_focus(key)
-			end
-			screen:find_child(image12.focus[key]):grab_key_focus()
-			if screen:find_child(image12.focus[key]).set_focus then
-				screen:find_child(image12.focus[key]).set_focus(key)
-			end
-		end
-	end
-	return true
-end
-
-image12.extra.reactive = true
-
-
 local image0 = Image
 	{
 		src = "/assets/images/ice-bridge.png",
@@ -87,7 +49,7 @@ local image2 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image2",
-		position = {16,455,0},
+		position = {2,455,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -124,7 +86,7 @@ local clone5 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone5",
-		position = {472,490,0},
+		position = {458,490,0},
 		size = {128,127},
 		opacity = 255,
 		reactive = true,
@@ -162,7 +124,7 @@ local image8 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image8",
-		position = {986,536,0},
+		position = {955,536,0},
 		size = {300,55},
 		opacity = 255,
 		reactive = true,
@@ -199,7 +161,7 @@ local clone9 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone9",
-		position = {33,361,0},
+		position = {19,361,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -236,7 +198,7 @@ local clone10 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone10",
-		position = {27,294,0},
+		position = {13,294,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -273,7 +235,7 @@ local clone11 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone11",
-		position = {1382,-48,0},
+		position = {1621,344,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -311,7 +273,7 @@ local image13 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image13",
-		position = {1172,-4,0},
+		position = {1154,-4,0},
 		size = {161,131},
 		opacity = 255,
 		reactive = true,
@@ -349,7 +311,7 @@ local image14 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image14",
-		position = {1099,489,0},
+		position = {1068,489,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -386,7 +348,7 @@ local clone15 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone15",
-		position = {413,250,0},
+		position = {399,250,0},
 		size = {475,89},
 		opacity = 255,
 		reactive = true,
@@ -414,4 +376,42 @@ end
 clone15.extra.reactive = true
 
 
-g:add(image12,image0,image2,clone5,image8,clone9,clone10,clone11,image13,image14,clone15)
+local image12 = Image
+	{
+		src = "/assets/images/cube-64.png",
+		clip = {0,0,64,63},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "image12",
+		position = {1652,306,0},
+		size = {64,63},
+		opacity = 255,
+		reactive = true,
+	}
+
+image12.extra.focus = {}
+
+function image12:on_key_down(key)
+	if image12.focus[key] then
+		if type(image12.focus[key]) == "function" then
+			image12.focus[key]()
+		elseif screen:find_child(image12.focus[key]) then
+			if image12.clear_focus then
+				image12.clear_focus(key)
+			end
+			screen:find_child(image12.focus[key]):grab_key_focus()
+			if screen:find_child(image12.focus[key]).set_focus then
+				screen:find_child(image12.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+image12.extra.reactive = true
+
+
+g:add(image0,image2,clone5,image8,clone9,clone10,clone11,image13,image14,clone15,image12)
