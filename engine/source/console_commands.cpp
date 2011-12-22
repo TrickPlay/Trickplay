@@ -786,7 +786,7 @@ protected:
 			}
 			else
 			{
-				g_info( "NO SUCH POFILE" );
+				g_info( "NO SUCH PROFILE" );
 			}
 		}
 		else

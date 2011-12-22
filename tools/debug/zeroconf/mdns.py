@@ -80,7 +80,7 @@ class Engine(threading.Thread):
                 # No sockets to manage, but we wait for the timeout
                 # or addition of a socket
                 #
-                log.debug( 'No sockets, waiting %s', self.timeout )
+                #log.debug( 'No sockets, waiting %s', self.timeout )
                 self.condition.acquire()
                 self.condition.wait(self.timeout/25.)
                 self.condition.release()
@@ -91,17 +91,20 @@ class Engine(threading.Thread):
                     if err[0] in (errno.EWOULDBLOCK,errno.EINTR,errno.EAGAIN):
                         pass 
                     else:
-                        log.info( 'Failure on select, ignoring: %s', err )
+                        #log.info( 'Failure on select, ignoring: %s', err )
+                        pass
                 except Exception, err:
-                    log.info( 'Select failure, ignored: %s', err )
+                    #log.info( 'Select failure, ignored: %s', err )
+                    pass
                 else:
                     for sock in rr:
                         try:
                             self.readers[sock].handle_read()
                         except Exception, err:
                             # Ignore errors that occur on shutdown
-                            log.info( 'Error handling read: %s', err )
-                            log.debug( 'Traceback: %s', traceback.format_exc())
+                            #log.info( 'Error handling read: %s', err )
+                            #log.debug( 'Traceback: %s', traceback.format_exc())
+                            pass
 
     def getReaders(self):
         result = []
@@ -145,7 +148,8 @@ class Listener(object):
             if getattr( err, 'errno', None ) == 9: # 'Bad file descriptor' during shutdown...
                 pass
             else:
-                log.info( 'Error on recvfrom: %s', err )
+                #log.info( 'Error on recvfrom: %s', err )
+				pass
             return None
         self.data = data
         try:
@@ -153,10 +157,11 @@ class Listener(object):
         except dns.NonLocalNameException, err:
             """We ignore mdns queries for non-local addresses, such as in-addr.arpa."""
         except dns.DNSError, err:
-            log.error( 
-                "Malformed packet from %s (%s), ignored: %r", 
-                addr, err, data 
-            )
+            #log.error( 
+                #"Malformed packet from %s (%s), ignored: %r", 
+                #addr, err, data 
+            #)
+			pass
         else:
             if msg.isQuery():
                 # Always multicast responses
@@ -170,9 +175,10 @@ class Listener(object):
                     self.zeroconf.handleQuery(msg, addr, port)
                     self.zeroconf.handleQuery(msg, dns._MDNS_ADDR, dns._MDNS_PORT)
                 else:
-                    log.error(
-                        "Unknown port: %s", port
-                    )
+                    #log.error(
+                    #   "Unknown port: %s", port
+                    #)
+					pass
             else:
                 self.zeroconf.handleResponse(msg)
 
@@ -404,9 +410,9 @@ class Zeroconf(object):
             if failures > 5:
                 # mDNS requires huge slowdown after 15 failures
                 # to prevent flooding network...
-                log.info( 
-                    "Throttling host-name configuration to prevent network flood"
-                )
+                #log.info( 
+                #    "Throttling host-name configuration to prevent network flood"
+                #)
                 delay = dns._PROBE_THROTTLED_TIME
                 timeout = 2.5 * delay
             if not address:
@@ -600,23 +606,25 @@ class Zeroconf(object):
             out = dns.DNSOutgoing(dns._FLAGS_QR_RESPONSE | dns._FLAGS_AA, 0)
             for question in msg.questions:
                 out.addQuestion(question)
-        log.debug( 'Questions...')
+        #log.debug( 'Questions...')
         for question in msg.questions:
-            log.debug( 'Question: %s', question )
+            #log.debug( 'Question: %s', question )
             if out is None:
                 out = dns.DNSOutgoing(dns._FLAGS_QR_RESPONSE | dns._FLAGS_AA)
             try:
                 self.responses( question, msg, out )
             except Exception, err:
-                log.error(
-                    'Error handling query: %s',traceback.format_exc()
-                )
+                #log.error(
+                #    'Error handling query: %s',traceback.format_exc()
+                #)
+				pass
         if out is not None and out.answers:
             out.id = msg.id
             self.send(out, addr, port)
-            log.debug( 'Sent response: %s', out.answers )
+            #log.debug( 'Sent response: %s', out.answers )
         else:
-            log.debug( 'No (newer) answer for %s', [q for q in msg.questions] )
+            #log.debug( 'No (newer) answer for %s', [q for q in msg.questions] )
+			pass
     
     def responses( self, question, msg, out ):
         """Adds all responses to out which match the given question
@@ -626,11 +634,11 @@ class Zeroconf(object):
         out.answers may be null even if we have the records that 
         match the query.
         """
-        log.debug( 'Question: %s', question )
+        #log.debug( 'Question: %s', question )
         for service in self.services.values():
             if question.type == dns._TYPE_PTR:
                 if question.name.lower() in (service.type.lower(),service.name.lower()):
-                    log.debug( 'Service query found %s', service.name )
+                    #log.debug( 'Service query found %s', service.name )
                     out.addAnswer(msg, dns.DNSPointer(question.name, dns._TYPE_PTR, dns._CLASS_IN, dns._DNS_TTL, service.name))
                     # devices such as AAstra phones will not re-query to
                     # resolve the pointer, they expect the final IP to show up
@@ -692,15 +700,15 @@ class Zeroconf(object):
         the addr/port combo...
         """
         current = dns.currentTimeMillis()
-        log.info( '%s messages in suppression_queue', len(self.suppression_queue))
+        #log.info( '%s messages in suppression_queue', len(self.suppression_queue))
         while self.suppression_queue and self.suppression_queue[0][0] < current:
-            log.debug( 'Removing...' )
+            #log.debug( 'Removing...' )
             self.suppression_queue.pop(0)
         packet = out.packet()
         sent = False
         for i,(expire,old_packet) in enumerate(self.suppression_queue[:]):
             if old_packet == packet:
-                log.debug( 'Dropping to prevent flood' )
+                #log.debug( 'Dropping to prevent flood' )
                 sent = True
         if not sent:
             try:
