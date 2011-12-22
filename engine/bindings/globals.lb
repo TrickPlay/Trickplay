@@ -202,7 +202,7 @@ String hmac( GChecksumType type , const void * key , gsize key_len , const void 
 ]]
 
 /*
-	File: Utility Functions
+	File: Miscellaneous Utility Functions
 	
 	This section describes utility functions provided by the TrickPlay SDK Libraries. A TrickPlay application can call any of the functions described here.
 */
