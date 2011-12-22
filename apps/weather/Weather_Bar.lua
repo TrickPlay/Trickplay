@@ -379,10 +379,11 @@ function Make_Bar(loc,index, master)
             
             dumptable(response)
             
-            if response.error then
+            if response.response.error then
                 
                 mesg.text = "Unable to connect."
-                
+                animate_list[bar.func_tbls.loading_sun_fade_out] = bar
+                return
             end
             
             
@@ -409,7 +410,9 @@ function Make_Bar(loc,index, master)
                 bar.func_tbls.blurb.dy = blurb_txt.h-blurb_txt.clip[4]
                 bar.func_tbls.blurb_up.dy = blurb_txt.h-blurb_txt.clip[4]
                 bar.func_tbls.blurb.duration = bar.func_tbls.blurb.dy/8*1000
+                
                 print(bar.func_tbls.blurb.duration)
+                
             end
             
             bar.curr_condition = response.forecast.simpleforecast.forecastday[1].conditions
@@ -1332,7 +1335,7 @@ function Make_Bar(loc,index, master)
                     
                     if type(response) == "table" then
                         
-                        if response.error then
+                        if response.response.error then
                             
                             zip_code_prompt.text = "No Search Result. Try again."
                             
