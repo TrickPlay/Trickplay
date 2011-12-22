@@ -27,6 +27,7 @@ local make_entry = function(app_id,app_name)
         color = "#ffffff",
         font  = "FreeSans Medium 28px",
         x     = i.w + 25,
+        ellipsize = "END", w = 340
     }
     
     t.anchor_point = {0,t.h/2}

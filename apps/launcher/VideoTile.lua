@@ -44,7 +44,7 @@ function self:create(p)
     local l_expanded_h = p.expanded_h and p.expanded_h < expanded_h and  p.expanded_h or expanded_h
     
     --Visual Components
-    local text = Text{ text   = p.text, font = font, color = "999999", x = 15, y = 3 }
+    local text = Text{ text   = p.text, font = font, color = "999999", x = 20, y = 8 }
     local top = Clone{ source = canvas_srcs.video_tile_frame_top }
     local mid = Clone{ source = canvas_srcs.video_tile_frame_middle_slice }
     local btm = Clone{ source = canvas_srcs.video_tile_frame_bottom } --[[make_frame{
