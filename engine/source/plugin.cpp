@@ -6,7 +6,7 @@
 
 #define TP_LOG_DOMAIN   "PLUGINS"
 #define TP_LOG_ON       true
-#define TP_LOG2_ON      true
+#define TP_LOG2_ON      false
 
 #include "log.h"
 
