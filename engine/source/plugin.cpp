@@ -58,6 +58,11 @@ Plugin::List Plugin::scan( TPContext * context , const String & prefix , const S
         return result;
     }
 
+    if ( ! g_file_test( plugins_path , G_FILE_TEST_IS_DIR ) )
+    {
+    	return result;
+    }
+
     GError * error = 0;
 
     GDir * dir = g_dir_open( plugins_path , 0 , & error );
