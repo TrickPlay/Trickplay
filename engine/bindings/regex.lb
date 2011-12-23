@@ -181,59 +181,71 @@ global regex [[void*]]
 
         if (error)
         {
-            g_warning("FAILED TO COMPILE REGEX '%s' : %s",pattern,error->message);
+            String message( error->message );
+            g_clear_error( & error );
+            return luaL_error( L , "FAILED TO COMPILE REGEX '%s' : %s",pattern,message.c_str() ); 
+        }
+
+
+        GMatchInfo * match_info = 0;
+        gboolean result = g_regex_match_full( re_pat, origin, origin_len, start_pos-1, (GRegexMatchFlags) 0, &match_info, &error );
+        
+        if (error)
+        {
+            g_warning("FAILED IN REGEX MATCH: %s",error->message);
             g_clear_error(&error);
-            return 0;
         }
         else
         {
-            GMatchInfo *match_info;
-            gboolean result = g_regex_match_full( re_pat, origin, origin_len, start_pos-1, (GRegexMatchFlags) 0, &match_info, &error );
-            if (error)
+            if(result)
             {
-                g_warning("FAILED IN REGEX MATCH: %s",error->message);
-                g_clear_error(&error);
-            }
-            else
-            {
-                if(result)
+                gint num_captures = g_match_info_get_match_count( match_info );
+        
+                if( num_captures > 1 )
                 {
-                    gint num_captures = g_regex_get_capture_count( re_pat );
-                    if( num_captures > 0 )
+                    for(int i=1; i<=num_captures; i++)
                     {
-                        for(int i=1; i<=num_captures; i++)
+                        if ( gchar * word = g_match_info_fetch( match_info, i ) )
                         {
-                            gchar *word = g_match_info_fetch( match_info, i );
-
-                            if(NULL != word)
-                            {
-                                lua_pushstring( L, word );
-                                g_free( word );
-                            }
+                            lua_pushstring( L, word );
+                            g_free( word );
+                            ++num_matches;
                         }
-
-                        num_matches = num_captures;
+                        else
+                        {
+                            g_critical( "g_match_info_fetch RETURNED NULL" );
+                            g_assert( false );
+                        }
                     }
-                    else // No captures, so just return the match
+                }
+                else // No captures, so just return the match
+                {
+                    if ( gchar * word = g_match_info_fetch ( match_info, 0 ) )
                     {
-                        gchar *word = g_match_info_fetch ( match_info, 0 );
-                        lua_pushstring( L, word );
+                        lua_pushstring( L , word );
                         g_free( word );
-                        g_match_info_next( match_info, &error );
-                        
-                        num_matches = 1;
+                        ++num_matches;
+                    }
+                    else
+                    {
+                        g_critical( "g_match_info_fetch RETURNED NULL" );
+                        g_assert( false );
                     }
                 }
             }
+        }
 
+        if ( match_info )
+        {
             g_match_info_free(match_info);
-            g_regex_unref( re_pat );
+        }
+        
+        g_regex_unref( re_pat );
 
-            if (error)
-            {
-                g_warning("FAILED IN REGEX MATCH GETTING MATCHES: %s",error->message);
-                g_clear_error(&error);
-            }
+        if (error)
+        {
+            g_warning("FAILED IN REGEX MATCH GETTING MATCHES: %s",error->message);
+            g_clear_error(&error);
         }
         
         return num_matches;
