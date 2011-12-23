@@ -177,7 +177,6 @@ global regex [[void*]]
 
     multi find ( lstring origin, string pattern, int start_pos = 1 )
     [[
-#if 0    
         int num_matches = 0;
 
         GError *error = 0;
@@ -204,32 +203,34 @@ global regex [[void*]]
             if(result)
             {
                 gint num_captures = g_match_info_get_match_count( match_info );
-        
+
+                gint begin_pos, end_pos;
+                g_match_info_fetch_pos( match_info, 0, &begin_pos, &end_pos );
+
+                lua_pushnumber( L, begin_pos+1 );
+                lua_pushnumber( L, end_pos );
+                num_matches = 2;
+
                 if( num_captures > 1 )
                 {
-                    gint begin_pos, end_pos;
-                    g_match_info_fetch_pos( match_info, 0, &begin_pos, &end_pos );
-
-                    lua_pushnumber( L, begin_pos+1 );
-                    lua_pushnumber( L, end_pos );
-                    num_matches = 2;
 
                     gint num_captures = g_regex_get_capture_count( re_pat );
                     if( num_captures > 0 )
                     {
-                        if ( gchar * word = g_match_info_fetch( match_info, i ) )
+                        for(int i=1; i<=num_captures; i++)
                         {
-                            lua_pushstring( L, word );
-                            g_free( word );
-                            ++num_matches;
+                            if ( gchar * word = g_match_info_fetch( match_info, i ) )
+                            {
+                                lua_pushstring( L, word );
+                                g_free( word );
+                                ++num_matches;
+                            }
+                            else
+                            {
+                                g_critical( "g_match_info_fetch RETURNED NULL" );
+                                g_assert( false );
+                            }
                         }
-                        else
-                        {
-                            g_critical( "g_match_info_fetch RETURNED NULL" );
-                            g_assert( false );
-                        }
-
-                        num_matches += num_captures;
                     }
                 }
             }
@@ -249,8 +250,6 @@ global regex [[void*]]
         }
         
         return num_matches;
-#endif
-        return 0;        
     ]];
 
     /*
