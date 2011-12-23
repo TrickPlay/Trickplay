@@ -84,7 +84,7 @@ tp_audio_detection_process_samples( const TPAudioDetectionSamples * samples , vo
 void
 tp_audio_detection_reset( void * user_data )
 {
-    // Nothing to do
+    /* Nothing to do */
 }
 
 /******************************************************************************
@@ -94,7 +94,7 @@ tp_audio_detection_reset( void * user_data )
 void
 tp_plugin_shutdown( void * user_data )
 {
-    // Nothing to do - but we could free resources associated with user data.
+    /* Nothing to do - but we could free resources associated with user data. */
 }
 
 /******************************************************************************
