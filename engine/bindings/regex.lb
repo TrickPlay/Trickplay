@@ -177,6 +177,7 @@ global regex [[void*]]
 
     multi find ( lstring origin, string pattern, int start_pos = 1 )
     [[
+#if 0    
         int num_matches = 0;
 
         GError *error = 0;
@@ -248,6 +249,8 @@ global regex [[void*]]
         }
         
         return num_matches;
+#endif
+        return 0;        
     ]];
 
     /*
