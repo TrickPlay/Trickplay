@@ -412,6 +412,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
+	${BINDINGS_SRC}/regex.lb
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
@@ -592,6 +593,7 @@ list( APPEND
     ${ENGINE_SRC}/source/jpeg_utils.cpp
     ${ENGINE_SRC}/source/console_commands.cpp
     ${ENGINE_SRC}/source/app_resource.cpp
+    ${ENGINE_SRC}/source/plugin.cpp
 )
 
 #------------------------------------------------------------------------------
