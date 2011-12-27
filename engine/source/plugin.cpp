@@ -6,7 +6,7 @@
 
 #define TP_LOG_DOMAIN   "PLUGINS"
 #define TP_LOG_ON       true
-#define TP_LOG2_ON      true
+#define TP_LOG2_ON      false
 
 #include "log.h"
 
@@ -56,6 +56,11 @@ Plugin::List Plugin::scan( TPContext * context , const String & prefix , const S
         tpwarn( "PLUGINS PATH IS NOT SET" );
 
         return result;
+    }
+
+    if ( ! g_file_test( plugins_path , G_FILE_TEST_IS_DIR ) )
+    {
+    	return result;
     }
 
     GError * error = 0;
