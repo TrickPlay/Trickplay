@@ -29,24 +29,19 @@ restricted global editor [[ void * ]]
 
     table readdir(string dir_name)
         [[
-             gchar *filename = NULL;
-             GDir *dir = NULL;
-
-             dir = g_dir_open(dir_name, 0, NULL);
-
-            if(dir)
+            if ( GDir * dir = g_dir_open( dir_name , 0 , 0 ) )
             {
-                filename = (gchar *)g_dir_read_name(dir);
                 lua_newtable( L );
                 int t = lua_gettop( L );
                 int i = 1;
-                while(filename != NULL)
+                
+                for ( const gchar * name = g_dir_read_name( dir ); name; name = g_dir_read_name( dir ) )
                 {
-                    lua_pushstring( L , filename );
+                    lua_pushstring( L , name );
                     lua_rawseti( L , t , i++ );
-                    filename = (gchar *)g_dir_read_name(dir);
                 }
-                g_dir_close(dir);
+                
+                g_dir_close( dir );
             }
             else
             {
