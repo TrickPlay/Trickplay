@@ -24,6 +24,9 @@
 ******************************************************************************/
 
 #include <dbus/dbus.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "appfrwk_openapi_types.h"
 #include "appfrwk_openapi_pm.h"
 
@@ -70,7 +73,12 @@ typedef enum tagVOICE_APP_TYPE_T
 
 } VOICE_APP_TYPE_T;
 
-
+typedef enum tagVOICE_MODE_TYPE_T
+{
+	VOICE_MODE_WORD = 0,
+	VOICE_MODE_DICTATION,
+	VOICE_MODE_MAX,	
+}VOICE_MODE_TYPE_T;
 
 /**
  * 현재 설정된 언어
@@ -85,10 +93,16 @@ typedef enum tagVOICE_LANG_TYPE_T
 	VOICE_ESUS,				// Spanish, US
 	VOICE_FRCA,				// French, Canada
 	VOICE_FRFR,				// French, EU
-	VOICE_ITIT,				//
-
-	VOICE_KOKR,   			//KOKR 언어, 지역
-	VOICE_MAX		,
+	VOICE_ITIT,				// 
+	VOICE_KOKR,   			// KOKR 언어, 지역
+	VOICE_SWE,				// Swedish 
+	VOICE_NOR,				// Norwegian 
+	VOICE_NLD,				// Dutch
+	VOICE_RUS,				// Russian
+	VOICE_ENAU,				// Australian English
+	VOICE_CHMN,				// Chinese Mandarin
+	
+	VOICE_MAX,
 } VOICE_LANG_TYPE_T;
 
 
@@ -103,23 +117,26 @@ typedef enum tagVOICE_LANG_TYPE_T
 	Global Variables & Function Prototypes Declarations
 ******************************************************************************/
 
-HOA_STATUS_T	HOA_LGINPUT_VoiceInitialize(void);
-HOA_STATUS_T	HOA_LGINPUT_VoiceAppInitialize(UINT32 appType, UINT32 pid);
-HOA_STATUS_T	HOA_LGINPUT_VoiceAppFinalize(UINT32 pid);
-HOA_STATUS_T	HOA_LGINPUT_VoiceLangSetting(UINT32 langType);
-HOA_STATUS_T	HOA_LGINPUT_VoiceStartRecog(void);
-HOA_STATUS_T	HOA_LGINPUT_VoiceExitRecog(void);
-HOA_STATUS_T	HOA_LGINPUT_VoiceRegistCB(LGINPUT_VOICE_CB_T  pfnCallback );
-HOA_STATUS_T	HOA_LGINPUT_VoiceFinalizeCB(void);
-HOA_STATUS_T	HOA_LGINPUT_VoiceRegisterUIFuncCB(LGINPUT_VOICE_UI_CB_T  pfnCB );
-HOA_STATUS_T	HOA_LGINPUT_VoiceUIFuncFreeCB(void);
-HOA_STATUS_T	HOA_LGINPUT_VoiceSelectMultiResult(int index);
+HOA_STATUS_T	HOA_MRCU_InitializeVoice(void);
+HOA_STATUS_T	HOA_MRCU_InitializeVoiceApp(UINT32 appType, UINT32 pid);
+HOA_STATUS_T	HOA_MRCU_FinalizeVoiceApp(UINT32 pid);
+HOA_STATUS_T	HOA_MRCU_SetVoiceLanguage(UINT32 langType);
+HOA_STATUS_T	HOA_MRCU_SelectVoiceMode(VOICE_MODE_TYPE_T mode);
+HOA_STATUS_T	HOA_MRCU_StartVoiceRecognition(void);
+HOA_STATUS_T	HOA_MRCU_ExitVoiceRecognition(void);
+HOA_STATUS_T	HOA_MRCU_RegisterVoiceCallback(LGINPUT_VOICE_CB_T  pfnCallback );
+HOA_STATUS_T	HOA_MRCU_UnregisterVoiceCallback(void);
+HOA_STATUS_T	HOA_MRCU_RegisterVoiceUiFuncCallback(LGINPUT_VOICE_UI_CB_T  pfnCB );
+HOA_STATUS_T	HOA_MRCU_UnregisterVoiceUiFuncCallback(void);
+HOA_STATUS_T	HOA_MRCU_SelectVoiceMultiResult(int index);
 
 HOA_STATUS_T APP_HNDL_LGINPUT_VoiceSendNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
 
 
 HOA_STATUS_T APP_HNDL_LGINPUT_VoiceSendMultiResult(DBusConnection *conn, DBusMessage *msg, void *user_data);
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _LGINPUT_VOICEOPENAPI_H_ */
 

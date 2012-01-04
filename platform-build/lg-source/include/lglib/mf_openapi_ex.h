@@ -34,6 +34,7 @@ typedef  enum
 	MF_DOWNLOAD_NONE	= 0x00,
 	MF_DOWNLOAD_EOS	= 0x01,
 	MF_DOWNLOAD_ERROR	= 0x02,
+	MF_DOWNLOAD_ERROR_NOT_FOUND	= 0x03,
 } MF_DOWNLOAD_STATE_T;
 
 typedef void (*pfnGetBusMessageAsync)(int download_id, MF_DOWNLOAD_STATE_T dwState);
@@ -52,15 +53,15 @@ int MEDIA_EX_DownloadFileAsync (char *pPath, char *pUrl, const char *pFilename, 
 HOA_STATUS_T MEDIA_EX_DownloadFileAsyncCancel(int download_id_num);
 
 // export //
-HOA_STATUS_T HOA_MEDIA_EX_GetFileInfoForNewURI(MEDIA_CHANNEL_T ch, char *pPath, char *pUri, char *pFileName, MEDIA_SOURCE_INFO_T *pSourceInfo, unsigned char tag_get, unsigned char album_get);
-HOA_STATUS_T HOA_MEDIA_EX_GetSourceInfoForNewURI(MEDIA_CHANNEL_T ch, char *pUri, MEDIA_SOURCE_INFO_T *pSourceInfo);
+HOA_STATUS_T HOA_MEDIA_EX_GetFileInfoForNewUri(MEDIA_CHANNEL_T ch, char *pPath, char *pUri, char *pFileName, MEDIA_SOURCE_INFO_T *pSourceInfo, unsigned char tag_get, unsigned char album_get);
+HOA_STATUS_T HOA_MEDIA_EX_GetSourceInfoForNewUri(MEDIA_CHANNEL_T ch, char *pUri, MEDIA_SOURCE_INFO_T *pSourceInfo);
 HOA_STATUS_T HOA_MEDIA_EX_DownloadFile (MEDIA_CHANNEL_T ch, char *pPath, char *pUrl, const char *pFilename, MEDIA_TRANSPORT_T mediaTransportType, MEDIA_FORMAT_T mediaFormatType);
 // for image download // will be removed// 2
-int HOA_MEDIA_EX_DownloadImageStart (char *pPath, char *pUrl, const char *pFilename);
-HOA_STATUS_T HOA_MEDIA_EX_DownloadImageCancel (int download_id);
+int HOA_MEDIA_EX_StartImageDownload (char *pPath, char *pUrl, const char *pFilename);
+HOA_STATUS_T HOA_MEDIA_EX_CancelImageDownload (int download_id);
 
-int HOA_MEDIA_EX_DownloadImageAsyncStart(char *pPath, char *pUrl, const char *pFilename, pfnGetBusMessageAsync msgCallback);
-HOA_STATUS_T HOA_MEDIA_EX_DownloadImageAsyncCancel (int download_id);
+int HOA_MEDIA_EX_StartAsyncImageDownload(char *pPath, char *pUrl, const char *pFilename, pfnGetBusMessageAsync msgCallback);
+HOA_STATUS_T HOA_MEDIA_EX_CancelAsyncImageDownload (int download_id);
 
 // end export //
 

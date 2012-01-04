@@ -46,9 +46,17 @@ typedef enum
 {
 	CREATE_NONE, 							/**< do not have plan to create background process */
 	CREATE_NOTYET,							/**< have plan to create bg process but not created */
+	CREATE_WAITING,							/**< bg process create waiting in register handler */
 	CREATE_COMPLETE,						/**< bg process create done */
 
 } PM_PROC_BG_STATUS_T;
+
+typedef enum
+{
+	TERM_UPDATE, 							/**< process terminate when s/w update */
+	TERM_POWEROFF, 							/**< process terminate when power off */
+
+} PM_PROC_TERM_CASE_T;
 
 /**
  * This enumeration describes the remote control key condition.
@@ -64,6 +72,13 @@ typedef enum
 	PM_KEY_COND_LAST
 
 } PM_KEY_COND_T;
+
+typedef struct
+{
+	char	*pServiceName;					/**< Process servicename */
+	UINT64	nAUID;							/**< The current auid of process */
+
+} PM_PROC_SUBINFO_T;
 
 #define	PM_CURSOR_MAX_FPS		70	/*maximum cursor fps is 50*/
 

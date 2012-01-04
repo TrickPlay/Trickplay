@@ -19,6 +19,9 @@
 
 static TPContext* pContext = NULL;
 static char _gszAppPath[PATH_MAX];
+static int f_argc = 0;
+static char** f_argv = NULL;
+static TP_DISPLAY_MODE_T gArgDispMode = TP_DISP_FULL;
 
 // TODO sanggi0.lee - remove
 #if 0 // def USE_DRM_ENCRYPTED_APP
@@ -65,6 +68,50 @@ static BOOLEAN _TP_GetAppDirectory(char* szAppDirectory, const char* szAppPath)
 	free(szTmp);
 
 	return TRUE;
+}
+
+// TODO sanggi0.lee - filter arguments
+static void gen_filtered_args(int argc, char* argv[])
+{
+	int i;
+	f_argv = malloc(sizeof(char*) * argc);
+	f_argv[f_argc++] = argv[0];
+
+	for (i = 1; i<argc; i++)
+	{
+		if( strcmp(argv[i], "--auid") == 0
+		 || strcmp(argv[i], "--runAt") == 0
+		 || strcmp(argv[i], "--service") == 0
+		  )
+		{
+			i++;
+		}
+		else if( strcmp(argv[i], "--shell") == 0 )
+		{
+			// do nothing
+		}
+		else if (strcmp(argv[i], "--disp") == 0 )
+		{
+			if ((i+1) < argc)
+			{
+				sscanf(argv[i+1], "%d", (int *)&gArgDispMode);
+				DBG_PRINT_TP("display mode=%d", gArgDispMode);
+				i++;
+			}
+		}
+		else
+		{
+			f_argv[f_argc++] = argv[i];
+			DBG_PRINT_TP("f_argv[%d]=%s", f_argc-1, f_argv[f_argc-1]);
+		}
+	}
+
+	DBG_PRINT_TP("########### filtered args ##############");
+	for (i = 1; i<f_argc; i++)
+	{
+		DBG_PRINT_TP("f_argv[%d]=%s", i, f_argv[i]);
+	}
+	DBG_PRINT_TP("########### filtered args ##############");
 }
 
 static BOOLEAN _TP_InitContext(int argc, char* argv[])
@@ -207,12 +254,15 @@ int main(int argc, char* argv[])
 {
 	int result = 1;
 
+	gen_filtered_args(argc, argv);
+
 	if (!TP_System_Initialize(argc, argv))
 		goto done;
 
 	_TP_SetRuntimeEnvs();
 
-	if (!_TP_InitContext(argc, argv))
+	//if (!_TP_InitContext(argc, argv))
+	if (!_TP_InitContext(f_argc, f_argv))
 		goto done;
 
 	if (!TP_Controller_Initialize(pContext)
@@ -223,7 +273,8 @@ int main(int argc, char* argv[])
 	// TODO sanggi0.lee - remove
 	//TP_System_EnableFullDisplay();
 	//TP_System_SetDisplayMode(TP_DISP_WIDGET);
-	TP_System_SetDisplayMode(TP_DISP_FULL);
+	TP_System_SetDisplayMode(gArgDispMode);
+	DBG_PRINT_TP("display mode=%d", TP_System_GetDisplayMode());
 	result = _TP_RunContext() ? 0 : 1;
 
 done:
@@ -237,6 +288,8 @@ done:
 	_TP_FiniContext();
 
 	TP_System_Finalize();
+
+	if(f_argv != NULL) free(f_argv);
 
 	return result;
 }

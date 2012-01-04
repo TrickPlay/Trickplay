@@ -105,7 +105,7 @@ static int _MediaPlayer_Load(TPMediaPlayer* pMP, const char* szURI, const char* 
 	DBG_PRINT_TP("trans type=%d, format=%d, codec=%d",
 			pMediaInfo->transType, pMediaInfo->formatType, pMediaInfo->codecType);
 
-	if (pMediaInfo->transType == MEDIA_TRANS_MSDL ||
+	if (pMediaInfo->transType == MEDIA_TRANS_URI ||
 		pMediaInfo->transType == MEDIA_TRANS_FILE)
 	{
 		pMP->play	= TP_PlayClip_Play;
@@ -152,7 +152,7 @@ static void _MediaPlayer_Reset(TPMediaPlayer* pMP)
 
 	pMediaInfo = (TP_MEDIA_INFO_T*)pMP->user_data;
 
-	if (pMediaInfo->transType == MEDIA_TRANS_MSDL ||
+	if (pMediaInfo->transType == MEDIA_TRANS_URI ||
 		pMediaInfo->transType == MEDIA_TRANS_FILE)
 		HOA_MEDIA_StopClip(MEDIA_CH_A);
 	else if (pMediaInfo->transType == MEDIA_TRANS_BUFFERSTREAM)
@@ -525,7 +525,7 @@ MEDIA_TRANSPORT_T TP_MediaPlayer_GetTransportType(const char* szURI)
 			return MEDIA_TRANS_BUFFERSTREAM;
 	}
 
-	return MEDIA_TRANS_MSDL;
+	return MEDIA_TRANS_URI;
 }
 
 MEDIA_FORMAT_T TP_MediaPlayer_GetFormatType(const char* szURI)

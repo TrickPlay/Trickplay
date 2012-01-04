@@ -93,6 +93,10 @@ extern int 	osa_mm_register_op (osa_mm_op_t * op);
 extern void osa_mm_init_op(osa_mm_op_t * op);
 extern int 	osa_mm_ctrl_byname(char * p_name);
 extern int 	osa_mm_ctrl_byidx (int idx);
+
+extern int 	osa_mm_ctrl_byname_self(char * p_name);
+extern int 	osa_mm_ctrl_byidx_self(int idx);
+
 extern int 	osa_mm_getidx(void);
 
 /*------------------------------------------------------------------------

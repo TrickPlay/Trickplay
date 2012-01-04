@@ -88,6 +88,8 @@ extern int 	osa_sigcmd(int cmd_no, osa_sigcmd_t sigcmd, osa_sigcmd_t * ocmd);
 extern int 	osa_sigcmd_kill(osa_thread_t tid, int cmd_no);
 
 extern int 	osa_signal_register_installer(void (* signal_install)(void));
+extern int 	osa_signal_register_uninstaller(osa_sig_setup_t p_setup_proc);
+extern int 	osa_signal_uninstall(void);
 
 
 

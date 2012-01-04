@@ -78,9 +78,10 @@ extern void 				xlibc_delay_us(unsigned int us);
 extern unsigned long		xlibc_suspend(unsigned int ms);
 extern unsigned long 		xlibc_calccrc32(unsigned char *buf, int len);
 extern unsigned long 		xlibc_rand(void);
+#ifndef ESCAPE_GNULICENSE
 extern void 				xlibc_quicksort(void *base, size_t nmemb, size_t size,
 						   int (*compar)(const void *, const void *));
-
+#endif
 extern void *				bitmask_setup (size_t last_pos, unsigned char * mem, unsigned char init_val);
 extern void *				bitmask_attach(size_t last_pos, unsigned char * mem);
 

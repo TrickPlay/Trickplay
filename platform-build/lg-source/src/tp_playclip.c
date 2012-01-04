@@ -17,8 +17,8 @@
 static HMAP _ghEffectMap = NULL;
 
 // TODO sanggi0.lee
-//static const HOA_RECT_T	_gVideoGeometry = { 0, 0, 1920, 1080 };
-static const HOA_RECT_T	_gVideoGeometry = { 0, 0, 1280, 720 };
+static const HOA_RECT_T	_gVideoGeometry = { 0, 0, 1920, 1080 };
+//static const HOA_RECT_T	_gVideoGeometry = { 0, 0, 1280, 720 };
 
 // TODO sanggi0.lee
 /*
@@ -353,7 +353,7 @@ int TP_PlayClip_PlaySound(TPMediaPlayer* pMP, const char* szURI)
 	//res = HOA_MEDIA_PlayStream(ch, pBufHandle,
 	//		MEDIA_TRANS_BUFFERSTREAM, fmt, MEDIA_AUDIO_PCM,
 	//		(UINT8*)&_gPCMInfo, sizeof(_gPCMInfo));
-	res = HOA_MEDIA_PlayClipBuffer(ch, pBufHandle, 1, 
+	res = HOA_MEDIA_PlayClipBuffer(ch, pBufHandle, 1,
 			MEDIA_TRANS_BUFFERCLIP, fmt, MEDIA_AUDIO_ANY,
 			(UINT8*)&_gPCMInfo, sizeof(_gPCMInfo));
 

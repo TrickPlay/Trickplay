@@ -106,6 +106,14 @@ typedef struct {
 								/*  interpreting 						*/
 } cmd_menu_t;
 
+//sunyoung20.park add for batch execution in standardizing debug format
+typedef struct {
+	char		*at_dm_name; 	/*Command Name of auto debug menu*/
+	char		*at_dm_expect;	/*Expect Value String of debug menu*/
+	int 		 at_dm_base;    /*Base String of expect value*/
+} cmd_auto_menu_t;
+
+
 #define	DMT_NOARG		 0		/* Pass no arguement       				*/
 #define	DMT_ARG1		11		/* Pass only first one arguement as str */
 #define	DMT_ARG2		12		/* Pass only first two arguement as str */
@@ -118,6 +126,7 @@ typedef struct {
 #define	DMT_EXTM		81		/* Link to user added command menus		*/
 #define	DMT_TERM		82		/* End mark of list of menu items		*/
 #define	DMT_MENU		90		/* Pass Menu Struct & Argv List 		*/
+#define DMT_AUTO_MENU 	91		//sunyoung20.park add for batch execution in standardizing debug format
 								/* This should be last item				*/
 
 #define	DM_SHOW_HELP	 1		/* Show help on entering new menu		*/

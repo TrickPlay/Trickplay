@@ -94,7 +94,9 @@ typedef enum _UC_HTTP_ERROR_CODE
 	UC_ERRCODE_A009_03				= 0xA00903,
 	UC_ERRCODE_A009_04				= 0xA00904,
 	UC_ERRCODE_A009_05				= 0xA00905,
-
+	UC_ERRCODE_A009_06				= 0xA00906,
+	UC_ERRCODE_A009_07				= 0xA00907,
+	
 	//A.018 RO ฟไรป
 	UC_ERRCODE_A018_01				= 0xA01801,
 	UC_ERRCODE_A018_02				= 0xA01802,
@@ -128,8 +130,6 @@ typedef struct UC_EVENT {
 } __UC_EVENT_T;
 #define UC_EVENT_T __UC_EVENT_T
 #endif
-
-
 
 #ifdef __cplusplus
 }

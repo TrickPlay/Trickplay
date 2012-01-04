@@ -57,12 +57,14 @@ extern "C" {
     (Constant Definitions)
 ---------------------------------------------------------*/
 #define	DEV_FILE_UINPUT					"/dev/uinput"
-
+#define LG_MRCU_INPUT_TYPE
 /*	LGE's event device names */
 #define	DEV_NAME_INPUT_LGE_KEY_RETURNPATH 		"LGE KEY RETURNPATH" 		/*Return Path of IR, Keyboard */
 #define	DEV_NAME_INPUT_LGE_CURSOR_RETURNPATH 	"LGE CURSOR RETURNPATH" 	/*Return Path of MRCU, mouse*/
 #define	DEV_NAME_INPUT_LGE_RCU  					"LGE RCU"					/*IR*/
 #define	DEV_NAME_INPUT_LGE_M_RCU					"LGE M-RCU - Builtin"	    /*MRCU*/
+#define	DEV_NAME_INPUT_LGE_M_RCU_FOR_GAME			"LGE M-RCU - For GAME"	    /*MRCU - For game*/
+#define	DEV_NAME_INPUT_LGE_SMART_REMOTE			"LGE Smart Remote - TouchPad"	/*App remote - For game*/
 
 /*	Max number of inputs(event devices) */
 #define MAX_LINUX_INPUT_DEVICES 		16
@@ -78,13 +80,43 @@ extern "C" {
 #define EV_MSC							0x04
 #define EV_SW							0x05
 #define EV_LED							0x11
-#define EV_SND							0x12
+#define EV_SND							0x12	
 #define EV_REP							0x14
 #define EV_FF							0x15
 #define EV_PWR							0x16
 #define EV_FF_STATUS					0x17
 #define EV_MAX							0x1f
 #define EV_CNT							(EV_MAX+1)
+#endif
+
+#ifdef LG_MRCU_INPUT_TYPE
+#define EV_MRCU_REL					0x1c
+
+#define REL_MRCU_GYRO_X				0x00
+#define REL_MRCU_GYRO_Y				0x01
+#define REL_MRCU_GYRO_Z				0x02
+#define REL_MRCU_ACCEL_X				0x03
+#define REL_MRCU_ACCEL_Y				0x04
+#define REL_MRCU_ACCEL_Z				0x05
+#define REL_MRCU_EULER_X				0x06
+#define REL_MRCU_EULER_Y				0x07
+#define REL_MRCU_EULER_Z				0x08
+
+//#define REL_MRCU_PACK_EULER_XY		0x09
+#define REL_MRCU_PACK_GYRO_ACELL_X	0x0a
+#define REL_MRCU_PACK_GYRO_ACELL_Y	0x0b
+#define REL_MRCU_PACK_GYRO_ACELL_Z	0x0c
+
+// when 10bit-pack data use it
+#define REL_MRCU_10BIT_COMPRESSED_GYRO_XYZ			0x10 
+#define REL_MRCU_10BIT_COMPRESSED_ACCEL_XYZ			0x11
+//#define REL_MRCU_10BIT_COMPRESSED_EULER_XYZ			0x12
+
+#define REL_MRCU_PACK_QUATERNION01					0x13
+#define REL_MRCU_PACK_QUATERNION23					0x14
+
+#define REL_MRCU_MAX					0x1f
+#define REL_MRCU_CNT					(REL_MRCU_MAX+1)
 #endif
 
 /*	definitions of special keys for LGE	*/
@@ -116,6 +148,7 @@ extern "C" {
 #define	KEY_VALUE_PRESS				1
 #define	KEY_VALUE_REPEAT				2
 #define KEY_VALUE_DRAG					3
+#define KEY_VALUE_REPEAT_RELEASE		4	
 
 /*
  * Type of input device for basic classification.
@@ -134,8 +167,8 @@ typedef enum {
 	PEID_TYPE_KEY_RETURN      			= 0x00000020,  /* Is a key(IR,keyboard)return input device. */
 	PEID_TYPE_CURSOR_RETURN				= 0x00000040,  /* Is a Cursor(MRCU,Mouse)return input device. */
 	PEID_TYPE_LGE          				= 0x00000080,  /* Is a LGE's input device. */
-
-	PEID_TYPE_ALL          				= 0x0000009F   /* All type flags set. */
+	PEID_TYPE_GESTURE					= 0x00000100,  /* Gesture camera. */ // sangkyu kang 2011. 9. 19
+	PEID_TYPE_ALL          				= 0x0000019F   /* All type flags set. */ // 9f -> 19f sangkyu kang 2011. 10. 26
 
 } PM_EVENT_INPUT_DEV_TYPE_T;
 

@@ -54,6 +54,9 @@ enum {
 	SDPIF_APPS_TYPE_HOT		= 5,
 	SDPIF_APPS_TYPE_NEW		= 6,
 
+	SDPIF_CHECK_AND_DNLD	= 7,
+	SDPIF_RE_DNLD			= 8,
+
 	APP_TYPE_UNKNOWN		= 10,
 	APP_TYPE_NEW,
 	APP_TYPE_HOT,
@@ -71,6 +74,11 @@ enum {
 	NOTICE_CONTENT_IMG_TXT,
 	NOTICE_CONTENT_TXT,
 	NOTICE_CONTENT_IMG,
+
+	ZONE_TYPE_UNKNOWN		= 50,
+	ZONE_TYPE_HOT,
+	ZONE_TYPE_NEW,
+	ZONE_TYPE_NORMAL,
 };
 
 /**
@@ -83,6 +91,7 @@ typedef enum {
 	SDPIF_MAINPAGE_PATH,
 	SDPIF_NOTICE_PATH,
 	SDPIF_HOME_CONFIG_PATH,
+	SDPIF_CERT_PATH,
 } HOA_SDPIF_PATH_T;
 
 /**
@@ -93,6 +102,8 @@ typedef struct _CARD_PREMIUM_ITEM
 	char	*pCpId;
 	char	*pCpName;
 	char	*pIconPath;
+	BOOLEAN	bCheckNet;
+	int		type;
 } HOA_SDPIF_CARD_PREMIUM_ITEM_T;
 
 /**
@@ -141,6 +152,27 @@ typedef struct _CARD_APP_INFO
 	UINT32						numOfItems;
 	HOA_SDPIF_CARD_APPS_ITEM_T	*pItems;
 } HOA_SDPIF_CARD_APP_INFO_T;
+
+/**
+ * 3d zone info
+ */
+typedef struct _CARD_ZONE_ITEM
+{
+	char	*pName;
+	char	*pId;
+	char	*pIconPath;
+	char	*pExecUrl;
+	BOOLEAN	bPaid;
+} HOA_SDPIF_CARD_ZONE_ITEM_T;
+
+/**
+ * 3d zone card
+ */
+typedef struct _CARD_ZONE_INFO_T
+{
+	UINT32					numOfItems;
+	HOA_SDPIF_CARD_ZONE_ITEM_T	*pItems;
+} HOA_SDPIF_CARD_ZONE_INFO_T;
 
 /**
  * user info
@@ -247,6 +279,9 @@ typedef struct _SVC_OPT
 	UINT32	bSocialCenter	:1;
 	UINT32	b3dZone			:1;
 	UINT32	bChBrowser		:1;
+	UINT32	bBrowser		:1;
+	UINT32	bKpopZone		:1;
+	UINT32	bAwind		 	:1;
 } HOA_SDPIF_SVC_OPT_T;
 
 /**
@@ -422,23 +457,6 @@ typedef enum _HOA_SDPIF_ADVS_DOMAIN_TYPE
 {
 	ADVS_DOMAIN_UNKNOWN	= -1,
 
-#if 0
-	ADVS_DOMAIN_LOADING	= 0,
-	ADVS_DOMAIN_LGAPPS,
-	ADVS_DOMAIN_SEARCH,
-	ADVS_DOMAIN_SEARCH_RESULT,
-	ADVS_DOMAIN_INAPP_FLASH_728x90,
-	ADVS_DOMAIN_INAPP_FLASH_300x250,
-	ADVS_DOMAIN_INAPP_BROWSER,
-	ADVS_DOMAIN_INAPP_PLEX,
-	ADVS_DOMAIN_VIDEO_FLASH,
-	ADVS_DOMAIN_VIDEO_BROWSER,
-	ADVS_DOMAIN_VIDEO_PLEX,
-	ADVS_DOMAIN_HOME,
-	ADVS_DOMAIN_MYAPPS,
-	ADVS_DOMAIN_PREMIUM,
-#endif
-
 	// portal AD
 	ADVS_DOMAIN_LOADING	= 0,
 	ADVS_DOMAIN_HOMELIVECARD,
@@ -447,6 +465,7 @@ typedef enum _HOA_SDPIF_ADVS_DOMAIN_TYPE
 	ADVS_DOMAIN_PREMIUM,
 	ADVS_DOMAIN_SEARCH,
 	ADVS_DOMAIN_SEARCH_RESULT,
+	ADVS_DOMAIN_SOCIAL_CENTER,
 
 	// inApp AD
 	ADVS_DOMAIN_INAPP_FLASH_BANNER,
@@ -482,7 +501,7 @@ typedef struct HOA_SDPIF_ADVS_INFO
 
 typedef struct HOA_AD_BANNER_URL_OUT
 {
-    UINT32        	result;
+    UINT32        	result;	// 0xAD0 (ADVS info error) , 0x1004 (requesting AD)
     SINT32        	errCode;
     UINT32        	apptype;
     UINT32        	imagesCount;
@@ -569,6 +588,15 @@ typedef struct _APP_CATEGORY_LIST
 	HOA_SDPIF_APP_CATEGORY_T	*pCategorys;
 } HOA_SDPIF_APP_CATEGORY_LIST_T;
 
+/**
+ * card list
+ */
+typedef struct _HOME_CARD_LIST
+{
+	UINT32		numOfCards;
+	char		**ppCards;
+} HOA_SDPIF_CARD_LIST_T;
+
 /******************************************************************************
 	Static Variables & Function Prototypes Declarations
 ******************************************************************************/
@@ -582,75 +610,81 @@ extern HOA_STATUS_T	HOA_SDPIF_PreInitialize(void);
 extern HOA_STATUS_T	HOA_SDPIF_Initialize(void);
 extern HOA_STATUS_T	HOA_SDPIF_NotifyNetworkReady(void);
 extern HOA_STATUS_T	HOA_SDPIF_NotifyNetworkError(void);
-extern HOA_STATUS_T	HOA_SDPIF_ClearData(void);
+extern HOA_STATUS_T	HOA_SDPIF_ClearSdpCacheData(void);
 
 /* - premium & home dashboard - */
-extern HOA_STATUS_T	HOA_SDPIF_CheckPkgVersion(void *pfnCallback);
-extern HOA_STATUS_T	HOA_SDPIF_CheckPremium(void *pfnCallback);
-extern HOA_STATUS_T	HOA_SDPIF_CheckHomeDashboard(void *pfnCallback);
-extern HOA_STATUS_T	HOA_SDPIF_SyncServer(void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RegisterCheckPackageVersionCallback(void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RegisterCheckPremiumPageCallback(void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RegisterCheckHomeDashboardCallback(void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RegisterSyncServerCallback(void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_GetCurrentPath(HOA_SDPIF_PATH_T type, char **ppPath );
 extern HOA_STATUS_T	HOA_SDPIF_GetPremiumCardInfo(HOA_SDPIF_CARD_PREMIUM_INFO_T *pCard);
-extern HOA_STATUS_T	HOA_SDPIF_DestroyPremiumCardInfo(HOA_SDPIF_CARD_PREMIUM_INFO_T *pCard);
+extern HOA_STATUS_T	HOA_SDPIF_FreePremiumCardInfo(HOA_SDPIF_CARD_PREMIUM_INFO_T *pCard);
 extern HOA_STATUS_T	HOA_SDPIF_GetAppsCardInfo(HOA_SDPIF_CARD_APPS_INFO_T *pCard);
-extern HOA_STATUS_T	HOA_SDPIF_DestroyAppsCardInfo(HOA_SDPIF_CARD_APPS_INFO_T *pCard);
+extern HOA_STATUS_T	HOA_SDPIF_FreeAppsCardInfo(HOA_SDPIF_CARD_APPS_INFO_T *pCard);
 extern HOA_STATUS_T	HOA_SDPIF_GetVersion(char *pCpId, char **ppCpVer, char **ppPlatformVer);
-extern char * 		HOA_SDPIF_GetPackageVer(void);
-extern HOA_STATUS_T HOA_SDPIF_RequestPkgsWithVer(char *pVer, void *pfnCallback);
+extern char * 		HOA_SDPIF_GetPackageVersion(void);
+extern HOA_STATUS_T HOA_SDPIF_RequestPackageWithVersion(char *pVer, void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_GetPremiumList(HOA_SDPIF_CARD_PREMIUM_INFO_T *pInfo);
 extern HOA_STATUS_T	HOA_SDPIF_GetHomeIconPath(char *pCpId, char **ppIconPath);
-extern HOA_STATUS_T	HOA_SDPIF_RequestResetCp(char *pCpId, void *pfnCallback);
-extern HOA_STATUS_T	HOA_SDPIF_RequestRefreshAppIcon(char  *pAppId, void  *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RequestToResetCp(char *pCpId, void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RequestToRefreshAppIcon(char  *pAppId, void  *pfnCallback);
 extern HOA_STATUS_T HOA_SDPIF_GetUrl(char *pCpId, char **ppUrl);
 extern BOOLEAN 		HOA_SDPIF_CheckUpdateStatus(void );
 extern HOA_STATUS_T	HOA_SDPIF_GetCurrentCpList(char **ppList);
 extern HOA_STATUS_T	HOA_SDPIF_GetRollbackPath(HOA_SDPIF_PATH_T type, char **ppPath);
 extern HOA_STATUS_T	HOA_SDPIF_GetNoticeList(HOA_SDPIF_NOTICE_LIST_T *pList);
-extern HOA_STATUS_T	HOA_SDPIF_DestroyNoticeList(HOA_SDPIF_NOTICE_LIST_T *pList);
+extern HOA_STATUS_T	HOA_SDPIF_FreeyNoticeList(HOA_SDPIF_NOTICE_LIST_T *pList);
 extern HOA_STATUS_T	HOA_SDPIF_GetServiceOption(HOA_SDPIF_SVC_OPT_T	*pOpt);
-extern HOA_STATUS_T	HOA_SDPIF_CheckMyApps(void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RegisterCheckMyAppCallback(void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_GetAppCardInfo(int type, int fromIndex, int count, HOA_SDPIF_CARD_APP_INFO_T	*pInfo);
-extern HOA_STATUS_T	HOA_SDPIF_DestroyAppCardInfo(HOA_SDPIF_CARD_APP_INFO_T *pCard);
-extern HOA_STATUS_T	HOA_SDPIF_Convert2AppIndex(char	*pData, int	*pType, int	*pIndex);
+extern HOA_STATUS_T	HOA_SDPIF_FreeAppCardInfo(HOA_SDPIF_CARD_APP_INFO_T *pCard);
+extern HOA_STATUS_T	HOA_SDPIF_ConvertToAppIndex(char	*pData, int	*pType, int	*pIndex);
 extern HOA_STATUS_T	HOA_SDPIF_RequestAddableCardList(void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_RequestDetailNotice(void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_GetBannerList(HOA_SDPIF_BANNER_LIST_T *pList);
+extern HOA_STATUS_T	HOA_SDPIF_Get3DZoneCardInfo(int	type, int fromIndex, int count, HOA_SDPIF_CARD_ZONE_INFO_T *pInfo);
+extern HOA_STATUS_T	HOA_SDPIF_Destroy3DZoneCardInfo(HOA_SDPIF_CARD_ZONE_INFO_T *pCard);
+extern HOA_STATUS_T	HOA_SDPIF_CheckHomeDashboardEx(char *pCardList, void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_GetHomeCardList(HOA_SDPIF_CARD_LIST_T	*pList);
+extern HOA_STATUS_T	HOA_SDPIF_DestroyHomeCardList(HOA_SDPIF_CARD_LIST_T *pList);
 
 /* - membership - */
-extern HOA_STATUS_T	HOA_SDPIF_RequestCheckUserId(char *pUserId, void  *pfnCallback);
-extern HOA_STATUS_T HOA_SDPIF_RequestRegisterUser(char *pUserId, char *pPasswd, void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RequestToCheckUserId(char *pUserId, void  *pfnCallback);
+extern HOA_STATUS_T HOA_SDPIF_RequestToRegisterUser(char *pUserId, char *pPasswd, void *pfnCallback);
 extern HOA_STATUS_T HOA_SDPIF_RequestSignIn(char *pUserId, char *pPasswd, BOOLEAN bAuto, void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_RequestSignOut(void *pfnCallback);
 extern HOA_STATUS_T HOA_SDPIF_GetCurrentUserInfo(HOA_SDPIF_USER_INFO_T *pInfo);
 extern HOA_STATUS_T	HOA_SDPIF_FreeUserInfo(HOA_SDPIF_USER_INFO_T *pInfo);
 extern HOA_STATUS_T	HOA_SDPIF_GetUserSession(char **ppSession);
 extern HOA_STATUS_T HOA_SDPIF_RequestUserList(UINT32 format, void *pfnCallback);
-extern HOA_STATUS_T HOA_SDPIF_RequestDeactivateUser(char *pUserId, void *pfnCallback);
-extern BOOLEAN		HOA_SDPIF_IsSignedIn(void);
-extern HOA_STATUS_T HOA_SDPIF_RequestAuthUser(char *pUserId, char *pPasswd, void *pfnCallback);
-extern HOA_STATUS_T HOA_SDPIF_RequestExtendUserSession(void * pfnCallback);
-extern HOA_STATUS_T	HOA_SDPIF_CheckTerms(void *pfnCallback);
-extern HOA_STATUS_T	HOA_SDPIF_AgreeTerms(HOA_SDPIF_TERMS_TYPE_T type, void *pfnCallback);
-extern BOOLEAN		HOA_SDPIF_IsAgreed(HOA_SDPIF_TERMS_TYPE_T type);
-extern HOA_STATUS_T HOA_SDPIF_GetCurrentTerms(HOA_SDPIF_TERMS_TYPE_T type, char **ppPath);
+extern HOA_STATUS_T HOA_SDPIF_RequestToDeactivateUser(char *pUserId, void *pfnCallback);
+extern BOOLEAN		HOA_SDPIF_CheckUserIsSignedIn(void);
+extern HOA_STATUS_T HOA_SDPIF_RequestToAuthenticateUser(char *pUserId, char *pPasswd, void *pfnCallback);
+extern HOA_STATUS_T HOA_SDPIF_RequestToExtendUserSession(void * pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RegisterCheckTermCallback(void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RegisterAgreeTermCallback(HOA_SDPIF_TERMS_TYPE_T type, void *pfnCallback);
+extern BOOLEAN		HOA_SDPIF_CheckAgreed(HOA_SDPIF_TERMS_TYPE_T type);
+extern HOA_STATUS_T HOA_SDPIF_GetCurrentTerm(HOA_SDPIF_TERMS_TYPE_T type, char **ppPath);
 extern HOA_STATUS_T	HOA_SDPIF_GetUserIdList(HOA_SDPIF_USER_ID_LIST_T *pList);
+extern HOA_STATUS_T HOA_SDPIF_DestroyUserIdList(HOA_SDPIF_USER_ID_LIST_T *pList);
 extern HOA_STATUS_T HOA_SDPIF_GetCurrentUserId(char	*pUserId, int size);
-extern HOA_STATUS_T	HOA_SDPIF_Convert2AuthResult(char *pData, HOA_SDPIF_AUTH_USER_RESULT_T *pResult);
-extern HOA_STATUS_T HOA_SDPIF_RequestChangePasswd(char *pOldPasswd, char *pNewPasswd, void *pfnCallback);
-extern HOA_STATUS_T HOA_SDPIF_RequestDeleteUser(char *pPasswd, void *pfnCallback);
-extern BOOLEAN		HOA_SDPIF_IsRegularMember(void);
-extern int			HOA_SDPIF_GetAge(void);
+extern HOA_STATUS_T	HOA_SDPIF_ConvertToAuthResult(char *pData, HOA_SDPIF_AUTH_USER_RESULT_T *pResult);
+extern HOA_STATUS_T HOA_SDPIF_RequestToChangePassword(char *pOldPasswd, char *pNewPasswd, void *pfnCallback);
+extern HOA_STATUS_T HOA_SDPIF_RequestToDeleteUser(char *pPasswd, void *pfnCallback);
+extern BOOLEAN		HOA_SDPIF_CheckMemberIsRegular(void);
+extern int			HOA_SDPIF_GetUserAge(void);
 
 /* - setting (country & language) - */
 extern HOA_STATUS_T	HOA_SDPIF_RequestDetectCountry(void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_GetCurrentCountryWith2Ciphers(char **ppCode);
 extern HOA_STATUS_T	HOA_SDPIF_GetCurrentCountryWith3Ciphers(char **ppCode);
 extern HOA_STATUS_T	HOA_SDPIF_NotifyCountryChanged(int type, char *pCode2, char *pCode3);
-extern HOA_STATUS_T	HOA_SDPIF_NotifyLangChanged(UINT32	code);
+extern HOA_STATUS_T	HOA_SDPIF_NotifyLanguageChanged(UINT32	code);
 
 /* - device auth & request header - */
-extern HOA_STATUS_T	HOA_SDPIF_RequestDeviceAuth(void *pfnCallback);
-extern HOA_STATUS_T	HOA_SDPIF_RequestCancelDeviceAuth(void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RequestToAuthenticateDev(void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RequestToCancelDevAuth(void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_GetSecretInfo(HOA_SDPIF_SECRET_INFO_T *pInfo);
 
 extern HOA_STATUS_T	HOA_SDPIF_GetHttpRequestHeaderVariablePart(char **ppHeader);
@@ -663,52 +697,58 @@ extern HOA_STATUS_T HOA_SDPIF_GetCurrentServerUrl(char **ppServerUrl);
 extern UINT32		HOA_SDPIF_GetCurrentServerIndex(void);
 extern HOA_STATUS_T	HOA_SDPIF_GetServerList(HOA_SDPIF_SERVER_LIST_T *pList);
 extern HOA_STATUS_T	HOA_SDPIF_SetPublishFlag(BOOLEAN bFlag);
-extern HOA_STATUS_T	HOA_SDPIF_GetPublishFlag(BOOLEAN *pbFlag);
+extern HOA_STATUS_T	HOA_SDPIF_CheckPublishedFlag(BOOLEAN *pbFlag);
 extern HOA_STATUS_T	HOA_SDPIF_SetAppPublishFlag(BOOLEAN	bFlag);
-extern HOA_STATUS_T	HOA_SDPIF_GetAppPublishFlag(BOOLEAN	*pbFlag);
+extern HOA_STATUS_T	HOA_SDPIF_CheckAppIsPublished(BOOLEAN	*pbFlag);
 
 /* - error log  - */
-extern HOA_STATUS_T	HOA_SDPIF_GetNetLogs(HOA_SDPIF_NETLOG_LIST_T *pList);
-extern HOA_STATUS_T	HOA_SDPIF_UpdateErrLog(int module, long result, char *pErrResult);
+extern HOA_STATUS_T	HOA_SDPIF_GetNetLogList(HOA_SDPIF_NETLOG_LIST_T *pList);
+extern HOA_STATUS_T	HOA_SDPIF_UpdateErrorLog(int module, long result, char *pErrResult);
 
 /* - SNS - */
-extern HOA_STATUS_T HOA_SDPIF_RemoveDeactivateUserSNS(	char *pSNSType, char *pSNSID, void *pfnCallback);
-extern HOA_STATUS_T HOA_SDPIF_RequestUserSNSInfo(char *pLGID, char *pPasswd, void *pfnCallback);
-extern int 			HOA_SDPIF_IsAutoSNSLogin(char *pSNSType, char * pSNSID);
-extern HOA_STATUS_T HOA_SDPIF_RequestRegisterSNSUser(char *pSNSType, char *pSNSID, int SNSAuto, char *pToken, void  *pfnCallback);
-extern int 			HOA_SDPIF_IsExistSNSUser(char* pSNSType, char * pSNSID);
+extern HOA_STATUS_T HOA_SDPIF_RemoveDeactivateUserSns(	char *pSNSType, char *pSNSID, void *pfnCallback);
+extern HOA_STATUS_T HOA_SDPIF_RequestUserSnsInfo(char *pLGID, char *pPasswd, void *pfnCallback);
+extern int 			HOA_SDPIF_GetAutoSnsLogin(char *pSNSType, char * pSNSID);
+extern HOA_STATUS_T HOA_SDPIF_RequestToRegisterSnsUser(char *pSNSType, char *pSNSID, int SNSAuto, char *pToken, void  *pfnCallback);
+extern int 			HOA_SDPIF_CheckSnsUserIsExisting(char* pSNSType, char * pSNSID);
 
 /* - billing - */
-extern HOA_STATUS_T	HOA_SDPIF_GetBillingDeviceId(char **ppDeviceId);
-extern HOA_STATUS_T	HOA_SDPIF_RequestPurchase(HOA_SDPIF_PURCHASE_T *pPurchase, HOA_SDPIF_APPLIED_COUPON_T *pCoupon, void *pfnCallback );
+extern HOA_STATUS_T	HOA_SDPIF_GetBillingDevId(char **ppDeviceId);
+extern HOA_STATUS_T	HOA_SDPIF_RequestToPurchase(HOA_SDPIF_PURCHASE_T *pPurchase, HOA_SDPIF_APPLIED_COUPON_T *pCoupon, void *pfnCallback );
 extern HOA_STATUS_T	HOA_SDPIF_RequestCouponList(HOA_SDPIF_REQ_CPN_LIST_T *pReq, void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_GetCouponList(HOA_SDPIF_COUPON_LIST_T *pList);
 extern HOA_STATUS_T	HOA_SDPIF_FreeCouponList(HOA_SDPIF_COUPON_LIST_T *pList);
-extern HOA_STATUS_T	HOA_SDPIF_Convert2PurResult(char*pData, HOA_SDPIF_PURCHASE_RESULT_T	*pResult);
+extern HOA_STATUS_T	HOA_SDPIF_ConvertToPurchaseResult(char*pData, HOA_SDPIF_PURCHASE_RESULT_T	*pResult);
 extern HOA_STATUS_T	HOA_SDPIF_FreePurchaseResult(HOA_SDPIF_PURCHASE_RESULT_T *pResult);
 
 /* - Advertisement - */
-extern HOA_STATUS_T HOA_SDPIF_RequestADUrl(int apptype,char *pAddparam,int isCached, int adType, int duration, int midrollNumber, void *pfnCallback);	// roll_position : pre, mid, post
-extern HOA_STATUS_T HOA_SDPIF_NotifyADBannerClicked(int apptype, void *pfnCallback);
-extern HOA_STATUS_T HOA_SDPIF_NotifyADPlaybackFinished(int apptype);
-extern HOA_STATUS_T HOA_SDPIF_NotifyADTimelineEvent(int apptype, int timeline);
-extern HOA_STATUS_T HOA_SDPIF_NotifyADEnded(int apptype);
+extern HOA_STATUS_T HOA_SDPIF_RequestAdUrl(int apptype,char *pAddparam,int isCached, int adType, int duration, int midrollNumber, void *pfnCallback);	// roll_position : pre, mid, post
+extern HOA_STATUS_T HOA_SDPIF_RequestAdVideoUrl(int apptype,char *pAddparam,int isCached, int adType, int duration, int midrollNumber, void *pfnCallback);	// roll_position : pre, mid, post
+extern HOA_STATUS_T HOA_SDPIF_NotifyAdBannerClicked(int apptype, void *pfnCallback);
+extern HOA_STATUS_T HOA_SDPIF_NotifyAdPlaybackFinished(int apptype);
+extern HOA_STATUS_T HOA_SDPIF_NotifyAdTimelineEvent(int apptype, int timeline);
+extern HOA_STATUS_T HOA_SDPIF_NotifyAdEnded(int apptype);
+extern HOA_STATUS_T HOA_SDPIF_SetCpidInAd(char *pCpid);
+
 #if 0
 extern HOA_STATUS_T HOA_SDPIF_RequestADVideoUrl(int apptype,int position, int duration, void *pfnCallback);
 #endif
 
 /* - App Store - */
-extern HOA_STATUS_T	HOA_SDPIF_ProvisionDevice(void);
-extern HOA_STATUS_T	HOA_SDPIF_IsPaid(void);
-extern HOA_STATUS_T	HOA_SDPIF_GetRecommCategoryList(HOA_SDPIF_APP_CATEGORY_LIST_T *pList);
+extern HOA_STATUS_T	HOA_SDPIF_DevProvisioning(void);
+extern HOA_STATUS_T	HOA_SDPIF_GetPaidAppStatus(void);
+extern HOA_STATUS_T	HOA_SDPIF_GetRecommendCategoryList(HOA_SDPIF_APP_CATEGORY_LIST_T *pList);
 extern HOA_STATUS_T	HOA_SDPIF_FreeCategoryList(HOA_SDPIF_APP_CATEGORY_LIST_T *pList);
 
 /* - etc - */
-extern HOA_STATUS_T HOA_SDPIF_RequestDeactivateDevice(void *pfnCallback);
+extern HOA_STATUS_T HOA_SDPIF_RequestToDeactivateDev(void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_FreeMemory(void **ppMem);
 extern HOA_STATUS_T	HOA_SDPIF_RegisterCallback(SDPIF_CB_TYPE_T type, SDPIF_CB_T pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_GetMacAddr(char *pBUf, int size);
 extern HOA_STATUS_T	HOA_SDPIF_RequestMetaData(char *pQuery, int  *pIndex, void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_CheckCert(int opt, void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_RequestEpgData(char *pEpgKey, int	*pIndex, void *pfnCallback);
+
 #ifdef __cplusplus
 }
 #endif

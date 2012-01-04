@@ -145,6 +145,13 @@ typedef struct
 
 } AF_BUFFER_HNDL_T;
 
+typedef struct 		t_SHM_MGR_T		SHM_MGR_T;
+struct t_SHM_MGR_T {
+	SHM_MGR_T			*pNext;
+	SHM_MGR_T			*pPrev;
+	AF_BUFFER_HNDL_T	bufferHndl;
+};
+
 /**
  * Application process가 Agent에 등록해야 하는 Callback들 .
  */
@@ -190,7 +197,7 @@ typedef struct
 	char					serviceName[AF_MAX_SERNAME_LEN];
 	DBusConnection			*connrcv;		/**< msg receive / reply sender 용 connection --> default connection */
 	DBusConnection			*connsend;		/**< msg send    / reply receive용 connection */
-	DBusConnection			*connkey;		/**< key receive 용 connection */
+	DBusConnection			*connkey;		/**< app process에서는 key receive 용 connection, pm에서는 key send용 connection */
 	DBusConnection			*connevt;		/**< evt receive 용 connection */
 	DBusConnection			*conncb;		/**< callback receive 용 connection */
 	HOA_PROC_CALLBACKS_T	callbacks;		/**< 초기화시에 등록한 callback */
@@ -246,6 +253,7 @@ int 			AF_PostSem( AF_SEMA_T sema );
 void 			AF_PrintStack(void);
 
 /* appfrwk_common_util.c */
+AF_STATE_T 		AF_UTIL_GetMacAddressFromCmdline(char *macaddr);
 AF_STATE_T 		AF_UTIL_GetServiceName(char *args, char *service);
 int 			AF_UTIL_GetUinputFDForReturn(BOOLEAN bIsKeyReturnPath);
 HOA_STATUS_T	HOA_UTIL_SetProcInfo(HOA_PROC_INFO_E info, void *pData);
@@ -254,14 +262,18 @@ SINT32 			HOA_UTIL_GetProcPID(void);
 char 			*HOA_UTIL_GetProcServiceName(void);
 DBusConnection 	*HOA_UTIL_GetProcRcvConnection(void);
 DBusConnection 	*HOA_UTIL_GetProcSendConnection(void);
+DBusConnection 	*HOA_UTIL_GetProcKeyConnection(void);
 #ifdef USE_POLLING
-void 			*HOA_UTIL_Task_MsgSender(void *data);
+void 			*App_Task_MessageSender(void *data);
 #endif
-HOA_STATUS_T	 HOA_UTIL_CheckProcessExistFromProcFs(const char *pProcName, const char *pServiceName, BOOLEAN *bExist, pid_t *pProcPID);
+HOA_STATUS_T	HOA_UTIL_CheckProcessExistFromProcFs(const char *pProcName, const char *pServiceName, BOOLEAN *bExist, pid_t *pProcPID);
 void 			HOA_UTIL_QuitTask(void);
 UINT32 			HOA_UTIL_GetAlive(void);
 
 /* appfrwk_common_shm.c */
+void 			AF_SHM_InsertList(SHM_MGR_T *pNewList);
+void 			AF_SHM_DeleteList(SHM_MGR_T *pDeleteList);
+SHM_MGR_T 		*AF_SHM_FindList(int shmid);
 AF_STATE_T		AF_SHM_CreateSharedMemory(AF_BUFFER_HNDL_T *pHndl, int size);
 AF_STATE_T		AF_SHM_GetSharedMemory(AF_BUFFER_HNDL_T *pHndl, char **ppBuffer);
 AF_STATE_T		AF_SHM_DetachSharedMemory(AF_BUFFER_HNDL_T *pHndl);

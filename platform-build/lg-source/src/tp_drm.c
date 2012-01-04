@@ -182,7 +182,8 @@ static unsigned long int _TP_DRM_resource_decrypt_reader(
 {
 	int hFile = ( int ) user_data;
 
-	size_t result = HOA_NCG_POSIX_read( hFile , buffer , bytes );
+	size_t result = 0;
+	HOA_NCG_POSIX_read( hFile , buffer , bytes , &result );
 
 	if ( result < bytes )
 	{
@@ -203,7 +204,7 @@ int TP_DRM_resource_loader(
 {
 	int result = 0;
 
-	result = HOA_NCG_POSIX_IsEncrypted(filename);
+	HOA_NCG_POSIX_CheckEncrypted(filename, &result);
 
 	DBG_PRINT_TP("filename: %s, result=%d", filename, result);
 
@@ -225,9 +226,10 @@ int TP_DRM_resource_loader(
 	{
 		DBG_PRINT_TP("+++++ encrypted +++++");
 
-		int hFile = HOA_NCG_POSIX_open( filename , O_RDONLY , 0);
+		int hFile = 0;
+		HOA_STATUS_T res = HOA_NCG_POSIX_open( filename , O_RDONLY , 0 ,  &hFile);
 
-		if ( hFile < 0 )
+		if ( res != HOA_OK )
 		{
 			return 1;
 		}

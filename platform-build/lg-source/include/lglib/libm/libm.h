@@ -83,7 +83,8 @@ typedef int 	(*vprintf_proc_t)(const char *format, va_list ap);
 typedef int 	(*puts_proc_t)(const char *s);
 typedef int 	(*fputs_proc_t)(const char *s, FILE *stream);
 typedef int 	(*vfprintf_proc_t)(FILE *stream, const char *format, va_list ap);
-typedef size_t (*fwrite_proc_t)(const void *ptr, size_t size, size_t nmemb, FILE *stream);
+typedef size_t 	(*fwrite_proc_t)(const void *ptr, size_t size, size_t nmemb, FILE *stream);
+typedef int 	(*close_proc_t)(int fd);
 
 /*------------------------------------------------------------------------
 *	Function Declaration

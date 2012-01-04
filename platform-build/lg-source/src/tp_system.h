@@ -26,6 +26,7 @@ void				TP_System_Finalize(void);
 void				TP_System_EnableFullDisplay(void);
 void				TP_System_DisableFullDisplay(void);
 
+TP_DISPLAY_MODE_T	TP_System_GetDisplayMode(void);
 void				TP_System_SetDisplayMode(TP_DISPLAY_MODE_T mode);
 
 HOA_STATUS_T		TP_System_MsgHandler(HOA_MSG_TYPE_T msg, UINT32 submsg,

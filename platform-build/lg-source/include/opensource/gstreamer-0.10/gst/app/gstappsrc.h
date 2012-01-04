@@ -74,7 +74,7 @@ typedef struct {
  * @GST_APP_STREAM_TYPE_STREAM: No seeking is supported in the stream, such as a
  * live stream.
  * @GST_APP_STREAM_TYPE_SEEKABLE: The stream is seekable but seeking might not
- * be very fast, such as data from a webserver. 
+ * be very fast, such as data from a webserver.
  * @GST_APP_STREAM_TYPE_RANDOM_ACCESS: The stream is seekable and seeking is fast,
  * such as in a local file.
  *
@@ -126,6 +126,8 @@ GstCaps*         gst_app_src_get_caps         (GstAppSrc *appsrc);
 
 void             gst_app_src_set_size         (GstAppSrc *appsrc, gint64 size);
 gint64           gst_app_src_get_size         (GstAppSrc *appsrc);
+
+guint64			 gst_app_src_get_queued_bytes (GstAppSrc * appsrc);	// INCLUDE_LMF
 
 void             gst_app_src_set_stream_type  (GstAppSrc *appsrc, GstAppStreamType type);
 GstAppStreamType gst_app_src_get_stream_type  (GstAppSrc *appsrc);

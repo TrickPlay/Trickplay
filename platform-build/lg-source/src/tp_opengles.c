@@ -109,7 +109,7 @@ NativeDisplayType tp_egl_get_native_display(void)
 	SINT32 id = 0;
 	HOA_STATUS_T ret = HOA_OK;
 
-	ret = HOA_PROC_GetDisplayID(&id);
+	ret = HOA_DISPLAY_GetDisplayId(&id);
 	DBG_PRINT_TP("display id = %d", ((NativeDisplayType)id));
 	if(ret == HOA_OK)
 	{

@@ -1,11 +1,15 @@
 #ifndef __TP_SETTINGS_H__
 #define __TP_SETTINGS_H__
 
+//#define SUPPORT_FULLHD_RES 1
 /* width and height of graphics plane. */
-//#define TRICKPLAY_SCREEN_WIDTH				1920
-//#define TRICKPLAY_SCREEN_HEIGHT				1080
-#define TRICKPLAY_SCREEN_WIDTH				1280
-#define TRICKPLAY_SCREEN_HEIGHT				720
+//#if SUPPORT_FULLHD_RES
+#define TRICKPLAY_SCREEN_WIDTH				1920
+#define TRICKPLAY_SCREEN_HEIGHT				1080
+//#else
+//#define TRICKPLAY_SCREEN_WIDTH				1280
+//#define TRICKPLAY_SCREEN_HEIGHT				720
+//#endif
 
 /* whether the display is stretched to full screen size. */
 #define TRICKPLAY_STRETCH_TO_SCREEN			1

@@ -300,17 +300,21 @@ typedef enum
 	HOST_EVT_USB_ATTATCHED,						/**< USB device is attatched (mount) */
 	HOST_EVT_USB_DETACHED,						/**< USB device is detached (umount) */
 
+	HOST_EVT_BTUSB_CONNECTED, 					/**< BT USB device is connected */
+	HOST_EVT_BTUSB_DISCONNECTED,					/**< BT USB device is disconnected */
+
 	HOST_EVT_POWER_OFF,							/**< Power off */
 	HOST_EVT_POWER_ON,							/**< Power on */
 	HOST_EVT_ASPECTRATIO_CHANGED, 				/**< Aspect ratio is changed */
-	HOST_EVT_LANGUAGE_CHANGED,					/**< language is changed */
-	HOST_EVT_COUNTRY_CHANGED,					/**< country is changed */
-	HOST_EVT_SCREENSAVER_CHANGED,				/**< screensaver(black out status) is changed */
-	HOST_EVT_REPEAT_CH_CHANGE,					/**< Change channel using repeat key */
+	HOST_EVT_LANGUAGE_CHANGED,					/**< A language is changed */
+	HOST_EVT_COUNTRY_CHANGED,					/**< B country is changed */
+	HOST_EVT_SCREENSAVER_CHANGED,				/**< C screensaver(black out status) is changed */
+	HOST_EVT_REPEAT_CH_CHANGE,					/**< D Change channel using repeat key */
+	HOST_EVT_INPUT_CHANGED, 						/**< E Input source is changed */
 
 	/* BSI On/Off */
-	HOST_EVT_BSI_ON,							/**< BSI on */
-	HOST_EVT_BSI_OFF,							/**< BSI off */
+	HOST_EVT_BSI_ON,							/**< F BSI on */
+	HOST_EVT_BSI_OFF,							/**< 10 BSI off */
 
 	HOST_EVT_CLOSE_ALL_WINDOW,					/**< Close all window */
 
@@ -362,14 +366,14 @@ typedef enum
 
 	HOST_EVT_WEBCAM_ON,						/**< Webcam on */
 	HOST_EVT_WEBCAM_OFF,					/**< Webcam off */
-	HOST_EVT_SDP_FORCE_UPDATE,				/**< SDP Force update*/
+	HOST_EVT_SDP_FORCE_UPDATE,				/**< A SDP Force update*/
 	HOST_EVT_SDP_DNLD_DONE,					/**< SDP Download done*/
 	HOST_EVT_SDP_PATH_UPDATE,				/**< SDP Path update*/
 
 	HOST_EVT_UPDATE_ALL,					/**< 'update all screen' is needed */
 	HOST_EVT_OUT_OF_MEMORY,					/**< out of device memory */
 	HOST_EVT_USB_FORMAT_COMPLETED,			/**< LG formatted USB format completed  */
-	HOST_EVT_FLASH_FORMAT_COMPLETED,		/**< MY Apps Internal flash format completed  */
+	HOST_EVT_FLASH_FORMAT_COMPLETED,		/**< 10 MY Apps Internal flash format completed  */
 
 	HOST_EVT_SDPIF_COUNTRY_CHANGED,			/**< SDPIF country information is changed */
 	HOST_EVT_SDPIF_UPDATE_OPT,				/**< SDP server data is updated */
@@ -377,25 +381,29 @@ typedef enum
 	HOST_EVT_SDPIF_SIGN_OUT,				/**< sign out */
 	HOST_EVT_SDPIF_UPDATE_DONE,				/**< premium pkg is updated */
 	HOST_EVT_SDPIF_UPDATE_ERR,				/**< cannot update premium pkgs */
+	HOST_EVT_SDPIF_LANG_CHANGED,			/**< lang is changed */
 
 	HOST_EVT_COUNTRY_OTHERS_AUTO,			/**< country is others(auto) */
 
 	HOST_EVT_VCS_UI_PRINT,					/**< skype flash ui print on/off */
 
-	HOST_EVT_HBBTV_OFF,						/**< hbbtv */
+	HOST_EVT_HBBTV_OFF,						/**< 1A hbbtv */
 	HOST_EVT_HBBTV_ON,
 
 	HOST_EVT_USB_FORMAT_INITIALIZE_COMPLETED,/**< MY Apps USB Init/format completed  */
 	HOST_EVT_USB_FORMAT_INITIALIZE_FAILED,	/**< MY Apps USB Init/format failed  */
 	HOST_EVT_USB_INITIALIZE_COMPLETED,		/**< MY Apps USB Init Completed */
-	HOST_EVT_USB_INITIALIZE_FAILED,			/**< MY Apps USB Init failed */
+	HOST_EVT_USB_INITIALIZE_FAILED,			/**< 1F MY Apps USB Init failed */
 
-	HOST_EVT_FLASH_MOUNT_COMPLETED,    		/**< MY Apps Internal flash Mount  completed  */
+	HOST_EVT_FLASH_MOUNT_COMPLETED,    		/**< 20 MY Apps Internal flash Mount  completed  */
 	HOST_EVT_FLASH_MOUNT_FAILED,       		/**< MY Apps Internal flash Mount  failed  */
 	HOST_EVT_FLASH_FORMAT_INITIALIZE_COMPLETED,    /**< MY Apps Internal flash Init/format  completed  */
 	HOST_EVT_FLASH_FORMAT_INITIALIZE_FAILED,       /**< MY Apps Internal flash Init/format  failed  */
 
 	HOST_EVT_3D_STATUS_CHANGE,				/**< 3D status change message. */
+
+	HOST_EVT_FXUI_FOCUS_ON, 					/**< fxui > */
+	HOST_EVT_FXUI_FOCUS_OFF,
 
 	HOST_EVT_LAST = 0xffff
 
@@ -420,6 +428,27 @@ typedef enum
 	SDPIF_UPDATE_EVENT_LAST
 
 }HOA_SDPIF_UPDATE_PKG_EVENT_T;
+#ifdef ENABLE_AJJA_GROUP
+/**
+ * Group Type
+ */
+typedef enum HOA_LOCALE_GROUP
+{
+	HOA_GROUP_KR = 0x01,	/**< Korea */
+	HOA_GROUP_US,			/**< United States */
+	HOA_GROUP_BR,			/**< Brazil */
+	HOA_GROUP_EU,			/**< EU */
+	HOA_GROUP_CN,			/**< China (Mainland) */
+	HOA_GROUP_TW,			/**< Taiwan */
+	HOA_GROUP_XA,			/**< 중남미 아날로그 국가, NTSC */
+	HOA_GROUP_IL,			/**< 이스라엘 */
+	HOA_GROUP_HK,			/**< China (Hongkong) */
+	HOA_GROUP_JP,			/**< Japan */
+	HOA_GROUP_AJ,			/**< ASIA */
+	HOA_GROUP_JA,			/**< MEA */
+	HOA_GROUP_ZZ			/**< not defined */
+} HOA_LOCALE_GROUP_T;
+#else
 
 /**
  * Group Type
@@ -448,6 +477,34 @@ typedef enum HOA_LOCALE_GROUP
 	HOA_GROUP_JA,			/**< MEA */
 	HOA_GROUP_ZZ			/**< not defined */
 } HOA_LOCALE_GROUP_T;
+#endif
+
+// 임시로 사용하는 locale group
+typedef enum HOA_OLD_LOCALE_GROUP
+{
+	HOA_OLD_GROUP_KR = 0x01,	/**< Korea */
+	HOA_OLD_GROUP_US,			/**< United States */
+	HOA_OLD_GROUP_BR,			/**< Brazil */
+	HOA_OLD_GROUP_EU,			/**< EU */
+	HOA_OLD_GROUP_CN,			/**< China (Mainland) */
+	HOA_OLD_GROUP_AU,			/**< Australia */
+	HOA_OLD_GROUP_SG,			/**< Singapore */
+	HOA_OLD_GROUP_ZA,			/**< South Africa */
+	HOA_OLD_GROUP_VN,			/**< Vietnam */
+	HOA_OLD_GROUP_TW,			/**< Taiwan */
+	HOA_OLD_GROUP_XA,			/**< 중남미 아날로그 국가, NTSC */
+	HOA_OLD_GROUP_XB,			/**< 중아, 아주 아날로그 국가, PAL */
+	HOA_OLD_GROUP_IL,			/**< 이스라엘 */
+	HOA_OLD_GROUP_ID,			/**< 인도네시아 */
+	HOA_OLD_GROUP_MY,			/**< 말레이시아 */
+	HOA_OLD_GROUP_IR,			/**< 이란 */
+	HOA_OLD_GROUP_HK,			/**< China (Hongkong) */
+	HOA_OLD_GROUP_JP,			/**< Japan */
+	HOA_OLD_GROUP_AJ,			/**< ASIA */
+	HOA_OLD_GROUP_JA,			/**< MEA */
+	HOA_OLD_GROUP_ZZ			/**< not defined */
+} HOA_OLD_LOCALE_GROUP_T;
+
 
 #if 0
 /**
@@ -680,15 +737,16 @@ typedef enum
  */
 typedef enum
 {
-	HOA_AC_SUBMSG_APPLIST_CHANGED			= 0x01,		/**< MyApps list change noti. (Send to AF_SERVICE_HOMEDASHBOARD).  pData is AM_APPLIST_EVENT_T * */
-	HOA_AC_SUBMSG_APPLIST_ADDED				= 0x02,		/**< MyApps list add noti. (Send to AF_SERVICE_HOMEDASHBOARD). pData is AM_APPLIST_EVENT_T * */
-	HOA_AC_SUBMSG_APPLIST_DELETED 			= 0x03, 	/**< MyApps list delete noti. (Send to AF_SERVICE_HOMEDASHBOARD). pData is AM_APPLIST_EVENT_T * */
+	HOA_AC_SUBMSG_APPLIST_CHANGED			= 0x01,		/**< MyApps list change event.  pData is AM_APPLIST_EVENT_T * */
+	HOA_AC_SUBMSG_APPLIST_ADDED				= 0x02,		/**< MyApps list add event. pData is AM_APPLIST_EVENT_T * */
+	HOA_AC_SUBMSG_APPLIST_DELETED 			= 0x03, 	/**< MyApps list delete event. pData is AM_APPLIST_EVENT_T * */
 	HOA_AC_SUBMSG_LOADING_START				= 0x04, 	/**< Loading starts. (Send to AF_SERVICE_ADPREMIUM). pData is  AM_APPLOADING_EVENT_T * */
 	HOA_AC_SUBMSG_LOADING_END	 			= 0x05, 	/**< Loading ends. (Send to AF_SERVICE_ADPREMIUM). pData is  AM_APPLOADING_EVENT_T * */
 	HOA_AC_SUBMSG_RUNNINGAPP_EXIST 			= 0x06, 	/**< Running App Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
 	HOA_AC_SUBMSG_RUNNINGAPP_NOT_EXIST		= 0x07, 	/**< Running App Not Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
 	HOA_AC_SUBMSG_RUNNINGAPP_EXCEPTDTV_EXIST		= 0x08, 	/**< Running App (not including DTV App) Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
 	HOA_AC_SUBMSG_RUNNINGAPP_EXCEPTDTV_NOT_EXIST	= 0x09, 	/**< Running App (not including DTV App) Not Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
+	HOA_AC_SUBMSG_APPLIST_CHANGED_BY_SERVER			= 0x0A, 	/**< MyApps list change event.  pData is AM_APPLIST_EVENT_T * */
 	HOA_AC_SUBMSG_LAST						= 0xff
 
 } HOA_AC_SUBMSG_TYPE_T;
@@ -790,12 +848,24 @@ typedef enum
 } HOA_CURSOR_STATE_T;
 
 /**
+ * HOA_CURSOR_SPEED_FOR_EXT_DEV.
+ * usb mouse, usb joystick, ... except MRCU
+*/
+typedef enum
+{
+	HOA_CURSOR_SPEED_SLOW = 0,
+	HOA_CURSOR_SPEED_NORMAL,
+	HOA_CURSOR_SPEED_FAST,
+	HOA_CURSOR_SPEED_LAST
+} HOA_CURSOR_SPEED_T;
+
+/**
  * HOA_CURSOR_HOTSPOT_T.
 */
 typedef enum
 {
 	HOA_CURSOR_HOTSPOT_LEFTTOP = 0,
-	HOA_CURSOR_HOTSPOT_CENTER,
+	HOA_CURSOR_HOTSPOT_USERSETTING,
 	HOA_CURSOR_HOTSPOT_LAST
 } HOA_CURSOR_HOTSPOT_T;
 
@@ -864,6 +934,15 @@ typedef enum {
 	HOA_ASPECT_RATIO_TYPE_NONE	=	0, /** < NONE */
 	HOA_ASPECT_RATIO_TYPE_FULL	=	1, /** < FULL VIDEO */
 } HOA_ASPECT_RATIO_TYPE_T;
+
+typedef enum
+{
+	GAME_DATA_MODE_CURSOR		= 0x01,	
+	GAME_DATA_MODE_BUTTON		= 0x02,	
+	GAME_DATA_MODE_GYRO			= 0x04,
+	GAME_DATA_MODE_ACCEL		= 0x08,
+	GAME_DATA_MODE_QUATERNION	= 0x10,
+} HOA_GAME_DATA_MODE_T;
 
 #ifdef __cplusplus
 }

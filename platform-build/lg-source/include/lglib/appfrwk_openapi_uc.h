@@ -29,31 +29,24 @@
 extern "C" {
 #endif
 
-HOA_STATUS_T		HOA_UC_InstallApp(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
-HOA_STATUS_T		HOA_UC_InstallAppInLocal(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType );
-HOA_STATUS_T		HOA_UC_GetStorageSize(char *pAbsPath, UINT64 *pAvailableSize, UINT64 *pTotalSize);
-HOA_STATUS_T		HOA_UC_SetInstalledAppsSync(HOA_TVAPPS_STORAGE_TYPE_T  storageType);
-HOA_STATUS_T		HOA_UC_CancelInstallApp(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
-HOA_STATUS_T		HOA_UC_UninstallApp(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
-HOA_STATUS_T		HOA_UC_UpdateApp(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
-HOA_STATUS_T		HOA_UC_CheckAppUpdate(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
-HOA_STATUS_T 		HOA_UC_GetAuthenticationInfo(/*out*/char** ppAuthenticaionInfo);
+HOA_STATUS_T		HOA_APP_InstallApp(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
+HOA_STATUS_T		HOA_APP_InstallAppInLocal(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType );
+HOA_STATUS_T		HOA_APP_GetStorageSize(char *pAbsPath, UINT64 *pAvailableSize, UINT64 *pTotalSize);
+HOA_STATUS_T		HOA_APP_CancelAppInstallation(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
+HOA_STATUS_T		HOA_APP_RequestToUninstallApp(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
+HOA_STATUS_T		HOA_APP_RequestToUpdateApp(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
+HOA_STATUS_T		HOA_APP_CheckAppIsUptodate(UINT32 appID, HOA_TVAPPS_STORAGE_TYPE_T  storageType);
 
-HOA_STATUS_T		HOA_UC_ServerUrlNoti(void);
-HOA_STATUS_T 		HOA_UC_NetcastCountryCodeNoti(void);
+HOA_STATUS_T		HOA_APP_CheckAdultAuth(/*out*/BOOLEAN *bAudltAuth);
+HOA_STATUS_T		HOA_APP_SetAdultAuth(BOOLEAN bAdultAuth);
 
-HOA_STATUS_T		HOA_UC_GetTotalNumInstalledApps(/*out*/UINT16 *pInstalledAppItemNum);
-
-HOA_STATUS_T		HOA_UC_GetAdultAuth(/*out*/BOOLEAN *bAudltAuth);
-HOA_STATUS_T		HOA_UC_SetAdultAuth(BOOLEAN bAdultAuth);
-
-HOA_STATUS_T		HOA_UC_GetCEK(const char* pszFilename, /*out*/UINT8* bszCEK, /*in/out*/ UINT32* pnBufferSize);
+HOA_STATUS_T		HOA_APP_GetContentEncryptedKey(const char* pszFilename, /*out*/UINT8* bszCEK, /*in/out*/ UINT32* pnBufferSize);
 
 /* Storage */ 
-HOA_STATUS_T		HOA_UC_MountAppStoreStorage(void);
-HOA_STATUS_T		HOA_UC_CheckAppStoreStorage(BOOLEAN *pMountStatus);
-HOA_STATUS_T		HOA_UC_InitializeAppStoreStorage(void);
-HOA_STATUS_T		HOA_UC_InitializeAppStoreUSBStorage(UINT32 usbDevNum);
+HOA_STATUS_T		HOA_APP_RequestToMountAppStoreStorage(void);
+HOA_STATUS_T		HOA_APP_CheckAppStoreStorageIsMounted(BOOLEAN *pMountStatus);
+HOA_STATUS_T		HOA_APP_InitializeAppStoreStorage(void);
+HOA_STATUS_T		HOA_APP_InitializeAppStoreUsbStorage(UINT32 usbDevNum);
 
 
 /* appfrwk_openapi_uc_msg_handler.c */

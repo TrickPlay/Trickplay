@@ -48,6 +48,12 @@ typedef struct
 #define  MAX_BLACKOUT_STRING 128
 #define  MAX_INPUT_SOURCE_STRING	64
 
+#define MAX_ONID_LIST_SIZE 10
+
+#define  MAX_EVENT_DESC_LEN 2048
+#define  MAX_EVENT_NAME_LEN 254
+
+
 /**
  *	Time structure.
  */
@@ -88,12 +94,32 @@ typedef struct	API_CHANNEL_NUM
 typedef struct HOA_CHANNEL_INFO
 {
 	API_CHANNEL_NUM_T	channelNum;						/**< Channel Number */
-	char				channelName[MAXCHANNELNAME];	/**< Channel Name */
+	UINT8				channelName[MAXCHANNELNAME];	/**< Channel Name */
 	UINT16				programNo;						/**< Program number */
    	UINT16				sourceId;							/**< Source ID */
    	UINT16				tsId;								/**< Transport Stream ID */
    	UINT8				serviceType;						/**< Service Type */
 } HOA_CHANNEL_INFO_T;
+
+/* for epg recommand*/
+typedef struct HOA_EVENT_DETAIL
+{
+	API_CHANNEL_NUM_T	channelNum;						/**< Channel Number */
+	char				channelName[MAXCHANNELNAME];	/**< Channel Name */
+	UINT16				programNo;						/**< Program number */
+   	UINT16				sourceId;							/**< Source ID */
+   	UINT16				tsId;								/**< Transport Stream ID */
+   	UINT8				serviceType;						/**< Service Type */
+	char				eventName[MAX_EVENT_NAME_LEN];
+	char				eventDesc[MAX_EVENT_DESC_LEN];
+	UINT16				eventLen;						/**< Program number */
+   	UINT16				descLen;
+//	char				s_time[8];
+//	char				e_time[8];
+	TIME_T				sTime;
+	TIME_T				eTime;
+} HOA_EVENT_DETAIL_T;
+
 
 /**
  *	HOA_CHANNEL_LIST structure.
@@ -107,6 +133,28 @@ typedef struct HOA_CHANNEL_LIST
 	UINT16				nextChannelNum;		/**< Channel List 의 Max size 를 넘을 경우, 다음 시작 채널 순서 번호 (0이면 종료.). */
 
 } HOA_CHANNEL_LIST_T;
+
+//for channel log
+typedef struct HOA_TUNER_INPUT_TYPE_INFO
+{
+	int							serviceCount;
+	int							onidCount;
+	UINT32						onidList[MAX_ONID_LIST_SIZE];
+} HOA_TUNER_INPUT_TYPE_INFO_T;
+
+typedef enum
+{
+	HOA_ANTENNA_ANALOG_DECODABLE = 0,
+    HOA_ANTENNA_DIGITAL_DECODABLE,
+	HOA_CABLE_ANALOG_DECODABLE,
+	HOA_CABLE_DIGITAL_DECODABLE,
+	HOA_OCABLE_ANALOG_DECODABLE,
+	HOA_OCABLE_DIGITAL_DECODABLE,
+	HOA_SATELITE_DIGITAL_DECODABLE
+} HOA_TUNER_INPUT_TYPE_T;
+
+
+
 
 /**
  * 예약녹화의 type
@@ -726,12 +774,22 @@ typedef enum HOA_DISPLAYMODE
  *
  */
 typedef enum MEDIA_CHANNEL {
-	MEDIA_CH_UNKNOWN = -1,								/**< Unknown channel. Host에서만 사용. */
-	MEDIA_CH_A = 0,										/**< Channel A */
-	MEDIA_CH_B,											/**< Channel B */
-	MEDIA_CH_C,											/**< Channel C */
-	MEDIA_CH_EX,										/**< Channel for Media Info Extraction, not for Play */
-	MEDIA_CH_NUM, 										/**< Maximum channel number */
+	MEDIA_CH_UNKNOWN 	= -1,							/**< Unknown channel. Host에서만 사용. */
+	MEDIA_CH_A			= 0,							/**< Channel A */
+	MEDIA_CH_B			= 1,							/**< Channel B */
+	MEDIA_CH_C			= 2,							/**< Channel C */
+	MEDIA_CH_PLAY_NUM	= 3,
+#if 1	/* temporary. 함부로 풀지 마시오. MEDIA_CH_NUM 틀어지면 바이너리들 다시 빌드해야함: 추후 코드 수정 예정 */
+	MEDIA_CH_THUMBNAIL	= MEDIA_CH_PLAY_NUM,			/**< Channel for Thumbnail  Extraction (Thumbnail manager), not for Play */
+	MEDIA_CH_EX			= MEDIA_CH_THUMBNAIL,
+	MEDIA_CH_SMH		= MEDIA_CH_THUMBNAIL,
+	MEDIA_CH_NUM		= 4,
+#else
+	MEDIA_CH_THUMBNAIL	= MEDIA_CH_PLAY_NUM,			/**< Channel for Thumbnail  Extraction (Thumbnail manager), not for Play */
+//	MEDIA_CH_EX											/**< Channel for Media Info Extraction (UI), not for Play */
+//	MEDIA_CH_SMH,										/**< Channel for Media Info Extraction (SMH), not for Play */
+	MEDIA_CH_NUM
+#endif
 } MEDIA_CHANNEL_T;
 
 /**
@@ -739,12 +797,27 @@ typedef enum MEDIA_CHANNEL {
  */
 typedef enum MEDIA_3D_TYPES {
 	MEDIA_3D_NONE 					= 0x00,
+
+	//added, interim format - half
 	MEDIA_3D_SIDE_BY_SIDE_HALF		= 0x01,
-	MEDIA_3D_TOP_AND_BOTTOM_HALF	= 0x02,
-	MEDIA_3D_BOTTOM_AND_TOP_HALF	= 0x03,
-	MEDIA_3D_SIDE_BY_SIDE_LR		= 0x04,
-	MEDIA_3D_SIDE_BY_SIDE_RL		= 0x05,
-	MEDIA_3D_OTHERS					= 0x06,
+	MEDIA_3D_SIDE_BY_SIDE_HALF_LR	= MEDIA_3D_SIDE_BY_SIDE_HALF,
+
+	MEDIA_3D_SIDE_BY_SIDE_HALF_RL	= 0x02,
+	MEDIA_3D_TOP_AND_BOTTOM_HALF	= 0x03,
+	MEDIA_3D_BOTTOM_AND_TOP_HALF	= 0x04,
+	MEDIA_3D_CHECK_BOARD 			= 0x05, /**< for T/B, S/S, Checker, Frame Seq*/
+	MEDIA_3D_FRAME_SEQUENTIAL 		= 0x06, /**< for T/B, S/S, Checker, Frame Seq*/
+	MEDIA_3D_COLUMN_INTERLEAVE 		= 0x07, /**< for H.264*/
+
+	//added, Full format
+	MEDIA_3D_SIDE_BY_SIDE_LR		= 0x08,
+	MEDIA_3D_SIDE_BY_SIDE_RL		= 0x09,
+	MEDIA_3D_FRAME_PACKING 			= 0x0A, /**< Full format*/
+	MEDIA_3D_FIELD_ALTERNATIVE 		= 0x0B, /**< Full format*/
+	MEDIA_3D_LINE_ALTERNATIVE 		= 0x0C, /**< Full format*/
+	MEDIA_3D_DUAL_STREAM 			= 0x0D, /**< Full format*/
+	MEDIA_3D_2DTO3D 				= 0x0E,	/**< Full format*/
+
 } MEDIA_3D_TYPES_T;
 
 typedef struct
@@ -763,15 +836,41 @@ typedef enum MEDIA_CB_MSG
 	MEDIA_CB_MSG_NONE			= 0x00,					/**< message 없는 상태 */
 	MEDIA_CB_MSG_PLAYEND,								/**< media data의 끝이어서 재생이 종료됨 */
 	MEDIA_CB_MSG_PLAYSTART,								/**< media가 실제로 재생 시작됨 */
+
+	MEDIA_CB_MEDIAFRAMEWORK_END,						/* PM이 mediaframework 를 종료하는 경우*/
 	//MEDIA_CB_MSG_3DTVFORMAT_NONE	= 0x100,			/**< 3D Format None */
 	//MEDIA_CB_MSG_3DTVFORMAT_SIDE_BY_SIDE_HALF,			/**< 3D Format Side by Side */
 	//MEDIA_CB_MSG_3DTVFORMAT_SIDE_BY_SIDE_LR,			/**< 3D Format Side by Side with LR */
 	//MEDIA_CB_MSG_3DTVFORMAT_SIDE_BY_SIDE_RL,			/**< 3D Format Side by Side with RL*/
 	//MEDIA_CB_MSG_3DTVFORMAT_TOP_AND_BOTTOM_HALF,		/**< 3D Format Top and Bottom */
 	//MEDIA_CB_MSG_3DTVFORMAT_FRAMEPACKING,				/**< 3D Format Framepacking */
-	MEDIA_CB_MSG_CONNECTED			= 0x200,			/**< html 5 */
+
+	// for specific applications.
+	MEDIA_CB_MSG_SPECIAL_START 		= 0x200,
+	MEDIA_CB_MSG_CONNECTED,								/**< html 5 */
 	MEDIA_CB_MSG_LOADED_METADATA,						/**< html 5 */
-	MEDIA_CB_MSG_STOPPED,								/**< SMH 정보 추출용 */
+	MEDIA_CB_MSG_SEEK_DONE,								/**< SmartShare */
+	MEDIA_CB_MSG_BUFFERING_PERCENT_0	= 0x300,		/**< China CP */
+	MEDIA_CB_MSG_BUFFERING_PERCENT_10,
+	MEDIA_CB_MSG_BUFFERING_PERCENT_20,
+	MEDIA_CB_MSG_BUFFERING_PERCENT_30,
+	MEDIA_CB_MSG_BUFFERING_PERCENT_40,
+	MEDIA_CB_MSG_BUFFERING_PERCENT_50,
+	MEDIA_CB_MSG_BUFFERING_PERCENT_60,
+	MEDIA_CB_MSG_BUFFERING_PERCENT_70,
+	MEDIA_CB_MSG_BUFFERING_PERCENT_80,
+	MEDIA_CB_MSG_BUFFERING_PERCENT_90,
+	MEDIA_CB_MSG_BUFFERING_PERCENT_100,
+	MEDIA_CB_MSG_SPECIAL_END   		= 0x4FF,
+
+	// for internal use.
+	MEDIA_CB_MSG_STOPPED 			= 0x300,			/**< SMH 정보, Thumbnail 추출용 */
+	MEDIA_CB_MSG_PAUSE_DONE, 							/**< SMH 정보 추출용 */
+	MEDIA_CB_MSG_RESUME_DONE, 							/**< for WIDEVINE */
+	MEDIA_CB_MSG_THUMBNAIL_EXTRACTED, 					/**< Thumbnail 추출용 */
+	MEDIA_CB_MSG_THUMBNAIL_ERROR, 						/**< Thumbnail 추출 도중 에러 **/
+	MEDIA_CB_MSG_THUMBNAIL_TIMEOUT, 					/**< Thumbnail 추출 도중 timeout **/
+
 
     // old error msg //
 	MEDIA_CB_MSG_ERR_PLAYING	= 0xf000,				/**< 재생중 error 발생 */
@@ -862,6 +961,24 @@ typedef enum MEDIA_CB_MSG
 
 } MEDIA_CB_MSG_T;
 
+//#ifdef INCLUDE_ACTVILA 
+typedef enum MEDIA_ACTVILA_CB_MSG
+{
+	ACTVILA_CB_MSG_REQUEST_SYNTAX_ERROR = -1, 
+	ACTVILA_CB_MSG_OBJECT_TAG_ERROR = -10,
+	ACTVILA_CB_MSG_A_TAG_ERROR = -20, 
+	ACTVILA_CB_MSG_GET_METAFILE_ERROR = -1000, 
+	ACTVILA_CB_MSG_METAFILE_DATA_ERROR = -2000, 
+	ACTVILA_CB_MSG_LLI_VERIFY_ERROR = -2020, 
+	ACTVILA_CB_MSG_GET_DRM_KEY_ERROR = -3000, 
+	ACTVILA_CB_MSG_INVALID_DRM_KEY_ERROR = -4000, 
+	ACTVILA_CB_MSG_NET_CANNOT_CONNECT = -5000,  
+	ACTVILA_CB_MSG_SDP_SYNTAX_ERROR = -6000,
+	ACTVILA_CB_MSG_RECV_STREAM_ERROR = -7000, 
+	ACTVILA_CB_MSG_LAST 
+} MEDIA_ACTVILA_CB_MSG_T;
+
+//#endif 
 
 /**
  * Callback Message EX of Media play
@@ -944,13 +1061,15 @@ typedef enum IMAGE_CB_MSG
 	IMAGE_CB_MSG_PLAY_DOWNLOAD_SUCCESS,
 	IMAGE_CB_MSG_CACHE_SUCCESS,
 	IMAGE_CB_MSG_PLAY_DOWNLOAD_FAIL,
-	IMAGE_CB_MSG_CACHE_FAIL
+	IMAGE_CB_MSG_CACHE_FAIL,
+	IMAGE_CB_MSG_CACHE_ALREADY_DONE,
+	IMAGE_CB_MSG_CANCEL_CACHE_FAIL
 } IMAGE_CB_MSG_T;
 
 /**
  * Typedef of callback function to get notice about playback end.
  */
-typedef void (*CTRL_IMAGE_CB_T)(MEDIA_CHANNEL_T ch, IMAGE_CB_MSG_T msg);
+typedef void (*CTRL_IMAGE_CB_T)(MEDIA_CHANNEL_T ch, IMAGE_CB_MSG_T msg, UINT32 imageID);
 
 typedef enum MEDIA_TRANSPORT
 {
@@ -969,7 +1088,8 @@ typedef enum MEDIA_TRANSPORT
 	MEDIA_TRANS_WFD				= 0x18, 	/**< SmartShare Wifi Display Play시 선택. */
 	MEDIA_TRANS_HLS 			= 0x19, 	/**< Http Live Streaming시 선택. */
 	MEDIA_TRANS_AD 				= 0x20,  	/**< 광고 재생시 선택: FF & Seek disable되고 광고 정보 전달용 함수 호출됨. */
-
+    MEDIA_TRANS_JPMARLIN		= 0x22, 	/**< japan marlin Play시 선택. */
+    MEDIA_TRANS_FCC 			= 0x23, 	/**< FCC Streaming시 선택. */
 #if 1
 	/**< obsolete >**/
 
@@ -991,6 +1111,7 @@ typedef enum MEDIA_TRANSPORT
 	//MEDIA_TRANS_MSIIS		= 0x17,		/**< MS Smooth Streaming시 선택. */// reserved..
 	//MEDIA_TRANS_WFD	= 0x18, 	/**< Wifi Display Play시 선택. */
 	//MEDIA_TRANS_HLS = 0x19, 	/**< Http Live Streaming시 선택. */
+
 #endif
 } MEDIA_TRANSPORT_T;
 
@@ -1038,6 +1159,14 @@ typedef enum MEDIA_FORMAT
  */
 typedef UINT32 	MEDIA_CODEC_T;
 
+
+typedef struct MEDIA_BUFFER_INFO
+{
+	UINT32				vidRemainedSize;	// for ES - byte
+	UINT32				audRemainedSize;	// for ES - byte
+	UINT32				totalRemainedSize;
+} MEDIA_BUFFER_INFO_T;
+
 /**
  * This structure contains the media play informations
  *
@@ -1052,6 +1181,7 @@ typedef struct MEDIA_PLAY_INFO
 	UINT32				bufEndSec;		/**< Buffering된 stream의 가장 뒷 부분. */
 	SINT32				bufRemainSec;	/**< Buffering된 stream의 남은 부분. */
 	SINT8				bufPercent;		/**< Buffering된 stream의 전체 버퍼 크기 대비 용량(0~100 퍼센트) */
+	MEDIA_BUFFER_INFO_T	bufRemainedSize;	//
 
 	SINT32				instantBps;		/**< 현재의 Stream 전송 속도. */
 	SINT32				totalBps;		/**< 전체 Stream 전송 속도. */
@@ -1068,6 +1198,11 @@ typedef struct MEDIA_PLAY_INFO
  */
 typedef void (*MEDIA_PLAY_CB_T)(MEDIA_CHANNEL_T ch, MEDIA_CB_MSG_T msg);
 typedef void (*MEDIA_PLAY_CB_EX_T)(MEDIA_CHANNEL_T ch, MEDIA_CB_EX_MSG_T msg, UINT32 cb_param[4]);
+
+//#ifdef INCLUDE_ACTVILA
+typedef void (*MEDIA_ACTVILA_CB_T)(MEDIA_CHANNEL_T ch, MEDIA_ACTVILA_CB_MSG_T msg);
+//#endif 
+
 
 /**
  * Type of captured image
@@ -1386,6 +1521,8 @@ typedef enum MEDIA_CODEC_VIDEO
 	MEDIA_VIDEO_YUY2	= 0x80,		/**< YUY2 (YUV422) format */
 	MEDIA_VIDEO_VC1		= 0x90,		/**< VC1 codec */
 	MEDIA_VIDEO_DIVX	= 0xA0,		/**< Divx codec */
+	MEDIA_VIDEO_H263	= 0xe0,		/**< h.263 codec */  // 추후 값 조정 필요.
+
 	MEDIA_VIDEO_NOT_SUPPORTED = 0xb0,
 
 	MEDIA_VIDEO_MASK	= 0xF0		/**< Video codec mask */
@@ -1404,17 +1541,17 @@ typedef enum MEDIA_CODEC_AUDIO
 	MEDIA_AUDIO_AC3		= 0x02,		/**< ac3 codec */
 	MEDIA_AUDIO_MPEG	= 0x03,		/**< mpeg codec */
 	MEDIA_AUDIO_AAC		= 0x04,		/**< aac codec */
-	MEDIA_AUDIO_CDDA	= 0x05,		/**< cdda codec */
+	MEDIA_AUDIO_CDDA	= 0x05,		/**< cdda codec */   	//not implemented in LMF
 	MEDIA_AUDIO_PCM		= 0x06,		/**< pcm codec */
-	MEDIA_AUDIO_LBR		= 0x07,		/**< lbr codec */
+	MEDIA_AUDIO_LBR		= 0x07,		/**< lbr codec */		//not implemented in LMF
 	MEDIA_AUDIO_WMA		= 0x08,		/**< wma codec */
 	MEDIA_AUDIO_DTS		= 0x09,		/**< dts codec */
 	MEDIA_AUDIO_AC3PLUS	= 0x0A,		/**< ac3 plus codec */
 	MEDIA_AUDIO_RA		= 0x0B,		/**< ra  plus codec */
 	MEDIA_AUDIO_AMR		= 0x0C,		/**< amr plus codec */
-	MEDIA_AUDIO_HEAAC	= 0x0D,
-	MEDIA_AUDIO_PCMWAV	= 0x0E,
-	MEDIA_AUDIO_WMA_PRO	= 0x0F,
+	MEDIA_AUDIO_HEAAC	= 0x0D,								//not implemented in LMF (could not tell from AAC)
+	MEDIA_AUDIO_PCMWAV	= 0x0E,								//not implemented in LMF
+	MEDIA_AUDIO_WMA_PRO	= 0x0F,								//not implemented in LMF
 //	MEDIA_AUDIO_XPCM 	= 0x0F,
 	MEDIA_AUDIO_NOT_SUPPORTED = 0xC0, /** Audio not supported */
 
@@ -1679,6 +1816,7 @@ typedef enum
 	HOA_3DINPUT_CHECK_BOARD,	/**< for T/B, S/S, Checker, Frame Seq*/
 	HOA_3DINPUT_FRAME_SEQUENTIAL,/**< for T/B, S/S, Checker, Frame Seq*/
 	HOA_3DINPUT_COLUMN_INTERLEAVE,	/**< for H.264*/
+	HOA_3DINPUT_LINE_INTERLEAVE_HALF, /**< for H.264*/
 	//Full format
 	HOA_3DINPUT_FRAME_PACKING,	/**< Full format*/
 	HOA_3DINPUT_FIELD_ALTERNATIVE,	/**< Full format*/
@@ -1687,6 +1825,19 @@ typedef enum
 	HOA_3DINPUT_DUAL_STREAM,	/**< Full format*/
 	HOA_3DINPUT_2DTO3D,	/**< Full format*/
 } HOA_TV_3D_INPUTMODE_TYPE_T;	/**< Full format*/
+
+/**
+* 3D hotkey, 3D 버튼 동작위한 property 설정.
+* 아래 enum 수정 시 ui_svc_tridtv.h 파일도 같이 추가해야 함.
+*/
+typedef enum
+{
+	HOA_3DKEY_ENABLE_DTV				= 0,	/**< DTV Process 에서 동작 */
+	HOA_3DKEY_ENABLE_CP_KEEP_3DSTATUS,		/**< CP에서 3D키 동작 가능한 상태이며, 설정된 3D 상태가 계속 유지됨. */
+	HOA_3DKEY_ENABLE_CP_RESET_3DSTATUS,		/**< CP에서 3D키 동작 가능한 상태이며, 설정된 3D 상태는 신호 변경 전까지 유효함. */
+	HOA_3DKEY_DISABLE_CP,					/**< CP에서 3D키 동작 가능하지 않은 상태 */
+} HOA_TV_3DKEY_PROPERTY_T;
+
 
 /**
 * Status Content License Download
@@ -1866,6 +2017,7 @@ typedef enum	_HOA_IO_DRV_FORMAT
 	HOA_IO_DRV_DB,
 	HOA_IO_DRV_VOD,
 	HOA_IO_DRV_APP,
+	HOA_IO_DRV_CNTV,
 	HOA_IO_DRV_NORMAL,
 	HOA_IO_DRV_UNKNOWN
 } HOA_IO_DRV_FORMAT_T;
@@ -1933,6 +2085,7 @@ typedef enum HOA_IO_USB_DEV_TYPE
 	HOA_DVRHDD_DEV,									/**<LG MFS Format for DVR */
 	HOA_APPSTORE_DEV,								/**<LG MFS Format for App Store */
 	HOA_VOD_DEV,									/**<LG MFS Format for Orange VOD */
+	HOA_CNTV_DEV,									/**<LG MFS Format for CNTV */
 	HOA_DEV_TYPE_INVALID,							/** Not Connected or Invalid */
 } HOA_IO_USB_DEV_TYPE_T;
 
@@ -2092,8 +2245,11 @@ typedef enum HOA_CTRL_SUPPORT_TYPE
 	HOA_SUPPORT_IPTV,				/**< IPTV 지원 여부 */
 	HOA_SUPPORT_SKYPE,				/**< SKYPE 지원 여부 */
 	HOA_SUPPORT_3D,					/**< Support 3D feature(TRUE/FALSE)(TRUE means that supports 3D feature) */
+	HOA_SUPPORT_DUALVIEW,			/**< Dual View 지원 여부(TRUE/FALSE) */
 	HOA_SUPPORT_CURSORNAVIGATION	= 0xa000,	/**< Cursor Navigation 지원 여부 */
 	HOA_SUPPORT_COMBITYPE 	= 0xa001,	/**< COMBITYPE 지원 여부 */
+	HOA_SUPPORT_DTV			= 0xb000, 	/**< Support DTV (TRUE/FALSE) */
+	HOA_SUPPORT_CADTV,					/**< Support CADTV (TRUE/FALSE) */
 	HOA_SUPPORT_LAST	= 0xffff
 } HOA_CTRL_SUPPORT_TYPE_T;
 
@@ -2258,10 +2414,11 @@ typedef enum HOA_TV_BACKLIGHT_TYPE
 /* MOTION REMOCON TYPE */
 typedef enum MOTION_REMOCON_TYPE
 {
-	MOTION_REMOCON_OFF   		= 0,
-	MOTION_REMOCON_BUILTIN		= 1,
-	MOTION_REMOCON_DONGLE		= 2,
-	SUPPORT_MOTION_RC_MAX		= 3,
+	MOTION_REMOCON_BUILTIN_M3   	= 0,
+	MOTION_REMOCON_BUILTIN_M4		= 1,
+	MOTION_REMOCON_BUILTIN_M4CI		= 2,
+	MOTION_REMOCON_DONGLE			= 3,
+	SUPPORT_MOTION_RC_MAX			= 4,
 }__MOTION_REMOCON_TYPE_T;
 #define MOTION_REMOCON_TYPE_T __MOTION_REMOCON_TYPE_T
 #endif // MOTION_REMOCON_TYPE_T
@@ -2274,6 +2431,7 @@ typedef enum HOA_LOGIN_CONFIRM_TYPE
 	HOA_RECONFIRM_DELETE 	= 1,
 	HOA_RECONFIRM_ADULT,
 	HOA_RECONFIRM_PURCHASE,
+	HOA_RECONFIRM_PASSWORD,
 	HOA_RECONFIRM_MAX,
 } HOA_LOGIN_CONFIRM_TYPE_T;
 
@@ -2378,6 +2536,7 @@ typedef enum _SDPIF_CB_TYPE
 	SDPIF_CB_BILLING,
 	SDPIF_CB_PKG,
 	SDPIF_CB_ADV,
+	SDPIF_CB_ADV_VIDEO,
 	SDPIF_CB_HOME,
 
 	SDPIF_CB_TYPE_LAST
@@ -2419,8 +2578,11 @@ typedef enum _SDPIF_CB_MSG
 
 	SDPIF_SUCCESS_DETECT_COUNTRY,
 
+	SDPIF_SUCCESS_MY_APPS,
+
 	SDPIF_SUCCESS_SEARCH_MEATA,
 	SDPIF_SUCCESS_DNLD_CERT,
+
 
 	SDPIF_ERR_UNKNOWN				= 0x2000,
 
@@ -2459,7 +2621,11 @@ typedef enum _SDPIF_CB_MSG
 	SDPIF_ERR_BILLING,
 	SDPIF_ERR_CPN_LIST,
 
+	SDPIF_ERR_AD_NOT_SUPPORT_COUNTRY,				/* AD.T.001.01 */
+
 	SDPIF_ERR_CANNOT_DETECT_COUNTRY,	/* I.001.01 */
+
+	SDPIF_ERR_MY_APPS,
 
 	SDPIF_ERR_SEARCH_META,
 	SDPIF_ERR_DNLD_CERT,
@@ -2467,6 +2633,8 @@ typedef enum _SDPIF_CB_MSG
 	SDPIF_NOTIFY					= 0x3000,
 	SDPIF_NOTIFY_DNLD_HOME_APP,
 	SDPIF_NOTIFY_DNLD_HOME_APP_DONE,
+	SDPIF_NOTIFY_DNLD_HOME_3D_ZONE,
+	SDPIF_NOTIFY_DNLD_HOME_3D_ZONE_DONE,
 
 	SDPIF_CB_MSG_LAST
 } SDPIF_CB_MSG_T;
@@ -2499,14 +2667,7 @@ typedef struct
 	BOOLEAN						bIsMarked;				/**< Mark 된 상태 */
 
 	UINT8						fileName[512];			/**< File Name */
-	//UINT8						fullPath[1024];			/**< File Path or URI */
-	//UINT8						thumbURI[1024];			/**< Thumbnail URI */
-#if 0	// 110813 lewis.kim
-	UI_VIDEO_INFO_T				*pVideoInfo;				/**< Video Metadata */
-	UI_PHOTO_INFO_T				*pPhotoInfo;			/**< Photo Metadata */
-	UI_MUSIC_INFO_T				*pMusicInfo;				/**< Music Metadata */
-	UI_RECTV_INFO_T				*pRecTVInfo;			/**< Rec. Tv Metadata */
-#endif	//110813  lewis.kim
+	UINT32						lastPlayPos;				/**< Video, Rec.Tv 용 */
 } HOA_SMTS_ITEM_INFO_T;
 
 
@@ -2584,6 +2745,27 @@ typedef struct
 } HOA_SMTS_RECTV_METADATA_T;
 
 
+/**
+ *	Playing status 에 대한 Enumeration
+ *
+*/
+typedef enum {
+	SMTS_PLAY_STATE_STOPPED,
+	SMTS_PLAY_STATE_PAUSED,
+	SMTS_PLAY_STATE_PLAYING,
+	SMTS_PLAY_STATE_MAX,
+} SMTS_PLAY_STATE_T;
+
+/**
+ *	Playing status 에 대한 Data structure.
+ *
+*/
+typedef struct {
+	SMTS_PLAY_STATE_T		state;
+	UINT8					fileName[512];
+} HOA_SMTS_PLAY_STATE_T;
+
+
 typedef struct TAG_LINKED_DEVICE_INFO_T {
 	int 					deviceType;
 	int 					DataId;
@@ -2593,6 +2775,8 @@ typedef struct TAG_LINKED_DEVICE_INFO_T {
 	BOOLEAN 				bConnect;
 	char					pDeviceId[200];
 	char					rootPath[256];
+	char					iconUrl[1024]; //DLNA
+	int 					iconType; //PLEX
 	int 					inputLabelIndex;
 } LINKED_DEVICE_INFO_T;
 
@@ -2608,13 +2792,26 @@ typedef void (*LGINPUT_VOICE_CB_T)(UINT32 dataSize, UINT8 *pData);
 //#endif INCLUDE_VOICE
 
 typedef void (*LGINPUT_VOICE_UI_CB_T)(UINT32 dataSize, UINT8 **pData);
-typedef void (*LGINPUT_CB_T)(UINT32 pktCount, UINT32 per, UINT32 rssiTv, UINT32 rssiDv);
+typedef void (*LGINPUT_CB_T)(UINT32 pktCount, UINT32 vPktCount, UINT32 rssiTv, UINT32 rssiDv, UINT32 per);
 typedef void (*LGINPUT_BSI_CB_T)(void *data);
+typedef void (*LGINPUT_PDP3D_CB_T)(void);
 
 /**
  * SmartShare callback func type
  */
 typedef void (*SMTS_CB_T)(UINT32 operation, UINT32 mode[4],int intpParam, char *pParam);
+
+#define MAX_SMTS_LEN_FILE_NAME		129
+
+/**
+ *	Smart Share에서 사용하는 Path Tree에 대한 구조체
+ *
+ */
+typedef struct
+{
+	UINT8		pathDepth;
+	UINT8		folderName[MAX_SMTS_LEN_FILE_NAME];
+} HOA_SMTS_PATH_INFO_T;
 
 /**
  *	Smart Share에서 사용하는 List Type에 대한 Enumeration
@@ -2831,6 +3028,14 @@ typedef enum
  */
 typedef void (*GESTURE_CB_T)(int gesture_type, int gesture_time, int key_value, int shmid, int buffer_size);
 
+
+typedef enum GESTURE_CALLBACK_MSG
+{
+	GESTURE_CALLBACK_REGISTER    	= 0x01,
+	GESTURE_CALLBACK_UNREGISTER     = 0x00,
+}GESTURE_CALLBACK_MSG_T;
+
+
 /**
  *	Gesture Game에서 사용하는 Enumeration
  */
@@ -2969,6 +3174,12 @@ typedef enum FXUI_CB_MSG
  */
 typedef void (*FXUI_CB_T)(FXUI_CB_MSG_T msg, UINT32 dataSize, char *pData);
 
+typedef struct _FX_STRING_T
+{
+	UINT16 *str;
+	UINT32  length;
+} FX_STRING_T;
+
 
 /**
  * Structure of MemoCast Flash Setting Info.
@@ -3008,6 +3219,8 @@ typedef enum HOA_EASYSETTING_T
 	HOA_NATIVE_EASYSETTING_MUSIC,		/**< MUSIC */
 	HOA_NATIVE_EASYSETTING_IDLE,		/**< IDLE */
 	HOA_NATIVE_EASYSETTING_AUDIOMENU,	/**< AUDIOMENU */
+	HOA_NATIVE_EASYSETTING_MOVIE_ASPECTRATIO,	/**< ASPECT RATIO */
+	HOA_NATIVE_EASYSETTING_IDLE_ASPECTRATIO,	/**< ASPECT RATIO */
 	HOA_NATIVE_EASYSETTING_NOT_USE, 	/**< CP에서 사용하지 않는 경우 */
 	HOA_EASYSETTING_MAX,
 } HOA_EASYSETTING_T;
@@ -3062,6 +3275,39 @@ typedef enum
 } HOA_DIMMING_STATE_T;
 
 
+/**
+ * DRM Send Message result enumeration for onDRMMessageResult(), specified by OIPF
+ */
+typedef enum HOA_DRM_MSG_RESULT_CODE {
+	HOA_DRM_MSG_RESULT_NONE                   = -1,/**< NONE value */
+	HOA_DRM_MSG_RESULT_SUCCESSFUL             = 0, /**< The action(s) requeseted by SendDRMMessage() completed successfully. */
+	HOA_DRM_MSG_RESULT_UNKNOWN_ERROR          = 1, /**< SendDRMMessage() failed because an unspecified error occurred. */
+	HOA_DRM_MSG_RESULT_CANNOT_PROCESS_REQUEST = 2, /**< SendDRMMessage() failed because the DRM agent was unable to complete the request. */
+	HOA_DRM_MSG_RESULT_UNKNOWN_MIMETYPE       = 3, /**< SendDRMMessage() failed because the specified Mime Type is unknown for the specified DRM system indicated in MIME type */
+	HOA_DRM_MSG_RESULT_USER_CONSENT_NEEDED    = 4, /**< SendDRMMessage() failed because user consent is needed for that action. */
+	HOA_DRM_MSG_RESULT_MAX                         /**< MAX value */
+} HOA_DRM_MSG_RESULT_CODE_T;
+
+/**
+ * DRM Callback type for onDRMMessageResult(), specified by OIPF
+ */
+typedef void (*HOA_DRM_MSG_RESULT_CB_T) (char* pszMsgID, char* pszResultMsg, HOA_DRM_MSG_RESULT_CODE_T eResultCode);
+
+/**
+ * DRM Rights error enumeration for onDRMRightsError(), specified by OIPF
+ */
+typedef enum HOA_DRM_RIGHTS_ERR_STATE {
+	HOA_DRM_RIGHTS_ERR_NONE            = -1,/**< NONE value */
+	HOA_DRM_RIGHTS_ERR_NO_LICENSE      = 0, /**< no license */
+	HOA_DRM_RIGHTS_ERR_INVALID_LICENSE = 1, /**< invalid license */
+	HOA_DRM_RIGHTS_ERR_MAX                  /**< MAX value */
+} HOA_DRM_RIGHTS_ERR_STATE_T;
+
+/**
+ * DRM Callback type for onDRMRightsError(), specified by OIPF
+ */
+typedef void (*HOA_DRM_RIGHTS_ERR_CB_T) (HOA_DRM_RIGHTS_ERR_STATE_T eErrState, char* pszConTentID, char* pszDRMSystemID, char* pszRightsIssureURL);
+
 
 //////////////////////////////////////////////////////////////////////////////////
 // Types for MemoCast(PDP Only)
@@ -3073,6 +3319,15 @@ typedef enum
  */
 typedef void (*ENABLED_DISPLAY_CB_T)(SINT32 *pDisplayID);
 
+
+/**
+ * Capture output image format
+ */
+typedef enum HOA_CAPTURE_FORMAT {
+	HOA_CAPTURE_BMP		= 1,
+	HOA_CAPTURE_JPEG	= 2,
+	HOA_CAPTURE_PNG		= 3,
+} HOA_CAPTURE_FORMAT_T;
 
 #ifdef __cplusplus
 }

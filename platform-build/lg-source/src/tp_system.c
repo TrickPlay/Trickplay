@@ -11,6 +11,7 @@
 
 static UINT32 ulInitializedStep;
 static UINT64 gAuid;
+static TP_DISPLAY_MODE_T gDispMode;
 
 BOOLEAN TP_System_Initialize(int argc, char **argv)
 {
@@ -59,10 +60,10 @@ BOOLEAN TP_System_Initialize(int argc, char **argv)
 	++ulInitializedStep;	/* Done initialize step 1 */
 
 	//hoaStatus = HOA_APP_RegisterToMgr(&callbacks);
-	hoaStatus = HOA_PROC_RegisterToMgr(argc, argv, &callbacks);
+	hoaStatus = HOA_PROC_RegisterService(argc, argv, &callbacks);
 	if (hoaStatus != HOA_OK)
 	{
-		DBG_PRINT_TP("HOA_PROC_RegisterToMgr() failed. (%d)", hoaStatus);
+		DBG_PRINT_TP("HOA_PROC_RegisterService() failed. (%d)", hoaStatus);
 		TP_System_Finalize();
 		return FALSE;
 	}
@@ -77,12 +78,16 @@ BOOLEAN TP_System_Initialize(int argc, char **argv)
 	}
 	++ulInitializedStep;	/* Done initialize step 3 */
 
-	//hoaStatus = HOA_APP_RequestFocus();
+
+	// TODO keunbae.choi - Setresolution
+	HOA_APP_SetResolution(gAuid, 0, 0, 1920, 1080, TRUE);
+	
+	//hoaStatus = HOA_APP_RequestToFocusedApp();
 	// TODO sanggi0.lee - parameter AUID
-	hoaStatus = HOA_APP_RequestFocus(gAuid);
+	hoaStatus = HOA_APP_RequestToFocusedApp(gAuid);
 	if (hoaStatus != HOA_OK)
 	{
-		DBG_PRINT_TP("HOA_APP_RequestFocus() failed. (%d)", hoaStatus);
+		DBG_PRINT_TP("HOA_APP_RequestToFocusedApp() failed. (%d)", hoaStatus);
 		TP_System_Finalize();
 		return FALSE;
 	}
@@ -105,16 +110,16 @@ void TP_System_Finalize(void)
 
 	if (ulInitializedStep > 2)
 	{
-		HOA_PROC_SetTerminate();
+		HOA_PROC_NotifyAppTermination();
 	}
 #endif
 
 	if (ulInitializedStep > 1)
 	{
 		//HOA_APP_DeregisterFromMgr(EXITCODE_NORMAL);
-		HOA_PROC_SetTerminate();
+		HOA_PROC_NotifyAppTermination();
 		HOA_APP_ExitApp(gAuid, AM_EXITCODE_BACK);
-		HOA_PROC_DeregisterFromMgr();
+		HOA_PROC_UnregisterService();
 	}
 	if (ulInitializedStep > 0)
 		TP_OpenGLES_Finalize();
@@ -138,7 +143,11 @@ void TP_System_DisableFullDisplay(void)
 	// TODO sanggi0.lee - new function
 	HOA_CTRL_SetAVBlock(FALSE,FALSE);
 	HOA_CTRL_SetDisplayMode(HOA_DISP_NONE);		/* This API always returns HOA_OK */
-	HOA_CTRL_SetAVBlock(FALSE,FALSE);
+}
+
+TP_DISPLAY_MODE_T TP_System_GetDisplayMode(void)
+{
+	return gDispMode;
 }
 
 void TP_System_SetDisplayMode(TP_DISPLAY_MODE_T mode)
@@ -149,15 +158,19 @@ void TP_System_SetDisplayMode(TP_DISPLAY_MODE_T mode)
 	{
 	case TP_DISP_WIDGET:
 		disp = HOA_DISP_UIWITHTV;
+		HOA_CTRL_SetAVBlock(FALSE,FALSE);
 		break;
 	case TP_DISP_FULL:
 		disp = HOA_DISP_FULLVIDEO;
 		break;
 	case TP_DISP_NONE:
 	default:
+		mode = TP_DISP_NONE;
 		HOA_CTRL_SetAVBlock(FALSE,FALSE);
 		break;
 	}
+
+	gDispMode = mode;
 
 	DBG_PRINT_TP("mode=%d, disp=%d", mode, disp);
 

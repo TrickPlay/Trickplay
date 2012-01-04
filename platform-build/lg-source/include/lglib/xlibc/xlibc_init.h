@@ -96,10 +96,14 @@ extern int 			xlibc_attr_init	(xlibc_attr_t * attr);
 extern int 			xlibc_attr_get	(xlibc_attr_t * attr) ;
 extern int 			xlibc_init(const xlibc_attr_t * attr);
 
+extern void 		xlibc_set_close_safe(bool enb);
+
+
 
 /*------------------------------------------------------------------------
 *	Private Function Declaration
 *-----------------------------------------------------------------------*/
+
 
 
 

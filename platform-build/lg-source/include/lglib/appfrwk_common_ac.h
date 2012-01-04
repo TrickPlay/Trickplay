@@ -70,6 +70,10 @@ typedef enum
 	AM_EXITCODE_BACK_TO_NETWORKSETTING,
 	AM_EXITCODE_BACK_TO_SETUP,
 
+#ifdef BDP_HOST
+	AM_EXITCODE_BACK_TO_SWUPDATE,
+#endif //BDP_HOST
+
 	AM_EXITCODE_RETURN		= 0xe0,			// 종료 후 이전 상태로 돌아가기
 	AM_EXITCODE_FORCED		= 0xf0, 		//모든 app 강제 종료
 	AM_EXITCODE_RESETBACKLIST , 	/**< Exit with no focusing to other app and reset backlist.*/
@@ -143,6 +147,43 @@ typedef enum AM_VIDEO_TYPE
 } AM_VIDEO_TYPE_T;
 
 /**
+ * Type of camera
+ */
+typedef enum AM_CAMERA_TYPE
+{
+	AM_CAMERA_NONE		= 0x00, 			/**< Camera is not used */
+	AM_CAMERA_NORMAL	= 0x01, 			/**< Camera Ready : O, Gesture Cam : X */
+	AM_CAMERA_GESTURE 	= 0x02, 			/**< Camera Ready : O, Gesture Cam : O */
+	AM_CAMERA_MAX
+} AM_CAMERA_TYPE_T;
+
+/**
+ * Type of Remocon
+ */
+typedef enum AM_MAGICRC_TYPE
+{
+	AM_MAGICRC_NONE		= 0x00, 			/**< Motion RC is not used */
+	AM_MAGICRC_NORMAL	= 0x01, 			/**< Motion RC : O, Voice MRCU : X */
+	AM_MAGICRC_VOICE	= 0x02, 			/**< Motion RC : O, Voice MRCU : O */
+	AM_MAGICRC_MAX
+} AM_MAGICRC_TYPE_T;
+
+//SDP 연동 규격서 V.2.0.9 기준
+typedef enum AM_UPDATE_TYPE
+{	
+	AM_UPDATE_NEED_NOT_TO_UPDATE			= 0x00, //Need not to update
+	AM_UPDATE_NEED_TO_UPDATE, 						//Exist new version 
+	AM_UPDATE_UNKNOWN_ERROR,						//Unknown error ex) Network Error
+	AM_UPDATE_WRONG_APP_ID,							//A.009.01, Wrong App ID
+	AM_UPDATE_APP_VERSION_INFO_NULL,				//A.009.02, App Version Info is NULL
+	AM_UPDATE_APP_PURCHASE_INFO_NOT_EXIST,			//A.009.03, App Purchase Info is not existed
+	AM_UPDATE_DEVICE_HW_NOT_SUPPORT,				//A.009.04, Device H/W do not support execution of this app
+	AM_UPDATE_DEVICE_SW_NOT_SUPPORT,				//A.009.05, Device S/W do not support execution of this app
+	AM_UPDATE_NSU_UPDATE_REQUIRED,					//A.009.06, NSU Update Required
+	AM_UPDATE_APPINFO_NOT_FOUND,					//A.009.07, App Info Not Found
+} AM_UPDATE_TYPE_T;
+
+/**
  * Type of Image Size
  */
 typedef enum AM_IMAGE_SIZE
@@ -154,6 +195,18 @@ typedef enum AM_IMAGE_SIZE
 } AM_IMAGE_SIZE_T;
 
 /**
+ * Type of Show in Myapps
+ */
+typedef enum AM_SHOW_IN_MYAPPS
+{
+	AM_SHOW_IN_MYAPPS_NO = 0,		
+	AM_SHOW_IN_MYAPPS_YES,			
+	AM_SHOW_IN_MYAPPS_COND,			
+	AM_SHOW_IN_MYAPPS_ASK_SDP,		
+			
+} AM_SHOW_IN_MYAPPS_T;
+
+/**
  * Application Information.
  */
 typedef struct AM_APP_INFO
@@ -161,8 +214,10 @@ typedef struct AM_APP_INFO
 	UINT64 AUID;
 	AM_APP_TYPE_T appType;		/**< AM_APP_TYPE_C1_T | AM_APP_TYPE_C2_T */
 	char szName[AF_MAX_NAME_LEN];
+	char szStringID[AF_MAX_NAME_LEN];
 	char szIconPathArr[AM_MAX_IMAGE_SIZE_TYPE][AF_MAX_PATH_LEN];
 	unsigned char szVersion[AF_MAX_VER_LEN];
+	
 	union _ATTR
 	{
 		struct _ATTR_BIT
@@ -171,21 +226,27 @@ typedef struct AM_APP_INFO
 			BOOLEAN bAdult:1;
 			BOOLEAN	bCheckNetwork:1;
 			BOOLEAN bUseNetwork:1;
-			BOOLEAN bUseCamera:1;
-			BOOLEAN bUseMagic:1;
 			BOOLEAN bUse3D:1;
-			BOOLEAN bLoadingEffect:1;	// 8
-
+			BOOLEAN bLoadingEffect:1;
+			BOOLEAN bEnableOnWidi:1;
+			BOOLEAN bEnableOnDVR:1;	// 8
+			BOOLEAN bCheckTime:1;
+			
 			BOOLEAN bLoadingAd:1;
-			BOOLEAN bIDmgmt:1;
+			BOOLEAN bIDmgmt:1;			
+
 			BOOLEAN	bDeactivation:1;
 			BOOLEAN	bInCPBox:1;
 
+			AM_CAMERA_TYPE_T useCamera:2;
+			AM_MAGICRC_TYPE_T useMagic:2;	// 9
+
 			AM_CTXT_TYPE_T contextType:8;	/**< for contextual menu */
 			AM_VIDEO_TYPE_T videoType:3;	/**< for video type */
-		} bit;
+			AM_UPDATE_TYPE_T updateType:5;	/**< for update type */
+		} bit;				// 33bit 사용 
 
-		UINT32 val;
+		UINT64 val;
 	} attr;
 	time_t installTime;
 } AM_APP_INFO_T;
@@ -243,15 +304,19 @@ typedef struct AM_DEVICE_INFO
 	char szModelName[32];		/**< Model Name, OSA_MD_GetModelName() */
 	char szGroupLC[3];
 	char szGroupUC[3];
-	char szCountry2[3];
-	char szCountry3[4];
+	char szSmartCountry2[3];	/**< Smart TV Setting's country */
+	char szSmartCountry3[4];
+	char szSetupCountry2[3];	/**< Setup menu's country */
+	char szSetupCountry3[4];
 	char szLanguage2[3];
 	char szLanguage3[4];
 
 	BOOLEAN bDVR;
 	BOOLEAN bPDP;
 	BOOLEAN b3D;
+	BOOLEAN bDTV;
 	BOOLEAN	bCPBox;
+	BOOLEAN bDualView;
 } AM_DEVICE_INFO_T;
 
 /**
@@ -283,7 +348,20 @@ typedef struct AM_APP_RECENT_INFO	/* ktj fixed */
 	char szIconPath[AF_MAX_PATH_LEN];
 	BOOLEAN bCheckNetwork;
 	AM_APP_TYPE_T appType;		/**< AM_APP_TYPE_C1_T | AM_APP_TYPE_C2_T */
+	char szStringID[AF_MAX_NAME_LEN];
 } AM_APP_RECENT_INFO_T;
+
+/**
+ * Option Type.
+ */
+ typedef enum AM_APP_OPT
+{
+	AM_OPT_UNKNOWN					= 0x00,
+	AM_OPT_CHECK_UPDATE_INTERVAL,
+}AM_APP_OPT_T;
+
+
+
 
 #ifdef __cplusplus
 }

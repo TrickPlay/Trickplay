@@ -297,13 +297,15 @@ extern "C" {
 	//IR_KEY_HOTELMODE, IR_KEY_HOTELMODE_READY 를 Virtual Key Code로 변경.
 #define IR_KEY_HOTELMODE                LGE_BASE(0xda)		// 0x05CF
 #define IR_KEY_HOTELMODE_READY          LGE_BASE(0xdb)		// 0x0523
+#define IR_KEY_MYAPPS					LGE_BASE(0xdc)		/* GP4 New key value */
 #ifdef INCLUDE_PENTOUCH
-#define IR_KEY_PENTOUCH                LGE_BASE(0xdf)
+#define IR_KEY_PENTOUCH					LGE_BASE(0xdf)
 #endif
 
 //changwook.joo_111011 - Add Japan Model two byte key code definition.
 // IR_KEY_SET_REGIST를 Virtual key code로 변경.
 #define IR_KEY_SETCHANNEL				LGE_BASE(0xe0)
+#define IR_KEY_PAIRING_M4				LGE_BASE(0xe1)
 
 #define IR_KEY_POWER					KEY_POWER			/* 0x08 전원  */
 #define IR_KEY_TV						KEY_TV				/* 0x0F TV */
@@ -501,13 +503,18 @@ extern "C" {
 #define IR_VIRKEY_3D_ONOFF				0x5034
 #define IR_VIRKEY_3D_3DTO2D				0x5035
 #define IR_VIRKEY_3D_2DTO3D				0x5036
-#define IR_VIRKEY_3DOPT_LR				0x5037
+#define IR_VIRKEY_3DOPT_IMG_CORRECT		0x5037
 #define IR_VIRKEY_3DOPT_DEPTH			0x5038
 #define IR_VIRKEY_3DOPT_VIEWPOINT		0x5039
 #define IR_VIRKEY_3DOPT_OPTIMIZATION	0x5040
-#define IR_VIRKEY_3DOPT_SIZE			0x5041
+#define IR_VIRKEY_3DOPT_PIC_SIZE		0x5041
 #define IR_VIRKEY_3DOPT_BALANCE			0x5042
-
+#define IR_VIRKEY_3DOPT_COLOUR_CORRECT  0x5043
+#define IR_VIRKEY_3DOPT_SOUND_ZOOM      0x5044
+#define IR_VIRKEY_3DOPT_NORMAL_IMAGE    0x5045
+#define IR_VIRKEY_3DOPT_MODE            0x5046
+#define IR_VIRKEY_3DOPT_ONSTARTSETTING  0x5047
+#define IR_VIRKEY_TEXTDISPLAY           0x5048
 
 	//--------------------------------------------------//
 	//			Magic Motion Remote RF Key				//
@@ -558,9 +565,10 @@ extern "C" {
 #define RF_KEY_CH_DOWN_UP				(RF_KEY_CH_DOWN | RF_KEY_UP)
 // to be deleted end!!!!!!!!!!!!!!
 
-#define RF_KEY_LAUNCHER				IR_KEY_QMENU
+#define RF_KEY_LAUNCHER				IR_KEY_MYAPPS
 #define RF_KEY_3D_MODE				IR_KEY_3D_MODE
 #define RF_KEY_HOME						IR_KEY_HOME
+#define RF_KEY_EMANUAL				IR_KEY_EMANUAL
 
 
 //#define CURSOR_ON_INIT					(0x8000 | 0x0000)
@@ -570,6 +578,7 @@ extern "C" {
 
 /*	definitions of special keys for LGE	*/
 
+#define KEY_LGE_DEBUG_CURSOR				0x4A0
 #define KEY_LGE_MRCU_VOICE_RECOGSTART		0x4A1
 #define KEY_LGE_MRCU_VOICE_RECOGSUCCESS		0x4A2
 #define KEY_LGE_MRCU_VOICE_RECOGING			0x4A3
@@ -600,9 +609,15 @@ extern "C" {
 #define KEY_LGE_WIFI_DISCONNECTED				0x4BA
 #define KEY_LGE_MRCU_LOW_BATTERY				0x4BB
 #define KEY_LGE_WIFI_SMARTTEXTEND            0x4BC
+#define KEY_LGE_MRCU_LOW_SIGNAL_STRENGTH		0x4BD
+#define KEY_LGE_MRCU_GESTURE_SHAKE			0x4BE
 
-#define KEY_LGE_MRCU_VOICE_BUTTONENABLE		0x4C1	
+#define KEY_LGE_MRCU_VOICE_BUTTONENABLE		0x4C1
 #define KEY_LGE_MRCU_VOICE_BUTTONDISABLE	0x4C2
+
+#define KEY_LGE_GESTURECAMERA_POWER_OFF		 0x4D1		// Gesture Camera 2011. 10.15
+#define KEY_LGE_GESTURECAMERA_READY_FORUSE	 0x4D2		// Gesture camera 2011. 11. 14
+#define KEY_LGE_GESTURECAMERA_HAND_ACTIVATED 0x4D3		// Gesture Camera 2011. 11. 18
 
 #define KEY_LGE_INPUT_FIRST				        0x4F0	// Print input's list
 
@@ -621,10 +636,10 @@ extern "C" {
 #define ABS_LGE_ACCEL_X	 	0x24
 #define ABS_LGE_ACCEL_Y	 	0x25
 #define ABS_LGE_ACCEL_Z 	0x26
-#define ABS_LGE_EULER_ROLL		0x27
-#define ABS_LGE_EULER_PITCH		0x29
-#define ABS_LGE_EULER_YAW		0x3a
-#define ABS_LGE_PACKET_ID 		0x3b
+#define ABS_LGE_QUATERNION_X		0x27
+#define ABS_LGE_QUATERNION_Y		0x29
+#define ABS_LGE_QUATERNION_Z		0x3a
+#define ABS_LGE_QUATERNION_W		0x3b
 
 /*---------------------------------------------------------
     매크로 함수 정의

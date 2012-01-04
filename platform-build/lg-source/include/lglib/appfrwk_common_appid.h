@@ -45,9 +45,18 @@ extern "C" {
 #define HOA_AUID_LAUNCHER			18
 #define HOA_AUID_SOCIALCENTER		19
 #define HOA_AUID_3DCHANGE			20
-#define HOA_AUID_3DSETTING			21
+#define HOA_AUID_3DCHANGEAPP		21
 #define HOA_AUID_ADPOPUP			22
 #define HOA_AUID_ADPREMIUM			23
+#define HOA_AUID_DUALPLAY			24
+
+// bar list
+#define HOA_AUID_SIMPLINKBAR		25
+#define HOA_AUID_MHLBAR				26
+#define HOA_AUID_DIIVABAR			27
+#define HOA_AUID_UNIVERSALREMOTEBAR	28
+#define HOA_AUID_WIFIDISPLAYBAR		29
+
 
 #define HOA_AUID_LIVETV				99
 // launcher
@@ -83,7 +92,8 @@ extern "C" {
 #define HOA_AUID_SMARTSHARECEC		127 // Set Simplink
 #define HOA_AUID_SMARTSHAREDMR	128 // DMR
 #define HOA_AUID_SMARTSHAREDVR	129 // DVR
-#define HOA_AUID_SMARTSHARRECORDEDTV	130
+#define HOA_AUID_SMARTSHARERECORED 130// will be deleted
+
 
 
 // CP
@@ -100,6 +110,13 @@ extern "C" {
 #define HOA_AUID_CNTV				202
 #define HOA_AUID_AWIND				203
 #define HOA_AUID_TEST				999
+
+
+// 100000000~ : Reserved for BDP
+// BDP
+#ifdef BDP_HOST
+#define HOA_AUID_SWUPDATE			100000000
+#endif //BDP_HOST
 
 #ifdef __cplusplus
 }

@@ -2,6 +2,7 @@
 
 #include "tp_common.h"
 #include "tp_controller.h"
+#include "tp_system.h"
 
 //#include <addon_key.h>
 #include <appfrwk_common_key.h>
@@ -230,6 +231,26 @@ BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, PM_KEY_COND_T keyCond, PM_ADD
 
 	DBG_PRINT_TP("KeyEvent: Key(%#4x) / KeyCond(%u)", key, keyCond);
 
+	if (TP_System_GetDisplayMode() == TP_DISP_WIDGET)
+	{
+		switch (key)
+		{
+			case IR_FRONTKEY_CH_UP:
+			case IR_FRONTKEY_CH_DOWN:
+			case IR_FRONTKEY_VOL_UP:
+			case IR_FRONTKEY_VOL_DOWN:
+			case IR_KEY_VOL_UP:
+			case IR_KEY_VOL_DOWN:
+			case IR_KEY_MUTE:
+			case IR_KEY_CH_UP:
+			case IR_KEY_CH_DOWN:
+				return FALSE;
+			default:
+				// do nothing
+				break;
+		}
+	}
+
 	switch (keyCond)
 	{
 		case PM_KEY_PRESS:
@@ -273,6 +294,26 @@ BOOLEAN	TP_Controller_MouseEventCallback(
 	   Other key events of MotionRemote are sent to key event callback. */
 	if (keyCode == RF_KEY_OK)
 		tpButton = 1;
+
+	if (TP_System_GetDisplayMode() == TP_DISP_WIDGET)
+	{
+		switch (keyCode)
+		{
+			case KEY_VOLUMEUP:
+			case KEY_VOLUMEDOWN:
+			case KEY_MUTE:
+			case KEY_CHANNELUP:
+			case KEY_CHANNELDOWN:
+			//case RF_KEY_3D_MODE:  // 3D mode
+			//case KEY_PREVIOUS:    // Back
+			//case RF_KEY_HOME:     // Home
+			//case RF_KEY_LAUNCHER: // My Apps
+				return FALSE;
+			default:
+				// do nothing
+				break;
+		}
+	}
 
 	switch (keyCond)
 	{
