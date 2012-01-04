@@ -279,6 +279,9 @@ BOOLEAN	TP_Controller_MouseEventCallback(
 	if (!_gbMouseEnabled)
 		return FALSE;
 
+	posX = (posX*3)/2;
+	posY = (posY*3)/2;
+
 	if ((keyCode == RF_KEY_NONE) || (keyCond == PM_KEY_COND_LAST))
 	{
 		tp_controller_pointer_move(_gpMouseController, posX, posY, 0);
