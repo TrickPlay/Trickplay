@@ -42,8 +42,8 @@ local function main()
     
     local imgs = {
         --
-        overlay = Image{src = "assets/gloss-small.png"},
-        
+        overlay    = Image{src = "assets/gloss-small.png"},
+        featured   = Image{src = "assets/featured-banner.png"},
         tw_focus   = Image{src = "assets/share_menu/icon-twitter-on.png"},
         tw_unfocus = Image{src = "assets/share_menu/icon-twitter-off.png"},
         fb_focus   = Image{src = "assets/share_menu/icon-facebook-on.png"},
@@ -200,6 +200,7 @@ local function main()
     
     mkb:init{
         img_srcs    = srcs,
+        featured = imgs.featured,
     }
     
     my_apps_aic = aic:create{
@@ -434,6 +435,20 @@ local function main()
             {
                 text     = "App Store",
                 contents = Group{children={shop,app_shop_aic}, on_key_down = shop.on_key_down},
+                outer    = Group{
+                    children = {
+                    Clone{
+                        source = imgs.featured,
+                        x = 419,
+                        y = 343,
+                    },
+                    Clone{
+                        source = imgs.featured,
+                        x = 419,
+                        y =  652,
+                    }
+                    },
+                },
                 slider   = shopHL,
                 focus    = function() app_shop_aic:pause() shop.focus()   end,
                 unfocus  = function() app_shop_aic:play()  shop.unfocus() end,
