@@ -198,7 +198,8 @@ Group: Engine Reference {
     	File: Overview (no auto-title, docs/rte/reference/overview_util.txt)
     	
     	Group: Globals {
-			File: Utility Functions (no auto-title, bindings/globals.lb)
+			File: regex (no auto-title, bindings/regex.lb)
+			File: Misc. Utility Functions (no auto-title, bindings/globals.lb)
 		}
 	}
 
