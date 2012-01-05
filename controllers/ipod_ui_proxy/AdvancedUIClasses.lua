@@ -155,8 +155,8 @@ local function pango_to_html(pango_string)
         "\\<div%1 %2\\>")
 
     -- convert to html entities
-    html_string = regex_replace(html_string, "(?<!\\\\)<", "&lt;")
-    html_string = regex_replace(html_string, "(?<!\\\\)>", "&gt;")
+    html_string = regex:replace(html_string, "(?<!\\\\)<", "&lt;")
+    html_string = regex:replace(html_string, "(?<!\\\\)>", "&gt;")
     --html_string = string.gsub(html_string, "<", "&lt;")
     --html_string = string.gsub(html_string, ">", "&rt;")
 

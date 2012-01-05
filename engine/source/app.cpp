@@ -9,6 +9,8 @@
 #include "json.h"
 #include "common.h"
 #include "keyboard.h"
+#include "plugin.h"
+#include "trickplay/plugins/lua-api.h"
 
 //.............................................................................
 
@@ -66,6 +68,7 @@ extern int luaopen_Controller( lua_State * L );
 extern int luaopen_mediaplayer_module( lua_State * L );
 extern int luaopen_stopwatch( lua_State * L );
 extern int luaopen_json( lua_State * L );
+extern int luaopen_regex( lua_State * L);
 
 extern int luaopen_socket( lua_State * L );
 
@@ -133,6 +136,165 @@ bool LuaStateProxy::is_valid()
 {
     return L != NULL;
 }
+
+//=============================================================================
+
+class LuaAPIPlugin
+{
+public:
+
+	static void call_open( lua_State * L )
+	{
+		App * app = App::get( L );
+
+		String app_id = app->get_id();
+
+		List * list = get_list( app->get_context() );
+
+		for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
+		{
+			tplog2( "CALLING OPEN ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
+
+			lua_pushstring( L , app_id.c_str() );
+
+			int top_before = lua_gettop( L );
+
+			int result = (*it)->open( L , (*it)->plugin->user_data() );
+
+			if ( 0 != result )
+			{
+				tpwarn( "  PLUGIN OPEN RETURNED %d" , result );
+			}
+			else
+			{
+				tplog2( "  PLUGIN OPENED" );
+			}
+
+			int top_after = lua_gettop( L );
+
+			if ( top_after > top_before )
+			{
+				tpwarn( "  PLUGIN OPEN LEFT %d VALUE(S) ON THE STACK" , top_after - top_before );
+
+				lua_pop( L , top_after - top_before + 1 );
+			}
+			else if ( top_after < top_before )
+			{
+				tpwarn( "  PLUGIN OPEN POPPED TOO MANY VALUES OFF THE STACK" );
+			}
+			else
+			{
+				lua_pop( L , 1 );
+			}
+		}
+	}
+
+	static void call_close( lua_State * L )
+	{
+		App * app = App::get( L );
+
+		String app_id = app->get_id();
+
+		List * list = get_list( app->get_context() );
+
+		for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
+		{
+			tplog2( "CALLING CLOSE ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
+
+			lua_pushstring( L , app_id.c_str() );
+
+			int top_before = lua_gettop( L );
+
+			(*it)->close( L , (*it)->plugin->user_data() );
+
+			tplog2( "  PLUGIN CLOSED" );
+
+			int top_after = lua_gettop( L );
+
+			if ( top_after > top_before )
+			{
+				tpwarn( "  PLUGIN CLOSE LEFT %d VALUE(S) ON THE STACK" , top_after - top_before );
+
+				lua_pop( L , top_after - top_before + 1 );
+			}
+			else if ( top_after < top_before )
+			{
+				tpwarn( "  PLUGIN CLOSE POPPED TOO MANY VALUES OFF THE STACK" );
+			}
+			else
+			{
+				lua_pop( L , 1 );
+			}
+		}
+	}
+
+private:
+
+	LuaAPIPlugin( TrickPlay::Plugin * _plugin )
+	:
+		plugin( _plugin )
+	{
+		g_assert( plugin );
+
+		open = ( TPLuaAPIOpen ) plugin->get_symbol( TP_LUA_API_OPEN );
+		close = ( TPLuaAPIClose ) plugin->get_symbol( TP_LUA_API_CLOSE );
+
+		g_assert( open );
+		g_assert( close );
+	}
+
+	~LuaAPIPlugin()
+	{
+		delete plugin;
+	}
+
+	typedef std::list< LuaAPIPlugin * > List;
+
+	static List * get_list( TPContext * context )
+	{
+		static char key = 0;
+
+		List * result = ( List * ) context->get_internal( & key );
+
+		if ( ! result )
+		{
+			result = new List;
+
+			StringList symbols;
+			symbols.push_back( TP_LUA_API_OPEN );
+			symbols.push_back( TP_LUA_API_CLOSE );
+
+			TrickPlay::Plugin::List plugins = TrickPlay::Plugin::scan( context , "tp_lua_api-" , symbols );
+
+			for ( TrickPlay::Plugin::List::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
+			{
+				result->push_back( new LuaAPIPlugin( * it ) );
+			}
+
+			context->add_internal( & key , result , destroy_list );
+		}
+
+		return result;
+	}
+
+	static void destroy_list( gpointer _list )
+	{
+		g_assert( _list );
+
+		List * list = ( List * ) _list;
+
+		for ( List::const_iterator it = list->begin(); it != list->end(); ++it )
+		{
+			delete * it;
+		}
+
+		delete list;
+	}
+
+	TrickPlay::Plugin *	plugin;
+	TPLuaAPIOpen		open;
+	TPLuaAPIClose		close;
+};
 
 //=============================================================================
 
@@ -920,6 +1082,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_profile( L );
     luaopen_stopwatch( L );
     luaopen_json( L );
+    luaopen_regex( L );
     luaopen_Controller( L );
     luaopen_controllers( L );
     luaopen_mediaplayer_module( L );
@@ -965,6 +1128,12 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
 #endif
 
+    //.........................................................................
+    // Open plugins
+
+    LuaAPIPlugin::call_open( L );
+
+    //.........................................................................
     // Run the script
 
     FreeLater free_later;
@@ -1034,6 +1203,10 @@ App::~App()
     // Release the cookie jar
 
     release_cookie_jar();
+
+    // Close plugins
+
+    LuaAPIPlugin::call_close( L );
 
     // Close Lua
 
@@ -1583,7 +1756,6 @@ gboolean App::animate_out_callback( gpointer s )
 
 //-----------------------------------------------------------------------------
 
-
 Image * App::load_image( const gchar * source , bool read_tags )
 {
     tplog( "LOADING SYNC '%s'" , source );
@@ -1638,6 +1810,8 @@ Image * App::load_image( const gchar * source , bool read_tags )
 
     return image;
 }
+
+//-----------------------------------------------------------------------------
 
 class ImageResponseClosure
 {
@@ -1697,6 +1871,8 @@ private:
     GDestroyNotify              destroy_notify;
 };
 
+//-----------------------------------------------------------------------------
+
 bool App::load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify )
 {
     tplog( "LOADING ASYNC '%s'" , source );
@@ -1753,6 +1929,8 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
     return true;
 }
 
+//-----------------------------------------------------------------------------
+
 void App::audio_match( const String & json )
 {
     // TODO: Not terribly excited about doing it this way
@@ -1781,3 +1959,5 @@ void App::audio_match( const String & json )
 
     lua_pop( L , 1 );
 }
+
+//.........................................................................
