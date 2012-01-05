@@ -766,8 +766,8 @@ function myAppsHL:create(p)
                         self:find_child("text").color = "ffffff"
                     end,
                     press_enter = function(self)
-                        arrow:hide()
-                        apps:launch(self.app_id)
+                        self:find_child("arrow"):hide()
+                        apps:launch(instance.app_id)
                     end,
                 },
             },
@@ -845,6 +845,7 @@ function myAppsHL:create(p)
         
     end
     function instance:focus(...)
+        
         --[[
         self.app_id = id
         
