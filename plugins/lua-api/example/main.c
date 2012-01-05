@@ -1,16 +1,16 @@
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
 #include "trickplay/plugins/lua-api.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 
 /******************************************************************************
  * Initialize
  * Called by TrickPlay the first time this plugin is loaded.
  */
 
-extern "C"
 void
 tp_plugin_initialize( TPPluginInfo * info , const char * config )
 {
@@ -43,7 +43,6 @@ static int foo( lua_State * L )
  * On the top of the stack is the app's id (string).
  */
 
-extern "C"
 int
 tp_lua_api_open( lua_State * L , void * user_data )
 {
@@ -63,7 +62,6 @@ tp_lua_api_open( lua_State * L , void * user_data )
  * On the top of the stack is the app's id (string).
  */
 
-extern "C"
 void
 tp_lua_api_close( lua_State * L , void * user_data )
 {
@@ -75,7 +73,6 @@ tp_lua_api_close( lua_State * L , void * user_data )
  * Called by TrickPlay before this plugin is unloaded.
  */
 
-extern "C"
 void
 tp_plugin_shutdown( void * user_data )
 {
