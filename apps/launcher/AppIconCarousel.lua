@@ -76,12 +76,12 @@ function IconCarousel:create(p)
                     )
                     
                 ]
-                
+                --[[
                 print(wrap_i(
                         
                         curr_i + math.ceil(#app_list/2)
                         
-                    ))
+                    ))--]]
         end,
     }
     
