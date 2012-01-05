@@ -161,7 +161,11 @@
 
 #else
 
+#if defined(__cplusplus)
+#define LUA_API		extern "C"
+#else
 #define LUA_API		extern
+#endif
 
 #endif
 
