@@ -102,6 +102,7 @@ local function make_video_tile_frame(p)
             c.h-2*p.s_sz+2*i,
             p.r+2*i
         )
+        --[[
         print(
             p.s_sz-i,
             p.s_sz-i,
@@ -109,6 +110,7 @@ local function make_video_tile_frame(p)
             c.h-2*p.s_sz+2*i,
             p.r+2*i
         )
+        --]]
         c:stroke()
     end
     
