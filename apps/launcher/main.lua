@@ -1,44 +1,11 @@
 
-local function make_text(title,caption,title_font,caption_font)
-    
-    local title = Text{
-        text = title,
-        font = title_font
-    }
-    local caption = Text{
-        text = caption,
-        font = caption_font
-    }
-    
-    local c = Canvas(
-        title.w > caption.w and title.w or caption.w,
-        title.h + caption.h
-    )
-    
-    c:text_element_path(title)
-    
-    c:set_source_color("000000")
-    c:stroke(true)
-    c:set_source_color("ffffff")
-    c:fill()
-    
-    c:move_to(0,title.h)
-    
-    c:text_element_path(caption)
-    
-    c:set_source_color("000000")
-    c:stroke(true)
-    c:set_source_color("ffffff")
-    c:fill()
-    
-    
-    return c:Image()
-end
-
-
 --dolater...
 local function main()
     
+    
+    ----------------------------------------------------------------------------
+    -- Image Sources
+    ----------------------------------------------------------------------------
     
     local imgs = {
         --
@@ -65,6 +32,9 @@ local function main()
         jype_1      = Image{ src = "assets/showcase/jype-1.jpg"},
         jype_2      = Image{ src = "assets/showcase/jype-2.jpg"},
         jype_3      = Image{ src = "assets/showcase/jype-3.jpg"},
+        
+        overlay = Image{src = "assets/gloss-medium.png"},
+        caption_grad = Image{src = "assets/lower-gradient.png"},
     }
     
     
@@ -130,7 +100,7 @@ local function main()
     end
     
     ----------------------------------------------------------------------------
-    -- dofiles()
+    -- dofiles's
     ----------------------------------------------------------------------------
     
     local canvas_srcs = dofile("CanvasCloneSources")
@@ -141,9 +111,9 @@ local function main()
     
     local kb =  dofile("KenBurns.lua")
     
-    local l = dofile("MyAppsList.lua")
+    local my_app_list = dofile("MyAppsList.lua")
     
-    local HL = dofile("MyAppsHL.lua")
+    local HL = dofile("VideoTileSlider.lua")
     
     local clouds =  dofile("MyAppsBg.lua")
     
@@ -152,7 +122,7 @@ local function main()
     local aic = dofile("AppIconCarousel.lua")
     
     ----------------------------------------------------------------------------
-    -- init()
+    -- init's
     ----------------------------------------------------------------------------
     
     canvas_srcs:init{
@@ -184,7 +154,6 @@ local function main()
         max_vis_len = 12,
         font        = "FreeSans Medium 32px",
     }
-    tiles = {}
     
     kb:init{}
     
@@ -199,19 +168,23 @@ local function main()
     }
     
     mkb:init{
-        img_srcs    = srcs,
-        featured = imgs.featured,
+        overlay_src  = imgs.overlay,
+        gradient_src = imgs.caption_grad,
+        title_font   = "FreeSans Bold 24px",
+        caption_font = "FreeSans Medium 24px",
+        ken_burns    = kb,
     }
     
-    my_apps_aic = aic:create{
+    ----------------------------------------------------------------------------
+    -- Create Components
+    ----------------------------------------------------------------------------
+    
+    
+    -- My Apps   Video Tile
+    ----------------------------------------------------------------------------
+    
+    my_apps_closed = aic:create{
         launcher_icons = launcher_icons,
-        icon_w   = 480,
-        vis_w    = 547,
-        duration = 10000,
-    }
-    
-    app_shop_aic = aic:create{
-        launcher_icons = shop_icons,
         icon_w   = 480,
         vis_w    = 547,
         duration = 10000,
@@ -258,7 +231,28 @@ local function main()
             end
         }
     end
+    
+    
+    my_app_list:init{
+        launcher_icons=launcher_icons,
+        app_list=app_list,
+        max_vis_len = 10,
+        slider = myAppsHL,
+        frame=canvas_srcs.launcher_icon_frame,--imgs.icon_overlay,
+    }
+    
+    clouds:init{
+        img_srcs  = srcs,
+        visible_w = 600,
+        visible_h = 1000,
+    }
+    
+    -- Showcase   Video Tile
+    ----------------------------------------------------------------------------
+    
+    
     showcase = Group{}
+    
     do
         
         local title   = Text{  name = "title",   font = "FreeSans Bold 26px",  x = 26,y=26}
@@ -284,17 +278,15 @@ local function main()
     showcase_closed = kb:create{
         visible_w = 547,
         visible_h = 306,
-        q = {  imgs.burberry_1,imgs.dew_1,imgs.jype_1  },
+        q = {  imgs.burberry_1,imgs.dew_1,imgs.jype_2  },
     }
     showcase_closed.x = 8
     showcase=mkb:create{
         hl = showcaseHL,
         group = showcase,
         w = 547,
-        kb = kb,
         panes = {
             {
-                text    = make_text("Burberry","Spring/Summer 2011 Collection","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "Burberry",
                 caption = "Spring/Summer 2011 Collection",
                 app_id  = "com.trickplay.burberry",
@@ -306,7 +298,6 @@ local function main()
                 }
             },
             {
-                text    = make_text("Mountain Dew","Vote for the new green label bottle art","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "Mountain Dew",
                 caption = "Vote for the new green label bottle art",
                 app_id  = "com.trickplay.mountain-dew",
@@ -318,7 +309,6 @@ local function main()
                 }
             },
             {
-                text    = make_text("JYPE","Greatest Hits Video Showcase","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "JYPE",
                 caption = "Greatest Hits Video Showcase",
                 app_id  = "com.trickplay.jyp",
@@ -330,9 +320,18 @@ local function main()
                 }
             },
         },
-        srcs = srcs,
     }
     
+    
+    -- App Shop   Video Tile
+    ----------------------------------------------------------------------------
+    
+    app_shop_closed = aic:create{
+        launcher_icons = shop_icons,
+        icon_w   = 480,
+        vis_w    = 547,
+        duration = 10000,
+    }
     
     shop = Group{}
     do
@@ -361,10 +360,8 @@ local function main()
         group = shop,
         hl = shopHL,
         w = 547,
-        kb = kb,
         panes = {
             {
-                text    = make_text("Enter the App Shop","Explore new apps for your smart TV","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "Enter the App Shop",
                 caption = "Explore new apps for your smart TV",
                 app_id  = "com.trickplay.app-shop",
@@ -375,7 +372,6 @@ local function main()
                 }
             },
             {
-                text    = make_text("HULU","Watch TV shows & movies free online","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "HULU",
                 caption = "Watch TV shows & movies free online",
                 app_id  = "com.trickplay.app-shop",
@@ -386,7 +382,6 @@ local function main()
                 }
             },
             {
-                text    = make_text("True Blood Comics","The thrills continue in Bon Temp","FreeSans Bold 24px","FreeSans Medium 24px"),
                 title   = "True Blood Comics",
                 caption = "The thrills continue in Bon Temp",
                 app_id  = "com.trickplay.app-shop",
@@ -397,33 +392,23 @@ local function main()
                 }
             },
         },
-        srcs = srcs,
-    }
-    
-    l:init{
-        launcher_icons=launcher_icons,
-        app_list=app_list,
-        max_vis_len = 10,
-        slider = myAppsHL,
-        frame=canvas_srcs.launcher_icon_frame,--imgs.icon_overlay,
-    }
-    
-    clouds:init{
-        visible_w = 600,
-        visible_h = 1000,
     }
     
     
+    -- The Video Tile Bar
+    ----------------------------------------------------------------------------
+    
+    --defaults focus to the first tile
     vtb:init{
         video_tile = vt,
         tiles = {
             {
                 text = "My Apps",
-                contents = Group{y=-48,children={clouds,l,Clone{source =imgs.overlay,x=8,y = 48},my_apps_aic}, on_key_down = l.on_key_down},
+                contents = Group{y=-48,children={clouds,my_app_list,Clone{source =imgs.overlay,x=8,y = 48},my_apps_closed}, on_key_down = my_app_list.on_key_down},
                 slider = myAppsHL,
-                expanded_h =l.list_h-20,
-                focus    = function() my_apps_aic:pause() end,
-                unfocus  = function() my_apps_aic:play()  end,
+                expanded_h =my_app_list.list_h-20,
+                focus    = function() my_apps_closed:pause() end,
+                unfocus  = function() my_apps_closed:play()  end,
             },
             {
                 text = "Showcase",
@@ -434,7 +419,7 @@ local function main()
             },
             {
                 text     = "App Store",
-                contents = Group{children={shop,app_shop_aic}, on_key_down = shop.on_key_down},
+                contents = Group{children={shop,app_shop_closed}, on_key_down = shop.on_key_down},
                 outer    = Group{
                     children = {
                     Clone{
@@ -450,88 +435,16 @@ local function main()
                     },
                 },
                 slider   = shopHL,
-                focus    = function() app_shop_aic:pause() shop.focus()   end,
-                unfocus  = function() app_shop_aic:play()  shop.unfocus() end,
+                focus    = function() app_shop_closed:pause() shop.focus()   end,
+                unfocus  = function() app_shop_closed:play()  shop.unfocus() end,
             },
         },
     }
-    showcase_closed:fade_in()
-    app_shop_aic:play()
     
-    screen:add(--[[Rectangle{size = screen.size},]]vtb)
+    screen:add(vtb)
     
-    ----------------------------------------------------------------------------
-    -- key events()
-    ----------------------------------------------------------------------------
-    --[=[
-    local screen_keys = {
-        [keys["1"]] = function()
-            vtb:move_anchor_point(0,0)
-            vtb.position = {0,0}
-            vtb:animate{
-                --mode = "EASE_IN_BACK",
-                duration = 400,
-                x_rotation = -180,
-            }
-        end,
-        [keys["2"]] = function()
-            vtb:move_anchor_point(0,0)
-            vtb.position = {0,0}
-            vtb:animate{
-                --mode = "EASE_OUT_BACK",
-                duration = 400,
-                x_rotation = 0,
-            }
-        end,
-        [keys["3"]] = function()
-            vtb:move_anchor_point(screen.w/2,screen.h/2)
-            vtb.position = {screen.w/2,screen.h/2}
-            vtb:animate{
-                mode = "EASE_IN_QUAD",
-                duration = 400,
-                scale = {1.5,1.5},
-                opacity = 0,
-            }
-        end,
-        [keys["4"]] = function()
-            vtb:move_anchor_point(screen.w/2,screen.h/2)
-            vtb.position = {screen.w/2,screen.h/2}
-            vtb:animate{
-                mode = "EASE_OUT_QUAD",
-                duration = 400,
-                scale = {1,1},
-                opacity = 255,
-            }
-        end,
-        [keys["5"]] = function()
-            vtb:move_anchor_point(screen.w/2,screen.h/2)
-            vtb.position = {screen.w/2,screen.h/2}
-            vtb:animate{
-                mode = "EASE_IN_BACK",
-                duration = 600,
-                z=600,
-                --z_rotation = 180,
-            }
-        end,
-        [keys["6"]] = function()
-            vtb:move_anchor_point(screen.w/2,screen.h/2)
-            vtb.position = {screen.w/2,screen.h/2}
-            vtb:animate{
-                mode = "EASE_OUT_BACK",
-                duration = 600,
-                z=0,
-                --z_rotation = 0,
-            }
-        end,
-    }
-    function screen:on_key_down(k)
-        
-        print("screen:on_key_down("..k..")")
-        
-        return screen_keys[k] and screen_keys[k]()
-        
-    end
-    --]=]
+    collectgarbage("collect")
+    
 end
     
 --------------------------------------------------------------------------------
@@ -552,7 +465,7 @@ function mediaplayer:on_end_of_stream()
     
 end
 
-mediaplayer:load("glee-1.mp4")
+mediaplayer:load("glee-1.mp4") --comment this line out to remove the video
 
     
 --------------------------------------------------------------------------------
