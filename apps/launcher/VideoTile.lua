@@ -70,7 +70,7 @@ function self:create(p)
     
     contents:add(p.contents)
     local overlay = Clone{ source = overlay, x = 8, y = top.h - btm.h + 8 }
-    g:add(contents,overlay,top,mid,btm,text,p.slider)
+    g:add(contents,overlay,top,mid,btm,text,p.outer,p.slider)
     
     
     local anim_state = AnimationState{
@@ -84,6 +84,7 @@ function self:create(p)
                     {btm,       "y",     shrunken_h + mid.y},
                     {contents,  "clip",  {8,0,inner_w,shrunken_h+2*btm.h-8}},
                     {overlay,  "opacity",  255},
+                    p.outer and {p.outer,  "opacity",  0} or nil,
                 },
             },
             {
@@ -94,6 +95,7 @@ function self:create(p)
                     {btm,       "y",     l_expanded_h + mid.y},
                     {contents,  "clip",  {8,0,inner_w, l_expanded_h+2*btm.h-8}},
                     {overlay,  "opacity",  0},
+                    p.outer and {p.outer,  "opacity",  255} or nil,
                 },
             },
         },
@@ -116,6 +118,7 @@ function self:create(p)
                             {btm,       "y",    shrunken_h + mid.y},
                             {contents,  "clip", {8,0,inner_w,shrunken_h+2*btm.h-8}},
                             {overlay,  "opacity",  255},
+                            p.outer and {p.outer,  "opacity",  0} or nil,
                         },
                     },
                     {
@@ -126,6 +129,7 @@ function self:create(p)
                             {btm,       "y",     l_expanded_h + mid.y},
                             {contents,  "clip",  {8,0,inner_w, l_expanded_h+2*btm.h-8}},
                             {overlay,  "opacity",  0},
+                            p.outer and {p.outer,  "opacity",  255} or nil,
                         },
                     },
                 },

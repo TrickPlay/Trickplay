@@ -65,7 +65,7 @@ function ken_burns:create(p)
             
             prev_ms = 0
             
-            print("goo")
+            --print("goo")
             prev_item.source = curr_item.source
             
             prev_item.x     = curr_item.x

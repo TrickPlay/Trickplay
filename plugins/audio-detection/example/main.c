@@ -10,16 +10,17 @@
  */
 
 void
-tp_audio_detection_initialize( TPAudioDetectionPluginInfo * info , const char * config );
+tp_plugin_initialize( TPPluginInfo * info , const char * config );
+
+void
+tp_plugin_shutdown( void * user_data );
+
 
 TPAudioDetectionResult *
 tp_audio_detection_process_samples( const TPAudioDetectionSamples * samples , void * user_data );
 
 void
 tp_audio_detection_reset( void * user_data );
-
-void
-tp_audio_detection_shutdown( void * user_data );
 
 /******************************************************************************
  * Our internal functions
@@ -36,10 +37,10 @@ parse_response( TPAudioDetectionResult * result , const char * response_body , u
  */
 
 void
-tp_audio_detection_initialize( TPAudioDetectionPluginInfo * info , const char * config )
+tp_plugin_initialize( TPPluginInfo * info , const char * config )
 {
-    strncpy( info->name , "Trickplay example" , sizeof( info->name ) - 1 );
-    strncpy( info->version , "1.0" , sizeof( info->version ) - 1 );
+    strncpy( info->name , "TrickPlay Example" , sizeof( info->name ) - 1 );
+    strncpy( info->version , "2.0" , sizeof( info->version ) - 1 );
 }
 
 /******************************************************************************
@@ -83,7 +84,7 @@ tp_audio_detection_process_samples( const TPAudioDetectionSamples * samples , vo
 void
 tp_audio_detection_reset( void * user_data )
 {
-    // Nothing to do
+    /* Nothing to do */
 }
 
 /******************************************************************************
@@ -91,9 +92,9 @@ tp_audio_detection_reset( void * user_data )
  */
 
 void
-tp_audio_detection_shutdown( void * user_data )
+tp_plugin_shutdown( void * user_data )
 {
-    // Nothing to do - but we could free resources associated with user data.
+    /* Nothing to do - but we could free resources associated with user data. */
 }
 
 /******************************************************************************

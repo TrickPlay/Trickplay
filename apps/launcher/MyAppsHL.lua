@@ -63,6 +63,7 @@ local function make_sub_menu(p)
     
     
     local dur = 200
+    --[[
     local sub_menu_state = AnimationState{
         transitions = {
             {
@@ -225,8 +226,167 @@ local function make_sub_menu(p)
             },
         },
     }
+    --]]
+    local state = "HIDE"
+    if p.new_shadow then
+        p.new_shadow.opacity = 0
+    end
+    sub_menu_edge.opacity = 0
+    contents.opacity = 0
+    local show = Animator{
+        duration   = dur,
+        properties = {
+            p.old_shadow and {
+                source = p.old_shadow,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR", 255},
+                    {0.8, "LINEAR", 255},
+                    {1.0, "LINEAR",   0},
+                }
+            } or nil,
+            p.new_shadow and {
+                source = p.new_shadow,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR",   0},
+                    {0.8, "LINEAR",   0},
+                    {1.0, "LINEAR", 255},
+                }
+            } or nil,
+            p.right_triangle and {
+                source = p.right_triangle,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR", 255},
+                    {0.5, "LINEAR",   0},
+                    {1.0, "LINEAR",   0},
+                }
+            } or nil,
+            {
+                source = sub_menu_edge,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR",   0},
+                    {0.1, "LINEAR", 255},
+                    {1.0, "LINEAR", 255},
+                }
+            },
+            {
+                source = sub_menu_edge,
+                name = "y_rotation",
+                
+                keys = {
+                    {0.0, "LINEAR", 120},
+                    {0.3, "LINEAR",   0},
+                    {1.0, "LINEAR",   0},
+                }
+            },
+            {
+                source = contents,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR",   0},
+                    {0.7, "LINEAR",   0},
+                    {0.8, "LINEAR", 255},
+                    {1.0, "LINEAR", 255},
+                }
+            },
+            {
+                source = contents,
+                name = "y_rotation",
+                
+                keys = {
+                    {0.0, "LINEAR", 120},
+                    {0.7, "LINEAR", 120},
+                    {1.0, "LINEAR",   0},
+                }
+            },
+        }
+    }
+    local hide = Animator{
+        duration   = dur,
+        properties = {
+            p.old_shadow and {
+                source = p.old_shadow,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR",   0},
+                    {0.2, "LINEAR", 255},
+                    {1.0, "LINEAR", 255},
+                }
+            } or nil,
+            p.new_shadow and {
+                source = p.new_shadow,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR", 255},
+                    {0.2, "LINEAR",   0},
+                    {1.0, "LINEAR",   0},
+                }
+            } or nil,
+            p.right_triangle and {
+                source = p.right_triangle,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR",   0},
+                    {0.7, "LINEAR",   0},
+                    {1.0, "LINEAR", 255},
+                }
+            } or nil,
+            {
+                source = contents,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR", 255},
+                    {0.2, "LINEAR", 255},
+                    {0.3, "LINEAR",   0},
+                    {1.0, "LINEAR",   0},
+                }
+            },
+            {
+                source = contents,
+                name = "y_rotation",
+                
+                keys = {
+                    {0.0, "LINEAR",   0},
+                    {0.3, "LINEAR", 120},
+                    {1.0, "LINEAR", 120},
+                }
+            },
+            {
+                source = sub_menu_edge,
+                name = "opacity",
+                
+                keys = {
+                    {0.0, "LINEAR", 255},
+                    {0.9, "LINEAR", 255},
+                    {1.0, "LINEAR",   0},
+                }
+            },
+            {
+                source = sub_menu_edge,
+                name = "y_rotation",
+                
+                keys = {
+                    {0.0, "LINEAR",   0},
+                    {0.7, "LINEAR",   0},
+                    {1.0, "LINEAR", 120},
+                }
+            },
+        }
+    }
     
-    sub_menu_state.state = "HIDE"
+    --sub_menu_state.state = "HIDE"
     
     local sub_menu_i = 1
     
@@ -430,7 +590,12 @@ local function make_sub_menu(p)
         
         parent_ref.parent:raise_to_top()
         
-        sub_menu_state.state = "SHOW"
+        --sub_menu_state.state = "SHOW"
+        if state == "HIDE" then
+        if hide.is_playing then hide:stop() end
+        show:start()
+        state = "SHOW"
+        end
         
         sub_menu:grab_key_focus()
         
@@ -440,10 +605,16 @@ local function make_sub_menu(p)
         
         parent_ref.parent:raise_to_top()
         
-        sub_menu_state.state = "HIDE"
-        
+        --sub_menu_state.state = "HIDE"
+        if state == "SHOW" then
+        if show.is_playing then show:stop() end
+        hide:start()
+        state = "HIDE"
+        end
     end
-    sub_menu_state:warp("HIDE")
+    
+    --sub_menu_state:warp("HIDE")
+    
     return sub_menu
     
 end
@@ -595,8 +766,8 @@ function myAppsHL:create(p)
                         self:find_child("text").color = "ffffff"
                     end,
                     press_enter = function(self)
-                        arrow:hide()
-                        apps:launch(self.app_id)
+                        self:find_child("arrow"):hide()
+                        apps:launch(instance.app_id)
                     end,
                 },
             },
@@ -674,6 +845,7 @@ function myAppsHL:create(p)
         
     end
     function instance:focus(...)
+        
         --[[
         self.app_id = id
         
