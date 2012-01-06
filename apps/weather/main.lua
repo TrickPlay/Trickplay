@@ -118,6 +118,16 @@ function post_main()
         nil,
 		"MINI"
     )
+	bar_state:add_state_change_function(
+        function() current_bar:launch_5_day_to_1_day() end,
+        "5_DAY",
+		"MINI"
+    )
+	bar_state:add_state_change_function(
+        function() current_bar:launch_zip_to_1_day() end,
+        "ZIP_ENTRY",
+		"MINI"
+    )
     bar_state:add_state_change_function(
         function() current_bar:launch_mini_to_full() end,
         "MINI",
