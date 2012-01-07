@@ -241,10 +241,10 @@ BOOLEAN TP_Controller_KeyEventCallback(UINT32 key, PM_KEY_COND_T keyCond, PM_ADD
 			case IR_FRONTKEY_VOL_DOWN:
 			case IR_KEY_VOL_UP:
 			case IR_KEY_VOL_DOWN:
-			case IR_KEY_MUTE:
 			case IR_KEY_CH_UP:
 			case IR_KEY_CH_DOWN:
-				return FALSE;
+			case IR_KEY_MUTE:
+			return FALSE;
 			default:
 				// do nothing
 				break;
@@ -278,9 +278,6 @@ BOOLEAN	TP_Controller_MouseEventCallback(
 {
 	if (!_gbMouseEnabled)
 		return FALSE;
-
-	posX = (posX*3)/2;
-	posY = (posY*3)/2;
 
 	if ((keyCode == RF_KEY_NONE) || (keyCond == PM_KEY_COND_LAST))
 	{

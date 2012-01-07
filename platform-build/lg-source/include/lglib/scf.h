@@ -33,6 +33,7 @@
 #include <stdlib.h>
 
 #include "appfrwk_common.h"
+#include "appfrwk_openapi_pm.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +59,7 @@ extern "C" {
 
 #define CHECK_DBUS_AVAILABLE(x)											\
 do {																	\
-	if (HOA_UTIL_GetAlive() == FALSE)									\
+	if (HOA_UTIL_CheckEndProgress() == TRUE)							\
 	return (x);															\
 } while(0)
 

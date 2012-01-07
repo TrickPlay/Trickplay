@@ -167,8 +167,8 @@ typedef enum {
 	PEID_TYPE_KEY_RETURN      			= 0x00000020,  /* Is a key(IR,keyboard)return input device. */
 	PEID_TYPE_CURSOR_RETURN				= 0x00000040,  /* Is a Cursor(MRCU,Mouse)return input device. */
 	PEID_TYPE_LGE          				= 0x00000080,  /* Is a LGE's input device. */
-	PEID_TYPE_GESTURE					= 0x00000100,  /* Gesture camera. */ // sangkyu kang 2011. 9. 19
-	PEID_TYPE_ALL          				= 0x0000019F   /* All type flags set. */ // 9f -> 19f sangkyu kang 2011. 10. 26
+
+	PEID_TYPE_ALL          				= 0x0000009F   /* All type flags set. */
 
 } PM_EVENT_INPUT_DEV_TYPE_T;
 

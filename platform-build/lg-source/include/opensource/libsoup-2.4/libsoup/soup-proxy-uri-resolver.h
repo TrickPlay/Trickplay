@@ -19,18 +19,22 @@ G_BEGIN_DECLS
 
 typedef struct _SoupProxyURIResolver SoupProxyURIResolver;
 
-typedef void (*SoupProxyURIResolverCallback) (SoupProxyURIResolver *,
-					      guint, SoupURI *, gpointer);
+typedef void (*SoupProxyURIResolverCallback) (SoupProxyURIResolver *resolver,
+					      guint status, SoupURI *proxy_uri,
+					      gpointer user_data);
 
 typedef struct {
 	GTypeInterface base;
 
 	/* virtual methods */
-	void (*get_proxy_uri_async) (SoupProxyURIResolver *, SoupURI *,
-				     GMainContext *, GCancellable *,
-				     SoupProxyURIResolverCallback, gpointer);
-	guint (*get_proxy_uri_sync) (SoupProxyURIResolver *, SoupURI *,
-				     GCancellable *, SoupURI **);
+	void (*get_proxy_uri_async) (SoupProxyURIResolver *proxy_uri_resolver,
+				     SoupURI *uri, GMainContext *async_context,
+				     GCancellable *cancellable,
+				     SoupProxyURIResolverCallback callback,
+				     gpointer user_data);
+	guint (*get_proxy_uri_sync) (SoupProxyURIResolver *proxy_uri_resolver,
+				     SoupURI *uri, GCancellable *cancellable,
+				     SoupURI **proxy_uri);
 
 	/* Padding for future expansion */
 	void (*_libsoup_reserved1) (void);

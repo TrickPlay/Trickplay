@@ -317,6 +317,8 @@ typedef struct AM_DEVICE_INFO
 	BOOLEAN bDTV;
 	BOOLEAN	bCPBox;
 	BOOLEAN bDualView;
+	BOOLEAN	bPentouch;
+	BOOLEAN bMemocast;
 } AM_DEVICE_INFO_T;
 
 /**
@@ -360,7 +362,27 @@ typedef struct AM_APP_RECENT_INFO	/* ktj fixed */
 	AM_OPT_CHECK_UPDATE_INTERVAL,
 }AM_APP_OPT_T;
 
+/**
+ * BSI Print
+ */
+typedef enum AM_BSI_PRINT
+{
+	AM_BSI_APP_START = 0,		/**< Download App 의 시작  BSI print */
+	AM_BSI_APP_END,				/**< Download App 의 종료  BSI print */
+			
+} AM_BSI_PRINT_T;
 
+/**
+ * SDP 로깅 
+ */
+typedef enum AM_ACTION_TYPE
+{
+	AM_ACTION_EXECUTE = 0,		/**< 실행 */
+	AM_ACTION_TERMINATE,		/**< 종료 */
+	AM_ACTION_INSTALL,			/**< 설치 */
+	AM_ACTION_DELETE,			/**< 삭제 */ 
+			
+} AM_ACTION_TYPE_T;
 
 
 #ifdef __cplusplus

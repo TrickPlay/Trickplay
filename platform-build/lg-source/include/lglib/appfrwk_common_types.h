@@ -213,6 +213,28 @@ typedef	signed long long		__SINT64;
 #endif
 
 /**
+ * HOA API의 Return type.
+ *
+ */
+typedef enum {
+	HOA_OK					= 0,	/**< HOA 함수가 성공적으로 수행 */
+	HOA_HANDLED				= 0,	/**< 주어진 요청사항에 대한 처리를 완료함 */
+	HOA_ERROR				= -1,	/**< 함수 수행 중 에러 발생 */
+	HOA_NOT_HANDLED			= -1,	/**< 주어진 요청사항에 대한 처리를 하지 않음 */
+	HOA_BLOCKED				= -2,	/**< 다른 App.가 HOA를 독점적으로 사용하고 있어 수행되지 않음 */
+	HOA_INVALID_PARAMS		= -3,	/**< 함수 인자에 잘못된 값이 들어있음 */
+	HOA_NOT_ENOUGH_MEMORY	= -4,	/**< 메모리가 함수를 수행할 수 있을 만큼 충분하지 않음 */
+	HOA_TIMEOUT				= -5,	/**< 함수 수행 요청 후 일정 시간 내에 답이 오지 않음 */
+	HOA_NOT_SUPPORTED		= -6,	/**< 버전 차이 등으로 인해 지원되지 않는 함수임 */
+	HOA_BUFFER_FULL			= -7,	/**< 버퍼에 데이터가 가득 차있어 함수가 수행되지 않음  */
+	HOA_HOST_NOT_CONNECTED	= -8,	/**< Host가 연결되어 있지 않아 함수가 수행되지 않음  */
+	HOA_VERSION_MISMATCH	= -9,	/**< App.와 library간에 버전이 맞지 않아 수행되지 않음 */
+	HOA_ALREADY_REGISTERED	= -10,	/**< App.가 이미 Manager에 등록되어 있음 */
+	HOA_LAST
+
+} HOA_STATUS_T;
+
+/**
  * Message의 종류
  */
 typedef enum MSG_TYPE
@@ -301,7 +323,7 @@ typedef enum
 	HOST_EVT_USB_DETACHED,						/**< USB device is detached (umount) */
 
 	HOST_EVT_BTUSB_CONNECTED, 					/**< BT USB device is connected */
-	HOST_EVT_BTUSB_DISCONNECTED,					/**< BT USB device is disconnected */
+	HOST_EVT_BTUSB_DISCONNECTED,				/**< BT USB device is disconnected */
 
 	HOST_EVT_POWER_OFF,							/**< Power off */
 	HOST_EVT_POWER_ON,							/**< Power on */
@@ -310,7 +332,7 @@ typedef enum
 	HOST_EVT_COUNTRY_CHANGED,					/**< B country is changed */
 	HOST_EVT_SCREENSAVER_CHANGED,				/**< C screensaver(black out status) is changed */
 	HOST_EVT_REPEAT_CH_CHANGE,					/**< D Change channel using repeat key */
-	HOST_EVT_INPUT_CHANGED, 						/**< E Input source is changed */
+	HOST_EVT_INPUT_CHANGED, 					/**< E Input source is changed */
 
 	/* BSI On/Off */
 	HOST_EVT_BSI_ON,							/**< F BSI on */
@@ -354,53 +376,53 @@ typedef enum
 		2. HOST_EVT_NETWORK_INET_ENABLED
 	==> you can reach internet.
 	*/
-	HOST_EVT_NETWORK_CONNECTED,				/**< Network is connected: This means that the physical link is connected */
-	HOST_EVT_NETWORK_DISCONNECTED,			/**< Network is disconnected: This means that the physical link is disconnected */
-	HOST_EVT_NETWORK_SETTINGCHANGED,		/**< Network setting is changed */
-	HOST_EVT_NETWORK_INET_ENABLED ,			/**< Internet is enabled : This means that you can use internet */
-	HOST_EVT_NETWORK_INET_DISABLED, 		/**< Internet is disabled : This means that you can't use internet */
+	HOST_EVT_NETWORK_CONNECTED,					/**< Network is connected: This means that the physical link is connected */
+	HOST_EVT_NETWORK_DISCONNECTED,				/**< Network is disconnected: This means that the physical link is disconnected */
+	HOST_EVT_NETWORK_SETTINGCHANGED,			/**< Network setting is changed */
+	HOST_EVT_NETWORK_INET_ENABLED ,				/**< Internet is enabled : This means that you can use internet */
+	HOST_EVT_NETWORK_INET_DISABLED, 			/**< Internet is disabled : This means that you can't use internet */
 
 	/* Bluetooth Event\n */
-	HOST_EVT_BLUETOOTH_CONNECTED,			/**< Bluetooth is connected */
-	HOST_EVT_BLUETOOTH_DISCONNECTED,		/**< Bluetooth is disconnected */
+	HOST_EVT_BLUETOOTH_CONNECTED,				/**< Bluetooth is connected */
+	HOST_EVT_BLUETOOTH_DISCONNECTED,			/**< Bluetooth is disconnected */
 
-	HOST_EVT_WEBCAM_ON,						/**< Webcam on */
-	HOST_EVT_WEBCAM_OFF,					/**< Webcam off */
-	HOST_EVT_SDP_FORCE_UPDATE,				/**< A SDP Force update*/
-	HOST_EVT_SDP_DNLD_DONE,					/**< SDP Download done*/
-	HOST_EVT_SDP_PATH_UPDATE,				/**< SDP Path update*/
+	HOST_EVT_WEBCAM_ON,							/**< Webcam on */
+	HOST_EVT_WEBCAM_OFF,						/**< Webcam off */
+	HOST_EVT_SDP_FORCE_UPDATE,					/**< A SDP Force update*/
+	HOST_EVT_SDP_DNLD_DONE,						/**< SDP Download done*/
+	HOST_EVT_SDP_PATH_UPDATE,					/**< SDP Path update*/
 
-	HOST_EVT_UPDATE_ALL,					/**< 'update all screen' is needed */
-	HOST_EVT_OUT_OF_MEMORY,					/**< out of device memory */
-	HOST_EVT_USB_FORMAT_COMPLETED,			/**< LG formatted USB format completed  */
-	HOST_EVT_FLASH_FORMAT_COMPLETED,		/**< 10 MY Apps Internal flash format completed  */
+	HOST_EVT_UPDATE_ALL,						/**< 'update all screen' is needed */
+	HOST_EVT_OUT_OF_MEMORY,						/**< out of device memory */
+	HOST_EVT_USB_FORMAT_COMPLETED,				/**< LG formatted USB format completed  */
+	HOST_EVT_FLASH_FORMAT_COMPLETED,			/**< 10 MY Apps Internal flash format completed  */
 
-	HOST_EVT_SDPIF_COUNTRY_CHANGED,			/**< SDPIF country information is changed */
-	HOST_EVT_SDPIF_UPDATE_OPT,				/**< SDP server data is updated */
-	HOST_EVT_SDPIF_SIGN_IN,					/**< sign in */
-	HOST_EVT_SDPIF_SIGN_OUT,				/**< sign out */
-	HOST_EVT_SDPIF_UPDATE_DONE,				/**< premium pkg is updated */
-	HOST_EVT_SDPIF_UPDATE_ERR,				/**< cannot update premium pkgs */
-	HOST_EVT_SDPIF_LANG_CHANGED,			/**< lang is changed */
+	HOST_EVT_SDPIF_COUNTRY_CHANGED,				/**< SDPIF country information is changed */
+	HOST_EVT_SDPIF_UPDATE_OPT,					/**< SDP server data is updated */
+	HOST_EVT_SDPIF_SIGN_IN,						/**< sign in */
+	HOST_EVT_SDPIF_SIGN_OUT,					/**< sign out */
+	HOST_EVT_SDPIF_UPDATE_DONE,					/**< premium pkg is updated */
+	HOST_EVT_SDPIF_UPDATE_ERR,					/**< cannot update premium pkgs */
+	HOST_EVT_SDPIF_LANG_CHANGED,				/**< lang is changed */
 
-	HOST_EVT_COUNTRY_OTHERS_AUTO,			/**< country is others(auto) */
+	HOST_EVT_COUNTRY_OTHERS_AUTO,				/**< country is others(auto) */
 
-	HOST_EVT_VCS_UI_PRINT,					/**< skype flash ui print on/off */
+	HOST_EVT_VCS_UI_PRINT,						/**< skype flash ui print on/off */
 
-	HOST_EVT_HBBTV_OFF,						/**< 1A hbbtv */
+	HOST_EVT_HBBTV_OFF,							/**< 1A hbbtv */
 	HOST_EVT_HBBTV_ON,
 
-	HOST_EVT_USB_FORMAT_INITIALIZE_COMPLETED,/**< MY Apps USB Init/format completed  */
-	HOST_EVT_USB_FORMAT_INITIALIZE_FAILED,	/**< MY Apps USB Init/format failed  */
-	HOST_EVT_USB_INITIALIZE_COMPLETED,		/**< MY Apps USB Init Completed */
-	HOST_EVT_USB_INITIALIZE_FAILED,			/**< 1F MY Apps USB Init failed */
+	HOST_EVT_USB_FORMAT_INITIALIZE_COMPLETED,	/**< MY Apps USB Init/format completed  */
+	HOST_EVT_USB_FORMAT_INITIALIZE_FAILED,		/**< MY Apps USB Init/format failed  */
+	HOST_EVT_USB_INITIALIZE_COMPLETED,			/**< MY Apps USB Init Completed */
+	HOST_EVT_USB_INITIALIZE_FAILED,				/**< 1F MY Apps USB Init failed */
 
-	HOST_EVT_FLASH_MOUNT_COMPLETED,    		/**< 20 MY Apps Internal flash Mount  completed  */
-	HOST_EVT_FLASH_MOUNT_FAILED,       		/**< MY Apps Internal flash Mount  failed  */
-	HOST_EVT_FLASH_FORMAT_INITIALIZE_COMPLETED,    /**< MY Apps Internal flash Init/format  completed  */
-	HOST_EVT_FLASH_FORMAT_INITIALIZE_FAILED,       /**< MY Apps Internal flash Init/format  failed  */
+	HOST_EVT_FLASH_MOUNT_COMPLETED,    			/**< 20 MY Apps Internal flash Mount  completed  */
+	HOST_EVT_FLASH_MOUNT_FAILED,       			/**< MY Apps Internal flash Mount  failed  */
+	HOST_EVT_FLASH_FORMAT_INITIALIZE_COMPLETED, /**< MY Apps Internal flash Init/format  completed  */
+	HOST_EVT_FLASH_FORMAT_INITIALIZE_FAILED,	/**< MY Apps Internal flash Init/format  failed  */
 
-	HOST_EVT_3D_STATUS_CHANGE,				/**< 3D status change message. */
+	HOST_EVT_3D_STATUS_CHANGE,					/**< 3D status change message. */
 
 	HOST_EVT_FXUI_FOCUS_ON, 					/**< fxui > */
 	HOST_EVT_FXUI_FOCUS_OFF,
@@ -419,6 +441,7 @@ typedef enum
 	SDPIF_CANDIDATE_COUNTRY_EVENT_LAST
 
 } HOA_SDPIF_COUNTRY_EVENT_T;
+
 /**
 * Force Update Message Event
 */
@@ -428,6 +451,7 @@ typedef enum
 	SDPIF_UPDATE_EVENT_LAST
 
 }HOA_SDPIF_UPDATE_PKG_EVENT_T;
+
 #ifdef ENABLE_AJJA_GROUP
 /**
  * Group Type
@@ -505,38 +529,6 @@ typedef enum HOA_OLD_LOCALE_GROUP
 	HOA_OLD_GROUP_ZZ			/**< not defined */
 } HOA_OLD_LOCALE_GROUP_T;
 
-
-#if 0
-/**
- * Send Host System Info to Managers
- */
-typedef struct HOA_HOST_INFO
-{
-	UINT8	macAddress[6];
-	char	productType[8];				// { DTV | BDP }
-	char	modelName[32];
-	UINT32	countryCode;
-	char	countryGroup[3];			// {'Z', 'Z', '\0');
-	UINT32	languageCode;
-	UINT32	mtdIdxApps;
-	UINT16	flashMemorySize;
-	UINT16	dramSize;
-	char	support3D[5];
-	char	videoResolution[5];
-	char	osdResolution[10];			//resolution = deviceFeatureOsdResolution
-	char	wifiReady[4];
-	char	gpuSpec[9];
-	char	openGLVersion[4];
-	char	flashEngineVersion[15];
-	char	browserVersion[15];
-	char	lgSDKVersion[10];
-	char	firmwareVersion[9];			//firmwareVer = deviceFeatureTvFirmwareVersion
-	char	netcastPlatformVersion[15];	//netcastPlatformVersion = deviceFeatureNetcastPlatformVersion
-	char	otaID[33];
-
-} HOA_HOST_INFO_T;
-#endif
-
 /**
  * Device Feature Info.
  */
@@ -567,13 +559,13 @@ typedef struct HOA_DEVICE_FEATURE_INFO
  */
 typedef struct HOA_CTRL_INFO
 {
-	char	projectName[32];	/**< Project Name, OSA_MD_GetProjectName() */
-	char	modelName[32];		/**< Model Name, OSA_MD_GetModelName() */
-	char	hwVer[32];			/**< Hardware Version, OSA_MD_GetEventBoardType(), tv_system.c 참조 */
-	char	swVer[32];			/**< Software Version, G_FIRMWARE_VERSION */
-	char	ESN[32];			/**< ESN, API_NSU_GetESN() */
-	char	toolTypeName[32];	/**< Tool type name, OSA_MD_GetToolType(), toolitem.h */
-	char	serialNumber[32];
+	char projectName[32];	/**< Project Name, OSA_MD_GetProjectName() */
+	char modelName[32];		/**< Model Name, OSA_MD_GetModelName() */
+	char hwVer[32];			/**< Hardware Version, OSA_MD_GetEventBoardType(), tv_system.c 참조 */
+	char swVer[32];			/**< Software Version, G_FIRMWARE_VERSION */
+	char ESN[32];			/**< ESN, API_NSU_GetESN() */
+	char toolTypeName[32];	/**< Tool type name, OSA_MD_GetToolType(), toolitem.h */
+	char serialNumber[32];
 	char modelInch[8];		/** model inch from UI_SUMODE_GetInchTypeString() */
 	char countryGroup[8];	/** countryGroup from UI_SUMODE_GetCountryGroupString*/
 } HOA_CTRL_INFO_T;
@@ -611,18 +603,16 @@ typedef struct HOA_INSTART_SYSTEM_INFO
 	HOA_CTRL_DEVELOPMENT_MODE_T	cpDevelopmentMode;
 } HOA_INSTART_SYSTEM_INFO_T;
 
-#if 1
 /**
  * rect struct
  */
 typedef struct HOA_RECT_4PIP
 {
-	UINT16 x; /**< x cordinate of its top-letf point */
-	UINT16 y; /**< y cordinate of its top-left point */
-	UINT16 w; /**< width of it */
-	UINT16 h; /**< height of it */
+	UINT16 x;						/**< x cordinate of its top-letf point */
+	UINT16 y;						/**< y cordinate of its top-left point */
+	UINT16 w;						/**< width of it */
+	UINT16 h;						/**< height of it */
 } HOA_RECT_4PIP_T;
-#endif
 
 /**
 * HOA AV Block ctrl type
@@ -631,7 +621,7 @@ typedef struct HOA_AV_BLOCKCTRL
 {
 	BOOLEAN 	bBackToTVInput;		/* TV 입력으로 빠져나가는 상황이면 True (기존의 DISPLAY_NONE, UIWITHTV, WIDGET_MODE 로 변경할 때 )*/
 	UINT32		backToTVBlockDelay;	/* TV 입력으로 빠져나갈 때 몇 ms 이후에 block control 함수를 호출할 지 setting 하는 변수 ( ms 단위, 1초면 1000 ) , bBackToDTV 가  True일 경우에만 의미가 있음*/
-	BOOLEAN 	bAddonBlock;			/* Addon Block 을 걸지, 말지 여부 (Addon block 을 걸려면 : TRUE,  풀려면: False), bBackToTVInput 이 TRUE 일 때는 AddonBlock 을 무조건 풀어줌 */
+	BOOLEAN 	bAddonBlock;		/* Addon Block 을 걸지, 말지 여부 (Addon block 을 걸려면 : TRUE,  풀려면: False), bBackToTVInput 이 TRUE 일 때는 AddonBlock 을 무조건 풀어줌 */
 } HOA_AV_BLOCK_CTRL_T;
 
 /**
@@ -640,12 +630,11 @@ typedef struct HOA_AV_BLOCKCTRL
 */
 typedef enum HOA_AV_PATH_CTRL
 {
-	HOA_PATH_ATTR_TV = 0,			/*  TV 입력으로 빠져나가는 경우에 사용 (기존의 DISPLAY_NONE, UIWITHTV, WIDGET_MODE 로 변경할 때 )*/
-	HOA_PATH_ATTR_PHOTO_MUSIC,	/* Photo 혹은  Music play 시 사용 (기존 HOA_DISP_FULLIMAGE)*/
+	HOA_PATH_ATTR_TV = 0,			/* TV 입력으로 빠져나가는 경우에 사용 (기존의 DISPLAY_NONE, UIWITHTV, WIDGET_MODE 로 변경할 때 )*/
+	HOA_PATH_ATTR_PHOTO_MUSIC,		/* Photo 혹은  Music play 시 사용 (기존 HOA_DISP_FULLIMAGE)*/
 	HOA_PATH_ATTR_MOVIE,			/* Movie play  시 사용 (기존 HOA_DISP_FULLVIDEO, HOA_DISP_FULLVIDEONVS)*/
-	HOA_PATH_ATTR_NONE,			/* path 를 변경할 필요가 없을 때*/
+	HOA_PATH_ATTR_NONE,				/* path 를 변경할 필요가 없을 때*/
 }HOA_AV_PATH_CTRL_T;
-
 
 /**
  * detail dtv action specification.
@@ -656,35 +645,34 @@ typedef struct HOA_DTV_DETAIL_ACTION_SPEC
 	* App,CP 진입 후 즉시 수행 가능한 부분
 	********************************/
 #if 0
-	HOA_AV_BLOCK_CTRL_T	av_block;			/* HOA_AV_BLOCK_CTRL_T 구조체 참조 */
+	HOA_AV_BLOCK_CTRL_T	av_block;				/* HOA_AV_BLOCK_CTRL_T 구조체 참조 */
 	HOA_AV_PATH_CTRL_T	pathAttr;				/* HOA_AV_PATH_CTRL_T enum 참조 */
 
-	UINT8				pvr_play;			/* on:1, off:0, none:0xff */
+	UINT8				pvr_play;				/* on:1, off:0, none:0xff */
 	UINT8				Dimming;				/* */
 	UINT8				caption;				/* on:1, off:0, none:0xff */
 	UINT8				subtitle;				/* */
-	UINT8				mhp;				/* */
-	UINT8				mheg;				/* */
+	UINT8				mhp;					/* */
+	UINT8				mheg;					/* */
 	UINT8				auto_volume;			/* */
 	UINT8				auto_av;				/* on:1, off:0, none:0xff */
-	UINT8				analog_ttx;			/* */
-	UINT8				cecp;				/* on:1, off:0, none:0xff */
+	UINT8				analog_ttx;				/* */
+	UINT8				cecp;					/* on:1, off:0, none:0xff */
 	UINT8				cursor_shape;			/* */
-	HOA_RECT_4PIP_T 		display_area;				/* video rect area 		*/
+	HOA_RECT_4PIP_T		display_area;			/* video rect area 		*/
 #endif
 	/*******************************
 	* 진입 이후 사용하게 될 status setting
 	********************************/
-	UINT8				quick_menu_type;			/* q menu type number */
+	UINT8				quick_menu_type;		/* q menu type number */
 	UINT8				aspect_ratio_menu;		/* aspect ration menu */
 	UINT8				network_setting_menu; 	/* */
 	UINT8				emf_subtitle_menu;		/* */
 	UINT8				camera_popup;			/* */
 	UINT8				evergy_saving_menu;		/* key return path  대치 가능 */
-//	UINT8	ratio_menu;				/* key return path  대치 가능 */
-//	UINT8	av_mode_menu;			/* key return path  대치 가능 */
+//	UINT8				ratio_menu;				/* key return path  대치 가능 */
+//	UINT8				av_mode_menu;			/* key return path  대치 가능 */
 } HOA_DTV_DETAIL_ACTION_SPEC_T;
-
 
 /**
  *  Addon  Storage Device Type for TV Apps.
@@ -737,17 +725,17 @@ typedef enum
  */
 typedef enum
 {
-	HOA_AC_SUBMSG_APPLIST_CHANGED			= 0x01,		/**< MyApps list change event.  pData is AM_APPLIST_EVENT_T * */
-	HOA_AC_SUBMSG_APPLIST_ADDED				= 0x02,		/**< MyApps list add event. pData is AM_APPLIST_EVENT_T * */
-	HOA_AC_SUBMSG_APPLIST_DELETED 			= 0x03, 	/**< MyApps list delete event. pData is AM_APPLIST_EVENT_T * */
-	HOA_AC_SUBMSG_LOADING_START				= 0x04, 	/**< Loading starts. (Send to AF_SERVICE_ADPREMIUM). pData is  AM_APPLOADING_EVENT_T * */
-	HOA_AC_SUBMSG_LOADING_END	 			= 0x05, 	/**< Loading ends. (Send to AF_SERVICE_ADPREMIUM). pData is  AM_APPLOADING_EVENT_T * */
-	HOA_AC_SUBMSG_RUNNINGAPP_EXIST 			= 0x06, 	/**< Running App Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
-	HOA_AC_SUBMSG_RUNNINGAPP_NOT_EXIST		= 0x07, 	/**< Running App Not Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
+	HOA_AC_SUBMSG_APPLIST_CHANGED					= 0x01,		/**< MyApps list change event.  pData is AM_APPLIST_EVENT_T * */
+	HOA_AC_SUBMSG_APPLIST_ADDED						= 0x02,		/**< MyApps list add event. pData is AM_APPLIST_EVENT_T * */
+	HOA_AC_SUBMSG_APPLIST_DELETED 					= 0x03, 	/**< MyApps list delete event. pData is AM_APPLIST_EVENT_T * */
+	HOA_AC_SUBMSG_LOADING_START						= 0x04, 	/**< Loading starts. (Send to AF_SERVICE_ADPREMIUM). pData is  AM_APPLOADING_EVENT_T * */
+	HOA_AC_SUBMSG_LOADING_END	 					= 0x05, 	/**< Loading ends. (Send to AF_SERVICE_ADPREMIUM). pData is  AM_APPLOADING_EVENT_T * */
+	HOA_AC_SUBMSG_RUNNINGAPP_EXIST 					= 0x06, 	/**< Running App Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
+	HOA_AC_SUBMSG_RUNNINGAPP_NOT_EXIST				= 0x07, 	/**< Running App Not Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
 	HOA_AC_SUBMSG_RUNNINGAPP_EXCEPTDTV_EXIST		= 0x08, 	/**< Running App (not including DTV App) Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
 	HOA_AC_SUBMSG_RUNNINGAPP_EXCEPTDTV_NOT_EXIST	= 0x09, 	/**< Running App (not including DTV App) Not Exist. (Send to AF_SERVICE_BROADCAST). pData is  NULL */
 	HOA_AC_SUBMSG_APPLIST_CHANGED_BY_SERVER			= 0x0A, 	/**< MyApps list change event.  pData is AM_APPLIST_EVENT_T * */
-	HOA_AC_SUBMSG_LAST						= 0xff
+	HOA_AC_SUBMSG_LAST								= 0xff
 
 } HOA_AC_SUBMSG_TYPE_T;
 
@@ -767,41 +755,19 @@ typedef enum
 
 } HOA_UC_SUBMSG_TYPE_T;
 
-
 /**
  * PM SubMessage의 종류
  */
 typedef enum
 {
-	HOA_PM_SUBMSG_PROC_NONE,
+	HOA_PM_SUBMSG_PROC_INIT,
 	HOA_PM_SUBMSG_PROC_LOAD,
 	HOA_PM_SUBMSG_PROC_RUN,
 	HOA_PM_SUBMSG_PROC_TERM,
+	HOA_PM_SUBMSG_PROC_NONE,
 	HOA_PM_SUBMSG_PROC_LAST
 
 } HOA_PM_SUBMSG_TYPE_T;
-
-/**
- * HOA API의 Return type.
- *
- */
-typedef enum {
-	HOA_OK					= 0,	/**< HOA 함수가 성공적으로 수행 */
-	HOA_HANDLED				= 0,	/**< 주어진 요청사항에 대한 처리를 완료함 */
-	HOA_ERROR				= -1,	/**< 함수 수행 중 에러 발생 */
-	HOA_NOT_HANDLED			= -1,	/**< 주어진 요청사항에 대한 처리를 하지 않음 */
-	HOA_BLOCKED				= -2,	/**< 다른 App.가 HOA를 독점적으로 사용하고 있어 수행되지 않음 */
-	HOA_INVALID_PARAMS		= -3,	/**< 함수 인자에 잘못된 값이 들어있음 */
-	HOA_NOT_ENOUGH_MEMORY	= -4,	/**< 메모리가 함수를 수행할 수 있을 만큼 충분하지 않음 */
-	HOA_TIMEOUT				= -5,	/**< 함수 수행 요청 후 일정 시간 내에 답이 오지 않음 */
-	HOA_NOT_SUPPORTED		= -6,	/**< 버전 차이 등으로 인해 지원되지 않는 함수임 */
-	HOA_BUFFER_FULL			= -7,	/**< 버퍼에 데이터가 가득 차있어 함수가 수행되지 않음  */
-	HOA_HOST_NOT_CONNECTED	= -8,	/**< Host가 연결되어 있지 않아 함수가 수행되지 않음  */
-	HOA_VERSION_MISMATCH	= -9,	/**< App.와 library간에 버전이 맞지 않아 수행되지 않음 */
-	HOA_ALREADY_REGISTERED	= -10,	/**< App.가 이미 Manager에 등록되어 있음 */
-	HOA_LAST
-
-} HOA_STATUS_T;
 
 /**
  * HOA_CURSOR_TYPE_T.
@@ -811,7 +777,7 @@ typedef enum {
 	HOA_CURSOR_TYPE_B,
 	HOA_CURSOR_TYPE_C,
 	HOA_CURSOR_TYPE_D,
-	HOA_CURSOR_TYPE_DRAG, // hand type(for drag)
+	HOA_CURSOR_TYPE_DRAG, 			/** hand type(for drag) */
 	HOA_CURSOR_TYPE_POINT,
 	HOA_CURSOR_TYPE_HOLD,
 	HOA_CURSOR_TYPE_GESTURE_POINT,
@@ -821,9 +787,9 @@ typedef enum {
 	HOA_CURSOR_TYPE_CUSTOM_C,		/** < user defined cursor type C */
 	HOA_CURSOR_TYPE_CUSTOM_D,		/** < user defined cursor type D */
 	HOA_CURSOR_TYPE_CUSTOM_E,		/** < user defined cursor type E */
-	HOA_CURSOR_TYPE_LASTEST, 			/** < Lastest cursor type */
+	HOA_CURSOR_TYPE_LASTEST, 		/** < Lastest cursor type */
 	HOA_CURSOR_TYPE_LAST,
-}HOA_CURSOR_TYPE_T;
+} HOA_CURSOR_TYPE_T;
 
 /**
  * HOA_CURSOR_SIZE_T.
@@ -834,7 +800,7 @@ typedef enum {
 	HOA_CURSOR_SIZE_S,
 	HOA_CURSOR_SIZE_LASTEST,
 	HOA_CURSOR_SIZE_LAST
-}HOA_CURSOR_SIZE_T;
+} HOA_CURSOR_SIZE_T;
 
 /**
  * HOA_CURSOR_STATE_T.
@@ -869,19 +835,18 @@ typedef enum
 	HOA_CURSOR_HOTSPOT_LAST
 } HOA_CURSOR_HOTSPOT_T;
 
-
 /**
  * HOA_CUSTOM_CURSOR_T.
 */
 typedef struct HOA_CUSTOM_CURSOR
 {
-	char	fileInfo[256];						/*   cursor file  info.(path+filename) ex. /mnt/lg/res/customA.png */
-	HOA_CURSOR_TYPE_T cursorType;              /*   cursor type */
-	HOA_CURSOR_SIZE_T cursorSize;				/*   cursor size */
-	HOA_CURSOR_STATE_T cursorState;			/*   cursor state */
-	HOA_CURSOR_HOTSPOT_T cursorHotSpot;		/*   cursor hotspot info. */
-	UINT16  gapX;                   			/*   cursor hotspot gap X info. */
-    UINT16  gapY;                   			/*   cursor hotspot gap Y info. */
+	char	fileInfo[256];					/** cursor file  info.(path+filename) ex. /mnt/lg/res/customA.png */
+	HOA_CURSOR_TYPE_T cursorType;           /** cursor type */
+	HOA_CURSOR_SIZE_T cursorSize;			/** cursor size */
+	HOA_CURSOR_STATE_T cursorState;			/** cursor state */
+	HOA_CURSOR_HOTSPOT_T cursorHotSpot;		/** cursor hotspot info. */
+	UINT16  gapX;                   		/** cursor hotspot gap X info. */
+    UINT16  gapY;                   		/** cursor hotspot gap Y info. */
 } HOA_CUSTOM_CURSOR_T;
 
 /**
@@ -889,8 +854,8 @@ typedef struct HOA_CUSTOM_CURSOR
 */
 typedef struct HOA_INPUTDEV_INFO
 {
-	SINT32 devID;								/*   input device ID. */
-	char devName[256];							/*   input device Name. */
+	SINT32 devID;							/** input device ID. */
+	char devName[256];						/** input device Name. */
 }HOA_INPUTDEV_INFO_T;
 
 /**
@@ -937,12 +902,21 @@ typedef enum {
 
 typedef enum
 {
-	GAME_DATA_MODE_CURSOR		= 0x01,	
-	GAME_DATA_MODE_BUTTON		= 0x02,	
+	GAME_DATA_MODE_CURSOR		= 0x01,
+	GAME_DATA_MODE_BUTTON		= 0x02,
 	GAME_DATA_MODE_GYRO			= 0x04,
 	GAME_DATA_MODE_ACCEL		= 0x08,
 	GAME_DATA_MODE_QUATERNION	= 0x10,
 } HOA_GAME_DATA_MODE_T;
+
+typedef enum {
+	HOA_INPUT_DISPATCH_NONE		=	0,  /** <  모든 event(cursor,key)를 전달 하지 않는다. */
+	HOA_INPUT_DISPATCH_CURSOR, 			/** < cursor moving event(MRCU/Mouse)만을 전달 한다.*/
+	HOA_INPUT_DISPATCH_KEY,				/** < cursor hide이후, key event(IR/Keyboard/MRCU/Mouse의 key)만을 전달 한다.*/
+	HOA_INPUT_DISPATCH_ALL,				/** < 모든 event(cursor,key)를 전달 한다.*/
+	HOA_INPUT_DISPATCH_HOOKING,			/** < cursor hide이후, 모든 event를 PM에서 가공없이 App.으로 바로 전달하여 App.이 원하는 처리를 가능하게 한다. */
+	HOA_INPUT_DISPATCH_LAST
+} HOA_INPUT_DISPATCH_TYPE_T;
 
 #ifdef __cplusplus
 }

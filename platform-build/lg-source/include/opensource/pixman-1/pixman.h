@@ -93,7 +93,7 @@ typedef unsigned __int64 uint64_t;
 #endif
 
 /* GCC visibility */
-#if defined(__GNUC__) && __GNUC__ >= 4 && 0
+#if defined(__GNUC__) && __GNUC__ >= 4
 #define PIXMAN_EXPORT __attribute__ ((visibility("default")))
 #else
 #define PIXMAN_EXPORT

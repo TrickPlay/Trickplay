@@ -60,13 +60,20 @@ typedef struct {
 
 GType soup_message_get_type (void);
 
-#define SOUP_MESSAGE_METHOD        "method"
-#define SOUP_MESSAGE_URI           "uri"
-#define SOUP_MESSAGE_HTTP_VERSION  "http-version"
-#define SOUP_MESSAGE_FLAGS         "flags"
-#define SOUP_MESSAGE_SERVER_SIDE   "server-side"
-#define SOUP_MESSAGE_STATUS_CODE   "status-code"
-#define SOUP_MESSAGE_REASON_PHRASE "reason-phrase"
+#define SOUP_MESSAGE_METHOD           "method"
+#define SOUP_MESSAGE_URI              "uri"
+#define SOUP_MESSAGE_HTTP_VERSION     "http-version"
+#define SOUP_MESSAGE_FLAGS            "flags"
+#define SOUP_MESSAGE_SERVER_SIDE      "server-side"
+#define SOUP_MESSAGE_STATUS_CODE      "status-code"
+#define SOUP_MESSAGE_REASON_PHRASE    "reason-phrase"
+#define SOUP_MESSAGE_FIRST_PARTY      "first-party"
+#define SOUP_MESSAGE_REQUEST_BODY     "request-body"
+#define SOUP_MESSAGE_REQUEST_HEADERS  "request-headers"
+#define SOUP_MESSAGE_RESPONSE_BODY    "response-body"
+#define SOUP_MESSAGE_RESPONSE_HEADERS "response-headers"
+#define SOUP_MESSAGE_TLS_CERTIFICATE  "tls-certificate"
+#define SOUP_MESSAGE_TLS_ERRORS       "tls-errors"
 
 SoupMessage   *soup_message_new                 (const char        *method,
 						 const char        *uri_string);
@@ -85,8 +92,8 @@ void           soup_message_set_response        (SoupMessage       *msg,
 						 gsize              resp_length);
 
 typedef enum {
-	SOUP_HTTP_1_0 = 0,
-	SOUP_HTTP_1_1 = 1
+	SOUP_HTTP_1_0 = 0, /*< nick=http-1-0 >*/
+	SOUP_HTTP_1_1 = 1  /*< nick=http-1-1 >*/
 } SoupHTTPVersion;
 
 void             soup_message_set_http_version    (SoupMessage       *msg,
@@ -100,17 +107,28 @@ void             soup_message_set_uri             (SoupMessage       *msg,
 						   SoupURI           *uri);
 SoupAddress     *soup_message_get_address         (SoupMessage       *msg);
 
+SoupURI         *soup_message_get_first_party     (SoupMessage       *msg);
+void             soup_message_set_first_party     (SoupMessage       *msg,
+						   SoupURI           *first_party);
+
 typedef enum {
+	SOUP_MESSAGE_NO_REDIRECT          = (1 << 1),
 #ifndef LIBSOUP_DISABLE_DEPRECATED
-	SOUP_MESSAGE_OVERWRITE_CHUNKS = (1 << 3),
+	SOUP_MESSAGE_OVERWRITE_CHUNKS     = (1 << 3),
 #endif
-	SOUP_MESSAGE_NO_REDIRECT      = (1 << 1)
+	SOUP_MESSAGE_CONTENT_DECODED      = (1 << 4),
+	SOUP_MESSAGE_CERTIFICATE_TRUSTED  = (1 << 5)
 } SoupMessageFlags;
 
-void           soup_message_set_flags           (SoupMessage        *msg,
-						 SoupMessageFlags    flags);
+void             soup_message_set_flags           (SoupMessage           *msg,
+						   SoupMessageFlags       flags);
 
-SoupMessageFlags soup_message_get_flags         (SoupMessage        *msg);
+SoupMessageFlags soup_message_get_flags           (SoupMessage           *msg);
+
+gboolean         soup_message_get_https_status    (SoupMessage           *msg,
+						   GTlsCertificate      **certificate,
+						   GTlsCertificateFlags  *errors);
+
 
 /* Specialized signal handlers */
 guint          soup_message_add_header_handler  (SoupMessage       *msg,
@@ -145,6 +163,9 @@ void           soup_message_set_chunk_allocator (SoupMessage       *msg,
 						 SoupChunkAllocator allocator,
 						 gpointer           user_data,
 						 GDestroyNotify     destroy_notify);
+
+void           soup_message_disable_feature     (SoupMessage       *msg,
+						 GType              feature_type);
 
 void soup_message_wrote_informational (SoupMessage *msg);
 void soup_message_wrote_headers       (SoupMessage *msg);

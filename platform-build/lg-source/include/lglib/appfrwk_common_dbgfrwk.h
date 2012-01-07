@@ -171,9 +171,9 @@ extern "C" {
 #define	ROVI_DBG_PRINT(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2, 9, format, ##args)
 #define	VCSIF_DBG_PRINT(format, args...)				cmd_mask_print(PRNT_MOD_SVC___2,10, format, ##args)
 #define	NETFLIX_DBG_PRINT1(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,11, format, ##args)
-#define	S2_UNDEF_PRINT_12(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,12, format, ##args)
-#define	S2_UNDEF_PRINT_13(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,13, format, ##args)
-#define	S2_UNDEF_PRINT_14(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,14, format, ##args)
+#define	MF_PERI_PRINT3(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,12, format, ##args)
+#define	MF_PERI_PRINT4(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,13, format, ##args)
+#define	NHL_MLB_DBG_PRINT(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,14, format, ##args)
 #define	S2_UNDEF_PRINT_15(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,15, format, ##args)
 #define	S2_UNDEF_PRINT_16(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,16, format, ##args)
 #define	S2_UNDEF_PRINT_17(format, args...) 				cmd_mask_print(PRNT_MOD_SVC___2,17, format, ##args)
@@ -190,7 +190,7 @@ extern "C" {
 #define S2_UNDEF_PRINT_28(format, args...)				cmd_mask_print(PRNT_MOD_SVC___2,28, format, ##args)
 #define S2_UNDEF_PRINT_29(format, args...)				cmd_mask_print(PRNT_MOD_SVC___2,29, format, ##args)
 #define S2_UNDEF_PRINT_30(format, args...)				cmd_mask_print(PRNT_MOD_SVC___2,30, format, ##args)
-#define GESTURE_PRINT(format, args...)				cmd_mask_print(PRNT_MOD_SVC___2,31, format, ##args)
+#define S2_UNDEF_PRINT_31(format, args...)				cmd_mask_print(PRNT_MOD_SVC___2,31, format, ##args)
 
 /*----------------  BROWSER  ----------------*/
 #define BR_INTERFACE_PRINT(format, args...)				cmd_mask_print(PRNT_MOD_BROWSER, 0, format, ##args)
@@ -199,13 +199,13 @@ extern "C" {
 #define	BR_UNDEF_PRINT_3(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 3, format, ##args)
 #define	BR_UNDEF_PRINT_4(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 4, format, ##args)
 #define	BR_FLASH_PLUGIN(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 5, format, ##args)
-#define BR_UNDEF_PRINT_6(format, args...)				cmd_mask_print(PRNT_MOD_BROWSER, 6, format, ##args)
+#define BR_FLASH_PLUGIN2(format, args...)				cmd_mask_print(PRNT_MOD_BROWSER, 6, format, ##args)
 #define	BR_UNDEF_PRINT_7(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 7, format, ##args)
 #define	BR_UNDEF_PRINT_8(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 8, format, ##args)
 #define	BR_UNDEF_PRINT_9(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER, 9, format, ##args)
 #define	BR_UNDEF_PRINT_10(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER,10, format, ##args)
 #define	BR_MEDIA_PLUGIN(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER,11, format, ##args)
-#define	BR_UNDEF_PRINT_12(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER,12, format, ##args)
+#define	BR_MEDIA_BUFFER(format, args...)				cmd_mask_print(PRNT_MOD_BROWSER,12, format, ##args)
 #define	BR_UNDEF_PRINT_13(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER,13, format, ##args)
 #define	BR_UNDEF_PRINT_14(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER,14, format, ##args)
 #define	BR_UNDEF_PRINT_15(format, args...) 				cmd_mask_print(PRNT_MOD_BROWSER,15, format, ##args)
@@ -358,12 +358,12 @@ static cmd_mask_group_attr_t	_gSvc2Attr =
 		/*pName | num | nm_flag | color*/
 		{ "MF_MSG",		0, 1, 0 }, 		{ "MF_DBG",		1, 1, 0 },
 		{ "MF_ERR",		2, 1, 0 }, 		{ "MF_PERI",	3, 1, 0 },
-		{ "MF_PERI2",	4, 1, 0 }, 		{ "LGINPUT",	5, 1, 0 },
+		{ "MF_STATIC_PERI",	4, 1, 0 }, 	{ "LGINPUT",	5, 1, 0 },
 		{ "AE_DBG", 	6, 1, 0 }, 		{ "VUDU_DBG",	7, 1, 0 },
 		{ "NETFLIX_DBG",8, 1, 0 }, 		{ "ROVI_DBG",	9, 1, 0 },
 		{ "VCSIF_DBG",  10, 1, 0 },		{ "NETFLIX_PLAY",	11, 1, 0 },
-		{ "UNDEF_12",	12, 1, 0 },		{ "UNDEF_13",	13, 1, 0 },
-		{ "UNDEF_14",  	14, 1, 0 },		{ "UNDEF_15",	15, 1, 0 },
+		{ "MF_BUFFER_PERI",	12, 1, 0 },	{ "MF_INFO_PERI",	13, 1, 0 },
+		{ "NHL_MLB_DBG",  	14, 1, 0 },		{ "UNDEF_15",	15, 1, 0 },
 		{ "UNDEF_16",  	16, 1, 0 },		{ "UNDEF_17",	17, 1, 0 },
 		{ "UNDEF_18",  	18, 1, 0 },		{ "UNDEF_19",	19, 1, 0 },
 		{ "UNDEF_20",  	20, 1, 0 },		{ "UNDEF_21",	21, 1, 0 },
@@ -371,7 +371,7 @@ static cmd_mask_group_attr_t	_gSvc2Attr =
 		{ "UNDEF_24", 	24, 1, 0 },		{ "UNDEF_25",	25, 1, 0 },
 		{ "UNDEF_26",  	26, 1, 0 },		{ "UNDEF_27",	27, 1, 0 },
 		{ "UNDEF_28",  	28, 1, 0 },		{ "UNDEF_29", 	29, 1, 0 },
-		{ "UNDEF_30",  	30, 1, 0 },		{ "GESTURE",	31, 1, 0 }
+		{ "UNDEF_30",  	30, 1, 0 },		{ "UNDEF_31",	31, 1, 0 }
 	}
 };
 
@@ -383,10 +383,10 @@ static cmd_mask_group_attr_t	_gBrowserAttr =
 		{ "Interface",	0, 1, 0 }, 		{ "UNDEF_1",	1, 1, 0 },
 		{ "UNDEF_2",	2, 1, 0 }, 		{ "UNDEF_3",	3, 1, 0 },
 		{ "UNDEF_4",	4, 1, 0 }, 		{ "Flash plugin",	5, 1, 0 },
-		{ "UNDEF_6", 	6, 1, 0 }, 		{ "UNDEF_7",	7, 1, 0 },
+		{ "Flash plugin2", 	6, 1, 0 }, 	{ "UNDEF_7",	7, 1, 0 },
 		{ "UNDEF_8",   	8, 1, 0 }, 		{ "UNDEF_9",	9, 1, 0 },
 		{ "UNDEF_10",  	10, 1, 0 },		{ "Media plugin",	11, 1, 0 },
-		{ "UNDEF_12",	12, 1, 0 },		{ "UNDEF_13",	13, 1, 0 },
+		{ "Media buffer",	12, 1, 0 },	{ "UNDEF_13",	13, 1, 0 },
 		{ "UNDEF_14",  	14, 1, 0 },		{ "UNDEF_15",	15, 1, 0 },
 		{ "UNDEF_16",  	16, 1, 0 },		{ "UNDEF_17",	17, 1, 0 },
 		{ "UNDEF_18",  	18, 1, 0 },		{ "UNDEF_19",	19, 1, 0 },

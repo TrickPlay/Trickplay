@@ -7,7 +7,6 @@
 #define SOUP_PROXY_RESOLVER_H 1
 
 #include <libsoup/soup-types.h>
-#include <gio/gio.h>
 
 G_BEGIN_DECLS
 
@@ -29,11 +28,14 @@ typedef struct {
 	GTypeInterface base;
 
 	/* virtual methods */
-	void (*get_proxy_async) (SoupProxyResolver *, SoupMessage *,
-				 GMainContext *, GCancellable *,
-				 SoupProxyResolverCallback, gpointer);
-	guint (*get_proxy_sync) (SoupProxyResolver *, SoupMessage *,
-				 GCancellable *, SoupAddress **);
+	void (*get_proxy_async) (SoupProxyResolver *proxy_resolver,
+				 SoupMessage *msg, GMainContext *async_context,
+				 GCancellable *cancellable,
+				 SoupProxyResolverCallback callaback,
+				 gpointer user_data);
+	guint (*get_proxy_sync) (SoupProxyResolver *proxy_resolver,
+				 SoupMessage *msg, GCancellable *cancellable,
+				 SoupAddress **addr);
 
 } SoupProxyResolverInterface;
 

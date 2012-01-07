@@ -101,7 +101,7 @@ typedef enum tagVOICE_LANG_TYPE_T
 	VOICE_RUS,				// Russian
 	VOICE_ENAU,				// Australian English
 	VOICE_CHMN,				// Chinese Mandarin
-	
+	VOICE_BRA,				// Brazilian
 	VOICE_MAX,
 } VOICE_LANG_TYPE_T;
 
@@ -129,11 +129,16 @@ HOA_STATUS_T	HOA_MRCU_UnregisterVoiceCallback(void);
 HOA_STATUS_T	HOA_MRCU_RegisterVoiceUiFuncCallback(LGINPUT_VOICE_UI_CB_T  pfnCB );
 HOA_STATUS_T	HOA_MRCU_UnregisterVoiceUiFuncCallback(void);
 HOA_STATUS_T	HOA_MRCU_SelectVoiceMultiResult(int index);
+HOA_STATUS_T	HOA_MRCU_RegisterRMSCallback(LGINPUT_VOICE_RMS_CB_T pfnRMSCBFuncion);
+HOA_STATUS_T	HOA_MRCU_UnregisterRMSCallback(void);
+
+
 
 HOA_STATUS_T APP_HNDL_LGINPUT_VoiceSendNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
 
 
 HOA_STATUS_T APP_HNDL_LGINPUT_VoiceSendMultiResult(DBusConnection *conn, DBusMessage *msg, void *user_data);
+
 #ifdef __cplusplus
 }
 #endif

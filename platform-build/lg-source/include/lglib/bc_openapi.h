@@ -186,6 +186,7 @@ HOA_STATUS_T 	HOA_CTRL_CheckSdpProductionMode (BOOLEAN *pbSdpProductionMode);
 HOA_STATUS_T	HOA_CTRL_GetModelName(char **ppModelName);
 HOA_STATUS_T	HOA_CTRL_CheckRunningWiDi(BOOLEAN *pbRunningWiDi);
 HOA_STATUS_T 	HOA_CTRL_StopWiDiSession(void);
+HOA_STATUS_T 	HOA_CTRL_StopWiDiScan(void);
 HOA_STATUS_T 	HOA_CTRL_CheckWiFiIsSupported(BOOLEAN *pbSupportWifi);
 HOA_STATUS_T 	HOA_CTRL_CheckWiFiBuiltinIsSupported(BOOLEAN *pbSupportWifiBuiltin);
 HOA_STATUS_T 	HOA_CTRL_GetSWVersion(char **ppSWVersion);
@@ -349,6 +350,8 @@ HOA_STATUS_T 	HOA_SMTS_GetEditDeviceCount(int *pLength);
 HOA_STATUS_T 	HOA_SMTS_GetEditDevInfo(AF_BUFFER_HNDL_T* pBuffHandler);
 HOA_STATUS_T	HOA_SMTS_SetProtectableRecordedTVProgram(int *pProtectableMediaIdArray, BOOLEAN *pProtectableMediaValueArray, UINT32 nArraySize);
 HOA_STATUS_T 	HOA_SMTS_DeleteSubtitleWindow(MEDIA_CHANNEL_T ch);
+HOA_STATUS_T 	HOA_SMTS_SetLinkedDeviceSceneInfo(UINT32 info);
+HOA_STATUS_T 	HOA_SMTS_GetLinkedDeviceSceneInfo(UINT32 *pInfo);
 
 
 // Mcast
@@ -378,6 +381,9 @@ HOA_STATUS_T HOA_CTRL_EndChannel(void);
 // home status(PDP only)
 HOA_STATUS_T HOA_CTRL_SetHomeStatus(HOME_STATUS_T homeStatus);
 
+// User Guide status (PDP Only)
+HOA_STATUS_T HOA_CTRL_SetUserGuideStatus(GUIDE_STATUS_T guideStatus);
+
 // KKC
 HOA_STATUS_T HOA_KKC_StartController(int isPred);
 HOA_STATUS_T HOA_KKC_StopController(void);
@@ -392,6 +398,15 @@ HOA_STATUS_T HOA_KKC_RequestToConvert(char* pYomi, int* pCvSz, int* pCdNm, char*
 HOA_STATUS_T HOA_KKC_RequestToSelect(int cand_idx, char* pYomi, int* pCvSz, int* pCdNm, char* pCdDt);
 HOA_STATUS_T HOA_KKC_RequestToPredict(int isPred, char* pYomi, int* pCvSz, int* pCdNm, char* pCdDt);
 HOA_STATUS_T HOA_KKC_RequestToSpace(char* pYomi, int* pCvSz, int* pCdNm, char* pCdDt);
+
+// CMF for social center like
+#ifdef INCLUDE_CMF
+HOA_STATUS_T HOA_CMF_CheckLikeByCB(HOA_CMF_COMPONENT_TYPE_T contentType, UINT8* pContentId, HOA_CMF_CHECK_LIKE_CB_T fnCallBack);
+HOA_STATUS_T HOA_CMF_ContentLike(HOA_CMF_CONTENT_INFO_T *pContentInfo);
+HOA_STATUS_T HOA_CMF_ExcuteContent(UINT32 cmid);
+HOA_STATUS_T HOA_CMF_SetChannel(HOA_CMF_CHANNEL_INFO_T *pChInfo, UINT8 *pProgramName);
+HOA_STATUS_T HOA_CMF_CheckLike(HOA_CMF_COMPONENT_TYPE_T contentType, UINT8* pContentId, BOOLEAN* pIsLiked);
+#endif
 
 #ifdef __cplusplus
 }

@@ -1961,8 +1961,8 @@ typedef enum {
   CURLINFO_LOCAL_IP         = CURLINFO_STRING + 41,
   CURLINFO_LOCAL_PORT       = CURLINFO_LONG   + 42,
   /* Fill in new entries below here! */
-
-  CURLINFO_LASTONE          = 42
+  CURLINFO_DISK_CACHED      = CURLINFO_LONG   + 43,
+  CURLINFO_LASTONE          = 43
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

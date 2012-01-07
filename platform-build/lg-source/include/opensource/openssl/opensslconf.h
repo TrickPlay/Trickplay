@@ -32,9 +32,6 @@
 #ifndef OPENSSL_THREADS
 # define OPENSSL_THREADS
 #endif
-#ifndef OPENSSL_NO_ASM
-# define OPENSSL_NO_ASM
-#endif
 #ifndef OPENSSL_NO_STATIC_ENGINE
 # define OPENSSL_NO_STATIC_ENGINE
 #endif
@@ -74,8 +71,8 @@
 
 #if !(defined(VMS) || defined(__VMS)) /* VMS uses logical names instead */
 #if defined(HEADER_CRYPTLIB_H) && !defined(OPENSSLDIR)
-#define ENGINESDIR "~/work/lib/openssl/lib/engines"
-#define OPENSSLDIR "~/work/lib/openssl/~/work/lib/openssl/ssl"
+#define ENGINESDIR "/vol/users/chan.jeong/upload/openssl-1.0.0a/install/lib/engines"
+#define OPENSSLDIR "/vol/users/chan.jeong/upload/openssl-1.0.0a/install/ssl"
 #endif
 #endif
 
@@ -121,7 +118,7 @@
 /* If this is set to 'unsigned int' on a DEC Alpha, this gives about a
  * %20 speed up (longs are 8 bytes, int's are 4). */
 #ifndef DES_LONG
-#define DES_LONG unsigned long
+#define DES_LONG unsigned int
 #endif
 #endif
 
@@ -146,7 +143,7 @@
 
 #if defined(HEADER_BF_LOCL_H) && !defined(CONFIG_HEADER_BF_LOCL_H)
 #define CONFIG_HEADER_BF_LOCL_H
-#undef BF_PTR
+#define BF_PTR
 #endif /* HEADER_BF_LOCL_H */
 
 #if defined(HEADER_DES_LOCL_H) && !defined(CONFIG_HEADER_DES_LOCL_H)
@@ -155,18 +152,18 @@
 /* the following is tweaked from a config script, that is why it is a
  * protected undef/define */
 #ifndef DES_PTR
-#define DES_PTR
+#undef DES_PTR
 #endif
 
 /* This helps C compiler generate the correct code for multiple functional
  * units.  It reduces register dependancies at the expense of 2 more
  * registers */
 #ifndef DES_RISC1
-#define DES_RISC1
+#undef DES_RISC1
 #endif
 
 #ifndef DES_RISC2
-#undef DES_RISC2
+#define DES_RISC2
 #endif
 
 #if defined(DES_RISC1) && defined(DES_RISC2)

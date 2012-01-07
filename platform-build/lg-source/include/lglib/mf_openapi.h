@@ -131,7 +131,7 @@ HOA_STATUS_T HOA_MEDIA_SetInternalSubtitleSettings(MEDIA_CHANNEL_T ch, LMF_INT_S
 HOA_STATUS_T HOA_MEDIA_GetSubtitleType(MEDIA_CHANNEL_T ch, LMF_SUBT_FILE_TYPE_T *pSubtitleType);
 HOA_STATUS_T HOA_MEDIA_GetLanguageCount(MEDIA_CHANNEL_T ch, int *pNumLanguage);
 HOA_STATUS_T HOA_MEDIA_GetChannelAnsiEncidingType(MEDIA_CHANNEL_T ch);
-HOA_STATUS_T HOA_MEDIA_GetLanguageType(MEDIA_CHANNEL_T ch, UINT32 retvalue, char* langType);
+HOA_STATUS_T HOA_MEDIA_GetLanguageType(MEDIA_CHANNEL_T ch, UINT32 retvalue, char** langType);
 
 // for audio multi track playback //
 //HOA_STATUS_T HOA_MEDIA_GetLanguages(MEDIA_CHANNEL_T ch);

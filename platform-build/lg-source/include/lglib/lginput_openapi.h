@@ -45,6 +45,7 @@ HOA_STATUS_T	HOA_MRCU_AttachManualDev(UINT32 nRemoteType);
 HOA_STATUS_T	HOA_MRCU_SetDragMode(HOA_DRAG_MODE_T dragType);
 HOA_STATUS_T	HOA_MRCU_UpdateFirmware(UINT32 *pnSuccess);
 HOA_STATUS_T    HOA_MRCU_GetMRCURecieverEnable(int *pnOnOff);
+HOA_STATUS_T	HOA_MRCU_SetMultiPairingMode(BOOLEAN bOnOff);
 
 
 // Gesture Camera
@@ -68,14 +69,6 @@ HOA_STATUS_T	HOA_MRCU_UnregisterBsiRFKeyCallback(void);
 
 //SG 3D Pairing
 HOA_STATUS_T	HOA_SG3D_RegisterPairingCallback(LGINPUT_PDP3D_CB_T pfnPDP3DPairingCBFunction);
-
-HOA_STATUS_T	HOA_GESTURE_SetGestureCursorAlignment(BOOLEAN bOnOff);
-HOA_STATUS_T	HOA_GESTURE_SetGestureSensitivity(UINT32 nSensitivity);
-HOA_STATUS_T	HOA_GESTURE_SetIRProjector(BOOLEAN bOnOff);
-HOA_STATUS_T	HOA_GESTURE_GestureCreateTask(void);
-HOA_STATUS_T	HOA_GESTURE_GestureDestroyTask(void);
-HOA_STATUS_T	HOA_GESTURE_SetMouseOnControl(int bOn);
-
 #ifdef __cplusplus
 }
 #endif

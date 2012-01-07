@@ -28,20 +28,25 @@ extern "C" {
 /*
  * Service Names
  */
-#define AF_SERVICE_SPECIAL			"lg.service.special."				/* 안죽어야 하는 service */
-#define AF_SERVICE_NORMAL			"lg.service.normal."				/* 죽여도 되는 service */
-#define AF_SERVICE_NORMAL_OFF		"lg.service.normal.off."			/* power off때만 죽이는 service */
+#define AF_SERVICE_SPECIAL			"lg.service.special."						/* 안죽어야 하는 service */
+#define AF_SERVICE_NORMAL			"lg.service.normal."						/* 죽여도 되는 service */
+#define AF_SERVICE_PWOFF_SFX		"pwoff."									/* power off 때 suffix */
+#define AF_SERVICE_NOMEM_SFX		"nomem."									/* memory 없을 때 suffix */
+#define AF_SERVICE_PWMEM_SFX		AF_SERVICE_PWOFF_SFX AF_SERVICE_NOMEM_SFX	/* power off/memory 없을 때 suffix */
+#define AF_SERVICE_NORMAL_PWOFF		AF_SERVICE_NORMAL AF_SERVICE_PWOFF_SFX		/* power off 때 죽이는 service */
+#define AF_SERVICE_NORMAL_NOMEM		AF_SERVICE_NORMAL AF_SERVICE_NOMEM_SFX		/* memory 없을 때 죽이는 service */
+#define AF_SERVICE_NORMAL_PWMEM		AF_SERVICE_NORMAL AF_SERVICE_PWMEM_SFX		/* power off/memory 없을 때 죽이는 service */
 #define AF_SERVICE_SEND				".send"
 #define AF_SERVICE_INPUT			".input"
 #define AF_SERVICE_EVENT			".event"
 #define AF_SERVICE_CALLBACK			".callback"
 #define AF_SERVICE_MULTI			".multi"
-#define AF_SERVICE_DNLD				".dnld"								/* sdpif sub */
-#define AF_SERVICE_MBSH				".membership"						/* sdpif sub */
-#define AF_SERVICE_SNS				".sns"								/* sdpif sub */
-#define AF_SERVICE_APPS				".apps"								/* sdpif sub */
-#define AF_SERVICE_ADV				".adv"								/* sdpif sub */
-#define AF_SERVICE_LOG				".log"								/* sdpif sub */
+#define AF_SERVICE_DNLD				".dnld"										/* sdpif sub */
+#define AF_SERVICE_MBSH				".membership"								/* sdpif sub */
+#define AF_SERVICE_SNS				".sns"										/* sdpif sub */
+#define AF_SERVICE_APPS				".apps"										/* sdpif sub */
+#define AF_SERVICE_ADV				".adv"										/* sdpif sub */
+#define AF_SERVICE_LOG				".log"										/* sdpif sub */
 
 #define AF_NAME_PROCESSMANAGER		"processmanager"
 #define AF_NAME_BROADCAST			"broadcast"
@@ -87,8 +92,8 @@ extern "C" {
 #define AF_SERVICE_VIDEOHOST		AF_SERVICE_SPECIAL		AF_NAME_VIDEOHOST
 #define AF_SERVICE_RODP             AF_SERVICE_SPECIAL		AF_NAME_RODP
 
-#define AF_SERVICE_BROWSER			AF_SERVICE_NORMAL_OFF	AF_NAME_BROWSER
-#define AF_SERVICE_NETFLIX			AF_SERVICE_NORMAL_OFF	AF_NAME_NETFLIX
+#define AF_SERVICE_BROWSER			AF_SERVICE_NORMAL_PWMEM	AF_NAME_BROWSER
+#define AF_SERVICE_NETFLIX			AF_SERVICE_NORMAL_PWOFF	AF_NAME_NETFLIX
 
 #define AF_SERVICE_SDPIF			AF_SERVICE_NORMAL		AF_NAME_SDPIF
 #define AF_SERVICE_LGINPUT			AF_SERVICE_NORMAL		AF_NAME_LGINPUT
@@ -146,9 +151,7 @@ extern "C" {
 #define AF_ELF_MF					"/usr/local/bin/mediaframework"
 #define AF_ELF_FXUI					"/usr/local/bin/fxui"
 #define AF_ELF_SDPIF				"/usr/local/bin/sdpif"
-
 #define AF_ELF_RODP                 "/usr/local/bin/rodp"
-
 #define AF_ELF_DTV					"/mnt/lg/lgapp/RELEASE"
 #define AF_ELF_BR					"/mnt/browser/run3556"
 #define AF_REALELF_BR				"lb5wk"
@@ -173,7 +176,6 @@ extern "C" {
 #define AF_MASTER_SEARCH			"search.swf"
 #define AF_MASTER_TERMS				"TermsOfService.swf"
 #define AF_MASTER_ADPREMIUM			"adpremium.swf"
-
 
 #ifdef __cplusplus
 }

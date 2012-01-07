@@ -310,4 +310,4 @@ typedef unsigned int uint32_t;
 /* Programs used by ICU code                                                 */
 /*===========================================================================*/
 
-#define U_MAKE  "make"
+#define U_MAKE  "/usr/bin/gmake"

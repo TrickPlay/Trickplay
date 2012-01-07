@@ -669,6 +669,7 @@ then
 	    -lsoup-2.4 \
 	    -lxml2 \
         -lMali \
+        -lUMP \
         -lexif \
 	    ${THERE}/test/main.cpp \
 	    -Wl,--end-group 

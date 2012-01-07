@@ -961,24 +961,24 @@ typedef enum MEDIA_CB_MSG
 
 } MEDIA_CB_MSG_T;
 
-//#ifdef INCLUDE_ACTVILA 
+//#ifdef INCLUDE_ACTVILA
 typedef enum MEDIA_ACTVILA_CB_MSG
 {
-	ACTVILA_CB_MSG_REQUEST_SYNTAX_ERROR = -1, 
+	ACTVILA_CB_MSG_REQUEST_SYNTAX_ERROR = -1,
 	ACTVILA_CB_MSG_OBJECT_TAG_ERROR = -10,
-	ACTVILA_CB_MSG_A_TAG_ERROR = -20, 
-	ACTVILA_CB_MSG_GET_METAFILE_ERROR = -1000, 
-	ACTVILA_CB_MSG_METAFILE_DATA_ERROR = -2000, 
-	ACTVILA_CB_MSG_LLI_VERIFY_ERROR = -2020, 
-	ACTVILA_CB_MSG_GET_DRM_KEY_ERROR = -3000, 
-	ACTVILA_CB_MSG_INVALID_DRM_KEY_ERROR = -4000, 
-	ACTVILA_CB_MSG_NET_CANNOT_CONNECT = -5000,  
+	ACTVILA_CB_MSG_A_TAG_ERROR = -20,
+	ACTVILA_CB_MSG_GET_METAFILE_ERROR = -1000,
+	ACTVILA_CB_MSG_METAFILE_DATA_ERROR = -2000,
+	ACTVILA_CB_MSG_LLI_VERIFY_ERROR = -2020,
+	ACTVILA_CB_MSG_GET_DRM_KEY_ERROR = -3000,
+	ACTVILA_CB_MSG_INVALID_DRM_KEY_ERROR = -4000,
+	ACTVILA_CB_MSG_NET_CANNOT_CONNECT = -5000,
 	ACTVILA_CB_MSG_SDP_SYNTAX_ERROR = -6000,
-	ACTVILA_CB_MSG_RECV_STREAM_ERROR = -7000, 
-	ACTVILA_CB_MSG_LAST 
+	ACTVILA_CB_MSG_RECV_STREAM_ERROR = -7000,
+	ACTVILA_CB_MSG_LAST
 } MEDIA_ACTVILA_CB_MSG_T;
 
-//#endif 
+//#endif
 
 /**
  * Callback Message EX of Media play
@@ -1182,6 +1182,7 @@ typedef struct MEDIA_PLAY_INFO
 	SINT32				bufRemainSec;	/**< Buffering된 stream의 남은 부분. */
 	SINT8				bufPercent;		/**< Buffering된 stream의 전체 버퍼 크기 대비 용량(0~100 퍼센트) */
 	MEDIA_BUFFER_INFO_T	bufRemainedSize;	//
+//	BOOLEAN				bIsBufferFull;	/**< streaming Buffer의 buffer full 발생여부. */
 
 	SINT32				instantBps;		/**< 현재의 Stream 전송 속도. */
 	SINT32				totalBps;		/**< 전체 Stream 전송 속도. */
@@ -1201,7 +1202,7 @@ typedef void (*MEDIA_PLAY_CB_EX_T)(MEDIA_CHANNEL_T ch, MEDIA_CB_EX_MSG_T msg, UI
 
 //#ifdef INCLUDE_ACTVILA
 typedef void (*MEDIA_ACTVILA_CB_T)(MEDIA_CHANNEL_T ch, MEDIA_ACTVILA_CB_MSG_T msg);
-//#endif 
+//#endif
 
 
 /**
@@ -2246,6 +2247,8 @@ typedef enum HOA_CTRL_SUPPORT_TYPE
 	HOA_SUPPORT_SKYPE,				/**< SKYPE 지원 여부 */
 	HOA_SUPPORT_3D,					/**< Support 3D feature(TRUE/FALSE)(TRUE means that supports 3D feature) */
 	HOA_SUPPORT_DUALVIEW,			/**< Dual View 지원 여부(TRUE/FALSE) */
+	HOA_SUPPORT_PENTOUCH,			/**< Pentouch 지원 여부(TRUE/FALSE) */
+	HOA_SUPPORT_MEMOCAST,			/**< Memocast 지원 여부(TRUE/FALSE) */
 	HOA_SUPPORT_CURSORNAVIGATION	= 0xa000,	/**< Cursor Navigation 지원 여부 */
 	HOA_SUPPORT_COMBITYPE 	= 0xa001,	/**< COMBITYPE 지원 여부 */
 	HOA_SUPPORT_DTV			= 0xb000, 	/**< Support DTV (TRUE/FALSE) */
@@ -2795,6 +2798,7 @@ typedef void (*LGINPUT_VOICE_UI_CB_T)(UINT32 dataSize, UINT8 **pData);
 typedef void (*LGINPUT_CB_T)(UINT32 pktCount, UINT32 vPktCount, UINT32 rssiTv, UINT32 rssiDv, UINT32 per);
 typedef void (*LGINPUT_BSI_CB_T)(void *data);
 typedef void (*LGINPUT_PDP3D_CB_T)(void);
+typedef void (*LGINPUT_VOICE_RMS_CB_T)(SINT16 voice_min, SINT16 voice_max, double avg_rms, double total_avg_rms);
 
 /**
  * SmartShare callback func type
@@ -3028,14 +3032,6 @@ typedef enum
  */
 typedef void (*GESTURE_CB_T)(int gesture_type, int gesture_time, int key_value, int shmid, int buffer_size);
 
-
-typedef enum GESTURE_CALLBACK_MSG
-{
-	GESTURE_CALLBACK_REGISTER    	= 0x01,
-	GESTURE_CALLBACK_UNREGISTER     = 0x00,
-}GESTURE_CALLBACK_MSG_T;
-
-
 /**
  *	Gesture Game에서 사용하는 Enumeration
  */
@@ -3156,6 +3152,7 @@ typedef enum HOA_MCAST_CMD
 	HOA_MCAST_SCMD_OSD_CLEAR,
 	HOA_MCAST_SCMD_MEMO_EXIT,
 	HOA_MCAST_SCMD_CREATEJPGLIST,
+	HOA_MCAST_SCMD_SYNC,
 } HOA_MCAST_CMD_T;
 
 /**
@@ -3258,6 +3255,16 @@ typedef enum HOME_STATUS_T
 	HOME_STATUS_SHOW_TV = 2
 }HOME_STATUS_T;
 
+/**
+* User Guide status setting for screen saver(PDP only).
+*/
+typedef enum GUIDE_STATUS_T
+{
+	HOME_STATUS_FULLUI 	 = 0,
+	HOME_STATUS_UIWITHTV = 1
+}GUIDE_STATUS_T;
+
+
 typedef enum HOA_DRAG_MODE_T{
 	DRAG_MODE_NONE = 0,
 	DRAG_MODE_HORIZONTAL = 1,
@@ -3328,6 +3335,64 @@ typedef enum HOA_CAPTURE_FORMAT {
 	HOA_CAPTURE_JPEG	= 2,
 	HOA_CAPTURE_PNG		= 3,
 } HOA_CAPTURE_FORMAT_T;
+
+
+#ifdef INCLUDE_CMF
+/**
+ * Component type
+ */
+typedef enum
+{
+	HOA_CMF_BROADCAST_ATSC	= 1,
+	HOA_CMF_BROADCAST_DVB 	= 2,
+	HOA_CMF_LGAPPS_DETAIL 	= 101,
+	HOA_CMF_SEARCH 			= 102,
+	HOA_CMF_CP      		= 1001,
+ 	HOA_CMF_K_POP   		= 1002,
+   	HOA_CMF_3D_WORLD		= 1003,
+
+} HOA_CMF_COMPONENT_TYPE_T;
+
+
+/**
+ * Structure of channel information for social center like
+ */
+typedef struct
+{
+	API_CHANNEL_NUM_T channelNum;
+	UINT8 channelName[64];
+	UINT32 startTime;
+	UINT32 endTime;
+
+} HOA_CMF_CHANNEL_INFO_T;
+
+
+/**
+ * Structure of content information for content like
+ */
+typedef struct
+{
+	UINT8 countryCode[4];
+    UINT8 contentName[256];
+   	UINT8 contentModuleName[32];
+    UINT8 contentDesc[512];
+    UINT8 contentThumbUrl[128];
+   	UINT8* contentThumbBin;
+	UINT8* contentThumbBinLength;
+   	UINT8 recommendMsg[512];
+	UINT8 webUrl[128];
+    HOA_CMF_COMPONENT_TYPE_T contentType;
+ 	UINT8 contentId[256];
+    HOA_CMF_CHANNEL_INFO_T chInfo;
+
+} HOA_CMF_CONTENT_INFO_T;
+
+/**
+ * CheckLike callback func type
+ */
+typedef void (*HOA_CMF_CHECK_LIKE_CB_T)(BOOLEAN isLiked);
+
+#endif
 
 #ifdef __cplusplus
 }

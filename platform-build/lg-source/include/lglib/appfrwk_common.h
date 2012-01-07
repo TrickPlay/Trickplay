@@ -106,8 +106,8 @@ typedef enum
 */
 typedef struct
 {
-	char 		*	name;
-	void  		*	(*entry_point)(void *);
+	char 			*name;
+	void  			*(*entry_point)(void *);
 	int   			priority;
 	size_t			stack_size;
 	int				sched_policy;
@@ -151,6 +151,28 @@ struct t_SHM_MGR_T {
 	SHM_MGR_T			*pPrev;
 	AF_BUFFER_HNDL_T	bufferHndl;
 };
+
+#ifdef AF_USE_DBGFRWK
+
+typedef osa_thread_t	 	AF_TID_TYPE;
+typedef osa_thread_attr_t	AF_TASK_CONF_T;
+typedef osa_thread_attr_t	AF_TASK_GCONF_T;
+typedef	osa_lock_t			AF_MUTEX_T;
+typedef	osa_lock_t			AF_SEMA_T;
+
+#define RES_END_POINT   	{ "",   NULL,0,0,0,0,0}
+#define CHK_RES_END(p_conf)	((p_conf)->entry_point == NULL)
+#else
+
+typedef pthread_t	 		AF_TID_TYPE;
+typedef _AF_TASK_CONF_T		AF_TASK_CONF_T;
+typedef _AF_TASK_GCONF_T	AF_TASK_GCONF_T;
+typedef	sem_t *				AF_SEMA_T;
+
+#define RES_END_POINT  		{NULL, NULL, 0, 0, 0}
+#define CHK_RES_END(p_conf)	((p_conf)->name == NULL)
+
+#endif
 
 /**
  * Application process가 Agent에 등록해야 하는 Callback들 .
@@ -204,38 +226,13 @@ typedef struct
 
 } HOA_PROC_INFO_T;
 
-#ifdef AF_USE_DBGFRWK
-
-typedef osa_thread_t	 	AF_TID_TYPE;
-typedef osa_thread_attr_t	AF_TASK_CONF_T;
-typedef osa_thread_attr_t	AF_TASK_GCONF_T;
-typedef	osa_lock_t			AF_MUTEX_T;
-typedef	osa_lock_t			AF_SEMA_T;
-
-#define RES_END_POINT   	{ "",   NULL,0,0,0,0,0}
-#define CHK_RES_END(p_conf)	((p_conf)->entry_point == NULL)
-#else
-
-typedef pthread_t	 		AF_TID_TYPE;
-typedef _AF_TASK_CONF_T		AF_TASK_CONF_T;
-typedef _AF_TASK_GCONF_T	AF_TASK_GCONF_T;
-typedef	sem_t *				AF_SEMA_T;
-
-#define RES_END_POINT  		{NULL, NULL, 0, 0, 0}
-#define CHK_RES_END(p_conf)	((p_conf)->name == NULL)
-
-#endif
-
-
 /* appfrwk_common_debug.c */
 void			AF_DEBUG_Print(const char *function_name, const char * format, ...);
 void 			AF_DEBUG_Init(void);
 
 /* appfrwk_common_osa.c */
 AF_STATE_T		AF_InitTaskRes(void);
-
 AF_TID_TYPE		AF_CreateTask(AF_TASK_CONF_T *taskconf, void *pArgs);
-
 AF_TID_TYPE 	AF_CreateTaskEx(
 						   char		*name,
 						   void	*	(*entry_point)(void *),
@@ -253,22 +250,24 @@ int 			AF_PostSem( AF_SEMA_T sema );
 void 			AF_PrintStack(void);
 
 /* appfrwk_common_util.c */
-AF_STATE_T 		AF_UTIL_GetMacAddressFromCmdline(char *macaddr);
-AF_STATE_T 		AF_UTIL_GetServiceName(char *args, char *service);
+AF_STATE_T		AF_UTIL_GetMacAddressFromCmdline(char *macaddr);
+AF_STATE_T		AF_UTIL_FlushKernelPageCache(void);
+AF_STATE_T		AF_UTIL_GetServiceName(char *args, char *service);
+AF_STATE_T		AF_UTIL_CheckProcessExistFromProcFs(const char *pProcName, const char *pServiceName, BOOLEAN *bExist, pid_t *pProcPID);
 int 			AF_UTIL_GetUinputFDForReturn(BOOLEAN bIsKeyReturnPath);
-HOA_STATUS_T	HOA_UTIL_SetProcInfo(HOA_PROC_INFO_E info, void *pData);
-HOA_STATUS_T	HOA_UTIL_GetProcInfo(HOA_PROC_INFO_T *procInfo);
-SINT32 			HOA_UTIL_GetProcPID(void);
-char 			*HOA_UTIL_GetProcServiceName(void);
-DBusConnection 	*HOA_UTIL_GetProcRcvConnection(void);
-DBusConnection 	*HOA_UTIL_GetProcSendConnection(void);
-DBusConnection 	*HOA_UTIL_GetProcKeyConnection(void);
+AF_STATE_T 		AF_UTIL_SetProcInfo(HOA_PROC_INFO_E info, void *pData);
+AF_STATE_T 		AF_UTIL_GetProcInfo(HOA_PROC_INFO_T *procInfo);
+SINT32 			AF_UTIL_GetProcPID(void);
+char 			*AF_UTIL_GetProcServiceName(void);
+DBusConnection	*AF_UTIL_GetProcRcvConnection(void);
+DBusConnection	*AF_UTIL_GetProcSendConnection(void);
+DBusConnection	*AF_UTIL_GetProcKeyConnection(void);
+void 			AF_UTIL_SetEndProgress(void);
+UINT32 			AF_UTIL_CheckEndProgress(void);
+void 			AF_UTIL_ReleaseCommFrwk(void);
 #ifdef USE_POLLING
 void 			*App_Task_MessageSender(void *data);
 #endif
-HOA_STATUS_T	HOA_UTIL_CheckProcessExistFromProcFs(const char *pProcName, const char *pServiceName, BOOLEAN *bExist, pid_t *pProcPID);
-void 			HOA_UTIL_QuitTask(void);
-UINT32 			HOA_UTIL_GetAlive(void);
 
 /* appfrwk_common_shm.c */
 void 			AF_SHM_InsertList(SHM_MGR_T *pNewList);

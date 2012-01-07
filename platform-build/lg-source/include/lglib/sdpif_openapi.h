@@ -597,6 +597,23 @@ typedef struct _HOME_CARD_LIST
 	char		**ppCards;
 } HOA_SDPIF_CARD_LIST_T;
 
+/**
+ * detail user info
+ */
+typedef struct _DETAIL_USER_INFO
+{
+	char		*pFirstName;
+	char		*pLastName;
+	char		*pDateOfBirth;
+	char		*pEmail;
+	char		*pAddr;
+	char		*pPostal;
+	char		*pCity;
+	char		*pState;
+	char		gender;
+	BOOLEAN		bEmailSubscribed;
+} HOA_SDPIF_DETAIL_USER_INFO_T;
+
 /******************************************************************************
 	Static Variables & Function Prototypes Declarations
 ******************************************************************************/
@@ -674,6 +691,7 @@ extern HOA_STATUS_T HOA_SDPIF_RequestToChangePassword(char *pOldPasswd, char *pN
 extern HOA_STATUS_T HOA_SDPIF_RequestToDeleteUser(char *pPasswd, void *pfnCallback);
 extern BOOLEAN		HOA_SDPIF_CheckMemberIsRegular(void);
 extern int			HOA_SDPIF_GetUserAge(void);
+extern HOA_STATUS_T	HOA_SDPIF_FreeDetailUserInfo(HOA_SDPIF_DETAIL_USER_INFO_T *pInfo);
 
 /* - setting (country & language) - */
 extern HOA_STATUS_T	HOA_SDPIF_RequestDetectCountry(void *pfnCallback);
@@ -686,6 +704,7 @@ extern HOA_STATUS_T	HOA_SDPIF_NotifyLanguageChanged(UINT32	code);
 extern HOA_STATUS_T	HOA_SDPIF_RequestToAuthenticateDev(void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_RequestToCancelDevAuth(void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_GetSecretInfo(HOA_SDPIF_SECRET_INFO_T *pInfo);
+extern HOA_STATUS_T	HOA_SDPIF_CheckIsDevAuth(BOOLEAN	*pbAuth);
 
 extern HOA_STATUS_T	HOA_SDPIF_GetHttpRequestHeaderVariablePart(char **ppHeader);
 extern HOA_STATUS_T	HOA_SDPIF_GetHttpRequestHeaderFixedPart(char **ppHeader);
@@ -748,6 +767,8 @@ extern HOA_STATUS_T	HOA_SDPIF_GetMacAddr(char *pBUf, int size);
 extern HOA_STATUS_T	HOA_SDPIF_RequestMetaData(char *pQuery, int  *pIndex, void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_CheckCert(int opt, void *pfnCallback);
 extern HOA_STATUS_T	HOA_SDPIF_RequestEpgData(char *pEpgKey, int	*pIndex, void *pfnCallback);
+extern HOA_STATUS_T	HOA_SDPIF_SendLog(char *pCode, char *pParam);
+extern HOA_STATUS_T	HOA_SDPIF_SendNaviLog(char *pParam);
 
 #ifdef __cplusplus
 }

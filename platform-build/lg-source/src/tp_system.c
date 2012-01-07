@@ -78,10 +78,6 @@ BOOLEAN TP_System_Initialize(int argc, char **argv)
 	}
 	++ulInitializedStep;	/* Done initialize step 3 */
 
-
-	// TODO keunbae.choi - Setresolution
-	HOA_APP_SetResolution(gAuid, 0, 0, 1920, 1080, TRUE);
-	
 	//hoaStatus = HOA_APP_RequestToFocusedApp();
 	// TODO sanggi0.lee - parameter AUID
 	hoaStatus = HOA_APP_RequestToFocusedApp(gAuid);

@@ -33,7 +33,9 @@ extern "C" {
 HOA_STATUS_T 		HOA_PROC_RegisterService(int argc, char **argv, HOA_PROC_CALLBACKS_T *pCallbacks);
 HOA_STATUS_T		HOA_PROC_UnregisterService(void);
 HOA_STATUS_T		HOA_PROC_TerminateProcess(SINT32 PID, BOOLEAN bRespawn);
-HOA_STATUS_T 		HOA_PROC_TerminateAllProcess(PM_PROC_TERM_CASE_T termCase, BOOLEAN bRespawn);
+HOA_STATUS_T 		HOA_PROC_TerminateProcesses(PM_PROC_TERM_CASE_T termCase, BOOLEAN bRespawn);
+HOA_STATUS_T 		HOA_PROC_RequestMemory(BOOLEAN bTermProcess);
+HOA_STATUS_T 		HOA_PROC_RecoverMemory(void);
 HOA_STATUS_T 		HOA_PROC_ExecuteProcess(char *pszProcPath, char *pszArgument, BOOLEAN bSingle, UINT64 AUID, SINT32 *pPID);
 HOA_STATUS_T		HOA_PROC_GetRunningProcessCount(UINT16 *pProcessNum);
 HOA_STATUS_T		HOA_PROC_GetExecuteArgument(SINT32 PID, char *pszArgument);
@@ -48,6 +50,7 @@ HOA_STATUS_T 		HOA_PROC_GetBgServiceCreationStatus(char *pServiceName, PM_PROC_B
 HOA_STATUS_T		HOA_PROC_CheckStoreMasterIsExecuted(BOOLEAN *pStoreMasterEnable);
 HOA_STATUS_T		HOA_PROC_ClearBatchList(void);
 HOA_STATUS_T		HOA_PROC_RunBatchList(void);
+HOA_STATUS_T 		HOA_PROC_RespawnTermProcesses(void);
 HOA_STATUS_T		HOA_PROC_SetLoading(void);
 HOA_STATUS_T		HOA_PROC_SetReady(void);
 HOA_STATUS_T		HOA_PROC_NotifyAppTermination(void);
@@ -56,7 +59,7 @@ HOA_STATUS_T        HOA_DISPLAY_GetResolution(UINT16 *pWidth, UINT16 *pHeight);
 HOA_STATUS_T 		HOA_INPUT_SetCursorVisible(BOOLEAN bShow); //cursor show/hide
 HOA_STATUS_T		HOA_INPUT_CheckCursorIsVisible(BOOLEAN *pbShow);//get show/hide
 HOA_STATUS_T		HOA_INPUT_SetCursorFps(UINT8 cursorFPS);//cursor fps
-HOA_STATUS_T		HOA_INPUT_SetCursorSupport(BOOLEAN bSupport);
+HOA_STATUS_T		HOA_INPUT_SetInputDispatchType(HOA_INPUT_DISPATCH_TYPE_T type);
 HOA_STATUS_T		HOA_INPUT_SetCursorSpeed(UINT32 speed);
 HOA_STATUS_T 		HOA_INPUT_SetCursorShape(HOA_CURSOR_TYPE_T cursorType, HOA_CURSOR_SIZE_T cursorSize, HOA_CURSOR_STATE_T cursorState);
 HOA_STATUS_T 		HOA_INPUT_GetCursorShape(HOA_CURSOR_TYPE_T* pCursorType, HOA_CURSOR_SIZE_T* pCursorSize, HOA_CURSOR_STATE_T *pCursorState);
@@ -66,6 +69,7 @@ HOA_STATUS_T 		HOA_INPUT_CancelMrcuStandbytimer(void);
 HOA_STATUS_T 		HOA_INPUT_GetCursorPosition(UINT16 *pX, UINT16 *pY);
 HOA_STATUS_T        HOA_PROC_UnregisterKeyFromAppKeyTable(UINT32 uiNumKey, ...);
 HOA_STATUS_T        HOA_PROC_UnregisterKeysFromAppKeyTable(UINT32 *pKeyArray, UINT32 uiNumKey);
+HOA_STATUS_T 		HOA_PROC_ResetUnregisteredKeys(void);
 HOA_STATUS_T		HOA_INPUT_GetLastInputEventInfo(struct input_event *pEvent);
 HOA_STATUS_T		HOA_INPUT_SetCustomCursor(HOA_CUSTOM_CURSOR_T *pCustomCursor, UINT32 nNumOfCustomCursor);
 HOA_STATUS_T		HOA_INPUT_ResetCustomCursor(HOA_CUSTOM_CURSOR_T *pCustomCursor, UINT32 nNumOfCustomCursor);
@@ -76,7 +80,6 @@ HOA_STATUS_T        HOA_DISPLAY_RegisterDisplayStateObserverCallback(ENABLED_DIS
 HOA_STATUS_T        HOA_DISPLAY_UnregisterDisplayStateObserverCallback(void);
 HOA_STATUS_T        HOA_PROC_DisplayForceEnabledNoti(SINT32 displayID);
 HOA_STATUS_T 		HOA_PROC_GetServiceNameWithAuid(UINT64 AUID, char *pServiceName, UINT32 serviceNameLength);
-
 
 /* appfrwk_openapi_send2proc.c */
 HOA_STATUS_T		HOA_PROC_SendEventToProcess(HOA_HOST_EVENT_T event, UINT32 param);
@@ -106,9 +109,9 @@ void 				*App_Task_EventRecvHandler(void *data);
 /* appfrwk_openapi_cb_handler.c */
 HOA_STATUS_T		APP_HNDL_PlayNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
 HOA_STATUS_T		APP_HNDL_PlayNoti_EX(DBusConnection *conn, DBusMessage *msg, void *user_data);
-//#ifdef INCLUDE_ACTVILA 
+#ifdef INCLUDE_ACTVILA
 HOA_STATUS_T		APP_HNDL_ActvilaNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
-//#endif 
+#endif
 HOA_STATUS_T		APP_HNDL_PmsNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
 HOA_STATUS_T		APP_HNDL_PopupNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
 HOA_STATUS_T		APP_HNDL_HbbtvNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
@@ -122,6 +125,7 @@ HOA_STATUS_T 		APP_HNDL_LGINPUT_BSIPosXSendNoti(DBusConnection *conn, DBusMessag
 HOA_STATUS_T 		APP_HNDL_LGINPUT_BSIPosYSendNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
 HOA_STATUS_T 		APP_HNDL_LGINPUT_BSIRFKeySendNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
 HOA_STATUS_T 		APP_HNDL_LGINPUT_PDP3DPairingSendNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
+HOA_STATUS_T 		APP_HNDL_LGINPUT_VoiceSendRMS(DBusConnection *conn, DBusMessage *msg, void *user_data);
 
 void 				*App_Task_CallbackHandler(void *data);
 HOA_STATUS_T 		APP_HNDL_VCS_EventNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
@@ -134,8 +138,6 @@ HOA_STATUS_T 		APP_HNDL_LGINPUT_GestureEventNoti(DBusConnection *conn, DBusMessa
 
 HOA_STATUS_T		APP_HNDL_DRM_NotifyDRMMsgResult( DBusConnection *conn, DBusMessage *msg, void *user_data );
 HOA_STATUS_T 		APP_HNDL_DRM_NotifyDRMRightsErr( DBusConnection *conn, DBusMessage *msg, void *user_data );
-
-
 
 /* appfrwk_openapi_pm_msg_handler.c */
 HOA_STATUS_T		PM_HNDL_TerminateNoti(DBusConnection *conn, DBusMessage *msg, void *user_data);
@@ -159,6 +161,18 @@ void 				*App_Task_InputHandler(void *data);
 HOA_HNDL_CONF_T 	*HOA_UTIL_FindHandler(AF_MSG_TYPE_T msgType, DBusMessage *msg);
 HOA_STATUS_T 		HOA_UTIL_AddHandleConf(AF_MSG_TYPE_T msgType, HOA_HNDL_CONF_T *hndlconf);
 HOA_STATUS_T 		HOA_UTIL_AddMatchRule(DBusConnection *conn);
+HOA_STATUS_T 		HOA_UTIL_FlushKernelPageCache(void);
+HOA_STATUS_T		HOA_UTIL_SetProcInfo(HOA_PROC_INFO_E info, void *pData);
+HOA_STATUS_T		HOA_UTIL_GetProcInfo(HOA_PROC_INFO_T *procInfo);
+SINT32 				HOA_UTIL_GetProcPID(void);
+char 				*HOA_UTIL_GetProcServiceName(void);
+DBusConnection		*HOA_UTIL_GetProcRcvConnection(void);
+DBusConnection		*HOA_UTIL_GetProcSendConnection(void);
+DBusConnection		*HOA_UTIL_GetProcKeyConnection(void);
+HOA_STATUS_T 		HOA_UTIL_CheckProcessExistFromProcFs(const char *pProcName, const char *pServiceName, BOOLEAN *bExist, pid_t *pProcPID);
+void 				HOA_UTIL_SetEndProgress(void);
+UINT32 				HOA_UTIL_CheckEndProgress(void);
+void 				HOA_UTIL_ReleaseCommFrwk(void);
 
 /* appfrwk_openapi_cb_func.c */
 HOA_STATUS_T		CB_MEDIA_CheckCbInit(MEDIA_CHANNEL_T ch);
@@ -197,13 +211,12 @@ HOA_STATUS_T		CB_MRCU_MotionSendNoti(UINT32 pktCount, UINT32 vPktCount, UINT32 r
 HOA_STATUS_T		CB_MRCU_BSIPosXSendNoti(UINT32 posX, LGINPUT_BSI_CB_T pfnCallBack);
 HOA_STATUS_T		CB_MRCU_BSIPosYSendNoti(UINT32 posY, LGINPUT_BSI_CB_T pfnCallBack);
 HOA_STATUS_T		CB_MRCU_BSIRFKeySendNoti(UINT32 RFKey, LGINPUT_BSI_CB_T pfnCallBack);
-
+HOA_STATUS_T		CB_LGINPUT_VoiceSendRMS(SINT16 voice_min, SINT16 voice_max, double avg_rms, double total_avg_rms, LGINPUT_VOICE_RMS_CB_T pfnCallBack);
 
 HOA_STATUS_T 		CB_VCS_RegisterCallback(VCS_CB_T pfnVCSCB);
 HOA_STATUS_T 		CB_VCS_UnRegisterCallback( void );
 HOA_STATUS_T 		CB_VCS_SendEventNoti( VCS_CB_MSG_T cbMsg, UINT32 eventSize, char *pEvent, UINT32 dataSize, char *pData );
 HOA_STATUS_T 		CB_LGINPUT_GestureSendNoti(int gesture_type, int gesture_time, int key_value, int shmid, int buffer_size, GESTURE_CB_T pfnCallBack);
-
 
 HOA_STATUS_T 		CB_SMTS_SendSmartshareMsg(UINT32 operation, UINT32 mode[4], int ip,char *pParam);
 HOA_STATUS_T 		CB_SMTS_RegisterCallback(SMTS_CB_T callbackFn);
@@ -226,7 +239,7 @@ HOA_STATUS_T 		APP_HNDL_ImageNoti(DBusConnection *conn, DBusMessage *msg, void *
 HOA_STATUS_T 		CB_CTRL_SetCallback(MEDIA_CHANNEL_T ch, CTRL_IMAGE_CB_T pfnImageCB);
 HOA_STATUS_T 		CB_CTRL_ClearCallback(MEDIA_CHANNEL_T ch);
 HOA_STATUS_T 		CB_CTRL_SendImageNoti(MEDIA_CHANNEL_T ch, IMAGE_CB_MSG_T msg, UINT32 imageID);
-HOA_STATUS_T 		CB_LGINPUT_PDP3DPairingSendNoti(BOOLEAN bOnOff, LGINPUT_BSI_CB_T pfnCallBack);
+HOA_STATUS_T 		CB_LGINPUT_PDP3DPairingSendNoti(BOOLEAN bOnOff, LGINPUT_PDP3D_CB_T pfnCallBack);
 
 HOA_STATUS_T		CB_DRM_RegisterDRMMsgResultCallback( HOA_DRM_MSG_RESULT_CB_T pfnHOADRMMsgResultCB );
 HOA_STATUS_T		CB_DRM_UnRegisterDRMMsgResultCallback( void );
@@ -235,6 +248,10 @@ HOA_STATUS_T		CB_DRM_RegisterDRMRightsErrCallback( HOA_DRM_RIGHTS_ERR_CB_T pfnDR
 HOA_STATUS_T		CB_DRM_UnRegisterDRMRightsErrCallback( void );
 HOA_STATUS_T		CB_DRM_DRMRightsErr( HOA_DRM_RIGHTS_ERR_STATE_T eErrState, char* pszContentID, char* pszDRMSystemID, char* pszRightsIssuerURL );
 
+#ifdef INCLUDE_CMF
+HOA_STATUS_T 		CB_CMF_CheckLikeCallback(BOOLEAN isLiked, HOA_CMF_CHECK_LIKE_CB_T pfnCallBack);
+HOA_STATUS_T 		APP_HNDL_CMF_CheckLike(DBusConnection *conn, DBusMessage *msg, void *user_data);
+#endif
 
 #ifdef __cplusplus
 }

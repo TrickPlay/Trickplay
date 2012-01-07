@@ -615,10 +615,6 @@ extern "C" {
 #define KEY_LGE_MRCU_VOICE_BUTTONENABLE		0x4C1
 #define KEY_LGE_MRCU_VOICE_BUTTONDISABLE	0x4C2
 
-#define KEY_LGE_GESTURECAMERA_POWER_OFF		 0x4D1		// Gesture Camera 2011. 10.15
-#define KEY_LGE_GESTURECAMERA_READY_FORUSE	 0x4D2		// Gesture camera 2011. 11. 14
-#define KEY_LGE_GESTURECAMERA_HAND_ACTIVATED 0x4D3		// Gesture Camera 2011. 11. 18
-
 #define KEY_LGE_INPUT_FIRST				        0x4F0	// Print input's list
 
 #define KEY_LGE_INPUT_PRINT				(KEY_LGE_INPUT_FIRST + 1)	// Print input's list

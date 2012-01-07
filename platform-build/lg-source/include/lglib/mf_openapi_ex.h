@@ -49,7 +49,7 @@ HOA_STATUS_T MEDIA_EX_GetSourceInfoForNewURI(MEDIA_CHANNEL_T ch, char *pPath, ch
 int MEDIA_EX_DownloadFile (char *pPath, char *pUrl, const char *pFilename);
 //HOA_STATUS_T MEDIA_DownloadFileCancel(int download_id_num);
 
-int MEDIA_EX_DownloadFileAsync (char *pPath, char *pUrl, const char *pFilename, pfnGetBusMessageAsync msgCallback);
+int MEDIA_EX_DownloadFileAsync (char *pPath, char *pUrl, const char *pFilename, pfnGetBusMessageAsync msgCallback, int *download_id);
 HOA_STATUS_T MEDIA_EX_DownloadFileAsyncCancel(int download_id_num);
 
 // export //
@@ -60,7 +60,7 @@ HOA_STATUS_T HOA_MEDIA_EX_DownloadFile (MEDIA_CHANNEL_T ch, char *pPath, char *p
 int HOA_MEDIA_EX_StartImageDownload (char *pPath, char *pUrl, const char *pFilename);
 HOA_STATUS_T HOA_MEDIA_EX_CancelImageDownload (int download_id);
 
-int HOA_MEDIA_EX_StartAsyncImageDownload(char *pPath, char *pUrl, const char *pFilename, pfnGetBusMessageAsync msgCallback);
+int HOA_MEDIA_EX_StartAsyncImageDownload(char *pPath, char *pUrl, const char *pFilename, pfnGetBusMessageAsync msgCallback, int *download_id);
 HOA_STATUS_T HOA_MEDIA_EX_CancelAsyncImageDownload (int download_id);
 
 // end export //

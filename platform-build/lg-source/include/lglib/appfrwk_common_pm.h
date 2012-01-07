@@ -27,6 +27,8 @@
 extern "C" {
 #endif
 
+#define	PM_CURSOR_MAX_FPS		70			/**< maximum cursor fps is 50 */
+
 /**
 * PM_PROC_STATE_T
 *
@@ -34,10 +36,11 @@ extern "C" {
 */
 typedef enum
 {
-	PM_PROC_STATE_NONE,						/**< Process가 생성은 되었지만 Register는 되지 않은 상태 */
-	PM_PROC_STATE_LOAD,						/**< Loading중인 상태로, 아직 Event, Key등을 받아서 처리할 여건이 되지 못함 */
-	PM_PROC_STATE_RUN,						/**< 실행 중인 상태 */
-	PM_PROC_STATE_TERM,						/**< Terminate중인 상태 */
+	PM_PROC_STATE_INIT,						/**< Process가 생성은 되었지만 register는 되지 않은 상태 : dbus 송수신 불가 */
+	PM_PROC_STATE_LOAD,						/**< Process가 register까지만 된 상태 : 이상태에서도 dbus는 connection이 맺어져 evt를 받을 수는 있음 */
+	PM_PROC_STATE_RUN,						/**< 실행 중인 상태로 보통 이 상태 이후 부터 process들이 evt를 받음 */
+	PM_PROC_STATE_TERM,						/**< Terminate중인 상태 : 이 상태 이후에 deregister를 한 다음 NONE 상태로 간다 */
+	PM_PROC_STATE_NONE,						/**< Process가 deregister 되었을 때의 상태 : 이 상태 이후로 process는 exit된다. */
 	PM_PROC_STATE_LAST
 
 } PM_PROC_STATE_T;
@@ -48,6 +51,7 @@ typedef enum
 	CREATE_NOTYET,							/**< have plan to create bg process but not created */
 	CREATE_WAITING,							/**< bg process create waiting in register handler */
 	CREATE_COMPLETE,						/**< bg process create done */
+	CREATE_TERM,							/**< bg process is terminated forcibly */
 
 } PM_PROC_BG_STATUS_T;
 
@@ -55,6 +59,7 @@ typedef enum
 {
 	TERM_UPDATE, 							/**< process terminate when s/w update */
 	TERM_POWEROFF, 							/**< process terminate when power off */
+	TERM_NOMEM, 							/**< process terminate when memory is insufficient */
 
 } PM_PROC_TERM_CASE_T;
 
@@ -79,8 +84,6 @@ typedef struct
 	UINT64	nAUID;							/**< The current auid of process */
 
 } PM_PROC_SUBINFO_T;
-
-#define	PM_CURSOR_MAX_FPS		70	/*maximum cursor fps is 50*/
 
 #ifdef __cplusplus
 }

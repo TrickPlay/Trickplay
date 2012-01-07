@@ -145,6 +145,7 @@ LIB_PATHS		=
 LIB_PATHS		+= $(TP_DIR)/lib/lglib
 LIB_PATHS		+= $(TP_DIR)/lib/opengles
 LIB_PATHS		+= ${TRICKPLAY_LIB}
+LIB_PATHS		+= $(TP_DIR)/lib/local
 
 #=========================================================================
 # Aggregations
