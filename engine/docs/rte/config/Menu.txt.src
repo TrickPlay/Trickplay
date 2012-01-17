@@ -63,6 +63,10 @@ Group: SDK Tutorial {
 	File: Tutorial Source Code (no auto-title, docs/rte/tutorial/code.txt)
 }
 
+Group: Sample Applications {
+	File: Multi-Level Menus (no auto-title, docs/tutorials/menu_multilevel/doc.txt)
+}
+
 Group: Programmer's Guide {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
 	File: The Engine Console (no auto-title, docs/rte/progguide/console_cmds.txt)
