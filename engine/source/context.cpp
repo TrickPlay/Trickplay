@@ -1376,7 +1376,7 @@ void TPContext::quit()
     }
     else
     {
-        g_idle_add( delayed_quit, NULL );
+    	g_idle_add_full( TRICKPLAY_PRIORITY , delayed_quit, 0 , 0 );
     }
 }
 

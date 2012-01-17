@@ -383,7 +383,35 @@ globals
 
     reload()
     	[[
-    		App::get(L)->get_context()->reload_app();
+            class ReloadAction : public Action
+            {
+            public:
+            
+                ReloadAction( lua_State * L )
+                {
+                    app = App::get( L );
+                    app->ref();
+                }
+                
+                virtual ~ReloadAction()
+                {
+                    app->unref();
+                }
+            
+            protected:
+            
+                virtual bool run()
+                {
+                    app->get_context()->reload_app();
+                    return false;
+                }
+                
+            private:
+            
+                App * app;    
+            };
+    	    
+    	    Action::post( new ReloadAction( L ) );
     	]];
         
     /*    
