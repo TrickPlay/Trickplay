@@ -9,6 +9,7 @@
 #include "json.h"
 #include "common.h"
 #include "keyboard.h"
+#include "app_resource.h"
 #include "plugin.h"
 #include "trickplay/plugins/lua-api.h"
 
@@ -138,6 +139,30 @@ bool LuaStateProxy::is_valid()
 }
 
 //=============================================================================
+
+bool App::Metadata::set_root( const String & uri_or_native_path )
+{
+	GFile * file = g_file_new_for_commandline_arg( uri_or_native_path.c_str() );
+
+	char * uri = g_file_get_uri( file );
+
+	char * path = g_file_is_native( file ) ? g_file_get_path( file ) : 0;
+
+	g_object_unref( file );
+
+	bool result = uri != 0;
+
+	if ( result )
+	{
+		root_uri = uri;
+		root_native_path = path ? path : "";
+	}
+
+	g_free( uri );
+	g_free( path );
+
+	return result;
+}
 
 class LuaAPIPlugin
 {
@@ -359,7 +384,7 @@ private:
 
 //=============================================================================
 
-bool App::load_metadata_from_data( const gchar * data, Metadata & md)
+bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
 {
     // To clear the incoming metadata
 
@@ -588,32 +613,23 @@ bool App::load_metadata( const char * app_path, App::Metadata & md )
 {
     g_assert( app_path );
 
-    Sandbox sandbox( app_path );
-
-    gsize length = 0;
-
-    gchar * contents = sandbox.get_native_child_contents( APP_METADATA_FILENAME , length );
+    Util::Buffer contents( AppResource( app_path , APP_METADATA_FILENAME , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED ).load_contents( 0 ) );
 
     if ( ! contents )
     {
 		g_warning( "FAILED TO LOAD APP METADATA FROM '%s'" , app_path );
-
 		return false;
     }
 
-    FreeLater free_later( contents );
-
-    bool result = App::load_metadata_from_data( contents, md );
+    bool result = App::load_metadata_from_data( contents.data() , md );
 
     if ( result )
     {
-        md.sandbox = sandbox;
+        md.set_root( app_path );
     }
 
     return result;
 }
-
-
 
 //-----------------------------------------------------------------------------
 
@@ -862,8 +878,6 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
 
 #endif
 {
-	metadata.sandbox.set_context( c );
-
     // Create the user agent
 
     user_agent = Network::format_user_agent(
@@ -974,11 +988,11 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
 
 	Image * splash_image = 0;
 
-	if ( metadata.sandbox.native_child_exists( "default.jpg" ) )
+	if ( AppResource( this , "default.jpg" ).exists( this ) )
 	{
 		splash_image = load_image( "default.jpg" , false );
 	}
-	else if ( metadata.sandbox.native_child_exists( "default.png" ) )
+	else if ( AppResource( this , "default.png" ).exists( this ) )
 	{
 		splash_image = load_image( "default.png" , false );
 	}
@@ -1142,7 +1156,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
 	int top = lua_gettop( L );
 
-	if ( metadata.sandbox.lua_load_pi_child( L , APP_MAIN_FILENAME ) || lua_pcall( L , 0 , LUA_MULTRET , 0 ) )
+	if ( AppResource( this , APP_MAIN_FILENAME , AppResource::URI_NOT_ALLOWED ).lua_load( L ) || lua_pcall( L , 0 , LUA_MULTRET , 0 ) )
 	{
 		g_critical( "%s", String( 60, '=' ).c_str() );
 		g_critical( "LUA ERROR : %s", lua_tostring( L, -1 ) );
@@ -1517,61 +1531,6 @@ EventGroup * App::get_event_group()
 
 //-----------------------------------------------------------------------------
 
-char * App::normalize_path( const gchar * path_or_uri, bool & is_uri, const StringSet & additional_uri_schemes )
-{
-	if ( ! path_or_uri )
-	{
-		return 0;
-	}
-
-	FreeLater free_later;
-
-	char * scheme = g_uri_parse_scheme( path_or_uri );
-
-	if ( scheme )
-	{
-		free_later( scheme );
-
-		if ( ! strcmp( scheme , "http" ) || ! strcmp( scheme , "https" ) )
-		{
-			is_uri = true;
-			return g_strdup( path_or_uri );
-		}
-
-		if ( additional_uri_schemes.find( scheme ) != additional_uri_schemes.end() )
-		{
-			is_uri = true;
-			return g_strdup( path_or_uri );
-		}
-	}
-
-	// There is no recognizable scheme, we assume it is a platform independent path,
-	// which may have a scheme of its own.
-
-	String result;
-
-	if ( metadata.sandbox.is_native() )
-	{
-		is_uri = false;
-		result = metadata.sandbox.get_pi_child_native_path( path_or_uri );
-	}
-	else
-	{
-		is_uri = true;
-		bool is_native = false;
-		result = metadata.sandbox.get_pi_child_uri( path_or_uri , is_native );
-	}
-
-	if ( result.empty() )
-	{
-		return 0;
-	}
-
-	return g_strdup( result.c_str() );
-}
-
-//-----------------------------------------------------------------------------
-
 bool App::change_app_path( const char * path )
 {
     g_assert( path );
@@ -1581,10 +1540,12 @@ bool App::change_app_path( const char * path )
         return false;
     }
 
-    metadata.sandbox = Sandbox( path );
-    metadata.sandbox.set_context( context );
+    if ( ! metadata.set_root( path ) )
+    {
+    	return false;
+    }
 
-    g_warning( "*** APP SANDBOX CHANGED FOR %s TO '%s'" , metadata.id.c_str() , metadata.sandbox.get_root_uri().c_str() );
+    g_warning( "*** APP SANDBOX CHANGED FOR %s TO '%s'" , metadata.id.c_str() , metadata.get_root_uri().c_str() );
 
     return true;
 }
@@ -1765,25 +1726,20 @@ Image * App::load_image( const gchar * source , bool read_tags )
         return 0;
     }
 
-    bool is_uri = false;
+    AppResource resource( this , source );
 
-    char * path = normalize_path( source , is_uri );
-
-    if ( ! path )
+    if ( ! resource.good() )
     {
-        tplog( "  INVALID PATH" );
-        return 0;
+    	return 0;
     }
-
-    FreeLater free_later( path );
 
     Image * image = 0;
 
-    if ( is_uri )
+    if ( resource.is_http() )
     {
         tplog( "  STARTING REQUEST" );
 
-        Network::Request request( get_user_agent(), path );
+        Network::Request request( get_user_agent() , resource.get_uri() );
 
         Network::Response response = get_network()->perform_request( request, get_cookie_jar() );
 
@@ -1798,12 +1754,14 @@ Image * App::load_image( const gchar * source , bool read_tags )
             tplog( "  REQUEST FAILED" );
         }
     }
-    else
+    else if ( resource.is_native() )
     {
-        tplog( "  PATH IS '%s'" , path );
+    	String path( resource.get_native_path().c_str() );
+
+        tplog( "  PATH IS '%s'" , path.c_str() );
         tplog( "  DECODING" );
 
-        image = Image::decode( path , read_tags );
+        image = Image::decode( path.c_str() , read_tags );
     }
 
     tplog( "  %s" , image ? "SUCCEEDED" : "FAILED" );
@@ -1887,11 +1845,9 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
         return false;
     }
 
-    bool is_uri = false;
+    AppResource resource( this , source );
 
-    char * path = normalize_path( source , is_uri );
-
-    if ( ! path )
+    if ( ! resource.good() )
     {
         tplog( "  INVALID PATH" );
 
@@ -1903,13 +1859,11 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
         return false;
     }
 
-    FreeLater free_later( path );
-
-    if ( is_uri )
+    if ( resource.is_http() )
     {
         tplog( "  STARTING NETWORK REQUEST" );
 
-        Network::Request request( get_user_agent(), path );
+        Network::Request request( get_user_agent() , resource.get_uri() );
 
         get_network()->perform_request_async(
             request,
@@ -1918,12 +1872,14 @@ bool App::load_image_async( const gchar * source , bool read_tags , Image::Decod
             new ImageResponseClosure( read_tags , callback , user , destroy_notify ),
             ImageResponseClosure::destroy );
     }
-    else
+    else if ( resource.is_native() )
     {
-        tplog( "  PATH IS '%s'" , path );
+    	String path( resource.get_native_path() );
+
+        tplog( "  PATH IS '%s'" , path.c_str() );
         tplog( "  STARTING DECODE FROM FILE" );
 
-        Image::decode_async( path , read_tags , callback , user , destroy_notify );
+        Image::decode_async( path.c_str() , read_tags , callback , user , destroy_notify );
     }
 
     return true;
@@ -1961,3 +1917,4 @@ void App::audio_match( const String & json )
 }
 
 //.........................................................................
+

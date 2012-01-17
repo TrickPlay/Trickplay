@@ -2,6 +2,7 @@
 #include "controller_delegates.h"
 #include "json.h"
 #include "app.h"
+#include "app_resource.h"
 ]]
 
 #==============================================================================
@@ -727,25 +728,13 @@ interface Controller [[ControllerDelegate*]]
 
     bool declare_resource(string resource, string url)
         [[
-            result=false;
-            
-            bool is_uri=false;
-            
-            App * app = App::get(L);
-
-            gchar * path=app->normalize_path(url,is_uri);
-            
-            if (path)
+            if ( AppResource r = AppResource( L , url ) )
             {
-                String final_uri(path);
-                g_free(path);
-                
-                if (!is_uri)
-                {
-                    final_uri="file://"+final_uri;
-                }
-                
-                result=self->declare_resource(resource,final_uri);
+                result = self->declare_resource( resource , r.get_uri().c_str() ); 
+            }
+            else
+            {
+                result = false;
             }
         ]];
         
