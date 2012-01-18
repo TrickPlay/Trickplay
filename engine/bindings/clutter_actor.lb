@@ -2506,7 +2506,9 @@ interface actor [[ClutterActor*]]
     
     self - reference to the object receiving the event
     
-    old_parent - the object that was the parent of this UIElement or nil.
+    old_parent - reference to the parent object (now unparented). If the object had no parent, this argument will be nil.
+    
+    *See Also:* the <parent> property and the <unparent> function
     
     */
 
