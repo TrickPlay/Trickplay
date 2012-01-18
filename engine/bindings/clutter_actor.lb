@@ -2036,16 +2036,42 @@ interface actor [[ClutterActor*]]
 
     bool complete_animation()
 	[[
-	    ClutterAnimation * animation=clutter_actor_get_animation(self);
-	    if (animation)
+	    result = false;
+	    
+	    if ( ClutterAnimation * animation=clutter_actor_get_animation( self ) )
 	    {
-		clutter_animation_completed(animation);
-		result=true;
+	        if ( ClutterTimeline * timeline = clutter_animation_get_timeline( animation ) )
+	        {
+	            clutter_timeline_advance( timeline , clutter_timeline_get_duration( timeline ) );
+                 
+                result=true;
+	        }    
 	    }
-	    else
-	    {
-		result=false;
-	    }
+	]];
+	
+	/*
+    Function: stop_animation
+    
+    The stop_animation() function terminates the animation started with a call to <animate>. All the properties that were being animated remain at their current values and if the animation specified an on_completed event, it will not be called.
+    
+    *Arguments:* None
+    
+    *Return Value:* Boolean indicating whether or not an animation had been running (true = animation was running and was stopped).
+    
+    *See Also:* the <animate> function
+    
+	*/
+	
+	bool stop_animation()
+	[[
+        result = false;
+        
+        if ( clutter_actor_get_animation( self ) )
+        {
+            clutter_actor_detach_animation( self );
+            
+            result=true;
+        }
 	]];
 	
 	table constraints
