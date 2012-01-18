@@ -9,27 +9,34 @@ module clutter_actor;
 
 [[
 
-void actor_on_show(ClutterActor*actor,lua_State*L)
+static void actor_on_show(ClutterActor*actor,lua_State*L)
 {
 	UserData::invoke_callback( G_OBJECT( actor ) , "on_show" , 0 , 0 , L );
 }
 
-void actor_on_hide(ClutterActor*actor,lua_State*L)
+static void actor_on_hide(ClutterActor*actor,lua_State*L)
 {
 	UserData::invoke_callback( G_OBJECT( actor ) , "on_hide" , 0 , 0 , L );
 }
     
-void actor_on_key_focus_in(ClutterActor*actor,lua_State*L)
+static void actor_on_key_focus_in(ClutterActor*actor,lua_State*L)
 {
 	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_focus_in" , 0 , 0 , L );
 }
 
-void actor_on_key_focus_out(ClutterActor*actor,lua_State*L)
+static void actor_on_key_focus_out(ClutterActor*actor,lua_State*L)
 {
 	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_focus_out" , 0 , 0 , L );
 }
 
-gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
+static void actor_on_parent_changed( ClutterActor * actor , ClutterActor * old_parent , lua_State * L )
+{
+    ClutterUtil::wrap_concrete_actor( L , old_parent );
+    
+    UserData::invoke_callback( G_OBJECT( actor ) , "on_parent_changed" , 1 , 0 , L );    
+}
+
+static gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
 {
     int result = FALSE;
     
@@ -50,7 +57,7 @@ gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     return result;
 }
 
-gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
+static gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
 {
     int result = FALSE;
     
@@ -71,7 +78,7 @@ gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     return result;
 }
 
-gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
+static gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
 {
     int result = FALSE;
 
@@ -96,7 +103,7 @@ gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_St
     return result;
 }
 
-gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
+static gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -120,7 +127,7 @@ gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_Stat
     return result;
 }
 
-gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L)
+static gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -142,7 +149,7 @@ gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L
     return result;
 }
 
-gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L)
+static gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -165,7 +172,7 @@ gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L
     return result;
 }
 
-gboolean actor_on_enter(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
+static gboolean actor_on_enter(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -186,7 +193,7 @@ gboolean actor_on_enter(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*
     return result;
 }
 
-gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
+static gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -2463,4 +2470,28 @@ interface actor [[ClutterActor*]]
 			G_CALLBACK(actor_on_hide),
 			L);	    	    
 	]];
+	
+    /*
+    Event Handler: on_parent_changed
+    
+    The on_parent_changed() event handler is called whenever the object's parent changes.
+    
+    *Arguments:*
+    
+    self - reference to the object receiving the event
+    
+    old_parent - the object that was the parent of this UIElement or nil.
+    
+    */
+
+	callback on_parent_changed( UIElement self , UIElement old_parent )
+	[[
+        UserData::get(L)->connect_signal_if( 
+            on_parent_changed,
+            "on_parent_changed",
+            "parent-set",
+            G_CALLBACK(actor_on_parent_changed),
+            L);             
+	]];
+	
 }
