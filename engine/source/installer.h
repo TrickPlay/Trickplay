@@ -12,7 +12,7 @@ public:
 
     Installer( TPContext * context );
 
-    ~Installer();
+    virtual ~Installer();
 
     //.........................................................................
     // This will download and install an app. The download is done in a download
@@ -54,7 +54,7 @@ public:
 
     struct Info
     {
-        enum Status { DOWNLOADING, INSTALLING, FAILED, FINISHED };
+        enum InfoStatus { DOWNLOADING, INSTALLING, FAILED, FINISHED };
 
         Info()
         :
@@ -91,7 +91,7 @@ public:
         {}
 
         guint       id;
-        Status      status;
+        InfoStatus  status;
         String      app_id;
         String      app_name;
         String      owner;

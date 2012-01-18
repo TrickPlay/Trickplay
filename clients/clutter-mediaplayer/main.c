@@ -24,6 +24,8 @@ typedef struct
     gint            video_width;
     gint            video_height;
     int             media_type;
+    int             mute;
+    double          volume;
 }
 UserData;
 
@@ -491,7 +493,14 @@ static int mp_get_audio_volume(TPMediaPlayer * mp,double * volume)
     USERDATA(mp);
     CM(ud);
 
-    *volume=clutter_media_get_audio_volume(cm);
+    if ( ud->mute )
+    {
+        * volume = ud->volume;
+    }
+    else
+    {
+        *volume=clutter_media_get_audio_volume(cm);
+    }
     return 0;
 }
 
@@ -500,18 +509,51 @@ static int mp_set_audio_volume(TPMediaPlayer * mp,double volume)
     USERDATA(mp);
     CM(ud);
 
-    clutter_media_set_audio_volume(cm,volume);
+    if ( ud->mute )
+    {
+        ud->volume = volume;
+    }
+    else
+    {
+        clutter_media_set_audio_volume(cm,volume);
+    }
     return 0;
 }
 
 static int mp_get_audio_mute(TPMediaPlayer * mp,int * mute)
 {
-    return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
+    USERDATA(mp);
+    CM(ud);
+
+    *mute = ud->mute;
+
+    return 0;
 }
 
 static int mp_set_audio_mute(TPMediaPlayer * mp,int mute)
 {
-    return TP_MEDIAPLAYER_ERROR_NOT_IMPLEMENTED;
+    USERDATA(mp);
+    CM(ud);
+
+    int old_mute = ud->mute;
+
+    ud->mute = mute ? 1 : 0;
+
+    if ( old_mute != ud->mute )
+    {
+        if ( ud->mute )
+        {
+            ud->volume = clutter_media_get_audio_volume(cm);
+            clutter_media_set_audio_volume(cm,0);
+        }
+        else
+        {
+            clutter_media_set_audio_volume(cm,ud->volume);
+            ud->volume = 0;
+        }
+    }
+
+    return 0;
 }
 
 static void play_sound_done(GstBus * bus, GstMessage * message, GstElement * playbin)

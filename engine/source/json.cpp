@@ -672,6 +672,24 @@ namespace JSON
         return type;
     }
 
+    double Value::as_number() const
+    {
+        switch( type )
+        {
+            case T_DOUBLE:
+                return value.double_value;
+
+            case T_INT:
+                return value.int_value;
+
+            case T_BOOL:
+                return value.boolean_value ? 1 : 0;
+
+            default:
+                return 0;
+        }
+    }
+
     std::ostream & operator << ( std::ostream & os , const Value & value )
     {
         switch( value.get_type() )
@@ -730,10 +748,25 @@ namespace JSON
     {
         return map[ key ];
     }
+    
+    Value & Object::at ( const String & key )
+    {
+        return map[ key ];
+    }
 
     bool Object::has( const String & key ) const
     {
         return map.find( key ) != map.end();
+    }
+
+    Object::Map::iterator Object::find( const String & key )
+    {
+    	return map.find( key );
+    }
+
+    Object::Map::const_iterator Object::find( const String & key ) const
+    {
+    	return map.find( key );
     }
 
     Object::Map::iterator Object::begin()
@@ -783,6 +816,16 @@ namespace JSON
         os << * this;
 
         return os.str();
+    }
+
+    Object::Map::size_type Object::size() const
+    {
+    	return map.size();
+    }
+
+    void Object::clear()
+    {
+    	map.clear();
     }
 
     //=============================================================================
@@ -876,6 +919,16 @@ namespace JSON
 
         return os.str();
     }
+
+    template <> Object & Array::append< Object > ()
+	{
+    	return append().as<Object>();
+	}
+
+    template <> Array & Array::append< Array >( )
+	{
+    	return append().as<Array>();
+	}
 
     //=============================================================================
 

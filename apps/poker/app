@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.poker-dawgz",
+    release     = "7",
+    version     = "2.0",
+    name        = "Poker Dawgz",
+    author      = "Darren, Devin, and Rex",
+    copyright   = "© Trickplay Inc."
+}
+

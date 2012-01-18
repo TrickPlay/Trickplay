@@ -133,7 +133,7 @@ private:
 
     struct ResourceInfo
     {
-        String      file_name;
+        String      native_uri;
         String      group;
         gpointer    connection;
     };
@@ -144,7 +144,7 @@ private:
 
     virtual void handle_http_get( const HttpServer::Request & request , HttpServer::Response & response );
 
-    String start_serving_resource( gpointer connection , const String & file_name , const String & group );
+    String start_serving_resource( gpointer connection , const String & native_uri , const String & group );
 
     void drop_resource_group( gpointer connection , const String & group );
 
@@ -152,7 +152,7 @@ private:
 
     struct PostInfo
     {
-        enum Type { PICTURES , AUDIO };
+        enum Type { IMAGE , AUDIO };
 
         Type        type;
         gpointer    connection;

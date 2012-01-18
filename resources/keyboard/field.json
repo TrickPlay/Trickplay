@@ -1,0 +1,42 @@
+[
+    {
+        'type'      :   'ClutterGroup',
+        'id'        :   'field',
+        'x'         :   40,
+        'y'         :   6,
+        'children'  :
+        [
+            {
+                'type'      :   'ClutterText',
+                'name'      :   'caption',
+                'color'     :   '#ffffff',
+                'font-name' :   'FreeSans 26px',
+                'text'      :   'Field caption',
+                'width'                 :   420,
+                'clip-to-allocation'    :   true,
+                'line-wrap'             :   false,
+                'ellipsize'             :   'PANGO_ELLIPSIZE_END'
+            },
+            
+            {
+                'type'      :   'ClutterTexture',
+                'name'      :   'text-field',
+                'y'         :   36
+            },
+            
+            {
+                'type'                  :   'ClutterText',
+                'name'                  :   'value',
+                'color'                 :   '#ffffff',
+                'font-name'             :   'FreeSans 26px',
+                'y'                     :   41,
+                'x'                     :   10,
+                'width'                 :   420,
+                'clip-to-allocation'    :   true,
+                'line-wrap'             :   false,
+                'ellipsize'             :   'PANGO_ELLIPSIZE_END'
+            }
+            
+        ]
+    }
+]

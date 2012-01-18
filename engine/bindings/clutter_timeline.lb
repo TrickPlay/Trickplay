@@ -41,8 +41,44 @@ void Timeline_completed( ClutterTimeline * timeline , gpointer )
 /*
     Class: Timeline
     
-    A timeline is an object that lets you animate UIElements. You create one, set
-    a function for the <on_new_frame> event and then start it.
+    The Timeline class enables the asynchronous animation of one or more UIElement objects. A Timeline-based animation is appropriate for animations that require property settings to move in multiple directions, such as across the screen and back again.
+    
+    The <UIElement.animate> function provides a similar asynchronous method of animating UIElement objects. The animate() function defines beginning and ending property settings, starts running, and continues until completion without requiring further intervention by the program. The property settings for each frame of the animation are generated automatically. For animations of a single object having property changes that go straight from start to finish with no deviations, the animate() function provides a simple method of implementation.
+    
+    A Timeline-based animation enables finer control over the animation, but at the cost of requiring the program to perform periodic animation maintenance. A Timeline-based animation defines its initial property settings, starts running, and then receives periodic notifications in the form of on_new_frame() events that enable--and, in fact, require--the program to update and modify the property settings based upon the current progress of the animation. Unlike the animate() function which generates property settings automatically, a Timeline-based animation must generate each frame's property settings dynamically in the on_new_frame() event handler. For animations that animate more than one object or that have property values that change course or have varying speeds, a Timeline animation provides a reasonable and powerful method of implementation.
+    
+    *Code Example:* The following statements use a Timeline object to animate a Rectangle so it moves across the display while rotating around its X-axis.
+    
+    (code)
+    -- Create the Rectangle to animate
+   	movingRect = Rectangle{ position = { -100, 400 },
+	                        size = { 100, 100 },
+	                        color = { 225, 225, 0, 255 } }
+
+	-- Show it on the screen
+	screen:add( movingRect )	                        
+
+	-- Animate the Rectangle using a Timeline
+	movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
+							  loop = true,      -- loop forever
+
+		-- Event handler
+		on_new_frame = function( self, msecs, progress )
+		
+			-- X changes from -100 to 2020
+			movingRect.x = -100 + (2120 * progress)
+			
+			-- X rotation changes from 0 to 360
+			movingRect.x_rotation = { 360 * progress, 0, 0 }
+		end
+	}
+
+	-- Start the Timeline animation
+	movingRect_tl:start()
+    (end)
+
+	*Code Example:* The source code for an <Expanded Timeline Demo> is listed at the end of this page. The program uses a single Timeline object to animate multiple properties of three rectangles.
+	
 */
 
 class Timeline [[ClutterTimeline*]]
@@ -68,7 +104,11 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: duration
 		
-		The duration of the timeline in milliseconds.
+		The duration property is an integer value specifying the length of the Timeline in milliseconds.
+		
+		*Default Setting:* 1000 milliseconds, i.e., one second
+		
+		*See Also:* the <delay> property
 	*/
 	
     int duration
@@ -78,7 +118,11 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: loop
 		
-		Whether the timeline should loop forever.
+		The loop property is a boolean flag indicating whether or not the Timeline should loop infinitely (true = loop). A looping Timeline can be terminated by calling the <stop> function.
+		
+		*Default Setting:* false, i.e., Timeline does not loop infinitely
+		
+		*See Also:* the <duration> property and the <stop> function
 	*/
 	
     bool loop
@@ -88,7 +132,11 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: delay
 		
-		A delay, in milliseconds after which the timeline will start.
+		The delay property is an integer value specifying the number of milliseconds the Timeline should delay before starting. This is a one-time delay that precedes the initial running of the Timeline. If the Timeline loops, the delay does not occur at the start of subsequent iterations.
+		
+		*Default Setting:* 0 milliseconds, i.e., no delay
+		
+		*See Also:* the <duration> property and the <start> function
 	*/
 	
     int delay
@@ -98,12 +146,18 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: direction
 		
-		The direction of the timeline.
+		The direction property is a string specifying the Timeline's direction.
 		
-		Possible Values:
+		The direction property can be set while the Timeline is running to change its direction.
+
+		*Supported Settings:* The direction string is case-sensitive.
 		
-			FORWARD - The timeline will move from 0 to 1.
-			BACKWARD - The timeline will move from 1 to 0.
+			FORWARD - The Timeline will move from its first frame to its last frame
+			BACKWARD - The Timeline will move from its last frame to its first frame
+			
+		*Default Setting:* "FORWARD"
+		
+		*See Also:* the <duration> property
 	*/
 	
     string direction
@@ -116,7 +170,13 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: elapsed
 		
-		The number of milliseconds elapsed since the timeline was started.
+		The elapsed property is an integer value specifying the number of milliseconds elapsed since the Timeline began its current iteration.
+		
+		The elapsed property has a valid value only while the Timeline is running.
+		
+		*Default Setting:* 0
+		
+		*See Also:* the <duration> and <loop> properties
 	*/
 	
     readonly int elapsed
@@ -125,8 +185,15 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: delta
 		
-		This value is only valid inside the <on_new_frame> event. It tells you
-		how many milliseconds have elapsed since on_new_frame was called last.
+		The delta property is an integer value specifying the number of milliseconds since the last on_new_frame() event handler was invoked.
+		
+		The delta property contains a valid value only while processing the on_new_frame() event handler; outside of the handler, the property's setting is undefined.
+		
+		The delta value enables physics-based simulations that require knowledge of the exact amount of time elapsed since the previous callback.
+		
+		*Default Setting:* Undefined, valid only within the on_new_frame() event handler
+		
+		*See Also:* the <elapsed> and <duration> properties and the <on_new_frame> event handler
 	*/
 	
     readonly int delta
@@ -135,7 +202,13 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: progress
 		
-		The progress of the timeline as a value between 0 and 1.
+		The progress property is a double value between 0 and 1 that indicates the percentage of a running Timeline iteration that has completed. For example, a value of 0.10 indicates that 10% of the current iteration has completed.
+		
+		The progress property has a valid value only while a Timeline is running. A program can determine if a Timeline is running by accessing the <is_playing> property.
+		
+		*Default Setting:* Undefined, valid only while the Timeline is running
+		
+		*See Also:* the <duration>, <elapsed> and <is_playing> properties
 	*/
     readonly double progress
 	[[progress=clutter_timeline_get_progress(self);]];
@@ -143,7 +216,13 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: is_playing
 		
-		True if the timeline is running.
+		The is_playing property is a boolean flag specifying whether or not the Timeline is currently running (true = running).
+		
+		During the period when a running Timeline is paused, the is_playing property will be false until the Timeline resumes.
+		
+		*Default Setting:* false
+		
+		*See Also:* the <progress> property
 	*/
 	
     readonly bool is_playing
@@ -152,8 +231,11 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: markers
 		
-		A table listing all the markers that have been set on the timeline.
-		The table contains the names of all the markers.
+		The markers property is a table containing all the markers defined for the Timeline. Each entry in the table is a unique string specifying a marker name. If no markers are defined for the Timeline, the property is set to an empty table.
+
+		*Default Setting:* {}, i.e., an empty table
+		
+		*See Also:* the <add_marker> and <list_markers> functions
 	*/
 	
     readonly table markers
@@ -162,8 +244,15 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: reverse
 		
-		Reverses the <direction> of the timeline.
+		The reverse() function toggles the direction of the Timeline, from either "FORWARD" to "BACKWARD" or vice versa. If the reverse() function is called when the Timeline is running, it will reverse direction and run all the way back to its opposite starting/ending point.
+		
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*See Also:* the <direction> property
 	*/
+	
 	reverse()
 	[[clutter_timeline_set_direction(self,
 			clutter_timeline_get_direction(self)==CLUTTER_TIMELINE_FORWARD
@@ -173,7 +262,17 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: start
 		
-		Starts the timeline.
+		The start() function causes the Timeline to begin running and invokes the on_started() event handler.
+		
+		If a <delay> has been defined, it counts down before the animation begins and the on_started() event handler is called.
+		
+		If a running Timeline has been paused, it can resume running by calling start() again.
+		
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*See Also:* the <on_started> event handler and the <pause> and <stop> functions
 	*/
 	
     start()
@@ -184,15 +283,30 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: pause
 		
-		Pauses the timeline.
+		The pause() function halts a running Timeline at its current position and invokes the on_paused() event handler.
+		
+		To resume the paused Timeline, call the start() function again; the Timeline will resume from the point at which it had been paused. Note: Calling start() to resume a paused Timeline causes the on_started() event handler to be called.
+		
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*See Also:* the <on_paused> event handler and the <start> and <stop> functions
 	*/
+	
     pause()
 	[[clutter_timeline_pause(self);]];
 	
 	/*
 		Function: stop
 		
-		Stops the timeline and resets it to the beginning (or end, if direction is backward).
+		The stop() function halts a running Timeline and resets the Timeline to its starting position. The stop() function does *not* cause the on_completed() event handler to be called.
+		
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*See Also:* the <start> and <pause> functions
 	*/
 	
     stop()
@@ -201,7 +315,13 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: rewind
 		
-		Rewinds the timeline to the beginning  (or end, if direction is backward).
+		The rewind() function moves the animation back to its original starting position. If the Timeline is running, it will continue running from its new position.
+		
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*See Also:* the <start> and <stop> functions
 	*/
 	
     rewind()
@@ -210,12 +330,19 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: skip
 		
-		Skips a number of milliseconds.
+		The skip() function moves the Timeline ahead a specified number of milliseconds.
 		
-		Arguments:
+		To skip to a specific time on the Timeline, use the advance() function.
+
+		Note: It is not possible to skip backwards along the Timeline by specifying a negative number of milliseconds. Instead, use the advance() function or define a marker for the desired position and then call advance_to_marker().
+
+		*Arguments:*
 		
-			msecs - The milliseconds to skip.
+			msecs - positive integer value specifying the number of milliseconds to advance along the Timeline
+			
+		*Return Value:* None
 		
+		*See Also:* the <advance> and <advance_to_marker> functions
 	*/
 
     skip(int msecs)
@@ -224,11 +351,19 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: advance
 		
-		Advances the timeline by a number of milliseconds.
+		The advance() function moves the current position to a time specified in milliseconds since the Timeline's beginning. Any non-negative time along the Timeline can be specified, including zero.
 		
-		Arguments:
+		The on_new_frame() event handler is not immediately called following a call to advance().
 		
-			msecs - The milliseconds to advance.
+		To advance a specific number of milliseconds on the Timeline, use the skip() function.
+
+		*Arguments:*
+		
+			msecs - non-negative integer value specifying the number of milliseconds along the Timeline at which to set the current position
+			
+		*Return Value:* None
+		
+		*See Also:* the <skip> and <advance_to_marker> functions
 	*/
 	
     advance(int msecs)
@@ -237,13 +372,65 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: add_marker
 		
-		Adds a named marker at the desired position.
+		The add_marker() function defines a named marker that is attached to a specific time on the Timeline. During the running of the Timeline's animation, when the marked time is reached, the on_marker_reached() event handler is called.
 		
-		Arguments:
+		Each marker defined for the object must be a unique string. An attempt to add a marker with an existing name has no effect.
 		
-			name - The name of the new marker.
+		The marked time on the Timeline is specified in milliseconds from the start of the animation, not including any initial delay.
+		
+		A marker can be removed by calling the <remove_marker> function.
+		
+		The animiation can jump to a particular marker by calling the <advance_to_marker> function.
+		
+		A table of defined markers can be retrieved from the <markers> property.
+
+		*Arguments:*
+		
+			name - unique string name of the marker
+			msecs - time position in milliseconds from start of Timeline at which to add the marker
 			
-			msecs - The position at which to add the marker.
+		*Return Value:* None
+		
+		*Code Example:* The following statements use a Timeline object to animate a Rectangle so it moves across the display while rotating around its X-axis. It also places  markers at one-second intervals along the Timeline and defines an on_marker_reached() event handler to output an informational message to the console every time a marker is hit during the animation.
+    
+	    (code)
+    	-- Create the Rectangle to animate
+   		movingRect = Rectangle{ position = { -100, 400 },
+		                        size = { 100, 100 },
+		                        color = { 225, 225, 0, 255 } }
+
+		-- Show it on the screen
+		screen:add( movingRect )	                        
+
+		-- Animate the Rectangle using a Timeline
+		movingRect_tl = Timeline{ duration = 5000,  -- 5 seconds
+								  loop = true,      -- loop forever
+
+			-- on_marker_reached() event handler
+			on_marker_reached = function( self, name, msecs )
+				print( "In on_marker_reached(): Name = ", name, ", time = ", msecs )
+			end,
+
+			-- on_new_frame() event handler
+			on_new_frame = function( self, msecs, progress )
+				-- X changes from -100 to 2020
+				movingRect.x = -100 + (2120 * progress)
+				-- X rotation changes from 0 to 360
+				movingRect.x_rotation = { 360 * progress, 0, 0 }
+			end
+		}
+
+		-- Define Timeline markers at one-second intervals
+		movingRect_tl:add_marker( "Marker1000", 1000 )
+		movingRect_tl:add_marker( "Marker2000", 2000 )
+		movingRect_tl:add_marker( "Marker3000", 3000 )
+		movingRect_tl:add_marker( "Marker4000", 4000 )
+
+		-- Start the Timeline animation
+		movingRect_tl:start()
+    	(end)
+
+		*See Also:* the <markers> property, the <remove_marker> and <advance_to_marker> functions and the <on_marker_reached> event handler
 	*/
 
     add_marker(string name,int msecs)
@@ -252,11 +439,15 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: remove_marker
 		
-		Removes a marker by name.
+		The remove_marker() function removes the specified marker from the Timeline. If no marker with the specified name is found, the function has no effect. The <has_marker> function can be used to determine whether a particular marker name is attached to the Timeline.
 		
-		Arguments:
+		*Arguments:*
 		
-			name - The name of the marker to remove.
+			name - string name of the marker to remove
+			
+		*Return Value:* None
+		
+		*See Also:* the <markers> property and the <add_marker> function
 	*/
 		
     remove_marker(string name)
@@ -265,16 +456,17 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: has_marker
 		
-		Tells you whether the timeline has a marker by this name.
+		The has_marker() function returns a boolean value specifying whether or not a specified marker name has been defined (true = is defined).
 		
-		Arguments:
+		The name-comparison operation is case-sensitive.
+
+		*Arguments:*
 		
-			name - The name of the marker to check.
+			name - string name of the marker to search for
 			
-		Returns:
+		*Return Value:* Returns true if marker exists, else returns false.
 		
-			true - If that marker exists.
-			false - Otherwise.
+		*See Also:* the <markers> property and the <add_marker> function
 	*/
 	
     bool has_marker(string name)
@@ -283,11 +475,17 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: advance_to_marker
 		
-		Advances to a marker by name.
+		The advance_to_marker() function moves the animation to the specified marker. This also causes the on_marker_reached() event handler to be called with the specified marker name.
 		
-		Arguments:
+		The advance_to_marker() function can move the animation to any time point on the Timeline.
 		
-			name - The name of the marker.
+		*Arguments:*
+		
+			name - string name of the marker. The string must match a defined marker exactly, including case.
+			
+		*Return Value:* None
+		
+		*See Also:* the <add_marker> function and the <on_marker_reached> event handler
 	*/
 	
     advance_to_marker(string name)
@@ -296,15 +494,15 @@ class Timeline [[ClutterTimeline*]]
     /*
     	Function: list_markers
     	
-    	Returns a table of all markers at the given position. 
+    	The list_markers() function returns a table of markers that have been defined for a specified time. If no time is specified, the returned table contains all the markers defined for the Timeline.
     	
-    	Arguments:
+    	*Arguments:*
     	
-    		msecs - The position, in milliseconds, for which to list markers.
+    		msecs - time position in milliseconds for which to retrieve markers. Optional.
     		
-    	Returns:
+    	*Return Value:* Table of marker name strings defined for the specified time. If no time was specified, the table contains all the markers defined for the Timeline.
     	
-    		table - A table of marker names at that position.  
+    	*See Also:* the <add_marker> function and the <markers> property
     */
     
     table list_markers(int msecs = -1)
@@ -322,18 +520,19 @@ class Timeline [[ClutterTimeline*]]
 	]];
 	
 	/*
-		Event: on_new_frame
+		Event Handler: on_new_frame
 		
-		Called as often as possible while a timeline is running. This is where
-		you would adjust values for your UIElements.
+		The on_new_frame() event handler is called for each frame of the animation (in theory), enabling the program to update the animation's settings to appropriate values based upon the current position within the animation. In reality, the handler is called as often as possible during the running of the animation and will vary depending primarily upon the underlying hardware.
 		
-		Arguments:
+		*Arguments:*
 		
-			timeline - The timeline the event applies to.
+			timeline - Timeline object the event applies to
+			elapsed - integer value specifying the elapsed time in milliseconds from the animation's start. The same value will be in the object's <elapsed> property.
+			progress - double value between 0 and 1 that indicates the percentage of the current Timeline iteration that has completed. The same value will be in the object's <progress> property.
 			
-			elapsed - The current time, in milliseconds of the timeline. Same as <elapsed>.
-			
-			progress - The progress of the timeline, same as <progress>. 
+		*Return Value:* None
+		
+		*See Also:* the <duration>, <elapsed> and <progress> properties
 	*/
 		
     callback on_new_frame
@@ -347,13 +546,17 @@ class Timeline [[ClutterTimeline*]]
 	]];
 	
 	/*
-		Event: on_started
+		Event Handler: on_started
 		
-		Called whenever the timeline is started.
+		The on_started() event handler is called when the Timeline is started. If a <delay> has been defined, the handler is called after the delay has expired.
 		
-		Arguments:
+		*Argument:*
 		
-			timeline - The timeline.
+			timeline - Timeline object the event applies to
+			
+		*Return Value:* None
+		
+		*See Also:* the <start> function
 	*/
 	
     callback on_started
@@ -367,13 +570,17 @@ class Timeline [[ClutterTimeline*]]
 	]];
     
     /*
-    	Event: on_completed
+    	Event Handler: on_completed
     	
-    	Called whenever the timeline reaches the end.
+    	The on_completed() event handler is called each time the Timeline completes a single iteration. If the object's <loop> property is false, the Timeline will perform a single iteration; otherwise, it will loop infinitely or until it is stopped explicitly by calling the stop() function.
 		
-		Arguments:
+		*Argument:*
 		
-			timeline - The timeline.
+			timeline - Timeline object the event applies to
+			
+		*Return Value:* None
+		
+		*See Also:* the <duration> and <loop> properties and the <start> and <stop> functions
     */
     
     callback on_completed
@@ -387,13 +594,19 @@ class Timeline [[ClutterTimeline*]]
 	]];
 	
 	/*
-		Event: on paused
+		Event Handler: on_paused
 		
-		Called whenever the timeline is paused.
+		The on_paused() event handler is called when a running Timeline is paused by calling the pause() function.
+		
+		Paused animations can be resumed by calling the start() function.
+		
+		*Argument:*
+		
+			timeline - Timeline object the event applies to
 			
-		Arguments:
+		*Return Value:* None
 		
-			timeline - The timeline.
+		*See Also:* the <pause> and <start> functions
 	*/
 	
     callback on_paused
@@ -407,17 +620,21 @@ class Timeline [[ClutterTimeline*]]
 	]];
 	
 	/*
-		Event: on_marker_reached
+		Event Handler: on_marker_reached
 		
-		Called whenever the timeline reaches a marker.
+		The on_marker_reached() event handler is called when a running Timeline arrives at a defined marker.
 				
-		Arguments:
+		*Arguments:*
 		
-			timeline - The timeline.
+			timeline - Timeline object the event applies to
+			name - string name of the marker reached
+			msecs - integer elapsed time in milliseconds from the animation's beginning
 			
-			name - The name of the marker reached.
-			
-			msecs - The position of the marker.
+		*Return Value:* None
+		
+		*Code Example:* To see an example of the on_marker_reached() event handler, refer to the code example in the <add_marker> function 
+		
+		*See Also:* the <add_marker> function
 	*/
 	
     callback on_marker_reached
@@ -434,7 +651,7 @@ class Timeline [[ClutterTimeline*]]
 [[
 void Timeline_on_new_frame(ClutterTimeline*timeline,gint msecs,lua_State*L)
 {
-    lua_pushinteger(L,msecs);
+    lua_pushinteger(L,clutter_timeline_get_elapsed_time(timeline));
     lua_pushnumber(L,clutter_timeline_get_progress(timeline));
     UserData::invoke_callback(G_OBJECT(timeline),"on_new_frame",2,0,L);
 }
@@ -462,3 +679,262 @@ void Timeline_on_marker_reached(ClutterTimeline *timeline,gchar*marker_name,gint
 }
 
 ]]
+
+/*
+	Routine: Expanded Timeline Demo
+	
+	The following source listing demonstrates a Timeline object that animates multiple properties of three rectangles. In addition to the Timeline class, the program uses the <Interval> utility class to ease the calculation of each property's in-between value during the animation. Finally, each rectangle's starting and ending positions change randomly for each iteration through the animation, so the animation will be different each time it is run. Extensive comments within the code provide complete explanations. A sample of the resulting animation is shown below.
+	
+(see expandedTimeline.gif)
+
+	(code)
+	-- Expanded Timeline Demo Animation
+
+	-- ********************************
+	-- Globals
+
+	-- Constants
+	DEMO_SIZE = 300		-- size of demoArea
+	SIZE      = 30		-- size of animated rectangle
+	
+	-- ********************************
+	function
+	rectNewFrameEvent( animationTL, msecs, progress )
+	
+		-- This event handler is attached to the Timeline's on_new_frame property. It is called
+		-- intermittently while the animation runs. It is responsible for determining the current
+		-- property values for each animated property based upon the current progress of the
+		-- animation. Every Timeline-based animation must have an on_new_frame event handler.
+		--
+		-- For this animation, each rectangle is animated along its X and Y coordinates and is
+		-- rotated along the Z-axis. The starting and ending ranges for each animated property
+		-- have been assigned to Interval objects, so the Interval performs all the calculations
+		-- to determine a property's current value.
+	
+		-- Determine each rectangle's current position
+		rectRed.position   = { rectRedRangeX:get_value( progress ),   rectRedRangeY:get_value( progress ) }
+		rectGreen.position = { rectGreenRangeX:get_value( progress ), rectGreenRangeY:get_value( progress ) }
+		rectBlue.position  = { rectBlueRangeX:get_value( progress ),  rectBlueRangeY:get_value( progress ) }
+		
+		-- Rotate each rectangle
+		local zRotation = rectRangeRotation:get_value( progress )
+		rectRed.z_rotation   = { zRotation, 0, 0 }
+		rectGreen.z_rotation = { zRotation, 0, 0 }
+		rectBlue.z_rotation  = { zRotation, 0, 0 }
+
+	end  -- rectNewFrameEvent
+
+	-- ********************************
+	function
+	rectCompletedEvent( animationTL )
+	
+		-- This event handler is attached to the Timeline's on_completed property. It is called
+		-- when the animation completes, and can perform any desired operations, such as object
+		-- clean-up, etc. Animations that have no completion requirements need not implement
+		-- this handler.
+		--
+		-- For this animation, another iteration of the animation will be started. This entails
+		-- getting new starting and ending positions for each rectangle, assigning them to the
+		-- Interval objects to ease property calculations in the on_new_frame() event handler,
+		-- positioning the rectangles to their new starting positions, and finally, starting
+		-- the animation. Notice that the original Timeline and Interval objects are simply
+		-- re-used with new starting and ending positions plugged into them.
+
+		-- Determine new starting and ending animation positions
+		rectRedAnimationPositions   = getAnimationPositions()
+		rectGreenAnimationPositions = getAnimationPositions()
+		rectBlueAnimationPositions  = getAnimationPositions()
+	
+		-- Update Interval objects with new animated X and Y coordinates
+		rectRedRangeX.from   = rectRedAnimationPositions[ 1 ]
+		rectRedRangeX.to     = rectRedAnimationPositions[ 3 ]
+		rectRedRangeY.from   = rectRedAnimationPositions[ 2 ]
+		rectRedRangeY.to     = rectRedAnimationPositions[ 4 ]
+		rectGreenRangeX.from = rectGreenAnimationPositions[ 1 ]
+		rectGreenRangeX.to   = rectGreenAnimationPositions[ 3 ]
+		rectGreenRangeY.from = rectGreenAnimationPositions[ 2 ]
+		rectGreenRangeY.to   = rectGreenAnimationPositions[ 4 ]
+		rectBlueRangeX.from  = rectBlueAnimationPositions[ 1 ]
+		rectBlueRangeX.to    = rectBlueAnimationPositions[ 3 ]
+		rectBlueRangeY.from  = rectBlueAnimationPositions[ 2 ]
+		rectBlueRangeY.to    = rectBlueAnimationPositions[ 4 ]
+
+		-- Place rectangles in their starting positions
+		positionRects()
+	
+		-- Start animation again
+		animationTL:start()
+
+	end  -- rectCompletedEvent
+	
+	-- ********************************
+	function
+	getAnimationPositions()
+	
+		-- This function generates random starting and ending X and Y positions.
+		--
+		-- Positions are always just outside of the demoArea space. They can start from
+		-- any side and end on any different side.
+		--
+		-- The function returns a table in the format { startX, startY, endX, endY }
+		
+		-- Constants representing the four sides of the demoArea
+		local TOP, RIGHT, BOTTOM, LEFT = 1, 2, 3, 4
+	
+		-- Determine starting and ending sides (each must be a different side)
+		local startSide, endSide = 1, 1
+		while( startSide == endSide ) do
+			startSide = math.random( 4 )
+			endSide   = math.random( 4 )
+		end
+		
+		-- Determine starting and ending X and Y coordinates
+		local rangeLower = SIZE / 2
+		local rangeUpper = DEMO_SIZE - (SIZE / 2)
+		local startX = math.random( rangeLower, rangeUpper )
+		local startY = math.random( rangeLower, rangeUpper )
+		local endX   = math.random( rangeLower, rangeUpper )
+		local endY   = math.random( rangeLower, rangeUpper )
+		
+		-- Depending on the starting and ending side, some coordinates will require adjustment
+		if( startSide == TOP ) then
+			-- Force Y coordinate
+			startY = -(SIZE / 2)
+		end
+		if( endSide == TOP ) then
+			-- Force Y coordinate
+			endY = -(SIZE / 2)
+		end
+		if( startSide == LEFT ) then
+			-- Force X coordinate
+			startX = -(SIZE / 2)
+		end
+		if( endSide == LEFT ) then
+			-- Force X coordinate
+			endX = -(SIZE / 2)
+		end
+		if( startSide == RIGHT ) then
+			-- Force X coordinate
+			startX = DEMO_SIZE + (SIZE / 2)
+		end
+		if( endSide == RIGHT ) then
+			-- Force X coordinate
+			endX = DEMO_SIZE + (SIZE / 2)
+		end
+		if( startSide == BOTTOM ) then
+			-- Force Y coordinate
+			startY = DEMO_SIZE + (SIZE / 2)
+		end
+		if( endSide == BOTTOM ) then
+			-- Force Y coordinate
+			endY = DEMO_SIZE + (SIZE / 2)
+		end
+		
+		-- Return "calculated" positions
+		return { startX, startY, endX, endY }
+
+	end  -- getAnimationPositions()
+	
+	-- ********************************
+	function
+	positionRects()
+	
+		-- Position the three rectangles to their starting animation positions
+		rectRed.position   = { rectRedAnimationPositions[ 1 ],   rectRedAnimationPositions[ 2 ] }
+		rectGreen.position = { rectGreenAnimationPositions[ 1 ], rectGreenAnimationPositions[ 2 ] }
+		rectBlue.position  = { rectBlueAnimationPositions[ 1 ],  rectBlueAnimationPositions[ 2 ] }
+		
+	end  -- positionRects()
+
+	-- ********************************
+	-- Program entry point
+	
+	-- Create a screen background
+	bckgnd = Canvas( 1920, 1080 )
+	--bckgnd:set_source_color( { 255, 255, 255, 255 } )   -- ice white
+	bckgnd:set_source_color( { 70, 100, 130, 255 } )      -- nice blue
+	bckgnd:paint()
+	bckgndImage = bckgnd:Image()
+	bckgndImage.name = "Background"
+	screen:add( bckgndImage )
+
+	-- Demo area X and Y position, near screen center
+	local DEMO_X, DEMO_Y = 800, 300
+	
+	-- Create a rectangular demo area and add it to the screen
+	demoArea = Rectangle( {
+    	            position = { DEMO_X, DEMO_Y },
+    	            size = { DEMO_SIZE + 8, DEMO_SIZE + 8 }, -- add 8 for borders
+    	            color = { 100, 100, 100, 255 },
+    	            border_color = { 0, 0, 0, 255 },
+    	            border_width = 4,
+    	            name = "demoArea",
+    	            opacity = 255,
+    	                } )
+	screen:add( demoArea )
+
+	-- Create a Group for the demo area for clipping purposes and add it to the screen
+	demoGroup = Group( { position = { DEMO_X, DEMO_Y }, -- must overlay demoArea rectangle
+	                     size = { DEMO_SIZE + 8, DEMO_SIZE + 8 },
+	                     name = "demoGroup",
+	                     clip = { 4, 4, DEMO_SIZE, DEMO_SIZE },  -- clip within demoArea's borders
+	                 } )
+	screen:add( demoGroup )
+
+	-- Define three rectangles to animate and add them to the demoGroup
+	rectRed   = Rectangle( { size = { SIZE, SIZE },
+	                         color = { 250, 0, 0, 255 },
+	                         anchor_point = { SIZE / 2, SIZE / 2 },
+	                         name = "rectRed",
+	                     } )
+	rectGreen = Rectangle( { size = { SIZE, SIZE },
+							 color = { 0, 250, 0, 255 },
+							 anchor_point = { SIZE / 2, SIZE / 2 },
+							 name = "rectGreen",
+	                     } )
+	rectBlue  = Rectangle( { size = { SIZE, SIZE },
+	                         color = { 0, 0, 250, 255 },
+	                         anchor_point = { SIZE / 2, SIZE / 2 },
+	                         name = "rectBlue",
+	                     } )
+	demoGroup:add( rectRed, rectGreen, rectBlue )
+
+	-- Determine starting and ending positions for each rectangle
+	-- Each variable is in the format { startX, startY, endX, endY }
+	rectRedAnimationPositions   = getAnimationPositions()
+	rectGreenAnimationPositions = getAnimationPositions()
+	rectBlueAnimationPositions  = getAnimationPositions()
+
+	-- Create Interval objects for all the animated X and Y coordinates
+	-- Note: These objects are re-used and reset for each iteration through the animation
+	rectRedRangeX   = Interval( rectRedAnimationPositions[ 1 ],   rectRedAnimationPositions[ 3 ] )
+	rectRedRangeY   = Interval( rectRedAnimationPositions[ 2 ],   rectRedAnimationPositions[ 4 ] )
+	rectGreenRangeX = Interval( rectGreenAnimationPositions[ 1 ], rectGreenAnimationPositions[ 3 ] )
+	rectGreenRangeY = Interval( rectGreenAnimationPositions[ 2 ], rectGreenAnimationPositions[ 4 ] )
+	rectBlueRangeX  = Interval( rectBlueAnimationPositions[ 1 ],  rectBlueAnimationPositions[ 3 ] )
+	rectBlueRangeY  = Interval( rectBlueAnimationPositions[ 2 ],  rectBlueAnimationPositions[ 4 ] )
+	
+	-- Create Interval object for the rectangle's Z-rotation
+	-- Each rectangle shares this object
+	rectRangeRotation = Interval( 0, 1080 )  -- rotate three times (360x3)
+	
+	-- Place rectangles at their starting positions
+	positionRects()
+
+	-- Show the screen
+	screen:show()
+
+	-- Create the animation Timeline object
+	animationTL = Timeline( { duration     = 2000,
+	                          on_new_frame = rectNewFrameEvent,
+	                          on_completed = rectCompletedEvent,
+	                    } )
+
+	-- Start the animation
+	animationTL:start()
+
+	-- ********************************
+	(end)
+
+*/
+

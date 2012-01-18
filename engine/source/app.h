@@ -10,6 +10,7 @@
 #include "images.h"
 
 #define APP_METADATA_FILENAME   "app"
+#define APP_MAIN_FILENAME		"main.lua"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -79,7 +80,6 @@ public:
 
         Metadata() : release( 0 ) {}
 
-        String      path;
         String      id;
         String      name;
         int         release;
@@ -87,8 +87,26 @@ public:
         String      description;
         String      author;
         String      copyright;
+        StringSet   attributes;
 
         Action::Map actions;
+
+        String get_root_uri() const
+        {
+        	return root_uri;
+        }
+
+        String get_root_native_path() const
+        {
+        	return root_native_path;
+        }
+
+        bool set_root( const String & uri_or_native_path );
+
+    private:
+
+        String		root_uri;
+        String		root_native_path;
     };
 
     //.........................................................................
@@ -214,17 +232,6 @@ public:
     EventGroup * get_event_group();
 
     //.........................................................................
-    // Processes paths to ensure they are either URIs or valid paths within the
-    // app bundle. Also checks for links and handles custom schemes such as
-    // 'localized:'
-    //
-    // May return NULL if the path is invalid.
-    //
-    // CALLER HAS TO FREE RESULT
-
-    char * normalize_path( const gchar * path_or_uri, bool * is_uri = NULL, const StringSet & additional_uri_schemes = StringSet() );
-
-    //.........................................................................
     // ONLY FOR THE EDITOR - apps should not do this
 
     bool change_app_path( const char * path );
@@ -246,13 +253,15 @@ public:
 
     //.........................................................................
 
-    Debugger * get_debugger();
+    class Debugger * get_debugger();
+
+    guint16 get_debugger_port();
 
     //.........................................................................
 
-    Image * load_image( const gchar * source );
+    Image * load_image( const gchar * source , bool read_tags );
 
-    bool load_image_async( const gchar * source , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
+    bool load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
     void audio_match( const String & json );
 
@@ -325,7 +334,7 @@ private:
 
 #ifndef TP_PRODUCTION
 
-    Debugger                debugger;
+    class Debugger                debugger;
 
 #endif
 };

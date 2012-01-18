@@ -1,0 +1,310 @@
+
+module typed_array;
+
+[[
+#include "typed_array.h"
+]]
+
+#==============================================================================
+
+class ArrayBuffer [[ ArrayBuffer * ]]
+{
+    ArrayBuffer( int length )
+        [[
+            if ( length < 0 )
+            {
+                length = 0;
+            }
+
+            self = lb_construct( ArrayBuffer , new ArrayBuffer( length ) );
+        ]];
+
+    ~ArrayBuffer()
+        [[
+            if ( self )
+            {
+                self->unref();
+            }
+        ]];
+
+    readonly int byte_length
+        [[
+            byte_length = self->get_length();
+        ]];
+
+}
+
+#==============================================================================
+
+interface TypedArray [[ TypedArray * ]]
+{
+    readonly int byte_offset
+        [[
+            byte_offset = self->get_offset();
+        ]];
+
+    readonly int byte_length
+        [[
+            byte_length = self->get_length() * self->get_bpe();
+        ]];
+
+    readonly int BYTES_PER_ELEMENT
+        [[
+            BYTES_PER_ELEMENT = self->get_bpe();
+        ]];
+
+    readonly int length
+        [[
+            length = self->get_length();
+        ]];
+
+    readonly ArrayBuffer buffer
+        [[
+            self->get_buffer()->push( L );
+        ]];
+
+    dump()
+        [[
+            self->dump();
+        ]];
+
+    set( ... )
+        [[
+            if ( lua_gettop( L ) < 2 )
+            {
+                luaL_error( L , "Invalid arguments" );
+            }
+            else
+            {
+                glong offset = 0;
+
+                if ( lua_gettop( L ) > 2 )
+                {
+                    offset = lua_tonumber( L , 3 );
+
+                    if ( offset < 0 )
+                    {
+                        offset = 0;
+                    }
+                }
+
+                if ( lua_istable( L , 2 ) )
+                {
+                    TypedArray * source = TypedArray::from_lua_table( L , 2 );
+
+                    bool ok = self->copy_from( source , offset );
+
+                    delete source;
+
+                    if ( ! ok )
+                    {
+                        luaL_error( L , "Array set failed" );
+                    }
+                }
+                else if ( lb_check_udata_type( L , 2 , "TypedArray" , false ) )
+                {
+                    TypedArray * source = ( TypedArray * ) UserData::get_client( L , 2 );
+
+                    if ( ! self->copy_from( source , offset ) )
+                    {
+                        luaL_error( L , "Array set failed" );
+                    }
+                }
+                else
+                {
+                    luaL_error( L , "Invalid arguments" );
+                }
+            }
+        ]];
+
+    TypedArray subarray( int begin , int end = -1 )
+        [[
+            TypedArray * result = self->subarray( begin , end );
+
+            UserData * me = UserData::get( L , 1 );
+
+            UserData * ud = UserData::make( L , me->get_type() );
+            lua_getmetatable( L , 1 );
+            lua_setmetatable( L , -2 );
+            ud->initialize_with_client( result );
+        ]];
+}
+
+#==============================================================================
+
+class Int8Array [[ TypedArray * ]] TypedArray
+{
+    Int8Array( ... )
+        [[
+            self = lb_construct( TypedArray , TypedArray::make( L , TypedArray::T_INT8 ) );
+
+            if ( self->is_bad() )
+            {
+                luaL_error( L , "Invalid Int8Array" );
+            }
+
+            TypedArray::update_metatable( L );
+        ]];
+
+    ~Int8Array()
+        [[
+            delete self;
+        ]];
+}
+
+#==============================================================================
+
+class Uint8Array [[ TypedArray * ]] TypedArray
+{
+    Uint8Array( ... )
+        [[
+            self = lb_construct( TypedArray , TypedArray::make( L , TypedArray::T_UINT8 ) );
+
+            if ( self->is_bad() )
+            {
+                luaL_error( L , "Invalid Uint8Array" );
+            }
+
+            TypedArray::update_metatable( L );
+        ]];
+
+    ~Uint8Array()
+        [[
+            delete self;
+        ]];
+}
+
+#==============================================================================
+
+class Int16Array [[ TypedArray * ]] TypedArray
+{
+    Int16Array( ... )
+        [[
+            self = lb_construct( TypedArray , TypedArray::make( L , TypedArray::T_INT16 ) );
+
+            if ( self->is_bad() )
+            {
+                luaL_error( L , "Invalid Int16Array" );
+            }
+
+            TypedArray::update_metatable( L );
+        ]];
+
+    ~Int16Array()
+        [[
+            delete self;
+        ]];
+}
+
+#==============================================================================
+
+class Uint16Array [[ TypedArray * ]] TypedArray
+{
+    Uint16Array( ... )
+        [[
+            self = lb_construct( TypedArray , TypedArray::make( L , TypedArray::T_UINT16 ) );
+
+            if ( self->is_bad() )
+            {
+                luaL_error( L , "Invalid Uint16Array" );
+            }
+
+            TypedArray::update_metatable( L );
+        ]];
+
+    ~Uint16Array()
+        [[
+            delete self;
+        ]];
+}
+
+#==============================================================================
+
+class Int32Array [[ TypedArray * ]] TypedArray
+{
+    Int32Array( ... )
+        [[
+            self = lb_construct( TypedArray , TypedArray::make( L , TypedArray::T_INT32 ) );
+
+            if ( self->is_bad() )
+            {
+                luaL_error( L , "Invalid Int32Array" );
+            }
+
+            TypedArray::update_metatable( L );
+        ]];
+
+    ~Int32Array()
+        [[
+            delete self;
+        ]];
+}
+
+#==============================================================================
+
+class Uint32Array [[ TypedArray * ]] TypedArray
+{
+    Uint32Array( ... )
+        [[
+            self = lb_construct( TypedArray , TypedArray::make( L , TypedArray::T_UINT32 ) );
+
+            if ( self->is_bad() )
+            {
+                luaL_error( L , "Invalid Uint32Array" );
+            }
+
+            TypedArray::update_metatable( L );
+        ]];
+
+    ~Uint32Array()
+        [[
+            delete self;
+        ]];
+}
+
+#==============================================================================
+
+class Float32Array [[ TypedArray * ]] TypedArray
+{
+    Float32Array( ... )
+        [[
+            self = lb_construct( TypedArray , TypedArray::make( L , TypedArray::T_FLOAT32 ) );
+
+            if ( self->is_bad() )
+            {
+                luaL_error( L , "Invalid Float32Array" );
+            }
+
+            TypedArray::update_metatable( L );
+        ]];
+
+    ~Float32Array()
+        [[
+            delete self;
+        ]];
+}
+
+#==============================================================================
+
+class Float64Array [[ TypedArray * ]] TypedArray
+{
+    Float64Array( ... )
+        [[
+            self = lb_construct( TypedArray , TypedArray::make( L , TypedArray::T_FLOAT64 ) );
+
+            if ( self->is_bad() )
+            {
+                luaL_error( L , "Invalid Float64Array" );
+            }
+
+            TypedArray::update_metatable( L );
+        ]];
+
+    ~Float64Array()
+        [[
+            delete self;
+        ]];
+}
+
+#==============================================================================
+

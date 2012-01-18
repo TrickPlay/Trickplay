@@ -9,10 +9,13 @@ class Bitmap : public RefCounted
 {
 public:
 
-    Bitmap( lua_State * L , const char * _src , bool _async );
+    Bitmap( lua_State * L , const char * _src , bool _async , bool read_tags );
+
+    static Bitmap * get( lua_State * L , int index );
 
     guint width() const;
     guint height() const;
+    guint depth() const;
 
     bool loaded() const;
 

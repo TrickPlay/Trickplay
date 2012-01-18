@@ -6,6 +6,7 @@
 #include "app.h"
 #include "util.h"
 #include "json.h"
+#include "app_resource.h"
 
 //.............................................................................
 
@@ -37,11 +38,10 @@ AppPushServer * AppPushServer::make( TPContext * context )
 
 AppPushServer::AppPushServer( TPContext * _context )
 :
+	HttpServer::RequestHandler( _context->get_http_server() , "/push" ),
     context( _context ),
     current_push_path( 0 )
 {
-    context->get_http_server()->register_handler( "/push" , this );
-
     tplog( "READY" );
 }
 
@@ -49,8 +49,6 @@ AppPushServer::AppPushServer( TPContext * _context )
 
 AppPushServer::~AppPushServer()
 {
-    context->get_http_server()->unregister_handler( "/push" );
-
     g_free( current_push_path );
 }
 
@@ -275,11 +273,11 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
         {
             // The app is up to date, we can just launch it
 
-            set_response( response , true , "Nothing changed." );
-
             current_push_info = push_info;
 
-            launch_it();
+            bool ok = launch_it();
+
+            set_response( response , true , ! ok , "Nothing changed." );
         }
         else
         {
@@ -301,25 +299,26 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
 
             current_push_info = push_info;
 
-            set_response( response , false , "" , push_info.target_files.front().source.name , current_push_path );
+            set_response( response , false , false , "" , push_info.target_files.front().source.name , current_push_path );
         }
     }
     catch( const String & e )
     {
-        set_response( response , true , e );
+        set_response( response , true , true , e );
     }
 }
 
 //.............................................................................
 
-void AppPushServer::set_response( HttpServer::Response & response , bool done , const String & msg , const String & file , const String & url )
+void AppPushServer::set_response( HttpServer::Response & response , bool done , bool failed , const String & msg , const String & file , const String & url )
 {
     using namespace JSON;
 
     Object object;
 
-    object[ "done" ] = done;
-    object[ "msg"  ] = msg;
+    object[ "done"   ] = done;
+    object[ "failed" ] = failed;
+    object[ "msg"    ] = msg;
 
     if ( ! file.empty() )
     {
@@ -362,7 +361,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
 
     gchar * app_path = g_build_filename( context->get( TP_DATA_PATH ) , "pushed" , push_info.metadata.id.c_str() , NULL );
 
-    push_info.metadata.path = app_path;
+    push_info.metadata.set_root( app_path );
 
     free_later( app_path );
 
@@ -382,25 +381,25 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
 
         FreeLater free_later;
 
-        gchar * target_path = Util::rebase_path( app_path , it->name.c_str() , false );
+        AppResource resource( app_path , it->name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED );
 
-        if ( ! target_path )
+        if ( ! resource || ! resource.is_native() )
         {
             throw Util::format( "Invalid file path '%s'" , it->name.c_str() );
         }
+
+        String target_path( resource.get_native_path() );
 
         TargetInfo target_info;
 
         target_info.source = * it;
         target_info.path = target_path;
 
-        free_later( target_path );
-
         //.....................................................................
         // If the target file does not exist, mark it as such and add it to the
         // list of changed files.
 
-        if ( ! g_file_test( target_path , G_FILE_TEST_EXISTS ) )
+        if ( ! g_file_test( target_path.c_str() , G_FILE_TEST_EXISTS ) )
         {
             push_info.target_files.push_back( target_info );
 
@@ -410,7 +409,7 @@ AppPushServer::PushInfo AppPushServer::compare_files( const String & app_content
         //.....................................................................
         // It exists. Lets get a GFile for it.
 
-        GFile * file = g_file_new_for_path( target_path );
+        GFile * file = g_file_new_for_path( target_path.c_str() );
 
         free_later( file , g_object_unref );
 
@@ -591,7 +590,7 @@ void AppPushServer::handle_push_file( const HttpServer::Request & request , Http
     }
     catch ( const String & e )
     {
-        set_response( response , true , e );
+        set_response( response , true , true , e );
 
         return;
     }
@@ -604,15 +603,15 @@ void AppPushServer::handle_push_file( const HttpServer::Request & request , Http
 
     if ( current_push_info.target_files.empty() )
     {
-        set_response( response , true , "Finished." );
+        bool ok = launch_it();
 
-        launch_it();
+        set_response( response , true , ! ok , "Finished." );
     }
     else
     {
         // Otherwise, we move on to the next file.
 
-        set_response( response , false , "" , current_push_info.target_files.front().source.name , current_push_path );
+        set_response( response , false , false , "" , current_push_info.target_files.front().source.name , current_push_path );
 
         // Keep it from canceling
 
@@ -660,13 +659,15 @@ void AppPushServer::write_file( const TargetInfo & target_info , const HttpServe
 //.............................................................................
 // When the push is complete, we launch the app.
 
-void AppPushServer::launch_it( )
+bool AppPushServer::launch_it( )
 {
-    tplog( "LAUNCHING FROM %s" , current_push_info.metadata.path.c_str() );
+    tplog( "LAUNCHING FROM %s" , current_push_info.metadata.get_root_uri().c_str() );
 
     context->close_current_app();
 
-    context->launch_app( current_push_info.metadata.path.c_str() , App::LaunchInfo() , true );
+    int result = context->launch_app( current_push_info.metadata.get_root_uri().c_str() , App::LaunchInfo() , true );
+
+    return 0 == result;
 }
 
 //.............................................................................

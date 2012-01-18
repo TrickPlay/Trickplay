@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.tests.examples",
+    release     = "1",
+    version     = "1.0",
+    name        = "Examples",
+    copyright   = "© Trickplay Inc."
+}
+

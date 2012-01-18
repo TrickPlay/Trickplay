@@ -1,0 +1,8 @@
+Oval: 20% opaque white to 20% 0x838383
+Size: 318 x 218
+
+Main Socre text: 40 bold white 1px black drop shadow
+
+Combo text: 15 light white 1px black drop shadow
+
+Font: SegoeUI

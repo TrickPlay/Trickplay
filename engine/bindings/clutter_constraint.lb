@@ -1,0 +1,254 @@
+module clutter_constraint;
+
+[[
+#include "clutter/clutter.h"
+
+#include "util.h"
+#include "clutter_util.h"
+]]
+
+interface constraint [[ ClutterConstraint * ]]
+{
+}
+
+class Align [[ ClutterConstraint * ]] constraint
+{
+    Align( table props = 0 )
+        [[
+            self = clutter_align_constraint_new( NULL , CLUTTER_ALIGN_X_AXIS , 0 );
+            g_object_ref( self );
+            (void)lb_construct_gobject( ClutterConstraint , self );
+            ClutterUtil::set_props_from_table( L , props );
+            g_object_unref( self );
+        ]];
+        
+    ~Align()
+        [[
+        ]];
+        
+    UIElement source
+        [[
+            ClutterUtil::wrap_concrete_actor(L,clutter_align_constraint_get_source(CLUTTER_ALIGN_CONSTRAINT(self)));            
+        ]]
+        [[
+            if ( lua_isnil( L , 2 ) )
+            {
+                clutter_align_constraint_set_source(CLUTTER_ALIGN_CONSTRAINT(self),0);
+            }
+            else
+            {
+                ClutterActor* source=ClutterUtil::user_data_to_actor(L,2);
+                clutter_align_constraint_set_source(CLUTTER_ALIGN_CONSTRAINT(self),source);
+            }
+        ]];
+        
+    string axis
+        [[
+            switch ( clutter_align_constraint_get_align_axis( CLUTTER_ALIGN_CONSTRAINT( self ) ) )
+            {
+                case CLUTTER_ALIGN_X_AXIS:
+                    axis = "X";
+                    break;
+                default:
+                    axis = "Y";
+                    break;                   
+            }
+        ]]
+        [[
+            if ( ! strcmp( axis , "X" ) )
+            {
+                clutter_align_constraint_set_align_axis( CLUTTER_ALIGN_CONSTRAINT( self ) , CLUTTER_ALIGN_X_AXIS );
+            }
+            else if ( ! strcmp( axis , "Y" ) )
+            {
+                clutter_align_constraint_set_align_axis( CLUTTER_ALIGN_CONSTRAINT( self ) , CLUTTER_ALIGN_Y_AXIS );
+            }
+            else
+            {
+                luaL_error( L , "Invalid axis '%s' for AlignConstraint : expecting 'X' or 'Y'" , axis );
+            }
+        ]];
+        
+    double factor
+        [[
+            factor = clutter_align_constraint_get_factor( CLUTTER_ALIGN_CONSTRAINT( self ) );
+        ]]
+        [[
+            clutter_align_constraint_set_factor( CLUTTER_ALIGN_CONSTRAINT( self ) , factor );
+        ]];                                
+}
+ 
+class Bind [[ ClutterConstraint * ]] constraint
+{
+    Bind( table props = 0 )
+        [[
+            self = clutter_bind_constraint_new( NULL , CLUTTER_BIND_X , 0 );
+            g_object_ref( self );
+            (void)lb_construct_gobject( ClutterConstraint , self );
+            ClutterUtil::set_props_from_table( L , props );
+            g_object_unref( self );
+        ]];
+        
+    ~Bind()
+        [[
+        ]];
+        
+    UIElement source
+        [[
+            ClutterUtil::wrap_concrete_actor(L,clutter_bind_constraint_get_source(CLUTTER_BIND_CONSTRAINT(self)));            
+        ]]
+        [[
+            if ( lua_isnil( L , 2 ) )
+            {
+                clutter_bind_constraint_set_source(CLUTTER_BIND_CONSTRAINT(self),0);
+            }
+            else
+            {
+                ClutterActor* source=ClutterUtil::user_data_to_actor(L,2);
+                clutter_bind_constraint_set_source(CLUTTER_BIND_CONSTRAINT(self),source);
+            }
+        ]];
+        
+    string coordinate
+        [[
+            switch ( clutter_bind_constraint_get_coordinate( CLUTTER_BIND_CONSTRAINT( self ) ) )
+            {
+                case CLUTTER_BIND_X:
+                    coordinate = "X";
+                    break;
+                case CLUTTER_BIND_Y:
+                    coordinate = "Y";
+                    break;
+                case CLUTTER_BIND_WIDTH:
+                    coordinate = "WIDTH";
+                    break;
+                case CLUTTER_BIND_HEIGHT:
+                    coordinate = "HEIGHT";
+                    break;
+                case CLUTTER_BIND_POSITION:
+                    coordinate = "POSITION";
+                    break;
+                default:
+                    coordinate = "SIZE";
+                    break;                   
+            }
+        ]]
+        [[
+            ClutterBindCoordinate bc = CLUTTER_BIND_X;
+            
+            if ( ! strcmp( coordinate , "X" ) )
+            {
+                bc = CLUTTER_BIND_X;
+            }
+            else if ( ! strcmp( coordinate , "Y" ) )
+            {
+                bc = CLUTTER_BIND_Y;
+            }
+            else if ( ! strcmp( coordinate , "WIDTH" ) )
+            {
+                bc = CLUTTER_BIND_WIDTH;
+            }
+            else if ( ! strcmp( coordinate , "HEIGHT" ) )
+            {
+                bc = CLUTTER_BIND_HEIGHT;
+            }
+            else if ( ! strcmp( coordinate , "POSITION" ) )
+            {
+                bc = CLUTTER_BIND_POSITION;
+            }
+            else if ( ! strcmp( coordinate , "SIZE" ) )
+            {
+                bc = CLUTTER_BIND_SIZE;
+            }
+            else
+            {
+                luaL_error( L , "Invalid coordinate '%s' for BindConstraint : expecting 'X', 'Y', 'WIDTH', 'HEIGHT', 'POSITION' or 'SIZE'" , coordinate );
+            }
+            
+            clutter_bind_constraint_set_coordinate( CLUTTER_BIND_CONSTRAINT( self ) , bc );
+        ]];
+        
+    double offset
+        [[
+            offset = clutter_bind_constraint_get_offset( CLUTTER_BIND_CONSTRAINT( self ) );
+        ]]
+        [[
+            clutter_bind_constraint_set_offset( CLUTTER_BIND_CONSTRAINT( self ) , offset );
+        ]];                                
+}
+
+
+/*
+
+SnapConstraint seems to be broken - the header has 'clutter_snap_constraint_get_edges' but the library has 
+only the symbol 'clutter_snap_constraint_get_edge'. Leaving it alone for now.
+
+
+class Snap [[ ClutterConstraint * ]] constraint
+{
+    Snap( table props = 0 )
+        [[
+            self = clutter_snap_constraint_new( NULL , CLUTTER_SNAP_EDGE_TOP , CLUTTER_SNAP_EDGE_TOP , 0 );
+            g_object_ref( self );
+            (void)lb_construct_gobject( ClutterConstraint , self );
+            ClutterUtil::set_props_from_table( L , props );
+            g_object_unref( self );
+        ]];
+        
+    ~Snap()
+        [[
+        ]];
+        
+    UIElement source
+        [[
+            ClutterUtil::wrap_concrete_actor(L,clutter_snap_constraint_get_source(CLUTTER_SNAP_CONSTRAINT(self)));            
+        ]]
+        [[
+            if ( lua_isnil( L , 2 ) )
+            {
+                clutter_snap_constraint_set_source(CLUTTER_SNAP_CONSTRAINT(self),0);
+            }
+            else
+            {
+                ClutterActor* source=ClutterUtil::user_data_to_actor(L,2);
+                clutter_snap_constraint_set_source(CLUTTER_SNAP_CONSTRAINT(self),source);
+            }
+        ]];
+        
+    string from_edge
+        [[
+            ClutterSnapEdge fe;
+            ClutterSnapEdge te;
+            
+            clutter_snap_constraint_get_edges( CLUTTER_SNAP_CONSTRAINT( self ) , & fe , & te );
+            
+            switch( fe )
+            {
+                case CLUTTER_SNAP_EDGE_TOP:
+                    from_edge = "TOP";
+                    break;
+                case CLUTTER_SNAP_EDGE_RIGHT:
+                    from_edge = "RIGHT";
+                    break;
+                case CLUTTER_SNAP_EDGE_BOTTOM:
+                    from_edge = "BOTTOM";
+                    break;
+                default:
+                    from_edge = "LEFT";
+                    break;
+            }                    
+        ]]
+        [[
+        ]];
+        
+        
+    double offset
+        [[
+            offset = clutter_snap_constraint_get_offset( CLUTTER_SNAP_CONSTRAINT( self ) );
+        ]]
+        [[
+            clutter_snap_constraint_set_offset( CLUTTER_SNAP_CONSTRAINT( self ) , offset );
+        ]];                                
+}
+
+*/

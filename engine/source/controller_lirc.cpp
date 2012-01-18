@@ -132,6 +132,7 @@ ControllerLIRC::ControllerLIRC( TPContext * context , const char * uds , guint _
     key_map[ "GREEN"     ] = TP_KEY_GREEN;
     key_map[ "YELLOW"    ] = TP_KEY_YELLOW;
     key_map[ "BLUE"      ] = TP_KEY_BLUE;
+    key_map[ "BACK"      ] = TP_KEY_BACK;
 
     timer = g_timer_new();
 
@@ -199,8 +200,8 @@ void ControllerLIRC::line_read( GObject * stream , GAsyncResult * result )
             {
                 if ( g_timer_elapsed( timer , NULL ) >= repeat )
                 {
-                    tp_controller_key_down( controller , it->second , 0 );
-                    tp_controller_key_up( controller , it->second , 0 );
+                    tp_controller_key_down( controller , it->second , 0 , TP_CONTROLLER_MODIFIER_NONE );
+                    tp_controller_key_up( controller , it->second , 0 , TP_CONTROLLER_MODIFIER_NONE );
 
                     g_timer_start( timer );
                 }

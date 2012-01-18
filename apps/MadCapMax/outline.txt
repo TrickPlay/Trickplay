@@ -1,0 +1,124 @@
+GameStates {
+    
+    OFFLINE
+       |
+       V
+    SPLASH      <->  HELP
+       |       \
+       V        v
+    GAMEPLAY <-> V_H_SCORE
+       |        ^
+       V       /
+    S_H_SCORE
+}
+
+
+
+layers = {
+    far_distance,
+    background,
+    items,
+    player,
+    enemy,
+    foreground
+}
+
+
+
+Levels{
+    
+    [1] = { --level one
+        
+        --source is the number that corresponds to the index in clone_srcs
+        
+        tiling = {
+            
+            [x] = {
+                {w,source},
+            },
+            
+            ...
+            
+        },
+        
+        
+        items = {
+            {
+                x,
+                y,
+                
+                type = non_collidable, static, or dynamic,
+                
+                foreground = bool, -- enemy/bird fly behind it
+                
+                shape,
+                
+                source or pieces = {
+                    
+                    {x,y,source},
+                    
+                    ...
+                    
+                }
+                
+                on_begin_contact = function or nil, -- for objects that need to shatter when hit
+                impact_floor     = function or nil, -- for objects that cause spills when they hit the floor
+                scroll           = function or nil, -- for objects in the background
+            },
+            
+            ...
+            
+        },
+        
+        clone_srcs = {
+            
+            img_string,
+            
+            ...
+            
+        }
+        
+        
+    },
+    
+    [2] = {},
+    
+    ...
+    
+}
+
+
+
+
+Max's keys - up,rt,left,dn, ok (poop)
+
+Max {
+    flap_animation
+    gets_hit --and falls of the screen
+    
+}
+
+
+GameLoop {
+    
+    Scroll
+    
+    ---------Max react to user input
+    
+    Level react to max position
+        - Level Auto scrolls,
+        - Loads next pieces when close
+    
+    Enemy react to max position
+        - run to next strike position
+        - lunge when at a strike position
+        - swing at/swat if in middle of lunge
+    
+}
+
+
+
+
+
+
+

@@ -62,7 +62,8 @@ struct Event
         ACCELEROMETER,
         POINTER_MOVE , POINTER_DOWN , POINTER_UP,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
-        UI, SUBMIT_PICTURE, SUBMIT_AUDIO_CLIP
+        UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP,
+        ADVANCED_UI_READY, ADVANCED_UI_EVENT
     };
 
 public:
@@ -77,6 +78,7 @@ public:
 
         event->type = type;
         event->controller = controller;
+        event->modifiers = TP_CONTROLLER_MODIFIER_NONE;
 
 #ifdef TP_TIME_CONTROLLER_EVENTS
 
@@ -84,7 +86,7 @@ public:
 
 #endif
 
-        if ( type == UI )
+        if ( type == UI || type == ADVANCED_UI_EVENT )
         {
             event->ui.parameters = NULL;
         }
@@ -100,10 +102,11 @@ public:
         switch ( event->type )
         {
 			case UI:
+			case ADVANCED_UI_EVENT:
 				g_free( event->ui.parameters );
 				break;
 
-			case SUBMIT_PICTURE:
+			case SUBMIT_IMAGE:
 			case SUBMIT_AUDIO_CLIP:
 				g_free( event->data.data );
 				g_free( event->data.mime_type );
@@ -118,34 +121,37 @@ public:
         g_slice_free( Event, event );
     }
 
-    inline static Event * make_key( Type type, Controller * controller, unsigned int key_code, unsigned long int unicode )
+    inline static Event * make_key( Type type, Controller * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
     {
         Event * event = make( type, controller );
 
         event->key.key_code = key_code;
         event->key.unicode = unicode;
+        event->modifiers = modifiers;
 
         return event;
     }
 
-    inline static Event * make_accelerometer( Controller * controller, double x, double y, double z )
+    inline static Event * make_accelerometer( Controller * controller, double x, double y, double z , unsigned long int modifiers )
     {
         Event * event = make( ACCELEROMETER, controller );
 
         event->accelerometer.x = x;
         event->accelerometer.y = y;
         event->accelerometer.z = z;
+        event->modifiers = modifiers;
 
         return event;
     }
 
-    inline static Event * make_click_touch( Type type, Controller * controller, int button_or_finger, int x, int y )
+    inline static Event * make_click_touch( Type type, Controller * controller, int button_or_finger, int x, int y , unsigned long int modifiers )
     {
         Event * event = make( type, controller );
 
         event->click_touch.button_or_finger = button_or_finger;
         event->click_touch.x = x;
         event->click_touch.y = y;
+        event->modifiers = modifiers;
 
         return event;
     }
@@ -155,6 +161,15 @@ public:
         Event * event = make( UI, controller );
 
         event->ui.parameters = g_strdup( parameters );
+
+        return event;
+    }
+
+    inline static Event * make_advanced_ui_event( Controller * controller, const char * json )
+    {
+        Event * event = make( ADVANCED_UI_EVENT, controller );
+
+        event->ui.parameters = g_strdup( json );
 
         return event;
     }
@@ -189,53 +204,68 @@ public:
                 break;
 
             case KEY_DOWN:
-                controller->key_down( key.key_code, key.unicode );
+                controller->key_down( key.key_code, key.unicode , modifiers );
                 break;
 
             case KEY_UP:
-                controller->key_up( key.key_code, key.unicode );
+                controller->key_up( key.key_code, key.unicode , modifiers );
                 break;
 
             case ACCELEROMETER:
-                controller->accelerometer( accelerometer.x, accelerometer.y, accelerometer.z );
+                controller->accelerometer( accelerometer.x, accelerometer.y, accelerometer.z , modifiers );
                 break;
 
             case POINTER_MOVE:
-                controller->pointer_move( click_touch.x, click_touch.y );
+                controller->pointer_move( click_touch.x, click_touch.y , modifiers );
                 break;
 
             case POINTER_DOWN:
-                controller->pointer_button_down( click_touch.button_or_finger,  click_touch.x, click_touch.y );
+                controller->pointer_button_down( click_touch.button_or_finger,  click_touch.x, click_touch.y , modifiers );
                 break;
 
             case POINTER_UP:
-                controller->pointer_button_up( click_touch.button_or_finger,  click_touch.x, click_touch.y );
+                controller->pointer_button_up( click_touch.button_or_finger,  click_touch.x, click_touch.y , modifiers );
                 break;
 
             case TOUCH_DOWN:
-                controller->touch_down( click_touch.button_or_finger, click_touch.x, click_touch.y );
+                controller->touch_down( click_touch.button_or_finger, click_touch.x, click_touch.y , modifiers );
                 break;
 
             case TOUCH_MOVE:
-                controller->touch_move( click_touch.button_or_finger, click_touch.x, click_touch.y );
+                controller->touch_move( click_touch.button_or_finger, click_touch.x, click_touch.y , modifiers );
                 break;
 
             case TOUCH_UP:
-                controller->touch_up( click_touch.button_or_finger, click_touch.x, click_touch.y );
+                controller->touch_up( click_touch.button_or_finger, click_touch.x, click_touch.y , modifiers );
                 break;
 
             case UI:
                 controller->ui_event( ui.parameters );
                 break;
 
-            case SUBMIT_PICTURE:
-                controller->submit_picture( data.data, data.size, data.mime_type );
+            case SUBMIT_IMAGE:
+                controller->submit_image( data.data, data.size, data.mime_type );
                 break;
 
             case SUBMIT_AUDIO_CLIP:
             	controller->submit_audio_clip( data.data, data.size, data.mime_type );
                 break;
 
+            case CANCEL_IMAGE:
+                controller->cancel_image();
+                break;
+
+            case CANCEL_AUDIO_CLIP:
+                controller->cancel_audio_clip();
+                break;
+
+            case ADVANCED_UI_READY:
+                controller->advanced_ui_ready();
+                break;
+
+            case ADVANCED_UI_EVENT:
+            	controller->advanced_ui_event( ui.parameters );
+            	break;
         }
     }
 
@@ -249,6 +279,8 @@ private:
     gulong          create_time;
 
 #endif
+
+    unsigned long int modifiers;
 
     union
     {
@@ -299,12 +331,13 @@ Controller::Controller( ControllerList * _list, TPContext * _context , const cha
     loaded_external_map( false ),
     ts_accelerometer_started( 0 ),
     ts_pointer_started( 0 ),
-    ts_touch_started( 0 )
+    ts_touch_started( 0 ),
+    advanced_ui_is_ready( false )
 {
     // If the outside world did not provide a function to execute commands,
     // we set our own which always fails.
 
-    if ( !spec.execute_command )
+    if ( ! spec.execute_command )
     {
         spec.execute_command = default_execute_command;
     }
@@ -320,7 +353,18 @@ Controller::Controller( ControllerList * _list, TPContext * _context , const cha
 
         // NULL it because we don't own the memory past this call
 
-        spec.key_map = NULL;
+        spec.key_map = 0;
+    }
+
+    if ( spec.id )
+    {
+    	id = spec.id;
+
+    	spec.id = 0;
+    }
+    else
+    {
+    	id = Util::make_v4_uuid();
     }
 }
 
@@ -416,9 +460,6 @@ void Controller::load_external_map()
     loaded_external_map = true;
 
     String file_name = get_key_map_file_name();
-
-
-    tplog( "LOADING CONTROLLER MAP FROM '%s'" , file_name.c_str() );
 
     std::ifstream stream;
 
@@ -517,7 +558,7 @@ void Controller::disconnected()
 
 //.............................................................................
 
-void Controller::key_down( unsigned int key_code, unsigned long int unicode )
+void Controller::key_down( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
 {
     if ( !connected )
     {
@@ -530,7 +571,7 @@ void Controller::key_down( unsigned int key_code, unsigned long int unicode )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->key_down( key_code, unicode ) )
+        if ( ! ( *it )->key_down( key_code, unicode , modifiers ) )
         {
             inject = false;
         }
@@ -538,13 +579,13 @@ void Controller::key_down( unsigned int key_code, unsigned long int unicode )
 
     if ( inject )
     {
-        ClutterUtil::inject_key_down( key_code, unicode );
+        ClutterUtil::inject_key_down( key_code, unicode , modifiers );
     }
 }
 
 //.............................................................................
 
-void Controller::key_up( unsigned int key_code, unsigned long int unicode )
+void Controller::key_up( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
 {
     if ( !connected )
     {
@@ -557,7 +598,7 @@ void Controller::key_up( unsigned int key_code, unsigned long int unicode )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->key_up( key_code, unicode ) )
+        if ( ! ( *it )->key_up( key_code, unicode , modifiers ) )
         {
             inject = false;
         }
@@ -565,13 +606,13 @@ void Controller::key_up( unsigned int key_code, unsigned long int unicode )
 
     if ( inject )
     {
-        ClutterUtil::inject_key_up( key_code, unicode );
+        ClutterUtil::inject_key_up( key_code, unicode , modifiers );
     }
 }
 
 //.............................................................................
 
-void Controller::accelerometer( double x, double y, double z )
+void Controller::accelerometer( double x, double y, double z , unsigned long int modifiers )
 {
     if ( !connected )
     {
@@ -580,13 +621,13 @@ void Controller::accelerometer( double x, double y, double z )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        ( *it )->accelerometer( x, y, z );
+        ( *it )->accelerometer( x, y, z , modifiers );
     }
 }
 
 //.............................................................................
 
-void Controller::pointer_move( int x, int y )
+void Controller::pointer_move( int x, int y , unsigned long int modifiers )
 {
     if ( !connected )
     {
@@ -602,7 +643,7 @@ void Controller::pointer_move( int x, int y )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->pointer_move( sx, sy ) )
+        if ( ! ( *it )->pointer_move( sx, sy , modifiers ) )
         {
             inject = false;
         }
@@ -610,13 +651,13 @@ void Controller::pointer_move( int x, int y )
 
     if ( inject )
     {
-        ClutterUtil::inject_motion( x , y );
+        ClutterUtil::inject_motion( x , y , modifiers );
     }
 }
 
 //.............................................................................
 
-void Controller::pointer_button_down( int button, int x, int y )
+void Controller::pointer_button_down( int button, int x, int y , unsigned long int modifiers )
 {
     if ( !connected )
     {
@@ -632,7 +673,7 @@ void Controller::pointer_button_down( int button, int x, int y )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->pointer_button_down( button, sx, sy ) )
+        if ( ! ( *it )->pointer_button_down( button, sx, sy , modifiers ) )
         {
             inject = false;
         }
@@ -640,13 +681,13 @@ void Controller::pointer_button_down( int button, int x, int y )
 
     if ( inject )
     {
-        ClutterUtil::inject_button_press( button , x , y );
+        ClutterUtil::inject_button_press( button , x , y , modifiers );
     }
 }
 
 //.............................................................................
 
-void Controller::pointer_button_up( int button, int x, int y )
+void Controller::pointer_button_up( int button, int x, int y , unsigned long int modifiers )
 {
     if ( !connected )
     {
@@ -662,7 +703,7 @@ void Controller::pointer_button_up( int button, int x, int y )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        if ( ! ( *it )->pointer_button_up( button, sx, sy ) )
+        if ( ! ( *it )->pointer_button_up( button, sx, sy , modifiers ) )
         {
             inject = false;
         }
@@ -670,13 +711,13 @@ void Controller::pointer_button_up( int button, int x, int y )
 
     if ( inject )
     {
-        ClutterUtil::inject_button_release( button , x , y );
+        ClutterUtil::inject_button_release( button , x , y , modifiers );
     }
 }
 
 //.............................................................................
 
-void Controller::touch_down( int finger, int x, int y )
+void Controller::touch_down( int finger, int x, int y , unsigned long int modifiers )
 {
     if ( !connected )
     {
@@ -685,13 +726,13 @@ void Controller::touch_down( int finger, int x, int y )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        ( *it )->touch_down( finger, x, y );
+        ( *it )->touch_down( finger, x, y , modifiers );
     }
 }
 
 //.............................................................................
 
-void Controller::touch_move( int finger, int x, int y )
+void Controller::touch_move( int finger, int x, int y , unsigned long int modifiers )
 {
     if ( !connected )
     {
@@ -700,13 +741,13 @@ void Controller::touch_move( int finger, int x, int y )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        ( *it )->touch_move( finger, x, y );
+        ( *it )->touch_move( finger, x, y , modifiers );
     }
 }
 
 //.............................................................................
 
-void Controller::touch_up( int finger, int x, int y )
+void Controller::touch_up( int finger, int x, int y , unsigned long int modifiers )
 {
     if ( !connected )
     {
@@ -715,7 +756,7 @@ void Controller::touch_up( int finger, int x, int y )
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        ( *it )->touch_up( finger, x, y );
+        ( *it )->touch_up( finger, x, y , modifiers );
     }
 }
 
@@ -736,7 +777,7 @@ void Controller::ui_event( const String & parameters )
 
 //.............................................................................
 
-void Controller::submit_picture( void * data, unsigned int size, const char * mime_type )
+void Controller::submit_image( void * data, unsigned int size, const char * mime_type )
 {
     if ( !connected )
     {
@@ -745,7 +786,22 @@ void Controller::submit_picture( void * data, unsigned int size, const char * mi
 
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
-        ( *it )->submit_picture( data, size, mime_type );
+        ( *it )->submit_image( data, size, mime_type );
+    }
+}
+
+//.............................................................................
+
+void Controller::cancel_image( void )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->cancel_image( );
     }
 }
 
@@ -764,6 +820,53 @@ void Controller::submit_audio_clip( void * data, unsigned int size, const char *
     }
 }
 
+//.............................................................................
+
+void Controller::cancel_audio_clip( void )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->cancel_audio_clip( );
+    }
+}
+
+//.............................................................................
+
+void Controller::advanced_ui_ready( void )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    advanced_ui_is_ready = true;
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->advanced_ui_ready( );
+    }
+}
+
+
+//.............................................................................
+
+void Controller::advanced_ui_event( const char * json )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->advanced_ui_event( json );
+    }
+}
 
 //.............................................................................
 
@@ -1102,38 +1205,45 @@ bool Controller::enter_text( const String & label, const String & text )
                data ) == 0;
 }
 
-bool Controller::submit_picture( unsigned int max_width , unsigned int max_height , bool edit , const String & mask_resource )
+bool Controller::request_image( unsigned int max_width , unsigned int max_height , bool edit , const String & mask_resource, const String & dialog_label, const String & cancel_label )
 {
-    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_PICTURES ) )
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_IMAGES ) )
     {
         return false;
     }
 
-    TPControllerSubmitPicture parameters;
+    TPControllerRequestImage parameters;
 
     parameters.max_width = max_width;
     parameters.max_height = max_height;
     parameters.edit = edit ? 1 : 0;
     parameters.mask = mask_resource.empty() ? 0 : mask_resource.c_str();
+    parameters.dialog_label = dialog_label.empty() ? 0 : dialog_label.c_str();
+    parameters.cancel_label = cancel_label.empty() ? 0 : cancel_label.c_str();
 
     return spec.execute_command(
                tp_controller,
-               TP_CONTROLLER_COMMAND_SUBMIT_PICTURE,
+               TP_CONTROLLER_COMMAND_REQUEST_IMAGE,
                & parameters,
                data ) == 0;
 }
 
-bool Controller::submit_audio_clip( )
+bool Controller::request_audio_clip( const String & dialog_label, const String & cancel_label )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_AUDIO_CLIPS ) )
     {
         return false;
     }
 
+    TPControllerRequestAudioClip parameters;
+
+    parameters.dialog_label = dialog_label.empty() ? 0 : dialog_label.c_str();
+    parameters.cancel_label = cancel_label.empty() ? 0 : cancel_label.c_str();
+
     return spec.execute_command(
                tp_controller,
-               TP_CONTROLLER_COMMAND_SUBMIT_AUDIO_CLIP,
-               0,
+               TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP,
+               & parameters,
                data ) == 0;
 }
 
@@ -1167,6 +1277,34 @@ bool Controller::advanced_ui( const String & payload , String & result )
     }
 
     return r;
+}
+
+bool Controller::show_virtual_remote()
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_VIRTUAL_REMOTE ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_SHOW_VIRTUAL_REMOTE,
+               0,
+               data ) == 0;
+}
+
+bool Controller::hide_virtual_remote()
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_VIRTUAL_REMOTE ) )
+    {
+        return false;
+    }
+
+    return spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_HIDE_VIRTUAL_REMOTE,
+               0,
+               data ) == 0;
 }
 
 //==============================================================================
@@ -1350,87 +1488,87 @@ void ControllerList::reset_all()
 //==============================================================================
 // External-facing functions. They all do a sanity check and then post an event.
 
-void tp_controller_key_down( TPController * controller, unsigned int key_code, unsigned long int unicode )
+void tp_controller_key_down( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
 {
     TPController::check( controller );
 
-    controller->list->post_event( Event::make_key( Event::KEY_DOWN, controller->controller, key_code, unicode ) );
+    controller->list->post_event( Event::make_key( Event::KEY_DOWN, controller->controller, key_code, unicode , modifiers ) );
 }
 
-void tp_controller_key_up( TPController * controller, unsigned int key_code, unsigned long int unicode )
+void tp_controller_key_up( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers )
 {
     TPController::check( controller );
 
-    controller->list->post_event( Event::make_key( Event::KEY_UP, controller->controller, key_code, unicode ) );
+    controller->list->post_event( Event::make_key( Event::KEY_UP, controller->controller, key_code, unicode , modifiers ) );
 }
 
-void tp_controller_accelerometer( TPController * controller, double x, double y, double z )
+void tp_controller_accelerometer( TPController * controller, double x, double y, double z , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     if ( controller->controller->wants_accelerometer_events() )
     {
-        controller->list->post_event( Event::make_accelerometer( controller->controller, x, y, z ) );
+        controller->list->post_event( Event::make_accelerometer( controller->controller, x, y, z , modifiers ) );
     }
 }
 
-void tp_controller_pointer_move( TPController * controller, int x, int y )
+void tp_controller_pointer_move( TPController * controller, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     if ( controller->controller->wants_pointer_events() )
     {
-        controller->list->post_event( Event::make_click_touch( Event::POINTER_MOVE, controller->controller, 0 , x, y ) );
+        controller->list->post_event( Event::make_click_touch( Event::POINTER_MOVE, controller->controller, 0 , x, y , modifiers ) );
     }
 }
 
-void tp_controller_pointer_button_down( TPController * controller, int button, int x, int y )
+void tp_controller_pointer_button_down( TPController * controller, int button, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     if ( controller->controller->wants_pointer_events() )
     {
-        controller->list->post_event( Event::make_click_touch( Event::POINTER_DOWN, controller->controller, button , x, y ) );
+        controller->list->post_event( Event::make_click_touch( Event::POINTER_DOWN, controller->controller, button , x, y , modifiers ) );
     }
 }
 
-void tp_controller_pointer_button_up( TPController * controller, int button, int x, int y )
+void tp_controller_pointer_button_up( TPController * controller, int button, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     if ( controller->controller->wants_pointer_events() )
     {
-        controller->list->post_event( Event::make_click_touch( Event::POINTER_UP, controller->controller, button, x, y ) );
+        controller->list->post_event( Event::make_click_touch( Event::POINTER_UP, controller->controller, button, x, y , modifiers ) );
     }
 }
 
-void tp_controller_touch_down( TPController * controller, int finger, int x, int y )
+void tp_controller_touch_down( TPController * controller, int finger, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     if ( controller->controller->wants_touch_events() )
     {
-        controller->list->post_event( Event::make_click_touch( Event::TOUCH_DOWN, controller->controller, finger, x, y ) );
+        controller->list->post_event( Event::make_click_touch( Event::TOUCH_DOWN, controller->controller, finger, x, y , modifiers ) );
     }
 }
 
-void tp_controller_touch_move( TPController * controller, int finger, int x, int y )
+void tp_controller_touch_move( TPController * controller, int finger, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     if ( controller->controller->wants_touch_events() )
     {
-        controller->list->post_event( Event::make_click_touch( Event::TOUCH_MOVE, controller->controller, finger, x, y ) );
+        controller->list->post_event( Event::make_click_touch( Event::TOUCH_MOVE, controller->controller, finger, x, y , modifiers ) );
     }
 }
 
-void tp_controller_touch_up( TPController * controller, int finger, int x, int y )
+void tp_controller_touch_up( TPController * controller, int finger, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
 
     if ( controller->controller->wants_touch_events() )
     {
-        controller->list->post_event( Event::make_click_touch( Event::TOUCH_UP, controller->controller, finger, x, y ) );
+        controller->list->post_event( Event::make_click_touch( Event::TOUCH_UP, controller->controller, finger, x, y , modifiers ) );
     }
 }
 
@@ -1462,13 +1600,13 @@ int tp_controller_wants_touch_events( TPController * controller )
     return controller->controller->wants_touch_events();
 }
 
-void tp_controller_submit_picture( TPController * controller, const void * data, unsigned int size, const char * mime_type )
+void tp_controller_submit_image( TPController * controller, const void * data, unsigned int size, const char * mime_type )
 {
 	g_assert(data);
 	g_assert(size);
 
 	TPController::check( controller );
-	controller->list->post_event( Event::make_data( Event::SUBMIT_PICTURE, controller->controller, data, size, mime_type ) );
+	controller->list->post_event( Event::make_data( Event::SUBMIT_IMAGE, controller->controller, data, size, mime_type ) );
 }
 
 void tp_controller_submit_audio_clip( TPController * controller, const void * data, unsigned int size, const char * mime_type )
@@ -1478,4 +1616,30 @@ void tp_controller_submit_audio_clip( TPController * controller, const void * da
 
 	TPController::check( controller );
 	controller->list->post_event( Event::make_data( Event::SUBMIT_AUDIO_CLIP, controller->controller, data, size, mime_type ) );
+}
+
+void tp_controller_cancel_image( TPController * controller )
+{
+    TPController::check(controller);
+    controller->list->post_event( Event::make( Event::CANCEL_IMAGE, controller->controller ) );
+}
+
+void tp_controller_cancel_audio_clip( TPController * controller )
+{
+    TPController::check(controller);
+    controller->list->post_event( Event::make( Event::CANCEL_AUDIO_CLIP, controller->controller ) );
+}
+
+void tp_controller_advanced_ui_ready( TPController * controller )
+{
+    TPController::check(controller);
+    controller->list->post_event( Event::make( Event::ADVANCED_UI_READY, controller->controller ) );
+}
+
+void tp_controller_advanced_ui_event( TPController * controller , const char * json )
+{
+	g_assert( json );
+
+	TPController::check(controller);
+    controller->list->post_event( Event::make_advanced_ui_event( controller->controller , json ) );
 }

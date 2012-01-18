@@ -4,6 +4,9 @@
 #include "common.h"
 #include "gio/gio.h"
 
+namespace TrickPlay
+{
+
 class Socket
 {
 public:
@@ -23,6 +26,7 @@ public:
     class Delegate
     {
     public:
+    	virtual ~Delegate() {}
 
         virtual void on_connected() = 0;
         virtual void on_connect_failed() = 0;
@@ -60,5 +64,6 @@ private:
     Delegate *          delegate;
 };
 
+} // namespace TrickPlay
 
 #endif // _TRICKPLAY_SOCKET_H

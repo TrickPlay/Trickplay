@@ -1,0 +1,9 @@
+{
+    "id" : "com.trickplay.test.shadertricks",
+    "release" : 1,
+    "version" : "1.0",
+    "name"    : "GL Shader Tricks",
+    "author"  : "Craig Hughes",
+    "copyright" : "© Trickplay Inc."
+}
+

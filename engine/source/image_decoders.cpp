@@ -20,6 +20,15 @@
 #include "common.h"
 #include "profiler.h"
 #include "util.h"
+#include "jpeg_utils.h"
+
+//=============================================================================
+
+#define TP_LOG_DOMAIN   "IMAGES"
+#define TP_LOG_ON       false
+#define TP_LOG2_ON      false
+
+#include "log.h"
 
 //=============================================================================
 
@@ -99,7 +108,10 @@ namespace ImageDecoders
                     image->pitch = width * 4;
                     image->depth = 4;
                     image->bgr = 0;
-                    image->free_pixels = _TIFFfree;
+                    image->free_image = free_image;
+                    image->pm_alpha = 0;
+
+                    Image::premultiply_alpha( image );
 
                     result = TP_IMAGE_DECODE_OK;
                 }
@@ -110,6 +122,14 @@ namespace ImageDecoders
             }
 
             return result;
+        }
+
+        static void free_image( TPImage * image )
+        {
+        	g_assert( image );
+        	g_assert( image->pixels );
+
+        	_TIFFfree( image->pixels );
         }
     };
 
@@ -272,7 +292,10 @@ namespace ImageDecoders
                                 image->pitch = width * depth;
                                 image->depth = depth;
                                 image->bgr = 0;
-                                image->free_pixels = NULL;
+                                image->free_image = 0;
+                                image->pm_alpha = 0;
+
+                                Image::premultiply_alpha( image );
 
                                 result = TP_IMAGE_DECODE_OK;
                             }
@@ -305,6 +328,12 @@ namespace ImageDecoders
             }
         }
     };
+
+#ifdef TP_JPEG_FORCE_ALPHA
+#define TP_JPEG_DEPTH 			4
+#else
+#define TP_JPEG_DEPTH			3
+#endif
 
     class JPEGDecoder : public Images::Decoder
     {
@@ -352,11 +381,13 @@ namespace ImageDecoders
 
             cinfo.src = &source;
 
+            int orientation = JPEGUtils::get_exif_orientation( ( const unsigned char * ) data , size );
+
             int result = TP_IMAGE_DECODE_FAILED;
 
             try
             {
-                result = decode( &cinfo, image );
+                result = decode( &cinfo , image , orientation );
 
                 jpeg_finish_decompress( &cinfo );
             }
@@ -397,6 +428,8 @@ namespace ImageDecoders
 
             fseek( file, 0, SEEK_SET );
 
+            int orientation = JPEGUtils::get_exif_orientation( filename );
+
             jpeg_decompress_struct cinfo;
             jpeg_error_mgr jerr;
 
@@ -411,7 +444,7 @@ namespace ImageDecoders
             {
                 jpeg_stdio_src( &cinfo, file );
 
-                result = decode( &cinfo, image );
+                result = decode( &cinfo, image, orientation );
 
                 jpeg_finish_decompress( &cinfo );
             }
@@ -429,7 +462,7 @@ namespace ImageDecoders
 
     private:
 
-        int decode( j_decompress_ptr cinfo, TPImage * image )
+        int decode( j_decompress_ptr cinfo, TPImage * image, int orientation )
         {
             jpeg_read_header( cinfo, TRUE );
 
@@ -477,7 +510,7 @@ namespace ImageDecoders
                 return TP_IMAGE_DECODE_FAILED;
             }
 
-            guchar * pixels = ( guchar * )malloc( cinfo->output_width * cinfo->output_height * 3 );
+            guchar * pixels = ( guchar * )malloc( cinfo->output_width * cinfo->output_height * TP_JPEG_DEPTH );
 
             if ( ! pixels )
             {
@@ -486,6 +519,13 @@ namespace ImageDecoders
 
             try
             {
+            	JPEGUtils::Rotator rotator( orientation, cinfo->output_width, cinfo->output_height, TP_JPEG_DEPTH );
+
+            	if ( orientation > 1 )
+            	{
+            		tplog2( "ROTATING JPEG WITH ORIENTATION = %d", orientation );
+            	}
+
                 guchar * p = pixels;
 
                 unsigned int index;
@@ -502,9 +542,13 @@ namespace ImageDecoders
 
                             for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 1 )
                             {
+                                p = pixels + rotator.get_transformed_location( c, cinfo->output_scanline - 1 );
+                            	*(p++) = (*buffer)[ index ];
                                 *(p++) = (*buffer)[ index ];
                                 *(p++) = (*buffer)[ index ];
-                                *(p++) = (*buffer)[ index ];
+#ifdef TP_JPEG_FORCE_ALPHA
+                                *(p++) = 255;
+#endif
                             }
                             break;
 
@@ -512,9 +556,13 @@ namespace ImageDecoders
 
                             for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 3 )
                             {
-                                *(p++) = (*buffer)[ index ];
+                                p = pixels + rotator.get_transformed_location( c, cinfo->output_scanline - 1 );
+                            	*(p++) = (*buffer)[ index ];
                                 *(p++) = (*buffer)[ index + 1 ];
                                 *(p++) = (*buffer)[ index + 2 ];
+#ifdef TP_JPEG_FORCE_ALPHA
+                                *(p++) = 255;
+#endif
                             }
                             break;
 
@@ -522,23 +570,41 @@ namespace ImageDecoders
 
                             for( unsigned int c = 0; c < cinfo->output_width; ++c, index += 4 )
                             {
+                                p = pixels + rotator.get_transformed_location( c, cinfo->output_scanline - 1 );
+
                                 int k = (*buffer)[index + 3];
 
                                 *(p++) = k * (*buffer)[ index ] / 255;
                                 *(p++) = k * (*buffer)[ index + 1 ] / 255;
                                 *(p++) = k * (*buffer)[ index + 2 ] / 255;
+#ifdef TP_JPEG_FORCE_ALPHA
+                                *(p++) = 255;
+#endif
                             }
                             break;
                     }
                 }
 
                 image->pixels = pixels;
-                image->width = cinfo->output_width;
-                image->height = cinfo->output_height;
-                image->depth = 3;
-                image->pitch = cinfo->output_width * 3;
+                image->width = rotator.get_transformed_width();
+                image->height = rotator.get_transformed_height();
+                image->depth = TP_JPEG_DEPTH;
+                image->pitch = rotator.get_transformed_width() * image->depth;
                 image->bgr = 0;
-                image->free_pixels = NULL;
+                image->free_image = 0;
+
+                switch ( cinfo->output_components )
+                {
+                case 1:
+                case 3:
+                	image->pm_alpha = 1;
+                	break;
+                case 4:
+                	image->pm_alpha = 0;
+                    Image::premultiply_alpha( image );
+                    break;
+                }
+
             }
             catch( ... )
             {
@@ -793,6 +859,7 @@ namespace ImageDecoders
                 image->height = g->SHeight;
                 image->depth = transparent_color >= 0 ? 4 : 3;
                 image->pitch = g->SWidth * image->depth;
+                image->pm_alpha = 0;
 
                 image->pixels = malloc( image->height * image->width * image->depth );
 
@@ -829,6 +896,8 @@ namespace ImageDecoders
                         }
                     }
                 }
+
+                Image::premultiply_alpha( image );
 
                 return TP_IMAGE_DECODE_OK;
             }

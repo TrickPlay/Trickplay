@@ -5,6 +5,7 @@
 #include "sysdb.h"
 #include "util.h"
 #include "installer.h"
+#include "app_resource.h"
 ]]
 
 [[
@@ -122,6 +123,16 @@ public:
         
         lua_pushstring(L,info.badge_text.c_str() );
         lua_setfield(L,-2,"badge_text" );
+
+        lua_newtable( L );
+        i = 1;
+        for ( StringSet::const_iterator fit = info.attributes.begin(); fit != info.attributes.end(); ++fit )
+        {
+            lua_pushstring( L , fit->c_str() );
+            lua_pushboolean( L , true );
+            lua_rawset( L , -3 );
+        }
+        lua_setfield(L,-2,"attributes");
     }
 
 private:
@@ -219,35 +230,17 @@ global apps [[Apps*]]
     
     lstring load_app_file( string app_id, string file_name )
         [[
-            result = NULL;
+            result = 0;
+            result_len = 0;
             
-            String app_path=self->get_context()->get_db()->get_app_path( app_id );
+            String root_uri = self->get_context()->get_db()->get_app_path( app_id );
             
-            if (app_path.empty())
+            Util::Buffer contents( AppResource( root_uri.c_str() , file_name , AppResource::URI_NOT_ALLOWED | AppResource::LOCALIZED_NOT_ALLOWED ).load_contents( 0 ) );  
+
+            if ( contents )
             {
-                lua_pushnil(L);
-                return 1;
-            }
-            
-            gchar * path=Util::rebase_path(app_path.c_str(),file_name);
-            FreeLater free_later(path);
-                
-            gchar * contents=NULL;            
-            GError * error=NULL;
-            gsize length=0;
-            
-            g_file_get_contents(path,&contents,&length,&error);
-            free_later(contents);
-            
-            if (error)
-            {
-                g_warning("FAILED TO LOAD APP FILE '%s' : %s",path,error->message);
-                g_clear_error(&error);
-            }
-            else
-            {
-                result=contents;
-                result_len=length;
+                result = contents.data();
+                result_len = contents.length();     
             }
         ]];
         
