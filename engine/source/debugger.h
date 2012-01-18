@@ -2,6 +2,7 @@
 #define _TRICKPLAY_DEBUGGER_H
 
 #include "common.h"
+#include "json.h"
 
 class App;
 
@@ -13,32 +14,68 @@ public:
 
     ~Debugger();
 
-    void install();
+    void install( bool break_next_line = false );
 
     void uninstall();
 
     void break_next_line();
 
+    bool is_in_break() const
+    {
+    	return in_break;
+    }
+
+    guint16 get_server_port() const;
+
+    class Server;
+
+    class Command;
+
 private:
-
-    static void command_handler( TPContext * context , const char * command, const char * parameters, void * me );
-
-    void handle_command( const char * parameters );
 
     static void lua_hook( lua_State * L, lua_Debug * ar );
 
     void debug_break( lua_State * L, lua_Debug * ar );
 
-    App *           app;
-    bool            installed;
+    JSON::Object get_location( lua_State * L , lua_Debug * ar );
+    JSON::Array get_back_trace( lua_State * L , lua_Debug * ar );
+    JSON::Array get_locals( lua_State * L , lua_Debug * ar );
+    JSON::Array get_breakpoints( lua_State * L , lua_Debug * ar );
+    JSON::Object get_app_info();
 
-    bool            break_next;
+    StringVector * get_source( const String & pi_path );
 
-    typedef std::pair< String, int > Breakpoint;
+    bool handle_command( lua_State * L , lua_Debug * ar , Command * command );
 
-    typedef std::list< Breakpoint > BreakpointList;
+    App *	app;
+    bool    installed;
+    bool    break_next;
+    int 	returns;
+    bool	in_break;
 
-    BreakpointList  breakpoints;
+    struct Breakpoint
+    {
+    	Breakpoint( const String & _file , int _line , bool _enabled = true )
+    	:
+    		file( _file ),
+    		line( _line ),
+    		enabled( _enabled )
+    	{}
+
+    	String	file;
+    	int		line;
+    	bool	enabled;
+    };
+
+    typedef std::vector< Breakpoint > BreakpointList;
+
+    BreakpointList  	breakpoints;
+
+    typedef std::map< String , StringVector > SourceMap;
+
+    SourceMap			source;
+
+    static Server *		server;
 };
 
 #endif // _TRICKPLAY_DEBUGGER_H

@@ -1,0 +1,34 @@
+
+Topic: CheckBox and RadioButton Elements
+
+Along with the UI elements we've looked at so far, such as Button and ButtonPicker, the Visual Editor provides many additional elements. In this section, we'll look at some of these elements.
+
+CheckBox:
+
+The CheckBox UI element enables the user to toggle between two different states, such as On/Off, True/False or Enabled/Disabled.
+
+(see images/edCheckboxes.png)
+
+As the sample checkboxes above demonstrate, a checkbox can be either checked or unchecked. Also, the box itself can be to the left or to the right of the text.
+
+A single CheckBox element may contain one or more checkboxes. The setting of a particular checkbox is independent of the settings of any other checkboxes in the element. When displayed, the checkboxes in the element can be stacked vertically or spread horizontally.
+
+Note: Even though it's possible for a CheckBox element to contain multiple checkboxes, it is usually easier to associate a single checkbox with each CheckBox element.
+
+For additional information about the CheckBox element, refer to the <Visual Editor Reference at file:../reference/checkBoxGroup-txt.html#CheckBox>.
+
+
+
+RadioButtonGroup:
+
+The RadioButtonGroup UI element enables the user to select a single setting from a group of possible settings. Only one setting in the group may be selected at any given time. A RadioButtonGroup contains two or more possible settings.
+
+(see images/edRadioButtons.png)
+
+Like the CheckBox element, a RadioButtonGroup can place its buttons to the left or to the right of its text. When displayed, radio buttons can be stacked vertically or spread horizontally.
+
+For additional information about RadioButtonGroup,refer to the <Visual Editor Reference at file:../reference/radioButtonGroup-txt.html#RadioButtonGroup>.
+
+
+
+

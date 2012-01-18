@@ -101,6 +101,8 @@ namespace JSON
 
         String stringify() const;
 
+        double as_number() const;
+
     private:
 
         Type    type;
@@ -158,9 +160,14 @@ namespace JSON
 
         Value & operator [] ( const String & key );
 
+        Value & at( const String & key );
+
         typedef std::map< String , Value > Map;
 
         bool has( const String & key ) const;
+
+        Map::iterator find( const String & key );
+        Map::const_iterator find( const String & key ) const;
 
         Map::iterator begin();
         Map::const_iterator begin() const;
@@ -170,6 +177,10 @@ namespace JSON
         friend std::ostream & operator<<( std::ostream & os , const Object & object );
 
         String stringify() const;
+
+        Map::size_type size() const;
+
+        void clear();
 
     private:
 
@@ -196,6 +207,8 @@ namespace JSON
 
         Value & append( const Value & value = Value() );
 
+        template < typename T > T & append();
+
         typedef std::vector< Value > Vector;
 
         Vector::iterator begin();
@@ -212,6 +225,9 @@ namespace JSON
 
         Vector vector;
     };
+
+    template <> Object &    Array::append< Object       >();
+    template <> Array &     Array::append< Array        >();
 
     //=============================================================================
 

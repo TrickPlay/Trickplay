@@ -25,6 +25,8 @@ private:
     int controller_port;
 
     UpnpDevice_Handle device_handle;
+    UpnpDevice_Handle device6_handle;
+    UpnpDevice_Handle device6ulagua_handle;
 };
 
 

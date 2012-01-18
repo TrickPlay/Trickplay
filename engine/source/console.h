@@ -10,7 +10,7 @@ public:
 
     static Console * make( TPContext * context );
 
-    ~Console();
+    virtual ~Console();
 
     typedef int ( *CommandHandler )( const char * command, const char * parameters, void * data );
 

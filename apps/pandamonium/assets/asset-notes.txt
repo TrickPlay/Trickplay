@@ -1,0 +1,81 @@
+Game Mechanics:
+The panda body bounces off the platforms and arms and head flail around; if the panda falls off the bottom of the screen in general, you lose.
+
+Only the panda and branches need to be real physics objects
+
+
+Branches:
+Branches are physics objects attached off-screen with spring joints, connected to leaf-platforms that the player actually collides with. Branches are randomly generated to maximize platform distribution, and branches that fall below two screen heights are removed or recycled
+
+branches-1.png: anchor(0,95)
+branches-2.png: anchor(0,93)
+branches-3.png: anchor(0,13)
+
+
+Coin counter:
+Tracks the number of coins the player has collected. If multiple coins are collected, they are racked up one at a time
+
+coin-symbol.png: (1766,926)
+score #s are the same height but will need to be manually placed and spaced
+--score: 64pt Baveuse #f3c81e, right-aligned, try (1754,948)
+
+
+Coins:
+Coins increment the counter by 1. They appear alone, and also in formations (+ shape, trail of 3 or 5)
+
+t = angle = 180 * (seconds % 1) - 90
+
+anchor each piece in the center
+coin-1.png
+	x = xAnchor - 10*sin(t)
+	xScale = cos(t)
+coin-2.png
+	only show if abs(t) > 60
+	xScale = sin(t)
+coin-3.png
+	behind coin-1
+	x = xAnchor + 10*sin(t)
+	xScale = cos(t)
+
+
+Envelope:
+Red envelopes appears rarely with coin formations and are worth 10 coins, which burst out in a circle when the envelope is taken
+xScale = cos(t), swap image each period
+
+
+Sparks on firecracker:
+Firecrackers explode when the panda falls down onto them (but not if he hits them going up), making the panda fly away and fall off the bottom of the screen
+
+2 images at a time, randomize the older one each frame and bring it to the front, and set the newer one to 60% opacity, which then becomes the older one
+
+x = firecracker.x + 195 + rand(6)
+y = firecracker.y + 7 + rand(6)
+src = randomly select one of the sparks
+scale = 0.5+rand(0.5)
+
+Random, moving sparks & smoke when it explodes.
+
+
+Sparks on fireworks:
+Fireworks launch as soon as the panda grabs on, and rocket up maybe 2-3 screens, then the panda lets go and the firework falls
+
+mostly the same
+
+x = firecracker.x + 307 + rand(6)
+y = firecracker.y + 27 + rand(6)
+
+Random, downward sparks & smoke when it launches.
+
+
+Smoke:
+
+white/grey circles, slow drift in random direction
+Enlarges over time & loses opacity
+
+
+Parasol:
+Parasols are held by the panda until he falls off the bottom of the screen, then the parasol opens, and the panda floats down and can land on one of the branches on the screen beneath. If the panda still falls off the bottom again, you lose.
+
+
+Corner text:
+back.png (in-game w/ LG MMR) / quit.png (title screen): (1760,20)

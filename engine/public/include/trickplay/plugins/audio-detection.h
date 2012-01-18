@@ -1,25 +1,7 @@
 #ifndef _TRICKPLAY_AUDIO_DETECTION_H
 #define _TRICKPLAY_AUDIO_DETECTION_H
 
-/*-----------------------------------------------------------------------------*/
-
-    typedef struct TPAudioDetectionPluginInfo TPAudioDetectionPluginInfo;
-
-    struct TPAudioDetectionPluginInfo
-    {
-        char            name[64];
-        char            version[64];
-        int             resident;
-        unsigned int    min_buffer_seconds;
-        void *          user_data;
-    };
-
-    typedef
-    void
-    (*TPAudioDetectionInitialize)(
-
-            TPAudioDetectionPluginInfo *    info,
-            const char *                    config);
+#include "trickplay/plugins/plugins.h"
 
 /*-----------------------------------------------------------------------------*/
 
@@ -72,18 +54,8 @@
 
 /*-----------------------------------------------------------------------------*/
 
-    typedef
-    void
-    (*TPAudioDetectionShutdown)(
-
-            void * user_data);
-
-/*-----------------------------------------------------------------------------*/
-
-#define TP_AUDIO_DETECTION_INITIALIZE       "tp_audio_detection_initialize"
 #define TP_AUDIO_DETECTION_PROCESS_SAMPLES  "tp_audio_detection_process_samples"
 #define TP_AUDIO_DETECTION_RESET            "tp_audio_detection_reset"
-#define TP_AUDIO_DETECTION_SHUTDOWN         "tp_audio_detection_shutdown"
 
 /*-----------------------------------------------------------------------------*/
 

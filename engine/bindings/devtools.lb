@@ -5,6 +5,7 @@
 #include "context.h"
 #include "clutter_util.h"
 #include "images.h"
+#include "app_resource.h"
 
 //-----------------------------------------------------------------------------
 // __gc metamethod for markers
@@ -15,6 +16,141 @@ static int marker_gc( lua_State * L )
     return 0;
 }
 
+//-----------------------------------------------------------------------------
+// Graph that shows how long it takes to draw each frame.
+
+class Graph
+{
+public:
+    
+    static void toggle( TPContext * ctx )
+    {
+        static char key = 0;
+        
+        Graph * graph = ( Graph * ) ctx->get_internal( & key );
+        
+        if ( graph ) 
+        {
+            ctx->add_internal( & key , 0 , 0 );
+        }
+        else
+        {
+            ctx->add_internal( & key , new Graph() , destroy );
+        }
+    }
+    
+private:
+
+    static void destroy( gpointer me ) 
+    {
+        delete ( Graph * ) me;
+    }    
+    
+    Graph()
+    {
+        texture = clutter_texture_new();
+        
+        g_object_ref_sink( texture );
+        
+        ClutterActor * stage = clutter_stage_get_default();
+        
+        width = clutter_actor_get_width( stage );
+        height = clutter_actor_get_height( stage );
+        
+        guchar * t = g_new0( guchar , 4 * width * height );
+        
+        clutter_texture_set_from_rgb_data( CLUTTER_TEXTURE( texture ) , t , TRUE , width , height , 4 * width , 4 , CLUTTER_TEXTURE_NONE , 0 );
+        
+        g_free( t );
+        
+        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , texture );
+        
+        clutter_actor_set_name( texture , "graph" );
+        
+        bar = g_new0( guchar , 4 * height );
+        
+        white_bar = g_new( guchar , 4 * height );
+        
+        memset( white_bar , 255 , 4 * height );
+        
+        x = 0;
+        
+        source = clutter_threads_add_repaint_func( on_tick , this , 0 );
+        
+        timer = g_timer_new(); 
+    }
+    
+    ~Graph()
+    {
+        if ( ClutterActor * parent = clutter_actor_get_parent( texture ) )
+        {
+            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , texture );
+        }
+        
+        g_object_unref( texture );
+        
+        g_free( bar );
+        
+        g_free( white_bar );
+        
+        clutter_threads_remove_repaint_func( source );
+        
+        g_timer_destroy( timer );
+    }
+    
+    static gboolean on_tick( gpointer me )
+    {
+        ( ( Graph *) me )->tick();
+        
+        return TRUE; 
+    }
+    
+    void tick()
+    {
+        gint y = g_timer_elapsed( timer , 0 ) * height;
+        
+        if ( y < 0 )
+        {
+            y = 0;
+        }
+        else if ( y > height ) 
+        {
+            y = height;
+        }
+        
+        guchar * p = bar;
+        
+        for ( gint i = height - 1; i >= 0; --i )
+        {
+            *(p++) = i > y ? 0 : 255;
+            *(p++) = 0;
+            *(p++) = 0;
+            *(p++) = i > y ? 0 : 255; 
+        }
+
+        clutter_texture_set_area_from_rgb_data( CLUTTER_TEXTURE( texture ) , bar , TRUE , x , 0 , 1 , height , 4 , 4 , CLUTTER_TEXTURE_NONE , 0 );
+        
+        if ( ++x >= width )
+        {
+            x = 0;
+        }   
+        
+        clutter_texture_set_area_from_rgb_data( CLUTTER_TEXTURE( texture ) , white_bar , TRUE , x , 0 , 1 , height , 4 , 4 , CLUTTER_TEXTURE_NONE , 0 );
+        
+        clutter_actor_raise_top( texture );
+        
+        g_timer_start( timer );
+    }
+    
+    gint            width;
+    gint            height;
+    guchar *        bar;
+    guchar *        white_bar;
+    ClutterActor *  texture;
+    gint            x;
+    guint           source;
+    GTimer *        timer;
+};
 ]]
 
 /*
@@ -52,7 +188,7 @@ global devtools [[ void * ]]
             lua_newuserdata( L , 1 );
 
             lua_newtable( L );
-            lua_pushvalue( L , 1 );
+            lua_pushlstring( L , name , name_len );
             lua_pushcclosure( L , marker_gc , 1 );
             lua_setfield( L , -2 , "__gc" );
             lua_setmetatable( L , -2 );
@@ -100,18 +236,143 @@ global devtools [[ void * ]]
 
     keypress( int key , int unicode = 0 )
         [[
-            ClutterUtil::inject_key_down( key , unicode );
-            ClutterUtil::inject_key_up( key , unicode );
+            ClutterUtil::inject_key_down( key , unicode , 0 );
+            ClutterUtil::inject_key_up( key , unicode , 0 );
         ]];
 
     udata gid( int gid )
         [[
-            ClutterUtil::wrap_concrete_actor( L , clutter_get_actor_by_gid( gid ) );
+            ClutterActor * actor = clutter_get_actor_by_gid( gid );
+            
+            // There is a bug in clutter 1.6.14 where free gids are
+            // set to this value but not checked later.
+             
+            if ( actor == 0 || actor == (gpointer) 0xdecafbad )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                ClutterUtil::wrap_concrete_actor( L , actor );
+            }
         ]];
 
     sleep( int ms )
         [[
             usleep( ms * 1000 );
         ]];
+        
+    string screenshot( string filename = 0 )
+        [[
+            // WE ARE BREAKING THE RULES HERE BY ALLOWING THE APP TO SAVE
+            // A FILE TO ITS BUNDLE, BUT THAT IS OK BECAUSE THIS IS DONE
+            // IN DEVTOOLS WHICH IS NOT AVAILABLE ON PRODUCTION BUILDS.
+            
+            result = 0;
+            
+            Image * image = Image::screenshot();
+            
+            if ( ! image )
+            {
+                g_warning( "FAILED TO TAKE SCREENSHOT" );
+            }
+            else
+            {
+                String path;
+                String name;
+                
+                App * app = App::get( L );
+                
+                String app_path = app->get_metadata().get_root_native_path();
+                
+                if ( ! app_path.empty() )
+                {
+                    if ( ! filename || ( filename && 0 == strlen( filename ) ) )
+                    {
+                        GTimeVal t;
+        
+                        g_get_current_time( & t );
+        
+                        gchar * ts = g_strdup_printf( "trickplay-ss-%ld-%ld.png" , t.tv_sec , t.tv_usec );
+        
+                        gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
+        
+                        name = ts;
+                        path = fn;
+                        
+                        g_free( ts );
+                        g_free( fn );
+                    }
+                    else
+                    {
+                        gchar * ts = g_strdup_printf( "%s.png" , filename );
+                        
+                        gchar * fn = g_build_filename( app_path.c_str() , ts , NULL );
+                        
+                        name = ts;
+                        path = fn;
+                        
+                        g_free( ts );
+                        g_free( fn );
+                    }
+                    
+                    if ( ! image->write_to_png( path.c_str() ) )
+                    {
+                        g_warning( "FAILED TO WRITE SCREENSHOT TO '%s'" , path.c_str() );
+                    }
+                    else
+                    {
+                        result = name.c_str();
+                    }
+                }                
+                delete image;
+            }                   
+        ]];
+        
+    graph( )
+        [[
+            Graph::toggle( App::get( L )->get_context() );    
+        ]];
+        
+    bool gctag( udata udata , string comment )
+        [[
+            result = false;
+            
+            if ( UserData * u = UserData::get_check( L , udata ) )
+            {
+                result = u->gc_tag( comment );
+            } 
+        ]];        
+
+    multi path_test( string path , int flags = 0 , table schemes = 0 )
+        [[
+            StringSet allowed_schemes;
+            
+            if ( schemes )
+            {
+                lua_pushnil( L );
+                while( lua_next( L , schemes ) )
+                {
+                    allowed_schemes.insert( lua_tostring( L , -1 ) );
+                    lua_pop( L , 1 );
+                }
+            }
+            
+            AppResource p( L , path , flags , allowed_schemes );
+            
+            if ( p )
+            {
+                lua_pushboolean( L , true );
+            }
+            else
+            {
+                lua_pushboolean( L , false );
+            }
+            
+            lua_pushstring( L , p.get_native_path().c_str() );
+            lua_pushstring( L , p.get_uri().c_str() );
+            
+            return 3;
+        ]];                     
 }
 

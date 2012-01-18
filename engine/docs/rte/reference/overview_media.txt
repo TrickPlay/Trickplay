@@ -1,0 +1,5 @@
+
+Title: Media Playback Overview
+
+This section describes the support provided by the <mediaplayer> global variable to process audio and video media resources.
+

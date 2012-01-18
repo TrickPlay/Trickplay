@@ -1,0 +1,10 @@
+app=
+{
+    id          = "com.trickplay.air-combat",
+    release     = "5",
+    version     = "1.4",
+    name        = "Air Combat",
+    author      = "Pablo Pissanetzky",
+    copyright   = "© Trickplay Inc."
+}
+

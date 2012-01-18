@@ -3,6 +3,7 @@
 
 //-----------------------------------------------------------------------------
 #include "trickplay/audio-sampler.h"
+#include "trickplay/resource.h"
 #include "common.h"
 #include "notify.h"
 #include "mediaplayers.h"
@@ -22,26 +23,28 @@
 //-----------------------------------------------------------------------------
 // Default values
 
-#define TP_SYSTEM_LANGUAGE_DEFAULT      "en"
-#define TP_SYSTEM_COUNTRY_DEFAULT       "US"
-#define TP_SYSTEM_NAME_DEFAULT          "Desktop"
-#define TP_SYSTEM_VERSION_DEFAULT       "0.0.0"
-#define TP_SYSTEM_SN_DEFAULT            "SN"
-#define TP_SCAN_APP_SOURCES_DEFAULT     false
-#define TP_CONFIG_FROM_ENV_DEFAULT      true
-#define TP_CONFIG_FROM_FILE_DEFAULT     ".trickplay"
-#define TP_CONSOLE_ENABLED_DEFAULT      true
-#define TP_TELNET_CONSOLE_PORT_DEFAULT  7777
-#define TP_CONTROLLERS_ENABLED_DEFAULT  false
-#define TP_CONTROLLERS_PORT_DEFAULT     0
-#define TP_SCREEN_WIDTH_DEFAULT         960
-#define TP_SCREEN_HEIGHT_DEFAULT        540
-#define TP_CONTROLLERS_NAME_DEFAULT     "TrickPlay"
-#define TP_LIRC_ENABLED_DEFAULT         true
-#define TP_LIRC_UDS_DEFAULT             "/var/run/lirc/lircd"
-#define TP_LIRC_REPEAT_DEFAULT          150
-#define TP_APP_PUSH_ENABLED_DEFAULT     true
-#define TP_APP_PUSH_PORT_DEFAULT        8888
+#define TP_SYSTEM_LANGUAGE_DEFAULT      	"en"
+#define TP_SYSTEM_COUNTRY_DEFAULT       	"US"
+#define TP_SYSTEM_NAME_DEFAULT          	"Desktop"
+#define TP_SYSTEM_VERSION_DEFAULT       	"0.0.0"
+#define TP_SYSTEM_SN_DEFAULT            	"SN"
+#define TP_SCAN_APP_SOURCES_DEFAULT     	false
+#define TP_CONFIG_FROM_ENV_DEFAULT      	true
+#define TP_CONFIG_FROM_FILE_DEFAULT     	".trickplay"
+#define TP_CONSOLE_ENABLED_DEFAULT      	true
+#define TP_TELNET_CONSOLE_PORT_DEFAULT  	7777
+#define TP_CONTROLLERS_ENABLED_DEFAULT  	false
+#define TP_CONTROLLERS_PORT_DEFAULT     	0
+#define TP_SCREEN_WIDTH_DEFAULT         	960
+#define TP_SCREEN_HEIGHT_DEFAULT        	540
+#define TP_CONTROLLERS_NAME_DEFAULT     	"TrickPlay"
+#define TP_LIRC_ENABLED_DEFAULT         	true
+#define TP_LIRC_UDS_DEFAULT             	"/var/run/lirc/lircd"
+#define TP_LIRC_REPEAT_DEFAULT          	150
+#define TP_APP_PUSH_ENABLED_DEFAULT     	true
+#define TP_APP_PUSH_PORT_DEFAULT        	8888
+#define TP_TEXTURE_CACHE_LIMIT_DEFAULT		0
+#define TP_MEDIAPLAYER_SCHEMES_DEFAULT		"rtsp"
 
 // TODO: Don't like hard-coding this app id here
 
@@ -70,9 +73,9 @@ public:
     //.........................................................................
     // Getting context configuration variables
 
-    const char * get( const char * key, const char * def = NULL );
-    bool get_bool( const char * key, bool def = false );
-    int get_int( const char * key, int def = 0 );
+    const char * get( const char * key, const char * def = NULL , bool default_if_empty = false ) const;
+    bool get_bool( const char * key, bool def = false ) const;
+    int get_int( const char * key, int def = 0 ) const;
 
     //.........................................................................
     // Console command handlers
@@ -192,6 +195,11 @@ public:
 
     void audio_detection_match( const gchar * json );
 
+    //.........................................................................
+    // Get a resource loader
+
+    bool get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const;
+
 private:
 
     TPContext();
@@ -262,9 +270,17 @@ private:
     static void log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self );
 
     //.........................................................................
+    // Resource readers
+    void set_resource_loader( unsigned int resource_type , TPResourceLoader loader , void * user_data );
+
+    //.........................................................................
     // Request handlers
 
     void set_request_handler( const char * subject, TPRequestHandler handler, void * data );
+
+    //.........................................................................
+
+    void load_background();
 
     //.........................................................................
     // External functions are our friends
@@ -281,6 +297,7 @@ private:
     friend void tp_context_set_request_handler( TPContext * context, const char * subject, TPRequestHandler handler, void * data );
     friend void tp_context_add_console_command_handler( TPContext * context, const char * command, TPConsoleCommandHandler handler, void * data );
     friend void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void * data );
+    friend void tp_context_set_resource_loader( TPContext * context, unsigned int type, TPResourceLoader loader, void * data);
     friend void tp_context_key_event( TPContext * context, const char * key );
     friend int tp_context_run( TPContext * context );
     friend void tp_context_quit( TPContext * context );
@@ -363,9 +380,11 @@ private:
     typedef std::map<gpointer,InternalPair>                     InternalMap;
 
     InternalMap                                                 internals;
+    
+    typedef std::pair<TPResourceLoader,void *>					ResourceLoaderClosure;
+    typedef std::map<unsigned int, ResourceLoaderClosure> 		ResourceLoaderMap;
+    
+    ResourceLoaderMap                                           resource_loaders;
 };
-
-
-
 
 #endif // _TICKPLAY_CONTEXT_H

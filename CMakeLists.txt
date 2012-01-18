@@ -21,6 +21,10 @@ set( TP_CONTROLLER_DISCOVERY_UPNP 1 )
 
 set( TP_UPNP_CLIENT 1 )
 
+if(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
+	set( TP_WITH_WEBGL 1 )
+endif(NOT( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" ))
+
 #------------------------------------------------------------------------------
 
 include(util.cmake)
@@ -34,7 +38,7 @@ execute_process(
 
 execute_process(
 	WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-	COMMAND git describe --tags ${GIT_CURRENT_REVISION}
+	COMMAND git describe --tags --dirty
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 	OUTPUT_VARIABLE GIT_CURRENT_TAG
 )
@@ -44,6 +48,7 @@ if(NOT GIT_CURRENT_TAG)
 endif (NOT GIT_CURRENT_TAG)
 
 string(REPLACE "\n" ", " GIT_CURRENT_TAG ${GIT_CURRENT_TAG})
+string(REPLACE "/"  "~"  GIT_CURRENT_TAG ${GIT_CURRENT_TAG})
 
 set(GIT_VERSION "${GIT_CURRENT_TAG}")
 
@@ -57,6 +62,8 @@ if (CMAKE_TOOLCHAIN_FILE)
 
     add_subdirectory( engine )
     
+    add_subdirectory( pdk )
+    
 else (CMAKE_TOOLCHAIN_FILE)
 
     add_subdirectory( engine )
@@ -64,6 +71,8 @@ else (CMAKE_TOOLCHAIN_FILE)
     add_subdirectory( clients/desktop )
 
     add_subdirectory( clients/clutter-mediaplayer )
+    
+#    add_subdirectory( clients/jpeg-utils-test )
     
     add_subdirectory( sdk )
     
@@ -73,7 +82,9 @@ endif (CMAKE_TOOLCHAIN_FILE)
 # Docs, you have to tell us where the NaturalDocs script is, like this:
 # cmake -DNATURAL_DOCS=/path/to/NaturalDocs
 
-add_subdirectory( engine/docs )
+add_subdirectory( engine/docs EXCLUDE_FROM_ALL )
+
+add_subdirectory ( apps EXCLUDE_FROM_ALL )
 
 add_subdirectory( plugins )
 

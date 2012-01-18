@@ -1,0 +1,4 @@
+#!/bin/bash
+#python /home/hjkim/code/trickplay/tools/debug/start.py "$1" & 
+python ~/code/trickplay/tools/debug/start.py "$1" & 
+

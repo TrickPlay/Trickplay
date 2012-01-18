@@ -1,0 +1,270 @@
+Class: Button
+
+A Button is a standard user interface button. In addition to Button-specific properties, Buttons also provide all the properties, events, and functions implemented by the TrickPlay Runtime Engine's <UIElement> interface.
+
+
+
+Constructor: button( properties )
+
+The button() function creates a new Button UI Element. Property settings can be set by the properties argument; default settings are used for any property not set explicitly.
+
+*Argument:*
+
+properties - table of Button property settings
+
+The properties table contains a comma-separated list of property settings for the new Button. If a property is not explicitly set, its default value is used.
+
+*Return Value:* Returns a Group object that contains the new Button
+
+*Example:* Create a new button, specifying some properties
+
+(code)
+-- Create all the UI Elements
+ui_element = dofile( "/lib/ui_element.lua" )
+
+-- Create a new button, setting some of its Button-specific properties
+local myButton = ui_element.button{ label = "myButton", ui_width = 400 }
+
+-- Set some of the button's UIElement properties
+myButton.name = "myButton"
+myButton.position = { 700, 300, 0 }
+(end)
+
+
+
+Property: ui_width 
+
+The ui_width property is an integer value specifying the button's width in pixels.
+
+*Default Setting:* 180
+
+*See Also:* the <ui_height> property
+
+
+
+Property: ui_height
+
+The ui_height property is an integer specifying the button's height in pixels.
+
+*Default Setting:* 60
+
+*See Also:* the <ui_width> property
+
+
+
+Property: ui_position
+
+The ui_position property is a table of integer values specifying the object's screen coordinates: X, Y and Z, respectively.
+
+*Default Setting:* { 100, 100, 0 }
+
+*See Also:* the <ui_width> and <ui_height> properties
+
+
+
+Property: label
+
+The label property is a string to display within the button.
+
+*Default Setting:* "Button"
+
+*See Also:* the <text_font> and the <text_color> properties
+
+
+
+Property: text_font
+
+The text_font property is a string specifying the Button's font. The font string's format is described in the <Text.font> section.
+
+*Default Setting:* "DejaVu Sans 30px"
+
+*See Also:* the <label> and <text_color> properties
+
+
+
+Property: text_color 
+
+The text_color property specifies the color of the Button's text when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The text_color property supports only the "Lua Table of RGB Values" format.
+
+*Default Setting:* {255, 255, 255, 255} (white and completely opaque)
+
+*See Also:* the <label>, <text_font> and <focus_text_color> properties
+
+
+
+Property: focus_text_color
+
+The focus_text_color property specifies the color of the Button's text when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_text_color property supports only the "Lua Table of RGB Values" format.
+
+*Default Setting:* {255, 255, 255, 255} (white and completely opaque)
+
+*See Also:* the <text_color> property
+
+
+
+Property: text_has_shadow
+
+The text_has_shadow property is a boolean value indicating whether or not the button text displays a shadow (true=has shadow).
+
+*Default Setting:* true
+
+
+
+Property: skin
+
+The skin property is a string specifying the button's skin. The skin functionality is under active development.
+
+*Default Setting:* "default"
+
+
+
+Property: fill_color
+
+The fill_color property specifies the Button's fill color when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The fill_color property supports only the "Lua Table of RGB Values" format.
+
+*Default Setting:* { 255, 255, 255, 0 } (white and transparent)
+
+*See Also:* the <focus_fill_color> and <border_color> properties
+
+
+
+Property: focus_fill_color
+
+The focus_fill_color property specifies the Button's fill color when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_fill_color property supports only the "Lua Table of RGB Values" format.
+
+*Default Setting:* {27, 145, 27, 0}
+
+*See Also:* the <fill_color> property
+
+
+
+Property: border_width
+
+The border_width property is an integer specifying button's border width in pixels.
+
+*Default Setting:* 1
+
+*See Also:* the <border_corner_radius> and <border_color> properties
+
+
+
+Property: border_corner_radius
+
+The border_corner_radius property is an integer specifying the radius in pixels of each of the button's four corners.
+
+A radius of 0 will produce square, 90-degree corners. As values increase, the corners become more rounded. To produce a button with a completely rounded left and right side, set the border_corner_radius property to a value of ui_height / 2. To create a circular button, set the button's ui_width and ui_height to identical values, and set the border_corner_radius property to ui_height (or ui_width) / 2.
+
+*Default Setting:* 12
+
+*See Also:* the <ui_width> and <ui_height> properties
+
+
+
+Property: border_color
+
+The border_color property specifies the color of the Button's border when the object does not have the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The border_color property supports only the "Lua Table of RGB Values" format.
+
+*Default Setting:* {255, 255, 255, 255} (white and opaque)
+
+*See Also:* the <focus_border_color> and <fill_color> properties
+
+
+
+Property: focus_border_color
+
+The focus_border_color property specifies the color of the Button's border when the object has the input focus. For information about color formats, refer to the <Specifying Colors in the TrickPlay SDK> section of the Programmer's Guide. Note: The focus_border_color property supports only the "Lua Table of RGB Values" format.
+
+*Default Setting:* {27, 145, 27, 255}
+
+*See Also:* the <border_color> property
+
+
+
+Function: set_focus
+
+The set_focus() function forces the key focus to the button.
+
+Calling set_focus() also causes the <on_focus> event handler to be called.
+
+If the function's key argument is set to keys.Return then the button's <on_press> event handler is also called.
+
+*Prototype:* set_focus( key )
+
+*Arguments:*
+
+key - Optional argument. If equal to keys.Return, the on_press() event handler is called. Other values have no effect.
+
+*Return Value:* None.
+
+*See Also:* the <on_focus> and <on_press> event handlers
+
+
+
+Function: clear_focus
+
+The clear_focus() function releases the key focus from the button.
+
+Calling clear_focus() also causes the <on_unfocus> event handler to be called.
+
+After calling clear_focus(), no screen element has the input focus.
+
+*Prototype:* clear_focus()
+
+*Arguments:* None.
+
+*Return Value:* None.
+
+*See Also:* the <on_unfocus> event handler
+
+
+
+Event Handler: on_focus
+
+The on_focus() event handler is called whenever the button receives the key focus.
+
+The TrickPlay Visual Editor generates an empty skeleton on_focus() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button receives the key focus.
+
+*Default Setting:* nil or references an empty skeleton handler, i.e., focus-in events are ignored.
+
+*See Also:* the <set_focus> function and the <on_unfocus> event handler
+
+
+
+Event Handler: on_unfocus
+
+The on_unfocus() event handler is called whenever the button loses the key focus.
+
+The TrickPlay Visual Editor generates an empty skeleton on_unfocus() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button loses the key focus.
+
+*Default Setting:* nil or references an empty skeleton handler, i.e., focus-out events are ignored.
+
+*See Also:* the <clear_focus> function and the <on_focus> event handler
+
+
+
+Event Handler: on_press
+
+The on_press() event handler is called whenever the button is pressed.
+
+The TrickPlay Visual Editor generates an empty skeleton on_press() event handler in the project's main.lua file for every button it creates. Add your own code to this skeleton handler to implement the operations that should be performed when the button is pressed.
+
+*Default Setting:* nil or references an empty skeleton handler, i.e., button-press events are ignored.
+
+*Example:* When button is pressed, transition to another screen
+
+(code)
+-- Assume we have two screens: FirstScreen and NextScreen.
+-- We are currently in the FirstScreen, which contains a button with its name property set to "GoToNextScreen".
+-- When the GoToNextScreen button is pressed, its on_press() event handler below is called.
+
+-- The TrickPlay Visual Editor automatically generates the handler skeleton and saves it in the
+-- project's main.lua file. You can also write the handler definition yourself if you don't use the Editor.
+layout["FirstScreen"].GoToNextScreen.on_press = function() -- Handler for GoToNextScreen.on_press in this screen
+  -- We add this code...
+  -- Transition to NextScreen using a fade-out/fade-in effect
+  ui_element.transit_to( groups["FirstScreen"], groups["NextScreen"], "fade" )
+end
+
+
+(end)
+

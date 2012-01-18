@@ -80,13 +80,15 @@ while not response[ "done" ]:
     try:
         
         file_name = file_map[ response[ "file" ] ]
+        length = os.path.getsize( file_name )
         print( "Sending %s" % response[ "file" ] )
+
         f = open( file_name )
-        contents = f.read()
-        f.close()
-    
-        request = urllib2.Request( "http://localhost:8888" + response[ "url" ] , contents , { "Content-Type" : "application/octet-stream" } )
+        
+        request = urllib2.Request( "http://localhost:8888" + response[ "url" ] , f , { "Content-Type" : "application/octet-stream" , "Content-Length" : "%d" % length } )
         response = json.load( urllib2.urlopen( request ) )
+        
+        f.close()
         
     except:
         
@@ -94,7 +96,5 @@ while not response[ "done" ]:
     
     
 print( response[ "msg" ] )
-
-        
 
 #------------------------------------------------------------------------------

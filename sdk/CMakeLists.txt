@@ -20,11 +20,10 @@ if (UNIX AND NOT APPLE)
             "libavahi-common3 (>= 0.6.25)"
             "libavahi-core6 (>= 0.6.25) | libavahi-core7"
             "libavahi-glib1(>= 0.6.25)"
-            "libc-ares2"
             "libc6 (>= 2.7)"
             "libcairo2 (>= 1.4.10)"
-            "libclutter-1.0-0 (>= 1.0.6)"
-            "libclutter-gst-0.10-0 | libclutter-gst-1.0-0"
+            "libclutter-1.0-0 (>= 1.6.14)"
+            "libclutter-gst-1.0-0"
             "libcurl3 (>=7.19.0)"
             "libexpat1"
             "libfontconfig1"
@@ -48,6 +47,7 @@ if (UNIX AND NOT APPLE)
             "libupnp3 (>= 1.6)"
             "liburiparser1"
             "libxml2"
+            "libexif12"
 		)
 		
 		set( FIRST 1 )
@@ -84,8 +84,16 @@ if (UNIX AND NOT APPLE)
         
         set(CPACK_SYSTEM_NAME "Linux-${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
         
-        set(CPACK_PACKAGE_FILE_NAME "trickplay-sdk_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}_${BUILD_TYPE}")
+        if ( "${BUILD_TYPE}" STREQUAL "relwithdebinfo" )
         
+            set(CPACK_PACKAGE_FILE_NAME "trickplay-sdk_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+            
+        else ( "${BUILD_TYPE}" STREQUAL "relwithdebinfo" )
+        
+            set(CPACK_PACKAGE_FILE_NAME "trickplay-sdk_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}_${BUILD_TYPE}")
+            
+        endif ("${BUILD_TYPE}" STREQUAL "relwithdebinfo" )
+                    
         set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Pablo Pissanetzky <pablo@trickplay.com>")
         
         set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "TrickPlay SDK\n The TrickPlay SDK allows you to build and test TrickPlay apps.")
@@ -102,11 +110,14 @@ if (UNIX AND NOT APPLE)
             COMMAND sed s/%TRICKPLAY_VERSION%/${CPACK_PACKAGE_VERSION}/ ${CMAKE_CURRENT_SOURCE_DIR}/changelog | gzip --best > changelog.gz
             )
             
+        add_dependencies( debian rte-docs )
+                    
+            
         set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "trickplay.1.gz;changelog.gz") 
 
         # Documentation
         
-        install(DIRECTORY ${PROJECT_BINARY_DIR}/docs/apps/ DESTINATION share/doc/trickplay-sdk/html)
+        install(DIRECTORY ${PROJECT_BINARY_DIR}/docs/rte/ DESTINATION share/doc/trickplay-sdk/html)
         
         # Copyright
         
@@ -121,8 +132,40 @@ if (UNIX AND NOT APPLE)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz DESTINATION share/doc/trickplay-sdk)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/changelog.gz DESTINATION share/doc/trickplay-sdk RENAME changelog.Debian.gz)
 
+        # Resources
+	
+	install(DIRECTORY ${PROJECT_SOURCE_DIR}/resources DESTINATION share/trickplay/ )
+	
+	# Menu entry
+	
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay.desktop DESTINATION share/applications/)
+	
+	# Icons
+	
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay.png DESTINATION share/icons/hicolor/64x64/apps/)
 
-        include(CPack)
+    #--------------------------------------------------------------------------	
+    # Editor
+
+    if ( EXISTS ${PROJECT_SOURCE_DIR}/tools/editor )
+
+	    # Editor script
+	
+	    install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor DESTINATION bin )
+	
+	    # Editor app
+	
+	    install(DIRECTORY ${PROJECT_SOURCE_DIR}/tools/editor DESTINATION share/trickplay/apps/ )
+
+        # Editor icons
+
+	    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/trickplay-editor.desktop DESTINATION share/applications/ ) 
+	    
+    endif ( EXISTS ${PROJECT_SOURCE_DIR}/tools/editor )
+
+    #--------------------------------------------------------------------------	
+
+    include(CPack)
 
     endif (NATURAL_DOCS)		
 		

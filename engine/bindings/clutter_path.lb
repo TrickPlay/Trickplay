@@ -10,48 +10,90 @@ module clutter_path;
 
 /*
     Class: Path
+    
+    The Path class enables an animation to specify a route to follow by creating a group of nodes that connect via lines and Bezier curves. Nodes are created by calling Path functions, such as line_to() and curve_to(), or by using an SVG-like string syntax, as in "M0 0 L100 100".
+    
+    Paths are typically used in conjunction with a Timeline animation, but they can be used in other types of animations, as well.
 
-    Path lets you build a path using points, lines and curves. Then, given
-    a number between 0 and 1, it lets you get x and y coordinates. Paths can
-    be used to animate UIElements.
-
-    You an also use an SVG-like syntax to construct and modify paths, as follows.
-
-    M - Tells the path to move to the coordinates, expects 1 set of coordinates.
-    L - Adds a line to the path. Expects 1 set of coordinates.
-    C - Adds a curve to the path. Expects 3 sets of coordinates.
-    z - Closes the path. Expects no coordinates.
-
-    You can also use lower case for M, L and C; which implies the coordinates are
-    relative.
-
-    Example:
-
-    This example shows a rectangle moving along a curved path using a <Timeline>.
-
+    *Code Example:* Animate a bouncing sphere along a Path. The animation created by the code and a graph depicting the defined Path are shown below.
+    
+(see pathDemo.gif)
+(see pathGraph.png)
+    
     (code)
-    local rectangle = Rectangle
-    {
-        color = "FF0000" ,
-        size = { 100 , 100 },
-        position = { 0 , 980 }
-    }
+    -- Create a screen background
+	bckgnd = Canvas( 1920, 1080 )
+	bckgnd:set_source_color( "ffffffFF" )
+	bckgnd:paint()
+	bckgndImage = bckgnd:Image()
+	bckgndImage.name = "Background"
+	screen:add( bckgndImage )
 
-    local path = Path( "M 0,980 C 0,0 1820,0 1820,980" )
+	-- Create a rectangular demo area
+	demoArea = Rectangle {
+					color = { 100, 100, 100, 255 },
+					border_color = { 0, 0, 0, 255 },
+					border_width = 4,
+					name = "demoArea",
+					position = { 96, 96, 0 },
+					size = { 308, 308 },
+					opacity = 255,
+				}
+	screen:add( demoArea )
 
-    local timeline = Timeline
-    {
-        duration = 3000,
-        on_new_frame =
-            function( timeline , duration , progress )
-                rectangle.position = path:get_position( progress )
-            end
-    }
+	-- Create a sphere image using Canvas
+	sphere = Canvas( 40, 40 )
+	sphere:set_source_radial_pattern( 12, 12, 2, 20, 20, 20 )
+	sphere:add_source_pattern_color_stop( 0.0, "d00000FF" )
+	sphere:add_source_pattern_color_stop( 1.0, "000000FF" )
+	sphere:arc( 20, 20, 20, 0, 360 )
+	sphere:fill()
 
-    timeline:start()
+	-- Convert Canvas object to Image object and show on the screen
+	sphereImage = sphere:Image()
+	sphereImage.position = { 100, 100 }
+	sphereImage.name = "Sphere"
+	screen:add( sphereImage )
 
-    screen:add( rectangle )
-    screen:show()
+	-- Define an Alpha mode for our animation
+	sphereAlpha  = Alpha { mode = "EASE_IN_OUT_QUINT" }
+
+	-- Animate the sphere with a Timeline
+	sphereTL = Timeline { 
+					duration = 3000,
+					loop = true,
+				}
+
+	-- Hook the Alpha to the Timeline
+	sphereAlpha.timeline  = sphereTL
+
+	--Define a Path for the sphere
+	spherePath = Path( "M100 100 l30 0 l30 260 l30 -200 l30 200 l30 -100 l30 100 l30 -25 l30 25 L360 360" )
+	
+	--[[ The same Path could have been constructed by calling the following functions...
+	spherePath = Path()
+	spherePath:move_to( 100, 100 )       -- "M100 100"
+	spherePath:line_to( 30, 0, true )    -- "l30 0" using coordinates relative to last-defined node
+	spherePath:line_to( 30, 260, true )  -- "l30, 260"
+	spherePath:line_to( 30, -200, true ) -- "l30 -200"
+	spherePath:line_to( 30, 200, true )  -- "l30 200"
+	spherePath:line_to( 30, -100, true ) -- "l30 -100"
+	spherePath:line_to( 30, 100, true )  -- "l30 100"
+	spherePath:line_to( 30, -25, true )  -- "l30 -25"
+	spherePath:line_to( 30, 25, true )   -- "l30 25"
+	spherePath:line_to( 360, 360 )       -- "L360 360" using coordinates absolute to the display
+	--]]
+
+	-- Define the on_new_frame() event handler that accesses the transformed Path and Alpha values to determine the sphere's location
+	function sphereTL:on_new_frame( msecs, progress )
+		sphereImage.position = spherePath:get_position( sphereAlpha.alpha )
+	end
+
+	-- Start the animation
+	sphereTL:start()
+
+	-- Make the screen visible
+	screen:show()
     (end)
 
 */
@@ -60,14 +102,24 @@ class Path [[ClutterPath*]]
 {
     /*
         Constructor: Path
+        
+        The Path() constructor creates a new Path object. By default, the path is empty, but a path can be defined in the constructor's string_path argument, if desired. Alternatively, the path can be defined by calling the various node-creation functions, such as move_to(), line_to(), etc.
+        
+        *Arguments:*
+        
+        string_path - String describing the path. If specified, the path can be modified further by calling the various node-creation functions. The format of the string is identical to that recognized by the <add_string_path> function. The string_path argument is optional; if not specified, the object's path is empty.
+        
+        *Return Value:* A new Path object
 
-        Arguments:
+		*Code Example:* Create two Path objects
+		
+		(code)
+		animationPath1 = Path()  -- no path defined yet for this object
+		animationPath2 = Path( "M0 0 L100 100" )  -- this object has a defined path consisting of a straight line from point (0, 0) to (100, 100)
+		(end)
+		
+		*See Also:* the <move_to>, <line_to> and <get_position> functions
 
-            string_path - Optional string, describing a path in SVG-like syntax.
-
-        Returns:
-
-            A newly constructed path.
     */
 
     Path( string string_path = 0 )
@@ -89,8 +141,12 @@ class Path [[ClutterPath*]]
 
     /*
         Property: length
-
-        An approximation of the current length of the path.
+        
+        The length property is an integer value specifying the approximate length in pixels of the currently-defined path.
+        
+        *Default Value:* 0
+        
+        *See Also:* the <add_string_path> function
 
     */
 
@@ -101,19 +157,22 @@ class Path [[ClutterPath*]]
 
     /*
         Function: move_to
+        
+        The move_to() function defines a node at the specified X, Y coordinates. If no path has been defined yet, this node will be the beginning of the path. If a portion of the path has already been defined, there will be a gap between the last-defined node and this node. When the animation is running, the animated object will jump over the gap.
+        
+        *Arguments:*
+        
+        x - integer value specifying the node's X coordinate
+        y - integer value specifying the node's Y coordinate
+        relative - boolean value indicating whether the specified coordinates are relative to the last-defined node or absolute to the display. Default = false, i.e., absolute to the display
+        
+        *Return Value:* None
+        
+        *See Also:* the <line_to> and <curve_to> functions and the M command in the <add_string_path> function
 
-        Moves the path to the given point. This can be used when you first create the
-        path to establish an initial point, or in the middle of the path to jump to
-        a new point.
-
-        Arguments:
-
-            x - The x coordinate to move to.
-            y - The y coordinate.
-            relative - Whether the coordinates are relative to the last point or absolute.
     */
 
-    move_to( int x , int y , bool relative = false )
+    move_to( int x, int y, bool relative = false )
         [[
             if ( relative )
             {
@@ -127,17 +186,22 @@ class Path [[ClutterPath*]]
 
     /*
         Function: line_to
+        
+        The line_to() function defines a node at the specified X, Y coordinates and connects the new node to the last-defined node with a straight line.
 
-        Adds a line to the path.
+        *Arguments:*
+        
+        x - integer value specifying the node's X coordinate
+        y - integer value specifying the node's Y coordinate
+        relative - boolean value indicating whether the specified coordinates are relative to the last-defined node or absolute to the display. Default = false, i.e., absolute to the display
+        
+        *Return Value:* None
+        
+        *See Also:* the <move_to> and <curve_to> functions and the L command in the <add_string_path> function
 
-        Arguments:
-
-            x - The x coordinate to draw the line to.
-            y - The y coordinate.
-            relative - Whether the coordinates are relative to the last point or absolute.
     */
 
-    line_to( int x , int y , bool relative = false )
+    line_to( int x, int y, bool relative = false )
         [[
             if ( relative )
             {
@@ -151,18 +215,23 @@ class Path [[ClutterPath*]]
 
     /*
         Function: curve_to
+        
+        The curve_to() function defines a node at the specified X3, Y3 coordinates and connects the new node to the last-defined node with a Bezier curve. The X1, Y1 and X2, Y2 coordinates specify the two control points used to define the curve.
 
-        Adds a Bezier curve to the path.
+        *Arguments:*
+        
+        x1, y1 - X, Y coordinates of first control point
+        x2, y2 - X, Y coordinates of second control point
+        x3, y3 - X, Y coordiantes of curve's end point. The curve starts at the last-defined node.
+        relative - boolean value indicating whether the specified coordinates are relative to the last-defined node or absolute to the display. Default = false, i.e., absolute to the display
+        
+        *Return Value:* None
+        
+        *See Also:* the <move_to> and <line_to> functions and the C command in the <add_string_path> function
 
-        Arguments:
-
-            x1 , y1 - The first control point.
-            x2 , y2 - The second control point.
-            x3 , y3 - The third control point.
-            relative - Whether the coordinates are relative to the last point or absolute.
     */
 
-    curve_to( int x1 , int y1 , int x2 , int y2 , int x3 , int y3 , bool relative = false )
+    curve_to( int x1, int y1, int x2, int y2, int x3, int y3, bool relative = false )
         [[
             if ( relative )
             {
@@ -176,8 +245,14 @@ class Path [[ClutterPath*]]
 
     /*
         Function: close
+        
+        The close() function adds a straight line from the last-defined node to the node created by the most-recent call to the move_to() function.
 
-        Closes the path adding a straight line from the current point to the last move_to point.
+		*Arguments:* None
+		
+		*Return Value:* None
+		
+		*See Also:* the <move_to> function and the z command in the <add_string_path> function
     */
 
     close()
@@ -187,19 +262,73 @@ class Path [[ClutterPath*]]
 
     /*
         Function: add_string_path
+        
+        The add_string_path() function adds nodes to the current path by using a textual, SVG-like syntax. 
+        
+        *Arguments:*
+        
+        string_path - string specifying the nodes to add to the path. If the string format is incorrect in any way then no nodes are added to the path. The format of the string_path is described below.
+        
+        *Return Value:* Boolean indicating success or failure (true=nodes were added successfully)
+        
+        A node is defined by specifying a node type, usually followed by one or more X, Y coordinates. Node types are specified by a single alphabetic character. An uppercase character indicates that the specified X, Y coordinates are absolute to the display; a lowercase character indicates the X, Y coordinates are relative to the last-defined node. The coordinate values can be separated by spaces or a comma.
+        
+        *Supported Node Types:*
+        
+        M, m - Adds a move_to-type node. Requires one X, Y coordinate. This is equivalent to calling the Path <move_to> function.
+        L, l - Adds a line_to-type node. Requires one X, Y coordinate. This is equivalent to calling the Path <line_to> function.
+        C, c - Adds a curve_to-type node. Requires three X, Y coordinates in the following order: FirstControlPoint, SecondControlPoint, EndPoint. This is equivalent to calling the Path <curve_to> function.
+        z - Adds a close-type node. Takes no X, Y coordinates. This is equivalent to calling the Path <close> function.
+        
+        *Code Example:* Define a Path using a string and then use it to animate a rectangle.
+        
+        (code)
+        -- Define the rectangle to animate
+	    local rectangle = Rectangle {
+				    	    color = "FF0000" ,
+    	    				size = { 100 , 100 },
+    	    				position = { 0 , 980 }
+    					  }
 
-        Lets you specify path operations using the SVG-like syntax described above.
+		-- Define the Path to animate along
+    	local path = Path( "M 0,980 C 0,0 1820,0 1820,980" )
+
+		-- Define the Timeline animation
+    	local timeline = Timeline {
+				    	    duration = 3000,
+    	    				loop = true,
+    	    				on_new_frame = function( timeline , duration , progress )
+											  rectangle.position = path:get_position( progress )
+    	        						   end
+    					 }
+
+		-- Start the animation
+	    timeline:start()
+
+		-- Don't forget to add the rectangle to the display and show everything
+	    screen:add( rectangle )
+	    screen:show()
+        (end)
+
+
     */
 
-    add_string_path( string string_path )
+    bool add_string_path( string string_path )
         [[
-            clutter_path_add_string( self , string_path );
+            result = clutter_path_add_string( self , string_path );
         ]];
 
     /*
         Function: clear
+        
+        The clear() function removes all nodes from the path.
+        
+        *Arguments:* None
+        
+        *Return Value:* None
+        
+        *See Also:* the <move_to> and <add_string_path> functions
 
-        Clears the path completely.
     */
 
     clear()
@@ -209,17 +338,24 @@ class Path [[ClutterPath*]]
 
     /*
         Function: get_position
+        
+        The get_position() function receives a progress value between 0 and 1, such as is available in a Timeline object's on_new_frame() event handler, and returns a table of the corresponding X, Y position along the defined Path.
+        
+        For example, if the received progress value is 0, the corresponding X, Y coordinate position would be the first point on the Path. If progress is 1, the corresponding X, Y coordinate would be the last point on the Path. A progress of 0.5 would return the coordinates at the halfway point on the Path, as calculated by multiplying the total number of pixels in the Path by 0.5.
 
-        Given a number between 0 and 1, where 0 is the beginning of the path and 1 is the end
-        of the path, this function returns a table with x and y coordinates.
+        *Arguments:*
+        
+        progress - double value specifying the percentage of progress completed. Must be a value between 0 and 1, inclusive.
 
-        Arguments:
+        *Return Values:* Table of corresponding X, Y position along the defined Path. The format of the table is shown below.
+        
+        (code)
+        { X_coordinate_position, Y_coordinate_position }
+        (end)
 
-            progress - Between 0 and 1.
-
-        Returns:
-
-            table - A table with interpolated x and y coordinates.
+		*Code Example:* Refer to the example at the top of this section for a complete demonstration of the Path and get_position() function.
+		
+		*See Also:* the <add_string_path> function
     */
 
     table get_position( double progress )

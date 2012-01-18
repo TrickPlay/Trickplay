@@ -33,7 +33,7 @@ extern "C" {
 */
 
 #define TP_MAJOR_VERSION    1
-#define TP_MINOR_VERSION    19
+#define TP_MINOR_VERSION    26
 #define TP_PATCH_VERSION    0
 
 /*-----------------------------------------------------------------------------
@@ -207,6 +207,10 @@ typedef struct TPContext TPContext;
                                 will behave as if there is no media player.
                                 Defaults to "true".
 
+    TP_MEDIAPLAYER_SCHEMES - 	A comma separated list of additional URI schemes allowed by
+    							the media player. The media player always allows http and https.
+                                Defaults to "rtsp".
+
     TP_IMAGE_DECODER_ENABLED -  Whether the external image decoder is enabled. If set to false,
                                 only internal decoders will be used.
                                 Defaults to "true".
@@ -237,12 +241,37 @@ typedef struct TPContext TPContext;
                                 Default is not set.
 
     TP_FIRST_APP_EXITS -        If set to true, when you press the EXIT key within the
-                                first app launched by Trickplay, tp_context_run will return.
+                                first app launched by TrickPlay, tp_context_run will return.
                                 Otherwise, the first app launched will remain running and the
                                 EXIT key will be passed to it.
                                 Defaults is true.
 
-    TP_HTTP_PORT -              The port for Trickplay's HTTP server.
+    TP_HTTP_PORT -              The port for TrickPlay's HTTP server.
+                                Defaults to "0".
+
+    TP_RESOURCES_PATH -         The path to various TrickPlay resources.
+                                Defaults to "resources" (in the current working directory).
+
+    TP_TEXTURE_CACHE_LIMIT	 -	The size of the texture cache (in MB). A value <= 0 will disable
+    							the cache altogether.
+                                Defaults to "0".
+
+    TP_RESOURCE_LOADER_ENABLED - 	Whether external resource loaders are enabled.
+                                    Defaults to "true".
+
+    TP_APP_ARGS - 				A string that is passed to the first app launched by TrickPlay
+                                in app.args.
+                                Defaults to "".
+
+    TP_APP_ANIMATIONS_ENABLED - Whether apps animate when they close and launch.
+                                Defaults to "true".
+
+    TP_DEBUGGER_PORT - 			The port used to remotely debug apps. If set to 0,
+                                a port will be chosen.
+                                Defaults to "0".
+
+    TP_START_DEBUGGER - 		If set to true, when trickplay launches an app, it will
+                                do so with the debugger started.
                                 Defaults to "0".
 
 */
@@ -281,6 +310,7 @@ typedef struct TPContext TPContext;
 #define TP_LIRC_REPEAT                  "lirc_repeat"
 #define TP_APP_PUSH_ENABLED             "app_push_enabled"
 #define TP_MEDIAPLAYER_ENABLED          "mediaplayer_enabled"
+#define TP_MEDIAPLAYER_SCHEMES			"mediaplayer_schemes"
 #define TP_IMAGE_DECODER_ENABLED        "image_decoder_enabled"
 #define TP_RANDOM_SEED                  "random_seed"
 #define TP_PLUGINS_PATH                 "plugins_path"
@@ -290,6 +320,13 @@ typedef struct TPContext TPContext;
 #define TP_TOAST_JSON_PATH              "toast_json_path"
 #define TP_FIRST_APP_EXITS              "first_app_exits"
 #define TP_HTTP_PORT                    "http_port"
+#define TP_RESOURCES_PATH               "resources_path"
+#define TP_TEXTURE_CACHE_LIMIT			"texture_cache_limit"
+#define TP_RESOURCE_LOADER_ENABLED		"resource_loader_enabled"
+#define TP_APP_ARGS						"app_args"
+#define TP_APP_ANIMATIONS_ENABLED		"app_animations_enabled"
+#define TP_DEBUGGER_PORT				"debugger_port"
+#define TP_START_DEBUGGER				"start_debugger"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
@@ -327,8 +364,8 @@ typedef struct TPContext TPContext;
     TP_NOTIFICATION_RELEASE_NUMERIC_KEYPAD -            The app no longer needs to use the numeric keypad.
     TP_NOTIFICATION_RELEASE_TRANSPORT_CONTROL_KEYS -    The app no longer needs the transport control keys.
     TP_NOTIFICATION_RELEASE_KEYBOARD -                  The app no longer needs the keyboard.
-    TP_NOTIFICATION_RUNNING -                           Trickplay is running and has entered its main loop.
-    TP_NOTIFICATION_EXITING -                           Trickplay has exited its main loop and <tp_context_run> will return soon.
+    TP_NOTIFICATION_RUNNING -                           TrickPlay is running and has entered its main loop.
+    TP_NOTIFICATION_EXITING -                           TrickPlay has exited its main loop and <tp_context_run> will return soon.
 */
 
 #define TP_NOTIFICATION_PROFILE_CHANGING                "profile-changing"
@@ -384,7 +421,7 @@ typedef struct TPContext TPContext;
 #define TP_RUN_APP_PREPARE_FAILED       4
 #define TP_RUN_APP_ERROR                5
 #define TP_RUN_ALREADY_RUNNING          6
-    
+
 /*-----------------------------------------------------------------------------
     Function: tp_init_version
     
@@ -447,7 +484,7 @@ typedef struct TPContext TPContext;
 
         key -       A configuration key.
 
-        value -     The value for the key. Trickplay will make a copy.
+        value -     The value for the key. TrickPlay will make a copy.
 */
                 
     TP_API_EXPORT
@@ -508,7 +545,7 @@ typedef struct TPContext TPContext;
 /*-----------------------------------------------------------------------------
     Function: tp_context_set_user_data
 
-    Associate an opaque pointer with the Trickplay context.
+    Associate an opaque pointer with the TrickPlay context.
 
     Arguments:
 
@@ -527,7 +564,7 @@ typedef struct TPContext TPContext;
 /*-----------------------------------------------------------------------------
     Function: tp_context_get_user_data
 
-    Get user data associated with the Trickplay context with <tp_context_set_user_data>.
+    Get user data associated with the TrickPlay context with <tp_context_set_user_data>.
 
     Arguments:
 
@@ -553,7 +590,7 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
-        context -   The Trickplay context.
+        context -   The TrickPlay context.
 
         subject -   A string describing the nature of the request.
 
@@ -612,7 +649,7 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
-        context -   The Trickplay context.
+        context -   The TrickPlay context.
 
         subject -   A string describing the specific notification.
 
@@ -665,7 +702,7 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
-        context -       The Trickplay context.
+        context -       The TrickPlay context.
 
         command -       A string describing the command. It does not include the initial
                         / and will never be NULL.
@@ -723,7 +760,7 @@ typedef struct TPContext TPContext;
     
     Arguments:
     
-        context -   The Trickplay context.
+        context -   The TrickPlay context.
 
         level -     An integer describing the information level of the log message,
                     such as DEBUG, INFO, WARNING, etc.
@@ -768,6 +805,7 @@ typedef struct TPContext TPContext;
         TPContext * context,
         TPLogHandler handler,
         void * data);
+
 
 /*-----------------------------------------------------------------------------
     Function: tp_context_run
@@ -825,8 +863,7 @@ typedef struct TPContext TPContext;
                     
         TPContext * context);
 
-/*-----------------------------------------------------------------------------
-*/
+/*---------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 }
