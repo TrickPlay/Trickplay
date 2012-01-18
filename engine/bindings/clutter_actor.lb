@@ -2024,7 +2024,7 @@ interface actor [[ClutterActor*]]
     /*
 	Function: complete_animation
 	
-	The complete_animation() function terminates the animation started with a call to <animate>. All the properties that were being animated are forced to their final values. If the animation specified an on_completed property, its associated function will be called.
+	The complete_animation() function terminates the animation started with a call to <animate>. All the properties that were being animated are forced immediately to their final values. If the animation specified an on_completed event handler, it is invoked.
 	
 	*Arguments:* None
 	
@@ -2052,7 +2052,7 @@ interface actor [[ClutterActor*]]
 	/*
     Function: stop_animation
     
-    The stop_animation() function terminates the animation started with a call to <animate>. All the properties that were being animated remain at their current values and if the animation specified an on_completed event, it will not be called.
+    The stop_animation() function terminates the animation started with a call to <animate>. All the properties that were being animated remain at their stopped values. If the animation specified an on_completed event handler, it is not called.
     
     *Arguments:* None
     
