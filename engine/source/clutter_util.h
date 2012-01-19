@@ -103,6 +103,7 @@ namespace ClutterUtil
 
     void push_event_modifiers( lua_State * L , unsigned long int modifiers );
 
+    void keep_alive( gpointer object , bool on );
 };
 
 

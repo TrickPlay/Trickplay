@@ -835,3 +835,34 @@ bool ClutterUtil::is_qualified_child( ClutterActor * container , ClutterActor* a
 }
 
 //-----------------------------------------------------------------------------
+
+void ClutterUtil::keep_alive( gpointer o , bool on )
+{
+    g_assert( o );
+
+    GObject * object = G_OBJECT( o );
+
+    static GQuark key = 0;
+    static char value = 0;
+
+    if ( 0 == key )
+    {
+    	key = g_quark_from_string( "__tp-keep-alive" );
+    }
+
+    bool has_one = g_object_get_qdata( object , key );
+
+    if ( on && ! has_one )
+    {
+        g_object_set_qdata( object , key , & value );
+        g_object_ref( object );
+    }
+    else if ( ! on && has_one )
+    {
+        g_object_set_qdata( object , key , 0 );
+        g_object_unref( object );
+    }
+
+}
+
+//-----------------------------------------------------------------------------
