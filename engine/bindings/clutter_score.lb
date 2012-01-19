@@ -12,26 +12,17 @@ void Score_on_started(ClutterScore*score,lua_State*L);
 void Score_on_completed(ClutterScore*score,lua_State*L);
 void Score_on_paused(ClutterScore*score,lua_State*L);
 
-// We use these signal handlers to keep the timeline alive as long as
-// it is running. There is still an issue with timelines that have
-// delays...while the delay is ticking away, they can get collected.
+// We use these signal handlers to keep the score alive as long as
+// it is running.
 
-void Score_started( ClutterScore * score , gpointer )
+static void Score_started( ClutterScore * score , gpointer )
 {
-    g_object_ref( score );
+    ClutterUtil::keep_alive( score , true ); 
 }
 
-void Score_paused( ClutterScore * score , gpointer )
+static void Score_completed( ClutterScore * score , gpointer )
 {
-    g_object_unref( score );
-}
-
-void Score_completed( ClutterScore * score , gpointer )
-{
-    if ( ! clutter_score_get_loop( score ) )
-    {
-        g_object_unref( score );
-    }
+    ClutterUtil::keep_alive( score , false );
 }
 
 ]]
@@ -172,7 +163,6 @@ class Score [[ClutterScore*]]
     	ClutterUtil::set_props_from_table(L,props);
 
     	g_signal_connect( self , "started" , ( GCallback ) Score_started , 0 );
-    	g_signal_connect( self , "paused" , ( GCallback ) Score_paused , 0 );
         g_signal_connect( self , "completed" , ( GCallback ) Score_completed , 0 );
 
     	g_object_unref(self);
@@ -263,7 +253,10 @@ class Score [[ClutterScore*]]
 	*/
 	
     stop()
-	[[clutter_score_stop(self);]];
+	[[
+	   clutter_score_stop(self);
+	   ClutterUtil::keep_alive( self , false );
+	]];
 	
 	/*
 		Function: rewind
