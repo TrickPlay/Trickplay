@@ -480,7 +480,14 @@ class Timeline [[ClutterTimeline*]]
 	*/
 
     add_marker(string name,int msecs)
-	[[clutter_timeline_add_marker_at_time(self,name,msecs);]];
+	[[
+	   if ( clutter_timeline_has_marker( self , name ) )
+	   {
+	       clutter_timeline_remove_marker( self , name );
+	   }
+	      
+	   clutter_timeline_add_marker_at_time( self , name , msecs );
+	]];
 
 	/*
 		Function: remove_marker
