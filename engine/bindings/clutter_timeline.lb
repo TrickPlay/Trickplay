@@ -346,7 +346,36 @@ class Timeline [[ClutterTimeline*]]
 	*/
 
     skip(int msecs)
-	[[clutter_timeline_skip(self,msecs);]];
+	[[
+	   if ( msecs < 0 )
+	   {
+	       luaL_error( L , "Duration argument to Timeline:skip must be positive." );
+	   }
+	   else
+	   {
+           guint elapsed = clutter_timeline_get_elapsed_time( self );
+           guint duration = clutter_timeline_get_duration( self );
+       
+    	   switch( clutter_timeline_get_direction( self ) )
+    	   {
+    	       case CLUTTER_TIMELINE_FORWARD:
+                   if ( msecs + elapsed > duration ) 
+                   {
+                       msecs = duration - elapsed;
+                   }
+                   break;
+                   
+               case CLUTTER_TIMELINE_BACKWARD:
+                   if ( int( elapsed ) - msecs < 0 )
+                   {
+                       msecs = ( duration - ( duration - elapsed ) ) -1;
+                   }                     
+                   break;
+    	   }
+    	   
+    	   clutter_timeline_skip( self , msecs );
+    	}
+	]];
 	
 	/*
 		Function: advance
@@ -367,7 +396,24 @@ class Timeline [[ClutterTimeline*]]
 	*/
 	
     advance(int msecs)
-	[[clutter_timeline_advance(self,msecs);]];
+	[[
+	   if ( msecs < 0 )
+	   {
+	       luaL_error( L , "Duration argument to Timeline:advance must be positive." );
+	   }
+	   else
+	   { 
+           int duration = clutter_timeline_get_duration( self );
+           
+           if ( msecs > duration ) 
+           {
+               msecs = duration;
+           }
+           
+	       clutter_timeline_advance(self,msecs);
+	   }
+	   
+	]];
 	
 	/*
 		Function: add_marker
