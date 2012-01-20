@@ -32,7 +32,7 @@ static void Score_completed( ClutterScore * score , gpointer )
     
     The Score class choreographs multiple Timeline animations. By using a Score, multiple animations can begin at the same time or one or more animations can begin when another animation completes or reaches a marked point.
     
-    To create a sequence of animations, each animation must be attached to the Score object using the append() or append_at_marker() function. Animations are arranged in a parent/child relationship. When the parent animation completes, its immediate children, if any, begin. Multiple levels of parent/child relationships can be defined. An animation with no parent begins running as soon as the Score starts. Scores can also loop, so following the completion of the last child animation, the initial parent animation will begin again. A Score can also be prematurely stopped or temporarily paused and then restarted or rewound to its beginning.
+    To create a sequence of animations, each animation must be attached to the Score object using the append() function. Animations are arranged in a parent/child relationship. When the parent animation completes, its immediate children, if any, begin. Multiple levels of parent/child relationships can be defined. An animation with no parent begins running as soon as the Score starts. Scores can also loop, so following the completion of the last child animation, the initial parent animation will begin again. A Score can also be prematurely stopped or temporarily paused and then restarted or rewound to its beginning.
     
     The program is notified during various stages of the Score's running by the firing of event handlers. For example, when all the animations in the Score have completed, the object's on_completed() event handler is called. Additional event handlers are fired when the Score starts running and whenever the Score is paused.
     
@@ -285,7 +285,7 @@ class Score [[ClutterScore*]]
 		
 		*Return Value:* None
 		
-		*See Also:* the <append_at_marker> and <start> functions
+		*See Also:* the <start> function
 	*/
 
     append(Timeline parent=0, Timeline timeline)
@@ -305,7 +305,7 @@ class Score [[ClutterScore*]]
         
         *Return Value:* None
         
-        *See Also:* the <append> and <append_at_marker> functions
+        *See Also:* the <append> function
     */
     
     remove_all()
