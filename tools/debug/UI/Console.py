@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Console3.ui'
+# Form implementation generated from reading ui file 'Console.ui'
 #
-# Created: Thu Nov  3 09:45:54 2011
+# Created: Thu Jan 19 15:25:50 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,12 @@ class Ui_Console(object):
     def setupUi(self, Console):
         Console.setObjectName(_fromUtf8("Console"))
         Console.resize(811, 166)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        Console.setFont(font)
         self.verticalLayout = QtGui.QVBoxLayout(Console)
+        self.verticalLayout.setSpacing(0)
+        self.verticalLayout.setMargin(1)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.textEdit = QtGui.QTextEdit(Console)
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
