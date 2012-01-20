@@ -10,10 +10,21 @@
     <height>166</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Console</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="margin">
+    <number>1</number>
+   </property>
    <item>
     <widget class="QTextEdit" name="textEdit"/>
    </item>

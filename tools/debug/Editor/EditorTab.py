@@ -107,11 +107,24 @@ class EditorDock(QDockWidget):
     def __init__(self, main, parent = None):
         QDockWidget.__init__(self, parent)
         self.setAcceptDrops(True)
-        #self.setFeatures(QDockWidget.DockWidgetClosable)
-        self.setFeatures(QDockWidget.DockWidgetMovable)
+        self.setFeatures(QDockWidget.DockWidgetClosable)
         self.setObjectName("editorDock")
-        #self.setWindowTitle("Text Editor")
-        
+
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
+        self.setMinimumSize(QSize(215, 100))
+
+        font = QFont()
+        font.setPointSize(10)
+        self.setFont(font)
+
+		# Set empty title bar widget to remove title bar space
+        titleWidget = QWidget()
+        self.setTitleBarWidget(titleWidget)
+
         self.main = main
         
     def dragEnterEvent(self, event):

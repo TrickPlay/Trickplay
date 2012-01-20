@@ -1,5 +1,4 @@
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4 import QtCore, QtGui
 
 import os
 import re
@@ -9,15 +8,18 @@ from Editor import Editor
 from UI.SaveAsDialog import Ui_saveAsDialog
 
 
-class EditorManager(QWidget):    
+class EditorManager(QtGui.QWidget):    
     
     def __init__(self, fileSystem, parent = None):
     
-        QWidget.__init__(self)
+        QtGui.QWidget.__init__(self)
         
         self.setupUi(parent)
         
         self.fileSystem = fileSystem
+
+        self.tab = None
+
     
     
     def setupUi(self, parent):
@@ -25,19 +27,40 @@ class EditorManager(QWidget):
         Set up the editor UI where two QTabWidgets are arranged in a QSplitter
         """
         
-        self.splitter = QSplitter()
-        
-        mainGrid = QGridLayout(parent)
-        
+        self.splitter = QtGui.QSplitter()
+        mainGrid = QtGui.QGridLayout(parent)
+        mainGrid.setSpacing(0)
+        mainGrid.setMargin(0)
+
         # Dock in MainWindow
         dock = EditorDock(self, parent)
         
-        frame = QWidget()
-        grid = QGridLayout(frame)
-        hbox = QHBoxLayout()
+        container = QtGui.QWidget()
+
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(container.sizePolicy().hasHeightForWidth())
+        container.setSizePolicy(sizePolicy)
+        container.setMinimumSize(QtCore.QSize(0, 0))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        container.setFont(font)
+
+        grid = QtGui.QGridLayout(container)
+
+        grid.setSpacing(0)
+        grid.setMargin(0)
+
+        hbox = QtGui.QHBoxLayout()
+
+        hbox.setSpacing(0)
+        hbox.setMargin(0)
+
         grid.addLayout(hbox, 0, 1, 1, 1)
         
-        dock.setWidget(frame)
+        dock.setWidget(container)
+
         dock.setWidget(self.splitter)
         mainGrid.addWidget(dock, 0, 0, 1, 1)
         

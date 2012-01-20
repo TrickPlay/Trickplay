@@ -36,7 +36,7 @@ class Editor(QsciScintilla):
     
         # Set the default font
         font = QFont()
-        font.setFamily('Monospace')
+        #font.setFamily('Monospace')
         font.setFixedPitch(True)
         font.setPointSize(10)
         self.setFont(font)
@@ -99,6 +99,8 @@ class Editor(QsciScintilla):
 			self.markerDelete(nline, self.ARROW_MARKER_NUM)
 		else:
 			self.markerAdd(nline, self.ARROW_MARKER_NUM)
+			self.markerDefine( QsciScintilla.SC_MARK_CIRCLE, 11 )
+			self.markerAdd(nline + 1, 11)
             
     def readFile(self, path):
         self.setText(open(path).read())
