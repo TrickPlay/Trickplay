@@ -1804,155 +1804,168 @@ interface actor [[ClutterActor*]]
 	    
 	    while(lua_next(L,props))
 	    {
-		GValue value={0};
-		
-		if (lua_really_isstring(L,-2)&&!lua_isnil(L,-2))
-		{
-		    const char * k=lua_tostring(L,-2);
-		
-		    if (!strcmp("x",k)||!strcmp("y",k))
-		    {
-			g_value_init(&value,G_TYPE_FLOAT);
-			g_value_set_float(&value,lua_tonumber(L,-1));
-			g_ptr_array_add(names,g_strdup(k));
-			g_value_array_append(values,&value);
-		    }
-		    else if (!strcmp("w",k)||!strcmp("width",k))
-		    {
-			g_value_init(&value,G_TYPE_FLOAT);
-			g_value_set_float(&value,lua_tonumber(L,-1));
-			g_ptr_array_add(names,g_strdup("width"));
-			g_value_array_append(values,&value);
-		    }
-		    else if (!strcmp("h",k)||!strcmp("height",k))
-		    {
-			g_value_init(&value,G_TYPE_FLOAT);
-			g_value_set_float(&value,lua_tonumber(L,-1));
-			g_ptr_array_add(names,g_strdup("height"));
-			g_value_array_append(values,&value);
-		    }
-		    else if (!strcmp("z",k)||!strcmp("depth",k))
-		    {
-			g_value_init(&value,G_TYPE_FLOAT);
-			g_value_set_float(&value,lua_tonumber(L,-1));			
-			g_ptr_array_add(names,g_strdup("depth"));
-			g_value_array_append(values,&value);			
-		    }
-		    else if (!strcmp("opacity",k))
-		    {
-			g_value_init(&value,G_TYPE_UINT);
-			g_value_set_uint(&value,lua_tointeger(L,-1));
-			g_ptr_array_add(names,g_strdup(k));
-			g_value_array_append(values,&value);
-		    }
-		    else if (!strcmp("position",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    g_ptr_array_add(names,g_strdup("x"));
-			    g_ptr_array_add(names,g_strdup("y"));
-			    
-			    lua_rawgeti(L,-1,1);
-			    g_value_init(&value,G_TYPE_FLOAT);
-			    g_value_set_float(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);			    
-			    lua_pop(L,1);
-			    
-			    lua_rawgeti(L,-1,2);
-			    g_value_unset(&value);
-			    g_value_init(&value,G_TYPE_FLOAT);
-			    g_value_set_float(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			    lua_pop(L,1);
-			}
-		    }
-		    else if (!strcmp("size",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    g_ptr_array_add(names,g_strdup("width"));
-			    g_ptr_array_add(names,g_strdup("height"));
-			    
-			    lua_rawgeti(L,-1,1);
-			    g_value_init(&value,G_TYPE_FLOAT);
-			    g_value_set_float(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);			    
-			    lua_pop(L,1);
-			    
-			    lua_rawgeti(L,-1,2);
-			    g_value_unset(&value);
-			    g_value_init(&value,G_TYPE_FLOAT);
-			    g_value_set_float(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			    lua_pop(L,1);
-			}			
-		    }
-		    else if (!strcmp("scale",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    g_ptr_array_add(names,g_strdup("scale-x"));
-			    g_ptr_array_add(names,g_strdup("scale-y"));
-			    
-			    lua_rawgeti(L,-1,1);
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);			    
-			    lua_pop(L,1);
-			    
-			    lua_rawgeti(L,-1,2);
-			    g_value_unset(&value);
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			    lua_pop(L,1);
-			}			
-		    }
-		    else if (!strcmp("x_rotation",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    
-			}
-			else
-			{
-			    g_ptr_array_add(names,g_strdup("rotation-angle-x"));
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			}
-		    }
-		    else if (!strcmp("y_rotation",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    
-			}
-			else
-			{
-			    g_ptr_array_add(names,g_strdup("rotation-angle-y"));
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			}
-		    }
-		    else if (!strcmp("z_rotation",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    
-			}
-			else
-			{
-			    g_ptr_array_add(names,g_strdup("rotation-angle-z"));
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			}
-		    }
-		}
-		
-		lua_pop(L,1);
+    		GValue value={0};
+    		
+    		if (lua_really_isstring(L,-2)&&!lua_isnil(L,-2))
+    		{
+    		    const char * k=lua_tostring(L,-2);
+    		
+    		    if (!strcmp("x",k)||!strcmp("y",k))
+    		    {
+        			g_value_init(&value,G_TYPE_FLOAT);
+        			g_value_set_float(&value,lua_tonumber(L,-1));
+        			g_ptr_array_add(names,g_strdup(k));
+        			g_value_array_append(values,&value);
+    		    }
+    		    else if (!strcmp("w",k)||!strcmp("width",k))
+    		    {
+        			g_value_init(&value,G_TYPE_FLOAT);
+        			g_value_set_float(&value,lua_tonumber(L,-1));
+        			g_ptr_array_add(names,g_strdup("width"));
+        			g_value_array_append(values,&value);
+    		    }
+    		    else if (!strcmp("h",k)||!strcmp("height",k))
+    		    {
+        			g_value_init(&value,G_TYPE_FLOAT);
+        			g_value_set_float(&value,lua_tonumber(L,-1));
+        			g_ptr_array_add(names,g_strdup("height"));
+        			g_value_array_append(values,&value);
+    		    }
+    		    else if (!strcmp("z",k)||!strcmp("depth",k))
+    		    {
+        			g_value_init(&value,G_TYPE_FLOAT);
+        			g_value_set_float(&value,lua_tonumber(L,-1));			
+        			g_ptr_array_add(names,g_strdup("depth"));
+        			g_value_array_append(values,&value);			
+    		    }
+    		    else if (!strcmp("opacity",k))
+    		    {
+        			g_value_init(&value,G_TYPE_UINT);
+        			g_value_set_uint(&value,lua_tointeger(L,-1));
+        			g_ptr_array_add(names,g_strdup(k));
+        			g_value_array_append(values,&value);
+    		    }
+    		    else if (!strcmp("position",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    g_ptr_array_add(names,g_strdup("x"));
+        			    g_ptr_array_add(names,g_strdup("y"));
+        			    
+        			    lua_rawgeti(L,-1,1);
+        			    g_value_init(&value,G_TYPE_FLOAT);
+        			    g_value_set_float(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);			    
+        			    lua_pop(L,1);
+        			    
+        			    lua_rawgeti(L,-1,2);
+        			    g_value_unset(&value);
+        			    g_value_init(&value,G_TYPE_FLOAT);
+        			    g_value_set_float(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			    lua_pop(L,1);
+        			}
+    		    }
+    		    else if (!strcmp("size",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    g_ptr_array_add(names,g_strdup("width"));
+        			    g_ptr_array_add(names,g_strdup("height"));
+        			    
+        			    lua_rawgeti(L,-1,1);
+        			    g_value_init(&value,G_TYPE_FLOAT);
+        			    g_value_set_float(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);			    
+        			    lua_pop(L,1);
+        			    
+        			    lua_rawgeti(L,-1,2);
+        			    g_value_unset(&value);
+        			    g_value_init(&value,G_TYPE_FLOAT);
+        			    g_value_set_float(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			    lua_pop(L,1);
+        			}			
+    		    }
+    		    else if (!strcmp("scale",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    g_ptr_array_add(names,g_strdup("scale-x"));
+        			    g_ptr_array_add(names,g_strdup("scale-y"));
+        			    
+        			    lua_rawgeti(L,-1,1);
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);			    
+        			    lua_pop(L,1);
+        			    
+        			    lua_rawgeti(L,-1,2);
+        			    g_value_unset(&value);
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			    lua_pop(L,1);
+        			}			
+    		    }
+    		    else if (!strcmp("x_rotation",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    
+        			}
+        			else
+        			{
+        			    g_ptr_array_add(names,g_strdup("rotation-angle-x"));
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			}
+    		    }
+    		    else if (!strcmp("y_rotation",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    
+        			}
+        			else
+        			{
+        			    g_ptr_array_add(names,g_strdup("rotation-angle-y"));
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			}
+    		    }
+    		    else if (!strcmp("z_rotation",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    
+        			}
+        			else
+        			{
+        			    g_ptr_array_add(names,g_strdup("rotation-angle-z"));
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			}
+    		    }
+    		    else if ( ! strcmp( "clip" , k ) )
+    		    {
+    		        if ( lua_type( L , - 1 ) == LUA_TTABLE )
+    		        {
+                        ClutterGeometry geometry;
+                        ClutterUtil::to_clutter_geometry(L, lua_gettop(L), &geometry);
+                        
+                        g_ptr_array_add(names,g_strdup("clip"));
+                        g_value_init(&value, CLUTTER_TYPE_GEOMETRY);
+                        g_value_set_boxed(&value, &geometry);
+                        g_value_array_append(values,&value);    		          
+    		        }
+    		    }
+    		}
+    		
+    		lua_pop(L,1);
 	    }
 	    
 	    if ( values->n_values == 0 )
