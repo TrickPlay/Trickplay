@@ -297,32 +297,6 @@ class Score [[ClutterScore*]]
     ]];
 
     /*
-        Function: append_at_marker
-        
-        The append_at_marker() function attaches a Timeline object to the Score and defines a parent and marker within the parent for the newly-attached Timeline. When the marker in the parent Timeline is reached, it will trigger the running of the newly-attached Timeline. The specified parent Timeline must already be attached to the Score and the specified marker must exist in the parent Timeline.
-        
-        To start running a Timeline at the completion of another Timeline, use the append() function.
-        
-		*Arguments:*
-
-			parent - Timeline object to act as "parent" to newly-attached Timeline. The parent Timeline must already be attached to the Score.
-			marker - string name of marker in the parent Timeline. When marker is reached, the newly-attached Timeline (specified in the timeline argument) begins running.
-			timeline - Timeline object to attach to Score
-			
-		*Return Value:* None
-		
-		*See Also:* the <append> and <start> function
-    */
-
-    append_at_marker(Timeline parent, string marker, Timeline timeline)
-    [[
-	    ClutterTimeline *tl = ClutterUtil::user_data_to_timeline(L,timeline);
-	    ClutterTimeline *p = ClutterUtil::user_data_to_timeline(L,parent);
-
-        if(tl && p) clutter_score_append_at_marker(self,p,marker,tl);
-    ]];
-
-    /*
         Function: remove_all
         
         The remove_all() function detaches all attached Timelines from the Score.
