@@ -420,8 +420,13 @@ class Timeline [[ClutterTimeline*]]
 		
 		The add_marker() function defines a named marker that is attached to a specific time on the Timeline. During the running of the Timeline's animation, when the marked time is reached, the on_marker_reached() event handler is called.
 		
-		Each marker defined for the object must be a unique string. An attempt to add a marker with an existing name has no effect.
-		
+		Each marker defined for the object must have a unique name. If a marker with the specified name already exists on the Timeline, the new marker replaces the existing marker, as shown below.
+
+		(code)
+		someTimeline:add_marker( "myMarker", 1000 )  -- sets myMarker at 1000 milliseconds
+		someTimeline:add_marker( "myMarker", 2000 )  -- replaces existing myMarker; myMarker now set at 2000 msecs
+		(end)
+				
 		The marked time on the Timeline is specified in milliseconds from the start of the animation, not including any initial delay.
 		
 		A marker can be removed by calling the <remove_marker> function.

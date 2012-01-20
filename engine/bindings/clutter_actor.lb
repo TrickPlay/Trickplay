@@ -532,19 +532,23 @@ interface actor [[ClutterActor*]]
     /*
 	Property: scale
 	
-	The scale property is a table of four numeric values specifying (1) the object's X/Y scale factor and (2) the object's X/Y scaling center coordinates. The scaling center coordinates are specified in pixels and are relative to the object's anchor point, which is usually 0, 0.
+	The scale property is a table of four numeric values specifying the object's X/Y scale factor and X/Y scaling-center coordinates. The scaling-center coordinates are specified in pixels and are relative to the object's anchor point, which is usually 0, 0.
 	
-	When setting the scale property, the scaling center coordinates are optional and will default to 0, 0, i.e., the object's default anchor point. 
+	When setting the scale property, the scaling-center coordinates are optional and, if not specified, default to 0, 0, i.e., the object's default anchor point.
 	
-	*Format:* { x/horizontal_scale_factor, y/vertical_scale_factor, x_center_coordinate, y_center_coordinate }
+	To maintain the object's aspect ratio, scale the object's X and Y factors by the same amount. In such cases, the scale property can be specified as a single numeric value, rather than a table, as shown below.
+	
+		(code)
+		-- Double the object's size, maintaining its aspect ratio
+		myObject.scale = 2
+		
+		-- Equivalent method using a table
+		myObject.scale = { 2, 2 }
+		(end)
+	
+	*Format:* { X_scale_factor, Y_scale_factor, X_center_coordinate, Y_center_coordinate }
 	
 	*Default Setting:* { 1, 1, 0, 0 }
-	
-	*Code Example:* Double the object's size both horizontally and vertically. Use default center coordinates.
-	
-	(code)
-	myObject.scale = { 2, 2 }
-	(end)
 	
 	*See Also:* the <anchor_point> and <is_scaled> properties
 	
@@ -760,15 +764,15 @@ interface actor [[ClutterActor*]]
     /*
 	Property: clip
 	
-	The clip property is a table of four integer values (x origin, y origin, width, height, respectively) specifying the object's clipping rectangle. All values are measured in pixels.
+	The clip property is a table specifying the object's clipping rectangle. The table's format is { X origin, Y origin, width, height }. All values are measured in pixels.
 	
-	By default, objects are not clipped, even if output is placed beyond the object's width and height boundaries. To activate clipping, define a clipping rectangle.
+	By default, objects are not clipped, even if output is placed beyond the object's width and height boundaries. To activate clipping, define a clipping rectangle in the clip property.
 	
 	Retrieving the clip property when there is no clipping rectangle defined, returns a value of nil.
 	
 	To clear a defined clipping rectangle and deactivate clipping, set the clip property to a value of nil.
 	
-	*Format:* { x-coordinate origin, y-coodinate origin, width, height }
+	*Format:* { X origin, Y origin, width, height }
 	
 	*Default Setting:* nil (clipping does not occur)
 	
@@ -1742,6 +1746,7 @@ interface actor [[ClutterActor*]]
 	position - X and Y coordinates at end of animation. Same as specifying x and y properties individually. The position property is specified as a table with two integers in the format { x, y }.
 	size - width and height at end of animation. Same as specifying width and height properties individually. The size property is specified as a table with two floating point values in the format { width, height }.
 	scale - object's scaling factor at end of animation. The scale property is specified as a table with two double values in the format { X_scale_factor, Y_scale_factor }.
+	clip - object's clipping rectangle at end of animation. The clipping rectangle is specified as a table with four integer values in the format { X_origin, Y_origin, width, height }.
 	x_rotation - object's rotation in degrees along the x-axis at end of animation
 	y_rotation - object's rotation in degrees along the y-axis at end of animation
 	z_rotation - object's rotation in degrees along the z-axis at end of animation
