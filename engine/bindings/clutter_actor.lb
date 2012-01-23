@@ -893,15 +893,15 @@ interface actor [[ClutterActor*]]
     /*
 	Property: reactive
 	
-	The reactive property is a boolean value specifying whether or not the object should receive mouse events and emit pointer events (true = receive mouse events and send pointer events).
+	The reactive property is a boolean value specifying whether or not the object should send pointer events and receive mouse and scroll wheel events (true = send pointer events and receive mouse and scroll wheel events).
 	
-	Mouse events include button clicks, which are processed by the <on_button_down> and <on_button_up> event handlers. Pointer events include motion notifications and enter-element and leave-element events, which are handled by the <on_motion>, <on_enter> and <on_leave> handlers, respectively.
+	Mouse events include button clicks, which are processed by the <on_button_down> and <on_button_up> event handlers. Scroll wheel events occur when the wheel moves in any direction; such events are handled by the <on_scroll> handler. Pointer events include motion notifications and enter-element and leave-element events, which are handled by the <on_motion>, <on_enter> and <on_leave> handlers, respectively.
 	
-	To receive mouse events and emit pointer events, the following conditions must be enabled: (1) start mouse and pointer events by calling the global <controllers.start_pointer> function and (2) set the object's reactive property to true.
+	Scroll wheel events are enabled by setting the object's reactive property to true. To receive mouse events and send pointer events, two steps are required: (1) set the object's reactive property to true and (2) start mouse and pointer events by calling the global <controllers.start_pointer> function.
 	
-	*Default Setting:* false (the object neither receives mouse events nor sends pointer events)
+	*Default Setting:* false (the object neither receives mouse/scroll wheel events nor sends pointer events)
 	
-	*See Also:* the <on_button_down>, <on_button_up>, <on_motion>, <on_enter> and <on_leave> event handlers
+	*See Also:* the <on_button_down>, <on_button_up>, <on_motion>, <on_scroll>, <on_enter> and <on_leave> event handlers
 
     */
     
@@ -2392,15 +2392,19 @@ interface actor [[ClutterActor*]]
 	
 	The on_scroll() event handler is called whenever a scroll wheel event occurs. Scroll wheels are commonly found on computer mice and can be on other input devices, as well.
 	
+	To enable receiving scroll wheel events, the object's <reactive> property must be set to true.
+	
 	*Arguments:*
 	
 	    self - reference to the object receiving the event
 	    x - X coordinate position of the pointer
 	    y - Y coordinate position of the pointer
-	    scroll_direction - direction of scroll wheel. 0 = scrolling up, 1 = scrolling down
+	    scroll_direction - direction of scroll wheel. 0 = scrolling up, 1 = scrolling down, 2 = scrolling left, 3 = scrolling right. Note: Some directions may not be supported on a particular scroll wheel.
 	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
 		
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <reactive> property
 
 	*/
 
