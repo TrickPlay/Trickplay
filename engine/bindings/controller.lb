@@ -212,7 +212,7 @@ interface Controller [[ControllerDelegate*]]
         
         The has_touches property is a Boolean flag indicating whether or not the device has the capability to send touch-related events, typical of touchscreens (true=can send touch-related events).
         
-        If the has_touches pointer property is true, the application can enable/disable the generation of touch-related events by calling the object's <start_touches> and <stop_touches> functions. To monitor the touch-related events, the program can hook the object's <on_touch_move>, <on_touch_up> and <on_touch_down> event handlers.
+        If the has_touches property is true, the application can enable/disable the generation of touch-related events by calling the object's <start_touches> and <stop_touches> functions. To monitor the touch-related events, the program can hook the object's <on_touch_move>, <on_touch_up> and <on_touch_down> event handlers.
         
         *Possible Settings:* true=device can send touch-related events, else false
         
@@ -227,7 +227,13 @@ interface Controller [[ControllerDelegate*]]
     /*
         Property: has_scroll
         
-        DOCME
+        The has_scroll property is a Boolean flag indicating whether or not the device has the capability to send scroll wheel events (true=can send scroll wheel events). Scroll wheels are commonly found on computer mice, but are also available on other input devices.
+        
+        To monitor scroll-related events, a program can hook an object's <on_scroll> event handler.
+        
+        *Possible Settings:* true=device can send scroll-related events, else false
+        
+        *See Also:* the <on_scroll> event handler
     */
     
     readonly bool has_scroll
@@ -1002,7 +1008,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_key_down() event handler is invoked when a key is pressed or a key on the virtual remote control is pressed.
         
-        A key-down event is processed initially by the device's Controller on_key_down() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_key_down> event handler.
+        A key-down event is processed initially by this function--the Controller's on_key_down() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_key_down> event handler.
         
         *Prototype:*
         
@@ -1029,7 +1035,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_key_up() event handler is invoked when a key is released or a key on the virtual remote control is released.
         
-        A key-up event is processed initially by the device's Controller on_key_up() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_key_up> event handler.
+        A key-up event is processed initially by this function--the Controller's on_key_up() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_key_up> event handler.
         
         *Prototype:*
         
@@ -1080,7 +1086,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_pointer_button_down() event handler is invoked when a pointer device's button is pressed. For devices with multiple buttons, it is possible to identify which button was pressed.
         
-        A pointer-button-down event is processed initially by the device's Controller on_pointer_button_down() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_button_down> event handler.
+        A pointer-button-down event is processed initially by this function--the Controller's on_pointer_button_down() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_button_down> event handler.
         
         *Prototype:*
         
@@ -1107,7 +1113,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_pointer_move() event handler is invoked when a pointer device moves.
         
-        A pointer-move event is processed initially by the device's Controller on_pointer_move() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_motion> event handler.
+        A pointer-move event is processed initially by this function--the Controller's on_pointer_move() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_motion> event handler.
         
         *Prototype:*
         
@@ -1133,7 +1139,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_pointer_button_up() event handler is invoked when a pointer device's button is released. For devices with multiple buttons, it is possible to identify which button was released.
         
-        A pointer-button_up event is processed initially by the device's Controller on_pointer_button_up() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_button_up> event handler.
+        A pointer-button_up event is processed initially by this function--the Controller's on_pointer_button_up() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_button_up> event handler.
         
         *Prototype:*
         
@@ -1251,17 +1257,25 @@ interface Controller [[ControllerDelegate*]]
     /*
         Event Handler: on_scroll
         
-        DOCME
-        
         The on_scroll() event handler is invoked when the scroll wheel is moved.
         
-        *Arguments:*
+        A scroll event is processed initially by this function--the Controller's on_scroll() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_scroll> event handler.
         
+        *Prototype:*
+        
+        	(code)
+        	boolean on_scroll( Controller controller, int direction, int modifiers )
+        	(end)
+        
+        *Arguments:*
+
             controller - reference to the Controller device that generated the event
-            direction - 0 is up, 1 is down, 2 is left 3 is right
-            modifiers - table of <keys.Key Modifiers> pressed in combination with the scroll. If no modifier keys were pressed, set to nil.
+            direction - 0 = scrolling up, 1 = scrolling down, 2 = scrolling left, 3 = scrolling right. Note: Some directions may not be supported on a particular scroll wheel.
+            modifiers - table of <keys.Key Modifiers> pressed in combination with the scroll wheel movement. If no modifier keys were pressed, set to nil.
 
         *Return Value:* true to propagate the event up the event chain, else false
+        
+        *See Also:* the <UIElement.on_scroll> event handler
     */
     
     callback on_scroll;
