@@ -64,6 +64,8 @@ public:
 
     void touch_up( int finger , int x, int y , unsigned long int modifiers );
 
+    void scroll( int direction , unsigned long int modifiers );
+
     void ui_event( const String & parameters );
 
     void submit_image( void * data, unsigned int size, const char * mime_type );
@@ -94,6 +96,7 @@ public:
         virtual void touch_down( int finger , int x, int y , unsigned long int modifiers ) = 0;
         virtual void touch_move( int finger , int x, int y , unsigned long int modifiers ) = 0;
         virtual void touch_up( int finger , int x, int y , unsigned long int modifiers ) = 0;
+        virtual bool scroll( int direction , unsigned long int modifiers ) = 0;
         virtual void ui_event( const String & parameters ) = 0;
         virtual void submit_image( void * data, unsigned int size, const char * mime_type ) = 0;
         virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type ) = 0;
@@ -274,6 +277,7 @@ private:
     friend void tp_controller_cancel_audio_clip( TPController * controller );
     friend void tp_controller_advanced_ui_ready( TPController * controller );
     friend void tp_controller_advanced_ui_event( TPController * controller , const char * json );
+    friend void tp_controller_scroll( TPController * controller , int direction , unsigned long int modifiers );
 
     //.........................................................................
 

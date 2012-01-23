@@ -212,6 +212,17 @@ interface Controller [[ControllerDelegate*]]
         [[
             has_touches=self->has_cap(TP_CONTROLLER_HAS_TOUCHES);    
         ]];
+        
+    /*
+        Property: has_scroll
+        
+        DOCME
+    */
+    
+    readonly bool has_scroll
+        [[
+            has_scroll = self->has_cap( TP_CONTROLLER_HAS_SCROLL );    
+        ]];
     
     /*
         Property: has_multiple_choice
@@ -1167,6 +1178,24 @@ interface Controller [[ControllerDelegate*]]
     */
 
     callback on_touch_up;
+    
+    /*
+        Event Handler: on_scroll
+        
+        DOCME
+        
+        The on_scroll() event handler is invoked when the scroll wheel is moved.
+        
+        *Arguments:*
+        
+            controller - reference to the Controller device that generated the event
+            direction - 0 is up, 1 is down, 2 is left 3 is right
+            modifiers - table of <keys.Key Modifiers> pressed in combination with the scroll. If no modifier keys were pressed, set to nil.
+
+        *Return Value:* true to propagate the event up the event chain, else false
+    */
+    
+    callback on_scroll;
 
     /*
         Event Handler: on_ui_event

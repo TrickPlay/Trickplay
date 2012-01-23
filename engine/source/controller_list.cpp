@@ -63,7 +63,7 @@ struct Event
         POINTER_MOVE , POINTER_DOWN , POINTER_UP,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
         UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP,
-        ADVANCED_UI_READY, ADVANCED_UI_EVENT
+        ADVANCED_UI_READY, ADVANCED_UI_EVENT , SCROLL
     };
 
 public:
@@ -185,6 +185,16 @@ public:
 		return event;
 	}
 
+    inline static Event * make_scroll( Controller * controller , int direction , unsigned long int modifiers )
+    {
+    	Event * event = make( SCROLL , controller );
+
+    	event->scroll.direction = direction;
+        event->modifiers = modifiers;
+
+        return event;
+    }
+
     inline void process()
     {
 
@@ -266,6 +276,10 @@ public:
             case ADVANCED_UI_EVENT:
             	controller->advanced_ui_event( ui.parameters );
             	break;
+
+            case SCROLL:
+            	controller->scroll( scroll.direction , modifiers );
+            	break;
         }
     }
 
@@ -288,32 +302,38 @@ private:
         {
             unsigned int key_code;
             unsigned long int unicode;
-        }    key;
+        }    						key;
 
         struct
         {
             double x;
             double y;
             double z;
-        }                     accelerometer;
+        }                     		accelerometer;
 
         struct
         {
             int button_or_finger;
             int x;
             int y;
-        }                        click_touch;
+        }                        	click_touch;
 
         struct
         {
             char * parameters;
-        }            ui;
+        }							ui;
+
+        struct
+        {
+        	int direction;
+        }							scroll;
+
         struct
         {
         	void * data;
         	unsigned int size;
         	char * mime_type;
-        }	data;
+        }							data;
     };
 };
 
@@ -757,6 +777,31 @@ void Controller::touch_up( int finger, int x, int y , unsigned long int modifier
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
         ( *it )->touch_up( finger, x, y , modifiers );
+    }
+}
+
+//.............................................................................
+
+void Controller::scroll( int direction , unsigned long int modifiers )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    bool inject = true;
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        if ( ! ( *it )->scroll( direction , modifiers ) )
+        {
+            inject = false;
+        }
+    }
+
+    if ( inject )
+    {
+        ClutterUtil::inject_scroll( direction , modifiers );
     }
 }
 
@@ -1570,6 +1615,13 @@ void tp_controller_touch_up( TPController * controller, int finger, int x, int y
     {
         controller->list->post_event( Event::make_click_touch( Event::TOUCH_UP, controller->controller, finger, x, y , modifiers ) );
     }
+}
+
+void tp_controller_scroll( TPController * controller, int direction , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_scroll( controller->controller , direction , modifiers ) );
 }
 
 void tp_controller_ui_event( TPController * controller, const char * parameters )
