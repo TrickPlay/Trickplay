@@ -36,6 +36,8 @@ public:
     virtual bool pointer_move( int x, int y ,unsigned long int modifiers);
     virtual bool pointer_button_down( int button , int x, int y ,unsigned long int modifiers);
     virtual bool pointer_button_up( int button , int x, int y ,unsigned long int modifiers);
+    virtual void pointer_active();
+    virtual void pointer_inactive();
     virtual void touch_down(int finger,int x,int y,unsigned long int modifiers);
     virtual void touch_move(int finger,int x,int y,unsigned long int modifiers);
     virtual void touch_up(int finger,int x,int y,unsigned long int modifiers);
