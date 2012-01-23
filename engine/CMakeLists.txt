@@ -545,6 +545,7 @@ list( APPEND
     ${ENGINE_SRC}/source/console_commands.cpp
     ${ENGINE_SRC}/source/app_resource.cpp
     ${ENGINE_SRC}/source/plugin.cpp
+    ${ENGINE_SRC}/source/desktop_controller.cpp
 )
 
 #------------------------------------------------------------------------------

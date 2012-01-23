@@ -58,6 +58,10 @@ public:
 
     void pointer_button_up( int button , int x, int y , unsigned long int modifiers );
 
+    void pointer_active();
+
+    void pointer_inactive();
+
     void touch_down( int finger , int x, int y , unsigned long int modifiers );
 
     void touch_move( int finger , int x, int y , unsigned long int modifiers );
@@ -93,6 +97,8 @@ public:
         virtual bool pointer_move( int x, int y , unsigned long int modifiers ) = 0;
         virtual bool pointer_button_down( int button , int x, int y , unsigned long int modifiers ) = 0;
         virtual bool pointer_button_up( int button , int x, int y , unsigned long int modifiers ) = 0;
+        virtual void pointer_active() = 0;
+        virtual void pointer_inactive() = 0;
         virtual void touch_down( int finger , int x, int y , unsigned long int modifiers ) = 0;
         virtual void touch_move( int finger , int x, int y , unsigned long int modifiers ) = 0;
         virtual void touch_up( int finger , int x, int y , unsigned long int modifiers ) = 0;
@@ -125,6 +131,12 @@ public:
     bool start_pointer();
 
     bool stop_pointer();
+
+    bool show_pointer_cursor();
+
+    bool hide_pointer_cursor();
+
+    bool set_pointer_cursor( int x , int y , const String & image_uri );
 
     bool start_touches();
 
@@ -267,6 +279,8 @@ private:
     friend void tp_controller_pointer_move( TPController * controller, int x, int y , unsigned long int modifiers );
     friend void tp_controller_pointer_button_down( TPController * controller, int button, int x, int y , unsigned long int modifiers );
     friend void tp_controller_pointer_button_up( TPController * controller, int button, int x, int y , unsigned long int modifiers );
+    friend void tp_controller_pointer_active( TPController * controller );
+    friend void tp_controller_pointer_inactive( TPController * controller );
     friend void tp_controller_touch_down( TPController * controller, int finger, int x, int y , unsigned long int modifiers );
     friend void tp_controller_touch_move( TPController * controller, int finger, int x, int y , unsigned long int modifiers );
     friend void tp_controller_touch_up( TPController * controller, int finger, int x, int y , unsigned long int modifiers );

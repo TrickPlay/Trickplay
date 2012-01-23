@@ -195,6 +195,17 @@ interface Controller [[ControllerDelegate*]]
         [[
             has_pointer=self->has_cap(TP_CONTROLLER_HAS_POINTER);
         ]];
+        
+    /*
+        Property: has_pointer_cursor
+        
+        DOCME - whether the system draws a (mous) cursor on the screen. 
+    */        
+    
+    readonly bool has_pointer_cursor
+        [[
+            has_pointer_cursor = self->has_cap( TP_CONTROLLER_HAS_POINTER_CURSOR );
+        ]];
     
     /*
         Property: has_touches
@@ -482,7 +493,47 @@ interface Controller [[ControllerDelegate*]]
         [[
             result=self->get_controller()->stop_pointer();
         ]];
+        
+    /*
+        Function: show_pointer_cursor
+        
+        DOCME - to make the system draw its mouse cursor
+    */
     
+    bool show_pointer_cursor()
+        [[
+            result = self->get_controller()->show_pointer_cursor();
+        ]];
+        
+    /*
+        Function: hide_pointer_cursor
+        
+        DOCME - to make the system hide its mouse cursor
+    */
+    
+    bool hide_pointer_cursor()
+        [[
+            result = self->get_controller()->hide_pointer_cursor();
+        ]];
+        
+    /*
+        Function: set_pointer_cursor
+        
+        DOCME - to make the mouse cursor use a custom image
+    */
+
+    bool set_pointer_cursor( int x , int y , string image )
+        [[
+            if ( AppResource ar = AppResource( L , image ) )
+            {
+                result = self->get_controller()->set_pointer_cursor( x , y , ar.get_uri() );
+            }
+            else
+            {
+                result = false;
+            }    
+        ]];
+            
     /*
         Function: start_touches
         
@@ -1104,6 +1155,24 @@ interface Controller [[ControllerDelegate*]]
 
     callback on_pointer_button_up;
 
+    /*
+        Event Handler: on_pointer_active
+        
+        DOCME
+        On some systems, the mouse is "asleep". When it awakes, you will get this event.
+    */
+    
+    callback on_pointer_active;
+    
+    /*
+        Event Handler: on_pointer_inactive
+        
+        DOCME
+        The opposite of the above. The mouse may fall asleep on its own.
+    */
+    
+    callback on_pointer_inactive;
+    
     /*
         Event Handler: on_touch_down
         

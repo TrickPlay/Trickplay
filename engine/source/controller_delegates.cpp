@@ -21,6 +21,8 @@ extern int invoke_Controller_on_key_up( lua_State * , ControllerDelegate * , int
 extern int invoke_Controller_on_pointer_button_down( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_pointer_button_up( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_pointer_move( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_pointer_active( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_pointer_inactive( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_touch_down( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_touch_move( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_touch_up( lua_State * , ControllerDelegate * , int , int );
@@ -188,6 +190,20 @@ bool ControllerDelegate::pointer_button_up(int button,int x,int y,unsigned long 
         lua_pop( L , 1 );
     }
     return result;
+}
+
+//.........................................................................
+
+void ControllerDelegate::pointer_active()
+{
+    invoke_Controller_on_pointer_active(L,this,0,0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::pointer_inactive()
+{
+    invoke_Controller_on_pointer_inactive(L,this,0,0);
 }
 
 //.........................................................................
