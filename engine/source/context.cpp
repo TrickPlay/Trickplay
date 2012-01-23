@@ -464,6 +464,30 @@ gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer c
                 }
             }
 
+            case CLUTTER_SCROLL:
+            {
+                if ( !( event->scroll.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
+                {
+                    unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
+
+                    int direction = -1;
+
+                    switch( event->scroll.direction )
+                    {
+                    case CLUTTER_SCROLL_UP: 	direction = TP_CONTROLLER_SCROLL_UP; break;
+                    case CLUTTER_SCROLL_DOWN: 	direction = TP_CONTROLLER_SCROLL_DOWN; break;
+                    case CLUTTER_SCROLL_LEFT: 	direction = TP_CONTROLLER_SCROLL_LEFT; break;
+                    case CLUTTER_SCROLL_RIGHT: 	direction = TP_CONTROLLER_SCROLL_RIGHT; break;
+                    }
+
+                    if ( direction != -1 )
+                    {
+                    	tp_controller_scroll( ( TPController * ) controller , direction , modifiers );
+                    }
+                    return TRUE;
+                }
+            }
+
             default:
             {
                 break;
@@ -875,7 +899,7 @@ int TPContext::run()
 
     memset( &spec, 0, sizeof( spec ) );
 
-    spec.capabilities = TP_CONTROLLER_HAS_KEYS | TP_CONTROLLER_HAS_POINTER;
+    spec.capabilities = TP_CONTROLLER_HAS_KEYS | TP_CONTROLLER_HAS_POINTER | TP_CONTROLLER_HAS_SCROLL;
 
     spec.execute_command = controller_execute_command;
 

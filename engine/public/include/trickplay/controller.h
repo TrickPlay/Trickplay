@@ -83,6 +83,8 @@ typedef struct TPController TPController;
 
     TP_CONTROLLER_HAS_VIRTUAL_REMOTE  - The controller can display a virtual remote.
 
+    TP_CONTROLELR_HAS_SCROLL		  - The controller has a scroll-wheel-like device.
+
 */
 
 #define TP_CONTROLLER_HAS_KEYS                      0x0001
@@ -96,6 +98,7 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_IMAGES                	0x0100
 #define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0200
 #define TP_CONTROLLER_HAS_VIRTUAL_REMOTE			0x0400
+#define TP_CONTROLLER_HAS_SCROLL					0x0800
 
 #define TP_CONTROLLER_HAS_ADVANCED_UI               0x1000
 
@@ -1112,6 +1115,19 @@ struct TPControllerRequestAudioClip
 #define TP_CONTROLLER_MODIFIER_4			0x0800
 #define TP_CONTROLLER_MODIFIER_5			0x1000
 
+/*
+ 	Constants: Scroll Directions
+
+ 	TP_CONTROLLER_SCROLL_UP				- Scroll Up
+ 	TP_CONTROLLER_SCROLL_DOWN			- Scroll Down
+ 	TP_CONTROLLER_SCROLL_LEFT			- Scroll Left
+ 	TP_CONTROLLER_SCORLL_RIGHT			- Scroll Right
+*/
+
+#define TP_CONTROLLER_SCROLL_UP				0
+#define TP_CONTROLLER_SCROLL_DOWN			1
+#define TP_CONTROLLER_SCROLL_LEFT			2
+#define TP_CONTROLLER_SCROLL_RIGHT			3
 
 /*
     Callback: tp_controller_key_down
@@ -1340,6 +1356,28 @@ struct TPControllerRequestAudioClip
         int y,
         unsigned long int modifiers);
     
+/*
+	Callback: tp_controller_scroll
+
+	Report a scroll event.
+
+	Arguments:
+
+		controller	- The controller.
+
+		direction	- One of the <Scroll Directions>.
+
+		modifiers	- A combination of <Key Modifiers>.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_scroll(
+
+        TPController * controller,
+        int direction,
+        unsigned long int modifiers);
+
 /*
     Callback: tp_controller_ui_event
 
