@@ -199,7 +199,13 @@ interface Controller [[ControllerDelegate*]]
     /*
         Property: has_pointer_cursor
         
-        DOCME - whether the system draws a (mous) cursor on the screen. 
+        The has_pointer_cursor property is a Boolean flag indicating whether or not a pointer device has the capability of displaying its own cursor, such as the pointer cursor for a mouse (true=can display its own cursor).
+        
+        Before accessing the has_pointer_cursor property, verify that the <has_pointer> property is true. If has_pointer is false then the has_pointer_cursor property is not relevant.
+        
+		*Possible Settings:* true=device can display its own cursor, else false
+		
+		*See Also:* the <has_pointer> property and the <show_pointer_cursor>, <hide_pointer_cursor> and <set_pointer_cursor> functions
     */        
     
     readonly bool has_pointer_cursor
@@ -503,7 +509,13 @@ interface Controller [[ControllerDelegate*]]
     /*
         Function: show_pointer_cursor
         
-        DOCME - to make the system draw its mouse cursor
+        The show_pointer_cursor() function instructs the device to show its display cursor. For this function to have an effect, the object's <has_pointer_cursor> property must be true.
+        
+        *Arguments:* None
+        
+        *Return Value:* true if the device's cursor was successfully shown, else false
+        
+        *See Also:* the <has_pointer_cursor> property and the <hide_pointer_cursor> function
     */
     
     bool show_pointer_cursor()
@@ -514,7 +526,13 @@ interface Controller [[ControllerDelegate*]]
     /*
         Function: hide_pointer_cursor
         
-        DOCME - to make the system hide its mouse cursor
+        The hide_pointer_cursor() function instructs the device to hide its display cursor. For this function to have an effect, the object's <has_pointer_cursor> property must be true.
+        
+        *Arguments:* None
+        
+        *Return Value:* true if the the device's cursor was successfully hidden, else false
+        
+        *See Also:* the <has_pointer_cursor> property and the <show_pointer_cursor> function
     */
     
     bool hide_pointer_cursor()
@@ -525,10 +543,20 @@ interface Controller [[ControllerDelegate*]]
     /*
         Function: set_pointer_cursor
         
-        DOCME - to make the mouse cursor use a custom image
+        The set_pointer_cursor() function sets the device's display cursor to a specified URI image. For this function to have an effect, the object's <has_pointer_cursor> property must be true.
+        
+        *Arguments:*
+        
+        	x - X coordinate at which to position the cursor
+        	y - Y coordinate at which to position the cursor
+        	image - string referencing the URI (Uniform Resource Identifier) address of the image resource to use for the cursor
+        	
+        *Return Value:* true if the cursor image was successfully set, else false
+        
+        *See Also:* the <has_pointer_cursor> property
     */
 
-    bool set_pointer_cursor( int x , int y , string image )
+    bool set_pointer_cursor( int x, int y, string image )
         [[
             if ( AppResource ar = AppResource( L , image ) )
             {
@@ -1163,9 +1191,22 @@ interface Controller [[ControllerDelegate*]]
 
     /*
         Event Handler: on_pointer_active
-        
-        DOCME
-        On some systems, the mouse is "asleep". When it awakes, you will get this event.
+
+		The on_pointer_active() event handler is invoked when a pointer device becomes active from a suspended state.
+		
+		*Prototype:*
+		
+			(code)
+			void on_pointer_active( Controller controller )
+			(end)
+			
+		*Arguments:*
+		
+			controller - reference to the Controller device that generated the event
+			
+		*Return Value:* None
+		
+		*See Also:* the <on_pointer_inactive> event handler
     */
     
     callback on_pointer_active;
@@ -1173,8 +1214,21 @@ interface Controller [[ControllerDelegate*]]
     /*
         Event Handler: on_pointer_inactive
         
-        DOCME
-        The opposite of the above. The mouse may fall asleep on its own.
+        The on_pointer_inactive() event handler is invoked when a pointer device becomes inactive, such as when it is turned off or suspends itself.
+        
+        *Prototype:*
+        
+        	(code)
+        	void on_pointer_inactive( Controller controller )
+        	(end)
+        	
+        *Arguments:*
+        
+        	controller - reference to the Controller device that generated the event
+        	
+        *Return Value:* None
+        
+        *See Also:* the <on_pointer_active> event handler
     */
     
     callback on_pointer_inactive;
