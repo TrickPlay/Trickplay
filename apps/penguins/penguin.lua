@@ -1,4 +1,4 @@
-local img = Image{ src = "penguin", position = {-80,220,0}, opacity = 0, name = "penguin"}
+local img = _Clone{source = pengsrcs[1], position = {-80,ground[1],0}, opacity = 0, name = "penguin"}
 local jvy = -1
 local g = gravity > 0
 local jstate = 0
@@ -15,7 +15,7 @@ img.armor = nil
 
 local reset = function()
 	ovx = 2020*(row == 2 and -1 or 1)/4000
-		img.vx = ovx
+	img.vx = ovx
 	img.vy = 0
 	jstate = 0
 	floor = nil
@@ -33,21 +33,30 @@ local reset = function()
 	gravity = 0.002
 	for k,v in pairs(levels.this.children) do
 		if v.reset then
-			v:reset()
+			v:reset(row)
 		end
+	end
+	img.source = pengsrcs[levels.this.bank == 2 and 2 or 1]
+	if levels.this.bank == 2 then
+		darkness.dark:warp(darkness.dark.state)
+		darkness.dark.state = 0
 	end
 end
 
 local falling = Timeline{ duration = 500,
 	on_new_frame = function(self,ms,t)
-		img.x = ox + img.vx*ms
-		img.y = oy + (img.vy ~= 0 and img.vy*ms + gravity*ms*ms/2 or 0)
-		img.z_rotation = {oz + img.vz*ms,imgw2,imgh2}
-		img.opacity = 255*(1-t)
-		if (self.duration == 200 and img.y > oy+40) or
-			(levels.this.bank > 0 and img.y > ground[row]+30) then
+		if self.duration == 200 and img.y > oy+40 then
+			self.duration = 199
+			img.opacity = 0
+			fx.splash()
+		elseif levels.this.bank == 1 and img.y > ground[row]+30 then
 			self:stop()
 			self:on_completed()
+		elseif self.duration ~= 199 then
+			img.x = ox + img.vx*ms
+			img.y = oy + (img.vy ~= 0 and img.vy*ms + gravity*ms*ms/2 or 0)
+			img.z_rotation = {oz + img.vz*ms,imgw2,imgh2}
+			img.opacity = 255*(1-t)
 		end
 	end,
 	on_completed = function(self)
@@ -63,6 +72,9 @@ local falling = Timeline{ duration = 500,
 local fall = function(sink)
 	ox, oy, oz = img.x, img.y, img.z_rotation[1]
 	falling.duration = sink and 200 or 500
+	if levels.this.bank == 2 then
+		darkness.dark.state = sink and 1 or 2
+	end
 	falling:start()
 end
 
@@ -114,7 +126,7 @@ local jump = function(vy)
 		if not vy then
 			audio.play("jump-" .. (jstate > 0 and 2 or 1))
 		end
-		if jstate == 0 and floor == nil and levels.this.bank > 0 then
+		if jstate == 0 and floor == nil and levels.this.bank == 1 then
 			fx.explode(12)
 		end
 		img.vy = math.min(img.vy,(vy or jvy) * (g and 1 or -1) * 2/(2+jstate))
@@ -166,14 +178,14 @@ end
 skating.on_started = reset
 
 function skating:on_new_frame(ms,t)
-	audio:fresh()
 	d = self.delta
 	img.x = img.x + img.vx*d
 	
 	if img.x > 1920 or img.x < -80 then
-		img.x = 2200
+		img.x = img.x > 960 and 2200 or -200
 		skating:stop()
 		skating:on_completed()
+		return
 	end
 	
 	if jstate > 0 then
@@ -229,13 +241,13 @@ function skating:on_new_frame(ms,t)
 	-- ceiling collisions
 	if img.y > ground[row] or img.y < ground[row] - ground[1] then
 		land(ground[row] - (img.y > ground[row] and 0 or ground[1]))
-		if levels.this.bank > 0 then
+		if levels.this.bank == 1 then
 			fx.explode(12)
 		end
 	end
 	landjump = landjump-1
 	
-	if jstate == 0 and levels.this.bank > 0 and rand(4) == 1 then
+	if jstate == 0 and levels.this.bank == 1 and rand(4) == 1 then
 		fx.flakes(1)
 	end
 end
@@ -250,21 +262,20 @@ function skating:on_completed()
 		end
 		levels.this.trans = a+640
 		row = 2
-		levels.this:animate{y = -160, duration = 500, mode = "EASE_IN_OUT_QUAD"}
-		overlay:animate{y = -160, duration = 500, mode = "EASE_IN_OUT_QUAD",
+		overlay.lift()
+		img:animate{y = ground[2], duration = 500, mode = "EASE_IN_OUT_QUAD",
 			on_completed = function() skating:start() end}
-		if levels.this.bank > 0 then
-			snowbank:animate{y = -160, duration = 500, mode = "EASE_IN_OUT_QUAD"}
-		end
 	else
 		audio.play("level")
 		levels.next()
+		img:animate{y = ground[1], duration = 1120, mode = "EASE_IN_OUT_QUAD"}
 		row = 1
 	end
 end
 
 function screen:on_key_down(key)
-	--[[if key >= keys["4"] and key <= keys["7"] then
+	---[[
+	if key >= keys["4"] and key <= keys["7"] then
 		skating:rewind()
 		skating:stop()
 		if key == keys["4"] then
@@ -279,7 +290,7 @@ function screen:on_key_down(key)
 	elseif key >= keys["0"] and key <= keys["9"] then
 		skating:rewind()
 		reset()
-	else]]
+	else--]]
 		if levels.this.id == 1 then
 			img.deaths = 0
 			overlay.deaths.text = "0"
@@ -292,7 +303,8 @@ function screen:on_key_down(key)
 		elseif skating.is_playing and not img.armor then
 			jump()
 		end
-	--end
+	--
+	end
 end
 
 img.vx, img.vy, img.vz = 0, 0, 0

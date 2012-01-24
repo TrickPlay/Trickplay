@@ -66,34 +66,36 @@ local f = function(src,state,func,bbox)
 end
 
 local cubedriver = function (obj)
-	local switch = obj.name:match("s_(%w+)")
+	local switch = obj.name:match("s_(%w+)-?(%w+)")
 	local move = obj.clip
-	obj.clip = {0,0,obj.w,obj.h}
+	obj.clip = {0,0,obj.source.w,obj.source.h}
 	if move and (move[1] ~= 0 or move[2] ~= 0) then
+		obj.state = 2
 		if switch then
-			--local on = 1
-			--local ox, oy
 			local anim
 			obj.insert = function(self,top)
-				ox, oy = obj.x, obj.y
-				switch = levels.this:find_child((top and "" or "_") .. switch)
-				switch.moves[#switch.moves] = obj
+				for v in obj.name:gmatch("s_(%w+)") do
+					v = levels.this:find_child((top and "" or "_") .. v)
+					v.moves[#v.moves+1] = obj
+				end
 				anim = AnimationState{duration = move[3], mode = "EASE_IN_OUT_QUAD", transitions = {
 					{source = "*", target = 0, keys = {{obj,"x",obj.x},{obj,"y",obj.y}}},
-					{source = "*", target = 1, keys = {{obj,"x",obj.x+move[1]},{obj,"y",obj.y+move[2]}}}
+					{source = "*", target = 1, keys = {{obj,"x",obj.x+move[1]*10},{obj,"y",obj.y+move[2]*10}}}
 				}}
 				anim:warp(0)
 			end
 			obj.move = function()
-				--obj:animate{x = ox + move[1]*on, y = oy + move[2]*on, duration = move[3], mode = "EASE_IN_OUT_QUAD"}
 				anim.state = 1-tonumber(anim.state)
-				--on = 1-on
+			end
+			obj.reset = function()
+				if anim then
+					anim.state = 0
+				end
 			end
 			obj.unload = function()
 				anim = nil
 			end
 		else
-			obj.state = 2
 			obj.vx, obj.vy = move[1], move[2]
 			local ox = (obj.vx > 0 and -128 or 1921)
 			
@@ -196,8 +198,7 @@ local make = {
 		sign = function()
 			audio.play("theme")
 			zg:animate{y = -1420, duration = 1000, mode = "EASE_IN_QUAD", on_completed = function()
-				zt = 0
-				za = 4
+				zt, za = 0, 4
 				zg:animate{y = -1450, duration = 200, mode = "EASE_OUT_QUAD", on_completed = function()
 					zg:animate{y = -1420, duration = 200, mode = "EASE_IN_QUAD"}
 				end}
@@ -205,8 +206,7 @@ local make = {
 			
 			Timer{interval = 200, on_timer = function(self)
 				pg:animate{y = -1400, duration = 1000, mode = "EASE_IN_QUAD", on_completed = function()
-					pt = 0
-					pa = 4
+					pt, pa = 0, 4
 					pg:animate{y = -1430, duration = 200, mode = "EASE_OUT_QUAD", on_completed = function()
 						pg:animate{y = -1400, duration = 200, mode = "EASE_IN_QUAD"}
 					end}
@@ -281,7 +281,6 @@ local make = {
 			pwire:free()
 			pg:unparent()
 			step[pg] = nil
-			pg, zg = nil, nil
 			step[moving] = nil
 			moving:unparent()
 			for k,v in ipairs(moving.children) do
@@ -306,6 +305,7 @@ local make = {
 	["start-sign"]		= f("start-sign.png"),
 	["thought-bubble"]	= f("thought-bubble.png"),
 	["penguin"]			= f("penguin.png"),
+	["penguin-l"]		= f("penguin-lantern.png"),
 	["logo-z"]			= f("logo-z.png"),
 	["logo-z-wire"]		= f("logo-z-wire.png"),
 	["logo-p"]			= f("logo-p.png"),
@@ -315,6 +315,7 @@ local make = {
 	["igloo-back"]		= f("igloo-back.png"),
 	["bg-sun"]			= f("bg-sun.png"),
 	["bg-slice-2"]		= f("bg-slice-2.png"),
+	["bg-slice-3"]		= f("bg-slice-3.png"),
 	["tree-1"]			= f("tree-1.png"),
 	["tree-2"]			= f("tree-2.png"),
 	["tree-3"]			= f("tree-3.png"),
@@ -334,57 +335,60 @@ local make = {
 	["snow-bank"]		= f("snow-bank.png"),
 	["river-left"]		= f("river-left.png"),
 	["river-right"]		= f("river-right.png"),
-	["vane-pole.png"]	= f("vane-pole.png", 1, function(obj)
+	["switch-pole.png"]	= f("switch-pole.png", 1, function(obj)
 		obj.moves = {}
-		local bar, top, tg
-		local r, vr = 0, 0
+		obj:move_anchor_point(obj.w/2,obj.h-15)
+		local flag, snow, anim, timer, trow
 		
-		step[obj] = function(d,ms)
-			vr = vr*0.95 + sin(-(r+nrand(5))*pi/180)
-			r = r + vr
-			tg.x_rotation = {atan((obj.y+obj.parent.y-540)/1080)*180/pi - 20,0,0}
-			top.y_rotation = {r,0,0}
-		end
-		
-		obj.insert = function()
-			bar = Image{src = "vane-bar.png", x = obj.x-66, y = obj.y+20}
-			top = Image{src = "vane-top.png", anchor_point = {89,42}}
-			tg = Group{x = obj.x+4, y = obj.y}
-			tg:add(top)
-			obj.parent:add(bar,tg)
-			bar:raise(obj)
-			tg:raise(bar)
+		obj.insert = function(self,top)
+			trow = top and 1 or 2
+			flag = Image{src = "switch-red", x = obj.x, y = obj.y}
+			flag.anchor_point = {flag.w-4,obj.h-15}
+			flag.scale = {top and 1 or -1,1}
+			local zr = top and 20 or -20
+			anim = AnimationState{duration = 128, mode = "EASE_OUT_QUAD", transitions = {
+				{source = "*", target = 1, keys = {{obj,"z_rotation",0}, {flag,"z_rotation",0}, {flag,"y_rotation",0}}},
+				{source = "*", target = 0, keys = {{obj,"z_rotation",zr},{flag,"z_rotation",20},{flag,"y_rotation",180}}}
+			}}
+			timer = Timer{on_timer = function(self)
+				flag.source = index['switch-green.png']
+				self:stop()
+			end}
+			timer.interval = 64
+			anim:warp(1)
+			snow = Image{src = "switch-snow", x = obj.x, y = obj.y+15}
+			snow.anchor_point = {snow.w/2,snow.h/2}
+			obj.parent:add(flag,snow)
+			flag:raise(obj)
 		end
 		obj.collision = function()
 			for k,v in pairs(obj.moves) do
 				v.move()
 			end
-			vr = vr + (row == 2 and -25 or 25)
+			anim.state = 0
 			obj.state = 0
+			timer:start()
 		end
-		obj.reset = function()
-			if obj.state == 0 then
-				for k,v in pairs(obj.moves) do
-					v.move()
-				end
-				vr = vr + (row == 2 and 25 or -25)
+		obj.reset = function(self,row)
+			if row == trow and obj.state == 0 then
+				anim.state = 1
 				obj.state = 1
+				flag.source = index['switch-red.png']
 			end
 		end
 		obj.unload = function()
-			tg:unparent()
-			tg = nil
-			bar:free()
-			top:free()
+			flag.source = index['switch-red.png']
+			anim = nil
 		end
 	end),
-	["vane-bar.png"]	= f("vane-bar.png"),
-	["vane-top.png"]	= f("vane-top.png"),
-	["icicles.png"]		= f("icicles.png", 3, function (obj)
+	["switch-red"]		= f("switch-red.png"),
+	["switch-green"]	= f("switch-green.png"),
+	["switch-snow"]		= f("switch-snow.png"),
+	["icicles.png"]		= f("icicles.png", 1--[[, function (obj)
 		obj.insert = function()
 			obj:free()
 		end
-	end),
+	end]]),
 	["cube-64.png"]		= f("cube-64.png", 3, cubedriver),
 	["cube-128-4.png"]	= f("cube-128-4.png", 3, cubedriver),
 	["cube-128.png"]	= f("cube-128.png", 3, cubedriver),
@@ -429,7 +433,7 @@ local make = {
 			t = (t+d/1000)%1
 			obj.y = y + cos(pi*2*t)*amp
 			s, st = rubberize(obj,s,st,d,6,300)
-			r = sqrt(1-(2*(obj.y-ring.y)/obj.h)^2)
+			r = max(0,sqrt(1-(2*(obj.y-ring.y)/obj.h)^2))
 			ring.scale = {r*obj.scale[1],r*obj.scale[2]}
 		end
 			
@@ -600,7 +604,36 @@ local make = {
 		end
 	end, {l = 20, t = 10, r = -20, b = 0}),
 	["ice-bridge.png"]	= f("ice-bridge.png", 1, function (obj)
+		local switch = obj.name:match("s_(%w+)")
+		local move = obj.clip
+		local anim
+		obj.clip = {0,0,obj.w,obj.h}
+		
 		obj.insert = function(self,top)
+			if switch and move and (move[1] ~= 0 or move[2] ~= 0) then
+				obj.state = 2
+				for v in obj.name:gmatch("s_(%w+)") do
+					v = levels.this:find_child((top and "" or "_") .. v)
+					v.moves[#v.moves+1] = obj
+				end
+				anim = AnimationState{duration = move[3], mode = "EASE_IN_OUT_QUAD", transitions = {
+					{source = "*", target = 0, keys = {{obj,"x",obj.x},{obj,"y",obj.y}}},
+					{source = "*", target = 1, keys = {{obj,"x",obj.x+move[1]*10},{obj,"y",obj.y+move[2]*10}}}
+				}}
+				anim:warp(0)
+				obj.move = function()
+					anim.state = 1-tonumber(anim.state)
+				end
+				obj.reset = function()
+					if anim then
+						anim.state = 0
+					end
+				end
+				obj.unload = function()
+					anim = nil
+				end
+			end
+			
 			if not top or self.x+self.w < 1920 then return end
 			for k,v in pairs(self.parent.children) do
 				if v.name and v.source.name == "ice-bridge.png\t" and
@@ -618,7 +651,7 @@ local make = {
 				penguin.kill(obj)
 			end
 		end
-	end),
+	end, {l = 0, t = 0, r = 0, b = -30}),
 	["snow-ledge.png"]	= f("snow-ledge.png", 1, function(obj)
 		obj.insert = function(self,top)
 			if not top or self.x+self.w < 1920 then return end
@@ -715,7 +748,16 @@ local make = {
 			audio.play("armor-drop")
 		end
 	end, {l = 24, t = 0, r = -24, b = 0}),
+	["monster.png"]			= f("monster.png", 2, function(obj)
+		obj.scale = {1.3,1.3}
+		
+		obj.reset = function()
+			obj.x = rand(900)
+		end
+	end, {l = 0, t = -40, r = -80, b = 0}),
 }
+
+pengsrcs = {index["penguin.png"],index["penguin-lantern.png"]}
 
 recycle = function(i,src)
 	src = src:sub((src:find('/',10,true) or src:find('/',0,true) or 0)+1,-1)
