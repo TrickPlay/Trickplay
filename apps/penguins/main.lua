@@ -2,9 +2,12 @@
 
 Penguin Zip-Zip
 
+renumber levels
+monster
+
 --]]
 
---screen.perspective = {60,0.5,0.1,100}
+screen.perspective = {1,1,0.1,100}
 
 sin = math.sin
 cos = math.cos
@@ -36,6 +39,7 @@ step = {}
 local d, tms = 0, 0
 local anim = Timeline{duration = 9001, loop = true,
 	on_new_frame = function(self,ms,t)
+		audio:fresh()
 		d = self.delta
 		tms = tms+d
 		for k,v in pairs(step) do
@@ -51,7 +55,7 @@ levels.this:load()
 snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
 overlay	= dofile("overlay.lua")
-snow(levels.this.snow,levels.this.bank)
+snow(levels.this.snow)
 dofile("effects.lua")
 
 collectgarbage("collect")
