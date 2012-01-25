@@ -2,9 +2,6 @@
 
 Penguin Zip-Zip
 
-renumber levels
-monster
-
 --]]
 
 screen.perspective = {1,1,0.1,100}
