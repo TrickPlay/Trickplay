@@ -1,0 +1,136 @@
+Title: Multi-Level Menus Sample Application
+
+The Multi-Level Menus application demonstrates how to use the TrickPlay SDK Libraries to implement multiple-level menus. For demonstration purposes, the menus offer an assortment of movies for selection, and the movies are organized within diverse genres.
+
+The complete application, including source code, can be downloaded <here at http://www.trickplay.com/tutorials/menu_multilevel/menu_multilevel.zip>.
+
+(see MultiLevelMenusDemo.png)
+
+Group: Main Data Structures
+
+The Multi-Level Menus application organizes its data in three types of tables: Menu tables, menuItem tables, and movieInfo tables. These data structures are accessed to create the application's display screens and also as the user navigates through the menus.
+
+Each Menu table defines a single menu, including its menuItems. The contents of a Menu table are described below.
+
+parentMenu - reference to the menu's parent Menu table, if any. If the menu has no parent, this field is nil. 
+title - string to display above the menu
+menuItems - table of menuItem records
+
+The parentMenu field is used by child menus to enable the user to navigate back to a previous menu. The menuItems field is a table of menuItem records. Each entry in the menuItems table describes a single menuItem on the menu. The contents of a menuItem table are described below.
+
+menuText - string that describes the menuItem's purpose, such as "Save..." or "Help". This string is displayed as part of the menu.
+childMenu - reference to a child Menu table, if any. If no child menu exists, this field is nil.
+info - reference to a movieInfo table. If this menuItem does not refer to a particular movie, this field is nil.
+
+The childMenu and info fields are related; one, and only one, must reference a valid data structure, and the other must be nil. If the childMenu field references a child Menu table, then selecting this menuItem will cause the child menu to be displayed. If the info field references a movieInfo table, then selecting this menuItem will display a screen showing the movie's information. When one field references a valid data structure, the other field must be nil. With this structure, multiple levels of menus are supported. The "bottom" of the menu is eventually reached when the menuItem references a movieInfo table. The contents of a movieInfo table are described below.
+
+title - string title of the movie
+description - string description of the movie. For the sample application, this string is always filled with a "Lorem ipsum..." text.
+image - file specification referencing a movie poster image. The sample application always refers to files stored in the application's app bundle, but it's also possible to reference resources using a URI (Uniform Resource Identifier).
+
+Each movieInfo table defines information about a particular movie. This information is displayed on-screen when the user selects the movie from a menu.
+
+A simple, multi-level menu is defined below. It contains a primary menu, a child menu, and a movieInfo table.
+
+	(code)
+	-- Define a movieInfo table
+	godfatherMovie = {
+		title = "The Godfather",
+		description = " ... ",
+		image = "images/TheGodfather.jpg",
+	}
+
+	-- Define a Menu table with a single menuItem
+	dramaMenu = {
+		parentMenu = nil,             -- this field is set after the parent menu has been defined below
+		title = "Select Movie",
+    	menuItems = {
+    		{ menuText = "The Godfather",
+    		  childMenu = nil,        -- the info field is set, so this field must be nil
+    		  info = godfatherMovie,  -- if user selects this menuItem, show this movie info screen
+    		},
+    	},
+    }
+
+	-- Define primary Menu table with a child menu of dramaMenu
+	primaryMenu = {
+		parentMenu = nil,
+		title = "Select Movie Genre",
+		menuItems = {
+			{ menuText = "Drama",
+	          childMenu = dramaMenu,  -- if user selects this menuItem, show this child menu
+	          info = nil,             -- the childMenu field is set, so this field must be nil
+	    	},
+		},
+	}
+
+	-- Assign primaryMenu as the parent menu of the dramaMenu
+	dramaMenu.parentMenu = primaryMenu
+	(end)
+
+All the application's data structures are defined in a file called "menus.lua." Each table and record are defined as entries in a local variable called "vars." The application processes the menus.lua file by passing it to the Lua dofile() function which returns the contents of the vars table. In the main.lua source file, the vars table is assigned to a global variable called appMenus. All data defined in menus.lua is subsequently accessed via this appMenus variable.
+
+Group: General Program Structure
+
+The application displays two types of screens: a menu screen and a movieInfo screen. Each screen type has its own layout which is created at the start of the program. The layout defines the presentational aspects of the screen, such as the location, font, and color of a menu's title or location and size of a movie's poster image. When a particular menu or movieInfo screen must be displayed, the data for the menu/movieInfo is retrieved from the application's data structures and inserted into the layout. Thus, all menus are displayed in the same menu layout screen and all movieInfo records are displayed in the same movieInfo screen.
+
+The layout for the menu screen is constructed in the defineMenuLayout() function. 
+
+One interesting aspect of the menu layout is the "menuItem plaque." This rectangular region is the size of a single menuItem and always covers the current menuItem. By displaying the plaque in a different color from the other menuItems, it provides a visual indication of which menuItem is current. In addition, when the current menuItem changes, the plaque is animated to glide to the new current menuItem, providing some ocular sugar to the application.
+
+When a particular menu must be displayed, the showMenu() function performs the necessary tasks of retrieving the menu's data from the data structures and inserting it into the menu screen's layout. The function also positions the menuItem plaque over the initial current menuItem.
+
+The menus are implemented using the TrickPlay Engine's <Image> and <Text> classes. There is no concept of "focus" or individual resources/controls/widgets for each menu and menuItem in the application. Instead, the current menu and current menuItem are maintained in global variables called currMenu and currMenuItem, respectively. The currMenu variable always references a Menu table stored in the main data structure; the currMenuItem variable contains the current menuItem's index in the current menu's menuItems table. As the user navigates through the menus, the contents of the display layout are updated accordingly. When the user presses the <Enter> or <OK> key to select the current menuItem, the appropriate action is taken based upon the information contained in the current menuItem's table. If the childMenu field is set, the child menu is displayed; if the info field is set, the movie's information screen is shown.
+
+The movieInfo screen's layout is constructed in the defineMovieInfoLayout() function.
+
+The movieInfo screen is positioned in front of the menu screen and actually covers its entire central region. The menu screen is visible because the movieInfo screen is hidden until it needs to be shown. When the user selects a movie, the showMovieInfoScreen() function retrieves the movie's information from the data structures and inserts it into the screen's layout. The screen is then made visible by calling the TrickPlay SDK <UIElement.show_all> function. If the user leaves the movieInfo screen and returns to the previous menu screen, the movieInfo screen is hidden again by calling the SDK <UIElement.hide_all> function, which automatically reveals the original menu screen below. This method of "stacking" screens and hiding and showing them as needed is a common technique in applications that require multiple screens.
+
+Group: Interesting Functions and Techniques
+
+Topic: Processing User Input with KeyHandler()
+
+User keystroke input is processed by the KeyHandler() function. This function is initialized by passing it a table. Each table entry is in the format KEY=function(), where KEY is a key element from the SDK <keys> global variable, and function() is a function that is called when KEY is pressed.
+
+To process the user input for the menu screen, the sample application defines a keyInputHandlerMenu table shown below.
+
+	(code)
+	-- Menu screen keystroke handler
+	keyInputHandlerMenu = {
+			UP   = function() moveToPrevMenuItem() end,
+			DOWN = function() moveToNextMenuItem() end,
+			LEFT = function() moveToPrevMenu()     end,
+			OK   = function() selectMenuItem()     end,
+	}
+	(end)
+	
+In the table defined above, pressing the UP arrow key will cause the KeyHandler() function to call the moveToPrevMenuItem() function. The KeyHandler() function is initialized by passing the table to it, as shown below.
+
+	(code)
+	-- Hook the screen's menu keyboard input to our handlers
+	screen.on_key_down = KeyHandler( keyInputHandlerMenu )
+	(end)
+
+The movieInfo screen recognizes its own set of key input, but the same KeyHandler() function can be set to process this new input by passing it a different table when the movieInfo screen is displayed, as shown below.
+
+	(code)
+	-- MovieInfo screen keystroke handler
+	keyInputHandlerMovie = {
+			LEFT  = "OK",
+			OK    = function() selectControl() end,
+	}
+
+	-- Direct user input to the movieInfo handlers
+	screen.on_key_down = KeyHandler( keyInputHandlerMovie )
+	(end)
+
+The keyInputHandlerMovie table uses an alternative key assignment syntax. The LEFT = "OK" statement instructs the KeyHandler() function to process LEFT arrow keystrokes in the same manner as OK keystrokes. In other words, if the user presses either the LEFT arrow or OK keys, the selectControl() function will be called.
+
+If the user leaves the movieInfo screen and returns to the previous menu screen, the menu screen's key processing is restored by simply repassing the keyInputHandlerMenu table to the KeyHandler() function.
+
+Topic: Scaling an Image
+
+When displaying a movie's poster image, the application can accept images that are too large to fit in the screen space allocated for it. When this occurs, the program automatically scales the image so it fits in the screen space. The scalePoster() function determines whether or not scaling is required and, if necessary, scales the image. The scaling operation maintains the image's aspect ratio, so odd stretching or squeezing effects don't occur.
+
+The scalePoster() function scales a large image down, but it will not scale a small image up. If your application requires such a capability, it can be added using the current scalePoster() function as a model.
+
