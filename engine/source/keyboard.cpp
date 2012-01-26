@@ -731,7 +731,7 @@ public:
             }
         }
 
-        return false;
+        return true;
     }
 
 protected:
@@ -935,7 +935,7 @@ public:
 
         if ( ! button )
         {
-            return false;
+            return true;
         }
 
         if ( event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == TP_KEY_OK && button->action == "item" )
@@ -973,7 +973,7 @@ public:
 
         if ( ! target )
         {
-            return false;
+            return true;
         }
 
         // If we are not moving into the list, out of the list or within the list,
@@ -1073,7 +1073,7 @@ public:
                             KeyboardHandler::show_focus_ring( kb->list_focus , target );
                             return true;
                         }
-                        return false;
+                        return true;
                     }
 
                     // The target is below the list.
@@ -1107,7 +1107,7 @@ public:
             }
         }
 
-        return false;
+        return true;
     }
 
 protected:
