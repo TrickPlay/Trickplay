@@ -2310,6 +2310,8 @@ void Keyboard::submit()
 {
     // TODO: validate required fields
 
+	bool hide = true;
+
     if ( lsp )
     {
         if ( lua_State * L = lsp->get_lua_state() )
@@ -2323,11 +2325,21 @@ void Keyboard::submit()
                 lua_rawset( L , -3 );
             }
 
-            UserData::invoke_global_callback( L , "keyboard" , "on_submit" , 1 , 0 );
+            if ( UserData::invoke_global_callback( L , "keyboard" , "on_submit" , 1 , 1 ) )
+            {
+            	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+            	{
+            		hide = false;
+            	}
+           		lua_pop( L , 1 );
+            }
         }
     }
 
-    hide_internal( false );
+    if ( hide )
+    {
+    	hide_internal( false );
+    }
 }
 
 //-----------------------------------------------------------------------------
