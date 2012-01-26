@@ -90,8 +90,6 @@ def sendTrickplayDebugCommand(db_port, cmd, start=False):
 
     s = str(CON.address+":"+db_port)
 	
-    print s+"OOOOOO"
-    print cmd
     #conn = httplib.HTTPConnection( CON.address, db_port)
     conn = httplib.HTTPConnection( s )
     

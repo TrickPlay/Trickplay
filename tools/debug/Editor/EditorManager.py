@@ -6,6 +6,8 @@ import re
 from EditorTab import EditorTabWidget, EditorDock
 from Editor import Editor
 from UI.SaveAsDialog import Ui_saveAsDialog
+from PyQt4.Qsci import QsciScintilla, QsciLexerLua
+
 
 
 class EditorManager(QtGui.QWidget):    
@@ -181,7 +183,7 @@ class EditorManager(QtGui.QWidget):
 
 		
 
-    def newEditor(self, path, tabGroup = None):
+    def newEditor(self, path, tabGroup = None, line_no = None, prev_file = None):
         """
         Create a tab group if both don't exist,
         then add an editor in the correct tab widget.
@@ -219,6 +221,20 @@ class EditorManager(QtGui.QWidget):
 				for k in self.editors:
 					if path == k:
 						self.editorGroups[tabGroup].setCurrentIndex(self.editors[k][1])
+						if line_no != None:
+							self.tab.editors[self.editors[k][1]].SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
+							if self.tab.editors[self.editors[k][1]].current_line > -1 :
+								self.tab.editors[self.editors[k][1]].markerDelete(self.tab.editors[self.editors[k][1]].current_line, Editor.ARROW_MARKER_NUM)
+							elif prev_file != None:
+								if closedTab != prev_file:
+									for j in self.editors:
+										if prev_file == j:
+											self.tab.editors[self.editors[j][1]].markerDelete(self.tab.editors[self.editors[j][1]].current_line, Editor.ARROW_MARKER_NUM)
+											self.tab.editors[self.editors[j][1]].current_line = -1
+							if path == k:
+								self.tab.editors[self.editors[k][1]].markerAdd(int(line_no) -1, Editor.ARROW_MARKER_NUM)
+								self.tab.editors[self.editors[k][1]].current_line = int(line_no) -1 
+
 				return
         else:
             editor.readFile(path)
@@ -237,12 +253,26 @@ class EditorManager(QtGui.QWidget):
         editor.setFocus()
         editor.path = path
 
+        if not line_no == None:
+			editor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
+			if editor.current_line > -1 :
+				editor.markerDelete(
+					edito.current_line, 
+					Editor.ARROW_MARKER_NUM)
+			elif prev_file != None:
+				for l in self.editors:
+					if prev_file == l:
+						self.tab.editors[self.editors[l][1]].markerDelete(self.tab.editors[self.editors[l][1]].current_line, Editor.ARROW_MARKER_NUM)
+						self.tab.editors[self.editors[l][1]].current_line = -1
+
+			editor.markerAdd(int(line_no) -1, Editor.ARROW_MARKER_NUM)
+			editor.current_line = int(line_no) -1 
+
     def dropFileEvent(self, event, src, w = None):
         """
         Accept a file either by dragging onto the editor dock or into one of the
         editor tab widgets
         """
-        
         n = self.getTabWidgetNumber(w)
         
         # This external file can be opened as plain text
