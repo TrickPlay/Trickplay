@@ -1,8 +1,7 @@
-local img = Image{ src = "assets/penguin.png", position = {-80,220,0}, opacity = 0, name = "penguin"}
+local img = Image{ src = "penguin", position = {-80,220,0}, opacity = 0, name = "penguin"}
 local jvy = -1
 local g = gravity > 0
 local jstate = 0
-local deathcount = 0
 local skating = Timeline{duration = 8000}
 local floor
 local a, b, d
@@ -10,6 +9,8 @@ local ovx = 2020/4000
 local imgw2, imgh2 = img.w/2, img.h/2
 local ox, oy, oz = 0, 0, 0
 local boosted = false
+local landjump = 0
+img.deaths = 0
 img.armor = nil
 
 local reset = function()
@@ -49,11 +50,10 @@ local falling = Timeline{ duration = 500,
 	end,
 	on_completed = function(self)
 		if self.duration == 200 then
-			explode(levels.this.bank > 0 and rand(15,20) or nil,nil,true) 
+			fx.splash()
 		end
-		reset()
-		deathcount = deathcount+1
-		overlay.deaths.text = deathcount
+		img.deaths = img.deaths+1
+		overlay.deaths.text = img.deaths
 		skating:start()
 	end
 }
@@ -67,6 +67,7 @@ end
 local sink = function()
 	skating:stop()
 	img.vz = jstate > 0 and 0 or (row == 2 and -0.2 or 0.2)
+	audio.play("splash-" .. (jstate > 0 and 2 or 1))
 	fall(true)
 	if img.vy == 0 then
 		img.vy = 0.01
@@ -74,7 +75,7 @@ local sink = function()
 end
 
 local kill = function(obj)
-	explode((levels.this.bank > 0 and img.vy == 0) and rand(15,20) or nil)
+	fx.explode()
 	skating:stop()
 	
 	a = {x = (obj.bb.l + obj.bb.r - img.bb.l - img.bb.r)/2,
@@ -82,7 +83,7 @@ local kill = function(obj)
 	t = math.atan2(a.y/obj.scale[2],a.x/obj.scale[1])
 	t = t + math.sin(4*t-math.pi)/4
 	a = {x = math.cos(t), y = math.sin(t)}
-	d = obj.vx and obj.vy and obj.vx*a.x + obj.vy*a.y or 0
+	d = obj.state == 2 and obj.vx and obj.vy and obj.vx*a.x + obj.vy*a.y or 0
 	
 	if img.vy == 0 then
 		img.vz = (img.vx > 0) == g and -0.5 or 0.5
@@ -101,20 +102,26 @@ local kill = function(obj)
 	end
 	
 	fall()
+	audio.play("crash")
 end
 
 local jump = function(vy)
 	floor = nil
 	if row == 1 and img.x < 250 then return end
 	if jstate < 2 or vy then
+		if not vy then
+			audio.play("jump-" .. (jstate > 0 and 2 or 1))
+		end
 		if jstate == 0 and floor == nil and levels.this.bank > 0 then
-			explode(12)
+			fx.explode(12)
 		end
 		img.vy = math.min(img.vy,(vy or jvy) * (g and 1 or -1) * 2/(2+jstate))
 		a = (g == (row ~= 2) and -1 or 1)
 		b = img.z_rotation[1] % (a*360)
 		img.z_rotation = {b + (b*a < 240 and 360*a or 0), imgw2, imgh2}
-		jstate = jstate + (vy and 0.9 or 1)
+		jstate = min(jstate,1) + (vy and 0.9 or 1)
+	else
+		landjump = 5
 	end
 end
 
@@ -130,13 +137,21 @@ local boost = function()
 		b = img.z_rotation[1] % (a*360)
 		img.z_rotation = {b + (b*a < 240 and 360*a or 0), imgw2, imgh2}
 	end
+	audio.play("boost")
 end
 
-local land = function(y,obj)
+local land = function(y,obj,silent)
 	img.y = y
 	if (img.vy > 0) == g then
 		img.vy = 0
 		jstate = 0
+		if not silent then
+			audio.play("land")
+		end
+		if landjump > 0 then
+			jump()
+			landjump = 0
+		end
 	else
 		img.vy = -img.vy/2
 	end
@@ -149,11 +164,12 @@ end
 skating.on_started = reset
 
 function skating:on_new_frame(ms,t)
+	audio:fresh()
 	d = self.delta
-	--img.vx = ovx - (ovx-img.vx)/2^(d/400)
 	img.x = img.x + img.vx*d
 	
 	if img.x > 1920 or img.x < -80 then
+		img.x = 2200
 		skating:stop()
 		skating:on_completed()
 	end
@@ -167,7 +183,7 @@ function skating:on_new_frame(ms,t)
 	
 	img.bb = {l = img.x + 20,			t = img.y + imgh2-imgw2 + 13,
 			  r = img.x - 20 + img.w,	b = img.y + imgh2+imgw2 - 13}
-			  
+	
 	if jstate == 0 then
 		a = img.z_rotation[1]
 		if a ~= 0 then
@@ -184,8 +200,9 @@ function skating:on_new_frame(ms,t)
 	end
 	
 	--object collisions
+	if row == 1 and img.x < 250 then return end
 	for k,v in pairs(levels.this.children) do
-		if v.state > 0 and v.is_visible then
+		if v.state and v.state > 0 and v.is_visible then
 			if v.state == 2 then
 				v.bb = {l = v.x + v.bbox.l, r = v.x + v.bbox.r,
 						t = v.y + v.bbox.t, b = v.y + v.bbox.b}
@@ -196,6 +213,7 @@ function skating:on_new_frame(ms,t)
 				else
 					if v.state == 3 and img.armor then 
 						v.smash(true)
+						audio.play("ice-blocks-fall")
 						img.armor.drop()
 					else
 						kill(v)
@@ -210,12 +228,13 @@ function skating:on_new_frame(ms,t)
 	if img.y > ground[row] or img.y < ground[row] - ground[1] then
 		land(ground[row] - (img.y > ground[row] and 0 or ground[1]))
 		if levels.this.bank > 0 then
-			explode(12)
+			fx.explode(12)
 		end
 	end
+	landjump = landjump-1
 	
 	if jstate == 0 and levels.this.bank > 0 and rand(4) == 1 then
-		explode(1)
+		fx.flakes(1)
 	end
 end
 
@@ -236,13 +255,14 @@ function skating:on_completed()
 			snowbank:animate{y = -160, duration = 500, mode = "EASE_IN_OUT_QUAD"}
 		end
 	else
+		audio.play("level")
 		levels.next()
 		row = 1
 	end
 end
 
 function screen:on_key_down(key)
-	if key >= keys["4"] and key <= keys["7"] then
+	--[[if key >= keys["4"] and key <= keys["7"] then
 		skating:rewind()
 		skating:stop()
 		if key == keys["4"] then
@@ -254,17 +274,23 @@ function screen:on_key_down(key)
 		else
 			levels.next(5)
 		end
-		row = 1
 	elseif key >= keys["0"] and key <= keys["9"] then
 		skating:rewind()
 		reset()
-	else
-		if skating.is_playing and not img.armor then
+	else]]
+		if levels.this.id == 1 then
+			img.deaths = 0
+			overlay.deaths.text = "0"
+			img.x = 0
+			if levels.this.swap then
+				levels.this.swap()
+			else
+				levels.next()
+			end
+		elseif skating.is_playing and not img.armor then
 			jump()
-		elseif levels.this.id == 1 then
-			levels.next()
 		end
-	end
+	--end
 end
 
 img.vx, img.vy, img.vz = 0, 0, 0

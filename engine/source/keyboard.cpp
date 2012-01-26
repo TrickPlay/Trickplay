@@ -731,7 +731,7 @@ public:
             }
         }
 
-        return false;
+        return true;
     }
 
 protected:
@@ -935,7 +935,7 @@ public:
 
         if ( ! button )
         {
-            return false;
+            return true;
         }
 
         if ( event->any.type == CLUTTER_KEY_PRESS && event->key.keyval == TP_KEY_OK && button->action == "item" )
@@ -973,7 +973,7 @@ public:
 
         if ( ! target )
         {
-            return false;
+            return true;
         }
 
         // If we are not moving into the list, out of the list or within the list,
@@ -1073,7 +1073,7 @@ public:
                             KeyboardHandler::show_focus_ring( kb->list_focus , target );
                             return true;
                         }
-                        return false;
+                        return true;
                     }
 
                     // The target is below the list.
@@ -1107,7 +1107,7 @@ public:
             }
         }
 
-        return false;
+        return true;
     }
 
 protected:
@@ -2310,6 +2310,8 @@ void Keyboard::submit()
 {
     // TODO: validate required fields
 
+	bool hide = true;
+
     if ( lsp )
     {
         if ( lua_State * L = lsp->get_lua_state() )
@@ -2323,11 +2325,21 @@ void Keyboard::submit()
                 lua_rawset( L , -3 );
             }
 
-            UserData::invoke_global_callback( L , "keyboard" , "on_submit" , 1 , 0 );
+            if ( UserData::invoke_global_callback( L , "keyboard" , "on_submit" , 1 , 1 ) )
+            {
+            	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+            	{
+            		hide = false;
+            	}
+           		lua_pop( L , 1 );
+            }
         }
     }
 
-    hide_internal( false );
+    if ( hide )
+    {
+    	hide_internal( false );
+    }
 }
 
 //-----------------------------------------------------------------------------

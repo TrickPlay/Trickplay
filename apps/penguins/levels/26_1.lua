@@ -226,4 +226,41 @@ end
 clone6.extra.reactive = true
 
 
-g:add(image0,image15,clone22,image24,clone5,clone6)
+local clone7 = Clone
+	{
+		scale = {1,1,0,0},
+		source = image0,
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "clone7",
+		position = {1694,453,0},
+		size = {128,128},
+		opacity = 255,
+		reactive = true,
+	}
+
+clone7.extra.focus = {}
+
+function clone7:on_key_down(key)
+	if clone7.focus[key] then
+		if type(clone7.focus[key]) == "function" then
+			clone7.focus[key]()
+		elseif screen:find_child(clone7.focus[key]) then
+			if clone7.clear_focus then
+				clone7.clear_focus(key)
+			end
+			screen:find_child(clone7.focus[key]):grab_key_focus()
+			if screen:find_child(clone7.focus[key]).set_focus then
+				screen:find_child(clone7.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+clone7.extra.reactive = true
+
+
+g:add(image0,image15,clone22,image24,clone5,clone6,clone7)

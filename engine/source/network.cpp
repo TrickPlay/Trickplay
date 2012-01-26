@@ -939,6 +939,10 @@ public:
                 cc( curl_easy_setopt( eh, CURLOPT_POST, 1 ) );
                 cc( curl_easy_setopt( eh, CURLOPT_POSTFIELDSIZE, closure->request.body.size() ) );
             }
+            else if ( closure->request.method == "HEAD" )
+            {
+            	cc( curl_easy_setopt( eh, CURLOPT_NOBODY , 1 ) );
+            }
             else if ( closure->request.method != "GET" )
             {
                 cc( curl_easy_setopt( eh, CURLOPT_CUSTOMREQUEST, closure->request.method.c_str() ) );

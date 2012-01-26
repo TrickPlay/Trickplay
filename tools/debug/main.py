@@ -203,9 +203,9 @@ class MainWindow(QMainWindow):
         Close in a clean way... but still Trickplay closes too soon and the
         Avahi service stays alive
         """
-		#try to close current index tab and then, do that for every other tabs too
-    	while self.editorManager.tab.count() != 0:
-			self.editorManager.close()
+    	if self.editorManager.tab != None:
+    		while self.editorManager.tab.count() != 0:
+				self.editorManager.close()
 
         self._deviceManager.stop()
         self.close()

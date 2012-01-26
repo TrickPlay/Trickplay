@@ -10,6 +10,7 @@
 #include "util.h"
 #include "http_server.h"
 #include "user_data.h"
+#include "app_resource.h"
 
 //.............................................................................
 
@@ -763,7 +764,7 @@ JSON::Object Debugger::get_app_info()
 
 	JSON::Array & array = result[ "contents" ].as<JSON::Array>();
 
-	StringList contents = md.sandbox.get_pi_children();
+	StringList contents = AppResource::get_pi_children( md.get_root_uri() );
 
 	for ( StringList::const_iterator it = contents.begin(); it != contents.end(); ++it )
 	{
@@ -1171,13 +1172,11 @@ StringVector * Debugger::get_source( const String & pi_path )
 
 	StringVector * result = 0;
 
-	gsize length = 0;
+	Util::Buffer contents( AppResource( app , pi_path ).load_contents( app ) );
 
-	gchar * contents = app->get_metadata().sandbox.get_pi_child_contents( pi_path , length );
-
-	if ( contents && length )
+	if ( contents.length() )
 	{
-		imstream stream( contents , length );
+		imstream stream( ( char * ) contents.data() , contents.length() );
 
 		StringVector & lines = source[ pi_path ];
 
@@ -1190,8 +1189,6 @@ StringVector * Debugger::get_source( const String & pi_path )
 
 		result = & lines;
 	}
-
-	g_free( contents );
 
 	return result;
 }

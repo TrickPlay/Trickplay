@@ -124,8 +124,8 @@ local clone5 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone5",
-		position = {1400,536,0},
-		size = {500,55},
+		position = {1500,536,0},
+		size = {400,55},
 		opacity = 255,
 		reactive = true,
 	}

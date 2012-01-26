@@ -1,5 +1,5 @@
 
 Title: Media Playback Overview
 
-This is a placeholder for the Media Playback:Overview section of the TrickPlay Runtime Engine Reference
+This section describes the support provided by the <mediaplayer> global variable to process audio and video media resources.
 
