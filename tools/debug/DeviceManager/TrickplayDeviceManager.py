@@ -1,7 +1,5 @@
 
-import telnetlib
-import base64
-import sys
+import telnetlib, base64, sys, random
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -45,6 +43,11 @@ class TrickplayDeviceManager(QWidget):
         QObject.connect(self.trickplay, SIGNAL('finished(int)'), self.app_finished)
         QObject.connect(self.trickplay, SIGNAL('started()'), self.app_started)
 
+        self.debug_port = 9876
+        self.console_port = 7777
+        #self.my_name = ""
+
+
     def service_selected(self, index):
         
 		if index < 0:
@@ -56,7 +59,7 @@ class TrickplayDeviceManager(QWidget):
 		if not address or not port:
 			return
         
-		self.inspector.clearTree()
+		#self.inspector.clearTree()
         
 		print(index,address,port)
 
@@ -67,26 +70,48 @@ class TrickplayDeviceManager(QWidget):
 		while 1:
 			if event.type() == ADDEVENT:
 				d = event.dict
-				print "Service \'", d[0], "\' added"
-				# Add item to ComboBox
-				self.ui.comboBox.addItem(d[0])
-				index = self.ui.comboBox.findText(d[0])
-				self.ui.comboBox.setItemData(index, d[1], ADDRESS)
-				self.ui.comboBox.setItemData(index, d[2], PORT)
-				self.ui.comboBox.setItemData(index, d[1], NAME)
-        		# Automatically select a service if only one exists
-				if 1 == self.ui.comboBox.count():
-					self.service_selected(1) # index -> 1 
+				if d[0] != self.my_name:
+					print "Service \'", d[0], "\' added"
+					# Add item to ComboBox
+					self.ui.comboBox.addItem(d[0])
+					index = self.ui.comboBox.findText(d[0])
+					self.ui.comboBox.setItemData(index, d[1], ADDRESS)
+					self.ui.comboBox.setItemData(index, d[2], PORT)
+					self.ui.comboBox.setItemData(index, d[1], NAME)
+        			# Automatically select a service if only one exists
+					if 1 == self.ui.comboBox.count():
+						self.service_selected(1) # index -> 1 
+					"""
+					elif hasattr(self, 'newApp') :
+						if self.newApp == True :
+							self.ui.comboBox.setCurrentIndex(self.ui.comboBox.count() - 1)
+							self.service_selected(self.ui.comboBox.count())
+							self.newAppText = self.ui.comboBox.itemText(self.ui.comboBox.count() - 1)
+							self.inspector.refresh()
+							self.inspector.ui.inspector.expandAll()
+							self.newApp = False
+					"""
+				else: 
+					name = 'Emulator'  #'Trickplay Device   '
+					address = d[1]
+					port = d[2]
+					self.ui.comboBox.setItemData(0, address, ADDRESS)
+					self.ui.comboBox.setItemData(0, port, PORT)
+					CON.port = port
+					CON.address = address
+					self.inspector.refresh()
+					self.inspector.ui.inspector.expandAll()
+
 			elif event.type() == REMEVENT:
 				d = event.dict
 				print "Service \'", d[0], "\' removed"
 				# Remove item from ComboBox
 				index = self.ui.comboBox.findText(d[0])
 				self.ui.comboBox.removeItem(index)
-				self.inspector.clearTree()
+				#self.inspector.clearTree()
+
 			return True
 
- 
     def stop(self):
 		self.discovery.stop()
 
@@ -94,7 +119,7 @@ class TrickplayDeviceManager(QWidget):
         """
         Add combo box from running app locally. This always exists.
         """
-        name = 'Local Device'  #'Trickplay Device   '
+        name = 'Emulator'  #'Trickplay Device   '
         port = '6789'
         address = 'localhost'
         
@@ -121,50 +146,77 @@ class TrickplayDeviceManager(QWidget):
         return self._path
     
     def app_started(self):
-		"""
-		while 1:
-			try : 
-				tn = telnetlib.Telnet(CON.address, "7777")
-				break
-			except : 
-				print "retry ..."
-
-		tn.interact()
-		"""
+		#tn.interact()
 		print "APP Started"
+		self.newApp = True
+
+		# Console Port 
 		self.socket = QTcpSocket()
 		self.nextBlockSize = 0
 		self.bytesAvail = 0
 
 		self.connect(self.socket, SIGNAL("connected()"), self.sendRequest)
 		self.connect(self.socket, SIGNAL("readyRead()"), self.readResponse)
-		self.connect(self.socket, SIGNAL("disconnected()"),
-					self.serverHasStopped)
-		#self.connect(self.socket,
-                     #SIGNAL("error(QAbstractSocket::SocketError)"),
-                     #self.serverHasError)
+		self.connect(self.socket, SIGNAL("disconnected()"), self.serverHasStopped)
 
 		if self.socket.isOpen():
 			self.socket.close()
-		print("Connecting to server...")
+
+		print("Connecting to console port ...")
+
 
 		while 1:
 			try : 
-				self.socket.connectToHost(CON.address, 7777, mode=QIODevice.ReadWrite)
+				self.socket.connectToHost(CON.address, self.console_port, mode=QIODevice.ReadWrite)
 				if self.socket.waitForConnected(100): 
+					self.newApp = True
 					break
 			except : 
 				pass
 
+		"""
+		if hasattr(self, "debug_mode") and self.debug_mode == 0 :
+			# Debug Port 
+			
+			self.debug_socket = QTcpSocket()
+			self.debug_nextBlockSize = 0
+			self.debug_bytesAvail = 0
+
+			self.connect(self.debug_socket, SIGNAL("connected()"), self.sendRequest)
+			self.connect(self.debug_socket, SIGNAL("readyRead()"), self.readDebugResponse)
+			self.connect(self.debug_socket, SIGNAL("disconnected()"), self.debugServerHasStopped)
+			#self.connect(self.socket,
+                     	#SIGNAL("error(QAbstractSocket::SocketError)"),
+                     	#self.serverHasError)
+
+			if self.debug_socket.isOpen():
+				self.debug_socket.close()
+
+			print("Connecting to debugger port ...")
+
+			while 1:
+				try : 
+					self.debug_socket.connectToHost(CON.address, self.debug_port, mode=QIODevice.ReadWrite)
+					if self.debug_socket.waitForConnected(100): 
+						break
+				except : 
+					pass
+		"""
+	
+
     def sendRequest(self):
         print "Connected"
+
+    def readDebugResponse(self):
+		while self.debug_socket.waitForReadyRead(1100) :
+			print self.debug_socket.read(self.debug_socket.bytesAvailable())+"&&&&&&&&&&&&&&&&&&"
 
     def readResponse(self):
 		while self.socket.waitForReadyRead(1100) :
 			print self.socket.read(self.socket.bytesAvailable())
+		self.socket.flush()
 
 		"""
-
 		stream = QDataStream(self.socket)
 		stream.setVersion(QDataStream.Qt_4_2)
 		self.bytesAvail = self.bytesAvail + self.socket.bytesAvailable() 
@@ -181,17 +233,20 @@ class TrickplayDeviceManager(QWidget):
 			if self.bytesAvail < self.nextBlockSize:
 				break
 
-			print "herehehrehr"
+			print "herehehrehr"py
 			msg = QString()
 			stream >> msg
 			print str(msg)
 
 			self.nextBlockSize = 0
-		
 		"""
 
+    def debugServerHasStopped(self):
+    	print ("Connection closed by server")
+    	self.debug_socket.close()
+
     def serverHasStopped(self):
-    	print ("Error: Connection closed by server")
+    	print ("Connection closed by server")
     	self.socket.close()
 
     def serverHasError(self, error):
@@ -204,10 +259,10 @@ class TrickplayDeviceManager(QWidget):
 		print errorCode
 		if self.trickplay.state() == QProcess.NotRunning :
 			print "trickplay app is finished"
+			self.inspector.clearTree()
 			#self.trickplay.terminate()
 	
-    def run(self):
-        
+    def run(self, dm=False):
        
         # Run on local trickplay
         if 0 == self.ui.comboBox.currentIndex():
@@ -215,20 +270,21 @@ class TrickplayDeviceManager(QWidget):
             if self.trickplay.state() == QProcess.Running:
                 self.trickplay.close()
             
-            #env = self.trickplay.systemEnvironment()
-            #env.append("TP_http_port=6789")
-            #self.trickplay.setEnvironment(env)
             env = self.trickplay.systemEnvironment()
-            env.append("TP_telent_console_port=7777")
+            env.append("TP_telent_console_port="+str(self.console_port))
             env.append("TP_controllers_enabled=1")
-            env.append("TP_controllers_name=LocalHost")
+            self.my_name = "LocalHost_"+str(int(random.random() * 100000))
+            env.append("TP_controllers_name="+self.my_name)
+
+            if dm == True :
+            	self.debug_mode = True
+            	env.append("TP_debugger_port="+str(self.debug_port))
+            	env.append("TP_start_debugger=1")
+            else :
+				self.debug_mode = False
             self.trickplay.setEnvironment(env)
-
-            #self.trickplay.ProcessChannelMode(QProcess.MergedChannels)
-
             ret = self.trickplay.start('trickplay', [self.path()])
 			
-            
         # Push to foreign device
         else:
             self.push()
@@ -236,6 +292,8 @@ class TrickplayDeviceManager(QWidget):
     def printResp(self, data, command):
 
 		pdata = json.loads(data)
+		if command == 'q':
+			print pdata
 
 		file_name = pdata["file"] 
 		tp_id = pdata["id"] 

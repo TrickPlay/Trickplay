@@ -17,8 +17,10 @@ TEXT_CHANGED = 2
 
 class Editor(QsciScintilla):
 
+    BACKGROUND_MARKER_NUM = 0
+    ACTIVE_BREAK_MARKER_NUM = 1
+    DEACTIVE_BREAK_MARKER_NUM = 2
     ARROW_MARKER_NUM = 8
-
     
     def __init__(self, parent=None):
         super(Editor, self).__init__(parent)
@@ -54,10 +56,27 @@ class Editor(QsciScintilla):
         self.connect(self,
             SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),
             self.on_margin_clicked)
-        self.markerDefine(QsciScintilla.RightArrow,
-            self.ARROW_MARKER_NUM)
-        self.setMarkerBackgroundColor(QColor("#ee1111"),
-            self.ARROW_MARKER_NUM)
+
+		# Define markers 
+        self.markerDefine(QsciScintilla.Background, self.BACKGROUND_MARKER_NUM)
+        self.markerDefine(QsciScintilla.RightTriangle, self.ARROW_MARKER_NUM)
+        self.markerDefine(QsciScintilla.Circle, self.DEACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QsciScintilla.Circle, self.ACTIVE_BREAK_MARKER_NUM)
+
+		# Red : #ee1111, Orange : #DB7F1E
+        self.setMarkerBackgroundColor(QColor("#DB7F1E"), self.ARROW_MARKER_NUM)
+        self.setMarkerForegroundColor(QColor("#DB7F1E"), self.ARROW_MARKER_NUM)
+
+		# Light blue : ##C7E4E4, White : #FFFFFF
+        self.setMarkerBackgroundColor(QColor("#FFFFFF"), self.ACTIVE_BREAK_MARKER_NUM)
+        #self.setMarkerForegroundColor(QColor("#FFFFFF"), self.ACTIVE_BREAK_MARKER_NUM)
+
+		# Gray : #C5C5C5
+        self.setMarkerBackgroundColor(QColor("#C5C5C5"), self.DEACTIVE_BREAK_MARKER_NUM)
+        #self.setMarkerForegroundColor(QColor("#C5C5C5"), self.DEACTIVE_BREAK_MARKER_NUM)
+
+		# Light green : #7CD7A5
+        #self.setMarkerBackgroundColor(QColor("#7CD7A5"), #self.BACKGROUND_MARKER_NUM)
 
         # Brace matching: enable for a brace immediately before or after
         # the current position
@@ -75,6 +94,7 @@ class Editor(QsciScintilla):
         lexer = QsciLexerLua()
         lexer.setDefaultFont(font)
         self.setLexer(lexer)
+
         #self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, 1, 12)
         #self.SendScintilla(QsciScintilla.SCI_STYLESETFORE, 1, 0xBFBFBF)
         #self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Monospace')
@@ -91,16 +111,27 @@ class Editor(QsciScintilla):
         QObject.connect(self, SIGNAL("textChanged()"), self.text_changed)
         #QObject.connect(self, SIGNAL("selectionChanged()"), self.ss_changed)
         self.text_status = TEXT_DEFAULT
+        self.setWrapMode(QsciScintilla.WrapWord)
+        self.line_click = {}
+        self.current_line = -1
 
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
-		print "on_margin_clicked"
-		if self.markersAtLine(nline) != 0:
-			self.markerDelete(nline, self.ARROW_MARKER_NUM)
-		else:
-			self.markerAdd(nline, self.ARROW_MARKER_NUM)
-			self.markerDefine( QsciScintilla.SC_MARK_CIRCLE, 11 )
-			self.markerAdd(nline + 1, 11)
+		#print "on_margin_clicked"
+
+		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
+			#if self.markersAtLine(nline) == 0:
+			self.markerAdd(nline, self.ACTIVE_BREAK_MARKER_NUM)
+			self.line_click[nline] = 1
+		elif self.line_click[nline] == 1:
+			self.markerDelete(nline, self.ACTIVE_BREAK_MARKER_NUM)
+			self.markerAdd(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+			self.line_click[nline] = 2
+		elif self.line_click[nline] == 2:
+			self.markerDelete(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+			self.line_click[nline] = 0
+		
+		#if self.markersAtLine(nline) == 0:
             
     def readFile(self, path):
         self.setText(open(path).read())
