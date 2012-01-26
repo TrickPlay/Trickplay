@@ -2124,7 +2124,12 @@ void Keyboard::switch_to_field( size_t field_index )
 
     g_assert( nfields > 0 );
 
-    const Form::Field & old_field( form.get_field() );
+    // Hide all the handlers
+
+    for ( Form::FieldVector::const_iterator it = form.fields.begin(); it != form.fields.end(); ++it )
+    {
+    	it->handler->hide();
+    }
 
     // Make sure the container has the right number of fields
 
@@ -2215,8 +2220,6 @@ void Keyboard::switch_to_field( size_t field_index )
 
     //-------------------------------------------------------------------------
     // Now, prepare the keyboard for this field
-
-    old_field.handler->hide();
 
     field.handler->show_for_field( field );
 
