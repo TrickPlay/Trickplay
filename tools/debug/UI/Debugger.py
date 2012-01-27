@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Debugger.ui'
 #
-# Created: Thu Jan 19 16:15:13 2012
+# Created: Fri Jan 27 13:47:21 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -46,8 +46,11 @@ class Ui_TrickplayDebugger(object):
         self.gridLayout_3.setMargin(0)
         self.gridLayout_3.setSpacing(0)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
-        self.breakTable = QtGui.QTableView(self.Breaks)
+        self.breakTable = QtGui.QTableWidget(self.Breaks)
         self.breakTable.setObjectName(_fromUtf8("breakTable"))
+        self.breakTable.setColumnCount(0)
+        self.breakTable.setRowCount(0)
+        self.breakTable.horizontalHeader().setStretchLastSection(True)
         self.gridLayout_3.addWidget(self.breakTable, 0, 0, 1, 1)
         self.tabWidget.addTab(self.Breaks, _fromUtf8(""))
         self.Locals = QtGui.QWidget()
@@ -62,14 +65,29 @@ class Ui_TrickplayDebugger(object):
         self.gridLayout_2.setMargin(0)
         self.gridLayout_2.setSpacing(0)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
-        self.localTable = QtGui.QTableView(self.Locals)
+        self.localTable = QtGui.QTableWidget(self.Locals)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.localTable.sizePolicy().hasHeightForWidth())
+        self.localTable.setSizePolicy(sizePolicy)
+        self.localTable.setMinimumSize(QtCore.QSize(100, 0))
+        self.localTable.setAutoFillBackground(False)
+        self.localTable.setTabKeyNavigation(False)
+        self.localTable.setDragDropOverwriteMode(False)
+        self.localTable.setAlternatingRowColors(True)
+        self.localTable.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.localTable.setObjectName(_fromUtf8("localTable"))
+        self.localTable.setColumnCount(0)
+        self.localTable.setRowCount(0)
+        self.localTable.horizontalHeader().setStretchLastSection(True)
+        self.localTable.verticalHeader().setStretchLastSection(False)
         self.gridLayout_2.addWidget(self.localTable, 0, 0, 1, 1)
         self.tabWidget.addTab(self.Locals, _fromUtf8(""))
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
 
         self.retranslateUi(TrickplayDebugger)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(TrickplayDebugger)
 
     def retranslateUi(self, TrickplayDebugger):

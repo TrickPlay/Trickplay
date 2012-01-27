@@ -94,9 +94,11 @@ def sendTrickplayDebugCommand(db_port, cmd, start=False):
     conn = httplib.HTTPConnection( s )
     
     try:
+        #print("sending "+cmd)
         conn.request("POST", "/debugger", cmd)
         response = conn.getresponse()
         data = response.read()
+        #print(" response "+data)
         conn.close()
         return data
 

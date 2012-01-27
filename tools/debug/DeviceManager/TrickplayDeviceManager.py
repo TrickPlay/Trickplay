@@ -45,7 +45,7 @@ class TrickplayDeviceManager(QWidget):
 
         self.debug_port = 9876
         self.console_port = 7777
-        #self.my_name = ""
+        self.my_name = ""
 
 
     def service_selected(self, index):
@@ -292,9 +292,6 @@ class TrickplayDeviceManager(QWidget):
     def printResp(self, data, command):
 
 		pdata = json.loads(data)
-		if command == 'q':
-			print pdata
-
 		file_name = pdata["file"] 
 		tp_id = pdata["id"] 
 		line_num = pdata["line"]
@@ -303,36 +300,54 @@ class TrickplayDeviceManager(QWidget):
 		self.file_name = str(file_name)
 
 		if "locals" in pdata:
-			local_vars = ""
+			#g(userdata) = Group (m:0xdd25a0,c:0xdd25a0,l:0x7fc82c0917d8)
+			name_var_list = []
+			type_var_list = []
+			value_var_list = []
+			local_vars_str = ""
+			local_vars = {}
 			for c in pdata["locals"]:
 				if c["name"] != "(*temporary)":
 					c_v = None
-					if local_vars != "":
-						local_vars = local_vars+"\n\t"
+					if local_vars_str != "":
+						local_vars_str = local_vars_str+"\n\t"
 
-					local_vars = local_vars+str(c["name"])+"("+str(c["type"])+")"
+					local_vars_str = local_vars_str+str(c["name"])+"("+str(c["type"])+")"
+					name_var_list.append(str(c["name"]))
+					type_var_list.append(str(c["type"]))
 					try:
 						c_v = c["value"]	
 					except KeyError: 
 						pass
 
 					if c_v:
-						local_vars = local_vars+" = "+str(c["value"])
+						local_vars_str = local_vars_str+" = "+str(c["value"])
+						value_var_list.append(str(c["value"]))
+					else:
+						value_var_list.append("")
 
-			print "\t"+local_vars
-			print "\t"+"Break at "+file_name+":"+str(line_num)
+			local_vars[1] = name_var_list
+			local_vars[2] = type_var_list
+			local_vars[3] = value_var_list
+
+			#print "\t"+local_vars_str
+			#print "\t"+"Break at "+file_name+":"+str(line_num)
+			return local_vars
 
 		elif "error" in pdata:
 			print "\t"+pdata["error"] 
 		
 		elif "stack" in pdata:
-			stack_info = ""
+			stack_info_str = ""
+			stack_info = {}
 			index = 0
 			for s in pdata["stack"]:
 				if "file" in s and "line" in s:
-					stack_info = stack_info+"["+str(index)+"] "+s["file"]+":"+str(s["line"])+"\n\t"
+					stack_info_str = stack_info_str+"["+str(index)+"] "+s["file"]+":"+str(s["line"])+"\n\t"
+					stack_info[index] = "["+str(index)+"] "+s["file"]+":"+str(s["line"])
 					index = index + 1
-			print "\t"+stack_info
+			#print "\t"+stack_info_str
+			return stack_info
 
 		elif "breakpoints" in pdata:
 			breakpoints_info = ""
