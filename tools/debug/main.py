@@ -306,6 +306,10 @@ class MainWindow(QMainWindow):
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, Editor.ARROW_MARKER_NUM)
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
+				# clean backtrace and debug window
+				self._backtrace.ui.listWidget.clear()
+				self._debug.clearLocalTable(0)
+				self._debug.ui.breakTable.clear()
 			else :
 				print('Run stop------------------')
 				ret = self.deviceManager.socket.write('/quit\n\n')
@@ -486,9 +490,24 @@ class MainWindow(QMainWindow):
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].markerDelete(
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
+				# clean backtrace and debug windows
+				self._backtrace.ui.listWidget.clear()
+				self._debug.clearLocalTable(0)
+				self._debug.ui.breakTable.clear()
+
 			else :
 				file_name = ""
+				# update local variables table
+				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "l", False)
+				local_info = self._deviceManager.printResp(data, "l")
+				self._debug.populateLocalTable(local_info)
 
+				# update backtrace table
+				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
+				stack_info = self._deviceManager.printResp(data, "bt")
+				self._backtrace.populateList(stack_info)
+
+				# open current file and put line marker on the current line's margin 
 				if self._deviceManager.file_name[:1] != '/' :
 					file_name = self.path+'/'+self._deviceManager.file_name
 				else :
@@ -498,9 +517,12 @@ class MainWindow(QMainWindow):
 					self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, self.current_debug_file)
 				else :
 					self.editorManager.newEditor(file_name, None, self._deviceManager.line_no)
+
 				self.current_debug_file = file_name
+
 		else :
-			print('oh no ! not in debug mode -----')
+			pass
+			#print('oh no ! not in debug mode -----')
 
 		return None
 
