@@ -95,6 +95,7 @@ INCLUDE_MODULE	+= expat
 INCLUDE_MODULE	+= fontconfig
 INCLUDE_MODULE	+= freetype
 INCLUDE_MODULE	+= gif
+INCLUDE_MODULE  += ffi
 INCLUDE_MODULE	+= gio-2.0
 INCLUDE_MODULE	+= glib-2.0
 INCLUDE_MODULE	+= gmodule-2.0
@@ -107,7 +108,7 @@ INCLUDE_MODULE	+= pango-1.0
 INCLUDE_MODULE	+= pangocairo-1.0
 INCLUDE_MODULE	+= pangoft2-1.0
 INCLUDE_MODULE	+= pixman-1
-INCLUDE_MODULE	+= png12
+INCLUDE_MODULE	+= png15
 INCLUDE_MODULE	+= sndfile
 INCLUDE_MODULE	+= soup-2.4
 INCLUDE_MODULE	+= sqlite3
@@ -159,7 +160,7 @@ LIBS			= $(addprefix -l, $(INCLUDE_MODULE))
 LDPATHS			= $(addprefix -L, $(LIB_PATHS))
 
 CFLAGS			= $(INCLUDES) $(DEFINES)
-CFLAGS			+= -Wall -Wstrict-prototypes -fPIC
+CFLAGS			+= -Wall -Wstrict-prototypes -fPIC -fexceptions
 CFLAGS			+= -D__ARM__ -D__LINUX_ARM_ARCH__=7 -march=armv7-a -msoft-float -funwind-tables
 ifeq ($(DEBUG_MODE), YES)
 CFLAGS			+= -O0 -g

@@ -3,7 +3,7 @@ TOOLCHAIN_ROOT=/opt/toolchains/arm-linux-androideabi-4.4.3
 
 ARCH="arm-eabi"
 GLES="2.0"
-#GLIB_ICONV="--with-libiconv=gnu"
+#GLIB_ICONV="--with-libiconv"
 GLIB_ICONV=""
 
 PREFIX=${PWD}/output

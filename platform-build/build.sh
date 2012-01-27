@@ -101,37 +101,47 @@ LIBBIND_URL="ftp://ftp.isc.org/isc/libbind/${LIBBIND_V}/libbind-${LIBBIND_V}.tar
 LIBBIND_COMMANDS="./configure --host=${HOST} --with-randomdev=/dev/random --prefix=$PREFIX && make CFLAGS='$CFLAGS -Iinclude' AR='$AR' ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
+# libffi
+
+LIBFFI_MV="3.0"
+LIBFFI_V="${LIBFFI_MV}.10"
+LIBFFI_URL="ftp://sourceware.org/pub/libffi/libffi-${LIBFFI_V}.tar.gz"
+LIBFFI_DIST="libffi-${LIBFFI_V}.tar.gz"
+LIBFFI_SOURCE="libffi-${LIBFFI_V}"
+LIBFFI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
 # glib
 
-GLIB_MV="2.26"
-GLIB_V="${GLIB_MV}.1"
-GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.gz"
-GLIB_DIST="glib-${GLIB_V}.tar.gz"
+GLIB_MV="2.30"
+GLIB_V="${GLIB_MV}.2"
+GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.xz"
+GLIB_DIST="glib-${GLIB_V}.tar.xz"
 GLIB_SOURCE="glib-${GLIB_V}"
-GLIB_COMMANDS="(./autogen.sh 2>/dev/null) ; cp ${THERE}/files/config.{sub,guess} . && PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=no ac_cv_func_posix_getgrgid_r=no ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -I${PREFIX}/include/bind\" && make ${NUM_MAKE_JOBS} install"
+GLIB_COMMANDS="(./autogen.sh 2>/dev/null) ; cp ${THERE}/files/config.{sub,guess} . && PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=no ac_cv_func_posix_getgrgid_r=no glib_cv_have_qsort_r=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -I${PREFIX}/include/bind\" && make ${NUM_MAKE_JOBS} install"
+GLIB_DEPENDS="LIBFFI"
 
 #------------------------------------------------------------------------------
 # We build glib for the host system first, so the cross compiled one can get
 # glib-genmarhsal and glib-compile-schemas without having to install a new glib
 # on the host system.
 
-GLIB_HOST_DIST="glib-${GLIB_V}.tar.gz"
+GLIB_HOST_DIST="glib-${GLIB_V}.tar.xz"
 GLIB_HOST_SOURCE="glib-${GLIB_V}"
 GLIB_HOST_COMMANDS="env -i PATH=$PATH ./configure --prefix=$PREFIX/host --disable-fam && make ${NUM_MAKE_JOBS} install && cd .. && rm -rf ./$GLIB_HOST_SOURCE"
-GLIB_DEPENDS="ICONV"
 
 #------------------------------------------------------------------------------
 # sqlite
 
-SQLITE_V="3.6.22"
-SQLITE_DIST="sqlite-amalgamation-${SQLITE_V}.tar.gz"
-SQLITE_SOURCE="sqlite-${SQLITE_V}"
+SQLITE_V="3071000"
+SQLITE_DIST="sqlite-autoconf-${SQLITE_V}.tar.gz"
+SQLITE_SOURCE="sqlite-autoconf-${SQLITE_V}"
 SQLITE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST  --build=$BUILD --with-pic $SHARED && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # openssl
 
-OPENSSL_V="0.9.8l"
+OPENSSL_V="1.0.0g"
 OPENSSL_URL="http://www.openssl.org/source/openssl-${OPENSSL_V}.tar.gz"
 OPENSSL_DIST="openssl-${OPENSSL_V}.tar.gz"
 OPENSSL_SOURCE="openssl-${OPENSSL_V}"
@@ -149,7 +159,7 @@ ZLIB_COMMANDS="./configure --prefix=$PREFIX ${ZLIB_SHARED} && make CC=\"$CC\" AR
 #------------------------------------------------------------------------------
 # cares
 
-CARES_V="1.7.0"
+CARES_V="1.7.5"
 CARES_URL="http://c-ares.haxx.se/c-ares-${CARES_V}.tar.gz"
 CARES_DIST="c-ares-${CARES_V}.tar.gz"
 CARES_SOURCE="c-ares-${CARES_V}"
@@ -158,16 +168,16 @@ CARES_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED
 #------------------------------------------------------------------------------
 # curl
 
-CURL_V="7.20.0"
-CURL_URL="http://curl.haxx.se/download/curl-${CURL_V}.tar.gz"
-CURL_DIST="curl-${CURL_V}.tar.gz"
+CURL_V="7.24.0"
+CURL_URL="http://curl.haxx.se/download/curl-${CURL_V}.tar.bz2"
+CURL_DIST="curl-${CURL_V}.tar.bz2"
 CURL_SOURCE="curl-${CURL_V}"
-CURL_COMMANDS="curl_cv_func_recvfrom_args='int,void *,size_t,unsigned int,struct sockaddr *,socklen_t *,ssize_t' ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-dependency-tracking --disable-ares --with-ssl --with-zlib --without-random --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-manual --disable-dict --enable-ipv6 && make ${NUM_MAKE_JOBS} install"
-CURL_DEPENDS="ZLIB OPENSSL"
+CURL_COMMANDS="curl_cv_func_recvfrom_args='int,void *,size_t,unsigned int,struct sockaddr *,socklen_t *,ssize_t' ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-ares --with-ssl --with-zlib --without-random --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-manual --disable-dict && make ${NUM_MAKE_JOBS} install"
+CURL_DEPENDS="CARES ZLIB OPENSSL"
 #------------------------------------------------------------------------------
 # bzip
 
-BZIP_V="1.0.5"
+BZIP_V="1.0.6"
 BZIP_URL="http://www.bzip.org/${BZIP_V}/bzip2-${BZIP_V}.tar.gz"
 BZIP_DIST="bzip2-${BZIP_V}.tar.gz"
 BZIP_SOURCE="bzip2-${BZIP_V}"
@@ -194,11 +204,11 @@ EXPAT_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED
 #------------------------------------------------------------------------------
 # freetype
 
-FREETYPE_V="2.3.12"
-FREETYPE_URL="http://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_V}.tar.gz"
-FREETYPE_DIST="freetype-${FREETYPE_V}.tar.gz"
+FREETYPE_V="2.4.8"
+FREETYPE_URL="http://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_V}.tar.bz2"
+FREETYPE_DIST="freetype-${FREETYPE_V}.tar.bz2"
 FREETYPE_SOURCE="freetype-${FREETYPE_V}"
-FREETYPE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
+FREETYPE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # fontconfig
@@ -212,18 +222,18 @@ FONTCONFIG_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD -
 #------------------------------------------------------------------------------
 # pixman
 
-PIXMAN_V="0.21.2"
+PIXMAN_V="0.24.2"
 PIXMAN_URL="http://cgit.freedesktop.org/pixman/snapshot/pixman-${PIXMAN_V}.tar.gz"
 PIXMAN_DIST="pixman-${PIXMAN_V}.tar.gz"
 PIXMAN_SOURCE="pixman-${PIXMAN_V}"
-PIXMAN_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-gtk && make ${NUM_MAKE_JOBS} install"
+PIXMAN_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-gtk && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # png
 
-PNG_V="1.2.42"
-PNG_URL="http://sourceforge.net/projects/libpng/files/00-libpng-stable/${PNG_V}/libpng-${PNG_V}.tar.gz/download"
-PNG_DIST="libpng-${PNG_V}.tar.gz"
+PNG_V="1.5.7"
+PNG_URL="http://download.sourceforge.net/libpng/libpng-${PNG_V}.tar.xz"
+PNG_DIST="libpng-${PNG_V}.tar.xz"
 PNG_SOURCE="libpng-${PNG_V}"
 PNG_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
@@ -240,17 +250,17 @@ CAIRO_DEPENDS="PIXMAN PNG"
 #------------------------------------------------------------------------------
 # pango
 
-PANGO_MV="1.26"
-PANGO_V="${PANGO_MV}.2"
-PANGO_URL="http://ftp.gnome.org/pub/GNOME/sources/pango/${PANGO_MV}/pango-${PANGO_V}.tar.gz"
-PANGO_DIST="pango-${PANGO_V}.tar.gz"
+PANGO_MV="1.28"
+PANGO_V="${PANGO_MV}.4"
+PANGO_URL="http://ftp.gnome.org/pub/GNOME/sources/pango/${PANGO_MV}/pango-${PANGO_V}.tar.bz2"
+PANGO_DIST="pango-${PANGO_V}.tar.bz2"
 PANGO_SOURCE="pango-${PANGO_V}"
 PANGO_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --without-x $SHARED --with-pic --with-included-modules=yes && make ${NUM_MAKE_JOBS} install"
 PANGO_DEPENDS="CAIRO FREETYPE FONTCONFIG"
 #------------------------------------------------------------------------------
 # jpeg
 
-JPEG_V="8b"
+JPEG_V="8d"
 JPEG_URL="http://www.ijg.org/files/jpegsrc.v${JPEG_V}.tar.gz"
 JPEG_DIST="jpegsrc.v${JPEG_V}.tar.gz"
 JPEG_SOURCE="jpeg-${JPEG_V}"
@@ -259,7 +269,7 @@ JPEG_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED 
 #------------------------------------------------------------------------------
 # tiff
 
-TIFF_V="3.9.4"
+TIFF_V="4.0.0"
 TIFF_URL="ftp://ftp.remotesensing.org/pub/libtiff/tiff-${TIFF_V}.tar.gz"
 TIFF_DIST="tiff-${TIFF_V}.tar.gz"
 TIFF_SOURCE="tiff-${TIFF_V}"
@@ -278,9 +288,9 @@ GIF_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED -
 # json
 
 JSON_MV="0.12"
-JSON_V="${JSON_MV}.2"
-JSON_URL="http://ftp.gnome.org/pub/GNOME/sources/json-glib/${JSON_MV}/json-glib-${JSON_V}.tar.gz"
-JSON_DIST="json-glib-${JSON_V}.tar.gz"
+JSON_V="${JSON_MV}.6"
+JSON_URL="http://ftp.gnome.org/pub/GNOME/sources/json-glib/${JSON_MV}/json-glib-${JSON_V}.tar.xz"
+JSON_DIST="json-glib-${JSON_V}.tar.xz"
 JSON_SOURCE="json-glib-${JSON_V}"
 JSON_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-glibtest && make ${NUM_MAKE_JOBS} install"
 JSON_DEPENDS="GLIB"
@@ -288,10 +298,10 @@ JSON_DEPENDS="GLIB"
 #------------------------------------------------------------------------------
 # ATK
 
-ATK_MV="1.32"
+ATK_MV="2.2"
 ATK_V="${ATK_MV}.0"
-ATK_URL="http://ftp.gnome.org/pub/gnome/sources/atk/${ATK_MV}/atk-${ATK_V}.tar.gz"
-ATK_DIST="atk-${ATK_V}.tar.gz"
+ATK_URL="http://ftp.gnome.org/pub/gnome/sources/atk/${ATK_MV}/atk-${ATK_V}.tar.xz"
+ATK_DIST="atk-${ATK_V}.tar.xz"
 ATK_SOURCE="atk-${ATK_V}"
 ATK_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
@@ -315,31 +325,31 @@ CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clu
 CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
 CLUTTER_PROFILING=""
-if [[ $PROFILING != "0" ]]
+if [[ $PROFILING != "0" ]] 
 then
     CLUTTER_PROFILING="--enable-profile=yes"
 fi
 
 #Override Clutter CFLAGS so that it is not built optimized
 
-CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
-#CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.so $PREFIX/lib"
+CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
+#CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.so $PREFIX/lib" 
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
 #------------------------------------------------------------------------------
 # avahi
 
-AVAHI_V="0.6.25"
+AVAHI_V="0.6.30"
 AVAHI_URL="http://avahi.org/download/avahi-${AVAHI_V}.tar.gz"
 AVAHI_DIST="avahi-${AVAHI_V}.tar.gz"
 AVAHI_SOURCE="avahi-${AVAHI_V}"
-AVAHI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-qt3 --disable-qt4 --disable-gtk --disable-dbus --disable-gdbm --disable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-xml --with-distro=none --disable-nls --disable-stack-protector $SHARED && make ${NUM_MAKE_JOBS} install"
+AVAHI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-qt3 --disable-qt4 --disable-gtk --disable-gtk3 --disable-dbus --disable-gdbm --disable-libdaemon --disable-python --disable-pygtk --disable-python-dbus --disable-mono --disable-monodoc --disable-autoipd --disable-doxygen-doc --disable-doxygen-dot --disable-doxygen-xml --with-distro=none --disable-nls --disable-stack-protector $SHARED && make ${NUM_MAKE_JOBS} install"
 AVAHI_DEPENDS="GLIB"
 
 #------------------------------------------------------------------------------
 # upnp
 
-UPNP_V="1.6.6"
+UPNP_V="1.6.15"
 UPNP_DIST="libupnp-${UPNP_V}.tar.bz2"
 UPNP_SOURCE="libupnp-${UPNP_V}"
 UPNP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
@@ -347,8 +357,8 @@ UPNP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED 
 #------------------------------------------------------------------------------
 # uriparser
 
-URI_V="0.7.5"
-URI_DIST="uriparser-${URI_V}.tar.gz"
+URI_V="0.7.6"
+URI_DIST="uriparser-${URI_V}.tar.bz2"
 URI_SOURCE="uriparser-${URI_V}"
 URI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-test --disable-doc && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
@@ -363,7 +373,7 @@ UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./co
 #------------------------------------------------------------------------------
 # libsndfile
 
-SNDFILE_V="1.0.23"
+SNDFILE_V="1.0.25"
 SNDFILE_DIST="libsndfile-${SNDFILE_V}.tar.gz"
 SNDFILE_SOURCE="libsndfile-${SNDFILE_V}"
 SNDFILE_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --disable-cpu-clip  --disable-sqlite --disable-alsa --disable-external-libs --with-pic && make && make ${NUM_MAKE_JOBS} install"
@@ -380,10 +390,10 @@ XML_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED -
 #------------------------------------------------------------------------------
 # libsoup
 
-SOUP_V="2.32.2"
-SOUP_DIST="libsoup-${SOUP_V}.tar.gz"
+SOUP_V="2.36.1"
+SOUP_DIST="libsoup-${SOUP_V}.tar.xz"
 SOUP_SOURCE="libsoup-${SOUP_V}"
-SOUP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --without-gnome --disable-ssl --disable-glibtest && make && make ${NUM_MAKE_JOBS} install"
+SOUP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --without-gnome --disable-glibtest --disable-gtk-doc-html && make && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # libexif
@@ -395,7 +405,7 @@ EXIF_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED 
 
 #------------------------------------------------------------------------------
 
-ALL="ZLIB EXPAT XML EXIF ICONV GET_TEXT LIBBIND GLIB SQLITE OPENSSL CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
+ALL="ZLIB EXPAT XML EXIF LIBFFI ICONV GET_TEXT LIBBIND GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 
 #-----------------------------------------------------------------------------
 
@@ -520,6 +530,9 @@ for THIS in ${ALL}; do
             if [[ "${!THIS_DIST:0-3}" == "bz2" ]]
             then
                 tar jxf "${SOURCE}/${!THIS_DIST}"
+            elif [[ "${!THIS_DIST:0-2}" == "xz" ]]
+            then
+                tar Jxf "${SOURCE}/${!THIS_DIST}"
             else
                 tar zxf "${SOURCE}/${!THIS_DIST}"
             fi
@@ -652,7 +665,7 @@ then
 	    -lpangoft2-1.0 \
 	    -lcairo \
 	    -lpixman-1 \
-	    -lpng12 \
+	    -lpng15 \
 	    -lpng \
 	    -ltiff \
 	    -ltiffxx \
@@ -668,6 +681,7 @@ then
 	    -lssl \
 	    -lcrypto \
 	    -lsqlite3 \
+	    -lffi \
 	    -lgio-2.0 \
 	    -lgmodule-2.0 \
 	    -lgobject-2.0 \
