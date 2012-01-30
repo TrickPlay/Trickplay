@@ -195,15 +195,31 @@ imgs = {
 		unknown        = "assets/icons/icon-unknown.png",
 	}
 }
+
+local clone_sources_group = Group{name="clone sources"}
+screen:add(clone_sources_group)
+clone_sources_group:hide()
+local recursive_table_traverse
+recursive_table_traverse = function(t)
+	for k,v in pairs(t) do
+		if type(v) == "table" then
+			recursive_table_traverse(v)
+		elseif type(v) == "string" then
+			t[k] = Image{ name=v,  src=v }
+			clone_sources_group:add(t[k])
+		else
+			error("Invalid entry")
+		end
+	end
+end
+recursive_table_traverse(imgs)
+
 imgs.icons.partlysunny = imgs.icons.mostlycloudy
 imgs.icons.mostlysunny = imgs.icons.partlycloudy
 imgs.icons.clear       = imgs.icons.sunny
-
-local clone_sources_group = Group{name="clone sources"}
+--[==[
 local clone_sources_table = {}
 
-screen:add(clone_sources_group)
-clone_sources_group:hide()
 
 --save the function pointer to the old Clone constructor
 local TP_Clone = Clone
@@ -269,11 +285,12 @@ Clone = function(t)
 	return t
 end
 
-
+--]==]
 
 
 ENUM = function(array_of_states)
     
+	assert(array_of_states~=nil)
     assert(type(array_of_states) == "table")
     assert(#array_of_states > 1)
     
@@ -311,25 +328,25 @@ ENUM = function(array_of_states)
     end
     
     enum.add_state_change_function = function(self, new_function, old_state, new_state)
-	assert(type(new_function)=="function", "You attempted to add an element of type \""..type(new_function).."\". This function only accepts other functions")
-	if old_state ~= nil then assert(states[old_state] ~= nil, tostring(old_state).." is not a State") end
-	if new_state ~= nil then assert(states[new_state] ~= nil, tostring(new_state).." is not a State") end
-	if old_state == nil then
-        for _,old_state in pairs(states) do
-            if new_state == nil then
-                for _,new_state in pairs(states) do
-                    if old_state ~= new_state then 
-                        table.insert(state_change_functions[old_state][new_state],new_function)
-                    end
-                end
-            else
-                if old_state ~= new_state then 
-                    table.insert(state_change_functions[old_state][new_state],new_function)
-                end
-            end
-        end
-	else
-	    if new_state == nil then
+		assert(type(new_function)=="function", "You attempted to add an element of type \""..type(new_function).."\". This function only accepts other functions")
+		if old_state ~= nil then assert(states[old_state] ~= nil, tostring(old_state).." is not a State") end
+		if new_state ~= nil then assert(states[new_state] ~= nil, tostring(new_state).." is not a State") end
+		if old_state == nil then
+			for _,old_state in pairs(states) do
+				if new_state == nil then
+					for _,new_state in pairs(states) do
+						if old_state ~= new_state then 
+							table.insert(state_change_functions[old_state][new_state],new_function)
+						end
+					end
+				else
+					if old_state ~= new_state then 
+						table.insert(state_change_functions[old_state][new_state],new_function)
+					end
+				end
+			end
+		else
+			if new_state == nil then
                 for _,new_state in pairs(states) do
                     if old_state ~= new_state then 
                         table.insert(state_change_functions[old_state][new_state],new_function)
@@ -346,23 +363,23 @@ ENUM = function(array_of_states)
     end
 
     enum.change_state_to = function(self, new_state)
-	
+		
         if current_state == new_state then
-	    
-            print("warning changing state to current state")
+			
+            print("warning changing state to current state: ", new_state)
             
 	    return
             
 	end
-	
+		
         assert(states[new_state] ~= nil, tostring(new_state).." is not a State")
         
 	for i,func in ipairs(state_change_functions[current_state][new_state]) do
-	    
+			
             func(current_state,new_state)
             
 	end
-	
+		
         current_state = new_state
         
     end
