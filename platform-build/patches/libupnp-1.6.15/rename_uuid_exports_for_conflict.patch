@@ -1,0 +1,124 @@
+Index: libupnp-1.6.15/upnp/src/uuid/uuid.c
+===================================================================
+--- libupnp-1.6.15.orig/upnp/src/uuid/uuid.c	2012-01-30 12:26:28.523785932 -0800
++++ libupnp-1.6.15/upnp/src/uuid/uuid.c	2012-01-30 12:26:31.851786015 -0800
+@@ -50,7 +50,7 @@
+ /*!
+  * \brief Generator of a UUID.
+  */
+-int uuid_create(uuid_upnp * uid)
++int uuid_create_upnp(uuid_upnp * uid)
+ {
+ 	uuid_time_t timestamp;
+ 	uuid_time_t last_time;
+@@ -82,7 +82,7 @@
+ 	return 1;
+ };
+ 
+-void uuid_unpack(uuid_upnp * u, char *out)
++void uuid_unpack_upnp(uuid_upnp * u, char *out)
+ {
+ 	sprintf(out,
+ 		"%8.8x-%4.4x-%4.4x-%2.2x%2.2x-%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x",
+@@ -221,7 +221,7 @@
+ /*!
+  * \brief Create a UUID using a "name" from a "name space".
+  */
+-void uuid_create_from_name(
++void uuid_create_from_name_upnp(
+ 	/*! resulting UUID. */
+ 	uuid_upnp *uid,
+ 	/*! UUID to serve as context, so identical names from different name
+@@ -280,7 +280,7 @@
+  *
+  * Note: Lexical ordering is not temporal ordering!
+  */
+-int uuid_compare(uuid_upnp *u1, uuid_upnp *u2)
++int uuid_compare_upnp(uuid_upnp *u1, uuid_upnp *u2)
+ {
+ 	int i;
+ 
+Index: libupnp-1.6.15/upnp/src/inc/uuid.h
+===================================================================
+--- libupnp-1.6.15.orig/upnp/src/inc/uuid.h	2012-01-30 12:26:28.535786057 -0800
++++ libupnp-1.6.15/upnp/src/inc/uuid.h	2012-01-30 12:26:31.851786015 -0800
+@@ -41,14 +41,14 @@
+ /*!
+  * \brief Generate a UUID.
+  */
+-int uuid_create(
++int uuid_create_upnp(
+ 	/*! . */
+ 	uuid_upnp * id);
+ 
+ /*!
+  * \brief Out will be xxxx-xx-xx-xx-xxxxxx format.
+  */
+-void uuid_unpack(
++void uuid_unpack_upnp(
+ 	/*! . */
+ 	uuid_upnp * u,
+ 	/*! . */
+@@ -57,7 +57,7 @@
+ /*!
+  * \brief Create a UUID using a "name" from a "name space"
+  */
+-void uuid_create_from_name(
++void uuid_create_from_name_upnp(
+ 	/*! Resulting UUID. */
+ 	uuid_upnp * uid,
+ 	/*! UUID to serve as context, so identical names from different name
+@@ -78,7 +78,7 @@
+  *
+  * \note Lexical ordering is not temporal ordering!
+  */
+-int uuid_compare(
++int uuid_compare_upnp(
+ 	/*! . */
+ 	uuid_upnp * u1,
+ 	/*! . */
+Index: libupnp-1.6.15/upnp/src/api/upnpapi.c
+===================================================================
+--- libupnp-1.6.15.orig/upnp/src/api/upnpapi.c	2012-01-30 12:28:05.823786036 -0800
++++ libupnp-1.6.15/upnp/src/api/upnpapi.c	2012-01-30 12:28:13.831785032 -0800
+@@ -336,8 +336,8 @@
+ 	}
+ 
+ 	/* Create the NLS uuid. */
+-	uuid_create(&nls_uuid);
+-	uuid_unpack(&nls_uuid, gUpnpSdkNLSuuid);
++	uuid_create_upnp(&nls_uuid);
++	uuid_unpack_upnp(&nls_uuid, gUpnpSdkNLSuuid);
+ 
+ 	/* Initializes the handle list. */
+ 	HandleLock();
+Index: libupnp-1.6.15/upnp/src/gena/gena_ctrlpt.c
+===================================================================
+--- libupnp-1.6.15.orig/upnp/src/gena/gena_ctrlpt.c	2012-01-30 12:27:48.079786054 -0800
++++ libupnp-1.6.15/upnp/src/gena/gena_ctrlpt.c	2012-01-30 12:27:55.887785896 -0800
+@@ -543,8 +543,8 @@
+ 	}
+ 
+ 	/* generate client SID */
+-	uuid_create(&uid );
+-	uuid_unpack(&uid, temp_sid);
++	uuid_create_upnp(&uid );
++	uuid_unpack_upnp(&uid, temp_sid);
+ 	sprintf(temp_sid2, "uuid:%s", temp_sid);
+ 	UpnpString_set_String(out_sid, temp_sid2);
+ 
+Index: libupnp-1.6.15/upnp/src/gena/gena_device.c
+===================================================================
+--- libupnp-1.6.15.orig/upnp/src/gena/gena_device.c	2012-01-30 12:27:25.935785981 -0800
++++ libupnp-1.6.15/upnp/src/gena/gena_device.c	2012-01-30 12:27:40.911785562 -0800
+@@ -1312,8 +1312,8 @@
+ 	}
+ 
+ 	/* generate SID */
+-	uuid_create(&uid);
+-	uuid_unpack(&uid, temp_sid);
++	uuid_create_upnp(&uid);
++	uuid_unpack_upnp(&uid, temp_sid);
+ 	sprintf(sub->sid, "uuid:%s", temp_sid);
+ 
+ 	/* respond OK */

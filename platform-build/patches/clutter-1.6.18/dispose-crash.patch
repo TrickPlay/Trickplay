@@ -1,0 +1,13 @@
+Index: clutter-1.6.18/clutter/egl/clutter-backend-egl.c
+===================================================================
+--- clutter-1.6.18.orig/clutter/egl/clutter-backend-egl.c	2012-01-26 16:22:35.030919968 -0800
++++ clutter-1.6.18/clutter/egl/clutter-backend-egl.c	2012-01-26 16:22:37.114919995 -0800
+@@ -589,6 +589,8 @@
+ 
+ #else /* COGL_HAS_XLIB_SUPPORT */
+ 
++  return;
++  
+   if (backend_egl->egl_surface != EGL_NO_SURFACE)
+     {
+       eglDestroySurface (backend_egl->edpy, backend_egl->egl_surface);

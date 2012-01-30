@@ -1,0 +1,984 @@
+Index: clutter-1.6.4/clutter/cogl/cogl/cogl-matrix.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/cogl/cogl/cogl-matrix.h	2012-01-30 12:05:23.815786023 -0800
++++ clutter-1.6.4/clutter/cogl/cogl/cogl-matrix.h	2012-01-30 12:11:31.039786025 -0800
+@@ -277,7 +277,7 @@
+  *
+  * Return value: a pointer to the float array
+  */
+-G_CONST_RETURN float *
++const float *
+ cogl_matrix_get_array (const CoglMatrix *matrix);
+ 
+ /**
+Index: clutter-1.6.4/clutter/cally/cally-actor.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/cally/cally-actor.c	2012-01-30 12:10:58.387786026 -0800
++++ clutter-1.6.4/clutter/cally/cally-actor.c	2012-01-30 12:11:31.019786026 -0800
+@@ -148,7 +148,7 @@
+ static AtkObject*            cally_actor_get_parent          (AtkObject *obj);
+ static gint                  cally_actor_get_index_in_parent (AtkObject *obj);
+ static AtkStateSet*          cally_actor_ref_state_set       (AtkObject *obj);
+-static G_CONST_RETURN gchar* cally_actor_get_name            (AtkObject *obj);
++static const gchar* cally_actor_get_name            (AtkObject *obj);
+ static gint                  cally_actor_get_n_children      (AtkObject *obj);
+ static AtkObject*            cally_actor_ref_child           (AtkObject *obj,
+                                                              gint       i);
+@@ -195,11 +195,11 @@
+                                                                 gint       i);
+ static gboolean              idle_do_action                    (gpointer data);
+ static gint                  cally_actor_action_get_n_actions   (AtkAction *action);
+-static G_CONST_RETURN gchar* cally_actor_action_get_description (AtkAction *action,
++static const gchar* cally_actor_action_get_description (AtkAction *action,
+                                                                 gint       i);
+-static G_CONST_RETURN gchar* cally_actor_action_get_keybinding  (AtkAction *action,
++static const gchar* cally_actor_action_get_keybinding  (AtkAction *action,
+                                                                 gint       i);
+-static G_CONST_RETURN gchar* cally_actor_action_get_name        (AtkAction *action,
++static const gchar* cally_actor_action_get_name        (AtkAction *action,
+                                                                 gint       i);
+ static gboolean              cally_actor_action_set_description (AtkAction   *action,
+                                                                 gint         i,
+@@ -420,10 +420,10 @@
+ 
+ /* AtkObject */
+ 
+-static G_CONST_RETURN gchar*
++static const gchar*
+ cally_actor_get_name (AtkObject *obj)
+ {
+-  G_CONST_RETURN gchar* name = NULL;
++  const gchar* name = NULL;
+ 
+   g_return_val_if_fail (CALLY_IS_ACTOR (obj), NULL);
+ 
+@@ -1063,7 +1063,7 @@
+   return g_list_length (priv->action_list);
+ }
+ 
+-static G_CONST_RETURN gchar*
++static const gchar*
+ cally_actor_action_get_name (AtkAction *action,
+                             gint       i)
+ {
+@@ -1080,7 +1080,7 @@
+   return info->name;
+ }
+ 
+-static G_CONST_RETURN gchar*
++static const gchar*
+ cally_actor_action_get_description (AtkAction *action,
+                                    gint       i)
+ {
+@@ -1118,7 +1118,7 @@
+   return TRUE;
+ }
+ 
+-static G_CONST_RETURN gchar*
++static const gchar*
+ cally_actor_action_get_keybinding (AtkAction *action,
+                                   gint       i)
+ {
+Index: clutter-1.6.4/clutter/cally/cally-clone.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/cally/cally-clone.c	2012-01-30 12:10:58.415786026 -0800
++++ clutter-1.6.4/clutter/cally/cally-clone.c	2012-01-30 12:11:31.023786026 -0800
+@@ -81,7 +81,7 @@
+ /* AtkObject */
+ static void                  cally_clone_real_initialize (AtkObject *obj,
+                                                            gpointer   data);
+-static G_CONST_RETURN gchar *cally_clone_get_description (AtkObject *obj);
++static const gchar *cally_clone_get_description (AtkObject *obj);
+ 
+ 
+ G_DEFINE_TYPE (CallyClone, cally_clone, CALLY_TYPE_ACTOR)
+@@ -138,10 +138,10 @@
+   obj->role = ATK_ROLE_IMAGE;
+ }
+ 
+-static G_CONST_RETURN gchar *
++static const gchar *
+ cally_clone_get_description (AtkObject *obj)
+ {
+-  G_CONST_RETURN gchar *description = NULL;
++  const gchar *description = NULL;
+ 
+   g_return_val_if_fail (CALLY_IS_CLONE (obj), NULL);
+ 
+Index: clutter-1.6.4/clutter/cally/cally-rectangle.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/cally/cally-rectangle.c	2012-01-30 12:10:58.351786026 -0800
++++ clutter-1.6.4/clutter/cally/cally-rectangle.c	2012-01-30 12:11:31.015786026 -0800
+@@ -41,7 +41,7 @@
+ /* AtkObject */
+ static void                  cally_rectangle_real_initialize (AtkObject *obj,
+                                                              gpointer   data);
+-static G_CONST_RETURN gchar *cally_rectangle_get_description (AtkObject *obj);
++static const gchar *cally_rectangle_get_description (AtkObject *obj);
+ 
+ 
+ G_DEFINE_TYPE (CallyRectangle, cally_rectangle, CALLY_TYPE_ACTOR)
+@@ -98,10 +98,10 @@
+   obj->role = ATK_ROLE_IMAGE;
+ }
+ 
+-static G_CONST_RETURN gchar *
++static const gchar *
+ cally_rectangle_get_description                    (AtkObject *obj)
+ {
+-  G_CONST_RETURN gchar *description = NULL;
++  const gchar *description = NULL;
+ 
+   g_return_val_if_fail (CALLY_IS_RECTANGLE (obj), NULL);
+ 
+Index: clutter-1.6.4/clutter/cally/cally-stage.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/cally/cally-stage.c	2012-01-30 12:10:58.375786025 -0800
++++ clutter-1.6.4/clutter/cally/cally-stage.c	2012-01-30 12:11:31.015786026 -0800
+@@ -52,8 +52,8 @@
+ static void cally_stage_init       (CallyStage      *stage);
+ 
+ /* AtkObject.h */
+-static G_CONST_RETURN gchar *cally_stage_get_name        (AtkObject *obj);
+-static G_CONST_RETURN gchar *cally_stage_get_description (AtkObject *obj);
++static const gchar *cally_stage_get_name        (AtkObject *obj);
++static const gchar *cally_stage_get_description (AtkObject *obj);
+ static void                  cally_stage_real_initialize (AtkObject *obj,
+                                                           gpointer   data);
+ static AtkStateSet*          cally_stage_ref_state_set   (AtkObject *obj);
+@@ -214,10 +214,10 @@
+ }
+ 
+ /* AtkObject.h */
+-static G_CONST_RETURN gchar *
++static const gchar *
+ cally_stage_get_name (AtkObject *obj)
+ {
+-  G_CONST_RETURN gchar *name = NULL;
++  const gchar *name = NULL;
+ 
+   g_return_val_if_fail (CALLY_IS_STAGE (obj), NULL);
+ 
+@@ -230,10 +230,10 @@
+   return name;
+ }
+ 
+-static G_CONST_RETURN gchar *
++static const gchar *
+ cally_stage_get_description (AtkObject *obj)
+ {
+-  G_CONST_RETURN gchar *description = NULL;
++  const gchar *description = NULL;
+ 
+   g_return_val_if_fail (CALLY_IS_STAGE (obj), NULL);
+ 
+Index: clutter-1.6.4/clutter/cally/cally-text.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/cally/cally-text.c	2012-01-30 12:10:58.403786025 -0800
++++ clutter-1.6.4/clutter/cally/cally-text.c	2012-01-30 12:11:31.023786026 -0800
+@@ -80,7 +80,7 @@
+ /* AtkObject */
+ static void                   cally_text_real_initialize (AtkObject *obj,
+                                                           gpointer   data);
+-static G_CONST_RETURN gchar * cally_text_get_name        (AtkObject *obj);
++static const gchar * cally_text_get_name        (AtkObject *obj);
+ static AtkStateSet*           cally_text_ref_state_set   (AtkObject *obj);
+ 
+ /* atkaction */
+@@ -327,10 +327,10 @@
+   obj->role = ATK_ROLE_TEXT;
+ }
+ 
+-static G_CONST_RETURN gchar *
++static const gchar *
+ cally_text_get_name (AtkObject *obj)
+ {
+-  G_CONST_RETURN gchar *name;
++  const gchar *name;
+ 
+   g_return_val_if_fail (CALLY_IS_ACTOR (obj), NULL);
+ 
+Index: clutter-1.6.4/clutter/cally/cally-texture.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/cally/cally-texture.c	2012-01-30 12:10:58.427786024 -0800
++++ clutter-1.6.4/clutter/cally/cally-texture.c	2012-01-30 12:11:31.023786026 -0800
+@@ -42,7 +42,7 @@
+ /* AtkObject */
+ static void                  cally_texture_real_initialize (AtkObject *obj,
+                                                            gpointer   data);
+-static G_CONST_RETURN gchar *cally_texture_get_description (AtkObject *obj);
++static const gchar *cally_texture_get_description (AtkObject *obj);
+ 
+ 
+ G_DEFINE_TYPE (CallyTexture, cally_texture, CALLY_TYPE_ACTOR)
+@@ -100,10 +100,10 @@
+   obj->role = ATK_ROLE_IMAGE;
+ }
+ 
+-static G_CONST_RETURN gchar *
++static const gchar *
+ cally_texture_get_description (AtkObject *obj)
+ {
+-  G_CONST_RETURN gchar *description = NULL;
++  const gchar *description = NULL;
+ 
+   g_return_val_if_fail (CALLY_IS_TEXTURE (obj), NULL);
+ 
+Index: clutter-1.6.4/clutter/cally/cally-util.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/cally/cally-util.c	2012-01-30 12:10:58.363786025 -0800
++++ clutter-1.6.4/clutter/cally/cally-util.c	2012-01-30 12:11:31.015786026 -0800
+@@ -62,8 +62,8 @@
+                                                                      gpointer        data);
+ static void                  cally_util_remove_key_event_listener    (guint remove_listener);
+ static AtkObject*            cally_util_get_root			    (void);
+-static G_CONST_RETURN gchar *cally_util_get_toolkit_name		    (void);
+-static G_CONST_RETURN gchar *cally_util_get_toolkit_version          (void);
++static const gchar *cally_util_get_toolkit_name		    (void);
++static const gchar *cally_util_get_toolkit_version          (void);
+ 
+ /* private */
+ static void		     _listener_info_destroy                  (gpointer data);
+@@ -162,13 +162,13 @@
+   return root;
+ }
+ 
+-static G_CONST_RETURN gchar *
++static const gchar *
+ cally_util_get_toolkit_name (void)
+ {
+   return "CALLY";
+ }
+ 
+-static G_CONST_RETURN gchar *
++static const gchar *
+ cally_util_get_toolkit_version (void)
+ {
+   /*
+Index: clutter-1.6.4/clutter/clutter-actor.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-actor.c	2012-01-30 12:10:58.203786024 -0800
++++ clutter-1.6.4/clutter/clutter-actor.c	2012-01-30 12:11:30.995786026 -0800
+@@ -677,7 +677,7 @@
+                                   G_IMPLEMENT_INTERFACE (ATK_TYPE_IMPLEMENTOR,
+                                                          atk_implementor_iface_init));
+ 
+-G_CONST_RETURN gchar *
++const gchar *
+ _clutter_actor_get_debug_name (ClutterActor *actor)
+ {
+   return actor->priv->name != NULL ? actor->priv->name
+@@ -7156,7 +7156,7 @@
+  * Return value: the name of the actor, or %NULL. The returned string is
+  *   owned by the actor and should not be modified or freed.
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_actor_get_name (ClutterActor *self)
+ {
+   g_return_val_if_fail (CLUTTER_IS_ACTOR (self), NULL);
+Index: clutter-1.6.4/clutter/clutter-actor.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-actor.h	2012-01-30 12:10:58.551786026 -0800
++++ clutter-1.6.4/clutter/clutter-actor.h	2012-01-30 12:11:31.047786026 -0800
+@@ -426,7 +426,7 @@
+ 
+ void                  clutter_actor_set_name                  (ClutterActor          *self,
+                                                                const gchar           *name);
+-G_CONST_RETURN gchar *clutter_actor_get_name                  (ClutterActor          *self);
++const gchar *clutter_actor_get_name                  (ClutterActor          *self);
+ 
+ guint32               clutter_actor_get_gid                   (ClutterActor          *self);
+ void                  clutter_actor_set_clip                  (ClutterActor          *self,
+Index: clutter-1.6.4/clutter/clutter-actor-meta.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-actor-meta.c	2012-01-30 12:10:58.219786026 -0800
++++ clutter-1.6.4/clutter/clutter-actor-meta.c	2012-01-30 12:11:30.999786025 -0800
+@@ -278,7 +278,7 @@
+  *
+  * Since: 1.4
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_actor_meta_get_name (ClutterActorMeta *meta)
+ {
+   g_return_val_if_fail (CLUTTER_IS_ACTOR_META (meta), NULL);
+@@ -467,7 +467,7 @@
+  *
+  * Return value: a const pointer to the #GList of #ClutterActorMeta
+  */
+-G_CONST_RETURN GList *
++const GList *
+ _clutter_meta_group_peek_metas (ClutterMetaGroup *group)
+ {
+   return group->meta;
+Index: clutter-1.6.4/clutter/clutter-actor-meta.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-actor-meta.h	2012-01-30 12:06:35.895786005 -0800
++++ clutter-1.6.4/clutter/clutter-actor-meta.h	2012-01-30 12:11:31.047786026 -0800
+@@ -92,7 +92,7 @@
+ 
+ void                  clutter_actor_meta_set_name    (ClutterActorMeta *meta,
+                                                       const gchar      *name);
+-G_CONST_RETURN gchar *clutter_actor_meta_get_name    (ClutterActorMeta *meta);
++const gchar *clutter_actor_meta_get_name    (ClutterActorMeta *meta);
+ void                  clutter_actor_meta_set_enabled (ClutterActorMeta *meta,
+                                                       gboolean          is_enabled);
+ gboolean              clutter_actor_meta_get_enabled (ClutterActorMeta *meta);
+Index: clutter-1.6.4/clutter/clutter-actor-meta-private.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-actor-meta-private.h	2012-01-30 12:10:58.763786024 -0800
++++ clutter-1.6.4/clutter/clutter-actor-meta-private.h	2012-01-30 12:11:31.071786026 -0800
+@@ -56,7 +56,7 @@
+                                                        ClutterActorMeta *meta);
+ void                  _clutter_meta_group_remove_meta (ClutterMetaGroup *group,
+                                                        ClutterActorMeta *meta);
+-G_CONST_RETURN GList *_clutter_meta_group_peek_metas  (ClutterMetaGroup *group);
++const GList *_clutter_meta_group_peek_metas  (ClutterMetaGroup *group);
+ void                  _clutter_meta_group_clear_metas (ClutterMetaGroup *group);
+ ClutterActorMeta *    _clutter_meta_group_get_meta    (ClutterMetaGroup *group,
+                                                        const gchar      *name);
+Index: clutter-1.6.4/clutter/clutter-actor-private.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-actor-private.h	2012-01-30 12:10:58.603786026 -0800
++++ clutter-1.6.4/clutter/clutter-actor-private.h	2012-01-30 12:11:31.051786026 -0800
+@@ -156,7 +156,7 @@
+                                                             GType         check_gtype,
+                                                             ClutterPaintVolume *volume);
+ 
+-G_CONST_RETURN gchar *_clutter_actor_get_debug_name (ClutterActor *self);
++const gchar *_clutter_actor_get_debug_name (ClutterActor *self);
+ 
+ void _clutter_actor_push_clone_paint (void);
+ void _clutter_actor_pop_clone_paint  (void);
+Index: clutter-1.6.4/clutter/clutter-animator.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-animator.c	2012-01-30 12:10:58.455786024 -0800
++++ clutter-1.6.4/clutter/clutter-animator.c	2012-01-30 12:11:31.031786024 -0800
+@@ -2020,7 +2020,7 @@
+  *
+  * Since: 1.2
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_animator_key_get_property_name (const ClutterAnimatorKey *key)
+ {
+   g_return_val_if_fail (key != NULL, NULL);
+Index: clutter-1.6.4/clutter/clutter-animator.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-animator.h	2012-01-30 12:10:58.667786026 -0800
++++ clutter-1.6.4/clutter/clutter-animator.h	2012-01-30 12:11:31.055786025 -0800
+@@ -161,7 +161,7 @@
+ 
+ GType                 clutter_animator_key_get_type          (void) G_GNUC_CONST;
+ GObject *             clutter_animator_key_get_object        (const ClutterAnimatorKey *key);
+-G_CONST_RETURN gchar *clutter_animator_key_get_property_name (const ClutterAnimatorKey *key);
++const gchar *clutter_animator_key_get_property_name (const ClutterAnimatorKey *key);
+ GType                 clutter_animator_key_get_property_type (const ClutterAnimatorKey *key);
+ gulong                clutter_animator_key_get_mode          (const ClutterAnimatorKey *key);
+ gdouble               clutter_animator_key_get_progress      (const ClutterAnimatorKey *key);
+Index: clutter-1.6.4/clutter/clutter-backend.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-backend.c	2012-01-30 12:10:58.563786024 -0800
++++ clutter-1.6.4/clutter/clutter-backend.c	2012-01-30 12:11:31.047786026 -0800
+@@ -896,7 +896,7 @@
+  *
+  * Deprecated: 1.4: Use #ClutterSettings:font-name instead
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_backend_get_font_name (ClutterBackend *backend)
+ {
+   ClutterBackendPrivate *priv;
+Index: clutter-1.6.4/clutter/clutter-backend.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-backend.h	2012-01-30 12:10:58.179786025 -0800
++++ clutter-1.6.4/clutter/clutter-backend.h	2012-01-30 12:11:30.975786024 -0800
+@@ -71,7 +71,7 @@
+ guint                       clutter_backend_get_double_click_distance (ClutterBackend             *backend);
+ void                        clutter_backend_set_font_name             (ClutterBackend             *backend,
+                                                                        const gchar                *font_name);
+-G_CONST_RETURN gchar *      clutter_backend_get_font_name             (ClutterBackend             *backend);
++const gchar *      clutter_backend_get_font_name             (ClutterBackend             *backend);
+ #endif /* CLUTTER_DISABLE_DEPRECATED */
+ 
+ gdouble                     clutter_backend_get_resolution            (ClutterBackend             *backend);
+Index: clutter-1.6.4/clutter/clutter-binding-pool.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-binding-pool.c	2012-01-30 12:10:58.323786026 -0800
++++ clutter-1.6.4/clutter/clutter-binding-pool.c	2012-01-30 12:11:31.011786025 -0800
+@@ -723,7 +723,7 @@
+  *
+  * Since: 1.0
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_binding_pool_find_action (ClutterBindingPool  *pool,
+                                   guint                key_val,
+                                   ClutterModifierType  modifiers)
+Index: clutter-1.6.4/clutter/clutter-binding-pool.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-binding-pool.h	2012-01-30 12:10:58.591786024 -0800
++++ clutter-1.6.4/clutter/clutter-binding-pool.h	2012-01-30 12:11:31.047786026 -0800
+@@ -98,7 +98,7 @@
+                                                              ClutterModifierType  modifiers,
+                                                              GClosure            *closure);
+ 
+-G_CONST_RETURN gchar *clutter_binding_pool_find_action      (ClutterBindingPool  *pool,
++const gchar *clutter_binding_pool_find_action      (ClutterBindingPool  *pool,
+                                                              guint                key_val,
+                                                              ClutterModifierType  modifiers);
+ void                  clutter_binding_pool_remove_action    (ClutterBindingPool  *pool,
+Index: clutter-1.6.4/clutter/clutter-color.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-color.c	2012-01-30 12:10:58.247786026 -0800
++++ clutter-1.6.4/clutter/clutter-color.c	2012-01-30 12:11:31.003786024 -0800
+@@ -115,7 +115,7 @@
+  *
+  * Since: 1.6
+  */
+-G_CONST_RETURN ClutterColor *
++const ClutterColor *
+ clutter_color_get_static (ClutterStaticColor color)
+ {
+   g_return_val_if_fail (color >= CLUTTER_COLOR_WHITE &&
+@@ -1056,7 +1056,7 @@
+  *
+  * Since: 0.8.4
+  */
+-G_CONST_RETURN ClutterColor *
++const ClutterColor *
+ clutter_value_get_color (const GValue *value)
+ {
+   g_return_val_if_fail (CLUTTER_VALUE_HOLDS_COLOR (value), NULL);
+Index: clutter-1.6.4/clutter/clutter-color.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-color.h	2012-01-30 12:10:58.775786026 -0800
++++ clutter-1.6.4/clutter/clutter-color.h	2012-01-30 12:11:31.071786026 -0800
+@@ -140,7 +140,7 @@
+ 
+ void                         clutter_value_set_color (GValue             *value,
+                                                       const ClutterColor *color);
+-G_CONST_RETURN ClutterColor *clutter_value_get_color (const GValue       *value);
++const ClutterColor *clutter_value_get_color (const GValue       *value);
+ 
+ GType       clutter_param_color_get_type (void) G_GNUC_CONST;
+ GParamSpec *clutter_param_spec_color     (const gchar        *name,
+@@ -254,7 +254,7 @@
+   CLUTTER_COLOR_TRANSPARENT
+ } ClutterStaticColor;
+ 
+-G_CONST_RETURN ClutterColor *clutter_color_get_static (ClutterStaticColor color);
++const ClutterColor *clutter_color_get_static (ClutterStaticColor color);
+ 
+ G_END_DECLS
+ 
+Index: clutter-1.6.4/clutter/clutter-event.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-event.c	2012-01-30 12:10:58.099786026 -0800
++++ clutter-1.6.4/clutter/clutter-event.c	2012-01-30 12:11:30.963786026 -0800
+@@ -937,7 +937,7 @@
+  *
+  * Since: 1.2
+  */
+-G_CONST_RETURN ClutterEvent *
++const ClutterEvent *
+ clutter_get_current_event (void)
+ {
+   ClutterMainContext *context = _clutter_context_get_default ();
+Index: clutter-1.6.4/clutter/clutter-event.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-event.h	2012-01-30 12:10:58.643786025 -0800
++++ clutter-1.6.4/clutter/clutter-event.h	2012-01-30 12:11:31.055786025 -0800
+@@ -430,7 +430,7 @@
+ guint32                clutter_keysym_to_unicode            (guint               keyval);
+ 
+ guint32                clutter_get_current_event_time       (void);
+-G_CONST_RETURN ClutterEvent *clutter_get_current_event      (void);
++const ClutterEvent *clutter_get_current_event      (void);
+ 
+ G_END_DECLS
+ 
+Index: clutter-1.6.4/clutter/clutter-input-device.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-input-device.c	2012-01-30 12:10:58.615786025 -0800
++++ clutter-1.6.4/clutter/clutter-input-device.c	2012-01-30 12:11:31.051786026 -0800
+@@ -784,7 +784,7 @@
+  *
+  * Since: 1.2
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_input_device_get_device_name (ClutterInputDevice *device)
+ {
+   g_return_val_if_fail (CLUTTER_IS_INPUT_DEVICE (device), NULL);
+Index: clutter-1.6.4/clutter/clutter-input-device.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-input-device.h	2012-01-30 12:10:58.299786026 -0800
++++ clutter-1.6.4/clutter/clutter-input-device.h	2012-01-30 12:11:31.011786025 -0800
+@@ -135,7 +135,7 @@
+                                                                  gint                *y);
+ ClutterActor *          clutter_input_device_get_pointer_actor  (ClutterInputDevice  *device);
+ ClutterStage *          clutter_input_device_get_pointer_stage  (ClutterInputDevice  *device);
+-G_CONST_RETURN gchar *  clutter_input_device_get_device_name    (ClutterInputDevice  *device);
++const gchar *  clutter_input_device_get_device_name    (ClutterInputDevice  *device);
+ ClutterInputMode        clutter_input_device_get_device_mode    (ClutterInputDevice  *device);
+ gboolean                clutter_input_device_get_has_cursor     (ClutterInputDevice  *device);
+ void                    clutter_input_device_set_enabled        (ClutterInputDevice  *device,
+Index: clutter-1.6.4/clutter/clutter-interval.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-interval.c	2012-01-30 12:10:58.335786025 -0800
++++ clutter-1.6.4/clutter/clutter-interval.c	2012-01-30 12:11:31.015786026 -0800
+@@ -918,7 +918,7 @@
+  *
+  * Since: 1.4
+  */
+-G_CONST_RETURN GValue *
++const GValue *
+ clutter_interval_compute (ClutterInterval *interval,
+                           gdouble          factor)
+ {
+Index: clutter-1.6.4/clutter/clutter-interval.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-interval.h	2012-01-30 12:10:58.735786024 -0800
++++ clutter-1.6.4/clutter/clutter-interval.h	2012-01-30 12:11:31.059786024 -0800
+@@ -154,7 +154,7 @@
+                                                       gdouble          factor,
+                                                       GValue          *value);
+ 
+-G_CONST_RETURN GValue *clutter_interval_compute      (ClutterInterval *interval,
++const GValue *clutter_interval_compute      (ClutterInterval *interval,
+                                                       gdouble          factor);
+ 
+ void clutter_interval_register_progress_func (GType               value_type,
+Index: clutter-1.6.4/clutter/clutter-model.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-model.c	2012-01-30 12:10:58.231786024 -0800
++++ clutter-1.6.4/clutter/clutter-model.c	2012-01-30 12:11:31.003786024 -0800
+@@ -1382,7 +1382,7 @@
+  *
+  * Since: 0.6
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_model_get_column_name (ClutterModel *model,
+                                guint         column)
+ {
+Index: clutter-1.6.4/clutter/clutter-model.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-model.h	2012-01-30 12:10:58.139786025 -0800
++++ clutter-1.6.4/clutter/clutter-model.h	2012-01-30 12:11:30.967786026 -0800
+@@ -226,7 +226,7 @@
+ 
+ guint                 clutter_model_get_n_rows         (ClutterModel     *model);
+ guint                 clutter_model_get_n_columns      (ClutterModel     *model);
+-G_CONST_RETURN gchar *clutter_model_get_column_name    (ClutterModel     *model,
++const gchar *clutter_model_get_column_name    (ClutterModel     *model,
+                                                         guint             column);
+ GType                 clutter_model_get_column_type    (ClutterModel     *model,
+                                                         guint             column);
+Index: clutter-1.6.4/clutter/clutter-private.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-private.h	2012-01-30 12:10:58.655786025 -0800
++++ clutter-1.6.4/clutter/clutter-private.h	2012-01-30 12:11:31.055786025 -0800
+@@ -192,7 +192,7 @@
+ #define P_(String) (String)
+ #endif
+ 
+-G_CONST_RETURN gchar *_clutter_gettext (const gchar *str);
++const gchar *_clutter_gettext (const gchar *str);
+ 
+ gboolean      _clutter_feature_init (GError **error);
+ 
+Index: clutter-1.6.4/clutter/clutter-scriptable.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-scriptable.c	2012-01-30 12:10:58.695786026 -0800
++++ clutter-1.6.4/clutter/clutter-scriptable.c	2012-01-30 12:11:31.055786025 -0800
+@@ -104,7 +104,7 @@
+  *
+  * Since: 0.6
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_scriptable_get_id (ClutterScriptable *scriptable)
+ {
+   ClutterScriptableIface *iface;
+Index: clutter-1.6.4/clutter/clutter-scriptable.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-scriptable.h	2012-01-30 12:10:58.575786026 -0800
++++ clutter-1.6.4/clutter/clutter-scriptable.h	2012-01-30 12:11:31.047786026 -0800
+@@ -91,7 +91,7 @@
+ 
+ void                  clutter_scriptable_set_id              (ClutterScriptable *scriptable,
+                                                               const gchar       *id);
+-G_CONST_RETURN gchar *clutter_scriptable_get_id              (ClutterScriptable *scriptable);
++const gchar *clutter_scriptable_get_id              (ClutterScriptable *scriptable);
+ gboolean              clutter_scriptable_parse_custom_node   (ClutterScriptable *scriptable,
+                                                               ClutterScript     *script,
+                                                               GValue            *value,
+Index: clutter-1.6.4/clutter/clutter-script.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-script.c	2012-01-30 12:10:58.483786024 -0800
++++ clutter-1.6.4/clutter/clutter-script.c	2012-01-30 12:11:31.035786024 -0800
+@@ -799,7 +799,7 @@
+  *
+  * Since: 0.6
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_get_script_id (GObject *gobject)
+ {
+   g_return_val_if_fail (G_IS_OBJECT (gobject), NULL);
+Index: clutter-1.6.4/clutter/clutter-script.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-script.h	2012-01-30 12:10:58.191786026 -0800
++++ clutter-1.6.4/clutter/clutter-script.h	2012-01-30 12:11:30.975786024 -0800
+@@ -168,7 +168,7 @@
+ GType          clutter_script_get_type_from_name   (ClutterScript  *script,
+                                                     const gchar    *type_name);
+ 
+-G_CONST_RETURN gchar *clutter_get_script_id        (GObject        *gobject);
++const gchar *clutter_get_script_id        (GObject        *gobject);
+ 
+ void           clutter_script_connect_signals      (ClutterScript  *script,
+                                                     gpointer        user_data);
+Index: clutter-1.6.4/clutter/clutter-shader.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-shader.c	2012-01-30 12:10:58.707786024 -0800
++++ clutter-1.6.4/clutter/clutter-shader.c	2012-01-30 12:11:31.059786024 -0800
+@@ -815,7 +815,7 @@
+  *
+  * Since: 0.6
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_shader_get_fragment_source (ClutterShader *shader)
+ {
+   g_return_val_if_fail (CLUTTER_IS_SHADER (shader), NULL);
+@@ -835,7 +835,7 @@
+  *
+  * Since: 0.6
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_shader_get_vertex_source (ClutterShader *shader)
+ {
+   g_return_val_if_fail (CLUTTER_IS_SHADER (shader), NULL);
+Index: clutter-1.6.4/clutter/clutter-shader.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-shader.h	2012-01-30 12:10:58.683786025 -0800
++++ clutter-1.6.4/clutter/clutter-shader.h	2012-01-30 12:11:31.055786025 -0800
+@@ -117,8 +117,8 @@
+                                                                const gchar        *data,
+                                                                gssize              length);
+ 
+-G_CONST_RETURN gchar *clutter_shader_get_vertex_source        (ClutterShader      *shader);
+-G_CONST_RETURN gchar *clutter_shader_get_fragment_source      (ClutterShader      *shader);
++const gchar *clutter_shader_get_vertex_source        (ClutterShader      *shader);
++const gchar *clutter_shader_get_fragment_source      (ClutterShader      *shader);
+ 
+ void                  clutter_shader_set_uniform              (ClutterShader      *shader,
+                                                                const gchar        *name,
+Index: clutter-1.6.4/clutter/clutter-shader-types.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-shader-types.c	2012-01-30 12:10:58.259786024 -0800
++++ clutter-1.6.4/clutter/clutter-shader-types.c	2012-01-30 12:11:31.007786024 -0800
+@@ -485,7 +485,7 @@
+  *
+  * Since: 0.8
+  */
+-G_CONST_RETURN gfloat *
++const gfloat *
+ clutter_value_get_shader_float (const GValue *value,
+                                 gsize        *length)
+ {
+@@ -517,7 +517,7 @@
+  *
+  * Since: 0.8
+  */
+-G_CONST_RETURN gint *
++const gint *
+ clutter_value_get_shader_int (const GValue *value,
+                               gsize        *length)
+ {
+@@ -549,7 +549,7 @@
+  *
+  * Since: 0.8
+  */
+-G_CONST_RETURN gfloat *
++const gfloat *
+ clutter_value_get_shader_matrix (const GValue *value,
+                                  gsize        *length)
+ {
+Index: clutter-1.6.4/clutter/clutter-shader-types.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-shader-types.h	2012-01-30 12:10:58.723786026 -0800
++++ clutter-1.6.4/clutter/clutter-shader-types.h	2012-01-30 12:11:31.059786024 -0800
+@@ -84,11 +84,11 @@
+ void                    clutter_value_set_shader_matrix (GValue       *value,
+                                                          gint          size,
+                                                          const gfloat *matrix);
+-G_CONST_RETURN gfloat * clutter_value_get_shader_float  (const GValue *value,
++const gfloat * clutter_value_get_shader_float  (const GValue *value,
+                                                          gsize        *length);
+-G_CONST_RETURN gint   * clutter_value_get_shader_int    (const GValue *value,
++const gint   * clutter_value_get_shader_int    (const GValue *value,
+                                                          gsize        *length);
+-G_CONST_RETURN gfloat * clutter_value_get_shader_matrix (const GValue *value,
++const gfloat * clutter_value_get_shader_matrix (const GValue *value,
+                                                          gsize        *length);
+ 
+ G_END_DECLS
+Index: clutter-1.6.4/clutter/clutter-stage.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-stage.c	2012-01-30 12:10:58.151786025 -0800
++++ clutter-1.6.4/clutter/clutter-stage.c	2012-01-30 12:11:30.971786025 -0800
+@@ -2300,7 +2300,7 @@
+  *
+  * Since: 0.4
+  **/
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_stage_get_title (ClutterStage       *stage)
+ {
+   g_return_val_if_fail (CLUTTER_IS_STAGE (stage), NULL);
+Index: clutter-1.6.4/clutter/clutter-stage.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-stage.h	2012-01-30 12:10:58.495786026 -0800
++++ clutter-1.6.4/clutter/clutter-stage.h	2012-01-30 12:11:31.035786024 -0800
+@@ -218,7 +218,7 @@
+ 
+ void                  clutter_stage_set_title          (ClutterStage *stage,
+                                                         const gchar  *title);
+-G_CONST_RETURN gchar *clutter_stage_get_title          (ClutterStage *stage);
++const gchar *clutter_stage_get_title          (ClutterStage *stage);
+ void                  clutter_stage_set_user_resizable (ClutterStage *stage,
+ 						        gboolean      resizable);
+ gboolean              clutter_stage_get_user_resizable (ClutterStage *stage);
+Index: clutter-1.6.4/clutter/clutter-state.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-state.c	2012-01-30 12:10:58.439786026 -0800
++++ clutter-1.6.4/clutter/clutter-state.c	2012-01-30 12:11:31.027786025 -0800
+@@ -1590,7 +1590,7 @@
+  *
+  * Since: 1.4
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_state_key_get_property_name (const ClutterStateKey *state_key)
+ {
+   g_return_val_if_fail (state_key, NULL);
+@@ -1611,7 +1611,7 @@
+  *
+  * Since: 1.4
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_state_key_get_source_state_name (const ClutterStateKey *state_key)
+ {
+   g_return_val_if_fail (state_key, NULL);
+@@ -1635,7 +1635,7 @@
+  *
+  * Since: 1.4
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_state_key_get_target_state_name (const ClutterStateKey *state_key)
+ {
+   g_return_val_if_fail (state_key, NULL);
+@@ -1799,7 +1799,7 @@
+  *
+  * Since: 1.4
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_state_get_state (ClutterState *state)
+ {
+   g_return_val_if_fail (CLUTTER_IS_STATE (state), NULL);
+Index: clutter-1.6.4/clutter/clutter-state.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-state.h	2012-01-30 12:10:58.163786026 -0800
++++ clutter-1.6.4/clutter/clutter-state.h	2012-01-30 12:11:30.975786024 -0800
+@@ -138,7 +138,7 @@
+ ClutterAnimator * clutter_state_get_animator  (ClutterState    *state,
+                                                const gchar     *source_state_name,
+                                                const gchar     *target_state_name);
+-G_CONST_RETURN gchar *clutter_state_get_state (ClutterState    *state);
++const gchar *clutter_state_get_state (ClutterState    *state);
+ 
+ /*
+  * ClutterStateKey
+@@ -152,9 +152,9 @@
+                                                                GValue                *value);
+ GType                 clutter_state_key_get_property_type     (const ClutterStateKey *key);
+ GObject *             clutter_state_key_get_object            (const ClutterStateKey *state_key);
+-G_CONST_RETURN gchar *clutter_state_key_get_property_name     (const ClutterStateKey *state_key);
+-G_CONST_RETURN gchar *clutter_state_key_get_source_state_name (const ClutterStateKey *state_key);
+-G_CONST_RETURN gchar *clutter_state_key_get_target_state_name (const ClutterStateKey *state_key);
++const gchar *clutter_state_key_get_property_name     (const ClutterStateKey *state_key);
++const gchar *clutter_state_key_get_source_state_name (const ClutterStateKey *state_key);
++const gchar *clutter_state_key_get_target_state_name (const ClutterStateKey *state_key);
+ 
+ G_END_DECLS
+ 
+Index: clutter-1.6.4/clutter/clutter-text.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-text.c	2012-01-30 12:10:58.747786026 -0800
++++ clutter-1.6.4/clutter/clutter-text.c	2012-01-30 12:11:31.067786025 -0800
+@@ -3858,7 +3858,7 @@
+  *
+  * Since: 1.0
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_text_get_font_name (ClutterText *text)
+ {
+   g_return_val_if_fail (CLUTTER_IS_TEXT (text), NULL);
+@@ -3963,7 +3963,7 @@
+  *
+  * Since: 1.0
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ clutter_text_get_text (ClutterText *self)
+ {
+   g_return_val_if_fail (CLUTTER_IS_TEXT (self), NULL);
+Index: clutter-1.6.4/clutter/clutter-text.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-text.h	2012-01-30 12:10:58.467786026 -0800
++++ clutter-1.6.4/clutter/clutter-text.h	2012-01-30 12:11:31.031786024 -0800
+@@ -103,7 +103,7 @@
+ ClutterActor *        clutter_text_new_with_text        (const gchar          *font_name,
+                                                          const gchar          *text);
+ 
+-G_CONST_RETURN gchar *clutter_text_get_text             (ClutterText          *self);
++const gchar *clutter_text_get_text             (ClutterText          *self);
+ void                  clutter_text_set_text             (ClutterText          *self,
+                                                          const gchar          *text);
+ void                  clutter_text_set_markup           (ClutterText          *self,
+@@ -114,7 +114,7 @@
+                                                          ClutterColor         *color);
+ void                  clutter_text_set_font_name        (ClutterText          *self,
+                                                          const gchar          *font_name);
+-G_CONST_RETURN gchar *clutter_text_get_font_name        (ClutterText          *self);
++const gchar *clutter_text_get_font_name        (ClutterText          *self);
+ void                  clutter_text_set_font_description (ClutterText          *self,
+                                                          PangoFontDescription *font_desc);
+ PangoFontDescription *clutter_text_get_font_description (ClutterText          *self);
+Index: clutter-1.6.4/clutter/clutter-units.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-units.c	2012-01-30 12:10:58.283786024 -0800
++++ clutter-1.6.4/clutter/clutter-units.c	2012-01-30 12:11:31.011786025 -0800
+@@ -773,7 +773,7 @@
+  *
+  * Since: 0.8
+  */
+-G_CONST_RETURN ClutterUnits *
++const ClutterUnits *
+ clutter_value_get_units (const GValue *value)
+ {
+   g_return_val_if_fail (CLUTTER_VALUE_HOLDS_UNITS (value), NULL);
+Index: clutter-1.6.4/clutter/clutter-units.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-units.h	2012-01-30 12:10:58.311786024 -0800
++++ clutter-1.6.4/clutter/clutter-units.h	2012-01-30 12:11:31.011786025 -0800
+@@ -181,7 +181,7 @@
+ 
+ void                         clutter_value_set_units  (GValue             *value,
+                                                        const ClutterUnits *units);
+-G_CONST_RETURN ClutterUnits *clutter_value_get_units  (const GValue       *value);
++const ClutterUnits *clutter_value_get_units  (const GValue       *value);
+ 
+ G_END_DECLS
+ 
+Index: clutter-1.6.4/clutter/clutter-util.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/clutter-util.c	2012-01-30 12:10:58.631786026 -0800
++++ clutter-1.6.4/clutter/clutter-util.c	2012-01-30 12:11:31.051786026 -0800
+@@ -68,7 +68,7 @@
+  *
+  * Return value: the translated string
+  */
+-G_CONST_RETURN gchar *
++const gchar *
+ _clutter_gettext (const gchar *str)
+ {
+   return g_dgettext (GETTEXT_PACKAGE, str);
+Index: clutter-1.6.4/clutter/cogl/cogl/cogl-material-compat.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/cogl/cogl/cogl-material-compat.c	2012-01-30 12:10:58.507786024 -0800
++++ clutter-1.6.4/clutter/cogl/cogl/cogl-material-compat.c	2012-01-30 12:11:31.039786025 -0800
+@@ -279,7 +279,7 @@
+                                   layer_index, matrix);
+ }
+ 
+-G_CONST_RETURN GList *
++const GList *
+ cogl_material_get_layers (CoglMaterial *material)
+ {
+   return _cogl_pipeline_get_layers (COGL_PIPELINE (material));
+Index: clutter-1.6.4/clutter/cogl/cogl/cogl-material-compat.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/cogl/cogl/cogl-material-compat.h	2012-01-30 12:10:58.523786026 -0800
++++ clutter-1.6.4/clutter/cogl/cogl/cogl-material-compat.h	2012-01-30 12:11:31.043786026 -0800
+@@ -889,7 +889,7 @@
+  *    cogl_material_layer_* functions. The list is owned by Cogl and it
+  *    should not be modified or freed
+  */
+-G_CONST_RETURN GList *
++const GList *
+ cogl_material_get_layers (CoglMaterial *material);
+ 
+ /**
+Index: clutter-1.6.4/clutter/cogl/cogl/cogl-pipeline-private.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/cogl/cogl/cogl-pipeline-private.h	2012-01-30 12:10:58.535786024 -0800
++++ clutter-1.6.4/clutter/cogl/cogl/cogl-pipeline-private.h	2012-01-30 12:11:31.043786026 -0800
+@@ -1174,7 +1174,7 @@
+  * API to support the deprecate cogl_pipeline_layer_xyz functions...
+  */
+ 
+-G_CONST_RETURN GList *
++const GList *
+ _cogl_pipeline_get_layers (CoglPipeline *pipeline);
+ 
+ void
+Index: clutter-1.6.4/clutter/glx/clutter-backend-glx.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/glx/clutter-backend-glx.c	2012-01-30 12:10:58.271786026 -0800
++++ clutter-1.6.4/clutter/glx/clutter-backend-glx.c	2012-01-30 12:11:31.007786024 -0800
+@@ -60,7 +60,7 @@
+ 
+ static gchar    *clutter_vblank_name = NULL;
+ 
+-G_CONST_RETURN gchar*
++const gchar*
+ _clutter_backend_glx_get_vblank_method (void)
+ {
+   return clutter_vblank_name;
+Index: clutter-1.6.4/clutter/x11/clutter-backend-x11.c
+===================================================================
+--- clutter-1.6.4.orig/clutter/x11/clutter-backend-x11.c	2012-01-30 12:10:58.111786025 -0800
++++ clutter-1.6.4/clutter/x11/clutter-backend-x11.c	2012-01-30 12:11:30.967786026 -0800
+@@ -1026,7 +1026,7 @@
+  *   pointer to the internal list of input devices; the returned list is
+  *   owned by Clutter and should not be modified or freed
+  */
+-G_CONST_RETURN GSList *
++const GSList *
+ clutter_x11_get_input_devices (void)
+ {
+   ClutterDeviceManager *manager;
+Index: clutter-1.6.4/clutter/x11/clutter-x11.h
+===================================================================
+--- clutter-1.6.4.orig/clutter/x11/clutter-x11.h	2012-01-30 12:10:58.127786026 -0800
++++ clutter-1.6.4/clutter/x11/clutter-x11.h	2012-01-30 12:11:30.967786026 -0800
+@@ -127,7 +127,7 @@
+ ClutterStage *clutter_x11_get_stage_from_window (Window win);
+ 
+ #ifndef CLUTTER_DISABLE_DEPRECATED
+-G_CONST_RETURN GSList* clutter_x11_get_input_devices (void) G_GNUC_DEPRECATED;
++const GSList* clutter_x11_get_input_devices (void) G_GNUC_DEPRECATED;
+ #endif
+ 
+ void     clutter_x11_enable_xinput (void);

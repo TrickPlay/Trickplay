@@ -1,0 +1,13 @@
+Index: clutter-1.6.18/clutter/egl/clutter-backend-egl.c
+===================================================================
+--- clutter-1.6.18.orig/clutter/egl/clutter-backend-egl.c	2012-01-26 16:22:37.114919995 -0800
++++ clutter-1.6.18/clutter/egl/clutter-backend-egl.c	2012-01-26 16:22:38.778919970 -0800
+@@ -195,7 +195,7 @@
+     EGL_RED_SIZE,        1,
+     EGL_GREEN_SIZE,      1,
+     EGL_BLUE_SIZE,       1,
+-    EGL_ALPHA_SIZE,      EGL_DONT_CARE,
++    EGL_ALPHA_SIZE,      1,
+ 
+     EGL_DEPTH_SIZE,      1,
+ 

@@ -5,7 +5,5 @@ dispose-crash.patch
 egl_config_alpha.patch
 get_egl_config.patch
 medium_precision.patch
-timeline-zero-msecs.patch
 clutterstate-default-durations-fix.patch
 color-parsing-whitespace-bugfix.patch
-glib-deprecated-g_const_return.patch

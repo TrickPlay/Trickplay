@@ -320,9 +320,9 @@ UPROF_DEPENDS="GLIB"
 # clutter
 
 CLUTTER_MV="1.6"
-CLUTTER_V="${CLUTTER_MV}.4"
-CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.gz"
-CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
+CLUTTER_V="${CLUTTER_MV}.18"
+CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.xz"
+CLUTTER_DIST="clutter-${CLUTTER_V}.tar.xz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
 CLUTTER_PROFILING=""
 if [[ $PROFILING != "0" ]] 
