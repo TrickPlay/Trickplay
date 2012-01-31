@@ -1,0 +1,35 @@
+Index: clutter-1.8.2/clutter/cogl/clutter-backend-cogl.c
+===================================================================
+--- clutter-1.8.2.orig/clutter/cogl/clutter-backend-cogl.c	2012-01-30 13:56:04.215786004 -0800
++++ clutter-1.8.2/clutter/cogl/clutter-backend-cogl.c	2012-01-30 14:24:08.463786140 -0800
+@@ -506,6 +506,18 @@
+ 
+   return cogl_egl_context_get_egl_display (backend_singleton->cogl_context);
+ }
++
++EGLConfig
++clutter_egl_get_egl_config (void)
++{
++  if (backend_singleton == NULL)
++    {
++      g_critical ("%s has been called before clutter_init()", G_STRFUNC);
++      return 0;
++    }
++
++  return cogl_egl_context_get_egl_config (backend_singleton->cogl_context);
++}
+ #endif
+ 
+ /* FIXME we should have a CLUTTER_ define for this */
+Index: clutter-1.8.2/clutter/cogl/clutter-egl.h
+===================================================================
+--- clutter-1.8.2.orig/clutter/cogl/clutter-egl.h	2012-01-30 14:22:08.927786008 -0800
++++ clutter-1.8.2/clutter/cogl/clutter-egl.h	2012-01-30 14:22:50.999785666 -0800
+@@ -86,6 +86,7 @@
+  * Since: 1.6
+  */
+ EGLDisplay      clutter_egl_get_egl_display     (void);
++EGLConfig       clutter_egl_get_egl_config      (void);
+ 
+ G_END_DECLS
+ 

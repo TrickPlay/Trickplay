@@ -1,0 +1,4 @@
+trickplay-native-backend.patch
+dont-build-test.patch
+cogl-get-egl-config.patch
+egl-config-fixup.patch

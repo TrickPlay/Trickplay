@@ -1,0 +1,13 @@
+Index: cogl-1.8.2/Makefile.in
+===================================================================
+--- cogl-1.8.2.orig/Makefile.in	2012-01-30 13:52:12.815786018 -0800
++++ cogl-1.8.2/Makefile.in	2012-01-30 13:52:27.823785820 -0800
+@@ -332,7 +332,7 @@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-SUBDIRS = cogl tests $(am__append_1) examples doc po
++SUBDIRS = cogl $(am__append_1) po
+ ACLOCAL_AMFLAGS = -I build/autotools ${ACLOCAL_FLAGS}
+ EXTRA_DIST = \
+ 	README.in \

@@ -317,24 +317,32 @@ UPROF_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARE
 UPROF_DEPENDS="GLIB"
 
 #------------------------------------------------------------------------------
-# clutter
-
-CLUTTER_MV="1.6"
-CLUTTER_V="${CLUTTER_MV}.18"
-CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.xz"
-CLUTTER_DIST="clutter-${CLUTTER_V}.tar.xz"
-CLUTTER_SOURCE="clutter-${CLUTTER_V}"
+# cogl
+COGL_MV="1.8"
+COGL_V="${COGL_MV}.2"
+COGL_DIST="cogl-${COGL_V}.tar.xz"
+COGL_SOURCE="cogl-${COGL_V}"
 CLUTTER_PROFILING=""
-if [[ $PROFILING != "0" ]] 
+if [[ $PROFILING != "0" ]]
 then
     CLUTTER_PROFILING="--enable-profile=yes"
 fi
+COGL_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-gles2=yes --enable-gl=no --enable-glx=no --enable-xlib-egl-platform=no --enable-null-egl-platform=yes $CLUTTER_PROFILING --disable-glibtest --enable-gtk-doc-html=no CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
+COGL_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
+
+#------------------------------------------------------------------------------
+# clutter
+
+CLUTTER_MV="1.8"
+CLUTTER_V="${CLUTTER_MV}.2"
+CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clutter-${CLUTTER_V}.tar.xz"
+CLUTTER_DIST="clutter-${CLUTTER_V}.tar.xz"
+CLUTTER_SOURCE="clutter-${CLUTTER_V}"
 
 #Override Clutter CFLAGS so that it is not built optimized
 
-CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
-#CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.so $PREFIX/lib" 
-CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
+CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --enable-conformance=no i--disable-glibtest --enable-gtk-doc-html=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
+CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF COGL"
 
 #------------------------------------------------------------------------------
 # avahi
@@ -405,7 +413,7 @@ EXIF_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED 
 
 #------------------------------------------------------------------------------
 
-ALL="ZLIB EXPAT XML EXIF LIBFFI ICONV GET_TEXT LIBBIND GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
+ALL="ZLIB EXPAT XML EXIF LIBFFI ICONV GET_TEXT LIBBIND GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF COGL CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 
 #-----------------------------------------------------------------------------
 
@@ -650,11 +658,13 @@ then
         -L ${PREFIX}/lib \
         -I ${PREFIX}/include \
         -Wl,--start-group \
-            -ltpcore \
-            -ltplua \
-            -lpthread \
+        -ltpcore \
+        -ltplua \
+        -lpthread \
 	    -ljson-glib-1.0 \
 	    -latk-1.0 \
+        -lcogl \
+        -lcogl-pango \
 	    -lclutter-eglnative-1.0 \
 	    -luprof-0.3 \
 	    -lavahi-core \

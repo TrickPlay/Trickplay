@@ -1,0 +1,78 @@
+Index: cogl-1.8.2/cogl/cogl-context.c
+===================================================================
+--- cogl-1.8.2.orig/cogl/cogl-context.c	2012-01-30 14:06:21.915785935 -0800
++++ cogl-1.8.2/cogl/cogl-context.c	2012-01-30 14:08:28.863785963 -0800
+@@ -517,6 +517,16 @@
+ 
+   return winsys->context_egl_get_egl_display (context);
+ }
++
++EGLConfig
++cogl_egl_context_get_egl_config (CoglContext *context)
++{
++  const CoglWinsysVtable *winsys = _cogl_context_get_winsys (context);
++
++  g_return_val_if_fail (winsys->context_egl_get_egl_config != NULL, NULL);
++
++  return winsys->context_egl_get_egl_config (context);
++}
+ #endif
+ 
+ gboolean
+Index: cogl-1.8.2/cogl/cogl-context.h
+===================================================================
+--- cogl-1.8.2.orig/cogl/cogl-context.h	2012-01-30 14:08:38.159786176 -0800
++++ cogl-1.8.2/cogl/cogl-context.h	2012-01-30 14:09:20.919786031 -0800
+@@ -67,8 +67,11 @@
+ 
+ #ifdef COGL_HAS_EGL_SUPPORT
+ #define cogl_egl_context_get_egl_display cogl_egl_context_get_egl_display_EXP
++#define cogl_egl_context_get_egl_config  cogl_egl_context_get_egl_config_EXP
+ EGLDisplay
+ cogl_egl_context_get_egl_display (CoglContext *context);
++EGLConfig
++cogl_egl_context_get_egl_config  (CoglContext *context);
+ #endif
+ 
+ #ifdef COGL_HAS_EGL_PLATFORM_ANDROID_SUPPORT
+Index: cogl-1.8.2/cogl/winsys/cogl-winsys-egl.c
+===================================================================
+--- cogl-1.8.2.orig/cogl/winsys/cogl-winsys-egl.c	2012-01-30 14:10:34.067786034 -0800
++++ cogl-1.8.2/cogl/winsys/cogl-winsys-egl.c	2012-01-30 14:20:26.095785857 -0800
+@@ -1632,6 +1632,14 @@
+   return egl_renderer->edpy;
+ }
+ 
++static EGLConfig
++_cogl_winsys_context_egl_get_egl_config (CoglContext *context)
++{
++  CoglDisplayEGL *egl_display = context->display->winsys;
++
++  return egl_display->egl_config;
++}
++
+ #if defined (COGL_HAS_XLIB_SUPPORT) && defined (EGL_KHR_image_pixmap)
+ static gboolean
+ _cogl_winsys_texture_pixmap_x11_create (CoglTexturePixmapX11 *tex_pixmap)
+@@ -1748,6 +1756,8 @@
+     .context_deinit = _cogl_winsys_context_deinit,
+     .context_egl_get_egl_display =
+       _cogl_winsys_context_egl_get_egl_display,
++    .context_egl_get_egl_config =
++      _cogl_winsys_context_egl_get_egl_config,
+ #ifdef COGL_HAS_EGL_PLATFORM_POWERVR_X11_SUPPORT
+     .xlib_get_visual_info = _cogl_winsys_xlib_get_visual_info,
+ #endif
+Index: cogl-1.8.2/cogl/winsys/cogl-winsys-private.h
+===================================================================
+--- cogl-1.8.2.orig/cogl/winsys/cogl-winsys-private.h	2012-01-30 14:10:04.939786062 -0800
++++ cogl-1.8.2/cogl/winsys/cogl-winsys-private.h	2012-01-30 14:10:25.831786002 -0800
+@@ -113,6 +113,8 @@
+ #ifdef COGL_HAS_EGL_SUPPORT
+   EGLDisplay
+   (*context_egl_get_egl_display) (CoglContext *context);
++  EGLConfig
++  (*context_egl_get_egl_config)  (CoglContext *context);
+ #endif
+ 
+ #ifdef COGL_HAS_XLIB_SUPPORT

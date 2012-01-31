@@ -1,0 +1,27 @@
+Index: cogl-1.8.2/cogl/winsys/cogl-winsys-egl.c
+===================================================================
+--- cogl-1.8.2.orig/cogl/winsys/cogl-winsys-egl.c	2012-01-30 15:24:09.855786031 -0800
++++ cogl-1.8.2/cogl/winsys/cogl-winsys-egl.c	2012-01-30 15:51:51.879786039 -0800
+@@ -626,7 +626,7 @@
+     EGL_RED_SIZE,        1,
+     EGL_GREEN_SIZE,      1,
+     EGL_BLUE_SIZE,       1,
+-    EGL_ALPHA_SIZE,      EGL_DONT_CARE,
++    EGL_ALPHA_SIZE,      1,
+ 
+     EGL_DEPTH_SIZE,      1,
+ 
+@@ -929,11 +929,13 @@
+   if (retry_cookie == 0)
+     {
+       *try_fallback = TRUE;
++      g_debug("Failing to make EGL: %s (%04x)", error_message, eglGetError());
+       return FALSE;
+     }
+   else
+     {
+       *try_fallback = FALSE;
++      g_debug("Failing to make EGL: %s (%04x)", error_message, eglGetError());
+       g_set_error (error, COGL_WINSYS_ERROR,
+                    COGL_WINSYS_ERROR_CREATE_CONTEXT,
+                    "%s", error_message);
