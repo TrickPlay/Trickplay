@@ -224,7 +224,7 @@ global keyboard [[ void * ]]
         *Prototype:*
         
         	(code)
-        	void on_submit( keyboard, results )
+        	boolean on_submit( keyboard, results )
         	(end)
         
         *Arguments:*
@@ -232,7 +232,7 @@ global keyboard [[ void * ]]
         	keyboard - the keyboard global variable
         	results - table of key-value pairs for each field in the form. The key will contain the field's string ID and the value will contain the field's final string setting. For fields of type "list," the value will be the string ID of a possible value contained in the field's choices table. For any blank field, the value will be an empty string.
 
-		*Return Value:* Boolean value indicating whether to hide the keyboard. If you return 'false', the keyboard will remain on-screen. This gives you an opportunity to validate the values. 
+		*Return Value:* Boolean flag indicating whether to remove the keyboard from the display or leave it visible (true=remove keyboard). This enables a program to validate the user input and, if necessary, to leave the keyboard visible for additional editing.
 		
 		*See Also:* the <on_cancel> event handler
     */
