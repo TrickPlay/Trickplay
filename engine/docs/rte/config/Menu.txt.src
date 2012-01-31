@@ -65,6 +65,7 @@ Group: SDK Tutorial {
 
 Group: Sample Applications {
 	File: Multi-Level Menus (no auto-title, docs/tutorials/menu_multilevel/doc.txt)
+	File: Run a Video (no auto-title, docs/tutorials/video_run/doc.txt)
 }
 
 Group: Programmer's Guide {
