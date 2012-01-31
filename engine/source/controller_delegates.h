@@ -36,9 +36,12 @@ public:
     virtual bool pointer_move( int x, int y ,unsigned long int modifiers);
     virtual bool pointer_button_down( int button , int x, int y ,unsigned long int modifiers);
     virtual bool pointer_button_up( int button , int x, int y ,unsigned long int modifiers);
+    virtual void pointer_active();
+    virtual void pointer_inactive();
     virtual void touch_down(int finger,int x,int y,unsigned long int modifiers);
     virtual void touch_move(int finger,int x,int y,unsigned long int modifiers);
     virtual void touch_up(int finger,int x,int y,unsigned long int modifiers);
+    virtual bool scroll( int direction , unsigned long int modifiers );
     virtual void ui_event(const String & parameters);
     virtual void submit_image( void * data, unsigned int size, const char * mime_type );
     virtual void submit_audio_clip( void * data, unsigned int size, const char * mime_type );

@@ -1,44 +1,39 @@
 --[[
 Filename: UIElement12.lua
 Author: Peter von dem Hagen
-Date: April 19, 2011
-Description:  This test verifies that UIElement objects call the on_key_focus events accordingly
+Date: January 26, 2012
+Description: This test animates an image over 1 minute and then calls complete_animation. So the animation should
+             should be stopped right after it starts. The unit_test timer runs the unit_tests 30 seconds after 
+             starting so if it is still animating then complete_animation did not work. 
 --]]
 
 -- Test Set up --
-local on_key_focus_in_called = false
-local on_key_focus_out_called = false
+local image1 = Image()
+UIElement12_completed_called = false
 
-logo_image = Image()
-globe_image = Image()
+image1.src = "packages/engine_unit_tests/tests/assets/logo.png"
+image1.x = 600
+image1.y = 600
+image1.h = 100
+image1.w = 100
 
-logo_image.src = "packages/engine_unit_tests/tests/assets/logo.png"
-logo_image.position = { 150, 120 }
-test_group:add(logo_image)
+test_group:add(image1)
 
-globe_image.src = "packages/engine_unit_tests/tests/assets/globe.png"
-globe_image.position = { 200, 200 }
-test_group:add(globe_image)
-
-function logo_image.on_key_focus_in (self)
-	on_key_focus_in_called = true
+function onCompleted ()
+	print ("************** Animation Completed called ****************")
+	UIElement12_completed_called = true
 end
 
-function logo_image.on_key_focus_out (self)
-	on_key_focus_out_called = true
-end
+image1.on_completed = onCompleted()
 
---[[
-Note: The following code is in the main.lua as the focus was switching before the events were set up.
-	logo_image:grab_key_focus()
-	globe_image:grab_key_focus()
---]]
+image1:animate{duration= 60000, loop=false, x=500, y=500}
+image1:complete_animation()
 
 -- Tests --
 
-function test_UIElement_on_key_focus_events ()
-    assert_equal( on_key_focus_in_called , true , "on_key_focus_in not called" )
-    assert_equal( on_key_focus_out_called , true , "on_key_focus_out not called" )
+-- Verify that animation was stopped.
+function test_UIElement_image_complete_animation ()
+	assert_false(image1.is_animating, "image1.is_animating returned: ".. tostring(image1.is_animating).. " Expected: false")
 end
 
 

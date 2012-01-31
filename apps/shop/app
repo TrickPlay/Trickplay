@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.app-shop",
+    release     = "1",
+    version     = "1.0",
+    name        = "TrickPlay App Shop",
+    copyright   = "© Trickplay Inc."
+}
+

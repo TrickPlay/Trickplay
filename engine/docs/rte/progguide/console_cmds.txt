@@ -18,7 +18,8 @@ Title: The Engine Console
 
 		/config - Display configuration information about the Engine.
 		/exit - Terminate any running TrickPlay application and exit the Console. Pressing the <Esc> key has the same result.
-		/gc - Schedule a garbage collection operation. Note: The operation may not occur immediately.
+		/gc - Perform a single garbage collection cycle. Note: The cycle may make other items available for collection, so performing additional cycles may be useful.
+		/gc all - Perform garbage collection cycles until no further items will be collected.
 		/images - List information about existing Image objects in a running TrickPlay application.
 		/obj - List information about all existing objects in a running TrickPlay application.
 		/prof - Display profiling information for a running TrickPlay application.
