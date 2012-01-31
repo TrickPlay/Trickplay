@@ -201,7 +201,7 @@ function do_test (tests)
 			print( string.format( "NOT TESTED   %4d (%d%%)" , disabled_count , ( disabled_count / #test_list ) * 100 ) )
 			print( string.format( "TOTAL    	   %4d" , #test_list ) )
 			print( "" )
-			--exit()
+			exit()
 		end
 	end
 end
