@@ -63,6 +63,11 @@ Group: SDK Tutorial {
 	File: Tutorial Source Code (no auto-title, docs/rte/tutorial/code.txt)
 }
 
+Group: Sample Applications {
+	File: Multi-Level Menus (no auto-title, docs/tutorials/menu_multilevel/doc.txt)
+	File: Run a Video (no auto-title, docs/tutorials/video_run/doc.txt)
+}
+
 Group: Programmer's Guide {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
 	File: The Engine Console (no auto-title, docs/rte/progguide/console_cmds.txt)
@@ -198,7 +203,8 @@ Group: Engine Reference {
     	File: Overview (no auto-title, docs/rte/reference/overview_util.txt)
     	
     	Group: Globals {
-			File: Utility Functions (no auto-title, bindings/globals.lb)
+			File: regex (no auto-title, bindings/regex.lb)
+			File: Misc. Utility Functions (no auto-title, bindings/globals.lb)
 		}
 	}
 
