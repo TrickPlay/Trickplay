@@ -283,7 +283,8 @@ local make = {
 				peng:animate{x = 1040, mode = "EASE_OUT_BACK", duration = 15000}
 				sign()
 			end
-			par:add(Image{src = "start-sign", position = {1470,700}})
+			par:add(Image{src = "start-sign", position = {1470,670}})
+			par:add(Image{src = "continue-sign", position = {1470,850}})
 			par:add(Image{src = "snow-bank", position = {2200,940}, scale = {-1.4,1.05}})
 			--[[if settings.best then
 				par:add(Text{font = "Sigmar 42px", color = "ffffff", text = "Best Score",
@@ -325,6 +326,7 @@ local make = {
 		end
 	end),
 	["start-sign"]		= f("start-sign.png"),
+	["continue-sign"]	= f("continue-sign.png"),
 	["thought-bubble"]	= f("thought-bubble.png"),
 	["penguin"]			= f("penguin.png"),
 	["penguin-l"]		= f("penguin-lantern.png"),

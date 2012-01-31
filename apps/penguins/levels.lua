@@ -114,7 +114,7 @@ local toload = {
 	{4,	2,0,"Double Jump!"},
 	{5,	1,0,"Great Heights"},
 	{6,	2,0,"Cold Water"},
-	{7,	3,0,"Bounce Me Higher"}, -- something here about the edges of beach balls
+	{7,	3,0,"It Matters How You Bounce"},
 	{8,	1,0,"Pool Party"},
 	{9,	3,0,"A Brief Exercise in Futility"},
 	{10,2,0,"Blocks Stop for No Penguin"}, -- time tweaking?
