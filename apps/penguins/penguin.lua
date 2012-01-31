@@ -289,8 +289,11 @@ function screen:on_key_down(key)
 		end
 	elseif key >= keys["0"] and key <= keys["9"] then
 		skating:rewind()
-		reset()
-	else--]]
+		reset()--]]
+	elseif key == keys['BACK'] then
+		skating:stop()
+		levels.next(0)
+	else
 		if levels.this.id == 1 then
 			img.deaths = 0
 			overlay.deaths.text = "0"
@@ -310,6 +313,7 @@ end
 img.vx, img.vy, img.vz = 0, 0, 0
 img.dy = 0
 img.skating = skating
+img.falling = falling
 img.kill = kill
 img.sink = sink
 img.jump = jump
