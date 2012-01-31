@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
         
 		# Toolbar font 
         font = QFont()
-        font.setPointSize(10)
+        font.setPointSize(9)
 
         # Create FileSystem
         self.ui.FileSystemDock.toggleViewAction().setText("&File System")
@@ -48,9 +48,6 @@ class MainWindow(QMainWindow):
         #self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fs)
         self._fileSystem = FileSystem()
         self.ui.FileSystemLayout.addWidget(self._fileSystem)
-        
-        # Create Editor
-        self._editorManager = EditorManager(self._fileSystem, self.ui.centralwidget)
         
         # Create Inspector
         self.ui.InspectorDock.toggleViewAction().setText("&Inspector")
@@ -80,6 +77,9 @@ class MainWindow(QMainWindow):
         self.ui.DebugLayout.addWidget(self._debug)
         self.ui.DebugDock.hide()
 
+        # Create Editor
+        self._editorManager = EditorManager(self._fileSystem, self._debug, self.ui.centralwidget)
+        
 		#Create Backtrace
         self.ui.BacktraceDock.toggleViewAction().setText("&Backtrace")
         self.ui.BacktraceDock.toggleViewAction().setFont(font)
@@ -123,13 +123,29 @@ class MainWindow(QMainWindow):
         QObject.connect(app, SIGNAL('aboutToQuit()'), self.cleanUp)
         self.app = app
 
-		#ICON 
-
+		#Icon 
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("img_samples/voice-1.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap("img_samples/rightfocus.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+        icon_continue = QtGui.QIcon()
+        icon_continue.addPixmap(QtGui.QPixmap("Assets/icon-continue.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_debug = QtGui.QIcon()
+        icon_debug.addPixmap(QtGui.QPixmap("Assets/icon-debug.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_pause = QtGui.QIcon()
+        icon_pause.addPixmap(QtGui.QPixmap("Assets/icon-pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_run = QtGui.QIcon()
+        icon_run.addPixmap(QtGui.QPixmap("Assets/icon-run.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stepinto = QtGui.QIcon()
+        icon_stepinto.addPixmap(QtGui.QPixmap("Assets/icon-stepinto.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stepout = QtGui.QIcon()
+        icon_stepout.addPixmap(QtGui.QPixmap("Assets/icon-stepout.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stepover = QtGui.QIcon()
+        icon_stepover.addPixmap(QtGui.QPixmap("Assets/icon-stepover.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stop = QtGui.QIcon()
+        icon_stop.addPixmap(QtGui.QPixmap("Assets/icon-stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
 
 		# Create ToolBar 
         self.toolbar = DockAwareToolBar() 
@@ -154,35 +170,38 @@ class MainWindow(QMainWindow):
 
 		# Create Debug/Run tool button 
         debug_tbt = QToolButton()
-        debug_tbt.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        debug_tbt.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         debug_tbt.setFont(font)
         debug_tbt.setText("Debug")
-        #debug_tbt.setIcon(icon)
+        debug_tbt.setIcon(icon_debug)
 
         self.toolbar.addWidget(debug_tbt)
 
         QObject.connect(debug_tbt , SIGNAL("clicked()"),  self.debug)
 
         debug_tbt2 = QToolButton()
-        debug_tbt2.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        debug_tbt2.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         debug_tbt2.setText("Run")
         debug_tbt2.setFont(font)
-        #debug_tbt2.setIcon(icon2)
+        debug_tbt2.setIcon(icon_run)
 
         self.toolbar.addWidget(debug_tbt2)
 
         QObject.connect(debug_tbt2 , SIGNAL("clicked()"),  self.run)
         
         debug_tbt5 = QToolButton()
-        debug_tbt5.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        debug_tbt5.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         debug_tbt5.setText("Stop")
         debug_tbt5.setFont(font)
+        debug_tbt5.setIcon(icon_stop)
         self.toolbar.addWidget(debug_tbt5)
         QObject.connect(debug_tbt5 , SIGNAL("clicked()"),  self.stop)
 
 		#Create Target Trickplay Devices Button
         self._deviceManager = TrickplayDeviceManager(self._inspector)
-        self._deviceManager.ui.comboBox.setFont(font)
+        font_deviceManager = QFont()
+        font_deviceManager.setPointSize(9)
+        self._deviceManager.ui.comboBox.setFont(font_deviceManager)
         self.toolbar.addWidget(self._deviceManager.ui.comboBox)
         
         """
@@ -198,43 +217,48 @@ class MainWindow(QMainWindow):
         #self._mini_menu.addAction(icon, "Device2")
 
         self._menu_button.setMenu(self._mini_menu)        
-        self._menu_button.setToolButtonStyle(QtCore.Qt.ToolButtonFollowStyle)
+        self._menu_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         self.toolbar.addWidget(self._menu_button)
 		"""
 
         debug_tbt3 = QToolButton()
-        debug_tbt3.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        debug_tbt3.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         debug_tbt3.setText("Step Into")
         debug_tbt3.setFont(font)
         self.toolbar.addWidget(debug_tbt3)
         QObject.connect(debug_tbt3 , SIGNAL("clicked()"),  self.debug_step_into)
+        debug_tbt3.setIcon(icon_stepinto)
 
         debug_tbt4 = QToolButton()
-        debug_tbt4.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        debug_tbt4.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         debug_tbt4.setText("Step Over")
         debug_tbt4.setFont(font)
+        debug_tbt4.setIcon(icon_stepover)
         self.toolbar.addWidget(debug_tbt4)
         QObject.connect(debug_tbt4 , SIGNAL("clicked()"),  self.debug_step_over)
 
         debug_tbt7 = QToolButton()
-        debug_tbt7.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        debug_tbt7.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         debug_tbt7.setText("Step Out")
         debug_tbt7.setFont(font)
+        debug_tbt7.setIcon(icon_stepout)
         self.toolbar.addWidget(debug_tbt7)
         QObject.connect(debug_tbt7 , SIGNAL("clicked()"),  self.debug_step_out)
 
 		 
         debug_pause = QToolButton()
-        debug_pause.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        debug_pause.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         debug_pause.setText("Pause")
         debug_pause.setFont(font)
+        debug_pause.setIcon(icon_pause)
         self.toolbar.addWidget(debug_pause)
         QObject.connect(debug_pause , SIGNAL("clicked()"),  self.debug_pause)
  
         debug_tbt6 = QToolButton()
-        debug_tbt6.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        debug_tbt6.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         debug_tbt6.setText("Continue")
         debug_tbt6.setFont(font)
+        debug_tbt6.setIcon(icon_continue)
         self.toolbar.addWidget(debug_tbt6)
         QObject.connect(debug_tbt6 , SIGNAL("clicked()"),  self.debug_continue)
 
@@ -309,7 +333,7 @@ class MainWindow(QMainWindow):
 				# clean backtrace and debug window
 				self._backtrace.ui.listWidget.clear()
 				self._debug.clearLocalTable(0)
-				self._debug.ui.breakTable.clear()
+				self._debug.clearBreakTable(0)
 			else :
 				print('Run stop------------------')
 				ret = self.deviceManager.socket.write('/quit\n\n')
@@ -353,7 +377,7 @@ class MainWindow(QMainWindow):
         else :
 			self.current_debug_file = self.path+self._deviceManager.file_name
 
-        self._editorManager.newEditor(self.current_debug_file, None, self._deviceManager.line_no)
+        self._editorManager.newEditor(self.current_debug_file, None, self._deviceManager.line_no, None, True)
 	
 	
     def editor_undo(self):
@@ -493,7 +517,7 @@ class MainWindow(QMainWindow):
 				# clean backtrace and debug windows
 				self._backtrace.ui.listWidget.clear()
 				self._debug.clearLocalTable(0)
-				self._debug.ui.breakTable.clear()
+				self._debug.clearBreakTable(0)
 
 			else :
 				file_name = ""
@@ -507,6 +531,10 @@ class MainWindow(QMainWindow):
 				stack_info = self._deviceManager.printResp(data, "bt")
 				self._backtrace.populateList(stack_info)
 
+				# print breakpoints info 
+				#data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "b", False)
+				#self._deviceManager.printResp(data, "b")
+
 				# open current file and put line marker on the current line's margin 
 				if self._deviceManager.file_name[:1] != '/' :
 					file_name = self.path+'/'+self._deviceManager.file_name
@@ -514,9 +542,9 @@ class MainWindow(QMainWindow):
 					file_name = self.path+self._deviceManager.file_name
 
 				if self.current_debug_file != file_name :
-					self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, self.current_debug_file)
+					self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, self.current_debug_file, True)
 				else :
-					self.editorManager.newEditor(file_name, None, self._deviceManager.line_no)
+					self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, None, True)
 
 				self.current_debug_file = file_name
 

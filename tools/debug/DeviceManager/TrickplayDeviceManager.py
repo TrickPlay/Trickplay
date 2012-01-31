@@ -292,6 +292,7 @@ class TrickplayDeviceManager(QWidget):
     def printResp(self, data, command):
 
 		pdata = json.loads(data)
+
 		file_name = pdata["file"] 
 		tp_id = pdata["id"] 
 		line_num = pdata["line"]
@@ -350,22 +351,38 @@ class TrickplayDeviceManager(QWidget):
 			return stack_info
 
 		elif "breakpoints" in pdata:
-			breakpoints_info = ""
+			state_var_list = []
+			info_var_list = []
+			file_var_list = []
+			linenum_var_list = []
+			breakpoints_info = {}
+			breakpoints_info_str = ""
 			index = 0
 			if len(pdata["breakpoints"]) == 0:
 				print "\t"+"No breakpoints set"
 			else:
 				for b in pdata["breakpoints"]:
 					if "file" in b and "line" in b:
-						breakpoints_info = breakpoints_info+"["+str(index)+"] "+b["file"]+":"+str(b["line"])
-						index = index + 1
+						breakpoints_info_str = breakpoints_info_str+"["+str(index)+"] "+b["file"]+":"+str(b["line"])
+						info_var_list.append(b["file"]+":"+str(b["line"]))
+						file_var_list.append(b["file"])
+						linenum_var_list.append(str(b["line"]))
 					if "on" in b:
 						if b["on"] == True:
-							breakpoints_info = breakpoints_info+""+"\n\t"
+							breakpoints_info_str = breakpoints_info_str+""+"\n\t"
+							state_var_list.append("on")
 						else:
-							breakpoints_info = breakpoints_info+" (disabled)"+"\n\t"
+							breakpoints_info_str = breakpoints_info_str+" (disabled)"+"\n\t"
+							state_var_list.append("off")
+					index = index + 1
 
-			print "\t"+breakpoints_info
+			breakpoints_info[1] = info_var_list
+			breakpoints_info[2] = file_var_list
+			breakpoints_info[3] = linenum_var_list
+			breakpoints_info[4] = state_var_list
+
+			print "\t"+breakpoints_info_str
+			return breakpoints_info
 		
 		elif "source" in pdata:
 			source_info = ""
