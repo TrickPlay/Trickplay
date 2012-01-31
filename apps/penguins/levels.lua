@@ -104,20 +104,20 @@ local new = function (def)
 end
 
 local toload = {
-	{0,	2,0,"Splash Screen"},
+	{0,	2,0,"Splash Screen"}, -- save/continue
 	--
 	--[[
 	--]]
-	{1,	1,0,"Penguin In Motion"},
+	{1,	1,0,"Learning To Fly"}, -- button press anim?
 	{2,	1,0,"You're Probably Gonna Die"},
 	{3,	2,0,"Ice Trios"},
 	{4,	2,0,"Double Jump!"},
 	{5,	1,0,"Great Heights"},
 	{6,	2,0,"Cold Water"},
-	{7,	3,0,"Bounce Me Higher"},
+	{7,	3,0,"Bounce Me Higher"}, -- something here about the edges of beach balls
 	{8,	1,0,"Pool Party"},
 	{9,	3,0,"A Brief Exercise in Futility"},
-	{10,2,0,"Blocks Stop for No Penguin"},
+	{10,2,0,"Blocks Stop for No Penguin"}, -- time tweaking?
 	--
 	{11,2,0,"Playtime With Mr. Seal"},
 	{12,1,0,"And Now Bounce Me Lower"},
@@ -175,9 +175,17 @@ screen:add(levels.this)
 
 levels.cycle = false
 levels.next = function(arg)
-	levels.cycle = true
 	local oldlevel = levels.this
-	levels.this = levels[oldlevel.id % #levels + (oldlevel.id > 1 and arg or 1)]
+	if arg == 0 then
+		if oldlevel.id == 1 then return end
+		levels.cycle = false
+		levels.this = levels[1]
+	else
+		levels.cycle = true
+		levels.this = levels[oldlevel.id % #levels + (oldlevel.id > 1 and arg or 1)]
+		settings.level = levels.this.id
+	end
+	settings.deaths = penguin.deaths
 	levels.this:load()
 	levels.this.y = oldlevel.id == 1 and 1070 or 1120
 	screen:add(levels.this)
