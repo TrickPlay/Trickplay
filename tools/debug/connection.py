@@ -1,5 +1,5 @@
 import httplib, urllib, urllib2, json
-import os, time
+import os, time, re
 from socket import error
 #from Inspector.Data import BadDataException
 
@@ -154,3 +154,50 @@ def test():
 if __name__ == "__main__":
     
     test()
+
+def printResp(data, command):
+
+	pdata = json.loads(data)
+
+	file_name = pdata["file"] 
+	tp_id = pdata["id"] 
+	line_num = pdata["line"]
+
+	if "error" in pdata:
+		print "\t"+pdata["error"] 
+	elif "breakpoints" in pdata:
+		state_var_list = []
+		info_var_list = []
+		file_var_list = []
+		#linenum_var_list = []
+		breakpoints_info = {}
+		breakpoints_info_str = ""
+		index = 0
+		if len(pdata["breakpoints"]) == 0:
+			print "\t"+"No breakpoints set"
+			return breakpoints_info
+		else:
+			for b in pdata["breakpoints"]:
+				if "file" in b and "line" in b:
+					breakpoints_info_str = breakpoints_info_str+"["+str(index)+"] "+b["file"]+":"+str(b["line"])
+					info_var_list.append(b["file"]+":"+str(b["line"]))
+
+					n = re.search("[/]+\S+[/]+", b["file"]).end()
+					
+					file_var_list.append(b["file"][n:]+" : "+str(b["line"]))
+				if "on" in b:
+					if b["on"] == True:
+						breakpoints_info_str = breakpoints_info_str+""+"\n\t"
+						state_var_list.append("on")
+					else:
+						breakpoints_info_str = breakpoints_info_str+" (disabled)"+"\n\t"
+						state_var_list.append("off")
+				index = index + 1
+
+			breakpoints_info[1] = state_var_list
+			breakpoints_info[2] = file_var_list
+			breakpoints_info[3] = info_var_list
+			#breakpoints_info[4] = linenum_var_list
+
+			print "\t"+breakpoints_info_str
+			return breakpoints_info

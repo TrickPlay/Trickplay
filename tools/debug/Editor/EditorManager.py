@@ -12,7 +12,7 @@ from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 
 class EditorManager(QtGui.QWidget):    
     
-    def __init__(self, fileSystem, parent = None):
+    def __init__(self, fileSystem, debugWindow, parent = None):
     
         QtGui.QWidget.__init__(self)
         
@@ -20,7 +20,11 @@ class EditorManager(QtGui.QWidget):
         
         self.fileSystem = fileSystem
 
+        self.debugWindow = debugWindow
+
         self.tab = None
+
+        self.currentEditor = None
 
     
     
@@ -183,7 +187,7 @@ class EditorManager(QtGui.QWidget):
 
 		
 
-    def newEditor(self, path, tabGroup = None, line_no = None, prev_file = None):
+    def newEditor(self, path, tabGroup = None, line_no = None, prev_file = None, currentLine = False):
         """
         Create a tab group if both don't exist,
         then add an editor in the correct tab widget.
@@ -191,7 +195,7 @@ class EditorManager(QtGui.QWidget):
 
         path = str(path)
         name = os.path.basename(str(path))
-        editor = Editor()
+        editor = Editor(self.debugWindow, self, None)
         closedTab = None
 
         # Default to opening in the first tab group
@@ -215,7 +219,7 @@ class EditorManager(QtGui.QWidget):
         		for k in self.tab.paths:
 					self.editors[k][1] = self.tab.paths.index(k) 
 
-        		editor.readFile(path) # ????? don't need ?
+        		editor.readFile(path) 
 
             if closedTab != path:
 				for k in self.editors:
@@ -223,18 +227,19 @@ class EditorManager(QtGui.QWidget):
 						self.editorGroups[tabGroup].setCurrentIndex(self.editors[k][1])
 						if line_no != None:
 							self.tab.editors[self.editors[k][1]].SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
-							if self.tab.editors[self.editors[k][1]].current_line > -1 :
-								self.tab.editors[self.editors[k][1]].markerDelete(self.tab.editors[self.editors[k][1]].current_line, Editor.ARROW_MARKER_NUM)
-							elif prev_file != None:
-								if closedTab != prev_file:
-									for j in self.editors:
-										if prev_file == j:
-											self.tab.editors[self.editors[j][1]].markerDelete(self.tab.editors[self.editors[j][1]].current_line, Editor.ARROW_MARKER_NUM)
-											self.tab.editors[self.editors[j][1]].current_line = -1
-							if path == k:
-								self.tab.editors[self.editors[k][1]].markerAdd(int(line_no) -1, Editor.ARROW_MARKER_NUM)
-								self.tab.editors[self.editors[k][1]].current_line = int(line_no) -1 
-
+							self.currentEditor = self.tab.editors[self.editors[k][1]]
+							if currentLine == True :
+								if self.tab.editors[self.editors[k][1]].current_line > -1 :
+									self.tab.editors[self.editors[k][1]].markerDelete(self.tab.editors[self.editors[k][1]].current_line, Editor.ARROW_MARKER_NUM)
+								elif prev_file != None:
+									if closedTab != prev_file:
+										for j in self.editors:
+											if prev_file == j:
+												self.tab.editors[self.editors[j][1]].markerDelete(self.tab.editors[self.editors[j][1]].current_line, Editor.ARROW_MARKER_NUM)
+												self.tab.editors[self.editors[j][1]].current_line = -1
+								if path == k:
+									self.tab.editors[self.editors[k][1]].markerAdd(int(line_no) -1, Editor.ARROW_MARKER_NUM)
+									self.tab.editors[self.editors[k][1]].current_line = int(line_no) -1 
 				return
         else:
             editor.readFile(path)
@@ -255,18 +260,20 @@ class EditorManager(QtGui.QWidget):
 
         if not line_no == None:
 			editor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
-			if editor.current_line > -1 :
-				editor.markerDelete(
-					edito.current_line, 
-					Editor.ARROW_MARKER_NUM)
-			elif prev_file != None:
-				for l in self.editors:
-					if prev_file == l:
-						self.tab.editors[self.editors[l][1]].markerDelete(self.tab.editors[self.editors[l][1]].current_line, Editor.ARROW_MARKER_NUM)
-						self.tab.editors[self.editors[l][1]].current_line = -1
+			self.currentEditor = editor
+			if currentLine == True :
+				if editor.current_line > -1 :
+					editor.markerDelete(
+						edito.current_line, 
+						Editor.ARROW_MARKER_NUM)
+				elif prev_file != None:
+					for l in self.editors:
+						if prev_file == l:
+							self.tab.editors[self.editors[l][1]].markerDelete(self.tab.editors[self.editors[l][1]].current_line, Editor.ARROW_MARKER_NUM)
+							self.tab.editors[self.editors[l][1]].current_line = -1
 
-			editor.markerAdd(int(line_no) -1, Editor.ARROW_MARKER_NUM)
-			editor.current_line = int(line_no) -1 
+				editor.markerAdd(int(line_no) -1, Editor.ARROW_MARKER_NUM)
+				editor.current_line = int(line_no) -1 
 
     def dropFileEvent(self, event, src, w = None):
         """

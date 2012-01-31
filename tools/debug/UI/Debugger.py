@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Debugger.ui'
+# Form implementation generated from reading ui file 'Debugger2.ui'
 #
-# Created: Fri Jan 27 13:47:21 2012
+# Created: Mon Jan 30 12:16:31 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -50,7 +50,9 @@ class Ui_TrickplayDebugger(object):
         self.breakTable.setObjectName(_fromUtf8("breakTable"))
         self.breakTable.setColumnCount(0)
         self.breakTable.setRowCount(0)
+        self.breakTable.horizontalHeader().setVisible(False)
         self.breakTable.horizontalHeader().setStretchLastSection(True)
+        self.breakTable.verticalHeader().setVisible(False)
         self.gridLayout_3.addWidget(self.breakTable, 0, 0, 1, 1)
         self.tabWidget.addTab(self.Breaks, _fromUtf8(""))
         self.Locals = QtGui.QWidget()
@@ -81,13 +83,14 @@ class Ui_TrickplayDebugger(object):
         self.localTable.setColumnCount(0)
         self.localTable.setRowCount(0)
         self.localTable.horizontalHeader().setStretchLastSection(True)
+        self.localTable.verticalHeader().setVisible(False)
         self.localTable.verticalHeader().setStretchLastSection(False)
         self.gridLayout_2.addWidget(self.localTable, 0, 0, 1, 1)
         self.tabWidget.addTab(self.Locals, _fromUtf8(""))
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
 
         self.retranslateUi(TrickplayDebugger)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(TrickplayDebugger)
 
     def retranslateUi(self, TrickplayDebugger):
