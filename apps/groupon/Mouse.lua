@@ -63,8 +63,8 @@ function screen:on_motion(x,y)
     
 end
 
-function screen:on_scroll(dir)
-	print(dir)
+function screen:on_scroll(_,_,dir)
+	--print(dir)
 	if dir == 0 then
 		
 		App_State.rolodex.scroll_up()
