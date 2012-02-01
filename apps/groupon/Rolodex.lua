@@ -1,6 +1,6 @@
 --local top_card = 1
 
-local r_pos
+local r_pos, flip_on_completed
 
 local function flip_forward(self,msecs,p)
 	
@@ -39,6 +39,13 @@ local function flip_forward(self,msecs,p)
         
         self.flipping = false
 		
+        if flip_on_completed then
+            dolater(function()
+                flip_on_completed()
+                flip_on_completed = nil
+            end)
+        end
+        
 	end
 	
 end
@@ -91,6 +98,13 @@ local function flip_backward(self,msecs,p)
         self.cards[self.top_card]:get_focus()
         
         self.flipping = false
+		
+        if flip_on_completed then
+            dolater(function()
+                flip_on_completed()
+                flip_on_completed = nil
+            end)
+        end
         
 	end
     
@@ -147,14 +161,20 @@ local function update_times(self)
 end
 
 
+
 --ROLODEX CONSTRUCTOR
 return function(response_table)
     
     --upvals: card, deal, rolodex
     local c, d
-    
-    --grab pre-existing rolodex, if any
-    --r = screen:find_child("Rolodex")
+    print('make')
+    if response_table == false then
+        
+        Loading_G:message("Having trouble connecting")
+        
+        return
+        
+    end
     
     --if not, create
     if App_State.rolodex == nil then
@@ -182,7 +202,7 @@ return function(response_table)
                         Idle_Loop:add_function(
                             App_State.rolodex.flip_backward,
                             App_State.rolodex,
-                            1000
+                            500
                         )
                         
                         App_State.rolodex.flipping = true
@@ -200,7 +220,7 @@ return function(response_table)
                         Idle_Loop:add_function(
                             App_State.rolodex.flip_forward,
                             App_State.rolodex,
-                            1000
+                            500
                         )
                         
                         App_State.rolodex.flipping = true
@@ -209,6 +229,78 @@ return function(response_table)
                 end,
             }
         )
+        
+        App_State.rolodex.scroll_up = function(self)
+            
+            if not App_State.rolodex.flipping then
+                
+                App_State.rolodex:pre_forward_flip()
+                
+                Idle_Loop:add_function(
+                    App_State.rolodex.flip_forward,
+                    App_State.rolodex,
+                    500
+                )
+                
+                App_State.rolodex.flipping = true
+                
+            else
+                
+                Idle_Loop:modify_duration(
+                    App_State.rolodex.flip_forward,
+                    200
+                )
+                
+                flip_on_completed = function()
+                    
+                    App_State.rolodex:pre_forward_flip()
+                    
+                    Idle_Loop:add_function(
+                        App_State.rolodex.flip_forward,
+                        App_State.rolodex,
+                        500
+                    )
+                    
+                    App_State.rolodex.flipping = true
+                end
+            end
+        end
+        
+        App_State.rolodex.scroll_dn = function(self)
+            
+            if not App_State.rolodex.flipping then
+                
+                App_State.rolodex:pre_backward_flip()
+                
+                Idle_Loop:add_function(
+                    App_State.rolodex.flip_backward,
+                    App_State.rolodex,
+                    500
+                )
+                
+                App_State.rolodex.flipping = true
+                
+            else
+                
+                Idle_Loop:modify_duration(
+                    App_State.rolodex.flip_backward,
+                    200
+                )
+                
+                flip_on_completed = function()
+                    
+                    App_State.rolodex:pre_backward_flip()
+                    
+                    Idle_Loop:add_function(
+                        App_State.rolodex.flip_backward,
+                        App_State.rolodex,
+                        500
+                    )
+                    
+                    App_State.rolodex.flipping = true
+                end
+            end
+        end
         
         App_State.rolodex.to_mouse = function()
             for _,c in pairs(App_State.rolodex.cards) do
@@ -270,29 +362,29 @@ return function(response_table)
             --pass the card constructor all of the important aspects of the deal information
             c = Card_Constructor{
                 --Card Data
-                title         = d.title,
-                division      = d.division.name,
+                title         = d.title or "Groupon Deal",
+                division      = d.division and d.division.name or "",
                 --Pricing
-                price         = "$"..d.options[lowest_price_i].price.amount/100,
-                msrp          = "$"..d.options[lowest_price_i].value.amount/100,
-                percentage    =      d.options[lowest_price_i].discountPercent,
-                saved         = "$"..d.options[lowest_price_i].discount.amount/100,
+                price         = (d.options[lowest_price_i] and d.options[lowest_price_i].price and "$"..d.options[lowest_price_i].price.amount/100 or ""),
+                msrp          = (d.options[lowest_price_i].value and "$"..d.options[lowest_price_i].value.amount/100 or ""),
+                percentage    = (d.options[lowest_price_i].discountPercent.."%" or ""),
+                saved         = (d.options[lowest_price_i].discount and "$"..d.options[lowest_price_i].discount.amount/100 or ""),
                 --Timer
-                expiration    = d.endAt ~= json.null and d.endAt or d.options[lowest_price_i].expiresAt,
-                tz            = d.division.timezoneOffsetInSeconds,
+                expiration    = d.endAt ~= json.null and d.endAt or d.options[lowest_price_i].expiresAt or json.null,
+                tz            = d.division.timezoneOffsetInSeconds or json.null,
                 --Amount Sold
-                amount_sold   = d.soldQuantity      or d.options[lowest_price_i].soldQuantity,
-                sold_out      = choose(d.isSoldOut         ~= nil, d.isSoldOut, d.options[lowest_price_i].isSoldOut),
-                limit         = choose(d.isLimitedQuantity ~= nil, d.isLimitedQuantity, d.options[lowest_price_i].isLimitedQuantity),
+                amount_sold   = d.soldQuantity      or d.options[lowest_price_i].soldQuantity or "0",
+                sold_out      = choose(d.isSoldOut         ~= nil, d.isSoldOut, choose(d.options[lowest_price_i].isSoldOut~= nil,d.options[lowest_price_i].isSoldOut,false)),
+                limit         = choose(d.isLimitedQuantity ~= nil, d.isLimitedQuantity, choose(d.options[lowest_price_i].isLimitedQuantity~= nil,d.options[lowest_price_i].isLimitedQuantity,false)),
                 
-                picture_url   = d.largeImageUrl,
-                id            = d.id,
+                picture_url   = choose(d.largeImageUrl~=nil,d.largeImageUrl, false),
+                id            = choose(d.id~=nil,d.id, false),
                 
                 --SMS Menu needs these
-                fine_print    = d.options[lowest_price_i].details[1].description,
-                highlights    = d.highlightsHtml,
-                merchant      = d.merchant.name,
-                deal_url      = d.dealUrl,
+                fine_print    = d.options[lowest_price_i].details and d.options[lowest_price_i].details[1].description or "",
+                highlights    = d.highlightsHtml or "",
+                merchant      = d.merchant.name or "",
+                deal_url      = choose(d.dealUrl~=nil,d.dealUrl, false),
             }
             table.insert( App_State.rolodex.cards, c )
             

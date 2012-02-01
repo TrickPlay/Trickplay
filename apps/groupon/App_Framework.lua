@@ -64,7 +64,7 @@ do
 				end
 			end
 			
-			error("was in to_be_deleted_r but not to_be_deleted?!?!?")
+			error("was in to_be_deleted_r but not to_be_deleted?!?!?",2)
 		elseif to_be_added_r[new_function] ~= nil then
 			
 			parameters[new_function].duration = duration
@@ -75,7 +75,7 @@ do
 			
         elseif iterated_list[new_function] ~= nil then
 			
-			error("function is already iterating in the idle_loop")
+			--error("function is already iterating in the idle_loop",2)
 			
         else
             
@@ -204,6 +204,20 @@ do
             parameters[to_be_deleted[i]]      = nil
             
             to_be_deleted[i]                  = nil
+            
+        end
+        
+    end
+    
+    Idle_Loop.modify_duration  = function(self,obj,new_dur)
+        
+        if parameters[obj] then
+            
+            local p = parameters[obj].elapsed/parameters[obj].duration
+            
+            parameters[obj].duration = new_dur
+            
+            parameters[obj].elapsed = new_dur*p
             
         end
         
