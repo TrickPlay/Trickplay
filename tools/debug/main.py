@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         self.ui.FileSystemDock.toggleViewAction().setText("&File System")
         self.ui.FileSystemDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.FileSystemDock.toggleViewAction())
-        #self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fs)
+        self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fileWindowClicked)
         self._fileSystem = FileSystem()
         self.ui.FileSystemLayout.addWidget(self._fileSystem)
         
@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
         self.ui.InspectorDock.toggleViewAction().setText("&Inspector")
         self.ui.InspectorDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
+        self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
         self._inspector = TrickplayInspector()
         self.ui.InspectorLayout.addWidget(self._inspector)
         self.ui.InspectorDock.hide()
@@ -61,6 +62,7 @@ class MainWindow(QMainWindow):
         self.ui.ConsoleDock.toggleViewAction().setText("&Console")
         self.ui.ConsoleDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.ConsoleDock.toggleViewAction())
+        self.ui.ConsoleDock.toggleViewAction().triggered.connect(self.consoleWindowClicked)
         self._console = TrickplayConsole()
         self.ui.ConsoleLayout.addWidget(self._console)
         self.ui.ConsoleDock.hide()
@@ -73,6 +75,7 @@ class MainWindow(QMainWindow):
         self.ui.DebugDock.toggleViewAction().setText("&Debug")
         self.ui.DebugDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.DebugDock.toggleViewAction())
+        self.ui.DebugDock.toggleViewAction().triggered.connect(self.debugWindowClicked)
         self._debug = TrickplayDebugger()
         self.ui.DebugLayout.addWidget(self._debug)
         self.ui.DebugDock.hide()
@@ -84,6 +87,7 @@ class MainWindow(QMainWindow):
         self.ui.BacktraceDock.toggleViewAction().setText("&Backtrace")
         self.ui.BacktraceDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.BacktraceDock.toggleViewAction())
+        self.ui.BacktraceDock.toggleViewAction().triggered.connect(self.traceWindowClicked)
         self._backtrace = TrickplayBacktrace()
         self.ui.BacktraceLayout.addWidget(self._backtrace)
         self.ui.BacktraceDock.hide()
@@ -124,12 +128,6 @@ class MainWindow(QMainWindow):
         self.app = app
 
 		#Icon 
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("img_samples/voice-1.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("img_samples/rightfocus.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-
         icon_continue = QtGui.QIcon()
         icon_continue.addPixmap(QtGui.QPixmap("Assets/icon-continue.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon_debug = QtGui.QIcon()
@@ -146,6 +144,26 @@ class MainWindow(QMainWindow):
         icon_stepover.addPixmap(QtGui.QPixmap("Assets/icon-stepover.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon_stop = QtGui.QIcon()
         icon_stop.addPixmap(QtGui.QPixmap("Assets/icon-stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.icon_file_on = QtGui.QIcon()
+    	self.icon_file_on.addPixmap(QtGui.QPixmap("Assets/panel-files-on.png"), QtGui.QIcon.Normal)
+        self.icon_file_off = QtGui.QIcon()
+    	self.icon_file_off.addPixmap(QtGui.QPixmap("Assets/panel-files-off.png"), QtGui.QIcon.Normal)
+        self.icon_inspector_on = QtGui.QIcon()
+    	self.icon_inspector_on.addPixmap(QtGui.QPixmap("Assets/panel-inspector-on.png"), QtGui.QIcon.Normal)
+        self.icon_inspector_off = QtGui.QIcon()
+    	self.icon_inspector_off.addPixmap(QtGui.QPixmap("Assets/panel-inspector-off.png"), QtGui.QIcon.Normal)
+        self.icon_console_on = QtGui.QIcon()
+    	self.icon_console_on.addPixmap(QtGui.QPixmap("Assets/panel-console-on.png"), QtGui.QIcon.Normal)
+        self.icon_console_off = QtGui.QIcon()
+    	self.icon_console_off.addPixmap(QtGui.QPixmap("Assets/panel-console-off.png"), QtGui.QIcon.Normal)
+        self.icon_debug_on = QtGui.QIcon()
+    	self.icon_debug_on.addPixmap(QtGui.QPixmap("Assets/panel-debug-on.png"), QtGui.QIcon.Normal)
+        self.icon_debug_off = QtGui.QIcon()
+    	self.icon_debug_off.addPixmap(QtGui.QPixmap("Assets/panel-debug-off.png"), QtGui.QIcon.Normal)
+        self.icon_trace_on = QtGui.QIcon()
+    	self.icon_trace_on.addPixmap(QtGui.QPixmap("Assets/panel-refresh-on.png"), QtGui.QIcon.Normal)
+        self.icon_trace_off = QtGui.QIcon()
+    	self.icon_trace_off.addPixmap(QtGui.QPixmap("Assets/panel-refresh-off.png"), QtGui.QIcon.Normal)
 
 		# Create ToolBar 
         self.toolbar = DockAwareToolBar() 
@@ -264,6 +282,93 @@ class MainWindow(QMainWindow):
 
         self.current_debug_file = None
 
+        right_spacer = QWidget()
+        right_spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.toolbar.addWidget(right_spacer)
+        self.windows = {"file":True, "inspector":False, "console":False, "debug":False, "trace":False}
+
+        self.file_toolBtn = QPushButton()
+        self.file_toolBtn.setFixedWidth(30)
+        self.file_toolBtn.setIcon(self.icon_file_on)
+        self.toolbar.addWidget(self.file_toolBtn)
+        QObject.connect(self.file_toolBtn , SIGNAL("clicked()"),  self.fileWindowClicked)
+
+        self.inspector_toolBtn = QPushButton()
+        self.inspector_toolBtn.setFixedWidth(30)
+        self.inspector_toolBtn.setIcon(self.icon_inspector_off)
+        self.toolbar.addWidget(self.inspector_toolBtn)
+        QObject.connect(self.inspector_toolBtn , SIGNAL("clicked()"),  self.inspectorWindowClicked)
+	
+        self.console_toolBtn = QPushButton()
+        self.console_toolBtn.setFixedWidth(30)
+        self.console_toolBtn.setIcon(self.icon_console_off)
+        self.toolbar.addWidget(self.console_toolBtn)
+        QObject.connect(self.console_toolBtn , SIGNAL("clicked()"),  self.consoleWindowClicked)
+
+        self.debug_toolBtn = QPushButton()
+        self.debug_toolBtn.setFixedWidth(30)
+        self.debug_toolBtn.setIcon(self.icon_debug_off)
+        self.toolbar.addWidget(self.debug_toolBtn)
+        QObject.connect(self.debug_toolBtn , SIGNAL("clicked()"),  self.debugWindowClicked)
+
+        self.trace_toolBtn = QPushButton()
+        self.trace_toolBtn.setFixedWidth(30)
+        self.trace_toolBtn.setIcon(self.icon_trace_off)
+        self.toolbar.addWidget(self.trace_toolBtn)
+        QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
+
+        #toolBtn.setEnabled(False)
+        #toolBtn.setIcon(icon_console_on)
+    def traceWindowClicked(self) :
+    	if self.windows['trace'] == True:
+    		self.trace_toolBtn.setIcon(self.icon_trace_off)
+    		self.ui.BacktraceDock.hide()
+    		self.windows['trace'] = False
+    	else :
+    		self.trace_toolBtn.setIcon(self.icon_trace_on)
+    		self.ui.BacktraceDock.show()
+    		self.windows['trace'] = True
+
+    def fileWindowClicked(self) :
+    	if self.windows['file'] == True:
+			self.file_toolBtn.setIcon(self.icon_file_off)
+			self.ui.FileSystemDock.hide()
+			self.windows['file'] = False
+    	else :
+    		self.file_toolBtn.setIcon(self.icon_file_on)
+    		self.ui.FileSystemDock.show()
+    		self.windows['file'] = True
+
+    def inspectorWindowClicked(self) :
+    	if self.windows['inspector'] == True:
+    		self.inspector_toolBtn.setIcon(self.icon_inspector_off)
+    		self.ui.InspectorDock.hide()
+    		self.windows['inspector'] = False
+    	else :
+    		self.inspector_toolBtn.setIcon(self.icon_inspector_on)
+    		self.ui.InspectorDock.show()
+    		self.windows['inspector'] = True
+
+    def debugWindowClicked(self) :
+    	if self.windows['debug'] == True:
+    		self.debug_toolBtn.setIcon(self.icon_debug_off)
+    		self.ui.DebugDock.hide()
+    		self.windows['debug'] = False
+    	else :
+    		self.debug_toolBtn.setIcon(self.icon_debug_on)
+    		self.ui.DebugDock.show()
+    		self.windows['debug'] = True
+
+    def consoleWindowClicked(self) :
+    	if self.windows['console'] == True:
+    		self.console_toolBtn.setIcon(self.icon_console_off)
+    		self.ui.ConsoleDock.hide()
+    		self.windows['console'] = False
+    	else :
+    		self.console_toolBtn.setIcon(self.icon_console_on)
+    		self.ui.ConsoleDock.show()
+    		self.windows['console'] = True
+
 		
     @property
     def fileSystem(self):
@@ -340,11 +445,17 @@ class MainWindow(QMainWindow):
 				if ret < 0 :
 					print ("tp console socket is not available !")
 
+        #self.ui.InspectorDock.hide()
+        #self.ui.ConsoleDock.hide()
+        #self.ui.DebugDock.hide()
+        #self.ui.BacktraceDock.hide()
 
-        self.ui.InspectorDock.hide()
-        self.ui.ConsoleDock.hide()
-        self.ui.DebugDock.hide()
-        self.ui.BacktraceDock.hide()
+        self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
+        self.inspectorWindowClicked()
+        self.consoleWindowClicked()
+        self.debugWindowClicked()
+        self.traceWindowClicked()
+
         self.inspector.clearTree()
         #self._deviceManager.ui.comboBox.removeItem(self._deviceManager.ui.comboBox.findText(self._deviceManager.newAppText))
         self._deviceManager.ui.comboBox.setCurrentIndex(0)
@@ -353,18 +464,30 @@ class MainWindow(QMainWindow):
     def run(self):
         self.inspector.clearTree()
         self._deviceManager.run(False)
-        self.ui.InspectorDock.show()
-        self.ui.ConsoleDock.show()
-        self.ui.DebugDock.hide()
-        self.ui.BacktraceDock.hide()
+        self.windows = {"file":False, "inspector":False, "console":False, "debug":True, "trace":True}
+        self.inspectorWindowClicked()
+        self.consoleWindowClicked()
+        self.debugWindowClicked()
+        self.traceWindowClicked()
+
+        #self.ui.InspectorDock.show()
+        #self.ui.ConsoleDock.show()
+        #self.ui.DebugDock.hide()
+        #self.ui.BacktraceDock.hide()
 
     def debug(self):
         self.inspector.clearTree()
         self._deviceManager.run(True)
-        self.ui.InspectorDock.show()
-        self.ui.ConsoleDock.show()
-        self.ui.DebugDock.show()
-        self.ui.BacktraceDock.show()
+
+        self.windows = {"file":False, "inspector":False, "console":False, "debug":False, "trace":False}
+        self.inspectorWindowClicked()
+        self.consoleWindowClicked()
+        self.debugWindowClicked()
+        self.traceWindowClicked()
+        #self.ui.InspectorDock.show()
+        #self.ui.ConsoleDock.show()
+        #self.ui.DebugDock.show()
+        #self.ui.BacktraceDock.show()
         time.sleep(2)
         data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bn", True)
         print ("-----------")
