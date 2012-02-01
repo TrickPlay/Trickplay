@@ -10,16 +10,29 @@ local try_again = Timer{
 		
         print( "Resending " .. self.req.url )
         
-		self.req:send()
+		cancel_obj = self.req:send()
 		
 	end
 }
 
 try_again:stop()
 
+local cancel_obj
+
+local cancel = function()
+    
+    if cancel_obj then
+        cancel_obj:cancel()
+    end
+    
+    try_again:stop()
+    
+end
+
 local response_check = function(request_object,response_object,callback)
 	
 	if response_object.failed then
+        
         print(
 			
 			"URLRequest FAILED, receiving the reponse code: "..
@@ -29,11 +42,9 @@ local response_check = function(request_object,response_object,callback)
 			response_object.status..".  Trying again in "..try_again.interval/1000
 			
 		)
+        
     elseif response_object.code ~= 200 then
 		
-        
-        
-        
 		print(
 			
 			"URLRequest received a reponse code: "..
@@ -43,26 +54,7 @@ local response_check = function(request_object,response_object,callback)
 			response_object.status..".  Trying again in "..try_again.interval/1000
 			
 		)
-        --]]
         
-        --[[
-		if attempts[request_object] == nil then
-			
-			attempts[request_object] = 1
-			
-		elseif attempts[request_object] > 3 then
-			
-			
-			
-		else
-			
-			attempts[request_object] = attempts[request_object] + 1
-			
-		end
-		--]]
-        
-		
-		
 	elseif response_object.body == nil then
 		
 		error(
@@ -75,33 +67,30 @@ local response_check = function(request_object,response_object,callback)
 		
 		local json_response = json:parse(response_object.body)
 		
-		
 		if json_response == nil then
 			
+            cancel_obj = nil
+            
 			callback(  Xml_Parse(response_object.body)  )
 			
         else
             
+            cancel_obj = nil
+            
             callback(json_response)
             
 		end
-        
-		--[[
-		if json_response == nil or type(json_response) ~= "table" then
-			
-			print(response_object.body)
-			
-			error("Unable to parse ResponseObject.body, parse result = "..json_response)
-			
-		end
-		--]]
 		
         return
+        
 	end
     
+    callback(false)
+    
     try_again.req = request_object
-		
+	
 	try_again:start()
+    
 end
 
 --------------------------------------------------------------------------------
@@ -124,7 +113,8 @@ local google_maps_get_lat_lng_from_zip = function(zip, callback)
 	end
     }
     
-    return req:send()
+    cancel_obj = req:send()
+    
 end
 
 --------------------------------------------------------------------------------
@@ -162,7 +152,7 @@ local function groupon_get_deals(callback,lat,lng,radius)
 	end
 	
 	
-	return req:send()
+	cancel_obj = req:send()
 end
 
 --------------------------------------------------------------------------------
@@ -190,7 +180,7 @@ local shorten_url = function(url,callback)
 		end
 	}
 	
-	return req:send()
+	cancel_obj = req:send()
 	
 end
 
@@ -220,11 +210,20 @@ local tropo_sms = function(callback,merchant_name,deal_url,to)
 		cj_link(deal_url),
 		
 		function(response)
-			dumptable(response)
+			--dumptable(response)
+            
+            if response == false then
+                
+                callback(false)
+                
+                return
+                
+            end
+            
 			local req = URLRequest{
 				
 				url = "https://api.tropo.com/1.0/sessions?action=create&token="..
-					tropo_api_key.."&msg="..uri:escape("Here's your "..'"'..merchant_name..'"'.." Groupon offer: "..response.data.url).."&to="..to,
+					tropo_api_key.."&msg="..uri:escape("Here's your "..(merchant_name and merchant_name~= "" and('"'..merchant_name..'"') or "").." Groupon offer: "..response.data.url).."&to="..to,
 				
 				on_complete = function(self,response_object)
 					
@@ -233,12 +232,11 @@ local tropo_sms = function(callback,merchant_name,deal_url,to)
 				end
 			}
 			
-			req:send()
+			cancel_obj = req:send()
 			
 		end
 	)
     
-	print("sent")
 end
 
-return groupon_get_deals, tropo_sms, google_maps_get_lat_lng_from_zip, try_again
+return groupon_get_deals, tropo_sms, google_maps_get_lat_lng_from_zip, cancel
