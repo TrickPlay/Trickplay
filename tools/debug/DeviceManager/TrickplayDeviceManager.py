@@ -47,12 +47,20 @@ class TrickplayDeviceManager(QWidget):
         self.console_port = 7777
         self.my_name = ""
 
+        self.icon = QIcon()
+        self.icon.addPixmap(QPixmap("Assets/icon-target.png"), QIcon.Normal, QIcon.Off)
+        self.icon_null = QIcon()
+        self.prev_index = 0
 
     def service_selected(self, index):
         
 		if index < 0:
 			return
         
+		self.ui.comboBox.setItemIcon(self.prev_index, self.icon_null)
+		self.ui.comboBox.setItemIcon(index, self.icon)
+		self.prev_index = index
+
 		address = self.ui.comboBox.itemData(index, ADDRESS).toPyObject()
 		port = self.ui.comboBox.itemData(index, PORT).toPyObject()
 
@@ -122,9 +130,12 @@ class TrickplayDeviceManager(QWidget):
         name = 'Emulator'  #'Trickplay Device   '
         port = '6789'
         address = 'localhost'
-        
+        icon = QIcon()
+        icon.addPixmap(QPixmap("Assets/icon-target.png"), QIcon.Normal, QIcon.Off)
+
         self.ui.comboBox.addItem(name)
         index = self.ui.comboBox.findText(name)
+        self.ui.comboBox.setItemIcon(index, icon)
         self.ui.comboBox.setItemData(index, address, ADDRESS)
         self.ui.comboBox.setItemData(index, port, PORT)
         self.ui.comboBox.setItemData(index, address, NAME)

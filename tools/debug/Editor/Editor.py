@@ -21,7 +21,9 @@ class Editor(QsciScintilla):
     BACKGROUND_MARKER_NUM = 0
     ACTIVE_BREAK_MARKER_NUM = 1
     DEACTIVE_BREAK_MARKER_NUM = 2
-    ARROW_MARKER_NUM = 8
+    ARROW_MARKER_NUM = 3
+    ARROW_ACTIVE_BREAK_MARKER_NUM = 4
+    ARROW_DEACTIVE_BREAK_MARKER_NUM = 5
     
     def __init__(self, debugWindow=None, editorManager=None, parent=None):
         super(Editor, self).__init__(parent)
@@ -61,6 +63,13 @@ class Editor(QsciScintilla):
             self.on_margin_clicked)
 
 		# Define markers 
+
+        self.markerDefine(QPixmap("Assets/currentline.png"), self.ARROW_MARKER_NUM)
+        self.markerDefine(QPixmap("Assets/breakpoint-off.png"), self.DEACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QPixmap("Assets/breakpoint-on.png"), self.ACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QPixmap("Assets/breakpoint-off-currentline.png"), self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QPixmap("Assets/breakpoint-on-currentline.png"), self.ARROW_ACTIVE_BREAK_MARKER_NUM)
+        """
         self.markerDefine(QsciScintilla.Background, self.BACKGROUND_MARKER_NUM)
         self.markerDefine(QsciScintilla.RightTriangle, self.ARROW_MARKER_NUM)
         self.markerDefine(QsciScintilla.Circle, self.DEACTIVE_BREAK_MARKER_NUM)
@@ -80,7 +89,7 @@ class Editor(QsciScintilla):
 
 		# Light green : #7CD7A5
         #self.setMarkerBackgroundColor(QColor("#7CD7A5"), #self.BACKGROUND_MARKER_NUM)
-
+		"""
         # Brace matching: enable for a brace immediately before or after
         # the current position
         #
@@ -136,21 +145,31 @@ class Editor(QsciScintilla):
 		print (nmargin)
 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
-			#if self.markersAtLine(nline) == 0:
 			sendTrickplayDebugCommand("9876", "b "+self.path+":"+str(nline+1), False)
 			data = sendTrickplayDebugCommand("9876", "b",False)
 			bp_info = printResp(data, "b") # no need to print 
 										   # bp_info need to be drawn in bp window 
 			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
-			self.markerAdd(nline, self.ACTIVE_BREAK_MARKER_NUM)
+
+			if self.current_line != nline :#self.markersAtLine(nline) == 0:
+				self.markerAdd(nline, self.ACTIVE_BREAK_MARKER_NUM)
+			else:
+				self.markerDelete(nline, self.ARROW_MARKER_NUM)
+				self.markerAdd(nline, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
 			self.line_click[nline] = 1
 
 		elif self.line_click[nline] == 1:
 
 			bp_num = self.get_bp_num(nline)
 			sendTrickplayDebugCommand("9876", "b "+str(bp_num)+" "+"off", False)
-			self.markerDelete(nline, self.ACTIVE_BREAK_MARKER_NUM)
-			self.markerAdd(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+
+			if self.current_line != nline :
+				self.markerDelete(nline, self.ACTIVE_BREAK_MARKER_NUM)
+				self.markerAdd(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+			else :
+				self.markerDelete(nline, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
+				self.markerAdd(nline, self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+
 			data = sendTrickplayDebugCommand("9876", "b",False)
 			bp_info = printResp(data, "b") # no need to print 
 										   # bp_info need to be drawn in bp window 
@@ -161,7 +180,11 @@ class Editor(QsciScintilla):
 
 			bp_num = self.get_bp_num(nline)
 			sendTrickplayDebugCommand("9876", "d "+str(bp_num), False)
-			self.markerDelete(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+			if self.current_line != nline :
+				self.markerDelete(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+			else :
+				self.markerDelete(nline, self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+				self.markerAdd(nline, self.ARROW_MARKER_NUM)
 			data = sendTrickplayDebugCommand("9876", "b",False)
 			bp_info = printResp(data, "b") # no need to print 
 										   # bp_info need to be drawn in bp window 

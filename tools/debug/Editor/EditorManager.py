@@ -224,22 +224,53 @@ class EditorManager(QtGui.QWidget):
             if closedTab != path:
 				for k in self.editors:
 					if path == k:
-						self.editorGroups[tabGroup].setCurrentIndex(self.editors[k][1])
+						curIndex = self.editors[k][1]
+						self.editorGroups[tabGroup].setCurrentIndex(curIndex)
 						if line_no != None:
-							self.tab.editors[self.editors[k][1]].SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
-							self.currentEditor = self.tab.editors[self.editors[k][1]]
+							self.currentEditor = self.tab.editors[curIndex]
+							self.currentEditor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
 							if currentLine == True :
-								if self.tab.editors[self.editors[k][1]].current_line > -1 :
-									self.tab.editors[self.editors[k][1]].markerDelete(self.tab.editors[self.editors[k][1]].current_line, Editor.ARROW_MARKER_NUM)
+								if self.currentEditor.current_line > -1 :
+									if not self.currentEditor.line_click.has_key(self.currentEditor.current_line) or self.currentEditor.line_click[self.currentEditor.current_line] == 0 :
+										self.currentEditor.markerDelete(self.currentEditor.current_line, 
+																	Editor.ARROW_MARKER_NUM)
+									elif self.currentEditor.line_click[self.currentEditor.current_line] == 1 :
+										self.currentEditor.markerDelete(self.currentEditor.current_line, 
+																	Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+										self.currentEditor.markerAdd(self.currentEditor.current_line, 
+																	Editor.ACTIVE_BREAK_MARKER_NUM)
+									elif self.currentEditor.line_click[self.currentEditor.current_line] == 2 :
+										self.currentEditor.markerDelete(self.currentEditor.current_line, 
+																	Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+										self.currentEditor.markerAdd(self.currentEditor.current_line, 
+																	Editor.DEACTIVE_BREAK_MARKER_NUM)
 								elif prev_file != None:
 									if closedTab != prev_file:
 										for j in self.editors:
 											if prev_file == j:
-												self.tab.editors[self.editors[j][1]].markerDelete(self.tab.editors[self.editors[j][1]].current_line, Editor.ARROW_MARKER_NUM)
-												self.tab.editors[self.editors[j][1]].current_line = -1
+												prevIndex = self.editors[j][1]
+												curLine = self.tab.editors[prevIndex].current_line
+												prevEditor = self.tab.editors[prevIndex]
+												if not prevEditor.line_click.has_key(curLine) or prevEditor.line_click[curLine] == 0:
+													prevEditor.markerDelete( curLine, Editor.ARROW_MARKER_NUM)
+												elif prevEditor.line_click[curLine] == 1:
+													prevEditor.markerDelete( curLine, Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+													prevEditor.markerAdd( curLine, Editor.ACTIVE_BREAK_MARKER_NUM)
+												elif prevEditor.line_click[curLine] == 2:
+													prevEditor.markerDelete( curLine, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+													prevEditor.markerAdd( curLine, Editor.DEACTIVE_BREAK_MARKER_NUM)
+												self.tab.editors[prevIndex].current_line = -1
 								if path == k:
-									self.tab.editors[self.editors[k][1]].markerAdd(int(line_no) -1, Editor.ARROW_MARKER_NUM)
-									self.tab.editors[self.editors[k][1]].current_line = int(line_no) -1 
+									nextCurLine = int(line_no) -1
+									if not self.currentEditor.line_click.has_key(nextCurLine) or self.currentEditor.line_click[nextCurLine] == 0: 
+										self.currentEditor.markerAdd(nextCurLine, Editor.ARROW_MARKER_NUM)
+									elif self.currentEditor.line_click[nextCurLine] == 1: 
+										self.currentEditor.markerDelete(nextCurLine, Editor.ACTIVE_BREAK_MARKER_NUM)
+										self.currentEditor.markerAdd(nextCurLine, Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+									elif self.currentEditor.line_click[nextCurLine] == 2: 
+										self.currentEditor.markerDelete(nextCurLine, Editor.DEACTIVE_BREAK_MARKER_NUM)
+										self.currentEditor.markerAdd(nextCurLine, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+									self.currentEditor.current_line = nextCurLine
 				return
         else:
             editor.readFile(path)
@@ -263,16 +294,37 @@ class EditorManager(QtGui.QWidget):
 			self.currentEditor = editor
 			if currentLine == True :
 				if editor.current_line > -1 :
-					editor.markerDelete(
-						edito.current_line, 
-						Editor.ARROW_MARKER_NUM)
+					if not editor.line_click.has_key(editor.current_line) or editor.line_click[editor.current_line] == 0:
+						editor.markerDelete( editor.current_line, Editor.ARROW_MARKER_NUM)
+					if editor.line_click[editor.current_line] == 1:
+						editor.markerDelete( editor.current_line, Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+						editor.markerAdd( editor.current_line, Editor.ACTIVE_BREAK_MARKER_NUM)
+					if editor.line_click[editor.current_line] == 2:
+						editor.markerDelete( editor.current_line, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+						editor.markerAdd( editor.current_line, Editor.DEACTIVE_BREAK_MARKER_NUM)
 				elif prev_file != None:
 					for l in self.editors:
 						if prev_file == l:
-							self.tab.editors[self.editors[l][1]].markerDelete(self.tab.editors[self.editors[l][1]].current_line, Editor.ARROW_MARKER_NUM)
+							prevEditor = self.tab.editors[self.editors[l][1]]
+							curLine = self.tab.editors[self.editors[l][1]].current_line
+							if not prevEditor.line_click.has_key(curLine) or prevEditor.line_click[curLine] == 0 :
+								prevEditor.markerDelete(curLine, Editor.ARROW_MARKER_NUM)
+							elif prevEditor.line_click[curLine] == 1 :
+								prevEditor.markerDelete(curLine, Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+								prevEditor.markerAdd(curLine, Editor.ACTIVE_BREAK_MARKER_NUM)
+							elif prevEditor.line_click[curLine] == 0 :
+								prevEditor.markerDelete(curLine, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+								prevEditor.markerAdd(curLine, Editor.DEACTIVE_BREAK_MARKER_NUM)
 							self.tab.editors[self.editors[l][1]].current_line = -1
 
-				editor.markerAdd(int(line_no) -1, Editor.ARROW_MARKER_NUM)
+				if not editor.line_click.has_key(int(line_no) -1) or editor.line_click[int(line_no) -1] == 0:
+					editor.markerAdd(int(line_no) -1, Editor.ARROW_MARKER_NUM)
+				elif editor.line_click[int(line_no) -1] == 1:
+					editor.markerDelete(int(line_no) -1, Editor.ACTIVE_BREAK_MARKER_NUM)
+					editor.markerAdd(int(line_no) -1, Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+				elif editor.line_click[int(line_no) -1] == 2:
+					editor.markerDelete(int(line_no) -1, Editor.DEACTIVE_BREAK_MARKER_NUM)
+					editor.markerAdd(int(line_no) -1, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 				editor.current_line = int(line_no) -1 
 
     def dropFileEvent(self, event, src, w = None):
