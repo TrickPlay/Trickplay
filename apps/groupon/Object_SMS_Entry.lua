@@ -3,7 +3,6 @@ local sms_entry = Group{opacity=0}
 
 local state = ENUM({"HIDDEN","ANIMATING_IN","ACTIVE","SENDING","ANIMATING_OUT"})
 
-local cancel_object = nil
 local cursor_index  = 1
 local phone_digit_max = 3+3+4
 local cursor_base_x = 14
@@ -218,6 +217,36 @@ do
         
     end
 end
+local status_text = Text{
+    text="",
+    font="DejaVu Sans Condensed Bold normal 20px",
+    color="#86ad53",
+    y = 315,
+	x = 212,
+}
+local base_text
+local str
+local ellipsis_i = 0
+local ellipsis_max = 5
+status_text.ellipsis = Timer{
+    interval = 300,
+    on_timer = function()
+        
+        str = base_text
+        
+        ellipsis_i = (ellipsis_i+1)%ellipsis_max
+        
+        for i = 0,ellipsis_i do
+            
+            str = str.."."
+            
+        end
+        
+        status_text.text = str
+        
+    end
+}
+status_text.ellipsis:stop()
 local submit_button = Clone{
 	source = assets.submit_btn,
 	x = 627,
@@ -277,7 +306,8 @@ sms_entry:add(
 	submit_button,
 	submit_button_focus,
 	submit_button_shadow,
-	submit_button_text
+	submit_button_text,
+    status_text
 )
 sms_entry:add(unpack(entry))
 
@@ -309,7 +339,13 @@ end
 
 local sms_callback = function(sms_result)
 	
-    cancel_object = nil
+    if sms_result == false then
+        
+		base_text = "Couldn't connect. Trying again"
+        
+        return
+        
+    end
 	
 	
 	dumptable(sms_result)
@@ -446,7 +482,7 @@ state:add_state_change_function(
 		
 		submit_button_focus:hide()
 		
-		cancel_object = SEND_SMS(
+		SEND_SMS(
 			sms_callback,
 			merchant_name,
 			deal_url,
@@ -462,16 +498,8 @@ state:add_state_change_function(
             entry[10].text
 		)
 		
-		
-		Loading_G.opacity = 255
-        
-        Loading_G.y = 350
-        
-        Loading_G:raise_to_top()
-        
-        mouse:raise_to_top()
-        
-        Idle_Loop:add_function(Loading_G.spinning,Loading_G,2000,true)
+		base_text = "Sending"
+        status_text.ellipsis:start()
 		
 		--[[
         assert(App_State.state:current_state() == "ROLODEX")
@@ -501,6 +529,8 @@ state:add_state_change_function(
 state:add_state_change_function(
     function(prev_state,new_state)
         Idle_Loop:add_function(Loading_G.fade_out,Loading_G,500)
+        status_text.ellipsis:stop()
+        status_text.text = ""
     end,
     "SENDING",
     nil
@@ -623,10 +653,8 @@ state:add_state_change_function(
 
 --keys
 local cancel = function()
-    assert(cancel_object ~= nil)
     --print("pre_cancel")
-	TRY_AGAIN:stop()
-    cancel_object:cancel()
+	CANCEL()
 	--print("post_cancel")
     state:change_state_to("ANIMATING_OUT")
     --App_State.state:change_state_to("ROLODEX")
