@@ -242,7 +242,7 @@ public:
                     if ( file )
                     {
                         bool is_uri=false;
-                        char * path=App::get(L)->normalize_path(file,&is_uri);
+                        char * path=App::get(L)->normalize_path(file,is_uri);
 
                         if ( path )
                         {

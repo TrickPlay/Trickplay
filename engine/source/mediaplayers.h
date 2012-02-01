@@ -23,7 +23,7 @@ public:
     //.........................................................................
     // Constructing a media player
 
-    static MediaPlayer * make( TPMediaPlayerConstructor constructor, Delegate * delegate = NULL );
+    static MediaPlayer * make( TPContext * context , TPMediaPlayerConstructor constructor, Delegate * delegate = NULL );
 
     // Getting one from a TPMediaPlayer
 
@@ -62,6 +62,13 @@ public:
 
     void add_delegate( Delegate * delegate );
     void remove_delegate( Delegate * delegate );
+
+    //.........................................................................
+
+    const StringSet & get_valid_schemes() const
+    {
+    	return schemes;
+    }
 
 private:
 
@@ -133,7 +140,7 @@ private:
     //.........................................................................
     // Constructor given a wrapper and a delegate (from make)
 
-    MediaPlayer( Wrapper *, Delegate * );
+    MediaPlayer( TPContext *, Wrapper *, Delegate * );
 
     //.........................................................................
     // Not allowed
@@ -169,6 +176,7 @@ private:
     GAsyncQueue  *  queue;
     DelegateSet     delegates;
     StringPairList  tags;
+    StringSet		schemes;
 };
 
 #endif // _TRICKPLAY_MEDIAPLAYERS_H

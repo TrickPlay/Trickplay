@@ -41,8 +41,8 @@ image8.extra.reactive = true
 
 local image7 = Image
 	{
-		src = "/assets/images/cube-64-move.png",
-		clip = {0,0,64,64},
+		src = "assets/images/cube-64.png",
+		clip = {-0.60000002384186,0,10,64},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
@@ -79,8 +79,8 @@ image7.extra.reactive = true
 
 local image6 = Image
 	{
-		src = "/assets/images/cube-64-move.png",
-		clip = {0,0,64,64},
+		src = "assets/images/cube-64.png",
+		clip = {-0.60000002384186,0,10,64},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
@@ -124,8 +124,8 @@ local clone5 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone5",
-		position = {1400,536,0},
-		size = {500,55},
+		position = {1500,536,0},
+		size = {400,55},
 		opacity = 255,
 		reactive = true,
 	}
@@ -154,8 +154,8 @@ clone5.extra.reactive = true
 
 local image9 = Image
 	{
-		src = "/assets/images/cube-64-move.png",
-		clip = {0,0,64,64},
+		src = "assets/images/cube-64.png",
+		clip = {-0.60000002384186,0,10,64},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
@@ -192,8 +192,8 @@ image9.extra.reactive = true
 
 local image10 = Image
 	{
-		src = "/assets/images/cube-64-move.png",
-		clip = {0,0,64,63},
+		src = "assets/images/cube-64.png",
+		clip = {-0.60000002384186,0,10,63},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},

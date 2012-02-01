@@ -158,7 +158,7 @@ public:
     //.........................................................................
     // Populates plugin info and parses the configuration data
 
-    State( TPAudioDetectionPluginInfo * info , const char * string_config )
+    State( TPPluginInfo * info , const char * string_config )
     :
         sound_file( 0 ),
         sound_file_vio( 0 )
@@ -590,7 +590,7 @@ private:
 
 extern "C"
 void
-tp_audio_detection_initialize( TPAudioDetectionPluginInfo * info , const char * config )
+tp_plugin_initialize( TPPluginInfo * info , const char * config )
 {
     info->user_data = new State( info , config );
 }
@@ -611,7 +611,7 @@ tp_audio_detection_reset( void * user_data )
 
 extern "C"
 void
-tp_audio_detection_shutdown( void * user_data )
+tp_plugin_shutdown( void * user_data )
 {
     delete ( State * ) user_data;
 }

@@ -11,6 +11,7 @@ Description: Mediaplayer  test
  local video_paused
  local video_idle
  media_player_loaded = false
+ media_player_stream_completed = false
 
  mediaplayer:load("packages/engine_unit_tests/tests/assets/glee-1.mp4")
  mediaplayer:set_viewport_geometry (750,10,200,200)
@@ -24,13 +25,18 @@ Description: Mediaplayer  test
 	bitrate = mediaplayer.tags["bitrate"]
 	mediaplayer.volume = 0.5
 	mediaplayer.mute = false
+	mediaplayer:seek(130)
+  end
+
+  function mediaplayer:on_end_of_stream()
+	media_player_stream_completed = true
   end
 
 
 screen:show()
 
 function test_mediaplayer_state ()
-	mediaplayer:seek(20)
+	mediaplayer:seek(2)
 	mediaplayer:pause()
 	video_paused =mediaplayer.state
     assert_equal( video_playing, 8 , "Playing mediaplayer.state = "..video_playing.." Expected 8")
@@ -72,7 +78,8 @@ function test_mediaplayer_has_audio ()
 end
 
 function test_mediaplayer_tags ()
-    assert_string ( mediaplayer.tags["bitrate"] , "mediaplayer.tags[bitrate] returned: "..mediaplayer.tags["bitrate"].." Expected a string"  )
+-- Commenting out this test as it's returning nil due to the short movie --  
+  assert_string ( mediaplayer.tags["bitrate"] , "mediaplayer.tags[bitrate] returned: "..tostring(mediaplayer.tags["bitrate"]).." Expected a string"  )
     assert_string ( mediaplayer.tags["container-format"] , "mediaplayer.tags[container-format] returned: "..mediaplayer.tags["container-format"].." Expected a string"  )
     assert_string ( mediaplayer.tags["video-codec"] , "mediaplayer.tags[video-codec] returned: "..mediaplayer.tags["video-codec"].." Expected a string"  )
     assert_string ( mediaplayer.tags["maximum-bitrate"] , "mediaplayer.tags[maximum-bitrate] returned: "..mediaplayer.tags["maximum-bitrate"].." Expected a string"  )
