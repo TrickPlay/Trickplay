@@ -282,6 +282,28 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		    return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : table expected");
 		}
 	}
+	else if (!strcmp("clip", k))
+	{
+		if (lua_type(L,index)==LUA_TTABLE)
+		{
+			ClutterGeometry geometry;
+			ClutterUtil::to_clutter_geometry(L, index, &geometry);
+			
+			GValue gvalue={0};
+			g_value_init(&gvalue, CLUTTER_TYPE_GEOMETRY);
+			g_value_set_boxed (&gvalue, &geometry);
+
+			clutter_animator_set_key(animator, G_OBJECT(source), "clip", nmode, progress, &gvalue);
+			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "clip", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "clip", interpolation);
+            g_value_unset(&gvalue);
+		}
+		else
+		{
+			return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : table expected");
+		}
+	}
+
 	return 0;
 }
 
@@ -454,9 +476,10 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
     x, y, z, depth - float
     width, height, w, h - float
     opacity - int
-    position - table of {float x, float y}
+    position - table of { float x, float y }
     size - table of {float width, float height}
-    scale - table of {double x, double y}
+    scale - table of { double x, double y }
+    clip - table of four integers specifying the clipping rectangle { x-origin, y-origin, width, height }
     x_rotation - double specifying rotation angle
     y_rotation - double specifying rotation angle
     z_rotation - double specifying rotation angle

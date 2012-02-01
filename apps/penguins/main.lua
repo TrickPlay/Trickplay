@@ -1,68 +1,54 @@
 --[[
-wed
-	level 'suck it up and squeeze through'? (after level 3 maybe)
-	inter-level platforms
-	snow ramp thing
-	finish level 20, make 21 ('blue fish ice bridge')
-	insert rolling/bouncing blocks? (3-5 levels)
-	
-mon-wed
-	blue fish adjustments, preferrably w/ burst anim
-	2-3 blue fish levels
-	snow banks (need assets)
-	5-8 snow bank levels
-	
 
-Mon
-refine collisions
-breakable blocks
-faster fish adjustments
-armor
-gravity fish
-darkness
-snow tunnel
-polar bear
-eskimo
-monster
+Penguin Zip-Zip
 
+--]]
 
-submersion of
-	ball
-	ice blocks
-	seal
-	penguin
-splashing
-double jump cues?
-
-
-Need
-	audio
-	better ice water
-	better seal
-	breakable block
-	"faster" fish
-	armor pieces
-	"upside down" fish
-	darkness
-	snow tunnel
-]]
+sin = math.sin
+cos = math.cos
+asin = math.asin
+atan2 = math.atan2
+pi = math.pi
+max = math.max
+min = math.min
+sqrt = math.sqrt
+log10 = math.log10
+floor = math.floor
 
 math.randomseed(os.time())
 rand = math.random
 function nrand(n)
     return (2*rand()-1)*n
 end
+function drand(n)
+    return (rand()+rand()-1)*n
+end
 
 gravity = 0.002
 ground = {440,1080}
 row = 1
+usebg = true
 
-dofile("cloner.lua")
+step = {}
+local d, tms = 0, 0
+local anim = Timeline{duration = 9001, loop = true,
+	on_new_frame = function(self,ms,t)
+		d = self.delta
+		tms = tms+d
+		for k,v in pairs(step) do
+			v(d,tms)
+		end
+	end}
+anim:start()
+
+dofile("assets.lua")
+audio	= dofile("audio.lua")
+levels  = dofile("levels.lua")
+levels.this:load()
 snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
-levels  = dofile("levels.lua")
 overlay	= dofile("overlay.lua")
-snow(levels.this.snow)
-explode = dofile("explode.lua")
+snow(levels.this.snow,levels.this.bank)
+dofile("effects.lua")
 
 collectgarbage("collect")

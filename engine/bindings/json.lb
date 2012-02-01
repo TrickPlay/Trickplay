@@ -6,13 +6,8 @@
 /*
 	Global: json
 	
-	This global object lets you convert JSON strings to Lua objects. 
-	You invoke it like this
+	The json global variable enables the conversion of a JSON string to a Lua table and vice-versa. The <parse> function translates a JSON string to a Lua table. The <stringify> function converts a Lua table to a JSON string.
 	
-	> local t = json:parse( "<some JSON string>" )
-	
-	The parser is strict in that it requires the top level JSON element to be either an array
-	or an object. 
 */
 
 global json [[void*]]
@@ -20,12 +15,27 @@ global json [[void*]]
 	/*
 		Property: null
 		
-		This property is used to represent a null value. It is not the same as Lua's nil, 
-		and is only useful for comparisons. For example:
+		The null property contains a Lua representation of the JSON null value. When a JSON null value is converted by the <parse> function to a Lua value, the result is a special value equivalent to the json.null property. (Note: JSON null values are not converted to Lua nil.) The json.null property can be used in value comparisons, as shown in the Code Example below.
 		
-		> local j = json:parse( "[null]" )
-		> j[ 1 ] == nil -- False, it is not equal to nil.
-		> j[ 1 ] == json.null -- True, this is a JSON null value. 
+		*Code Example:* Convert JSON null value to Lua table and perform comparisons
+		
+		(code)
+		-- Convert JSON null to Lua table
+		value = json:parse( "[null]" )
+		
+		-- Compare converted value
+		if( value[ 1 ] == json.null )then
+			-- Above comparison is true, so this print state will execute
+			print( "Successful null conversion" )
+		end
+		
+		if( value[ 1 ] ~= nil )then
+			-- Above comparison is also true, so this print state will execute
+			print( "JSON null is not the same as Lua nil" )
+		end
+		(end)
+		
+		*See Also:* the <parse> function
 	*/
 		
 	readonly lightuserdata null
@@ -36,17 +46,32 @@ global json [[void*]]
 	/*
 		Function: parse
 		
-		Decodes the JSON string and returns a Lua table, or nil if decoding failed.
+		The parse() function converts the elements in a JSON string to a Lua table. The top-level JSON element must be either an object or an array. If the string could not be parsed, the function returns nil.
 		
-		Arguments:
+		JSON null string values are converted to json.null Lua values. See the <null> property for further details.
 		
-			json_string - A JSON string to parse
+		*Arguments:*
+		
+			json_string - JSON string to convert
 			
-		Returns:
+		*Return Value:* If conversion succeeds, returns Lua table containing converted JSON elements. Else returns nil.
 		
-			A Lua table - If decoding succeeded.
-						
-			nil - If there was a problem parsing the string.
+		*Code Example:* Convert a JSON string and output the resulting Lua table
+		
+		(code)
+		-- Convert a JSON object that contains an array
+		argonaut = json:parse( '{ "Actresses": ["Michelle Pfeiffer", "Meg Ryan", "Olivia Wilde"] }' )
+	
+		-- Display Lua table
+		if( argonaut == nil )then
+			print( "JSON string not parsed successfully." )
+		else
+			print( "Contents of JSON string:" )
+			dumptable( argonaut )
+		end
+		(end)
+
+		*See Also:* the <null> property	
 	*/
 	
 	table parse( string json_string )
@@ -57,27 +82,23 @@ global json [[void*]]
 	/*	
 		Function: stringify
 		
-		Converts a table to a JSON string. 
+		The stringify() function converts the contents of a Lua table to a JSON string.
 		
-		Lua tables can have a mixture of 
-		numerically indexed entries and key/value entries. This is not possible 
-		with JSON; Lua tables that have indexed entries will become JSON arrays
-		and those that don't will become JSON objects. JSON objects only support
-		string keys, so members of Lua tables that have other types of keys will
-		not be present in the output. Functions, user data or other types that 
-		cannot be converted to JSON will be represented as nulls.
+		Lua tables may contain elements that cannot be directly translated to a JSON string. If any of the items listed below are found in the Lua table, they are handled in the described manner.
 		
-		Arguments:
+		Key/value pairs with numerically-indexed keys - converted to JSON arrays
+		Key/value pairs with string-based keys - converted to JSON objects
+		Key/value pairs with keys based on other Lua data types - not converted. Ignored.
+		Functions, user data, and Lua data types with no direct equivalent in JSON - converted to <json.null> values
 		
-			t - A table to convert to JSON.
+		*Arguments:*
+		
+			t - Lua table to convert to JSON string
+			pretty - boolean flag indicating whether or not the JSON string should be "pretty-printed," i.e., indented to make it more readable (true=pretty-print). The default is that the string will not be pretty-printed.
 			
-			pretty - Whether to indent the output and make it more readable.
-			
-		Returns:
+		*Return Value:* If conversion succeeds, returns the converted JSON string. Else returns nil.
 		
-			string - A JSON representation of the table.
-			
-			nil - If there is a problem. 
+		*See Also:* the <parse> function
 	*/
 	
 	lstring stringify( table t, bool pretty = false )
