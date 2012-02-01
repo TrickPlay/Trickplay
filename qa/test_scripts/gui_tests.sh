@@ -2,6 +2,12 @@
 
 ## This bash script is meant to be run after qa/automated_tests is run and has generated screenshots for all the tests.
 
+THE_PATH=$1
+AUTOMATED_TESTS=$2
+
+echo THE_PATH=$THE_PATH
+echo AUTOMATED_TESTS=$AUTOMATED_TESTS
+
 ## Global variables
 test_count=0
 minor_fail=0
@@ -11,13 +17,11 @@ pass=0
 ##Set Fuzz % 
 fuzz=60%
 
-cd $WORKSPACE/qa/gui_test_results
-
 start_time=$(date +%s.%N)
 
 ## Determine the screen resolution of the screenshots ##
 
-test_info=$(identify $WORKSPACE/qa/automated_tests/00001_rectangle_basic.png )
+test_info=$(identify "$AUTOMATED_TESTS/00001_rectangle_basic.png" )
 
 
 if `echo ${test_info} | grep "1080" 1>/dev/null 2>&1`
@@ -41,20 +45,21 @@ fi
 ##  For each baseline image, run ImageMagick Compare. Run first with no fuzzy. If they don't match
 ##  then run a second time with fuzzy in case there are minor color differences. Save test results in an array. 
 
-for f in $WORKSPACE/qa/test_scripts/baselines/$test_resolution/*.png; do
+for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
     start_test_time=$(date +%s.%N)
     test_count=$((test_count+1))
     png_file=${f##*/}
-
-    if test -e $WORKSPACE/qa/automated_tests/$png_file ; then
-	    compare_cmd="compare -metric AE $f $WORKSPACE/qa/automated_tests/$png_file /dev/null 2>&1"
-	    #echo "$compare_cmd"
-	    imgdiff=$(compare -metric AE $f $WORKSPACE/qa/automated_tests/$png_file /dev/null 2>&1)
-            #echo "original imgdiff = $imgdiff"
+    if test -e "$AUTOMATED_TESTS/$png_file" ; then
+	    compare_cmd="compare -metric AE '$f' '$AUTOMATED_TESTS/$png_file' /dev/null 2>&1"
+#	    echo $compare_cmd
+	    imgdiff=$(compare -metric AE "$f" "$AUTOMATED_TESTS/$png_file" /dev/null 2>&1)
+#           echo original imgdiff = $imgdiff
 	    status2=$?
             imgdiff=`echo $imgdiff|awk '{print($1)}'`
-         #  echo "new imgdiff = $imgdiff"
+	 #  echo
+#           echo new imgdiff = $imgdiff
          #  echo `expr "$imgdiff" : ''`
+	 #  echo
 	    if [ $status2 -eq 0 ]; then {
 		    if [ $imgdiff -eq 0 ]; then {
 	    		end_test_time=$(date +%s.%N)
@@ -67,8 +72,8 @@ for f in $WORKSPACE/qa/test_scripts/baselines/$test_resolution/*.png; do
 		    }
 		    else {
 			
-			imgdiff_fuzz=$(compare -metric AE -fuzz $fuzz $f $WORKSPACE/qa/automated_tests/$png_file /dev/null 2>&1)
-			#echo compare -metric AE -fuzz $fuzz $f $WORKSPACE/qa/automated_tests/$png_file /dev/null 2>&1
+			imgdiff_fuzz=$(compare -metric AE -fuzz $fuzz "$f" "$AUTOMATED_TESTS"/$png_file /dev/null 2>&1)
+			#echo compare -metric AE -fuzz $fuzz "$f" "$AUTOMATED_TESTS"/$png_file /dev/null 2>&1
 			#echo imgdiff_fuzz=$imgdiff_fuzz
 
 	    		end_test_time=$(date +%s.%N)
@@ -76,19 +81,19 @@ for f in $WORKSPACE/qa/test_scripts/baselines/$test_resolution/*.png; do
 	   		test_duration=${test_duration:0:5}  
 		    
 			if [ $imgdiff_fuzz -ge 0 -a $imgdiff_fuzz -lt 401 ]; then {
-				echo "Minor fail: $f "
+				echo Minor fail: "$f"
 				minor_fail=$(($minor_fail+1))
 				N_ARRAY[test_count]=$png_file
 				D_ARRAY[test_count]=$test_duration
 				R_ARRAY[test_count]="pass"
 		   	 }
 		   	elif [ $imgdiff_fuzz -gt 400 ]; then 
-				echo "Major fail: $f"
+				echo Major fail: "$f"
 				major_fail=$(($major_fail+1))
 				N_ARRAY[test_count]=$png_file
 				D_ARRAY[test_count]=$test_duration
 				R_ARRAY[test_count]="fail"
-				M_ARRAY[test_count]="Fuzz at $fuzz difference: $imgdiff_fuzz"
+				M_ARRAY[test_count]="Image diff > 400 px even with $fuzz difference: $imgdiff_fuzz"
 			fi
 		    }
 		    fi
@@ -117,7 +122,7 @@ done
 ## Create the XML results file ##
 
 trickplay_version=1.0
-XML_FILE=gui_test.xml
+XML_FILE=../../gui-test-results/gui_test.xml
 
 end_time=$(date +%s.%N)
 total_test_time=$(echo "$end_time - $start_time" | bc)
