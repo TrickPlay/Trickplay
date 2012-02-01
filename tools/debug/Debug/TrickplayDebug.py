@@ -50,15 +50,23 @@ class TrickplayDebugger(QWidget):
 
 		if itemState == "on" and cellItemState == Qt.Unchecked:
 			sendTrickplayDebugCommand("9876", "b "+str(r)+" "+"off", False)
-			editor.markerDelete(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
-			editor.markerAdd(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
+			if editor.current_line != lineNum :
+				editor.markerDelete(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
+				editor.markerAdd(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
+			else :
+				editor.markerDelete(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+				editor.markerAdd(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 			editor.line_click[lineNum] = 2
 			data = sendTrickplayDebugCommand("9876", "b",False)
 			self.break_info = printResp(data, "b")
 		elif itemState == "off" and cellItemState == Qt.Checked:
 			sendTrickplayDebugCommand("9876", "b "+str(r)+" "+"on", False)
-			editor.markerDelete(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
-			editor.markerAdd(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
+			if editor.current_line != lineNum :
+				editor.markerDelete(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
+				editor.markerAdd(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
+			else :
+				editor.markerDelete(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+				editor.markerAdd(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
 			editor.line_click[lineNum] = 1
 			data = sendTrickplayDebugCommand("9876", "b",False)
 			self.break_info = printResp(data, "b")
