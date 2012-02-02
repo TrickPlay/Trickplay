@@ -131,17 +131,17 @@ total_test_time=${total_test_time:0:6}
 xml_open_tag_to_add="<testsuite name='com.trickplay.gui-test.engine' errors='$minor_fail' failures='$major_fail' tests='$test_count' time='$total_test_time'><properties><property name='trickplay.version' value='$trickplay_version' /></properties>"
 xml_close_tag_to_add="</testsuite>"
 
-echo $xml_open_tag_to_add 1>$XML_FILE
+echo $xml_open_tag_to_add 1>"$XML_FILE"
 
 i=1
 while [ $i -le $test_count ]; do
 	if [ ${R_ARRAY[$i]} == 'pass' ]; then
 		xml_pass_to_add="<testcase classname='com.trickplay.gui-test.engine' name='${N_ARRAY[$i]}' time='${D_ARRAY[$i]}'/>"
-		echo $xml_pass_to_add 1>>$XML_FILE
+		echo $xml_pass_to_add 1>>"$XML_FILE"
 	else
 	echo fail_test=$i
 		xml_failure_to_add="<testcase classname='com.trickplay.unit-test.engine' name='${N_ARRAY[$i]}' time='${D_ARRAY[$i]}'><failure type='failure'>'${M_ARRAY[$i]}'</failure></testcase>"
-		echo $xml_failure_to_add 1>>$XML_FILE
+		echo $xml_failure_to_add 1>>"$XML_FILE"
 	fi
 	let i=i+1
 done
@@ -155,5 +155,5 @@ echo -e "ERRORS  \t$minor_fail"
 echo -e "TOTAL TESTS \t$test_count"
 echo
 
-echo $xml_close_tag_to_add 1>>$XML_FILE
+echo $xml_close_tag_to_add 1>>"$XML_FILE"
 exit 0
