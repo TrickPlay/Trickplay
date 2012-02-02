@@ -130,10 +130,25 @@ protected:
         {
             if ( lua_State * L = app->get_lua_state() )
             {
-                int old_kb = lua_gc( L , LUA_GCCOUNT , 0 );
-                lua_gc( L , LUA_GCCOLLECT , 0 );
-                int new_kb = lua_gc( L , LUA_GCCOUNT , 0 );
-                g_info( "GC : %d KB - %d KB = %d KB" , new_kb , old_kb , new_kb - old_kb );
+            	while( true )
+            	{
+            		int old_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+            		(void) lua_gc( L , LUA_GCCOLLECT , 0 );
+            		int new_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+            		g_info( "GC : %d KB - %d KB = %d KB" , new_kb , old_kb , new_kb - old_kb );
+
+            		if ( parameters == "all" )
+            		{
+            			if ( old_kb == new_kb )
+            			{
+            				break;
+            			}
+            		}
+            		else
+            		{
+            			break;
+            		}
+            	}
             }
         }
 	}

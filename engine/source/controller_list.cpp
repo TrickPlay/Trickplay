@@ -60,10 +60,10 @@ struct Event
         ADDED, REMOVED,
         KEY_DOWN, KEY_UP,
         ACCELEROMETER,
-        POINTER_MOVE , POINTER_DOWN , POINTER_UP,
+        POINTER_MOVE , POINTER_DOWN , POINTER_UP, POINTER_ACTIVE, POINTER_INACTIVE,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
         UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP,
-        ADVANCED_UI_READY, ADVANCED_UI_EVENT
+        ADVANCED_UI_READY, ADVANCED_UI_EVENT , SCROLL
     };
 
 public:
@@ -185,6 +185,16 @@ public:
 		return event;
 	}
 
+    inline static Event * make_scroll( Controller * controller , int direction , unsigned long int modifiers )
+    {
+    	Event * event = make( SCROLL , controller );
+
+    	event->scroll.direction = direction;
+        event->modifiers = modifiers;
+
+        return event;
+    }
+
     inline void process()
     {
 
@@ -266,6 +276,18 @@ public:
             case ADVANCED_UI_EVENT:
             	controller->advanced_ui_event( ui.parameters );
             	break;
+
+            case SCROLL:
+            	controller->scroll( scroll.direction , modifiers );
+            	break;
+
+            case POINTER_ACTIVE:
+            	controller->pointer_active();
+            	break;
+
+            case POINTER_INACTIVE:
+            	controller->pointer_inactive();
+            	break;
         }
     }
 
@@ -288,32 +310,38 @@ private:
         {
             unsigned int key_code;
             unsigned long int unicode;
-        }    key;
+        }    						key;
 
         struct
         {
             double x;
             double y;
             double z;
-        }                     accelerometer;
+        }                     		accelerometer;
 
         struct
         {
             int button_or_finger;
             int x;
             int y;
-        }                        click_touch;
+        }                        	click_touch;
 
         struct
         {
             char * parameters;
-        }            ui;
+        }							ui;
+
+        struct
+        {
+        	int direction;
+        }							scroll;
+
         struct
         {
         	void * data;
         	unsigned int size;
         	char * mime_type;
-        }	data;
+        }							data;
     };
 };
 
@@ -717,6 +745,36 @@ void Controller::pointer_button_up( int button, int x, int y , unsigned long int
 
 //.............................................................................
 
+void Controller::pointer_active( )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->pointer_active();
+    }
+}
+
+//.............................................................................
+
+void Controller::pointer_inactive( )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->pointer_inactive();
+    }
+}
+
+//.............................................................................
+
 void Controller::touch_down( int finger, int x, int y , unsigned long int modifiers )
 {
     if ( !connected )
@@ -757,6 +815,31 @@ void Controller::touch_up( int finger, int x, int y , unsigned long int modifier
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
         ( *it )->touch_up( finger, x, y , modifiers );
+    }
+}
+
+//.............................................................................
+
+void Controller::scroll( int direction , unsigned long int modifiers )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    bool inject = true;
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        if ( ! ( *it )->scroll( direction , modifiers ) )
+        {
+            inject = false;
+        }
+    }
+
+    if ( inject )
+    {
+        ClutterUtil::inject_scroll( direction , modifiers );
     }
 }
 
@@ -980,6 +1063,50 @@ bool Controller::stop_pointer()
               NULL,
               data ) == 0 );
 }
+
+bool Controller::show_pointer_cursor()
+{
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_SHOW_POINTER_CURSOR,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::hide_pointer_cursor()
+{
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_HIDE_POINTER_CURSOR,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::set_pointer_cursor( int x , int y , const String & image_uri )
+{
+	TPControllerSetPointerCursor parameters;
+
+	parameters.x = x;
+	parameters.y = y;
+	parameters.image_uri = image_uri.c_str();
+
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_POINTER_CURSOR ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_SET_POINTER_CURSOR,
+              &parameters,
+              data ) == 0 );
+
+}
+
 
 bool Controller::start_touches()
 {
@@ -1542,6 +1669,20 @@ void tp_controller_pointer_button_up( TPController * controller, int button, int
     }
 }
 
+void tp_controller_pointer_active( TPController * controller )
+{
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make( Event::POINTER_ACTIVE , controller->controller ) );
+}
+
+void tp_controller_pointer_inactive( TPController * controller )
+{
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make( Event::POINTER_INACTIVE , controller->controller ) );
+}
+
 void tp_controller_touch_down( TPController * controller, int finger, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );
@@ -1570,6 +1711,13 @@ void tp_controller_touch_up( TPController * controller, int finger, int x, int y
     {
         controller->list->post_event( Event::make_click_touch( Event::TOUCH_UP, controller->controller, finger, x, y , modifiers ) );
     }
+}
+
+void tp_controller_scroll( TPController * controller, int direction , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    controller->list->post_event( Event::make_scroll( controller->controller , direction , modifiers ) );
 }
 
 void tp_controller_ui_event( TPController * controller, const char * parameters )
