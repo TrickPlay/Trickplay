@@ -10,12 +10,12 @@ FOOTER_PERCENT     = HEADER_PERCENT
 MENU_PERCENT       = 0.20  -- percentage of screen width for menu region
 
 -- Using percentages above, calculate region sizes
-MENU_WIDTH         = (math.floor( screen.width  * MENU_PERCENT   ) + 1)
+MENU_WIDTH         = (math.ceil( screen.width * MENU_PERCENT ))
 MENU_HEIGHT        = screen.height
 HEADER_WIDTH       = (screen.width - MENU_WIDTH)
-HEADER_HEIGHT      = (math.floor( screen.height * HEADER_PERCENT ) + 1)
+HEADER_HEIGHT      = (math.ceil( screen.height * HEADER_PERCENT ))
 FOOTER_WIDTH       = HEADER_WIDTH
-FOOTER_HEIGHT      = (math.floor( screen.height * FOOTER_PERCENT ) + 1)
+FOOTER_HEIGHT      = (math.ceil( screen.height * FOOTER_PERCENT ))
 MAIN_WIDTH         = (screen.width  - MENU_WIDTH)
 MAIN_HEIGHT        = (screen.height - HEADER_HEIGHT - FOOTER_HEIGHT)
 SCREEN_WIDTH       = (screen.width - MENU_WIDTH)
@@ -74,7 +74,7 @@ LOGO_IMAGE         = "images/Logo.png"
 
 -- Louver/Blinds constants
 NUM_LOUVERS        = 10
-LOUVER_WIDTH       = math.floor( (SCREEN_WIDTH / NUM_LOUVERS) ) + 1	
+LOUVER_WIDTH       = math.ceil( SCREEN_WIDTH / NUM_LOUVERS )
 LOUVER_HEIGHT      = SCREEN_HEIGHT
 
 -- Menu of screen transitions
