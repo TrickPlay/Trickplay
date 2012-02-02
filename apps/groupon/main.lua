@@ -107,7 +107,7 @@ KEY_HANDLER                                 = dofile("User_Input.lua")
 
 screen.on_key_down                          = KEY_HANDLER.on_key_down
 
-GET_DEALS, SEND_SMS, GET_LAT_LNG, TRY_AGAIN = dofile("Internet_Interfaces.lua")
+GET_DEALS, SEND_SMS, GET_LAT_LNG, CANCEL    = dofile("Internet_Interfaces.lua")
 
 Loading_G                                   = dofile("LoadingDots.lua")
 
@@ -137,7 +137,7 @@ App_State.state:add_state_change_function(
         
         mouse:raise_to_top()
         
-        Loading_G.x = 450
+        Loading_G.x = 200
         
         Loading_G.y = screen_h - 200
         

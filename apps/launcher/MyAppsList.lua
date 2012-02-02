@@ -41,7 +41,7 @@ local make_entry = function(app_id,app_name)
     g.x = i.w/2
     function g:unfocus()
         
-        print("Unfocus "..app_name )
+        --print("Unfocus "..app_name )
         
         --g:animate{
         --    duration = 100,
@@ -52,7 +52,7 @@ local make_entry = function(app_id,app_name)
     
     function g:focus()
         
-        print("Focus "..app_name )
+        --print("Focus "..app_name )
         
         
         --g:animate{
@@ -97,7 +97,7 @@ function AppList:init(p)
             k ~= "com.trickplay.app-shop" and
             k ~= "com.trickplay.editor"   then
             
-            print(k,"\t",v.id,"\t",v.name)
+            --print(k,"\t",v.id,"\t",v.name)
             
             list[ #list + 1 ] = make_entry(v.id,v.name)
             
@@ -351,11 +351,11 @@ move_dn = function()
                 exiting_item = wrap_around_clone_ref
                 
             else
-                print("yea",wrap_i( top_vis_i + vis_len - 1 ),list[ wrap_i( top_vis_i + vis_len - 1 ) ] )
+                --print("yea",wrap_i( top_vis_i + vis_len - 1 ),list[ wrap_i( top_vis_i + vis_len - 1 ) ] )
                 gl = list[ wrap_i( top_vis_i + vis_len - 1 ) ]
                 dumptable(list)
                 AppList:add(list[ wrap_i( top_vis_i + vis_len - 1 ) ])
-                print(top_vis_i,list[ wrap_i(top_vis_i) ].name)
+                --print(top_vis_i,list[ wrap_i(top_vis_i) ].name)
                 exiting_item = list[
                     wrap_i(top_vis_i-1)
                 ]
@@ -497,8 +497,6 @@ local key_events = {
 }
 
 function AppList:on_key_down(k)
-    
-    print("AppList:on_key_down("..k..")")
     
     return key_events[k] and key_events[k]()
     
