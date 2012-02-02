@@ -130,20 +130,28 @@ class MainWindow(QMainWindow):
 		#Icon 
         icon_continue = QtGui.QIcon()
         icon_continue.addPixmap(QtGui.QPixmap("Assets/icon-continue.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_continue.addPixmap(QtGui.QPixmap("Assets/icon-continue-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_debug = QtGui.QIcon()
         icon_debug.addPixmap(QtGui.QPixmap("Assets/icon-debug.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_debug.addPixmap(QtGui.QPixmap("Assets/icon-debug-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_pause = QtGui.QIcon()
         icon_pause.addPixmap(QtGui.QPixmap("Assets/icon-pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_pause.addPixmap(QtGui.QPixmap("Assets/icon-pause-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_run = QtGui.QIcon()
         icon_run.addPixmap(QtGui.QPixmap("Assets/icon-run.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_run.addPixmap(QtGui.QPixmap("Assets/icon-run-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_stepinto = QtGui.QIcon()
         icon_stepinto.addPixmap(QtGui.QPixmap("Assets/icon-stepinto.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stepinto.addPixmap(QtGui.QPixmap("Assets/icon-stepinto-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_stepout = QtGui.QIcon()
         icon_stepout.addPixmap(QtGui.QPixmap("Assets/icon-stepout.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stepout.addPixmap(QtGui.QPixmap("Assets/icon-stepout-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_stepover = QtGui.QIcon()
         icon_stepover.addPixmap(QtGui.QPixmap("Assets/icon-stepover.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stepover.addPixmap(QtGui.QPixmap("Assets/icon-stepover-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_stop = QtGui.QIcon()
         icon_stop.addPixmap(QtGui.QPixmap("Assets/icon-stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stop.addPixmap(QtGui.QPixmap("Assets/icon-stop-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         self.icon_file_on = QtGui.QIcon()
     	self.icon_file_on.addPixmap(QtGui.QPixmap("Assets/panel-files-on.png"), QtGui.QIcon.Normal)
         self.icon_file_off = QtGui.QIcon()
@@ -186,35 +194,6 @@ class MainWindow(QMainWindow):
 
 		"""
 
-		# Create Debug/Run tool button 
-        debug_tbt = QToolButton()
-        debug_tbt.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        debug_tbt.setFont(font)
-        debug_tbt.setText("Debug")
-        debug_tbt.setIcon(icon_debug)
-
-        self.toolbar.addWidget(debug_tbt)
-
-        QObject.connect(debug_tbt , SIGNAL("clicked()"),  self.debug)
-
-        debug_tbt2 = QToolButton()
-        debug_tbt2.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        debug_tbt2.setText("Run")
-        debug_tbt2.setFont(font)
-        debug_tbt2.setIcon(icon_run)
-
-        self.toolbar.addWidget(debug_tbt2)
-
-        QObject.connect(debug_tbt2 , SIGNAL("clicked()"),  self.run)
-        
-        debug_tbt5 = QToolButton()
-        debug_tbt5.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        debug_tbt5.setText("Stop")
-        debug_tbt5.setFont(font)
-        debug_tbt5.setIcon(icon_stop)
-        self.toolbar.addWidget(debug_tbt5)
-        QObject.connect(debug_tbt5 , SIGNAL("clicked()"),  self.stop)
-
 		#Create Target Trickplay Devices Button
         self._deviceManager = TrickplayDeviceManager(self._inspector)
         font_deviceManager = QFont()
@@ -222,63 +201,114 @@ class MainWindow(QMainWindow):
         self._deviceManager.ui.comboBox.setFont(font_deviceManager)
         self.toolbar.addWidget(self._deviceManager.ui.comboBox)
         
+
+		# Create Debug/Run tool button 
+		#V2 ---------------------------------------------------------------
+        self.debug_tbt = QtGui.QToolButton()
+        self.debug_tbt.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
+        self.debug_tbt.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.debug_tbt.setFont(font)
+        self.debug_tbt.setText("Run")
+        self.debug_tbt.setIcon(icon_run)
+
+        self.debug_menu = QtGui.QMenu()
+        #self.debug_menu.setIcon(icon_run)
+        #self.debug_menu.setTitle("Run")
+        debug_action = QtGui.QAction(self.debug_menu)
+        debug_action.setIcon(icon_debug)
+        debug_action.setText("Debug")
+        debug_action.setFont(font)
+        debug_action.setIconVisibleInMenu (True)
+        self.debug_menu.addAction(debug_action)
+        QObject.connect(debug_action , SIGNAL("triggered()"),  self.debug)
+
+        #self.debug_menu.addAction(self.ui.action_New)
+        #self.debug_menu.addAction(self.ui.action_Save)
+        #self.debug_menu.addAction(icon2, "Device1")
+        #self.debug_menu.addSeperator()
+        #self.debug_menu.addAction(icon, "Device2")
+        self.debug_tbt.setMenu(self.debug_menu)        
+
+        self.toolbar.addWidget(self.debug_tbt)
+        QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
+
         """
-        self._menu_button = QtGui.QToolButton()
-        self._menu_button.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
-        self._menu_button.setText("TrickPlay Devices    ")
+		#V1 ---------------------------------------------------------------
+        self.debug_debug = QToolButton()
+        self.debug_debug.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.debug_debug.setFont(font)
+        self.debug_debug.setText("Debug")
+        self.debug_debug.setIcon(icon_debug)
 
-        self._mini_menu = QtGui.QMenu()
-        self._mini_menu.addAction(self.ui.action_New)
-        self._mini_menu.addAction(self.ui.action_Save)
-        #self._mini_menu.addAction(icon2, "Device1")
-        #self._mini_menu.addSeperator()
-        #self._mini_menu.addAction(icon, "Device2")
+        self.toolbar.addWidget(self.debug_debug)
 
-        self._menu_button.setMenu(self._mini_menu)        
-        self._menu_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        self.toolbar.addWidget(self._menu_button)
-		"""
+        QObject.connect(self.debug_debug , SIGNAL("clicked()"),  self.debug)
 
-        debug_tbt3 = QToolButton()
-        debug_tbt3.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        debug_tbt3.setText("Step Into")
-        debug_tbt3.setFont(font)
-        self.toolbar.addWidget(debug_tbt3)
-        QObject.connect(debug_tbt3 , SIGNAL("clicked()"),  self.debug_step_into)
-        debug_tbt3.setIcon(icon_stepinto)
+        self.debug_run = QToolButton()
+        self.debug_run.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.debug_run.setText("Run")
+        self.debug_run.setFont(font)
+        self.debug_run.setIcon(icon_run)
 
-        debug_tbt4 = QToolButton()
-        debug_tbt4.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        debug_tbt4.setText("Step Over")
-        debug_tbt4.setFont(font)
-        debug_tbt4.setIcon(icon_stepover)
-        self.toolbar.addWidget(debug_tbt4)
-        QObject.connect(debug_tbt4 , SIGNAL("clicked()"),  self.debug_step_over)
+        self.toolbar.addWidget(self.debug_run)
 
-        debug_tbt7 = QToolButton()
-        debug_tbt7.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        debug_tbt7.setText("Step Out")
-        debug_tbt7.setFont(font)
-        debug_tbt7.setIcon(icon_stepout)
-        self.toolbar.addWidget(debug_tbt7)
-        QObject.connect(debug_tbt7 , SIGNAL("clicked()"),  self.debug_step_out)
+        QObject.connect(self.debug_run , SIGNAL("clicked()"),  self.run)
+        """
+        
+        self.debug_stop = QToolButton()
+        self.debug_stop.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.debug_stop.setText("Stop")
+        self.debug_stop.setFont(font)
+        self.debug_stop.setIcon(icon_stop)
+        self.debug_stop.setEnabled(False)
+        self.toolbar.addWidget(self.debug_stop)
+        QObject.connect(self.debug_stop , SIGNAL("clicked()"),  self.stop)
+
+        self.debug_stepinto = QToolButton()
+        self.debug_stepinto.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.debug_stepinto.setText("Step Into")
+        self.debug_stepinto.setFont(font)
+        self.debug_stepinto.setEnabled(False)
+        self.toolbar.addWidget(self.debug_stepinto)
+        QObject.connect(self.debug_stepinto , SIGNAL("clicked()"),  self.debug_step_into)
+        self.debug_stepinto.setIcon(icon_stepinto)
+
+        self.debug_stepover = QToolButton()
+        self.debug_stepover.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.debug_stepover.setText("Step Over")
+        self.debug_stepover.setFont(font)
+        self.debug_stepover.setEnabled(False)
+        self.debug_stepover.setIcon(icon_stepover)
+        self.toolbar.addWidget(self.debug_stepover)
+        QObject.connect(self.debug_stepover , SIGNAL("clicked()"),  self.debug_step_over)
+
+        self.debug_stepout = QToolButton()
+        self.debug_stepout.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.debug_stepout.setText("Step Out")
+        self.debug_stepout.setFont(font)
+        self.debug_stepout.setEnabled(False)
+        self.debug_stepout.setIcon(icon_stepout)
+        self.toolbar.addWidget(self.debug_stepout)
+        QObject.connect(self.debug_stepout , SIGNAL("clicked()"),  self.debug_step_out)
 
 		 
-        debug_pause = QToolButton()
-        debug_pause.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        debug_pause.setText("Pause")
-        debug_pause.setFont(font)
-        debug_pause.setIcon(icon_pause)
-        self.toolbar.addWidget(debug_pause)
-        QObject.connect(debug_pause , SIGNAL("clicked()"),  self.debug_pause)
+        self.debug_pause_bt = QToolButton()
+        self.debug_pause_bt.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.debug_pause_bt.setText("Pause")
+        self.debug_pause_bt.setFont(font)
+        self.debug_pause_bt.setIcon(icon_pause)
+        self.debug_pause_bt.setEnabled(False)
+        self.toolbar.addWidget(self.debug_pause_bt)
+        QObject.connect(self.debug_pause_bt , SIGNAL("clicked()"),  self.debug_pause)
  
-        debug_tbt6 = QToolButton()
-        debug_tbt6.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        debug_tbt6.setText("Continue")
-        debug_tbt6.setFont(font)
-        debug_tbt6.setIcon(icon_continue)
-        self.toolbar.addWidget(debug_tbt6)
-        QObject.connect(debug_tbt6 , SIGNAL("clicked()"),  self.debug_continue)
+        self.debug_continue_bt = QToolButton()
+        self.debug_continue_bt.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.debug_continue_bt.setText("Continue")
+        self.debug_continue_bt.setFont(font)
+        self.debug_continue_bt.setEnabled(False)
+        self.debug_continue_bt.setIcon(icon_continue)
+        self.toolbar.addWidget(self.debug_continue_bt)
+        QObject.connect(self.debug_continue_bt , SIGNAL("clicked()"),  self.debug_continue)
 
         self.current_debug_file = None
 
@@ -436,7 +466,7 @@ class MainWindow(QMainWindow):
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, Editor.ARROW_MARKER_NUM)
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
 				# clean backtrace and debug window
-				self._backtrace.ui.listWidget.clear()
+				self._backtrace.clearTraceTable(0)
 				self._debug.clearLocalTable(0)
 				self._debug.clearBreakTable(0)
 			else :
@@ -445,16 +475,24 @@ class MainWindow(QMainWindow):
 				if ret < 0 :
 					print ("tp console socket is not available !")
 
-        #self.ui.InspectorDock.hide()
-        #self.ui.ConsoleDock.hide()
-        #self.ui.DebugDock.hide()
-        #self.ui.BacktraceDock.hide()
-
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
         self.consoleWindowClicked()
         self.debugWindowClicked()
         self.traceWindowClicked()
+
+        """
+		#V1 -------------------------
+        self.debug_debug.setEnabled(True)
+        self.debug_run.setEnabled(True)
+        """
+
+        self.debug_stop.setEnabled(False)
+        self.debug_stepinto.setEnabled(False)
+        self.debug_stepover.setEnabled(False)
+        self.debug_stepout.setEnabled(False)
+        self.debug_pause_bt.setEnabled(False)
+        self.debug_continue_bt.setEnabled(False)
 
         self.inspector.clearTree()
         #self._deviceManager.ui.comboBox.removeItem(self._deviceManager.ui.comboBox.findText(self._deviceManager.newAppText))
@@ -469,11 +507,18 @@ class MainWindow(QMainWindow):
         self.consoleWindowClicked()
         self.debugWindowClicked()
         self.traceWindowClicked()
-
-        #self.ui.InspectorDock.show()
-        #self.ui.ConsoleDock.show()
-        #self.ui.DebugDock.hide()
-        #self.ui.BacktraceDock.hide()
+		
+        """
+		#V1-------------------------------
+        self.debug_debug.setEnabled(False)
+        self.debug_run.setEnabled(True)
+        """
+        self.debug_stop.setEnabled(True)
+        self.debug_stepinto.setEnabled(False)
+        self.debug_stepover.setEnabled(False)
+        self.debug_stepout.setEnabled(False)
+        self.debug_pause_bt.setEnabled(False)
+        self.debug_continue_bt.setEnabled(False)
 
     def debug(self):
         self.inspector.clearTree()
@@ -484,15 +529,28 @@ class MainWindow(QMainWindow):
         self.consoleWindowClicked()
         self.debugWindowClicked()
         self.traceWindowClicked()
-        #self.ui.InspectorDock.show()
-        #self.ui.ConsoleDock.show()
-        #self.ui.DebugDock.show()
-        #self.ui.BacktraceDock.show()
+
+        """
+		#V1------------------------------
+        self.debug_debug.setEnabled(True)
+        self.debug_run.setEnabled(False)
+		"""
+        self.debug_stop.setEnabled(True)
+        self.debug_stepinto.setEnabled(True)
+        self.debug_stepover.setEnabled(True)
+        self.debug_stepout.setEnabled(True)
+        self.debug_pause_bt.setEnabled(True)
+        self.debug_continue_bt.setEnabled(True)
+
         time.sleep(2)
         data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bn", True)
         print ("-----------")
         self._deviceManager.printResp(data, "cn")
         print ("-----------")
+        # update backtrace table
+        data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
+        stack_info = self._deviceManager.printResp(data, "bt")
+        self._backtrace.populateTraceTable(stack_info, self.editorManager)
 
 		# Open File, Show Current Lines 
         if self._deviceManager.file_name[:1] != '/' :
@@ -638,7 +696,7 @@ class MainWindow(QMainWindow):
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
 				# clean backtrace and debug windows
-				self._backtrace.ui.listWidget.clear()
+				self._backtrace.clearTraceTabe(0)
 				self._debug.clearLocalTable(0)
 				self._debug.clearBreakTable(0)
 
@@ -652,7 +710,7 @@ class MainWindow(QMainWindow):
 				# update backtrace table
 				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
 				stack_info = self._deviceManager.printResp(data, "bt")
-				self._backtrace.populateList(stack_info)
+				self._backtrace.populateTraceTable(stack_info, self.editorManager)
 
 				# print breakpoints info 
 				#data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "b", False)

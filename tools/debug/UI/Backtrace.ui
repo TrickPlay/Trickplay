@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>184</height>
+    <width>230</width>
+    <height>183</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,12 +21,24 @@
     <number>0</number>
    </property>
    <item row="0" column="0">
-    <widget class="QListWidget" name="listWidget">
+    <widget class="QTableWidget" name="traceTable">
      <property name="font">
       <font>
-       <pointsize>10</pointsize>
+       <pointsize>9</pointsize>
       </font>
      </property>
+     <property name="showGrid">
+      <bool>false</bool>
+     </property>
+     <attribute name="horizontalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
     </widget>
    </item>
   </layout>
