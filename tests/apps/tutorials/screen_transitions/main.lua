@@ -105,23 +105,23 @@ InLouverTransition = false
 
 -- Menu keystroke handler
 keyInputHandlerMenu = {
-	["1"] = function() transitionInstant   ( otherScreen( CurrentScreen ) ) end,
-	["2"] = function() transitionFadeOutOld( CurrentScreen, 
-	                                         otherScreen( CurrentScreen ) ) end,
-	["3"] = function() transitionFadeInNew ( otherScreen( CurrentScreen ) ) end,
-	["4"] = function() transitionFadeInOut ( CurrentScreen,
-	                                         otherScreen( CurrentScreen ) ) end,
-	["5"] = function() transitionEdgeWipe  ( CurrentScreen,
-	                                         otherScreen( CurrentScreen ) ) end,
-	["6"] = function() transitionSlide     ( CurrentScreen,
-	                                         otherScreen( CurrentScreen ) ) end,
-	["7"] = function() transitionSlideBoth ( CurrentScreen,
-	                                         otherScreen( CurrentScreen ) ) end,
-	["8"] = function() transitionZoomOut   ( CurrentScreen,
-	                                         otherScreen( CurrentScreen ) ) end,
-	["9"] = function() transitionZoomIn    ( otherScreen( CurrentScreen ) ) end,
-	["0"] = function() transitionLouvBlinds( CurrentScreen,
-	                                         otherScreen( CurrentScreen ) ) end,
+	["1"] = function() transitionInstant    ( otherScreen( CurrentScreen ) ) end,
+	["2"] = function() transitionFadeOut    ( CurrentScreen, 
+	                                          otherScreen( CurrentScreen ) ) end,
+	["3"] = function() transitionFadeIn     ( otherScreen( CurrentScreen ) ) end,
+	["4"] = function() transitionFadeInOut  ( CurrentScreen,
+	                                          otherScreen( CurrentScreen ) ) end,
+	["5"] = function() transitionEdgeWipe   ( CurrentScreen,
+	                                          otherScreen( CurrentScreen ) ) end,
+	["6"] = function() transitionSlide      ( CurrentScreen,
+	                                          otherScreen( CurrentScreen ) ) end,
+	["7"] = function() transitionSlideDouble( CurrentScreen,
+	                                          otherScreen( CurrentScreen ) ) end,
+	["8"] = function() transitionZoomOut    ( CurrentScreen,
+	                                          otherScreen( CurrentScreen ) ) end,
+	["9"] = function() transitionZoomIn     ( otherScreen( CurrentScreen ) ) end,
+	["0"] = function() transitionLouvBlinds ( CurrentScreen,
+	                                          otherScreen( CurrentScreen ) ) end,
 }
 
 -- *********************************************************
@@ -354,7 +354,7 @@ end -- transitionInstant()
 
 -- *********************************************************
 function
-transitionFadeOutOldCleanup()
+transitionFadeOutCleanup()
 
 	-- This function is invoked at the completion of the FadeOutOld screen
 	-- transition.
@@ -369,11 +369,11 @@ transitionFadeOutOldCleanup()
 		ScreenOne.opacity = 255
 	end
 	
-end -- transitionFadeOutOldCleanup()
+end -- transitionFadeOutCleanup()
 
 -- *********************************************************
 function
-transitionFadeOutOld( OldScreen, NewScreen )
+transitionFadeOut( OldScreen, NewScreen )
 
 	-- Arguments: OldScreen - Group object of screen to transition from
 	--            NewScreen - Group object of screen to transition to
@@ -383,14 +383,14 @@ transitionFadeOutOld( OldScreen, NewScreen )
 	-- handler to clean up, afterwards.
 	OldScreen:animate( { duration = 500,    -- transition time duration
 	                     opacity = 0,        -- fade to fully transparent
-	                     on_completed = transitionFadeOutOldCleanup,
+	                     on_completed = transitionFadeOutCleanup,
 	} )
 	
-end -- transitionFadeOutOld()
+end -- transitionFadeOut()
 	                   
 -- *********************************************************
 function
-transitionFadeInNew( NewScreen )
+transitionFadeIn( NewScreen )
 
 	-- Argument: NewScreen - Group object of screen to transition to
 	
@@ -406,7 +406,7 @@ transitionFadeInNew( NewScreen )
 	                     opacity = 255,     -- fade in to fully opaque
 	} )
 	
-end -- transitionFadeInNew()
+end -- transitionFadeIn()
 
 -- *********************************************************
 function
@@ -416,8 +416,8 @@ transitionFadeInOut( OldScreen, NewScreen )
 	--            NewScreen - Group object of screen to transition to
 	
 	-- Fade out OldScreen, fade in NewScreen
-	transitionFadeOutOld( OldScreen, NewScreen )	
-	transitionFadeInNew( NewScreen )
+	transitionFadeOut( OldScreen, NewScreen )	
+	transitionFadeIn( NewScreen )
 	
 end -- transitionFadeInOut()
 
@@ -494,7 +494,7 @@ end -- transitionSlide()
 
 -- *********************************************************
 function
-transitionSlideBoth( OldScreen, NewScreen )
+transitionSlideDouble( OldScreen, NewScreen )
 
 	-- Arguments: OldScreen - Group object of screen to transition from
 	--            NewScreen - Group object of screen to transition to
@@ -511,7 +511,7 @@ transitionSlideBoth( OldScreen, NewScreen )
 	-- Perform Slide screen transition on OldScreen
 	transitionSlide( OldScreen, NewScreen )
 
-end -- transitionSlideBoth()
+end -- transitionSlideDouble()
 
 -- *********************************************************
 function
