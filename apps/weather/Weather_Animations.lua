@@ -2061,6 +2061,8 @@ do
             wiper_freeze:lower_to_bottom()
         end,
         ["PULSE"] = function()
+            pulse_timer.interval = 8000*.3
+            show = false
             pulse_timer:start()
             curr_condition:add(wiper_freeze)
             wiper_freeze:lower_to_bottom()
@@ -2425,11 +2427,25 @@ do
 						y          = screen_h+100,
 						z_rotation = (flake.duration/(math.random(900,1100)*10))*360,
                         on_completed = function(self)
+                            table.remove(active_flakes,flake)
                             flake:unparent()
                             table.insert(old_flakes,flake)
                         end
 					}
                     
+                end,
+                hurry_out = function(self)
+                    self:stop_animation()
+                    self:animate{
+                        duration     = 200,
+                        x            = self.x+300,
+                        y            = screen_h+100,
+						on_completed = function(self)
+                            table.remove(active_flakes,flake)
+                            flake:unparent()
+                            table.insert(old_flakes,flake)
+                        end
+                    }
                 end
             }
         }
@@ -2457,6 +2473,8 @@ do
         curr_condition:add(flake)
         
         flake:drift()
+        
+        table.insert(active_flakes,flake)
         
     end
     
@@ -2515,6 +2533,9 @@ do
     end
     snow_state.timeline.on_completed = function()
         if snow_state.state == "NONE" and snow_corner.parent ~= nil then
+            for i,flake in ipairs(active_flakes) do
+                flake:hurry_out()
+            end
             snow_corner:unparent()
         end
     end
@@ -2587,7 +2608,7 @@ do
         interval = 8000*.7,
         on_timer = function(self)
             rain_on = not rain_on
-            
+            print("rain")
             if rain_on then
                 self.interval = 8000*.3
                 
@@ -2605,6 +2626,7 @@ do
         self.interval = 8000*.3
         rain_on = false
         self:start()
+        print("rain begin",intermittent_rain_timer.interval)
     end
     
     intermittent_rain_timer:stop()
@@ -2612,16 +2634,12 @@ do
     
     local curr_state = "OFF"
     function chance_rain_state:next_state(next_state)
-        if curr_state ~= next_state then
-            
-            if next_state == "OFF" then
-                intermittent_rain_timer:stop()
-                rain_drops_timer:stop()
-            else
-                intermittent_rain_timer:begin()
-            end
-            curr_state = next_state
+        intermittent_rain_timer:stop()
+        rain_drops_timer:stop()
+        if next_state ~= "OFF" then
+            intermittent_rain_timer:begin()
         end
+        curr_state = next_state
     end
     
 end
@@ -2708,7 +2726,7 @@ do
         interval = 8000*.7,
         on_timer = function(self)
             snow_on = not snow_on
-            
+            print("snow")
             if snow_on then
                 
                 self.interval = 8000*.3
@@ -2725,13 +2743,14 @@ do
     }
     intermittent_timer.begin = function(self)
         self.interval = 8000*.3
-        rain_on = false
+        snow_on = false
         self:start()
+        print("snow begin",intermittent_timer.interval)
     end
     intermittent_timer:stop()
     local curr_state = "OFF"
     function chance_snow_state:next_state(next_state)
-        if curr_state ~= next_state then
+        --if curr_state ~= next_state then
             intermittent_timer:stop()
             flurry_timer:stop()
             snow_timer:stop()
@@ -2744,7 +2763,7 @@ do
                 curr_timer = snow_timer
             end
             curr_state = next_state
-        end
+        --end
     end
     
 end
