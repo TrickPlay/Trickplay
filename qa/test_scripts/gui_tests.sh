@@ -110,11 +110,6 @@ for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
          
      else
 	echo "Skipping $png_file. Test generated png does not exist."
-		major_fail=$(($major_fail+1))
-		N_ARRAY[test_count]=$png_file
-		D_ARRAY[test_count]=$test_duration
-		R_ARRAY[test_count]="fail"
-		M_ARRAY[test_count]="Test generated png does not exist."
      fi
 
 done
