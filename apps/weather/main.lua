@@ -175,7 +175,7 @@ function post_main()
 			table.insert(bars,Make_Bar(location,i,true))
 			bars[#bars].curr_condition="Sunny"
 		else
-			table.insert(bars,Make_Bar(location,i))
+			table.insert(bars,Make_Bar(location,nil,i))
 		end
 		
 	end

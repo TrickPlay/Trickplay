@@ -366,19 +366,19 @@ ENUM = function(array_of_states)
 		
         if current_state == new_state then
 			
-            print("warning changing state to current state: ", new_state)
+            --print("warning changing state to current state: ", new_state)
             
-	    return
-            
-	end
-		
-        assert(states[new_state] ~= nil, tostring(new_state).." is not a State")
-        
-	for i,func in ipairs(state_change_functions[current_state][new_state]) do
+			return
 			
-            func(current_state,new_state)
-            
-	end
+		end
+			
+			assert(states[new_state] ~= nil, tostring(new_state).." is not a State")
+			
+		for i,func in ipairs(state_change_functions[current_state][new_state]) do
+				
+				func(current_state,new_state)
+				
+		end
 		
         current_state = new_state
         

@@ -36,7 +36,8 @@ local SHADOW_OPACITY =  255   *  .4
 
 local FULL_BAR_X = 166
 local function make_five_day(fday)
-
+    
+    
     local c = Canvas(170*5,300)
     c:begin_painting()
     local icon 
@@ -46,14 +47,14 @@ local function make_five_day(fday)
         c:new_path()
         c:move_to(39+170*(i-1),0)
         if i == 1 then
-            c:text_path(FONT..DAY_SZ,"Tomorrow")
+            c:text_path(FONT..DAY_SZ,fday[i+1] and fday[i+1].icon and "Tomorrow" or "")
         else
-            c:text_path(FONT..DAY_SZ,fday[i+1].date.weekday)
+            c:text_path(FONT..DAY_SZ,fday[i+1] and fday[i+1].date and fday[i+1].date.weekday or "")
         end
         c:set_source_color(TEXT_COLOR)
         c:fill(true)
         
-        icon = Bitmap(imgs.icons[fday[i+1].icon].src)
+        icon = Bitmap(imgs.icons[fday[i+1] and fday[i+1].icon or "unknown"].src)
         
         c:new_path()
         c:move_to(7+170*(i-1),12)
@@ -66,13 +67,13 @@ local function make_five_day(fday)
         
         c:new_path()
         c:move_to(36+170*(i-1),73)
-        c:text_path(FONT.."Bold normal "..DAY_HI_LO_SZ,fday[i+1].high.fahrenheit..DEG)
+        c:text_path(FONT.."Bold normal "..DAY_HI_LO_SZ,(fday[i+1] and fday[i+1].high and fday[i+1].high.fahrenheit..DEG) or "")
         c:set_source_color(HI_TEMP_COLOR)
         c:fill(true)
         
         c:new_path()
         c:move_to(100+170*(i-1),73)
-        c:text_path(FONT.."Bold normal "..DAY_HI_LO_SZ,fday[i+1].low.fahrenheit.. DEG)
+        c:text_path(FONT.."Bold normal "..DAY_HI_LO_SZ,(fday[i+1] and fday[i+1].low and fday[i+1].low.fahrenheit.. DEG) or "")
         c:set_source_color(LO_TEMP_COLOR)
         c:fill(true)
         
@@ -83,7 +84,7 @@ local function make_five_day(fday)
 
 end
 
-local function make_curr_temps(curr_temp_tbl,fday,w)
+local function make_curr_temps(curr_temp_tbl,fday,w,zip,city_name,state)
 
     local c = Canvas(w,300)
     c:begin_painting()
@@ -92,13 +93,27 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     --Curr temp
     c:new_path()
     c:move_to(0+2,CURR_TEMP_Y-30+2)
-    c:text_path(FONT.."Condensed Bold normal "..LARGE_TEMP_SZ,string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG)
+    c:text_path(
+        FONT.."Condensed Bold normal "..LARGE_TEMP_SZ,
+        (
+            curr_temp_tbl.current_observation and
+            curr_temp_tbl.current_observation.temp_f and
+            string.format("%d",curr_temp_tbl.current_observation.temp_f) or "--"
+        )..DEG
+    )
     c:set_source_color({0,0,0,255*.4})
     c:fill(true) 
     
     c:new_path()
     c:move_to(0,CURR_TEMP_Y-30)
-    c:text_path(FONT.."Condensed Bold normal "..LARGE_TEMP_SZ,string.format("%d",curr_temp_tbl.current_observation.temp_f)..DEG)
+    c:text_path(
+        FONT.."Condensed Bold normal "..LARGE_TEMP_SZ,
+        (
+            curr_temp_tbl.current_observation and
+            curr_temp_tbl.current_observation.temp_f and
+            string.format("%d",curr_temp_tbl.current_observation.temp_f) or "--"
+        )..DEG
+    )
     c:set_source_color(HI_TEMP_COLOR)
     c:fill(true)
     
@@ -106,13 +121,13 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     --Hi temp
     c:new_path()
     c:move_to(HI_LO_X-CURR_TEMP_X+2,HI_LO_Y-10+2)
-    c:text_path(FONT.."Condensed Bold normal "..HI_LO_SZ,fday.high.fahrenheit..DEG)
+    c:text_path(FONT.."Condensed Bold normal "..HI_LO_SZ,(fday.high and fday.high.fahrenheit or "--")..DEG)
     c:set_source_color({0,0,0,255*.4})
     c:fill(true)
     
     c:new_path()
     c:move_to(HI_LO_X-CURR_TEMP_X,HI_LO_Y-10)
-    c:text_path(FONT.."Condensed Bold normal "..HI_LO_SZ,fday.high.fahrenheit..DEG)
+    c:text_path(FONT.."Condensed Bold normal "..HI_LO_SZ,(fday.high and fday.high.fahrenheit or "--")..DEG)
     c:set_source_color(HI_TEMP_COLOR)
     c:fill(true)
     
@@ -120,21 +135,19 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     --Lo temp
     c:new_path()
     c:move_to(HI_LO_X-CURR_TEMP_X+80+2,HI_LO_Y-10+2)
-    c:text_path(FONT.."Condensed Bold normal "..HI_LO_SZ,fday.low.fahrenheit.. DEG)
+    c:text_path(FONT.."Condensed Bold normal "..HI_LO_SZ,(fday.low and fday.low.fahrenheit or "--").. DEG)
     c:set_source_color({0,0,0,255*.4})
     c:fill(true)
     
     c:new_path()
     c:move_to(HI_LO_X-CURR_TEMP_X+80,HI_LO_Y-10)
-    c:text_path(FONT.."Condensed Bold normal "..HI_LO_SZ,fday.low.fahrenheit.. DEG)
+    c:text_path(FONT.."Condensed Bold normal "..HI_LO_SZ,(fday.low and fday.low.fahrenheit or "--").. DEG)
     c:set_source_color(LO_TEMP_COLOR)
     c:fill(true)
     
     
     
-    
-    local city_name = curr_temp_tbl.current_observation.display_location.city
-    
+        
     print("PRINTTT",city_name)
     local regexed_name = ""
     for i = 1, # city_name do
@@ -154,15 +167,19 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
     --Location
     c:new_path()
     c:move_to(LOCATION_X-CURR_TEMP_X+2,LOCATION_Y-10+2)
-    c:text_path(FONT..LOCATION_SZ,regexed_name..
-                    ", "..curr_temp_tbl.current_observation.display_location.state)
+    c:text_path(
+        FONT..LOCATION_SZ,
+        regexed_name..", "..state
+    )
     c:set_source_color({0,0,0,255*.4})
     c:fill(true)
     
     c:new_path()
     c:move_to(LOCATION_X-CURR_TEMP_X,LOCATION_Y-10)
-    c:text_path(FONT..LOCATION_SZ,regexed_name..
-                    ", "..curr_temp_tbl.current_observation.display_location.state)
+    c:text_path(
+        FONT..LOCATION_SZ,
+        regexed_name..", "..state
+    )
     c:set_source_color(TEXT_COLOR)
     c:fill(true)
     
@@ -171,7 +188,7 @@ local function make_curr_temps(curr_temp_tbl,fday,w)
 
 end
 
-function Make_Bar(loc,index, master)
+function Make_Bar(loc,wu_data,index, master)
     --local curr_state = "1_DAY"
     local bar_index = index
     local mini_width = MINI_BAR_MIN_W
@@ -182,7 +199,7 @@ function Make_Bar(loc,index, master)
     print(loc)
     --Visual Components
     local bar = Group{
-        name = (type(loc) == "string" and loc or loc.current_observation.display_location.zip) .." Weather Bar",
+        name = loc .." Weather Bar",
         opacity = 0,
         x = MINI_BAR_X,
         y = BAR_Y,
@@ -548,24 +565,34 @@ function Make_Bar(loc,index, master)
                 return
             end
             
+            local fday = type(response.forecast) == "table" and
+                type(response.forecast.txt_forecast) == "table" and
+                type(response.forecast.txt_forecast.forecastday) == "table" and
+                type(response.forecast.txt_forecast.forecastday[1]) == "table" and
+                response.forecast.txt_forecast.forecastday[1] or {}
             
-            local t = {string.match( response.current_observation.observation_time ,
-                "^.* (%d*):%d* (%u%u) .*" )}
-            
-            
-            t[1] = tonumber(t[1])
-            
-            if t[1] >= 7 and t[2] =="PM" and t[1] ~= 12 or (t[1] <= 5 or t[1] == 12) and t[2] =="AM" then
+            if type(response.current_observation) == "table" and type(response.current_observation.observation_time) == "string" then
+                local t = {string.match( response.current_observation.observation_time ,
+                    "^.* (%d*):%d* (%u%u) .*" )}
                 
-                bar.local_time_of_day = "NIGHT"
                 
+                t[1] = tonumber(t[1])
+                
+                if t[1] >= 7 and t[2] =="PM" and t[1] ~= 12 or (t[1] <= 5 or t[1] == 12) and t[2] =="AM" then
+                    
+                    bar.local_time_of_day = "NIGHT"
+                    
+                else
+                    
+                    bar.local_time_of_day = "DAY"
+                    
+                end
             else
-                
                 bar.local_time_of_day = "DAY"
-                
             end
             
-            blurb_txt.text = response.forecast.txt_forecast.forecastday[1].fcttext
+            blurb_txt.text =fday.fcttext or "No forecast for today"
+            
             if blurb_txt.h > yellow_button.y+yellow_button.h-blurb_txt.y then
                 blurb_txt.clip = {0,0,blurb_txt.w,100}--yellow_button.y+yellow_button.h-blurb_txt.y}
                 --print(yellow_button.y+yellow_button.h-blurb_txt.y)
@@ -576,11 +603,16 @@ function Make_Bar(loc,index, master)
                 
             end
             
-            bar.curr_condition = response.forecast.simpleforecast.forecastday[1].conditions
+            bar.curr_condition = fday.conditions or "Unknown"
             
             five_day:unparent()
             
-            five_day = make_five_day(response.forecast.simpleforecast.forecastday)
+            five_day = make_five_day(
+                type(response.forecast) == "table" and
+                type(response.forecast.simpleforecast) == "table" and
+                response.forecast.simpleforecast.forecastday or
+                {}
+            )
             
             full_bar:add(five_day)
             if anim_state and anim_state.state ~= "5_DAY" then
@@ -588,26 +620,44 @@ function Make_Bar(loc,index, master)
                 five_day:hide()
             end
             
+            local city_name = (type(response.current_observation) == "table" and
+                    type(response.current_observation.display_location) == "table" and
+                    response.current_observation.display_location.city or loc)
+            
+            local state = (type(response.current_observation) == "table" and
+                    type(response.current_observation.display_location) == "table" and
+                    response.current_observation.display_location.state or "USA")
+            
+            
+            
             mini_width = Text{
                 font=FONT.."Condensed Bold normal "..LOCATION_SZ,
-                text=response.current_observation.display_location.city..
-                    ", "..response.current_observation.display_location.state
+                text=city_name..", "..state
             }.w + LOCATION_X - MINI_BAR_X + 100
             
             if mini_width > BLURB_X-40 then
-                response.current_observation.display_location.city =
-                    string.sub(response.current_observation.display_location.city,1,10).."... "
+                city_name = string.sub(city_name,1,10).."... "
                 mini_width = Text{
                     font=FONT.."Condensed Bold normal "..LOCATION_SZ,
-                    text=response.current_observation.display_location.city..
-                        ", "..response.current_observation.display_location.state
+                    text=city_name..", "..state
                 }.w + LOCATION_X - MINI_BAR_X + 100
             end
             if mesg then
                 mesg:unparent()
                 mesg=nil
             end
-            bar:add(make_curr_temps(response,response.forecast.simpleforecast.forecastday[1],mini_width))
+            bar:add(
+                make_curr_temps(
+                    response,
+                    type(response.forecast) == "table" and
+                    type(response.forecast.simpleforecast) == "table" and
+                    response.forecast.simpleforecast.forecastday[1] or {},
+                    mini_width,
+                    loc,
+                    city_name,
+                    state
+                )
+            )
             if anim_state and anim_state.state == "MINI" then
                 print("MINIIIIII")
                 --bar:find_child("mid").scale = {mini_width,1}
@@ -649,7 +699,7 @@ function Make_Bar(loc,index, master)
         bar_i  = next_i
         screen:grab_key_focus()
         current_bar:show()
-        current_bar.go_to_state(anim_state.state)
+        current_bar.warp_to_state(anim_state.state)
         time_of_day = current_bar.local_time_of_day
         if conditions[current_bar.curr_condition] then
             conditions[current_bar.curr_condition]()
@@ -981,7 +1031,6 @@ function Make_Bar(loc,index, master)
     }
     
     general_on_key_down = function(self,k)
-        print("wo")
         return bar_keys[k] and bar_keys[k]()
     end
     
@@ -1032,10 +1081,10 @@ function Make_Bar(loc,index, master)
         end,
         
     }
-    local zip_entry_make_bar = function(zip,master_i)
+    local zip_entry_make_bar = function(zip,make_bar_param,master_i)
         zip_code_prompt.text = "Success"
         table.insert(locations,zip)
-        table.insert(bars,Make_Bar(zip,#locations,master_i))
+        table.insert(bars,Make_Bar(zip,make_bar_param,#locations,master_i))
         next_i = #bars
         screen:add(bars[next_i])
         bar.go_to_state("1_DAY")
@@ -1073,10 +1122,9 @@ function Make_Bar(loc,index, master)
                 if zip == "00000" then
                     
                     --create the new bar
-                    zip_entry_make_bar(zip,true)
+                    zip_entry_make_bar(zip,zip,true)
                     
                 else
-                    
                     
                     zip_ellipsis_base_text = "Searching"
                     
@@ -1084,7 +1132,6 @@ function Make_Bar(loc,index, master)
                     
                     zip_search_cancel_obj = lookup_zipcode(zip,function(response)
                         
-                        print("I got DIS")
                         if type(response) == "table" then
                             
                             zip_search_cancel_obj = nil
@@ -1104,7 +1151,7 @@ function Make_Bar(loc,index, master)
                                 return
                             else
                                 
-                                zip_entry_make_bar(response)
+                                zip_entry_make_bar(zip,response)
                                 
                             end
                             
@@ -1139,10 +1186,18 @@ function Make_Bar(loc,index, master)
     end
     
     bar.on_key_down = general_on_key_down
-    print("bleh")
+    
     function bar.get_state()
         
         return anim_state.state
+        
+    end
+    
+    function bar.warp_to_state(s)
+        
+        anim_state:warp(s)
+        anim_state.timeline:on_started()
+        anim_state.timeline:on_completed()
         
     end
     
@@ -1156,9 +1211,9 @@ function Make_Bar(loc,index, master)
     --send weather query
     if master_i == nil then
         
-        if type(loc) == "table" then
+        if wu_data then
             
-            bar.update(loc)
+            bar.update(wu_data)
             
         else
             
