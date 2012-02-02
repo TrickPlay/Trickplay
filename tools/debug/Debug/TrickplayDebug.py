@@ -10,9 +10,6 @@ from connection import *
 class TrickplayDebugger(QWidget):
     
     def __init__(self, parent = None, f = 0):
-        """
-        UI Element property inspector made up of two QTreeViews
-        """
         QWidget.__init__(self, parent)
         
         self.ui = Ui_TrickplayDebugger()
@@ -27,8 +24,8 @@ class TrickplayDebugger(QWidget):
         self.connect(self.ui.breakTable, SIGNAL("cellClicked(int, int)"), self.cellClicked)
         self.break_info = {}
 
+
     def cellClicked(self, r, c):
-		print ("TABLE CHANGED"+str(r)+":"+str(c))
 		cellItem= self.ui.breakTable.item(r, 0) 
 		cellItemState = cellItem.checkState()  
 		#fileLine = cellItem.text()
@@ -109,7 +106,6 @@ class TrickplayDebugger(QWidget):
 			n += 1
 		self.ui.breakTable.show()
 
-
     def clearLocalTable(self, row_num=0):
 		self.ui.localTable.clear()
 		self.ui.localTable.setHorizontalHeaderLabels(self.headers)
@@ -128,58 +124,56 @@ class TrickplayDebugger(QWidget):
 			n += 1
 		self.ui.localTable.show()
 
-    def populateTable(self, debug_info=None):
-		selected = None
-		self.ui.tableWidget.clear()
-		"""
-		self.ui.tableWidget.setSortingEnabled(False)
-		self.ui.tableWidget.setRowCount(len(debug_info))
-		headers = ["Name","Type","Value"]
-		self.ui.tableWidget.setColumnCount(len(headers))
-		self.ui.tableWidget.setHorizontalHeaderLabels(headers)
-		for index in debug_info:
-			item = QTableWidgetItem(debug_info[index][0])
-			#item.setData(Qt.UserRole, 
-
-		for row, ship in enumerate(self.ships):
-            item = QTableWidgetItem(ship.name)
-            item.setData(Qt.UserRole, int(id(ship)))
-            if selectedShip is not None and selectedShip == id(ship):
-                selected = item
-            self.tableWidget.setItem(row, ships.NAME, item)
-            self.tableWidget.setItem(row, ships.OWNER,
-                    QTableWidgetItem(ship.owner))
-            self.tableWidget.setItem(row, ships.COUNTRY,
-                    QTableWidgetItem(ship.country))
-            self.tableWidget.setItem(row, ships.DESCRIPTION,
-                    QTableWidgetItem(ship.description))
-            item = QTableWidgetItem("{:10}".format(ship.teu))
-            item.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
-            self.tableWidget.setItem(row, ships.TEU, item)
-        self.tableWidget.setSortingEnabled(True)
-        self.tableWidget.resizeColumnsToContents()
-        if selected is not None:
-            selected.setSelected(True)
-            self.tableWidget.setCurrentItem(selected)
-		"""
-
 class TrickplayBacktrace(QWidget):
+    
     def __init__(self, parent = None, f = 0):
         QWidget.__init__(self, parent)
         
         self.ui = Ui_TrickplayBacktrace()
         self.ui.setupUi(self)
+        self.ui.traceTable.setSortingEnabled(False)
+        self.ui.traceTable.setColumnCount(1)
+        self.connect(self.ui.traceTable, SIGNAL("cellClicked(int, int)"), self.cellClicked)
+        self.stack_info = {}
 
-    def populateList(self, stack_info=None):
-        selected = None
-        self.ui.listWidget.clear()
+    def cellClicked(self, r, c):
+		cellItem= self.ui.traceTable.item(r, 0) 
+		fileLine = cellItem.whatsThis()
+		n = re.search(":", fileLine).end()
+		fileName = fileLine[:n-1]
+		lineNum = int(fileLine[n:])-1
 
-        for index in stack_info:
-			print (stack_info[index])
-			item = QListWidgetItem(stack_info[index])
-			self.ui.listWidget.addItem(item)
-        selected = item
-        if selected is not None:
-        	selected.setSelected(True)
-        	self.ui.listWidget.setCurrentItem(selected)
+		self.editorManager.newEditor(fileName, None, lineNum)
+		editor = self.editorManager.currentEditor 
+		
+    def clearTraceTable(self, row_num=0):
+		self.ui.traceTable.clear()
+		self.ui.traceTable.setRowCount(row_num)
+		
+    def populateTraceTable(self, stack_info=None, editorManager=None):
+
+		self.stack_info = stack_info
+		self.editorManager = editorManager
+
+		if len(stack_info) > 0 :
+			self.clearTraceTable(len(stack_info[1]))
+		else :
+			self.clearTraceTable()
+
+		n = 0
+		for key in stack_info:
+			m = 0
+			for item in stack_info[key]:
+				if key == 1:
+					newitem = QTableWidgetItem()
+					newitem.setText(item)
+					self.ui.traceTable.setItem(m, n, newitem)
+				elif key == 2:
+					newitem= self.ui.traceTable.item(m,0)
+					newitem.setWhatsThis(item)
+				else:
+					pass
+				m += 1
+			n += 1
+		self.ui.traceTable.show()
 

@@ -51,6 +51,8 @@ class TrickplayDeviceManager(QWidget):
         self.icon.addPixmap(QPixmap("Assets/icon-target.png"), QIcon.Normal, QIcon.Off)
         self.icon_null = QIcon()
         self.prev_index = 0
+        self.ui.comboBox.setSizeAdjustPolicy(QComboBox.AdjustToContents)
+        self.ui.comboBox.setIconSize(QSize(20,32))
 
     def service_selected(self, index):
         
@@ -69,7 +71,7 @@ class TrickplayDeviceManager(QWidget):
         
 		#self.inspector.clearTree()
         
-		print(index,address,port)
+		#print(index,address,port)
 
 		CON.port = port
 		CON.address = address
@@ -342,8 +344,6 @@ class TrickplayDeviceManager(QWidget):
 			local_vars[2] = type_var_list
 			local_vars[3] = value_var_list
 
-			#print "\t"+local_vars_str
-			#print "\t"+"Break at "+file_name+":"+str(line_num)
 			return local_vars
 
 		elif "error" in pdata:
@@ -351,13 +351,26 @@ class TrickplayDeviceManager(QWidget):
 		
 		elif "stack" in pdata:
 			stack_info_str = ""
+			stack_list = []
+			info_list = []
 			stack_info = {}
 			index = 0
 			for s in pdata["stack"]:
 				if "file" in s and "line" in s:
 					stack_info_str = stack_info_str+"["+str(index)+"] "+s["file"]+":"+str(s["line"])+"\n\t"
-					stack_info[index] = "["+str(index)+"] "+s["file"]+":"+str(s["line"])
+					stack_list.append("["+str(index)+"] "+s["file"]+":"+str(s["line"]))
+					#info_list.append(str(self.path())+'/'+s["file"]+":"+str(s["line"]))
+					
+					eChar = ""
+					if s["file"][:1] != "/" :
+						eChar = "/"
+
+					info_list.append(str(self.path())+eChar+s["file"]+":"+str(s["line"]))
 					index = index + 1
+
+			stack_info[1] = stack_list
+			stack_info[2] = info_list
+
 			#print "\t"+stack_info_str
 			return stack_info
 
@@ -392,7 +405,7 @@ class TrickplayDeviceManager(QWidget):
 			breakpoints_info[3] = linenum_var_list
 			breakpoints_info[4] = state_var_list
 
-			print "\t"+breakpoints_info_str
+			#print "\t"+breakpoints_info_str
 			return breakpoints_info
 		
 		elif "source" in pdata:

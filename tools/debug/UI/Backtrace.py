@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Backtrace.ui'
+# Form implementation generated from reading ui file 'Backtrace2.ui'
 #
-# Created: Thu Jan 26 16:06:42 2012
+# Created: Thu Feb  2 13:57:55 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,17 +17,23 @@ except AttributeError:
 class Ui_TrickplayBacktrace(object):
     def setupUi(self, TrickplayBacktrace):
         TrickplayBacktrace.setObjectName(_fromUtf8("TrickplayBacktrace"))
-        TrickplayBacktrace.resize(200, 184)
+        TrickplayBacktrace.resize(230, 183)
         self.gridLayout = QtGui.QGridLayout(TrickplayBacktrace)
         self.gridLayout.setMargin(0)
         self.gridLayout.setSpacing(0)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.listWidget = QtGui.QListWidget(TrickplayBacktrace)
+        self.traceTable = QtGui.QTableWidget(TrickplayBacktrace)
         font = QtGui.QFont()
-        font.setPointSize(10)
-        self.listWidget.setFont(font)
-        self.listWidget.setObjectName(_fromUtf8("listWidget"))
-        self.gridLayout.addWidget(self.listWidget, 0, 0, 1, 1)
+        font.setPointSize(9)
+        self.traceTable.setFont(font)
+        self.traceTable.setShowGrid(False)
+        self.traceTable.setObjectName(_fromUtf8("traceTable"))
+        self.traceTable.setColumnCount(0)
+        self.traceTable.setRowCount(0)
+        self.traceTable.horizontalHeader().setVisible(False)
+        self.traceTable.horizontalHeader().setStretchLastSection(True)
+        self.traceTable.verticalHeader().setVisible(False)
+        self.gridLayout.addWidget(self.traceTable, 0, 0, 1, 1)
 
         self.retranslateUi(TrickplayBacktrace)
         QtCore.QMetaObject.connectSlotsByName(TrickplayBacktrace)
