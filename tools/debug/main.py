@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         self.ui.DebugDock.hide()
 
         # Create Editor
-        self._editorManager = EditorManager(self._fileSystem, self._debug, self.ui.centralwidget)
+        self._editorManager = EditorManager(self._fileSystem, self._debug, self.ui.menuView, self.ui.centralwidget)
         
 		#Create Backtrace
         self.ui.BacktraceDock.toggleViewAction().setText("&Backtrace")
@@ -178,21 +178,6 @@ class MainWindow(QMainWindow):
         self.toolbar.setObjectName("debug_toolbar")
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar)
 
-        """
-        self.debugComboBox = QtGui.QComboBox()
-        self.debugComboBox.setEditable(False)
-        self.debugComboBox.setDuplicatesEnabled(False)
-        self.debugComboBox.setFrame(False)
-        #self.debugComboBox.setObjectName(_fromUtf8("debugComboBox"))
-        self.toolbar.addWidget(self.debugComboBox)
-
-        self.debugComboBox.addItem(icon, "Debug")
-        self.debugComboBox.addItem(icon2, "Run")
-
-        QObject.connect(self.debugComboBox, SIGNAL('currentIndexChanged(int)'), self.debug_selected)
-        QObject.connect(self.debugComboBox, SIGNAL("clicked()"),  self.debug_clicked)
-
-		"""
 
 		#Create Target Trickplay Devices Button
         self._deviceManager = TrickplayDeviceManager(self._inspector)
@@ -222,39 +207,11 @@ class MainWindow(QMainWindow):
         self.debug_menu.addAction(debug_action)
         QObject.connect(debug_action , SIGNAL("triggered()"),  self.debug)
 
-        #self.debug_menu.addAction(self.ui.action_New)
-        #self.debug_menu.addAction(self.ui.action_Save)
-        #self.debug_menu.addAction(icon2, "Device1")
-        #self.debug_menu.addSeperator()
-        #self.debug_menu.addAction(icon, "Device2")
         self.debug_tbt.setMenu(self.debug_menu)        
 
         self.toolbar.addWidget(self.debug_tbt)
         QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
 
-        """
-		#V1 ---------------------------------------------------------------
-        self.debug_debug = QToolButton()
-        self.debug_debug.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        self.debug_debug.setFont(font)
-        self.debug_debug.setText("Debug")
-        self.debug_debug.setIcon(icon_debug)
-
-        self.toolbar.addWidget(self.debug_debug)
-
-        QObject.connect(self.debug_debug , SIGNAL("clicked()"),  self.debug)
-
-        self.debug_run = QToolButton()
-        self.debug_run.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        self.debug_run.setText("Run")
-        self.debug_run.setFont(font)
-        self.debug_run.setIcon(icon_run)
-
-        self.toolbar.addWidget(self.debug_run)
-
-        QObject.connect(self.debug_run , SIGNAL("clicked()"),  self.run)
-        """
-        
         self.debug_stop = QToolButton()
         self.debug_stop.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         self.debug_stop.setText("Stop")
@@ -347,8 +304,6 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(self.trace_toolBtn)
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
 
-        #toolBtn.setEnabled(False)
-        #toolBtn.setIcon(icon_console_on)
     def traceWindowClicked(self) :
     	if self.windows['trace'] == True:
     		self.trace_toolBtn.setIcon(self.icon_trace_off)
@@ -416,31 +371,9 @@ class MainWindow(QMainWindow):
     def inspector(self):
         return self._inspector
 
-    def debug_clicked(self):
-		print ("DEBUG_clicked!!!!!!!!!!!!!")
-		if index == None :
-			index = self.debugComboBox.currentIndex()
-		print(index)
-		if index < 0:
-			return
-		elif index == 0:
-			self.debug()
-		else:
-			self.run()
-
-    def debug_selected(self, index):
-		print ("DEBUG_SELECTED!!!!!!!!!!!!!")
-		print(index)
-		if index < 0:
-			return
-		elif index == 0:
-			self.debug()
-		else:
-			self.run()
-
     def return_pressed(self):
 		self.request = str(self.ui.interactive.text())
-		print self.request
+		#print self.request
 		try:
 			ret = self.deviceManager.socket.write(self.request+'\n\n')
 			if ret < 0 :
@@ -457,7 +390,6 @@ class MainWindow(QMainWindow):
     	if self._deviceManager.trickplay.state() == QProcess.Running:
         	# self._deviceManager.trickplay.kill() #close, terminate 
 			if getattr(self._deviceManager, "debug_mode") == True :
-				print('Debug stop------------------')
 				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
 				# delete current line marker
 				for n in self.editorManager.editors:
@@ -470,7 +402,6 @@ class MainWindow(QMainWindow):
 				self._debug.clearLocalTable(0)
 				self._debug.clearBreakTable(0)
 			else :
-				print('Run stop------------------')
 				ret = self.deviceManager.socket.write('/quit\n\n')
 				if ret < 0 :
 					print ("tp console socket is not available !")
@@ -480,12 +411,6 @@ class MainWindow(QMainWindow):
         self.consoleWindowClicked()
         self.debugWindowClicked()
         self.traceWindowClicked()
-
-        """
-		#V1 -------------------------
-        self.debug_debug.setEnabled(True)
-        self.debug_run.setEnabled(True)
-        """
 
         self.debug_stop.setEnabled(False)
         self.debug_stepinto.setEnabled(False)
@@ -508,11 +433,6 @@ class MainWindow(QMainWindow):
         self.debugWindowClicked()
         self.traceWindowClicked()
 		
-        """
-		#V1-------------------------------
-        self.debug_debug.setEnabled(False)
-        self.debug_run.setEnabled(True)
-        """
         self.debug_stop.setEnabled(True)
         self.debug_stepinto.setEnabled(False)
         self.debug_stepover.setEnabled(False)
@@ -530,11 +450,6 @@ class MainWindow(QMainWindow):
         self.debugWindowClicked()
         self.traceWindowClicked()
 
-        """
-		#V1------------------------------
-        self.debug_debug.setEnabled(True)
-        self.debug_run.setEnabled(False)
-		"""
         self.debug_stop.setEnabled(True)
         self.debug_stepinto.setEnabled(True)
         self.debug_stepover.setEnabled(True)
@@ -544,9 +459,7 @@ class MainWindow(QMainWindow):
 
         time.sleep(2)
         data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bn", True)
-        print ("-----------")
         self._deviceManager.printResp(data, "cn")
-        print ("-----------")
         # update backtrace table
         data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
         stack_info = self._deviceManager.printResp(data, "bt")
@@ -626,7 +539,7 @@ class MainWindow(QMainWindow):
         Initialize widgets on the main window with a given app path
         """
         
-        print("main.start")
+        #print("main.start")
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
@@ -684,9 +597,9 @@ class MainWindow(QMainWindow):
     def debug_command(self, cmd):
 		if getattr(self._deviceManager, "debug_mode") == True :
 			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), cmd, False)
-			print ("-----------")
+			#print ("-----------")
 			self._deviceManager.printResp(data, cmd)
-			print ("-----------")
+			#print ("-----------")
 			# Open File, Show Current Lines 
 			if cmd == "c":
 				# delete current line marker 

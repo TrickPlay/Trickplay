@@ -438,7 +438,8 @@ class TrickplayDeviceManager(QWidget):
 			print "\t"+app_info
 
 		if command in ['n','s','bn', 'cn']:
-			print "\t"+"Break at "+file_name+":"+str(line_num)
+			#print "\t"+"Break at "+file_name+":"+str(line_num)
+			pass
 
 
 

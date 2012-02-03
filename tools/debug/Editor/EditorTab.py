@@ -7,7 +7,7 @@ from Editor import Editor
 
 class EditorTabWidget(QTabWidget):
 
-    def __init__(self, main, parent = None):
+    def __init__(self, main, windowsMenu=None, parent = None):
         
         QTabWidget.__init__(self, parent)
         
@@ -21,6 +21,7 @@ class EditorTabWidget(QTabWidget):
         self.paths = []
         self.editors = []
         self.textBefores = []
+        self.windowsMenu = windowsMenu
         
         QObject.connect(self, SIGNAL('tabCloseRequested(int)'), self.closeTab)
         QObject.connect(self, SIGNAL('currentChanged(int)'), self.changeTab)
@@ -37,9 +38,17 @@ class EditorTabWidget(QTabWidget):
 		# find current index tab 
 		index = self.currentIndex()
 
-		# save before close
-		print index
 		editor = self.editors[index] #self.app.focusWidget()
+		self.windowsMenu.removeAction(editor.windowsAction)
+
+		# reset the windowsActions'shortcuts 
+		n=0
+		for edt in self.editors:
+			if n > index:
+				edt.windowsAction.setShortcut(QApplication.translate("MainWindow", "Ctrl+"+str(n), None, QApplication.UnicodeUTF8)) 
+			n=n+1
+
+		# save before close
 		if isinstance(editor, Editor):
 			currentText = editor.text()#open(editor.path).read()
 			if self.textBefores[index] != currentText:
