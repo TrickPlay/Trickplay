@@ -1,4 +1,5 @@
-from PyQt4 import QtCore, QtGui
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 
 import os
 import re
@@ -10,12 +11,14 @@ from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 
 
 
-class EditorManager(QtGui.QWidget):    
+class EditorManager(QWidget):    
     
-    def __init__(self, fileSystem, debugWindow, parent = None):
+    def __init__(self, fileSystem = None, debugWindow = None, windowsMenu = None, parent = None):
     
-        QtGui.QWidget.__init__(self)
+        QWidget.__init__(self)
         
+        self.windowsMenu = windowsMenu
+
         self.setupUi(parent)
         
         self.fileSystem = fileSystem
@@ -26,6 +29,7 @@ class EditorManager(QtGui.QWidget):
 
         self.currentEditor = None
 
+
     
     
     def setupUi(self, parent):
@@ -33,32 +37,32 @@ class EditorManager(QtGui.QWidget):
         Set up the editor UI where two QTabWidgets are arranged in a QSplitter
         """
         
-        self.splitter = QtGui.QSplitter()
-        mainGrid = QtGui.QGridLayout(parent)
+        self.splitter = QSplitter()
+        mainGrid = QGridLayout(parent)
         mainGrid.setSpacing(0)
         mainGrid.setMargin(0)
 
         # Dock in MainWindow
         dock = EditorDock(self, parent)
         
-        container = QtGui.QWidget()
+        container = QWidget()
 
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(container.sizePolicy().hasHeightForWidth())
         container.setSizePolicy(sizePolicy)
-        container.setMinimumSize(QtCore.QSize(0, 0))
-        font = QtGui.QFont()
+        container.setMinimumSize(QSize(0, 0))
+        font = QFont()
         font.setPointSize(10)
         container.setFont(font)
 
-        grid = QtGui.QGridLayout(container)
+        grid = QGridLayout(container)
 
         grid.setSpacing(0)
         grid.setMargin(0)
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QHBoxLayout()
 
         hbox.setSpacing(0)
         hbox.setMargin(0)
@@ -78,7 +82,7 @@ class EditorManager(QtGui.QWidget):
         return self.editorGroups
     
     def EditorTabWidget(self, parent = None):
-        tab = EditorTabWidget(self, self.splitter)
+        tab = EditorTabWidget(self, self.windowsMenu, self.splitter)
         tab.setObjectName('EditorTab' + str(len(self.editorGroups)))
         return tab
     
@@ -275,6 +279,10 @@ class EditorManager(QtGui.QWidget):
         else:
             editor.readFile(path)
         
+        if 0 == nTabGroups:
+			seperatorAction = self.windowsMenu.addSeparator()
+
+
         if not self.editors.has_key(path):
             self.tab.paths.append(path)
             self.tab.textBefores.append(editor.text())
@@ -288,6 +296,22 @@ class EditorManager(QtGui.QWidget):
         self.editorGroups[tabGroup].setCurrentIndex(index)
         editor.setFocus()
         editor.path = path
+
+		#  KKK
+        font = QFont()
+        font.setPointSize(10)
+
+        n = re.search("[/]+\S+[/]+", editor.path).end()
+        fileName = editor.path[n:]
+		
+        editorAction = QAction(self.windowsMenu)
+        editorAction.setText(fileName)
+        editorAction.setIconText(editor.path)
+        editorAction.setFont(font)
+        editorAction.setShortcut(QApplication.translate("MainWindow", "Ctrl+"+str(index+1), None, QApplication.UnicodeUTF8))
+        self.windowsMenu.addAction(editorAction)
+        QObject.connect(editorAction , SIGNAL("triggered()"),  self, SLOT("moveToThisEditor()"))
+        editor.windowsAction = editorAction 
 
         if not line_no == None:
 			editor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
@@ -327,6 +351,13 @@ class EditorManager(QtGui.QWidget):
 					editor.markerAdd(int(line_no) -1, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 				editor.current_line = int(line_no) -1 
 
+    @pyqtSlot()
+    def moveToThisEditor(self):
+		senderAction = self.sender()
+		self.newEditor(senderAction.iconText(), None)
+
+    def dropFileEvent(self, index):
+		pass
     def dropFileEvent(self, event, src, w = None):
         """
         Accept a file either by dragging onto the editor dock or into one of the

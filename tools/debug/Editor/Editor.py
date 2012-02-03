@@ -69,6 +69,7 @@ class Editor(QsciScintilla):
         self.markerDefine(QPixmap("Assets/breakpoint-on.png"), self.ACTIVE_BREAK_MARKER_NUM)
         self.markerDefine(QPixmap("Assets/breakpoint-off-currentline.png"), self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
         self.markerDefine(QPixmap("Assets/breakpoint-on-currentline.png"), self.ARROW_ACTIVE_BREAK_MARKER_NUM)
+
         """
         self.markerDefine(QsciScintilla.Background, self.BACKGROUND_MARKER_NUM)
         self.markerDefine(QsciScintilla.RightTriangle, self.ARROW_MARKER_NUM)
