@@ -2,6 +2,8 @@
 
 Penguin Zip-Zip
 
+
+tell pablo about segfault
 --]]
 
 orient = dofile('orient/orient.lua')()

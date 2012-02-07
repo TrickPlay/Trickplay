@@ -2,6 +2,7 @@ local a, s = {0,0}, {1,1}
 local trans = {'l','t','r','b'}
 
 local intersects = function(a,b)
+	if not a or not b then return end
 	if a.update then a:update() end
 	if b.update then b:update() end
 	return a.x <= b.x + b.w and a.x + a.w >= b.x and

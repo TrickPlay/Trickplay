@@ -16,11 +16,13 @@ objectSet = Set()
 Object = Class {
 	extends = Sprite,
 	public = {
-		row = 0
+		row = 0,
+		level = 0
 	},
 	new = function(self,t)
 		table.merge(self,t)
 		self.mask = BBox(self)
+		self.mask.dirty = 1
 		objectSet[self] = true
 	end
 }
@@ -84,7 +86,7 @@ SwitchPole = Class {
 			objectSet[self] = nil
 		end,
 		on_insert = function(self,group)
-			self.flag.
+			self.flag.y = self.y
 			self.flag.scale = {self.row == 1 and 1 or -1,1}
 			
 			self.anim = AnimationState{duration = 128, mode = "EASE_OUT_QUAD", transitions = {
@@ -95,11 +97,11 @@ SwitchPole = Class {
 			}}
 			self.anim:warp(1)
 			
-			group:add(self.flag,Sprite{src = "switch-snow", x = obj.x, y = obj.y+15, anchor_point = {60,32}})
-			self.flag:raise(obj)
+			group:add(self.flag,Sprite{src = "switch-snow.png", x = self.x, y = self.y+30, anchor_point = {60,32}})
+			self.flag:raise(self)
 		end,
 		on_reset = function(self)
-			if row == self.row and objectSet.listeners[self] then
+			if row == self.row and not objectSet[self] then
 				self.anim.state = 1
 				self.state = 1
 				self.flag.src = "switch-red.png"
@@ -118,7 +120,7 @@ SwitchPole = Class {
 		self:move_anchor_point(4.5,126)
 		
 		self.moves = table.weak()
-		self.flag = Sprite{src = "switch-red.png", x = self.x, y = self.y, anchor_point = {56,126}}
+		self.flag = Sprite{src = "switch-red.png", x = self.x, anchor_point = {56,126}}
 		
 		self.timer = Timer{on_timer = function(this)
 			self.flag.src = "switch-green.png"
@@ -152,7 +154,7 @@ IceCube = Class {
 				else
 					self.vx, self.vy = self.mx, self.my
 					self.ox = self.vx > 0 and -128 or 1921
-					evFrame:add(self)
+					evFrame[self] = self.on_frame
 				end
 			else
 				self.touching = table.weak()
@@ -168,7 +170,7 @@ IceCube = Class {
 			if self.x == self.mt or (self.x > self.mt) == (self.vx > 0) then
 				if 20 < self.x and self.x < 1920 then
 					if self.x == self.mt then
-						fx.smash(obj)
+						fx.smash(self)
 						audio.play("ice-breaking")
 						self.x = self.ox
 					else
@@ -182,31 +184,33 @@ IceCube = Class {
 			end
 		end,
 		on_reset = function(self)
-			if self.anim then
+			if row == self.row and self.anim then
 				self.anim.state = 0
 			end
 		end,
 		move = function(self)
 			if self.anim then
-				self.anim.state = 1-tonumber(anim.state)
+				self.anim.state = 1-tonumber(self.anim.state)
 			end
 		end,
 		smash = function(self,now)
 			objectSet:drop(self)
 			self:move_anchor_point(self.w/2,self.h/2)
+			self:unparent()
+			
+			for k,v in ipairs(self.touching) do
+				if v.parent and v.parent ~= overlay.effects then
+					v:smash()
+				end
+			end
 			
 			if now then
-				fx.smash(obj)
+				fx.smash(self)
 				self:free()
 			else
 				self.vx, self.vy, self.vz, self.vo = nrand(0.4), nrand(0.2)-0.2, nrand(0.8), 0
-				self:unparent()
 				overlay.effects:add(self)
-			end
-			for k,v in ipairs(touching) do
-				if v.parent ~= overlay.effects then
-					v:smash()
-				end
+				Event(self,'free'):add(fx.smash)
 			end
 		end
 	},
@@ -232,7 +236,7 @@ IceBridge = Class {
 	extends = Object,
 	shared = {
 		on_collision = function(self,other,layer)
-			if penguin.mask.b - penguin.dy < self.mask.t then
+			if penguin.mask.y + penguin.mask.h - penguin.dy < self.mask.y then
 				penguin.land(self.y-110,self)
 			else
 				penguin.kill(self)
@@ -245,7 +249,7 @@ IceBridge = Class {
 					v = group:find_child((self.row == 1 and "" or "_") .. v)
 					v.moves[#v.moves+1] = self
 				end
-				 self.anim = AnimationState{duration = move[3], mode = "EASE_IN_OUT_QUAD", transitions = {
+				 self.anim = AnimationState{duration = self.mt, mode = "EASE_IN_OUT_QUAD", transitions = {
 					{source = "*", target = 0, keys = {{self,"x",self.x},{self,"y",self.y}}},
 					{source = "*", target = 1, keys = {{self,"x",self.x+self.mx*10},{self,"y",self.y+self.my*10}}}
 				}}
@@ -255,7 +259,7 @@ IceBridge = Class {
 			if self.row ~= 1 or self.x+self.w < 1920 then return end
 			
 			for k,v in pairs(group.children) do
-				if v.name and v.src == "ice-bridge.png" and v.x+v.w > 1920 and v.y == self.y+640 then
+				if IceBridge:is(v) and v.x+v.w > 1920 and v.y == self.y+640 then
 					group.bridges[self.y-110] = v
 					return
 				end
@@ -268,7 +272,7 @@ IceBridge = Class {
 		end,
 		move = function(self)
 			if self.anim then
-				self.anim.state = 1-tonumber(anim.state)
+				self.anim.state = 1-tonumber(self.anim.state)
 			end
 		end,
 	},
@@ -280,7 +284,7 @@ IceBridge = Class {
 	},
 	new = function(self,t)
 		table.merge(self,t)
-		self.mx, self.my, self.mt = unpack(self.clip)
+		self.mx, self.my, self.mt = unpack(self.clip or noclip)
 		self.clip = self.source.clip
 		self.mask:set(nil,{0,0,0,-30})
 		
@@ -391,21 +395,21 @@ SealBall = Class {
 			self.time = min(self.time+delta/self.dur,1)%1
 			ms = self.time*self.dur
 			
-			if state == 1 then
+			if self.state == 1 then
 				self.x = self.ox + self.vx*ms
 				self.opacity = 255*(1-self.time)
 			else
 				self.opacity = 255
 			end
 			
-			if t == 0 then
+			if self.time == 0 then
 				if self.state == 2 then
 					self.state = 0
 					self.oy, self.oz, self.vx, self.vy, self.vz = self.fy, 0, 0, -1.6, 0
 					self.time = 0.5
 					self.dur = -3*self.vy/gravity
 				elseif self.state == 1 then
-					self:reset()
+					self:on_reset()
 				elseif self.state == 0 then
 					self.seal:switch()
 					self.oz, self.vz = self.z_rotation[1], nrand(500)
@@ -463,7 +467,7 @@ SealBall = Class {
 			end
 		end,
 		init = function(self,v,w)
-			self.vspd, self.wait = v, w or 1
+			self.vspd, self.wait = v or false, w or 1
 			self.time = 0.001
 			self.dur = self.wait
 		end,
@@ -489,7 +493,7 @@ SealBall = Class {
 		vz = 0,
 		dur = 4.8*gravity,
 		wait = 1,
-		vspd = 0,
+		vspd = false,
 		high = true,
 		off = true,
 		seal = false
@@ -506,8 +510,9 @@ SealBall = Class {
 		self.oy = self.y
 		self.y = self.fy - 800
 		
-		evFrame:add(self)
+		evFrame[self] = self.on_frame
 		penguin.reset[self] = self.on_reset
+		--Event(self,'free'):add(function() print(Class:echo(self)) end)
 	end
 }
 
@@ -557,8 +562,9 @@ Seal = Class {
 	new = function(self,t)
 		table.merge(self,t)
 		self:move_anchor_point(self.w/2,self.h)
+		self.mask.dirty = 1
 		
-		evFrame:add(self)
+		evFrame[self] = self.on_frame
 		evInsert[self] = self.on_insert
 	end
 }
@@ -596,7 +602,7 @@ SealLion = Class {
 		self:move_anchor_point(self.w/2,self.h)
 		self.mask:set(nil,{20,10,-20,0})
 		
-		evFrame:add(self)
+		evFrame[self] = self.on_frame
 		evInsert[self] = self.on_insert
 	end
 }
@@ -607,7 +613,7 @@ SnowLedge = Class {
 		on_insert = function(self,group)
 			if self.row == 2 or self.x+self.w < 1920 then return end
 			for k,v in pairs(group.children) do
-				if v.name and v.src == "snow-ramp.png" and
+				if SnowRamp:is(v) and
 						v.x+v.w >= 1920 and v.y == self.y+640-67 then
 					group.bridges[self.y-120] = v
 					return
@@ -647,18 +653,21 @@ SnowRamp = Class {
 BlueFish = Class {
 	extends = Object,
 	shared = {
+		on_free = function(self)
+			self.layer:free()
+		end,
 		on_reset = function(self)
 			if row == self.row then
 				self:show()
 			end
 		end,
-		on_collision = function(self,other,layer)
+		on_collision = function(self)
+			self.layer:show()
 			self.streak:set{scale = {0.6,1}, opacity = 255}
 			self.streak:animate{scale = {1.5,1}, opacity = 0, duration = 400,
 				mode = "EASE_OUT_QUAD", on_completed = function() self.layer:hide() end}
-			self.layer:set{y_rotation = {x = penguin.x+(self.row == 2 and penguin.w or 0), y = penguin.y+penguin.h*3/5,
-				self.row == 2 and 180 or 0,0,0}, z_rotation = {self.row == 2 and 10 or -10,0,0}}
-			overlay:add(self.layer)
+			self.layer:set{x = penguin.x+(self.row == 2 and penguin.w or 0), y = penguin.y+penguin.h*3/5,
+				y_rotation = {self.row == 2 and 180 or 0,0,0}, z_rotation = {self.row == 2 and 10 or -10,0,0}}
 			penguin:boost()
 			self:hide()
 		end
@@ -672,10 +681,13 @@ BlueFish = Class {
 		self.mask:set(nil,{50,50,-50,-50})
 		
 		self.streak = Sprite{src = "streak.png", anchor_point = {0,65}}
-		self.layer = Layer()
-		self.layer:add(streak)
+		self.layer = Layer{name = "streak"}
+		self.layer:add(self.streak)
+		self.layer:hide()
+		overlay:add(self.layer)
 		
 		penguin.reset[self] = self.on_reset
+		Event(self,'free'):add(self.on_free)
 	end
 }
 
@@ -684,14 +696,16 @@ Armor = Class {
 	shared = {
 		on_frame = function(self)
 			a = {x = penguin.x, y = penguin.y, y_rotation = penguin.y_rotation}
-			for i in 1,self.has do
+			for i=1,self.has do
 				self.pieces[3-i]:set(a)
 			end
 		end,
 		on_insert = function(self,group)
-			a = {y = obj.y, scale = {self.row == 1 and 1 or -1,1}, y_rotation = {self.row == 1 and 0 or 180,penguin.w/2,0}}
+			a = {y = self.y, scale = {self.row == 1 and 1 or -1,1}, y_rotation = {self.row == 1 and 0 or 180,penguin.w/2,0}}
 			self.pieces[1]:set(a)
 			self.pieces[2]:set(a)
+			self.pieces[1].level = self.level
+			self.pieces[2].level = self.level
 			overlay.armor:add(self.pieces[2],self.pieces[1])
 			self.opacity = 1
 		end,
@@ -704,15 +718,14 @@ Armor = Class {
 			self.y = -200
 		end,
 		drop = function(self)
-			a = self.pieces[3-has]
+			a = self.pieces[3-self.has]
 			a:move_anchor_point(a.w/2,a.h/2)
 			a.y_rotation = {penguin.y_rotation[1],0,0}
 			a.vx, a.vy, a.vz, a.vo = self.row == 2 and 0.1 or -0.1, -0.4, self.row == 2 and 0.3 or -0.3, -0.33
 			a:unparent()
 			overlay.effects:add(a)
-			has = has-1
-			if has == 0 then
-				self.pieces[1]:free()
+			self.has = self.has-1
+			if self.has == 0 then
 				self.pieces[2]:free()
 				evFrame[self] = nil
 				penguin.armor = nil
@@ -730,8 +743,8 @@ Armor = Class {
 		self.mask:set(nil,{24,0,-24,0})
 		self:move_anchor_point(-34,-43)
 		
-		self.pieces = {Sprite{src = "armor-1.png", x = obj.x, opacity = 0, anchor_point = {12,17}, z_rotation = {30,40,60}},
-			Sprite{src = "armor-2.png", x = obj.x, opacity = 0, anchor_point = {-34,-43}, z_rotation = {0,0,0}} }
+		self.pieces = {Sprite{src = "armor-1.png", x = self.x, opacity = 0, anchor_point = {12,17}, z_rotation = {30,40,60}},
+			Sprite{src = "armor-2.png", x = self.x, opacity = 0, anchor_point = {-34,-43}, z_rotation = {0,0,0}} }
 		
 		evInsert[self] = self.on_insert
 	end
@@ -744,10 +757,10 @@ Monster = Class {
 			self.x = rand(900)
 		end
 	},
-	new = function(selt,t)
+	new = function(self,t)
 		table.merge(self,t)
 		self.scale = {1.3,1.3}
-		self.mask:set(nil,{0,-40,-80,0})
+		self.mask:set(nil,{0,40,-80,0})
 		self.mask.dirty = 2
 		penguin.reset[self] = self.on_reset
 	end
@@ -757,7 +770,7 @@ local make = {
 	["penguin-ghost.png"]	= PenguinGhost,
 	["cube-64-glow.png"]	= CubeGhost,
 	["switch-pole.png"]		= SwitchPole,
-	["icicle.png"]			= Object,
+	["icicles.png"]			= Object,
 	["cube-64.png"]			= IceCube,
 	["cube-128.png"]		= IceCube,
 	["ice-bridge.png"]		= IceBridge,
@@ -779,7 +792,6 @@ end
 
 Image = function(t)
 	t.src = normalize(t.src)
-	--Class:dump(make[t.src])
 	return (make[t.src] or Sprite)(t)
 end
 
@@ -788,5 +800,5 @@ Clone = function(t)
 		t.source = t.source.source
 	end
 	t.src = normalize(t.source.src)
-	return (make[t.src] or Clone)(t)
+	return (make[t.src] or _Clone)(t)
 end

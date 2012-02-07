@@ -1,5 +1,12 @@
 local g = ... 
---g:add(Image{src = "assets/images/splash.png",reactive = false})
+
+
+--[[
+best	fewest deaths
+level	current level
+deaths	current deaths
+
+]]
 
 local z, zwire = Sprite{src = "logo-z.png", y = 800}, Sprite{src = "logo-z-wire.png", y = 600, h = 200}
 local p, pwire = Sprite{src = "logo-p.png", y = 700}, Sprite{src = "logo-p-wire.png", y = 600, h = 100}
@@ -84,9 +91,7 @@ g:add(Sprite{src = "floor-btm.png", position = {0,971}},
 g:add(peng)
 g:add(zg,pg)
 if levels.cycle then
-	--[[if not settings.best or penguin.deaths < settings.best then
-		settings.best = penguin.deaths
-	end]]
+	settings.level = nil
 	audio.play("applause")
 	peng.x = 760
 	bubble:add(Sprite{src = "thought-bubble.png", scale = {2,2}},
@@ -96,12 +101,15 @@ if levels.cycle then
 				text = "Time" .. (penguin.deaths == 1 and "!" or "s!")})
 	g:add(bubble)
 	g.swap = function()
-		--[[if best and best.text ~= tostring(settings.best) then
-			best:animate{opacity = 0, on_complete = function()
+		if not settings.best or penguin.deaths < settings.best then
+			settings.best = penguin.deaths
+		end
+		if best and best.text ~= tostring(settings.best) then
+			best:animate{duration = 500, opacity = 0, on_completed = function()
 				best.text = settings.best
-				best:animate{opacity = 255}
+				best:animate{duration = 500, opacity = 255}
 			end}
-		end]]
+		end
 		bubble:animate{y = 80, opacity = 0, duration = 300}
 		sign()
 		g.swap = nil
@@ -111,17 +119,27 @@ else
 	sign()
 end
 g:add(Sprite{src = "start-sign.png", position = {1470,670}})
-g:add(Sprite{src = "continue-sign.png", position = {1470,850}})
+
+if settings.level then
+	local sdark = Sprite{src = "start-sign-dim.png", position = {1470,670}, opacity = 0}
+	local cdark = Sprite{src = "continue-sign-dim.png", position = {1470,850}}
+	g:add(sdark,Sprite{src = "continue-sign.png", position = {1470,850}},cdark)
+	g.anim = AnimationState{duration = 500, transitions = {
+		{source = 1, target = 0, keys = {{sdark,"opacity",255},{cdark,"opacity",0}}},
+		{source = 0, target = 1, keys = {{sdark,"opacity",0},{cdark,"opacity",255}}}, }}
+	g.anim.state = 0
+end
 g:add(Sprite{src = "snow-bank.png", position = {2200,940}, scale = {-1.4,1.05}})
---[[if settings.best then
+
+if settings.best then
 	g:add(Text{font = "Sigmar 42px", color = "ffffff", text = "Best Score",
 		alignment = "CENTER", x = 1500, y = 20, w = 400})
 	best = Text{font = "Sigmar 120px", color = "ffffff", text = settings.best,
 		alignment = "CENTER", x = 1500, y = 30, w = 400}
 	g:add(best)
-end]]
+end
 
 Event(zg,'free'):add(function()
+	g.anim = nil
 	evFrame:drop(zg,pg,moving)
-	--zg.free[zg] = nil
 end)

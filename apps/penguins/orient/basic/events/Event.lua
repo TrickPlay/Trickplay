@@ -3,7 +3,7 @@ Event = Class {
 		trigger = function() end,
 		add = function(self,...)
 			for _,v in ipairs(arg) do
-				table.insert(self,v)
+				table.insert(self,1,v)
 			end
 		end,
 		drop = function(self,...)
@@ -29,6 +29,7 @@ Event = Class {
 		self.trigger = function(...)
 			for k,v in pairs(self) do
 				if type(k) == 'number' then
+					if type(v) == 'userdata' then Class:dump(v) end
 					v(...)
 				elseif type(k) ~= 'string' then
 					v(k,...)
