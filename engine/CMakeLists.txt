@@ -1,5 +1,6 @@
 
 add_subdirectory( lua )
+add_subdirectory( clutter_alpha_mode )
 
 add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
 
@@ -13,6 +14,7 @@ set( ENGINE_SOURCE_FILES )
 set( LB_FILES )
 
 include_directories( ${ENGINE_SRC}/lua/lua-5.1.4/src )
+include_directories( ${ENGINE_SRC}/clutter_alpha_mode )
 
 include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
@@ -611,6 +613,7 @@ target_link_libraries(
     m
     dl
     tplua
+    clutteralphamode
 )
 
 
