@@ -1,7 +1,7 @@
 app = {
 	id = "com.trickplay.penguins",
-	release = "6",
-	version = "2",
+	release = "2",
+	version = "1.5",
 	name = "Penguin Zip-Zip",
 	copyright = "Trickplay Inc."
 }
