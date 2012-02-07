@@ -64,6 +64,7 @@ Group: SDK Tutorial {
 }
 
 Group: Sample Applications {
+	File: Screen Transitions (no auto-title, docs/tutorials/screen_transitions/doc.txt)
 	File: Multi-Level Menus (no auto-title, docs/tutorials/menu_multilevel/doc.txt)
 	File: Run a Video (no auto-title, docs/tutorials/video_run/doc.txt)
 }
