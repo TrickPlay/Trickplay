@@ -1517,15 +1517,14 @@ do
     moon_state.state = "SET"
     
     moon_state.timeline.on_started = function()
-        if sun_state.state ~= "SET" then
-            print("herer")
+        if moon_state.state ~= "SET" then
             curr_condition:add(moon_g)
             moon_g.twinkle:start()
         end
     end
     
     moon_state.timeline.on_completed = function()
-        if sun_state.state == "SET" then
+        if moon_state.state == "SET" then
             moon_g.twinkle:stop()
             moon_g:unparent()
         end
