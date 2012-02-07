@@ -35,7 +35,7 @@ function IconCarousel:create(p)
     
     instance:add(unpack(clones))
     
-    local crossfade = Clone{x = clones[1].x}
+    local crossfade = Clone{x = clones[1].x, size = {480,270}}
     instance:add(crossfade)
     crossfade:lower_to_bottom()
     
@@ -61,6 +61,7 @@ function IconCarousel:create(p)
             clones[1].opacity = 255
             clones[1]:animate{duration=800,opacity=0}
             crossfade.source = app_list[ wrap_i( curr_i + math.ceil(#app_list/2) ) ]
+            print(clones[1].source.src,crossfade.source.src)
         end,
     }
     
