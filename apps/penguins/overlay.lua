@@ -1,8 +1,8 @@
-local overlay = Group{name = "overlay", y = -1200}
+local overlay = Layer{name = "overlay", y = -1200}
 overlay.deaths = Text{font = "Sigmar 68px", x = 240,  y = 568, color = "8bbbe0", text = "0"}
 overlay.level  = Text{font = "Sigmar 68px", x = 350, y = 568, width = 1400, alignment = "CENTER", color = "ffffff"}
-overlay.effects = Group{name = "effects"}
-overlay.armor = Group{name = "armor"}
+overlay.effects = Layer{name = "effects"}
+overlay.armor = Layer{name = "armor"}
 
 local dx, dy = 0, 0
 local d = {_Image{src = "assets/dark3.png", scale = {3,3}},
@@ -11,12 +11,12 @@ local d = {_Image{src = "assets/dark3.png", scale = {3,3}},
 	Rectangle{color = "000000", w = 1920},
 	Rectangle{color = "000000", h = 768},
 	Rectangle{color = "000000", w = 1920, h = 1080, opacity = 0}}
-darkness = Group{name = "darkness", opacity = 0}
+darkness = Layer{name = "darkness", opacity = 0}
 darkness:add(d[1],d[2],d[3],d[4],d[5],d[6])
 
 overlay:add(overlay.effects,penguin,
-	Image{src = "assets/igloo-front.png", y = 134},overlay.armor,
-	Image{src = "assets/death-bug.png", x = 150, y = 591},
+	Sprite{src = "igloo-front.png", y = 134},overlay.armor,
+	Sprite{src = "death-bug.png", x = 150, y = 591},
 	overlay.deaths,overlay.level)
 screen:add(overlay,darkness)
 overlay.clone = _Clone{source = overlay, name = "overclone"}
@@ -71,7 +71,7 @@ end}
 timer.interval = 560
 
 local a
-step[darkness] = function(delta)
+evFrame[darkness] = function(delta)
 	if darkness.opacity > 0 then
 		a = anim.timeline.is_playing and -160*(overlay.y+1300)/1140 or overlay.y
 		px, py = penguin.x+45-384, penguin.y+a+65-384
