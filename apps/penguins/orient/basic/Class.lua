@@ -10,6 +10,7 @@ NewClass = Class {
 }
 
 --]]
+
 local instsOf = {}
 local metaOf, nameOf, classOf, newOf, extsnOf, sharedOf =
 	table.weak(), table.weak(), table.weak(), table.weak(), table.weak(), table.weak()
@@ -25,8 +26,12 @@ local newclass = function(this,def)
 		extsnOf[this] = def.extends
 		make = extsnOf[this]
 		new = newOf[extsnOf[this]]
-		if sharedOf[this] and sharedOf[extsnOf[this]] then
-			setmetatable(sharedOf[this],{__index = sharedOf[extsnOf[this]]})
+		if sharedOf[extsnOf[this]] then
+			if sharedOf[this] then
+				setmetatable(sharedOf[this],{__index = sharedOf[extsnOf[this]]})
+			else
+				sharedOf[this] = sharedOf[extsnOf[this]]
+			end
 		end
 	end
 	

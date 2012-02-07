@@ -57,12 +57,11 @@ Level = Class {
 			
 			for k,v in ipairs(self.children) do
 				v.row = v.row ~= 0 and v.row or 1
+				v.level = self.id
 				v.reactive = false
 				(evInsert[v] or noop)(v,self)
 			end
 			
-			for k,v in pairs(self.children) do
-			end
 			evInsert:clear()
 		end,
 		unload = function(self)
@@ -70,6 +69,7 @@ Level = Class {
 			self.ice = false
 			for _,v in pairs(self.children) do
 				evFrame[v] = nil
+				penguin.reset[v] = nil
 				(v.free or v.unparent)(v)
 			end
 		end
@@ -100,9 +100,7 @@ Level = Class {
 local toload = {
 	{0,	2,0,"Splash Screen"}, -- save/continue
 	--
-	--[[
-	--]]
-	{1,	1,0,"Learning To Fly"}, -- button press anim?
+	{1,	1,0,"Learning To Fly"},
 	{2,	1,0,"You're Probably Gonna Die"},
 	{3,	2,0,"Ice Trios"},
 	{4,	2,0,"Double Jump!"},
@@ -113,6 +111,7 @@ local toload = {
 	{9,	3,0,"A Brief Exercise in Futility"},
 	{10,2,0,"Blocks Stop for No Penguin"}, -- time tweaking?
 	--
+	--[[
 	{11,2,0,"Playtime With Mr. Seal"},
 	{12,1,0,"And Now Bounce Me Lower"},
 	{13,2,0,"Dangerous Airspace"},
@@ -156,6 +155,7 @@ local toload = {
 	{24,3,2,"Same As Before"},
 	{32,1,2,"Antartican Knights"},
 	{50,3,2,"What Lurks In the Dark"},
+	--]]
 }
 
 for k,v in ipairs(toload) do
@@ -168,19 +168,22 @@ screen:show()
 screen:add(levels.this)
 
 levels.cycle = false
-levels.next = function(arg)
+levels.next = function(n)
+	n = type(n) == 'number' and n or 1
 	objectSet:clear()
 	local oldlevel = levels.this
-	if arg == 0 then
+	if n == 0 then
 		if oldlevel.id == 1 then return end
 		levels.cycle = false
 		levels.this = levels[1]
 	else
 		levels.cycle = true
-		levels.this = levels[oldlevel.id % #levels + (oldlevel.id > 1 and arg or 1)]
+		if oldlevel.id == 1 then
+			n = max(n,1)
+		end
+		levels.this = levels[oldlevel.id % #levels + n]
 		settings.level = levels.this.id
 	end
-	settings.deaths = penguin.deaths
 	levels.this:load()
 	levels.this.y = oldlevel.id == 1 and 1070 or 1120
 	screen:add(levels.this)
