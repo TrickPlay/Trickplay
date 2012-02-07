@@ -2419,7 +2419,6 @@ do
             name = "snow_flake",
             extra={
                 drift = function(self)
-					print(flake.duration)
                     self:animate{
 						duration   = flake.duration,
 						--loop       = true,
@@ -2427,7 +2426,7 @@ do
 						y          = screen_h+100,
 						z_rotation = (flake.duration/(math.random(900,1100)*10))*360,
                         on_completed = function(self)
-                            table.remove(active_flakes,flake)
+                            active_flakes[flake] = nil
                             flake:unparent()
                             table.insert(old_flakes,flake)
                         end
@@ -2437,11 +2436,11 @@ do
                 hurry_out = function(self)
                     self:stop_animation()
                     self:animate{
-                        duration     = 200,
+                        duration     = 1000,
                         x            = self.x+300,
                         y            = screen_h+100,
 						on_completed = function(self)
-                            table.remove(active_flakes,flake)
+                            active_flakes[flake] = nil
                             flake:unparent()
                             table.insert(old_flakes,flake)
                         end
@@ -2474,7 +2473,7 @@ do
         
         flake:drift()
         
-        table.insert(active_flakes,flake)
+        active_flakes[flake] = flake
         
     end
     
@@ -2533,7 +2532,7 @@ do
     end
     snow_state.timeline.on_completed = function()
         if snow_state.state == "NONE" and snow_corner.parent ~= nil then
-            for i,flake in ipairs(active_flakes) do
+            for _,flake in pairs(active_flakes) do
                 flake:hurry_out()
             end
             snow_corner:unparent()
