@@ -603,7 +603,7 @@ function Make_Bar(loc,wu_data,index, master)
                 
             end
             
-            bar.curr_condition = fday.conditions or "Unknown"
+            bar.curr_condition = type(response.current_observation) == "table" and response.current_observation.weather
             
             five_day:unparent()
             
@@ -1097,10 +1097,10 @@ function Make_Bar(loc,wu_data,index, master)
             --enter the digit
             digits[zip_focus]:set{
                 text = i,
-                anchor_point = {digits[zip_focus].w/2,digits[zip_focus].h/2},
                 x = zip_code_prompt.x+(41+6)*(zip_focus-1) + 35/2,
                 y = 89 + 41/2,
             }
+            digits[zip_focus].anchor_point = {digits[zip_focus].w/2,digits[zip_focus].h/2}
             zip_backing[zip_focus].color={255,255,255}
             
             --inc
