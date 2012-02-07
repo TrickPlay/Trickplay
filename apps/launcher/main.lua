@@ -56,8 +56,7 @@ local function main()
     for k,v in pairs(app_list) do
         
         local i = Image{}
-        
-        if
+        if not v.attributes.nolauncher    and
             i:load_app_icon(v.id,"launcher-icon.png") or
             i:load_app_icon(v.id,"launcher-icon.jpg") then
             
@@ -66,7 +65,7 @@ local function main()
         end
         
     end
-    
+    dumptable(launcher_icons)
     shop_icons = {
         Image{src="assets/app_shop_icons/1945.jpg"},
         Image{src="assets/app_shop_icons/aquaria.jpg"},

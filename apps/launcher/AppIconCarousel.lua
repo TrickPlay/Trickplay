@@ -37,6 +37,7 @@ function IconCarousel:create(p)
     
     local crossfade = Clone{x = clones[1].x}
     instance:add(crossfade)
+    crossfade:lower_to_bottom()
     
     local curr_i = 0
     
@@ -54,7 +55,7 @@ function IconCarousel:create(p)
             
             for i,c in ipairs(clones) do
                 
-                c.source = app_list[  wrap_i(  curr_i + i - 1  )  ]
+                c.source = app_list[  wrap_i(  curr_i + (i - 1)  )  ]
                 
             end
             clones[1].opacity = 255
