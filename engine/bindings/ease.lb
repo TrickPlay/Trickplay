@@ -1,0 +1,94 @@
+module ease;
+
+[[
+#include "clutter/clutter.h"
+#include "clutter_alpha_mode.h"
+
+typedef double (*EaseFunc)(double);
+ 
+struct Ease
+{
+    Ease( EaseFunc _func ) : func( _func ) {}
+    
+    EaseFunc func;
+};
+
+]]
+
+/*
+    DOCME
+*/
+
+class Ease [[Ease *]]
+{
+    Ease( string mode )
+    [[
+        GEnumClass * ec = G_ENUM_CLASS( g_type_class_ref( CLUTTER_TYPE_ANIMATION_MODE ) );
+        
+        gchar * name = g_strdup_printf( "CLUTTER_%s" , mode );
+
+        GEnumValue * value = g_enum_get_value_by_name( ec , name );
+        
+        g_free( name );
+
+        EaseFunc func = 0;
+
+        if ( value )
+        {        
+            switch( value->value )
+            {
+                case CLUTTER_LINEAR: func =               clutter_am_linear; break;
+                case CLUTTER_EASE_IN_QUAD: func =         clutter_am_ease_in_quad; break;
+                case CLUTTER_EASE_OUT_QUAD: func =        clutter_am_ease_out_quad; break;
+                case CLUTTER_EASE_IN_OUT_QUAD: func =     clutter_am_ease_in_out_quad; break;
+                case CLUTTER_EASE_IN_CUBIC: func =        clutter_am_ease_in_cubic; break;
+                case CLUTTER_EASE_OUT_CUBIC: func =       clutter_am_ease_out_cubic; break;
+                case CLUTTER_EASE_IN_OUT_CUBIC: func =    clutter_am_ease_in_out_cubic; break;
+                case CLUTTER_EASE_IN_QUART: func =        clutter_am_ease_in_quart; break;
+                case CLUTTER_EASE_OUT_QUART: func =       clutter_am_ease_out_quart; break;
+                case CLUTTER_EASE_IN_OUT_QUART: func =    clutter_am_ease_in_out_quart; break;
+                case CLUTTER_EASE_IN_QUINT: func =        clutter_am_ease_in_quint; break;
+                case CLUTTER_EASE_OUT_QUINT: func =       clutter_am_ease_out_quint; break;
+                case CLUTTER_EASE_IN_OUT_QUINT: func =    clutter_am_ease_in_out_quint; break;
+                case CLUTTER_EASE_IN_SINE: func =         clutter_am_ease_in_sine; break;
+                case CLUTTER_EASE_OUT_SINE: func =        clutter_am_ease_out_sine; break;
+                case CLUTTER_EASE_IN_OUT_SINE: func =     clutter_am_ease_in_out_sine; break;
+                case CLUTTER_EASE_IN_EXPO: func =         clutter_am_ease_in_expo; break;
+                case CLUTTER_EASE_OUT_EXPO: func =        clutter_am_ease_out_expo; break;
+                case CLUTTER_EASE_IN_OUT_EXPO: func =     clutter_am_ease_in_out_expo; break;
+                case CLUTTER_EASE_IN_CIRC: func =         clutter_am_ease_in_circ; break;
+                case CLUTTER_EASE_OUT_CIRC: func =        clutter_am_ease_out_circ; break;
+                case CLUTTER_EASE_IN_OUT_CIRC: func =     clutter_am_ease_in_out_circ; break;
+                case CLUTTER_EASE_IN_ELASTIC: func =      clutter_am_ease_in_elastic; break;
+                case CLUTTER_EASE_OUT_ELASTIC: func =     clutter_am_ease_out_elastic; break;
+                case CLUTTER_EASE_IN_OUT_ELASTIC: func =  clutter_am_ease_in_out_elastic; break;
+                case CLUTTER_EASE_IN_BACK: func =         clutter_am_ease_in_back; break;
+                case CLUTTER_EASE_OUT_BACK: func =        clutter_am_ease_out_back; break;
+                case CLUTTER_EASE_IN_OUT_BACK: func =     clutter_am_ease_in_out_back; break;
+                case CLUTTER_EASE_IN_BOUNCE: func =       clutter_am_ease_in_bounce; break;
+                case CLUTTER_EASE_OUT_BOUNCE: func =      clutter_am_ease_out_bounce; break;
+                case CLUTTER_EASE_IN_OUT_BOUNCE: func =   clutter_am_ease_in_out_bounce; break;
+            }
+        }
+        
+        g_type_class_unref( ec );
+        
+        if ( 0 == func )
+        {
+            return luaL_error( L , "Invalid mode '%s'" , mode );   
+        }        
+        
+        self = lb_construct( Ease , new Ease( func ) );
+    ]];
+    
+    ~Ease()
+    [[
+        delete self;
+    ]];
+    
+    double get_value( double progress )
+    [[
+        result = self->func( progress );
+    ]];
+}
+
