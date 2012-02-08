@@ -61,7 +61,7 @@ function IconCarousel:create(p)
             clones[1].opacity = 255
             clones[1]:animate{duration=800,opacity=0}
             crossfade.source = app_list[ wrap_i( curr_i + math.ceil(#app_list/2) ) ]
-            print(clones[1].source.src,crossfade.source.src)
+            
         end,
     }
     

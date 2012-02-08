@@ -202,7 +202,7 @@ local function main()
         local caption = Text{  name = "caption", font = "FreeSans Medium 30px",x = 240,y=35, ellipsize = "END", w = 310}
         
         myAppsHL = HL:create{
-            logical_parent = l,
+            logical_parent = my_app_list,
             contents = Group{
                 children = {
                     prev,
