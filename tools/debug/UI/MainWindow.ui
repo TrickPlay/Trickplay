@@ -54,7 +54,6 @@
      <string>File</string>
     </property>
     <addaction name="actionNew_File"/>
-    <addaction name="actionNew_Folder"/>
     <addaction name="action_New"/>
     <addaction name="actionOpen_App"/>
     <addaction name="action_Save"/>

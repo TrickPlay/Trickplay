@@ -7,7 +7,7 @@ from Editor import Editor
 
 class EditorTabWidget(QTabWidget):
 
-    def __init__(self, main, windowsMenu=None, parent = None):
+    def __init__(self, main, windowsMenu=None, fileSystem = None, parent = None):
         
         QTabWidget.__init__(self, parent)
         
@@ -22,6 +22,7 @@ class EditorTabWidget(QTabWidget):
         self.editors = []
         self.textBefores = []
         self.windowsMenu = windowsMenu
+        self.fileSystem = fileSystem
         
         QObject.connect(self, SIGNAL('tabCloseRequested(int)'), self.closeTab)
         QObject.connect(self, SIGNAL('currentChanged(int)'), self.changeTab)
@@ -39,14 +40,6 @@ class EditorTabWidget(QTabWidget):
 		index = self.currentIndex()
 
 		editor = self.editors[index] #self.app.focusWidget()
-		self.windowsMenu.removeAction(editor.windowsAction)
-
-		# reset the windowsActions'shortcuts 
-		n=0
-		for edt in self.editors:
-			if n > index:
-				edt.windowsAction.setShortcut(QApplication.translate("MainWindow", "Ctrl+"+str(n), None, QApplication.UnicodeUTF8)) 
-			n=n+1
 
 		# save before close
 		if isinstance(editor, Editor):
@@ -65,13 +58,17 @@ class EditorTabWidget(QTabWidget):
 					if ret == QMessageBox.Save:
 						self.textBefores[index] = editor.text()
 						editor.text_status = 1 #TEXT_READ
-						editor.save()
+						if editor.tempfile == False:
+							editor.save()
+						else:
+							self.main.saveas()
 					elif ret == QMessageBox.Cancel:
 						return 
 					else:
 						pass
 
 		#close current index tab
+		print(index)
 		self.paths.pop(index)
 		self.textBefores.pop(index) #new
 		self.editors.pop(index) #new
@@ -80,30 +77,68 @@ class EditorTabWidget(QTabWidget):
 			self.close()
 			self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
 
+		self.windowsMenu.removeAction(editor.windowsAction)
+
+		# reset the windowsActions'shortcuts 
+		n=0
+		for edt in self.editors:
+			if n > index:
+				edt.windowsAction.setShortcut(QApplication.translate("MainWindow", "Ctrl+"+str(n), None, QApplication.UnicodeUTF8)) 
+			n=n+1
+
+			
     def changeTab(self, index):
 
 		if index == -1:
 			return 
 
-		currentText = open(self.paths[index]).read()
-
-		if self.textBefores[index] != currentText:
-			msg = QMessageBox()
-			msg.setText('The file "' + self.paths[index] + '" changed on disk.')
-			if self.editors[index].text_status == 2: #TEXT_CHANGED
-				msg.setInformativeText('Do you want to drop your changes and reload the file ?')
+		"""
+		if hasattr(self.editors[index], "fileIndex") == True :
+			if self.editors[index].fileIndex is not None:
+				self.fileSystem.model.view.setSelectionMode(QAbstractItemView.SingleSelection)
+				self.fileSystem.model.view.setCurrentIndex(self.editors[index].fileIndex)
 			else:
-				msg.setInformativeText('Do you want to reload the file ?')
-			msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-			msg.setDefaultButton(QMessageBox.Cancel)
-			msg.setWindowTitle("Warning")
-			ret = msg.exec_()
+				print("FIRST ELSE")
+				self.fileSystem.model.view.setSelectionMode(QAbstractItemView.NoSelection)
+				#self.fileSystem.model.view.setCurrentIndex(None)
+		else:
+			print("SECOND ELSE")
+			self.fileSystem.model.view.setSelectionMode(QAbstractItemView.NoSelection)
+			#self.fileSystem.model.view.setCurrentIndex(None)
+		"""
 
-			if ret == QMessageBox.Ok:
-    			# Reload 
-				self.editors[index].readFile(self.paths[index])
-				self.textBefores[index] = self.editors[index].text()
-				self.editors[index].text_status = 1 #TEXT_READ
+		try :
+			currentText = open(self.paths[index]).read()
+		except :
+			return
+
+		if self.editors[index].tempfile == False :
+			if self.textBefores[index] != currentText:
+				msg = QMessageBox()
+				msg.setText('The file "' + self.paths[index] + '" changed on disk.')
+				if self.editors[index].text_status == 2: #TEXT_CHANGED
+					msg.setInformativeText('Do you want to drop your changes and reload the file ?')
+				else:
+					msg.setInformativeText('Do you want to reload the file ?')
+				msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+				msg.setDefaultButton(QMessageBox.Cancel)
+				msg.setWindowTitle("Warning")
+				ret = msg.exec_()
+
+				if ret == QMessageBox.Ok:
+    				# Reload 
+					self.editors[index].readFile(self.paths[index])
+					self.textBefores[index] = self.editors[index].text()
+					self.editors[index].text_status = 1 #TEXT_READ
+					self.editors[index].save() # added 2/3
+					self.textBefores[index] = self.editors[index].text() #added 2/3
+		else:
+			self.editors[index].readFile(self.paths[index])
+			self.textBefores[index] = self.editors[index].text()
+			self.editors[index].text_status = 1 #TEXT_READ
+			self.editors[index].save() # added 2/3
+			self.textBefores[index] = self.editors[index].text() #added 2/3
+			self.editors[index].tempfile = True
 
 		self.setCurrentIndex(index)
 

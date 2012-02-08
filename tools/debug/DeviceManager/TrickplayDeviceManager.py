@@ -20,12 +20,15 @@ REMEVENT = QEvent.User + 2
 SIZEOF_UINT16 = 2
 
 
+#self.debug_stop.setEnabled(False)
+
 class TrickplayDeviceManager(QWidget):
     
-    def __init__(self, inspector, parent = None):
+    def __init__(self, inspector, main=None, parent = None):
         
         QWidget.__init__(self, parent)
                 
+        self.main = main
         self.ui = Ui_DeviceManager()
         self.ui.setupUi(self)
         
@@ -274,6 +277,7 @@ class TrickplayDeviceManager(QWidget):
 			print "trickplay app is finished"
 			self.inspector.clearTree()
 			#self.trickplay.terminate()
+			self.main.debug_stop.setEnabled(False)
 	
     def run(self, dm=False):
        
