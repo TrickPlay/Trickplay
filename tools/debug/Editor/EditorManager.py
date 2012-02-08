@@ -128,17 +128,20 @@ class EditorManager(QWidget):
 			self.ui.directory.setText(path)
 
     def save(self, editor_index = None):
+		
 		editor = None
 		if editor_index is not None:
 			editor = self.tab.editors[editor_index]
 		else:
 			editor = self.app.focusWidget()
 
+	
 		if isinstance(editor, Editor):
 			if editor.tempfile == False:
 				currentText = open(editor.path).read()
 			else:
-				currentText = ""
+				self.saveas()
+				return 
 
 			index = self.tab.currentIndex()
 			#comment 2/3 next if block
