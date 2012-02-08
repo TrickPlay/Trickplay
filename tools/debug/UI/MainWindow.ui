@@ -583,7 +583,7 @@
   </action>
   <action name="actionSearch_Replace">
    <property name="text">
-    <string>Search &amp; Replace</string>
+    <string>Search/Replace...</string>
    </property>
    <property name="font">
     <font>
@@ -596,7 +596,7 @@
   </action>
   <action name="actionGo_to_line">
    <property name="text">
-    <string>Go to line</string>
+    <string>Go to line...</string>
    </property>
    <property name="font">
     <font>

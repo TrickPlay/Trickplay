@@ -144,7 +144,6 @@ class Editor(QsciScintilla):
         # Toggle marker for the line the margin was clicked on
 		#print "on_margin_clicked"
 		bp_num = 0
-		print (nmargin)
 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
 			sendTrickplayDebugCommand("9876", "b "+self.path+":"+str(nline+1), False)

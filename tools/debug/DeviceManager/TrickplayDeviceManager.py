@@ -288,6 +288,12 @@ class TrickplayDeviceManager(QWidget):
                 self.trickplay.close()
             
             env = self.trickplay.systemEnvironment()
+
+            for item in env:
+				if item[:3] == "TP_":
+					ii = env.indexOf(item)
+					env.removeAt(ii)
+
             env.append("TP_telent_console_port="+str(self.console_port))
             env.append("TP_controllers_enabled=1")
             self.my_name = "LocalHost_"+str(int(random.random() * 100000))
@@ -300,6 +306,7 @@ class TrickplayDeviceManager(QWidget):
             else :
 				self.debug_mode = False
             self.trickplay.setEnvironment(env)
+
             ret = self.trickplay.start('trickplay', [self.path()])
 			
         # Push to foreign device

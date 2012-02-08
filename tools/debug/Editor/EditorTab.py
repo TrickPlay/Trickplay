@@ -37,7 +37,7 @@ class EditorTabWidget(QTabWidget):
 		if index < 0:
 			return 
 		# find current index tab 
-		index = self.currentIndex()
+		#index = self.currentIndex()
 
 		editor = self.editors[index] #self.app.focusWidget()
 
