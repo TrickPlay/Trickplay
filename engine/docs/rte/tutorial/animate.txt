@@ -43,9 +43,9 @@ If you run the application, you'll see the TrickPlay logo animated.
 
 Considering that a single code statement produced the animation, it's pretty impressive, but it could still use some improvements. First, the animation seems to start pretty abruptly and, second, scaling the logo back up to its original size would make the loop seamless. Performing each of these enhancements will also expose us to other useful components of the SDK libraries.
 
-As the animation proceeds, each of the animated properties updates its value in an unchanging, linear progression by default. However, in real life, objects usually start slowly when beginning to move and gradually slow down just before stopping. These characteristics are called "easing in" and "easing out" or simply ease in and ease out. The SDK libraries support ease in and ease out through its <Alpha> class. Different Alpha "modes" implement various rates of ease in/out and whether only ease in is applied, only ease out, or both ease in and out. Animated demos and graphic depictions of each available mode are included in the <Alpha.mode> section of the Engine Reference.
+As the animation proceeds, each of the animated properties updates its value in an unchanging, linear progression by default. However, in real life, objects usually start slowly when beginning to move and gradually slow down just before stopping. These characteristics are called "easing in" and "easing out" or simply ease in and ease out. The SDK libraries support ease in and ease out through its <Ease> class. Different Ease transitions implement various rates of ease in/out and whether only ease in is applied, only ease out, or both ease in and out. Animated demos and graphic depictions of each available transition are included in the <Ease> section of the Engine Reference.
 
-The animate() function accepts an optional mode argument that specifies the Alpha mode to apply to the animated properties. The mode affects all the properties being animated; with the animate() function, it is not possible to apply the mode to only a single property. If you need to apply different Alpha modes to individual properties, one of the other SDK animation techniques should be used. For the Tutorial's animated logo, we'll apply an ease-in mode so that the logo doesn't start rotating so quickly. This can be accomplished by adding a single mode property to the original animate() call. The complete function call is shown below.
+The animate() function accepts an optional mode argument that specifies the Ease transition to apply to the animated properties. The mode affects all the properties being animated; with the animate() function, it is not possible to apply the mode to only a single property. If you need to apply different Ease transitions to individual properties, one of the other SDK animation techniques should be used. For the Tutorial's animated logo, we'll apply an ease-in transition so that the logo doesn't start rotating so quickly. This can be accomplished by adding a single mode property to the original animate() call. The complete function call is shown below.
 
 	(code)
 	logoImage:animate( {
@@ -58,7 +58,7 @@ The animate() function accepts an optional mode argument that specifies the Alph
 
 	(end)
 
-If you add the mode property to the animate() call in the logoAnimation.lua file and run the application, you'll see the logo gradually eases into its rotation and scaling movements. The resulting animation is less frenetic. You can try setting some of the other Alpha modes to see the effect they have on the animation.
+If you add the mode property to the animate() call in the logoAnimation.lua file and run the application, you'll see the logo gradually eases into its rotation and scaling movements. The resulting animation is less frenetic. You can try setting some of the other Ease transitions to see the effect they have on the animation.
 
 To make the loop seamless, it needs to scale the logo back up to its original size. This won't be so easy to do with the animate() function. In cases like this where a property's value goes back and forth in a cyclical manner, it is easier to use one of the other SDK library animation methods. But, although awkward, it is still possible to do with animate(), and doing so will get us better acquainted with the animate() function.
 
@@ -89,7 +89,7 @@ The required code is a bit more involved than our original single-line animation
 					duration     = 3000,            -- 3000 milliseconds = 3 seconds
 					scale        = { 0, 0 },        -- scale down to nothing
 					z_rotation   = 360,             -- rotate 360 degrees
-					mode         = "EASE_IN_QUART", -- Alpha mode
+					mode         = "EASE_IN_QUART", -- Ease mode
 					on_completed = logoCompleted    -- called when finished
 				  } )
 	end
