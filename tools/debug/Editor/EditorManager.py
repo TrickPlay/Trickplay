@@ -13,25 +13,17 @@ from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 
 class EditorManager(QWidget):    
     
-    def __init__(self, fileSystem = None, debugWindow = None, windowsMenu = None, parent = None):
+    def __init__(self, main=None, fileSystem = None, debugWindow = None, windowsMenu = None, parent = None):
     
         QWidget.__init__(self)
-        
         self.windowsMenu = windowsMenu
-
+        self.main = main
         self.setupUi(parent)
-        
         self.fileSystem = fileSystem
-
         self.debugWindow = debugWindow
-
         self.tab = None
-
         self.currentEditor = None
 
-
-    
-    
     def setupUi(self, parent):
         """
         Set up the editor UI where two QTabWidgets are arranged in a QSplitter
@@ -121,7 +113,6 @@ class EditorManager(QWidget):
 
     def chooseDirectoryDialog(self):
 		dir = self.ui.directory.text()
-		print(dir)
 		path = QFileDialog.getExistingDirectory(None, 'Select app directory', dir)
 		result = self.adjustDialog(path)
 		if result > 0:

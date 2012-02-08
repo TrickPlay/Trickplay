@@ -86,7 +86,7 @@ def sendTrickplayDebugCommand(db_port, cmd, start=False):
     """
     
     if start == True:
-		print '\t'+"Connecting remote debugger ..."
+		print "Connecting remote debugger ..."
 
     s = str(CON.address+":"+db_port)
 	
@@ -116,7 +116,7 @@ def getTrickplayDebug():
     """
 
     s = CON.get()
-    print s
+    #print s
     r = urllib2.Request("http://" + s + "/debug/start")
     f = None
     
@@ -174,7 +174,7 @@ def printResp(data, command):
 		breakpoints_info_str = ""
 		index = 0
 		if len(pdata["breakpoints"]) == 0:
-			print "\t"+"No breakpoints set"
+			#print "\t"+"No breakpoints set"
 			return breakpoints_info
 		else:
 			for b in pdata["breakpoints"]:
@@ -199,5 +199,5 @@ def printResp(data, command):
 			breakpoints_info[3] = info_var_list
 			#breakpoints_info[4] = linenum_var_list
 
-			print "\t"+breakpoints_info_str
+			#print "\t"+breakpoints_info_str
 			return breakpoints_info

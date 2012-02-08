@@ -143,6 +143,9 @@ class Editor(QsciScintilla):
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
 		#print "on_margin_clicked"
+		if self.editorManager.main.debug_mode == False:
+			return
+
 		bp_num = 0
 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :

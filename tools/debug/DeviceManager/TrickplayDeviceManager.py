@@ -3,14 +3,12 @@ import telnetlib, base64, sys, random
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from PyQt4.QtNetwork import (QTcpSocket,)
 
 from TrickplayDiscovery import TrickplayDiscovery
 from TrickplayPushApp import TrickplayPushApp
 from UI.DeviceManager import Ui_DeviceManager
-
 from connection import *
-
-from PyQt4.QtNetwork import (QTcpSocket,)
 
 NAME = Qt.UserRole + 1
 ADDRESS = Qt.UserRole + 2
@@ -56,6 +54,7 @@ class TrickplayDeviceManager(QWidget):
         self.prev_index = 0
         self.ui.comboBox.setSizeAdjustPolicy(QComboBox.AdjustToContents)
         self.ui.comboBox.setIconSize(QSize(20,32))
+        self.debug_mode = False
 
     def service_selected(self, index):
         
@@ -225,7 +224,8 @@ class TrickplayDeviceManager(QWidget):
 
     def readDebugResponse(self):
 		while self.debug_socket.waitForReadyRead(1100) :
-			print self.debug_socket.read(self.debug_socket.bytesAvailable())+"&&&&&&&&&&&&&&&&&&"
+			#print self.debug_socket.read(self.debug_socket.bytesAvailable())+"&&&&&&&&&&&&&&&&&&"
+			print self.debug_socket.read(self.debug_socket.bytesAvailable())
 
     def readResponse(self):
 		while self.socket.waitForReadyRead(1100) :
@@ -272,9 +272,8 @@ class TrickplayDeviceManager(QWidget):
 
     def app_finished(self, errorCode):
 
-		print errorCode
 		if self.trickplay.state() == QProcess.NotRunning :
-			print "trickplay app is finished"
+			print "Trickplay APP is finished"
 			self.inspector.clearTree()
 			#self.trickplay.terminate()
 			self.main.debug_stop.setEnabled(False)
@@ -301,10 +300,12 @@ class TrickplayDeviceManager(QWidget):
 
             if dm == True :
             	self.debug_mode = True
+            	self.main.debug_mode = True
             	env.append("TP_debugger_port="+str(self.debug_port))
             	env.append("TP_start_debugger=1")
             else :
 				self.debug_mode = False
+				self.main.debug_mode = False
             self.trickplay.setEnvironment(env)
 
             ret = self.trickplay.start('trickplay', [self.path()])
