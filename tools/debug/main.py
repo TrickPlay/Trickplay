@@ -400,10 +400,8 @@ class MainWindow(QMainWindow):
 				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
 				# delete current line marker
 				for n in self.editorManager.editors:
-					"""
-					for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_chick:
+					for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete( int(l), -1) 
-					"""
 
 					if self.current_debug_file == n:
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
