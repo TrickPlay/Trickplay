@@ -96,7 +96,7 @@ overlay.next = function(first)
 			snowbank.clone.y = first and 1080 or 1120
 		end
 		if levels.this.bank == 2 then
-			darkness:animate{opacity = 232, duration = 1120}
+			darkness:animate{opacity = 85 + levels.this.id*3, duration = 1120}
 		elseif darkness.opacity ~= 0 then
 			darkness:animate{opacity = 0, duration = 1120}
 		end

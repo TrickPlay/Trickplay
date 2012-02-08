@@ -24,8 +24,6 @@ local tree = {
 		"Sprite",
 		"FlipSprite",
 		"Layer",
-		"CollisionLayer",
-		"MetaBranch",
 	}
 }
 
@@ -64,19 +62,3 @@ getmetatable(_G).__index = function(t,k)
 end
 
 return orient
-
---[[
-{
-	path = 'orient/',
-	load = function(self,...)
-		for _,file in pairs(arg) do
-			if type(file) == 'string' and not loaded[file] then
-				local f = loadfile(self.path .. index[file])
-				assert(f,"ORIENT: " .. self.path .. index[file] .. " failed to load.")
-				f(self)
-				loaded[file] = true
-			end
-		end
-	end
-}
---]]

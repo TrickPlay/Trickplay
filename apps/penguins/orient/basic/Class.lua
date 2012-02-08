@@ -130,7 +130,7 @@ Class = newclass(c,{
 			return extsnOf[self]
 		end,
 		count = function(self)
-			local n = 1
+			local n = 0
 			for k in pairs(instsOf[self]) do
 				n = n+1
 			end

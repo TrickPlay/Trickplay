@@ -59,6 +59,7 @@ Level = Class {
 				v.row = v.row ~= 0 and v.row or 1
 				v.level = self.id
 				v.reactive = false
+				v.on_key_down = nil
 				(evInsert[v] or noop)(v,self)
 			end
 			
@@ -98,8 +99,10 @@ Level = Class {
 }
 
 local toload = {
-	{0,	2,0,"Splash Screen"}, -- save/continue
+	{0,	2,0,"Splash Screen"},
 	--
+	--[[
+	--]]
 	{1,	1,0,"Learning To Fly"},
 	{2,	1,0,"You're Probably Gonna Die"},
 	{3,	2,0,"Ice Trios"},
@@ -109,9 +112,8 @@ local toload = {
 	{7,	3,0,"It Matters How You Bounce"},
 	{8,	1,0,"Pool Party"},
 	{9,	3,0,"A Brief Exercise in Futility"},
-	{10,2,0,"Blocks Stop for No Penguin"}, -- time tweaking?
+	{10,2,0,"Blocks Stop for No Penguin"},
 	--
-	--[[
 	{11,2,0,"Playtime With Mr. Seal"},
 	{12,1,0,"And Now Bounce Me Lower"},
 	{13,2,0,"Dangerous Airspace"},
@@ -155,7 +157,6 @@ local toload = {
 	{24,3,2,"Same As Before"},
 	{32,1,2,"Antartican Knights"},
 	{50,3,2,"What Lurks In the Dark"},
-	--]]
 }
 
 for k,v in ipairs(toload) do

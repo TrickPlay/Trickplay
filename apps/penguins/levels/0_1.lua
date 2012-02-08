@@ -121,8 +121,8 @@ end
 g:add(Sprite{src = "start-sign.png", position = {1470,670}})
 
 if settings.level then
-	local sdark = Sprite{src = "start-sign-dim.png", position = {1470,670}, opacity = 0}
-	local cdark = Sprite{src = "continue-sign-dim.png", position = {1470,850}}
+	local sdark = Sprite{src = "start-sign-dim.png", position = {1470,670}}
+	local cdark = Sprite{src = "continue-sign-dim.png", position = {1470,850}, opacity = 0}
 	g:add(sdark,Sprite{src = "continue-sign.png", position = {1470,850}},cdark)
 	g.anim = AnimationState{duration = 500, transitions = {
 		{source = 1, target = 0, keys = {{sdark,"opacity",255},{cdark,"opacity",0}}},
