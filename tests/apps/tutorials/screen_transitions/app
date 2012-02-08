@@ -1,0 +1,7 @@
+app=
+{	id = "com.trickplay.screenTransitionsApp",
+	release = "1",
+	version = "1.0",
+	name = "Screen Transitions App",
+	copyright = "Trickplay Inc."
+}

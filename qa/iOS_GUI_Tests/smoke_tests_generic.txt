@@ -134,5 +134,13 @@
 {
 "name": "00034_ellipsize.lua",
 "active": "true"
+},
+{
+"name": "00035_pango_text.lua",
+"active": "true"
+},
+{
+"name": "00036_pango_text.lua",
+"active": "true"
 }
 ]

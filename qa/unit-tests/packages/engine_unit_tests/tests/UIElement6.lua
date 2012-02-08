@@ -44,12 +44,12 @@ end
 
 -- Verify that on_hide gets called 4 times.
 function test_UIElement_image_on_hide ()
-    assert_equal(on_hide_called, 4, "on_hide ~= 4")
+    assert_equal(on_hide_called, 4, "on_hide_called returned: "..tostring(on_hide_called).." Expected: 4")
 end
 
 -- Verify that on_show gets called 4 times
 function test_UIElement_image_on_show ()
-    assert_equal(on_show_called, 4, "on_hide ~= 4")
+    assert_equal(on_show_called, 4, "on_show_called returned: "..tostring(on_show_called).. " Expected: 4")
 end
 
 

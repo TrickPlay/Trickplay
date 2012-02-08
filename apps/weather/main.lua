@@ -1,5 +1,5 @@
 
-
+g_app_is_running = true
 
 screen_w = screen.w
 screen_h = screen.h
@@ -70,12 +70,62 @@ function post_main()
 	screen:add(m_grad,f_grad,logo)
 	
 	
+	focused_bar = {}
 	
+	function make_focused_bar_state()
+		local transitions = {}
+		local keys
+		local prev_i
+		for i,v in ipairs(bars) do
+			
+			--FULL Bars
+			
+			--MINI Bars
+			
+			-- Press Right, Bars shift to the right, focused index: (i-1) -> i
+			keys = {}
+			prev_i = (i-2)%#bars+1
+			for ii,vv in ipairs(bars) do
+				if ii == i then
+					
+				else
+					
+				end
+			end
+			
+			transitions[i] = {
+                source = prev_i .."",
+                target = i.."",
+				keys
+			}
+			
+			
+			
+			-- Press Left, Bars shift to the right, focused index: (i+1) -> i
+			keys = {}
+			prev_i = (i)%#bars+1
+			for ii,vv in ipairs(bars) do
+				if ii == i then
+					
+				else
+					
+				end
+			end
+			
+			transitions[i] = {
+                source = prev_i .."",
+                target = i.."",
+				keys
+			}
+		end
+		focused_bar = AnimationState{
+            transitions = transitions
+		}
+	end
 	
-	
-	
+		
 	--load saved settings, or default to Palo Alto,CA
-	locations = settings.locations or {"94019","94022",}
+	locations = settings.locations or {"94306","89109"}
 	dumptable(locations)
 	bar_i = 1
 	view_5_day=false
@@ -107,54 +157,17 @@ function post_main()
 		
 		settings.locations = locations
 		
-		settings.bar_state = bar_state:current_state()
+		settings.bar_state = current_bar:get_state()
+		
+		g_app_is_running = false
 		
 	end
 	
+	
+	
+	
 	if settings.bar_state then bar_state:change_state_to(settings.bar_state) end
-	
-	bar_state:add_state_change_function(
-        function() current_bar:launch_full_to_mini() end,
-        nil,
-		"MINI"
-    )
-    bar_state:add_state_change_function(
-        function() current_bar:launch_mini_to_full() end,
-        "MINI",
-        "1_DAY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:launch_5_day_to_1_day() end,
-        "5_DAY",
-        "1_DAY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:launch_zip_to_1_day() end,
-        "ZIP_ENTRY",
-        "1_DAY"
-    )
-	
-	bar_state:add_state_change_function(
-        function() current_bar:launch_1_day_to_5_day() end,
-        "1_DAY",
-        "5_DAY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:reset_zip() end,
-        nil,
-        "ZIP_ENTRY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:launch_1_day_to_zip_animation() end,
-        "1_DAY",
-        "ZIP_ENTRY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:launch_5_day_to_zip_animation() end,
-        "5_DAY",
-        "ZIP_ENTRY"
-    )
-	
+	print(settings.bar_state)
 	--make the weather bars for each location
 	for i,location in pairs(locations) do
 		
@@ -162,13 +175,11 @@ function post_main()
 			table.insert(bars,Make_Bar(location,i,true))
 			bars[#bars].curr_condition="Sunny"
 		else
-			table.insert(bars,Make_Bar(location,i))
+			table.insert(bars,Make_Bar(location,nil,i))
 		end
 		
 	end
-	current_bar = bars[1]
 	
-	current_bar.go_to_state(bar_state:current_state())
 	
 	--moon:setup()
 	--animate_list[moon.func_tbls.rise]  = moon
@@ -188,6 +199,11 @@ function post_main()
 	bars[1].opacity=255
 	
 	bars[1]:show()
-	dolater(bars[1].grab_key_focus,bars[1])
+	bars[1]:grab_key_focus()
+	
+	current_bar = bars[1]
+	--current_bar.go_to_state("1_DAY")
+	current_bar.go_to_state(bar_state:current_state())
+	
 end
 dolater(post_main)

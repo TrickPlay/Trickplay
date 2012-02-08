@@ -8,6 +8,490 @@
 #include "context.h"
 #include "console.h"
 #include "util.h"
+#include "http_server.h"
+#include "user_data.h"
+#include "app_resource.h"
+
+//.............................................................................
+
+#define TP_LOG_DOMAIN   "DEBUGGER"
+#define TP_LOG_ON       true
+#define TP_LOG2_ON      false
+
+#include "log.h"
+
+//.............................................................................
+
+class Debugger::Command
+{
+public:
+
+	Command() {}
+
+	virtual ~Command() {}
+
+	virtual String get() const = 0;
+
+	virtual bool reply( const JSON::Object & obj ) = 0;
+
+	static void destroy( gpointer me )
+	{
+		delete ( Command * ) me;
+	}
+
+private:
+
+	Command( const Command & ) {}
+};
+
+class Debugger::Server
+{
+public:
+
+	Server( TPContext * context )
+	{
+		g_assert( context );
+
+		static char key = 0;
+
+		context->add_internal( & key , this , destroy );
+	}
+
+	virtual Command * get_next_command( bool wait ) = 0;
+
+	virtual guint16 get_port() const = 0;
+
+	virtual void enable_console() = 0;
+
+	virtual void disable_console() = 0;
+
+protected:
+
+	virtual ~Server() {}
+
+private:
+
+	Server( const Server & ) {}
+
+	static void destroy( gpointer me )
+	{
+		delete ( Server * ) me;
+	}
+};
+
+//.............................................................................
+
+class HCommand : public Debugger::Command
+{
+public:
+
+	HCommand( const HttpServer::Request::Body & body , HttpServer::Response & _response )
+	{
+		line = String( body.get_data() , body.get_length() );
+
+		response = _response.pause();
+	}
+
+	virtual ~HCommand()
+	{
+		if ( response )
+		{
+			response->resume();
+		}
+	}
+
+	virtual String get() const
+	{
+		return line;
+	}
+
+	virtual bool reply( const JSON::Object & obj )
+	{
+		response->set_status( HttpServer::HTTP_STATUS_OK );
+		response->set_response( "application/json" , obj.stringify() );
+		response->resume();
+
+		response = 0;
+
+		fprintf( stdout , "\n" );
+		fflush( stdout );
+
+		return true;
+	}
+
+private:
+
+	String 					line;
+	HttpServer::Response * 	response;
+
+};
+
+//.............................................................................
+
+class HServer : public Debugger::Server , public HttpServer::RequestHandler
+{
+public:
+
+	HServer( TPContext * context )
+	:
+		Debugger::Server( context ),
+		queue( g_async_queue_new_full( Debugger::Command::destroy ) ),
+		gctx(  g_main_context_new() ),
+		server( 0 ),
+		thread( 0 ),
+		channel( 0 ),
+		console_enabled( 0 )
+	{
+		server = new HttpServer( context->get_int( TP_DEBUGGER_PORT , 0 ) , gctx );
+
+		if ( 0 == server->get_port() )
+		{
+			delete server;
+
+			server = 0;
+
+			tpwarn( "FAILED TO START HTTP SERVER" );
+		}
+		else
+		{
+            tp_context_set( context , TP_DEBUGGER_PORT , Util::format( "%u" , server->get_port() ).c_str() );
+
+			tplog( "HTTP SERVER READY ON PORT %u" , server->get_port() );
+
+			server->register_handler( "/debugger" , this );
+
+			//.................................................................
+			// Set up machinery to read from stdin
+
+			int fd = fileno( stdin );
+
+			if ( fd > -1 )
+			{
+				channel = g_io_channel_unix_new( fd );
+
+				if ( channel )
+				{
+					if ( GSource * source = g_io_create_watch( channel , G_IO_IN ) )
+					{
+						g_source_set_callback( source , ( GSourceFunc ) console_read , this , 0 );
+
+						g_source_attach( source , gctx );
+
+						g_source_unref( source );
+					}
+				}
+			}
+
+			//.................................................................
+			// Create and start the thread that will run the HTTP server
+
+			thread = g_thread_create( process , this , TRUE , 0 );
+		}
+	}
+
+	virtual Debugger::Command * get_next_command( bool wait )
+	{
+		if ( wait )
+		{
+			return ( Debugger::Command * ) g_async_queue_pop( queue );
+		}
+
+		return ( Debugger::Command * ) g_async_queue_try_pop( queue );
+	}
+
+	virtual guint16 get_port() const
+	{
+		return server ? server->get_port() : 0;
+	}
+
+	virtual void enable_console()
+	{
+		g_atomic_int_set( & console_enabled , 1 );
+	}
+
+	virtual void disable_console()
+	{
+		g_atomic_int_set( & console_enabled , 0 );
+	}
+
+protected:
+
+	virtual ~HServer()
+	{
+		if ( channel )
+		{
+			g_io_channel_unref( channel );
+		}
+
+		if ( server )
+		{
+			tplog2( "STOPPING HTTP SERVER" );
+
+			server->quit();
+
+			delete server;
+		}
+
+		if ( thread )
+		{
+			tplog2( "WAITING FOR HTTP SERVER THREAD" );
+
+			( void ) g_thread_join( thread );
+		}
+
+		g_async_queue_unref( queue );
+
+		g_main_context_unref( gctx );
+
+		tplog2( "HTTP SERVER DESTROYED" );
+	}
+
+	//-------------------------------------------------------------------------
+	// Happens in other thread
+
+    virtual void handle_http_request( const HttpServer::Request & request , HttpServer::Response & response )
+    {
+    	response.set_status( HttpServer::HTTP_STATUS_BAD_REQUEST );
+
+    	if ( request.get_method() != HttpServer::Request::HTTP_POST )
+    	{
+    		return;
+    	}
+
+    	const HttpServer::Request::Body & body( request.get_body() );
+
+    	if ( 0 == body.get_length() )
+    	{
+    		return;
+    	}
+
+    	g_async_queue_push( queue , new HCommand( body , response ) );
+    }
+
+    static gpointer process( gpointer me )
+    {
+    	tplog2( "STARTING SERVER THREAD" );
+
+    	( ( HServer * ) me )->server->run();
+
+    	tplog2( "SERVER THREAD EXITING" );
+
+    	return 0;
+    }
+
+    class ConsoleCommand : public Debugger::Command
+    {
+    public:
+
+    	ConsoleCommand( const String & _line )
+    	:
+    		line( _line )
+    	{
+    	}
+
+    	virtual String get() const
+    	{
+    		return line;
+    	}
+
+    	virtual bool reply( const JSON::Object & obj )
+    	{
+    		JSON::Object::Map::const_iterator key;
+
+    		//.................................................................
+    		// An error
+
+    		key = obj.find( "error" );
+
+    		if ( key != obj.end() )
+    		{
+    			fprintf( stdout , "%s\n" , key->second.as<String>().c_str() );
+    			fflush( stdout );
+    			return true;
+    		}
+
+    		//.................................................................
+    		// List locals
+
+    		key = obj.find( "locals" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+        		JSON::Array::Vector::iterator it;
+
+    			for ( it = array.begin(); it != array.end(); ++it )
+    			{
+    				JSON::Object & local( (*it).as<JSON::Object>() );
+
+    				const String & name = local[ "name" ].as<String>();
+
+    				if ( name != "(*temporary)" )
+    				{
+						fprintf( stdout , "%s (%s) = %s\n" ,
+								name.c_str(),
+								local[ "type" ].as<String>().c_str(),
+								local[ "value"].as<String>().c_str());
+    				}
+    			}
+
+    			fflush( stdout );
+    		}
+
+    		//.................................................................
+    		// Back trace
+
+    		key = obj.find( "stack" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+        		JSON::Array::Vector::iterator it;
+
+        		int i = 0;
+
+    			for ( it = array.begin(); it != array.end(); ++it , ++i )
+    			{
+    				JSON::Object & local( (*it).as<JSON::Object>() );
+
+    				String func = local[ "name" ].as<String>();
+
+    				if ( ! func.empty() )
+    				{
+    					func += "()";
+    				}
+
+    				fprintf( stdout , "[%d] %s:%lld %s\n" ,
+    						i,
+    						local[ "file" ].as<String>().c_str(),
+    						local[ "line" ].as< long long >(),
+    						func.c_str() );
+    			}
+
+    			fflush( stdout );
+    		}
+
+    		//.................................................................
+    		// List breakpoints
+
+    		key = obj.find( "breakpoints" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+    			if ( array.empty() )
+    			{
+    				fprintf( stdout , "No breakpoints set\n" );
+    			}
+    			else
+    			{
+					JSON::Array::Vector::iterator it;
+
+					int i = 0;
+
+					for ( it = array.begin(); it != array.end(); ++it , ++i )
+					{
+						JSON::Object & bp( (*it).as<JSON::Object>() );
+
+						fprintf( stdout , "[%d] %s:%lld%s\n" ,
+								i,
+								bp[ "file" ].as<String>().c_str(),
+								bp[ "line" ].as< long long >(),
+								bp[ "on" ].as<bool>() ? "" : " (disabled)" );
+					}
+    			}
+
+    			fflush( stdout );
+    		}
+
+    		//.................................................................
+    		// Source listing
+
+    		key = obj.find( "source" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+        		JSON::Array::Vector::iterator it;
+
+        		long long current_line = -1;
+
+        		key = obj.find( "line" );
+
+        		if ( key != obj.end() )
+        		{
+        			current_line = key->second.as<long long>();
+        		}
+
+    			for ( it = array.begin(); it != array.end(); ++it )
+    			{
+    				JSON::Object & src( (*it).as<JSON::Object>() );
+
+    				long long line = src[ "line" ].as< long long >();
+    				const char * marker = ( line == current_line ) ?  " >>" : "   ";
+
+    				fprintf( stdout , "%4.4lld%s %s\n" ,
+    						line,
+    						marker,
+    						src[ "text" ].as<String>().c_str());
+    			}
+
+    			fflush( stdout );
+    		}
+
+    		//.................................................................
+    		// List app info
+
+    		key = obj.find( "app" );
+
+    		if ( key != obj.end() )
+    		{
+    		}
+
+    		return true;
+    	}
+
+    private:
+
+    	String line;
+    };
+
+    static gboolean console_read( GIOChannel * channel , GIOCondition condition , gpointer me )
+    {
+    	HServer * server = ( HServer * ) me;
+
+    	if ( 1 == g_atomic_int_get( & server->console_enabled ) )
+    	{
+			GString * line = g_string_new( 0 );
+
+			if ( G_IO_STATUS_NORMAL == g_io_channel_read_line_string( channel , line , 0 , 0 ) )
+			{
+				g_async_queue_push( server->queue , new ConsoleCommand( g_strstrip( line->str ) ) );
+			}
+
+			g_string_free( line , TRUE );
+    	}
+
+    	return TRUE;
+    }
+
+private:
+
+	GAsyncQueue * 	queue;
+	GMainContext *	gctx;
+	HttpServer  *	server;
+	GThread *		thread;
+	GIOChannel * 	channel;
+	gint			console_enabled;
+};
+
+//.............................................................................
+
+Debugger::Server * Debugger::server = 0;
 
 //.............................................................................
 
@@ -16,9 +500,13 @@ Debugger::Debugger( App * _app )
     app( _app ),
     installed( false ),
     break_next( false ),
-    tracing( false )
+    returns( 0 ),
+    in_break( false )
 {
-    app->get_context()->add_console_command_handler( "debug", command_handler, this );
+    if ( 0 == server )
+    {
+    	server = new HServer( app->get_context() );
+    }
 }
 
 //.............................................................................
@@ -26,15 +514,6 @@ Debugger::Debugger( App * _app )
 Debugger::~Debugger()
 {
     uninstall();
-
-    app->get_context()->remove_console_command_handler( "debug", command_handler, this );
-}
-
-//.............................................................................
-
-void Debugger::command_handler( TPContext * context , const char * command, const char * parameters, void * me )
-{
-    ( ( Debugger * ) me )->handle_command( parameters );
 }
 
 //.............................................................................
@@ -45,131 +524,22 @@ void Debugger::uninstall()
     {
         lua_sethook( app->get_lua_state(), lua_hook, 0, 0 );
     }
-
-    source.clear();
 }
 
 //.............................................................................
 
-void Debugger::install()
+void Debugger::install( bool break_next_line )
 {
+	break_next = break_next_line;
+
     if ( installed )
     {
         return;
     }
 
-    lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET | */ LUA_MASKLINE, 0 );
+    lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET |*/ LUA_MASKLINE, 0 );
 
     installed = true;
-}
-
-//.............................................................................
-
-void Debugger::handle_command( const char * parameters )
-{
-    install();
-
-    if ( ! parameters )
-    {
-        return;
-    }
-
-    FreeLater free_later;
-
-    gchar * * p = g_strsplit( parameters, " ", 0 );
-
-    free_later( p );
-
-    guint count = g_strv_length( p );
-
-    if ( ! count )
-    {
-        return;
-    }
-
-    if ( g_str_has_prefix( p[ 0 ], "b" ) )
-    {
-        // List or set breakpoints
-
-        if ( count == 1 )
-        {
-            // No parameters, list breakpoints
-
-            if ( breakpoints.empty() )
-            {
-                std::cout << "No breakpoints set" << std::endl;
-            }
-            else
-            {
-                int i = 1;
-
-                for ( BreakpointList::const_iterator it = breakpoints.begin(); it != breakpoints.end(); ++it, ++i )
-                {
-                    std::cout << i << ") " << it->first << ":" << it->second << std::endl;
-                }
-            }
-        }
-        else if ( count == 3 )
-        {
-            int line = atoi( p[ 2 ] );
-
-            if ( ! line )
-            {
-                std::cout << "Invalid line" << std::endl;
-            }
-            else
-            {
-                breakpoints.push_back( Breakpoint( p[ 1 ], line ) );
-
-                std::cout << "Breakpoint " << breakpoints.size() << " set at " << p[1] << ":" << line << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "Use 'b' to list breakpoints or 'b <file> <line>' to set a breakpoint" << std::endl;
-        }
-    }
-    else if ( g_str_has_prefix( p[ 0 ], "d" ) )
-    {
-        // Delete a breakpoint
-
-        if ( count < 2 )
-        {
-            std::cout << "Use 'd <breakpoint number>' to delete a breakpoint"  << std::endl;
-        }
-        else if ( ! strcmp( p[ 1 ] , "all" ) )
-        {
-            breakpoints.clear();
-
-            std::cout << "Deleted all breakpoints" << std::endl;
-        }
-        else
-        {
-            int n = atoi( p[ 1 ] );
-
-            int i = 1;
-
-            bool deleted = false;
-
-            for ( BreakpointList::iterator it = breakpoints.begin(); it != breakpoints.end() && ! deleted; ++it, ++i )
-            {
-                if ( i == n )
-                {
-                    breakpoints.erase( it );
-                    deleted = true;
-                }
-            }
-
-            if ( deleted )
-            {
-                std::cout << "Deleted breakpoint " << n << std::endl;
-            }
-            else
-            {
-                std::cout << "No such breakpoint" << std::endl;
-            }
-        }
-    }
 }
 
 //.............................................................................
@@ -192,289 +562,633 @@ void Debugger::break_next_line()
 
 //.............................................................................
 
-void Debugger::debug_break( lua_State * L, lua_Debug * ar )
+guint16 Debugger::get_server_port() const
 {
-    bool should_break = tracing;
+	return server->get_port();
+}
 
-    lua_getinfo( L, "nSl", ar );
+//.............................................................................
 
-    switch( ar->event )
+JSON::Array Debugger::get_back_trace( lua_State * L , lua_Debug * ar )
+{
+	JSON::Array array;
+
+    for( int i = 0; true; ++i )
     {
-        case LUA_HOOKCALL:
-            break;
+    	lua_Debug stack;
 
-        case LUA_HOOKRET:
-            break;
+    	memset( & stack , 0 , sizeof( stack ) );
 
-        case LUA_HOOKTAILRET:
-            break;
+    	if ( 0 == lua_getstack( L , i, & stack ) )
+    	{
+    		break;
+    	}
 
-        case LUA_HOOKLINE:
+        if ( lua_getinfo( L, "nSl", & stack ) )
+        {
+        	if ( strcmp( stack.what , "C" ) && stack.currentline >= 0 )
+        	{
+				String source;
 
-            if ( break_next )
-            {
-                should_break = true;
-            }
-            else
-            {
-                // see if there is a breakpoint for this file/line
+				if ( g_str_has_prefix( stack.source, "@" ) )
+				{
+					gchar * basename = g_path_get_basename( stack.source + 1 );
 
-                for ( BreakpointList::const_iterator it = breakpoints.begin(); it != breakpoints.end(); ++it )
-                {
-                    if ( it->second == ar->currentline && g_str_has_suffix( ar->source, it->first.c_str() ) )
-                    {
-                        should_break = true;
-                        break;
-                    }
-                }
-            }
+					source = basename;
 
-            break;
+					g_free( basename );
+				}
+				else
+				{
+					source = stack.source;
+				}
+
+				JSON::Object & frame = array.append<JSON::Object>();
+
+				frame[ "file" ] = source;
+				frame[ "line" ] = stack.currentline;
+
+				if ( stack.name && stack.namewhat )
+				{
+					frame[ "name" ] = stack.name;
+					frame[ "type" ] = stack.namewhat;
+				}
+        	}
+        }
     }
 
-    if ( ! should_break )
+    return array;
+}
+
+//.............................................................................
+
+static String get_value( lua_State * L , int index )
+{
+	switch( lua_type( L , index ) )
+	{
+	case LUA_TNUMBER:
+		return lua_tostring( L , index );
+	case LUA_TSTRING:
+		return Util::format( "\"%s\"" , lua_tostring( L , index ) );
+	case LUA_TBOOLEAN:
+		return lua_toboolean( L , index ) ? "true" : "false";
+	case LUA_TNIL:
+		return "nil";
+	default:
+		return UserData::describe( L , index );
+	}
+}
+
+//.............................................................................
+
+JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
+{
+	JSON::Array array;
+
+    for( int i = 1; ; ++i )
     {
-        return;
+        const char * name = lua_getlocal( L , ar , i );
+
+        if ( ! name )
+        {
+            break;
+        }
+
+        JSON::Object & local( array.append<JSON::Object>() );
+
+		local[ "name"  ] = name;
+
+		int type = lua_type( L , -1 );
+
+		local[ "type"  ] = lua_typename( L , type );
+		local[ "value" ] = get_value( L , -1 );
+
+		lua_pop( L , 1 );
     }
 
-    Console * console = app->get_context()->get_console();
+    // Get the function that is currently executing and
+    // then go through all of is upvalues.
 
-    if ( console )
+    lua_getinfo( L , "f" , ar );
+
+    int f = lua_gettop( L );
+
+    if ( ! lua_isnil( L , f ) )
     {
-        console->disable();
+		for( int i = 1; ; ++i )
+		{
+			const char * name = lua_getupvalue( L , f , i );
+
+			if ( ! name )
+			{
+				break;
+			}
+
+			JSON::Object & local( array.append<JSON::Object>() );
+
+			local[ "name"  ] = name;
+
+			int type = lua_type( L , -1 );
+
+			local[ "type"  ] = lua_typename( L , type );
+			local[ "value" ] = get_value( L , -1 );
+
+			lua_pop( L , 1 );
+		}
     }
 
-    // Print where we are
+    lua_pop( L , 1 );
 
-    String source;
+    return array;
+}
 
-    StringVector * lines = 0;
+//.............................................................................
+
+JSON::Object Debugger::get_location( lua_State * L , lua_Debug * ar )
+{
+	JSON::Object result;
 
 	if ( g_str_has_prefix( ar->source, "@" ) )
     {
         gchar * basename = g_path_get_basename( ar->source + 1 );
 
-        source = basename;
+        result[ "file" ] = basename;
 
         g_free( basename );
-
-		lines = load_source_file( ar->source + 1 );
     }
     else
     {
-        source = ar->source;
+        result[ "file" ] = ar->source;
     }
 
-    std::cout << source << ":" << ar->currentline;
+	result[ "line" ] = ar->currentline;
 
-    if ( lines && tracing )
-    {
-    	if ( ( ar->currentline - 1 ) >= 0 && ( ar->currentline - 1 ) < int( lines->size() ) )
-    	{
-    		std::cout << ":" << (*lines)[ ar->currentline - 1 ];
-    	}
-    }
+	result[ "id" ] = app->get_id();
 
-    std::cout << std::endl;
-
-    if ( lines && ! tracing )
-	{
-		int list_start = std::max( ar->currentline - 5 , 1 );
-		int list_end = std::min( ar->currentline + 5 , int( lines->size() ) );
-
-		for ( int i = list_start; i < list_end; ++i )
-		{
-			std::cout << ( ( i == ar->currentline ) ? ">" : " " ) << (*lines)[i-1] << std::endl;
-		}
-
-	}
-
-    while ( true )
-    {
-    	if ( tracing )
-    	{
-    		break;
-    	}
-
-        std::cout << "(debug) ";
-
-        String command;
-
-        std::getline( std::cin, command );
-
-        // Show backtrace
-
-        if ( command == "bt")
-        {
-            lua_Debug stack;
-
-            for( int i = 0; lua_getstack( L , i, & stack ); ++i )
-            {
-                if ( lua_getinfo( L, "nSl", & stack ) )
-                {
-                    String source;
-
-                    if ( g_str_has_prefix( stack.source, "@" ) )
-                    {
-                        gchar * basename = g_path_get_basename( stack.source + 1 );
-
-                        source = basename;
-
-                        g_free( basename );
-                    }
-                    else
-                    {
-                        source = ar->source;
-                    }
-
-                    std::cout << i << ") " << source << ":" << stack.currentline;
-
-                    if ( stack.name && stack.namewhat )
-                    {
-                        std::cout << " " << stack.name << " (" << stack.namewhat << ")";
-                    }
-
-                    std::cout << std::endl;
-                }
-            }
-        }
-
-        // Quit
-
-        else if ( command == "q" )
-        {
-            tp_context_quit( app->get_context() );
-            break_next = false;
-            break;
-        }
-
-        // Continue
-
-        else if ( command == "c" )
-        {
-            break_next = false;
-            break;
-        }
-
-        // Step or next
-
-        else if ( command == "s" || command == "n" )
-        {
-            break_next = true;
-            break;
-        }
-
-        // Print out locals
-
-        else if ( command == "l" )
-        {
-            std::cout << "Locals:" << std::endl;
-
-            for( int i = 1; ; ++i )
-            {
-                const char * name = lua_getlocal( L, ar, i );
-
-                if ( ! name )
-                {
-                    break;
-                }
-                else
-                {
-                    const char * value = lua_tostring( L , -1 );
-
-                    if ( value )
-                    {
-                        std::cout << name << " = " << value << std::endl;
-                    }
-
-                    lua_pop( L , 1 );
-                }
-            }
-        }
-
-        else if ( command == "t" )
-        {
-        	tracing = true;
-        }
-
-        // Run some Lua
-
-        else if ( command.substr( 0 , 2 ) == "r " )
-        {
-            String exp( command.substr( 2 ) );
-
-            int top = lua_gettop( L );
-
-            if ( luaL_dostring( L, exp.c_str() ) )
-            {
-                std::cout << "Error: " << lua_tostring( L, -1 ) << std::endl;
-
-                lua_pop( L, 1 );
-            }
-            else
-            {
-                lua_pop( L, lua_gettop( L ) - top );
-            }
-        }
-
-        // Help
-
-        else if ( command == "help" || command == "h" || command == "?" )
-        {
-            std::cout <<
-
-                    "'b' to list breakpoints" << std::endl <<
-                    "'b <file> <line number>' to set a breakpoint" << std::endl <<
-                    "'d <breakpoint number>' to delete a breakpoint" << std::endl <<
-                    "'bt' to show a backtrace" << std::endl <<
-                    "'c' to continue" << std::endl <<
-                    "'s' or 'n' to continue until the next line" << std::endl <<
-                    "'l' to list local variables" << std::endl <<
-                    "'t' to trace execution" << std::endl <<
-                    "'r <some Lua>' to run some Lua (in global scope)" << std::endl <<
-                    "'q' to quit TrickPlay" << std::endl;
-        }
-
-        // Handle it in the command handler
-
-        else
-        {
-            handle_command( command.c_str() );
-        }
-    }
-
-    if ( console )
-    {
-        console->enable();
-    }
+	return result;
 }
 
 //.............................................................................
 
-StringVector * Debugger::load_source_file( const char * file_name )
+JSON::Array Debugger::get_breakpoints( lua_State * L , lua_Debug * ar )
 {
-	SourceMap::iterator it = source.find( file_name );
+	JSON::Array result;
+
+	for ( BreakpointList::const_iterator it = breakpoints.begin(); it != breakpoints.end(); ++it )
+	{
+		JSON::Object & b = result.append<JSON::Object>();
+
+		b[ "file" ] = it->file;
+		b[ "line" ] = it->line;
+		b[ "on"   ] = it->enabled;
+	}
+
+	return result;
+}
+
+//.............................................................................
+
+JSON::Object Debugger::get_app_info()
+{
+	JSON::Object result;
+
+	const App::Metadata & md = app->get_metadata();
+
+	result[ "id"         ] = md.id;
+	result[ "name" 		 ] = md.name;
+	result[ "release" 	 ] = md.release;
+	result[ "version" 	 ] = md.version;
+	result[ "description"] = md.description;
+	result[ "author"     ] = md.author;
+	result[ "copyright"  ] = md.copyright;
+
+	JSON::Array & array = result[ "contents" ].as<JSON::Array>();
+
+	StringList contents = AppResource::get_pi_children( md.get_root_uri() );
+
+	for ( StringList::const_iterator it = contents.begin(); it != contents.end(); ++it )
+	{
+		array.append( * it );
+	}
+
+	return result;
+}
+
+//.............................................................................
+
+bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server_command )
+{
+	bool result = false;
+
+	String command( server_command->get() );
+
+	JSON::Object reply( get_location( L , ar ) );
+
+	// List locals
+
+	if ( command == "l" )
+	{
+		reply[ "locals" ] = get_locals( L , ar );
+	}
+
+	// Where
+
+	else if ( command == "w" )
+	{
+		StringVector * lines = get_source( reply[ "file" ].as<String>() );
+
+		if ( lines )
+		{
+			int line = reply[ "line" ].as<long long>();
+
+			int start_line = line - 4;
+			int end_line = line + 5;
+
+			if ( start_line < 0 )
+			{
+				start_line = 0;
+			}
+
+			if ( end_line >= int( lines->size() ) )
+			{
+				end_line = lines->size() - 1;
+			}
+
+			if ( end_line > start_line )
+			{
+				JSON::Array & array = reply[ "source" ].as<JSON::Array>();
+
+				for ( line = start_line; line <= end_line; ++line )
+				{
+					JSON::Object & l = array.append<JSON::Object>();
+
+					l[ "line" ] = line + 1;
+					l[ "text" ] = (*lines)[ line ];
+				}
+			}
+		}
+	}
+
+	// Reset - delete all breakpoints and continue
+
+	else if ( command == "r" )
+	{
+		break_next = false;
+
+		breakpoints.clear();
+
+		result = true;
+	}
+
+	// Back trace
+
+	else if ( command == "bt" )
+	{
+		reply[ "stack" ] = get_back_trace( L , ar );
+	}
+
+	// Break next
+
+	else if ( command == "bn" )
+	{
+		break_next = true;
+	}
+
+	// Quit
+
+	else if ( command == "q" )
+	{
+		tp_context_quit( app->get_context() );
+		break_next = false;
+		result = true;
+	}
+
+	// Continue
+
+	else if ( command == "c" )
+	{
+		break_next = false;
+		result = true;
+	}
+
+	// Step
+
+	else if ( command == "s" )
+	{
+		break_next = true;
+		result = true;
+	}
+
+	// Next
+
+	else if ( command == "n" )
+	{
+		// To step over, we change the hook to watch for function calls.
+		// If, during the next iteration, a function call happens, it
+		// will increment the number of returns, start watching for
+		// returns and stopping watching for lines.
+
+		// When a return happens, the number of returns is
+		// decremented until it reaches zero. When it does, it means
+		// we are done stepping over, so we reset the hook to only
+		// watch for lines and break on the next one.
+
+	    lua_sethook( L , lua_hook, LUA_MASKCALL | LUA_MASKLINE , 0 );
+		result = true;
+	}
+
+	// List breakpoints
+
+	else if ( command == "b" )
+	{
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
+	}
+
+	// App information
+
+	else if ( command == "a" )
+	{
+		reply[ "app" ] = get_app_info();
+	}
+
+	// Set a breakpoint
+	// b 57 - set a breakpoint at line 57 of the current file
+	// b main.lua:57 - set a breakpoint at line 57 of main.lua
+	// b 1 on|off - enable/disable breakpoints
+
+	else if ( 0 == command.find( "b " ) )
+	{
+		StringVector parts = split_string( command , " " , 3 );
+
+		if ( parts.size() == 3 )
+		{
+			// This is an enable/disable command
+
+			unsigned int index = atoi( parts[ 1 ].c_str() );
+
+			if ( index >= breakpoints.size() )
+			{
+				reply[ "error" ] = Util::format( "Invalid breakpoint index '%u'" , index );
+			}
+			else
+			{
+				( breakpoints.begin() + index )->enabled = parts[ 2 ] == "on";
+			}
+		}
+		else if ( parts.size() == 2 )
+		{
+			parts = split_string( parts[ 1 ] , ":" , 2 );
+
+			if ( parts.size() == 1 )
+			{
+				// b <line>
+
+				breakpoints.push_back( Breakpoint( reply[ "file" ].as<String>() , atoi( parts[ 0 ].c_str() ) ) );
+			}
+			else if ( parts.size() == 2 )
+			{
+				// b <file>:<line>
+
+				breakpoints.push_back( Breakpoint( parts[ 0 ] , atoi( parts[ 1 ].c_str() ) ) );
+			}
+		}
+		else
+		{
+			reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>' or 'b <line>'. To enable or disable breakpoints, enter 'b <index> on|off'";
+		}
+	}
+
+	// Delete a breakpoint
+
+	else if ( 0 == command.find( "d " ) )
+	{
+		StringVector parts = split_string( command , " " , 2 );
+
+		if ( parts.size() != 2 )
+		{
+			reply[ "error" ] = "To delete a breakpoint, enter 'd <breakpoint index>' or 'd all'";
+		}
+		else if ( parts[ 1 ] == "all" )
+		{
+			breakpoints.clear();
+		}
+		else
+		{
+			unsigned int index = atoi( parts[ 1 ].c_str() );
+
+			if ( index < breakpoints.size() )
+			{
+				breakpoints.erase( breakpoints.begin() + index );
+			}
+			else
+			{
+				reply[ "error" ] = "Invalid breakpoint index";
+			}
+		}
+	}
+
+	// Fetch a file
+
+	else if ( 0 == command.find( "f " ) )
+	{
+		StringVector parts = split_string( command , " " , 2 );
+
+		if ( parts.size() != 2 )
+		{
+			reply[ "error" ] = "To fetch a file, enter 'f <file name>'";
+		}
+		else
+		{
+			StringVector * lines = get_source( parts[ 1 ] );
+
+			if ( 0 == lines )
+			{
+				reply[ "error" ] = Util::format( "Failed to fetch '%s'" , parts[ 1 ].c_str() );
+			}
+			else
+			{
+				JSON::Array & array = reply[ "lines" ].as<JSON::Array>();
+
+				for ( StringVector::const_iterator it = lines->begin(); it != lines->end(); ++it )
+				{
+					array.append( *it );
+				}
+			}
+		}
+	}
+
+	server_command->reply( reply );
+
+	delete server_command;
+
+	return result;
+}
+
+//.............................................................................
+
+void Debugger::debug_break( lua_State * L, lua_Debug * ar )
+{
+	lua_getinfo( L, "nSl", ar );
+
+    //.........................................................................
+	// Process any pending debugger commands here
+
+	for ( Command * server_command = server->get_next_command( false ); server_command; server_command = server->get_next_command( false ) )
+	{
+		( void ) handle_command( L , ar , server_command );
+	}
+
+	//.........................................................................
+
+    JSON::Object location( get_location( L , ar ) );
+
+    String at = Util::format( "%s:%lld" , location[ "file" ].as<String>().c_str() , location[ "line" ].as<long long>() );
+
+	//.........................................................................
+
+    bool should_break = false;
+
+	switch( ar->event )
+	{
+		case LUA_HOOKCALL:
+			++returns;
+			tplog2( "HOOK CALL %s RETURNS %d" , at.c_str() , returns );
+		    lua_sethook( L , lua_hook , LUA_MASKCALL | LUA_MASKRET , 0 );
+			break;
+
+		case LUA_HOOKRET:
+		case LUA_HOOKTAILRET:
+			--returns;
+			tplog2( "HOOK RET %s RETURNS %d" , at.c_str() , returns );
+			if ( returns <= 0 )
+			{
+				lua_sethook( L , lua_hook, LUA_MASKLINE, 0 );
+				break_next = true;
+			}
+			break;
+
+		case LUA_HOOKLINE:
+
+			tplog2( "HOOK LINE %s" , at.c_str()  );
+			if ( break_next )
+			{
+				should_break = true;
+			}
+			else
+			{
+				// see if there is a breakpoint for this file/line
+
+				for ( BreakpointList::const_iterator it = breakpoints.begin(); it != breakpoints.end(); ++it )
+				{
+					if ( it->enabled && it->line == ar->currentline && g_str_has_suffix( ar->source, it->file.c_str() ) )
+					{
+						should_break = true;
+						break;
+					}
+				}
+			}
+
+			break;
+	}
+
+	//.........................................................................
+    // If we are not breaking, we are done
+
+    if ( ! should_break )
+    {
+    	return;
+    }
+
+	//.........................................................................
+
+    in_break = true;
+
+	//.........................................................................
+    // Disable the console
+
+    Console * console = app->get_context()->get_console();
+
+    if ( console )
+    {
+    	console->disable();
+    }
+
+	//.........................................................................
+
+	server->enable_console();
+
+	fprintf( stdout , "(%s) " , at.c_str() );
+	fflush( stdout );
+
+    lua_sethook( L , lua_hook, LUA_MASKLINE , 0 );
+    returns = 0;
+
+    while ( true )
+    {
+    	//.....................................................................
+    	// Wait for a command from the server, this will pause indefinitely
+
+    	Command * server_command = server->get_next_command( true );
+
+    	if ( ! server_command )
+    	{
+    		// Something went very wrong
+
+    		break;
+    	}
+
+    	// Deal with the command, deletes it.
+    	// If it returns true, it means we should jump out
+
+    	if ( handle_command( L , ar , server_command ) )
+    	{
+    		break;
+    	}
+
+		fprintf( stdout , "(%s) " , at.c_str() );
+		fflush( stdout );
+    }
+
+	server->disable_console();
+
+	//.........................................................................
+
+	if ( console )
+	{
+		console->enable();
+	}
+
+	in_break = false;
+}
+
+StringVector * Debugger::get_source( const String & pi_path )
+{
+	SourceMap::iterator it = source.find( pi_path );
 
 	if ( it != source.end() )
 	{
 		return & it->second;
 	}
 
-	std::ifstream stream( file_name , std::ios_base::in );
+	StringVector * result = 0;
 
-	if ( ! stream )
+	Util::Buffer contents( AppResource( app , pi_path ).load_contents( app ) );
+
+	if ( contents.length() )
 	{
-		return 0;
+		imstream stream( ( char * ) contents.data() , contents.length() );
+
+		StringVector & lines = source[ pi_path ];
+
+		String line;
+
+		while ( std::getline( stream , line ) )
+		{
+			lines.push_back( line );
+		}
+
+		result = & lines;
 	}
 
-	String line;
-
-	StringVector & lines( source[ file_name ] );
-
-	while ( std::getline( stream , line ) )
-	{
-		lines.push_back( line );
-	}
-
-	return & lines;
+	return result;
 }

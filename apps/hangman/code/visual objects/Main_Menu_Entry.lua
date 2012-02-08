@@ -1,26 +1,50 @@
 
---colors
-local x_off = {155,155,155}
-local x_on  = {255,  0,  0}
+local all_mmes = {}
+setmetatable(all_mmes,{__mode = "k"})
 
-local your_turn      = "ffffff"
-local awaiting_reply = x_off
+local mme = {}
+
+local logic, box_w, entry_h, score_limit, guess_word, make_word, img_srcs
+
+local function update_times()
+    
+    for entry,sesh in pairs(all_mmes) do
+        
+        sesh:update_time()
+        
+    end
+    
+    if app_state.state == "MAIN_PAGE" then logic:report_win_loss() end
+    
+end
+
+local clock = Timer{
+    interval  = 1000,
+    on_timer  = update_times,
+}
 
 
-
-
---constructor
-local make_mme = function(t)--score_limit,box_w,entry_h,mml)
+function mme:init(t)
     
     if type(t) ~= "table" then error("must pass a table as the parameter",2) end
     
+    logic        = t.logic       or error( "must pass logic",       2 )
+    box_w        = t.box_w       or error( "must pass box_w",       2 )
+    entry_h      = t.entry_h     or error( "must pass entry_h",     2 )
+    score_limit  = t.score_limit or error( "must pass score_limit", 2 )
+    guess_word   = t.guess_word  or error( "must pass guess_word",  2 )
+    make_word    = t.make_word   or error( "must pass make_word",   2 )
+    img_srcs     = t.img_srcs    or error( "must pass img_srcs",    2 )
+    ls           = t.ls          or error( "must pass ls",          2 )
+    
+end
+
+--constructor
+function mme:make(sesh)
+    
     --attributes
-    local mml          = t.mml         or error( "must pass mml",         2 )
-    local box_w        = t.box_w       or error( "must pass box_w",       2 )
-    local entry_h      = t.entry_h     or error( "must pass entry_h",     2 )
-    local score_limit  = t.score_limit or error( "must pass get_letters", 2 )
-    local sesh_ref     = t.sesh           -- set later
-    local prev_my_turn = nil              -- set later
+    local sesh_ref     = sesh 
+    local prev_my_turn = nil  
     
     
     print("MAKE_MME",sesh_ref)
@@ -28,76 +52,63 @@ local make_mme = function(t)--score_limit,box_w,entry_h,mml)
     --Object
     local entry = Group{}
     
-    
     --visual pieces
     ----------------------------------------------------------------------------
-    local my_x_s    = {}
-    local their_x_s = {}
-    
-    for i = 1,score_limit do
-        
-        my_x_s[i] = Text{
-            text  = "X",
-            font  = g_font .. " Bold 28px",
-            color = x_off,
-            y     = 5,
-        }
-        my_x_s[i].x = box_w/2 - (my_x_s[i].w+5)*(i-1) - my_x_s[i].w - 10
-        
-        their_x_s[i] = Text{
-            text  = "X",
-            font  = g_font .. " Bold 28px",
-            color = x_off,
-            y     = 5,
-        }
-        their_x_s[i].x = box_w/2 + (their_x_s[i].w+5)*(i-1)+ 10
-        
-    end
-    
-    local my_name = Text{
-        text  = "Waiting for a player",
-        font  = g_font .. " Medium 28px",
-        color = awaiting_reply,
-        x     = 10,
-        y     = 5,
-    }
     
     local their_name = Text{
+        text  = "invite pending",
+        font  = g_font .. " Medium 36px",
+        color = "b7b7b7",
+        x     = 20,
+        y     = 3,
+    }
+    local their_name_s = Text{
+        text  = "invite pending",
+        font  = g_font .. " Medium 36px",
+        color = "000000",
+        x     = 20-2,
+        y     = 3-2,
+    }
+    
+    local time_remaining = Text{
         text  = "",
         font  = g_font .. " Medium 28px",
-        color = your_turn,
+        color = "aaaa00",
         x     = box_w - 10,
-        y     = 5,
+        y     = 12,
+        on_text_changed = function(self)
+            
+            self.anchor_point = {self.w,0}
+            
+        end,
     }
-    their_name.anchor_point = {their_name.w,0}
     
-    local whore_line = Rectangle{
+    local top_line = Clone{source = img_srcs.hr, y = -1}--[[Rectangle{
         w = box_w-6,
         h = 2,
         x = 3,
-        y = entry_h - 2,
-        color = "ffffff",
-    }
+        y = -1,
+        color = "a7a7a7",
+    }]]
+    local btm_line = Clone{source = img_srcs.hr, y = entry_h-1}--[[Rectangle{
+        w = box_w-6,
+        h = 2,
+        x = 3,
+        y = entry_h -1,
+        color = "a7a7a7",
+    }]]
     
-    local vert_line = Rectangle{
-        w = 2,
-        h = entry_h-20,
-        x = box_w/2-1,
-        y = 8,
-        color = "ffffff",
-    }
-    
-    entry:add(unpack(my_x_s))
-    entry:add(unpack(their_x_s))
-    entry:add(my_name,their_name,whore_line,vert_line)
-    ----------------------------------------------------------------------------
+    entry:add(their_name_s,their_name,top_line,btm_line,time_remaining)
     
     
     --methods
     ----------------------------------------------------------------------------
+    
     function entry:set_session_reference(session)
         
         sesh_ref = session
+        
+        all_mmes[entry] = sesh_ref
         
         self:update()
         
@@ -110,37 +121,52 @@ local make_mme = function(t)--score_limit,box_w,entry_h,mml)
     function entry:update()
         
         assert(sesh_ref ~= nil)
-        print("entry updated")
-        for i = 1,score_limit do
+        
+        if not sesh_ref.opponent_name then
+            their_name.text     = "Invite Pending"
+            their_name_s.text   = "Invite Pending"
             
-            my_x_s[i].color    = (i <= sesh_ref.my_score)    and x_on or x_off
-            
-            their_x_s[i].color = (i <= sesh_ref.opponent_score) and x_on or x_off
-            
+            their_name.w           = -1
+            their_name.ellipsize   = "NONE"
+            their_name_s.w         = -1
+            their_name_s.ellipsize = "NONE"
+        else
+            their_name.text     = sesh_ref.opponent_name
+            their_name_s.text   = sesh_ref.opponent_name
+            their_name.w           = 190
+            their_name.ellipsize   = "END"
+            their_name_s.w         = 190
+            their_name_s.ellipsize = "END"
         end
-        
-        my_name.text  = (sesh_ref.my_turn and "Your Turn") or (sesh_ref.opponent_name and "Waiting for...") or "Waiting for a player"
-        my_name.color =  sesh_ref.my_turn and  your_turn   or  awaiting_reply
-        
-        their_name.text         =  sesh_ref.opponent_name or ""
-        their_name.color        =  your_turn
-        their_name.anchor_point = {their_name.w,0}
+        time_remaining.text = sesh_ref.time_rem      or ""
         
         if sesh_ref.my_score == score_limit then
             
-            my_name.text  = "You lost against..."
+            print("IIIIIII LOST!!!!!!!")
             
-            my_name.color = awaiting_reply
+            sesh_ref.i_counted_score = true
             
-            mml:move_to_old_games(self)
+            logic:lost_against(self)
+            
+            sesh_ref:remove_view(self)
+            
+            all_mmes[self] = nil
+            
+            --self:delete()
             
         elseif sesh_ref.opponent_score == score_limit then
             
-            my_name.text = "You won against..."
+            print("IIIIIII WON!!!!!!!")
             
-            my_name.color = awaiting_reply
+            sesh_ref.i_counted_score = true
             
-            mml:move_to_old_games(self)
+            logic:won_against(self)
+            
+            sesh_ref:remove_view(self)
+            
+            all_mmes[self] = nil
+            
+            --self:delete()
             
         elseif prev_my_turn ~= sesh_ref.my_turn then
             
@@ -149,20 +175,86 @@ local make_mme = function(t)--score_limit,box_w,entry_h,mml)
             -- if its my turn now
             if prev_my_turn then
                 
-                mml:move_to_my_turn(self)
+                logic:move_to_my_turn(self)
                 
             -- if its no longer my turn
             else
                 
-                mml:move_to_their_turn(self)
+                logic:move_to_their_turn(self)
                 
             end
-            
-            mml:update_y_s()
             
         end
         
     end
+    
+    
+    function entry:status()
+        
+        if sesh_ref.my_turn then
+            
+            if sesh_ref.phase == "MAKING" then
+                
+                return "Your turn to make a word."
+                
+            else
+                
+                return "Your turn to guess."
+                
+            end
+            
+        elseif sesh_ref.opponent_name == false then
+            
+            return "Waiting for an opponent to join the game."
+            
+        else
+            
+            if sesh_ref.phase == "MAKING" then
+                
+                return "Waiting for opponent to make a word."--"..sesh_ref.opponent_name.."
+                
+            else
+                
+                return "Waiting for opponent to guess '"..sesh_ref.word.."'."--"..sesh_ref.opponent_name.."
+                
+            end
+            
+        end
+        
+    end
+    
+    function entry:select()
+        
+        if not sesh_ref.my_turn then return end
+        
+        if sesh_ref.phase == "MAKING" then
+            
+            make_word:set_session(sesh_ref)
+            
+            app_state.state = "MAKE_WORD"
+            
+        else
+            guess_word:reset()
+            guess_word:guess_word(sesh_ref)
+            ls:reset()
+            
+            app_state.state = "GUESS_WORD"
+        end
+    end
+    
+    function entry:delete()
+        
+        self:unparent()
+        
+        if sesh_ref ~= nil then   sesh_ref:remove_view(self)   end
+        
+        all_mmes[self] = nil
+        
+        
+        
+    end
+    
+    
     
     function entry:get_session()
         
@@ -171,13 +263,11 @@ local make_mme = function(t)--score_limit,box_w,entry_h,mml)
     end
     ----------------------------------------------------------------------------
     
-    if sesh_ref ~= nil then
-        print("sesh_ref is present")
-        sesh_ref:add_view(entry)
-        
-    end
+    all_mmes[entry] = sesh_ref
+    if sesh_ref ~= nil then   sesh_ref:add_view(entry)   end
+    print("hurrrrr")
     
     return entry
 end
 
-return make_mme
+return mme

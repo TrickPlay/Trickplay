@@ -282,6 +282,28 @@ int set_animator_value(lua_State * L, int index, ClutterAnimator* animator, Clut
 		    return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : table expected");
 		}
 	}
+	else if (!strcmp("clip", k))
+	{
+		if (lua_type(L,index)==LUA_TTABLE)
+		{
+			ClutterGeometry geometry;
+			ClutterUtil::to_clutter_geometry(L, index, &geometry);
+			
+			GValue gvalue={0};
+			g_value_init(&gvalue, CLUTTER_TYPE_GEOMETRY);
+			g_value_set_boxed (&gvalue, &geometry);
+
+			clutter_animator_set_key(animator, G_OBJECT(source), "clip", nmode, progress, &gvalue);
+			clutter_animator_property_set_ease_in(animator, G_OBJECT(source), "clip", ease_in);
+			clutter_animator_property_set_interpolation(animator, G_OBJECT(source), "clip", interpolation);
+            g_value_unset(&gvalue);
+		}
+		else
+		{
+			return luaL_error(L, "Incorrect argument, failed to set the third argument of keys : table expected");
+		}
+	}
+
 	return 0;
 }
 
@@ -454,9 +476,10 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
     x, y, z, depth - float
     width, height, w, h - float
     opacity - int
-    position - table of {float x, float y}
+    position - table of { float x, float y }
     size - table of {float width, float height}
-    scale - table of {double x, double y}
+    scale - table of { double x, double y }
+    clip - table of four integers specifying the clipping rectangle { x-origin, y-origin, width, height }
     x_rotation - double specifying rotation angle
     y_rotation - double specifying rotation angle
     z_rotation - double specifying rotation angle
@@ -490,7 +513,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
     A key frame consists of the following three pieces of information.
     
     progress - the animation's percentage of completion expressed as a value between 0.0 and 1.0, inclusive. The start of the animation is 0.0; the end is 1.0. By the point in the animation specified by progress, the target value should be reached.
-    easing mode - the alpha mode, if any, to use while moving toward the target value. By default, a LINEAR alpha mode is used. Supported alpha modes are described in the <Alpha.mode> section.
+    ease transition - the Ease transition, if any, to use while moving toward the target value. By default, a "LINEAR" Ease transition is used. Supported Ease transitions are described in the <Ease> class.
     target value - the property's value when the animation has reached the point specified by progress
     
     Each key frame is defined in a table called "keys." As an example, say we want our Rectangle to move along the X-axis from point 0 to 200 and arrive there when the Animator has completed 20% of its animation. To accomplish this, the following two key frames should be defined.
@@ -503,7 +526,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
     }
     (end)
 
-	The first key frame defined above specifies that at the start of the animation (at progress value 0.0), the Rectangle's position along the X-axis should be at 0. There is no transition at this key frame, so the "LINEAR" alpha mode is simply a dummy value. The second key frame states that when the animation is 20% complete at 0.2, the Rectangle's X-axis position should be at 200. Also, as it moves to that position, it should use an alpha mode of EASE_IN_QUAD.
+	The first key frame defined above specifies that at the start of the animation (at progress value 0.0), the Rectangle's position along the X-axis should be at 0. There is no ease transition at this key frame, so the "LINEAR" ease is simply a dummy value. The second key frame states that when the animation is 20% complete at 0.2, the Rectangle's X-axis position should be at 200. Also, as it moves to that position, it should use an ease transition of EASE_IN_QUAD.
 	
 	To continue with the example, let's move onto the Y-axis. After moving the Rectangle along the X-axis, we'll move it along the Y-axis by the same amount. The following key frames accomplish this.
 	
@@ -516,7 +539,7 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
 	}
 	(end)
 	
-	The first key frame starts the Rectangle along the Y-axis at position 0. When the animation is 20% complete, the Rectangle is still at point 0 on the Y-axis. This intermediate key frame is necessary to guarantee that no movement occurs along the Y-axis while the Rectangle is moving along the X-axis. Because there is no movement, the alpha mode is another dummy value. The third key frame states that when the animation is 40% complete, the Rectangle should be positioned at point 200 on the Y-axis and the movement should follow the EASE_IN_QUAD alpha mode.
+	The first key frame starts the Rectangle along the Y-axis at position 0. When the animation is 20% complete, the Rectangle is still at point 0 on the Y-axis. This intermediate key frame is necessary to guarantee that no movement occurs along the Y-axis while the Rectangle is moving along the X-axis. Because there is no movement, the ease transition is another dummy value. The third key frame states that when the animation is 40% complete, the Rectangle should be positioned at point 200 on the Y-axis and the movement should follow the EASE_IN_QUAD ease transition.
 	
 	For the remainder of the animation, we'll move the Rectangle along both the X- and Y-axes, simultaneously, resulting in a diagonal line. The following key frames accomplish this.
 	

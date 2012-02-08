@@ -55,7 +55,10 @@ typedef struct TPController TPController;
                                         
     TP_CONTROLLER_HAS_POINTER         - The controller has a pointer (mouse-like input).
 
+    TP_CONTROLLER_HAS_POINTER_CURSOR  - The controller draws a pointer cursor on the screen.
                                         
+    TP_CONTROLLER_HAS_SCROLL		  - The controller has a scroll-wheel-like device.
+
     TP_CONTROLLER_HAS_TOUCHES         - The controller supports touches, or swipes
                                         and can send their x and y coordinates.
                                         
@@ -96,8 +99,9 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_IMAGES                	0x0100
 #define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0200
 #define TP_CONTROLLER_HAS_VIRTUAL_REMOTE			0x0400
-
+#define TP_CONTROLLER_HAS_SCROLL					0x0800
 #define TP_CONTROLLER_HAS_ADVANCED_UI               0x1000
+#define TP_CONTROLLER_HAS_POINTER_CURSOR			0x2000
 
 /*-----------------------------------------------------------------------------*/
 
@@ -581,20 +585,56 @@ struct TPControllerSpec
 
     Parameters:
 
-        A point to a <TPControllerRequestAudio> structure
+        A pointer to a <TPControllerRequestAudio> structure
 */
 
 #define TP_CONTROLLER_COMMAND_REQUEST_AUDIO_CLIP     101
 
 /*
-   Constant: TP_CONTROLLER_COMMAND_ADVANCED_UI
+    Constant: TP_CONTROLLER_COMMAND_ADVANCED_UI
 
-   Parameters:
+    Parameters:
 
-         A pointer to a <TPControllerAdvancedUI> structure.
+    	A pointer to a <TPControllerAdvancedUI> structure.
 */
 
 #define TP_CONTROLLER_COMMAND_ADVANCED_UI           200
+
+/*
+	Constant: TP_CONTROLLER_COMMAND_HIDE_POINTER_CURSOR
+
+	The controller should hide its on-screen pointer cursor.
+
+	Parameters:
+
+    	None.
+*/
+
+#define TP_CONTROLLER_COMMAND_HIDE_POINTER_CURSOR	300
+
+/*
+	Constant: TP_CONTROLLER_COMMAND_SHOW_POINTER_CURSOR
+
+	The controller should show its on-screen pointer cursor.
+
+	Parameters:
+
+    	None
+*/
+
+#define TP_CONTROLLER_COMMAND_SHOW_POINTER_CURSOR	301
+
+/*
+	Constant: TP_CONTROLLER_COMMAND_SET_POINTER_CURSOR
+
+	The controller should change its on-screen pointer cursor.
+
+	Parameters:
+
+    	A pointer to a <TPControllerSetPointerCursor> structure.
+*/
+
+#define TP_CONTROLLER_COMMAND_SET_POINTER_CURSOR	302
 
 /*-----------------------------------------------------------------------------*/
 
@@ -965,7 +1005,7 @@ struct TPControllerAdvancedUI
 
 /*-----------------------------------------------------------------------------*/
 
-typedef struct TPControllerSubmitPicture TPControllerSubmitPicture;
+typedef struct TPControllerRequestImage TPControllerRequestImage;
 
 /*
     Struct: TPControllerRequestImage
@@ -1038,6 +1078,10 @@ struct TPControllerRequestImage
     const char * cancel_label;
 };
 
+/*-----------------------------------------------------------------------------*/
+
+typedef struct TPControllerRequestAudio TPControllerRequestAudio;
+
 /*
     Struct: TPControllerRequestAudio
 
@@ -1066,6 +1110,46 @@ struct TPControllerRequestAudioClip
     */
     
     const char * cancel_label;
+};
+
+/*-----------------------------------------------------------------------------*/
+
+typedef struct TPControllerSetPointerCursor TPControllerSetPointerCursor;
+
+/*
+ 	Struct: TPControllerSetPointerCursor
+
+ 	A pointer a structure of this type is passed to execute_command when
+ 	the command is <TP_CONTROLLER_COMMAND_SET_POINTER_CURSOR>.
+*/
+
+struct TPControllerSetPointerCursor
+{
+	/*
+		Field: x
+
+		The X coordinate for the cursor's handle, relative to the dimensions
+		of its image.
+	*/
+
+	int x;
+
+	/*
+		Field: y
+
+		The Y coordinate for the cursor's handle, relative to the dimensions
+		of its image.
+	*/
+
+	int y;
+
+	/*
+	 	Field: image_uri
+
+	 	A URI to the image to use for the cursor.
+	*/
+
+	const char * image_uri;
 };
 
 /*-----------------------------------------------------------------------------*/
@@ -1112,6 +1196,19 @@ struct TPControllerRequestAudioClip
 #define TP_CONTROLLER_MODIFIER_4			0x0800
 #define TP_CONTROLLER_MODIFIER_5			0x1000
 
+/*
+ 	Constants: Scroll Directions
+
+ 	TP_CONTROLLER_SCROLL_UP				- Scroll Up
+ 	TP_CONTROLLER_SCROLL_DOWN			- Scroll Down
+ 	TP_CONTROLLER_SCROLL_LEFT			- Scroll Left
+ 	TP_CONTROLLER_SCORLL_RIGHT			- Scroll Right
+*/
+
+#define TP_CONTROLLER_SCROLL_UP				0
+#define TP_CONTROLLER_SCROLL_DOWN			1
+#define TP_CONTROLLER_SCROLL_LEFT			2
+#define TP_CONTROLLER_SCROLL_RIGHT			3
 
 /*
     Callback: tp_controller_key_down
@@ -1263,6 +1360,38 @@ struct TPControllerRequestAudioClip
         unsigned long int modifiers);
     
 /*
+	Callback: tp_controller_pointer_active
+
+	Report that the pointer is active.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_pointer_active(
+
+		TPController * controller);
+
+/*
+	Callback: tp_controller_pointer_inactive
+
+	Report that the pointer is inactive.
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_pointer_inactive(
+
+		TPController * controller);
+
+/*
     Callback: tp_controller_touch_down
     
     Report a touch down event.
@@ -1340,6 +1469,28 @@ struct TPControllerRequestAudioClip
         int y,
         unsigned long int modifiers);
     
+/*
+	Callback: tp_controller_scroll
+
+	Report a scroll event.
+
+	Arguments:
+
+		controller	- The controller.
+
+		direction	- One of the <Scroll Directions>.
+
+		modifiers	- A combination of <Key Modifiers>.
+*/
+
+    TP_API_EXPORT
+    void
+    tp_controller_scroll(
+
+        TPController * controller,
+        int direction,
+        unsigned long int modifiers);
+
 /*
     Callback: tp_controller_ui_event
 

@@ -1,4 +1,7 @@
 
+add_subdirectory( lua )
+add_subdirectory( clutter_alpha_mode )
+
 add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
 
 set( ENGINE_SRC     ${PROJECT_SOURCE_DIR}/engine )
@@ -9,6 +12,9 @@ set( 3RD_PARTY_SOURCE_FILES )
 set( ENGINE_LIBRARY_NAMES )
 set( ENGINE_SOURCE_FILES )
 set( LB_FILES )
+
+include_directories( ${ENGINE_SRC}/lua/lua-5.1.4/src )
+include_directories( ${ENGINE_SRC}/clutter_alpha_mode )
 
 include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
@@ -25,6 +31,7 @@ IF( PKG_CONFIG_FOUND )
     pkg_check_modules(GIO_UNIX      REQUIRED    gio-unix-2.0)
     pkg_check_modules(CAIRO         REQUIRED    cairo)
     pkg_check_modules(PANGO         REQUIRED    pango)
+    pkg_check_modules(COGL                      cogl-1.0)
     pkg_check_modules(CLUTTER       REQUIRED    clutter-1.0)
     pkg_check_modules(FONTCONFIG    REQUIRED    fontconfig)
     pkg_check_modules(FREETYPE2     REQUIRED    freetype2)
@@ -43,10 +50,10 @@ IF( PKG_CONFIG_FOUND )
         pkg_check_modules(UUID      REQUIRED    ossp-uuid)
     endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR TP_CLUTTER_BACKEND_EGL)
 
-    if (TP_CONTROLLER_DISCOVERY_MDNS)
+    if (TP_CONTROLLER_DISCOVERY_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
         pkg_check_modules(AVAHI_CORE REQUIRED avahi-core)
         pkg_check_modules(AVAHI_GLIB REQUIRED avahi-glib)
-    endif (TP_CONTROLLER_DISCOVERY_MDNS)
+    endif (TP_CONTROLLER_DISCOVERY_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 
     list(APPEND ENGINE_INCLUDE_DIRS
 
@@ -55,6 +62,7 @@ IF( PKG_CONFIG_FOUND )
         ${GIO_UNIX_INCLUDE_DIRS}
         ${CAIRO_INCLUDE_DIRS}
         ${PANGO_INCLUDE_DIRS}
+        ${COGL_INCLUDE_DIRS}
         ${CLUTTER_INCLUDE_DIRS}
         ${FONTCONFIG_INCLUDE_DIRS}
         ${FREETYPE2_INCLUDE_DIRS}
@@ -77,6 +85,7 @@ IF( PKG_CONFIG_FOUND )
         ${GIO_UNIX_LIBRARIES}
         ${CAIRO_LIBRARIES}
         ${PANGO_LIBRARIES}
+        ${COGL_LIBRARIES}
         ${CLUTTER_LIBRARIES}
         ${FONTCONFIG_LIBRARIES}
         ${FREETYPE2_LIBRARIES}
@@ -93,6 +102,7 @@ IF( PKG_CONFIG_FOUND )
         ${EXIF_LIBRARIES}
     )
 
+
 ELSE ( PKG_CONFIG_FOUND )
 
     TP_FIND_INCLUDE( curl/curl.h                            ENGINE_INCLUDE_DIRS )
@@ -102,6 +112,7 @@ ELSE ( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( cairo cairo.h                          ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( pango-1.0 pango/pango.h                ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( clutter-1.0 clutter/clutter.h          ENGINE_INCLUDE_DIRS )
+    TP_FIND_INCLUDE( cogl-1.0 cogl/cogl.h                   ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( fontconfig fontconfig/fontconfig.h     ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( freetype2 freetype/freetype.h          ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( png.h                                  ENGINE_INCLUDE_DIRS )
@@ -112,12 +123,12 @@ ELSE ( PKG_CONFIG_FOUND )
     TP_FIND_INCLUDE( libsoup-2.4 libsoup/soup.h             ENGINE_INCLUDE_DIRS )
     TP_FIND_INCLUDE( libexif/exif-data.h                    ENGINE_INCLUDE_DIRS )
 
-    if (TP_CONTROLLER_DISCOVERY_MDNS)
+    if (TP_CONTROLLER_DISCOVERY_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
         TP_FIND_INCLUDE( avahi-core core.h                  ENGINE_INCLUDE_DIRS )
         TP_FIND_INCLUDE( avahi-glib glib-watch.h            ENGINE_INCLUDE_DIRS )
         TP_FIND_INCLUDE( avahi-common watch.h               ENGINE_INCLUDE_DIRS )
         list( APPEND ENGINE_LIBRARY_NAMES avahi-core avahi-common avahi-glib )
-    endif (TP_CONTROLLER_DISCOVER_MDNS)
+    endif (TP_CONTROLLER_DISCOVER_MDNS AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 
 
 #------------------------------------------------------------------------------
@@ -162,7 +173,7 @@ ELSE ( PKG_CONFIG_FOUND )
 
         if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-            list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 clutter-glx-1.0 )
+            list( APPEND ENGINE_LIBRARY_NAMES clutter-osx-1.0 clutter-glx-1.0 cogl )
 
         else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
@@ -238,7 +249,11 @@ list( APPEND  ENGINE_LIBRARY_NAMES expat jpeg png tiff tiffxx gif uriparser )
 
 if (TP_CONTROLLER_DISCOVERY_MDNS)
     add_definitions( -DTP_CONTROLLER_DISCOVERY_MDNS=1 )
-    list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.mm )
+    else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        list( APPEND ENGINE_SOURCE_FILES ${ENGINE_SRC}/source/controller_discovery_mdns.cpp )
+    endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif (TP_CONTROLLER_DISCOVERY_MDNS)
 
 #------------------------------------------------------------------------------
@@ -403,6 +418,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
+	${BINDINGS_SRC}/regex.lb
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
@@ -431,6 +447,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/canvas.lb
     ${BINDINGS_SRC}/http.lb
     ${BINDINGS_SRC}/keyboard.lb
+    ${BINDINGS_SRC}/ease.lb
 
     ${BINDINGS_SRC}/physics_bullet.lb
 )
@@ -476,59 +493,6 @@ foreach( LB_FILE ${LB_SPECIAL_MAC_FILES} )
 endforeach( LB_FILE )
 
 set_source_files_properties( ${GENERATED_FILES} PROPERTIES GENERATED TRUE )
-
-#------------------------------------------------------------------------------
-# Lua has to be built as C++ in order to get exceptions. Since most distributions
-# do not already do that, we include Lua directly into our engine.
-
-set( LUA_VERSION 5.1.4 )
-
-set( LUA_ROOT ${PROJECT_SOURCE_DIR}/engine/lua/lua-${LUA_VERSION} )
-
-add_definitions( -DLUA_USE_LINUX=1 )
-
-include_directories( ${LUA_ROOT}/src )
-
-set( LUA_SOURCE_FILES
-
-    ${LUA_ROOT}/src/lapi.c
-    ${LUA_ROOT}/src/lcode.c
-    ${LUA_ROOT}/src/ldebug.c
-    ${LUA_ROOT}/src/ldo.c
-    ${LUA_ROOT}/src/ldump.c
-    ${LUA_ROOT}/src/lfunc.c
-    ${LUA_ROOT}/src/lgc.c
-    ${LUA_ROOT}/src/llex.c
-    ${LUA_ROOT}/src/lmem.c
-    ${LUA_ROOT}/src/lobject.c
-    ${LUA_ROOT}/src/lopcodes.c
-    ${LUA_ROOT}/src/lparser.c
-    ${LUA_ROOT}/src/lstate.c
-    ${LUA_ROOT}/src/lstring.c
-    ${LUA_ROOT}/src/ltable.c
-    ${LUA_ROOT}/src/ltm.c
-    ${LUA_ROOT}/src/lundump.c
-    ${LUA_ROOT}/src/lvm.c
-    ${LUA_ROOT}/src/lzio.c
-    ${LUA_ROOT}/src/lauxlib.c
-    ${LUA_ROOT}/src/lbaselib.c
-    ${LUA_ROOT}/src/ldblib.c
-    ${LUA_ROOT}/src/lmathlib.c
-    ${LUA_ROOT}/src/loslib.c
-    ${LUA_ROOT}/src/ltablib.c
-    ${LUA_ROOT}/src/lstrlib.c
-    ${LUA_ROOT}/src/loadlib.c
-    ${LUA_ROOT}/src/liolib.c
-#    ${LUA_ROOT}/src/linit.c
-)
-
-set_source_files_properties(
-
-    ${LUA_SOURCE_FILES}
-
-    PROPERTIES
-        LANGUAGE CXX
-)
 
 #------------------------------------------------------------------------------
 
@@ -582,8 +546,10 @@ list( APPEND
     ${ENGINE_SRC}/source/log.cpp
     ${ENGINE_SRC}/source/keyboard.cpp
     ${ENGINE_SRC}/source/jpeg_utils.cpp
-    ${ENGINE_SRC}/source/sandbox.cpp
     ${ENGINE_SRC}/source/console_commands.cpp
+    ${ENGINE_SRC}/source/app_resource.cpp
+    ${ENGINE_SRC}/source/plugin.cpp
+    ${ENGINE_SRC}/source/desktop_controller.cpp
     ${ENGINE_SRC}/source/physics_bullet.cpp
 )
 
@@ -600,6 +566,8 @@ list( APPEND
 
 FIND_LIBRARY (APPKIT_LIBRARY AppKit)
 MARK_AS_ADVANCED (APPKIT_LIBRARY)
+FIND_LIBRARY (CORESERVICES_LIBRARY CoreServices)
+MARK_AS_ADVANCED (CORESERVICES_LIBRARY)
 FIND_LIBRARY (OSX_GL_LIBRARY OpenGL)
 MARK_AS_ADVANCED (OSX_GL_LIBRARY)
 
@@ -608,6 +576,7 @@ list( APPEND
     ENGINE_LIBRARIES
 
     ${APPKIT_LIBRARY}
+    ${CORESERVICES_LIBRARY}
     ${OSX_GL_LIBRARY}
     objc
 )
@@ -625,8 +594,6 @@ add_library(
     ${ENGINE_SOURCE_FILES}
 
     ${GENERATED_FILES}
-
-    ${LUA_SOURCE_FILES}
 
     ${3RD_PARTY_SOURCE_FILES}
 )
@@ -648,6 +615,8 @@ target_link_libraries(
     ${ENGINE_LIBRARIES}
     m
     dl
+    tplua
+    clutteralphamode
     
     LinearMath
     BulletDynamics
