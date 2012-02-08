@@ -130,10 +130,25 @@ protected:
         {
             if ( lua_State * L = app->get_lua_state() )
             {
-                int old_kb = lua_gc( L , LUA_GCCOUNT , 0 );
-                lua_gc( L , LUA_GCCOLLECT , 0 );
-                int new_kb = lua_gc( L , LUA_GCCOUNT , 0 );
-                g_info( "GC : %d KB - %d KB = %d KB" , new_kb , old_kb , new_kb - old_kb );
+            	while( true )
+            	{
+            		int old_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+            		(void) lua_gc( L , LUA_GCCOLLECT , 0 );
+            		int new_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+            		g_info( "GC : %d KB - %d KB = %d KB" , new_kb , old_kb , new_kb - old_kb );
+
+            		if ( parameters == "all" )
+            		{
+            			if ( old_kb == new_kb )
+            			{
+            				break;
+            			}
+            		}
+            		else
+            		{
+            			break;
+            		}
+            	}
             }
         }
 	}
@@ -596,10 +611,13 @@ protected:
 	        clutter_text_get_color( CLUTTER_TEXT( actor ), &color );
 
 	        gchar * c = g_strdup_printf( "color=(%u,%u,%u,%u)", color.red, color.green, color.blue, color.alpha );
+	        
+	        gchar * f = g_strdup_printf( "font=(%s)", clutter_text_get_font_name( CLUTTER_TEXT( actor ) ) );
 
-	        extra = extra + "," + c + "]";
+	        extra = extra + "," + c + "," + f + "]";
 
 	        g_free( c );
+	        g_free( f );
 
 	    }
 	    else if ( CLUTTER_IS_TEXTURE( actor ) )
@@ -783,7 +801,7 @@ protected:
 			}
 			else
 			{
-				g_info( "NO SUCH POFILE" );
+				g_info( "NO SUCH PROFILE" );
 			}
 		}
 		else

@@ -1,177 +1,209 @@
 local levels = {}
-local bg_trees = {
-	"assets/images/tree-1.png",
-	"assets/images/tree-2.png",
-	"assets/images/tree-3.png",
-	"assets/images/tree-4.png",
-	"assets/images/tree-5.png"}
+local noop = function() end
+local a
 
-local generate = function(g,top)
-	g:add(Image{src = "assets/images/bg-slice-2.png", y = 0, size = {1920,542}, tile = {true,false}})
-	if top then
-	  g:add(Image{src = "assets/images/sun.png", position = {math.random(300,1600),100}})
-	end
-	for i=15,20 do
-		if rand(2) == 1 then
-			a = Image{src = bg_trees[rand(5)]}
-			a.position = {rand(20,1900),542}
-			a.anchor_point = {a.w/2,a.h}
-			a.scale = {i/rand(18,20),i/rand(18,20)}
-			a.opacity = 255*i/20
-			g:add(a)
-		end
-	end
-	g.ice = Image{src = "assets/images/ice-slice.png", position = {0,536}, size = {1920,55}, tile = {true,false}}
-	g:add(g.ice)
-	if top then
-		g:add(Image{src = "assets/images/igloo-back.png", position = {235,374,0}})
-		g:loader1()
-	else
-		g:loader2()
-	end
-	g:add(Image{src = "assets/images/floor-btm.png", position = {0,591}},
-		  Image{src = "assets/images/floor-btm.png", position = {1920,591}, scale = {-1,1}})
-end
-
-local free = function(self)
-	self:unparent()
-	if self.text1 then
-		self.text1:unparent()
-		self.text1 = nil
-		self.text2:unparent()
-		self.text2 = nil
-	end
-	for k,v in ipairs(self.children) do
-		if v.free then
-			v:free()
-		else
-			print('object ' .. v.gid .. ' ' .. (v.source.src or 'n/a') .. ' has no :free()')
-		end
-	end
-end
-
-local new = function (def)
-	local group = Group()
-	local a
-	
-	group.loader1 = loadfile("levels/"..def[3]..".lua")
-	if def[5] then
-		group.loader2 = loadfile("levels/"..def[5]..".lua")
-	end
-	
-	group.free = free
-	group.name = def[1]
-	group.snow = def[2]
-	group.id = #levels+1
-	
-	group.load = function()
-		if group.loader2 then
-			generate(group)
-			
-			for k,v in pairs(group.children) do
-				v.y = v.y + 640
+Level = Class {
+	extends = Layer,
+	shared = {
+		generate = function(self,top)
+			self:add(Sprite{src = "bg-slice-" .. (self.bank == 2 and "3" or "2") .. ".png", y = 0, size = {1920,542}, tile = {true,false}})
+			if top and self.bank ~= 2 then
+				self:add(Sprite{src = "bg-sun.png", position = {math.random(300,1600),100}})
 			end
-			
-			for k,v in pairs(group.children) do
-				if v.insert then
-					v:insert()
-					v.insert = nil
-				end
-				if (v.name) then
-					v.name = "_" .. v.name
+			for i=12,15 do
+				if rand(2) == 1 then
+					a = Sprite{src = "tree-" .. rand(5) .. ".png"}
+					a.position = {rand(20,1900),542}
+					a.anchor_point = {a.w/2,a.h}
+					a.scale = {i/rand(13,15)*(rand(2)==1 and 1 or -1),i/rand(13,15)}
+					a.opacity = 255*i/15
+					self:add(a)
 				end
 			end
+			self.ice = Sprite{src = "ice-slice.png", position = {0,536}, size = {1920,55}, tile = {true,false}}
+			self:add(self.ice)
+			if self.bank == 1 then
+				self:add(Sprite{src = "snow-bank.png", position = {top and 1904 or 30,410}, scale = {top and -1.12 or 1.12,1}})
+			end
+			if top then
+				self:add(Sprite{src = "igloo-back.png", position = {235,374,0}})
+				self:loader1()
+			else
+				self:loader2()
+			end
+			self:add(Sprite{src = "floor-btm.png", position = {0,591}},
+					 Sprite{src = "floor-btm.png", position = {1920,591}, scale = {-1,1}})
+		end,
+		load = function(self)
+			evInsert:clear()
+			if self.loader2 then
+				self:generate(false)
+				for k,v in pairs(self.children) do
+					v.y = v.y + 640
+					v.row = 2
+					if v.name then
+						v.name = "_" .. v.name
+					end
+				end
+				
+				for k,v in pairs(self.children) do
+					(evInsert[v] or noop)(v,self)
+				end
+				evInsert:clear()
+				self:generate(true)
+			else
+				self:loader1()
+			end
 			
-			generate(group,true)
-			group.text1 = Text{text = def[4], font = "Sigmar 52px",
-							x = 30,  y = -140,		color = "036BB4", opacity = 0}
-			group.text2 = Text{text = def[6], font = "Sigmar 52px",
-							x = 900, y = 640-130,	color = "036BB4", opacity = 0,
-							alignment = "RIGHT", w = 990}
-			group:add(group.text1,group.text2)
-		else
-			group:loader1()
+			for k,v in ipairs(self.children) do
+				v.row = v.row ~= 0 and v.row or 1
+				v.level = self.id
+				v.reactive = false
+				v.on_key_down = nil
+				(evInsert[v] or noop)(v,self)
+			end
+			
+			evInsert:clear()
+		end,
+		unload = function(self)
+			self:unparent()
+			self.ice = false
+			for _,v in pairs(self.children) do
+				evFrame[v] = nil
+				penguin.reset[v] = nil
+				(v.free or v.unparent)(v)
+			end
+		end
+	},
+	public = {
+		snow = false,
+		bank = false,
+		name = "",
+		id = -1,
+		bridges = false,
+		ice = false
+	},
+	new = function(self,def)
+		self.loader1 = loadfile("levels/"..def[1].."_1.lua")
+		if def[1] ~= 0 then
+			self.loader2 = loadfile("levels/"..def[1].."_2.lua")
 		end
 		
-		for k,v in pairs(group.children) do
-			if v.insert then
-				v:insert()
-				v.insert = nil
-			end
-			a = v.anchor_point
-			v.bb = {l = v.x - a[1], r = v.x - a[1] + v.w*v.scale[1],
-					t = v.y - a[2], b = v.y - a[2] + v.h*v.scale[2]}
-			v.collide = v.reactive
-			v.reactive = false
-		end
+		self.snow = def[2]
+		self.bank = def[3]
+		self.name = def[4]
+		self.id = #levels+1
+		self.bridges = {[ground[1]] = 1}
+		self.trans = ground[1]+640
 	end
-	
-	return group
-end
+}
 
-local toload = { -- name, snow, row1, txt1, row2, txt2
-	{"splash screen",2,		"splash",""},
-	{"Penguin In Motion",1,	"level1_1","This is Penguin.",	"level1_2","Press [OK] to watch him soar!"},
-	{"Don't Touch",1,		"level2_1","Can you make it?",	"level2_2","Watch your head"},
-	{"Ice Trios",2,			"level3_1","Bet you can't.",	"level3_2","Don't Jump Too Far"},
-	{"Double Jump!",2,		"level4_1","Mind the Gap",		"level4_2","Press [OK] in Midair!"},
-	{"Tall Stuff",1,		"level5_1","Too Tall for You?",	"level5_2","Almost There"},
-	{"Cold Water",2,		"level6_1","Don't Fall In ...",	"level6_2","Careful Now"},
-	{"Inflation",3,			"level7_1","Reach New Heights",	"level7_2","Further Than Ever"},
-	{"Evasive Action",3,	"level8_1","Triple Jump",		"level8_2","Blocks Stop for No Penguin"}}
+local toload = {
+	{0,	2,0,"Splash Screen"},
+	--
+	--[[
+	--]]
+	{1,	1,0,"Learning To Fly"},
+	{2,	1,0,"You're Probably Gonna Die"},
+	{3,	2,0,"Ice Trios"},
+	{4,	2,0,"Double Jump!"},
+	{5,	1,0,"Great Heights"},
+	{6,	2,0,"Cold Water"},
+	{7,	3,0,"It Matters How You Bounce"},
+	{8,	1,0,"Pool Party"},
+	{9,	3,0,"A Brief Exercise in Futility"},
+	{10,2,0,"Blocks Stop for No Penguin"},
+	--
+	{11,2,0,"Playtime With Mr. Seal"},
+	{12,1,0,"And Now Bounce Me Lower"},
+	{13,2,0,"Dangerous Airspace"},
+	{14,2,0,"Return of Mr. Seal"},
+	{15,2,0,"Squeeze Through"},
+	{16,2,0,"Go the Distance"},
+	{17,2,0,"Slide Across"},
+	{18,2,0,"Double Bridges"},
+	{19,3,0,"Bridge Over Cold Water"},
+	{20,3,0,"March Of the Ice"},
+	--
+	{21,2,0,"A Good Swift Kick"},
+	{22,1,0,"Stick the Landing"},
+	{23,3,0,"Fish Hopper"},
+	{24,1,0,"From the Top Now"},
+	{25,1,1,"Penguin the Snowplow"},
+	{26,1,1,"Too Cold For a Swim"},
+	{27,1,1,"Snow Doubles"},
+	{28,2,1,"Over the Top"},
+	{29,3,1,"Can't See Enough"},
+	{30,3,1,"Where's Walrus?"},
+	--
+	{31,1,0,"That Armor Looks Smashing"},
+	{32,1,0,"Drop Like A Rock"},
+	{33,1,1,"Smashing In the Snow"},
+	{34,1,1,"Switch It Up"},
+	{35,2,1,"The Switchboxes"},
+	{36,3,0,"Puzzle Me This"},
+	{37,3,0,"Double Switch"},
+	{38,2,0,"Water World"},
+	{39,2,0,"Moving Day"},
+	{3,	2,2,"Into the Night"},
+	--
+	{8,	1,2,"Campfire Pool Party"},
+	{10,1,2,"Can't See Them Coming"},
+	{11,2,2,"The Nocturnal Wildlife"},
+	{18,2,2,"Revisit the Bridges"},
+	{19,3,2,"The Ice-Cold Precipice"},
+	{22,1,2,"Night Landing"},
+	{23,1,2,"Deception Again"},
+	{24,3,2,"Same As Before"},
+	{32,1,2,"Antartican Knights"},
+	{50,3,2,"What Lurks In the Dark"},
+}
 
 for k,v in ipairs(toload) do
-	levels[#levels+1] = new(v)
+	levels[#levels+1] = Level(v)
 end
 
 levels.this = levels[1]
-levels.this:load()
 
 screen:show()
 screen:add(levels.this)
-dolater(function() 
-   snow(levels.this.snow)
-   levels.this:find_child("image0"):grab_key_focus()
-end)
 
-levels.next = function()
+levels.cycle = false
+levels.next = function(n)
+	n = type(n) == 'number' and n or 1
+	objectSet:clear()
 	local oldlevel = levels.this
-	levels.this = levels[(levels.this.id) % #levels + 1]
-	
-	levels.this:load()
-	overlay.level:animate{opacity = 0, duration = 570, on_completed = function()
-		overlay.level.text = "Level " .. (levels.this.id-1) .. ": " .. levels.this.name
-		overlay.level:animate{opacity = 255, duration = 560}
-	end}
-	
-	levels.this.y = 1120
-	screen:add(levels.this)
-	levels.this:lower_to_bottom()
-	snow(levels.this.snow)
-	
-	if levels.this.id ~= 1 then
-		screen:add(overlay.clone)
-		overlay.clone.y = 1120
+	if n == 0 then
+		if oldlevel.id == 1 then return end
+		levels.cycle = false
+		levels.this = levels[1]
+	else
+		levels.cycle = true
+		if oldlevel.id == 1 then
+			n = max(n,1)
+		end
+		levels.this = levels[oldlevel.id % #levels + n]
+		settings.level = levels.this.id
 	end
+	levels.this:load()
+	levels.this.y = oldlevel.id == 1 and 1070 or 1120
+	screen:add(levels.this)
+	levels.this:lower(oldlevel)
 	
 	levels.this:animate{y = 0, duration = 1120, mode = "EASE_IN_OUT_QUAD"}
-	overlay.clone:animate{y = 0, duration = 1120, mode = "EASE_IN_OUT_QUAD"}
-	
-	oldlevel:animate{y = -1300, duration = 1140, mode = "EASE_IN_OUT_QUAD", on_completed = function()
-		oldlevel:free()
-		if levels.this.id ~= 1 then
-			overlay.clone:unparent()
-			levels.this.text1:animate{y = 20, opacity = 255, duration = 500, mode = "EASE_IN_OUT_QUAD"}
-			overlay.position = {0,0}
+	oldlevel:animate{y = oldlevel.id == 1 and -1080 or -1300, duration = 1120,
+					mode = "EASE_IN_OUT_QUAD", on_completed = function()
+		oldlevel:unload()
+		collectgarbage("collect")
+		if levels.this.id > 1 then
 			row = 1
 			penguin.skating:start()
-			screen:grab_key_focus()
-		else
-			levels.this:find_child("image0"):grab_key_focus()
+			audio.play("slide")
 		end
-		collectgarbage("collect")
 	end}
-	overlay:animate{y = -1300, duration = 1140, mode = "EASE_IN_OUT_QUAD"}
+	
+	overlay.next(oldlevel.id == 1)
+	row = 1
 end
 
 return levels

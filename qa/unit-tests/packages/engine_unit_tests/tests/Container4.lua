@@ -48,7 +48,7 @@ local children = g.children
 
 -- Verify that find_child finds the image and remove removes it.
 function test_Container_group_remove_find_child ()
-	assert_equal(#children, initial_children-1 , "container.remove failed")
+	assert_equal(#children, initial_children-1 , "Returned: "..#children.." Expected: :"..(initial_children-1))
 end
 
 

@@ -6,23 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1060</width>
-    <height>178</height>
+    <width>811</width>
+    <height>166</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Console</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <layout class="QFormLayout" name="formLayout">
-     <property name="fieldGrowthPolicy">
-      <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-     </property>
-     <item row="0" column="0" colspan="2">
-      <widget class="QTextEdit" name="textEdit"/>
-     </item>
-    </layout>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTextEdit" name="textEdit"/>
    </item>
   </layout>
  </widget>

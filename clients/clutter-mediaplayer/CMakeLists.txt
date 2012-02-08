@@ -1,12 +1,14 @@
 include( FindPkgConfig )
 
 IF( PKG_CONFIG_FOUND )
-    pkg_search_module(CLUTTER_GST REQUIRED clutter-gst-1.0 clutter-gst-0.10)
-    pkg_check_modules(GSTVIDEO REQUIRED gstreamer-video-0.10)
+    pkg_search_module(CLUTTER_GST   REQUIRED    clutter-gst-1.0 )
+    pkg_check_modules(GSTVIDEO      REQUIRED    gstreamer-video-0.10)
+    pkg_check_modules(COGL                      cogl-1.0)
 
     list( APPEND        TPCMP_INCLUDE_DIRS
             ${CLUTTER_GST_INCLUDE_DIRS}
             ${GSTVIDEO_INCLUDE_DIRS}
+            ${COGL_INCLUDE_DIRS}
     )
     list( APPEND        TPCMP_LIBRARY_NAMES
             ${CLUTTER_GST_LIBRARIES}
@@ -21,7 +23,6 @@ ELSE( PKG_CONFIG_FOUND )
         # This one must come before the clutter libraries - so we
         # get the json symbols from here
         clutter-gst-1.0
-        clutter-gst-0.10
         gstvideo-0.10
     )
 

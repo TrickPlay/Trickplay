@@ -51,11 +51,20 @@ import com.trickplay.gameservice.transferObj.VendorTO;
 public class GameServiceClient {
 
 	private static final String GS_ENDPOINT = "http://localhost:9081/gameservice/rest";
-
+    //private static final String GS_ENDPOINT = "http://localhost:8091/rest";
 
 		public static void main(String[] args) {
 			
 			RestTemplate restTemplate = getTemplate();
+			
+			// reset database
+			try { 
+			
+			    resetDB(restTemplate, "admin", "admin");
+			} catch (Exception ex) {
+			    System.out.println("Got exception will reseting GameService database. Ignoring exception and continuing. exception message: " + ex.getMessage());
+			    ex.printStackTrace();
+			}
 			
 			checkUserExists(restTemplate, "u1");
 			checkUserExists(restTemplate, "u2");
@@ -296,6 +305,16 @@ public class GameServiceClient {
 			
 		}
 		
+		public static BooleanResponse resetDB(RestTemplate rest, String username, String password) {
+            HttpEntity<String> entity = prepareJsonGet(username, password);
+            ResponseEntity<BooleanResponse> response = rest.exchange(
+                    GS_ENDPOINT+"/user/resetDB", HttpMethod.GET, 
+                    entity, BooleanResponse.class);
+            
+            BooleanResponse output = response.getBody();
+            System.out.println("user/resetDB returned " + output.isValue());
+            return output;
+        }
 		
 		public static GamePlaySummaryTO getGamePlaySummary(RestTemplate rest, Long gameId, String username, String password) {
             HttpEntity<String> entity = prepareJsonGet(username, password);
