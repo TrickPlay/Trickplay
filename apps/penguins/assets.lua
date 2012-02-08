@@ -43,10 +43,10 @@ PenguinGhost = Class {
 		op = 255
 	},
 	new = function(self,t)
-		t = t or {}
 		self.op = t.opacity or 255
-		t.src = "penguin.png"
+		if t then t.src = "penguin.png" end
 		table.merge(self,t)
+		self.src = "penguin.png"
 		evFrame[self] = self.on_frame
 	end
 }
@@ -177,7 +177,7 @@ IceCube = Class {
 						self.x = self.mt
 					end
 				else
-					self.x = self.ox + self.x - self.mt
+					self.x = self.ox + self.x - self.mt + self.vx*delta
 				end
 			else
 				self.x = self.x + self.vx*delta
@@ -224,7 +224,12 @@ IceCube = Class {
 	new = function(self,t)
 		table.merge(self,t)
 		self.mx, self.my, self.mt = unpack(self.clip or noclip)
-		self.clip = self.source.clip
+		self.mx = floor(self.mx*10000+0.5)/10000
+		self.my = floor(self.my*10000+0.5)/10000
+		self.mt = floor(self.mt*10000+0.5)/10000
+		if self.clip then
+			self.clip = self.source.clip
+		end
 		self.mask.dirty = 1
 		
 		evInsert[self] = self.on_insert
@@ -512,7 +517,6 @@ SealBall = Class {
 		
 		evFrame[self] = self.on_frame
 		penguin.reset[self] = self.on_reset
-		--Event(self,'free'):add(function() print(Class:echo(self)) end)
 	end
 }
 
@@ -569,7 +573,7 @@ Seal = Class {
 	end
 }
 
-SealLion = Class {
+SeaLion = Class {
 	extends = Object,
 	shared = {
 		on_frame = function(self,delta,ms)
@@ -778,7 +782,7 @@ local make = {
 	["beach-ball.png"]		= BeachBall,
 	["seal-ball.png"]		= SealBall,
 	["seal-down.png"]		= Seal,
-	["sea-lion.png"]		= SealLion,
+	["sea-lion.png"]		= SeaLion,
 	["snow-ledge.png"]		= SnowLedge,
 	["snow-ramp.png"]		= SnowRamp,
 	["fish-blue.png"]		= BlueFish,

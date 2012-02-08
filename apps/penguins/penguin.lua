@@ -267,10 +267,8 @@ function skating:on_completed()
 end
 
 function screen:on_key_down(key)
-	---[[
-	if levels.this.id == 1 and levels.this.anim and (key == keys["Up"] or key == keys["Down"]) then
-		levels.this.anim.state = 1-tonumber(levels.this.anim.state)
-	elseif key >= keys["4"] and key <= keys["7"] then
+	--[[
+	if key >= keys["4"] and key <= keys["7"] then
 		skating:rewind()
 		skating:stop()
 		if key == keys["4"] then
@@ -284,20 +282,25 @@ function screen:on_key_down(key)
 		end
 	elseif key >= keys["0"] and key <= keys["9"] then
 		skating:rewind()
-		reset()--]]
+		reset()
+	else--]] if levels.this.id == 1 and levels.this.anim and (key == keys["Up"] or key == keys["Down"]) then
+		levels.this.anim.state = 1-tonumber(levels.this.anim.state)
 	elseif key == keys['BACK'] then
-		skating:stop()
-		levels.next(0)
+		if penguin.skating.is_playing then
+			skating:stop()
+			levels.next(0)
+		end
 	elseif levels.this.id == 1 then
 		if levels.this.swap then
 			levels.this.swap()
 		elseif levels.this.anim and levels.this.anim.state == '0' then
-			img.deaths = settings.deaths
+			img.deaths = settings.deaths or 0
 			overlay.deaths.text = img.deaths
 			levels.next(settings.level-1)
 		else
 			levels.next()
 			img.deaths = 0
+			settings.deaths = nil
 			overlay.deaths.text = img.deaths
 		end
 	elseif skating.is_playing and not img.armor then

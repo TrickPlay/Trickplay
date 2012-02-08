@@ -2,15 +2,15 @@ local loopuri, looptime
 local recent = {}
 local on = false --true
 
-local play = function(uri,force)
-	if on and not recent[uri] or force then
+local play = function(uri)
+	if on and not recent[uri] then
 		mediaplayer:play_sound("audio/" .. uri .. ".mp3")
 		recent[uri] = 1
 	end
 end
 
 local timer = Timer{on_timer = function(self)
-	play(loopuri,true)
+	play(loopuri)
 	self.interval = looptime
 end}
 
@@ -18,7 +18,7 @@ local loop = function(uri,time)
 	loopuri = uri
 	looptime = time
 	if timer.interval == 0 then
-		play(uri)--,true)
+		play(uri)
 		timer.interval = time
 	end
 	timer:start()

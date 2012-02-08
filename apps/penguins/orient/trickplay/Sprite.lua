@@ -27,7 +27,6 @@ Sprite = Class {
 	},
 	shared = {
 		free = function(self)
-			--print('free ' .. Class:echo(self))
 			self.source = nil
 			self.mask = nil
 			self:set(reset)

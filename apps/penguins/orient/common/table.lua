@@ -41,24 +41,3 @@ local weak = {k = {__mode = "k"}, v = {__mode = "v"}, kv = {__mode = "kv"}}
 function table.weak(t,type)
 	return setmetatable(t or {},weak[type or 'kv'])
 end
-
- --[[ proxies might too convoluted an idea
-
-local orig = table.weak()
-local pmt, p = {__index = function(p,k)
-	return orig[p][k]
-end, __newindex = function()
-	print("Cannot write to proxy table.")
-end, __metatable = false}
-
-function table.proxy(t)
-	p = {}
-	orig[p] = t
-	return setmetatable(p,pmt)
-end
-
-function table.deproxy(p)
-	return table.merge(setmetatable(p),orig[p],true)
-end
-
---]]
