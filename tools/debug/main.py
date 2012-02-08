@@ -21,6 +21,7 @@ from Editor.Editor import Editor
 from FileSystem.FileSystem import FileSystem
 from Debug.TrickplayDebug import *
 from Console.TrickplayConsole import TrickplayConsole
+from UI.Search import Ui_searchDialog
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -94,9 +95,9 @@ class MainWindow(QMainWindow):
 
 		#File Menu
         QObject.connect(self.ui.actionNew_File, SIGNAL("triggered()"),  self.newFile)
-        QObject.connect(self.ui.actionNew_Folder, SIGNAL("triggered()"),  self.newFolder)
+        #QObject.connect(self.ui.actionNew_Folder, SIGNAL("triggered()"),  self.newFolder)
         QObject.connect(self.ui.action_New, SIGNAL("triggered()"),  self.new)
-        QObject.connect(self.ui.actionOpen_App, SIGNAL("triggered()"),  self.new)
+        QObject.connect(self.ui.actionOpen_App, SIGNAL("triggered()"),  self.openApp)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
         QObject.connect(self.ui.action_Save_As, SIGNAL('triggered()'),  self.editorManager.saveas)
         QObject.connect(self.ui.action_Close, SIGNAL('triggered()'),  self.editorManager.close)
@@ -180,7 +181,7 @@ class MainWindow(QMainWindow):
 
 
 		#Create Target Trickplay Devices Button
-        self._deviceManager = TrickplayDeviceManager(self._inspector)
+        self._deviceManager = TrickplayDeviceManager(self._inspector, self)
         font_deviceManager = QFont()
         font_deviceManager.setPointSize(9)
         self._deviceManager.ui.comboBox.setFont(font_deviceManager)
@@ -303,6 +304,7 @@ class MainWindow(QMainWindow):
         self.trace_toolBtn.setIcon(self.icon_trace_off)
         self.toolbar.addWidget(self.trace_toolBtn)
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
+        self.untitled_idx = 1
 
     def traceWindowClicked(self) :
     	if self.windows['trace'] == True:
@@ -560,6 +562,18 @@ class MainWindow(QMainWindow):
         settings.setValue("mainWindowState", self.saveState());
         
 	
+    def openApp(self):
+		wizard = Wizard()
+		dir = "/home/hjkim/trickplay-editor/"
+		path = QFileDialog.getExistingDirectory(None, 'Open App', dir, QFileDialog.ShowDirsOnly)
+		#path = wizard.chooseDirectoryDialog(dir)
+		path = wizard.start(path)
+		print (path)
+		if path:
+			settings = QSettings()
+			settings.setValue('path', path)
+			self.start(path, wizard.filesToOpen())
+
     def new(self):
 		wizard = Wizard()
 		path = wizard.start("")
@@ -583,12 +597,41 @@ class MainWindow(QMainWindow):
         self.close()
 
     def newFile(self):
-		pass
-
-    def newFolder(self):
-		pass
+    	print("newFile")
+    	#file_name = self.path+'/Untitled.lua'
+    	file_name = self.path+'/Untitled_'+str(self.untitled_idx)+".lua"
+    	self.editorManager.newEditor(file_name, None, None, None, False, None, True)
+    	self.untitled_idx = self.untitled_idx + 1
+		
     def editor_search(self):
-		pass
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.search_dialog = QDialog()
+				self.search_ui = Ui_searchDialog()
+				self.search_ui.setupUi(self.search_dialog)
+				
+				while self.search_dialog.exec_() :
+					cur_geo = self.search_dialog.geometry()
+					expr = self.search_ui.search_txt.text()
+					re = False
+					cs = self.search_ui.checkBox_case.isChecked() 
+					wo = self.search_ui.checkBox_word.isChecked() 
+					wrap = self.search_ui.checkBox_wrap.isChecked() 
+					forward = self.search_ui.checkBox_forward.isChecked() 
+					self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
+
+					self.search_dialog = QDialog()
+					self.search_ui = Ui_searchDialog()
+					self.search_ui.setupUi(self.search_dialog)
+					self.search_ui.search_txt.setText(expr)
+					self.search_ui.checkBox_case.setChecked(cs) 
+					self.search_ui.checkBox_word.setChecked(wo) 
+					self.search_ui.checkBox_wrap.setChecked(wrap) 
+					self.search_ui.checkBox_forward.setChecked(forward) 
+					self.search_dialog.setGeometry(cur_geo)
+
+
     def editor_search_replace(self):
 		pass
     def editor_go_to_line(self):
@@ -597,9 +640,7 @@ class MainWindow(QMainWindow):
     def debug_command(self, cmd):
 		if getattr(self._deviceManager, "debug_mode") == True :
 			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), cmd, False)
-			#print ("-----------")
 			self._deviceManager.printResp(data, cmd)
-			#print ("-----------")
 			# Open File, Show Current Lines 
 			if cmd == "c":
 				# delete current line marker 

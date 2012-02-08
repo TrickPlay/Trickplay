@@ -82,7 +82,7 @@ class EditorManager(QWidget):
         return self.editorGroups
     
     def EditorTabWidget(self, parent = None):
-        tab = EditorTabWidget(self, self.windowsMenu, self.splitter)
+        tab = EditorTabWidget(self, self.windowsMenu, self.fileSystem, self.splitter)
         tab.setObjectName('EditorTab' + str(len(self.editorGroups)))
         return tab
     
@@ -121,16 +121,28 @@ class EditorManager(QWidget):
 
     def chooseDirectoryDialog(self):
 		dir = self.ui.directory.text()
+		print(dir)
 		path = QFileDialog.getExistingDirectory(None, 'Select app directory', dir)
 		result = self.adjustDialog(path)
 		if result > 0:
 			self.ui.directory.setText(path)
 
-    def save(self):
-		editor = self.app.focusWidget()
+    def save(self, editor_index = None):
+		editor = None
+		if editor_index is not None:
+			editor = self.tab.editors[editor_index]
+		else:
+			editor = self.app.focusWidget()
+
 		if isinstance(editor, Editor):
-			currentText = open(editor.path).read()
+			if editor.tempfile == False:
+				currentText = open(editor.path).read()
+			else:
+				currentText = ""
+
 			index = self.tab.currentIndex()
+			#comment 2/3 next if block
+			"""
 			if self.tab.textBefores[index] != currentText:
 				if editor.text_status == 2: #TEXT_CHANGED
 					msg = QMessageBox()
@@ -147,10 +159,17 @@ class EditorManager(QWidget):
 						editor.save()
 					else:
 						return None
+			"""
 			editor.save()
+			self.tab.textBefores[index] = editor.text() ## new 2/3 
 		else:
 			print 'Failed to save because no text editor is currently selected.'                
 		
+    def saveall(self):
+		index = 0 
+		for editor in self.tab.editors :
+			self.save(index)
+			index = index + 1
 
     def close(self):
 		
@@ -180,18 +199,25 @@ class EditorManager(QWidget):
 			new_path = cur_dir+'/'+cur_file
 			print "Save As .. "+new_path
 
-			currentText = open(editor.path).read()
-			index = self.tab.currentIndex()
-			self.tab.textBefores[index] = editor.text()
-			editor.text_status = 1 
-			editor.path = new_path
-			editor.save()
-			self.close()
-			self.newEditor(new_path)
+			if editor.tempfile == False :
+				currentText = open(editor.path).read()
+				index = self.tab.currentIndex()
+				self.tab.textBefores[index] = editor.text()
+				editor.text_status = 1 
+				editor.path = new_path
+				editor.save()
+				self.close()
+				self.newEditor(new_path)
+			else :
+				index = self.tab.currentIndex()
+				self.tab.textBefores[index] = editor.text()
+				editor.text_status = 1 
+				editor.path = new_path
+				editor.save()
+				self.close()
+				editor = self.newEditor(new_path,None,None,None,False,None,True)
 
-		
-
-    def newEditor(self, path, tabGroup = None, line_no = None, prev_file = None, currentLine = False):
+    def newEditor(self, path, tabGroup = None, line_no = None, prev_file = None, currentLine = False, fileIndex=None, tempfile = False):
         """
         Create a tab group if both don't exist,
         then add an editor in the correct tab widget.
@@ -200,6 +226,10 @@ class EditorManager(QWidget):
         path = str(path)
         name = os.path.basename(str(path))
         editor = Editor(self.debugWindow, self, None)
+
+        editor.tempfile = tempfile
+        editor.fileIndex = fileIndex
+
         closedTab = None
 
         # Default to opening in the first tab group
@@ -210,8 +240,7 @@ class EditorManager(QWidget):
 		# If there is already one tab group, create a new one in split view and open the file there  
         if 0 == nTabGroups:
             self.tab = self.EditorTabWidget(self.splitter)
-            self.editorGroups.append(self.tab)
-            
+            self.editorGroups.append(self.tab) 
         # If the file is already open, just use the open document
         if self.editors.has_key(path):
             for k in self.editors:
@@ -222,8 +251,8 @@ class EditorManager(QWidget):
         		self.editors.pop(closedTab)
         		for k in self.tab.paths:
 					self.editors[k][1] = self.tab.paths.index(k) 
-
-        		editor.readFile(path) 
+        		if editor.tempfile == False:
+        			editor.readFile(path) 
 
             if closedTab != path:
 				for k in self.editors:
@@ -275,13 +304,12 @@ class EditorManager(QWidget):
 										self.currentEditor.markerDelete(nextCurLine, Editor.DEACTIVE_BREAK_MARKER_NUM)
 										self.currentEditor.markerAdd(nextCurLine, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 									self.currentEditor.current_line = nextCurLine
-				return
-        else:
+				return self.currentEditor
+        elif tempfile == False:
             editor.readFile(path)
         
         if 0 == nTabGroups:
 			seperatorAction = self.windowsMenu.addSeparator()
-
 
         if not self.editors.has_key(path):
             self.tab.paths.append(path)
@@ -289,6 +317,7 @@ class EditorManager(QWidget):
             self.tab.editors.append(editor)
 
         index = self.editorGroups[tabGroup].addTab(editor, name)
+        editor.tabIndex = index
 
         if not self.editors.has_key(path):
             self.editors[path] = [editor, index]
@@ -297,7 +326,6 @@ class EditorManager(QWidget):
         editor.setFocus()
         editor.path = path
 
-		#  KKK
         font = QFont()
         font.setPointSize(10)
 
@@ -350,6 +378,7 @@ class EditorManager(QWidget):
 					editor.markerDelete(int(line_no) -1, Editor.DEACTIVE_BREAK_MARKER_NUM)
 					editor.markerAdd(int(line_no) -1, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 				editor.current_line = int(line_no) -1 
+        return editor
 
     @pyqtSlot()
     def moveToThisEditor(self):
@@ -382,10 +411,9 @@ class EditorManager(QWidget):
         """
         Open a file from the FileSystemModel in the correct tab widget.
         """
-        
         model = self.fileSystem.model
         
         if not model.isDir(fileIndex):
             path = model.filePath(fileIndex)
             
-            self.newEditor(path, n)       
+            self.newEditor(path, n, None, None, False, fileIndex, False)       

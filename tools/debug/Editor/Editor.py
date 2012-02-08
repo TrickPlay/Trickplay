@@ -69,7 +69,6 @@ class Editor(QsciScintilla):
         self.markerDefine(QPixmap("Assets/breakpoint-on.png"), self.ACTIVE_BREAK_MARKER_NUM)
         self.markerDefine(QPixmap("Assets/breakpoint-off-currentline.png"), self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
         self.markerDefine(QPixmap("Assets/breakpoint-on-currentline.png"), self.ARROW_ACTIVE_BREAK_MARKER_NUM)
-
         """
         self.markerDefine(QsciScintilla.Background, self.BACKGROUND_MARKER_NUM)
         self.markerDefine(QsciScintilla.RightTriangle, self.ARROW_MARKER_NUM)
@@ -128,6 +127,8 @@ class Editor(QsciScintilla):
         self.line_click = {}
         self.current_line = -1
         self.editorManager = editorManager
+        self.path = None
+        self.tempfile = False
 
     def get_bp_num(self, nline):
 		data = sendTrickplayDebugCommand("9876", "b",False)
@@ -201,6 +202,17 @@ class Editor(QsciScintilla):
 		#print "SS changed "
 
     def text_changed(self):
+
+		if self.tempfile == True and self.text_status != TEXT_CHANGED:
+			self.text_status = TEXT_READ
+
+		if self.text_status == TEXT_DEFAULT or self.text_status != TEXT_CHANGED:#(self.text_status == TEXT_READ and self.path == self.editorManager.tab.editors[0].path):
+			index = 0 
+			for edt in self.editorManager.tab.editors :
+				if edt.path == self.path :
+					self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+				index = index + 1
+
 		if self.text_status == TEXT_DEFAULT:
 			self.text_status = TEXT_READ 
 		else:
@@ -211,17 +223,32 @@ class Editor(QsciScintilla):
         path = self.path
         try:
             f = open(path,'w+')
+            f.write(self.text())
+            f.close()
         except:
             #statusBar.message('Could not write to %s' % (path),2000)
-            print 'Could not write to path'
-            return
+            pass
         
-        f.write(self.text())
         self.text_status = TEXT_READ 
-        f.close()
         
+        index = 0 
+        if self.editorManager is not None :
+        	for edt in self.editorManager.tab.editors :
+				if edt.path == self.path :
+					tabTitle = self.editorManager.tab.tabText(index)
+					if tabTitle[:1] == "*":
+						self.editorManager.tab.setTabText (index, tabTitle[1:])
+					break
+				index = index + 1
+
+        	self.editorManager.tab.textBefores[index] = self.text()
+        	self.tempfile = False
+        	print 'File saved'
+        else: 
+			self.tempfile = True
+			print 'Temp file true'
+
         #statusBar.showMessage('File %s saved' % (path), 2000)
-        print 'File saved'
         
     def charAdded(self, c):
         """
