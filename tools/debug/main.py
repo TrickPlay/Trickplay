@@ -402,10 +402,10 @@ class MainWindow(QMainWindow):
 				for n in self.editorManager.editors:
 					for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete( int(l), -1) 
+					self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
 
 					if self.current_debug_file == n:
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
-						#self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, Editor.ARROW_MARKER_NUM)
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
 
