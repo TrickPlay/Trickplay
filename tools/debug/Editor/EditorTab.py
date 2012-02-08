@@ -68,7 +68,6 @@ class EditorTabWidget(QTabWidget):
 						pass
 
 		#close current index tab
-		print(index)
 		self.paths.pop(index)
 		self.textBefores.pop(index) #new
 		self.editors.pop(index) #new

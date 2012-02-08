@@ -7,6 +7,7 @@ import signal
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 
 from UI.MainWindow import Ui_MainWindow
 
@@ -22,6 +23,8 @@ from FileSystem.FileSystem import FileSystem
 from Debug.TrickplayDebug import *
 from Console.TrickplayConsole import TrickplayConsole
 from UI.Search import Ui_searchDialog
+from UI.Replace import Ui_replaceDialog
+from UI.GotoLine import Ui_gotoLineDialog
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -31,6 +34,9 @@ class MainWindow(QMainWindow):
         
         QWidget.__init__(self, parent)
         
+        self.untitled_idx = 1
+        self.debug_mode = False
+
         # Restore size/position of window
         settings = QSettings()
         #self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
@@ -82,7 +88,7 @@ class MainWindow(QMainWindow):
         self.ui.DebugDock.hide()
 
         # Create Editor
-        self._editorManager = EditorManager(self._fileSystem, self._debug, self.ui.menuView, self.ui.centralwidget)
+        self._editorManager = EditorManager(self, self._fileSystem, self._debug, self.ui.menuView, self.ui.centralwidget)
         
 		#Create Backtrace
         self.ui.BacktraceDock.toggleViewAction().setText("&Backtrace")
@@ -304,7 +310,6 @@ class MainWindow(QMainWindow):
         self.trace_toolBtn.setIcon(self.icon_trace_off)
         self.toolbar.addWidget(self.trace_toolBtn)
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
-        self.untitled_idx = 1
 
     def traceWindowClicked(self) :
     	if self.windows['trace'] == True:
@@ -395,10 +400,18 @@ class MainWindow(QMainWindow):
 				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
 				# delete current line marker
 				for n in self.editorManager.editors:
+					"""
+					for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_chick:
+						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete( int(l), -1) 
+					"""
+
 					if self.current_debug_file == n:
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
-						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, Editor.ARROW_MARKER_NUM)
+						#self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, Editor.ARROW_MARKER_NUM)
+						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
+
+
 				# clean backtrace and debug window
 				self._backtrace.clearTraceTable(0)
 				self._debug.clearLocalTable(0)
@@ -597,8 +610,6 @@ class MainWindow(QMainWindow):
         self.close()
 
     def newFile(self):
-    	print("newFile")
-    	#file_name = self.path+'/Untitled.lua'
     	file_name = self.path+'/Untitled_'+str(self.untitled_idx)+".lua"
     	self.editorManager.newEditor(file_name, None, None, None, False, None, True)
     	self.untitled_idx = self.untitled_idx + 1
@@ -633,9 +644,67 @@ class MainWindow(QMainWindow):
 
 
     def editor_search_replace(self):
-		pass
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.search_dialog = QDialog()
+				self.search_ui = Ui_searchDialog()
+				self.search_ui.setupUi(self.search_dialog)
+				
+				while self.search_dialog.exec_() :
+					cur_geo = self.search_dialog.geometry()
+					expr = self.search_ui.search_txt.text()
+					re = False
+					cs = self.search_ui.checkBox_case.isChecked() 
+					wo = self.search_ui.checkBox_word.isChecked() 
+					wrap = self.search_ui.checkBox_wrap.isChecked() 
+					forward = self.search_ui.checkBox_forward.isChecked() 
+					self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
+
+					self.search_dialog = QDialog()
+					self.search_ui = Ui_searchDialog()
+					self.search_ui.setupUi(self.search_dialog)
+					self.search_ui.search_txt.setText(expr)
+					self.search_ui.checkBox_case.setChecked(cs) 
+					self.search_ui.checkBox_word.setChecked(wo) 
+					self.search_ui.checkBox_wrap.setChecked(wrap) 
+					self.search_ui.checkBox_forward.setChecked(forward) 
+					self.search_dialog.setGeometry(cur_geo)
+
+
     def editor_go_to_line(self):
-		pass
+		if self.editorManager.tab:
+			index = self.editorManager.tab.currentIndex()
+			if not index < 0:
+				self.gotoLine_dialog = QDialog()
+				self.gotoLine_ui = Ui_gotoLineDialog()
+				self.gotoLine_ui.setupUi(self.gotoLine_dialog)
+				#okButton = self.gotoLine_ui.buttonBox.button(QDialogButtonBox.Ok)
+				#okButton.setEnabled(False)
+				while self.gotoLine_dialog.exec_() :
+					cur_geo = self.gotoLine_dialog.geometry()
+					try :
+						lineNum = int(self.gotoLine_ui.line_txt.text())
+					except :
+						lineNum = -1
+					maxNum = self.editorManager.tab.editors[index].lines()
+					if 1 <= lineNum and lineNum <= maxNum:
+						self.editorManager.tab.editors[index].SendScintilla(QsciScintilla.SCI_GOTOLINE, int(lineNum) - 1)
+						return
+					else :
+						msg = QMessageBox()
+						msg.setGeometry(cur_geo)
+						msg.setText('The line number is not valid')
+						msg.setInformativeText('Please enter a number (1..'+str(maxNum)+')')
+						msg.setStandardButtons(QMessageBox.Ok)
+						msg.setDefaultButton(QMessageBox.Ok)
+						msg.setWindowTitle("Warning")
+						ret = msg.exec_()
+						self.gotoLine_ui.line_txt.setText(str(lineNum))
+						self.gotoLine_dialog = QDialog()
+						self.gotoLine_ui = Ui_gotoLineDialog()
+						self.gotoLine_ui.setupUi(self.gotoLine_dialog)
+						self.gotoLine_dialog.setGeometry(cur_geo)
 
     def debug_command(self, cmd):
 		if getattr(self._deviceManager, "debug_mode") == True :

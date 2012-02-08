@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>470</width>
-    <height>150</height>
+    <width>343</width>
+    <height>146</height>
    </rect>
   </property>
   <property name="font">
@@ -24,7 +24,7 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>150</x>
      <y>110</y>
      <width>176</width>
      <height>27</height>
@@ -42,24 +42,17 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>451</width>
+     <width>321</width>
      <height>28</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QFormLayout" name="formLayout">
     <property name="horizontalSpacing">
      <number>10</number>
     </property>
     <property name="verticalSpacing">
      <number>0</number>
     </property>
-    <item row="0" column="1">
-     <widget class="QLineEdit" name="search_txt">
-      <property name="placeholderText">
-       <string/>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="0">
      <widget class="QLabel" name="labelName">
       <property name="font">
@@ -72,15 +65,22 @@
       </property>
      </widget>
     </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="search_txt">
+      <property name="placeholderText">
+       <string/>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="verticalLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>230</x>
+     <x>160</x>
      <y>50</y>
-     <width>231</width>
-     <height>41</height>
+     <width>171</width>
+     <height>50</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -111,8 +111,8 @@
     <rect>
      <x>10</x>
      <y>50</y>
-     <width>221</width>
-     <height>41</height>
+     <width>141</width>
+     <height>50</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">

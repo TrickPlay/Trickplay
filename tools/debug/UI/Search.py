@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Search2.ui'
+# Form implementation generated from reading ui file 'Search.ui'
 #
-# Created: Tue Feb  7 16:39:26 2012
+# Created: Wed Feb  8 12:27:28 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,36 +17,36 @@ except AttributeError:
 class Ui_searchDialog(object):
     def setupUi(self, searchDialog):
         searchDialog.setObjectName(_fromUtf8("searchDialog"))
-        searchDialog.resize(470, 150)
+        searchDialog.resize(343, 146)
         font = QtGui.QFont()
         font.setPointSize(10)
         searchDialog.setFont(font)
         searchDialog.setModal(True)
         self.buttonBox = QtGui.QDialogButtonBox(searchDialog)
-        self.buttonBox.setGeometry(QtCore.QRect(280, 110, 176, 27))
+        self.buttonBox.setGeometry(QtCore.QRect(150, 110, 176, 27))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.layoutWidget = QtGui.QWidget(searchDialog)
-        self.layoutWidget.setGeometry(QtCore.QRect(10, 10, 451, 28))
+        self.layoutWidget.setGeometry(QtCore.QRect(10, 10, 321, 28))
         self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
-        self.gridLayout = QtGui.QGridLayout(self.layoutWidget)
-        self.gridLayout.setMargin(0)
-        self.gridLayout.setHorizontalSpacing(10)
-        self.gridLayout.setVerticalSpacing(0)
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.search_txt = QtGui.QLineEdit(self.layoutWidget)
-        self.search_txt.setPlaceholderText(_fromUtf8(""))
-        self.search_txt.setObjectName(_fromUtf8("search_txt"))
-        self.gridLayout.addWidget(self.search_txt, 0, 1, 1, 1)
+        self.formLayout = QtGui.QFormLayout(self.layoutWidget)
+        self.formLayout.setMargin(0)
+        self.formLayout.setHorizontalSpacing(10)
+        self.formLayout.setVerticalSpacing(0)
+        self.formLayout.setObjectName(_fromUtf8("formLayout"))
         self.labelName = QtGui.QLabel(self.layoutWidget)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.labelName.setFont(font)
         self.labelName.setObjectName(_fromUtf8("labelName"))
-        self.gridLayout.addWidget(self.labelName, 0, 0, 1, 1)
+        self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.labelName)
+        self.search_txt = QtGui.QLineEdit(self.layoutWidget)
+        self.search_txt.setPlaceholderText(_fromUtf8(""))
+        self.search_txt.setObjectName(_fromUtf8("search_txt"))
+        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.search_txt)
         self.verticalLayoutWidget_2 = QtGui.QWidget(searchDialog)
-        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(230, 50, 231, 41))
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(160, 50, 171, 50))
         self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayout_2.setMargin(0)
@@ -60,7 +60,7 @@ class Ui_searchDialog(object):
         self.checkBox_wrap.setObjectName(_fromUtf8("checkBox_wrap"))
         self.verticalLayout_2.addWidget(self.checkBox_wrap)
         self.verticalLayoutWidget_3 = QtGui.QWidget(searchDialog)
-        self.verticalLayoutWidget_3.setGeometry(QtCore.QRect(10, 50, 221, 41))
+        self.verticalLayoutWidget_3.setGeometry(QtCore.QRect(10, 50, 141, 50))
         self.verticalLayoutWidget_3.setObjectName(_fromUtf8("verticalLayoutWidget_3"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.verticalLayoutWidget_3)
         self.verticalLayout_3.setMargin(0)
