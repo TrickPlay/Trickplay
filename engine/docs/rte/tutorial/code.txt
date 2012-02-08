@@ -222,7 +222,7 @@ File: logoAnimation.lua
 					duration     = 3000,            -- 3000 milliseconds = 3 seconds
 					scale        = { 0, 0 },        -- scale down to nothing
 					z_rotation   = 360,             -- rotate 360 degrees, clockwise
-					mode         = "EASE_IN_QUART", -- Alpha mode
+					mode         = "EASE_IN_QUART", -- Ease mode
 					on_completed = logoCompleted    -- called when finished
 				  } )
 	end
