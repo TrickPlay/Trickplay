@@ -229,26 +229,25 @@ class Ease [[Ease *]]
 	-- This will cause initial values to change quickly, but final values
 	-- will change very slowly, i.e., ease-out.
 	easeTransition = Ease( "EASE_OUT_EXPO" )
-	rangeInterval  = Interval( 1, 100 )
+	range          = Interval( 1, 100 )
 	
-	for i = 1, 100 do
-		eased_i = rangeInterval:get_value( easeTransition:get_value( i / 100 ) )
+	for i = range.from, range.to do
+		eased_i = range:get_value( easeTransition:get_value( i / 100 ) )
 		print( "i =", i, ", eased_i =", eased_i )
 	end
-	
+
 	--[[
 	Code Output:
-		i = 1 , eased_i = 2.5550244138702
-		i = 2 , eased_i = 4.1096651487347
-		i = 3 , eased_i = 5.6635386202546
-		i = 4 , eased_i = 7.216261433402
+		i = 1 , eased_i = 7.6297338378561
+		i = 2 , eased_i = 13.815494233684
+		i = 3 , eased_i = 19.587012760733
+		i = 4 , eased_i = 24.972029957735
 		...
-		i = 96 , eased_i = 99.804646114399
-		i = 97 , eased_i = 99.890097621235
-		i = 98 , eased_i = 99.951149476207
-		i = 99 , eased_i = 99.987786615684
+		i = 97 , eased_i = 99.88097334285
+		i = 98 , eased_i = 99.888944202007
+		i = 99 , eased_i = 99.896381276571
 		i = 100 , eased_i = 100
-	--]]
+[	--]]
 	(end)
 		
 	*Return Value:* Modified double value after applying ease transition
