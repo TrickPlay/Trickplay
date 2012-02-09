@@ -1,59 +1,49 @@
 --[[
-tues
-	polish boost anim
-	
-wed
-	2-3 blue fish levels
-	internal release?
-	
-level notes
-	12a and 16a and might be too difficult
 
-	
-breakable blocks
-armor
-gravity fish
-darkness
-polar bear
-eskimo
-monster
+Penguin Zip-Zip
 
 
-submersion of
-	ball
-	ice blocks
-	seal
-	penguin
-splashing
+tell pablo about segfault
+--]]
 
+orient = dofile('orient/orient.lua')()
 
-need
-	audio
-	better ice water
-	splash pieces
-	armor pieces
-	ice pieces
-	switches
-	"upside down" fish
-	darkness
-]]
+--screen.perspective = {1,1,0.1,100}
+
+sin = math.sin
+cos = math.cos
+asin = math.asin
+atan = math.atan
+atan2 = math.atan2
+pi = math.pi
+max = math.max
+min = math.min
+sqrt = math.sqrt
+log10 = math.log10
+floor = math.floor
 
 math.randomseed(os.time())
 rand = math.random
 function nrand(n)
     return (2*rand()-1)*n
 end
+function drand(n)
+    return (rand()+rand()-1)*n
+end
 
 gravity = 0.002
 ground = {440,1080}
 row = 1
+usebg = true
 
-dofile("cloner.lua")
+dofile("assets.lua")
+audio	= dofile("audio.lua")
+levels  = dofile("levels.lua")
+levels.this:load()
 snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
-levels  = dofile("levels.lua")
 overlay	= dofile("overlay.lua")
-snow(levels.this.snow,levels.this.bank)
-explode = dofile("explode.lua")
+snow(levels.this.snow)
+dofile("effects.lua")
 
 collectgarbage("collect")

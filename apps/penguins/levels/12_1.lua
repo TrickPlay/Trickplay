@@ -114,41 +114,42 @@ end
 image8.extra.reactive = true
 
 
-local image2 = Image
+local v_95_500 = Image
 	{
 		src = "/assets/images/seal-down.png",
+		clip = {0,0,131,151},
 		scale = {1,1,0,0},
 		x_rotation = {0,0,0},
 		y_rotation = {180,0,0},
 		z_rotation = {0,0,0},
-		anchor_point = {55,0},
-		name = "image2",
-		position = {1247,440,0},
+		anchor_point = {0,0},
+		name = "v_95_500",
+		position = {1192,440,0},
 		size = {131,151},
 		opacity = 255,
 		reactive = false,
 	}
 
-image2.extra.focus = {}
+v_95_500.extra.focus = {}
 
-function image2:on_key_down(key)
-	if image2.focus[key] then
-		if type(image2.focus[key]) == "function" then
-			image2.focus[key]()
-		elseif screen:find_child(image2.focus[key]) then
-			if image2.clear_focus then
-				image2.clear_focus(key)
+function v_95_500:on_key_down(key)
+	if v_95_500.focus[key] then
+		if type(v_95_500.focus[key]) == "function" then
+			v_95_500.focus[key]()
+		elseif screen:find_child(v_95_500.focus[key]) then
+			if v_95_500.clear_focus then
+				v_95_500.clear_focus(key)
 			end
-			screen:find_child(image2.focus[key]):grab_key_focus()
-			if screen:find_child(image2.focus[key]).set_focus then
-				screen:find_child(image2.focus[key]).set_focus(key)
+			screen:find_child(v_95_500.focus[key]):grab_key_focus()
+			if screen:find_child(v_95_500.focus[key]).set_focus then
+				screen:find_child(v_95_500.focus[key]).set_focus(key)
 			end
 		end
 	end
 	return true
 end
 
-image2.extra.reactive = false
+v_95_500.extra.reactive = false
 
 
 local image3 = Image
@@ -374,4 +375,4 @@ end
 clone8.extra.reactive = true
 
 
-g:add(image9,clone10,image8,image2,image3,clone4,clone5,clone6,clone7,clone8)
+g:add(image9,clone10,image8,v_95_500,image3,clone4,clone5,clone6,clone7,clone8)

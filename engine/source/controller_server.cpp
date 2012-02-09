@@ -295,28 +295,34 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
         {
             TPControllerDeclareResource * ds = ( TPControllerDeclareResource * )parameters;
 
-            const char * uri = NULL;
+            GFile * file = g_file_new_for_uri( ds->uri );
 
+            bool native = g_file_is_native( file );
+
+            g_object_unref( file );
+
+
+            const char * uri = 0;
             String path;
 
-            if ( g_str_has_prefix( ds->uri, "http://" ) || g_str_has_prefix( ds->uri, "https://" ) )
+            if ( ! native )
             {
                 uri = ds->uri;
             }
-            else if ( g_str_has_prefix( ds->uri, "file://" ) )
+            else
             {
-                path = start_serving_resource( connection , ( ds->uri ) + 7 , ds->group );
+                path = start_serving_resource( connection , ds->uri , ds->group );
                 uri = path.c_str();
             }
 
-            if ( !uri )
+            if ( ! uri )
             {
                 return 5;
             }
 
             if ( * uri == '/' )
             {
-                ++uri;
+            	++uri;
             }
 
             server->write_printf( connection, "DR\t%s\t%s\t%s\n", ds->resource, uri , ds->group );
@@ -994,9 +1000,9 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
 
 //-----------------------------------------------------------------------------
 
-String ControllerServer::start_serving_resource( gpointer connection , const String & file_name , const String & group )
+String ControllerServer::start_serving_resource( gpointer connection , const String & native_uri , const String & group )
 {
-    String path = group + ":" + file_name;
+    String path = group + ":" + native_uri;
 
     gchar * h = g_compute_checksum_for_string( G_CHECKSUM_MD5 , path.c_str() , path.length() );
 
@@ -1006,12 +1012,12 @@ String ControllerServer::start_serving_resource( gpointer connection , const Str
 
     path = String( "/controllers/resource/" ) + path;
 
-    tplog( "SERVING %s : %s" , path.c_str() , file_name.c_str() );
+    tplog( "SERVING %s : %s" , path.c_str() , native_uri.c_str() );
 
     ResourceInfo & info( resources[ path ] );
 
     info.connection = connection;
-    info.file_name = file_name;
+    info.native_uri = native_uri;
     info.group = group;
 
     return path;
@@ -1025,7 +1031,7 @@ void ControllerServer::drop_resource_group( gpointer connection , const String &
     {
         if ( it->second.connection == connection && ( group.empty() || it->second.group == group  ) )
         {
-            tplog( "DROPPING %s : %s : %s", it->first.c_str(), it->second.group.c_str() , it->second.file_name.c_str() );
+            tplog( "DROPPING %s : %s : %s", it->first.c_str(), it->second.group.c_str() , it->second.native_uri.c_str() );
 
             resources.erase( it++ );
         }
@@ -1060,7 +1066,7 @@ void ControllerServer::handle_http_get( const HttpServer::Request & request , Ht
         return;
     }
 
-    response.respond_with_file_contents( it->second.file_name );
+    response.respond_with_file_contents( it->second.native_uri );
 }
 
 //-----------------------------------------------------------------------------

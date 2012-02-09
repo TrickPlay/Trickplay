@@ -24,6 +24,7 @@ class EditorManager(QWidget):
         self.tab = None
         self.currentEditor = None
 
+
     def setupUi(self, parent):
         """
         Set up the editor UI where two QTabWidgets are arranged in a QSplitter

@@ -637,6 +637,44 @@ void ClutterUtil::inject_button_release( guint32 button , gfloat x , gfloat y , 
 #endif
 }
 
+void ClutterUtil::inject_scroll( int direction , unsigned long int modifiers )
+{
+    clutter_threads_enter();
+
+    ClutterEvent * event = clutter_event_new( CLUTTER_SCROLL );
+    event->any.stage = CLUTTER_STAGE( clutter_stage_get_default() );
+    event->any.time = timestamp();
+    event->any.flags = CLUTTER_EVENT_FLAG_SYNTHETIC;
+    event->scroll.modifier_state = to_clutter_modifier( modifiers );
+
+    switch( direction )
+    {
+    case TP_CONTROLLER_SCROLL_UP:		event->scroll.direction = CLUTTER_SCROLL_UP; break;
+    case TP_CONTROLLER_SCROLL_DOWN:		event->scroll.direction = CLUTTER_SCROLL_DOWN; break;
+    case TP_CONTROLLER_SCROLL_LEFT:		event->scroll.direction = CLUTTER_SCROLL_LEFT; break;
+    case TP_CONTROLLER_SCROLL_RIGHT:	event->scroll.direction = CLUTTER_SCROLL_RIGHT; break;
+    default:
+    	clutter_event_free( event );
+    	clutter_threads_leave();
+    	return;
+    }
+
+    clutter_event_put( event );
+
+    clutter_event_free( event );
+
+    clutter_threads_leave();
+
+#ifdef TP_CLUTTER_BACKEND_EGL
+
+    // In the EGL backend, there is nothing pulling the events from
+    // the event queue, so we force that by adding an idle source
+
+    g_idle_add_full( TRICKPLAY_PRIORITY , event_pump, NULL, NULL );
+
+#endif
+}
+
 void ClutterUtil::stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y )
 {
     ClutterContainer *stage = (ClutterContainer*)clutter_stage_get_default();
@@ -832,6 +870,37 @@ bool ClutterUtil::is_qualified_child( ClutterActor * container , ClutterActor* a
         }
 	}
     return false;
+}
+
+//-----------------------------------------------------------------------------
+
+void ClutterUtil::keep_alive( gpointer o , bool on )
+{
+    g_assert( o );
+
+    GObject * object = G_OBJECT( o );
+
+    static GQuark key = 0;
+    static char value = 0;
+
+    if ( 0 == key )
+    {
+    	key = g_quark_from_string( "__tp-keep-alive" );
+    }
+
+    bool has_one = g_object_get_qdata( object , key );
+
+    if ( on && ! has_one )
+    {
+        g_object_set_qdata( object , key , & value );
+        g_object_ref( object );
+    }
+    else if ( ! on && has_one )
+    {
+        g_object_set_qdata( object , key , 0 );
+        g_object_unref( object );
+    }
+
 }
 
 //-----------------------------------------------------------------------------

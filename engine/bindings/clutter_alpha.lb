@@ -24,7 +24,9 @@ static gdouble dummy_alpha( ClutterAlpha * self , gpointer )
 ]]
 
 /*
-    Class: Alpha
+    UndocumentedClass: Alpha
+    
+    The Alpha class has been deprecated. All new code should use the Ease class, instead.
     
     The Alpha class works in conjunction with a <Timeline> object to modify the Timeline's progress value to enable various animation ease-in and ease-out modes. (Note: The term "alpha" is also used to refer to an object's transparency/opacity setting, but the Alpha class and the alpha transparency setting are not in fact related in any way.)
     
@@ -103,7 +105,7 @@ class Alpha [[ClutterAlpha*]]
 	]];
 	
 	/*
-		Property: timeline
+		UndocumentedProperty: timeline
 		
 		The timeline property references the Timeline object to which the Alpha object is attached. An Alpha object must be attached to a Timeline.
 		
@@ -127,7 +129,7 @@ class Alpha [[ClutterAlpha*]]
 		]];
 		
 	/*
-		Property: mode
+		UndocumentedProperty: mode
 		
 		The mode property is a string value that defines the ease-in and ease-out behavior of the animation. Several predefined modes are built-in and can be assigned to the mode property. To define a custom mode, implement the desired behavior in the on_alpha() event handler. If using a custom mode, setting the Alpha object's mode property is not necessary.
 		
@@ -216,7 +218,7 @@ class Alpha [[ClutterAlpha*]]
 		]];
 	
 	/*
-		Property: alpha
+		UndocumentedProperty: alpha
 		
 		The alpha property is a double value containing the transformed progress value from the associated Timeline object.
 		
@@ -234,7 +236,7 @@ class Alpha [[ClutterAlpha*]]
 		[[alpha=clutter_alpha_get_alpha(self);]];
 	
 	/*
-		Event Handler: on_alpha
+		UndocumentedEvent Handler: on_alpha
 		
 		The on_alpha() event handler implements a custom Alpha mode by transforming a received progress value to match a desired behavior. The on_alpha() handler is called immediately before the <Timeline.on_new_frame> event handler is fired. The transformed return value gets assigned to the Alpha object's <alpha> property for use in the subsequently fired on_new_frame() event handler.
 		

@@ -5,8 +5,6 @@ dofile( "packages/engine_unit_tests/harness/unit_test.lua" )
 -- Unit Tests
 
 --dofile( "urlRequest2.lua" )  -- Failing because can't fail url request due to URL redirect.
-dofile( "packages/engine_unit_tests/tests/Alpha1.lua" ) 
-dofile( "packages/engine_unit_tests/tests/Alpha2.lua" )
 dofile( "packages/engine_unit_tests/tests/xmlParser1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/xmlParser2.lua" )
 dofile( "packages/engine_unit_tests/tests/timer1.lua")
@@ -21,6 +19,8 @@ dofile( "packages/engine_unit_tests/tests/UIElement7.lua" )
 dofile( "packages/engine_unit_tests/tests/UIElement8.lua" )
 dofile( "packages/engine_unit_tests/tests/UIElement9.lua" )
 dofile( "packages/engine_unit_tests/tests/UIElement10.lua" )
+dofile( "packages/engine_unit_tests/tests/UIElement11.lua" )
+dofile( "packages/engine_unit_tests/tests/UIElement12.lua" )
 dofile( "packages/engine_unit_tests/tests/Container1.lua" )
 dofile( "packages/engine_unit_tests/tests/Container2.lua" )
 dofile( "packages/engine_unit_tests/tests/Container3.lua" )
@@ -60,9 +60,7 @@ dofile( "packages/engine_unit_tests/tests/uri1.lua" )
 dofile( "packages/engine_unit_tests/tests/stopwatch1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/bitmap1.lua") 
 dofile( "packages/engine_unit_tests/tests/canvas1.lua" ) 
-dofile( "packages/engine_unit_tests/tests/profile1.lua" ) 
-dofile( "packages/engine_unit_tests/tests/UIElement12.lua" )  
-
+dofile( "packages/engine_unit_tests/tests/profile1.lua" )  
 dofile( "packages/engine_unit_tests/tests/animator1.lua" )
 dofile( "packages/engine_unit_tests/tests/animationState1.lua" )
 dofile( "packages/engine_unit_tests/tests/app1.lua" )
@@ -77,7 +75,7 @@ dofile( "packages/engine_unit_tests/tests/all_callbacks.lua" )
 
 dofile( "packages/engine_unit_tests/tests/Score1.lua" )
 dofile( "packages/engine_unit_tests/tests/Score2.lua" )
-dofile( "packages/engine_unit_tests/tests/Score3.lua" )
+--dofile( "packages/engine_unit_tests/tests/Score3.lua" )
 dofile( "packages/engine_unit_tests/tests/Score4.lua" )
 
 dofile( "packages/engine_unit_tests/tests/Timeline7.lua" )
@@ -88,6 +86,7 @@ dofile( "packages/engine_unit_tests/tests/Path5.lua")
 dofile( "packages/engine_unit_tests/tests/bitmap1.lua")
 dofile( "packages/engine_unit_tests/tests/bitmap2.lua")
 dofile( "packages/engine_unit_tests/tests/mediaplayer1.lua" )
+
 screen:add (test_group)
 
 -- setup steps
@@ -117,11 +116,15 @@ function idle.on_idle( idle , seconds )
 		--on_alpha_called == true  and
 		media_player_stream_completed == true and
 		timeline1_on_completed_called == true and
+		alpha1_completed == true and
+		timeline_4_test_completed == true and
 		timeline5_on_completed_called == true and
 		timeline6_on_completed_called == true and 
+		timeline_8_test_completed == true and
 		urlrequest1_on_complete_called == true and
 		tag_img_loaded == true and
 		animation_state2_completed == true and
+		score_on_completed_called == true and 
 		total > 5 ) 
  		or total > 30 then
 

@@ -249,5 +249,13 @@ global screen [[ClutterActor*]] actor , container
         ]];
 
     callback on_toast;
+    
+    /*
+        This is here to hide UIElement's on_parent_changed. We don't want anyone to
+        be able to access the screen's parent...ever. So, we install a callback that
+        does nothing.
+    */
+    
+    callback on_parent_changed;
 }
 

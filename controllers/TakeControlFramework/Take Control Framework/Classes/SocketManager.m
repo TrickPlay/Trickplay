@@ -38,6 +38,11 @@
     if ((self = [super init])) {
         functional = YES;
         
+        if (!theHost || !((thePort > 0) && (thePort < 65536))) {
+            functional = NO;
+            return self;
+        }
+        
         self.input_stream = nil;
         self.output_stream = nil;
         self.host = nil;
