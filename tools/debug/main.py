@@ -619,8 +619,12 @@ class MainWindow(QMainWindow):
 				self.search_dialog = QDialog()
 				self.search_ui = Ui_searchDialog()
 				self.search_ui.setupUi(self.search_dialog)
+    			QObject.connect(self.search_ui.search_txt , SIGNAL("textChanged(QString)"),  self.search_textChanged)
 				
-				while self.search_dialog.exec_() :
+    			self.search_ui.okButton = self.search_ui.buttonBox.button(QDialogButtonBox.Ok)
+    			self.search_ui.okButton.setEnabled(False)
+
+    			while self.search_dialog.exec_() :
 					cur_geo = self.search_dialog.geometry()
 					expr = self.search_ui.search_txt.text()
 					re = False
@@ -628,7 +632,7 @@ class MainWindow(QMainWindow):
 					wo = self.search_ui.checkBox_word.isChecked() 
 					wrap = self.search_ui.checkBox_wrap.isChecked() 
 					forward = self.search_ui.checkBox_forward.isChecked() 
-					self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
+					search_res = self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
 
 					self.search_dialog = QDialog()
 					self.search_ui = Ui_searchDialog()
@@ -639,36 +643,110 @@ class MainWindow(QMainWindow):
 					self.search_ui.checkBox_wrap.setChecked(wrap) 
 					self.search_ui.checkBox_forward.setChecked(forward) 
 					self.search_dialog.setGeometry(cur_geo)
+					if search_res == False:
+						self.search_ui.notification.setText("String Not Found") 
+					else :
+						self.search_ui.notification.setText("")
 
 
-    def editor_search_replace(self):
-		if self.editorManager.tab:
-			index = self.editorManager.tab.currentIndex()
-			if not index < 0:
-				self.search_dialog = QDialog()
-				self.search_ui = Ui_searchDialog()
-				self.search_ui.setupUi(self.search_dialog)
-				
-				while self.search_dialog.exec_() :
-					cur_geo = self.search_dialog.geometry()
-					expr = self.search_ui.search_txt.text()
+    def  search_textChanged(self, change):
+		if len (self.search_ui.search_txt.text()) >= 1 :
+			self.search_ui.okButton.setEnabled(True)
+		else:
+			self.search_ui.okButton.setEnabled(False)
+
+    def editor_search_replace(self, expr="",replace_expr="", cs=True, wo=True, wrap=True, forward=True, cur_geo=None):
+    	if self.editorManager.tab:
+    		index = self.editorManager.tab.currentIndex()
+    		if not index < 0:
+    			self.replace_dialog = QDialog()
+    			self.replace_ui = Ui_replaceDialog()
+    			self.replace_ui.setupUi(self.replace_dialog)
+
+        		self.replace_ui.pushButton_find.setEnabled(False)
+        		self.replace_ui.pushButton_replace.setEnabled(False)
+        		self.replace_ui.pushButton_replaceAll.setEnabled(False)
+        		self.replace_ui.pushButton_replaceFind.setEnabled(False)
+
+    			QObject.connect(self.replace_ui.search_txt , SIGNAL("textChanged(QString)"),  self.replace_textChanged)
+    			QObject.connect(self.replace_ui.pushButton_close , SIGNAL("clicked()"),  self.replace_close)
+    			QObject.connect(self.replace_ui.pushButton_find , SIGNAL("clicked()"),  self.replace_find)
+    			QObject.connect(self.replace_ui.pushButton_replace , SIGNAL("clicked()"),  self.replace_replace)
+    			QObject.connect(self.replace_ui.pushButton_replaceAll , SIGNAL("clicked()"),  self.replace_replaceAll)
+    			QObject.connect(self.replace_ui.pushButton_replaceFind , SIGNAL("clicked()"),  self.replace_replaceFind)
+
+    			while self.replace_dialog.exec_() :
+					cur_geo = self.replace_dialog.geometry()
+					expr = self.replace_ui.search_txt.text()
+					replace_expr = self.replace_ui.replace_txt.text()
 					re = False
-					cs = self.search_ui.checkBox_case.isChecked() 
-					wo = self.search_ui.checkBox_word.isChecked() 
-					wrap = self.search_ui.checkBox_wrap.isChecked() 
-					forward = self.search_ui.checkBox_forward.isChecked() 
-					self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
+					cs = self.replace_ui.checkBox_case.isChecked() 
+					wo = self.replace_ui.checkBox_word.isChecked() 
+					wrap = self.replace_ui.checkBox_wrap.isChecked() 
+					forward = self.replace_ui.checkBox_forward.isChecked() 
 
-					self.search_dialog = QDialog()
-					self.search_ui = Ui_searchDialog()
-					self.search_ui.setupUi(self.search_dialog)
-					self.search_ui.search_txt.setText(expr)
-					self.search_ui.checkBox_case.setChecked(cs) 
-					self.search_ui.checkBox_word.setChecked(wo) 
-					self.search_ui.checkBox_wrap.setChecked(wrap) 
-					self.search_ui.checkBox_forward.setChecked(forward) 
-					self.search_dialog.setGeometry(cur_geo)
+					self.replace_ui.search_txt.setText(expr)
+					self.replace_ui.replace_txt.setText(replace_expr)
+					self.replace_ui.checkBox_case.setChecked(cs) 
+					self.replace_ui.checkBox_word.setChecked(wo) 
+					self.replace_ui.checkBox_wrap.setChecked(wrap) 
+					self.replace_ui.checkBox_forward.setChecked(forward) 
+					self.replace_dialog.setGeometry(cur_geo)
+	
+    def  replace_textChanged(self, change):
+		if len (self.replace_ui.search_txt.text()) >= 1 :
+			self.replace_ui.pushButton_find.setEnabled(True)
+			self.replace_ui.pushButton_replaceAll.setEnabled(True)
+		else:
+			self.replace_ui.pushButton_find.setEnabled(False)
+			self.replace_ui.pushButton_replace.setEnabled(False)
+			self.replace_ui.pushButton_replaceAll.setEnabled(False)
+			self.replace_ui.pushButton_replaceFind.setEnabled(False)
 
+    def  replace_close(self):
+		self.replace_dialog.close()
+
+    def  replace_find(self):
+		cur_geo = self.replace_dialog.geometry()
+		expr = self.replace_ui.search_txt.text()
+		replace_expr = self.replace_ui.replace_txt.text()
+		re = False
+		cs = self.replace_ui.checkBox_case.isChecked() 
+		wo = self.replace_ui.checkBox_word.isChecked() 
+		wrap = self.replace_ui.checkBox_wrap.isChecked() 
+		forward = self.replace_ui.checkBox_forward.isChecked() 
+		index = self.editorManager.tab.currentIndex()
+		if self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward) == False :
+			self.replace_ui.notification.setText("String Not Found") 
+		else:
+			self.replace_ui.notification.setText("")
+        	self.replace_ui.pushButton_replace.setEnabled(True)
+        	self.replace_ui.pushButton_replaceFind.setEnabled(True)
+
+		return self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
+
+    def  replace_replace(self):
+		replace_expr = self.replace_ui.replace_txt.text()
+		index = self.editorManager.tab.currentIndex()
+		self.editorManager.tab.editors[index].replace(replace_expr)
+
+    def  replace_replaceAll(self):
+		findNext = self.replace_find() 
+		if findNext == False:
+			self.replace_ui.notification.setText("String Not Found") 
+			return
+
+		replaceNum = 0 
+		while findNext == True:
+			self.replace_replace()
+			findNext = self.replace_find()
+			replaceNum = replaceNum + 1 
+
+		self.replace_ui.notification.setText(str(replaceNum)+" matches replaced") 
+
+    def  replace_replaceFind(self):
+		self.replace_replace()
+		self.replace_find()
 
     def editor_go_to_line(self):
 		if self.editorManager.tab:
@@ -677,9 +755,12 @@ class MainWindow(QMainWindow):
 				self.gotoLine_dialog = QDialog()
 				self.gotoLine_ui = Ui_gotoLineDialog()
 				self.gotoLine_ui.setupUi(self.gotoLine_dialog)
-				#okButton = self.gotoLine_ui.buttonBox.button(QDialogButtonBox.Ok)
-				#okButton.setEnabled(False)
-				while self.gotoLine_dialog.exec_() :
+    			QObject.connect(self.gotoLine_ui.line_txt , SIGNAL("textChanged(QString)"),  self.line_textChanged)
+
+    			self.gotoLine_ui.okButton = self.gotoLine_ui.buttonBox.button(QDialogButtonBox.Ok)
+    			self.gotoLine_ui.okButton.setEnabled(False)
+
+    			while self.gotoLine_dialog.exec_() :
 					cur_geo = self.gotoLine_dialog.geometry()
 					try :
 						lineNum = int(self.gotoLine_ui.line_txt.text())
@@ -690,6 +771,7 @@ class MainWindow(QMainWindow):
 						self.editorManager.tab.editors[index].SendScintilla(QsciScintilla.SCI_GOTOLINE, int(lineNum) - 1)
 						return
 					else :
+						"""
 						msg = QMessageBox()
 						msg.setGeometry(cur_geo)
 						msg.setText('The line number is not valid')
@@ -698,11 +780,35 @@ class MainWindow(QMainWindow):
 						msg.setDefaultButton(QMessageBox.Ok)
 						msg.setWindowTitle("Warning")
 						ret = msg.exec_()
+						"""
 						self.gotoLine_ui.line_txt.setText(str(lineNum))
 						self.gotoLine_dialog = QDialog()
 						self.gotoLine_ui = Ui_gotoLineDialog()
 						self.gotoLine_ui.setupUi(self.gotoLine_dialog)
 						self.gotoLine_dialog.setGeometry(cur_geo)
+
+    def  line_textChanged(self, change):
+		if len (self.gotoLine_ui.line_txt.text()) >= 1 :
+			try :
+				lineNum = int(self.gotoLine_ui.line_txt.text())
+				self.gotoLine_ui.notification.setText("")
+			except :
+				self.gotoLine_ui.notification.setText("Not a number")
+				lineNum = int(self.gotoLine_ui.line_txt.text())
+				lineNum = -1
+			index = self.editorManager.tab.currentIndex()
+			maxNum = self.editorManager.tab.editors[index].lines()
+			if lineNum < 1 :
+				self.gotoLine_ui.notification.setText("Line number out of range")
+				self.gotoLine_ui.okButton.setEnabled(False)
+			elif lineNum > maxNum:
+				self.gotoLine_ui.notification.setText("Line number out of range")
+				self.gotoLine_ui.okButton.setEnabled(False)
+			else:
+				self.gotoLine_ui.notification.setText("")
+				self.gotoLine_ui.okButton.setEnabled(True)
+		else:
+			self.gotoLine_ui.okButton.setEnabled(False)
 
     def debug_command(self, cmd):
 		if getattr(self._deviceManager, "debug_mode") == True :
@@ -717,9 +823,9 @@ class MainWindow(QMainWindow):
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
 				# clean backtrace and debug windows
-				self._backtrace.clearTraceTabe(0)
+				self._backtrace.clearTraceTable(0)
 				self._debug.clearLocalTable(0)
-				self._debug.clearBreakTable(0)
+				#self._debug.clearBreakTable(0)
 
 			else :
 				file_name = ""

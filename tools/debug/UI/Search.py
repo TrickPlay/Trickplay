@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Search.ui'
 #
-# Created: Wed Feb  8 12:27:28 2012
+# Created: Thu Feb  9 11:22:40 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,18 +17,18 @@ except AttributeError:
 class Ui_searchDialog(object):
     def setupUi(self, searchDialog):
         searchDialog.setObjectName(_fromUtf8("searchDialog"))
-        searchDialog.resize(343, 146)
+        searchDialog.resize(418, 147)
         font = QtGui.QFont()
         font.setPointSize(10)
         searchDialog.setFont(font)
         searchDialog.setModal(True)
         self.buttonBox = QtGui.QDialogButtonBox(searchDialog)
-        self.buttonBox.setGeometry(QtCore.QRect(150, 110, 176, 27))
+        self.buttonBox.setGeometry(QtCore.QRect(230, 110, 176, 27))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Close|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.layoutWidget = QtGui.QWidget(searchDialog)
-        self.layoutWidget.setGeometry(QtCore.QRect(10, 10, 321, 28))
+        self.layoutWidget.setGeometry(QtCore.QRect(10, 10, 401, 28))
         self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
         self.formLayout = QtGui.QFormLayout(self.layoutWidget)
         self.formLayout.setMargin(0)
@@ -46,7 +46,7 @@ class Ui_searchDialog(object):
         self.search_txt.setObjectName(_fromUtf8("search_txt"))
         self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.search_txt)
         self.verticalLayoutWidget_2 = QtGui.QWidget(searchDialog)
-        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(160, 50, 171, 50))
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(220, 50, 191, 50))
         self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayout_2.setMargin(0)
@@ -73,6 +73,13 @@ class Ui_searchDialog(object):
         self.checkBox_forward.setChecked(True)
         self.checkBox_forward.setObjectName(_fromUtf8("checkBox_forward"))
         self.verticalLayout_3.addWidget(self.checkBox_forward)
+        self.notification = QtGui.QLabel(searchDialog)
+        self.notification.setGeometry(QtCore.QRect(10, 110, 201, 26))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.notification.setFont(font)
+        self.notification.setText(_fromUtf8(""))
+        self.notification.setObjectName(_fromUtf8("notification"))
 
         self.retranslateUi(searchDialog)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), searchDialog.accept)

@@ -139,7 +139,6 @@ class Editor(QsciScintilla):
 				return m
 			m += 1
 
-		
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
 		#print "on_margin_clicked"
@@ -149,7 +148,8 @@ class Editor(QsciScintilla):
 		bp_num = 0
 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
-			sendTrickplayDebugCommand("9876", "b "+self.path+":"+str(nline+1), False)
+			t_path = os.path.basename(str(self.path))
+			sendTrickplayDebugCommand("9876", "b "+t_path+":"+str(nline+1), False)
 			data = sendTrickplayDebugCommand("9876", "b",False)
 			bp_info = printResp(data, "b") # no need to print 
 										   # bp_info need to be drawn in bp window 

@@ -300,6 +300,7 @@ class EditorManager(QWidget):
 									self.currentEditor.current_line = nextCurLine
 				return self.currentEditor
         elif tempfile == False:
+            print(path)
             editor.readFile(path)
         
         if 0 == nTabGroups:

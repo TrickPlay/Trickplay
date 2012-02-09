@@ -182,9 +182,9 @@ def printResp(data, command):
 					breakpoints_info_str = breakpoints_info_str+"["+str(index)+"] "+b["file"]+":"+str(b["line"])
 					info_var_list.append(b["file"]+":"+str(b["line"]))
 
-					n = re.search("[/]+\S+[/]+", b["file"]).end()
+					#n = re.search("[/]+\S+[/]+", b["file"]).end()
 					
-					file_var_list.append(b["file"][n:]+" : "+str(b["line"]))
+					file_var_list.append(b["file"]+":"+str(b["line"]))
 				if "on" in b:
 					if b["on"] == True:
 						breakpoints_info_str = breakpoints_info_str+""+"\n\t"
