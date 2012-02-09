@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Replace.ui'
 #
-# Created: Wed Feb  8 12:36:16 2012
+# Created: Thu Feb  9 10:47:05 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,13 +17,13 @@ except AttributeError:
 class Ui_replaceDialog(object):
     def setupUi(self, replaceDialog):
         replaceDialog.setObjectName(_fromUtf8("replaceDialog"))
-        replaceDialog.resize(340, 218)
+        replaceDialog.resize(415, 219)
         font = QtGui.QFont()
         font.setPointSize(10)
         replaceDialog.setFont(font)
         replaceDialog.setModal(True)
         self.layoutWidget = QtGui.QWidget(replaceDialog)
-        self.layoutWidget.setGeometry(QtCore.QRect(10, 10, 321, 28))
+        self.layoutWidget.setGeometry(QtCore.QRect(10, 10, 391, 28))
         self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
         self.formLayout = QtGui.QFormLayout(self.layoutWidget)
         self.formLayout.setMargin(0)
@@ -41,7 +41,7 @@ class Ui_replaceDialog(object):
         self.search_txt.setObjectName(_fromUtf8("search_txt"))
         self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.search_txt)
         self.verticalLayoutWidget_2 = QtGui.QWidget(replaceDialog)
-        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(150, 80, 181, 50))
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(220, 80, 181, 50))
         self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
         self.verticalLayout_2.setMargin(0)
@@ -69,7 +69,7 @@ class Ui_replaceDialog(object):
         self.checkBox_forward.setObjectName(_fromUtf8("checkBox_forward"))
         self.verticalLayout_3.addWidget(self.checkBox_forward)
         self.layoutWidget_2 = QtGui.QWidget(replaceDialog)
-        self.layoutWidget_2.setGeometry(QtCore.QRect(10, 40, 321, 28))
+        self.layoutWidget_2.setGeometry(QtCore.QRect(10, 40, 391, 28))
         self.layoutWidget_2.setObjectName(_fromUtf8("layoutWidget_2"))
         self.formLayout_2 = QtGui.QFormLayout(self.layoutWidget_2)
         self.formLayout_2.setMargin(0)
@@ -87,20 +87,27 @@ class Ui_replaceDialog(object):
         self.replace_txt.setObjectName(_fromUtf8("replace_txt"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.FieldRole, self.replace_txt)
         self.pushButton_replaceAll = QtGui.QPushButton(replaceDialog)
-        self.pushButton_replaceAll.setGeometry(QtCore.QRect(230, 180, 99, 27))
+        self.pushButton_replaceAll.setGeometry(QtCore.QRect(300, 180, 99, 27))
         self.pushButton_replaceAll.setObjectName(_fromUtf8("pushButton_replaceAll"))
         self.pushButton_replace = QtGui.QPushButton(replaceDialog)
-        self.pushButton_replace.setGeometry(QtCore.QRect(120, 180, 99, 27))
+        self.pushButton_replace.setGeometry(QtCore.QRect(190, 180, 99, 27))
         self.pushButton_replace.setObjectName(_fromUtf8("pushButton_replace"))
         self.pushButton_replaceFind = QtGui.QPushButton(replaceDialog)
-        self.pushButton_replaceFind.setGeometry(QtCore.QRect(230, 140, 99, 27))
+        self.pushButton_replaceFind.setGeometry(QtCore.QRect(300, 140, 99, 27))
         self.pushButton_replaceFind.setObjectName(_fromUtf8("pushButton_replaceFind"))
         self.pushButton_find = QtGui.QPushButton(replaceDialog)
-        self.pushButton_find.setGeometry(QtCore.QRect(120, 140, 99, 27))
+        self.pushButton_find.setGeometry(QtCore.QRect(190, 140, 99, 27))
         self.pushButton_find.setObjectName(_fromUtf8("pushButton_find"))
         self.pushButton_close = QtGui.QPushButton(replaceDialog)
-        self.pushButton_close.setGeometry(QtCore.QRect(10, 140, 99, 27))
+        self.pushButton_close.setGeometry(QtCore.QRect(80, 140, 99, 27))
         self.pushButton_close.setObjectName(_fromUtf8("pushButton_close"))
+        self.notification = QtGui.QLabel(replaceDialog)
+        self.notification.setGeometry(QtCore.QRect(10, 180, 161, 26))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.notification.setFont(font)
+        self.notification.setText(_fromUtf8(""))
+        self.notification.setObjectName(_fromUtf8("notification"))
 
         self.retranslateUi(replaceDialog)
         QtCore.QMetaObject.connectSlotsByName(replaceDialog)
