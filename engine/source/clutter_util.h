@@ -94,6 +94,8 @@ namespace ClutterUtil
 
     void inject_button_release( guint32 button , gfloat x , gfloat y , unsigned long int modifiers );
 
+    void inject_scroll( int direction , unsigned long int modifiers );
+
     // Convert stage coordinates into screen coordinates -- adjusts x,y in place
     void stage_coordinates_to_screen_coordinates( gdouble *x, gdouble *y );
 
@@ -103,6 +105,7 @@ namespace ClutterUtil
 
     void push_event_modifiers( lua_State * L , unsigned long int modifiers );
 
+    void keep_alive( gpointer object , bool on );
 };
 
 

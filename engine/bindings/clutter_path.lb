@@ -55,17 +55,14 @@ module clutter_path;
 	sphereImage.name = "Sphere"
 	screen:add( sphereImage )
 
-	-- Define an Alpha mode for our animation
-	sphereAlpha  = Alpha { mode = "EASE_IN_OUT_QUINT" }
+	-- Define an Ease mode for our animation
+	sphereEase = Ease( "EASE_IN_OUT_QUINT" )
 
 	-- Animate the sphere with a Timeline
 	sphereTL = Timeline { 
 					duration = 3000,
 					loop = true,
 				}
-
-	-- Hook the Alpha to the Timeline
-	sphereAlpha.timeline  = sphereTL
 
 	--Define a Path for the sphere
 	spherePath = Path( "M100 100 l30 0 l30 260 l30 -200 l30 200 l30 -100 l30 100 l30 -25 l30 25 L360 360" )
@@ -84,9 +81,9 @@ module clutter_path;
 	spherePath:line_to( 360, 360 )       -- "L360 360" using coordinates absolute to the display
 	--]]
 
-	-- Define the on_new_frame() event handler that accesses the transformed Path and Alpha values to determine the sphere's location
+	-- Define the on_new_frame() event handler that accesses the transformed Path and Ease values to determine the sphere's location
 	function sphereTL:on_new_frame( msecs, progress )
-		sphereImage.position = spherePath:get_position( sphereAlpha.alpha )
+		sphereImage.position = spherePath:get_position( sphereEase:get_value( progress ) )
 	end
 
 	-- Start the animation
