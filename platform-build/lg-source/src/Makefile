@@ -72,7 +72,7 @@ C_NAMES			+= main
 INCLUDE_MODULE	=
 
 # TrickPlay core library
-INCLUDE_MODULE	+= tpcore tplua
+INCLUDE_MODULE	+= tpcore tplua clutteralphamode
 
 # OpenGL ES
 INCLUDE_MODULE	+= EGL

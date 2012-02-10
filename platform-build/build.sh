@@ -660,6 +660,7 @@ then
         -Wl,--start-group \
         -ltpcore \
         -ltplua \
+        -lclutteralphamode \
         -lpthread \
 	    -ljson-glib-1.0 \
 	    -latk-1.0 \
