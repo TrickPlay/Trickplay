@@ -1,6 +1,6 @@
 
 local bg = {}
-local bg_layer, imgs
+local bg_layer, imgs, fg_layer
 
 local has_been_initialized = false
 function bg:init(t)
@@ -11,6 +11,7 @@ function bg:init(t)
     
     if type(t) ~= "table" then error("Parameter must be a table",2) end
     
+    fg_layer = t.fg_layer or error("fg_layer")
     bg_layer = t.bg_layer or error("bg_layer")
     imgs = t.imgs or error("imgs")
     
@@ -46,10 +47,14 @@ function bg:start(t)
             src = "assets/bg/tree-right.png",
             x   = screen_w - 286,
         },
+        --Image{
+        --    src = "assets/bg/mountain.png",
+        --    x   = screen_w - 541,
+        --    y   = screen_h - 115,
+        --},
         Image{
-            src = "assets/bg/mountain.png",
-            x   = screen_w - 541,
-            y   = screen_h - 115,
+            src = "assets/bg/sun.png",
+            y   = 900,
         },
         make_water()
     )
@@ -57,12 +62,12 @@ function bg:start(t)
     
     
     local reflections = {
-        Image{
-            src = "assets/bg/mountain-reflection.png",
-            anchor_point = {541/2,0},
-            x   = screen_w - 541/2,
-            y   = screen_h - 45,
-        },---[[,
+        --Image{
+        --    src = "assets/bg/mountain-reflection.png",
+        --    anchor_point = {541/2,0},
+        --    x   = screen_w - 541/2,
+        --    y   = screen_h - 45,
+        --},---[[,
         Image{
             src = "assets/bg/water-reflection.png",
             anchor_point = {684/2,0},
@@ -78,6 +83,10 @@ function bg:start(t)
     }
     
     bg_layer:add(unpack(reflections))
+    
+    
+    
+    
     
     --[[
     for i, r in ipairs(reflections) do
@@ -110,10 +119,11 @@ function bg:start(t)
             }
             ripples:add(ripple)
             local orig_x = ripple.x
+            local move_x_by = math.random(180,230)
             Timeline{
-                duration = 10000,
+                duration = math.random(8000,12000),
                 on_new_frame = function(tl,ms,p)
-                    ripple.x = orig_x + 200*p
+                    ripple.x = orig_x + move_x_by*p
                     ripple.y = screen_h-50*(1-p) 
                     if p < .1 then
                         p=p/.1
@@ -130,27 +140,106 @@ function bg:start(t)
             
         end
     }
+    reed = Image{
+            src = "assets/bg/reeds-left.png",
+            y   = screen_h,
+            anchor_point = {0,297},
+        }
+    reed1 = Image{
+            src = "assets/bg/reeds-left-1.png",
+            y   = screen_h,
+            anchor_point = {0,307},
+        }
+    reed2 = Image{
+            src = "assets/bg/reeds-left-2.png",
+            y   = screen_h,
+            anchor_point = {0,307},
+        }
     
+    Timeline{
+        duration = 4000,
+        loop = true,
+        on_new_frame = function(tl,ms,p)
+            
+            reed.x_rotation  = {-.3 + .3*math.sin(math.pi*2*(p+.3)),0,0}
+            
+        end
+    }:start()
+    Timeline{
+        duration = 3000,
+        loop = true,
+        on_new_frame = function(tl,ms,p)
+            
+            reed1.x_rotation = {-1 + 1*math.sin(math.pi*2*p),0,0}
+            reed2.x_rotation = {-1 + 1*math.sin(math.pi*2*(p+.2)),0,0}
+            
+        end
+    }:start()
+    
+    
+    local cattail = Image{
+        src = "assets/bg/cattails.png",
+        y   = screen_h,
+        x   = screen_w,
+        anchor_point = {197,213},
+    }
+    local cattail2 = Image{
+        src = "assets/bg/cattails-2.png",
+        y   = screen_h,
+        x   = screen_w,
+        anchor_point = {197,213},
+    }
+    local cattail3 = Image{
+        src = "assets/bg/cattails-3.png",
+        y   = screen_h,
+        x   = screen_w,
+        anchor_point = {197,213},
+    }
+    local cattail4 = Image{
+        src = "assets/bg/cattails-4.png",
+        y   = screen_h,
+        x   = screen_w,
+        anchor_point = {197,213},
+    }
+    
+    Timeline{
+        duration = 4000,
+        loop = true,
+        on_new_frame = function(tl,ms,p)
+            
+            cattail.x_rotation  = {-.3 + .3*math.sin(math.pi*2*(p+.3)),0,0}
+            
+        end
+    }:start()
+    Timeline{
+        duration = 3000,
+        loop = true,
+        on_new_frame = function(tl,ms,p)
+            
+            cattail2.x_rotation = {-1 + 1*math.sin(math.pi*2*p),0,0}
+            cattail3.x_rotation = {-1 + 1*math.sin(math.pi*2*(p+.2)),0,0}
+            cattail4.x_rotation = {-1 + 1*math.sin(math.pi*2*(p+.4)),0,0}
+            
+        end
+    }:start()
     bg_layer:add(
         ripples,
-        --Clone{source = ripples,x=screen_w/5+imgs.ripple.w/2,y=30},
         Clone{source = ripples,x=ripples.x+imgs.ripple.w},
-        --Clone{source = ripples,x=screen_w/5+imgs.ripple.w/2*3,y=30},
         Clone{source = ripples,x=ripples.x+imgs.ripple.w*2},
         Clone{source = ripples,x=ripples.x+imgs.ripple.w*3},
         Clone{source = ripples,x=ripples.x+imgs.ripple.w*4},
         Clone{source = ripples,x=ripples.x+imgs.ripple.w*5},
         Clone{source = ripples,x=ripples.x+imgs.ripple.w*6},
-        --Clone{source = ripples,x=screen_w/5+imgs.ripple.w/2*5,y=30},
-        Image{
-            src = "assets/bg/reeds-left.png",
-            y   = screen_h - 307,
-        },
-        Image{
-            src = "assets/bg/cattails.png",
-            x   = screen_w - 265,
-            y   = screen_h - 217,
-        },
+        Clone{source = ripples,x=ripples.x+imgs.ripple.w*7}
+        )
+    fg_layer:add(
+        reed,
+        reed1,
+        reed2,
+        cattail,
+        cattail2,
+        cattail3,
+        cattail4,
         Image{
             src = "assets/bg/reeds-middle.png",
             x   = screen_w/2 - 100,
