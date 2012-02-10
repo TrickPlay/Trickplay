@@ -43,8 +43,8 @@ class Editor(QsciScintilla):
     
         # Set the default font
         font = QFont()
-        #font.setFamily('Monospace')
-        font.setFixedPitch(True)
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
         self.setFont(font)
         self.setMarginsFont(font)
@@ -107,9 +107,12 @@ class Editor(QsciScintilla):
         lexer.setDefaultFont(font)
         self.setLexer(lexer)
 
-        #self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, 1, 12)
-        #self.SendScintilla(QsciScintilla.SCI_STYLESETFORE, 1, 0xBFBFBF)
-        #self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Monospace')
+        self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, lexer.Comment, font.pointSize())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, lexer.Comment, font.family())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, lexer.LineComment, font.pointSize())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, lexer.LineComment, font.family())
+
+		
 
         # Don't want to see the horizontal scrollbar at all
         # Use raw message to Scintilla here (all messages are documented

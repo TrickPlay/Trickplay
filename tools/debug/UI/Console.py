@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Console.ui'
 #
-# Created: Thu Jan 19 15:25:50 2012
+# Created: Thu Feb  9 13:57:03 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,6 +26,7 @@ class Ui_Console(object):
         self.verticalLayout.setMargin(1)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.textEdit = QtGui.QTextEdit(Console)
+        self.textEdit.setTextInteractionFlags(QtCore.Qt.TextSelectableByKeyboard|QtCore.Qt.TextSelectableByMouse)
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
         self.verticalLayout.addWidget(self.textEdit)
 
