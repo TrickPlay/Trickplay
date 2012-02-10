@@ -21,19 +21,30 @@ class TrickplayDebugger(QWidget):
         self.ui.localTable.setHorizontalHeaderLabels(self.headers)
         self.ui.breakTable.setSortingEnabled(False)
         self.ui.breakTable.setColumnCount(1)
+        
+        self.ui.breakTable.popupMenu = QMenu(self.ui.breakTable)
+        self.ui.breakTable.popupMenu.addAction ('&Delete', self.deleteBP)
+
+        self.ui.breakTable.setContextMenuPolicy(Qt.CustomContextMenu)
+        #self.connect(self.ui.breakTable, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
         self.connect(self.ui.breakTable, SIGNAL("cellClicked(int, int)"), self.cellClicked)
+
         self.break_info = {}
 
-
+	def contextMenu(self, point=None):
+		self.ui.breakTable.popupMenu.exec_( self.ui.breakTable.mapToGlobal(point) )
+    
+    def deleteBP(self):
+		print("delete BP !!!")
+		
     def cellClicked(self, r, c):
 		cellItem= self.ui.breakTable.item(r, 0) 
 		cellItemState = cellItem.checkState()  
-		#fileLine = cellItem.text()
 		fileLine = cellItem.whatsThis()
 
 		n = re.search(":", fileLine).end()
 		fileName = fileLine[:n-1]
-		lineNum = int(fileLine[n:])-1
+		lineNum = int(fileLine[n:])
 
 		self.editorManager.newEditor(fileName, None, lineNum)
 		editor = self.editorManager.currentEditor 
@@ -141,7 +152,7 @@ class TrickplayBacktrace(QWidget):
 		fileLine = cellItem.whatsThis()
 		n = re.search(":", fileLine).end()
 		fileName = fileLine[:n-1]
-		lineNum = int(fileLine[n:])-1
+		lineNum = int(fileLine[n:])
 
 		self.editorManager.newEditor(fileName, None, lineNum)
 		editor = self.editorManager.currentEditor 
