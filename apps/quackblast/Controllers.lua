@@ -25,10 +25,18 @@ function external_devices:start()
     
     function controllers:on_controller_connected( c )
         
-        local cursor = cursor_class:make_cursor()
+        print("CONTROLLER ADDED")
+        
+        
         
         if c.has_pointer then
-            
+            local cursor = cursor_class:make_cursor()
+            function c:on_pointer_button_down()
+                cursor:highlight()
+            end
+            function c:on_pointer_button_up()
+                cursor:unhighlight()
+            end
             function c:on_pointer_move(x,y)
                 
                 cursor.x = x

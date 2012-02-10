@@ -1,10 +1,10 @@
 local cursor = {}
 
-local reload_time = 1000
+local reload_time = 100
 
 local has_been_initialized = false
 
-local imgs, duck_layer, cursor_layer
+local imgs, duck_layer, cursor_layer, hud
 
 function cursor:init(t)
     
@@ -16,6 +16,7 @@ function cursor:init(t)
     
     if type(t) ~= "table" then error("Parameter must be a table",2) end
     
+    hud          = t.hud
     imgs         = t.imgs
     duck_layer   = t.duck_layer
     cursor_layer = t.cursor_layer
@@ -80,22 +81,31 @@ function cursor:make_cursor()
     
     local reload_timer = Timer{
         
-        interval = reload_time,
+        interval = 200,
         
         on_timer = function(self)
             
             self:stop()
             
             reloading = false
-            instance.opacity = 255
+            --instance.opacity = 255
             blink:stop()
         end
     }
     reload_timer:stop()
     
-    function instance:fire()
+    function instance:highlight()
+        instance.source = imgs.crosshair.target
+    end
+    
+    function instance:unhighlight()
+        instance.source = imgs.crosshair.normal
+    end
+    function instance:fire(hit)
         
-        if reloading then return false end
+        if reloading or not in_game then return false end
+        
+        hud:inc_shots_fired()
         
         --if hovering_over then
         --    
@@ -104,7 +114,7 @@ function cursor:make_cursor()
         --    instance.player:inc_score(hovering_over)
         --    
         --end
-        local r = imgs.crosshair.burst[math.random(1,#imgs.crosshair.burst)]
+        local r = imgs.crosshair.burst[hit and 2 or 1]--math.random(1,#imgs.crosshair.burst)]
         r = Clone{
             source = r,
             position = self.position,
@@ -118,9 +128,9 @@ function cursor:make_cursor()
         )
         
         reloading = true
-        self.opacity = 100
+        --self.opacity = 100
         reload_timer:start()
-        blink:start()
+        --blink:start()
         return true
         
     end
