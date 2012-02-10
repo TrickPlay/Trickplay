@@ -17,7 +17,7 @@ APP = """
 # Could use QWizard, but this is simpler
 class Wizard():
     
-    def __init(self, mainWindow):
+    def __init(self, mainWindow = None):
         self.mainWindow = mainWindow
         self.id = None
         self.name = None
@@ -27,7 +27,7 @@ class Wizard():
         return self.openList
     
     
-    def start(self, path):
+    def start(self, path, openApp=False):
     
         self.openList = None
         
@@ -39,12 +39,13 @@ class Wizard():
             dir = str(settings.value('path', '').toString())
 
             # Get a path from the user
-            userPath = self.createAppDialog(dir)
+            if openApp == False:
+            	userPath = self.createAppDialog(dir)
             
             if userPath:
                 print('Path chosen: ' + str(userPath))
             else:    
-                sys.exit()
+                return
                 
             if os.path.exists(userPath):
                 if os.path.isdir(userPath):
@@ -195,10 +196,13 @@ class Wizard():
         
         self.adjustDialog(path)
         
+        cancelButton = self.ui.buttonBox.button(QDialogButtonBox.Cancel)
+        okButton = self.ui.buttonBox.button(QDialogButtonBox.Ok)
         QObject.connect(self.ui.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
+        QObject.connect(cancelButton, SIGNAL('clicked()'), self.exit_ii)
+        QObject.connect(okButton, SIGNAL('clicked()'), self.exit_ii)
         
         if self.dialog.exec_():
-            
             id = str(self.ui.id.text())
             name = str(self.ui.name.text())
             path = str(self.ui.directory.text())
@@ -219,11 +223,6 @@ class Wizard():
                 return path
             else:
                 return path
-        else:
-            sys.exit()
-
-
-
 
 
         # If the path is a directory...
@@ -253,3 +252,7 @@ class Wizard():
         # User shouldn't be able to get here...
         #else:
         #    sys.exit()
+
+    def exit_ii(self):
+		#print("asjflashdflks")
+		pass

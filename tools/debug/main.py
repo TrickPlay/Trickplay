@@ -39,7 +39,9 @@ class MainWindow(QMainWindow):
 
         # Restore size/position of window
         settings = QSettings()
-        #self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+        self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+        #print( settings.value( "mainWindowSize").toSize() )
+        #self.resize( settings.value("mainWindowSize").toSize() )
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -138,15 +140,15 @@ class MainWindow(QMainWindow):
         icon_continue = QtGui.QIcon()
         icon_continue.addPixmap(QtGui.QPixmap("Assets/icon-continue.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon_continue.addPixmap(QtGui.QPixmap("Assets/icon-continue-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
-        icon_debug = QtGui.QIcon()
-        icon_debug.addPixmap(QtGui.QPixmap("Assets/icon-debug.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon_debug.addPixmap(QtGui.QPixmap("Assets/icon-debug-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        self.icon_debug = QtGui.QIcon()
+        self.icon_debug.addPixmap(QtGui.QPixmap("Assets/icon-debug.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.icon_debug.addPixmap(QtGui.QPixmap("Assets/icon-debug-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_pause = QtGui.QIcon()
         icon_pause.addPixmap(QtGui.QPixmap("Assets/icon-pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon_pause.addPixmap(QtGui.QPixmap("Assets/icon-pause-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
-        icon_run = QtGui.QIcon()
-        icon_run.addPixmap(QtGui.QPixmap("Assets/icon-run.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon_run.addPixmap(QtGui.QPixmap("Assets/icon-run-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        self.icon_run = QtGui.QIcon()
+        self.icon_run.addPixmap(QtGui.QPixmap("Assets/icon-run.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.icon_run.addPixmap(QtGui.QPixmap("Assets/icon-run-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_stepinto = QtGui.QIcon()
         icon_stepinto.addPixmap(QtGui.QPixmap("Assets/icon-stepinto.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         icon_stepinto.addPixmap(QtGui.QPixmap("Assets/icon-stepinto-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
@@ -201,22 +203,29 @@ class MainWindow(QMainWindow):
         self.debug_tbt.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         self.debug_tbt.setFont(font)
         self.debug_tbt.setText("Run")
-        self.debug_tbt.setIcon(icon_run)
+        self.debug_tbt.setIcon(self.icon_run)
 
         self.debug_menu = QtGui.QMenu()
-        #self.debug_menu.setIcon(icon_run)
-        #self.debug_menu.setTitle("Run")
-        debug_action = QtGui.QAction(self.debug_menu)
-        debug_action.setIcon(icon_debug)
-        debug_action.setText("Debug")
-        debug_action.setFont(font)
-        debug_action.setIconVisibleInMenu (True)
-        self.debug_menu.addAction(debug_action)
-        QObject.connect(debug_action , SIGNAL("triggered()"),  self.debug)
 
+        self.debug_action = QtGui.QAction(self.debug_menu)
+        self.debug_action.setIcon(self.icon_debug)
+        self.debug_action.setText("Debug")
+        self.debug_action.setFont(font)
+        self.debug_action.setIconVisibleInMenu (True)
+
+        self.run_action = QtGui.QAction(self.debug_menu)
+        self.run_action.setIcon(self.icon_run)
+        self.run_action.setText("Run")
+        self.run_action.setFont(font)
+        self.run_action.setIconVisibleInMenu (True)
+        
+        QObject.connect(self.debug_action , SIGNAL("triggered()"),  self.debug)
+        QObject.connect(self.run_action , SIGNAL("triggered()"),  self.run)
+
+        self.debug_menu.addAction(self.debug_action)
         self.debug_tbt.setMenu(self.debug_menu)        
-
         self.toolbar.addWidget(self.debug_tbt)
+
         QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
 
         self.debug_stop = QToolButton()
@@ -310,6 +319,24 @@ class MainWindow(QMainWindow):
         self.trace_toolBtn.setIcon(self.icon_trace_off)
         self.toolbar.addWidget(self.trace_toolBtn)
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
+
+    def mioMrC_debug(self) :
+        self.debug_tbt.setText("Debug")
+        self.debug_tbt.setIcon(self.icon_debug)
+
+        self.debug_menu.removeAction(self.debug_action)
+        self.debug_menu.addAction(self.run_action)
+        QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
+
+
+    def mioMrC_run(self) :
+        self.debug_tbt.setText("Run")
+        self.debug_tbt.setIcon(self.icon_run)
+
+        self.debug_menu.removeAction(self.run_action)
+        self.debug_menu.addAction(self.debug_action)
+
+        QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
 
     def traceWindowClicked(self) :
     	if self.windows['trace'] == True:
@@ -434,8 +461,10 @@ class MainWindow(QMainWindow):
 
         self.inspector.clearTree()
         #self._deviceManager.ui.comboBox.removeItem(self._deviceManager.ui.comboBox.findText(self._deviceManager.newAppText))
-        self._deviceManager.ui.comboBox.setCurrentIndex(0)
-        self._deviceManager.service_selected(0)
+
+        #self._deviceManager.ui.comboBox.setCurrentIndex(0)
+        #self._deviceManager.service_selected(0)
+    	self.mioMrC_run()
 
     def run(self):
         self.inspector.clearTree()
@@ -452,6 +481,7 @@ class MainWindow(QMainWindow):
         self.debug_stepout.setEnabled(False)
         self.debug_pause_bt.setEnabled(False)
         self.debug_continue_bt.setEnabled(False)
+    	self.mioMrC_run()
 
     def debug(self):
         self.inspector.clearTree()
@@ -485,6 +515,7 @@ class MainWindow(QMainWindow):
 			self.current_debug_file = self.path+self._deviceManager.file_name
 
         self._editorManager.newEditor(self.current_debug_file, None, self._deviceManager.line_no, None, True)
+    	self.mioMrC_debug()
 	
 	
     def editor_undo(self):
@@ -552,11 +583,12 @@ class MainWindow(QMainWindow):
         Initialize widgets on the main window with a given app path
         """
         
-        #print("main.start")
+        print("main.start")
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
-        
+        print(path)
+        self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
         self.deviceManager.setPath(path)
         
         if openList:
@@ -567,23 +599,23 @@ class MainWindow(QMainWindow):
         """
         Save window and dock geometry on close
         """
-        
         settings = QSettings()
         settings.setValue("mainWindowGeometry", self.saveGeometry());
-        settings.setValue("mainWindowState", self.saveState());
-        
+        settings.setValue("mainWindowSize", self.size());
+        #settings.setValue("mainWindowState", self.saveState());
 	
     def openApp(self):
 		wizard = Wizard()
 		dir = "/home/hjkim/trickplay-editor/"
 		path = QFileDialog.getExistingDirectory(None, 'Open App', dir, QFileDialog.ShowDirsOnly)
 		#path = wizard.chooseDirectoryDialog(dir)
-		path = wizard.start(path)
+		path = wizard.start(path, True)
 		print (path)
 		if path:
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
 
     def new(self):
 		wizard = Wizard()
@@ -593,6 +625,7 @@ class MainWindow(QMainWindow):
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
 
     def exit(self):
         """
@@ -818,6 +851,7 @@ class MainWindow(QMainWindow):
 				# delete current line marker 
 				for m in self.editorManager.editors:
 					if self.current_debug_file == m:
+						# check what kind of arrow marker was on the current line and delete just arrow mark not break points 
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].markerDelete(
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
 						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
@@ -826,38 +860,36 @@ class MainWindow(QMainWindow):
 				self._debug.clearLocalTable(0)
 				#self._debug.clearBreakTable(0)
 
+			file_name = ""
+			# update local variables table
+			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "l", False)
+			local_info = self._deviceManager.printResp(data, "l")
+			self._debug.populateLocalTable(local_info)
+
+			# update backtrace table
+			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
+			stack_info = self._deviceManager.printResp(data, "bt")
+			self._backtrace.populateTraceTable(stack_info, self.editorManager)
+
+			# print breakpoints info 
+			#data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "b", False)
+			#self._deviceManager.printResp(data, "b")
+
+			# open current file and put line marker on the current line's margin 
+			if self._deviceManager.file_name[:1] != '/' :
+				file_name = self.path+'/'+self._deviceManager.file_name
 			else :
-				file_name = ""
-				# update local variables table
-				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "l", False)
-				local_info = self._deviceManager.printResp(data, "l")
-				self._debug.populateLocalTable(local_info)
+				file_name = self.path+self._deviceManager.file_name
 
-				# update backtrace table
-				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
-				stack_info = self._deviceManager.printResp(data, "bt")
-				self._backtrace.populateTraceTable(stack_info, self.editorManager)
+			if self.current_debug_file != file_name :
+				self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, self.current_debug_file, True)
+			else :
+				self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, None, True)
 
-				# print breakpoints info 
-				#data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "b", False)
-				#self._deviceManager.printResp(data, "b")
-
-				# open current file and put line marker on the current line's margin 
-				if self._deviceManager.file_name[:1] != '/' :
-					file_name = self.path+'/'+self._deviceManager.file_name
-				else :
-					file_name = self.path+self._deviceManager.file_name
-
-				if self.current_debug_file != file_name :
-					self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, self.current_debug_file, True)
-				else :
-					self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, None, True)
-
-				self.current_debug_file = file_name
+			self.current_debug_file = file_name
 
 		else :
 			pass
-			#print('oh no ! not in debug mode -----')
 
 		return None
 
