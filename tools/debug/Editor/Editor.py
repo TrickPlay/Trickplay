@@ -154,7 +154,7 @@ class Editor(QsciScintilla):
 			t_path = os.path.basename(str(self.path))
 			sendTrickplayDebugCommand("9876", "b "+t_path+":"+str(nline+1), False)
 			data = sendTrickplayDebugCommand("9876", "b",False)
-			bp_info = printResp(data, "b") # no need to print 
+			bp_info = printResp(data, "b", self.path) # no need to print 
 										   # bp_info need to be drawn in bp window 
 			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
 

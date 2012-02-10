@@ -155,7 +155,7 @@ if __name__ == "__main__":
     
     test()
 
-def printResp(data, command):
+def printResp(data, command, path = None):
 
 	pdata = json.loads(data)
 
@@ -180,7 +180,10 @@ def printResp(data, command):
 			for b in pdata["breakpoints"]:
 				if "file" in b and "line" in b:
 					breakpoints_info_str = breakpoints_info_str+"["+str(index)+"] "+b["file"]+":"+str(b["line"])
-					info_var_list.append(b["file"]+":"+str(b["line"]))
+					if path is not None :
+						info_var_list.append(path+":"+str(b["line"]))
+					else:
+						info_var_list.append(b["file"]+":"+str(b["line"]))
 
 					#n = re.search("[/]+\S+[/]+", b["file"]).end()
 					
@@ -194,6 +197,7 @@ def printResp(data, command):
 						state_var_list.append("off")
 				index = index + 1
 
+			
 			breakpoints_info[1] = state_var_list
 			breakpoints_info[2] = file_var_list
 			breakpoints_info[3] = info_var_list
