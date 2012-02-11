@@ -326,6 +326,7 @@ class MainWindow(QMainWindow):
 
         self.debug_menu.removeAction(self.debug_action)
         self.debug_menu.addAction(self.run_action)
+        QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
         QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
 
 
@@ -336,6 +337,7 @@ class MainWindow(QMainWindow):
         self.debug_menu.removeAction(self.run_action)
         self.debug_menu.addAction(self.debug_action)
 
+        QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
         QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
 
     def traceWindowClicked(self) :
@@ -441,10 +443,13 @@ class MainWindow(QMainWindow):
 				self._backtrace.clearTraceTable(0)
 				self._debug.clearLocalTable(0)
 				self._debug.clearBreakTable(0)
+				self.mioMrC_run()
 			else :
 				ret = self.deviceManager.socket.write('/quit\n\n')
 				if ret < 0 :
 					print ("tp console socket is not available !")
+    	else :
+    		self.deviceManager.socket.write('/quit\n\n')
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
@@ -464,7 +469,6 @@ class MainWindow(QMainWindow):
 
         #self._deviceManager.ui.comboBox.setCurrentIndex(0)
         #self._deviceManager.service_selected(0)
-    	self.mioMrC_run()
 
     def run(self):
         self.inspector.clearTree()
@@ -481,7 +485,7 @@ class MainWindow(QMainWindow):
         self.debug_stepout.setEnabled(False)
         self.debug_pause_bt.setEnabled(False)
         self.debug_continue_bt.setEnabled(False)
-    	self.mioMrC_run()
+    	#self.mioMrC_run()
 
     def debug(self):
         self.inspector.clearTree()
