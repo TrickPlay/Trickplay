@@ -10,6 +10,7 @@ import sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.Qsci import QsciScintilla, QsciLexerLua
+from connection import *
 
 TEXT_DEFAULT = 0
 TEXT_READ = 1
@@ -17,12 +18,18 @@ TEXT_CHANGED = 2
 
 class Editor(QsciScintilla):
 
-    ARROW_MARKER_NUM = 8
-
+    BACKGROUND_MARKER_NUM = 0
+    ACTIVE_BREAK_MARKER_NUM = 1
+    DEACTIVE_BREAK_MARKER_NUM = 2
+    ARROW_MARKER_NUM = 3
+    ARROW_ACTIVE_BREAK_MARKER_NUM = 4
+    ARROW_DEACTIVE_BREAK_MARKER_NUM = 5
     
-    def __init__(self, parent=None):
+    def __init__(self, debugWindow=None, editorManager=None, parent=None):
         super(Editor, self).__init__(parent)
         self.setAcceptDrops(False)
+
+        self.debugWindow = debugWindow
 
         self.setTabWidth(4)
         
@@ -36,8 +43,8 @@ class Editor(QsciScintilla):
     
         # Set the default font
         font = QFont()
+        font.setStyleHint(font.Monospace)
         font.setFamily('Monospace')
-        font.setFixedPitch(True)
         font.setPointSize(10)
         self.setFont(font)
         self.setMarginsFont(font)
@@ -54,11 +61,35 @@ class Editor(QsciScintilla):
         self.connect(self,
             SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),
             self.on_margin_clicked)
-        self.markerDefine(QsciScintilla.RightArrow,
-            self.ARROW_MARKER_NUM)
-        self.setMarkerBackgroundColor(QColor("#ee1111"),
-            self.ARROW_MARKER_NUM)
 
+		# Define markers 
+
+        self.markerDefine(QPixmap("Assets/currentline.png"), self.ARROW_MARKER_NUM)
+        self.markerDefine(QPixmap("Assets/breakpoint-off.png"), self.DEACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QPixmap("Assets/breakpoint-on.png"), self.ACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QPixmap("Assets/breakpoint-off-currentline.png"), self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QPixmap("Assets/breakpoint-on-currentline.png"), self.ARROW_ACTIVE_BREAK_MARKER_NUM)
+        """
+        self.markerDefine(QsciScintilla.Background, self.BACKGROUND_MARKER_NUM)
+        self.markerDefine(QsciScintilla.RightTriangle, self.ARROW_MARKER_NUM)
+        self.markerDefine(QsciScintilla.Circle, self.DEACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QsciScintilla.Circle, self.ACTIVE_BREAK_MARKER_NUM)
+
+		# Red : #ee1111, Orange : #DB7F1E
+        self.setMarkerBackgroundColor(QColor("#DB7F1E"), self.ARROW_MARKER_NUM)
+        self.setMarkerForegroundColor(QColor("#DB7F1E"), self.ARROW_MARKER_NUM)
+
+		# Light blue : ##C7E4E4, White : #FFFFFF
+        self.setMarkerBackgroundColor(QColor("#FFFFFF"), self.ACTIVE_BREAK_MARKER_NUM)
+        #self.setMarkerForegroundColor(QColor("#FFFFFF"), self.ACTIVE_BREAK_MARKER_NUM)
+
+		# Gray : #C5C5C5
+        self.setMarkerBackgroundColor(QColor("#C5C5C5"), self.DEACTIVE_BREAK_MARKER_NUM)
+        #self.setMarkerForegroundColor(QColor("#C5C5C5"), self.DEACTIVE_BREAK_MARKER_NUM)
+
+		# Light green : #7CD7A5
+        #self.setMarkerBackgroundColor(QColor("#7CD7A5"), #self.BACKGROUND_MARKER_NUM)
+		"""
         # Brace matching: enable for a brace immediately before or after
         # the current position
         #
@@ -75,9 +106,13 @@ class Editor(QsciScintilla):
         lexer = QsciLexerLua()
         lexer.setDefaultFont(font)
         self.setLexer(lexer)
-        #self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, 1, 12)
-        #self.SendScintilla(QsciScintilla.SCI_STYLESETFORE, 1, 0xBFBFBF)
-        #self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Monospace')
+
+        self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, lexer.Comment, font.pointSize())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, lexer.Comment, font.family())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, lexer.LineComment, font.pointSize())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, lexer.LineComment, font.family())
+
+		
 
         # Don't want to see the horizontal scrollbar at all
         # Use raw message to Scintilla here (all messages are documented
@@ -91,14 +126,79 @@ class Editor(QsciScintilla):
         QObject.connect(self, SIGNAL("textChanged()"), self.text_changed)
         #QObject.connect(self, SIGNAL("selectionChanged()"), self.ss_changed)
         self.text_status = TEXT_DEFAULT
+        self.setWrapMode(QsciScintilla.WrapWord)
+        self.line_click = {}
+        self.current_line = -1
+        self.editorManager = editorManager
+        self.path = None
+        self.tempfile = False
+
+    def get_bp_num(self, nline):
+		data = sendTrickplayDebugCommand("9876", "b",False)
+		bp_info = printResp(data, "b") # no need to print 
+		m = 0
+		for item in bp_info[3]: #info_var_list 
+			if item == self.path+":"+str(nline+1) :
+				return m
+			m += 1
 
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
-		print "on_margin_clicked"
-		if self.markersAtLine(nline) != 0:
-			self.markerDelete(nline, self.ARROW_MARKER_NUM)
-		else:
-			self.markerAdd(nline, self.ARROW_MARKER_NUM)
+		#print "on_margin_clicked"
+		if self.editorManager.main.debug_mode == False:
+			return
+
+		bp_num = 0
+
+		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
+			t_path = os.path.basename(str(self.path))
+			sendTrickplayDebugCommand("9876", "b "+t_path+":"+str(nline+1), False)
+			data = sendTrickplayDebugCommand("9876", "b",False)
+			bp_info = printResp(data, "b", self.path) # no need to print 
+										   # bp_info need to be drawn in bp window 
+			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
+
+			if self.current_line != nline :#self.markersAtLine(nline) == 0:
+				self.markerAdd(nline, self.ACTIVE_BREAK_MARKER_NUM)
+			else:
+				self.markerDelete(nline, self.ARROW_MARKER_NUM)
+				self.markerAdd(nline, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
+			self.line_click[nline] = 1
+
+		elif self.line_click[nline] == 1:
+
+			bp_num = self.get_bp_num(nline)
+			sendTrickplayDebugCommand("9876", "b "+str(bp_num)+" "+"off", False)
+
+			if self.current_line != nline :
+				self.markerDelete(nline, self.ACTIVE_BREAK_MARKER_NUM)
+				self.markerAdd(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+			else :
+				self.markerDelete(nline, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
+				self.markerAdd(nline, self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+
+			data = sendTrickplayDebugCommand("9876", "b",False)
+			bp_info = printResp(data, "b") # no need to print 
+										   # bp_info need to be drawn in bp window 
+			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
+			self.line_click[nline] = 2
+
+		elif self.line_click[nline] == 2:
+
+			bp_num = self.get_bp_num(nline)
+			sendTrickplayDebugCommand("9876", "d "+str(bp_num), False)
+			if self.current_line != nline :
+				self.markerDelete(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+			else :
+				self.markerDelete(nline, self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+				self.markerAdd(nline, self.ARROW_MARKER_NUM)
+			data = sendTrickplayDebugCommand("9876", "b",False)
+			bp_info = printResp(data, "b") # no need to print 
+										   # bp_info need to be drawn in bp window 
+			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
+			self.line_click[nline] = 0
+		
+		#if self.markersAtLine(nline) == 0:
             
     def readFile(self, path):
         self.setText(open(path).read())
@@ -107,6 +207,17 @@ class Editor(QsciScintilla):
 		#print "SS changed "
 
     def text_changed(self):
+
+		if self.tempfile == True and self.text_status != TEXT_CHANGED:
+			self.text_status = TEXT_READ
+
+		if self.text_status == TEXT_DEFAULT or self.text_status != TEXT_CHANGED:#(self.text_status == TEXT_READ and self.path == self.editorManager.tab.editors[0].path):
+			index = 0 
+			for edt in self.editorManager.tab.editors :
+				if edt.path == self.path :
+					self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+				index = index + 1
+
 		if self.text_status == TEXT_DEFAULT:
 			self.text_status = TEXT_READ 
 		else:
@@ -117,17 +228,32 @@ class Editor(QsciScintilla):
         path = self.path
         try:
             f = open(path,'w+')
+            f.write(self.text())
+            f.close()
         except:
             #statusBar.message('Could not write to %s' % (path),2000)
-            print 'Could not write to path'
-            return
+            pass
         
-        f.write(self.text())
         self.text_status = TEXT_READ 
-        f.close()
         
+        index = 0 
+        if self.editorManager is not None :
+        	for edt in self.editorManager.tab.editors :
+				if edt.path == self.path :
+					tabTitle = self.editorManager.tab.tabText(index)
+					if tabTitle[:1] == "*":
+						self.editorManager.tab.setTabText (index, tabTitle[1:])
+					break
+				index = index + 1
+
+        	self.editorManager.tab.textBefores[index] = self.text()
+        	self.tempfile = False
+        	print 'File saved'
+        else: 
+			self.tempfile = True
+			print 'Temp file true'
+
         #statusBar.showMessage('File %s saved' % (path), 2000)
-        print 'File saved'
         
     def charAdded(self, c):
         """
