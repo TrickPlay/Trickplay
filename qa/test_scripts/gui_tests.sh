@@ -118,6 +118,7 @@ done
 
 trickplay_version=1.0
 XML_FILE="$THE_PATH/gui-test-results/gui_test.xml"
+XML_FILE=../../gui-test-results/gui_test.xml
 
 end_time=$(date +%s.%N)
 total_test_time=$(echo "$end_time - $start_time" | bc)
