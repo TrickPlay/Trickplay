@@ -63,6 +63,7 @@ local mt = {}
 local tot = 0
 local iterated_tot = 0
 function mt.__newindex(t,k,v)
+	error("nope",2)
     assert(#animate_list == 0, "User added something to the animate list that"..
                                 " wasn't caught by the meta table")
     --assert(type(k) == "table")
@@ -178,4 +179,4 @@ local idle_loop = function(self, seconds)
     
 end
 
-idle.on_idle = idle_loop
+--idle.on_idle = idle_loop

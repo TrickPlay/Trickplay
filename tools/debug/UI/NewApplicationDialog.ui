@@ -10,6 +10,11 @@
     <height>174</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>New Application</string>
   </property>
