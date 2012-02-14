@@ -117,11 +117,8 @@ done
 ## Create the XML results file ##
 
 trickplay_version=1.0
-<<<<<<< HEAD
 XML_FILE="$THE_PATH/gui-test-results/gui_test.xml"
-=======
 XML_FILE=../../gui-test-results/gui_test.xml
->>>>>>> origin/working/pvdhagen
 
 end_time=$(date +%s.%N)
 total_test_time=$(echo "$end_time - $start_time" | bc)

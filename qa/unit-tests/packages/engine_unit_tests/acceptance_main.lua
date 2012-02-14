@@ -5,10 +5,8 @@ dofile( "packages/engine_unit_tests/harness/unit_test.lua" )
 -- Unit Tests
 
 --dofile( "urlRequest2.lua" )  -- Failing because can't fail url request due to URL redirect.
-<<<<<<< HEAD
-=======
+
 dofile( "packages/engine_unit_tests/tests/Alpha1.lua" ) 
->>>>>>> origin/working/pvdhagen
 dofile( "packages/engine_unit_tests/tests/xmlParser1.lua" ) 
 dofile( "packages/engine_unit_tests/tests/xmlParser2.lua" )
 dofile( "packages/engine_unit_tests/tests/timer1.lua")
