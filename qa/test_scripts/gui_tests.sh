@@ -110,11 +110,6 @@ for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
          
      else
 	echo "Skipping $png_file. Test generated png does not exist."
-		major_fail=$(($major_fail+1))
-		N_ARRAY[test_count]=$png_file
-		D_ARRAY[test_count]=$test_duration
-		R_ARRAY[test_count]="fail"
-		M_ARRAY[test_count]="Test generated png does not exist."
      fi
 
 done
@@ -122,7 +117,11 @@ done
 ## Create the XML results file ##
 
 trickplay_version=1.0
+<<<<<<< HEAD
 XML_FILE=../../gui-test-results/gui_test.xml
+=======
+XML_FILE="$THE_PATH/gui-test-results/gui_test.xml"
+>>>>>>> origin/master
 
 end_time=$(date +%s.%N)
 total_test_time=$(echo "$end_time - $start_time" | bc)
@@ -131,17 +130,17 @@ total_test_time=${total_test_time:0:6}
 xml_open_tag_to_add="<testsuite name='com.trickplay.gui-test.engine' errors='$minor_fail' failures='$major_fail' tests='$test_count' time='$total_test_time'><properties><property name='trickplay.version' value='$trickplay_version' /></properties>"
 xml_close_tag_to_add="</testsuite>"
 
-echo $xml_open_tag_to_add 1>$XML_FILE
+echo $xml_open_tag_to_add 1>"$XML_FILE"
 
 i=1
 while [ $i -le $test_count ]; do
 	if [ ${R_ARRAY[$i]} == 'pass' ]; then
 		xml_pass_to_add="<testcase classname='com.trickplay.gui-test.engine' name='${N_ARRAY[$i]}' time='${D_ARRAY[$i]}'/>"
-		echo $xml_pass_to_add 1>>$XML_FILE
+		echo $xml_pass_to_add 1>>"$XML_FILE"
 	else
 	echo fail_test=$i
 		xml_failure_to_add="<testcase classname='com.trickplay.unit-test.engine' name='${N_ARRAY[$i]}' time='${D_ARRAY[$i]}'><failure type='failure'>'${M_ARRAY[$i]}'</failure></testcase>"
-		echo $xml_failure_to_add 1>>$XML_FILE
+		echo $xml_failure_to_add 1>>"$XML_FILE"
 	fi
 	let i=i+1
 done
@@ -155,5 +154,5 @@ echo -e "ERRORS  \t$minor_fail"
 echo -e "TOTAL TESTS \t$test_count"
 echo
 
-echo $xml_close_tag_to_add 1>>$XML_FILE
+echo $xml_close_tag_to_add 1>>"$XML_FILE"
 exit 0
