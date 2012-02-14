@@ -274,6 +274,10 @@ typedef struct TPContext TPContext;
                                 do so with the debugger started.
                                 Defaults to "0".
 
+    TP_DONT_RUN_APP -			If set to true, trickplay will not launch the initial
+                                app; instead it will start the engine and remain idle.
+                                Defaults to "0".
+
 */
 
 #define TP_APP_SOURCES                  "app_sources"
@@ -327,6 +331,7 @@ typedef struct TPContext TPContext;
 #define TP_APP_ANIMATIONS_ENABLED		"app_animations_enabled"
 #define TP_DEBUGGER_PORT				"debugger_port"
 #define TP_START_DEBUGGER				"start_debugger"
+#define TP_DONT_RUN_APP					"dont_run_app"
 
 /*-----------------------------------------------------------------------------
     Constants: Request Subjects
