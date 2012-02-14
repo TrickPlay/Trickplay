@@ -740,6 +740,8 @@ int TPContext::run()
     //.........................................................................
     // Load the app
 
+    bool run_app = ! get_bool( TP_DONT_RUN_APP , false );
+
     g_info( "LOADING APP..." );
 
     App * app = 0;
@@ -752,8 +754,14 @@ int TPContext::run()
         // Execute the app's script
 
         first_app_id = app->get_id();
-        app->run( app_allowed[ first_app_id ] , app_run_callback );
+
+        if ( run_app )
+        {
+        	app->run( app_allowed[ first_app_id ] , app_run_callback );
+        }
+
         app->unref();
+
         app = 0;
 
         //.................................................................
