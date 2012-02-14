@@ -1242,6 +1242,41 @@ void TPContext::remove_console_command_handler( const char * command, TPConsoleC
 
 //-----------------------------------------------------------------------------
 
+class LogHandlerAction : public Action
+{
+public:
+
+	LogHandlerAction( gchar * _line , const TPContext::OutputHandlerSet & _handlers )
+	:
+		line( _line ),
+		handlers( _handlers )
+	{}
+
+	virtual ~LogHandlerAction()
+	{
+		g_free( line );
+	}
+
+protected:
+
+    virtual bool run()
+    {
+        for ( TPContext::OutputHandlerSet::const_iterator it = handlers.begin(); it != handlers.end(); ++it )
+        {
+            it->first( line, it->second );
+        }
+
+    	return false;
+    }
+
+private:
+
+	gchar * 					line;
+	TPContext::OutputHandlerSet handlers;
+};
+
+//-----------------------------------------------------------------------------
+
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
     static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT , BARE } verbose = CHECK;
@@ -1352,16 +1387,21 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
 
             if ( !context->output_handlers.empty() )
             {
-                if ( !line )
+                if ( ! line )
                 {
                     line = format_log_line( log_domain, log_level, message );
                 }
 
-                for ( OutputHandlerSet::const_iterator it = context->output_handlers.begin();
-                        it != context->output_handlers.end(); ++it )
-                {
-                    it->first( line, it->second );
-                }
+                // Because we are already being called by g_logv and it is not
+                // recursive/re-entrant, we defer logging to other handlers by posting an
+                // action.
+
+                Action::post( new LogHandlerAction( line , context->output_handlers ) );
+
+                // The action will free the original line when it is finished with it,
+                // so we clear it here
+
+                line = 0;
             }
         }
     }
