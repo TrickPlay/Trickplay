@@ -1284,7 +1284,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
         case APP_RAW:
             if ( log_level == G_LOG_LEVEL_MESSAGE )
             {
-                fprintf( stdout, "%s\n", message );
+                fprintf( stderr, "%s\n", message );
             }
             return;
 
@@ -1292,7 +1292,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             break;
     }
 
-    gchar * line = NULL;
+    gchar * line = 0;
 
     // This is before a context is created, so we just print out the message
 
