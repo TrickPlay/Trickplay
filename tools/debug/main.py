@@ -416,6 +416,7 @@ class MainWindow(QMainWindow):
 				print "tp console socket is not available"
 			else :
 				print ret
+
 		except AttributeError, e:
     		# deal with AttributeError
 			print "tp console socket is not opened"
@@ -437,19 +438,17 @@ class MainWindow(QMainWindow):
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
 						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
-
-
-				# clean backtrace and debug window
-				self._backtrace.clearTraceTable(0)
-				self._debug.clearLocalTable(0)
-				self._debug.clearBreakTable(0)
-				self.mioMrC_run()
-			else :
-				ret = self.deviceManager.socket.write('/quit\n\n')
-				if ret < 0 :
-					print ("tp console socket is not available !")
-    	else :
-    		self.deviceManager.socket.write('/quit\n\n')
+	
+    	if getattr(self._deviceManager, "debug_mode") == True :
+    		# clean backtrace and debug window
+    		self._backtrace.clearTraceTable(0)
+    		self._debug.clearLocalTable(0)
+    		self._debug.clearBreakTable(0)
+    		self.mioMrC_run()
+    	else:
+    		ret = self.deviceManager.socket.write('/quit\n\n')
+    		if ret < 0 :
+    			print ("tp console socket is not available !")
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
@@ -899,15 +898,19 @@ class MainWindow(QMainWindow):
 
     def debug_continue(self):
 		self.debug_command("c")
+		return
 
     def debug_pause(self):
 		self.debug_command("bn")
+		return
 
     def debug_step_into(self):
 		self.debug_command("s")
+		return
 
     def debug_step_over(self):
 		self.debug_command("n")
+		return
 
     def debug_step_out(self):
-		pass
+		return
