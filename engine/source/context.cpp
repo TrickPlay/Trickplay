@@ -1236,7 +1236,7 @@ void TPContext::remove_console_command_handler( const char * command, TPConsoleC
 
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
-    static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT } verbose = CHECK;
+    static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT , BARE } verbose = CHECK;
 
     if ( verbose == CHECK )
     {
@@ -1259,6 +1259,10 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             else if ( ! strcmp( e , "silent" ) )
             {
                 verbose = SILENT;
+            }
+            else if ( ! strcmp( e , "bare" ) )
+            {
+            	verbose = BARE;
             }
         }
     }
@@ -1287,6 +1291,11 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
                 fprintf( stderr, "%s\n", message );
             }
             return;
+
+        case BARE:
+        	fprintf( stderr , "%s\n" , message );
+        	fflush( stderr );
+        	return;
 
         default:
             break;
