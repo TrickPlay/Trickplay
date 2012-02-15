@@ -1373,6 +1373,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             if ( log_level == G_LOG_LEVEL_MESSAGE )
             {
                 fprintf( stderr, "%s\n", message );
+                fflush( stderr );
             }
             return;
 
@@ -1393,6 +1394,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
     {
         line = format_log_line( log_domain, log_level, message );
         fprintf( stderr, "%s", line );
+        fflush( stderr );
     }
 
     // Otherwise, we have a context and more choices as to what we can do with
@@ -1424,6 +1426,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             {
                 line = format_log_line( log_domain, log_level, message );
                 fprintf( stderr, "%s", line );
+                fflush( stderr );
             }
 
             if ( !context->output_handlers.empty() )
