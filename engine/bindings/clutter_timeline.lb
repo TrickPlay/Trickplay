@@ -104,11 +104,29 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: duration
 		
-		The duration property is an integer value specifying the length of the Timeline in milliseconds.
+		The duration property is an integer value specifying the length of the Timeline's animation in milliseconds.
+		
+		Note: While an animation is running, its duration property should not be modified. It is possible, however, to alter the duration of a looping animation in the Timeline object's on_completed() event handler by following the steps shown below.
+		
+		(code)
+		myTimeline = Timeline( { duration = 1000,
+		                         loop = true,
+		                         ...other Timeline settings...,
+		                         
+		                         on_completed = function( self )
+		                         	-- Change duration
+		                         	self.duration = 2000
+		                         	
+		                         	-- Stop and restart current animation
+		                         	self.stop()
+		                         	self.start()
+		                         end
+		} )
+		(end)
 		
 		*Default Setting:* 1000 milliseconds, i.e., one second
 		
-		*See Also:* the <delay> property
+		*See Also:* the <delay> and <loop> properties and the <on_completed> event handler
 	*/
 	
     int duration
