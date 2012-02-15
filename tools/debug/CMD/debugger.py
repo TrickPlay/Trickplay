@@ -104,6 +104,7 @@ class CLDebuger():
 						print '\t'+'Try "connect" or "cn" followed by device name.'
 						print '\t'+'Try "ld" to get a list of available remote devices.'
 					else: 
+						print( cmd+' '+arg)
 						data = sendTrickplayDebugCommand(self.debug_port, cmd+' '+arg, False)
 
 			if data:

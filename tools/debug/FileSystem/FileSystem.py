@@ -22,7 +22,7 @@ class FileSystem(QWidget):
         Start the FileSystem with the given app path and editor
         """
         
-        self.model = FileSystemModel(self.ui.view, path, self)
+        self.model = FileSystemModel(self.ui.view, path, editorManager, self)
         
         self.editorManager = editorManager
         

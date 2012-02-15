@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'FileSystem.ui'
 #
-# Created: Fri Aug 19 10:16:38 2011
+# Created: Thu Jan 19 15:25:35 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,8 +19,13 @@ class Ui_FileSystem(object):
         FileSystem.setObjectName(_fromUtf8("FileSystem"))
         FileSystem.resize(286, 715)
         self.verticalLayout = QtGui.QVBoxLayout(FileSystem)
+        self.verticalLayout.setSpacing(0)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.view = QtGui.QTreeView(FileSystem)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.view.setFont(font)
         self.view.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.view.setDragEnabled(True)
         self.view.setDragDropMode(QtGui.QAbstractItemView.DragOnly)

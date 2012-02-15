@@ -283,6 +283,8 @@ typedef struct TPMediaPlayer    TPMediaPlayer;
     Arguments:
     
         mp -        The TPMediaPlayer.
+        code -      An integer error code.
+        message -   A string describing the error. TrickPlay will make a copy.
 
     Valid States:
     - LOADING
@@ -305,8 +307,6 @@ typedef struct TPMediaPlayer    TPMediaPlayer;
     Arguments:
     
         mp -        The TPMediaPlayer.
-        code -      An integer error code.
-        message -   A string describing the error. TrickPlay will make a copy.
     
     Valid States:
     - PLAYING

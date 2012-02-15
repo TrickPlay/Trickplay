@@ -106,34 +106,29 @@ screen:add( sphereImage3 )
 -- Define an Interval for our animation
 sphereInterval  = Interval( 100, 400 - 40 )
 
--- Define an Alpha mode for our animation
-sphereAlpha  = Alpha { mode = "EASE_IN_OUT_QUINT" }
-sphereAlpha2 = Alpha { mode = "EASE_OUT_ELASTIC" }
-sphereAlpha3 = Alpha { mode = "EASE_IN_OUT_ELASTIC" }
+-- Define Ease transitions for our animation
+sphereEase  = Ease( "EASE_IN_OUT_QUINT" )
+sphereEase2 = Ease( "EASE_OUT_ELASTIC" )
+sphereEase3 = Ease( "EASE_IN_OUT_ELASTIC" )
 
 -- Animate the spheres with Timelines
 sphereTL = Timeline { duration = 3000 }
 sphereTL2 = Timeline { duration = 1500 }
 sphereTL3 = Timeline { duration = 1500 }
 			
--- Hook the Alphas to the Timelines
-sphereAlpha.timeline  = sphereTL
-sphereAlpha2.timeline = sphereTL2
-sphereAlpha3.timeline = sphereTL3
-
 --Define a Path for the first sphere
 spherePath = Path( "M100 100 l30 0 l30 260 l30 -200 l30 200 l30 -100 l30 100 l30 -25 l30 25 L360 360" )
 
 function sphereTL:on_new_frame( msecs, progress )
-	sphereImage.position = spherePath:get_position( sphereAlpha.alpha )
+	sphereImage.position = spherePath:get_position( sphereEase:get_value( progress ) )
 end
 
 function sphereTL2:on_new_frame( msecs, progress )
-	sphereImage2.y = sphereInterval:get_value( sphereAlpha2.alpha )
+	sphereImage2.y = sphereInterval:get_value( sphereEase2:get_value( progress ) )
 end
 
 function sphereTL3:on_new_frame( msecs, progress )
-	sphereImage3.y = sphereInterval:get_value( sphereAlpha3.alpha )
+	sphereImage3.y = sphereInterval:get_value( sphereEase3:get_value( progress ) )
 end
 
 -- ****** Score-related code ******

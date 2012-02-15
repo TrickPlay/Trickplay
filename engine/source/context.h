@@ -200,6 +200,9 @@ public:
 
     bool get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const;
 
+    typedef std::pair<OutputHandler, void *>                    OutputHandlerClosure;
+    typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
+
 private:
 
     TPContext();
@@ -366,9 +369,6 @@ private:
     typedef std::map<String, RequestHandlerClosure>             RequestHandlerMap;
 
     RequestHandlerMap                                           request_handlers;
-
-    typedef std::pair<OutputHandler, void *>                    OutputHandlerClosure;
-    typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
 
     OutputHandlerSet                                            output_handlers;
 

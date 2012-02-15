@@ -184,6 +184,7 @@ class TrickplayInspector(QWidget):
         Re-populate the property view every time a new UI element
         is selected in the inspector view.
         """
+        print (selected, deselected)
         
         if not self.preventChanges:
             

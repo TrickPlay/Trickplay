@@ -64,6 +64,7 @@ Group: SDK Tutorial {
 }
 
 Group: Sample Applications {
+	File: Screen Transitions (no auto-title, docs/tutorials/screen_transitions/doc.txt)
 	File: Multi-Level Menus (no auto-title, docs/tutorials/menu_multilevel/doc.txt)
 	File: Run a Video (no auto-title, docs/tutorials/video_run/doc.txt)
 }
@@ -88,9 +89,9 @@ Group: Engine Reference {
 		File: Overview (no auto-title, docs/rte/reference/overview_animation.txt)
 		
 		Group: Classes {
-			File: Alpha (no auto-title, bindings/clutter_alpha.lb)
 	        File: Animator (no auto-title, bindings/clutter_animator.lb)
     	    File: AnimationState (no auto-title, bindings/clutter_state.lb)
+    	    File: Ease (no auto-title, bindings/ease.lb)
             File: Interval (no auto-title, bindings/clutter_interval.lb)
             File: Path (no auto-title, bindings/clutter_path.lb)
             File: Score (no auto-title, bindings/clutter_score.lb)

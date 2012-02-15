@@ -37,7 +37,7 @@ screen:show()
 -- Define an AnimationState for the sphere
 sphereAnimationState = AnimationState( {
 		duration = 2000,            -- default transition duration
-		mode = "EASE_IN_OUT_QUAD",  -- default Alpha mode for all transitions
+		mode = "EASE_IN_OUT_QUAD",  -- default Ease mode for all transitions
 		transitions = {
 			{ -- Wildcard state--->Disappear
 			  source = "*",
