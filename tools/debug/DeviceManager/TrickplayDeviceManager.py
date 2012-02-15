@@ -111,8 +111,9 @@ class TrickplayDeviceManager(QWidget):
 					self.ui.comboBox.setItemData(0, port, PORT)
 					CON.port = port
 					CON.address = address
-					self.inspector.refresh()
-					self.inspector.ui.inspector.expandAll()
+					#if getattr(self, "debug_mode") != True :
+						##self.inspector.refresh()
+						#self.inspector.ui.inspector.expandAll()
 
 			elif event.type() == REMEVENT:
 				d = event.dict
@@ -271,43 +272,44 @@ class TrickplayDeviceManager(QWidget):
 
 
     def app_finished(self, errorCode):
-
+		#print(errorCode)
 		if self.trickplay.state() == QProcess.NotRunning :
 			print "Trickplay APP is finished"
 			self.inspector.clearTree()
-			#self.trickplay.terminate()
-			self.main.debug_stop.setEnabled(False)
+			self.main.stop()
 	
     def run(self, dm=False):
        
         # Run on local trickplay
+
         if 0 == self.ui.comboBox.currentIndex():
             print("Starting trickplay locally")
             if self.trickplay.state() == QProcess.Running:
                 self.trickplay.close()
-            
-            env = self.trickplay.systemEnvironment()
 
-            for item in env:
-				if item[:3] == "TP_":
-					ii = env.indexOf(item)
-					env.removeAt(ii)
+            env = self.trickplay.processEnvironment().systemEnvironment()
 
-            env.append("TP_telent_console_port="+str(self.console_port))
-            env.append("TP_controllers_enabled=1")
+            for item in env.toStringList():
+   				if item[:3] == "TP_":
+   					n = re.search("=", item).end()
+   					env.remove(item[:n-1])
+
+            env.insert("TP_telnet_console_port", str(self.console_port))
+            env.insert("TP_controllers_enabled", "1")
             self.my_name = "LocalHost_"+str(int(random.random() * 100000))
-            env.append("TP_controllers_name="+self.my_name)
+            env.insert("TP_controllers_name",self.my_name)
+            env.insert("TP_config_file","")
 
             if dm == True :
             	self.debug_mode = True
             	self.main.debug_mode = True
-            	env.append("TP_debugger_port="+str(self.debug_port))
-            	env.append("TP_start_debugger=1")
+            	env.insert("TP_debugger_port",str(self.debug_port))
+            	env.insert("TP_start_debugger","1")
             else :
-				self.debug_mode = False
-				self.main.debug_mode = False
-            self.trickplay.setEnvironment(env)
+            	self.debug_mode = False
+            	self.main.debug_mode = False
 
+            self.trickplay.setProcessEnvironment(env)
             ret = self.trickplay.start('trickplay', [self.path()])
 			
         # Push to foreign device
@@ -359,7 +361,7 @@ class TrickplayDeviceManager(QWidget):
 			return local_vars
 
 		elif "error" in pdata:
-			print "\t"+pdata["error"] 
+			print "\t"+pdata["error"]
 		
 		elif "stack" in pdata:
 			stack_info_str = ""

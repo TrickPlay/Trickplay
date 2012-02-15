@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>415</width>
-    <height>219</height>
+    <width>408</width>
+    <height>235</height>
    </rect>
   </property>
   <property name="font">
@@ -163,7 +163,7 @@
    <property name="geometry">
     <rect>
      <x>300</x>
-     <y>180</y>
+     <y>200</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -176,7 +176,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>180</y>
+     <y>200</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -189,7 +189,7 @@
    <property name="geometry">
     <rect>
      <x>300</x>
-     <y>140</y>
+     <y>160</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -202,7 +202,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>140</y>
+     <y>160</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -214,8 +214,8 @@
   <widget class="QPushButton" name="pushButton_close">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>140</y>
+     <x>10</x>
+     <y>200</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -228,8 +228,8 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>180</y>
-     <width>161</width>
+     <y>140</y>
+     <width>361</width>
      <height>26</height>
     </rect>
    </property>
@@ -239,10 +239,23 @@
     </font>
    </property>
    <property name="text">
-    <string/>
+    <string>String Not Found</string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>search_txt</tabstop>
+  <tabstop>replace_txt</tabstop>
+  <tabstop>checkBox_case</tabstop>
+  <tabstop>checkBox_word</tabstop>
+  <tabstop>checkBox_forward</tabstop>
+  <tabstop>checkBox_wrap</tabstop>
+  <tabstop>pushButton_find</tabstop>
+  <tabstop>pushButton_replaceFind</tabstop>
+  <tabstop>pushButton_close</tabstop>
+  <tabstop>pushButton_replace</tabstop>
+  <tabstop>pushButton_replaceAll</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

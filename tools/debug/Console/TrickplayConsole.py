@@ -14,7 +14,7 @@ class OutLog:
         color = alternate color (i.e. color stderr a different color)
         """
         self.edit = edit
-        self.out = None
+        self.out = out
         self.color = color
 
     def flush(self):
@@ -34,6 +34,7 @@ class OutLog:
 
         if self.out:
             self.out.write(m)
+            self.out.flush()
 
 	
 class TrickplayConsole(QWidget):

@@ -321,24 +321,25 @@ class MainWindow(QMainWindow):
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
 
     def mioMrC_debug(self) :
-        self.debug_tbt.setText("Debug")
-        self.debug_tbt.setIcon(self.icon_debug)
+        if self.debug_tbt.text() != "Debug":
+        	self.debug_tbt.setText("Debug")
+        	self.debug_tbt.setIcon(self.icon_debug)
 
-        self.debug_menu.removeAction(self.debug_action)
-        self.debug_menu.addAction(self.run_action)
-        QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
-        QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
-
+        	self.debug_menu.removeAction(self.debug_action)
+        	self.debug_menu.addAction(self.run_action)
+        	QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
+        	QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
 
     def mioMrC_run(self) :
-        self.debug_tbt.setText("Run")
-        self.debug_tbt.setIcon(self.icon_run)
+        if self.debug_tbt.text() != "Run":
+        	self.debug_tbt.setText("Run")
+        	self.debug_tbt.setIcon(self.icon_run)
 
-        self.debug_menu.removeAction(self.run_action)
-        self.debug_menu.addAction(self.debug_action)
-
-        QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
-        QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
+        	self.debug_menu.removeAction(self.run_action)
+        	self.debug_menu.addAction(self.debug_action)
+	
+        	QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
+        	QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
 
     def traceWindowClicked(self) :
     	if self.windows['trace'] == True:
@@ -425,26 +426,26 @@ class MainWindow(QMainWindow):
 		
     def stop(self):
     	if self._deviceManager.trickplay.state() == QProcess.Running:
-        	# self._deviceManager.trickplay.kill() #close, terminate 
 			if getattr(self._deviceManager, "debug_mode") == True :
 				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
-				# delete current line marker
-				for n in self.editorManager.editors:
-					for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
-						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete( int(l), -1) 
-					self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
-
-					if self.current_debug_file == n:
-						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
-						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
-						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
 	
     	if getattr(self._deviceManager, "debug_mode") == True :
+    		# delete current line marker
+    		for n in self.editorManager.editors:
+				for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
+					self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete( int(l), -1) 
+				self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
+
+				if self.current_debug_file == n:
+					self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
+					self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
+					self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
+
     		# clean backtrace and debug window
     		self._backtrace.clearTraceTable(0)
     		self._debug.clearLocalTable(0)
     		self._debug.clearBreakTable(0)
-    		self.mioMrC_run()
+    		#self.mioMrC_run()
     	else:
     		ret = self.deviceManager.socket.write('/quit\n\n')
     		if ret < 0 :
@@ -452,7 +453,7 @@ class MainWindow(QMainWindow):
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
-        self.consoleWindowClicked()
+        #self.consoleWindowClicked()
         self.debugWindowClicked()
         self.traceWindowClicked()
 
@@ -465,7 +466,6 @@ class MainWindow(QMainWindow):
 
         self.inspector.clearTree()
         #self._deviceManager.ui.comboBox.removeItem(self._deviceManager.ui.comboBox.findText(self._deviceManager.newAppText))
-
         #self._deviceManager.ui.comboBox.setCurrentIndex(0)
         #self._deviceManager.service_selected(0)
 
@@ -484,7 +484,7 @@ class MainWindow(QMainWindow):
         self.debug_stepout.setEnabled(False)
         self.debug_pause_bt.setEnabled(False)
         self.debug_continue_bt.setEnabled(False)
-    	#self.mioMrC_run()
+    	self.mioMrC_run()
 
     def debug(self):
         self.inspector.clearTree()
