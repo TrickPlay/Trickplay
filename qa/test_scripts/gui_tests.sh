@@ -110,11 +110,6 @@ for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
          
      else
 	echo "Skipping $png_file. Test generated png does not exist."
-		major_fail=$(($major_fail+1))
-		N_ARRAY[test_count]=$png_file
-		D_ARRAY[test_count]=$test_duration
-		R_ARRAY[test_count]="fail"
-		M_ARRAY[test_count]="Test generated png does not exist."
      fi
 
 done
@@ -122,7 +117,7 @@ done
 ## Create the XML results file ##
 
 trickplay_version=1.0
-XML_FILE="$THE_PATH/gui-test-results/gui_test.xml"
+XML_FILE=../../gui-test-results/gui_test.xml
 
 end_time=$(date +%s.%N)
 total_test_time=$(echo "$end_time - $start_time" | bc)

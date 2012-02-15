@@ -1,4 +1,4 @@
-local img = _Clone{source = pengsrcs[1], position = {-80,ground[1],0}, opacity = 0, name = "penguin"}
+local img = Sprite{src = "penguin.png", position = {-80,ground[1],0}, opacity = 0, name = "penguin"}
 local jvy = -1
 local g = gravity > 0
 local jstate = 0
@@ -13,7 +13,11 @@ local landjump = 0
 img.deaths = 0
 img.armor = nil
 
-local reset = function()
+img.mask = BBox(img,{20,imgh2-imgw2 + 13,-20,-imgh2+imgw2 - 13})
+
+local reset = Event()
+
+reset[img] = function()
 	ovx = 2020*(row == 2 and -1 or 1)/4000
 	img.vx = ovx
 	img.vy = 0
@@ -31,12 +35,7 @@ local reset = function()
 	img.y_rotation = {row == 2 and 180 or 0,imgw2,0}
 	img.z_rotation = {0,0,0}
 	gravity = 0.002
-	for k,v in pairs(levels.this.children) do
-		if v.reset then
-			v:reset(row)
-		end
-	end
-	img.source = pengsrcs[levels.this.bank == 2 and 2 or 1]
+	img.src = levels.this.bank == 2 and "penguin-lantern.png" or "penguin.png"
 	if levels.this.bank == 2 then
 		darkness.dark:warp(darkness.dark.state)
 		darkness.dark.state = 0
@@ -56,7 +55,7 @@ local falling = Timeline{ duration = 500,
 			img.x = ox + img.vx*ms
 			img.y = oy + (img.vy ~= 0 and img.vy*ms + gravity*ms*ms/2 or 0)
 			img.z_rotation = {oz + img.vz*ms,imgw2,imgh2}
-			img.opacity = 255*(1-t)
+			img.opacity = self.duration == 200 and max(0,255+(oy-img.y)*255/40) or 255*(1-t)
 		end
 	end,
 	on_completed = function(self)
@@ -64,6 +63,7 @@ local falling = Timeline{ duration = 500,
 			fx.splash()
 		end
 		img.deaths = img.deaths+1
+		settings.deaths = img.deaths
 		overlay.deaths.text = img.deaths
 		skating:start()
 	end
@@ -79,21 +79,23 @@ local fall = function(sink)
 end
 
 local sink = function()
-	skating:stop()
-	img.vz = jstate > 0 and 0 or (row == 2 and -0.2 or 0.2)
-	audio.play("splash-" .. (jstate > 0 and 2 or 1))
-	fall(true)
-	if img.vy == 0 then
-		img.vy = 0.01
+	if img.vy >= 0 then
+		skating:stop()
+		img.vz = jstate > 0 and 0 or (row == 2 and -0.2 or 0.2)
+		audio.play("splash-" .. (jstate > 0 and 2 or 1))
+		fall(true)
+		if img.vy == 0 then
+			img.vy = 0.01
+		end
 	end
 end
 
 local kill = function(obj)
 	fx.explode()
 	skating:stop()
-	
-	a = {x = (obj.bb.l + obj.bb.r - img.bb.l - img.bb.r)/2,
-		 y = (obj.bb.t + obj.bb.b - img.bb.t - img.bb.b)/2}
+	a = obj.mask or obj
+	a = {x = a.x + a.w/2 - img.mask.x - img.mask.w/2,
+		 y = a.y + a.h/2 - img.mask.y - img.mask.h/2}
 	t = math.atan2(a.y/obj.scale[2],a.x/obj.scale[1])
 	t = t + math.sin(4*t-math.pi)/4
 	a = {x = math.cos(t), y = math.sin(t)}
@@ -112,7 +114,7 @@ local kill = function(obj)
 	end
 	
 	if obj.fall then
-		obj.fall(-img.vx,-img.vy,-img.vz)
+		obj:fall(-img.vx,-img.vy,-img.vz)
 	end
 	
 	fall()
@@ -195,8 +197,7 @@ function skating:on_new_frame(ms,t)
 		img.z_rotation = {(0.4 + 0.4/(1+8^img.vy)) ^ (d/100) * img.z_rotation[1], imgw2, imgh2}
 	end
 	
-	img.bb = {l = img.x + 20,			t = img.y + imgh2-imgw2 + 13,
-			  r = img.x - 20 + img.w,	b = img.y + imgh2+imgw2 - 13}
+	img.mask.dirty = 1
 	
 	if jstate == 0 then
 		a = img.z_rotation[1]
@@ -204,7 +205,7 @@ function skating:on_new_frame(ms,t)
 			b = (a > 0 and 1 or -1)
 			img.z_rotation = {math.max(0,a*b-d/2)*b, imgw2, imgh2}
 		end
-		if floor and (img.bb.l > floor.bb.r or img.bb.r < floor.bb.l) then
+		if floor and (img.mask.x > floor.mask.x + floor.mask.w or img.mask.x + img.mask.w < floor.mask.x and img.x < 1900) then
 			if floor.flip then
 				jump()
 			end
@@ -215,26 +216,18 @@ function skating:on_new_frame(ms,t)
 	
 	--object collisions
 	if row == 1 and img.x < 250 then return end
-	for k,v in pairs(levels.this.children) do
-		if v.state and v.state > 0 and v.is_visible then
-			if v.state == 2 then
-				v.bb = {l = v.x + v.bbox.l, r = v.x + v.bbox.r,
-						t = v.y + v.bbox.t, b = v.y + v.bbox.b}
+	for k in pairs(objectSet) do
+		if img.mask:intersects(k.mask) then
+			if k.on_collision then
+				k:on_collision()
+			elseif k.smash and img.armor then 
+				k:smash(true)
+				audio.play("ice-blocks-fall")
+				img.armor:drop()
+			else
+				img.kill(k)
 			end
-			if img.bb.l < v.bb.r and img.bb.t < v.bb.b and img.bb.r > v.bb.l and img.bb.b > v.bb.t then
-				if v.collision then
-					v.collision()
-				else
-					if v.state == 3 and img.armor then 
-						v.smash(true)
-						audio.play("ice-blocks-fall")
-						img.armor.drop()
-					else
-						kill(v)
-					end
-				end
-				return
-			end
+			return
 		end
 	end
 	
@@ -274,7 +267,7 @@ function skating:on_completed()
 end
 
 function screen:on_key_down(key)
-	---[[
+	--[[
 	if key >= keys["4"] and key <= keys["7"] then
 		skating:rewind()
 		skating:stop()
@@ -289,25 +282,31 @@ function screen:on_key_down(key)
 		end
 	elseif key >= keys["0"] and key <= keys["9"] then
 		skating:rewind()
-		reset()--]]
+		reset()
+	else--]] if levels.this.id == 1 and levels.this.anim and (key == keys["Up"] or key == keys["Down"]) then
+		levels.this.anim.state = 1-tonumber(levels.this.anim.state)
 	elseif key == keys['BACK'] then
-		skating:stop()
-		levels.next(0)
-	else
-		if levels.this.id == 1 then
-			img.deaths = 0
-			overlay.deaths.text = "0"
-			img.x = 0
-			if levels.this.swap then
-				levels.this.swap()
-			else
-				levels.next()
-			end
-		elseif skating.is_playing and not img.armor then
-			jump()
+		if penguin.skating.is_playing then
+			skating:stop()
+			levels.next(0)
 		end
-	--
+	elseif levels.this.id == 1 then
+		if levels.this.swap then
+			levels.this.swap()
+		elseif levels.this.anim and levels.this.anim.state == '0' then
+			img.deaths = settings.deaths or 0
+			overlay.deaths.text = img.deaths
+			levels.next(settings.level-1)
+		else
+			levels.next()
+			img.deaths = 0
+			settings.deaths = nil
+			overlay.deaths.text = img.deaths
+		end
+	elseif skating.is_playing and not img.armor then
+		jump()
 	end
+	--
 end
 
 img.vx, img.vy, img.vz = 0, 0, 0
@@ -319,6 +318,6 @@ img.sink = sink
 img.jump = jump
 img.boost = boost
 img.land = land
-img.bb = {}
+img.reset = reset
 
 return img

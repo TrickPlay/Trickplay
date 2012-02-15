@@ -1,5 +1,5 @@
 
--- Create three demo areas showing the effect of the Alpha mode on a Timeline's animated property
+-- Create three demo areas showing the effect of the Ease transition on a Timeline's animated property
 
 -- Create a screen background
 bckgnd = Canvas( 1920, 1080 )
@@ -68,10 +68,10 @@ screen:add( sphereImage3 )
 -- Define an Interval for our animation
 sphereInterval  = Interval( 100, 400 - 40 )
 
--- Define an Alpha mode for our animation
-sphereAlpha  = Alpha { mode = "EASE_IN_ELASTIC" }
-sphereAlpha2 = Alpha { mode = "EASE_OUT_ELASTIC" }
-sphereAlpha3 = Alpha { mode = "EASE_IN_OUT_ELASTIC" }
+-- Define Ease transitions for our animation
+sphereEase  = Ease( "EASE_IN_ELASTIC" )
+sphereEase2 = Ease( "EASE_OUT_ELASTIC" )
+sphereEase3 = Ease( "EASE_IN_OUT_ELASTIC" )
 
 -- Animate the spheres with Timelines
 sphereTL = Timeline { 
@@ -87,22 +87,17 @@ sphereTL3 = Timeline {
 				loop = true,
 			}
 			
--- Hook the Alphas to the Timelines
-sphereAlpha.timeline  = sphereTL
-sphereAlpha2.timeline = sphereTL2
-sphereAlpha3.timeline = sphereTL3
-			
 -- Define the on_new_frame() event handlers
 function sphereTL:on_new_frame( msecs, progress )
-	sphereImage.y = sphereInterval:get_value( sphereAlpha.alpha )
+	sphereImage.y = sphereInterval:get_value( sphereEase:get_value( progress ) )
 end
 
 function sphereTL2:on_new_frame( msecs, progress )
-	sphereImage2.y = sphereInterval:get_value( sphereAlpha2.alpha )
+	sphereImage2.y = sphereInterval:get_value( sphereEase2:get_value( progress ) )
 end
 
 function sphereTL3:on_new_frame( msecs, progress )
-	sphereImage3.y = sphereInterval:get_value( sphereAlpha3.alpha )
+	sphereImage3.y = sphereInterval:get_value( sphereEase3:get_value( progress ) )
 end
 
 -- Start all the animations

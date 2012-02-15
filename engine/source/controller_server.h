@@ -47,6 +47,7 @@ public:
         {}
     };
 
+    guint16 get_port() const;
 
 private:
 

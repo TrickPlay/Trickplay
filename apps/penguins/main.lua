@@ -2,9 +2,13 @@
 
 Penguin Zip-Zip
 
+
+tell pablo about segfault
 --]]
 
-screen.perspective = {1,1,0.1,100}
+orient = dofile('orient/orient.lua')()
+
+--screen.perspective = {1,1,0.1,100}
 
 sin = math.sin
 cos = math.cos
@@ -31,19 +35,6 @@ gravity = 0.002
 ground = {440,1080}
 row = 1
 usebg = true
-
-step = {}
-local d, tms = 0, 0
-local anim = Timeline{duration = 9001, loop = true,
-	on_new_frame = function(self,ms,t)
-		audio:fresh()
-		d = self.delta
-		tms = tms+d
-		for k,v in pairs(step) do
-			v(d,tms)
-		end
-	end}
-anim:start()
 
 dofile("assets.lua")
 audio	= dofile("audio.lua")

@@ -1,7 +1,7 @@
 local i, j, d, dt, d2, s, px, py, b, c
-local snow		= {"explode-16","explode-24","explode-32"}
-local chunks	= {"icechunk-1","icechunk-2","icechunk-3","icechunk-4"}
-local splashes	= {"splash-1","splash-2"}
+local snow		= {"explode-16.png","explode-24.png","explode-32.png"}
+local chunks	= {"icechunk-1.png","icechunk-2.png","icechunk-3.png","icechunk-4.png"}
+local splashes	= {"splash-1.png","splash-2.png"}
 local isbank	= 0
 
 local group = overlay.effects
@@ -9,7 +9,7 @@ group:raise(penguin)
 group.level = levels.this.id
 fx = {}
 
-step[fx] = function(d,ms)
+evFrame[fx] = function(self,d,ms)
 	dt = d/2300/2
 	s = 1+dt*6
 	d2 = 4^(d/1000)
@@ -53,12 +53,12 @@ end
 
 fx.splash = function()
 	init()
-	j = Image{src = "splash-3", x = px, y = ground[row]+120,
+	j = Sprite{src = "splash-3.png", x = px, y = ground[row]+120,
 			  anchor_point = {64,120}, scale = {0.5,0.2}, opacity = 255}
 	j.vy, j.vo, j.t = 0.02*(1-isbank), -0.32, 0
 	group:add(j)
 	for i=1+c,rand(12,15) do
-		j = Image{src = splashes[rand(2)], x = px, y = py-30*isbank, opacity = rand(160,255),
+		j = Sprite{src = splashes[rand(2)], x = px, y = py-30*isbank, opacity = rand(160,255),
 				  anchor_point = {32,32}, z_rotation = {rand(360),0,0}}
 		j.vx, j.vo = nrand(0.25), -0.25
 		j.vy = nrand(0.15) - 0.05*isbank - 0.25 - 4*(0.25-math.abs(j.vx))^2
@@ -72,7 +72,7 @@ fx.smash = function(block)
 	if block.level ~= group.level then return end
 	init(block)
 	for i=1+floor(c/3),rand(5,8) do
-		j = Image{src = chunks[rand(4)], opacity = 255, x = px+nrand(50),
+		j = Sprite{src = chunks[rand(4)], opacity = 255, x = px+nrand(50),
 				  y = py+(isbank == 1 and nrand(30)-30 or nrand(50)),
 				  scale = {rand(2)*2-3,rand(2)*2-3}, z_rotation = {rand(4)*90,0,0}}
 		j.anchor_point = {j.w/2,j.h/2}
@@ -86,12 +86,13 @@ fx.flakes = function(num)
 	num = num and num-c or 1
 	if num == 1 and rand(6) < c then return end
 	for i=1,num do
-		j = Image{src = snow[rand(#snow-isbank)], x = px, y = py,
-				  z_rotation = {rand(360),0,0}, opacity = rand(128,255)}
+		j = Sprite{src = snow[rand(#snow-isbank)], x = px, y = py,
+			z_rotation = {rand(360),0,0}, opacity = rand(128,255)}
 		j.anchor_point = {j.w*(0.5+nrand(0.7)), j.h*(0.5+nrand(0.7))}
 		j.vx, j.vy, j.vz, j.vo = nrand(0.25), nrand(0.25) - 0.15*isbank, 0.1, -0.125
 		d = nrand(0.2)+0.9
 		j.scale = {d,d}
+		--Class:dump(j)
 		group:add(j)
 	end
 end
@@ -99,8 +100,9 @@ end
 fx.explode = function(num)
 	fx.flakes(num or rand(12,15))
 	group:raise(penguin)
-	j = Image{src = "explode-128", x = px, y = py-20*isbank,
+	j = Sprite{src = "explode-128.png", x = px, y = py-20*isbank,
 		opacity = 255, anchor_point = {64,64}, scale = {1,1}}
 	j.vx, j.vy, j.vo = 0, -0.06*isbank, -0.32
+	--Class:dump(j)
 	group:add(j)
 end

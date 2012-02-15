@@ -29,7 +29,8 @@ request_url = request_url .. "/q/"
 
 
 
-local RATE_LIMIT  = 5 --queries per minute
+local req
+local RATE_LIMIT  = 10 --queries per minute
 --local freq        = 60000/RATE_LIMIT
 
 local queue = {}
@@ -40,7 +41,8 @@ local throttle = Timer{
 			self:stop()
 			self.is_running = false
 		else
-			table.remove(queue,1):send()
+			req = table.remove(queue,1)
+			req.cancel_obj = req:send()
 		end
 	end
 }
@@ -50,7 +52,7 @@ do
 	local mt = {}
 	
 	function mt.__newindex(t,k,v)
-		print('gots')
+		
 		if throttle.is_running then
 			rawset(t,k,v)
 		else
@@ -64,24 +66,31 @@ do
 	setmetatable(queue, mt)
 end
 
+local notify_of_failure = function()
+	for i,req in ipairs(queue)do
+		req:notify_of_failure()
+	end
+end
 function lookup_zipcode(zip,callback)
 	
 	if type(zip) ~= "string" and #zip ~= 5 then error("Invalid Zip",2) end
 	
 	print("looking up ",zip)
 	
-	queue[#queue+1] = URLRequest{
+	req = URLRequest{
 		
 		encoding="UTF-8", url = request_url..zip..".json",
 		
 		
 		on_complete = function(req,response)
-			print("respon")
+			print("URLRequest:on_completed()")
+			req.cancel_obj = nil
+			
 			if response == nil or response.failed or response.body == nil then
 				
-				callback("Unable to connect to Weather Underground.")
-				
 				queue[#queue+1]= req
+				
+				notify_of_failure()
 				
 			else
 				
@@ -89,9 +98,9 @@ function lookup_zipcode(zip,callback)
 				
 				if response == nil then
 					
-					callback("Unable to connect to Weather Underground.")
-					
 					queue[#queue+1]= req
+					
+					notify_of_failure()
 					
 				else
 					
@@ -101,9 +110,38 @@ function lookup_zipcode(zip,callback)
 				
 			end
 			
-		end
+		end,
 	}
+	req.notify_of_failure = function(req)
+		
+		callback("Unable to connect to Weather Underground.")
+		
+	end
 	
+	req.cancel = function(req)
+		
+		if req.cancel_obj then
+			req.cancel_obj:cancel()
+			return true
+		else
+			for i,r in ipairs(queue) do
+				if req == r then
+					table.remove(queue,i)
+					return true
+				end
+			end
+		end
+		return false
+	end
+	
+	queue[#queue+1] = req
+	
+	return req
+	--queue[#queue].notify_of_failure = function(req)
+	--	
+	--	callback("Unable to connect to Weather Underground.")
+	--	
+	--end
 end
 
 
