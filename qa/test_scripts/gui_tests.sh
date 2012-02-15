@@ -47,9 +47,9 @@ fi
 
 for f in "$THE_PATH"/qa/test_scripts/baselines/$test_resolution/*.png; do
     start_test_time=$(date +%s.%N)
-    test_count=$((test_count+1))
     png_file=${f##*/}
     if test -e "$AUTOMATED_TESTS/$png_file" ; then
+    	    test_count=$((test_count+1))
 	    compare_cmd="compare -metric AE '$f' '$AUTOMATED_TESTS/$png_file' /dev/null 2>&1"
 #	    echo $compare_cmd
 	    imgdiff=$(compare -metric AE "$f" "$AUTOMATED_TESTS/$png_file" /dev/null 2>&1)
