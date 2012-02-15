@@ -1,4 +1,4 @@
-local sensitivity = 1
+--local sensitivity = 1 -- used to determine how fast a swipe on the iphone moves the cursor
 local cursor_class
 local has_been_initialized = false
 
@@ -9,11 +9,9 @@ function external_devices:init(t)
     
     has_been_initialized = true
     
-    print("duck launcher has been initialized")
-    
     if type(t) ~= "table" then error("Parameter must be a table",2) end
     
-    cursor_class = t.cursor
+    cursor_class = t.cursor or error("must pass cursor",2)
     
 end
 
@@ -27,24 +25,26 @@ function external_devices:start()
         
         print("CONTROLLER ADDED")
         
-        
-        
         if c.has_pointer then
+            
+            print("new controller has pointer")
+            
             local cursor = cursor_class:make_cursor()
-            function c:on_pointer_button_down()
-                cursor:highlight()
-            end
-            function c:on_pointer_button_up()
-                cursor:unhighlight()
-            end
+            
+            function c:on_pointer_button_down()   cursor:highlight()     end
+            function c:on_pointer_button_up()     cursor:unhighlight()   end
+            
             function c:on_pointer_move(x,y)
                 
                 cursor.x = x
                 cursor.y = y
+                
             end
             
             c:start_pointer()
-            --[[
+            
+        --[[code that might be used for the iphone
+        
         elseif c.has_touches then
             
             local ui_w, ui_h = unpack(c.ui_size)

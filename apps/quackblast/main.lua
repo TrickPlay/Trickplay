@@ -1,15 +1,30 @@
 
-screen.perspective = {screen.perspective[1],screen.perspective[2],screen.perspective[3],300}
+screen.perspective = {
+    screen.perspective[1],
+    screen.perspective[2],
+    screen.perspective[3],
+    300 -- need to set this so that objects in really far z show up
+}
+
 screen:show()
 
+--upvals for the commonly used screen.w & h
 screen_w = screen.w
 screen_h = screen.h
 
-local splash = Image{src = "assets/splash.jpg"} -- loads first
---screen:add(splash)
+--llets the splash screen get uncompressed and added to the screen so
+--that the user sees that the app is doing something while waiting for the rest of
+--it to load
+local splash_screen = Image{src = "assets/splash.jpg"}
+screen:add(splash_screen)
 
+
+--this function is 'done later,' workaround for bugs like the one where you can't
+--use UIElement:grab_key_focus() during the first pass through the app
+--
+--also this lets the splash screen load first
 local main = function()
-    in_game = true
+    
     ----------------------------------------------------------------------------
     -- Images                                                                 --
     ----------------------------------------------------------------------------
@@ -36,6 +51,7 @@ local main = function()
                 "assets/crosshair/burst-2.png",
             },
         },
+        splash       = "assets/bg/splash.png",
         feathers = {
             "assets/feathers/feather-1.png",
             "assets/feathers/feather-2.png",
@@ -72,25 +88,22 @@ local main = function()
                 "assets/ducks/float-4.png",
                 "assets/ducks/float-5.png",
                 "assets/ducks/float-6.png",
+                "assets/ducks/float-6a.png",
                 "assets/ducks/float-7.png",
+                "assets/ducks/float-8.png",
+                "assets/ducks/float-8-a.png",
+                "assets/ducks/float-9.png",
             },
         },
         ripple = "assets/bg/ripple.png",
-        --[[   These one Images would have only been Cloned once
-        bg = {
-            btm_r   = "assets/bg/cattails.png",
-            btm_l   = "assets/bg/reeds-left.png",
-            btm_mid = "assets/bg/reeds-middle.png",
-            top_l   = "assets/bg/tree-left.png",
-            top_r   = "assets/bg/tree-right.png",
-        },
-        --]]
     }
     
     ----------------------------------------------------------------------------
     -- Layers                                                                 --
     ----------------------------------------------------------------------------
     
+    -- traverse the 'imgs' table and add them as Images to the hidden clone
+    -- source layer
     do
         
         local clone_srcs = Group{name = "Clone Sources"}
@@ -151,29 +164,41 @@ local main = function()
     local cursor        = dofile("Cursor.lua")
     local ext_devices   = dofile("Controllers.lua")
     local options       = dofile("OptionsMenu.lua")
-    local duck_timer    = Timer{}
+    
+    local bg_img = Image{src = "assets/bg.jpg",size = screen.size}
+    bg_layer:add(bg_img)
+    
+    local duck_timer    = Timer{--needed as a dependency
+        interval = 3000,
+        on_timer = function(self)     duck_launcher:launch_duck()   end
+    }
+    
+    duck_timer:stop() -- the ducks will have to wait
     
     ----------------------------------------------------------------------------
     -- link dependecies                                                       --
     ----------------------------------------------------------------------------
     duck_launcher:init{
         parent = duck_layer,
-        imgs = imgs,
-        hud  = hud,
+        imgs   = imgs,
+        hud    = hud,
     }
     hud:init{
         parent = hud_layer,
-        imgs = imgs,
+        imgs   = imgs,
     }
     options:init{
-        imgs = imgs,
-        parent = menu_layer,
-        duck_timer = duck_timer,
+        imgs         = imgs,
+        parent       = menu_layer,
+        duck_timer   = duck_timer,
+        cursor_class = cursor,
+        bg_img       = bg_img,
+        bg           = bg,
     }
     cursor:init{
-        hud  = hud,
-        imgs = imgs,
-        duck_layer = duck_layer,
+        hud          = hud,
+        imgs         = imgs,
+        duck_layer   = duck_layer,
         cursor_layer = cursor_layer,
     }
     ext_devices:init{
@@ -182,30 +207,33 @@ local main = function()
     bg:init{
         bg_layer = bg_layer,
         fg_layer = fg_layer,
-        imgs = imgs,
+        imgs     = imgs,
     }
+    ----------------------------------------------------------------------------
+    -- create everything                                                      --
+    ----------------------------------------------------------------------------
+    
+    bg:create()
+    hud:create()
+    options:create()
+    
     ----------------------------------------------------------------------------
     -- start everything                                                       --
     ----------------------------------------------------------------------------
     
-    bg:start()
-    hud:start()
-    options:start()
-    duck_timer.interval = 3000
-    duck_timer.on_timer = function(self)
-        duck_launcher:launch_duck()
-        print("launch",duck_timer.interval)
-    end
+    ext_devices:start()
+    
+    --animates out splash screen after 
     dolater(
         2000,
         function()
             
-            splash:animate{
+            splash_screen:animate{
                 duration = 1000,
                 opacity = 0,
                 on_completed = function()
-                    splash:unparent()
-                    splash = nil
+                    splash_screen:unparent()
+                    splash_screen = nil
                     duck_timer:start()
                     
                 end
@@ -213,9 +241,9 @@ local main = function()
             
         end
     )
-    ext_devices:start()
     
-    --]]
+    ---[=[        Debugging code that lets you launch ducks manually
+    
     local key_press = {
         [keys["1"]] = function() d = duck_launcher:launch_duck(1) end,
         [keys["2"]] = function() d = duck_launcher:launch_duck(2) end,
@@ -226,22 +254,28 @@ local main = function()
     
     
     function screen:on_key_down(k,...)  return key_press[k] and key_press[k]()  end
+    --]=]
+    
+    ----------------------------------------------------------------------------
+    -- mouse events for screen                                                --
+    ----------------------------------------------------------------------------
     
     screen.reactive = true
     
-    function screen:on_key_down(...)
-        print("screen:on_key_down",...)
-    end
-    function screen:on_button_down()
-        print("screen:on_button_down")
-        last_cursor:fire(false)
-        
-    end
+    function screen:on_button_down() last_cursor:fire(false) end
     function screen:on_motion(...)  return g_dragging and g_dragging(...) end
     function screen:on_button_up()         g_dragging = nil               end
     
-    screen:add(splash)
     
+    
+    --raise the splash screen on top of everything 
+    splash_screen:raise_to_top()
+    
+    --collect all of the tables, and locals inside do-ends, for loops, etc that
+    --are no longer needed
+    collectgarbage("collect")
+    
+    mediaplayer.volume = 0.5
 end
 
     
@@ -262,6 +296,9 @@ function mediaplayer:on_end_of_stream()
     mediaplayer:play()
     
 end
+
+--I need to comment out this line otherwise the screen gets blacked out on the
+--hardware devices since the 'glee' video doesn't get packaged with the app
 
 --mediaplayer:load("glee-1.mp4")
 
