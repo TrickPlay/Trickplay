@@ -19,9 +19,11 @@ class TrickplayDebugger(QWidget):
         self.ui.localTable.setSortingEnabled(False)
         self.ui.localTable.setColumnCount(len(self.headers))
         self.ui.localTable.setHorizontalHeaderLabels(self.headers)
+        self.ui.localTable.verticalHeader().setDefaultSectionSize(18)
+
         self.ui.breakTable.setSortingEnabled(False)
         self.ui.breakTable.setColumnCount(1)
-        
+        self.ui.breakTable.verticalHeader().setDefaultSectionSize(18)
         self.ui.breakTable.popupMenu = QMenu(self.ui.breakTable)
         self.ui.breakTable.popupMenu.addAction ('&Delete', self.deleteBP)
 
@@ -178,6 +180,8 @@ class TrickplayBacktrace(QWidget):
 				if key == 1:
 					newitem = QTableWidgetItem()
 					newitem.setText(item)
+					vh = self.ui.traceTable.verticalHeader()
+					vh.setDefaultSectionSize(18)
 					self.ui.traceTable.setItem(m, n, newitem)
 				elif key == 2:
 					newitem= self.ui.traceTable.item(m,0)

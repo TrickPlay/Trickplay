@@ -61,7 +61,7 @@ def getTrickplayData():
     f = None
     
     try:
-        f = urllib2.urlopen(r, "", 5) # timeout 5 sec 
+        f = urllib2.urlopen(r, "", 10) # timeout 10 sec 
         return decode(f.read())
     
     # Connection refused
