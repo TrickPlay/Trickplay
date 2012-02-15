@@ -203,6 +203,8 @@ public:
     typedef std::pair<OutputHandler, void *>                    OutputHandlerClosure;
     typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
 
+    String get_control_message( App * app = 0 ) const;
+
 private:
 
     TPContext();

@@ -750,44 +750,13 @@ int TPContext::run()
 
     if ( app )
     {
-    	// Output a machine-readable JSON string with all
-    	// the "control" ports.
 
 #ifndef TP_PRODUCTION
 
-    	{
-    		JSON::Object control;
+    	// Output a machine-readable JSON string with all
+    	// the "control" ports.
 
-			guint16 port;
-
-			if ( ( port = http_server->get_port() ) )
-			{
-				control[ "http" ] = port;
-			}
-
-			if ( ( port = console ? console->get_port() : 0 ) )
-			{
-				control[ "console" ] = port;
-			}
-
-			if ( Debugger * debugger = app->get_debugger() )
-			{
-				if ( ( port = debugger->get_server_port() ) )
-				{
-					control[ "debugger" ] = port;
-				}
-			}
-
-			if ( controller_server )
-			{
-				if ( ( port = controller_server->get_port() ) )
-				{
-					control[ "controllers" ] = port;
-				}
-			}
-
-			g_info( "<<CONTROL>>:%s" , control.stringify().c_str() );
-    	}
+    	g_info( "<<CONTROL>>:%s" , get_control_message( app ).c_str() );
 
 #endif
 
@@ -2444,6 +2413,46 @@ void TPContext::load_background()
 	}
 
 #endif
+}
+
+String TPContext::get_control_message( App * app ) const
+{
+	app = app ? app : current_app;
+
+	JSON::Object control;
+
+	guint16 port;
+
+	if ( ( port = http_server->get_port() ) )
+	{
+		control[ "http" ] = port;
+	}
+
+	if ( ( port = console ? console->get_port() : 0 ) )
+	{
+		control[ "console" ] = port;
+	}
+
+	if ( app )
+	{
+		if ( Debugger * debugger = app->get_debugger() )
+		{
+			if ( ( port = debugger->get_server_port() ) )
+			{
+				control[ "debugger" ] = port;
+			}
+		}
+	}
+
+	if ( controller_server )
+	{
+		if ( ( port = controller_server->get_port() ) )
+		{
+			control[ "controllers" ] = port;
+		}
+	}
+
+	return control.stringify();
 }
 
 //=============================================================================
