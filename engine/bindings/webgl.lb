@@ -1285,6 +1285,8 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
 
             glGetProgramiv( program , GL_INFO_LOG_LENGTH , & length );
 
+            FreeLater free_later;
+
             if ( length <= 0 )
             {
                 result = "";
@@ -1295,7 +1297,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
 
                 glGetProgramInfoLog( program , length + 1 , 0 , log );
 
-                FreeLater free_later( log );
+                free_later( log );
 
                 result = log;
             }
@@ -1359,6 +1361,8 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
         [[
             _GET_CONTEXT_;
             GLint length = 0;
+            
+            FreeLater free_later;
 
             glGetShaderiv( shader , GL_INFO_LOG_LENGTH , & length );
 
@@ -1372,7 +1376,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
 
               glGetShaderInfoLog( shader , length + 1 , 0 , log );
 
-              FreeLater free_later( log );
+              free_later( log );
 
               result = log;
             }
@@ -1384,6 +1388,8 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
             GLint length = 0;
 
             glGetShaderiv( shader , GL_SHADER_SOURCE_LENGTH , & length );
+            
+            FreeLater free_later;
 
             if ( length <= 0 )
             {
@@ -1395,7 +1401,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
 
                 glGetShaderSource( shader , length + 1 , 0 , log );
 
-                FreeLater free_later( log );
+                free_later( log );
 
                 result = log;
             }
