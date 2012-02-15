@@ -786,14 +786,14 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// List locals
 
-	if ( command == "l" )
+	if ( command == "l" || command == "i" )
 	{
 		reply[ "locals" ] = get_locals( L , ar );
 	}
 
 	// Where
 
-	else if ( command == "w" )
+	if ( command == "w" )
 	{
 		StringVector * lines = get_source( reply[ "file" ].as<String>() );
 
@@ -831,7 +831,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Reset - delete all breakpoints and continue
 
-	else if ( command == "r" )
+	if ( command == "r" )
 	{
 		break_next = false;
 
@@ -842,21 +842,21 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Back trace
 
-	else if ( command == "bt" )
+	if ( command == "bt" || command == "i" )
 	{
 		reply[ "stack" ] = get_back_trace( L , ar );
 	}
 
 	// Break next
 
-	else if ( command == "bn" )
+	if ( command == "bn" )
 	{
 		break_next = true;
 	}
 
 	// Quit
 
-	else if ( command == "q" )
+	if ( command == "q" )
 	{
 		tp_context_quit( app->get_context() );
 		break_next = false;
@@ -865,7 +865,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Continue
 
-	else if ( command == "c" )
+	if ( command == "c" )
 	{
 		break_next = false;
 		result = true;
@@ -873,7 +873,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Step
 
-	else if ( command == "s" )
+	if ( command == "s" )
 	{
 		break_next = true;
 		result = true;
@@ -881,7 +881,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Next
 
-	else if ( command == "n" )
+	if ( command == "n" )
 	{
 		// To step over, we change the hook to watch for function calls.
 		// If, during the next iteration, a function call happens, it
@@ -899,14 +899,14 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// List breakpoints
 
-	else if ( command == "b" )
+	if ( command == "b" || command == "i" )
 	{
 		reply[ "breakpoints" ] = get_breakpoints( L , ar );
 	}
 
 	// App information
 
-	else if ( command == "a" )
+	if ( command == "a" )
 	{
 		reply[ "app" ] = get_app_info();
 	}
@@ -916,7 +916,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 	// b main.lua:57 - set a breakpoint at line 57 of main.lua
 	// b 1 on|off - enable/disable breakpoints
 
-	else if ( 0 == command.find( "b " ) )
+	if ( 0 == command.find( "b " ) )
 	{
 		StringVector parts = split_string( command , " " , 3 );
 
@@ -960,7 +960,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Delete a breakpoint
 
-	else if ( 0 == command.find( "d " ) )
+	if ( 0 == command.find( "d " ) )
 	{
 		StringVector parts = split_string( command , " " , 2 );
 
@@ -989,7 +989,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Fetch a file
 
-	else if ( 0 == command.find( "f " ) )
+	if ( 0 == command.find( "f " ) )
 	{
 		StringVector parts = split_string( command , " " , 2 );
 
