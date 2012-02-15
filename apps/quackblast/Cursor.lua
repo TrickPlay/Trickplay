@@ -12,8 +12,6 @@ function cursor:init(t)
     
     has_been_initialized = true
     
-    print("duck launcher has been initialized")
-    
     if type(t) ~= "table" then error("Parameter must be a table",2) end
     
     hud          = t.hud
@@ -23,15 +21,35 @@ function cursor:init(t)
     
 end
 
+local in_a_menu = false
+function cursor:in_a_menu()
+    
+    in_a_menu = true
+    
+end
+function cursor:not_in_a_menu()
+    
+    in_a_menu = false
+    
+end
 function cursor:make_cursor()
     
     if not has_been_initialized then error("Must initialize",2) end
     
-    local instance = Clone()
+    local instance = Clone{
+        source = imgs.crosshair.normal,
+        anchor_point = {
+            imgs.crosshair.normal.w/2,
+            imgs.crosshair.normal.h/2
+        }
+    }
     
     ----------------------------------------------------------------------------
     -- Aim                                                                    --
     ----------------------------------------------------------------------------
+    
+    --[=[code that might be used for the iphone
+    
     local x_upval,y_upval, hovering_over
     
     local check_ducks = Timeline{
@@ -45,7 +63,7 @@ function cursor:make_cursor()
             
             for _,duck in pairs(duck_layer.children) do
                 
-                if   duck:contains(x_upval,y_upval) then print("got") if
+                if   duck:contains(x_upval,y_upval) then --[[print("got") ]]if
                     (hovering_over == nil or hovering_over.z < duck.z) then
                     
                     hovering_over = duck
@@ -53,7 +71,7 @@ function cursor:make_cursor()
                 end
                 
             end
-            if hovering_over then print("weeee") end
+            --if hovering_over then print("weeee") end
             instance.source =
                 hovering_over and
                 imgs.crosshair.target or
@@ -61,21 +79,12 @@ function cursor:make_cursor()
             
         end
     }
-    instance.source = imgs.crosshair.normal
-    instance.anchor_point = {imgs.crosshair.normal.w/2,imgs.crosshair.normal.h/2}
-    --check_ducks:start()
+    check_ducks:start()
+    --]=]
     
     ----------------------------------------------------------------------------
     -- Shoot                                                                  --
     ----------------------------------------------------------------------------
-    
-    local blink = Timer{
-        interval = 200,
-        on_timer = function()
-            instance.opacity = instance.opacity ~= 255 and 255 or 100
-        end
-    }
-    blink:stop()
     
     local reloading = false
     
@@ -88,8 +97,7 @@ function cursor:make_cursor()
             self:stop()
             
             reloading = false
-            --instance.opacity = 255
-            blink:stop()
+            
         end
     }
     reload_timer:stop()
@@ -103,17 +111,21 @@ function cursor:make_cursor()
     end
     function instance:fire(hit)
         
-        if reloading or not in_game then return false end
+        if reloading or in_a_menu then return false end
         
-        hud:inc_shots_fired()
         
-        --if hovering_over then
-        --    
-        --    hovering_over:kill()
-        --    
-        --    instance.player:inc_score(hovering_over)
-        --    
-        --end
+        mediaplayer:play_sound("audio/gunshot.mp3")
+        
+        --[[ code that might be used for the iphone
+        
+        if hovering_over then
+            
+            hovering_over:kill()
+            
+            instance.player:inc_score(hovering_over)
+            
+        end
+        --]]
         local r = imgs.crosshair.burst[hit and 2 or 1]--math.random(1,#imgs.crosshair.burst)]
         r = Clone{
             source = r,
@@ -123,14 +135,12 @@ function cursor:make_cursor()
         }
         
         dolater(100,function() r:unparent() end)
-        self.parent:add(
-            r
-        )
+        self.parent:add( r )
         
         reloading = true
-        --self.opacity = 100
+        
         reload_timer:start()
-        --blink:start()
+        
         return true
         
     end
