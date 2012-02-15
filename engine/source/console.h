@@ -22,6 +22,8 @@ public:
 
     void disable();
 
+    guint16 get_port() const;
+
 protected:
 
     Console( TPContext * context, bool read_stdin, int port );

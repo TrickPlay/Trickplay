@@ -1030,13 +1030,19 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 {
 	lua_getinfo( L, "nSl", ar );
 
-    //.........................................................................
+#if 0
+	// This is bad because it returns information while the app is running,
+	// which will look incorrect.
+
+	//.........................................................................
 	// Process any pending debugger commands here
 
-	for ( Command * server_command = server->get_next_command( false ); server_command; server_command = server->get_next_command( false ) )
+ 	for ( Command * server_command = server->get_next_command( false ); server_command; server_command = server->get_next_command( false ) )
 	{
 		( void ) handle_command( L , ar , server_command );
 	}
+
+#endif
 
 	//.........................................................................
 

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'SaveAsDialog.ui'
 #
-# Created: Wed Nov  9 16:03:56 2011
+# Created: Tue Feb  7 13:47:05 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,9 @@ class Ui_saveAsDialog(object):
     def setupUi(self, saveAsDialog):
         saveAsDialog.setObjectName(_fromUtf8("saveAsDialog"))
         saveAsDialog.resize(427, 120)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        saveAsDialog.setFont(font)
         saveAsDialog.setModal(True)
         self.gridLayout_2 = QtGui.QGridLayout(saveAsDialog)
         self.gridLayout_2.setVerticalSpacing(12)
@@ -35,6 +38,7 @@ class Ui_saveAsDialog(object):
         self.horizontalLayout.setSpacing(3)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.directory = QtGui.QLineEdit(saveAsDialog)
+        self.directory.setText(_fromUtf8(""))
         self.directory.setReadOnly(True)
         self.directory.setPlaceholderText(_fromUtf8(""))
         self.directory.setObjectName(_fromUtf8("directory"))
@@ -62,7 +66,6 @@ class Ui_saveAsDialog(object):
 
     def retranslateUi(self, saveAsDialog):
         saveAsDialog.setWindowTitle(QtGui.QApplication.translate("saveAsDialog", "Save As", None, QtGui.QApplication.UnicodeUTF8))
-        self.directory.setText(QtGui.QApplication.translate("saveAsDialog", " ", None, QtGui.QApplication.UnicodeUTF8))
         self.browse.setText(QtGui.QApplication.translate("saveAsDialog", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.labelDirectory.setText(QtGui.QApplication.translate("saveAsDialog", "Folder", None, QtGui.QApplication.UnicodeUTF8))
         self.labelName.setText(QtGui.QApplication.translate("saveAsDialog", "File Name", None, QtGui.QApplication.UnicodeUTF8))
