@@ -1,4 +1,3 @@
-
 import telnetlib, base64, sys, random
 
 from PyQt4.QtGui import *
@@ -230,8 +229,9 @@ class TrickplayDeviceManager(QWidget):
 
     def readResponse(self):
 		while self.socket.waitForReadyRead(1100) :
-			print self.socket.read(self.socket.bytesAvailable())
-		self.socket.flush()
+			print self.socket.read(self.socket.bytesAvailable())[:-1]
+			#print self.socket.read(self.socket.bytesAvailable())[:-1].replace('\033[34;1m','').replace('\033[31;1m','').replace('\033[0m','').replace('\033[37m','').replace('\033[32m','')
+		#self.socket.flush()
 
 		"""
 		stream = QDataStream(self.socket)
@@ -296,7 +296,7 @@ class TrickplayDeviceManager(QWidget):
 
             env.insert("TP_telnet_console_port", str(self.console_port))
             env.insert("TP_controllers_enabled", "1")
-            self.my_name = "LocalHost_"+str(int(random.random() * 100000))
+            self.my_name = str(u"\u0020")+str(int(random.random() * 100000))
             env.insert("TP_controllers_name",self.my_name)
             env.insert("TP_config_file","")
 

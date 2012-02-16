@@ -426,6 +426,7 @@ class MainWindow(QMainWindow):
 		
     def stop(self):
     	if self._deviceManager.trickplay.state() == QProcess.Running:
+			#self._deviceManager.trickplay.close()
 			if getattr(self._deviceManager, "debug_mode") == True :
 				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
 	
@@ -445,7 +446,6 @@ class MainWindow(QMainWindow):
     		self._backtrace.clearTraceTable(0)
     		self._debug.clearLocalTable(0)
     		self._debug.clearBreakTable(0)
-    		#self.mioMrC_run()
     	else:
     		ret = self.deviceManager.socket.write('/quit\n\n')
     		if ret < 0 :
@@ -453,7 +453,6 @@ class MainWindow(QMainWindow):
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
-        #self.consoleWindowClicked()
         self.debugWindowClicked()
         self.traceWindowClicked()
 
