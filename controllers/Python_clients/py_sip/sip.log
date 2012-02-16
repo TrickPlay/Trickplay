@@ -1,0 +1,31 @@
+REGISTER sip:asterisk-1.asterisk.trickplay.com SIP/2.0
+Via: SIP/2.0/UDP 10.0.190.153:50418;rport;branch=z9hG4bKd272731d70824ef5b2db18c6e237beb2
+Max-Forwards: 70
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=46fe7a0e961b4a3cb6dccec1900fa03c
+To: <sip:phone@asterisk-1.asterisk.trickplay.com>
+Call-ID: a45692fe-c1bc-4b8c-b7b3-5db6434c3894
+CSeq: 101 REGISTER
+Contact: <sip:phone@10.0.190.153:50418>
+User-Agent: Python
+Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE
+Supported: timer, 100rel, path
+Content-Length: 0
+
+
+
+REGISTER sip:asterisk-1.asterisk.trickplay.com SIP/2.0
+Via: SIP/2.0/UDP 10.0.190.153:50418;rport;branch=z9hG4bK43d06524b2614e62b7377d74fe48224b
+Max-Forwards: 70
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=46fe7a0e961b4a3cb6dccec1900fa03c
+To: <sip:phone@asterisk-1.asterisk.trickplay.com>
+Call-ID: a45692fe-c1bc-4b8c-b7b3-5db6434c3894
+CSeq: 102 REGISTER
+Contact: <sip:phone@10.0.190.153:50418>
+User-Agent: Python
+Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE
+Supported: timer, 100rel, path
+Authorization: Digest username="phone", realm="asterisk", nonce="15f57392", algorithm=MD5, uri="sip:asterisk-1.asterisk.trickplay.com", response="fe1490da61db2239ff6563c4a0b12e9a"
+Content-Length: 0
+
+
+

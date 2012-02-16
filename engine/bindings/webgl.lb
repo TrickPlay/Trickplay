@@ -2496,8 +2496,6 @@ class Matrix [[CoglMatrix*]]
             CoglMatrix * ma = ( CoglMatrix * ) UserData::get_client( L , a );
             CoglMatrix * mb = ( CoglMatrix * ) UserData::get_client( L , b );
 
-            cogl_matrix_init_identity( self );
-
             if ( ma && mb )
             {
                 cogl_matrix_multiply( self , ma , mb );

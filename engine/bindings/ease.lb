@@ -247,7 +247,7 @@ class Ease [[Ease *]]
 		i = 98 , eased_i = 99.888944202007
 		i = 99 , eased_i = 99.896381276571
 		i = 100 , eased_i = 100
-[	--]]
+	--]]
 	(end)
 		
 	*Return Value:* Modified double value after applying ease transition
