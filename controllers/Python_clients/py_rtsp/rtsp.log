@@ -1,0 +1,66 @@
+ANNOUNCE rtsp://tpmini.internal.trickplay.com/sample.sdp RTSP/1.0
+Cseq: 1
+Content-Length: 601
+Content-Type: application/sdp
+Authorization: Basic YnJvYWRjYXN0OnNheXdoYXQ=
+
+v=0
+o=- 536 3212164818 IN IP4 127.0.0.0
+s=QuickTime
+c=IN IP4 10.0.190.5
+t=0 0
+a=range:npt=now-
+a=isma-compliance:2,2.0,2
+m=audio 6970 RTP/AVP 96
+b=AS:64
+a=rtpmap:96 mpeg4-generic/44100/1
+a=fmtp:96 profile-level-id=15;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3;config=1388
+a=mpeg4-esid:101
+a=control:trackid=1
+m=video 6970 RTP/AVP 97
+b=AS:1372
+a=rtpmap:97 H264/90000
+a=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPZ,aM4JyA==
+a=mpeg4-esid:201
+a=cliprect:0,0,480,640
+a=framesize:97 640-480
+a=control:trackid=2
+
+
+
+
+OPTIONS rtsp://tpmini.internal.trickplay.com/sample.sdp RTSP/1.0
+CSeq: 2
+Authorization: Basic YnJvYWRjYXN0OnNheXdoYXQ=
+
+
+
+RTSP/1.0 200 OK
+Server: QTSS/6.1.0 (Build/532; Platform/MacOSX; Release/Mac OS X Server; )
+Cseq: 1
+
+
+
+SETUP rtsp://tpmini.internal.trickplay.com/sample.sdp/trackid=2 RTSP/1.0
+Transport: RTP/AVP;unicast;client_port=6970-6971;mode=record
+Authorization: Basic YnJvYWRjYXN0OnNheXdoYXQ=
+CSeq: 3
+
+
+
+RTSP/1.0 400 Bad Request
+Server: QTSS/6.1.0 (Build/532; Platform/MacOSX; Release/Mac OS X Server; )
+Cseq: 
+Connection: Close
+
+
+
+RECORD rtsp://tpmini.internal.trickplay.com/sample.sdp RTSP/1.0
+Authorization: Basic YnJvYWRjYXN0OnNheXdoYXQ=
+CSeq: 4
+
+
+
+
+
+
