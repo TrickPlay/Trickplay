@@ -691,6 +691,21 @@ function Make_Bar(loc,wu_data,index, master)
     local bar_dist = 1905-bar_side_w-MINI_BAR_X
     local next_i = bar_index
     
+    local flag_for_deletion = false
+    
+    local function delete_me()
+        
+        table.remove(bars,bar_index)
+        table.remove(locations,bar_index)
+        
+        for i,v in ipairs(bars) do
+            bars[i].set_bar_index(i)
+        end
+        
+        bar:unparent()
+        
+        
+    end
     
     local moving_to_new_bar = function()
         bar_i  = next_i
@@ -775,6 +790,9 @@ function Make_Bar(loc,wu_data,index, master)
         on_completed = function()
             bars[next_i]:grab_key_focus()
             bar:hide()
+            
+            if flag_for_deletion then delete_me() end
+            
         end
     }
     bar.full_move_right = Timeline{
@@ -802,6 +820,9 @@ function Make_Bar(loc,wu_data,index, master)
             right_faux_bar.x = 0
             left_faux_bar.x = 0
             bars[next_i]:grab_key_focus()
+            
+            if flag_for_deletion then delete_me() end
+            
         end
     }
     local s
@@ -876,7 +897,8 @@ function Make_Bar(loc,wu_data,index, master)
     }
     
     --Key Handler
-    local bar_keys = {
+    local bar_keys
+    bar_keys = {
         [keys.Up]     = function()
             
             if master_i ~= nil then
@@ -925,7 +947,7 @@ function Make_Bar(loc,wu_data,index, master)
         [keys.Left]   = function()
             if #bars == 1 then return end
             
-            next_i = (bar_i-2) % (# bars) + 1
+            next_i = (bar_index-2) % (# bars) + 1
             
             
             if anim_state.state == "MINI" then
@@ -938,7 +960,7 @@ function Make_Bar(loc,wu_data,index, master)
             
             if #bars == 1 then return end
             
-            next_i = (bar_i) % (# bars) + 1
+            next_i = (bar_index) % (# bars) + 1
             
             
             if anim_state.state == "MINI" then
@@ -976,6 +998,11 @@ function Make_Bar(loc,wu_data,index, master)
         end,
         [keys.RED]    = function()
             if #bars == 1 then return end
+            
+            flag_for_deletion = true
+            
+            bar_keys[keys.Right]()
+            --[[
             table.remove(bars,bar_index)
             table.remove(locations,bar_index)
             
@@ -991,6 +1018,7 @@ function Make_Bar(loc,wu_data,index, master)
             else
                 bar.full_move_right:start()
             end
+            --]]
         end,
         [keys.GREEN]  = function()
             
@@ -1044,9 +1072,11 @@ function Make_Bar(loc,wu_data,index, master)
         [keys.RED]    = function()
             
             if zip_focus <= 5 then
+                digits[zip_focus].text = ""
+                
                 zip_backing[zip_focus].color={255,255,255}
             end
-            zip_focus = zip_focus + 1
+            zip_focus = zip_focus - 1
             if zip_focus == #zip_backing + 1 then
                 zip_focus = 1
                 
