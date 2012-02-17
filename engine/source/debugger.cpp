@@ -65,6 +65,8 @@ public:
 
 	virtual void disable_console() = 0;
 
+	virtual void clear_pending_commands() = 0;
+
 protected:
 
 	virtual ~Server() {}
@@ -107,6 +109,11 @@ public:
 
 	virtual bool reply( const JSON::Object & obj )
 	{
+		if ( 0 == response )
+		{
+			return false;
+		}
+
 		response->set_status( HttpServer::HTTP_STATUS_OK );
 		response->set_response( "application/json" , obj.stringify() );
 		response->resume();
@@ -212,6 +219,20 @@ public:
 	virtual void disable_console()
 	{
 		g_atomic_int_set( & console_enabled , 0 );
+	}
+
+	virtual void clear_pending_commands()
+	{
+		g_async_queue_lock( queue );
+
+		while( Debugger::Command * command = ( Debugger::Command * ) g_async_queue_try_pop_unlocked( queue ) )
+		{
+			g_debug( "CLEARING PENDING COMMAND %s" , command->get().c_str() );
+
+			delete command;
+		}
+
+		g_async_queue_unlock( queue );
 	}
 
 protected:
@@ -523,6 +544,8 @@ void Debugger::uninstall()
     if ( installed )
     {
         lua_sethook( app->get_lua_state(), lua_hook, 0, 0 );
+
+        server->clear_pending_commands();
     }
 }
 
@@ -536,6 +559,8 @@ void Debugger::install( bool break_next_line )
     {
         return;
     }
+
+    server->clear_pending_commands();
 
     lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET |*/ LUA_MASKLINE, 0 );
 
