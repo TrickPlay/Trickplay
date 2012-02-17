@@ -38,6 +38,10 @@ namespace Bullet
 
         int create_body( int element , int properties , const char * metatable );
 
+        int create_body_3d( int properties );
+
+        int create_shape( btCollisionShape * shape );
+
         void step( float time_step , int max_sub_steps , float fixed_time_step );
 
 	private:

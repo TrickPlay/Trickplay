@@ -7,6 +7,11 @@
 #include "clutter_util.h"
 #include "lb.h"
 
+extern int new_PBShape( lua_State * L );
+extern int new_PBBody3d( lua_State * L );
+extern int invoke_PBBody3d_on_get_transform(lua_State*L, btRigidBody *  self,int nargs,int nresults);
+extern int invoke_PBBody3d_on_set_transform(lua_State*L, btRigidBody *  self,int nargs,int nresults);
+
 
 namespace Bullet
 {
@@ -132,6 +137,68 @@ private:
 
 	World *			world;
 	ClutterActor * 	actor;
+};
+
+
+class GLMotionState : public btMotionState
+{
+public:
+
+	GLMotionState( lua_State * _L , btRigidBody * _body )
+	:
+		L( _L ),
+		body( _body )
+	{
+		g_assert( L );
+		g_assert( body );
+	}
+
+	virtual ~GLMotionState()
+	{
+	}
+
+	virtual void getWorldTransform(	btTransform & transform ) const
+	{
+		if ( invoke_PBBody3d_on_get_transform( L , body , 0 , 1 ) )
+		{
+			int n = lua_gettop( L );
+
+			if ( UserData * ud = UserData::get_check( L , n ) )
+			{
+				CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
+
+				transform.setFromOpenGLMatrix( & matrix->xx );
+			}
+
+			lua_pop( L , 1 );
+		}
+	}
+
+	virtual void setWorldTransform(	const btTransform & transform )
+	{
+		if ( invoke_PBBody3d_on_set_transform( L , body , 0 , 1 ) )
+		{
+			int n = lua_gettop( L );
+
+			if ( UserData * ud = UserData::get_check( L , n ) )
+			{
+				CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
+
+				float m[16];
+
+				transform.getOpenGLMatrix( m );
+
+				cogl_matrix_init_from_array( matrix , m );
+			}
+
+			lua_pop( L , 1 );
+		}
+	}
+
+private:
+
+	lua_State * 	L;
+	btRigidBody *	body;
 };
 
 //=============================================================================
@@ -367,6 +434,169 @@ int World::create_body( int element , int properties , const char * metatable )
     lua_pushvalue( L , element );
 
     return 1;
+}
+
+//-----------------------------------------------------------------------------
+
+int World::create_body_3d( int properties )
+{
+	lua_State * L = lsp->get_lua_state();
+
+    luaL_checktype( L , properties , LUA_TTABLE );
+
+    //.........................................................................
+    // Get the shape
+
+    lua_getfield( L , properties , "shape" );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+    	return luaL_error( L , "Missing shape for body" );
+    }
+
+    UserData * ud = UserData::get_check( L , lua_gettop( L ) );
+
+    if ( ! ud )
+    {
+    	return luaL_error( L , "Invalid shape for body" );
+    }
+
+    btCollisionShape * shape = ( btCollisionShape * ) ud->get_client();
+
+    lua_pop( L , 1 );
+
+    //.........................................................................
+
+    lua_getfield( L , properties , "transform" );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+    	return luaL_error( L , "Missing body transform" );
+    }
+
+    ud = UserData::get_check( L , lua_gettop( L ) );
+
+    if ( ! ud )
+    {
+    	return luaL_error( L , "Invalid body transform" );
+    }
+
+    CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
+
+    btTransform transform;
+
+    transform.setFromOpenGLMatrix( & matrix->xx );
+
+    lua_pop( L , 1 );
+
+    //.........................................................................
+    // Default mass to 1 unless it is specified in the properties
+
+    btScalar mass( 1.0f );
+
+    lua_getfield( L , properties , "mass" );
+    if ( lua_isnumber( L , -1 ) )
+    {
+    	mass = lua_tonumber( L , -1 );
+    }
+    lua_pop( L , 1 );
+
+    btVector3 local_inertia( 0 , 0 , 0 );
+
+    if ( mass != 0.0f )
+    {
+    	shape->calculateLocalInertia( mass , local_inertia );
+    }
+
+    //.........................................................................
+    // Info to construct the body
+
+	btRigidBody::btRigidBodyConstructionInfo cinfo( mass , 0 , shape , local_inertia );
+
+	cinfo.m_startWorldTransform = transform;
+
+    //.........................................................................
+
+	lua_getfield( L , properties , "bounce" );
+	if ( lua_isnumber( L , -1 ) )
+	{
+		cinfo.m_restitution = lua_tonumber( L , -1 );
+	}
+	lua_pop( L , 1 );
+
+	lua_getfield( L , properties , "restitution" );
+	if ( lua_isnumber( L , -1 ) )
+	{
+		cinfo.m_restitution = lua_tonumber( L , -1 );
+	}
+	lua_pop( L , 1 );
+
+	lua_getfield( L , properties , "friction" );
+	if ( lua_isnumber( L , -1 ) )
+	{
+		cinfo.m_friction = lua_tonumber( L , -1 );
+	}
+	lua_pop( L , 1 );
+
+	lua_getfield( L , properties , "linear_damping" );
+	if ( lua_isnumber( L , -1 ) )
+	{
+		cinfo.m_linearDamping = lua_tonumber( L , -1 );
+	}
+	lua_pop( L , 1 );
+
+	lua_getfield( L , properties , "angular_damping" );
+	if ( lua_isnumber( L , -1 ) )
+	{
+		cinfo.m_angularDamping = lua_tonumber( L , -1 );
+	}
+	lua_pop( L , 1 );
+
+	//.........................................................................
+
+	btRigidBody * body = new btRigidBody( cinfo );
+
+	body->setMotionState( new GLMotionState( L , body ) );
+
+	world->addRigidBody( body );
+
+	//.........................................................................
+
+	lua_pushlightuserdata( L , body );
+	new_PBBody3d( L );
+	lua_remove( L , -2 );
+
+	lua_pushvalue( L , properties );
+	lb_set_props_from_table( L );
+	lua_pop( L , 1 );
+
+    return 1;
+}
+
+
+//-----------------------------------------------------------------------------
+
+int World::create_shape( btCollisionShape * shape )
+{
+	g_assert( shape );
+
+	lua_State * L = lsp->get_lua_state();
+
+	if ( 0 == L )
+	{
+		delete shape;
+		return 0;
+	}
+
+	lua_pushlightuserdata( L , shape );
+
+	new_PBShape( L );
+
+	lua_remove( L , -2 );
+
+	shapes.push_back( shape );
+
+	return 1;
 }
 
 //-----------------------------------------------------------------------------
