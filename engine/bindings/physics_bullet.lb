@@ -10,6 +10,36 @@ interface PBBody [[ void * ]]
 {
 }
 
+interface PBShape [[ btCollisionShape * ]]
+{
+    PBShape()
+        [[
+            self = lb_construct( btCollisionShape , lua_touserdata( L , -2 ) );
+        ]];
+        
+    ~PBShape()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+}
+
+interface PBBody3d [[ btRigidBody * ]]
+{
+    PBBody3d()
+        [[
+            self = lb_construct( btRigidBody , lua_touserdata( L , -2 ) );
+        ]];
+        
+    ~PBBody3d()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+        
+    callback on_get_transform;
+    
+    callback on_set_transform;        
+}
+
 global pb [[ Bullet::World * ]] 
 {
     pb()
@@ -61,5 +91,20 @@ global pb [[ Bullet::World * ]]
             {
                 ClutterUtil::set_props_from_table( L , properties );
             }
-        ]];               
+        ]];
+        
+    PBBody3d Body3d( table properties )
+        [[
+            int n = self->create_body_3d( properties );
+
+            if ( ! n )
+            {
+                lua_pushnil( L );
+            }
+        ]];
+
+    PBShape BoxShape( double half_width , double half_height , double half_depth )
+        [[
+            self->create_shape( new btBoxShape( btVector3( half_width , half_height , half_depth ) ) );              
+        ]];                       
 }

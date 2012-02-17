@@ -2471,27 +2471,31 @@ class Matrix [[CoglMatrix*]]
             cogl_matrix_init_from_array( self , m );
         ]];
 
-    identity()
+    Matrix identity()
         [[
             cogl_matrix_init_identity( self );
+            lua_pushvalue( L , 1 );
         ]];
 
-    frustum( double left , double right , double bottom , double top , double z_near , double z_far )
+    Matrix frustum( double left , double right , double bottom , double top , double z_near , double z_far )
         [[
             cogl_matrix_frustum( self , left , right , bottom , top , z_near , z_far );
+            lua_pushvalue( L , 1 );
         ]];
 
-    ortho( double left , double right , double bottom , double top , double z_near , double z_far )
+    Matrix ortho( double left , double right , double bottom , double top , double z_near , double z_far )
         [[
             cogl_matrix_ortho( self , left , right , bottom , top , z_near , z_far );
+            lua_pushvalue( L , 1 );
         ]];
 
-    perspective( double fov_y , double aspect , double z_near , double z_far )
+    Matrix perspective( double fov_y , double aspect , double z_near , double z_far )
         [[
             cogl_matrix_perspective( self , fov_y , aspect , z_near , z_far );
+            lua_pushvalue( L , 1 );
         ]];
 
-    multiply( Matrix a , Matrix b )
+    Matrix multiply( Matrix a , Matrix b )
         [[
             CoglMatrix * ma = ( CoglMatrix * ) UserData::get_client( L , a );
             CoglMatrix * mb = ( CoglMatrix * ) UserData::get_client( L , b );
@@ -2500,23 +2504,30 @@ class Matrix [[CoglMatrix*]]
             {
                 cogl_matrix_multiply( self , ma , mb );
             }
+
+            lua_pushvalue( L , 1 );
         ]];
 
-    rotate( double angle , double x , double y , double z )
+    Matrix rotate( double angle , double x , double y , double z )
         [[
             cogl_matrix_rotate( self , angle , x , y , z );
+            lua_pushvalue( L , 1 );
         ]];
 
-    translate( double x , double y , double z )
+    Matrix translate( double x , double y , double z )
         [[
             cogl_matrix_translate( self , x , y , z );
+            lua_pushvalue( L , 1 );
         ]];
 
-    scale( double sx , double sy , double sz )
+    Matrix scale( double sx , double sy , double sz )
         [[
             cogl_matrix_scale( self , sx , sy , sz );
+            lua_pushvalue( L , 1 );
         ]];
 
+    # Returns a new one
+    
     Matrix inverse()
         [[
             CoglMatrix * m = g_slice_new( CoglMatrix );
@@ -2528,6 +2539,8 @@ class Matrix [[CoglMatrix*]]
             ud->initialize_with_client( m );
         ]];
 
+    # Returns a new one
+    
     Matrix copy()
         [[
             CoglMatrix * m = g_slice_new( CoglMatrix );
@@ -2571,4 +2584,13 @@ class Matrix [[CoglMatrix*]]
                 lua_rawseti( L , -2 , i + 1 );
             }
         ]];
+        
+    Matrix set( Matrix other )
+        [[
+            CoglMatrix * source = ( CoglMatrix * ) UserData::get_client( L , other );
+            
+            cogl_matrix_init_from_array( self , cogl_matrix_get_array( source ) );
+            
+            lua_pushvalue( L , 1 );
+        ]];        
 }
