@@ -5,7 +5,7 @@ screen_w = screen.w
 screen_h = screen.h
 screen:show()
 --screen:add(Rectangle{name="A Grey Background for the APP",w=screen_w,h=screen_h,color={60,60,60}})
-dofile("App_Loop.lua")
+--dofile("App_Loop.lua")
 dofile("Utils.lua")
 
 function post_main()
@@ -167,7 +167,9 @@ function post_main()
 	
 	
 	if settings.bar_state then bar_state:change_state_to(settings.bar_state) end
-	print(settings.bar_state)
+	
+	--print(settings.bar_state)
+	
 	--make the weather bars for each location
 	for i,location in pairs(locations) do
 		
