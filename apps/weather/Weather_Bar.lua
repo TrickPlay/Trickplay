@@ -1071,16 +1071,15 @@ function Make_Bar(loc,wu_data,index, master)
         end,
         [keys.RED]    = function()
             
-            if zip_focus <= 5 then
-                digits[zip_focus].text = ""
-                
-                zip_backing[zip_focus].color={255,255,255}
-            end
+            zip_backing[zip_focus].color={255,255,255}
             zip_focus = zip_focus - 1
-            if zip_focus == #zip_backing + 1 then
-                zip_focus = 1
+            if zip_focus == 0 then
+                zip_focus = #zip_backing
                 
             end
+            digits[zip_focus].text = ""
+            
+            
             zip_backing[zip_focus].color = {140,140,140}
             
         end,
