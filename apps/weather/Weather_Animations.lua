@@ -1629,8 +1629,10 @@ conditions = {
     ["Overcast"]                 = function() set_states{sun="HALF",clouds="MOSTLY",fog="FULL"} end,
     --["Scattered Clouds"]         = nil,
 }
+
+
 for k,_ in pairs(conditions) do
-    table.insert(all_anims,k)
+    table.insert(all_anims,k) -- index all the animations for the test bar
 end
 
 conditions["Clear"]                  = conditions["Sunny"]
@@ -1644,6 +1646,7 @@ conditions["Chance of a Thunderstorm"] = conditions["Chance of Thunderstorms"]
 --from curr conditions
 conditions["Rain Showers"]        = conditions["Rain"]
 conditions["Drizzle"]             = conditions["Rain"]
+conditions["Light Rain"]          = conditions["Rain"]
 conditions["Snow Grains"]         = conditions["Snow"]
 conditions["Ice Crystals"]        = conditions["Snow"]
 conditions["Ice Pellets"]         = conditions["Snow"]
@@ -1662,6 +1665,15 @@ conditions["Thunderstorms and Hail"]        = conditions["Thunderstorms"]
 conditions["Thunderstorms and Small Hail"]  = conditions["Thunderstorms"]
 
 
+setmetatable(conditions,{
+    __index = function(t,k)
+        
+        print("conditions in WeatherAnimations.lua received unexpected weather condition: ")
+        print("\t"..k)
+        print("Please tell Alex Indaco that this happened\n\n")
+        
+    end,
+})
 
 
 

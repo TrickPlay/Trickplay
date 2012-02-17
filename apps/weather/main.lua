@@ -72,56 +72,7 @@ function post_main()
 	
 	focused_bar = {}
 	
-	function make_focused_bar_state()
-		local transitions = {}
-		local keys
-		local prev_i
-		for i,v in ipairs(bars) do
-			
-			--FULL Bars
-			
-			--MINI Bars
-			
-			-- Press Right, Bars shift to the right, focused index: (i-1) -> i
-			keys = {}
-			prev_i = (i-2)%#bars+1
-			for ii,vv in ipairs(bars) do
-				if ii == i then
-					
-				else
-					
-				end
-			end
-			
-			transitions[i] = {
-                source = prev_i .."",
-                target = i.."",
-				keys
-			}
-			
-			
-			
-			-- Press Left, Bars shift to the right, focused index: (i+1) -> i
-			keys = {}
-			prev_i = (i)%#bars+1
-			for ii,vv in ipairs(bars) do
-				if ii == i then
-					
-				else
-					
-				end
-			end
-			
-			transitions[i] = {
-                source = prev_i .."",
-                target = i.."",
-				keys
-			}
-		end
-		focused_bar = AnimationState{
-            transitions = transitions
-		}
-	end
+	
 	
 		
 	--load saved settings, or default to Palo Alto,CA
@@ -131,7 +82,7 @@ function post_main()
 	view_5_day=false
 	curr_condition=Group{name="Bottom Corner Weather conditions"}
 	
-	all_anims = {}
+	all_anims = {} -- used for test bar
 	bars={}
 	screen:add(curr_condition,left_faux_bar,right_faux_bar)
 	dofile("Internet.lua")
