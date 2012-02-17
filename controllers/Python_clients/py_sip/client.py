@@ -5,6 +5,7 @@ import select
 import telnetlib
 import hashlib
 import uuid
+from collections import deque
 
 branch = 'z9hG4bKg40a3m4gXXj3c'
 
@@ -124,11 +125,12 @@ To = {
     'tag' : ""
 }
 
-# All Calls have are tied to a specific Call-ID. OPTIONS always
-# has unique Call-IDs. All REGISTERs from the same UA have the
+# All Calls are tied to a specific Call-ID. OPTIONS always
+# has a unique Call-ID. All REGISTERs from the same UA have the
 # same Call-ID.
 Call_IDs = {
-    'REGISTER' : str(uuid.uuid4())
+    'REGISTER' : str(uuid.uuid4()),
+    'INVITE' : str(uuid.uuid4())
 }
 
 # Sequence Number, increments per request for same call.
@@ -185,7 +187,6 @@ Content-Length: 601\r\n'
 
 
 
-
 #####################################
 
 
@@ -205,7 +206,6 @@ print "\n"
 """
 
 branch_start = 'z9hG4bK'
-register_branch = ""
 
 session = ""
 nonce = None
@@ -215,8 +215,9 @@ udp_sip_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp_sip_sock.bind(("", udp_sip_client_port))
 
 
-read_buf = ""
-write_buf = ""
+read_buf = bytearray("")
+
+write_queue = deque([])
 
 current_header = {}
 
@@ -225,73 +226,10 @@ states = ["UnRegistered", "Registered", "Inviting"]
 state = "UnRegistered"
 
 
-def gen_branch():
-    """Use to create a unique branch id"""
-
-    return branch_start + uuid.uuid4().hex
-
-
-
-def gen_register(authorization):
-    """Create and return a REGISTER packet"""
-
-    global register_branch
-    # generate new branch id
-    register_branch = gen_branch()
-
-    # build REGISTER packet
-    register = "REGISTER sip:asterisk-1.asterisk.trickplay.com SIP/2.0\r\n"
-    register += "Via: " + Via[1]['protocol'] + " " + Via[1]['client_ip'] + \
-                ":" + Via[1]['client_port'] + ";rport;branch=" + register_branch + \
-                "\r\n"
-    register += "Max-Forwards: " + Max_Forwards + "\r\n"
-    register += "From: " + From['sender'] + ";tag=" + From['tag'] + "\r\n"
-    register += "To: " + From['sender'] + "\r\n"
-    register += "Call-ID: " + Call_IDs['REGISTER'] + "\r\n"
-    register += "CSeq: " + str(CSeqs['REGISTER']) + " REGISTER\r\n"
-    register += "Contact: " + Contact + "\r\n"
-    register += "User-Agent: " + User_Agent + "\r\n"
-    register += "Allow: " + Allow + "\r\n"
-    register += "Supported: " + Supported + "\r\n"
-
-    # add authorization line if available
-    if authorization:
-        register += authorization
-
-    # terminate with default Content-Length of 0
-    register += Content_Length
-
-    # increment sequence number
-    CSeqs['REGISTER'] += 1
-
-    return register
-
-
-
-def register(nonce):
-    """Register to the SIP Server"""
-
-    # if authorization key exists then generate auth line
-    auth = None
-    if nonce:
-        ha1 = hashlib.md5("phone:asterisk:saywhat").hexdigest()
-        ha2 = hashlib.md5("REGISTER:sip:asterisk-1.asterisk.trickplay.com").hexdigest()
-        ha3 = hashlib.md5(ha1 + ":" + nonce + ":" + ha2).hexdigest()
-
-        auth = Auth_1 + nonce + Auth_2 + ha3 + '"\r\n'
-
-    # create REGISTER packet
-    packet = gen_register(auth)
-
-    # send over network
-    sip_send(packet)
-
-
-
 def sip_parse(data):
     """Parses incoming data"""
 
-    global read_buf, current_header
+    global read_buf
     read_buf = read_buf + data
     result = read_buf.split('\r\n\r\n', 1)
     if len(result) < 2:
@@ -299,73 +237,20 @@ def sip_parse(data):
     header, read_buf = result
 
     elements = header.split('\r\n')
-    current_header['Status-Line'] = elements[0]
+
+    response = {}
+    response['Status-Line'] = str(elements[0])
     
     for element in elements[1:]:
-        key, var = element.split(":", 1)
-        current_header[key] = var
+        key, var = element.split(": ", 1)
+        response[str(key)] = str(var)
 
-    print 'current_header:\n', current_header, '\n\n'
+    print 'response:\n', response, '\n\n'
 
-    return True
+    if 'Call-ID' in response:
+        return response
 
-def handle_state():
-    """State machine stuff"""
-
-    global states, state
-
-    
-
-def sip_send(packet):
-    """Send sip request, log request and response"""
-    print packet
-    print "\n"
-
-    global nonce
-
-    log.write(packet)
-    log.write("\n\n")
-
-    readable, writeable, in_error = select.select([udp_sip_sock], [udp_sip_sock], [], 5)
-
-    if readable.count(udp_sip_sock):
-        data, addr = udp_sip_sock.recvfrom(1024)
-        print "received from", addr, ":", data
-
-    if writeable.count(udp_sip_sock):
-        udp_sip_sock.sendto(packet, (host, udp_sip_server_port))
-
-    while True:
-        readable, writeable, in_error = select.select([udp_sip_sock], [udp_sip_sock], [], 5)
-
-        #if readable.count(udp_sip_sock)
-        #    data, addr = udp_sip_sock.recvfrom(1024)
-        #    print "received from", addr, ":\n", data
-        #    if sip_parse(data):
-        #        handle_state()
-
-        if readable.count(udp_sip_sock):
-            data, addr = udp_sip_sock.recvfrom(1024)
-            print "received from", addr, ":\n", data
-            sip_parse(data)
-            if data.find('nonce="') >= 0:
-                begin = data.find('nonce="')
-                start = data.find('"', begin)
-                end = data.find('"', start+1)
-                nonce = data[start+1:end]
-                print "nonce: " + nonce
-
-            if data[:7] != 'SIP/2.0':
-                continue
-
-            break
-
-        if in_error.count(udp_sip_sock):
-            print "error"
-            print udp_sip_sock.error
-            break
-
-    print "\n"
+    return False 
 
 
 def get_frames():
@@ -380,84 +265,70 @@ def get_frames():
     frames_fd.close()
 
 
-def rtp_send():
-    """Send rtp frames over and over"""
-    global frames
-
-    counter = 0
-    
-    while True:
-        for frame in frames[0:]:
-            print "writing a frame"
-            tn.write(frame)
-            #print tn.read_until("\r\n\r\n", 1)
-            print counter
-            counter = counter + 1
-    
-    print tn.read_until("\r\n\r\n", 5)
-
-def udp_sip():
-    """This is a udp sip session"""
-    udp_sip_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp_sip_sock.bind(("", udp_sip_client_port))
+#########################
 
 
-def udp_rtsp_session():
-    """This sets up a UDP RTSP session and sends frames via UDP"""
+import call
 
-    global udp_rtp_server_port
-    global udp_rtp_client_port
-    global udp_rtcp_client_port
-    global udp_rtp_sock
-    global frames
+active_calls = {}
 
-    udp_rtcp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp_rtcp_sock.bind(("", udp_rtcp_client_port))
 
-    rtsp_send(udp_announce2 + udp_sdp2)
-    ##rtsp_send(udp_announce + udp_sdp)
-    rtsp_send(udp_options)
-    rtsp_send(udp_setup)
-    rtsp_send(udp_record + session + "\r\n\r\n")
+register_call = call.Register("phone", sender_uri, remote_uri, udp_sip_client_ip,
+                     udp_sip_client_port, udp_sip_server_port, write_queue)
 
-    index = 1
-    counter = 1
+invite_call = call.Invite("phone", sender_uri, remote_uri, udp_sip_client_ip,
+                     udp_sip_client_port, udp_sip_server_port, write_queue)
+
+active_calls[register_call.Call_ID] = register_call
+active_calls[invite_call.Call_ID] = invite_call
+
+def register_callback():
+    invite_call.invite()
+
+register_call.callback = register_callback
+
+register_call.register()
+
+
+def select_loop():
+    """
+    Continuously checks for data to read and room to write
+    and informs call state machines of activity.
+    """
+
+    global nonce
 
     while True:
-        readable, writeable, in_error = select.select([udp_rtcp_sock], [udp_rtp_sock], [], 5)
+        readable, writeable, in_error = select.select([udp_sip_sock], [udp_sip_sock], [], 5)
 
-        if readable.count(udp_rtcp_sock):
-            data, addr = udp_rtcp_sock.recvfrom(1024)
-            print "received from", addr, ":", data
+        # this is how we read
+        if readable.count(udp_sip_sock):
+            data, addr = udp_sip_sock.recvfrom(1024)
 
-        if writeable.count(udp_rtp_sock):
-            udp_rtp_sock.sendto(frames[index], (host, udp_rtp_server_port))
-            index += 1
+            print "received from", addr, ":\n", data
+            log.write("\n" + data + "\n\n")
 
-        if index >= len(frames):
-            index = 1
-            #print counter
-            #counter += 1
-            #print "wrote all frames"
-    
+            response = sip_parse(data)
+            
+            if response and response['Call-ID'] in active_calls:
+                active_calls[response['Call-ID']].interpret(response)
+
+        # this is how we write
+        if writeable.count(udp_sip_sock) and len(write_queue):
+            packet = write_queue.popleft()
+
+            print "\nwriting:\n" + packet + "\n\n"
+            log.write('\n' + packet + "\n\n")
+
+            udp_sip_sock.sendto(packet, (host, udp_sip_server_port))
+
+        # this is why im hot
+        if in_error.count(udp_sip_sock):
+            print "error"
+            print udp_sip_sock.error
 
 
-
-#get_frames()
-#udp_rtsp_session()
-
-#sip_send(sip_register + sip_content_length)
-
-#ha1 = hashlib.md5("phone:asterisk:saywhat").hexdigest()
-#ha2 = hashlib.md5("REGISTER:sip:asterisk-1.asterisk.trickplay.com").hexdigest()
-#ha3 = hashlib.md5(ha1 + ":" + nonce + ":" + ha2).hexdigest()
-
-#sip_send(sip_register + sip_auth_1 + nonce + sip_auth_2 + ha3 + '"\r\n' + sip_content_length)
-
-#sip_send(sip_invite + sip_udp_sdp)
-
-register(nonce)
-register(nonce)
+select_loop()
 
 log.close()
 #tn.close()
