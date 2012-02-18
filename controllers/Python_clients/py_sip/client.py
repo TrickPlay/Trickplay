@@ -98,6 +98,8 @@ Supported: timer, 100rel, path\r\n'
 sender_uri = "sip:phone@asterisk-1.asterisk.trickplay.com"
 remote_uri = "sip:rex@asterisk-1.asterisk.trickplay.com"
 
+dial_600_uri = "sip:600@asterisk-1.asterisk.trickplay.com"
+
 # Used to record the SIP route taken by a request and used to route the response
 # back to the originator.
 # UAs generating a request records its own address in a Via and adds it to the header.
@@ -236,14 +238,24 @@ def sip_parse(data):
         return False
     header, read_buf = result
 
+    #print "\nheader:\n", header, "\nread_buf\n", read_buf
+
     elements = header.split('\r\n')
 
     response = {}
     response['Status-Line'] = str(elements[0])
     
+    #print "\n elements: \n", elements, "\n\n"
+
     for element in elements[1:]:
+        #print "\n element: \n", element, "\n\n"
         key, var = element.split(": ", 1)
         response[str(key)] = str(var)
+
+    if 'Content-Length' in response and response['Content-Length'] > 0:
+        length = int(response['Content-Length'])
+        response['full_body'] = str(read_buf[:length])
+        read_buf = read_buf[length:]
 
     print 'response:\n', response, '\n\n'
 
@@ -276,7 +288,7 @@ active_calls = {}
 register_call = call.Register("phone", sender_uri, remote_uri, udp_sip_client_ip,
                      udp_sip_client_port, udp_sip_server_port, write_queue)
 
-invite_call = call.Invite("phone", sender_uri, remote_uri, udp_sip_client_ip,
+invite_call = call.Invite("phone", sender_uri, dial_600_uri, udp_sip_client_ip,
                      udp_sip_client_port, udp_sip_server_port, write_queue)
 
 active_calls[register_call.Call_ID] = register_call

@@ -192,8 +192,8 @@ class Invite(Call):
         # generate new branch id
         self.branch = self.gen_branch()
 
-        # build REGISTER packet
-        invite = "INVITE sip:rex@asterisk-1.asterisk.trickplay.com SIP/2.0\r\n"
+        # build INVITE packet
+        invite = "INVITE " + self.remote_uri + " SIP/2.0\r\n"
         invite += "Via: " + self.Via[1]['protocol'] + " " + self.Via[1]['client_ip'] + \
                     ":" + self.Via[1]['client_port'] + ";rport;branch=" + self.branch + \
                     "\r\n"
