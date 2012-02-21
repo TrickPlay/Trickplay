@@ -19,7 +19,7 @@ local SPHERE_START_VELOCITY_MIN     = 6
 local SPHERE_START_VELOCITY_MAX     = 12
 local SPHERE_FRICTION               = 0.01
 local SPHERE_DENSITY                = 1
-local SPHERE_BOUNCE                 = 1.00
+local SPHERE_BOUNCE                 = 1.05
 
 local RING_ANIMATE_IN_DURATION      = 400
 
@@ -556,7 +556,7 @@ local function start_level()
     
     neutral_spheres = 0
 
-    for i = 1 , 0 do
+    for i = 1 , 10 do
         local sphere = make_sphere()
         local W , H = sphere.w , sphere.h
         sphere.x = math.random( W , SW - W )
