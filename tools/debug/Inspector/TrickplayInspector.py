@@ -87,8 +87,6 @@ class TrickplayInspector(QWidget):
         except:
             gid = 1
             
-        print(gid)
-        
         # Get all new data
         self.inspectorModel.empty()
         self.inspectorModel.fill()

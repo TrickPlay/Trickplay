@@ -13,14 +13,15 @@ from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 
 class EditorManager(QWidget):    
     
-    def __init__(self, main=None, fileSystem = None, debugWindow = None, windowsMenu = None, parent = None):
+    def __init__(self, main=None, windowsMenu = None, parent = None):
     
         QWidget.__init__(self)
         self.windowsMenu = windowsMenu
         self.main = main
         self.setupUi(parent)
-        self.fileSystem = fileSystem
-        self.debugWindow = debugWindow
+        self.fileSystem = main._fileSystem
+        self.debugWindow = main._debug
+        self.deviceManager = None
         self.tab = None
         self.currentEditor = None
 
@@ -218,9 +219,12 @@ class EditorManager(QWidget):
         then add an editor in the correct tab widget.
         """
 
+        if self.deviceManager is None:
+            self.deviceManager = self.main._deviceManager
+
         path = str(path)
         name = os.path.basename(str(path))
-        editor = Editor(self.debugWindow, self, None)
+        editor = Editor(self, None)
 
         editor.tempfile = tempfile
         editor.fileIndex = fileIndex
@@ -247,6 +251,7 @@ class EditorManager(QWidget):
         		for k in self.tab.paths:
 					self.editors[k][1] = self.tab.paths.index(k) 
         		if editor.tempfile == False:
+        			print (path+"pp")
         			editor.readFile(path) 
 
             if closedTab != path:
@@ -256,7 +261,7 @@ class EditorManager(QWidget):
 						self.editorGroups[tabGroup].setCurrentIndex(curIndex)
 						if line_no != None:
 							self.currentEditor = self.tab.editors[curIndex]
-							self.currentEditor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
+							self.currentEditor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no)) # -1
 							if currentLine == True :
 								if self.currentEditor.current_line > -1 :
 									if not self.currentEditor.line_click.has_key(self.currentEditor.current_line) or self.currentEditor.line_click[self.currentEditor.current_line] == 0 :
@@ -301,6 +306,7 @@ class EditorManager(QWidget):
 									self.currentEditor.current_line = nextCurLine
 				return self.currentEditor
         elif tempfile == False:
+            path = os.path.join (self.deviceManager.path(), path)
             print(path)
             editor.readFile(path)
         
@@ -338,7 +344,7 @@ class EditorManager(QWidget):
         editor.windowsAction = editorAction 
 
         if not line_no == None:
-			editor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
+			editor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no))
 			self.currentEditor = editor
 			if currentLine == True :
 				if editor.current_line > -1 :

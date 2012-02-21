@@ -2,11 +2,12 @@ import telnetlib, base64, sys, random
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-from PyQt4.QtNetwork import (QTcpSocket,)
+from PyQt4.QtNetwork import  QTcpSocket, QNetworkAccessManager , QNetworkRequest , QNetworkReply
 
 from TrickplayDiscovery import TrickplayDiscovery
 from TrickplayPushApp import TrickplayPushApp
 from UI.DeviceManager import Ui_DeviceManager
+from Editor.Editor import Editor
 from connection import *
 
 NAME = Qt.UserRole + 1
@@ -16,36 +17,34 @@ ADDEVENT = QEvent.User + 1
 REMEVENT = QEvent.User + 2
 SIZEOF_UINT16 = 2
 
-
 #self.debug_stop.setEnabled(False)
 
 class TrickplayDeviceManager(QWidget):
     
-    def __init__(self, inspector, main=None, parent = None):
+    def __init__(self, main=None, parent = None):
         
         QWidget.__init__(self, parent)
                 
         self.main = main
+        self.inspector = main._inspector
+        self.editorManager = main._editorManager
+        self.debugWindow = main._debug
+        self.backtraceWindow = main._backtrace
+
         self.ui = Ui_DeviceManager()
         self.ui.setupUi(self)
         
         self.addLocalComboItem()
         
         self.discovery = TrickplayDiscovery(self)
-        self.inspector = inspector
         QObject.connect(self.ui.comboBox, SIGNAL('currentIndexChanged(int)'), self.service_selected)
-        QObject.connect(self.ui.run,
-                        SIGNAL("clicked()"),
-                        self.run)
+        QObject.connect(self.ui.run, SIGNAL("clicked()"), self.run)
         
         self._path = ''
         self.trickplay = QProcess()
-        QObject.connect(self.trickplay, SIGNAL('finished(int)'), self.app_finished)
         QObject.connect(self.trickplay, SIGNAL('started()'), self.app_started)
-
-        self.debug_port = 9876
-        self.console_port = 7777
-        self.my_name = ""
+        QObject.connect(self.trickplay, SIGNAL('finished(int)'), self.app_finished)
+        QObject.connect(self.trickplay, SIGNAL('readyRead()'), self.app_ready_read)
 
         self.icon = QIcon()
         self.icon.addPixmap(QPixmap("Assets/icon-target.png"), QIcon.Normal, QIcon.Off)
@@ -53,36 +52,44 @@ class TrickplayDeviceManager(QWidget):
         self.prev_index = 0
         self.ui.comboBox.setSizeAdjustPolicy(QComboBox.AdjustToContents)
         self.ui.comboBox.setIconSize(QSize(20,32))
+
         self.debug_mode = False
+        self.debug_port = None
+        self.console_port = 7777
+        self.my_name = ""
+        self.manager = QNetworkAccessManager()
+        self.reply = None
+        self.command = None
+
 
     def service_selected(self, index):
         
-		if index < 0:
-			return
+	if index < 0:
+	    return
         
-		self.ui.comboBox.setItemIcon(self.prev_index, self.icon_null)
-		self.ui.comboBox.setItemIcon(index, self.icon)
-		self.prev_index = index
+	self.ui.comboBox.setItemIcon(self.prev_index, self.icon_null)
+	self.ui.comboBox.setItemIcon(index, self.icon)
+	self.prev_index = index
+	address = self.ui.comboBox.itemData(index, ADDRESS).toPyObject()
+	port = self.ui.comboBox.itemData(index, PORT).toPyObject()
 
-		address = self.ui.comboBox.itemData(index, ADDRESS).toPyObject()
-		port = self.ui.comboBox.itemData(index, PORT).toPyObject()
-
-		if not address or not port:
-			return
+	if not address or not port:
+	    return
         
-		#self.inspector.clearTree()
-        
-		#print(index,address,port)
+	#self.inspector.clearTree()
+	#print(index,address,port)
 
-		CON.port = port
-		CON.address = address
+	CON.port = port
+	CON.address = address
 
     def event(self, event):
-		while 1:
+        QCoreApplication.setOrganizationName('Trickplay');
+
+        while 1:
 			if event.type() == ADDEVENT:
 				d = event.dict
 				if d[0] != self.my_name:
-					print "Service \'", d[0], "\' added"
+					print "[VDBG] Service ' %s ' added"%d[0]
 					# Add item to ComboBox
 					self.ui.comboBox.addItem(d[0])
 					index = self.ui.comboBox.findText(d[0])
@@ -101,9 +108,7 @@ class TrickplayDeviceManager(QWidget):
 							self.inspector.refresh()
 							self.inspector.ui.inspector.expandAll()
 							self.newApp = False
-					"""
 				else: 
-					name = 'Emulator'  #'Trickplay Device   '
 					address = d[1]
 					port = d[2]
 					self.ui.comboBox.setItemData(0, address, ADDRESS)
@@ -113,10 +118,11 @@ class TrickplayDeviceManager(QWidget):
 					#if getattr(self, "debug_mode") != True :
 						##self.inspector.refresh()
 						#self.inspector.ui.inspector.expandAll()
+					"""
 
 			elif event.type() == REMEVENT:
 				d = event.dict
-				print "Service \'", d[0], "\' removed"
+				print "[VDBG] Service ' %s ' removed"%d[0]
 				# Remove item from ComboBox
 				index = self.ui.comboBox.findText(d[0])
 				self.ui.comboBox.removeItem(index)
@@ -147,11 +153,10 @@ class TrickplayDeviceManager(QWidget):
         CON.port = port
         CON.address = address
     
-    def push(self):    
-        print('Pushing app to', CON.get())
+    def push(self):   
+        print('[VDBG] Pushing app to %s'%CON.get())
         tp = TrickplayPushApp(str(self.path()))
         tp.push(address = CON.get())
-        print "push"+CON.get()
         self.app_started()
         
     def setPath(self, p):
@@ -161,8 +166,7 @@ class TrickplayDeviceManager(QWidget):
         return self._path
     
     def app_started(self):
-		#tn.interact()
-		print "APP Started"
+		print "[VDBG] APP Started"
 		self.newApp = True
 
 		# Console Port 
@@ -177,9 +181,7 @@ class TrickplayDeviceManager(QWidget):
 		if self.socket.isOpen():
 			self.socket.close()
 
-		print("Connecting to console port ...")
-
-
+		print("[VDBG] Connecting to console port")
 		while 1:
 			try : 
 				self.socket.connectToHost(CON.address, self.console_port, mode=QIODevice.ReadWrite)
@@ -188,36 +190,6 @@ class TrickplayDeviceManager(QWidget):
 					break
 			except : 
 				pass
-
-		"""
-		if hasattr(self, "debug_mode") and self.debug_mode == 0 :
-			# Debug Port 
-			
-			self.debug_socket = QTcpSocket()
-			self.debug_nextBlockSize = 0
-			self.debug_bytesAvail = 0
-
-			self.connect(self.debug_socket, SIGNAL("connected()"), self.sendRequest)
-			self.connect(self.debug_socket, SIGNAL("readyRead()"), self.readDebugResponse)
-			self.connect(self.debug_socket, SIGNAL("disconnected()"), self.debugServerHasStopped)
-			#self.connect(self.socket,
-                     	#SIGNAL("error(QAbstractSocket::SocketError)"),
-                     	#self.serverHasError)
-
-			if self.debug_socket.isOpen():
-				self.debug_socket.close()
-
-			print("Connecting to debugger port ...")
-
-			while 1:
-				try : 
-					self.debug_socket.connectToHost(CON.address, self.debug_port, mode=QIODevice.ReadWrite)
-					if self.debug_socket.waitForConnected(100): 
-						break
-				except : 
-					pass
-		"""
-	
 
     def sendRequest(self):
         print "Connected"
@@ -259,7 +231,7 @@ class TrickplayDeviceManager(QWidget):
 		"""
 
     def debugServerHasStopped(self):
-    	print ("Connection closed by server")
+    	print ("[VDBG] Connection closed by server")
     	self.debug_socket.close()
 
     def serverHasStopped(self):
@@ -270,20 +242,228 @@ class TrickplayDeviceManager(QWidget):
         print(QString("Error: %1").arg(self.socket.errorString()))
         self.socket.close()
 
+    def app_ready_read(self):
+
+		# Read all available output from the process
+		
+		while True:
+			# Read one line
+			s = self.trickplay.readLine()
+			# If the line is null, it means there is nothing more
+			# to read during this iteration
+			if s.isNull():
+				break
+			# Convert it to a string and strip the trailing white space
+			s = str( s ).rstrip()
+			# Look for the CONTROL line
+			if s.startswith( "<<CONTROL>>:" ):
+				try:
+					# Parse the contents of the control line and get the
+					# debugger port.
+					control = json.loads( s[12:] )
+					# Store it. This could fail if the engine has no debugger
+					# port.
+					self.debug_port = control[ "debugger" ]
+					print("[VDBG] Debug Port : %s"%self.debug_port)
+					self.http_port = control[ "http" ]
+					self.ui.comboBox.setItemData(0, self.http_port, PORT)
+					CON.port = self.http_port 
+					# Send our first debugger command, which will return
+					# when the app breaks
+					if self.debug_mode == True:
+					    self.send_debugger_command(DBG_CMD_INFO)
+				except:
+					print( "FAILED TO OBTAIN DEBUGGER PORT" )
+					# Kill the process
+					self.trickplay.close()
+			else:
+				# Output the log line
+				print( ">> %s" % s )
+				
+    def debugger_reply_finished(self):
+
+        if self.reply.error()== QNetworkReply.NoError:
+
+		    data = self.getFileLineInfo_Resp(str(self.reply.readAll()))
+
+		    if data is not None:
+
+		        print("[VDBG] %s Response"%self.command)
+		        #print("[VDBG] %s DATA"%data)
+
+		        if self.command == DBG_CMD_INFO:
+		            # Open File, Show Current Lines 
+		            if self.file_name.startswith("/"):
+		                self.file_name= self.file_name[1:]
+
+		            self.current_debug_file = os.path.join(self.main.path, self.file_name)
+		            self.editorManager.newEditor(self.current_debug_file, None, self.line_no, None, True)
+
+		            # Local Variable Table
+		            local_info = self.getLocalInfo_Resp(data)
+		            if local_info is not None:
+		                self.debugWindow.populateLocalTable(local_info)
+
+		            # Stack Trace Table
+		            stack_info = self.getStackInfo_Resp(data)
+		            if stack_info is not None:
+		                self.backtraceWindow.populateTraceTable(stack_info, self.editorManager)
+                        
+		            self.reply = None
+		            self.command = None
+
+		        elif len(self.command) > 3 and self.command[:1] == DBG_CMD_BREAKPOINT or self.command[:1] == DBG_CMD_DELETE:
+
+		            self.bs_command = False
+		            #if self.command[-2:] == "ff" or self.command[-2:] == "on" :
+		                #self.bs_command = True
+		            self.reply = None
+		            self.command = None
+		            self.send_debugger_command(DBG_CMD_BREAKPOINT)
+
+		        elif self.command == DBG_CMD_BREAKPOINT:
+
+		            # Break Point 
+		            break_info = self.getBreakPointInfo_Resp(data)
+
+		            if break_info is not None:
+		                self.debugWindow.populateBreakTable(break_info, self.editorManager)
+
+		            if self.bs_command == True :
+		                self.reply = None
+		                self.command = None
+		                return
+
+		            editor = self.editorManager.app.focusWidget()
+		            nline = editor.margin_nline
+
+		            """
+		            m=0
+		            for item in break_info[3]: #info_var_list 
+		                if item == editor.path+":"+str(nline+1) :
+		                    return m
+		                m += 1
+
+		            editor.bp_num[nline] = m-1
+		            print(editor.path+":"+str(nline)+":"+str(m-1))
+		            """
+
+		            # Break Point Setting 
+		            if not editor.line_click.has_key(nline) or editor.line_click[nline] == 0 :
+		                if editor.current_line != nline :
+		                    editor.markerAdd(nline, editor.ACTIVE_BREAK_MARKER_NUM)
+		                else:
+		                    editor.markerDelete(nline, editor.ARROW_MARKER_NUM)
+		                    editor.markerAdd(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+
+		                editor.line_click[nline] = 1
+
+		            # Break Point Deactivate  
+		            elif editor.line_click[nline] == 1:
+		                if editor.current_line != nline :
+		                    editor.markerDelete(nline, editor.ACTIVE_BREAK_MARKER_NUM)
+		                    editor.markerAdd(nline, editor.DEACTIVE_BREAK_MARKER_NUM)
+		                else :
+		                    editor.markerDelete(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+		                    editor.markerAdd(nline, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+
+		                editor.line_click[nline] = 2
+
+                    # Break Point Active 
+		            elif editor.line_click[nline] == 2:
+				"""
+                                # Delete Break Point 
+                                if editor.current_line != nline :
+				    editor.markerDelete(nline, editor.DEACTIVE_BREAK_MARKER_NUM)
+                                else :
+				    editor.markerDelete(nline, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+				    editor.markerAdd(nline, editor.ARROW_MARKER_NUM)
+				"""
+		                if editor.current_line != nline :
+		                    editor.markerDelete(nline, editor.DEACTIVE_BREAK_MARKER_NUM)
+		                    editor.markerAdd(nline, editor.ACTIVE_BREAK_MARKER_NUM)
+		                else :
+		                    editor.markerDelete(nline, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+		                    editor.markerAdd(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+		                editor.line_click[nline] = 1
+
+		            self.reply = None
+		            self.command = None
+
+		        elif self.command not in DBG_ADVANCE_COMMANDS:
+		            self.reply = None
+		            self.command = None
+
+        if self.command in DBG_ADVANCE_COMMANDS:
+			if self.command == DBG_CMD_CONTINUE :
+				# delete current line marker 
+				for m in self.editorManager.editors:
+					if self.current_debug_file == m:
+						# check what kind of arrow marker was on the current line and delete just arrow mark not break points 
+						self.editorManager.tab.editors[self.editorManager.editors[m][1]].markerDelete(
+						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
+						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
+
+				# clean backtrace and debug windows
+				self.backtraceWindow.clearTraceTable(0)
+				self.debugWindow.clearLocalTable(0)
+
+			# TODO: Leave the debug UI disabled, and wait for the info command to return
+
+			self.reply = None
+			self.command = None
+			self.send_debugger_command( DBG_CMD_INFO )
+			#self.reply = None
+			#self.command = None
+        else:
+
+			# TODO: Here we should enable the debug UI
+			pass
+				
+        #self.send_debugger_command( DBG_CMD_STEP_OVER )
+		
+    def send_debugger_command(self, command):
+		# We don't have a debugger port yet
+		print("send_debugger_command : [%s]"%command)
+		if self.debug_port is None:
+			raise "NO DEBUGGER PORT"
+		
+		# We are processing a request
+		if self.reply is not None:
+			print("reply is not None")
+			return False
+		
+		url = QUrl()
+		url.setScheme( "http" )
+		url.setHost( CON.address )
+		url.setPort( self.debug_port )
+		url.setPath( "/debugger" )
+		
+		print ("[VDBG] ' %s ' Command Sent"%command)
+		
+		request = QNetworkRequest( url )
+		self.reply = self.manager.post( request , command )
+		QObject.connect( self.reply , SIGNAL( 'finished()' ) , self.debugger_reply_finished )
+		self.command = command
+		
+		# print( "WAITING FOR TRICKPLAY TO BREAK" )
+		
+		if command in DBG_ADVANCE_COMMANDS:
+			# TODO: Here we should disable the debug UI
+			pass
+		
+		return True
 
     def app_finished(self, errorCode):
-		#print(errorCode)
 		if self.trickplay.state() == QProcess.NotRunning :
-			print "Trickplay APP is finished"
+			print "[VDBG] Trickplay APP is finished"
 			self.inspector.clearTree()
 			self.main.stop()
 	
-    def run(self, dm=False):
-       
+    def run(self, dMode=False):
         # Run on local trickplay
-
         if 0 == self.ui.comboBox.currentIndex():
-            print("Starting trickplay locally")
+            print("[VDBG] Starting trickplay locally")
             if self.trickplay.state() == QProcess.Running:
                 self.trickplay.close()
 
@@ -294,47 +474,60 @@ class TrickplayDeviceManager(QWidget):
    					n = re.search("=", item).end()
    					env.remove(item[:n-1])
 
-            env.insert("TP_telnet_console_port", str(self.console_port))
-            env.insert("TP_controllers_enabled", "1")
-            self.my_name = str(u"\u0020")+str(int(random.random() * 100000))
-            env.insert("TP_controllers_name",self.my_name)
+            env.insert("TP_LOG", "bare")
             env.insert("TP_config_file","")
 
-            if dm == True :
+            #env.insert("TP_telnet_console_port", str(self.console_port))
+            #env.insert("TP_controllers_enabled", "1")
+            #self.my_name = str(u"\u0020")+str(int(random.random() * 100000))
+            #env.insert("TP_controllers_name",self.my_name)
+
+            if dMode == True :
             	self.debug_mode = True
             	self.main.debug_mode = True
-            	env.insert("TP_debugger_port",str(self.debug_port))
-            	env.insert("TP_start_debugger","1")
+            	#env.insert("TP_debugger_port",str(self.debug_port))
+            	env.insert("TP_start_debugger","true")
             else :
             	self.debug_mode = False
             	self.main.debug_mode = False
 
+			
+            #  To merge stdout and stderr
+            self.trickplay.setProcessChannelMode( QProcess.MergedChannels )
+
             self.trickplay.setProcessEnvironment(env)
             ret = self.trickplay.start('trickplay', [self.path()])
+
 			
         # Push to foreign device
         else:
             self.push()
 	
-    def printResp(self, data, command):
+    def getFileLineInfo_Resp(self, data):
 
 		pdata = json.loads(data)
 
-		file_name = pdata["file"] 
-		tp_id = pdata["id"] 
-		line_num = pdata["line"]
+		if "error" in pdata:
+			print "[VDBG] "+pdata["error"]
+			return None
+		else:
+			file_name = pdata["file"] 
+			tp_id = pdata["id"] 
+			line_num = pdata["line"]
+	
+			self.line_no = str(line_num)
+			self.file_name = str(file_name)
+			return pdata
 
-		self.line_no = str(line_num)
-		self.file_name = str(file_name)
-
-		if "locals" in pdata:
-			#g(userdata) = Group (m:0xdd25a0,c:0xdd25a0,l:0x7fc82c0917d8)
+		
+    def getLocalInfo_Resp(self, data):
+		if "locals" in data:
 			name_var_list = []
 			type_var_list = []
 			value_var_list = []
 			local_vars_str = ""
 			local_vars = {}
-			for c in pdata["locals"]:
+			for c in data["locals"]:
 				if c["name"] != "(*temporary)":
 					c_v = None
 					if local_vars_str != "":
@@ -359,17 +552,18 @@ class TrickplayDeviceManager(QWidget):
 			local_vars[3] = value_var_list
 
 			return local_vars
+		else:
+			return None
 
-		elif "error" in pdata:
-			print "\t"+pdata["error"]
 		
-		elif "stack" in pdata:
+    def getStackInfo_Resp(self, data):
+		if "stack" in data:
 			stack_info_str = ""
 			stack_list = []
 			info_list = []
 			stack_info = {}
 			index = 0
-			for s in pdata["stack"]:
+			for s in data["stack"]:
 				if "file" in s and "line" in s:
 					stack_info_str = stack_info_str+"["+str(index)+"] "+s["file"]+":"+str(s["line"])+"\n\t"
 					stack_list.append("["+str(index)+"] "+s["file"]+":"+str(s["line"]))
@@ -387,44 +581,60 @@ class TrickplayDeviceManager(QWidget):
 
 			#print "\t"+stack_info_str
 			return stack_info
+		else:
+			return None
 
-		elif "breakpoints" in pdata:
+    def getBreakPointInfo_Resp(self, data):
+		if "breakpoints" in data:
 			state_var_list = []
 			info_var_list = []
 			file_var_list = []
-			linenum_var_list = []
+			#linenum_var_list = []
 			breakpoints_info = {}
 			breakpoints_info_str = ""
 			index = 0
-			if len(pdata["breakpoints"]) == 0:
-				print "\t"+"No breakpoints set"
+			if len(data["breakpoints"]) == 0:
+				print "[VDBG] No breakpoints set"
+				return breakpoints_info
 			else:
-				for b in pdata["breakpoints"]:
+				for b in data["breakpoints"]:
 					if "file" in b and "line" in b:
 						breakpoints_info_str = breakpoints_info_str+"["+str(index)+"] "+b["file"]+":"+str(b["line"])
+						"""if path is not None :
+							info_var_list.append(path+":"+str(b["line"]))
+						else:
+                        """
 						info_var_list.append(b["file"]+":"+str(b["line"]))
-						file_var_list.append(b["file"])
-						linenum_var_list.append(str(b["line"]))
+
+						#n = re.search("[/]+\S+[/]+", b["file"]).end()
+					
+						file_var_list.append(b["file"]+":"+str(b["line"]))
 					if "on" in b:
 						if b["on"] == True:
-							breakpoints_info_str = breakpoints_info_str+""+"\n\t"
+							breakpoints_info_str = breakpoints_info_str+""+"\n       "
 							state_var_list.append("on")
 						else:
-							breakpoints_info_str = breakpoints_info_str+" (disabled)"+"\n\t"
+							breakpoints_info_str = breakpoints_info_str+" (disabled)"+"\n       "
 							state_var_list.append("off")
 					index = index + 1
 
-			breakpoints_info[1] = info_var_list
-			breakpoints_info[2] = file_var_list
-			breakpoints_info[3] = linenum_var_list
-			breakpoints_info[4] = state_var_list
+			
+				breakpoints_info[1] = state_var_list
+				breakpoints_info[2] = file_var_list
+				breakpoints_info[3] = info_var_list
+				#breakpoints_info[4] = linenum_var_list
 
-			#print "\t"+breakpoints_info_str
-			return breakpoints_info
-		
-		elif "source" in pdata:
+				print "[VDBG] "+breakpoints_info_str
+				return breakpoints_info
+		else:
+			return None
+
+
+    def printResp(self, data, command):
+
+		if "source" in data:
 			source_info = ""
-			for l in pdata["source"]:
+			for l in data["source"]:
 				if "line" in l and "text" in l:
 					if l["line"] == line_num:
 						source_info = source_info+str(l["line"])+" >>"+str(l["text"])+"\n\t"
@@ -432,21 +642,21 @@ class TrickplayDeviceManager(QWidget):
 						source_info = source_info+str(l["line"])+"   "+str(l["text"])+"\n\t"
 			print "\t"+source_info
 		
-		elif "lines" in pdata:
+		elif "lines" in data:
 			fetched_lines = ""
 			
-			for l in pdata["lines"]:
+			for l in data["lines"]:
 				fetched_lines = fetched_lines+l+"\n\t"
 			print "\t"+fetched_lines
 
-		elif "app" in pdata:
+		elif "app" in data:
 			app_info = ""
-			for key in pdata["app"].keys():
+			for key in data["app"].keys():
 				if key != "contents":
-					app_info = app_info+str(key)+" : "+str(pdata["app"][key])+"\n\t"
+					app_info = app_info+str(key)+" : "+str(data["app"][key])+"\n\t"
 				else:
 					app_info = app_info+key+" : "
-					for c in pdata["app"]["contents"]:
+					for c in data["app"]["contents"]:
 						app_info = app_info + str(c) + ","
 					app_info = app_info+"\n\t"					
 			print "\t"+app_info
@@ -455,5 +665,4 @@ class TrickplayDeviceManager(QWidget):
 			#print "\t"+"Break at "+file_name+":"+str(line_num)
 			pass
 
-
-
+		return True
