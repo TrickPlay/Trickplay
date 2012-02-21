@@ -127,12 +127,14 @@ class EditorTabWidget(QTabWidget):
 				if ret == QMessageBox.Ok:
     				# Reload 
 					self.editors[index].readFile(self.paths[index])
+					print("LLLLLLLLLL"+self.paths[index])
 					self.textBefores[index] = self.editors[index].text()
 					self.editors[index].text_status = 1 #TEXT_READ
 					self.editors[index].save() # added 2/3
 					self.textBefores[index] = self.editors[index].text() #added 2/3
 		else:
 			self.editors[index].readFile(self.paths[index])
+			print("UUUUUUUUU"+self.paths[index])
 			self.textBefores[index] = self.editors[index].text()
 			self.editors[index].text_status = 1 #TEXT_READ
 			self.editors[index].save() # added 2/3

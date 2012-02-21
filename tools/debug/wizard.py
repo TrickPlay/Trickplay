@@ -186,9 +186,6 @@ class Wizard():
         """
         New app dialog
         """
-        
-        print('Started app creator')
-        
         self.dialog = QDialog()
         self.ui = Ui_newApplicationDialog()
         self.ui.setupUi(self.dialog)

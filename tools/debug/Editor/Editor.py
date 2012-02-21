@@ -25,11 +25,13 @@ class Editor(QsciScintilla):
     ARROW_ACTIVE_BREAK_MARKER_NUM = 4
     ARROW_DEACTIVE_BREAK_MARKER_NUM = 5
     
-    def __init__(self, debugWindow=None, editorManager=None, parent=None):
+    def __init__(self, editorManager=None, parent=None):
         super(Editor, self).__init__(parent)
         self.setAcceptDrops(False)
 
-        self.debugWindow = debugWindow
+        self.editorManager = editorManager
+        self.debugWindow = editorManager.debugWindow
+        self.deviceManager = editorManager.deviceManager
 
         self.setTabWidth(4)
         
@@ -128,11 +130,27 @@ class Editor(QsciScintilla):
         self.text_status = TEXT_DEFAULT
         self.setWrapMode(QsciScintilla.WrapWord)
         self.line_click = {}
+        #self.bp_num = {}
         self.current_line = -1
-        self.editorManager = editorManager
         self.path = None
         self.tempfile = False
+        self.margin_nline = None
 
+    def get_bp_num(self, nline):
+        
+        #print("TABLE LEN = %s"%str(self.editorManager.main._debug.ui.breakTable.rowCount()))
+        editorName = os.path.basename(str(self.path))
+        editorName = editorName+":%s"%str(nline+1)
+        #print("Editor Name = %s"%editorName)
+        rowCnt = self.editorManager.main._debug.ui.breakTable.rowCount()
+
+        for r in range(0, rowCnt):
+            cellItem = self.editorManager.main._debug.ui.breakTable.item(r, 0) 
+            #print (cellItem.whatsThis())
+            if cellItem.whatsThis() == editorName :
+                #print ("R [%s] Found !"%str(r))
+                return r
+    """
     def get_bp_num(self, nline):
 		data = sendTrickplayDebugCommand("9876", "b",False)
 		bp_info = printResp(data, "b") # no need to print 
@@ -141,35 +159,33 @@ class Editor(QsciScintilla):
 			if item == self.path+":"+str(nline+1) :
 				return m
 			m += 1
+    """
 
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
 		#print "on_margin_clicked"
+        
 		if self.editorManager.main.debug_mode == False:
 			return
 
 		bp_num = 0
+		self.margin_nline = nline
+		print(self.margin_nline)
 
+        # Break Point ADD 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
 			t_path = os.path.basename(str(self.path))
-			sendTrickplayDebugCommand("9876", "b "+t_path+":"+str(nline+1), False)
-			data = sendTrickplayDebugCommand("9876", "b",False)
-			bp_info = printResp(data, "b", self.path) # no need to print 
-										   # bp_info need to be drawn in bp window 
-			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
+			self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s:"%t_path+"%s"%str(nline+1))
+			#self.line_click[nline] = 1
 
-			if self.current_line != nline :#self.markersAtLine(nline) == 0:
-				self.markerAdd(nline, self.ACTIVE_BREAK_MARKER_NUM)
-			else:
-				self.markerDelete(nline, self.ARROW_MARKER_NUM)
-				self.markerAdd(nline, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
-			self.line_click[nline] = 1
-
+        # Break Point Deactivate  
 		elif self.line_click[nline] == 1:
 
 			bp_num = self.get_bp_num(nline)
-			sendTrickplayDebugCommand("9876", "b "+str(bp_num)+" "+"off", False)
+			#bp_num = self.bp_num[nline]
+			self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s "%str(bp_num)+"off")
 
+			"""
 			if self.current_line != nline :
 				self.markerDelete(nline, self.ACTIVE_BREAK_MARKER_NUM)
 				self.markerAdd(nline, self.DEACTIVE_BREAK_MARKER_NUM)
@@ -181,12 +197,19 @@ class Editor(QsciScintilla):
 			bp_info = printResp(data, "b") # no need to print 
 										   # bp_info need to be drawn in bp window 
 			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
-			self.line_click[nline] = 2
+			"""
+            
+			#self.line_click[nline] = 2
 
+        # Break Point Delete  (/ Activate .. in the future, and set line_click[nline] = 1)
 		elif self.line_click[nline] == 2:
 
 			bp_num = self.get_bp_num(nline)
-			sendTrickplayDebugCommand("9876", "d "+str(bp_num), False)
+			#bp_num = self.bp_num[nline]
+			self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s "%str(bp_num)+"on")
+			#self.deviceManager.send_debugger_command("%s "%DBG_CMD_DELETE+"%s "%str(bp_num))
+
+			"""
 			if self.current_line != nline :
 				self.markerDelete(nline, self.DEACTIVE_BREAK_MARKER_NUM)
 			else :
@@ -196,7 +219,9 @@ class Editor(QsciScintilla):
 			bp_info = printResp(data, "b") # no need to print 
 										   # bp_info need to be drawn in bp window 
 			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
-			self.line_click[nline] = 0
+			"""
+            
+			#self.line_click[nline] = 0
 		
 		#if self.markersAtLine(nline) == 0:
             

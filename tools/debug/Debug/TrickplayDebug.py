@@ -9,9 +9,11 @@ from connection import *
 
 class TrickplayDebugger(QWidget):
     
-    def __init__(self, parent = None, f = 0):
+    def __init__(self, main=None, parent = None, f = 0):
         QWidget.__init__(self, parent)
         
+        self.main = main
+        self.deviceManager = None
         self.ui = Ui_TrickplayDebugger()
         self.ui.setupUi(self)
 
@@ -40,16 +42,21 @@ class TrickplayDebugger(QWidget):
 		print("delete BP !!!")
 		
     def cellClicked(self, r, c):
+		if self.deviceManager is None:
+		    self.deviceManager = self.main.deviceManager
+
 		cellItem= self.ui.breakTable.item(r, 0) 
 		cellItemState = cellItem.checkState()  
 		fileLine = cellItem.whatsThis()
 
 		n = re.search(":", fileLine).end()
-		fileName = fileLine[:n-1]
-		lineNum = int(fileLine[n:])
+		fileName = str(fileLine[:n-1])
+		lineNum = int(fileLine[n:]) - 1
 
+		fileName = os.path.join(self.deviceManager.path(), fileName)
 		self.editorManager.newEditor(fileName, None, lineNum)
 		editor = self.editorManager.currentEditor 
+		editor.margin_nline = lineNum
 		
 		m = 0
 		for item in self.break_info[1]:
@@ -58,8 +65,10 @@ class TrickplayDebugger(QWidget):
 				break
 			m += 1
 
+        
 		if itemState == "on" and cellItemState == Qt.Unchecked:
-			sendTrickplayDebugCommand("9876", "b "+str(r)+" "+"off", False)
+			self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" off")
+			"""
 			if editor.current_line != lineNum :
 				editor.markerDelete(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
 				editor.markerAdd(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
@@ -67,10 +76,14 @@ class TrickplayDebugger(QWidget):
 				editor.markerDelete(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
 				editor.markerAdd(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 			editor.line_click[lineNum] = 2
-			data = sendTrickplayDebugCommand("9876", "b",False)
-			self.break_info = printResp(data, "b")
+			"""
+
+			#data = sendTrickplayDebugCommand("9876", "b",False)
+			#self.break_info = printResp(data, "b")
+
 		elif itemState == "off" and cellItemState == Qt.Checked:
-			sendTrickplayDebugCommand("9876", "b "+str(r)+" "+"on", False)
+			self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" on")
+			"""
 			if editor.current_line != lineNum :
 				editor.markerDelete(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
 				editor.markerAdd(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
@@ -78,8 +91,10 @@ class TrickplayDebugger(QWidget):
 				editor.markerDelete(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 				editor.markerAdd(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
 			editor.line_click[lineNum] = 1
-			data = sendTrickplayDebugCommand("9876", "b",False)
-			self.break_info = printResp(data, "b")
+			"""
+
+			#data = sendTrickplayDebugCommand("9876", "b",False)
+			#self.break_info = printResp(data, "b")
 		
     def clearBreakTable(self, row_num=0):
 		self.ui.breakTable.clear()

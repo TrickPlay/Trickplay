@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
         self._console = TrickplayConsole()
         self.ui.ConsoleLayout.addWidget(self._console)
         self.ui.ConsoleDock.hide()
-	
+        
 		# Set Interactive Line Edit 
         self.ui.interactive.setText("")
         self.connect(self.ui.interactive, SIGNAL("returnPressed()"), self.return_pressed)
@@ -85,12 +85,12 @@ class MainWindow(QMainWindow):
         self.ui.DebugDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.DebugDock.toggleViewAction())
         self.ui.DebugDock.toggleViewAction().triggered.connect(self.debugWindowClicked)
-        self._debug = TrickplayDebugger()
+        self._debug = TrickplayDebugger(self)
         self.ui.DebugLayout.addWidget(self._debug)
         self.ui.DebugDock.hide()
 
         # Create Editor
-        self._editorManager = EditorManager(self, self._fileSystem, self._debug, self.ui.menuView, self.ui.centralwidget)
+        self._editorManager = EditorManager(self, self.ui.menuView, self.ui.centralwidget)
         
 		#Create Backtrace
         self.ui.BacktraceDock.toggleViewAction().setText("&Backtrace")
@@ -189,7 +189,7 @@ class MainWindow(QMainWindow):
 
 
 		#Create Target Trickplay Devices Button
-        self._deviceManager = TrickplayDeviceManager(self._inspector, self)
+        self._deviceManager = TrickplayDeviceManager(self)
         font_deviceManager = QFont()
         font_deviceManager.setPointSize(9)
         self._deviceManager.ui.comboBox.setFont(font_deviceManager)
@@ -320,7 +320,7 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(self.trace_toolBtn)
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
 
-    def mioMrC_debug(self) :
+    def chgTool_debug(self) :
         if self.debug_tbt.text() != "Debug":
         	self.debug_tbt.setText("Debug")
         	self.debug_tbt.setIcon(self.icon_debug)
@@ -330,7 +330,7 @@ class MainWindow(QMainWindow):
         	QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
         	QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
 
-    def mioMrC_run(self) :
+    def chgTool_run(self) :
         if self.debug_tbt.text() != "Run":
         	self.debug_tbt.setText("Run")
         	self.debug_tbt.setIcon(self.icon_run)
@@ -425,31 +425,38 @@ class MainWindow(QMainWindow):
 		self.request = ""
 		
     def stop(self):
-    	if self._deviceManager.trickplay.state() == QProcess.Running:
-			#self._deviceManager.trickplay.close()
-			if getattr(self._deviceManager, "debug_mode") == True :
-				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
+        # send 'q' command and close trickplay process
+        if self._deviceManager.trickplay.state() == QProcess.Running:
+            """
+            if getattr(self._deviceManager, "debug_mode") == True :
+                #data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
+                self._deviceManager.send_debugger_command(DBG_CMD_QUIT)
+            else:
+                ret = self.deviceManager.socket.write('/quit\n\n')
+                if ret < 0 :
+                    print ("tp console socket is not available !")
+            """
+            self._deviceManager.trickplay.close()
 	
-    	if getattr(self._deviceManager, "debug_mode") == True :
-    		# delete current line marker
-    		for n in self.editorManager.editors:
-				for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
-					self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete( int(l), -1) 
-				self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
+        if getattr(self._deviceManager, "debug_mode") == True :
+            # delete break points marker
+    	    for n in self.editorManager.editors:
+    	        for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
+    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
+                    print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
+    	        self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
 
-				if self.current_debug_file == n:
-					self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
-					self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
-					self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
+            # delete current line marker
+    		self.current_debug_file = self.path+'/'+self._deviceManager.file_name
+    		if self.current_debug_file == n:
+    		    self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
+    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
+     	        self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
 
-    		# clean backtrace and debug window
-    		self._backtrace.clearTraceTable(0)
-    		self._debug.clearLocalTable(0)
-    		self._debug.clearBreakTable(0)
-    	else:
-    		ret = self.deviceManager.socket.write('/quit\n\n')
-    		if ret < 0 :
-    			print ("tp console socket is not available !")
+            # clean backtrace and debug window
+            self._backtrace.clearTraceTable(0)
+            self._debug.clearLocalTable(0)
+            self._debug.clearBreakTable(0)
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
@@ -483,7 +490,7 @@ class MainWindow(QMainWindow):
         self.debug_stepout.setEnabled(False)
         self.debug_pause_bt.setEnabled(False)
         self.debug_continue_bt.setEnabled(False)
-    	self.mioMrC_run()
+    	self.chgTool_run()
 
     def debug(self):
         self.inspector.clearTree()
@@ -502,7 +509,7 @@ class MainWindow(QMainWindow):
         self.debug_pause_bt.setEnabled(True)
         self.debug_continue_bt.setEnabled(True)
 
-        time.sleep(2)
+        """"time.sleep(2)
         data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bn", True)
         self._deviceManager.printResp(data, "cn")
         # update backtrace table
@@ -517,7 +524,8 @@ class MainWindow(QMainWindow):
 			self.current_debug_file = self.path+self._deviceManager.file_name
 
         self._editorManager.newEditor(self.current_debug_file, None, self._deviceManager.line_no, None, True)
-    	self.mioMrC_debug()
+		"""
+    	self.chgTool_debug()
 	
 	
     def editor_undo(self):
@@ -584,13 +592,12 @@ class MainWindow(QMainWindow):
         """
         Initialize widgets on the main window with a given app path
         """
-        
-        print("main.start")
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
-        print(path)
-        self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
+        self.setWindowTitle(QtGui.QApplication.translate("MainWindow", 
+							"Trickplay Visual Debugger  [ "+str(os.path.basename(str(path))+" ]"), 
+							None, QtGui.QApplication.UnicodeUTF8))
         self.deviceManager.setPath(path)
         
         if openList:
@@ -612,7 +619,7 @@ class MainWindow(QMainWindow):
 		path = QFileDialog.getExistingDirectory(None, 'Open App', dir, QFileDialog.ShowDirsOnly)
 		#path = wizard.chooseDirectoryDialog(dir)
 		path = wizard.start(path, True)
-		print (path)
+		print ("[VDBG] openApp [%s]"%path)
 		if path:
 			settings = QSettings()
 			settings.setValue('path', path)
@@ -845,6 +852,9 @@ class MainWindow(QMainWindow):
 			self.gotoLine_ui.okButton.setEnabled(False)
 
     def debug_command(self, cmd):
+        print("[VDBG] OOOPS ! don't use debug_command @ main.py ") 
+
+        """
 		if getattr(self._deviceManager, "debug_mode") == True :
 			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), cmd, False)
 			self._deviceManager.printResp(data, cmd)
@@ -892,23 +902,23 @@ class MainWindow(QMainWindow):
 
 		else :
 			pass
-
-		return None
+        """
+        return None
 
     def debug_continue(self):
-		self.debug_command("c")
+		self._deviceManager.send_debugger_command(DBG_CMD_CONTINUE)
 		return
 
     def debug_pause(self):
-		self.debug_command("bn")
+		self._deviceManager.send_debugger_command(DBG_CMD_BREAK_NEXT)
 		return
 
     def debug_step_into(self):
-		self.debug_command("s")
+		self._deviceManager.send_debugger_command(DBG_CMD_STEP_INTO)
 		return
 
     def debug_step_over(self):
-		self.debug_command("n")
+		self._deviceManager.send_debugger_command(DBG_CMD_STEP_OVER)
 		return
 
     def debug_step_out(self):

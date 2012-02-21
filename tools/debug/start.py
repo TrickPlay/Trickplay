@@ -8,13 +8,14 @@ from wizard import Wizard
 from main import MainWindow
 
 from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import QCoreApplication, QSettings
+from PyQt4.QtCore import QCoreApplication, QSettings, QT_VERSION_STR
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 def main(argv):
     
     path = None
+    print("QT VERSION %s" % QT_VERSION_STR )
     
     try:
         path = argv[1]
