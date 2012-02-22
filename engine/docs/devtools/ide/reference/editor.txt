@@ -1,0 +1,42 @@
+
+Title: TrickPlay IDE Editor Reference
+
+The TrickPlay IDE includes a full-featured text editor for the creation of program source files.
+
+Topic: The Editor Window
+
+The Editor Window lists the contents of a text source file. Multiple files can be loaded simultaneously. Each loaded file is represented by a tab along the top of the window. Select a file's tab to view the file's contents in the Editor Window.
+
+A new file can be created by selecting the File->New File menu item.
+
+If the file has been modified, an asterisk will appear in front of the file's name in its tab.
+
+To save a file, select the File->Save or File->Save As... menu item or press their corresponding shortcut key. To save all files that have been modified, select the File->Save All menu item.
+
+To close a source file, click on the X graphic on the file's tab or select the File->Close menu item. If the file has been modified, you will be queried whether you wish to save the file or close without saving.
+
+Topic: Editing Text
+
+The cursor can be positioned by using the mouse, keyboard arrow keys, or the window's scroll bars.
+
+Keyboard Actions:
+	<Insert> - Toggle Insert and Overwrite modes
+	<Delete> - Delete character at cursor position
+	<Backspace> - Delete character left of cursor position
+
+To undo the last operation, select the Edit->Undo menu item. To redo an action that you just undid, select the Edit->Redo menu item.
+
+To remove the currently-selected text, select the Edit->Cut or Edit->Delete menu item. The removed text is saved in the Editor's clipboard and can be restored by selecting the Edit->Paste menu item.
+
+To copy the currently-selected text, select the Edit->Copy menu item. The copied text is saved in the Editor's clipboard and can be restored by selecting the Edit->Paste menu item.
+
+To insert the text stored in the Editor's clipboard at the current cursor position, select the Edit->Paste menu item.
+
+To select all the text in a file, select the Edit->Select All menu item.
+
+To locate some particular text in a file, select the Edit->Search... menu item. A Search dialog box will display. Enter the text you wish to locate and set the desired search options. Press the OK button to initiate the search. If the text is found, it is displayed and highlighted in the Editor Window. To find the next occurrence of the text, press the Search dialog's OK button again. When you have finished searching, close the Search dialog by pressing its Close button.
+
+To replace text in a file, select the Edit->Search/Replace... menu item. A Search/Replace dialog box will display. Enter the text you wish to find and replace and set the desired options. When you have finished replacing text, close the dialog by pressing its Close button.
+
+To jump to a particular line in the file, select the Edit->Go to line... menu item. A Go-to-Line dialog box will display. Enter the line number you wish to jump to and press the OK button. To abort the operation and close the dialog, press the Cancel button.
+

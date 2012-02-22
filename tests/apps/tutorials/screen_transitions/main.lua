@@ -29,7 +29,7 @@ SCREEN_X           = MENU_WIDTH
 SCREEN_Y           = 0
 
 -- These coordinates are in relation to the screen's Group object. The Group
--- may be placed anywhere on the screen, but the object's in the Group are
+-- may be placed anywhere on the screen, but the objects in the Group are
 -- positioned from the 0,0 location in the Group.
 HEADER_X           = 0
 HEADER_Y           = 0
