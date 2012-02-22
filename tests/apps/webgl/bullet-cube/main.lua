@@ -272,9 +272,16 @@ local function main()
     
     pb.gravity = { 0 , -10 * 64 , 0  }
     
+
     local ground_matrix = Matrix()
-    ground_matrix:translate( 0 , -300 , -1000 )
-    local ground = pb:Body3d{ transform = ground_matrix , shape = pb:BoxShape( 10000 , 16 , 100000 ) , mass = 0 , bounce = 0.4 , friction = 0.5 }
+    ground_matrix:translate( 0 , -320 , -1000 )
+    local ground_shape = pb:StaticPlaneShape( 0 , 1 , 0 , 1 )
+    local ground = pb:Body3d{ transform = ground_matrix , shape = ground_shape, mass = 0 , bounce = 0.5 , friction = 0.2 }
+    
+    local wall_matrix = Matrix()
+    wall_matrix:translate( -200 , -320 , -1000 )
+    local wall_shape = pb:StaticPlaneShape( 1 , 0.9 , 0 , 1 )
+    local wall = pb:Body3d{ transform = wall_matrix , shape = wall_shape, mass = 0 , bounce = 0.5 , friction = 0.2 }
     
     local function render()
         pb:step()
