@@ -5,13 +5,21 @@ class Call(object):
 
     def __init__(self, user, sender_uri, remote_uri,
                  udp_client_ip, udp_client_port, udp_server_port, write_queue):
+        # This is your user name
         self.user = user
+        # This is your contact uri
         self.sender_uri = sender_uri
+        # This is the original destination uri; this stays constant
         self.remote_uri = remote_uri
         self.udp_client_ip = udp_client_ip
         self.udp_client_port = udp_client_port
         self.udp_server_port = udp_server_port
         self.write_queue = write_queue
+
+        # This is the destination uri; this is not constant.
+        # Used in the Request line and the md5 authentication.
+        # This uri will be updated as SIP discovers the final destination uri.
+        self.sip_uri = remote_uri
 
         # Used to record the SIP route taken by a request and used to route the response
         # back to the originator.
@@ -80,6 +88,7 @@ class Call(object):
 
         self.branch = None
         self.nonce = None
+        self.auth = None
 
         self.states = ("UNREGISTERED", "REGISTERED")
         self.current_state = 0
@@ -87,11 +96,41 @@ class Call(object):
         self.callback = None
 
 
+    def gen_auth_line(self, request_type):
+        if not self.nonce or not self.sip_uri or not request_type:
+            return None
+
+        ha1 = hashlib.md5(self.user + ":asterisk:saywhat").hexdigest()
+        ha2 = hashlib.md5(request_type + ":" + self.sip_uri).hexdigest()
+        ha3 = hashlib.md5(ha1 + ":" + self.nonce + ":" + ha2).hexdigest()
+
+        auth = 'Authorization: Digest username="' + self.user + '", realm="asterisk", ' + \
+                'nonce="' + self.nonce + '", algorithm=MD5, uri="' + self.sip_uri + '", '\
+                'response="' + ha3 + '"\r\n'
+
+        return auth
+
+
     def gen_branch(self):
         """Use to create a unique branch id"""
 
         # branch must begin with that weird 7 character string
         return 'z9hG4bK' + uuid.uuid4().hex
+
+
+    def pull_server_tag(self, response):
+        if 'To' not in response:
+            return False
+
+        to_line = response['To']
+        if to_line.find('tag=') >= 0:
+            begin = to_line.find('tag=')
+            self.To['tag'] = to_line[begin+4:]
+            print "\nserver tag: " + self.To['tag'] + "\n\n"
+
+            return True
+
+        return False
 
     
     def pull_nonce(self, response):
@@ -185,6 +224,20 @@ class Register(Call):
 
 
 class Invite(Call):
+    def __init__(self, user, sender_uri, remote_uri,
+                 udp_client_ip, udp_client_port, udp_server_port, write_queue):
+        super(Invite, self).__init__(user, sender_uri, remote_uri,
+                 udp_client_ip, udp_client_port, udp_server_port, write_queue)
+        self.sent_invite = False
+        self.received_100 = False
+        self.received_200 = False
+        self.sent_ack = False
+
+    def reset(self):
+        self.sent_invite = False
+        self.received_100 = False
+        self.received_200 = False
+        self.sent_ack = False
     
     def gen_invite(self, authorization):
         """Create and return an INVITE packet"""
@@ -193,7 +246,7 @@ class Invite(Call):
         self.branch = self.gen_branch()
 
         # build INVITE packet
-        invite = "INVITE " + self.remote_uri + " SIP/2.0\r\n"
+        invite = "INVITE " + self.sip_uri + " SIP/2.0\r\n"
         invite += "Via: " + self.Via[1]['protocol'] + " " + self.Via[1]['client_ip'] + \
                     ":" + self.Via[1]['client_port'] + ";rport;branch=" + self.branch + \
                     "\r\n"
@@ -224,6 +277,7 @@ class Invite(Call):
         """Register to the SIP Server"""
 
         # if authorization key exists then generate auth line
+        """
         auth = None
         if self.nonce:
             ha1 = hashlib.md5("phone:asterisk:saywhat").hexdigest()
@@ -231,25 +285,71 @@ class Invite(Call):
             ha3 = hashlib.md5(ha1 + ":" + self.nonce + ":" + ha2).hexdigest()
 
             auth = self.Auth_1 + self.nonce + self.Auth_2 + ha3 + '"\r\n'
+        """
+        self.auth = self.gen_auth_line("INVITE")
 
         # create INVITE packet
-        packet = self.gen_invite(auth)
+        packet = self.gen_invite(self.auth)
 
         # send over network
         self.write_queue.append(packet)
+        self.sent_invite = True
 
     
-    def ack(self):
+    def gen_ack(self, authorization):
         """Send an ACK to an INVITE"""
-        return
+        # TODO: handle end-to-end ack differently
+        # generate new branch id
+        self.branch = self.gen_branch()
+
+        tag = ""
+        if 'tag' in self.To:
+            tag = ";tag=" + self.To['tag']
+
+        # build ACK packet
+        ack = "ACK " + self.sip_uri + " SIP/2.0\r\n"
+        ack += "Via: " + self.Via[1]['protocol'] + " " + self.Via[1]['client_ip'] + \
+                    ":" + self.Via[1]['client_port'] + ";rport;branch=" + self.branch + \
+                    "\r\n"
+        ack += "Max-Forwards: " + self.Max_Forwards + "\r\n"
+        ack += "From: " + self.From['sender'] + ";tag=" + self.From['tag'] + "\r\n"
+        ack += "To: " + self.To['remote_contact'] + tag + "\r\n"
+        ack += "Call-ID: " + self.Call_ID + "\r\n"
+        ack += "CSeq: " + str(self.CSeq - 1) + " ACK\r\n"
+
+        # add authorization line if available
+        if authorization:
+            ack += authorization
+
+        # terminate with default Content-Length of 0
+        ack += self.Content_Length
+
+        return ack
+
+
+    def ack(self):
+        """Register to the SIP Server"""
+
+        # create INVITE packet
+        packet = self.gen_ack(self.auth)
+
+        # send over network
+        self.write_queue.append(packet)
+        self.sent_ack = True
 
 
     def interpret(self, response):
+        self.pull_server_tag(response)
         if response['Status-Line'] == "SIP/2.0 200 OK":
-            #self.current_state = 1
+            self.received_200 = True
+            self.ack()
             if self.callback:
                 self.callback()
+        elif response['Status-Line'] == "SIP/2.0 100 Trying":
+            self.received_100 = True
         elif response['Status-Line'] == "SIP/2.0 401 Unauthorized":
+            self.ack()
+            self.reset()
             if self.pull_nonce(response):
                 self.invite()
         
