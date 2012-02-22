@@ -16,6 +16,9 @@ PORT = Qt.UserRole + 3
 ADDEVENT = QEvent.User + 1
 REMEVENT = QEvent.User + 2
 SIZEOF_UINT16 = 2
+DEBUG_PORT = Qt.UserRole + 4
+HTTP_PORT = Qt.UserRole + 5
+CONSOLE_PORT = Qt.UserRole + 6
 
 #self.debug_stop.setEnabled(False)
 
@@ -55,7 +58,8 @@ class TrickplayDeviceManager(QWidget):
 
         self.debug_mode = False
         self.debug_port = None
-        self.console_port = 7777
+        self.console_port = None
+        self.http_port = None
         self.my_name = ""
         self.manager = QNetworkAccessManager()
         self.reply = None
@@ -72,6 +76,10 @@ class TrickplayDeviceManager(QWidget):
 	self.prev_index = index
 	address = self.ui.comboBox.itemData(index, ADDRESS).toPyObject()
 	port = self.ui.comboBox.itemData(index, PORT).toPyObject()
+
+	self.debug_port = self.ui.comboBox.itemData(index, DEBUG_PORT).toPyObject()
+	self.http_port = self.ui.comboBox.itemData(index, HTTP_PORT).toPyObject()
+	self.console_port = self.ui.comboBox.itemData(index, CONSOLE_PORT).toPyObject()
 
 	if not address or not port:
 	    return
@@ -99,6 +107,30 @@ class TrickplayDeviceManager(QWidget):
         			# Automatically select a service if only one exists
 					if 1 == self.ui.comboBox.count():
 						self.service_selected(1) # index -> 1 
+
+					data = getTrickplayControlData("%s:"%str(d[1])+"%s"%str(d[2]))
+					if data is not None:
+					    if data.has_key("debugger"):
+					        self.ui.comboBox.setItemData(index, data["debugger"], DEBUG_PORT)
+					        #d_port = data["debugger"]
+					        #print("[VDBG] debug Port : %s"%d_port)
+					    else:
+					        self.ui.comboBox.setItemData(index, None, DEBUG_PORT)
+					    if data.has_key("http"):
+					        #self.http_port = data["http"]
+					        #print("[VDBG] http Port : %s"%self.http_port)
+					        self.ui.comboBox.setItemData(index, data["http"], HTTP_PORT)
+					    else:
+					        self.ui.comboBox.setItemData(index, None, HTTP_PORT)
+					    if data.has_key("console"):
+					        #self.console_port = data["console"]
+					        #print("[VDBG] console Port : %s"%self.console_port)
+					        self.ui.comboBox.setItemData(index, data["console"], CONSOLE_PORT)
+					    else:
+					        self.ui.comboBox.setItemData(index, 7777, CONSOLE_PORT)
+					else:
+					    print("[VDBG] Didn't get Control information ")
+
 					"""
 					elif hasattr(self, 'newApp') :
 						if self.newApp == True :
@@ -181,15 +213,17 @@ class TrickplayDeviceManager(QWidget):
 		if self.socket.isOpen():
 			self.socket.close()
 
-		print("[VDBG] Connecting to console port")
-		while 1:
-			try : 
-				self.socket.connectToHost(CON.address, self.console_port, mode=QIODevice.ReadWrite)
-				if self.socket.waitForConnected(100): 
-					self.newApp = True
-					break
-			except : 
-				pass
+		if self.ui.comboBox.currentIndex() != 0:
+		    print("[VDBG] Connecting to console port")
+		    while 1:
+			    try : 
+				    self.socket.connectToHost(CON.address, self.console_port, mode=QIODevice.ReadWrite)
+				    if self.socket.waitForConnected(100): 
+					    self.newApp = True
+					    break
+			    except : 
+				    #print("console_port : [%s]"%str(self.console_port))
+				    pass
 
     def sendRequest(self):
         print "Connected"
@@ -263,11 +297,16 @@ class TrickplayDeviceManager(QWidget):
 					control = json.loads( s[12:] )
 					# Store it. This could fail if the engine has no debugger
 					# port.
-					self.debug_port = control[ "debugger" ]
-					print("[VDBG] Debug Port : %s"%self.debug_port)
-					self.http_port = control[ "http" ]
+					#print("[VDBG] Debug Port : %s"%self.debug_port)
+
+					if control.has_key("debugger"):
+					    self.debug_port = control[ "debugger" ]
+					if control.has_key("http"):
+					    self.http_port = control[ "http" ]
+					if control.has_key("console"):
+					    self.console_port = control[ "console" ]
+
 					self.ui.comboBox.setItemData(0, self.http_port, PORT)
-					CON.port = self.http_port 
 					# Send our first debugger command, which will return
 					# when the app breaks
 					if self.debug_mode == True:
@@ -459,6 +498,11 @@ class TrickplayDeviceManager(QWidget):
 			print "[VDBG] Trickplay APP is finished"
 			self.inspector.clearTree()
 			self.main.stop()
+			if self.reply is not None:
+			    self.reply.abort()
+			    self.reply = None 
+			    self.command = None 
+
 	
     def run(self, dMode=False):
         # Run on local trickplay
@@ -501,7 +545,29 @@ class TrickplayDeviceManager(QWidget):
 			
         # Push to foreign device
         else:
+
+            if dMode == True:
+                # POST http://<host>:<debugger port>/debugger "r"
+                url = QUrl()
+                url.setScheme( "http" )
+                url.setHost( CON.address )
+                url.setPort( self.debug_port )
+                url.setPath( "/debugger" )
+		
+                #print ("[VDBG] ' %s ' Command Sent"%'r')
+                #request = QNetworkRequest( url )
+                #self.manager.post( request , 'r' )
+            
+                # GET http://<host>:<http port>/debug/start 
+                getTrickplayDebug()
+            	self.debug_mode = True
+            	self.main.debug_mode = True
+            
             self.push()
+
+            if dMode == True:
+			    self.send_debugger_command(DBG_CMD_INFO)
+            
 	
     def getFileLineInfo_Resp(self, data):
 
