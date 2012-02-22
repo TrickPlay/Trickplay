@@ -981,6 +981,8 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		{
 			reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>' or 'b <line>'. To enable or disable breakpoints, enter 'b <index> on|off'";
 		}
+
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
 	}
 
 	// Delete a breakpoint
@@ -1010,6 +1012,8 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 				reply[ "error" ] = "Invalid breakpoint index";
 			}
 		}
+
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
 	}
 
 	// Fetch a file
