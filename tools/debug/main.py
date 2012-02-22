@@ -409,34 +409,48 @@ class MainWindow(QMainWindow):
         return self._inspector
 
     def return_pressed(self):
-		self.request = str(self.ui.interactive.text())
-		#print self.request
-		try:
-			ret = self.deviceManager.socket.write(self.request+'\n\n')
-			if ret < 0 :
-				print "tp console socket is not available"
-			else :
-				print ret
-
-		except AttributeError, e:
-    		# deal with AttributeError
-			print "tp console socket is not opened"
-		self.ui.interactive.setText("")
-		self.request = ""
+		if self._deviceManager.ui.comboBox.currentIndex() != 0:
+		    self.request = str(self.ui.interactive.text())
+		    #print self.request
+		    try:
+			    ret = self.deviceManager.socket.write(self.request+'\n\n')
+			    if ret < 0 :
+				    print "tp console socket is not available"
+			    else :
+				    print ret
+    
+		    except AttributeError, e:
+    		    # deal with AttributeError
+			    print "tp console socket is not opened"
+		    self.ui.interactive.setText("")
+		    self.request = ""
+		else:
+		    inputCmd = str(self.ui.interactive.text())
+		    self._deviceManager.trickplay.write(inputCmd+"\n")
+		    self._deviceManager.trickplay.waitForBytesWritten();
+		    self.ui.interactive.setText("")
 		
     def stop(self):
         # send 'q' command and close trickplay process
+
         if self._deviceManager.trickplay.state() == QProcess.Running:
+            # Local Debugging / Run 
+            self._deviceManager.trickplay.close()
+        elif self._deviceManager.ui.comboBox.currentIndex() != 0:
+            # Remote Debugging / Run 
+            ret = self.deviceManager.socket.write('/close\n\n')
+            if ret < 0 :
+                print ("tp console socket is not available !")
+
             """
             if getattr(self._deviceManager, "debug_mode") == True :
                 #data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
                 self._deviceManager.send_debugger_command(DBG_CMD_QUIT)
             else:
-                ret = self.deviceManager.socket.write('/quit\n\n')
+                ret = self.deviceManager.socket.write('/close\n\n')
                 if ret < 0 :
                     print ("tp console socket is not available !")
             """
-            self._deviceManager.trickplay.close()
 	
         if getattr(self._deviceManager, "debug_mode") == True :
             # delete break points marker

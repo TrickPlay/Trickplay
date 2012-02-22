@@ -98,20 +98,51 @@ def getTrickplayData():
     
     # Connection refused
     except urllib2.URLError, e:
-        print("Error >> Connection to Trickplay application unsuccessful.")
+        print("[VDBG] getTrickplayData : Connection to Trickplay application unsuccessful.")
         print(e)
     
     except httplib.BadStatusLine, e:
-        print("Error >> Trickplay application closed before data could be retreived.")
+        print("[VDBG] getTrickplayData : Trickplay application closed before data could be retreived.")
         print(e)
     
     except httplib.InvalidURL, e:
-        print('Could not find a Trickplay device.')
+        print('[VDBG] getTrickplayData : Couldn\'t find a Trickplay device.')
         print(e)
         
     return None
     
+def getTrickplayControlData(addrPort):
+    """
+    Get Trickplay UI tree data for the inspector
+    """
     
+    if addrPort is None:
+        print("[VDBG] getTrickplayControlData : address is not valid.")
+        return None 
+
+    s = "http://%s/api/control"%addrPort
+    r = urllib2.Request(s)
+    f = None
+    
+    try:
+        f = urllib2.urlopen(r, None, 10) # timeout 10 sec 
+        return decode(f.read())
+    
+    # Connection refused
+    except urllib2.URLError, e:
+        print("[VDBG] getTrickplayControlData : Connection to Trickplay application unsuccessful.")
+        print(e)
+    
+    except httplib.BadStatusLine, e:
+        print("[VDBG] getTrickplayControlData : Trickplay application closed before data could be retreived.")
+        print(e)
+    
+    except httplib.InvalidURL, e:
+        print('[VDBG] getTrickplayControlData : Couldn\'t find a Trickplay device.')
+        print(e)
+        
+    return None
+
 def sendTrickplayDebugCommand(db_port, cmd, start=False):
     """
     Send Start Trickplay Remote Debugger
@@ -148,24 +179,26 @@ def getTrickplayDebug():
     """
 
     s = CON.get()
-    #print s
+    print s
     r = urllib2.Request("http://" + s + "/debug/start")
     f = None
     
     try:
         f = urllib2.urlopen(r)
-        return decode(f.read())
+        k = f.read()
+        print(k+"********************")
+        return decode(k)
     
     # Connection refused
     except urllib2.URLError, e:
-        print("Error >> Connection to Trickplay application unsuccessful.")
+        print("[VDBG] getTrickplayDebug : Connection to Trickplay application unsuccessful.")
         print(e)
     except httplib.BadStatusLine, e:
-        print("Error >> Trickplay application closed before data could be retreived.")
+        print("[VDBG] getTrickplayDebug : Trickplay application closed before data could be retreived.")
         print(e)
     
     except httplib.InvalidURL, e:
-        print('Could not find a Trickplay device.')
+        print('[VDBG] getTrickplayDebug : Couldn\'t find a Trickplay device.')
         print(e)
         
     return None
