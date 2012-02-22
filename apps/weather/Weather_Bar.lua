@@ -147,8 +147,6 @@ local function make_curr_temps(curr_temp_tbl,fday,w,zip,city_name,state)
     
     
     
-        
-    print("PRINTTT",city_name)
     local regexed_name = ""
     for i = 1, # city_name do
         
@@ -196,7 +194,7 @@ function Make_Bar(loc,wu_data,index, master)
     if master then
         master_i = 1
     end
-    print(loc)
+    
     --Visual Components
     local bar = Group{
         name = loc .." Weather Bar",
@@ -413,7 +411,6 @@ function Make_Bar(loc,wu_data,index, master)
                 full_bar:show()
                 blurb_txt:show()
                 bar.on_key_down = general_on_key_down
-                print("bleh2",bar.on_key_down)
             end,
             ["5_DAY"] = function()
                 full_bar:show()
@@ -595,7 +592,7 @@ function Make_Bar(loc,wu_data,index, master)
             
             if blurb_txt.h > yellow_button.y+yellow_button.h-blurb_txt.y then
                 blurb_txt.clip = {0,0,blurb_txt.w,100}--yellow_button.y+yellow_button.h-blurb_txt.y}
-                --print(yellow_button.y+yellow_button.h-blurb_txt.y)
+                
                 bar.blurb_scroll.dy = blurb_txt.h-blurb_txt.clip[4]
                 bar.blurb_scroll.duration = bar.blurb_scroll.dy/8*1000
                 
@@ -659,7 +656,7 @@ function Make_Bar(loc,wu_data,index, master)
                 )
             )
             if anim_state and anim_state.state == "MINI" then
-                print("MINIIIIII")
+                
                 --bar:find_child("mid").scale = {mini_width,1}
                 bar:find_child("mid").w   = mini_width
                 bar:find_child("right").x = bar_side_w + mini_width
@@ -672,7 +669,7 @@ function Make_Bar(loc,wu_data,index, master)
             
             if bar_i == bar_index then
                 time_of_day = bar.local_time_of_day
-                print(bar.curr_condition)
+                
                 conditions[bar.curr_condition]()
                 
                 if blurb_txt.has_clip and full_bar.opacity ~= 0 and blurb_txt.opacity ~= 0 then
@@ -694,6 +691,21 @@ function Make_Bar(loc,wu_data,index, master)
     local bar_dist = 1905-bar_side_w-MINI_BAR_X
     local next_i = bar_index
     
+    local flag_for_deletion = false
+    
+    local function delete_me()
+        
+        table.remove(bars,bar_index)
+        table.remove(locations,bar_index)
+        
+        for i,v in ipairs(bars) do
+            bars[i].set_bar_index(i)
+        end
+        
+        bar:unparent()
+        
+        
+    end
     
     local moving_to_new_bar = function()
         bar_i  = next_i
@@ -778,6 +790,9 @@ function Make_Bar(loc,wu_data,index, master)
         on_completed = function()
             bars[next_i]:grab_key_focus()
             bar:hide()
+            
+            if flag_for_deletion then delete_me() end
+            
         end
     }
     bar.full_move_right = Timeline{
@@ -805,6 +820,9 @@ function Make_Bar(loc,wu_data,index, master)
             right_faux_bar.x = 0
             left_faux_bar.x = 0
             bars[next_i]:grab_key_focus()
+            
+            if flag_for_deletion then delete_me() end
+            
         end
     }
     local s
@@ -814,7 +832,7 @@ function Make_Bar(loc,wu_data,index, master)
     bar.zip_ellipsis = Timer{
         interval = 1500/4,
         on_timer = function(self)
-            --print("sip")
+            
             s = zip_ellipsis_base_text
             
             zip_ellipsis_count = (zip_ellipsis_count+1)%zip_ellipsis_max
@@ -879,13 +897,13 @@ function Make_Bar(loc,wu_data,index, master)
     }
     
     --Key Handler
-    local bar_keys = {
+    local bar_keys
+    bar_keys = {
         [keys.Up]     = function()
             
             if master_i ~= nil then
                 screen:grab_key_focus()
                 master_i = (master_i-2)%(#all_anims) + 1
-                print("And the Lord said.. Let there be ",all_anims[master_i])
                 bar.curr_condition = all_anims[master_i]
                 conditions[bar.curr_condition]()
                 mesg.text = bar.curr_condition..", USA"
@@ -899,7 +917,7 @@ function Make_Bar(loc,wu_data,index, master)
                     green_button_mini.x = MINI_BAR_X+mini_width -83
                     arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
                 end
-                print("UP")
+                
             end
             
         end,
@@ -908,7 +926,6 @@ function Make_Bar(loc,wu_data,index, master)
             if  master_i ~= nil then
                 screen:grab_key_focus()
                 master_i = master_i%(#all_anims) + 1
-                print("And the Lord said.. Let there be ",all_anims[master_i])
                 bar.curr_condition = all_anims[master_i]
                 conditions[bar.curr_condition]()
                 mesg.text = bar.curr_condition..", USA"
@@ -923,14 +940,14 @@ function Make_Bar(loc,wu_data,index, master)
                     green_button_mini.x = MINI_BAR_X+mini_width -83
                     arrow_r.x = MINI_BAR_X + mini_width -bar_side_w/2+1
                 end
-                print("DOWN")
+                
             end
             
         end,
         [keys.Left]   = function()
             if #bars == 1 then return end
             
-            next_i = (bar_i-2) % (# bars) + 1
+            next_i = (bar_index-2) % (# bars) + 1
             
             
             if anim_state.state == "MINI" then
@@ -943,7 +960,7 @@ function Make_Bar(loc,wu_data,index, master)
             
             if #bars == 1 then return end
             
-            next_i = (bar_i) % (# bars) + 1
+            next_i = (bar_index) % (# bars) + 1
             
             
             if anim_state.state == "MINI" then
@@ -981,6 +998,11 @@ function Make_Bar(loc,wu_data,index, master)
         end,
         [keys.RED]    = function()
             if #bars == 1 then return end
+            
+            flag_for_deletion = true
+            
+            bar_keys[keys.Right]()
+            --[[
             table.remove(bars,bar_index)
             table.remove(locations,bar_index)
             
@@ -996,6 +1018,7 @@ function Make_Bar(loc,wu_data,index, master)
             else
                 bar.full_move_right:start()
             end
+            --]]
         end,
         [keys.GREEN]  = function()
             
@@ -1048,14 +1071,15 @@ function Make_Bar(loc,wu_data,index, master)
         end,
         [keys.RED]    = function()
             
-            if zip_focus <= 5 then
-                zip_backing[zip_focus].color={255,255,255}
-            end
-            zip_focus = zip_focus + 1
-            if zip_focus == #zip_backing + 1 then
-                zip_focus = 1
+            zip_backing[zip_focus].color={255,255,255}
+            zip_focus = zip_focus - 1
+            if zip_focus == 0 then
+                zip_focus = #zip_backing
                 
             end
+            digits[zip_focus].text = ""
+            
+            
             zip_backing[zip_focus].color = {140,140,140}
             
         end,
@@ -1174,7 +1198,7 @@ function Make_Bar(loc,wu_data,index, master)
             
             zip_code_prompt.text = "Canceled"
             
-            print("Cancel send",zip_search_cancel_obj:cancel())
+            zip_search_cancel_obj:cancel()
             
             zip_search_cancel_obj= nil
             
@@ -1202,7 +1226,7 @@ function Make_Bar(loc,wu_data,index, master)
     end
     
     function bar.go_to_state(s)
-        print(s)
+        
         anim_state.state = s
         
     end
@@ -1231,8 +1255,6 @@ function Make_Bar(loc,wu_data,index, master)
         blurb_txt.text = "Testing bar, Press up and down to view all the animations"
         
     end
-    
-    print("making a bar with parameters:",loc,index)
     
     bar:hide()
     

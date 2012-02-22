@@ -1,0 +1,11 @@
+
+Title: TrickPlay IDE Introduction
+
+The TrickPlay IDE (Integrated Development Environment) provides editing and debugging capabilities that streamline the creation of a TrickPlay application.
+
+The IDE Editor can be used to create a TrickPlay application's source files. The TrickPlay Visual Editor can be used to define the user interface and the generated project files can be loaded into the IDE Editor to run the application and add additional functionality.
+
+A TrickPlay application is typically developed on a computer terminal, but the final application is intended to run on a television. The IDE can run a TrickPlay application in either of these configurations.
+
+While running, the application can be tested and debugged by stepping through the code and monitoring variable values. The application can be stopped at any code statement by setting a breakpoint on the statement. Using the debugging capabilities, it's possible to see exactly what a program is doing and how variable values are affected. The debugger is especially effective in locating problems that exist deep within a program's logic where the use of print statements would be difficult.
+
