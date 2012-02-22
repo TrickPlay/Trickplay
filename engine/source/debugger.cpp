@@ -936,6 +936,62 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		reply[ "app" ] = get_app_info();
 	}
 
+	// Batch breakpoints
+
+	if ( 0 == command.find( "bb " ) )
+	{
+		StringVector parts = split_string( command , " " , 2 );
+
+		if ( parts.size() == 2 )
+		{
+			JSON::Value root = JSON::Parser::parse( parts[ 1 ] );
+
+			if ( root.is<JSON::Object>() )
+			{
+				JSON::Object & o = root.as<JSON::Object>();
+
+				if ( o.has( "clear" ) &&  o["clear"].as<bool>() )
+				{
+					breakpoints.clear();
+				}
+
+				JSON::Array & b = o["add"].as<JSON::Array>();
+
+				for ( JSON::Array::Vector::iterator it = b.begin(); it != b.end(); ++it )
+				{
+					JSON::Object & bo = it->as<JSON::Object>();
+
+					String file = bo[ "file" ].as<String>();
+					int line = bo[ "line" ].as<long long>();
+					bool on = bo.has( "on" ) ? bo[ "on" ].as<bool>() : true;
+
+					breakpoints.push_back( Breakpoint( file , line , on ) );
+				}
+
+				b = o[ "delete" ].as<JSON::Array>();
+
+				for ( JSON::Array::Vector::iterator it = b.begin(); it != b.end(); ++it )
+				{
+					JSON::Object & bo = it->as<JSON::Object>();
+
+					String file = bo[ "file" ].as<String>();
+					int line = bo[ "line" ].as<long long>();
+
+					for ( BreakpointList::iterator ib = breakpoints.begin(); ib != breakpoints.end(); ++ib )
+					{
+						if ( ib->file == file && ib->line == line )
+						{
+							breakpoints.erase( ib );
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
+	}
+
 	// Set a breakpoint
 	// b 57 - set a breakpoint at line 57 of the current file
 	// b main.lua:57 - set a breakpoint at line 57 of main.lua
