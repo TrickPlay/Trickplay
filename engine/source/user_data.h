@@ -239,6 +239,8 @@ struct UserData
 
     static void clear_callbacks( lua_State * L , int index = 1 );
 
+    void clear_callbacks();
+
     //.........................................................................
     // This one looks up a user data given a client pointer and invokes the
     // given callback. It expects that nargs have been pushed on to the stack
@@ -370,11 +372,6 @@ private:
     int             weak_ref;
 
     int             strong_ref;
-
-    //.........................................................................
-    // Callbacks are kept in a table we reference.
-
-    int             callbacks_ref;
 
     //.........................................................................
     // A map to signals we have connected to the master. Each entry has our own
