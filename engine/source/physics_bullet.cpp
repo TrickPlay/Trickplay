@@ -9,9 +9,7 @@
 
 extern int new_PBShape( lua_State * L );
 extern int new_PBBody3d( lua_State * L );
-extern int invoke_PBBody3d_on_get_transform(lua_State*L, btRigidBody *  self,int nargs,int nresults);
-extern int invoke_PBBody3d_on_set_transform(lua_State*L, btRigidBody *  self,int nargs,int nresults);
-
+extern int invoke_pb_on_step( lua_State * L , Bullet::World * self , int nargs , int nresults );
 
 namespace Bullet
 {
@@ -161,6 +159,8 @@ World::World( lua_State * L , float _pixels_per_meter )
 	world = new btDiscreteDynamicsWorld( dispatcher , pair_cache , solver , collision_configuration );
 
 	world->setGravity( btVector3( 0 , 10 , 0 ) );
+
+	world->setInternalTickCallback( tick_callback , this );
 }
 
 //-----------------------------------------------------------------------------
@@ -541,5 +541,17 @@ void World::step( float time_step , int max_sub_steps , float fixed_time_step )
 }
 
 //-----------------------------------------------------------------------------
+
+void World::tick_callback( btDynamicsWorld * world , btScalar time )
+{
+	Bullet::World * self = ( Bullet::World * ) world->getWorldUserInfo();
+
+	if ( lua_State * L = self->lsp->get_lua_state() )
+	{
+		lua_pushnumber( L , time );
+		invoke_pb_on_step( L , self , 1 , 0 );
+	}
+}
+
 
 } // namespace Bullet
