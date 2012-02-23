@@ -40,8 +40,6 @@ class MainWindow(QMainWindow):
         # Restore size/position of window
         settings = QSettings()
         self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
-        #print( settings.value( "mainWindowSize").toSize() )
-        #self.resize( settings.value("mainWindowSize").toSize() )
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -103,7 +101,6 @@ class MainWindow(QMainWindow):
 
 		#File Menu
         QObject.connect(self.ui.actionNew_File, SIGNAL("triggered()"),  self.newFile)
-        #QObject.connect(self.ui.actionNew_Folder, SIGNAL("triggered()"),  self.newFolder)
         QObject.connect(self.ui.action_New, SIGNAL("triggered()"),  self.new)
         QObject.connect(self.ui.actionOpen_App, SIGNAL("triggered()"),  self.openApp)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
@@ -133,7 +130,7 @@ class MainWindow(QMainWindow):
         # Restore sizes/positions of docks
         #self.restoreState(settings.value("mainWindowState").toByteArray());
         self.path = None
-        QObject.connect(app, SIGNAL('aboutToQuit()'), self.cleanUp)
+        QObject.connect(app, SIGNAL('aboutToQuit()'), self.exit)
         self.app = app
 
 		#Icon 
@@ -188,7 +185,7 @@ class MainWindow(QMainWindow):
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar)
 
 
-		#Create Target Trickplay Devices Button
+		#Create Target Devices Drop Down Button
         self._deviceManager = TrickplayDeviceManager(self)
         font_deviceManager = QFont()
         font_deviceManager.setPointSize(9)
@@ -197,7 +194,6 @@ class MainWindow(QMainWindow):
         
 
 		# Create Debug/Run tool button 
-		#V2 ---------------------------------------------------------------
         self.debug_tbt = QtGui.QToolButton()
         self.debug_tbt.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
         self.debug_tbt.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -584,7 +580,8 @@ class MainWindow(QMainWindow):
         try:
             print('[VDBG] Trickplay state : [ %s ]'%self.deviceManager.trickplay.state())
             #if self.trickplay.state() == QProcess.Running:
-            self.deviceManager.trickplay.close()
+            self.exit()
+            #self.deviceManager.trickplay.close()
             #    print('terminated trickplay')
         except AttributeError, e:
             pass
