@@ -9,6 +9,7 @@ from TrickplayPushApp import TrickplayPushApp
 from UI.DeviceManager import Ui_DeviceManager
 from Editor.Editor import Editor
 from connection import *
+from Console.TrickplayConsole import *
 
 NAME = Qt.UserRole + 1
 ADDRESS = Qt.UserRole + 2
@@ -114,20 +115,15 @@ class TrickplayDeviceManager(QWidget):
 					        self.ui.comboBox.setItemData(index, data["debugger"], DEBUG_PORT)
 					        #d_port = data["debugger"]
 					        #print("[VDBG] debug Port : %s"%d_port)
-					    else:
-					        self.ui.comboBox.setItemData(index, None, DEBUG_PORT)
 					    if data.has_key("http"):
 					        #self.http_port = data["http"]
 					        #print("[VDBG] http Port : %s"%self.http_port)
 					        self.ui.comboBox.setItemData(index, data["http"], HTTP_PORT)
-					    else:
-					        self.ui.comboBox.setItemData(index, None, HTTP_PORT)
 					    if data.has_key("console"):
 					        #self.console_port = data["console"]
 					        #print("[VDBG] console Port : %s"%self.console_port)
 					        self.ui.comboBox.setItemData(index, data["console"], CONSOLE_PORT)
-					    else:
-					        self.ui.comboBox.setItemData(index, 7777, CONSOLE_PORT)
+					        CON.port = self.http_port
 					else:
 					    print("[VDBG] Didn't get Control information ")
 
@@ -235,8 +231,8 @@ class TrickplayDeviceManager(QWidget):
 
     def readResponse(self):
 		while self.socket.waitForReadyRead(1100) :
-			print self.socket.read(self.socket.bytesAvailable())[:-1]
-			#print self.socket.read(self.socket.bytesAvailable())[:-1].replace('\033[34;1m','').replace('\033[31;1m','').replace('\033[0m','').replace('\033[37m','').replace('\033[32m','')
+			#print self.socket.read(self.socket.bytesAvailable())[:-1]
+			EGN_MSG(self.socket.read(self.socket.bytesAvailable())[:-1].replace('\033[34;1m','').replace('\033[31;1m','').replace('\033[0m','').replace('\033[37m','').replace('\033[32m',''))
 		#self.socket.flush()
 
 		"""
@@ -307,6 +303,7 @@ class TrickplayDeviceManager(QWidget):
 					    self.console_port = control[ "console" ]
 
 					self.ui.comboBox.setItemData(0, self.http_port, PORT)
+					CON.port = self.http_port
 					# Send our first debugger command, which will return
 					# when the app breaks
 					if self.debug_mode == True:
@@ -317,7 +314,7 @@ class TrickplayDeviceManager(QWidget):
 					self.trickplay.close()
 			else:
 				# Output the log line
-				print( ">> %s" % s )
+				EGN_MSG(">> %s"%s.replace('\033[34;1m','').replace('\033[31;1m','').replace('\033[0m','').replace('\033[37m','').replace('\033[32m',''))
 				
     def debugger_reply_finished(self):
 
@@ -327,7 +324,7 @@ class TrickplayDeviceManager(QWidget):
 
 		    if data is not None:
 
-		        print("[VDBG] %s Response"%self.command)
+		        print("[VDBG] ' %s ' Response"%self.command)
 		        #print("[VDBG] %s DATA"%data)
 
 		        if self.command == DBG_CMD_INFO:
@@ -463,9 +460,8 @@ class TrickplayDeviceManager(QWidget):
 		
     def send_debugger_command(self, command):
 		# We don't have a debugger port yet
-		print("send_debugger_command : [%s]"%command)
 		if self.debug_port is None:
-			raise "NO DEBUGGER PORT"
+			raise "No debugger port"
 		
 		# We are processing a request
 		if self.reply is not None:

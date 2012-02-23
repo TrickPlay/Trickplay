@@ -159,7 +159,7 @@ class EditorManager(QWidget):
 			editor.save()
 			self.tab.textBefores[index] = editor.text() ## new 2/3 
 		else:
-			print 'Failed to save because no text editor is currently selected.'                
+			print '[VDBG] Failed to save because no text editor is currently selected.'                
 		
     def saveall(self):
 		index = 0 
@@ -193,7 +193,7 @@ class EditorManager(QWidget):
 			cur_file = self.ui.filename.text() 
 
 			new_path = cur_dir+'/'+cur_file
-			print "Save As .. "+new_path
+			print "[VDBG] Save As .. ' %s '"%new_path
 
 			if editor.tempfile == False :
 				currentText = open(editor.path).read()
@@ -251,7 +251,6 @@ class EditorManager(QWidget):
         		for k in self.tab.paths:
 					self.editors[k][1] = self.tab.paths.index(k) 
         		if editor.tempfile == False:
-        			print (path+"pp")
         			editor.readFile(path) 
 
             if closedTab != path:
@@ -307,7 +306,6 @@ class EditorManager(QWidget):
 				return self.currentEditor
         elif tempfile == False:
             path = os.path.join (self.deviceManager.path(), path)
-            print(path)
             editor.readFile(path)
         
         if 0 == nTabGroups:
@@ -407,7 +405,7 @@ class EditorManager(QWidget):
             self.openFromFileSystem(event.source().currentIndex(), n)
             
         else:
-            print('Failed to open dropped file.')
+            print('[VDBG] Failed to open dropped file.')
         
     def openFromFileSystem(self, fileIndex, n = None):
         """
