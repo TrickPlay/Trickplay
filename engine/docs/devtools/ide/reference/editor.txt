@@ -9,7 +9,9 @@ The Editor Window lists the contents of a text source file. Multiple files can b
 
 A new file can be created by selecting the File->New File menu item.
 
-If the file has been modified, an asterisk will appear in front of the file's name in its tab.
+A new project can be started by selecting the File->New App menu item. When creating a new project, the IDE will prompt for the location of the project's source files. If you select a directory that already contains an existing TrickPlay application, the IDE will open that application. If you select a clean directory, the IDE will create the application's app file and an empty main.lua file.
+
+To load an existing project, select the File->Open App menu item. The IDE will prompt for the location of the project's source files. The selected application's source files are then listed in the IDE's Project Window. To view and edit a source file in the Editor Window, double-click the file's name in the Project Window.
 
 To save a file, select the File->Save or File->Save As... menu item or press their corresponding shortcut key. To save all files that have been modified, select the File->Save All menu item.
 
@@ -18,6 +20,8 @@ To close a source file, click on the X graphic on the file's tab or select the F
 Topic: Editing Text
 
 The cursor can be positioned by using the mouse, keyboard arrow keys, or the window's scroll bars.
+
+After a source file has been modified in the editor, an asterisk will appear in front of the file's name in its tab.
 
 Keyboard Actions:
 	<Insert> - Toggle Insert and Overwrite modes
