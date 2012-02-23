@@ -132,5 +132,7 @@ global pb [[ Bullet::World * ]]
     PBShape SphereShape( double radius )
         [[
             self->create_shape( new btSphereShape( radius ) );
-        ]];                      
+        ]];
+        
+    callback on_step( double seconds );
 }

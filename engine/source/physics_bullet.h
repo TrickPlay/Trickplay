@@ -46,6 +46,8 @@ namespace Bullet
 
 	private:
 
+        static void tick_callback( btDynamicsWorld * world , btScalar time );
+
 		LuaStateProxy *				lsp;
 
 		float 						ppm;
