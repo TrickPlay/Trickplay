@@ -139,68 +139,6 @@ private:
 	ClutterActor * 	actor;
 };
 
-
-class GLMotionState : public btMotionState
-{
-public:
-
-	GLMotionState( lua_State * _L , btRigidBody * _body )
-	:
-		L( _L ),
-		body( _body )
-	{
-		g_assert( L );
-		g_assert( body );
-	}
-
-	virtual ~GLMotionState()
-	{
-	}
-
-	virtual void getWorldTransform(	btTransform & transform ) const
-	{
-		if ( invoke_PBBody3d_on_get_transform( L , body , 0 , 1 ) )
-		{
-			int n = lua_gettop( L );
-
-			if ( UserData * ud = UserData::get_check( L , n ) )
-			{
-				CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
-
-				transform.setFromOpenGLMatrix( & matrix->xx );
-			}
-
-			lua_pop( L , 1 );
-		}
-	}
-
-	virtual void setWorldTransform(	const btTransform & transform )
-	{
-		if ( invoke_PBBody3d_on_set_transform( L , body , 0 , 1 ) )
-		{
-			int n = lua_gettop( L );
-
-			if ( UserData * ud = UserData::get_check( L , n ) )
-			{
-				CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
-
-				float m[16];
-
-				transform.getOpenGLMatrix( m );
-
-				cogl_matrix_init_from_array( matrix , m );
-			}
-
-			lua_pop( L , 1 );
-		}
-	}
-
-private:
-
-	lua_State * 	L;
-	btRigidBody *	body;
-};
-
 //=============================================================================
 
 
@@ -511,9 +449,7 @@ int World::create_body_3d( int properties )
     //.........................................................................
     // Info to construct the body
 
-	btRigidBody::btRigidBodyConstructionInfo cinfo( mass , 0 , shape , local_inertia );
-
-	cinfo.m_startWorldTransform = transform;
+	btRigidBody::btRigidBodyConstructionInfo cinfo( mass , new btDefaultMotionState( transform ) , shape , local_inertia );
 
     //.........................................................................
 
@@ -555,8 +491,6 @@ int World::create_body_3d( int properties )
 	//.........................................................................
 
 	btRigidBody * body = new btRigidBody( cinfo );
-
-	body->setMotionState( new GLMotionState( L , body ) );
 
 	world->addRigidBody( body );
 
