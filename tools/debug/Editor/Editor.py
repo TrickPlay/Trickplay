@@ -165,7 +165,7 @@ class Editor(QsciScintilla):
         # Toggle marker for the line the margin was clicked on
 		#print "on_margin_clicked"
         
-		if self.editorManager.main.debug_mode == False:
+		if self.editorManager.main.debug_mode == False or self.editorManager.main.debug_run == True:
 			return
 
 		bp_num = 0
