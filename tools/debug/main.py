@@ -459,7 +459,7 @@ class MainWindow(QMainWindow):
     	    for n in self.editorManager.editors:
     	        for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
     	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
-                    print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
+                    #print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
     	        self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
 
             # delete current line marker
@@ -487,9 +487,8 @@ class MainWindow(QMainWindow):
         self.debug_continue_bt.setEnabled(False)
 
         self.inspector.clearTree()
-        #self._deviceManager.ui.comboBox.removeItem(self._deviceManager.ui.comboBox.findText(self._deviceManager.newAppText))
-        #self._deviceManager.ui.comboBox.setCurrentIndex(0)
-        #self._deviceManager.service_selected(0)
+        self._deviceManager.ui.comboBox.setEnabled(True)
+        self.debug_tbt.setEnabled(True)
 
     def run(self):
         self.inspector.clearTree()
@@ -508,6 +507,9 @@ class MainWindow(QMainWindow):
         self.debug_continue_bt.setEnabled(False)
     	self.chgTool_run()
 
+        self._deviceManager.ui.comboBox.setEnabled(False)
+        self.debug_tbt.setEnabled(False)
+
     def debug(self):
         self.inspector.clearTree()
         self._deviceManager.run(True)
@@ -525,23 +527,9 @@ class MainWindow(QMainWindow):
         self.debug_pause_bt.setEnabled(True)
         self.debug_continue_bt.setEnabled(True)
 
-        """"time.sleep(2)
-        data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bn", True)
-        self._deviceManager.printResp(data, "cn")
-        # update backtrace table
-        data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
-        stack_info = self._deviceManager.printResp(data, "bt")
-        self._backtrace.populateTraceTable(stack_info, self.editorManager)
-
-		# Open File, Show Current Lines 
-        if self._deviceManager.file_name[:1] != '/' :
-			self.current_debug_file = self.path+'/'+self._deviceManager.file_name
-        else :
-			self.current_debug_file = self.path+self._deviceManager.file_name
-
-        self._editorManager.newEditor(self.current_debug_file, None, self._deviceManager.line_no, None, True)
-		"""
     	self.chgTool_debug()
+        self._deviceManager.ui.comboBox.setEnabled(False)
+        self.debug_tbt.setEnabled(False)
 	
 	
     def editor_undo(self):
