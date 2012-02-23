@@ -34,10 +34,26 @@ interface PBBody3d [[ btRigidBody * ]]
         [[
             // Not deleted because they are owned by the world
         ]];
+
+    Matrix get_transform( Matrix matrix )
+        [[
+            if ( UserData * ud = UserData::get_check( L , matrix ) )
+            {
+                CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
         
-    callback on_get_transform;
-    
-    callback on_set_transform;        
+                float m[16];
+        
+                btTransform transform;
+                
+                self->getMotionState()->getWorldTransform( transform );
+        
+                transform.getOpenGLMatrix( m );
+        
+                cogl_matrix_init_from_array( matrix , m );
+            }
+            
+            lua_pushvalue( L , matrix );
+        ]];
 }
 
 global pb [[ Bullet::World * ]] 

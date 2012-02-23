@@ -207,28 +207,26 @@ local function make_cube( x , y , z , hw , xr , yr , zr )
     matrix:rotate( yr or 0 , 0 , 1 , 0 )
     matrix:rotate( zr or 0 , 0 , 0 , 1 )
     
-    local function gt()
-        return matrix
-    end
+    
+    local shape = pb:BoxShape( hw , hw , hw )
+--    local shape = pb:SphereShape( hw )
     
     local body =
         
         pb:Body3d
         {
             transform = matrix ,
-            shape = pb:BoxShape( hw , hw , hw ),
+            shape = shape,
             bounce = 0.1,
             mass = 1 ,
-            friction = 1,
-            on_get_transform = gt,
-            on_set_transform = gt
+            friction = 1
         }
         
     local sm = Matrix()
         
     return
     {
-        matrix = function() return sm:set( matrix ):scale(hw,hw,hw) end,
+        matrix = function() return body:get_transform( sm ):scale(hw,hw,hw) end,
         body = body
     }
     
@@ -270,7 +268,7 @@ local function main()
     
     display( cubes )
     
-    pb.gravity = { 0 , -10 * 64 , 0  }
+    pb.gravity = { 0 ,  -10 * 64 , 0  }
     
 
     local ground_matrix = Matrix()
