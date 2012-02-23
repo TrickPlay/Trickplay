@@ -147,7 +147,6 @@ UserData * UserData::make( lua_State * L , const gchar * type )
     result->master = 0;
     result->client = 0;
     result->initialized = false;
-    result->callbacks_ref = LUA_NOREF;
     result->signals = 0;
 
 #ifdef TP_PROFILING
@@ -379,7 +378,7 @@ void UserData::finalize( lua_State * L , int index )
 
     tplog2( "  CLEARING CALLBACKS" );
 
-    lb_strong_unref( L , self->callbacks_ref );
+    self->clear_callbacks();
 
     lb_weak_unref( L , self->weak_ref );
 
@@ -395,7 +394,6 @@ void UserData::finalize( lua_State * L , int index )
     self->client = ( gpointer ) 0xDEADBEEF;
     self->weak_ref = LUA_NOREF;
     self->strong_ref = LUA_NOREF;
-    self->callbacks_ref = LUA_NOREF;
 
 #ifdef TP_PROFILING
 
@@ -436,90 +434,39 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 {
     LSG;
 
-    UserData * self = UserData::get( L , index );
+    int me = abs_index( L , index );
 
     int fn = abs_index( L , function_index );
 
-    lb_strong_deref( L , self->callbacks_ref );
+    void * p = lua_touserdata( L , me );
+
+    lua_getfenv( L , me );
+
+    lua_pushlightuserdata( L , p );
+    lua_rawget( L , -2 );
 
     if ( lua_isnil( L , -1 ) )
     {
-        LSG;
-
-        // The callbacks table does not exist, we need to create it
-
-        // Get rid of the nil
-
-        lua_pop( L , 1 );
-
-        // Create the table
-
-        // This table will have a single entry:
-        // The key is a ref to our proxy, and it is weak
-        // The value is a table of callbacks, where each key is the name and the value is the function
-
-        lua_newtable( L );
-
-        // Create a metatable for it so that the key is weak
-
-        lua_newtable( L );
-        lua_pushstring( L , "__mode" );
-        lua_pushstring( L , "k" );
-        lua_rawset( L , -3 );
-        lua_setmetatable( L , -2 );
-
-        // Get a ref to the table and save it
-
-        lua_pushvalue( L , -1 );
-        self->callbacks_ref = lb_strong_ref( L );
-
-        LSG_CHECK( 0 );
+    	lua_pop( L , 2 );
+    	lua_newtable( L );
+    	lua_pushvalue( L , -1 );
+    	lua_setfenv( L , me );
+    	lua_pushlightuserdata( L , p );
+    	lua_pushboolean( L , true );
+    	lua_rawset( L , -3 );
     }
-
-    // Now the callbacks table is at the top of the stack. We need to use our
-    // proxy Lua object to get the table of functions.
-
-    self->push_proxy();
-
-    g_assert( !lua_isnil(L,-1));
-
-    lua_rawget( L , -2 );
-
-    if ( lua_isnil( L , -1  ) )
+    else
     {
-        // The table of functions is not there, we have to create it
-
-        lua_pop( L , 1 );
-
-        lua_newtable( L );
-
-        self->push_proxy();
-        lua_pushvalue( L , -2 );
-        lua_rawset( L , -4 );
+    	lua_pop( L , 1 );
     }
-
-    // Now, we have the callbacks table followed by the functions table
-
-    lua_remove( L , -2 );
-
-    // Only the functions table left on top
-
-
-    int isnil = lua_isnil( L , fn );
-
-    // Set the new function in the functions table
 
     lua_pushstring( L , name );
     lua_pushvalue( L , fn );
     lua_rawset( L , -3 );
 
-    // Pop the functions table
-
     lua_pop( L , 1 );
 
-    LSG_CHECK( 0 );
-
-    return isnil;
+    return lua_isnil( L , fn );
 }
 
 //.............................................................................
@@ -530,45 +477,18 @@ int UserData::get_callback( const char * name )
 
     g_assert( name );
 
-    lb_strong_deref( L , callbacks_ref );
-
-    // We don't have a callbacks table, so we just leave the nil on the stack
-
-    if ( lua_isnil( L , -1 ) )
-    {
-        LSG_CHECK( 1 );
-        return 1;
-    }
-
-    // We do have a callbacks table, fetch the functions table
-
     push_proxy();
 
-    if (lua_isnil(L,-1))
-    {
-        lua_remove(L,-2);
-        LSG_CHECK(1);
-        return 1;
-    }
-
-    lua_rawget( L , -2 );
-
+    lua_getfenv( L , -1 );
     lua_remove( L , -2 );
 
-    if ( lua_isnil( L , -1 ) )
+    if ( ! lua_isnil( L , -1 ) )
     {
-        LSG_CHECK( 1 );
-        return 1;
+    	lua_pushstring( L , name );
+    	lua_rawget( L , -2 );
+    	lua_remove( L , -2 );
     }
 
-    // We do have the functions table, get the function
-
-    lua_pushstring( L , name );
-    lua_rawget( L , -2 );
-
-    lua_remove( L , -2 );
-
-    LSG_CHECK( 1 );
     return 1;
 }
 
@@ -599,13 +519,17 @@ int UserData::is_callback_attached( const char * name , lua_State * L , int inde
 
 //.............................................................................
 
+void UserData::clear_callbacks( )
+{
+	push_proxy();
+	lua_newtable( L );
+	lua_setfenv( L , -2 );
+	lua_pop( L , 1 );
+}
+
 void UserData::clear_callbacks( lua_State * L , int index )
 {
-    UserData * self = UserData::get( L , index );
-
-    lb_strong_unref( L , self->callbacks_ref );
-
-    self->callbacks_ref = LUA_NOREF;
+	UserData::get( L , index )->clear_callbacks();
 }
 
 //.............................................................................
@@ -644,32 +568,25 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
         return 0;
     }
 
-    // nargs : callback
-
-    push_proxy();
-
-    g_assert(!lua_isnil(L,-1));
-
-    // nargs : callback : proxy
-
-    // Move the proxy before the arguments
-
-    lua_insert( L , - ( nargs + 2 ) );
-
-    // proxy : nargs : callback
-
-    // Move the callback before the proxy
-
-    lua_insert( L , - ( nargs + 2 ) );
-
     {
+    	// Move function to just before the arguments
+
+    	lua_insert( L , - ( nargs + 1 ) );
+
+    	// Push self
+
+    	push_proxy();
+
+    	// Move self to just before the arguments (and right after the function)
+
+    	lua_insert( L , - ( nargs + 1 ) );
+
         PROFILER(name,PROFILER_CALLS_TO_LUA);
 
-        // callback : proxy : nargs
+        // callback : nargs
 
         lua_call( L , nargs + 1 , nresults );
     }
-    LSG_CHECK( nresults - nargs );
 
     return 1;
 }
@@ -861,6 +778,8 @@ void UserData::disconnect_all_signals()
 
 void UserData::dump_cb( lua_State * L , int index )
 {
+#if 0
+
     int cb = UserData::get( L , index )->callbacks_ref;
 
     g_debug( "DUMPING CALLBACKS" );
@@ -899,6 +818,7 @@ void UserData::dump_cb( lua_State * L , int index )
     lua_pop( L , 1 );
 
     g_debug( "END OF CALLBACKS" );
+#endif
 }
 
 
