@@ -7,6 +7,7 @@ module globals;
 #include "context.h"
 #include "actions.h"
 #include "images.h"
+#include "app_resource.h"
 
 struct DoLater
 {
@@ -218,7 +219,7 @@ globals
 		
 			... - the print() function accepts a variable number of arguments of any supported type
 			
-		*Return Value:* None, if successful, else returns string error message
+		*Return Value:* None
 		
 		*Code Example:* Output various messages to the console
 		
@@ -227,7 +228,7 @@ globals
 			print( "Code:", error_code, ", Message:", error_message )
 			(end)
 			
-		*See Also:* the <dumptable> function
+		*See Also:* the <dumptable> and <warn> functions
 	*/
 	
     print()
@@ -255,6 +256,50 @@ globals
         ]];
     
     /*
+        Function: warn
+        
+        The warn() function outputs all its arguments to the TrickPlay Console. Unlike <print>, the output of the warn function is displayed more prominently. 
+        
+        *Arguments:*
+        
+            ... - the warn() function accepts a variable number of arguments of any supported type
+            
+        *Return Value:* None
+        
+        *Code Example:* Output various messages to the console
+        
+            (code)
+            warn( "Something went wrong!" )
+            (end)
+            
+        *See Also:* the <dumptable> and <print> functions
+    */
+    
+    warn()
+        [[
+            std::string result;
+            int n = lua_gettop(L);  /* number of arguments */
+            int i;
+            lua_getglobal(L, "tostring");
+            for (i=1; i<=n; i++)
+            {
+              const char *s;
+              lua_pushvalue(L, -1);  /* function to be called */
+              lua_pushvalue(L, i);   /* value to print */
+              lua_call(L, 1, 1);
+              s = lua_tostring(L, -1);  /* get result */
+              if (s == NULL)
+                return luaL_error(L, LUA_QL("tostring") " must return a string to "
+                                     LUA_QL("print"));
+              if (i>1)
+                result += ' ';
+              result += s;
+              lua_pop(L, 1);  /* pop result */
+            }
+            g_warning("%s",result.c_str());                
+        ]];
+
+    /*
     	Function: dofile
     	
     	The dofile() function loads a file containing Lua source code and executes the code. If any error occurs during the running of the Lua code, an error is raised.
@@ -270,23 +315,15 @@ globals
     
     multi dofile(string file_name)
         [[
-            String path;
+            String path( file_name );
             
-            if ( g_str_has_suffix( file_name , ".lua" ) )
+            if ( ! g_str_has_suffix( file_name , ".lua" ) )
             {
-                path = file_name;
+                path += ".lua";
             }
-            else
-            {
-                gchar * p = g_strdup_printf( "%s.lua" , file_name );
-                path = p;
-                g_free( p );
-            }
-            
-            App * app = App::get( L );
             
             int n = lua_gettop(L);
-            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) != 0)
+            if ( AppResource( L , path , AppResource::URI_NOT_ALLOWED ).lua_load( L ) != 0 )
             {
                 lua_error(L);
             }
@@ -310,22 +347,14 @@ globals
     
     multi loadfile(string file_name)
         [[
-            String path;
+            String path( file_name );
             
-            if ( g_str_has_suffix( file_name , ".lua" ) )
+            if ( ! g_str_has_suffix( file_name , ".lua" ) )
             {
-                path = file_name;
-            }
-            else
-            {
-                gchar * p = g_strdup_printf( "%s.lua" , file_name );
-                path = p;
-                g_free( p );
+                path += ".lua";
             }
 
-            App * app = App::get( L );
-            
-            if (app->get_metadata().sandbox.lua_load_pi_child(L,path) == 0)
+            if ( AppResource( L , path , AppResource::URI_NOT_ALLOWED ).lua_load( L ) == 0 )
             {
                 return 1;
             }
@@ -356,17 +385,14 @@ globals
 			result = 0;
 			result_len = 0;
 
-            gsize length = 0;
-            gchar * contents = App::get( L )->get_metadata().sandbox.get_pi_child_contents( file_name , length );
+            App * app = App::get( L );
             
-            FreeLater free_later;
-            
+            Util::Buffer contents = AppResource( app , file_name , AppResource::URI_NOT_ALLOWED ).load_contents( app ); 
+
             if ( contents )
             {
-                free_later( contents );
-                
-                result = contents;
-                result_len = length;
+                result = contents.data();
+                result_len = contents.length();
             }
 		]];       
         
@@ -401,7 +427,35 @@ globals
 
     reload()
     	[[
-    		App::get(L)->get_context()->reload_app();
+            class ReloadAction : public Action
+            {
+            public:
+            
+                ReloadAction( lua_State * L )
+                {
+                    app = App::get( L );
+                    app->ref();
+                }
+                
+                virtual ~ReloadAction()
+                {
+                    app->unref();
+                }
+            
+            protected:
+            
+                virtual bool run()
+                {
+                    app->get_context()->reload_app();
+                    return false;
+                }
+                
+            private:
+            
+                App * app;    
+            };
+    	    
+    	    Action::post( new ReloadAction( L ) );
     	]];
         
     /*    

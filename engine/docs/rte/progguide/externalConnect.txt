@@ -214,7 +214,7 @@ The async property has no effect with device-based Image objects. All image load
 
 Header: The Text Class
 
-Text objects displayed on an iOS device are not editable using the SDK library functions. Thus, the Text properties applicable to editable text are not supported. This includes the following Text properties: editable, single_line, wants_enter, selection_color, cursor_visible, cursor_color, and cursor_size.
+Text objects displayed on an iOS device are not editable using the SDK library functions. Thus, the Text properties applicable to editable text are not supported. This includes the following Text properties: editable, single_line, wants_enter, baseline, cursor_position, selection_end, selected_text, selection_color, cursor_visible, cursor_color, cursor_size, set_selection(), delete_selection(), delete_text(), delete_chars(), insert_text(), get_chars(), and position_to_coordinates().
 
 *The <Text.font> property*
 

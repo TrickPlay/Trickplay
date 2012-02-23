@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'NewApplicationDialog.ui'
 #
-# Created: Fri Aug 19 14:53:38 2011
+# Created: Tue Feb  7 13:46:46 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,6 +18,9 @@ class Ui_newApplicationDialog(object):
     def setupUi(self, newApplicationDialog):
         newApplicationDialog.setObjectName(_fromUtf8("newApplicationDialog"))
         newApplicationDialog.resize(427, 174)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        newApplicationDialog.setFont(font)
         newApplicationDialog.setModal(True)
         self.gridLayout_2 = QtGui.QGridLayout(newApplicationDialog)
         self.gridLayout_2.setVerticalSpacing(12)

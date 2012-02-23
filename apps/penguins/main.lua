@@ -2,11 +2,18 @@
 
 Penguin Zip-Zip
 
+
+tell pablo about segfault
 --]]
+
+orient = dofile('orient/orient.lua')()
+
+--screen.perspective = {1,1,0.1,100}
 
 sin = math.sin
 cos = math.cos
 asin = math.asin
+atan = math.atan
 atan2 = math.atan2
 pi = math.pi
 max = math.max
@@ -29,18 +36,6 @@ ground = {440,1080}
 row = 1
 usebg = true
 
-step = {}
-local d, tms = 0, 0
-local anim = Timeline{duration = 9001, loop = true,
-	on_new_frame = function(self,ms,t)
-		d = self.delta
-		tms = tms+d
-		for k,v in pairs(step) do
-			v(d,tms)
-		end
-	end}
-anim:start()
-
 dofile("assets.lua")
 audio	= dofile("audio.lua")
 levels  = dofile("levels.lua")
@@ -48,7 +43,7 @@ levels.this:load()
 snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
 overlay	= dofile("overlay.lua")
-snow(levels.this.snow,levels.this.bank)
+snow(levels.this.snow)
 dofile("effects.lua")
 
 collectgarbage("collect")

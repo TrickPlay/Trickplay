@@ -32,17 +32,14 @@
 	sphereImage.name = "Sphere"
 	screen:add( sphereImage )
 
-	-- Define an Alpha mode for our animation
-	sphereAlpha  = Alpha { mode = "EASE_IN_OUT_QUINT" }
+	-- Define an Ease transition for our animation
+	sphereEase = Ease( "EASE_IN_OUT_QUINT" )
 
 	-- Animate the spheres with Timelines
 	sphereTL = Timeline { 
 					duration = 3000,
 					loop = true,
 				}
-
-	-- Hook the Alpha to the Timeline
-	sphereAlpha.timeline  = sphereTL
 
 	--Define a Path for the sphere
 	spherePath = Path( "M100 100 l30 0 l30 260 l30 -200 l30 200 l30 -100 l30 100 l30 -25 l30 25 L360 360" )
@@ -62,7 +59,7 @@
 	--]]
 
 	function sphereTL:on_new_frame( msecs, progress )
-		sphereImage.position = spherePath:get_position( sphereAlpha.alpha )
+		sphereImage.position = spherePath:get_position( sphereEase:get_value( progress ) )
 	end
 
 	-- Start all the animations

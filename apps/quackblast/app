@@ -1,0 +1,9 @@
+app=
+{
+    id          = "com.trickplay.quackblast",
+    release     = "1",
+    version     = "0.0",
+    name        = "Quack Blast",
+    author      = "Alex Indaco",
+    copyright   = "© Trickplay Inc."
+}

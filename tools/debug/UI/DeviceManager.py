@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DeviceManager.ui'
 #
-# Created: Fri Aug 19 14:27:27 2011
+# Created: Fri Jan 20 16:27:24 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_DeviceManager(object):
     def setupUi(self, DeviceManager):
         DeviceManager.setObjectName(_fromUtf8("DeviceManager"))
-        DeviceManager.resize(287, 100)
+        DeviceManager.resize(294, 106)
         self.gridLayout = QtGui.QGridLayout(DeviceManager)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.frame = QtGui.QFrame(DeviceManager)
@@ -37,6 +37,9 @@ class Ui_DeviceManager(object):
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout.addWidget(self.label)
         self.comboBox = QtGui.QComboBox(self.frame)
+        self.comboBox.setEditable(False)
+        self.comboBox.setDuplicatesEnabled(False)
+        self.comboBox.setFrame(False)
         self.comboBox.setObjectName(_fromUtf8("comboBox"))
         self.horizontalLayout.addWidget(self.comboBox)
         self.verticalLayout_4.addLayout(self.horizontalLayout)
