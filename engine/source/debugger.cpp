@@ -39,6 +39,15 @@ public:
 		delete ( Command * ) me;
 	}
 
+	typedef std::list<Command*> List;
+
+	class Filter
+	{
+	public:
+		virtual ~Filter() {}
+		virtual bool operator()( Command * command ) const = 0;
+	};
+
 private:
 
 	Command( const Command & ) {}
@@ -66,6 +75,8 @@ public:
 	virtual void disable_console() = 0;
 
 	virtual void clear_pending_commands() = 0;
+
+	virtual Command::List get_commands_matching( const Command::Filter & filter ) = 0;
 
 protected:
 
@@ -233,6 +244,38 @@ public:
 		}
 
 		g_async_queue_unlock( queue );
+	}
+
+	virtual Debugger::Command::List get_commands_matching( const Debugger::Command::Filter & filter )
+	{
+		Debugger::Command::List result;
+		Debugger::Command::List putback;
+
+		g_async_queue_lock( queue );
+
+		while ( Debugger::Command * command = ( Debugger::Command * ) g_async_queue_try_pop_unlocked( queue ) )
+		{
+			if ( filter( command ) )
+			{
+				result.push_back( command );
+			}
+			else
+			{
+				putback.push_back( command );
+			}
+		}
+
+		if ( ! putback.empty() )
+		{
+			for ( Debugger::Command::List::const_iterator it = putback.begin(); it != putback.end(); ++it )
+			{
+				g_async_queue_push_unlocked( queue , * it );
+			}
+		}
+
+		g_async_queue_unlock( queue );
+
+		return result;
 	}
 
 protected:
@@ -801,24 +844,36 @@ JSON::Object Debugger::get_app_info()
 
 //.............................................................................
 
-bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server_command )
+bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server_command , bool with_location )
 {
 	bool result = false;
 
 	String command( server_command->get() );
 
-	JSON::Object reply( get_location( L , ar ) );
+	JSON::Object reply;
+
+	if ( with_location )
+	{
+		reply = get_location( L , ar );
+	}
+
+	if ( command == "i" )
+	{
+		reply[ "locals" ] = get_locals( L , ar );
+		reply[ "stack" ] = get_back_trace( L , ar );
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
+	}
 
 	// List locals
 
-	if ( command == "l" || command == "i" )
+	else if ( command == "l" )
 	{
 		reply[ "locals" ] = get_locals( L , ar );
 	}
 
 	// Where
 
-	if ( command == "w" )
+	else if ( command == "w" )
 	{
 		StringVector * lines = get_source( reply[ "file" ].as<String>() );
 
@@ -856,7 +911,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Reset - delete all breakpoints and continue
 
-	if ( command == "r" )
+	else if ( command == "r" )
 	{
 		break_next = false;
 
@@ -867,21 +922,21 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Back trace
 
-	if ( command == "bt" || command == "i" )
+	else if ( command == "bt" )
 	{
 		reply[ "stack" ] = get_back_trace( L , ar );
 	}
 
 	// Break next
 
-	if ( command == "bn" )
+	else if ( command == "bn" )
 	{
 		break_next = true;
 	}
 
 	// Quit
 
-	if ( command == "q" )
+	else if ( command == "q" )
 	{
 		tp_context_quit( app->get_context() );
 		break_next = false;
@@ -890,7 +945,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Continue
 
-	if ( command == "c" )
+	else if ( command == "c" )
 	{
 		break_next = false;
 		result = true;
@@ -898,7 +953,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Step
 
-	if ( command == "s" )
+	else if ( command == "s" )
 	{
 		break_next = true;
 		result = true;
@@ -906,7 +961,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Next
 
-	if ( command == "n" )
+	else if ( command == "n" )
 	{
 		// To step over, we change the hook to watch for function calls.
 		// If, during the next iteration, a function call happens, it
@@ -924,21 +979,21 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// List breakpoints
 
-	if ( command == "b" || command == "i" )
+	else if ( command == "b" )
 	{
 		reply[ "breakpoints" ] = get_breakpoints( L , ar );
 	}
 
 	// App information
 
-	if ( command == "a" )
+	else if ( command == "a" )
 	{
 		reply[ "app" ] = get_app_info();
 	}
 
 	// Batch breakpoints
 
-	if ( 0 == command.find( "bb " ) )
+	else if ( 0 == command.find( "bb " ) )
 	{
 		StringVector parts = split_string( command , " " , 2 );
 
@@ -997,7 +1052,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 	// b main.lua:57 - set a breakpoint at line 57 of main.lua
 	// b 1 on|off - enable/disable breakpoints
 
-	if ( 0 == command.find( "b " ) )
+	else if ( 0 == command.find( "b " ) )
 	{
 		StringVector parts = split_string( command , " " , 3 );
 
@@ -1043,7 +1098,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Delete a breakpoint
 
-	if ( 0 == command.find( "d " ) )
+	else if ( 0 == command.find( "d " ) )
 	{
 		StringVector parts = split_string( command , " " , 2 );
 
@@ -1074,7 +1129,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	// Fetch a file
 
-	if ( 0 == command.find( "f " ) )
+	else if ( 0 == command.find( "f " ) )
 	{
 		StringVector parts = split_string( command , " " , 2 );
 
@@ -1115,19 +1170,34 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 {
 	lua_getinfo( L, "nSl", ar );
 
-#if 0
-	// This is bad because it returns information while the app is running,
-	// which will look incorrect.
-
-	//.........................................................................
-	// Process any pending debugger commands here
-
- 	for ( Command * server_command = server->get_next_command( false ); server_command; server_command = server->get_next_command( false ) )
 	{
-		( void ) handle_command( L , ar , server_command );
-	}
+		// Some commands can be (and should be) handled here, when we may not be
+		// breaking.
 
-#endif
+		class NoBreakCommands : public Command::Filter
+		{
+			virtual bool operator()( Command * command ) const
+			{
+				String s( command->get() );
+
+				return s == "r" || s == "bn" || s == "q" || s == "b" || s == "a" ||
+						( 0 == s.find( "b ") ) ||
+						( 0 == s.find( "bb ") ) ||
+						( 0 == s.find( "d ") ) ||
+						( 0 == s.find( "f ") );
+			}
+		};
+
+		Command::List commands = server->get_commands_matching( NoBreakCommands() );
+
+		if ( ! commands.empty() )
+		{
+			for ( Command::List::const_iterator it = commands.begin(); it != commands.end(); ++it )
+			{
+				handle_command( L , ar , * it , false );
+			}
+		}
+	}
 
 	//.........................................................................
 
@@ -1231,7 +1301,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     	// Deal with the command, deletes it.
     	// If it returns true, it means we should jump out
 
-    	if ( handle_command( L , ar , server_command ) )
+    	if ( handle_command( L , ar , server_command , true ) )
     	{
     		break;
     	}
