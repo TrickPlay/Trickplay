@@ -111,5 +111,10 @@ global pb [[ Bullet::World * ]]
     PBShape StaticPlaneShape( double normal_x , double normal_y , double normal_z , double plane_constant )
         [[
             self->create_shape( new btStaticPlaneShape( btVector3( normal_x , normal_y , normal_z ) , plane_constant ) );
-        ]];              
+        ]];
+        
+    PBShape SphereShape( double radius )
+        [[
+            self->create_shape( new btSphereShape( radius ) );
+        ]];                      
 }
