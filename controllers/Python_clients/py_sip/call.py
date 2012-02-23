@@ -118,6 +118,25 @@ class Call(object):
         return 'z9hG4bK' + uuid.uuid4().hex
 
 
+    def gen_sdp(self):
+# No idea how Empathy discovered the public address
+        sdp_header = "v=0\r\n" + \
+        "o=- 0 0 IN IP4 " + self.udp_client_ip + "\r\n" + \
+        "s=" + self.user + "\r\n" + \
+        "c=IN IP4 66.201.49.178\r\n" + \
+        "a=tool:Python RTP\r\n" + \
+        "m=audio 7078 RTP/AVP 96\r\n" + \
+        "b=AS:64\r\n" + \
+        "a=rtpmap:96 MPEG4-GENERIC/44100/1\r\n" + \
+        "a=fmtp:96 profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=1208\r\n" + \
+        "m=video 7078 RTP/AVP 97\r\n" + \
+        "b=AS:64\r\n" + \
+        "a=rtpmap:97 H264/90000\r\n" + \
+        "a=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPZ,aM4JyA==\r\n"
+ 
+        return sdp_header
+
+
     def pull_server_tag(self, response):
         if 'To' not in response:
             return False
@@ -222,6 +241,33 @@ class Register(Call):
         print "\ncurrent state:", self.states[self.current_state], '\n\n'
 
 
+class Options(Call):
+    
+    def gen_response(self, call, addr):
+        via = call['Via'].split(';')
+
+        packet = "SIP/2.0 200 OK\r\n" + \
+        "Via: " + via[0] + ';' + via[1] + ";rport=" + str(addr[1]) + ";received=" + addr[0] + "\r\n" + \
+        "From: " + call['From'] + "\r\n" + \
+        "To: " + call['To'] + ';tag=' + self.From['tag'] + "\r\n" + \
+        "Call-ID: " + call['Call-ID'] + "\r\n" + \
+        "CSeq: " + call['CSeq'] + "\r\n" + \
+        "Contact: " + self.Contact + "\r\n" + \
+        "User-Agent: " + self.User_Agent + "\r\n" + \
+        "Accept: application/sdp\r\n" + \
+        "Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE\r\n" + \
+        "Supported: timer, 100rel\r\n" + \
+        self.Content_Length
+
+        return packet
+
+
+    def incoming_options(self, call, addr):
+        """Respond to an incoming OPTIONS call""" 
+
+        packet = self.gen_response(call, addr)
+        self.write_queue.append(packet)
+
 
 class Invite(Call):
     def __init__(self, user, sender_uri, remote_uri,
@@ -264,8 +310,11 @@ class Invite(Call):
         if authorization:
             invite += authorization
 
-        # terminate with default Content-Length of 0
-        invite += self.Content_Length
+        # add sdp
+        sdp_packet = self.gen_sdp()
+
+        invite += 'Content-Length: ' + str(len(sdp_packet)) + '\r\n\r\n'
+        invite += sdp_packet
 
         # increment sequence number
         self.CSeq += 1
@@ -277,15 +326,6 @@ class Invite(Call):
         """Register to the SIP Server"""
 
         # if authorization key exists then generate auth line
-        """
-        auth = None
-        if self.nonce:
-            ha1 = hashlib.md5("phone:asterisk:saywhat").hexdigest()
-            ha2 = hashlib.md5("INVITE:sip:asterisk-1.asterisk.trickplay.com").hexdigest()
-            ha3 = hashlib.md5(ha1 + ":" + self.nonce + ":" + ha2).hexdigest()
-
-            auth = self.Auth_1 + self.nonce + self.Auth_2 + ha3 + '"\r\n'
-        """
         self.auth = self.gen_auth_line("INVITE")
 
         # create INVITE packet
@@ -338,13 +378,34 @@ class Invite(Call):
         self.sent_ack = True
 
 
+    def parse_sdp(self, sdp):
+        if not sdp:
+            return None
+
+        sdp_lines = sdp.split("\r\n")
+        sdp_dict = {}
+        # Huge hack to get some necessary IP and port stuff for testing
+        for line in sdp_lines:
+            if not line:
+                continue
+            key, var = line.split("=", 1)
+            sdp_dict[key] = var
+
+        network_type, address_type, dst_addr = sdp_dict['c'].split(" ")
+        media_description = sdp_dict['m'].split(" ")
+        dst_port = int(media_description[1])
+
+        return [dst_addr, dst_port]
+
     def interpret(self, response):
         self.pull_server_tag(response)
+
         if response['Status-Line'] == "SIP/2.0 200 OK":
             self.received_200 = True
             self.ack()
-            if self.callback:
-                self.callback()
+            media_dst = self.parse_sdp(response['full_body'])
+            if self.callback and media_dst:
+                self.callback(media_dst)
         elif response['Status-Line'] == "SIP/2.0 100 Trying":
             self.received_100 = True
         elif response['Status-Line'] == "SIP/2.0 401 Unauthorized":
