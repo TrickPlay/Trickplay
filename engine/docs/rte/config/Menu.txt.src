@@ -63,6 +63,12 @@ Group: SDK Tutorial {
 	File: Tutorial Source Code (no auto-title, docs/rte/tutorial/code.txt)
 }
 
+Group: Sample Applications {
+	File: Screen Transitions (no auto-title, docs/tutorials/screen_transitions/doc.txt)
+	File: Multi-Level Menus (no auto-title, docs/tutorials/menu_multilevel/doc.txt)
+	File: Run a Video (no auto-title, docs/tutorials/video_run/doc.txt)
+}
+
 Group: Programmer's Guide {
 	File: The app MetaData File (no auto-title, docs/rte/progguide/app_metafile.txt)
 	File: The Engine Console (no auto-title, docs/rte/progguide/console_cmds.txt)
@@ -83,9 +89,9 @@ Group: Engine Reference {
 		File: Overview (no auto-title, docs/rte/reference/overview_animation.txt)
 		
 		Group: Classes {
-			File: Alpha (no auto-title, bindings/clutter_alpha.lb)
 	        File: Animator (no auto-title, bindings/clutter_animator.lb)
     	    File: AnimationState (no auto-title, bindings/clutter_state.lb)
+    	    File: Ease (no auto-title, bindings/ease.lb)
             File: Interval (no auto-title, bindings/clutter_interval.lb)
             File: Path (no auto-title, bindings/clutter_path.lb)
             File: Score (no auto-title, bindings/clutter_score.lb)
@@ -219,7 +225,25 @@ Group: Engine Reference {
 }  # Group: Reference
 
 Group: Development Tools {
-	File: Overview* (no auto-title, docs/devtools/overview_tools.txt)
+	File: Overview (no auto-title, docs/devtools/overview_tools.txt)
+	
+	Group: TrickPlay IDE {
+		File: Overview (no auto-title, docs/devtools/ide/introduction.txt)
+		
+		Group: Tutorial {
+			File: Introduction* (no auto-title, docs/devtools/ide/tutorial/introduction.txt)
+			File: Create New TrickPlay Application* (no auto-title, docs/devtools/ide/tutorial/editor.txt)
+			File: Run the Application* (no auto-title, docs/devtools/ide/tutorial/runApp.txt)
+			File: Debug the Application* (no auto-title, docs/devtools/ide/tutorial/debug.txt)
+		}
+		
+		Group: Reference {
+			File: IDE User Interface* (no auto-title, docs/devtools/ide/reference/ui.txt)
+			File: Editor Reference* (no auto-title, docs/devtools/ide/reference/editor.txt)
+			File: Running a TrickPlay Application* (no auto-title, docs/devtools/ide/reference/run.txt)
+			File: Debugger Reference* (no auto-title, docs/devtools/ide/reference/debugger.txt)
+		}
+	}
 	
 	Group: Visual Editor {
 		File: Overview (no auto-title, docs/devtools/editor/introduction.txt)

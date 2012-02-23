@@ -106,6 +106,7 @@ String Util::canonical_external_path( const char * path , bool abort_on_error )
 
 	return result;
 }
+
 //-----------------------------------------------------------------------------
 
 Action::~Action()
@@ -235,3 +236,99 @@ gboolean Action::run_internal( Action * action )
     return action->run() ? TRUE : FALSE;
 }
 
+//-----------------------------------------------------------------------------
+
+Util::Buffer::Buffer()
+:
+    bytes( 0 )
+{}
+
+Util::Buffer::Buffer( gconstpointer _data , guint _length )
+:
+	bytes( g_byte_array_sized_new( _length ) )
+{
+	g_byte_array_append( bytes , ( const guint8 * ) _data , _length );
+}
+
+Util::Buffer::Buffer( MemoryUse memory_use , gpointer _data , guint _length )
+:
+	bytes( g_byte_array_sized_new( _length ) )
+{
+	switch( memory_use )
+	{
+	case Util::Buffer::MEMORY_USE_TAKE:
+		bytes->data = ( guint8 * ) _data;
+		bytes->len = _length;
+		break;
+	case Util::Buffer::MEMORY_USE_COPY:
+		g_byte_array_append( bytes , ( const guint8 * ) _data , _length );
+		break;
+	}
+}
+
+Util::Buffer::Buffer( GByteArray * _bytes )
+:
+    bytes( _bytes )
+{
+	if ( bytes )
+	{
+		g_byte_array_ref( bytes );
+	}
+}
+
+Util::Buffer::Buffer( const Buffer & other )
+:
+    bytes( other.bytes )
+{
+	if ( bytes )
+	{
+		g_byte_array_ref( bytes );
+	}
+}
+
+Util::Buffer::~Buffer()
+{
+	if ( bytes )
+	{
+		g_byte_array_unref( bytes );
+	}
+}
+
+const Util::Buffer & Util::Buffer::operator = ( const Buffer & other )
+{
+	GByteArray * old = bytes;
+
+	bytes = other.bytes;
+
+	if ( bytes )
+	{
+		g_byte_array_ref( bytes );
+	}
+
+	if ( old )
+	{
+		g_byte_array_unref( old );
+	}
+
+	return * this;
+}
+
+bool Util::Buffer::good() const
+{
+	return bytes != 0;
+}
+
+Util::Buffer::operator bool () const
+{
+	return good();
+}
+
+const char * Util::Buffer::data() const
+{
+	return bytes ? ( const char * ) bytes->data : 0;
+}
+
+guint Util::Buffer::length() const
+{
+	return bytes ? bytes->len : 0;
+}

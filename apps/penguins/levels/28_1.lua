@@ -11,7 +11,7 @@ local image0 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image0",
-		position = {1623,448,0},
+		position = {1084,380,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -39,7 +39,45 @@ end
 image0.extra.reactive = true
 
 
-local clone1 = Clone
+local image15 = Image
+	{
+		src = "/assets/images/cube-64.png",
+		clip = {0,0,64,64},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "image15",
+		position = {910,60,0},
+		size = {64,64},
+		opacity = 255,
+		reactive = true,
+	}
+
+image15.extra.focus = {}
+
+function image15:on_key_down(key)
+	if image15.focus[key] then
+		if type(image15.focus[key]) == "function" then
+			image15.focus[key]()
+		elseif screen:find_child(image15.focus[key]) then
+			if image15.clear_focus then
+				image15.clear_focus(key)
+			end
+			screen:find_child(image15.focus[key]):grab_key_focus()
+			if screen:find_child(image15.focus[key]).set_focus then
+				screen:find_child(image15.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+image15.extra.reactive = true
+
+
+local clone22 = Clone
 	{
 		scale = {1,1,0,0},
 		source = image0,
@@ -47,119 +85,83 @@ local clone1 = Clone
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
-		name = "clone1",
-		position = {1301,-34,0},
-		size = {128,128},
+		name = "clone22",
+		position = {984,382,0},
+		size = {128,127},
 		opacity = 255,
 		reactive = true,
 	}
 
-clone1.extra.focus = {}
+clone22.extra.focus = {}
 
-function clone1:on_key_down(key)
-	if clone1.focus[key] then
-		if type(clone1.focus[key]) == "function" then
-			clone1.focus[key]()
-		elseif screen:find_child(clone1.focus[key]) then
-			if clone1.clear_focus then
-				clone1.clear_focus(key)
+function clone22:on_key_down(key)
+	if clone22.focus[key] then
+		if type(clone22.focus[key]) == "function" then
+			clone22.focus[key]()
+		elseif screen:find_child(clone22.focus[key]) then
+			if clone22.clear_focus then
+				clone22.clear_focus(key)
 			end
-			screen:find_child(clone1.focus[key]):grab_key_focus()
-			if screen:find_child(clone1.focus[key]).set_focus then
-				screen:find_child(clone1.focus[key]).set_focus(key)
+			screen:find_child(clone22.focus[key]):grab_key_focus()
+			if screen:find_child(clone22.focus[key]).set_focus then
+				screen:find_child(clone22.focus[key]).set_focus(key)
 			end
 		end
 	end
 	return true
 end
 
-clone1.extra.reactive = true
+clone22.extra.reactive = true
 
 
-local clone3 = Clone
+local image24 = Image
 	{
+		src = "/assets/images/icicles.png",
+		clip = {0,0,161,131},
 		scale = {1,1,0,0},
-		source = image0,
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
-		name = "clone3",
-		position = {664,450,0},
-		size = {128,128},
+		name = "image24",
+		position = {1109,-34,0},
+		size = {161,131},
 		opacity = 255,
 		reactive = true,
 	}
 
-clone3.extra.focus = {}
+image24.extra.focus = {}
 
-function clone3:on_key_down(key)
-	if clone3.focus[key] then
-		if type(clone3.focus[key]) == "function" then
-			clone3.focus[key]()
-		elseif screen:find_child(clone3.focus[key]) then
-			if clone3.clear_focus then
-				clone3.clear_focus(key)
+function image24:on_key_down(key)
+	if image24.focus[key] then
+		if type(image24.focus[key]) == "function" then
+			image24.focus[key]()
+		elseif screen:find_child(image24.focus[key]) then
+			if image24.clear_focus then
+				image24.clear_focus(key)
 			end
-			screen:find_child(clone3.focus[key]):grab_key_focus()
-			if screen:find_child(clone3.focus[key]).set_focus then
-				screen:find_child(clone3.focus[key]).set_focus(key)
+			screen:find_child(image24.focus[key]):grab_key_focus()
+			if screen:find_child(image24.focus[key]).set_focus then
+				screen:find_child(image24.focus[key]).set_focus(key)
 			end
 		end
 	end
 	return true
 end
 
-clone3.extra.reactive = true
-
-
-local clone4 = Clone
-	{
-		scale = {0.75,0.75,0,0},
-		source = image0,
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "clone4",
-		position = {679,386,0},
-		size = {128,128},
-		opacity = 255,
-		reactive = true,
-	}
-
-clone4.extra.focus = {}
-
-function clone4:on_key_down(key)
-	if clone4.focus[key] then
-		if type(clone4.focus[key]) == "function" then
-			clone4.focus[key]()
-		elseif screen:find_child(clone4.focus[key]) then
-			if clone4.clear_focus then
-				clone4.clear_focus(key)
-			end
-			screen:find_child(clone4.focus[key]):grab_key_focus()
-			if screen:find_child(clone4.focus[key]).set_focus then
-				screen:find_child(clone4.focus[key]).set_focus(key)
-			end
-		end
-	end
-	return true
-end
-
-clone4.extra.reactive = true
+image24.extra.reactive = true
 
 
 local clone5 = Clone
 	{
-		scale = {0.75,0.75,0,0},
+		scale = {1,1,0,0},
 		source = image0,
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone5",
-		position = {1637,382,0},
+		position = {800,382,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -190,14 +192,14 @@ clone5.extra.reactive = true
 local clone6 = Clone
 	{
 		scale = {1,1,0,0},
-		source = image0,
+		source = clone22,
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone6",
-		position = {943,-31,0},
-		size = {127.99993896484,128},
+		position = {699,382,0},
+		size = {127,127},
 		opacity = 255,
 		reactive = true,
 	}
@@ -224,118 +226,41 @@ end
 clone6.extra.reactive = true
 
 
-local image11 = Image
+local clone7 = Clone
 	{
-		src = "/assets/images/icicles.png",
-		clip = {0,0,161,131},
 		scale = {1,1,0,0},
+		source = image0,
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
-		name = "image11",
-		position = {505,-10,0},
-		size = {160.99996948242,131},
+		name = "clone7",
+		position = {1694,453,0},
+		size = {128,128},
 		opacity = 255,
 		reactive = true,
 	}
 
-image11.extra.focus = {}
+clone7.extra.focus = {}
 
-function image11:on_key_down(key)
-	if image11.focus[key] then
-		if type(image11.focus[key]) == "function" then
-			image11.focus[key]()
-		elseif screen:find_child(image11.focus[key]) then
-			if image11.clear_focus then
-				image11.clear_focus(key)
+function clone7:on_key_down(key)
+	if clone7.focus[key] then
+		if type(clone7.focus[key]) == "function" then
+			clone7.focus[key]()
+		elseif screen:find_child(clone7.focus[key]) then
+			if clone7.clear_focus then
+				clone7.clear_focus(key)
 			end
-			screen:find_child(image11.focus[key]):grab_key_focus()
-			if screen:find_child(image11.focus[key]).set_focus then
-				screen:find_child(image11.focus[key]).set_focus(key)
+			screen:find_child(clone7.focus[key]):grab_key_focus()
+			if screen:find_child(clone7.focus[key]).set_focus then
+				screen:find_child(clone7.focus[key]).set_focus(key)
 			end
 		end
 	end
 	return true
 end
 
-image11.extra.reactive = true
+clone7.extra.reactive = true
 
 
-local image12 = Image
-	{
-		src = "/assets/images/river-slice.png",
-		clip = {0,0,300,55},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "image12",
-		position = {1100,536,0},
-		size = {300,55},
-		opacity = 255,
-		reactive = true,
-	}
-
-image12.extra.focus = {}
-
-function image12:on_key_down(key)
-	if image12.focus[key] then
-		if type(image12.focus[key]) == "function" then
-			image12.focus[key]()
-		elseif screen:find_child(image12.focus[key]) then
-			if image12.clear_focus then
-				image12.clear_focus(key)
-			end
-			screen:find_child(image12.focus[key]):grab_key_focus()
-			if screen:find_child(image12.focus[key]).set_focus then
-				screen:find_child(image12.focus[key]).set_focus(key)
-			end
-		end
-	end
-	return true
-end
-
-image12.extra.reactive = true
-
-
-local image14 = Image
-	{
-		src = "/assets/images/sea-lion.png",
-		clip = {0,0,122,135},
-		scale = {1,1,0,0},
-		x_rotation = {0,0,0},
-		y_rotation = {0,0,0},
-		z_rotation = {0,0,0},
-		anchor_point = {0,0},
-		name = "image14",
-		position = {1136,436,0},
-		size = {122,135},
-		opacity = 255,
-		reactive = true,
-	}
-
-image14.extra.focus = {}
-
-function image14:on_key_down(key)
-	if image14.focus[key] then
-		if type(image14.focus[key]) == "function" then
-			image14.focus[key]()
-		elseif screen:find_child(image14.focus[key]) then
-			if image14.clear_focus then
-				image14.clear_focus(key)
-			end
-			screen:find_child(image14.focus[key]):grab_key_focus()
-			if screen:find_child(image14.focus[key]).set_focus then
-				screen:find_child(image14.focus[key]).set_focus(key)
-			end
-		end
-	end
-	return true
-end
-
-image14.extra.reactive = true
-
-
-g:add(image0,clone1,clone3,clone4,clone5,clone6,image11,image12,image14)
+g:add(image0,image15,clone22,image24,clone5,clone6,clone7)

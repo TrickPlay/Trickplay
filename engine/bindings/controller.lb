@@ -2,6 +2,7 @@
 #include "controller_delegates.h"
 #include "json.h"
 #include "app.h"
+#include "app_resource.h"
 ]]
 
 #==============================================================================
@@ -194,13 +195,30 @@ interface Controller [[ControllerDelegate*]]
         [[
             has_pointer=self->has_cap(TP_CONTROLLER_HAS_POINTER);
         ]];
+        
+    /*
+        Property: has_pointer_cursor
+        
+        The has_pointer_cursor property is a Boolean flag indicating whether or not a pointer device has the capability of displaying its own cursor, such as the pointer cursor for a mouse (true=can display its own cursor).
+        
+        Before accessing the has_pointer_cursor property, verify that the <has_pointer> property is true. If has_pointer is false then the has_pointer_cursor property is not relevant.
+        
+		*Possible Settings:* true=device can display its own cursor, else false
+		
+		*See Also:* the <has_pointer> property and the <show_pointer_cursor>, <hide_pointer_cursor> and <set_pointer_cursor> functions
+    */        
+    
+    readonly bool has_pointer_cursor
+        [[
+            has_pointer_cursor = self->has_cap( TP_CONTROLLER_HAS_POINTER_CURSOR );
+        ]];
     
     /*
         Property: has_touches
         
         The has_touches property is a Boolean flag indicating whether or not the device has the capability to send touch-related events, typical of touchscreens (true=can send touch-related events).
         
-        If the has_touches pointer property is true, the application can enable/disable the generation of touch-related events by calling the object's <start_touches> and <stop_touches> functions. To monitor the touch-related events, the program can hook the object's <on_touch_move>, <on_touch_up> and <on_touch_down> event handlers.
+        If the has_touches property is true, the application can enable/disable the generation of touch-related events by calling the object's <start_touches> and <stop_touches> functions. To monitor the touch-related events, the program can hook the object's <on_touch_move>, <on_touch_up> and <on_touch_down> event handlers.
         
         *Possible Settings:* true=device can send touch-related events, else false
         
@@ -210,6 +228,23 @@ interface Controller [[ControllerDelegate*]]
     readonly bool has_touches
         [[
             has_touches=self->has_cap(TP_CONTROLLER_HAS_TOUCHES);    
+        ]];
+        
+    /*
+        Property: has_scroll
+        
+        The has_scroll property is a Boolean flag indicating whether or not the device has the capability to send scroll wheel events (true=can send scroll wheel events). Scroll wheels are commonly found on computer mice, but are also available on other input devices.
+        
+        To monitor scroll-related events, a program can hook an object's <on_scroll> event handler.
+        
+        *Possible Settings:* true=device can send scroll-related events, else false
+        
+        *See Also:* the <on_scroll> event handler
+    */
+    
+    readonly bool has_scroll
+        [[
+            has_scroll = self->has_cap( TP_CONTROLLER_HAS_SCROLL );    
         ]];
     
     /*
@@ -470,7 +505,69 @@ interface Controller [[ControllerDelegate*]]
         [[
             result=self->get_controller()->stop_pointer();
         ]];
+        
+    /*
+        Function: show_pointer_cursor
+        
+        The show_pointer_cursor() function instructs the device to show its display cursor. For this function to have an effect, the object's <has_pointer_cursor> property must be true.
+        
+        *Arguments:* None
+        
+        *Return Value:* true if the device's cursor was successfully shown, else false
+        
+        *See Also:* the <has_pointer_cursor> property and the <hide_pointer_cursor> function
+    */
     
+    bool show_pointer_cursor()
+        [[
+            result = self->get_controller()->show_pointer_cursor();
+        ]];
+        
+    /*
+        Function: hide_pointer_cursor
+        
+        The hide_pointer_cursor() function instructs the device to hide its display cursor. For this function to have an effect, the object's <has_pointer_cursor> property must be true.
+        
+        *Arguments:* None
+        
+        *Return Value:* true if the the device's cursor was successfully hidden, else false
+        
+        *See Also:* the <has_pointer_cursor> property and the <show_pointer_cursor> function
+    */
+    
+    bool hide_pointer_cursor()
+        [[
+            result = self->get_controller()->hide_pointer_cursor();
+        ]];
+        
+    /*
+        Function: set_pointer_cursor
+        
+        The set_pointer_cursor() function sets the device's display cursor to a specified URI image. For this function to have an effect, the object's <has_pointer_cursor> property must be true.
+        
+        *Arguments:*
+        
+        	x - X coordinate at which to position the cursor
+        	y - Y coordinate at which to position the cursor
+        	image - string referencing the URI (Uniform Resource Identifier) address of the image resource to use for the cursor
+        	
+        *Return Value:* true if the cursor image was successfully set, else false
+        
+        *See Also:* the <has_pointer_cursor> property
+    */
+
+    bool set_pointer_cursor( int x, int y, string image )
+        [[
+            if ( AppResource ar = AppResource( L , image ) )
+            {
+                result = self->get_controller()->set_pointer_cursor( x , y , ar.get_uri() );
+            }
+            else
+            {
+                result = false;
+            }    
+        ]];
+            
     /*
         Function: start_touches
         
@@ -727,25 +824,13 @@ interface Controller [[ControllerDelegate*]]
 
     bool declare_resource(string resource, string url)
         [[
-            result=false;
-            
-            bool is_uri=false;
-            
-            App * app = App::get(L);
-
-            gchar * path=app->normalize_path(url,is_uri);
-            
-            if (path)
+            if ( AppResource r = AppResource( L , url ) )
             {
-                String final_uri(path);
-                g_free(path);
-                
-                if (!is_uri)
-                {
-                    final_uri="file://"+final_uri;
-                }
-                
-                result=self->declare_resource(resource,final_uri);
+                result = self->declare_resource( resource , r.get_uri().c_str() ); 
+            }
+            else
+            {
+                result = false;
             }
         ]];
         
@@ -951,7 +1036,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_key_down() event handler is invoked when a key is pressed or a key on the virtual remote control is pressed.
         
-        A key-down event is processed initially by the device's Controller on_key_down() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_key_down> event handler.
+        A key-down event is processed initially by this function--the Controller's on_key_down() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_key_down> event handler.
         
         *Prototype:*
         
@@ -978,7 +1063,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_key_up() event handler is invoked when a key is released or a key on the virtual remote control is released.
         
-        A key-up event is processed initially by the device's Controller on_key_up() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_key_up> event handler.
+        A key-up event is processed initially by this function--the Controller's on_key_up() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_key_up> event handler.
         
         *Prototype:*
         
@@ -1029,7 +1114,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_pointer_button_down() event handler is invoked when a pointer device's button is pressed. For devices with multiple buttons, it is possible to identify which button was pressed.
         
-        A pointer-button-down event is processed initially by the device's Controller on_pointer_button_down() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_button_down> event handler.
+        A pointer-button-down event is processed initially by this function--the Controller's on_pointer_button_down() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_button_down> event handler.
         
         *Prototype:*
         
@@ -1056,7 +1141,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_pointer_move() event handler is invoked when a pointer device moves.
         
-        A pointer-move event is processed initially by the device's Controller on_pointer_move() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_motion> event handler.
+        A pointer-move event is processed initially by this function--the Controller's on_pointer_move() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_motion> event handler.
         
         *Prototype:*
         
@@ -1082,7 +1167,7 @@ interface Controller [[ControllerDelegate*]]
         
         The on_pointer_button_up() event handler is invoked when a pointer device's button is released. For devices with multiple buttons, it is possible to identify which button was released.
         
-        A pointer-button_up event is processed initially by the device's Controller on_pointer_button_up() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_button_up> event handler.
+        A pointer-button_up event is processed initially by this function--the Controller's on_pointer_button_up() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_button_up> event handler.
         
         *Prototype:*
         
@@ -1104,6 +1189,50 @@ interface Controller [[ControllerDelegate*]]
 
     callback on_pointer_button_up;
 
+    /*
+        Event Handler: on_pointer_active
+
+		The on_pointer_active() event handler is invoked when a pointer device becomes active from a suspended state.
+		
+		*Prototype:*
+		
+			(code)
+			void on_pointer_active( Controller controller )
+			(end)
+			
+		*Arguments:*
+		
+			controller - reference to the Controller device that generated the event
+			
+		*Return Value:* None
+		
+		*See Also:* the <on_pointer_inactive> event handler
+    */
+    
+    callback on_pointer_active;
+    
+    /*
+        Event Handler: on_pointer_inactive
+        
+        The on_pointer_inactive() event handler is invoked when a pointer device becomes inactive, such as when it is turned off or suspends itself.
+        
+        *Prototype:*
+        
+        	(code)
+        	void on_pointer_inactive( Controller controller )
+        	(end)
+        	
+        *Arguments:*
+        
+        	controller - reference to the Controller device that generated the event
+        	
+        *Return Value:* None
+        
+        *See Also:* the <on_pointer_active> event handler
+    */
+    
+    callback on_pointer_inactive;
+    
     /*
         Event Handler: on_touch_down
         
@@ -1178,6 +1307,32 @@ interface Controller [[ControllerDelegate*]]
     */
 
     callback on_touch_up;
+    
+    /*
+        Event Handler: on_scroll
+        
+        The on_scroll() event handler is invoked when the scroll wheel is moved.
+        
+        A scroll event is processed initially by this function--the Controller's on_scroll() event handler. Afterward, the event is normally propagated up the event chain to any objects that have hooked into the <UIElement.on_scroll> event handler.
+        
+        *Prototype:*
+        
+        	(code)
+        	boolean on_scroll( Controller controller, int direction, int modifiers )
+        	(end)
+        
+        *Arguments:*
+
+            controller - reference to the Controller device that generated the event
+            direction - 0 = scrolling up, 1 = scrolling down, 2 = scrolling left, 3 = scrolling right. Note: Some directions may not be supported on a particular scroll wheel.
+            modifiers - table of <keys.Key Modifiers> pressed in combination with the scroll wheel movement. If no modifier keys were pressed, set to nil.
+
+        *Return Value:* true to propagate the event up the event chain, else false
+        
+        *See Also:* the <UIElement.on_scroll> event handler
+    */
+    
+    callback on_scroll;
 
     /*
         Event Handler: on_ui_event

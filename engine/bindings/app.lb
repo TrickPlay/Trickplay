@@ -2,6 +2,7 @@
 #include "app.h"
 #include "context.h"
 #include "sysdb.h"
+#include "app_resource.h"
 
 void app_loaded_handler(TPContext *,const char *,void * l);
 void app_closing_handler(TPContext *,const char *,void * l);
@@ -163,7 +164,7 @@ global app [[App*]]
         [[
             // TODO: THIS WON'T WORK FOR APPS LAUNCHED FROM A REMOTE URI.
             
-            StringList list = self->get_metadata().sandbox.get_pi_children();
+            StringList list = AppResource::get_pi_children( self->get_metadata().get_root_uri() );
             
             if ( list.empty() )
             {

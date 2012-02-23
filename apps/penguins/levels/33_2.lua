@@ -11,7 +11,7 @@ local image2 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image2",
-		position = {221,284,0},
+		position = {143,284,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -48,7 +48,7 @@ local clone3 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone3",
-		position = {234,209,0},
+		position = {156,209,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -85,7 +85,7 @@ local clone5 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone5",
-		position = {692,291,0},
+		position = {614,291,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -122,7 +122,7 @@ local clone6 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone6",
-		position = {702,217,0},
+		position = {624,217,0},
 		size = {128,127},
 		opacity = 255,
 		reactive = true,
@@ -188,7 +188,7 @@ end
 image9.extra.reactive = true
 
 
-local image10 = Image
+local v_90_20 = Image
 	{
 		src = "/assets/images/seal-down.png",
 		clip = {0,0,131,151},
@@ -197,33 +197,33 @@ local image10 = Image
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
-		name = "image10",
-		position = {1049,432,0},
+		name = "v_90_20",
+		position = {977,432,0},
 		size = {131,151},
 		opacity = 255,
 		reactive = true,
 	}
 
-image10.extra.focus = {}
+v_90_20.extra.focus = {}
 
-function image10:on_key_down(key)
-	if image10.focus[key] then
-		if type(image10.focus[key]) == "function" then
-			image10.focus[key]()
-		elseif screen:find_child(image10.focus[key]) then
-			if image10.clear_focus then
-				image10.clear_focus(key)
+function v_90_20:on_key_down(key)
+	if v_90_20.focus[key] then
+		if type(v_90_20.focus[key]) == "function" then
+			v_90_20.focus[key]()
+		elseif screen:find_child(v_90_20.focus[key]) then
+			if v_90_20.clear_focus then
+				v_90_20.clear_focus(key)
 			end
-			screen:find_child(image10.focus[key]):grab_key_focus()
-			if screen:find_child(image10.focus[key]).set_focus then
-				screen:find_child(image10.focus[key]).set_focus(key)
+			screen:find_child(v_90_20.focus[key]):grab_key_focus()
+			if screen:find_child(v_90_20.focus[key]).set_focus then
+				screen:find_child(v_90_20.focus[key]).set_focus(key)
 			end
 		end
 	end
 	return true
 end
 
-image10.extra.reactive = true
+v_90_20.extra.reactive = true
 
 
 local image11 = Image
@@ -264,4 +264,4 @@ end
 image11.extra.reactive = true
 
 
-g:add(image2,clone3,clone5,clone6,image9,image10,image11)
+g:add(image2,clone3,clone5,clone6,image9,v_90_20,image11)
