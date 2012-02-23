@@ -2,7 +2,6 @@ import sys
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4 import QtCore, QtGui
-
 from UI.Console import Ui_Console
 
 class OutLog:
@@ -21,21 +20,26 @@ class OutLog:
 		if self.out:
 			self.out.flush()
 
-    def write(self, m):
+    def EGN_MSG(self, m):
         if self.color:
             tc = self.edit.textColor()
             self.edit.setTextColor(self.color)
 
         self.edit.moveCursor(QtGui.QTextCursor.End)
-        self.edit.insertPlainText( m )
+        self.edit.insertPlainText( m+'\n' )
 
         if self.color:
             self.edit.setTextColor(tc)
-
+        """
         if self.out:
             self.out.write(m)
             self.out.flush()
+        """
 
+    def write (self, m):
+        if self.out:
+            self.out.write(m)
+            self.out.flush()
 	
 class TrickplayConsole(QWidget):
 
@@ -51,4 +55,6 @@ class TrickplayConsole(QWidget):
 
 	#def text_changed(self):
 		#print ("changed !!")
+
+EGN_MSG = lambda m : sys.stdout.EGN_MSG(m) 
 

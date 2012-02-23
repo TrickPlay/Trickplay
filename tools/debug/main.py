@@ -415,13 +415,11 @@ class MainWindow(QMainWindow):
 		    try:
 			    ret = self.deviceManager.socket.write(self.request+'\n\n')
 			    if ret < 0 :
-				    print "tp console socket is not available"
-			    else :
-				    print ret
+				    print "[VDBG] tp console socket is not available"
     
 		    except AttributeError, e:
     		    # deal with AttributeError
-			    print "tp console socket is not opened"
+			    print "[VDBG] tp console socket is not opened"
 		    self.ui.interactive.setText("")
 		    self.request = ""
 		else:
@@ -441,6 +439,10 @@ class MainWindow(QMainWindow):
             ret = self.deviceManager.socket.write('/close\n\n')
             if ret < 0 :
                 print ("tp console socket is not available !")
+            if self._deviceManager.reply is not None:
+                self._deviceManager.reply.abort()
+                self._deviceManager.reply = None 
+                self._deviceManager.command = None 
 
             """
             if getattr(self._deviceManager, "debug_mode") == True :
@@ -592,7 +594,7 @@ class MainWindow(QMainWindow):
         """
         
         try:
-            print('Trickplay state', self.deviceManager.trickplay.state())
+            print('[VDBG] Trickplay state : [ %s ]'%self.deviceManager.trickplay.state())
             #if self.trickplay.state() == QProcess.Running:
             self.deviceManager.trickplay.close()
             #    print('terminated trickplay')
@@ -866,8 +868,6 @@ class MainWindow(QMainWindow):
 			self.gotoLine_ui.okButton.setEnabled(False)
 
     def debug_command(self, cmd):
-        print("[VDBG] OOOPS ! don't use debug_command @ main.py ") 
-
         """
 		if getattr(self._deviceManager, "debug_mode") == True :
 			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), cmd, False)

@@ -1,13 +1,54 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+from PyQt4.QtNetwork import  QTcpSocket, QNetworkAccessManager , QNetworkRequest , QNetworkReply
 from TrickplayElement import TrickplayElement
 from connection import getTrickplayData
 
-
-
 class TrickplayElementModel(QStandardItemModel):
     
+    def inspector_reply_finished(self):
+        if self.reply.error()== QNetworkReply.NoError:
+            pdata = json.loads(str(self.reply.readAll()))
+            if pdata is not None:
+                root = self.invisibleRootItem()
+                child = None
+                for c in data["children"]:
+                    if c["name"] == "screen":
+                        child = c
+                        break
+                
+                if child is None:
+                    print( "Could not find screen element." )
+                else:
+                    self.tpData = data
+                    self.insertElement(root, child, data, True)
+            else:
+                print("Could not retreive data.")
+
+    def getInspectorData(self):
+        """
+        Get Trickplay UI tree data for the inspector
+        """
+
+        if CON.address is None or CON.port is None:
+            raise "NO HTTP PORT"
+		
+        self.manager = QNetworkAccessManager()
+
+        url = QUrl()
+        url.setScheme( "http" )
+        url.setHost( CON.address )
+        url.setPort( int(CON.port) )
+        url.setPath( "/debug/ui" )
+		    
+        self.request = QNetworkRequest( url )
+        self.reply = self.manager.get( self.request )
+
+        QObject.connect( self.reply , SIGNAL( 'finished()' ) , self.inspector_reply_finished )
+		
+        #return None
+
     def fill(self):
         """
         Get UI data from Trickplay and fill the tree with it.
@@ -15,6 +56,7 @@ class TrickplayElementModel(QStandardItemModel):
         """
         self.tpData = None
         data = getTrickplayData()
+        #data = getTrickplayInspectorData()
         if data:
         
             root = self.invisibleRootItem()
