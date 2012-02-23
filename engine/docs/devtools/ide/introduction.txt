@@ -9,3 +9,28 @@ A TrickPlay application is typically developed on a computer terminal, but the f
 
 While running, the application can be tested and debugged by stepping through the code and monitoring variable values. The application can be stopped at any code statement by setting a breakpoint on the statement. Using the debugging capabilities, it's possible to see exactly what a program is doing and how variable values are affected. The debugger is especially effective in locating problems that exist deep within a program's logic where the use of print statements would be difficult.
 
+Prerequisites:
+
+To run the TrickPlay IDE, you should have completed the following steps.
+- Installed the TrickPlay SDK
+- Installed the Ubuntu packages listed below. These can be installed with the Ubuntu Software Center.
+
+	(code)
+	python-qt4
+	python-qscintilla2
+	(end)
+	
+The Python version must be v2.7 or later, but not Python 3.x. The PyQt version must be v4.7.2 or later.
+	
+Running the TrickPlay IDE:
+
+The TrickPlay IDE can be run from either the command line or from a graphical interface.
+
+To run from the command line: From any directory, enter the following command.
+
+	(code)
+	./start.py
+	(end)
+
+To run from a graphical user interface: In either the Applications->Developer Tools or Applications->Programming window (depending on the Linux graphic shell you are running), click on the "TrickPlay IDE" icon.
+
