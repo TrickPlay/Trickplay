@@ -1,0 +1,7 @@
+
+Topic: TrickPlay IDE Tutorial
+
+Introduction:
+
+This tutorial will walk through the creation and debugging of a simple application using the TrickPlay IDE. The application will enable the user to... Over the course of creating this application, many of the IDE's capabilities will be demonstrated.
+
