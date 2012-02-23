@@ -1,0 +1,7 @@
+
+Topic: Run the Application in the IDE
+
+This section describes how to run a TrickPlay application from the IDE.
+
+Demonstrates: (1) the Target button/running remotely/locally, (2) Inspector/Properties Window and editing variable values dynamically.
+
