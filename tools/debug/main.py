@@ -507,7 +507,7 @@ class MainWindow(QMainWindow):
         self.debug_tbt.setEnabled(False)
 
     def debug(self):
-        self.inspector.clearTree()
+        #self.inspector.clearTree()
         self._deviceManager.run(True)
 
         self.windows = {"file":False, "inspector":False, "console":False, "debug":False, "trace":False}
