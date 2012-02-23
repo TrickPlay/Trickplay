@@ -66,6 +66,7 @@ class TrickplayDeviceManager(QWidget):
         self.manager = QNetworkAccessManager()
         self.reply = None
         self.command = None
+        self.current_debug_file = None
 
 
     def service_selected(self, index):
@@ -123,27 +124,6 @@ class TrickplayDeviceManager(QWidget):
 					        CON.port = self.http_port
 					else:
 					    print("[VDBG] Didn't get Control information ")
-
-					"""
-					elif hasattr(self, 'newApp') :
-						if self.newApp == True :
-							self.ui.comboBox.setCurrentIndex(self.ui.comboBox.count() - 1)
-							self.service_selected(self.ui.comboBox.count())
-							self.newAppText = self.ui.comboBox.itemText(self.ui.comboBox.count() - 1)
-							self.inspector.refresh()
-							self.inspector.ui.inspector.expandAll()
-							self.newApp = False
-				else: 
-					address = d[1]
-					port = d[2]
-					self.ui.comboBox.setItemData(0, address, ADDRESS)
-					self.ui.comboBox.setItemData(0, port, PORT)
-					CON.port = port
-					CON.address = address
-					#if getattr(self, "debug_mode") != True :
-						##self.inspector.refresh()
-						#self.inspector.ui.inspector.expandAll()
-					"""
 
 			elif event.type() == REMEVENT:
 				d = event.dict
@@ -294,8 +274,14 @@ class TrickplayDeviceManager(QWidget):
 		            if self.file_name.startswith("/"):
 		                self.file_name= self.file_name[1:]
 
-		            self.current_debug_file = os.path.join(self.main.path, self.file_name)
-		            self.editorManager.newEditor(self.current_debug_file, None, self.line_no, None, True)
+		            current_file = os.path.join(self.main.path, self.file_name)
+
+		            if self.current_debug_file != current_file:
+		                self.editorManager.newEditor(current_file, None, self.line_no, self.current_debug_file, True)
+		            else :
+		                self.editorManager.newEditor(current_file, None, self.line_no, None, True)
+
+		            self.current_debug_file = current_file
 
 		            # Local Variable Table
 		            local_info = self.getLocalInfo_Resp(data)
@@ -466,20 +452,13 @@ class TrickplayDeviceManager(QWidget):
             env.insert("TP_LOG", "bare")
             env.insert("TP_config_file","")
 
-            #env.insert("TP_telnet_console_port", str(self.console_port))
-            #env.insert("TP_controllers_enabled", "1")
-            #self.my_name = str(u"\u0020")+str(int(random.random() * 100000))
-            #env.insert("TP_controllers_name",self.my_name)
-
             if dMode == True :
             	self.debug_mode = True
             	self.main.debug_mode = True
-            	#env.insert("TP_debugger_port",str(self.debug_port))
             	env.insert("TP_start_debugger","true")
             else :
             	self.debug_mode = False
             	self.main.debug_mode = False
-
 			
             #  To merge stdout and stderr
             self.trickplay.setProcessChannelMode( QProcess.MergedChannels )
@@ -487,10 +466,8 @@ class TrickplayDeviceManager(QWidget):
             self.trickplay.setProcessEnvironment(env)
             ret = self.trickplay.start('trickplay', [self.path()])
 
-			
-        # Push to foreign device
+        # Push to remote device
         else:
-
             if dMode == True:
                 # POST http://<host>:<debugger port>/debugger "r"
                 url = QUrl()
