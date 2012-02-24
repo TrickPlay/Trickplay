@@ -29,7 +29,7 @@ DBG_CMD_RESET		= "r"
 DBG_CMD_STEP_INTO	= "s"
 DBG_CMD_STEP_OVER	= "n"
 
-DBG_ADVANCE_COMMANDS = [ DBG_CMD_CONTINUE , DBG_CMD_STEP_OVER , DBG_CMD_STEP_INTO , DBG_CMD_RESET ]
+DBG_ADVANCE_COMMANDS = [ DBG_CMD_CONTINUE , DBG_CMD_STEP_OVER , DBG_CMD_STEP_INTO ]
 
 #==============================================================================
 

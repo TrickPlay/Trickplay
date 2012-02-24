@@ -33,6 +33,8 @@ class FileSystemModel(QFileSystemModel):
         
 		# Toolbar font 
         font = QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(9)
 
         # Popup Menu
