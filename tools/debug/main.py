@@ -46,6 +46,8 @@ class MainWindow(QMainWindow):
         
 		# Toolbar font 
         font = QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(9)
 
         # Create FileSystem
@@ -188,6 +190,8 @@ class MainWindow(QMainWindow):
 		#Create Target Devices Drop Down Button
         self._deviceManager = TrickplayDeviceManager(self)
         font_deviceManager = QFont()
+        font_deviceManager.setStyleHint(font.Monospace)
+        font_deviceManager.setFamily('Monospace')
         font_deviceManager.setPointSize(9)
         self._deviceManager.ui.comboBox.setFont(font_deviceManager)
         self.toolbar.addWidget(self._deviceManager.ui.comboBox)
@@ -432,23 +436,15 @@ class MainWindow(QMainWindow):
             self._deviceManager.trickplay.close()
         elif self._deviceManager.ui.comboBox.currentIndex() != 0:
             # Remote Debugging / Run 
-            ret = self.deviceManager.socket.write('/close\n\n')
-            if ret < 0 :
-                print ("tp console socket is not available !")
-            if self._deviceManager.reply is not None:
-                self._deviceManager.reply.abort()
-                self._deviceManager.reply = None 
-                self._deviceManager.command = None 
+		    self._deviceManager.send_debugger_command(DBG_CMD_RESET)
+            #ret = self.deviceManager.socket.write('/close\n\n')
+            #if ret < 0 :
+                #print ("tp console socket is not available !")
+            #if self._deviceManager.reply is not None:
+                #self._deviceManager.reply.abort()
+                #self._deviceManager.reply = None 
+                #self._deviceManager.command = None 
 
-            """
-            if getattr(self._deviceManager, "debug_mode") == True :
-                #data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
-                self._deviceManager.send_debugger_command(DBG_CMD_QUIT)
-            else:
-                ret = self.deviceManager.socket.write('/close\n\n')
-                if ret < 0 :
-                    print ("tp console socket is not available !")
-            """
 	
         if getattr(self._deviceManager, "debug_mode") == True :
             # delete break points marker

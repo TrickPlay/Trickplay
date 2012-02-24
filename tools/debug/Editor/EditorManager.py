@@ -48,6 +48,8 @@ class EditorManager(QWidget):
         container.setSizePolicy(sizePolicy)
         container.setMinimumSize(QSize(0, 0))
         font = QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
         container.setFont(font)
 
@@ -327,6 +329,8 @@ class EditorManager(QWidget):
         editor.path = path
 
         font = QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
 
         n = re.search("[/]+\S+[/]+", editor.path).end()

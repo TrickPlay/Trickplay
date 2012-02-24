@@ -163,6 +163,8 @@ class EditorDock(QDockWidget):
         self.setMinimumSize(QSize(215, 100))
 
         font = QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
         self.setFont(font)
 
