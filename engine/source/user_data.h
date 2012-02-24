@@ -189,6 +189,13 @@ struct UserData
         return result;
     }
 
+    inline static gpointer get_client_check( lua_State * L , int index = 1 )
+    {
+    	UserData * ud = get_check( L , index );
+
+    	return ud ? ud->client : 0;
+    }
+
     //.........................................................................
     // Gets the user data given a master object - can return NULL if the
     // user data/Lua state are gone.
