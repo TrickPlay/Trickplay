@@ -40,13 +40,21 @@ namespace Bullet
 
         int create_body_3d( int properties );
 
+#if 0
+        int create_sensor( int properties );
+#endif
+
         int create_shape( btCollisionShape * shape );
 
         void step( float time_step , int max_sub_steps , float fixed_time_step );
 
+        void get_contacts( double max_distance , btCollisionObject * co1 , btCollisionObject * co2 );
+
 	private:
 
         static void tick_callback( btDynamicsWorld * world , btScalar time );
+
+        gpointer get_next_handle();
 
 		LuaStateProxy *				lsp;
 

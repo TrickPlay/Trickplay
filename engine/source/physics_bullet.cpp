@@ -2,6 +2,7 @@
 
 #include <BulletCollision/CollisionShapes/btBox2dShape.h>
 #include <BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
 #include "physics_bullet.h"
 #include "clutter_util.h"
@@ -494,6 +495,17 @@ int World::create_body_3d( int properties )
 
 	world->addRigidBody( body );
 
+	body->setUserPointer( get_next_handle() );
+
+	//.........................................................................
+
+	lua_getfield( L , properties , "sensor" );
+	if ( lua_isboolean( L , -1 ) && lua_toboolean( L , -1 ) )
+	{
+		body->setCollisionFlags( body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+	}
+	lua_pop( L , 1 );
+
 	//.........................................................................
 
 	lua_pushlightuserdata( L , body );
@@ -507,6 +519,83 @@ int World::create_body_3d( int properties )
     return 1;
 }
 
+//-----------------------------------------------------------------------------
+#if 0
+int World::create_sensor( int properties )
+{
+	lua_State * L = lsp->get_lua_state();
+
+    luaL_checktype( L , properties , LUA_TTABLE );
+
+    //.........................................................................
+    // Get the shape
+
+    lua_getfield( L , properties , "shape" );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+    	return luaL_error( L , "Missing shape for sensor" );
+    }
+
+    UserData * ud = UserData::get_check( L , lua_gettop( L ) );
+
+    if ( ! ud )
+    {
+    	return luaL_error( L , "Invalid shape for sensor" );
+    }
+
+    btCollisionShape * shape = ( btCollisionShape * ) ud->get_client();
+
+    lua_pop( L , 1 );
+
+    //.........................................................................
+
+    lua_getfield( L , properties , "transform" );
+
+    if ( lua_isnil( L , -1 ) )
+    {
+    	return luaL_error( L , "Missing sensor transform" );
+    }
+
+    ud = UserData::get_check( L , lua_gettop( L ) );
+
+    if ( ! ud )
+    {
+    	return luaL_error( L , "Invalid sensor transform" );
+    }
+
+    CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
+
+    btTransform transform;
+
+    transform.setFromOpenGLMatrix( & matrix->xx );
+
+    lua_pop( L , 1 );
+
+	//.........................................................................
+
+    btGhostObject * body = new btGhostObject();
+
+    body->setCollisionShape( shape );
+    body->setWorldTransform( transform );
+
+	world->addCollisionObject( body );
+
+	body->setUserPointer( get_next_handle() );
+
+	//.........................................................................
+
+	lua_pushlightuserdata( L , body );
+	new_PBBody3d( L );
+	lua_remove( L , -2 );
+
+	lua_pushvalue( L , properties );
+	lb_set_props_from_table( L );
+	lua_pop( L , 1 );
+
+    return 1;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 
@@ -550,6 +639,114 @@ void World::tick_callback( btDynamicsWorld * world , btScalar time )
 	{
 		lua_pushnumber( L , time );
 		invoke_pb_on_step( L , self , 1 , 0 );
+	}
+}
+
+gpointer World::get_next_handle()
+{
+	static int handle = 1;
+
+	return GINT_TO_POINTER( handle++ );
+}
+
+void World::get_contacts( double max_distance , btCollisionObject * co1 , btCollisionObject * co2 )
+{
+	lua_State * L = lsp->get_lua_state();
+
+	int manifold_count = world->getDispatcher()->getNumManifolds();
+
+	bool have_table = false;
+
+	int c = 1;
+
+	for ( int i = 0; i< manifold_count; ++i )
+	{
+		btPersistentManifold * manifold =  world->getDispatcher()->getManifoldByIndexInternal(i);
+
+		btCollisionObject* obA = static_cast<btCollisionObject*>( manifold->getBody0() );
+
+		btCollisionObject* obB = static_cast<btCollisionObject*>( manifold->getBody1() );
+
+		if ( obA && obB )
+		{
+			bool wanted = ( co1 == 0 && co2 == 0 );
+
+			if ( ! wanted )
+			{
+				if ( co1 != 0 && co2 != 0 )
+				{
+					wanted = ( obA == co1 && obB == co2 ) || ( obA == co2 && obB == co1 );
+				}
+				else
+				{
+					wanted = ( obA == co1 ) || ( obA == co2 ) || ( obB == co1 ) || ( obB == co2 );
+				}
+
+				if ( ! wanted )
+				{
+					continue;
+				}
+			}
+
+			int contact_count = manifold->getNumContacts();
+
+			for ( int j = 0; j < contact_count; j++ )
+			{
+				const btManifoldPoint & point( manifold->getContactPoint( j ) );
+
+				double distance = point.getDistance();
+
+				if ( abs( distance ) <= max_distance )
+				{
+					if ( ! have_table )
+					{
+						lua_createtable( L , manifold_count * 2 , 0 );
+						have_table = true;
+					}
+
+					lua_newtable( L );
+
+					lua_pushinteger( L , GPOINTER_TO_INT( obA->getUserPointer() ) );
+					lua_rawseti( L , -2 , 1 );
+
+					lua_pushinteger( L , GPOINTER_TO_INT( obB->getUserPointer() ) );
+					lua_rawseti( L , -2 , 2 );
+
+					lua_pushnumber( L , distance );
+					lua_rawseti( L , -2 , 3 );
+
+					lua_createtable( L , 3 , 0 );
+					const btVector3 & pa = point.getPositionWorldOnA();
+					lua_pushnumber( L , pa.getX() );
+					lua_rawseti( L , -2 , 1 );
+					lua_pushnumber( L , pa.getY() );
+					lua_rawseti( L , -2 , 2 );
+					lua_pushnumber( L , pa.getZ() );
+					lua_rawseti( L , -2 , 3 );
+
+					lua_rawseti( L , -2 , 4 );
+
+					lua_createtable( L , 3 , 0 );
+					const btVector3 & pb = point.getPositionWorldOnB();
+					lua_pushnumber( L , pb.getX() );
+					lua_rawseti( L , -2 , 1 );
+					lua_pushnumber( L , pb.getY() );
+					lua_rawseti( L , -2 , 2 );
+					lua_pushnumber( L , pb.getZ() );
+					lua_rawseti( L , -2 , 3 );
+
+					lua_rawseti( L , -2 , 5 );
+
+					lua_rawseti( L , -2 , c++ );
+
+				}
+			}
+		}
+	}
+
+	if ( ! have_table )
+	{
+		lua_pushnil( L );
 	}
 }
 

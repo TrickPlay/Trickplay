@@ -23,29 +23,36 @@ interface PBShape [[ btCollisionShape * ]]
         ]];
 }
 
-interface PBBody3d [[ btRigidBody * ]]
+interface PBBody3d [[ btCollisionObject * ]]
 {
     PBBody3d()
         [[
-            self = lb_construct( btRigidBody , lua_touserdata( L , -2 ) );
+            self = lb_construct( btCollisionObject , lua_touserdata( L , -2 ) );
         ]];
         
     ~PBBody3d()
         [[
             // Not deleted because they are owned by the world
         ]];
+        
+    readonly int handle
+        [[
+            handle = GPOINTER_TO_INT( self->getUserPointer() );
+        ]];
 
     Matrix get_transform( Matrix matrix )
         [[
             if ( UserData * ud = UserData::get_check( L , matrix ) )
             {
+                // FIXME - NOT CHECKING THE TYPE OF THE UDATA. 
+                // BAD-MEMORY CORRUPTION VERY EASILY
+                // GOOD-PERFORMANCE
+                
                 CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
         
                 float m[16];
         
-                btTransform transform;
-                
-                self->getMotionState()->getWorldTransform( transform );
+                btTransform transform( self->getWorldTransform() );
         
                 transform.getOpenGLMatrix( m );
         
@@ -91,6 +98,14 @@ global pb [[ Bullet::World * ]]
     step( double time_step = 1.0f/60.0f , int max_sub_steps = 1 , double fixed_time_step = 1.0f/60.0f )
         [[
             self->step( time_step , max_sub_steps , fixed_time_step );
+        ]];
+        
+    table get_contacts( double max_distance = 0 , PBBody3d body1 = 0 , PBBody3d body2 = 0 )
+        [[
+            btCollisionObject * co1 = body1 ? ( btCollisionObject * ) UserData::get_client_check( L , body1 ) : 0;
+            btCollisionObject * co2 = body2 ? ( btCollisionObject * ) UserData::get_client_check( L , body2 ) : 0;
+            
+            self->get_contacts( max_distance , co1 , co2 );
         ]];          
         
     PBBody Body( UIElement element , table properties )
@@ -111,13 +126,21 @@ global pb [[ Bullet::World * ]]
         
     PBBody3d Body3d( table properties )
         [[
-            int n = self->create_body_3d( properties );
-
-            if ( ! n )
+            if ( ! self->create_body_3d( properties ) )
             {
                 lua_pushnil( L );
             }
         ]];
+        
+/*        
+    PBBody3d Sensor3d( table properties )
+        [[
+            if ( ! self->create_sensor( properties ) )
+            {
+                lua_pushnil( L );
+            }
+        ]];
+*/
 
     PBShape BoxShape( double half_width , double half_height , double half_depth )
         [[
