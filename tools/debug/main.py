@@ -428,7 +428,7 @@ class MainWindow(QMainWindow):
 		    self._deviceManager.trickplay.waitForBytesWritten();
 		    self.ui.interactive.setText("")
 		
-    def stop(self):
+    def stop(self, serverStoped=False):
         # send 'q' command and close trickplay process
 
         if self._deviceManager.trickplay.state() == QProcess.Running:
@@ -436,16 +436,13 @@ class MainWindow(QMainWindow):
             self._deviceManager.trickplay.close()
         elif self._deviceManager.ui.comboBox.currentIndex() != 0:
             # Remote Debugging / Run 
-		    self._deviceManager.send_debugger_command(DBG_CMD_RESET)
-            #ret = self.deviceManager.socket.write('/close\n\n')
-            #if ret < 0 :
-                #print ("tp console socket is not available !")
-            #if self._deviceManager.reply is not None:
-                #self._deviceManager.reply.abort()
-                #self._deviceManager.reply = None 
-                #self._deviceManager.command = None 
+            if getattr(self._deviceManager, "debug_mode") == False :
+                ret = self.deviceManager.socket.write('/close\n\n')
+                if ret < 0 :
+                    print ("tp console socket is not available !")
+            elif serverStoped == False :
+		        self._deviceManager.send_debugger_command(DBG_CMD_RESET)
 
-	
         if getattr(self._deviceManager, "debug_mode") == True :
             # delete break points marker
     	    for n in self.editorManager.editors:
@@ -516,7 +513,7 @@ class MainWindow(QMainWindow):
         self.debug_stepinto.setEnabled(True)
         self.debug_stepover.setEnabled(True)
         self.debug_stepout.setEnabled(True)
-        self.debug_pause_bt.setEnabled(True)
+        #self.debug_pause_bt.setEnabled(False)
         self.debug_continue_bt.setEnabled(True)
 
     	self.chgTool_debug()
