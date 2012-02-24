@@ -255,6 +255,8 @@ local function main()
 --        make_cube(    0 , 200 , -1000 , 100 , 45 , 45 , 45 ),
         make_cube( -200 ,   0 , -1000 , 50 , 47 , 0 , r(90) ),
 --        make_cube(  100 , 600 , -1000 , 100 ),
+
+
         make_cube( -300 , 400 , -1000 , 50 , 47 , 0 , r(90) ),
         
 
@@ -274,7 +276,7 @@ local function main()
     local ground_matrix = Matrix()
     ground_matrix:translate( 0 , -320 , -1000 )
     local ground_shape = pb:StaticPlaneShape( 0 , 1 , 0 , 1 )
-    local ground = pb:Body3d{ transform = ground_matrix , shape = ground_shape, mass = 0 , bounce = 0.5 , friction = 0.2 }
+    local ground = pb:Body3d{ transform = ground_matrix , shape = ground_shape, mass = 0 , bounce = 0.5 , friction = 1 }
     
     local wall_matrix = Matrix()
     wall_matrix:translate( -200 , -320 , -1000 )
@@ -297,13 +299,14 @@ local function main()
     end
     
 
-    function idle.on_idle() render() end
+    --function idle.on_idle() render() end
 
---[[
     function pb:on_step( seconds )
-        print( "STEP" , seconds )
+        local contacts = pb:get_contacts( 10 , cubes[1].body , ground )
+        if contacts then
+            dumptable( contacts )
+        end
     end
-]]
 
 end
 
