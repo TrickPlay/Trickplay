@@ -188,7 +188,7 @@ FONTCONFIG_V="2.8.0"
 FONTCONFIG_URL="http://fontconfig.org/release/fontconfig-${FONTCONFIG_V}.tar.gz"
 FONTCONFIG_DIST="fontconfig-${FONTCONFIG_V}.tar.gz"
 FONTCONFIG_SOURCE="fontconfig-${FONTCONFIG_V}"
-FONTCONFIG_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD --with-arch=$ARCH $SHARED --with-pic --with-freetype-config=\"$PREFIX/bin/freetype-config\" && make ${NUM_MAKE_JOBS} install"
+FONTCONFIG_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD --with-arch=$ARCH $SHARED --with-pic --with-freetype-config=\"$PREFIX/bin/freetype-config\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # pixman
