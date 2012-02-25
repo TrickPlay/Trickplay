@@ -501,25 +501,24 @@ class MainWindow(QMainWindow):
 
     def debug(self):
         #self.inspector.clearTree()
-        self._deviceManager.run(True)
-
-        self.windows = {"file":False, "inspector":False, "console":False, "debug":False, "trace":False}
-        self.inspectorWindowClicked()
-        self.consoleWindowClicked()
-        self.debugWindowClicked()
-        self.traceWindowClicked()
-
-        self.debug_stop.setEnabled(True)
-        self.debug_stepinto.setEnabled(True)
-        self.debug_stepover.setEnabled(True)
-        self.debug_stepout.setEnabled(True)
-        #self.debug_pause_bt.setEnabled(False)
-        self.debug_continue_bt.setEnabled(True)
-
-    	self.chgTool_debug()
-        self._deviceManager.ui.comboBox.setEnabled(False)
-        self.debug_tbt.setEnabled(False)
-	
+        ret = self._deviceManager.run(True)
+        if ret != False :
+            self.windows = {"file":False, "inspector":False, "console":False, "debug":False, "trace":False}
+            self.inspectorWindowClicked()
+            self.consoleWindowClicked()
+            self.debugWindowClicked()
+            self.traceWindowClicked()
+    
+            self.debug_stop.setEnabled(True)
+            self.debug_stepinto.setEnabled(True)
+            self.debug_stepover.setEnabled(True)
+            self.debug_stepout.setEnabled(True)
+            #self.debug_pause_bt.setEnabled(False)
+            self.debug_continue_bt.setEnabled(True)
+    
+    	    self.chgTool_debug()
+            self._deviceManager.ui.comboBox.setEnabled(False)
+            self.debug_tbt.setEnabled(False)
 	
     def editor_undo(self):
 		if self.editorManager.tab:

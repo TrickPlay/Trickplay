@@ -184,7 +184,8 @@ def getTrickplayDebug():
     f = None
     
     try:
-        f = urllib2.urlopen(r)
+        print("YUGI222")
+        f = urllib2.urlopen(r, None, 2)
         k = f.read()
         print(k+"********************")
         return decode(k)

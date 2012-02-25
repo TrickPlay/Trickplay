@@ -87,7 +87,7 @@ class TrickplayDiscovery():
         self.type = "_trickplay-http._tcp.local."
 
         self.listener = TrickPlayListener(self.r, reciever)
-        browser = ServiceBrowser(self.r, self.type, self.listener)
+        self.browser = ServiceBrowser(self.r, self.type, self.listener)
         time.sleep(2)
 
     def stop(self):
