@@ -161,9 +161,11 @@ class TrickplayDeviceManager(QWidget):
     
     def push(self):   
         print('[VDBG] Pushing app to %s'%CON.get())
-        tp = TrickplayPushApp(str(self.path()))
-        tp.push(address = CON.get())
-        self.app_started()
+        tp = TrickplayPushApp(self, str(self.path()))
+        ret = tp.push(address = CON.get())
+        if ret is not False:
+            self.app_started()
+        return ret
         
     def setPath(self, p):
         self._path = p
@@ -188,17 +190,16 @@ class TrickplayDeviceManager(QWidget):
 			self.socket.close()
 
 		if self.ui.comboBox.currentIndex() != 0:
-		    print("[VDBG] Connecting to console port !!!")
-		    while 1:
+		    print("[VDBG] Connecting to console port ")
+		    cnt = 0
+		    while cnt < 5:
 			    try : 
 				    self.socket.connectToHost(CON.address, self.console_port, mode=QIODevice.ReadWrite)
 				    if self.socket.waitForConnected(100): 
 					    self.newApp = True
-					    print("[VDBG] Connecting to console port ...")
 					    break
 			    except : 
-			        print("[VDBG] Fail to connect to console port")
-			        return
+			        cnt = cnt + 1
 
     def sendRequest(self):
         print "Connected"
@@ -212,19 +213,19 @@ class TrickplayDeviceManager(QWidget):
 			EGN_MSG(self.socket.read(self.socket.bytesAvailable())[:-1].replace('\033[34;1m','').replace('\033[31;1m','').replace('\033[0m','').replace('\033[37m','').replace('\033[32m',''))
 
     def debugServerHasStopped(self):
-    	print ("[VDBG] Connection closed by server")
     	self.debug_socket.close()
 
     def serverHasStopped(self):
-    	print ("[VDBG] Connection closed by server")
+        print("Console port disconnected")
     	self.socket.close()
     	self.main.stop(True)
-    	index = self.main._deviceManager.ui.comboBox.currentIndex()
+
+        """
+    	index = self.ui.comboBox.currentIndex()
     	self.ui.comboBox.removeItem(index)
-    	self.main._deviceManager.ui.comboBox.setCurrentIndex(0)
-    	self.main._deviceManager.service_selected(0)
-
-
+    	self.ui.comboBox.setCurrentIndex(0)
+    	self.service_selected(0)
+        """
 
     def serverHasError(self, error):
         print(QString("[VDBG] Error: %1").arg(self.socket.errorString()))
@@ -274,137 +275,10 @@ class TrickplayDeviceManager(QWidget):
 				# Output the log line
 				EGN_MSG(">> %s"%s.replace('\033[34;1m','').replace('\033[31;1m','').replace('\033[0m','').replace('\033[37m','').replace('\033[32m',''))
 				
-    """
-    def debugger_reply_finished(self):
-
-        if self.reply.error()== QNetworkReply.NoError:
-		    print("[VDBG] ' %s ' Response"%self.reply.command)
-
-		    if self.reply.command == "bn":
-		        return
-
-		    if self.reply.command == "r":
-		        self.main.deviceManager.socket.write('/close\n\n')
-
-		    data = self.getFileLineInfo_Resp(str(self.reply.readAll()))
-		    if data is not None:
-		        #print("[VDBG] ' %s ' Response"%self.reply.command)
-		        #print("[VDBG] Response Data : ' %s '"%data)
-		        if self.reply.command == DBG_CMD_INFO:
-		            self.inbreak = True
-		            # Open File, Show Current Lines 
-		            if self.file_name.startswith("/"):
-		                self.file_name= self.file_name[1:]
-
-		            current_file = os.path.join(self.main.path, self.file_name)
-
-		            if self.current_debug_file != current_file:
-		                self.editorManager.newEditor(current_file, None, self.line_no, self.current_debug_file, True)
-		            else :
-		                self.editorManager.newEditor(current_file, None, self.line_no, None, True)
-
-		            self.current_debug_file = current_file
-
-		            # Local Variable Table
-		            local_info = self.getLocalInfo_Resp(data)
-		            if local_info is not None:
-		                self.debugWindow.populateLocalTable(local_info)
-
-		            # Stack Trace Table
-		            stack_info = self.getStackInfo_Resp(data)
-		            if stack_info is not None:
-		                self.backtraceWindow.populateTraceTable(stack_info, self.editorManager)
-                        
-		            #self.reply = None
-		            #self.reply.command = None
-			        # TODO: Here we should enable the debug UI
-		            self.main.debug_stepinto.setEnabled(True)
-		            self.main.debug_stepover.setEnabled(True)
-		            self.main.debug_stepout.setEnabled(True)
-		            self.main.debug_continue_bt.setEnabled(True)
-		            self.main.debug_run = False
-
-		        elif len(self.reply.command) > 3 and self.reply.command[:1] == DBG_CMD_BREAKPOINT or self.reply.command[:1] == DBG_CMD_DELETE:
-
-		            self.bs_command = False
-		            #if self.command[-2:] == "ff" or self.command[-2:] == "on" :
-		                #self.bs_command = True
-		            #self.reply = None
-		            #self.command = None
-		            self.send_debugger_command(DBG_CMD_BREAKPOINT)
-
-		        elif self.reply.command == DBG_CMD_BREAKPOINT:
-
-		            # Break Point 
-		            break_info = self.getBreakPointInfo_Resp(data)
-
-		            if break_info is not None:
-		                self.debugWindow.populateBreakTable(break_info, self.editorManager)
-
-		            if self.bs_command == True :
-		                #self.reply = None
-		                #self.command = None
-		                return
-
-		            editor = self.editorManager.app.focusWidget()
-		            nline = editor.margin_nline
-
-		            # Break Point Setting 
-		            if not editor.line_click.has_key(nline) or editor.line_click[nline] == 0 :
-		                if editor.current_line != nline :
-		                    editor.markerAdd(nline, editor.ACTIVE_BREAK_MARKER_NUM)
-		                else:
-		                    editor.markerDelete(nline, editor.ARROW_MARKER_NUM)
-		                    editor.markerAdd(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-
-		                editor.line_click[nline] = 1
-
-		            # Break Point Deactivate  
-		            elif editor.line_click[nline] == 1:
-		                if editor.current_line != nline :
-		                    editor.markerDelete(nline, editor.ACTIVE_BREAK_MARKER_NUM)
-		                    editor.markerAdd(nline, editor.DEACTIVE_BREAK_MARKER_NUM)
-		                else :
-		                    editor.markerDelete(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-		                    editor.markerAdd(nline, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-
-		                editor.line_click[nline] = 2
-
-                    # Break Point Active 
-		            elif editor.line_click[nline] == 2:
-		                if editor.current_line != nline :
-		                    editor.markerDelete(nline, editor.DEACTIVE_BREAK_MARKER_NUM)
-		                    editor.markerAdd(nline, editor.ACTIVE_BREAK_MARKER_NUM)
-		                else :
-		                    editor.markerDelete(nline, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-		                    editor.markerAdd(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-		                editor.line_click[nline] = 1
-
-		            #self.reply = None
-		            #self.command = None
-		    if self.reply.command in DBG_ADVANCE_COMMANDS:
-		        if self.reply.command == DBG_CMD_CONTINUE :
-		            # delete current line marker 
-		            for m in self.editorManager.editors:
-		                if self.current_debug_file == m:
-		                    # check what kind of arrow marker was on the current line and delete just arrow mark not break points 
-						    self.editorManager.tab.editors[self.editorManager.editors[m][1]].markerDelete(
-						    self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
-						    self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
-
-				    # clean backtrace and debug windows
-		            self.backtraceWindow.clearTraceTable(0)
-		            self.debugWindow.clearLocalTable(0)
-
-		        # Leave the debug UI disabled, and wait for the info command to return
-		        self.send_debugger_command( DBG_CMD_INFO )
-       				
-        #self.send_debugger_command( DBG_CMD_STEP_OVER )
-    """
-		
     def send_debugger_command(self, command):
 		if self.debug_port is None:
-			raise "No debugger port"
+			print "No debugger port"
+			return
 		
 		url = QUrl()
 		url.setScheme( "http" )
@@ -418,134 +292,136 @@ class TrickplayDeviceManager(QWidget):
 		reply = self.manager.post( request , command )
 		reply.command = command
 
-		def debugger_reply_finished():
-		    if reply.error()== QNetworkReply.NoError:
-		        print("[VDBG] ' %s ' Response"%reply.command)
+		def debugger_reply_finished(reply):
+		    def foo ():
+		        if reply.error()== QNetworkReply.NoError:
+		            print("[VDBG] ' %s ' Response"%reply.command)
 
-		        if reply.command == "bn":
-		            return
-
-		        if reply.command == "r":
-		            self.main.deviceManager.socket.write('/close\n\n')
-
-		        data = self.getFileLineInfo_Resp(str(reply.readAll()), command)
-		        if data is not None:
-		            #print("[VDBG] ' %s ' Response"%reply.command)
-		            #print("[VDBG] Response Data : ' %s '"%data)
-		            if reply.command == DBG_CMD_INFO:
-		                self.inbreak = True
-		                # Open File, Show Current Lines 
-		                if self.file_name.startswith("/"):
-		                    self.file_name= self.file_name[1:]
+		            if reply.command == "bn":
+		                return
     
-		                current_file = os.path.join(self.main.path, self.file_name)
+		            if reply.command == "r":
+		                self.main.deviceManager.socket.write('/close\n\n')
+
+		            data = self.getFileLineInfo_Resp(str(reply.readAll()), command)
+		            if data is not None:
+		                #print("[VDBG] ' %s ' Response"%reply.command)
+		                #print("[VDBG] Response Data : ' %s '"%data)
+		                if reply.command == DBG_CMD_INFO:
+		                    self.inbreak = True
+		                    # Open File, Show Current Lines 
+		                    if self.file_name.startswith("/"):
+		                        self.file_name= self.file_name[1:]
     
-		                if self.current_debug_file != current_file:
-		                    self.editorManager.newEditor(current_file, None, self.line_no, self.current_debug_file, True)
-		                else :
-		                    self.editorManager.newEditor(current_file, None, self.line_no, None, True)
+		                    current_file = os.path.join(self.main.path, self.file_name)
+    
+		                    if self.current_debug_file != current_file:
+		                        self.editorManager.newEditor(current_file, None, self.line_no, self.current_debug_file, True)
+		                    else :
+		                        self.editorManager.newEditor(current_file, None, self.line_no, None, True)
+    
+		                    self.current_debug_file = current_file
 
-		                self.current_debug_file = current_file
+		                    # Local Variable Table
+		                    local_info = self.getLocalInfo_Resp(data)
+		                    if local_info is not None:
+		                        self.debugWindow.populateLocalTable(local_info)
 
-		                # Local Variable Table
-		                local_info = self.getLocalInfo_Resp(data)
-		                if local_info is not None:
-		                    self.debugWindow.populateLocalTable(local_info)
-
-		                # Stack Trace Table
-		                stack_info = self.getStackInfo_Resp(data)
-		                if stack_info is not None:
-		                    self.backtraceWindow.populateTraceTable(stack_info, self.editorManager)
+		                    # Stack Trace Table
+		                    stack_info = self.getStackInfo_Resp(data)
+		                    if stack_info is not None:
+		                        self.backtraceWindow.populateTraceTable(stack_info, self.editorManager)
                         
-		                #reply = None
-		                #reply.command = None
-			            # TODO: Here we should enable the debug UI
-		                self.main.debug_stepinto.setEnabled(True)
-		                self.main.debug_stepover.setEnabled(True)
-		                self.main.debug_stepout.setEnabled(True)
-		                self.main.debug_pause_bt.setEnabled(False)
-		                self.main.debug_continue_bt.setEnabled(True)
-		                self.main.debug_run = False
+		                    #reply = None
+		                    #reply.command = None
+			                # TODO: Here we should enable the debug UI
+		                    self.main.debug_stepinto.setEnabled(True)
+		                    self.main.debug_stepover.setEnabled(True)
+		                    self.main.debug_stepout.setEnabled(True)
+		                    self.main.debug_pause_bt.setEnabled(False)
+		                    self.main.debug_continue_bt.setEnabled(True)
+		                    self.main.debug_run = False
 
-		            elif len(reply.command) > 3 and reply.command[:1] == DBG_CMD_BREAKPOINT or reply.command[:1] == DBG_CMD_DELETE:
+		                elif len(reply.command) > 3 and reply.command[:1] == DBG_CMD_BREAKPOINT or reply.command[:1] == DBG_CMD_DELETE:
 
-		                self.bs_command = False
-		                #if self.command[-2:] == "ff" or self.command[-2:] == "on" :
-		                    #self.bs_command = True
-		                #reply = None
-		                #self.command = None
-		                self.send_debugger_command(DBG_CMD_BREAKPOINT)
-
-		            elif reply.command == DBG_CMD_BREAKPOINT:
-
-		                # Break Point 
-		                break_info = self.getBreakPointInfo_Resp(data)
-    
-		                if break_info is not None:
-		                    self.debugWindow.populateBreakTable(break_info, self.editorManager)
-
-		                if self.bs_command == True :
+		                    self.bs_command = False
+		                    #if self.command[-2:] == "ff" or self.command[-2:] == "on" :
+		                        #self.bs_command = True
 		                    #reply = None
 		                    #self.command = None
-		                    return
+		                    self.send_debugger_command(DBG_CMD_BREAKPOINT)
     
-		                editor = self.editorManager.app.focusWidget()
-		                nline = editor.margin_nline
+		                elif reply.command == DBG_CMD_BREAKPOINT:
+        
+		                    # Break Point 
+		                    break_info = self.getBreakPointInfo_Resp(data)
+        
+		                    if break_info is not None:
+		                        self.debugWindow.populateBreakTable(break_info, self.editorManager)
+
+		                    if self.bs_command == True :
+		                        #reply = None
+		                        #self.command = None
+		                        return
     
-		                # Break Point Setting 
-		                if not editor.line_click.has_key(nline) or editor.line_click[nline] == 0 :
-		                    if editor.current_line != nline :
-		                        editor.markerAdd(nline, editor.ACTIVE_BREAK_MARKER_NUM)
-		                    else:
-		                        editor.markerDelete(nline, editor.ARROW_MARKER_NUM)
-		                        editor.markerAdd(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-
-		                    editor.line_click[nline] = 1
-
-		                # Break Point Deactivate  
-		                elif editor.line_click[nline] == 1:
-		                    if editor.current_line != nline :
-		                        editor.markerDelete(nline, editor.ACTIVE_BREAK_MARKER_NUM)
-		                        editor.markerAdd(nline, editor.DEACTIVE_BREAK_MARKER_NUM)
-		                    else :
-		                        editor.markerDelete(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-		                        editor.markerAdd(nline, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-
-		                    editor.line_click[nline] = 2
-
-                        # Break Point Active 
-		                elif editor.line_click[nline] == 2:
-		                    if editor.current_line != nline :
-		                        editor.markerDelete(nline, editor.DEACTIVE_BREAK_MARKER_NUM)
-		                        editor.markerAdd(nline, editor.ACTIVE_BREAK_MARKER_NUM)
-		                    else :
-		                        editor.markerDelete(nline, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-		                        editor.markerAdd(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-
-		                    editor.line_click[nline] = 1
+		                    editor = self.editorManager.app.focusWidget()
+		                    nline = editor.margin_nline
     
-		                    #reply = None
-		                    #self.command = None
-		        if reply.command in DBG_ADVANCE_COMMANDS:
-		            if reply.command == DBG_CMD_CONTINUE :
-		                # delete current line marker 
-		                for m in self.editorManager.editors:
-		                    if self.current_debug_file == m:
-		                        # check what kind of arrow marker was on the current line and delete just arrow mark not break points 
-						        self.editorManager.tab.editors[self.editorManager.editors[m][1]].markerDelete(
-						        self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
-						        self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
+		                    # Break Point Setting t
+		                    if not editor.line_click.has_key(nline) or editor.line_click[nline] == 0 :
+		                        if editor.current_line != nline :
+		                            editor.markerAdd(nline, editor.ACTIVE_BREAK_MARKER_NUM)
+		                        else:
+		                            editor.markerDelete(nline, editor.ARROW_MARKER_NUM)
+		                            editor.markerAdd(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
 
-				        # clean backtrace and debug windows
-		                self.backtraceWindow.clearTraceTable(0)
-		                self.debugWindow.clearLocalTable(0)
+		                        editor.line_click[nline] = 1
+
+		                    # Break Point Deactivate  
+		                    elif editor.line_click[nline] == 1:
+		                        if editor.current_line != nline :
+		                            editor.markerDelete(nline, editor.ACTIVE_BREAK_MARKER_NUM)
+		                            editor.markerAdd(nline, editor.DEACTIVE_BREAK_MARKER_NUM)
+		                        else :
+		                            editor.markerDelete(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+		                            editor.markerAdd(nline, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
     
-		            # Leave the debug UI disabled, and wait for the info command to return
-		            self.send_debugger_command( DBG_CMD_INFO )
+		                        editor.line_click[nline] = 2
+
+                            # Break Point Active 
+		                    elif editor.line_click[nline] == 2:
+		                        if editor.current_line != nline :
+		                            editor.markerDelete(nline, editor.DEACTIVE_BREAK_MARKER_NUM)
+		                            editor.markerAdd(nline, editor.ACTIVE_BREAK_MARKER_NUM)
+		                        else :
+		                            editor.markerDelete(nline, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+		                            editor.markerAdd(nline, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+    
+		                        editor.line_click[nline] = 1
+        
+		                        #reply = None
+		                        #self.command = None
+		            if reply.command in DBG_ADVANCE_COMMANDS:
+		                if reply.command == DBG_CMD_CONTINUE :
+		                    # delete current line marker 
+		                    for m in self.editorManager.editors:
+		                        if self.current_debug_file == m:
+		                            # check what kind of arrow marker was on the current line and delete just arrow mark not break points 
+						            self.editorManager.tab.editors[self.editorManager.editors[m][1]].markerDelete(
+						            self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
+						            self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
+    
+				            # clean backtrace and debug windows
+		                    self.backtraceWindow.clearTraceTable(0)
+		                    self.debugWindow.clearLocalTable(0)
+    
+		                # Leave the debug UI disabled, and wait for the info command to return
+		                self.send_debugger_command( DBG_CMD_INFO )
        				
-        #self.send_debugger_command( DBG_CMD_STEP_OVER )
+		    return foo
+		f=debugger_reply_finished(reply)
 
-		QObject.connect( reply , SIGNAL( 'finished()' ) , debugger_reply_finished )
+		QObject.connect( reply , SIGNAL( 'finished()' ) , f)
 		reply.command = command[:]
 		
 		if command in DBG_ADVANCE_COMMANDS:
@@ -598,6 +474,7 @@ class TrickplayDeviceManager(QWidget):
 
         # Push to remote device
         else:
+            print("aa")
             if dMode == True:
                 # POST http://<host>:<debugger port>/debugger "r"
                 url = QUrl()
@@ -611,15 +488,19 @@ class TrickplayDeviceManager(QWidget):
                 #self.manager.post( request , 'r' )
             
                 # GET http://<host>:<http port>/debug/start 
+                print("bb")
                 getTrickplayDebug()
             	self.debug_mode = True
             	self.main.debug_mode = True
+                print("cc")
             
-            self.push()
-
-            if dMode == True:
+            ret = self.push()
+            if ret == False:
+                return ret
+            elif dMode == True:
 			    self.inbreak = False
 			    self.send_debugger_command(DBG_CMD_INFO)
+			    print("ee")
             
 	
     def getFileLineInfo_Resp(self, data, command):
