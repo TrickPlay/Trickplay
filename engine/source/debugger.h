@@ -45,7 +45,7 @@ private:
 
     StringVector * get_source( const String & pi_path );
 
-    bool handle_command( lua_State * L , lua_Debug * ar , Command * command );
+    bool handle_command( lua_State * L , lua_Debug * ar , Command * command , bool with_location );
 
     App *	app;
     bool    installed;
