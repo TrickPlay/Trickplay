@@ -187,15 +187,11 @@ class MainWindow(QMainWindow):
 
 		# Toolbar font 
         font = QFont()
-        font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
         font.setPointSize(9)
 
 		#Create Target Devices Drop Down Button
         self._deviceManager = TrickplayDeviceManager(self)
         font_deviceManager = QFont()
-        font_deviceManager.setStyleHint(font.Monospace)
-        font_deviceManager.setFamily('Monospace')
         font_deviceManager.setPointSize(9)
         self._deviceManager.ui.comboBox.setFont(font_deviceManager)
         self.toolbar.addWidget(self._deviceManager.ui.comboBox)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'NewApplicationDialog.ui'
 #
-# Created: Tue Feb  7 13:46:46 2012
+# Created: Mon Feb 27 13:41:04 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,8 +19,6 @@ class Ui_newApplicationDialog(object):
         newApplicationDialog.setObjectName(_fromUtf8("newApplicationDialog"))
         newApplicationDialog.resize(427, 174)
         font = QtGui.QFont()
-        font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
         font.setPointSize(10)
         newApplicationDialog.setFont(font)
         newApplicationDialog.setModal(True)
@@ -67,6 +65,10 @@ class Ui_newApplicationDialog(object):
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), newApplicationDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), newApplicationDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(newApplicationDialog)
+        newApplicationDialog.setTabOrder(self.directory, self.browse)
+        newApplicationDialog.setTabOrder(self.browse, self.id)
+        newApplicationDialog.setTabOrder(self.id, self.name)
+        newApplicationDialog.setTabOrder(self.name, self.buttonBox)
 
     def retranslateUi(self, newApplicationDialog):
         newApplicationDialog.setWindowTitle(QtGui.QApplication.translate("newApplicationDialog", "New Application", None, QtGui.QApplication.UnicodeUTF8))

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'NewFolder.ui'
 #
-# Created: Tue Feb  7 13:56:07 2012
+# Created: Mon Feb 27 13:42:14 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,8 +19,6 @@ class Ui_newFolderDialog(object):
         newFolderDialog.setObjectName(_fromUtf8("newFolderDialog"))
         newFolderDialog.resize(427, 85)
         font = QtGui.QFont()
-        font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
         font.setPointSize(10)
         newFolderDialog.setFont(font)
         newFolderDialog.setModal(True)
@@ -50,6 +48,7 @@ class Ui_newFolderDialog(object):
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), newFolderDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), newFolderDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(newFolderDialog)
+        newFolderDialog.setTabOrder(self.folder_name, self.buttonBox)
 
     def retranslateUi(self, newFolderDialog):
         newFolderDialog.setWindowTitle(QtGui.QApplication.translate("newFolderDialog", "New Folder", None, QtGui.QApplication.UnicodeUTF8))

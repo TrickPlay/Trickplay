@@ -19,11 +19,6 @@ class Wizard():
     
     # font 
     font = QFont()
-    #font.setStyleHint(font.Inconsolata)
-    #font.setFamily('Inconsolata')
-    #if not font.exactMatch():
-    font.setStyleHint(font.Monospace)
-    font.setFamily('Monospace')
     font.setPointSize(10)
 
 

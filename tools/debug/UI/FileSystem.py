@@ -25,7 +25,6 @@ class Ui_FileSystem(object):
         self.view = QtGui.QTreeView(FileSystem)
         font = QtGui.QFont()
         font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
         font.setPointSize(10)
         self.view.setFont(font)
         self.view.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)

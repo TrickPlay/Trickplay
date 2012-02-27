@@ -103,6 +103,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>directory</tabstop>
+  <tabstop>browse</tabstop>
+  <tabstop>id</tabstop>
+  <tabstop>name</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

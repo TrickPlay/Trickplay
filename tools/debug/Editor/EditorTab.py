@@ -166,8 +166,6 @@ class EditorDock(QDockWidget):
         #font.setStyleHint(font.Inconsolata)
         #font.setFamily('Inconsolata')
         #if not font.exactMatch():
-        font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
         font.setPointSize(10)
         self.setFont(font)
 

@@ -95,6 +95,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>filename</tabstop>
+  <tabstop>directory</tabstop>
+  <tabstop>browse</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
