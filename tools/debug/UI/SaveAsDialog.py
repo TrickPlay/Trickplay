@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'SaveAsDialog.ui'
 #
-# Created: Tue Feb  7 13:47:05 2012
+# Created: Mon Feb 27 13:42:24 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,8 +19,6 @@ class Ui_saveAsDialog(object):
         saveAsDialog.setObjectName(_fromUtf8("saveAsDialog"))
         saveAsDialog.resize(427, 120)
         font = QtGui.QFont()
-        font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
         font.setPointSize(10)
         saveAsDialog.setFont(font)
         saveAsDialog.setModal(True)
@@ -65,6 +63,9 @@ class Ui_saveAsDialog(object):
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), saveAsDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), saveAsDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(saveAsDialog)
+        saveAsDialog.setTabOrder(self.filename, self.directory)
+        saveAsDialog.setTabOrder(self.directory, self.browse)
+        saveAsDialog.setTabOrder(self.browse, self.buttonBox)
 
     def retranslateUi(self, saveAsDialog):
         saveAsDialog.setWindowTitle(QtGui.QApplication.translate("saveAsDialog", "Save As", None, QtGui.QApplication.UnicodeUTF8))

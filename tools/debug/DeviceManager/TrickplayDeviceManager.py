@@ -474,7 +474,6 @@ class TrickplayDeviceManager(QWidget):
 
         # Push to remote device
         else:
-            print("aa")
             if dMode == True:
                 # POST http://<host>:<debugger port>/debugger "r"
                 url = QUrl()
@@ -488,11 +487,9 @@ class TrickplayDeviceManager(QWidget):
                 #self.manager.post( request , 'r' )
             
                 # GET http://<host>:<http port>/debug/start 
-                print("bb")
                 getTrickplayDebug()
             	self.debug_mode = True
             	self.main.debug_mode = True
-                print("cc")
             
             ret = self.push()
             if ret == False:
@@ -500,7 +497,6 @@ class TrickplayDeviceManager(QWidget):
             elif dMode == True:
 			    self.inbreak = False
 			    self.send_debugger_command(DBG_CMD_INFO)
-			    print("ee")
             
 	
     def getFileLineInfo_Resp(self, data, command):

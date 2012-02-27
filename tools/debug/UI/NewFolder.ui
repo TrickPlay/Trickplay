@@ -66,6 +66,10 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>folder_name</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

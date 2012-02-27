@@ -18,10 +18,15 @@ class Ui_TrickplayInspector(object):
     def setupUi(self, TrickplayInspector):
         TrickplayInspector.setObjectName(_fromUtf8("TrickplayInspector"))
         TrickplayInspector.resize(258, 762)
+
+        monofont = QtGui.QFont()
+        monofont.setStyleHint(monofont.Monospace)
+        monofont.setFamily('Monospace')
+        monofont.setPointSize(10)
+
         font = QtGui.QFont()
-        font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
         font.setPointSize(10)
+
         TrickplayInspector.setFont(font)
         self.gridLayout = QtGui.QGridLayout(TrickplayInspector)
         self.gridLayout.setMargin(1)
@@ -32,14 +37,15 @@ class Ui_TrickplayInspector(object):
         self.splitter.setObjectName(_fromUtf8("splitter"))
         self.inspector = QtGui.QTreeView(self.splitter)
         self.inspector.setMinimumSize(QtCore.QSize(100, 0))
-        self.inspector.setFont(font)
+        self.inspector.setFont(monofont)
         self.inspector.setAlternatingRowColors(True)
         self.inspector.setUniformRowHeights(True)
         self.inspector.setObjectName(_fromUtf8("inspector"))
         self.inspector.header().setDefaultSectionSize(150)
+        
         self.property = QtGui.QTreeView(self.splitter)
         self.property.setMinimumSize(QtCore.QSize(100, 0))
-        self.property.setFont(font)
+        self.property.setFont(monofont)
         self.property.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked|QtGui.QAbstractItemView.EditKeyPressed|QtGui.QAbstractItemView.SelectedClicked)
         self.property.setAlternatingRowColors(True)
         self.property.setUniformRowHeights(True)
