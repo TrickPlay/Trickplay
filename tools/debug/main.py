@@ -46,12 +46,11 @@ class MainWindow(QMainWindow):
         
 		# Toolbar font 
         font = QFont()
-        font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
-        font.setPointSize(9)
+        font.setFamily('Ubuntu')
+        font.setPointSize(11)
 
         # Create FileSystem
-        self.ui.FileSystemDock.toggleViewAction().setText("&File System")
+        self.ui.FileSystemDock.toggleViewAction().setText("File system")
         self.ui.FileSystemDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.FileSystemDock.toggleViewAction())
         self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fileWindowClicked)
@@ -59,7 +58,7 @@ class MainWindow(QMainWindow):
         self.ui.FileSystemLayout.addWidget(self._fileSystem)
         
         # Create Inspector
-        self.ui.InspectorDock.toggleViewAction().setText("&Inspector")
+        self.ui.InspectorDock.toggleViewAction().setText("Inspector")
         self.ui.InspectorDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
         self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
@@ -68,7 +67,7 @@ class MainWindow(QMainWindow):
         self.ui.InspectorDock.hide()
         
         # Create Console
-        self.ui.ConsoleDock.toggleViewAction().setText("&Console")
+        self.ui.ConsoleDock.toggleViewAction().setText("Console")
         self.ui.ConsoleDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.ConsoleDock.toggleViewAction())
         self.ui.ConsoleDock.toggleViewAction().triggered.connect(self.consoleWindowClicked)
@@ -81,7 +80,7 @@ class MainWindow(QMainWindow):
         self.connect(self.ui.interactive, SIGNAL("returnPressed()"), self.return_pressed)
 
 		# Create Debug 
-        self.ui.DebugDock.toggleViewAction().setText("&Debug")
+        self.ui.DebugDock.toggleViewAction().setText("Debug")
         self.ui.DebugDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.DebugDock.toggleViewAction())
         self.ui.DebugDock.toggleViewAction().triggered.connect(self.debugWindowClicked)
@@ -93,7 +92,7 @@ class MainWindow(QMainWindow):
         self._editorManager = EditorManager(self, self.ui.menuView, self.ui.centralwidget)
         
 		#Create Backtrace
-        self.ui.BacktraceDock.toggleViewAction().setText("&Backtrace")
+        self.ui.BacktraceDock.toggleViewAction().setText("Backtrace")
         self.ui.BacktraceDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.BacktraceDock.toggleViewAction())
         self.ui.BacktraceDock.toggleViewAction().triggered.connect(self.traceWindowClicked)
@@ -186,6 +185,11 @@ class MainWindow(QMainWindow):
         self.toolbar.setObjectName("debug_toolbar")
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar)
 
+		# Toolbar font 
+        font = QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
+        font.setPointSize(9)
 
 		#Create Target Devices Drop Down Button
         self._deviceManager = TrickplayDeviceManager(self)

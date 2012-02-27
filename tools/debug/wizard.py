@@ -17,6 +17,16 @@ APP = """
 # Could use QWizard, but this is simpler
 class Wizard():
     
+    # font 
+    font = QFont()
+    #font.setStyleHint(font.Inconsolata)
+    #font.setFamily('Inconsolata')
+    #if not font.exactMatch():
+    font.setStyleHint(font.Monospace)
+    font.setFamily('Monospace')
+    font.setPointSize(10)
+
+
     def __init(self, mainWindow = None):
         self.mainWindow = mainWindow
         self.id = None
@@ -25,7 +35,6 @@ class Wizard():
         
     def filesToOpen(self):
         return self.openList
-    
     
     def start(self, path, openApp=False):
     
@@ -39,8 +48,8 @@ class Wizard():
             dir = str(settings.value('path', '').toString())
 
             # Get a path from the user
-            if openApp == False:
-            	userPath = self.createAppDialog(dir)
+	    if openApp == False:
+		userPath = self.createAppDialog(dir)
             
             if userPath:
                 print('Path chosen: ' + str(userPath))
@@ -60,6 +69,8 @@ class Wizard():
                         return userPath
                     else:
                         msg = QMessageBox()
+                        #msg.setFont(font)
+
                         msg.setText('Directory "' + os.path.basename(str(userPath)) +
                                     '" does not contain an "app" file and a "main.lua" file.')
                         msg.setInformativeText('If you pick an empty directory, you will be '
@@ -137,24 +148,23 @@ class Wizard():
         else:
             return -2
         
-    def adjustDialog(self, path):
+    def adjustDialog(self, path, dir=None):
         
         result = self.scan(str(path))
         
         # If the path is a directory...
-        if 0 == result:
-            self.ui.id.setReadOnly(False)
-            self.ui.name.setReadOnly(False)
-            self.new = True
-                
-        elif 1 == result:
-            self.ui.id.setReadOnly(True)
-            self.ui.name.setReadOnly(True)
-            self.ui.id.setText(self.id)
-            self.ui.name.setText(self.name)
-            self.new = False
-                
-        elif -1 == result:
+        if dir is None :
+        	if 0 == result:
+		    self.ui.id.setReadOnly(False)
+		    self.ui.name.setReadOnly(False)
+		    self.new = True
+        	elif 1 == result:
+		    self.ui.id.setReadOnly(True)
+	            self.ui.name.setReadOnly(True)
+		    self.ui.id.setText(self.id)
+		    self.ui.name.setText(self.name)
+		    self.new = False                
+        if -1 == result:
             msg = QMessageBox()
             msg.setText('Directory "' + os.path.basename(str(path)) +
                         '" does not contain an "app" file and a "main.lua" file.')
@@ -166,7 +176,7 @@ class Wizard():
         return result
         
 
-    def chooseDirectoryDialog(self):
+    def chooseDirectoryDialog(self, dir=None):
         """
         User chooses a directory:
         If the directory is empty, then they must fill in Name and Id
@@ -174,18 +184,25 @@ class Wizard():
         """
         
         # Open the browser, wait for it to close
-        dir = self.ui.directory.text()
+        if dir is None:
+        	directory = self.ui.directory.text()
+        else :
+        	directory = dir
         
-        path = QFileDialog.getExistingDirectory(None, 'Select app directory', dir)
+        path = QFileDialog.getExistingDirectory(None, 'Select app directory', directory, QFileDialog.ShowDirsOnly)
         
-        result = self.adjustDialog(path)
+        result = self.adjustDialog(path, dir)
         if result >= 0:
-            self.ui.directory.setText(path)
+        	if dir is None :
+        		self.ui.directory.setText(path)
+        	else :
+        		return path
         
     def createAppDialog(self, path):
         """
         New app dialog
         """
+                
         self.dialog = QDialog()
         self.ui = Ui_newApplicationDialog()
         self.ui.setupUi(self.dialog)
@@ -193,13 +210,15 @@ class Wizard():
         
         self.adjustDialog(path)
         
-        cancelButton = self.ui.buttonBox.button(QDialogButtonBox.Cancel)
+	cancelButton = self.ui.buttonBox.button(QDialogButtonBox.Cancel)
         okButton = self.ui.buttonBox.button(QDialogButtonBox.Ok)
+
         QObject.connect(self.ui.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
-        QObject.connect(cancelButton, SIGNAL('clicked()'), self.exit_ii)
+	QObject.connect(cancelButton, SIGNAL('clicked()'), self.exit_ii)
         QObject.connect(okButton, SIGNAL('clicked()'), self.exit_ii)
+
         
-        if self.dialog.exec_():
+        if self.dialog.exec_():            
             id = str(self.ui.id.text())
             name = str(self.ui.name.text())
             path = str(self.ui.directory.text())
@@ -220,6 +239,8 @@ class Wizard():
                 return path
             else:
                 return path
+        else:
+            return path
 
 
         # If the path is a directory...
@@ -249,6 +270,8 @@ class Wizard():
         # User shouldn't be able to get here...
         #else:
         #    sys.exit()
+
+
 
     def exit_ii(self):
 		#print("asjflashdflks")
