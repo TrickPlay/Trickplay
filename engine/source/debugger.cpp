@@ -39,6 +39,10 @@ public:
 		delete ( Command * ) me;
 	}
 
+	virtual void cancel()
+	{
+	}
+
 	typedef std::list<Command*> List;
 
 	class Filter
@@ -77,6 +81,19 @@ public:
 	virtual void clear_pending_commands() = 0;
 
 	virtual Command::List get_commands_matching( const Command::Filter & filter ) = 0;
+
+	Command::List get_all_commands()
+	{
+		class FilterNone : public Command::Filter
+		{
+			virtual bool operator()( Command * ) const
+			{
+				return true;
+			}
+		};
+
+		return get_commands_matching( FilterNone() );
+	}
 
 protected:
 
@@ -135,6 +152,15 @@ public:
 		fflush( stdout );
 
 		return true;
+	}
+
+	virtual void cancel()
+	{
+		if ( response )
+		{
+			response->unref();
+			response = 0;
+		}
 	}
 
 private:
@@ -234,16 +260,14 @@ public:
 
 	virtual void clear_pending_commands()
 	{
-		g_async_queue_lock( queue );
+		Debugger::Command::List commands = get_all_commands();
 
-		while( Debugger::Command * command = ( Debugger::Command * ) g_async_queue_try_pop_unlocked( queue ) )
+		for ( Debugger::Command::List::const_iterator it = commands.begin(); it != commands.end(); ++it )
 		{
-			g_debug( "CLEARING PENDING COMMAND %s" , command->get().c_str() );
+			tplog( "CLEARING PENDING COMMAND %s" , (*it)->get().c_str() );
 
-			delete command;
+			delete (*it);
 		}
-
-		g_async_queue_unlock( queue );
 	}
 
 	virtual Debugger::Command::List get_commands_matching( const Debugger::Command::Filter & filter )
@@ -301,6 +325,20 @@ protected:
 			tplog2( "WAITING FOR HTTP SERVER THREAD" );
 
 			( void ) g_thread_join( thread );
+		}
+
+		// Cancel any commands that are in the queue now. Otherwise, we will
+		// try to reply to them when the server has already been destroyed.
+
+		Debugger::Command::List list = get_all_commands();
+
+		for ( Debugger::Command::List::const_iterator it = list.begin(); it != list.end(); ++it )
+		{
+			tplog2( "CANCELLING COMMAND '%s'" , (*it)->get().c_str() );
+
+			(*it)->cancel();
+
+			delete (*it);
 		}
 
 		g_async_queue_unref( queue );
