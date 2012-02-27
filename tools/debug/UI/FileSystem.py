@@ -24,6 +24,8 @@ class Ui_FileSystem(object):
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.view = QtGui.QTreeView(FileSystem)
         font = QtGui.QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
         self.view.setFont(font)
         self.view.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)

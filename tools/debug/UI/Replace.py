@@ -19,6 +19,8 @@ class Ui_replaceDialog(object):
         replaceDialog.setObjectName(_fromUtf8("replaceDialog"))
         replaceDialog.resize(415, 219)
         font = QtGui.QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
         replaceDialog.setFont(font)
         replaceDialog.setModal(True)
@@ -42,8 +44,6 @@ class Ui_replaceDialog(object):
         self.formLayout_2.setObjectName(_fromUtf8("formLayout_2"))
         self.labelName_2 = QtGui.QLabel(self.layoutWidget_2)
 
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.labelName.setFont(font)
         self.labelName.setObjectName(_fromUtf8("labelName"))
         self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.labelName)
@@ -53,8 +53,6 @@ class Ui_replaceDialog(object):
         self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.search_txt)
 
 
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.labelName_2.setFont(font)
         self.labelName_2.setObjectName(_fromUtf8("labelName_2"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.LabelRole, self.labelName_2)
@@ -115,8 +113,6 @@ class Ui_replaceDialog(object):
 
         self.notification = QtGui.QLabel(replaceDialog)
         self.notification.setGeometry(QtCore.QRect(10, 180, 161, 26))
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.notification.setFont(font)
         self.notification.setText(_fromUtf8(""))
         self.notification.setObjectName(_fromUtf8("notification"))

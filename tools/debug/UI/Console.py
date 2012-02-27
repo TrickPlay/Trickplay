@@ -19,6 +19,8 @@ class Ui_Console(object):
         Console.setObjectName(_fromUtf8("Console"))
         Console.resize(811, 166)
         font = QtGui.QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
         Console.setFont(font)
         self.verticalLayout = QtGui.QVBoxLayout(Console)

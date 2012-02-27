@@ -19,6 +19,8 @@ class Ui_newApplicationDialog(object):
         newApplicationDialog.setObjectName(_fromUtf8("newApplicationDialog"))
         newApplicationDialog.resize(427, 174)
         font = QtGui.QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
         newApplicationDialog.setFont(font)
         newApplicationDialog.setModal(True)

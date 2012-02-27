@@ -19,6 +19,8 @@ class Ui_saveAsDialog(object):
         saveAsDialog.setObjectName(_fromUtf8("saveAsDialog"))
         saveAsDialog.resize(427, 120)
         font = QtGui.QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
         saveAsDialog.setFont(font)
         saveAsDialog.setModal(True)

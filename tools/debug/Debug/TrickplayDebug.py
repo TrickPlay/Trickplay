@@ -7,6 +7,7 @@ from UI.Debugger import Ui_TrickplayDebugger
 from UI.Backtrace import Ui_TrickplayBacktrace
 from connection import *
 
+
 class TrickplayDebugger(QWidget):
     
     def __init__(self, main=None, parent = None, f = 0):
@@ -34,6 +35,11 @@ class TrickplayDebugger(QWidget):
         self.connect(self.ui.breakTable, SIGNAL("cellClicked(int, int)"), self.cellClicked)
 
         self.break_info = {}
+
+        self.font = QFont()
+        self.font.setStyleHint(self.font.Monospace)
+        self.font.setFamily('Monospace')
+        self.font.setPointSize(10)
 
 	def contextMenu(self, point=None):
 		self.ui.breakTable.popupMenu.exec_( self.ui.breakTable.mapToGlobal(point) )
@@ -117,6 +123,7 @@ class TrickplayDebugger(QWidget):
 			for item in break_info[key]:
 				if key == 1:
 					newitem = QTableWidgetItem()
+					newitem.setFont(self.font)
 					if item == "on":
 						newitem.setCheckState(Qt.Checked)
 					else :
@@ -147,6 +154,7 @@ class TrickplayDebugger(QWidget):
 			m = 0
 			for item in local_info[key]:
 				newitem = QTableWidgetItem(item)
+				newitem.setFont(self.font)
 				self.ui.localTable.setItem(m, n, newitem)
 				m += 1
 			n += 1
@@ -163,6 +171,12 @@ class TrickplayBacktrace(QWidget):
         self.ui.traceTable.setColumnCount(1)
         self.connect(self.ui.traceTable, SIGNAL("cellClicked(int, int)"), self.cellClicked)
         self.stack_info = {}
+
+        self.font = QFont()
+        self.font.setStyleHint(self.font.Monospace)
+        self.font.setFamily('Monospace')
+        self.font.setPointSize(10)
+
 
     def cellClicked(self, r, c):
 		cellItem= self.ui.traceTable.item(r, 0) 
@@ -194,6 +208,7 @@ class TrickplayBacktrace(QWidget):
 			for item in stack_info[key]:
 				if key == 1:
 					newitem = QTableWidgetItem()
+					newitem.setFont(self.font)
 					newitem.setText(item)
 					vh = self.ui.traceTable.verticalHeader()
 					vh.setDefaultSectionSize(18)
