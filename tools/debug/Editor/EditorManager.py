@@ -78,7 +78,7 @@ class EditorManager(QWidget):
         return self.editorGroups
     
     def EditorTabWidget(self, parent = None):
-        tab = EditorTabWidget(self, self.windowsMenu, self.fileSystem, self.splitter)
+        tab = EditorTabWidget(self, self.windowsMenu, self.fileSystem, self.splitter, self.main)
         tab.setObjectName('EditorTab' + str(len(self.editorGroups)))
         return tab
     
@@ -170,7 +170,6 @@ class EditorManager(QWidget):
 			index = index + 1
 
     def close(self):
-		
 		index = self.tab.currentIndex()
 		self.tab.closeTab(index)
 
@@ -382,6 +381,21 @@ class EditorManager(QWidget):
 					editor.markerDelete(int(line_no) -1, Editor.DEACTIVE_BREAK_MARKER_NUM)
 					editor.markerAdd(int(line_no) -1, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 				editor.current_line = int(line_no) -1 
+
+        if self.tab.count() > 0:
+            self.main.editorMenuEnabled()
+
+            if self.currentEditor is not None :
+                if self.currentEditor.isRedoAvailable() == True:
+                    self.main.ui.actionRedo.setEnabled(True)
+                else :
+                    self.main.ui.actionRedo.setEnabled(False)
+    
+                if self.currentEditor.isUndoAvailable() == True:
+                    self.main.ui.actionUndo.setEnabled(True)
+                else :
+                    self.editorManager.main.ui.actionUndo.setEnabled(False)
+
         return editor
 
     @pyqtSlot()

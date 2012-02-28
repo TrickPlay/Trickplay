@@ -61,9 +61,16 @@ class Editor(QsciScintilla):
         # Clickable margin 1 for showing markers
         self.setMarginSensitivity(1, True)
         self.connect(self,
+            SIGNAL('copyAvailable(bool)'),
+            self.copyAvailable)
+
+        self.connect(self,
             SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),
             self.on_margin_clicked)
 
+        self.connect(self,
+            SIGNAL('modificationChanged(bool)'),
+            self.modificationChanged)
 		# Define markers 
 
         self.markerDefine(QPixmap("Assets/currentline.png"), self.ARROW_MARKER_NUM)
@@ -160,7 +167,29 @@ class Editor(QsciScintilla):
 				return m
 			m += 1
     """
+    def modificationChanged(self, changed):
+        if self.isRedoAvailable() == True:
+            self.editorManager.main.ui.actionRedo.setEnabled(True)
+        else :
+            self.editorManager.main.ui.actionRedo.setEnabled(False)
 
+        index = self.editorManager.tab.currentIndex()
+        if self.isUndoAvailable() == True and self.text_status is not TEXT_DEFAULT :
+            self.editorManager.main.ui.actionUndo.setEnabled(True)
+            tabTitle = self.editorManager.tab.tabText(index)
+            if tabTitle[:1] != "*":
+                self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+        else :
+            self.editorManager.main.ui.actionUndo.setEnabled(False)
+            tabTitle = self.editorManager.tab.tabText(index)
+            if tabTitle[:1] == "*":
+                self.editorManager.tab.setTabText (index, tabTitle[1:])
+        
+    def copyAvailable(self, avail):
+        self.editorManager.main.ui.action_Cut.setEnabled(avail)
+        self.editorManager.main.ui.action_Copy.setEnabled(avail)
+        self.editorManager.main.ui.action_Delete.setEnabled(avail)
+        
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
 		#print "on_margin_clicked"
@@ -170,7 +199,7 @@ class Editor(QsciScintilla):
 
 		bp_num = 0
 		self.margin_nline = nline
-		print(self.margin_nline)
+		#print(self.margin_nline)
 
         # Break Point ADD 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
@@ -239,8 +268,10 @@ class Editor(QsciScintilla):
 		if self.text_status == TEXT_DEFAULT or self.text_status != TEXT_CHANGED:#(self.text_status == TEXT_READ and self.path == self.editorManager.tab.editors[0].path):
 			index = 0 
 			for edt in self.editorManager.tab.editors :
-				if edt.path == self.path :
-					self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+				if edt.path == self.path:
+				    if self.isUndoAvailable() is True:
+					    #self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+					    pass
 				index = index + 1
 
 		if self.text_status == TEXT_DEFAULT:
@@ -273,10 +304,9 @@ class Editor(QsciScintilla):
 
         	self.editorManager.tab.textBefores[index] = self.text()
         	self.tempfile = False
-        	print 'File saved'
+        	print '[VDBG] \''+self.path+'\' File saved'
         else: 
 			self.tempfile = True
-			print 'Temp file true'
 
         #statusBar.showMessage('File %s saved' % (path), 2000)
         
