@@ -57,6 +57,8 @@ class TrickplayDebugger(QWidget):
 
 		n = re.search(":", fileLine).end()
 		fileName = str(fileLine[:n-1])
+		if fileName.startswith("/"):
+		    fileName = fileName[1:]
 		lineNum = int(fileLine[n:]) - 1
 
 		fileName = os.path.join(self.deviceManager.path(), fileName)
