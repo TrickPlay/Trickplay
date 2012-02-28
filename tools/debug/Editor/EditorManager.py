@@ -220,6 +220,7 @@ class EditorManager(QWidget):
         then add an editor in the correct tab widget.
         """
 
+        
         if self.deviceManager is None:
             self.deviceManager = self.main._deviceManager
 
@@ -433,5 +434,13 @@ class EditorManager(QWidget):
         
         if not model.isDir(fileIndex):
             path = model.filePath(fileIndex)
+
+            fi = QFileInfo(path)
+            ext = fi.suffix();
+            name = os.path.basename(str(path))
+            if ext == "lua" or ext == "txt" or name == "app":
+                self.newEditor(path, n, None, None, False, fileIndex, False)       
+            else:
+                print"[VDBG] This is %s"%str(model.type(fileIndex))+". Not editable."
+                return
             
-            self.newEditor(path, n, None, None, False, fileIndex, False)       
