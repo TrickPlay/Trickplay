@@ -324,6 +324,8 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(self.trace_toolBtn)
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
 
+        # Search Flag
+        self.find_expr = None
 
 
     def chgTool_debug(self) :
@@ -704,11 +706,16 @@ class MainWindow(QMainWindow):
     			self.replace_dialog = QDialog()
     			self.replace_ui = Ui_replaceDialog()
     			self.replace_ui.setupUi(self.replace_dialog)
-
-        		self.replace_ui.pushButton_find.setEnabled(False)
-        		self.replace_ui.pushButton_replace.setEnabled(False)
-        		self.replace_ui.pushButton_replaceAll.setEnabled(False)
-        		self.replace_ui.pushButton_replaceFind.setEnabled(False)
+    			self.prevForward = True
+    			if self.find_expr is not None :
+    			    self.replace_ui.search_txt.setText(self.find_expr)
+    			    self.replace_ui.pushButton_find.setEnabled(True)
+        		    self.replace_ui.pushButton_replaceAll.setEnabled(True)
+    			else:
+    			    self.replace_ui.pushButton_find.setEnabled(False)
+        		    self.replace_ui.pushButton_replaceAll.setEnabled(False)
+        		    self.replace_ui.pushButton_replace.setEnabled(False)
+        		    self.replace_ui.pushButton_replaceFind.setEnabled(False)
 
     			QObject.connect(self.replace_ui.search_txt , SIGNAL("textChanged(QString)"),  self.replace_textChanged)
     			QObject.connect(self.replace_ui.pushButton_close , SIGNAL("clicked()"),  self.replace_close)
@@ -720,19 +727,19 @@ class MainWindow(QMainWindow):
     			while self.replace_dialog.exec_() :
 					cur_geo = self.replace_dialog.geometry()
 					expr = self.replace_ui.search_txt.text()
+					self.find_expr = expr
 					replace_expr = self.replace_ui.replace_txt.text()
 					re = False
 					cs = self.replace_ui.checkBox_case.isChecked() 
 					wo = self.replace_ui.checkBox_word.isChecked() 
 					wrap = self.replace_ui.checkBox_wrap.isChecked() 
-					forward = self.replace_ui.checkBox_forward.isChecked() 
-
+					forward = self.replace_ui.radioButton_fw.isChecked() 
 					self.replace_ui.search_txt.setText(expr)
 					self.replace_ui.replace_txt.setText(replace_expr)
 					self.replace_ui.checkBox_case.setChecked(cs) 
 					self.replace_ui.checkBox_word.setChecked(wo) 
 					self.replace_ui.checkBox_wrap.setChecked(wrap) 
-					self.replace_ui.checkBox_forward.setChecked(forward) 
+					self.replace_ui.radioButton.setChecked(forward) 
 					self.replace_dialog.setGeometry(cur_geo)
 	
     def  replace_textChanged(self, change):
@@ -751,21 +758,32 @@ class MainWindow(QMainWindow):
     def  replace_find(self):
 		cur_geo = self.replace_dialog.geometry()
 		expr = self.replace_ui.search_txt.text()
+		self.find_expr = expr
 		replace_expr = self.replace_ui.replace_txt.text()
 		re = False
 		cs = self.replace_ui.checkBox_case.isChecked() 
 		wo = self.replace_ui.checkBox_word.isChecked() 
 		wrap = self.replace_ui.checkBox_wrap.isChecked() 
-		forward = self.replace_ui.checkBox_forward.isChecked() 
+		forward = self.replace_ui.radioButton_fw.isChecked() 
+		if forward is False and self.prevForward is True:
+		    self.firstBackward = True
+
 		index = self.editorManager.tab.currentIndex()
-		if self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward) == False :
+		if forward is True or self.firstBackward is True:
+		    find_result = self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
+		    self.firstBackward = False
+		else:
+		    find_result = self.editorManager.tab.editors[index].findNext()
+
+		if find_result == False :
 			self.replace_ui.notification.setText("String Not Found") 
 		else:
 			self.replace_ui.notification.setText("")
         	self.replace_ui.pushButton_replace.setEnabled(True)
         	self.replace_ui.pushButton_replaceFind.setEnabled(True)
 
-		return self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
+		self.prevForward = forward 
+		return find_result
 
     def  replace_replace(self):
 		replace_expr = self.replace_ui.replace_txt.text()
@@ -813,16 +831,6 @@ class MainWindow(QMainWindow):
 						self.editorManager.tab.editors[index].SendScintilla(QsciScintilla.SCI_GOTOLINE, int(lineNum) - 1)
 						return
 					else :
-						"""
-						msg = QMessageBox()
-						msg.setGeometry(cur_geo)
-						msg.setText('The line number is not valid')
-						msg.setInformativeText('Please enter a number (1..'+str(maxNum)+')')
-						msg.setStandardButtons(QMessageBox.Ok)
-						msg.setDefaultButton(QMessageBox.Ok)
-						msg.setWindowTitle("Warning")
-						ret = msg.exec_()
-						"""
 						self.gotoLine_ui.line_txt.setText(str(lineNum))
 						self.gotoLine_dialog = QDialog()
 						self.gotoLine_ui = Ui_gotoLineDialog()
@@ -851,58 +859,6 @@ class MainWindow(QMainWindow):
 				self.gotoLine_ui.okButton.setEnabled(True)
 		else:
 			self.gotoLine_ui.okButton.setEnabled(False)
-
-    def debug_command(self, cmd):
-        """
-		if getattr(self._deviceManager, "debug_mode") == True :
-			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), cmd, False)
-			self._deviceManager.printResp(data, cmd)
-			# Open File, Show Current Lines 
-			if cmd == "c":
-				# delete current line marker 
-				for m in self.editorManager.editors:
-					if self.current_debug_file == m:
-						# check what kind of arrow marker was on the current line and delete just arrow mark not break points 
-						self.editorManager.tab.editors[self.editorManager.editors[m][1]].markerDelete(
-						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
-						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
-				# clean backtrace and debug windows
-				self._backtrace.clearTraceTable(0)
-				self._debug.clearLocalTable(0)
-				#self._debug.clearBreakTable(0)
-
-			file_name = ""
-			# update local variables table
-			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "l", False)
-			local_info = self._deviceManager.printResp(data, "l")
-			self._debug.populateLocalTable(local_info)
-
-			# update backtrace table
-			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
-			stack_info = self._deviceManager.printResp(data, "bt")
-			self._backtrace.populateTraceTable(stack_info, self.editorManager)
-
-			# print breakpoints info 
-			#data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "b", False)
-			#self._deviceManager.printResp(data, "b")
-
-			# open current file and put line marker on the current line's margin 
-			if self._deviceManager.file_name[:1] != '/' :
-				file_name = self.path+'/'+self._deviceManager.file_name
-			else :
-				file_name = self.path+self._deviceManager.file_name
-
-			if self.current_debug_file != file_name :
-				self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, self.current_debug_file, True)
-			else :
-				self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, None, True)
-
-			self.current_debug_file = file_name
-
-		else :
-			pass
-        """
-        return None
 
     def debug_continue(self):
 		self._deviceManager.send_debugger_command(DBG_CMD_CONTINUE)

@@ -143,7 +143,7 @@ class Ui_replaceDialog(object):
         replaceDialog.setTabOrder(self.pushButton_replaceAll, self.pushButton_close)
 
     def retranslateUi(self, replaceDialog):
-        replaceDialog.setWindowTitle(QtGui.QApplication.translate("replaceDialog", "Search/Replace", None, QtGui.QApplication.UnicodeUTF8))
+        replaceDialog.setWindowTitle(QtGui.QApplication.translate("replaceDialog", "Find/Replace", None, QtGui.QApplication.UnicodeUTF8))
         self.labelName.setText(QtGui.QApplication.translate("replaceDialog", "Find:                     ", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBox_case.setText(QtGui.QApplication.translate("replaceDialog", "Match case", None, QtGui.QApplication.UnicodeUTF8))
         self.checkBox_word.setText(QtGui.QApplication.translate("replaceDialog", "Match entire word only", None, QtGui.QApplication.UnicodeUTF8))
@@ -154,7 +154,7 @@ class Ui_replaceDialog(object):
         self.pushButton_replaceFind.setText(QtGui.QApplication.translate("replaceDialog", "Replace& Find", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_find.setText(QtGui.QApplication.translate("replaceDialog", "Find", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_close.setText(QtGui.QApplication.translate("replaceDialog", "Close", None, QtGui.QApplication.UnicodeUTF8))
-        self.notification.setText(QtGui.QApplication.translate("replaceDialog", "String Not Found", None, QtGui.QApplication.UnicodeUTF8))
+        self.notification.setText(QtGui.QApplication.translate("replaceDialog", "", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton_fw.setText(QtGui.QApplication.translate("replaceDialog", "Forward", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton_bw.setText(QtGui.QApplication.translate("replaceDialog", "Backward", None, QtGui.QApplication.UnicodeUTF8))
         self.labelName_3.setText(QtGui.QApplication.translate("replaceDialog", "Direction:", None, QtGui.QApplication.UnicodeUTF8))

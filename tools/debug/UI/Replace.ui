@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Search/Replace</string>
+   <string>Find/Replace</string>
   </property>
   <property name="modal">
    <bool>true</bool>
@@ -223,7 +223,7 @@
     </font>
    </property>
    <property name="text">
-    <string>String Not Found</string>
+    <string/>
    </property>
   </widget>
   <widget class="QWidget" name="horizontalLayoutWidget">
