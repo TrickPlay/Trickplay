@@ -18,6 +18,28 @@ static btVector3 btVector3FromTable( lua_State * L , int t )
     return result;
 }
 
+static void TableFrombtVector3( lua_State * L , int t , const btVector3 & v )
+{
+    if ( 0 == t )
+    {
+        lua_newtable( L );
+        t = lua_gettop( L );
+    }
+    else
+    {
+        t = abs_index( L , t );
+    }
+    
+    g_assert( lua_istable( L , t ) );
+    
+    lua_pushnumber( L , v.getX() );
+    lua_rawseti( L , t , 1 );
+    lua_pushnumber( L , v.getY() );
+    lua_rawseti( L , t , 2 );
+    lua_pushnumber( L , v.getZ() );
+    lua_rawseti( L , t , 3 );
+}
+
 ]]
 
 interface PBBody [[ void * ]]
@@ -35,6 +57,22 @@ interface PBShape [[ btCollisionShape * ]]
         [[
             // Not deleted because they are owned by the world
         ]];
+        
+    table local_scaling
+        [[
+            TableFrombtVector3( L , 0 , self->getLocalScaling() );
+        ]]
+        [[
+            self->setLocalScaling( btVector3FromTable( L , 2 ) ); 
+        ]];        
+        
+    double margin
+        [[
+            margin = self->getMargin();
+        ]]
+        [[
+            self->setMargin( margin );
+        ]];        
 }
 
 interface PBBody3d [[ btCollisionObject * ]]
@@ -88,14 +126,7 @@ interface PBBody3d [[ btCollisionObject * ]]
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
-                const btVector3 & v( body->getLinearVelocity() );
-                
-                lua_pushnumber( L , v.getX() );
-                lua_rawseti( L , -2 , 1 );
-                lua_pushnumber( L , v.getY() );
-                lua_rawseti( L , -2 , 2 );
-                lua_pushnumber( L , v.getZ() );
-                lua_rawseti( L , -2 , 3 );
+                TableFrombtVector3( L , -1 , body->getLinearVelocity() ); 
             }
         ]]
         [[
@@ -111,14 +142,7 @@ interface PBBody3d [[ btCollisionObject * ]]
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
-                const btVector3 & v( body->getAngularVelocity() );
-                
-                lua_pushnumber( L , v.getX() );
-                lua_rawseti( L , -2 , 1 );
-                lua_pushnumber( L , v.getY() );
-                lua_rawseti( L , -2 , 2 );
-                lua_pushnumber( L , v.getZ() );
-                lua_rawseti( L , -2 , 3 );
+                TableFrombtVector3( L , -1 , body->getAngularVelocity() ); 
             }
         ]]
         [[
@@ -170,14 +194,7 @@ interface PBBody3d [[ btCollisionObject * ]]
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
-                const btVector3 & v( body->getLinearFactor() );
-                
-                lua_pushnumber( L , v.getX() );
-                lua_rawseti( L , -2 , 1 );
-                lua_pushnumber( L , v.getY() );
-                lua_rawseti( L , -2 , 2 );
-                lua_pushnumber( L , v.getZ() );
-                lua_rawseti( L , -2 , 3 );
+                TableFrombtVector3( L , -1 , body->getLinearFactor() ); 
             }            
         ]]
         [[
@@ -193,14 +210,7 @@ interface PBBody3d [[ btCollisionObject * ]]
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
-                const btVector3 & v( body->getAngularFactor() );
-                
-                lua_pushnumber( L , v.getX() );
-                lua_rawseti( L , -2 , 1 );
-                lua_pushnumber( L , v.getY() );
-                lua_rawseti( L , -2 , 2 );
-                lua_pushnumber( L , v.getZ() );
-                lua_rawseti( L , -2 , 3 );
+                TableFrombtVector3( L , -1 , body->getAngularFactor() ); 
             }            
         ]]
         [[
@@ -216,14 +226,7 @@ interface PBBody3d [[ btCollisionObject * ]]
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
-                const btVector3 & v( body->getGravity() );
-                
-                lua_pushnumber( L , v.getX() );
-                lua_rawseti( L , -2 , 1 );
-                lua_pushnumber( L , v.getY() );
-                lua_rawseti( L , -2 , 2 );
-                lua_pushnumber( L , v.getZ() );
-                lua_rawseti( L , -2 , 3 );
+                TableFrombtVector3( L , -1 , body->getGravity() ); 
             }            
         ]]
         [[
@@ -402,22 +405,10 @@ global pb [[ Bullet::World * ]]
         
     table gravity
         [[
-            lua_newtable( L );
-            btVector3 g = self->get_world()->getGravity();
-            lua_pushnumber( L , g.x() );
-            lua_rawseti( L , -2 , 1 );
-            lua_pushnumber( L , g.y() );
-            lua_rawseti( L , -2 , 2 );
-            lua_pushnumber( L , g.z() );
-            lua_rawseti( L , -2 , 3 );
+            TableFrombtVector3( L , 0 , self->get_world()->getGravity() ); 
         ]]
         [[
-            lua_rawgeti( L , -1 , 1 );
-            lua_rawgeti( L , -2 , 2 );
-            lua_rawgeti( L , -3 , 3 );
-            btVector3 g( lua_tonumber( L , -3 ) , lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) );
-            lua_pop( L , 3 );
-            self->get_world()->setGravity( g ); 
+            self->get_world()->setGravity( btVector3FromTable( L , 2 ) ); 
         ]];        
         
     step( double time_step = 1.0f/60.0f , int max_sub_steps = 1 , double fixed_time_step = 1.0f/60.0f )
