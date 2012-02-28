@@ -4,6 +4,20 @@ module physics_bullet;
 [[
 #include "physics_bullet.h"
 #include "clutter_util.h"
+
+static btVector3 btVector3FromTable( lua_State * L , int t )
+{
+    lua_rawgeti( L , t , 1 );
+    lua_rawgeti( L , t , 2 );
+    lua_rawgeti( L , t , 3 );
+    
+    btVector3 result( lua_tonumber( L , -3 ) , lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) );
+    
+    lua_pop( L , 3 );
+    
+    return result;
+}
+
 ]]
 
 interface PBBody [[ void * ]]
@@ -39,7 +53,251 @@ interface PBBody3d [[ btCollisionObject * ]]
         [[
             handle = GPOINTER_TO_INT( self->getUserPointer() );
         ]];
+        
+    bool awake
+        [[
+            awake = self->isActive();
+        ]]
+        [[
+            self->activate( true );
+        ]];
 
+    bool active
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                active = body->isInWorld();
+            }
+            else
+            {
+                active = false;
+            }
+        ]]
+        [[
+            // FIXME: To de-activate a body, we have to remove it from 
+            // its world. Right now, this would cause the body pointer to
+            // leak because we only delete the ones that are listed in the
+            // world. 
+            
+            g_assert( false );
+        ]];
+
+    table linear_velocity
+        [[
+            lua_newtable( L );
+            
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                const btVector3 & v( body->getLinearVelocity() );
+                
+                lua_pushnumber( L , v.getX() );
+                lua_rawseti( L , -2 , 1 );
+                lua_pushnumber( L , v.getY() );
+                lua_rawseti( L , -2 , 2 );
+                lua_pushnumber( L , v.getZ() );
+                lua_rawseti( L , -2 , 3 );
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setLinearVelocity( btVector3FromTable( L , 2 ) );
+            }
+        ]];
+
+    table angular_velocity
+        [[
+            lua_newtable( L );
+            
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                const btVector3 & v( body->getAngularVelocity() );
+                
+                lua_pushnumber( L , v.getX() );
+                lua_rawseti( L , -2 , 1 );
+                lua_pushnumber( L , v.getY() );
+                lua_rawseti( L , -2 , 2 );
+                lua_pushnumber( L , v.getZ() );
+                lua_rawseti( L , -2 , 3 );
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setAngularVelocity( btVector3FromTable( L , 2 ) );
+            }
+        ]];
+        
+    double linear_damping
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                linear_damping = body->getLinearDamping();
+            }
+            else
+            {
+                linear_damping = 0;
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setDamping( linear_damping , body->getAngularDamping() );
+            }
+        ]];
+
+    double angular_damping
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                angular_damping = body->getAngularDamping();
+            }
+            else
+            {
+                angular_damping = 0;
+            }
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setDamping( body->getLinearDamping() , angular_damping );
+            }
+        ]];
+        
+    table linear_factor
+        [[
+            lua_newtable( L );
+            
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                const btVector3 & v( body->getLinearFactor() );
+                
+                lua_pushnumber( L , v.getX() );
+                lua_rawseti( L , -2 , 1 );
+                lua_pushnumber( L , v.getY() );
+                lua_rawseti( L , -2 , 2 );
+                lua_pushnumber( L , v.getZ() );
+                lua_rawseti( L , -2 , 3 );
+            }            
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setLinearFactor( btVector3FromTable( L , 2 ) );
+            }            
+        ]];
+        
+    table angular_factor
+        [[
+            lua_newtable( L );
+            
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                const btVector3 & v( body->getAngularFactor() );
+                
+                lua_pushnumber( L , v.getX() );
+                lua_rawseti( L , -2 , 1 );
+                lua_pushnumber( L , v.getY() );
+                lua_rawseti( L , -2 , 2 );
+                lua_pushnumber( L , v.getZ() );
+                lua_rawseti( L , -2 , 3 );
+            }            
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setAngularFactor( btVector3FromTable( L , 2 ) );
+            }            
+        ]];
+        
+    table gravity
+        [[
+            lua_newtable( L );
+            
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                const btVector3 & v( body->getGravity() );
+                
+                lua_pushnumber( L , v.getX() );
+                lua_rawseti( L , -2 , 1 );
+                lua_pushnumber( L , v.getY() );
+                lua_rawseti( L , -2 , 2 );
+                lua_pushnumber( L , v.getZ() );
+                lua_rawseti( L , -2 , 3 );
+            }            
+        ]]
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->setGravity( btVector3FromTable( L , 2 ) );
+            }            
+        ]];
+
+    apply_force( table force , table point = 0 )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                btVector3 f( btVector3FromTable( L , force ) );
+
+                if ( 0 == point )
+                {
+                    body->applyCentralForce( f );
+                }
+                else
+                {
+                    body->applyForce( f , btVector3FromTable( L , point ) ); 
+                }
+            }            
+        ]];        
+
+    apply_torque( table torque )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->applyTorque( btVector3FromTable( L , torque ) );
+            }            
+        ]];        
+
+    apply_linear_impulse( table force , table point = 0 )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                btVector3 f( btVector3FromTable( L , force ) );
+
+                if ( 0 == point )
+                {
+                    body->applyCentralImpulse( f );
+                }
+                else
+                {
+                    body->applyImpulse( f , btVector3FromTable( L , point ) ); 
+                }
+            }            
+        ]];        
+        
+    apply_angular_impulse( table torque )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->applyTorqueImpulse( btVector3FromTable( L , torque ) );
+            }
+        ]];        
+        
+    clear_forces()
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                body->clearForces();
+            }
+        ]];
+        
+    /*
+        Copies its transform matrix into the one provided and returns it.
+        
+        This is for performance reasons - instead of creating a new one every
+        time.
+    */
+        
     Matrix get_transform( Matrix matrix )
         [[
             if ( UserData * ud = UserData::get_check( L , matrix ) )
@@ -51,16 +309,83 @@ interface PBBody3d [[ btCollisionObject * ]]
                 CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
         
                 float m[16];
+                m[15]=1;
         
-                btTransform transform( self->getWorldTransform() );
-        
-                transform.getOpenGLMatrix( m );
+                self->getWorldTransform().getOpenGLMatrix( m );
         
                 cogl_matrix_init_from_array( matrix , m );
             }
             
             lua_pushvalue( L , matrix );
         ]];
+        
+    Matrix set_transform( Matrix matrix )
+        [[
+            if ( UserData * ud = UserData::get_check( L , matrix ) )
+            {
+                // FIXME - NOT CHECKING THE TYPE OF THE UDATA. 
+                // BAD-MEMORY CORRUPTION VERY EASILY
+                // GOOD-PERFORMANCE
+                
+                CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
+        
+                btTransform transform;
+                
+                transform.setFromOpenGLMatrix( & matrix->xx );
+                
+                self->setWorldTransform( transform );
+            }
+            
+            lua_pushvalue( L , matrix );
+        ]];
+        
+    Matrix get_center_of_mass_transform( Matrix matrix )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                if ( UserData * ud = UserData::get_check( L , matrix ) )
+                {
+                    // FIXME - NOT CHECKING THE TYPE OF THE UDATA. 
+                    // BAD-MEMORY CORRUPTION VERY EASILY
+                    // GOOD-PERFORMANCE
+                    
+                    CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
+            
+                    float m[16];
+                    m[15]=1;
+            
+                    body->getCenterOfMassTransform().getOpenGLMatrix( m );
+
+                    cogl_matrix_init_from_array( matrix , m );
+                }
+            }
+                        
+            lua_pushvalue( L , matrix );
+        ]];
+       
+        
+    Matrix set_center_of_mass_transform( Matrix matrix )
+        [[
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                if ( UserData * ud = UserData::get_check( L , matrix ) )
+                {
+                    // FIXME - NOT CHECKING THE TYPE OF THE UDATA. 
+                    // BAD-MEMORY CORRUPTION VERY EASILY
+                    // GOOD-PERFORMANCE
+                    
+                    CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
+            
+                    btTransform transform;
+                    
+                    transform.setFromOpenGLMatrix( & matrix->xx );
+                    
+                    body->setCenterOfMassTransform( transform );
+                }
+            }
+                        
+            lua_pushvalue( L , matrix );
+        ]];                
 }
 
 global pb [[ Bullet::World * ]] 
