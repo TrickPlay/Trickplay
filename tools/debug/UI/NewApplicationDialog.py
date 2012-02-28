@@ -35,6 +35,7 @@ class Ui_newApplicationDialog(object):
         self.horizontalLayout.setSpacing(12)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.directory = QtGui.QLineEdit(newApplicationDialog)
+        self.directory.setFocus()
         self.directory.setReadOnly(True)
         self.directory.setObjectName(_fromUtf8("directory"))
         self.horizontalLayout.addWidget(self.directory)

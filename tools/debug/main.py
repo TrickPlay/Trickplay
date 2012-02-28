@@ -844,7 +844,6 @@ class MainWindow(QMainWindow):
 				self.gotoLine_ui.notification.setText("")
 			except :
 				self.gotoLine_ui.notification.setText("Not a number")
-				lineNum = int(self.gotoLine_ui.line_txt.text())
 				lineNum = -1
 			index = self.editorManager.tab.currentIndex()
 			maxNum = self.editorManager.tab.editors[index].lines()
