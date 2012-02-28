@@ -43,7 +43,10 @@ class MainWindow(QMainWindow):
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        
+       
+        self.editorMenuEnabled(False)
+        self.debuggerMenuEnabled(False)
+
 		# Toolbar font 
         font = QFont()
         font.setFamily('Ubuntu')
@@ -106,6 +109,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionOpen_App, SIGNAL("triggered()"),  self.openApp)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
         QObject.connect(self.ui.action_Save_As, SIGNAL('triggered()'),  self.editorManager.saveas)
+        QObject.connect(self.ui.actionSave_All, SIGNAL('triggered()'),  self.editorManager.saveall)
         QObject.connect(self.ui.action_Close, SIGNAL('triggered()'),  self.editorManager.close)
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         
@@ -320,6 +324,8 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(self.trace_toolBtn)
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
 
+
+
     def chgTool_debug(self) :
         if self.debug_tbt.text() != "Debug":
         	self.debug_tbt.setText("Debug")
@@ -462,6 +468,7 @@ class MainWindow(QMainWindow):
             self._backtrace.clearTraceTable(0)
             self._debug.clearLocalTable(0)
             self._debug.clearBreakTable(0)
+            self.debuggerMenuEnabled(False)
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
@@ -519,6 +526,7 @@ class MainWindow(QMainWindow):
     	    self.chgTool_debug()
             self._deviceManager.ui.comboBox.setEnabled(False)
             self.debug_tbt.setEnabled(False)
+            self.debuggerMenuEnabled()
 	
     def editor_undo(self):
 		if self.editorManager.tab:
@@ -914,3 +922,27 @@ class MainWindow(QMainWindow):
 
     def debug_step_out(self):
 		return
+    def editorMenuEnabled(self, enabled=True):
+        self.ui.action_Save.setEnabled(enabled)
+        self.ui.action_Save_As.setEnabled(enabled)
+        self.ui.actionSave_All.setEnabled(enabled)
+        self.ui.action_Close.setEnabled(enabled)
+        if enabled == False :
+            self.ui.actionUndo.setEnabled(enabled)
+            self.ui.actionRedo.setEnabled(enabled)
+            self.ui.action_Cut.setEnabled(enabled)
+            self.ui.action_Copy.setEnabled(enabled)
+            self.ui.action_Delete.setEnabled(enabled)
+
+        self.ui.action_Paste.setEnabled(enabled)
+
+        self.ui.actionSelect_All.setEnabled(enabled)
+        self.ui.actionSearch_Replace.setEnabled(enabled)
+        self.ui.actionGo_to_line.setEnabled(enabled)
+
+    def debuggerMenuEnabled(self, enabled=True):
+        self.ui.actionContinue.setEnabled(enabled)
+        self.ui.actionPause.setEnabled(enabled)
+        self.ui.actionStep_into.setEnabled(enabled)
+        self.ui.actionStep_over.setEnabled(enabled)
+        self.ui.actionStep_out.setEnabled(enabled)

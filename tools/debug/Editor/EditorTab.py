@@ -7,7 +7,7 @@ from Editor import Editor
 
 class EditorTabWidget(QTabWidget):
 
-    def __init__(self, main, windowsMenu=None, fileSystem = None, parent = None):
+    def __init__(self, main, windowsMenu=None, fileSystem = None, parent = None, m=None):
         
         QTabWidget.__init__(self, parent)
         
@@ -17,6 +17,7 @@ class EditorTabWidget(QTabWidget):
         self.setCurrentIndex(-1)
         self.setAcceptDrops(True)
         
+        self.m = m
         self.main = main
         self.paths = []
         self.editors = []
@@ -40,6 +41,7 @@ class EditorTabWidget(QTabWidget):
 		#index = self.currentIndex()
 
 		editor = self.editors[index] #self.app.focusWidget()
+		
 		self.windowsMenu.removeAction(editor.windowsAction)
 		# reset the windowsActions'shortcuts 
 		n=0
@@ -47,7 +49,6 @@ class EditorTabWidget(QTabWidget):
 			if n > index:
 				edt.windowsAction.setShortcut(QApplication.translate("MainWindow", "Ctrl+"+str(n), None, QApplication.UnicodeUTF8)) 
 			n=n+1
-
 
 		# save before close
 		if isinstance(editor, Editor):
@@ -81,6 +82,7 @@ class EditorTabWidget(QTabWidget):
 		self.editors.pop(index) #new
 		self.removeTab(index)
 		if 0 == self.count():
+			self.m.editorMenuEnabled(False)
 			self.close()
 			self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
 
