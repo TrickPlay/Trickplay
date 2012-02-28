@@ -137,7 +137,6 @@ class Editor(QsciScintilla):
         self.text_status = TEXT_DEFAULT
         self.setWrapMode(QsciScintilla.WrapWord)
         self.line_click = {}
-        #self.bp_num = {}
         self.current_line = -1
         self.path = None
         self.tempfile = False
@@ -203,7 +202,13 @@ class Editor(QsciScintilla):
 
         # Break Point ADD 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
-			t_path = os.path.basename(str(self.path))
+			#t_path = self
+			n = re.search(self.deviceManager.path(), str(self.path)).end()
+			#t_path = os.path.basename(str(self.path))
+			t_path = str(self.path)[n:]
+			if t_path.startswith("/"):
+			    t_path = t_path[1:]
+
 			self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s:"%t_path+"%s"%str(nline+1))
 			#self.line_click[nline] = 1
 
