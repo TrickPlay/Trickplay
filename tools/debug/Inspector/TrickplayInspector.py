@@ -22,6 +22,8 @@ class TrickplayInspector(QWidget):
         
         self.ui = Ui_TrickplayInspector()
         self.ui.setupUi(self)
+        self.ui.refresh.setEnabled(False)
+        self.ui.search.setEnabled(False)
         
         # Ignore signals while updating elements internally
         self.preventChanges = False
@@ -31,7 +33,7 @@ class TrickplayInspector(QWidget):
         #self.lastSearchedItem = None
         
         # Models
-        self.inspectorModel = TrickplayElementModel()
+        self.inspectorModel = TrickplayElementModel(self)
         self.propertyModel = TrickplayPropertyModel()
         
         self.ui.inspector.setModel(self.inspectorModel)
@@ -76,8 +78,8 @@ class TrickplayInspector(QWidget):
         Fill the inspector with Trickplay UI element data
         """
         
-        self.preventChanges = True
         
+        self.preventChanges = True
         # Reselect gid of last item selected
         gid = None
         try:
@@ -99,7 +101,7 @@ class TrickplayInspector(QWidget):
         result = self.search(gid, 'gid')
         if result:
             self.selectItem(result)
-        
+                
     def setHeaders(self, model, headers):
         """
         Set headers for a given model

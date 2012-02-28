@@ -267,6 +267,9 @@ class TrickplayDeviceManager(QWidget):
 					if self.debug_mode == True:
 					    self.inbreak = False
 					    self.send_debugger_command(DBG_CMD_INFO)
+					else :
+					    self.inspector.ui.refresh.setEnabled(True)
+					    self.inspector.ui.search.setEnabled(True)
 				except:
 					print( "[VDBG] Failed to obtain debugger port" )
 					# Kill the process
@@ -309,6 +312,9 @@ class TrickplayDeviceManager(QWidget):
 		                #print("[VDBG] Response Data : ' %s '"%data)
 		                if reply.command == DBG_CMD_INFO:
 		                    self.inbreak = True
+		                    self.inspector.ui.refresh.setEnabled(False)
+		                    self.inspector.ui.search.setEnabled(False)
+
 		                    # Open File, Show Current Lines 
 		                    if self.file_name.startswith("/"):
 		                        self.file_name= self.file_name[1:]
@@ -438,6 +444,8 @@ class TrickplayDeviceManager(QWidget):
 		if self.trickplay.state() == QProcess.NotRunning :
 			print "[VDBG] Trickplay APP is finished"
 			self.inspector.clearTree()
+			self.inspector.ui.refresh.setEnabled(False)
+			self.inspector.ui.search.setEnabled(False)
 			self.main.stop()
 
 	
@@ -497,6 +505,9 @@ class TrickplayDeviceManager(QWidget):
             elif dMode == True:
 			    self.inbreak = False
 			    self.send_debugger_command(DBG_CMD_INFO)
+            else :
+                self.inspector.ui.refresh.setEnabled(True)
+                self.inspector.ui.search.setEnabled(True)
             
 	
     def getFileLineInfo_Resp(self, data, command):

@@ -439,6 +439,9 @@ class MainWindow(QMainWindow):
     def stop(self, serverStoped=False):
         # send 'q' command and close trickplay process
 
+        self.inspector.ui.refresh.setEnabled(False)
+        self.inspector.ui.search.setEnabled(False)
+
         if self._deviceManager.trickplay.state() == QProcess.Running:
             # Local Debugging / Run 
             self._deviceManager.trickplay.close()
@@ -861,10 +864,15 @@ class MainWindow(QMainWindow):
 
     def debug_continue(self):
 		self._deviceManager.send_debugger_command(DBG_CMD_CONTINUE)
+		self.inspector.ui.refresh.setEnabled(True)
+		self.inspector.ui.search.setEnabled(True)
 		return
 
     def debug_pause(self):
 		self._deviceManager.send_debugger_command(DBG_CMD_BREAK_NEXT)
+		self.inspector.clearTree()
+		self.inspector.ui.refresh.setEnabled(False)
+		self.inspector.ui.search.setEnabled(False)
 		return
 
     def debug_step_into(self):
