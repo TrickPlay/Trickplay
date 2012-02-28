@@ -561,13 +561,13 @@
   </action>
   <action name="actionSearch_Replace">
    <property name="text">
-    <string>Search/Replace...</string>
+    <string>Find/Replace...</string>
    </property>
    <property name="font">
     <font/>
    </property>
    <property name="shortcut">
-    <string>Ctrl+H</string>
+    <string>Ctrl+F</string>
    </property>
   </action>
   <action name="actionGo_to_line">
