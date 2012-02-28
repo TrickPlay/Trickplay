@@ -395,7 +395,7 @@ class EditorManager(QWidget):
                 if self.currentEditor.isUndoAvailable() == True:
                     self.main.ui.actionUndo.setEnabled(True)
                 else :
-                    self.editorManager.main.ui.actionUndo.setEnabled(False)
+                    self.main.ui.actionUndo.setEnabled(False)
 
         return editor
 
