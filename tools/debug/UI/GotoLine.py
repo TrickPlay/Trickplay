@@ -44,6 +44,7 @@ class Ui_gotoLineDialog(object):
         self.line_txt = QtGui.QLineEdit(self.layoutWidget)
         self.line_txt.setPlaceholderText(_fromUtf8(""))
         self.line_txt.setObjectName(_fromUtf8("line_txt"))
+        self.line_txt.setFocus()
         self.gridLayout.addWidget(self.line_txt, 0, 1, 1, 1)
         self.labelName = QtGui.QLabel(self.layoutWidget)
         self.labelName.setFont(font)

@@ -35,6 +35,7 @@ class Ui_newFolderDialog(object):
         self.gridLayout.setVerticalSpacing(0)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.folder_name = QtGui.QLineEdit(newFolderDialog)
+        self.folder_name.setFocus()
         self.folder_name.setPlaceholderText(_fromUtf8(""))
         self.folder_name.setObjectName(_fromUtf8("folder_name"))
         self.gridLayout.addWidget(self.folder_name, 0, 1, 1, 1)
