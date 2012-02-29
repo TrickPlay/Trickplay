@@ -458,6 +458,7 @@ class MainWindow(QMainWindow):
         if getattr(self._deviceManager, "debug_mode") == True :
             # delete break points marker
     	    for n in self.editorManager.editors:
+    	        #print(self.editorManager.editors[n][1])
     	        for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
     	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
                     #print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
@@ -624,6 +625,8 @@ class MainWindow(QMainWindow):
 		wizard = Wizard()
 		path = -1
 		while path == -1 :
+		    if self.path is None:
+		        self.path = self.apath
 		    path = QFileDialog.getExistingDirectory(None, 'Open App', self.path, QFileDialog.ShowDirsOnly)
 		    path = wizard.start(path, True)
 		print ("[VDBG] openApp [%s]"%path)
@@ -644,6 +647,9 @@ class MainWindow(QMainWindow):
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
 			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
+			if self.editorManager.tab != None:
+			    while self.editorManager.tab.count() != 0:
+			        self.editorManager.close()
 
     def exit(self):
     	if self.editorManager.tab != None:
