@@ -318,6 +318,12 @@ class TrickplayDeviceManager(QWidget):
 		                    # Open File, Show Current Lines 
 		                    if self.file_name.startswith("/"):
 		                        self.file_name= self.file_name[1:]
+		                    self.file_name= self.file_name+'/'
+		                    print(self.file_name)
+
+		                    if self.file_name.endswith("/"):
+		                        self.file_name= self.file_name[:len(self.file_name) - 1]
+		                        print(self.file_name)
     
 		                    current_file = os.path.join(self.main.path, self.file_name)
     
