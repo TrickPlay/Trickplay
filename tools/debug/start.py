@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Allow keyboard interrupt with ^C
+import os
 import sys
 import signal
 
@@ -35,9 +36,10 @@ def main(argv):
         s = QProcessEnvironment.systemEnvironment().toStringList()
         for item in s:
             k , v = str( item ).split( "=" , 1 )
-            if k == 'OLDPWD':
+            if k == 'PWD':
                 apath = v
 
+        apath = os.path.join(apath, os.path.dirname(str(argv[0])))
         main = MainWindow(app, apath)
         main.show()
         wizard = Wizard()
