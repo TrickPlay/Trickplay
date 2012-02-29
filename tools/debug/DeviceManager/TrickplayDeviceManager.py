@@ -51,7 +51,7 @@ class TrickplayDeviceManager(QWidget):
         QObject.connect(self.trickplay, SIGNAL('readyRead()'), self.app_ready_read)
 
         self.icon = QIcon()
-        self.icon.addPixmap(QPixmap("Assets/icon-target.png"), QIcon.Normal, QIcon.Off)
+        self.icon.addPixmap(QPixmap(self.main.apath+"/Assets/icon-target.png"), QIcon.Normal, QIcon.Off)
         self.icon_null = QIcon()
         self.prev_index = 0
         self.ui.comboBox.setSizeAdjustPolicy(QComboBox.AdjustToContents)
@@ -147,7 +147,7 @@ class TrickplayDeviceManager(QWidget):
         port = '6789'
         address = 'localhost'
         icon = QIcon()
-        icon.addPixmap(QPixmap("Assets/icon-target.png"), QIcon.Normal, QIcon.Off)
+        icon.addPixmap(QPixmap(self.main.apath+"/Assets/icon-target.png"), QIcon.Normal, QIcon.Off)
 
         self.ui.comboBox.addItem(name)
         index = self.ui.comboBox.findText(name)
