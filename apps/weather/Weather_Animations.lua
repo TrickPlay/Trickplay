@@ -956,11 +956,13 @@ do
     
     local add_to_screen = function()
         
-        curr_condition:add(
-            snow_blade,
-            wiper_blade,
-            wiper_rain
-        )
+        if wiper_rain.parent == nil then
+            curr_condition:add(
+                snow_blade,
+                wiper_blade,
+                wiper_rain
+            )
+        end
         snow_blade.z_rotation = {0,0,0}
         wiper_blade.z_rotation = {0,0,0}
         
