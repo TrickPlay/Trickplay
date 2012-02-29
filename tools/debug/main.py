@@ -632,6 +632,9 @@ class MainWindow(QMainWindow):
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
 			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
+			if self.editorManager.tab != None:
+			    while self.editorManager.tab.count() != 0:
+			        self.editorManager.close()
 
     def new(self):
 		wizard = Wizard()
@@ -643,10 +646,6 @@ class MainWindow(QMainWindow):
 			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
 
     def exit(self):
-        """
-        Close in a clean way... but still Trickplay closes too soon and the
-        Avahi service stays alive
-        """
     	if self.editorManager.tab != None:
     		while self.editorManager.tab.count() != 0:
 				self.editorManager.close()

@@ -319,13 +319,11 @@ class TrickplayDeviceManager(QWidget):
 		                    if self.file_name.startswith("/"):
 		                        self.file_name= self.file_name[1:]
 		                    self.file_name= self.file_name+'/'
-		                    print(self.file_name)
 
 		                    if self.file_name.endswith("/"):
 		                        self.file_name= self.file_name[:len(self.file_name) - 1]
-		                        print(self.file_name)
     
-		                    current_file = os.path.join(self.main.path, self.file_name)
+		                    current_file = os.path.join(str(self.main.path), str(self.file_name))
     
 		                    if self.current_debug_file != current_file:
 		                        self.editorManager.newEditor(current_file, None, self.line_no, self.current_debug_file, True)
