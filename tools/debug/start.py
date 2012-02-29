@@ -25,7 +25,6 @@ def main(argv):
         pass
     
     try:
-    
         app = QApplication(argv)
             
         QCoreApplication.setOrganizationDomain('www.trickplay.com');

@@ -622,10 +622,10 @@ class MainWindow(QMainWindow):
 	
     def openApp(self):
 		wizard = Wizard()
-		dir = "/home/hjkim/trickplay-editor/"
-		path = QFileDialog.getExistingDirectory(None, 'Open App', dir, QFileDialog.ShowDirsOnly)
-		#path = wizard.chooseDirectoryDialog(dir)
-		path = wizard.start(path, True)
+		path = -1
+		while path == -1 :
+		    path = QFileDialog.getExistingDirectory(None, 'Open App', self.path, QFileDialog.ShowDirsOnly)
+		    path = wizard.start(path, True)
 		print ("[VDBG] openApp [%s]"%path)
 		if path:
 			settings = QSettings()
@@ -635,9 +635,8 @@ class MainWindow(QMainWindow):
 
     def new(self):
 		wizard = Wizard()
-		path = wizard.start("")
+		path = wizard.start("", False, True)
 		if path:
-
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
@@ -654,6 +653,8 @@ class MainWindow(QMainWindow):
 
         self._deviceManager.stop()
         self.close()
+        #settings = QSettings()
+        #settings.remove("path") 
 
     def newFile(self):
     	file_name = self.path+'/Untitled_'+str(self.untitled_idx)+".lua"
