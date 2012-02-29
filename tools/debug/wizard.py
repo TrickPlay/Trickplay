@@ -31,21 +31,34 @@ class Wizard():
     def filesToOpen(self):
         return self.openList
     
-    def start(self, path, openApp=False):
-    
+    def start(self, path, openApp=False, newApp=False):
         self.openList = None
         
+        # Check settings for the last path used
+        settings = QSettings()
+        dir = str(settings.value('path', '').toString())
         # If no app path was passed in
-        if not path:
-            
+        if not path and newApp == False:
             # Check settings for the last path used
-            settings = QSettings()
-            dir = str(settings.value('path', '').toString())
+            #settings = QSettings()
+            #dir = str(settings.value('path', '').toString())
+            if os.path.exists(dir) and os.path.isdir(dir):
+                files = os.listdir(dir)
+                if len(files) <= 0:
+                    return self.createAppDialog(dir)
+                else:
+                    if 'app' in files and 'main.lua' in files:
+                        return dir
+                    else:
+                        sys.exit('Error >> ' + dir +
+                                 ' does not contain an app file and a main.lua file.')
+            else:
+                #TODO: add dialog box for openApp or newApp 
+                return
 
-            # Get a path from the user
-	    if openApp == False:
-		userPath = self.createAppDialog(dir)
-            
+	    # Get a path from the user
+        if openApp == False and newApp == True:
+            userPath = self.createAppDialog(dir)
             if userPath:
                 print('Path chosen: ' + str(userPath))
             else:    
@@ -64,11 +77,9 @@ class Wizard():
                         return userPath
                     else:
                         msg = QMessageBox()
-                        #msg.setFont(font)
-
                         msg.setText('Directory "' + os.path.basename(str(userPath)) +
                                     '" does not contain an "app" file and a "main.lua" file.')
-                        msg.setInformativeText('If you pick an empty directory, you will be '
+                        msg.setInformativeTet('If you pick an empty directory, you will be '
                                                'prompted to create a new app there.');
                         msg.setWindowTitle("Error")
                         msg.exec_()
@@ -84,10 +95,18 @@ class Wizard():
                     if 'app' in files and 'main.lua' in files:
                         return path
                     else:
-                        sys.exit('Error >> ' + path +
-                                 ' does not contain an app file and a main.lua file.')
+                        #print('[VDBG] Error - ' + path + ' does not contain an app file and a main.lua file.')
+                        msg = QMessageBox()
+                        msg.setText('Directory "' + os.path.basename(str(path)) +
+                                    '" does not contain an "app" file and a "main.lua" file.')
+                        #msg.setInformativeText('If you pick an empty directory, you will be '
+                        #                       'prompted to create a new app there.');
+                        msg.setWindowTitle("Error")
+                        msg.exec_()
+                        return -1
+
             else:
-                sys.exit('Error >> ' + path + ' is not existing directory.')
+                print('[VDBG] Error - ' + path + ' is not existing directory.')
             
     def lineSplit(self, line):
         """
@@ -138,9 +157,11 @@ class Wizard():
                     return -3
                 
             else:
+                # no app or main.lua
                 return -1
             
         else:
+            # not a valid directory
             return -2
         
     def adjustDialog(self, path, dir=None):
@@ -150,23 +171,22 @@ class Wizard():
         # If the path is a directory...
         if dir is None :
         	if 0 == result:
-		    self.ui.id.setReadOnly(False)
-		    self.ui.name.setReadOnly(False)
-		    self.new = True
+        	    self.ui.id.setReadOnly(False)
+        	    self.ui.name.setReadOnly(False)
+        	    self.new = True
         	elif 1 == result:
-		    self.ui.id.setReadOnly(True)
-	            self.ui.name.setReadOnly(True)
-		    self.ui.id.setText(self.id)
-		    self.ui.name.setText(self.name)
-		    self.new = False                
-        if -1 == result:
-            msg = QMessageBox()
-            msg.setText('Directory "' + os.path.basename(str(path)) +
-                        '" does not contain an "app" file and a "main.lua" file.')
-            msg.setInformativeText('If you pick an empty directory, you will be '
-                                   'prompted to create a new app there.');
-            msg.setWindowTitle("Error")
-            msg.exec_()
+        	    self.ui.id.setReadOnly(True)
+        	    self.ui.name.setReadOnly(True)
+        	    self.ui.id.setText(self.id)
+        	    self.ui.name.setText(self.name)
+        	    self.new = False                
+
+        	if -1 == result:
+        	    msg = QMessageBox()
+        	    msg.setText('Directory "' + os.path.basename(str(path)) + '" does not contain an "app" file and a "main.lua" file.')
+        	    msg.setInformativeText('If you pick an empty directory, you will be ' 'prompted to create a new app there.');
+        	    msg.setWindowTitle("Error")
+        	    msg.exec_()
         
         return result
         
@@ -204,12 +224,11 @@ class Wizard():
         self.ui.directory.setText(path)
         
         self.adjustDialog(path)
-        
-	cancelButton = self.ui.buttonBox.button(QDialogButtonBox.Cancel)
+        cancelButton = self.ui.buttonBox.button(QDialogButtonBox.Cancel)
         okButton = self.ui.buttonBox.button(QDialogButtonBox.Ok)
 
         QObject.connect(self.ui.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
-	QObject.connect(cancelButton, SIGNAL('clicked()'), self.exit_ii)
+        QObject.connect(cancelButton, SIGNAL('clicked()'), self.exit_ii)
         QObject.connect(okButton, SIGNAL('clicked()'), self.exit_ii)
 
         
