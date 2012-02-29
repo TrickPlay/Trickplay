@@ -125,10 +125,10 @@ function post_main()
 	for i,location in pairs(locations) do
 		
 		if location == "00000" then
-			table.insert(bars,Make_Bar(location,nil,i,true))
-			bars[#bars].curr_condition="Sunny"
+			bars[i] = Make_Bar(location,nil,i,true)
+			bars[i].curr_condition="Sunny"
 		else
-			table.insert(bars,Make_Bar(location,nil,i))
+			bars[i] = Make_Bar(location,nil,i)
 		end
 		
 	end
