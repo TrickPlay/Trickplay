@@ -55,10 +55,17 @@ class TrickplayElement(QStandardItem):
         """
         
         QStandardItem.__init__(self, *args)
-        
+
+        monofont = QFont()
+        monofont.setStyleHint(monofont.Monospace)
+        monofont.setFamily('Monospace')
+        monofont.setPointSize(10)
+ 
+        self.setFont(monofont)
         self.setData(TrickplayData(), Qt.TP)
         
         self._partner = QStandardItem()
+        self._partner.setFont(monofont)
         
     def partner(self):
         """

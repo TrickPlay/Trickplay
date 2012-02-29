@@ -12,7 +12,7 @@ class TrickplayElementModel(QStandardItemModel):
         self.inspector = inspector
         self.manager = QNetworkAccessManager()
         self.reply = None
-        
+
     def inspector_reply_finished(self):
         if self.reply.error()== QNetworkReply.NoError:
             pdata = json.loads(str(self.reply.readAll()))
