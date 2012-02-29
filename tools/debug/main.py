@@ -765,7 +765,7 @@ class MainWindow(QMainWindow):
     def  replace_close(self):
 		self.replace_dialog.close()
 
-    def  replace_find(self):
+    def  replace_find(self, replaceall = False):
 		cur_geo = self.replace_dialog.geometry()
 		expr = self.replace_ui.search_txt.text()
 		self.find_expr = expr
@@ -775,6 +775,9 @@ class MainWindow(QMainWindow):
 		wo = self.replace_ui.checkBox_word.isChecked() 
 		wrap = self.replace_ui.checkBox_wrap.isChecked() 
 		forward = self.replace_ui.radioButton_fw.isChecked() 
+		if replaceall is True:
+		    wo = True
+
 		if forward is False and self.prevForward is True:
 		    self.firstBackward = True
 
@@ -801,7 +804,7 @@ class MainWindow(QMainWindow):
 		self.editorManager.tab.editors[index].replace(replace_expr)
 
     def  replace_replaceAll(self):
-		findNext = self.replace_find() 
+		findNext = self.replace_find(True) 
 		if findNext == False:
 			self.replace_ui.notification.setText("String Not Found") 
 			return
@@ -809,7 +812,7 @@ class MainWindow(QMainWindow):
 		replaceNum = 0 
 		while findNext == True:
 			self.replace_replace()
-			findNext = self.replace_find()
+			findNext = self.replace_find(True)
 			replaceNum = replaceNum + 1 
 
 		self.replace_ui.notification.setText(str(replaceNum)+" matches replaced") 

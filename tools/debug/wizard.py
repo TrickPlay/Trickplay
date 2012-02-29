@@ -58,6 +58,7 @@ class Wizard():
 
 	    # Get a path from the user
         if openApp == False and newApp == True:
+            
             userPath = self.createAppDialog(dir)
             if userPath:
                 print('Path chosen: ' + str(userPath))
@@ -74,7 +75,8 @@ class Wizard():
                         return self.createAppDialog(userPath)
                         
                     if 'app' in files and 'main.lua' in files:
-                        return userPath
+                        return self.start(path, False, False)
+                        #return userPath
                     else:
                         msg = QMessageBox()
                         msg.setText('Directory "' + os.path.basename(str(userPath)) +
@@ -157,6 +159,13 @@ class Wizard():
                     return -3
                 
             else:
+                print("U",path)
+                path = os.path.dirname(path)
+                
+                msg = QMessageBox()
+                msg.setText('\'' + os.path.basename(str(path)) + '\' is not an empty directory. Please select an empty directory to create a new app.')
+                msg.setWindowTitle("Warning")
+                msg.exec_()
                 # no app or main.lua
                 return -1
             
@@ -204,14 +213,22 @@ class Wizard():
         else :
         	directory = dir
         
-        path = QFileDialog.getExistingDirectory(None, 'Select app directory', directory, QFileDialog.ShowDirsOnly)
+        path = QFileDialog.getExistingDirectory(None, 'Create an app directory', directory, QFileDialog.ShowDirsOnly)
+        apath = os.path.dirname(str(path))
         
-        result = self.adjustDialog(path, dir)
+        result = self.adjustDialog(path, directory)
         if result >= 0:
-        	if dir is None :
-        		self.ui.directory.setText(path)
-        	else :
-        		return path
+        	if directory is None :
+        	    print("W",path,apath)
+        	    self.ui.directory.setText(path)
+        	else:
+        	    print("H",path,apath,directory)
+        	    msg = QMessageBox()
+        	    msg.setText('\'' + os.path.basename(str(path)) + '\' is not an empty directory. Please select an empty directory to create a new app.')
+        	    msg.setWindowTitle("Warning")
+        	    msg.exec_()
+        	    self.ui.directory.setText(path)
+		    return path
         
     def createAppDialog(self, path):
         """
