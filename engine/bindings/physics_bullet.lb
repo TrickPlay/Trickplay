@@ -99,6 +99,8 @@ static bool btTransformFromMatrix( lua_State * L , int matrix , btTransform & tr
     if ( CoglMatrix * cm = tp_lua_get( CoglMatrix , L , matrix , MATRIX_TYPE ) )
     {
         transform.setFromOpenGLMatrix( & cm->xx );
+        
+        return true;
     }
     return false;
 }
