@@ -276,7 +276,7 @@ function Make_Bar(loc,wu_data,index, master)
         y      = 33
     }
     local blue_button_today = Clone{
-        name   = "blurb",
+        name   = "1 day",
         source = imgs.color_button.blue_5_day,
         x      = MINI_BAR_X+FULL_BAR_W-83,
         y      = 33+40,
@@ -287,7 +287,7 @@ function Make_Bar(loc,wu_data,index, master)
         source = imgs.color_button.blue_today,
         x      = MINI_BAR_X+FULL_BAR_W-83,
         y      = 33+40,
-        opacity=0
+        --opacity=0
     }
     local yellow_button = Clone{
         source = imgs.color_button.yellow,
@@ -492,6 +492,7 @@ function Make_Bar(loc,wu_data,index, master)
                     keys = {
                         {five_day, "opacity",   0},
                         {blurb_txt,"opacity", 255},
+                        {blue_button_today,"opacity", 255},
                         {zip_entry,"opacity",   0},
                         unpack(trans_to_full)
                     },
@@ -502,6 +503,7 @@ function Make_Bar(loc,wu_data,index, master)
                     keys = {
                         {five_day, "opacity", 255},
                         {blurb_txt,"opacity",   0},
+                        {blue_button_today,"opacity", 0},
                         {zip_entry,"opacity",   0},
                         unpack(trans_to_full)
                     },
@@ -512,6 +514,7 @@ function Make_Bar(loc,wu_data,index, master)
                     keys = {
                         {five_day, "opacity",   0},
                         {blurb_txt,"opacity",   0},
+                        {blue_button_today,"opacity", 255},
                         {zip_entry,"opacity", 255},
                         unpack(trans_to_full)
                     },
