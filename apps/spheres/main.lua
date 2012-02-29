@@ -4,7 +4,7 @@ screen_w = screen.w
 screen_h = screen.h
 
 --------------------------------------------------------------------------------
--- GLOBALS
+-- GLOBALS                                                                    --
 --------------------------------------------------------------------------------
 
 BULB_PAD                      = 24 -- alpha around a bulb in px
@@ -35,7 +35,7 @@ SCORE_FONT                    = "DejaVu Sans Mono 50px"
 --DEBUG                         = true
 
 --------------------------------------------------------------------------------
--- COLORS for the players
+-- COLORS for the players                                                     --
 --------------------------------------------------------------------------------
 
 RED           = "red"
@@ -47,23 +47,24 @@ NEUTRAL       = "N"
 COLORS        = { RED , GREEN , BLUE , YELLOW }
 
 local margin = 140
+
 SPAWN_LOCATION = {
-    [ RED    ]  = {  margin , screen_h - margin },
-    [ GREEN  ]  = { screen_w - margin , screen_h -margin },
-    [ YELLOW ]  = {  margin ,  margin },
-    [ BLUE   ]  = { screen_w - margin ,  margin }
+    [ RED    ]  = {            margin , screen_h - margin },
+    [ GREEN  ]  = { screen_w - margin , screen_h - margin },
+    [ YELLOW ]  = {            margin ,            margin },
+    [ BLUE   ]  = { screen_w - margin ,            margin }
 }
 
 RING_START    =
 {
-    [ RED    ]  = {  0 , screen_h },
+    [ RED    ]  = {        0 , screen_h },
     [ GREEN  ]  = { screen_w , screen_h },
-    [ YELLOW ]  = {  0 ,  0 },
-    [ BLUE   ]  = { screen_w ,  0 }
+    [ YELLOW ]  = {        0 ,        0 },
+    [ BLUE   ]  = { screen_w ,        0 }
 }
 
 --------------------------------------------------------------------------------
--- LAYERS
+-- LAYERS                                                                     --
 --------------------------------------------------------------------------------
 
 clone_sources_layer = Group{     name = "Hidden Clone Sources"                 }
@@ -102,7 +103,7 @@ clone_sources_layer:hide()
 
 
 --------------------------------------------------------------------------------
--- STATE
+-- STATE                                                                      --
 --------------------------------------------------------------------------------
 
 GAME_IS_LIVE = false
@@ -114,53 +115,62 @@ SCORE_ITEM_HANDLES = {}
 PLAYER_HANDLES     = {}
 
 --------------------------------------------------------------------------------
--- DOFILES
+-- DOFILES                                                                    --
 --------------------------------------------------------------------------------
 
 
+--------------------------------------------------------------------------------
+-- Utility files
+
+--The idle loop framework for appending animations to the physics engines idle loop
+dofile("IdleLoop.lua")
+
+--the State machine class
 MAKE_ENUM = dofile("Enum.lua")
 
 STATE = MAKE_ENUM{"OFFLINE","INTRO","SPLASH","GAME","ROUND_OVER","COUNTDOWN"}
 
 
---The idle loop framework for appending animations to the physics engines idle loop
-dofile("IdleLoop.lua")
 
-
+--------------------------------------------------------------------------------
 --Elements of the Arena/HUD
-dofile("Timers.lua")
 
+--the large 3-2-1 countdown timer that animates in between rounds
+dofile("RoundCountdown.lua")
+--the timer the countsdown the time limit for a round
+dofile("MatchTimer.lua")
+--Background Image and physics boards of the game Arena
 dofile("SphereArena.lua")
 
 
+--------------------------------------------------------------------------------
 --Gameplay Objects
-dofile("CollectableBall.lua")
-dofile("Powerups.lua")
 
-PLAYER_SCORE = dofile("PlayerScore.lua")
-PLAYER_RINGS = dofile("PlayerRing.lua")
+dofile("Formations.lua")      -- start formations of the collectable spheres
+dofile("CollectableBall.lua") -- code for creating and launching the collectable spheres
+dofile("Powerups.lua")        -- power ups that the player ball can collect
+
+--Player UI elements
+PLAYER_RINGS = dofile("PlayerRing.lua")  -- spawn location of the PLAYER_BALL
+PLAYER_SCORE = dofile("PlayerScore.lua") -- score counter, child of PLAYER_RING
 PLAYER_BALLS = dofile("PlayerBall.lua")
 
-dofile("Player.lua")
+-- links the Player UI elements and the User's Controller
+dofile("Player.lua") 
 
---connecting the players to their balls
+
+-- setups up the controller events, connecting the players to their balls
 dofile("IPhoneController.lua")
 
 
+--------------------------------------------------------------------------------
+-- Menus
 
---Game Structure (i.e. different rounds are launched by Level Manager)
-dofile("Rounds.lua")
-
-dofile("LevelManager.lua")
-
-
-
-
---menus
+--The splash screen & intro animation
 dofile("SplashScreen.lua")
 
 --------------------------------------------------------------------------------
--- Start the game
+-- Start the game                                                             --
 --------------------------------------------------------------------------------
 
 physics.gravity = { 0 , 0 }
@@ -169,6 +179,7 @@ physics:start()
 
 screen:show()
 
+-- if i don't delay the start of the app you seem to miss the intro animation
 dolater(
     
     2000,
@@ -180,6 +191,8 @@ dolater(
     end
 )
 
+--collect all of the temporary upvals and tables generated in all of the
+--initialization code
 collectgarbage("collect")
 
 

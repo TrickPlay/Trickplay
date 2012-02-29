@@ -5,7 +5,6 @@ local make_player_score_counter = function(color)
         font     = SCORE_FONT ,
         color    = color ,
         text     = "0000" ,
-        position = SPAWN_LOCATION[ color ],
         opacity  = 0
     }
     
@@ -37,6 +36,7 @@ local make_player_score_counter = function(color)
     end
     
     ----------------------------------------------------------------------------
+    -- public methods for changing the score
     
     local score = 0
     
@@ -52,9 +52,11 @@ local make_player_score_counter = function(color)
     
     
     ----------------------------------------------------------------------------
+    -- public methods for fading the score in and out
     
     function text:fade_in()
         
+        --fading the score in resets the score
         self:update_score( 0 )
         
         add_step_func(
@@ -84,13 +86,14 @@ local make_player_score_counter = function(color)
         
     end
     
-    background_layer:add(text)
+    PLAYER_RINGS[color]:add(text)
     
     return text
     
 end
 
-
+-------------------------------------------------------------------------------
+-- create a score counter for each color
 local score_counters = {}
 
 for _,color in ipairs(COLORS) do

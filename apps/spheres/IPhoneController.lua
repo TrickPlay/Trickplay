@@ -19,6 +19,7 @@ local key_press_mt = {
 }
 
 --------------------------------------------------------------------------------
+-- The different sets of KEY PRESS events for different states of the app
 
 local add_key_events = {
     
@@ -51,25 +52,10 @@ local add_key_events = {
     end,
 }
 
-for state,func in pairs(add_key_events) do
-    
-    STATE:add_state_change_function(nil,state,
-        
-        function()
-            
-            for c,player_ball in pairs(active_controllers) do
-                
-                func(c,player_ball)
-                
-            end
-            
-        end
-    )
-    
-end
-
 
 --------------------------------------------------------------------------------
+-- The different sets of TOUCH events for different states of the app
+
 local add_touch_events = {
     
     ["SPLASH"] = function(c,player_ball)
@@ -120,27 +106,95 @@ local add_touch_events = {
     end,
 }
 
-for state,func in pairs(add_touch_events) do
+--------------------------------------------------------------------------------
+-- sets up the functions in the state machine to set the controller's event 
+-- handlers to the appropriate function for the app's current state
+
+
+for _,state in ipairs(STATE:states()) do
     
-    STATE:add_state_change_function(nil,state,
+    --KEY EVENTS
+    if add_key_events[state] then
         
-        function()
+        --the function from 'add_key_events' that will set up the event handler
+        local func = add_key_events[state]
+        
+        STATE:add_state_change_function(nil,state,
             
-            for c,player_ball in pairs(active_controllers) do
+            function()
                 
-                func(c,player_ball)
+                for c,player_ball in pairs(active_controllers) do
+                    
+                    func(c,player_ball)
+                    
+                end
                 
             end
+        )
+        
+    else
+        
+        --nil's the event handler if there is no function defined for this state
+        STATE:add_state_change_function(nil,state,
             
-        end
-    )
+            function()
+                
+                for c,player_ball in pairs(active_controllers) do
+                    
+                    c.on_key_down = nil
+                    
+                end
+                
+            end
+        )
+        
+    end
+    
+    
+    --TOUCH EVENTS
+    if add_touch_events[state] then
+        
+        --the function from 'add_touch_events' that will set up the event handlers
+        local func = add_touch_events[state]
+        
+        STATE:add_state_change_function(nil,state,
+            
+            function()
+                
+                for c,player_ball in pairs(active_controllers) do
+                    
+                    func(c,player_ball)
+                    
+                end
+                
+            end
+        )
+        
+    else
+        
+        --nil's the event handler if there is no function defined for this state
+        STATE:add_state_change_function(nil,state,
+            
+            function()
+                
+                for c,player_ball in pairs(active_controllers) do
+                    
+                    c.on_touch_down = nil
+                    c.on_touch_up   = nil
+                    
+                end
+                
+            end
+        )
+        
+    end
     
 end
 
 --------------------------------------------------------------------------------
-local setup_controller
+-- The function that sets up controllers that connect to the App
 
-setup_controller  = function( c )
+local setup_controller  = function( c )
     
     if not c.has_keys and not c.has_touches then
         
@@ -150,25 +204,28 @@ setup_controller  = function( c )
         
     end
     
+    --Attempts to join the game, receives false if all players were taken
     local player = PLAYER:new_player()
     
     if player then
         
-        active_controllers[c] = player.ball
+        print("PLAYER CONNECTED")
         
-        print("Player connected")
+        active_controllers[c] = player.ball
         
         if c.has_touches then
             
             c:start_touches()
             
-            if add_touch_events[STATE:current_state()] then
+            -- set up the event handler for the current state
+            if  add_touch_events[STATE:current_state()] then
                 add_touch_events[STATE:current_state()](c,player.ball)
             end
             
         else
             
-            if add_key_events[STATE:current_state()] then
+            -- set up the event handler for the current state
+            if  add_key_events[STATE:current_state()] then
                 add_key_events[STATE:current_state()](c,player.ball)
             end
             
@@ -214,23 +271,21 @@ setup_controller  = function( c )
 end
 --------------------------------------------------------------------------------
 
-dolater(
+-- Connect existing controllers
+for i = 1 , # controllers.connected do
     
-    function()
-        for i = 1 , # controllers.connected do
-            
-            setup_controller( controllers.connected[ i ] )
-            
-        end
-        
-        
-        function controllers:on_controller_connected( c )
-            
-            setup_controller( c )
-            
-        end
-    end
-)
+    setup_controller( controllers.connected[ i ] )
+    
+end
+
+-- call the setup function for every new controller
+function controllers:on_controller_connected( c )
+    
+    setup_controller( c )
+    
+end
+ 
+
 
 
 

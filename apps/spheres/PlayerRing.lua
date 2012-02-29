@@ -16,14 +16,22 @@ end
 
 local function make_ring( color )
     
-    local ring       = Clone{
-        name         = string.format( "%s-ring" , color ),
-        source       = srcs[ color ],
-        position     = RING_START[ color ],
-        anchor_point = srcs[ color ].center,
+    
+    local ring   = Group{
+        name     = string.format( "%s-ring" , color ),
+        position = RING_START[ color ],
+        children = {
+            Clone{
+                source       = srcs[ color ],
+                anchor_point = srcs[ color ].center,
+            }
+        }
     }
     
+    ----------------------------------------------------------------------------
+    -- Animation for flipping the ring
     local flipping = false
+    
     function ring:flip( callback )
         
         if flipping then return false end
@@ -50,47 +58,39 @@ local function make_ring( color )
         
     end
     
-    function ring:animate_out( callback )
+    
+    ----------------------------------------------------------------------------
+    -- Public method for moving the ring
+    
+    local xi = Interval(0,0)
+    local yi = Interval(0,0)
+    
+    local function move(p)
+        ring.x = xi:get_value( p )
+        ring.y = yi:get_value( p )
+    end
+    
+    function ring:move_to( position, callback )
         
-        local xi = Interval( ring.x , RING_START[ color ][1] )
-        local yi = Interval( ring.y , RING_START[ color ][2] )
-        
-        -- moves the ring to position
-        local function move( p )
-            ring.x = xi:get_value( p )
-            ring.y = yi:get_value( p )
-        end
-        
+        xi.from = ring.x
+        xi.to   = position[1]
+        yi.from = ring.y
+        yi.to   = position[2]
         
         --move the ring to position
         add_step_func( RING_ANIMATE_IN_DURATION , move , callback )
+        
     end
     
-    function ring:animate_in( callback )
-        
-        local xi = Interval( ring.x , SPAWN_LOCATION[color][1] )
-        local yi = Interval( ring.y , SPAWN_LOCATION[color][2] )
-        -- moves the ring to position
-        local function move( p )
-            ring.x = xi:get_value( p )
-            ring.y = yi:get_value( p )
-        end
-        
-        local function move_done()
-            ring:flip()
-            dolater( callback )
-        end
-        
-        --move the ring to position
-        add_step_func( RING_ANIMATE_IN_DURATION , move , move_done )
-        
-    end
     
     background_layer:add(ring)
     
     return ring
+    
 end
 
+-------------------------------------------------------------------------------
+-- create a ring for each color
 local rings = {}
 
 for _,color in ipairs(COLORS) do

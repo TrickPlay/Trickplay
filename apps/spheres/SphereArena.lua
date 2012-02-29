@@ -5,14 +5,11 @@ local bgs = Image{ src = "assets/bg-planet-topleft.png" }
 
 background_layer:add( bgc , bgs )
 
-local function bg_step( seconds )
-    -- animate background
-end
 
 
--------------------------------------------------------------------------------
--- Add invisible walls
--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Add invisible walls                                                        --
+--------------------------------------------------------------------------------
 
 local CORNER_BUMPER_X        = 40
 local CORNER_BUMPER_Y        = 40

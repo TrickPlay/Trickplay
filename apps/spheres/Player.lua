@@ -52,8 +52,10 @@ function PLAYER:new_player()
     
     function player:join_game()
         
-        player.ring:animate_in(
+        player.ring:move_to(SPAWN_LOCATION[color],
             function()
+                
+                player.ring:flip()
                 
                 player.ball.has_player = true
                 
@@ -76,7 +78,7 @@ function PLAYER:new_player()
         player.ball:fade_out_to(
             
             RING_START[color][1],
-            RING_START[color][1],
+            RING_START[color][2],
             function()
                 
                 player.ball.has_player = false
@@ -87,8 +89,8 @@ function PLAYER:new_player()
                 
             end
         )
-            
-        player.ring:animate_out()
+        
+        player.ring:move_to(RING_START[color])
         player.score:fade_out()
         
     end

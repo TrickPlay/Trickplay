@@ -2,6 +2,7 @@
 local animated_in = false
 
 --------------------------------------------------------------------------------
+-- Set up the UI elements of the splash screen
 
 local title        = Image{ src = "assets/splash_screen/logo-large.png",   opacity = 0 }
 
@@ -21,6 +22,7 @@ start_circle.position = {screen_w/2,screen_h/2+200}
 menu_layer:add(title,start_txt,start_circle)
 
 --------------------------------------------------------------------------------
+-- the animation for the spinning circle
 
 local function start_circle_idle_spin(p)
     
@@ -28,6 +30,7 @@ local function start_circle_idle_spin(p)
     
 end
 
+--every 2 seconds spin the circle
 local start_circle_idle_spin = Timer{
     
     interval = 2000,
@@ -43,6 +46,7 @@ local start_circle_idle_spin = Timer{
 start_circle_idle_spin:stop()
 
 --------------------------------------------------------------------------------
+-- The fade in intro animations
 
 local function fade_in_circle()
     
@@ -88,6 +92,7 @@ local function fade_in_text(callback)
 end
 
 --------------------------------------------------------------------------------
+-- The Intro Animation
 
 STATE:add_state_change_function("OFFLINE","INTRO",
     
@@ -118,6 +123,7 @@ STATE:add_state_change_function("OFFLINE","INTRO",
 )
 
 --------------------------------------------------------------------------------
+-- The Fade Out Animation
 
 STATE:add_state_change_function("SPLASH",nil,
     
@@ -151,7 +157,7 @@ STATE:add_state_change_function("SPLASH",nil,
                 
                 STATE:add_state_change_function("SPLASH",nil,function()
                     
-                    error("This shouldn't be possible, attempted to got back to the splash screen",2)
+                    error("Attempted to got back to the splash screen. This shouldn't be possible.")
                     
                 end)
             end

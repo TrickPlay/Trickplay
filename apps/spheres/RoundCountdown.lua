@@ -33,10 +33,12 @@ local countdown_clone = Clone{position = {screen_w/2,screen_h/2}}
 hud_layer:add(countdown_clone)
 
 
---The scale/opacity countdown animation
+--------------------------------------------------------------------------------
+-- The scale/opacity countdown animation
+
 local source_i, src, countdown_callback, countdown_done
 
---this function calls it self as the on_completed call_back for the
+-- this function calls it self as the on_completed call_back for the
 -- 'scale/opacity countdown' animation, it stops when the number reaches 0
 countdown_done = function(s)
     
@@ -82,6 +84,8 @@ countdown_done = function(s)
     
 end
 
+--------------------------------------------------------------------------------
+-- start the countdown
 
 STATE:add_state_change_function(nil,"COUNTDOWN",
     
@@ -96,7 +100,7 @@ STATE:add_state_change_function(nil,"COUNTDOWN",
     end
 )
 
---TODO: need a better solution to this
+--TODO: need a better solution than just blindly initiating the countdown 2 seconds after the round ended
 STATE:add_state_change_function(nil,"ROUND_OVER",
     
     function()
@@ -106,51 +110,5 @@ STATE:add_state_change_function(nil,"ROUND_OVER",
     end
 )
 
---------------------------------------------------------------------------------
---Timer Numbers
---------------------------------------------------------------------------------
-local timer_numbers = {}
-
-for i = 0,9 do
-    
-    local t = Text{
-        text = i,
-        font = "DejaVu Sans Mono 100px"
-    }
-    
-    local c = Canvas(t.w,t.h)
-    
-    c:text_element_path(t)
-    
-    c:set_source_color("ffffff")
-    
-    c:stroke(true)
-    
-    c:set_source_color("ff0000")
-    
-    c:fill(true)
-    
-    timer_numbers[i] = c:Image()
-    
-    clone_sources_layer:add( timer_numbers[i] )
-    
-end
---]]
-
-local digits = {}
-
-function start_timer(start_value,callback)
-    
-    local num_digits = 0
-    
-    while(start_value / 10 > 1) do
-        
-        start_value = start_value / 10
-        
-        num_digits = num_digits + 1
-        
-    end
-    
-end
 
 

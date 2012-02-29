@@ -14,15 +14,15 @@ clone_sources_layer:add( srcs[ NEUTRAL ] )
 local neutral_spheres = 0 -- how many are left
 
 
-    local physics_props =
-    {
-        shape = physics:Circle( ( srcs[ NEUTRAL ].w / 2 ) - SPHERE_PAD ),
-        friction        = SPHERE_FRICTION,
-        density         = SPHERE_DENSITY,
-        bounce          = SPHERE_BOUNCE,
-        linear_damping  = SPHERE_LINEAR_DAMPING,
-        angular_damping = SPHERE_ANGULAR_DAMPING,
-    }
+local physics_props =
+{
+    shape = physics:Circle( ( srcs[ NEUTRAL ].w / 2 ) - SPHERE_PAD ),
+    friction        = SPHERE_FRICTION,
+    density         = SPHERE_DENSITY,
+    bounce          = SPHERE_BOUNCE,
+    linear_damping  = SPHERE_LINEAR_DAMPING,
+    angular_damping = SPHERE_ANGULAR_DAMPING,
+}
 
 function make_sphere()
     
@@ -61,6 +61,32 @@ function make_sphere()
     
     return sphere
 end
+
+STATE:add_state_change_function(nil,"GAME",
+    
+    function()
+        
+        for i, ball in ipairs(  formations[math.random(1,#formations)]  ) do
+            
+            local sphere = make_sphere()
+            
+            
+            sphere:set{
+                x = ball.x,  
+                y = ball.y,  
+                linear_velocity = {
+                    ball.vx, 
+                    ball.vy  
+                }
+            }
+            
+            
+            objects_layer:add( sphere )
+            
+        end
+        
+    end
+)
 
 STATE:add_state_change_function(nil,"ROUND_OVER",
     

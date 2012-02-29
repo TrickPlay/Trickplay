@@ -78,92 +78,6 @@ local function make_player_ball( color )
     
     PLAYER_HANDLES[bulb.handle] = bulb
     
-    
-    
-    
-    local return_to_normal_size = Timer{
-        
-        interval = 10000,
-        
-        on_timer = function(self)
-            print("return")
-            bulb:remove_fixture(bulb.fixtures[1].handle)
-            
-            bulb:add_fixture(player_ball_physics_props)
-            
-            bulb.scale = 1
-            
-            self:stop()
-        end
-    }
-    
-    return_to_normal_size:stop()
-    
-    function bulb:shrink()
-        
-        bulb:remove_fixture(bulb.fixtures[1].handle)
-        
-        bulb:add_fixture{
-            shape           = physics:Circle( ( srcs[ COLORS[1] ].bulb.w *.75 / 2 ) - BULB_PAD ),
-            friction        = BULB_FRICTION,
-            density         = BULB_DENSITY,
-            bounce          = BULB_BOUNCE,
-            linear_damping  = BULB_LINEAR_DAMPING,
-            angular_damping = BULB_ANGULAR_DAMPING
-        }
-        
-        bulb.scale = .75
-        return_to_normal_size:stop()
-        return_to_normal_size:start()
-    end
-    
-    function bulb:enlarge()
-        
-        bulb:remove_fixture(bulb.fixtures[1].handle)
-        
-        bulb:add_fixture{
-            shape           = physics:Circle( ( srcs[ COLORS[1] ].bulb.w *1.5 / 2 ) - BULB_PAD ),
-            friction        = BULB_FRICTION,
-            density         = BULB_DENSITY,
-            bounce          = BULB_BOUNCE,
-            linear_damping  = BULB_LINEAR_DAMPING,
-            angular_damping = BULB_ANGULAR_DAMPING
-        }
-        
-        bulb.scale = 1.5
-        
-        return_to_normal_size:stop()
-        return_to_normal_size:start()
-    end
-    
-    local return_to_normal_linear_damping = Timer{
-        interval = 10000,
-        on_timer = function(self)
-            print("normal")
-            bulb.key_press_force = BULB_FORCE
-            
-            self:stop()
-        end,
-    }
-    
-    return_to_normal_linear_damping:stop()
-    
-    function bulb:slow()
-        print("slow")
-        bulb.key_press_force = BULB_FORCE / 8
-        
-        return_to_normal_linear_damping:stop()
-        return_to_normal_linear_damping:start()
-    end
-    function bulb:fast()
-        
-        bulb.key_press_force = BULB_FORCE * 8
-        
-        return_to_normal_linear_damping:stop()
-        return_to_normal_linear_damping:start()
-    end
-    
-    
     function bulb:on_pre_solve_contact( contact )
         
         -- If we collied with a sphere and it has the same color as we do
@@ -200,8 +114,96 @@ local function make_player_ball( color )
         
     end
     
+    
+    ----------------------------------------------------------------------------
+    -- Public Methods used by the powerups that shrink & enlargen the player
+    local return_to_normal_size = Timer{
+        
+        interval = 10000,
+        
+        on_timer = function(self)
+            print("return")
+            bulb:remove_fixture(bulb.fixtures[1].handle)
+            
+            bulb:add_fixture(player_ball_physics_props)
+            
+            bulb.scale = 1
+            
+            self:stop()
+        end
+    }
+    
+    return_to_normal_size:stop()
+    
+    function bulb:shrink()
+        
+        bulb:remove_fixture(bulb.fixtures[1].handle)
+        
+        bulb:add_fixture{
+            shape           = physics:Circle( ( srcs[ COLORS[1] ].bulb.w *.75 / 2 ) - BULB_PAD ),
+            friction        = BULB_FRICTION,
+            density         = BULB_DENSITY,
+            bounce          = BULB_BOUNCE,
+        }
+        
+        bulb.scale = .75
+        return_to_normal_size:stop()
+        return_to_normal_size:start()
+    end
+    
+    function bulb:enlarge()
+        
+        bulb:remove_fixture(bulb.fixtures[1].handle)
+        
+        bulb:add_fixture{
+            shape           = physics:Circle( ( srcs[ COLORS[1] ].bulb.w *1.5 / 2 ) - BULB_PAD ),
+            friction        = BULB_FRICTION,
+            density         = BULB_DENSITY,
+            bounce          = BULB_BOUNCE,
+        }
+        
+        bulb.scale = 1.5
+        
+        return_to_normal_size:stop()
+        return_to_normal_size:start()
+    end
+    
+    
+    
+    ----------------------------------------------------------------------------
+    -- Public Methods used by the powerups that speed up & slow down the player
+    local return_to_normal_linear_damping = Timer{
+        interval = 10000,
+        on_timer = function(self)
+            print("normal")
+            bulb.key_press_force = BULB_FORCE
+            
+            self:stop()
+        end,
+    }
+    
+    return_to_normal_linear_damping:stop()
+    
+    function bulb:slow()
+        print("slow")
+        bulb.key_press_force = BULB_FORCE / 8
+        
+        return_to_normal_linear_damping:stop()
+        return_to_normal_linear_damping:start()
+    end
+    function bulb:fast()
+        
+        bulb.key_press_force = BULB_FORCE * 8
+        
+        return_to_normal_linear_damping:stop()
+        return_to_normal_linear_damping:start()
+    end
+    
+    ----------------------------------------------------------------------------
+    -- Public Methods for fading the player ball in and out
+    
     local step_function
-    -- Public Methods
+    
     function bulb:fade_out_to(x,y, callback)
         
         local xi = Interval( self.x , x )
