@@ -299,13 +299,15 @@ local function main()
     end
     
 
-    --function idle.on_idle() render() end
+    function idle.on_idle() render() end
 
     function pb:on_step( seconds )
+--[[
         local contacts = pb:get_contacts( 10 , cubes[1].body , ground )
         if contacts then
             dumptable( contacts )
         end
+]]        
     end
 
 end

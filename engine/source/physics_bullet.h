@@ -44,7 +44,7 @@ namespace Bullet
         int create_sensor( int properties );
 #endif
 
-        int create_shape( btCollisionShape * shape );
+        int create_shape( btCollisionShape * shape , lua_CFunction constructor );
 
         void step( float time_step , int max_sub_steps , float fixed_time_step );
 
