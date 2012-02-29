@@ -83,8 +83,7 @@ class Call(object):
         self.Auth_2 = '", algorithm=MD5, uri="sip:asterisk-1.asterisk.trickplay.com", response="'
 
         # Default Content length of 0 indicates no message body
-        self.Content_Length = 'Content-Length: 0\r\n\
-        \r\n' 
+        self.Content_Length = "Content-Length: 0\r\n\r\n"
 
         self.branch = None
         self.nonce = None
@@ -119,21 +118,36 @@ class Call(object):
 
 
     def gen_sdp(self):
-# No idea how Empathy discovered the public address
         sdp_header = "v=0\r\n" + \
         "o=- 0 0 IN IP4 " + self.udp_client_ip + "\r\n" + \
         "s=" + self.user + "\r\n" + \
-        "c=IN IP4 66.201.49.178\r\n" + \
-        "a=tool:Python RTP\r\n" + \
+        "c=IN IP4 " + self.udp_client_ip + "\r\n" + \
+        "t=0 0\r\n" + \
+        "a=range:npt=now-\r\n" +\
         "m=audio 7078 RTP/AVP 96\r\n" + \
         "b=AS:64\r\n" + \
-        "a=rtpmap:96 MPEG4-GENERIC/44100/1\r\n" + \
-        "a=fmtp:96 profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=1208\r\n" + \
-        "m=video 7078 RTP/AVP 97\r\n" + \
-        "b=AS:64\r\n" + \
+        "a=rtpmap:96 mpeg4-generic/44100/1\r\n" + \
+        "a=fmtp:96 profile-level-id=15;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3;config=1388\r\n" + \
+        "m=video 9078 RTP/AVP 97\r\n" + \
+        "b=AS:1372\r\n" + \
         "a=rtpmap:97 H264/90000\r\n" + \
         "a=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPZ,aM4JyA==\r\n"
+        "mpeg4-esid:201\r\n"
  
+        return sdp_header
+
+    def gen_sdp_asterisk(self):
+        sdp_header = "v=0\r\n" + \
+        "o=- 0 0 IN IP4 " + self.udp_client_ip + "\r\n" + \
+        "s=" + self.user + "\r\n" + \
+        "c=IN IP4 " + self.udp_client_ip + "\r\n" + \
+        "t=0 0\r\n" + \
+        "a=range:npt=now-\r\n" +\
+        "m=audio 7078 RTP/AVP 0\r\n" + \
+        "a=rtpmap:0 PCMU/8000\r\n" + \
+        "a=sendrecv\r\n" + \
+        "m=video 0 RTP/AVP 34 99\r\n"
+
         return sdp_header
 
 
@@ -269,6 +283,28 @@ class Options(Call):
         self.write_queue.append(packet)
 
 
+class Bye(Call):
+    
+    def gen_response(self, call, addr):
+        via = call['Via'].split(';')
+
+        packet = "SIP/2.0 200 OK\r\n" + \
+        "Via: " + via[0] + ';' + via[1] + ";rport=" + str(addr[1]) + ";received=" + addr[0] + "\r\n" + \
+        "From: " + call['From'] + "\r\n" + \
+        "To: " + call['To'] + "\r\n" + \
+        "Call-ID: " + call['Call-ID'] + "\r\n" + \
+        "CSeq: " + call['CSeq'] + "\r\n" + \
+        self.Content_Length
+
+        return packet
+
+    def incoming_bye(self, call, addr):
+        """Respond to an incoming BYE call"""
+
+        packet = self.gen_response(call, addr)
+        self.write_queue.append(packet)
+
+
 class Invite(Call):
     def __init__(self, user, sender_uri, remote_uri,
                  udp_client_ip, udp_client_port, udp_server_port, write_queue):
@@ -311,7 +347,8 @@ class Invite(Call):
             invite += authorization
 
         # add sdp
-        sdp_packet = self.gen_sdp()
+        #sdp_packet = self.gen_sdp()
+        sdp_packet = self.gen_sdp_asterisk()
 
         invite += 'Content-Length: ' + str(len(sdp_packet)) + '\r\n\r\n'
         invite += sdp_packet
@@ -378,24 +415,59 @@ class Invite(Call):
         self.sent_ack = True
 
 
+    def gen_bye_response(self, bye_request):
+        packet = "SIP/2.0 200 OK\r\n" + \
+        "Via: " + bye_request['Via'] + "\r\n" + \
+        "From: " + bye_request['From'] + "\r\n" + \
+        "To: " + bye_request['To'] + "\r\n" + \
+        "Call-ID: " + bye_request['Call-ID'] + "\r\n" + \
+        "CSeq: " + bye_request['CSeq'] + "\r\n" + \
+        self.Content_Length
+
+        return packet
+
+    def bye(self, bye_request):
+        """Respond to bye"""
+        packet = self.gen_bye_response(bye_request)
+
+        self.write_queue.append(packet)
+        self.destruction_callback(self)
+
+
     def parse_sdp(self, sdp):
         if not sdp:
             return None
 
         sdp_lines = sdp.split("\r\n")
         sdp_dict = {}
+
+        dst_audio_addr = None
+        dst_audio_port = None
+        dst_video_addr = None
+        dst_video_port = None
         # Huge hack to get some necessary IP and port stuff for testing
         for line in sdp_lines:
             if not line:
                 continue
             key, var = line.split("=", 1)
-            sdp_dict[key] = var
+            # sdp_dict[key] = var
 
-        network_type, address_type, dst_addr = sdp_dict['c'].split(" ")
-        media_description = sdp_dict['m'].split(" ")
-        dst_port = int(media_description[1])
+            var = var.split(" ")
+            if key == 'c':
+                dst_audio_addr = var[2]
+                dst_video_addr = var[2]
+            elif key == 'm':
+                if var[0] == "audio":
+                    dst_audio_port = int(var[1])
+                elif var[0] == "video":
+                    dst_video_port = int(var[1])
 
-        return [dst_addr, dst_port]
+        # network_type, address_type, dst_addr = sdp_dict['c'].split(" ")
+        # media_description = sdp_dict['m'].split(" ")
+        # dst_port = int(media_description[1])
+
+        # return [dst_addr, dst_port]
+        return (dst_audio_addr, dst_audio_port)
 
     def interpret(self, response):
         self.pull_server_tag(response)
@@ -413,5 +485,7 @@ class Invite(Call):
             self.reset()
             if self.pull_nonce(response):
                 self.invite()
+        elif response['Status-Line'][:3] == "BYE":
+            self.bye(response)
         
         print "\ncurrent state:", self.states[self.current_state], '\n\n'

@@ -5,6 +5,7 @@ import select
 import telnetlib
 import hashlib
 import uuid
+from time import sleep
 from collections import deque
 
 udp_sip_client_ip = "10.0.190.153"
@@ -88,7 +89,7 @@ Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE\r\n\
 Supported: timer, 100rel, path\r\n'
 
 sender_uri = "sip:phone@asterisk-1.asterisk.trickplay.com"
-remote_uri = "sip:rex@asterisk-1.asterisk.trickplay.com"
+remote_uri = "sip:rex_sip@asterisk-1.asterisk.trickplay.com"
 
 dial_600_uri = "sip:600@asterisk-1.asterisk.trickplay.com"
 
@@ -107,6 +108,10 @@ Min-SE: 120\r\n\
 Content-Type: application/sdp\r\n\
 Content-Disposition: session\r\n\
 Content-Length: 601\r\n'
+
+
+rtp_header = "80005585000001e07da3dac9"
+rtp_header = bytearray(rtp_header.decode("hex"))
 
 
 
@@ -211,6 +216,7 @@ def get_frames():
 import call
 
 active_calls = {}
+bye_triggered = False
 
 rtp_dst_addr = None
 rtp_dst_port = 0
@@ -218,7 +224,7 @@ rtp_dst_port = 0
 register_call = call.Register("phone", sender_uri, remote_uri, udp_sip_client_ip,
                      udp_sip_client_port, udp_sip_server_port, write_queue)
 
-invite_call = call.Invite("phone", sender_uri, dial_600_uri, udp_sip_client_ip,
+invite_call = call.Invite("phone", sender_uri, remote_uri, udp_sip_client_ip,
                      udp_sip_client_port, udp_sip_server_port, write_queue)
 
 active_calls[register_call.Call_ID] = register_call
@@ -231,10 +237,16 @@ def register_callback():
 def invite_callback(media_dst):
     global rtp_dst_addr, rtp_dst_port
     rtp_dst_addr, rtp_dst_port = media_dst
+    udp_rtp_sock.connect(media_dst)
     print '\nmedia_dst: ', media_dst, '\n'
+
+def destruction_callback(call):
+    global bye_triggered
+    bye_triggered = True
 
 register_call.callback = register_callback
 invite_call.callback = invite_callback
+invite_call.destruction_callback = destruction_callback
 
 register_call.register()
 
@@ -244,6 +256,9 @@ def new_call(data, addr):
         options = call.Options("phone", sender_uri, remote_uri, udp_sip_client_ip,
                         udp_sip_client_port, udp_sip_server_port, write_queue)
         options.incoming_options(data, addr)
+    elif data['Status-Line'][:3] == "BYE":
+        bye = call.Bye("phone", sender_uri, remote_uri, udp_sip_client_ip,
+                    udp_sip_client_port, udp_sip_server_port, write_queue)
 
 
 def select_loop():
@@ -255,7 +270,7 @@ def select_loop():
     global nonce
 
     while True:
-        readable, writeable, in_error = select.select(sockets, sockets, [], 5)
+        readable, writeable, in_error = select.select(sockets, sockets, sockets, 5)
 
         # this is how we read
         if readable.count(udp_sip_sock):
@@ -272,7 +287,7 @@ def select_loop():
                 else:
                     new_call(response, addr)
 
-        if readable.count(udp_rtp_sock):
+        if readable.count(udp_rtp_sock) and rtp_dst_addr:
             data, addr = udp_rtp_sock.recvfrom(1024)
 
             print "\nRTP received from", addr, ":\n", data
@@ -287,14 +302,29 @@ def select_loop():
             udp_sip_sock.sendto(packet, (host, udp_sip_server_port))
 
         if writeable.count(udp_rtp_sock) and rtp_dst_addr and rtp_dst_port:
-            udp_rtp_sock.sendto("REXFENLEY", (rtp_dst_addr, rtp_dst_port))
+            
+            #udp_rtp_sock.sendto("REXFENLEY", (rtp_dst_addr, rtp_dst_port))
+            udp_rtp_sock.send(str(rtp_header) + "REXFENLEY")
+            sleep(.5)
 
             # print "\n\nREXFENLEY\n\n"
 
         # this is why im hot
         if in_error.count(udp_sip_sock):
-            print "error"
-            print udp_sip_sock.error
+            print "error: udp_sip_sock", udp_sip_sock.error
+            exit()
+
+        if in_error.count(udp_rtp_sock):
+            print "error: udp_rtp_sock", udp_rtp_sock.error
+            exit()
+
+        if bye_triggered:
+            print "\nGood Bye\n"
+            udp_rtp_sock.close()
+            udp_sip_sock.close()
+            log.close()
+            del sockets[1]
+            exit()
 
 
 select_loop()
