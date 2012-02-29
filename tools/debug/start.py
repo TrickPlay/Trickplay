@@ -8,13 +8,14 @@ from wizard import Wizard
 from main import MainWindow
 
 from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import QCoreApplication, QSettings, QT_VERSION_STR
+from PyQt4.QtCore import QCoreApplication, QSettings, QT_VERSION_STR, QProcessEnvironment
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 def main(argv):
     
     path = None
+    apath = None
     print("QT VERSION %s" % QT_VERSION_STR )
     
     try:
@@ -31,7 +32,13 @@ def main(argv):
         QCoreApplication.setApplicationName('Trickplay Debugger');
         QCoreApplication.setApplicationVersion('0.0.1');
             
-        main = MainWindow(app)
+        s = QProcessEnvironment.systemEnvironment().toStringList()
+        for item in s:
+            k , v = str( item ).split( "=" , 1 )
+            if k == 'OLDPWD':
+                apath = v
+
+        main = MainWindow(app, apath)
         main.show()
         wizard = Wizard()
         
