@@ -716,11 +716,7 @@ function Make_Bar(loc,wu_data,index, master)
         current_bar:show()
         current_bar.warp_to_state(anim_state.state)
         time_of_day = current_bar.local_time_of_day
-        if conditions[current_bar.curr_condition] then
-            conditions[current_bar.curr_condition]()
-        else
-            conditions["Unknown"]()
-        end
+        conditions[current_bar.curr_condition]()
     end
     
     
