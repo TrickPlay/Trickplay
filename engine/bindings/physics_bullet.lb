@@ -11,9 +11,38 @@ extern int new_Matrix( lua_State * L );
 
 static const char * MATRIX_TYPE = "Matrix";
 static const char * PBSHAPE_TYPE = "PBShape";
+static const char * BODY3D_TYPE = "PBBody3d";
+
+//.............................................................................
+
+static gpointer tp_lua_get_typed_udata( lua_State * L , int index , const char * type )
+{
+    g_assert( L );
+    g_assert( type );
+    
+    if ( index )
+    {
+        index = abs_index( L , index );
+    
+        if ( lb_check_udata_type( L , index , type , false ) )
+        {
+            return UserData::get_client_check( L , index );
+        }
+    }
+    return 0;
+}
+
+#define tp_lua_get( T , L , index , type ) (static_cast<T*>(tp_lua_get_typed_udata(L,index,type)))
+
+//.............................................................................
 
 static btVector3 btVector3FromTable( lua_State * L , int t )
 {
+    if ( 0 == t )
+    {
+        return btVector3();
+    }
+    
     t = abs_index( L , t );
     
     lua_rawgeti( L , t , 1 );
@@ -51,39 +80,37 @@ static void TableFrombtVector3( lua_State * L , int t , const btVector3 & v )
 
 static bool btTransformToMatrix( lua_State * L , const btTransform & transform , int matrix )
 {
-    matrix = abs_index( L , matrix );
-    
-    if ( lb_check_udata_type( L , matrix , MATRIX_TYPE, false ) )
+    if ( CoglMatrix * cm = tp_lua_get( CoglMatrix , L , matrix , MATRIX_TYPE ) )
     {
-        if ( CoglMatrix * cm = ( CoglMatrix * ) UserData::get_client_check( L , matrix ) )
-        {
-            float m[16];
-            m[15] = 1;
-            
-            transform.getOpenGLMatrix( m );
-            
-            cogl_matrix_init_from_array( cm , m );
-            
-            return true;                 
-        }
+        float m[16];
+        m[15] = 1;
+        
+        transform.getOpenGLMatrix( m );
+        
+        cogl_matrix_init_from_array( cm , m );
+        
+        return true;                 
     }
     return false;
 }
 
 static bool btTransformFromMatrix( lua_State * L , int matrix , btTransform & transform )
 {
-    matrix = abs_index( L , matrix );
-    
-    if ( lb_check_udata_type( L , matrix , MATRIX_TYPE , false ) )
+    if ( CoglMatrix * cm = tp_lua_get( CoglMatrix , L , matrix , MATRIX_TYPE ) )
     {
-        if ( CoglMatrix * cm = ( CoglMatrix * ) UserData::get_client_check( L , matrix ) )
-        {
-            transform.setFromOpenGLMatrix( & cm->xx );
-            
-            return true;
-        }
+        transform.setFromOpenGLMatrix( & cm->xx );
     }
     return false;
+}
+
+static btRigidBody * get_rigid_body( lua_State * L , int body )
+{
+    if ( btCollisionObject * co = tp_lua_get( btCollisionObject , L , body , BODY3D_TYPE ) )
+    {
+        return btRigidBody::upcast( co );
+    }
+    
+    return 0;
 }
 
 ]]
@@ -223,15 +250,14 @@ interface PBCompoundShape [[ btCollisionShape * ]] PBShape
                     
                     lua_rawgeti( L , t , 2 );
                     
-                    if ( ! lb_check_udata_type( L , lua_gettop( L ) , PBSHAPE_TYPE , false ) )
+                    btCollisionShape * shape = tp_lua_get( btCollisionShape , L , -1 , PBSHAPE_TYPE );
+                    
+                    if ( ! shape )
                     {
                         return luaL_error( L , "Invalid shape for compound shape child" );
                     }
                     
-                    if ( btCollisionShape * shape = ( btCollisionShape * ) UserData::get_client_check( L , lua_gettop( L ) ) )
-                    {
-                        me->addChildShape( transform , shape );
-                    }
+                    me->addChildShape( transform , shape );
                     
                     lua_pop( L , 1 );
                 }
@@ -250,15 +276,14 @@ interface PBCompoundShape [[ btCollisionShape * ]] PBShape
                 return luaL_error( L , "Invalid matrix" );
             }
              
-            if ( ! lb_check_udata_type( L , shape , PBSHAPE_TYPE , false ) )
+            btCollisionShape * s = tp_lua_get( btCollisionShape , L , shape , PBSHAPE_TYPE );
+            
+            if ( ! s )
             {
                 return luaL_error( L , "Invalid shape" );
             }
             
-            if ( btCollisionShape * s = ( btCollisionShape * ) UserData::get_client_check( L , shape ) )
-            {
-                me->addChildShape( t , s );
-            }
+            me->addChildShape( t , s );
         ]];
         
     remove( any shape_or_index )
@@ -271,15 +296,14 @@ interface PBCompoundShape [[ btCollisionShape * ]] PBShape
             } 
             else
             {
-                if ( ! lb_check_udata_type( L , shape_or_index , PBSHAPE_TYPE , false ) )
+                btCollisionShape * s = tp_lua_get( btCollisionShape , L , shape_or_index , PBSHAPE_TYPE );
+                
+                if ( ! s )
                 {
-                    return luaL_error( L , "Invalid shape" );
+                    return luaL_error( L , "Invalid shape or index" );
                 }
                 
-                if ( btCollisionShape * s = ( btCollisionShape * ) UserData::get_client_check( L , shape_or_index ) )
-                {
-                    me->removeChildShape( s );
-                }
+                me->removeChildShape( s );
             }
         ]];                    
         
@@ -309,6 +333,61 @@ interface PBCompoundShape [[ btCollisionShape * ]] PBShape
             me->updateChildTransform( child_index , t );             
         ]];        
 }
+
+
+interface PBPointToPointConstraint [[ btPoint2PointConstraint * ]]
+{
+    PBPointToPointConstraint( any world , PBBody3d bodyA , table pivotA , PBBody3d bodyB = 0 , table pivotB = 0 )
+        [[
+            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+
+            btRigidBody * ba = get_rigid_body( L , bodyA );
+                        
+            if ( 0 == ba )
+            {
+                return luaL_error( L , "Invalid first body" ); 
+            }                        
+            
+            btVector3 pa( btVector3FromTable( L , pivotA ) );
+            
+            btPoint2PointConstraint * c = 0;
+            
+            if ( 0 == bodyB )
+            {
+                c = new btPoint2PointConstraint( * ba , pa );    
+            }
+            else
+            {
+                btRigidBody * bb = get_rigid_body( L , bodyB );
+                
+                if ( 0 == bb )
+                {
+                    return luaL_error( L , "Invalid second body" );
+                }
+                
+                btVector3 pb( btVector3FromTable( L , pivotB ) );
+                
+                c = new btPoint2PointConstraint( * ba , * bb , pa , pb );
+            }
+            
+            g_assert( c );
+            
+            self = lb_construct( btPoint2PointConstraint , c );
+            
+            // TODO: need to support the disableCollisionsBetweenLinkedBodies 
+            // flag. Perhaps by not adding the constraint when it is created,
+            // but having an explicit add_constraint function on the world 
+            // that includes that flag.
+            
+            w->get_world()->addConstraint( c );
+        ]];
+
+    ~PBPointToPointConstraint()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+}
+
 
 interface PBBody3d [[ btCollisionObject * ]]
 {
@@ -609,14 +688,15 @@ global pb [[ Bullet::World * ]]
         
     table get_contacts( double max_distance = 0 , PBBody3d body1 = 0 , PBBody3d body2 = 0 )
         [[
-            btCollisionObject * co1 = body1 ? ( btCollisionObject * ) UserData::get_client_check( L , body1 ) : 0;
-            btCollisionObject * co2 = body2 ? ( btCollisionObject * ) UserData::get_client_check( L , body2 ) : 0;
+            btCollisionObject * co1 = tp_lua_get( btCollisionObject , L , body1 , BODY3D_TYPE );
+            btCollisionObject * co2 = tp_lua_get( btCollisionObject , L , body2 , BODY3D_TYPE );
             
             self->get_contacts( max_distance , co1 , co2 );
         ]];          
         
     PBBody Body( UIElement element , table properties )
         [[
+#if 0
             lb_check_udata_type( L , element , "actor" );
 
             int n = self->create_body( element , properties , PBBODY_METATABLE );
@@ -629,6 +709,9 @@ global pb [[ Bullet::World * ]]
             {
                 ClutterUtil::set_props_from_table( L , properties );
             }
+#else
+            lua_pushnil( L );
+#endif
         ]];
         
     PBBody3d Body3d( table properties )
@@ -783,6 +866,27 @@ global pb [[ Bullet::World * ]]
                 lua_pushvalue( L , children );
                 lua_call( L , 2 , 0 );
             }
+        ]];
+        
+    PBPointToPointConstraint PointToPointConstraint( PBBody3d bodyA , table pivotA , PBBody3d bodyB = 0 , table pivotB = 0 )
+        [[
+            lua_pushcfunction( L , new_PBPointToPointConstraint );
+            lua_pushlightuserdata( L , self );
+            lua_pushvalue( L , bodyA );
+            lua_pushvalue( L , pivotA );
+            
+            if ( 0 == bodyB || 0 == pivotB )
+            {
+                lua_pushnil( L );
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_pushvalue( L , bodyB );
+                lua_pushvalue( L , pivotB );
+            }
+            
+            lua_call( L , 5 , 1 );
         ]];
 
     callback on_step( double seconds );
