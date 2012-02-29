@@ -1,6 +1,8 @@
 PLAYER = {}
 
 --------------------------------------------------------------------------------
+-- keeps track of which colors are currently in use
+
 local available_colors = {}
 
 for _,color in ipairs(COLORS) do
@@ -35,16 +37,17 @@ end
 
 
 --------------------------------------------------------------------------------
-
-
+-- creates a new player if one is available
 function PLAYER:new_player()
     
     local color = assign_color()
     
     if color == false then return false end
     
+    --player object
     local player = {}
     
+    --the UI pieces of the player
     player.ball  = PLAYER_BALLS[color]
     player.ring  = PLAYER_RINGS[color]
     player.score = PLAYER_SCORE[color]
@@ -84,7 +87,7 @@ function PLAYER:new_player()
                 player.ball.has_player = false
                 
                 player.ball:unparent()
-                --TODO turn off player.ball.on_step
+                
                 unassign_color(color)
                 
             end
@@ -98,7 +101,8 @@ function PLAYER:new_player()
     return player
 end
 
-
+--------------------------------------------------------------------------------
+-- returns the balls to their spawn locations when the countdown starts
 STATE:add_state_change_function(nil,"COUNTDOWN",
     
     function()
@@ -129,6 +133,8 @@ STATE:add_state_change_function(nil,"COUNTDOWN",
     end
 )
 
+--------------------------------------------------------------------------------
+-- launches the balls when the game starts
 STATE:add_state_change_function(nil,"GAME",
     
     function()

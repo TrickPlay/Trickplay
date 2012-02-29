@@ -1,3 +1,5 @@
+--clone sources for the collectable balls
+
 local srcs = {}
 for i = 1 , # COLORS do
     local color = COLORS[i]
@@ -7,9 +9,9 @@ end
 
 srcs[ NEUTRAL ] = Image{ src = "assets/spheres/sphere-neutral.png" }
 
-
 clone_sources_layer:add( srcs[ NEUTRAL ] )
 
+-------------------------------------------------------------------------------
 
 local neutral_spheres = 0 -- how many are left
 
@@ -24,15 +26,16 @@ local physics_props =
     angular_damping = SPHERE_ANGULAR_DAMPING,
 }
 
+-------------------------------------------------------------------------------
+-- makes a collectable sphere
+
 function make_sphere()
     
     neutral_spheres = neutral_spheres + 1
     
-    local sphere = Clone{ source = srcs[ NEUTRAL ] }
+    local sphere = physics:Body( Clone{ source = srcs[ NEUTRAL ] }, physics_props )
     
-    local e = sphere.extra
-    
-    function e:switch( color )
+    function sphere:switch( color )
         
         self.source = srcs[ color ]
         
@@ -44,9 +47,6 @@ function make_sphere()
             
             if neutral_spheres == 0 then
                 
-                --reset_balls()
-                
-                --end_level()
                 STATE:change_state_to("ROUND_OVER")
                 
             end
@@ -55,13 +55,13 @@ function make_sphere()
         
     end
     
-    sphere = physics:Body( sphere , physics_props )
-    
-    SCORE_ITEM_HANDLES[ sphere.handle ] = sphere
+    COLLECTABLE_SPHERES_HANDLES[ sphere.handle ] = sphere
     
     return sphere
 end
 
+-------------------------------------------------------------------------------
+-- Add balls to the screen when the round begins
 STATE:add_state_change_function(nil,"GAME",
     
     function()
@@ -88,11 +88,14 @@ STATE:add_state_change_function(nil,"GAME",
     end
 )
 
+-------------------------------------------------------------------------------
+-- Remove balls (that are no longer neutral) from the screen when the round is over
+
 STATE:add_state_change_function(nil,"ROUND_OVER",
     
     function()
         
-        for k , sphere in pairs( SCORE_ITEM_HANDLES ) do
+        for k , sphere in pairs( COLLECTABLE_SPHERES_HANDLES ) do
             
             add_step_func(
                 
@@ -104,7 +107,7 @@ STATE:add_state_change_function(nil,"ROUND_OVER",
                     
                     sphere:unparent()
                     
-                    SCORE_ITEM_HANDLES[sphere] = nil
+                    COLLECTABLE_SPHERES_HANDLES[sphere] = nil
                     
                 end
                 

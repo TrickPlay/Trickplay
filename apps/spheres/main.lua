@@ -106,11 +106,8 @@ clone_sources_layer:hide()
 -- STATE                                                                      --
 --------------------------------------------------------------------------------
 
-GAME_IS_LIVE = false
 
-
-
-SCORE_ITEM_HANDLES = {}
+COLLECTABLE_SPHERES_HANDLES = {}
 
 PLAYER_HANDLES     = {}
 

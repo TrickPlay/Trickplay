@@ -15,16 +15,9 @@ for i = 1 , # COLORS do
     end
 end
 
+-------------------------------------------------------------------------------
+
 local player_balls = {}
-
-
-
-
-
-
-
-
-
 
 local player_ball_physics_props =
     {
@@ -35,7 +28,8 @@ local player_ball_physics_props =
         linear_damping  = BULB_LINEAR_DAMPING,
         angular_damping = BULB_ANGULAR_DAMPING
     }
-
+    
+-------------------------------------------------------------------------------
 
 local function make_player_ball( color )
     
@@ -82,7 +76,7 @@ local function make_player_ball( color )
         
         -- If we collied with a sphere and it has the same color as we do
         -- we disable the contact, so the sphere will pass right through us
-        local sphere = SCORE_ITEM_HANDLES[ contact.other_body[ self.handle ] ]
+        local sphere = COLLECTABLE_SPHERES_HANDLES[ contact.other_body[ self.handle ] ]
         
         if sphere and sphere.extra.color == color then
             
@@ -96,7 +90,7 @@ local function make_player_ball( color )
         
         -- If we collide with a sphere that has no color, it becomes
         -- ours
-        local sphere = SCORE_ITEM_HANDLES[ contact.other_body[ self.handle ] ]
+        local sphere = COLLECTABLE_SPHERES_HANDLES[ contact.other_body[ self.handle ] ]
         
         if sphere then
             
@@ -261,25 +255,6 @@ end
 for _,color in ipairs(COLORS) do
     
     player_balls[color] = make_player_ball( color )
-    
-end
-
-function shrink()
-    
-    local b = player_balls[RED]
-    
-    b:remove_fixture(b.fixtures[1].handle)
-    
-    b:add_fixture{
-        shape           = physics:Circle( ( srcs[ COLORS[1] ].bulb.w *.75 / 2 ) - BULB_PAD ),
-        friction        = BULB_FRICTION,
-        density         = BULB_DENSITY,
-        bounce          = BULB_BOUNCE,
-        linear_damping  = BULB_LINEAR_DAMPING,
-        angular_damping = BULB_ANGULAR_DAMPING
-    }
-    
-    b.scale = .75
     
 end
 

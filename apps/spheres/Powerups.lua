@@ -28,7 +28,7 @@ Timer{
     interval = 15000,
     on_timer = function()
         
-        --only has 2 power ups on screen at a time
+        --only 2 power ups on screen at a time
         --doesn't add power ups if the games isn't happening
         if num_power_ups > 1 or STATE:current_state() ~= "GAME" then return end
         
