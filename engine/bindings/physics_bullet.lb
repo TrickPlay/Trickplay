@@ -2,11 +2,20 @@
 module physics_bullet;
 
 [[
+#include "BulletCollision/CollisionShapes/btTriangleShape.h"
+
 #include "physics_bullet.h"
 #include "clutter_util.h"
 
+extern int new_Matrix( lua_State * L );
+
+static const char * MATRIX_TYPE = "Matrix";
+static const char * PBSHAPE_TYPE = "PBShape";
+
 static btVector3 btVector3FromTable( lua_State * L , int t )
 {
+    t = abs_index( L , t );
+    
     lua_rawgeti( L , t , 1 );
     lua_rawgeti( L , t , 2 );
     lua_rawgeti( L , t , 3 );
@@ -40,6 +49,43 @@ static void TableFrombtVector3( lua_State * L , int t , const btVector3 & v )
     lua_rawseti( L , t , 3 );
 }
 
+static bool btTransformToMatrix( lua_State * L , const btTransform & transform , int matrix )
+{
+    matrix = abs_index( L , matrix );
+    
+    if ( lb_check_udata_type( L , matrix , MATRIX_TYPE, false ) )
+    {
+        if ( CoglMatrix * cm = ( CoglMatrix * ) UserData::get_client_check( L , matrix ) )
+        {
+            float m[16];
+            m[15] = 1;
+            
+            transform.getOpenGLMatrix( m );
+            
+            cogl_matrix_init_from_array( cm , m );
+            
+            return true;                 
+        }
+    }
+    return false;
+}
+
+static bool btTransformFromMatrix( lua_State * L , int matrix , btTransform & transform )
+{
+    matrix = abs_index( L , matrix );
+    
+    if ( lb_check_udata_type( L , matrix , MATRIX_TYPE , false ) )
+    {
+        if ( CoglMatrix * cm = ( CoglMatrix * ) UserData::get_client_check( L , matrix ) )
+        {
+            transform.setFromOpenGLMatrix( & cm->xx );
+            
+            return true;
+        }
+    }
+    return false;
+}
+
 ]]
 
 interface PBBody [[ void * ]]
@@ -57,6 +103,11 @@ interface PBShape [[ btCollisionShape * ]]
         [[
             // Not deleted because they are owned by the world
         ]];
+    
+    readonly string name
+        [[
+            name = self->getName();
+        ]];        
         
     table local_scaling
         [[
@@ -72,6 +123,190 @@ interface PBShape [[ btCollisionShape * ]]
         ]]
         [[
             self->setMargin( margin );
+        ]];        
+}
+
+interface PBCompoundShape [[ btCollisionShape * ]] PBShape
+{
+    PBCompoundShape()
+        [[
+            self = lb_construct( btCollisionShape , lua_touserdata( L , -2 ) );
+        ]];
+        
+    ~PBCompoundShape()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+        
+    readonly int count
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+            
+            count = me->getNumChildShapes();
+        ]];        
+
+    # Expects a table of tables with two elements, a matrix and a shape
+    
+    table children
+        [[
+            float m[16];
+            m[15] = 1;
+            
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+            
+            int count = me->getNumChildShapes();
+            
+            lua_newtable( L );
+            
+            int i = 1;
+            
+            for ( btCompoundShapeChild * s = me->getChildList(); count; s++ , count-- , i++ )
+            {
+                lua_newtable( L );
+                
+                new_Matrix( L );
+                
+                (void) btTransformToMatrix( L , s->m_transform , -1 );
+                
+                lua_rawseti( L , -2 , 1 );
+
+                lua_pushlightuserdata( L , s->m_childShape );
+                                
+                if ( s->m_childShapeType == COMPOUND_SHAPE_PROXYTYPE )
+                {
+                    new_PBCompoundShape( L );
+                }    
+                else
+                {
+                    new_PBShape( L );
+                }
+                lua_remove( L , -2 );
+                                
+                lua_rawseti( L , -2 , 2 );
+                
+                lua_rawseti( L , -2 , i );                                
+            }
+        ]]
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+            
+            // Clear all existing child shapes
+            
+            while ( int count = me->getNumChildShapes() )
+            {
+                me->removeChildShapeByIndex( count - 1 );
+            }
+
+            lua_pushnil( L );
+            
+            while( lua_next( L , 2 ) )
+            {
+                if ( lua_istable( L , -1 ) )
+                {
+                    int t = lua_gettop( L );
+                    
+                    // Get the matrix, from index 1 of this table and
+                    // convert it to a transform.
+                    
+                    lua_rawgeti( L , t , 1 );
+                    
+                    btTransform transform;
+                    
+                    if ( ! btTransformFromMatrix( L , -1 , transform ) )
+                    {
+                        return luaL_error( L , "Transform for shape is not a matrix." );
+                    }
+                    
+                    lua_pop( L , 1 );
+
+                    // Get the shape from index 2
+                    
+                    lua_rawgeti( L , t , 2 );
+                    
+                    if ( ! lb_check_udata_type( L , lua_gettop( L ) , PBSHAPE_TYPE , false ) )
+                    {
+                        return luaL_error( L , "Invalid shape for compound shape child" );
+                    }
+                    
+                    if ( btCollisionShape * shape = ( btCollisionShape * ) UserData::get_client_check( L , lua_gettop( L ) ) )
+                    {
+                        me->addChildShape( transform , shape );
+                    }
+                    
+                    lua_pop( L , 1 );
+                }
+                lua_pop( L , 1 );
+            }            
+        ]];        
+        
+    add( Matrix transform , PBShape shape )
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+
+            btTransform t;
+            
+            if ( ! btTransformFromMatrix( L , transform , t ) )
+            {
+                return luaL_error( L , "Invalid matrix" );
+            }
+             
+            if ( ! lb_check_udata_type( L , shape , PBSHAPE_TYPE , false ) )
+            {
+                return luaL_error( L , "Invalid shape" );
+            }
+            
+            if ( btCollisionShape * s = ( btCollisionShape * ) UserData::get_client_check( L , shape ) )
+            {
+                me->addChildShape( t , s );
+            }
+        ]];
+        
+    remove( any shape_or_index )
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+            
+            if ( lua_isnumber( L , shape_or_index ) )
+            {
+                me->removeChildShapeByIndex( lua_tonumber( L , shape_or_index ) );
+            } 
+            else
+            {
+                if ( ! lb_check_udata_type( L , shape_or_index , PBSHAPE_TYPE , false ) )
+                {
+                    return luaL_error( L , "Invalid shape" );
+                }
+                
+                if ( btCollisionShape * s = ( btCollisionShape * ) UserData::get_client_check( L , shape_or_index ) )
+                {
+                    me->removeChildShape( s );
+                }
+            }
+        ]];                    
+        
+    clear()
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+            
+            // Clear all existing child shapes
+            
+            while ( int count = me->getNumChildShapes() )
+            {
+                me->removeChildShapeByIndex( count - 1 );
+            }
+        ]];        
+        
+    update_child_transform( int child_index , Matrix transform )
+        [[
+            btCompoundShape * me = static_cast<btCompoundShape*>(self);
+
+            btTransform t;
+            
+            if ( ! btTransformFromMatrix( L , transform , t ) )
+            {
+                luaL_error( L , "Invalid matrix" ); 
+            }
+            
+            me->updateChildTransform( child_index , t );             
         ]];        
 }
 
@@ -303,40 +538,18 @@ interface PBBody3d [[ btCollisionObject * ]]
         
     Matrix get_transform( Matrix matrix )
         [[
-            if ( UserData * ud = UserData::get_check( L , matrix ) )
-            {
-                // FIXME - NOT CHECKING THE TYPE OF THE UDATA. 
-                // BAD-MEMORY CORRUPTION VERY EASILY
-                // GOOD-PERFORMANCE
-                
-                CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
-        
-                float m[16];
-                m[15]=1;
-        
-                self->getWorldTransform().getOpenGLMatrix( m );
-        
-                cogl_matrix_init_from_array( matrix , m );
-            }
+            btTransformToMatrix( L , self->getWorldTransform() , matrix );
             
             lua_pushvalue( L , matrix );
         ]];
         
     Matrix set_transform( Matrix matrix )
         [[
-            if ( UserData * ud = UserData::get_check( L , matrix ) )
+            btTransform t;
+            
+            if ( btTransformFromMatrix( L , matrix , t ) )
             {
-                // FIXME - NOT CHECKING THE TYPE OF THE UDATA. 
-                // BAD-MEMORY CORRUPTION VERY EASILY
-                // GOOD-PERFORMANCE
-                
-                CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
-        
-                btTransform transform;
-                
-                transform.setFromOpenGLMatrix( & matrix->xx );
-                
-                self->setWorldTransform( transform );
+                self->setWorldTransform( t );
             }
             
             lua_pushvalue( L , matrix );
@@ -346,21 +559,7 @@ interface PBBody3d [[ btCollisionObject * ]]
         [[
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
-                if ( UserData * ud = UserData::get_check( L , matrix ) )
-                {
-                    // FIXME - NOT CHECKING THE TYPE OF THE UDATA. 
-                    // BAD-MEMORY CORRUPTION VERY EASILY
-                    // GOOD-PERFORMANCE
-                    
-                    CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
-            
-                    float m[16];
-                    m[15]=1;
-            
-                    body->getCenterOfMassTransform().getOpenGLMatrix( m );
-
-                    cogl_matrix_init_from_array( matrix , m );
-                }
+                btTransformToMatrix( L , body->getCenterOfMassTransform() , matrix );
             }
                         
             lua_pushvalue( L , matrix );
@@ -371,19 +570,11 @@ interface PBBody3d [[ btCollisionObject * ]]
         [[
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
-                if ( UserData * ud = UserData::get_check( L , matrix ) )
+                btTransform t;
+                
+                if ( btTransformFromMatrix( L , matrix , t ) )
                 {
-                    // FIXME - NOT CHECKING THE TYPE OF THE UDATA. 
-                    // BAD-MEMORY CORRUPTION VERY EASILY
-                    // GOOD-PERFORMANCE
-                    
-                    CoglMatrix * matrix = ( CoglMatrix * ) ud->get_client();
-            
-                    btTransform transform;
-                    
-                    transform.setFromOpenGLMatrix( & matrix->xx );
-                    
-                    body->setCenterOfMassTransform( transform );
+                    body->setCenterOfMassTransform( t );
                 }
             }
                         
@@ -460,18 +651,139 @@ global pb [[ Bullet::World * ]]
 
     PBShape BoxShape( double half_width , double half_height , double half_depth )
         [[
-            self->create_shape( new btBoxShape( btVector3( half_width , half_height , half_depth ) ) );              
+            self->create_shape( new btBoxShape( btVector3( half_width , half_height , half_depth ) ) , new_PBShape );              
         ]];                 
         
     PBShape StaticPlaneShape( double normal_x , double normal_y , double normal_z , double plane_constant )
         [[
-            self->create_shape( new btStaticPlaneShape( btVector3( normal_x , normal_y , normal_z ) , plane_constant ) );
+            self->create_shape( new btStaticPlaneShape( btVector3( normal_x , normal_y , normal_z ) , plane_constant ) , new_PBShape );
         ]];
         
     PBShape SphereShape( double radius )
         [[
-            self->create_shape( new btSphereShape( radius ) );
+            self->create_shape( new btSphereShape( radius ) , new_PBShape );
         ]];
         
+    PBShape CapsuleShapeX( double radius , double height )
+        [[
+            self->create_shape( new btCapsuleShapeX( radius , height ) , new_PBShape );
+        ]];
+                
+    PBShape CapsuleShapeY( double radius , double height )
+        [[
+            self->create_shape( new btCapsuleShape( radius , height ) , new_PBShape );
+        ]];        
+        
+    PBShape CapsuleShapeZ( double radius , double height )
+        [[
+            self->create_shape( new btCapsuleShapeZ( radius , height ) , new_PBShape );
+        ]];
+
+    PBShape ConeShapeX( double radius , double height )
+        [[
+            self->create_shape( new btConeShapeX( radius , height ) , new_PBShape );
+        ]];
+                
+    PBShape ConeShapeY( double radius , double height )
+        [[
+            self->create_shape( new btConeShape( radius , height ) , new_PBShape );
+        ]];        
+        
+    PBShape ConeShapeZ( double radius , double height )
+        [[
+            self->create_shape( new btConeShapeZ( radius , height ) , new_PBShape );
+        ]];
+
+    PBShape CylinderShapeX( double half_width , double half_height , double half_depth )
+        [[
+            self->create_shape( new btCylinderShapeX( btVector3( half_width , half_height , half_depth ) ) , new_PBShape );
+        ]];
+                
+    PBShape CylinderShapeY( double half_width , double half_height , double half_depth )
+        [[
+            self->create_shape( new btCylinderShape( btVector3( half_width , half_height , half_depth ) ) , new_PBShape );
+        ]];
+
+    PBShape CylinderShapeZ( double half_width , double half_height , double half_depth )
+        [[
+            self->create_shape( new btCylinderShapeZ( btVector3( half_width , half_height , half_depth ) ) , new_PBShape );
+        ]];
+        
+    PBShape TriangleShape( table point0 , table point1 , table point2 )
+        [[
+            btVector3 p0( btVector3FromTable( L , point0 ) );
+            btVector3 p1( btVector3FromTable( L , point1 ) );
+            btVector3 p2( btVector3FromTable( L , point2 ) );
+            
+            self->create_shape( new btTriangleShape( p0 , p1 , p2 ) , new_PBShape );
+        ]];
+        
+    # Expects a table of tables with 3 elements each, for x,y and z
+    
+    PBShape ConvexHullShape( table points )
+        [[
+            btConvexHullShape * shape = new btConvexHullShape();
+            
+            lua_pushnil( L );
+            
+            while( lua_next( L , points ) )
+            {
+                if ( lua_istable( L , -1 ) )
+                {
+                    shape->addPoint( btVector3FromTable( L , -1 ) );
+                }
+                
+                lua_pop( L , 1 );
+            }
+            
+            self->create_shape( shape , new_PBShape );
+        ]];
+    
+    # Expects a table of tables with 4 elements each, for x,y,z and radius.
+        
+    PBShape MultiSphereShape( table positions_and_radi )
+        [[
+            btAlignedObjectArray<btVector3> positions;
+            btAlignedObjectArray<btScalar>  radi;
+            
+            lua_pushnil( L );
+            
+            while( lua_next( L , positions_and_radi ) )
+            {
+                if ( lua_istable( L , -1 ) )
+                {
+                    positions.push_back( btVector3FromTable( L , -1 ) );
+                    lua_rawgeti( L , -1 , 4 );
+                    radi.push_back( lua_tonumber( L , -1 ) );
+                    lua_pop( L , 1 );
+                }
+                lua_pop( L , 1 );
+            }
+            
+            if ( 0 == positions.size() )
+            {
+                lua_pushnil( L );
+            }
+            else
+            {
+                self->create_shape( new btMultiSphereShape( & positions[0] , & radi[0] , positions.size() ) , new_PBShape );
+            } 
+        ]];
+
+    # Expects a table of tables with 2 elements each, a matrix and a shape
+    
+    PBShape CompoundShape( table children = 0 )
+        [[
+            self->create_shape( new btCompoundShape() , new_PBCompoundShape );
+            
+            if ( children )
+            {
+                lua_pushcfunction( L , set_PBCompoundShape_children );
+                lua_pushvalue( L , -2 );
+                lua_pushvalue( L , children );
+                lua_call( L , 2 , 0 );
+            }
+        ]];
+
     callback on_step( double seconds );
 }

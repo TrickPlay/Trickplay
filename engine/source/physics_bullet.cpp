@@ -8,7 +8,6 @@
 #include "clutter_util.h"
 #include "lb.h"
 
-extern int new_PBShape( lua_State * L );
 extern int new_PBBody3d( lua_State * L );
 extern int invoke_pb_on_step( lua_State * L , Bullet::World * self , int nargs , int nresults );
 
@@ -599,9 +598,10 @@ int World::create_sensor( int properties )
 
 //-----------------------------------------------------------------------------
 
-int World::create_shape( btCollisionShape * shape )
+int World::create_shape( btCollisionShape * shape , lua_CFunction constructor )
 {
 	g_assert( shape );
+	g_assert( constructor );
 
 	lua_State * L = lsp->get_lua_state();
 
@@ -613,7 +613,7 @@ int World::create_shape( btCollisionShape * shape )
 
 	lua_pushlightuserdata( L , shape );
 
-	new_PBShape( L );
+	constructor( L );
 
 	lua_remove( L , -2 );
 
