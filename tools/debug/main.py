@@ -458,11 +458,13 @@ class MainWindow(QMainWindow):
         if getattr(self._deviceManager, "debug_mode") == True :
             # delete break points marker
     	    for n in self.editorManager.editors:
-    	        #print(self.editorManager.editors[n][1])
-    	        for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
-    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
-                    #print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
-    	        self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
+    	        try :
+    	            for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
+    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
+                        #print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
+    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
+    	        except :
+    	            print("[VDBG] YUGI 1 : ", self.editorManager.editors[n][1])
 
             # delete current line marker
     		self.current_debug_file = self.path+'/'+self._deviceManager.file_name
@@ -604,7 +606,7 @@ class MainWindow(QMainWindow):
         
         self.fileSystem.start(self.editorManager, path)
         self.setWindowTitle(QtGui.QApplication.translate("MainWindow", 
-							"Trickplay Visual Debugger  [ "+str(os.path.basename(str(path))+" ]"), 
+							"Trickplay IDE [ "+str(os.path.basename(str(path))+" ]"), 
 							None, QtGui.QApplication.UnicodeUTF8))
         self.deviceManager.setPath(path)
         
@@ -634,7 +636,7 @@ class MainWindow(QMainWindow):
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
-			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay IDE [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
 			if self.editorManager.tab != None:
 			    while self.editorManager.tab.count() != 0:
 			        self.editorManager.close()
@@ -646,7 +648,7 @@ class MainWindow(QMainWindow):
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
-			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay IDE [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
 			if self.editorManager.tab != None:
 			    while self.editorManager.tab.count() != 0:
 			        self.editorManager.close()
