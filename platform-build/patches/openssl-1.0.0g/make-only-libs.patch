@@ -11,15 +11,6 @@ Index: openssl-1.0.0g/Makefile.org
  ENGDIRS= ccgost
  SHLIBDIRS= crypto ssl
  
-@@ -158,7 +158,7 @@ WTARFILE=       $(NAME)-win.tar
- EXHEADER=       e_os2.h
- HEADER=         e_os.h
- 
--all: Makefile build_all openssl.pc libssl.pc libcrypto.pc
-+all: Makefile build_all libssl.pc libcrypto.pc
- 
- # as we stick to -e, CLEARENV ensures that local variables in lower
- # Makefiles remain local and variable. $${VAR+VAR} is tribute to Korn
 @@ -237,21 +237,21 @@ reflect:
  	@[ -n "$(THIS)" ] && $(CLEARENV) && $(MAKE) $(THIS) -e $(BUILDENV)
  
