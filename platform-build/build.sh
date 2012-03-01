@@ -709,6 +709,9 @@ then
 	    -lsoup-2.4 \
 	    -lxml2 \
         -lexif \
+        -lintl \
+        -liconv \
+        -landroid \
 	    ${THERE}/test/main.cpp \
 	    -Wl,--end-group
 
