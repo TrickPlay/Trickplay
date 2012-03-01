@@ -12,7 +12,7 @@ class ControllerDelegate : public Controller::Delegate
 {
 public:
 
-    ControllerDelegate( lua_State * _L , Controller * _controller , ControllerListDelegate * _list );
+    ControllerDelegate( lua_State * _LS , Controller * _controller , ControllerListDelegate * _list );
 
     ~ControllerDelegate();
 

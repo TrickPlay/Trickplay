@@ -33,9 +33,9 @@ extern int invoke_controllers_on_controller_connected( lua_State * , ControllerL
 
 //=============================================================================
 
-ControllerDelegate::ControllerDelegate(lua_State * _L,Controller * _controller,ControllerListDelegate * _list)
+ControllerDelegate::ControllerDelegate(lua_State * _LS,Controller * _controller,ControllerListDelegate * _list)
 :
-    L(_L),
+    L(_LS),
     controller(_controller),
     list(_list)
 {
