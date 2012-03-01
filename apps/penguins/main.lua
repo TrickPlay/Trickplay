@@ -1,26 +1,26 @@
 --[[
-wed
-	armor levels
-	internal release
-	weather vane
-	moving block levels
-	darkness
-	
-level notes
-	12a and 16a and might be too difficult
 
-refactor animation, gravity fall systems?
-reduce particle animation
-submersion of ball
-darkness
-monster?
+Penguin Zip-Zip
 
-need
-	audio
-	better ice water
-	switches
-	darkness
-]]
+
+tell pablo about segfault
+--]]
+
+orient = dofile('orient/orient.lua')()
+
+--screen.perspective = {1,1,0.1,100}
+
+sin = math.sin
+cos = math.cos
+asin = math.asin
+atan = math.atan
+atan2 = math.atan2
+pi = math.pi
+max = math.max
+min = math.min
+sqrt = math.sqrt
+log10 = math.log10
+floor = math.floor
 
 math.randomseed(os.time())
 rand = math.random
@@ -34,14 +34,16 @@ end
 gravity = 0.002
 ground = {440,1080}
 row = 1
+usebg = true
 
-dofile("cloner.lua")
+dofile("assets.lua")
+audio	= dofile("audio.lua")
 levels  = dofile("levels.lua")
 levels.this:load()
 snow    = dofile("snow.lua")
 penguin = dofile("penguin.lua")
 overlay	= dofile("overlay.lua")
-snow(levels.this.snow,levels.this.bank)
-explode = dofile("explode.lua")
+snow(levels.this.snow)
+dofile("effects.lua")
 
 collectgarbage("collect")

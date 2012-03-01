@@ -37,7 +37,6 @@ if (NATURAL_DOCS)
             -xi ${PROJECT_SOURCE_DIR}/engine/lua
             -xi ${PROJECT_SOURCE_DIR}/engine/public
             -xi ${PROJECT_SOURCE_DIR}/engine/source
-            -xi ${PROJECT_SOURCE_DIR}/engine/bindings/system.lb
             -o HTML ${PROJECT_BINARY_DIR}/docs/rte
             -p ${PROJECT_SOURCE_DIR}/engine/docs/rte/config
             -s Default Trickplay
@@ -67,6 +66,7 @@ if (NATURAL_DOCS)
 			-r
             -i ${PROJECT_SOURCE_DIR}/engine            
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/rte
+            -xi ${PROJECT_SOURCE_DIR}/engine/docs/tutorials
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/devtools
             -xi ${PROJECT_SOURCE_DIR}/engine/bindings
             -xi ${PROJECT_SOURCE_DIR}/engine/3rd_party

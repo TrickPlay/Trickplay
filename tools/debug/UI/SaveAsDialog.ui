@@ -10,6 +10,11 @@
     <height>120</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Save As</string>
   </property>
@@ -46,7 +51,7 @@
        <item>
         <widget class="QLineEdit" name="directory">
          <property name="text">
-          <string> </string>
+          <string/>
          </property>
          <property name="readOnly">
           <bool>true</bool>

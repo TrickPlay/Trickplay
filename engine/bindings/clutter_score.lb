@@ -12,26 +12,17 @@ void Score_on_started(ClutterScore*score,lua_State*L);
 void Score_on_completed(ClutterScore*score,lua_State*L);
 void Score_on_paused(ClutterScore*score,lua_State*L);
 
-// We use these signal handlers to keep the timeline alive as long as
-// it is running. There is still an issue with timelines that have
-// delays...while the delay is ticking away, they can get collected.
+// We use these signal handlers to keep the score alive as long as
+// it is running.
 
-void Score_started( ClutterScore * score , gpointer )
+static void Score_started( ClutterScore * score , gpointer )
 {
-    g_object_ref( score );
+    ClutterUtil::keep_alive( score , true ); 
 }
 
-void Score_paused( ClutterScore * score , gpointer )
+static void Score_completed( ClutterScore * score , gpointer )
 {
-    g_object_unref( score );
-}
-
-void Score_completed( ClutterScore * score , gpointer )
-{
-    if ( ! clutter_score_get_loop( score ) )
-    {
-        g_object_unref( score );
-    }
+    ClutterUtil::keep_alive( score , false );
 }
 
 ]]
@@ -41,7 +32,7 @@ void Score_completed( ClutterScore * score , gpointer )
     
     The Score class choreographs multiple Timeline animations. By using a Score, multiple animations can begin at the same time or one or more animations can begin when another animation completes or reaches a marked point.
     
-    To create a sequence of animations, each animation must be attached to the Score object using the append() or append_at_marker() function. Animations are arranged in a parent/child relationship. When the parent animation completes, its immediate children, if any, begin. Multiple levels of parent/child relationships can be defined. An animation with no parent begins running as soon as the Score starts. Scores can also loop, so following the completion of the last child animation, the initial parent animation will begin again. A Score can also be prematurely stopped or temporarily paused and then restarted or rewound to its beginning.
+    To create a sequence of animations, each animation must be attached to the Score object using the append() function. Animations are arranged in a parent/child relationship. When the parent animation completes, its immediate children, if any, begin. Multiple levels of parent/child relationships can be defined. An animation with no parent begins running as soon as the Score starts. Scores can also loop, so following the completion of the last child animation, the initial parent animation will begin again. A Score can also be prematurely stopped or temporarily paused and then restarted or rewound to its beginning.
     
     The program is notified during various stages of the Score's running by the firing of event handlers. For example, when all the animations in the Score have completed, the object's on_completed() event handler is called. Additional event handlers are fired when the Score starts running and whenever the Score is paused.
     
@@ -115,34 +106,29 @@ screen:add( sphereImage3 )
 -- Define an Interval for our animation
 sphereInterval  = Interval( 100, 400 - 40 )
 
--- Define an Alpha mode for our animation
-sphereAlpha  = Alpha { mode = "EASE_IN_OUT_QUINT" }
-sphereAlpha2 = Alpha { mode = "EASE_OUT_ELASTIC" }
-sphereAlpha3 = Alpha { mode = "EASE_IN_OUT_ELASTIC" }
+-- Define Ease transitions for our animation
+sphereEase  = Ease( "EASE_IN_OUT_QUINT" )
+sphereEase2 = Ease( "EASE_OUT_ELASTIC" )
+sphereEase3 = Ease( "EASE_IN_OUT_ELASTIC" )
 
 -- Animate the spheres with Timelines
 sphereTL = Timeline { duration = 3000 }
 sphereTL2 = Timeline { duration = 1500 }
 sphereTL3 = Timeline { duration = 1500 }
 			
--- Hook the Alphas to the Timelines
-sphereAlpha.timeline  = sphereTL
-sphereAlpha2.timeline = sphereTL2
-sphereAlpha3.timeline = sphereTL3
-
 --Define a Path for the first sphere
 spherePath = Path( "M100 100 l30 0 l30 260 l30 -200 l30 200 l30 -100 l30 100 l30 -25 l30 25 L360 360" )
 
 function sphereTL:on_new_frame( msecs, progress )
-	sphereImage.position = spherePath:get_position( sphereAlpha.alpha )
+	sphereImage.position = spherePath:get_position( sphereEase:get_value( progress ) )
 end
 
 function sphereTL2:on_new_frame( msecs, progress )
-	sphereImage2.y = sphereInterval:get_value( sphereAlpha2.alpha )
+	sphereImage2.y = sphereInterval:get_value( sphereEase2:get_value( progress ) )
 end
 
 function sphereTL3:on_new_frame( msecs, progress )
-	sphereImage3.y = sphereInterval:get_value( sphereAlpha3.alpha )
+	sphereImage3.y = sphereInterval:get_value( sphereEase3:get_value( progress ) )
 end
 
 -- ****** Score-related code ******
@@ -172,7 +158,6 @@ class Score [[ClutterScore*]]
     	ClutterUtil::set_props_from_table(L,props);
 
     	g_signal_connect( self , "started" , ( GCallback ) Score_started , 0 );
-    	g_signal_connect( self , "paused" , ( GCallback ) Score_paused , 0 );
         g_signal_connect( self , "completed" , ( GCallback ) Score_completed , 0 );
 
     	g_object_unref(self);
@@ -263,7 +248,10 @@ class Score [[ClutterScore*]]
 	*/
 	
     stop()
-	[[clutter_score_stop(self);]];
+	[[
+	   clutter_score_stop(self);
+	   ClutterUtil::keep_alive( self , false );
+	]];
 	
 	/*
 		Function: rewind
@@ -292,7 +280,7 @@ class Score [[ClutterScore*]]
 		
 		*Return Value:* None
 		
-		*See Also:* the <append_at_marker> and <start> functions
+		*See Also:* the <start> function
 	*/
 
     append(Timeline parent=0, Timeline timeline)
@@ -304,32 +292,6 @@ class Score [[ClutterScore*]]
     ]];
 
     /*
-        Function: append_at_marker
-        
-        The append_at_marker() function attaches a Timeline object to the Score and defines a parent and marker within the parent for the newly-attached Timeline. When the marker in the parent Timeline is reached, it will trigger the running of the newly-attached Timeline. The specified parent Timeline must already be attached to the Score and the specified marker must exist in the parent Timeline.
-        
-        To start running a Timeline at the completion of another Timeline, use the append() function.
-        
-		*Arguments:*
-
-			parent - Timeline object to act as "parent" to newly-attached Timeline. The parent Timeline must already be attached to the Score.
-			marker - string name of marker in the parent Timeline. When marker is reached, the newly-attached Timeline (specified in the timeline argument) begins running.
-			timeline - Timeline object to attach to Score
-			
-		*Return Value:* None
-		
-		*See Also:* the <append> and <start> function
-    */
-
-    append_at_marker(Timeline parent, string marker, Timeline timeline)
-    [[
-	    ClutterTimeline *tl = ClutterUtil::user_data_to_timeline(L,timeline);
-	    ClutterTimeline *p = ClutterUtil::user_data_to_timeline(L,parent);
-
-        if(tl && p) clutter_score_append_at_marker(self,p,marker,tl);
-    ]];
-
-    /*
         Function: remove_all
         
         The remove_all() function detaches all attached Timelines from the Score.
@@ -338,7 +300,7 @@ class Score [[ClutterScore*]]
         
         *Return Value:* None
         
-        *See Also:* the <append> and <append_at_marker> functions
+        *See Also:* the <append> function
     */
     
     remove_all()

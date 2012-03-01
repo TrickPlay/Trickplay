@@ -26,6 +26,7 @@
 #include "http_trickplay_api_support.h"
 #include "clutter_util.h"
 #include "console_commands.h"
+#include "desktop_controller.h"
 
 //-----------------------------------------------------------------------------
 #ifndef TP_DEFAULT_RESOURCES_PATH
@@ -321,159 +322,6 @@ void TPContext::setup_fonts()
         FcConfigDestroy( config );
     }
 }
-
-//-----------------------------------------------------------------------------
-
-#ifndef TP_CLUTTER_BACKEND_EGL
-
-static int controller_execute_command( TPController * , unsigned int command , void * , void * )
-{
-    switch( command )
-    {
-        case TP_CONTROLLER_COMMAND_START_POINTER:
-            return 0;
-
-        case TP_CONTROLLER_COMMAND_STOP_POINTER:
-            return 0;
-    }
-
-    return 1;
-}
-
-static void map_key( ClutterEvent * event , guint * keyval , gunichar * unicode )
-{
-    * keyval = event->key.keyval;
-    * unicode = event->key.unicode_value;
-
-    switch ( * keyval )
-    {
-        case CLUTTER_F5:
-            * keyval = TP_KEY_RED;
-            * unicode = 0;
-            break;
-
-        case CLUTTER_F6:
-            * keyval = TP_KEY_GREEN;
-            * unicode = 0;
-            break;
-
-        case CLUTTER_F7:
-            * keyval = TP_KEY_YELLOW;
-            * unicode = 0;
-            break;
-
-        case CLUTTER_F8:
-            * keyval = TP_KEY_BLUE;
-            * unicode = 0;
-            break;
-
-        case CLUTTER_F9:
-            * keyval = TP_KEY_BACK;
-            * unicode = 0;
-            break;
-    }
-}
-
-// In desktop builds, we catch all key events that are not synthetic and pass
-// them through a keyboard controller. That will generate an event for the
-// controller and re-inject the event into clutter as a synthetic event.
-//
-// We also use this for mouse events.
-
-gboolean controller_keys( ClutterActor * actor, ClutterEvent * event, gpointer controller )
-{
-    if ( event )
-    {
-        switch ( event->any.type )
-        {
-            case CLUTTER_KEY_PRESS:
-            {
-                if ( !( event->key.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
-                {
-                    guint keyval;
-                    gunichar unicode;
-
-                    map_key( event , & keyval , & unicode );
-
-                	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
-
-                    tp_controller_key_down( ( TPController * )controller, keyval, unicode , modifiers );
-                    return TRUE;
-                }
-
-                break;
-            }
-
-            case CLUTTER_KEY_RELEASE:
-            {
-                if ( !( event->key.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
-                {
-                    guint keyval;
-                    gunichar unicode;
-
-                    map_key( event , & keyval , & unicode );
-
-                	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
-
-                    tp_controller_key_up( ( TPController * )controller, keyval, unicode , modifiers );
-                    return TRUE;
-                }
-                break;
-            }
-
-            case CLUTTER_MOTION:
-            {
-                if ( !(event->motion.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
-                {
-                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
-                    {
-                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
-
-                        tp_controller_pointer_move( ( TPController * ) controller , event->motion.x , event->motion.y , modifiers );
-                    }
-                    return TRUE;
-                }
-                break;
-            }
-
-            case CLUTTER_BUTTON_PRESS:
-            {
-                if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
-                {
-                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
-                    {
-                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
-
-                        tp_controller_pointer_button_down( ( TPController * ) controller , event->button.button , event->button.x , event->button.y , modifiers );
-                    }
-                    return TRUE;
-                }
-            }
-
-            case CLUTTER_BUTTON_RELEASE:
-            {
-                if ( !( event->button.flags & CLUTTER_EVENT_FLAG_SYNTHETIC ) )
-                {
-                    if ( tp_controller_wants_pointer_events( ( TPController * ) controller ) )
-                    {
-                    	unsigned int modifiers = ClutterUtil::get_tp_modifiers( event );
-
-                        tp_controller_pointer_button_up( ( TPController * ) controller , event->button.button , event->button.x , event->button.y , modifiers );
-                    }
-                    return TRUE;
-                }
-            }
-
-            default:
-            {
-                break;
-            }
-        }
-    }
-    return FALSE;
-}
-
-#endif
 
 //-----------------------------------------------------------------------------
 // This one deals with the ESCAPE and EXIT keys to exit the current app. If the current
@@ -871,27 +719,7 @@ int TPContext::run()
 
 #endif
 
-#ifndef TP_CLUTTER_BACKEND_EGL
-
-    // We add a controller for the keyboard in non-egl builds
-
-    TPControllerSpec spec;
-
-    memset( &spec, 0, sizeof( spec ) );
-
-    spec.capabilities = TP_CONTROLLER_HAS_KEYS | TP_CONTROLLER_HAS_POINTER;
-
-    spec.execute_command = controller_execute_command;
-
-    spec.id = "d6a59106-8879-4748-bcfe-e3c976f82556";
-
-    // This controller won't leak because the controller list will free it
-
-    TPController * keyboard = tp_context_add_controller( this, "Keyboard", &spec, NULL );
-
-    g_signal_connect( stage, "captured-event", ( GCallback )controller_keys, keyboard );
-    
-#endif
+    install_desktop_controller( this );
 
     clutter_stage_set_throttle_motion_events( CLUTTER_STAGE( stage ) , FALSE );
 
@@ -916,6 +744,8 @@ int TPContext::run()
     //.........................................................................
     // Load the app
 
+    bool run_app = ! get_bool( TP_DONT_RUN_APP , false );
+
     g_info( "LOADING APP..." );
 
     App * app = 0;
@@ -924,12 +754,28 @@ int TPContext::run()
 
     if ( app )
     {
+
+#ifndef TP_PRODUCTION
+
+    	// Output a machine-readable JSON string with all
+    	// the "control" ports.
+
+    	g_info( "<<CONTROL>>:%s" , get_control_message( app ).c_str() );
+
+#endif
+
         //.....................................................................
         // Execute the app's script
 
         first_app_id = app->get_id();
-        app->run( app_allowed[ first_app_id ] , app_run_callback );
+
+        if ( run_app )
+        {
+        	app->run( app_allowed[ first_app_id ] , app_run_callback );
+        }
+
         app->unref();
+
         app = 0;
 
         //.................................................................
@@ -1380,7 +1226,7 @@ void TPContext::quit()
     }
     else
     {
-        g_idle_add( delayed_quit, NULL );
+    	g_idle_add_full( TRICKPLAY_PRIORITY , delayed_quit, 0 , 0 );
     }
 }
 
@@ -1410,9 +1256,44 @@ void TPContext::remove_console_command_handler( const char * command, TPConsoleC
 
 //-----------------------------------------------------------------------------
 
+class LogHandlerAction : public Action
+{
+public:
+
+	LogHandlerAction( gchar * _line , const TPContext::OutputHandlerSet & _handlers )
+	:
+		line( _line ),
+		handlers( _handlers )
+	{}
+
+	virtual ~LogHandlerAction()
+	{
+		g_free( line );
+	}
+
+protected:
+
+    virtual bool run()
+    {
+        for ( TPContext::OutputHandlerSet::const_iterator it = handlers.begin(); it != handlers.end(); ++it )
+        {
+            it->first( line, it->second );
+        }
+
+    	return false;
+    }
+
+private:
+
+	gchar * 					line;
+	TPContext::OutputHandlerSet handlers;
+};
+
+//-----------------------------------------------------------------------------
+
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
-    static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT } verbose = CHECK;
+    static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT , BARE } verbose = CHECK;
 
     if ( verbose == CHECK )
     {
@@ -1435,6 +1316,10 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             else if ( ! strcmp( e , "silent" ) )
             {
                 verbose = SILENT;
+            }
+            else if ( ! strcmp( e , "bare" ) )
+            {
+            	verbose = BARE;
             }
         }
     }
@@ -1460,15 +1345,21 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
         case APP_RAW:
             if ( log_level == G_LOG_LEVEL_MESSAGE )
             {
-                fprintf( stdout, "%s\n", message );
+                fprintf( stderr, "%s\n", message );
+                fflush( stderr );
             }
             return;
+
+        case BARE:
+        	fprintf( stderr , "%s\n" , message );
+        	fflush( stderr );
+        	return;
 
         default:
             break;
     }
 
-    gchar * line = NULL;
+    gchar * line = 0;
 
     // This is before a context is created, so we just print out the message
 
@@ -1476,6 +1367,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
     {
         line = format_log_line( log_domain, log_level, message );
         fprintf( stderr, "%s", line );
+        fflush( stderr );
     }
 
     // Otherwise, we have a context and more choices as to what we can do with
@@ -1507,20 +1399,26 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             {
                 line = format_log_line( log_domain, log_level, message );
                 fprintf( stderr, "%s", line );
+                fflush( stderr );
             }
 
             if ( !context->output_handlers.empty() )
             {
-                if ( !line )
+                if ( ! line )
                 {
                     line = format_log_line( log_domain, log_level, message );
                 }
 
-                for ( OutputHandlerSet::const_iterator it = context->output_handlers.begin();
-                        it != context->output_handlers.end(); ++it )
-                {
-                    it->first( line, it->second );
-                }
+                // Because we are already being called by g_logv and it is not
+                // recursive/re-entrant, we defer logging to other handlers by posting an
+                // action.
+
+                Action::post( new LogHandlerAction( line , context->output_handlers ) );
+
+                // The action will free the original line when it is finished with it,
+                // so we clear it here
+
+                line = 0;
             }
         }
     }
@@ -2519,6 +2417,46 @@ void TPContext::load_background()
 	}
 
 #endif
+}
+
+String TPContext::get_control_message( App * app ) const
+{
+	app = app ? app : current_app;
+
+	JSON::Object control;
+
+	guint16 port;
+
+	if ( ( port = http_server->get_port() ) )
+	{
+		control[ "http" ] = port;
+	}
+
+	if ( ( port = console ? console->get_port() : 0 ) )
+	{
+		control[ "console" ] = port;
+	}
+
+	if ( app )
+	{
+		if ( Debugger * debugger = app->get_debugger() )
+		{
+			if ( ( port = debugger->get_server_port() ) )
+			{
+				control[ "debugger" ] = port;
+			}
+		}
+	}
+
+	if ( controller_server )
+	{
+		if ( ( port = controller_server->get_port() ) )
+		{
+			control[ "controllers" ] = port;
+		}
+	}
+
+	return control.stringify();
 }
 
 //=============================================================================

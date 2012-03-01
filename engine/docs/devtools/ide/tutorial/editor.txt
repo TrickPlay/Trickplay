@@ -1,0 +1,7 @@
+
+Topic: Create a New TrickPlay Application
+
+This section describes the creation of a new TrickPlay application using the TrickPlay IDE. The source file is entered with the IDE Editor.
+
+Demonstrates: (1) Open New App... and (2) Using the IDE Editor to create and save source files
+

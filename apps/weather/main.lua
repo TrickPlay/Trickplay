@@ -5,7 +5,7 @@ screen_w = screen.w
 screen_h = screen.h
 screen:show()
 --screen:add(Rectangle{name="A Grey Background for the APP",w=screen_w,h=screen_h,color={60,60,60}})
-dofile("App_Loop.lua")
+--dofile("App_Loop.lua")
 dofile("Utils.lua")
 
 function post_main()
@@ -70,18 +70,19 @@ function post_main()
 	screen:add(m_grad,f_grad,logo)
 	
 	
+	focused_bar = {}
 	
 	
 	
-	
+		
 	--load saved settings, or default to Palo Alto,CA
-	locations = settings.locations or {"94019","94022",}
+	locations = settings.locations or {"94306","89109"}
 	dumptable(locations)
 	bar_i = 1
 	view_5_day=false
 	curr_condition=Group{name="Bottom Corner Weather conditions"}
 	
-	all_anims = {}
+	all_anims = {} -- used for test bar
 	bars={}
 	screen:add(curr_condition,left_faux_bar,right_faux_bar)
 	dofile("Internet.lua")
@@ -107,64 +108,27 @@ function post_main()
 		
 		settings.locations = locations
 		
-		settings.bar_state = bar_state:current_state()
+		settings.bar_state = current_bar:get_state()
 		
 		g_app_is_running = false
 		
 	end
 	
-	bar_state:add_state_change_function(
-        function() current_bar:launch_full_to_mini() end,
-        nil,
-		"MINI"
-    )
-    bar_state:add_state_change_function(
-        function() current_bar:launch_mini_to_full() end,
-        "MINI",
-        "1_DAY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:launch_5_day_to_1_day() end,
-        "5_DAY",
-        "1_DAY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:launch_zip_to_1_day() end,
-        "ZIP_ENTRY",
-        "1_DAY"
-    )
 	
-	bar_state:add_state_change_function(
-        function() current_bar:launch_1_day_to_5_day() end,
-        "1_DAY",
-        "5_DAY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:reset_zip() end,
-        nil,
-        "ZIP_ENTRY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:launch_1_day_to_zip_animation() end,
-        "1_DAY",
-        "ZIP_ENTRY"
-    )
-	bar_state:add_state_change_function(
-        function() current_bar:launch_5_day_to_zip_animation() end,
-        "5_DAY",
-        "ZIP_ENTRY"
-    )
+	
 	
 	if settings.bar_state then bar_state:change_state_to(settings.bar_state) end
+	
+	--print(settings.bar_state)
 	
 	--make the weather bars for each location
 	for i,location in pairs(locations) do
 		
 		if location == "00000" then
-			table.insert(bars,Make_Bar(location,i,true))
+			table.insert(bars,Make_Bar(location,nil,i,true))
 			bars[#bars].curr_condition="Sunny"
 		else
-			table.insert(bars,Make_Bar(location,i))
+			table.insert(bars,Make_Bar(location,nil,i))
 		end
 		
 	end
@@ -191,7 +155,7 @@ function post_main()
 	bars[1]:grab_key_focus()
 	
 	current_bar = bars[1]
-	current_bar.go_to_state("1_DAY")
+	--current_bar.go_to_state("1_DAY")
 	current_bar.go_to_state(bar_state:current_state())
 	
 end

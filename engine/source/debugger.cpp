@@ -10,6 +10,7 @@
 #include "util.h"
 #include "http_server.h"
 #include "user_data.h"
+#include "app_resource.h"
 
 //.............................................................................
 
@@ -38,6 +39,19 @@ public:
 		delete ( Command * ) me;
 	}
 
+	virtual void cancel()
+	{
+	}
+
+	typedef std::list<Command*> List;
+
+	class Filter
+	{
+	public:
+		virtual ~Filter() {}
+		virtual bool operator()( Command * command ) const = 0;
+	};
+
 private:
 
 	Command( const Command & ) {}
@@ -63,6 +77,23 @@ public:
 	virtual void enable_console() = 0;
 
 	virtual void disable_console() = 0;
+
+	virtual void clear_pending_commands() = 0;
+
+	virtual Command::List get_commands_matching( const Command::Filter & filter ) = 0;
+
+	Command::List get_all_commands()
+	{
+		class FilterNone : public Command::Filter
+		{
+			virtual bool operator()( Command * ) const
+			{
+				return true;
+			}
+		};
+
+		return get_commands_matching( FilterNone() );
+	}
 
 protected:
 
@@ -106,6 +137,11 @@ public:
 
 	virtual bool reply( const JSON::Object & obj )
 	{
+		if ( 0 == response )
+		{
+			return false;
+		}
+
 		response->set_status( HttpServer::HTTP_STATUS_OK );
 		response->set_response( "application/json" , obj.stringify() );
 		response->resume();
@@ -116,6 +152,15 @@ public:
 		fflush( stdout );
 
 		return true;
+	}
+
+	virtual void cancel()
+	{
+		if ( response )
+		{
+			response->unref();
+			response = 0;
+		}
 	}
 
 private:
@@ -213,6 +258,50 @@ public:
 		g_atomic_int_set( & console_enabled , 0 );
 	}
 
+	virtual void clear_pending_commands()
+	{
+		Debugger::Command::List commands = get_all_commands();
+
+		for ( Debugger::Command::List::const_iterator it = commands.begin(); it != commands.end(); ++it )
+		{
+			tplog( "CLEARING PENDING COMMAND %s" , (*it)->get().c_str() );
+
+			delete (*it);
+		}
+	}
+
+	virtual Debugger::Command::List get_commands_matching( const Debugger::Command::Filter & filter )
+	{
+		Debugger::Command::List result;
+		Debugger::Command::List putback;
+
+		g_async_queue_lock( queue );
+
+		while ( Debugger::Command * command = ( Debugger::Command * ) g_async_queue_try_pop_unlocked( queue ) )
+		{
+			if ( filter( command ) )
+			{
+				result.push_back( command );
+			}
+			else
+			{
+				putback.push_back( command );
+			}
+		}
+
+		if ( ! putback.empty() )
+		{
+			for ( Debugger::Command::List::const_iterator it = putback.begin(); it != putback.end(); ++it )
+			{
+				g_async_queue_push_unlocked( queue , * it );
+			}
+		}
+
+		g_async_queue_unlock( queue );
+
+		return result;
+	}
+
 protected:
 
 	virtual ~HServer()
@@ -236,6 +325,20 @@ protected:
 			tplog2( "WAITING FOR HTTP SERVER THREAD" );
 
 			( void ) g_thread_join( thread );
+		}
+
+		// Cancel any commands that are in the queue now. Otherwise, we will
+		// try to reply to them when the server has already been destroyed.
+
+		Debugger::Command::List list = get_all_commands();
+
+		for ( Debugger::Command::List::const_iterator it = list.begin(); it != list.end(); ++it )
+		{
+			tplog2( "CANCELLING COMMAND '%s'" , (*it)->get().c_str() );
+
+			(*it)->cancel();
+
+			delete (*it);
 		}
 
 		g_async_queue_unref( queue );
@@ -522,6 +625,8 @@ void Debugger::uninstall()
     if ( installed )
     {
         lua_sethook( app->get_lua_state(), lua_hook, 0, 0 );
+
+        server->clear_pending_commands();
     }
 }
 
@@ -535,6 +640,8 @@ void Debugger::install( bool break_next_line )
     {
         return;
     }
+
+    server->clear_pending_commands();
 
     lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET |*/ LUA_MASKLINE, 0 );
 
@@ -763,7 +870,7 @@ JSON::Object Debugger::get_app_info()
 
 	JSON::Array & array = result[ "contents" ].as<JSON::Array>();
 
-	StringList contents = md.sandbox.get_pi_children();
+	StringList contents = AppResource::get_pi_children( md.get_root_uri() );
 
 	for ( StringList::const_iterator it = contents.begin(); it != contents.end(); ++it )
 	{
@@ -775,17 +882,29 @@ JSON::Object Debugger::get_app_info()
 
 //.............................................................................
 
-bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server_command )
+bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server_command , bool with_location )
 {
 	bool result = false;
 
 	String command( server_command->get() );
 
-	JSON::Object reply( get_location( L , ar ) );
+	JSON::Object reply;
+
+	if ( with_location )
+	{
+		reply = get_location( L , ar );
+	}
+
+	if ( command == "i" )
+	{
+		reply[ "locals" ] = get_locals( L , ar );
+		reply[ "stack" ] = get_back_trace( L , ar );
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
+	}
 
 	// List locals
 
-	if ( command == "l" )
+	else if ( command == "l" )
 	{
 		reply[ "locals" ] = get_locals( L , ar );
 	}
@@ -910,6 +1029,62 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		reply[ "app" ] = get_app_info();
 	}
 
+	// Batch breakpoints
+
+	else if ( 0 == command.find( "bb " ) )
+	{
+		StringVector parts = split_string( command , " " , 2 );
+
+		if ( parts.size() == 2 )
+		{
+			JSON::Value root = JSON::Parser::parse( parts[ 1 ] );
+
+			if ( root.is<JSON::Object>() )
+			{
+				JSON::Object & o = root.as<JSON::Object>();
+
+				if ( o.has( "clear" ) &&  o["clear"].as<bool>() )
+				{
+					breakpoints.clear();
+				}
+
+				JSON::Array & b = o["add"].as<JSON::Array>();
+
+				for ( JSON::Array::Vector::iterator it = b.begin(); it != b.end(); ++it )
+				{
+					JSON::Object & bo = it->as<JSON::Object>();
+
+					String file = bo[ "file" ].as<String>();
+					int line = bo[ "line" ].as<long long>();
+					bool on = bo.has( "on" ) ? bo[ "on" ].as<bool>() : true;
+
+					breakpoints.push_back( Breakpoint( file , line , on ) );
+				}
+
+				b = o[ "delete" ].as<JSON::Array>();
+
+				for ( JSON::Array::Vector::iterator it = b.begin(); it != b.end(); ++it )
+				{
+					JSON::Object & bo = it->as<JSON::Object>();
+
+					String file = bo[ "file" ].as<String>();
+					int line = bo[ "line" ].as<long long>();
+
+					for ( BreakpointList::iterator ib = breakpoints.begin(); ib != breakpoints.end(); ++ib )
+					{
+						if ( ib->file == file && ib->line == line )
+						{
+							breakpoints.erase( ib );
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
+	}
+
 	// Set a breakpoint
 	// b 57 - set a breakpoint at line 57 of the current file
 	// b main.lua:57 - set a breakpoint at line 57 of main.lua
@@ -955,6 +1130,8 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		{
 			reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>' or 'b <line>'. To enable or disable breakpoints, enter 'b <index> on|off'";
 		}
+
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
 	}
 
 	// Delete a breakpoint
@@ -984,6 +1161,8 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 				reply[ "error" ] = "Invalid breakpoint index";
 			}
 		}
+
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
 	}
 
 	// Fetch a file
@@ -1029,12 +1208,33 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 {
 	lua_getinfo( L, "nSl", ar );
 
-    //.........................................................................
-	// Process any pending debugger commands here
-
-	for ( Command * server_command = server->get_next_command( false ); server_command; server_command = server->get_next_command( false ) )
 	{
-		( void ) handle_command( L , ar , server_command );
+		// Some commands can be (and should be) handled here, when we may not be
+		// breaking.
+
+		class NoBreakCommands : public Command::Filter
+		{
+			virtual bool operator()( Command * command ) const
+			{
+				String s( command->get() );
+
+				return s == "r" || s == "bn" || s == "q" || s == "b" || s == "a" ||
+						( 0 == s.find( "b ") ) ||
+						( 0 == s.find( "bb ") ) ||
+						( 0 == s.find( "d ") ) ||
+						( 0 == s.find( "f ") );
+			}
+		};
+
+		Command::List commands = server->get_commands_matching( NoBreakCommands() );
+
+		if ( ! commands.empty() )
+		{
+			for ( Command::List::const_iterator it = commands.begin(); it != commands.end(); ++it )
+			{
+				handle_command( L , ar , * it , false );
+			}
+		}
 	}
 
 	//.........................................................................
@@ -1139,7 +1339,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     	// Deal with the command, deletes it.
     	// If it returns true, it means we should jump out
 
-    	if ( handle_command( L , ar , server_command ) )
+    	if ( handle_command( L , ar , server_command , true ) )
     	{
     		break;
     	}
@@ -1171,13 +1371,11 @@ StringVector * Debugger::get_source( const String & pi_path )
 
 	StringVector * result = 0;
 
-	gsize length = 0;
+	Util::Buffer contents( AppResource( app , pi_path ).load_contents( app ) );
 
-	gchar * contents = app->get_metadata().sandbox.get_pi_child_contents( pi_path , length );
-
-	if ( contents && length )
+	if ( contents.length() )
 	{
-		imstream stream( contents , length );
+		imstream stream( ( char * ) contents.data() , contents.length() );
 
 		StringVector & lines = source[ pi_path ];
 
@@ -1190,8 +1388,6 @@ StringVector * Debugger::get_source( const String & pi_path )
 
 		result = & lines;
 	}
-
-	g_free( contents );
 
 	return result;
 }

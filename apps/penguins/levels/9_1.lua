@@ -85,7 +85,7 @@ local clone19 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone19",
-		position = {1734,450,0},
+		position = {1763,459,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -122,7 +122,7 @@ local clone20 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone20",
-		position = {1752,353,0},
+		position = {1774,365,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -152,14 +152,14 @@ clone20.extra.reactive = true
 
 local clone21 = Clone
 	{
-		scale = {1,1,0,0},
+		scale = {0.75,0.75,0,0},
 		source = clone20,
 		x_rotation = {0,0,0},
 		y_rotation = {0,0,0},
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone21",
-		position = {1775,259,0},
+		position = {1792,299,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -196,7 +196,7 @@ local clone9 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone9",
-		position = {978,454,0},
+		position = {985,456,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -233,7 +233,7 @@ local clone10 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone10",
-		position = {989,362,0},
+		position = {974,360,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -298,4 +298,79 @@ end
 clone11.extra.reactive = true
 
 
-g:add(image12,clone14,clone19,clone20,clone21,clone9,clone10,clone11)
+local image8 = Image
+	{
+		src = "/assets/images/cube-64.png",
+		clip = {0,0,64,64},
+		scale = {1,1,0,0},
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "image8",
+		position = {839,515,0},
+		size = {64,64},
+		opacity = 255,
+		reactive = true,
+	}
+
+image8.extra.focus = {}
+
+function image8:on_key_down(key)
+	if image8.focus[key] then
+		if type(image8.focus[key]) == "function" then
+			image8.focus[key]()
+		elseif screen:find_child(image8.focus[key]) then
+			if image8.clear_focus then
+				image8.clear_focus(key)
+			end
+			screen:find_child(image8.focus[key]):grab_key_focus()
+			if screen:find_child(image8.focus[key]).set_focus then
+				screen:find_child(image8.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+image8.extra.reactive = true
+
+
+local clone12 = Clone
+	{
+		scale = {1,1,0,0},
+		source = image8,
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "clone12",
+		position = {1697,513,0},
+		size = {64,64},
+		opacity = 255,
+		reactive = true,
+	}
+
+clone12.extra.focus = {}
+
+function clone12:on_key_down(key)
+	if clone12.focus[key] then
+		if type(clone12.focus[key]) == "function" then
+			clone12.focus[key]()
+		elseif screen:find_child(clone12.focus[key]) then
+			if clone12.clear_focus then
+				clone12.clear_focus(key)
+			end
+			screen:find_child(clone12.focus[key]):grab_key_focus()
+			if screen:find_child(clone12.focus[key]).set_focus then
+				screen:find_child(clone12.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+clone12.extra.reactive = true
+
+
+g:add(image12,clone14,clone19,clone20,clone21,clone9,clone10,clone11,image8,clone12)

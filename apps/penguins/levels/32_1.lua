@@ -11,7 +11,7 @@ local image6 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image6",
-		position = {1031,264,0},
+		position = {1095,360,0},
 		size = {475,89},
 		opacity = 255,
 		reactive = true,
@@ -49,7 +49,7 @@ local image1 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image1",
-		position = {1259,177,0},
+		position = {1323,273,0},
 		size = {66,98},
 		opacity = 255,
 		reactive = true,
@@ -87,7 +87,7 @@ local image2 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image2",
-		position = {1767,460,0},
+		position = {1686,460,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -124,7 +124,7 @@ local clone3 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone3",
-		position = {1779,386,0},
+		position = {1698,386,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -161,7 +161,7 @@ local clone4 = Clone
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "clone4",
-		position = {1778,307,0},
+		position = {1697,307,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -199,7 +199,7 @@ local image7 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image7",
-		position = {529,536,0},
+		position = {596,536,0},
 		size = {700,55},
 		opacity = 255,
 		reactive = true,
@@ -237,7 +237,7 @@ local image8 = Image
 		z_rotation = {0,0,0},
 		anchor_point = {0,0},
 		name = "image8",
-		position = {729,485,0},
+		position = {807,485,0},
 		size = {128,128},
 		opacity = 255,
 		reactive = true,
@@ -265,4 +265,115 @@ end
 image8.extra.reactive = true
 
 
-g:add(image6,image1,image2,clone3,clone4,image7,image8)
+local clone7 = Clone
+	{
+		scale = {0.8,0.8,0,0},
+		source = image2,
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "clone7",
+		position = {1696,230,0},
+		size = {128,127},
+		opacity = 255,
+		reactive = true,
+	}
+
+clone7.extra.focus = {}
+
+function clone7:on_key_down(key)
+	if clone7.focus[key] then
+		if type(clone7.focus[key]) == "function" then
+			clone7.focus[key]()
+		elseif screen:find_child(clone7.focus[key]) then
+			if clone7.clear_focus then
+				clone7.clear_focus(key)
+			end
+			screen:find_child(clone7.focus[key]):grab_key_focus()
+			if screen:find_child(clone7.focus[key]).set_focus then
+				screen:find_child(clone7.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+clone7.extra.reactive = true
+
+
+local clone8 = Clone
+	{
+		scale = {0.8,0.8,0,0},
+		source = image2,
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "clone8",
+		position = {1696,153,0},
+		size = {128,127},
+		opacity = 255,
+		reactive = true,
+	}
+
+clone8.extra.focus = {}
+
+function clone8:on_key_down(key)
+	if clone8.focus[key] then
+		if type(clone8.focus[key]) == "function" then
+			clone8.focus[key]()
+		elseif screen:find_child(clone8.focus[key]) then
+			if clone8.clear_focus then
+				clone8.clear_focus(key)
+			end
+			screen:find_child(clone8.focus[key]):grab_key_focus()
+			if screen:find_child(clone8.focus[key]).set_focus then
+				screen:find_child(clone8.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+clone8.extra.reactive = true
+
+
+local clone9 = Clone
+	{
+		scale = {0.8,0.8,0,0},
+		source = image2,
+		x_rotation = {0,0,0},
+		y_rotation = {0,0,0},
+		z_rotation = {0,0,0},
+		anchor_point = {0,0},
+		name = "clone9",
+		position = {1696,76,0},
+		size = {128,127},
+		opacity = 255,
+		reactive = true,
+	}
+
+clone9.extra.focus = {}
+
+function clone9:on_key_down(key)
+	if clone9.focus[key] then
+		if type(clone9.focus[key]) == "function" then
+			clone9.focus[key]()
+		elseif screen:find_child(clone9.focus[key]) then
+			if clone9.clear_focus then
+				clone9.clear_focus(key)
+			end
+			screen:find_child(clone9.focus[key]):grab_key_focus()
+			if screen:find_child(clone9.focus[key]).set_focus then
+				screen:find_child(clone9.focus[key]).set_focus(key)
+			end
+		end
+	end
+	return true
+end
+
+clone9.extra.reactive = true
+
+
+g:add(image6,image1,image2,clone3,clone4,image7,image8,clone7,clone8,clone9)

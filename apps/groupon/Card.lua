@@ -79,71 +79,6 @@ local update_time = function(self,curr_time)
 			os.time(curr_time)
 		)
 	)
-	--dumptable(self.exp)
-	--dumptable(delta)
-	
-	--print(diff)
-	
-	--for _,c in ipairs(cards) do
-		
-	--delta.year  = self.exp.year  - curr_time.year
-	--delta.month = self.exp.month - curr_time.month
-	--delta.day   = self.exp.day   - curr_time.day
-	--delta.hour  = self.exp.hour  - curr_time.hour --+ self.tz
-	--delta.min   = self.exp.min   - curr_time.min
-	--delta.sec   = self.exp.sec   - curr_time.sec
-	--[[
-	if delta.sec < 0 then
-		delta.sec = delta.sec + 60
-		delta.min = delta.min - 1
-		
-	end
-	if delta.min < 0 then
-		delta.min  = delta.min + 60
-		delta.hour = delta.hour - 1
-		if delta.min < 1 then
-			src = assets.hourglass[11]
-		elseif delta.min < 31 then
-			src = assets.hourglass[10]
-		else
-			src = assets.hourglass[9]
-		end
-	end
-	if delta.hour < 0 then
-		delta.hour = delta.hour + 24
-		delta.day  = delta.day - 1
-		if delta.hour < 1 then
-			src = assets.hourglass[9]
-		elseif delta.hour < 7 then
-			src = assets.hourglass[8]
-		elseif delta.hour < 13 then
-			src = assets.hourglass[7]
-		elseif delta.hour < 20 then
-			src = assets.hourglass[6]
-		else
-			src = assets.hourglass[5]
-		end
-	end
-	if delta.day < 0 then
-		delta.day   = delta.day + 30
-		delta.month = delta.month - 1
-		if delta.day < 1 then
-			src = assets.hourglass[5]
-		elseif delta.day < 2 then
-			src = assets.hourglass[4]
-		elseif delta.day < 3 then
-			src = assets.hourglass[3]
-		elseif delta.day < 4 then
-			src = assets.hourglass[2]
-		else
-			src = assets.hourglass[1]
-		end
-	end
-	if delta.month < 0 then
-		delta.month = delta.month + 12
-		delta.year  = delta.year - 1
-	end
-	--]]
 	if delta.day < 1 then
 		if delta.hour < 1 then
 			if delta.min < 1 then
@@ -277,7 +212,7 @@ end
 local make_card = function(input)
 	
 	--the returned group
-	local card = Group{w = bmp.card_bg.w}
+	local card = Group{w = bmp.card_bg.w,name=input.title}
 	
 	--the group's two animate functions
 	card.update_time = update_time
@@ -431,7 +366,7 @@ local make_card = function(input)
 	txt_to_canvas(bg,discount)
 	
 	local discount_amt = Text{
-		text=input.percentage.."%",
+		text=input.percentage,
 		font=font_b.." 20px",
 		color = black_text,
 		x = discount.x,
@@ -582,16 +517,17 @@ local make_card = function(input)
 		opacity = 0,
 	}
 	
-	local deal_img       = Bitmap(input.picture_url,true)
+    if input.picture_url then
+        local deal_img       = Bitmap(input.picture_url,true)
+        
+        deal_img.on_loaded   = img_on_loaded
+        deal_img.targ_canvas = bg
+        deal_img.group       = card
+        
+        card.deal_img = deal_img
+	end
 	
-	deal_img.on_loaded   = img_on_loaded
-	deal_img.targ_canvas = bg
-	deal_img.group       = card
-	
-	card.deal_img = deal_img
-	
-	
-	if input.expiration ~= json.null then
+	if input.expiration ~= json.null and input.tz ~= json.null then
         
         card.exp = {isdst = "false"}
         
@@ -778,6 +714,10 @@ local make_card = function(input)
         red_dot,
         change_loc_btn
 	)
+    
+    if input.deal_url == false or input.id == false then
+        card:not_available()
+    end
 	
 	--table.insert(cards,card)
 	--t:start()

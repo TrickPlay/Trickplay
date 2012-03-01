@@ -1,4 +1,7 @@
 
+add_subdirectory( lua )
+add_subdirectory( clutter_alpha_mode )
+
 add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
 
 set( ENGINE_SRC     ${PROJECT_SOURCE_DIR}/engine )
@@ -9,6 +12,9 @@ set( 3RD_PARTY_SOURCE_FILES )
 set( ENGINE_LIBRARY_NAMES )
 set( ENGINE_SOURCE_FILES )
 set( LB_FILES )
+
+include_directories( ${ENGINE_SRC}/lua/lua-5.1.4/src )
+include_directories( ${ENGINE_SRC}/clutter_alpha_mode )
 
 include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
@@ -412,6 +418,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/mediaplayer.lb
     ${BINDINGS_SRC}/idle.lb
     ${BINDINGS_SRC}/json.lb
+	${BINDINGS_SRC}/regex.lb
 
     ${BINDINGS_SRC}/clutter_actor.lb
     ${BINDINGS_SRC}/clutter_container.lb
@@ -440,6 +447,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/canvas.lb
     ${BINDINGS_SRC}/http.lb
     ${BINDINGS_SRC}/keyboard.lb
+    ${BINDINGS_SRC}/ease.lb
 
 )
 
@@ -484,59 +492,6 @@ foreach( LB_FILE ${LB_SPECIAL_MAC_FILES} )
 endforeach( LB_FILE )
 
 set_source_files_properties( ${GENERATED_FILES} PROPERTIES GENERATED TRUE )
-
-#------------------------------------------------------------------------------
-# Lua has to be built as C++ in order to get exceptions. Since most distributions
-# do not already do that, we include Lua directly into our engine.
-
-set( LUA_VERSION 5.1.4 )
-
-set( LUA_ROOT ${PROJECT_SOURCE_DIR}/engine/lua/lua-${LUA_VERSION} )
-
-add_definitions( -DLUA_USE_LINUX=1 )
-
-include_directories( ${LUA_ROOT}/src )
-
-set( LUA_SOURCE_FILES
-
-    ${LUA_ROOT}/src/lapi.c
-    ${LUA_ROOT}/src/lcode.c
-    ${LUA_ROOT}/src/ldebug.c
-    ${LUA_ROOT}/src/ldo.c
-    ${LUA_ROOT}/src/ldump.c
-    ${LUA_ROOT}/src/lfunc.c
-    ${LUA_ROOT}/src/lgc.c
-    ${LUA_ROOT}/src/llex.c
-    ${LUA_ROOT}/src/lmem.c
-    ${LUA_ROOT}/src/lobject.c
-    ${LUA_ROOT}/src/lopcodes.c
-    ${LUA_ROOT}/src/lparser.c
-    ${LUA_ROOT}/src/lstate.c
-    ${LUA_ROOT}/src/lstring.c
-    ${LUA_ROOT}/src/ltable.c
-    ${LUA_ROOT}/src/ltm.c
-    ${LUA_ROOT}/src/lundump.c
-    ${LUA_ROOT}/src/lvm.c
-    ${LUA_ROOT}/src/lzio.c
-    ${LUA_ROOT}/src/lauxlib.c
-    ${LUA_ROOT}/src/lbaselib.c
-    ${LUA_ROOT}/src/ldblib.c
-    ${LUA_ROOT}/src/lmathlib.c
-    ${LUA_ROOT}/src/loslib.c
-    ${LUA_ROOT}/src/ltablib.c
-    ${LUA_ROOT}/src/lstrlib.c
-    ${LUA_ROOT}/src/loadlib.c
-    ${LUA_ROOT}/src/liolib.c
-#    ${LUA_ROOT}/src/linit.c
-)
-
-set_source_files_properties(
-
-    ${LUA_SOURCE_FILES}
-
-    PROPERTIES
-        LANGUAGE CXX
-)
 
 #------------------------------------------------------------------------------
 
@@ -590,8 +545,10 @@ list( APPEND
     ${ENGINE_SRC}/source/log.cpp
     ${ENGINE_SRC}/source/keyboard.cpp
     ${ENGINE_SRC}/source/jpeg_utils.cpp
-    ${ENGINE_SRC}/source/sandbox.cpp
     ${ENGINE_SRC}/source/console_commands.cpp
+    ${ENGINE_SRC}/source/app_resource.cpp
+    ${ENGINE_SRC}/source/plugin.cpp
+    ${ENGINE_SRC}/source/desktop_controller.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -642,8 +599,6 @@ add_library(
 
     ${GENERATED_FILES}
 
-    ${LUA_SOURCE_FILES}
-
     ${3RD_PARTY_SOURCE_FILES}
 )
 
@@ -664,6 +619,8 @@ target_link_libraries(
     ${ENGINE_LIBRARIES}
     m
     dl
+    tplua
+    clutteralphamode
 )
 
 #------------------------------------------------------------------------------
