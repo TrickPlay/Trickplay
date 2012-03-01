@@ -377,12 +377,15 @@ class TrickplayDeviceManager(QWidget):
 		                        self.debugWindow.populateBreakTable(break_info, self.editorManager)
 
 		                    if self.bs_command == True :
-		                        #reply = None
-		                        #self.command = None
 		                        return
     
 		                    editor = self.editorManager.app.focusWidget()
-		                    nline = editor.margin_nline
+		                    if editor is not None : 
+		                        nline = editor.margin_nline
+		                    else:
+		                        index = self.editorManager.tab.currentIndex()
+		                        editor = self.editorManager.tab.editors[index]
+		                        nline = editor.margin_nline
     
 		                    # Break Point Setting t
 		                    if not editor.line_click.has_key(nline) or editor.line_click[nline] == 0 :
