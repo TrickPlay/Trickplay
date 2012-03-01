@@ -1,1 +1,3 @@
 glib-deprecated-G_CONST_RETURN.patch
+fixup-config-for-android.patch
+only-build-libs.patch

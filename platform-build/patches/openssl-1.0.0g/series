@@ -1,0 +1,2 @@
+openssl-parallel-build.patch
+make-only-libs.patch

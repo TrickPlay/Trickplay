@@ -1,0 +1,64 @@
+Index: openssl-1.0.0g/Makefile.org
+===================================================================
+--- openssl-1.0.0g.orig/Makefile.org
++++ openssl-1.0.0g/Makefile.org
+@@ -109,7 +109,7 @@ LIBKRB5=
+ ZLIB_INCLUDE=
+ LIBZLIB=
+ 
+-DIRS=   crypto ssl engines apps test tools
++DIRS=   crypto ssl engines
+ ENGDIRS= ccgost
+ SHLIBDIRS= crypto ssl
+ 
+@@ -158,7 +158,7 @@ WTARFILE=       $(NAME)-win.tar
+ EXHEADER=       e_os2.h
+ HEADER=         e_os.h
+ 
+-all: Makefile build_all openssl.pc libssl.pc libcrypto.pc
++all: Makefile build_all libssl.pc libcrypto.pc
+ 
+ # as we stick to -e, CLEARENV ensures that local variables in lower
+ # Makefiles remain local and variable. $${VAR+VAR} is tribute to Korn
+@@ -237,21 +237,21 @@ reflect:
+ 	@[ -n "$(THIS)" ] && $(CLEARENV) && $(MAKE) $(THIS) -e $(BUILDENV)
+ 
+ sub_all: build_all
+-build_all: build_libs build_apps build_tests build_tools
++build_all: build_libs
+ 
+ build_libs: build_crypto build_ssl build_engines
+ 
+ build_crypto:
+ 	@dir=crypto; target=all; $(BUILD_ONE_CMD)
+-build_ssl:
++build_ssl: build_crypto
+ 	@dir=ssl; target=all; $(BUILD_ONE_CMD)
+-build_engines:
++build_engines: build_crypto
+ 	@dir=engines; target=all; $(BUILD_ONE_CMD)
+-build_apps:
++build_apps: build_libs
+ 	@dir=apps; target=all; $(BUILD_ONE_CMD)
+-build_tests:
++build_tests: build_libs
+ 	@dir=test; target=all; $(BUILD_ONE_CMD)
+-build_tools:
++build_tools: build_libs
+ 	@dir=tools; target=all; $(BUILD_ONE_CMD)
+ 
+ all_testapps: build_libs build_testapps
+@@ -495,10 +495,10 @@ dist:
+ dist_pem_h:
+ 	(cd crypto/pem; $(MAKE) -e $(BUILDENV) pem.h; $(MAKE) clean)
+ 
+-install: all install_docs install_sw
++install: all install_sw
+ 
+-install_sw:
+-	@$(PERL) $(TOP)/util/mkdir-p.pl $(INSTALL_PREFIX)$(INSTALLTOP)/bin \
++install_sw: build_all
++	@$(PERL) $(TOP)/util/mkdir-p.pl \
+ 		$(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR) \
+ 		$(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/engines \
+ 		$(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/pkgconfig \

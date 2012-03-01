@@ -1,0 +1,14 @@
+Index: openssl-1.0.0g/Makefile.org
+===================================================================
+--- openssl-1.0.0g.orig/Makefile.org
++++ openssl-1.0.0g/Makefile.org
+@@ -258,6 +258,9 @@ all_testapps: build_libs build_testapps
+ build_testapps:
+ 	@dir=crypto; target=testapps; $(BUILD_ONE_CMD)
+ 
++libcrypto.a: build_crypto
++libssl.a: build_ssl
++
+ libcrypto$(SHLIB_EXT): libcrypto.a
+ 	@if [ "$(SHLIB_TARGET)" != "" ]; then \
+ 		$(MAKE) SHLIBDIRS=crypto build-shared; \

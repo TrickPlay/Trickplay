@@ -1,0 +1,34 @@
+Index: pixman-0.24.2/pixman/pixman-cpu.c
+===================================================================
+--- pixman-0.24.2.orig/pixman/pixman-cpu.c
++++ pixman-0.24.2/pixman/pixman-cpu.c
+@@ -255,29 +255,9 @@ static pixman_bool_t arm_tests_initializ
+ 
+ #if defined(__ANDROID__) || defined(ANDROID) /* Android device support */
+ 
+-#include <cpu-features.h>
+-
+ static void
+ pixman_arm_read_auxv_or_cpu_features ()
+ {
+-    AndroidCpuFamily cpu_family;
+-    uint64_t cpu_features;
+-
+-    cpu_family = android_getCpuFamily();
+-    cpu_features = android_getCpuFeatures();
+-
+-    if (cpu_family == ANDROID_CPU_FAMILY_ARM)
+-    {
+-	if (cpu_features & ANDROID_CPU_ARM_FEATURE_ARMv7)
+-	    arm_has_v7 = TRUE;
+-	
+-	if (cpu_features & ANDROID_CPU_ARM_FEATURE_VFPv3)
+-	    arm_has_vfp = TRUE;
+-	
+-	if (cpu_features & ANDROID_CPU_ARM_FEATURE_NEON)
+-	    arm_has_neon = TRUE;
+-    }
+-
+     arm_tests_initialized = TRUE;
+ }
+ 

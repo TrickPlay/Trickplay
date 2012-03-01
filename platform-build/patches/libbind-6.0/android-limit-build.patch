@@ -1,0 +1,16 @@
+Index: libbind-6.0/Makefile.in
+===================================================================
+--- libbind-6.0.orig/Makefile.in
++++ libbind-6.0/Makefile.in
+@@ -89,9 +89,9 @@ RESOLVOBJS= resolv/herror.@O@ resolv/mtc
+ 	resolv/res_query.@O@ resolv/res_send.@O@ resolv/res_sendsigned.@O@ \
+ 	resolv/res_update.@O@
+ 
+-SUBDIRS = bsd dst doc include inet irs isc nameser resolv @PORT_INCLUDE@
++SUBDIRS = bsd dst include inet irs isc nameser resolv @PORT_INCLUDE@
+ 
+-TARGETS= timestamp build-tests
++TARGETS= timestamp
+ OBJS=	${BSDOBJS} ${DSTOBJS} ${INETOBJS} ${IRSOBJS} ${ISCOBJS} \
+ 	${NAMESEROBJS} ${RESOLVOBJS}
+ 

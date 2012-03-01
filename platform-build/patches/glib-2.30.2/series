@@ -1,0 +1,7 @@
+android-gecos.patch
+android-getpwent.patch
+android-lconv-decimal-point.patch
+android-libresolv-libbind.patch
+android-no-pthread.patch
+android-prctl-args.patch
+android-no-test.patch

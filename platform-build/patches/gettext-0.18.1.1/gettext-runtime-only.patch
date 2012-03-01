@@ -1,0 +1,13 @@
+Index: gettext-0.18.1.1/Makefile.in
+===================================================================
+--- gettext-0.18.1.1.orig/Makefile.in
++++ gettext-0.18.1.1/Makefile.in
+@@ -211,7 +211,7 @@ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ AUTOMAKE_OPTIONS = 1.5 gnu no-dependencies
+ ACLOCAL_AMFLAGS = -I m4
+-SUBDIRS = gnulib-local gettext-runtime gettext-tools
++SUBDIRS = gettext-runtime
+ 
+ # DJGPP port.
+ 

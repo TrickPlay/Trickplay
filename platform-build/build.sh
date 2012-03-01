@@ -108,7 +108,7 @@ LIBFFI_V="${LIBFFI_MV}.10"
 LIBFFI_URL="ftp://sourceware.org/pub/libffi/libffi-${LIBFFI_V}.tar.gz"
 LIBFFI_DIST="libffi-${LIBFFI_V}.tar.gz"
 LIBFFI_SOURCE="libffi-${LIBFFI_V}"
-LIBFFI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
+LIBFFI_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # glib
@@ -118,7 +118,7 @@ GLIB_V="${GLIB_MV}.2"
 GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.xz"
 GLIB_DIST="glib-${GLIB_V}.tar.xz"
 GLIB_SOURCE="glib-${GLIB_V}"
-GLIB_COMMANDS="(./autogen.sh 2>/dev/null) ; cp ${THERE}/files/config.{sub,guess} . && PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=no ac_cv_func_posix_getgrgid_r=no glib_cv_have_qsort_r=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -I${PREFIX}/include/bind\" && make ${NUM_MAKE_JOBS} install"
+GLIB_COMMANDS="(./autogen.sh 2>/dev/null) ; cp ${THERE}/files/config.{sub,guess} . && PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=no ac_cv_func_posix_getgrgid_r=no glib_cv_have_qsort_r=no ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -I${PREFIX}/include/bind\" && make ${NUM_MAKE_JOBS} install"
 GLIB_DEPENDS="LIBFFI"
 
 #------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ OPENSSL_V="1.0.0g"
 OPENSSL_URL="http://www.openssl.org/source/openssl-${OPENSSL_V}.tar.gz"
 OPENSSL_DIST="openssl-${OPENSSL_V}.tar.gz"
 OPENSSL_SOURCE="openssl-${OPENSSL_V}"
-OPENSSL_COMMANDS="./Configure dist threads --prefix=$PREFIX -fPIC -D_REENTRANT && make CC=$CC RANLIB=$RANLIB AR=\"$AR r\" CXX=$CXX install"
+OPENSSL_COMMANDS="./Configure dist threads --prefix=$PREFIX -fPIC -D_REENTRANT && make CC=$CC RANLIB=$RANLIB AR=\"$AR r\" CXX=$CXX ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # zlib
@@ -163,7 +163,7 @@ CARES_V="1.7.5"
 CARES_URL="http://c-ares.haxx.se/c-ares-${CARES_V}.tar.gz"
 CARES_DIST="c-ares-${CARES_V}.tar.gz"
 CARES_SOURCE="c-ares-${CARES_V}"
-CARES_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-dependency-tracking && make ${NUM_MAKE_JOBS} install"
+CARES_COMMANDS="curl_cv_func_recv_args='int,void *,size_t,unsigned int,ssize_t' curl_cv_func_send_args='int,const void *,size_t,unsigned int,ssize_t' curl_cv_func_recvfrom_args='int,void *,size_t,unsigned int,struct sockaddr *,socklen_t *,ssize_t' curl_cv_func_getnameinfo_args='const struct sockaddr *,socklen_t,size_t,int' ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-dependency-tracking && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # curl
@@ -172,7 +172,7 @@ CURL_V="7.24.0"
 CURL_URL="http://curl.haxx.se/download/curl-${CURL_V}.tar.bz2"
 CURL_DIST="curl-${CURL_V}.tar.bz2"
 CURL_SOURCE="curl-${CURL_V}"
-CURL_COMMANDS="curl_cv_func_recvfrom_args='int,void *,size_t,unsigned int,struct sockaddr *,socklen_t *,ssize_t' ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-ares --with-ssl --with-zlib --without-random --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-manual --disable-dict && make ${NUM_MAKE_JOBS} install"
+CURL_COMMANDS="curl_cv_func_recv_args='int,void *,size_t,unsigned int,ssize_t' curl_cv_func_send_args='int,const void *,size_t,unsigned int,ssize_t' curl_cv_func_recvfrom_args='int,void *,size_t,unsigned int,struct sockaddr *,socklen_t *,ssize_t' curl_cv_func_getnameinfo_args='const struct sockaddr *,socklen_t,size_t,int' ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-ares --with-ssl --with-zlib --without-random --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-manual --disable-dict && make ${NUM_MAKE_JOBS} install"
 CURL_DEPENDS="CARES ZLIB OPENSSL"
 #------------------------------------------------------------------------------
 # bzip
@@ -208,7 +208,7 @@ FREETYPE_V="2.4.8"
 FREETYPE_URL="http://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_V}.tar.bz2"
 FREETYPE_DIST="freetype-${FREETYPE_V}.tar.bz2"
 FREETYPE_SOURCE="freetype-${FREETYPE_V}"
-FREETYPE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
+FREETYPE_COMMANDS="CFLAGS='$CFLAGS -std=gnu99' ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # fontconfig
@@ -327,7 +327,7 @@ if [[ $PROFILING != "0" ]]
 then
     CLUTTER_PROFILING="--enable-profile=yes"
 fi
-COGL_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-gles2=yes --enable-gl=no --enable-glx=no --enable-xlib-egl-platform=no --enable-null-egl-platform=yes $CLUTTER_PROFILING --disable-glibtest --enable-gtk-doc-html=no CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
+COGL_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-gles2=yes --enable-gl=no --enable-glx=no --enable-xlib-egl-platform=no --enable-android-egl-platform=yes $CLUTTER_PROFILING --disable-glibtest --enable-gtk-doc-html=no CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
 COGL_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
 #------------------------------------------------------------------------------
@@ -360,7 +360,7 @@ AVAHI_DEPENDS="GLIB"
 UPNP_V="1.6.15"
 UPNP_DIST="libupnp-${UPNP_V}.tar.bz2"
 UPNP_SOURCE="libupnp-${UPNP_V}"
-UPNP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
+UPNP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # uriparser
@@ -393,7 +393,7 @@ SNDFILE_URL="http://www.mega-nerd.com/libsndfile/files/${SNDFILE_DIST}"
 XML_V="2.7.8"
 XML_DIST="libxml2-${XML_V}.tar.gz"
 XML_SOURCE="libxml2-${XML_V}"
-XML_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
+XML_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # libsoup
@@ -401,7 +401,7 @@ XML_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED -
 SOUP_V="2.36.1"
 SOUP_DIST="libsoup-${SOUP_V}.tar.xz"
 SOUP_SOURCE="libsoup-${SOUP_V}"
-SOUP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --without-gnome --disable-glibtest --disable-gtk-doc-html && make && make ${NUM_MAKE_JOBS} install"
+SOUP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --without-gnome --disable-glibtest --disable-gtk-doc-html && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # libexif
@@ -413,7 +413,7 @@ EXIF_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED 
 
 #------------------------------------------------------------------------------
 
-ALL="ZLIB EXPAT XML EXIF LIBFFI ICONV GET_TEXT LIBBIND GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF COGL CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
+ALL="ZLIB EXPAT XML EXIF LIBFFI ICONV GET_TEXT LIBBIND GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK COGL CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 
 #-----------------------------------------------------------------------------
 
@@ -626,7 +626,7 @@ then
         cd ${HERE}/tp-build
 
         cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
-                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                -DCMAKE_BUILD_TYPE=MinSizeRel \
                 -DTP_CLUTTER_BACKEND_EGL=1 \
                 -DNATURAL_DOCS=${SOURCE}/nd/NaturalDocs \
                 $TP_CORE_SHARED \
@@ -661,13 +661,11 @@ then
         -ltpcore \
         -ltplua \
         -lclutteralphamode \
-        -lpthread \
 	    -ljson-glib-1.0 \
 	    -latk-1.0 \
         -lcogl \
         -lcogl-pango \
 	    -lclutter-eglnative-1.0 \
-	    -luprof-0.3 \
 	    -lavahi-core \
 	    -lavahi-common \
 	    -lavahi-glib \
@@ -698,8 +696,6 @@ then
 	    -lgobject-2.0 \
 	    -lglib-2.0 \
 	    -lgthread-2.0 \
-	    -lrt \
-	    -lresolv \
 	    -ldl \
 	    -luuid \
 	    -luriparser \
@@ -709,41 +705,12 @@ then
 	    -lGLESv2 \
 	    -lEGL \
 	    -lcairo-gobject \
-	    -luprof-0.3 \
 	    -lsndfile \
 	    -lsoup-2.4 \
 	    -lxml2 \
-        -lMali \
-        -lUMP \
         -lexif \
 	    ${THERE}/test/main.cpp \
 	    -Wl,--end-group
 
     rm -rf ${HERE}/test
 fi
-
-#------------------------------------------------------------------------------
-# Build the LG addon
-
-if [[ -d "${THERE}/lg-source" ]]
-then
-
-    echo "================================================================="
-    echo "== Building LG addon..."
-    echo "================================================================="
-
-    make -C ${THERE}/lg-source --no-print-directory clean
-    make -C ${THERE}/lg-source TRICKPLAY_INCLUDE="${PREFIX}/include" TRICKPLAY_LIB="${PREFIX}/lib"
-    if [[ ! -d "${HERE}/lg" ]]
-    then
-        mkdir "${HERE}/lg"
-    fi
-
-    mv ${THERE}/lg-source/bin/trickplay ${HERE}/lg/
-    make -C ${THERE}/lg-source --no-print-directory clean
-
-fi
-
-
-
-

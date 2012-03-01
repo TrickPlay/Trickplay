@@ -1,0 +1,15 @@
+Index: libsndfile-1.0.25/Makefile.in
+===================================================================
+--- libsndfile-1.0.25.orig/Makefile.in
++++ libsndfile-1.0.25/Makefile.in
+@@ -320,8 +320,8 @@ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ DISTCHECK_CONFIGURE_FLAGS = --enable-gcc-werror
+ @BUILD_OCTAVE_MOD_TRUE@octave_dir = Octave
+-SUBDIRS = M4 man doc Win32 src $(octave_dir) examples regtest tests programs
+-DIST_SUBDIRS = M4 man doc Win32 src Octave examples regtest tests programs
++SUBDIRS = M4 Win32 src $(octave_dir)
++DIST_SUBDIRS = M4 Win32 src Octave
+ EXTRA_DIST = libsndfile.spec.in sndfile.pc.in
+ CLEANFILES = *~
+ pkgconfigdir = $(libdir)/pkgconfig

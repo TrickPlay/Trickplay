@@ -1,0 +1,13 @@
+Index: pango-1.28.4/Makefile.in
+===================================================================
+--- pango-1.28.4.orig/Makefile.in
++++ pango-1.28.4/Makefile.in
+@@ -327,7 +327,7 @@ target_alias = @target_alias@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-SUBDIRS = pango modules pango-view examples docs tools tests
++SUBDIRS = pango modules
+ EXTRA_DIST = \
+ 	autogen.sh		\
+ 	pango.pc.in		\

@@ -1,0 +1,20 @@
+Index: giflib-4.1.6/lib/egif_lib.c
+===================================================================
+--- giflib-4.1.6.orig/lib/egif_lib.c
++++ giflib-4.1.6/lib/egif_lib.c
+@@ -101,13 +101,13 @@ EGifOpenFileName(const char *FileName,
+ #if defined(__MSDOS__) || defined(WINDOWS32) || defined(_OPEN_BINARY)
+                           | O_BINARY
+ #endif /* __MSDOS__ */
+-                          , S_IREAD | S_IWRITE);
++                          , S_IRUSR | S_IWUSR);
+     else
+         FileHandle = open(FileName, O_WRONLY | O_CREAT | O_TRUNC
+ #if defined(__MSDOS__) || defined(WINDOWS32) || defined(_OPEN_BINARY)
+                           | O_BINARY
+ #endif /* __MSDOS__ */
+-                          , S_IREAD | S_IWRITE);
++                          , S_IRUSR | S_IWUSR);
+ 
+     if (FileHandle == -1) {
+         _GifError = E_GIF_ERR_OPEN_FAILED;

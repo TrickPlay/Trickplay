@@ -1,0 +1,16 @@
+Index: cairo-1.10.2/src/cairo-output-stream.c
+===================================================================
+--- cairo-1.10.2.orig/src/cairo-output-stream.c
++++ cairo-1.10.2/src/cairo-output-stream.c
+@@ -313,7 +313,11 @@ _cairo_dtostr (char *buffer, size_t size
+ 	d = 0.0;
+ 
+     locale_data = localeconv ();
++#ifdef __ANDROID__
++	decimal_point = ".";
++#else
+     decimal_point = locale_data->decimal_point;
++#endif
+     decimal_point_len = strlen (decimal_point);
+ 
+     assert (decimal_point_len != 0);

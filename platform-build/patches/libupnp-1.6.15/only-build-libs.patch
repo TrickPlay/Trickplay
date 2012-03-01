@@ -1,0 +1,27 @@
+Index: libupnp-1.6.15/Makefile.in
+===================================================================
+--- libupnp-1.6.15.orig/Makefile.in
++++ libupnp-1.6.15/Makefile.in
+@@ -264,8 +264,7 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-deb
+ SUBDIRS = \
+ 	ixml \
+ 	threadutil \
+-	upnp \
+-	docs/dist
++	upnp
+ 
+ EXTRA_DIST = \
+ 	Doxyfile \
+Index: libupnp-1.6.15/upnp/Makefile.in
+===================================================================
+--- libupnp-1.6.15.orig/upnp/Makefile.in
++++ libupnp-1.6.15/upnp/Makefile.in
+@@ -341,7 +341,7 @@ target_alias = @target_alias@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-SUBDIRS = doc . sample
++SUBDIRS = .
+ AM_CPPFLAGS = \
+ 	-I$(srcdir)/inc \
+ 	-I$(top_srcdir)/threadutil/inc \

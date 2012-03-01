@@ -1,0 +1,48 @@
+Index: c-ares-1.7.5/ares_init.c
+===================================================================
+--- c-ares-1.7.5.orig/ares_init.c
++++ c-ares-1.7.5/ares_init.c
+@@ -60,7 +60,7 @@
+ #include <ctype.h>
+ #include <time.h>
+ 
+-#ifdef ANDROID
++#if defined(ANDROID) || defined(__ANDROID__)
+ #include <sys/system_properties.h>
+ #endif
+ 
+@@ -961,7 +961,7 @@ DhcpNameServer
+   }
+   status = ARES_EOF;
+ 
+-#elif defined(ANDROID)
++#elif defined(ANDROID) || defined(__ANDROID__)
+   char value[PROP_VALUE_MAX]="";
+   __system_property_get("net.dns1", value);
+   status = config_nameserver(&servers, &nservers, value);
+Index: c-ares-1.7.5/ares.h
+===================================================================
+--- c-ares-1.7.5.orig/ares.h
++++ c-ares-1.7.5/ares.h
+@@ -37,7 +37,7 @@
+    libc5-based Linux systems. Only include it on system that are known to
+    require it! */
+ #if defined(_AIX) || defined(__NOVELL_LIBC__) || defined(__NetBSD__) || \
+-    defined(__minix) || defined(__SYMBIAN32__) || defined(__INTEGRITY)
++    defined(__minix) || defined(__SYMBIAN32__) || defined(__INTEGRITY) || defined(__ANDROID__)
+ #include <sys/select.h>
+ #endif
+ #if (defined(NETWARE) && !defined(__NOVELL_LIBC__))
+Index: c-ares-1.7.5/configure
+===================================================================
+--- c-ares-1.7.5.orig/configure
++++ c-ares-1.7.5/configure
+@@ -17610,8 +17610,6 @@ for ac_header in sys/types.h \
+        stdbool.h \
+        time.h \
+        limits.h \
+-       arpa/nameser.h \
+-       arpa/nameser_compat.h \
+        arpa/inet.h
+ do :
+   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`

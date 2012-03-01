@@ -1,3 +1,2 @@
 fixup-config-for-android.patch
-rename_uuid_exports_for_conflict.patch
 only-build-libs.patch

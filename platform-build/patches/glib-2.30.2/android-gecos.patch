@@ -1,0 +1,38 @@
+Index: glib-2.30.2/glib/gutils.c
+===================================================================
+--- glib-2.30.2.orig/glib/gutils.c
++++ glib-2.30.2/glib/gutils.c
+@@ -1862,7 +1862,8 @@ g_get_any_init_do (void)
+       {
+ 	g_user_name = g_strdup (pw->pw_name);
+ 
+-	if (pw->pw_gecos && *pw->pw_gecos != '\0') 
++#ifndef __ANDROID__
++	if (pw->pw_gecos && *pw->pw_gecos != '\0')
+ 	  {
+ 	    gchar **gecos_fields;
+ 	    gchar **name_parts;
+@@ -1875,6 +1876,7 @@ g_get_any_init_do (void)
+ 	    g_strfreev (gecos_fields);
+ 	    g_strfreev (name_parts);
+ 	  }
++#endif
+ 
+ 	if (!g_home_dir)
+ 	  g_home_dir = g_strdup (pw->pw_dir);
+Index: glib-2.30.2/gio/glocalfileinfo.c
+===================================================================
+--- glib-2.30.2.orig/gio/glocalfileinfo.c
++++ glib-2.30.2/gio/glocalfileinfo.c
+@@ -1095,7 +1095,11 @@ lookup_uid_data (uid_t uid)
+       if (pwbufp->pw_name != NULL && pwbufp->pw_name[0] != 0)
+ 	data->user_name = convert_pwd_string_to_utf8 (pwbufp->pw_name);
+ 
++#ifdef __ANDROID__
++	  gecos = NULL;
++#else
+       gecos = pwbufp->pw_gecos;
++#endif
+ 
+       if (gecos)
+ 	{

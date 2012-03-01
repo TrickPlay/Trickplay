@@ -1,0 +1,15 @@
+Index: pixman-0.24.2/pixman/pixman-utils.c
+===================================================================
+--- pixman-0.24.2.orig/pixman/pixman-utils.c
++++ pixman-0.24.2/pixman/pixman-utils.c
+@@ -30,6 +30,10 @@
+ 
+ #include "pixman-private.h"
+ 
++#ifdef __ANDROID__
++#include <sys/limits.h>
++#endif
++
+ #define N_CACHED_FAST_PATHS 8
+ 
+ typedef struct

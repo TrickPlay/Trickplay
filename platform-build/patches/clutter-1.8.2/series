@@ -1,3 +1,4 @@
+fixup-config-for-android.patch
 dont-build-tests.patch
 color-parsing-whitespace-bugfix.patch
 get_egl_config.patch

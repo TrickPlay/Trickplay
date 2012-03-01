@@ -1,0 +1,26 @@
+Index: atk-2.2.0/atk/atkutil.c
+===================================================================
+--- atk-2.2.0.orig/atk/atkutil.c
++++ atk-2.2.0/atk/atkutil.c
+@@ -71,7 +71,7 @@ static gboolean init_done = FALSE;
+  * Array of FocusTracker structs
+  */
+ static GArray *trackers = NULL;
+-static guint  index = 0;
++static guint  atk_index = 0;
+ 
+ typedef struct _FocusTracker FocusTracker;
+ 
+@@ -124,10 +124,10 @@ atk_add_focus_tracker (AtkEventListener
+   {
+     FocusTracker item;
+ 
+-    item.index = ++index;
++    item.index = ++atk_index;
+     item.func = focus_tracker;
+     trackers = g_array_append_val (trackers, item);
+-    return index;
++    return atk_index;
+   }
+   else
+   {

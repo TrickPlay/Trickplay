@@ -1,0 +1,33 @@
+Index: libxml2-2.7.8/Makefile.in
+===================================================================
+--- libxml2-2.7.8.orig/Makefile.in
++++ libxml2-2.7.8/Makefile.in
+@@ -564,8 +564,8 @@ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ ACLOCAL_AMFLAGS = -I m4
+-SUBDIRS = include . doc example xstc @PYTHON_SUBDIR@
+-DIST_SUBDIRS = include . doc example python xstc
++SUBDIRS = include .
++DIST_SUBDIRS = include .
+ INCLUDES = -I$(top_builddir)/include -I@srcdir@/include @THREAD_CFLAGS@ @Z_CFLAGS@ 
+ bin_SCRIPTS = xml2-config
+ lib_LTLIBRARIES = libxml2.la
+@@ -1548,7 +1548,7 @@ distcleancheck: distclean
+ 	       exit 1; } >&2
+ check-am: all-am
+ check: check-recursive
+-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(SCRIPTS) $(MANS) $(DATA) \
++all-am: Makefile $(LTLIBRARIES) $(SCRIPTS) $(MANS) $(DATA) \
+ 		config.h
+ install-binPROGRAMS: install-libLTLIBRARIES
+ 
+@@ -1615,7 +1615,7 @@ install-dvi: install-dvi-recursive
+ 
+ install-dvi-am:
+ 
+-install-exec-am: install-binPROGRAMS install-binSCRIPTS \
++install-exec-am: install-binSCRIPTS \
+ 	install-confexecDATA install-libLTLIBRARIES
+ 
+ install-html: install-html-recursive
