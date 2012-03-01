@@ -3,6 +3,7 @@ module physics_bullet;
 
 [[
 #include "BulletCollision/CollisionShapes/btTriangleShape.h"
+#include <BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h>
 
 #include "physics_bullet.h"
 #include "clutter_util.h"
@@ -390,6 +391,101 @@ interface PBPointToPointConstraint [[ btPoint2PointConstraint * ]]
         ]];
 }
 
+interface PBGeneric6DOFConstraint [[ btGeneric6DofConstraint * ]]
+{
+    PBGeneric6DOFConstraint( any world , PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
+        [[
+            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+
+            btRigidBody * ba = get_rigid_body( L , bodyA );
+                        
+            if ( 0 == ba )
+            {
+                return luaL_error( L , "Invalid first body" ); 
+            }
+            
+            btTransform ta;
+            
+            if ( ! btTransformFromMatrix( L , frameA , ta ) )
+            {
+                return luaL_error( L , "Invalid matrix for first frame" );
+            }                         
+            
+            btGeneric6DofConstraint * c = 0;
+            
+            if ( 0 == bodyB )
+            {
+                c = new btGeneric6DofConstraint( * ba , ta , use_linear_reference_frame );    
+            }
+            else
+            {
+                btRigidBody * bb = get_rigid_body( L , bodyB );
+                
+                if ( 0 == bb )
+                {
+                    return luaL_error( L , "Invalid second body" );
+                }
+                
+                btTransform tb;
+                
+                if ( ! btTransformFromMatrix( L , frameB , tb ) )
+                {
+                    return luaL_error( L , "Invalid matrix for second frame" );
+                }             
+                            
+                c = new btGeneric6DofConstraint( * ba , * bb , ta , tb , use_linear_reference_frame );
+            }
+            
+            g_assert( c );
+            
+            self = lb_construct( btGeneric6DofConstraint , c );
+            
+            // TODO: need to support the disableCollisionsBetweenLinkedBodies 
+            // flag. Perhaps by not adding the constraint when it is created,
+            // but having an explicit add_constraint function on the world 
+            // that includes that flag.
+            
+            w->get_world()->addConstraint( c );
+        ]];
+
+    ~PBGeneric6DOFConstraint()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+        
+    set_linear_lower_limit( table limit )
+        [[
+            self->setLinearLowerLimit( btVector3FromTable( L , limit ) );
+        ]];
+                
+    set_linear_upper_limit( table limit )
+        [[
+            self->setLinearUpperLimit( btVector3FromTable( L , limit ) );
+        ]];
+                
+    set_angular_lower_limit( table limit )
+        [[
+            self->setAngularLowerLimit( btVector3FromTable( L , limit ) );
+        ]];
+                
+    set_angular_upper_limit( table limit )
+        [[
+            self->setAngularUpperLimit( btVector3FromTable( L , limit ) );
+        ]];
+        
+    get_frame_offsets( Matrix offsetA , Matrix offsetB )
+        [[
+            if ( ! btTransformToMatrix( L , self->getFrameOffsetA() , offsetA ) )
+            {
+                luaL_error( L , "Invalid matrix for first offset" );
+            }
+
+            if ( ! btTransformToMatrix( L , self->getFrameOffsetB() , offsetB ) )
+            {
+                luaL_error( L , "Invalid matrix for second offset" );
+            }
+        ]];        
+}
 
 interface PBBody3d [[ btCollisionObject * ]]
 {
@@ -891,5 +987,27 @@ global pb [[ Bullet::World * ]]
             lua_call( L , 5 , 1 );
         ]];
 
+    PBGeneric6DOFConstraint Generic6DOFConstraint( PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
+        [[
+            lua_pushcfunction( L , new_PBGeneric6DOFConstraint );
+            lua_pushlightuserdata( L , self );
+            lua_pushvalue( L , bodyA );
+            lua_pushvalue( L , frameA );
+            lua_pushboolean( L , use_linear_reference_frame );
+            
+            if ( 0 == bodyB || 0 == frameB )
+            {
+                lua_pushnil( L );
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_pushvalue( L , bodyB );
+                lua_pushvalue( L , frameB );
+            }
+            
+            lua_call( L , 6 , 1 );
+        ]];
+        
     callback on_step( double seconds );
 }
