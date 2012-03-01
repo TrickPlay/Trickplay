@@ -37,11 +37,9 @@ class Wizard():
         # Check settings for the last path used
         settings = QSettings()
         dir = str(settings.value('path', '').toString())
+
         # If no app path was passed in
         if not path and newApp == False:
-            # Check settings for the last path used
-            #settings = QSettings()
-            #dir = str(settings.value('path', '').toString())
             if os.path.exists(dir) and os.path.isdir(dir):
                 files = os.listdir(dir)
                 if len(files) <= 0:
@@ -54,6 +52,7 @@ class Wizard():
                                  ' does not contain an app file and a main.lua file.')
             else:
                 #TODO: add dialog box for openApp or newApp 
+                print("[VDBG] YUGI 2")
                 return
 
 	    # Get a path from the user
@@ -75,8 +74,8 @@ class Wizard():
                         return self.createAppDialog(userPath)
                         
                     if 'app' in files and 'main.lua' in files:
-                        return self.start(path, False, False)
-                        #return userPath
+                        #return self.start(path, True, False)
+                        return userPath
                     else:
                         msg = QMessageBox()
                         msg.setText('Directory "' + os.path.basename(str(userPath)) +
@@ -159,14 +158,7 @@ class Wizard():
                     return -3
                 
             else:
-                print("U",path)
-                path = os.path.dirname(path)
-                
-                msg = QMessageBox()
-                msg.setText('\'' + os.path.basename(str(path)) + '\' is not an empty directory. Please select an empty directory to create a new app.')
-                msg.setWindowTitle("Warning")
-                msg.exec_()
-                # no app or main.lua
+                #print("U",path)
                 return -1
             
         else:
@@ -186,8 +178,8 @@ class Wizard():
         	elif 1 == result:
         	    self.ui.id.setReadOnly(True)
         	    self.ui.name.setReadOnly(True)
-        	    self.ui.id.setText(self.id)
-        	    self.ui.name.setText(self.name)
+        	    #self.ui.id.setText(self.id)
+        	    #self.ui.name.setText(self.name)
         	    self.new = False                
 
         	if -1 == result:
@@ -213,22 +205,22 @@ class Wizard():
         else :
         	directory = dir
         
+
         path = QFileDialog.getExistingDirectory(None, 'Create an app directory', directory, QFileDialog.ShowDirsOnly)
         apath = os.path.dirname(str(path))
         
         result = self.adjustDialog(path, directory)
-        if result >= 0:
-        	if directory is None :
-        	    print("W",path,apath)
-        	    self.ui.directory.setText(path)
-        	else:
-        	    print("H",path,apath,directory)
-        	    msg = QMessageBox()
-        	    msg.setText('\'' + os.path.basename(str(path)) + '\' is not an empty directory. Please select an empty directory to create a new app.')
-        	    msg.setWindowTitle("Warning")
-        	    msg.exec_()
-        	    self.ui.directory.setText(path)
-		    return path
+        if result == 0:
+            self.ui.directory.setText(path)
+            self.ui.id.setReadOnly(False)
+            self.ui.name.setReadOnly(False)
+            self.new = True
+        else:
+            msg = QMessageBox()
+            msg.setText('\'' + os.path.basename(str(path)) + '\' is not an empty directory. Please select an empty directory to create a new app.')
+            msg.setWindowTitle("Warning")
+            msg.exec_()
+        return path
         
     def createAppDialog(self, path):
         """
@@ -238,9 +230,9 @@ class Wizard():
         self.dialog = QDialog()
         self.ui = Ui_newApplicationDialog()
         self.ui.setupUi(self.dialog)
-        self.ui.directory.setText(path)
+        #self.ui.directory.setText(path)
         
-        self.adjustDialog(path)
+        #self.adjustDialog(path)
         cancelButton = self.ui.buttonBox.button(QDialogButtonBox.Cancel)
         okButton = self.ui.buttonBox.button(QDialogButtonBox.Ok)
 
@@ -305,5 +297,4 @@ class Wizard():
 
 
     def exit_ii(self):
-		#print("asjflashdflks")
 		pass

@@ -168,6 +168,7 @@ class Editor(QsciScintilla):
 			m += 1
     """
     def modificationChanged(self, changed):
+        print("modification changed")
         if self.isRedoAvailable() == True:
             self.editorManager.main.ui.actionRedo.setEnabled(True)
         else :
@@ -175,6 +176,11 @@ class Editor(QsciScintilla):
 
         index = self.editorManager.tab.currentIndex()
         if self.isUndoAvailable() == True and self.text_status is not TEXT_DEFAULT :
+            self.editorManager.main.ui.actionUndo.setEnabled(True)
+            tabTitle = self.editorManager.tab.tabText(index)
+            if tabTitle[:1] != "*":
+                self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+        elif self.isUndoAvailable() == True and self.tempfile is True :
             self.editorManager.main.ui.actionUndo.setEnabled(True)
             tabTitle = self.editorManager.tab.tabText(index)
             if tabTitle[:1] != "*":

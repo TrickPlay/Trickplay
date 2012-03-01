@@ -42,7 +42,6 @@ class EditorTabWidget(QTabWidget):
 
 		editor = self.editors[index] #self.app.focusWidget()
 		
-		self.windowsMenu.removeAction(editor.windowsAction)
 		# reset the windowsActions'shortcuts 
 		n=0
 		for edt in self.editors:
@@ -71,22 +70,25 @@ class EditorTabWidget(QTabWidget):
 							editor.save()
 						else:
 							self.main.saveas()
+							index = self.count() - 1
 					elif ret == QMessageBox.Cancel:
 						return 
 					else:
 						pass
 
 		#close current index tab
-		self.paths.pop(index)
+
+		#print(index, "deleted")
 		self.textBefores.pop(index) #new
-		self.editors.pop(index) #new
+		edt = self.editors.pop(index) #new
+		self.windowsMenu.removeAction(edt.windowsAction)
 		self.removeTab(index)
+		self.paths.pop(index)
+
 		if 0 == self.count():
 			self.m.editorMenuEnabled(False)
 			self.close()
 			self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
-
-
 				
     def changeTab(self, index):
 

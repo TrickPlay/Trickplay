@@ -212,7 +212,8 @@ class EditorManager(QWidget):
 				editor.path = new_path
 				editor.save()
 				self.close()
-				editor = self.newEditor(new_path,None,None,None,False,None,True)
+				#editor = self.newEditor(new_path,None,None,None,False,None,True)
+				editor = self.newEditor(new_path)
 
     def newEditor(self, path, tabGroup = None, line_no = None, prev_file = None, currentLine = False, fileIndex=None, tempfile = False):
         """
