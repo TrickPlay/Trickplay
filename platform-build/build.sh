@@ -384,7 +384,7 @@ UUID_COMMANDS="sed -i \"s/-c -s -m/-c -m/\" Makefile.in && ac_cv_va_copy=no ./co
 SNDFILE_V="1.0.25"
 SNDFILE_DIST="libsndfile-${SNDFILE_V}.tar.gz"
 SNDFILE_SOURCE="libsndfile-${SNDFILE_V}"
-SNDFILE_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --disable-cpu-clip  --disable-sqlite --disable-alsa --disable-external-libs --with-pic && make && make ${NUM_MAKE_JOBS} install"
+SNDFILE_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --disable-cpu-clip  --disable-sqlite --disable-alsa --disable-external-libs --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 SNDFILE_URL="http://www.mega-nerd.com/libsndfile/files/${SNDFILE_DIST}"
 
 #------------------------------------------------------------------------------
@@ -409,7 +409,7 @@ SOUP_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED 
 EXIF_V="0.6.20"
 EXIF_DIST="libexif-${EXIF_V}.tar.gz"
 EXIF_SOURCE="libexif-${EXIF_V}"
-EXIF_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-docs && make && make ${NUM_MAKE_JOBS} install"
+EXIF_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-docs && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 
