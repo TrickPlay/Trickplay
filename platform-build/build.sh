@@ -730,7 +730,7 @@ then
 
     cp -a "${THERE}/android" "${HERE}/android"
     cd "${HERE}/android"
-    ndk-build
+    TRICKPLAY_LIBRARIES_DIR="${PREFIX}" ndk-build
     android update project -p . -s
     ant release
     cp "${HERE}/android/bin/"*.apk "${HERE}"

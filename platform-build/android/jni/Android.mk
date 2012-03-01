@@ -1,5 +1,5 @@
 ORIG_PATH       :=  $(call my-dir)
-LOCAL_PATH      :=  ${PREFIX}
+LOCAL_PATH      :=  ${TRICKPLAY_LIBRARIES_DIR}
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    :=  atk-1.0
@@ -246,10 +246,10 @@ LOCAL_MODULE	:=	xml2
 LOCAL_SRC_FILES	:=	lib/libxml2.so
 include $(PREBUILT_SHARED_LIBRARY)
 
-#include $(CLEAR_VARS)
-#LOCAL_MODULE	:=	z
-#LOCAL_SRC_FILES	:=	lib/libz.a
-#include $(PREBUILT_STATIC_LIBRARY)
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	zlib
+LOCAL_SRC_FILES	:=	lib/libz.a
+include $(PREBUILT_STATIC_LIBRARY)
 
 LOCAL_PATH := $(ORIG_PATH)
 
@@ -264,7 +264,8 @@ LOCAL_SRC_FILES := 	gl_code.cpp \
 LOCAL_STATIC_LIBRARIES  :=  libbz2 \
                             crypto \
                             ssl \
-                            tpcore
+                            tpcore \
+                            zlib
 
 LOCAL_SHARED_LIBRARIES  :=  atk-1.0 \
                             avahi-common \
@@ -312,6 +313,6 @@ LOCAL_SHARED_LIBRARIES  :=  atk-1.0 \
                             uuid \
                             xml2
 
-LOCAL_LDLIBS    := -lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2 -lz
+LOCAL_LDLIBS    := -lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)
