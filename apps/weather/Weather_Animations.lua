@@ -391,7 +391,7 @@ do
         }
     }
     
-    tstorm_state.state = "SET"
+    tstorm_state.state = "OFF"
     
     tstorm_state.timeline.on_started = function()
         if tstorm_state.state == "ON" then
@@ -952,15 +952,17 @@ do
         },
     }
     
-    wiper_state.state = "OFF"
+    wiper_state.state = "NONE"
     
     local add_to_screen = function()
         
-        curr_condition:add(
-            snow_blade,
-            wiper_blade,
-            wiper_rain
-        )
+        if wiper_rain.parent == nil then
+            curr_condition:add(
+                snow_blade,
+                wiper_blade,
+                wiper_rain
+            )
+        end
         snow_blade.z_rotation = {0,0,0}
         wiper_blade.z_rotation = {0,0,0}
         
@@ -997,6 +999,7 @@ do
     end
     
     function wiper_state:next_state(s)
+        
         if s == wiper_state.state then
             return
         end
@@ -1646,11 +1649,14 @@ conditions["Chance of a Thunderstorm"] = conditions["Chance of Thunderstorms"]
 --from curr conditions
 conditions["Rain Showers"]        = conditions["Rain"]
 conditions["Drizzle"]             = conditions["Rain"]
-conditions["Light Rain"]          = conditions["Rain"]
+--conditions["Light Rain"]          = conditions["Rain"]
+--conditions["Heavy Rain"]          = conditions["Rain"]
 conditions["Snow Grains"]         = conditions["Snow"]
 conditions["Ice Crystals"]        = conditions["Snow"]
 conditions["Ice Pellets"]         = conditions["Snow"]
 conditions["Hail"]                = conditions["Snow"]
+--conditions["Heavy Snow"]          = conditions["Snow"]
+--conditions["Light Snow"]          = conditions["Snow"]
 conditions["Mist"]                = conditions["Haze"]
 conditions["Smoke"]               = conditions["Fog"]
 conditions["Low Drifting Snow"]   = conditions["Flurries"]
@@ -1664,14 +1670,27 @@ conditions["Thunderstorms and Ice Pellets"] = conditions["Thunderstorms"]
 conditions["Thunderstorms and Hail"]        = conditions["Thunderstorms"]
 conditions["Thunderstorms and Small Hail"]  = conditions["Thunderstorms"]
 
-
+local n1, n2
 setmetatable(conditions,{
     __index = function(t,k)
         
-        print("conditions in WeatherAnimations.lua received unexpected weather condition: ")
-        print("\t"..k)
-        print("Please tell Alex Indaco that this happened\n\n")
+        k = k or "" --quick fix to not cause nil exception in the gsubs
         
+        k, n1 = string.gsub(k,"^Light ","")
+        k, n2 = string.gsub(k,"^Heavy ","")
+        
+        if n1 > 0 or n2 > 0 then
+            
+            return t[k]
+        else
+            
+            print("conditions in WeatherAnimations.lua received unexpected weather condition: ")
+            print("\t",k)
+            print("Please tell Alex Indaco that this happened\n\n")
+            
+            return t["Unknown"]
+            
+        end
     end,
 })
 

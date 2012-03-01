@@ -13,6 +13,7 @@ function post_main()
 	fade_in_full_gradient = nil
 	fade_in_mini_gradient = nil
 	
+--[[
 	faux_len = 15
 	
 	left_faux_bar = Group{
@@ -46,13 +47,14 @@ function post_main()
 			}
 		}
 	}
-	
+--]]	
+
 	logo = Clone{source=imgs.logo,x=1670,y=1042}
-	
+--[[
 	left_faux_bar.x=-left_faux_bar.w
 	
 	right_faux_bar.x=left_faux_bar.w
-
+--]]
 
 
 	m_grad = Clone{
@@ -84,7 +86,7 @@ function post_main()
 	
 	all_anims = {} -- used for test bar
 	bars={}
-	screen:add(curr_condition,left_faux_bar,right_faux_bar)
+	screen:add(curr_condition)--,left_faux_bar,right_faux_bar)
 	dofile("Internet.lua")
 	dofile("Weather_Bar.lua")
 	dofile("Weather_Animations.lua")
@@ -125,10 +127,10 @@ function post_main()
 	for i,location in pairs(locations) do
 		
 		if location == "00000" then
-			table.insert(bars,Make_Bar(location,nil,i,true))
-			bars[#bars].curr_condition="Sunny"
+			bars[i] = Make_Bar(location,nil,i,true)
+			bars[i].curr_condition="Sunny"
 		else
-			table.insert(bars,Make_Bar(location,nil,i))
+			bars[i] = Make_Bar(location,nil,i)
 		end
 		
 	end
