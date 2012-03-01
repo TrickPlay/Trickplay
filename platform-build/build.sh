@@ -638,6 +638,7 @@ then
         -I ${PREFIX}/include \
         -Wl,--start-group \
             -ltpcore \
+            -ltplua \
             -lpthread \
 	    -ljson-glib-1.0 \
 	    -latk-1.0 \
