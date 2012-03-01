@@ -5,7 +5,7 @@ screen_w = screen.w
 screen_h = screen.h
 screen:show()
 --screen:add(Rectangle{name="A Grey Background for the APP",w=screen_w,h=screen_h,color={60,60,60}})
-dofile("App_Loop.lua")
+--dofile("App_Loop.lua")
 dofile("Utils.lua")
 
 function post_main()
@@ -13,6 +13,7 @@ function post_main()
 	fade_in_full_gradient = nil
 	fade_in_mini_gradient = nil
 	
+--[[
 	faux_len = 15
 	
 	left_faux_bar = Group{
@@ -46,13 +47,14 @@ function post_main()
 			}
 		}
 	}
-	
+--]]	
+
 	logo = Clone{source=imgs.logo,x=1670,y=1042}
-	
+--[[
 	left_faux_bar.x=-left_faux_bar.w
 	
 	right_faux_bar.x=left_faux_bar.w
-
+--]]
 
 
 	m_grad = Clone{
@@ -72,56 +74,7 @@ function post_main()
 	
 	focused_bar = {}
 	
-	function make_focused_bar_state()
-		local transitions = {}
-		local keys
-		local prev_i
-		for i,v in ipairs(bars) do
-			
-			--FULL Bars
-			
-			--MINI Bars
-			
-			-- Press Right, Bars shift to the right, focused index: (i-1) -> i
-			keys = {}
-			prev_i = (i-2)%#bars+1
-			for ii,vv in ipairs(bars) do
-				if ii == i then
-					
-				else
-					
-				end
-			end
-			
-			transitions[i] = {
-                source = prev_i .."",
-                target = i.."",
-				keys
-			}
-			
-			
-			
-			-- Press Left, Bars shift to the right, focused index: (i+1) -> i
-			keys = {}
-			prev_i = (i)%#bars+1
-			for ii,vv in ipairs(bars) do
-				if ii == i then
-					
-				else
-					
-				end
-			end
-			
-			transitions[i] = {
-                source = prev_i .."",
-                target = i.."",
-				keys
-			}
-		end
-		focused_bar = AnimationState{
-            transitions = transitions
-		}
-	end
+	
 	
 		
 	--load saved settings, or default to Palo Alto,CA
@@ -131,9 +84,9 @@ function post_main()
 	view_5_day=false
 	curr_condition=Group{name="Bottom Corner Weather conditions"}
 	
-	all_anims = {}
+	all_anims = {} -- used for test bar
 	bars={}
-	screen:add(curr_condition,left_faux_bar,right_faux_bar)
+	screen:add(curr_condition)--,left_faux_bar,right_faux_bar)
 	dofile("Internet.lua")
 	dofile("Weather_Bar.lua")
 	dofile("Weather_Animations.lua")
@@ -167,15 +120,17 @@ function post_main()
 	
 	
 	if settings.bar_state then bar_state:change_state_to(settings.bar_state) end
-	print(settings.bar_state)
+	
+	--print(settings.bar_state)
+	
 	--make the weather bars for each location
 	for i,location in pairs(locations) do
 		
 		if location == "00000" then
-			table.insert(bars,Make_Bar(location,i,true))
-			bars[#bars].curr_condition="Sunny"
+			bars[i] = Make_Bar(location,nil,i,true)
+			bars[i].curr_condition="Sunny"
 		else
-			table.insert(bars,Make_Bar(location,nil,i))
+			bars[i] = Make_Bar(location,nil,i)
 		end
 		
 	end

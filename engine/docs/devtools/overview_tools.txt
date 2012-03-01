@@ -1,5 +1,9 @@
 
 Title: TrickPlay Development Tools Overview
 
-This is a placeholder for the Overview section of the TrickPlay Development Tools Manual
+The TrickPlay SDK provides powerful tools that assist in the rapid development of a TrickPlay application.
+
+The TrickPlay IDE is a complete development environment that includes a full-featured Editor and powerful Debugger. With the IDE, a TrickPlay application can be developed, run, tested and debugged from either a local computer terminal or a remote television.
+
+A TrickPlay application's user interface can be created quickly by using the Visual Editor to position screen elements, like pushbuttons and edit boxes.
 

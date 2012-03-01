@@ -740,6 +740,8 @@ int TPContext::run()
     //.........................................................................
     // Load the app
 
+    bool run_app = ! get_bool( TP_DONT_RUN_APP , false );
+
     g_info( "LOADING APP..." );
 
     App * app = 0;
@@ -748,12 +750,28 @@ int TPContext::run()
 
     if ( app )
     {
+
+#ifndef TP_PRODUCTION
+
+    	// Output a machine-readable JSON string with all
+    	// the "control" ports.
+
+    	g_info( "<<CONTROL>>:%s" , get_control_message( app ).c_str() );
+
+#endif
+
         //.....................................................................
         // Execute the app's script
 
         first_app_id = app->get_id();
-        app->run( app_allowed[ first_app_id ] , app_run_callback );
+
+        if ( run_app )
+        {
+        	app->run( app_allowed[ first_app_id ] , app_run_callback );
+        }
+
         app->unref();
+
         app = 0;
 
         //.................................................................
@@ -1234,9 +1252,44 @@ void TPContext::remove_console_command_handler( const char * command, TPConsoleC
 
 //-----------------------------------------------------------------------------
 
+class LogHandlerAction : public Action
+{
+public:
+
+	LogHandlerAction( gchar * _line , const TPContext::OutputHandlerSet & _handlers )
+	:
+		line( _line ),
+		handlers( _handlers )
+	{}
+
+	virtual ~LogHandlerAction()
+	{
+		g_free( line );
+	}
+
+protected:
+
+    virtual bool run()
+    {
+        for ( TPContext::OutputHandlerSet::const_iterator it = handlers.begin(); it != handlers.end(); ++it )
+        {
+            it->first( line, it->second );
+        }
+
+    	return false;
+    }
+
+private:
+
+	gchar * 					line;
+	TPContext::OutputHandlerSet handlers;
+};
+
+//-----------------------------------------------------------------------------
+
 void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level, const gchar * message, gpointer self )
 {
-    static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT } verbose = CHECK;
+    static enum { CHECK , NORMAL , ENGINE , APP , APP_RAW , SILENT , BARE } verbose = CHECK;
 
     if ( verbose == CHECK )
     {
@@ -1259,6 +1312,10 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             else if ( ! strcmp( e , "silent" ) )
             {
                 verbose = SILENT;
+            }
+            else if ( ! strcmp( e , "bare" ) )
+            {
+            	verbose = BARE;
             }
         }
     }
@@ -1284,15 +1341,21 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
         case APP_RAW:
             if ( log_level == G_LOG_LEVEL_MESSAGE )
             {
-                fprintf( stdout, "%s\n", message );
+                fprintf( stderr, "%s\n", message );
+                fflush( stderr );
             }
             return;
+
+        case BARE:
+        	fprintf( stderr , "%s\n" , message );
+        	fflush( stderr );
+        	return;
 
         default:
             break;
     }
 
-    gchar * line = NULL;
+    gchar * line = 0;
 
     // This is before a context is created, so we just print out the message
 
@@ -1300,6 +1363,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
     {
         line = format_log_line( log_domain, log_level, message );
         fprintf( stderr, "%s", line );
+        fflush( stderr );
     }
 
     // Otherwise, we have a context and more choices as to what we can do with
@@ -1331,20 +1395,26 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             {
                 line = format_log_line( log_domain, log_level, message );
                 fprintf( stderr, "%s", line );
+                fflush( stderr );
             }
 
             if ( !context->output_handlers.empty() )
             {
-                if ( !line )
+                if ( ! line )
                 {
                     line = format_log_line( log_domain, log_level, message );
                 }
 
-                for ( OutputHandlerSet::const_iterator it = context->output_handlers.begin();
-                        it != context->output_handlers.end(); ++it )
-                {
-                    it->first( line, it->second );
-                }
+                // Because we are already being called by g_logv and it is not
+                // recursive/re-entrant, we defer logging to other handlers by posting an
+                // action.
+
+                Action::post( new LogHandlerAction( line , context->output_handlers ) );
+
+                // The action will free the original line when it is finished with it,
+                // so we clear it here
+
+                line = 0;
             }
         }
     }
@@ -2343,6 +2413,46 @@ void TPContext::load_background()
 	}
 
 #endif
+}
+
+String TPContext::get_control_message( App * app ) const
+{
+	app = app ? app : current_app;
+
+	JSON::Object control;
+
+	guint16 port;
+
+	if ( ( port = http_server->get_port() ) )
+	{
+		control[ "http" ] = port;
+	}
+
+	if ( ( port = console ? console->get_port() : 0 ) )
+	{
+		control[ "console" ] = port;
+	}
+
+	if ( app )
+	{
+		if ( Debugger * debugger = app->get_debugger() )
+		{
+			if ( ( port = debugger->get_server_port() ) )
+			{
+				control[ "debugger" ] = port;
+			}
+		}
+	}
+
+	if ( controller_server )
+	{
+		if ( ( port = controller_server->get_port() ) )
+		{
+			control[ "controllers" ] = port;
+		}
+	}
+
+	return control.stringify();
 }
 
 //=============================================================================

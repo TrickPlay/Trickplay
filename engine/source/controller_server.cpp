@@ -1176,4 +1176,8 @@ void ControllerServer::handle_http_post( const HttpServer::Request & request , H
 
 //-----------------------------------------------------------------------------
 
+guint16 ControllerServer::get_port() const
+{
+	return server.get() ? server->get_port() : 0;
+}
 
