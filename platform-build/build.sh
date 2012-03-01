@@ -717,3 +717,20 @@ then
 
     rm -rf ${HERE}/test
 fi
+
+#------------------------------------------------------------------------------
+# Build Android project
+
+if [[ -d "${THERE}/android" ]]
+then
+
+    echo "================================================================="
+    echo "== Building Android JNI project"
+    echo "================================================================="
+
+    cp -a "${THERE}/android" "${HERE}/android"
+    cd "${HERE}/android"
+    ndk-build
+    ant release
+
+fi
