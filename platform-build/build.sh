@@ -44,10 +44,12 @@ if [[ ${DYNAMIC_BUILD} == 1 ]]
 then
     TP_CORE_SHARED="-DTP_CORE_SHARED=1"
     SHARED="--enable-shared --disable-static"
+    ZLIB_SHARED="--shared"
     echo "DYMAMIC build selected"
 else
     TP_CORE_SHARED=""
     SHARED="--disable-shared"
+    ZLIB_SHARED=""
     echo "STATIC build selected"
 fi
 
@@ -56,7 +58,7 @@ then
 	NUM_MAKE_JOBS=-j`awk '/processor/{num_procs+=1} END {print num_procs+1}' /proc/cpuinfo`
 	echo "Setting NUM_MAKE_JOBS to '${NUM_MAKE_JOBS}'"
 else
-	NUM_MAKE_JOBS=''
+	NUM_MAKE_JOBS='-j8'
 fi
 
 #------------------------------------------------------------------------------
@@ -80,7 +82,23 @@ fi
 GET_TEXT_V="0.18.1.1"
 GET_TEXT_DIST="gettext-${GET_TEXT_V}.tar.gz"
 GET_TEXT_SOURCE="gettext-${GET_TEXT_V}"
-GET_TEXT_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
+GET_TEXT_COMMANDS="gl_cv_header_working_stdint_h=yes ./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
+# libiconv
+
+ICONV_V="1.14"
+ICONV_DIST="libiconv-${ICONV_V}.tar.gz"
+ICONV_SOURCE="libiconv-${ICONV_V}"
+ICONV_COMMANDS="gl_cv_header_working_stdint_h=yes ./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-dependency-tracking && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
+# libbind
+LIBBIND_V="6.0"
+LIBBIND_DIST="libbind-${LIBBIND_V}.tar.gz"
+LIBBIND_SOURCE="libbind-${LIBBIND_V}"
+LIBBIND_URL="ftp://ftp.isc.org/isc/libbind/${LIBBIND_V}/libbind-${LIBBIND_V}.tar.gz"
+LIBBIND_COMMANDS="./configure --host=${HOST} --with-randomdev=/dev/random --prefix=$PREFIX && make CFLAGS='$CFLAGS -Iinclude' AR='$AR' ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # glib
@@ -90,7 +108,7 @@ GLIB_V="${GLIB_MV}.1"
 GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.gz"
 GLIB_DIST="glib-${GLIB_V}.tar.gz"
 GLIB_SOURCE="glib-${GLIB_V}"
-GLIB_COMMANDS="PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=yes ac_cv_func_posix_getgrgid_r=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && make ${NUM_MAKE_JOBS} install"
+GLIB_COMMANDS="(./autogen.sh 2>/dev/null) ; cp ${THERE}/files/config.{sub,guess} . && PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=no ac_cv_func_posix_getgrgid_r=no ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -I${PREFIX}/include/bind\" && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # We build glib for the host system first, so the cross compiled one can get
@@ -100,6 +118,7 @@ GLIB_COMMANDS="PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore
 GLIB_HOST_DIST="glib-${GLIB_V}.tar.gz"
 GLIB_HOST_SOURCE="glib-${GLIB_V}"
 GLIB_HOST_COMMANDS="env -i PATH=$PATH ./configure --prefix=$PREFIX/host --disable-fam && make ${NUM_MAKE_JOBS} install && cd .. && rm -rf ./$GLIB_HOST_SOURCE"
+GLIB_DEPENDS="ICONV"
 
 #------------------------------------------------------------------------------
 # sqlite
@@ -125,7 +144,7 @@ ZLIB_V="1.2.3"
 ZLIB_URL="http://www.zlib.net/zlib-${ZLIB_V}.tar.gz"
 ZLIB_DIST="zlib-${ZLIB_V}.tar.gz"
 ZLIB_SOURCE="zlib-${ZLIB_V}"
-ZLIB_COMMANDS="make prefix=$PREFIX CC=\"$CC\" AR=\"$AR r\" CFLAGS=\"-fPIC\" ${NUM_MAKE_JOBS} install"
+ZLIB_COMMANDS="./configure --prefix=$PREFIX ${ZLIB_SHARED} && make CC=\"$CC\" AR=\"$AR r\" CFLAGS=\"-fPIC\" ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # cares
@@ -134,7 +153,7 @@ CARES_V="1.7.0"
 CARES_URL="http://c-ares.haxx.se/c-ares-${CARES_V}.tar.gz"
 CARES_DIST="c-ares-${CARES_V}.tar.gz"
 CARES_SOURCE="c-ares-${CARES_V}"
-CARES_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
+CARES_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-dependency-tracking && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # curl
@@ -143,8 +162,8 @@ CURL_V="7.20.0"
 CURL_URL="http://curl.haxx.se/download/curl-${CURL_V}.tar.gz"
 CURL_DIST="curl-${CURL_V}.tar.gz"
 CURL_SOURCE="curl-${CURL_V}"
-CURL_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-ares --with-ssl --with-zlib --without-random --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-manual --disable-dict && make ${NUM_MAKE_JOBS} install"
-CURL_DEPENDS="CARES ZLIB OPENSSL"
+CURL_COMMANDS="curl_cv_func_recvfrom_args='int,void *,size_t,unsigned int,struct sockaddr *,socklen_t *,ssize_t' ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-dependency-tracking --disable-ares --with-ssl --with-zlib --without-random --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smtp --disable-manual --disable-dict --enable-ipv6 && make ${NUM_MAKE_JOBS} install"
+CURL_DEPENDS="ZLIB OPENSSL"
 #------------------------------------------------------------------------------
 # bzip
 
@@ -179,7 +198,7 @@ FREETYPE_V="2.3.12"
 FREETYPE_URL="http://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_V}.tar.gz"
 FREETYPE_DIST="freetype-${FREETYPE_V}.tar.gz"
 FREETYPE_SOURCE="freetype-${FREETYPE_V}"
-FREETYPE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} install"
+FREETYPE_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic && make && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # fontconfig
@@ -296,15 +315,15 @@ CLUTTER_URL="http://source.clutter-project.org/sources/clutter/${CLUTTER_MV}/clu
 CLUTTER_DIST="clutter-${CLUTTER_V}.tar.gz"
 CLUTTER_SOURCE="clutter-${CLUTTER_V}"
 CLUTTER_PROFILING=""
-if [[ $PROFILING != "0" ]] 
+if [[ $PROFILING != "0" ]]
 then
     CLUTTER_PROFILING="--enable-profile=yes"
 fi
 
 #Override Clutter CFLAGS so that it is not built optimized
 
-CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install" 
-#CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.so $PREFIX/lib" 
+CLUTTER_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --with-flavour=eglnative --with-gles=${GLES} --with-imagebackend=internal --enable-conformance=no $CLUTTER_PROFILING CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
+#CLUTTER_COMMANDS="make ${NUM_MAKE_JOBS} && cp ./clutter/.libs/*.so $PREFIX/lib"
 CLUTTER_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
 #------------------------------------------------------------------------------
@@ -376,7 +395,7 @@ EXIF_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED 
 
 #------------------------------------------------------------------------------
 
-ALL="ZLIB EXPAT XML EXIF GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
+ALL="ZLIB EXPAT XML EXIF ICONV GET_TEXT LIBBIND GLIB SQLITE OPENSSL CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK UPROF CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 
 #-----------------------------------------------------------------------------
 
@@ -394,7 +413,7 @@ if [[ ! -d "${PREFIX}" ]]
 then
 
     mkdir "${PREFIX}"
-    
+
     if [[ -d ${THERE}/base ]]
     then
         cp -r ${THERE}/base/* ${PREFIX}/
@@ -407,12 +426,12 @@ fi
 if [[ ! -d "${SOURCE}" ]]
 then
     mkdir "${SOURCE}"
-fi   
+fi
 
 if [[ ! -d "${LIB_BUILD}" ]]
 then
     mkdir "${LIB_BUILD}"
-fi   
+fi
 
 #-----------------------------------------------------------------------------
 # Get the list of things that have already been built - this lets you keep
@@ -444,19 +463,19 @@ then
         if [[ ${ALL} == *clean* ]]
         then
             CLEAN=1
-        fi    
+        fi
     fi
 fi
 
 #-----------------------------------------------------------------------------
 
 for THIS in ${ALL}; do
-    
+
     if [[ ${THIS} == "clean" ]]
     then
         continue
     fi
-    
+
     if [[ $BUILT == "" ]]
     then
       DOIT=1
@@ -466,43 +485,43 @@ for THIS in ${ALL}; do
       DOIT=$?
       set -e
     fi
-        
+
     if [[ $DOIT != 0 ]]
     then
-    
+
         THIS_V=${THIS}_V
         THIS_URL=${THIS}_URL
         THIS_DIST=${THIS}_DIST
         THIS_SOURCE=${THIS}_SOURCE
         THIS_COMMANDS=${THIS}_COMMANDS
-        
+
 
         echo "================================================================="
         echo "== Building ${!THIS_SOURCE}...($THIS)"
         echo "================================================================="
 
         # If the source directory does not exist, unpack the dist
-        
+
 
         if [[ ! -d "${LIB_BUILD}/${!THIS_SOURCE}" ]]
         then
-        
+
             cd ${SOURCE}
-            
+
             # If the dist does not exist, download it
-            
+
             if [[ ! -f "${!THIS_DIST}" ]]
             then
                 wget "http://developer.trickplay.com/sources/${!THIS_DIST}"
             fi
-            
+
             cd ${LIB_BUILD}
-            
+
             if [[ "${!THIS_DIST:0-3}" == "bz2" ]]
             then
-                tar jxf "${SOURCE}/${!THIS_DIST}" 
+                tar jxf "${SOURCE}/${!THIS_DIST}"
             else
-                tar zxf "${SOURCE}/${!THIS_DIST}" 
+                tar zxf "${SOURCE}/${!THIS_DIST}"
             fi
 
 	        # Patches
@@ -513,38 +532,38 @@ for THIS in ${ALL}; do
 			    QUILT_PATCHES="${THERE}/patches/${!THIS_SOURCE}" quilt push -a
 	        fi
         fi
-        
-        
+
+
         # cd into the source directory for this one
-        
+
         cd ${LIB_BUILD}/${!THIS_SOURCE}
-        
+
         # clean
-        
+
         if [[ ${CLEAN} == 1 ]]
         then
             make ${NUM_MAKE_JOBS} clean > ${OUT}
         fi
-        
+
         # configure and build
         echo "executing command: ${!THIS_COMMANDS} > ${OUT}" > ${OUT}
         eval ${!THIS_COMMANDS} > ${OUT}
-        
+
         # Save it to the built file
-        
+
         if [[ ${STATE} == 1 ]]
         then
-        
+
             echo "${THIS}" >> ${HERE}/built
-            
+
         fi
-        
+
         # cd back here
-        
+
         cd ${HERE}
-    
+
     fi
-    
+
 done
 
 #------------------------------------------------------------------------------
@@ -555,7 +574,7 @@ ND_DIST="NaturalDocs-1.52.zip"
 if [[ ! -d ${SOURCE}/nd ]]
 then
 
-    cd ${SOURCE} 
+    cd ${SOURCE}
     if [[ ! -f "./${ND_DIST}" ]]
     then
         wget "http://developer.trickplay.com/sources/${ND_DIST}"
@@ -564,45 +583,45 @@ then
     unzip "${ND_DIST}" -d ./nd/
     chmod +x ./nd/NaturalDocs
     cd ${HERE}
-    
+
 fi
 
 #------------------------------------------------------------------------------
 # Trickplay
 
-if [[ -f "${THERE}/../CMakeLists.txt" ]]    
+if [[ -f "${THERE}/../CMakeLists.txt" ]]
 then
 
     if [[ ! -d ${HERE}/tp-build ]]
     then
-    
+
         TP_PROFILING=""
         if [[ $PROFILING != "0" ]]
         then
             TP_PROFILING="-DTP_PROFILING=1"
         fi
-        
+
         mkdir ${HERE}/tp-build
-        cd ${HERE}/tp-build 
-        
+        cd ${HERE}/tp-build
+
         cmake   -DCMAKE_TOOLCHAIN_FILE=${THERE}/toolchain.cmake \
                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
                 -DTP_CLUTTER_BACKEND_EGL=1 \
                 -DNATURAL_DOCS=${SOURCE}/nd/NaturalDocs \
                 $TP_CORE_SHARED \
 	            $TP_PROFILING \
-                "${THERE}/../"   
+                "${THERE}/../"
     fi
 
     echo "================================================================="
     echo "== Building libtpcore..."
     echo "================================================================="
 
-    make -C ${HERE}/tp-build ${NUM_MAKE_JOBS} --no-print-directory 
+    make -C ${HERE}/tp-build ${NUM_MAKE_JOBS} --no-print-directory
     make -C ${HERE}/tp-build --no-print-directory oem-docs install
 
 fi
-   
+
 #------------------------------------------------------------------------------
 # Build a test exe
 
@@ -672,9 +691,9 @@ then
         -lUMP \
         -lexif \
 	    ${THERE}/test/main.cpp \
-	    -Wl,--end-group 
-	
-    rm -rf ${HERE}/test	
+	    -Wl,--end-group
+
+    rm -rf ${HERE}/test
 fi
 
 #------------------------------------------------------------------------------
@@ -687,13 +706,13 @@ then
     echo "== Building LG addon..."
     echo "================================================================="
 
-    make -C ${THERE}/lg-source --no-print-directory clean 
+    make -C ${THERE}/lg-source --no-print-directory clean
     make -C ${THERE}/lg-source TRICKPLAY_INCLUDE="${PREFIX}/include" TRICKPLAY_LIB="${PREFIX}/lib"
     if [[ ! -d "${HERE}/lg" ]]
     then
         mkdir "${HERE}/lg"
     fi
-    
+
     mv ${THERE}/lg-source/bin/trickplay ${HERE}/lg/
     make -C ${THERE}/lg-source --no-print-directory clean
 
