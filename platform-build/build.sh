@@ -731,6 +731,8 @@ then
     cp -a "${THERE}/android" "${HERE}/android"
     cd "${HERE}/android"
     ndk-build
+    android update project -p . -s
     ant release
+    cp "${HERE}/android/bin/"*.apk "${HERE}"
 
 fi
