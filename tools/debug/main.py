@@ -28,6 +28,11 @@ from UI.GotoLine import Ui_gotoLineDialog
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+EDITOR_MODE = 1
+RUN_STOP = 2
+DEBUG_INBREAK = 3
+DEBUG_NOT_INBREAK = 4
+
 class MainWindow(QMainWindow):
     
     def __init__(self, app, apath=None, parent = None):
@@ -127,6 +132,9 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionGo_to_line, SIGNAL("triggered()"),  self.editor_go_to_line)
 
 		#Debug Menu
+        QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
+        QObject.connect(self.ui.action_Debug, SIGNAL("triggered()"),  self.debug)
+        QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
         QObject.connect(self.ui.actionContinue, SIGNAL("triggered()"),  self.debug_continue)
         QObject.connect(self.ui.actionPause, SIGNAL("triggered()"),  self.debug_pause)
         QObject.connect(self.ui.actionStep_into, SIGNAL("triggered()"),  self.debug_step_into)
@@ -477,7 +485,6 @@ class MainWindow(QMainWindow):
             self._backtrace.clearTraceTable(0)
             self._debug.clearLocalTable(0)
             self._debug.clearBreakTable(0)
-            self.debuggerMenuEnabled(False)
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
@@ -494,6 +501,7 @@ class MainWindow(QMainWindow):
         self.inspector.clearTree()
         self._deviceManager.ui.comboBox.setEnabled(True)
         self.debug_tbt.setEnabled(True)
+        self.debuggerMenuEnabled(False)
 
     def run(self):
         self.inspector.clearTree()
@@ -510,10 +518,20 @@ class MainWindow(QMainWindow):
         self.debug_stepout.setEnabled(False)
         self.debug_pause_bt.setEnabled(False)
         self.debug_continue_bt.setEnabled(False)
+
+        self.ui.action_Stop.setEnabled(True)
+        self.ui.actionContinue.setEnabled(False)
+        self.ui.actionPause.setEnabled(False)
+        self.ui.actionStep_into.setEnabled(False)
+        self.ui.actionStep_over.setEnabled(False)
+        self.ui.actionStep_out.setEnabled(False)
+
     	self.chgTool_run()
 
         self._deviceManager.ui.comboBox.setEnabled(False)
         self.debug_tbt.setEnabled(False)
+        self.ui.action_Run.setEnabled(False)
+        self.ui.action_Debug.setEnabled(False)
 
     def debug(self):
         #self.inspector.clearTree()
@@ -531,11 +549,20 @@ class MainWindow(QMainWindow):
             self.debug_stepout.setEnabled(True)
             #self.debug_pause_bt.setEnabled(False)
             self.debug_continue_bt.setEnabled(True)
+
+            self.ui.action_Stop.setEnabled(True)
+            self.ui.actionContinue.setEnabled(True)
+            self.ui.actionPause.setEnabled(False)
+            self.ui.actionStep_into.setEnabled(True)
+            self.ui.actionStep_over.setEnabled(True)
+            self.ui.actionStep_out.setEnabled(True)
     
     	    self.chgTool_debug()
             self._deviceManager.ui.comboBox.setEnabled(False)
             self.debug_tbt.setEnabled(False)
-            self.debuggerMenuEnabled()
+            self.ui.action_Run.setEnabled(False)
+            self.ui.action_Debug.setEnabled(False)
+            #self.debuggerMenuEnabled()
 	
     def editor_undo(self):
 		if self.editorManager.tab:
@@ -919,6 +946,11 @@ class MainWindow(QMainWindow):
         self.ui.actionGo_to_line.setEnabled(enabled)
 
     def debuggerMenuEnabled(self, enabled=True):
+
+        self.ui.action_Run.setEnabled(not enabled)
+        self.ui.action_Debug.setEnabled(not enabled)
+
+        self.ui.action_Stop.setEnabled(enabled)
         self.ui.actionContinue.setEnabled(enabled)
         self.ui.actionPause.setEnabled(enabled)
         self.ui.actionStep_into.setEnabled(enabled)

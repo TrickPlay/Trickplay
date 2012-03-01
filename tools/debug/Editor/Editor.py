@@ -168,7 +168,6 @@ class Editor(QsciScintilla):
 			m += 1
     """
     def modificationChanged(self, changed):
-        print("modification changed")
         if self.isRedoAvailable() == True:
             self.editorManager.main.ui.actionRedo.setEnabled(True)
         else :

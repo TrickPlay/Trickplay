@@ -350,6 +350,13 @@ class TrickplayDeviceManager(QWidget):
 		                    self.main.debug_stepout.setEnabled(True)
 		                    self.main.debug_pause_bt.setEnabled(False)
 		                    self.main.debug_continue_bt.setEnabled(True)
+
+		                    self.main.ui.actionContinue.setEnabled(True)
+		                    self.main.ui.actionPause.setEnabled(False)
+		                    self.main.ui.actionStep_into.setEnabled(True)
+		                    self.main.ui.actionStep_over.setEnabled(True)
+		                    self.main.ui.actionStep_out.setEnabled(True)
+
 		                    self.main.debug_run = False
 
 		                elif len(reply.command) > 3 and reply.command[:1] == DBG_CMD_BREAKPOINT or reply.command[:1] == DBG_CMD_DELETE:
@@ -441,6 +448,12 @@ class TrickplayDeviceManager(QWidget):
 		    self.main.debug_stepout.setEnabled(False)
 		    self.main.debug_pause_bt.setEnabled(True)
 		    self.main.debug_continue_bt.setEnabled(False)
+
+		    self.main.ui.actionContinue.setEnabled(False)
+		    self.main.ui.actionPause.setEnabled(True)
+		    self.main.ui.actionStep_into.setEnabled(False)
+		    self.main.ui.actionStep_over.setEnabled(False)
+		    self.main.ui.actionStep_out.setEnabled(False)
 		    self.main.debug_run = True
 		return True
 
