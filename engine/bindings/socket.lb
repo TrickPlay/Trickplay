@@ -7,9 +7,9 @@ class SocketDelegate : public TrickPlay::Socket::Delegate
 {
 public:
 
-	SocketDelegate( lua_State * _L )
+	SocketDelegate( lua_State * _LS )
 	:
-		L( _L )
+		L( _LS )
 	{
 		socket.set_delegate( this );
 	}

@@ -212,7 +212,7 @@ end
 local make_card = function(input)
 	
 	--the returned group
-	local card = Group{w = bmp.card_bg.w}
+	local card = Group{w = bmp.card_bg.w,name=input.title}
 	
 	--the group's two animate functions
 	card.update_time = update_time
