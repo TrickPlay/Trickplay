@@ -310,7 +310,8 @@ class Editor(QsciScintilla):
 
         	self.editorManager.tab.textBefores[index] = self.text()
         	self.tempfile = False
-        	print '[VDBG] \''+self.path+'\' File saved'
+        	if self.path is not None :
+        	    print '[VDBG] \''+self.path+'\' File saved'
         else: 
 			self.tempfile = True
 

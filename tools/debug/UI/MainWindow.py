@@ -16,6 +16,7 @@ except AttributeError:
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+        
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.setEnabled(True)
         MainWindow.resize(1020, 744)
@@ -192,6 +193,13 @@ class Ui_MainWindow(object):
         self.ConsoleLayout.setObjectName(_fromUtf8("ConsoleLayout"))
         self.gridLayout_5.addLayout(self.ConsoleLayout, 1, 0, 1, 1)
         self.interactive = QtGui.QLineEdit(self.ConsoleContainer)
+
+        monofont = QtGui.QFont()
+        monofont.setStyleHint(monofont.Monospace)
+        monofont.setFamily('Monospace')
+        monofont.setPointSize(10)
+
+        self.interactive.setFont(monofont)
         self.interactive.setText(_fromUtf8(""))
         self.interactive.setObjectName(_fromUtf8("interactive"))
         self.gridLayout_5.addWidget(self.interactive, 2, 0, 1, 1)
@@ -343,6 +351,13 @@ class Ui_MainWindow(object):
         font.setPointSize(10)
         self.actionNew_App.setFont(font)
         self.actionNew_App.setObjectName(_fromUtf8("actionNew_App"))
+        self.action_Run = QtGui.QAction(MainWindow)
+        self.action_Run.setObjectName(_fromUtf8("action_Run"))
+        self.action_Debug = QtGui.QAction(MainWindow)
+        self.action_Debug.setObjectName(_fromUtf8("action_Debug"))
+        self.action_Stop = QtGui.QAction(MainWindow)
+        self.action_Stop.setObjectName(_fromUtf8("action_Stop"))
+
         self.menuFile.addAction(self.action_New)
         self.menuFile.addAction(self.actionOpen_App)
         self.menuFile.addSeparator()
@@ -363,6 +378,9 @@ class Ui_MainWindow(object):
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionSearch_Replace)
         self.menuEdit.addAction(self.actionGo_to_line)
+        self.menuRun.addAction(self.action_Run)
+        self.menuRun.addAction(self.action_Debug)
+        self.menuRun.addAction(self.action_Stop)
         self.menuRun.addAction(self.actionContinue)
         self.menuRun.addAction(self.actionPause)
         self.menuRun.addAction(self.actionStep_into)
@@ -377,7 +395,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay IDE", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "Windows", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
@@ -437,4 +455,10 @@ class Ui_MainWindow(object):
         self.actionOpen_App.setText(QtGui.QApplication.translate("MainWindow", "Open existing app...", None, QtGui.QApplication.UnicodeUTF8))
         self.actionOpen_App.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew_App.setText(QtGui.QApplication.translate("MainWindow", "New App", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Run.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Run.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+F11", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Debug.setText(QtGui.QApplication.translate("MainWindow", "Debug", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Debug.setShortcut(QtGui.QApplication.translate("MainWindow", "F11", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Stop.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Stop.setShortcut(QtGui.QApplication.translate("MainWindow", "Esc", None, QtGui.QApplication.UnicodeUTF8))
 

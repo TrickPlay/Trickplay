@@ -29,7 +29,7 @@
    <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>Trickplay Visual Debugger</string>
+   <string>Trickplay IDE</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -85,6 +85,9 @@
     <property name="title">
      <string>Debug</string>
     </property>
+    <addaction name="action_Run"/>
+    <addaction name="action_Debug"/>
+    <addaction name="action_Stop"/>
     <addaction name="actionContinue"/>
     <addaction name="actionPause"/>
     <addaction name="actionStep_into"/>
@@ -345,6 +348,12 @@
      </item>
      <item row="2" column="0">
       <widget class="QLineEdit" name="interactive">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -674,6 +683,30 @@
     <font>
      <pointsize>10</pointsize>
     </font>
+   </property>
+  </action>
+  <action name="action_Run">
+   <property name="text">
+    <string>Run</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F11</string>
+   </property>
+  </action>
+  <action name="action_Debug">
+   <property name="text">
+    <string>Debug</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
+   </property>
+  </action>
+  <action name="action_Stop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
   </action>
  </widget>

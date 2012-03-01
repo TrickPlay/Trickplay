@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Replace.ui'
 #
-# Created: Mon Feb 27 14:08:11 2012
+# Created: Wed Feb 29 15:44:19 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_replaceDialog(object):
     def setupUi(self, replaceDialog):
         replaceDialog.setObjectName(_fromUtf8("replaceDialog"))
-        replaceDialog.resize(412, 284)
+        replaceDialog.resize(412, 254)
         font = QtGui.QFont()
         font.setPointSize(10)
         replaceDialog.setFont(font)
@@ -82,25 +82,26 @@ class Ui_replaceDialog(object):
         self.replace_txt.setObjectName(_fromUtf8("replace_txt"))
         self.formLayout_2.setWidget(0, QtGui.QFormLayout.FieldRole, self.replace_txt)
         self.pushButton_replaceAll = QtGui.QPushButton(replaceDialog)
-        self.pushButton_replaceAll.setGeometry(QtCore.QRect(300, 248, 99, 27))
+        self.pushButton_replaceAll.setGeometry(QtCore.QRect(300, 216, 99, 27))
         self.pushButton_replaceAll.setObjectName(_fromUtf8("pushButton_replaceAll"))
         self.pushButton_replace = QtGui.QPushButton(replaceDialog)
-        self.pushButton_replace.setGeometry(QtCore.QRect(190, 248, 99, 27))
+        self.pushButton_replace.setGeometry(QtCore.QRect(190, 216, 99, 27))
         self.pushButton_replace.setObjectName(_fromUtf8("pushButton_replace"))
         self.pushButton_replaceFind = QtGui.QPushButton(replaceDialog)
-        self.pushButton_replaceFind.setGeometry(QtCore.QRect(300, 216, 99, 27))
+        self.pushButton_replaceFind.setGeometry(QtCore.QRect(300, 184, 99, 27))
         self.pushButton_replaceFind.setObjectName(_fromUtf8("pushButton_replaceFind"))
         self.pushButton_find = QtGui.QPushButton(replaceDialog)
-        self.pushButton_find.setGeometry(QtCore.QRect(190, 216, 99, 27))
+        self.pushButton_find.setGeometry(QtCore.QRect(190, 184, 99, 27))
         self.pushButton_find.setObjectName(_fromUtf8("pushButton_find"))
         self.pushButton_close = QtGui.QPushButton(replaceDialog)
-        self.pushButton_close.setGeometry(QtCore.QRect(10, 248, 99, 27))
+        self.pushButton_close.setGeometry(QtCore.QRect(10, 216, 99, 27))
         self.pushButton_close.setObjectName(_fromUtf8("pushButton_close"))
         self.notification = QtGui.QLabel(replaceDialog)
-        self.notification.setGeometry(QtCore.QRect(10, 182, 391, 26))
+        self.notification.setGeometry(QtCore.QRect(10, 182, 173, 26))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.notification.setFont(font)
+        self.notification.setText(_fromUtf8(""))
         self.notification.setObjectName(_fromUtf8("notification"))
         self.horizontalLayoutWidget = QtGui.QWidget(replaceDialog)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(110, 70, 291, 31))
@@ -154,7 +155,6 @@ class Ui_replaceDialog(object):
         self.pushButton_replaceFind.setText(QtGui.QApplication.translate("replaceDialog", "Replace& Find", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_find.setText(QtGui.QApplication.translate("replaceDialog", "Find", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_close.setText(QtGui.QApplication.translate("replaceDialog", "Close", None, QtGui.QApplication.UnicodeUTF8))
-        self.notification.setText(QtGui.QApplication.translate("replaceDialog", "", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton_fw.setText(QtGui.QApplication.translate("replaceDialog", "Forward", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton_bw.setText(QtGui.QApplication.translate("replaceDialog", "Backward", None, QtGui.QApplication.UnicodeUTF8))
         self.labelName_3.setText(QtGui.QApplication.translate("replaceDialog", "Direction:", None, QtGui.QApplication.UnicodeUTF8))
