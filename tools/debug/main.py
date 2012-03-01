@@ -471,15 +471,23 @@ class MainWindow(QMainWindow):
     	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
                         #print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
     	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
+    	            # delete current line marker
+    	            self.current_debug_file = self.path+'/'+self._deviceManager.file_name
+    	            if self.current_debug_file == n:
+    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
+                            self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
+    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
     	        except :
     	            print("[VDBG] YUGI 1 : ", self.editorManager.editors[n][1])
 
             # delete current line marker
+            """
     		self.current_debug_file = self.path+'/'+self._deviceManager.file_name
     		if self.current_debug_file == n:
     		    self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
     	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
      	        self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
+            """
 
             # clean backtrace and debug window
             self._backtrace.clearTraceTable(0)
