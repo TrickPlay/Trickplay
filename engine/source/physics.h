@@ -293,7 +293,7 @@ namespace Physics
     {
     public:
 
-        AABBQuery( lua_State * _L );
+        AABBQuery( lua_State * _LS );
 
         virtual bool ReportFixture( b2Fixture * fixture );
 
