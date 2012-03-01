@@ -1,8 +1,259 @@
-
-LOCAL_PATH:= $(call my-dir)
+ORIG_PATH       :=  $(call my-dir)
+LOCAL_PATH      :=  ${PREFIX}
 
 include $(CLEAR_VARS)
+LOCAL_MODULE    :=  atk-1.0
+LOCAL_SRC_FILES :=  lib/libatk-1.0.so
+include $(PREBUILT_SHARED_LIBRARY)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	avahi-common
+LOCAL_SRC_FILES	:=	lib/libavahi-common.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	avahi-core
+LOCAL_SRC_FILES	:=	lib/libavahi-core.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	avahi-glib
+LOCAL_SRC_FILES	:=	lib/libavahi-glib.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	bz2
+LOCAL_SRC_FILES	:=	lib/libbz2.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	cairo
+LOCAL_SRC_FILES	:=	lib/libcairo.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	cairo-gobject
+LOCAL_SRC_FILES	:=	lib/libcairo-gobject.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	cares
+LOCAL_SRC_FILES	:=	lib/libcares.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	clutter-eglnative-1.0
+LOCAL_SRC_FILES	:=	lib/libclutter-eglnative-1.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	clutteralphamode
+LOCAL_SRC_FILES	:=	lib/libclutteralphamode.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	cogl
+LOCAL_SRC_FILES	:=	lib/libcogl.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	cogl-pango
+LOCAL_SRC_FILES	:=	lib/libcogl-pango.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	crypto
+LOCAL_SRC_FILES	:=	lib/libcrypto.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	curl
+LOCAL_SRC_FILES	:=	lib/libcurl.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	exif
+LOCAL_SRC_FILES	:=	lib/libexif.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	expat
+LOCAL_SRC_FILES	:=	lib/libexpat.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	ffi
+LOCAL_SRC_FILES	:=	lib/libffi.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	fontconfig
+LOCAL_SRC_FILES	:=	lib/libfontconfig.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	freetype
+LOCAL_SRC_FILES	:=	lib/libfreetype.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	gif
+LOCAL_SRC_FILES	:=	lib/libgif.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	gio-2.0
+LOCAL_SRC_FILES	:=	lib/libgio-2.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	glib-2.0
+LOCAL_SRC_FILES	:=	lib/libglib-2.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	gmodule-2.0
+LOCAL_SRC_FILES	:=	lib/libgmodule-2.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	gobject-2.0
+LOCAL_SRC_FILES	:=	lib/libgobject-2.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	gthread-2.0
+LOCAL_SRC_FILES	:=	lib/libgthread-2.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	iconv
+LOCAL_SRC_FILES	:=	lib/libiconv.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	intl
+LOCAL_SRC_FILES	:=	lib/libintl.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	ixml
+LOCAL_SRC_FILES	:=	lib/libixml.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	jpeg
+LOCAL_SRC_FILES	:=	lib/libjpeg.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	json-glib-1.0
+LOCAL_SRC_FILES	:=	lib/libjson-glib-1.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	pango-1.0
+LOCAL_SRC_FILES	:=	lib/libpango-1.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	pangocairo-1.0
+LOCAL_SRC_FILES	:=	lib/libpangocairo-1.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	pangoft2-1.0
+LOCAL_SRC_FILES	:=	lib/libpangoft2-1.0.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	pixman-1
+LOCAL_SRC_FILES	:=	lib/libpixman-1.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	png
+LOCAL_SRC_FILES	:=	lib/libpng.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	png15
+LOCAL_SRC_FILES	:=	lib/libpng15.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	sndfile
+LOCAL_SRC_FILES	:=	lib/libsndfile.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	soup-2.4
+LOCAL_SRC_FILES	:=	lib/libsoup-2.4.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	sqlite3
+LOCAL_SRC_FILES	:=	lib/libsqlite3.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	ssl
+LOCAL_SRC_FILES	:=	lib/libssl.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	threadutil
+LOCAL_SRC_FILES	:=	lib/libthreadutil.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	tiff
+LOCAL_SRC_FILES	:=	lib/libtiff.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	tiffxx
+LOCAL_SRC_FILES	:=	lib/libtiffxx.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	tpcore
+LOCAL_SRC_FILES	:=	lib/libtpcore.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	tplua
+LOCAL_SRC_FILES	:=	lib/libtplua.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	upnp
+LOCAL_SRC_FILES	:=	lib/libupnp.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	uriparser
+LOCAL_SRC_FILES	:=	lib/liburiparser.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	uuid
+LOCAL_SRC_FILES	:=	lib/libuuid.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE	:=	xml2
+LOCAL_SRC_FILES	:=	lib/libxml2.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+#include $(CLEAR_VARS)
+#LOCAL_MODULE	:=	z
+#LOCAL_SRC_FILES	:=	lib/libz.a
+#include $(PREBUILT_STATIC_LIBRARY)
+
+LOCAL_PATH := $(ORIG_PATH)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE    := libgl2jni
 LOCAL_CFLAGS    := -Werror
 LOCAL_SRC_FILES := 	gl_code.cpp \
@@ -10,61 +261,57 @@ LOCAL_SRC_FILES := 	gl_code.cpp \
     				tp_opengles.c \
     				tp_opengles_oem.c \
 
-LOCAL_LDLIBS    := -lstdc++ -lc -lm -llog -ldl \
-                    -L ${PREFIX}/lib \
-                    -landroid \
-                    -latk-1.0 \
-                    -lavahi-common \
-                    -lavahi-core \
-                    -lavahi-glib \
-                    -lbz2 \
-                    -lcairo \
-                    -lcairo-gobject \
-                    -lcares \
-                    -lclutter-eglnative-1.0 \
-                    -lclutteralphamode \
-                    -lcogl \
-                    -lcogl-pango \
-                    -lcrypto \
-                    -lcurl \
-                    -lEGL \
-                    -lexif \
-                    -lexpat \
-                    -lffi \
-                    -lfontconfig \
-                    -lfreetype \
-                    -lgif \
-                    -lgio-2.0 \
-                    -lGLESv2 \
-                    -lglib-2.0 \
-                    -lgmodule-2.0 \
-                    -lgobject-2.0 \
-                    -lgthread-2.0 \
-                    -liconv \
-                    -lintl \
-                    -lixml \
-                    -ljpeg \
-                    -ljson-glib-1.0 \
-                    -lpango-1.0 \
-                    -lpangocairo-1.0 \
-                    -lpangoft2-1.0 \
-                    -lpixman-1 \
-                    -lpng \
-                    -lpng15 \
-                    -lsndfile \
-                    -lsoup-2.4 \
-                    -lsqlite3 \
-                    -lssl \
-                    -lthreadutil \
-                    -ltiff \
-                    -ltiffxx \
-                    -ltpcore \
-                    -ltplua \
-                    -lupnp \
-                    -luriparser \
-                    -luuid \
-                    -lxml2 \
-                    -lz
+LOCAL_STATIC_LIBRARIES  :=  libbz2 \
+                            crypto \
+                            ssl \
+                            tpcore
 
+LOCAL_SHARED_LIBRARIES  :=  atk-1.0 \
+                            avahi-common \
+                            avahi-core \
+                            avahi-glib \
+                            cairo \
+                            cairo-gobject \
+                            cares \
+                            clutter-eglnative-1.0 \
+                            clutteralphamode \
+                            cogl \
+                            cogl-pango \
+                            curl \
+                            exif \
+                            expat \
+                            ffi \
+                            fontconfig \
+                            freetype \
+                            gif \
+                            gio-2.0 \
+                            glib-2.0 \
+                            gmodule-2.0 \
+                            gobject-2.0 \
+                            gthread-2.0 \
+                            iconv \
+                            intl \
+                            ixml \
+                            jpeg \
+                            json-glib-1.0 \
+                            pango-1.0 \
+                            pangocairo-1.0 \
+                            pangoft2-1.0 \
+                            pixman-1 \
+                            png \
+                            png15 \
+                            sndfile \
+                            soup-2.4 \
+                            sqlite3 \
+                            threadutil \
+                            tiff \
+                            tiffxx \
+                            tplua \
+                            upnp \
+                            uriparser \
+                            uuid \
+                            xml2
+
+LOCAL_LDLIBS    := -lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2 -lz
 
 include $(BUILD_SHARED_LIBRARY)
