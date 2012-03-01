@@ -530,7 +530,11 @@ new_JSON_parser(JSON_config const * config)
     jc->ctx = config->callback_ctx;
     jc->allow_comments = (signed char)(config->allow_comments != 0);
     jc->handle_floats_manually = (signed char)(config->handle_floats_manually != 0);
+#ifdef __ANDROID__
+	jc->decimal_point = ".";
+#else
     jc->decimal_point = *localeconv()->decimal_point;
+#endif
     /* We need to be able to push at least one object */
     jc->depth = config->depth == 0 ? 1 : config->depth;
     
