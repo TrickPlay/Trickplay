@@ -25,7 +25,7 @@ class Ui_TrickplayBacktrace(object):
         self.traceTable = QtGui.QTableWidget(TrickplayBacktrace)
         font = QtGui.QFont()
         font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
+        font.setFamily('Inconsolata')
         font.setPointSize(10)
         self.traceTable.setFont(font)
         self.traceTable.setShowGrid(False)

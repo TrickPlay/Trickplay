@@ -20,7 +20,7 @@ class Ui_searchDialog(object):
         searchDialog.resize(418, 147)
         font = QtGui.QFont()
         font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
+        font.setFamily('Inconsolata')
         font.setPointSize(10)
         searchDialog.setFont(font)
         searchDialog.setModal(True)

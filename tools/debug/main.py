@@ -55,7 +55,6 @@ class MainWindow(QMainWindow):
 
 		# Toolbar font 
         font = QFont()
-        font.setFamily('Ubuntu')
         font.setPointSize(11)
 
         # Create FileSystem

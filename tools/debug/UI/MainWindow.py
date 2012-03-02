@@ -196,7 +196,7 @@ class Ui_MainWindow(object):
 
         monofont = QtGui.QFont()
         monofont.setStyleHint(monofont.Monospace)
-        monofont.setFamily('Monospace')
+        monofont.setFamily('Inconsolata')
         monofont.setPointSize(10)
 
         self.interactive.setFont(monofont)
@@ -220,7 +220,6 @@ class Ui_MainWindow(object):
         self.action_Save.setObjectName(_fromUtf8("action_Save"))
         self.action_New = QtGui.QAction(MainWindow)
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Ubuntu"))
         font.setPointSize(11)
         self.action_New.setFont(font)
         self.action_New.setShortcutContext(QtCore.Qt.WindowShortcut)
