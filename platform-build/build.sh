@@ -732,6 +732,7 @@ then
 
     rsync -a "${THERE}/android/" "${HERE}/android/"
     cd "${HERE}/android"
+    rm -rf bin libs obj
     TRICKPLAY_PDK_DIR="${PREFIX}" ndk-build
     android update project -p . -s
     ant debug
