@@ -12,9 +12,9 @@ class MyHandler : public HttpServer::RequestHandler
 {
 public:
 
-    MyHandler( lua_State * _L )
+    MyHandler( lua_State * _LS )
     :
-        L( _L )
+        L( _LS )
     {
         App * app = App::get( L );
 

@@ -1,19 +1,72 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+from PyQt4.QtNetwork import  QTcpSocket, QNetworkAccessManager , QNetworkRequest , QNetworkReply
 from TrickplayElement import TrickplayElement
-from connection import getTrickplayData
-
-
+from connection import *
 
 class TrickplayElementModel(QStandardItemModel):
     
+    def __init__(self, inspector, parent=None):
+        QWidget.__init__(self, parent)
+        self.inspector = inspector
+        self.manager = QNetworkAccessManager()
+        self.reply = None
+
+    def inspector_reply_finished(self):
+        if self.reply.error()== QNetworkReply.NoError:
+            pdata = json.loads(str(self.reply.readAll()))
+            if pdata is not None:
+                root = self.invisibleRootItem()
+                child = None
+                for c in pdata["children"]:
+                    if c["name"] == "screen":
+                        child = c
+                        break
+                
+                if child is None:
+                    print( "Could not find screen element." )
+                else:
+                    self.tpData = pdata
+                    self.insertElement(root, child, pdata, True)
+                self.inspector.ui.refresh.setText("Refresh")
+
+            else:
+                print("Could not retreive data.")
+
+    def getInspectorData(self):
+        """
+        Get Trickplay UI tree data for the inspector
+        """
+
+        self.inspector.ui.refresh.setText("Retrieving...")
+
+        if CON.address is None or CON.port is None:
+            raise "NO HTTP PORT"
+		
+        self.manager = QNetworkAccessManager()
+
+        url = QUrl()
+        url.setScheme( "http" )
+        url.setHost( CON.address )
+        url.setPort( int(CON.port) )
+        url.setPath( "/debug/ui" )
+		    
+        self.request = QNetworkRequest( url )
+        self.reply = self.manager.get( self.request )
+
+        QObject.connect( self.reply , SIGNAL( 'finished()' ) , self.inspector_reply_finished )
+		
+        #return None
+
     def fill(self):
         """
         Get UI data from Trickplay and fill the tree with it.
         If no data is available, do nothing.
         """
         self.tpData = None
+        self.getInspectorData()
+        """
         data = getTrickplayData()
         if data:
         
@@ -33,6 +86,7 @@ class TrickplayElementModel(QStandardItemModel):
                 
         else:
             print("Could not retreive data.")
+        """
             
     def insertElement(self, parent, data, parentData, screen):
         """

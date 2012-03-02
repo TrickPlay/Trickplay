@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'SaveAsDialog.ui'
+# Form implementation generated from reading ui file 'UI/SaveAsDialog.ui'
 #
-# Created: Tue Feb  7 13:47:05 2012
+# Created: Tue Feb 28 11:20:40 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,6 +26,8 @@ class Ui_saveAsDialog(object):
         self.gridLayout_2.setVerticalSpacing(12)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.buttonBox = QtGui.QDialogButtonBox(saveAsDialog)
+        self.buttonBox.setFocusPolicy(QtCore.Qt.TabFocus)
+        self.buttonBox.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
@@ -48,6 +50,7 @@ class Ui_saveAsDialog(object):
         self.horizontalLayout.addWidget(self.browse)
         self.gridLayout.addLayout(self.horizontalLayout, 1, 1, 1, 1)
         self.filename = QtGui.QLineEdit(saveAsDialog)
+        self.filename.setFocus()
         self.filename.setPlaceholderText(_fromUtf8(""))
         self.filename.setObjectName(_fromUtf8("filename"))
         self.gridLayout.addWidget(self.filename, 0, 1, 1, 1)
@@ -63,6 +66,9 @@ class Ui_saveAsDialog(object):
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), saveAsDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), saveAsDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(saveAsDialog)
+        saveAsDialog.setTabOrder(self.filename, self.directory)
+        saveAsDialog.setTabOrder(self.directory, self.browse)
+        saveAsDialog.setTabOrder(self.browse, self.buttonBox)
 
     def retranslateUi(self, saveAsDialog):
         saveAsDialog.setWindowTitle(QtGui.QApplication.translate("saveAsDialog", "Save As", None, QtGui.QApplication.UnicodeUTF8))
