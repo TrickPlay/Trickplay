@@ -182,14 +182,7 @@ World::~World()
 
 	for ( i = world->getNumCollisionObjects() - 1; i >=0 ; --i )
 	{
-		btCollisionObject * obj = world->getCollisionObjectArray()[ i ];
-		btRigidBody * body = btRigidBody::upcast( obj );
-		if ( body && body->getMotionState() )
-		{
-			delete body->getMotionState();
-		}
-		world->removeCollisionObject( obj );
-		delete obj;
+		BodyData::destroy_object( world->getCollisionObjectArray()[ i ] , false );
 	}
 
 	// Delete shapes
@@ -492,9 +485,7 @@ int World::create_body_3d( int properties )
 
 	btRigidBody * body = new btRigidBody( cinfo );
 
-	world->addRigidBody( body );
-
-	body->setUserPointer( get_next_handle() );
+	BodyData::set( this , body );
 
 	//.........................................................................
 
@@ -642,13 +633,6 @@ void World::tick_callback( btDynamicsWorld * world , btScalar time )
 	}
 }
 
-gpointer World::get_next_handle()
-{
-	static int handle = 1;
-
-	return GINT_TO_POINTER( handle++ );
-}
-
 void World::get_contacts( double max_distance , btCollisionObject * co1 , btCollisionObject * co2 )
 {
 	lua_State * L = lsp->get_lua_state();
@@ -706,10 +690,10 @@ void World::get_contacts( double max_distance , btCollisionObject * co1 , btColl
 
 					lua_newtable( L );
 
-					lua_pushinteger( L , GPOINTER_TO_INT( obA->getUserPointer() ) );
+					lua_pushinteger( L , BodyData::get( obA )->get_handle() );
 					lua_rawseti( L , -2 , 1 );
 
-					lua_pushinteger( L , GPOINTER_TO_INT( obB->getUserPointer() ) );
+					lua_pushinteger( L , BodyData::get( obB )->get_handle() );
 					lua_rawseti( L , -2 , 2 );
 
 					lua_pushnumber( L , distance );

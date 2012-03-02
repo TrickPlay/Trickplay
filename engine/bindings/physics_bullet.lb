@@ -496,12 +496,12 @@ interface PBBody3d [[ btCollisionObject * ]]
         
     ~PBBody3d()
         [[
-            // Not deleted because they are owned by the world
+            Bullet::BodyData::destroy_object( self , true );
         ]];
         
     readonly int handle
         [[
-            handle = GPOINTER_TO_INT( self->getUserPointer() );
+            handle = Bullet::BodyData::get( self )->get_handle();
         ]];
         
     bool awake
@@ -512,24 +512,9 @@ interface PBBody3d [[ btCollisionObject * ]]
             self->activate( true );
         ]];
 
-    bool active
+    readonly bool in_world
         [[
-            if ( btRigidBody * body = btRigidBody::upcast( self ) )
-            {
-                active = body->isInWorld();
-            }
-            else
-            {
-                active = false;
-            }
-        ]]
-        [[
-            // FIXME: To de-activate a body, we have to remove it from 
-            // its world. Right now, this would cause the body pointer to
-            // leak because we only delete the ones that are listed in the
-            // world. 
-            
-            g_assert( false );
+            in_world = Bullet::BodyData::get( self )->is_in_world();
         ]];
 
     table linear_velocity
@@ -829,6 +814,30 @@ global pb [[ Bullet::World * ]]
             }
         ]];
 */
+
+    # Takes any number of bodies
+    
+    add( ... )
+        [[
+            for ( int i = 2; i <= lua_gettop( L ); ++i )
+            {
+                if ( btCollisionObject * co = tp_lua_get( btCollisionObject , L , i , BODY3D_TYPE ) )
+                {
+                    Bullet::BodyData::add_object( co );
+                }
+            }
+        ]];
+        
+    remove( ... )
+        [[
+            for ( int i = 2; i <= lua_gettop( L ); ++i )
+            {
+                if ( btCollisionObject * co = tp_lua_get( btCollisionObject , L , i , BODY3D_TYPE ) )
+                {
+                    Bullet::BodyData::remove_object( co );
+                }
+            }
+        ]]; 
 
     PBShape BoxShape( double half_width , double half_height , double half_depth )
         [[
