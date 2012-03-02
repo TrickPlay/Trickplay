@@ -14,10 +14,10 @@ class Apps : private Installer::Delegate
 {
 public:
 
-    Apps( lua_State * _L )
+    Apps( lua_State * _LS )
     :
-        L( _L ),
-        context( App::get( _L )->get_context() )
+        L( _LS ),
+        context( App::get( _LS )->get_context() )
     {
         context->get_installer()->add_delegate( this );
     }

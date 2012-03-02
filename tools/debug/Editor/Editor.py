@@ -25,11 +25,13 @@ class Editor(QsciScintilla):
     ARROW_ACTIVE_BREAK_MARKER_NUM = 4
     ARROW_DEACTIVE_BREAK_MARKER_NUM = 5
     
-    def __init__(self, debugWindow=None, editorManager=None, parent=None):
+    def __init__(self, editorManager=None, parent=None):
         super(Editor, self).__init__(parent)
         self.setAcceptDrops(False)
 
-        self.debugWindow = debugWindow
+        self.editorManager = editorManager
+        self.debugWindow = editorManager.debugWindow
+        self.deviceManager = editorManager.deviceManager
 
         self.setTabWidth(4)
         
@@ -59,16 +61,24 @@ class Editor(QsciScintilla):
         # Clickable margin 1 for showing markers
         self.setMarginSensitivity(1, True)
         self.connect(self,
+            SIGNAL('copyAvailable(bool)'),
+            self.copyAvailable)
+
+        self.connect(self,
             SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),
             self.on_margin_clicked)
 
+        self.connect(self,
+            SIGNAL('modificationChanged(bool)'),
+            self.modificationChanged)
 		# Define markers 
 
-        self.markerDefine(QPixmap("Assets/currentline.png"), self.ARROW_MARKER_NUM)
-        self.markerDefine(QPixmap("Assets/breakpoint-off.png"), self.DEACTIVE_BREAK_MARKER_NUM)
-        self.markerDefine(QPixmap("Assets/breakpoint-on.png"), self.ACTIVE_BREAK_MARKER_NUM)
-        self.markerDefine(QPixmap("Assets/breakpoint-off-currentline.png"), self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-        self.markerDefine(QPixmap("Assets/breakpoint-on-currentline.png"), self.ARROW_ACTIVE_BREAK_MARKER_NUM)
+        apath = self.editorManager.main.apath
+        self.markerDefine(QPixmap(apath+"/Assets/currentline.png"), self.ARROW_MARKER_NUM)
+        self.markerDefine(QPixmap(apath+"/Assets/breakpoint-off.png"), self.DEACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QPixmap(apath+"/Assets/breakpoint-on.png"), self.ACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QPixmap(apath+"/Assets/breakpoint-off-currentline.png"), self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+        self.markerDefine(QPixmap(apath+"/Assets/breakpoint-on-currentline.png"), self.ARROW_ACTIVE_BREAK_MARKER_NUM)
         """
         self.markerDefine(QsciScintilla.Background, self.BACKGROUND_MARKER_NUM)
         self.markerDefine(QsciScintilla.RightTriangle, self.ARROW_MARKER_NUM)
@@ -129,10 +139,25 @@ class Editor(QsciScintilla):
         self.setWrapMode(QsciScintilla.WrapWord)
         self.line_click = {}
         self.current_line = -1
-        self.editorManager = editorManager
         self.path = None
         self.tempfile = False
+        self.margin_nline = None
 
+    def get_bp_num(self, nline):
+        
+        #print("TABLE LEN = %s"%str(self.editorManager.main._debug.ui.breakTable.rowCount()))
+        editorName = os.path.basename(str(self.path))
+        editorName = editorName+":%s"%str(nline+1)
+        #print("Editor Name = %s"%editorName)
+        rowCnt = self.editorManager.main._debug.ui.breakTable.rowCount()
+
+        for r in range(0, rowCnt):
+            cellItem = self.editorManager.main._debug.ui.breakTable.item(r, 0) 
+            #print (cellItem.whatsThis())
+            if cellItem.whatsThis() == editorName :
+                #print ("R [%s] Found !"%str(r))
+                return r
+    """
     def get_bp_num(self, nline):
 		data = sendTrickplayDebugCommand("9876", "b",False)
 		bp_info = printResp(data, "b") # no need to print 
@@ -141,35 +166,66 @@ class Editor(QsciScintilla):
 			if item == self.path+":"+str(nline+1) :
 				return m
 			m += 1
+    """
+    def modificationChanged(self, changed):
+        if self.isRedoAvailable() == True:
+            self.editorManager.main.ui.actionRedo.setEnabled(True)
+        else :
+            self.editorManager.main.ui.actionRedo.setEnabled(False)
 
+        index = self.editorManager.tab.currentIndex()
+        if self.isUndoAvailable() == True and self.text_status is not TEXT_DEFAULT :
+            self.editorManager.main.ui.actionUndo.setEnabled(True)
+            tabTitle = self.editorManager.tab.tabText(index)
+            if tabTitle[:1] != "*":
+                self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+        elif self.isUndoAvailable() == True and self.tempfile is True :
+            self.editorManager.main.ui.actionUndo.setEnabled(True)
+            tabTitle = self.editorManager.tab.tabText(index)
+            if tabTitle[:1] != "*":
+                self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+        else :
+            self.editorManager.main.ui.actionUndo.setEnabled(False)
+            tabTitle = self.editorManager.tab.tabText(index)
+            if tabTitle[:1] == "*":
+                self.editorManager.tab.setTabText (index, tabTitle[1:])
+        
+    def copyAvailable(self, avail):
+        self.editorManager.main.ui.action_Cut.setEnabled(avail)
+        self.editorManager.main.ui.action_Copy.setEnabled(avail)
+        self.editorManager.main.ui.action_Delete.setEnabled(avail)
+        
     def on_margin_clicked(self, nmargin, nline, modifiers):
         # Toggle marker for the line the margin was clicked on
 		#print "on_margin_clicked"
-		if self.editorManager.main.debug_mode == False:
-			return
+        
+		#if self.editorManager.main.debug_mode == False or self.editorManager.main.debug_run == True:
+			#return
 
 		bp_num = 0
+		self.margin_nline = nline
+		#print(self.margin_nline)
 
+        # Break Point ADD 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
-			t_path = os.path.basename(str(self.path))
-			sendTrickplayDebugCommand("9876", "b "+t_path+":"+str(nline+1), False)
-			data = sendTrickplayDebugCommand("9876", "b",False)
-			bp_info = printResp(data, "b", self.path) # no need to print 
-										   # bp_info need to be drawn in bp window 
-			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
+			#t_path = self
+			n = re.search(self.deviceManager.path(), str(self.path)).end()
+			#t_path = os.path.basename(str(self.path))
+			t_path = str(self.path)[n:]
+			if t_path.startswith("/"):
+			    t_path = t_path[1:]
 
-			if self.current_line != nline :#self.markersAtLine(nline) == 0:
-				self.markerAdd(nline, self.ACTIVE_BREAK_MARKER_NUM)
-			else:
-				self.markerDelete(nline, self.ARROW_MARKER_NUM)
-				self.markerAdd(nline, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
-			self.line_click[nline] = 1
+			self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s:"%t_path+"%s"%str(nline+1))
+			#self.line_click[nline] = 1
 
+        # Break Point Deactivate  
 		elif self.line_click[nline] == 1:
 
 			bp_num = self.get_bp_num(nline)
-			sendTrickplayDebugCommand("9876", "b "+str(bp_num)+" "+"off", False)
+			#bp_num = self.bp_num[nline]
+			self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s "%str(bp_num)+"off")
 
+			"""
 			if self.current_line != nline :
 				self.markerDelete(nline, self.ACTIVE_BREAK_MARKER_NUM)
 				self.markerAdd(nline, self.DEACTIVE_BREAK_MARKER_NUM)
@@ -181,12 +237,19 @@ class Editor(QsciScintilla):
 			bp_info = printResp(data, "b") # no need to print 
 										   # bp_info need to be drawn in bp window 
 			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
-			self.line_click[nline] = 2
+			"""
+            
+			#self.line_click[nline] = 2
 
+        # Break Point Delete  (/ Activate .. in the future, and set line_click[nline] = 1)
 		elif self.line_click[nline] == 2:
 
 			bp_num = self.get_bp_num(nline)
-			sendTrickplayDebugCommand("9876", "d "+str(bp_num), False)
+			#bp_num = self.bp_num[nline]
+			self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s "%str(bp_num)+"on")
+			#self.deviceManager.send_debugger_command("%s "%DBG_CMD_DELETE+"%s "%str(bp_num))
+
+			"""
 			if self.current_line != nline :
 				self.markerDelete(nline, self.DEACTIVE_BREAK_MARKER_NUM)
 			else :
@@ -196,7 +259,9 @@ class Editor(QsciScintilla):
 			bp_info = printResp(data, "b") # no need to print 
 										   # bp_info need to be drawn in bp window 
 			self.debugWindow.populateBreakTable(bp_info, self.editorManager)
-			self.line_click[nline] = 0
+			"""
+            
+			#self.line_click[nline] = 0
 		
 		#if self.markersAtLine(nline) == 0:
             
@@ -214,8 +279,10 @@ class Editor(QsciScintilla):
 		if self.text_status == TEXT_DEFAULT or self.text_status != TEXT_CHANGED:#(self.text_status == TEXT_READ and self.path == self.editorManager.tab.editors[0].path):
 			index = 0 
 			for edt in self.editorManager.tab.editors :
-				if edt.path == self.path :
-					self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+				if edt.path == self.path:
+				    if self.isUndoAvailable() is True:
+					    #self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+					    pass
 				index = index + 1
 
 		if self.text_status == TEXT_DEFAULT:
@@ -248,10 +315,10 @@ class Editor(QsciScintilla):
 
         	self.editorManager.tab.textBefores[index] = self.text()
         	self.tempfile = False
-        	print 'File saved'
+        	if self.path is not None :
+        	    print '[VDBG] \''+self.path+'\' File saved'
         else: 
 			self.tempfile = True
-			print 'Temp file true'
 
         #statusBar.showMessage('File %s saved' % (path), 2000)
         

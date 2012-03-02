@@ -13,14 +13,15 @@ from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 
 class EditorManager(QWidget):    
     
-    def __init__(self, main=None, fileSystem = None, debugWindow = None, windowsMenu = None, parent = None):
+    def __init__(self, main=None, windowsMenu = None, parent = None):
     
         QWidget.__init__(self)
         self.windowsMenu = windowsMenu
         self.main = main
         self.setupUi(parent)
-        self.fileSystem = fileSystem
-        self.debugWindow = debugWindow
+        self.fileSystem = main._fileSystem
+        self.debugWindow = main._debug
+        self.deviceManager = None
         self.tab = None
         self.currentEditor = None
 
@@ -47,6 +48,8 @@ class EditorManager(QWidget):
         container.setSizePolicy(sizePolicy)
         container.setMinimumSize(QSize(0, 0))
         font = QFont()
+        font.setStyleHint(font.Monospace)
+        font.setFamily('Monospace')
         font.setPointSize(10)
         container.setFont(font)
 
@@ -75,7 +78,7 @@ class EditorManager(QWidget):
         return self.editorGroups
     
     def EditorTabWidget(self, parent = None):
-        tab = EditorTabWidget(self, self.windowsMenu, self.fileSystem, self.splitter)
+        tab = EditorTabWidget(self, self.windowsMenu, self.fileSystem, self.splitter, self.main)
         tab.setObjectName('EditorTab' + str(len(self.editorGroups)))
         return tab
     
@@ -158,7 +161,7 @@ class EditorManager(QWidget):
 			editor.save()
 			self.tab.textBefores[index] = editor.text() ## new 2/3 
 		else:
-			print 'Failed to save because no text editor is currently selected.'                
+			print '[VDBG] Failed to save because no text editor is currently selected.'                
 		
     def saveall(self):
 		index = 0 
@@ -167,7 +170,6 @@ class EditorManager(QWidget):
 			index = index + 1
 
     def close(self):
-		
 		index = self.tab.currentIndex()
 		self.tab.closeTab(index)
 
@@ -192,7 +194,7 @@ class EditorManager(QWidget):
 			cur_file = self.ui.filename.text() 
 
 			new_path = cur_dir+'/'+cur_file
-			print "Save As .. "+new_path
+			print "[VDBG] Save As .. ' %s '"%new_path
 
 			if editor.tempfile == False :
 				currentText = open(editor.path).read()
@@ -210,7 +212,8 @@ class EditorManager(QWidget):
 				editor.path = new_path
 				editor.save()
 				self.close()
-				editor = self.newEditor(new_path,None,None,None,False,None,True)
+				#editor = self.newEditor(new_path,None,None,None,False,None,True)
+				editor = self.newEditor(new_path)
 
     def newEditor(self, path, tabGroup = None, line_no = None, prev_file = None, currentLine = False, fileIndex=None, tempfile = False):
         """
@@ -218,9 +221,13 @@ class EditorManager(QWidget):
         then add an editor in the correct tab widget.
         """
 
+        
+        if self.deviceManager is None:
+            self.deviceManager = self.main._deviceManager
+
         path = str(path)
         name = os.path.basename(str(path))
-        editor = Editor(self.debugWindow, self, None)
+        editor = Editor(self, None)
 
         editor.tempfile = tempfile
         editor.fileIndex = fileIndex
@@ -256,7 +263,7 @@ class EditorManager(QWidget):
 						self.editorGroups[tabGroup].setCurrentIndex(curIndex)
 						if line_no != None:
 							self.currentEditor = self.tab.editors[curIndex]
-							self.currentEditor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
+							self.currentEditor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no)) # -1
 							if currentLine == True :
 								if self.currentEditor.current_line > -1 :
 									if not self.currentEditor.line_click.has_key(self.currentEditor.current_line) or self.currentEditor.line_click[self.currentEditor.current_line] == 0 :
@@ -301,7 +308,7 @@ class EditorManager(QWidget):
 									self.currentEditor.current_line = nextCurLine
 				return self.currentEditor
         elif tempfile == False:
-            print(path)
+            path = os.path.join (self.deviceManager.path(), path)
             editor.readFile(path)
         
         if 0 == nTabGroups:
@@ -322,8 +329,10 @@ class EditorManager(QWidget):
         editor.setFocus()
         editor.path = path
 
-        font = QFont()
-        font.setPointSize(10)
+        #font = QFont()
+        #font.setStyleHint(font.Monospace)
+        #font.setFamily('Monospace')
+        #font.setPointSize(10)
 
         n = re.search("[/]+\S+[/]+", editor.path).end()
         fileName = editor.path[n:]
@@ -331,14 +340,14 @@ class EditorManager(QWidget):
         editorAction = QAction(self.windowsMenu)
         editorAction.setText(fileName)
         editorAction.setIconText(editor.path)
-        editorAction.setFont(font)
+        #editorAction.setFont(font)
         editorAction.setShortcut(QApplication.translate("MainWindow", "Ctrl+"+str(index+1), None, QApplication.UnicodeUTF8))
         self.windowsMenu.addAction(editorAction)
         QObject.connect(editorAction , SIGNAL("triggered()"),  self, SLOT("moveToThisEditor()"))
         editor.windowsAction = editorAction 
 
         if not line_no == None:
-			editor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no) - 1)
+			editor.SendScintilla(QsciScintilla.SCI_GOTOLINE, int(line_no))
 			self.currentEditor = editor
 			if currentLine == True :
 				if editor.current_line > -1 :
@@ -374,6 +383,21 @@ class EditorManager(QWidget):
 					editor.markerDelete(int(line_no) -1, Editor.DEACTIVE_BREAK_MARKER_NUM)
 					editor.markerAdd(int(line_no) -1, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 				editor.current_line = int(line_no) -1 
+
+        if self.tab.count() > 0:
+            self.main.editorMenuEnabled()
+
+            if self.currentEditor is not None :
+                if self.currentEditor.isRedoAvailable() == True:
+                    self.main.ui.actionRedo.setEnabled(True)
+                else :
+                    self.main.ui.actionRedo.setEnabled(False)
+    
+                if self.currentEditor.isUndoAvailable() == True:
+                    self.main.ui.actionUndo.setEnabled(True)
+                else :
+                    self.main.ui.actionUndo.setEnabled(False)
+
         return editor
 
     @pyqtSlot()
@@ -401,7 +425,7 @@ class EditorManager(QWidget):
             self.openFromFileSystem(event.source().currentIndex(), n)
             
         else:
-            print('Failed to open dropped file.')
+            print('[VDBG] Failed to open dropped file.')
         
     def openFromFileSystem(self, fileIndex, n = None):
         """
@@ -411,5 +435,13 @@ class EditorManager(QWidget):
         
         if not model.isDir(fileIndex):
             path = model.filePath(fileIndex)
+
+            fi = QFileInfo(path)
+            ext = fi.suffix();
+            name = os.path.basename(str(path))
+            if ext == "lua" or ext == "txt" or name == "app":
+                self.newEditor(path, n, None, None, False, fileIndex, False)       
+            else:
+                print"[VDBG] This is %s"%str(model.type(fileIndex))+". Not editable."
+                return
             
-            self.newEditor(path, n, None, None, False, fileIndex, False)       
