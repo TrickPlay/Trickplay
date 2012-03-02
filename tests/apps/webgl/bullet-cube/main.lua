@@ -197,7 +197,7 @@ local function dm( m )
     print( string.format( "%5.0f %5.0f %5.0f %5.0f" , m[4] , m[8] , m[12] , m[16] ) )
 end
 
-local function make_cube( x , y , z , hw , xr , yr , zr )
+local function make_cube( x , y , z , hw , xr , yr , zr , props )
 
     local matrix = Matrix()
 
@@ -207,13 +207,15 @@ local function make_cube( x , y , z , hw , xr , yr , zr )
     matrix:rotate( yr or 0 , 0 , 1 , 0 )
     matrix:rotate( zr or 0 , 0 , 0 , 1 )
     
+    local w , h , d = hw , hw , hw
     
-    local shape = pb:BoxShape( hw , hw , hw )
---    local shape = pb:SphereShape( hw )
+    if type( hw ) == "table" then
+        w , h , d = unpack( hw )
+    end
     
-    local body =
-        
-        pb:Body3d
+    local shape = pb:BoxShape( w , h , d )
+    
+    local b = 
         {
             transform = matrix ,
             shape = shape,
@@ -221,19 +223,29 @@ local function make_cube( x , y , z , hw , xr , yr , zr )
             mass = 1 ,
             friction = 1
         }
+    
+    if props then
+        for k , v in pairs( props ) do
+            b[ k ] = v
+        end
+    end
+    
+    local body = pb:Body3d( b )
         
     local sm = Matrix()
+    
+    pb:add( body )
         
     return
     {
-        matrix = function() return body:get_transform( sm ):scale(hw,hw,hw) end,
+        matrix = function() return body:get_transform( sm ):scale(w,h,d) end,
         body = body
     }
     
 end
 
 local function main()
-    
+  
     local vw  = gl.width
     local vh = gl.height
 
@@ -252,12 +264,9 @@ local function main()
     
     local cubes =
     {
---        make_cube(    0 , 200 , -1000 , 100 , 45 , 45 , 45 ),
-        make_cube( -200 ,   0 , -1000 , 50 , 47 , 0 , r(90) ),
---        make_cube(  100 , 600 , -1000 , 100 ),
-
-
-        make_cube( -300 , 400 , -1000 , 50 , 47 , 0 , r(90) ),
+----[[
+        make_cube( -250 , 200 , -1000 , 50 , 0 , 0 , 0 ),
+        make_cube( -100 , 200 , -1000 , 50 , 0 , 0 , 0 ),
         
 
         make_cube( -400 , 800 , -1000 , r(90) , r(90) , r(90) , r(90) ),
@@ -265,23 +274,50 @@ local function main()
         make_cube(    0 , 800 , -1000 , r(90) , r(90) , r(90) , r(90) ),
         make_cube(  200 , 800 , -1000 , r(90) , r(90) , r(90) , r(90) ),
         make_cube(  400 , 800 , -1000 , r(90) , r(90) , r(90) , r(90) ),
-
+--]]
     }
     
-    display( cubes )
+    pb.gravity = { 0 ,  1 * -10 * 64 , 0  }
     
-    pb.gravity = { 0 ,  -10 * 64 , 0  }
-    
-
     local ground_matrix = Matrix()
     ground_matrix:translate( 0 , -320 , -1000 )
     local ground_shape = pb:StaticPlaneShape( 0 , 1 , 0 , 1 )
-    local ground = pb:Body3d{ transform = ground_matrix , shape = ground_shape, mass = 0 , bounce = 0.5 , friction = 1 }
+    local ground = pb:Body3d{ transform = ground_matrix , shape = ground_shape, mass = 0 , bounce = 0.5 , friction = 0.2 }
     
     local wall_matrix = Matrix()
     wall_matrix:translate( -200 , -320 , -1000 )
     local wall_shape = pb:StaticPlaneShape( 1 , 0.9 , 0 , 1 )
     local wall = pb:Body3d{ transform = wall_matrix , shape = wall_shape, mass = 0 , bounce = 0.5 , friction = 0.2 }
+    
+    pb:add( ground )
+
+
+    local bar = make_cube( -300 , -320 + 150 , -1000 , { 10 , 150 , 50 } , 0 , 0 , 0 , { mass = 0 } )
+    local paddle = make_cube( -300 + 150 + 10 , -320 + 150 + 150 + 25 , -1000 , { 150 , 25 , 50 } , 0 , 0 , 0 , { mass = 2 } )
+    
+    paddle.body.gravity = { 100 * 64 , 16 * 64 , 0 }
+    paddle.body.angular_damping = 0.95
+    
+    cn = pb:HingeConstraint( bar.body , { 10 , 150 , 0 } , { 0 , 0 , 1 } , false , paddle.body , { -150 , -25 , 0 } , { 0 , 0 , 1 } )
+    
+    --cn:enable_angular_motor( true , 100000 , 1900 )
+    --cn:set_motor_target( -10 , 10 )
+    
+    table.insert( cubes , bar )
+    table.insert( cubes , paddle )
+    
+    --local paddle = make_cube()
+    
+    --local cn = pb:HingeConstraint( c1 , { 50 , 50 , 0 } , { 0 , 0 , 1 } , false , c2 , { -50 , 50 , 0 } , { 0 , 0 , 1 } )
+
+    --cn:enable_angular_motor( true , 100 , 100 )
+    --cn:enable_motor( false )
+    --cn:set_motor_target( -0.5 , 1 )
+    --cn:set_limit( 0 , 10 )
+
+
+    display( cubes )
+    
     
     local function render()
         pb:step()
