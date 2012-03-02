@@ -487,6 +487,90 @@ interface PBGeneric6DOFConstraint [[ btGeneric6DofConstraint * ]]
         ]];        
 }
 
+interface PBHingeConstraint [[ btHingeConstraint * ]]
+{
+    PBHingeConstraint( any world , PBBody3d bodyA , table pivotA , table axisA , bool use_reference_frame , PBBody3d bodyB = 0 , table pivotB = 0 , table axisB )
+        [[
+            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+
+            btRigidBody * ba = get_rigid_body( L , bodyA );
+                        
+            if ( 0 == ba )
+            {
+                return luaL_error( L , "Invalid first body" ); 
+            }                        
+            
+            btVector3 pa( btVector3FromTable( L , pivotA ) );
+            btVector3 aa( btVector3FromTable( L , axisA ) );
+            
+            btHingeConstraint * c = 0;
+            
+            if ( 0 == bodyB )
+            {
+                c = new btHingeConstraint( * ba , pa , aa , use_reference_frame );    
+            }
+            else
+            {
+                btRigidBody * bb = get_rigid_body( L , bodyB );
+                
+                if ( 0 == bb )
+                {
+                    return luaL_error( L , "Invalid second body" );
+                }
+                
+                btVector3 pb( btVector3FromTable( L , pivotB ) );
+                btVector3 ab( btVector3FromTable( L , axisB ) );
+                
+                c = new btHingeConstraint( * ba , * bb , pa , pb , aa , ab , use_reference_frame );
+            }
+            
+            g_assert( c );
+            
+            self = lb_construct( btHingeConstraint , c );
+            
+            // TODO: need to support the disableCollisionsBetweenLinkedBodies 
+            // flag. Perhaps by not adding the constraint when it is created,
+            // but having an explicit add_constraint function on the world 
+            // that includes that flag.
+            
+            w->get_world()->addConstraint( c );
+        ]];
+
+    ~PBHingeConstraint()
+        [[
+            // Not deleted because they are owned by the world
+        ]];    
+        
+        
+    bool angular_only
+        [[
+            angular_only = self->getAngularOnly();
+        ]]
+        [[
+            self->setAngularOnly( angular_only );
+        ]];        
+        
+    enable_angular_motor( bool enable , double target_velocity , double max_motor_impulse )
+        [[
+            self->enableAngularMotor( enable , target_velocity , max_motor_impulse );
+        ]];        
+        
+    enable_motor( bool enable )
+        [[
+            self->enableMotor( enable );
+        ]];
+        
+    set_motor_target( double angle , double dt )
+        [[
+            self->setMotorTarget( angle , dt );
+        ]];        
+        
+    set_limit( double low , double high , double softness = 0.9 , double bias_factor = 0.3 , double relaxation_factor = 1.0 )
+        [[
+            self->setLimit( low , high , softness , bias_factor , relaxation_factor );
+        ]];        
+}
+
 interface PBBody3d [[ btCollisionObject * ]]
 {
     PBBody3d()
@@ -1018,5 +1102,30 @@ global pb [[ Bullet::World * ]]
             lua_call( L , 6 , 1 );
         ]];
         
+    PBHingeConstraint HingeConstraint( PBBody3d bodyA , table pivotA , table axisA , bool use_reference_frame , PBBody3d bodyB = 0 , table pivotB = 0 , table axisB = 0 )
+        [[
+            lua_pushcfunction( L , new_PBHingeConstraint );
+            lua_pushlightuserdata( L , self );
+            lua_pushvalue( L , bodyA );
+            lua_pushvalue( L , pivotA );
+            lua_pushvalue( L , axisA );
+            lua_pushboolean( L , use_reference_frame );
+            
+            if ( 0 == bodyB || 0 == pivotB || 0 == axisB )
+            {
+                lua_pushnil( L );
+                lua_pushnil( L );
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_pushvalue( L , bodyB );
+                lua_pushvalue( L , pivotB );
+                lua_pushvalue( L , axisB );
+            }
+            
+            lua_call( L , 8 , 1 );
+        ]];
+
     callback on_step( double seconds );
 }
