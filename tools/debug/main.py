@@ -28,30 +28,37 @@ from UI.GotoLine import Ui_gotoLineDialog
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+EDITOR_MODE = 1
+RUN_STOP = 2
+DEBUG_INBREAK = 3
+DEBUG_NOT_INBREAK = 4
+
 class MainWindow(QMainWindow):
     
-    def __init__(self, app, parent = None):
+    def __init__(self, app, apath=None, parent = None):
         
         QWidget.__init__(self, parent)
         
         self.untitled_idx = 1
         self.debug_mode = False
+        self.apath = apath
 
         # Restore size/position of window
         settings = QSettings()
         self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
-        #print( settings.value( "mainWindowSize").toSize() )
-        #self.resize( settings.value("mainWindowSize").toSize() )
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        
+       
+        self.editorMenuEnabled(False)
+        self.debuggerMenuEnabled(False)
+
 		# Toolbar font 
         font = QFont()
-        font.setPointSize(9)
+        font.setPointSize(11)
 
         # Create FileSystem
-        self.ui.FileSystemDock.toggleViewAction().setText("&File System")
+        self.ui.FileSystemDock.toggleViewAction().setText("File system")
         self.ui.FileSystemDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.FileSystemDock.toggleViewAction())
         self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fileWindowClicked)
@@ -59,7 +66,7 @@ class MainWindow(QMainWindow):
         self.ui.FileSystemLayout.addWidget(self._fileSystem)
         
         # Create Inspector
-        self.ui.InspectorDock.toggleViewAction().setText("&Inspector")
+        self.ui.InspectorDock.toggleViewAction().setText("Inspector")
         self.ui.InspectorDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
         self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
@@ -68,32 +75,32 @@ class MainWindow(QMainWindow):
         self.ui.InspectorDock.hide()
         
         # Create Console
-        self.ui.ConsoleDock.toggleViewAction().setText("&Console")
+        self.ui.ConsoleDock.toggleViewAction().setText("Console")
         self.ui.ConsoleDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.ConsoleDock.toggleViewAction())
         self.ui.ConsoleDock.toggleViewAction().triggered.connect(self.consoleWindowClicked)
         self._console = TrickplayConsole()
         self.ui.ConsoleLayout.addWidget(self._console)
         self.ui.ConsoleDock.hide()
-	
+        
 		# Set Interactive Line Edit 
         self.ui.interactive.setText("")
         self.connect(self.ui.interactive, SIGNAL("returnPressed()"), self.return_pressed)
 
 		# Create Debug 
-        self.ui.DebugDock.toggleViewAction().setText("&Debug")
+        self.ui.DebugDock.toggleViewAction().setText("Debug")
         self.ui.DebugDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.DebugDock.toggleViewAction())
         self.ui.DebugDock.toggleViewAction().triggered.connect(self.debugWindowClicked)
-        self._debug = TrickplayDebugger()
+        self._debug = TrickplayDebugger(self)
         self.ui.DebugLayout.addWidget(self._debug)
         self.ui.DebugDock.hide()
 
         # Create Editor
-        self._editorManager = EditorManager(self, self._fileSystem, self._debug, self.ui.menuView, self.ui.centralwidget)
+        self._editorManager = EditorManager(self, self.ui.menuView, self.ui.centralwidget)
         
 		#Create Backtrace
-        self.ui.BacktraceDock.toggleViewAction().setText("&Backtrace")
+        self.ui.BacktraceDock.toggleViewAction().setText("Backtrace")
         self.ui.BacktraceDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.BacktraceDock.toggleViewAction())
         self.ui.BacktraceDock.toggleViewAction().triggered.connect(self.traceWindowClicked)
@@ -103,11 +110,11 @@ class MainWindow(QMainWindow):
 
 		#File Menu
         QObject.connect(self.ui.actionNew_File, SIGNAL("triggered()"),  self.newFile)
-        #QObject.connect(self.ui.actionNew_Folder, SIGNAL("triggered()"),  self.newFolder)
         QObject.connect(self.ui.action_New, SIGNAL("triggered()"),  self.new)
         QObject.connect(self.ui.actionOpen_App, SIGNAL("triggered()"),  self.openApp)
         QObject.connect(self.ui.action_Save, SIGNAL('triggered()'),  self.editorManager.save)
         QObject.connect(self.ui.action_Save_As, SIGNAL('triggered()'),  self.editorManager.saveas)
+        QObject.connect(self.ui.actionSave_All, SIGNAL('triggered()'),  self.editorManager.saveall)
         QObject.connect(self.ui.action_Close, SIGNAL('triggered()'),  self.editorManager.close)
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         
@@ -124,6 +131,9 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionGo_to_line, SIGNAL("triggered()"),  self.editor_go_to_line)
 
 		#Debug Menu
+        QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
+        QObject.connect(self.ui.action_Debug, SIGNAL("triggered()"),  self.debug)
+        QObject.connect(self.ui.action_Stop, SIGNAL("triggered()"),  self.stop)
         QObject.connect(self.ui.actionContinue, SIGNAL("triggered()"),  self.debug_continue)
         QObject.connect(self.ui.actionPause, SIGNAL("triggered()"),  self.debug_pause)
         QObject.connect(self.ui.actionStep_into, SIGNAL("triggered()"),  self.debug_step_into)
@@ -133,63 +143,66 @@ class MainWindow(QMainWindow):
         # Restore sizes/positions of docks
         #self.restoreState(settings.value("mainWindowState").toByteArray());
         self.path = None
-        QObject.connect(app, SIGNAL('aboutToQuit()'), self.cleanUp)
+        QObject.connect(app, SIGNAL('aboutToQuit()'), self.exit)
         self.app = app
 
 		#Icon 
         icon_continue = QtGui.QIcon()
-        icon_continue.addPixmap(QtGui.QPixmap("Assets/icon-continue.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon_continue.addPixmap(QtGui.QPixmap("Assets/icon-continue-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        icon_continue.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-continue.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_continue.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-continue-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         self.icon_debug = QtGui.QIcon()
-        self.icon_debug.addPixmap(QtGui.QPixmap("Assets/icon-debug.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.icon_debug.addPixmap(QtGui.QPixmap("Assets/icon-debug-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        self.icon_debug.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-debug.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.icon_debug.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-debug-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_pause = QtGui.QIcon()
-        icon_pause.addPixmap(QtGui.QPixmap("Assets/icon-pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon_pause.addPixmap(QtGui.QPixmap("Assets/icon-pause-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        icon_pause.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_pause.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-pause-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         self.icon_run = QtGui.QIcon()
-        self.icon_run.addPixmap(QtGui.QPixmap("Assets/icon-run.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.icon_run.addPixmap(QtGui.QPixmap("Assets/icon-run-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        self.icon_run.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-run.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.icon_run.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-run-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_stepinto = QtGui.QIcon()
-        icon_stepinto.addPixmap(QtGui.QPixmap("Assets/icon-stepinto.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon_stepinto.addPixmap(QtGui.QPixmap("Assets/icon-stepinto-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        icon_stepinto.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-stepinto.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stepinto.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-stepinto-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_stepout = QtGui.QIcon()
-        icon_stepout.addPixmap(QtGui.QPixmap("Assets/icon-stepout.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon_stepout.addPixmap(QtGui.QPixmap("Assets/icon-stepout-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        icon_stepout.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-stepout.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stepout.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-stepout-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_stepover = QtGui.QIcon()
-        icon_stepover.addPixmap(QtGui.QPixmap("Assets/icon-stepover.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon_stepover.addPixmap(QtGui.QPixmap("Assets/icon-stepover-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        icon_stepover.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-stepover.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stepover.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-stepover-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         icon_stop = QtGui.QIcon()
-        icon_stop.addPixmap(QtGui.QPixmap("Assets/icon-stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon_stop.addPixmap(QtGui.QPixmap("Assets/icon-stop-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        icon_stop.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon_stop.addPixmap(QtGui.QPixmap(apath+"/Assets/icon-stop-gray.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         self.icon_file_on = QtGui.QIcon()
-    	self.icon_file_on.addPixmap(QtGui.QPixmap("Assets/panel-files-on.png"), QtGui.QIcon.Normal)
+    	self.icon_file_on.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-files-on.png"), QtGui.QIcon.Normal)
         self.icon_file_off = QtGui.QIcon()
-    	self.icon_file_off.addPixmap(QtGui.QPixmap("Assets/panel-files-off.png"), QtGui.QIcon.Normal)
+    	self.icon_file_off.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-files-off.png"), QtGui.QIcon.Normal)
         self.icon_inspector_on = QtGui.QIcon()
-    	self.icon_inspector_on.addPixmap(QtGui.QPixmap("Assets/panel-inspector-on.png"), QtGui.QIcon.Normal)
+    	self.icon_inspector_on.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-inspector-on.png"), QtGui.QIcon.Normal)
         self.icon_inspector_off = QtGui.QIcon()
-    	self.icon_inspector_off.addPixmap(QtGui.QPixmap("Assets/panel-inspector-off.png"), QtGui.QIcon.Normal)
+    	self.icon_inspector_off.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-inspector-off.png"), QtGui.QIcon.Normal)
         self.icon_console_on = QtGui.QIcon()
-    	self.icon_console_on.addPixmap(QtGui.QPixmap("Assets/panel-console-on.png"), QtGui.QIcon.Normal)
+    	self.icon_console_on.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-console-on.png"), QtGui.QIcon.Normal)
         self.icon_console_off = QtGui.QIcon()
-    	self.icon_console_off.addPixmap(QtGui.QPixmap("Assets/panel-console-off.png"), QtGui.QIcon.Normal)
+    	self.icon_console_off.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-console-off.png"), QtGui.QIcon.Normal)
         self.icon_debug_on = QtGui.QIcon()
-    	self.icon_debug_on.addPixmap(QtGui.QPixmap("Assets/panel-debug-on.png"), QtGui.QIcon.Normal)
+    	self.icon_debug_on.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-debug-on.png"), QtGui.QIcon.Normal)
         self.icon_debug_off = QtGui.QIcon()
-    	self.icon_debug_off.addPixmap(QtGui.QPixmap("Assets/panel-debug-off.png"), QtGui.QIcon.Normal)
+    	self.icon_debug_off.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-debug-off.png"), QtGui.QIcon.Normal)
         self.icon_trace_on = QtGui.QIcon()
-    	self.icon_trace_on.addPixmap(QtGui.QPixmap("Assets/panel-refresh-on.png"), QtGui.QIcon.Normal)
+    	self.icon_trace_on.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-refresh-on.png"), QtGui.QIcon.Normal)
         self.icon_trace_off = QtGui.QIcon()
-    	self.icon_trace_off.addPixmap(QtGui.QPixmap("Assets/panel-refresh-off.png"), QtGui.QIcon.Normal)
+    	self.icon_trace_off.addPixmap(QtGui.QPixmap(apath+"/Assets/panel-refresh-off.png"), QtGui.QIcon.Normal)
 
 		# Create ToolBar 
         self.toolbar = DockAwareToolBar() 
         self.toolbar.setObjectName("debug_toolbar")
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar)
 
+		# Toolbar font 
+        font = QFont()
+        font.setPointSize(9)
 
-		#Create Target Trickplay Devices Button
-        self._deviceManager = TrickplayDeviceManager(self._inspector, self)
+		#Create Target Devices Drop Down Button
+        self._deviceManager = TrickplayDeviceManager(self)
         font_deviceManager = QFont()
         font_deviceManager.setPointSize(9)
         self._deviceManager.ui.comboBox.setFont(font_deviceManager)
@@ -197,7 +210,6 @@ class MainWindow(QMainWindow):
         
 
 		# Create Debug/Run tool button 
-		#V2 ---------------------------------------------------------------
         self.debug_tbt = QtGui.QToolButton()
         self.debug_tbt.setPopupMode(QtGui.QToolButton.MenuButtonPopup)
         self.debug_tbt.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -320,25 +332,30 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(self.trace_toolBtn)
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
 
-    def mioMrC_debug(self) :
-        self.debug_tbt.setText("Debug")
-        self.debug_tbt.setIcon(self.icon_debug)
-
-        self.debug_menu.removeAction(self.debug_action)
-        self.debug_menu.addAction(self.run_action)
-        QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
-        QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
+        # Search Flag
+        self.find_expr = None
 
 
-    def mioMrC_run(self) :
-        self.debug_tbt.setText("Run")
-        self.debug_tbt.setIcon(self.icon_run)
+    def chgTool_debug(self) :
+        if self.debug_tbt.text() != "Debug":
+        	self.debug_tbt.setText("Debug")
+        	self.debug_tbt.setIcon(self.icon_debug)
 
-        self.debug_menu.removeAction(self.run_action)
-        self.debug_menu.addAction(self.debug_action)
+        	self.debug_menu.removeAction(self.debug_action)
+        	self.debug_menu.addAction(self.run_action)
+        	QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
+        	QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
 
-        QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
-        QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
+    def chgTool_run(self) :
+        if self.debug_tbt.text() != "Run":
+        	self.debug_tbt.setText("Run")
+        	self.debug_tbt.setIcon(self.icon_run)
+
+        	self.debug_menu.removeAction(self.run_action)
+        	self.debug_menu.addAction(self.debug_action)
+	
+        	QObject.disconnect(self.debug_tbt , SIGNAL("clicked()"),  self.debug)
+        	QObject.connect(self.debug_tbt , SIGNAL("clicked()"),  self.run)
 
     def traceWindowClicked(self) :
     	if self.windows['trace'] == True:
@@ -408,52 +425,76 @@ class MainWindow(QMainWindow):
         return self._inspector
 
     def return_pressed(self):
-		self.request = str(self.ui.interactive.text())
-		#print self.request
-		try:
-			ret = self.deviceManager.socket.write(self.request+'\n\n')
-			if ret < 0 :
-				print "tp console socket is not available"
-			else :
-				print ret
-		except AttributeError, e:
-    		# deal with AttributeError
-			print "tp console socket is not opened"
-		self.ui.interactive.setText("")
-		self.request = ""
+		if self._deviceManager.ui.comboBox.currentIndex() != 0:
+		    self.request = str(self.ui.interactive.text())
+		    #print self.request
+		    try:
+			    ret = self.deviceManager.socket.write(self.request+'\n\n')
+			    if ret < 0 :
+				    print "[VDBG] tp console socket is not available"
+    
+		    except AttributeError, e:
+    		    # deal with AttributeError
+			    print "[VDBG] tp console socket is not opened"
+		    self.ui.interactive.setText("")
+		    self.request = ""
+		else:
+		    inputCmd = str(self.ui.interactive.text())
+		    self._deviceManager.trickplay.write(inputCmd+"\n")
+		    self._deviceManager.trickplay.waitForBytesWritten();
+		    self.ui.interactive.setText("")
 		
-    def stop(self):
-    	if self._deviceManager.trickplay.state() == QProcess.Running:
-        	# self._deviceManager.trickplay.kill() #close, terminate 
-			if getattr(self._deviceManager, "debug_mode") == True :
-				data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "q", True)
-				# delete current line marker
-				for n in self.editorManager.editors:
-					for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
-						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete( int(l), -1) 
-					self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
+    def stop(self, serverStoped=False):
+        # send 'q' command and close trickplay process
 
-					if self.current_debug_file == n:
-						self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
-						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
-						self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
+        self.inspector.ui.refresh.setEnabled(False)
+        self.inspector.ui.search.setEnabled(False)
 
+        if self._deviceManager.trickplay.state() == QProcess.Running:
+            # Local Debugging / Run 
+            self._deviceManager.trickplay.close()
+        elif self._deviceManager.ui.comboBox.currentIndex() != 0:
+            # Remote Debugging / Run 
+            if getattr(self._deviceManager, "debug_mode") == False :
+                ret = self.deviceManager.socket.write('/close\n\n')
+                if ret < 0 :
+                    print ("tp console socket is not available !")
+            elif serverStoped == False :
+		        self._deviceManager.send_debugger_command(DBG_CMD_RESET)
 
-				# clean backtrace and debug window
-				self._backtrace.clearTraceTable(0)
-				self._debug.clearLocalTable(0)
-				self._debug.clearBreakTable(0)
-				self.mioMrC_run()
-			else :
-				ret = self.deviceManager.socket.write('/quit\n\n')
-				if ret < 0 :
-					print ("tp console socket is not available !")
-    	else :
-    		self.deviceManager.socket.write('/quit\n\n')
+        if getattr(self._deviceManager, "debug_mode") == True :
+            # delete break points marker
+    	    for n in self.editorManager.editors:
+    	        try :
+    	            for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
+    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
+                        #print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
+    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
+    	            # delete current line marker
+    	            self.current_debug_file = self.path+'/'+self._deviceManager.file_name
+    	            if self.current_debug_file == n:
+    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
+                            self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
+    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
+    	        except :
+    	            print("[VDBG] YUGI 1 : ", self.editorManager.editors[n][1])
+
+            # delete current line marker
+            """
+    		self.current_debug_file = self.path+'/'+self._deviceManager.file_name
+    		if self.current_debug_file == n:
+    		    self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
+    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
+     	        self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
+            """
+
+            # clean backtrace and debug window
+            self._backtrace.clearTraceTable(0)
+            self._debug.clearLocalTable(0)
+            self._debug.clearBreakTable(0)
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
-        self.consoleWindowClicked()
         self.debugWindowClicked()
         self.traceWindowClicked()
 
@@ -465,10 +506,9 @@ class MainWindow(QMainWindow):
         self.debug_continue_bt.setEnabled(False)
 
         self.inspector.clearTree()
-        #self._deviceManager.ui.comboBox.removeItem(self._deviceManager.ui.comboBox.findText(self._deviceManager.newAppText))
-
-        #self._deviceManager.ui.comboBox.setCurrentIndex(0)
-        #self._deviceManager.service_selected(0)
+        self._deviceManager.ui.comboBox.setEnabled(True)
+        self.debug_tbt.setEnabled(True)
+        self.debuggerMenuEnabled(False)
 
     def run(self):
         self.inspector.clearTree()
@@ -485,42 +525,51 @@ class MainWindow(QMainWindow):
         self.debug_stepout.setEnabled(False)
         self.debug_pause_bt.setEnabled(False)
         self.debug_continue_bt.setEnabled(False)
-    	#self.mioMrC_run()
+
+        self.ui.action_Stop.setEnabled(True)
+        self.ui.actionContinue.setEnabled(False)
+        self.ui.actionPause.setEnabled(False)
+        self.ui.actionStep_into.setEnabled(False)
+        self.ui.actionStep_over.setEnabled(False)
+        self.ui.actionStep_out.setEnabled(False)
+
+    	self.chgTool_run()
+
+        self._deviceManager.ui.comboBox.setEnabled(False)
+        self.debug_tbt.setEnabled(False)
+        self.ui.action_Run.setEnabled(False)
+        self.ui.action_Debug.setEnabled(False)
 
     def debug(self):
-        self.inspector.clearTree()
-        self._deviceManager.run(True)
+        #self.inspector.clearTree()
+        ret = self._deviceManager.run(True)
+        if ret != False :
+            self.windows = {"file":False, "inspector":False, "console":False, "debug":False, "trace":False}
+            self.inspectorWindowClicked()
+            self.consoleWindowClicked()
+            self.debugWindowClicked()
+            self.traceWindowClicked()
+    
+            self.debug_stop.setEnabled(True)
+            self.debug_stepinto.setEnabled(True)
+            self.debug_stepover.setEnabled(True)
+            self.debug_stepout.setEnabled(True)
+            #self.debug_pause_bt.setEnabled(False)
+            self.debug_continue_bt.setEnabled(True)
 
-        self.windows = {"file":False, "inspector":False, "console":False, "debug":False, "trace":False}
-        self.inspectorWindowClicked()
-        self.consoleWindowClicked()
-        self.debugWindowClicked()
-        self.traceWindowClicked()
-
-        self.debug_stop.setEnabled(True)
-        self.debug_stepinto.setEnabled(True)
-        self.debug_stepover.setEnabled(True)
-        self.debug_stepout.setEnabled(True)
-        self.debug_pause_bt.setEnabled(True)
-        self.debug_continue_bt.setEnabled(True)
-
-        time.sleep(2)
-        data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bn", True)
-        self._deviceManager.printResp(data, "cn")
-        # update backtrace table
-        data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
-        stack_info = self._deviceManager.printResp(data, "bt")
-        self._backtrace.populateTraceTable(stack_info, self.editorManager)
-
-		# Open File, Show Current Lines 
-        if self._deviceManager.file_name[:1] != '/' :
-			self.current_debug_file = self.path+'/'+self._deviceManager.file_name
-        else :
-			self.current_debug_file = self.path+self._deviceManager.file_name
-
-        self._editorManager.newEditor(self.current_debug_file, None, self._deviceManager.line_no, None, True)
-    	self.mioMrC_debug()
-	
+            self.ui.action_Stop.setEnabled(True)
+            self.ui.actionContinue.setEnabled(True)
+            self.ui.actionPause.setEnabled(False)
+            self.ui.actionStep_into.setEnabled(True)
+            self.ui.actionStep_over.setEnabled(True)
+            self.ui.actionStep_out.setEnabled(True)
+    
+    	    self.chgTool_debug()
+            self._deviceManager.ui.comboBox.setEnabled(False)
+            self.debug_tbt.setEnabled(False)
+            self.ui.action_Run.setEnabled(False)
+            self.ui.action_Debug.setEnabled(False)
+            #self.debuggerMenuEnabled()
 	
     def editor_undo(self):
 		if self.editorManager.tab:
@@ -572,9 +621,10 @@ class MainWindow(QMainWindow):
         """
         
         try:
-            print('Trickplay state', self.deviceManager.trickplay.state())
+            print('[VDBG] Trickplay state : [ %s ]'%self.deviceManager.trickplay.state())
             #if self.trickplay.state() == QProcess.Running:
-            self.deviceManager.trickplay.close()
+            self.exit()
+            #self.deviceManager.trickplay.close()
             #    print('terminated trickplay')
         except AttributeError, e:
             pass
@@ -586,13 +636,12 @@ class MainWindow(QMainWindow):
         """
         Initialize widgets on the main window with a given app path
         """
-        
-        print("main.start")
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
-        print(path)
-        self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
+        self.setWindowTitle(QtGui.QApplication.translate("MainWindow", 
+							"Trickplay IDE [ "+str(os.path.basename(str(path))+" ]"), 
+							None, QtGui.QApplication.UnicodeUTF8))
         self.deviceManager.setPath(path)
         
         if openList:
@@ -610,41 +659,49 @@ class MainWindow(QMainWindow):
 	
     def openApp(self):
 		wizard = Wizard()
-		dir = "/home/hjkim/trickplay-editor/"
-		path = QFileDialog.getExistingDirectory(None, 'Open App', dir, QFileDialog.ShowDirsOnly)
-		#path = wizard.chooseDirectoryDialog(dir)
-		path = wizard.start(path, True)
-		print (path)
+		path = -1
+		while path == -1 :
+		    if self.path is None:
+		        self.path = self.apath
+		    path = QFileDialog.getExistingDirectory(None, 'Open App', self.path, QFileDialog.ShowDirsOnly)
+		    path = wizard.start(path, True)
+		print ("[VDBG] openApp [%s]"%path)
 		if path:
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
-			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay IDE [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
+			if self.editorManager.tab != None:
+			    while self.editorManager.tab.count() != 0:
+			        self.editorManager.close()
 
     def new(self):
 		wizard = Wizard()
-		path = wizard.start("")
+		path = wizard.start("", False, True)
 		if path:
-
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
-			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay Visual Debugger  [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay IDE [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
+			if self.editorManager.tab != None:
+			    while self.editorManager.tab.count() != 0:
+			        self.editorManager.close()
 
     def exit(self):
-        """
-        Close in a clean way... but still Trickplay closes too soon and the
-        Avahi service stays alive
-        """
     	if self.editorManager.tab != None:
     		while self.editorManager.tab.count() != 0:
 				self.editorManager.close()
 
         self._deviceManager.stop()
         self.close()
+        #settings = QSettings()
+        #settings.remove("path") 
 
     def newFile(self):
     	file_name = self.path+'/Untitled_'+str(self.untitled_idx)+".lua"
+        
+        #TODO check if file_name is available and ... 
+
     	self.editorManager.newEditor(file_name, None, None, None, False, None, True)
     	self.untitled_idx = self.untitled_idx + 1
 		
@@ -698,11 +755,16 @@ class MainWindow(QMainWindow):
     			self.replace_dialog = QDialog()
     			self.replace_ui = Ui_replaceDialog()
     			self.replace_ui.setupUi(self.replace_dialog)
-
-        		self.replace_ui.pushButton_find.setEnabled(False)
-        		self.replace_ui.pushButton_replace.setEnabled(False)
-        		self.replace_ui.pushButton_replaceAll.setEnabled(False)
-        		self.replace_ui.pushButton_replaceFind.setEnabled(False)
+    			self.prevForward = True
+    			if self.find_expr is not None :
+    			    self.replace_ui.search_txt.setText(self.find_expr)
+    			    self.replace_ui.pushButton_find.setEnabled(True)
+        		    self.replace_ui.pushButton_replaceAll.setEnabled(True)
+    			else:
+    			    self.replace_ui.pushButton_find.setEnabled(False)
+        		    self.replace_ui.pushButton_replaceAll.setEnabled(False)
+        		    self.replace_ui.pushButton_replace.setEnabled(False)
+        		    self.replace_ui.pushButton_replaceFind.setEnabled(False)
 
     			QObject.connect(self.replace_ui.search_txt , SIGNAL("textChanged(QString)"),  self.replace_textChanged)
     			QObject.connect(self.replace_ui.pushButton_close , SIGNAL("clicked()"),  self.replace_close)
@@ -714,19 +776,19 @@ class MainWindow(QMainWindow):
     			while self.replace_dialog.exec_() :
 					cur_geo = self.replace_dialog.geometry()
 					expr = self.replace_ui.search_txt.text()
+					self.find_expr = expr
 					replace_expr = self.replace_ui.replace_txt.text()
 					re = False
 					cs = self.replace_ui.checkBox_case.isChecked() 
 					wo = self.replace_ui.checkBox_word.isChecked() 
 					wrap = self.replace_ui.checkBox_wrap.isChecked() 
-					forward = self.replace_ui.checkBox_forward.isChecked() 
-
+					forward = self.replace_ui.radioButton_fw.isChecked() 
 					self.replace_ui.search_txt.setText(expr)
 					self.replace_ui.replace_txt.setText(replace_expr)
 					self.replace_ui.checkBox_case.setChecked(cs) 
 					self.replace_ui.checkBox_word.setChecked(wo) 
 					self.replace_ui.checkBox_wrap.setChecked(wrap) 
-					self.replace_ui.checkBox_forward.setChecked(forward) 
+					self.replace_ui.radioButton.setChecked(forward) 
 					self.replace_dialog.setGeometry(cur_geo)
 	
     def  replace_textChanged(self, change):
@@ -742,24 +804,38 @@ class MainWindow(QMainWindow):
     def  replace_close(self):
 		self.replace_dialog.close()
 
-    def  replace_find(self):
+    def  replace_find(self, replaceall = False):
 		cur_geo = self.replace_dialog.geometry()
 		expr = self.replace_ui.search_txt.text()
+		self.find_expr = expr
 		replace_expr = self.replace_ui.replace_txt.text()
 		re = False
 		cs = self.replace_ui.checkBox_case.isChecked() 
 		wo = self.replace_ui.checkBox_word.isChecked() 
 		wrap = self.replace_ui.checkBox_wrap.isChecked() 
-		forward = self.replace_ui.checkBox_forward.isChecked() 
+		forward = self.replace_ui.radioButton_fw.isChecked() 
+		if replaceall is True:
+		    wo = True
+
+		if forward is False and self.prevForward is True:
+		    self.firstBackward = True
+
 		index = self.editorManager.tab.currentIndex()
-		if self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward) == False :
+		if forward is True or self.firstBackward is True:
+		    find_result = self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
+		    self.firstBackward = False
+		else:
+		    find_result = self.editorManager.tab.editors[index].findNext()
+
+		if find_result == False :
 			self.replace_ui.notification.setText("String Not Found") 
 		else:
 			self.replace_ui.notification.setText("")
         	self.replace_ui.pushButton_replace.setEnabled(True)
         	self.replace_ui.pushButton_replaceFind.setEnabled(True)
 
-		return self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
+		self.prevForward = forward 
+		return find_result
 
     def  replace_replace(self):
 		replace_expr = self.replace_ui.replace_txt.text()
@@ -767,7 +843,7 @@ class MainWindow(QMainWindow):
 		self.editorManager.tab.editors[index].replace(replace_expr)
 
     def  replace_replaceAll(self):
-		findNext = self.replace_find() 
+		findNext = self.replace_find(True) 
 		if findNext == False:
 			self.replace_ui.notification.setText("String Not Found") 
 			return
@@ -775,7 +851,7 @@ class MainWindow(QMainWindow):
 		replaceNum = 0 
 		while findNext == True:
 			self.replace_replace()
-			findNext = self.replace_find()
+			findNext = self.replace_find(True)
 			replaceNum = replaceNum + 1 
 
 		self.replace_ui.notification.setText(str(replaceNum)+" matches replaced") 
@@ -807,16 +883,6 @@ class MainWindow(QMainWindow):
 						self.editorManager.tab.editors[index].SendScintilla(QsciScintilla.SCI_GOTOLINE, int(lineNum) - 1)
 						return
 					else :
-						"""
-						msg = QMessageBox()
-						msg.setGeometry(cur_geo)
-						msg.setText('The line number is not valid')
-						msg.setInformativeText('Please enter a number (1..'+str(maxNum)+')')
-						msg.setStandardButtons(QMessageBox.Ok)
-						msg.setDefaultButton(QMessageBox.Ok)
-						msg.setWindowTitle("Warning")
-						ret = msg.exec_()
-						"""
 						self.gotoLine_ui.line_txt.setText(str(lineNum))
 						self.gotoLine_dialog = QDialog()
 						self.gotoLine_ui = Ui_gotoLineDialog()
@@ -830,7 +896,6 @@ class MainWindow(QMainWindow):
 				self.gotoLine_ui.notification.setText("")
 			except :
 				self.gotoLine_ui.notification.setText("Not a number")
-				lineNum = int(self.gotoLine_ui.line_txt.text())
 				lineNum = -1
 			index = self.editorManager.tab.currentIndex()
 			maxNum = self.editorManager.tab.editors[index].lines()
@@ -846,68 +911,55 @@ class MainWindow(QMainWindow):
 		else:
 			self.gotoLine_ui.okButton.setEnabled(False)
 
-    def debug_command(self, cmd):
-		if getattr(self._deviceManager, "debug_mode") == True :
-			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), cmd, False)
-			self._deviceManager.printResp(data, cmd)
-			# Open File, Show Current Lines 
-			if cmd == "c":
-				# delete current line marker 
-				for m in self.editorManager.editors:
-					if self.current_debug_file == m:
-						# check what kind of arrow marker was on the current line and delete just arrow mark not break points 
-						self.editorManager.tab.editors[self.editorManager.editors[m][1]].markerDelete(
-						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line, Editor.ARROW_MARKER_NUM)
-						self.editorManager.tab.editors[self.editorManager.editors[m][1]].current_line = -1
-				# clean backtrace and debug windows
-				self._backtrace.clearTraceTable(0)
-				self._debug.clearLocalTable(0)
-				#self._debug.clearBreakTable(0)
-
-			file_name = ""
-			# update local variables table
-			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "l", False)
-			local_info = self._deviceManager.printResp(data, "l")
-			self._debug.populateLocalTable(local_info)
-
-			# update backtrace table
-			data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "bt", False)
-			stack_info = self._deviceManager.printResp(data, "bt")
-			self._backtrace.populateTraceTable(stack_info, self.editorManager)
-
-			# print breakpoints info 
-			#data = sendTrickplayDebugCommand(str(self._deviceManager.debug_port), "b", False)
-			#self._deviceManager.printResp(data, "b")
-
-			# open current file and put line marker on the current line's margin 
-			if self._deviceManager.file_name[:1] != '/' :
-				file_name = self.path+'/'+self._deviceManager.file_name
-			else :
-				file_name = self.path+self._deviceManager.file_name
-
-			if self.current_debug_file != file_name :
-				self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, self.current_debug_file, True)
-			else :
-				self.editorManager.newEditor(file_name, None, self._deviceManager.line_no, None, True)
-
-			self.current_debug_file = file_name
-
-		else :
-			pass
-
-		return None
-
     def debug_continue(self):
-		self.debug_command("c")
+		self._deviceManager.send_debugger_command(DBG_CMD_CONTINUE)
+		self.inspector.ui.refresh.setEnabled(True)
+		self.inspector.ui.search.setEnabled(True)
+		return
 
     def debug_pause(self):
-		self.debug_command("bn")
+		self._deviceManager.send_debugger_command(DBG_CMD_BREAK_NEXT)
+		self.inspector.clearTree()
+		self.inspector.ui.refresh.setEnabled(False)
+		self.inspector.ui.search.setEnabled(False)
+		return
 
     def debug_step_into(self):
-		self.debug_command("s")
+		self._deviceManager.send_debugger_command(DBG_CMD_STEP_INTO)
+		return
 
     def debug_step_over(self):
-		self.debug_command("n")
+		self._deviceManager.send_debugger_command(DBG_CMD_STEP_OVER)
+		return
 
     def debug_step_out(self):
-		pass
+		return
+    def editorMenuEnabled(self, enabled=True):
+        self.ui.action_Save.setEnabled(enabled)
+        self.ui.action_Save_As.setEnabled(enabled)
+        self.ui.actionSave_All.setEnabled(enabled)
+        self.ui.action_Close.setEnabled(enabled)
+        if enabled == False :
+            self.ui.actionUndo.setEnabled(enabled)
+            self.ui.actionRedo.setEnabled(enabled)
+            self.ui.action_Cut.setEnabled(enabled)
+            self.ui.action_Copy.setEnabled(enabled)
+            self.ui.action_Delete.setEnabled(enabled)
+
+        self.ui.action_Paste.setEnabled(enabled)
+
+        self.ui.actionSelect_All.setEnabled(enabled)
+        self.ui.actionSearch_Replace.setEnabled(enabled)
+        self.ui.actionGo_to_line.setEnabled(enabled)
+
+    def debuggerMenuEnabled(self, enabled=True):
+
+        self.ui.action_Run.setEnabled(not enabled)
+        self.ui.action_Debug.setEnabled(not enabled)
+
+        self.ui.action_Stop.setEnabled(enabled)
+        self.ui.actionContinue.setEnabled(enabled)
+        self.ui.actionPause.setEnabled(enabled)
+        self.ui.actionStep_into.setEnabled(enabled)
+        self.ui.actionStep_over.setEnabled(enabled)
+        self.ui.actionStep_out.setEnabled(enabled)

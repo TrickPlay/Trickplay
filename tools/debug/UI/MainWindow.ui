@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>911</width>
+    <width>1020</width>
     <height>744</height>
    </rect>
   </property>
@@ -29,7 +29,7 @@
    <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>Trickplay Visual Debugger</string>
+   <string>Trickplay IDE</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -40,22 +40,22 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>911</width>
-     <height>26</height>
+     <width>1020</width>
+     <height>27</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>10</pointsize>
+     <pointsize>11</pointsize>
     </font>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionNew_File"/>
     <addaction name="action_New"/>
     <addaction name="actionOpen_App"/>
+    <addaction name="actionNew_File"/>
     <addaction name="action_Save"/>
     <addaction name="action_Save_As"/>
     <addaction name="actionSave_All"/>
@@ -78,7 +78,6 @@
     <addaction name="action_Paste"/>
     <addaction name="action_Delete"/>
     <addaction name="actionSelect_All"/>
-    <addaction name="actionSearch"/>
     <addaction name="actionSearch_Replace"/>
     <addaction name="actionGo_to_line"/>
    </widget>
@@ -86,6 +85,9 @@
     <property name="title">
      <string>Debug</string>
     </property>
+    <addaction name="action_Run"/>
+    <addaction name="action_Debug"/>
+    <addaction name="action_Stop"/>
     <addaction name="actionContinue"/>
     <addaction name="actionPause"/>
     <addaction name="actionStep_into"/>
@@ -346,6 +348,12 @@
      </item>
      <item row="2" column="0">
       <widget class="QLineEdit" name="interactive">
+       <property name="font">
+        <font>
+         <family>Monospace</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -364,9 +372,7 @@
     <string>Exit</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -377,12 +383,10 @@
   </action>
   <action name="action_Save">
    <property name="text">
-    <string>&amp;Save</string>
+    <string>Save file</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -390,12 +394,16 @@
   </action>
   <action name="action_New">
    <property name="text">
-    <string>New  APP</string>
+    <string>Create new  app...</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
    </property>
   </action>
   <action name="action_Cut">
@@ -403,9 +411,7 @@
     <string>Cut</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
@@ -413,12 +419,10 @@
   </action>
   <action name="action_Copy">
    <property name="text">
-    <string>&amp;Copy</string>
+    <string>Copy</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -429,9 +433,7 @@
     <string>Paste</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
@@ -439,12 +441,10 @@
   </action>
   <action name="action_Delete">
    <property name="text">
-    <string>&amp;Delete</string>
+    <string>Delete</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
@@ -452,12 +452,10 @@
   </action>
   <action name="actionSelect_All">
    <property name="text">
-    <string>Select &amp;All</string>
+    <string>Select all</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
@@ -465,12 +463,13 @@
   </action>
   <action name="action_Close">
    <property name="text">
-    <string>Close</string>
+    <string>Close file</string>
+   </property>
+   <property name="iconText">
+    <string notr="true">Close file</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
@@ -478,12 +477,10 @@
   </action>
   <action name="action_Save_As">
    <property name="text">
-    <string>Save &amp;As...</string>
+    <string>Save file as...</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
   </action>
   <action name="actionUndo">
@@ -491,9 +488,7 @@
     <string>Undo</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+Z</string>
@@ -501,12 +496,10 @@
   </action>
   <action name="actionRedo">
    <property name="text">
-    <string>&amp;Redo</string>
+    <string>Redo</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -527,9 +520,7 @@
     <string>Step Into</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
@@ -537,12 +528,10 @@
   </action>
   <action name="actionStep_over">
    <property name="text">
-    <string>Step Over</string>
+    <string>Step over</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+K</string>
@@ -560,12 +549,10 @@
   </action>
   <action name="actionSave_All">
    <property name="text">
-    <string>Save All</string>
+    <string>Save all files</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
   </action>
   <action name="actionSearch">
@@ -583,15 +570,13 @@
   </action>
   <action name="actionSearch_Replace">
    <property name="text">
-    <string>Search/Replace...</string>
+    <string>Find/Replace...</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
-    <string>Ctrl+H</string>
+    <string>Ctrl+F</string>
    </property>
   </action>
   <action name="actionGo_to_line">
@@ -599,9 +584,7 @@
     <string>Go to line...</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+J</string>
@@ -624,12 +607,10 @@
   </action>
   <action name="actionStep_out">
    <property name="text">
-    <string>Step Out</string>
+    <string>Step out</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
@@ -645,9 +626,7 @@
     <string>Pause</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
@@ -658,9 +637,7 @@
     <string>Continue</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+B</string>
@@ -668,12 +645,10 @@
   </action>
   <action name="actionNew_File">
    <property name="text">
-    <string>New File</string>
+    <string>Create new file...</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -691,12 +666,10 @@
   </action>
   <action name="actionOpen_App">
    <property name="text">
-    <string>Open App</string>
+    <string>Open existing app...</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-    </font>
+    <font/>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -710,6 +683,30 @@
     <font>
      <pointsize>10</pointsize>
     </font>
+   </property>
+  </action>
+  <action name="action_Run">
+   <property name="text">
+    <string>Run</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F11</string>
+   </property>
+  </action>
+  <action name="action_Debug">
+   <property name="text">
+    <string>Debug</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
+   </property>
+  </action>
+  <action name="action_Stop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
   </action>
  </widget>
