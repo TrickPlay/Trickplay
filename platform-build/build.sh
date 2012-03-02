@@ -328,7 +328,7 @@ if [[ $PROFILING != "0" ]]
 then
     CLUTTER_PROFILING="--enable-profile=yes"
 fi
-COGL_COMMANDS="ac_cv_lib_EGL_eglInitialize=yes ac_cv_lib_GLES2_CM_eglInitialize=yes ac_cv_func_malloc_0_nonnull=yes ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-gles2=yes --enable-gl=no --enable-glx=no --enable-xlib-egl-platform=no --enable-android-egl-platform=yes $CLUTTER_PROFILING --disable-glibtest --enable-gtk-doc-html=no CFLAGS=\"$CFLAGS -O0 -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
+COGL_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --enable-gles2=yes --enable-gl=no --enable-glx=no --enable-xlib-egl-platform=no --enable-android-egl-platform=yes $CLUTTER_PROFILING --disable-glibtest --enable-gtk-doc-html=no CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -landroid\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
 COGL_DEPENDS="GLIB PANGO FREETYPE CAIRO FONTCONFIG UPROF"
 
 #------------------------------------------------------------------------------
