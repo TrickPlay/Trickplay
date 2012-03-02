@@ -8,7 +8,7 @@
 	<class>org.frogx.service.openfire.MUGPlugin</class>
 	
 	<!-- Plugin meta-data -->
-	<name>frogx support</name>
+	<name>mug support</name>
 	<description>${pom.description}</description>
 	<author>${author}</author>    
 	<version>${pom.version}</version>
@@ -17,7 +17,7 @@
 	<minServerVersion>3.6.4</minServerVersion>
 	
 	<!-- Database data -->
-	<databaseKey>frogx-openfire</databaseKey>
+	<databaseKey>mug-openfire</databaseKey>
 	<databaseVersion>0</databaseVersion>
 	
 	<!-- License -->

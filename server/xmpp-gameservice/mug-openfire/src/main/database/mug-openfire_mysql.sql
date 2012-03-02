@@ -1,6 +1,6 @@
 # Initializing the openfire mysql database for the Multi-User Gaming Plugin  
 
-INSERT INTO ofVersion (name, version) VALUES ('frogx-openfire', 0);
+INSERT INTO ofVersion (name, version) VALUES ('mug-openfire', 0);
 
 CREATE TABLE frogxMugService (
   serviceID             BIGINT        NOT NULL,

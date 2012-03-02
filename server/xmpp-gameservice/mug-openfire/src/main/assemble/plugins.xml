@@ -19,7 +19,7 @@
 			<directory>target</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
-				<include>frogx-service.jar</include>
+				<include>mug-service.jar</include>
 			</includes>
 		</fileSet>
 	</fileSets>

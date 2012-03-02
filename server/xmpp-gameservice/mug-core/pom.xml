@@ -7,7 +7,6 @@
 		<version>0.1-SNAPSHOT</version>
 		<relativePath />
 	</parent>
-	<groupId>org.frogx.service</groupId>
 	<artifactId>mug-core</artifactId>
 	<name>mug-core</name>
 	<description>A framework to support Multi-User Games on Jabber servers.</description>

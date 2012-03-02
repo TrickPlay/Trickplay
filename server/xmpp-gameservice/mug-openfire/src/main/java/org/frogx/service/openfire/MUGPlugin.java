@@ -69,7 +69,7 @@ public class MUGPlugin implements Plugin, MUGManager {
 	/**
 	 * The name of the plugin for loading the resource bundle.
 	 */
-	public static final String pluginName = "frogx-service";
+	public static final String pluginName = "mug-service";
 	
 	/**
 	 * The fallback description of a MUGService if no description
