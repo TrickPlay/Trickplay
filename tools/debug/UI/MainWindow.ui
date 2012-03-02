@@ -350,7 +350,6 @@
       <widget class="QLineEdit" name="interactive">
        <property name="font">
         <font>
-         <family>Monospace</family>
          <pointsize>10</pointsize>
         </font>
        </property>
