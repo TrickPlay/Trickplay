@@ -39,7 +39,7 @@ class TrickplayDebugger(QWidget):
         self.font = QFont()
         self.font.setStyleHint(self.font.Monospace)
         self.font.setFamily('Inconsolata')
-        self.font.setPointSize(10)
+        self.font.setPointSize(12)
 
 	def contextMenu(self, point=None):
 		self.ui.breakTable.popupMenu.exec_( self.ui.breakTable.mapToGlobal(point) )
@@ -177,7 +177,7 @@ class TrickplayBacktrace(QWidget):
         self.font = QFont()
         self.font.setStyleHint(self.font.Monospace)
         self.font.setFamily('Inconsolata')
-        self.font.setPointSize(10)
+        self.font.setPointSize(12)
 
 
     def cellClicked(self, r, c):

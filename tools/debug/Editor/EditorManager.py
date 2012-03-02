@@ -50,7 +50,7 @@ class EditorManager(QWidget):
         font = QFont()
         font.setStyleHint(font.Monospace)
         font.setFamily('Inconsolata')
-        font.setPointSize(10)
+        font.setPointSize(12)
         container.setFont(font)
 
         grid = QGridLayout(container)

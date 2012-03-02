@@ -197,7 +197,7 @@ class Ui_MainWindow(object):
         monofont = QtGui.QFont()
         monofont.setStyleHint(monofont.Monospace)
         monofont.setFamily('Inconsolata')
-        monofont.setPointSize(10)
+        monofont.setPointSize(12)
 
         self.interactive.setFont(monofont)
         self.interactive.setText(_fromUtf8(""))

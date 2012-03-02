@@ -21,7 +21,7 @@ class Ui_Console(object):
         font = QtGui.QFont()
         font.setStyleHint(font.Monospace)
         font.setFamily('Inconsolata')
-        font.setPointSize(10)
+        font.setPointSize(12)
         Console.setFont(font)
         self.verticalLayout = QtGui.QVBoxLayout(Console)
         self.verticalLayout.setSpacing(0)
