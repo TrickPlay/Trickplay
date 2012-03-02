@@ -337,10 +337,13 @@ do
     
     function tstorm_g:stop_rain()
         for i = 1, #rain do
+            
+            
             if rain[i].parent then
+                
                 rain[i]:stop_animation()
                 rain[i]:animate{
-                    duration = rain_launcher.interval*#rain * ((screen_h-rain[i].y)/(screen_h-rain_y)),
+                    duration = rain_launcher.interval*#rain * ((1+screen_h-rain[i].y)/(screen_h-rain_y)),
                     y = screen_h,
                     on_completed = rain[i].unparent_no_param
                 }
