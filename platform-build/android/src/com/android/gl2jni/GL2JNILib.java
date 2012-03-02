@@ -5,9 +5,6 @@ package com.android.gl2jni;
 
 public class GL2JNILib {
 
-//ALL="ZLIB EXPAT XML EXIF LIBFFI ICONV GET_TEXT LIBBIND GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK COGL CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
-
-
      static {
          System.loadLibrary("android");
          System.loadLibrary("GLESv2");
