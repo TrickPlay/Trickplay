@@ -9,12 +9,16 @@ public class GL2JNILib {
 
 
      static {
-         System.loadLibrary("expat");
-         System.loadLibrary("xml2");
-         System.loadLibrary("exif");
-         System.loadLibrary("ffi");
+         System.loadLibrary("android");
+         System.loadLibrary("GLESv2");
+         System.loadLibrary("EGL");
+
          System.loadLibrary("iconv");
          System.loadLibrary("intl");
+         System.loadLibrary("exif-tp");
+         System.loadLibrary("expat");
+         System.loadLibrary("xml2");
+         System.loadLibrary("ffi");
          System.loadLibrary("glib-2.0");
          System.loadLibrary("gthread-2.0");
          System.loadLibrary("gobject-2.0");
@@ -53,6 +57,7 @@ public class GL2JNILib {
          System.loadLibrary("soup-2.4");
          System.loadLibrary("clutteralphamode");
          System.loadLibrary("tplua");
+
          System.loadLibrary("gl2jni");
      }
 

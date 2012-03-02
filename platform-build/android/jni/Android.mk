@@ -73,7 +73,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE	:=	exif
-LOCAL_SRC_FILES	:=	lib/libexif.so
+LOCAL_SRC_FILES	:=	lib/libexif-tp.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -257,62 +257,64 @@ LOCAL_PATH := $(ORIG_PATH)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := libgl2jni
 LOCAL_CFLAGS    := -Werror
-LOCAL_SRC_FILES := 	gl_code.cpp \
+LOCAL_SRC_FILES := 	\
+                    gl_code.cpp \
     				esutil.c \
     				tp_opengles.c \
     				tp_opengles_oem.c \
 
-LOCAL_STATIC_LIBRARIES  :=  libbz2 \
-                            crypto \
+LOCAL_STATIC_LIBRARIES  :=  \
                             ssl \
-                            tpcore \
-                            zlib
+                            crypto \
+                            libbz2 \
+                            zlib \
+                            tpcore
 
-LOCAL_SHARED_LIBRARIES  :=  atk-1.0 \
-                            avahi-common \
-                            avahi-core \
-                            avahi-glib \
-                            cairo \
-                            cairo-gobject \
-                            cares \
-                            clutter-eglnative-1.0 \
+LOCAL_SHARED_LIBRARIES  :=  \
                             clutteralphamode \
-                            cogl \
-                            cogl-pango \
-                            curl \
-                            exif \
-                            expat \
-                            ffi \
-                            fontconfig \
-                            freetype \
-                            gif \
-                            gio-2.0 \
-                            glib-2.0 \
-                            gmodule-2.0 \
-                            gobject-2.0 \
-                            gthread-2.0 \
-                            iconv \
-                            intl \
+                            tplua \
+                            soup-2.4 \
+                            sndfile \
+                            uuid \
+                            uriparser \
+                            upnp \
                             ixml \
-                            jpeg \
+                            threadutil \
+                            avahi-glib \
+                            avahi-core \
+                            avahi-common \
+                            clutter-eglnative-1.0 \
+                            cogl-pango \
+                            cogl \
+                            atk-1.0 \
                             json-glib-1.0 \
-                            pango-1.0 \
+                            gif \
+                            tiffxx \
+                            tiff \
+                            jpeg \
                             pangocairo-1.0 \
                             pangoft2-1.0 \
-                            pixman-1 \
-                            png \
+                            pango-1.0 \
+                            cairo-gobject \
+                            cairo \
                             png15 \
-                            sndfile \
-                            soup-2.4 \
+                            pixman-1 \
+                            fontconfig \
+                            freetype \
+                            curl \
+                            cares \
                             sqlite3 \
-                            threadutil \
-                            tiff \
-                            tiffxx \
-                            tplua \
-                            upnp \
-                            uriparser \
-                            uuid \
-                            xml2
+                            gio-2.0 \
+                            gmodule-2.0 \
+                            glib-2.0 \
+                            gobject-2.0 \
+                            gthread-2.0 \
+                            exif \
+                            ffi \
+                            xml2 \
+                            expat \
+                            intl \
+                            iconv
 
 LOCAL_LDLIBS    :=  -lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2
 

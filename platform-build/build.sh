@@ -411,10 +411,11 @@ EXIF_V="0.6.20"
 EXIF_DIST="libexif-${EXIF_V}.tar.gz"
 EXIF_SOURCE="libexif-${EXIF_V}"
 EXIF_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-docs && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
+EXIF_DEPENDS="ICONV GET_TEXT"
 
 #------------------------------------------------------------------------------
 
-ALL="ZLIB EXPAT XML EXIF LIBFFI ICONV GET_TEXT LIBBIND GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK COGL CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
+ALL="ZLIB ICONV GET_TEXT EXPAT XML EXIF LIBFFI LIBBIND GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK COGL CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 
 #-----------------------------------------------------------------------------
 
@@ -709,7 +710,7 @@ then
 	    -lsndfile \
 	    -lsoup-2.4 \
 	    -lxml2 \
-        -lexif \
+        -lexif-tp \
         -lintl \
         -liconv \
         -landroid \

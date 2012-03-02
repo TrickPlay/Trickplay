@@ -100,6 +100,7 @@ IF( PKG_CONFIG_FOUND )
         ${AVAHI_CORE_LIBRARIES}
         ${AVAHI_GLIB_LIBRARIES}
         ${EXIF_LIBRARIES}
+        exif-tp
     )
 
 
@@ -152,8 +153,8 @@ ELSE ( PKG_CONFIG_FOUND )
         json-glib-1.0
 
         sndfile
-        
-        exif
+
+        exif-tp
     )
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
