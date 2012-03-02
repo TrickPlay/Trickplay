@@ -22,7 +22,7 @@ class Ui_TrickplayInspector(object):
         monofont = QtGui.QFont()
         monofont.setStyleHint(monofont.Monospace)
         monofont.setFamily('Inconsolata')
-        monofont.setPointSize(10)
+        monofont.setPointSize(12)
 
         font = QtGui.QFont()
         font.setPointSize(10)

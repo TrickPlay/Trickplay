@@ -47,7 +47,7 @@ class Editor(QsciScintilla):
         font = QFont()
         font.setStyleHint(font.Monospace)
         font.setFamily('Inconsolata')
-        font.setPointSize(10)
+        font.setPointSize(14)
         self.setFont(font)
         self.setMarginsFont(font)
 

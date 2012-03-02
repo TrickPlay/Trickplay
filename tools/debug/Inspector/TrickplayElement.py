@@ -59,8 +59,8 @@ class TrickplayElement(QStandardItem):
         monofont = QFont()
         monofont.setStyleHint(monofont.Monospace)
         monofont.setFamily('Inconsolata')
-        monofont.setPointSize(10)
- 
+        monofont.setPointSize(12)
+
         self.setFont(monofont)
         self.setData(TrickplayData(), Qt.TP)
         
