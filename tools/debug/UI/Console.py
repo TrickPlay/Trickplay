@@ -20,7 +20,7 @@ class Ui_Console(object):
         Console.resize(811, 166)
         font = QtGui.QFont()
         font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
+        font.setFamily('Inconsolata')
         font.setPointSize(10)
         Console.setFont(font)
         self.verticalLayout = QtGui.QVBoxLayout(Console)

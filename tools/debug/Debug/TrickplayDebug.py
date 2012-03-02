@@ -38,7 +38,7 @@ class TrickplayDebugger(QWidget):
 
         self.font = QFont()
         self.font.setStyleHint(self.font.Monospace)
-        self.font.setFamily('Monospace')
+        self.font.setFamily('Inconsolata')
         self.font.setPointSize(10)
 
 	def contextMenu(self, point=None):
@@ -176,7 +176,7 @@ class TrickplayBacktrace(QWidget):
 
         self.font = QFont()
         self.font.setStyleHint(self.font.Monospace)
-        self.font.setFamily('Monospace')
+        self.font.setFamily('Inconsolata')
         self.font.setPointSize(10)
 
 

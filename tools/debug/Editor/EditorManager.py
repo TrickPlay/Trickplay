@@ -49,7 +49,7 @@ class EditorManager(QWidget):
         container.setMinimumSize(QSize(0, 0))
         font = QFont()
         font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
+        font.setFamily('Inconsolata')
         font.setPointSize(10)
         container.setFont(font)
 
@@ -329,18 +329,12 @@ class EditorManager(QWidget):
         editor.setFocus()
         editor.path = path
 
-        #font = QFont()
-        #font.setStyleHint(font.Monospace)
-        #font.setFamily('Monospace')
-        #font.setPointSize(10)
-
         n = re.search("[/]+\S+[/]+", editor.path).end()
         fileName = editor.path[n:]
 		
         editorAction = QAction(self.windowsMenu)
         editorAction.setText(fileName)
         editorAction.setIconText(editor.path)
-        #editorAction.setFont(font)
         editorAction.setShortcut(QApplication.translate("MainWindow", "Ctrl+"+str(index+1), None, QApplication.UnicodeUTF8))
         self.windowsMenu.addAction(editorAction)
         QObject.connect(editorAction , SIGNAL("triggered()"),  self, SLOT("moveToThisEditor()"))
