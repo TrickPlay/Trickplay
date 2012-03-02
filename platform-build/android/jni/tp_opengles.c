@@ -12,6 +12,8 @@
 #include "tp_opengles.h"
 #include "esutil.h"
 
+#include "trickplay/trickplay.h"
+
 /*****************************************************************************/
 
 #define CHECKER_BOARD_IMAGE_WIDTH   64
@@ -60,6 +62,13 @@ void print_gl_properties(void)
 	char dimensions_str[32];
 	char * pch;
 	int is_first_iteration = 1;
+
+    char **argv = { NULL };
+    int argc = 0;
+
+    tp_init( &argc, &argv );
+    TPContext *my_tp = tp_context_new();
+    tp_context_free(my_tp);
 
     /* Print some OpenGL vendor information */
 

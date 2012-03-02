@@ -77,20 +77,21 @@ else
 fi
 
 #------------------------------------------------------------------------------
-# gettext
-
-GET_TEXT_V="0.18.1.1"
-GET_TEXT_DIST="gettext-${GET_TEXT_V}.tar.gz"
-GET_TEXT_SOURCE="gettext-${GET_TEXT_V}"
-GET_TEXT_COMMANDS="gl_cv_header_working_stdint_h=yes ./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
-
-#------------------------------------------------------------------------------
 # libiconv
 
 ICONV_V="1.14"
 ICONV_DIST="libiconv-${ICONV_V}.tar.gz"
 ICONV_SOURCE="libiconv-${ICONV_V}"
 ICONV_COMMANDS="gl_cv_header_working_stdint_h=yes ./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic --disable-dependency-tracking && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
+
+#------------------------------------------------------------------------------
+# gettext
+
+GET_TEXT_V="0.18.1.1"
+GET_TEXT_DIST="gettext-${GET_TEXT_V}.tar.gz"
+GET_TEXT_SOURCE="gettext-${GET_TEXT_V}"
+GET_TEXT_COMMANDS="gl_cv_header_working_stdint_h=yes ./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED --with-pic && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install"
+GET_TEXT_DEPENDS="ICONV"
 
 #------------------------------------------------------------------------------
 # libbind
@@ -118,7 +119,7 @@ GLIB_V="${GLIB_MV}.2"
 GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.xz"
 GLIB_DIST="glib-${GLIB_V}.tar.xz"
 GLIB_SOURCE="glib-${GLIB_V}"
-GLIB_COMMANDS="(./autogen.sh 2>/dev/null) ; cp ${THERE}/files/config.{sub,guess} . && PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=no ac_cv_func_posix_getgrgid_r=no glib_cv_have_qsort_r=no ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -I${PREFIX}/include/bind\" && make ${NUM_MAKE_JOBS} install"
+GLIB_COMMANDS="(./autogen.sh 2>/dev/null) ; cp ${THERE}/files/config.{sub,guess} . && patch -p1 -i ${THERE}/patches/${GLIB_SOURCE}/NOT-IN-QUILT-APPLIED-AFTER-AUTOCONF-fixup-config-for-android.patch && PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=no ac_cv_func_posix_getgrgid_r=no glib_cv_have_qsort_r=no ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -I${PREFIX}/include/bind\" && make ${NUM_MAKE_JOBS} install"
 GLIB_DEPENDS="LIBFFI"
 
 #------------------------------------------------------------------------------
@@ -217,7 +218,7 @@ FONTCONFIG_V="2.8.0"
 FONTCONFIG_URL="http://fontconfig.org/release/fontconfig-${FONTCONFIG_V}.tar.gz"
 FONTCONFIG_DIST="fontconfig-${FONTCONFIG_V}.tar.gz"
 FONTCONFIG_SOURCE="fontconfig-${FONTCONFIG_V}"
-FONTCONFIG_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD --with-arch=$ARCH $SHARED --with-pic --with-freetype-config=\"$PREFIX/bin/freetype-config\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
+FONTCONFIG_COMMANDS="(./autogen.sh 2>/dev/null) ; patch -p1 -i ${THERE}/patches/${FONTCONFIG_SOURCE}/NOT-IN-QUILT-APPLIED-AFTER-AUTOCONF-fixup-config-for-android.patch && ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --with-arch=$ARCH $SHARED --with-pic --with-freetype-config=\"$PREFIX/bin/freetype-config\" && V=$VERBOSE make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # pixman
@@ -226,7 +227,7 @@ PIXMAN_V="0.24.2"
 PIXMAN_URL="http://cgit.freedesktop.org/pixman/snapshot/pixman-${PIXMAN_V}.tar.gz"
 PIXMAN_DIST="pixman-${PIXMAN_V}.tar.gz"
 PIXMAN_SOURCE="pixman-${PIXMAN_V}"
-PIXMAN_COMMANDS="./autogen.sh --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-gtk && make ${NUM_MAKE_JOBS} install"
+PIXMAN_COMMANDS="(./autogen.sh 2>/dev/null) ; patch -p1 -i ${THERE}/patches/${PIXMAN_SOURCE}/NOT-IN-QUILT-APPLIED-AFTER-AUTOCONF-fixup-config-for-android.patch && ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED --with-pic --disable-gtk && make ${NUM_MAKE_JOBS} install"
 
 #------------------------------------------------------------------------------
 # png
@@ -728,11 +729,11 @@ then
     echo "== Building Android JNI project"
     echo "================================================================="
 
-    cp -a "${THERE}/android" "${HERE}/android"
+    rsync -a "${THERE}/android/" "${HERE}/android/"
     cd "${HERE}/android"
-    TRICKPLAY_LIBRARIES_DIR="${PREFIX}" ndk-build
+    TRICKPLAY_PDK_DIR="${PREFIX}" ndk-build
     android update project -p . -s
-    ant release
+    ant debug
     cp "${HERE}/android/bin/"*.apk "${HERE}"
 
 fi

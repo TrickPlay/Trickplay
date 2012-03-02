@@ -1111,3 +1111,29 @@ Index: pango-1.28.4/config.sub
  		os=-mmixware
  		;;
  	*-wec)
+Index: pango-1.28.4/configure
+===================================================================
+--- pango-1.28.4.orig/configure
++++ pango-1.28.4/configure
+@@ -11621,8 +11621,8 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no
+@@ -15089,8 +15089,8 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no

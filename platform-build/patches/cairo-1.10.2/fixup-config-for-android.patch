@@ -1223,3 +1223,29 @@ Index: cairo-1.10.2/build/config.sub
  				vendor=ibm
  				;;
  			-beos*)
+Index: cairo-1.10.2/configure
+===================================================================
+--- cairo-1.10.2.orig/configure
++++ cairo-1.10.2/configure
+@@ -10731,8 +10731,8 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no
+@@ -16328,8 +16328,8 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no

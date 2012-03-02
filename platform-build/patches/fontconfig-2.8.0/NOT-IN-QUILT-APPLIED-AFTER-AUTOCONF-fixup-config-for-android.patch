@@ -1,0 +1,15 @@
+Index: fontconfig-2.8.0/configure
+===================================================================
+--- fontconfig-2.8.0.orig/configure
++++ fontconfig-2.8.0/configure
+@@ -10762,8 +10762,8 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
+   version_type=linux # correct to gnu/linux during the next big refactor
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no

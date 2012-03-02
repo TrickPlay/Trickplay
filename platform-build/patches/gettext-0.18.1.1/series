@@ -1,2 +1,3 @@
+fixup-config-for-android.patch
 gettext-runtime-only.patch
 include_sched.patch

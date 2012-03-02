@@ -2780,3 +2780,48 @@ Index: libiconv-1.14/libcharset/build-aux/config.sub
  				vendor=ibm
  				;;
  			-beos*)
+Index: libiconv-1.14/configure
+===================================================================
+--- libiconv-1.14.orig/configure
++++ libiconv-1.14/configure
+@@ -12212,8 +12212,8 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no
+Index: libiconv-1.14/libcharset/configure
+===================================================================
+--- libiconv-1.14.orig/libcharset/configure
++++ libiconv-1.14/libcharset/configure
+@@ -10044,8 +10044,8 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no
+Index: libiconv-1.14/preload/configure
+===================================================================
+--- libiconv-1.14.orig/preload/configure
++++ libiconv-1.14/preload/configure
+@@ -10056,8 +10056,8 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no

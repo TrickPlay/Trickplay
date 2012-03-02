@@ -1,7 +1,7 @@
-Index: sqlite-3.6.22/config.guess
+Index: sqlite-autoconf-3071000/config.guess
 ===================================================================
---- sqlite-3.6.22.orig/config.guess
-+++ sqlite-3.6.22/config.guess
+--- sqlite-autoconf-3071000.orig/config.guess
++++ sqlite-autoconf-3071000/config.guess
 @@ -1,9 +1,10 @@
  #! /bin/sh
  # Attempt to guess a canonical system name.
@@ -896,10 +896,10 @@ Index: sqlite-3.6.22/config.guess
  
  If the version you run ($0) is already up to date, please
  send the following data and any information you think might be
-Index: sqlite-3.6.22/config.sub
+Index: sqlite-autoconf-3071000/config.sub
 ===================================================================
---- sqlite-3.6.22.orig/config.sub
-+++ sqlite-3.6.22/config.sub
+--- sqlite-autoconf-3071000.orig/config.sub
++++ sqlite-autoconf-3071000/config.sub
 @@ -1,9 +1,10 @@
  #! /bin/sh
  # Configuration validation subroutine script.
@@ -1617,3 +1617,51 @@ Index: sqlite-3.6.22/config.sub
  				vendor=ibm
  				;;
  			-beos*)
+Index: sqlite-autoconf-3071000/configure
+===================================================================
+--- sqlite-autoconf-3071000.orig/configure
++++ sqlite-autoconf-3071000/configure
+@@ -9579,8 +9579,8 @@ linux*)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no
+@@ -13153,8 +13153,8 @@ linux*)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no
+@@ -15690,8 +15690,8 @@ linux*)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no
+@@ -18226,8 +18226,8 @@ linux*)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no

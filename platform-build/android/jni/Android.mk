@@ -1,5 +1,5 @@
 ORIG_PATH       :=  $(call my-dir)
-LOCAL_PATH      :=  ${TRICKPLAY_LIBRARIES_DIR}
+LOCAL_PATH      :=  ${TRICKPLAY_PDK_DIR}
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    :=  atk-1.0
@@ -219,6 +219,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE	:=	tpcore
 LOCAL_SRC_FILES	:=	lib/libtpcore.a
+LOCAL_EXPORT_C_INCLUDES :=  $(LOCAL_PATH)/include
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -313,6 +314,6 @@ LOCAL_SHARED_LIBRARIES  :=  atk-1.0 \
                             uuid \
                             xml2
 
-LOCAL_LDLIBS    := -lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2
+LOCAL_LDLIBS    :=  -lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)

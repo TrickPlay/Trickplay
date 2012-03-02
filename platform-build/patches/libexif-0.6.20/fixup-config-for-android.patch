@@ -1111,3 +1111,18 @@ Index: libexif-0.6.20/config.sub
  		os=-mmixware
  		;;
  	*-wec)
+Index: libexif-0.6.20/configure
+===================================================================
+--- libexif-0.6.20.orig/configure
++++ libexif-0.6.20/configure
+@@ -9632,8 +9632,8 @@ linux* | k*bsd*-gnu | kopensolaris*-gnu)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no

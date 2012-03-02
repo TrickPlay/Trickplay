@@ -869,3 +869,18 @@ Index: atk-2.2.0/config.sub
  		os=-mmixware
  		;;
  	*-wec)
+Index: atk-2.2.0/configure
+===================================================================
+--- atk-2.2.0.orig/configure
++++ atk-2.2.0/configure
+@@ -9870,8 +9870,8 @@ linux* | k*bsd*-gnu)
+   version_type=linux
+   need_lib_prefix=no
+   need_version=no
+-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+-  soname_spec='${libname}${release}${shared_ext}$major'
++  library_names_spec='${libname}${release}${shared_ext}'
++  soname_spec='${libname}${release}${shared_ext}'
+   finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
+   shlibpath_var=LD_LIBRARY_PATH
+   shlibpath_overrides_runpath=no
