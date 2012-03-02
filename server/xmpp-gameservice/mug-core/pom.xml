@@ -1,143 +1,30 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.trickplay.mug</groupId>
+		<artifactId>mug-service</artifactId>
+		<version>0.1-SNAPSHOT</version>
+		<relativePath />
+	</parent>
 	<groupId>org.frogx.service</groupId>
-	<artifactId>frogx-service</artifactId>
-	<name>frogx - Free Online Gaming Service for XMPP</name>
+	<artifactId>mug-core</artifactId>
+	<name>mug-core</name>
+	<description>A framework to support Multi-User Games on Jabber servers.</description>
 	<version>0.1-SNAPSHOT</version>
-	<description>Support Multi-User Games on Jabber servers.</description>
-	<url>http://frogx.org/</url>
-	<inceptionYear>2009</inceptionYear>
-	<packaging>pom</packaging>
-<!--
-	<modules>
-		<module>frogx-api</module>
-		<module>frogx-core</module>
-		<module>frogx-plugin-extension</module>
-		<module>frogx-games</module>
-		<module>frogx-openfire</module>
-		<module>frogx-component</module>
-	</modules>
--->
-	<developers>
-		<developer>
-			<id>gniess</id>
-			<name>Guenther Niess</name>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<email>gniess@users.sourceforge.net</email>
-			<timezone>+1</timezone>
-		</developer>
-	</developers>
-<!--
-	<scm>
-		<connection>scm:svn:https://svn.frogx.org/svnroot/frogx/service/trunk</connection>
-		<developerConnection>scm:svn:https://svn.frogx.org/svnroot/frogx/service/trunk</developerConnection>
-	</scm>
--->
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.igniterealtime</groupId>
-				<artifactId>tinder</artifactId>
-				<version>1.2.1</version>
-			</dependency>
-<!--
-			<dependency>
-				<groupId>org.igniterealtime</groupId>
-				<artifactId>openfire</artifactId>
-				<version>3.6.5-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.igniterealtime</groupId>
-				<artifactId>whack</artifactId>
-				<version>1.1.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>xpp3</groupId>
-				<artifactId>xpp3</artifactId>
-				<version>1.1.4c</version>
-			</dependency>
--->
-		</dependencies>
-	</dependencyManagement>
 	<dependencies>
 		<dependency>
-			<groupId>dom4j</groupId>
-			<artifactId>dom4j</artifactId>
-			<version>1.6.1</version>
-			<scope>provided</scope>
+			<groupId>com.trickplay.mug</groupId>
+			<artifactId>mug-api</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.igniterealtime</groupId>
-			<artifactId>tinder</artifactId>
-			<version>1.2.1</version>
-			<scope>provided</scope>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
 		</dependency>
 	</dependencies>
-	<repositories>
-<!--
-		<repository>
-			<id>frogx-repos</id>
-			<name>frogx.org repository</name>
-			<url>http://maven.frogx.org/repository</url>
-			<layout>default</layout>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>warn</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
--->
-		<repository>
-			<id>mvn-repos</id>
-			<name>mvn repository</name>
-			<url>http://repo1.maven.org/maven2</url>
-			<layout>default</layout>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>warn</checksumPolicy>
-			</releases>
-		</repository>
-	</repositories>
-<!--
-	<pluginRepositories>
-		<pluginRepository>
-			<id>frogx-repos</id>
-			<url>http://maven.frogx.org/repository</url>
-		</pluginRepository>
-	</pluginRepositories>
-	<distributionManagement>
-		<downloadUrl>http://maven.frogx.org/repository</downloadUrl>
-		<repository>
-			<id>frogx-repos</id>
-			<name>frogx.org repository</name>
-			<uniqueVersion>false</uniqueVersion>
-			<url>sftp://web.sf.net/home/groups/o/op/openfire-mug/htdocs/repository</url>
-			<layout>default</layout>
-		</repository>
-	</distributionManagement>
--->
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 </project>
