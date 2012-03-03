@@ -291,6 +291,21 @@ local function main()
     
     pb:add( ground )
 
+--[[ Slider constraint example
+
+    local c1 = cubes[1].body
+    local c2 = cubes[2].body
+    
+
+    local cn = pb:SliderConstraint( c1 , Matrix():translate( 50 , 0 , 0 ) , false , c2 , Matrix():translate( -50 , 0 , 0 ) )
+    
+    cn.linear_lower_limit = 600
+    cn.linear_upper_limit = 100
+    
+--]]
+    
+
+--[[ Hinge constraint example
 
     local bar = make_cube( -300 , -320 + 150 , -1000 , { 10 , 150 , 50 } , 0 , 0 , 0 , { mass = 0 } )
     local paddle = make_cube( -300 + 150 + 10 , -320 + 150 + 150 + 25 , -1000 , { 150 , 25 , 50 } , 0 , 0 , 0 , { mass = 2 } )
@@ -305,17 +320,10 @@ local function main()
     
     table.insert( cubes , bar )
     table.insert( cubes , paddle )
+
+--]]    
     
-    --local paddle = make_cube()
     
-    --local cn = pb:HingeConstraint( c1 , { 50 , 50 , 0 } , { 0 , 0 , 1 } , false , c2 , { -50 , 50 , 0 } , { 0 , 0 , 1 } )
-
-    --cn:enable_angular_motor( true , 100 , 100 )
-    --cn:enable_motor( false )
-    --cn:set_motor_target( -0.5 , 1 )
-    --cn:set_limit( 0 , 10 )
-
-
     display( cubes )
     
     
@@ -338,12 +346,14 @@ local function main()
     function idle.on_idle() render() end
 
     function pb:on_step( seconds )
---[[
-        local contacts = pb:get_contacts( 10 , cubes[1].body , ground )
+----[[
+        local contacts = pb:get_contacts( 10 ) -- , cubes[1].body , ground )
+        
         if contacts then
-            dumptable( contacts )
+            --print( # contacts )
+            --dumptable( contacts )
         end
-]]        
+--]]        
     end
 
 end
