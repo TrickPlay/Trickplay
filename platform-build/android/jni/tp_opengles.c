@@ -12,8 +12,6 @@
 #include "tp_opengles.h"
 #include "esutil.h"
 
-#include "trickplay/trickplay.h"
-
 /*****************************************************************************/
 
 #define CHECKER_BOARD_IMAGE_WIDTH   64
@@ -26,19 +24,19 @@
 /*****************************************************************************/
 void pretty_print_string_attrib(const char * a_name, const char* a_val)
 {
-	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "%-36s%s\n", a_name, a_val);
+	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "%-36s%s\n", a_name, a_val);
 }
 
 /*****************************************************************************/
 void pretty_print_int_attrib(const char * a_name, int a_val)
 {
-	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "%-36s%d\n", a_name, a_val);
+	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "%-36s%d\n", a_name, a_val);
 }
 
 /*****************************************************************************/
 void pretty_print_boolean_attrib(const char * a_name, int a_val)
 {
-	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "%-36s%s\n", a_name, a_val ? "TRUE" : "FALSE");
+	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "%-36s%s\n", a_name, a_val ? "TRUE" : "FALSE");
 }
 
 /*****************************************************************************/
@@ -62,13 +60,6 @@ void print_gl_properties(void)
 	char dimensions_str[32];
 	char * pch;
 	int is_first_iteration = 1;
-
-    char **argv = { NULL };
-    int argc = 0;
-
-    tp_init( &argc, &argv );
-    TPContext *my_tp = tp_context_new();
-    tp_context_free(my_tp);
 
     /* Print some OpenGL vendor information */
 
@@ -159,12 +150,12 @@ GLuint load_shader(GLenum shaderType, const char *shaderSrc)
         {
             char* infoLog = (char *) malloc(sizeof(char) * infoLen);
             glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
-            __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Error compiling shader:\n%s\n", infoLog);
+            __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Error compiling shader:\n%s\n", infoLog);
             free(infoLog);
         }
         else
         {
-        	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Unknown error during %s shader compilation\n",
+        	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Unknown error during %s shader compilation\n",
                     shaderType==GL_VERTEX_SHADER?"VERTEX":"FRAGMENT");
         }
         glDeleteShader(shader);
@@ -255,13 +246,13 @@ int init_gl_state(ApplicationContext* app_context)
         return 0;
     }
 
-    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Vertex shader compilation successful\n");
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Vertex shader compilation successful\n");
 
     f = load_shader(GL_FRAGMENT_SHADER, fShaderStr_highp);
 
     if (!f)
     {
-    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Failed to load Fragment Shader that uses highp precision. Trying mediump\n");
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Failed to load Fragment Shader that uses highp precision. Trying mediump\n");
 
         f = load_shader(GL_FRAGMENT_SHADER, fShaderStr_mediump);
 
@@ -272,7 +263,7 @@ int init_gl_state(ApplicationContext* app_context)
         }
     }
 
-    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Fragment shader compilation successful\n");
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Fragment shader compilation successful\n");
 
     app_context->program = glCreateProgram();
     glAttachShader(app_context->program, v);
@@ -290,12 +281,12 @@ int init_gl_state(ApplicationContext* app_context)
         {
             char* infoLog = (char *) malloc(sizeof(char) * infoLen);
             glGetProgramInfoLog(app_context->program, infoLen, NULL, infoLog);
-            __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Error linking program:\n%s\n", infoLog);
+            __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Error linking program:\n%s\n", infoLog);
             free(infoLog);
         }
         else
         {
-        	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Failed to link program, no log\n");
+        	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Failed to link program, no log\n");
         }
 
         glDeleteShader(f);
@@ -304,7 +295,7 @@ int init_gl_state(ApplicationContext* app_context)
         return 0;
     }
 
-    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Linking compiled vertex and fragment shaders successful. Created program object\n");
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Linking compiled vertex and fragment shaders successful. Created program object\n");
 
     app_context->position_loc = glGetAttribLocation(app_context->program, "a_position");
     app_context->texture_coordinate_loc = glGetAttribLocation(app_context->program, "a_texCoord");
@@ -399,141 +390,237 @@ void display(ApplicationContext* app_context)
 
 int init_egl(ApplicationContext* app_context, EGLNativeDisplayType display_type, EGLNativeWindowType egl_win)
 {
-//    EGLDisplay egl_display      = 0;
-//    EGLSurface egl_surface      = 0;
-//    EGLContext egl_context      = 0;
-//    EGLConfig  egl_config;
-//    EGLint     major_version;
-//    EGLint     minor_version;
-//    int        config_count;
-//
-//
-//    egl_display = eglGetDisplay(display_type);
-//
-//    if (EGL_NO_DISPLAY == egl_display)
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglGetDisplay() failed\n");
-//        return 0;
-//    }
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglGetDisplay() successful\n");
-//
-//    if (EGL_FALSE == eglInitialize(egl_display, &major_version, &minor_version))
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglInitialize() failed\n");
-//        return 0;
-//    }
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglInitialize() successful\n");
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "EGL version info: major=%d minor=%d\n", major_version, minor_version);
-//
-//    if (EGL_FALSE == eglGetConfigs(egl_display, NULL, 0, &config_count))
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglGetConfigs() failed\n");
-//        return 0;
-//    }
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglGetConfigs() successful. Supported configs=%d\n", config_count);
-//
-//    EGLint  cfg_attribs[] =
-//    {
-//        /* NB: This must be the first attribute, since we may
-//         * try and fallback to no stencil buffer */
-//        EGL_STENCIL_SIZE,    0,
-//        EGL_RED_SIZE,        1,
-//        EGL_GREEN_SIZE,      1,
-//        EGL_BLUE_SIZE,       1,
-//        EGL_ALPHA_SIZE,      1,
-//        EGL_DEPTH_SIZE,      1,
-//        EGL_BUFFER_SIZE,     EGL_DONT_CARE,
-//        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-//        EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
-//        EGL_NONE
-//    };
-//
-//    if (EGL_FALSE == eglChooseConfig(egl_display, cfg_attribs, &egl_config, 1, &config_count) || (config_count == 0))
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglChooseConfig() failed\n");
-//        return 0;
-//    }
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglChooseConfig() successful.\n");
-//
-//    EGLint red_size;
-//    EGLint green_size;
-//    EGLint blue_size;
-//    EGLint alpha_size;
-//    EGLint depth_size;
-//
-//    eglGetConfigAttrib(egl_display, egl_config, EGL_RED_SIZE,   &red_size);
-//    eglGetConfigAttrib(egl_display, egl_config, EGL_GREEN_SIZE, &green_size);
-//    eglGetConfigAttrib(egl_display, egl_config, EGL_BLUE_SIZE,  &blue_size);
-//    eglGetConfigAttrib(egl_display, egl_config, EGL_ALPHA_SIZE, &alpha_size);
-//    eglGetConfigAttrib(egl_display, egl_config, EGL_DEPTH_SIZE, &depth_size);
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Selected config: R=%d G=%d B=%d A=%d Depth=%d\n",
-//            red_size, green_size, blue_size, alpha_size, depth_size);
+    EGLDisplay egl_display      = 0;
+    EGLSurface egl_surface      = 0;
+    EGLContext egl_context      = 0;
+    EGLConfig  egl_config;
+    EGLint     major_version;
+    EGLint     minor_version;
+    int        config_count;
 
-//    egl_surface = eglCreateWindowSurface(egl_display, egl_config, egl_win, NULL);
-//
-//    if (EGL_NO_SURFACE == egl_surface)
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglCreateWindowSurface() failed\n");
-//        return 0;
-//    }
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglCreateWindowSurface() successful\n");
-//
-//    eglQuerySurface(egl_display, egl_surface, EGL_WIDTH, &app_context->width);
-//    eglQuerySurface(egl_display, egl_surface, EGL_HEIGHT, &app_context->height);
 
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "EGL surface is %dx%d\n", app_context->width, app_context->height);
+    egl_display = eglGetDisplay(display_type);
 
-//    if (app_context->width <= 0 || app_context->width > 1920)
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Unsupported value for surface width=%d\n", app_context->width);
-//        return 0;
-//    }
-//
-//    if (app_context->height <= 0 || app_context->height > 1080)
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "Unsupported value for surface height=%d\n", app_context->height);
-//        return 0;
-//    }
-//
-//    EGLint ctx_attrib_list[3] =
-//    {
-//        EGL_CONTEXT_CLIENT_VERSION , 2 ,
-//        EGL_NONE
-//    };
-//
-//    egl_context = eglCreateContext(egl_display, egl_config, EGL_NO_CONTEXT, ctx_attrib_list);
-//
-//    if (EGL_NO_CONTEXT == egl_context)
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglCreateContext() failed");
-//        return 0;
-//    }
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglCreateContext() successful\n");
-//
-//    if (EGL_FALSE == eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context))
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglMakeCurrent() failed\n");
-//        return 0;
-//    }
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglMakeCurrent() successful\n");
-//
-//    if (EGL_FALSE == eglSwapInterval(egl_display, 1))
-//    {
-//    	__android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglSwapInterval() failed\n");
-//        return 0;
-//    }
-//
-//    __android_log_print(ANDROID_LOG_INFO, "ECT_CORES",  "eglSwapInternal() successful\n");
+    if (EGL_NO_DISPLAY == egl_display)
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglGetDisplay() failed\n");
+        return 0;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglGetDisplay() successful\n");
+
+    if (EGL_FALSE == eglInitialize(egl_display, &major_version, &minor_version))
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglInitialize() failed\n");
+        return 0;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglInitialize() successful\n");
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "EGL version info: major=%d minor=%d\n", major_version, minor_version);
+
+    if (EGL_FALSE == eglGetConfigs(egl_display, NULL, 0, &config_count))
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglGetConfigs() failed\n");
+        return 0;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglGetConfigs() successful. Supported configs=%d\n", config_count);
+
+    EGLint  cfg_attribs[] =
+    {
+        /* NB: This must be the first attribute, since we may
+         * try and fallback to no stencil buffer */
+        EGL_STENCIL_SIZE,    0,
+        EGL_RED_SIZE,        1,
+        EGL_GREEN_SIZE,      1,
+        EGL_BLUE_SIZE,       1,
+        EGL_ALPHA_SIZE,      1,
+        EGL_DEPTH_SIZE,      1,
+        EGL_BUFFER_SIZE,     EGL_DONT_CARE,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
+        EGL_NONE
+    };
+
+    if (EGL_FALSE == eglChooseConfig(egl_display, cfg_attribs, &egl_config, 1, &config_count) || (config_count == 0))
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglChooseConfig() failed\n");
+        return 0;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglChooseConfig() successful.\n");
+
+    EGLint red_size;
+    EGLint green_size;
+    EGLint blue_size;
+    EGLint alpha_size;
+    EGLint depth_size;
+
+    eglGetConfigAttrib(egl_display, egl_config, EGL_RED_SIZE,   &red_size);
+    eglGetConfigAttrib(egl_display, egl_config, EGL_GREEN_SIZE, &green_size);
+    eglGetConfigAttrib(egl_display, egl_config, EGL_BLUE_SIZE,  &blue_size);
+    eglGetConfigAttrib(egl_display, egl_config, EGL_ALPHA_SIZE, &alpha_size);
+    eglGetConfigAttrib(egl_display, egl_config, EGL_DEPTH_SIZE, &depth_size);
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Selected config: R=%d G=%d B=%d A=%d Depth=%d\n",
+            red_size, green_size, blue_size, alpha_size, depth_size);
+
+    egl_surface = eglCreateWindowSurface(egl_display, egl_config, egl_win, NULL);
+
+    if (EGL_NO_SURFACE == egl_surface)
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglCreateWindowSurface() failed\n");
+        return 0;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglCreateWindowSurface() successful\n");
+
+    eglQuerySurface(egl_display, egl_surface, EGL_WIDTH, &app_context->width);
+    eglQuerySurface(egl_display, egl_surface, EGL_HEIGHT, &app_context->height);
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "EGL surface is %dx%d\n", app_context->width, app_context->height);
+
+    if (app_context->width <= 0 || app_context->width > 1920)
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Unsupported value for surface width=%d\n", app_context->width);
+        return 0;
+    }
+
+    if (app_context->height <= 0 || app_context->height > 1080)
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "Unsupported value for surface height=%d\n", app_context->height);
+        return 0;
+    }
+
+    EGLint ctx_attrib_list[3] =
+    {
+        EGL_CONTEXT_CLIENT_VERSION , 2 ,
+        EGL_NONE
+    };
+
+    egl_context = eglCreateContext(egl_display, egl_config, EGL_NO_CONTEXT, ctx_attrib_list);
+
+    if (EGL_NO_CONTEXT == egl_context)
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglCreateContext() failed");
+        return 0;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglCreateContext() successful\n");
+
+    if (EGL_FALSE == eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context))
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglMakeCurrent() failed\n");
+        return 0;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglMakeCurrent() successful\n");
+
+    if (EGL_FALSE == eglSwapInterval(egl_display, 1))
+    {
+    	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglSwapInterval() failed\n");
+        return 0;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "eglSwapInternal() successful\n");
 
     return 1;
 }
 
+int main(int argc, char** argv)
+{
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference", "In MAIN with (%d,%s)", argc, argv[0]);
+
+    EGLNativeDisplayType display_type  = EGL_DEFAULT_DISPLAY;
+    EGLNativeWindowType  native_window = 0;
+
+    EGLDisplay eglDisplay;
+
+    int frame_count = 0;
+    int max_frames;
+
+    ApplicationContext app_context;
+
+    if (argc >= 2)
+    {
+        max_frames = atoi(argv[1]);
+    }
+    else if (argc == 1)
+    {
+        max_frames = 10000;
+    }
+    else
+    {
+        __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference", "Usage is:\n\t%s [max_frames]\n", argv[0]);
+        __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference", "\twhere\n");
+        __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference", "\t'max_frames' is the maximum number of frames to show before terminating\n");
+        __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference", "\tDefault value for 'max_frames' is 10000. Setting 'max_frames' to 0 will cause the program to run forever\n");
+        return 1;
+    }
+
+    memset(&app_context, 0, sizeof(ApplicationContext));
+
+    /* Call the custom pre-initialization function */
+
+    if (0 != tp_pre_egl_initialize(&display_type, &native_window))
+    {
+        __android_log_print(ANDROID_LOG_ERROR, "TrickPlay-OpenGL-ES-Reference", "tp_pre_egl_initializate() failed. fatal error\n");
+        return 2;
+    }
+
+    /* Initialise EGL */
+
+    if (!init_egl(&app_context, display_type, native_window))
+    {
+        EGLint err = eglGetError();
+        __android_log_print(ANDROID_LOG_ERROR, "TrickPlay-OpenGL-ES-Reference", "EGL initialization failed. EGL error: id=0x%x name=%s\n",
+                err, esErrorToName(err));
+        return 3;
+    }
+
+    /* print GL system properties */
+
+    print_gl_properties();
+
+
+    /* Setup the local OpenGL state for this demo */
+
+    if (!init_gl_state(&app_context))
+    {
+        return 4;
+    }
+
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference", "Press CTRL+C to terminate\n");
+
+    while (1)
+    {
+        /* Draw the graphics and flush them to the screen */
+
+        display( & app_context );
+
+        ++frame_count;
+
+        if (max_frames > 0 && frame_count >= max_frames)
+        {
+            break;
+        }
+    }
+
+    /* Close the local state for this demo */
+
+    terminate_gl_state(&app_context);
+
+    /* Terminate EGL */
+
+    eglDisplay = eglGetDisplay(display_type);
+    eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglTerminate(eglDisplay);
+
+    /* Do post EGL cleanup */
+
+    tp_post_egl_terminate();
+
+    return 0;
+}

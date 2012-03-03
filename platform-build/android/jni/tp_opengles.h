@@ -40,24 +40,24 @@ typedef struct
 } ApplicationContext;
 
 /******************************************************************************
- 
- This function should be implemented by TrickPlay's OEM vendors. The 
- implementation is expected to initialize the platform and, optionally, return 
- the EGL display and native window. It should return 0 if initialization is 
+
+ This function should be implemented by TrickPlay's OEM vendors. The
+ implementation is expected to initialize the platform and, optionally, return
+ the EGL display and native window. It should return 0 if initialization is
  successful or non-zero if there is a problem.
- 
+
 */
 
 int tp_pre_egl_initialize( EGLNativeDisplayType * display , EGLNativeWindowType * window );
 
 /******************************************************************************
- 
- This function should be implemented by TrickPlay's OEM vendors. The 
- implementation should cleanup and/or release any resources which have been 
+
+ This function should be implemented by TrickPlay's OEM vendors. The
+ implementation should cleanup and/or release any resources which have been
  allocated during the call to tp_pre_egl_initialize.
- 
+
 */
- 
+
 void tp_post_egl_terminate( void );
 
 /*****************************************************************************/
@@ -72,6 +72,7 @@ void terminate_gl_state(ApplicationContext* app_context);
 void display(ApplicationContext* app_context);
 int init_egl(ApplicationContext* app_context, EGLNativeDisplayType display_type, EGLNativeWindowType egl_win);
 
+int main(int argc, char** argv);
 
 #ifdef __cplusplus
 }
