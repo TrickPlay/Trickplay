@@ -15,6 +15,7 @@
 #import "AVCEncoder.h"
 #import "SocketManager.h"
 #import "RTSPClient.h"
+//#import "jpeg_utils.hpp"
 
 #import <stdio.h>
 #import <stdlib.h>
@@ -29,6 +30,11 @@
 
 #import "rtp.h"
 
+/*
+#ifdef __cplusplus
+extern "C"
+#endif
+*/
 static struct timeval timeout;
 
 typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
@@ -36,6 +42,7 @@ typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
 @interface ViewController : UIViewController <AVCaptureVideoDataOutputSampleBufferDelegate> {
     int sockfd;
     dispatch_queue_t socket_queue;
+    dispatch_queue_t image_processing_queue;
     
     RTSPClient *rtspClient;
     
@@ -51,11 +58,19 @@ typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
     CALayer *customLayer;
     AVCaptureVideoPreviewLayer *prevLayer;
     
+    CVPixelBufferRef pxbuffer;
+    
     NSMutableArray *avQueue;
 }
 
 void rtp_avc_session_callback(struct rtp *session, rtp_event *e);
-void *get_in_addr(struct sockaddr *sa);
+#ifdef __cplusplus
+extern "C" {
+#endif
+    void *get_in_addr(struct sockaddr *sa);
+#ifdef __cplusplus
+}
+#endif
 
 @property (retain) SocketManager *socketManager;
 @property (retain) AVCEncoder *avcEncoder;
@@ -65,5 +80,6 @@ void *get_in_addr(struct sockaddr *sa);
 @property (nonatomic, retain) AVCaptureVideoPreviewLayer *prevLayer;
 
 - (void)initCapture;
+- (CVPixelBufferRef)rotateBuffer:(CVImageBufferRef)imageBuffer;
 
 @end
