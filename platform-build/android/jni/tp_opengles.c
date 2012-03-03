@@ -19,29 +19,51 @@
 
 /*****************************************************************************/
 
+typedef struct
+{
+    EGLint      width;
+    EGLint      height;
 
+    ESMatrix    projection_matrix;
+    ESMatrix    modelview_matrix;
+    ESMatrix    mvp_matrix;
+
+    GLint       mvp_matrix_loc;
+    GLint       position_loc;
+    GLint       texture_coordinate_loc;
+    GLint       sampler_loc;
+
+    GLuint      texture;
+
+    GLint       program;
+
+    GLuint      vbo[2];
+
+    GLsizei     number_of_elements;
+
+} ApplicationContext;
 
 /*****************************************************************************/
-void pretty_print_string_attrib(const char * a_name, const char* a_val)
+static void pretty_print_string_attrib(const char * a_name, const char* a_val)
 {
 	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "%-36s%s\n", a_name, a_val);
 }
 
 /*****************************************************************************/
-void pretty_print_int_attrib(const char * a_name, int a_val)
+static void pretty_print_int_attrib(const char * a_name, int a_val)
 {
 	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "%-36s%d\n", a_name, a_val);
 }
 
 /*****************************************************************************/
-void pretty_print_boolean_attrib(const char * a_name, int a_val)
+static void pretty_print_boolean_attrib(const char * a_name, int a_val)
 {
 	__android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "%-36s%s\n", a_name, a_val ? "TRUE" : "FALSE");
 }
 
 /*****************************************************************************/
 
-void print_gl_properties(void)
+static void print_gl_properties(void)
 {
 	GLboolean shaderCompiler;
 	GLint numBinaryFormats;
@@ -124,7 +146,7 @@ void print_gl_properties(void)
 
 /*****************************************************************************/
 
-GLuint load_shader(GLenum shaderType, const char *shaderSrc)
+static GLuint load_shader(GLenum shaderType, const char *shaderSrc)
 {
     GLuint shader;
     GLint compiled;
@@ -166,7 +188,7 @@ GLuint load_shader(GLenum shaderType, const char *shaderSrc)
 
 /*****************************************************************************/
 
-int init_gl_state(ApplicationContext* app_context)
+static int init_gl_state(ApplicationContext* app_context)
 {
     /* The shaders */
     const char* vShaderStr =
@@ -347,7 +369,7 @@ int init_gl_state(ApplicationContext* app_context)
 
 /*****************************************************************************/
 
-void terminate_gl_state(ApplicationContext* app_context)
+static void terminate_gl_state(ApplicationContext* app_context)
 {
     glDeleteTextures(1, &app_context->texture);
     glDeleteProgram(app_context->program);
@@ -356,7 +378,7 @@ void terminate_gl_state(ApplicationContext* app_context)
 
 /*****************************************************************************/
 
-void display(ApplicationContext* app_context)
+static void display(ApplicationContext* app_context)
 {
     esMatrixMultiply(&app_context->mvp_matrix, &app_context->modelview_matrix, &app_context->projection_matrix);
 
@@ -388,7 +410,7 @@ void display(ApplicationContext* app_context)
 
 /*****************************************************************************/
 
-int init_egl(ApplicationContext* app_context, EGLNativeDisplayType display_type, EGLNativeWindowType egl_win)
+static int init_egl(ApplicationContext* app_context, EGLNativeDisplayType display_type, EGLNativeWindowType egl_win)
 {
     EGLDisplay egl_display      = 0;
     EGLSurface egl_surface      = 0;
@@ -527,6 +549,8 @@ int init_egl(ApplicationContext* app_context, EGLNativeDisplayType display_type,
 
     return 1;
 }
+
+/*****************************************************************************/
 
 int main(int argc, char** argv)
 {
