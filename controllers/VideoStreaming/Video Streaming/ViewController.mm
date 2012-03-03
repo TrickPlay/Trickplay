@@ -34,6 +34,16 @@ typedef enum avtype AVType;
 
 @end
 
+//*
+@interface ViewController()
+
+- (IplImage *)IplImageFromCGImage:(CGImageRef)imageRef;
+- (CGImageRef)CGImageFromIplImage:(IplImage *)iplImage;
+
+@end
+//*/
+ 
+ 
 static NSString *fullsdp = @"v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=Livu\r\nc=IN IP4 %s\r\nt=0 0\r\na=tool:Livu RTP\r\nm=audio 0 RTP/AVP 96\r\nb=AS:64\r\na=rtpmap:96 MPEG4-GENERIC/44100/1\r\na=fmtp:96 profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=1208\r\na=control:streamid=0\r\nm=video 0 RTP/AVP 97\r\nb=AS:64\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@\r\na=control:streamid=1";
 
 
@@ -86,7 +96,10 @@ void *get_in_addr(struct sockaddr *sa) {
     timeout.tv_usec = 0;
     avc_session_id = 97;
     
+    pxbuffer = NULL;
+    
     socket_queue = dispatch_queue_create("Network Queue", NULL);
+    image_processing_queue = dispatch_queue_create("Image Processing Queue", NULL);
     
     if (YES) {
         return 0;
@@ -146,13 +159,13 @@ void *get_in_addr(struct sockaddr *sa) {
 	NSString *b64sps = nil, *b64pps = nil, *sdp = nil;
 	
 	//if (profile.broadcastType != kBroadcastTypeAudio) {
-		int length = base64encode([sps bytes] + 4, [sps length] - 4, csps, 32);
+		int length = base64encode(((unsigned char *)[sps bytes]) + 4, [sps length] - 4, csps, 32);
 		csps[length] = '\0';
 		b64sps = [NSString stringWithCString:(const char*)csps encoding:NSASCIIStringEncoding];
 		
 		//NSLog(@"SPS Len: %d", length);
 		
-		length = base64encode([pps bytes] + 4, [pps length] - 4, cpps, 32);
+		length = base64encode(((unsigned char *)[pps bytes]) + 4, [pps length] - 4, cpps, 32);
 		cpps[length] = '\0';
 		b64pps = [NSString stringWithCString:(const char*)cpps encoding:NSASCIIStringEncoding];
 	//}
@@ -511,6 +524,9 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 - (void)initCapture {
+    glEnable(GL_TEXTURE_2D);
+	glDisable(GL_DEPTH_TEST);
+    
     avQueue = [[NSMutableArray alloc] initWithCapacity:100];
     
     AVCaptureDeviceInput *captureInput = [AVCaptureDeviceInput deviceInputWithDevice:[AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo] error:nil];
@@ -564,7 +580,7 @@ void *get_in_addr(struct sockaddr *sa) {
     
     self.customLayer = [CALayer layer];
     self.customLayer.frame = self.view.bounds;
-    self.customLayer.transform = CATransform3DRotate(CATransform3DIdentity, M_PI/2.0f, 0, 0, 1.0);
+    //self.customLayer.transform = CATransform3DRotate(CATransform3DIdentity, M_PI/2.0f, 0, 0, 1.0);
     self.customLayer.contentsGravity = kCAGravityResizeAspectFill;
     [self.view.layer addSublayer:self.customLayer];
     
@@ -587,6 +603,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     
+    //dispatch_sync(image_processing_queue, ^{
+    
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     
     CVPixelBufferLockBaseAddress(imageBuffer, 0);
@@ -600,26 +618,253 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGContextRef newContext = CGBitmapContextCreate(baseAddress, width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+    CGContextRotateCTM(newContext, M_PI_2);
+    CFAbsoluteTime begin = CFAbsoluteTimeGetCurrent();
     CGImageRef newImage = CGBitmapContextCreateImage(newContext);
     
+    /*
+    if (!pxbuffer) {
+        NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 [NSNumber numberWithBool:YES],
+                                 kCVPixelBufferCGImageCompatibilityKey,
+                                 [NSNumber numberWithBool:YES],
+                                 kCVPixelBufferCGBitmapContextCompatibilityKey,
+                                 nil];
+        
+        CVReturn status = CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, (CFDictionaryRef)options, &pxbuffer);
+        
+        NSParameterAssert(status == kCVReturnSuccess && pxbuffer != NULL);
+    }
+    
+    CVPixelBufferLockBaseAddress(pxbuffer, 0);
+    CGContextRef context = CGBitmapContextCreate(CVPixelBufferGetBaseAddress(pxbuffer), width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+    CGContextTranslateCTM(context, width*.5, height);
+    CGContextRotateCTM(context, -M_PI_2);
+    CFAbsoluteTime a_start = CFAbsoluteTimeGetCurrent();
+    CGContextDrawImage(context, CGRectMake(0.0, 0.0, width, height), newImage);
+    CFAbsoluteTime an_end = CFAbsoluteTimeGetCurrent();
+    CGImageRelease(newImage);
+    
+    
+    newImage = CGBitmapContextCreateImage(context);
+    
+    
+    fprintf(stderr, "\nNew bitmap time = %lf\n", (an_end - a_start)*1000.0);
+    //*/
+    
     CGContextRelease(newContext);
+    //CGContextRelease(context);
     CGColorSpaceRelease(colorSpace);
+    
+    CFAbsoluteTime starttime = CFAbsoluteTimeGetCurrent();
+    
+    fprintf(stderr, "\nSetup time = %lf\n", (starttime - begin)*1000.0);
+    
+    
+    // TODO: create reusable OpenCV objects as instance variables to reduce
+    // overhead of object creation
+    /*
+    using namespace cv;
+    
+    IplImage *iplImage = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 4);//[self IplImageFromCGImage:newImage];
+    iplImage->imageData = (char *)baseAddress;
+    
+    CFAbsoluteTime afteripl = CFAbsoluteTimeGetCurrent();
+    fprintf(stderr, "\nIplImage conversion time = %lf\n", (afteripl - starttime)*1000.0);
+    
+    IplImage *rotated_image = cvCreateImage(cvSize(iplImage->height, iplImage->width), iplImage->depth, iplImage->nChannels);
+    
+    CFAbsoluteTime afterrot = CFAbsoluteTimeGetCurrent();
+    fprintf(stderr, "IplImage creation time = %lf\n", (afterrot - afteripl)*1000.0);
+    
+    // rotate image
+    char *src = iplImage->imageData;
+    char *dest = rotated_image->imageData;
+    for (int x = 0; x <= iplImage->width; x++) {
+        for (int y = iplImage->height - 1; y > -1; y--) {
+            *dest = *(src + ((y * width) + x) * iplImage->nChannels);
+            dest++;
+        }
+    }
+    
+    //cvTranspose(iplImage, rotated_image);
+    //cvFlip(rotated_image, rotated_image, 1);
+    
+    CFAbsoluteTime rotatetime = CFAbsoluteTimeGetCurrent();
+    fprintf(stderr, "Rotation time = %lf\n", (rotatetime - afterrot)*1000.0);
+    
+    cvReleaseImage(&iplImage);
+    
+    CGImageRelease(newImage);
+    newImage = [self CGImageFromIplImage:rotated_image];
+    
+    cvReleaseImage(&rotated_image);
+    
+    CFAbsoluteTime endtime = CFAbsoluteTimeGetCurrent();
+    
+    fprintf(stderr, "Convert back time = %lf\n", (endtime - rotatetime)*1000.0);
+    //*/
+    
+    //[self rotateBuffer:imageBuffer];
+    
+    CFAbsoluteTime endtime = CFAbsoluteTimeGetCurrent();
+    
+    fprintf(stderr, "Total time = %lf\n", (endtime - starttime)*1000.0);
     
     [self.customLayer performSelectorOnMainThread:@selector(setContents:) withObject:(id)newImage waitUntilDone:NO];
     
-    UIImage *image = [UIImage imageWithCGImage:newImage scale:1.0 orientation:UIImageOrientationRight];
+    //UIImage *image = [UIImage imageWithCGImage:newImage scale:1.0 orientation:UIImageOrientationRight];
     
     CGImageRelease(newImage);
     
-    [self.imageView performSelectorOnMainThread:@selector(setImage:) withObject:image waitUntilDone:NO];
+    //[self.imageView performSelectorOnMainThread:@selector(setImage:) withObject:image waitUntilDone:NO];
     
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+    //CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
     
     [self.avcEncoder encode:sampleBuffer];
+    //});
     
     [pool drain];
 }
 
+#pragma mark -
+#pragma mark Rotation Functions
+
+/*
+- (CVPixelBufferRef)GLrotate:(CVImageBufferRef)imageBuffer {
+    EAGLContext *context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    NSParameterAssert(context != nil);
+    
+    uint8_t *src_buff = (uint8_t *)CVPixelBufferGetBaseAddress(imageBuffer);
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+    
+    if (!pxbuffer) {
+        NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 [NSNumber numberWithBool:YES],
+                                 kCVPixelBufferCGImageCompatibilityKey,
+                                 [NSNumber numberWithBool:YES],
+                                 kCVPixelBufferCGBitmapContextCompatibilityKey,
+                                 nil];
+        
+        CVReturn status = CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, (CFDictionaryRef)options, &pxbuffer);
+        
+        NSParameterAssert(status == kCVReturnSuccess && pxbuffer != NULL);
+    }
+    
+    // Create a new texture from the camera frame data, display that using the shaders
+    GLuint videoFrameTexture;
+    
+	glGenTextures(1, &videoFrameTexture);
+	glBindTexture(GL_TEXTURE_2D, videoFrameTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// This is necessary for non-power-of-two textures
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	
+	// Using BGRA extension to pull in video frame data directly
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, CVPixelBufferGetBaseAddress(imageBuffer));
+    
+    
+    GLuint framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindBuffer(GL_FRAMEBUFFER, framebuffer);
+    
+}
+//*/
+
+- (CVPixelBufferRef)rotateBuffer:(CVImageBufferRef)imageBuffer {
+    CFAbsoluteTime starttime = CFAbsoluteTimeGetCurrent();
+    
+    uint8_t *src_buff = (uint8_t *)CVPixelBufferGetBaseAddress(imageBuffer);
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+    
+    if (!pxbuffer) {
+        NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 [NSNumber numberWithBool:YES],
+                                 kCVPixelBufferCGImageCompatibilityKey,
+                                 [NSNumber numberWithBool:YES],
+                                 kCVPixelBufferCGBitmapContextCompatibilityKey,
+                                 nil];
+
+        CVReturn status = CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, (CFDictionaryRef)options, &pxbuffer);
+    
+        NSParameterAssert(status == kCVReturnSuccess && pxbuffer != NULL);
+    }
+    
+    CVPixelBufferLockBaseAddress(pxbuffer, 0);
+    void *dest_buff = CVPixelBufferGetBaseAddress(pxbuffer);
+    NSParameterAssert(dest_buff != NULL);
+    
+    int *src = (int *)src_buff;
+    int *dest = (int *)dest_buff;
+    
+    size_t count = (bytesPerRow * height) / 4;
+    //*
+    CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
+    while (count--) {
+        *dest = *src;
+        src++;
+        dest++;
+    }
+    CFAbsoluteTime end = CFAbsoluteTimeGetCurrent();
+    fprintf(stderr, "\nSwap time = %lf\n", (end - start) * 1000.0);
+    //*/
+    
+    CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
+    
+    CFAbsoluteTime endtime = CFAbsoluteTimeGetCurrent();
+    
+    fprintf(stderr, "\nRotation time = %lf\n", (endtime - starttime) * 1000.0);
+    
+    return pxbuffer;
+}
+
+#pragma mark -
+#pragma mark OpenCV craziness
+//*
+- (IplImage *)IplImageFromCGImage:(CGImageRef)imageRef {
+    size_t width = CGImageGetWidth(imageRef);
+    size_t height = CGImageGetHeight(imageRef);
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    // Creating temp IplImage
+    IplImage *iplImage = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 4);
+    // Create CGContext from temp IplImage
+    CGContextRef contextRef = CGBitmapContextCreate(iplImage->imageData, iplImage->width, iplImage->height, iplImage->depth, iplImage->widthStep, colorSpace, kCGImageAlphaPremultipliedLast|kCGBitmapByteOrderDefault);
+    // Drawing CGImage to CGContext
+    CGContextDrawImage(contextRef, CGRectMake(0.0, 0.0, (CGFloat)width, (CGFloat)height), imageRef);
+    CGContextRelease(contextRef);
+    CGColorSpaceRelease(colorSpace);
+    
+    // Create resulting IplImage
+    IplImage *ret = cvCreateImage(cvGetSize(iplImage), IPL_DEPTH_8U, 3);
+    cvCvtColor(iplImage, ret, CV_RGBA2BGR);
+    cvReleaseImage(&iplImage);
+    
+    return ret;
+}
+
+- (CGImageRef)CGImageFromIplImage:(IplImage *)iplImage {
+    //cvCvtColor(iplImage, iplImage, CV_RGBA2BGR);
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    // Buffer for CGImage
+    NSData *data = [NSData dataWithBytes:iplImage->imageData length:iplImage->imageSize];
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
+    
+    // Create CGImage from chunk of IplImage
+    CGImageRef imageRef = CGImageCreate(iplImage->width, iplImage->height, iplImage->depth, iplImage->depth * iplImage->nChannels, iplImage->widthStep, colorSpace, kCGImageAlphaNone|kCGBitmapByteOrderDefault, provider, NULL, false, kCGRenderingIntentDefault);
+    
+    CGDataProviderRelease(provider);
+    CGColorSpaceRelease(colorSpace);
+    
+    return imageRef;
+}
+//*/
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad
@@ -695,6 +940,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     if (socket_queue) {
         dispatch_release(socket_queue);
+    }
+    if (image_processing_queue) {
+        dispatch_release(image_processing_queue);
     }
     
     [super dealloc];
