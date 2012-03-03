@@ -67,6 +67,53 @@ void android_main(struct android_app* state) {
     // Make sure glue isn't stripped.
     app_dummy();
 
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "About to load all DLLs");
+     dlopen("libiconv.so");
+     dlopen("libintl.so");
+     dlopen("libexif-tp.so");
+     dlopen("libexpat.so");
+     dlopen("libxml2.so");
+     dlopen("libffi.so");
+     dlopen("libglib-2.0.so");
+     dlopen("libgthread-2.0.so");
+     dlopen("libgobject-2.0.so");
+     dlopen("libgmodule-2.0.so");
+     dlopen("libgio-2.0.so");
+     dlopen("libsqlite3.so");
+     dlopen("libcares.so");
+     dlopen("libcurl.so");
+     dlopen("libfreetype.so");
+     dlopen("libfontconfig.so");
+     dlopen("libpixman-1.so");
+     dlopen("libpng15.so");
+     dlopen("libcairo.so");
+     dlopen("libcairo-gobject.so");
+     dlopen("libpango-1.0.so");
+     dlopen("libpangoft2-1.0.so");
+     dlopen("libpangocairo-1.0.so");
+     dlopen("libjpeg.so");
+     dlopen("libtiff.so");
+     dlopen("libtiffxx.so");
+     dlopen("libgif.so");
+     dlopen("libjson-glib-1.0.so");
+     dlopen("libatk-1.0.so");
+     dlopen("libcogl.so");
+     dlopen("libcogl-pango.so");
+     dlopen("libclutter-eglnative-1.0.so");
+     dlopen("libavahi-common.so");
+     dlopen("libavahi-core.so");
+     dlopen("libavahi-glib.so");
+     dlopen("libixml.so");
+     dlopen("libthreadutil.so");
+     dlopen("libupnp.so");
+     dlopen("liburiparser.so");
+     dlopen("libuuid.so");
+     dlopen("libsndfile.so");
+     dlopen("libsoup-2.4.so");
+     dlopen("libclutteralphamode.so");
+     dlopen("libtplua.so");
+    __android_log_print(ANDROID_LOG_INFO, "TrickPlay-OpenGL-ES-Reference",  "DLL Loading success!");
+
     state->onAppCmd = engine_handle_cmd;
     state->onInputEvent = engine_handle_input;
 
