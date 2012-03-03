@@ -571,6 +571,115 @@ interface PBHingeConstraint [[ btHingeConstraint * ]]
         ]];        
 }
 
+interface PBSliderConstraint [[ btSliderConstraint * ]]
+{
+    PBSliderConstraint( any world , PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
+        [[
+            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+
+            btRigidBody * ba = get_rigid_body( L , bodyA );
+                        
+            if ( 0 == ba )
+            {
+                return luaL_error( L , "Invalid first body" ); 
+            }
+            
+            btTransform ta;
+            
+            if ( ! btTransformFromMatrix( L , frameA , ta ) )
+            {
+                return luaL_error( L , "Invalid matrix for first frame" );
+            }                         
+            
+            btSliderConstraint * c = 0;
+            
+            if ( 0 == bodyB )
+            {
+                c = new btSliderConstraint( * ba , ta , use_linear_reference_frame );    
+            }
+            else
+            {
+                btRigidBody * bb = get_rigid_body( L , bodyB );
+                
+                if ( 0 == bb )
+                {
+                    return luaL_error( L , "Invalid second body" );
+                }
+                
+                btTransform tb;
+                
+                if ( ! btTransformFromMatrix( L , frameB , tb ) )
+                {
+                    return luaL_error( L , "Invalid matrix for second frame" );
+                }             
+                            
+                c = new btSliderConstraint( * ba , * bb , ta , tb , use_linear_reference_frame );
+            }
+            
+            g_assert( c );
+            
+            self = lb_construct( btSliderConstraint , c );
+            
+            // TODO: need to support the disableCollisionsBetweenLinkedBodies 
+            // flag. Perhaps by not adding the constraint when it is created,
+            // but having an explicit add_constraint function on the world 
+            // that includes that flag.
+            
+            w->get_world()->addConstraint( c );
+        ]];
+
+    ~PBSliderConstraint()
+        [[
+            // Not deleted because they are owned by the world
+        ]];
+        
+    double linear_lower_limit
+        [[
+            linear_lower_limit = self->getLowerLinLimit();    
+        ]]
+        [[
+            self->setLowerLinLimit( linear_lower_limit );
+        ]];        
+
+    double linear_upper_limit
+        [[
+            linear_upper_limit = self->getUpperLinLimit();    
+        ]]
+        [[
+            self->setUpperLinLimit( linear_upper_limit );
+        ]];
+                
+    double angular_lower_limit
+        [[
+            angular_lower_limit = self->getLowerAngLimit();    
+        ]]
+        [[
+            self->setLowerAngLimit( angular_lower_limit );
+        ]];        
+
+    double angular_upper_limit
+        [[
+            angular_upper_limit = self->getUpperAngLimit();    
+        ]]
+        [[
+            self->setUpperAngLimit( angular_upper_limit );
+        ]];
+
+
+    get_frame_offsets( Matrix offsetA , Matrix offsetB )
+        [[
+            if ( ! btTransformToMatrix( L , self->getFrameOffsetA() , offsetA ) )
+            {
+                luaL_error( L , "Invalid matrix for first offset" );
+            }
+
+            if ( ! btTransformToMatrix( L , self->getFrameOffsetB() , offsetB ) )
+            {
+                luaL_error( L , "Invalid matrix for second offset" );
+            }
+        ]];        
+}        
+
 interface PBBody3d [[ btCollisionObject * ]]
 {
     PBBody3d()
@@ -1125,6 +1234,28 @@ global pb [[ Bullet::World * ]]
             }
             
             lua_call( L , 8 , 1 );
+        ]];
+
+    PBSliderConstraint SliderConstraint( PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
+        [[
+            lua_pushcfunction( L , new_PBSliderConstraint );
+            lua_pushlightuserdata( L , self );
+            lua_pushvalue( L , bodyA );
+            lua_pushvalue( L , frameA );
+            lua_pushboolean( L , use_linear_reference_frame );
+            
+            if ( 0 == bodyB || 0 == frameB )
+            {
+                lua_pushnil( L );
+                lua_pushnil( L );
+            }
+            else
+            {
+                lua_pushvalue( L , bodyB );
+                lua_pushvalue( L , frameB );
+            }
+            
+            lua_call( L , 6 , 1 );
         ]];
 
     callback on_step( double seconds );
