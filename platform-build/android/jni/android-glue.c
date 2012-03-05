@@ -7,6 +7,8 @@
 #include <android_native_app_glue.h>
 #include <dlfcn.h>
 
+#define LOG(...) __android_log_print(ANDROID_LOG_INFO, "TP-Engine", __VA_ARGS__)
+
 #define LIBRARY_PATH_PREFIX "/data/data/com.trickplay.Engine/lib/"
 
 typedef int (*main_type)(int, char**);
@@ -36,15 +38,13 @@ typedef void                (*GLogFunc)                         (const char *log
                                                          GLogLevelFlags log_level,
                                                          const char *message,
                                                          void* user_data);
-typedef unsigned (*g_log_set_handler_type)(const char *log_domain,
-                                                         GLogLevelFlags log_levels,
-                                                         GLogFunc log_func,
+typedef unsigned (*g_log_set_handler_type)(GLogFunc log_func,
                                                          void* user_data);
 
 
 static void my_glog_func(const char *domain, GLogLevelFlags log_level, const char *message, void *user_data)
 {
-    __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "domain(%d): %s", log_level, message);
+    LOG( "%s(%d): %s", domain, log_level, message);
 }
 
 /**
@@ -88,18 +88,18 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 
 void *load_library(const char *path, int mode)
 {
-    __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "About to load: %s", path);
+    LOG( "About to load: %s", path);
     void *res = dlopen(path, mode);
     if(NULL == res)
     {
-        __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "Failed to load library %s", path);
-        __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "Error is: %s", dlerror());
+        LOG( "Failed to load library %s", path);
+        LOG( "Error is: %s", dlerror());
 
         abort();
     }
     else
     {
-        __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "%s loaded at %p", path, res);
+        LOG( "%s loaded at %p", path, res);
         return res;
     }
 }
@@ -109,14 +109,14 @@ void *load_sym( void* lib, const char *symbol)
     void *res = dlsym(lib, symbol);
     if(NULL == res)
     {
-        __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "Failed to locate symbol %s", symbol);
-        __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "Error is: %s", dlerror());
+        LOG( "Failed to locate symbol %s", symbol);
+        LOG( "Error is: %s", dlerror());
 
         abort();
     }
     else
     {
-        __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "Located %s at %p", symbol, res);
+        LOG( "Located %s at %p", symbol, res);
         return res;
     }
 }
@@ -130,7 +130,7 @@ void android_main(struct android_app* state) {
     // Make sure glue isn't stripped.
     app_dummy();
 
-    __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "About to load all DLLs");
+    LOG( "About to load all DLLs");
      load_library(LIBRARY_PATH_PREFIX "libiconv.so", RTLD_NOW);
      load_library(LIBRARY_PATH_PREFIX "libintl.so", RTLD_NOW);
      load_library(LIBRARY_PATH_PREFIX "libexif-tp.so", RTLD_NOW);
@@ -138,15 +138,15 @@ void android_main(struct android_app* state) {
      load_library(LIBRARY_PATH_PREFIX "libxml2.so", RTLD_NOW);
      load_library(LIBRARY_PATH_PREFIX "libffi.so", RTLD_NOW);
      void *glib_impl = load_library(LIBRARY_PATH_PREFIX "libglib-2.0.so", RTLD_NOW);
-     g_log_set_handler_type glog_set_handler = (g_log_set_handler_type) load_sym( glib_impl, "g_log_set_handler" );
+     g_log_set_handler_type glog_set_handler = (g_log_set_handler_type) load_sym( glib_impl, "g_log_set_default_handler" );
 
      load_library(LIBRARY_PATH_PREFIX "libgthread-2.0.so", RTLD_NOW);
      load_library(LIBRARY_PATH_PREFIX "libgobject-2.0.so", RTLD_NOW);
      load_library(LIBRARY_PATH_PREFIX "libgmodule-2.0.so", RTLD_NOW);
      load_library(LIBRARY_PATH_PREFIX "libgio-2.0.so", RTLD_NOW);
 
-     glog_set_handler(NULL, G_LOG_LEVEL_MASK, my_glog_func, NULL);
-    __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "Log handler for Glib installed");
+     glog_set_handler(my_glog_func, NULL);
+     LOG( "Glue Log handler for Glib installed");
 
      load_library(LIBRARY_PATH_PREFIX "libsqlite3.so", RTLD_NOW);
      load_library(LIBRARY_PATH_PREFIX "libcares.so", RTLD_NOW);
@@ -187,7 +187,7 @@ void android_main(struct android_app* state) {
      void *impl = load_library(LIBRARY_PATH_PREFIX "libtp-implementation.so", RTLD_NOW);
      main = (main_type) load_sym(impl, "main");
 
-    __android_log_print(ANDROID_LOG_INFO, "TP-Engine",  "DLL Loading success!");
+    LOG( "DLL Loading success!");
 
     state->onAppCmd = engine_handle_cmd;
     state->onInputEvent = engine_handle_input;
