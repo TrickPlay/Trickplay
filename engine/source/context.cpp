@@ -664,6 +664,10 @@ int TPContext::run()
     //.........................................................................
     // Set default size and color for the stage
 
+	g_info( "GRABBING CLUTTER LOCK...");
+
+	clutter_threads_enter ();
+
     g_info( "INITIALIZING STAGE..." );
 
     ClutterActor * stage = clutter_stage_get_default();
@@ -817,6 +821,9 @@ int TPContext::run()
                 }
             }
         }
+
+		g_debug("RELEASING CLUTTER LOCK...");
+		clutter_threads_leave ();
     }
 
     //.....................................................................
@@ -2469,6 +2476,8 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
     {
         g_thread_init( NULL );
     }
+
+	clutter_threads_init ();
 
     if ( !( major_version == TP_MAJOR_VERSION &&
             minor_version == TP_MINOR_VERSION &&
