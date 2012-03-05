@@ -24,6 +24,7 @@ class EditorManager(QWidget):
         self.deviceManager = None
         self.tab = None
         self.currentEditor = None
+        self.bp_info = {}
 
 
     def setupUi(self, parent):
