@@ -688,6 +688,7 @@ class MainWindow(QMainWindow):
 			        self.editorManager.close()
 
     def exit(self):
+        self.stop()
     	if self.editorManager.tab != None:
     		while self.editorManager.tab.count() != 0:
 				self.editorManager.close()

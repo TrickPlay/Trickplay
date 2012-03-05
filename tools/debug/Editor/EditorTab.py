@@ -24,6 +24,7 @@ class EditorTabWidget(QTabWidget):
         self.textBefores = []
         self.windowsMenu = windowsMenu
         self.fileSystem = fileSystem
+        self.tabClosing = False 
         
         QObject.connect(self, SIGNAL('tabCloseRequested(int)'), self.closeTab)
         QObject.connect(self, SIGNAL('currentChanged(int)'), self.changeTab)
@@ -69,7 +70,9 @@ class EditorTabWidget(QTabWidget):
 						if editor.tempfile == False:
 							editor.save()
 						else:
-							self.main.saveas()
+							self.tabClosing = True 
+							ret = self.main.saveas()
+							self.tabClosing = False
 							index = self.count() - 1
 					elif ret == QMessageBox.Cancel:
 						return 
@@ -77,9 +80,6 @@ class EditorTabWidget(QTabWidget):
 						pass
 
 		#close current index tab
-
-		#print(index, "deleted")
-		self.textBefores.pop(index) #new
 		edt = self.editors.pop(index) #new
 		self.windowsMenu.removeAction(edt.windowsAction)
 		self.removeTab(index)
@@ -101,11 +101,9 @@ class EditorTabWidget(QTabWidget):
 				self.fileSystem.model.view.setSelectionMode(QAbstractItemView.SingleSelection)
 				self.fileSystem.model.view.setCurrentIndex(self.editors[index].fileIndex)
 			else:
-				print("FIRST ELSE")
 				self.fileSystem.model.view.setSelectionMode(QAbstractItemView.NoSelection)
 				#self.fileSystem.model.view.setCurrentIndex(None)
 		else:
-			print("SECOND ELSE")
 			self.fileSystem.model.view.setSelectionMode(QAbstractItemView.NoSelection)
 			#self.fileSystem.model.view.setCurrentIndex(None)
 		"""
@@ -116,7 +114,7 @@ class EditorTabWidget(QTabWidget):
 			return
 
 		if self.editors[index].tempfile == False :
-			if self.textBefores[index] != currentText:
+			if self.textBefores[index] != currentText and self.tabClosing == False :
 				msg = QMessageBox()
 				msg.setText('The file "' + self.paths[index] + '" changed on disk.')
 				if self.editors[index].text_status == 2: #TEXT_CHANGED
@@ -131,19 +129,22 @@ class EditorTabWidget(QTabWidget):
 				if ret == QMessageBox.Ok:
     				# Reload 
 					self.editors[index].readFile(self.paths[index])
-					print("LLLLLLLLLL"+self.paths[index])
+					#print("YUGI4"+self.paths[index])
 					self.textBefores[index] = self.editors[index].text()
 					self.editors[index].text_status = 1 #TEXT_READ
 					self.editors[index].save() # added 2/3
 					self.textBefores[index] = self.editors[index].text() #added 2/3
 		else:
-			self.editors[index].readFile(self.paths[index])
-			print("UUUUUUUUU"+self.paths[index])
-			self.textBefores[index] = self.editors[index].text()
-			self.editors[index].text_status = 1 #TEXT_READ
-			self.editors[index].save() # added 2/3
-			self.textBefores[index] = self.editors[index].text() #added 2/3
-			self.editors[index].tempfile = True
+			#print("[VDBG] YUGI3: "+self.paths[index])
+			if self.tabClosing == False :
+			    self.editors[index].readFile(self.paths[index])
+			    self.textBefores[index] = self.editors[index].text()
+			    self.editors[index].text_status = 1 #TEXT_READ
+			    self.editors[index].save() # added 2/3
+			    self.textBefores[index] = self.editors[index].text() #added 2/3
+			    self.editors[index].tempfile = True
+			else:
+			    return
 
 		self.setCurrentIndex(index)
 
