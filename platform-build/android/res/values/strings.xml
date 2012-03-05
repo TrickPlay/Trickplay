@@ -23,7 +23,7 @@
 
 <resources>
     <!-- Simple strings. -->
-    <string name="libtp-opengles-reference">TrickPlay OpenGL-ES Reference</string>
+    <string name="trickplay-engine">TrickPlay Engine</string>
 
 </resources>
 

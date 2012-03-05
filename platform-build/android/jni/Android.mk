@@ -255,24 +255,72 @@ include $(PREBUILT_STATIC_LIBRARY)
 LOCAL_PATH := $(ORIG_PATH)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE    := tp-opengles-reference
+LOCAL_MODULE    := tp-implementation
 LOCAL_CFLAGS    := -Werror
 LOCAL_SRC_FILES := 	\
-    				esutil.c \
-    				tp_opengles.c \
-    				tp_opengles_oem.c \
+    				main.cpp
 
 LOCAL_STATIC_LIBRARIES  :=  \
-                            android_native_app_glue \
                             ssl \
                             crypto \
                             libbz2 \
                             zlib \
                             tpcore
 
-LOCAL_LDLIBS    :=  -lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2
+LOCAL_SHARED_LIBRARIES  :=  \
+                            clutteralphamode \
+                            tplua \
+                            soup-2.4 \
+                            sndfile \
+                            uuid \
+                            uriparser \
+                            upnp \
+                            ixml \
+                            threadutil \
+                            avahi-glib \
+                            avahi-core \
+                            avahi-common \
+                            clutter-eglnative-1.0 \
+                            cogl-pango \
+                            cogl \
+                            atk-1.0 \
+                            json-glib-1.0 \
+                            gif \
+                            tiffxx \
+                            tiff \
+                            jpeg \
+                            pangocairo-1.0 \
+                            pangoft2-1.0 \
+                            pango-1.0 \
+                            cairo-gobject \
+                            cairo \
+                            png15 \
+                            pixman-1 \
+                            fontconfig \
+                            freetype \
+                            curl \
+                            cares \
+                            sqlite3 \
+                            gio-2.0 \
+                            gmodule-2.0 \
+                            glib-2.0 \
+                            gobject-2.0 \
+                            gthread-2.0 \
+                            exif \
+                            ffi \
+                            xml2 \
+                            expat \
+                            intl \
+                            iconv
 
+LOCAL_LDLIBS    :=  -lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2
 include $(BUILD_SHARED_LIBRARY)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE    := tp-wrapper
+LOCAL_SRC_FILES :=  android-glue.c
+LOCAL_STATIC_LIBRARIES  :=  android_native_app_glue
+LOCAL_LDLIBS    :=  -llog -ldl -landroid
+include $(BUILD_SHARED_LIBRARY)
 
 $(call import-module,android/native_app_glue)
