@@ -202,7 +202,6 @@ class Editor(QsciScintilla):
 			if self.editorManager.main.debug_mode == True :
 			    self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s:"%t_path+"%s"%str(nline+1))
 			else :
-			    #pass
 			    if self.current_line != nline :
 			        self.markerAdd(nline, self.ACTIVE_BREAK_MARKER_NUM)
 			    else:
@@ -222,7 +221,6 @@ class Editor(QsciScintilla):
 			if self.editorManager.main.debug_mode == True :
 			    self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s "%str(bp_num)+"off")
 			else:
-			    #pass
 			    if self.current_line != nline :
 				    self.markerDelete(nline, self.ACTIVE_BREAK_MARKER_NUM)
 				    self.markerAdd(nline, self.DEACTIVE_BREAK_MARKER_NUM)
@@ -244,12 +242,12 @@ class Editor(QsciScintilla):
 			if self.editorManager.main.debug_mode == True :
 			    self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s "%str(bp_num)+"on")
 			else:
-			    #pass
 			    if self.current_line != nline :
-				    self.markerDelete(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+			        self.markerDelete(nline, self.DEACTIVE_BREAK_MARKER_NUM)
+			        self.markerAdd(nline, self.ACTIVE_BREAK_MARKER_NUM)
 			    else :
-				    self.markerDelete(nline, self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-				    self.markerAdd(nline, self.ARROW_MARKER_NUM)
+			        self.markerDelete(nline, self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+			        self.markerAdd(nline, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
 
 			    self.debugWindow.populateBreakTable(self.editorManager.bp_info, self.editorManager)
 			    self.line_click[nline] = 1
