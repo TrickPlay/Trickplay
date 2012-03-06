@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 #import "AVCEncoder.h"
+#import "SIPClient.h"
 
 #import <netinet/in.h>
 #import "rtp.h"
@@ -26,8 +27,9 @@ typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
     NSData *spspps, *pps, *sps;
     
     AVCEncoder *avcEncoder;
-    
     NSMutableArray *avQueue;
+    
+    SIPClient *sipClient;
 }
 
 void *get_in_addr(struct sockaddr *sa);
