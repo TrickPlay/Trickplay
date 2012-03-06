@@ -75,40 +75,35 @@ class TrickplayDebugger(QWidget):
 
         
 		if itemState == "on" and cellItemState == Qt.Unchecked:
-			self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" off")
-			"""
-			if editor.current_line != lineNum :
-				editor.markerDelete(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
-				editor.markerAdd(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
-			else :
-				editor.markerDelete(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-				editor.markerAdd(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-			editor.line_click[lineNum] = 2
-			"""
+			if self.deviceManager.debug_mode == True:
+			    self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" off")
+			else:
+			    if editor.current_line != lineNum :
+			        editor.markerDelete(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
+			        editor.markerAdd(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
+			    else :
+			        editor.markerDelete(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+			        editor.markerAdd(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+			    editor.line_click[lineNum] = 2
 
 			self.editorManager.bp_info[1].pop(r)
 			self.editorManager.bp_info[1].insert(r, "off")
 
-			#data = sendTrickplayDebugCommand("9876", "b",False)
-			#self.break_info = printResp(data, "b")
-
 		elif itemState == "off" and cellItemState == Qt.Checked:
-			self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" on")
-			"""
-			if editor.current_line != lineNum :
-				editor.markerDelete(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
-				editor.markerAdd(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
-			else :
-				editor.markerDelete(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-				editor.markerAdd(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-			editor.line_click[lineNum] = 1
-			"""
+			if self.deviceManager.debug_mode == True:
+			    self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" on")
+			else:
+			    if editor.current_line != lineNum :
+			        editor.markerDelete(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
+			        editor.markerAdd(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
+			    else :
+			        editor.markerDelete(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+			        editor.markerAdd(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+			    editor.line_click[lineNum] = 1
+
 			self.editorManager.bp_info[1].pop(r)
 			self.editorManager.bp_info[1].insert(r, "on")
 
-			#data = sendTrickplayDebugCommand("9876", "b",False)
-			#self.break_info = printResp(data, "b")
-		
     def clearBreakTable(self, row_num=0):
 		self.ui.breakTable.clear()
 		self.ui.breakTable.setRowCount(row_num)
