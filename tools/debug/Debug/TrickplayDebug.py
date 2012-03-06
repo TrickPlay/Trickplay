@@ -86,6 +86,9 @@ class TrickplayDebugger(QWidget):
 			editor.line_click[lineNum] = 2
 			"""
 
+			self.editorManager.bp_info[1].pop(r)
+			self.editorManager.bp_info[1].insert(r, "off")
+
 			#data = sendTrickplayDebugCommand("9876", "b",False)
 			#self.break_info = printResp(data, "b")
 
@@ -100,6 +103,8 @@ class TrickplayDebugger(QWidget):
 				editor.markerAdd(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
 			editor.line_click[lineNum] = 1
 			"""
+			self.editorManager.bp_info[1].pop(r)
+			self.editorManager.bp_info[1].insert(r, "on")
 
 			#data = sendTrickplayDebugCommand("9876", "b",False)
 			#self.break_info = printResp(data, "b")
@@ -134,8 +139,6 @@ class TrickplayDebugger(QWidget):
 				elif key == 2:
 					newitem= self.ui.breakTable.item(m,0)
 					newitem.setText(item)
-				elif key == 3:
-					newitem= self.ui.breakTable.item(m,0)
 					newitem.setWhatsThis(item)
 				else:
 					pass

@@ -463,35 +463,34 @@ class MainWindow(QMainWindow):
 		        self._deviceManager.send_debugger_command(DBG_CMD_RESET)
 
         if getattr(self._deviceManager, "debug_mode") == True :
-            # delete break points marker
+    	    # delete current line marker 
     	    for n in self.editorManager.editors:
     	        try :
-    	            for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
-    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
-                        #print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
-    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
-    	            # delete current line marker
-    	            self.current_debug_file = self.path+'/'+self._deviceManager.file_name
+    	            # delete current line marker and keep break point marker
+    	            self.current_debug_file = str(self.path+'/'+self._deviceManager.file_name)
     	            if self.current_debug_file == n:
-    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
-                            self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
-    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
-    	        except :
-    	            print("[VDBG] YUGI 1 : ", self.editorManager.editors[n][1])
+                        cEditor = self.editorManager.tab.editors[self.editorManager.editors[n][1]]
+                        cLine = cEditor.current_line
+                        lClick = 0
+                        
+                        if cEditor.line_click.has_key(cLine):
+    	                    lClick = cEditor.line_click[cLine]
 
-            # delete current line marker
-            """
-    		self.current_debug_file = self.path+'/'+self._deviceManager.file_name
-    		if self.current_debug_file == n:
-    		    self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
-    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
-     	        self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
-            """
+                        if lClick == 0 : #no break point
+                            cEditor.markerDelete(cLine, -1)
+                        elif lClick == 1 : #active break point 
+                            cEditor.markerDelete(cLine, Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+                            cEditor.markerAdd(cLine, Editor.ACTIVE_BREAK_MARKER_NUM)
+                        elif lClick == 2 : #deactive break point
+                            cEditor.markerDelete(cLine, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+                            cEditor.markerAdd(cLine, Editor.DEACTIVE_BREAK_MARKER_NUM)
+    	                cEditor.current_line = -1
+    	        except :
+    	            print("[VDBG] exept ", self.editorManager.editors[n][1])
 
             # clean backtrace and debug window
             self._backtrace.clearTraceTable(0)
             self._debug.clearLocalTable(0)
-            self._debug.clearBreakTable(0)
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
@@ -509,6 +508,7 @@ class MainWindow(QMainWindow):
         self._deviceManager.ui.comboBox.setEnabled(True)
         self.debug_tbt.setEnabled(True)
         self.debuggerMenuEnabled(False)
+        self.debug_mode = False
 
     def run(self):
         self.inspector.clearTree()
@@ -541,7 +541,6 @@ class MainWindow(QMainWindow):
         self.ui.action_Debug.setEnabled(False)
 
     def debug(self):
-        #self.inspector.clearTree()
         ret = self._deviceManager.run(True)
         if ret != False :
             self.windows = {"file":False, "inspector":False, "console":False, "debug":False, "trace":False}
@@ -554,7 +553,6 @@ class MainWindow(QMainWindow):
             self.debug_stepinto.setEnabled(True)
             self.debug_stepover.setEnabled(True)
             self.debug_stepout.setEnabled(True)
-            #self.debug_pause_bt.setEnabled(False)
             self.debug_continue_bt.setEnabled(True)
 
             self.ui.action_Stop.setEnabled(True)
@@ -569,7 +567,6 @@ class MainWindow(QMainWindow):
             self.debug_tbt.setEnabled(False)
             self.ui.action_Run.setEnabled(False)
             self.ui.action_Debug.setEnabled(False)
-            #self.debuggerMenuEnabled()
 	
     def editor_undo(self):
 		if self.editorManager.tab:
@@ -657,6 +654,21 @@ class MainWindow(QMainWindow):
         settings.setValue("mainWindowSize", self.size());
         #settings.setValue("mainWindowState", self.saveState());
 	
+    def clearBreakPoints(self):
+        for n in self.editorManager.editors:
+            try :
+                for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
+                    self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
+                self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
+            except :
+                print("[VDBG] clearBreakPoints failed")
+        self.editorManager.bp_info = {1:[], 2:[]}
+        self._debug.clearBreakTable(0)
+
+
+    #def exit(self):
+        #self.stop()
+
     def openApp(self):
 		wizard = Wizard()
 		path = -1
@@ -667,6 +679,8 @@ class MainWindow(QMainWindow):
 		    path = wizard.start(path, True)
 		print ("[VDBG] openApp [%s]"%path)
 		if path:
+			self.stop()
+			self.clearBreakPoints()
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
@@ -679,6 +693,8 @@ class MainWindow(QMainWindow):
 		wizard = Wizard()
 		path = wizard.start("", False, True)
 		if path:
+			self.stop()
+			self.clearBreakPoints()
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
@@ -692,7 +708,6 @@ class MainWindow(QMainWindow):
     	if self.editorManager.tab != None:
     		while self.editorManager.tab.count() != 0:
 				self.editorManager.close()
-
         self._deviceManager.stop()
         self.close()
         #settings = QSettings()
@@ -913,10 +928,34 @@ class MainWindow(QMainWindow):
 			self.gotoLine_ui.okButton.setEnabled(False)
 
     def debug_continue(self):
-		self._deviceManager.send_debugger_command(DBG_CMD_CONTINUE)
-		self.inspector.ui.refresh.setEnabled(True)
-		self.inspector.ui.search.setEnabled(True)
-		return
+        # delete current line marker 
+        for n in self.editorManager.editors:
+            try :
+                # delete current line marker and keep break point marker
+                self.current_debug_file = str(self.path+'/'+self._deviceManager.file_name)
+                if self.current_debug_file == n:
+                    cEditor = self.editorManager.tab.editors[self.editorManager.editors[n][1]]
+                    cLine = cEditor.current_line
+                    lClick = 0
+                    if cEditor.line_click.has_key(cLine):
+                        lClick = cEditor.line_click[cLine]
+
+                    if lClick == 0 : #no break point
+                        cEditor.markerDelete(cLine, -1)
+                    elif lClick == 1 : #active break point 
+                        cEditor.markerDelete(cLine, Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+                        cEditor.markerAdd(cLine, Editor.ACTIVE_BREAK_MARKER_NUM)
+                    elif lClick == 2 : #deactive break point
+                        cEditor.markerDelete(cLine, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+                        cEditor.markerAdd(cLine, Editor.DEACTIVE_BREAK_MARKER_NUM)
+                    cEditor.current_line = -1
+            except :
+                print("[VDBG] exept ", self.editorManager.editors[n][1])
+
+        self._deviceManager.send_debugger_command(DBG_CMD_CONTINUE)
+        self.inspector.ui.refresh.setEnabled(True)
+        self.inspector.ui.search.setEnabled(True)
+        return
 
     def debug_pause(self):
 		self._deviceManager.send_debugger_command(DBG_CMD_BREAK_NEXT)
