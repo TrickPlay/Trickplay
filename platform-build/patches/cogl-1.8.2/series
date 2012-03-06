@@ -2,3 +2,5 @@ fixup-config-for-android.patch
 dont-build-test.patch
 cogl-get-egl-config.patch
 egl-config-fixup.patch
+use-g_module_symbol-before-glGetProcAddress.patch
+android-cogl_renderer_check_onscreen_template.patch
