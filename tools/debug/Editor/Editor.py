@@ -47,7 +47,7 @@ class Editor(QsciScintilla):
         font = QFont()
         font.setStyleHint(font.Monospace)
         font.setFamily('Inconsolata')
-        font.setPointSize(14)
+        font.setPointSize(13)
         self.setFont(font)
         self.setMarginsFont(font)
 
@@ -120,29 +120,46 @@ class Editor(QsciScintilla):
         self.tempfile = False
         self.margin_nline = None
 
+    def show_marker (self) :
+        bp_file = self.get_bp_file()
+        bp_cnt = len(self.editorManager.bp_info[1]) 
+        if bp_cnt > 0:
+            for r in range(0, bp_cnt):
+                #cellItem = self.editorManager.main._debug.ui.breakTable.item(r, 0) 
+                bp_info = self.editorManager.bp_info[2][r]
+                n = re.search(":", bp_info).end()
+                fileName = bp_info[:n-1]
+                lineNum  = int(bp_info[n:]) -1
+                if fileName == bp_file :
+                    bp_status = self.editorManager.bp_info[1][r]
+                    if bp_status == "on":
+                        self.markerAdd(lineNum, self.ACTIVE_BREAK_MARKER_NUM)
+                    else:
+                        self.markerAdd(lineNum, self.DEACTIVE_BREAK_MARKER_NUM)
+
+    def get_bp_file(self) :
+        if self.deviceManager.path() is None :
+            print ("get_bp_file error ")
+            return
+        if re.search(str(self.deviceManager.path()), str(self.path)) is not None :
+            n = re.search(str(self.deviceManager.path()), str(self.path)).end()
+            editorName = str(self.path)[n:]
+            if editorName.startswith("/"):
+                return editorName[1:]
+        else:
+            return None
+        
     def get_bp_num(self, nline): #from break points table 
-        #print("TABLE LEN = %s"%str(self.editorManager.main._debug.ui.breakTable.rowCount()))
-        editorName = os.path.basename(str(self.path))
+
+        editorName = self.get_bp_file()
         editorName = editorName+":%s"%str(nline+1)
-        #print("Editor Name = %s"%editorName)
         rowCnt = self.editorManager.main._debug.ui.breakTable.rowCount()
 
         for r in range(0, rowCnt):
             cellItem = self.editorManager.main._debug.ui.breakTable.item(r, 0) 
-            #print (cellItem.whatsThis())
             if cellItem.whatsThis() == editorName :
-                #print ("R [%s] Found !"%str(r))
                 return r
-    """
-    def get_bp_num(self, nline): # from b response 
-		data = sendTrickplayDebugCommand("9876", "b",False)
-		bp_info = printResp(data, "b") # no need to print 
-		m = 0
-		for item in bp_info[3]: #info_var_list 
-			if item == self.path+":"+str(nline+1) :
-				return m
-			m += 1
-    """
+
     def modificationChanged(self, changed):
         if self.isRedoAvailable() == True:
             self.editorManager.main.ui.actionRedo.setEnabled(True)
@@ -176,37 +193,36 @@ class Editor(QsciScintilla):
 
 		bp_num = 0
 		self.margin_nline = nline
+		t_path = self.get_bp_file()
 
         # Break Point ADD 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
-			#t_path = self
-			n = re.search(self.deviceManager.path(), str(self.path)).end()
-			#t_path = os.path.basename(str(self.path))
-			t_path = str(self.path)[n:]
-			if t_path.startswith("/"):
-			    t_path = t_path[1:]
-
+			self.editorManager.bp_info[1].append("on")
+			self.editorManager.bp_info[2].append(t_path+":"+str(nline+1))
 			if self.editorManager.main.debug_mode == True :
 			    self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s:"%t_path+"%s"%str(nline+1))
 			else :
-			    pass
+			    #pass
 			    if self.current_line != nline :
 			        self.markerAdd(nline, self.ACTIVE_BREAK_MARKER_NUM)
 			    else:
 			        self.markerDelete(nline, self.ARROW_MARKER_NUM)
 			        self.markerAdd(nline, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
-			    #self.debugWindow.populateBreakTable(bp_info, self.editorManager)
+
+			    self.debugWindow.populateBreakTable(self.editorManager.bp_info, self.editorManager)
 			    self.line_click[nline] = 1
 
         # Break Point Deactivate  
 		elif self.line_click[nline] == 1:
 
 			bp_num = self.get_bp_num(nline)
+			self.editorManager.bp_info[1].pop(bp_num)
+			self.editorManager.bp_info[1].insert(bp_num, "off")
 
 			if self.editorManager.main.debug_mode == True :
 			    self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s "%str(bp_num)+"off")
 			else:
-			    pass
+			    #pass
 			    if self.current_line != nline :
 				    self.markerDelete(nline, self.ACTIVE_BREAK_MARKER_NUM)
 				    self.markerAdd(nline, self.DEACTIVE_BREAK_MARKER_NUM)
@@ -214,26 +230,28 @@ class Editor(QsciScintilla):
 				    self.markerDelete(nline, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
 				    self.markerAdd(nline, self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 
-			    self.editorManager.bp_info[1].pop(bp_num)
-			    self.editorManager.bp_info[1].insert(bp_num, "off")
 
-			    #self.debugWindow.populateBreakTable(self.editorManager.bp_info, self.editorManager)
+			    self.debugWindow.populateBreakTable(self.editorManager.bp_info, self.editorManager)
 			    self.line_click[nline] = 2
 
         # Break Point Activate  
 		elif self.line_click[nline] == 2:
 
 			bp_num = self.get_bp_num(nline)
+			self.editorManager.bp_info[1].pop(bp_num)
+			self.editorManager.bp_info[1].insert(bp_num, "on")
+
 			if self.editorManager.main.debug_mode == True :
 			    self.deviceManager.send_debugger_command("%s "%DBG_CMD_BREAKPOINT+"%s "%str(bp_num)+"on")
 			else:
-			    pass
+			    #pass
 			    if self.current_line != nline :
 				    self.markerDelete(nline, self.DEACTIVE_BREAK_MARKER_NUM)
 			    else :
 				    self.markerDelete(nline, self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 				    self.markerAdd(nline, self.ARROW_MARKER_NUM)
-			    #self.debugWindow.populateBreakTable(bp_info, self.editorManager)
+
+			    self.debugWindow.populateBreakTable(self.editorManager.bp_info, self.editorManager)
 			    self.line_click[nline] = 1
 
     def readFile(self, path):

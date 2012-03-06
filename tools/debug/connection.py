@@ -12,6 +12,7 @@ DGB_CMD_LOCALS		= "l"
 DBG_CMD_WHERE		= "w"
 DBG_CMD_BACKTRACE	= "bt"
 DBG_CMD_BREAKPOINT  = "b"
+DBG_CMD_BB          = "bb"
 DBG_CMD_APP_INFO	= "a"
 DBG_CMD_DELETE		= "d"
 DBG_CMD_FETCH_FILE	= "f"
@@ -184,10 +185,8 @@ def getTrickplayDebug():
     f = None
     
     try:
-        print("YUGI222")
         f = urllib2.urlopen(r, None, 2)
         k = f.read()
-        print(k+"********************")
         return decode(k)
     
     # Connection refused
