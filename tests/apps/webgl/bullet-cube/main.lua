@@ -161,10 +161,6 @@ local function display( cubes )
 
     gl:acquire()
 
-    --modelview_matrix:rotate( 1 , 1 , 0 , 0 )
-    
-    --modelview_matrix:rotate( 0.5 , 0 , 1 , 0 )
-
     gl:clear( gl.COLOR_BUFFER_BIT + gl.STENCIL_BUFFER_BIT + gl.DEPTH_BUFFER_BIT )
     
     gl:useProgram( program )
@@ -184,6 +180,7 @@ local function display( cubes )
         mvp_matrix:identity():multiply( projection_matrix , cube.matrix() )
 
         gl:uniformMatrix4fv( mvp_matrix_loc , false , mvp_matrix )
+        
         gl:drawElements( gl.TRIANGLES , 36 , gl.UNSIGNED_SHORT , 0 )
     end
     
@@ -289,7 +286,7 @@ local function main()
     local wall_shape = pb:StaticPlaneShape( 1 , 0.9 , 0 , 1 )
     local wall = pb:Body3d{ transform = wall_matrix , shape = wall_shape, mass = 0 , bounce = 0.5 , friction = 0.2 }
     
-    pb:add( ground )
+    pb:add( ground , wall )
 
 --[[ Slider constraint example
 
@@ -326,7 +323,7 @@ local function main()
     
     display( cubes )
     
-    
+   
     local function render()
         pb:step()
         display( cubes )
@@ -361,3 +358,6 @@ end
 screen:show()
 
 main()
+
+
+
