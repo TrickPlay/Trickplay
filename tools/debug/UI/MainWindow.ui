@@ -29,7 +29,7 @@
    <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>Trickplay IDE</string>
+   <string>TrickPlay IDE</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>

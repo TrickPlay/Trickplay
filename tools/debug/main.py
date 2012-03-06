@@ -637,7 +637,7 @@ class MainWindow(QMainWindow):
         
         self.fileSystem.start(self.editorManager, path)
         self.setWindowTitle(QtGui.QApplication.translate("MainWindow", 
-							"Trickplay IDE [ "+str(os.path.basename(str(path))+" ]"), 
+							"TrickPlay IDE [ "+str(os.path.basename(str(path))+" ]"), 
 							None, QtGui.QApplication.UnicodeUTF8))
         self.deviceManager.setPath(path)
         
@@ -684,7 +684,7 @@ class MainWindow(QMainWindow):
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
-			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay IDE [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
 			if self.editorManager.tab != None:
 			    while self.editorManager.tab.count() != 0:
 			        self.editorManager.close()
@@ -698,7 +698,7 @@ class MainWindow(QMainWindow):
 			settings = QSettings()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
-			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay IDE [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
 			if self.editorManager.tab != None:
 			    while self.editorManager.tab.count() != 0:
 			        self.editorManager.close()
