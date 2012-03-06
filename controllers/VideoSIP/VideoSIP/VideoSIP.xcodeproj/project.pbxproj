@@ -43,6 +43,7 @@
 		CDABC6BA150000D10039DBE0 /* SIPDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6B9150000D10039DBE0 /* SIPDialog.m */; };
 		CDABC6BC15002E6D0039DBE0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6BB15002E6C0039DBE0 /* CoreFoundation.framework */; };
 		CDABC6BF150066560039DBE0 /* SIPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6BE150066550039DBE0 /* SIPClient.m */; };
+		CDABC6C6150563380039DBE0 /* MyExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6C5150563380039DBE0 /* MyExtensions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -111,6 +112,8 @@
 		CDABC6BB15002E6C0039DBE0 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		CDABC6BD150066540039DBE0 /* SIPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SIPClient.h; sourceTree = "<group>"; };
 		CDABC6BE150066550039DBE0 /* SIPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SIPClient.m; sourceTree = "<group>"; };
+		CDABC6C4150563380039DBE0 /* MyExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyExtensions.h; sourceTree = "<group>"; };
+		CDABC6C5150563380039DBE0 /* MyExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyExtensions.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,6 +210,8 @@
 			children = (
 				CDABC69814FEC7090039DBE0 /* sm_math.h */,
 				CDABC69914FEC7090039DBE0 /* sm_math.m */,
+				CDABC6C4150563380039DBE0 /* MyExtensions.h */,
+				CDABC6C5150563380039DBE0 /* MyExtensions.m */,
 			);
 			name = utilities;
 			sourceTree = "<group>";
@@ -371,6 +376,7 @@
 				CDABC6B614FEDE9F0039DBE0 /* NetworkManager.m in Sources */,
 				CDABC6BA150000D10039DBE0 /* SIPDialog.m in Sources */,
 				CDABC6BF150066560039DBE0 /* SIPClient.m in Sources */,
+				CDABC6C6150563380039DBE0 /* MyExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

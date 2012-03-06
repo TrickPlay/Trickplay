@@ -74,6 +74,9 @@ void *get_in_addr(struct sockaddr *sa) {
 			NSLog(@"Session is NULL");
 		}
         
+        sipClient = [[SIPClient alloc] init];
+        [sipClient connectToService];
+        
         socket_queue = dispatch_queue_create("Network Queue", NULL);
     }
     
@@ -131,7 +134,7 @@ void *get_in_addr(struct sockaddr *sa) {
      params.videoProfileLevel = AVVideoProfileLevelH264Baseline30;
      params.bps = (broadcastBitrates[profile.broadcastOption] * profile.bitrateScalar);// / kIPadScale;
      params.keyFrameInterval = profile.keyFrameInterval;
-     */
+    */
     avcEncoder.parameters = params;
     
     if(![avcEncoder prepareEncoder]) {
