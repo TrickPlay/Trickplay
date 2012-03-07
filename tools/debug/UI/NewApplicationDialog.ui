@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>427</width>
-    <height>174</height>
+    <width>465</width>
+    <height>156</height>
    </rect>
   </property>
   <property name="font">
@@ -27,20 +27,26 @@
    </property>
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
-     <property name="verticalSpacing">
+     <property name="horizontalSpacing">
       <number>16</number>
+     </property>
+     <property name="verticalSpacing">
+      <number>8</number>
      </property>
      <item row="0" column="0">
       <widget class="QLabel" name="labelDirectory">
        <property name="text">
-        <string>App Directory</string>
+        <string>Directory</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
        <property name="spacing">
-        <number>12</number>
+        <number>6</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinimumSize</enum>
        </property>
        <item>
         <widget class="QLineEdit" name="directory">
@@ -64,7 +70,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="labelId">
        <property name="text">
-        <string>App ID</string>
+        <string>ID</string>
        </property>
       </widget>
      </item>
@@ -78,7 +84,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="labelName">
        <property name="text">
-        <string>App Name</string>
+        <string>Name</string>
        </property>
       </widget>
      </item>
@@ -103,6 +109,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>directory</tabstop>
+  <tabstop>browse</tabstop>
+  <tabstop>id</tabstop>
+  <tabstop>name</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

@@ -16,12 +16,12 @@
 namespace Physics
 {
 
-World::World( lua_State * _L , ClutterActor * _screen , float32 _pixels_per_meter )
+World::World( lua_State * _LS , ClutterActor * _screen , float32 _pixels_per_meter )
 :
     ppm( _pixels_per_meter ),
     z_for_y( false ),
     global_callbacks( 0 ),
-    L( _L ),
+    L( _LS ),
     world( b2Vec2( 0.0f , 10.0f ) , true ),
     next_handle( 1 ),
     velocity_iterations( 6 ),
@@ -1174,9 +1174,9 @@ void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
 
 //.............................................................................
 
-AABBQuery::AABBQuery( lua_State * _L )
+AABBQuery::AABBQuery( lua_State * _LS )
 :
-    L( _L )
+    L( _LS )
 {
     lua_newtable( L );
 }
