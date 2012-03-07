@@ -23,7 +23,7 @@ CFLAGS="-I${PREFIX}/include -fPIC -Os"
 CPPFLAGS=${CFLAGS}
 CXXFLAGS=${CFLAGS}
 LDFLAGS="-L${PREFIX}/lib -Wl,-rpath-link,${PREFIX}/lib"
-LIBS="-lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2"
+LIBS=""
 
 PKG_CONFIG_LIBDIR=${PREFIX}/lib/pkgconfig
 
