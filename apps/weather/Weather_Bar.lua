@@ -276,7 +276,7 @@ function Make_Bar(loc,wu_data,index, master)
         y      = 33
     }
     local blue_button_today = Clone{
-        name   = "blurb",
+        name   = "1 day",
         source = imgs.color_button.blue_5_day,
         x      = MINI_BAR_X+FULL_BAR_W-83,
         y      = 33+40,
@@ -287,7 +287,7 @@ function Make_Bar(loc,wu_data,index, master)
         source = imgs.color_button.blue_today,
         x      = MINI_BAR_X+FULL_BAR_W-83,
         y      = 33+40,
-        opacity=0
+        --opacity=0
     }
     local yellow_button = Clone{
         source = imgs.color_button.yellow,
@@ -466,8 +466,8 @@ function Make_Bar(loc,wu_data,index, master)
             {bar_mid,"w",FULL_BAR_W},
             {bar_right,"x",bar_side_w + FULL_BAR_W},
             {arrow_r,"x",MINI_BAR_X + FULL_BAR_W -bar_side_w/2+1},
-            {left_faux_bar,"x","EASE_OUT_BACK",0},
-            {right_faux_bar,"x","EASE_OUT_BACK",0},
+            --{left_faux_bar,"x","EASE_OUT_BACK",0},
+            --{right_faux_bar,"x","EASE_OUT_BACK",0},
         }
         
         anim_state= AnimationState{
@@ -482,8 +482,8 @@ function Make_Bar(loc,wu_data,index, master)
                         {bar_mid,  "w",mini_width},
                         {bar_right,"x",bar_side_w + mini_width},
                         {arrow_r,  "x",MINI_BAR_X + mini_width -bar_side_w/2+1},
-                        {left_faux_bar,"x",-faux_len-bar_side_w},
-                        {right_faux_bar,"x",faux_len+bar_side_w},
+                        --{left_faux_bar,"x",-faux_len-bar_side_w},
+                        --{right_faux_bar,"x",faux_len+bar_side_w},
                     },
                 },
                 {
@@ -492,6 +492,7 @@ function Make_Bar(loc,wu_data,index, master)
                     keys = {
                         {five_day, "opacity",   0},
                         {blurb_txt,"opacity", 255},
+                        {blue_button_today,"opacity", 255},
                         {zip_entry,"opacity",   0},
                         unpack(trans_to_full)
                     },
@@ -502,6 +503,7 @@ function Make_Bar(loc,wu_data,index, master)
                     keys = {
                         {five_day, "opacity", 255},
                         {blurb_txt,"opacity",   0},
+                        {blue_button_today,"opacity", 0},
                         {zip_entry,"opacity",   0},
                         unpack(trans_to_full)
                     },
@@ -512,6 +514,7 @@ function Make_Bar(loc,wu_data,index, master)
                     keys = {
                         {five_day, "opacity",   0},
                         {blurb_txt,"opacity",   0},
+                        {blue_button_today,"opacity", 255},
                         {zip_entry,"opacity", 255},
                         unpack(trans_to_full)
                     },
@@ -713,11 +716,7 @@ function Make_Bar(loc,wu_data,index, master)
         current_bar:show()
         current_bar.warp_to_state(anim_state.state)
         time_of_day = current_bar.local_time_of_day
-        if conditions[current_bar.curr_condition] then
-            conditions[current_bar.curr_condition]()
-        else
-            conditions["Unknown"]()
-        end
+        conditions[current_bar.curr_condition]()
     end
     
     
@@ -749,26 +748,26 @@ function Make_Bar(loc,wu_data,index, master)
             current_bar = bars[next_i]
             current_bar.x = MINI_BAR_X + bar_dist
             current_bar.opacity = 255
-            left_faux_bar.x = -bar_dist
+            --left_faux_bar.x = -bar_dist
             
             moving_to_new_bar()
         end,
         on_new_frame = function(tl,ms,p)
             
-            bar.x = MINI_BAR_X + bar_dist*p
+            bar.x = MINI_BAR_X + (bar_dist+150)*p
             
-            bars[next_i].x = MINI_BAR_X - bar_dist + bar_dist*p
+            bars[next_i].x = MINI_BAR_X - (bar_dist+150) + (bar_dist+150)*p
             
-            right_faux_bar.x = bar_dist + bar_dist*p
+            --right_faux_bar.x = bar_dist + bar_dist*p
             
-            left_faux_bar.x = -bar_dist  + bar_dist*p
+            --left_faux_bar.x = -bar_dist  + bar_dist*p
             
         end,
         on_completed = function()
             bar.opacity=0
             bar:hide()
-            right_faux_bar.x = 0
-            left_faux_bar.x  = 0
+            --right_faux_bar.x = 0
+            --left_faux_bar.x  = 0
             bars[next_i]:grab_key_focus()
         end
     }
@@ -801,24 +800,24 @@ function Make_Bar(loc,wu_data,index, master)
             current_bar = bars[next_i]
             current_bar.x = MINI_BAR_X + bar_dist
             current_bar.opacity = 255
-            right_faux_bar.x = bar_dist
+            --right_faux_bar.x = bar_dist
             
             moving_to_new_bar()
         end,
         on_new_frame = function(tl,ms,p)
-            bar.x = MINI_BAR_X - bar_dist*p
+            bar.x = MINI_BAR_X - (bar_dist+150)*p
             
-            bars[next_i].x = MINI_BAR_X + bar_dist - bar_dist*p
+            bars[next_i].x = MINI_BAR_X + (bar_dist+150) - (bar_dist+150)*p
             
-            right_faux_bar.x = bar_dist - bar_dist*p
+            --right_faux_bar.x = bar_dist - bar_dist*p
             
-            left_faux_bar.x = - bar_dist*p
+            --left_faux_bar.x = - bar_dist*p
         end,
         on_completed = function()
             bar.opacity=0
             bar:hide()
-            right_faux_bar.x = 0
-            left_faux_bar.x = 0
+            --right_faux_bar.x = 0
+            --left_faux_bar.x = 0
             bars[next_i]:grab_key_focus()
             
             if flag_for_deletion then delete_me() end

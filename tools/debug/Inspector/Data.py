@@ -113,7 +113,6 @@ def toFloat(v):
     try:
         return float(v)
     except:
-        print(v)
         raise BadDataException('Value entered cannot be converted to a float.')
 
 class BadDataException(Exception):
