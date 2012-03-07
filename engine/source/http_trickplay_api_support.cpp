@@ -434,11 +434,6 @@ public:
 
                 	debugger->install( false );
 
-                	// This makes sure that if a new app is launched, the debugger
-                	// will get installed and will break on the first line.
-
-                	tp_context_set_int( context , TP_START_DEBUGGER , 1 );
-
                     Object object;
 
                     object[ "port" ] = debugger->get_server_port();
