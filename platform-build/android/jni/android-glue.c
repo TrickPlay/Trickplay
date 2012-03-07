@@ -8,8 +8,6 @@
 
 #define LOG(...) __android_log_print(ANDROID_LOG_INFO, "TP-Engine", __VA_ARGS__)
 
-#define LIBRARY_PATH_PREFIX "/data/data/com.trickplay.Engine/lib/"
-
 typedef int (*main_type)(int, char**);
 static main_type main;
 
@@ -60,21 +58,27 @@ void window_created(ANativeActivity* activity, ANativeWindow* window)
     ANativeActivity_finish(activity);
 }
 
-
-void *load_library(const char *path, int mode)
+void *load_library(const char *path, const char *lib)
 {
-    LOG( "About to load: %s", path);
-    void *res = dlopen(path, mode);
+    char *full_path = malloc( strlen(path) + strlen("/../lib/") + strlen(lib) + 1 );
+    strcpy( full_path, path );
+    strcat( full_path, "/../lib/" );
+    strcat( full_path, lib );
+
+    void *res = dlopen(full_path, RTLD_NOW);
+    free(full_path);
+
     if(NULL == res)
     {
-        LOG( "Failed to load library %s", path);
+        LOG( "Failed to load library %s", lib);
         LOG( "Error is: %s", dlerror());
 
         abort();
     }
     else
     {
-        LOG( "%s loaded at %p", path, res);
+        LOG( "%s loaded at %p", lib, res);
+
         return res;
     }
 }
@@ -96,6 +100,68 @@ void *load_sym( void* lib, const char *symbol)
     }
 }
 
+void preload_shared_libraries(ANativeActivity *activity)
+{
+    LOG( "About to load all DLLs from %s", activity->internalDataPath);
+    load_library(activity->internalDataPath, "libiconv.so");
+    load_library(activity->internalDataPath, "libintl.so");
+    load_library(activity->internalDataPath, "libexif-tp.so");
+    load_library(activity->internalDataPath, "libexpat.so");
+    load_library(activity->internalDataPath, "libxml2.so");
+    load_library(activity->internalDataPath, "libffi.so");
+    void *glib_impl = load_library(activity->internalDataPath, "libglib-2.0.so");
+    g_log_set_handler_type glog_set_handler = (g_log_set_handler_type) load_sym( glib_impl, "g_log_set_default_handler" );
+
+    load_library(activity->internalDataPath, "libgthread-2.0.so");
+    load_library(activity->internalDataPath, "libgobject-2.0.so");
+    load_library(activity->internalDataPath, "libgmodule-2.0.so");
+    load_library(activity->internalDataPath, "libgio-2.0.so");
+
+    glog_set_handler(my_glog_func, NULL);
+    LOG( "Glue Log handler for Glib installed");
+
+    load_library(activity->internalDataPath, "libsqlite3.so");
+    load_library(activity->internalDataPath, "libcares.so");
+    load_library(activity->internalDataPath, "libcurl.so");
+    load_library(activity->internalDataPath, "libfreetype.so");
+    load_library(activity->internalDataPath, "libfontconfig.so");
+    load_library(activity->internalDataPath, "libpixman-1.so");
+    load_library(activity->internalDataPath, "libpng15.so");
+    load_library(activity->internalDataPath, "libcairo.so");
+    load_library(activity->internalDataPath, "libcairo-gobject.so");
+    load_library(activity->internalDataPath, "libpango-1.0.so");
+    load_library(activity->internalDataPath, "libpangoft2-1.0.so");
+    load_library(activity->internalDataPath, "libpangocairo-1.0.so");
+    load_library(activity->internalDataPath, "libjpeg.so");
+    load_library(activity->internalDataPath, "libtiff.so");
+    load_library(activity->internalDataPath, "libtiffxx.so");
+    load_library(activity->internalDataPath, "libgif.so");
+    load_library(activity->internalDataPath, "libjson-glib-1.0.so");
+    load_library(activity->internalDataPath, "libatk-1.0.so");
+    void *cogl_impl = load_library(activity->internalDataPath, "libcogl.so");
+    cogl_init = (cogl_init_type) load_sym(cogl_impl, "cogl_android_set_native_window_EXP");
+
+    load_library(activity->internalDataPath, "libcogl-pango.so");
+    load_library(activity->internalDataPath, "libclutter-eglnative-1.0.so");
+    load_library(activity->internalDataPath, "libavahi-common.so");
+    load_library(activity->internalDataPath, "libavahi-core.so");
+    load_library(activity->internalDataPath, "libavahi-glib.so");
+    load_library(activity->internalDataPath, "libixml.so");
+    load_library(activity->internalDataPath, "libthreadutil.so");
+    load_library(activity->internalDataPath, "libupnp.so");
+    load_library(activity->internalDataPath, "liburiparser.so");
+    load_library(activity->internalDataPath, "libuuid.so");
+    load_library(activity->internalDataPath, "libsndfile.so");
+    load_library(activity->internalDataPath, "libsoup-2.4.so");
+    load_library(activity->internalDataPath, "libclutteralphamode.so");
+    load_library(activity->internalDataPath, "libtplua.so");
+
+    void *impl = load_library(activity->internalDataPath, "libtp-implementation.so");
+    main = (main_type) load_sym(impl, "main");
+
+    LOG( "DLL Loading success!");
+}
+
 /**
  * This is the main entry point of a native application that is using
  * android_native_app_glue.  It runs in its own thread, with its own
@@ -105,64 +171,7 @@ void android_main(struct android_app* state) {
     // Make sure glue isn't stripped.
     app_dummy();
 
-    LOG( "About to load all DLLs");
-     load_library(LIBRARY_PATH_PREFIX "libiconv.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libintl.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libexif-tp.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libexpat.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libxml2.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libffi.so", RTLD_NOW);
-     void *glib_impl = load_library(LIBRARY_PATH_PREFIX "libglib-2.0.so", RTLD_NOW);
-     g_log_set_handler_type glog_set_handler = (g_log_set_handler_type) load_sym( glib_impl, "g_log_set_default_handler" );
-
-     load_library(LIBRARY_PATH_PREFIX "libgthread-2.0.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libgobject-2.0.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libgmodule-2.0.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libgio-2.0.so", RTLD_NOW);
-
-     glog_set_handler(my_glog_func, NULL);
-     LOG( "Glue Log handler for Glib installed");
-
-     load_library(LIBRARY_PATH_PREFIX "libsqlite3.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libcares.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libcurl.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libfreetype.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libfontconfig.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libpixman-1.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libpng15.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libcairo.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libcairo-gobject.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libpango-1.0.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libpangoft2-1.0.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libpangocairo-1.0.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libjpeg.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libtiff.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libtiffxx.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libgif.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libjson-glib-1.0.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libatk-1.0.so", RTLD_NOW);
-     void *cogl_impl = load_library(LIBRARY_PATH_PREFIX "libcogl.so", RTLD_NOW);
-     cogl_init = (cogl_init_type) load_sym(cogl_impl, "cogl_android_set_native_window_EXP");
-
-     load_library(LIBRARY_PATH_PREFIX "libcogl-pango.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libclutter-eglnative-1.0.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libavahi-common.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libavahi-core.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libavahi-glib.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libixml.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libthreadutil.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libupnp.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "liburiparser.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libuuid.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libsndfile.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libsoup-2.4.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libclutteralphamode.so", RTLD_NOW);
-     load_library(LIBRARY_PATH_PREFIX "libtplua.so", RTLD_NOW);
-
-     void *impl = load_library(LIBRARY_PATH_PREFIX "libtp-implementation.so", RTLD_NOW);
-     main = (main_type) load_sym(impl, "main");
-
-    LOG( "DLL Loading success!");
+    preload_shared_libraries(state->activity);
 
     state->activity->callbacks->onNativeWindowCreated = window_created;
 
