@@ -35,7 +35,10 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/qa/ DESTINATION qa)
 
 # Apps
 
-install(DIRECTORY ${PROJECT_BINARY_DIR}/apps/ DESTINATION apps PATTERN "*.zip")
+install(DIRECTORY ${PROJECT_BINARY_DIR}/apps/ DESTINATION apps
+            FILES_MATCHING PATTERN "*.zip"
+            PATTERN "CMakeFiles" EXCLUDE
+        )
 
 include(CPack)
 
