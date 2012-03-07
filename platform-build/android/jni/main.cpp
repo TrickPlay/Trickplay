@@ -6,13 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/errno.h>
+#include <sys/stat.h>
 
 #include "trickplay/trickplay.h"
 #include "trickplay/controller.h"
 #include "trickplay/keys.h"
 
 #define LOG(...) __android_log_print(ANDROID_LOG_INFO, "TP-Engine", __VA_ARGS__)
-
 
 static TPController * remote = NULL;
 
@@ -44,6 +44,38 @@ extern "C" int main( int argc , char ** argv )
     LOG("tp_context_new");
 
     TPContext * context = tp_context_new();
+
+    // Set TP Context variables
+
+    tp_context_set( context, TP_LIRC_ENABLED, "FALSE");
+
+    mkdir("/data/data/com.trickplay.Engine/files", 0770);
+    mkdir("/data/data/com.trickplay.Engine/files/data", 0770);
+    tp_context_set( context, TP_DATA_PATH, "/data/data/com.trickplay.Engine/files/data");
+
+    mkdir("/data/data/com.trickplay.Engine/cache", 0770);
+    mkdir("/data/data/com.trickplay.Engine/cache/downloads", 0770);
+    tp_context_set( context, TP_DOWNLOADS_PATH, "/data/data/com.trickplay.Engine/cache/downloads");
+
+    tp_context_set( context, TP_APP_SOURCES, "/data/data/com.trickplay.Engine/files/apps");
+
+    tp_context_set( context, TP_RESOURCES_PATH, "/data/data/com.trickplay.Engine/files/resources");
+    tp_context_set( context, TP_FONTS_PATH, "/data/data/com.trickplay.Engine/files/resources/fonts");
+    tp_context_set( context, TP_PLUGINS_PATH, "/data/data/com.trickplay.Engine/files/plugins");
+
+    tp_context_set( context, TP_SCAN_APP_SOURCES, "TRUE");
+
+    tp_context_set( context, TP_APP_ALLOWED,    "com.trickplay.kt-menu=apps:"
+                                                "com.trickplay.kt-menu=editor:"
+                                                "trickplay.launcher=apps:"
+                                                "com.trickplay.editor=editor");
+
+    tp_context_set( context, TP_CONTROLLERS_ENABLED,    "TRUE" );
+    tp_context_set( context, TP_CONTROLLERS_NAME, "Android");
+    tp_context_set( context, TP_CONTROLLERS_MDNS_ENABLED, "TRUE");
+    tp_context_set( context, TP_CONTROLLERS_UPNP_ENABLED, "TRUE");
+
+    tp_context_set( context, TP_APP_ID, "com.trickplay.physics-showcase");
 
     // Initialize a key map for the remote
 
@@ -96,4 +128,3 @@ void remote_control_callback( unsigned char key )
         tp_controller_key_up( remote, key, 0 , 0 );
 	}
 }
-
