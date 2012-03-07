@@ -260,6 +260,8 @@ void AppPushServer::handle_http_post( const HttpServer::Request & request , Http
     {
         PushInfo push_info = compare_files( app_contents , file_list );
 
+        push_info.debug = root[ "debug" ].is<bool>() ? root[ "debug" ].as<bool>() : false;
+
         // Stop any other push that is going on
 
         if ( current_push_path )
@@ -665,7 +667,11 @@ bool AppPushServer::launch_it( )
 
     context->close_current_app();
 
-    int result = context->launch_app( current_push_info.metadata.get_root_uri().c_str() , App::LaunchInfo() , true );
+    App::LaunchInfo launch_info;
+
+    launch_info.debug = current_push_info.debug;
+
+    int result = context->launch_app( current_push_info.metadata.get_root_uri().c_str() , launch_info , true );
 
     return 0 == result;
 }
