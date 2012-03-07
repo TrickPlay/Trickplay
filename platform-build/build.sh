@@ -733,11 +733,20 @@ then
     rsync -a "${THERE}/android/" "${HERE}/android/"
     cd "${HERE}/android"
     rm -rf bin libs obj
+
     mkdir -p assets
     zip -9vr assets/resources.zip "${PREFIX}/resources"
-    mkdir -p assets/apps
-    cp -v "${PREFIX}/apps/"*.zip assets/apps
+    cd assets
+    md5sum resources.zip > resources.zip.md5sum
 
+    mkdir -p apps
+    cp -v "${PREFIX}/apps/"*.zip apps
+    cd apps
+    for i in *.zip;do
+        md5sum "${i}" > "${i}.md5sum"
+    done
+
+    cd "${HERE}/android"
     TRICKPLAY_PDK_DIR="${PREFIX}" ndk-build
     android update project -p . -s
     ant debug
