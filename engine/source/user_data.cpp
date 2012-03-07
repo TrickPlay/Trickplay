@@ -373,13 +373,6 @@ void UserData::finalize( lua_State * L , int index )
         g_hash_table_remove( get_client_map() , self->client );
     }
 
-    // Unref the callback table. We don't care if it is LUA_NOREF, because
-    // luaL_unref will deal with it gracefully.
-
-    tplog2( "  CLEARING CALLBACKS" );
-
-    self->clear_callbacks();
-
     lb_weak_unref( L , self->weak_ref );
 
     // Get rid of the type
@@ -522,14 +515,18 @@ int UserData::is_callback_attached( const char * name , lua_State * L , int inde
 void UserData::clear_callbacks( )
 {
 	push_proxy();
-	lua_newtable( L );
-	lua_setfenv( L , -2 );
+	clear_callbacks( L , -1 );
 	lua_pop( L , 1 );
 }
 
 void UserData::clear_callbacks( lua_State * L , int index )
 {
-	UserData::get( L , index )->clear_callbacks();
+	index = abs_index( L , index );
+	if ( ! lua_isnil( L , index ) )
+	{
+		lua_newtable( L );
+		lua_setfenv( L , index );
+	}
 }
 
 //.............................................................................
