@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 
-#include <android/sensor.h>
 #include <android/log.h>
 #include <android_native_app_glue.h>
 #include <dlfcn.h>
@@ -47,42 +46,18 @@ static void my_glog_func(const char *domain, GLogLevelFlags log_level, const cha
     LOG( "%s(%d): %s", domain, log_level, message);
 }
 
-/**
- * Process the next input event.
- */
-static int32_t engine_handle_input(struct android_app* app, AInputEvent* event) {
+void window_created(ANativeActivity* activity, ANativeWindow* window)
+{
+    cogl_init( window );
 
-    return 0;
-}
+    // Hand off to main()
+    char *argv[] = { "TP-Engine", NULL };
+    int argc = 1;
 
-/**
- * Process the next main command.
- */
-static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
+    main( argc, argv );
 
-    switch (cmd) {
-        case APP_CMD_SAVE_STATE:
-            break;
-        case APP_CMD_INIT_WINDOW:
-            // The window is being shown, get it ready.
-            if (app->window != NULL) {
-
-                cogl_init( app->window );
-
-                // Hand off to main()
-                char *argv[] = { "TP-Engine", NULL };
-                int argc = 1;
-
-                main( argc, argv );
-            }
-            break;
-        case APP_CMD_TERM_WINDOW:
-            break;
-        case APP_CMD_GAINED_FOCUS:
-            break;
-        case APP_CMD_LOST_FOCUS:
-            break;
-    }
+    // When main() returns, we're all done, so exit
+    ANativeActivity_finish(activity);
 }
 
 
@@ -189,8 +164,8 @@ void android_main(struct android_app* state) {
 
     LOG( "DLL Loading success!");
 
-    state->onAppCmd = engine_handle_cmd;
-    state->onInputEvent = engine_handle_input;
+    state->activity->callbacks->onNativeWindowCreated = window_created;
+
 
     while (1) {
         // Read all pending events.
