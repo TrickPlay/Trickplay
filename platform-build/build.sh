@@ -641,7 +641,7 @@ then
     echo "================================================================="
 
     make -C ${HERE}/tp-build ${NUM_MAKE_JOBS} --no-print-directory
-    make -C ${HERE}/tp-build --no-print-directory oem-docs install
+    make -C ${HERE}/tp-build --no-print-directory oem-docs apps install
 
 fi
 
@@ -733,6 +733,11 @@ then
     rsync -a "${THERE}/android/" "${HERE}/android/"
     cd "${HERE}/android"
     rm -rf bin libs obj
+    mkdir -p assets
+    zip -9vr assets/resources.zip "${PREFIX}/resources"
+    mkdir -p assets/apps
+    cp -v "${PREFIX}/apps/"*.zip assets/apps
+
     TRICKPLAY_PDK_DIR="${PREFIX}" ndk-build
     android update project -p . -s
     ant debug

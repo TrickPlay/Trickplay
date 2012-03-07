@@ -33,6 +33,9 @@ install(FILES ${PROJECT_SOURCE_DIR}/pdk/opensource-list.csv DESTINATION opensour
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/qa/ DESTINATION qa)
 
+# Apps
+
+install(DIRECTORY ${PROJECT_BINARY_DIR}/apps/ DESTINATION apps PATTERN "*.zip")
 
 include(CPack)
 
