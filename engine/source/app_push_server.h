@@ -36,8 +36,11 @@ private:
 
     struct PushInfo
     {
+    	PushInfo() : debug( false ) {}
+
         App::Metadata       metadata;
         TargetInfo::List    target_files;
+        bool				debug;
     };
 
     AppPushServer() { g_assert( 0 ); }
