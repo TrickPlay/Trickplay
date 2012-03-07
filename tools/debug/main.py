@@ -509,6 +509,7 @@ class MainWindow(QMainWindow):
         self.debug_tbt.setEnabled(True)
         self.debuggerMenuEnabled(False)
         self.debug_mode = False
+        self.deviceManager.debug_mode = False
 
     def run(self):
         self.inspector.clearTree()

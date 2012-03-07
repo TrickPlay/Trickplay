@@ -383,16 +383,7 @@ class TrickplayDeviceManager(QWidget):
 
 		                    self.main.debug_run = False
 
-		                elif len(reply.command) > 3 and reply.command[:1] == DBG_CMD_BREAKPOINT or reply.command[:1] == DBG_CMD_DELETE:
-
-		                    #self.bs_command = False
-		                    #if self.command[-2:] == "ff" or self.command[-2:] == "on" :
-		                        #self.bs_command = True
-		                    #reply = None
-		                    #self.command = None
-		                    self.send_debugger_command(DBG_CMD_BREAKPOINT)
-    
-		                elif reply.command == DBG_CMD_BREAKPOINT or reply.command == DBG_CMD_BB:
+		                elif reply.command[:1] == DBG_CMD_BREAKPOINT or reply.command == DBG_CMD_BB or reply.command[:1] == DBG_CMD_DELETE:
         
 		                    # Break Point 
 		                    break_info = self.getBreakPointInfo_Resp(data)
@@ -402,7 +393,7 @@ class TrickplayDeviceManager(QWidget):
 
 		                    if reply.command == DBG_CMD_BB :
 		                        return
-    
+
 		                    editor = self.editorManager.app.focusWidget()
 		                    if editor is not None : 
 		                        nline = editor.margin_nline
@@ -410,6 +401,15 @@ class TrickplayDeviceManager(QWidget):
 		                        index = self.editorManager.tab.currentIndex()
 		                        editor = self.editorManager.tab.editors[index]
 		                        nline = editor.margin_nline
+    
+		                    if reply.command[:1] == DBG_CMD_DELETE :
+		                        if editor.current_line != nline :
+		                            editor.markerDelete(nline, -1)
+		                        else :
+		                            editor.markerDelete(nline, -1)
+		                            editor.markerAdd(nline, editor.ARROW_MARKER_NUM)
+		                        editor.line_click[nline] = 0
+		                        return
     
 		                    # Break Point Setting t
 		                    if not editor.line_click.has_key(nline) or editor.line_click[nline] == 0 :

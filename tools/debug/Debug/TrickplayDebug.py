@@ -28,10 +28,10 @@ class TrickplayDebugger(QWidget):
         self.ui.breakTable.setColumnCount(1)
         self.ui.breakTable.verticalHeader().setDefaultSectionSize(18)
         self.ui.breakTable.popupMenu = QMenu(self.ui.breakTable)
-        self.ui.breakTable.popupMenu.addAction ('&Delete', self.deleteBP)
+        self.ui.breakTable.popupMenu.addAction ('Delete', self.deleteBP)
 
         self.ui.breakTable.setContextMenuPolicy(Qt.CustomContextMenu)
-        #self.connect(self.ui.breakTable, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
+        self.connect(self.ui.breakTable, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
         self.connect(self.ui.breakTable, SIGNAL("cellClicked(int, int)"), self.cellClicked)
 
         self.break_info = {}
@@ -41,12 +41,49 @@ class TrickplayDebugger(QWidget):
         self.font.setFamily('Inconsolata')
         self.font.setPointSize(12)
 
-	def contextMenu(self, point=None):
-		self.ui.breakTable.popupMenu.exec_( self.ui.breakTable.mapToGlobal(point) )
+    def contextMenu(self, point=None):
+        self.ui.breakTable.popupMenu.exec_( self.ui.breakTable.mapToGlobal(point) )
     
     def deleteBP(self):
-		print("delete BP !!!")
-		
+        index = 0 
+        for item in  self.ui.breakTable.selectedIndexes():
+            index = item.row() 
+            r= item.row()
+            c= item.column()
+
+        if self.deviceManager is None:
+            self.deviceManager = self.main.deviceManager
+
+        cellItem= self.ui.breakTable.item(index, 0) 
+        fileLine = cellItem.whatsThis()
+        n = re.search(":", fileLine).end()
+        fileName = str(fileLine[:n-1])
+
+        if fileName.startswith("/"):
+            fileName = fileName[1:]
+
+        lineNum = int(fileLine[n:]) - 1
+
+        fileName = os.path.join(self.deviceManager.path(), fileName)
+        self.editorManager.newEditor(fileName, None, lineNum)
+        editor = self.editorManager.currentEditor 
+        editor.margin_nline = lineNum
+
+        if self.deviceManager.debug_mode == True:
+	    self.deviceManager.send_debugger_command(DBG_CMD_DELETE+" %s"%str(index))
+        else:
+            if editor.current_line != lineNum :
+                editor.markerDelete(lineNum, -1)
+            else :
+                editor.markerDelete(lineNum, -1)
+    	        editor.markerAdd(lineNum, editor.ARROW_MARKER_NUM)
+            editor.line_click[lineNum] = 0
+
+        self.editorManager.bp_info[1].pop(index)
+        self.editorManager.bp_info[2].pop(index)
+
+        self.ui.breakTable.removeRow(r)
+
     def cellClicked(self, r, c):
 		if self.deviceManager is None:
 		    self.deviceManager = self.main.deviceManager
