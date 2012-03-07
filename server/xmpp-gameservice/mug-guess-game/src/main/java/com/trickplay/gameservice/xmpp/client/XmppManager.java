@@ -48,11 +48,12 @@ import com.trickplay.gameservice.xmpp.mug.LeaveMessageExtension;
 import com.trickplay.gameservice.xmpp.mug.MatchStateExtension;
 import com.trickplay.gameservice.xmpp.mug.MatchStateListener;
 import com.trickplay.gameservice.xmpp.mug.NewGameResponse;
+import com.trickplay.gameservice.xmpp.mug.Participant;
 import com.trickplay.gameservice.xmpp.mug.PlayerStatusListener;
 import com.trickplay.gameservice.xmpp.mug.StartMessageExtension;
 import com.trickplay.gameservice.xmpp.mug.TurnExtension;
 import com.trickplay.gameservice.xmpp.mug.TurnMessage;
-import com.trickplay.gameservice.xmpp.mug.UserGameDataExtension;
+import com.trickplay.gameservice.xmpp.mug.GameDataExtension;
 
 public class XmppManager {
 	private static final String MUGServiceId = "mug.internal.trickplay.com";
@@ -113,27 +114,27 @@ public class XmppManager {
 			matchStateListeners.add(listener);
 	}
 	
-	private void fireLeftEvent(String participant) {
+	private void fireLeftEvent(Participant participant) {
 		for(PlayerStatusListener listener : participantStatusListeners) {
 				listener.left(participant);
 		}
 	}
 	
-	private void fireUnavailableEvent(String participant) {
+	private void fireUnavailableEvent(Participant participant) {
 		for(PlayerStatusListener listener : participantStatusListeners) {
 				listener.unavailable(participant);
 		}
 	}
 	
-	private void fireJoinedEvent(String participant, GamePresenceExtension.Item item) {
+	private void fireJoinedEvent(Participant participant, GamePresenceExtension.Item item) {
 		for(PlayerStatusListener listener : participantStatusListeners) {
 				listener.joined(participant, item);
 		}
 	}
 	
-	private void fireNickChangedEvent(String oldname, String newname) {
+	private void fireNickChangedEvent(Participant p, String newname) {
 		for(PlayerStatusListener listener : participantStatusListeners) {
-				listener.nicknameChanged(oldname, newname);
+				listener.nicknameChanged(p, newname);
 		}
 	}
 	
@@ -143,14 +144,14 @@ public class XmppManager {
 		}
 	}
 	
-	private void fireMatchStartEvent(String from) {
+	private void fireMatchStartEvent(Participant participant) {
 		for(GamePlayListener listener : gamePlayListeners)
-			listener.start(from);
+			listener.start(participant);
 	}
 	
-	private void fireTurnEvent(String from, TurnMessage turn) {
+	private void fireTurnEvent(Participant p, TurnMessage turn) {
 		for(GamePlayListener listener : gamePlayListeners)
-			listener.turn(from, turn);
+			listener.turn(p, turn);
 	}
 	
 	public void init() throws XMPPException {
@@ -163,10 +164,10 @@ public class XmppManager {
 				MatchStateExtension.NAMESPACE, new MatchStateExtension.Provider());
 		ProviderManager.getInstance().addExtensionProvider(TurnExtension.name,
 				TurnExtension.NAMESPACE, new TurnExtension.Provider());
-		ProviderManager.getInstance().addExtensionProvider(UserGameDataExtension.name,
-				UserGameDataExtension.NAMESPACE, new UserGameDataExtension.Provider());
-		ProviderManager.getInstance().addIQProvider(UserGameDataExtension.name,
-				UserGameDataExtension.NAMESPACE, new UserGameDataExtension.Provider());
+		ProviderManager.getInstance().addExtensionProvider(GameDataExtension.name,
+				GameDataExtension.NAMESPACE, new GameDataExtension.Provider());
+		ProviderManager.getInstance().addIQProvider(GameDataExtension.name,
+				GameDataExtension.NAMESPACE, new GameDataExtension.Provider());
 		System.out.println(String.format(
 				"Initializing connection to server %1$s port %2$d", server,
 				port));
@@ -199,12 +200,12 @@ public class XmppManager {
 							switch (ext.getType()) {
 							case Occupant:
 								if (((Presence)p).getType().equals(Presence.Type.unavailable)) 
-									fireUnavailableEvent(StringUtils.parseResource(p.getFrom()));
+									fireUnavailableEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())));
 								else
-									fireJoinedEvent(StringUtils.parseResource(p.getFrom()), ext.getItem());
+									fireJoinedEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())), ext.getItem());
 								break;
 							case NickChanged:
-								fireNickChangedEvent(StringUtils.parseResource(p.getFrom()), ext.getItem().getNick());
+								fireNickChangedEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())), ext.getItem().getNick());
 								break;								
 							case Status:
 								fireMatchStateEvent(ext.getStatus(), ext.getState());
@@ -221,11 +222,11 @@ public class XmppManager {
 						
 						PacketExtension ext = p.getExtension(START_ELEMENT_TAG, MUGuserns);
 						if (ext != null) {
-							fireMatchStartEvent(StringUtils.parseResource(p.getFrom()));
+							fireMatchStartEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())));
 						} else if (null != (ext = p.getExtension(TURN_ELEMENT_TAG, MUGuserns))) {
-							fireTurnEvent(StringUtils.parseResource(p.getFrom()), (TurnExtension)ext);
+							fireTurnEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())), (TurnExtension)ext);
 						} else if (null != (ext = p.getExtension(LeaveMessageExtension.name, LeaveMessageExtension.NAMESPACE))) {
-							fireLeftEvent(StringUtils.parseResource(p.getFrom()));
+							fireLeftEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())));
 						} else {
 							//log message
 						}
@@ -239,6 +240,7 @@ public class XmppManager {
 		};
 
 	}
+	
 
 	public void performLogin(String username, String password)
 			throws XMPPException {
@@ -629,13 +631,50 @@ public class XmppManager {
 		*/
 	}
 	
-	public String getUserGameData(final String gameId) throws XMPPException {
+	public GameDataExtension getMatchdata(final String gameId) throws XMPPException {
+		System.out.println("Inside getMatchData().");
+		IQ matchdataIQ = new IQ() {
+
+			@Override
+			public String getChildElementXML() {
+				return new GameDataExtension(gameId, GameDataExtension.Type.MATCHDATA).toXML();
+			}
+
+		};
+
+		matchdataIQ.setType(IQ.Type.GET);
+		matchdataIQ.setTo(MUGServiceId);
+
+		PacketCollector collector = connection
+				.createPacketCollector(new PacketIDFilter(matchdataIQ
+						.getPacketID()));
+
+		connection.sendPacket(matchdataIQ);
+
+		IQ result = (IQ) collector.nextResult(500000);
+		// Stop queuing results
+		collector.cancel();
+		if (result == null) {
+			throw new XMPPException("No response from the server.");
+		} else if (result.getError() != null) {
+			throw new XMPPException(result.getError());
+		}
+
+		GameDataExtension gamedata = (GameDataExtension)result.getExtension(GameDataExtension.name, GameDataExtension.NAMESPACE);
+
+		if (gamedata != null)
+			System.out.println("Inside getMatchdata(). matchdata:"+gamedata.toXML());
+
+		return gamedata;
+	}
+
+	public String getUserdata(final String gameId) throws XMPPException {
 		System.out.println("Inside getUserData().");
 		IQ userDataIQ = new IQ() {
 
 			@Override
 			public String getChildElementXML() {
-				return new UserGameDataExtension(gameId).toXML();
+				return new GameDataExtension(gameId, GameDataExtension.Type.USERDATA).toXML();
 			}
 
 		};
@@ -658,7 +697,7 @@ public class XmppManager {
 			throw new XMPPException(result.getError());
 		}
 
-		UserGameDataExtension userData = (UserGameDataExtension)result.getExtension(UserGameDataExtension.name, UserGameDataExtension.NAMESPACE);
+		GameDataExtension userData = (GameDataExtension)result.getExtension(GameDataExtension.name, GameDataExtension.NAMESPACE);
 
 		if (userData != null)
 			System.out.println("Inside getUserdata(). userdata:"+userData.toXML());
@@ -666,13 +705,13 @@ public class XmppManager {
 		return userData != null ? userData.getUserdata() : "";
 	}
 	
-	public void setUserGameData(final String gameId, final String userdata) throws XMPPException {
+	public void setUserdata(final String gameId, final String userdata) throws XMPPException {
 		System.out.println("Inside setUserData(). input userdata="+userdata);
 		IQ userDataIQ = new IQ() {
 
 			@Override
 			public String getChildElementXML() {
-				return new UserGameDataExtension(gameId, userdata, null).toXML();
+				return new GameDataExtension(gameId, userdata, null).toXML();
 			}
 
 		};
@@ -695,7 +734,7 @@ public class XmppManager {
 			throw new XMPPException(result.getError());
 		}
 
-		UserGameDataExtension userData = (UserGameDataExtension)result.getExtension(UserGameDataExtension.name, UserGameDataExtension.NAMESPACE);
+		GameDataExtension userData = (GameDataExtension)result.getExtension(GameDataExtension.name, GameDataExtension.NAMESPACE);
 
 		if (userData != null)
 			System.out.println("Inside setUserData(). updated userdata="+userData.toXML());

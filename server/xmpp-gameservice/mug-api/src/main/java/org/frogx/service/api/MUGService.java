@@ -1,6 +1,7 @@
 package org.frogx.service.api;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 
@@ -231,4 +232,7 @@ public interface MUGService extends Component {
 	public void removeGameRoom(String roomName);
 	
 	public MUGPersistenceProvider getPersistenceProvider();
+	
+	public List<MUGRoom> getGameRooms(String gameNS, JID jid);
+	
 }

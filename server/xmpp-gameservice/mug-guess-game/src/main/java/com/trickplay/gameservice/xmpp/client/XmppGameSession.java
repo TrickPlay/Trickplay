@@ -4,10 +4,12 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.trickplay.gameservice.xmpp.mug.GameDataExtension;
 import com.trickplay.gameservice.xmpp.mug.GamePlayListener;
 import com.trickplay.gameservice.xmpp.mug.GamePresenceExtension.Item;
 import com.trickplay.gameservice.xmpp.mug.MatchStateExtension;
 import com.trickplay.gameservice.xmpp.mug.MatchStateListener;
+import com.trickplay.gameservice.xmpp.mug.Participant;
 import com.trickplay.gameservice.xmpp.mug.PlayerStatusListener;
 import com.trickplay.gameservice.xmpp.mug.TurnMessage;
 
@@ -218,19 +220,19 @@ public abstract class XmppGameSession implements MatchStateListener,
 		return getMatchStatus().equals("active");
 	}
 
-	public void start(String from) {
-		System.out.println("received state message from:" + from);
+	public void start(Participant from) {
+		System.out.println("received state message from:" + from.getNick());
 	}
 
 	public Command getCommand() throws InterruptedException {
 		return commandQueue.take();
 	}
 
-	public void turn(String from, TurnMessage turnMessage) {
+	public void turn(Participant from, TurnMessage turnMessage) {
 		try {
-			System.out.println("received turn message from:" + from
+			System.out.println("received turn message from:" + from.getNick()
 					+ ". message:" + turnMessage.toXML());
-			if (getUserName().equals(from)) {
+			if (getUserName().equals(from.getNick())) {
 				setTurnAckReceived(true);
 				return;
 			}
@@ -247,26 +249,26 @@ public abstract class XmppGameSession implements MatchStateListener,
 		}
 	}
 
-	public void joined(String from, Item item) {
-		System.out.println("received join message from:" + from + ". item:"
+	public void joined(Participant from, Item item) {
+		System.out.println("received join message from:" + from.getNick() + ". item:"
 				+ item.toXML());
 		// check whether you successfully joined the match
-		if (from.equals(getUserName()) && item.getRole() != null
+		if (from.getNick().equals(getUserName()) && item.getRole() != null
 				&& !item.getRole().isEmpty()) {
 			setJoined(true);
 			setRole(item.getRole());
 		}
 	}
 
-	public void unavailable(String participant) {
+	public void unavailable(Participant participant) {
 		
 	}
 	
-	public void left(String participant) {
-		commandQueue.add(new LeftMatchCommand(participant));
+	public void left(Participant participant) {
+		commandQueue.add(new LeftMatchCommand(participant.getNick()));
 	}
 
-	public void nicknameChanged(String participant, String newNickname) {
+	public void nicknameChanged(Participant participant, String newNickname) {
 		// TODO Auto-generated method stub
 
 	}
@@ -290,5 +292,37 @@ public abstract class XmppGameSession implements MatchStateListener,
 		}
 
 	}
+	
+	protected void updateUserdata(MatchResult result) {
+		try {
+			String userData = xmppManager.getUserdata(gameId);
+			if (userData != null) {
+				UserGameData gameData = UserGameData.parseFromJSON(userData);
+				gameData.setPlayed(gameData.getPlayed()+1);
+				switch (result) {
+				case WON:
+					gameData.setWins(gameData.getWins()+1);
+					break;
+				case LOST:
+					gameData.setLosses(gameData.getLosses()+1);
+					break;
+				}
+				xmppManager.setUserdata(gameId, gameData.toJSON());
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	public GameDataExtension getMatchdata() {
+		try {
+			return xmppManager.getMatchdata(gameId);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return null;
+	}
+	
 
 }

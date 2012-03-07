@@ -66,11 +66,11 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 		if (state.getGuess() == secret) {
 			state.setWon(true);
 			xmppManager.sendTurn(matchId, state.toJSON(), true);
-			updateUserGameData(MatchResult.LOST);
+			updateUserdata(MatchResult.LOST);
 		} else {
 			if (state.getAttempts() == MAX_ALLOWED_ATTEMPTS) {
 				xmppManager.sendTurn(matchId, state.toJSON(), true);
-				updateUserGameData(MatchResult.WON);
+				updateUserdata(MatchResult.WON);
 			} else {
 				if (secret > state.getGuess())
 					state.setLow(state.getGuess() + 1);
@@ -83,27 +83,6 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 	}
 	
 
-	private void updateUserGameData(MatchResult result) {
-		try {
-			String userData = xmppManager.getUserGameData(gameId);
-			if (userData != null) {
-				UserGameData gameData = UserGameData.parseFromJSON(userData);
-				gameData.setPlayed(gameData.getPlayed()+1);
-				switch (result) {
-				case WON:
-					gameData.setWins(gameData.getWins()+1);
-					break;
-				case LOST:
-					gameData.setLosses(gameData.getLosses()+1);
-					break;
-				}
-				xmppManager.setUserGameData(gameId, gameData.toJSON());
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
-	
 	@Override
 	public String getUserName() {
 		return "p1";
@@ -142,6 +121,9 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 			
 			p1.startMatch("player1");
 			
+			// obtain the list of matches player is currently participating in
+			p1.getMatchdata();
+			//
 			while(!p1.isGameOver()) {
 				Command cmd = p1.getCommand();
 				switch(cmd.getCommandType()) {

@@ -63,5 +63,6 @@ public interface MUGPersistenceProvider {
 	 * @return the contents of the persisted mug property
 	 */
 	public MUGProperty updateUserProperty(String username, MUGProperty property) throws Exception;
+	
 		
 }

@@ -71,6 +71,8 @@ public class DefaultMUGOccupant implements MUGOccupant {
 	 */
 	private MUGManager mugManager;
 	
+	private int inRoomId;
+	
 	/**
 	 * Create an occupant of a game room and try to register with the 
 	 * {@see net.sf.openfire.mug.lib.MUGMatch}.
@@ -84,7 +86,7 @@ public class DefaultMUGOccupant implements MUGOccupant {
 	 * @param componentManager A {@see ComponentManager} utility for logging and 
 	 * sending XMPP Stanzas.
 	 */
-	public DefaultMUGOccupant(MUGRoom room, JID realJID, String nickname,
+	public DefaultMUGOccupant(MUGRoom room, JID realJID, int inRoomId, String nickname,
 			MUGOccupant.Affiliation affiliation, Presence presence,
 			MUGManager mugManager, boolean acquireRole) {
 		// Initialize the occupant
@@ -93,6 +95,7 @@ public class DefaultMUGOccupant implements MUGOccupant {
 		this.nick = nickname;
 		this.affiliation = affiliation;
 		this.realJID = realJID;
+		this.inRoomId = inRoomId;
 		setPresence(presence);
 		if (acquireRole) {
 			String assignedRole = room.getMatch().reserveFreeRole(this);
@@ -149,7 +152,7 @@ public class DefaultMUGOccupant implements MUGOccupant {
 	 * @return The Jabber ID that represents this occupant in the room.
 	 */
 	public JID getRoomAddress() {
-		return new JID(room.getName(),room.getMUGService().getDomain(), nick);
+		return new JID(room.getName(),room.getMUGService().getDomain(), inRoomId+"_"+nick);
 	}
 	
 	/**
@@ -276,9 +279,14 @@ public class DefaultMUGOccupant implements MUGOccupant {
 	public boolean equals(Object other) {
 		if (this == other)
 			return true;
+		else if (!(other instanceof MUGOccupant)) 
+			return false;
 		
 		MUGOccupant otherOccupant = (MUGOccupant)other;
-		return otherOccupant != null && otherOccupant.getNickname() != null && otherOccupant.getNickname().equals(nick);
+		return otherOccupant != null 
+		&& otherOccupant.getNickname() != null 
+		&& otherOccupant.getNickname().equals(nick)
+		&& otherOccupant.getInRoomId() == getInRoomId();
 	}
 	
 	@Override
@@ -291,5 +299,9 @@ public class DefaultMUGOccupant implements MUGOccupant {
 			return !Presence.Type.unavailable.equals(presence.getType());
 		}
 		return false;
+	}
+
+	public int getInRoomId() {
+		return inRoomId;
 	}
 }

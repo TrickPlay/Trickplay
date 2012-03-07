@@ -1,6 +1,8 @@
 package com.trickplay.gameservice.xmpp.mug;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.dom4j.DocumentHelper;
@@ -14,31 +16,63 @@ import org.xmlpull.v1.XmlPullParser;
 
 
 
-public class UserGameDataExtension implements PacketExtension {
+public class GameDataExtension implements PacketExtension {
 	
 	public static final String NAMESPACE = "http://jabber.org/protocol/mug";
 	public static final String name = "gamedata";
     private String userdata;
+    private List<MatchInfoExtension> matchdata = new ArrayList<MatchInfoExtension>();
     private Integer version;
     private String gameId;
+    private Type dataType;
     
-	public UserGameDataExtension(String gameId, String userdata, Integer version) {
-		super();
+    public enum Type {
+    	USERDATA, MATCHDATA
+    }
+    
+	public GameDataExtension(String gameId, String userdata, Integer version) {
+		this(gameId, Type.USERDATA);
 		
-		this.gameId = gameId;
 		this.userdata = userdata;
 		this.version = version;
 	}
 
-
-	public UserGameDataExtension(String gameId) {
-		this(gameId, null, null);
+	public GameDataExtension(String gameId, Type datatype) {
+		this.gameId = gameId;
+		this.setDataType(datatype);
     }
 	
-	public UserGameDataExtension() {
+	public GameDataExtension(String gameId, List<MatchInfoExtension> matchData) {
+		this(gameId, Type.MATCHDATA);
+		if (matchData!=null)
+			this.matchdata.addAll(matchData);
+    }
+	
+	public GameDataExtension() {		
     }
     
 	
+	public void setDataType(Type dataType) {
+		this.dataType = dataType;
+	}
+
+	public Type getDataType() {
+		return dataType;
+	}
+
+	public void setMatchdata(List<MatchInfoExtension> matchData) {
+		this.matchdata.clear();
+		this.matchdata.addAll(matchData);
+	}
+
+	public void addMatchInfo(MatchInfoExtension matchInfo) {
+		matchdata.add(matchInfo);
+	}
+	
+	public List<MatchInfoExtension> getMatchdata() {
+		return matchdata;
+	}
+
 	public void setGameId(String gameId) {
 		this.gameId = gameId;
 	}
@@ -78,14 +112,19 @@ public class UserGameDataExtension implements PacketExtension {
 
 		if (gameId != null)
 			gameElement.addAttribute("gameId", gameId);
-		
-		Element userDataElem = gameElement.addElement("userdata");
-		if (userdata!=null)
-			userDataElem.add(DocumentHelper.createCDATA(userdata));
-		
-		if (version != null)
-			userDataElem.addAttribute("version", version.toString());
-
+		if (Type.USERDATA.equals(dataType)) {
+			Element userElem = gameElement.addElement("userdata");
+			if (userdata!=null)
+				userElem.add(DocumentHelper.createCDATA(userdata));
+			
+			if (version != null)
+				userElem.addAttribute("version", version.toString());
+		} else {
+			Element matchdataElem = gameElement.addElement("matchdata");
+			for(MatchInfoExtension matchinfo : matchdata) {
+				matchdataElem.add(matchinfo.toXMLElement());
+			}
+		}
 		return gameElement;
 	}
 	
@@ -104,15 +143,17 @@ public class UserGameDataExtension implements PacketExtension {
 
 		public PacketExtension parseExtension(XmlPullParser parser)
 				throws Exception {
-			UserGameDataExtension resp = new UserGameDataExtension();
+			GameDataExtension resp = new GameDataExtension();
 //			Map<String,String> attributeMap = getAttributes(parser);
 			resp.setGameId(parser.getAttributeValue(null, "gameId"));
 			boolean done = false;
+			boolean processingMatchdata = false;
 			while (!done) {
 				int eventType = parser.next();
 				if (eventType == XmlPullParser.START_TAG) {
 						System.out.println("processing element:"+parser.getName());
 						if (parser.getName().equals("userdata")) {
+							resp.setDataType(Type.USERDATA);
 							String versionStr = parser.getAttributeValue(null, "version");
 							resp.setUserdata(parser.nextText());
 							if (versionStr != null) {
@@ -126,7 +167,15 @@ public class UserGameDataExtension implements PacketExtension {
 									resp.setVersion(version);
 								}
 							}
-						} 
+						}
+						else if (parser.getName().equals("matchdata")) {
+							processingMatchdata = true;
+							resp.setDataType(Type.MATCHDATA);
+						}
+						else if (processingMatchdata && parser.getName().equals("match")) {
+							MatchInfoExtension.Provider p = new MatchInfoExtension.Provider();
+							resp.addMatchInfo((MatchInfoExtension)p.parseExtension(parser));
+						}
 					}
 						
 					else if (eventType == XmlPullParser.END_TAG) {
@@ -140,7 +189,7 @@ public class UserGameDataExtension implements PacketExtension {
 		}
 
 		public IQ parseIQ(XmlPullParser parser) throws Exception {
-			final UserGameDataExtension gameData = (UserGameDataExtension)parseExtension(parser);
+			final GameDataExtension gameData = (GameDataExtension)parseExtension(parser);
 			IQ iq = new IQ() {
 
 				@Override

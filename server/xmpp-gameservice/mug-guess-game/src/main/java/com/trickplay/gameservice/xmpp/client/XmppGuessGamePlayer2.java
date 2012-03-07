@@ -127,6 +127,9 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 			p2 = new XmppGuessGamePlayer2("challenge27");
 			
 			if (!correspondenceMode) {
+				p2.findAndJoin();
+				// obtain the list of matches player is currently participating in
+				p2.getMatchdata();
 				while(!p2.isGameOver()) {
 					Command cmd = p2.getCommand();
 					switch(cmd.getCommandType()) {
@@ -153,6 +156,8 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 					p2.join(matchId);
 				}
 
+				// obtain the list of matches player is currently participating in
+				p2.getMatchdata();
 				do {
 					Command cmd = p2.getCommand();
 					switch (cmd.getCommandType()) {

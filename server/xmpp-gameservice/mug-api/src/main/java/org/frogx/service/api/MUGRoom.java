@@ -241,6 +241,15 @@ public interface MUGRoom extends Result {
 	public void broadcastTurn(Collection<Element> moves, MUGOccupant player) throws ComponentException;
 	
 	/**
+	 * Use this version when a occupant has more than one role in the game. 
+	 * @param moves
+	 * @param sender
+	 * @param role
+	 * @throws ComponentException
+	 */
+	public void broadcastTurn(Collection<Element> moves, MUGOccupant sender, String role) throws ComponentException;	
+	
+	/**
 	 * An {@see MUGOccupant} want to change his nickname.
 	 * 
 	 * @param oldNick The old nickname of the occupant.
@@ -250,7 +259,7 @@ public interface MUGRoom extends Result {
 	 * @throws NotFoundException if the old nickname isn't found in the room.
 	 * @throws ConflictException if the new nickname is already in use.
 	 */
-	public MUGOccupant changeNickname(String oldNick, String newNick, Presence newPresence) throws NotFoundException, ConflictException;
+	public MUGOccupant changeNickname(JID userJID, String oldNick, String newNick, Presence newPresence) throws NotFoundException, ConflictException;
 	
 	/**
 	 * Handle game room requests within the Owner namespace.
@@ -361,16 +370,9 @@ public interface MUGRoom extends Result {
 	 */
 	public void destroy();
 	
-	public boolean isOccupant(String nick, JID jid);
+	public boolean isOccupant(JID jid);
 	
-	/**
-	 * 
-	 * @param nick
-	 * @param jid
-	 * @return a occupant whose nick name and bare JID match the provided params
-	 */
-	public MUGOccupant getOccupant(String nick, JID jid);
-	
+		
 	/**
 	 * 
 	 * @param jid

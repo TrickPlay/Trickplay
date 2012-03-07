@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.frogx.service.api.MUGManager;
+import org.frogx.service.api.MUGMatch;
 import org.frogx.service.api.MUGOccupant;
 import org.frogx.service.api.MUGPersistenceProvider;
 import org.frogx.service.api.MUGRoom;
@@ -524,6 +525,24 @@ public class DefaultMUGService implements MUGService {
 		return gameCategories;
 	}
 	
+	private List<MUGRoom> getGameRooms(String gameNS) {
+		List<MUGRoom> gameRooms = new ArrayList<MUGRoom>();
+		for(MUGRoom room : rooms.values()) {
+			if (room.getGame().getNamespace().equals(gameNS))
+				gameRooms.add(room);
+		}
+		return gameRooms;
+	}
+	
+	public List<MUGRoom> getGameRooms(String gameNS, JID jid) {
+		List<MUGRoom> gameRooms = new ArrayList<MUGRoom>();
+		for(MUGRoom room : getGameRooms(gameNS)) {
+			if (room.isOccupant(jid) && room.getOccupant(jid).hasRole()) {
+				gameRooms.add(room);
+			}
+		}			
+		return gameRooms;
+	}
 	/**
 	 * Obtains a game room by name. If the game room does not exists then null will be returned.
 	 * 

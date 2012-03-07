@@ -519,8 +519,12 @@ public class DefaultMUGSession implements MUGSession {
 						}
 					}
 				} else if ("gamedata".equals(childElement.getName())) {
-					Element userDataElement = null;
-					if (null != (userDataElement = childElement.element("userdata"))) {
+					
+					Element gameElement = DocumentHelper.createElement(QName.get(
+							"gamedata", MUGService.mugNS));
+					gameElement.addAttribute("gameId", gameNS);
+					if (null != childElement.element("userdata")) {
+						Element userDataElement = childElement.element("userdata");
 						//if "get" query then return data
 						String propertyName = "game:"+gameNS;
 						String username = iq.getFrom().getNode();
@@ -541,9 +545,6 @@ public class DefaultMUGSession implements MUGSession {
 								throw new ComponentException("failed to service request", ex);
 							}
 						}
-						Element gameElement = DocumentHelper.createElement(QName.get(
-								"gamedata", MUGService.mugNS));
-						gameElement.addAttribute("gameId", gameNS);
 						Element userdataElem = gameElement.addElement("userdata");
 						
 						if (property != null) {
@@ -551,6 +552,22 @@ public class DefaultMUGSession implements MUGSession {
 							userdataElem.addAttribute("version", Integer.toString(property.getVersion()));
 						}
 							
+						reply.setChildElement(gameElement);
+						mugManager.sendPacket(component, reply);
+					}
+					else if (null != childElement.element("matchdata")) {
+						Element matchdataElement = gameElement.addElement("matchdata");
+						List<MUGRoom> rooms = component.getGameRooms(gameNS, jid);
+						for(MUGRoom room : rooms) {
+							Element matchElement = matchdataElement.addElement("match");
+							matchElement.addAttribute("matchId", room.getJID().toBareJID());
+							matchElement.addElement("status").setText(room.getMatch().getStatus().name());
+							
+							Element matchState = room.getMatch().getState();
+							if (matchState != null)
+								matchElement.add(matchState.createCopy());
+						}
+						
 						reply.setChildElement(gameElement);
 						mugManager.sendPacket(component, reply);
 					}
@@ -629,7 +646,7 @@ public class DefaultMUGSession implements MUGSession {
 						&& !room.isPasswordProtected()
 						&& !room.isLocked()
 						&& !MUGMatch.Status.completed.equals(room.getMatch()
-								.getStatus()) && !room.isOccupant(nick, jid)
+								.getStatus()) && !room.isOccupant(jid)
 						&& room.getMatch().getFreeRoles().size() > 0) {
 					if (requestedRole == null || requestedRole.isEmpty()) {
 						String freeRole = room.getMatch().holdFreeRole(jid);
@@ -684,7 +701,7 @@ public class DefaultMUGSession implements MUGSession {
 
 						Element roleElement = gameElement.element("item");
 						// check if the user is already an occupant
-						occupant = room.getOccupant(recipient.getResource(), jid);
+						occupant = room.getOccupant(jid);
 						if (occupant != null) {
 							processRoleElement(roleElement, occupant);
 							room.rejoin(occupant, presence);
@@ -786,7 +803,7 @@ public class DefaultMUGSession implements MUGSession {
 				occupant.send(occupant.getPresence());
 			} else {
 				// Try to change nickname
-				occupant = occupant.getGameRoom().changeNickname(
+				occupant = occupant.getGameRoom().changeNickname(jid,
 						occupant.getNickname(), resource, presence);
 				// Refresh the occupant object
 				occupants.remove(roomName);

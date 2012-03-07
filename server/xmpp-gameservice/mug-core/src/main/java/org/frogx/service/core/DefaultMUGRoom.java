@@ -202,6 +202,8 @@ public class DefaultMUGRoom implements MUGRoom {
 	 */
 	private String owner;
 	
+	private int nextAvailableInRoomId = 0;
+	
 	/**
 	 * The IQ handler for the owner namespace.
 	 * It helps to configure the room.
@@ -536,21 +538,14 @@ public class DefaultMUGRoom implements MUGRoom {
 			members.add(bareJID);
 	}
 	
-	public boolean isOccupant(String nick, JID jid) {
-		return occupants.containsKey(nick) && occupants.get(nick).getUserAddress().toBareJID().equals(jid.toBareJID());
-	}
-	
-	public MUGOccupant getOccupant(String nick, JID jid) {
-		if (occupants.containsKey(nick) && occupants.get(nick).getUserAddress().toBareJID().equals(jid.toBareJID())) {
-			return occupants.get(nick);
-		}
-		return null;
+	public boolean isOccupant(JID jid) {
+	//	return occupants.containsKey(nick) && occupants.get(nick).getUserAddress().toBareJID().equals(jid.toBareJID());
+		return occupants.containsKey(jid.toBareJID());
 	}
 	
 	public MUGOccupant getOccupant(JID jid) {
-		String nick = jid.getNode();
-		if (occupants.containsKey(nick) && occupants.get(nick).getUserAddress().toBareJID().equals(jid.toBareJID())) {
-			return occupants.get(nick);
+		if (isOccupant(jid)) {
+			return occupants.get(jid.toBareJID());
 		}
 		return null;
 	}
@@ -613,9 +608,25 @@ public class DefaultMUGRoom implements MUGRoom {
 		sendBroadcastPacket(message, sender);
 	}
 	
-	public MUGOccupant changeNickname(String oldNick, String newNick, Presence newPresence) throws NotFoundException,
+	public void broadcastTurn(Collection<Element> moves, MUGOccupant sender, String role) throws ComponentException {
+		Element rawMessage = DocumentFactory.getInstance().createDocument().addElement("message");
+		Element turn = rawMessage.addElement("turn", MUGService.mugNS + "#user");
+		turn.addAttribute("role", role);
+		
+		if (moves != null) {
+			for (Element move : moves) {
+				move.setParent(null);
+				turn.add(move);
+			}
+		}
+			
+		Message message = new Message(rawMessage, false);
+		sendBroadcastPacket(message, sender);
+	}
+	
+	public MUGOccupant changeNickname(JID userJID, String oldNick, String newNick, Presence newPresence) throws NotFoundException,
 			ConflictException {
-		MUGOccupant occupant = occupants.get(oldNick.toLowerCase());
+		MUGOccupant occupant = occupants.get(userJID.toBareJID());
 		
 		if (occupant == null)
 			throw new NotFoundException();
@@ -623,6 +634,7 @@ public class DefaultMUGRoom implements MUGRoom {
 		if (occupants.containsKey(newNick.toLowerCase()))
 			throw new ConflictException();
 		
+		/*
 		// Refresh start counter
 		if (startMatch.contains(oldNick.toLowerCase())) {
 			startMatch.remove(oldNick.toLowerCase());
@@ -632,6 +644,7 @@ public class DefaultMUGRoom implements MUGRoom {
 		// Submit changing
 		occupants.remove(oldNick.toLowerCase());
 		occupants.put(newNick.toLowerCase(), occupant);
+		*/
 		occupant.changeNickname(newNick);
 		
 		// Update presence
@@ -737,15 +750,8 @@ public class DefaultMUGRoom implements MUGRoom {
 		}
 		
 		// Check if the nickname is already used in the room
-		if (occupants.containsKey(nick.toLowerCase())) {
-			if (occupants.get(nick.toLowerCase()).getUserAddress().toBareJID().equals(fullJID.toBareJID())) {
-				//TODO: Nickname exists in room, and belongs to this user, maybe kick the previous instance.
-				// The new instance will "take over" the previous role or handle two user instances.
-				// Participants in the room shouldn't notice anything has occurred.
-				throw new UserAlreadyExistsException();
-			}
-			else
-				throw new UserAlreadyExistsException();
+		if (occupants.containsKey(fullJID.toBareJID())) {
+			throw new UserAlreadyExistsException();
 		}
 		
 		// Check password
@@ -776,8 +782,8 @@ public class DefaultMUGRoom implements MUGRoom {
 			presence.setTo(getJID());
 		}
 		// Add the new occupant
-		occupant = new DefaultMUGOccupant(this, fullJID, nick, affiliation, presence, mugManager, acquireRole);
-		occupants.put(nick.toLowerCase(), occupant);
+		occupant = new DefaultMUGOccupant(this, fullJID, nextAvailableInRoomId++, nick, affiliation, presence, mugManager, acquireRole);
+		occupants.put(fullJID.toBareJID(), occupant);
 		
 		// Send presence of the room itself (room and match information)
 		occupant.send(getPresence());
@@ -811,7 +817,7 @@ public class DefaultMUGRoom implements MUGRoom {
 	public void rejoin(MUGOccupant occupant, Presence presence) throws ForbiddenException, ComponentException {
 		
 		// make sure user is the member of this room already
-		if (occupants.get(occupant.getNickname()) == null) {
+		if (occupants.get(occupant.getUserAddress().toBareJID()) == null) {
 			throw new ForbiddenException();
 		}
 		
@@ -854,8 +860,8 @@ public class DefaultMUGRoom implements MUGRoom {
 	}
 	
 	public void sendPrivatePacket(Packet packet, MUGOccupant sender) throws NotFoundException, ComponentException {
-		String nick = packet.getTo().getResource();
-		MUGOccupant occupant = occupants.get(nick.toLowerCase());
+		String barejid = packet.getTo().toBareJID();
+		MUGOccupant occupant = occupants.get(barejid);
 		if (occupant != null) {
 			packet.setFrom(sender.getRoomAddress());
 			occupant.send(packet);
@@ -902,8 +908,8 @@ public class DefaultMUGRoom implements MUGRoom {
 		//TODO: Make this robust against changing roles or nicknames
 		boolean started = false;
 		if (occupant.hasRole()) {
-			if (!startMatch.contains(occupant.getNickname().toLowerCase())) {
-				startMatch.add(occupant.getNickname().toLowerCase());
+			if (!startMatch.contains(occupant.getUserAddress().toBareJID())) {
+				startMatch.add(occupant.getUserAddress().toBareJID());
 			}
 
 			
@@ -952,8 +958,8 @@ public class DefaultMUGRoom implements MUGRoom {
 		broadcastPresence(occupant);
 		
 		// remove the occupant
-		if (!hasRole && occupants.containsKey(occupant.getNickname().toLowerCase())) {
-			occupants.remove(occupant.getNickname().toLowerCase());
+		if (!hasRole && occupants.containsKey(occupant.getUserAddress().toBareJID())) {
+			occupants.remove(occupant.getUserAddress().toBareJID());
 			occupant.destroy();
 			occupant = null;
 		}
@@ -978,8 +984,8 @@ public class DefaultMUGRoom implements MUGRoom {
 		}
 		
 		// remove the occupant
-		if (occupants.containsKey(occupant.getNickname().toLowerCase()))
-			occupants.remove(occupant.getNickname().toLowerCase());
+		if (occupants.containsKey(occupant.getUserAddress().toBareJID()))
+			occupants.remove(occupant.getUserAddress().toBareJID());
 		occupant.destroy();
 		occupant = null;
 		

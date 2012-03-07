@@ -34,7 +34,7 @@ public interface PlayerStatusListener {
      * @param player the player that has just joined the room
      * (e.g. room@mug.jabber.org/nick).
      */
-    public abstract void joined(String participant, GamePresenceExtension.Item item);
+    public abstract void joined(Participant participant, GamePresenceExtension.Item item);
 
     /**
      * Called when a room occupant has left the room on its own. This means that the occupant was
@@ -43,9 +43,9 @@ public interface PlayerStatusListener {
      * @param player the player that has left the room on its own.
      * (e.g. room@conference.jabber.org/nick).
      */
-    public abstract void left(String participant);
+    public abstract void left(Participant participant);
     
-    public abstract void unavailable(String participant);
+    public abstract void unavailable(Participant participant);
 
 
     /**
@@ -56,6 +56,6 @@ public interface PlayerStatusListener {
      * (e.g. room@conference.jabber.org/nick).
      * @param newNickname the new nickname that the player decided to use.
      */
-    public abstract void nicknameChanged(String participant, String newNickname);
+    public abstract void nicknameChanged(Participant p, String newNickname);
 
 }

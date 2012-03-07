@@ -162,4 +162,6 @@ public interface MUGOccupant {
 	 * to clean things up.
 	 */
 	public void destroy();
+	
+	public int getInRoomId();
 }
