@@ -950,6 +950,8 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 
 	JSON::Object reply;
 
+	reply[ "command" ] = command;
+
 	if ( with_location )
 	{
 		reply = get_location( L , ar );
