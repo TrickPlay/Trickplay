@@ -404,6 +404,8 @@ private:
 
 //-----------------------------------------------------------------------------
 
+#if 0
+
 class StartDebuggerRequestHandler: public Handler
 {
 public:
@@ -452,7 +454,10 @@ public:
 			response.set_status( HttpServer::HTTP_STATUS_NOT_FOUND );
 		}
 	}
+
 };
+
+#endif
 
 #endif // TP_PRODUCTION
 
@@ -689,7 +694,9 @@ HttpTrickplayApiSupport::HttpTrickplayApiSupport( TPContext * ctx )
 #ifndef TP_PRODUCTION
 
 	handlers.push_back( new DebugUIRequestHandler( context ) );
+#if 0
 	handlers.push_back( new StartDebuggerRequestHandler( context ) );
+#endif
 	handlers.push_back( new ControlInfoRequestHandler( context ) );
 
 #endif
