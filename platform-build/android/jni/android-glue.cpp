@@ -43,11 +43,17 @@ typedef void                (*GLogFunc)                         (const char *log
                                                          void* user_data);
 typedef unsigned (*g_log_set_handler_type)(GLogFunc log_func,
                                                          void* user_data);
-
+typedef void                (*GPrintFunc)                       (const char *string);
+typedef GPrintFunc          (*g_set_print_handler_type)              (GPrintFunc func);
 
 static void my_glog_func(const char *domain, GLogLevelFlags log_level, const char *message, void *user_data)
 {
     LOG( "%s(%d): %s", domain, log_level, message);
+}
+
+static void my_gprint_func(const char *string)
+{
+    LOG("%s",string);
 }
 
 void window_created(ANativeActivity* activity, ANativeWindow* window)
@@ -118,12 +124,15 @@ void preload_shared_libraries(ANativeActivity *activity)
     void *glib_impl = load_library(activity->internalDataPath, "libglib-2.0.so");
     g_log_set_handler_type glog_set_handler = (g_log_set_handler_type) load_sym( glib_impl, "g_log_set_default_handler" );
 
+    g_set_print_handler_type gset_print_handler = (g_set_print_handler_type) load_sym( glib_impl, "g_set_print_handler" );
+
     load_library(activity->internalDataPath, "libgthread-2.0.so");
     load_library(activity->internalDataPath, "libgobject-2.0.so");
     load_library(activity->internalDataPath, "libgmodule-2.0.so");
     load_library(activity->internalDataPath, "libgio-2.0.so");
 
     glog_set_handler(my_glog_func, NULL);
+    gset_print_handler(my_gprint_func);
     LOG( "Glue Log handler for Glib installed");
 
     load_library(activity->internalDataPath, "libsqlite3.so");
