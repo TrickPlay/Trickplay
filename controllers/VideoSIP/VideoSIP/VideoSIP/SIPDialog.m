@@ -8,7 +8,7 @@
 
 #import "SIPDialog.h"
 
-#import <uuid/uuid.h>
+#import <CoreFoundation/CoreFoundation.h>
 
 #import "MyExtensions.h"
 
@@ -47,29 +47,27 @@
         self.user = _user;
         self.contactURI = _contactURI;
         self.remoteURI = _remoteURI;
+        self.sipURI = _remoteURI;
         self.udpClientIP = _udpClientIP;
         self.udpClientPort = _udpClientPort;
         self.udpServerPort = _udpServerPort;
         
         self.via = [NSMutableDictionary dictionaryWithCapacity:3];
         [via setObject:@"SIP/2.0/UDP" forKey:@"protocol"];
-        [via setObject:@"clientIP" forKey:udpClientIP];
-        [via setObject:@"clientPort" forKey:[NSNumber numberWithUnsignedInt:udpClientPort]];
+        [via setObject:udpClientIP forKey:@"clientIP"];
+        [via setObject:[NSNumber numberWithUnsignedInt:udpClientPort] forKey:@"clientPort"];
         
         self.maxForwards = 70;
         
         self.from = [NSMutableDictionary dictionaryWithCapacity:2];
-        uuid_t generated_from_tag;
-        uuid_generate(generated_from_tag);
-        [from setObject:@"sender" forKey:[NSString stringWithFormat:@"<%@>", contactURI]];
-        [from setObject:@"tag" forKey:[[[NSString alloc] initWithBytes:generated_from_tag length:16 encoding:NSUTF8StringEncoding] autorelease] ];
-        
+        NSString *fromTag = [NSString uuid];
+        [from setObject:[NSString stringWithFormat:@"<%@>", contactURI] forKey:@"sender"];
+        [from setObject:fromTag forKey:@"tag"];
+                
         self.to = [NSMutableDictionary dictionaryWithCapacity:2];
-        [to setObject:@"remoteContact" forKey:[NSString stringWithFormat:@"<%@>", remoteURI]];
+        [to setObject:[NSString stringWithFormat:@"<%@>", remoteURI] forKey:@"remoteContact"];
         
-        uuid_t generated_call_id;
-        uuid_generate(generated_call_id);
-        self.callID = [[[NSString alloc] initWithBytes:generated_call_id length:16 encoding:NSUTF8StringEncoding] autorelease];
+        self.callID = [NSString uuid];
         
         self.cseq = 101;
         
@@ -86,16 +84,18 @@
         
         self.writeQueue = _writeQueue;
         
-        self.delegate = delegate;
+        self.delegate = _delegate;
     }
     
     return self;
 }
 
+#pragma mark -
+#pragma mark Utilities
+
 - (NSString *)generateBranch {
-    uuid_t branch_suffix;
-    uuid_generate(branch_suffix);
-    return [NSString stringWithFormat:@"z9hG4bK%@", [[[NSString alloc] initWithBytes:branch_suffix length:16 encoding:NSUTF8StringEncoding] autorelease]];
+    NSString *branchSuffix = [NSString uuid];
+    return [NSString stringWithFormat:@"z9hG4bK%@", branchSuffix];
 }
 
 - (NSString *)generateAuthLine:(NSString *)requestType {
@@ -153,6 +153,9 @@
 @implementation RegisterDialog
 
 - (NSString *)generateRegister {
+    // TODO: figure out why shit is null
+    self.branch = [self generateBranch];
+    
     NSString *registerHdr = [NSString stringWithFormat:@"REGISTER %@ SIP/2.0\r\n"
                              @"Via: %@ %@:%d;rport;branch=%@\r\n"
                              @"Max-Forwards: %d\r\n"
@@ -182,16 +185,22 @@
     
     registerHdr = [NSString stringWithFormat:@"%@%@", registerHdr, @"Content-Length: 0\r\n\r\n"];
     
+    NSLog(@"Register packet:\n%@", registerHdr);
+    
     cseq += 1;
     
     return registerHdr;
 }
 
-- (void)registerToAsteriskWithCallID:(uuid_t)registerCallID {
-    self.callID = [[[NSString alloc] initWithBytes:registerCallID length:16 encoding:NSUTF8StringEncoding] autorelease];
+- (void)registerToAsteriskWithCallID:(NSString *)registerCallID {
+    self.callID = registerCallID;
     
     self.auth = [self generateAuthLine:@"REGISTER"];
     NSString *packet = [self generateRegister];
+    
+    [delegate dialog:self wantsToSendData:[packet dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    //[writeQueue addObject:[packet dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
 @end
@@ -241,7 +250,9 @@
     self.auth = [self generateAuthLine:@"INVITE"];
     NSString *packet = [self generateInvite];
     
-    //TODO: send this packet out
+    [delegate dialog:self wantsToSendData:[packet dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    //[writeQueue addObject:[packet dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
 @end

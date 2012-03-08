@@ -8,17 +8,29 @@
 
 #import "SIPClient.h"
 
+#import <CoreFoundation/CoreFoundation.h>
+
 #import <sys/types.h>
 #import <sys/socket.h>
 #import <netdb.h>
 
-#import "SIPDialog.h"
+#import "MyExtensions.h"
 
 #define ASTERISK_HOST "asterisk-1.asterisk.trickplay.com"
 #define ASTERISK_PORT "5060"
 
 
+@interface SIPClient()
+
+@property (nonatomic, retain) NSMutableArray *writeQueue;
+
+@end
+
+
+
 @implementation SIPClient
+
+@synthesize writeQueue;
 
 - (id)init {
     self = [super init];
@@ -39,8 +51,26 @@
 #pragma mark -
 #pragma mark User Control
 
+- (void)registerToAsterisk:(id)arg {
+    NSString *user = @"phone";
+    NSString *contactURI = @"sip:phone@asterisk-1.asterisk.trickplay.com";
+    NSString *remoteURI = @"sip:asterisk-1.asterisk.trickplay.com";
+    NSString *udpClientIP = @"10.0.190.153";
+    NSUInteger udpClientPort = 50418;
+    NSUInteger udpServerPort = 5060;
+    
+    RegisterDialog *registerDialog = [[RegisterDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self];
+       
+    NSString *registerCallID = [NSString uuid];
+    [registerDialog registerToAsteriskWithCallID:registerCallID];
+    
+    [sipDialogs setObject:registerDialog forKey:registerCallID];
+}
+
 - (void)connectToService {
     [sipThread start];
+    //[self registerToAsterisk:nil];
+    [self performSelector:@selector(registerToAsterisk:) onThread:sipThread withObject:nil waitUntilDone:NO];
 }
 
 - (void)initiateVideoCall {
@@ -53,19 +83,103 @@
 
 - (void)disconnectFromService {
     [self stop];
-    
+}
+
+#pragma mark -
+#pragma mark SIPDialogDelegate Protocol
+
+- (void)dialog:(SIPDialog *)dialog wantsToSendData:(NSData *)data {
+    // Queue the packet
+    [writeQueue addObject:data];
+    // Enable the write callback
+    CFSocketEnableCallBacks(sipSocket, kCFSocketWriteCallBack);
 }
 
 #pragma mark -
 #pragma mark Network
 
-static void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
+/**
+ * This is broken, it assumes that the buffer only holds exactly 1 SIP packet.
+ * TODO: Fix this later.
+ */
+- (void)sipParse:(NSData *)sipData {
+    if (!sipData) {
+        return;
+    }
+    
+    NSString *sipPacket = [[NSString alloc] initWithData:sipData encoding:NSUTF8StringEncoding];
+    
+    // Separate header and body
+    NSArray *components = [sipPacket componentsSeparatedByString:@"\r\n\r\n"];
+    NSString *sipHdr = [components objectAtIndex:0];
+    NSString *sipBody = nil;
+    if (components.count > 1) {
+        sipBody = [components objectAtIndex:1];
+    }
+    
+    // Organize the elements of the Header into a Dictionary
+    NSMutableDictionary *sipHdrDic = [NSMutableDictionary dictionaryWithCapacity:20];
+    NSMutableArray *sipHdrComponents = [NSMutableArray arrayWithArray:[sipHdr componentsSeparatedByString:@"\r\n"]];
+    [sipHdrDic setObject:[sipHdrComponents objectAtIndex:0] forKey:@"Status-Line"];
+    [sipHdrComponents removeObjectAtIndex:0];
+    
+    for (NSString *component in sipHdrComponents) {
+        NSArray *sipLineComponents = [component componentsSeparatedByString:@": "];
+        [sipHdrDic setObject:[sipLineComponents objectAtIndex:1] forKey:[sipLineComponents objectAtIndex:0]];
+    }
+    
+    NSLog(@"SIP Header Dictionary:\n%@", sipHdrDic);
+}
+
+/**
+ * This is our CFSocket callback. This callback is NOT associated with the current
+ * object of this SIPCient class. No instance variables are directly accessible from
+ * this callback. Use the callback's void *info parameter to access 'self'.
+ */
+void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
                        const void *data, void *info) {
     fprintf(stderr, "SIP Socket Callback\n");
     
     switch (type) {
         case kCFSocketReadCallBack:
             fprintf(stderr, "SIP Socket Read\n");
+            
+            int err;
+            int sock = CFSocketGetNative(socket);
+            struct sockaddr_storage addr;
+            socklen_t addrLen;
+            uint8_t buffer[65536];
+            ssize_t bytesRead;
+            
+            assert(sock >= 0);
+            
+            bytesRead = recvfrom(sock, buffer, sizeof(buffer), 0, (struct sockaddr *)&addr, &addrLen);
+            if (bytesRead < 0) {
+                err = errno;
+            } else if (bytesRead == 0) {
+                err = EPIPE;
+            } else {
+                NSData *dataObj;
+                NSData *addrObj;
+                
+                err = 0;
+                
+                dataObj = [NSData dataWithBytes:buffer length:bytesRead];
+                assert(dataObj != nil);
+                addrObj = [NSData dataWithBytes:&addr length:addrLen];
+                assert(addrObj != nil);
+                
+                //NSLog(@"SIP read at address: %@ with data:\n%@", addrObj, dataObj);
+                // TODO: Tell the appropriate Dialog about the data
+                SIPClient *self = (SIPClient *)info;
+                [self sipParse:dataObj];
+            }
+            
+            if (err != 0) {
+                NSLog(@"SIP error reading data; error code: %d", err);
+                //TODO: Tell the delegate that things messed the eff up
+            }
+            
             break;
             
         case kCFSocketDataCallBack:
@@ -78,6 +192,20 @@ static void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFD
             
         case kCFSocketWriteCallBack:
             fprintf(stderr, "SIP Socket Write\n");
+            
+            SIPClient *self = (SIPClient *)info;
+            
+            if (self.writeQueue.count > 0) {
+                CFDataRef packet = (CFDataRef)[self.writeQueue objectAtIndex:0];
+                [self.writeQueue removeObjectAtIndex:0];
+                CFSocketError error = CFSocketSendData(socket, NULL, packet, 0);
+                if (error == kCFSocketError) {
+                    fprintf(stderr, "Error Writing to socket\n");
+                } else if (error == kCFSocketTimeout) {
+                    fprintf(stderr, "Timeout Writing to socket\n");
+                }
+            }
+            
             break;
             
         default:
