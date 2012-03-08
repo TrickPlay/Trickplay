@@ -21,6 +21,7 @@
 - (void)dialogSessionStarted:(SIPDialog *)dialog;
 - (void)dialogSessionEnded:(SIPDialog *)dialog;
 - (void)dialog:(SIPDialog *)dialog beganRTPStreamWithHost:(NSString *)host port:(NSUInteger)port;
+- (void)dialog:(SIPDialog *)dialog wantsToSendData:(NSData *)data;
 
 @end
 
@@ -136,7 +137,7 @@
 
 @interface RegisterDialog : SIPDialog
 
-- (void)registerToAsteriskWithCallID:(uuid_t)registerCallID;
+- (void)registerToAsteriskWithCallID:(NSString *)registerCallID;
 
 @end
 

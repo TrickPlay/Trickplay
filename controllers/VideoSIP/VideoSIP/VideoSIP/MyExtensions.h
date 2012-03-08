@@ -12,6 +12,7 @@
 
 @interface NSString (MyExtensions)
 
++ (NSString *)uuid;
 - (NSString *)md5;
 
 @end

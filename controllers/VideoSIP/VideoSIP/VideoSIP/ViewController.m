@@ -135,7 +135,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     CFAbsoluteTime starttime = CFAbsoluteTimeGetCurrent();
     
-    fprintf(stderr, "\nSetup time = %lf\n", (starttime - begin)*1000.0);
+    //fprintf(stderr, "\nSetup time = %lf\n", (starttime - begin)*1000.0);
     
     
     // TODO: create reusable OpenCV objects as instance variables to reduce
@@ -186,7 +186,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     CFAbsoluteTime endtime = CFAbsoluteTimeGetCurrent();
     
-    fprintf(stderr, "Total time = %lf\n", (endtime - starttime)*1000.0);
+    //fprintf(stderr, "Total time = %lf\n", (endtime - starttime)*1000.0);
     
     [customLayer performSelectorOnMainThread:@selector(setContents:) withObject:(id)newImage waitUntilDone:NO];
     

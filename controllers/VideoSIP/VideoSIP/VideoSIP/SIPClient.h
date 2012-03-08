@@ -15,8 +15,10 @@
 
 #import <CoreFoundation/CoreFoundation.h>
 
+#import "SIPDialog.h"
 
-@interface SIPClient : NSObject {
+
+@interface SIPClient : NSObject <SIPDialogDelegate> {
     NSThread *sipThread;
     // this variable belongs to sipThread
     BOOL exit_thread;
@@ -33,7 +35,7 @@
 - (void)hangUp;
 
 // private
-static void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
+void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
                        const void *data, void*info);
 
 - (void)threadMain:(id)argument;
@@ -46,4 +48,13 @@ static void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFD
  */
 - (void)stop;
 
+/**
+ * Send the SIP data received over the network to this method.
+ */
+- (void)sipParse:(NSData *)sipData;
+
 @end
+
+
+
+

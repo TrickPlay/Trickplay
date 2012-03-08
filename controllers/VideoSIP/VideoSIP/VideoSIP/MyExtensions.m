@@ -5,16 +5,30 @@
 //  Created by Rex Fenley on 3/5/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
-// code found here: http://stackoverflow.com/questions/1524604/md5-algorithm-in-objective-c
+// md5 code found here: http://stackoverflow.com/questions/1524604/md5-algorithm-in-objective-c
+// uuid code found here: http://stackoverflow.com/questions/227590/unique-identifier-for-an-iphone-app
 //
 
 #import "MyExtensions.h"
 
 #import <CommonCrypto/CommonDigest.h> // Need to import for CC_MD5 access
+#import <CoreFoundation/CoreFoundation.h>
 
 @implementation NSString (MyExtensions)
 
-- (NSString *) md5 {
++ (NSString *)uuid {
+    NSString *uuid = nil;
+    CFUUIDRef theUUID = CFUUIDCreate(kCFAllocatorDefault);
+    if (theUUID) {
+        uuid = NSMakeCollectable(CFUUIDCreateString(kCFAllocatorDefault, theUUID));
+        [uuid autorelease];
+        CFRelease(theUUID);
+    }
+    
+    return uuid;
+}
+
+- (NSString *)md5 {
     const char *cStr = [self UTF8String];
     unsigned char result[16];
     CC_MD5( cStr, strlen(cStr), result ); // This is the md5 call
