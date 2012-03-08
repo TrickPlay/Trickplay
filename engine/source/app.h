@@ -115,6 +115,8 @@ public:
     struct LaunchInfo
     {
         LaunchInfo()
+        :
+        	debug( false )
         {}
 
         LaunchInfo( const String & _caller,
@@ -127,7 +129,8 @@ public:
             action( _action ),
             uri( _uri ? _uri : "" ),
             type( _type ? _type : "" ),
-            parameters( _parameters ? _parameters : "" )
+            parameters( _parameters ? _parameters : "" ),
+            debug( false )
         {}
 
         String  caller;
@@ -135,6 +138,8 @@ public:
         String  uri;
         String  type;
         String  parameters; // serialized Lua
+
+        bool	debug;
     };
 
     //.........................................................................

@@ -1201,4 +1201,11 @@ globals
 
             result = rs.c_str();
         ]];
+        
+    # Experimental, do not document
+    
+    dupmetatable( udata ud )
+        [[
+            lb_chain( L , ud , 0 );
+        ]];        
 }
