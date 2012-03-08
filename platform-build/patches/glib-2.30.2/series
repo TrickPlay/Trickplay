@@ -5,3 +5,4 @@ android-libresolv-libbind.patch
 android-no-pthread.patch
 android-prctl-args.patch
 android-no-test.patch
+android-ipv6-uses-enum-not-define.patch

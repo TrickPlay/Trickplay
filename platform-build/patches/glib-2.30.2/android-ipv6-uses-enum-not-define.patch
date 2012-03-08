@@ -1,0 +1,14 @@
+Index: glib-2.30.2/gio/gsocket.c
+===================================================================
+--- glib-2.30.2.orig/gio/gsocket.c
++++ glib-2.30.2/gio/gsocket.c
+@@ -1477,6 +1477,9 @@ g_socket_speaks_ipv4 (GSocket *socket)
+       return TRUE;
+ 
+     case G_SOCKET_FAMILY_IPV6:
++#if defined(__ANDROID__)
++#define IPPROTO_IPV6 IPPROTO_IPV6
++#endif
+ #if defined (IPPROTO_IPV6) && defined (IPV6_V6ONLY)
+       {
+         guint sizeof_int = sizeof (int);

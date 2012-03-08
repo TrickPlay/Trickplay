@@ -64,13 +64,13 @@ extern "C" int main( int argc , char ** argv )
                                                 "trickplay.launcher=apps:"
                                                 "com.trickplay.editor=editor");
 
-    tp_context_set( context, TP_CONTROLLERS_ENABLED,    "FALSE" );
+    tp_context_set( context, TP_CONTROLLERS_ENABLED,    "TRUE" );
     tp_context_set( context, TP_CONTROLLERS_NAME, "Android");
     tp_context_set( context, TP_CONTROLLERS_MDNS_ENABLED, "TRUE");
     tp_context_set( context, TP_CONTROLLERS_UPNP_ENABLED, "TRUE");
 
     tp_context_set( context, TP_CONSOLE_ENABLED, "FALSE" );
-    tp_context_set( context, TP_TELNET_CONSOLE_PORT, "0" );
+    tp_context_set( context, TP_TELNET_CONSOLE_PORT, "7778" ); // 7777 is bound on 127.0.0.1 at least on galaxy tab
 
     tp_context_set( context, TP_MEDIAPLAYER_ENABLED, "FALSE");
     tp_context_set( context, TP_IMAGE_DECODER_ENABLED, "FALSE");
