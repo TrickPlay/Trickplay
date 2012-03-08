@@ -3,6 +3,7 @@
 
 //------------------------------------------------------------------------------
 #include "server.h"
+#include "util.h"
 //------------------------------------------------------------------------------
 static gsize SERVER_BUFFER_SIZE = 128;
 //------------------------------------------------------------------------------
@@ -141,7 +142,18 @@ bool Server::write_printf( gpointer connection, const char * format, ... )
 
 void Server::write_to_all( const char * data )
 {
+	FreeLater free_later;
+
+	ConnectionSet tc;
+
     for ( ConnectionSet::iterator it = connections.begin(); it != connections.end(); ++it )
+    {
+    	tc.insert( *it );
+
+    	free_later( g_object_ref( *it ) , g_object_unref );
+    }
+
+    for ( ConnectionSet::iterator it = tc.begin(); it != tc.end(); ++it )
     {
         write( *it, data );
     }
