@@ -230,18 +230,18 @@ Group: Development Tools {
 	Group: TrickPlay IDE {
 		File: Overview (no auto-title, docs/devtools/ide/introduction.txt)
 		
-		Group: Tutorial {
-			File: Introduction* (no auto-title, docs/devtools/ide/tutorial/introduction.txt)
-			File: Create New TrickPlay Application* (no auto-title, docs/devtools/ide/tutorial/editor.txt)
-			File: Run the Application* (no auto-title, docs/devtools/ide/tutorial/runApp.txt)
-			File: Debug the Application* (no auto-title, docs/devtools/ide/tutorial/debug.txt)
-		}
+#		Group: Tutorial {
+#			File: Introduction* (no auto-title, docs/devtools/ide/tutorial/introduction.txt)
+#			File: Create New TrickPlay Application* (no auto-title, docs/devtools/ide/tutorial/editor.txt)
+#			File: Run the Application* (no auto-title, docs/devtools/ide/tutorial/runApp.txt)
+#			File: Debug the Application* (no auto-title, docs/devtools/ide/tutorial/debug.txt)
+#		}
 		
 		Group: Reference {
-			File: IDE User Interface* (no auto-title, docs/devtools/ide/reference/ui.txt)
-			File: Editor Reference* (no auto-title, docs/devtools/ide/reference/editor.txt)
-			File: Running a TrickPlay Application* (no auto-title, docs/devtools/ide/reference/run.txt)
-			File: Debugger Reference* (no auto-title, docs/devtools/ide/reference/debugger.txt)
+			File: IDE User Interface (no auto-title, docs/devtools/ide/reference/ui.txt)
+			File: Editor Reference (no auto-title, docs/devtools/ide/reference/editor.txt)
+			File: Running a TrickPlay Application (no auto-title, docs/devtools/ide/reference/run.txt)
+			File: Debugger Reference (no auto-title, docs/devtools/ide/reference/debugger.txt)
 		}
 	}
 	
