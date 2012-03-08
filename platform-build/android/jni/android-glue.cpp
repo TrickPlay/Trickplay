@@ -10,15 +10,25 @@
 #include <sys/stat.h>
 #include <sys/errno.h>
 
+#include <pthread.h>
+
 #include "unzip.h"
 
 #define LOG(...) __android_log_print(ANDROID_LOG_INFO, "TP-Engine", __VA_ARGS__)
 
 typedef int (*main_type)(int, char**);
-static main_type main;
-
 typedef void (*cogl_init_type)(ANativeWindow *window);
-static cogl_init_type cogl_init;
+
+
+typedef struct
+{
+    ANativeActivity* activity;
+    ANativeWindow* window;
+    main_type main;
+    cogl_init_type cogl_init;
+} MyStateT;
+
+static MyStateT my_state;
 
 // Copy some defs from glib for logging stuff
 typedef enum {
@@ -54,20 +64,6 @@ static void my_glog_func(const char *domain, GLogLevelFlags log_level, const cha
 static void my_gprint_func(const char *string)
 {
     LOG("%s",string);
-}
-
-void window_created(ANativeActivity* activity, ANativeWindow* window)
-{
-    cogl_init( window );
-
-    // Hand off to main()
-    char *argv[] = { (char *)"TP-Engine", NULL };
-    int argc = 1;
-
-    main( argc, argv );
-
-    // When main() returns, we're all done, so exit
-    ANativeActivity_finish(activity);
 }
 
 void *load_library(const char *path, const char *lib)
@@ -154,7 +150,7 @@ void preload_shared_libraries(ANativeActivity *activity)
     load_library(activity->internalDataPath, "libjson-glib-1.0.so");
     load_library(activity->internalDataPath, "libatk-1.0.so");
     void *cogl_impl = load_library(activity->internalDataPath, "libcogl.so");
-    cogl_init = (cogl_init_type) load_sym(cogl_impl, "cogl_android_set_native_window_EXP");
+    my_state.cogl_init = (cogl_init_type) load_sym(cogl_impl, "cogl_android_set_native_window_EXP");
 
     load_library(activity->internalDataPath, "libcogl-pango.so");
     load_library(activity->internalDataPath, "libclutter-eglnative-1.0.so");
@@ -172,7 +168,7 @@ void preload_shared_libraries(ANativeActivity *activity)
     load_library(activity->internalDataPath, "libtplua.so");
 
     void *impl = load_library(activity->internalDataPath, "libtp-implementation.so");
-    main = (main_type) load_sym(impl, "main");
+    my_state.main = (main_type) load_sym(impl, "main");
 
     LOG( "DLL Loading success!");
 }
@@ -377,6 +373,34 @@ void install_apps(ANativeActivity* activity)
     AAssetDir_close(apps_dir);
 }
 
+void *start_trickplay(void *state)
+{
+    MyStateT *my_state = (MyStateT *) state;
+
+    my_state->cogl_init( my_state->window );
+
+    // Hand off to main()
+    char *argv[] = { (char *)"TP-Engine", NULL };
+    int argc = 1;
+
+    my_state->main( argc, argv );
+
+    // When main() returns, we're all done, so exit
+    ANativeActivity_finish(my_state->activity);
+
+    pthread_exit(NULL);
+}
+
+void window_created(ANativeActivity* activity, ANativeWindow* window)
+{
+    my_state.activity = activity;
+    my_state.window = window;
+
+    pthread_t trickplay_thread;
+
+    pthread_create(&trickplay_thread, NULL, &start_trickplay, &my_state);
+}
+
 /**
  * This is the main entry point of a native application that is using
  * android_native_app_glue.  It runs in its own thread, with its own
@@ -399,9 +423,6 @@ extern "C" void android_main(struct android_app* state) {
         int events;
         struct android_poll_source* source;
 
-        // If not animating, we will block forever waiting for events.
-        // If animating, we loop until all events are read, then continue
-        // to draw the next frame of animation.
         while ((ident=ALooper_pollAll(0, NULL, &events,
                 (void**)&source)) >= 0) {
 
