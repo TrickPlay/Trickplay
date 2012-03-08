@@ -735,7 +735,11 @@ then
     rm -rf bin libs obj
 
     mkdir -p assets
-    zip -9vr assets/resources.zip "${PREFIX}/resources"
+    if [ ! -e "assets/resources.zip" ]; then
+        (cd "${PREFIX}"; zip -9vr "${HERE}/android/assets/resources.zip" "resources")
+    else
+        echo "Resources.zip is already there -- skipping"
+    fi
     cd assets
     md5sum resources.zip > resources.zip.md5sum
 
