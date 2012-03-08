@@ -23,17 +23,9 @@ static void android_log_handler( TPContext * context, unsigned int level, const 
 
 extern "C" int main( int argc , char ** argv )
 {
-    // Set up debug environment variables
-    if(setenv("COGL_DEBUG", "all", 0))
-    {
-        LOG("setenv failed: (%d): %s", errno, strerror(errno));
-    }
-    if(setenv("CLUTTER_DEBUG", "all", 0))
-    {
-        LOG("setenv failed: (%d): %s", errno, strerror(errno));
-    }
-
     // Initialize TP
+
+    setenv("CLUTTER_SHOW_FPS","1",1);
 
     LOG("tp_init");
 
