@@ -64,11 +64,17 @@ extern "C" int main( int argc , char ** argv )
                                                 "trickplay.launcher=apps:"
                                                 "com.trickplay.editor=editor");
 
-    tp_context_set( context, TP_CONTROLLERS_ENABLED,    "TRUE" );
+    tp_context_set( context, TP_CONTROLLERS_ENABLED,    "FALSE" );
     tp_context_set( context, TP_CONTROLLERS_NAME, "Android");
     tp_context_set( context, TP_CONTROLLERS_MDNS_ENABLED, "TRUE");
     tp_context_set( context, TP_CONTROLLERS_UPNP_ENABLED, "TRUE");
 
+    tp_context_set( context, TP_CONSOLE_ENABLED, "FALSE" );
+    tp_context_set( context, TP_TELNET_CONSOLE_PORT, "0" );
+
+    tp_context_set( context, TP_MEDIAPLAYER_ENABLED, "FALSE");
+    tp_context_set( context, TP_IMAGE_DECODER_ENABLED, "FALSE");
+    tp_context_set( context, TP_AUDIO_SAMPLER_ENABLED, "FALSE");
 
     // Initialize a key map for the remote
 
