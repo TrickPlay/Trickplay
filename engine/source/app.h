@@ -115,6 +115,8 @@ public:
     struct LaunchInfo
     {
         LaunchInfo()
+        :
+        	debug( false )
         {}
 
         LaunchInfo( const String & _caller,
