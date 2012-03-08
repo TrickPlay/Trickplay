@@ -50,6 +50,8 @@ extern "C" int main( int argc , char ** argv )
     tp_context_set( context, TP_DOWNLOADS_PATH, "/data/data/com.trickplay.Engine/cache/downloads");
 
     tp_context_set( context, TP_APP_SOURCES, "/data/data/com.trickplay.Engine/files/apps");
+    tp_context_set( context, TP_APP_ID, "com.trickplay.tests.benchmark");
+
 
     tp_context_set( context, TP_RESOURCES_PATH, "/data/data/com.trickplay.Engine/files/resources");
     tp_context_set( context, TP_FONTS_PATH, "/data/data/com.trickplay.Engine/files/resources/fonts");
@@ -67,7 +69,6 @@ extern "C" int main( int argc , char ** argv )
     tp_context_set( context, TP_CONTROLLERS_MDNS_ENABLED, "TRUE");
     tp_context_set( context, TP_CONTROLLERS_UPNP_ENABLED, "TRUE");
 
-    tp_context_set( context, TP_APP_ID, "com.trickplay.physics-showcase");
 
     // Initialize a key map for the remote
 
