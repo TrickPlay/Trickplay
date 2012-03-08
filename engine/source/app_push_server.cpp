@@ -665,10 +665,21 @@ bool AppPushServer::launch_it( )
 {
     tplog( "LAUNCHING FROM %s" , current_push_info.metadata.get_root_uri().c_str() );
 
+    // If there is an app running right now, we
+    // uninstall its debugger so that it a) will clear pending commands
+    // and b) won't break while it is closing.
+
+	if ( App * current_app = context->get_current_app() )
+	{
+        if ( Debugger * debugger = current_app->get_debugger() )
+        {
+        	debugger->uninstall();
+        }
+	}
+
     context->close_current_app();
 
     App::LaunchInfo launch_info;
-
     launch_info.debug = current_push_info.debug;
 
     int result = context->launch_app( current_push_info.metadata.get_root_uri().c_str() , launch_info , true );
