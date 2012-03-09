@@ -16,6 +16,7 @@
     <!-- This .apk has no Java code itself, so set hasCode to false. -->
     <application
             android:label="@string/trickplay-engine"
+            android:icon="@drawable/icon"
             android:hasCode="false"
             android:debuggable="true">
 
