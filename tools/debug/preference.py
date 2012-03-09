@@ -212,7 +212,10 @@ class Preference():
             settings.setValue("btFontString", self.btFontString)
             settings.setValue("btFont", font)
             self.btFont = font
-            self.main.backtrace.ui.traceTable.setFont(font)
+            self.main.backtrace.font = font
+            #if trace table is not empty, redraw it with new font settings 
+            if self.main.backtrace.ui.traceTable.rowCount() > 0 :
+                 self.main._deviceManager.send_debugger_command(DBG_CMD_INFO)
         else:
             return
 
