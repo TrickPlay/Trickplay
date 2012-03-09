@@ -344,7 +344,8 @@ class MainWindow(QMainWindow):
 
         # Search Flag
         self.find_expr = None
-
+        self.onExit = False
+        self.rSent = False
 
     def chgTool_debug(self) :
         if self.debug_tbt.text() != "Debug":
@@ -458,9 +459,9 @@ class MainWindow(QMainWindow):
 		    self._deviceManager.trickplay.waitForBytesWritten();
 		    self.ui.interactive.setText("")
 		
-    def stop(self, serverStoped=False):
+    def stop(self, serverStoped=False, exit=False):
         # send 'q' command and close trickplay process
-
+        self.onExit = exit
         self.inspector.ui.refresh.setEnabled(False)
         self.inspector.ui.search.setEnabled(False)
 
@@ -469,11 +470,13 @@ class MainWindow(QMainWindow):
             self._deviceManager.trickplay.close()
         elif self._deviceManager.ui.comboBox.currentIndex() != 0:
             # Remote Debugging / Run 
-            if getattr(self._deviceManager, "debug_mode") == False :
+            #if getattr(self._deviceManager, "debug_mode") == False :
+            if getattr(self, "debug_mode") == False :
                 ret = self.deviceManager.socket.write('/close\n\n')
                 if ret < 0 :
                     print ("tp console socket is not available !")
             elif serverStoped == False :
+		        self.rSent = True
 		        self._deviceManager.send_debugger_command(DBG_CMD_RESET)
 
         if getattr(self._deviceManager, "debug_mode") == True :
@@ -531,6 +534,7 @@ class MainWindow(QMainWindow):
         self.windows = {"file":False, "inspector":False, "console":False, "debug":True, "trace":True}
         self.inspectorWindowClicked()
         self.consoleWindowClicked()
+        self.traceWindowClicked()
         self.debugWindowClicked()
         self.traceWindowClicked()
 		
@@ -687,9 +691,6 @@ class MainWindow(QMainWindow):
         self._debug.clearBreakTable(0)
 
 
-    #def exit(self):
-        #self.stop()
-
     def openApp(self):
 		wizard = Wizard()
 		path = -1
@@ -700,9 +701,10 @@ class MainWindow(QMainWindow):
 		    path = wizard.start(path, True)
 		print ("[VDBG] openApp [%s]"%path)
 		if path:
-			self.stop()
-			self.clearBreakPoints()
 			settings = QSettings()
+			if settings.value('path') is not None:
+			    self.stop()
+			self.clearBreakPoints()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
 			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
@@ -714,9 +716,10 @@ class MainWindow(QMainWindow):
 		wizard = Wizard()
 		path = wizard.start("", False, True)
 		if path:
-			self.stop()
-			self.clearBreakPoints()
 			settings = QSettings()
+			if settings.value('path') is not None:
+			    self.stop()
+			self.clearBreakPoints()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
 			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
@@ -728,14 +731,14 @@ class MainWindow(QMainWindow):
         self.preference.start()
 
     def exit(self):
-        self.stop()
-    	if self.editorManager.tab != None:
-    		while self.editorManager.tab.count() != 0:
-				self.editorManager.close()
-        self._deviceManager.stop()
-        self.close()
-        #settings = QSettings()
-        #settings.remove("path") 
+        self.stop(False, True)
+        if self.rSent == False:
+    	    if self.editorManager.tab != None:
+    		    while self.editorManager.tab.count() != 0:
+				    self.editorManager.close()
+
+            self._deviceManager.stop()
+            self.close()
 
     def newFile(self):
     	file_name = self.path+'/Untitled_'+str(self.untitled_idx)+".lua"
