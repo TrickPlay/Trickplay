@@ -218,14 +218,6 @@ class TrickplayDeviceManager(QWidget):
     def serverHasStopped(self):
         print("Console port disconnected")
     	self.socket.close()
-    	self.main.stop(True)
-
-        """
-    	index = self.ui.comboBox.currentIndex()
-    	self.ui.comboBox.removeItem(index)
-    	self.ui.comboBox.setCurrentIndex(0)
-    	self.service_selected(0)
-        """
 
     def serverHasError(self, error):
         print(QString("[VDBG] Error: %1").arg(self.socket.errorString()))
@@ -331,6 +323,14 @@ class TrickplayDeviceManager(QWidget):
     
 		            if reply.command == "r":
 		                self.main.deviceManager.socket.write('/close\n\n')
+		                self.main.rSent = False
+		                if self.main.onExit == True:
+		                    if self.editorManager.tab != None:
+		                        while self.editorManager.tab.count() != 0:
+		                            self.editorManager.close()
+		                    self.stop()
+		                    self.main.close()
+
 
 		            data = self.getFileLineInfo_Resp(str(reply.readAll()), command)
 		            if data is not None:
