@@ -111,6 +111,7 @@ void *load_sym( void* lib, const char *symbol)
 void preload_shared_libraries(ANativeActivity *activity)
 {
     LOG( "About to load all DLLs from %s", activity->internalDataPath);
+    load_library(activity->internalDataPath, "libgnustl_shared.so");
     load_library(activity->internalDataPath, "libiconv.so");
     load_library(activity->internalDataPath, "libintl.so");
     load_library(activity->internalDataPath, "libexif-tp.so");

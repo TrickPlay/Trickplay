@@ -311,7 +311,8 @@ LOCAL_SHARED_LIBRARIES  :=  \
                             xml2 \
                             expat \
                             intl \
-                            iconv
+                            iconv \
+                            gnustl_shared
 
 LOCAL_CPP_FEATURES := exceptions
 LOCAL_LDLIBS    :=  -lstdc++ -lc -lm -llog -ldl -landroid -lEGL -lGLESv2
@@ -321,7 +322,6 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := tp-wrapper
 LOCAL_SRC_FILES :=  android-glue.cpp unzip.cpp
 LOCAL_STATIC_LIBRARIES  :=  android_native_app_glue
-LOCAL_CPP_FEATURES := exceptions
 LOCAL_LDLIBS    :=  -llog -ldl -landroid
 include $(BUILD_SHARED_LIBRARY)
 
