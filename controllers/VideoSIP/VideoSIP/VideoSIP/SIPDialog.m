@@ -9,6 +9,8 @@
 #import "SIPDialog.h"
 
 #import <CoreFoundation/CoreFoundation.h>
+#import <netdb.h>
+#import <arpa/inet.h>
 
 #import "MyExtensions.h"
 
@@ -250,6 +252,44 @@
 
 @end
 
+
+@implementation OptionsDialog
+
+- (void)receivedOptions:(NSDictionary *)optionsPacket fromAddr:(NSData *)remoteAddr {
+    // respond to the packet
+    struct sockaddr_in *addr = (struct sockaddr_in *)[remoteAddr bytes];
+    char ip_string[INET_ADDRSTRLEN];
+
+    inet_ntop(AF_INET, &(addr->sin_addr), ip_string, INET_ADDRSTRLEN);
+
+    NSArray *remoteVia = [[optionsPacket objectForKey:@"Via"] componentsSeparatedByString:@";"];
+
+    NSString *response = [NSString stringWithFormat:@"SIP/2.0 200 OK\r\n"
+                          @"Via: %@;%@;rport=%d;received=%s\r\n"
+                          @"From: %@\r\n"
+                          @"To: %@;tag=%@\r\n"
+                          @"Call-ID: %@\r\n"
+                          @"CSeq: %@\r\n"
+                          @"Contact: %@\r\n"
+                          @"User-Agent: %@\r\n"
+                          @"Accept: application/sdp\r\n"
+                          @"Supported: %@\r\n"
+                          @"Content-Length: 0\r\n\r\n",
+                          [remoteVia objectAtIndex:0], [remoteVia objectAtIndex:1], ntohs(addr->sin_port), ip_string,
+                          [optionsPacket objectForKey:@"From"],
+                          [optionsPacket objectForKey:@"To"], [from objectForKey:@"tag"],
+                          [optionsPacket objectForKey:@"Call-ID"],
+                          [optionsPacket objectForKey:@"CSeq"],
+                          contact,
+                          userAgent,
+                          supported];
+                          
+    NSLog(@"Options Response: %@\n", response);
+    
+    [delegate dialog:self wantsToSendData:[response dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
+@end
 
 
 @implementation InviteDialog
