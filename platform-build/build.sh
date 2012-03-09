@@ -751,7 +751,7 @@ then
     done
 
     cd "${HERE}/android"
-    TRICKPLAY_PDK_DIR="${PREFIX}" ndk-build
+    TRICKPLAY_PDK_DIR="${PREFIX}" ndk-build ${NUM_MAKE_JOBS}
     android update project -p . -s
     ant debug
     cp "${HERE}/android/bin/"*.apk "${HERE}"
