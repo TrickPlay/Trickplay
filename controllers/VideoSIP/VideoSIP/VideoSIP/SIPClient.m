@@ -20,6 +20,14 @@
 #define ASTERISK_PORT "5060"
 
 
+static NSString *const user = @"phone";
+static NSString *const contactURI = @"sip:phone@asterisk-1.asterisk.trickplay.com";
+static NSString *const remoteURI = @"sip:asterisk-1.asterisk.trickplay.com";
+static NSString *const udpClientIP = @"10.0.190.153";
+static NSUInteger const udpClientPort = 50418;
+static NSUInteger const udpServerPort = 5060;
+
+
 @interface SIPClient()
 
 @property (nonatomic, retain) NSMutableArray *writeQueue;
@@ -52,14 +60,7 @@
 #pragma mark User Control
 
 - (void)registerToAsterisk:(id)arg {
-    NSString *user = @"phone";
-    NSString *contactURI = @"sip:phone@asterisk-1.asterisk.trickplay.com";
-    NSString *remoteURI = @"sip:asterisk-1.asterisk.trickplay.com";
-    NSString *udpClientIP = @"10.0.190.153";
-    NSUInteger udpClientPort = 50418;
-    NSUInteger udpServerPort = 5060;
-    
-    RegisterDialog *registerDialog = [[RegisterDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self];
+    RegisterDialog *registerDialog = [[[RegisterDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
        
     NSString *registerCallID = [NSString uuid];
     [registerDialog registerToAsteriskWithCallID:registerCallID];
@@ -102,11 +103,22 @@
 #pragma mark -
 #pragma mark Network
 
+- (void)handleNewDialogWithHdr:(NSDictionary *)sipHdrDic body:(NSString *)sipBody fromAddr:(NSData *)remoteAddr {
+    NSString *statusLine = [sipHdrDic objectForKey:@"Status-Line"];
+    if ([statusLine rangeOfString:@"OPTIONS "].location != NSNotFound) {
+        OptionsDialog *options = [[[OptionsDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
+
+        [options receivedOptions:sipHdrDic fromAddr:remoteAddr];
+    } else if ([statusLine rangeOfString:@"BYE "].location != NSNotFound) {
+        
+    }
+}
+
 /**
  * This is broken, it assumes that the buffer only holds exactly 1 SIP packet at a time.
  * TODO: Fix this later.
  */
-- (void)sipParse:(NSData *)sipData {
+- (void)sipParse:(NSData *)sipData fromAddr:(NSData *)remoteAddr {
     if (!sipData) {
         return;
     }
@@ -141,7 +153,11 @@
     NSString *callID = [sipHdrDic objectForKey:@"Call-ID"];
     if (callID) {
         SIPDialog *dialog = [sipDialogs objectForKey:callID];
-        [dialog interpretSIP:sipHdrDic body:sipBody];
+        if (dialog) {
+            [dialog interpretSIP:sipHdrDic body:sipBody];
+        } else {
+            [self handleNewDialogWithHdr:(NSDictionary *)sipHdrDic body:(NSString *)sipBody fromAddr:(NSData *)remoteAddr];
+        }
     }
 }
 
@@ -184,9 +200,10 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
                 assert(addrObj != nil);
                 
                 //NSLog(@"SIP read at address: %@ with data:\n%@", addrObj, dataObj);
-                // TODO: Tell the appropriate Dialog about the data
                 SIPClient *self = (SIPClient *)info;
-                [self sipParse:dataObj];
+                // TODO: Some type of error catching here is well advised, in case of
+                // malformed packets.
+                [self sipParse:dataObj fromAddr:addrObj];
             }
             
             if (err != 0) {

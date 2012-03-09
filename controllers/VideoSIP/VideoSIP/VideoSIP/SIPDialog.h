@@ -143,6 +143,15 @@
 
 @end
 
+#pragma mark -
+#pragma mark OPTIONS
+
+@interface OptionsDialog : SIPDialog
+
+- (void)receivedOptions:(NSDictionary *)optionsPacket fromAddr:(NSData *)remoteAddr;
+
+@end
+
 
 #pragma mark -
 #pragma mark INVITE

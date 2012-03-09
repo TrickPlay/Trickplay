@@ -51,7 +51,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
 /**
  * Send the SIP data received over the network to this method.
  */
-- (void)sipParse:(NSData *)sipData;
+- (void)sipParse:(NSData *)sipData fromAddr:(NSData *)addr;
 
 @end
 
