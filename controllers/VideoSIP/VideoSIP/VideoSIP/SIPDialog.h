@@ -84,8 +84,8 @@
     NSString *supported;
     
     NSString *branch;
-    NSString *nonce;
-    NSString *auth;
+    NSString *authLine;
+    NSMutableDictionary *auth;
     
     // Packet writing queue.
     NSMutableArray *writeQueue;
@@ -114,8 +114,8 @@
 @property (nonatomic, retain) NSString *allow;
 @property (nonatomic, retain) NSString *supported;
 @property (nonatomic, retain) NSString *branch;
-@property (nonatomic, retain) NSString *nonce;
-@property (nonatomic, retain) NSString *auth;
+@property (nonatomic, retain) NSString *authLine;
+@property (nonatomic, retain) NSMutableDictionary *auth;
 
 @property (nonatomic, retain) NSMutableArray *writeQueue;
 
@@ -125,6 +125,8 @@
 // methods
 
 - (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue delegate:(id <SIPDialogDelegate>)_delegate;
+
+- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body;
 
 - (void)cancel;
 
