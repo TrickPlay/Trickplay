@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
         self.ui.menuView.addAction(self.ui.BacktraceDock.toggleViewAction())
         self.ui.BacktraceDock.toggleViewAction().triggered.connect(self.traceWindowClicked)
         self.backtrace = TrickplayBacktrace()
-        self.backtrace.ui.traceTable.setFont(self.preference.btFont)
+        self.backtrace.font = self.preference.btFont
         self.ui.BacktraceLayout.addWidget(self.backtrace)
         self.ui.BacktraceDock.hide()
 
