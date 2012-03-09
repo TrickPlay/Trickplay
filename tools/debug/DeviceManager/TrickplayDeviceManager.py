@@ -33,7 +33,7 @@ class TrickplayDeviceManager(QWidget):
         self.inspector = main._inspector
         self.editorManager = main._editorManager
         self.debugWindow = main._debug
-        self.backtraceWindow = main._backtrace
+        self.backtraceWindow = main.backtrace
 
         self.ui = Ui_DeviceManager()
         self.ui.setupUi(self)
@@ -529,18 +529,16 @@ class TrickplayDeviceManager(QWidget):
         else:
             if dMode == True:
                 # POST http://<host>:<debugger port>/debugger "r"
-                url = QUrl()
-                url.setScheme( "http" )
-                url.setHost( CON.address )
-                url.setPort( self.debug_port )
-                url.setPath( "/debugger" )
+                #url = QUrl()
+                #url.setScheme( "http" )
+                #url.setHost( CON.address )
+                #url.setPort( self.debug_port )
+                #url.setPath( "/debugger" )
 		
                 #print ("[VDBG] ' %s ' Command Sent"%'r')
                 #request = QNetworkRequest( url )
                 #self.manager.post( request , 'r' )
             
-                # GET http://<host>:<http port>/debug/start 
-                getTrickplayDebug()
             	self.debug_mode = True
             	self.main.debug_mode = True
             

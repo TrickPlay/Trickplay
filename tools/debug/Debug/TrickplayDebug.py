@@ -36,10 +36,10 @@ class TrickplayDebugger(QWidget):
 
         self.break_info = {}
 
-        self.font = QFont()
-        self.font.setStyleHint(self.font.Monospace)
-        self.font.setFamily('Inconsolata')
-        self.font.setPointSize(12)
+        self.font = self.main.preference.vFont
+        #self.font.setStyleHint(self.font.Monospace)
+        #self.font.setFamily('Inconsolata')
+        #self.font.setPointSize(12)
 
     def contextMenu(self, point=None):
         self.ui.breakTable.popupMenu.exec_( self.ui.breakTable.mapToGlobal(point) )

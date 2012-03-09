@@ -171,37 +171,6 @@ def sendTrickplayDebugCommand(db_port, cmd, start=False):
         print("Error >> Trickplay Application unavailable.")
         print(e)
         return False
- 
-
-
-def getTrickplayDebug():
-    """
-    Get Trickplay UI tree data for the inspector
-    """
-
-    s = CON.get()
-    print s
-    r = urllib2.Request("http://" + s + "/debug/start")
-    f = None
-    
-    try:
-        f = urllib2.urlopen(r, None, 2)
-        k = f.read()
-        return decode(k)
-    
-    # Connection refused
-    except urllib2.URLError, e:
-        print("[VDBG] getTrickplayDebug : Connection to Trickplay application unsuccessful.")
-        print(e)
-    except httplib.BadStatusLine, e:
-        print("[VDBG] getTrickplayDebug : Trickplay application closed before data could be retreived.")
-        print(e)
-    
-    except httplib.InvalidURL, e:
-        print('[VDBG] getTrickplayDebug : Couldn\'t find a Trickplay device.')
-        print(e)
-        
-    return None
 
 def decode(input):
     

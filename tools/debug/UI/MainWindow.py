@@ -356,6 +356,9 @@ class Ui_MainWindow(object):
         self.action_Debug.setObjectName(_fromUtf8("action_Debug"))
         self.action_Stop = QtGui.QAction(MainWindow)
         self.action_Stop.setObjectName(_fromUtf8("action_Stop"))
+        self.actionPreference = QtGui.QAction(MainWindow)
+        self.actionPreference.setObjectName(_fromUtf8("actionPreference"))
+
 
         self.menuFile.addAction(self.action_New)
         self.menuFile.addAction(self.actionOpen_App)
@@ -377,6 +380,7 @@ class Ui_MainWindow(object):
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionSearch_Replace)
         self.menuEdit.addAction(self.actionGo_to_line)
+        self.menuEdit.addAction(self.actionPreference)
         self.menuRun.addAction(self.action_Run)
         self.menuRun.addAction(self.action_Debug)
         self.menuRun.addAction(self.action_Stop)
@@ -460,4 +464,5 @@ class Ui_MainWindow(object):
         self.action_Debug.setShortcut(QtGui.QApplication.translate("MainWindow", "F11", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Stop.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Stop.setShortcut(QtGui.QApplication.translate("MainWindow", "Esc", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPreference.setText(QtGui.QApplication.translate("MainWindow", "Preference...", None, QtGui.QApplication.UnicodeUTF8))
 
