@@ -14,6 +14,7 @@ from UI.MainWindow import Ui_MainWindow
 from connection import *
 from wizard import Wizard
 from tbar import * 
+from preference import Preference
 
 from Inspector.TrickplayInspector import TrickplayInspector
 from DeviceManager.TrickplayDeviceManager import TrickplayDeviceManager
@@ -25,6 +26,7 @@ from Console.TrickplayConsole import TrickplayConsole
 from UI.Search import Ui_searchDialog
 from UI.Replace import Ui_replaceDialog
 from UI.GotoLine import Ui_gotoLineDialog
+from UI.Preference import Ui_preferenceDialog
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -45,13 +47,16 @@ class MainWindow(QMainWindow):
 
         # Restore size/position of window
         settings = QSettings()
-        self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+        self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray())
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
        
         self.editorMenuEnabled(False)
         self.debuggerMenuEnabled(False)
+
+		#Create Preference 
+        self._preference = Preference(self)
 
 		# Toolbar font 
         font = QFont()
@@ -62,7 +67,7 @@ class MainWindow(QMainWindow):
         self.ui.FileSystemDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.FileSystemDock.toggleViewAction())
         self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fileWindowClicked)
-        self._fileSystem = FileSystem()
+        self._fileSystem = FileSystem(self._preference)
         self.ui.FileSystemLayout.addWidget(self._fileSystem)
         
         # Create Inspector
@@ -79,12 +84,15 @@ class MainWindow(QMainWindow):
         self.ui.ConsoleDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.ConsoleDock.toggleViewAction())
         self.ui.ConsoleDock.toggleViewAction().triggered.connect(self.consoleWindowClicked)
-        self._console = TrickplayConsole()
-        self.ui.ConsoleLayout.addWidget(self._console)
+        self.console = TrickplayConsole()
+        self.console.ui.textEdit.setFont(self.preference.consoleFont)
+
+        self.ui.ConsoleLayout.addWidget(self.console)
         self.ui.ConsoleDock.hide()
         
 		# Set Interactive Line Edit 
         self.ui.interactive.setText("")
+        self.ui.interactive.setFont(self.preference.consoleFont)
         self.connect(self.ui.interactive, SIGNAL("returnPressed()"), self.return_pressed)
 
 		# Create Debug 
@@ -104,8 +112,9 @@ class MainWindow(QMainWindow):
         self.ui.BacktraceDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.BacktraceDock.toggleViewAction())
         self.ui.BacktraceDock.toggleViewAction().triggered.connect(self.traceWindowClicked)
-        self._backtrace = TrickplayBacktrace()
-        self.ui.BacktraceLayout.addWidget(self._backtrace)
+        self.backtrace = TrickplayBacktrace()
+        self.backtrace.ui.traceTable.setFont(self.preference.btFont)
+        self.ui.BacktraceLayout.addWidget(self.backtrace)
         self.ui.BacktraceDock.hide()
 
 		#File Menu
@@ -129,6 +138,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionSearch, SIGNAL("triggered()"),  self.editor_search)
         QObject.connect(self.ui.actionSearch_Replace, SIGNAL("triggered()"),  self.editor_search_replace)
         QObject.connect(self.ui.actionGo_to_line, SIGNAL("triggered()"),  self.editor_go_to_line)
+        QObject.connect(self.ui.actionPreference, SIGNAL("triggered()"),  self.preferenceStart)
 
 		#Debug Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
@@ -409,6 +419,10 @@ class MainWindow(QMainWindow):
 
 		
     @property
+    def preference(self):
+        return self._preference
+    
+    @property
     def fileSystem(self):
         return self._fileSystem
     
@@ -489,7 +503,7 @@ class MainWindow(QMainWindow):
     	            print("[VDBG] exept ", self.editorManager.editors[n][1])
 
             # clean backtrace and debug window
-            self._backtrace.clearTraceTable(0)
+            self.backtrace.clearTraceTable(0)
             self._debug.clearLocalTable(0)
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
@@ -569,6 +583,12 @@ class MainWindow(QMainWindow):
             self.ui.action_Run.setEnabled(False)
             self.ui.action_Debug.setEnabled(False)
 	
+    def preference2(self):
+        self.preference = QDialog()
+        self.preference.ui = Ui_preferenceDialog()
+        self.preference.ui.setupUi (self.preference)
+        self.preference.exec_()
+
     def editor_undo(self):
 		if self.editorManager.tab:
 			index = self.editorManager.tab.currentIndex()
@@ -703,6 +723,9 @@ class MainWindow(QMainWindow):
 			if self.editorManager.tab != None:
 			    while self.editorManager.tab.count() != 0:
 			        self.editorManager.close()
+
+    def preferenceStart(self):
+        self.preference.start()
 
     def exit(self):
         self.stop()
