@@ -143,7 +143,7 @@ void preload_shared_libraries(ANativeActivity *activity)
     load_library(activity->internalDataPath, "libpango-1.0.so");
     load_library(activity->internalDataPath, "libpangoft2-1.0.so");
     load_library(activity->internalDataPath, "libpangocairo-1.0.so");
-    load_library(activity->internalDataPath, "libjpeg.so");
+    load_library(activity->internalDataPath, "libjpeg.8.so");
     load_library(activity->internalDataPath, "libtiff.so");
     load_library(activity->internalDataPath, "libtiffxx.so");
     load_library(activity->internalDataPath, "libgif.so");

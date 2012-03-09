@@ -620,6 +620,10 @@ namespace ImageDecoders
 
         static void jpeg_error( j_common_ptr cinfo )
         {
+            char buffer[JMSG_LENGTH_MAX];
+            (*cinfo->err->format_message) (cinfo, buffer);
+
+            g_critical("JPEG DECODE ERROR: %s", buffer);
             throw 1;
         }
 

@@ -142,8 +142,8 @@ LOCAL_SRC_FILES	:=	lib/libixml.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE	:=	jpeg
-LOCAL_SRC_FILES	:=	lib/libjpeg.so
+LOCAL_MODULE	:=	jpeg.8
+LOCAL_SRC_FILES	:=	lib/libjpeg.8.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -288,7 +288,7 @@ LOCAL_SHARED_LIBRARIES  :=  \
                             gif \
                             tiffxx \
                             tiff \
-                            jpeg \
+                            jpeg.8 \
                             pangocairo-1.0 \
                             pangoft2-1.0 \
                             pango-1.0 \

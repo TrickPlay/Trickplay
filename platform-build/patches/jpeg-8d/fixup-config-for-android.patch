@@ -8,8 +8,8 @@ Index: jpeg-8d/configure
    need_version=no
 -  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
 -  soname_spec='${libname}${release}${shared_ext}$major'
-+  library_names_spec='${libname}${release}${shared_ext}'
-+  soname_spec='${libname}${release}${shared_ext}'
++  library_names_spec='${libname}${release}$major${shared_ext}'
++  soname_spec='${libname}${release}$major${shared_ext}'
    finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
    shlibpath_var=LD_LIBRARY_PATH
    shlibpath_overrides_runpath=no
