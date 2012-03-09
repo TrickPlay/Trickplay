@@ -95,11 +95,15 @@
     CFSocketEnableCallBacks(sipSocket, kCFSocketWriteCallBack);
 }
 
+- (void)dialogSessionEnded:(SIPDialog *)dialog {
+    
+}
+
 #pragma mark -
 #pragma mark Network
 
 /**
- * This is broken, it assumes that the buffer only holds exactly 1 SIP packet.
+ * This is broken, it assumes that the buffer only holds exactly 1 SIP packet at a time.
  * TODO: Fix this later.
  */
 - (void)sipParse:(NSData *)sipData {
@@ -115,6 +119,9 @@
     NSString *sipBody = nil;
     if (components.count > 1) {
         sipBody = [components objectAtIndex:1];
+        if ([sipBody compare:@""] == NSOrderedSame) {
+            sipBody = nil;
+        }
     }
     
     // Organize the elements of the Header into a Dictionary
@@ -129,6 +136,13 @@
     }
     
     NSLog(@"SIP Header Dictionary:\n%@", sipHdrDic);
+    // If a Dialog is already open for this packet, find it
+    // and the packet to it
+    NSString *callID = [sipHdrDic objectForKey:@"Call-ID"];
+    if (callID) {
+        SIPDialog *dialog = [sipDialogs objectForKey:callID];
+        [dialog interpretSIP:sipHdrDic body:sipBody];
+    }
 }
 
 /**

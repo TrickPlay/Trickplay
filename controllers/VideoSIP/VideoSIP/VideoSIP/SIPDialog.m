@@ -33,7 +33,7 @@
 @synthesize allow;
 @synthesize supported;
 @synthesize branch;
-@synthesize nonce;
+@synthesize authLine;
 @synthesize auth;
 
 @synthesize writeQueue;
@@ -79,8 +79,8 @@
         self.supported = @"timer, 100rel, path";
         
         self.branch = nil;
-        self.nonce = nil;
-        self.auth = nil;
+        self.authLine = nil;
+        self.auth = [NSMutableDictionary dictionaryWithCapacity:10];
         
         self.writeQueue = _writeQueue;
         
@@ -99,21 +99,49 @@
 }
 
 - (NSString *)generateAuthLine:(NSString *)requestType {
-    if (!self.nonce || !self.sipURI || !requestType) {
+    NSString *nonce = [auth objectForKey:@"nonce"];
+    NSString *realm = [auth objectForKey:@"realm"];
+    if (!nonce || !realm || !self.sipURI || !requestType) {
         return nil;
     }
         
-    NSString *ha1 = [[NSString stringWithFormat:@"%@:asterisk:saywhat", self.user] md5];
+    NSString *ha1 = [[NSString stringWithFormat:@"%@:%@:saywhat", self.user, realm] md5];
     NSString *ha2 = [[NSString stringWithFormat:@"%@:%@", requestType, sipURI] md5];
     NSString *ha3 = [[NSString stringWithFormat:@"%@:%@:%@", ha1, nonce, ha2] md5];
     
-    self.auth = [NSString stringWithFormat:@"Authorization: Digest username=%@, realm=\"asterisk\", nonce=%@, algorithm=MD5, uri=%@, response=%@\r\n", user, nonce, sipURI, ha3];
+    self.authLine = [NSString stringWithFormat:@"Authorization: Digest username=%@, realm=\"asterisk\", nonce=%@, algorithm=MD5, uri=%@, response=%@\r\n", user, nonce, sipURI, ha3];
     
-    return auth;
+    return authLine;
 }
 
 - (NSString *)genSDP {
     return [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 7078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 9078 RTP/AVP 99\r\nb=AS:1372\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPz,aM4jyA==\r\nmpeg4-esid:201\r\n", udpClientIP, user, udpClientIP];
+}
+
+- (void)parseAuthentication:(NSString *)authResponse {
+    //NSArray *components = [authLine componentsSeparatedByString:@", "];
+    // Make sure the challenge is Digest
+    NSRange authTypeRange = [authResponse rangeOfString:@"Digest "];
+    if (authTypeRange.location == NSNotFound) {
+        return;
+    }
+    // Eliminate "Digest" so only the parameters are left
+    NSString *split = [authResponse substringFromIndex:authTypeRange.location + authTypeRange.length];
+    // TODO: probably should handle case with and without whitespace
+    // Put parameters and values into a dictionary for easy lookup
+    NSArray *authParams = [split componentsSeparatedByString:@", "];
+    for (NSString *authParam in authParams) {
+        NSArray *components = [authParam componentsSeparatedByString:@"="];
+        NSString *param = [components objectAtIndex:0];
+        NSString *value = [components objectAtIndex:1];
+        // trim out quotation marks
+        NSCharacterSet *characterSet = [NSCharacterSet characterSetWithCharactersInString:@"\""];
+        [auth setObject:[value stringByTrimmingCharactersInSet:characterSet] forKey:param];
+    }
+}
+
+- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body {
+    NSLog(@"This method should be overwritten");
 }
 
 #pragma mark -
@@ -138,7 +166,6 @@
     self.allow = nil;
     self.supported = nil;
     self.branch = nil;
-    self.nonce = nil;
     self.auth = nil;
     
     self.delegate = nil;
@@ -179,8 +206,8 @@
                              allow,
                              supported];
     
-    if (auth) {
-        registerHdr = [NSString stringWithFormat:@"%@%@", registerHdr, auth];
+    if (authLine) {
+        registerHdr = [NSString stringWithFormat:@"%@%@", registerHdr, authLine];
     }
     
     registerHdr = [NSString stringWithFormat:@"%@%@", registerHdr, @"Content-Length: 0\r\n\r\n"];
@@ -195,12 +222,30 @@
 - (void)registerToAsteriskWithCallID:(NSString *)registerCallID {
     self.callID = registerCallID;
     
-    self.auth = [self generateAuthLine:@"REGISTER"];
+    self.authLine = [self generateAuthLine:@"REGISTER"];
     NSString *packet = [self generateRegister];
     
     [delegate dialog:self wantsToSendData:[packet dataUsingEncoding:NSUTF8StringEncoding]];
     
     //[writeQueue addObject:[packet dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
+- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body {
+    NSString *statusLine = [parsedPacket objectForKey:@"Status-Line"];
+    if (!statusLine) {
+        return;
+    }
+    if ([statusLine compare:@"SIP/2.0 200 OK"] == NSOrderedSame) {
+        [delegate dialogSessionEnded:self];
+    } else if ([statusLine compare:@"SIP/2.0 401 Unauthorized"] == NSOrderedSame) {
+        NSString *authRequest = [parsedPacket objectForKey:@"WWW-Authenticate"];
+        if (authRequest) {
+            [self parseAuthentication:authRequest];
+            [self registerToAsteriskWithCallID:self.callID];
+        }
+    } else {
+        NSLog(@"Unrecognized Response: %@", statusLine);
+    }
 }
 
 @end
@@ -233,8 +278,8 @@
                         allow,
                         supported];
     
-    if (auth) {
-        invite = [NSString stringWithFormat:@"%@%@", invite, auth];
+    if (authLine) {
+        invite = [NSString stringWithFormat:@"%@%@", invite, authLine];
     }
     
     NSString *sdpPacket = [self genSDP];
@@ -247,7 +292,7 @@
 }
 
 - (void)invite {
-    self.auth = [self generateAuthLine:@"INVITE"];
+    self.authLine = [self generateAuthLine:@"INVITE"];
     NSString *packet = [self generateInvite];
     
     [delegate dialog:self wantsToSendData:[packet dataUsingEncoding:NSUTF8StringEncoding]];
