@@ -19,7 +19,7 @@ NM=${HOST}-nm
 LD=${HOST}-ld
 RANLIB=${HOST}-ranlib
 
-CFLAGS="-I${PREFIX}/include -fPIC -Os -fexceptions -pipe"
+CFLAGS="-I${PREFIX}/include -fPIC -Os -fexceptions -pipe -Wall -Wpointer-arith -Wcast-align"
 CPPFLAGS=${CFLAGS}
 CXXFLAGS=${CFLAGS}
 LDFLAGS="-L${PREFIX}/lib -Wl,-rpath-link,${PREFIX}/lib"
