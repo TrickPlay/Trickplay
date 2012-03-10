@@ -681,7 +681,7 @@ then
 	    -ltiff \
 	    -ltiffxx \
 	    -lgif \
-	    -ljpeg \
+	    -ljpeg.8 \
 	    -lfontconfig \
 	    -lfreetype \
 	    -lexpat \
