@@ -5,7 +5,9 @@ import re
 from connection import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from PyQt4.Qsci import QsciScintilla, QsciLexerLua
 from UI.Preference import Ui_preferenceDialog
+
 
 class Preference():
 
@@ -16,6 +18,8 @@ class Preference():
         self.lexerLuaDesc = ["The Default.", "A block comment.\n--[[ THIS TEXT IS A BLOCK COMMENT ]]--", "A line comment.\n-- THIS TEXT IS A LINE COMMENT", "", "A Number.", "A Keyword.", "A String.", "A Character.", "A literal string.",  "Preprocessor.", "An operator.", "An identifier.", "The end of a line where a string is not closed.", "Basic functions.", "String, table and maths functions.", "Coroutines, I/O and system facilities.", "", "", "", "", "A label."]
         self.lexerLuaFontString = []
         self.lexerLuaFont = []
+        self.lexerLuaFColor = []
+        self.lexerLuaBColor = []
 
         # Default Font
         font = QFont()
@@ -74,12 +78,30 @@ class Preference():
             font.setPointSize(13)
             font.setFamily("Inconsolata")
 
+            fColorString = "#000000"
+            fColor = QColor () 
+            fColor.setNamedColor("#000000")
+
+            bColorString = "#FFFFFF"
+            bColor = QColor () 
+            bColor.setNamedColor("#FFFFFF")
+
             self.lexerLuaFontString.append(str(settings.value(self.lexerLua[index]+"String", "Inconsolata 13").toString()))	    
             self.lexerLuaFont.append(str(settings.value(self.lexerLua[index], font).toString()))	    
             font.fromString(self.lexerLuaFont[index])
             self.lexerLuaFont[index] = font
 
+            self.lexerLuaFColor.append(str(settings.value(self.lexerLua[index]+"FC", fColorString).toString()))	    
+            fColor.setNamedColor(self.lexerLuaFColor[index])
+            self.lexerLuaFColor[index] = fColor
+
+            self.lexerLuaBColor.append(str(settings.value(self.lexerLua[index]+"BC", bColorString).toString()))	    
+            bColor.setNamedColor(self.lexerLuaBColor[index])
+            self.lexerLuaBColor[index] = bColor
+
         self.lexerIndex= 0
+        self.editorCurrentIndex= 0
+        self.editorPaths = []
 
 	
     def start(self):
@@ -142,6 +164,8 @@ class Preference():
         self.ui.descriptionText.setText(self.lexerLuaDesc[0])
         self.ui.previewText.setText(self.lexerLuaFontString[0]+"\n"+"abcdefghijk ABCDEFGHIJK")
         self.ui.previewText.setFont(self.lexerLuaFont[0])
+        self.ui.previewText.setTextColor(self.lexerLuaFColor[0])
+        self.ui.previewText.setTextBackgroundColor(self.lexerLuaBColor[0])
 	
         self.dialog.exec_()
             
@@ -242,18 +266,121 @@ class Preference():
             return
 
     def fontSelect(self):
-        pass
+        font, ok = QFontDialog.getFont(self.lexerLuaFont[self.lexerIndex])
+        if ok:
+            # the user clicked OK and font is set to the font the user Selected
+            family = font.family()
+            size = font.pointSize()
+            self.lexerLuaFontString[self.lexerIndex] = "%s"%family+" %i"%size
+            self.ui.previewText.setText(self.lexerLuaFontString[self.lexerIndex]+"\n"+"abcdefghijk ABCDEFGHIJK")
+            self.ui.previewText.setFont(font)
+            settings = QSettings()
+            settings.setValue(self.lexerLua[self.lexerIndex]+"String", self.lexerLuaFontString[self.lexerIndex])
+            settings.setValue(self.lexerLua[self.lexerIndex], font)
+            self.lexerLuaFont[self.lexerIndex] = font
+
+            if self.main.editorManager.tab != None:
+                self.editorCurrentIndex = self.main.editorManager.tab.currentIndex()
+
+                tabCnt = self.main.editorManager.tab.count()
+                #while self.main.editorManager.tab.count() != 0:
+                for i in range (0, tabCnt):
+                    self.main.editorManager.fontSettingCheck[i] = True
+
+                #for index in range (0, tabCnt):
+                while tabCnt > 0 : 
+                    #index = self.main.editorManager.tab.currentIndex()
+                    editor = self.main.editorManager.tab.editors[0]
+                    #self.editorPaths.append(editor.path)
+                    editorPath = editor.path
+                    self.main.editorManager.fontSetting = True
+                    self.main.editorManager.tab.closeTab(0)
+                    #TODO : temp file ...
+                    self.main.editorManager.newEditor(editorPath)
+                    tabCnt -= 1 
+                
+                self.main.editorManager.tab.setCurrentIndex(self.editorCurrentIndex)
+        else:
+            return
+
     def bColorSelect(self):
-        pass
+        color = QColorDialog.getColor()
+        if color.isValid():
+            print (self.lexerIndex)
+            self.ui.previewText.setTextBackgroundColor(color)
+            settings = QSettings()
+            settings.setValue(self.lexerLua[self.lexerIndex]+"BC", color.name())
+            self.lexerLuaBColor[self.lexerIndex] = color
+
+            if self.main.editorManager.tab != None:
+                self.editorCurrentIndex = self.main.editorManager.tab.currentIndex()
+
+                tabCnt = self.main.editorManager.tab.count()
+                #while self.main.editorManager.tab.count() != 0:
+                for i in range (0, tabCnt):
+                    self.main.editorManager.fontSettingCheck[i] = True
+
+                #for index in range (0, tabCnt):
+                while tabCnt > 0 : 
+                    #index = self.main.editorManager.tab.currentIndex()
+                    editor = self.main.editorManager.tab.editors[0]
+                    #self.editorPaths.append(editor.path)
+                    editorPath = editor.path
+                    self.main.editorManager.fontSetting = True
+                    self.main.editorManager.tab.closeTab(0)
+                    #TODO : temp file ...
+                    self.main.editorManager.newEditor(editorPath)
+                    tabCnt -= 1 
+                
+                self.main.editorManager.tab.setCurrentIndex(self.editorCurrentIndex)
+        else:
+            return
+
+
+
     def fColorSelect(self):
-        pass
-    
+        color = QColorDialog.getColor()
+        if color.isValid():
+            print (self.lexerIndex)
+            self.ui.previewText.setTextColor(color)
+            settings = QSettings()
+            settings.setValue(self.lexerLua[self.lexerIndex]+"FC", color.name())
+            self.lexerLuaFColor[self.lexerIndex] = color
+
+            if self.main.editorManager.tab != None:
+                self.editorCurrentIndex = self.main.editorManager.tab.currentIndex()
+
+                tabCnt = self.main.editorManager.tab.count()
+                #while self.main.editorManager.tab.count() != 0:
+                for i in range (0, tabCnt):
+                    self.main.editorManager.fontSettingCheck[i] = True
+
+                #for index in range (0, tabCnt):
+                while tabCnt > 0 : 
+                    #index = self.main.editorManager.tab.currentIndex()
+                    editor = self.main.editorManager.tab.editors[0]
+                    #self.editorPaths.append(editor.path)
+                    editorPath = editor.path
+                    self.main.editorManager.fontSetting = True
+                    self.main.editorManager.tab.closeTab(0)
+                    #TODO : temp file ...
+                    self.main.editorManager.newEditor(editorPath)
+                    tabCnt -= 1 
+                
+                self.main.editorManager.tab.setCurrentIndex(self.editorCurrentIndex)
+        else:
+            return
+
     def cellClicked(self, r, c):
-        
+
         cellItem = self.ui.tableWidget.item(r, 0)
         lexerLua = str(cellItem.text())	
         index = self.lexerLua.index(lexerLua)
+        self.lexerIndex= index
+        print (self.lexerIndex)
 
         self.ui.descriptionText.setText(self.lexerLuaDesc[index])
         self.ui.previewText.setText(self.lexerLuaFontString[index]+"\n"+"abcdefghijk ABCDEFGHIJK")
         self.ui.previewText.setFont(self.lexerLuaFont[index])
+        self.ui.previewText.setTextBackgroundColor(self.lexerLuaBColor[index])
+        self.ui.previewText.setTextColor(self.lexerLuaFColor[index])

@@ -25,8 +25,7 @@ class EditorManager(QWidget):
         self.tab = None
         self.currentEditor = None
         self.bp_info = {1:[],2:[]}
-        #self.bp_info[1] = []
-        #self.bp_info[2] = []
+        self.fontSettingCheck = {}
 
 
     def setupUi(self, parent):

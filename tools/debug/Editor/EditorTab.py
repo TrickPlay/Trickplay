@@ -95,25 +95,19 @@ class EditorTabWidget(QTabWidget):
 		if index == -1:
 			return 
 
-		"""
-		if hasattr(self.editors[index], "fileIndex") == True :
-			if self.editors[index].fileIndex is not None:
-				self.fileSystem.model.view.setSelectionMode(QAbstractItemView.SingleSelection)
-				self.fileSystem.model.view.setCurrentIndex(self.editors[index].fileIndex)
-			else:
-				self.fileSystem.model.view.setSelectionMode(QAbstractItemView.NoSelection)
-				#self.fileSystem.model.view.setCurrentIndex(None)
-		else:
-			self.fileSystem.model.view.setSelectionMode(QAbstractItemView.NoSelection)
-			#self.fileSystem.model.view.setCurrentIndex(None)
-		"""
-
+		if len(self.main.fontSettingCheck) > 0 :
+		    if self.main.fontSettingCheck[index] == True :
+		        self.main.fontSettingCheck[index] == False
+		        self.textBefores[index] = self.editors[index].text()
+		        self.editors[index].text_status = 1 #TEXT_READ
+		        return
+    
 		try :
 			currentText = open(self.paths[index]).read()
 		except :
 			return
 
-		if self.editors[index].tempfile == False :
+		if self.editors[index].tempfile == False  :
 			if self.textBefores[index] != currentText and self.tabClosing == False :
 				msg = QMessageBox()
 				msg.setText('The file "' + self.paths[index] + '" changed on disk.')
