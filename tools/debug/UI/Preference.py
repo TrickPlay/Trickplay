@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Preference2.ui'
+# Form implementation generated from reading ui file 'Preference.ui'
 #
-# Created: Thu Mar  8 12:22:31 2012
+# Created: Fri Mar  9 15:59:41 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -210,7 +210,7 @@ class Ui_preferenceDialog(object):
         self.label_6.setText(QtGui.QApplication.translate("preferenceDialog", "Description:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("preferenceDialog", "Preview:", None, QtGui.QApplication.UnicodeUTF8))
         self.fontSelect.setText(QtGui.QApplication.translate("preferenceDialog", "Select Font...", None, QtGui.QApplication.UnicodeUTF8))
-        self.bColorSelect.setText(QtGui.QApplication.translate("preferenceDialog", "Papter Color...", None, QtGui.QApplication.UnicodeUTF8))
+        self.bColorSelect.setText(QtGui.QApplication.translate("preferenceDialog", "Paper Color...", None, QtGui.QApplication.UnicodeUTF8))
         self.fColorSelect.setText(QtGui.QApplication.translate("preferenceDialog", "Text Color...", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.EditorStyle), QtGui.QApplication.translate("preferenceDialog", "Editor Style", None, QtGui.QApplication.UnicodeUTF8))
 

@@ -44,10 +44,16 @@ class Editor(QsciScintilla):
         #self.SendScintilla(QsciScintilla.SCI_SETTABWIDTH, 4)
     
         # Set the default font
+
+        preference = self.editorManager.main.preference
+        font = preference.lexerLuaFont[0]
+
+        """
         font = QFont()
         font.setStyleHint(font.Monospace)
         font.setFamily('Inconsolata')
         font.setPointSize(13)
+        """
         self.setFont(font)
         self.setMarginsFont(font)
 
@@ -92,14 +98,24 @@ class Editor(QsciScintilla):
         # Set style for Python comments (style number 1) to a fixed-width
         # courier.
         #
-        lexer = QsciLexerLua()
-        lexer.setDefaultFont(font)
-        self.setLexer(lexer)
+        self.lexer = QsciLexerLua()
+        self.lexer.setDefaultFont(font)
+        self.setLexer(self.lexer)
 
-        self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, lexer.Comment, font.pointSize())
-        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, lexer.Comment, font.family())
-        self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, lexer.LineComment, font.pointSize())
-        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, lexer.LineComment, font.family())
+        """
+        self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, self.lexer.Comment, font.pointSize())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, self.lexer.Comment, font.family())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, self.lexer.LineComment, font.pointSize())
+        self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, self.lexer.LineComment, font.family())
+        """
+        for index in range(0, len(preference.lexerLua)):
+            if preference.lexerLua[index] != "":
+                font = preference.lexerLuaFont[index]
+                self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, index, font.pointSize())
+                self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, index, font.family())
+                self.SendScintilla(QsciScintilla.SCI_STYLESETITALIC, index, font.italic())
+                self.SendScintilla(QsciScintilla.SCI_STYLESETBOLD, index, font.bold())
+                self.SendScintilla(QsciScintilla.SCI_STYLESETUNDERLINE, index, font.underline())
 
         # Don't want to see the horizontal scrollbar at all
         # Use raw message to Scintilla here (all messages are documented
