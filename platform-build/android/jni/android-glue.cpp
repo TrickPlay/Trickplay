@@ -403,6 +403,13 @@ void *start_trickplay(void *state)
 {
     MyStateT *my_state = (MyStateT *) state;
 
+    LOG("TrickPlay engine thread running");
+
+    preload_shared_libraries(my_state->activity);
+
+    install_resources(my_state->activity);
+    install_apps(my_state->activity);
+
     my_state->cogl_init( my_state->window );
 
     // Hand off to main()
@@ -424,6 +431,7 @@ void window_created(ANativeActivity* activity, ANativeWindow* window)
 
     pthread_t trickplay_thread;
 
+    LOG("Starting new thread for Trickplay engine to run on...");
     pthread_create(&trickplay_thread, NULL, &start_trickplay, &my_state);
 }
 
@@ -436,12 +444,7 @@ extern "C" void android_main(struct android_app* state) {
     // Make sure glue isn't stripped.
     app_dummy();
 
-    preload_shared_libraries(state->activity);
-
     state->activity->callbacks->onNativeWindowCreated = window_created;
-
-    install_resources(state->activity);
-    install_apps(state->activity);
 
     while (1) {
         // Read all pending events.
