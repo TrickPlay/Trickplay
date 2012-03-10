@@ -1,0 +1,25 @@
+Index: fontconfig-2.8.0/configure.in
+===================================================================
+--- fontconfig-2.8.0.orig/configure.in
++++ fontconfig-2.8.0/configure.in
+@@ -273,17 +273,17 @@ if test "$enable_libxml2" != "yes"; then
+ 		yes)
+ 			case "$expat" in
+ 			yes)
+-				EXPAT_LIBS="-lexpat"
++				EXPAT_LIBS="-lexpat-tp"
+ 				;;
+ 			*)
+-				EXPAT_LIBS="-L$expat/lib -lexpat"
++				EXPAT_LIBS="-L$expat/lib -lexpat-tp"
+ 				;;
+ 			esac
+ 			;;
+ 		no)
+ 			;;
+ 		*)
+-			EXPAT_LIBS="-L$expat_lib -lexpat"
++			EXPAT_LIBS="-L$expat_lib -lexpat-tp"
+ 			;;
+ 		esac
+ 
