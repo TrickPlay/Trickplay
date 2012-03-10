@@ -61,7 +61,7 @@ extern "C" int main( int argc , char ** argv )
 
     tp_context_set( context, TP_APP_ALLOWED,    "com.trickplay.kt-menu=apps:"
                                                 "com.trickplay.kt-menu=editor:"
-                                                "trickplay.launcher=apps:"
+                                                "com.trickplay.launcher=apps:"
                                                 "com.trickplay.editor=editor");
 
     tp_context_set( context, TP_CONTROLLERS_ENABLED,    "TRUE" );
