@@ -199,6 +199,7 @@ int check_md5sum(ANativeActivity* activity, const char* zipfile_name)
     if(fd < 0)
     {
         LOG("Failed to open md5sum file %s: (%d) %s", md5sum_target_filename, errno, strerror(errno));
+        delete [] md5sum_filename;
         delete [] md5sum_target_filename;
         return 0;
     }
@@ -206,6 +207,14 @@ int check_md5sum(ANativeActivity* activity, const char* zipfile_name)
 
     AAssetManager * mgr = activity->assetManager;
     AAsset * md5sum_asset = AAssetManager_open( mgr, md5sum_filename, AASSET_MODE_BUFFER );
+    if(NULL == md5sum_asset)
+    {
+        LOG("Failed to open md5sum asset: %s", md5sum_filename);
+        delete [] md5sum_filename;
+        return 0;
+    }
+    delete [] md5sum_filename;
+
     const void* asset_contents = AAsset_getBuffer(md5sum_asset);
     char *md5sum_from_asset = new char[33];
     bzero(md5sum_from_asset, 33);
@@ -252,22 +261,31 @@ void install_zipfile(ANativeActivity* activity, const char* zipfile_name)
 
     AAssetManager * mgr = activity->assetManager;
     AAsset * asset = AAssetManager_open( mgr, zipfile_name, AASSET_MODE_BUFFER );
-    void* asset_contents = (void *)AAsset_getBuffer(asset);
-
-    HZIP zip = OpenZip( asset_contents, AAsset_getLength(asset), 0);
-    SetUnzipBaseDir(zip, unzip_target_directory);
-
-    ZIPENTRY ze;
-    GetZipItem(zip, -1, &ze);
-    int numitems=ze.index;
-    for (int i=0; i<numitems; i++)
+    if(asset)
     {
-        GetZipItem(zip,i,&ze);
-        LOG("Unzipping %s...", ze.name);
-        UnzipItem(zip,i,ze.name);
-    }
-    CloseZip(zip);
+        void* asset_contents = (void *)AAsset_getBuffer(asset);
 
+        HZIP zip = OpenZip( asset_contents, AAsset_getLength(asset), 0);
+        SetUnzipBaseDir(zip, unzip_target_directory);
+
+        ZIPENTRY ze;
+        GetZipItem(zip, -1, &ze);
+        int numitems=ze.index;
+        for (int i=0; i<numitems; i++)
+        {
+            GetZipItem(zip,i,&ze);
+            LOG("Unzipping %s...", ze.name);
+            UnzipItem(zip,i,ze.name);
+        }
+        CloseZip(zip);
+        AAsset_close(asset);
+    }
+    else
+    {
+        LOG("Failed to open zipfile asset %s", zipfile_name);
+    }
+
+    delete [] unzip_target_directory;
     LOG("Done unzipping %s", zipfile_name);
 }
 
@@ -293,21 +311,28 @@ void install_md5sum(ANativeActivity* activity, const char* zipfile_name)
     {
         AAssetManager * mgr = activity->assetManager;
         AAsset * md5sum_asset = AAssetManager_open( mgr, md5sum_filename, AASSET_MODE_BUFFER );
-        const char* md5sum_from_asset = (const char *)AAsset_getBuffer(md5sum_asset);
-        int write_len = 32;
-        int wrote_so_far = 0;
-        while(write_len > 0)
+        if(md5sum_asset)
         {
-            int wrote = write(fd, &(md5sum_from_asset[wrote_so_far]), write_len);
-            if(-1 == wrote)
+            const char* md5sum_from_asset = (const char *)AAsset_getBuffer(md5sum_asset);
+            int write_len = 32;
+            int wrote_so_far = 0;
+            while(write_len > 0)
             {
-                LOG("Error while writing %s: (%d) %s", md5sum_target_filename, errno, strerror(errno) );
-                break;
+                int wrote = write(fd, &(md5sum_from_asset[wrote_so_far]), write_len);
+                if(-1 == wrote)
+                {
+                    LOG("Error while writing %s: (%d) %s", md5sum_target_filename, errno, strerror(errno) );
+                    break;
+                }
+                write_len -= wrote;
             }
-            write_len -= wrote;
-        }
 
-        AAsset_close(md5sum_asset);
+            AAsset_close(md5sum_asset);
+        }
+        else
+        {
+            LOG("Failed to open md5sum asset %s", md5sum_filename);
+        }
         close(fd);
     }
     else
@@ -316,6 +341,7 @@ void install_md5sum(ANativeActivity* activity, const char* zipfile_name)
     }
 
     delete [] md5sum_target_filename;
+    delete [] md5sum_filename;
 }
 
 void check_install_zipfile(ANativeActivity* activity, const char* zipfile_name)
