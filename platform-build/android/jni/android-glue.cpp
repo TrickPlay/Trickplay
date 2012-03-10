@@ -178,7 +178,6 @@ void preload_shared_libraries(ANativeActivity *activity)
 // installed in activity->internalDataPath
 int check_md5sum(ANativeActivity* activity, const char* zipfile_name)
 {
-    int result = 0;
     // Check if md5sum file exists in target
     char *md5sum_filename = new char[(
                                             strlen(zipfile_name) +
