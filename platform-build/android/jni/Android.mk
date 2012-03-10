@@ -77,8 +77,8 @@ LOCAL_SRC_FILES	:=	lib/libexif-tp.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE	:=	expat
-LOCAL_SRC_FILES	:=	lib/libexpat.so
+LOCAL_MODULE	:=	expat-tp
+LOCAL_SRC_FILES	:=	lib/libexpat-tp.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -309,7 +309,7 @@ LOCAL_SHARED_LIBRARIES  :=  \
                             exif \
                             ffi \
                             xml2 \
-                            expat \
+                            expat-tp \
                             intl \
                             iconv \
                             gnustl_shared

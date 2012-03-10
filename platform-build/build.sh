@@ -684,7 +684,7 @@ then
 	    -ljpeg.8 \
 	    -lfontconfig \
 	    -lfreetype \
-	    -lexpat \
+	    -lexpat-tp \
 	    -lbz2 \
 	    -lcurl \
 	    -lcares \

@@ -115,7 +115,7 @@ void preload_shared_libraries(ANativeActivity *activity)
     load_library(activity->internalDataPath, "libiconv.so");
     load_library(activity->internalDataPath, "libintl.so");
     load_library(activity->internalDataPath, "libexif-tp.so");
-    load_library(activity->internalDataPath, "libexpat.so");
+    load_library(activity->internalDataPath, "libexpat-tp.so");
     load_library(activity->internalDataPath, "libxml2.so");
     load_library(activity->internalDataPath, "libffi.so");
     void *glib_impl = load_library(activity->internalDataPath, "libglib-2.0.so");
