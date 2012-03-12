@@ -745,6 +745,7 @@ class MainWindow(QMainWindow):
             self._deviceManager.stop()
             self.close()
 
+
     def newFile(self):
     	file_name = self.path+'/Untitled_'+str(self.untitled_idx)+".lua"
         

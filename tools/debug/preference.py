@@ -16,6 +16,8 @@ class Preference():
         self.lexerLua = ["Default", "Comment", "Line Comment", "", "Number", "Keyword", "String", "Character", "Literal String",  "", "Operator", "Identifier", "Unclosed String", "Basic Functions", "Library Functions",
         "Coroutines, I/O, etc.", "", "", "", "", "Label"] 
         self.lexerLuaDesc = ["The Default.", "A block comment.\n--[[ THIS TEXT IS A BLOCK COMMENT ]]--", "A line comment.\n-- THIS TEXT IS A LINE COMMENT", "", "A Number.", "A Keyword.", "A String.", "A Character.", "A literal string.",  "Preprocessor.", "An operator.", "An identifier.", "The end of a line where a string is not closed.", "Basic functions.", "String, table and maths functions.", "Coroutines, I/O and system facilities.", "", "", "", "", "A label."]
+        self.lexerLuaFColorDefault = ['#000000', '#7f0000', '#7f0000', '#000000', '#7f7f00', '#7f0000', '#7f0000', '#7f0000', '#7f0000', '#7f7f00', '#171717', '#171717', '#171717', '#7f0000', '#7f0000', '#7f0000', '#000000', '#000000', '#000000', '#000000', '#000000']
+        self.lexerLuaBColorDefault = ['#ffffff', '#f0f0d0', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffe0', '#ffffff', '#ffffff', '#ffffff', '#e0c0e0', '#e0c0e0', '#ffd0d0', '#dodoff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff']
         self.lexerLuaFontString = []
         self.lexerLuaFont = []
         self.lexerLuaFColor = []
@@ -78,13 +80,15 @@ class Preference():
             font.setPointSize(13)
             font.setFamily("Inconsolata")
 
-            fColorString = "#000000"
+            # default foreground color : black 
             fColor = QColor () 
-            fColor.setNamedColor("#000000")
+            fColorString =  "#000000" #self.lexerLuaFColorDefault[index] 
+            fColor.setNamedColor(fColorString)
 
-            bColorString = "#FFFFFF"
+            # default background color : white
             bColor = QColor () 
-            bColor.setNamedColor("#FFFFFF")
+            bColorString =  "#FFFFFF" #self.lexerLuaBColorDefault[index] 
+            bColor.setNamedColor(bColorString)
 
             self.lexerLuaFontString.append(str(settings.value(self.lexerLua[index]+"String", "Inconsolata 13").toString()))	    
             self.lexerLuaFont.append(str(settings.value(self.lexerLua[index], font).toString()))	    
@@ -98,6 +102,9 @@ class Preference():
             self.lexerLuaBColor.append(str(settings.value(self.lexerLua[index]+"BC", bColorString).toString()))	    
             bColor.setNamedColor(self.lexerLuaBColor[index])
             self.lexerLuaBColor[index] = bColor
+
+            print(index, "BCOLOR - setting ", self.lexerLuaBColor[index].name())
+            print(index, "FCOLOR - setting ", self.lexerLuaFColor[index].name())
 
         self.lexerIndex= 0
         self.editorCurrentIndex= 0
@@ -159,14 +166,34 @@ class Preference():
 
         self.ui.tableWidget.verticalHeader().setDefaultSectionSize(18)
         self.ui.tableWidget.horizontalHeader().setDefaultSectionSize(200)
-        self.ui.tableWidget.show()
-        # EditorStyle: Show description and preview of the first item of table ("default")
+	self.ui.tableWidget.show()
+	
+        # EditorStyle: Show description and preview of the first i)
+        self.ui.filesystemFont.setFont(self.fsFont)
+	
+        self.ui.inspectorFont.setText(self.inspFontString)
+        self.ui.inspectorFont.setFont(self.inspFont)
+
+        self.ui.consoleFont.setText(self.consoleFontString)
+        self.ui.consoleFont.setFont(self.consoleFont)
+
+        self.ui.backtraceFont.setText(self.btFontString)
+        self.ui.backtraceFont.setFont(self.btFont)
+
+        self.ui.variableFont.setText(self.vFontString)
+        self.ui.variableFont.setFont(self.vFont)
+#tem of table ("default")
         self.ui.descriptionText.setText(self.lexerLuaDesc[0])
-        self.ui.previewText.setText(self.lexerLuaFontString[0]+"\n"+"abcdefghijk ABCDEFGHIJK")
         self.ui.previewText.setFont(self.lexerLuaFont[0])
+        #print("BCOLOR - setting ", self.lexerLuaBColor[0].name())
+        #print("FCOLOR - setting ", self.lexerLuaFColor[0].name())
         self.ui.previewText.setTextColor(self.lexerLuaFColor[0])
         self.ui.previewText.setTextBackgroundColor(self.lexerLuaBColor[0])
+        #print("TEXT BCOLOR", self.ui.previewText.textBackgroundColor().name())
+        #print("TEXT FCOLOR", self.ui.previewText.textColor().name())
+        self.ui.previewText.setText(self.lexerLuaFontString[0]+"\n"+"abcdefghijk ABCDEFGHIJK")
 	
+
         self.dialog.exec_()
             
     def fileSystemSelect(self) :
@@ -306,10 +333,12 @@ class Preference():
     def bColorSelect(self):
         color = QColorDialog.getColor()
         if color.isValid():
-            print (self.lexerIndex)
+            #print (self.lexerIndex, color.name())
+            self.ui.previewText.clear()
             self.ui.previewText.setTextBackgroundColor(color)
             settings = QSettings()
             settings.setValue(self.lexerLua[self.lexerIndex]+"BC", color.name())
+            self.ui.previewText.setText(self.lexerLuaFontString[self.lexerIndex]+"\n"+"abcdefghijk ABCDEFGHIJK")
             self.lexerLuaBColor[self.lexerIndex] = color
 
             if self.main.editorManager.tab != None:
@@ -341,10 +370,12 @@ class Preference():
     def fColorSelect(self):
         color = QColorDialog.getColor()
         if color.isValid():
-            print (self.lexerIndex)
+            #print (self.lexerIndex, color.name())
+            self.ui.previewText.clear()
             self.ui.previewText.setTextColor(color)
             settings = QSettings()
             settings.setValue(self.lexerLua[self.lexerIndex]+"FC", color.name())
+            self.ui.previewText.setText(self.lexerLuaFontString[self.lexerIndex]+"\n"+"abcdefghijk ABCDEFGHIJK")
             self.lexerLuaFColor[self.lexerIndex] = color
 
             if self.main.editorManager.tab != None:
@@ -377,10 +408,17 @@ class Preference():
         lexerLua = str(cellItem.text())	
         index = self.lexerLua.index(lexerLua)
         self.lexerIndex= index
-        print (self.lexerIndex)
+
+        #print (index)
+        #print("BCOLOR", self.ui.previewText.textBackgroundColor().name())
+        #print("FCOLOR", self.ui.previewText.textColor().name())
+        #print("BCOLOR - setting ", self.lexerLuaBColor[index].name())
+        #print("FCOLOR - setting ", self.lexerLuaFColor[index].name())
 
         self.ui.descriptionText.setText(self.lexerLuaDesc[index])
-        self.ui.previewText.setText(self.lexerLuaFontString[index]+"\n"+"abcdefghijk ABCDEFGHIJK")
         self.ui.previewText.setFont(self.lexerLuaFont[index])
         self.ui.previewText.setTextBackgroundColor(self.lexerLuaBColor[index])
         self.ui.previewText.setTextColor(self.lexerLuaFColor[index])
+        self.ui.previewText.setText(self.lexerLuaFontString[index]+"\n"+"abcdefghijk ABCDEFGHIJK")
+        #print("BCOLOR", self.ui.previewText.textBackgroundColor().name())
+        #print("FCOLOR", self.ui.previewText.textColor().name())
