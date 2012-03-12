@@ -442,6 +442,8 @@ bool AppResource::is_child( const String & root_uri , const String & child_uri )
 		}
 	}
 
+	g_object_unref( root );
+	
 	return result;
 }
 
