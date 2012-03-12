@@ -119,7 +119,7 @@ GLIB_V="${GLIB_MV}.2"
 GLIB_URL="http://ftp.acc.umu.se/pub/GNOME/sources/glib/${GLIB_MV}/glib-${GLIB_V}.tar.xz"
 GLIB_DIST="glib-${GLIB_V}.tar.xz"
 GLIB_SOURCE="glib-${GLIB_V}"
-GLIB_COMMANDS="(./autogen.sh 2>/dev/null) ; cp ${THERE}/files/config.{sub,guess} . && patch -p1 -i ${THERE}/patches/${GLIB_SOURCE}/NOT-IN-QUILT-APPLIED-AFTER-AUTOCONF-fixup-config-for-android.patch && PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=no ac_cv_func_posix_getgrgid_r=no glib_cv_have_qsort_r=no ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -I${PREFIX}/include/bind\" && make ${NUM_MAKE_JOBS} install"
+GLIB_COMMANDS="(./autogen.sh 2>/dev/null) ; cp ${THERE}/files/config.{sub,guess} . && patch -p1 -i ${THERE}/patches/${GLIB_SOURCE}/NOT-IN-QUILT-APPLIED-AFTER-AUTOCONF-fixup-config-for-android.patch && PATH=$PREFIX/host/bin:$PATH glib_cv_stack_grows=no glib_cv_uscore=no ac_cv_func_posix_getpwuid_r=no ac_cv_func_posix_getgrgid_r=no glib_cv_have_qsort_r=no ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD $SHARED ${GLIB_ICONV} --enable-threads --disable-fam --with-pic CFLAGS=\"$CFLAGS -DG_DISABLE_CHECKS -DG_DISABLE_CAST_CHECKS -I${PREFIX}/include/bind\" && make ${NUM_MAKE_JOBS} install"
 GLIB_DEPENDS="LIBFFI"
 
 #------------------------------------------------------------------------------
