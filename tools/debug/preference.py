@@ -6,7 +6,7 @@ from connection import *
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.Qsci import QsciScintilla, QsciLexerLua
-from UI.Preference import Ui_preferenceDialog
+from UI.PreferenceDialog import Ui_preferenceDialog
 
 
 class Preference():

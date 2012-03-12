@@ -344,6 +344,11 @@ class MainWindow(QMainWindow):
 
         # Search Flag
         self.find_expr = None
+        self.replace_expr = None
+        self.wo = None
+        self.forward = None
+        self.cs = None
+        self.wrap = None
         self.onExit = False
         self.rSent = False
 
@@ -803,11 +808,22 @@ class MainWindow(QMainWindow):
     			    self.replace_ui.search_txt.setText(self.find_expr)
     			    self.replace_ui.pushButton_find.setEnabled(True)
         		    self.replace_ui.pushButton_replaceAll.setEnabled(True)
+    			    if self.replace_expr is not None :
+    			        self.replace_ui.replace_txt.setText(self.replace_expr)
     			else:
     			    self.replace_ui.pushButton_find.setEnabled(False)
         		    self.replace_ui.pushButton_replaceAll.setEnabled(False)
         		    self.replace_ui.pushButton_replace.setEnabled(False)
         		    self.replace_ui.pushButton_replaceFind.setEnabled(False)
+
+    			if self.forward is not None :
+    			    self.replace_ui.radioButton_fw.setChecked(self.forward)
+    			if self.cs is not None :
+    			    self.replace_ui.checkBox_case.setChecked(self.cs)
+    			if self.wo is not None :
+    			    self.replace_ui.checkBox_word.setChecked(self.wo)
+    			if self.wrap is not None :
+    			    self.replace_ui.checkBox_wrap.setChecked(self.wrap)
 
     			QObject.connect(self.replace_ui.search_txt , SIGNAL("textChanged(QString)"),  self.replace_textChanged)
     			QObject.connect(self.replace_ui.pushButton_close , SIGNAL("clicked()"),  self.replace_close)
@@ -821,11 +837,17 @@ class MainWindow(QMainWindow):
 					expr = self.replace_ui.search_txt.text()
 					self.find_expr = expr
 					replace_expr = self.replace_ui.replace_txt.text()
+					self.replace_expr = replace_expr
 					re = False
 					cs = self.replace_ui.checkBox_case.isChecked() 
 					wo = self.replace_ui.checkBox_word.isChecked() 
 					wrap = self.replace_ui.checkBox_wrap.isChecked() 
 					forward = self.replace_ui.radioButton_fw.isChecked() 
+					self.cs = cs
+					self.wo = wo
+					self.wrap = wrap
+					self.forward = forward
+
 					self.replace_ui.search_txt.setText(expr)
 					self.replace_ui.replace_txt.setText(replace_expr)
 					self.replace_ui.checkBox_case.setChecked(cs) 
@@ -852,11 +874,16 @@ class MainWindow(QMainWindow):
 		expr = self.replace_ui.search_txt.text()
 		self.find_expr = expr
 		replace_expr = self.replace_ui.replace_txt.text()
+		self.replace_expr = replace_expr
 		re = False
 		cs = self.replace_ui.checkBox_case.isChecked() 
 		wo = self.replace_ui.checkBox_word.isChecked() 
 		wrap = self.replace_ui.checkBox_wrap.isChecked() 
 		forward = self.replace_ui.radioButton_fw.isChecked() 
+		self.cs = cs
+		self.wo = wo
+		self.wrap = wrap
+		self.forward = forward
 		if replaceall is True:
 		    wo = True
 
@@ -872,10 +899,12 @@ class MainWindow(QMainWindow):
 
 		if find_result == False :
 			self.replace_ui.notification.setText("String Not Found") 
+			self.replace_ui.pushButton_replace.setEnabled(False)
+			self.replace_ui.pushButton_replaceFind.setEnabled(False)
 		else:
 			self.replace_ui.notification.setText("")
-        	self.replace_ui.pushButton_replace.setEnabled(True)
-        	self.replace_ui.pushButton_replaceFind.setEnabled(True)
+			self.replace_ui.pushButton_replace.setEnabled(True)
+			self.replace_ui.pushButton_replaceFind.setEnabled(True)
 
 		self.prevForward = forward 
 		return find_result
@@ -889,6 +918,8 @@ class MainWindow(QMainWindow):
 		findNext = self.replace_find(True) 
 		if findNext == False:
 			self.replace_ui.notification.setText("String Not Found") 
+			self.replace_ui.pushButton_replace.setEnabled(False)
+			self.replace_ui.pushButton_replaceFind.setEnabled(False)
 			return
 
 		replaceNum = 0 
