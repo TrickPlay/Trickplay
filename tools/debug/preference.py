@@ -16,8 +16,14 @@ class Preference():
         self.lexerLua = ["Default", "Comment", "Line Comment", "", "Number", "Keyword", "String", "Character", "Literal String",  "", "Operator", "Identifier", "Unclosed String", "Basic Functions", "Library Functions",
         "Coroutines, I/O, etc.", "", "", "", "", "Label"] 
         self.lexerLuaDesc = ["The Default.", "A block comment.\n--[[ THIS TEXT IS A BLOCK COMMENT ]]--", "A line comment.\n-- THIS TEXT IS A LINE COMMENT", "", "A Number.", "A Keyword.", "A String.", "A Character.", "A literal string.",  "Preprocessor.", "An operator.", "An identifier.", "The end of a line where a string is not closed.", "Basic functions.", "String, table and maths functions.", "Coroutines, I/O and system facilities.", "", "", "", "", "A label."]
-        self.lexerLuaFColorDefault = ['#000000', '#7f0000', '#7f0000', '#000000', '#7f7f00', '#7f0000', '#7f0000', '#7f0000', '#7f0000', '#7f7f00', '#171717', '#171717', '#171717', '#7f0000', '#7f0000', '#7f0000', '#000000', '#000000', '#000000', '#000000', '#000000']
-        self.lexerLuaBColorDefault = ['#ffffff', '#f0f0d0', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffe0', '#ffffff', '#ffffff', '#ffffff', '#e0c0e0', '#e0c0e0', '#ffd0d0', '#dodoff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff']
+        self.lexerLuaFColorDefault = ['#000000', '#007F00', '#007F00', '#000000', '#007F7F', '#00007F', '#7F007F',
+        '#7F007F', '#7F007F', '#7F7F00', '#171717', '#171717', '#171717', '#00007F', '#00007F', '#00007F', '#000000',
+        '#000000', '#000000', '#000000', '#000000']
+
+        self.lexerLuaBColorDefault = ['#FFFFFF', '#D0F0F0', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF',
+        '#FFFFFF', '#E0FFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#E0C0E0', '#D0FFD0', '#D0D0FF', '#FFD0D0',
+        '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF']
+
         self.lexerLuaFontString = []
         self.lexerLuaFont = []
         self.lexerLuaFColor = []
@@ -25,11 +31,11 @@ class Preference():
 
         # Default Font
         font = QFont()
-        font.setPointSize(9)
+        font.setPointSize(10)
 
         # Check settings 
         settings = QSettings()
-        self.fsFontString = str(settings.value("fsFontString", "Inconsolata 12").toString())
+        self.fsFontString = str(settings.value("fsFontString", "Ubuntu 10").toString())
         self.fsFont = settings.value("fsFont", font).toString()
         font.fromString(self.fsFont)
         self.fsFont = font
@@ -82,12 +88,12 @@ class Preference():
 
             # default foreground color : black 
             fColor = QColor () 
-            fColorString =  "#000000" #self.lexerLuaFColorDefault[index] 
+            fColorString = self.lexerLuaFColorDefault[index] # "#000000" 
             fColor.setNamedColor(fColorString)
 
             # default background color : white
             bColor = QColor () 
-            bColorString =  "#FFFFFF" #self.lexerLuaBColorDefault[index] 
+            bColorString = self.lexerLuaBColorDefault[index] #"#FFFFFF"
             bColor.setNamedColor(bColorString)
 
             self.lexerLuaFontString.append(str(settings.value(self.lexerLua[index]+"String", "Inconsolata 13").toString()))	    
@@ -103,8 +109,8 @@ class Preference():
             bColor.setNamedColor(self.lexerLuaBColor[index])
             self.lexerLuaBColor[index] = bColor
 
-            print(index, "BCOLOR - setting ", self.lexerLuaBColor[index].name())
-            print(index, "FCOLOR - setting ", self.lexerLuaFColor[index].name())
+            #print(index, "BCOLOR - setting ", self.lexerLuaBColor[index].name())
+            #print(index, "FCOLOR - setting ", self.lexerLuaFColor[index].name())
 
         self.lexerIndex= 0
         self.editorCurrentIndex= 0

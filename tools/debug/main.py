@@ -742,8 +742,15 @@ class MainWindow(QMainWindow):
     		    while self.editorManager.tab.count() != 0:
 				    self.editorManager.close()
 
+    	    #settings = QSettings()
+            #for i in range (0, len(self._preference.lexerLua)):
+                #settings.remove(self._preference.lexerLua[i]+"FC")
+                #settings.remove(self._preference.lexerLua[i]+"BC")
+                #settings.remove(self._preference.lexerLua[i])
+
             self._deviceManager.stop()
             self.close()
+
 
 
     def newFile(self):
