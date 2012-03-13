@@ -39,6 +39,10 @@ public:
 		delete ( Command * ) me;
 	}
 
+	virtual void cancel()
+	{
+	}
+
 	typedef std::list<Command*> List;
 
 	class Filter
@@ -78,6 +82,19 @@ public:
 
 	virtual Command::List get_commands_matching( const Command::Filter & filter ) = 0;
 
+	Command::List get_all_commands()
+	{
+		class FilterNone : public Command::Filter
+		{
+			virtual bool operator()( Command * ) const
+			{
+				return true;
+			}
+		};
+
+		return get_commands_matching( FilterNone() );
+	}
+
 protected:
 
 	virtual ~Server() {}
@@ -98,7 +115,9 @@ class HCommand : public Debugger::Command
 {
 public:
 
-	HCommand( const HttpServer::Request::Body & body , HttpServer::Response & _response )
+	HCommand( GMainContext * _gctx , const HttpServer::Request::Body & body , HttpServer::Response & _response )
+	:
+		gctx( _gctx )
 	{
 		line = String( body.get_data() , body.get_length() );
 
@@ -107,10 +126,7 @@ public:
 
 	virtual ~HCommand()
 	{
-		if ( response )
-		{
-			response->resume();
-		}
+		resume();
 	}
 
 	virtual String get() const
@@ -125,11 +141,7 @@ public:
 			return false;
 		}
 
-		response->set_status( HttpServer::HTTP_STATUS_OK );
-		response->set_response( "application/json" , obj.stringify() );
-		response->resume();
-
-		response = 0;
+		resume( obj.stringify() );
 
 		fprintf( stdout , "\n" );
 		fflush( stdout );
@@ -137,8 +149,78 @@ public:
 		return true;
 	}
 
+	virtual void cancel()
+	{
+		if ( response )
+		{
+			response->unref();
+			response = 0;
+		}
+	}
+
 private:
 
+	// In order to execute the actual resume in the server thread,
+	// we create a struct with the response and the content and
+	// queue an idle source in that thread's main context.
+
+	struct ResumeInfo
+	{
+		ResumeInfo( const String & _content , HttpServer::Response * _response )
+		:
+			content( _content ),
+			response( _response )
+		{}
+
+		static void destroy( gpointer me )
+		{
+			ResumeInfo * info = ( ResumeInfo * ) me;
+
+			if ( info->response )
+			{
+				info->response->unref();
+			}
+
+			delete info;
+		}
+
+		String 					content;
+		HttpServer::Response * 	response;
+	};
+
+	static gboolean resume_it( gpointer resume_info )
+	{
+		ResumeInfo * info = ( ResumeInfo * ) resume_info;
+
+		if ( ! info->content.empty() )
+		{
+			info->response->set_status( HttpServer::HTTP_STATUS_OK );
+			info->response->set_response( "application/json" , info->content );
+		}
+
+		info->response->resume();
+
+		info->response = 0;
+
+		return FALSE;
+	}
+
+	void resume( const String & content = String() )
+	{
+		if ( response )
+		{
+			GSource * source = g_idle_source_new();
+			g_source_set_priority( source , G_PRIORITY_DEFAULT );
+			g_source_set_callback( source , resume_it , new ResumeInfo( content , response ) , ResumeInfo::destroy );
+			g_source_attach( source , gctx );
+			g_source_unref( source );
+
+			response = 0;
+		}
+	}
+
+
+	GMainContext *			gctx;
 	String 					line;
 	HttpServer::Response * 	response;
 
@@ -234,16 +316,14 @@ public:
 
 	virtual void clear_pending_commands()
 	{
-		g_async_queue_lock( queue );
+		Debugger::Command::List commands = get_all_commands();
 
-		while( Debugger::Command * command = ( Debugger::Command * ) g_async_queue_try_pop_unlocked( queue ) )
+		for ( Debugger::Command::List::const_iterator it = commands.begin(); it != commands.end(); ++it )
 		{
-			g_debug( "CLEARING PENDING COMMAND %s" , command->get().c_str() );
+			tplog( "CLEARING PENDING COMMAND %s" , (*it)->get().c_str() );
 
-			delete command;
+			delete (*it);
 		}
-
-		g_async_queue_unlock( queue );
 	}
 
 	virtual Debugger::Command::List get_commands_matching( const Debugger::Command::Filter & filter )
@@ -303,6 +383,20 @@ protected:
 			( void ) g_thread_join( thread );
 		}
 
+		// Cancel any commands that are in the queue now. Otherwise, we will
+		// try to reply to them when the server has already been destroyed.
+
+		Debugger::Command::List list = get_all_commands();
+
+		for ( Debugger::Command::List::const_iterator it = list.begin(); it != list.end(); ++it )
+		{
+			tplog2( "CANCELLING COMMAND '%s'" , (*it)->get().c_str() );
+
+			(*it)->cancel();
+
+			delete (*it);
+		}
+
 		g_async_queue_unref( queue );
 
 		g_main_context_unref( gctx );
@@ -329,7 +423,7 @@ protected:
     		return;
     	}
 
-    	g_async_queue_push( queue , new HCommand( body , response ) );
+    	g_async_queue_push( queue , new HCommand( gctx , body , response ) );
     }
 
     static gpointer process( gpointer me )
@@ -589,6 +683,10 @@ void Debugger::uninstall()
         lua_sethook( app->get_lua_state(), lua_hook, 0, 0 );
 
         server->clear_pending_commands();
+
+        installed = false;
+
+        tplog( "UNINSTALLED FOR %s" , app->get_id().c_str() );
     }
 }
 
@@ -600,10 +698,11 @@ void Debugger::install( bool break_next_line )
 
     if ( installed )
     {
+        tplog( "BREAK NEXT IS %s" , break_next ? "TRUE" : "FALSE" );
         return;
     }
 
-    server->clear_pending_commands();
+    tplog( "INSTALLED FOR %s : BREAK NEXT IS %s" , app->get_id().c_str() , break_next ? "TRUE" : "FALSE" );
 
     lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET |*/ LUA_MASKLINE, 0 );
 
@@ -624,8 +723,7 @@ void Debugger::lua_hook( lua_State * L, lua_Debug * ar )
 
 void Debugger::break_next_line()
 {
-    install();
-    break_next = true;
+    install( true );
 }
 
 //.............................................................................
@@ -856,6 +954,8 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 	{
 		reply = get_location( L , ar );
 	}
+
+	reply[ "command" ] = command;
 
 	if ( command == "i" )
 	{

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>415</width>
-    <height>219</height>
+    <width>412</width>
+    <height>254</height>
    </rect>
   </property>
   <property name="font">
@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Search/Replace</string>
+   <string>Find/Replace</string>
   </property>
   <property name="modal">
    <bool>true</bool>
@@ -58,45 +58,13 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="verticalLayoutWidget_2">
-   <property name="geometry">
-    <rect>
-     <x>220</x>
-     <y>80</y>
-     <width>181</width>
-     <height>50</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <item>
-     <widget class="QCheckBox" name="checkBox_word">
-      <property name="text">
-       <string>Match entire word only</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBox_wrap">
-      <property name="text">
-       <string>Wrap around</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
   <widget class="QWidget" name="verticalLayoutWidget_3">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>80</y>
-     <width>141</width>
-     <height>50</height>
+     <x>110</x>
+     <y>100</y>
+     <width>291</width>
+     <height>77</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -111,9 +79,19 @@
      </widget>
     </item>
     <item>
-     <widget class="QCheckBox" name="checkBox_forward">
+     <widget class="QCheckBox" name="checkBox_word">
       <property name="text">
-       <string>Search forward</string>
+       <string>Match entire word only</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_wrap">
+      <property name="text">
+       <string>Wrap around</string>
       </property>
       <property name="checked">
        <bool>true</bool>
@@ -152,6 +130,12 @@
     </item>
     <item row="0" column="1">
      <widget class="QLineEdit" name="replace_txt">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="placeholderText">
        <string/>
       </property>
@@ -163,7 +147,7 @@
    <property name="geometry">
     <rect>
      <x>300</x>
-     <y>180</y>
+     <y>216</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -176,7 +160,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>180</y>
+     <y>216</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -189,20 +173,20 @@
    <property name="geometry">
     <rect>
      <x>300</x>
-     <y>140</y>
+     <y>184</y>
      <width>99</width>
      <height>27</height>
     </rect>
    </property>
    <property name="text">
-    <string>Replace/Find</string>
+    <string>Replace&amp; Find</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_find">
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>140</y>
+     <y>184</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -214,8 +198,8 @@
   <widget class="QPushButton" name="pushButton_close">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>140</y>
+     <x>10</x>
+     <y>216</y>
      <width>99</width>
      <height>27</height>
     </rect>
@@ -228,8 +212,8 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>180</y>
-     <width>161</width>
+     <y>182</y>
+     <width>173</width>
      <height>26</height>
     </rect>
    </property>
@@ -242,7 +226,86 @@
     <string/>
    </property>
   </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>70</y>
+     <width>291</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QRadioButton" name="radioButton_fw">
+      <property name="text">
+       <string>Forward</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QRadioButton" name="radioButton_bw">
+      <property name="text">
+       <string>Backward</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QLabel" name="labelName_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>70</y>
+     <width>91</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Direction:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelName_4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>98</y>
+     <width>91</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Options:</string>
+   </property>
+  </widget>
  </widget>
+ <tabstops>
+  <tabstop>search_txt</tabstop>
+  <tabstop>replace_txt</tabstop>
+  <tabstop>radioButton_fw</tabstop>
+  <tabstop>radioButton_bw</tabstop>
+  <tabstop>checkBox_case</tabstop>
+  <tabstop>checkBox_word</tabstop>
+  <tabstop>checkBox_wrap</tabstop>
+  <tabstop>pushButton_find</tabstop>
+  <tabstop>pushButton_replaceFind</tabstop>
+  <tabstop>pushButton_replace</tabstop>
+  <tabstop>pushButton_replaceAll</tabstop>
+  <tabstop>pushButton_close</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
