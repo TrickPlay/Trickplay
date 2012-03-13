@@ -2,18 +2,18 @@
 local states = {"default","focus","activation"}
 
 local make_canvases = function(button)
-	
+	---[[
 	local w = button.w
 	local h = button.h
 	local border_w      = button.style.border.width
 	local corner_radius = button.style.border.corner_radius
 	local border_colors = button.style.border.colors
 	local fill_colors   = button.style.fill_colors
-	
+	--]]
 	local button_images = {}
 	
-	for _,state in pairs(states) do
-		
+	for _,state in pairs(button.states) do
+		--[[
 		local c = Canvas(w,h)
 		
 		c.line_width = border_w
@@ -37,8 +37,9 @@ local make_canvases = function(button)
 		c:set_source_color( border_colors[state] )
 		
 		c:stroke(true)
-		
 		button_images[state] = c:Image()
+		--]]
+		button_images[state] = button:create_canvas(state)
 		
 	end
 	
@@ -53,21 +54,15 @@ local default_parameters = {
 Button = function(parameters)
 	
 	--input is either nil or a table
-    if parameters == nil then
-        parameters = {}
-    elseif type(parameters) ~= "table" then
-        error("Button requires a table or nil as input",2)
-    end
-	
+	parameters = is_table_or_nil("Button",parameters)
 	
 	--flags
 	local canvas = type(parameters.images) == "nil"
 	local set_w  = type(parameters.w)      ~= "nil"
 	local set_h  = type(parameters.h)      ~= "nil"
 	
-	print(set_w,set_h)
 	--upvals
-	local animation_state, images
+	local images
 	
 	for k,v in pairs(default_parameters) do
 		
@@ -91,19 +86,6 @@ Button = function(parameters)
 	
 	----------------------------------------------------------------------------
 	-- private helper functions for common actions
-	
-	local function add_images()
-		
-		instance:clear()
-		
-		instance:add(
-			images.default,
-			images.focus,
-			images.activation,
-			label
-		)
-		
-	end
 	
 	local define_image_animation = function(image)
 		
@@ -136,16 +118,6 @@ Button = function(parameters)
 		
 	end
 	
-	local function recanvas()
-		
-		images = make_canvases(instance)
-		
-		add_images()
-		
-		if images.focus      then images.focus.state      = define_image_animation(images.focus)      end
-		if images.activation then images.activation.state = define_image_animation(images.activation) end
-		
-	end
 	
 	local define_label_animation = function(label_colors)
 		
@@ -192,7 +164,7 @@ Button = function(parameters)
 			
 			set_w = true
 			
-			return canvas and recanvas() or resize_images()
+			return canvas and instance:create_canvases() or resize_images()
 			
 		end
 	)
@@ -209,7 +181,7 @@ Button = function(parameters)
 			
 			set_h = true
 			
-			return canvas and recanvas() or resize_images()
+			return canvas and instance:create_canvases() or resize_images()
 			
 		end
 	)
@@ -221,34 +193,11 @@ Button = function(parameters)
 		
 		function(oldf,self,v)
 			
-			if v == nil then
+			return v == nil and self:create_canvases() or
 				
-				if not canvas then
-					
-					recanvas()
-					
-				end
-				
-				canvas = true
-				
-			elseif type(v) == "table" then
-				
-				canvas = false
-				
-				images = v
-				
-				add_images()
-				
-				resize_images()
-				
-				if images.focus      then images.focus.state      = define_image_animation(images.focus)      end
-				if images.activation then images.activation.state = define_image_animation(images.activation) end
-				
-			else
+				type(v) == "table" and self:setup_images(v) or
 				
 				error("Button.images expected type 'table'. Received "..type(v),2)
-				
-			end
 			
 		end
 	)
@@ -268,7 +217,8 @@ Button = function(parameters)
 		end
 	)
 	
-	override_property(instance,"type", function() return "BUTTON" end )
+	override_property(instance,"type",   function() return "BUTTON" end )
+	override_property(instance,"states", function() return  states  end )
 	
 	----------------------------------------------------------------------------
 	--state changes
@@ -305,7 +255,7 @@ Button = function(parameters)
 	----------------------------------------------------------------------------
 	--functions
 	
-	override_function(instance,"press", function(settings)
+	override_function(instance,"press", function(old_function,self)
 		
 		--image
 		if images.activation then  images.activation.state.state = "ON"  end
@@ -325,6 +275,89 @@ Button = function(parameters)
 			if on_deactivation then on_deactivation() end
 			
 		end )
+		
+	end)
+	
+	override_function(instance,"create_canvas", function(old_function,self,state)
+		
+		local c = Canvas(self.w,self.h)
+		
+		c.line_width = self.style.border.width
+		
+		c:round_rectangle(
+			c.line_width/2,
+			c.line_width/2,
+			c.w - c.line_width,
+			c.h - c.line_width,
+			self.style.border.corner_radius
+		)
+		
+		c:set_source_color( self.style.fill_colors[state] )
+		
+		c:fill(true)
+		
+		c:set_source_color( self.style.border.colors[state] )
+		
+		c:stroke(true)
+		
+		return c:Image()
+		
+	end)
+	
+	override_function(instance,"create_canvases", function(old_function,self)
+		
+		canvas = true
+		
+		images = make_canvases(instance)
+		
+		instance:clear()
+		
+		
+		for _,state in pairs(instance.states) do
+			
+			if images[state] then
+				
+				instance:add(images[state])
+				if state ~= "default" then
+					images[state].state = define_image_animation(images[state])
+				end
+				
+			end
+			
+		end
+		
+		instance:add( label )
+		
+		return true
+		
+	end)
+	
+	override_function(instance,"setup_images", function(old_function,self,new_images)
+		
+		canvas = false
+		
+		images = new_images
+		
+		instance:clear()
+		
+		resize_images()
+		
+		for _,state in pairs(instance.states) do
+			
+			if images[state] then
+				
+				instance:add(images[state])
+				if state ~= "default" then
+					images[state].state = define_image_animation(images[state])
+				end
+				
+			end
+			
+		end
+		
+		instance:add( label )
+		
+		return true
 		
 	end)
 	
@@ -351,13 +384,11 @@ Button = function(parameters)
 		
 	end)
 	
-	instance.style.fill_colors:on_changed(    instance,function() if canvas then recanvas() end end)
-	instance.style.border:on_changed(         instance,function() if canvas then recanvas() end end)
-	instance.style.border:on_changed(         instance,function() if canvas then recanvas() end end)
-	instance.style.border.colors:on_changed(  instance,function() if canvas then recanvas() end end)
-	instance.style.fill_colors:on_changed(    instance,function() if canvas then recanvas() end end)
+	local canvas_callback = function() if canvas then instance:create_canvases() end end
 	
-	
+	instance.style.fill_colors:on_changed(    instance, canvas_callback )
+	instance.style.border:on_changed(         instance, canvas_callback )
+	instance.style.border.colors:on_changed(  instance, canvas_callback )
 	----------------------------------------------------------------------------
 	--Key events
 	function instance:on_key_focus_in()    instance.focused = true  end 
@@ -377,7 +408,7 @@ Button = function(parameters)
 	
 	instance:set(parameters)
 	
-	if images == nil then recanvas() end
+	if canvas then instance:create_canvases() end
 	
 	label.state = define_label_animation(instance.style.text.colors)
 	
