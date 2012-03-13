@@ -229,6 +229,8 @@ local lat_lng_callback = function(zip_info)
                 
             end
             
+            settings.zip = zip_info.results[1].address_components[1].short_name
+            
             state:change_state_to("ANIMATING_OUT")
             
             Rolodex_Constructor(resp)
