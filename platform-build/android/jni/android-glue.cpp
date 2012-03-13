@@ -366,7 +366,7 @@ void install_apps(ANativeActivity* activity)
     AAssetDir* apps_dir = AAssetManager_openDir(mgr, "apps");
 
     const char *app_name;
-    while(app_name = AAssetDir_getNextFileName(apps_dir))
+    while(NULL != (app_name = AAssetDir_getNextFileName(apps_dir)))
     {
         // Check if it's a ZIP file
         if( strlen(app_name) > 4 )
@@ -422,6 +422,7 @@ void *start_trickplay(void *state)
     ANativeActivity_finish(my_state->activity);
 
     pthread_exit(NULL);
+    return NULL;
 }
 
 void window_created(ANativeActivity* activity, ANativeWindow* window)
