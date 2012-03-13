@@ -825,7 +825,8 @@ class MainWindow(QMainWindow):
         		    self.replace_ui.pushButton_replaceFind.setEnabled(False)
 
     			if self.forward is not None :
-    			    self.replace_ui.radioButton_fw.setChecked(self.forward)
+    			    if self.forward is False:
+    			        self.replace_ui.radioButton_bw.setChecked(True)
     			if self.cs is not None :
     			    self.replace_ui.checkBox_case.setChecked(self.cs)
     			if self.wo is not None :
