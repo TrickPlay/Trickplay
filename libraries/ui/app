@@ -1,9 +1,9 @@
 app=
 {
-    id          = "com.trickplay.weather",
-    release     = "3",
-    version     = "1.1",
-    name        = "Weather",
+    id          = "com.trickplay.widget_text",
+    release     = "1",
+    version     = "0.1",
+    name        = "Widget Test App",
     author      = "Alex Indaco",
     copyright   = "© Trickplay Inc."
 }
