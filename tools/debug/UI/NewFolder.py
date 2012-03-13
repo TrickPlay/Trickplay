@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'NewFolder.ui'
 #
-# Created: Tue Feb  7 13:56:07 2012
+# Created: Mon Feb 27 13:42:14 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,12 +35,11 @@ class Ui_newFolderDialog(object):
         self.gridLayout.setVerticalSpacing(0)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.folder_name = QtGui.QLineEdit(newFolderDialog)
+        self.folder_name.setFocus()
         self.folder_name.setPlaceholderText(_fromUtf8(""))
         self.folder_name.setObjectName(_fromUtf8("folder_name"))
         self.gridLayout.addWidget(self.folder_name, 0, 1, 1, 1)
         self.labelName = QtGui.QLabel(newFolderDialog)
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.labelName.setFont(font)
         self.labelName.setObjectName(_fromUtf8("labelName"))
         self.gridLayout.addWidget(self.labelName, 0, 0, 1, 1)
@@ -50,6 +49,7 @@ class Ui_newFolderDialog(object):
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), newFolderDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), newFolderDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(newFolderDialog)
+        newFolderDialog.setTabOrder(self.folder_name, self.buttonBox)
 
     def retranslateUi(self, newFolderDialog):
         newFolderDialog.setWindowTitle(QtGui.QApplication.translate("newFolderDialog", "New Folder", None, QtGui.QApplication.UnicodeUTF8))

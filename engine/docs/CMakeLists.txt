@@ -37,6 +37,7 @@ if (NATURAL_DOCS)
             -xi ${PROJECT_SOURCE_DIR}/engine/lua
             -xi ${PROJECT_SOURCE_DIR}/engine/public
             -xi ${PROJECT_SOURCE_DIR}/engine/source
+            -xi ${PROJECT_SOURCE_DIR}/engine/docs/devtools/ide/tutorial
             -o HTML ${PROJECT_BINARY_DIR}/docs/rte
             -p ${PROJECT_SOURCE_DIR}/engine/docs/rte/config
             -s Default Trickplay

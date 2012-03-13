@@ -482,12 +482,15 @@ void lb_inherit(lua_State*L,const char*metatable)
 void lb_chain(lua_State*L,int index,const char * metatable )
 {
     g_assert( lua_isuserdata( L , index ) );
-    g_assert( metatable );
 
     LSG;
     lua_newtable( L );
     int t = lua_gettop( L );
-    lb_inherit( L , metatable );
+
+    if ( metatable )
+    {
+    	lb_inherit( L , metatable );
+    }
 
     lua_getmetatable( L , index );
     lb_inherit( L , 0 );
