@@ -134,7 +134,15 @@ App_State.state:add_state_change_function(
             
             GET_LAT_LNG( App_State.zip, function(zip_info)
                 
-                if zip_info == false then
+                if zip_info == false or
+                    type(zip_info)                                  ~= "table" or
+                    type(zip_info.results)                          ~= "table" or
+                    type(zip_info.results[1])                       ~= "table" or
+                    type(zip_info.results[1].address_components)    ~= "table" or
+                    type(zip_info.results[1].geometry)              ~= "table" or
+                    type(zip_info.results[1].geometry.location)     ~= "table" or
+                    type(zip_info.results[1].geometry.location.lat) == "nil" or
+                    type(zip_info.results[1].geometry.location.lng) == "nil" then
                     
                     Loading_G:message("Having trouble connecting")
                     
