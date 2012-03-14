@@ -26,7 +26,6 @@ from Console.TrickplayConsole import TrickplayConsole
 from UI.Search import Ui_searchDialog
 from UI.Replace import Ui_replaceDialog
 from UI.GotoLine import Ui_gotoLineDialog
-from UI.Preference import Ui_preferenceDialog
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
