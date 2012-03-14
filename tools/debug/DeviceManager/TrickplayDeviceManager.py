@@ -377,7 +377,7 @@ class TrickplayDeviceManager(QWidget):
 			                # TODO: Here we should enable the debug UI
 		                    self.main.debug_stepinto.setEnabled(True)
 		                    self.main.debug_stepover.setEnabled(True)
-		                    self.main.debug_stepout.setEnabled(True)
+		                    self.main.debug_stepout.setEnabled(False)
 		                    self.main.debug_pause_bt.setEnabled(False)
 		                    self.main.debug_continue_bt.setEnabled(True)
 
@@ -385,7 +385,7 @@ class TrickplayDeviceManager(QWidget):
 		                    self.main.ui.actionPause.setEnabled(False)
 		                    self.main.ui.actionStep_into.setEnabled(True)
 		                    self.main.ui.actionStep_over.setEnabled(True)
-		                    self.main.ui.actionStep_out.setEnabled(True)
+		                    self.main.ui.actionStep_out.setEnabled(False)
 
 		                    self.main.debug_run = False
 

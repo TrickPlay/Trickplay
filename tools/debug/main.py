@@ -574,8 +574,8 @@ class MainWindow(QMainWindow):
     
             self.debug_stop.setEnabled(True)
             self.debug_stepinto.setEnabled(True)
-            self.debug_stepover.setEnabled(True)
-            self.debug_stepout.setEnabled(True)
+            self.debug_stepover.setEnabled(False)
+            self.debug_stepout.setEnabled(False)
             self.debug_continue_bt.setEnabled(True)
 
             self.ui.action_Stop.setEnabled(True)
@@ -583,7 +583,7 @@ class MainWindow(QMainWindow):
             self.ui.actionPause.setEnabled(False)
             self.ui.actionStep_into.setEnabled(True)
             self.ui.actionStep_over.setEnabled(True)
-            self.ui.actionStep_out.setEnabled(True)
+            self.ui.actionStep_out.setEnabled(False)
     
     	    self.chgTool_debug()
             self._deviceManager.ui.comboBox.setEnabled(False)
@@ -1040,6 +1040,7 @@ class MainWindow(QMainWindow):
 
     def debug_step_out(self):
 		return
+
     def editorMenuEnabled(self, enabled=True):
         self.ui.action_Save.setEnabled(enabled)
         self.ui.action_Save_As.setEnabled(enabled)
@@ -1068,4 +1069,4 @@ class MainWindow(QMainWindow):
         self.ui.actionPause.setEnabled(enabled)
         self.ui.actionStep_into.setEnabled(enabled)
         self.ui.actionStep_over.setEnabled(enabled)
-        self.ui.actionStep_out.setEnabled(enabled)
+        self.ui.actionStep_out.setEnabled(False)
