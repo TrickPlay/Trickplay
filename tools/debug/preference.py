@@ -13,7 +13,7 @@ class Preference():
 
     def __init__(self, main = None):
         self.main= main
-        self.lexerLua = ["Default", "Comment", "Line Comment", "", "Number", "Keyword", "String", "Character", "Literal String",  "", "Operator", "Identifier", "Unclosed String", "Basic Functions", "Library Functions",
+        self.lexerLua = ["Default", "Block Comment", "Line Comment", "", "Number", "Keyword", "String", "Character", "Literal String",  "", "Operator", "Identifier", "Unclosed String", "Basic Functions", "Library Functions",
         "Coroutines, I/O, etc.", "", "", "", "", "Label"] 
         self.lexerLuaDesc = ["The Default.", "A block comment.\n--[[ THIS TEXT IS A BLOCK COMMENT ]]--", "A line comment.\n-- THIS TEXT IS A LINE COMMENT", "", "A Number.", "A Keyword.", "A String.", "A Character.", "A literal string.",  "Preprocessor.", "An operator.", "An identifier.", "The end of a line where a string is not closed.", "Basic functions.", "String, table and maths functions.", "Coroutines, I/O and system facilities.", "", "", "", "", "A label."]
         self.lexerLuaFColorDefault = ['#000000', '#007F00', '#007F00', '#000000', '#007F7F', '#00007F', '#7F007F',
