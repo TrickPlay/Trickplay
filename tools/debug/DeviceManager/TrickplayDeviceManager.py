@@ -113,18 +113,24 @@ class TrickplayDeviceManager(QWidget):
 					if data is not None:
 					    if data.has_key("debugger"):
 					        self.ui.comboBox.setItemData(index, data["debugger"], DEBUG_PORT)
-					        #print("[VDBG] debug Port : %s"%d_port)
+					        print("[VDBG] debug Port : %s"%data["debugger"], d[0])
+					    else :
+					        print("[VDBG] Didn't get %s's debug_port information "%d[0])
 					    if data.has_key("http"):
 					        self.http_port = data["http"]
 					        #print("[VDBG] http Port : %s"%self.http_port)
 					        self.ui.comboBox.setItemData(index, data["http"], HTTP_PORT)
+					    else :
+					        print("[VDBG] Didn't get %s's http_port information "%d[0])
 					    if data.has_key("console"):
 					        self.console_port = data["console"]
 					        #print("[VDBG] console Port : %s"%self.console_port)
 					        self.ui.comboBox.setItemData(index, data["console"], CONSOLE_PORT)
 					        CON.port = self.http_port
+					    else :
+					        print("[VDBG] Didn't get %s's console_port information "%d[0])
 					else:
-					    print("[VDBG] Didn't get Control information ")
+					    print("[VDBG] Didn't get %s's Control information "%d[0])
 
 			elif event.type() == REMEVENT:
 				d = event.dict
@@ -528,6 +534,9 @@ class TrickplayDeviceManager(QWidget):
         # Push to remote device
         else:
             if dMode == True:
+                if self.debug_port is None:
+                    print("[VDBG] Debug port is missing")
+                    return False
                 # POST http://<host>:<debugger port>/debugger "r"
                 #url = QUrl()
                 #url.setScheme( "http" )
