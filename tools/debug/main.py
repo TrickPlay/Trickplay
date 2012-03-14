@@ -58,12 +58,12 @@ class MainWindow(QMainWindow):
         self._preference = Preference(self)
 
 		# Toolbar font 
-        font = QFont()
+        font = QFont()   
         font.setPointSize(11)
 
         # Create FileSystem
         self.ui.FileSystemDock.toggleViewAction().setText("File system")
-        self.ui.FileSystemDock.toggleViewAction().setFont(font)
+        #self.ui.FileSystemDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.FileSystemDock.toggleViewAction())
         self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fileWindowClicked)
         self._fileSystem = FileSystem(self._preference)
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         
         # Create Inspector
         self.ui.InspectorDock.toggleViewAction().setText("Inspector")
-        self.ui.InspectorDock.toggleViewAction().setFont(font)
+        #self.ui.InspectorDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
         self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
         self._inspector = TrickplayInspector()
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
         
         # Create Console
         self.ui.ConsoleDock.toggleViewAction().setText("Console")
-        self.ui.ConsoleDock.toggleViewAction().setFont(font)
+        #self.ui.ConsoleDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.ConsoleDock.toggleViewAction())
         self.ui.ConsoleDock.toggleViewAction().triggered.connect(self.consoleWindowClicked)
         self.console = TrickplayConsole()
@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
 
 		# Create Debug 
         self.ui.DebugDock.toggleViewAction().setText("Debug")
-        self.ui.DebugDock.toggleViewAction().setFont(font)
+        #self.ui.DebugDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.DebugDock.toggleViewAction())
         self.ui.DebugDock.toggleViewAction().triggered.connect(self.debugWindowClicked)
         self._debug = TrickplayDebugger(self)
@@ -108,7 +108,7 @@ class MainWindow(QMainWindow):
         
 		#Create Backtrace
         self.ui.BacktraceDock.toggleViewAction().setText("Backtrace")
-        self.ui.BacktraceDock.toggleViewAction().setFont(font)
+        #self.ui.BacktraceDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.BacktraceDock.toggleViewAction())
         self.ui.BacktraceDock.toggleViewAction().triggered.connect(self.traceWindowClicked)
         self.backtrace = TrickplayBacktrace()
@@ -116,7 +116,7 @@ class MainWindow(QMainWindow):
         self.ui.BacktraceLayout.addWidget(self.backtrace)
         self.ui.BacktraceDock.hide()
 
-		#File Menu
+		#File Menu    
         QObject.connect(self.ui.actionNew_File, SIGNAL("triggered()"),  self.newFile)
         QObject.connect(self.ui.action_New, SIGNAL("triggered()"),  self.new)
         QObject.connect(self.ui.actionOpen_App, SIGNAL("triggered()"),  self.openApp)
