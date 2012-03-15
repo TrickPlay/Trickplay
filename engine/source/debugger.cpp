@@ -115,7 +115,9 @@ class HCommand : public Debugger::Command
 {
 public:
 
-	HCommand( const HttpServer::Request::Body & body , HttpServer::Response & _response )
+	HCommand( GMainContext * _gctx , const HttpServer::Request::Body & body , HttpServer::Response & _response )
+	:
+		gctx( _gctx )
 	{
 		line = String( body.get_data() , body.get_length() );
 
@@ -124,10 +126,7 @@ public:
 
 	virtual ~HCommand()
 	{
-		if ( response )
-		{
-			response->resume();
-		}
+		resume();
 	}
 
 	virtual String get() const
@@ -142,11 +141,7 @@ public:
 			return false;
 		}
 
-		response->set_status( HttpServer::HTTP_STATUS_OK );
-		response->set_response( "application/json" , obj.stringify() );
-		response->resume();
-
-		response = 0;
+		resume( obj.stringify() );
 
 		fprintf( stdout , "\n" );
 		fflush( stdout );
@@ -165,6 +160,67 @@ public:
 
 private:
 
+	// In order to execute the actual resume in the server thread,
+	// we create a struct with the response and the content and
+	// queue an idle source in that thread's main context.
+
+	struct ResumeInfo
+	{
+		ResumeInfo( const String & _content , HttpServer::Response * _response )
+		:
+			content( _content ),
+			response( _response )
+		{}
+
+		static void destroy( gpointer me )
+		{
+			ResumeInfo * info = ( ResumeInfo * ) me;
+
+			if ( info->response )
+			{
+				info->response->unref();
+			}
+
+			delete info;
+		}
+
+		String 					content;
+		HttpServer::Response * 	response;
+	};
+
+	static gboolean resume_it( gpointer resume_info )
+	{
+		ResumeInfo * info = ( ResumeInfo * ) resume_info;
+
+		if ( ! info->content.empty() )
+		{
+			info->response->set_status( HttpServer::HTTP_STATUS_OK );
+			info->response->set_response( "application/json" , info->content );
+		}
+
+		info->response->resume();
+
+		info->response = 0;
+
+		return FALSE;
+	}
+
+	void resume( const String & content = String() )
+	{
+		if ( response )
+		{
+			GSource * source = g_idle_source_new();
+			g_source_set_priority( source , G_PRIORITY_DEFAULT );
+			g_source_set_callback( source , resume_it , new ResumeInfo( content , response ) , ResumeInfo::destroy );
+			g_source_attach( source , gctx );
+			g_source_unref( source );
+
+			response = 0;
+		}
+	}
+
+
+	GMainContext *			gctx;
 	String 					line;
 	HttpServer::Response * 	response;
 
@@ -315,6 +371,8 @@ protected:
 		{
 			tplog2( "STOPPING HTTP SERVER" );
 
+			server->unregister_handler( "/debugger" );
+
 			server->quit();
 
 			delete server;
@@ -367,7 +425,7 @@ protected:
     		return;
     	}
 
-    	g_async_queue_push( queue , new HCommand( body , response ) );
+    	g_async_queue_push( queue , new HCommand( gctx , body , response ) );
     }
 
     static gpointer process( gpointer me )
@@ -627,6 +685,10 @@ void Debugger::uninstall()
         lua_sethook( app->get_lua_state(), lua_hook, 0, 0 );
 
         server->clear_pending_commands();
+
+        installed = false;
+
+        tplog( "UNINSTALLED FOR %s" , app->get_id().c_str() );
     }
 }
 
@@ -638,10 +700,11 @@ void Debugger::install( bool break_next_line )
 
     if ( installed )
     {
+        tplog( "BREAK NEXT IS %s" , break_next ? "TRUE" : "FALSE" );
         return;
     }
 
-    server->clear_pending_commands();
+    tplog( "INSTALLED FOR %s : BREAK NEXT IS %s" , app->get_id().c_str() , break_next ? "TRUE" : "FALSE" );
 
     lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET |*/ LUA_MASKLINE, 0 );
 
@@ -662,8 +725,7 @@ void Debugger::lua_hook( lua_State * L, lua_Debug * ar )
 
 void Debugger::break_next_line()
 {
-    install();
-    break_next = true;
+    install( true );
 }
 
 //.............................................................................
@@ -894,6 +956,8 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 	{
 		reply = get_location( L , ar );
 	}
+
+	reply[ "command" ] = command;
 
 	if ( command == "i" )
 	{
