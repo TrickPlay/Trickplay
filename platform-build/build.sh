@@ -256,7 +256,7 @@ PANGO_V="${PANGO_MV}.4"
 PANGO_URL="http://ftp.gnome.org/pub/GNOME/sources/pango/${PANGO_MV}/pango-${PANGO_V}.tar.bz2"
 PANGO_DIST="pango-${PANGO_V}.tar.bz2"
 PANGO_SOURCE="pango-${PANGO_V}"
-PANGO_COMMANDS="./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --without-x $SHARED --with-pic --with-included-modules=yes && make ${NUM_MAKE_JOBS} install"
+PANGO_COMMANDS="(./autogen.sh 2>/dev/null); patch -p1 -i ${THERE}/patches/${PANGO_SOURCE}/NOT-IN-QUILT-APPLIED-AFTER-AUTOCONF-fixup-config-for-android.patch && ./configure --prefix=$PREFIX --host=$HOST --build=$BUILD --without-x $SHARED --with-pic --with-included-modules=yes && make ${NUM_MAKE_JOBS} install"
 PANGO_DEPENDS="CAIRO FREETYPE FONTCONFIG"
 #------------------------------------------------------------------------------
 # jpeg
