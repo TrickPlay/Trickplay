@@ -18,7 +18,7 @@ class TrickplayDebugger(QWidget):
         self.ui = Ui_TrickplayDebugger()
         self.ui.setupUi(self)
 
-        self.headers = ["Name","Type","Value"]
+        self.headers = ["Name","Value","Type"]
         self.ui.localTable.setSortingEnabled(False)
         self.ui.localTable.setColumnCount(len(self.headers))
         self.ui.localTable.setHorizontalHeaderLabels(self.headers)
@@ -192,6 +192,10 @@ class TrickplayDebugger(QWidget):
 			for item in local_info[key]:
 				newitem = QTableWidgetItem(item)
 				newitem.setFont(self.font)
+				if n == 1 :  
+				    self.ui.localTable.setItem(m, n+1, newitem)
+				elif n == 2 :  
+				    self.ui.localTable.setItem(m, n-1, newitem)
 				self.ui.localTable.setItem(m, n, newitem)
 				m += 1
 			n += 1
