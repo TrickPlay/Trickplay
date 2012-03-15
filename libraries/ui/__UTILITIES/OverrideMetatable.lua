@@ -49,6 +49,48 @@ function is_table_or_nil(name,input)
 end
 
 
+function matches_nil_table_or_type(constructor,req_type,input)
+    
+    return input == nil and constructor() or
+        type(input) == "table" and (input.type == req_type and input or constructor(input)) or
+        error("input did not match nil, table, or "..req_type,2)
+    
+end
+
+function cover_defaults(parameters, defaults)
+    
+    if parameters == nil then return defaults end
+    
+    for k,v in pairs(defaults) do
+        
+        if type(v) == "table" then
+            
+            if type(parameters[k]) == "table" then
+                
+                cover_defaults(parameters[k],v)
+                
+            elseif parameters[k] == nil then
+                
+                parameters[k] = cover_defaults( {}, v)
+                
+                
+                
+            end
+            
+        elseif parameters[k] == nil then
+            
+            parameters[k] = v
+            
+        end
+        
+    end
+    
+    return parameters
+    
+end
+
+
+
 metatable_to_G = {
     __index    = function(t,k) return _G[k] end,
     __newindex = function(t,k,v) _G[k] = v end,
