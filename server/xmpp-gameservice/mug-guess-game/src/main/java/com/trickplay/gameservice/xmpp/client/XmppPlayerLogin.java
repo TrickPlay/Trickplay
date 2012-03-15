@@ -11,7 +11,7 @@ public class XmppPlayerLogin {
 		}
 		String username = args[0];
 		String password = args[1];
-		XmppManager xmppManager = new XmppManager("localhost", 5222);
+		GameServiceProxy xmppManager = new GameServiceProxy("localhost", 5222);
 
 		try {
 			xmppManager.init();

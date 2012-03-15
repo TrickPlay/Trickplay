@@ -18,9 +18,7 @@ package org.frogx.service.core;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -201,8 +199,53 @@ public class DefaultMultiUserGame implements MultiUserGame{
 	public String getCategory() {
 		return category;
 	}
-
+/*
 	public boolean isCorrespondence() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	*/
+
+	public GameType getGameType() {
+		// TODO Auto-generated method stub
+		return GameType.online;
+	}
+
+	public TurnPolicy getTurnPolicy() {
+		// TODO Auto-generated method stub
+		return TurnPolicy.custom;
+	}
+
+	public boolean allowsJoinAfterStart() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public int getMinPlayersForStart() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public RoleConfig getRoleConfig(String role) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String[] getRoles() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getFirstRole() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public long getMaxAllowedTimeForMove() {
+		return 300 * 1000; // 5 minutes
+	}
+
+	public boolean abortWhenPlayerLeaves() {
 		// TODO Auto-generated method stub
 		return false;
 	}

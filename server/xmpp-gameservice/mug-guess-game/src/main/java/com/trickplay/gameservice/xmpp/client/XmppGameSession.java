@@ -16,7 +16,7 @@ import com.trickplay.gameservice.xmpp.mug.TurnMessage;
 public abstract class XmppGameSession implements MatchStateListener,
 		PlayerStatusListener, GamePlayListener {
 
-	protected XmppManager xmppManager;
+	protected GameServiceProxy xmppManager;
 	protected String gameId;
 	protected String gameName;
 	protected AtomicBoolean gameOver = new AtomicBoolean();
@@ -86,12 +86,12 @@ public abstract class XmppGameSession implements MatchStateListener,
 
 	public abstract void updateState(String state);
 
-	protected final XmppManager getXmppManager() {
+	protected final GameServiceProxy getXmppManager() {
 		return xmppManager;
 	}
 
 	public XmppGameSession(String gameName) throws Exception {
-		xmppManager = new XmppManager("localhost", 5222);
+		xmppManager = new GameServiceProxy("localhost", 5222);
 		xmppManager.init();
 		xmppManager.registerGamePlayListener(this);
 		xmppManager.registerMatchStateListener(this);

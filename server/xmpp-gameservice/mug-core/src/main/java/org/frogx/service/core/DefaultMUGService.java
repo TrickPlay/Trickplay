@@ -29,8 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.frogx.service.api.MUGManager;
-import org.frogx.service.api.MUGMatch;
-import org.frogx.service.api.MUGOccupant;
+import org.frogx.service.api.MUGMatch.TurnInfo;
 import org.frogx.service.api.MUGPersistenceProvider;
 import org.frogx.service.api.MUGRoom;
 import org.frogx.service.api.MUGService;
@@ -398,7 +397,10 @@ public class DefaultMUGService implements MUGService {
 					return;
 				}
 			}
-			getGameSession(packet.getFrom()).process(packet);
+			MUGSession session = getGameSession(packet.getFrom());
+			synchronized (session) {
+				session.process(packet);
+			}
 		}
 		catch (Exception e) {
 			log.error(mugManager.getLocaleUtil().getLocalizedString("admin.error"), e);
@@ -690,29 +692,45 @@ public class DefaultMUGService implements MUGService {
 		final long deadline = System.currentTimeMillis() - sessiontimeout;
 		for (DefaultMUGSession session : sessions.values()) {
 			try {
+				synchronized (session) {
 				// If user is not present in any room then remove the session
-				if (!session.isParticipant()) {
-					removeSession(session.getAddress());
-					continue;
-				}
-				// Do nothing if this feature is disabled (i.e sessiontimeout equals -1)
-				if (sessiontimeout < 1) {
-					continue;
-				}
-				if (session.getLastPacketTime() < deadline) {
-					removeSession(session.getAddress());
+					if (!session.isParticipant()) {
+						removeSession(session.getAddress());
+						continue;
+					}
+					// Do nothing if this feature is disabled (i.e sessiontimeout equals -1)
+					if (sessiontimeout < 1) {
+						continue;
+					}
+					if (session.getLastPacketTime() < deadline) {
+						removeSession(session.getAddress());
+					}
 				}
 			}
 			catch (Throwable e) {
 				log.error(mugManager.getLocaleUtil().getLocalizedString("admin.error"), e);
 			}
 		}
+		
+		// go through all the rooms and make sure the matches are progressing
+		if (rooms != null) {
+			for (MUGRoom room: rooms.values()) {
+				synchronized(room) {
+					TurnInfo tinfo = room.getMatch() != null ? room.getMatch().getTurnInfo() : null;
+					if (tinfo != null && tinfo.getTarget() != null) {
+						long expireUntil = System.currentTimeMillis() - room.getGame().getMaxAllowedTimeForMove();
+						if (tinfo.getTarget().getLastPacketTime() < expireUntil)
+							room.leave(tinfo.getTarget());
+					}
+				}
+			}
+		}
 	}
 	
 	private void removeSession(JID jabberID) {
 		DefaultMUGSession session = sessions.remove(jabberID);
+		/*
 		if (session != null) {
-			/*
 			for (MUGOccupant occupant : session.getOccupants()) {
 				try {
 					occupant.getGameRoom().leave(occupant);
@@ -721,8 +739,8 @@ public class DefaultMUGService implements MUGService {
 					log.error("Can't leave game room: " + jabberID, e);
 				}
 			}
-			*/
 		}
+		*/
 	}
 	
 	public MUGPersistenceProvider getPersistenceProvider() {

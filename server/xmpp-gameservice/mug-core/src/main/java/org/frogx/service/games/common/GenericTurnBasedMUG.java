@@ -1,11 +1,12 @@
 package org.frogx.service.games.common;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -15,6 +16,7 @@ import org.frogx.service.api.MUGMatch;
 import org.frogx.service.api.MUGRoom;
 import org.frogx.service.api.MUGService;
 import org.frogx.service.api.MultiUserGame;
+import org.frogx.service.core.RoleConfigImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,8 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 	private static final String[] kEmptyStringArray = {};
 	private static final Logger log = LoggerFactory.getLogger(GenericTurnBasedMUG.class);
 	
+	private static final long TURN_TIME_LIMIT_CORRESPONDENCE = 1000 * 24 * 60 * 60 * 5; // 5 days in millis
+	private static final long TURN_TIME_LIMIT_ONLINE = 1000 * 5 * 60; // 5 minutes in millis
 	
 	private MUGManager mugManager;
 	
@@ -29,16 +33,22 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 	
 	private String name;
 	
+	private GameType gameType = GameType.correspondence;
+	private TurnPolicy turnPolicy = TurnPolicy.roundrobin;
 	private String namespace;
-	private boolean correspondence=true;
 	
 	private String description;
 	private static Pattern validNamePattern = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_\\.\\-]*){4,}$");
 	private String category;
 	private Map<String, Integer> roleToIndexMap = new LinkedHashMap<String, Integer>();
 	private String[] roles = kEmptyStringArray;
-	private String startingPlayerRole;
+	private String firstRole;
 	private Set<GameAttribute> attributes = new LinkedHashSet<GameAttribute>();
+
+	private Map<String, RoleConfig> roleConfigMap = new LinkedHashMap<String, RoleConfig>();
+	private int minPlayersForStart = -1;
+	private boolean joinAfterStart = true;
+	private boolean abortWhenPlayerLeaves = true;
 	
 	public GenericTurnBasedMUG(MUGManager mugManager, Element gameDescriptor) {
 		this.mugManager = mugManager;
@@ -53,47 +63,73 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 	 */
 	@SuppressWarnings("unchecked")
 	private void readGameDescriptor(Element gameDescriptor) {
-			for (Iterator i = gameDescriptor.elementIterator(); i.hasNext();) {
-				Element child = (Element) i.next();
-				if ("name".equals(child.getName())) {
-					name = child.getText();
-					namespace = MUGService.mugNS + "/" + name;
+		int cntPlayersCannotStart = 0;
+	//	boolean processRoles = false;
+		List<String> roleList = new ArrayList<String>();
+		for (Iterator i = gameDescriptor.elementIterator(); i.hasNext();) {
+			Element child = (Element) i.next();
+			if ("name".equals(child.getName())) {
+				name = child.getText();
+				namespace = MUGService.mugNS + "/" + name;
+			} else if ("description".equals(child.getName())) {
+				description = child.getText();
+			} else if ("category".equals(child.getName())) {
+				category = child.getText();
+			} else if ("roles".equals(child.getName())) {
+		//		processRoles = true;
+			//} else if (processRoles && "role".equals(child.getName())) {
+				List<Element> rolesList = (List<Element>)child.elements("role");
+				if (rolesList == null)
+					continue;
+				for(Element roleElem: rolesList) {
+					roleList.add(roleElem.getName());
+					RoleConfigImpl rc = new RoleConfigImpl(roleElem.getTextTrim());
+					if (roleElem.element("firstRole") != null) {
+						firstRole = rc.getRole();
+						rc.setFirstRole(true);
+					}
+					if (roleElem.element("cannotStart") != null) {
+						rc.setNotAllowedToStart(true);
+						cntPlayersCannotStart++;
+					}
+					roleConfigMap.put(rc.getRole(), rc);
 				}
-				else if ("description".equals(child.getName())) {
-					description = child.getText();
+			} else if ("gameType".equals(child.getName())) {
+				gameType = GameType.fromString(child.getTextTrim());
+			} else if ("turnPolicy".equals(child.getName())) {
+				turnPolicy = TurnPolicy.fromString(child.getTextTrim());
+			} else if ("minPlayersForStart".equals(child.getName())) {
+				try {
+					minPlayersForStart = Integer.parseInt(child.getTextTrim());
+				} catch (NumberFormatException ex) {
+					log.warn("Invalid value specified for minPlayersForStart in game="+name+". defaulting to number of specified roles");
+					minPlayersForStart = -1;
 				}
-				else if ("category".equals(child.getName())) {
-					category = child.getText();
-				} 
-				else if ("roles".equals(child.getName())) {
-					int roleIdx = 0;
-					StringTokenizer tokens = new StringTokenizer(
-							child.getText(), ",");
-					while (tokens.hasMoreElements()) {
-						String role = tokens.nextToken().trim();
-						if (!roleToIndexMap.containsKey(role))
-							roleToIndexMap.put(role, roleIdx++);
-					}
-					roleIdx = 0;
-					roles = new String[roleToIndexMap.size()];
-					for(String role : roleToIndexMap.keySet()) {
-						roles[roleIdx++] = role;
-					}
-				} 
-				else if ("startingPlayerRole".equals(child.getName())) {
-					startingPlayerRole = child.getTextTrim();
-				} 
-				else if("attribute".equals(child.getName())) {
-					GameAttribute attribute = new GameAttribute(
-							child.attributeValue("name"),
-							child.attributeValue("defaultValue")
-							);
-					
-					if (!attributes.contains(attribute)) {
-						attributes.add(attribute);
-					}
+				
+			} else if ("joinAfterStart".equals(child.getName())) {
+				try {
+					joinAfterStart = Boolean.valueOf(child.getTextTrim());
+				} catch (Exception e) {
+					log.warn("Invalid value specified for joinAfterStart in game="+name+". defaulting to true");
+					joinAfterStart = true;
+				}
+			} else if ("abortWhenPlayerLeaves".equals(child.getName())) {
+				try {
+					abortWhenPlayerLeaves = Boolean.valueOf(child.getTextTrim());
+				} catch (Exception e) {
+					log.warn("Invalid value specified for abortOnIdleTimeout in game="+name+". defaulting to true");
+					abortWhenPlayerLeaves = true;
+				}
+			} else if ("attribute".equals(child.getName())) {
+				GameAttribute attribute = new GameAttribute(
+						child.attributeValue("name"),
+						child.attributeValue("defaultValue"));
+
+				if (!attributes.contains(attribute)) {
+					attributes.add(attribute);
 				}
 			}
+		}
 		
 		// verify
 		if (name == null) {
@@ -105,13 +141,50 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 		if (description == null || description.trim().length() == 0) {
 			description = name;
 		}
-		if (roles == null || roles.length < 2) {
+		if (roleConfigMap == null || roleConfigMap.size() < 2) {
 			throw new IllegalArgumentException("Atleast 2 unique roles should be specified for a turn-based multi-user game");
 		}
-		if (startingPlayerRole==null)
-			startingPlayerRole = roles[0];
-		if (startingPlayerRole != null && !roleToIndexMap.containsKey(startingPlayerRole)) {
+		if (cntPlayersCannotStart >= roleConfigMap.size()) {
+			throw new IllegalArgumentException("None of specified roles can start the game. Invalid configuration");
+		}
+		if (gameType == null) {
+			throw new IllegalArgumentException("GameType should be specified. Valid types are correspondence and online");
+		}
+		if (turnPolicy == null) {
+			throw new IllegalArgumentException("TurnPolicy should be specified. Available options are roundrobin, specifiedRole, simultaneous and custom");
+		}
+		
+		roles = new String[roleConfigMap.size()];
+		int i=0;
+		for(RoleConfig rc: roleConfigMap.values()) {
+			roleToIndexMap.put(rc.getRole(), i);
+			roles[i++] = rc.getRole();
+		}
+		if (firstRole==null)
+			firstRole = roles[0];
+		if (firstRole != null && !roleToIndexMap.containsKey(firstRole)) {
 			throw new IllegalArgumentException("Starting player role should be one of those specified in roles element");
+		}
+		
+		if (minPlayersForStart < 0) {
+			if (joinAfterStart)
+				minPlayersForStart = 1;
+			else {
+				minPlayersForStart = roleConfigMap.size() - cntPlayersCannotStart;
+			}
+		} else if (joinAfterStart == false) {
+			if (minPlayersForStart < 2) {
+			// 
+				throw new IllegalArgumentException(
+						"Invalid value "+ minPlayersForStart+" specified for minPlayersForStart for game:"+name
+						+". Minimum of players required to start should be atleast 2");
+			} 
+		}
+		
+		if (minPlayersForStart > roleConfigMap.size() - cntPlayersCannotStart) {
+			throw new IllegalArgumentException("Invalid configuration for game. MinPlayersForStart "
+					+Integer.toString(minPlayersForStart)
+					+ " is more than the number of roles in configuration which are allowed to start a game");
 		}
 	}
 	
@@ -190,11 +263,11 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 	}
 
 	public String getStartingPlayerRole() {
-		return startingPlayerRole;
+		return firstRole;
 	}
 	
 	public int getStartingPlayerRoleIndex() {
-		return getRoleIndex(startingPlayerRole);
+		return getRoleIndex(firstRole);
 	}
 
 	public Set<GameAttribute> getAttributes() {
@@ -214,12 +287,51 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 			return null;
 		return roles[roleIndex];
 	}
-
+/*
 	public boolean isCorrespondence() {
-		return correspondence;
+		return GameType.correpondence == gameType;
 	}
+	*/
 	
 	public boolean isAutonext() {
-		return true;		
+		return turnPolicy == TurnPolicy.roundrobin;		
+	}
+
+	public GameType getGameType() {
+		return gameType;
+	}
+
+	public TurnPolicy getTurnPolicy() {
+		return turnPolicy;
+	}
+
+	public boolean allowsJoinAfterStart() {
+		return joinAfterStart;
+	}
+
+	public int getMinPlayersForStart() {
+		return minPlayersForStart;
+	}
+
+	public RoleConfig getRoleConfig(String role) {
+		return roleConfigMap.get(role);
+	}
+
+	public String getFirstRole() {
+		return firstRole;
+	}
+	
+	public long getMaxAllowedTimeForMove() {
+		switch (gameType) {
+		case correspondence:
+			return TURN_TIME_LIMIT_CORRESPONDENCE;
+		case online:
+			return TURN_TIME_LIMIT_ONLINE;
+		}
+		return TURN_TIME_LIMIT_CORRESPONDENCE;
+	}
+
+	public boolean abortWhenPlayerLeaves() {
+		return abortWhenPlayerLeaves;
 	}
 }

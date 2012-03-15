@@ -25,9 +25,9 @@ package org.frogx.service.core;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.dom4j.DocumentFactory;
@@ -36,10 +36,12 @@ import org.dom4j.Element;
 import org.dom4j.QName;
 import org.frogx.service.api.MUGManager;
 import org.frogx.service.api.MUGMatch;
+import org.frogx.service.api.MUGMatch.Status;
 import org.frogx.service.api.MUGOccupant;
 import org.frogx.service.api.MUGRoom;
 import org.frogx.service.api.MUGService;
 import org.frogx.service.api.MultiUserGame;
+import org.frogx.service.api.MultiUserGame.RoleConfig;
 import org.frogx.service.api.exception.CannotBeInvitedException;
 import org.frogx.service.api.exception.ConflictException;
 import org.frogx.service.api.exception.ForbiddenException;
@@ -190,7 +192,7 @@ public class DefaultMUGRoom implements MUGRoom {
 	/**
 	 * The occupants of the room accessible by the occupants nickname.
 	 */
-	private Map<String,MUGOccupant> occupants = new ConcurrentHashMap<String, MUGOccupant>();
+	private Map<String,MUGOccupant> occupants = new HashMap<String, MUGOccupant>();
 	
 	/**
 	 * A list of the occupants nicknames who want to start the match.
@@ -906,39 +908,51 @@ public class DefaultMUGRoom implements MUGRoom {
 	public boolean startMatch(MUGOccupant occupant) throws RequiredPlayerException, 
 			GameConfigurationException, ComponentException {
 		//TODO: Make this robust against changing roles or nicknames
+		// if already started just return
+		if (match != null && (match.getStatus() == Status.active || match.getStatus() == Status.completed))
+			return true;
+		
 		boolean started = false;
 		if (occupant.hasRole()) {
+			// check if the user's role is allowed to start the match 
+			// otherwise just ignore the start message
+			RoleConfig rc = getGame().getRoleConfig(occupant.getRoleName());
+			if (rc == null || rc.isNotAllowedToStart()) {
+				return started;
+			}
+			
 			if (!startMatch.contains(occupant.getUserAddress().toBareJID())) {
 				startMatch.add(occupant.getUserAddress().toBareJID());
 			}
 
-			
+			/*
 			// If all players sent a start, try to start.
 			if (getGame().isCorrespondence()) {
 				resetStartMatch();
 				match.start();
 				started = true;
 			} else {
-					if (match != null && 
-							match.getPlayers() != null && 
-							match.getPlayers().size() == startMatch.size() ) {
-						resetStartMatch();
-						match.start();
-						started = true;
-					}
-				
-				// Reflect Start Message to other players
-				Message startMessage = new Message();
-				startMessage.setFrom(occupant.getRoomAddress());
-				startMessage.addChildElement("start", MUGService.mugNS + "#user");
-				
-				for (MUGOccupant player : match.getPlayers()) {
-					if (player == occupant)
-						continue;
-					player.send(startMessage);
-				}
-			
+			*/
+			if (match != null && match.getPlayers() != null
+					&& match.getPlayers().size() >= startMatch.size()
+					&& startMatch.size() >= getGame().getMinPlayersForStart()) {
+				resetStartMatch();
+				match.start();
+				started = true;
 			}
+
+			// Reflect Start Message to other players
+			Message startMessage = new Message();
+			startMessage.setFrom(occupant.getRoomAddress());
+			startMessage.addChildElement("start", MUGService.mugNS + "#user");
+
+			for (MUGOccupant player : match.getPlayers()) {
+				if (player == occupant)
+					continue;
+				player.send(startMessage);
+			}
+			
+		/*	} */
 			// If the game has started, broadcast the room state
 			if (started)
 				broadcastRoomPresence();
@@ -955,9 +969,10 @@ public class DefaultMUGRoom implements MUGRoom {
 		if (occupant.getPresence().getType() != Type.unavailable)
 			occupant.setPresence(new Presence(Type.unavailable));
 		
+		// we will inform all the occupants that the user has gone offline. this doesn't mean the user left the game
 		broadcastPresence(occupant);
 		
-		// remove the occupant
+		// remove the occupant if he/she doesn't have a role
 		if (!hasRole && occupants.containsKey(occupant.getUserAddress().toBareJID())) {
 			occupants.remove(occupant.getUserAddress().toBareJID());
 			occupant.destroy();
@@ -975,7 +990,24 @@ public class DefaultMUGRoom implements MUGRoom {
 		
 		// leave the match and inform the occupants about changes
 		match.leave(occupant);
-		broadcastPresence(occupant);
+		// reflect the occupant left message to all other occupants
+	//	broadcastPresence(occupant);
+		// Reflect Start Message to other players
+		Message leftMessage = new Message();
+		leftMessage.setFrom(occupant.getRoomAddress());
+		leftMessage.addChildElement("leave", MUGService.mugNS + "#user");
+
+		for (MUGOccupant player : match.getPlayers()) {
+			if (player == occupant) {
+				continue;
+			}
+			try {
+				player.send(leftMessage);
+			} catch (Exception ex) {
+				// TODO: unable to send message to a player.... handle this gracefully
+			}
+		}
+		
 		try {
 			occupant.send(occupant.getPresence());
 		}
@@ -994,8 +1026,8 @@ public class DefaultMUGRoom implements MUGRoom {
 			broadcastRoomPresence();
 		
 		// reset start counter
-		if (hasRole)
-			resetStartMatch();
+	//	if (hasRole)
+		//	resetStartMatch();
 		
 		// if he was the last, remove the room
 		if (occupants.size() == 0) {

@@ -157,6 +157,8 @@ public interface MUGOccupant {
 	
 	public boolean isAvailable();
 	
+	public long getLastPacketTime();
+	
 	/**
 	 * Called when the occupant is leaving the game room,
 	 * to clean things up.

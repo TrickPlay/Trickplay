@@ -3,6 +3,10 @@ package com.trickplay.gameservice.xmpp.client;
 import java.util.List;
 import java.util.Random;
 
+import com.trickplay.gameservice.xmpp.mug.Game;
+import com.trickplay.gameservice.xmpp.mug.Game.GameType;
+import com.trickplay.gameservice.xmpp.mug.Game.TurnPolicy;
+
 public class XmppGuessGamePlayer1 extends XmppGameSession {
 	
 	private int MAX_ALLOWED_ATTEMPTS = 3;
@@ -30,9 +34,15 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 		}
 		
 		if (!allGames.contains(gameId)) {
-			Game g = new Game(gameName, "challenge game", "none", true);
-			g.addRole("player1");
-			g.addRole("player2");
+			Game g = new Game();
+			g.setName(gameName);
+			g.setDescription("guess the number in 3 attempts to win");
+			g.setCategory("other");
+			g.getRoles().add(new Game.RoleConfig("player1"));
+			g.getRoles().add(new Game.RoleConfig("player2"));
+			g.setJoinAfterStart(true);
+			g.setGameType(GameType.correspondence);
+			g.setTurnPolicy(TurnPolicy.roundrobin);
 			xmppManager.createGame(g);
 		}
 	}

@@ -21,6 +21,11 @@ import org.xmpp.packet.JID;
  */
 public interface MUGMatch {
 	
+	public interface TurnInfo {
+		public MUGOccupant getTarget();
+		public long getStartTime();
+		public long getExpirationTime();
+	}
 	
 	/**
 	 * The Status of a {@see MUGMatch} is part of the game state within a
@@ -58,7 +63,12 @@ public interface MUGMatch {
 		/**
 		 * The match has completed
 		 */
-		completed;
+		completed,
+		
+		/**
+		 * the match was aborted. happens when a partcipant leaves the match
+		 */
+		aborted;
 	}
 	
 	/**
@@ -115,6 +125,8 @@ public interface MUGMatch {
 	 * @return A collection of free roles.
 	 */
 	public Collection<String> getFreeRoles();
+	
+	public TurnInfo getTurnInfo();
 	
 	/**
 	 * Get xml element which represents the actual match state. This state

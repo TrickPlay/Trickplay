@@ -79,4 +79,49 @@ public class DummyMultiUserGame implements MultiUserGame {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	public GameType getGameType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public TurnPolicy getTurnPolicy() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public boolean allowsJoinAfterStart() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public int getMinPlayersForStart() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public RoleConfig getRoleConfig(String role) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String[] getRoles() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getFirstRole() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public long getMaxAllowedTimeForMove() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public boolean abortWhenPlayerLeaves() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

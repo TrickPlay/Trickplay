@@ -28,6 +28,7 @@ import org.frogx.service.api.exception.LeasedException;
 import org.frogx.service.api.exception.NotAllowedException;
 import org.frogx.service.api.exception.RequiredPlayerException;
 import org.frogx.service.api.exception.UnsupportedGameException;
+import org.frogx.service.core.DefaultTurnInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.component.ComponentException;
@@ -49,12 +50,12 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	
 	private GenericTurnBasedMUG mug;
 	private MUGOccupant[] players = null;
+	private TurnInfo turnInfo;
 	
 	private int lastTurnIndex = -1;
 	private int firstTurnIndex = -1;
 	private int nextTurnIndex = -1;
 	private int minPlayers=2;
-	private int numPlayers=0;
 	private boolean enforceMinPlayersForStart = false;
 	
 	private static class LeasedRole {
@@ -138,6 +139,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	private Set<MUGOccupant> spectators = null;
 	
 	private Set<String> freeRoles = new HashSet<String>(); 
+	private Set<String> releasedRoles = new HashSet<String>();
 	
 	/**
 	 * To create a match a multi-user game room is needed.
@@ -151,8 +153,19 @@ public class GenericTurnBasedMatch implements MUGMatch {
 		this.players = new MUGOccupant[mug.getRoles().length];
 		this.status = Status.created;
 		freeRoles.addAll(Arrays.asList(turnBasedMug.getRoles()));
+		firstTurnIndex = turnBasedMug.getStartingPlayerRoleIndex();	
+		enforceMinPlayersForStart = turnBasedMug.getMinPlayersForStart() > 0;
+		minPlayers = turnBasedMug.getMinPlayersForStart();
 	}
 	
+	public int getNumberOfPlayers() {
+		int cnt = 0;
+		//while
+		for(int i=0; players != null && i<players.length; i++)
+			if (players[i] != null)
+				cnt++;
+		return cnt;
+	}
 	/**
 	 * This method is called if the match will be destroyed.
 	 */
@@ -170,18 +183,18 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 */
 	public Collection<MUGOccupant> getPlayers() {
 		List<MUGOccupant> l = new ArrayList<MUGOccupant>();
-		synchronized (leaseManager) {
+	//	synchronized (leaseManager) {
 			for(MUGOccupant player: players) {
 				if (player!=null)
 					l.add(player);
 			}
-		}
+	//	}
 		return l;
 		
 	}
 	
 	public String holdFreeRole(JID jid) {
-		synchronized(leaseManager) {
+	//	synchronized(leaseManager) {
 			LeasedRole leasedRole = leaseManager.getLeasedRole(jid);
 			if (leasedRole != null && leasedRole.isValid()) {
 				leaseManager.acquireLease(leasedRole.role, jid);
@@ -193,18 +206,18 @@ public class GenericTurnBasedMatch implements MUGMatch {
 				if (leaseManager.acquireLease(role, jid))
 					return role;
 			}
-		}
+	//	}
 		return null;
 	}
 
 	public boolean holdRole(String role, JID jid) {
-		synchronized(leaseManager) {
+	//	synchronized(leaseManager) {
 			LeasedRole leasedRole = leaseManager.getLeasedRole(jid);
 			if (leasedRole != null && leasedRole.isValid() && !leasedRole.role.equals(role)) {
 				throw new NotAllowedException();
 			}
 			return leaseManager.acquireLease(role, jid);
-		}
+		//}
 	}
 
 	/**
@@ -218,7 +231,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 */
 	public void reserveRole(MUGOccupant occupant, String roleName) 
 			throws ConflictException, GameConfigurationException {
-			synchronized(leaseManager) {
+		//	synchronized(leaseManager) {
 				int roleIdx = mug.getRoleIndex(roleName);
 				if (roleIdx >= 0) {
 					if (players[roleIdx] != null) {
@@ -230,14 +243,12 @@ public class GenericTurnBasedMatch implements MUGMatch {
 							LeasedRole lease = leaseManager.getLeasedRole(occupant.getUserAddress());
 							if (lease != null && lease.role.equals(roleName)) {
 								players[roleIdx] = occupant;
-								numPlayers++;
 								leaseManager.terminateLease(roleName);
 							} else {
 								throw new LeasedException();
 							}
 						} else {
 							players[roleIdx] = occupant;
-							numPlayers++;
 							leaseManager.terminateLease(roleName);
 							leaseManager.terminateLease(occupant.getUserAddress());
 						}
@@ -245,7 +256,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 					freeRoles.remove(roleName);
 					removeSpectator(occupant);
 				}
-			}
+		//	}
 	}
 	
 	
@@ -256,13 +267,12 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 * @return The name of the reserved role or null if no role could be reserved.
 	 */
 	public String reserveFreeRole(MUGOccupant occupant) {
-		synchronized(leaseManager) {
+	//	synchronized(leaseManager) {
 			LeasedRole lease = leaseManager.getLeasedRole(occupant.getUserAddress());
 			int roleidx = lease != null ? mug.getRoleIndex(lease.role) : -1;
 			String reservedRole = null;
 			if (roleidx >= 0) {
 				players[roleidx] = occupant;
-				numPlayers++;
 				leaseManager.terminateLease(lease.role);
 				reservedRole = lease.role;
 			} else {
@@ -271,14 +281,13 @@ public class GenericTurnBasedMatch implements MUGMatch {
 				roleidx = mug.getRoleIndex(role);
 				if (roleidx >= 0) {
 					players[roleidx] = occupant;
-					numPlayers++;
 					reservedRole = role;
 				}
 			}
 			freeRoles.remove(reservedRole);
 			removeSpectator(occupant);
 			return reservedRole;
-		}
+	//	}
 	}
 	
 	/**
@@ -287,17 +296,17 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 * @param player The MUGPlayer which wants to release his role.
 	 */
 	public void releaseRole(MUGOccupant player) {
-		synchronized(leaseManager) {
+	//	synchronized(leaseManager) {
 			String role = getRole(player);
 			if (role!=null) {
 				int roleidx = mug.getRoleIndex(role);
 				if (roleidx>=0) {
 					players[roleidx] = null;
-					numPlayers--;
 					freeRoles.add(role);
+					releasedRoles.add(role);
 				}
 			}
-		}
+	//	}
 	}
 
 	
@@ -308,9 +317,9 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 * @return A collection of available game roles.
 	 */
 	public Collection<String> getFreeRoles() {
-		synchronized(leaseManager) {
+	//	synchronized(leaseManager) {
 			return Collections.unmodifiableSet(freeRoles);
-		}
+	//	}
 	}
 	
 	/**
@@ -322,12 +331,12 @@ public class GenericTurnBasedMatch implements MUGMatch {
 		String[] allRoles = mug.getRoles();
 		if (player == null)
 			return null;
-		synchronized(leaseManager) {
+	//	synchronized(leaseManager) {
 			for(int i=0; i<players.length; i++) {
 				if (player.equals(players[i]))
 					return allRoles[i];
 			}
-		}
+	//	}
 		return null;
 	}
 	
@@ -337,15 +346,15 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 * @param occupant The room occupant who joins the match without a game role.
 	 */
 	public void addSpectator(MUGOccupant occupant) {
-		synchronized(spectators) {
+		//synchronized(spectators) {
 			spectators.add(occupant);
-		}
+	//	}
 	}
 	
 	public void removeSpectator(MUGOccupant occupant) {
-		synchronized(spectators) {
+	//	synchronized(spectators) {
 			spectators.add(occupant);
-		}
+	//	}
 	}
 	/**
 	 * Get the state of the match in an xml element. This is used for
@@ -369,7 +378,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 *                     be thrown if the match options aren't playable.
 	 */
 	public void start() throws RequiredPlayerException, GameConfigurationException {
-		synchronized (leaseManager) {
+	//	synchronized (leaseManager) {
 			/* if game is already started then ignore the request */
 			if (status == Status.active) {
 				return;
@@ -377,8 +386,9 @@ public class GenericTurnBasedMatch implements MUGMatch {
 				throw new GameConfigurationException();
 			}
 			
-			if (numPlayers <= 0 ||
-					(enforceMinPlayersForStart && numPlayers < minPlayers)) {
+			int cntPlayers = getNumberOfPlayers();
+			if (cntPlayers <= 0 ||
+					(enforceMinPlayersForStart && cntPlayers < minPlayers)) {
 				throw new RequiredPlayerException();
 			}
 			
@@ -386,7 +396,14 @@ public class GenericTurnBasedMatch implements MUGMatch {
 			if (firstTurnIndex<0)
 				firstTurnIndex = 0;
 			nextTurnIndex = firstTurnIndex;
-		}
+			setTurnInfo();
+	//	}
+	}
+	
+	private void setTurnInfo() {
+		long now = System.currentTimeMillis();
+		long expiration = now + mug.getMaxAllowedTimeForMove();
+		turnInfo = new DefaultTurnInfo(nextTurnIndex >= 0 ? players[nextTurnIndex] : null, now, expiration);
 	}
 	
 	/**
@@ -403,9 +420,9 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 */
 	public void processTurn(MUGOccupant player, Collection<Element> moves) throws InvalidTurnException, ComponentException {
 		
-		synchronized (leaseManager) {
+	//	synchronized (leaseManager) {
 			if (status != Status.active) {
-				log.debug("Match " + room.getJID() + " not yet started");
+				log.debug("Match " + room.getJID() + " cannot accept turns in its current state. status="+status);
 				throw new GameConfigurationException();
 			}
 			
@@ -459,7 +476,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 			opaqueMatchState = stateElement.getText();
 			nextTurnIndex = nextRoleIdx;
 			lastTurnIndex = playerIdx;
-			
+			setTurnInfo();
 			if (!matchFinished) {
 				List<Element> movesCopy = new ArrayList<Element>();
 				movesCopy.add(stateElement);
@@ -476,7 +493,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 				room.broadcastRoomPresence();
 			};
 		
-		}
+	//	}
 	}
 	
 	private int computeNextTurnIndex(int curPlayerIdx) {
@@ -502,7 +519,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	private Element calculateStateElement() {
 		Element stateElement = DocumentFactory.getInstance().createDocument().addElement("state", NAMESPACE);
 
-			synchronized (leaseManager) {
+	//		synchronized (leaseManager) {
 			
 				
 				if (firstTurnIndex >= 0)
@@ -514,7 +531,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 				String[] allRoles = mug.getRoles();
 				Element rolesElem = stateElement.addElement("roles");
 				
-				synchronized (leaseManager) {
+			//	synchronized (leaseManager) {
 					for(int i=0; i<players.length; i++) {
 						if (players[i] != null) {
 							rolesElem.addElement("role").addText(allRoles[i]);
@@ -523,17 +540,25 @@ public class GenericTurnBasedMatch implements MUGMatch {
 					if (lastTurnIndex >= 0)
 						stateElement.addElement("last").addText(mug.getRoleForIndex(lastTurnIndex));
 					
+					// handle the case of a match with only one player and it is started by that player. when a second player joins
+					// we will assign the turn to the second player for a roundrobin style match
 					if (status == status.active && mug.isAutonext() && lastTurnIndex >= 0 && nextTurnIndex < 0) {
 						nextTurnIndex = computeNextTurnIndex(lastTurnIndex);
 					}
 					if (nextTurnIndex >= 0)
 						stateElement.addElement("next").addText(mug.getRoleForIndex(nextTurnIndex));
-					if (status == Status.completed)
+					if (releasedRoles.size()>0) {
+						Element releasedRolesElem = stateElement.addElement("releasedRoles");
+						for(String role:releasedRoles) {
+							releasedRolesElem.addElement("role").addText(role);
+						}
+					}
+					if (status == Status.completed || status == Status.aborted)
 						stateElement.addElement("terminated");
 					
 				
-				}
-		}
+			//	}
+		//}
 		return stateElement;
 	}
 
@@ -564,6 +589,17 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 * @param occupant The occupant who leaves the match.
 	 */
 	public void leave(MUGOccupant occupant) {
+		if (status == Status.active 
+				&& occupant != null 
+				&& occupant.hasRole()) {
+		//	releasedRoles
+			if (mug.abortWhenPlayerLeaves()) {
+				status = Status.aborted;
+			} else {
+				nextTurnIndex = -1;
+			}
+			//
+		}
 		releaseRole(occupant);
 		removeSpectator(occupant);
 	}
@@ -592,11 +628,11 @@ public class GenericTurnBasedMatch implements MUGMatch {
 	 * 		the default configuration should be applied.
 	 */
 	public void setConfiguration(Collection<Element> options) {
-		synchronized (leaseManager) {
+		//synchronized (leaseManager) {
 			if (status == Status.active || status == Status.completed) {
 				throw new NotAllowedException();
 			}
-		}
+	//	}
 		if (options != null && !options.isEmpty() && options.size() != 1)
 			throw new GameConfigurationException();
 		
@@ -611,7 +647,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 
 			try {
 
-				String str = matchElement.elementText("minPlayers");
+				String str = matchElement.elementText("minPlayersForStart");
 				if (str != null) {
 					int value = Integer.parseInt(str);
 					if (value < 2 || value > 10) {
@@ -620,7 +656,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 					minPlayers = value;
 				}
 				
-				str = matchElement.elementText("firstPlayerRole");
+				str = matchElement.elementText("firstRole");
 				if (str != null) {
 					int value = mug.getRoleIndex(str);
 					if (value < 0) {
@@ -629,10 +665,7 @@ public class GenericTurnBasedMatch implements MUGMatch {
 					firstTurnIndex = value;
 				}
 				
-				str = matchElement.elementText("enforceMinPlayersForStart");
-				if (str != null) {
-					enforceMinPlayersForStart = Boolean.parseBoolean(str);
-				}
+				enforceMinPlayersForStart = minPlayers > 0;
 			} catch (Exception ex) {
 				throw new GameConfigurationException();
 			}
@@ -640,6 +673,10 @@ public class GenericTurnBasedMatch implements MUGMatch {
 		
 		status = Status.inactive;
 
+	}
+
+	public TurnInfo getTurnInfo() {
+		return turnInfo;
 	}
 
 }

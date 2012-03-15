@@ -287,7 +287,7 @@ public class DefaultMUGSession implements MUGSession {
 		}
 
 		synchronized (room) {
-			if (occupant == null && room.getGame().isCorrespondence()) {
+			if (occupant == null /*&& room.getGame().isCorrespondence()*/) {
 				occupant = room.getOccupant(jid);
 				if (occupant != null)
 					occupants.put(roomName, occupant);
@@ -490,7 +490,10 @@ public class DefaultMUGSession implements MUGSession {
 		boolean foundOwnerNS = MUGService.mugOwnerNS.equals(childElement
 				.getNamespaceURI());
 
-		if (!foundOwnerNS && !("game".equals(childElement.getName())) && !("gamedata".equals(childElement.getName()))) {
+		if (!foundOwnerNS 
+				&& !("game".equals(childElement.getName())) 
+				&& !("gamedata".equals(childElement.getName()))
+				&& !("register".equals(childElement.getName()))) {
 			throw new NotAllowedException();
 		}
 
@@ -499,12 +502,12 @@ public class DefaultMUGSession implements MUGSession {
 		if (occupant == null) {
 			// assign a game room if the user is requesting for one
 			if (!foundOwnerNS) {
-				String gameNS = childElement.attributeValue("gameId");
-				if (gameNS == null) {
-					throw new NotFoundException();
-				}
 				
 				if ("game".equals(childElement.getName())) {
+					String gameNS = childElement.attributeValue("gameId");
+					if (gameNS == null) {
+						throw new NotFoundException();
+					}
 					Element itemElement = null;
 					 if (null != (itemElement = childElement.element("item"))) {
 						String role = itemElement.attributeValue("role");
@@ -520,6 +523,10 @@ public class DefaultMUGSession implements MUGSession {
 					}
 				} else if ("gamedata".equals(childElement.getName())) {
 					
+					String gameNS = childElement.attributeValue("gameId");
+					if (gameNS == null) {
+						throw new NotFoundException();
+					}
 					Element gameElement = DocumentHelper.createElement(QName.get(
 							"gamedata", MUGService.mugNS));
 					gameElement.addAttribute("gameId", gameNS);
@@ -572,33 +579,38 @@ public class DefaultMUGSession implements MUGSession {
 						mugManager.sendPacket(component, reply);
 					}
 				}
-				return;
-			}
-			// create a new game if the user requests for one
-			if ("newGame".equals(childElement.getName())) {
-				if ("turnbased".equals(childElement.attributeValue("type"))) {
-					GenericTurnBasedMUG mug = new GenericTurnBasedMUG(
-							mugManager, childElement);
-					if (mugManager.isGameRegistered(mug.getNamespace())) {
+				else if ("register".equals(childElement.getName())) {
+				//	if ("turnbased".equals(childElement.attributeValue("type"))) {
+						GenericTurnBasedMUG mug = new GenericTurnBasedMUG(
+								mugManager, childElement);
+						if (mugManager.isGameRegistered(mug.getNamespace())) {
+							throw new NotAllowedException(
+									"A game is already registered under the namespace '"
+											+ mug.getNamespace() + "'");
+						}
+						mugManager.registerMultiUserGame(mug.getNamespace(),
+								mug);
+						Element gameElem = DocumentHelper.createElement(QName
+								.get("register", MUGService.mugNS));
+					//	gameElem.addAttribute("retcode", "success");
+						gameElem.addAttribute("gameId", mug.getNamespace());
+						reply.setChildElement(gameElem);
+						mugManager.sendPacket(component, reply);
+						/*
+					} else {
 						throw new NotAllowedException(
-								"A game is already registered under the namespace '"
-										+ mug.getNamespace() + "'");
+								"Only turnbased games can be created using IQ set");
 					}
-					mugManager.registerMultiUserGame(mug.getNamespace(), mug);
-					Element gameElem = DocumentHelper.createElement(QName.get(
-							"newGameResponse", MUGService.mugOwnerNS));
-					gameElem.addAttribute("retcode", "success");
-					gameElem.addAttribute("gameId", mug.getNamespace());
-					reply.setChildElement(gameElem);
-					mugManager.sendPacket(component, reply);
-				} else {
-					throw new NotAllowedException(
-							"Only turnbased games can be created using IQ set");
+					*/
+					return;
 				}
 				return;
-			} // create a new game room and use the provided configuration to
+			}
+
+			// create a new game room and use the provided configuration to
 				// configure it
-			else if ("game".equals(childElement.getName())) {
+			
+			if ("game".equals(childElement.getName())) {
 				String gameNS = childElement.attributeValue("gameId");
 
 				MUGRoom room = component.createGameRoom(gameNS, jid);

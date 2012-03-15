@@ -73,6 +73,8 @@ public class DefaultMUGOccupant implements MUGOccupant {
 	
 	private int inRoomId;
 	
+	private long lastPacketTime;
+	
 	/**
 	 * Create an occupant of a game room and try to register with the 
 	 * {@see net.sf.openfire.mug.lib.MUGMatch}.
@@ -181,6 +183,7 @@ public class DefaultMUGOccupant implements MUGOccupant {
 		}
 		this.presence = presence;
 		this.presence.setFrom(getRoomAddress());
+		lastPacketTime = System.currentTimeMillis();
 	}
 	
 	/**
@@ -270,9 +273,15 @@ public class DefaultMUGOccupant implements MUGOccupant {
 			return;
 		}
 		
+		lastPacketTime = System.currentTimeMillis();
+		
 		packet.setTo(realJID);
 		
 		mugManager.sendPacket(room.getMUGService(), packet);
+	}
+	
+	public long getLastPacketTime() {
+		return lastPacketTime;
 	}
 	
 	@Override

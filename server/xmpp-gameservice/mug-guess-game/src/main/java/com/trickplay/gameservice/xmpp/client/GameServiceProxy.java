@@ -7,9 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.QName;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -41,6 +38,8 @@ import org.jivesoftware.smackx.packet.DiscoverInfo.Feature;
 
 import com.trickplay.gameservice.xmpp.mug.CreateMatch;
 import com.trickplay.gameservice.xmpp.mug.FindMatch;
+import com.trickplay.gameservice.xmpp.mug.Game;
+import com.trickplay.gameservice.xmpp.mug.GameDataExtension;
 import com.trickplay.gameservice.xmpp.mug.GamePlayListener;
 import com.trickplay.gameservice.xmpp.mug.GamePresenceExtension;
 import com.trickplay.gameservice.xmpp.mug.JoinMatch;
@@ -50,12 +49,12 @@ import com.trickplay.gameservice.xmpp.mug.MatchStateListener;
 import com.trickplay.gameservice.xmpp.mug.NewGameResponse;
 import com.trickplay.gameservice.xmpp.mug.Participant;
 import com.trickplay.gameservice.xmpp.mug.PlayerStatusListener;
+import com.trickplay.gameservice.xmpp.mug.RegisterGame;
 import com.trickplay.gameservice.xmpp.mug.StartMessageExtension;
 import com.trickplay.gameservice.xmpp.mug.TurnExtension;
 import com.trickplay.gameservice.xmpp.mug.TurnMessage;
-import com.trickplay.gameservice.xmpp.mug.GameDataExtension;
 
-public class XmppManager {
+public class GameServiceProxy {
 	private static final String MUGServiceId = "mug.internal.trickplay.com";
 	private static final String MUGownerns = "http://jabber.org/protocol/mug#owner";
 	private static final String MUGuserns = "http://jabber.org/protocol/mug#user";
@@ -94,7 +93,7 @@ public class XmppManager {
 			new ArrayList<GamePlayListener>());
 	
 
-	public XmppManager(String server, int port) {
+	public GameServiceProxy(String server, int port) {
 		this.server = server;
 		this.port = port;
 	}
@@ -323,15 +322,7 @@ public class XmppManager {
 				.getInstanceFor(connection);
 
 		DiscoverInfo discoInfo = discoManager.discoverInfo(MUGServiceId);
-		/*
-		 * // Get the discovered identities of the remote XMPP entity Iterator
-		 * it = discoInfo.getIdentities(); // Display the identities of the
-		 * remote XMPP entity while (it.hasNext()) { DiscoverInfo.Identity
-		 * identity = (DiscoverInfo.Identity) it.next();
-		 * System.out.println(identity.getName());
-		 * System.out.println(identity.getType());
-		 * System.out.println(identity.getCategory()); }
-		 */
+
 		List<String> allGames = new ArrayList<String>();
 		for (Iterator<Feature> iter = discoInfo.getFeatures(); iter.hasNext();) {
 			Feature f = iter.next();
@@ -344,22 +335,7 @@ public class XmppManager {
 		return allGames;
 	}
 
-	/*
-	 * IQ iq = new IQ() {...}; iq.setType(IQ.Type.GET); iq.setTo(entityID);
-	 * 
-	 * // Create a packet collector to listen for a response. PacketCollector
-	 * collector = connection.createPacketCollector(new
-	 * PacketIDFilter(iq.getPacketID()));
-	 * 
-	 * connection.sendPacket(disco);
-	 * 
-	 * // Wait up to 5 seconds for a result. IQ result = (IQ)
-	 * collector.nextResult(SmackConfiguration.getPacketReplyTimeout()); // Stop
-	 * queuing results collector.cancel(); if (result == null) { throw new
-	 * XMPPException("No response from the server."); } if (result.getType() ==
-	 * IQ.Type.ERROR) { throw new XMPPException(result.getError()); } return
-	 * result;
-	 */
+
 	private boolean isValidGameName(String x) {
 		return Pattern
 				.matches(
@@ -368,10 +344,14 @@ public class XmppManager {
 	}
 
 	public void createGame(final Game game) throws XMPPException {
+		final RegisterGame registerGame = new RegisterGame();
+		registerGame.setGame(game);
 		IQ iq = new IQ() {
 
 			@Override
 			public String getChildElementXML() {
+				return registerGame.toXML();
+				/*
 				Element element = DocumentHelper.createElement(QName.get(
 						"newGame", "http://jabber.org/protocol/mug#owner"));
 				element.addAttribute("type", game.isTurnbased() ? "turnbased"
@@ -395,6 +375,7 @@ public class XmppManager {
 				element.addElement("startingPlayerRole").addText(
 						rolesList.get(0));
 				return element.asXML();
+				*/
 			}
 
 		};
@@ -414,10 +395,7 @@ public class XmppManager {
 			throw new XMPPException("No response from the server.");
 		} else if (result.getType() == IQ.Type.ERROR) {
 			throw new XMPPException(result.getError());
-		} /*
-		 * else if (result.getExtension(MUGownerNS) == null) { throw new
-		 * XMPPException("Invalid response from server"); }
-		 */
+		} 
 
 		System.out.println("created game '" + game.getName()
 				+ "'. server response:" + result.toXML());
@@ -463,10 +441,6 @@ public class XmppManager {
 			throw new XMPPException(result.getError());
 		}
 
-		// result.getExtension(JoinGameResponse.NAMESPACE,
-		// JoinGameResponse.getElement());
-
-		// System.out.println("created game '"+game.getName()+"'. server response:"+result.toXML());
 
 		return result.getFrom();
 	}
@@ -517,29 +491,9 @@ public class XmppManager {
 				: new JoinMatch(role));
 
 		joinMatchPresence.setTo(matchId + "/" + loginUserId);
-/*
-		PacketCollector collector = connection
-				.createPacketCollector(new PacketIDFilter(joinMatchPresence
-						.getPacketID()));
-*/
+
 		connection.sendPacket(joinMatchPresence);
 		return joinMatchPresence.getPacketID();
-/*
-		Presence result = (Presence) collector.nextResult(5000);
-		// Stop queuing results
-		collector.cancel();
-		if (result == null) {
-			throw new XMPPException("No response from the server.");
-		} else if (result.getError() != null) {
-			throw new XMPPException(result.getError());
-		}
-*/
-		// result.getExtension(JoinGameResponse.NAMESPACE,
-		// JoinGameResponse.getElement());
-
-		// System.out.println("created game '"+game.getName()+"'. server response:"+result.toXML());
-
-	//	return result.getFrom();
 	}
 
 	public void startMatch(final String matchId) throws XMPPException {
@@ -548,29 +502,8 @@ public class XmppManager {
 
 		startMatchMessage.setTo(matchId);
 
-	/*	PacketCollector collector = connection
-				.createPacketCollector(new PacketIDFilter(startMatchMessage
-						.getPacketID()));
-						*/
 
 		connection.sendPacket(startMatchMessage);
-
-	/*	Presence result = (Presence) collector.nextResult(5000);
-		// Stop queuing results
-		collector.cancel();
-		if (result == null) {
-			throw new XMPPException("No response from the server.");
-		} else if (result.getError() != null) {
-			throw new XMPPException(result.getError());
-		}
-
-		// result.getExtension(JoinGameResponse.getElement(), JoinGameResponse.NAMESPACE,
-		// );
-
-		// System.out.println("created game '"+game.getName()+"'. server response:"+result.toXML());
-
-		return result.getFrom();
-		*/
 	}
 	
 	public void leaveMatch(final String matchId) throws XMPPException {
@@ -579,29 +512,8 @@ public class XmppManager {
 
 		leaveMatchMessage.setTo(matchId);
 
-	/*	PacketCollector collector = connection
-				.createPacketCollector(new PacketIDFilter(startMatchMessage
-						.getPacketID()));
-						*/
 
 		connection.sendPacket(leaveMatchMessage);
-
-	/*	Presence result = (Presence) collector.nextResult(5000);
-		// Stop queuing results
-		collector.cancel();
-		if (result == null) {
-			throw new XMPPException("No response from the server.");
-		} else if (result.getError() != null) {
-			throw new XMPPException(result.getError());
-		}
-
-		// result.getExtension(JoinGameResponse.getElement(), JoinGameResponse.NAMESPACE,
-		// );
-
-		// System.out.println("created game '"+game.getName()+"'. server response:"+result.toXML());
-
-		return result.getFrom();
-		*/
 	}
 
 	public void sendTurn(final String matchId, String newstate, boolean terminate)
@@ -610,25 +522,8 @@ public class XmppManager {
 		turnMessage.addExtension(new TurnMessage(newstate, terminate));
 
 		turnMessage.setTo(matchId);
-/*
-		PacketCollector collector = connection
-				.createPacketCollector(new PacketIDFilter(turnMessage
-						.getPacketID()));
-*/
+
 		connection.sendPacket(turnMessage);
-		/*
-
-		Presence result = (Presence) collector.nextResult(5000);
-		// Stop queuing results
-		collector.cancel();
-		if (result == null) {
-			throw new XMPPException("No response from the server.");
-		} else if (result.getError() != null) {
-			throw new XMPPException(result.getError());
-		}
-
-		return result.getFrom();
-		*/
 	}
 	
 	public GameDataExtension getMatchdata(final String gameId) throws XMPPException {

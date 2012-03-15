@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
-
 import org.frogx.service.api.MUGMatch;
 import org.frogx.service.api.MUGOccupant;
 import org.frogx.service.api.MUGRoom;
@@ -31,7 +30,6 @@ import org.frogx.service.api.exception.ConflictException;
 import org.frogx.service.api.exception.GameConfigurationException;
 import org.frogx.service.api.exception.InvalidTurnException;
 import org.frogx.service.api.exception.RequiredPlayerException;
-
 import org.xmpp.component.ComponentException;
 import org.xmpp.packet.JID;
 
@@ -174,5 +172,10 @@ public class DummyMatch implements MUGMatch {
 	public boolean holdRole(String roleName, JID jid) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public TurnInfo getTurnInfo() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
