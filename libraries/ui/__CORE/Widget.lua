@@ -5,7 +5,6 @@ Widget = function(parameters)
     
 	parameters = is_table_or_nil("Widget",parameters)
     
-    --parameters       input                 default value or error
     local style   --= Style(parameters.style)
     
     local focused = parameters.focused or false
@@ -68,10 +67,7 @@ Widget = function(parameters)
 	override_property(instance,"style",
 		function()   return style    end,
 		function(oldf,self,v)
-            style = 
-                type(v) == "nil"   and Style()   or
-                type(v) == "table" and v.type == "STYLE" and v   or
-                error("Must pass nil or Style   to Widget.style",  2)
+            style = matches_nil_table_or_type(Style, "STYLE", v)
         end
 	)
     
@@ -88,10 +84,7 @@ Widget = function(parameters)
 	)
 	override_property(instance,"type", function()  return "WIDGET"  end )
     
-    parameters.style = 
-                type(parameters.style) == "nil"   and Style()   or
-                type(parameters.style) == "table" and parameters.style.type == "STYLE" and parameters.style   or
-                error("Must pass nil or Style   to Widget.style",  2)
+    parameters.style = parameters.style or Style()
     
     instance:set( parameters )
     

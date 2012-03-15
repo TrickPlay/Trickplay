@@ -1,5 +1,24 @@
 
-
+local default_fill_colors = {
+    default    = {  0,  0,  0},
+    focus      = {155,155,155},
+    activation = {155,155,155}
+} 
+local default_arrow_colors = {
+    default    = {255,255,255},
+    focus      = {255,255,255},
+    activation = {255,  0,  0}
+} 
+local default_border_colors = {
+    default    = {255,255,255},
+    focus      = {255,255,255},
+    activation = {255,  0,  0}
+} 
+local default_text_colors = {
+    default    = {255,255,255},
+    focus      = {255,255,255},
+    activation = {255,  0,  0}
+} 
 local update_children = function(children_using_this_style)
     
     collectgarbage("collect")
@@ -49,48 +68,35 @@ ArrowStyle = function(parameters)
 	--input is either nil or a table
 	parameters = is_table_or_nil("ArrowStyle",parameters)
     
-    local instance = {}
-    
-    local children_using_this_style = {}
-    
-    setmetatable( children_using_this_style, { __mode = "k" } )
-    
-    local size   = parameters.size   or 20
-    local offset = parameters.offset or 10
-    local colors = 
-        type(parameters.colors) == "nil"   and ColorScheme{
-                                                    default = {255,255,255},
-                                                    focus = {255,255,255},
-                                                    activation = {255,0,0}
-                                                } or
-        type(parameters.colors) == "table" and parameters.colors.type == "COLORSCHEME" and parameters.colors   or
-        error("Must pass nil or ColorScheme to Style.fill_colors",  2)
-    
-    function instance:on_changed(object,update_function)
-        
-        children_using_this_style[object] = update_function
-        
-    end
+    local size, offset, colors
     
     local  meta_setters = {
-        size          = function(v) size          = v              end,
-        offset        = function(v) offset        = v              end,
-        arrow_colors  = function(v) arrow_colors  = ColorScheme(v) end,
+        size          = function(v) size          = v  end,
+        offset        = function(v) offset        = v  end,
+        arrow_colors  = function(v) arrow_colors  = matches_nil_table_or_type(ColorScheme, "COLORSCHEME", cover_defaults(v, default_arrow_colors)) end,
     }
     local meta_getters = {
-        size          = function() return size         end,
-        offset        = function() return offset       end,
+        size          = function() return size   or 20 end,
+        offset        = function() return offset or 10 end,
         arrow_colors  = function() return arrow_colors end,
         type          = function() return "ARROWSTYLE" end,
     }
     
-    setmetatable(
-        instance,
+    local children_using_this_style = setmetatable( {}, { __mode = "k" } )
+    
+    local instance = setmetatable(
+        {on_changed = function(self,object,update_function)
+            children_using_this_style[object] = update_function
+        end},
         {
             __newindex = __newindex(meta_setters, children_using_this_style),
             __index    = __index(meta_getters)
         }
     )
+    
+    instance.size   = parameters.size
+    instance.offset = parameters.offset
+    instance.colors = parameters.colors
     
     return instance
     
@@ -100,48 +106,37 @@ BorderStyle = function(parameters)
     
 	parameters = is_table_or_nil("BorderStyle",parameters)
     
-    local instance = {}
     
-    local children_using_this_style = {}
-    
-    setmetatable( children_using_this_style, { __mode = "k" } )
-    
-    local width         = parameters.width         or 2
-    local corner_radius = parameters.corner_radius or 20
-    local colors        = 
-        type(parameters.colors) == "nil"   and ColorScheme{
-                                                    default = {255,255,255},
-                                                    focus = {255,255,255},
-                                                    activation = {255,0,0}
-                                                } or
-        type(parameters.colors) == "table" and parameters.colors.type == "COLORSCHEME" and parameters.colors   or
-        error("Must pass nil or ColorScheme to Style.fill_colors",  2)
-        
-    function instance:on_changed(object,update_function)
-        
-        children_using_this_style[object] = update_function
-        
-    end
+    local width, corner_radius, colors
     
     local  meta_setters = {
-        width         = function(v) width         = v              end,
-        corner_radius = function(v) corner_radius = v              end,
-        colors        = function(v) colors        = ColorScheme(v) end,
+        width         = function(v) width         = v   end,
+        corner_radius = function(v) corner_radius = v   end,
+        colors        = function(v) colors        = matches_nil_table_or_type(ColorScheme, "COLORSCHEME", cover_defaults(v, default_border_colors)) end,
     }
     local meta_getters = {
-        width         = function() return width         end,
-        corner_radius = function() return corner_radius end,
-        colors        = function() return colors        end,
-        type          = function() return "BORDERSTYLE" end,
+        width         = function() return width         or 2  end,
+        corner_radius = function() return corner_radius or 20 end,
+        colors        = function() return colors              end,
+        type          = function() return "BORDERSTYLE"       end,
     }
     
-    setmetatable(
-        instance,
+    
+    local children_using_this_style = setmetatable( {}, { __mode = "k" } )
+    
+    local instance = setmetatable(
+        {on_changed = function(self,object,update_function)
+            children_using_this_style[object] = update_function
+        end},
         {
             __newindex = __newindex(meta_setters, children_using_this_style),
             __index    = __index(meta_getters),
         }
     )
+    
+    instance.width         = parameters.width
+    instance.corner_radius = parameters.corner_radius
+    instance.colors        = parameters.colors
     
     return instance
     
@@ -157,16 +152,18 @@ TextStyle = function(parameters)
         alignment = "CENTER",
         justify = true,
         wrap    = true,
-        colors = ColorScheme{default = {255,255,255}, focus = {255,255,255}, activation = {255,0,0}},
         x_offset = 0,
         y_offset = 0,
         type = "TEXTSTYLE",
-        color = {255,255,255},
     }
     
-    local children_using_this_style = {}
     
-    setmetatable( children_using_this_style, { __mode = "k" } )
+    parameters.colors = matches_nil_table_or_type(ColorScheme, "COLORSCHEME", cover_defaults(parameters.colors, default_text_colors))
+    
+    properties.color = parameters.color or parameters.colors.default
+    
+    
+    local children_using_this_style = setmetatable( {}, { __mode = "k" } )
     
     local instance = {
         set = function(_,parameters)
@@ -180,13 +177,14 @@ TextStyle = function(parameters)
             update_children(children_using_this_style)
             
         end,
-        get_table = function() return properties end,
+        get_table  = function() return properties end,
         on_changed = function(_,object,update_function)
             
             children_using_this_style[object] = update_function
             
         end,
     }
+    
     
     instance:set(parameters)
     
@@ -217,24 +215,14 @@ TextStyle = function(parameters)
 end
 
 Style = function(parameters)
-    
 	parameters = is_table_or_nil("Style",parameters)
     
     local instance = {}
     
-    local arrow       = type(parameters.arrow)  == "nil" and ArrowStyle()  or type(parameters.arrow)   == "table" and parameters.arrow.type  == "ARROWSTYLE"  and parameters.arrow  or error("Must pass nil or ArrowStyle to Style.arrow",   2)
-    local border      = type(parameters.border) == "nil" and BorderStyle() or type(parameters.border)  == "table" and parameters.border.type == "BORDERSTYLE" and parameters.border or error("Must pass nil or BorderStyle to Style.border", 2)
-    local text        = type(parameters.text)   == "nil" and TextStyle()   or type(parameters.text)    == "table" and parameters.text.type   == "TEXTSTYLE"   and parameters.text   or error("Must pass nil or TextStyle to Style.text",     2)
-    
-    local fill_colors =
-        type(parameters.fill_colors) == "nil"   and ColorScheme{
-                                                        default = {0,0,0},
-                                                        focus = {155,155,155},
-                                                        activation = {155,155,155}
-                                                    }   or
-        type(parameters.fill_colors) == "table" and parameters.fill_colors.type == "COLORSCHEME" and parameters.fill_colors   or
-        error("Must pass nil or ColorScheme to Style.fill_colors",  2)
-    
+    local arrow       = matches_nil_table_or_type(ArrowStyle,  "ARROWSTYLE",  parameters.arrow)
+    local border      = matches_nil_table_or_type(BorderStyle, "BORDERSTYLE", parameters.border)
+    local text        = matches_nil_table_or_type(TextStyle,   "TEXTSTYLE",   parameters.text)
+    local fill_colors = matches_nil_table_or_type(ColorScheme, "COLORSCHEME", cover_defaults(parameters.fill_colors, default_fill_colors))
     
     local meta_setters = {
         arrow          = function(v) arrow       = ArrowStyle(v)  end,
@@ -249,7 +237,6 @@ Style = function(parameters)
         fill_colors    = function() return fill_colors end,
         type           = function() return "STYLE"     end,
     }
-    
     
     setmetatable(
         instance,

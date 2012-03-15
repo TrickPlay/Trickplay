@@ -18,29 +18,26 @@ ColorScheme = function(parameters)
     
     local instance = {}
     
-    local children_using_this_style = {}
-    
-    setmetatable( children_using_this_style, { __mode = "k" } )
-    
-    local default    = is_color(parameters.default)    or error("must define 'default'",4)
-    local focus      = is_color(parameters.focus)      or error("must define 'focus'",  4)
-    local activation = is_color(parameters.activation) or error("must define 'activation'", 4)
-    --local selection  = is_color(parameters.selection) 
+    local default, focus, activation
     
     local  meta_setters = {
-        default    = function(v) default     = is_color(v) or error("must define 'default'",    4) end,
-        focus      = function(v) focus       = is_color(v) or error("must define 'focus'",      4) end,
-        activation = function(v) activation  = is_color(v) or error("must define 'activation'", 4) end,
+        default    = function(v) default     = is_color(v) end,--error("must define 'default'",    4) end,
+        focus      = function(v) focus       = is_color(v) end,--error("must define 'focus'",      4) end,
+        activation = function(v) activation  = is_color(v) end,--error("must define 'activation'", 4) end,
         --selection  = function(v) selection   = is_color(v) or error("must define 'activation'", 4) end,
     }
     local meta_getters = {
-        default    = function() return default       end,
-        focus      = function() return focus         end,
-        --selection  = function() return selection     end,
-        activation = function() return activation    end,
+        default    = function() return default    or "00000000"     end,
+        focus      = function() return focus      or "00000000"     end,
+        activation = function() return activation or "00000000"   end,
         type       = function() return "COLORSCHEME" end,
     }
     
+    
+    
+    local children_using_this_style = {}
+    
+    setmetatable( children_using_this_style, { __mode = "k" } )
     
     function instance:on_changed(object,update_function)
         
@@ -89,6 +86,7 @@ ColorScheme = function(parameters)
         }
     )
     
+    for k,v in pairs(parameters) do instance[k] = v  end
     
     return instance
     
