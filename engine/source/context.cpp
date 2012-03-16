@@ -818,9 +818,10 @@ int TPContext::run()
             }
         }
 
-		g_debug("RELEASING CLUTTER LOCK...");
-		clutter_threads_leave ();
     }
+
+	g_debug("RELEASING CLUTTER LOCK...");
+	clutter_threads_leave ();
 
     //.....................................................................
 
@@ -1445,7 +1446,7 @@ void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader
 {
 	g_assert( !running() );
 	g_assert( loader );
-	
+
 	resource_loaders[ type ] = ResourceLoaderClosure( loader , data );
 }
 
@@ -2613,7 +2614,7 @@ void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void
 void tp_context_set_resource_loader( TPContext * context , unsigned int type , TPResourceLoader loader, void * data)
 {
 	g_assert( context );
-	
+
 	context->set_resource_loader( type , loader , data );
 }
 
