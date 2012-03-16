@@ -21,8 +21,8 @@ class Ui_TrickplayInspector(object):
 
         monofont = QtGui.QFont()
         monofont.setStyleHint(monofont.Monospace)
-        monofont.setFamily('Monospace')
-        monofont.setPointSize(10)
+        monofont.setFamily('Inconsolata')
+        monofont.setPointSize(12)
 
         font = QtGui.QFont()
         font.setPointSize(10)

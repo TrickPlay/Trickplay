@@ -29,7 +29,7 @@
    <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>Trickplay IDE</string>
+   <string>TrickPlay IDE</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -80,6 +80,7 @@
     <addaction name="actionSelect_All"/>
     <addaction name="actionSearch_Replace"/>
     <addaction name="actionGo_to_line"/>
+    <addaction name="actionPreference"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -350,7 +351,6 @@
       <widget class="QLineEdit" name="interactive">
        <property name="font">
         <font>
-         <family>Monospace</family>
          <pointsize>10</pointsize>
         </font>
        </property>
@@ -707,6 +707,11 @@
    </property>
    <property name="shortcut">
     <string>Esc</string>
+   </property>
+  </action>
+  <action name="actionPreference">
+   <property name="text">
+    <string>Preference...</string>
    </property>
   </action>
  </widget>

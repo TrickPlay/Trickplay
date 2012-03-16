@@ -116,6 +116,7 @@ class TrickplayElementModel(QStandardItemModel):
             value = str(gid)
         
         node = TrickplayElement(title)
+        self.node = node
         node.setTPJSON(data)
         node.setTPParent(parentData)
         node.setFlags(node.flags() ^ Qt.ItemIsEditable)

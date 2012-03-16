@@ -664,6 +664,10 @@ int TPContext::run()
     //.........................................................................
     // Set default size and color for the stage
 
+	g_info( "GRABBING CLUTTER LOCK...");
+
+	clutter_threads_enter ();
+
     g_info( "INITIALIZING STAGE..." );
 
     ClutterActor * stage = clutter_stage_get_default();
@@ -813,7 +817,11 @@ int TPContext::run()
                 }
             }
         }
+
     }
+
+	g_debug("RELEASING CLUTTER LOCK...");
+	clutter_threads_leave ();
 
     //.....................................................................
 
@@ -1438,7 +1446,7 @@ void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader
 {
 	g_assert( !running() );
 	g_assert( loader );
-	
+
 	resource_loaders[ type ] = ResourceLoaderClosure( loader , data );
 }
 
@@ -2466,6 +2474,8 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
         g_thread_init( NULL );
     }
 
+	clutter_threads_init ();
+
     if ( !( major_version == TP_MAJOR_VERSION &&
             minor_version == TP_MINOR_VERSION &&
             patch_version == TP_PATCH_VERSION ) )
@@ -2604,7 +2614,7 @@ void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void
 void tp_context_set_resource_loader( TPContext * context , unsigned int type , TPResourceLoader loader, void * data)
 {
 	g_assert( context );
-	
+
 	context->set_resource_loader( type , loader , data );
 }
 
