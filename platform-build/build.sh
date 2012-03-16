@@ -414,6 +414,14 @@ EXIF_COMMANDS="./configure --host=$HOST --prefix=$PREFIX --build=$BUILD $SHARED 
 EXIF_DEPENDS="ICONV GET_TEXT"
 
 #------------------------------------------------------------------------------
+# valgrind
+
+VALGRIND_V="12445"
+VALGRIND_DIST="valgrind-${VALGRIND_V}.tar.xz"
+VALGRIND_SOURCE="valgrind-${VALGRIND_V}"
+VALGRIND_COMMANDS="(./autogen.sh 2>/dev/null) ; CPPFLAGS=\"$CPPFLAGS -DANDROID_HARDWARE_pandaboard\" ./configure --build=${BUILD} --host=armv7-unknown-linux --target=armv7-unknown-linux --with-tmpdir=/sdcard --prefix=/data/local/Inst && make ${NUM_MAKE_JOBS} && make ${NUM_MAKE_JOBS} install DESTDIR=\"${PREFIX}/Inst\""
+
+#------------------------------------------------------------------------------
 
 ALL="ZLIB ICONV GET_TEXT EXPAT XML EXIF LIBFFI LIBBIND GLIB SQLITE OPENSSL CARES CURL BZIP FREETYPE FONTCONFIG PIXMAN PNG CAIRO PANGO JPEG TIFF GIF JSON ATK COGL CLUTTER AVAHI UPNP URI UUID SNDFILE SOUP"
 

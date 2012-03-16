@@ -1,0 +1,13 @@
+Index: valgrind-12445/configure.in
+===================================================================
+--- valgrind-12445.orig/configure.in
++++ valgrind-12445/configure.in
+@@ -243,7 +243,7 @@ case "${host_os}" in
+         # Ok, this is linux. Check the kernel version
+         AC_MSG_CHECKING([for the kernel version])
+ 
+-        kernel=`uname -r`
++        kernel="2.6.36.3"
+ 
+         case "${kernel}" in
+              2.6.*|3.*) 

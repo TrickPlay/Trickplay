@@ -1,0 +1,15 @@
+Index: valgrind-12445/coregrind/vg_preloaded.c
+===================================================================
+--- valgrind-12445.orig/coregrind/vg_preloaded.c
++++ valgrind-12445/coregrind/vg_preloaded.c
+@@ -49,6 +49,10 @@
+ 
+ #if defined(VGO_linux)
+ 
++void __cxa_finalize(void)
++{
++}
++
+ /* ---------------------------------------------------------------------
+    Hook for running __libc_freeres once the program exits.
+    ------------------------------------------------------------------ */
