@@ -14,6 +14,7 @@ from UI.MainWindow import Ui_MainWindow
 from connection import *
 from wizard import Wizard
 from tbar import * 
+from preference import Preference
 
 from Inspector.TrickplayInspector import TrickplayInspector
 from DeviceManager.TrickplayDeviceManager import TrickplayDeviceManager
@@ -45,7 +46,7 @@ class MainWindow(QMainWindow):
 
         # Restore size/position of window
         settings = QSettings()
-        self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+        self.restoreGeometry(settings.value("mainWindowGeometry").toByteArray())
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -53,22 +54,24 @@ class MainWindow(QMainWindow):
         self.editorMenuEnabled(False)
         self.debuggerMenuEnabled(False)
 
+		#Create Preference 
+        self._preference = Preference(self)
+
 		# Toolbar font 
-        font = QFont()
-        font.setFamily('Ubuntu')
+        font = QFont()   
         font.setPointSize(11)
 
         # Create FileSystem
         self.ui.FileSystemDock.toggleViewAction().setText("File system")
-        self.ui.FileSystemDock.toggleViewAction().setFont(font)
+        #self.ui.FileSystemDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.FileSystemDock.toggleViewAction())
         self.ui.FileSystemDock.toggleViewAction().triggered.connect(self.fileWindowClicked)
-        self._fileSystem = FileSystem()
+        self._fileSystem = FileSystem(self._preference)
         self.ui.FileSystemLayout.addWidget(self._fileSystem)
         
         # Create Inspector
         self.ui.InspectorDock.toggleViewAction().setText("Inspector")
-        self.ui.InspectorDock.toggleViewAction().setFont(font)
+        #self.ui.InspectorDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.InspectorDock.toggleViewAction())
         self.ui.InspectorDock.toggleViewAction().triggered.connect(self.inspectorWindowClicked)
         self._inspector = TrickplayInspector()
@@ -77,20 +80,23 @@ class MainWindow(QMainWindow):
         
         # Create Console
         self.ui.ConsoleDock.toggleViewAction().setText("Console")
-        self.ui.ConsoleDock.toggleViewAction().setFont(font)
+        #self.ui.ConsoleDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.ConsoleDock.toggleViewAction())
         self.ui.ConsoleDock.toggleViewAction().triggered.connect(self.consoleWindowClicked)
-        self._console = TrickplayConsole()
-        self.ui.ConsoleLayout.addWidget(self._console)
+        self.console = TrickplayConsole()
+        self.console.ui.textEdit.setFont(self.preference.consoleFont)
+
+        self.ui.ConsoleLayout.addWidget(self.console)
         self.ui.ConsoleDock.hide()
         
 		# Set Interactive Line Edit 
         self.ui.interactive.setText("")
+        self.ui.interactive.setFont(self.preference.consoleFont)
         self.connect(self.ui.interactive, SIGNAL("returnPressed()"), self.return_pressed)
 
 		# Create Debug 
         self.ui.DebugDock.toggleViewAction().setText("Debug")
-        self.ui.DebugDock.toggleViewAction().setFont(font)
+        #self.ui.DebugDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.DebugDock.toggleViewAction())
         self.ui.DebugDock.toggleViewAction().triggered.connect(self.debugWindowClicked)
         self._debug = TrickplayDebugger(self)
@@ -102,14 +108,15 @@ class MainWindow(QMainWindow):
         
 		#Create Backtrace
         self.ui.BacktraceDock.toggleViewAction().setText("Backtrace")
-        self.ui.BacktraceDock.toggleViewAction().setFont(font)
+        #self.ui.BacktraceDock.toggleViewAction().setFont(font)
         self.ui.menuView.addAction(self.ui.BacktraceDock.toggleViewAction())
         self.ui.BacktraceDock.toggleViewAction().triggered.connect(self.traceWindowClicked)
-        self._backtrace = TrickplayBacktrace()
-        self.ui.BacktraceLayout.addWidget(self._backtrace)
+        self.backtrace = TrickplayBacktrace()
+        self.backtrace.font = self.preference.btFont
+        self.ui.BacktraceLayout.addWidget(self.backtrace)
         self.ui.BacktraceDock.hide()
 
-		#File Menu
+		#File Menu    
         QObject.connect(self.ui.actionNew_File, SIGNAL("triggered()"),  self.newFile)
         QObject.connect(self.ui.action_New, SIGNAL("triggered()"),  self.new)
         QObject.connect(self.ui.actionOpen_App, SIGNAL("triggered()"),  self.openApp)
@@ -130,6 +137,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionSearch, SIGNAL("triggered()"),  self.editor_search)
         QObject.connect(self.ui.actionSearch_Replace, SIGNAL("triggered()"),  self.editor_search_replace)
         QObject.connect(self.ui.actionGo_to_line, SIGNAL("triggered()"),  self.editor_go_to_line)
+        QObject.connect(self.ui.actionPreference, SIGNAL("triggered()"),  self.preferenceStart)
 
 		#Debug Menu
         QObject.connect(self.ui.action_Run, SIGNAL("triggered()"),  self.run)
@@ -335,7 +343,13 @@ class MainWindow(QMainWindow):
 
         # Search Flag
         self.find_expr = None
-
+        self.replace_expr = None
+        self.wo = None
+        self.forward = None
+        self.cs = None
+        self.wrap = None
+        self.onExit = False
+        self.rSent = False
 
     def chgTool_debug(self) :
         if self.debug_tbt.text() != "Debug":
@@ -410,6 +424,10 @@ class MainWindow(QMainWindow):
 
 		
     @property
+    def preference(self):
+        return self._preference
+    
+    @property
     def fileSystem(self):
         return self._fileSystem
     
@@ -445,9 +463,9 @@ class MainWindow(QMainWindow):
 		    self._deviceManager.trickplay.waitForBytesWritten();
 		    self.ui.interactive.setText("")
 		
-    def stop(self, serverStoped=False):
+    def stop(self, serverStoped=False, exit=False):
         # send 'q' command and close trickplay process
-
+        self.onExit = exit
         self.inspector.ui.refresh.setEnabled(False)
         self.inspector.ui.search.setEnabled(False)
 
@@ -456,43 +474,44 @@ class MainWindow(QMainWindow):
             self._deviceManager.trickplay.close()
         elif self._deviceManager.ui.comboBox.currentIndex() != 0:
             # Remote Debugging / Run 
-            if getattr(self._deviceManager, "debug_mode") == False :
+            #if getattr(self._deviceManager, "debug_mode") == False :
+            if getattr(self, "debug_mode") == False :
                 ret = self.deviceManager.socket.write('/close\n\n')
                 if ret < 0 :
                     print ("tp console socket is not available !")
             elif serverStoped == False :
+		        self.rSent = True
 		        self._deviceManager.send_debugger_command(DBG_CMD_RESET)
 
         if getattr(self._deviceManager, "debug_mode") == True :
-            # delete break points marker
+    	    # delete current line marker 
     	    for n in self.editorManager.editors:
     	        try :
-    	            for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
-    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
-                        #print("delete break points mark file [%s]"%str(n),"line [%s]"%str(l))
-    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
-    	            # delete current line marker
-    	            self.current_debug_file = self.path+'/'+self._deviceManager.file_name
+    	            # delete current line marker and keep break point marker
+    	            self.current_debug_file = str(self.path+'/'+self._deviceManager.file_name)
     	            if self.current_debug_file == n:
-    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
-                            self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
-    	                self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
-    	        except :
-    	            print("[VDBG] YUGI 1 : ", self.editorManager.editors[n][1])
+                        cEditor = self.editorManager.tab.editors[self.editorManager.editors[n][1]]
+                        cLine = cEditor.current_line
+                        lClick = 0
+                        
+                        if cEditor.line_click.has_key(cLine):
+    	                    lClick = cEditor.line_click[cLine]
 
-            # delete current line marker
-            """
-    		self.current_debug_file = self.path+'/'+self._deviceManager.file_name
-    		if self.current_debug_file == n:
-    		    self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(
-    	            self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line, -1)
-     	        self.editorManager.tab.editors[self.editorManager.editors[n][1]].current_line = -1
-            """
+                        if lClick == 0 : #no break point
+                            cEditor.markerDelete(cLine, -1)
+                        elif lClick == 1 : #active break point 
+                            cEditor.markerDelete(cLine, Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+                            cEditor.markerAdd(cLine, Editor.ACTIVE_BREAK_MARKER_NUM)
+                        elif lClick == 2 : #deactive break point
+                            cEditor.markerDelete(cLine, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+                            cEditor.markerAdd(cLine, Editor.DEACTIVE_BREAK_MARKER_NUM)
+    	                cEditor.current_line = -1
+    	        except :
+    	            print("[VDBG] exept ", self.editorManager.editors[n][1])
 
             # clean backtrace and debug window
-            self._backtrace.clearTraceTable(0)
+            self.backtrace.clearTraceTable(0)
             self._debug.clearLocalTable(0)
-            self._debug.clearBreakTable(0)
 
         self.windows = {"file":False, "inspector":True, "console":True, "debug":True, "trace":True}
         self.inspectorWindowClicked()
@@ -510,6 +529,8 @@ class MainWindow(QMainWindow):
         self._deviceManager.ui.comboBox.setEnabled(True)
         self.debug_tbt.setEnabled(True)
         self.debuggerMenuEnabled(False)
+        self.debug_mode = False
+        self.deviceManager.debug_mode = False
 
     def run(self):
         self.inspector.clearTree()
@@ -517,6 +538,7 @@ class MainWindow(QMainWindow):
         self.windows = {"file":False, "inspector":False, "console":False, "debug":True, "trace":True}
         self.inspectorWindowClicked()
         self.consoleWindowClicked()
+        self.traceWindowClicked()
         self.debugWindowClicked()
         self.traceWindowClicked()
 		
@@ -542,7 +564,6 @@ class MainWindow(QMainWindow):
         self.ui.action_Debug.setEnabled(False)
 
     def debug(self):
-        #self.inspector.clearTree()
         ret = self._deviceManager.run(True)
         if ret != False :
             self.windows = {"file":False, "inspector":False, "console":False, "debug":False, "trace":False}
@@ -553,9 +574,8 @@ class MainWindow(QMainWindow):
     
             self.debug_stop.setEnabled(True)
             self.debug_stepinto.setEnabled(True)
-            self.debug_stepover.setEnabled(True)
-            self.debug_stepout.setEnabled(True)
-            #self.debug_pause_bt.setEnabled(False)
+            self.debug_stepover.setEnabled(False)
+            self.debug_stepout.setEnabled(False)
             self.debug_continue_bt.setEnabled(True)
 
             self.ui.action_Stop.setEnabled(True)
@@ -563,15 +583,20 @@ class MainWindow(QMainWindow):
             self.ui.actionPause.setEnabled(False)
             self.ui.actionStep_into.setEnabled(True)
             self.ui.actionStep_over.setEnabled(True)
-            self.ui.actionStep_out.setEnabled(True)
+            self.ui.actionStep_out.setEnabled(False)
     
     	    self.chgTool_debug()
             self._deviceManager.ui.comboBox.setEnabled(False)
             self.debug_tbt.setEnabled(False)
             self.ui.action_Run.setEnabled(False)
             self.ui.action_Debug.setEnabled(False)
-            #self.debuggerMenuEnabled()
 	
+    def preference2(self):
+        self.preference = QDialog()
+        self.preference.ui = Ui_preferenceDialog()
+        self.preference.ui.setupUi (self.preference)
+        self.preference.exec_()
+
     def editor_undo(self):
 		if self.editorManager.tab:
 			index = self.editorManager.tab.currentIndex()
@@ -641,7 +666,7 @@ class MainWindow(QMainWindow):
         
         self.fileSystem.start(self.editorManager, path)
         self.setWindowTitle(QtGui.QApplication.translate("MainWindow", 
-							"Trickplay IDE [ "+str(os.path.basename(str(path))+" ]"), 
+							"TrickPlay IDE [ "+str(os.path.basename(str(path))+" ]"), 
 							None, QtGui.QApplication.UnicodeUTF8))
         self.deviceManager.setPath(path)
         
@@ -658,6 +683,18 @@ class MainWindow(QMainWindow):
         settings.setValue("mainWindowSize", self.size());
         #settings.setValue("mainWindowState", self.saveState());
 	
+    def clearBreakPoints(self):
+        for n in self.editorManager.editors:
+            try :
+                for l in self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click:
+                    self.editorManager.tab.editors[self.editorManager.editors[n][1]].markerDelete(int(l), -1) 
+                self.editorManager.tab.editors[self.editorManager.editors[n][1]].line_click = {}
+            except :
+                print("[VDBG] clearBreakPoints failed")
+        self.editorManager.bp_info = {1:[], 2:[]}
+        self._debug.clearBreakTable(0)
+
+
     def openApp(self):
 		wizard = Wizard()
 		path = -1
@@ -669,9 +706,12 @@ class MainWindow(QMainWindow):
 		print ("[VDBG] openApp [%s]"%path)
 		if path:
 			settings = QSettings()
+			if settings.value('path') is not None:
+			    self.stop()
+			self.clearBreakPoints()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
-			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay IDE [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(path))+" ]") , None, QtGui.QApplication.UnicodeUTF8))
 			if self.editorManager.tab != None:
 			    while self.editorManager.tab.count() != 0:
 			        self.editorManager.close()
@@ -681,22 +721,36 @@ class MainWindow(QMainWindow):
 		path = wizard.start("", False, True)
 		if path:
 			settings = QSettings()
+			if settings.value('path') is not None:
+			    self.stop()
+			self.clearBreakPoints()
 			settings.setValue('path', path)
 			self.start(path, wizard.filesToOpen())
-			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Trickplay IDE [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
+			self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(path)))+" ]" , None, QtGui.QApplication.UnicodeUTF8))
 			if self.editorManager.tab != None:
 			    while self.editorManager.tab.count() != 0:
 			        self.editorManager.close()
 
-    def exit(self):
-    	if self.editorManager.tab != None:
-    		while self.editorManager.tab.count() != 0:
-				self.editorManager.close()
+    def preferenceStart(self):
+        self.preference.start()
 
-        self._deviceManager.stop()
-        self.close()
-        #settings = QSettings()
-        #settings.remove("path") 
+    def exit(self):
+        self.stop(False, True)
+        if self.rSent == False:
+    	    if self.editorManager.tab != None:
+    		    while self.editorManager.tab.count() != 0:
+				    self.editorManager.close()
+
+    	    #settings = QSettings()
+            #for i in range (0, len(self._preference.lexerLua)):
+                #settings.remove(self._preference.lexerLua[i]+"FC")
+                #settings.remove(self._preference.lexerLua[i]+"BC")
+                #settings.remove(self._preference.lexerLua[i])
+
+            self._deviceManager.stop()
+            self.close()
+
+
 
     def newFile(self):
     	file_name = self.path+'/Untitled_'+str(self.untitled_idx)+".lua"
@@ -761,11 +815,23 @@ class MainWindow(QMainWindow):
     			    self.replace_ui.search_txt.setText(self.find_expr)
     			    self.replace_ui.pushButton_find.setEnabled(True)
         		    self.replace_ui.pushButton_replaceAll.setEnabled(True)
+    			    if self.replace_expr is not None :
+    			        self.replace_ui.replace_txt.setText(self.replace_expr)
     			else:
     			    self.replace_ui.pushButton_find.setEnabled(False)
         		    self.replace_ui.pushButton_replaceAll.setEnabled(False)
         		    self.replace_ui.pushButton_replace.setEnabled(False)
         		    self.replace_ui.pushButton_replaceFind.setEnabled(False)
+
+    			if self.forward is not None :
+    			    if self.forward is False:
+    			        self.replace_ui.radioButton_bw.setChecked(True)
+    			if self.cs is not None :
+    			    self.replace_ui.checkBox_case.setChecked(self.cs)
+    			if self.wo is not None :
+    			    self.replace_ui.checkBox_word.setChecked(self.wo)
+    			if self.wrap is not None :
+    			    self.replace_ui.checkBox_wrap.setChecked(self.wrap)
 
     			QObject.connect(self.replace_ui.search_txt , SIGNAL("textChanged(QString)"),  self.replace_textChanged)
     			QObject.connect(self.replace_ui.pushButton_close , SIGNAL("clicked()"),  self.replace_close)
@@ -779,11 +845,17 @@ class MainWindow(QMainWindow):
 					expr = self.replace_ui.search_txt.text()
 					self.find_expr = expr
 					replace_expr = self.replace_ui.replace_txt.text()
+					self.replace_expr = replace_expr
 					re = False
 					cs = self.replace_ui.checkBox_case.isChecked() 
 					wo = self.replace_ui.checkBox_word.isChecked() 
 					wrap = self.replace_ui.checkBox_wrap.isChecked() 
 					forward = self.replace_ui.radioButton_fw.isChecked() 
+					self.cs = cs
+					self.wo = wo
+					self.wrap = wrap
+					self.forward = forward
+
 					self.replace_ui.search_txt.setText(expr)
 					self.replace_ui.replace_txt.setText(replace_expr)
 					self.replace_ui.checkBox_case.setChecked(cs) 
@@ -810,11 +882,16 @@ class MainWindow(QMainWindow):
 		expr = self.replace_ui.search_txt.text()
 		self.find_expr = expr
 		replace_expr = self.replace_ui.replace_txt.text()
+		self.replace_expr = replace_expr
 		re = False
 		cs = self.replace_ui.checkBox_case.isChecked() 
 		wo = self.replace_ui.checkBox_word.isChecked() 
 		wrap = self.replace_ui.checkBox_wrap.isChecked() 
 		forward = self.replace_ui.radioButton_fw.isChecked() 
+		self.cs = cs
+		self.wo = wo
+		self.wrap = wrap
+		self.forward = forward
 		if replaceall is True:
 		    wo = True
 
@@ -830,10 +907,12 @@ class MainWindow(QMainWindow):
 
 		if find_result == False :
 			self.replace_ui.notification.setText("String Not Found") 
+			self.replace_ui.pushButton_replace.setEnabled(False)
+			self.replace_ui.pushButton_replaceFind.setEnabled(False)
 		else:
 			self.replace_ui.notification.setText("")
-        	self.replace_ui.pushButton_replace.setEnabled(True)
-        	self.replace_ui.pushButton_replaceFind.setEnabled(True)
+			self.replace_ui.pushButton_replace.setEnabled(True)
+			self.replace_ui.pushButton_replaceFind.setEnabled(True)
 
 		self.prevForward = forward 
 		return find_result
@@ -847,6 +926,8 @@ class MainWindow(QMainWindow):
 		findNext = self.replace_find(True) 
 		if findNext == False:
 			self.replace_ui.notification.setText("String Not Found") 
+			self.replace_ui.pushButton_replace.setEnabled(False)
+			self.replace_ui.pushButton_replaceFind.setEnabled(False)
 			return
 
 		replaceNum = 0 
@@ -913,10 +994,34 @@ class MainWindow(QMainWindow):
 			self.gotoLine_ui.okButton.setEnabled(False)
 
     def debug_continue(self):
-		self._deviceManager.send_debugger_command(DBG_CMD_CONTINUE)
-		self.inspector.ui.refresh.setEnabled(True)
-		self.inspector.ui.search.setEnabled(True)
-		return
+        # delete current line marker 
+        for n in self.editorManager.editors:
+            try :
+                # delete current line marker and keep break point marker
+                self.current_debug_file = str(self.path+'/'+self._deviceManager.file_name)
+                if self.current_debug_file == n:
+                    cEditor = self.editorManager.tab.editors[self.editorManager.editors[n][1]]
+                    cLine = cEditor.current_line
+                    lClick = 0
+                    if cEditor.line_click.has_key(cLine):
+                        lClick = cEditor.line_click[cLine]
+
+                    if lClick == 0 : #no break point
+                        cEditor.markerDelete(cLine, -1)
+                    elif lClick == 1 : #active break point 
+                        cEditor.markerDelete(cLine, Editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+                        cEditor.markerAdd(cLine, Editor.ACTIVE_BREAK_MARKER_NUM)
+                    elif lClick == 2 : #deactive break point
+                        cEditor.markerDelete(cLine, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+                        cEditor.markerAdd(cLine, Editor.DEACTIVE_BREAK_MARKER_NUM)
+                    cEditor.current_line = -1
+            except :
+                print("[VDBG] exept ", self.editorManager.editors[n][1])
+
+        self._deviceManager.send_debugger_command(DBG_CMD_CONTINUE)
+        self.inspector.ui.refresh.setEnabled(True)
+        self.inspector.ui.search.setEnabled(True)
+        return
 
     def debug_pause(self):
 		self._deviceManager.send_debugger_command(DBG_CMD_BREAK_NEXT)
@@ -935,6 +1040,7 @@ class MainWindow(QMainWindow):
 
     def debug_step_out(self):
 		return
+
     def editorMenuEnabled(self, enabled=True):
         self.ui.action_Save.setEnabled(enabled)
         self.ui.action_Save_As.setEnabled(enabled)
@@ -963,4 +1069,4 @@ class MainWindow(QMainWindow):
         self.ui.actionPause.setEnabled(enabled)
         self.ui.actionStep_into.setEnabled(enabled)
         self.ui.actionStep_over.setEnabled(enabled)
-        self.ui.actionStep_out.setEnabled(enabled)
+        self.ui.actionStep_out.setEnabled(False)

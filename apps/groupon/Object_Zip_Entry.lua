@@ -189,7 +189,15 @@ end
 
 local lat_lng_callback = function(zip_info)
 	
-    if zip_info == false then
+    if zip_info == false or
+        type(zip_info)                                  ~= "table" or
+        type(zip_info.results)                          ~= "table" or
+        type(zip_info.results[1])                       ~= "table" or
+        type(zip_info.results[1].address_components)    ~= "table" or
+        type(zip_info.results[1].geometry)              ~= "table" or
+        type(zip_info.results[1].geometry.location)     ~= "table" or
+        type(zip_info.results[1].geometry.location.lat) == "nil" or
+        type(zip_info.results[1].geometry.location.lng) == "nil" then 
         
         base_text = "Trying again"
         
@@ -228,6 +236,8 @@ local lat_lng_callback = function(zip_info)
                 return
                 
             end
+            
+            settings.zip = zip_info.results[1].address_components[1].short_name
             
             state:change_state_to("ANIMATING_OUT")
             

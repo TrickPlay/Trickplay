@@ -28,25 +28,62 @@ class TrickplayDebugger(QWidget):
         self.ui.breakTable.setColumnCount(1)
         self.ui.breakTable.verticalHeader().setDefaultSectionSize(18)
         self.ui.breakTable.popupMenu = QMenu(self.ui.breakTable)
-        self.ui.breakTable.popupMenu.addAction ('&Delete', self.deleteBP)
+        self.ui.breakTable.popupMenu.addAction ('Delete', self.deleteBP)
 
         self.ui.breakTable.setContextMenuPolicy(Qt.CustomContextMenu)
-        #self.connect(self.ui.breakTable, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
+        self.connect(self.ui.breakTable, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
         self.connect(self.ui.breakTable, SIGNAL("cellClicked(int, int)"), self.cellClicked)
 
         self.break_info = {}
 
-        self.font = QFont()
-        self.font.setStyleHint(self.font.Monospace)
-        self.font.setFamily('Monospace')
-        self.font.setPointSize(10)
+        self.font = self.main.preference.vFont
+        #self.font.setStyleHint(self.font.Monospace)
+        #self.font.setFamily('Inconsolata')
+        #self.font.setPointSize(12)
 
-	def contextMenu(self, point=None):
-		self.ui.breakTable.popupMenu.exec_( self.ui.breakTable.mapToGlobal(point) )
+    def contextMenu(self, point=None):
+        self.ui.breakTable.popupMenu.exec_( self.ui.breakTable.mapToGlobal(point) )
     
     def deleteBP(self):
-		print("delete BP !!!")
-		
+        index = 0 
+        for item in  self.ui.breakTable.selectedIndexes():
+            index = item.row() 
+            r= item.row()
+            c= item.column()
+
+        if self.deviceManager is None:
+            self.deviceManager = self.main.deviceManager
+
+        cellItem= self.ui.breakTable.item(index, 0) 
+        fileLine = cellItem.whatsThis()
+        n = re.search(":", fileLine).end()
+        fileName = str(fileLine[:n-1])
+
+        if fileName.startswith("/"):
+            fileName = fileName[1:]
+
+        lineNum = int(fileLine[n:]) - 1
+
+        fileName = os.path.join(self.deviceManager.path(), fileName)
+        self.editorManager.newEditor(fileName, None, lineNum)
+        editor = self.editorManager.currentEditor 
+        editor.margin_nline = lineNum
+
+        if self.deviceManager.debug_mode == True:
+	    self.deviceManager.send_debugger_command(DBG_CMD_DELETE+" %s"%str(index))
+        else:
+            if editor.current_line != lineNum :
+                editor.markerDelete(lineNum, -1)
+            else :
+                editor.markerDelete(lineNum, -1)
+    	        editor.markerAdd(lineNum, editor.ARROW_MARKER_NUM)
+            editor.line_click[lineNum] = 0
+
+        self.editorManager.bp_info[1].pop(index)
+        self.editorManager.bp_info[2].pop(index)
+
+        self.ui.breakTable.removeRow(r)
+
     def cellClicked(self, r, c):
 		if self.deviceManager is None:
 		    self.deviceManager = self.main.deviceManager
@@ -75,35 +112,35 @@ class TrickplayDebugger(QWidget):
 
         
 		if itemState == "on" and cellItemState == Qt.Unchecked:
-			self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" off")
-			"""
-			if editor.current_line != lineNum :
-				editor.markerDelete(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
-				editor.markerAdd(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
-			else :
-				editor.markerDelete(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-				editor.markerAdd(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-			editor.line_click[lineNum] = 2
-			"""
+			if self.deviceManager.debug_mode == True:
+			    self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" off")
+			else:
+			    if editor.current_line != lineNum :
+			        editor.markerDelete(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
+			        editor.markerAdd(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
+			    else :
+			        editor.markerDelete(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+			        editor.markerAdd(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+			    editor.line_click[lineNum] = 2
 
-			#data = sendTrickplayDebugCommand("9876", "b",False)
-			#self.break_info = printResp(data, "b")
+			self.editorManager.bp_info[1].pop(r)
+			self.editorManager.bp_info[1].insert(r, "off")
 
 		elif itemState == "off" and cellItemState == Qt.Checked:
-			self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" on")
-			"""
-			if editor.current_line != lineNum :
-				editor.markerDelete(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
-				editor.markerAdd(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
-			else :
-				editor.markerDelete(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
-				editor.markerAdd(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
-			editor.line_click[lineNum] = 1
-			"""
+			if self.deviceManager.debug_mode == True:
+			    self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" on")
+			else:
+			    if editor.current_line != lineNum :
+			        editor.markerDelete(lineNum, editor.DEACTIVE_BREAK_MARKER_NUM)
+			        editor.markerAdd(lineNum, editor.ACTIVE_BREAK_MARKER_NUM)
+			    else :
+			        editor.markerDelete(lineNum, editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+			        editor.markerAdd(lineNum, editor.ARROW_ACTIVE_BREAK_MARKER_NUM)
+			    editor.line_click[lineNum] = 1
 
-			#data = sendTrickplayDebugCommand("9876", "b",False)
-			#self.break_info = printResp(data, "b")
-		
+			self.editorManager.bp_info[1].pop(r)
+			self.editorManager.bp_info[1].insert(r, "on")
+
     def clearBreakTable(self, row_num=0):
 		self.ui.breakTable.clear()
 		self.ui.breakTable.setRowCount(row_num)
@@ -134,8 +171,6 @@ class TrickplayDebugger(QWidget):
 				elif key == 2:
 					newitem= self.ui.breakTable.item(m,0)
 					newitem.setText(item)
-				elif key == 3:
-					newitem= self.ui.breakTable.item(m,0)
 					newitem.setWhatsThis(item)
 				else:
 					pass
@@ -176,8 +211,8 @@ class TrickplayBacktrace(QWidget):
 
         self.font = QFont()
         self.font.setStyleHint(self.font.Monospace)
-        self.font.setFamily('Monospace')
-        self.font.setPointSize(10)
+        self.font.setFamily('Inconsolata')
+        self.font.setPointSize(12)
 
 
     def cellClicked(self, r, c):

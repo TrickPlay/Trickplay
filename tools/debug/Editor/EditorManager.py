@@ -24,6 +24,8 @@ class EditorManager(QWidget):
         self.deviceManager = None
         self.tab = None
         self.currentEditor = None
+        self.bp_info = {1:[],2:[]}
+        self.fontSettingCheck = {}
 
 
     def setupUi(self, parent):
@@ -49,8 +51,8 @@ class EditorManager(QWidget):
         container.setMinimumSize(QSize(0, 0))
         font = QFont()
         font.setStyleHint(font.Monospace)
-        font.setFamily('Monospace')
-        font.setPointSize(10)
+        font.setFamily('Inconsolata')
+        font.setPointSize(12)
         container.setFont(font)
 
         grid = QGridLayout(container)
@@ -328,11 +330,8 @@ class EditorManager(QWidget):
         self.editorGroups[tabGroup].setCurrentIndex(index)
         editor.setFocus()
         editor.path = path
-
-        #font = QFont()
-        #font.setStyleHint(font.Monospace)
-        #font.setFamily('Monospace')
-        #font.setPointSize(10)
+        if len(self.bp_info[1]) > 0:
+            editor.show_marker()
 
         n = re.search("[/]+\S+[/]+", editor.path).end()
         fileName = editor.path[n:]
@@ -340,7 +339,6 @@ class EditorManager(QWidget):
         editorAction = QAction(self.windowsMenu)
         editorAction.setText(fileName)
         editorAction.setIconText(editor.path)
-        #editorAction.setFont(font)
         editorAction.setShortcut(QApplication.translate("MainWindow", "Ctrl+"+str(index+1), None, QApplication.UnicodeUTF8))
         self.windowsMenu.addAction(editorAction)
         QObject.connect(editorAction , SIGNAL("triggered()"),  self, SLOT("moveToThisEditor()"))
@@ -445,3 +443,5 @@ class EditorManager(QWidget):
                 print"[VDBG] This is %s"%str(model.type(fileIndex))+". Not editable."
                 return
             
+    #def getBPInfo_file (self):
+        

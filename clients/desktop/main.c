@@ -1,6 +1,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <signal.h>
 
 #include "trickplay/trickplay.h"
 #include "trickplay/image.h"
@@ -32,11 +33,23 @@ int my_image_decoder( void * buffer, unsigned long int size, TPImage * image, vo
 
 //-----------------------------------------------------------------------------
 
+static TPContext * context = 0;
+
+static void quit( int sig )
+{
+	if ( context )
+	{
+		tp_context_quit( context );
+	}
+}
+
 int main( int argc, char * argv[ ] )
 {
+    signal( SIGINT , quit );
+
     tp_init( &argc, &argv );
 
-    TPContext * context = tp_context_new();
+    context = tp_context_new();
 
     if ( argc > 1 && * ( argv[ argc - 1 ] ) != '-' )
     {
@@ -52,6 +65,8 @@ int main( int argc, char * argv[ ] )
     int result = tp_context_run( context );
 
     tp_context_free( context );
+
+    context = 0;
 
     return result;
 }
