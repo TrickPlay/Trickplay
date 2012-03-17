@@ -22,7 +22,8 @@
 
 static NSString *const user = @"phone";
 static NSString *const contactURI = @"sip:phone@asterisk-1.asterisk.trickplay.com";
-static NSString *const remoteURI = @"sip:asterisk-1.asterisk.trickplay.com";
+static NSString *const remoteURI = @"sip:rex_sip@asterisk-1.asterisk.trickplay.com";
+static NSString *const asteriskURI = @"sip:asterisk-1.asterisk.trickplay.com";
 static NSString *const udpClientIP = @"10.0.190.153";
 static NSUInteger const udpClientPort = 50418;
 static NSUInteger const udpServerPort = 5060;
@@ -60,7 +61,7 @@ static NSUInteger const udpServerPort = 5060;
 #pragma mark User Control
 
 - (void)registerToAsterisk:(id)arg {
-    RegisterDialog *registerDialog = [[[RegisterDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
+    RegisterDialog *registerDialog = [[[RegisterDialog alloc] initWithUser:user contactURI:contactURI remoteURI:asteriskURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
        
     NSString *registerCallID = [NSString uuid];
     [registerDialog registerToAsteriskWithCallID:registerCallID];
@@ -75,7 +76,11 @@ static NSUInteger const udpServerPort = 5060;
 }
 
 - (void)initiateVideoCall {
+    InviteDialog *inviteDialog = [[[InviteDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
     
+    [sipDialogs setObject:inviteDialog forKey:inviteDialog.callID];
+    
+    [inviteDialog invite];
 }
 
 - (void)hangUp {
@@ -96,8 +101,19 @@ static NSUInteger const udpServerPort = 5060;
     CFSocketEnableCallBacks(sipSocket, kCFSocketWriteCallBack);
 }
 
+/**
+ * This is our main callback from Dialog sessions ending. This
+ * will have a large impact on the state machine.
+ */
 - (void)dialogSessionEnded:(SIPDialog *)dialog {
     
+    if ([dialog isKindOfClass:[RegisterDialog class]]) {
+        [self initiateVideoCall];
+    } else if ([dialog isKindOfClass:[InviteDialog class]]) {
+        // do nothing special for now
+    }
+    
+    [sipDialogs removeObjectForKey:dialog.callID];
 }
 
 #pragma mark -
@@ -106,7 +122,7 @@ static NSUInteger const udpServerPort = 5060;
 - (void)handleNewDialogWithHdr:(NSDictionary *)sipHdrDic body:(NSString *)sipBody fromAddr:(NSData *)remoteAddr {
     NSString *statusLine = [sipHdrDic objectForKey:@"Status-Line"];
     if ([statusLine rangeOfString:@"OPTIONS "].location != NSNotFound) {
-        OptionsDialog *options = [[[OptionsDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
+        OptionsDialog *options = [[[OptionsDialog alloc] initWithUser:user contactURI:contactURI remoteURI:asteriskURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
 
         [options receivedOptions:sipHdrDic fromAddr:remoteAddr];
     } else if ([statusLine rangeOfString:@"BYE "].location != NSNotFound) {
@@ -124,6 +140,7 @@ static NSUInteger const udpServerPort = 5060;
     }
     
     NSString *sipPacket = [[NSString alloc] initWithData:sipData encoding:NSUTF8StringEncoding];
+    NSLog(@"\nRecieved packet:\n%@\n", sipPacket);
     
     // Separate header and body
     NSArray *components = [sipPacket componentsSeparatedByString:@"\r\n\r\n"];
@@ -147,14 +164,14 @@ static NSUInteger const udpServerPort = 5060;
         [sipHdrDic setObject:[sipLineComponents objectAtIndex:1] forKey:[sipLineComponents objectAtIndex:0]];
     }
     
-    NSLog(@"SIP Header Dictionary:\n%@", sipHdrDic);
+    //NSLog(@"SIP Header Dictionary:\n%@", sipHdrDic);
     // If a Dialog is already open for this packet, find it
     // and the packet to it
     NSString *callID = [sipHdrDic objectForKey:@"Call-ID"];
     if (callID) {
         SIPDialog *dialog = [sipDialogs objectForKey:callID];
         if (dialog) {
-            [dialog interpretSIP:sipHdrDic body:sipBody];
+            [dialog interpretSIP:sipHdrDic body:sipBody fromAddr:remoteAddr];
         } else {
             [self handleNewDialogWithHdr:(NSDictionary *)sipHdrDic body:(NSString *)sipBody fromAddr:(NSData *)remoteAddr];
         }
@@ -172,12 +189,13 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
     
     switch (type) {
         case kCFSocketReadCallBack:
-            fprintf(stderr, "SIP Socket Read\n");
+        {
+            //fprintf(stderr, "SIP Socket Read\n");
             
             int err;
             int sock = CFSocketGetNative(socket);
             struct sockaddr_storage addr;
-            socklen_t addrLen;
+            socklen_t addrLen = sizeof(addr);
             uint8_t buffer[65536];
             ssize_t bytesRead;
             
@@ -203,7 +221,10 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
                 SIPClient *self = (SIPClient *)info;
                 // TODO: Some type of error catching here is well advised, in case of
                 // malformed packets.
-                [self sipParse:dataObj fromAddr:addrObj];
+                NSLog(@"Received from address: %@", addrObj);
+                if (addrLen > 0) {
+                    [self sipParse:dataObj fromAddr:addrObj];
+                }
             }
             
             if (err != 0) {
@@ -212,7 +233,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             }
             
             break;
-            
+        }    
         case kCFSocketDataCallBack:
             fprintf(stderr, "SIP Socket Data\n");
             break;
@@ -222,14 +243,17 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             break;
             
         case kCFSocketWriteCallBack:
-            fprintf(stderr, "SIP Socket Write\n");
+        {
+            //fprintf(stderr, "SIP Socket Write\n");
             
             SIPClient *self = (SIPClient *)info;
             
             if (self.writeQueue.count > 0) {
                 CFDataRef packet = (CFDataRef)[self.writeQueue objectAtIndex:0];
-                [self.writeQueue removeObjectAtIndex:0];
+                // TODO: sometimes will receive EXC_BAD_ACCESS on CFSocketSendData.
+                // Should be fixed now. moved removeObjectAtIndex to after send data.
                 CFSocketError error = CFSocketSendData(socket, NULL, packet, 0);
+                [self.writeQueue removeObjectAtIndex:0];
                 if (error == kCFSocketError) {
                     fprintf(stderr, "Error Writing to socket\n");
                 } else if (error == kCFSocketTimeout) {
@@ -238,7 +262,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             }
             
             break;
-            
+        }   
         default:
             fprintf(stderr, "SIP Socket callback type unknown\n");
             break;

@@ -44,6 +44,8 @@
 		CDABC6BC15002E6D0039DBE0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6BB15002E6C0039DBE0 /* CoreFoundation.framework */; };
 		CDABC6BF150066560039DBE0 /* SIPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6BE150066550039DBE0 /* SIPClient.m */; };
 		CDABC6C6150563380039DBE0 /* MyExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6C5150563380039DBE0 /* MyExtensions.m */; };
+		CDABC6C91511037F0039DBE0 /* SDPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6C81511037E0039DBE0 /* SDPParser.m */; };
+		CDABC6D11513D76E0039DBE0 /* MediaDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6D01513D76E0039DBE0 /* MediaDescription.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -114,6 +116,10 @@
 		CDABC6BE150066550039DBE0 /* SIPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SIPClient.m; sourceTree = "<group>"; };
 		CDABC6C4150563380039DBE0 /* MyExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyExtensions.h; sourceTree = "<group>"; };
 		CDABC6C5150563380039DBE0 /* MyExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyExtensions.m; sourceTree = "<group>"; };
+		CDABC6C71511037C0039DBE0 /* SDPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDPParser.h; sourceTree = "<group>"; };
+		CDABC6C81511037E0039DBE0 /* SDPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDPParser.m; sourceTree = "<group>"; };
+		CDABC6CF1513D76E0039DBE0 /* MediaDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaDescription.h; sourceTree = "<group>"; };
+		CDABC6D01513D76E0039DBE0 /* MediaDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaDescription.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -265,6 +271,7 @@
 				CDABC66A14FEC6C50039DBE0 /* utilities */,
 				CDABC66C14FEC6DA0039DBE0 /* packetizers */,
 				CDABC66B14FEC6D10039DBE0 /* rtp */,
+				CDABC6CE1513D7270039DBE0 /* SDP */,
 				CDABC6B714FF18F90039DBE0 /* SIP */,
 				CDABC69C14FEC74C0039DBE0 /* NSStreamAdditions.h */,
 				CDABC69D14FEC74C0039DBE0 /* NSStreamAdditions.m */,
@@ -287,6 +294,17 @@
 				CDABC6BE150066550039DBE0 /* SIPClient.m */,
 			);
 			name = SIP;
+			sourceTree = "<group>";
+		};
+		CDABC6CE1513D7270039DBE0 /* SDP */ = {
+			isa = PBXGroup;
+			children = (
+				CDABC6C71511037C0039DBE0 /* SDPParser.h */,
+				CDABC6C81511037E0039DBE0 /* SDPParser.m */,
+				CDABC6CF1513D76E0039DBE0 /* MediaDescription.h */,
+				CDABC6D01513D76E0039DBE0 /* MediaDescription.m */,
+			);
+			name = SDP;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -377,6 +395,8 @@
 				CDABC6BA150000D10039DBE0 /* SIPDialog.m in Sources */,
 				CDABC6BF150066560039DBE0 /* SIPClient.m in Sources */,
 				CDABC6C6150563380039DBE0 /* MyExtensions.m in Sources */,
+				CDABC6C91511037F0039DBE0 /* SDPParser.m in Sources */,
+				CDABC6D11513D76E0039DBE0 /* MediaDescription.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
