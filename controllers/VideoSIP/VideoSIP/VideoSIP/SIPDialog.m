@@ -13,6 +13,7 @@
 #import <arpa/inet.h>
 
 #import "MyExtensions.h"
+#import "SDPParser.h"
 
 
 @implementation SIPDialog
@@ -142,7 +143,7 @@
     }
 }
 
-- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body {
+- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr {
     NSLog(@"This method should be overwritten");
 }
 
@@ -168,7 +169,9 @@
     self.allow = nil;
     self.supported = nil;
     self.branch = nil;
+    self.authLine = nil;
     self.auth = nil;
+    self.writeQueue = nil;
     
     self.delegate = nil;
     
@@ -176,6 +179,7 @@
 }
 
 @end
+
 
 
 
@@ -232,7 +236,7 @@
     //[writeQueue addObject:[packet dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
-- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body {
+- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr {
     NSString *statusLine = [parsedPacket objectForKey:@"Status-Line"];
     if (!statusLine) {
         return;
@@ -246,11 +250,13 @@
             [self registerToAsteriskWithCallID:self.callID];
         }
     } else {
-        NSLog(@"Unrecognized Response: %@", statusLine);
+        NSLog(@"Unrecognized Response: %@\n", statusLine);
     }
 }
 
 @end
+
+
 
 
 @implementation OptionsDialog
@@ -292,9 +298,26 @@
 @end
 
 
+
+
 @implementation InviteDialog
 
+- (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue delegate:(id <SIPDialogDelegate>)_delegate {
+    
+    self = [super initWithUser:_user contactURI:_contactURI remoteURI:_remoteURI udpClientIP:_udpClientIP udpClientPort:_udpClientPort udpServerPort:_udpServerPort writeQueue:_writeQueue delegate:_delegate];
+    
+    if (self) {
+        previousAcks = [[NSMutableDictionary alloc] initWithCapacity:10];
+    }
+    
+    return self;
+}
+
+#pragma mark -
+#pragma mark INVITE and related packet generation
+
 - (NSString *)generateInvite {
+    
     NSString *invite = [NSString stringWithFormat:@"INVITE %@ SIP/2.0\r\n"
                         @"Via: %@ %@:%d;rport;branch=%@\r\n"
                         @"Max-Forwards: %d\r\n"
@@ -326,18 +349,165 @@
     
     invite = [NSString stringWithFormat:@"%@%@%d%@%@", invite, @"Content-Length: ", [sdpPacket length], @"\r\n\r\n", sdpPacket];
     
-    cseq += 1;
+    //cseq += 1;
     
     return invite;
 }
 
+- (void)ackResponse:(NSDictionary *)response withBranch:(NSString *)ackBranch {
+    NSString *existingAck = [previousAcks objectForKey:[response objectForKey:@"CSeq"]];
+    if (existingAck) {
+        [delegate dialog:self wantsToSendData:[existingAck dataUsingEncoding:NSUTF8StringEncoding]];
+        return;
+    }
+    
+    if (!ackBranch) {
+        ackBranch = branch;
+    }
+    
+    NSString *responseCSeq = [response objectForKey:@"CSeq"];
+    NSArray *components = [responseCSeq componentsSeparatedByString:@" "];
+    responseCSeq = [components objectAtIndex:0];
+    NSNumber *cseqVal = [NSNumber numberWithInt:[responseCSeq intValue]];
+    NSUInteger ackCSeq = [cseqVal unsignedIntValue];
+    
+    NSString *ack = [NSString stringWithFormat:@"ACK %@ SIP/2.0\r\n"
+                     @"Via: %@ %@:%d;rport;branch=%@\r\n"
+                     @"Max-Forwards: %d\r\n"
+                     @"From: %@;tag=%@\r\n"
+                     @"To: %@\r\n"
+                     @"Call-ID: %@\r\n"
+                     @"CSeq: %d ACK\r\n"
+                     @"Content-Length: 0\r\n\r\n",
+                     sipURI,
+                     [via objectForKey:@"protocol"], [via objectForKey:@"clientIP"], [[via objectForKey:@"clientPort"] unsignedIntValue], ackBranch,
+                     maxForwards,
+                     [from objectForKey:@"sender"], [from objectForKey:@"tag"],
+                     [response objectForKey:@"To"],
+                     callID,
+                     ackCSeq];
+    
+    [delegate dialog:self wantsToSendData:[ack dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    [previousAcks setObject:ack forKey:[NSString stringWithFormat:@"%@", [response objectForKey:@"CSeq"]]];
+    
+    if (ackCSeq == cseq) {
+        cseq += 1;
+    }
+    
+    NSLog(@"\nACK with packet:\n%@\n", ack);
+}
+
+
+// TODO: Respond to all BYE Requests, not just the first one. May need to use
+// some 400 error to get Asterisk to shut up.
+- (void)byeResponse:(NSDictionary *)request fromAddr:(NSData *)remoteAddr {
+    struct sockaddr_in *addr = (struct sockaddr_in *)[remoteAddr bytes];
+    char ip_string[INET_ADDRSTRLEN];
+    
+    inet_ntop(AF_INET, &(addr->sin_addr), ip_string, INET_ADDRSTRLEN);
+    
+    NSString *response = [NSString stringWithFormat:@"SIP/2.0 200 OK\r\n"
+                          @"Via: %@;rport=%d;received=%s\r\n"
+                          @"From: %@\r\n"
+                          @"To: %@\r\n"
+                          @"Call-ID: %@\r\n"
+                          @"CSeq %@\r\n"
+                          @"Content-Length: 0\r\n\r\n",
+                          [request objectForKey:@"Via"], ntohs(addr->sin_port), ip_string,
+                          [request objectForKey:@"From"],
+                          [request objectForKey:@"To"],
+                          [request objectForKey:@"Call-ID"],
+                          [request objectForKey:@"CSeq"]];
+    
+    NSLog(@"\nBYE Response:\n%@\n", response);
+    [delegate dialog:self wantsToSendData:[response dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
+#pragma mark -
+#pragma mark INVITE main control flow
+
+/**
+ * Any INVITE with a change in the packet (new SDP, Authorization added in) must
+ * have a new branch ID. All non-200 ACKs must use the corresponding INVITEs branch ID.
+ * A 200 ACK uses a new branch ID.
+ */
 - (void)invite {
     self.authLine = [self generateAuthLine:@"INVITE"];
+    self.branch = [self generateBranch];
     NSString *packet = [self generateInvite];
+    
+    NSLog(@"\nInvite packet:\n%@\n", packet);
     
     [delegate dialog:self wantsToSendData:[packet dataUsingEncoding:NSUTF8StringEncoding]];
     
     //[writeQueue addObject:[packet dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
+#pragma mark -
+#pragma mark INVITE interpreting data
+
+- (NSDictionary *)parseSDP:(NSString *)sdp {
+    if (!sdp) {
+        return nil;
+    }
+    
+    SDPParser *sdpParser = [[[SDPParser alloc] initWithSDP:sdp] autorelease];
+    NSArray *audioDest = [sdpParser audioHostandPort];
+    NSArray *videoDest = [sdpParser videoHostandPort];
+    
+    if (!audioDest || !videoDest) {
+        return nil;
+    }
+    
+    NSMutableDictionary *mediaDest = [NSMutableDictionary dictionaryWithCapacity:2];
+    
+    if (audioDest) {
+        [mediaDest setObject:audioDest forKey:@"audioDest"];
+    }
+    
+    if (videoDest) {
+        [mediaDest setObject:videoDest forKey:@"videoDest"];
+    }
+    
+    return mediaDest;
+}
+
+- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr {
+    NSString *statusLine = [parsedPacket objectForKey:@"Status-Line"];
+    if (!statusLine) {
+        return;
+    }
+    if ([statusLine compare:@"SIP/2.0 200 OK"] == NSOrderedSame) {
+        [self ackResponse:parsedPacket withBranch:[NSString uuid]];
+        NSDictionary *mediaDest = [self parseSDP:body];
+        NSLog(@"media destination:\n%@\n", mediaDest);
+        // TODO: Inform SIPClient of our new found host and port combo for RTP
+    } else if ([statusLine compare:@"SIP/2.0 401 Unauthorized"] == NSOrderedSame) {
+        NSString *authRequest = [parsedPacket objectForKey:@"WWW-Authenticate"];
+        if (authRequest) {
+            [self ackResponse:parsedPacket withBranch:nil];
+            [self parseAuthentication:authRequest];
+            [self invite];
+        }
+    } else if ([statusLine rangeOfString:@"BYE"].location != NSNotFound) {
+        [self byeResponse:parsedPacket fromAddr:remoteAddr];
+        [delegate dialogSessionEnded:self];
+    } else {
+        NSLog(@"Unrecognized Response: %@", statusLine);
+    }
+}
+
+#pragma mark -
+#pragma mark Memory Management
+
+- (void)dealloc {
+    if (previousAcks) {
+        [previousAcks release];
+        previousAcks = nil;
+    }
+    
+    [super dealloc];
 }
 
 @end

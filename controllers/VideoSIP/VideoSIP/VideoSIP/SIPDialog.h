@@ -126,7 +126,7 @@
 
 - (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue delegate:(id <SIPDialogDelegate>)_delegate;
 
-- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body;
+- (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr;
 
 - (void)cancel;
 
@@ -156,7 +156,9 @@
 #pragma mark -
 #pragma mark INVITE
 
-@interface InviteDialog : SIPDialog
+@interface InviteDialog : SIPDialog {
+    NSMutableDictionary *previousAcks;
+}
 
 - (void)invite;
 
