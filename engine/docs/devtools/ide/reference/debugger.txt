@@ -1,13 +1,15 @@
 
 Title: TrickPlay IDE Debugger Reference
 
-The TrickPlay IDE assists in locating and eliminating program errors by providing full-featured debugging capabilities. WIth the IDE Debugger, a TrickPlay application can be monitored while the application is running. Variable values can be checked and program logic can be followed to verify that the application runs as expected. Breakpoints enable the program to temporarily halt at a specified code statement, at which point the developer can check variable values and step through the code line-by-line to locate any logic errors.
+The TrickPlay IDE assists in locating and eliminating program errors by providing full-featured debugging capabilities. WIth the IDE Debugger, a TrickPlay application's variables and property settings can be monitored while the application is running. Variable values can be checked and program logic can be followed to verify that the application runs as expected. Breakpoints enable the program to temporarily halt at a specific code statement, at which point the developer can check variable values and step through the code line-by-line to locate any logic errors.
 
 Topic: Starting a Debug Session
 
 To begin a debug session, press the Debug button on the toolbar. If the Debug button is not on the toolbar, click on the down-arrow alongside the Run button and select the Debug entry.
 
-When a debug session starts, the IDE opens the following windows: Debug, Inspector, Console and Backtrace. If necessary, the TrickPlay application is deployed to the remote target device. It is loaded into the TrickPlay Engine and the debugger begins the session at the application's first code statement. At this point, all debugging capablities are enabled. Breakpoints can be set and code can be stepped through in any of the supported fashions.
+(see images/IdeDebugSession.png)
+
+When a debug session starts, the IDE opens the following windows: Debug, Inspector, Console and Backtrace. If necessary, the TrickPlay application is deployed to the remote target device. It is loaded into the TrickPlay Engine and the debugger begins the session at the application's first code statement. At this point, all debugging capablities are enabled, including the debugger-related toolbar buttons. Breakpoints can be set, and code can be stepped through in any of the supported fashions.
 
 To start the TrickPlay application, click the toolbar's Continue button or select the Debug->Continue menu item.
 
@@ -17,19 +19,23 @@ Topic: Setting a Breakpoint
 
 To set a breakpoint, click in the Editor Window to the right of the code statement's line number. A red breakpoint symbol will display on the line. The breakpoint will also be added to the Breaks tab of the Debug Window. Whenever program execution arrives at the breakpoint, execution will halt and the developer can check variable values, step through code, and continue debugging the program in any desired manner.
 
+(see images/Breakpoint.png)
+
 To disable a breakpoint, click on the red breakpoint symbol. The symbol will turn gray, indicating that is it disabled. Alternatively, disable a breakpoint by unchecking its checkbox in the Breaks tab of the Debug Window.
 
-To delete a breakpoint, click on the disabled gray breakpoint symbol. The symbol will disappear and the breakpoint will be deleted. The breakpoint is also removed from the Breaks tab of the Debug Window.
+To delete a breakpoint, right-click on the breakpoint entry in the Breaks tab of the Debug Window and select Delete from the displayed pop-up menu.
 
 Topic: Stepping Through the Code
 
-Several methods are provided to step through an executing TrickPlay application.
+Several methods are provided to step through an executing TrickPlay application. Each method can be performed by clicking the appropriate toolbar button, selecting its menu item, or pressing its shortcut key.
 
-Step Into - Advance to the next code statement. If the statement is a function call, advances to the first statement in the function. To "step into," click the toolbar's Step Into button or select the Debug->Step Into menu item.
+(see images/DebugToolbar.png)
 
-Step Over - Advance to the next code statement. If the statement is a function call, advances to the next statement after the function. To "step over," click the toolbar's Step Over button or select the Debug->Step Over menu item.
+Step Into - Advances to the next code statement. If the current statement is a function call, advances to the first statement in the function.
 
-Step Out - Advance to the end of the current function. To "step out," click the toolbar's Step Over button or select the Debug->Step Out menu item.
+Step Over - Advances to the next code statement. If the current statement is a function call, advances to the next statement after the function.
+
+Step Out - Advances to the end of the current function.
 
 Topic: Ending a Debug Session
 

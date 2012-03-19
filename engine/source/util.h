@@ -435,7 +435,7 @@ namespace Util
     {
     public:
 
-    	enum MemoryUse { MEMORY_USE_TAKE , MEMORY_USE_COPY };
+    	typedef enum { MEMORY_USE_TAKE , MEMORY_USE_COPY } MemoryUse;
 
     	Buffer();
 

@@ -1137,7 +1137,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
 #ifndef TP_PRODUCTION
 
-    if ( context->get_bool( TP_START_DEBUGGER , false ) )
+    if ( context->get_bool( TP_START_DEBUGGER , false ) || launch.debug )
     {
     	debugger.break_next_line();
     }

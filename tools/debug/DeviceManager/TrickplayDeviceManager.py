@@ -33,7 +33,7 @@ class TrickplayDeviceManager(QWidget):
         self.inspector = main._inspector
         self.editorManager = main._editorManager
         self.debugWindow = main._debug
-        self.backtraceWindow = main._backtrace
+        self.backtraceWindow = main.backtrace
 
         self.ui = Ui_DeviceManager()
         self.ui.setupUi(self)
@@ -65,7 +65,7 @@ class TrickplayDeviceManager(QWidget):
         self.my_name = ""
         self.manager = QNetworkAccessManager()
         #self.reply = None
-        #self.command = None
+        #self.bs_command = False
         self.current_debug_file = None
         self.inbreak = True
 
@@ -113,18 +113,24 @@ class TrickplayDeviceManager(QWidget):
 					if data is not None:
 					    if data.has_key("debugger"):
 					        self.ui.comboBox.setItemData(index, data["debugger"], DEBUG_PORT)
-					        #print("[VDBG] debug Port : %s"%d_port)
+					        print("[VDBG] debug Port : %s"%data["debugger"], d[0])
+					    else :
+					        print("[VDBG] Didn't get %s's debug_port information "%d[0])
 					    if data.has_key("http"):
 					        self.http_port = data["http"]
 					        #print("[VDBG] http Port : %s"%self.http_port)
 					        self.ui.comboBox.setItemData(index, data["http"], HTTP_PORT)
+					    else :
+					        print("[VDBG] Didn't get %s's http_port information "%d[0])
 					    if data.has_key("console"):
 					        self.console_port = data["console"]
 					        #print("[VDBG] console Port : %s"%self.console_port)
 					        self.ui.comboBox.setItemData(index, data["console"], CONSOLE_PORT)
 					        CON.port = self.http_port
+					    else :
+					        print("[VDBG] Didn't get %s's console_port information "%d[0])
 					else:
-					    print("[VDBG] Didn't get Control information ")
+					    print("[VDBG] Didn't get %s's Control information "%d[0])
 
 			elif event.type() == REMEVENT:
 				d = event.dict
@@ -218,14 +224,6 @@ class TrickplayDeviceManager(QWidget):
     def serverHasStopped(self):
         print("Console port disconnected")
     	self.socket.close()
-    	self.main.stop(True)
-
-        """
-    	index = self.ui.comboBox.currentIndex()
-    	self.ui.comboBox.removeItem(index)
-    	self.ui.comboBox.setCurrentIndex(0)
-    	self.service_selected(0)
-        """
 
     def serverHasError(self, error):
         print(QString("[VDBG] Error: %1").arg(self.socket.errorString()))
@@ -267,35 +265,61 @@ class TrickplayDeviceManager(QWidget):
 					if self.debug_mode == True:
 					    self.inbreak = False
 					    self.send_debugger_command(DBG_CMD_INFO)
+					    if len(self.editorManager.bp_info[1]) > 0 :
+					        self.send_debugger_command(DBG_CMD_BB)
 					else :
 					    self.inspector.ui.refresh.setEnabled(True)
 					    self.inspector.ui.search.setEnabled(True)
 				except:
 					print( "[VDBG] Failed to obtain debugger port" )
-					# Kill the process
+					# Close the process
 					self.trickplay.close()
 			else:
 				# Output the log line
 				EGN_MSG(">> %s"%s.replace('\033[34;1m','').replace('\033[31;1m','').replace('\033[0m','').replace('\033[37m','').replace('\033[32m',''))
 				
     def send_debugger_command(self, command):
-		if self.debug_port is None:
-			print "No debugger port"
-			return
+	    if self.debug_port is None:
+		print "No debugger port"
+		return
+	    url = QUrl()
+	    url.setScheme( "http" )
+	    url.setHost( CON.address )
+	    url.setPort( self.debug_port )
+	    url.setPath( "/debugger" )
+	
+	    print ("[VDBG] ' %s ' Command Sent"%command)
 		
-		url = QUrl()
-		url.setScheme( "http" )
-		url.setHost( CON.address )
-		url.setPort( self.debug_port )
-		url.setPath( "/debugger" )
-		
-		print ("[VDBG] ' %s ' Command Sent"%command)
-		
-		request = QNetworkRequest( url )
-		reply = self.manager.post( request , command )
-		reply.command = command
+	    data = {}
+	    request = QNetworkRequest( url )
+	    if command == "bb":
+	        data['clear'] =  True
+	        data['add'] =  []
+	        bpCnt = len(self.editorManager.bp_info[1])
+	        for r in range(0, bpCnt):
+	            bp_info = self.editorManager.bp_info[2][r]
+	            n = re.search(":", bp_info).end()
+	            fName = bp_info[:n-1]
+	            lNum  = int(bp_info[n:]) -1
+	            if self.editorManager.bp_info[1][r] == "on":
+	                bState = True
+	            else:
+	                bState = False
+	            #data['add'].append({'file':fName, 'line':lNum, 'on':bState})
+	            bp_item = {}
+	            bp_item['file'] = fName
+	            bp_item['line'] = lNum + 1
+	            bp_item['on'] = bState
+	            data['add'].append(bp_item)
+		    
+	        params = json.dumps(data)
+	        reply = self.manager.post( request ,command+' '+params)
+	        reply.command = command
+	    else:
+	        reply = self.manager.post( request , command )
+	        reply.command = command
 
-		def debugger_reply_finished(reply):
+	    def debugger_reply_finished(reply):
 		    def foo ():
 		        if reply.error()== QNetworkReply.NoError:
 		            print("[VDBG] ' %s ' Response"%reply.command)
@@ -305,11 +329,17 @@ class TrickplayDeviceManager(QWidget):
     
 		            if reply.command == "r":
 		                self.main.deviceManager.socket.write('/close\n\n')
+		                self.main.rSent = False
+		                if self.main.onExit == True:
+		                    if self.editorManager.tab != None:
+		                        while self.editorManager.tab.count() != 0:
+		                            self.editorManager.close()
+		                    self.stop()
+		                    self.main.close()
+
 
 		            data = self.getFileLineInfo_Resp(str(reply.readAll()), command)
 		            if data is not None:
-		                #print("[VDBG] ' %s ' Response"%reply.command)
-		                #print("[VDBG] Response Data : ' %s '"%data)
 		                if reply.command == DBG_CMD_INFO:
 		                    self.inbreak = True
 		                    self.inspector.ui.refresh.setEnabled(False)
@@ -347,7 +377,7 @@ class TrickplayDeviceManager(QWidget):
 			                # TODO: Here we should enable the debug UI
 		                    self.main.debug_stepinto.setEnabled(True)
 		                    self.main.debug_stepover.setEnabled(True)
-		                    self.main.debug_stepout.setEnabled(True)
+		                    self.main.debug_stepout.setEnabled(False)
 		                    self.main.debug_pause_bt.setEnabled(False)
 		                    self.main.debug_continue_bt.setEnabled(True)
 
@@ -355,20 +385,11 @@ class TrickplayDeviceManager(QWidget):
 		                    self.main.ui.actionPause.setEnabled(False)
 		                    self.main.ui.actionStep_into.setEnabled(True)
 		                    self.main.ui.actionStep_over.setEnabled(True)
-		                    self.main.ui.actionStep_out.setEnabled(True)
+		                    self.main.ui.actionStep_out.setEnabled(False)
 
 		                    self.main.debug_run = False
 
-		                elif len(reply.command) > 3 and reply.command[:1] == DBG_CMD_BREAKPOINT or reply.command[:1] == DBG_CMD_DELETE:
-
-		                    self.bs_command = False
-		                    #if self.command[-2:] == "ff" or self.command[-2:] == "on" :
-		                        #self.bs_command = True
-		                    #reply = None
-		                    #self.command = None
-		                    self.send_debugger_command(DBG_CMD_BREAKPOINT)
-    
-		                elif reply.command == DBG_CMD_BREAKPOINT:
+		                elif reply.command[:1] == DBG_CMD_BREAKPOINT or reply.command == DBG_CMD_BB or reply.command[:1] == DBG_CMD_DELETE:
         
 		                    # Break Point 
 		                    break_info = self.getBreakPointInfo_Resp(data)
@@ -376,9 +397,9 @@ class TrickplayDeviceManager(QWidget):
 		                    if break_info is not None:
 		                        self.debugWindow.populateBreakTable(break_info, self.editorManager)
 
-		                    if self.bs_command == True :
+		                    if reply.command == DBG_CMD_BB :
 		                        return
-    
+
 		                    editor = self.editorManager.app.focusWidget()
 		                    if editor is not None : 
 		                        nline = editor.margin_nline
@@ -386,6 +407,15 @@ class TrickplayDeviceManager(QWidget):
 		                        index = self.editorManager.tab.currentIndex()
 		                        editor = self.editorManager.tab.editors[index]
 		                        nline = editor.margin_nline
+    
+		                    if reply.command[:1] == DBG_CMD_DELETE :
+		                        if editor.current_line != nline :
+		                            editor.markerDelete(nline, -1)
+		                        else :
+		                            editor.markerDelete(nline, -1)
+		                            editor.markerAdd(nline, editor.ARROW_MARKER_NUM)
+		                        editor.line_click[nline] = 0
+		                        return
     
 		                    # Break Point Setting t
 		                    if not editor.line_click.has_key(nline) or editor.line_click[nline] == 0 :
@@ -439,26 +469,27 @@ class TrickplayDeviceManager(QWidget):
 		                self.send_debugger_command( DBG_CMD_INFO )
        				
 		    return foo
-		f=debugger_reply_finished(reply)
-
-		QObject.connect( reply , SIGNAL( 'finished()' ) , f)
-		reply.command = command[:]
 		
-		if command in DBG_ADVANCE_COMMANDS:
-			# TODO: Here we should disable the debug UI
-		    self.main.debug_stepinto.setEnabled(False)
-		    self.main.debug_stepover.setEnabled(False)
-		    self.main.debug_stepout.setEnabled(False)
-		    self.main.debug_pause_bt.setEnabled(True)
-		    self.main.debug_continue_bt.setEnabled(False)
+	    f=debugger_reply_finished(reply)
 
-		    self.main.ui.actionContinue.setEnabled(False)
-		    self.main.ui.actionPause.setEnabled(True)
-		    self.main.ui.actionStep_into.setEnabled(False)
-		    self.main.ui.actionStep_over.setEnabled(False)
-		    self.main.ui.actionStep_out.setEnabled(False)
-		    self.main.debug_run = True
-		return True
+	    QObject.connect( reply , SIGNAL( 'finished()' ) , f)
+	    reply.command = command[:]
+		
+	    if command in DBG_ADVANCE_COMMANDS:
+	    	# TODO: Here we should disable the debug UI
+	        self.main.debug_stepinto.setEnabled(False)
+	        self.main.debug_stepover.setEnabled(False)
+	        self.main.debug_stepout.setEnabled(False)
+	        self.main.debug_pause_bt.setEnabled(True)
+	        self.main.debug_continue_bt.setEnabled(False)
+    
+	        self.main.ui.actionContinue.setEnabled(False)
+	        self.main.ui.actionPause.setEnabled(True)
+	        self.main.ui.actionStep_into.setEnabled(False)
+	        self.main.ui.actionStep_over.setEnabled(False)
+	        self.main.ui.actionStep_out.setEnabled(False)
+	        self.main.debug_run = True
+	        return True
 
     def app_finished(self, errorCode):
 		if self.trickplay.state() == QProcess.NotRunning :
@@ -503,19 +534,20 @@ class TrickplayDeviceManager(QWidget):
         # Push to remote device
         else:
             if dMode == True:
+                if self.debug_port is None:
+                    print("[VDBG] Debug port is missing")
+                    return False
                 # POST http://<host>:<debugger port>/debugger "r"
-                url = QUrl()
-                url.setScheme( "http" )
-                url.setHost( CON.address )
-                url.setPort( self.debug_port )
-                url.setPath( "/debugger" )
+                #url = QUrl()
+                #url.setScheme( "http" )
+                #url.setHost( CON.address )
+                #url.setPort( self.debug_port )
+                #url.setPath( "/debugger" )
 		
                 #print ("[VDBG] ' %s ' Command Sent"%'r')
                 #request = QNetworkRequest( url )
                 #self.manager.post( request , 'r' )
             
-                # GET http://<host>:<http port>/debug/start 
-                getTrickplayDebug()
             	self.debug_mode = True
             	self.main.debug_mode = True
             
@@ -525,6 +557,8 @@ class TrickplayDeviceManager(QWidget):
             elif dMode == True:
 			    self.inbreak = False
 			    self.send_debugger_command(DBG_CMD_INFO)
+			    if len(self.editorManager.bp_info[1]) > 0 :
+			        self.send_debugger_command(DBG_CMD_BB)
             else :
                 self.inspector.ui.refresh.setEnabled(True)
                 self.inspector.ui.search.setEnabled(True)
@@ -616,9 +650,7 @@ class TrickplayDeviceManager(QWidget):
     def getBreakPointInfo_Resp(self, data):
 		if "breakpoints" in data:
 			state_var_list = []
-			info_var_list = []
 			file_var_list = []
-			#linenum_var_list = []
 			breakpoints_info = {}
 			breakpoints_info_str = ""
 			index = 0
@@ -629,14 +661,6 @@ class TrickplayDeviceManager(QWidget):
 				for b in data["breakpoints"]:
 					if "file" in b and "line" in b:
 						breakpoints_info_str = breakpoints_info_str+"["+str(index)+"] "+b["file"]+":"+str(b["line"])
-						"""if path is not None :
-							info_var_list.append(path+":"+str(b["line"]))
-						else:
-                        """
-						info_var_list.append(b["file"]+":"+str(b["line"]))
-
-						#n = re.search("[/]+\S+[/]+", b["file"]).end()
-					
 						file_var_list.append(b["file"]+":"+str(b["line"]))
 					if "on" in b:
 						if b["on"] == True:
@@ -650,9 +674,6 @@ class TrickplayDeviceManager(QWidget):
 			
 				breakpoints_info[1] = state_var_list
 				breakpoints_info[2] = file_var_list
-				breakpoints_info[3] = info_var_list
-				#breakpoints_info[4] = linenum_var_list
-
 				print "[VDBG] "+breakpoints_info_str
 				return breakpoints_info
 		else:
