@@ -24,11 +24,11 @@ local create_canvas = function(old_function,self,state)
 		c.h - c.line_width,
 		self.style.border.corner_radius
 	)
-	c:set_source_color( self.style.fill_colors[state] )
+	c:set_source_color( self.style.fill_colors[state] or "00000000" )
 	
 	c:fill(true)
 	
-	c:set_source_color( self.style.border.colors[state] )
+	c:set_source_color( self.style.border.colors[state] or "ffffff" )
 	
 	c:stroke()
 	
@@ -58,10 +58,6 @@ local create_canvas = function(old_function,self,state)
 end
 
 local default_parameters = {
-	style = {
-		border      = { colors = { selection = "ffffff" } },
-		fill_colors = { selection = "00000000" }
-	},
 	states          = states,
 	create_canvas   = create_canvas,
 }
@@ -71,11 +67,19 @@ local default_parameters = {
 --------------------------------------------------------------------------------
 
 ToggleButton = function(parameters)
+	
 	--input is either nil or a table
 	parameters = is_table_or_nil("ToggleButton",parameters)
 	
 	--flags
 	local canvas = type(parameters.images) == "nil"
+	
+	local size_is_set =
+		parameters.h      or
+		parameters.w      or
+		parameters.height or
+		parameters.width  or
+		parameters.size
 	
 	----------------------------------------------------------------------------
 	--The Button Object inherits from Widget
@@ -113,7 +117,7 @@ ToggleButton = function(parameters)
                 
                 if self.images.selection then self.images.selection.state.state = "ON"   end
                 
-                if on_deselection then on_deselection() end
+                if on_selection then on_selection() end
                 
             else
                 
@@ -125,13 +129,15 @@ ToggleButton = function(parameters)
             
 		end
 	)
+	
 	override_property(instance,"on_selection",   function() return on_selection   end, function(oldf,self,v) on_selection   = v end )
     override_property(instance,"on_deselection", function() return on_deselection end, function(oldf,self,v) on_deselection = v end )
 	
 	----------------------------------------------------------------------------
 	--set the parameters
-    
-	return instance:set(parameters)
+	if parameters.selected then instance.selected = parameters.selected end
+	
+	return instance
     
 end
     
