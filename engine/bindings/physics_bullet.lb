@@ -8,32 +8,10 @@ module physics_bullet;
 #include "physics_bullet.h"
 #include "clutter_util.h"
 
+#include "matrix.lb.h"
+#include "physics_bullet.lb.h"
+
 extern int new_Matrix( lua_State * L );
-
-static const char * MATRIX_TYPE = "Matrix";
-static const char * PBSHAPE_TYPE = "PBShape";
-static const char * BODY3D_TYPE = "PBBody3d";
-
-//.............................................................................
-
-static gpointer tp_lua_get_typed_udata( lua_State * L , int index , const char * type )
-{
-    g_assert( L );
-    g_assert( type );
-    
-    if ( index )
-    {
-        index = abs_index( L , index );
-    
-        if ( lb_check_udata_type( L , index , type , false ) )
-        {
-            return UserData::get_client_check( L , index );
-        }
-    }
-    return 0;
-}
-
-#define tp_lua_get( T , L , index , type ) (static_cast<T*>(tp_lua_get_typed_udata(L,index,type)))
 
 //.............................................................................
 
@@ -81,7 +59,7 @@ static void TableFrombtVector3( lua_State * L , int t , const btVector3 & v )
 
 static bool btTransformToMatrix( lua_State * L , const btTransform & transform , int matrix )
 {
-    if ( CoglMatrix * cm = tp_lua_get( CoglMatrix , L , matrix , MATRIX_TYPE ) )
+    if ( CoglMatrix * cm = LB_GET_MATRIX( L , matrix ) )
     {
         float m[16];
         m[15] = 1;
@@ -97,7 +75,7 @@ static bool btTransformToMatrix( lua_State * L , const btTransform & transform ,
 
 static bool btTransformFromMatrix( lua_State * L , int matrix , btTransform & transform )
 {
-    if ( CoglMatrix * cm = tp_lua_get( CoglMatrix , L , matrix , MATRIX_TYPE ) )
+    if ( CoglMatrix * cm = LB_GET_MATRIX( L , matrix ) )
     {
         transform.setFromOpenGLMatrix( & cm->xx );
         
@@ -108,7 +86,7 @@ static bool btTransformFromMatrix( lua_State * L , int matrix , btTransform & tr
 
 static btRigidBody * get_rigid_body( lua_State * L , int body )
 {
-    if ( btCollisionObject * co = tp_lua_get( btCollisionObject , L , body , BODY3D_TYPE ) )
+    if ( btCollisionObject * co = LB_GET_PBBODY3D( L , body ) )
     {
         return btRigidBody::upcast( co );
     }
@@ -253,7 +231,7 @@ interface PBCompoundShape [[ btCollisionShape * ]] PBShape
                     
                     lua_rawgeti( L , t , 2 );
                     
-                    btCollisionShape * shape = tp_lua_get( btCollisionShape , L , -1 , PBSHAPE_TYPE );
+                    btCollisionShape * shape = LB_GET_PBSHAPE( L , -1 );
                     
                     if ( ! shape )
                     {
@@ -279,7 +257,7 @@ interface PBCompoundShape [[ btCollisionShape * ]] PBShape
                 return luaL_error( L , "Invalid matrix" );
             }
              
-            btCollisionShape * s = tp_lua_get( btCollisionShape , L , shape , PBSHAPE_TYPE );
+            btCollisionShape * s = LB_GET_PBSHAPE( L , shape );
             
             if ( ! s )
             {
@@ -299,7 +277,7 @@ interface PBCompoundShape [[ btCollisionShape * ]] PBShape
             } 
             else
             {
-                btCollisionShape * s = tp_lua_get( btCollisionShape , L , shape_or_index , PBSHAPE_TYPE );
+                btCollisionShape * s = LB_GET_PBSHAPE( L , shape_or_index );
                 
                 if ( ! s )
                 {
@@ -964,8 +942,8 @@ global pb [[ Bullet::World * ]]
         
     table get_contacts( double max_distance = 0 , PBBody3d body1 = 0 , PBBody3d body2 = 0 )
         [[
-            btCollisionObject * co1 = tp_lua_get( btCollisionObject , L , body1 , BODY3D_TYPE );
-            btCollisionObject * co2 = tp_lua_get( btCollisionObject , L , body2 , BODY3D_TYPE );
+            btCollisionObject * co1 = LB_GET_PBBODY3D( L , body1 );
+            btCollisionObject * co2 = LB_GET_PBBODY3D( L , body2 );
             
             self->get_contacts( max_distance , co1 , co2 );
         ]];          
@@ -1014,7 +992,7 @@ global pb [[ Bullet::World * ]]
         [[
             for ( int i = 2; i <= lua_gettop( L ); ++i )
             {
-                if ( btCollisionObject * co = tp_lua_get( btCollisionObject , L , i , BODY3D_TYPE ) )
+                if ( btCollisionObject * co = LB_GET_PBBODY3D( L , i ) )
                 {
                     Bullet::BodyData::add_object( co );
                 }
@@ -1025,7 +1003,7 @@ global pb [[ Bullet::World * ]]
         [[
             for ( int i = 2; i <= lua_gettop( L ); ++i )
             {
-                if ( btCollisionObject * co = tp_lua_get( btCollisionObject , L , i , BODY3D_TYPE ) )
+                if ( btCollisionObject * co = LB_GET_PBBODY3D( L , i ) )
                 {
                     Bullet::BodyData::remove_object( co );
                 }
