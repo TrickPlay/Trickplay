@@ -66,6 +66,8 @@ class TrickplayPushApp():
         message[ "app" ] = app_file.read()
         app_file.close()
         
+        message[ "debug" ] = self.deviceManager.debug_mode
+
         message[ "files" ] = []
         
         file_map = {}

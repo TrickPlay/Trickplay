@@ -252,15 +252,18 @@ Util::Buffer::Buffer( gconstpointer _data , guint _length )
 
 Util::Buffer::Buffer( MemoryUse memory_use , gpointer _data , guint _length )
 :
-	bytes( g_byte_array_sized_new( _length ) )
+	bytes( 0 )
 {
 	switch( memory_use )
 	{
 	case Util::Buffer::MEMORY_USE_TAKE:
+		bytes = g_byte_array_new();
+		g_free( bytes->data );
 		bytes->data = ( guint8 * ) _data;
 		bytes->len = _length;
 		break;
 	case Util::Buffer::MEMORY_USE_COPY:
+		bytes = g_byte_array_sized_new( _length );
 		g_byte_array_append( bytes , ( const guint8 * ) _data , _length );
 		break;
 	}
