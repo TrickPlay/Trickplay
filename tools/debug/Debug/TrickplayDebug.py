@@ -139,6 +139,8 @@ class TrickplayDebugger(QWidget):
 
         if fileName.startswith("/"):
             fileName = fileName[1:]
+        elif fileName.endswith("/"):
+            fileName = fileName[:len(fileName) -1]
 
         lineNum = int(fileLine[n:]) - 1
 
@@ -175,6 +177,9 @@ class TrickplayDebugger(QWidget):
 		fileName = str(fileLine[:n-1])
 		if fileName.startswith("/"):
 		    fileName = fileName[1:]
+		elif fileName.endswith("/"):
+		    fileName= fileName[:len(fileName) - 1]
+
 		lineNum = int(fileLine[n:]) - 1
 
 		fileName = os.path.join(self.deviceManager.path(), fileName)
