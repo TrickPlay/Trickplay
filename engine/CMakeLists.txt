@@ -15,6 +15,7 @@ set( LB_FILES )
 
 include_directories( ${ENGINE_SRC}/lua/lua-5.1.4/src )
 include_directories( ${ENGINE_SRC}/clutter_alpha_mode )
+include_directories( ${PROJECT_BINARY_DIR}/engine )
 
 include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
