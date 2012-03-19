@@ -39,7 +39,7 @@ static void TableFrombtVector3( lua_State * L , int t , const btVector3 & v )
 {
     if ( 0 == t )
     {
-        lua_newtable( L );
+        lua_createtable( L , 3 , 0 );
         t = lua_gettop( L );
     }
     else
@@ -55,6 +55,30 @@ static void TableFrombtVector3( lua_State * L , int t , const btVector3 & v )
     lua_rawseti( L , t , 2 );
     lua_pushnumber( L , v.getZ() );
     lua_rawseti( L , t , 3 );
+}
+
+static void TableFrombtQuaternion( lua_State * L , int t , const btQuaternion & v )
+{
+    if ( 0 == t )
+    {
+        lua_createtable( L , 4 , 0 );
+        t = lua_gettop( L );
+    }
+    else
+    {
+        t = abs_index( L , t );
+    }
+    
+    g_assert( lua_istable( L , t ) );
+    
+    lua_pushnumber( L , v.x() );
+    lua_rawseti( L , t , 1 );
+    lua_pushnumber( L , v.y() );
+    lua_rawseti( L , t , 2 );
+    lua_pushnumber( L , v.z() );
+    lua_rawseti( L , t , 3 );
+    lua_pushnumber( L , v.w() );
+    lua_rawseti( L , t , 4 );
 }
 
 static bool btTransformToMatrix( lua_State * L , const btTransform & transform , int matrix )
@@ -687,10 +711,30 @@ interface PBBody3d [[ btCollisionObject * ]]
         [[
             in_world = Bullet::BodyData::get( self )->is_in_world();
         ]];
+        
+    readonly table center_of_mass_position
+        [[
+            lua_createtable( L , 3 , 0 );
+            
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                TableFrombtVector3( L , -1 , body->getCenterOfMassPosition() ); 
+            }             
+        ]];
+        
+    readonly table orientation
+        [[
+            lua_createtable( L , 4 , 0 );
+            
+            if ( btRigidBody * body = btRigidBody::upcast( self ) )
+            {
+                TableFrombtQuaternion( L , -1 , body->getOrientation() ); 
+            }             
+        ]];
 
     table linear_velocity
         [[
-            lua_newtable( L );
+            lua_createtable( L , 3 , 0 );
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
@@ -706,7 +750,7 @@ interface PBBody3d [[ btCollisionObject * ]]
 
     table angular_velocity
         [[
-            lua_newtable( L );
+            lua_createtable( L , 3 , 0 );
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
@@ -758,7 +802,7 @@ interface PBBody3d [[ btCollisionObject * ]]
         
     table linear_factor
         [[
-            lua_newtable( L );
+            lua_createtable( L , 3 , 0 );
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
@@ -774,7 +818,7 @@ interface PBBody3d [[ btCollisionObject * ]]
         
     table angular_factor
         [[
-            lua_newtable( L );
+            lua_createtable( L , 3 , 0 );
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
@@ -790,7 +834,7 @@ interface PBBody3d [[ btCollisionObject * ]]
         
     table gravity
         [[
-            lua_newtable( L );
+            lua_createtable( L , 3 , 0 );
             
             if ( btRigidBody * body = btRigidBody::upcast( self ) )
             {
