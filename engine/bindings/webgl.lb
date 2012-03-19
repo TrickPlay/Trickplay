@@ -10,6 +10,8 @@ module webgl;
 #include "bitmap.h"
 #include "clutter_util.h"
 
+#include "matrix.lb.h"
+
 //=============================================================================
 
 #define TP_LOG_DOMAIN   "WEBGL"
@@ -2256,12 +2258,9 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
             _GET_CONTEXT_;
               FreeLater free_later;
 
-              if ( lb_check_udata_type( L , value , "Matrix" , false ) )
+              if ( CoglMatrix * matrix = LB_GET_MATRIX( L , value ) )
               {
-                  if ( CoglMatrix * matrix = ( CoglMatrix * ) UserData::get_client( L , value ) )
-                  {
-                      glUniformMatrix4fv( location , 1 , transpose ? GL_TRUE : GL_FALSE , cogl_matrix_get_array( matrix ) );
-                  }
+                  glUniformMatrix4fv( location , 1 , transpose ? GL_TRUE : GL_FALSE , cogl_matrix_get_array( matrix ) );
               }
               else if ( TypedArray * array = WebGL::get_valid_array( L , value , free_later , TypedArray::T_FLOAT32 , 16 ) )
               {
