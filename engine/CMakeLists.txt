@@ -471,7 +471,7 @@ foreach( LB_FILE ${LB_FILES} )
     file( TO_NATIVE_PATH ${LB_FILE} NATIVE_LB_FILE )
 
     add_custom_command(
-        OUTPUT ${LB_FILE_NAME}.cpp
+        OUTPUT ${LB_FILE_NAME}.cpp ${LB_FILE_NAME}.h
         COMMAND ${LB_GENERATOR} ${LB_OPTIONS} "${NATIVE_LB_FILE}"
         DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 
@@ -486,7 +486,7 @@ foreach( LB_FILE ${LB_SPECIAL_MAC_FILES} )
     file( TO_NATIVE_PATH ${LB_FILE} NATIVE_LB_FILE )
 
     add_custom_command(
-        OUTPUT ${LB_FILE_NAME}.mm
+        OUTPUT ${LB_FILE_NAME}.mm ${LB_FILE_NAME}.h
         COMMAND ${LB_GENERATOR} ${LB_OPTIONS} --mac "${NATIVE_LB_FILE}"
         DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 
