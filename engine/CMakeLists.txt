@@ -451,6 +451,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/ease.lb
 
     ${BINDINGS_SRC}/physics_bullet.lb
+    ${BINDINGS_SRC}/matrix.lb
 )
 
 #------------------------------------------------------------------------------
