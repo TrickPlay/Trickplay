@@ -1,2 +1,3 @@
-
-dofile("Button/test.lua")
+dolater(
+dofile,"Button/test.lua"
+)

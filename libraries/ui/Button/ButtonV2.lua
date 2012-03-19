@@ -1,70 +1,23 @@
 
 local states = {"default","focus","activation"}
 
-local create_canvas = function(old_function,self,state)
-	
-	local c = Canvas(self.w,self.h)
-	
-	c.line_width = self.style.border.width
-	
-	c:round_rectangle(
-		c.line_width/2,
-		c.line_width/2,
-		c.w - c.line_width,
-		c.h - c.line_width,
-		self.style.border.corner_radius
-	)
-	
-	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
-	
-	c:set_source_color( self.style.border.colors[state] )   c:stroke(true)
-	
-	return c:Image()
-	
-end
+local default_parameters = { w = 200, h = 50, label = "Button", reactive = true }
 
 
-local default_parameters = {
-	w = 200, h = 50, label = "Button", reactive = true
-}
-
-Button = function(parameters)
+local inheritance_constructor = function(parameters)
 	
-	--input is either nil or a table
-	parameters = is_table_or_nil("Button",parameters)
+	local instance = Widget:inherit()
 	
-	--flags
-	local canvas          = type(parameters.images) == "nil"
-	local flag_for_redraw = false
-	local from_set        = false
-	local size_is_set =
-		parameters.h or
-		parameters.w or
-		parameters.height or
-		parameters.width or
-		parameters.size
+	local label = Text(instance.style.text:get_table())
 	
-	
-	--upvals
-	local images
-	
-	
-	parameters = cover_defaults(parameters,default_parameters)
-    
-	----------------------------------------------------------------------------
-	--The Button Object inherits from Widget
-	
-	local instance = Widget( parameters )
-	if not size_is_set then instance:reset_size_flag() end
-
-	local states = parameters.states or states
-	
-	local label = Text()
+	label.w = instance.w
+	--label.h = instance.h
+	label.anchor_point={0,label.h/2}
+	label.y = instance.h/2
 	
 	----------------------------------------------------------------------------
-	-- Helper functions that setup animation states
+	-- private helper functions for common actions
 	
-	-- setting up animation states for new images/canvases
 	local define_image_animation = function(image)
 		
 		local prev_state = image and image.state and image.state.state
@@ -89,13 +42,19 @@ Button = function(parameters)
 		
 	end
 	
-	-- setting up animation states for the label (called when label_colors changes)
-	local define_label_animation = function()
+	local function resize_images()
 		
-		local label_colors = instance.style.text.colors
+		if set_w then for k,img in pairs(images) do img.w = instance.w end end
+		if set_h then for k,img in pairs(images) do img.h = instance.h end end
+		
+	end
+	
+	
+	local define_label_animation = function(label_colors)
+		
 		local prev_state = label and label.state and label.state.state
 		
-		label.state = AnimationState{
+		local a = AnimationState{
 			duration    = 100,
 			transitions = {
 				{
@@ -114,43 +73,14 @@ Button = function(parameters)
 			}
 		}
 		
-		label.state:warp(prev_state or "DEFAULT")
+		a:warp(prev_state or "DEFAULT")
+		
+		return a
 		
 	end
 	
-	----------------------------------------------------------------------------
-	-- private helper functions for common actions
-	
-	local function resize_images()
-		
-		if not size_is_set then return end
-		
-		for k,img in pairs(images) do img.w = instance.w end
-		for k,img in pairs(images) do img.h = instance.h end
-		
-	end
-	
-	local center_label = function()
-		
-		label.w = instance.w
-		label.y = instance.style.text.y_offset + instance.h/2
-		
-	end
-	
-	----------------------------------------------------------------------------
-	-- helper functions used when Button.images is set
 	
 	local make_canvases = function()
-		
-		if from_set then
-			
-			flag_for_redraw = true
-			
-			return
-			
-		end
-		
-		flag_for_redraw = false
 		
 		canvas = true
 		
@@ -192,6 +122,19 @@ Button = function(parameters)
 		
 		instance:clear()
 		
+		if instance.is_size_set() then
+			
+			resize_images()
+			
+		else
+			
+			--so that the label centers properly
+			rawset(instance,size,images.default.size)
+			
+			center_label()
+			
+		end
+		
 		for _,state in pairs(instance.states) do
 			
 			if images[state] then
@@ -211,26 +154,75 @@ Button = function(parameters)
 		
 		instance:add( label )
 		
-		if instance.is_size_set() then
-			
-			resize_images()
-			
-		else
-			--so that the label centers properly
-			instance.size = images.default.size
-			
-			instance:reset_size_flag()
-			
-			center_label()
-			
-		end
-		
 		return true
 		
 	end
 	
+	local center_label = function()
+		
+		label.w = instance.w
+		label.y = instance.style.text.y_offset + instance.h/2
+		
+	end
+	
 	----------------------------------------------------------------------------
-	--functions pertaining to getting and setting of attributes
+	--getters and setters for the properties of a button
+	
+	--[[
+	override_property(instance,"w",
+		nil,
+		function(oldf,self,v)
+			
+			if v == instance.w then return end
+			
+			oldf(self,v)
+			
+			label.w = v
+			
+			set_w = true
+			
+			return canvas and make_canvases() or resize_images()
+			
+		end
+	)
+	override_property(instance,"h",
+		nil,
+		function(oldf,self,v)
+			
+			if v == instance.h then return end
+			
+			oldf(self,v)
+			
+			label.y = instance.style.text.y_offset + v/2
+			
+			set_h = true
+			
+			return canvas and make_canvases() or resize_images()
+			
+		end
+	)
+	--]]
+	function instance:on_size_changed()
+		
+		if canvas then
+			
+			make_canvases()
+			
+		elseif instance.is_size_set() then
+			
+			resize_images()
+			
+		else
+			
+			--so that the label centers properly
+			rawset(instance,size,images.default.size)
+			
+		end
+		
+		center_label()
+		
+	end
+	
 	
 	override_property(instance,"images",
 		
@@ -258,23 +250,10 @@ Button = function(parameters)
 	override_property(instance,"type",   function() return "BUTTON" end )
 	override_property(instance,"states", function() return  states  end )
 	
-	
-	override_function(instance,"set", function(old_function, ... )
-		
-		from_set = true
-		
-		old_function(...)
-		
-		from_set = false
-		
-		if flag_for_redraw then make_canvases() end
-		
-	end)
-	
 	----------------------------------------------------------------------------
-	--state changes for focus
+	--state changes
 	
-    local on_focus_in, on_focus_out
+    local on_focus_in, on_focus_out, on_pressed, on_released
 	
 	function instance:on_focus_in()
 		
@@ -300,21 +279,26 @@ Button = function(parameters)
 	
 	override_property(instance,"on_focus_in",  function() return on_focus_in  end, function(oldf,self,v) on_focus_in  = v end )
     override_property(instance,"on_focus_out", function() return on_focus_out end, function(oldf,self,v) on_focus_out = v end )
+	override_property(instance,"on_pressed",   function() return on_pressed   end, function(oldf,self,v) on_pressed   = v end )
+    override_property(instance,"on_released",  function() return on_released  end, function(oldf,self,v) on_released  = v end )
 	
 	----------------------------------------------------------------------------
-	-- events/functions pertaining to the button being pressed
+	--functions
 	
-    local on_pressed, on_released
 	local pressed = false
 	
 	override_function(instance,"click", function(old_function,self)
 		
 		self:press()
 		
-		dolater( 150, function()   self:release()   end)
+		--deactivate
+		dolater( 150, function()
+			
+			self:release()
+			
+		end)
 		
 	end)
-	
 	override_function(instance,"press", function(old_function,self)
 		
 		if pressed then return end
@@ -330,7 +314,6 @@ Button = function(parameters)
 		
 		
 	end)
-	
 	override_function(instance,"release", function(old_function,self)
 		
 		if not pressed then return end
@@ -346,38 +329,65 @@ Button = function(parameters)
 		
 	end)
 	
-	override_property(instance,"on_pressed",   function() return on_pressed   end, function(oldf,self,v) on_pressed   = v end )
-    override_property(instance,"on_released",  function() return on_released  end, function(oldf,self,v) on_released  = v end )
+	override_function(instance,"reset_size", function(old_function,self)
+		
+		set_w = false
+		set_h = false
+		
+		if not canvas then
+			
+			set_sz_to_image_sz()
+			
+			label.w = w
+			
+			label.y = h/2
+			
+		end
+		
+	end)
+	
+	override_function(instance,"create_canvas", function(old_function,self,state)
+		
+		local c = Canvas(self.w,self.h)
+		
+		c.line_width = self.style.border.width
+		
+		c:round_rectangle(
+			c.line_width/2,
+			c.line_width/2,
+			c.w - c.line_width,
+			c.h - c.line_width,
+			self.style.border.corner_radius
+		)
+		
+		c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
+		
+		c:set_source_color( self.style.border.colors[state] )   c:stroke(true)
+		
+		return c:Image()
+		
+	end)
 	
 	----------------------------------------------------------------------------
 	--Widget/Style Event Callabacks, to notify if properties change
 	
-	override_function(instance,"create_canvas", parameters.create_canvas or create_canvas)
+	instance.style.text:on_changed(instance,function()
+		
+		label:set(   instance.style.text:get_table()   )
+		
+		if set_w then label.w = instance.w end
+		
+		label.x = instance.style.text.x_offset
+		label.y = instance.style.text.y_offset + (set_h and instance.h/2 or label.h/2)
+		
+		
+	end)
 	
-	function instance:on_size_changed()
+	instance.style.text.colors:on_changed(instance,function()
 		
-		if canvas then    make_canvases()    else    resize_images()   end
+		label.state = define_label_animation(instance.style.text.colors)
 		
-		center_label()
-		
-	end
-	
-	local update_label, text_style = function()
-		
-		text_style = instance.style.text
-		
-		label:set(   text_style:get_table()   )
-		
-		label.anchor_point = {0,label.h/2}
-		label.x            = text_style.x_offset
-		label.y            = text_style.y_offset + instance.h/2
-		label.w            = instance.w
-		
-	end
-	
-	instance.style.text:on_changed(instance,update_label)
-	
-	instance.style.text.colors:on_changed(instance,define_label_animation)
+	end)
 	
 	local canvas_callback = function() if canvas then make_canvases() end end
 	
@@ -389,7 +399,509 @@ Button = function(parameters)
 	function instance:on_key_focus_in()    instance.focused = true  end 
 	function instance:on_key_focus_out()   instance.focused = false end 
 	
-	instance:add_key_handler(   keys.OK, function() instance:click()   end)
+	instance:add_key_handler(   keys.OK,   instance.click   )
+	
+	----------------------------------------------------------------------------
+	--Mouse events
+	
+	function instance:on_enter()        instance.focused = true   end
+	function instance:on_leave()        instance.focused = false  instance:release() end 
+	function instance:on_button_down()  instance:press()          end
+	function instance:on_button_up()    instance:release()        end
+	
+	
+	
+	
+	
+	
+	
+	label.state = define_label_animation(instance.style.text.colors)
+	
+end
+
+
+local public_constructor = function(parameters)
+	
+	--input is either nil or a table
+	parameters = is_table_or_nil("Button",parameters)
+	
+	local instance = inheritance_constructor()
+	
+	parameters = cover_defaults(parameters,default_parameters)
+	
+	--must be done first, other attributes rely on images/canvases being set
+	
+	instance.images = parameters.images
+	
+	instance:set(parameters)
+	if not size_is_set then instance:reset_size_flag() end
+	
+	return instance
+	
+end
+
+Button = setmetatable( {},
+	
+	__newindex = function() end, --ignore attempts to set values
+	
+	__index = function(t,k)
+		
+		if k == "inherit" then
+			
+			return inheritance_constructor
+			
+		end
+		
+	end,
+	
+	__call = public_constructor
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OLDButton = function(parameters)
+	
+	--input is either nil or a table
+	parameters = is_table_or_nil("Button",parameters)
+	
+	--flags
+	local canvas = type(parameters.images) == "nil"
+	
+	local size_is_set =
+		parameters.h or
+		parameters.w or
+		parameters.height or
+		parameters.width or
+		parameters.size
+	
+	
+	--upvals
+	local images
+	
+	
+	parameters = cover_defaults(parameters,default_parameters)
+    
+	----------------------------------------------------------------------------
+	--The Button Object inherits from Widget
+	
+	local instance = Widget( parameters )
+	
+	local states = parameters.states or states
+	
+	local label = Text(instance.style.text:get_table())
+	
+	label.w = instance.w
+	--label.h = instance.h
+	label.anchor_point={0,label.h/2}
+	label.y = instance.h/2
+	
+	----------------------------------------------------------------------------
+	-- private helper functions for common actions
+	
+	local define_image_animation = function(image)
+		
+		local prev_state = image and image.state and image.state.state
+		
+		local a = AnimationState{
+			duration    = 100,
+			transitions = {
+				{
+					source = "*", target = "OFF",
+					keys   = {  {image, "opacity",  0},  },
+				},
+				{
+					source = "*", target = "ON",
+					keys   = {  {image, "opacity",255},  },
+				},
+			}
+		}
+		
+		a:warp(prev_state or "OFF")
+		
+		return a
+		
+	end
+	
+	local function resize_images()
+		
+		if set_w then for k,img in pairs(images) do img.w = instance.w end end
+		if set_h then for k,img in pairs(images) do img.h = instance.h end end
+		
+	end
+	
+	
+	local define_label_animation = function(label_colors)
+		
+		local prev_state = label and label.state and label.state.state
+		
+		local a = AnimationState{
+			duration    = 100,
+			transitions = {
+				{
+					source = "*",  target = "DEFAULT",
+					keys   = {  {label, "color",label_colors.default},  },
+				},
+				{
+					source = "*",  target = "FOCUS",
+					keys   = {  {label, "color",label_colors.focus},  },
+				},
+				{
+					source = "*",
+					target = "ACTIVATION",
+					keys   = {  {label, "color",label_colors.activation},  },
+				},
+			}
+		}
+		
+		a:warp(prev_state or "DEFAULT")
+		
+		return a
+		
+	end
+	
+	
+	local make_canvases = function()
+		
+		canvas = true
+		
+		images = {}
+		
+		for _,state in pairs(instance.states) do
+			
+			images[state] = instance:create_canvas(state)
+			
+		end
+		
+		instance:clear()
+		
+		
+		for _,state in pairs(instance.states) do
+			
+			if images[state] then
+				
+				instance:add(images[state])
+				if state ~= "default" then
+					images[state].state = define_image_animation(images[state])
+				end
+				
+			end
+			
+		end
+		
+		instance:add( label )
+		
+		return true
+		
+	end
+	
+	local setup_images = function(new_images)
+		
+		canvas = false
+		
+		images = new_images
+		
+		instance:clear()
+		
+		if instance.is_size_set() then
+			
+			resize_images()
+			
+		else
+			
+			--so that the label centers properly
+			rawset(instance,size,images.default.size)
+			
+			center_label()
+			
+		end
+		
+		for _,state in pairs(instance.states) do
+			
+			if images[state] then
+				
+				images[state] = type(images[state] ) == "string" and
+					Image{src=images[state]} or images[state]
+				
+				instance:add(images[state])
+				
+				if state ~= "default" then
+					images[state].state = define_image_animation(images[state])
+				end
+				
+			end
+			
+		end
+		
+		instance:add( label )
+		
+		return true
+		
+	end
+	
+	local center_label = function()
+		
+		label.w = instance.w
+		label.y = instance.style.text.y_offset + instance.h/2
+		
+	end
+	
+	----------------------------------------------------------------------------
+	--getters and setters for the properties of a button
+	
+	--[[
+	override_property(instance,"w",
+		nil,
+		function(oldf,self,v)
+			
+			if v == instance.w then return end
+			
+			oldf(self,v)
+			
+			label.w = v
+			
+			set_w = true
+			
+			return canvas and make_canvases() or resize_images()
+			
+		end
+	)
+	override_property(instance,"h",
+		nil,
+		function(oldf,self,v)
+			
+			if v == instance.h then return end
+			
+			oldf(self,v)
+			
+			label.y = instance.style.text.y_offset + v/2
+			
+			set_h = true
+			
+			return canvas and make_canvases() or resize_images()
+			
+		end
+	)
+	--]]
+	function instance:on_size_changed()
+		
+		if canvas then
+			
+			make_canvases()
+			
+		elseif instance.is_size_set() then
+			
+			resize_images()
+			
+		else
+			
+			--so that the label centers properly
+			rawset(instance,size,images.default.size)
+			
+		end
+		
+		center_label()
+		
+	end
+	
+	
+	override_property(instance,"images",
+		
+		function(oldf)    return images   end,
+		
+		function(oldf,self,v)
+			
+			return v == nil and make_canvases() or
+				
+				type(v) == "table" and setup_images(v) or
+				
+				error("Button.images expected type 'table'. Received "..type(v),2)
+			
+		end
+	)
+	
+	override_property(instance,"label",
+		
+		function(oldf)     return label.text   end,
+		
+		function(oldf,self,v)    label.text = v end
+		
+	)
+	
+	override_property(instance,"type",   function() return "BUTTON" end )
+	override_property(instance,"states", function() return  states  end )
+	
+	----------------------------------------------------------------------------
+	--state changes
+	
+    local on_focus_in, on_focus_out, on_pressed, on_released
+	
+	function instance:on_focus_in()
+		
+		--image
+		if images.focus then   images.focus.state.state = "ON"   end
+		--text
+		label.state.state = "FOCUS"
+		--event callback
+		if on_focus_in then on_focus_in() end
+		
+	end
+	
+	function instance:on_focus_out()
+		
+		--image
+		if images.focus then   images.focus.state.state = "OFF"   end
+		--text
+		label.state.state = "DEFAULT"
+		--event callback
+		if on_focus_out then on_focus_out() end
+		
+	end
+	
+	override_property(instance,"on_focus_in",  function() return on_focus_in  end, function(oldf,self,v) on_focus_in  = v end )
+    override_property(instance,"on_focus_out", function() return on_focus_out end, function(oldf,self,v) on_focus_out = v end )
+	override_property(instance,"on_pressed",   function() return on_pressed   end, function(oldf,self,v) on_pressed   = v end )
+    override_property(instance,"on_released",  function() return on_released  end, function(oldf,self,v) on_released  = v end )
+	
+	----------------------------------------------------------------------------
+	--functions
+	
+	local pressed = false
+	
+	override_function(instance,"click", function(old_function,self)
+		
+		self:press()
+		
+		--deactivate
+		dolater( 150, function()
+			
+			self:release()
+			
+		end)
+		
+	end)
+	override_function(instance,"press", function(old_function,self)
+		
+		if pressed then return end
+		
+		pressed = true
+		
+		--image
+		if images.activation then  images.activation.state.state = "ON"  end
+		--text
+		label.state.state = "ACTIVATION"
+		--event callback
+		if on_pressed then on_pressed() end
+		
+		
+	end)
+	override_function(instance,"release", function(old_function,self)
+		
+		if not pressed then return end
+		
+		pressed = false
+		
+		--image
+		if images.activation then  images.activation.state.state = "OFF"  end
+		--text
+		label.state.state = focused and "FOCUS" or "DEFAULT"
+		--event callback
+		if on_released then on_released() end
+		
+	end)
+	
+	override_function(instance,"reset_size", function(old_function,self)
+		
+		set_w = false
+		set_h = false
+		
+		if not canvas then
+			
+			set_sz_to_image_sz()
+			
+			label.w = w
+			
+			label.y = h/2
+			
+		end
+		
+	end)
+	
+	override_function(instance,"create_canvas", function(old_function,self,state)
+		
+		local c = Canvas(self.w,self.h)
+		
+		c.line_width = self.style.border.width
+		
+		c:round_rectangle(
+			c.line_width/2,
+			c.line_width/2,
+			c.w - c.line_width,
+			c.h - c.line_width,
+			self.style.border.corner_radius
+		)
+		
+		c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
+		
+		c:set_source_color( self.style.border.colors[state] )   c:stroke(true)
+		
+		return c:Image()
+		
+	end)
+	
+	----------------------------------------------------------------------------
+	--Widget/Style Event Callabacks, to notify if properties change
+	
+	instance.style.text:on_changed(instance,function()
+		
+		label:set(   instance.style.text:get_table()   )
+		
+		if set_w then label.w = instance.w end
+		
+		label.x = instance.style.text.x_offset
+		label.y = instance.style.text.y_offset + (set_h and instance.h/2 or label.h/2)
+		
+		
+	end)
+	
+	instance.style.text.colors:on_changed(instance,function()
+		
+		label.state = define_label_animation(instance.style.text.colors)
+		
+	end)
+	
+	local canvas_callback = function() if canvas then make_canvases() end end
+	
+	instance.style.fill_colors:on_changed(    instance, canvas_callback )
+	instance.style.border:on_changed(         instance, canvas_callback )
+	instance.style.border.colors:on_changed(  instance, canvas_callback )
+	----------------------------------------------------------------------------
+	--Key events
+	function instance:on_key_focus_in()    instance.focused = true  end 
+	function instance:on_key_focus_out()   instance.focused = false end 
+	
+	instance:add_key_handler(   keys.OK,   instance.click   )
 	
 	----------------------------------------------------------------------------
 	--Mouse events
@@ -400,13 +912,26 @@ Button = function(parameters)
 	function instance:on_button_up()    instance:release()        end
 	
 	----------------------------------------------------------------------------
+	-- overrides
+	if parameters.create_canvas then 
+		
+		override_function(instance,"create_canvas", parameters.create_canvas)
+		
+	end
+	
+	----------------------------------------------------------------------------
 	--initial values
 	
-	update_label()
-	define_label_animation()
+	label.state = define_label_animation(instance.style.text.colors)
 	
+	--must be done first, other attributes rely on images/canvases being set
+	
+	--if 
+	if not size_is_set then instance:reset_size_flag() end
 	instance.images = parameters.images
-	instance.label  = parameters.label
+	
+	instance:set(parameters) -- 
+	if not size_is_set then instance:reset_size_flag() end
 	
 	return instance
 	

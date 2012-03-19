@@ -34,7 +34,37 @@ Widget = function(parameters)
         
     end
     
+    ----------------------------------------------------------------------------
     
+    local on_size_changed
+    local size_is_set = false
+    
+    local update_size = function(oldf,self,v)
+        
+        size_is_set = true
+        
+        oldf(self,v)
+        
+        if self.on_size_changed then
+            
+            self:on_size_changed(size_is_set)
+            
+        end
+    end
+    
+	override_property( instance, "w",      nil, update_size )
+	override_property( instance, "h",      nil, update_size )
+	override_property( instance, "width",  nil, update_size )
+	override_property( instance, "height", nil, update_size )
+	override_property( instance, "size",   nil, update_size )
+	override_property( instance, "on_size_changed",
+        function()     return on_size_changed  end,
+        function(oldf,self,v) on_size_changed  = v end
+    )
+	override_function( instance, "is_size_set",function() return size_is_set end)
+	override_function( instance, "reset_size_flag",function() size_is_set = false end)
+	
+	
     ----------------------------------------------------------------------------
     
     local on_focus_in, on_focus_out
@@ -66,12 +96,11 @@ Widget = function(parameters)
     
 	override_property(instance,"style",
 		function()   return style    end,
-		function(oldf,self,v)
+		function(oldf,self,v) 
             style = matches_nil_table_or_type(Style, "STYLE", v)
         end
 	)
     
-	
 	override_property(instance,"on_focus_in",
 		function()      return on_focus_in    end,
 		function(oldf,self,v) on_focus_in = v end
@@ -92,3 +121,8 @@ Widget = function(parameters)
     
     
 end
+
+
+
+
+
