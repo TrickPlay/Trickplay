@@ -24,6 +24,8 @@ class EditorManager(QWidget):
         self.deviceManager = None
         self.tab = None
         self.currentEditor = None
+        self.bp_info = {1:[],2:[]}
+        self.fontSettingCheck = {}
 
 
     def setupUi(self, parent):
@@ -328,6 +330,8 @@ class EditorManager(QWidget):
         self.editorGroups[tabGroup].setCurrentIndex(index)
         editor.setFocus()
         editor.path = path
+        if len(self.bp_info[1]) > 0:
+            editor.show_marker()
 
         n = re.search("[/]+\S+[/]+", editor.path).end()
         fileName = editor.path[n:]
@@ -439,3 +443,5 @@ class EditorManager(QWidget):
                 print"[VDBG] This is %s"%str(model.type(fileIndex))+". Not editable."
                 return
             
+    #def getBPInfo_file (self):
+        
