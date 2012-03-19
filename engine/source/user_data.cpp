@@ -459,6 +459,8 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 
     lua_pop( L , 1 );
 
+	LSG_CHECK( 0 );
+	
     return lua_isnil( L , fn );
 }
 
@@ -482,6 +484,8 @@ int UserData::get_callback( const char * name )
     	lua_remove( L , -2 );
     }
 
+	LSG_CHECK( 1 );
+	
     return 1;
 }
 
@@ -584,6 +588,8 @@ int UserData::invoke_callback( const char * name , int nargs , int nresults )
 
         lua_call( L , nargs + 1 , nresults );
     }
+    
+	LSG_CHECK( nresults - nargs );
 
     return 1;
 }
