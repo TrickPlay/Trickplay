@@ -296,7 +296,8 @@ class TrickplayDebugger(QWidget):
 				    self.ui.localTable.setItem(m, n+1, newitem)
 				elif n == 2 :  
 				    self.ui.localTable.setItem(m, n-1, newitem)
-				self.ui.localTable.setItem(m, n, newitem)
+				else :
+				    self.ui.localTable.setItem(m, n, newitem)
 				m += 1
 			n += 1
 		self.ui.localTable.show()
