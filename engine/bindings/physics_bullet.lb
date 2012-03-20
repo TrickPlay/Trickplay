@@ -27,7 +27,7 @@ static btVector3 btVector3FromTable( lua_State * L , int t )
     lua_rawgeti( L , t , 1 );
     lua_rawgeti( L , t , 2 );
     lua_rawgeti( L , t , 3 );
-    
+        
     btVector3 result( lua_tonumber( L , -3 ) , lua_tonumber( L , -2 ) , lua_tonumber( L , -1 ) );
     
     lua_pop( L , 3 );
@@ -155,7 +155,23 @@ interface PBShape [[ btCollisionShape * ]]
         ]]
         [[
             self->setMargin( margin );
-        ]];        
+        ]];
+        
+    readonly table aabb
+        [[
+            btTransform t;
+            t.setIdentity();
+            btVector3 mi , ma;
+            
+            self->getAabb( t , mi , ma );
+            
+            lua_newtable( L );
+            
+            TableFrombtVector3( L , 0 , mi );
+            lua_rawseti( L , -2 , 1 );
+            TableFrombtVector3( L , 0 , ma );
+            lua_rawseti( L , -2 , 2 );
+        ]];                    
 }
 
 interface PBCompoundShape [[ btCollisionShape * ]] PBShape
