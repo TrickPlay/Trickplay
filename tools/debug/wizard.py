@@ -263,7 +263,7 @@ class Wizard():
             else:
                 return path
         else:
-            return path
+            return 
 
 
         # If the path is a directory...
