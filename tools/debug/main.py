@@ -717,9 +717,10 @@ class MainWindow(QMainWindow):
 			        self.editorManager.close()
 
     def new(self):
+		orgPath = self.path
 		wizard = Wizard()
 		path = wizard.start("", False, True)
-		if path:
+		if path and path != orgPath :
 			settings = QSettings()
 			if settings.value('path') is not None:
 			    self.stop()
