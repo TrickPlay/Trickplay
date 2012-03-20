@@ -1206,6 +1206,60 @@ global pb [[ Bullet::World * ]]
             }
         ]];
         
+    PBShape TriangleMeshShape( table vertices , table indices , table scaling = 0 )
+        [[
+            btTriangleMesh * tm = new btTriangleMesh();
+            
+            btVector3 v[3];
+            
+            lua_pushnil( L );
+            
+            int n = 0;
+            int c = 0;
+            
+            while( lua_next( L , indices ) )
+            {
+                int i = lua_tonumber( L , -1 );
+                
+                lua_rawgeti( L , vertices , ( 3 * i ) + 1 );
+                lua_rawgeti( L , vertices , ( 3 * i ) + 2 );
+                lua_rawgeti( L , vertices , ( 3 * i ) + 3 );
+                
+                v[n].setX( lua_tonumber( L , -3 ) );
+                v[n].setY( lua_tonumber( L , -2 ) );
+                v[n].setZ( lua_tonumber( L , -1 ) );
+                
+ //               g_debug( "TRIANGLE %d.%d : %3.1f , %3.1f , %3.1f" , c , n , v[n].x() , v[n].y() , v[n].z() );
+                 
+                lua_pop( L , 4 );
+                
+                n += 1;
+                
+                if ( n == 3 )
+                {
+                    tm->addTriangle( v[0] , v[1] , v[2] );
+                    
+                    n = 0;
+                    ++c;
+                }
+            }
+            
+            btBvhTriangleMeshShape * ts = new btBvhTriangleMeshShape( tm , true );
+            
+            btCollisionShape * shape = ts; 
+
+            if ( scaling )
+            {
+//                g_debug( "SCALED!" ); 
+                
+                btVector3 vs = btVector3FromTable( L , scaling );
+                
+                shape = new btScaledBvhTriangleMeshShape( ts , vs );                
+            }
+            
+            self->create_shape( shape , new_PBShape );
+        ]];        
+        
     PBPointToPointConstraint PointToPointConstraint( PBBody3d bodyA , table pivotA , PBBody3d bodyB = 0 , table pivotB = 0 )
         [[
             lua_pushcfunction( L , new_PBPointToPointConstraint );
