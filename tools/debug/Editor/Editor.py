@@ -29,6 +29,7 @@ class Editor(QsciScintilla):
         super(Editor, self).__init__(parent)
         self.setAcceptDrops(False)
 
+        self.starMark = False
         self.editorManager = editorManager
         self.debugWindow = editorManager.debugWindow
         self.deviceManager = editorManager.deviceManager
@@ -206,16 +207,19 @@ class Editor(QsciScintilla):
             tabTitle = self.editorManager.tab.tabText(index)
             if tabTitle[:1] != "*":
                 self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+                self.starMark = True
         elif self.isUndoAvailable() == True and self.tempfile is True :
             self.editorManager.main.ui.actionUndo.setEnabled(True)
             tabTitle = self.editorManager.tab.tabText(index)
             if tabTitle[:1] != "*":
                 self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+                self.starMark = True
         else :
             self.editorManager.main.ui.actionUndo.setEnabled(False)
             tabTitle = self.editorManager.tab.tabText(index)
             if tabTitle[:1] == "*":
                 self.editorManager.tab.setTabText (index, tabTitle[1:])
+                self.starMark = False
         
     def copyAvailable(self, avail):
         self.editorManager.main.ui.action_Cut.setEnabled(avail)
@@ -301,9 +305,9 @@ class Editor(QsciScintilla):
 			index = 0 
 			for edt in self.editorManager.tab.editors :
 				if edt.path == self.path:
-				    if self.isUndoAvailable() is True:
-					    #self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
-					    pass
+				    if self.isUndoAvailable() is True and self.starMark is False:
+					    self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+					    self.starMark = True
 				index = index + 1
 
 		if self.text_status == TEXT_DEFAULT:
@@ -322,6 +326,7 @@ class Editor(QsciScintilla):
             pass
         
         self.text_status = TEXT_READ 
+        self.starMark = False
         
         index = 0 
         if self.editorManager is not None :
