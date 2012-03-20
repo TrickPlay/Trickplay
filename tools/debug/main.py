@@ -34,6 +34,10 @@ RUN_STOP = 2
 DEBUG_INBREAK = 3
 DEBUG_NOT_INBREAK = 4
 
+TEXT_DEFAULT = 0
+TEXT_READ = 1
+TEXT_CHANGED = 2
+
 class MainWindow(QMainWindow):
     
     def __init__(self, app, apath=None, parent = None):
@@ -591,23 +595,32 @@ class MainWindow(QMainWindow):
             self.ui.action_Run.setEnabled(False)
             self.ui.action_Debug.setEnabled(False)
 	
-    def preference2(self):
-        self.preference = QDialog()
-        self.preference.ui = Ui_preferenceDialog()
-        self.preference.ui.setupUi (self.preference)
-        self.preference.exec_()
+    def setEditorTabName(self, index):
+        tabTitle = self.editorManager.tab.tabText(index)
+        if self.editorManager.tab.textBefores[index] == self.editorManager.tab.editors[index].text():
+            if tabTitle[:1] == "*":
+                self.editorManager.tab.setTabText (index, tabTitle[1:])
+                self.editorManager.tab.editors[index].starMark = False
+                self.editorManager.tab.editors[index].text_status = TEXT_READ
+        else:
+            if tabTitle[:1] != "*" :
+                self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+                self.editorManager.tab.editors[index].starMark = True
+                self.editorManager.tab.editors[index].text_status = TEXT_CHANGED
 
     def editor_undo(self):
 		if self.editorManager.tab:
 			index = self.editorManager.tab.currentIndex()
 			if not index < 0:
 				self.editorManager.tab.editors[index].undo()
+                self.setEditorTabName(index)
 
     def editor_redo(self):
 		if self.editorManager.tab:
 			index = self.editorManager.tab.currentIndex()
 			if not index < 0:
 				self.editorManager.tab.editors[index].redo()
+                self.setEditorTabName(index)
 
     def editor_cut(self):
 		if self.editorManager.tab:
