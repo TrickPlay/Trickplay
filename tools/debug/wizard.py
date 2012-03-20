@@ -58,7 +58,7 @@ class Wizard():
 	    # Get a path from the user
         if openApp == False and newApp == True:
             
-            userPath = self.createAppDialog(dir)
+            userPath = self.createAppDialog()
             if userPath:
                 print('Path chosen: ' + str(userPath))
             else:    
@@ -71,7 +71,7 @@ class Wizard():
                     
                     # If the directory is empty, start the app creator
                     if len(files) <= 0:
-                        return self.createAppDialog(userPath)
+                        return self.createAppDialog()
                         
                     if 'app' in files and 'main.lua' in files:
                         #return self.start(path, True, False)
@@ -222,15 +222,15 @@ class Wizard():
             msg.exec_()
         return path
         
-    def createAppDialog(self, path):
+    def createAppDialog(self, path=None):
         """
         New app dialog
         """
-                
         self.dialog = QDialog()
         self.ui = Ui_newApplicationDialog()
         self.ui.setupUi(self.dialog)
-        #self.ui.directory.setText(path)
+        if path is not None :
+            self.ui.directory.setText(path)
         
         #self.adjustDialog(path)
         cancelButton = self.ui.buttonBox.button(QDialogButtonBox.Cancel)
