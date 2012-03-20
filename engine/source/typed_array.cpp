@@ -24,19 +24,14 @@ ArrayBuffer::~ArrayBuffer()
 
 bool ArrayBuffer::is_array_buffer( lua_State * L , int index )
 {
-    return lb_check_udata_type( L , index , "ArrayBuffer" , false );
+    return LB_GET_ARRAYBUFFER( L , index ) != 0;
 }
 
 //.............................................................................
 
 ArrayBuffer * ArrayBuffer::from_lua( lua_State * L , int index )
 {
-    if ( is_array_buffer( L , index ) )
-    {
-        return ( ArrayBuffer * ) UserData::get_client( L , index );
-    }
-
-    return 0;
+	return LB_GET_ARRAYBUFFER( L , index );
 }
 
 //.............................................................................
@@ -730,7 +725,7 @@ void TypedArray::update_metatable( lua_State * L )
 
 bool TypedArray::is_typed_array( lua_State * L , int index )
 {
-    return lb_check_udata_type( L , index , "TypedArray" , false );
+    return LB_GET_TYPEDARRAY( L , index ) != 0;
 }
 
 //.............................................................................
