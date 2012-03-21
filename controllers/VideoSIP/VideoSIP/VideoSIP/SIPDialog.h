@@ -20,7 +20,8 @@
 @required
 - (void)dialogSessionStarted:(SIPDialog *)dialog;
 - (void)dialogSessionEnded:(SIPDialog *)dialog;
-- (void)dialog:(SIPDialog *)dialog beganRTPStreamWithHost:(NSString *)host port:(NSUInteger)port;
+- (void)dialog:(SIPDialog *)dialog beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
+- (void)dialog:(SIPDialog *)dialog endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
 - (void)dialog:(SIPDialog *)dialog wantsToSendData:(NSData *)data;
 
 @end
@@ -158,6 +159,11 @@
 
 @interface InviteDialog : SIPDialog {
     NSMutableDictionary *previousAcks;
+    
+    // TODO: Currently the mediaDestination is passed from sipThread to the main thread
+    // for use with the video encoder. May instead want to make a copy of mediaDestination
+    // and pass the copy to the other thread to prevent possibilities of corrupt read/writes
+    NSDictionary *mediaDestination;
 }
 
 - (void)invite;

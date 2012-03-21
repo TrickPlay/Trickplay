@@ -71,6 +71,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class MediaDescription;
+
 @interface SDPParser : NSObject {
     NSArray *owner;
     NSString *sessionName;
@@ -88,6 +90,9 @@
 @property (nonatomic, retain) NSMutableDictionary *mediaDescriptions;
 
 - (id)initWithSDP:(NSString *)body;
+
+- (MediaDescription *)audioDescription;
+- (MediaDescription *)videoDescription;
 
 - (NSArray *)audioHostandPort;
 - (NSArray *)videoHostandPort;

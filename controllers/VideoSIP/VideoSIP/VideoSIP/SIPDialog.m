@@ -14,6 +14,7 @@
 
 #import "MyExtensions.h"
 #import "SDPParser.h"
+#import "MediaDescription.h"
 
 
 @implementation SIPDialog
@@ -453,8 +454,12 @@
     }
     
     SDPParser *sdpParser = [[[SDPParser alloc] initWithSDP:sdp] autorelease];
-    NSArray *audioDest = [sdpParser audioHostandPort];
-    NSArray *videoDest = [sdpParser videoHostandPort];
+    if (!sdpParser) {
+        return nil;
+    }
+    
+    MediaDescription *audioDest = [sdpParser audioDescription];
+    MediaDescription *videoDest = [sdpParser videoDescription];
     
     if (!audioDest || !videoDest) {
         return nil;
@@ -463,11 +468,11 @@
     NSMutableDictionary *mediaDest = [NSMutableDictionary dictionaryWithCapacity:2];
     
     if (audioDest) {
-        [mediaDest setObject:audioDest forKey:@"audioDest"];
+        [mediaDest setObject:audioDest forKey:@"audio"];
     }
     
     if (videoDest) {
-        [mediaDest setObject:videoDest forKey:@"videoDest"];
+        [mediaDest setObject:videoDest forKey:@"video"];
     }
     
     return mediaDest;
@@ -480,9 +485,16 @@
     }
     if ([statusLine compare:@"SIP/2.0 200 OK"] == NSOrderedSame) {
         [self ackResponse:parsedPacket withBranch:[NSString uuid]];
-        NSDictionary *mediaDest = [self parseSDP:body];
-        NSLog(@"media destination:\n%@\n", mediaDest);
-        // TODO: Inform SIPClient of our new found host and port combo for RTP
+        // If we already have an RTP stream then we can ignore this;
+        // if we enable re-invites this will have to change
+        if (!mediaDestination) {
+            mediaDestination = [[self parseSDP:body] retain];
+            NSLog(@"media destination:\n%@\n", mediaDestination);
+         
+            if (mediaDestination) {
+                [delegate dialog:self beganRTPStreamWithMediaDestination:mediaDestination];
+            }
+        }
     } else if ([statusLine compare:@"SIP/2.0 401 Unauthorized"] == NSOrderedSame) {
         NSString *authRequest = [parsedPacket objectForKey:@"WWW-Authenticate"];
         if (authRequest) {
@@ -492,6 +504,7 @@
         }
     } else if ([statusLine rangeOfString:@"BYE"].location != NSNotFound) {
         [self byeResponse:parsedPacket fromAddr:remoteAddr];
+        [delegate dialog:self endRTPStreamWithMediaDestination:mediaDestination];
         [delegate dialogSessionEnded:self];
     } else {
         NSLog(@"Unrecognized Response: %@", statusLine);
@@ -505,6 +518,11 @@
     if (previousAcks) {
         [previousAcks release];
         previousAcks = nil;
+    }
+    
+    if (mediaDestination) {
+        [mediaDestination release];
+        mediaDestination = nil;
     }
     
     [super dealloc];
