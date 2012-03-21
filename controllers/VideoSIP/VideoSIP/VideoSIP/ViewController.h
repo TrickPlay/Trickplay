@@ -16,7 +16,7 @@
 
 #import "NetworkManager.h"
 
-@interface ViewController : UIViewController <AVCaptureVideoDataOutputSampleBufferDelegate> {
+@interface ViewController : UIViewController <AVCaptureVideoDataOutputSampleBufferDelegate, NetworkManagerDelegate> {
     NetworkManager *networkMan;
     
     AVCaptureSession *captureSession;

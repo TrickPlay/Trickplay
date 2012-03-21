@@ -17,6 +17,15 @@
 
 #import "SIPDialog.h"
 
+@class SIPClient;
+
+@protocol SIPClientDelegate <NSObject>
+
+- (void)client:(SIPClient *)client beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
+- (void)client:(SIPClient *)client endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
+
+@end
+
 
 @interface SIPClient : NSObject <SIPDialogDelegate> {
     NSThread *sipThread;
@@ -27,12 +36,19 @@
     
     CFSocketRef sipSocket;
     NSMutableArray *writeQueue;
+    
+    id <SIPClientDelegate> delegate;
 }
 
+@property (atomic, assign) id <SIPClientDelegate> delegate;
+
 // public
+- (id)initWithDelegate:(id <SIPClientDelegate>)delegate;
+
 - (void)connectToService;
 - (void)initiateVideoCall;
 - (void)hangUp;
+- (void)disconnectFromService;
 
 // private
 void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,

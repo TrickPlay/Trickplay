@@ -40,8 +40,13 @@ static NSUInteger const udpServerPort = 5060;
 @implementation SIPClient
 
 @synthesize writeQueue;
+@synthesize delegate;
 
 - (id)init {
+    return [self initWithDelegate:nil];
+}
+
+- (id)initWithDelegate:(id<SIPClientDelegate>)_delegate {
     self = [super init];
     if (self) {
         sipDialogs = [[NSMutableDictionary alloc] initWithCapacity:40];
@@ -52,6 +57,8 @@ static NSUInteger const udpServerPort = 5060;
         writeQueue = [[NSMutableArray alloc] initWithCapacity:100];
         
         sipThread = [[NSThread alloc] initWithTarget:self selector:@selector(threadMain:) object:nil];
+        
+        self.delegate = _delegate;
     }
     
     return self;
@@ -71,10 +78,11 @@ static NSUInteger const udpServerPort = 5060;
 
 - (void)connectToService {
     [sipThread start];
-    //[self registerToAsterisk:nil];
     [self performSelector:@selector(registerToAsterisk:) onThread:sipThread withObject:nil waitUntilDone:NO];
 }
 
+// TODO: Since this call is public but needs to run on sipThread this should be changed
+// to leverage performSelector:onThread:
 - (void)initiateVideoCall {
     InviteDialog *inviteDialog = [[[InviteDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
     
@@ -101,6 +109,10 @@ static NSUInteger const udpServerPort = 5060;
     CFSocketEnableCallBacks(sipSocket, kCFSocketWriteCallBack);
 }
 
+- (void)dialogSessionStarted:(SIPDialog *)dialog {
+    
+}
+
 /**
  * This is our main callback from Dialog sessions ending. This
  * will have a large impact on the state machine.
@@ -110,10 +122,25 @@ static NSUInteger const udpServerPort = 5060;
     if ([dialog isKindOfClass:[RegisterDialog class]]) {
         [self initiateVideoCall];
     } else if ([dialog isKindOfClass:[InviteDialog class]]) {
-        // do nothing special for now
+        // TODO: might feel like updating network manager on this bit of info?
     }
     
     [sipDialogs removeObjectForKey:dialog.callID];
+}
+
+- (void)dialog:(SIPDialog *)dialog beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
+    // TODO: SIP connection could possibly die on sipThread before this gets called.
+    // Handle this possible race condition gracefully.
+    // delegate callbacks may have already taken care of that by using async dispatching however...
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self.delegate client:self beganRTPStreamWithMediaDestination:mediaDest];
+    });
+}
+
+- (void)dialog:(SIPDialog *)dialog endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self.delegate client:self endRTPStreamWithMediaDestination:mediaDest];
+    });
 }
 
 #pragma mark -
@@ -307,7 +334,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
         @synchronized(self) {
             exit_thread = NO;
     
-            // TODO: Add my input sources here (sockets, etc.)
+            // Add my input sources here (sockets, etc.)
             CFRunLoopSourceRef rls = CFSocketCreateRunLoopSource(NULL, sipSocket, 0);
             assert(rls != NULL);
     

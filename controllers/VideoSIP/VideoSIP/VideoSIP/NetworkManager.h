@@ -14,11 +14,22 @@
 #import <netinet/in.h>
 #import "rtp.h"
 
+@class NetworkManager;
+
+@protocol NetworkManagerDelegate <NSObject>
+
+- (void)networkManagerEncoderReady:(NetworkManager *)networkManager;
+
+@end
+
+
+
+
 static struct timeval timeout;
 
 typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
 
-@interface NetworkManager : NSObject {
+@interface NetworkManager : NSObject <SIPClientDelegate> {
     dispatch_queue_t socket_queue;
     
     uint8_t avc_session_id;
@@ -30,8 +41,14 @@ typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
     NSMutableArray *avQueue;
     
     SIPClient *sipClient;
+    
+    id <NetworkManagerDelegate> delegate;
 }
 
+@property (nonatomic, assign) id <NetworkManagerDelegate> delegate;
+@property (nonatomic, assign) AVCEncoder *avcEncoder;
+
+void rtp_avc_session_callback(struct rtp *session, rtp_event *e);
 void *get_in_addr(struct sockaddr *sa);
 
 - (void)startEncoder;

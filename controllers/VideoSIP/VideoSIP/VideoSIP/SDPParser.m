@@ -189,51 +189,6 @@ typedef enum {
             [self release];
             return nil;
         }
-        
-        
-        /*
-        // This array represents the elements that should arrive from the SDP packet
-        // in a specific order
-        NSArray *sessionElementOrder = [NSArray arrayWithObjects:@"v", @"o", @"s", @"i", @"u", @"e", @"p",
-                                        @"c", @"b",@"t", @"z", @"k", @"a", @"m", nil];
-        NSArray *timeElementOrder = [NSArray arrayWithObjects:@"t", @"r", nil];
-        NSArray *mediaElementOrder = [NSArray arrayWithObjects:@"m", @"i", @"c", @"b", @"k", @"a", nil];
-        
-        int required[] = {1, 1, 1, 0, };
-        int index = 0;
-
-        //for (NSString *element in components) {
-        for (int i = 0; i < components.count; i++) {
-            NSString *element = [components objectAtIndex:i];
-            NSArray *elementComponents = [element componentsSeparatedByString:@"="];
-            if (elementComponents.count < 2) {
-                [self release];
-                return nil;
-            }
-            NSString *key = [elementComponents objectAtIndex:0];
-            NSString *val = [elementComponents objectAtIndex:1];
-            
-            // Check to make sure this element is the correct element in the correct order.
-            if ([key compare:[sessionElementOrder objectAtIndex:index]] != NSOrderedSame) {
-                index++;
-                if ([key compare:[sessionElementOrder objectAtIndex:index]] != NSOrderedSame) {
-                    NSLog(@"SDP parsing failed, session elements not in mandatory order!");
-                    [self release];
-                    return nil;
-                }
-                
-            }
-            
-            
-        }
-        
-        owner;
-        sessionName;
-        connectionInfo;
-        bandwidth;
-        timeDescription;
-        mediaDescriptions;
-        */
     }
     
     return self;
@@ -344,6 +299,27 @@ typedef enum {
     return YES;
 }
 
+- (MediaDescription *)audioDescription {
+    MediaDescription *audioDescription = [mediaDescriptions objectForKey:@"audio"];
+    if (!audioDescription || !audioDescription.host || !audioDescription.port) {
+        return nil;
+    }
+    
+    return audioDescription;
+}
+
+- (MediaDescription *)videoDescription {
+    MediaDescription *videoDescription = [mediaDescriptions objectForKey:@"video"];
+    if (!videoDescription || !videoDescription.host || !videoDescription.port) {
+        return nil;
+    }
+    
+    return videoDescription;
+}
+
+
+// TODO: might want to get rid of these. Caller might as well just get the whole
+// media description rather than just the host and port
 - (NSArray *)audioHostandPort {
     MediaDescription *audioDescription = [mediaDescriptions objectForKey:@"audio"];
     if (!audioDescription || !audioDescription.host || !audioDescription.port) {

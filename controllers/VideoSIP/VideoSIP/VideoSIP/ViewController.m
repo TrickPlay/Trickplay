@@ -36,6 +36,7 @@
     }
     //*/
     networkMan = [[NetworkManager alloc] init];
+    networkMan.delegate = self;
     
     captureOutput.alwaysDiscardsLateVideoFrames = YES;
     
@@ -70,8 +71,8 @@
     prevLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [self.view.layer addSublayer:prevLayer];
     
-    [networkMan startEncoder];
-    [captureSession startRunning];
+    //[networkMan startEncoder];
+    //[captureSession startRunning];
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput
@@ -199,10 +200,20 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
     //CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
     
-    //[avcEncoder encode:sampleBuffer];
+    [networkMan.avcEncoder encode:sampleBuffer];
     //});
     
     [pool drain];
+}
+
+#pragma mark -
+#pragma mark NetworkManager Protocol
+
+- (void)networkManagerEncoderReady:(NetworkManager *)networkManager {
+    if (networkManager == networkMan) {
+        [networkMan startEncoder];
+        [captureSession startRunning];
+    }
 }
 
 #pragma mark - 
