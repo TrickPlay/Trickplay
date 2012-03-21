@@ -29,6 +29,10 @@ The File System Window lists the application's source files in a hierarchical tr
 
 (see images/IdeFileWindow.png)
 
+Right-clicking on a file will open a pop-up menu which enables various file operations, including renaming or deleting the file or creating a new directory.
+
+(see images/IdeFileSystemPopup.png)
+
 Topic: The Inspector Window
 
 The Inspector Window is located to the right of the Editor Window. To open the window, select the Windows->Inspector menu item or click on the toolbar's Inspector button. The Inspector Window opens automatically when a TrickPlay application is run from the IDE or when a debugging session is started.
