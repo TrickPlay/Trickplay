@@ -16,6 +16,57 @@ local mvp_matrix = Matrix()
 
 local program
 
+local cube_vs=
+    {
+       --          POSITION            
+       1.00000, 1.00000, -1.00000, 
+       1.00000, -1.00000, -1.00000, 
+       -1.00000, -1.00000, -1.00000, 
+       -1.00000, 1.00000, -1.00000,  
+    
+       -1.00000, -1.00000, 1.00000,  
+       -1.00000, 1.00000, 1.00000,   
+       -1.00000, 1.00000, -1.00000,  
+       -1.00000, -1.00000, -1.00000, 
+    
+       1.00000, -1.00000, 1.00000,   
+       1.00000, 1.00000, 1.00000,    
+       -1.00000, -1.00000, 1.00000,  
+       -1.00000, 1.00000, 1.00000,   
+    
+       1.00000, -1.00000, -1.00000,    
+       1.00000, 1.00000, -1.00000,     
+       1.00000, -1.00000, 1.00000,      
+       1.00000, 1.00000, 1.00000,       
+    
+       1.00000, 1.00000, -1.00000,     
+       -1.00000, 1.00000, -1.00000,    
+       1.00000, 1.00000, 1.00000,       
+       -1.00000, 1.00000, 1.00000,      
+    
+       1.00000, -1.00000, -1.00000,    
+       1.00000, -1.00000, 1.00000,     
+       -1.00000, -1.00000, 1.00000,     
+       -1.00000, -1.00000, -1.00000,    
+    }
+
+
+local cube_is=
+    {
+       0, 1, 2,
+       3, 0, 2,
+       4, 5, 6,
+       7, 4, 6,
+       8, 9, 10,
+       9, 11, 10,
+       12, 13, 14,
+       13, 15, 14,
+       16, 17, 18,
+       17, 19, 18,
+       20, 21, 22,
+       23, 20, 22,
+    }
+
 
 local function init_gl_state()
 
@@ -181,7 +232,7 @@ local function display( cubes )
 
         gl:uniformMatrix4fv( mvp_matrix_loc , false , mvp_matrix )
         
-        gl:drawElements( gl.TRIANGLES , 36 , gl.UNSIGNED_SHORT , 0 )
+        gl:drawElements( gl.TRIANGLES , 3 * 12 , gl.UNSIGNED_SHORT , 0 )
     end
     
     gl:release()   
@@ -211,6 +262,10 @@ local function make_cube( x , y , z , hw , xr , yr , zr , props )
     end
     
     local shape = pb:BoxShape( w , h , d )
+    
+    --local shape = pb:TriangleMeshShape( cube_vs , cube_is , { w , h , d } )
+    --dumptable( shape.local_scaling )
+    --dumptable( shape.aabb )
     
     local b = 
         {
@@ -261,8 +316,9 @@ local function main()
     
     local cubes =
     {
-----[[
-        make_cube( -250 , 200 , -1000 , 50 , 0 , 0 , 0 ),
+        make_cube( -250 , 200 , -1000 , 50 , 180 , 0 , 0 ),
+
+---[[
         make_cube( -100 , 200 , -1000 , 50 , 0 , 0 , 0 ),
         
 
@@ -287,6 +343,7 @@ local function main()
     local wall = pb:Body3d{ transform = wall_matrix , shape = wall_shape, mass = 0 , bounce = 0.5 , friction = 0.2 }
     
     pb:add( ground , wall )
+        
 
 --[[ Slider constraint example
 
@@ -343,7 +400,7 @@ local function main()
     function idle.on_idle() render() end
 
     function pb:on_step( seconds )
-----[[
+--[[
         local contacts = pb:get_contacts( 10 ) -- , cubes[1].body , ground )
         
         if contacts then
