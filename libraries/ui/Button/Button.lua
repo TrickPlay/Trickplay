@@ -1,19 +1,15 @@
+BUTTON = true
 
 local states = {"default","focus","activation"}
 
+--default create_canvas function
 local create_canvas = function(old_function,self,state)
 	
 	local c = Canvas(self.w,self.h)
 	
 	c.line_width = self.style.border.width
 	
-	c:round_rectangle(
-		c.line_width/2,
-		c.line_width/2,
-		c.w - c.line_width,
-		c.h - c.line_width,
-		self.style.border.corner_radius
-	)
+	round_rectangle(c,self.style.border.corner_radius)
 	
 	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
 	
@@ -31,13 +27,13 @@ local default_parameters = {
 Button = function(parameters)
 	
 	--input is either nil or a table
-	parameters = is_table_or_nil("Button",parameters)
+	parameters = is_table_or_nil("Button",parameters) -- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
 	
 	--flags
 	local canvas          = type(parameters.images) == "nil"
-	local flag_for_redraw = false
-	local from_set        = false
-	local size_is_set =
+	local flag_for_redraw = false --ensure at most one canvas redraw from Button:set()
+	local from_set        = false --indicates that an attribute is being set in Button:set()
+	local size_is_set = -- an ugly flag that is used to determine if the user set the Button size themselves yet
 		parameters.h or
 		parameters.w or
 		parameters.height or
@@ -48,13 +44,14 @@ Button = function(parameters)
 	--upvals
 	local images
 	
-	
-	parameters = cover_defaults(parameters,default_parameters)
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
     
 	----------------------------------------------------------------------------
 	--The Button Object inherits from Widget
 	
 	local instance = Widget( parameters )
+	--the default w and h does not count as setting the size
 	if not size_is_set then instance:reset_size_flag() end
 
 	local states = parameters.states or states
@@ -156,27 +153,17 @@ Button = function(parameters)
 		
 		images = {}
 		
+		instance:clear()
+		
 		for _,state in pairs(instance.states) do
 			
 			images[state] = instance:create_canvas(state)
-			
-		end
-		
-		instance:clear()
-		
-		
-		for _,state in pairs(instance.states) do
-			
-			if images[state] then
-				
-				instance:add(images[state])
-				if state ~= "default" then
-					images[state].state = define_image_animation(images[state])
-				end
-				
+			instance:add(images[state])
+			if state ~= "default" then
+				images[state].state = define_image_animation(images[state])
 			end
-			
 		end
+		
 		
 		instance:add( label )
 		
@@ -350,8 +337,9 @@ Button = function(parameters)
     override_property(instance,"on_released",  function() return on_released  end, function(oldf,self,v) on_released  = v end )
 	
 	----------------------------------------------------------------------------
-	--Widget/Style Event Callabacks, to notify if properties change
+	--Widget/Style Event Callbacks, to notify if properties change
 	
+	--sets the function that creates canvases for individual button states
 	override_function(instance,"create_canvas", parameters.create_canvas or create_canvas)
 	
 	function instance:on_size_changed()
@@ -362,7 +350,8 @@ Button = function(parameters)
 		
 	end
 	
-	local update_label, text_style = function()
+	local text_style
+	local update_label  = function()
 		
 		text_style = instance.style.text
 		
@@ -400,12 +389,26 @@ Button = function(parameters)
 	function instance:on_button_up()    instance:release()        end
 	
 	----------------------------------------------------------------------------
-	--initial values
+	-- apply initial values
 	
+	--set up the label [using the Widget.style.text.on_changed callback]
 	update_label()
 	define_label_animation()
 	
-	instance.images = parameters.images
+	--[[
+	if parameters.images ~= nil then
+		
+		if parameters.w then instance.w = parameters.w end
+		if parameters.h then instance.h = parameters.h end
+		
+	else
+		instance.w = parameters.w or default_parameters.w
+		instance.h = parameters.h or default_parameters.h
+	end
+	--]]
+	
+	-- if no images, the instance.images is set to nil, causing the canvases to be drawn
+	instance.images = parameters.images 
 	instance.label  = parameters.label
 	
 	return instance

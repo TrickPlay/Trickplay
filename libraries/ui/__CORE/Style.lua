@@ -1,3 +1,4 @@
+STYLE = true
 
 local default_fill_colors = {
     default    = {  0,  0,  0},
@@ -63,6 +64,8 @@ local __index = function(meta_getters)
     
 end
 
+--------------------------------------------------------------------------------
+
 ArrowStyle = function(parameters)
     
 	--input is either nil or a table
@@ -73,7 +76,13 @@ ArrowStyle = function(parameters)
     local  meta_setters = {
         size          = function(v) size          = v  end,
         offset        = function(v) offset        = v  end,
-        arrow_colors  = function(v) arrow_colors  = matches_nil_table_or_type(ColorScheme, "COLORSCHEME", cover_defaults(v, default_arrow_colors)) end,
+        arrow_colors  = function(v) arrow_colors  =
+            matches_nil_table_or_type(
+                ColorScheme,
+                "COLORSCHEME",
+                recursive_overwrite(v, default_arrow_colors)
+            )
+        end,
     }
     local meta_getters = {
         size          = function() return size   or 20 end,
@@ -102,6 +111,8 @@ ArrowStyle = function(parameters)
     
 end
 
+--------------------------------------------------------------------------------
+
 BorderStyle = function(parameters)
     
 	parameters = is_table_or_nil("BorderStyle",parameters)
@@ -112,11 +123,17 @@ BorderStyle = function(parameters)
     local  meta_setters = {
         width         = function(v) width         = v   end,
         corner_radius = function(v) corner_radius = v   end,
-        colors        = function(v) colors        = matches_nil_table_or_type(ColorScheme, "COLORSCHEME", cover_defaults(v, default_border_colors)) end,
+        colors        = function(v) colors        =
+            matches_nil_table_or_type(
+                ColorScheme,
+                "COLORSCHEME",
+                recursive_overwrite(v, default_border_colors)
+            )
+        end,
     }
     local meta_getters = {
         width         = function() return width         or 2  end,
-        corner_radius = function() return corner_radius or 20 end,
+        corner_radius = function() return corner_radius or 10 end,
         colors        = function() return colors              end,
         type          = function() return "BORDERSTYLE"       end,
     }
@@ -125,9 +142,13 @@ BorderStyle = function(parameters)
     local children_using_this_style = setmetatable( {}, { __mode = "k" } )
     
     local instance = setmetatable(
-        {on_changed = function(self,object,update_function)
-            children_using_this_style[object] = update_function
-        end},
+        {
+            on_changed = function(self,object,update_function)
+                
+                children_using_this_style[object] = update_function
+                
+            end
+        },
         {
             __newindex = __newindex(meta_setters, children_using_this_style),
             __index    = __index(meta_getters),
@@ -142,6 +163,7 @@ BorderStyle = function(parameters)
     
 end
 
+--------------------------------------------------------------------------------
 
 TextStyle = function(parameters)
     
@@ -158,7 +180,12 @@ TextStyle = function(parameters)
     }
     
     
-    parameters.colors = matches_nil_table_or_type(ColorScheme, "COLORSCHEME", cover_defaults(parameters.colors, default_text_colors))
+    parameters.colors =
+            matches_nil_table_or_type(
+                ColorScheme,
+                "COLORSCHEME",
+                recursive_overwrite(parameters.colors, default_text_colors)
+            )
     
     properties.color = parameters.color or parameters.colors.default
     
@@ -214,21 +241,25 @@ TextStyle = function(parameters)
     
 end
 
+--------------------------------------------------------------------------------
+
 Style = function(parameters)
-	parameters = is_table_or_nil("Style",parameters)
+	
+    parameters = is_table_or_nil("Style",parameters)
     
-    local instance = {}
-    
-    local arrow       = matches_nil_table_or_type(ArrowStyle,  "ARROWSTYLE",  parameters.arrow)
-    local border      = matches_nil_table_or_type(BorderStyle, "BORDERSTYLE", parameters.border)
-    local text        = matches_nil_table_or_type(TextStyle,   "TEXTSTYLE",   parameters.text)
-    local fill_colors = matches_nil_table_or_type(ColorScheme, "COLORSCHEME", cover_defaults(parameters.fill_colors, default_fill_colors))
+    local arrow, border,text, fill_colors
     
     local meta_setters = {
-        arrow          = function(v) arrow       = ArrowStyle(v)  end,
-        border         = function(v) border      = BorderStyle(v) end,
-        text           = function(v) text        = TextStyle(v)   end,
-        fill_colors    = function(v) fill_colors = ColorScheme(v) end,
+        arrow          = function(v) arrow       = matches_nil_table_or_type(ArrowStyle,  "ARROWSTYLE",  v)  end,
+        border         = function(v) border      = matches_nil_table_or_type(BorderStyle, "BORDERSTYLE", v) end,
+        text           = function(v) text        = matches_nil_table_or_type(TextStyle,   "TEXTSTYLE",   v)   end,
+        fill_colors    = function(v) fill_colors = 
+            matches_nil_table_or_type(
+                ColorScheme,
+                "COLORSCHEME",
+                recursive_overwrite(v, default_fill_colors)
+            )
+        end,
     }
     local meta_getters = {
         arrow          = function() return arrow       end,
@@ -238,8 +269,8 @@ Style = function(parameters)
         type           = function() return "STYLE"     end,
     }
     
-    setmetatable(
-        instance,
+    local instance = setmetatable(
+        {},
         {
             __newindex = function(t,k,v)
                 
@@ -251,6 +282,11 @@ Style = function(parameters)
             __index    = __index(meta_getters)
         }
     )
+    
+    instance.arrow       = parameters.arrow
+    instance.border      = parameters.border
+    instance.text        = parameters.text
+    instance.fill_colors = parameters.fill_colors
     
     return instance
     

@@ -1,4 +1,6 @@
 
+COLORSCHEME = true
+
 local function is_color(v)
     
     if type(v) ~= "string" and type(v) ~= "table" then

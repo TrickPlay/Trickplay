@@ -1,3 +1,5 @@
+OVERRIDEMETATABLE = true
+
 function override_property( object , name , getter , setter )
     assert( type( object ) == "userdata" )
     assert( type( name ) == "string" )
@@ -38,56 +40,6 @@ function override_function( object , name , newf )
         end
 end
 
-function is_table_or_nil(name,input)
-    
-    return input == nil and {} or
-        
-        type(input) == "table" and input or 
-        
-        error(name.." requires a table or nil as input",3)
-    
-end
-
-
-function matches_nil_table_or_type(constructor,req_type,input)
-    
-    return input == nil and constructor() or
-        type(input) == "table" and (input.type == req_type and input or constructor(input)) or
-        error("input did not match nil, table, or "..req_type,2)
-    
-end
-
-function cover_defaults(parameters, defaults)
-    
-    if parameters == nil then return defaults end
-    
-    for k,v in pairs(defaults) do
-        
-        if type(v) == "table" then
-            
-            if type(parameters[k]) == "table" then
-                
-                cover_defaults(parameters[k],v)
-                
-            elseif parameters[k] == nil then
-                
-                parameters[k] = cover_defaults( {}, v)
-                
-                
-                
-            end
-            
-        elseif parameters[k] == nil then
-            
-            parameters[k] = v
-            
-        end
-        
-    end
-    
-    return parameters
-    
-end
 
 
 

@@ -1,4 +1,4 @@
-
+WIDGET = true
 
 
 Widget = function(parameters)

@@ -1,3 +1,4 @@
+TOGGLEBUTTON = true
 
 local states = {"default","focus","selection","activation"}
 
@@ -17,13 +18,8 @@ local create_canvas = function(old_function,self,state)
 	
 	c.line_width = self.style.border.width
 	
-	c:round_rectangle(
-		c.line_width/2,
-		c.line_width/2,
-		c.w - c.line_width,
-		c.h - c.line_width,
-		self.style.border.corner_radius
-	)
+	round_rectangle(c,self.style.border.corner_radius)
+	
 	c:set_source_color( self.style.fill_colors[state] or "00000000" )
 	
 	c:fill(true)
@@ -84,7 +80,7 @@ ToggleButton = function(parameters)
 	----------------------------------------------------------------------------
 	--The Button Object inherits from Widget
 	
-	parameters = cover_defaults(parameters,default_parameters)
+	parameters = recursive_overwrite(parameters,default_parameters)
 	
 	
 	local instance = Button( parameters )
@@ -98,9 +94,22 @@ ToggleButton = function(parameters)
 	----------------------------------------------------------------------------
 	-- the ToggleButton.selected attribute and its callbacks
 	
+	local radio_button_group
     local on_deselection, on_selection
     local selected = false
     
+	override_property(instance,"group",
+		function() return radio_button_group end,
+		function(oldf,self,v)
+			
+			if radio_button_group == v then return end
+			
+			radio_button_group = v
+			
+			radio_button_group:add_item(self)
+			
+		end
+	)
 	override_property(instance,"selected",
 		function() return selected end,
 		function(oldf,self,v)
@@ -115,6 +124,22 @@ ToggleButton = function(parameters)
             
             if selected then
                 
+				if radio_button_group then
+					
+					for i, b in ipairs(radio_button_group.items) do
+						
+						if b ~= self then b.selected = false end
+						
+					end
+					
+					if radio_button_group.on_selection_change then
+						
+						radio_button_group:on_selection_change()
+						
+					end
+					
+				end
+				
                 if self.images.selection then self.images.selection.state.state = "ON"   end
                 
                 if on_selection then on_selection() end
