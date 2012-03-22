@@ -1,3 +1,158 @@
+
+local items_metatable = {
+	  __newindex = function(t,k,v)
+			
+			
+			
+	  end,
+}
+
+RadioButtonGroup = function(parameters)
+	
+	--input is either nil or a table
+	parameters = is_table_or_nil("RadioButtonGroup",parameters)
+	
+	
+	local default_index = 1
+	local instance
+	local items = setmetatable({},{
+			__newindex = function(t,k,v)
+				  
+				if type(v) ~= "userdata" then
+					  
+					  error("RadioButtonGroup.items expected table of ToggleButtons."..
+							" Received "..type(tb) .." at index ".. i,2)
+					  
+				end
+				
+				items[i] = tb
+				
+				tb.group = self
+				
+				tb.selected = false
+				
+			end,
+	  })
+	  
+	  local  meta_setters = {
+			focus         = function(v)
+				  
+				  if type(v) == "table" then
+						
+						error("RadioButtonGroup.items expected type 'table'. Received "..type(v),2)
+						
+				  end
+				  
+				  for i,tb in ipairs(items) do
+						
+						tb.on_selection = nil
+						
+				  end
+				  
+				  items = recursive_overwrite({},items)
+				  
+				  for i, tb in ipairs(v) do
+						
+						tb.group = self -- ToggleButton.group will call RadioButtonGroup:add_item()
+						
+				  end
+				  
+				  if items[default_index] then
+						
+						items[default_index].selected = true
+						
+				  end
+				  
+			end,
+			default_index = function(v)
+				  
+				  if type(v) ~= "number" then
+						
+						error("RadioButtonGroup.default_index expected type 'number'. Received "..type(v),2)
+						
+				  elseif v < 1 then
+						
+						error("RadioButtonGroup.default_index expected positive number. Received "..v,2)
+						
+				  else
+						
+						default_index = v
+						
+						if items[default_index] then
+							  
+							  items[default_index].selected = true
+							  
+						end
+						
+				  end
+				  
+			end
+	  }
+	  local meta_getters = {
+			items         = function() return recursive_overwrite({},items) end,
+			default_index = function() return default_index                 end,
+			type          = function() return "RadioButtonGroup"            end,
+	  }
+	  
+	  
+	  
+	  instance = setmetatable({
+				insert = function(self,tb, i)
+				  
+						if type(tb) ~= "userdata" then
+							  
+							  error("RadioButtonGroup.items expected table of ToggleButtons."..
+									" Received "..type(tb) .." at index ".. i,2)
+							  
+						end
+						
+						table.insert(items, i, tb )
+						
+						tb.group = self
+						
+						tb.selected = false
+						
+				end,
+				remove = function(self,tb)
+				  
+						if type(tb) ~= "userdata" then
+							  
+							  error("RadioButtonGroup.items expected table of ToggleButtons."..
+									" Received "..type(tb) .." at index ".. i,2)
+							  
+						end
+						
+						table.insert(items, tb )
+						
+						tb.group = self
+						
+						tb.selected = false
+						
+				end,
+			},
+			{
+				  __index = function(t,k,v)
+						
+						return meta_getters[k] and meta_getters[k]()
+						
+				  end,
+				  __newindex = function(t,k,v)
+						
+						return meta_setters[k] and meta_setters[k]()
+						
+				  end,
+			}
+	  )
+	  
+	  
+	  instance.items = parameters.items
+	  
+	  return instance
+	  
+end
+
+
+
 --[[
 Function: radioButtonGroup
 
@@ -29,7 +184,7 @@ Extra Function:
 	insert_item(item) - Add an item to the items table
 	remove_item(item) - Remove an item from the items table 
 ]]
-
+--[[
 
 function ui_element.radioButtonGroup(t) 
 
@@ -297,4 +452,5 @@ function ui_element.radioButtonGroup(t)
      setmetatable (rb_group.extra, mt)
 
      return rb_group
-end 
+end
+--]]

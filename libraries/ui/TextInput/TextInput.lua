@@ -99,7 +99,7 @@ function ui_element.textInput(t)
 		local focus_box = t_group:find_child("focus_box") 
 		local box_img	= t_group:find_child("box_img") 
 		local focus_img	= t_group:find_child("focus_img") 
-		local text	= t_group:find_child("textInput") 
+		local text	    = t_group:find_child("textInput") 
 
         if (p.skin == "Custom") then 
 	    	box.opacity = 255

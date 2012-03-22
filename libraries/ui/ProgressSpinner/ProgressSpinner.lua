@@ -1,3 +1,22 @@
+
+local canvas_dot = function(instance)
+	
+	local c = Canvas(instance.w,instance.h)
+	
+	canvas:arc( instance.w/2, instance.h/2, instance.w/2, 0, 360 )
+	
+	return c:Image()
+	
+end
+
+ProgressSpinner = function(parameters)
+	
+	parameters = is_table_or_nil("ProgressSpinner",parameters)
+	
+	local duration
+	local dot_img
+end
+
 --[[
 Function: Progress Spinner
 
@@ -20,7 +39,7 @@ Extra Function:
 	speed_down() - spin slower
 ]]
  
- 
+ --[[
 function ui_element.progressSpinner(t) 
     --default parameters
     local p = {
@@ -175,3 +194,4 @@ function ui_element.progressSpinner(t)
     setmetatable(l_dots.extra, mt)
     return l_dots
 end
+--]]
