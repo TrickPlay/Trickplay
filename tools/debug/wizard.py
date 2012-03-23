@@ -52,7 +52,6 @@ class Wizard():
                     msg.setWindowTitle("Error")
                     msg.exec_()
                     return -1
-
                 else:
                     if 'app' in files and 'main.lua' in files:
                         return dir
@@ -98,20 +97,8 @@ class Wizard():
         # Path was given on command line
         else:
             if os.path.exists(path) and os.path.isdir(path):
-                #files = os.listdir(path)
-                msg = QMessageBox()
-                msg.setText('Directory "' + os.path.basename(str(path)) +
-                '" does not contain an "app" file and a "main.lua" file.')
-                #msg.setInformativeText('If you pick an empty directory, you will be '
-                #                       'prompted to create a new app there.');
-                msg.setWindowTitle("Error")
-                msg.exec_()
-                return -1
-
-                """
+                files = os.listdir(path)
                 if len(files) <= 0:
-                    return self.createAppDialog(path)
-                else:
                     msg = QMessageBox()
                     msg.setText('Directory "' + os.path.basename(str(path)) +
                     '" does not contain an "app" file and a "main.lua" file.')
@@ -120,6 +107,8 @@ class Wizard():
                     msg.setWindowTitle("Error")
                     msg.exec_()
                     return -1
+                    #return self.createAppDialog(path)
+                else:
                     if 'app' in files and 'main.lua' in files:
                         return path
                     else:
@@ -132,7 +121,6 @@ class Wizard():
                         msg.setWindowTitle("Error")
                         msg.exec_()
                         return -1
-                """
 
             else:
                 print('[VDBG] Error - ' + path + ' is not existing directory.')
@@ -161,11 +149,12 @@ class Wizard():
         """
         
         if os.path.isdir(path):
-            
+
             try:
                 files = os.listdir(path)
             except:
                 return -4
+
             
             # If the directory is empty, allow the user to change id and name
             if len(files) <= 0:
@@ -237,6 +226,7 @@ class Wizard():
         else :
         	directory = dir
         
+
         path = QFileDialog.getExistingDirectory(None, 'Create an app directory', directory, QFileDialog.ShowDirsOnly)
         apath = os.path.dirname(str(path))
         
