@@ -97,6 +97,9 @@ class Editor(QsciScintilla):
         self.setCaretLineVisible(True)
         self.setCaretLineBackgroundColor(QColor("#ffe4e4"))  #HJ
 
+        # Indentation guides
+        self.setIndentationGuides(False)
+
         # Set Python lexer
         # Set style for Python comments (style number 1) to a fixed-width
         # courier.
