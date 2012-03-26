@@ -84,6 +84,8 @@ class EditorTabWidget(QTabWidget):
 		self.windowsMenu.removeAction(edt.windowsAction)
 		self.removeTab(index)
 		self.paths.pop(index)
+		for k in self.paths:
+		    self.main.editors[k][1] = self.paths.index(k)
 
 		if 0 == self.count():
 			self.m.editorMenuEnabled(False)
@@ -135,13 +137,11 @@ class EditorTabWidget(QTabWidget):
 		if ret == QMessageBox.Ok:
     		# Reload 
 		    self.editors[index].readFile(self.paths[index])
-		    #print("YUGI4"+self.paths[index])
 		    self.textBefores[index] = self.editors[index].text()
 		    self.editors[index].text_status = 1 #TEXT_READ
 		    self.editors[index].save() # added 2/3
 		    self.textBefores[index] = self.editors[index].text() #added 2/3
 	else:
-	    #print("[VDBG] YUGI3: "+self.paths[index])
 	    if self.tabClosing == False :
 	        self.editors[index].readFile(self.paths[index])
 		self.textBefores[index] = self.editors[index].text()
