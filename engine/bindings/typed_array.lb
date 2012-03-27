@@ -3,6 +3,7 @@ module typed_array;
 
 [[
 #include "typed_array.h"
+#include "typed_array.lb.h"
 ]]
 
 #==============================================================================
@@ -101,10 +102,8 @@ interface TypedArray [[ TypedArray * ]]
                         luaL_error( L , "Array set failed" );
                     }
                 }
-                else if ( lb_check_udata_type( L , 2 , "TypedArray" , false ) )
+                else if ( TypedArray * source = LB_GET_TYPEDARRAY( L , 2 ) )
                 {
-                    TypedArray * source = ( TypedArray * ) UserData::get_client( L , 2 );
-
                     if ( ! self->copy_from( source , offset ) )
                     {
                         luaL_error( L , "Array set failed" );

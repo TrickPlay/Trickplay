@@ -6,6 +6,11 @@
 #include "lb.h"
 #include "trickplay/controller.h"
 
+#include "clutter_actor.lb.h"
+#include "clutter_timeline.lb.h"
+#include "clutter_animator.lb.h"
+#include "clutter_constraint.lb.h"
+
 //.............................................................................
 
 ClutterActor * ClutterUtil::make_actor( ClutterActor * ( constructor )() )
@@ -179,93 +184,68 @@ gulong ClutterUtil::to_clutter_animation_mode( const char * mode )
 
 ClutterActor * ClutterUtil::user_data_to_actor( lua_State * L, int n )
 {
-    if ( ! lb_check_udata_type( L , n , "actor" , false ) )
+	ClutterActor * result = LB_GET_ACTOR( L , n );
+
+    if ( ! result )
     {
         luaL_where( L , 1 );
         g_warning( "%s : NOT A UI ELEMENT" , lua_tostring( L , -1 ) );
         lua_pop( L , 1 );
-        return NULL;
+        return 0;
     }
 
-    UserData * ud = UserData::get( L , n );
-
-    if ( ! ud )
-    {
-        return NULL;
-    }
-
-    GObject * obj = ud->get_master();
-
-    return CLUTTER_IS_ACTOR( obj ) ? CLUTTER_ACTOR( obj ) : NULL;
+    return CLUTTER_IS_ACTOR( result ) ? result : 0;
 }
 
 //.............................................................................
 
 ClutterTimeline * ClutterUtil::user_data_to_timeline( lua_State * L, int n )
 {
-    if ( ! lb_check_udata_type( L , n , "Timeline" , false ) )
+	ClutterTimeline * result = LB_GET_TIMELINE( L , n );
+
+    if ( ! result )
     {
         luaL_where( L , 1 );
+        g_warning( "%s : NOT A TIMELINE" , lua_tostring( L , -1 ) );
         lua_pop( L , 1 );
-        return NULL;
+        return 0;
     }
 
-    UserData * ud = UserData::get( L , n );
-
-    if ( ! ud )
-    {
-        return NULL;
-    }
-
-    GObject * obj = ud->get_master();
-
-    return CLUTTER_IS_TIMELINE( obj ) ? CLUTTER_TIMELINE( obj ) : NULL;
+    return CLUTTER_IS_TIMELINE( result ) ? result : 0;
 }
 
 //.............................................................................
 
 ClutterAnimator * ClutterUtil::user_data_to_animator( lua_State * L, int n )
 {
-    if ( ! lb_check_udata_type( L , n , "Animator" , false ) )
+	ClutterAnimator * result = LB_GET_ANIMATOR( L , n );
+
+    if ( ! result )
     {
         luaL_where( L , 1 );
+        g_warning( "%s : NOT AN ANIMATOR" , lua_tostring( L , -1 ) );
         lua_pop( L , 1 );
         return NULL;
     }
 
-    UserData * ud = UserData::get( L , n );
-
-    if ( ! ud )
-    {
-        return NULL;
-    }
-
-    GObject * obj = ud->get_master();
-
-    return CLUTTER_IS_ANIMATOR( obj ) ? CLUTTER_ANIMATOR( obj ) : NULL;
+    return CLUTTER_IS_ANIMATOR( result ) ? result : 0;
 }
 
 //.............................................................................
 
 ClutterConstraint * ClutterUtil::user_data_to_constraint( lua_State * L , int n )
 {
-    if ( ! lb_check_udata_type( L , n , "constraint" , false ) )
+	ClutterConstraint * result = LB_GET_CONSTRAINT( L , n );
+
+    if ( ! result )
     {
         luaL_where( L , 1 );
+        g_warning( "%s : NOT A CONSTRAINT" , lua_tostring( L , -1 ) );
         lua_pop( L , 1 );
         return NULL;
     }
 
-    UserData * ud = UserData::get( L , n );
-
-    if ( ! ud )
-    {
-        return NULL;
-    }
-
-    GObject * obj = ud->get_master();
-
-    return CLUTTER_IS_CONSTRAINT( obj ) ? CLUTTER_CONSTRAINT( obj ) : NULL;
+    return CLUTTER_IS_CONSTRAINT( result ) ? result : 0;
 }
 
 //.............................................................................
