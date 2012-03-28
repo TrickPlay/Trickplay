@@ -241,6 +241,9 @@ class TrickplayDeviceManager(QWidget):
 		
 		while True:
 			# Read one line
+			if not self.trickplay.canReadLine():
+			    break
+			# Read one line
 			s = self.trickplay.readLine()
 			# If the line is null, it means there is nothing more
 			# to read during this iteration
