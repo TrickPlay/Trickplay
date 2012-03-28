@@ -2,7 +2,7 @@ OVERRIDEMETATABLE = true
 
 function override_property( object , name , getter , setter )
     assert( type( object ) == "userdata" )
-    assert( type( name ) == "string" )
+    assert( type( name )   == "string"   )
     assert( getter == nil or type( getter ) == "function" )
     assert( setter == nil or type( setter ) == "function" )
     
@@ -27,17 +27,15 @@ end
 
 function override_function( object , name , newf )
     assert( type( object ) == "userdata" )
-    assert( type( name ) == "string" )
-    assert( type( newf ) == "function" )
+    assert( type( name )   == "string"   )
+    assert( type( newf )   == "function" )
     
     local mt = getmetatable( object )
     
     local oldf = mt[ name ]
     
-    mt[ name ] =
-        function( ... )
-            return newf( oldf , ... )
-        end
+    mt[ name ] =  function( ... )   return newf( oldf , ... )   end
+    
 end
 
 

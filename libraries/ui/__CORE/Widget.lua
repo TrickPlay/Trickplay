@@ -1,6 +1,5 @@
 WIDGET = true
 
-
 Widget = function(parameters)
     
 	parameters = is_table_or_nil("Widget",parameters)
@@ -58,13 +57,49 @@ Widget = function(parameters)
 	override_property( instance, "height", nil, update_size )
 	override_property( instance, "size",   nil, update_size )
 	override_property( instance, "on_size_changed",
-        function()     return on_size_changed  end,
+        function()     return on_size_changed      end,
         function(oldf,self,v) on_size_changed  = v end
     )
-	override_function( instance, "is_size_set",function() return size_is_set end)
+	override_function( instance, "is_size_set",    function() return size_is_set  end)
 	override_function( instance, "reset_size_flag",function() size_is_set = false end)
 	
 	
+    ----------------------------------------------------------------------------
+    
+    local to_json__overridden
+    
+    local to_json = function(_,t)
+        
+        t = is_table_or_nil("Widget.to_json",t)
+        t = to_json__overridden and to_json__overridden(_,t) or t
+        
+        t.w       = instance.w
+        t.h       = instance.h
+        t.style   = instance.style.name
+        t.focused = instance.focused
+        
+        return json:stringify(t)
+    end
+	
+	override_property(instance,"to_json",
+		function() return to_json end,
+		function(oldf,self,v) to_json__overridden = v end
+	)
+	
+	override_function(instance,"from_json", function(old_function,self,j)
+		
+        if type(j) ~= "string" then
+        end
+        
+        j = json:parse(j)
+        
+        if type(j) ~= "table" then
+        end
+        
+		self:set(j)
+		
+	end)
+    
     ----------------------------------------------------------------------------
     
     local on_focus_in, on_focus_out
