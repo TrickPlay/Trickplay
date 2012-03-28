@@ -104,8 +104,7 @@ Button = function(parameters)
 					keys   = {  {label, "color",label_colors.focus},  },
 				},
 				{
-					source = "*",
-					target = "ACTIVATION",
+					source = "*",  target = "ACTIVATION",
 					keys   = {  {label, "color",label_colors.activation},  },
 				},
 			}
@@ -235,11 +234,8 @@ Button = function(parameters)
 	)
 	
 	override_property(instance,"label",
-		
-		function(oldf)     return label.text   end,
-		
+		function(oldf)    return label.text     end,
 		function(oldf,self,v)    label.text = v end
-		
 	)
 	
 	override_property(instance,"type",   function() return "BUTTON" end )
@@ -248,11 +244,7 @@ Button = function(parameters)
 	
 	override_function(instance,"set", function(old_function, ... )
 		
-		from_set = true
-		
-		old_function(...)
-		
-		from_set = false
+		from_set = true    old_function(...)     from_set = false
 		
 		if flag_for_redraw then make_canvases() end
 		
@@ -261,7 +253,8 @@ Button = function(parameters)
 	----------------------------------------------------------------------------
 	--state changes for focus
 	
-    local on_focus_in, on_focus_out
+    local on_focus_in  = parameters.on_focus_in
+	local on_focus_out = parameters.on_focus_out
 	
 	function instance:on_focus_in()
 		
@@ -291,8 +284,9 @@ Button = function(parameters)
 	----------------------------------------------------------------------------
 	-- events/functions pertaining to the button being pressed
 	
-    local on_pressed, on_released
-	local pressed = false
+    local on_pressed  = parameters.on_pressed
+	local on_released = parameters.on_released
+	local pressed     = false
 	
 	override_function(instance,"click", function(old_function,self)
 		
@@ -336,6 +330,52 @@ Button = function(parameters)
 	override_property(instance,"on_pressed",   function() return on_pressed   end, function(oldf,self,v) on_pressed   = v end )
     override_property(instance,"on_released",  function() return on_released  end, function(oldf,self,v) on_released  = v end )
 	
+    ----------------------------------------------------------------------------
+    
+    local widget_to_json
+    
+	instance.to_json = function(_,t)
+		
+		t.label = instance.label
+		
+		if not canvas then
+			
+			t.images = {}
+			
+			for state, img in pairs(images) do
+				
+				while img.source do img = img.source end
+				
+				if img.src and img.src ~= "[canvas]" then t.images[state] = img.src end
+			end
+			
+		end
+		
+		return t
+		
+	end
+	
+	widget_to_json = instance.to_json
+	
+    ----------------------------------------------------------------------------
+	
+    local to_json__overridden
+	
+    local to_json = function(_,t)
+        
+        t = is_table_or_nil("Button.to_json",t)
+        t = to_json__overridden and to_json__overridden(_,t) or t
+        
+        --t = widget_to_json(_,t)
+        
+        return widget_to_json(_,t)
+    end
+	
+	override_property(instance,"to_json",
+		function() return to_json end,
+		function(oldf,self,v) to_json__overridden = v end
+	)
+    
 	----------------------------------------------------------------------------
 	--Widget/Style Event Callbacks, to notify if properties change
 	
@@ -394,18 +434,6 @@ Button = function(parameters)
 	--set up the label [using the Widget.style.text.on_changed callback]
 	update_label()
 	define_label_animation()
-	
-	--[[
-	if parameters.images ~= nil then
-		
-		if parameters.w then instance.w = parameters.w end
-		if parameters.h then instance.h = parameters.h end
-		
-	else
-		instance.w = parameters.w or default_parameters.w
-		instance.h = parameters.h or default_parameters.h
-	end
-	--]]
 	
 	-- if no images, the instance.images is set to nil, causing the canvases to be drawn
 	instance.images = parameters.images 
