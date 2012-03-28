@@ -371,6 +371,8 @@ protected:
 		{
 			tplog2( "STOPPING HTTP SERVER" );
 
+			server->unregister_handler( "/debugger" );
+
 			server->quit();
 
 			delete server;

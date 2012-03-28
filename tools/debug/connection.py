@@ -12,6 +12,7 @@ DGB_CMD_LOCALS		= "l"
 DBG_CMD_WHERE		= "w"
 DBG_CMD_BACKTRACE	= "bt"
 DBG_CMD_BREAKPOINT  = "b"
+DBG_CMD_BB          = "bb"
 DBG_CMD_APP_INFO	= "a"
 DBG_CMD_DELETE		= "d"
 DBG_CMD_FETCH_FILE	= "f"
@@ -170,39 +171,6 @@ def sendTrickplayDebugCommand(db_port, cmd, start=False):
         print("Error >> Trickplay Application unavailable.")
         print(e)
         return False
- 
-
-
-def getTrickplayDebug():
-    """
-    Get Trickplay UI tree data for the inspector
-    """
-
-    s = CON.get()
-    print s
-    r = urllib2.Request("http://" + s + "/debug/start")
-    f = None
-    
-    try:
-        print("YUGI222")
-        f = urllib2.urlopen(r, None, 2)
-        k = f.read()
-        print(k+"********************")
-        return decode(k)
-    
-    # Connection refused
-    except urllib2.URLError, e:
-        print("[VDBG] getTrickplayDebug : Connection to Trickplay application unsuccessful.")
-        print(e)
-    except httplib.BadStatusLine, e:
-        print("[VDBG] getTrickplayDebug : Trickplay application closed before data could be retreived.")
-        print(e)
-    
-    except httplib.InvalidURL, e:
-        print('[VDBG] getTrickplayDebug : Couldn\'t find a Trickplay device.')
-        print(e)
-        
-    return None
 
 def decode(input):
     

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Replace.ui'
 #
-# Created: Wed Feb 29 15:44:19 2012
+# Created: Mon Mar 12 09:52:43 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -51,7 +51,7 @@ class Ui_replaceDialog(object):
         self.checkBox_case.setObjectName(_fromUtf8("checkBox_case"))
         self.verticalLayout_3.addWidget(self.checkBox_case)
         self.checkBox_word = QtGui.QCheckBox(self.verticalLayoutWidget_3)
-        self.checkBox_word.setChecked(True)
+        self.checkBox_word.setChecked(False)
         self.checkBox_word.setObjectName(_fromUtf8("checkBox_word"))
         self.verticalLayout_3.addWidget(self.checkBox_word)
         self.checkBox_wrap = QtGui.QCheckBox(self.verticalLayoutWidget_3)

@@ -535,6 +535,8 @@ Util::Buffer AppResource::load_contents( App * app ) const
 
 		g_file_load_contents( file , 0 , & contents , & length , 0 , & error );
 
+		g_object_unref( file );
+
 		if ( error )
 		{
 			tpwarn( "FAILED TO READ CONTENTS OF '%s' : %s" , original.c_str() , error->message );
