@@ -291,7 +291,7 @@ b3 = Button{x = 100,y = 400, label = "new_label",style = style, h = 100}
 b3.w = 400
 --------------------------------------------------------------------------------
 b4 = Button{
-    x = 600,y = 200,
+    x = 200,y = 600,
     images = {
         default = "Button/button3.png",
         focus   = "Button/button-focus.png"
