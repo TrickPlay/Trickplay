@@ -14,7 +14,8 @@ end
 function matches_nil_table_or_type(constructor,req_type,input)
     
     return input == nil and constructor() or
-        type(input) == "table" and (input.type == req_type and input or constructor(input)) or
+        type(input) == "string" and constructor(input) or
+        type(input) == "table"  and (input.type == req_type and input or constructor(input)) or
         error("input did not match nil, table, or "..req_type,2)
     
 end
