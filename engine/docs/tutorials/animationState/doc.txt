@@ -1,0 +1,47 @@
+
+Title: AnimationState Sample Application
+
+The AnimationState example program demonstrates a typical use of the TrickPlay SDK library's <AnimationState> class.
+
+The complete sample application, including source code and graphic assets, can be <downloaded here at http://www.trickplay.com/tutorials/animationState.zip>.
+
+(see AnimationStateDemo.png)
+
+Group: General Program Structure
+
+The sample application uses an AnimationState object to animate multiple objects and properties. Animations are organized into "state transitions" where the transition from one state to another causes an animation to run that hides the current image and displays another. By pressing keys, the user can change from one state to another and perform the animation associated with the state transition.
+
+To start, the displayMainScreen() function loads and displays a full-screen background image.
+
+Then the initBoxes() function loads the three Images that the user may cycle through. The anchor point for each Image is initialized to its horizontal center. It is from this horizontal center that the Image will be rotated when it is hidden or displayed. Upon program start-up, only the Middle Image is visible; the Left and Right Images are hidden. To hide an Image, its opacity property is set to 0 and it is rotated 90 degrees along the Y-axis so that it is perpendicular to the viewer. After initializing an Image, it is added to the screen global variable.
+
+Each Image also has a shadow Image associated with it. Each shadow's anchor point is set to the image's center. This is necessary because the shadows will be scaled along their X- or Y-axis, and we want the scaling to occur toward or from the center, depending upon whether it is being scaled down to nothing or back up to its original size. For hidden objects, the opacity is set to 0, and either its X- or Y-axis scaling factor is set to 0. After the shadow Image is initialized, it is added to the screen global variable.
+
+Group: Defining the Animation States
+
+The initAnimationStates() function defines the animations to run when transitioning from one state to another. Four transitions are defined to cover each possible movement between the three images: Left-to-Middle, Middle-to-Right, Right-to-Middle and Middle-to-Left. The animation for transitioning from Left-to-Middle is defined below.
+
+	(code)
+	transitions = {
+		{ -- Move from Left to Middle
+	      source = "Left",
+	      target = "Middle",
+	      keys   = { { gLeftBox,      "y_rotation", 90 },                          -- rotate so image is perpendicular to viewer
+	                 { gLeftBox,      "opacity", "EASE_IN_QUINT", 0, 0.0, 0.25 },  -- fade out image (runs faster than other keys)
+	                 { gLeftShadow,   "opacity", "EASE_IN_QUINT", 0, 0.0, 0.25 },  -- fade out shadow (runs faster than other keys)
+	                 { gLeftShadow,   "scale", { 1, 0 } },                         -- scale shadow down Y-axis until it is nothing
+	                 { gMiddleBox,    "y_rotation", 0 },                           -- rotate so image is facing the viewer
+	                 { gMiddleBox,    "opacity", "EASE_IN_QUAD", 255 },            -- fade in image
+	                 { gMiddleShadow, "opacity", "EASE_IN_QUAD", 255 },            -- fade in shadow
+	                 { gMiddleShadow, "scale", { 1, 1 } },                         -- scale shadow back to full size
+	               },
+	      },
+	}
+	(end)
+
+During each transition, one image/shadow pair is hidden, while another is shown. To show or hide an image or shadow, its opacity is animated so the image fades in or out. For an improved visual effect, the animation of fading images is performed slightly faster than the other animations by specifying a PostDelay value. In addition, the image being hidden is rotated until it is perpendicular to the viewer, giving the impression of closing. Conversely, the "opening" image is rotated until it is facing the viewer. Finally, the shadow of the hidden image is gradually scaled down until it is nothing, while the other shadow scales back up to its original size. Each of these animated properties is defined in a single entry in the keys table, as shown in the transition definition listed above.
+
+After defining the AnimationState object, its beginning state ("Middle") is initialized by setting its state property.
+
+A state transition occurs when the user presses the Left-Arrow or Right-Arrow key. Keystrokes are processed by the openBoxLeft() and openBoxRight() functions. Depending on the current state and the key pressed, a new state may be entered, causing the associated transition animation to run.
+
