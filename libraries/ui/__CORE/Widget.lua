@@ -66,6 +66,13 @@ Widget = function(parameters)
 	
     ----------------------------------------------------------------------------
     
+    local on_style_changed
+    override_property( instance, "on_style_changed",
+        function()     return on_style_changed      end,
+        function(oldf,self,v) on_style_changed  = v end
+    )
+    ----------------------------------------------------------------------------
+    
     local to_json__overridden
     
     local to_json = function(_,t)
@@ -133,6 +140,7 @@ Widget = function(parameters)
 		function()   return style    end,
 		function(oldf,self,v) 
             style = matches_nil_table_or_type(Style, "STYLE", v)
+            if on_style_changed then on_style_changed() end
         end
 	)
     
