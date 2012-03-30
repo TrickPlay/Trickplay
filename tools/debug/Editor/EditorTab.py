@@ -98,6 +98,8 @@ class EditorTabWidget(QTabWidget):
             return 
 
         if len(self.main.fontSettingCheck) > 0 :
+            if self.main.fontSettingCheck.has_key(index) == False :
+                return
             if self.main.fontSettingCheck[index] == True :
                 self.main.fontSettingCheck[index] == False
                 self.textBefores[index] = self.editors[index].text()
