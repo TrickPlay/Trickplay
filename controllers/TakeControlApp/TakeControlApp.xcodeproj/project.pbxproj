@@ -16,6 +16,7 @@
 		446C2153143F7823007A2FE9 /* iOS-logo-57x57.png in Resources */ = {isa = PBXBuildFile; fileRef = 446C2151143F7823007A2FE9 /* iOS-logo-57x57.png */; };
 		446C2154143F7823007A2FE9 /* iOS-logo-114x114.png in Resources */ = {isa = PBXBuildFile; fileRef = 446C2152143F7823007A2FE9 /* iOS-logo-114x114.png */; };
 		446C2157143F782D007A2FE9 /* iOS-logo-72x72.png in Resources */ = {isa = PBXBuildFile; fileRef = 446C2156143F782D007A2FE9 /* iOS-logo-72x72.png */; };
+		4476FE0015212E8900B6CB4A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4476FDFF15212E8900B6CB4A /* libz.dylib */; };
 		44B48F821457335F00C14A7D /* libTestFlight.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 44B48F801457335F00C14A7D /* libTestFlight.a */; };
 		CD2D3149145B84A2009DA3D7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD2D3148145B84A2009DA3D7 /* AVFoundation.framework */; };
 		CD4B2E96143A748A0073BB88 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E95143A748A0073BB88 /* UIKit.framework */; };
@@ -47,6 +48,7 @@
 		446C2151143F7823007A2FE9 /* iOS-logo-57x57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-57x57.png"; path = "Icons/iOS-logo-57x57.png"; sourceTree = "<group>"; };
 		446C2152143F7823007A2FE9 /* iOS-logo-114x114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-114x114.png"; path = "Icons/iOS-logo-114x114.png"; sourceTree = "<group>"; };
 		446C2156143F782D007A2FE9 /* iOS-logo-72x72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "iOS-logo-72x72.png"; path = "Icons/iOS-logo-72x72.png"; sourceTree = "<group>"; };
+		4476FDFF15212E8900B6CB4A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		44B48F801457335F00C14A7D /* libTestFlight.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libTestFlight.a; path = TestFlight/libTestFlight.a; sourceTree = SOURCE_ROOT; };
 		44B48F811457335F00C14A7D /* TestFlight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestFlight.h; path = TestFlight/TestFlight.h; sourceTree = SOURCE_ROOT; };
 		CD2D3148145B84A2009DA3D7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -78,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4476FE0015212E8900B6CB4A /* libz.dylib in Frameworks */,
 				CD2D3149145B84A2009DA3D7 /* AVFoundation.framework in Frameworks */,
 				CD4B2F2B143A76B30073BB88 /* MobileCoreServices.framework in Frameworks */,
 				CD4B2F2C143A76B30073BB88 /* MediaPlayer.framework in Frameworks */,
@@ -119,6 +122,7 @@
 		CD4B2E86143A74890073BB88 = {
 			isa = PBXGroup;
 			children = (
+				4476FDFF15212E8900B6CB4A /* libz.dylib */,
 				CD4B2E9B143A748A0073BB88 /* TakeControlApp */,
 				CD4B2E94143A748A0073BB88 /* Frameworks */,
 				CD4B2E92143A748A0073BB88 /* Products */,

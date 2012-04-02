@@ -404,25 +404,6 @@ void UserData::finalize( lua_State * L , int index )
 
 //.............................................................................
 
-/*
-
-    If the functions reference the user data, they won't be collected. This is
-    a known problem that is solved by Ephemerons in 5.2.
-
-    http://www.inf.puc-rio.br/~roberto/docs/ry08-06.pdf
-
-
-    callbacks_ref ( strong ) =
-    {
-        user data (weak) =
-        {
-            callback name 1 = function ,
-            callback name 2 = function
-        }
-    }
-
-*/
-
 int UserData::set_callback( const char * name , lua_State * L , int index , int function_index )
 {
     LSG;
@@ -431,9 +412,14 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 
     int fn = abs_index( L , function_index );
 
-    void * p = lua_touserdata( L , me );
 
     lua_getfenv( L , me );
+
+    // To ensure that this instance has a unique environment table, we
+    // check to see if it contains a key for its pointer. If it doesn't
+    // we create a new env table for it.
+
+    void * p = lua_touserdata( L , me );
 
     lua_pushlightuserdata( L , p );
     lua_rawget( L , -2 );
