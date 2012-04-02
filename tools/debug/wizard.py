@@ -43,7 +43,15 @@ class Wizard():
             if os.path.exists(dir) and os.path.isdir(dir):
                 files = os.listdir(dir)
                 if len(files) <= 0:
-                    return self.createAppDialog(dir)
+                    #return self.createAppDialog(dir)
+                    msg = QMessageBox()
+                    msg.setText('Directory "' + os.path.basename(str(path)) +
+                    '" does not contain an "app" file and a "main.lua" file.')
+                    #msg.setInformativeText('If you pick an empty directory, you will be '
+                    #                       'prompted to create a new app there.');
+                    msg.setWindowTitle("Error")
+                    msg.exec_()
+                    return -1
                 else:
                     if 'app' in files and 'main.lua' in files:
                         return dir
@@ -58,7 +66,7 @@ class Wizard():
 	    # Get a path from the user
         if openApp == False and newApp == True:
             
-            userPath = self.createAppDialog(dir)
+            userPath = self.createAppDialog()
             if userPath:
                 print('Path chosen: ' + str(userPath))
             else:    
@@ -71,7 +79,7 @@ class Wizard():
                     
                     # If the directory is empty, start the app creator
                     if len(files) <= 0:
-                        return self.createAppDialog(userPath)
+                        return self.createAppDialog()
                         
                     if 'app' in files and 'main.lua' in files:
                         #return self.start(path, True, False)
@@ -91,7 +99,15 @@ class Wizard():
             if os.path.exists(path) and os.path.isdir(path):
                 files = os.listdir(path)
                 if len(files) <= 0:
-                    return self.createAppDialog(path)
+                    msg = QMessageBox()
+                    msg.setText('Directory "' + os.path.basename(str(path)) +
+                    '" does not contain an "app" file and a "main.lua" file.')
+                    #msg.setInformativeText('If you pick an empty directory, you will be '
+                    #                       'prompted to create a new app there.');
+                    msg.setWindowTitle("Error")
+                    msg.exec_()
+                    return -1
+                    #return self.createAppDialog(path)
                 else:
                     if 'app' in files and 'main.lua' in files:
                         return path
@@ -124,6 +140,7 @@ class Wizard():
     def scan(self, path):
         """
         Scan the path given:
+        If invalid app dir, return -4
         If invalid app file, return -3
         If user cancels the dialog, return -2
         If non-empty with no app and main.lua, return -1
@@ -132,8 +149,12 @@ class Wizard():
         """
         
         if os.path.isdir(path):
-            
-            files = os.listdir(path)
+
+            try:
+                files = os.listdir(path)
+            except:
+                return -4
+
             
             # If the directory is empty, allow the user to change id and name
             if len(files) <= 0:
@@ -215,6 +236,11 @@ class Wizard():
             self.ui.id.setReadOnly(False)
             self.ui.name.setReadOnly(False)
             self.new = True
+        elif result == -4:
+            msg = QMessageBox()
+            msg.setText('\'' + os.path.basename(str(path)) + '\' is not a valid directory. Please select another empty directory to create a new app.')
+            msg.setWindowTitle("Warning")
+            msg.exec_()
         else:
             msg = QMessageBox()
             msg.setText('\'' + os.path.basename(str(path)) + '\' is not an empty directory. Please select an empty directory to create a new app.')
@@ -222,15 +248,15 @@ class Wizard():
             msg.exec_()
         return path
         
-    def createAppDialog(self, path):
+    def createAppDialog(self, path=None):
         """
         New app dialog
         """
-                
         self.dialog = QDialog()
         self.ui = Ui_newApplicationDialog()
         self.ui.setupUi(self.dialog)
-        #self.ui.directory.setText(path)
+        if path is not None :
+            self.ui.directory.setText(path)
         
         #self.adjustDialog(path)
         cancelButton = self.ui.buttonBox.button(QDialogButtonBox.Cancel)
@@ -263,7 +289,7 @@ class Wizard():
             else:
                 return path
         else:
-            return path
+            return 
 
 
         # If the path is a directory...

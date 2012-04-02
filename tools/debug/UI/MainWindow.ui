@@ -446,9 +446,6 @@
    <property name="font">
     <font/>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+D</string>
-   </property>
   </action>
   <action name="actionSelect_All">
    <property name="text">
