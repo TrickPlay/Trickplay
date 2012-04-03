@@ -1,283 +1,244 @@
+DIALOGBOX = true
 
-
-local round_rectangle = function(c,r)
-    
-    local inset = c.line_width/2
-    
-    c:move_to( inset, inset+r)
-    
-    c:arc(            inset+r,         inset+r, r,180,270)
-    c:line_to( c.w - (inset+r),        inset)
-    
-    c:arc(     c.w - (inset+r),        inset+r, r,270,360)
-    c:line_to( c.w -  inset,    c.h - (inset+r))
-    
-    c:arc(     c.w - (inset+r), c.h - (inset+r), r,0,90)
-    c:line_to(        inset+r,  c.h -  inset)
-    
-    c:arc(            inset+r,  c.h - (inset+r), r,90,180)
-    c:line_to(        inset,           inset+r)
-    
+local function default_bg(self)
+	
+	
+	local c = Canvas(self.w,self.h)
+	
+	c.line_width = self.style.border.width
+	
+	round_rectangle(c,self.style.border.corner_radius)
+	
+	c:set_source_color( self.style.fill_colors.default )     c:fill(true)
+	
+	c:move_to(       c.line_width/2, self.separator_y or 0 )
+	c:line_to( c.w - c.line_width/2, self.separator_y or 0 )
+	
+	c:set_source_color( self.style.border.colors.default )   c:stroke(true)
+	
+	return c:Image()
+	
 end
+
+local default_parameters = {
+	w = 400, h = 300, title = "DialogBox", separator_y = 50, reactive = true
+}
 
 DialogBox = function(parameters)
-	  
-	  
-	  
+	
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("DialogBox",parameters)
+	
+	--flags
+	local canvas          = type(parameters.images) == "nil"
+	local flag_for_redraw = false --ensure at most one canvas redraw from Button:set()
+	local from_set        = false --indicates that an attribute is being set in Button:set()
+	local size_is_set = -- an ugly flag that is used to determine if the user set the Button size themselves yet
+		parameters.h or
+		parameters.w or
+		parameters.height or
+		parameters.width or
+		parameters.size
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+	----------------------------------------------------------------------------
+	--The Button Object inherits from Widget
+	
+	local instance = Widget( parameters )
+	
+	local title = Text()
+	
+	local bg
+	
+	----------------------------------------------------------------------------
+	-- private helper functions for common actions
+	
+	local function resize_images()
+		
+		if not size_is_set then return end
+		
+		bg.w = instance.w
+		bg.h = instance.h
+		
+	end
+	
+	local center_title = function()
+		
+		title.w = instance.w
+		title.y = instance.style.text.y_offset + title.h/2
+		
+	end
+	
+	----------------------------------------------------------------------------
+	
+	local function make_canvas()
+		
+		if from_set then
+			
+			flag_for_redraw = true
+			
+			return
+			
+		end
+		
+		flag_for_redraw = false
+		
+		canvas = true
+		
+		bg = default_bg(instance)
+		
+		instance:add( bg )
+		
+		bg:lower_to_bottom()
+		
+		return true
+		
+	end
+	
+	local function setup_image(v)
+		
+		canvas = false
+		
+		bg = v
+		
+		instance:add( bg )
+		
+		bg:lower_to_bottom()
+		
+		if instance.is_size_set() then
+			
+			resize_image()
+			
+		else
+			--so that the label centers properly
+			instance.size = images.default.size
+			
+			instance:reset_size_flag()
+			
+			center_title()
+			
+		end
+		
+		return true
+		
+	end
+	
+	----------------------------------------------------------------------------
+	--functions pertaining to getting and setting of attributes
+	
+	override_property(instance,"image",
+		
+		function(oldf)    return bg   end,
+		
+		function(oldf,self,v)
+			
+			if bg then bg:unparent() end
+			
+			return v == nil and make_canvas() or
+				
+				type(v) == "userdata" and setup_image(v) or
+				
+				error("Button.images expected type 'table'. Received "..type(v),2)
+			
+		end
+	)
+	
+	override_property(instance,"title",
+		function(oldf) return title.text     end,
+		function(oldf,self,v) title.text = v end
+	)
+	
+	local separator_y = parameters.separator_y
+	
+	override_property(instance,"separator_y",
+		function(oldf) return separator_y     end,
+		function(oldf,self,v)
+			
+			separator_y = v
+			
+			return canvas and make_canvas()
+		end
+	)
+	
+	override_property(instance,"content",
+		function(oldf) return content     end,
+		function(oldf,self,v)
+			
+			instance:clear()
+			
+			instance:add(bg)
+			
+			if type(v) == "table" then
+				
+				instance:add(unpack(content))
+				
+			elseif type(v) == "userdata" then
+				
+				instance:add(content)
+				
+			end
+			
+			instance:add(label)
+			
+		end
+	)
+	
+	override_function(instance,"set", function(old_function, ... )
+		
+		from_set = true    old_function(...)     from_set = false
+		
+		if flag_for_redraw then make_canvas() end
+		
+	end)
+	
+	
+	function instance:on_size_changed()
+		
+		if canvas then    make_canvas()    else    resize_images()   end
+		
+		center_title()
+		
+	end
+	
+	local text_style
+	local update_title  = function()
+		
+		text_style = instance.style.text
+		
+		title:set(   text_style:get_table()   )
+		
+		title.anchor_point = {0,title.h/2}
+		title.x            = text_style.x_offset
+		title.y            = text_style.y_offset + title.h/2
+		title.w            = instance.w
+		
+	end
+	
+	local canvas_callback = function() if canvas then make_canvas() end end
+	
+	function instance:on_style_changed()
+		
+		instance.style.text:on_changed(instance,update_title)
+		
+		instance.style.fill_colors:on_changed(    instance, canvas_callback )
+		instance.style.border:on_changed(         instance, canvas_callback )
+		instance.style.border.colors:on_changed(  instance, canvas_callback )
+		
+		update_title()
+		canvas_callback()
+	end
+	
+	instance:on_style_changed()
+	
+	
+	
+	
+	instance:add(title)
+	
+	instance:set(parameters)
+	
+	return instance
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---[[
-Function: dialogBox
-
-Creates a Dialog box ui element
-
-Arguments:
-	Table of Dialog box properties
-
-	skin - Modify the skin used for the dialog box by changing this value
-    bwidth  - Width of the dialog box 
-    bheight - Height of the dialog box
-    label - Title in the dialog box
-    fill_color - Background color of the dialog box
-    border_color - Border color of the dialog box
-    title_color - Color of the dialog box text 
-    title_font - Font of the text in the dialog box
-    border_width - Border width of the dialog box  
-    border_corner_radius - The radius of the border of the dialog box
-	title_separator_thickness - Thickness of the title separator 
-	title_separator_color - Color of the title separator 
-    padding_x - Padding of the dialog box on the X axis
-    padding_y - Padding of the dialog box on the Y axis
-
-Return:
- 	db_group - group containing the dialog box
-]]
-
---[[
-
--- Dialog Box with josh's canvas image 
-
-function ui_element.dialogBox(t) 
- 
---default parameters
-   local p = {
-	skin = "Custom", 
-	ui_width = 500 ,
-	ui_height = 400 ,
-	label = "Dialog Box Title" ,
-	border_color  = {255,255,255,255}, --"FFFFFFC0" , 
-	fill_color  = {25,25,25,100},
-	title_color = {255,255,255,255} , --"FFFFFF" , 
-	border_width  = 12 ,
-	padding_x = 0 ,
-	padding_y = 0 ,
-	border_corner_radius = 22 ,
-	title_font = "FreeSans Medium 28px" , 
-	title_separator_thickness = 10, 
-	title_separator_color = {100,100,100,100},
-	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
-    }
-
- --overwrite defaults
-    if t ~= nil then 
-        for k, v in pairs (t) do
-	    p[k] = v 
-        end 
-    end 
-
- --the umbrella Group
-    local db_group_cur_y = 6
-
-    local  db_group = Group {
-    	  name = "dialogBox",  
-    	  position = {200, 200, 0}, 
-          reactive = true, 
-          extra = {type = "DialogBox"} 
-    }
-
-
-    local create_dialogBox  = function ()
-
-    	local d_box, title_separator, title, d_box_img, title_separator_img
-   
-    	db_group:clear()
-    	db_group.size = { p.ui_width , p.ui_height }
-
-		if p.skin == "Custom" then 
-			local key = string.format("dBG:%d,%d,%d,%s", p.ui_width, p.ui_height, p.border_width, color_to_string(p.title_separator_color))
-
-			d_box = assets(key, my_draw_dialogBG, p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
-			d_box.y = d_box.y 
-			d_box:set{name="d_box"} 
-
-    		title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-    		title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
-			db_group:add(d_box,title)
-		else 
-        	d_box_img = assets(skin_list[p.skin]["dialogbox"])
-        	d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
-			db_group:add(d_box_img, title)
-		end
-
-		if p.content then 
-	     	db_group:add(p.content)
-		end 
-
-     end 
-
-     create_dialogBox ()
-
-     mt = {}
-     mt.__newindex = function (t, k, v)
-	 	if k == "bsize" then  
-	    	p.ui_width = v[1] 
-	    	p.ui_height = v[2]  
-        else 
-           p[k] = v
-        end
-		if k ~= "selected" then 
-        	create_dialogBox()
-		end
-     end 
-
-     mt.__index = function (t,k)
-	if k == "bsize" then 
-	    return {p.ui_width, p.ui_height}  
-        else 
-	    return p[k]
-        end 
-     end 
-
-     setmetatable (db_group.extra, mt) 
-     return db_group
-end 
-]]
-
-function ui_element.dialogBox(t) 
- 
---default parameters
-   local p = {
-	skin = "Custom", 
-	ui_width = 500 ,
-	ui_height = 400 ,
-	label = "Dialog Box Title" ,
-	border_color  = {255,255,255,100}, --"FFFFFFC0" , 
-	fill_color  = {255,255,255,100},
-	title_color = {255,255,255,180} , --"FFFFFF" , 
-	title_font = "FreeSans Medium 28px" , 
-	border_width  = 4 ,
-	padding_x = 0 ,
-	padding_y = 0 ,
-	border_corner_radius = 22 ,
-	title_separator_thickness = 4, 
-	title_separator_color = {255,255,255,100},
-	content = Group{}--children = {Rectangle{size={20,20},position= {100,100,0}, color = {255,255,255,255}}}},
-    }
-
- --overwrite defaults
-    if t~= nil then 
-        for k, v in pairs (t) do
-	    p[k] = v 
-        end 
-    end 
-
- --the umbrella Group
-    local db_group_cur_y = 6
-
-    local  db_group = Group {
-    	  name = "dialogBox",  
-    	  position = {200, 200, 0}, 
-          reactive = true, 
-          extra = {type = "DialogBox"} 
-    }
-
-
-    local create_dialogBox  = function ()
-   
-    	local d_box, title_separator, title, d_box_img, title_separator_img, key
-
-        db_group:clear()
-        db_group.size = { p.ui_width , p.ui_height - 34}
-
-		if p.skin == "Custom" then 
-			key = string.format("dialogBox:%d:%d:%d:%s:%s:%d:%d:%d:%d:%s", p.ui_width, p.ui_height, p.border_width, color_to_string(p.border_color), color_to_string( p.fill_color ), p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, color_to_string( p.title_separator_color))
-
-        	d_box = assets(key, my_make_dialogBox_bg, p.ui_width, p.ui_height, p.border_width, p.border_color, p.fill_color, p.padding_x, p.padding_y, p.border_corner_radius, p.title_separator_thickness, p.title_separator_color) 
-
-			d_box.y = d_box.y - 34
-			d_box:set{name="d_box"} 
-			db_group:add(d_box)
-		else 
-        	--d_box_img = assets(skin_list[p.skin]["dialogbox"])
-        	--d_box_img:set{name="d_box_img", size = { p.ui_width , p.ui_height } , opacity = 0}
-			--db_group:add(d_box_img)
-
-			p.title_font = "FreeSans Medium 24px"  
-			p.title_separator_thickness = 10
-			p.title_separator_color = {100,100,100,100}
-
-			local key = string.format("dBG:%d,%d,%d,%s", p.ui_width, p.ui_height, p.border_width, color_to_string(p.title_separator_color))
-
-			d_box = assets(key, my_draw_dialogBG, p.ui_width, p.ui_height, p.border_width, p.title_separator_color)
-			d_box.y = d_box.y 
-			d_box:set{name="d_box"} 
-
-    		title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-    		title:set{name = "title", position = {(p.ui_width - title.w - 50)/2 , db_group_cur_y - 5}}
-			db_group:add(d_box)
-
-			db_group.w = d_box.w
-			db_group.h = d_box.h
-
-		end
-        title= Text{text = p.label, font= p.title_font, color = p.title_color}     
-        title:set{name = "title", position = {(p.ui_width - title.w )/2 , db_group_cur_y }}
-		db_group:add(title)
-
-		if p.content then 
-	     	db_group:add(p.content)
-		end 
-     end 
-
-     create_dialogBox ()
-
-     mt = {}
-     mt.__newindex = function (t, k, v)
-	 	if k == "bsize" then  
-	    	p.ui_width = v[1] 
-	    	p.ui_height = v[2]  
-        else 
-           p[k] = v
-        end
-		if k ~= "selected" then 
-        	create_dialogBox()
-		end
-     end 
-
-     mt.__index = function (t,k)
-	if k == "bsize" then 
-	    return {p.ui_width, p.ui_height}  
-        else 
-	    return p[k]
-        end 
-     end 
-
-     setmetatable (db_group.extra, mt) 
-     return db_group
-end 

@@ -1,5 +1,12 @@
 WIDGET = true
 
+local uielement_properties = {
+	"x","y","z","w","h","anchor_point","name","gid",
+	"x_rotation","y_rotation","z_rotation","scale",
+	"opacity","clip",""
+}
+
+
 Widget = function(parameters)
     
 	parameters = is_table_or_nil("Widget",parameters)
@@ -14,6 +21,136 @@ Widget = function(parameters)
     dupmetatable(instance)
     
     
+    ----------------------------------------------------------------------------
+	local subscriptions     = {}
+	local subscriptions_all = {}
+	
+	local add_subscription = function(subscription,callback)
+		
+		if not subscriptions[subscription] then
+			
+			subscriptions[subscription] = {}
+			
+		end
+		
+		subscriptions[subscription][callback] = callback
+		
+	end
+	
+	override_function(instance,"unsubscribe",
+		function(old_function,self,subscription,callback)
+			
+			if type(callback) ~= "function" then
+				
+				error(
+					"Widget:unsubscribe() expects a function as the second"..
+					" parameter. Received "..type(callback),2
+				)
+				
+			end
+			
+			if type(subscription) == "nil" then
+				
+				subscriptions_all[subscription][callback] = nil
+				
+			elseif type(subscription) == "table" then
+				
+				for _,key in ipairs(subscription) do
+					
+					subscriptions[subscription][callback] = nil
+					
+				end
+				
+			elseif type(subscription) == "string" then
+				
+				subscriptions[subscription][callback] = nil
+				
+			else
+				
+				error(
+					"Widget:subscribe_to() expects a string, a table of strings,"..
+					" or nil as its first parameter. Received "..type(subscription),2
+				)
+				
+			end
+			
+		end
+	)
+	override_function(instance,"subscribe_to",
+		function(old_function,self,subscription,callback)
+			
+			if type(callback) ~= "function" then
+				
+				error(
+					"Widget:subscribe_to() expects a function as the second"..
+					" parameter. Received "..type(callback),2
+				)
+				
+			end
+			
+			if type(subscription) == "nil" then
+				
+				subscriptions_all[callback] = callback
+				
+			elseif type(subscription) == "table" then
+				
+				for _,key in ipairs(subscription) do
+					
+					add_subscription(key,callback)
+					
+				end
+				
+			elseif type(subscription) == "string" then
+				
+				add_subscription(subscription,callback)
+				
+				
+			else
+				
+				error(
+					"Widget:subscribe_to() expects a string, a table of strings,"..
+					" or nil as its first parameter. Received "..type(subscription),2
+				)
+				
+			end
+			
+		end
+	)
+	local instance_mt = getmetatable(instance)
+	local old__newindex = instance_mt.__newindex
+    function instance_mt:__newindex(key,value)
+		
+		old__newindex(self,key,value)
+		
+		if subscriptions[key] then
+			
+			for _,f in pairs(subscriptions[key]) do f(key) end
+		end
+		for _,f in pairs(subscriptions_all ) do f(key) end
+		
+	end
+	
+	
+	override_function(instance,"set", function(old_function, obj, t )
+		
+		old_function(obj, t)
+		
+		local p = {}
+		
+		for key,_ in pairs(t) do
+			if subscriptions[key] then
+				
+				for _,f in pairs(subscriptions[key]) do f(key) end
+				
+			end
+			table.insert(p,key)
+		end
+		--functionality of widgets relies on subscriptions_all happening after
+		--subscriptions
+		for _,f in pairs(subscriptions_all ) do f(p) end
+		
+	end)
+	
     ----------------------------------------------------------------------------
     local key_functions = {}
     
@@ -35,42 +172,21 @@ Widget = function(parameters)
     
     ----------------------------------------------------------------------------
     
-    local on_size_changed
     local size_is_set = false
     
-    local update_size = function(oldf,self,v)
-        
-        size_is_set = true
-        
-        oldf(self,v)
-        
-        if self.on_size_changed then
-            
-            self:on_size_changed(size_is_set)
-            
-        end
-    end
-    
-	override_property( instance, "w",      nil, update_size )
-	override_property( instance, "h",      nil, update_size )
-	override_property( instance, "width",  nil, update_size )
-	override_property( instance, "height", nil, update_size )
-	override_property( instance, "size",   nil, update_size )
-	override_property( instance, "on_size_changed",
-        function()     return on_size_changed      end,
-        function(oldf,self,v) on_size_changed  = v end
-    )
+	instance:subscribe_to(
+		{"w","h","width","height","size"},
+		function()
+			
+			size_is_set = true
+			
+		end
+	)
+	
 	override_function( instance, "is_size_set",    function() return size_is_set  end)
 	override_function( instance, "reset_size_flag",function() size_is_set = false end)
 	
 	
-    ----------------------------------------------------------------------------
-    
-    local on_style_changed
-    override_property( instance, "on_style_changed",
-        function()     return on_style_changed      end,
-        function(oldf,self,v) on_style_changed  = v end
-    )
     ----------------------------------------------------------------------------
     
     local to_json__overridden
@@ -80,8 +196,13 @@ Widget = function(parameters)
         t = is_table_or_nil("Widget.to_json",t)
         t = to_json__overridden and to_json__overridden(_,t) or t
         
-        t.w       = instance.w
-        t.h       = instance.h
+		
+		for _,k in pairs(uielement_properties) do
+			
+			t[k] = instance[k]
+			
+		end
+        
         t.style   = instance.style.name
         t.focused = instance.focused
         
@@ -108,6 +229,7 @@ Widget = function(parameters)
 	end)
     
     ----------------------------------------------------------------------------
+	
     
     local on_focus_in, on_focus_out
 	
@@ -140,7 +262,7 @@ Widget = function(parameters)
 		function()   return style    end,
 		function(oldf,self,v) 
             style = matches_nil_table_or_type(Style, "STYLE", v)
-            if on_style_changed then on_style_changed() end
+            
         end
 	)
     
