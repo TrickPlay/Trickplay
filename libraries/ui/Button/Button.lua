@@ -241,7 +241,7 @@ Button = function(parameters)
 	override_property(instance,"type",   function() return "BUTTON" end )
 	override_property(instance,"states", function() return  states  end )
 	
-	
+	--[[
 	override_function(instance,"set", function(old_function, ... )
 		
 		from_set = true    old_function(...)     from_set = false
@@ -249,7 +249,7 @@ Button = function(parameters)
 		if flag_for_redraw then make_canvases() end
 		
 	end)
-	
+	--]]
 	----------------------------------------------------------------------------
 	--state changes for focus
 	
@@ -382,14 +382,31 @@ Button = function(parameters)
 	--sets the function that creates canvases for individual button states
 	override_function(instance,"create_canvas", parameters.create_canvas or create_canvas)
 	
-	function instance:on_size_changed()
-		
-		if canvas then    make_canvases()    else    resize_images()   end
-		
-		center_label()
-		
-	end
-	
+	instance:subscribe_to(
+		{"h","w","width","height","size"},
+		function()
+			
+			flag_for_redraw = true
+			
+			center_label()
+			
+		end
+	)
+	instance:subscribe_to(
+		nil,
+		function()
+			
+			if flag_for_redraw then
+				flag_for_redraw = false
+				if canvas then
+					make_canvases()
+				else
+					resize_images()
+				end
+			end
+			
+		end
+	)
 	local text_style
 	local update_label  = function()
 		
@@ -406,8 +423,7 @@ Button = function(parameters)
 	
 	local canvas_callback = function() if canvas then make_canvases() end end
 	
-	local i = 1
-	function instance:on_style_changed()
+	local function instance_on_style_changed()
 		
 		instance.style.text:on_changed(instance,update_label)
 		
@@ -422,7 +438,12 @@ Button = function(parameters)
 		canvas_callback()
 	end
 	
-	instance:on_style_changed()
+	instance:subscribe_to(
+		"style",
+		instance_on_style_changed
+	)
+	
+	instance_on_style_changed()
 	
 	----------------------------------------------------------------------------
 	--Key events

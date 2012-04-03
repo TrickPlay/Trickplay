@@ -1,3 +1,103 @@
+
+TOASTALERT = 1
+
+ToastAlert = function(parameters)
+	
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("DialogBox",parameters)
+	
+	--flags
+	local canvas          = type(parameters.images) == "nil"
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+	----------------------------------------------------------------------------
+	--The Button Object inherits from Widget
+	
+	local instance = DialogBox( parameters )
+	
+	local message = Text()
+	
+	local icon
+	
+	----------------------------------------------------------------------------
+	--functions pertaining to getting and setting of attributes
+	
+	override_property(instance,"icon",
+		
+		function(oldf)    return icon   end,
+		
+		function(oldf,self,v)
+			
+			if type(v) == "string" then
+				
+				icon = Image{ src = v }
+				
+				if icon == nil then
+					
+					error("ToastAlert.icon recieved string but it was not a valid image uri",2)
+					
+				end
+				
+			elseif type(v) == "userdata" and v.__types__.actor then
+				
+				icon = v
+				
+			else
+				
+				error("ToastAlert.icon expected string uri or UIElement. Received "..type(v),2)
+				
+			end
+			
+			icon.y = instance.separator_y
+			
+		end
+	)
+	override_property(instance,"message_x",
+		
+		function(oldf)    return message.x   end,
+		
+		function(oldf,self,v)
+			
+			message.x = v
+			
+		end
+	)
+	override_property(instance,"message",
+		
+		function(oldf)    return message.text   end,
+		
+		function(oldf,self,v)
+			
+			message.text = v
+			
+		end
+	)
+	
+	function instance:on_size_changed()
+		
+		message.size = instance.size
+		
+	end
+	
+	
+	instance:set(parameters)
+	
+	return instance
+	
+end
+
+
+
+
+
+
+
+
+
+
 --[[
 Function: toastAlert
 
@@ -30,7 +130,7 @@ Return:
 
 Extra Function:
 		popup() - Start the timer of the Toast alert
-]]
+
 
 
 
@@ -175,4 +275,6 @@ function ui_element.toastAlert(t)
      setmetatable (tb_group.extra, mt) 
 
      return tb_group
-end 
+end
+
+--]]
