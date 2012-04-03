@@ -305,7 +305,7 @@ TextStyle = function(parameters)
     end
     
 	parameters = is_table_or_nil("TextStyle",parameters)
-    
+    local colors,name
     local properties = {
         font  = "Sans 40px",
         alignment = "CENTER",
@@ -344,7 +344,7 @@ TextStyle = function(parameters)
     local meta_setters = {
         colors    = function(v) 
             
-            properties.colors = matches_nil_table_or_type(
+            colors = matches_nil_table_or_type(
                 ColorScheme,  "COLORSCHEME",
                 recursive_overwrite(v, default_text_colors)
             )
@@ -356,11 +356,16 @@ TextStyle = function(parameters)
             
             if name ~= nil then all_text_styles[name] = nil end
             
-            properties.name = check_name( all_text_styles, instance, v, "TextStyle" )
+            name = check_name( all_text_styles, instance, v, "TextStyle" )
             
             return true
             
         end,
+    }
+    
+    local meta_getters = {
+        colors = function() return colors end,
+        name   = function() return name   end,
     }
     
     setmetatable(
@@ -376,9 +381,18 @@ TextStyle = function(parameters)
                 if      func_upval then func_upval(v)
                 elseif k ~= "type" then properties[k] = v end
                 
+                update_children(children_using_this_style)
+                
             end,
             
-            __index    = function(t,k)   return properties[k]  end
+            __index    = function(t,k)
+                
+                func_upval = meta_getters[k]
+                
+                if func_upval then return func_upval()
+                else return properties[k] end
+                
+            end
             
         }
     )
@@ -387,7 +401,7 @@ TextStyle = function(parameters)
     instance.name = parameters.name 
     instance:set(parameters)
     
-    properties.color = parameters.color or properties.colors.default
+    properties.color = parameters.color or instance.colors.default
     
     return instance
     

@@ -404,15 +404,26 @@ Button = function(parameters)
 		
 	end
 	
-	instance.style.text:on_changed(instance,update_label)
-	
-	instance.style.text.colors:on_changed(instance,define_label_animation)
-	
 	local canvas_callback = function() if canvas then make_canvases() end end
 	
-	instance.style.fill_colors:on_changed(    instance, canvas_callback )
-	instance.style.border:on_changed(         instance, canvas_callback )
-	instance.style.border.colors:on_changed(  instance, canvas_callback )
+	local i = 1
+	function instance:on_style_changed()
+		
+		instance.style.text:on_changed(instance,update_label)
+		
+		instance.style.text.colors:on_changed(instance,define_label_animation)
+		
+		instance.style.fill_colors:on_changed(    instance, canvas_callback )
+		instance.style.border:on_changed(         instance, canvas_callback )
+		instance.style.border.colors:on_changed(  instance, canvas_callback )
+		
+		update_label()
+		define_label_animation()
+		canvas_callback()
+	end
+	
+	instance:on_style_changed()
+	
 	----------------------------------------------------------------------------
 	--Key events
 	function instance:on_key_focus_in()    instance.focused = true  end 
@@ -432,11 +443,11 @@ Button = function(parameters)
 	-- apply initial values
 	
 	--set up the label [using the Widget.style.text.on_changed callback]
-	update_label()
-	define_label_animation()
+	--update_label()
+	--define_label_animation()
 	
 	-- if no images, the instance.images is set to nil, causing the canvases to be drawn
-	instance.images = parameters.images 
+	if not canvas then instance.images = parameters.images end
 	instance.label  = parameters.label
 	
 	return instance
