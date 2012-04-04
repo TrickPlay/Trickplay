@@ -16,15 +16,26 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 def main(argv):
 
     path = None
+    first_arg = None
+    second_arg = None
+    config = None
     apath = None
     print("QT VERSION %s" % QT_VERSION_STR )
     
 
     try:
-        path = argv[1]
+        first_arg = argv[1]
+        second_arg = argv[1]
     except IndexError:
         pass
 
+    if first_arg == "-c":
+        config = True 
+        if second_arg is not None:
+            path = second_arg
+    elif first_arg is not None:
+        path = first_arg
+        
     try:
         app = QApplication(argv)
 
@@ -41,6 +52,7 @@ def main(argv):
 
         apath = os.path.join(apath, os.path.dirname(str(argv[0])))
         main = MainWindow(app, apath)
+        main.config = config
 
         main.show()
         main.raise_()

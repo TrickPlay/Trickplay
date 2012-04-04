@@ -518,13 +518,18 @@ class TrickplayDeviceManager(QWidget):
 
             env = self.trickplay.processEnvironment().systemEnvironment()
 
-            for item in env.toStringList():
-   				if item[:3] == "TP_":
-   					n = re.search("=", item).end()
-   					env.remove(item[:n-1])
+            if self.main.config is None :
+                print("[VDBG] .trickplay config file is ignored.")
+                for item in env.toStringList():
+   				    if item[:3] == "TP_":
+   					    n = re.search("=", item).end()
+   					    env.remove(item[:n-1])
+                env.insert("TP_config_file","")
+            else:
+                print("[VDBG] .trickplay config file is read.")
+                
 
             env.insert("TP_LOG", "bare")
-            env.insert("TP_config_file","")
 
             if dMode == True :
             	self.debug_mode = True
