@@ -120,7 +120,7 @@ typedef enum {
         // attribute line.
         for (NSString *element in components) {
             elementComponents = [element componentsSeparatedByString:@"="];
-            NSLog(@"elementComponents: %@", elementComponents);
+            //NSLog(@"elementComponents: %@", elementComponents);
             if (elementComponents.count < 2) {
                 [self release];
                 return nil;

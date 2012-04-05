@@ -34,6 +34,9 @@ typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
     
     uint8_t avc_session_id;
     struct rtp *avc_session;
+    struct rtp *pcmu_session;
+    
+    uint32_t rtp_audio_ts;
     
     NSData *spspps, *pps, *sps;
     

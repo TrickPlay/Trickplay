@@ -16,6 +16,8 @@
 #import "SDPParser.h"
 #import "MediaDescription.h"
 
+#import "base64.h"
+
 
 @implementation SIPDialog
 
@@ -102,24 +104,45 @@
     return [NSString stringWithFormat:@"z9hG4bK%@", branchSuffix];
 }
 
-- (NSString *)generateAuthLine:(NSString *)requestType {
+- (NSString *)generateAuthLine:(NSString *)requestType headerKey:(NSString *)key {
     NSString *nonce = [auth objectForKey:@"nonce"];
     NSString *realm = [auth objectForKey:@"realm"];
-    if (!nonce || !realm || !self.sipURI || !requestType) {
+    NSString *qop = [auth objectForKey:@"qop"];
+    if (!nonce || !realm || !self.sipURI || !requestType || !key) {
         return nil;
     }
+    
+    if (!qop) {
+        NSString *ha1 = [[NSString stringWithFormat:@"%@:%@:1234", self.user, realm] md5];
+        NSString *ha2 = [[NSString stringWithFormat:@"%@:%@", requestType, sipURI] md5];
+        NSString *ha3 = [[NSString stringWithFormat:@"%@:%@:%@", ha1, nonce, ha2] md5];
+    
+        self.authLine = [NSString stringWithFormat:@"%@: Digest username=%@, realm=\"%@\", nonce=%@, algorithm=MD5, uri=%@, response=%@\r\n", key, user, realm, nonce, sipURI, ha3];
+    
+        return authLine;
+    } else {  // handle qop case
+        NSString *cnonce = [NSString uuid];
         
-    NSString *ha1 = [[NSString stringWithFormat:@"%@:%@:saywhat", self.user, realm] md5];
-    NSString *ha2 = [[NSString stringWithFormat:@"%@:%@", requestType, sipURI] md5];
-    NSString *ha3 = [[NSString stringWithFormat:@"%@:%@:%@", ha1, nonce, ha2] md5];
-    
-    self.authLine = [NSString stringWithFormat:@"Authorization: Digest username=%@, realm=\"asterisk\", nonce=%@, algorithm=MD5, uri=%@, response=%@\r\n", user, nonce, sipURI, ha3];
-    
-    return authLine;
+        NSString *ha1 = [[NSString stringWithFormat:@"%@:%@:1234", self.user, realm] md5];
+        NSString *ha2 = [[NSString stringWithFormat:@"%@:%@", requestType, sipURI] md5];
+        NSString *ha3 = [[NSString stringWithFormat:@"%@:%@:00000001:%@:%@:%@", ha1, nonce, cnonce, qop, ha2] md5];
+        
+        /*
+        NSString *ha_1 = [[NSString stringWithFormat:@"1002:%@:1234", realm] md5];
+        NSString *ha_2 = [[NSString stringWithFormat:@"%@:%@", requestType, sipURI] md5];
+        NSString *ha_jitsi = [[NSString stringWithFormat:@"%@:bb9e430e-7876-11e1-9775-eb625bf41e15:00000001:xyz:%@:%@", ha_1, qop, ha_2] md5];
+        
+        NSLog(@"Jitsi:\n%@\n", ha_jitsi);
+        */
+        
+        self.authLine = [NSString stringWithFormat:@"%@: Digest username=\"%@\", realm=\"%@\", nonce=\"%@\", nc=00000001, cnonce=\"%@\", qop=\"%@\", algorithm=MD5, uri=\"%@\", response=\"%@\"\r\n", key, user, realm, nonce, cnonce, qop, sipURI, ha3];
+        
+        return authLine;
+    }
 }
 
 - (NSString *)genSDP {
-    return [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 7078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 9078 RTP/AVP 99\r\nb=AS:1372\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPz,aM4jyA==\r\nmpeg4-esid:201\r\n", udpClientIP, user, udpClientIP];
+    return [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 7078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 9078 RTP/AVP 99\r\nb=AS:1372\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPz,aM4jyA==\r\nmpeg4-esid:201\r\n", udpClientIP, user, udpClientIP];
 }
 
 - (void)parseAuthentication:(NSString *)authResponse {
@@ -196,7 +219,7 @@
                              @"From: %@;tag=%@\r\n"
                              @"To: %@\r\n"
                              @"Call-ID: %@\r\n"
-                             @"CSeq: %d INVITE\r\n"
+                             @"CSeq: %d REGISTER\r\n"
                              @"Contact: %@\r\n"
                              @"User-Agent: %@\r\n"
                              @"Allow: %@\r\n"
@@ -218,6 +241,20 @@
     }
     
     registerHdr = [NSString stringWithFormat:@"%@%@", registerHdr, @"Content-Length: 0\r\n\r\n"];
+    /*
+    registerHdr = [NSString stringWithFormat:@"REGISTER sip:asterisk-1.asterisk.trickplay.com SIP/2.0\r\n"
+                    "Call-ID: 15ab29652ca513810373e17405589e9e@0:0:0:0:0:0:0:0\r\n"
+                    "CSeq: 688 REGISTER\r\n"
+                    "From: \"rex_1002\" <sip:1002@asterisk-1.asterisk.trickplay.com>;tag=18f73da4\r\n"
+                    "To: \"rex_1002\" <sip:1002@asterisk-1.asterisk.trickplay.com>\r\n"
+                    "Via: SIP/2.0/UDP %@:%d;branch=z9hG4bK-393838-a71ebeabb1522eb20bae8d6057a784ff\r\n"
+                    "Max-Forwards: 70\r\n"
+                    "Expires: 0\r\n"
+                    "Contact: \"rex_1002\" <sip:1002@%@:%d;transport=udp;registering_acc=asterisk-1_asterisk_trickplay_com>\r\n"
+                    "Authorization: Digest username=\"1002\",realm=\"asterisk-1.asterisk.trickplay.com\",nonce=\"bbd759dc-7ace-11e1-96d5-c57250bac8c9\",uri=\"sip:asterisk-1.asterisk.trickplay.com\",response=\"9a115d9f40510c8e39147d157c7fcd8a\",algorithm=MD5,qop=auth,cnonce=\"xyz\",nc=00000001\r\n"
+                    "User-Agent: Jitsi1.0-beta1-nightly.build.3820Mac OS X\r\n"
+                   "Content-Length: 0\r\n\r\n", @"10.0.190.55", 5060, @"10.0.190.55", 5060]; //udpClientIP, udpClientPort, udpClientIP, udpClientPort];
+    */
     
     NSLog(@"Register packet:\n%@", registerHdr);
     
@@ -229,7 +266,7 @@
 - (void)registerToAsteriskWithCallID:(NSString *)registerCallID {
     self.callID = registerCallID;
     
-    self.authLine = [self generateAuthLine:@"REGISTER"];
+    self.authLine = [self generateAuthLine:@"REGISTER" headerKey:@"Authorization"];
     NSString *packet = [self generateRegister];
     
     [delegate dialog:self wantsToSendData:[packet dataUsingEncoding:NSUTF8StringEncoding]];
@@ -303,12 +340,15 @@
 
 @implementation InviteDialog
 
-- (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue delegate:(id <SIPDialogDelegate>)_delegate {
+- (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue sps:(NSData *)_sps pps:(NSData *)_pps delegate:(id <SIPDialogDelegate>)_delegate {
     
     self = [super initWithUser:_user contactURI:_contactURI remoteURI:_remoteURI udpClientIP:_udpClientIP udpClientPort:_udpClientPort udpServerPort:_udpServerPort writeQueue:_writeQueue delegate:_delegate];
     
     if (self) {
         previousAcks = [[NSMutableDictionary alloc] initWithCapacity:10];
+        
+        sps = [_sps retain];
+        pps = [_pps retain];
     }
     
     return self;
@@ -316,6 +356,32 @@
 
 #pragma mark -
 #pragma mark INVITE and related packet generation
+
+- (NSString *)genSDP {
+    
+    unsigned char csps[32], cpps[32];
+	NSString *b64sps = nil, *b64pps = nil, *sdp = nil;
+	
+	//if (profile.broadcastType != kBroadcastTypeAudio) {
+    int length = base64encode(((unsigned char *)[sps bytes]) + 4, [sps length] - 4, csps, 32);
+    csps[length] = '\0';
+    b64sps = [NSString stringWithCString:(const char*)csps encoding:NSASCIIStringEncoding];
+    
+    //NSLog(@"SPS Len: %d", length);
+    
+    length = base64encode(((unsigned char *)[pps bytes]) + 4, [pps length] - 4, cpps, 32);
+    cpps[length] = '\0';
+    b64pps = [NSString stringWithCString:(const char*)cpps encoding:NSASCIIStringEncoding];
+    
+    //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 97\r\nb=AS:1372\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@==\r\nmpeg4-esid:201\r\n", udpClientIP, user, udpClientIP, b64sps, b64pps];
+    
+    //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\nm=video 22078 RTP/AVP 102\r\na=rtpmap:102 H264/90000\r\na=fmtp:102 packetization-mode=0;sprop-parameter-sets=%@,%@==\r\n", udpClientIP, user, udpClientIP, b64sps, b64pps];
+    
+    sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 99\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 profile-level-id=42000A;packetization-mode=0", udpClientIP, user, udpClientIP];
+    
+    return sdp;
+}
+
 
 - (NSString *)generateInvite {
     
@@ -359,6 +425,7 @@
     NSString *existingAck = [previousAcks objectForKey:[response objectForKey:@"CSeq"]];
     if (existingAck) {
         [delegate dialog:self wantsToSendData:[existingAck dataUsingEncoding:NSUTF8StringEncoding]];
+        NSLog(@"\nACK with packet:\n%@\n", existingAck);
         return;
     }
     
@@ -432,9 +499,12 @@
  * Any INVITE with a change in the packet (new SDP, Authorization added in) must
  * have a new branch ID. All non-200 ACKs must use the corresponding INVITEs branch ID.
  * A 200 ACK uses a new branch ID.
+ *
+ * TODO: Get rid of this Auth Header and authenticate in a different way so the method can
+ * be reduced to just "invite"
  */
-- (void)invite {
-    self.authLine = [self generateAuthLine:@"INVITE"];
+- (void)inviteWithAuthHeader:(NSString *)key {
+    self.authLine = [self generateAuthLine:@"INVITE" headerKey:key];
     self.branch = [self generateBranch];
     NSString *packet = [self generateInvite];
     
@@ -500,7 +570,14 @@
         if (authRequest) {
             [self ackResponse:parsedPacket withBranch:nil];
             [self parseAuthentication:authRequest];
-            [self invite];
+            [self inviteWithAuthHeader:@"Authorization"];
+        }
+    } else if ([statusLine compare:@"SIP/2.0 407 Proxy Authentication Required"] == NSOrderedSame) {
+        NSString *authRequest = [parsedPacket objectForKey:@"Proxy-Authenticate"];
+        if (authRequest) {
+            [self ackResponse:parsedPacket withBranch:nil];
+            [self parseAuthentication:authRequest];
+            [self inviteWithAuthHeader:@"Proxy-Authorization"];
         }
     } else if ([statusLine rangeOfString:@"BYE"].location != NSNotFound) {
         [self byeResponse:parsedPacket fromAddr:remoteAddr];
@@ -518,6 +595,16 @@
     if (previousAcks) {
         [previousAcks release];
         previousAcks = nil;
+    }
+    
+    if (sps) {
+        [sps release];
+        sps = nil;
+    }
+    
+    if (pps) {
+        [pps release];
+        pps = nil;
     }
     
     if (mediaDestination) {

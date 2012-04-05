@@ -37,13 +37,18 @@
     CFSocketRef sipSocket;
     NSMutableArray *writeQueue;
     
+    NSString *udpClientIP;
+    
+    NSData *sps;
+    NSData *pps;
+    
     id <SIPClientDelegate> delegate;
 }
 
 @property (atomic, assign) id <SIPClientDelegate> delegate;
 
 // public
-- (id)initWithDelegate:(id <SIPClientDelegate>)delegate;
+- (id)initWithSPS:(NSData *)sps PPS:(NSData *)pps delegate:(id <SIPClientDelegate>)delegate;
 
 - (void)connectToService;
 - (void)initiateVideoCall;

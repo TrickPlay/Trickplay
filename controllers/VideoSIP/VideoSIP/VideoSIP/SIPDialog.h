@@ -160,13 +160,17 @@
 @interface InviteDialog : SIPDialog {
     NSMutableDictionary *previousAcks;
     
+    NSData *sps;
+    NSData *pps;
+    
     // TODO: Currently the mediaDestination is passed from sipThread to the main thread
     // for use with the video encoder. May instead want to make a copy of mediaDestination
     // and pass the copy to the other thread to prevent possibilities of corrupt read/writes
     NSDictionary *mediaDestination;
 }
 
-- (void)invite;
+- (void)inviteWithAuthHeader:(NSString *)key;
+- (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue sps:(NSData *)_sps pps:(NSData *)_pps delegate:(id <SIPDialogDelegate>)_delegate;
 
 @end
 

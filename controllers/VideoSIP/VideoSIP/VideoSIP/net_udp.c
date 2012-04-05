@@ -212,6 +212,9 @@ udp_send4(socket_udp *s, char *buffer, int buflen)
 	s_in.sin_port        = htons(s->tx_port);
     
     //sendto(s->fd, "REXFENLEY", 10, 0, (struct sockaddr *) &s_in, sizeof(s_in));
+    //char str[INET_ADDRSTRLEN];
+    //fprintf(stderr, "Address: %s\n", inet_ntop(AF_INET, &(s_in.sin_addr), str, INET_ADDRSTRLEN));
+    //fprintf(stderr, "Port: %d\nNetwork Port: %d\n", s->tx_port, s_in.sin_port);
 	
 	return sendto(s->fd, buffer, buflen, 0, (struct sockaddr *) &s_in, sizeof(s_in));
 }

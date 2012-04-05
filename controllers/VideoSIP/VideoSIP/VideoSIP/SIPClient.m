@@ -14,6 +14,8 @@
 #import <sys/socket.h>
 #import <netdb.h>
 
+#import "net_common.h"
+
 #import "MyExtensions.h"
 
 #define ASTERISK_HOST "asterisk-1.asterisk.trickplay.com"
@@ -22,10 +24,10 @@
 
 static NSString *const user = @"phone";
 static NSString *const contactURI = @"sip:phone@asterisk-1.asterisk.trickplay.com";
-static NSString *const remoteURI = @"sip:rex_sip@asterisk-1.asterisk.trickplay.com";
+static NSString *const remoteURI = @"sip:1002@asterisk-1.asterisk.trickplay.com";
 static NSString *const asteriskURI = @"sip:asterisk-1.asterisk.trickplay.com";
-static NSString *const udpClientIP = @"10.0.190.153";
-static NSUInteger const udpClientPort = 50418;
+//static NSString *udpClientIP = @"10.0.190.153";
+static NSUInteger const udpClientPort = 50160;
 static NSUInteger const udpServerPort = 5060;
 
 
@@ -43,10 +45,10 @@ static NSUInteger const udpServerPort = 5060;
 @synthesize delegate;
 
 - (id)init {
-    return [self initWithDelegate:nil];
+    return [self initWithSPS:nil PPS:nil delegate:nil];
 }
 
-- (id)initWithDelegate:(id<SIPClientDelegate>)_delegate {
+- (id)initWithSPS:(NSData *)_sps PPS:(NSData *)_pps delegate:(id<SIPClientDelegate>)_delegate {
     self = [super init];
     if (self) {
         sipDialogs = [[NSMutableDictionary alloc] initWithCapacity:40];
@@ -57,6 +59,12 @@ static NSUInteger const udpServerPort = 5060;
         writeQueue = [[NSMutableArray alloc] initWithCapacity:100];
         
         sipThread = [[NSThread alloc] initWithTarget:self selector:@selector(threadMain:) object:nil];
+        
+        //udpClientIP = [[NSString stringWithFormat:@"%s", host_addr4()] retain];
+        udpClientIP = [NSString stringWithString:@"66.201.49.178"];
+        
+        sps = [_sps retain];
+        pps = [_pps retain];
         
         self.delegate = _delegate;
     }
@@ -84,11 +92,11 @@ static NSUInteger const udpServerPort = 5060;
 // TODO: Since this call is public but needs to run on sipThread this should be changed
 // to leverage performSelector:onThread:
 - (void)initiateVideoCall {
-    InviteDialog *inviteDialog = [[[InviteDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
+    InviteDialog *inviteDialog = [[[InviteDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue sps:sps pps:pps delegate:self] autorelease];
     
     [sipDialogs setObject:inviteDialog forKey:inviteDialog.callID];
     
-    [inviteDialog invite];
+    [inviteDialog inviteWithAuthHeader:nil];
 }
 
 - (void)hangUp {
@@ -154,6 +162,8 @@ static NSUInteger const udpServerPort = 5060;
         [options receivedOptions:sipHdrDic fromAddr:remoteAddr];
     } else if ([statusLine rangeOfString:@"BYE "].location != NSNotFound) {
         
+    } else {
+        NSLog(@"\nUnauthorized New Dialog\n");
     }
 }
 
@@ -248,7 +258,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
                 SIPClient *self = (SIPClient *)info;
                 // TODO: Some type of error catching here is well advised, in case of
                 // malformed packets.
-                NSLog(@"Received from address: %@", addrObj);
+                NSLog(@"\nReceived from address: %@\n", addrObj);
                 if (addrLen > 0) {
                     [self sipParse:dataObj fromAddr:addrObj];
                 }
@@ -275,7 +285,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             
             SIPClient *self = (SIPClient *)info;
             
-            if (self.writeQueue.count > 0) {
+            while (self.writeQueue.count > 0) {
                 CFDataRef packet = (CFDataRef)[self.writeQueue objectAtIndex:0];
                 // TODO: sometimes will receive EXC_BAD_ACCESS on CFSocketSendData.
                 // Should be fixed now. moved removeObjectAtIndex to after send data.
@@ -411,6 +421,23 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
     if (sipSocket) {
         CFRelease(sipSocket);
         sipSocket = NULL;
+    }
+    
+    //*
+    if (udpClientIP) {
+        [udpClientIP release];
+        udpClientIP = nil;
+    }
+    //*/
+    
+    if (sps) {
+        [sps release];
+        sps = nil;
+    }
+    
+    if (pps) {
+        [pps release];
+        pps = nil;
     }
     
     [super dealloc];
