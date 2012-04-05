@@ -3,6 +3,9 @@ TABLEMANIPULATION = true
 function recursive_overwrite(target, source)
     
     if target == nil then target = {} end
+	
+	if type(target) ~= "table" then error("First  arg expected to be table. Received "..type(target),2) end
+	if type(source) ~= "table" then error("Second arg expected to be table. Received "..type(source),2) end
     
     for k,v in pairs(source) do
         

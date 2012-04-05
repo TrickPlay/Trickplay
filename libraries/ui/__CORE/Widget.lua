@@ -130,7 +130,6 @@ Widget = function(parameters)
 		
 	end
 	
-	
 	override_function(instance,"set", function(old_function, obj, t )
 		
 		old_function(obj, t)
@@ -205,6 +204,8 @@ Widget = function(parameters)
         
         t.style   = instance.style.name
         t.focused = instance.focused
+		
+		t.type = t.type or "Widget"
         
         return json:stringify(t)
     end
