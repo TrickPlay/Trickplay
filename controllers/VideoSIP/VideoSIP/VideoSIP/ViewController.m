@@ -51,7 +51,7 @@
     captureOutput.videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:AVVideoCodecH264, AVVideoCodecKey, pixelBufferType, pixelBufferKey, nil];
     
     captureSession = [[AVCaptureSession alloc] init];
-    [captureSession setSessionPreset:AVCaptureSessionPresetHigh];
+    [captureSession setSessionPreset:AVCaptureSessionPreset640x480];
     
     [captureSession addInput:captureInput];
     [captureSession addOutput:captureOutput];

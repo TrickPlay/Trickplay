@@ -75,12 +75,24 @@ void *get_in_addr(struct sockaddr *sa) {
 #pragma mark -
 #pragma mark SIPClientDelegate Protocol
 
+- (void)sendAudio:(NSTimer *)timer {
+    dispatch_async(socket_queue, ^(void) {
+        char buff[122];
+        for (int i = 0; i < 122; i++) {
+            buff[i] = 0xFF;
+        }
+        rtp_send_data(pcmu_session, rtp_audio_ts, 0, 1, 0, NULL, (char *)buff, 122, NULL, 0, 0, &timeout);
+    });
+    rtp_audio_ts += 160;
+}
+
 - (void)client:(SIPClient *)client beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
     if (avc_session) {
         return;
     }
     // TODO: Audio
     MediaDescription *video = [mediaDest objectForKey:@"video"];
+    MediaDescription *audio = [mediaDest objectForKey:@"audio"];
     
     if (video) {
         // Our Rx ports for video/audio is apart of the string established in genSDP method of
@@ -91,12 +103,17 @@ void *get_in_addr(struct sockaddr *sa) {
         
         // TODO: think of all the places avc_session might need to send BYE and get freed. still
         // not sure if i'm covering them all.
-        avc_session = rtp_init_udp([video.host UTF8String], 9078, video.port, 60, 2000, rtp_avc_session_callback, self);
+        avc_session = rtp_init_udp([video.host UTF8String], 22078, video.port, 60, 2000, rtp_avc_session_callback, self);
+        NSLog(@"port: %d", video.port);
         
         if(avc_session == NULL) {
             // TODO: handle this gracefully
 			NSLog(@"Session is NULL");
 		}
+    }
+    if (audio) {
+        pcmu_session = rtp_init_udp([audio.host UTF8String], 21078, audio.port, 60, 2000, rtp_avc_session_callback, self);
+        [NSTimer scheduledTimerWithTimeInterval:0.16 target:self selector:@selector(sendAudio:) userInfo:nil repeats:YES];
     }
     
     [delegate networkManagerEncoderReady:self];
@@ -104,6 +121,7 @@ void *get_in_addr(struct sockaddr *sa) {
 
 - (void)client:(SIPClient *)client endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
     MediaDescription *video = [mediaDest objectForKey:@"video"];
+    
     if (video) {
         // TODO: consider wrapping this part in a block and sending it to socket_queue.
         //
@@ -127,7 +145,9 @@ void *get_in_addr(struct sockaddr *sa) {
     if (self) {
         timeout.tv_sec = 5;
         timeout.tv_usec = 0;
-        avc_session_id = 97;
+        avc_session_id = 99;
+        
+        rtp_audio_ts = 0;
         
         avQueue = [[NSMutableArray alloc] initWithCapacity:100];
         avcEncoder = [[AVCEncoder alloc] init];
@@ -144,7 +164,7 @@ void *get_in_addr(struct sockaddr *sa) {
 		}
         */
         
-        sipClient = [[SIPClient alloc] initWithDelegate:self];
+        sipClient = [[SIPClient alloc] initWithSPS:avcEncoder.sps PPS:avcEncoder.pps delegate:self];
         [sipClient connectToService];
         
         socket_queue = dispatch_queue_create("Network Queue", NULL);
@@ -187,7 +207,7 @@ void *get_in_addr(struct sockaddr *sa) {
             /* TODO: send stuff */
             int ret = send_nal(avc_session, packet->time, avc_session_id, (uint8_t*) [packet->data bytes], packet->size, &timeout);
             
-            fprintf(stderr, "ret: %d\n", ret);
+            //fprintf(stderr, "ret: %d\n", ret);
             
             [sendPacket release];
         });
@@ -201,6 +221,10 @@ void *get_in_addr(struct sockaddr *sa) {
     //NSLog(@"retain count: %d", self.avcEncoder.callback.retainCount);
     
     AVCParameters *params = [[AVCParameters alloc] init];
+    params.outWidth = 640;
+    params.outHeight = 480;
+    params.bps = 60000;
+    //params.keyFrameInterval = 1;
     //NSLog(@" %dx%d", profile.broadcastWidth, profile.broadcastHeight);
     /*
      params.outWidth = profile.broadcastWidth;
