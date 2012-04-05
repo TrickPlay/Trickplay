@@ -6,7 +6,7 @@ test_area = "request_image"
 test_api = "request_image"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 	  
 	controller:request_image({20, 20}, true, "", "Test Test Test", "Test Cancel")
 	local total = 0

@@ -7,7 +7,7 @@ test_area = "camera"
 test_api = "request_image"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 	  
 	controller:request_image()
 	local total = 0
@@ -35,4 +35,7 @@ function generate_test_image (controller, factory)
 
 	return nil
 end
+
+
+
 

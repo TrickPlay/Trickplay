@@ -7,7 +7,7 @@ test_area = "rectangle"
 test_api = "basic"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 
 	local g = factory:Group{ x = 0, y = 0}
 	
@@ -22,4 +22,18 @@ function generate_test_image (controller, factory)
 	return g
 end
 
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local g = Group{ x = 0, y = 0}
 	
+	local t1 = Text{x = 10 * resize_ratio_w, y = 10 * resize_ratio_h, w = 310 * resize_ratio_w, h = 50 * resize_ratio_h, markup = "TrickPlay", color = "FF00FF", font = "Verdana 30px", use_markup = true}
+
+	local t2 = Text{x = 10 * resize_ratio_w, y = 100 * resize_ratio_h, w = 310 * resize_ratio_w, h = 200 * resize_ratio_h, markup = "That Sam-I-Am\nThat Sam-I-Am\nI do not like that Sam-I-Am", color = "00FFFF", font = "DeJa Vu 20px", use_markup = true}
+
+	local t3 = Text{x = 10 * resize_ratio_w, y = 200 * resize_ratio_h, w = 510 * resize_ratio_w, h = 200 * resize_ratio_h, markup = "<span foreground=\"blue\" size=\"x-large\">This text</span> should display several tags and <i>have no italicizations.</i>!", font = "DeJa Vu 20px", use_markup = false}
+
+	g:add(t1, t2, t3)
+
+
+	return g
+end

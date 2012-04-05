@@ -7,7 +7,7 @@ test_area = "show_multiple_choice"
 test_api = "show_multiple_choice"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 
 
 		function controller.on_ui_event (controller, text)
@@ -19,5 +19,12 @@ function generate_test_image (controller, factory)
 
 
 	return nil
+end
+
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local t1 = Text{x = 10 * resize_ratio_w, y = 10 * resize_ratio_h, w = 310 * resize_ratio_w, h = 50 * resize_ratio_h, markup = "Multiple choice screen. No comparison image.", color = "FFFFFF", font = "Verdana 30px", use_markup = true}
+
+	return t1
 end
 
