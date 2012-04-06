@@ -186,23 +186,31 @@ DialogBox = function(parameters)
 		end
 	)
 	
-	override_function(instance,"set", function(old_function, ... )
-		
-		from_set = true    old_function(...)     from_set = false
-		
-		if flag_for_redraw then make_canvas() end
-		
-	end)
-	
-	
-	function instance:on_size_changed()
-		
-		if canvas then    make_canvas()    else    resize_images()   end
-		
-		center_title()
-		
-	end
-	
+	instance:subscribe_to(
+		{"h","w","width","height","size"},
+		function()
+			
+			flag_for_redraw = true
+			
+			center_title()
+			
+		end
+	)
+	instance:subscribe_to(
+		nil,
+		function()
+			
+			if flag_for_redraw then
+				flag_for_redraw = false
+				if canvas then
+					make_canvas()
+				else
+					resize_images()
+				end
+			end
+			
+		end
+	)
 	local text_style
 	local update_title  = function()
 		
@@ -219,7 +227,7 @@ DialogBox = function(parameters)
 	
 	local canvas_callback = function() if canvas then make_canvas() end end
 	
-	function instance:on_style_changed()
+	function instance_on_style_changed()
 		
 		instance.style.text:on_changed(instance,update_title)
 		
@@ -231,7 +239,9 @@ DialogBox = function(parameters)
 		canvas_callback()
 	end
 	
-	instance:on_style_changed()
+	instance:subscribe_to( "style", instance_on_style_changed )
+	
+	instance_on_style_changed()
 	
 	
 	
