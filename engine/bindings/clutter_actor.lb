@@ -1732,7 +1732,7 @@ interface actor [[ClutterActor*]]
 	
 	duration - length of animation in milliseconds. Required.
 	mode - string specifying the Ease mode to apply to the animated property. For descriptions of the supported modes, refer to the <Ease> class. Default = "LINEAR"
-	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called. To terminate a looping animation, call the <complete_animation> function.
+	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called. To terminate a looping animation, call the <stop_animation> function.
 	on_completed - function to call when the animation is finished. The function should accept no arguments and have no return value.
 	x - X coordinate at end of animation
 	y - Y coordinate at end of animation
@@ -2050,7 +2050,7 @@ interface actor [[ClutterActor*]]
     /*
 	Function: complete_animation
 	
-	The complete_animation() function terminates the animation started with a call to <animate>. All the properties that were being animated are forced immediately to their final values. If the animation specified an on_completed event handler, it is invoked.
+	The complete_animation() function terminates the current cycle of an animation started with a call to <animate>. All the properties that were being animated are forced immediately to their final values. If the animation specified an on_completed event handler, it is invoked. If the animation is a looping animation, the next animation cycle begins. (To terminate a looping animation, call the <stop_animation> function.)
 	
 	*Arguments:* None
 	
@@ -2078,7 +2078,7 @@ interface actor [[ClutterActor*]]
 	/*
     Function: stop_animation
     
-    The stop_animation() function terminates the animation started with a call to <animate>. All the properties that were being animated remain at their stopped values. If the animation specified an on_completed event handler, it is not called.
+    The stop_animation() function terminates the animation (including a looping animation) started with a call to <animate>. All the properties that were being animated remain at their stopped values. If the animation specified an on_completed event handler, it is not called.
     
     *Arguments:* None
     
