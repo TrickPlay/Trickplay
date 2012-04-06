@@ -94,6 +94,8 @@ ToggleButton = function(parameters)
 		t.group    = instance.group.name
 		t.selected = instance.selected
 		
+		t.type = t.type or "ToggleButton"
+		
 		return t
 		
 	end

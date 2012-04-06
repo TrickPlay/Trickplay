@@ -351,6 +351,8 @@ Button = function(parameters)
 			
 		end
 		
+		t.type = t.type or "Button"
+		
 		return t
 		
 	end
