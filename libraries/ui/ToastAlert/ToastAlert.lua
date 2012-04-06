@@ -1,11 +1,12 @@
+TOASTALERT = true
 
-TOASTALERT = 1
+default_parameters = {title = "ToastAlert", message_x = 100,message_font="Sans 40px" }
 
 ToastAlert = function(parameters)
 	
 	-- input is either nil or a table
 	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
-	parameters = is_table_or_nil("DialogBox",parameters)
+	parameters = is_table_or_nil("ToastAlert",parameters)
 	
 	--flags
 	local canvas          = type(parameters.images) == "nil"
@@ -17,9 +18,14 @@ ToastAlert = function(parameters)
 	--The Button Object inherits from Widget
 	
 	local instance = DialogBox( parameters )
-	
-	local message = Text()
-	
+	local message_padding = 5
+	local icon_padding = 5
+	local message = Text{
+		wrap=true,
+		w = 350,
+		color = instance.style.border.colors.default,
+	}
+	instance:add(message)
 	local icon
 	
 	----------------------------------------------------------------------------
@@ -31,7 +37,11 @@ ToastAlert = function(parameters)
 		
 		function(oldf,self,v)
 			
-			if type(v) == "string" then
+			if v == nil then
+				
+				icon = Text{text="!",color = instance.style.border.colors.default,font = "Sans 60px"}
+				
+			elseif type(v) == "string" then
 				
 				icon = Image{ src = v }
 				
@@ -51,37 +61,57 @@ ToastAlert = function(parameters)
 				
 			end
 			
-			icon.y = instance.separator_y
-			
-		end
-	)
-	override_property(instance,"message_x",
-		
-		function(oldf)    return message.x   end,
-		
-		function(oldf,self,v)
-			
-			message.x = v
-			
+			instance:add(icon)
 		end
 	)
 	override_property(instance,"message",
-		
-		function(oldf)    return message.text   end,
-		
-		function(oldf,self,v)
+		function(oldf) return   message.text     end,
+		function(oldf,self,v)   message.text = v end
+	)
+	override_property(instance,"message_font",
+		function(oldf) return   message.font     end,
+		function(oldf,self,v)   message.font = v end
+	)
+	override_property(instance,"message_padding",
+		function(oldf) return   message_padding     end,
+		function(oldf,self,v)   message_padding = v end
+	)
+	override_property(instance,"icon_padding",
+		function(oldf) return   icon_padding     end,
+		function(oldf,self,v)   icon_padding = v end
+	)
+	
+	instance:subscribe_to(
+		{"h","w","width","height","size","separator_y","icon"},
+		function()
 			
-			message.text = v
+			--reposition icon
+			icon.x = icon_padding 
+			icon.y = instance.separator_y + icon_padding
+			
+			--resize icon
+			--icon.w = instance.w - message.x - message_padding
+			--icon.h = instance.h - instance.separator_y - message_padding
+			if (icon.y + icon.h + icon_padding) > instance.h then
+				
+				icon.scale = (icon.h - (icon.y + icon.h + icon_padding - instance.h)) / icon.h
+				
+				dumptable(icon.scale)
+			end
+			
+			
+			--reposition message
+			message.x = icon.x + icon.w + icon_padding + message_padding
+			message.y = instance.separator_y + message_padding
+			
+			--resize message
+			message.w = instance.w - message.x - message_padding
+			message.h = instance.h - instance.separator_y - message_padding
 			
 		end
 	)
 	
-	function instance:on_size_changed()
-		
-		message.size = instance.size
-		
-	end
-	
+	if parameters.icon == nil then instance.icon = nil end
 	
 	instance:set(parameters)
 	
