@@ -1,3 +1,148 @@
+TEXTINPUT = true
+
+local create_canvas = function(self)
+	
+	local c = Canvas(self.w,self.h)
+	
+	c.line_width = self.style.border.width
+	
+	round_rectangle(c,self.style.border.corner_radius)
+	
+	c:set_source_color( self.style.fill_colors.default )     c:fill(true)
+	
+	c:set_source_color( self.style.border.colors.default )   c:stroke(true)
+	
+	return c:Image()
+	
+end
+
+local default_parameters = {
+	w = 200, h = 50,
+}
+TextInput = function()
+	
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("TextInput",parameters)
+	
+	local canvas = type(parameters.image) == "nil"
+	local flag_for_redraw = false --ensure at most one canvas redraw from Button:set()
+	local size_is_set = -- an ugly flag that is used to determine if the user set the Button size themselves yet
+		parameters.h or
+		parameters.w or
+		parameters.height or
+		parameters.width or
+		parameters.size
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+	----------------------------------------------------------------------------
+	--The Button Object inherits from Widget
+	
+	local instance = Widget( parameters )
+	local bg
+	local text = Text{
+		editable = true,
+		single_line = true,
+		cursor_visible = true,
+		reactive = true,
+	}
+	
+	instance:add(text)
+	--the default w and h does not count as setting the size
+	if not size_is_set then instance:reset_size_flag() end
+	
+	
+	local center_label  = function()
+		text.x = instance.style.border.width
+		text.w = instance.w - instance.style.border.width*2
+		text.y = instance.h/2
+		
+	end
+	override_property(instance,"text",
+		function(oldf)    return text.text     end,
+		function(oldf,self,v)    text.text = v end
+	)
+	
+	instance:subscribe_to(
+		{"h","w","width","height","size"},
+		function()
+			
+			flag_for_redraw = true
+			
+			center_label()
+			
+		end
+	)
+	instance:subscribe_to(
+		nil,
+		function()
+			
+			if flag_for_redraw then
+				
+				flag_for_redraw = false
+				
+				if bg then bg:unparent() end
+				
+				bg = create_canvas(instance)
+				
+				instance:add(bg)
+				
+				bg:lower_to_bottom()
+				
+				center_label()
+				
+			end
+			
+		end
+	)
+	center_label()
+	----------------------------------------------------------------------------
+	
+	local style_callback = function() flag_for_redraw = true end  
+	local update_text  = function()
+		text_style = instance.style.text
+		
+		text.font  = text_style.font
+		text.color = text_style.colors.default
+		text.anchor_point = {0,text.h/2}
+		text.y            =  instance.h/2
+		
+	end
+	local update_text_color  = function()
+		
+		text.color = instance.style.text.colors.default
+		
+	end
+	function instance_on_style_changed()
+		
+		instance.style.text:on_changed(instance,update_text)
+		
+		instance.style.text.colors:on_changed(instance,update_text_color)
+		instance.style.fill_colors:on_changed(    instance, style_callback )
+		instance.style.border:on_changed(         instance, style_callback )
+		instance.style.border.colors:on_changed(  instance, style_callback )
+		
+		update_text()
+		update_text_color()
+		style_callback()
+	end
+	
+	instance:subscribe_to( "style", instance_on_style_changed )
+	
+	instance_on_style_changed()
+	
+	----------------------------------------------------------------------------
+	
+	instance:set(parameters)
+	
+	return instance
+	
+end
+
+
+
+
 --[[
 Function: textInput
 
@@ -26,7 +171,7 @@ Extra Function:
 	set_focus() - Grabs the text field focus
 ]]
 
-
+--[[
 function ui_element.textInput(t) 
  --default parameters
     local p = {
@@ -217,4 +362,6 @@ function ui_element.textInput(t)
      setmetatable (t_group.extra, mt) 
 
      return t_group
-end 
+end
+
+--]]
