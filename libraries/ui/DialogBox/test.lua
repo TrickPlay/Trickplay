@@ -7,6 +7,7 @@ if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
 if not STYLE             then dofile("__CORE/Style.lua")                  end
 if not WIDGET            then dofile("__CORE/Widget.lua")                 end
 if not DIALOGBOX         then dofile("DialogBox/DialogBox.lua")           end
+if not TOASTALERT        then dofile("ToastAlert/ToastAlert.lua")         end
 
 
 
@@ -16,7 +17,6 @@ screen:show()
 
 
 d1 = DialogBox()
-
 
 screen:add(d1)
 
