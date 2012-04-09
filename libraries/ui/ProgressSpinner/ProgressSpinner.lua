@@ -109,6 +109,7 @@ ProgressSpinner = function(parameters)
 			resize_images()
 			
 		else
+			
 			--so that the label centers properly
 			instance.size = image.size
 			
@@ -144,18 +145,7 @@ ProgressSpinner = function(parameters)
 	
 	override_property(instance,"duration",
 		function(oldf) return duration     end,
-		function(oldf,self,v)
-			
-			duration = v
-			
-			if animating then
-				
-				self.animating = false
-				
-				self.animating = true
-				
-			end
-		end
+		function(oldf,self,v) duration = v end
 	)
 	
 	override_property(instance,"animating",
@@ -192,6 +182,18 @@ ProgressSpinner = function(parameters)
 		{"h","w","width","height","size"},
 		function()   flag_for_redraw = true   end
 	)
+	instance:subscribe_to(
+		{"duration","image"},
+		function()
+			if animating then
+				
+				instance.animating = false
+				
+				instance.animating = true
+				
+			end
+		end
+	)
 	
 	local canvas_callback = function() return canvas and make_canvas()   end
 	
@@ -226,7 +228,9 @@ ProgressSpinner = function(parameters)
 	
 	----------------------------------------------------------------------------
 	
-	instance:set(parameters)
+	instance.duration  = parameters.duration
+	instance.image     = parameters.image
+	instance.animating = parameters.animating
 	
 	return instance
 	
