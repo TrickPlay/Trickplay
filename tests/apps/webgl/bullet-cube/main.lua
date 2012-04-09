@@ -356,6 +356,8 @@ local function main()
     cn.linear_lower_limit = 600
     cn.linear_upper_limit = 100
     
+    pb:add_constraint( cn , false )
+    
 --]]
     
 
@@ -371,6 +373,8 @@ local function main()
     
     --cn:enable_angular_motor( true , 100000 , 1900 )
     --cn:set_motor_target( -10 , 10 )
+    
+    pb:add_constraint( cn )
     
     table.insert( cubes , bar )
     table.insert( cubes , paddle )
