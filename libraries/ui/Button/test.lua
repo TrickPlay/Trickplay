@@ -307,6 +307,7 @@ b4 = Button{
     h = 150
 }
 b4.w = 300
+print(b4.h)
 --------------------------------------------------------------------------------
 style.text.font = "Sans Bold 40px"
 b5 = Button{y=900}
@@ -314,7 +315,7 @@ b5 = Button{y=900}
 b5:from_json(b3:to_json())
 print(b3:to_json())
 print(b5:to_json())
-
+b5.y = 700
 screen:add(Rectangle{size = screen.size, color = "000033"},b0,b1,b2,b3,b4,b5)
 
 controllers:start_pointer()

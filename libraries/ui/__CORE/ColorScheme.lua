@@ -19,7 +19,7 @@ ColorScheme = function(parameters)
 	
     if type(parameters) == "string" then
         
-        if all_styles[parameters] then
+        if all_colorschemes[parameters] then
             
             return all_colorschemes[parameters]
             
@@ -48,13 +48,18 @@ ColorScheme = function(parameters)
                 
                 t[name] = {}
                 
-                for property, value in pairs(colors) do
+                for property, value in pairs(obj:get_table()) do
                     t[name][property] = value
                 end
                 
             end
             
             return json:stringify(t)
+            
+        end,
+        get_table = function()
+            
+            return colors
             
         end,
         update = function()

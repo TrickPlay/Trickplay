@@ -1,0 +1,7 @@
+app=
+{	id = "com.trickplay.localizationApp",
+	release = "1",
+	version = "1.0",
+	name = "Localization App",
+	copyright = "Trickplay Inc."
+}

@@ -118,7 +118,7 @@ ArrowStyle = function(parameters)
             matches_nil_table_or_type(
                 ColorScheme,
                 "COLORSCHEME",
-                recursive_overwrite(v, default_arrow_colors)
+                type(v) == "string" and v or recursive_overwrite(v, default_arrow_colors)
             )
         end,
         name = function(v)
@@ -215,7 +215,7 @@ BorderStyle = function(parameters)
             matches_nil_table_or_type(
                 ColorScheme,
                 "COLORSCHEME",
-                recursive_overwrite(v, default_border_colors)
+                type(v) == "string" and v or recursive_overwrite(v, default_border_colors)
             )
         end,
         name = function(v)
@@ -346,7 +346,7 @@ TextStyle = function(parameters)
             
             colors = matches_nil_table_or_type(
                 ColorScheme,  "COLORSCHEME",
-                recursive_overwrite(v, default_text_colors)
+                type(v) == "string" and v or recursive_overwrite(v, default_text_colors)
             )
             
             return true
@@ -459,7 +459,7 @@ Style = function(parameters)
             matches_nil_table_or_type(
                 ColorScheme,
                 "COLORSCHEME",
-                recursive_overwrite(v, default_fill_colors)
+                type(v) == "string" and v or recursive_overwrite(v, default_fill_colors)
             )
         end,
         name = function(v)
