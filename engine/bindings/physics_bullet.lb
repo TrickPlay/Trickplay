@@ -360,7 +360,7 @@ interface PBPointToPointConstraint [[ btPoint2PointConstraint * ]]
 {
     PBPointToPointConstraint( any world , PBBody3d bodyA , table pivotA , PBBody3d bodyB = 0 , table pivotB = 0 )
         [[
-            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+//            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
 
             btRigidBody * ba = get_rigid_body( L , bodyA );
                         
@@ -394,13 +394,6 @@ interface PBPointToPointConstraint [[ btPoint2PointConstraint * ]]
             g_assert( c );
             
             self = lb_construct( btPoint2PointConstraint , c );
-            
-            // TODO: need to support the disableCollisionsBetweenLinkedBodies 
-            // flag. Perhaps by not adding the constraint when it is created,
-            // but having an explicit add_constraint function on the world 
-            // that includes that flag.
-            
-            w->get_world()->addConstraint( c );
         ]];
 
     ~PBPointToPointConstraint()
@@ -413,7 +406,7 @@ interface PBGeneric6DOFConstraint [[ btGeneric6DofConstraint * ]]
 {
     PBGeneric6DOFConstraint( any world , PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
         [[
-            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+//            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
 
             btRigidBody * ba = get_rigid_body( L , bodyA );
                         
@@ -456,14 +449,7 @@ interface PBGeneric6DOFConstraint [[ btGeneric6DofConstraint * ]]
             
             g_assert( c );
             
-            self = lb_construct( btGeneric6DofConstraint , c );
-            
-            // TODO: need to support the disableCollisionsBetweenLinkedBodies 
-            // flag. Perhaps by not adding the constraint when it is created,
-            // but having an explicit add_constraint function on the world 
-            // that includes that flag.
-            
-            w->get_world()->addConstraint( c );
+            self = lb_construct( btGeneric6DofConstraint , c );           
         ]];
 
     ~PBGeneric6DOFConstraint()
@@ -509,7 +495,7 @@ interface PBHingeConstraint [[ btHingeConstraint * ]]
 {
     PBHingeConstraint( any world , PBBody3d bodyA , table pivotA , table axisA , bool use_reference_frame , PBBody3d bodyB = 0 , table pivotB = 0 , table axisB )
         [[
-            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+//            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
 
             btRigidBody * ba = get_rigid_body( L , bodyA );
                         
@@ -544,14 +530,7 @@ interface PBHingeConstraint [[ btHingeConstraint * ]]
             
             g_assert( c );
             
-            self = lb_construct( btHingeConstraint , c );
-            
-            // TODO: need to support the disableCollisionsBetweenLinkedBodies 
-            // flag. Perhaps by not adding the constraint when it is created,
-            // but having an explicit add_constraint function on the world 
-            // that includes that flag.
-            
-            w->get_world()->addConstraint( c );
+            self = lb_construct( btHingeConstraint , c );            
         ]];
 
     ~PBHingeConstraint()
@@ -593,7 +572,7 @@ interface PBSliderConstraint [[ btSliderConstraint * ]]
 {
     PBSliderConstraint( any world , PBBody3d bodyA , Matrix frameA , bool use_linear_reference_frame , PBBody3d bodyB = 0 , Matrix frameB = 0 )
         [[
-            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
+//            Bullet::World * w = static_cast<Bullet::World*>( lua_touserdata( L , world ) );
 
             btRigidBody * ba = get_rigid_body( L , bodyA );
                         
@@ -636,14 +615,7 @@ interface PBSliderConstraint [[ btSliderConstraint * ]]
             
             g_assert( c );
             
-            self = lb_construct( btSliderConstraint , c );
-            
-            // TODO: need to support the disableCollisionsBetweenLinkedBodies 
-            // flag. Perhaps by not adding the constraint when it is created,
-            // but having an explicit add_constraint function on the world 
-            // that includes that flag.
-            
-            w->get_world()->addConstraint( c );
+            self = lb_construct( btSliderConstraint , c );            
         ]];
 
     ~PBSliderConstraint()
@@ -1069,6 +1041,14 @@ global pb [[ Bullet::World * ]]
                 }
             }
         ]]; 
+        
+    add_constraint( any constraint , bool disable_collisions_between_linked_bodies = false )
+        [[
+            if ( btTypedConstraint * c = static_cast<btTypedConstraint*>( UserData::get_client_check( L , constraint ) ) )
+            {
+                self->get_world()->addConstraint( c , disable_collisions_between_linked_bodies );
+            }
+        ]];        
 
     PBShape BoxShape( double half_width , double half_height , double half_depth )
         [[
