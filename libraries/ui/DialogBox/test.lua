@@ -18,5 +18,7 @@ screen:show()
 
 d1 = DialogBox()
 
+d1.style.fill_colors.default = "660000"
+
 screen:add(d1)
 
