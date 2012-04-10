@@ -33,7 +33,6 @@ DialogBox = function(parameters)
 	--flags
 	local canvas          = type(parameters.images) == "nil"
 	local flag_for_redraw = false --ensure at most one canvas redraw from Button:set()
-	local from_set        = false --indicates that an attribute is being set in Button:set()
 	local size_is_set = -- an ugly flag that is used to determine if the user set the Button size themselves yet
 		parameters.h or
 		parameters.w or
@@ -48,6 +47,9 @@ DialogBox = function(parameters)
 	--The Button Object inherits from Widget
 	
 	local instance = Widget( parameters )
+	
+	--the default w and h does not count as setting the size
+	if not size_is_set then instance:reset_size_flag() end
 	
 	local title = Text()
 	
@@ -75,14 +77,6 @@ DialogBox = function(parameters)
 	----------------------------------------------------------------------------
 	
 	local function make_canvas()
-		
-		if from_set then
-			
-			flag_for_redraw = true
-			
-			return
-			
-		end
 		
 		flag_for_redraw = false
 		
@@ -118,7 +112,7 @@ DialogBox = function(parameters)
 			
 		else
 			--so that the label centers properly
-			instance.size = images.default.size
+			instance.size = bg.size
 			
 			instance:reset_size_flag()
 			
@@ -135,19 +129,44 @@ DialogBox = function(parameters)
 	
 	override_property(instance,"image",
 		
-		function(oldf)    return bg   end,
+		function(oldf)    return image   end,
 		
 		function(oldf,self,v)
 			
-			return v == nil and make_canvas() or
+			if type(v) == "string" then
 				
-				type(v) == "userdata" and setup_image(v) or
+				if image == nil or image.src ~= v then
+					
+					setup_image(Image{ src = v })
+					
+				end
 				
-				error("Button.images expected type 'table'. Received "..type(v),2)
+			elseif type(v) == "userdata" and v.__types__.actor then
+				
+				if v ~= image then
+					
+					setup_image(v)
+					
+				end
+				
+			elseif v == nil then
+				
+				if not canvas then
+					
+					flag_for_redraw = true
+					
+					return
+					
+				end
+				
+			else
+				
+				error("DialogBox.image expected type 'table'. Received "..type(v),2)
+				
+			end
 			
 		end
 	)
-	
 	override_property(instance,"title",
 		function(oldf) return title.text     end,
 		function(oldf,self,v) title.text = v end
