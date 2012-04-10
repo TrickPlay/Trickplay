@@ -13,13 +13,25 @@ if not ORBITTINGDOTS     then dofile("OrbittingDots/OrbittingDots.lua")     end
 
 
 
+
+
+
+
 screen:show()
 
 
-ps1 = OrbittingDots()
+od1 = OrbittingDots()
 
---ps2 = ProgressSpinner{x = 200,image = "ProgressSpinner/load-sun-spin.png"}
+od2 = OrbittingDots{x = 200,image = "OrbittingDots/x.png",dot_size = 40}
+od3 = OrbittingDots{x = 400}
 
+od3.image = "OrbittingDots/x.png"
 
-screen:add(ps1,ps2)
+od4 = OrbittingDots{y = 200,num_dots = 40,animating = true}
+od4.num_dots = 4
+od4.num_dots = 12
+od4.num_dots = 12
+od4.size = {200,200}
+
+screen:add(od1,od2,od3,od4)
 
