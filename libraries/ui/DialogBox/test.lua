@@ -17,8 +17,18 @@ screen:show()
 
 
 d1 = DialogBox()
+d2 = DialogBox{x = 500}
 
-d1.style.fill_colors.default = "660000"
+d2.title = "This is a really really really long title"
+d2.style.fill_colors.default = "660000"
+d2.style.border.corner_radius = 40
 
-screen:add(d1)
+d3 = DialogBox{x = 1000,separator_y = 200}
+d3.style.border.width = 10
+
+d4 = DialogBox{y = 400, image = "DialogBox/panel.png"}
+d4.style.text.font = "Sans 80px"
+
+
+screen:add(Rectangle{size = screen.size,color = "000033"},d1,d2,d3,d4)
 
