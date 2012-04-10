@@ -1,6 +1,16 @@
 TOASTALERT = true
 
-default_parameters = {title = "ToastAlert", message_x = 100,message_font="Sans 40px" }
+default_parameters = {
+    title = "ToastAlert", 
+    message_font="Sans 40px",
+    vertical_message_padding   = 10,
+    horizontal_message_padding =  5,
+    horizontal_icon_padding    = 20,
+    vertical_icon_padding      = 10,
+    on_screen_duration         = 5000,
+    animate_in_duration        = 500,
+    animate_out_duration       = 500,
+}
 
 ToastAlert = function(parameters)
 	
@@ -18,15 +28,17 @@ ToastAlert = function(parameters)
 	--The Button Object inherits from Widget
 	
 	local instance = DialogBox( parameters )
-	local message_padding = 5
-	local icon_padding = 5
+	local vertical_message_padding   = 0
+	local horizontal_message_padding = 0
+	local horizontal_icon_padding = 5
+	local vertical_icon_padding = 5
 	local message = Text{
 		wrap=true,
 		w = 350,
 		color = instance.style.border.colors.default,
 	}
 	instance:add(message)
-	local icon
+	local icon, on_completed, on_screen_duration, animate_in_duration, animate_out_duration
 	
 	----------------------------------------------------------------------------
 	--functions pertaining to getting and setting of attributes
@@ -72,13 +84,82 @@ ToastAlert = function(parameters)
 		function(oldf) return   message.font     end,
 		function(oldf,self,v)   message.font = v end
 	)
-	override_property(instance,"message_padding",
-		function(oldf) return   message_padding     end,
-		function(oldf,self,v)   message_padding = v end
+	override_property(instance,"horizontal_message_padding",
+		function(oldf) return   horizontal_message_padding     end,
+		function(oldf,self,v)   horizontal_message_padding = v end
 	)
-	override_property(instance,"icon_padding",
-		function(oldf) return   icon_padding     end,
-		function(oldf,self,v)   icon_padding = v end
+	override_property(instance,"vertical_message_padding",
+		function(oldf) return   vertical_message_padding     end,
+		function(oldf,self,v)   vertical_message_padding = v end
+	)
+	override_property(instance,"horizontal_icon_padding",
+		function(oldf) return   horizontal_icon_padding     end,
+		function(oldf,self,v)   horizontal_icon_padding = v end
+	)
+	override_property(instance,"vertical_icon_padding",
+		function(oldf) return   vertical_icon_padding     end,
+		function(oldf,self,v)   vertical_icon_padding = v end
+	)
+	
+	override_property(instance,"on_completed",
+		function(oldf) return   on_completed     end,
+		function(oldf,self,v)   on_completed = v end
+	)
+	override_property(instance,"on_screen_duration",
+		function(oldf) return   on_screen_duration     end,
+		function(oldf,self,v)   on_screen_duration = v end
+	)
+	override_property(instance,"animate_in_duration",
+		function(oldf) return   animate_in_duration     end,
+		function(oldf,self,v)   animate_in_duration = v end
+	)
+	override_property(instance,"animate_out_duration",
+		function(oldf) return   animate_out_duration     end,
+		function(oldf,self,v)   animate_out_duration = v end
+	)
+    local animating = false
+	override_function(instance,"popup",
+		function(oldf,self,v) 
+            
+            if animating then return end
+            
+            if instance.parent then instance:unparent() end
+            
+            screen:add(instance)
+            
+            instance.opacity = 0
+            
+            instance.y = screen.h + instance.anchor_point[2]
+            
+            instance:animate{
+                duration = animate_in_duration,
+                y        = 50 + instance.anchor_point[2],
+                opacity  = 255,
+                on_completed = function()
+                    
+                    dolater(
+                        on_screen_duration,
+                        function()
+                            
+                            instance:animate{
+                                duration = animate_out_duration,
+                                opacity  = 0,
+                                on_completed = function()
+                                    
+                                    animating = false
+                                    
+                                    if on_completed then on_completed(instance) end
+                                    
+                                end
+                            }
+                            
+                        end
+                    )
+                    
+                end
+            }
+            
+        end
 	)
 	
 	instance:subscribe_to(
@@ -86,27 +167,27 @@ ToastAlert = function(parameters)
 		function()
 			
 			--reposition icon
-			icon.x = icon_padding 
-			icon.y = instance.separator_y + icon_padding
+			icon.x = horizontal_icon_padding 
+			icon.y = instance.separator_y + vertical_icon_padding
 			
 			--resize icon
 			--icon.w = instance.w - message.x - message_padding
 			--icon.h = instance.h - instance.separator_y - message_padding
-			if (icon.y + icon.h + icon_padding) > instance.h then
+			if (icon.y + icon.h + vertical_icon_padding) > instance.h then
 				
-				icon.scale = (icon.h - (icon.y + icon.h + icon_padding - instance.h)) / icon.h
+				icon.scale = (icon.h - (icon.y + icon.h + vertical_icon_padding - instance.h)) / icon.h
 				
 				dumptable(icon.scale)
 			end
 			
 			
 			--reposition message
-			message.x = icon.x + icon.w + icon_padding + message_padding
-			message.y = instance.separator_y + message_padding
+			message.x = icon.x + icon.w + horizontal_icon_padding + horizontal_message_padding
+			message.y = instance.separator_y + vertical_message_padding
 			
 			--resize message
-			message.w = instance.w - message.x - message_padding
-			message.h = instance.h - instance.separator_y - message_padding
+			message.w = instance.w - message.x - horizontal_message_padding
+			message.h = instance.h - instance.separator_y - vertical_message_padding
 			
 		end
 	)
