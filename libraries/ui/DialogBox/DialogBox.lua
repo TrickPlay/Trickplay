@@ -88,6 +88,8 @@ DialogBox = function(parameters)
 		
 		canvas = true
 		
+		if bg then bg:unparent() end
+		
 		bg = default_bg(instance)
 		
 		instance:add( bg )
@@ -103,6 +105,8 @@ DialogBox = function(parameters)
 		canvas = false
 		
 		bg = v
+		
+		if bg then bg:unparent() end
 		
 		instance:add( bg )
 		
@@ -135,8 +139,6 @@ DialogBox = function(parameters)
 		
 		function(oldf,self,v)
 			
-			if bg then bg:unparent() end
-			
 			return v == nil and make_canvas() or
 				
 				type(v) == "userdata" and setup_image(v) or
@@ -159,7 +161,8 @@ DialogBox = function(parameters)
 			
 			separator_y = v
 			
-			return canvas and make_canvas()
+			if canvas then flag_for_redraw = false end
+			
 		end
 	)
 	
@@ -236,14 +239,12 @@ DialogBox = function(parameters)
 		instance.style.border.colors:on_changed(  instance, canvas_callback )
 		
 		update_title()
-		canvas_callback()
+		flag_for_redraw = true
 	end
 	
 	instance:subscribe_to( "style", instance_on_style_changed )
 	
 	instance_on_style_changed()
-	
-	
 	
 	
 	instance:add(title)
