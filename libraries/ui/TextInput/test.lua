@@ -17,6 +17,13 @@ screen:show()
 
 t1 = TextInput()
 
-screen:add(t1)
+t1.style.fill_colors.default = "660000"
+
+t2 = TextInput{h=400,x = 200}
+
+t2.text = "default"
+
+screen:add(t1,t2)
+
 
 controllers:start_pointer()

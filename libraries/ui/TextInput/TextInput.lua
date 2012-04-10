@@ -19,7 +19,7 @@ end
 local default_parameters = {
 	w = 200, h = 50,
 }
-TextInput = function()
+TextInput = function(parameters)
 	
 	-- input is either nil or a table
 	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
@@ -60,8 +60,8 @@ TextInput = function()
 		
 	end
 	override_property(instance,"text",
-		function(oldf)    return text.text     end,
-		function(oldf,self,v)    text.text = v end
+		function(oldf) return text.text     end,
+		function(oldf,self,v) text.text = v end
 	)
 	
 	instance:subscribe_to(
@@ -74,24 +74,33 @@ TextInput = function()
 			
 		end
 	)
+	
+	local redraw = function()
+		
+		flag_for_redraw = false
+		
+		if bg then bg:unparent() end
+		
+		bg = create_canvas(instance)
+		
+		instance:add(bg)
+		
+		bg.reactive = true
+		
+		function bg:on_button_down() text:grab_key_focus() end
+		
+		bg:lower_to_bottom()
+		
+		center_label()
+		
+	end
+	
 	instance:subscribe_to(
 		nil,
 		function()
 			
 			if flag_for_redraw then
-				
-				flag_for_redraw = false
-				
-				if bg then bg:unparent() end
-				
-				bg = create_canvas(instance)
-				
-				instance:add(bg)
-				
-				bg:lower_to_bottom()
-				
-				center_label()
-				
+				redraw()
 			end
 			
 		end
@@ -99,7 +108,6 @@ TextInput = function()
 	center_label()
 	----------------------------------------------------------------------------
 	
-	local style_callback = function() flag_for_redraw = true end  
 	local update_text  = function()
 		text_style = instance.style.text
 		
@@ -119,13 +127,13 @@ TextInput = function()
 		instance.style.text:on_changed(instance,update_text)
 		
 		instance.style.text.colors:on_changed(instance,update_text_color)
-		instance.style.fill_colors:on_changed(    instance, style_callback )
-		instance.style.border:on_changed(         instance, style_callback )
-		instance.style.border.colors:on_changed(  instance, style_callback )
+		instance.style.fill_colors:on_changed(    instance, redraw )
+		instance.style.border:on_changed(         instance, redraw )
+		instance.style.border.colors:on_changed(  instance, redraw )
 		
 		update_text()
 		update_text_color()
-		style_callback()
+		flag_for_redraw = true
 	end
 	
 	instance:subscribe_to( "style", instance_on_style_changed )
