@@ -77,7 +77,7 @@ OrbittingDots = function(parameters)
 	)
 	
 	local reanchor_clones = function()
-		print("aaaa")
+		
 		for i,d in ipairs(clones) do
 			d:set{
 				anchor_point = {dot_size/2,dot_size/2},
@@ -119,9 +119,9 @@ OrbittingDots = function(parameters)
 		image:hide()
 		
 		for i,d in ipairs(clones) do d.source = image end
-		print(1)
+		
 		if not size_is_set then
-			print(2)
+			
 			--so that the label centers properly
 			instance.dot_size = image.w
 			
