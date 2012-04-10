@@ -20,7 +20,7 @@ local canvas_dot = function(self)
 	
 end
 
-default_parameters = {w = 100, h = 100, num_dots = 12, dot_size = 20}
+default_parameters = {w = 100, h = 100, num_dots = 12}
 
 OrbittingDots = function(parameters)
 	
@@ -30,12 +30,7 @@ OrbittingDots = function(parameters)
 	
 	local canvas = parameters.image == nil
 	local flag_for_redraw = false --ensure at most one canvas redraw from Button:set()
-	local size_is_set = -- an ugly flag that is used to determine if the user set the Button size themselves yet
-		parameters.h or
-		parameters.w or
-		parameters.height or
-		parameters.width or
-		parameters.size
+	local size_is_set = parameters.dot_size ~= nil
 	
 	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
 	parameters = recursive_overwrite(parameters,default_parameters) 
@@ -44,8 +39,6 @@ OrbittingDots = function(parameters)
 	
 	local instance = Widget( parameters )
 	
-	--the default w and h does not count as setting the size
-	if not size_is_set then instance:reset_size_flag() end
 	
 	local image
 	local dot_size = 20
@@ -84,7 +77,7 @@ OrbittingDots = function(parameters)
 	)
 	
 	local reanchor_clones = function()
-		
+		print("aaaa")
 		for i,d in ipairs(clones) do
 			d:set{
 				anchor_point = {dot_size/2,dot_size/2},
@@ -117,7 +110,7 @@ OrbittingDots = function(parameters)
 		
 		canvas = false
 		
-		if images then image:unparent() end
+		if image then image:unparent() end
 		
 		image = v
 		
@@ -126,7 +119,15 @@ OrbittingDots = function(parameters)
 		image:hide()
 		
 		for i,d in ipairs(clones) do d.source = image end
-		
+		print(1)
+		if not size_is_set then
+			print(2)
+			--so that the label centers properly
+			instance.dot_size = image.w
+			
+			size_is_set = false
+			
+		end
 	end
 	
 	override_property(instance,"image",
@@ -137,7 +138,7 @@ OrbittingDots = function(parameters)
 			
 			if type(v) == "string" then
 				
-				if image and image.src ~= v then
+				if image == nil or image.src ~= v then
 					
 					setup_image(Image{ src = v })
 					
@@ -193,6 +194,8 @@ OrbittingDots = function(parameters)
 		
 		function(oldf,self,v)
 			
+			size_is_set = true
+			
 			dot_size = v
 			
 			reanchor_clones()
@@ -211,7 +214,7 @@ OrbittingDots = function(parameters)
 			if num > v then
 				
 				--toss the excess
-				for i = num,v,-1 do
+				for i = num,v+1,-1 do
 					clones[i]:unparent()
 					clones[i] = nil
 				end
@@ -220,7 +223,7 @@ OrbittingDots = function(parameters)
 			else
 				
 				--add more
-				for i = num,v do
+				for i = num+1,v do
 					clones[i] = Clone{
 						source       = image,
 						anchor_point = {dot_size/2,dot_size/2},
