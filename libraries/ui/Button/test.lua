@@ -312,7 +312,7 @@ print(b4.h)
 style.text.font = "Sans Bold 40px"
 b5 = Button{y=900}
 
-b5:from_json(b3:to_json())
+b5:from_json(    b3:to_json()   )
 print(b3:to_json())
 print(b5:to_json())
 b5.y = 700

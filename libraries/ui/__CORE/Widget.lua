@@ -262,7 +262,8 @@ Widget = function(parameters)
 	override_property(instance,"style",
 		function()   return style    end,
 		function(oldf,self,v) 
-            style = matches_nil_table_or_type(Style, "STYLE", v)
+            
+			style = matches_nil_table_or_type(Style, "STYLE", v)
             
         end
 	)
@@ -279,8 +280,8 @@ Widget = function(parameters)
 	)
 	override_property(instance,"type", function()  return "WIDGET"  end )
     
-    parameters.style = parameters.style or Style()
-    
+    if parameters.style == nil then instance.style = nil end
+	
     instance:set( parameters )
     
     return instance

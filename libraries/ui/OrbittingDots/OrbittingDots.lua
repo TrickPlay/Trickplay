@@ -1,4 +1,4 @@
-PROGRESSSPINNER = true
+ORBITTINGDOTS = true
 
 
 local canvas_dot = function(self)
@@ -15,39 +15,22 @@ local canvas_dot = function(self)
 	c:set_source_color(c1)
 	c:stroke()
 	
-	c:move_to(c.w/2,c.line_width/2)
-	c:arc(c.w/2,c.h/2,c.w/2 - c.line_width/2,270,360)
-	c:line_to(c.w/2,c.h/2)
-	c:line_to(c.w/2,c.line_width/2)
-	c:set_source_color(c1)
-	c:fill()
-	
-	c:move_to(c.w/2,c.h - c.line_width/2)
-	c:arc(c.w/2,c.h/2,c.w/2 - c.line_width/2,90,180)
-	c:line_to(c.w/2,c.h/2)
-	c:line_to(c.w/2,c.h - c.line_width/2)
-	c:fill()
 	
 	return c:Image()
 	
 end
 
-default_parameters = {w = 100, h = 100, duration = 2000}
+default_parameters = {w = 100, h = 100, num_dots = 12}
 
-ProgressSpinner = function(parameters)
+OrbittingDots = function(parameters)
 	
 	-- input is either nil or a table
 	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
-	parameters = is_table_or_nil("ProgressSpinner",parameters)
+	parameters = is_table_or_nil("OrbittingDots",parameters)
 	
-	local canvas = type(parameters.image) == "nil"
+	local canvas = parameters.image == nil
 	local flag_for_redraw = false --ensure at most one canvas redraw from Button:set()
-	local size_is_set = -- an ugly flag that is used to determine if the user set the Button size themselves yet
-		parameters.h or
-		parameters.w or
-		parameters.height or
-		parameters.width or
-		parameters.size
+	local size_is_set = parameters.dot_size ~= nil
 	
 	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
 	parameters = recursive_overwrite(parameters,default_parameters) 
@@ -56,12 +39,54 @@ ProgressSpinner = function(parameters)
 	
 	local instance = Widget( parameters )
 	
-	--the default w and h does not count as setting the size
-	if not size_is_set then instance:reset_size_flag() end
 	
+	local image
+	local dot_size = 20
+	local num = 0
+	local clones = {}
+	local load_timeline = Timeline{
+		loop =  true,
+		on_new_frame = function(tl,ms,p)
+			
+			for i,d in ipairs(clones) do
+				d.opacity = 255*((1-p)-i/num)
+			end
+		end
+	}
 	
-	local duration, image, animating
+	----------------------------------------------------------------------------
+	-- helper functions used for the clones
+	local rad
+	local reposition_clones = function()
+		
+		for i,d in ipairs(clones) do
+			--they're radial position
+        	rad = (2*math.pi)/(num) * i
+			
+			clones[i].position = {
+				math.floor( instance.w/2 * math.cos(rad) )+instance.w/2+dot_size/2,
+				math.floor( instance.h/2 * math.sin(rad) )+instance.h/2+dot_size/2
+			}
+        	
+		end
+		
+	end
+	instance:subscribe_to(
+		{"h","w","width","height","size"},
+		reposition_clones
+	)
 	
+	local reanchor_clones = function()
+		
+		for i,d in ipairs(clones) do
+			d:set{
+				anchor_point = {dot_size/2,dot_size/2},
+				w            = dot_size,
+				h            = dot_size,
+			}
+		end
+		
+	end
 	----------------------------------------------------------------------------
 	-- helper functions used when Button.images is set
 	
@@ -69,25 +94,15 @@ ProgressSpinner = function(parameters)
 		
 		canvas = true
 		
-		if image then image:unparent() end
+		if images then image:unparent() end
 		
 		image = canvas_dot(instance)
 		
 		instance:add( image )
 		
-		image:move_anchor_point(image.w/2,image.h/2)
-		image:move_by(image.w/2,image.h/2)
+		image:hide()
 		
-		return true
-		
-	end
-	
-	local function resize_images()
-		
-		if not size_is_set then return end
-		
-		image.w = instance.w
-		image.h = instance.h
+		for i,d in ipairs(clones) do d.source = image end
 		
 	end
 	
@@ -101,28 +116,19 @@ ProgressSpinner = function(parameters)
 		
 		instance:add( image )
 		
-		image:move_anchor_point(image.w/2,image.h/2)
-		image:move_by(image.w/2,image.h/2)
+		image:hide()
 		
-		if instance.is_size_set() then
-			
-			resize_images()
-			
-		else
+		for i,d in ipairs(clones) do d.source = image end
+		
+		if not size_is_set then
 			
 			--so that the label centers properly
-			instance.size = image.size
+			instance.dot_size = image.w
 			
-			instance:reset_size_flag()
+			size_is_set = false
 			
 		end
-		
-		return true
-		
 	end
-	
-	----------------------------------------------------------------------------
-	--functions pertaining to getting and setting of attributes
 	
 	override_property(instance,"image",
 		
@@ -130,13 +136,108 @@ ProgressSpinner = function(parameters)
 		
 		function(oldf,self,v)
 			
-			return v == nil and make_canvas() or
+			if type(v) == "string" then
 				
-				type(v) == "string" and setup_image( Image{ src = v } ) or
+				if image == nil or image.src ~= v then
+					
+					setup_image(Image{ src = v })
+					
+				end
 				
-				type(v) == "userdata" and v.__types__.actor and setup_image(v) or
+			elseif type(v) == "userdata" and v.__types__.actor then
+				
+				if v ~= image then
+					
+					setup_image(v)
+					
+				end
+				
+			elseif v == nil then
+				
+				if not canvas then
+					
+					flag_for_redraw = true
+					
+					return
+					
+				end
+				
+			else
 				
 				error("ProgressSpinner.image expected type 'table'. Received "..type(v),2)
+				
+			end
+			
+		end
+	)
+	--prevents multiple canvas redraws
+	instance:subscribe_to(
+		nil,
+		function()
+			
+			if flag_for_redraw then
+				
+				flag_for_redraw = false
+				
+				make_canvas()
+				
+			end
+			
+		end
+	)
+	----------------------------------------------------------------------------
+	--functions pertaining to getting and setting of attributes
+	
+	override_property(instance,"dot_size",
+		
+		function(oldf)    return dot_size   end,
+		
+		function(oldf,self,v)
+			
+			size_is_set = true
+			
+			dot_size = v
+			
+			reanchor_clones()
+		end
+	)
+	
+	override_property(instance,"num_dots",
+		
+		function(oldf)    return image   end,
+		
+		function(oldf,self,v)
+			
+			if v == num then return end
+			
+			--if new number is smaller than the previous number
+			if num > v then
+				
+				--toss the excess
+				for i = num,v+1,-1 do
+					clones[i]:unparent()
+					clones[i] = nil
+				end
+				
+			--if new number is larger than the previous number
+			else
+				
+				--add more
+				for i = num+1,v do
+					clones[i] = Clone{
+						source       = image,
+						anchor_point = {dot_size/2,dot_size/2},
+						w            = dot_size,
+						h            = dot_size,
+					}
+					instance:add(clones[i])
+				end
+				
+			end
+			
+			num = v
+			
+			reposition_clones()
 			
 		end
 	)
@@ -144,15 +245,17 @@ ProgressSpinner = function(parameters)
 	----------------------------------------------------------------------------
 	
 	override_property(instance,"duration",
-		function(oldf) return duration     end,
-		function(oldf,self,v) duration = v end
+		function(oldf) return load_timeline.duration     end,
+		function(oldf,self,v) load_timeline.duration = v end
 	)
-	
 	override_property(instance,"animating",
-		function(oldf) return animating     end,
+		function(oldf) return load_timeline.is_playing end,
 		function(oldf,self,v)
 			
 			if type(v) ~= "boolean" then
+				
+				error("OrbittingDots.animating expects type boolean. Received "..type(v),2)
+				
 			elseif animating == v then
 				
 				return
@@ -163,63 +266,28 @@ ProgressSpinner = function(parameters)
 			
 			if animating then
 				
-				image:animate{
-					duration   = duration,
-					z_rotation = 360,
-					loop       = true,
-				}
+				load_timeline:start()
 				
 			else
-				image:stop_animation()
-				image.z_rotation = {0,0,0}
+				
+				load_timeline:stop()
+				
 			end
+			
 		end
 	)
 	
 	----------------------------------------------------------------------------
 	
-	instance:subscribe_to(
-		{"h","w","width","height","size"},
-		function()   flag_for_redraw = true   end
-	)
-	instance:subscribe_to(
-		{"duration","image"},
-		function()
-			if animating then
-				
-				instance.animating = false
-				
-				instance.animating = true
-				
-			end
-		end
-	)
-	
-	local canvas_callback = function() return canvas and make_canvas()   end
-	
-	instance:subscribe_to(
-		nil,
-		function()
-			
-			if flag_for_redraw then
-				flag_for_redraw = false
-				if canvas then
-					canvas_callback()
-				else
-					resize_images()
-				end
-			end
-			
-		end
-	)
+	local style_callback = function() if canvas then flag_for_redraw = true end   end
 	
 	function instance_on_style_changed()
 		
-		instance.style.fill_colors:on_changed(    instance, canvas_callback )
-		instance.style.border:on_changed(         instance, canvas_callback )
-		instance.style.border.colors:on_changed(  instance, canvas_callback )
+		instance.style.fill_colors:on_changed(    instance, style_callback )
+		instance.style.border:on_changed(         instance, style_callback )
+		instance.style.border.colors:on_changed(  instance, style_callback )
 		
-		canvas_callback()
+		style_callback()
 	end
 	
 	instance:subscribe_to( "style", instance_on_style_changed )
@@ -228,9 +296,7 @@ ProgressSpinner = function(parameters)
 	
 	----------------------------------------------------------------------------
 	
-	instance.duration  = parameters.duration
-	instance.image     = parameters.image
-	instance.animating = parameters.animating
+	instance:set(parameters)
 	
 	return instance
 	

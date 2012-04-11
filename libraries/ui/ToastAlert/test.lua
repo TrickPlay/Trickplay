@@ -11,24 +11,16 @@ if not TOASTALERT        then dofile("ToastAlert/ToastAlert.lua")         end
 
 
 
-
+text = "This is a sample message. This is a sample message. This is a sample message. This is a sample message. This is a sample message. "
 
 screen:show()
 
 
-d1 = DialogBox()
-d2 = DialogBox{x = 500}
+t1 = ToastAlert()
 
-d2.title = "This is a really really really long title"
-d2.style.fill_colors.default = "660000"
-d2.style.border.corner_radius = 40
-
-d3 = DialogBox{x = 1000,separator_y = 200}
-d3.style.border.width = 10
-
-d4 = DialogBox{y = 400, image = "DialogBox/panel.png"}
-d4.style.text.font = "Sans 80px"
-
-
-screen:add(Rectangle{size = screen.size,color = "000033"},d1,d2,d3,d4)
+t2 = ToastAlert{message = text,icon = "ToastAlert/load-error.png",x = 1000}
+t3 = ToastAlert{message = text,icon = "ToastAlert/load-error.png",x =  500, h =120}
+t4 = ToastAlert{message = text,icon = "ToastAlert/load-error.png",x = 1500, message_font = "Sans 30px",message_color="00ff00"}
+t4.style.border.colors.default = "00ff00"
+screen:add(t1,t2,t3,t4)
 

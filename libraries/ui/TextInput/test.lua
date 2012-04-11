@@ -6,29 +6,24 @@ if not CANVAS            then dofile("__UTILITIES/Canvas.lua")            end
 if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
 if not STYLE             then dofile("__CORE/Style.lua")                  end
 if not WIDGET            then dofile("__CORE/Widget.lua")                 end
-if not DIALOGBOX         then dofile("DialogBox/DialogBox.lua")           end
-if not TOASTALERT        then dofile("ToastAlert/ToastAlert.lua")         end
+if not TEXTINPUT         then dofile("TextInput/TextInput.lua")           end
 
 
 
-
+text = "This is a sample message. This is a sample message. This is a sample message. This is a sample message. This is a sample message. "
 
 screen:show()
 
 
-d1 = DialogBox()
-d2 = DialogBox{x = 500}
+t1 = TextInput()
 
-d2.title = "This is a really really really long title"
-d2.style.fill_colors.default = "660000"
-d2.style.border.corner_radius = 40
+t1.style.fill_colors.default = "660000"
 
-d3 = DialogBox{x = 1000,separator_y = 200}
-d3.style.border.width = 10
+t2 = TextInput{h=400,x = 200}
 
-d4 = DialogBox{y = 400, image = "DialogBox/panel.png"}
-d4.style.text.font = "Sans 80px"
+t2.text = "default"
+
+screen:add(t1,t2)
 
 
-screen:add(Rectangle{size = screen.size,color = "000033"},d1,d2,d3,d4)
-
+controllers:start_pointer()
