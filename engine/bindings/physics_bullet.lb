@@ -3,7 +3,8 @@ module physics_bullet;
 
 [[
 #include "BulletCollision/CollisionShapes/btTriangleShape.h"
-#include <BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h>
+#include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h"
+#include "BulletCollision/Gimpact/btGImpactShape.h"
 
 #include "physics_bullet.h"
 #include "clutter_util.h"
@@ -146,7 +147,12 @@ interface PBShape [[ btCollisionShape * ]]
             TableFrombtVector3( L , 0 , self->getLocalScaling() );
         ]]
         [[
-            self->setLocalScaling( btVector3FromTable( L , 2 ) ); 
+            self->setLocalScaling( btVector3FromTable( L , 2 ) );
+            
+            if ( btGImpactMeshShape * ms = static_cast< btGImpactMeshShape * >( self ) )
+            {
+                ms->updateBound();
+            } 
         ]];        
         
     double margin
@@ -1209,7 +1215,7 @@ global pb [[ Bullet::World * ]]
                 v[n].setY( lua_tonumber( L , -2 ) );
                 v[n].setZ( lua_tonumber( L , -1 ) );
                 
- //               g_debug( "TRIANGLE %d.%d : %3.1f , %3.1f , %3.1f" , c , n , v[n].x() , v[n].y() , v[n].z() );
+//                g_debug( "TRIANGLE %d.%d : %3.1f , %3.1f , %3.1f" , c , n , v[n].x() , v[n].y() , v[n].z() );
                  
                 lua_pop( L , 4 );
                 
@@ -1224,20 +1230,15 @@ global pb [[ Bullet::World * ]]
                 }
             }
             
-            btBvhTriangleMeshShape * ts = new btBvhTriangleMeshShape( tm , true );
+            btGImpactMeshShape * ms = new btGImpactMeshShape( tm );
             
-            btCollisionShape * shape = ts; 
-
             if ( scaling )
             {
-//                g_debug( "SCALED!" ); 
-                
-                btVector3 vs = btVector3FromTable( L , scaling );
-                
-                shape = new btScaledBvhTriangleMeshShape( ts , vs );                
+                ms->setLocalScaling( btVector3FromTable( L , scaling ) );
+                ms->updateBound();
             }
-            
-            self->create_shape( shape , new_PBShape );
+
+            self->create_shape( ms , new_PBShape );
         ]];        
         
     PBPointToPointConstraint PointToPointConstraint( PBBody3d bodyA , table pivotA , PBBody3d bodyB = 0 , table pivotB = 0 )
