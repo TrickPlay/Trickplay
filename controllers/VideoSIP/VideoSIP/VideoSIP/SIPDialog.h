@@ -153,6 +153,15 @@
 
 @end
 
+#pragma mark -
+#pragma mark NOTIFY
+
+@interface NotifyDialog : SIPDialog
+
+- (void)receivedNotify:(NSDictionary *)notifyPacket fromAddr:(NSData *)remoteAddr;
+
+@end
+
 
 #pragma mark -
 #pragma mark INVITE

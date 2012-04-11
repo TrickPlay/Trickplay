@@ -13,19 +13,26 @@
 #import <sys/types.h>
 #import <sys/socket.h>
 #import <netdb.h>
+#import <arpa/inet.h>
 
 #import "net_common.h"
 
 #import "MyExtensions.h"
 
-#define ASTERISK_HOST "asterisk-1.asterisk.trickplay.com"
+//#define ASTERISK_HOST "asterisk-1.asterisk.trickplay.com"
+#define ASTERISK_HOST "freeswitch.internal.trickplay.com"
 #define ASTERISK_PORT "5060"
 
 
 static NSString *const user = @"phone";
+/*
 static NSString *const contactURI = @"sip:phone@asterisk-1.asterisk.trickplay.com";
 static NSString *const remoteURI = @"sip:1002@asterisk-1.asterisk.trickplay.com";
 static NSString *const asteriskURI = @"sip:asterisk-1.asterisk.trickplay.com";
+*/
+static NSString *const contactURI = @"sip:phone@freeswitch.internal.trickplay.com";
+static NSString *const remoteURI = @"sip:1002@freeswitch.internal.trickplay.com";
+static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 //static NSString *udpClientIP = @"10.0.190.153";
 static NSUInteger const udpClientPort = 50160;
 static NSUInteger const udpServerPort = 5060;
@@ -53,15 +60,27 @@ static NSUInteger const udpServerPort = 5060;
     if (self) {
         sipDialogs = [[NSMutableDictionary alloc] initWithCapacity:40];
         
+        // Create socket
         const CFSocketContext context = {0, self, NULL, NULL, NULL};
         sipSocket = CFSocketCreate(kCFAllocatorDefault, PF_INET, SOCK_DGRAM, IPPROTO_UDP, kCFSocketReadCallBack | kCFSocketWriteCallBack, sipSocketCallback, &context);
+        
+        // Bind socket to appropriate port
+        int sock = CFSocketGetNative(sipSocket);
+        // TODO: check to make suer host_addr4 returns something
+        udpClientIP = [[NSString stringWithFormat:@"%s", host_addr4()] retain];
+        //udpClientIP = [NSString stringWithString:@"66.201.49.178"];
+        
+        struct sockaddr_in client_address;
+        client_address.sin_family = AF_INET;
+        client_address.sin_addr.s_addr = inet_addr([udpClientIP UTF8String]);
+        client_address.sin_port = htons(udpClientPort);
+        memset(client_address.sin_zero, 0, sizeof(client_address.sin_zero));
+        
+        bind(sock, (struct sockaddr *)&client_address, sizeof(client_address));
         
         writeQueue = [[NSMutableArray alloc] initWithCapacity:100];
         
         sipThread = [[NSThread alloc] initWithTarget:self selector:@selector(threadMain:) object:nil];
-        
-        //udpClientIP = [[NSString stringWithFormat:@"%s", host_addr4()] retain];
-        udpClientIP = [NSString stringWithString:@"66.201.49.178"];
         
         sps = [_sps retain];
         pps = [_pps retain];
@@ -160,8 +179,12 @@ static NSUInteger const udpServerPort = 5060;
         OptionsDialog *options = [[[OptionsDialog alloc] initWithUser:user contactURI:contactURI remoteURI:asteriskURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
 
         [options receivedOptions:sipHdrDic fromAddr:remoteAddr];
-    } else if ([statusLine rangeOfString:@"BYE "].location != NSNotFound) {
+    } else if ([statusLine rangeOfString:@"NOTIFY "].location != NSNotFound) {
+        NotifyDialog *notify = [[[NotifyDialog alloc] initWithUser:user contactURI:contactURI remoteURI:asteriskURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
         
+        [notify receivedNotify:sipHdrDic fromAddr:remoteAddr];
+    } else if ([statusLine rangeOfString:@"BYE "].location != NSNotFound) {
+        NSLog(@"Fix handling extra BYEs here\n");
     } else {
         NSLog(@"\nUnauthorized New Dialog\n");
     }
@@ -177,7 +200,7 @@ static NSUInteger const udpServerPort = 5060;
     }
     
     NSString *sipPacket = [[NSString alloc] initWithData:sipData encoding:NSUTF8StringEncoding];
-    NSLog(@"\nRecieved packet:\n%@\n", sipPacket);
+    NSLog(@"Received packet:\n%@\n", sipPacket);
     
     // Separate header and body
     NSArray *components = [sipPacket componentsSeparatedByString:@"\r\n\r\n"];
@@ -222,7 +245,7 @@ static NSUInteger const udpServerPort = 5060;
  */
 void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
                        const void *data, void *info) {
-    fprintf(stderr, "SIP Socket Callback\n");
+    //fprintf(stderr, "SIP Socket Callback\n");
     
     switch (type) {
         case kCFSocketReadCallBack:
@@ -258,7 +281,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
                 SIPClient *self = (SIPClient *)info;
                 // TODO: Some type of error catching here is well advised, in case of
                 // malformed packets.
-                NSLog(@"\nReceived from address: %@\n", addrObj);
+                //NSLog(@"\nReceived from address: %@\n\n", addrObj);
                 if (addrLen > 0) {
                     [self sipParse:dataObj fromAddr:addrObj];
                 }
@@ -339,6 +362,10 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
         if (p == NULL) {
             fprintf(stderr, "client: failed to connect\n");
             return;
+        } else {
+            char str[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, p->ai_addr, str, INET_ADDRSTRLEN);
+            fprintf(stderr, "\nSIP IP address: %s\nSIP port: %d\n", str, ntohs(((struct sockaddr_in *)(p->ai_addr))->sin_port));
         }
     
         @synchronized(self) {
