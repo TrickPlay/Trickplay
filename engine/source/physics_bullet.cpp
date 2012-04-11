@@ -3,6 +3,7 @@
 #include <BulletCollision/CollisionShapes/btBox2dShape.h>
 #include <BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <BulletCollision/Gimpact/btGImpactCollisionAlgorithm.h>
 
 #include "physics_bullet.h"
 #include "clutter_util.h"
@@ -151,6 +152,9 @@ World::World( lua_State * L , float _pixels_per_meter )
 	collision_configuration = new btDefaultCollisionConfiguration();
 
 	dispatcher = new btCollisionDispatcher( collision_configuration );
+
+
+	btGImpactCollisionAlgorithm::registerAlgorithm( dispatcher );
 
 	pair_cache = new btDbvtBroadphase();
 
