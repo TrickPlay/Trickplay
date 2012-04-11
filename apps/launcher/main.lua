@@ -164,7 +164,7 @@ local function main()
         
         video_tile_inner_width   = 547,
         video_tile_border_width  = 3,
-        video_tile_corner_radius = 20,
+        video_tile_corner_radius = 10,
         video_tile_font          = "FreeSans Medium 32px",
         
         my_apps_hl_w        = 300,
