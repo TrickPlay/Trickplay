@@ -308,6 +308,7 @@
 
     NSArray *remoteVia = [[optionsPacket objectForKey:@"Via"] componentsSeparatedByString:@";"];
 
+    // TODO: malformed packets that are missing information could crash this.
     NSString *response = [NSString stringWithFormat:@"SIP/2.0 200 OK\r\n"
                           @"Via: %@;%@;rport=%d;received=%s\r\n"
                           @"From: %@\r\n"
@@ -329,6 +330,67 @@
                           supported];
                           
     NSLog(@"Options Response: %@\n", response);
+    
+    [delegate dialog:self wantsToSendData:[response dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
+@end
+
+
+@implementation NotifyDialog
+
+- (void)receivedNotify:(NSDictionary *)notifyPacket fromAddr:(NSData *)remoteAddr {
+    // respond to the packet
+    struct sockaddr_in *addr = (struct sockaddr_in *)[remoteAddr bytes];
+    char ip_string[INET_ADDRSTRLEN];
+    
+    inet_ntop(AF_INET, &(addr->sin_addr), ip_string, INET_ADDRSTRLEN);
+    
+    NSArray *remoteVia = [[notifyPacket objectForKey:@"Via"] componentsSeparatedByString:@";"];
+    
+    // TODO: malformed received packets that have different information could crash this.
+    /*
+    NSString *response = [NSString stringWithFormat:@"SIP/2.0 481 Dialog/Transaction Does Not Exist\r\n"
+                          @"Via: %@;rport=%d;received=%s;%@\r\n"
+                          @"From: %@\r\n"
+                          @"To: %@;tag=%@\r\n"
+                          @"Call-ID: %@\r\n"
+                          @"CSeq: %@\r\n"
+                          @"Contact: %@\r\n"
+                          @"User-Agent: %@\r\n"
+                          @"Supported: %@\r\n"
+                          @"Event: %@\r\n"
+                          @"Allow-Events: %@\r\n"
+                          @"Subscription-State: %@\r\n"
+                          @"Content-Length: 0\r\n\r\n",
+                          [remoteVia objectAtIndex:0], ntohs(addr->sin_port), ip_string, [remoteVia objectAtIndex:2],
+                          [notifyPacket objectForKey:@"From"],
+                          [notifyPacket objectForKey:@"To"], [from objectForKey:@"tag"],
+                          [notifyPacket objectForKey:@"Call-ID"],
+                          [notifyPacket objectForKey:@"CSeq"],
+                          contact,
+                          userAgent,
+                          supported,
+                          [notifyPacket objectForKey:@"Event"],
+                          [notifyPacket objectForKey:@"Allow-Events"],
+                          [notifyPacket objectForKey:@"Subscription-State"]];
+    //*/
+    
+    // copied from vippie
+    NSString *response = [NSString stringWithFormat:@"SIP/2.0 200 OK\r\n"
+                          @"Via: %@;rport=%d;received=%s;%@\r\n"
+                          @"From: %@\r\n"
+                          @"To: %@;tag=%@\r\n"
+                          @"Call-ID: %@\r\n"
+                          @"CSeq: %@\r\n"
+                          @"Content-Length: 0\r\n\r\n",
+                          [remoteVia objectAtIndex:0], ntohs(addr->sin_port), ip_string, [remoteVia objectAtIndex:2],
+                          [notifyPacket objectForKey:@"From"],
+                          [notifyPacket objectForKey:@"To"], [from objectForKey:@"tag"],
+                          [notifyPacket objectForKey:@"Call-ID"],
+                          [notifyPacket objectForKey:@"CSeq"]];
+    
+    NSLog(@"Notify Response: %@\n", response);
     
     [delegate dialog:self wantsToSendData:[response dataUsingEncoding:NSUTF8StringEncoding]];
 }
@@ -375,9 +437,9 @@
     
     //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 97\r\nb=AS:1372\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@==\r\nmpeg4-esid:201\r\n", udpClientIP, user, udpClientIP, b64sps, b64pps];
     
-    //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\nm=video 22078 RTP/AVP 102\r\na=rtpmap:102 H264/90000\r\na=fmtp:102 packetization-mode=0;sprop-parameter-sets=%@,%@==\r\n", udpClientIP, user, udpClientIP, b64sps, b64pps];
+    sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 99\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 packetization-mode=1;sprop-parameter-sets=%@,%@\r\n", udpClientIP, user, udpClientIP, b64sps, b64pps];
     
-    sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 99\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 profile-level-id=42000A;packetization-mode=0", udpClientIP, user, udpClientIP];
+    //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 99\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 profile-level-id=42000A;packetization-mode=0\r\n", udpClientIP, user, udpClientIP];
     
     return sdp;
 }
@@ -414,7 +476,7 @@
     
     NSString *sdpPacket = [self genSDP];
     
-    invite = [NSString stringWithFormat:@"%@%@%d%@%@", invite, @"Content-Length: ", [sdpPacket length], @"\r\n\r\n", sdpPacket];
+    invite = [NSString stringWithFormat:@"%@%@%d%@%@", invite, @"Content-Type: application/sdp\r\nContent-Length: ", [sdpPacket length], @"\r\n\r\n", sdpPacket];
     
     //cseq += 1;
     
@@ -508,7 +570,7 @@
     self.branch = [self generateBranch];
     NSString *packet = [self generateInvite];
     
-    NSLog(@"\nInvite packet:\n%@\n", packet);
+    NSLog(@"\nInvite packet:\n%@\n\n", packet);
     
     [delegate dialog:self wantsToSendData:[packet dataUsingEncoding:NSUTF8StringEncoding]];
     
@@ -579,12 +641,12 @@
             [self parseAuthentication:authRequest];
             [self inviteWithAuthHeader:@"Proxy-Authorization"];
         }
-    } else if ([statusLine rangeOfString:@"BYE"].location != NSNotFound) {
+    } else if ([statusLine rangeOfString:@"BYE "].location != NSNotFound) {
         [self byeResponse:parsedPacket fromAddr:remoteAddr];
         [delegate dialog:self endRTPStreamWithMediaDestination:mediaDestination];
         [delegate dialogSessionEnded:self];
     } else {
-        NSLog(@"Unrecognized Response: %@", statusLine);
+        NSLog(@"Unrecognized Response: %@\n", statusLine);
     }
 }
 
