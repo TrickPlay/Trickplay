@@ -1,24 +1,5 @@
 local clonesources = {}
 
---draws a rounded rectangle canvas path
-local round_rectangle = function(c,x,y,w,h,r)
-    
-    c:move_to( x, y+r)
-    --top-left corner
-    c:arc( x+r, y+r, r,180,270)
-    c:line_to(x+w - r, y)
-    --top-right corner
-    c:arc( x+w - r, y+r, r,270,360)
-    c:line_to(x+w, y+h - r)
-    --bottom-right corner
-    c:arc( x+w - r, y+h - r, r,0,90)
-    c:line_to( x+r, y+h )
-    --bottom-left corner
-    c:arc( x+r, y+h - r, r,90,180)
-    c:line_to( x, y+r)
-    
-end
-
 local make_hl = function(p)
     local c = Canvas(p.w,p.h)
     
@@ -96,13 +77,13 @@ local function make_video_tile_frame(p)
     
     local c = Canvas(
         p.w+2*p.b+2*p.s_sz,
-        2*p.r+1+3*p.b+p.t_h+2*p.s_sz
+        p.r+1+3*p.b+p.t_h+2*p.s_sz
     )
     
     c.op = "SOURCE"
     
     --background
-    round_rectangle(c,
+    c:round_rectangle(
         p.s_sz,
         p.s_sz,
         c.w-2*p.s_sz,
@@ -111,11 +92,10 @@ local function make_video_tile_frame(p)
     )
     c:set_source_color("#ffffff")
     c:fill()
-    
     for i = 1, p.s_sz do
         c:set_source_color{0,0,0,(255/p.s_sz*(p.s_sz-i+1))/4}
         
-        round_rectangle(c,
+        c:round_rectangle(
             p.s_sz-i,
             p.s_sz-i,
             c.w-2*p.s_sz+2*i,
@@ -135,11 +115,11 @@ local function make_video_tile_frame(p)
     end
     
     --punch a hole
-    round_rectangle(c,
+    c:round_rectangle(
         p.b+p.s_sz,
         2*p.b + p.t_h+p.s_sz,
         p.w,
-        2*p.r+1,
+        p.r+1,
         p.r
     )
     c:set_source_color("#00000000")
@@ -165,7 +145,7 @@ local function make_video_tile_frame(p)
     
     
     --get bottom piece
-    c = Canvas(c.w, p.b + p.r+2)
+    c = Canvas(c.w, p.b + 10)
     c:set_source_bitmap(b,0,-b.h+c.h)
     c:paint()
     
