@@ -3,6 +3,7 @@ TOASTALERT = true
 default_parameters = {
     title = "ToastAlert", 
     message_font="Sans 40px",
+    message_color = "ffffff",
     vertical_message_padding   = 10,
     horizontal_message_padding =  5,
     horizontal_icon_padding    = 20,
@@ -34,8 +35,6 @@ ToastAlert = function(parameters)
 	local vertical_icon_padding = 5
 	local message = Text{
 		wrap=true,
-		w = 350,
-		color = instance.style.border.colors.default,
 	}
 	instance:add(message)
 	local icon, on_completed, on_screen_duration, animate_in_duration, animate_out_duration
@@ -80,6 +79,10 @@ ToastAlert = function(parameters)
 		function(oldf) return   message.text     end,
 		function(oldf,self,v)   message.text = v end
 	)
+	override_property(instance,"message_color",
+		function(oldf) return   message.color     end,
+		function(oldf,self,v)   message.color = v end
+	)
 	override_property(instance,"message_font",
 		function(oldf) return   message.font     end,
 		function(oldf,self,v)   message.font = v end
@@ -100,7 +103,6 @@ ToastAlert = function(parameters)
 		function(oldf) return   vertical_icon_padding     end,
 		function(oldf,self,v)   vertical_icon_padding = v end
 	)
-	
 	override_property(instance,"on_completed",
 		function(oldf) return   on_completed     end,
 		function(oldf,self,v)   on_completed = v end
