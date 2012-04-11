@@ -208,6 +208,17 @@ local function init_gl_viewport( width , height , panel_aspect , stretch )
 --    modelview_matrix:rotate( 0.5 , 0 , 1 , 1 )
 end
 
+local function dm( m )
+    local t = m.table
+    if t then
+        m = t
+    end
+    print( string.format( "%5.0f %5.0f %5.0f %5.0f" , m[1] , m[5] , m[9] , m[13] ) )
+    print( string.format( "%5.0f %5.0f %5.0f %5.0f" , m[2] , m[6] , m[10] , m[14] ) )
+    print( string.format( "%5.0f %5.0f %5.0f %5.0f" , m[3] , m[7] , m[11] , m[15] ) )
+    print( string.format( "%5.0f %5.0f %5.0f %5.0f" , m[4] , m[8] , m[12] , m[16] ) )
+end
+
 local function display( cubes )
 
     gl:acquire()
@@ -227,7 +238,7 @@ local function display( cubes )
     for i = 1 , # cubes do
     
         local cube = cubes[ i ]
-        
+       
         mvp_matrix:identity():multiply( projection_matrix , cube.matrix() )
 
         gl:uniformMatrix4fv( mvp_matrix_loc , false , mvp_matrix )
@@ -238,12 +249,6 @@ local function display( cubes )
     gl:release()   
 end
 
-local function dm( m )
-    print( string.format( "%5.0f %5.0f %5.0f %5.0f" , m[1] , m[5] , m[9] , m[13] ) )
-    print( string.format( "%5.0f %5.0f %5.0f %5.0f" , m[2] , m[6] , m[10] , m[14] ) )
-    print( string.format( "%5.0f %5.0f %5.0f %5.0f" , m[3] , m[7] , m[11] , m[15] ) )
-    print( string.format( "%5.0f %5.0f %5.0f %5.0f" , m[4] , m[8] , m[12] , m[16] ) )
-end
 
 local function make_cube( x , y , z , hw , xr , yr , zr , props )
 
@@ -261,11 +266,20 @@ local function make_cube( x , y , z , hw , xr , yr , zr , props )
         w , h , d = unpack( hw )
     end
     
-    local shape = pb:BoxShape( w , h , d )
+    local shape
     
-    --local shape = pb:TriangleMeshShape( cube_vs , cube_is , { w , h , d } )
-    --dumptable( shape.local_scaling )
-    --dumptable( shape.aabb )
+    if false then
+        
+        shape = pb:TriangleMeshShape( cube_vs , cube_is , { w , h , d } )
+        
+    else
+    
+        shape = pb:BoxShape( w , h , d )
+        
+    end
+    
+    dumptable( shape.local_scaling )
+    dumptable( shape.aabb )
     
     local b = 
         {
@@ -276,7 +290,7 @@ local function make_cube( x , y , z , hw , xr , yr , zr , props )
             friction = 1
         }
     
-    if props then
+    if type( props ) == "table" then
         for k , v in pairs( props ) do
             b[ k ] = v
         end
@@ -316,10 +330,10 @@ local function main()
     
     local cubes =
     {
-        make_cube( -250 , 200 , -1000 , 50 , 180 , 0 , 0 ),
+        make_cube( -250 , 200 , -1000 , 50 , 0 , 0 , 0 ),
 
----[[
-        make_cube( -100 , 200 , -1000 , 50 , 0 , 0 , 0 ),
+----[[
+        make_cube( -100 , 200 , -1000 , 40 , 0 , 0 , 0 ),
         
 
         make_cube( -400 , 800 , -1000 , r(90) , r(90) , r(90) , r(90) ),
