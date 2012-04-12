@@ -700,6 +700,21 @@ interface PBBody3d [[ btCollisionObject * ]]
         [[
             self->activate( true );
         ]];
+        
+    bool collides
+        [[
+            collides = ( self->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE ) == 0;
+        ]]
+        [[
+            if ( collides )
+            {
+                self->setCollisionFlags( self->getCollisionFlags() & ! btCollisionObject::CF_NO_CONTACT_RESPONSE );
+            }
+            else
+            {
+                self->setCollisionFlags( self->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE );
+            }
+        ]];        
 
     readonly bool in_world
         [[
