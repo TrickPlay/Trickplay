@@ -33,7 +33,6 @@ DialogBox = function(parameters)
 	--flags
 	local canvas          = type(parameters.images) == "nil"
 	local flag_for_redraw = false --ensure at most one canvas redraw from Button:set()
-	local from_set        = false --indicates that an attribute is being set in Button:set()
 	local size_is_set = -- an ugly flag that is used to determine if the user set the Button size themselves yet
 		parameters.h or
 		parameters.w or
@@ -48,6 +47,9 @@ DialogBox = function(parameters)
 	--The Button Object inherits from Widget
 	
 	local instance = Widget( parameters )
+	
+	--the default w and h does not count as setting the size
+	if not size_is_set then instance:reset_size_flag() end
 	
 	local title = Text()
 	
@@ -76,17 +78,11 @@ DialogBox = function(parameters)
 	
 	local function make_canvas()
 		
-		if from_set then
-			
-			flag_for_redraw = true
-			
-			return
-			
-		end
-		
 		flag_for_redraw = false
 		
 		canvas = true
+		
+		if bg then bg:unparent() end
 		
 		bg = default_bg(instance)
 		
@@ -104,6 +100,8 @@ DialogBox = function(parameters)
 		
 		bg = v
 		
+		if bg then bg:unparent() end
+		
 		instance:add( bg )
 		
 		bg:lower_to_bottom()
@@ -114,7 +112,7 @@ DialogBox = function(parameters)
 			
 		else
 			--so that the label centers properly
-			instance.size = images.default.size
+			instance.size = bg.size
 			
 			instance:reset_size_flag()
 			
@@ -131,21 +129,44 @@ DialogBox = function(parameters)
 	
 	override_property(instance,"image",
 		
-		function(oldf)    return bg   end,
+		function(oldf)    return image   end,
 		
 		function(oldf,self,v)
 			
-			if bg then bg:unparent() end
-			
-			return v == nil and make_canvas() or
+			if type(v) == "string" then
 				
-				type(v) == "userdata" and setup_image(v) or
+				if image == nil or image.src ~= v then
+					
+					setup_image(Image{ src = v })
+					
+				end
 				
-				error("Button.images expected type 'table'. Received "..type(v),2)
+			elseif type(v) == "userdata" and v.__types__.actor then
+				
+				if v ~= image then
+					
+					setup_image(v)
+					
+				end
+				
+			elseif v == nil then
+				
+				if not canvas then
+					
+					flag_for_redraw = true
+					
+					return
+					
+				end
+				
+			else
+				
+				error("DialogBox.image expected type 'table'. Received "..type(v),2)
+				
+			end
 			
 		end
 	)
-	
 	override_property(instance,"title",
 		function(oldf) return title.text     end,
 		function(oldf,self,v) title.text = v end
@@ -159,7 +180,8 @@ DialogBox = function(parameters)
 			
 			separator_y = v
 			
-			return canvas and make_canvas()
+			if canvas then flag_for_redraw = false end
+			
 		end
 	)
 	
@@ -186,23 +208,31 @@ DialogBox = function(parameters)
 		end
 	)
 	
-	override_function(instance,"set", function(old_function, ... )
-		
-		from_set = true    old_function(...)     from_set = false
-		
-		if flag_for_redraw then make_canvas() end
-		
-	end)
-	
-	
-	function instance:on_size_changed()
-		
-		if canvas then    make_canvas()    else    resize_images()   end
-		
-		center_title()
-		
-	end
-	
+	instance:subscribe_to(
+		{"h","w","width","height","size"},
+		function()
+			
+			flag_for_redraw = true
+			
+			center_title()
+			
+		end
+	)
+	instance:subscribe_to(
+		nil,
+		function()
+			
+			if flag_for_redraw then
+				flag_for_redraw = false
+				if canvas then
+					make_canvas()
+				else
+					resize_images()
+				end
+			end
+			
+		end
+	)
 	local text_style
 	local update_title  = function()
 		
@@ -219,7 +249,7 @@ DialogBox = function(parameters)
 	
 	local canvas_callback = function() if canvas then make_canvas() end end
 	
-	function instance:on_style_changed()
+	function instance_on_style_changed()
 		
 		instance.style.text:on_changed(instance,update_title)
 		
@@ -228,12 +258,12 @@ DialogBox = function(parameters)
 		instance.style.border.colors:on_changed(  instance, canvas_callback )
 		
 		update_title()
-		canvas_callback()
+		flag_for_redraw = true
 	end
 	
-	instance:on_style_changed()
+	instance:subscribe_to( "style", instance_on_style_changed )
 	
-	
+	instance_on_style_changed()
 	
 	
 	instance:add(title)
