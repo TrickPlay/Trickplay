@@ -22,7 +22,7 @@ Extra Function:
     get_tile_group(r,c) - returns group for the tile at row 'r' and column 'c'
     animate_in() - performs the animate-in sequence
 ]]
---[[
+--[=[
 function ui_element.layoutManager(t)
     --default parameters
     local p = {
@@ -460,4 +460,4 @@ function ui_element.layoutManager(t)
     return slate
 end
 
---]]
+--]=]
