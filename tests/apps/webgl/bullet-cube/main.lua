@@ -1,4 +1,25 @@
 
+    local function dump_properties( o )
+        local t = {}
+        local l = 0
+        for k , v in pairs( getmetatable( o ).__getters__ ) do
+            local s = v( o )
+            if type( s ) == "table" then
+                s = serialize( s )
+            elseif type( s ) == "string" then
+                s = string.format( "%q" , s )
+            else
+                s = tostring( s )
+            end
+            table.insert( t , { k , s } )
+            l = math.max( l , # k )
+        end
+        table.sort( t , function( a , b ) return a[1] < b[1] end )
+        for i = 1 , # t do
+            print( string.format( "%-"..tostring(l+1).."s = %s" , t[i][1] , t[i][2] ) )
+        end
+    end
+
 local gl = WebGLCanvas{ size = screen.size }
 
 screen:add( gl )
@@ -278,8 +299,8 @@ local function make_cube( x , y , z , hw , xr , yr , zr , props )
         
     end
     
-    dumptable( shape.local_scaling )
-    dumptable( shape.aabb )
+    --dumptable( shape.local_scaling )
+    --dumptable( shape.aabb )
     
     local b = 
         {
@@ -301,7 +322,7 @@ local function make_cube( x , y , z , hw , xr , yr , zr , props )
     local sm = Matrix()
     
     pb:add( body )
-        
+    
     return
     {
         matrix = function() return body:get_transform( sm ):scale(w,h,d) end,
@@ -333,9 +354,9 @@ local function main()
         make_cube( -250 , 200 , -1000 , 50 , 0 , 0 , 0 ),
 
 ----[[
-        make_cube( -100 , 200 , -1000 , 40 , 0 , 0 , 0 ),
+        make_cube( -100 , 200 , -1000 , 50 , 0 , 0 , 0 ),
         
-
+----[[
         make_cube( -400 , 800 , -1000 , r(90) , r(90) , r(90) , r(90) ),
         make_cube( -200 , 800 , -1000 , r(90) , r(90) , r(90) , r(90) ),
         make_cube(    0 , 800 , -1000 , r(90) , r(90) , r(90) , r(90) ),
@@ -367,8 +388,15 @@ local function main()
 
     local cn = pb:SliderConstraint( c1 , Matrix():translate( 50 , 0 , 0 ) , false , c2 , Matrix():translate( -50 , 0 , 0 ) )
     
-    cn.linear_lower_limit = 600
-    cn.linear_upper_limit = 100
+    --cn.linear_lower_limit = 600
+    --cn.linear_upper_limit = 100
+    
+    dump_properties( cn )
+    
+    cn.linear_motor_on = true
+    cn.linear_motor_target_velocity = 5
+    cn.linear_motor_max_force = 10
+    
     
     pb:add_constraint( cn , false )
     
