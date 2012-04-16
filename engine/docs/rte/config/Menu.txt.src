@@ -66,6 +66,7 @@ Group: SDK Tutorial {
 Group: Sample Applications {
 	File: Using AnimationState (no auto-title, docs/tutorials/animationState/doc.txt)
 	File: Program Localization (no auto-title, docs/tutorials/localization/doc.txt)
+	File: Using Canvas (no auto-title, docs/tutorials/canvasDemo/doc.txt)
 	File: Screen Transitions (no auto-title, docs/tutorials/screen_transitions/doc.txt)
 	File: Multi-Level Menus (no auto-title, docs/tutorials/menu_multilevel/doc.txt)
 	File: Using 3D Assets (no auto-title, docs/tutorials/assets3d/doc.txt)
