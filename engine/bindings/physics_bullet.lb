@@ -660,6 +660,153 @@ interface PBSliderConstraint [[ btSliderConstraint * ]]
         [[
             self->setUpperAngLimit( angular_upper_limit );
         ]];
+        
+        
+    double softness_dir_linear
+        [[
+            softness_dir_linear = self->getSoftnessDirLin();
+        ]]
+        [[
+            self->setSoftnessDirLin( softness_dir_linear );
+        ]];
+        
+    double softness_dir_angular
+        [[
+            softness_dir_angular = self->getSoftnessDirAng();
+        ]]
+        [[
+            self->setSoftnessDirAng( softness_dir_angular );
+        ]];
+        
+    double softness_lim_linear
+        [[
+            softness_lim_linear = self->getSoftnessLimLin();
+        ]]
+        [[
+            self->setSoftnessLimLin( softness_lim_linear );
+        ]];
+        
+    double softness_lim_angular
+        [[
+            softness_lim_angular = self->getSoftnessLimAng();
+        ]]
+        [[
+            self->setSoftnessLimAng( softness_lim_angular );
+        ]];
+        
+    double softness_ortho_linear
+        [[
+            softness_ortho_linear = self->getSoftnessOrthoLin();
+        ]]
+        [[
+            self->setSoftnessOrthoLin( softness_ortho_linear );
+        ]];
+        
+     double softness_ortho_angular
+        [[
+            softness_ortho_angular = self->getSoftnessOrthoAng();
+        ]]
+        [[
+            self->setSoftnessOrthoAng( softness_ortho_angular );
+        ]];
+        
+        
+    double restitution_dir_linear
+        [[
+            restitution_dir_linear = self->getRestitutionDirLin();
+        ]]
+        [[
+            self->setRestitutionDirLin( restitution_dir_linear );
+        ]];
+        
+    double restitution_dir_angular
+        [[
+            restitution_dir_angular = self->getRestitutionDirAng();
+        ]]
+        [[
+            self->setRestitutionDirAng( restitution_dir_angular );
+        ]];
+        
+    double restitution_lim_linear
+        [[
+            restitution_lim_linear = self->getRestitutionLimLin();
+        ]]
+        [[
+            self->setRestitutionLimLin( restitution_lim_linear );
+        ]];
+        
+    double restitution_lim_angular
+        [[
+            restitution_lim_angular = self->getRestitutionLimAng();
+        ]]
+        [[
+            self->setRestitutionLimAng( restitution_lim_angular );
+        ]];
+        
+    double restitution_ortho_linear
+        [[
+            restitution_ortho_linear = self->getRestitutionOrthoLin();
+        ]]
+        [[
+            self->setRestitutionOrthoLin( restitution_ortho_linear );
+        ]];
+        
+     double restitution_ortho_angular
+        [[
+            restitution_ortho_angular = self->getRestitutionOrthoAng();
+        ]]
+        [[
+            self->setRestitutionOrthoAng( restitution_ortho_angular );
+        ]];
+     
+                
+    double damping_dir_linear
+        [[
+            damping_dir_linear = self->getDampingDirLin();
+        ]]
+        [[
+            self->setDampingDirLin( damping_dir_linear );
+        ]];
+        
+    double damping_dir_angular
+        [[
+            damping_dir_angular = self->getDampingDirAng();
+        ]]
+        [[
+            self->setDampingDirAng( damping_dir_angular );
+        ]];
+        
+    double damping_lim_linear
+        [[
+            damping_lim_linear = self->getDampingLimLin();
+        ]]
+        [[
+            self->setDampingLimLin( damping_lim_linear );
+        ]];
+        
+    double damping_lim_angular
+        [[
+            damping_lim_angular = self->getDampingLimAng();
+        ]]
+        [[
+            self->setDampingLimAng( damping_lim_angular );
+        ]];
+        
+    double damping_ortho_linear
+        [[
+            damping_ortho_linear = self->getDampingOrthoLin();
+        ]]
+        [[
+            self->setDampingOrthoLin( damping_ortho_linear );
+        ]];
+        
+     double damping_ortho_angular
+        [[
+            damping_ortho_angular = self->getDampingOrthoAng();
+        ]]
+        [[
+            self->setDampingOrthoAng( damping_ortho_angular );
+        ]];
 
 
     get_frame_offsets( Matrix offsetA , Matrix offsetB )
