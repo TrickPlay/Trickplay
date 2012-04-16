@@ -25,16 +25,17 @@ def main(argv):
 
     try:
         first_arg = argv[1]
-        second_arg = argv[1]
+        second_arg = argv[2]
     except IndexError:
         pass
 
-    if first_arg == "-c":
-        config = True 
-        if second_arg is not None:
-            path = second_arg
-    elif first_arg is not None:
-        path = first_arg
+    if first_arg is not None:
+        if first_arg == "-c":
+            config = True 
+            if second_arg is not None:
+                path = second_arg
+        else:
+            path = first_arg
         
     try:
         app = QApplication(argv)
