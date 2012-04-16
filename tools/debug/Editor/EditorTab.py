@@ -21,7 +21,7 @@ class EditorTabWidget(QTabWidget):
         self.main = main
         self.paths = []
         self.editors = []
-        self.textBefores = []
+        #self.textBefores = []
         self.windowsMenu = windowsMenu
         self.fileSystem = fileSystem
         self.tabClosing = False 
@@ -53,7 +53,9 @@ class EditorTabWidget(QTabWidget):
 		# save before close
 		if isinstance(editor, Editor):
 			currentText = editor.text()#open(editor.path).read()
-			if self.textBefores[index] != currentText:
+			textBefore = self.main.editors[editor.path][2]
+			#if self.textBefores[index] != currentText:
+			if textBefore != currentText:
 				if editor.text_status == 2: #TEXT_CHANGED
 					msg = QMessageBox()
 					msg.setText('The file "' + editor.path + '" changed.')
@@ -65,7 +67,11 @@ class EditorTabWidget(QTabWidget):
 					ret = msg.exec_()
 
 					if ret == QMessageBox.Save:
-						self.textBefores[index] = editor.text()
+						textBefore = editor.text()
+						self.main.editors[editor.path][2] = textBefore
+						
+                        #self.textBefores[index] = editor.text()
+
 						editor.text_status = 1 #TEXT_READ
 						if editor.tempfile == False:
 							editor.save()
@@ -102,7 +108,10 @@ class EditorTabWidget(QTabWidget):
                 return
             if self.main.fontSettingCheck[index] == True :
                 self.main.fontSettingCheck[index] == False
-                self.textBefores[index] = self.editors[index].text()
+                #self.textBefores[index] = self.editors[index].text()
+
+                self.main.editors[editor.path][2] = self.editors[index].text()
+
                 self.editors[index].text_status = 1 #TEXT_READ
                 return
     
@@ -124,7 +133,12 @@ class EditorTabWidget(QTabWidget):
             self.m.ui.action_Delete.setEnabled(False)
 
 	if self.editors[index].tempfile == False  :
-	    if self.textBefores[index] != currentText and self.tabClosing == False :
+	    #if self.textBefores[index] != currentText and self.tabClosing == False :
+	    if not self.main.editors.has_key(self.paths[index]) :
+	        textBefore =  currentText
+	    else :
+	        textBefore = self.main.editors[self.paths[index]][2] 
+	    if textBefore != currentText and self.tabClosing == False :
 		msg = QMessageBox()
 		msg.setText('The file "' + self.paths[index] + '" changed on disk.')
 		if self.editors[index].text_status == 2: #TEXT_CHANGED
@@ -139,17 +153,32 @@ class EditorTabWidget(QTabWidget):
 		if ret == QMessageBox.Ok:
     		# Reload 
 		    self.editors[index].readFile(self.paths[index])
-		    self.textBefores[index] = self.editors[index].text()
+		    #self.textBefores[index] = self.editors[index].text()
+
+		    if self.main.editors.has_key(self.paths[index]) :
+		        self.main.editors[self.paths[index]][2] = self.editors[index].text()
+
 		    self.editors[index].text_status = 1 #TEXT_READ
 		    self.editors[index].save() # added 2/3
-		    self.textBefores[index] = self.editors[index].text() #added 2/3
+		    #self.textBefores[index] = self.editors[index].text() #added 2/3
+
+		    if self.main.editors.has_key(self.paths[index]) :
+		        self.main.editors[self.paths[index]][2] = self.editors[index].text()
 	else:
 	    if self.tabClosing == False :
 	        self.editors[index].readFile(self.paths[index])
-		self.textBefores[index] = self.editors[index].text()
+		#self.textBefores[index] = self.editors[index].text()
+
+		if self.main.editors.has_key(self.paths[index]) :
+		    self.main.editors[self.paths[index]][2] = self.editors[index].text()
+
 		self.editors[index].text_status = 1 #TEXT_READ
 		self.editors[index].save() # added 2/3
-		self.textBefores[index] = self.editors[index].text() #added 2/3
+		#self.textBefores[index] = self.editors[index].text() #added 2/3
+
+		if self.main.editors.has_key(self.paths[index]) :
+		    self.main.editors[self.paths[index]][2] = self.editors[index].text()
+
 		self.editors[index].tempfile = True
 	    else:
 	        return

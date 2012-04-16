@@ -597,7 +597,8 @@ class MainWindow(QMainWindow):
 	
     def setEditorTabName(self, index):
         tabTitle = self.editorManager.tab.tabText(index)
-        if self.editorManager.tab.textBefores[index] == self.editorManager.tab.editors[index].text():
+        #if self.editorManager.tab.textBefores[index] == self.editorManager.tab.editors[index].text():
+        if self.editorManager.editors[self.editorManager.tab.editors[index].path][2] == self.editorManager.tab.editors[index].text():
             if tabTitle[:1] == "*":
                 self.editorManager.tab.setTabText (index, tabTitle[1:])
                 self.editorManager.tab.editors[index].starMark = False
