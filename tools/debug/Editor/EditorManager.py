@@ -161,7 +161,11 @@ class EditorManager(QWidget):
 						return None
 			"""
 			editor.save()
-			self.tab.textBefores[index] = editor.text() ## new 2/3 
+
+			#self.tab.textBefores[index] = editor.text() ## new 2/3 
+            
+			if self.editors.has_key(editor.path):
+			    self.editors[editor.path][2] = editor.text() 
 		else:
 			print '[VDBG] Failed to save because no text editor is currently selected.'                
 		
@@ -201,7 +205,9 @@ class EditorManager(QWidget):
 			if editor.tempfile == False :
 				currentText = open(editor.path).read()
 				index = self.tab.currentIndex()
-				self.tab.textBefores[index] = editor.text()
+				#self.tab.textBefores[index] = editor.text()
+				if self.editors.has_key(editor.path):
+				    self.editors[editor.path][2] = editor.text() 
 				editor.text_status = 1 
 				editor.path = new_path
 				editor.save()
@@ -209,7 +215,9 @@ class EditorManager(QWidget):
 				self.newEditor(new_path)
 			else :
 				index = self.tab.currentIndex()
-				self.tab.textBefores[index] = editor.text()
+				#self.tab.textBefores[index] = editor.text()
+				if self.editors.has_key(editor.path):
+				    self.editors[editor.path][2] = editor.text() 
 				editor.text_status = 1 
 				editor.path = new_path
 				editor.save()
@@ -316,14 +324,15 @@ class EditorManager(QWidget):
 
         if not self.editors.has_key(path):
             self.tab.paths.append(path)
-            self.tab.textBefores.append(editor.text())
+            #self.tab.textBefores.append(editor.text())
+            #self.editors[path][2] = editor.text()
             self.tab.editors.append(editor)
 
         index = self.editorGroups[tabGroup].addTab(editor, name)
         editor.tabIndex = index
 
         if not self.editors.has_key(path):
-            self.editors[path] = [editor, index]
+            self.editors[path] = [editor, index, editor.text()]
         
         self.editorGroups[tabGroup].setCurrentIndex(index)
         editor.setFocus()

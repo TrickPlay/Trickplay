@@ -341,7 +341,8 @@ class Editor(QsciScintilla):
 					break
 				index = index + 1
 
-        	self.editorManager.tab.textBefores[index] = self.text()
+        	#self.editorManager.tab.textBefores[index] = self.text()
+        	self.editorManager.editors[self.path][2] = self.text()
         	self.tempfile = False
         	if self.path is not None :
         	    print '[VDBG] \''+self.path+'\' File saved'
