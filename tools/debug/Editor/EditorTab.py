@@ -1,4 +1,4 @@
-
+import os
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
@@ -99,6 +99,23 @@ class EditorTabWidget(QTabWidget):
 			self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
 				
     def changeTab(self, index):
+
+        newPath = os.path.join(self.main.main.path,  str(self.tabText(index)))
+
+        if self.paths[index] is not newPath:
+            i = 0 
+            for k in self.paths :
+                if k == newPath:
+                    break
+                i += 1
+            tempPath = self.paths[index]
+            self.paths[index] = newPath
+            self.paths[i] = tempPath
+
+            orgEditor = self.editors[index] 
+            newEditor = self.editors[i] 
+            self.editors[index] = newEditor 
+            self.editors[i] = orgEditor 
 
         if index == -1:
             return 
