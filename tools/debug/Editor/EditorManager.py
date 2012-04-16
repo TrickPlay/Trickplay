@@ -127,10 +127,13 @@ class EditorManager(QWidget):
     def save(self, editor_index = None):
 		
 		editor = None
+		editor = self.app.focusWidget()
+		"""
 		if editor_index is not None:
 			editor = self.tab.editors[editor_index]
 		else:
 			editor = self.app.focusWidget()
+		"""
 
 	
 		if isinstance(editor, Editor):
