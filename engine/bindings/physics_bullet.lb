@@ -808,6 +808,72 @@ interface PBSliderConstraint [[ btSliderConstraint * ]]
             self->setDampingOrthoAng( damping_ortho_angular );
         ]];
 
+    bool linear_motor_on
+        [[
+            linear_motor_on = self->getPoweredLinMotor();
+        ]]
+        [[
+            self->setPoweredLinMotor( linear_motor_on );
+        ]];
+        
+    double linear_motor_target_velocity
+        [[
+            linear_motor_target_velocity = self->getTargetLinMotorVelocity();
+        ]]
+        [[
+            self->setTargetLinMotorVelocity( linear_motor_target_velocity );
+        ]];
+        
+    double linear_motor_max_force
+        [[
+            linear_motor_max_force = self->getMaxLinMotorForce();
+        ]]
+        [[
+            self->setMaxLinMotorForce( linear_motor_max_force );
+        ]];
+       
+
+
+    bool angular_motor_on
+        [[
+            angular_motor_on = self->getPoweredAngMotor();
+        ]]
+        [[
+            self->setPoweredAngMotor( angular_motor_on );
+        ]];
+        
+    double angular_motor_target_velocity
+        [[
+            angular_motor_target_velocity = self->getTargetAngMotorVelocity();
+        ]]
+        [[
+            self->setTargetAngMotorVelocity( angular_motor_target_velocity );
+        ]];
+        
+    double angular_motor_max_force
+        [[
+            angular_motor_max_force = self->getMaxAngMotorForce();
+        ]]
+        [[
+            self->setMaxAngMotorForce( angular_motor_max_force );
+        ]];
+        
+        
+    readonly double linear_position
+        [[
+            linear_position = self->getLinearPos();        
+        ]];
+        
+    readonly double linear_depth
+        [[
+            linear_depth = self->getLinDepth();
+        ]];
+        
+    readonly double angular_depth
+        [[
+            angular_depth = self->getAngDepth();
+        ]];
+
 
     get_frame_offsets( Matrix offsetA , Matrix offsetB )
         [[
