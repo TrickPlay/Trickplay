@@ -37,7 +37,12 @@ class EditorTabWidget(QTabWidget):
 
 
     def fixTabInfo(self, index):
-        newPath = os.path.join(self.main.main.path,  str(self.tabText(index)))
+        editor = self.widget(index)
+        newPath = None
+        if editor is not None and editor.path is not None:
+            newPath = editor.path 
+
+        #newPath = os.path.join(self.main.main.path,  str(self.tabText(index)))
 
         if self.paths[index] is not newPath:
             i = 0 
@@ -127,7 +132,20 @@ class EditorTabWidget(QTabWidget):
 				
     def changeTab(self, index):
 
-        newPath = os.path.join(self.main.main.path,  str(self.tabText(index)))
+        editor = self.widget(index)
+        newPath = None
+        if editor is not None and editor.path is not None:
+            newPath = editor.path 
+
+        #change mainwindow title with selected file, location 
+        if newPath is not None :
+
+            self.main.main.setWindowTitle(QApplication.translate("MainWindow", str(os.path.basename(str(newPath)))+" ["+str(self.main.main.path)+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
+
+        else :
+            self.main.main.setWindowTitle(QApplication.translate("MainWindow",
+            str(os.path.basename(str(self.paths[index])))+" ["+str(os.path.dirname(str(self.paths[index])))+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
+            
 
         if str(self.paths[index]) != str(newPath) and not self.tabClosing:
             i = 0 
