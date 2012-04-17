@@ -34,13 +34,36 @@ class EditorTabWidget(QTabWidget):
         
     def dropEvent(self, event):
         self.main.dropFileEvent(event, 'tab', self)
-        
+
+
+    def fixTabInfo(self, index):
+        newPath = os.path.join(self.main.main.path,  str(self.tabText(index)))
+
+        if self.paths[index] is not newPath:
+            i = 0 
+            for k in self.paths :
+                if k == newPath:
+                    break
+                i += 1
+
+            if i < len (self.paths) :
+                tempPath = self.paths[index]
+                self.paths[index] = newPath
+                self.paths[i] = tempPath
+    
+            if i < len (self.editors):
+                orgEditor = self.editors[index] 
+                newEditor = self.editors[i] 
+                self.editors[index] = newEditor 
+                self.editors[i] = orgEditor 
+
     def closeTab(self, index):
+
+		self.tabClosing = True 
 		if index < 0:
 			return 
-		# find current index tab 
-		#index = self.currentIndex()
 
+		self.fixTabInfo(index)
 		editor = self.editors[index] #self.app.focusWidget()
 		
 		# reset the windowsActions'shortcuts 
@@ -76,9 +99,9 @@ class EditorTabWidget(QTabWidget):
 						if editor.tempfile == False:
 							editor.save()
 						else:
-							self.tabClosing = True 
+							#self.tabClosing = True 
 							ret = self.main.saveas()
-							self.tabClosing = False
+							#self.tabClosing = False
 							index = self.count() - 1
 					elif ret == QMessageBox.Cancel:
 						return 
@@ -86,10 +109,12 @@ class EditorTabWidget(QTabWidget):
 						pass
 
 		#close current index tab
+
 		edt = self.editors.pop(index) #new
 		self.windowsMenu.removeAction(edt.windowsAction)
 		self.removeTab(index)
 		self.paths.pop(index)
+
 		for k in self.paths:
 		    self.main.editors[k][1] = self.paths.index(k)
 
@@ -97,25 +122,30 @@ class EditorTabWidget(QTabWidget):
 			self.m.editorMenuEnabled(False)
 			self.close()
 			self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
+
+		self.tabClosing = False
 				
     def changeTab(self, index):
 
         newPath = os.path.join(self.main.main.path,  str(self.tabText(index)))
 
-        if self.paths[index] is not newPath:
+        if str(self.paths[index]) != str(newPath) and not self.tabClosing:
             i = 0 
             for k in self.paths :
                 if k == newPath:
                     break
                 i += 1
-            tempPath = self.paths[index]
-            self.paths[index] = newPath
-            self.paths[i] = tempPath
 
-            orgEditor = self.editors[index] 
-            newEditor = self.editors[i] 
-            self.editors[index] = newEditor 
-            self.editors[i] = orgEditor 
+            if i < len(self.paths) :
+                tempPath = self.paths[index]
+                self.paths[index] = newPath
+                self.paths[i] = tempPath
+    
+            if i < len(self.editors):
+                orgEditor = self.editors[index] 
+                newEditor = self.editors[i] 
+                self.editors[index] = newEditor 
+                self.editors[i] = orgEditor 
 
         if index == -1:
             return 
