@@ -539,7 +539,7 @@ class MainWindow(QMainWindow):
     def run(self):
         self.inspector.clearTree()
         self._deviceManager.run(False)
-        self.windows = {"file":False, "inspector":False, "console":False, "debug":True, "trace":True}
+        self.windows = {"file":False, "inspector":False, "console":False, "debug":True, "trace":False}
         self.inspectorWindowClicked()
         self.consoleWindowClicked()
         self.traceWindowClicked()
