@@ -204,6 +204,9 @@ class Editor(QsciScintilla):
         else :
             self.editorManager.main.ui.actionRedo.setEnabled(False)
 
+        for i in range (0, self.editorManager.tab.count()) :
+            self.editorManager.tab.fixTabInfo(i)
+
         index = self.editorManager.tab.currentIndex()
         if self.isUndoAvailable() == True and self.text_status is not TEXT_DEFAULT :
             self.editorManager.main.ui.actionUndo.setEnabled(True)
@@ -305,11 +308,15 @@ class Editor(QsciScintilla):
 			self.text_status = TEXT_READ
 
 		if self.text_status == TEXT_DEFAULT or self.text_status != TEXT_CHANGED:#(self.text_status == TEXT_READ and self.path == self.editorManager.tab.editors[0].path):
+			for i in range (0, self.editorManager.tab.count()) :
+			    self.editorManager.tab.fixTabInfo(i)
+
 			index = 0 
 			for edt in self.editorManager.tab.editors :
 				if edt.path == self.path:
 				    if self.isUndoAvailable() is True and self.starMark is False:
 					    self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
+                        
 					    self.starMark = True
 				index = index + 1
 
