@@ -13,6 +13,8 @@
 #include "images.h"
 #include "sysdb.h"
 
+#include "ansi_color.h"
+
 namespace ConsoleCommands
 {
 #ifndef TP_PRODUCTION
@@ -611,7 +613,7 @@ protected:
 	        clutter_text_get_color( CLUTTER_TEXT( actor ), &color );
 
 	        gchar * c = g_strdup_printf( "color=(%u,%u,%u,%u)", color.red, color.green, color.blue, color.alpha );
-	        
+
 	        gchar * f = g_strdup_printf( "font=(%s)", clutter_text_get_font_name( CLUTTER_TEXT( actor ) ) );
 
 	        extra = extra + "," + c + "," + f + "]";
@@ -704,12 +706,12 @@ protected:
 			details += " HIDDEN";
 		}
 
-	    g_info( "%s%s%s%s:%s%u [%p]: (%d,%d %ux%u)%s%s\033[0m",
-	    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : "\33[37m",
+	    g_info( "%s%s%s%s:%s%u [%p]: (%d,%d %ux%u)%s%s%s",
+	    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : SAFE_ANSI_COLOR_FG_WHITE,
 	            clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
 	            String( info->indent, ' ' ).c_str(),
 	            type,
-	            name ? String( " \033[33m" + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "\33[0m" : "\33[37m" ) + " : " ).c_str()  : " ",
+	            name ? String( String(" ") + SAFE_ANSI_COLOR_FG_YELLOW + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE ) + " : " ).c_str()  : " ",
 	            clutter_actor_get_gid( actor ),
 	            actor,
 	            g.x,
@@ -717,7 +719,8 @@ protected:
 	            g.width,
 	            g.height,
 	            details.empty() ? "" : details.c_str(),
-	            extra.empty() ? "" : extra.c_str() );
+	            extra.empty() ? "" : extra.c_str(),
+	            SAFE_ANSI_COLOR_RESET );
 
 	    if ( CLUTTER_IS_CONTAINER( actor ) )
 	    {
