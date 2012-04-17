@@ -219,6 +219,7 @@ class MainWindow(QMainWindow):
         font_deviceManager = QFont()
         font_deviceManager.setPointSize(9)
         self._deviceManager.ui.comboBox.setFont(font_deviceManager)
+        self._deviceManager.ui.comboBox.setToolTip("Target Devices")
         self.toolbar.addWidget(self._deviceManager.ui.comboBox)
         
 
