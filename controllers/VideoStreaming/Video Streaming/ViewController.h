@@ -30,6 +30,8 @@
 
 #import "rtp.h"
 
+int hostname_to_ip(char *hostname, char *ip);
+
 /*
 #ifdef __cplusplus
 extern "C"

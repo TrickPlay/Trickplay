@@ -51,8 +51,77 @@ static NSString *fullsdp = @"v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=Livu\r\nc=IN I
 static NSString *audio_sdp = @"v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=Livu\r\nc=IN IP4 %s\r\nt=0 0\r\na=tool:Livu RTP\r\nm=audio 0 RTP/AVP 97\r\nb=AS:64\r\na=rtpmap:96 MPEG4-GENERIC/44100/1\r\na=fmtp:97 profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=1208\r\na=control:streamid=0";
 
 //static NSString *video_sdp = @"v=0\r\no=- 0 0 IN IP4 127.0.0.1\r\ns=Livu\r\nc=IN IP4 %@\r\nt=0 0\r\na=tool:Livu RTP\r\nm=video 0 RTP/AVP 97\r\nb=AS:64\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@\r\na=control:streamid=1";
+//*
+static NSString *video_sdp = @"v=0\r\n"
+        @"o=- 536 3212164818 IN IP4 127.0.0.0\r\n"
+        @"s=QuickTime\r\n"
+        @"c=IN IP4 %s\r\n"
+        @"t=0 0\r\n"
+        @"a=range:npt=now-\r\n"
+        @"a=isma-compliance:2,2.0,2\r\n"
+@"m=audio 5002 RTP/AVP 96\r\n"
+@"b=AS:64\r\n"
+@"a=rtpmap:96 mpeg4-generic/44100/1\r\n"
+@"a=fmtp:96 profile-level-id=15;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3;config=1388\r\n"
+@"a=mpeg4-esid:101\r\n"
+@"a=control:trackid=1\r\n"
+        @"m=video 5002 RTP/AVP 97\r\n"
+        @"b=AS:1372\r\n"
+        @"a=rtpmap:97 H264/90000\r\n"
+        @"a=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@\r\n"
+        @"a=mpeg4-esid:201\r\n"
+        @"a=cliprect:0,0,480,640\r\n"
+        @"a=framesize:97 640-480\r\n"
+        @"a=control:trackid=2\r\n";
+//*/
 
-static NSString *video_sdp = @"v=0\r\no=- 536 3212164818 IN IP4 127.0.0.0\r\ns=Livu\r\nc=IN IP4 %s\r\nt=0 0\r\na=range:npt=now-\r\na=isma-compliance:2,2.0,2\r\nm=video 5002 RTP/AVP 97\n\rb=AS:1372\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@\r\na=mpeg4-esid:201\r\na=cliprect:0,0,480,640\r\na=framesize:97 640-480\r\na=control:trackid=2";
+//@"v=0\r\no=- 536 3212164818 IN IP4 127.0.0.0\r\ns=QuickTime\r\nc=IN IP4 %s\r\nt=0 0\r\na=range:npt=now-\r\na=isma-compliance:2,2.0,2\r\nm=audio 5002 RTP/AVP 96\r\nb=AS:64\r\na=rtpmap:96 mpeg4-generic/44100/1\r\na=fmtp:96 profile-level-id=15;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3;config=1388\r\na=mpeg4-esid:101\r\na=control:trackid=1\r\nm=video 5002 RTP/AVP 97\r\nb=AS:1372\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@\r\na=mpeg4-esid:201\r\na=cliprect:0,0,480,640\r\na=framesize:97 640-480\r\na=control:trackid=2\r\n"
+
+/*
+static NSString *video_sdp = @"v=0\r\n"
+@"o=- 536 3212164818 IN IP4 127.0.0.0\r\n"
+@"s=QuickTime\r\n"
+@"c=IN IP4 10.0.190.5\r\n"
+@"t=0 0\r\n"
+@"a=range:npt=now-\r\n"
+@"a=isma-compliance:2,2.0,2\r\n"
+@"m=audio 6970 RTP/AVP 96\r\n"
+@"b=AS:64\r\n"
+@"a=rtpmap:96 mpeg4-generic/44100/1\r\n"
+@"a=fmtp:96 profile-level-id=15;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3;config=1388\r\n"
+@"a=mpeg4-esid:101\r\n"
+@"a=control:trackid=1\r\n"
+@"m=video 6970 RTP/AVP 97\r\n"
+@"b=AS:1372\r\n"
+@"a=rtpmap:97 H264/90000\r\n"
+@"a=fmtp:97 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPZ,aM4JyA==\r\n"
+@"a=mpeg4-esid:201\r\n"
+@"a=cliprect:0,0,480,640\r\n"
+@"a=framesize:97 640-480\r\n"
+@"a=control:trackid=2\r\n";
+//*/
+
+
+
+int hostname_to_ip(char *hostname, char *ip) {
+    struct hostent *he;
+    struct in_addr **addr_list;
+    int i;
+    
+    if ((he = gethostbyname(hostname)) == NULL) {
+        herror("gethostbyname");
+        return 1;
+    }
+    
+    addr_list = (struct in_addr **)he->h_addr_list;
+    
+    for (i = 0; addr_list[i] != NULL; i++) {
+        strcpy(ip, inet_ntoa(*addr_list[i]));
+        return 0;
+    }
+    
+    return 1;
+}
 
 
 #define HOST "rex-desktop"
@@ -191,7 +260,9 @@ void *get_in_addr(struct sockaddr *sa) {
     NSLog(@"sps: %@, b64sps: %@", sps, b64sps);
     NSLog(video_sdp, RTSP_HOST, b64sps, b64pps);
     
-    sdp = [NSString stringWithFormat:video_sdp, RTSP_HOST, b64sps, b64pps];
+    char ip[200];
+    hostname_to_ip(RTSP_HOST, ip);
+    sdp = [NSString stringWithFormat:video_sdp, ip, b64sps, b64pps];
 	return sdp;
 }
 
