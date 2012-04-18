@@ -485,7 +485,7 @@ class MainWindow(QMainWindow):
         elif self._deviceManager.ui.comboBox.currentIndex() != 0:
             # Remote Debugging / Run 
             #if getattr(self._deviceManager, "debug_mode") == False :
-            if getattr(self, "debug_mode") == False :
+            if getattr(self, "debug_mode") == False and hasattr(self.deviceManager, "socket") == True:
                 ret = self.deviceManager.socket.write('/close\n\n')
                 if ret < 0 :
                     print ("tp console socket is not available !")
@@ -639,6 +639,12 @@ class MainWindow(QMainWindow):
 		if self.editorManager.tab:
 			index = self.editorManager.tab.currentIndex()
 			if not index < 0:
+				#self.editorManager.tab.editors[index].SendScintilla(QsciScintilla.SCI_SETSELEOLFILLED, True)
+				#self.editorManager.tab.editors[index].setSelectionToEol(True)
+				#self.editorManager.tab.editors[index].selectAll()
+				#self.editorManager.tab.editors[index].setSelection(1,10,3,10)
+				#print self.editorManager.tab.editors[index].selectedText()
+				#self.editorManager.tab.editors[index].SendScintilla(QsciScintilla.SCI_COPYALLOWLINE, 0,0)
 				self.editorManager.tab.editors[index].copy()
 	
     def editor_paste(self):
