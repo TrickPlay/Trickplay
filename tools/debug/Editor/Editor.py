@@ -46,17 +46,13 @@ class Editor(QsciScintilla):
     
         # Set the default font
 
+        self.setEditorStyle()
+        """
         preference = self.editorManager.main.preference
         font = preference.lexerLuaFont[0]
         fcolor = preference.lexerLuaFColor[0]
         bcolor = preference.lexerLuaBColor[0]
 
-        """
-        font = QFont()
-        font.setStyleHint(font.Monospace)
-        font.setFamily('Inconsolata')
-        font.setPointSize(13)
-        """
         self.setFont(font)
         self.setMarginsFont(font)
 
@@ -66,6 +62,7 @@ class Editor(QsciScintilla):
         self.setMarginWidth(0, fontmetrics.width("00000"))
         self.setMarginLineNumbers(0, True)
         self.setMarginsBackgroundColor(QColor("#E6E6E6")) # HJ
+        """
 
         # Clickable margin 1 for showing markers
         self.setMarginSensitivity(1, True)
@@ -100,6 +97,7 @@ class Editor(QsciScintilla):
         # Indentation guides
         self.setIndentationGuides(False)
 
+        """
         # Set Python lexer
         # Set style for Python comments (style number 1) to a fixed-width
         # courier.
@@ -108,7 +106,6 @@ class Editor(QsciScintilla):
         self.lexer.setDefaultFont(font)
         self.setLexer(self.lexer)
 
-        """
         self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, self.lexer.Comment, font.pointSize())
         self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, self.lexer.Comment, font.family())
         self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, self.lexer.LineComment, font.pointSize())
@@ -121,6 +118,7 @@ class Editor(QsciScintilla):
         #for index in range(0, len(preference.lexerLua)):
             #print self.SendScintilla(QsciScintilla.SCI_STYLEGETBACK, index, 0)
 
+        """
         for index in range(0, len(preference.lexerLua)):
             if preference.lexerLua[index] != "":
                 font = preference.lexerLuaFont[index]
@@ -133,6 +131,7 @@ class Editor(QsciScintilla):
                 self.SendScintilla(QsciScintilla.SCI_STYLESETUNDERLINE, index, font.underline())
                 self.SendScintilla(QsciScintilla.SCI_STYLESETFORE, index, self.colorfix(fcolor.name()))
                 self.SendScintilla(QsciScintilla.SCI_STYLESETBACK, index, self.colorfix(bcolor.name()))
+        """
 
         # Don't want to see the horizontal scrollbar at all
         # Use raw message to Scintilla here (all messages are documented
@@ -151,6 +150,44 @@ class Editor(QsciScintilla):
         self.path = None
         self.tempfile = False
         self.margin_nline = None
+
+    def setEditorStyle(self):
+        
+        preference = self.editorManager.main.preference
+        font = preference.lexerLuaFont[0]
+        fcolor = preference.lexerLuaFColor[0]
+        bcolor = preference.lexerLuaBColor[0]
+
+        self.setFont(font)
+        self.setMarginsFont(font)
+
+        # Margin 0 is used for line numbers
+        fontmetrics = QFontMetrics(font)
+        self.setMarginsFont(font)
+        self.setMarginWidth(0, fontmetrics.width("00000"))
+        self.setMarginLineNumbers(0, True)
+        self.setMarginsBackgroundColor(QColor("#E6E6E6")) # HJ
+
+        # Set Python lexer
+        # Set style for Python comments (style number 1) to a fixed-width
+        # courier.
+        #
+        self.lexer = QsciLexerLua()
+        self.lexer.setDefaultFont(font)
+        self.setLexer(self.lexer)
+
+        for index in range(0, len(preference.lexerLua)):
+            if preference.lexerLua[index] != "":
+                font = preference.lexerLuaFont[index]
+                fcolor = preference.lexerLuaFColor[index]
+                bcolor = preference.lexerLuaBColor[index]
+                self.SendScintilla(QsciScintilla.SCI_STYLESETSIZE, index, font.pointSize())
+                self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, index, font.family())
+                self.SendScintilla(QsciScintilla.SCI_STYLESETITALIC, index, font.italic())
+                self.SendScintilla(QsciScintilla.SCI_STYLESETBOLD, index, font.bold())
+                self.SendScintilla(QsciScintilla.SCI_STYLESETUNDERLINE, index, font.underline())
+                self.SendScintilla(QsciScintilla.SCI_STYLESETFORE, index, self.colorfix(fcolor.name()))
+                self.SendScintilla(QsciScintilla.SCI_STYLESETBACK, index, self.colorfix(bcolor.name()))
 
     def colorfix(self, color):
         """Fixing color code, otherwise QScintilla is taking red for blue..."""
@@ -233,8 +270,6 @@ class Editor(QsciScintilla):
         self.editorManager.main.ui.action_Delete.setEnabled(avail)
         
     def on_margin_clicked(self, nmargin, nline, modifiers):
-        
-
 		bp_num = 0
 		self.margin_nline = nline
 		t_path = self.get_bp_file()
