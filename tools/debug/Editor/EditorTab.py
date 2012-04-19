@@ -175,7 +175,8 @@ class EditorTabWidget(QTabWidget):
                 self.main.fontSettingCheck[index] == False
                 #self.textBefores[index] = self.editors[index].text()
 
-                self.main.editors[editor.path][2] = self.editors[index].text()
+                if editor.path is not None :
+                    self.main.editors[editor.path][2] = self.editors[index].text()
 
                 self.editors[index].text_status = 1 #TEXT_READ
                 return
