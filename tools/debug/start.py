@@ -9,9 +9,23 @@ from wizard import Wizard
 from main import MainWindow
 
 from PyQt4.QtGui import QApplication
-from PyQt4.QtCore import QCoreApplication, QSettings, QT_VERSION_STR, QProcessEnvironment
+from PyQt4.QtCore import QCoreApplication, QSettings, QT_VERSION_STR, QProcessEnvironment, QEvent
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+class MyApp(QApplication):
+  def __init__(self, argv):
+    QApplication.__init__(self, argv)
+
+  def event(self, e):
+    if e.type() == QEvent.ApplicationActivate :
+        if hasattr(self.main, 'editorManager'):
+            if hasattr(self.main.editorManager, 'tab'):
+                if self.main.editorManager.tab is not None:
+                    index = self.main.editorManager.tab.currentIndex()
+                    self.main.editorManager.tab.changeTab(index)
+
+    return QApplication.event(self, e)
 
 def main(argv):
 
@@ -21,7 +35,6 @@ def main(argv):
     config = None
     apath = None
     print("QT VERSION %s" % QT_VERSION_STR )
-    
 
     try:
         first_arg = argv[1]
@@ -38,7 +51,8 @@ def main(argv):
             path = first_arg
         
     try:
-        app = QApplication(argv)
+        #app = QApplication(argv)
+        app = MyApp(argv)
 
         QCoreApplication.setOrganizationDomain('www.trickplay.com');
         QCoreApplication.setOrganizationName('Trickplay');
@@ -58,6 +72,7 @@ def main(argv):
         main.show()
         main.raise_()
         wizard = Wizard()
+        app.main = main
 
         path = wizard.start(path)
         if path:

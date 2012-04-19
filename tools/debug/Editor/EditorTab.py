@@ -25,6 +25,8 @@ class EditorTabWidget(QTabWidget):
         self.windowsMenu = windowsMenu
         self.fileSystem = fileSystem
         self.tabClosing = False 
+        self.prevChange = {}
+        self.checkedPath = None
         
         QObject.connect(self, SIGNAL('tabCloseRequested(int)'), self.closeTab)
         QObject.connect(self, SIGNAL('currentChanged(int)'), self.changeTab)
@@ -133,9 +135,14 @@ class EditorTabWidget(QTabWidget):
     def changeTab(self, index):
 
         editor = self.widget(index)
+
         newPath = None
         if editor is not None and editor.path is not None:
             newPath = editor.path 
+            if self.prevChange.has_key(editor.path) and self.prevChange[editor.path] != open(editor.path).read() :
+                self.checkedPath = None
+            if editor.path == self.checkedPath:
+                return
 
         #change mainwindow title with selected file, location 
         if newPath is not None :
@@ -199,6 +206,8 @@ class EditorTabWidget(QTabWidget):
             self.m.ui.action_Delete.setEnabled(False)
 
 	if self.editors[index].tempfile == False  :
+
+
 	    #if self.textBefores[index] != currentText and self.tabClosing == False :
 	    if not self.main.editors.has_key(self.paths[index]) :
 	        textBefore =  currentText
@@ -214,6 +223,8 @@ class EditorTabWidget(QTabWidget):
 		msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
 		msg.setDefaultButton(QMessageBox.Cancel)
 		msg.setWindowTitle("Warning")
+		editor = self.widget(index)
+		msg.setGeometry(500,500,0,0)
 		ret = msg.exec_()
 
 		if ret == QMessageBox.Ok:
@@ -230,6 +241,9 @@ class EditorTabWidget(QTabWidget):
 
 		    if self.main.editors.has_key(self.paths[index]) :
 		        self.main.editors[self.paths[index]][2] = self.editors[index].text()
+		elif ret == QMessageBox.Cancel:
+		    self.checkedPath = editor.path
+		    self.prevChange[editor.path] = open(editor.path).read()
 	else:
 	    if self.tabClosing == False :
 	        self.editors[index].readFile(self.paths[index])
