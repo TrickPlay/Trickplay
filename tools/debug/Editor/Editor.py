@@ -151,6 +151,21 @@ class Editor(QsciScintilla):
         self.tempfile = False
         self.margin_nline = None
 
+    """
+        #menu = self.createStandardContextMenu()
+        #tempAction = QAction(menu)
+        #tempAction.setText("DeleteBreakPoint")
+        #menu.addAction(tempAction)
+
+
+    def contextMenuEvent(self, event):
+        print (event.globalPos().x(), event.globalPos().y())
+        line, idx = self.lineIndexFromPosition(event.globalPos().y())
+        #line, idx = self.lineIndexFromPosition(event.globalPos().y())
+        print (line, idx, "***" )
+
+    """
+
     def setEditorStyle(self):
         
         preference = self.editorManager.main.preference
@@ -375,6 +390,12 @@ class Editor(QsciScintilla):
         
         index = 0 
         if self.editorManager is not None :
+        	index = self.editorManager.tab.currentIndex()
+        	tabTitle = self.editorManager.tab.tabText(index)
+        	if tabTitle[:1] == "*":
+        	    self.editorManager.tab.setTabText (index, tabTitle[1:])
+
+        	"""
         	for edt in self.editorManager.tab.editors :
 				if edt.path == self.path :
 					tabTitle = self.editorManager.tab.tabText(index)
@@ -382,6 +403,7 @@ class Editor(QsciScintilla):
 						self.editorManager.tab.setTabText (index, tabTitle[1:])
 					break
 				index = index + 1
+        	"""
 
         	#self.editorManager.tab.textBefores[index] = self.text()
         	self.editorManager.editors[self.path][2] = self.text()
