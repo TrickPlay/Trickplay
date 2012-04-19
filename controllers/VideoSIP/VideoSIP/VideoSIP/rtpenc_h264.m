@@ -9,6 +9,7 @@
 #import "rtpenc_h264.h"
 #include "rtp.h"
 #include "sm_math.h"
+#include "net_udp.h"
 #define kMaxPayloadSize 1200
 
 
@@ -65,3 +66,71 @@ int send_nal(struct rtp *session, int64_t rtp_ts, uint8_t pt, const uint8_t *buf
 	
 	return ret;
 }
+
+int send_sps(struct rtp *session, int64_t rtp_ts, uint8_t pt, const uint8_t *buff, int size, struct timeval *timeout) {
+    uint8_t sps_nal[kMaxPayloadSize];
+    
+    buff += 5;
+    size -= 5;
+
+    if (size < 1) {
+        fprintf(stderr, "SPS too short\n");
+        return 0;
+    }
+    
+    if (size + 1 >= kMaxPayloadSize) {
+        fprintf(stderr, "SPS too long\n");
+        return 0;
+    }
+    
+    // Indicates Sequence Paramter Set; this nal unit header
+    // was already included but I'm putting mine in anyway
+    uint8_t nalu_hdr = 0b01100111;
+    sps_nal[0] = nalu_hdr;
+    memcpy(&sps_nal[1], buff, size);
+    
+    fprintf(stderr, "\n\n");
+    hex_print(sps_nal, size + 1);
+    fprintf(stderr, "\n");
+    
+    return rtp_send_data(session, rtp_ts, pt, 1, 0, NULL, (char *)sps_nal, size + 1, NULL, 0, 0, timeout);
+}
+
+int send_pps(struct rtp *session, int64_t rtp_ts, uint8_t pt, const uint8_t *buff, int size, struct timeval *timeout) {
+    uint8_t pps_nal[kMaxPayloadSize];
+    
+    buff += 5;
+    size -= 5;
+    
+    if (size < 1) {
+        fprintf(stderr, "PPS too short: %d\n", size);
+        return 0;
+    }
+    
+    if (size + 1 >= kMaxPayloadSize) {
+        fprintf(stderr, "PPS too long\n");
+        return 0;
+    }
+    
+    // Indicates Picture Paramter Set; this nal unit header
+    // was already included but I'm putting mine in anyway
+    uint8_t nalu_hdr = 0b01101000;
+    pps_nal[0] = nalu_hdr;
+    memcpy(&pps_nal[1], buff, size);
+    
+    fprintf(stderr, "\n\n");
+    hex_print(pps_nal, size + 1);
+    fprintf(stderr, "\n");
+    
+    return rtp_send_data(session, rtp_ts, pt, 1, 0, NULL, (char *)pps_nal, size + 1, NULL, 0, 0, timeout);
+}
+
+
+
+
+
+
+
+
+
+

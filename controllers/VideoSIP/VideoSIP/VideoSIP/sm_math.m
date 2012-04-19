@@ -39,3 +39,13 @@ inline int64_t rescale(int64_t a, int32_t org_den, int32_t new_den) {
     int64_t c= 1 * (int64_t)org_den;
 	return rescale_rnd(a,b,c,AV_ROUND_NEAR_INF);
 }
+
+void hex_print(const uint8_t *bytes, int length) {
+    int i;
+    for (i = 0; i < length; i++) {
+        if (i > 0) printf(":");
+        fprintf(stderr, "%02X", *(bytes+i));
+    }
+    
+    printf("\n");
+}

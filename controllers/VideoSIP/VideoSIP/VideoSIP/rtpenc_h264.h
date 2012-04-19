@@ -30,6 +30,8 @@ struct rtp;
  @result int The number of bytes sent or -1 if an error occured.
  */
 int send_nal(struct rtp *session, int64_t rtp_ts, uint8_t pt, const uint8_t *buff, int size, struct timeval *timeout);
+int send_sps(struct rtp *session, int64_t rtp_ts, uint8_t pt, const uint8_t *buff, int size, struct timeval *timeout);
+int send_pps(struct rtp *session, int64_t rtp_ts, uint8_t pt, const uint8_t *buff, int size, struct timeval *timeout);
 
 #ifdef __cplusplus
 }

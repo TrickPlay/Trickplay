@@ -437,7 +437,20 @@
     
     //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 97\r\nb=AS:1372\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@==\r\nmpeg4-esid:201\r\n", udpClientIP, user, udpClientIP, b64sps, b64pps];
     
-    sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 99\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 packetization-mode=1;sprop-parameter-sets=%@,%@\r\n", udpClientIP, user, udpClientIP, b64sps, b64pps];
+    sdp = [NSString stringWithFormat:@"v=0\r\n"
+                                    @"o=- 0 0 IN IP4 %@\r\n"
+                                    @"s=%@\r\n"
+                                    @"c=IN IP4 %@\r\n"
+                                    @"t=0 0\r\n"
+                                    @"m=audio 21078 RTP/AVP 0\r\n"
+                                    @"a=rtpmap:0 PCMU/8000\r\n"
+                                    @"a=sendrecv\r\n"
+                                    @"m=video 22078 RTP/AVP 99\r\n"
+                                    @"a=rtpmap:99 H264/90000\r\n"
+                                    @"a=sendonly\r\n"
+                                    @"a=fmtp:99 packetization-mode=0\r\n",
+                                    //@"a=fmtp:99 packetization-mode=1;sprop-parameter-sets=%@,%@\r\n",
+                                    udpClientIP, user, udpClientIP];//, b64sps, b64pps];
     
     //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 99\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 profile-level-id=42000A;packetization-mode=0\r\n", udpClientIP, user, udpClientIP];
     

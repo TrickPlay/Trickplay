@@ -22,3 +22,4 @@ static const int kRTPAVCBaseTime	= 90000;
 double round(double r) ;
 int64_t rescale_rnd(int64_t a, int64_t b, int64_t c, enum AVRounding rnd);
 int64_t rescale(int64_t a, int32_t org_den, int32_t new_den);
+void hex_print(const uint8_t *bytes, int length);

@@ -221,9 +221,10 @@ void *get_in_addr(struct sockaddr *sa) {
     //NSLog(@"retain count: %d", self.avcEncoder.callback.retainCount);
     
     AVCParameters *params = [[AVCParameters alloc] init];
-    params.outWidth = 640;
-    params.outHeight = 480;
-    params.bps = 60000;
+    //params.outWidth = 640;
+    //params.outHeight = 480;
+    //params.bps = 60000;
+    params.videoProfileLevel = AVVideoProfileLevelH264Main31;
     //params.keyFrameInterval = 1;
     //NSLog(@" %dx%d", profile.broadcastWidth, profile.broadcastHeight);
     /*
@@ -249,6 +250,8 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 - (void)startEncoder {
+    fprintf(stderr, "sps packet size: %d\n", send_sps(avc_session, CACurrentMediaTime(), avc_session_id, (uint8_t *)sps.bytes, sps.length, &timeout));
+    fprintf(stderr, "pps packet size: %d\n", send_pps(avc_session, CACurrentMediaTime(), avc_session_id, (uint8_t *)pps.bytes, pps.length, &timeout));
     [avcEncoder start];
 }
 
