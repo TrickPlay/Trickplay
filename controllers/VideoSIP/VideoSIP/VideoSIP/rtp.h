@@ -246,6 +246,9 @@ int			rtp_send_data(struct rtp *session,
 						  char *extn, uint16_t extn_len, uint16_t extn_type,
 						  struct timeval *timeout);
 
+// Rex addition
+int udp_send_raw(struct rtp *session, char *buffer, int buffer_len);
+
 int         rtp_send_data_iov(struct rtp *session, 
 							  uint32_t rtp_ts, char pt, int m, 
 							  int cc, uint32_t csrc[], 

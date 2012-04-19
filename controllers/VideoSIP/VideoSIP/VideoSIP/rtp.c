@@ -3379,6 +3379,10 @@ void rtp_send_bye(struct rtp *session)
 	}
 }
 
+int udp_send_raw(struct rtp *session, char *buffer, int buffer_len) {
+    return udp_send(session->rtp_socket, buffer, buffer_len);
+}
+
 /**
  * rtp_done:
  * @session: the RTP session to finish
