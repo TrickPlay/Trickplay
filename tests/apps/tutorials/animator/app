@@ -1,0 +1,7 @@
+app=
+{	id = "com.trickplay.animatorApp",
+	release = "1",
+	version = "1.0",
+	name = "Animator Sample App",
+	copyright = "Trickplay Inc."
+}
