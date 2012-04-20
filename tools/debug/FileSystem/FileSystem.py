@@ -7,12 +7,15 @@ from UI.FileSystem import Ui_FileSystem
 
 class FileSystem(QWidget):
     
-    def __init__(self, parent = None):
+    def __init__(self, pref=None, parent = None):
         
         QWidget.__init__(self, parent)
         
         self.ui = Ui_FileSystem()
         self.ui.setupUi(self)
+        self.preference = pref 
+
+        self.ui.view.setFont(self.preference.fsFont)
         
         self.editorManager = None
         

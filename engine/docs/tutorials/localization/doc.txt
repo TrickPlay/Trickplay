@@ -1,0 +1,117 @@
+
+Title: Localization Sample Application
+
+The Localization program demonstrates various techniques a TrickPlay application can use to support multiple languages and countries. With these techniques, resources specific to a particular locale, including language-specific images, text, and even executable code, can be used.
+
+The complete sample application, including source code and resource files, can be <downloaded here at http://www.trickplay.com/tutorials/localization.zip>.
+
+(see localizationDemo.png)
+
+
+
+Group: General Program Structure
+
+The sample application organizes its language-specific resources following the guidelines described in the <Localization> section of the TrickPlay Programmer's Guide. Separate directories are used to store the language-specific files for the three supported languages: the "en" directory for English, "fr" for French, and "es" for Spanish. Each directory is located in the application bundle's "localized" directory.
+
+Many of the English-specific files are actually stored in the application's root directory. The application bundle's root directory is the last location the TrickPlay Engine searches for locale-based files. By placing the English-specific files in the root directory, they will be found and used as defaults whenever dedicated support for the active language is not provided by the application. For example, assume the active language is German, having a language code of "de". The sample application does not provide dedicated support for that language; that is, there is no "localized/de" directory containing German-specific resource files. In such a case, the English-based files in the root directory are eventually found and used by default. By organizing an application's resource files in this manner, specific languages can be supported and a default language can be assigned to handle all other languages.
+
+The active language is defined in the .trickplay configuration file and is specified by the system_language key. If no system_language key is defined, the sample application uses its English-based resource files by default. Sample system_language definitions for the .trickplay file are shown below.
+
+	(code)
+	-- .trickplay definitions to specify the active language
+	-- Note: Only one definition should be specified; any others should be commented out
+	system_language="en"		-- English
+	system_language="fr"		-- French
+	system_language="es"		-- Spanish
+	(end)
+
+To switch the sample application's active language, modify the system_language setting in the .trickplay file and restart the application from the command line. (Note: Executing the TrickPlay Console /reload command does not affect the active language because the TrickPlay Engine does not reread the .trickplay configuration file when executing the reload operation.)
+
+
+
+Group: Localized Screen Layouts
+
+The Localization sample application uses a different screen layout for each supported language. Full-screen images of the basic layouts are stored in files called "Background.png." Each of the application's supported languages defines its own "Background.png" file. Unsupported languages use the default English-language layout. The screen layouts for the sample application's three supported languages are shown below.
+
+(see localScreenLayouts.png)
+
+Each screen layout includes title and footer areas and three empty rectangular buttons. The text for each of the buttons varies between languages and is defined in another localized file described later. Each layout also contains an empty area that will be filled with a language-specific "billboard" image. The screen layout for the active language is loaded and displayed by the sample application's displayMainScreen() function.
+
+Like the language-specific screen layouts, each language has its own "billboard" image. The billboard image for the active language is loaded by the sample application's displayBillboard() function. The billboard images for the sample application's three supported languages are shown below.
+
+(see localBillboards.png)
+
+The billboard's location on the screen depends upon the layout. The billboard's X,Y screen coordinates are stored in language-specific files called i18n.lua. Each of the sample application's supported languages defines its own version of i18n.lua. The file includes definitions of screen coordinates for the language-specific objects displayed onscreen, like the billboard and screen text.
+
+
+
+Group: Localized Screen Text
+
+Displayed text strings and their X,Y screen positions are stored in localized versions of the i18n.lua file discussed in the previous section. Some of the text definitions for the English version of the i18n.lua file are shown below.
+
+	(code)
+	-- File i18n.lua localized string constants
+	return{
+		BUTTON_TOP_TEXT		= "English",
+		BUTTON_TOP_X		= 277,
+		BUTTON_TOP_Y		= 258,
+		
+		BUTTON_MIDDLE_TEXT	= "Français",
+		...
+		
+		BUTTON_BOTTOM_TEXT	= "Español",
+		...
+	}
+	(end)
+
+To reference the string in the sample application, the i18n.lua file is first read and processed by calling the TrickPlay SDK's version of the Lua <dofile> function, with the processed code chunk being stored in a variable. Definitions contained in the file can then be accessed through this storage variable. Example code is shown below.
+
+	(code)
+	-- Process the localized resource file and save in a variable
+	gI18n = dofile( "localized:i18n.lua" )
+	
+	-- Reference a variable defined in the resource file
+	print( "The top button's text is: ", gI18n.BUTTON_TOP_TEXT )
+	(end)
+
+The sample application reads the localized resource file to get the language-specific button text and its X,Y screen coordinates. This enables both the button text and its location to vary for each screen layout.
+
+
+
+Group: Localized Program Behavior
+
+An application can perform language-specific operations by executing a localized file that contains Lua source code.
+
+As an example, the Localization program animates its billboard image in a unique manner for each of the supported languages. A function is defined in a locale-specific source file called animation.lua, and the file is processed by calling the TrickPlay SDK's version of the Lua <loadfile> function. The source code is processed and returned by loadfile(), and the returned code chunk can subsequently be called like any Lua function, including passing arguments to it. Below is some example code that loads a localized source file and calls the function defined within it; the function receives the gBillboard variable as an argument.
+
+	(code)
+	-- Process the language-specific Lua source file
+	gAnimation = loadfile( "localized:animation.lua" )
+	
+	-- If the file existed and was successfully processed, call its function
+	if( gAnimation ~= nil )then
+		gAnimation( gBillboard )
+	end
+	(end)
+
+The function defined in the animation.lua file uses a Lua syntax that may not be well-known. The function definition, including its single argument called billbrd, is shown below.
+
+	(code)
+	-- Function definition, including argument
+	local billbrd = ...
+	
+		-- Note: The "three dots" (...) syntax in the definition above should be entered exactly as shown, as three dot/period characters.
+		
+		-- The function's code statements go here, with the function finally ending with:
+		-- NOTHING! No "end" statement. You can specify a "return" statement if you want to return values.
+	(end)
+
+To define a function with multiple arguments, simply separate the arguments with commas, as shown in the example below.
+
+	(code)
+	-- Function definition with multiple arguments
+	local billbrd, property, duration = ...
+	(end)
+	
+In the sample application, animating the billboard for a particular language is optional. If a language does not implement the animation.lua file, no animation will occur; not even a default animation. This is because the English-specific version of the animation.lua file is stored in its own "/localized/en" directory, rather than in the app bundle's root directory like the other English-specific files. Recall that by placing the English-based files in the root directory, they would be found and processed by default whenever dedicated support for a language was not implemented. By placing the animation.lua file in the English localized directory, neither it, nor any other animation.lua file, will be found when the TrickPlay Engine searches for the localized version of an unsupported language. If you want the animation.lua file to act as the default animation, you can simply move it to the root directory with the other English-specific files, and it would then be found and used as the default.
+

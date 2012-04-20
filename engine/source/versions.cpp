@@ -113,7 +113,7 @@ VersionMap get_versions()
     result[ "pango" ].push_back( pango_version_string() );
     result[ "pango" ].push_back( PANGO_VERSION_STRING );
 
-    result[ "clutter" ].push_back( CLUTTER_VERSION_S );
+    result[ "clutter" ].push_back( Util::format( "%d.%d.%d" , clutter_major_version , clutter_minor_version , clutter_micro_version ) );
     result[ "clutter" ].push_back( CLUTTER_VERSION_S );
     result[ "clutter" ].push_back( Util::format( "%s-%s" , CLUTTER_FLAVOUR, CLUTTER_COGL ) );
 

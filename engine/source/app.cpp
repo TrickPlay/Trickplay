@@ -82,6 +82,7 @@ extern int luaopen_canvas( lua_State * L );
 extern int luaopen_keyboard( lua_State * L );
 extern int luaopen_http_module( lua_State * L );
 extern int luaopen_ease( lua_State * L );
+extern int luaopen_matrix( lua_State * L );
 
 #ifdef TP_WITH_WEBGL
 extern int luaopen_typed_array( lua_State * L );
@@ -1112,6 +1113,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     luaopen_http_module( L );
     luaopen_keyboard( L );
     luaopen_ease( L );
+    luaopen_matrix( L );
 
 #ifdef TP_WITH_WEBGL
     luaopen_typed_array( L );
@@ -1137,7 +1139,7 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
 #ifndef TP_PRODUCTION
 
-    if ( context->get_bool( TP_START_DEBUGGER , false ) )
+    if ( context->get_bool( TP_START_DEBUGGER , false ) || launch.debug )
     {
     	debugger.break_next_line();
     }
