@@ -1,0 +1,39 @@
+
+Title: Animator Sample Application
+
+The Animator sample application uses the TrickPlay SDK Library's <Animator> class to animate screen elements and their properties. Animator objects are used to demonstrate how multiple animation segments can be choreographed to run simultaneously, while other segments play sequentially.
+
+The complete sample application, including source code and resource files, can be <downloaded here at http://www.trickplay.com/tutorials/animator.zip>.
+
+(see animatorDemo.png)
+
+
+
+Group: General Program Structure
+
+The program's screen includes a basic background image consisting of title and footer sections and a central area that includes a gray background, but without the TrickPlay logo. A <Group> object is defined to overlay this empty central region. Eventually, the TrickPlay logo and the two spotlight images will be contained within this group. The Group is initialized so that group members located outside the Group's boundaries are clipped. The background image and Group object are prepared in the application's displayMainScreen() function.
+
+The two spotlights and the "TrickPlay" string that comprise the TrickPlay logo will be animated to fill the central display area. They are created in the createResources() function. The spotlights are initially drawn onto a <Canvas> object as a semi-transparent circle, which is then scaled along its X-axis to create the desired oval shape. The oval is converted to an <Image> object and added to the display Group. The second spotlight is simply a <Clone> of the first light, which reduces the application's resource usage.
+
+Each character in the "TrickPlay" logo is created as a separate <Text> object in the createTrickPlayStr() function. The individual Text objects will be animated later by an Animator. Because each character is a separate entity, their positions in relation to each other to form the final "TrickPlay" logo must be calculated and are then saved in a table associated with the character. This table also saves each character's initial offscreen position.
+
+With the logo resources prepared, they are ready to be animated.
+
+Group: Animating the Logo
+
+The sample application divides the logo animation into three segments, with each part controlled by a different Animator object. The animation sequence is initiated in the performAnimation() function, which is invoked when the program begins and also whenever the user presses a key to replay the animation.
+
+The first animation segment moves the "TrickPlay" characters from their initial offscreen positions to their final locations to form the logo string; the segment is implemented in the animateCharacters() function. Each animated character must initialize a table that defines its animation, such as specifying its starting and ending locations. Each character is initially located outside the Group's display area and, therefore, is clipped and not visible. The characters gradually travel from these offscreen positions to their final destination onscreen to form the word "TrickPlay." All the individual character-animation tables are combined into a single table called props which gets assigned to the Animator object when the Animator is created.
+
+The Animator for this segment includes a <Timeline> object which sets its on_completed property so that it receives notification when the character animation has finished.
+
+After the Animator object is defined, the animation is started immediately by calling the object's start() method. The animation occurs asynchronously, so the second segment can be defined and started while the first segment is playing.
+
+The second animation segment is defined in the animateSpotlights() function. A new Animator object is created for this segment. The spotlights are initially positioned outside the display area, and the animation is defined to move them to their final position highlighting the "TrickPlay" logo string. After the Animator is defined, the spotlight animation is started.
+
+At this point, the character and the spotlight animations are running simultaneously. The duration of the character animation is significantly longer than the spotlight animation, so the spotlight animation always finishes first. Because of this, when the character animation's Timeline object receives notification that it has finished, we know that the spotlight animation has finished, too. With both segments complete, the third and final animation segment can begin.
+
+The third segment is constructed in the charAnimationFinished() function which was assigned as the first segment's Timeline.on_completed() event handler. The function defines a new Animator object to dynamically modify the color of the characters in the "TrickPlay" logo. This segment will loop, so an associated Timeline object is necessary, with its loop property set to true. The segment plays until either the program is terminated or the user presses a key to replay the entire animation sequence. If the animation is replayed, the looping Timeline's stop() function is called to terminate the animation. If the looping segment is not explicitly stopped like this, a reference to its Timeline object will remain in existence and prevent the no-longer-needed object from being garbage collected.
+
+The Animator sample application demonstrates how to simplify programming effort and improve program clarity by dividing a complex animation into multiple segments, with each segment controlled by its own Animator object.
+
