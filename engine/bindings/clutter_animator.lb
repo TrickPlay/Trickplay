@@ -886,6 +886,8 @@ class Animator [[ClutterAnimator*]]
 		
 		The start() function begins running the object's animation.
 		
+		To stop the animation before it finishes, the Animator object must have a <Timeline> associated with it and assigned to its <timeline> property. The Timeline object's stop() function can then be called to stop the animation.
+		
 		*Arguments:* None
 		
 		*Return Value:* None

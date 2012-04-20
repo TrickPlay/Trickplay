@@ -64,6 +64,7 @@ Group: SDK Tutorial {
 }
 
 Group: Sample Applications {
+	File: Using Animator (no auto-title, docs/tutorials/animator/doc.txt)
 	File: Using AnimationState (no auto-title, docs/tutorials/animationState/doc.txt)
 	File: Program Localization (no auto-title, docs/tutorials/localization/doc.txt)
 	File: Using Canvas (no auto-title, docs/tutorials/canvasDemo/doc.txt)
