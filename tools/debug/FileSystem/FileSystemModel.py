@@ -12,7 +12,11 @@ class FileSystemModel(QFileSystemModel):
         QFileSystemModel.__init__(self, parent)
         
         self.setReadOnly(False)
+        if path is -1 :
+            path = "-"
+            return 
         self.setRootPath(path)
+        
         self.path = path
         
         view.setModel(self)
