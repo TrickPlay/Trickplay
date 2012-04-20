@@ -4,6 +4,8 @@ local r_pos, flip_on_completed
 
 local function flip_forward(self,msecs,p)
 	
+    if not self.flipping then print("flip_forward double on_completed, TELL ALEX IF THIS HAPPENS") return end
+    
 	for i,c in ipairs(self.cards) do
 		
 		if i == (self.top_card - 2) % #self.cards + 1 then
@@ -45,23 +47,29 @@ local function flip_forward(self,msecs,p)
                 flip_on_completed = nil
             end)
         end
-        
+        --print("post_forward_flip",self.top_card)
 	end
 	
 end
 
+local next_card
+
 local function pre_forward_flip(self)
-    
+    --print("pre_forward_flip",self.top_card," raised & next ",(self.top_card - 2) % #self.cards + 1,"\n",self.cards[(self.top_card - 2) % #self.cards + 1].name,"\n")
     self.cards[self.top_card]:lose_focus()
     
-    self.cards[(self.top_card - 2) % #self.cards + 1]:raise_to_top()
+    next_card = (self.top_card - 2) % #self.cards + 1
     
-    self.visible_cards[(self.top_card - 2) % #self.cards + 1] = true
+    self.cards[  next_card  ]:raise_to_top()
     
-    self.cards[(self.top_card - 2) % #self.cards + 1]:update_time(os.date('*t'))
+    self.visible_cards[  next_card  ] = true
+    
+    self.cards[  next_card  ]:update_time(os.date('*t'))
 end
 
 local function flip_backward(self,msecs,p)
+	
+    if not self.flipping then print("flip_backward double on_completed, TELL ALEX IF THIS HAPPENS") return end
 	
 	for i,c in ipairs(self.cards) do
 		
@@ -105,13 +113,13 @@ local function flip_backward(self,msecs,p)
                 flip_on_completed = nil
             end)
         end
-        
+        --print("post_backward_flip",self.top_card)
 	end
     
 end
 
 local function pre_backward_flip(self)
-    
+    --print("pre_backward_flip, curr ",self.top_card," lowered ",(self.top_card - 2) % #self.cards + 1," next ",self.top_card % #self.cards + 1,"\n",self.cards[(self.top_card) % #self.cards + 1].name,"\n")
     self.cards[self.top_card]:lose_focus()
     
     self.cards[(self.top_card - 2) % #self.cards + 1]:lower_to_bottom()
@@ -119,6 +127,7 @@ local function pre_backward_flip(self)
     self.visible_cards[self.top_card % #self.cards + 1] = true
     
     self.cards[self.top_card % #self.cards + 1]:update_time(os.date('*t'))
+    
 end
 
 
@@ -167,7 +176,7 @@ return function(response_table)
     
     --upvals: card, deal, rolodex
     local c, d
-    print('make')
+    --print('make')
     if response_table == false then
         
         Loading_G:message("Having trouble connecting")

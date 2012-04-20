@@ -15,6 +15,7 @@ set( LB_FILES )
 
 include_directories( ${ENGINE_SRC}/lua/lua-5.1.4/src )
 include_directories( ${ENGINE_SRC}/clutter_alpha_mode )
+include_directories( ${PROJECT_BINARY_DIR}/engine )
 
 include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
@@ -448,7 +449,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/http.lb
     ${BINDINGS_SRC}/keyboard.lb
     ${BINDINGS_SRC}/ease.lb
-
+    ${BINDINGS_SRC}/matrix.lb
 )
 
 #------------------------------------------------------------------------------
@@ -470,7 +471,7 @@ foreach( LB_FILE ${LB_FILES} )
     file( TO_NATIVE_PATH ${LB_FILE} NATIVE_LB_FILE )
 
     add_custom_command(
-        OUTPUT ${LB_FILE_NAME}.cpp
+        OUTPUT ${LB_FILE_NAME}.cpp ${LB_FILE_NAME}.h
         COMMAND ${LB_GENERATOR} ${LB_OPTIONS} "${NATIVE_LB_FILE}"
         DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 
@@ -485,7 +486,7 @@ foreach( LB_FILE ${LB_SPECIAL_MAC_FILES} )
     file( TO_NATIVE_PATH ${LB_FILE} NATIVE_LB_FILE )
 
     add_custom_command(
-        OUTPUT ${LB_FILE_NAME}.mm
+        OUTPUT ${LB_FILE_NAME}.mm ${LB_FILE_NAME}.h
         COMMAND ${LB_GENERATOR} ${LB_OPTIONS} --mac "${NATIVE_LB_FILE}"
         DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 

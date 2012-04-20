@@ -12,23 +12,25 @@ import urllib2
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from zeroconf import dns
 
 class TrickplayPushApp():   
 
-    def __init__(self, path = None):
+    def __init__(self, deviceManager=None, path = None):
         
         self.path = path
+        self.deviceManager = deviceManager
     
     def push(self, path = None, address = None):
         
         path = path or self.path
         
         if not path:
-            print('No path given')
+            print('[VDBG] No path given')
             return False
         
         if not address:
-            print('No location given for pushing app')
+            print('[VDBG] No location given for pushing app')
             return False
         
         path = str(path)
@@ -56,7 +58,7 @@ class TrickplayPushApp():
             
         except:
             
-            print( "Missing 'app' file" )
+            print( "[VDBG] Missing 'app' file" )
             
             return False
         
@@ -64,6 +66,8 @@ class TrickplayPushApp():
         message[ "app" ] = app_file.read()
         app_file.close()
         
+        message[ "debug" ] = self.deviceManager.debug_mode
+
         message[ "files" ] = []
         
         file_map = {}
@@ -89,14 +93,30 @@ class TrickplayPushApp():
         
         try:
             
-            print( "Connecting..." )
+            print( "[VDBG] Connecting..." )
             request = urllib2.Request( "http://" + address + "/push" , json.dumps( message ) , { "Content-Type" : "application/json" } )
             response = urllib2.urlopen( request )
             response = json.load( response )
            
         except:
             
-            print( "Connection failed" )
+            print( "[VDBG] Connection failed" )
+            class Record:
+                def __init__(self):
+                    pass
+                def isExpired(self, now):
+                    return now
+                def getExpirationTime(self, p):
+                    return 300
+
+            index = self.deviceManager.ui.comboBox.currentIndex()
+            rec = Record()
+            rec.name = "_trickplay-http._tcp.local."
+            rec.type = dns._TYPE_PTR
+            rec.alias = str(self.deviceManager.ui.comboBox.itemText(index))+'.'+rec.name
+            self.deviceManager.discovery.browser.updateRecord(None, True, rec)
+
+    	    self.deviceManager.main.stop(True)
             
             return False
         
@@ -118,7 +138,7 @@ class TrickplayPushApp():
                 
                 file_name = file_map[ response[ "file" ] ]
                 length = os.path.getsize( file_name )
-                print( "Sending %s" % response[ "file" ] )
+                print( "[VDBG] Sending %s" % response[ "file" ] )
                 
                 f = open( file_name )
                 
@@ -131,7 +151,7 @@ class TrickplayPushApp():
                 
             except:
                 
-                print( "Failed to send files" )
+                print( "[VDBG] Failed to send files" )
                 
                 return False
         

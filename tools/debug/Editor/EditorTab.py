@@ -7,7 +7,7 @@ from Editor import Editor
 
 class EditorTabWidget(QTabWidget):
 
-    def __init__(self, main, windowsMenu=None, fileSystem = None, parent = None):
+    def __init__(self, main, windowsMenu=None, fileSystem = None, parent = None, m=None):
         
         QTabWidget.__init__(self, parent)
         
@@ -17,12 +17,14 @@ class EditorTabWidget(QTabWidget):
         self.setCurrentIndex(-1)
         self.setAcceptDrops(True)
         
+        self.m = m
         self.main = main
         self.paths = []
         self.editors = []
         self.textBefores = []
         self.windowsMenu = windowsMenu
         self.fileSystem = fileSystem
+        self.tabClosing = False 
         
         QObject.connect(self, SIGNAL('tabCloseRequested(int)'), self.closeTab)
         QObject.connect(self, SIGNAL('currentChanged(int)'), self.changeTab)
@@ -40,14 +42,13 @@ class EditorTabWidget(QTabWidget):
 		#index = self.currentIndex()
 
 		editor = self.editors[index] #self.app.focusWidget()
-		self.windowsMenu.removeAction(editor.windowsAction)
+		
 		# reset the windowsActions'shortcuts 
 		n=0
 		for edt in self.editors:
 			if n > index:
 				edt.windowsAction.setShortcut(QApplication.translate("MainWindow", "Ctrl+"+str(n), None, QApplication.UnicodeUTF8)) 
 			n=n+1
-
 
 		# save before close
 		if isinstance(editor, Editor):
@@ -69,77 +70,89 @@ class EditorTabWidget(QTabWidget):
 						if editor.tempfile == False:
 							editor.save()
 						else:
-							self.main.saveas()
+							self.tabClosing = True 
+							ret = self.main.saveas()
+							self.tabClosing = False
+							index = self.count() - 1
 					elif ret == QMessageBox.Cancel:
 						return 
 					else:
 						pass
 
 		#close current index tab
-		self.paths.pop(index)
-		self.textBefores.pop(index) #new
-		self.editors.pop(index) #new
+		edt = self.editors.pop(index) #new
+		self.windowsMenu.removeAction(edt.windowsAction)
 		self.removeTab(index)
+		self.paths.pop(index)
+		for k in self.paths:
+		    self.main.editors[k][1] = self.paths.index(k)
+
 		if 0 == self.count():
+			self.m.editorMenuEnabled(False)
 			self.close()
 			self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
-
-
 				
     def changeTab(self, index):
 
-		if index == -1:
-			return 
+        if index == -1:
+            return 
 
-		"""
-		if hasattr(self.editors[index], "fileIndex") == True :
-			if self.editors[index].fileIndex is not None:
-				self.fileSystem.model.view.setSelectionMode(QAbstractItemView.SingleSelection)
-				self.fileSystem.model.view.setCurrentIndex(self.editors[index].fileIndex)
-			else:
-				print("FIRST ELSE")
-				self.fileSystem.model.view.setSelectionMode(QAbstractItemView.NoSelection)
-				#self.fileSystem.model.view.setCurrentIndex(None)
+        if len(self.main.fontSettingCheck) > 0 :
+            if self.main.fontSettingCheck[index] == True :
+                self.main.fontSettingCheck[index] == False
+                self.textBefores[index] = self.editors[index].text()
+                self.editors[index].text_status = 1 #TEXT_READ
+                return
+    
+        try :
+            currentText = open(self.paths[index]).read()
+        except :
+            return
+
+        self.m.ui.actionUndo.setEnabled(self.editors[index].isUndoAvailable())
+        self.m.ui.actionRedo.setEnabled(self.editors[index].isRedoAvailable())
+
+        if len (self.editors[index].selectedText()) > 0 :
+            self.m.ui.action_Cut.setEnabled(True)
+            self.m.ui.action_Copy.setEnabled(True)
+            self.m.ui.action_Delete.setEnabled(True)
+        else :
+            self.m.ui.action_Cut.setEnabled(False)
+            self.m.ui.action_Copy.setEnabled(False)
+            self.m.ui.action_Delete.setEnabled(False)
+
+	if self.editors[index].tempfile == False  :
+	    if self.textBefores[index] != currentText and self.tabClosing == False :
+		msg = QMessageBox()
+		msg.setText('The file "' + self.paths[index] + '" changed on disk.')
+		if self.editors[index].text_status == 2: #TEXT_CHANGED
+		    msg.setInformativeText('Do you want to drop your changes and reload the file ?')
 		else:
-			print("SECOND ELSE")
-			self.fileSystem.model.view.setSelectionMode(QAbstractItemView.NoSelection)
-			#self.fileSystem.model.view.setCurrentIndex(None)
-		"""
+		    msg.setInformativeText('Do you want to reload the file ?')
+		msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+		msg.setDefaultButton(QMessageBox.Cancel)
+		msg.setWindowTitle("Warning")
+		ret = msg.exec_()
 
-		try :
-			currentText = open(self.paths[index]).read()
-		except :
-			return
+		if ret == QMessageBox.Ok:
+    		# Reload 
+		    self.editors[index].readFile(self.paths[index])
+		    self.textBefores[index] = self.editors[index].text()
+		    self.editors[index].text_status = 1 #TEXT_READ
+		    self.editors[index].save() # added 2/3
+		    self.textBefores[index] = self.editors[index].text() #added 2/3
+	else:
+	    if self.tabClosing == False :
+	        self.editors[index].readFile(self.paths[index])
+		self.textBefores[index] = self.editors[index].text()
+		self.editors[index].text_status = 1 #TEXT_READ
+		self.editors[index].save() # added 2/3
+		self.textBefores[index] = self.editors[index].text() #added 2/3
+		self.editors[index].tempfile = True
+	    else:
+	        return
 
-		if self.editors[index].tempfile == False :
-			if self.textBefores[index] != currentText:
-				msg = QMessageBox()
-				msg.setText('The file "' + self.paths[index] + '" changed on disk.')
-				if self.editors[index].text_status == 2: #TEXT_CHANGED
-					msg.setInformativeText('Do you want to drop your changes and reload the file ?')
-				else:
-					msg.setInformativeText('Do you want to reload the file ?')
-				msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-				msg.setDefaultButton(QMessageBox.Cancel)
-				msg.setWindowTitle("Warning")
-				ret = msg.exec_()
-
-				if ret == QMessageBox.Ok:
-    				# Reload 
-					self.editors[index].readFile(self.paths[index])
-					self.textBefores[index] = self.editors[index].text()
-					self.editors[index].text_status = 1 #TEXT_READ
-					self.editors[index].save() # added 2/3
-					self.textBefores[index] = self.editors[index].text() #added 2/3
-		else:
-			self.editors[index].readFile(self.paths[index])
-			self.textBefores[index] = self.editors[index].text()
-			self.editors[index].text_status = 1 #TEXT_READ
-			self.editors[index].save() # added 2/3
-			self.textBefores[index] = self.editors[index].text() #added 2/3
-			self.editors[index].tempfile = True
-
-		self.setCurrentIndex(index)
+	self.setCurrentIndex(index)
 
 
 """
@@ -161,6 +174,9 @@ class EditorDock(QDockWidget):
         self.setMinimumSize(QSize(215, 100))
 
         font = QFont()
+        #font.setStyleHint(font.Inconsolata)
+        #font.setFamily('Inconsolata')
+        #if not font.exactMatch():
         font.setPointSize(10)
         self.setFont(font)
 

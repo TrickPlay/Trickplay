@@ -634,13 +634,15 @@ class HttpResponse : public HttpServer::Response
 {
 private:
 
-    HttpMessageContext * message_context;
+    HttpMessageContext *	message_context;
+    bool				 	paused;
 
 public:
 
 	HttpResponse( HttpMessageContext * ctx )
 	:
-	    message_context( ctx )
+	    message_context( ctx ),
+	    paused( false )
 	{
 		message_context->ref();
 
@@ -759,16 +761,29 @@ public:
 
     Response * pause()
     {
+    	g_assert( ! paused );
+
     	soup_server_pause_message( message_context->server , message_context->message );
 
     	ref();
 
+    	paused = true;
+
     	return this;
+    }
+
+    bool is_paused() const
+    {
+    	return paused;
     }
 
     void resume()
     {
+    	g_assert( paused );
+
     	soup_server_unpause_message( message_context->server , message_context->message );
+
+    	paused = false;
 
     	unref();
     }
@@ -828,7 +843,14 @@ void HttpServer::soup_server_callback(
         ud->handler->handle_http_delete( request , * response );
     }
 
-    tplog( ">> %u %s" , msg->status_code , msg->reason_phrase );
+    if ( response->is_paused() )
+    {
+    	tplog( ">> PAUSED" );
+    }
+    else
+    {
+    	tplog( ">> %u %s" , msg->status_code , msg->reason_phrase );
+    }
 
     message_context->unref();
 

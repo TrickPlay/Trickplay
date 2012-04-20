@@ -591,12 +591,32 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	The remainder of the constructor definition consists of a table of transitions. Each transition includes the following components.
 	
-	source - unique string identifying a particular beginning state. Can also be "*", which will act as a wildcard starting state.
+	source - unique string identifying a particular beginning state. Can also be an asterisk character ("*") which acts as a wildcard state.
 	target - unique string identifying a particular ending state
 	duration - Optional. Positive numeric value specifying the time in milliseconds required to transition from the source state to the target state. If not specified, the value specified in the constructor's duration property is used. If the constructor's duration property is not specified, a value of 1000 is used. The maximum duration value is 86,400,000 (24 hours).
 	mode - Optional. String identifying the Ease mode to use in the transition's animation. Supported Ease modes are described in the <Ease> class. If not specified, the mode setting specified in the constructor's mode property is used. If the constructor's mode property is not specified, the "LINEAR" mode is used.
 	animator - Animator object used to drive animation. Each transition table contains either an animator property or a keys table, but never both.
 	keys - table of key frames specifying the objects and properties to animate and various characteristics of the animation. Additional information about the contents and format of the keys table is described below. Each transition table contains either a keys table or an animator property, but never both.
+
+	(code)
+	-- Example transitions table definition
+	transitions = {
+		{ source   = "State1",
+		  target   = "State2",
+		  duration = 3000,                 -- overrides any duration setting specified in the outer level
+		  mode     = "EASE_IN_QUART",      -- overrides any mode setting specified in the outer level
+		  animator = transitionAnimator,   -- this Animator object will control the animation for this transition
+		},
+		{ source = "State2",
+		  target = "State3",
+		  keys   = { ... },                -- animation objects and properties, described below
+		},
+		{ source = "*",                    -- wildcard source state
+		  target = "State1",
+		  keys   = { ... },
+		},
+	}
+	(end)
 
 	The transition's source and target properties specify the starting and ending states, respectively. During processing of an AnimationState, one state is always current. Setting a new state causes a transition to occur between the current, source state and the new, target state. When a new state is set, the AnimationState object selects the appropriate transition to perform based on these source and target states. If the object contains a transition that explicitly specifies the current source and new target states, that transition is selected and the associated animation is executed. If no matching transition is found, the AnimationState searches for a transition with the specified target state and a source state with a wildcard value of "*", which matches all states.
 	
@@ -610,7 +630,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	
 	The animator property specifies an <Animator> object that defines the associated animation. When using an Animator-based animation, the duration and mode properties defined in the AnimationState object are ignored. Instead, these properties should be set in the Animator object.
 	
-	The keys property specifies a table of key frame entries that define the associated animation. Each key frame is itself a table containing the following components.
+	The keys property specifies a table of key frame entries that defines the associated animation. Each key frame is itself a table containing the following components.
 	
 	(code)
 	{ AnimatedObject, AnimatedProperty, [EaseMode,] FinalValue [, PreDelay, PostDelay] }

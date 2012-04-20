@@ -59,10 +59,9 @@ make_loading_g = function()
     end
     
     loading_g.message = function(self,t)
-        print(
-        "reeefdsdv"
-        )
+        
         message.text = t
+        
     end
     
     return loading_g    

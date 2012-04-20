@@ -172,6 +172,8 @@ public:
 
 	    virtual Response * pause() = 0;
 
+	    virtual bool is_paused() const = 0;
+
 	    // Resume decreases the ref count and tells the server the response
 	    // is ready to be sent.
 

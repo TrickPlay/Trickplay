@@ -27,6 +27,7 @@
 #include "clutter_util.h"
 #include "console_commands.h"
 #include "desktop_controller.h"
+#include "ansi_color.h"
 
 //-----------------------------------------------------------------------------
 #ifndef TP_DEFAULT_RESOURCES_PATH
@@ -664,6 +665,10 @@ int TPContext::run()
     //.........................................................................
     // Set default size and color for the stage
 
+	g_info( "GRABBING CLUTTER LOCK...");
+
+	clutter_threads_enter ();
+
     g_info( "INITIALIZING STAGE..." );
 
     ClutterActor * stage = clutter_stage_get_default();
@@ -750,44 +755,13 @@ int TPContext::run()
 
     if ( app )
     {
-    	// Output a machine-readable JSON string with all
-    	// the "control" ports.
 
 #ifndef TP_PRODUCTION
 
-    	{
-    		JSON::Object control;
+    	// Output a machine-readable JSON string with all
+    	// the "control" ports.
 
-			guint16 port;
-
-			if ( ( port = http_server->get_port() ) )
-			{
-				control[ "http" ] = port;
-			}
-
-			if ( ( port = console ? console->get_port() : 0 ) )
-			{
-				control[ "console" ] = port;
-			}
-
-			if ( Debugger * debugger = app->get_debugger() )
-			{
-				if ( ( port = debugger->get_server_port() ) )
-				{
-					control[ "debugger" ] = port;
-				}
-			}
-
-			if ( controller_server )
-			{
-				if ( ( port = controller_server->get_port() ) )
-				{
-					control[ "controllers" ] = port;
-				}
-			}
-
-			g_info( "<<CONTROL>>:%s" , control.stringify().c_str() );
-    	}
+    	g_info( "<<CONTROL>>:%s" , get_control_message( app ).c_str() );
 
 #endif
 
@@ -844,7 +818,11 @@ int TPContext::run()
                 }
             }
         }
+
     }
+
+	g_debug("RELEASING CLUTTER LOCK...");
+	clutter_threads_leave ();
 
     //.....................................................................
 
@@ -1373,6 +1351,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             if ( log_level == G_LOG_LEVEL_MESSAGE )
             {
                 fprintf( stderr, "%s\n", message );
+                fflush( stderr );
             }
             return;
 
@@ -1393,6 +1372,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
     {
         line = format_log_line( log_domain, log_level, message );
         fprintf( stderr, "%s", line );
+        fflush( stderr );
     }
 
     // Otherwise, we have a context and more choices as to what we can do with
@@ -1424,6 +1404,7 @@ void TPContext::log_handler( const gchar * log_domain, GLogLevelFlags log_level,
             {
                 line = format_log_line( log_domain, log_level, message );
                 fprintf( stderr, "%s", line );
+                fflush( stderr );
             }
 
             if ( !context->output_handlers.empty() )
@@ -1466,7 +1447,7 @@ void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader
 {
 	g_assert( !running() );
 	g_assert( loader );
-	
+
 	resource_loaders[ type ] = ResourceLoaderClosure( loader , data );
 }
 
@@ -1992,43 +1973,38 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
     const char * level = "OTHER";
 
     const char * color_start = "";
-    const char * color_end = "\033[0m";
+    const char * color_end = SAFE_ANSI_COLOR_RESET;
 
     if ( log_level & G_LOG_LEVEL_ERROR )
     {
-        color_start = "\033[31m";
+        color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "ERROR";
     }
     else if ( log_level & G_LOG_LEVEL_CRITICAL )
     {
-        color_start = "\033[31m";
+        color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "CRITICAL";
     }
     else if ( log_level & G_LOG_LEVEL_WARNING )
     {
-        color_start = "\033[33m";
+        color_start = SAFE_ANSI_COLOR_FG_YELLOW;
         level = "WARNING";
     }
     else if ( log_level & G_LOG_LEVEL_MESSAGE )
     {
-        color_start = "\033[36m";
+        color_start = SAFE_ANSI_COLOR_FG_CYAN;
         level = "MESSAGE";
     }
     else if ( log_level & G_LOG_LEVEL_INFO )
     {
-        color_start = "\33[32m";
+        color_start = SAFE_ANSI_COLOR_FG_GREEN;
         level = "INFO";
     }
     else if ( log_level & G_LOG_LEVEL_DEBUG )
     {
-        color_start = "\33[37m";
+        color_start = SAFE_ANSI_COLOR_FG_WHITE;
         level = "DEBUG";
     }
-
-#if 0 // Set to 1 to disable colors
-    color_start = "";
-    color_end = "";
-#endif
 
     return g_strdup_printf( "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n" ,
                             log_domain,
@@ -2443,6 +2419,46 @@ void TPContext::load_background()
 #endif
 }
 
+String TPContext::get_control_message( App * app ) const
+{
+	app = app ? app : current_app;
+
+	JSON::Object control;
+
+	guint16 port;
+
+	if ( ( port = http_server->get_port() ) )
+	{
+		control[ "http" ] = port;
+	}
+
+	if ( ( port = console ? console->get_port() : 0 ) )
+	{
+		control[ "console" ] = port;
+	}
+
+	if ( app )
+	{
+		if ( Debugger * debugger = app->get_debugger() )
+		{
+			if ( ( port = debugger->get_server_port() ) )
+			{
+				control[ "debugger" ] = port;
+			}
+		}
+	}
+
+	if ( controller_server )
+	{
+		if ( ( port = controller_server->get_port() ) )
+		{
+			control[ "controllers" ] = port;
+		}
+	}
+
+	return control.stringify();
+}
+
 //=============================================================================
 // External-facing functions
 //=============================================================================
@@ -2453,6 +2469,8 @@ void tp_init_version( int * argc, char ** * argv, int major_version, int minor_v
     {
         g_thread_init( NULL );
     }
+
+	clutter_threads_init ();
 
     if ( !( major_version == TP_MAJOR_VERSION &&
             minor_version == TP_MINOR_VERSION &&
@@ -2592,7 +2610,7 @@ void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void
 void tp_context_set_resource_loader( TPContext * context , unsigned int type , TPResourceLoader loader, void * data)
 {
 	g_assert( context );
-	
+
 	context->set_resource_loader( type , loader , data );
 }
 
