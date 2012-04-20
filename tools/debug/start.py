@@ -22,8 +22,9 @@ class MyApp(QApplication):
         if hasattr(self.main, 'editorManager'):
             if hasattr(self.main.editorManager, 'tab'):
                 if self.main.editorManager.tab is not None:
-                    index = self.main.editorManager.tab.currentIndex()
-                    self.main.editorManager.tab.changeTab(index)
+                    if self.main.editorManager.tab.count() > 0 : 
+                        index = self.main.editorManager.tab.currentIndex()
+                        self.main.editorManager.tab.changeTab(index)
 
     return QApplication.event(self, e)
 
