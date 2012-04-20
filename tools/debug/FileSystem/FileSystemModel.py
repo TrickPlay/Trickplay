@@ -13,7 +13,6 @@ class FileSystemModel(QFileSystemModel):
         
         self.setReadOnly(False)
         if path is -1 :
-            path = "-"
             return 
         self.setRootPath(path)
         
