@@ -130,6 +130,9 @@ class EditorTabWidget(QTabWidget):
 			self.close()
 			self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
 
+		if self.count() == 0 :
+		    self.main.main.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
+            
 		self.tabClosing = False
 				
     def changeTab(self, index):
@@ -150,8 +153,7 @@ class EditorTabWidget(QTabWidget):
             self.main.main.setWindowTitle(QApplication.translate("MainWindow", str(os.path.basename(str(newPath)))+" ["+str(self.main.main.path)+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
 
         else :
-            self.main.main.setWindowTitle(QApplication.translate("MainWindow",
-            str(os.path.basename(str(self.paths[index])))+" ["+str(os.path.dirname(str(self.paths[index])))+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
+            self.main.main.setWindowTitle(QApplication.translate("MainWindow", str(os.path.basename(str(self.paths[index])))+" ["+str(os.path.dirname(str(self.paths[index])))+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
             
 
         if str(self.paths[index]) != str(newPath) and not self.tabClosing:
