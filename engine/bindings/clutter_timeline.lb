@@ -318,7 +318,7 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: stop
 		
-		The stop() function halts a running Timeline and resets the Timeline to its starting position. The stop() function does *not* cause the on_completed() event handler to be called.
+		The stop() function halts a running Timeline and resets the Timeline to its starting position. The properties of all animating objects, however, remain at whatever intermediate values they were at when the animation was stopped.  The stop() function does *not* cause the on_completed() event handler to be called.
 		
 		*Arguments:* None
 		

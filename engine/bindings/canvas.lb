@@ -72,7 +72,7 @@ class Canvas [[ cairo_t * ]]
     /*
         Constructor: Canvas
         
-        The Canvas constructor creates an empty in-memory drawing surface. Each pixel on the surface contains a Red, a Green, and a Blue color component and an Alpha transparency value.
+        The Canvas constructor creates an empty and transparent in-memory drawing surface. Each pixel on the surface contains a Red, a Green, and a Blue color component and an Alpha transparency value.
 
 		*Prototype:*
 		
@@ -87,7 +87,7 @@ class Canvas [[ cairo_t * ]]
 
         *Return Value:*
         
-        canvas - a Canvas object whose drawing surface is empty, i.e., all zeros. If insufficient memory exists to create the Canvas object, a Canvas object is still returned, but you will not be able to perform any operations with it. After creating a Canvas object, check the <ok> property to verify that a valid object exists.
+        canvas - a Canvas object whose drawing surface is empty and completely transparent. If insufficient memory exists to create the Canvas object, a Canvas object is still returned, but you will not be able to perform any operations with it. After creating a Canvas object, check the <ok> property to verify that a valid object exists.
     */
 
     Canvas( ... )
