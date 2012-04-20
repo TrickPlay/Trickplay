@@ -691,9 +691,9 @@ class MainWindow(QMainWindow):
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
-        self.setWindowTitle(QtGui.QApplication.translate("MainWindow", 
-							"TrickPlay IDE [ "+str(os.path.basename(str(path))+" ]"), 
-							None, QtGui.QApplication.UnicodeUTF8))
+        
+        if path is not -1:
+            self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(path))+" ]"), None, QtGui.QApplication.UnicodeUTF8))
         self.deviceManager.setPath(path)
         
         if openList:
