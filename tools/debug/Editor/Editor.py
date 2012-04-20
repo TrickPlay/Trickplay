@@ -210,6 +210,35 @@ class Editor(QsciScintilla):
         cstr = hexColor[2:].rjust(6, '0')
         return eval('0x' + cstr[-2:] + cstr[2:4] + cstr[:2])
 
+    def delete_marker (self) :
+        bp_file = self.get_bp_file()
+        bp_cnt = len(self.editorManager.bp_info[1]) 
+        if bp_cnt > 0:
+
+            idx=0
+            for r in range(0, bp_cnt):
+                #cellItem = self.editorManager.main._debug.ui.breakTable.item(r, 0) 
+                bp_info = self.editorManager.bp_info[2][idx]
+                n = re.search(":", bp_info).end()
+                fileName = bp_info[:n-1]
+                lineNum  = int(bp_info[n:]) -1
+                if fileName == bp_file :
+                    if self.deviceManager.debug_mode == True:
+                        self.deviceManager.send_debugger_command(DBG_CMD_DELETE+" %s"%str(idx))
+                    else:
+                        if self.current_line != lineNum :
+                            self.markerDelete(lineNum, -1)
+                        else :
+                            self.markerDelete(lineNum, -1)
+    	                    self.markerAdd(lineNum, self.ARROW_MARKER_NUM)
+                        self.line_click[lineNum] = 0
+            
+                    self.editorManager.bp_info[1].pop(idx)
+                    self.editorManager.bp_info[2].pop(idx)
+                    self.debugWindow.ui.breakTable.removeRow(idx)
+                else:
+                    idx += 1
+
     def show_marker (self) :
         bp_file = self.get_bp_file()
         bp_cnt = len(self.editorManager.bp_info[1]) 
@@ -272,7 +301,7 @@ class Editor(QsciScintilla):
             if tabTitle[:1] != "*":
                 self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
                 self.starMark = True
-        else :
+        elif self.isUndoAvailable() == False  :
             self.editorManager.main.ui.actionUndo.setEnabled(False)
             tabTitle = self.editorManager.tab.tabText(index)
             if tabTitle[:1] == "*":
@@ -366,7 +395,6 @@ class Editor(QsciScintilla):
 				if edt.path == self.path:
 				    if self.isUndoAvailable() is True and self.starMark is False:
 					    self.editorManager.tab.setTabText (index, "*"+self.editorManager.tab.tabText(index))
-                        
 					    self.starMark = True
 				index = index + 1
 
@@ -386,7 +414,6 @@ class Editor(QsciScintilla):
             pass
         
         self.text_status = TEXT_READ 
-        self.starMark = False
         
         index = 0 
         if self.editorManager is not None :
@@ -394,6 +421,7 @@ class Editor(QsciScintilla):
         	tabTitle = self.editorManager.tab.tabText(index)
         	if tabTitle[:1] == "*":
         	    self.editorManager.tab.setTabText (index, tabTitle[1:])
+        	    self.starMark = False
 
         	"""
         	for edt in self.editorManager.tab.editors :
@@ -406,10 +434,13 @@ class Editor(QsciScintilla):
         	"""
 
         	#self.editorManager.tab.textBefores[index] = self.text()
-        	self.editorManager.editors[self.path][2] = self.text()
-        	self.tempfile = False
         	if self.path is not None :
         	    print '[VDBG] \''+self.path+'\' File saved'
+        	    if self.editorManager.editors.has_key(self.path):
+        	        self.editorManager.editors[str(self.path)][2] = self.text()
+                else:
+                    pass
+        	    self.tempfile = False
         else: 
 			self.tempfile = True
 
