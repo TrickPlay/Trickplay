@@ -330,6 +330,8 @@ function controllers:on_controller_connected(controller)
 	function screen.on_key_down( screen , key )
 			if key == keys.Return then
 					controller.screen:remove(test_img)
+					if test_steps ~= nil then test_steps_txt.text = test_steps end
+					if test_verify ~= nil then test_verify_txt.text = test_verify end
 					collectgarbage("collect")
 					test_img = generate_device_image(controller,controller.factory)
 					controller.screen:add(test_img)
