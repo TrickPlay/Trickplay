@@ -21,7 +21,7 @@ function generate_device_image (controller, factory)
 	  photo.position = { 675, 470 }        
 	  screen:add(photo)
 
-	 	function idle.on_idle( idle , seconds )
+	 function idle.on_idle( idle , seconds )
 	      total = total + seconds
 	      if total >= 5 then
 			idle.on_idle = nil
