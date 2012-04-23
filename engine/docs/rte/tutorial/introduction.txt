@@ -1,6 +1,6 @@
 Topic: TrickPlay SDK Tutorial
 
-This tutorial walks through the creation of a TrickPlay application using the TrickPlay SDK libraries and the Lua programming language. It describes the basic elements that every TrickPlay application requires, introduces several of the Engine's classes, and demonstates some of the methods available to animate screen objects. Source listings for the entire Tutorial application are in the <Complete Tutorial Source Code> section.
+This tutorial walks through the creation of a TrickPlay application using the TrickPlay SDK libraries and the Lua programming language. It describes the basic elements that every TrickPlay application requires, introduces several of the Engine's classes, and demonstates some of the methods available to animate screen objects. Source listings for the entire Tutorial application are in the <Complete Tutorial Source Code> section. The application's source code and resource files can also be <accessed here at https://github.com/TrickPlay/SampleApps>.
 
 To follow this tutorial, the reader should understand the Lua programming language. Information about Lua can be found at <http://www.lua.org/>.
 
