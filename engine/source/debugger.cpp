@@ -518,10 +518,11 @@ protected:
 
     				if ( name != "(*temporary)" )
     				{
-						fprintf( stdout , "%s (%s) = %s\n" ,
+						fprintf( stdout , "%s (%s) = %s [%s]\n" ,
 								name.c_str(),
 								global[ "type" ].as<String>().c_str(),
-								global[ "value"].as<String>().c_str());
+								global[ "value"].as<String>().c_str(),
+								global[ "defined"].as<String>().c_str());
     				}
     			}
 
@@ -904,6 +905,7 @@ JSON::Array Debugger::get_globals( lua_State * L )
 
 			g[ "type"  ] = lua_typename( L , type );
 			g[ "value" ] = Util::describe_lua_value( L , -1 );
+			g[ "defined" ] = it->second;
 		}
 
 		lua_pop( L , 1 );
