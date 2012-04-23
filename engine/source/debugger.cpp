@@ -790,25 +790,6 @@ JSON::Array Debugger::get_back_trace( lua_State * L , lua_Debug * ar )
 
 //.............................................................................
 
-static String get_value( lua_State * L , int index )
-{
-	switch( lua_type( L , index ) )
-	{
-	case LUA_TNUMBER:
-		return lua_tostring( L , index );
-	case LUA_TSTRING:
-		return Util::format( "\"%s\"" , lua_tostring( L , index ) );
-	case LUA_TBOOLEAN:
-		return lua_toboolean( L , index ) ? "true" : "false";
-	case LUA_TNIL:
-		return "nil";
-	default:
-		return UserData::describe( L , index );
-	}
-}
-
-//.............................................................................
-
 JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
 {
 	JSON::Array array;
@@ -829,7 +810,7 @@ JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
 		int type = lua_type( L , -1 );
 
 		local[ "type"  ] = lua_typename( L , type );
-		local[ "value" ] = get_value( L , -1 );
+		local[ "value" ] = Util::describe_lua_value( L , -1 );
 
 		lua_pop( L , 1 );
     }
@@ -859,7 +840,7 @@ JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
 			int type = lua_type( L , -1 );
 
 			local[ "type"  ] = lua_typename( L , type );
-			local[ "value" ] = get_value( L , -1 );
+			local[ "value" ] = Util::describe_lua_value( L , -1 );
 
 			lua_pop( L , 1 );
 		}
