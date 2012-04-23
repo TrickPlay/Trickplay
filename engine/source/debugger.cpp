@@ -500,6 +500,36 @@ protected:
     		}
 
     		//.................................................................
+    		// List globals
+
+    		key = obj.find( "globals" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+        		JSON::Array::Vector::iterator it;
+
+    			for ( it = array.begin(); it != array.end(); ++it )
+    			{
+    				JSON::Object & global( (*it).as<JSON::Object>() );
+
+    				const String & name = global[ "name" ].as<String>();
+
+    				if ( name != "(*temporary)" )
+    				{
+						fprintf( stdout , "%s (%s) = %s\n" ,
+								name.c_str(),
+								global[ "type" ].as<String>().c_str(),
+								global[ "value"].as<String>().c_str());
+    				}
+    			}
+
+    			fflush( stdout );
+    		}
+
+
+    		//.................................................................
     		// Back trace
 
     		key = obj.find( "stack" );
@@ -853,6 +883,37 @@ JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
 
 //.............................................................................
 
+JSON::Array Debugger::get_globals( lua_State * L )
+{
+	JSON::Array array;
+
+	const StringMap & globals( app->get_globals() );
+
+	for ( StringMap::const_iterator it = globals.begin(); it != globals.end(); ++it )
+	{
+		lua_pushstring( L , it->first.c_str() );
+		lua_rawget( L , LUA_GLOBALSINDEX );
+
+		if ( ! lua_isnil( L , -1 ) )
+		{
+			JSON::Object & g( array.append<JSON::Object>() );
+
+			g[ "name"  ] = it->first;
+
+			int type = lua_type( L , -1 );
+
+			g[ "type"  ] = lua_typename( L , type );
+			g[ "value" ] = Util::describe_lua_value( L , -1 );
+		}
+
+		lua_pop( L , 1 );
+	}
+
+	return array;
+}
+
+//.............................................................................
+
 JSON::Object Debugger::get_location( lua_State * L , lua_Debug * ar )
 {
 	JSON::Object result;
@@ -945,6 +1006,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		reply[ "locals" ] = get_locals( L , ar );
 		reply[ "stack" ] = get_back_trace( L , ar );
 		reply[ "breakpoints" ] = get_breakpoints( L , ar );
+		reply[ "globals" ] = get_globals( L );
 	}
 
 	// List locals
@@ -952,6 +1014,13 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 	else if ( command == "l" )
 	{
 		reply[ "locals" ] = get_locals( L , ar );
+	}
+
+	// List globals
+
+	else if ( command == "g" )
+	{
+		reply[ "globals" ] = get_globals( L );
 	}
 
 	// Where
