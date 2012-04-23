@@ -3,7 +3,7 @@ Title: Using 3D Assets in a TrickPlay Application
 
 The 3D Assets sample application demonstrates how 3D assets, such as 3D models, animations, and still images, can be used to provide a visually unique effect in a standard TrickPlay application.
 
-The complete sample application, including source code and 3D assets, can be <downloaded here at http://www.trickplay.com/tutorials/assets3d.zip>.
+The complete sample application, including source code and 3D assets, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
 
 (see Assets3dDemo.png)
 
