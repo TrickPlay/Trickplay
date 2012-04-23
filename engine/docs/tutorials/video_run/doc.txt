@@ -3,7 +3,7 @@ Title: Run a Video in a TrickPlay Application
 
 The Run Video sample application demonstrates how to display a video in a TrickPlay application.
 
-The complete application, including source code, can be <downloaded here at http://www.trickplay.com/tutorials/video_run/video_run.zip>.
+The complete application, including source code, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
 
 (see VideoRunDemo.png)
 

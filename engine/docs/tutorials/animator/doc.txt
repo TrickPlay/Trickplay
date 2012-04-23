@@ -3,7 +3,7 @@ Title: Animator Sample Application
 
 The Animator sample application uses the TrickPlay SDK Library's <Animator> class to animate screen elements and their properties. Animator objects are used to demonstrate how multiple animation segments can be choreographed to run simultaneously, while other segments play sequentially.
 
-The complete sample application, including source code and resource files, can be <downloaded here at http://www.trickplay.com/tutorials/animator.zip>.
+The complete sample application, including source code and resource files, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
 
 (see animatorDemo.png)
 

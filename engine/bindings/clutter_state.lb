@@ -562,7 +562,7 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 
 /*
     Class: AnimationState
-
+    
 	The AnimationState class provides a method of organizing an animation as a group of different states and transitions from one state to another. Each state transition defines one or more objects to animate, their properties to modify, and the final property values they should transition to. During the transition from one state to another, the object's properties gradually change, and the animation results. When the target state is eventually reached, the program receives notification by having the AnimationState object's on_completed() event handler invoked. Upon arriving at the target state, the animation may continue by immediately transitioning to a new target state, but this is not a requirement. In fact, one strength of AnimationState-based animations is that they can transition from one state to another at different points in a running program, with transitions being determined by any number of factors, including user input. For example, the user clicking on a menu header may cause an animation to transition to a state that expands the menu and then waits for further user input. Subsequent user actions may cause the animation to transition to a different state which closes the menu. An indeterminate amount of time and program activity may pass before movement to any particular state occurs.
 	
 	The animation may be controlled by key frames defined in the AnimationState object itself or, alternatively, the animation may be driven by an external Animator object. For simple animations, it may be most convenient to have everything handled by the AnimationState object. For complex animations, it usually makes sense to have an Animator object perform the processing. By dividing responsibilities between the two objects--with the AnimationState object handling the state transitions and the Animator object performing the complex animation--each object performs the task it is most efficiently suited for.
@@ -719,6 +719,8 @@ int populate_state( lua_State * L, int index, ClutterState* state )
 	When the animation has completed, the program is notified by calling the object's <on_completed> event handler. This enables the program to perform any desired operations, including immediately transitioning to another state to daisy-chain animations.
 	
 	*Code Example:* Animate a sphere in two states: (1) from wildcard-source State to Disappear State and (2) from Disappear State to Appear State. For demonstration purposes, the program loops from one state to the other; in a real application, some activity, such as user input, would commonly cause the state transitions. All the AnimationState code is located in the bottom portion of the code sample.
+	
+	An additional code example is described in the <AnimationState Sample Application> section.
 	
 	(code)
 	-- Create a screen background
