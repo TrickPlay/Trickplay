@@ -2,7 +2,7 @@ Title: Multi-Level Menus Sample Application
 
 The Multi-Level Menus application demonstrates how to use the TrickPlay SDK Libraries to implement multiple-level menus. For demonstration purposes, the menus offer an assortment of movies for selection, and the movies are organized within diverse genres.
 
-The complete application, including source code, can be <downloaded here at http://www.trickplay.com/tutorials/menu_multilevel/menu_multilevel.zip>.
+The complete application, including source code, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
 
 (see MultiLevelMenusDemo.png)
 
