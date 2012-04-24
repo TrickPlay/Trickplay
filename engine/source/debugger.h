@@ -42,6 +42,7 @@ private:
     JSON::Array get_locals( lua_State * L , lua_Debug * ar );
     JSON::Array get_breakpoints( lua_State * L , lua_Debug * ar );
     JSON::Object get_app_info();
+    JSON::Array get_globals( lua_State * L );
 
     StringVector * get_source( const String & pi_path );
 

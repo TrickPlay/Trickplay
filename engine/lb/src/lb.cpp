@@ -5,6 +5,11 @@
 #include "lb.h"
 
 //.........................................................................
+// Copied from lauxlib.c
+
+#define abs_index(L, i) ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? (i) : lua_gettop(L) + (i) + 1)
+
+//.........................................................................
 
 void lb_get_extras_table( lua_State * L , bool create );
 
@@ -1163,7 +1168,8 @@ bool lb_check_udata_type( lua_State * L , int index , const char * type , bool f
     {
         if ( lua_getmetatable( L , index ) )
         {
-            lua_getfield( L , -1 , "__types__" );
+        	lua_pushliteral( L , "__types__" );
+            lua_rawget( L , -2 );
 
             if ( lua_type( L , -1 ) == LUA_TTABLE )
             {
@@ -1184,4 +1190,31 @@ bool lb_check_udata_type( lua_State * L , int index , const char * type , bool f
     LSG_CHECK(0);
 
     return result;
+}
+
+
+void * lb_get_udata_check( lua_State * L , int index , const char * type )
+{
+    assert( L );
+    assert( type );
+
+    if ( index )
+    {
+        index = abs_index( L , index );
+
+        if ( lb_check_udata_type( L , index , type , false ) )
+        {
+            return UserData::get_client_check( L , index );
+        }
+    }
+    return 0;
+}
+
+
+void lb_setglobal( lua_State * L , const char * name )
+{
+	lua_pushstring( L , name );
+	lua_pushvalue( L , -2 );
+	lua_rawset( L , LUA_GLOBALSINDEX );
+	lua_pop( L , 1 );
 }

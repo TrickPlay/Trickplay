@@ -76,6 +76,7 @@ void lb_inherit(lua_State*L,const char*metatable);
 void lb_set_props_from_table(lua_State*L);
 void lb_chain(lua_State*L,int index,const char * metatable );
 bool lb_check_udata_type(lua_State*L,int index,const char * type, bool fail = true);
+void * lb_get_udata_check(lua_State*L,int index,const char * type);
 
 #define lb_checkany(L,i) (luaL_checkany(L,i),i)
 #define lb_optany(L,i,d) (lua_isnone(L,i)?d:i)
@@ -118,6 +119,8 @@ void lb_set_lazy_loader(lua_State * L, const char * name , lua_CFunction loader 
 int lb_get_extra(lua_State * L);
 
 int lb_set_extra(lua_State * L);
+
+void lb_setglobal( lua_State * L , const char * name );
 
 //.........................................................................
 

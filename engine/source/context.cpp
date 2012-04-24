@@ -27,6 +27,7 @@
 #include "clutter_util.h"
 #include "console_commands.h"
 #include "desktop_controller.h"
+#include "ansi_color.h"
 
 //-----------------------------------------------------------------------------
 #ifndef TP_DEFAULT_RESOURCES_PATH
@@ -818,9 +819,10 @@ int TPContext::run()
             }
         }
 
-		g_debug("RELEASING CLUTTER LOCK...");
-		clutter_threads_leave ();
     }
+
+	g_debug("RELEASING CLUTTER LOCK...");
+	clutter_threads_leave ();
 
     //.....................................................................
 
@@ -1445,7 +1447,7 @@ void TPContext::set_resource_loader( unsigned int type , TPResourceLoader loader
 {
 	g_assert( !running() );
 	g_assert( loader );
-	
+
 	resource_loaders[ type ] = ResourceLoaderClosure( loader , data );
 }
 
@@ -1971,43 +1973,38 @@ gchar * TPContext::format_log_line( const gchar * log_domain, GLogLevelFlags log
     const char * level = "OTHER";
 
     const char * color_start = "";
-    const char * color_end = "\033[0m";
+    const char * color_end = SAFE_ANSI_COLOR_RESET;
 
     if ( log_level & G_LOG_LEVEL_ERROR )
     {
-        color_start = "\033[31m";
+        color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "ERROR";
     }
     else if ( log_level & G_LOG_LEVEL_CRITICAL )
     {
-        color_start = "\033[31m";
+        color_start = SAFE_ANSI_COLOR_FG_RED;
         level = "CRITICAL";
     }
     else if ( log_level & G_LOG_LEVEL_WARNING )
     {
-        color_start = "\033[33m";
+        color_start = SAFE_ANSI_COLOR_FG_YELLOW;
         level = "WARNING";
     }
     else if ( log_level & G_LOG_LEVEL_MESSAGE )
     {
-        color_start = "\033[36m";
+        color_start = SAFE_ANSI_COLOR_FG_CYAN;
         level = "MESSAGE";
     }
     else if ( log_level & G_LOG_LEVEL_INFO )
     {
-        color_start = "\33[32m";
+        color_start = SAFE_ANSI_COLOR_FG_GREEN;
         level = "INFO";
     }
     else if ( log_level & G_LOG_LEVEL_DEBUG )
     {
-        color_start = "\33[37m";
+        color_start = SAFE_ANSI_COLOR_FG_WHITE;
         level = "DEBUG";
     }
-
-#if 0 // Set to 1 to disable colors
-    color_start = "";
-    color_end = "";
-#endif
 
     return g_strdup_printf( "[%s] %p %2.2d:%2.2d:%2.2d:%3.3lu %s%-8s-%s %s\n" ,
                             log_domain,
@@ -2613,7 +2610,7 @@ void tp_context_set_log_handler( TPContext * context, TPLogHandler handler, void
 void tp_context_set_resource_loader( TPContext * context , unsigned int type , TPResourceLoader loader, void * data)
 {
 	g_assert( context );
-	
+
 	context->set_resource_loader( type , loader , data );
 }
 
