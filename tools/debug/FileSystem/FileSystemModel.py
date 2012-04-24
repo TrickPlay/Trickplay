@@ -62,20 +62,17 @@ class FileSystemModel(QFileSystemModel):
         if i:
             #Close the tab if the file is opened. 
             if self.isDir(i) == False:
-                path = self.filePath(i)
-                file_name = os.path.basename(str(path))
-                if len(self.editorManager.editors) > 0: 
-                    dir_name = str(self.editorManager.deviceManager.path())
-                    if dir_name.startswith("/"):
-                        dir_name = dir_name[1:]
-                    file_path = '/'+os.path.join(dir_name, file_name)
-
-                    for n in self.editorManager.editors :
-                        if n == file_path:
+                file_path = self.filePath(i)
+                for n in self.editorManager.editors :
+                    if n == file_path:
+                        try :
+                            self.editorManager.tab.editors[self.editorManager.editors[n][1]].delete_marker()
                             self.editorManager.tab.closeTab(self.editorManager.editors[n][1])
-                            break
+                        except:
+                            self.editorManager.delete_marker(n)
 
-            success = self.remove(i)
+                        break
+        success = self.remove(i)
             
     def rename(self):
         i = self.currentIndex()
