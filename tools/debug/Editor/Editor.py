@@ -210,11 +210,60 @@ class Editor(QsciScintilla):
         cstr = hexColor[2:].rjust(6, '0')
         return eval('0x' + cstr[-2:] + cstr[2:4] + cstr[:2])
 
+    def add_marker (self) :
+        bp_file = self.get_bp_file()
+        bp_cnt = len(self.editorManager.bp_info[1]) 
+        if bp_cnt > 0:
+            for r in range(0, bp_cnt):
+                bp_info = self.editorManager.bp_info[2][r]
+                n = re.search(":", bp_info).end()
+                fileName = bp_info[:n-1]
+                lineNum  = int(bp_info[n:]) -1
+                if fileName == bp_file :
+                    bp_status = self.editorManager.bp_info[1][r]
+                    if bp_status == "on":
+                        if self.editorManager.main.debug_mode is not True :
+                            if self.current_line != lineNum :
+                                self.markerAdd(lineNum, self.ACTIVE_BREAK_MARKER_NUM)
+                            else:
+                                self.markerDelete(lineNum, self.ARROW_MARKER_NUM)
+                                self.markerAdd(lineNum, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
+                            self.debugWindow.populateBreakTable(self.editorManager.bp_info, self.editorManager)
+                        else :
+                            self.deviceManager.send_debugger_command(DBG_CMD_BB)
+                        self.line_click[lineNum] = 1
+                    else:
+                        if self.editorManager.main.debug_mode is not True :
+                            if self.current_line != lineNum :
+                                self.markerDelete(lineNum, self.ACTIVE_BREAK_MARKER_NUM)
+                                self.markerAdd(lineNum, self.DEACTIVE_BREAK_MARKER_NUM)
+                            else :
+                                self.markerDelete(lineNum, self.ARROW_ACTIVE_BREAK_MARKER_NUM)
+                                self.markerAdd(lineNum, self.ARROW_DEACTIVE_BREAK_MARKER_NUM)
+                            self.debugWindow.populateBreakTable(self.editorManager.bp_info, self.editorManager)
+                        else:
+                            self.deviceManager.send_debugger_command(DBG_CMD_BB)
+                        self.line_click[lineNum] = 2
+
+
+    def set_temp_marker (self, new_bp_file) :
+        bp_file = self.get_bp_file()
+        bp_cnt = len(self.editorManager.bp_info[1]) 
+        if bp_cnt > 0:
+            idx=0
+            for r in range(0, bp_cnt):
+                bp_info = self.editorManager.bp_info[2][r]
+                n = re.search(":", bp_info).end()
+                fileName = bp_info[:n-1]
+                lineNum  = int(bp_info[n:]) 
+                if fileName == bp_file :
+                    self.editorManager.bp_info[2].append(str(new_bp_file)+":"+str(lineNum))
+                    self.editorManager.bp_info[1].append(self.editorManager.bp_info[1][r])
+
     def delete_marker (self) :
         bp_file = self.get_bp_file()
         bp_cnt = len(self.editorManager.bp_info[1]) 
         if bp_cnt > 0:
-
             idx=0
             for r in range(0, bp_cnt):
                 #cellItem = self.editorManager.main._debug.ui.breakTable.item(r, 0) 
@@ -378,9 +427,6 @@ class Editor(QsciScintilla):
     def readFile(self, path):
         self.setText(open(path).read())
         
-    #def ss_changed(self):
-		#print "SS changed "
-
     def text_changed(self):
 
 		if self.tempfile == True and self.text_status != TEXT_CHANGED:
@@ -403,11 +449,45 @@ class Editor(QsciScintilla):
 		else:
 			self.text_status = TEXT_CHANGED
 
-    def save(self):
+    def reload_marker(self):
+
+        bp_file = self.get_bp_file()
+        bp_cnt = len(self.editorManager.bp_info[1]) 
+        if bp_cnt > 0:
+            idx=0
+            for r in range(0, bp_cnt):
+                bp_info = self.editorManager.bp_info[2][idx]
+                n = re.search(":", bp_info).end()
+                fileName = bp_info[:n-1]
+                lineNum  = int(bp_info[n:]) -1
+                if fileName == bp_file :
+                    self.editorManager.bp_info[1].pop(idx)
+                    self.editorManager.bp_info[2].pop(idx)
+                    self.debugWindow.ui.breakTable.removeRow(idx)
+                else:
+                    idx += 1
+
+        for linen in range(0, self.text().count('\n') + 1):
+            if self.markersAtLine(linen) == 2: #on 
+                self.editorManager.bp_info[2].append(str(bp_file)+":"+str(linen+1))
+                self.editorManager.bp_info[1].append("on")
+            elif self.markersAtLine(linen) == 4L : #off
+                self.editorManager.bp_info[2].append(str(bp_file)+":"+str(linen+1))
+                self.editorManager.bp_info[1].append("off")
+    
+        self.line_click = {}
+        self.add_marker()
+
+
+
+    def save(self, text=None):
         path = self.path
         try:
             f = open(path,'w+')
-            f.write(self.text())
+            if text is None:
+                f.write(self.text())
+            else:
+                f.write(text)
             f.close()
         except:
             #statusBar.message('Could not write to %s' % (path),2000)
@@ -415,6 +495,8 @@ class Editor(QsciScintilla):
         
         self.text_status = TEXT_READ 
         
+        self.reload_marker()
+
         index = 0 
         if self.editorManager is not None :
         	index = self.editorManager.tab.currentIndex()
@@ -423,17 +505,6 @@ class Editor(QsciScintilla):
         	    self.editorManager.tab.setTabText (index, tabTitle[1:])
         	    self.starMark = False
 
-        	"""
-        	for edt in self.editorManager.tab.editors :
-				if edt.path == self.path :
-					tabTitle = self.editorManager.tab.tabText(index)
-					if tabTitle[:1] == "*":
-						self.editorManager.tab.setTabText (index, tabTitle[1:])
-					break
-				index = index + 1
-        	"""
-
-        	#self.editorManager.tab.textBefores[index] = self.text()
         	if self.path is not None :
         	    print '[VDBG] \''+self.path+'\' File saved'
         	    if self.editorManager.editors.has_key(self.path):
@@ -444,8 +515,7 @@ class Editor(QsciScintilla):
         else: 
 			self.tempfile = True
 
-        #statusBar.showMessage('File %s saved' % (path), 2000)
-        
+
     def charAdded(self, c):
         """
         Notification every time a character is typed, used for bringing up

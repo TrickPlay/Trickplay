@@ -417,13 +417,15 @@ class TrickplayDeviceManager(QWidget):
 		                        editor = self.editorManager.tab.editors[index]
 		                        nline = editor.margin_nline
     
-		                    if reply.command[:1] == DBG_CMD_DELETE :
+		                    if reply.command[:1] == DBG_CMD_DELETE and nline is not None:
 		                        if editor.current_line != nline :
 		                            editor.markerDelete(nline, -1)
 		                        else :
 		                            editor.markerDelete(nline, -1)
 		                            editor.markerAdd(nline, editor.ARROW_MARKER_NUM)
 		                        editor.line_click[nline] = 0
+		                        return
+		                    elif nline is None:
 		                        return
     
 		                    # Break Point Setting t
