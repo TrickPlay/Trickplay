@@ -84,6 +84,8 @@ class EditorTabWidget(QTabWidget):
 		self.windowsMenu.removeAction(edt.windowsAction)
 		self.removeTab(index)
 		self.paths.pop(index)
+		for k in self.paths:
+		    self.main.editors[k][1] = self.paths.index(k)
 
 		if 0 == self.count():
 			self.m.editorMenuEnabled(False)
@@ -92,55 +94,65 @@ class EditorTabWidget(QTabWidget):
 				
     def changeTab(self, index):
 
-		if index == -1:
-			return 
+        if index == -1:
+            return 
 
-		if len(self.main.fontSettingCheck) > 0 :
-		    if self.main.fontSettingCheck[index] == True :
-		        self.main.fontSettingCheck[index] == False
-		        self.textBefores[index] = self.editors[index].text()
-		        self.editors[index].text_status = 1 #TEXT_READ
-		        return
+        if len(self.main.fontSettingCheck) > 0 :
+            if self.main.fontSettingCheck[index] == True :
+                self.main.fontSettingCheck[index] == False
+                self.textBefores[index] = self.editors[index].text()
+                self.editors[index].text_status = 1 #TEXT_READ
+                return
     
-		try :
-			currentText = open(self.paths[index]).read()
-		except :
-			return
+        try :
+            currentText = open(self.paths[index]).read()
+        except :
+            return
 
-		if self.editors[index].tempfile == False  :
-			if self.textBefores[index] != currentText and self.tabClosing == False :
-				msg = QMessageBox()
-				msg.setText('The file "' + self.paths[index] + '" changed on disk.')
-				if self.editors[index].text_status == 2: #TEXT_CHANGED
-					msg.setInformativeText('Do you want to drop your changes and reload the file ?')
-				else:
-					msg.setInformativeText('Do you want to reload the file ?')
-				msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-				msg.setDefaultButton(QMessageBox.Cancel)
-				msg.setWindowTitle("Warning")
-				ret = msg.exec_()
+        self.m.ui.actionUndo.setEnabled(self.editors[index].isUndoAvailable())
+        self.m.ui.actionRedo.setEnabled(self.editors[index].isRedoAvailable())
 
-				if ret == QMessageBox.Ok:
-    				# Reload 
-					self.editors[index].readFile(self.paths[index])
-					#print("YUGI4"+self.paths[index])
-					self.textBefores[index] = self.editors[index].text()
-					self.editors[index].text_status = 1 #TEXT_READ
-					self.editors[index].save() # added 2/3
-					self.textBefores[index] = self.editors[index].text() #added 2/3
+        if len (self.editors[index].selectedText()) > 0 :
+            self.m.ui.action_Cut.setEnabled(True)
+            self.m.ui.action_Copy.setEnabled(True)
+            self.m.ui.action_Delete.setEnabled(True)
+        else :
+            self.m.ui.action_Cut.setEnabled(False)
+            self.m.ui.action_Copy.setEnabled(False)
+            self.m.ui.action_Delete.setEnabled(False)
+
+	if self.editors[index].tempfile == False  :
+	    if self.textBefores[index] != currentText and self.tabClosing == False :
+		msg = QMessageBox()
+		msg.setText('The file "' + self.paths[index] + '" changed on disk.')
+		if self.editors[index].text_status == 2: #TEXT_CHANGED
+		    msg.setInformativeText('Do you want to drop your changes and reload the file ?')
 		else:
-			#print("[VDBG] YUGI3: "+self.paths[index])
-			if self.tabClosing == False :
-			    self.editors[index].readFile(self.paths[index])
-			    self.textBefores[index] = self.editors[index].text()
-			    self.editors[index].text_status = 1 #TEXT_READ
-			    self.editors[index].save() # added 2/3
-			    self.textBefores[index] = self.editors[index].text() #added 2/3
-			    self.editors[index].tempfile = True
-			else:
-			    return
+		    msg.setInformativeText('Do you want to reload the file ?')
+		msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+		msg.setDefaultButton(QMessageBox.Cancel)
+		msg.setWindowTitle("Warning")
+		ret = msg.exec_()
 
-		self.setCurrentIndex(index)
+		if ret == QMessageBox.Ok:
+    		# Reload 
+		    self.editors[index].readFile(self.paths[index])
+		    self.textBefores[index] = self.editors[index].text()
+		    self.editors[index].text_status = 1 #TEXT_READ
+		    self.editors[index].save() # added 2/3
+		    self.textBefores[index] = self.editors[index].text() #added 2/3
+	else:
+	    if self.tabClosing == False :
+	        self.editors[index].readFile(self.paths[index])
+		self.textBefores[index] = self.editors[index].text()
+		self.editors[index].text_status = 1 #TEXT_READ
+		self.editors[index].save() # added 2/3
+		self.textBefores[index] = self.editors[index].text() #added 2/3
+		self.editors[index].tempfile = True
+	    else:
+	        return
+
+	self.setCurrentIndex(index)
 
 
 """

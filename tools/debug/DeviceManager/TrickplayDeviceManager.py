@@ -137,7 +137,13 @@ class TrickplayDeviceManager(QWidget):
 				print "[VDBG] Service ' %s ' removed"%d[0]
 				# Remove item from ComboBox
 				index = self.ui.comboBox.findText(d[0])
-				self.ui.comboBox.removeItem(index)
+				if index == self.ui.comboBox.currentIndex():
+				    self.ui.comboBox.removeItem(index)
+				    self.ui.comboBox.setCurrentIndex(0)
+				    self.service_selected(0)
+				else :
+				    self.ui.comboBox.removeItem(index)
+
 				#self.inspector.clearTree()
 
 			return True

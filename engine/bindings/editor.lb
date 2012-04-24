@@ -181,9 +181,9 @@ restricted global editor [[ void * ]]
 #endif
         ]];
 		
-	execute( string command_str )
+	int execute( string command_str )
 		[[
-			system(command_str);
+			result = system(command_str);
 		]];
 
 }

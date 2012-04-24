@@ -11,7 +11,7 @@ To begin a debug session, press the Debug button on the toolbar. If the Debug bu
 
 When a debug session starts, the IDE opens the following windows: Debug, Inspector, Console and Backtrace. If necessary, the TrickPlay application is deployed to the remote target device. It is loaded into the TrickPlay Engine and the debugger begins the session at the application's first code statement. At this point, all debugging capablities are enabled, including the debugger-related toolbar buttons. Breakpoints can be set, and code can be stepped through in any of the supported fashions.
 
-To start the TrickPlay application, click the toolbar's Continue button or select the Debug->Continue menu item.
+To run the TrickPlay application, click the toolbar's Continue button or select the Debug->Continue menu item.
 
 To interrupt a running application, click the toolbar's Pause button. The debugger will halt the TrickPlay application at its current location and display the next code statement to be executed in the Editor Window.
 

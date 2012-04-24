@@ -1,0 +1,61 @@
+
+Title: Canvas Sample Application
+
+The Canvas sample application uses the TrickPlay SDK Library's <Canvas> object to create composite screen graphics. This capability enables a TrickPlay application to generate graphics using data that may not be known or available until program runtime. Also, the combining of multiple objects into a single Canvas object reduces an application's system resource usage.
+
+The complete sample application, including source code and resource files, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
+
+(see canvasDemo.png)
+
+
+
+Group: Creating Composite Images with Canvas
+
+Each of the five weather slates displayed in the sample application is a composite image made by combining several <Image> and <Text> objects. Each item is "drawn" onto a Canvas object, which is then converted to the final image for display on the screen. In cases where the composite image's elements are known before running the program, it may actually be easier to create the final image with an image-editing program. But when the data is not known until the program runs, creating a composite image using a Canvas object is an elegant solution.
+
+The sample application constructs the composite images in its createCompositeImages() function. In the initial steps, a background is created by covering the Canvas with a white paper texture. The paper texture is then tinted with a gradient color. The Canvas's background is finished by making its edges slightly transparent. Onto this background is drawn the weather-related resources, which are not known until runtime. In an actual weather application, the weather data would probably be accessed from some external database; in the sample application, the weather data is simply selected at random.
+
+First, a weather graphic, such as Sunny, Cloudy, etc., is randomly selected and loaded into a <Bitmap> object. Then a rectangular area the same size as the bitmap is selected at the location on the Canvas where the image should be drawn. The bitmap is set as the drawing source for stroked lines and filled areas, and, finally, the rectangle is filled with the bitmap image. The code statements that perform these operations are shown below. (Note: The Canvas object is stored in the variable called "base.")
+
+	(code)
+	-- Load a weather image for the slate
+	bitmap = Bitmap( { src  = gWeatherImages[ math.random( #gWeatherImages ) ] } )
+	if( bitmap.loaded == true )then
+		-- Create a centered rectangle path on which to draw the bitmap
+		bitmap_X = (WEATHER_SLATE_WIDTH - bitmap.width) / 2		-- center along X-axis
+		base:rectangle( bitmap_X, BITMAP_Y, bitmap.width, bitmap.height )
+
+		-- Draw bitmap onto the weather slate canvas
+		base:set_source_bitmap( bitmap, bitmap_X, BITMAP_Y )
+		base:fill()
+	end
+	(end)
+
+The position of the temperature string is set by using the Canvas move_to() function. The string, including randomly selecting the temperature range, is defined by calling the Canvas text_path() and set_source_color() functions. The text is finally drawn on the Canvas by calling the fill() function. The relevant code statements are shown below.
+
+	(code)
+	-- Display temperature range on the slate
+	base:move_to( TEMP_X, TEMP_Y )
+	base:text_path( TEXT_FONT, "Temp: " .. math.random( 70, 99 ) .. "-" .. math.random( 40, 69 ) )
+	base:set_source_color( TEMP_COLOR )
+	base:fill()
+	(end)
+
+The day-of-the-week text is created using a similar technique, but the situation is slightly complicated by the fact that the string is centered horizontally on the Canvas. To accurately calculate the centered position, the text's width must be known. Calculating the width of a text path in a Canvas object would be difficult; however, when the string is contained in a Text object, its width is a standard property of the object. For this reason, the weekday string is first created as a Text object, and the centered starting position of the string is calculated. The Text object is then converted to a Canvas text path by calling the text_element_path() function. Like the previous resources drawn on the Canvas, the string is finally transferred to the Canvas by the fill() function. The code statements below perform these operations.
+
+	(code)
+	-- Display day of the week centered on the slate
+	-- Note: To center the text, we must use a Text object so we can get the text's width
+	text = Text( { text = weekday[ i ],
+	               font = TEXT_FONT,
+	} )		               
+	base:move_to( (WEATHER_SLATE_WIDTH - text.width) / 2, DAY_Y )		-- centered along X-axis
+	base:set_source_color( DAY_COLOR )
+	base:text_element_path( text )
+	base:fill()
+	(end)
+
+With the composite image complete, the Canvas is converted to an Image object and eventually added to the screen for display.
+
+By employing a Canvas object to create composite images, the sample application uses runtime data to create an up-to-the-minute graphic and, simultaneously, reduces the program's resource usage by combining multiple objects to a single image.
+
