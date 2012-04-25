@@ -7,50 +7,92 @@ local text_x = 28
 
 local text_y_off = 206
 
-local has_been_initialized = false
-
 local rule_h = 3
 
 
-local img_srcs, caption_grad, overlay
+local caption_grad, overlay, title_font, caption_font, kb
 
+local function make_text(title,caption)
+    
+    local title = Text{
+        text = title,
+        font = title_font
+    }
+    local caption = Text{
+        text = caption,
+        font = caption_font
+    }
+    
+    local c = Canvas(
+        title.w > caption.w and title.w or caption.w,
+        title.h + caption.h
+    )
+    
+    c:text_element_path(title)
+    
+    c:set_source_color("000000")
+    c:stroke(true)
+    c:set_source_color("ffffff")
+    c:fill()
+    
+    c:move_to(0,title.h)
+    
+    c:text_element_path(caption)
+    
+    c:set_source_color("000000")
+    c:stroke(true)
+    c:set_source_color("ffffff")
+    c:fill()
+    
+    
+    return c:Image()
+end
+
+local has_been_initialized = false
+
+    
+--------------------------------------------------------------------------------
+-- Init the Class
+--------------------------------------------------------------------------------
 function mkb:init(p)
     
     assert(not has_been_initialized)
     
     if type(p) ~= "table" then error("must pass a table",2) end
     
-    img_srcs = p.img_srcs or error("must pass img_srcs")
+    overlay      = p.overlay_src  or error("must pass 'overlay_src'",  2)
+    caption_grad = p.gradient_src or error("must pass 'gradient_src'", 2)
+    title_font   = p.title_font   or error("must pass 'title_font'",   2)
+    caption_font = p.caption_font or error("must pass 'caption_font'", 2)
+    kb           = p.ken_burns    or error("must pass 'ken_burns'",     2)
     
-    
-    overlay = Image{src = "assets/gloss-medium.png"}
-    caption_grad = Image{src = "assets/lower-gradient.png"}
-    
-    img_srcs:add(caption_grad,overlay)
     
     has_been_initialized = true
+    
 end
 
+    
+--------------------------------------------------------------------------------
+-- The Object Constructor
+--------------------------------------------------------------------------------
 
 function mkb:create(p)
+    
+    assert(has_been_initialized)
+    
+    if type(p) ~= "table" then error("must pass a table",2) end
     
     local instance = p.group or Group{}
     instance.name = "Multi Ken Burns"
     instance.x = 8
     
     local kb_s = {}
-    assert(has_been_initialized)
-    
-    if type(p) ~= "table" then error("must pass a table",2) end
     
     local curr_y = 0
     
-    local kb = p.kb or error("must pass 'kb'",2)
     
     local hl_y_off = {}
     for i,v in ipairs(p.panes or error("must pass 'panes'",2)) do
-        
-        --p.srcs:add(unpack(v.imgs))
         
         kb_s[i] = kb:create{
             visible_w = p.w or error("must pass 'w'",2),
@@ -67,13 +109,15 @@ function mkb:create(p)
         
         kb_s[i].y = curr_y
         
-        v.text.x = text_x
+        local text = make_text(v.title,v.caption)
         
-        v.text.y = curr_y + text_y_off
+        text.x = text_x
+        
+        text.y = curr_y + text_y_off
         
         curr_y = curr_y + v.h
         
-        instance:add( kb_s[i], Clone{source =overlay, y = curr_y - v.h}, Clone{source =caption_grad, y = curr_y - caption_grad.h} , v.text )
+        instance:add( kb_s[i], Clone{source =overlay, y = curr_y - v.h}, Clone{source =caption_grad, y = curr_y - caption_grad.h} , text )
         
         if i < #p.panes then
             

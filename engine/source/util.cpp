@@ -5,6 +5,7 @@
 #include "ossp/uuid.h"
 
 #include "util.h"
+#include "user_data.h"
 
 //.............................................................................
 
@@ -334,4 +335,29 @@ const char * Util::Buffer::data() const
 guint Util::Buffer::length() const
 {
 	return bytes ? bytes->len : 0;
+}
+
+String Util::describe_lua_value( lua_State * L , int index )
+{
+	index = abs_index( L , index );
+
+	switch( lua_type( L , index ) )
+	{
+		case LUA_TNUMBER:
+		{
+			lua_pushvalue( L , index );
+			String result = lua_tostring( L , -1 );
+			lua_pop( L , 1 );
+			return result;
+		}
+		case LUA_TSTRING:
+			return Util::format( "\"%s\"" , lua_tostring( L , index ) );
+		case LUA_TBOOLEAN:
+			return lua_toboolean( L , index ) ? "true" : "false";
+		case LUA_TNIL:
+			return "nil";
+		default:
+			return UserData::describe( L , index );
+	}
+
 }

@@ -1,3 +1,216 @@
+TOASTALERT = true
+
+default_parameters = {
+    title = "ToastAlert", 
+    message_font="Sans 40px",
+    message_color = "ffffff",
+    vertical_message_padding   = 10,
+    horizontal_message_padding =  5,
+    horizontal_icon_padding    = 20,
+    vertical_icon_padding      = 10,
+    on_screen_duration         = 5000,
+    animate_in_duration        = 500,
+    animate_out_duration       = 500,
+}
+
+ToastAlert = function(parameters)
+	
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("ToastAlert",parameters)
+	
+	--flags
+	local canvas          = type(parameters.images) == "nil"
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+	----------------------------------------------------------------------------
+	--The Button Object inherits from Widget
+	
+	local instance = DialogBox( parameters )
+	local vertical_message_padding   = 0
+	local horizontal_message_padding = 0
+	local horizontal_icon_padding = 5
+	local vertical_icon_padding = 5
+	local message = Text{
+		wrap=true,
+	}
+	instance:add(message)
+	local icon, on_completed, on_screen_duration, animate_in_duration, animate_out_duration
+	
+	----------------------------------------------------------------------------
+	--functions pertaining to getting and setting of attributes
+	
+	override_property(instance,"icon",
+		
+		function(oldf)    return icon   end,
+		
+		function(oldf,self,v)
+			
+			if v == nil then
+				
+				icon = Text{text="!",color = instance.style.border.colors.default,font = "Sans 60px"}
+				
+			elseif type(v) == "string" then
+				
+				icon = Image{ src = v }
+				
+				if icon == nil then
+					
+					error("ToastAlert.icon recieved string but it was not a valid image uri",2)
+					
+				end
+				
+			elseif type(v) == "userdata" and v.__types__.actor then
+				
+				icon = v
+				
+			else
+				
+				error("ToastAlert.icon expected string uri or UIElement. Received "..type(v),2)
+				
+			end
+			
+			instance:add(icon)
+		end
+	)
+	override_property(instance,"message",
+		function(oldf) return   message.text     end,
+		function(oldf,self,v)   message.text = v end
+	)
+	override_property(instance,"message_color",
+		function(oldf) return   message.color     end,
+		function(oldf,self,v)   message.color = v end
+	)
+	override_property(instance,"message_font",
+		function(oldf) return   message.font     end,
+		function(oldf,self,v)   message.font = v end
+	)
+	override_property(instance,"horizontal_message_padding",
+		function(oldf) return   horizontal_message_padding     end,
+		function(oldf,self,v)   horizontal_message_padding = v end
+	)
+	override_property(instance,"vertical_message_padding",
+		function(oldf) return   vertical_message_padding     end,
+		function(oldf,self,v)   vertical_message_padding = v end
+	)
+	override_property(instance,"horizontal_icon_padding",
+		function(oldf) return   horizontal_icon_padding     end,
+		function(oldf,self,v)   horizontal_icon_padding = v end
+	)
+	override_property(instance,"vertical_icon_padding",
+		function(oldf) return   vertical_icon_padding     end,
+		function(oldf,self,v)   vertical_icon_padding = v end
+	)
+	override_property(instance,"on_completed",
+		function(oldf) return   on_completed     end,
+		function(oldf,self,v)   on_completed = v end
+	)
+	override_property(instance,"on_screen_duration",
+		function(oldf) return   on_screen_duration     end,
+		function(oldf,self,v)   on_screen_duration = v end
+	)
+	override_property(instance,"animate_in_duration",
+		function(oldf) return   animate_in_duration     end,
+		function(oldf,self,v)   animate_in_duration = v end
+	)
+	override_property(instance,"animate_out_duration",
+		function(oldf) return   animate_out_duration     end,
+		function(oldf,self,v)   animate_out_duration = v end
+	)
+    local animating = false
+	override_function(instance,"popup",
+		function(oldf,self,v) 
+            
+            if animating then return end
+            
+            if instance.parent then instance:unparent() end
+            
+            screen:add(instance)
+            
+            instance.opacity = 0
+            
+            instance.y = screen.h + instance.anchor_point[2]
+            
+            instance:animate{
+                duration = animate_in_duration,
+                y        = 50 + instance.anchor_point[2],
+                opacity  = 255,
+                on_completed = function()
+                    
+                    dolater(
+                        on_screen_duration,
+                        function()
+                            
+                            instance:animate{
+                                duration = animate_out_duration,
+                                opacity  = 0,
+                                on_completed = function()
+                                    
+                                    animating = false
+                                    
+                                    if on_completed then on_completed(instance) end
+                                    
+                                end
+                            }
+                            
+                        end
+                    )
+                    
+                end
+            }
+            
+        end
+	)
+	
+	instance:subscribe_to(
+		{"h","w","width","height","size","separator_y","icon"},
+		function()
+			
+			--reposition icon
+			icon.x = horizontal_icon_padding 
+			icon.y = instance.separator_y + vertical_icon_padding
+			
+			--resize icon
+			--icon.w = instance.w - message.x - message_padding
+			--icon.h = instance.h - instance.separator_y - message_padding
+			if (icon.y + icon.h + vertical_icon_padding) > instance.h then
+				
+				icon.scale = (icon.h - (icon.y + icon.h + vertical_icon_padding - instance.h)) / icon.h
+				
+				dumptable(icon.scale)
+			end
+			
+			
+			--reposition message
+			message.x = icon.x + icon.w + horizontal_icon_padding + horizontal_message_padding
+			message.y = instance.separator_y + vertical_message_padding
+			
+			--resize message
+			message.w = instance.w - message.x - horizontal_message_padding
+			message.h = instance.h - instance.separator_y - vertical_message_padding
+			
+		end
+	)
+	
+	if parameters.icon == nil then instance.icon = nil end
+	
+	instance:set(parameters)
+	
+	return instance
+	
+end
+
+
+
+
+
+
+
+
+
+
 --[[
 Function: toastAlert
 
@@ -30,7 +243,7 @@ Return:
 
 Extra Function:
 		popup() - Start the timer of the Toast alert
-]]
+
 
 
 
@@ -175,4 +388,6 @@ function ui_element.toastAlert(t)
      setmetatable (tb_group.extra, mt) 
 
      return tb_group
-end 
+end
+
+--]]

@@ -415,5 +415,10 @@ global devtools [[ void * ]]
             
             return 3;
         ]];                     
+
+    fs( bool f)
+        [[
+            clutter_stage_set_fullscreen( CLUTTER_STAGE( clutter_stage_get_default() ) , f ? TRUE : FALSE );
+        ]];
 }
 

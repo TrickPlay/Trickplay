@@ -259,13 +259,21 @@ button_test_group:unparent()
 
 ---[[
 local style = {
+    border = {
+        width = 10,
+        colors = {
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
+    },
     text = {
         font = "Sans 50px",
         colors = {
-        default    = {255,255,155},
-        focus      = {255,255,155},
-        activation = {155,255,255}
-    }
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
     },
     fill_colors    = {
         default    = {80,0,0},
@@ -280,8 +288,8 @@ screen:show()
 b1 = Button()
 
 --------------------------------------------------------------------------------
-b2 = Button{x = 100,y = 200, label = "LABEL",style = style}
-
+b2 = Button{x = 100,y = 200, label = "LABEL"}--,style = style}
+b2.style = style
 b2.style.text.x_offset = 200
 b2.style.text.y_offset = -50
 b2.label = "lAbel"
@@ -291,7 +299,7 @@ b3 = Button{x = 100,y = 400, label = "new_label",style = style, h = 100}
 b3.w = 400
 --------------------------------------------------------------------------------
 b4 = Button{
-    x = 600,y = 200,
+    x = 200,y = 600,
     images = {
         default = "Button/button3.png",
         focus   = "Button/button-focus.png"
@@ -299,11 +307,15 @@ b4 = Button{
     h = 150
 }
 b4.w = 300
+print(b4.h)
 --------------------------------------------------------------------------------
 style.text.font = "Sans Bold 40px"
+b5 = Button{y=900}
 
-
---]]
-screen:add(Rectangle{size = screen.size, color = "000033"},b0,b1,b2,b3,b4)
+b5:from_json(    b3:to_json()   )
+print(b3:to_json())
+print(b5:to_json())
+b5.y = 700
+screen:add(Rectangle{size = screen.size, color = "000033"},b0,b1,b2,b3,b4,b5)
 
 controllers:start_pointer()

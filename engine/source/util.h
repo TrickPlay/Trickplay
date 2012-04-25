@@ -306,7 +306,7 @@ private:
 
 namespace Util
 {
-    inline String format( const gchar * format, ... )
+	inline String format( const gchar * format, ... )
     {
         va_list args;
         va_start( args, format );
@@ -463,6 +463,9 @@ namespace Util
 
     	GByteArray * bytes;
     };
+
+
+	String describe_lua_value( lua_State * L , int index );
 }
 
 #endif // _TRICKPLAY_UTIL_H

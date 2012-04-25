@@ -42,6 +42,7 @@ class Editor(QsciScintilla):
         self.setIndentationGuides(1)
         self.setIndentationsUseTabs(0)
         self.setAutoCompletionThreshold(2)
+        self.setWrapVisualFlags(QsciScintilla.WrapFlagByBorder, QsciScintilla.WrapFlagByText, 4)
         #self.SendScintilla(QsciScintilla.SCI_SETTABWIDTH, 4)
     
         # Set the default font
