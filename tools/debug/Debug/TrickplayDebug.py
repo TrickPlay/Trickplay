@@ -147,6 +147,10 @@ class TrickplayDebugger(QWidget):
         fileName = os.path.join(self.deviceManager.path(), fileName)
         self.editorManager.newEditor(fileName, None, lineNum)
         editor = self.editorManager.currentEditor 
+        if editor.starMark is True :
+            editor.if_star_mark_exist("delete")
+            return
+
         editor.margin_nline = lineNum
 
         if self.deviceManager.debug_mode == True:
@@ -193,7 +197,6 @@ class TrickplayDebugger(QWidget):
 				itemState = item
 				break
 			m += 1
-
         
 		if space == True:
 		    onState = Qt.Checked
@@ -202,7 +205,11 @@ class TrickplayDebugger(QWidget):
 		    onState = Qt.Unchecked
 		    offState = Qt.Checked
 
+
 		if itemState == "on" and cellItemState == onState:
+			if editor.starMark is True :
+			    editor.if_star_mark_exist("activate")
+			    return
 			if self.deviceManager.debug_mode == True:
 			    self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" off")
 			else:
@@ -222,6 +229,9 @@ class TrickplayDebugger(QWidget):
 			self.break_info[1].insert(r, "off")
 
 		elif itemState == "off" and cellItemState == offState:
+			if editor.starMark is True :
+			    editor.if_star_mark_exist("activate")
+			    return
 			if self.deviceManager.debug_mode == True:
 			    self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" on")
 			else:

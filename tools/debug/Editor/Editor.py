@@ -362,10 +362,37 @@ class Editor(QsciScintilla):
         self.editorManager.main.ui.action_Copy.setEnabled(avail)
         self.editorManager.main.ui.action_Delete.setEnabled(avail)
         
+    def if_star_mark_exist(self, command="create"):
+        if self.starMark is True:
+		    msg = QMessageBox()
+		    msg.setText('The file "' + self.path + '" has changed.')
+		    if command == "create":
+		        msg.setInformativeText('You must save the file first before you add or deactivate the break points.')
+		    elif command == "delete":
+		        msg.setInformativeText('You must save the file first before you delete the break points.')
+		    elif command == "activate":
+		        msg.setInformativeText('You must save the file first before you activate or deactivate the break points.')
+		    msg.setStandardButtons(QMessageBox.Save | QMessageBox.Cancel)
+		    msg.setDefaultButton(QMessageBox.Cancel)
+		    msg.setWindowTitle("Warning")
+		    ret = msg.exec_()
+		    if ret == QMessageBox.Save:
+		        textBefore = self.text()
+		        self.editorManager.editors[self.path][2] = textBefore
+		        self.text_status = 1 #TEXT_READ
+		        if self.tempfile == False:
+		            self.save()
+		        else:
+		            ret = self.editorManager.saveas()
+		    elif ret == QMessageBox.Cancel:
+		        return 
+
     def on_margin_clicked(self, nmargin, nline, modifiers):
 		bp_num = 0
 		self.margin_nline = nline
 		t_path = self.get_bp_file()
+	    
+		self.if_star_mark_exist()
 
         # Break Point ADD 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :
