@@ -6,13 +6,13 @@ import org.dom4j.QName;
 import org.jivesoftware.smack.packet.PacketExtension;
 
 
-public class CreateMatch implements PacketExtension {
+public class InstantMatch implements PacketExtension {
 	
 	public static final String NAMESPACE = "http://jabber.org/protocol/mug#owner";
-	public static final String name = "game";
+	public static final String name = "instantmatch";
     private String gameId;
     
-    public CreateMatch(String gameId) {
+    public InstantMatch(String gameId) {
     	this.gameId = gameId;
     }
     
@@ -30,7 +30,7 @@ public class CreateMatch implements PacketExtension {
 	}
 	
 	public Element toXMLElement() {
-		Element gameElement = DocumentHelper.createElement(QName.get("game", NAMESPACE));
+		Element gameElement = DocumentHelper.createElement(QName.get(name, NAMESPACE));
 		gameElement.addAttribute("gameId", gameId);
 		
 		

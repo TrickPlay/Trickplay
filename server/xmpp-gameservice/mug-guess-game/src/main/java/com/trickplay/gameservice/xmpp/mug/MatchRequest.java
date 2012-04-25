@@ -5,15 +5,16 @@ import org.dom4j.Element;
 import org.dom4j.QName;
 import org.jivesoftware.smack.packet.PacketExtension;
 
-public class FindMatch implements PacketExtension {
+public class MatchRequest implements PacketExtension {
 
 	public static final String NAMESPACE = "http://jabber.org/protocol/mug";
-	public static final String name = "game";
+	//public static final String name = "game";
+	public static final String name = "matchrequest";
 	private String role;
 	private String nick;
 	private String gameId;
 
-	public FindMatch(String gameId, String role, String nick) {
+	public MatchRequest(String gameId, String role, String nick) {
 		this.setGameId(gameId);
 		this.role = role;
 		this.nick = nick;
