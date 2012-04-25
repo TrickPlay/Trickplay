@@ -385,15 +385,17 @@ class Editor(QsciScintilla):
 		            self.save()
 		        else:
 		            ret = self.editorManager.saveas()
+		        return False
 		    elif ret == QMessageBox.Cancel:
-		        return 
+		        return True
 
     def on_margin_clicked(self, nmargin, nline, modifiers):
 		bp_num = 0
 		self.margin_nline = nline
 		t_path = self.get_bp_file()
 	    
-		self.if_star_mark_exist()
+		if self.if_star_mark_exist() is True :
+		    return
 
         # Break Point ADD 
 		if not self.line_click.has_key(nline) or self.line_click[nline] == 0 :

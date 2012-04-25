@@ -208,7 +208,9 @@ class TrickplayDebugger(QWidget):
 
 		if itemState == "on" and cellItemState == onState:
 			if editor.starMark is True :
-			    editor.if_star_mark_exist("activate")
+			    if editor.if_star_mark_exist("activate") is True :
+			        cellItem.setCheckState(Qt.Checked)
+		            self.ui.breakTable.setItem(r, 0, cellItem) 
 			    return
 			if self.deviceManager.debug_mode == True:
 			    self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" off")
@@ -230,7 +232,9 @@ class TrickplayDebugger(QWidget):
 
 		elif itemState == "off" and cellItemState == offState:
 			if editor.starMark is True :
-			    editor.if_star_mark_exist("activate")
+			    if editor.if_star_mark_exist("activate") is True :
+			        cellItem.setCheckState(Qt.Unchecked)
+		            self.ui.breakTable.setItem(r, 0, cellItem) 
 			    return
 			if self.deviceManager.debug_mode == True:
 			    self.deviceManager.send_debugger_command(DBG_CMD_BREAKPOINT+" %s"%str(r)+" on")
