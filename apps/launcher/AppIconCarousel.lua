@@ -10,18 +10,12 @@ function IconCarousel:create(p)
     
     for id,img in pairs(p.launcher_icons or error("must pass 'launcher_icons'",2)) do
         
-        table.insert(
-            
-            app_list,
-            
-            img
-        )
+        table.insert(  app_list,  img  )
         
     end
     
     
     
-    local clones = {}
     
     local vis_w  = p.vis_w  or error("must pass 'vis_w'",  2)
     local icon_w = p.icon_w or error("must pass 'icon_w'", 2)
@@ -31,12 +25,19 @@ function IconCarousel:create(p)
     
     num_vis = num_vis > #app_list and #app_list or num_vis
     
+    local clones = {}
     
-    for i = 1, num_vis do table.insert( clones, Clone{ x = icon_w*(i-1), size = {480,270} } ) end
+    for i = 1, num_vis do
+        
+        table.insert( clones, Clone{ x = icon_w*(i-1), size = {480,270} } )
+        
+    end
     
-    local crossfade = Clone{x = clones[1].x}
-    instance:add(crossfade)
     instance:add(unpack(clones))
+    
+    local crossfade = Clone{x = clones[1].x, size = {480,270}}
+    instance:add(crossfade)
+    crossfade:lower_to_bottom()
     
     local curr_i = 0
     
@@ -54,34 +55,13 @@ function IconCarousel:create(p)
             
             for i,c in ipairs(clones) do
                 
-                c.source = app_list[
-                    
-                    wrap_i(
-                        
-                        curr_i + i - 1
-                        
-                    )
-                    
-                ]
+                c.source = app_list[  wrap_i(  curr_i + (i - 1)  )  ]
                 
             end
             clones[1].opacity = 255
             clones[1]:animate{duration=800,opacity=0}
-            crossfade.source = app_list[
-                    
-                    wrap_i(
-                        
-                        curr_i + math.ceil(#app_list/2)
-                        
-                    )
-                    
-                ]
-                --[[
-                print(wrap_i(
-                        
-                        curr_i + math.ceil(#app_list/2)
-                        
-                    ))--]]
+            crossfade.source = app_list[ wrap_i( curr_i + math.ceil(#app_list/2) ) ]
+            
         end,
     }
     

@@ -469,6 +469,8 @@ int populate_animator( lua_State * L, int index, ClutterAnimator* animator )
     
     In many cases, the same animation can be created using either an Animator or one or more Timelines, perhaps combined with Path, Interval and/or Score objects. It is the responsibility of the programmer to decide on the best method of implementation.
     
+    This section describes and demonstrates the Animator class. An extended example is described in the <Animator Sample Application> section.
+    
     *Animator Modifiable Properties*
     
     An Animator animation can modify one or more of the following UIElement properties: (also shown is the property's data type)
@@ -885,6 +887,8 @@ class Animator [[ClutterAnimator*]]
 		Function: start
 		
 		The start() function begins running the object's animation.
+		
+		To stop the animation before it finishes, the Animator object must have a <Timeline> associated with it and assigned to its <timeline> property. The Timeline object's stop() function can then be called to stop the animation.
 		
 		*Arguments:* None
 		

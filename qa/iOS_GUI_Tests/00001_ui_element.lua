@@ -6,7 +6,7 @@ test_area = "ui_element"
 test_api = "size/position"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 
 	local g = factory:Group{ x = 0, y = 0}
 
@@ -22,6 +22,22 @@ function generate_test_image (controller, factory)
 
 	return g
 end
+
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local g = Group{ x = 0, y = 0}
+
+	local r1 = Rectangle{color = "0070E0", x = 100 * resize_ratio_w, y = 100 * resize_ratio_h, size = { 200 * resize_ratio_w, 200 * resize_ratio_h }}
+
+	local r2 = Rectangle{color = "0070E0", x = 100 * resize_ratio_w, y = 400 * resize_ratio_h, size = { 50 * resize_ratio_w, 50 * resize_ratio_h }}
+
+	local r3 = Rectangle{color = "0070E0", x = 200 * resize_ratio_w, y = 400 * resize_ratio_h, size = { 50 * resize_ratio_w, 50 * resize_ratio_h }}
+
+	g:add(r1, r2, r3)
+
+	return g
+end
+
 
 
 	

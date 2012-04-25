@@ -1,0 +1,9 @@
+app=
+{
+	id		= "com.trickplay.tests.timerTest",
+	release		= "1",
+	version		= "1.0",
+	name 		= "timer test",
+	author		= "Peter von dem Hagen",
+	copyright	= "Trickplay Inc."
+}

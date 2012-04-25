@@ -1242,7 +1242,7 @@ def emit( stuff , f , header ):
 
                 f.write(
                     "  new_%s(L);\n"
-                    '  lua_setglobal(L,"%s");\n'
+                    '  lb_setglobal(L,"%s");\n'
                     %
                     ( bind_name , bind_name )
                 )
@@ -1257,7 +1257,7 @@ def emit( stuff , f , header ):
 
                 f.write(
                     "  lua_pushcfunction(L,new_%s);\n"
-                    '  lua_setglobal(L,"%s");\n'
+                    '  lb_setglobal(L,"%s");\n'
                     %
                     ( bind_name , bind_name )
                 )
@@ -1315,7 +1315,7 @@ def emit( stuff , f , header ):
         for g in globals:
             f.write(
                 "  lua_pushcfunction(L,global_%s);\n"
-                '  lua_setglobal(L,"%s");\n'
+                '  lb_setglobal(L,"%s");\n'
                 %
                 ( g , g )
             )

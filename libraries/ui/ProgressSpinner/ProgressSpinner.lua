@@ -1,20 +1,239 @@
+PROGRESSSPINNER = true
 
-local canvas_dot = function(instance)
+
+local canvas_dot = function(self)
 	
-	local c = Canvas(instance.w,instance.h)
+	local c = Canvas(self.w,self.h)
 	
-	canvas:arc( instance.w/2, instance.h/2, instance.w/2, 0, 360 )
+	c.line_width = self.style.border.width
+	
+	local c1 = self.style.border.colors.default
+	local c2 = self.style.fill_colors.default
+	c:arc(c.w/2,c.h/2,c.w/2 - c.line_width/2,0,360)
+	c:set_source_color(c2)
+	c:fill(true)
+	c:set_source_color(c1)
+	c:stroke()
+	
+	c:move_to(c.w/2,c.line_width/2)
+	c:arc(c.w/2,c.h/2,c.w/2 - c.line_width/2,270,360)
+	c:line_to(c.w/2,c.h/2)
+	c:line_to(c.w/2,c.line_width/2)
+	c:set_source_color(c1)
+	c:fill()
+	
+	c:move_to(c.w/2,c.h - c.line_width/2)
+	c:arc(c.w/2,c.h/2,c.w/2 - c.line_width/2,90,180)
+	c:line_to(c.w/2,c.h/2)
+	c:line_to(c.w/2,c.h - c.line_width/2)
+	c:fill()
 	
 	return c:Image()
 	
 end
 
+default_parameters = {w = 100, h = 100, duration = 2000}
+
 ProgressSpinner = function(parameters)
 	
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
 	parameters = is_table_or_nil("ProgressSpinner",parameters)
 	
-	local duration
-	local dot_img
+	local canvas = type(parameters.image) == "nil"
+	local flag_for_redraw = false --ensure at most one canvas redraw from Button:set()
+	local size_is_set = -- an ugly flag that is used to determine if the user set the Button size themselves yet
+		parameters.h or
+		parameters.w or
+		parameters.height or
+		parameters.width or
+		parameters.size
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+	----------------------------------------------------------------------------
+	--The Button Object inherits from Widget
+	
+	local instance = Widget( parameters )
+	
+	--the default w and h does not count as setting the size
+	if not size_is_set then instance:reset_size_flag() end
+	
+	
+	local duration, image, animating
+	
+	----------------------------------------------------------------------------
+	-- helper functions used when Button.images is set
+	
+	local make_canvas = function()
+		
+		canvas = true
+		
+		if image then image:unparent() end
+		
+		image = canvas_dot(instance)
+		
+		instance:add( image )
+		
+		image:move_anchor_point(image.w/2,image.h/2)
+		image:move_by(image.w/2,image.h/2)
+		
+		return true
+		
+	end
+	
+	local function resize_images()
+		
+		if not size_is_set then return end
+		
+		image.w = instance.w
+		image.h = instance.h
+		
+	end
+	
+	local setup_image = function(v)
+		
+		canvas = false
+		
+		if image then image:unparent() end
+		
+		image = v
+		
+		instance:add( image )
+		
+		image:move_anchor_point(image.w/2,image.h/2)
+		image:move_by(image.w/2,image.h/2)
+		
+		if instance.is_size_set() then
+			
+			resize_images()
+			
+		else
+			
+			--so that the label centers properly
+			instance.size = image.size
+			
+			instance:reset_size_flag()
+			
+		end
+		
+		return true
+		
+	end
+	
+	----------------------------------------------------------------------------
+	--functions pertaining to getting and setting of attributes
+	
+	override_property(instance,"image",
+		
+		function(oldf)    return image   end,
+		
+		function(oldf,self,v)
+			
+			return v == nil and make_canvas() or
+				
+				type(v) == "string" and setup_image( Image{ src = v } ) or
+				
+				type(v) == "userdata" and v.__types__.actor and setup_image(v) or
+				
+				error("ProgressSpinner.image expected type 'table'. Received "..type(v),2)
+			
+		end
+	)
+	
+	----------------------------------------------------------------------------
+	
+	override_property(instance,"duration",
+		function(oldf) return duration     end,
+		function(oldf,self,v) duration = v end
+	)
+	
+	override_property(instance,"animating",
+		function(oldf) return animating     end,
+		function(oldf,self,v)
+			
+			if type(v) ~= "boolean" then
+			elseif animating == v then
+				
+				return
+				
+			end
+			
+			animating = v
+			
+			if animating then
+				
+				image:animate{
+					duration   = duration,
+					z_rotation = 360,
+					loop       = true,
+				}
+				
+			else
+				image:stop_animation()
+				image.z_rotation = {0,0,0}
+			end
+		end
+	)
+	
+	----------------------------------------------------------------------------
+	
+	instance:subscribe_to(
+		{"h","w","width","height","size"},
+		function()   flag_for_redraw = true   end
+	)
+	instance:subscribe_to(
+		{"duration","image"},
+		function()
+			if animating then
+				
+				instance.animating = false
+				
+				instance.animating = true
+				
+			end
+		end
+	)
+	
+	local canvas_callback = function() return canvas and make_canvas()   end
+	
+	instance:subscribe_to(
+		nil,
+		function()
+			
+			if flag_for_redraw then
+				flag_for_redraw = false
+				if canvas then
+					canvas_callback()
+				else
+					resize_images()
+				end
+			end
+			
+		end
+	)
+	
+	function instance_on_style_changed()
+		
+		instance.style.fill_colors:on_changed(    instance, canvas_callback )
+		instance.style.border:on_changed(         instance, canvas_callback )
+		instance.style.border.colors:on_changed(  instance, canvas_callback )
+		
+		canvas_callback()
+	end
+	
+	instance:subscribe_to( "style", instance_on_style_changed )
+	
+	instance_on_style_changed()
+	
+	----------------------------------------------------------------------------
+	
+	instance.duration  = parameters.duration
+	instance.image     = parameters.image
+	instance.animating = parameters.animating
+	
+	return instance
+	
 end
 
 --[[

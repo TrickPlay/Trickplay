@@ -13,50 +13,88 @@ local function is_color(v)
     
 end
 
+local all_colorschemes = setmetatable({},{__mode = 'v'})
 
 ColorScheme = function(parameters)
-    
-	parameters = is_table_or_nil("ColorScheme",parameters)
-    
-    local instance = {}
-    
-    local default, focus, activation
-    
-    local  meta_setters = {
-        default    = function(v) default     = is_color(v) end,--error("must define 'default'",    4) end,
-        focus      = function(v) focus       = is_color(v) end,--error("must define 'focus'",      4) end,
-        activation = function(v) activation  = is_color(v) end,--error("must define 'activation'", 4) end,
-        --selection  = function(v) selection   = is_color(v) or error("must define 'activation'", 4) end,
-    }
-    local meta_getters = {
-        default    = function() return default    or "00000000"     end,
-        focus      = function() return focus      or "00000000"     end,
-        activation = function() return activation or "00000000"   end,
-        type       = function() return "COLORSCHEME" end,
-    }
-    
-    
-    
-    local children_using_this_style = {}
-    
-    setmetatable( children_using_this_style, { __mode = "k" } )
-    
-    function instance:on_changed(object,update_function)
+	
+    if type(parameters) == "string" then
         
-        children_using_this_style[object] = update_function
-        
-    end
-    function instance:update()
-        
-        collectgarbage("collect")
-        
-        for _,update in pairs(children_using_this_style) do
+        if all_colorschemes[parameters] then
             
-            update(real_table)
+            return all_colorschemes[parameters]
+            
+        else
+            
+            parameters = { name = parameters }
             
         end
         
     end
+    
+	parameters = is_table_or_nil("ColorScheme",parameters)
+    
+    local colors = {}
+    
+    local children_using_this_style = setmetatable( {}, { __mode = "k" } )
+    
+    local instance = {
+        json = function()
+            
+            local t = {}
+            
+            collectgarbage("collect")
+            
+            for name,obj in pairs(all_colorschemes) do
+                
+                t[name] = {}
+                
+                for property, value in pairs(obj:get_table()) do
+                    t[name][property] = value
+                end
+                
+            end
+            
+            return json:stringify(t)
+            
+        end,
+        get_table = function()
+            
+            return colors
+            
+        end,
+        update = function()
+            
+            collectgarbage("collect")
+            
+            for _,update in pairs(children_using_this_style) do
+                
+                update(real_table)
+                
+            end
+            
+        end,
+        on_changed = function(self,object,update_function)
+            
+            children_using_this_style[object] = update_function
+            
+        end
+    }
+    
+    local name
+    
+    local  meta_setters = {
+        name = function(v)
+            
+            if name ~= nil then all_colorschemes[name] = nil end
+            
+            name = check_name( all_colorschemes, instance, v, "ColorScheme" )
+            
+        end,
+    }
+    local meta_getters = {
+        name       = function() return name                     end,
+        type       = function() return "COLORSCHEME"            end,
+    }
     
     setmetatable(
         instance,
@@ -69,11 +107,11 @@ ColorScheme = function(parameters)
                     
                     func_upval(v)
                     
-                    t:update()
-                    
                 else
                     
-                    rawset(t,k,v)
+                    colors[k] = is_color(v)
+                    
+                    t:update()
                     
                 end
                 
@@ -82,11 +120,21 @@ ColorScheme = function(parameters)
                 
                 func_upval = meta_getters[k]
                 
-                return func_upval and func_upval()
+                if func_upval then
+                    
+                    return func_upval()
+                    
+                else
+                    
+                    return colors[k] or "00000000"
+                    
+                end
                 
             end
         }
     )
+    
+    if parameters.name == nil then instance.name = nil end
     
     for k,v in pairs(parameters) do instance[k] = v  end
     

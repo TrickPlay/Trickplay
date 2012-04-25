@@ -153,9 +153,9 @@ screen:show()
 
 b0 = ToggleButton()
 
-b0.x = 200
-b1 = ToggleButton{x=200,y=100,style = style,selected = false, label = "text"}
-b2 = ToggleButton{x=200,y=200,style = style,selected = true}
+b0.x = 400
+b1 = ToggleButton{x=400,y=100,style = style,selected = false, label = "text"}
+b2 = ToggleButton{x=400,y=200,style = style,selected = true}
 
 b3 = ToggleButton{
     name = "B2",

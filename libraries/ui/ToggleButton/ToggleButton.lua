@@ -56,6 +56,7 @@ end
 local default_parameters = {
 	states          = states,
 	create_canvas   = create_canvas,
+	style = {border = { colors = { selection = "ffffff"}}}
 }
 
 --------------------------------------------------------------------------------
@@ -69,13 +70,6 @@ ToggleButton = function(parameters)
 	
 	--flags
 	local canvas = type(parameters.images) == "nil"
-	
-	local size_is_set =
-		parameters.h      or
-		parameters.w      or
-		parameters.height or
-		parameters.width  or
-		parameters.size
 	
 	----------------------------------------------------------------------------
 	--The Button Object inherits from Widget
@@ -92,6 +86,41 @@ ToggleButton = function(parameters)
 	override_property(instance,"type",   function() return "TOGGLEBUTTON" end )
     
 	----------------------------------------------------------------------------
+	
+    local button_to_json
+    
+	instance.to_json = function(_,t)
+		
+		t.group    = instance.group.name
+		t.selected = instance.selected
+		
+		t.type = t.type or "ToggleButton"
+		
+		return t
+		
+	end
+	
+	button_to_json = instance.to_json
+	
+	----------------------------------------------------------------------------
+	
+    local to_json__overridden
+	
+    local to_json = function(_,t)
+        
+        t = is_table_or_nil("ToggleButton.to_json",t)
+        t = to_json__overridden and to_json__overridden(_,t) or t or {}
+        
+        return button_to_json(_,t)
+		
+    end
+	
+	override_property(instance,"to_json",
+		function() return to_json end,
+		function(oldf,self,v) to_json__overridden = v end
+	)
+    
+	----------------------------------------------------------------------------
 	-- the ToggleButton.selected attribute and its callbacks
 	
 	local radio_button_group
@@ -102,11 +131,48 @@ ToggleButton = function(parameters)
 		function() return radio_button_group end,
 		function(oldf,self,v)
 			
-			if radio_button_group == v then return end
+			if radio_button_group and
+				(radio_button_group == v or radio_button_group.name == v) then
+				
+				return
+				
+			end
 			
-			radio_button_group = v
 			
-			radio_button_group:add_item(self)
+			if radio_button_group then
+				
+				radio_button_group:remove(self)
+				
+			end
+			
+			if type(v) == "nil" then
+				
+				radio_button_group = nil
+				
+				return
+				
+			elseif type(v) == "string" then
+				
+				radio_button_group = RadioButtonGroup(v)
+				
+			elseif type(v) == "table" and v.type == "RadioButtonGroup" then
+				
+				radio_button_group = v
+				
+			else
+				
+				error("ToggleButton.group must receive string or RadioButtonGroup",2)
+				
+			end
+			
+			radio_button_group:insert(self)
+			
+			if selected then
+				
+				selected = false
+				self.selected = true
+				
+			end
 			
 		end
 	)
@@ -128,17 +194,25 @@ ToggleButton = function(parameters)
 					
 					for i, b in ipairs(radio_button_group.items) do
 						
-						if b ~= self then b.selected = false end
+						if b ~= self then
+							
+							b.selected = false
+							
+						else
+							
+							radio_button_group.selected = i
+							
+						end
 						
-					end
+					end 
 					
 					if radio_button_group.on_selection_change then
 						
 						radio_button_group:on_selection_change()
 						
-					end
+					end 
 					
-				end
+				end 
 				
                 if self.images.selection then self.images.selection.state.state = "ON"   end
                 
@@ -146,13 +220,13 @@ ToggleButton = function(parameters)
                 
             else
                 
-                if self.images.selection then self.images.selection.state.state = "OFF"   end
+                if self.images.selection then self.images.selection.state.state = "OFF"  end
                 
                 if on_deselection then on_deselection() end
                 
-            end
+            end 
             
-		end
+		end 
 	)
 	
 	override_property(instance,"on_selection",   function() return on_selection   end, function(oldf,self,v) on_selection   = v end )
@@ -161,6 +235,7 @@ ToggleButton = function(parameters)
 	----------------------------------------------------------------------------
 	--set the parameters
 	if parameters.selected then instance.selected = parameters.selected end
+	if parameters.group    then instance.group    = parameters.group    end
 	
 	return instance
     
