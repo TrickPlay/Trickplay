@@ -22,20 +22,22 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 		return state;
 	}
 
-	public XmppGuessGamePlayer1(String gameName) throws Exception {
-		super(gameName);
+	public XmppGuessGamePlayer1() throws Exception {
+		super();
 	}
 	
-	public void createGame() throws Exception {
+	public String registerGame(String appname, int version, String gamename) throws Exception {
 		List<String> allGames = xmppManager.getRegisteredGames();
 		
 		for (String game : allGames) {
 			System.out.println("Game:" + game);
 		}
-		
+		String gameId = "urn:xmpp:mug:tp:"+appname+":"+version+":"+gamename;
 		if (!allGames.contains(gameId)) {
 			Game g = new Game();
-			g.setName(gameName);
+			g.setAppname(appname);
+			g.setAppversion(version);
+			g.setName(gamename);
 			g.setDescription("guess the number in 3 attempts to win");
 			g.setCategory("other");
 			g.getRoles().add(new Game.RoleConfig("player1"));
@@ -43,24 +45,27 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 			g.setJoinAfterStart(true);
 			g.setGameType(GameType.correspondence);
 			g.setTurnPolicy(TurnPolicy.roundrobin);
-			xmppManager.createGame(g);
+			g.setMaxDurationPerTurn(180000); // 3 minutes
+			g.setAbortWhenPlayerLeaves(true);
+			xmppManager.registerGame(g);
 		}
+		return gameId;
 	}
 	
 
-	public void play() throws Exception {
+	public void play(String matchId) throws Exception {
 		// keep making moves until the game is over
 		// send a turn
 		if (!sentFirstTurn) {
 			Random r = new Random();
 			secret = r.nextInt(state.getHigh()+1);
 			System.out.println("sending first turn. secret="+secret);
-			setTurnAckReceived(false);
+			setTurnAckReceived(matchId, false);
 		    xmppManager.sendTurn(matchId, state.toJSON(), false);
 		    
 		    int attempts = 0;
 		    int max_attempts = 10;
-		    while(!isTurnAckReceived() && attempts < max_attempts) {
+		    while(!isTurnAckReceived(matchId) && attempts < max_attempts) {
 				attempts++;
 				Thread.sleep(2000);
 		    }
@@ -76,11 +81,11 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 		if (state.getGuess() == secret) {
 			state.setWon(true);
 			xmppManager.sendTurn(matchId, state.toJSON(), true);
-			updateUserdata(MatchResult.LOST);
+			updateUserdata(getGameId(matchId), MatchResult.LOST);
 		} else {
 			if (state.getAttempts() == MAX_ALLOWED_ATTEMPTS) {
 				xmppManager.sendTurn(matchId, state.toJSON(), true);
-				updateUserdata(MatchResult.WON);
+				updateUserdata(getGameId(matchId), MatchResult.WON);
 			} else {
 				if (secret > state.getGuess())
 					state.setLow(state.getGuess() + 1);
@@ -125,25 +130,31 @@ public class XmppGuessGamePlayer1 extends XmppGameSession {
 		XmppGuessGamePlayer1 p1 = null;
 		try {
 
-			p1 = new XmppGuessGamePlayer1("challenge27");
+			p1 = new XmppGuessGamePlayer1();
 			
-			p1.createGame();
+			String appId = p1.registerApp("tpapps", 1);
 			
-			p1.startMatch("player1");
+			String gameId = p1.registerGame("tpapps", 1, "guessgame");
+			
+			p1.openApp(appId);
+			
+			String matchId = p1.startNewMatch(gameId, "player1");
 			
 			// obtain the list of matches player is currently participating in
-			p1.getMatchdata();
+			p1.getMatchdata(gameId);
 			//
-			while(!p1.isGameOver()) {
+			while(!p1.isMatchOver(matchId)) {
 				Command cmd = p1.getCommand();
+				if (!matchId.equals(cmd.getMatchId()))
+					continue;
 				switch(cmd.getCommandType()) {
 				case PLAY:
 					PlayCommand pcmd = (PlayCommand)cmd;
-					if (p1.getRole().equals(pcmd.getRole()))
-					p1.play();
+					if (p1.getRole(matchId).equals(pcmd.getRole()))
+					p1.play(matchId);
 					break;
 				case MATCH_COMPLETED:
-					p1.leaveMatch();
+					p1.leaveMatch(matchId);
 					break;
 				}
 			}

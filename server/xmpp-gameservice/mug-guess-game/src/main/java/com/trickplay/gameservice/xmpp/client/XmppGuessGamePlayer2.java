@@ -6,8 +6,8 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 		
 	GuessGameState state;
 
-	public XmppGuessGamePlayer2(String gameName) throws Exception {
-		super(gameName);
+	public XmppGuessGamePlayer2() throws Exception {
+		super();
 	}
 	
 	
@@ -46,40 +46,31 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 		}		
 	}
 	
-	public String findAndJoin() throws Exception {
-		System.out.println(getUserName() + " finding match for game " + gameName);
+	public String findAndJoin(String gameId) throws Exception {
+		System.out.println(getUserName() + " finding match for game " + gameId);
 		// create a match
-		matchId = xmppManager.findMatch(gameId);
+		String matchId = xmppManager.findMatch(gameId);
 		System.out.println(getUserName() + " found match to join. matchId " + matchId);
 
 		System.out.println(getUserName() + " joining match " + matchId );
+	
 		// join the match
-		xmppManager.joinMatch(matchId);
+		join(gameId, matchId); // obtains a free role also 
 		
-		
-		// wait till join match finishes successfully
-		int attempts = 0;
-		int max_attempts = 10;
-		while(!isJoined() && attempts < max_attempts) {
-			attempts++;
-			Thread.sleep(2000);
-		}
-		if (attempts >= max_attempts) {
-			System.out.println("failed to join match. aborting");
-			throw new RuntimeException("Join match did not complete successfully in 20 seconds. aborting");
-		}
-		System.out.println(getUserName() + " joined match successfully");
 		return matchId;		
 	}
 	
-	public void join(String matchId) throws Exception {
+	public void join(String gameId, String matchId) throws Exception {
+		if (!matchInfoMap.containsKey(matchId))
+			matchInfoMap.put(matchId, new MatchInfo(gameId, matchId));
+		joinMatch(matchId);
+		/*
 		xmppManager.joinMatch(matchId);
 		
-		this.matchId = matchId;
 		// wait till join match finishes successfully
 		int attempts = 0;
 		int max_attempts = 10;
-		while(!isJoined() && attempts < max_attempts) {
+		while(!isJoined(matchId) && attempts < max_attempts) {
 			attempts++;
 			Thread.sleep(2000);
 		}
@@ -88,9 +79,10 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 			throw new RuntimeException("Join match did not complete successfully in 20 seconds. aborting");
 		}
 		System.out.println(getUserName() + " joined match successfully");	
+		*/
 	}
 
-	public void play() throws Exception {
+	public void play(String matchId) throws Exception {
 		
 		int range = state.getHigh() - state.getLow() + 1;
 		Random r = new Random();
@@ -108,6 +100,7 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 
 	public static void main(String[] args) throws Exception {
 
+		boolean automode = false;
 		boolean correspondenceMode = false;
 		XmppGuessGamePlayer2 p2 = null;
 		String roomToJoin = "";
@@ -124,19 +117,27 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 				System.out.println("unknown game play mode "+args[0]+". defaulting to online mode");
 				correspondenceMode = false;
 			}
-			p2 = new XmppGuessGamePlayer2("challenge27");
+			p2 = new XmppGuessGamePlayer2();
+			String appname = "tpapps";
+			int appversion = 1;
+			String appId = "urn:xmpp:mug:tp:"+appname+":"+appversion;
+			p2.openApp(appId);
+			String gamename = "guessgame";
+			String gameId = appId+":"+gamename;
 			
 			if (!correspondenceMode) {
-				p2.findAndJoin();
+				String matchId = p2.findAndJoin(gameId);
 				// obtain the list of matches player is currently participating in
-				p2.getMatchdata();
-				while(!p2.isGameOver()) {
+				p2.getMatchdata(gameId);
+				while(!p2.isMatchOver(matchId)) {
 					Command cmd = p2.getCommand();
+					if (!matchId.equals(cmd.getMatchId()))
+						continue;
 					switch(cmd.getCommandType()) {
 					case PLAY:
 						PlayCommand pcmd = (PlayCommand)cmd;
-						if (pcmd.getRole().equals(p2.getRole()))
-							p2.play();
+						if (pcmd.getRole().equals(p2.getRole(matchId)))
+							p2.play(matchId);
 						break;
 					case MATCH_COMPLETED:
 						GuessGameState state = p2.getState();
@@ -149,36 +150,36 @@ public class XmppGuessGamePlayer2 extends XmppGameSession {
 				// disconnect and join match after each move
 				String matchId = "";
 				if (roomToJoin.isEmpty()) {
-					matchId = p2.findAndJoin();
+					matchId = p2.findAndJoin(gameId);
 					System.out.println("Joining match:" + matchId);
 				} else {
 					matchId = roomToJoin;
-					p2.join(matchId);
+					p2.join(gameId, matchId);
 				}
 
 				// obtain the list of matches player is currently participating in
-				p2.getMatchdata();
+				p2.getMatchdata(gameId);
 				do {
 					Command cmd = p2.getCommand();
 					switch (cmd.getCommandType()) {
 					case PLAY:
 						PlayCommand pcmd = (PlayCommand) cmd;
-						if (pcmd.getRole().equals(p2.getRole()))
-							p2.play();
+						if (pcmd.getRole().equals(p2.getRole(matchId)))
+							p2.play(matchId);
 						break;
 					case MATCH_COMPLETED:						
 						break;
 					}
 
-					if (!p2.isGameOver()) {
+					if (!p2.isMatchOver(matchId)) {
 						p2.destroy();
-						p2 = new XmppGuessGamePlayer2("challenge27");
-						p2.join(matchId);
+						p2 = new XmppGuessGamePlayer2();
+						p2.join(gameId, matchId);
 					} 
-				} while (!p2.isGameOver());
+				} while (!p2.isMatchOver(matchId) && automode);
 				
 				GuessGameState state = p2.getState();
-				System.out.println("match completed. state:" + state.toJSON());
+				System.out.println("match state:" + state.toJSON());
 
 			}
 			

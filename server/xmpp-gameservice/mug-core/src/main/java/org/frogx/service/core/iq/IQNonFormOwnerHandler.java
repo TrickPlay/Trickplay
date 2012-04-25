@@ -136,7 +136,7 @@ public class IQNonFormOwnerHandler {
 						throw new ForbiddenException();
 					}
 					
-					if (element.getNamespaceURI().equals(room.getGame().getNamespace())) {
+					if (element.getNamespaceURI().equals(room.getGame().getGameID().getNamespace())) {
 						room.getMatch().setConstructedState(element);
 					}
 					else {

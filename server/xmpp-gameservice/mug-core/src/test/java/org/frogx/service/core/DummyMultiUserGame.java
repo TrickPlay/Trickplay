@@ -1,19 +1,3 @@
-/**
- * Copyright (C) 2008-2010 Guenther Niess. All rights reserved.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package org.frogx.service.core;
 
 
@@ -21,6 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.frogx.service.api.AppID;
+import org.frogx.service.api.GameID;
 import org.frogx.service.api.MUGMatch;
 import org.frogx.service.api.MUGRoom;
 import org.frogx.service.api.MultiUserGame;
@@ -33,11 +19,11 @@ import org.frogx.service.api.MultiUserGame;
  * {@link MUGRoom}.
  */
 public class DummyMultiUserGame implements MultiUserGame {
-	
 	static public String category = "testing";
 	static public String description = "A dummy multi-user game for testing.";
-	static public String namespace = "urn:xmpp:mug:game:testing:1";
+	//static public String namespace = "urn:xmpp:mug:game:testing:1";
 	
+	public static GameID gameID = new GameID(new AppID("testapp", 1), "test");
 	private Map<MUGRoom, MUGMatch> matches = new HashMap<MUGRoom, MUGMatch>();
 	
 	public MUGMatch createMatch(MUGRoom room) {
@@ -72,7 +58,7 @@ public class DummyMultiUserGame implements MultiUserGame {
 	}
 	
 	public String getNamespace() {
-		return namespace;
+		return gameID.getNamespace();
 	}
 
 	public boolean isCorrespondence() {
@@ -123,5 +109,9 @@ public class DummyMultiUserGame implements MultiUserGame {
 	public boolean abortWhenPlayerLeaves() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public GameID getGameID() {
+		return gameID;
 	}
 }

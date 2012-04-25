@@ -31,11 +31,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.QName;
+import org.frogx.service.api.AppID;
 import org.frogx.service.api.MUGManager;
 import org.frogx.service.api.MUGMatch;
 import org.frogx.service.api.MUGOccupant;
-import org.frogx.service.api.MUGProperty;
 import org.frogx.service.api.MUGOccupant.Affiliation;
+import org.frogx.service.api.MUGProperty;
 import org.frogx.service.api.MUGRoom;
 import org.frogx.service.api.MUGService;
 import org.frogx.service.api.exception.CannotBeInvitedException;
@@ -49,6 +50,7 @@ import org.frogx.service.api.exception.NotAllowedException;
 import org.frogx.service.api.exception.NotFoundException;
 import org.frogx.service.api.exception.RequiredPlayerException;
 import org.frogx.service.api.exception.UnsupportedGameException;
+import org.frogx.service.api.util.CommonUtils;
 import org.frogx.service.games.common.GenericTurnBasedMUG;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -282,7 +284,7 @@ public class DefaultMUGSession implements MUGSession {
 				.getGameRoom(roomName);
 
 		if (room == null) {
-			// The sender is not an occupant of a NON-EXISTENT room!!!
+			// The sender is an occupant of a NON-EXISTENT room!!!
 			throw new NotFoundException();
 		}
 
@@ -432,6 +434,227 @@ public class DefaultMUGSession implements MUGSession {
 			}
 		}
 	}
+	
+	private interface IQRequestHandler {
+		public void execute() throws ComponentException;
+		
+		public Element getChildElement();
+		
+	}
+	
+	private abstract class IQRequestHandlerBase implements IQRequestHandler {
+		protected final IQ request;
+		protected final IQ reply;
+		public IQRequestHandlerBase(IQ request) {
+			this.request = request;
+			this.reply = IQ.createResultIQ((IQ) request);
+		}
+		
+		public Element getChildElement() {
+			return request.getChildElement();
+		}
+		
+	}
+	
+	private class MatchRequestHandler extends IQRequestHandlerBase {
+		
+		public MatchRequestHandler(IQ request) {
+			super(request);			
+		}
+				
+		public void execute() throws ComponentException {
+			Element childElement = getChildElement();
+			String gameNS = childElement.attributeValue("gameId");
+			if (gameNS == null) {
+				throw new NotFoundException();
+			}
+			Element itemElement = null;
+			 if (null != (itemElement = childElement.element("item"))) {
+				String role = itemElement.attributeValue("role");
+				String nick = itemElement.attributeValue("nick");
+
+				MUGRoom room = assignRoom(gameNS, nick, jid, role);
+				if (room != null) {
+					reply.setFrom(room.getJID());
+					mugManager.sendPacket(component, reply);
+				} else {
+					throw new NotFoundException();
+				}
+			}
+		}		
+	}
+	
+	private class UserDataHandler extends IQRequestHandlerBase {
+		
+		public UserDataHandler(IQ request) {
+			super(request);			
+		}
+				
+		public void execute() throws ComponentException {
+			Element childElement = getChildElement();
+			String gameNS = childElement.attributeValue("gameId");
+			if (gameNS == null) {
+				throw new NotFoundException();
+			}
+			Element userDataElementCopy = DocumentHelper.createElement(QName.get(
+					"userdata", MUGService.mugNS));
+			userDataElementCopy.addAttribute("gameId", gameNS);
+			
+			// if "get" query then return data
+			String propertyName = "game:" + gameNS;
+			String username = request.getFrom().getNode();
+			MUGProperty property = null;
+			if (request.getType() == IQ.Type.get) {
+				try {
+					property = component.getPersistenceProvider()
+							.getUserProperty(username, propertyName);
+				} catch (Exception ex) {
+					log.info("Cannot find user data for user:" + username
+							+ ", propertyName:" + propertyName + ".", ex);
+					throw new ComponentException("failed to service request",
+							ex);
+				}
+			} else if (request.getType() == IQ.Type.set) {
+				String userData = childElement.element("opaque") != null ? childElement.element("opaque").getTextTrim() : null;
+				try {
+					if (userData != null)
+						property = component.getPersistenceProvider()
+								.setUserProperty(username, propertyName, userData);
+				} catch (Exception ex) {
+					log.info("Cannot find user data for user:" + username
+							+ ", propertyName:" + propertyName + ".", ex);
+					throw new ComponentException("failed to service request",
+							ex);
+				}
+			}
+			Element opaqueElem = userDataElementCopy.addElement("opaque");
+
+			if (property != null) {
+				opaqueElem
+						.add(DocumentHelper.createCDATA(property.getValue()));
+				opaqueElem.addAttribute("version",
+						Integer.toString(property.getVersion()));
+			}
+
+			reply.setChildElement(userDataElementCopy);
+			mugManager.sendPacket(component, reply);
+		}		
+	}
+	
+	private class MatchDataHandler extends IQRequestHandlerBase {
+		
+		public MatchDataHandler(IQ request) {
+			super(request);			
+		}
+				
+		public void execute() throws ComponentException {
+			Element childElement = getChildElement();
+			String gameNS = childElement.attributeValue("gameId");
+			if (gameNS == null) {
+				throw new NotFoundException();
+			}
+			Element matchDataElementCopy = DocumentHelper.createElement(QName.get(
+					"matchdata", MUGService.mugNS));
+			matchDataElementCopy.addAttribute("gameId", gameNS);
+			
+			List<MUGRoom> rooms = component.getGameRooms(gameNS, jid);
+			for (MUGRoom room : rooms) {
+				Element matchElement = matchDataElementCopy.addElement("match");
+				matchElement.addAttribute("matchId", room.getJID().toBareJID());
+				matchElement.addElement("status").setText(
+						room.getMatch().getStatus().name());
+
+				Element matchState = room.getMatch().getState();
+				if (matchState != null)
+					matchElement.add(matchState.createCopy());
+			}
+
+			reply.setChildElement(matchDataElementCopy);
+			mugManager.sendPacket(component, reply);
+		} 
+	}
+	
+	private class RegisterAppHandler extends IQRequestHandlerBase {
+		
+		public RegisterAppHandler(IQ request) {
+			super(request);			
+		}
+				
+		public void execute() throws ComponentException {
+			Element childElement = getChildElement();
+			
+			String appName = childElement.element("name").getTextTrim();
+			String versionId = childElement.element("version").getTextTrim();
+			int version = -1;
+			version = Integer.parseInt(versionId);
+			AppID appid = component.registerApp(appName, version, request.getFrom());
+			
+			Element appElem = DocumentHelper.createElement(QName.get(
+					"registerapp", MUGService.mugOwnerNS));
+			// gameElem.addAttribute("retcode", "success");
+			appElem.addElement("name").setText(appid.getName());
+			appElem.addElement("version").setText(Integer.toString(appid.getVersion()));
+			appElem.addAttribute("appId", appid.getNamespace());
+			reply.setChildElement(appElem);
+			mugManager.sendPacket(component, reply);
+			
+		} 
+	}
+
+	private class RegisterGameHandler extends IQRequestHandlerBase {
+		
+		public RegisterGameHandler(IQ request) {
+			super(request);			
+		}
+				
+		public void execute() throws ComponentException {
+			Element childElement = getChildElement();
+			GenericTurnBasedMUG mug = new GenericTurnBasedMUG(
+					mugManager, childElement);
+			if (mugManager.isGameRegistered(mug.getNamespace())) {
+				throw new NotAllowedException(
+						"A game is already registered under the namespace '"
+								+ mug.getNamespace() + "'");
+			}
+			mugManager.registerMultiUserGame(mug.getNamespace(), mug);
+			Element gameElem = DocumentHelper.createElement(QName.get(
+					"registergame", MUGService.mugOwnerNS));
+			
+			gameElem.addAttribute("gameId", mug.getNamespace());
+			reply.setChildElement(gameElem);
+			mugManager.sendPacket(component, reply);
+			
+		} 
+	}
+	
+	private class InstantMatchHandler extends IQRequestHandlerBase {
+		
+		public InstantMatchHandler(IQ request) {
+			super(request);			
+		}
+				
+		public void execute() throws ComponentException {
+			Element childElement = getChildElement();
+			// create a new game room and use the provided configuration
+			// to
+			// configure it
+			String gameNS = childElement.attributeValue("gameId");
+
+			MUGRoom room = component.createGameRoom(gameNS, jid);
+			if (childElement.element("room") != null) {
+				room.setOptions(childElement.element("room"));
+			}
+			if (childElement.element("match") != null) {
+				List<Element> l = new ArrayList<Element>();
+				l.add(childElement.element("match"));
+				room.getMatch().setConfiguration(l);
+			}
+
+			reply.setFrom(room.getJID());
+			mugManager.sendPacket(component, reply);
+			
+		} 
+	}
 
 	/**
 	 * This method handles an {@see IQ} requests sent to a {@see MUGRoom}
@@ -442,19 +665,12 @@ public class DefaultMUGSession implements MUGSession {
 	 * @throws ComponentException
 	 */
 	protected void process(IQ iq) throws ComponentException {
-		/*
-		 * Handle IOs whith childs: - <save xmlns='...#owner'> -> save room -
-		 * <load xmlns='...#owner'> -> load room - <newMatch xmlns='...#owner'>
-		 * -> create room all others (config, memberlist, transfer owner): ->
-		 * room iqOwnerhandler
-		 */
 		JID recipient = iq.getTo();
 		String roomName = recipient.getNode();
 
 		Element childElement = iq.getChildElement();
 
-		MUGOccupant occupant = roomName != null ? occupants.get(roomName)
-				: null;
+		MUGOccupant occupant = roomName != null ? occupants.get(roomName) : null;
 
 		// Try to send a private message
 		if (recipient.getResource() != null
@@ -490,149 +706,45 @@ public class DefaultMUGSession implements MUGSession {
 		boolean foundOwnerNS = MUGService.mugOwnerNS.equals(childElement
 				.getNamespaceURI());
 
-		if (!foundOwnerNS 
-				&& !("game".equals(childElement.getName())) 
-				&& !("gamedata".equals(childElement.getName()))
-				&& !("register".equals(childElement.getName()))) {
-			throw new NotAllowedException();
-		}
-
-		IQ reply = IQ.createResultIQ((IQ) iq);
 
 		if (occupant == null) {
 			// assign a game room if the user is requesting for one
 			if (!foundOwnerNS) {
-				
-				if ("game".equals(childElement.getName())) {
-					String gameNS = childElement.attributeValue("gameId");
-					if (gameNS == null) {
-						throw new NotFoundException();
-					}
-					Element itemElement = null;
-					 if (null != (itemElement = childElement.element("item"))) {
-						String role = itemElement.attributeValue("role");
-						String nick = itemElement.attributeValue("nick");
-	
-						MUGRoom room = assignRoom(gameNS, nick, jid, role);
-						if (room != null) {
-							reply.setFrom(room.getJID());
-							mugManager.sendPacket(component, reply);
-						} else {
-							throw new NotFoundException();
-						}
-					}
-				} else if ("gamedata".equals(childElement.getName())) {
-					
-					String gameNS = childElement.attributeValue("gameId");
-					if (gameNS == null) {
-						throw new NotFoundException();
-					}
-					Element gameElement = DocumentHelper.createElement(QName.get(
-							"gamedata", MUGService.mugNS));
-					gameElement.addAttribute("gameId", gameNS);
-					if (null != childElement.element("userdata")) {
-						Element userDataElement = childElement.element("userdata");
-						//if "get" query then return data
-						String propertyName = "game:"+gameNS;
-						String username = iq.getFrom().getNode();
-						MUGProperty property = null;
-						if (iq.getType() == IQ.Type.get) {
-							try {
-								property = component.getPersistenceProvider().getUserProperty(username, propertyName);							
-							} catch (Exception ex) {
-								log.info("Cannot find user data for user:"+username + ", propertyName:"+propertyName+".", ex);
-								throw new ComponentException("failed to service request", ex);
-							}
-						} else if (iq.getType() == IQ.Type.set) {
-							String userData = userDataElement.getTextTrim();
-							try {
-								property = component.getPersistenceProvider().setUserProperty(username, propertyName, userData);
-							} catch (Exception ex) {
-								log.info("Cannot find user data for user:"+username + ", propertyName:"+propertyName+".", ex);
-								throw new ComponentException("failed to service request", ex);
-							}
-						}
-						Element userdataElem = gameElement.addElement("userdata");
-						
-						if (property != null) {
-							userdataElem.add(DocumentHelper.createCDATA(property.getValue()));
-							userdataElem.addAttribute("version", Integer.toString(property.getVersion()));
-						}
-							
-						reply.setChildElement(gameElement);
-						mugManager.sendPacket(component, reply);
-					}
-					else if (null != childElement.element("matchdata")) {
-						Element matchdataElement = gameElement.addElement("matchdata");
-						List<MUGRoom> rooms = component.getGameRooms(gameNS, jid);
-						for(MUGRoom room : rooms) {
-							Element matchElement = matchdataElement.addElement("match");
-							matchElement.addAttribute("matchId", room.getJID().toBareJID());
-							matchElement.addElement("status").setText(room.getMatch().getStatus().name());
-							
-							Element matchState = room.getMatch().getState();
-							if (matchState != null)
-								matchElement.add(matchState.createCopy());
-						}
-						
-						reply.setChildElement(gameElement);
-						mugManager.sendPacket(component, reply);
-					}
+
+				if ("matchrequest".equals(childElement.getName())) {
+					MatchRequestHandler handler = new MatchRequestHandler(iq);
+					handler.execute();
+				} else if ("userdata".equals(childElement.getName())) {
+					UserDataHandler handler = new UserDataHandler(iq);
+					handler.execute();
+				} else if ("matchdata".equals(childElement.getName())) {
+					MatchDataHandler handler = new MatchDataHandler(iq);
+					handler.execute();
+				} else {
+					throw new NotAllowedException();
 				}
-				else if ("register".equals(childElement.getName())) {
-				//	if ("turnbased".equals(childElement.attributeValue("type"))) {
-						GenericTurnBasedMUG mug = new GenericTurnBasedMUG(
-								mugManager, childElement);
-						if (mugManager.isGameRegistered(mug.getNamespace())) {
-							throw new NotAllowedException(
-									"A game is already registered under the namespace '"
-											+ mug.getNamespace() + "'");
-						}
-						mugManager.registerMultiUserGame(mug.getNamespace(),
-								mug);
-						Element gameElem = DocumentHelper.createElement(QName
-								.get("register", MUGService.mugNS));
-					//	gameElem.addAttribute("retcode", "success");
-						gameElem.addAttribute("gameId", mug.getNamespace());
-						reply.setChildElement(gameElem);
-						mugManager.sendPacket(component, reply);
-						/*
-					} else {
-						throw new NotAllowedException(
-								"Only turnbased games can be created using IQ set");
-					}
-					*/
-					return;
+
+			} else { // namespace == MUGownerNS
+				if ("registerapp".equals(childElement.getName())) {
+					RegisterAppHandler handler = new RegisterAppHandler(iq);
+					handler.execute();
+				} else if ("registergame".equals(childElement.getName())) {
+					RegisterGameHandler handler = new RegisterGameHandler(iq);
+					handler.execute();
+				} else if ("instantmatch".equals(childElement.getName())) {
+					InstantMatchHandler handler = new InstantMatchHandler(iq);
+					handler.execute();
+				} else if ("load".equals(childElement.getName())) {
+					// TODO: Implement loading a game room
+					throw new UnsupportedGameException();
+				} else {
+					// The sender is not an occupant of the room
+					throw new NotAcceptableException();
 				}
-				return;
 			}
-
-			// create a new game room and use the provided configuration to
-				// configure it
-			
-			if ("game".equals(childElement.getName())) {
-				String gameNS = childElement.attributeValue("gameId");
-
-				MUGRoom room = component.createGameRoom(gameNS, jid);
-				if (childElement.element("room") != null) {
-					room.setOptions(childElement.element("room"));
-				}
-				if (childElement.element("match") != null) {
-					List<Element> l = new ArrayList<Element>();
-					l.add(childElement.element("match"));
-					room.getMatch().setConfiguration(l);
-				}
-
-				reply.setFrom(room.getJID());
-				mugManager.sendPacket(component, reply);
-				return;
-			} else if ("load".equals(childElement.getName())) {
-				// TODO: Implement loading a game room
-				throw new UnsupportedGameException();
-			} else {
-				// The sender is not an occupant of the room
-				throw new NotAcceptableException();
-			}
+			return;
+		} else if (!foundOwnerNS) {
+				throw new NotAllowedException();			
 		}
 
 		// Check senders address and reject conflicting packets
@@ -674,6 +786,96 @@ public class DefaultMUGSession implements MUGSession {
 		return null;
 	}
 
+	private interface PresenceRequestHandler {
+		public void execute() throws ComponentException;
+		
+		public Element getChildElement();
+		
+	}
+	
+	private abstract class PresenceRequestHandlerBase implements PresenceRequestHandler {
+		protected final Presence request;
+		public PresenceRequestHandlerBase(Presence request) {
+			this.request = request;
+		}
+		
+	}
+	
+	private class CloseAppHandler extends PresenceRequestHandlerBase {
+		public CloseAppHandler(Presence request) {
+			super(request);
+		}
+				
+		public void execute() throws ComponentException {
+			Element childElement = getChildElement();
+			String appns = childElement != null ? childElement.attributeValue("appId") : null;
+			if (appns == null || appns.isEmpty()) {
+				// close all open apps
+				List<MUGRoom> rooms = component.getGameRooms(request.getFrom());
+				doClose(rooms);
+			} else {
+				AppID appID = CommonUtils.extractAppID(appns);
+				List<MUGRoom> rooms = component.getGameRooms(appID, jid);
+				doClose(rooms);
+			}
+		}
+
+		public Element getChildElement() {
+			return request.getChildElement("app", MUGService.mugNS);
+		}
+		
+		private void doClose(List<MUGRoom> rooms) {
+			for(MUGRoom room : rooms) {
+				synchronized(room) {
+					MUGOccupant occupant = room.getOccupant(request.getFrom());
+					if (occupant != null) {
+						room.markOffline(occupant);
+						occupants.remove(room.getName());
+					}
+				}
+			}
+		}
+	}
+	
+	private class OpenAppHandler extends PresenceRequestHandlerBase {
+		public OpenAppHandler(Presence request) {
+			super(request);
+		}
+				
+		public void execute() throws ComponentException {
+			Element childElement = getChildElement();
+			String appns = childElement != null ? childElement.attributeValue("appId") : null;
+			if (appns == null || appns.isEmpty()) {
+				// close all open apps
+				return;
+			} else {
+				AppID appID = CommonUtils.extractAppID(appns);
+				List<MUGRoom> rooms = component.getGameRooms(appID, jid);
+				doOpen(rooms);
+			}
+		}
+
+		public Element getChildElement() {
+			return request.getChildElement("app", MUGService.mugNS);
+		}
+		
+		private void doOpen(List<MUGRoom> rooms) throws ComponentException {
+			for(MUGRoom room : rooms) {
+				synchronized(room) {
+					MUGOccupant occupant = room.getOccupant(request.getFrom());
+					if (occupant != null) {
+						Presence appPresence = new Presence();
+						appPresence.setType(request.getType());
+						occupant.setPresence(appPresence);
+						room.broadcastPresence(occupant);
+						occupant.send(occupant.getPresence());
+						occupants.put(room.getName(), occupant);
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * This method handles a {@see Presence} packets send to a {@see MUGRoom} or
 	 * {@see MUGOccupant}. This can be creating or joining a game room, changing
@@ -686,8 +888,15 @@ public class DefaultMUGSession implements MUGSession {
 		JID recipient = presence.getTo();
 		String roomName = (recipient != null) ? recipient.getNode() : null;
 
-		// Ignore Presence sending to the service
 		if (roomName == null) {
+			boolean appClosingPresence = Presence.Type.unavailable.equals(presence.getType());
+			if (appClosingPresence) {
+				CloseAppHandler handler = new CloseAppHandler(presence);
+				handler.execute();
+			} else {
+				OpenAppHandler handler = new OpenAppHandler(presence);
+				handler.execute();
+			}
 			return;
 		}
 

@@ -255,7 +255,7 @@ public class DefaultMUGRoom implements MUGRoom {
 		
 		this.match = game.createMatch(this);
 		
-		log.debug(locale.getLocalizedString("mug.room.debug.create") + game.getNamespace() + "/" + roomName);
+		log.debug(locale.getLocalizedString("mug.room.debug.create") + game.getGameID().getNamespace() + "/" + roomName);
 	}
 	
 	public void destroy() {
@@ -690,7 +690,7 @@ public class DefaultMUGRoom implements MUGRoom {
 			
 			Element gameElement = message.addChildElement("game", MUGService.mugNS + "#user");
 			Element invite = gameElement.addElement("invited");
-			invite.addAttribute("var", game.getNamespace());
+			invite.addAttribute("var", game.getGameID().getNamespace());
 			if (invitor.getUserAddress() != null) {
 				invite.addAttribute("from", invitor.getUserAddress().toBareJID());
 			}
@@ -956,6 +956,9 @@ public class DefaultMUGRoom implements MUGRoom {
 			// If the game has started, broadcast the room state
 			if (started)
 				broadcastRoomPresence();
+			
+			// send the start message to the sender finally
+			occupant.send(startMessage);
 		}
 		else
 			throw new ForbiddenException();

@@ -26,6 +26,6 @@ package com.trickplay.gameservice.xmpp.mug;
  */
 public interface MatchStateListener {
 
-    public void currentMatchState(String status, MatchStateExtension matchState);
+    public void currentMatchState(String matchId, String status, MatchStateExtension matchState);
 
 }

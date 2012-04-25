@@ -26,8 +26,8 @@ package com.trickplay.gameservice.xmpp.mug;
  */
 public interface GamePlayListener {
 
-	public void start(Participant p);
+	public void start(String matchId, Participant p);
 	
-    public void turn(Participant from, TurnMessage turnMessage);
+    public void turn(String matchId, Participant from, TurnMessage turnMessage);
 
 }

@@ -1,25 +1,10 @@
-/**
- * Copyright (C) 2008-2009 Guenther Niess. All rights reserved.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package org.frogx.service.core;
 
 
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -28,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.frogx.service.api.AppID;
+import org.frogx.service.api.MUGApp;
 import org.frogx.service.api.MUGManager;
 import org.frogx.service.api.MUGMatch.TurnInfo;
 import org.frogx.service.api.MUGPersistenceProvider;
@@ -37,6 +24,7 @@ import org.frogx.service.api.MultiUserGame;
 import org.frogx.service.api.exception.ForbiddenException;
 import org.frogx.service.api.exception.NotAllowedException;
 import org.frogx.service.api.exception.UnsupportedGameException;
+import org.frogx.service.api.util.CommonUtils;
 import org.frogx.service.core.iq.IQDiscoInfoHandler;
 import org.frogx.service.core.iq.IQDiscoItemsHandler;
 import org.frogx.service.core.iq.IQSearchHandler;
@@ -53,7 +41,6 @@ import org.xmpp.packet.Packet;
  * A Multi-User Gaming service is a XMPP component which 
  * manages game rooms and user sessions.
  * 
- * @author G&uuml;nther Nie&szlig;
  */
 public class DefaultMUGService implements MUGService {
 	
@@ -114,10 +101,7 @@ public class DefaultMUGService implements MUGService {
 	 */
 	private Map<JID, DefaultMUGSession> sessions = new ConcurrentHashMap<JID, DefaultMUGSession>();
 	
-	/**
-	 * Supported games with disco info namespace.
-	 */
-	private Map<String, MultiUserGame> games = null;
+	private Map<AppID, MUGApp> apps = null;
 	
 	/**
 	 * A collection of the categories supported by the games on this service.
@@ -179,11 +163,12 @@ public class DefaultMUGService implements MUGService {
 	 * @param games A map of the supported games with the disco info namespace and implementing class.
 	 */
 	public DefaultMUGService(String subdomain, String description, MUGManager mugManager,
-			Map<String, MultiUserGame> games, MUGPersistenceProvider storage) {
+			Map<AppID, MUGApp> apps, MUGPersistenceProvider storage) {
 		this.serviceName      = subdomain;     
 		this.description      = description;
 		this.mugManager       = mugManager;
-		this.games            = games;
+		this.apps = apps != null ? apps : new ConcurrentHashMap<AppID, MUGApp>();
+		//this.games            = games;
 		this.rooms            = new ConcurrentHashMap<String, MUGRoom>();
 		this.serviceEnabled   = false;
 		this.storage          = storage;
@@ -193,9 +178,11 @@ public class DefaultMUGService implements MUGService {
 		iqSearchHandler = new IQSearchHandler(this, mugManager);
 		
 		// initialize game categories
-		for (MultiUserGame game : games.values()) {
-			if (!gameCategories.contains(game.getCategory().toLowerCase()))
-				gameCategories.add(game.getCategory().toLowerCase());
+		for(MUGApp app: this.apps.values()) {
+			for (MultiUserGame game : app.getGames().values()) {
+				if (!gameCategories.contains(game.getCategory().toLowerCase()))
+					gameCategories.add(game.getCategory().toLowerCase());
+			}
 		}
 	}
 	
@@ -464,15 +451,39 @@ public class DefaultMUGService implements MUGService {
 		return true;
 	}
 	
+	
+	public AppID registerApp(String appId, int version, JID requestorJID) {
+		AppID appID = new AppID(appId, version);
+		if (apps.containsKey(appID)) {
+			log.error("Attempt to register an app that is already registered:"+appID);
+			return appID;
+		}
+		apps.put(appID, new DefaultMUGApp(appID, requestorJID));
+		return appID;
+	}
+
+	public MUGApp getApp(String namespace) {
+		return null;
+	}
+
+	public MUGApp getApp(AppID appID) {
+		return null;
+	}
+
 	/**
 	 * Register a Multi-User Game
 	 *
 	 * @param game is the MultiUserGame which will be registered.
 	 */
-	public void registerMultiUserGame(String namespace, MultiUserGame game) {
+	public void registerMultiUserGame(MultiUserGame game) {
+		if (!apps.containsKey(game.getGameID().getAppID())) {
+			log.error("Attempt to register a game with unknown appID:"+game.getGameID().getAppID());
+			return;
+		}
 		if (!gameCategories.contains(game.getCategory().toLowerCase()))
 			gameCategories.add(game.getCategory().toLowerCase());
-		games.put(namespace, game);
+		MUGApp app = apps.get(game.getGameID().getAppID());
+		app.getGames().put(game.getGameID().getName(), game);
 	}
 	
 	/**
@@ -480,19 +491,36 @@ public class DefaultMUGService implements MUGService {
 	 *
 	 * @param namespace The namespace of the MultiUserGame which will be unregistered.
 	 */
-	public void unregisterMultiUserGame(String namespace) {
-		MultiUserGame game = games.get(namespace);
+	public void unregisterMultiUserGame(String gamens) {
+		AppID appID = CommonUtils.extractAppID(gamens);
+		String gameName = CommonUtils.extractGameName(gamens);
+		unregisterMultiUserGame(appID, gameName);
+	}
+	
+	public void unregisterMultiUserGame(AppID appID, String gameName) {
+		MUGApp app = apps.get(appID);
+		if (app == null) {
+			log.error("Cannot find app for appID:"+appID);
+			return;
+		}
+		MultiUserGame game = app.getGame(gameName);
+		if (game == null) {
+			log.error("Cannot find game for appID:"+appID+" gameName:"+gameName);
+			return;
+		}
 		for( MUGRoom room : getGameRooms() ) {
-			if (room.getGame().getNamespace().equals(namespace))
+			if (room.getGame().getGameID().equals(game.getGameID()))
 				try {
 					removeGameRoom(room.getName());
 				} catch (ForbiddenException e) {
 					log.error("[MUG] Can't remove room: ", e);
 				}
 		}
-		games.remove(namespace);
+		app.getGames().remove(gameName);
 		
 		// remove the game category if it isn't supported anymore
+		//TODO: handle empty category removal etc.
+		/*
 		if (game != null) {
 			boolean removeCategory = true;
 			String category = game.getCategory().toLowerCase();
@@ -503,19 +531,38 @@ public class DefaultMUGService implements MUGService {
 			if (removeCategory)
 				gameCategories.remove(category);
 		}
+		*/
+		
 	}
-	
+
 	/**
 	 * Get the supported game classes.
 	 * 
 	 * @return the namespaces and classes that are supported.
 	 */
 	public Map<String, MultiUserGame> getSupportedGames() {
-		return games;
+		Map<String, MultiUserGame> allGames = new HashMap<String, MultiUserGame>();
+		for(MUGApp app: apps.values()) {
+			for(MultiUserGame game : app.getGames().values())
+				allGames.put(game.getGameID().getNamespace(), game);
+		}
+		return allGames;
 	}
 	
 	public MultiUserGame getGame(String gamens) {
-		return games.get(gamens);
+		AppID appID = CommonUtils.extractAppID(gamens);
+		String gameName = CommonUtils.extractGameName(gamens);
+		MUGApp app = apps.get(appID);
+		if (app == null) {
+			log.error("Cannot find app for appID:"+appID);
+			return null;
+		}
+		MultiUserGame game = app.getGame(gameName);
+		if (game == null) {
+			log.error("Cannot find game for appID:"+appID+" gameName:"+gameName);
+			return null;
+		}
+		return game;
 	}
 	
 	/**
@@ -530,7 +577,7 @@ public class DefaultMUGService implements MUGService {
 	private List<MUGRoom> getGameRooms(String gameNS) {
 		List<MUGRoom> gameRooms = new ArrayList<MUGRoom>();
 		for(MUGRoom room : rooms.values()) {
-			if (room.getGame().getNamespace().equals(gameNS))
+			if (room.getGame().getGameID().getNamespace().equals(gameNS))
 				gameRooms.add(room);
 		}
 		return gameRooms;
@@ -545,6 +592,36 @@ public class DefaultMUGService implements MUGService {
 		}			
 		return gameRooms;
 	}
+	
+	private List<MUGRoom> getGameRooms(AppID appID) {
+		List<MUGRoom> gameRooms = new ArrayList<MUGRoom>();
+		for(MUGRoom room : rooms.values()) {
+			if (room.getGame().getGameID().getAppID().equals(appID))
+				gameRooms.add(room);
+		}
+		return gameRooms;
+	}
+	
+	public List<MUGRoom> getGameRooms(AppID appID, JID jid) {
+		List<MUGRoom> gameRooms = new ArrayList<MUGRoom>();
+		for(MUGRoom room : getGameRooms(appID)) {
+			if (room.isOccupant(jid) && room.getOccupant(jid).hasRole()) {
+				gameRooms.add(room);
+			}
+		}			
+		return gameRooms;
+	}
+	
+	public List<MUGRoom> getGameRooms(JID jid) {
+		List<MUGRoom> gameRooms = new ArrayList<MUGRoom>();
+		for(MUGRoom room : rooms.values()) {
+			if (room.isOccupant(jid) && room.getOccupant(jid).hasRole()) {
+				gameRooms.add(room);
+			}
+		}			
+		return gameRooms;
+	}
+	
 	/**
 	 * Obtains a game room by name. If the game room does not exists then null will be returned.
 	 * 
@@ -573,7 +650,7 @@ public class DefaultMUGService implements MUGService {
 		}
 
 		// Check Game Support
-		MultiUserGame game = games.get(gameNamespace);
+		MultiUserGame game = getGame(gameNamespace);
 		if (game == null)
 			throw new UnsupportedGameException();
 
@@ -746,4 +823,6 @@ public class DefaultMUGService implements MUGService {
 	public MUGPersistenceProvider getPersistenceProvider() {
 		return storage;
 	}
+
+
 }

@@ -14,10 +14,9 @@ import com.trickplay.gameservice.xmpp.mug.Game.RoleConfig;
 
 public class RegisterGame implements PacketExtension {
 	
-	public static final String NAMESPACE = "http://jabber.org/protocol/mug";
-	public static final String ELEMENT_NAME = "register";
+	public static final String NAMESPACE = "http://jabber.org/protocol/mug#owner";
+	public static final String ELEMENT_NAME = "registergame";
     
-	private String gameId;
 	private Game game;
 	
     public String getNamespace() {
@@ -25,16 +24,7 @@ public class RegisterGame implements PacketExtension {
     }
 	public String getElementName() {
 		return ELEMENT_NAME;
-	}
-	
-	public String getGameId() {
-		return gameId;
-	}
-	
-	public void setGameId(String gameId) {
-		this.gameId = gameId;
-	}
-	
+	}	
 
 	public void setGame(Game game) {
 		this.game = game;
@@ -51,11 +41,10 @@ public class RegisterGame implements PacketExtension {
 		Element rootElement = DocumentHelper.createElement(QName.get(ELEMENT_NAME,
 				NAMESPACE));
 
-		if (gameId != null && !gameId.isEmpty()) {
-			rootElement.addAttribute("gameId", gameId);
-			return rootElement;
-		}
-
+		Element appe = rootElement.addElement("app");
+		appe.addAttribute("name", game.getAppname());
+		appe.addAttribute("version", Integer.toString(game.getAppversion()));
+		
 		rootElement.addElement("name").setText(game.getName());
 		Element e = rootElement.addElement("description");
 		if (game.getDescription() != null)
@@ -82,11 +71,15 @@ public class RegisterGame implements PacketExtension {
 		e = rootElement.addElement("minPlayersForStart");
 		e.setText(Integer.toString(game.getMinPlayersForStart()>0 ? game.getMinPlayersForStart() : 1));
 		
-		
+		if (game.getMaxDurationPerTurn()>0) {
+			rootElement.addElement("maxDurationPerTurn").setText(Long.toString(game.getMaxDurationPerTurn()));
+		}
 
+		rootElement.addElement("abortWhenPlayerLeaves").setText(Boolean.toString(game.isAbortWhenPlayerLeaves()));
 		return rootElement;
 	}
 	
+	/*
 	public static class Provider implements PacketExtensionProvider, IQProvider {
 
 		public PacketExtension parseExtension(XmlPullParser parser)
@@ -94,7 +87,7 @@ public class RegisterGame implements PacketExtension {
 			RegisterGame resp = new RegisterGame();
 			
 			//resp.setRetcode(parser.getAttributeValue("", "retcode"));
-			resp.setGameId(parser.getAttributeValue("", "gameId"));
+		//	resp.setGameId(parser.getAttributeValue("", "gameId"));
 			
 
 			boolean done = false;
@@ -126,4 +119,5 @@ public class RegisterGame implements PacketExtension {
 		}
 		
 	}
+	*/
 }

@@ -53,6 +53,9 @@ public class Game {
     }
     
 	private String description;
+	private String appname;
+	private int appversion;
+
 	private String name;
 	private String category;
     private List<RoleConfig> roles = new ArrayList<RoleConfig>();
@@ -60,8 +63,26 @@ public class Game {
     private int minPlayersForStart = 1;
     private TurnPolicy turnPolicy = TurnPolicy.roundrobin;
     private GameType gameType = GameType.correspondence;
+    private long maxDurationPerTurn=0;
+    private boolean abortWhenPlayerLeaves;
     
     
+	public String getAppname() {
+		return appname;
+	}
+
+	public void setAppname(String appname) {
+		this.appname = appname;
+	}
+
+	public int getAppversion() {
+		return appversion;
+	}
+
+	public void setAppversion(int appversion) {
+		this.appversion = appversion;
+	}
+	
 	public String getDescription() {
 		return description;
 	}
@@ -126,7 +147,24 @@ public class Game {
 		return category;
 	}
 
+	public void setMaxDurationPerTurn(long maxDurationPerTurn) {
+		this.maxDurationPerTurn = maxDurationPerTurn;
+	}
 
+	public long getMaxDurationPerTurn() {
+		return maxDurationPerTurn;
+	}
 
+	public void setAbortWhenPlayerLeaves(boolean abortWhenPlayerLeaves) {
+		this.abortWhenPlayerLeaves = abortWhenPlayerLeaves;
+	}
+
+	public boolean isAbortWhenPlayerLeaves() {
+		return abortWhenPlayerLeaves;
+	}
 	
+	public String getGameId() {
+		return "urn:xmpp:mug:tp:"+appname+":"+appversion+":"+name;
+	}
+
 }

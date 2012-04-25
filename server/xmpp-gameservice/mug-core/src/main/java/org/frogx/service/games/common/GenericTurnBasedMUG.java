@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 import org.dom4j.Element;
+import org.frogx.service.api.AppID;
+import org.frogx.service.api.GameID;
 import org.frogx.service.api.MUGManager;
 import org.frogx.service.api.MUGMatch;
 import org.frogx.service.api.MUGRoom;
@@ -38,7 +39,6 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 	private String namespace;
 	
 	private String description;
-	private static Pattern validNamePattern = Pattern.compile("^([a-zA-Z][a-zA-Z0-9_\\.\\-]*){4,}$");
 	private String category;
 	private Map<String, Integer> roleToIndexMap = new LinkedHashMap<String, Integer>();
 	private String[] roles = kEmptyStringArray;
@@ -49,6 +49,8 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 	private int minPlayersForStart = -1;
 	private boolean joinAfterStart = true;
 	private boolean abortWhenPlayerLeaves = true;
+	private long maxDurationForTurn=-1;
+	private GameID gameID;
 	
 	public GenericTurnBasedMUG(MUGManager mugManager, Element gameDescriptor) {
 		this.mugManager = mugManager;
@@ -65,10 +67,20 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 	private void readGameDescriptor(Element gameDescriptor) {
 		int cntPlayersCannotStart = 0;
 	//	boolean processRoles = false;
+		String appname = "";
+		int appversion=-1;
 		List<String> roleList = new ArrayList<String>();
 		for (Iterator i = gameDescriptor.elementIterator(); i.hasNext();) {
 			Element child = (Element) i.next();
-			if ("name".equals(child.getName())) {
+			if ("app".equals(child.getName())) {
+				appname = child.attributeValue("name");
+				String versionstr = child.attributeValue("version");
+				try {
+					appversion = Integer.parseInt(versionstr);
+				} catch (Exception e) {
+					log.warn("Invalid value specified for app.version: "+appversion);					
+				}
+			} else if ("name".equals(child.getName())) {
 				name = child.getText();
 				namespace = MUGService.mugNS + "/" + name;
 			} else if ("description".equals(child.getName())) {
@@ -120,6 +132,14 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 					log.warn("Invalid value specified for abortOnIdleTimeout in game="+name+". defaulting to true");
 					abortWhenPlayerLeaves = true;
 				}
+			} else if ("maxDurationForTurn".equals(child.getName())) {
+				try {
+					maxDurationForTurn = Long.parseLong(child.getTextTrim());
+				} catch (NumberFormatException ex) {
+					log.warn("Invalid value specified for maxDurationForTurn in game="+name+". Defaults will be used");
+					maxDurationForTurn = -1;
+				}
+				
 			} else if ("attribute".equals(child.getName())) {
 				GameAttribute attribute = new GameAttribute(
 						child.attributeValue("name"),
@@ -132,10 +152,14 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 		}
 		
 		// verify
-		if (name == null) {
+		if (!AppID.isValidName(appname)) {
+			throw new IllegalArgumentException("Invalid app name provided. app.name:"+appname);
+		} else if (appversion < 0) {
+			throw new IllegalArgumentException("Invalid app version provided");
+		} else if (name == null) {
 			throw new IllegalArgumentException("The descriptor doesn't provide a name.");
 		} 
-		else if (!isValidWord(name)) {
+		else if (!AppID.isValidName(name)) {
 			throw new IllegalArgumentException("Provided name ["+name+"] for the game is not valid.");
 		}
 		if (description == null || description.trim().length() == 0) {
@@ -154,6 +178,7 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 			throw new IllegalArgumentException("TurnPolicy should be specified. Available options are roundrobin, specifiedRole, simultaneous and custom");
 		}
 		
+		gameID = new GameID(new AppID(appname, appversion), name);
 		roles = new String[roleConfigMap.size()];
 		int i=0;
 		for(RoleConfig rc: roleConfigMap.values()) {
@@ -188,10 +213,6 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 		}
 	}
 	
-	
-	private boolean isValidWord(String x) {
-		 return validNamePattern.matcher(x).matches();
-	}
 	
 	/**
 	 * Create a match which implements the game logic within a
@@ -322,16 +343,22 @@ public class GenericTurnBasedMUG implements MultiUserGame{
 	}
 	
 	public long getMaxAllowedTimeForMove() {
+		if (gameType == null)
+			gameType = GameType.correspondence;
 		switch (gameType) {
-		case correspondence:
-			return TURN_TIME_LIMIT_CORRESPONDENCE;
 		case online:
-			return TURN_TIME_LIMIT_ONLINE;
+			return maxDurationForTurn > 0 ? maxDurationForTurn : TURN_TIME_LIMIT_ONLINE;
+		case correspondence:
+		default:
+			return maxDurationForTurn > 0 ? maxDurationForTurn : TURN_TIME_LIMIT_CORRESPONDENCE;
 		}
-		return TURN_TIME_LIMIT_CORRESPONDENCE;
 	}
 
 	public boolean abortWhenPlayerLeaves() {
 		return abortWhenPlayerLeaves;
+	}
+
+	public GameID getGameID() {
+		return gameID;
 	}
 }

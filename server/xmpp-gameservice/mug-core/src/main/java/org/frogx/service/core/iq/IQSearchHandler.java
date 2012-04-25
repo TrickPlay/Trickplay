@@ -270,7 +270,7 @@ public class IQSearchHandler {
 			if (games != null && games.getValues().iterator().hasNext()) {
 				boolean withinCategory = false;
 				for (Iterator<String> gameIterator = games.getValues().iterator(); gameIterator.hasNext();) {
-					if (room.getGame().getNamespace().equals(gameIterator.next())) {
+					if (room.getGame().getGameID().getNamespace().equals(gameIterator.next())) {
 						withinCategory = true;
 						break;
 					}
@@ -336,7 +336,7 @@ public class IQSearchHandler {
 			Map<String, Object> fields = new HashMap<String, Object>();
 			
 			fields.put("name", room.getNaturalLanguageName());
-			fields.put("game", room.getGame().getNamespace());
+			fields.put("game", room.getGame().getGameID().getNamespace());
 			fields.put("jid", room.getJID().toString());
 			
 			resultForm.addItemFields(fields);
@@ -444,7 +444,7 @@ public class IQSearchHandler {
 					"mug.search.form.games"));
 			field.setRequired(false);
 			for (MultiUserGame game : games.values()) {
-				field.addOption(game.getDescription(), game.getNamespace());
+				field.addOption(game.getDescription(), game.getGameID().getNamespace());
 			}
 		}
 		

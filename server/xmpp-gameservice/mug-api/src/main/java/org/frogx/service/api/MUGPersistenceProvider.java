@@ -64,5 +64,18 @@ public interface MUGPersistenceProvider {
 	 */
 	public MUGProperty updateUserProperty(String username, MUGProperty property) throws Exception;
 	
+	/*
+	public MUGApp createMUGApp(String appName, int version, JID requestor);
+	
+	public AppID getAppID(String appName, int version);
 		
+	public GameID createGame(AppID appID, String gamename, String gameconfig);
+	
+	public GameID getGameID(long appID, String gamename);
+	
+	public GameID getGameID(String appname, int version, String gamename);
+	
+	public RoomID createRoom(GameID game, JID owner, int status);
+	*/
+	//public 
 }

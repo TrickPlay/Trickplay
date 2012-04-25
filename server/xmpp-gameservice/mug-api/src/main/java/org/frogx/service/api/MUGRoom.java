@@ -2,11 +2,18 @@ package org.frogx.service.api;
 
 import java.util.Collection;
 
-
 import org.dom4j.Element;
-import org.frogx.service.api.exception.*;
-import org.frogx.service.api.MultiUserGame;
-
+import org.frogx.service.api.exception.CannotBeInvitedException;
+import org.frogx.service.api.exception.ConflictException;
+import org.frogx.service.api.exception.ForbiddenException;
+import org.frogx.service.api.exception.GameConfigurationException;
+import org.frogx.service.api.exception.NotFoundException;
+import org.frogx.service.api.exception.RequiredPlayerException;
+import org.frogx.service.api.exception.RoomLockedException;
+import org.frogx.service.api.exception.ServiceUnavailableException;
+import org.frogx.service.api.exception.UnauthorizedException;
+import org.frogx.service.api.exception.UnsupportedGameException;
+import org.frogx.service.api.exception.UserAlreadyExistsException;
 import org.xmpp.component.ComponentException;
 import org.xmpp.forms.FormField;
 import org.xmpp.packet.IQ;

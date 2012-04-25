@@ -1,23 +1,3 @@
-/**
- * MUGPlugin - A Multi-User Gaming plugin.
- * Some parts are inspired by the sources of the Openfire XMPP server.
- * 
- * Copyright (C) 2004-2008 Jive Software. All rights reserved.
- * Copyright (C) 2008-2009 Guenther Niess. All rights reserved.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package org.frogx.service.openfire;
 
 
@@ -60,7 +40,6 @@ import org.xmpp.packet.Packet;
  * Multi-User Gaming services can be configured to listen on multiple
  * domains.
  * 
- * @author G&uuml;nther Nie&szlig;
  */
 public class MUGPlugin implements Plugin, MUGManager {
 	
@@ -125,7 +104,7 @@ public class MUGPlugin implements Plugin, MUGManager {
 					.getGameServices();
 			for (String subdomain : loadServices.keySet()) {
 				registerMultiUserGameService(new DefaultMUGService(subdomain,
-						loadServices.get(subdomain), this, games, persistenceProvider));
+						loadServices.get(subdomain), this, null, persistenceProvider));
 			}
 		}
 		catch (Exception e) {
@@ -168,7 +147,7 @@ public class MUGPlugin implements Plugin, MUGManager {
 		// TODO: Maybe manage the supported games for each service by the
 		//       permanent storage
 		for (MUGService service : mugServices.values()) {
-			service.registerMultiUserGame(namespace, game);
+			service.registerMultiUserGame(game);
 		}
 		
 		games.put(namespace, game);
@@ -263,7 +242,7 @@ public class MUGPlugin implements Plugin, MUGManager {
 		
 		// create and register the new component
 		MUGService mug = new DefaultMUGService(subdomain, description,
-				this, games, persistenceProvider);
+				this, null, persistenceProvider);
 		registerMultiUserGameService(mug);
 		return mug;
 	}
@@ -326,7 +305,7 @@ public class MUGPlugin implements Plugin, MUGManager {
 			if (description == null)
 				description = getDefaultServiceDescription();
 			mug = new DefaultMUGService(newSubdomain, description,
-					this, games, persistenceProvider);
+					this, null, persistenceProvider);
 			registerMultiUserGameService(mug);
 		}
 	}
@@ -470,7 +449,7 @@ public class MUGPlugin implements Plugin, MUGManager {
 	
 	private static class GameComparator implements Comparator<MultiUserGame> {
 		public int compare(MultiUserGame o1, MultiUserGame o2) {
-			return o1.getNamespace().compareTo(o2.getNamespace());
+			return o1.getGameID().getNamespace().compareTo(o2.getGameID().getNamespace());
 		}
 	}
 

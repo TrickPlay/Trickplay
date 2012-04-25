@@ -20,13 +20,14 @@ package org.frogx.service.core.iq;
 import java.util.Map;
 
 import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
 import org.frogx.service.api.MUGManager;
 import org.frogx.service.api.MUGRoom;
 import org.frogx.service.api.MUGService;
 import org.frogx.service.api.MultiUserGame;
 import org.frogx.service.api.util.LocaleUtil;
 import org.frogx.service.core.DefaultMUGService;
-
 import org.xmpp.forms.DataForm;
 import org.xmpp.forms.FormField;
 import org.xmpp.packet.IQ;
@@ -42,7 +43,6 @@ import org.xmpp.packet.PacketError;
  * @author G&uuml;nther Nie&szlig;
  */
 public class IQDiscoInfoHandler {
-	
 	/**
 	 * The Multi-User Gaming Service which can be discovered.
 	 */
@@ -84,10 +84,13 @@ public class IQDiscoInfoHandler {
 			String node = iq.attributeValue("node");
 			reply.setChildElement(iq.createCopy());
 			Element queryElement = reply.getChildElement();
+			Namespace discoInfoNS = Namespace.get(queryElement.getNamespacePrefix(), queryElement.getNamespaceURI());
+			QName identityQName = new QName("identity", discoInfoNS);
+			QName featureQName = new QName("feature", discoInfoNS);
 			
 			if ((roomName == null) && (node == null)) {
 				// Create and add a the identity of the mug service
-				Element identity = queryElement.addElement("identity");
+				Element identity = queryElement.addElement(identityQName);
 				identity.addAttribute("category", "game");
 				identity.addAttribute("type", "multi-user");
 				identity.addAttribute("name", service.getDescription());
@@ -98,29 +101,29 @@ public class IQDiscoInfoHandler {
 						queryElement.add(el);
 				
 				// Create and add a the disco#info feature
-				Element feature = queryElement.addElement("feature");
+				Element feature = queryElement.addElement(featureQName);
 				feature.addAttribute("var", "http://jabber.org/protocol/disco#info");
 				// Create and add a the disco#item feature
-				feature = queryElement.addElement("feature");
+				feature = queryElement.addElement(featureQName);
 				feature.addAttribute("var", "http://jabber.org/protocol/disco#items");
 				// Create and add a the search feature
-				feature = queryElement.addElement("feature");
+				feature = queryElement.addElement(featureQName);
 				feature.addAttribute("var", "jabber:iq:search");
 				// Create and add a the feature provided by the mug service
-				feature = queryElement.addElement("feature");
+				feature = queryElement.addElement(featureQName);
 				feature.addAttribute("var", MUGService.mugNS);
 				
 				// Create and add the supported game features
 				Map<String, MultiUserGame> gameClasses = service.getSupportedGames();
 				for (String namespace : gameClasses.keySet()) {
-					feature = queryElement.addElement("feature");
+					feature = queryElement.addElement(featureQName);
 					feature.addAttribute("var", namespace);
 				}
 				
 				// Add Extra Features
 				if (service.getExtraFeatures() != null)
 					for (String ns : service.getExtraFeatures()) { 
-						feature = queryElement.addElement("feature");
+						feature = queryElement.addElement(featureQName);
 						feature.addAttribute("var", ns);
 					}
 			}
@@ -128,24 +131,24 @@ public class IQDiscoInfoHandler {
 				// Answer the identity and features of a given room
 				MUGRoom room = service.getGameRoom(roomName);
 				if (room != null && room.isPublicRoom() && !room.isLocked()) {
-					Element identity = queryElement.addElement("identity");
+					Element identity = queryElement.addElement(identityQName);
 					identity.addAttribute("category", "game");
 					identity.addAttribute("name", room.getNaturalLanguageName());
 					identity.addAttribute("type", "multi-user");
 					
 					// Create and add a the feature provided by the mug service
-					Element feature = queryElement.addElement("feature");
+					Element feature = queryElement.addElement(featureQName);
 					feature.addAttribute("var", MUGService.mugNS);
 					
 					// Create and add the supported game features
-					feature = queryElement.addElement("feature");
-					feature.addAttribute("var", room.getGame().getNamespace());
+					feature = queryElement.addElement(featureQName);
+					feature.addAttribute("var", room.getGame().getGameID().getNamespace());
 					
 					// Always add public since only public rooms can be discovered
-					feature = queryElement.addElement("feature");
+					feature = queryElement.addElement(featureQName);
 					feature.addAttribute("var", "mug_public");
 					
-					feature = queryElement.addElement("feature");
+					feature = queryElement.addElement(featureQName);
 					if (room.isMembersOnly()) {
 						feature.addAttribute("var", "mug_membersonly");
 					}
@@ -153,7 +156,7 @@ public class IQDiscoInfoHandler {
 						feature.addAttribute("var", "mug_open");
 					}
 					
-					feature = queryElement.addElement("feature");
+					feature = queryElement.addElement(featureQName);
 					if (room.isModerated()) {
 						feature.addAttribute("var", "mug_moderated");
 					}
@@ -161,7 +164,7 @@ public class IQDiscoInfoHandler {
 						feature.addAttribute("var", "mug_unmoderated");
 					}
 					
-					feature = queryElement.addElement("feature");
+					feature = queryElement.addElement(featureQName);
 					if (room.isNonAnonymous()) {
 						feature.addAttribute("var", "mug_nonanonymous");
 					}
@@ -172,7 +175,7 @@ public class IQDiscoInfoHandler {
 						feature.addAttribute("var", "mug_fullyanonymous");
 					}
 					
-					feature = queryElement.addElement("feature");
+					feature = queryElement.addElement(featureQName);
 					if (room.isPasswordProtected()) {
 						feature.addAttribute("var", "mug_passwordprotected");
 					}
@@ -182,7 +185,7 @@ public class IQDiscoInfoHandler {
 					
 					if (room.getExtraFeatures() != null)
 						for (String ns : room.getExtraFeatures()) { 
-							feature = queryElement.addElement("feature");
+							feature = queryElement.addElement(featureQName);
 							feature.addAttribute("var", ns);
 						}
 					
@@ -196,7 +199,7 @@ public class IQDiscoInfoHandler {
 					field = dataForm.addField();
 					field.setVariable("mug#game");
 					field.setType(FormField.Type.hidden);
-					field.addValue(room.getGame().getNamespace());
+					field.addValue(room.getGame().getGameID().getNamespace());
 					
 					field = dataForm.addField();
 					field.setVariable("mug#matchinfo_roomname");

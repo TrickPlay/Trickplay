@@ -108,24 +108,27 @@ public class GameDataExtension implements PacketExtension {
 	}
 	
 	public Element toXMLElement() {
-		Element gameElement = DocumentHelper.createElement(QName.get(name, NAMESPACE));
+		Element rootElement = Type.USERDATA.equals(dataType) ? 
+				DocumentHelper.createElement(QName.get("userdata", NAMESPACE))
+				:
+					DocumentHelper.createElement(QName.get("matchdata", NAMESPACE))	;
 
 		if (gameId != null)
-			gameElement.addAttribute("gameId", gameId);
+			rootElement.addAttribute("gameId", gameId);
 		if (Type.USERDATA.equals(dataType)) {
-			Element userElem = gameElement.addElement("userdata");
+			Element userElem = rootElement.addElement("opaque");
 			if (userdata!=null)
 				userElem.add(DocumentHelper.createCDATA(userdata));
 			
 			if (version != null)
 				userElem.addAttribute("version", version.toString());
 		} else {
-			Element matchdataElem = gameElement.addElement("matchdata");
+			Element matchdataElem = rootElement;
 			for(MatchInfoExtension matchinfo : matchdata) {
 				matchdataElem.add(matchinfo.toXMLElement());
 			}
 		}
-		return gameElement;
+		return rootElement;
 	}
 	
 	public String getNamespace() {

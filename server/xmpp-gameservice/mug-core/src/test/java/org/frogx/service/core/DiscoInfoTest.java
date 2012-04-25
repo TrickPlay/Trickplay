@@ -24,15 +24,14 @@ import static org.junit.Assert.fail;
 
 import java.util.Iterator;
 
+import org.dom4j.Element;
+import org.frogx.service.api.MultiUserGame;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.dom4j.Element;
-
 import org.xmpp.packet.IQ;
-import org.xmpp.packet.JID;
 import org.xmpp.packet.IQ.Type;
+import org.xmpp.packet.JID;
 
 /**
  * The {@link DefaultMUGService} implementation offers Service Discovery support.
@@ -55,11 +54,16 @@ public class DiscoInfoTest {
 	
 	private DummyMUGManager manager = null;
 	private IQ response = null;
+	private MultiUserGame game = new DummyMultiUserGame();
 	
 	@Before
 	public void setUp() throws Exception {
 		manager = new DummyMUGManager();
-		manager.registerMultiUserGame(DummyMultiUserGame.namespace, new DummyMultiUserGame());
+		manager.getMultiUserGamingService().registerApp(
+				game.getGameID().getAppID().getName(), 
+				game.getGameID().getAppID().getVersion(), 
+				inquirer);
+		manager.registerMultiUserGame(game.getGameID().getNamespace(), game);
 		final IQ request = new IQ();
 		request.setType(Type.get);
 		request.setChildElement("query", DISCO_INFO_NS);
@@ -67,6 +71,7 @@ public class DiscoInfoTest {
 		request.setTo(manager.getMultiUserGamingService().getDomain());
 		manager.processPacket(request);
 		response = (IQ) manager.getSentPacket();
+		System.out.println("response:"+response.toXML());
 	}
 	
 	@After
@@ -219,7 +224,7 @@ public class DiscoInfoTest {
 	public void testDummyGameFeature() throws Exception {
 		assertNotNull(response);
 		assertTrue(response.isResponse());
-		assertTrue(manager.isGameRegistered(DummyMultiUserGame.namespace));
+		assertTrue(manager.isGameRegistered(game.getGameID().getNamespace()));
 		
 		final Element childElement = response.getChildElement();
 		assertSame(childElement.getName(), "query");
@@ -228,7 +233,7 @@ public class DiscoInfoTest {
 		while (iter.hasNext()) {
 			final Element element = iter.next();
 			final String var = element.attributeValue("var");
-			if (DummyMultiUserGame.namespace.equals(var)) {
+			if (game.getGameID().getNamespace().equals(var)) {
 				return;
 			}
 		}
@@ -243,10 +248,10 @@ public class DiscoInfoTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testRemoveDummyGameFeature() throws Exception {
-		assertTrue(manager.isGameRegistered(DummyMultiUserGame.namespace));
+		assertTrue(manager.isGameRegistered(game.getGameID().getNamespace()));
 		
 		// setup
-		manager.unregisterMultiUserGame(DummyMultiUserGame.namespace);
+		manager.unregisterMultiUserGame(game.getGameID().getNamespace());
 		final IQ request = new IQ();
 		request.setType(Type.get);
 		request.setChildElement("query", DISCO_INFO_NS);
@@ -263,7 +268,7 @@ public class DiscoInfoTest {
 		while (iter.hasNext()) {
 			final Element element = iter.next();
 			final String var = element.attributeValue("var");
-			if (DummyMultiUserGame.namespace.equals(var)) {
+			if (game.getGameID().getNamespace().equals(var)) {
 				fail("The multi-user game service shouldn't announce a unregistered dummy game.");;
 			}
 		}

@@ -199,7 +199,7 @@
 <%
 	if (room != null) {
 %>
-<meta name="extraParams" content="mugname=<%= URLEncoder.encode(room.getMUGService().getName(), "UTF-8") %>&roomname=<%= URLEncoder.encode(room.getName(), "UTF-8") %>&game=<%= URLEncoder.encode(room.getGame().getNamespace(), "UTF-8") %>"/>
+<meta name="extraParams" content="mugname=<%= URLEncoder.encode(room.getMUGService().getName(), "UTF-8") %>&roomname=<%= URLEncoder.encode(room.getName(), "UTF-8") %>&game=<%= URLEncoder.encode(room.getGame().getGameID().getNamespace(), "UTF-8") %>"/>
 <%
 	}
 %>
@@ -290,7 +290,7 @@
 <input type="hidden" name="save" value="true">
 <input type="hidden" name="mugname" value="<%= mugname %>">
 <input type="hidden" name="roomname" value="<%= roomname %>">
-<input type="hidden" name="game" value="<%= room.getGame().getNamespace() %>">
+<input type="hidden" name="game" value="<%= room.getGame().getGameID().getNamespace() %>">
 <table cellpadding="3" cellspacing="0" border="0">
 <tr>
 <td class="c1"><fmt:message key="mug.room.properties.label_address" /></td>

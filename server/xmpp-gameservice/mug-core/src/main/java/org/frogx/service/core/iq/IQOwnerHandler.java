@@ -170,7 +170,7 @@ public class IQOwnerHandler {
 								}
 								// process the match configuration
 								else if (el.getName().equals("options")) {
-									if (!el.getNamespaceURI().equals(room.getGame().getNamespace()))
+									if (!el.getNamespaceURI().equals(room.getGame().getGameID().getNamespace()))
 										throw new UnsupportedGameException();
 									
 									room.getMatch().setConfiguration(el.elements());
@@ -198,7 +198,7 @@ public class IQOwnerHandler {
 						throw new ForbiddenException();
 					}
 					
-					if (element.getNamespaceURI().equals(room.getGame().getNamespace())) {
+					if (element.getNamespaceURI().equals(room.getGame().getGameID().getNamespace())) {
 						room.getMatch().setConstructedState(element);
 					}
 					else {
@@ -374,8 +374,8 @@ public class IQOwnerHandler {
 		gameOptionsElement.remove(gameOptionsElement.element(QName.get("x", "jabber:x:data")));
 		// Add the new representation of configurationForm as an element 
 		gameOptionsElement.add(configurationForm.getElement());
-		gameOptionsElement.remove(gameOptionsElement.element(QName.get("options", room.getGame().getNamespace())));
-		Element gameOptions = gameOptionsElement.addElement("options", room.getGame().getNamespace());
+		gameOptionsElement.remove(gameOptionsElement.element(QName.get("options", room.getGame().getGameID().getNamespace())));
+		Element gameOptions = gameOptionsElement.addElement("options", room.getGame().getGameID().getNamespace());
 		Collection<Element> gameConfig = room.getMatch().getConfigurationForm();
 		if (gameConfig != null) {
 			for (Iterator<Element> it=gameConfig.iterator();it.hasNext();) {

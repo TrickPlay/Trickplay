@@ -81,7 +81,7 @@ public class DummyMUGManager implements MUGManager {
 					return "Localized string for key: " + key;
 				}
 			};
-		service = new DefaultMUGService(subDomain, description, this, games, storage);
+		service = new DefaultMUGService(subDomain, description, this, null, storage);
 		try {
 			service.initialize(new JID(null, subDomain + "." + xmppDomain, null), new DummyComponentManager());
 			service.start();
@@ -119,7 +119,7 @@ public class DummyMUGManager implements MUGManager {
 	}
 	
 	public void registerMultiUserGame(String namespace, MultiUserGame game) {
-		service.registerMultiUserGame(namespace, game);
+		service.registerMultiUserGame(game);
 		games.put(namespace, game);
 	}
 	

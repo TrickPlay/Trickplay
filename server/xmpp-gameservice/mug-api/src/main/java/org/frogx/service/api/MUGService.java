@@ -4,11 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-
 import org.dom4j.Element;
 import org.frogx.service.api.exception.NotAllowedException;
 import org.frogx.service.api.exception.UnsupportedGameException;
-import org.frogx.service.api.MultiUserGame;
 import org.xmpp.component.Component;
 import org.xmpp.packet.JID;
 
@@ -115,20 +113,25 @@ public interface MUGService extends Component {
 	 */
 	public int getNumberUserSessions();
 	
+	public AppID registerApp(String appId, int version, JID requestorJID);
+	
+	public MUGApp getApp(AppID appID);
+	
 	/**
 	 * Registers a new MultiUserGame implementation to the service.
 	 * 
 	 * @param namespace the MultiUserGame disco feature namespace.
 	 * @param gameClass the class which implements the MultiUserGame.
 	 */
-	public void registerMultiUserGame(String namespace, MultiUserGame gameClass);
+	public void registerMultiUserGame(MultiUserGame gameClass);
 	
 	/**
 	 * Unregisters a MultiUserGame implementation.
 	 * 
 	 * @param namespace the MultiUserGame disco feature namespace.
 	 */
-	public void unregisterMultiUserGame(String namespace);
+	public void unregisterMultiUserGame(AppID appID, String gameName);
+	public void unregisterMultiUserGame(String gamens);
 	
 	/**
 	 * Get the games supported by the service.
@@ -234,5 +237,9 @@ public interface MUGService extends Component {
 	public MUGPersistenceProvider getPersistenceProvider();
 	
 	public List<MUGRoom> getGameRooms(String gameNS, JID jid);
+	
+	public List<MUGRoom> getGameRooms(AppID appID, JID jid);
+	
+	public List<MUGRoom> getGameRooms(JID jid);
 	
 }

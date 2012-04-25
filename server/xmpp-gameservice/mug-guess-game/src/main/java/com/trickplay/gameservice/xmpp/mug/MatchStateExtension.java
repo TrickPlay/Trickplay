@@ -22,8 +22,6 @@ public class MatchStateExtension implements PacketExtension {
     private String next;
     private String last;
     private List<String> players = new ArrayList<String>();
-
-    
     
 	public MatchStateExtension() {
     	

@@ -62,7 +62,7 @@ public class DummyMatch implements MUGMatch {
 	
 	public Collection<Element> getConfigurationForm() {
 		Collection<Element> result = new ArrayList<Element>();
-		Element element = DocumentFactory.getInstance().createElement("config", DummyMultiUserGame.namespace);
+		Element element = DocumentFactory.getInstance().createElement("config", DummyMultiUserGame.gameID.getNamespace());
 		result.add(element);
 		return result;
 	}
@@ -92,7 +92,7 @@ public class DummyMatch implements MUGMatch {
 	}
 	
 	public Element getState() {
-		return DocumentFactory.getInstance().createElement("state", DummyMultiUserGame.namespace);
+		return DocumentFactory.getInstance().createElement("state", DummyMultiUserGame.gameID.getNamespace());
 	}
 	
 	public Status getStatus() {

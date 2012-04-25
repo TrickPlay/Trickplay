@@ -206,7 +206,7 @@
 <tr class="jive-<%= (((i%2)==0) ? "even" : "odd") %>">
 	<td width="1%"><%= i %></td>
 	<td width="23%">
-		<a href="mug-room-settings.jsp?mugname=<%= URLEncoder.encode(mugService.getName(), "UTF-8") %>&roomname=<%= URLEncoder.encode(room.getName(), "UTF-8") %>&game=<%= URLEncoder.encode(room.getGame().getNamespace(), "UTF-8") %>"><%= room.getNaturalLanguageName() + " (" + JID.unescapeNode(room.getName()) + ")" %></a>
+		<a href="mug-room-settings.jsp?mugname=<%= URLEncoder.encode(mugService.getName(), "UTF-8") %>&roomname=<%= URLEncoder.encode(room.getName(), "UTF-8") %>&game=<%= URLEncoder.encode(room.getGame().getGameID().getNamespace(), "UTF-8") %>"><%= room.getNaturalLanguageName() + " (" + JID.unescapeNode(room.getName()) + ")" %></a>
 	</td>
 	<td width="33%"><%= room.getDescription() %></td>
 	<td width="5%"><%= room.getGame().getDescription() %></td>

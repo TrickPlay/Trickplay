@@ -1,12 +1,12 @@
 package org.frogx.service.api;
 
 
+
 /**
  * A MultiUserGame provides information about the implemented
  * game and handles {@see MUGMatch} instances.
  */
 public interface MultiUserGame {
-	
 	public interface RoleConfig {
 		public String getRole();
 		public boolean isFirstRole();
@@ -41,12 +41,10 @@ public interface MultiUserGame {
 			return custom;
 		}
 	}
-	/**
-	 * Gets the xml namespace of the implemented game which can be discovered.
-	 * 
-	 * @return the namespace of the game.
-	 */
-	public String getNamespace(); 
+	
+	public GameID getGameID();
+	
+	
 	
 	/**
 	 * Get the human readable description of the game.

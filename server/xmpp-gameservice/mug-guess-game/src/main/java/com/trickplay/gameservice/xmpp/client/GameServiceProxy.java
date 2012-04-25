@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.jivesoftware.smack.Chat;
@@ -36,19 +38,21 @@ import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.DiscoverInfo.Feature;
 
-import com.trickplay.gameservice.xmpp.mug.CreateMatch;
-import com.trickplay.gameservice.xmpp.mug.FindMatch;
 import com.trickplay.gameservice.xmpp.mug.Game;
 import com.trickplay.gameservice.xmpp.mug.GameDataExtension;
 import com.trickplay.gameservice.xmpp.mug.GamePlayListener;
 import com.trickplay.gameservice.xmpp.mug.GamePresenceExtension;
+import com.trickplay.gameservice.xmpp.mug.InstantMatch;
+import com.trickplay.gameservice.xmpp.mug.OpenApp;
 import com.trickplay.gameservice.xmpp.mug.JoinMatch;
 import com.trickplay.gameservice.xmpp.mug.LeaveMessageExtension;
+import com.trickplay.gameservice.xmpp.mug.MatchRequest;
 import com.trickplay.gameservice.xmpp.mug.MatchStateExtension;
 import com.trickplay.gameservice.xmpp.mug.MatchStateListener;
 import com.trickplay.gameservice.xmpp.mug.NewGameResponse;
 import com.trickplay.gameservice.xmpp.mug.Participant;
 import com.trickplay.gameservice.xmpp.mug.PlayerStatusListener;
+import com.trickplay.gameservice.xmpp.mug.RegisterApp;
 import com.trickplay.gameservice.xmpp.mug.RegisterGame;
 import com.trickplay.gameservice.xmpp.mug.StartMessageExtension;
 import com.trickplay.gameservice.xmpp.mug.TurnExtension;
@@ -85,12 +89,11 @@ public class GameServiceProxy {
 	private MessageListener messageListener;
 	private PacketListener mugPacketListener;
 	private String loginUserId;
-	private List<PlayerStatusListener> participantStatusListeners = Collections.synchronizedList(
-			new ArrayList<PlayerStatusListener>());
-	private List<MatchStateListener> matchStateListeners = Collections.synchronizedList(
-			new ArrayList<MatchStateListener>());
-	private List<GamePlayListener> gamePlayListeners = Collections.synchronizedList(
-			new ArrayList<GamePlayListener>());
+	private Set<PlayerStatusListener> participantStatusListeners = Collections.synchronizedSet(
+			new LinkedHashSet<PlayerStatusListener>());
+	private Set<MatchStateListener> matchStateListeners = Collections.synchronizedSet(
+			new LinkedHashSet<MatchStateListener>());
+	private Set<GamePlayListener> gamePlayListeners = Collections.synchronizedSet(new LinkedHashSet<GamePlayListener>());
 	
 
 	public GameServiceProxy(String server, int port) {
@@ -99,58 +102,57 @@ public class GameServiceProxy {
 	}
 
 	public void registerParticipantStatusListener(PlayerStatusListener listener) {
-		if (!participantStatusListeners.contains(listener))
-			participantStatusListeners.add(listener);
+		participantStatusListeners.add(listener);
 	}
 	
 	public void registerGamePlayListener(GamePlayListener listener) {
-		if (!gamePlayListeners.contains(listener))
-			gamePlayListeners.add(listener);
+		gamePlayListeners.add(listener);
 	}
 	
 	public void registerMatchStateListener(MatchStateListener listener) {
-		if (!matchStateListeners.contains(listener))
-			matchStateListeners.add(listener);
+		matchStateListeners.add(listener);
 	}
 	
-	private void fireLeftEvent(Participant participant) {
+	
+	private void fireLeftEvent(String matchId, Participant participant) {
 		for(PlayerStatusListener listener : participantStatusListeners) {
-				listener.left(participant);
+				listener.left(matchId, participant);
+		}
+		
+	}
+	
+	private void fireUnavailableEvent(String matchId, Participant participant) {
+		for(PlayerStatusListener listener : participantStatusListeners) {
+				listener.unavailable(matchId, participant);
 		}
 	}
 	
-	private void fireUnavailableEvent(Participant participant) {
+	private void fireJoinedEvent(String matchId, Participant participant, GamePresenceExtension.Item item) {
 		for(PlayerStatusListener listener : participantStatusListeners) {
-				listener.unavailable(participant);
+				listener.joined(matchId, participant, item);
 		}
 	}
 	
-	private void fireJoinedEvent(Participant participant, GamePresenceExtension.Item item) {
+	private void fireNickChangedEvent(String matchId, Participant p, String newname) {
 		for(PlayerStatusListener listener : participantStatusListeners) {
-				listener.joined(participant, item);
+				listener.nicknameChanged(matchId, p, newname);
 		}
 	}
 	
-	private void fireNickChangedEvent(Participant p, String newname) {
-		for(PlayerStatusListener listener : participantStatusListeners) {
-				listener.nicknameChanged(p, newname);
-		}
-	}
-	
-	private void fireMatchStateEvent(String status, MatchStateExtension matchState) {
+	private void fireMatchStateEvent(String matchId, String status, MatchStateExtension matchState) {
 		for(MatchStateListener listener : matchStateListeners) {
-				listener.currentMatchState(status, matchState);
+				listener.currentMatchState(matchId, status, matchState);
 		}
 	}
 	
-	private void fireMatchStartEvent(Participant participant) {
+	private void fireMatchStartEvent(String matchId, Participant participant) {
 		for(GamePlayListener listener : gamePlayListeners)
-			listener.start(participant);
+			listener.start(matchId, participant);
 	}
 	
-	private void fireTurnEvent(Participant p, TurnMessage turn) {
+	private void fireTurnEvent(String matchId, Participant p, TurnMessage turn) {
 		for(GamePlayListener listener : gamePlayListeners)
-			listener.turn(p, turn);
+			listener.turn(matchId, p, turn);
 	}
 	
 	public void init() throws XMPPException {
@@ -192,6 +194,8 @@ public class GameServiceProxy {
 
 			public void processPacket(Packet p) {
 				System.out.println("received packet. contents:"+p.toXML());
+				String matchId = StringUtils.parseBareAddress(p.getFrom());
+				String resource = StringUtils.parseResource(p.getFrom());
 
 				if (PRESENCE_FILTER.accept(p)) {
 					if (MUG_FILTER.accept(p)) {
@@ -199,15 +203,15 @@ public class GameServiceProxy {
 							switch (ext.getType()) {
 							case Occupant:
 								if (((Presence)p).getType().equals(Presence.Type.unavailable)) 
-									fireUnavailableEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())));
+									fireUnavailableEvent(matchId, Participant.parseParticipant(resource));
 								else
-									fireJoinedEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())), ext.getItem());
+									fireJoinedEvent(matchId, Participant.parseParticipant(resource), ext.getItem());
 								break;
 							case NickChanged:
-								fireNickChangedEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())), ext.getItem().getNick());
+								fireNickChangedEvent(matchId, Participant.parseParticipant(resource), ext.getItem().getNick());
 								break;								
 							case Status:
-								fireMatchStateEvent(ext.getStatus(), ext.getState());
+								fireMatchStateEvent(matchId, ext.getStatus(), ext.getState());
 								break;
 							default:
 							// log error		
@@ -221,11 +225,11 @@ public class GameServiceProxy {
 						
 						PacketExtension ext = p.getExtension(START_ELEMENT_TAG, MUGuserns);
 						if (ext != null) {
-							fireMatchStartEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())));
+							fireMatchStartEvent(matchId, Participant.parseParticipant(resource));
 						} else if (null != (ext = p.getExtension(TURN_ELEMENT_TAG, MUGuserns))) {
-							fireTurnEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())), (TurnExtension)ext);
+							fireTurnEvent(matchId, Participant.parseParticipant(resource), (TurnExtension)ext);
 						} else if (null != (ext = p.getExtension(LeaveMessageExtension.name, LeaveMessageExtension.NAMESPACE))) {
-							fireLeftEvent(Participant.parseParticipant(StringUtils.parseResource(p.getFrom())));
+							fireLeftEvent(matchId, Participant.parseParticipant(resource));
 						} else {
 							//log message
 						}
@@ -339,43 +343,20 @@ public class GameServiceProxy {
 	private boolean isValidGameName(String x) {
 		return Pattern
 				.matches(
-						"^http://jabber\\.org/protocol/mug/[a-zA-Z]([a-zA-Z_0-9\\.\\-]*{3,})$",
-						x);
+						"^http://jabber\\.org/protocol/mug/[a-zA-Z]([a-zA-Z_0-9\\.\\-]*{3,})$",x) 
+						||
+						Pattern.matches("^urn:xmpp:mug:tp:[a-zA-Z]([a-zA-Z_0-9\\.\\-]*{3,}):[0-9]+:[a-zA-Z]([a-zA-Z_0-9\\.\\-]*{3,})", x);
 	}
 
-	public void createGame(final Game game) throws XMPPException {
-		final RegisterGame registerGame = new RegisterGame();
-		registerGame.setGame(game);
+	public void registerApp(final String appname, final int appversion) throws XMPPException {
+		final RegisterApp registerApp = new RegisterApp();
+		registerApp.setAppname(appname);
+		registerApp.setAppversion(appversion);
 		IQ iq = new IQ() {
 
 			@Override
 			public String getChildElementXML() {
-				return registerGame.toXML();
-				/*
-				Element element = DocumentHelper.createElement(QName.get(
-						"newGame", "http://jabber.org/protocol/mug#owner"));
-				element.addAttribute("type", game.isTurnbased() ? "turnbased"
-						: "undefined");
-				element.addElement("name").addText(game.getName());
-				element.addElement("description")
-						.addText(game.getDescription());
-				element.addElement("category").addText(game.getCategory());
-				StringBuilder allRoles = new StringBuilder();
-				boolean first = true;
-				List<String> rolesList = game.getRoles();
-				for (String role : rolesList) {
-					if (!first)
-						allRoles.append(",");
-					else {
-						first = false;
-					}
-					allRoles.append(role);
-				}
-				element.addElement("roles").addText(allRoles.toString());
-				element.addElement("startingPlayerRole").addText(
-						rolesList.get(0));
-				return element.asXML();
-				*/
+				return registerApp.toXML();
 			}
 
 		};
@@ -397,7 +378,40 @@ public class GameServiceProxy {
 			throw new XMPPException(result.getError());
 		} 
 
-		System.out.println("created game '" + game.getName()
+		System.out.println("registered app with (name:" + appname + ", version:" + appversion
+				+ "). server response:" + result.toXML());
+	}
+	
+	public void registerGame(final Game game) throws XMPPException {
+		final RegisterGame registerGame = new RegisterGame();
+		registerGame.setGame(game);
+		IQ iq = new IQ() {
+
+			@Override
+			public String getChildElementXML() {
+				return registerGame.toXML();
+			}
+
+		};
+
+		iq.setType(org.jivesoftware.smack.packet.IQ.Type.SET);
+		iq.setTo(MUGServiceId);
+
+		PacketCollector collector = connection
+				.createPacketCollector(new PacketIDFilter(iq.getPacketID()));
+
+		connection.sendPacket(iq);
+
+		IQ result = (IQ) collector.nextResult(360000);
+		// Stop queuing results
+		collector.cancel();
+		if (result == null) {
+			throw new XMPPException("No response from the server.");
+		} else if (result.getType() == IQ.Type.ERROR) {
+			throw new XMPPException(result.getError());
+		} 
+
+		System.out.println("registerd game '" + game.getName()
 				+ "'. server response:" + result.toXML());
 	}
 
@@ -419,7 +433,7 @@ public class GameServiceProxy {
 
 			@Override
 			public String getChildElementXML() {
-				return new CreateMatch(gameId).toXML();
+				return new InstantMatch(gameId).toXML();
 			}
 
 		};
@@ -432,7 +446,7 @@ public class GameServiceProxy {
 
 		connection.sendPacket(createMatchIQ);
 
-		IQ result = (IQ) collector.nextResult(5000);
+		IQ result = (IQ) collector.nextResult(50000);
 		// Stop queuing results
 		collector.cancel();
 		if (result == null) {
@@ -450,7 +464,7 @@ public class GameServiceProxy {
 
 			@Override
 			public String getChildElementXML() {
-				return new FindMatch(gameId, null, loginUserId).toXML();
+				return new MatchRequest(gameId, null, loginUserId).toXML();
 			}
 
 		};
@@ -463,7 +477,7 @@ public class GameServiceProxy {
 
 		connection.sendPacket(createMatchIQ);
 
-		IQ result = (IQ) collector.nextResult(5000);
+		IQ result = (IQ) collector.nextResult(50000);
 		// Stop queuing results
 		collector.cancel();
 		if (result == null) {
@@ -480,6 +494,22 @@ public class GameServiceProxy {
 		return result.getFrom();
 	}
 
+	public String openApp(final String appId) throws XMPPException {
+		Presence openAppPresence = new Presence(Type.available);
+		openAppPresence.addExtension(new OpenApp(appId));
+
+		connection.sendPacket(openAppPresence);
+		return openAppPresence.getPacketID();
+	}
+	
+	public String closeApp(final String appId) throws XMPPException {
+		Presence closeAppPresence = new Presence(Type.unavailable);
+		closeAppPresence.addExtension(new OpenApp(appId));
+
+		connection.sendPacket(closeAppPresence);
+		return closeAppPresence.getPacketID();
+	}
+	
 	public String joinMatch(final String matchId) throws XMPPException {
 		return joinMatch(matchId, true, null);
 	}
