@@ -83,7 +83,6 @@ class EditorTabWidget(QTabWidget):
 		# save before close
 		if isinstance(editor, Editor):
 			currentText = editor.text()#open(editor.path).read()
-			print str(editor.path)
 			textBefore = self.main.editors[editor.path][2]
 			#if self.textBefores[index] != currentText:
 			if textBefore != currentText:
@@ -111,6 +110,7 @@ class EditorTabWidget(QTabWidget):
 							ret = self.main.saveas()
 							#self.tabClosing = False
 							index = self.count() - 1
+
 					elif ret == QMessageBox.Cancel:
 						return 
 					elif editor.tempfile == True:
@@ -239,6 +239,7 @@ class EditorTabWidget(QTabWidget):
 		        self.main.editors[self.paths[index]][2] = self.editors[index].text()
 
 		    self.editors[index].text_status = 1 #TEXT_READ
+		    self.editors[index].delete_marker()
 		    self.editors[index].save() # added 2/3
 		    #self.textBefores[index] = self.editors[index].text() #added 2/3
 
