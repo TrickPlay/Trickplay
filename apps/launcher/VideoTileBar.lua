@@ -237,7 +237,6 @@ function bar:init(p)
     end
     state.state = curr_i
     
-    dolater(function() tiles[curr_i].state = "EXPAND" end)
     --tiles[state.state+0].state = "EXPAND"
     local key_press = {
         
@@ -288,7 +287,17 @@ function bar:init(p)
         
     end
     
-    --dolater(function() self:grab_key_focus() end)
+    
+    dolater(function()
+        for i,t in ipairs(tiles) do
+            
+            if i == curr_i then
+                t.state = "EXPAND"
+            else
+                p.tiles[i]:unfocus()
+            end
+        end
+    end)
     
 end
 
