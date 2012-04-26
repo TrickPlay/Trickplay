@@ -6,9 +6,9 @@ local all_tests = {}
 local test_img = nil
 local screenshot_name
 local screenshot = Image()
-local screen_w = screen.width
-local screen_h = screen.height
-
+local match_image = nil
+screen_w = screen.width
+screen_h = screen.height
 
 
 
@@ -181,11 +181,12 @@ function create_UI()
 			color = "FFFFFF"
 			}
 
-	test_list:add (no_screenshot_found_msg_txt)
+--	test_list:add (no_screenshot_found_msg_txt)
 end
 
 
 local offset = 0
+
 function focus_manager (line, direction)
 	if line <= 23 + offset and line >= 1 + offset then
 		screen:find_child("rect"..line - offset).color = { 52, 102, 255, 100 }
@@ -240,18 +241,24 @@ end
 
 
 
-function populate_test_fields ()	
+function populate_test_fields ()
+	if test_steps ~= nil then test_steps_txt.text = test_steps end
+--[[ if test_description ~= nil then 
+			test_desc_txt.text = "Test Group:\t"..test_group.."\nArea:\t\t"..test_area.."\nAPI:\t\t"..test_api.."\n\nDescription: "..test_description
+	end
+--]]
+	
+
+--[[
 
 	function on_loadedHandler (loadedImage, failed)
 
 		if failed then
 			screenshot:hide()
-			print ("1")
 			no_screenshot_found_msg_txt:show()
 		else      
 			screenshot.position = { 675, 470 }
 			screenshot.size = { 320, 480 }
-			print ("2")
 			no_screenshot_found_msg_txt:hide()
 			screenshot:show()
 		end
@@ -270,7 +277,7 @@ function populate_test_fields ()
 			test_desc_txt.text = "Test Group:\t"..test_group.."\nArea:\t\t"..test_area.."\nAPI:\t\t"..test_api.."\n\nDescription: "..test_description
 	end
 
-
+--]]
 end
 
 
@@ -314,15 +321,27 @@ function controllers:on_controller_connected(controller)
 	function controller:on_advanced_ui_ready()
 		class_table = dofile("AdvancedUIClasses.lua")
 		controller.factory = loadfile("AdvancedUIAPI.lua")(controller)
+		controller_w = controller.ui_size[1]
+		controller_h = controller.ui_size[2]
+		--dumptable (controller_size)
 	end
 
 
 	function screen.on_key_down( screen , key )
 			if key == keys.Return then
 					controller.screen:remove(test_img)
+					if test_steps ~= nil then test_steps_txt.text = test_steps end
+					if test_verify ~= nil then test_verify_txt.text = test_verify end
 					collectgarbage("collect")
-					test_img = generate_test_image(controller,controller.factory)
+					test_img = generate_device_image(controller,controller.factory)
 					controller.screen:add(test_img)
+					-- this is the ratio for resizing the expected result to fit the TV for comparison purposes.
+					local resize_ratio_w = 320/controller.ui_size[1]
+					local resize_ratio_h = 480/controller.ui_size[2]
+					if match_image ~= nil then screen:remove(match_image) end
+					match_image = generate_match_image( resize_ratio_w, resize_ratio_h)
+					match_image.position = { 675, 470 }
+					screen:add(match_image)
 			elseif key == keys.Up then
 				move_focus ("up", current_focus)
 			elseif key == keys.Down then

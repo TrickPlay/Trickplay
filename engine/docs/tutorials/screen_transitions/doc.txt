@@ -3,7 +3,7 @@ Title: Screen Transitions in a TrickPlay Application
 
 The Screen Transitions sample application demonstrates how to perform various types of screen transitions using the TrickPlay SDK Libraries.
 
-The complete application, including source code, can be <downloaded here at http://www.trickplay.com/tutorials/screen_transitions/screen_transitions.zip>.
+The complete application, including source code, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
 
 (see ScreenTransitionsDemo.png)
 

@@ -241,6 +241,9 @@ class TrickplayDeviceManager(QWidget):
 		
 		while True:
 			# Read one line
+			if not self.trickplay.canReadLine():
+			    break
+			# Read one line
 			s = self.trickplay.readLine()
 			# If the line is null, it means there is nothing more
 			# to read during this iteration
@@ -414,13 +417,15 @@ class TrickplayDeviceManager(QWidget):
 		                        editor = self.editorManager.tab.editors[index]
 		                        nline = editor.margin_nline
     
-		                    if reply.command[:1] == DBG_CMD_DELETE :
+		                    if reply.command[:1] == DBG_CMD_DELETE and nline is not None:
 		                        if editor.current_line != nline :
 		                            editor.markerDelete(nline, -1)
 		                        else :
 		                            editor.markerDelete(nline, -1)
 		                            editor.markerAdd(nline, editor.ARROW_MARKER_NUM)
 		                        editor.line_click[nline] = 0
+		                        return
+		                    elif nline is None:
 		                        return
     
 		                    # Break Point Setting t
@@ -515,13 +520,18 @@ class TrickplayDeviceManager(QWidget):
 
             env = self.trickplay.processEnvironment().systemEnvironment()
 
-            for item in env.toStringList():
-   				if item[:3] == "TP_":
-   					n = re.search("=", item).end()
-   					env.remove(item[:n-1])
+            if self.main.config is None :
+                print("[VDBG] .trickplay config file is ignored.")
+                for item in env.toStringList():
+   				    if item[:3] == "TP_":
+   					    n = re.search("=", item).end()
+   					    env.remove(item[:n-1])
+                env.insert("TP_config_file","")
+            else:
+                print("[VDBG] .trickplay config file is read.")
+                
 
             env.insert("TP_LOG", "bare")
-            env.insert("TP_config_file","")
 
             if dMode == True :
             	self.debug_mode = True

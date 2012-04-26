@@ -219,6 +219,7 @@ class MainWindow(QMainWindow):
         font_deviceManager = QFont()
         font_deviceManager.setPointSize(9)
         self._deviceManager.ui.comboBox.setFont(font_deviceManager)
+        self._deviceManager.ui.comboBox.setToolTip("Target Devices")
         self.toolbar.addWidget(self._deviceManager.ui.comboBox)
         
 
@@ -318,30 +319,35 @@ class MainWindow(QMainWindow):
         self.file_toolBtn = QPushButton()
         self.file_toolBtn.setFixedWidth(30)
         self.file_toolBtn.setIcon(self.icon_file_on)
+        self.file_toolBtn.setToolTip("File System")
         self.toolbar.addWidget(self.file_toolBtn)
         QObject.connect(self.file_toolBtn , SIGNAL("clicked()"),  self.fileWindowClicked)
 
         self.inspector_toolBtn = QPushButton()
         self.inspector_toolBtn.setFixedWidth(30)
         self.inspector_toolBtn.setIcon(self.icon_inspector_off)
+        self.inspector_toolBtn.setToolTip("Inspector")
         self.toolbar.addWidget(self.inspector_toolBtn)
         QObject.connect(self.inspector_toolBtn , SIGNAL("clicked()"),  self.inspectorWindowClicked)
 	
         self.console_toolBtn = QPushButton()
         self.console_toolBtn.setFixedWidth(30)
         self.console_toolBtn.setIcon(self.icon_console_off)
+        self.console_toolBtn.setToolTip("Console")
         self.toolbar.addWidget(self.console_toolBtn)
         QObject.connect(self.console_toolBtn , SIGNAL("clicked()"),  self.consoleWindowClicked)
 
         self.debug_toolBtn = QPushButton()
         self.debug_toolBtn.setFixedWidth(30)
         self.debug_toolBtn.setIcon(self.icon_debug_off)
+        self.debug_toolBtn.setToolTip("Debug")
         self.toolbar.addWidget(self.debug_toolBtn)
         QObject.connect(self.debug_toolBtn , SIGNAL("clicked()"),  self.debugWindowClicked)
 
         self.trace_toolBtn = QPushButton()
         self.trace_toolBtn.setFixedWidth(30)
         self.trace_toolBtn.setIcon(self.icon_trace_off)
+        self.trace_toolBtn.setToolTip("Trace")
         self.toolbar.addWidget(self.trace_toolBtn)
         QObject.connect(self.trace_toolBtn , SIGNAL("clicked()"),  self.traceWindowClicked)
 
@@ -479,7 +485,7 @@ class MainWindow(QMainWindow):
         elif self._deviceManager.ui.comboBox.currentIndex() != 0:
             # Remote Debugging / Run 
             #if getattr(self._deviceManager, "debug_mode") == False :
-            if getattr(self, "debug_mode") == False :
+            if getattr(self, "debug_mode") == False and hasattr(self.deviceManager, "socket") == True:
                 ret = self.deviceManager.socket.write('/close\n\n')
                 if ret < 0 :
                     print ("tp console socket is not available !")
@@ -539,7 +545,7 @@ class MainWindow(QMainWindow):
     def run(self):
         self.inspector.clearTree()
         self._deviceManager.run(False)
-        self.windows = {"file":False, "inspector":False, "console":False, "debug":True, "trace":True}
+        self.windows = {"file":False, "inspector":False, "console":False, "debug":True, "trace":False}
         self.inspectorWindowClicked()
         self.consoleWindowClicked()
         self.traceWindowClicked()
@@ -597,7 +603,8 @@ class MainWindow(QMainWindow):
 	
     def setEditorTabName(self, index):
         tabTitle = self.editorManager.tab.tabText(index)
-        if self.editorManager.tab.textBefores[index] == self.editorManager.tab.editors[index].text():
+        #if self.editorManager.tab.textBefores[index] == self.editorManager.tab.editors[index].text():
+        if self.editorManager.editors[self.editorManager.tab.editors[index].path][2] == self.editorManager.tab.editors[index].text():
             if tabTitle[:1] == "*":
                 self.editorManager.tab.setTabText (index, tabTitle[1:])
                 self.editorManager.tab.editors[index].starMark = False
@@ -632,6 +639,12 @@ class MainWindow(QMainWindow):
 		if self.editorManager.tab:
 			index = self.editorManager.tab.currentIndex()
 			if not index < 0:
+				#self.editorManager.tab.editors[index].SendScintilla(QsciScintilla.SCI_SETSELEOLFILLED, True)
+				#self.editorManager.tab.editors[index].setSelectionToEol(True)
+				#self.editorManager.tab.editors[index].selectAll()
+				#self.editorManager.tab.editors[index].setSelection(1,10,3,10)
+				#print self.editorManager.tab.editors[index].selectedText()
+				#self.editorManager.tab.editors[index].SendScintilla(QsciScintilla.SCI_COPYALLOWLINE, 0,0)
 				self.editorManager.tab.editors[index].copy()
 	
     def editor_paste(self):
@@ -678,9 +691,9 @@ class MainWindow(QMainWindow):
         self.path = path
         
         self.fileSystem.start(self.editorManager, path)
-        self.setWindowTitle(QtGui.QApplication.translate("MainWindow", 
-							"TrickPlay IDE [ "+str(os.path.basename(str(path))+" ]"), 
-							None, QtGui.QApplication.UnicodeUTF8))
+        
+        if path is not -1:
+            self.setWindowTitle(QtGui.QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(path))+" ]"), None, QtGui.QApplication.UnicodeUTF8))
         self.deviceManager.setPath(path)
         
         if openList:

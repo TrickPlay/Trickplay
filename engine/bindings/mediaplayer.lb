@@ -105,7 +105,8 @@ interface video_texture [[ClutterActor *]] actor
 /*
     Global: mediaplayer
     
-    The mediaplayer global variable enables a TrickPlay application to play and manage audio and video files.
+    The mediaplayer global variable enables a TrickPlay application to play and manage audio and video files. An extended code example that shows how to play a video is described in the <Run a Video in a TrickPlay Application> section.
+
 */
 
 global mediaplayer [[MP*]]

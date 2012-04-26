@@ -7,7 +7,7 @@ test_area = "touch"
 test_api = "touch_down/touch_up"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 	local g = factory:Group{ x = 0, y = 0}
 
 	local t_start = factory:Rectangle{color = "0070E0", x = 20, y = 20, size = { 50 , 50 }}
@@ -58,6 +58,13 @@ function generate_test_image (controller, factory)
 	end
 
 	return g
+end
+
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local t1 = Text{x = 10 * resize_ratio_w, y = 10 * resize_ratio_h, w = 310 * resize_ratio_w, h = 50 * resize_ratio_h, markup = "No comparison image for this test.", color = "FFFFFF", font = "Verdana 30px", use_markup = true}
+
+	return t1
 end
 
 

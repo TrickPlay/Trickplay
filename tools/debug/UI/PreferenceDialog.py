@@ -1,9 +1,8 @@
-
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'Preference.ui'
 #
-# Created: Fri Mar  9 15:59:41 2012
+# Created: Tue Apr 17 11:46:00 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,11 +18,14 @@ class Ui_preferenceDialog(object):
     def setupUi(self, preferenceDialog):
         preferenceDialog.setObjectName(_fromUtf8("preferenceDialog"))
         preferenceDialog.resize(500, 233)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(preferenceDialog.sizePolicy().hasHeightForWidth())
         preferenceDialog.setSizePolicy(sizePolicy)
+        preferenceDialog.setMaximumSize(QtCore.QSize(500, 233))
+        preferenceDialog.setSizeGripEnabled(False)
+        preferenceDialog.setModal(False)
         self.tabWidget = QtGui.QTabWidget(preferenceDialog)
         self.tabWidget.setGeometry(QtCore.QRect(4, 6, 491, 223))
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)

@@ -1,7 +1,0 @@
-app=
-{	id = "com.trickplay.3dAssetsApp",
-	release = "1",
-	version = "1.0",
-	name = "3D Assets App",
-	copyright = "Trickplay Inc."
-}
