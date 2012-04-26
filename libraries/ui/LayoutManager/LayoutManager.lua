@@ -1,6 +1,8 @@
 
 LAYOUTMANAGER = true
 
+local default_parameters = {horizontal_spacing = 20, vertical_spacing = 20}--, number_of_rows=3,number_of_cols=3}
+
 LayoutManager = function(parameters)
     
 	-- input is either nil or a table
@@ -14,13 +16,16 @@ LayoutManager = function(parameters)
 	--The LayoutManager Object inherits from Widget
 	
 	local instance = Widget( parameters )
-	
-    local cells_interface = {}
-    local cells_data      = {}
     
-    local cell_w, cell_h, horizontal_spacing, vertical_spacing,number_of_rows,number_of_cols
-    
-    local cols_metatable, rows_metatable
+    local placeholder = Rectangle{w=200,h=200,color="ff0000"}
+    instance:add(placeholder)
+    placeholder:hide()
+	local cells
+    local cell_w, cell_h
+    local horizontal_spacing = 0
+    local vertical_spacing   = 0
+    local number_of_rows = parameters.number_of_rows
+    local number_of_cols = parameters.number_of_cols
     
     ----------------------------------------------------------------------------
     
@@ -28,6 +33,7 @@ LayoutManager = function(parameters)
     local row_heights = {}
     
     local widths_of_cols = function(cell,r,c)
+        
         if cell.w  > (col_widths[c] or 0) then 
             col_widths[c] = cell.w 
         end
@@ -38,14 +44,36 @@ LayoutManager = function(parameters)
         end
     end
     local position_cell = function(cell,r,c)
-        cell.x = c == 1 and 0 or (cells[r][c-1].x + col_widths[c-1]  + horizontal_spacing)
-        cell.y = r == 1 and 0 or (cells[r-1][c].y + row_heights[r-1] +   vertical_spacing)
+        
+        --if not cells[r][c-1] then
+            cell.x = 0
+            for i = 1, c-1 do
+                cell.x = cell.x + (cell_w or col_widths[i]) + horizontal_spacing
+            end
+        --else
+        --    cell.x = cells[r][c-1].x + col_widths[c-1]  + horizontal_spacing
+        --end
+        --if not cells[r-1] or not cells[r-1][c] then
+            cell.y = 0
+            for i = 1, r-1 do
+                cell.y = cell.y + (cell_h or row_heights[i]) + vertical_spacing
+            end
+        --else
+        --    cell.y = cells[r-1][c].y + row_heights[r-1] +   vertical_spacing
+        --end
+        ---[[
+        cell.anchor_point = {cell.w/2,cell.h/2}--cell.center
+        cell:move_by(
+            (cell_w or col_widths[c])/2,
+            (cell_h or row_heights[r])/2
+        )
+        --]]
     end
     
     local for_each_cell = function(f)
-        for r = 1, number_of_rows do
-            for c = 1, number_of_cols do
-                if cells[r][c] then f(cells[r][c],r,c) end
+        for r,row in instance.cells.pairs() do
+            for c,cell in row.pairs() do
+                if cell then f(cell,r,c) end
             end
         end
     end
@@ -58,14 +86,18 @@ LayoutManager = function(parameters)
             
             if number_of_rows > v then
                 
-                for i = number_of_rows, v+1,-1 do
-                    instance.cells.remove(i)
+                for i = number_of_rows,v+1,-1 do
+                --while number_of_rows < v do
+                    
+                    instance.cells.remove(i)--number_of_rows)
                 end
                 
             elseif number_of_rows < v then
                 
-                for i = number_of_rows+1, v do
-                    instance.cells.insert(i)
+                for i = number_of_rows+1,v do
+                --while number_of_rows < v do
+                    
+                    instance.cells.insert(i)--number_of_rows+1)
                 end
                 
             end
@@ -74,27 +106,180 @@ LayoutManager = function(parameters)
 	)
 	override_property(instance,"number_of_cols",
 		function(oldf) return   number_of_cols     end,
-		function(oldf,self,v)   number_of_cols = v end
+		function(oldf,self,v)   
+            
+            if number_of_cols > v then
+                
+                while number_of_cols < v do
+                    
+                    instance.cells[1].remove(i)
+                end
+                
+            elseif number_of_cols < v then
+                
+                while number_of_cols < v do
+                    
+                    instance.cells[1].insert(i+1)
+                end
+                
+            end
+            
+        end
 	)
 	override_property(instance,"cell_w",
 		function(oldf) return   cell_w     end,
-		function(oldf,self,v)   cell_w = v end
+		function(oldf,self,v)   
+            cell_w = v 
+            for_each_cell(function(cell) cell.w = cell_w end)
+            col_widths  = {}
+            for_each_cell(widths_of_cols)
+            for_each_cell(position_cell)
+        end
 	)
 	override_property(instance,"cell_h",
 		function(oldf) return   cell_h     end,
-		function(oldf,self,v)   cell_h = v end
+		function(oldf,self,v)   
+            cell_h = v 
+            for_each_cell(function(cell) cell.h = cell_h end)
+            row_heights = {}
+            for_each_cell(heights_of_rows)
+            for_each_cell(position_cell)
+        end
 	)
 	override_property(instance,"horizontal_spacing",
 		function(oldf) return   horizontal_spacing     end,
-		function(oldf,self,v)   horizontal_spacing = v end
+		function(oldf,self,v)   
+            horizontal_spacing = v 
+            for_each_cell(position_cell)
+        end
 	)
 	override_property(instance,"vertical_spacing",
 		function(oldf) return   vertical_spacing     end,
-		function(oldf,self,v)   vertical_spacing = v end
+		function(oldf,self,v)   
+            vertical_spacing = v 
+            for_each_cell(position_cell)
+        end
 	)
     
     ----------------------------------------------------------------------------
+    cells = GridManager{  data = {},
+        
+        node_initializer=function(obj,r,c)
+            --[[
+            if cell_w then  obj.w = cell_w
+            
+            else  widths_of_cols(obj,r,c) end
+            
+            if cell_h then  obj.h = cell_h
+            
+            else  heights_of_rows(obj,r,c) end
+            --]]
+            col_widths  = {}
+            row_heights = {}
+            for_each_cell(widths_of_cols)
+            for_each_cell(heights_of_rows)
+            
+            --print(instance.cells.pairs(r))
+                for rr,row in instance.cells.pairs(r) do--rr = r, instance.number_of_rows do
+                    
+                    for cc,cell in row.pairs(c) do--= c, instance.number_of_cols do
+                        
+                        if cell then position_cell(cell,rr,cc) end
+                    end
+                end
+            
+        end,
+        node_constructor=function(obj,r,c)
+            
+            if obj == nil then  obj = Clone{source=placeholder}
+            
+            elseif type(obj) ~= "userdata" and obj.__types__.actor then 
+                
+                error("Must be a UIElement or nil. Received "..obj,2) 
+            
+            elseif obj.parent then  obj:unparent()  end
+            
+            instance:add(obj)
+            
+            return obj
+        end,
+        
+        node_destructor=function(obj) obj:unparent() end,
+        
+        on_size_change = function(r,c)
+            
+            number_of_rows = r
+            number_of_cols = c
+            col_widths  = {}
+            row_heights = {}
+            for_each_cell(widths_of_cols)
+            for_each_cell(heights_of_rows)
+            for_each_cell(position_cell)
+        end
+    }
+	override_property(instance,"cells",
+		function(oldf) return   cells     end,
+		function(oldf,self,v)  
+            
+            local num_cols = 0
+            
+            number_of_rows = number_of_rows or #v
+            
+            for r = 1,number_of_rows do
+                if not v[r] then 
+                    v[r] = {} 
+                elseif num_cols < #v[r] then  
+                    num_cols = #v[r]
+                end
+            end  
+            
+            number_of_cols = number_of_cols or num_cols
+            local data = {}
+            for r = 1,number_of_rows do
+                data[r] = {}
+                for c = 1,number_of_cols do
+                    
+                    data[r][c] = v[r][c] or
+                        Clone{source=placeholder}
+                        
+                end
+            end
+            
+            cells.data = data
+        end
+	)
     
+    
+    local function set_and_nil(t,k)
+        
+        if t[k] == nil then return end
+        instance[k] = t[k]
+        t[k]        = nil
+        
+    end
+    
+	override_function(instance,"set", function(old_function, obj, t )
+		--need to force the setting of number_of_cols/rows before cells
+        set_and_nil(t,"number_of_cols")
+        set_and_nil(t,"number_of_rows")
+        
+        set_and_nil(t,"cells")
+        
+		old_function(obj, t)
+		
+	end)
+    
+    ----------------------------------------------------------------------------
+    
+	instance:set(parameters)
+	
+	return instance
+    
+end
+
+
+    ----------------------------------------------------------------------------
+    --[[
     rows_metatable = {
         insert = function(r,new_row)
             
@@ -163,9 +348,9 @@ LayoutManager = function(parameters)
             
         end
     }
-    
+    --]]
     ----------------------------------------------------------------------------
-    
+    --[[
     cols_metatable = {
         insert = function(c,new_col)
             
@@ -233,37 +418,8 @@ LayoutManager = function(parameters)
             instance:add(obj)
         end
     }
-    
-	----------------------------------------------------------------------------
-	
-    local function update_grid()
-        if resize_cells then
-            resize_cells = false
-            if cell_w then
-                for_each_cell(function(cell) cell.w = cell_w end)
-            else
-                for_each_cell(widths_of_cols)
-            end
-            if cell_h then
-                for_each_cell(function(cell) cell.h = cell_h end)
-            else
-                for_each_cell(heights_of_rows)
-            end
-            reposition_cells = true
-        end
-        if reposition_cells then
-            reposition_cells = false
-            for_each_cell(position_cell)
-        end
-    end
-    
-	instance:subscribe_to( nil, update_grid )
-    ----------------------------------------------------------------------------
-    
-	override_property(instance,"cells",
-		function(oldf) return   cells     end,
-		function(oldf,self,v)   
-            
+    --]]
+            --[[
             if type(v) ~= "table" then 
                 error("LayoutManager.cells expected table",2) 
             end
@@ -292,16 +448,12 @@ LayoutManager = function(parameters)
             end
             
             setmetatable(cells,rows_metatable)
-            
-        end
-	)
-    ----------------------------------------------------------------------------
-    
-	instance:set(parameters)
-	
-	return instance
-    
-end
+            --]]
+
+
+
+
+
 --[[
 Function: Layout Manager
 
