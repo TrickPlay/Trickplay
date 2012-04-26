@@ -3,7 +3,7 @@ Title: AnimationState Sample Application
 
 The AnimationState example program demonstrates a typical use of the TrickPlay SDK library's <AnimationState> class.
 
-The complete sample application, including source code and graphic assets, can be <downloaded here at http://www.trickplay.com/tutorials/animationState.zip>.
+The complete sample application, including source code and graphic assets, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
 
 (see AnimationStateDemo.png)
 

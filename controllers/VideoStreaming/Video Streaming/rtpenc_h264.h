@@ -8,6 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct rtp;
 
 /*!
@@ -27,3 +31,6 @@ struct rtp;
  */
 int send_nal(struct rtp *session, int64_t rtp_ts, uint8_t pt, const uint8_t *buff, int size, struct timeval *timeout);
 
+#ifdef __cplusplus
+}
+#endif

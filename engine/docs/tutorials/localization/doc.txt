@@ -3,6 +3,8 @@ Title: Localization Sample Application
 
 The Localization program demonstrates various techniques a TrickPlay application can use to support multiple languages and countries. With these techniques, resources specific to a particular locale, including language-specific images, text, and even executable code, can be used.
 
+The complete sample application, including source code and resource files, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
+
 (see localizationDemo.png)
 
 

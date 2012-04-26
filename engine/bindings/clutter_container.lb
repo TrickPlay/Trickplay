@@ -147,10 +147,19 @@ interface container [[ClutterActor*]]
                 if ( ! lua_isnil( L , i ) )
                 {
                     ClutterActor * source=ClutterUtil::user_data_to_actor(L,i);
+
                     if ( ClutterUtil::is_qualified_child( self, source ) )
                     {                   
                         clutter_container_add_actor( CLUTTER_CONTAINER( self ),source );
                     }
+                    else
+                    {
+                        g_warning( "ATTEMPT TO ADD INVALID UI ELEMENT TO CONTAINER" );
+                    }
+                }
+                else
+                {
+                    g_warning( "ATTEMPT TO ADD NIL TO CONTAINER" );
                 }
             }
         ]];

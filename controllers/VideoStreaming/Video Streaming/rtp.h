@@ -37,6 +37,10 @@
  * SUCH DAMAGE.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef __RTP_H__
 #define __RTP_H__
 
@@ -276,3 +280,7 @@ int			rtp_get_ttl(struct rtp *session);
 void		*rtp_get_userdata(struct rtp *session);
 
 #endif /* __RTP_H__ */
+    
+#ifdef __cplusplus
+}
+#endif

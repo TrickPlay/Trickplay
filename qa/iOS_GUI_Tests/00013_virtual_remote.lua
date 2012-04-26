@@ -7,7 +7,7 @@ test_area = "virtual_remote"
 test_api = "hide/show_virtual_remote"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 	
 	local r1 = factory:Rectangle{color = "0070E0", x = 0, y =  0, size = { 40 , 40 }}	
 	controller.screen:add(r1)
@@ -33,3 +33,10 @@ function generate_test_image (controller, factory)
 
 end
 
+
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local t1 = Text{x = 10 * resize_ratio_w, y = 10 * resize_ratio_h, w = 310 * resize_ratio_w, h = 50 * resize_ratio_h, markup = "A remote control should display.", color = "FFFFFF", font = "Verdana 30px", use_markup = true}
+
+	return t1
+end

@@ -1030,6 +1030,41 @@ void App::run( const StringSet & allowed_names , RunCallback run_callback )
     ::Action::post( new RunAction( this , allowed_names , run_callback , splash ) );
 }
 
+//-----------------------------------------------------------------------------
+
+int App::global_tracker( lua_State * L )
+{
+	lua_pushvalue( L , 2 );
+	lua_pushvalue( L , 3 );
+	lua_rawset( L , 1 );
+
+	if ( lua_type( L , 2 ) == LUA_TSTRING )
+	{
+		if ( App * app = App::get( L ) )
+		{
+			String where;
+
+			lua_Debug ar;
+
+			if ( lua_getstack( L , 1 , & ar ) )
+			{
+				if ( lua_getinfo( L , "Sl" , & ar ) )
+				{
+					if ( ar.source )
+					{
+						where = Util::format( "%s:%d" , ar.source , ar.currentline );
+					}
+				}
+			}
+
+			app->globals[ String( lua_tostring( L , 2 ) ) ] = where;
+		}
+	}
+
+	return 0;
+}
+
+//-----------------------------------------------------------------------------
 
 void App::run_part2( const StringSet & allowed_names , RunCallback run_callback )
 {
@@ -1142,6 +1177,18 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     if ( context->get_bool( TP_START_DEBUGGER , false ) || launch.debug )
     {
     	debugger.break_next_line();
+    }
+
+    //.........................................................................
+    // Install a __newindex metamethod on the globals table that stores
+    // information about global values added by the user.
+
+    if ( lua_getmetatable( L , LUA_GLOBALSINDEX ) )
+    {
+    	lua_pushliteral( L , "__newindex" );
+    	lua_pushcfunction( L , global_tracker );
+    	lua_rawset( L , -3 );
+    	lua_pop( L , 1 );
     }
 
 #endif
