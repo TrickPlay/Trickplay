@@ -52,11 +52,15 @@ public class MatchRequest implements PacketExtension {
 		Element gameElement = DocumentHelper.createElement(QName.get(name,
 				NAMESPACE));
 		gameElement.addAttribute("gameId", gameId);
-		Element itemElement = gameElement.addElement("item");
+	//	Element itemElement = gameElement.addElement("item");
 		if (role != null && !role.isEmpty()) {
-			itemElement.addAttribute("role", role);
+			gameElement.addElement("role").setText(role);
+		} else {
+			gameElement.addElement("freerole");
 		}
-		itemElement.addAttribute("nick", nick);
+		if (nick != null && !nick.isEmpty()) {
+			gameElement.addElement("nick").setText(nick);
+		}
 
 		return gameElement;
 	}

@@ -23,9 +23,12 @@ package org.frogx.service.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.dom4j.DocumentHelper;
@@ -97,6 +100,7 @@ public class DefaultMUGSession implements MUGSession {
 	 * several occupants.
 	 */
 	protected Map<String, MUGOccupant> occupants = new ConcurrentHashMap<String, MUGOccupant>();
+	protected Set<AppID> openApps = Collections.synchronizedSet(new HashSet<AppID>());
 
 	/**
 	 * Time of last packet sent.
@@ -464,16 +468,34 @@ public class DefaultMUGSession implements MUGSession {
 				
 		public void execute() throws ComponentException {
 			Element childElement = getChildElement();
-			String gameNS = childElement.attributeValue("gameId");
-			if (gameNS == null) {
+			String gameId = childElement.attributeValue("gameId");
+			if (gameId == null) {
 				throw new NotFoundException();
 			}
-			Element itemElement = null;
-			 if (null != (itemElement = childElement.element("item"))) {
-				String role = itemElement.attributeValue("role");
-				String nick = itemElement.attributeValue("nick");
-
-				MUGRoom room = assignRoom(gameNS, nick, jid, role);
+			AppID appID = CommonUtils.extractAppID(gameId);
+			if (!openApps.contains(appID)) {
+				throw new NotFoundException();
+			}
+			boolean freerole = childElement.element("freerole") != null;
+			boolean newmatch = childElement.element("newmatch") != null;
+			String nick= childElement.elementText("nick");
+			String role = childElement.elementText("role");
+			
+			boolean acquire_role = freerole || (role!=null && !role.isEmpty());
+			if (!acquire_role && !newmatch) {
+				// invalid request
+				throw new IllegalArgumentException("neither role related nor newmatch attribute set");
+			}
+			if (newmatch) {
+				MUGRoom room = component.createGameRoom(gameId, jid);
+				if (reserveRole(room, nick, jid, role)) {
+					reply.setFrom(room.getJID());
+					mugManager.sendPacket(component, reply);
+				} else {
+					throw new NotFoundException();
+				}
+			} else {
+				MUGRoom room = assignRoom(gameId, nick, jid, role);
 				if (room != null) {
 					reply.setFrom(room.getJID());
 					mugManager.sendPacket(component, reply);
@@ -772,18 +794,24 @@ public class DefaultMUGSession implements MUGSession {
 						&& !MUGMatch.Status.completed.equals(room.getMatch()
 								.getStatus()) && !room.isOccupant(jid)
 						&& room.getMatch().getFreeRoles().size() > 0) {
-					if (requestedRole == null || requestedRole.isEmpty()) {
-						String freeRole = room.getMatch().holdFreeRole(jid);
-						if (freeRole != null)
-							return room;
-					} else {
-						if (room.getMatch().holdRole(requestedRole, jid))
-							return room;
-					}
+					if (reserveRole(room, nick, jid, requestedRole)) {
+						return room;
+					}						
 				}
 			}
 		}
 		return null;
+	}
+	
+	private boolean reserveRole(MUGRoom room, String nick, JID jid, String requestedRole) throws ComponentException {
+		synchronized(room) {
+			if (requestedRole == null || requestedRole.isEmpty()) {
+				String freeRole = room.getMatch().holdFreeRole(jid);
+				return freeRole != null;
+			} else {
+				return room.getMatch().holdRole(requestedRole, jid);
+			}
+		}
 	}
 
 	private interface PresenceRequestHandler {
@@ -813,10 +841,13 @@ public class DefaultMUGSession implements MUGSession {
 				// close all open apps
 				List<MUGRoom> rooms = component.getGameRooms(request.getFrom());
 				doClose(rooms);
+				openApps.clear();
+				occupants.clear();
 			} else {
 				AppID appID = CommonUtils.extractAppID(appns);
 				List<MUGRoom> rooms = component.getGameRooms(appID, jid);
 				doClose(rooms);
+				openApps.remove(appID);
 			}
 		}
 
@@ -846,12 +877,19 @@ public class DefaultMUGSession implements MUGSession {
 			Element childElement = getChildElement();
 			String appns = childElement != null ? childElement.attributeValue("appId") : null;
 			if (appns == null || appns.isEmpty()) {
-				// close all open apps
+				// id appId is not specified ignore the request ??
 				return;
 			} else {
 				AppID appID = CommonUtils.extractAppID(appns);
+				
+				// if app is already open just return silently
+				if (openApps.contains(appID)) {
+					return;
+				}
+					
 				List<MUGRoom> rooms = component.getGameRooms(appID, jid);
 				doOpen(rooms);
+				openApps.add(appID);
 			}
 		}
 
@@ -903,6 +941,12 @@ public class DefaultMUGSession implements MUGSession {
 		MUGRoom room = component.getGameRoom(roomName);
 		if (room == null) {
 			throw new NotFoundException();
+		}
+		
+		// ensure that user has the room's app open.
+		AppID appID = room.getGame().getGameID().getAppID();
+		if (!openApps.contains(appID)) {
+			throw new NotAllowedException("attempt to join room:"+room.getName()+". please join the room's app first");
 		}
 
 		synchronized (room) {

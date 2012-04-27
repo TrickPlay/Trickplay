@@ -497,6 +497,7 @@ public class GameServiceProxy {
 	public String openApp(final String appId) throws XMPPException {
 		Presence openAppPresence = new Presence(Type.available);
 		openAppPresence.addExtension(new OpenApp(appId));
+		openAppPresence.setTo(MUGServiceId);
 
 		connection.sendPacket(openAppPresence);
 		return openAppPresence.getPacketID();
@@ -505,7 +506,7 @@ public class GameServiceProxy {
 	public String closeApp(final String appId) throws XMPPException {
 		Presence closeAppPresence = new Presence(Type.unavailable);
 		closeAppPresence.addExtension(new OpenApp(appId));
-
+		closeAppPresence.setTo(MUGServiceId);
 		connection.sendPacket(closeAppPresence);
 		return closeAppPresence.getPacketID();
 	}
