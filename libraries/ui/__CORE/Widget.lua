@@ -1,9 +1,9 @@
 WIDGET = true
 
 local uielement_properties = {
-	"x","y","z","w","h","anchor_point","name","gid",
+	"position","size","anchor_point","name","gid",
 	"x_rotation","y_rotation","z_rotation","scale",
-	"opacity","clip",""
+	"opacity","clip","is_visible"
 }
 
 
