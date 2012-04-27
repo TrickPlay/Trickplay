@@ -150,9 +150,7 @@ class EditorTabWidget(QTabWidget):
 
         #change mainwindow title with selected file, location 
         if newPath is not None :
-
-            self.main.main.setWindowTitle(QApplication.translate("MainWindow", str(os.path.basename(str(newPath)))+" ["+str(self.main.main.path)+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
-
+            self.main.main.setWindowTitle(QApplication.translate("MainWindow", str(os.path.basename(str(newPath)))+" ["+str(os.path.dirname(newPath))+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
         else :
             self.main.main.setWindowTitle(QApplication.translate("MainWindow", str(os.path.basename(str(self.paths[index])))+" ["+str(os.path.dirname(str(self.paths[index])))+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
             
