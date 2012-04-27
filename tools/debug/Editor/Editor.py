@@ -385,9 +385,7 @@ class Editor(QsciScintilla):
 		            self.save()
 		        else:
 		            ret = self.editorManager.saveas()
-		        return False
-		    elif ret == QMessageBox.Cancel:
-		        return True
+		    return True
 
     def on_margin_clicked(self, nmargin, nline, modifiers):
 		bp_num = 0

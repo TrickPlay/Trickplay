@@ -113,8 +113,8 @@ class EditorTabWidget(QTabWidget):
 
 					elif ret == QMessageBox.Cancel:
 						return 
-					elif editor.tempfile == True:
-						editor.delete_marker()
+			if editor.tempfile == True:
+			    editor.delete_marker()
 
 		#close current index tab
 
