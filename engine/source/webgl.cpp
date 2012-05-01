@@ -247,8 +247,16 @@ Context::Context( ClutterActor * actor )
 	context_op( SWITCH_TO_CLUTTER_CONTEXT );
 
 	// Get the Clutter GL texture id and target
+	
+#ifdef CLUTTER_VERSION_1_10
 
-	CoglHandle th = clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) );
+    CoglTexture * th = COGL_TEXTURE( clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) ) );
+    
+#else 
+
+    CoglHandle th = clutter_texture_get_cogl_texture( CLUTTER_TEXTURE( actor ) );
+    
+#endif        
 
 	if ( ! cogl_texture_get_gl_texture( th , & texture , & texture_target ) )
 	{

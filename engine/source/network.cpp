@@ -1029,7 +1029,7 @@ public:
             {
                 // Wait for a new request
 
-                G_ASYNC_QUEUE_TIMEOUT_POP(queue, pop_wait, Event *, event);
+                event = ( Event *) Util::g_async_queue_timeout_pop( queue , pop_wait );
             }
             else
             {
