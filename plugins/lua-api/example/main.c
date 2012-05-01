@@ -40,13 +40,12 @@ static int foo( lua_State * L )
 /******************************************************************************
  * Open
  * Called whenever a new app is executed.
- * On the top of the stack is the app's id (string).
  */
 
 int
-tp_lua_api_open( lua_State * L , void * user_data )
+tp_lua_api_open( lua_State * L , const char * app_id , void * user_data )
 {
-	printf( "THIS PLUGIN IS BEING OPENED FOR APP '%s'\n" , lua_tostring( L , -1 ) );
+	printf( "THIS PLUGIN IS BEING OPENED FOR APP '%s'\n" , app_id );
 
 	/* Add a global function called 'foo' */
 
@@ -59,13 +58,12 @@ tp_lua_api_open( lua_State * L , void * user_data )
 /******************************************************************************
  * Close
  * Called when an app is shutting down.
- * On the top of the stack is the app's id (string).
  */
 
 void
-tp_lua_api_close( lua_State * L , void * user_data )
+tp_lua_api_close( lua_State * L , const char * app_id , void * user_data )
 {
-	printf( "THIS PLUGIN IS BEING CLOSED FOR APP '%s'\n" , lua_tostring( L , -1 ) );
+	printf( "THIS PLUGIN IS BEING CLOSED FOR APP '%s'\n" , app_id );
 }
 
 /******************************************************************************
