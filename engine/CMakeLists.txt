@@ -288,7 +288,14 @@ if ( TP_WITH_WEBGL )
             ${ENGINE_SRC}/source/typed_array.cpp
             ${ENGINE_SRC}/source/webgl.cpp)
     endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
+    
+	if (NOT TP_CLUTTER_BACKEND_EGL)
+	
+    	list( APPEND ENGINE_LIBRARY_NAMES GL )
+    	
+	endif (NOT TP_CLUTTER_BACKEND_EGL)
+    	
+    
 endif ( TP_WITH_WEBGL )
 
 
