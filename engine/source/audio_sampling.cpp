@@ -778,8 +778,7 @@ void TPAudioSampler::Thread::process()
     {
         // Pop an event from the queue, waiting if necessary up to 10 seconds
 
-        Event * event;
-        G_ASYNC_QUEUE_TIMEOUT_POP( queue , 10 * G_USEC_PER_SEC, Event *, event);
+        Event * event = ( Event * ) Util::g_async_queue_timeout_pop( queue , 10 * G_USEC_PER_SEC );
 
         // Nothing in the queue, carry on
 

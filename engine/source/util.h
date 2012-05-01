@@ -320,6 +320,8 @@ namespace Util
 
     String random_string( guint length );
 
+    gpointer g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout );
+
     //-----------------------------------------------------------------------------
 
     class GMutexLock
