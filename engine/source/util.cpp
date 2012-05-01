@@ -162,7 +162,7 @@ bool Action::run_one( GAsyncQueue * queue , gulong wait_ms )
     }
     else
     {
-        G_ASYNC_QUEUE_TIMEOUT_POP(queue, wait_ms*1000, Action *, action);
+        action = ( Action * ) Util::g_async_queue_timeout_pop( queue , wait_ms * 1000 );
     }
 
     g_async_queue_unref( queue );
@@ -355,4 +355,16 @@ String Util::describe_lua_value( lua_State * L , int index )
 			return UserData::describe( L , index );
 	}
 
+}
+
+gpointer Util::g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout )
+{
+#if GLIB_CHECK_VERSION(2,32,0)
+	return ::g_async_queue_timeout_pop( queue , timeout );
+#else
+	GTimeVal tv;
+	g_get_current_time( & tv );
+	g_time_val_add( & tv , timeout );
+	return g_async_queue_timed_pop( queue , & tv );
+#endif
 }
