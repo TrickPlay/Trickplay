@@ -162,12 +162,7 @@ bool Action::run_one( GAsyncQueue * queue , gulong wait_ms )
     }
     else
     {
-        GTimeVal t;
-
-        g_get_current_time( & t );
-        g_time_val_add( & t , wait_ms * 1000 );
-
-        action = ( Action * ) g_async_queue_timed_pop( queue , & t );
+        G_ASYNC_QUEUE_TIMEOUT_POP(queue, wait_ms*1000, Action *, action);
     }
 
     g_async_queue_unref( queue );
