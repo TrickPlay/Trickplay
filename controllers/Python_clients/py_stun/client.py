@@ -9,6 +9,10 @@ magic_cookie = 0x2112A442
 # uses Mersenne Twister, not cryptographically secure
 transaction_id = random.getrandbits(96)
 
+print "request message type", hex(message_type)
+print "request message length", hex(message_length)
+print "request magic cookie", hex(magic_cookie)
+print "request transaction id", hex(transaction_id)
 
 stun_request = bytearray(20)
 
@@ -39,7 +43,7 @@ data = 0
 # read stun response
 if readable.count(udp_stun_socket):
     data, addr = udp_stun_socket.recvfrom(1024)
-    print "Received stun response from", addr, ":\nwith data:\n", data
+    print "Received stun response from", addr, "with data length:", len(data)
 
 
 def make_value(start, size):
@@ -57,10 +61,9 @@ resp_id = make_value(8, 12)
 
 # grab the STUN attributes
 attributes = []
-i = 0
-while i < resp_length:
+pos = 20
+while pos < resp_length + 20:
     attribute = {}
-    pos = 20+i
     typ = make_value(pos, 2)
     length = make_value(pos+2, 2)
     attribute['type'] = typ
@@ -71,7 +74,14 @@ while i < resp_length:
     padding = 4 - length % 4
     if padding == 4:
         padding = 0
-    i += 4 + length + padding
+    pos += 4 + length + padding
+
+print "response message type", hex(resp_message)
+print "response message length", hex(resp_length)
+print "response cookie", hex(resp_cookie)
+print "response transaction id", hex(resp_id)
 
 for attribute in attributes:
     print "attribute: ", attribute
+
+
