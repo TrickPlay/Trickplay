@@ -9,11 +9,6 @@
 #include <memory>
 //-----------------------------------------------------------------------------
 #include "glib.h"
-#if (GLIB_MAJOR_VERSION == 2) && (GLIB_MINOR_VERSION < 32)
-#define G_ASYNC_QUEUE_TIMEOUT_POP(queue,timeout,type,event) do { GTimeVal tv; g_get_current_time( &tv ); g_time_val_add( &tv, timeout ); event = (type) g_async_queue_timed_pop( queue, &tv ); } while(0)
-#else
-#define G_ASYNC_QUEUE_TIMEOUT_POP(queue,timeout,type,event) event = (type)g_async_queue_timeout_pop(queue,timeout)
-#endif
 //-----------------------------------------------------------------------------
 #include "json-glib/json-glib.h"
 #include "clutter/clutter.h"
