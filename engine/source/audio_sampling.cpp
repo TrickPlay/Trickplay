@@ -766,8 +766,6 @@ void TPAudioSampler::Thread::process()
 
     bool done = false;
 
-    GTimeVal t;
-
     BufferList buffers;
 
     gdouble buffered_seconds = 0;
@@ -778,14 +776,10 @@ void TPAudioSampler::Thread::process()
 
     while( ! done )
     {
-        // Create a time val for 10 seconds from now
+        // Pop an event from the queue, waiting if necessary up to 10 seconds
 
-        g_get_current_time( & t );
-        g_time_val_add( & t , 10 * G_USEC_PER_SEC );
-
-        // Pop an event from the queue, waiting if necessary
-
-        Event * event = ( Event * ) g_async_queue_timed_pop( queue , & t );
+        Event * event;
+        G_ASYNC_QUEUE_TIMEOUT_POP( queue , 10 * G_USEC_PER_SEC, Event *, event);
 
         // Nothing in the queue, carry on
 
