@@ -1,0 +1,216 @@
+
+Title: Extending the TrickPlay SDK
+
+
+The TrickPlay Engine supports plug-ins that add new functions that can be called from a TrickPlay Lua application. Engine plug-ins are implemented as Linux shared libraries. This section describes how to create a plug-in using the C programming language. An example plug-in is provided that accepts three double values (X, Y, and Z) and returns a <Perlin Noise at http://en.wikipedia.org/wiki/Perlin_noise> value. Note: This section will not describe the details of the Perlin Noise algoritm, but instead will focus on the elements necessary to implement any TrickPlay plug-in.
+
+
+
+Group: Plug-in Required Conventions
+
+An extension plug-in must be stored in the "plugins" directory of the TrickPlay workspace. In the test application provided to exercise the example plug-in, the plug-in shared library file is stored in the "plugins" subdirectory of the application's bundle.
+
+Each plug-in must also conform to the naming format shown below.
+
+tp_lua_api-Name.so - where Name is the unique plug-in name. For example, the sample plug-in implements a Perlin noise algorithm and is called tp_lua_api-noise.so. Notice that the "tp_lua_api" prefix uses underscore characters, while the unique name suffix is preceded by a dash.
+
+In addition to these conventions, each plug-in library must define the four functions listed below. Each of these functions is described in the following sections.
+
+	(code)
+	tp_plugin_initialize()
+	tp_plugin_shutdown()
+	
+	tp_lua_api_open()
+	tp_lua_api_close()
+	(end)
+
+
+
+Group: Plug-in Initialization and Shutdown
+
+All plug-ins are loaded by the TrickPlay Engine during its initialization process.
+
+When a plug-in is first loaded, its function called tp_plugin_initialize() is called. Each plug-in must define this function, even if it does nothing. The prototype is shown below.
+
+	(code)
+	void
+	tp_plugin_initialize( TPPluginInfo * info, const char * config )
+	(end)
+	
+The TPPluginInfo structure is defined below.
+
+	(code)
+	struct
+	TPPluginInfo {
+		char	name[ 64 ];
+		char	version[ 64 ];
+		char	reserved[ 256 ];
+		int		resident;
+		void *	user_data;
+	}
+	(end)
+
+The structure passed into tp_plugin_initialize() has all its fields filled with zeros. The function may optionally set any of the fields it desires. Each field is described below.
+
+	name - null-terminated string specifying the plug-in's name. This string is used only when displaying plug-in information messages to the Engine Console.
+	version -  null-terminated string specifying the plug-in's version. This string is used only when displaying plug-in information messages to the Engine Console.
+	reserved - reserved for future use. Do not set this field.
+	resident - integer value specifying whether the plug-in should be unloaded from memory by the TrickPlay Engine when the Engine terminates or it should remain resident and the plug-in will unload itself. By default, this field is 0 which indicates that the Engine should unload the plug-in. To have the plug-in be responsible for unloading itself, set the resident field to any non-zero value.
+	user_data - pointer to a memory area allocated by the plug-in. This memory may contain any data the plug-in desires. The pointer is passed as an argument to each of the other required plug-in functions. The plug-in is responsible for freeing the memory, typically in the tp_plugin_shutdown() function.
+	
+The config argument is a pointer to a null-terminated string that contains the contents of a configuration file that may accompany the plug-in. The configuration file is optional. If it exists, it must have the same filename as the plug-in, but the .so extension should be replaced with .config, as in tp_lua_api-Name.config. The actual contents of the configuration file may be in any length and format; the file's contents are simply read and passed without modification to the tp_plugin_initialize() function.
+
+The tp_plugin_initialize() function below is from the sample Perlin Noise plug-in. It simply initializes some of the TPPluginInfo fields, and then calls a function to initialize the Perlin Noise data structures.
+
+	(code)
+	/******************************************************************************
+	 * Initialize
+	 * Called by TrickPlay the first time this plug-in is loaded.
+	 */
+
+	void
+	tp_plugin_initialize( TPPluginInfo * info, const char * config ){
+
+		/* Set some of the fields in the TPPluginInfo struct */
+	    strncpy( info->name, "TrickPlay OEM Plug-in Example", sizeof( info->name ) - 1 );
+	    strncpy( info->version, "1.0", sizeof( info->version ) - 1 );
+
+	    /* Initialize the noise data structures */
+	    init_noise();
+	}
+	(end)
+
+All plug-ins are notified when the TrickPlay Engine is shutting down by having their tp_plugin_shutdown() function called. The plug-in should perform any clean-up operations necessary prior to its termination. Each plug-in must define the tp_plugin_shutdown() function, even if it does nothing. The prototype is shown below.
+
+	(code)
+	void
+	tp_plugin_shutdown( void * user_data )
+	(end)
+
+The user_data argument is a pointer to the user_data field contained in the TPPluginInfo structure that was passed into the tp_plugin_initialize() function when the plug-in was first loaded. If the plug-in allocated any memory or loaded any resources during the initialization phase, they can be freed in tp_plugin_shutdown().
+
+The tp_plugin_shutdown() function from the Perlin Noise plug-in is shown below. Even though the function is empty and does nothing, it must still be defined.
+
+	(code)
+	/******************************************************************************
+	 * Shutdown
+	 * Called by TrickPlay before this plug-in is unloaded.
+	 */
+
+	void
+	tp_plugin_shutdown( void * user_data ){
+
+	    /* Nothing to do, but we could free resources associated with user data. */
+	}
+	(end)
+
+
+
+Group: Application Startup and Termination
+
+Each plug-in is notified when a new TrickPlay application is started by calling the plug-in's tp_lua_api_open() function. A plug-in must define this function, even if it does nothing. The prototype is shown below.
+
+	(code)
+	int
+	tp_lua_api_open( lua_State * L, void * user_data )
+	(end)
+
+The L argument is a pointer to the Lua module's internal state structure. For information about the lua_State structure, refer to the <Lua documentation at http://www.lua.org/docs.html>.
+
+The user_data argument is a pointer to the user_data field contained in the TPPluginInfo structure that was passed into the tp_plugin_initialize() function.
+
+In addition to the function's two arguments, the starting application's ID string is available on the top of the Lua stack. The application's ID string is specified in the app metadata file's id property. Refer to <The app Metadata File> section in the TrickPlay Programmer's Guide for further information about the id property.
+
+The tp_lua_api_open() function returns a SUCCESS/ERROR value: 0 for success, and non-zero to indicate an error condition. Note: Returning a non-zero value will cause the TrickPlay Console to output an informational message, but will not effect the running of the Lua application in any other way.
+
+The code statements listed below show a portion of the tp_lua_api_open() function used by the sample Perlin Noise plug-in. The code accesses the starting application's id string on the Lua stack with the phrase "lua_tostring( L, -1 )".
+
+	(code)
+	/******************************************************************************
+ 	* Open
+	 * Called whenever a new app is executed.
+	 * On the top of the stack is the app's id (string).
+	 */
+
+	int
+	tp_lua_api_open( lua_State * L, void * user_data ){
+
+		printf( "THIS PLUGIN IS BEING OPENED FOR APP '%s'\n", lua_tostring( L, -1 ) );
+
+		/* Return SUCCESS value */
+		return( 0 );
+
+	}
+	(end)
+
+Each plug-in is also notified whenever a TrickPlay application is terminated by having its tp_lua_api_close() function called. The tp_lua_api_close() function must be defined in every plug-in, even if it does nothing. The prototype is shown below.
+
+	(code)
+	void
+	tp_lua_api_close( lua_State * L, void * user_data )
+	(end)
+
+The L and user_data arguments are identical to those passed into the tp_lua_api_open() function. In addition, the terminating application's app metadata id property is available on the top of the Lua stack.
+
+The use of the user_data memory area must not contain assumptions about the order of tp_lua_api_open() and tp_lua_api_close() calls. Although every call to tp_lua_api_open() will eventually generate a call to tp_lua_api_close(), it is possible that a second application will begin and call tp_lua_api_open() prior to the first application terminating. In other words, the order of calls may be open(1)...open(2)...close(1). Do not assume the call order to be open(1)...close(1)...open(2).
+
+The code below lists the tp_lua_api_close() function for the Perlin Noise plug-in, which simply outputs an informational message to the TrickPlay Console.
+
+	(code)
+	/******************************************************************************
+	 * Close
+	 * Called when an app is shutting down.
+	 * On the top of the stack is the app's id (string).
+	 */
+
+	void
+	tp_lua_api_close( lua_State * L, void * user_data ){
+
+		printf( "THIS PLUGIN IS BEING CLOSED FOR APP '%s'\n", lua_tostring( L, -1 ) );
+	}
+	(end)
+
+
+
+Group: Writing the Plug-in Functionality
+
+Plug-in code consists of the four mandatory functions described in the previous sections, plus functions that implement the plug-in's specific capabilities, such as the Perlin Noise generator in the example plug-in. All this code is combined into a shared library.
+
+The sample plug-in is written in C and implemented in two source files: the mandatory functions are contained in the luaEntry.c file and the Perlin Noise functionality is in perlinNoise.c, plus an associated perlinNoise.h file. Perlin Noise is implemented in two functions: init_noise(), which initializes the Perlin Noise data structures, and pnoise(), which calculates a noise value.
+
+The init_noise() function is called once by the tp_plugin_initialize() function when the plug-in is loaded. A TrickPlay Lua application never needs to call init_noise() and, in fact, cannot call it because the function is never processed to make it available to a Lua application.
+
+The pnoise() function is registered so that the Lua application can call it. The process of registering plug-in functions is described in the next section.
+
+
+
+Group: Making the Plug-in Code Accessible to Lua
+
+Plug-in functions are made available to be called by a Lua application by registering them with the Lua state structure. Function registration is performed by calling the standard Lua function luaL_register(). The function accepts three arguments: the Lua state structure, 
+
+The tp_lua_api_open() function should register the C functions that the plug-in is making available to TrickPlay Lua applications. This is accomplished by first defining a table that links the C function names to the desired Lua function names. The Lua names can be the same as the C names or different. This table is then registered with the Lua state structure, making the functions available for invocation by the starting Lua application.
+
+	(code)
+	/* Array of the plug-in's Lua Interface */
+	struct luaL_Reg noiseAPI[] = {
+		// Lua Interfaces    C Functions
+		// ----------------  ---------------
+		{ "getPerlinNoise",  getPerlinNoise },
+		{ NULL, NULL } 						/* end of array */
+	};
+
+	/* Register the Lua interface functions */
+	luaL_register( L, "noiseAPI", noiseAPI );
+
+	/* luaL_register() leaves the registered table on the stack; pop it off before returning */
+	lua_pop( L, 1 );
+	(end)
+
+
+
+Group: Sample Application
+
+To build the plug-in shared library, run the Makefile.
+
+
+
