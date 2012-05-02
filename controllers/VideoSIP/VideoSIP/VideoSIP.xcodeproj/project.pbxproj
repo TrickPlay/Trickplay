@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CD470196154F721000A89E9C /* STUNClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CD470195154F721000A89E9C /* STUNClient.m */; };
 		CDABC64314FEC5870039DBE0 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC64214FEC5870039DBE0 /* UIKit.framework */; };
 		CDABC64514FEC5870039DBE0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC64414FEC5870039DBE0 /* Foundation.framework */; };
 		CDABC64714FEC5870039DBE0 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC64614FEC5870039DBE0 /* CoreGraphics.framework */; };
@@ -49,6 +50,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CD470194154F721000A89E9C /* STUNClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUNClient.h; sourceTree = "<group>"; };
+		CD470195154F721000A89E9C /* STUNClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUNClient.m; sourceTree = "<group>"; };
 		CDABC63E14FEC5870039DBE0 /* VideoSIP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VideoSIP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDABC64214FEC5870039DBE0 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		CDABC64414FEC5870039DBE0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -142,6 +145,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CD470192154F71DD00A89E9C /* STUN */ = {
+			isa = PBXGroup;
+			children = (
+				CD470194154F721000A89E9C /* STUNClient.h */,
+				CD470195154F721000A89E9C /* STUNClient.m */,
+			);
+			name = STUN;
+			sourceTree = "<group>";
+		};
 		CDABC63314FEC5860039DBE0 = {
 			isa = PBXGroup;
 			children = (
@@ -273,6 +285,7 @@
 				CDABC66B14FEC6D10039DBE0 /* rtp */,
 				CDABC6CE1513D7270039DBE0 /* SDP */,
 				CDABC6B714FF18F90039DBE0 /* SIP */,
+				CD470192154F71DD00A89E9C /* STUN */,
 				CDABC69C14FEC74C0039DBE0 /* NSStreamAdditions.h */,
 				CDABC69D14FEC74C0039DBE0 /* NSStreamAdditions.m */,
 				CDABC69E14FEC74C0039DBE0 /* SocketManager.h */,
@@ -397,6 +410,7 @@
 				CDABC6C6150563380039DBE0 /* MyExtensions.m in Sources */,
 				CDABC6C91511037F0039DBE0 /* SDPParser.m in Sources */,
 				CDABC6D11513D76E0039DBE0 /* MediaDescription.m in Sources */,
+				CD470196154F721000A89E9C /* STUNClient.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -524,6 +538,7 @@
 				CDABC66114FEC5870039DBE0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
