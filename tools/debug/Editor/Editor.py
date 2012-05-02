@@ -508,7 +508,7 @@ class Editor(QsciScintilla):
 
 
 
-    def save(self, text=None):
+    def save(self, text=None, editor_index=None):
         path = self.path
         try:
             f = open(path,'w+')
@@ -527,7 +527,10 @@ class Editor(QsciScintilla):
 
         index = 0 
         if self.editorManager is not None :
-        	index = self.editorManager.tab.currentIndex()
+        	if editor_index is None :
+        	    index = self.editorManager.tab.currentIndex()
+        	else:
+        	    index = editor_index
         	tabTitle = self.editorManager.tab.tabText(index)
         	if tabTitle[:1] == "*":
         	    self.editorManager.tab.setTabText (index, tabTitle[1:])
