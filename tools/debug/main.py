@@ -781,6 +781,9 @@ class MainWindow(QMainWindow):
 
     def newFile(self):
     	file_name = self.path+'/Untitled_'+str(self.untitled_idx)+".lua"
+        while os.path.exists(file_name) is True: 
+            self.untitled_idx += 1
+    	    file_name = self.path+'/Untitled_'+str(self.untitled_idx)+".lua"
         
         #TODO check if file_name is available and ... 
 
