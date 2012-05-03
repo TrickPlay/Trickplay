@@ -1172,13 +1172,21 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     // Install a __newindex metamethod on the globals table that stores
     // information about global values added by the user.
 
-    if ( lua_getmetatable( L , LUA_GLOBALSINDEX ) )
+    lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
+
+    if ( ! lua_isnil( L , -1 ) )
     {
-    	lua_pushliteral( L , "__newindex" );
-    	lua_pushcfunction( L , global_tracker );
-    	lua_rawset( L , -3 );
-    	lua_pop( L , 1 );
+		if ( lua_getmetatable( L , -1 ) )
+		{
+			lua_pushliteral( L , "__newindex" );
+			lua_pushcfunction( L , global_tracker );
+			lua_rawset( L , -3 );
+			lua_pop( L , 1 );
+		}
     }
+
+    lua_pop( L , 1 );
+
 
 #endif
 

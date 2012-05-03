@@ -890,10 +890,14 @@ JSON::Array Debugger::get_globals( lua_State * L )
 
 	const StringMap & globals( app->get_globals() );
 
+	lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
+
+	int g = lua_gettop( L );
+
 	for ( StringMap::const_iterator it = globals.begin(); it != globals.end(); ++it )
 	{
 		lua_pushstring( L , it->first.c_str() );
-		lua_rawget( L , LUA_GLOBALSINDEX );
+		lua_rawget( L , g );
 
 		if ( ! lua_isnil( L , -1 ) )
 		{
@@ -910,6 +914,8 @@ JSON::Array Debugger::get_globals( lua_State * L )
 
 		lua_pop( L , 1 );
 	}
+
+	lua_pop( L , 1 );
 
 	return array;
 }

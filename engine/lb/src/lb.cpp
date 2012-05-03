@@ -1213,8 +1213,9 @@ void * lb_get_udata_check( lua_State * L , int index , const char * type )
 
 void lb_setglobal( lua_State * L , const char * name )
 {
+	lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
 	lua_pushstring( L , name );
-	lua_pushvalue( L , -2 );
-	lua_rawset( L , LUA_GLOBALSINDEX );
-	lua_pop( L , 1 );
+	lua_pushvalue( L , -3 );
+	lua_rawset( L , -3 );
+	lua_pop( L , 2 );
 }
