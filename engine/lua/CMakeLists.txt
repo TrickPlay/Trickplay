@@ -7,7 +7,7 @@ set( LUA_VERSION 5.2.0 )
 
 set( LUA_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/lua-${LUA_VERSION} )
 
-add_definitions( -DLUA_USE_LINUX=1 )
+add_definitions( -DLUA_USE_LINUX=1 -DLUA_USE_LONGJMP=1 )
 
 include_directories( ${LUA_ROOT}/src )
 
