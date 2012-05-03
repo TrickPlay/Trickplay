@@ -106,7 +106,40 @@ TextInput = function(parameters)
 		end
 	)
 	center_label()
-	----------------------------------------------------------------------------
+	
+    ----------------------------------------------------------------------------
+    ---[=[
+    local widget_to_json = instance.to_json
+	
+    
+	instance.to_json = function(_,t)
+		
+		t.text = instance.text
+		
+		t.type = t.type or "TextInput"
+		
+		return t
+		
+	end
+	
+    ----------------------------------------------------------------------------
+	
+    local to_json__overridden
+	
+    local to_json = function(_,t)
+        
+        t = is_table_or_nil("TextInput.to_json",t)
+        t = to_json__overridden and to_json__overridden(_,t) or t
+        
+        return widget_to_json(_,t)
+    end
+	
+	override_property(instance,"to_json",
+		function() return to_json end,
+		function(oldf,self,v) to_json__overridden = v end
+	)
+    --]=]
+    ----------------------------------------------------------------------------
 	
 	local update_text  = function()
 		text_style = instance.style.text
