@@ -47,6 +47,7 @@ class TrickplayDeviceManager(QWidget):
         self._path = ''
         self.trickplay = QProcess()
         QObject.connect(self.trickplay, SIGNAL('started()'), self.app_started)
+        #QObject.connect(self.trickplay, SIGNAL('finished(int, QProcess.ExitStatus)'), self.app_finished)
         QObject.connect(self.trickplay, SIGNAL('finished(int)'), self.app_finished)
         QObject.connect(self.trickplay, SIGNAL('readyRead()'), self.app_ready_read)
 
@@ -503,12 +504,29 @@ class TrickplayDeviceManager(QWidget):
 	        return True
 
     def app_finished(self, errorCode):
-		if self.trickplay.state() == QProcess.NotRunning :
-			print "[VDBG] Trickplay APP is finished"
-			self.inspector.clearTree()
-			self.inspector.ui.refresh.setEnabled(False)
-			self.inspector.ui.search.setEnabled(False)
-			self.main.stop()
+        if errorCode == 0 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", FailedToStart] The process failed to start. Either the invoked program is missing, or you may have insufficient permissions to invoke the program" )
+        elif errorCode == 1 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", Crashed] The process crashed some time after starting successfully.")
+        elif errorCode == 2 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", Timedout] The process crashed some time after starting successfully.")
+        elif errorCode == 3 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", ReadError] An error occurred when attempting to read from the process.  For example, the process may not be running.")
+        elif errorCode == 4 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", WriteError] An error occurred when attempting to write to the process.  For example, the process may not be running, or it may have closed its input channel.")
+        elif errorCode == 5 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", UnknownError] An unknown error occurred.")
+
+	if self.trickplay.state() == QProcess.NotRunning :
+	    print "[VDBG] Trickplay APP is finished"
+	    if self.trickplay.exitStatus() == QProcess.NormalExit :
+		print ("[VDBG] ExitStatus : The process exited normally.")
+	    elif self.trickplay.exitStatus() == QProcess.CrashExit :
+		print ("[VDBG] ExitStatus : The process crashed.")
+	    self.inspector.clearTree()
+	    self.inspector.ui.refresh.setEnabled(False)
+	    self.inspector.ui.search.setEnabled(False)
+	    self.main.stop()
 
 	
     def run(self, dMode=False):
