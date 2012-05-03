@@ -505,7 +505,7 @@ class TrickplayDeviceManager(QWidget):
 
     def app_finished(self, errorCode):
         if errorCode == 0 :
-            print ("[VDBG] Error Code : ["+str(errorCode)+", FailedToStart] The process failed to start. Either the invoked program is missing, or you may have insufficient permissions to invoke the program" )
+            print ("[VDBG] Error Code : ["+str(errorCode)+", FailedToStart] the process failed to start. Either the invoked program is missing, or you may have insufficient permissions to invoke the program" )
         elif errorCode == 1 :
             print ("[VDBG] Error Code : ["+str(errorCode)+", Crashed] The process crashed some time after starting successfully.")
         elif errorCode == 2 :
@@ -520,9 +520,16 @@ class TrickplayDeviceManager(QWidget):
 	if self.trickplay.state() == QProcess.NotRunning :
 	    print "[VDBG] Trickplay APP is finished"
 	    if self.trickplay.exitStatus() == QProcess.NormalExit :
-		print ("[VDBG] ExitStatus : The process exited normally.")
+		print ("[VDBG] ExitStatus :  The process exited normally.")
 	    elif self.trickplay.exitStatus() == QProcess.CrashExit :
-		print ("[VDBG] ExitStatus : The process crashed.")
+		print ("[VDBG] ExitStatus :  The process crashed.")
+		msg = QMessageBox()
+		msg.setText("The process crashed.")
+		msg.setInformativeText('ErrorCode : [ '+str(errorCode)+' ]')
+		msg.setWindowTitle("Warning")
+		msg.setGeometry(500,500,0,0)
+		msg.exec_()
+
 	    self.inspector.clearTree()
 	    self.inspector.ui.refresh.setEnabled(False)
 	    self.inspector.ui.search.setEnabled(False)
