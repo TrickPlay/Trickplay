@@ -523,12 +523,13 @@ class TrickplayDeviceManager(QWidget):
 		print ("[VDBG] ExitStatus :  The process exited normally.")
 	    elif self.trickplay.exitStatus() == QProcess.CrashExit :
 		print ("[VDBG] ExitStatus :  The process crashed.")
-		msg = QMessageBox()
-		msg.setText("The process crashed.")
-		msg.setInformativeText('ErrorCode : [ '+str(errorCode)+' ]')
-		msg.setWindowTitle("Warning")
-		msg.setGeometry(500,500,0,0)
-		msg.exec_()
+		if self.main.closedByIDE == False :
+		    msg = QMessageBox()
+		    msg.setText("The process crashed.")
+		    msg.setInformativeText('ErrorCode : [ '+str(errorCode)+' ]')
+		    msg.setWindowTitle("Warning")
+		    msg.setGeometry(500,500,0,0)
+		    msg.exec_()
 
 	    self.inspector.clearTree()
 	    self.inspector.ui.refresh.setEnabled(False)
