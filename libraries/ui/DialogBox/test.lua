@@ -29,6 +29,9 @@ d3.style.border.width = 10
 d4 = DialogBox{y = 400, image = "DialogBox/panel.png"}
 d4.style.text.font = "Sans 80px"
 
-
+print(d1:to_json())
+print(d2:to_json())
+print(d3:to_json())
+print(d4:to_json())
 screen:add(Rectangle{size = screen.size,color = "000033"},d1,d2,d3,d4)
 
