@@ -1,0 +1,7 @@
+app=
+{	id = "com.trickplay.noise_plugin",
+	release = "1",
+	version = "1.0",
+	name = "Noise Plug-in App",
+	copyright = "Trickplay, Inc."
+}
