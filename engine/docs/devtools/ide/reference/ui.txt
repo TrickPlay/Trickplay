@@ -1,0 +1,65 @@
+
+Title: TrickPlay IDE User Interface
+
+The TrickPlay IDE user interface provides a standard menu bar, toolbar, Editor Window, and several other windows that can be opened or closed depending on the user's preferences and the IDE's mode of operation.
+
+Topic: The Menu Bar
+
+The IDE menu bar contains standard menu items to open and close files, manage windows, and debug a TrickPlay application. Each of the menu items is described in subsequent sections of this reference.
+
+(see images/IdeMenus.png)
+
+Topic: The Toolbar
+
+The IDE toolbar is located below the menu bar and contains access to debugging and application execution operations. Each toolbar button is described in subsequent sections of this reference.
+
+(see images/IdeToolbar.png)
+
+Topic: The Editor Window
+
+The Editor Window enables the creation and editing of an application's source files. The Editor Window is always open in the IDE. It is described in detail in the <TrickPlay IDE Editor Reference>.
+
+(see images/IdeEditor.png)
+
+Topic: The File System Window
+
+The File System Window is located to the left of the Editor Window. To open the window, select the Windows->File system menu item or click on the toolbar's File System button.
+
+The File System Window lists the application's source files in a hierarchical tree structure. Double-clicking on a file in the tree will open the file in the Editor Window.
+
+(see images/IdeFileWindow.png)
+
+Right-clicking on a file will open a pop-up menu which enables various file operations, including renaming or deleting the file or creating a new directory.
+
+(see images/IdeFileSystemPopup.png)
+
+Topic: The Inspector Window
+
+The Inspector Window is located to the right of the Editor Window. To open the window, select the Windows->Inspector menu item or click on the toolbar's Inspector button. The Inspector Window opens automatically when a TrickPlay application is run from the IDE or when a debugging session is started.
+
+The Inspector Window is described in detail in the section <Running an Application>.
+
+(see images/IdeInspector.png)
+
+Topic: The Console Window
+
+The Console Window is located beneath the Editor Window. To open the window, select the Windows->Console menu item or click on the toolbar's Console button.
+
+The Console Window displays message and debug information produced by the TrickPlay Engine. A TrickPlay application can output messages to the Console Window by executing Lua print statements.
+
+(see images/IdeConsole.png)
+
+Topic: The Debug Window
+
+The Debug Window is located to the left of the Editor Window and beneath the File System Window. To open the window, select the Windows->Debug menu item or click on the toolbar's Debug button. The Debug Window opens automatically when starting a debug session.
+
+The Debug Window is described in detail in the <TrickPlay IDE Debugger Reference>.
+
+(see images/IdeDebug.png)
+
+Topic: The Backtrace Window
+
+The Backtrace Window is located beneath the Editor Window. To open the window, select the Windows->Backtrace menu item or click on the toolbar's Backtrace button. The Backtrace Window opens automatically when starting a debug session.
+
+The Backtrace Window is described in detail in the <TrickPlay IDE Debugger Reference>.
+

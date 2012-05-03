@@ -1,5 +1,6 @@
 
 add_subdirectory( lua )
+add_subdirectory( clutter_alpha_mode )
 
 add_definitions( -DTP_GIT_VERSION="${GIT_VERSION}" )
 
@@ -13,6 +14,8 @@ set( ENGINE_SOURCE_FILES )
 set( LB_FILES )
 
 include_directories( ${ENGINE_SRC}/lua/lua-5.2.0/src )
+include_directories( ${ENGINE_SRC}/clutter_alpha_mode )
+include_directories( ${PROJECT_BINARY_DIR}/engine )
 
 include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
@@ -284,6 +287,13 @@ if ( TP_WITH_WEBGL )
         list( APPEND ENGINE_SOURCE_FILES
             ${ENGINE_SRC}/source/typed_array.cpp
             ${ENGINE_SRC}/source/webgl.cpp)
+
+        if (NOT TP_CLUTTER_BACKEND_EGL)
+
+            list( APPEND ENGINE_LIBRARY_NAMES GL )
+
+        endif (NOT TP_CLUTTER_BACKEND_EGL)
+
     endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 endif ( TP_WITH_WEBGL )
@@ -445,7 +455,8 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/canvas.lb
     ${BINDINGS_SRC}/http.lb
     ${BINDINGS_SRC}/keyboard.lb
-
+    ${BINDINGS_SRC}/ease.lb
+    ${BINDINGS_SRC}/matrix.lb
 )
 
 #------------------------------------------------------------------------------
@@ -467,7 +478,7 @@ foreach( LB_FILE ${LB_FILES} )
     file( TO_NATIVE_PATH ${LB_FILE} NATIVE_LB_FILE )
 
     add_custom_command(
-        OUTPUT ${LB_FILE_NAME}.cpp
+        OUTPUT ${LB_FILE_NAME}.cpp ${LB_FILE_NAME}.h
         COMMAND ${LB_GENERATOR} ${LB_OPTIONS} "${NATIVE_LB_FILE}"
         DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 
@@ -482,7 +493,7 @@ foreach( LB_FILE ${LB_SPECIAL_MAC_FILES} )
     file( TO_NATIVE_PATH ${LB_FILE} NATIVE_LB_FILE )
 
     add_custom_command(
-        OUTPUT ${LB_FILE_NAME}.mm
+        OUTPUT ${LB_FILE_NAME}.mm ${LB_FILE_NAME}.h
         COMMAND ${LB_GENERATOR} ${LB_OPTIONS} --mac "${NATIVE_LB_FILE}"
         DEPENDS ${LB_FILE} ${LB_GENERATOR} )
 
@@ -545,6 +556,7 @@ list( APPEND
     ${ENGINE_SRC}/source/console_commands.cpp
     ${ENGINE_SRC}/source/app_resource.cpp
     ${ENGINE_SRC}/source/plugin.cpp
+    ${ENGINE_SRC}/source/desktop_controller.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -610,6 +622,7 @@ target_link_libraries(
     m
     dl
     tplua
+    clutteralphamode
 )
 
 

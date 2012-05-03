@@ -9,27 +9,34 @@ module clutter_actor;
 
 [[
 
-void actor_on_show(ClutterActor*actor,lua_State*L)
+static void actor_on_show(ClutterActor*actor,lua_State*L)
 {
 	UserData::invoke_callback( G_OBJECT( actor ) , "on_show" , 0 , 0 , L );
 }
 
-void actor_on_hide(ClutterActor*actor,lua_State*L)
+static void actor_on_hide(ClutterActor*actor,lua_State*L)
 {
 	UserData::invoke_callback( G_OBJECT( actor ) , "on_hide" , 0 , 0 , L );
 }
     
-void actor_on_key_focus_in(ClutterActor*actor,lua_State*L)
+static void actor_on_key_focus_in(ClutterActor*actor,lua_State*L)
 {
 	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_focus_in" , 0 , 0 , L );
 }
 
-void actor_on_key_focus_out(ClutterActor*actor,lua_State*L)
+static void actor_on_key_focus_out(ClutterActor*actor,lua_State*L)
 {
 	UserData::invoke_callback( G_OBJECT( actor ) , "on_key_focus_out" , 0 , 0 , L );
 }
 
-gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
+static void actor_on_parent_changed( ClutterActor * actor , ClutterActor * old_parent , lua_State * L )
+{
+    ClutterUtil::wrap_concrete_actor( L , old_parent );
+    
+    UserData::invoke_callback( G_OBJECT( actor ) , "on_parent_changed" , 1 , 0 , L );    
+}
+
+static gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
 {
     int result = FALSE;
     
@@ -50,7 +57,7 @@ gboolean actor_on_key_down(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     return result;
 }
 
-gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
+static gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
 {
     int result = FALSE;
     
@@ -71,7 +78,7 @@ gboolean actor_on_key_up(ClutterActor*actor,ClutterKeyEvent*event,lua_State*L)
     return result;
 }
 
-gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
+static gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
 {
     int result = FALSE;
 
@@ -96,7 +103,7 @@ gboolean actor_on_button_down(ClutterActor*actor,ClutterButtonEvent*event,lua_St
     return result;
 }
 
-gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
+static gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -120,7 +127,7 @@ gboolean actor_on_button_up(ClutterActor*actor,ClutterButtonEvent*event,lua_Stat
     return result;
 }
 
-gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L)
+static gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -142,7 +149,7 @@ gboolean actor_on_motion(ClutterActor*actor,ClutterMotionEvent*event,lua_State*L
     return result;
 }
 
-gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L)
+static gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -165,7 +172,7 @@ gboolean actor_on_scroll(ClutterActor*actor,ClutterScrollEvent*event,lua_State*L
     return result;
 }
 
-gboolean actor_on_enter(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
+static gboolean actor_on_enter(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -186,7 +193,7 @@ gboolean actor_on_enter(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*
     return result;
 }
 
-gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
+static gboolean actor_on_leave(ClutterActor*actor,ClutterCrossingEvent*event,lua_State*L)
 {
     int result = FALSE;
     gdouble x = event->x, y = event->y;
@@ -525,19 +532,23 @@ interface actor [[ClutterActor*]]
     /*
 	Property: scale
 	
-	The scale property is a table of four numeric values specifying (1) the object's X/Y scale factor and (2) the object's X/Y scaling center coordinates. The scaling center coordinates are specified in pixels and are relative to the object's anchor point, which is usually 0, 0.
+	The scale property is a table of four numeric values specifying the object's X/Y scale factor and X/Y scaling-center coordinates. The scaling-center coordinates are specified in pixels and are relative to the object's anchor point, which is usually 0, 0.
 	
-	When setting the scale property, the scaling center coordinates are optional and will default to 0, 0, i.e., the object's default anchor point. 
+	When setting the scale property, the scaling-center coordinates are optional and, if not specified, default to 0, 0, i.e., the object's default anchor point.
 	
-	*Format:* { x/horizontal_scale_factor, y/vertical_scale_factor, x_center_coordinate, y_center_coordinate }
+	To maintain the object's aspect ratio, scale the object's X and Y factors by the same amount. In such cases, the scale property can be specified as a single numeric value, rather than a table, as shown below.
+	
+		(code)
+		-- Double the object's size, maintaining its aspect ratio
+		myObject.scale = 2
+		
+		-- Equivalent method using a table
+		myObject.scale = { 2, 2 }
+		(end)
+	
+	*Format:* { X_scale_factor, Y_scale_factor, X_center_coordinate, Y_center_coordinate }
 	
 	*Default Setting:* { 1, 1, 0, 0 }
-	
-	*Code Example:* Double the object's size both horizontally and vertically. Use default center coordinates.
-	
-	(code)
-	myObject.scale = { 2, 2 }
-	(end)
 	
 	*See Also:* the <anchor_point> and <is_scaled> properties
 	
@@ -563,16 +574,24 @@ interface actor [[ClutterActor*]]
             lua_rawseti(L,-2,4);
         ]]
         [[
-            luaL_checktype(L,2,LUA_TTABLE);
-            lua_rawgeti(L,2,1);
-            lua_rawgeti(L,2,2);            
-            lua_rawgeti(L,2,3);
-            lua_rawgeti(L,2,4);
-            if (!lua_isnil(L,-2)&&!lua_isnil(L,-1))
-                clutter_actor_set_scale_full(self,lua_tonumber(L,-4),lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1));
+            if ( lua_isnumber( L , 2 ) )
+            {
+                gfloat scale = lua_tonumber( L , 2 );
+                clutter_actor_set_scale( self , scale , scale );
+            }
             else
-                clutter_actor_set_scale(self,lua_tonumber(L,-4),lua_tonumber(L,-3));
-            lua_pop(L,4);
+            {
+                luaL_checktype(L,2,LUA_TTABLE);
+                lua_rawgeti(L,2,1);
+                lua_rawgeti(L,2,2);            
+                lua_rawgeti(L,2,3);
+                lua_rawgeti(L,2,4);
+                if (!lua_isnil(L,-2)&&!lua_isnil(L,-1))
+                    clutter_actor_set_scale_full(self,lua_tonumber(L,-4),lua_tonumber(L,-3),lua_tonumber(L,-2),lua_tonumber(L,-1));
+                else
+                    clutter_actor_set_scale(self,lua_tonumber(L,-4),lua_tonumber(L,-3));
+                lua_pop(L,4);
+            }
         ]];
         
     /*
@@ -745,15 +764,15 @@ interface actor [[ClutterActor*]]
     /*
 	Property: clip
 	
-	The clip property is a table of four integer values (x origin, y origin, width, height, respectively) specifying the object's clipping rectangle. All values are measured in pixels.
+	The clip property is a table specifying the object's clipping rectangle. The table's format is { X origin, Y origin, width, height }. All values are measured in pixels.
 	
-	By default, objects are not clipped, even if output is placed beyond the object's width and height boundaries. To activate clipping, define a clipping rectangle.
+	By default, objects are not clipped, even if output is placed beyond the object's width and height boundaries. To activate clipping, define a clipping rectangle in the clip property.
 	
 	Retrieving the clip property when there is no clipping rectangle defined, returns a value of nil.
 	
 	To clear a defined clipping rectangle and deactivate clipping, set the clip property to a value of nil.
 	
-	*Format:* { x-coordinate origin, y-coodinate origin, width, height }
+	*Format:* { X origin, Y origin, width, height }
 	
 	*Default Setting:* nil (clipping does not occur)
 	
@@ -874,15 +893,15 @@ interface actor [[ClutterActor*]]
     /*
 	Property: reactive
 	
-	The reactive property is a boolean value specifying whether or not the object should receive mouse events and emit pointer events (true = receive mouse events and send pointer events).
+	The reactive property is a boolean value specifying whether or not the object should send pointer events and receive mouse and scroll wheel events (true = send pointer events and receive mouse and scroll wheel events).
 	
-	Mouse events include button clicks, which are processed by the <on_button_down> and <on_button_up> event handlers. Pointer events include motion notifications and enter-element and leave-element events, which are handled by the <on_motion>, <on_enter> and <on_leave> handlers, respectively.
+	Mouse events include button clicks, which are processed by the <on_button_down> and <on_button_up> event handlers. Scroll wheel events occur when the wheel moves in any direction; such events are handled by the <on_scroll> handler. Pointer events include motion notifications and enter-element and leave-element events, which are handled by the <on_motion>, <on_enter> and <on_leave> handlers, respectively.
 	
-	To receive mouse events and emit pointer events, the following conditions must be enabled: (1) start mouse and pointer events by calling the global <controllers.start_pointer> function and (2) set the object's reactive property to true.
+	Scroll wheel events are enabled by setting the object's reactive property to true. To receive mouse events and send pointer events, two steps are required: (1) set the object's reactive property to true and (2) start mouse and pointer events by calling the global <controllers.start_pointer> function.
 	
-	*Default Setting:* false (the object neither receives mouse events nor sends pointer events)
+	*Default Setting:* false (the object neither receives mouse/scroll wheel events nor sends pointer events)
 	
-	*See Also:* the <on_button_down>, <on_button_up>, <on_motion>, <on_enter> and <on_leave> event handlers
+	*See Also:* the <on_button_down>, <on_button_up>, <on_motion>, <on_scroll>, <on_enter> and <on_leave> event handlers
 
     */
     
@@ -1712,8 +1731,8 @@ interface actor [[ClutterActor*]]
 	*Supported Animation Properties:* Property names are case-sensitive. The duration property is required; all other properties are optional.
 	
 	duration - length of animation in milliseconds. Required.
-	mode - string specifying the Alpha mode to apply to the animated property. For descriptions of the supported modes, refer to the <Alpha.mode> section. Default = "LINEAR"
-	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called. To terminate a looping animation, call the <complete_animation> function.
+	mode - string specifying the Ease mode to apply to the animated property. For descriptions of the supported modes, refer to the <Ease> class. Default = "LINEAR"
+	loop - boolean specifying whether or not the animation should loop forever (true = loop forever). If true then any function specified for the on_completed property will never be called. To terminate a looping animation, call the <stop_animation> function.
 	on_completed - function to call when the animation is finished. The function should accept no arguments and have no return value.
 	x - X coordinate at end of animation
 	y - Y coordinate at end of animation
@@ -1727,6 +1746,7 @@ interface actor [[ClutterActor*]]
 	position - X and Y coordinates at end of animation. Same as specifying x and y properties individually. The position property is specified as a table with two integers in the format { x, y }.
 	size - width and height at end of animation. Same as specifying width and height properties individually. The size property is specified as a table with two floating point values in the format { width, height }.
 	scale - object's scaling factor at end of animation. The scale property is specified as a table with two double values in the format { X_scale_factor, Y_scale_factor }.
+	clip - object's clipping rectangle at end of animation. The clipping rectangle is specified as a table with four integer values in the format { X_origin, Y_origin, width, height }.
 	x_rotation - object's rotation in degrees along the x-axis at end of animation
 	y_rotation - object's rotation in degrees along the y-axis at end of animation
 	z_rotation - object's rotation in degrees along the z-axis at end of animation
@@ -1789,155 +1809,168 @@ interface actor [[ClutterActor*]]
 	    
 	    while(lua_next(L,props))
 	    {
-		GValue value={0};
-		
-		if (lua_really_isstring(L,-2)&&!lua_isnil(L,-2))
-		{
-		    const char * k=lua_tostring(L,-2);
-		
-		    if (!strcmp("x",k)||!strcmp("y",k))
-		    {
-			g_value_init(&value,G_TYPE_FLOAT);
-			g_value_set_float(&value,lua_tonumber(L,-1));
-			g_ptr_array_add(names,g_strdup(k));
-			g_value_array_append(values,&value);
-		    }
-		    else if (!strcmp("w",k)||!strcmp("width",k))
-		    {
-			g_value_init(&value,G_TYPE_FLOAT);
-			g_value_set_float(&value,lua_tonumber(L,-1));
-			g_ptr_array_add(names,g_strdup("width"));
-			g_value_array_append(values,&value);
-		    }
-		    else if (!strcmp("h",k)||!strcmp("height",k))
-		    {
-			g_value_init(&value,G_TYPE_FLOAT);
-			g_value_set_float(&value,lua_tonumber(L,-1));
-			g_ptr_array_add(names,g_strdup("height"));
-			g_value_array_append(values,&value);
-		    }
-		    else if (!strcmp("z",k)||!strcmp("depth",k))
-		    {
-			g_value_init(&value,G_TYPE_FLOAT);
-			g_value_set_float(&value,lua_tonumber(L,-1));			
-			g_ptr_array_add(names,g_strdup("depth"));
-			g_value_array_append(values,&value);			
-		    }
-		    else if (!strcmp("opacity",k))
-		    {
-			g_value_init(&value,G_TYPE_UINT);
-			g_value_set_uint(&value,lua_tointeger(L,-1));
-			g_ptr_array_add(names,g_strdup(k));
-			g_value_array_append(values,&value);
-		    }
-		    else if (!strcmp("position",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    g_ptr_array_add(names,g_strdup("x"));
-			    g_ptr_array_add(names,g_strdup("y"));
-			    
-			    lua_rawgeti(L,-1,1);
-			    g_value_init(&value,G_TYPE_FLOAT);
-			    g_value_set_float(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);			    
-			    lua_pop(L,1);
-			    
-			    lua_rawgeti(L,-1,2);
-			    g_value_unset(&value);
-			    g_value_init(&value,G_TYPE_FLOAT);
-			    g_value_set_float(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			    lua_pop(L,1);
-			}
-		    }
-		    else if (!strcmp("size",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    g_ptr_array_add(names,g_strdup("width"));
-			    g_ptr_array_add(names,g_strdup("height"));
-			    
-			    lua_rawgeti(L,-1,1);
-			    g_value_init(&value,G_TYPE_FLOAT);
-			    g_value_set_float(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);			    
-			    lua_pop(L,1);
-			    
-			    lua_rawgeti(L,-1,2);
-			    g_value_unset(&value);
-			    g_value_init(&value,G_TYPE_FLOAT);
-			    g_value_set_float(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			    lua_pop(L,1);
-			}			
-		    }
-		    else if (!strcmp("scale",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    g_ptr_array_add(names,g_strdup("scale-x"));
-			    g_ptr_array_add(names,g_strdup("scale-y"));
-			    
-			    lua_rawgeti(L,-1,1);
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);			    
-			    lua_pop(L,1);
-			    
-			    lua_rawgeti(L,-1,2);
-			    g_value_unset(&value);
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			    lua_pop(L,1);
-			}			
-		    }
-		    else if (!strcmp("x_rotation",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    
-			}
-			else
-			{
-			    g_ptr_array_add(names,g_strdup("rotation-angle-x"));
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			}
-		    }
-		    else if (!strcmp("y_rotation",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    
-			}
-			else
-			{
-			    g_ptr_array_add(names,g_strdup("rotation-angle-y"));
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			}
-		    }
-		    else if (!strcmp("z_rotation",k))
-		    {
-			if (lua_type(L,-1)==LUA_TTABLE)
-			{
-			    
-			}
-			else
-			{
-			    g_ptr_array_add(names,g_strdup("rotation-angle-z"));
-			    g_value_init(&value,G_TYPE_DOUBLE);
-			    g_value_set_double(&value,lua_tonumber(L,-1));
-			    g_value_array_append(values,&value);
-			}
-		    }
-		}
-		
-		lua_pop(L,1);
+    		GValue value={0};
+    		
+    		if (lua_really_isstring(L,-2)&&!lua_isnil(L,-2))
+    		{
+    		    const char * k=lua_tostring(L,-2);
+    		
+    		    if (!strcmp("x",k)||!strcmp("y",k))
+    		    {
+        			g_value_init(&value,G_TYPE_FLOAT);
+        			g_value_set_float(&value,lua_tonumber(L,-1));
+        			g_ptr_array_add(names,g_strdup(k));
+        			g_value_array_append(values,&value);
+    		    }
+    		    else if (!strcmp("w",k)||!strcmp("width",k))
+    		    {
+        			g_value_init(&value,G_TYPE_FLOAT);
+        			g_value_set_float(&value,lua_tonumber(L,-1));
+        			g_ptr_array_add(names,g_strdup("width"));
+        			g_value_array_append(values,&value);
+    		    }
+    		    else if (!strcmp("h",k)||!strcmp("height",k))
+    		    {
+        			g_value_init(&value,G_TYPE_FLOAT);
+        			g_value_set_float(&value,lua_tonumber(L,-1));
+        			g_ptr_array_add(names,g_strdup("height"));
+        			g_value_array_append(values,&value);
+    		    }
+    		    else if (!strcmp("z",k)||!strcmp("depth",k))
+    		    {
+        			g_value_init(&value,G_TYPE_FLOAT);
+        			g_value_set_float(&value,lua_tonumber(L,-1));			
+        			g_ptr_array_add(names,g_strdup("depth"));
+        			g_value_array_append(values,&value);			
+    		    }
+    		    else if (!strcmp("opacity",k))
+    		    {
+        			g_value_init(&value,G_TYPE_UINT);
+        			g_value_set_uint(&value,lua_tointeger(L,-1));
+        			g_ptr_array_add(names,g_strdup(k));
+        			g_value_array_append(values,&value);
+    		    }
+    		    else if (!strcmp("position",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    g_ptr_array_add(names,g_strdup("x"));
+        			    g_ptr_array_add(names,g_strdup("y"));
+        			    
+        			    lua_rawgeti(L,-1,1);
+        			    g_value_init(&value,G_TYPE_FLOAT);
+        			    g_value_set_float(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);			    
+        			    lua_pop(L,1);
+        			    
+        			    lua_rawgeti(L,-1,2);
+        			    g_value_unset(&value);
+        			    g_value_init(&value,G_TYPE_FLOAT);
+        			    g_value_set_float(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			    lua_pop(L,1);
+        			}
+    		    }
+    		    else if (!strcmp("size",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    g_ptr_array_add(names,g_strdup("width"));
+        			    g_ptr_array_add(names,g_strdup("height"));
+        			    
+        			    lua_rawgeti(L,-1,1);
+        			    g_value_init(&value,G_TYPE_FLOAT);
+        			    g_value_set_float(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);			    
+        			    lua_pop(L,1);
+        			    
+        			    lua_rawgeti(L,-1,2);
+        			    g_value_unset(&value);
+        			    g_value_init(&value,G_TYPE_FLOAT);
+        			    g_value_set_float(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			    lua_pop(L,1);
+        			}			
+    		    }
+    		    else if (!strcmp("scale",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    g_ptr_array_add(names,g_strdup("scale-x"));
+        			    g_ptr_array_add(names,g_strdup("scale-y"));
+        			    
+        			    lua_rawgeti(L,-1,1);
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);			    
+        			    lua_pop(L,1);
+        			    
+        			    lua_rawgeti(L,-1,2);
+        			    g_value_unset(&value);
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			    lua_pop(L,1);
+        			}			
+    		    }
+    		    else if (!strcmp("x_rotation",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    
+        			}
+        			else
+        			{
+        			    g_ptr_array_add(names,g_strdup("rotation-angle-x"));
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			}
+    		    }
+    		    else if (!strcmp("y_rotation",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    
+        			}
+        			else
+        			{
+        			    g_ptr_array_add(names,g_strdup("rotation-angle-y"));
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			}
+    		    }
+    		    else if (!strcmp("z_rotation",k))
+    		    {
+        			if (lua_type(L,-1)==LUA_TTABLE)
+        			{
+        			    
+        			}
+        			else
+        			{
+        			    g_ptr_array_add(names,g_strdup("rotation-angle-z"));
+        			    g_value_init(&value,G_TYPE_DOUBLE);
+        			    g_value_set_double(&value,lua_tonumber(L,-1));
+        			    g_value_array_append(values,&value);
+        			}
+    		    }
+    		    else if ( ! strcmp( "clip" , k ) )
+    		    {
+    		        if ( lua_type( L , - 1 ) == LUA_TTABLE )
+    		        {
+                        ClutterGeometry geometry;
+                        ClutterUtil::to_clutter_geometry(L, lua_gettop(L), &geometry);
+                        
+                        g_ptr_array_add(names,g_strdup("clip"));
+                        g_value_init(&value, CLUTTER_TYPE_GEOMETRY);
+                        g_value_set_boxed(&value, &geometry);
+                        g_value_array_append(values,&value);    		          
+    		        }
+    		    }
+    		}
+    		
+    		lua_pop(L,1);
 	    }
 	    
 	    if ( values->n_values == 0 )
@@ -2017,7 +2050,7 @@ interface actor [[ClutterActor*]]
     /*
 	Function: complete_animation
 	
-	The complete_animation() function terminates the animation started with a call to <animate>. All the properties that were being animated are forced to their final values. If the animation specified an on_completed property, its associated function will be called.
+	The complete_animation() function terminates the current cycle of an animation started with a call to <animate>. All the properties that were being animated are forced immediately to their final values. If the animation specified an on_completed event handler, it is invoked. If the animation is a looping animation, the next animation cycle begins. (To terminate a looping animation, call the <stop_animation> function.)
 	
 	*Arguments:* None
 	
@@ -2029,16 +2062,42 @@ interface actor [[ClutterActor*]]
 
     bool complete_animation()
 	[[
-	    ClutterAnimation * animation=clutter_actor_get_animation(self);
-	    if (animation)
+	    result = false;
+	    
+	    if ( ClutterAnimation * animation=clutter_actor_get_animation( self ) )
 	    {
-		clutter_animation_completed(animation);
-		result=true;
+	        if ( ClutterTimeline * timeline = clutter_animation_get_timeline( animation ) )
+	        {
+	            clutter_timeline_advance( timeline , clutter_timeline_get_duration( timeline ) );
+                 
+                result=true;
+	        }    
 	    }
-	    else
-	    {
-		result=false;
-	    }
+	]];
+	
+	/*
+    Function: stop_animation
+    
+    The stop_animation() function terminates the animation (including a looping animation) started with a call to <animate>. All the properties that were being animated remain at their stopped values. If the animation specified an on_completed event handler, it is not called.
+    
+    *Arguments:* None
+    
+    *Return Value:* Boolean indicating whether or not an animation had been running (true = animation was running and was stopped).
+    
+    *See Also:* the <animate> function
+    
+	*/
+	
+	bool stop_animation()
+	[[
+        result = false;
+        
+        if ( clutter_actor_get_animation( self ) )
+        {
+            clutter_actor_detach_animation( self );
+            
+            result=true;
+        }
 	]];
 	
 	table constraints
@@ -2333,15 +2392,19 @@ interface actor [[ClutterActor*]]
 	
 	The on_scroll() event handler is called whenever a scroll wheel event occurs. Scroll wheels are commonly found on computer mice and can be on other input devices, as well.
 	
+	To enable receiving scroll wheel events, the object's <reactive> property must be set to true.
+	
 	*Arguments:*
 	
 	    self - reference to the object receiving the event
 	    x - X coordinate position of the pointer
 	    y - Y coordinate position of the pointer
-	    scroll_direction - direction of scroll wheel. 0 = scrolling up, 1 = scrolling down
+	    scroll_direction - direction of scroll wheel. 0 = scrolling up, 1 = scrolling down, 2 = scrolling left, 3 = scrolling right. Note: Some directions may not be supported on a particular scroll wheel.
 	    modifiers - table of pressed <keys.Key Modifiers>. If no modifier keys were pressed, set to nil.
 		
 	*Return Value:* Return 1 if the event should *not* be passed down the event chain to the next object. Else return 0.
+	
+	*See Also:* the <reactive> property
 
 	*/
 
@@ -2463,4 +2526,30 @@ interface actor [[ClutterActor*]]
 			G_CALLBACK(actor_on_hide),
 			L);	    	    
 	]];
+	
+    /*
+    Event Handler: on_parent_changed
+    
+    The on_parent_changed() event handler is called whenever the object's parent changes.
+    
+    *Arguments:*
+    
+    self - reference to the object receiving the event
+    
+    old_parent - reference to the parent object (now unparented). If the object had no parent, this argument will be nil.
+    
+    *See Also:* the <parent> property and the <unparent> function
+    
+    */
+
+	callback on_parent_changed( UIElement self , UIElement old_parent )
+	[[
+        UserData::get(L)->connect_signal_if( 
+            on_parent_changed,
+            "on_parent_changed",
+            "parent-set",
+            G_CALLBACK(actor_on_parent_changed),
+            L);             
+	]];
+	
 }

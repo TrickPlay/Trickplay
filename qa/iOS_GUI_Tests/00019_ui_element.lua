@@ -6,7 +6,7 @@ test_area = "ui_element"
 test_api = "animate"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 	local callback_test = false
 
 	local g = factory:Group{ x = 0, y = 0}
@@ -44,13 +44,18 @@ function generate_test_image (controller, factory)
 				controller.screen:remove(g)
 	      end
     end
-
-
 	
-	
-
 	return g
 end
+
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local t1 = Text{x = 10 * resize_ratio_w, y = 10 * resize_ratio_h, w = 310 * resize_ratio_w, h = 50 * resize_ratio_h, markup = "Animating so no comparison image.", color = "FFFFFF", font = "Verdana 30px", use_markup = true}
+
+	return t1
+
+end
+
 
 
 	

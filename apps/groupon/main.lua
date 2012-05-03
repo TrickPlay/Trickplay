@@ -107,7 +107,7 @@ KEY_HANDLER                                 = dofile("User_Input.lua")
 
 screen.on_key_down                          = KEY_HANDLER.on_key_down
 
-GET_DEALS, SEND_SMS, GET_LAT_LNG, TRY_AGAIN = dofile("Internet_Interfaces.lua")
+GET_DEALS, SEND_SMS, GET_LAT_LNG, CANCEL    = dofile("Internet_Interfaces.lua")
 
 Loading_G                                   = dofile("LoadingDots.lua")
 
@@ -125,10 +125,47 @@ mouse                                       = dofile("Mouse.lua")
 
 screen:add(mouse)
 
+App_State.zip = settings and settings.zip
+
 App_State.state:add_state_change_function(
     function(old_state,new_state)
         
-        if App_State.zip then
+        if type(App_State.zip) == "string" then
+            
+            GET_LAT_LNG( App_State.zip, function(zip_info)
+                
+                if zip_info == false or
+                    type(zip_info)                                  ~= "table" or
+                    type(zip_info.results)                          ~= "table" or
+                    type(zip_info.results[1])                       ~= "table" or
+                    type(zip_info.results[1].address_components)    ~= "table" or
+                    type(zip_info.results[1].geometry)              ~= "table" or
+                    type(zip_info.results[1].geometry.location)     ~= "table" or
+                    type(zip_info.results[1].geometry.location.lat) == "nil" or
+                    type(zip_info.results[1].geometry.location.lng) == "nil" then
+                    
+                    Loading_G:message("Having trouble connecting")
+                    
+                    return
+                    
+                end
+                
+                if zip_info.status ~= "OK" or
+                    zip_info.results[1].address_components[
+                            #zip_info.results[1].address_components
+                        ].short_name ~= "US" then
+                    GET_DEALS(Rolodex_Constructor)
+                else
+                    
+                    local lat = zip_info.results[1].geometry.location.lat
+                    local lng = zip_info.results[1].geometry.location.lng
+                    
+                    GET_DEALS(Rolodex_Constructor,lat,lng,50)
+                    
+                    
+                end
+            end)
+            
         else
             GET_DEALS(Rolodex_Constructor)
         end
@@ -137,7 +174,7 @@ App_State.state:add_state_change_function(
         
         mouse:raise_to_top()
         
-        Loading_G.x = 450
+        Loading_G.x = 200
         
         Loading_G.y = screen_h - 200
         
@@ -147,6 +184,10 @@ App_State.state:add_state_change_function(
     "OFFLINE",
     "LOADING"
 )
+
+
+
+
 
 
 App_State.state:change_state_to("LOADING")

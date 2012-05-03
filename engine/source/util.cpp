@@ -5,6 +5,7 @@
 #include "ossp/uuid.h"
 
 #include "util.h"
+#include "user_data.h"
 
 //.............................................................................
 
@@ -161,12 +162,7 @@ bool Action::run_one( GAsyncQueue * queue , gulong wait_ms )
     }
     else
     {
-        GTimeVal t;
-
-        g_get_current_time( & t );
-        g_time_val_add( & t , wait_ms * 1000 );
-
-        action = ( Action * ) g_async_queue_timed_pop( queue , & t );
+        action = ( Action * ) Util::g_async_queue_timeout_pop( queue , wait_ms * 1000 );
     }
 
     g_async_queue_unref( queue );
@@ -252,15 +248,18 @@ Util::Buffer::Buffer( gconstpointer _data , guint _length )
 
 Util::Buffer::Buffer( MemoryUse memory_use , gpointer _data , guint _length )
 :
-	bytes( g_byte_array_sized_new( _length ) )
+	bytes( 0 )
 {
 	switch( memory_use )
 	{
 	case Util::Buffer::MEMORY_USE_TAKE:
+		bytes = g_byte_array_new();
+		g_free( bytes->data );
 		bytes->data = ( guint8 * ) _data;
 		bytes->len = _length;
 		break;
 	case Util::Buffer::MEMORY_USE_COPY:
+		bytes = g_byte_array_sized_new( _length );
 		g_byte_array_append( bytes , ( const guint8 * ) _data , _length );
 		break;
 	}
@@ -331,4 +330,41 @@ const char * Util::Buffer::data() const
 guint Util::Buffer::length() const
 {
 	return bytes ? bytes->len : 0;
+}
+
+String Util::describe_lua_value( lua_State * L , int index )
+{
+	index = abs_index( L , index );
+
+	switch( lua_type( L , index ) )
+	{
+		case LUA_TNUMBER:
+		{
+			lua_pushvalue( L , index );
+			String result = lua_tostring( L , -1 );
+			lua_pop( L , 1 );
+			return result;
+		}
+		case LUA_TSTRING:
+			return Util::format( "\"%s\"" , lua_tostring( L , index ) );
+		case LUA_TBOOLEAN:
+			return lua_toboolean( L , index ) ? "true" : "false";
+		case LUA_TNIL:
+			return "nil";
+		default:
+			return UserData::describe( L , index );
+	}
+
+}
+
+gpointer Util::g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout )
+{
+#if GLIB_CHECK_VERSION(2,32,0)
+	return ::g_async_queue_timeout_pop( queue , timeout );
+#else
+	GTimeVal tv;
+	g_get_current_time( & tv );
+	g_time_val_add( & tv , timeout );
+	return g_async_queue_timed_pop( queue , & tv );
+#endif
 }

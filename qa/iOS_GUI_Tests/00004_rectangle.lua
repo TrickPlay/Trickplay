@@ -7,7 +7,7 @@ test_area = "rectangle"
 test_api = "basic"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 
 	local g = factory:Group{ x = 0, y = 0}
 
@@ -18,5 +18,15 @@ function generate_test_image (controller, factory)
 	return g
 end
 
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local g = Group{ x = 0, y = 0}
+
+	local r1 = Rectangle{color = "FF00FFFF", x = 10 * resize_ratio_w, y = 10 * resize_ratio_h, size = { 300 * resize_ratio_w , 420 * resize_ratio_h },border_color = "00FF00", border_width = 10}
+
+	g:add(r1)
+
+	return g
+end
 
 	

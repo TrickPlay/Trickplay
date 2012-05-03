@@ -50,7 +50,7 @@ do
         if to_be_deleted_r[new_function] ~= nil then
 			
 			--error("function is already being deleted from the idle_loop")
-			
+			print("deletion prevented")
 			for i = 1, #to_be_deleted do
 				if to_be_deleted[i] == new_function then
 					table.remove(to_be_deleted,i)
@@ -64,7 +64,7 @@ do
 				end
 			end
 			
-			error("was in to_be_deleted_r but not to_be_deleted?!?!?")
+			error("was in to_be_deleted_r but not to_be_deleted?!?!?",2)
 		elseif to_be_added_r[new_function] ~= nil then
 			
 			parameters[new_function].duration = duration
@@ -75,7 +75,7 @@ do
 			
         elseif iterated_list[new_function] ~= nil then
 			
-			error("function is already iterating in the idle_loop")
+			print("function is already iterating in the idle_loop")
 			
         else
             
@@ -150,26 +150,32 @@ do
         
         in_idle_loop = true
         
+        local param
+        
         for func, object in pairs( iterated_list ) do
             if to_be_deleted_r[func] == nil then
-				if parameters[func].duration ~= nil then
-					parameters[func].elapsed = parameters[func].elapsed + msecs
-					if parameters[func].elapsed > parameters[func].duration then
+                
+                param = parameters[func]
+                
+				if param.duration ~= nil then
+					
+                    param.elapsed = param.elapsed + msecs
+                    
+					if param.elapsed >= param.duration then
 						
 						func(
 							object,
-							msecs + parameters[func].duration - parameters[func].elapsed,
+							msecs + param.duration - param.elapsed,
 							1
 						)
-						
-						if parameters[func].loop then
+						if param.loop then
 							
-							parameters[func].elapsed = parameters[func].elapsed - parameters[func].duration
+							param.elapsed = param.elapsed - param.duration
 							
 							func(
 								object,
-								parameters[func].elapsed,
-								parameters[func].elapsed/parameters[func].duration
+								param.elapsed,
+								param.elapsed/param.duration
 							)
 						else
 							table.insert(to_be_deleted,func)
@@ -178,8 +184,8 @@ do
 					else
 						func(
 								object,
-								parameters[func].elapsed,
-								parameters[func].elapsed/parameters[func].duration
+								param.elapsed,
+								param.elapsed/param.duration
 							)
 					end
 				else
@@ -195,15 +201,35 @@ do
         in_idle_loop = false
         
         
-        for i = #to_be_deleted, 1, -1 do
+        local c = #to_be_deleted
+        
+        if c > 0 then
             
-			to_be_deleted_r[to_be_deleted[i]] = nil
+            for i = 1,c do
+                
+                to_be_deleted_r[to_be_deleted[i]] = nil
+                
+                iterated_list[to_be_deleted[i]]   = nil
+                
+                parameters[to_be_deleted[i]]      = nil
+                
+            end
             
-            iterated_list[to_be_deleted[i]]   = nil
+            to_be_deleted = {}
             
-            parameters[to_be_deleted[i]]      = nil
+        end
+        
+    end
+    
+    Idle_Loop.modify_duration  = function(self,obj,new_dur)
+        
+        if parameters[obj] then
             
-            to_be_deleted[i]                  = nil
+            local p = parameters[obj].elapsed/parameters[obj].duration
+            
+            parameters[obj].duration = new_dur
+            
+            parameters[obj].elapsed = new_dur*p
             
         end
         
@@ -221,31 +247,5 @@ do
     
 end
 
---[[
-delay = function(delay_amount, function_to_call, ...)
-	
-	assert(type(delay_amount)=="number",
-		"Received type\""..type(delay_amount)..
-		"\" for the delay amount, must be a number."
-	)
-	
-	assert(
-		type(function_to_call) == "function",
-		"Received type \""..type(function_to_call)..
-		"\" for the callback, can only delay the call to a function."
-	)
-	
-	Timer{
-		interval = delay_amount,
-		
-		on_timer = function(self)
-			self:stop()
-			
-			
-			function_to_call(...)
-		end
-	}:start()
-end
---]]
 
 return App_State, Idle_Loop

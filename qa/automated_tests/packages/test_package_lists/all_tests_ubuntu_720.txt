@@ -236,7 +236,7 @@
 },
 {
 "name": "00048_text_wrap.lua",
-"checksum": "2f02f0c77f8f15244453071f240333f3",
+"checksum": "f98b4be173012d38f2700f43b9e41c0d",
 "active": "true"
 },
 {
@@ -261,7 +261,7 @@
 },
 {
 "name": "00054_text_single_line.lua",
-"checksum": "f98456ddc978f8b53ba99640be39fb90",
+"checksum": "6abfe15c1d575906fe27a108d139d028",
 "active": "true"
 },
 {
@@ -292,7 +292,7 @@
 {
 "name": "00061_image_tile.lua",
 "checksum": "88c59f14d63c8fee3f6560a235cbefa3",
-"active": "true"
+"active": "false"
 },
 {
 "name": "00062_image_tile_sync.lua",
@@ -346,7 +346,7 @@
 },
 {
 "name": "00072_container_for_each.lua",
-"checksum": "2f02f0c77f8f15244453071f240333f3",
+"checksum": "e9b7e30ffcab4b2a8b91492d2a5d7ce0",
 "active": "true"
 },
 {
@@ -401,12 +401,12 @@
 },
 {
 "name": "10006_canvas_rotate.lua",
-"checksum": "2dba43523c763c9ef8e98d16a6f10afe",
+"checksum": "ef86da199dfb37dc98639c715f28c4d2",
 "active": "true"
 },
 {
 "name": "10007_canvas_rotate.lua",
-"checksum": "23486924e1227b6ff707d2dac6f76fc4",
+"checksum": "f8b38b0569ed6c9698beb0baed55bd62",
 "active": "true"
 },
 {
@@ -441,22 +441,22 @@
 },
 {
 "name": "10014_image_exif_orientation.lua",
-"checksum": "7f9d329c3b1d89cda10408a8c1f4f265",
+"checksum": "2f02f0c77f8f15244453071f240333f3",
 "active": "true"
 },
 {
 "name": "10015_container_boundary.lua",
-"checksum": "7f9d329c3b1d89cda10408a8c1f4f265",
+"checksum": "d33938ff5f5f6c8af164cf5a30be2ceb",
 "active": "true"
 },
 {
 "name": "10016_container_raise_lower.lua",
-"checksum": "0a7e80c81fa51388fe7c2357f0f98d5d",
+"checksum": "efe1846c25b07944e49ff8e30e472661",
 "active": "true"
 },
 {
 "name": "10017_container_children.lua",
-"checksum": "079f8ad6b4545016392b41106591b174",
+"checksum": "2f02f0c77f8f15244453071f240333f3",
 "active": "true"
 }
 ]

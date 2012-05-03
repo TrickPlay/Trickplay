@@ -19,8 +19,9 @@
 	int
 	(*TPLuaAPIOpen)(
 
-			lua_State *	L,
-			void * 		user_data);
+			lua_State *		L,
+			const char * 	app_id,
+			void * 			user_data);
 
 /*-----------------------------------------------------------------------------*/
 /*
@@ -31,8 +32,9 @@
 	void
 	(*TPLuaAPIClose)(
 
-			lua_State *	L,
-			void * 		user_data);
+			lua_State *		L,
+			const char * 	app_id,
+			void * 			user_data);
 
 /*-----------------------------------------------------------------------------*/
 
