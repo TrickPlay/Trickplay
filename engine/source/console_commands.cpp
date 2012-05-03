@@ -13,6 +13,8 @@
 #include "images.h"
 #include "sysdb.h"
 
+#include "ansi_color.h"
+
 namespace ConsoleCommands
 {
 #ifndef TP_PRODUCTION
@@ -130,10 +132,25 @@ protected:
         {
             if ( lua_State * L = app->get_lua_state() )
             {
-                int old_kb = lua_gc( L , LUA_GCCOUNT , 0 );
-                lua_gc( L , LUA_GCCOLLECT , 0 );
-                int new_kb = lua_gc( L , LUA_GCCOUNT , 0 );
-                g_info( "GC : %d KB - %d KB = %d KB" , new_kb , old_kb , new_kb - old_kb );
+            	while( true )
+            	{
+            		int old_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+            		(void) lua_gc( L , LUA_GCCOLLECT , 0 );
+            		int new_kb = lua_gc( L , LUA_GCCOUNT , 0 );
+            		g_info( "GC : %d KB - %d KB = %d KB" , new_kb , old_kb , new_kb - old_kb );
+
+            		if ( parameters == "all" )
+            		{
+            			if ( old_kb == new_kb )
+            			{
+            				break;
+            			}
+            		}
+            		else
+            		{
+            			break;
+            		}
+            	}
             }
         }
 	}
@@ -596,7 +613,7 @@ protected:
 	        clutter_text_get_color( CLUTTER_TEXT( actor ), &color );
 
 	        gchar * c = g_strdup_printf( "color=(%u,%u,%u,%u)", color.red, color.green, color.blue, color.alpha );
-	        
+
 	        gchar * f = g_strdup_printf( "font=(%s)", clutter_text_get_font_name( CLUTTER_TEXT( actor ) ) );
 
 	        extra = extra + "," + c + "," + f + "]";
@@ -689,12 +706,12 @@ protected:
 			details += " HIDDEN";
 		}
 
-	    g_info( "%s%s%s%s:%s%u [%p]: (%d,%d %ux%u)%s%s\033[0m",
-	    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : "\33[37m",
+	    g_info( "%s%s%s%s:%s%u [%p]: (%d,%d %ux%u)%s%s%s",
+	    		CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "" : SAFE_ANSI_COLOR_FG_WHITE,
 	            clutter_stage_get_key_focus( CLUTTER_STAGE( clutter_stage_get_default() ) ) == actor ? "> " : "  ",
 	            String( info->indent, ' ' ).c_str(),
 	            type,
-	            name ? String( " \033[33m" + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? "\33[0m" : "\33[37m" ) + " : " ).c_str()  : " ",
+	            name ? String( String(" ") + SAFE_ANSI_COLOR_FG_YELLOW + String( name ) + ( CLUTTER_ACTOR_IS_VISIBLE( actor ) ? SAFE_ANSI_COLOR_RESET : SAFE_ANSI_COLOR_FG_WHITE ) + " : " ).c_str()  : " ",
 	            clutter_actor_get_gid( actor ),
 	            actor,
 	            g.x,
@@ -702,7 +719,8 @@ protected:
 	            g.width,
 	            g.height,
 	            details.empty() ? "" : details.c_str(),
-	            extra.empty() ? "" : extra.c_str() );
+	            extra.empty() ? "" : extra.c_str(),
+	            SAFE_ANSI_COLOR_RESET );
 
 	    if ( CLUTTER_IS_CONTAINER( actor ) )
 	    {
@@ -796,6 +814,44 @@ protected:
 	}
 };
 
+//.............................................................................
+
+class Globals : public Handler
+{
+protected:
+
+	virtual void operator() ( TPContext * context , const String & command , const String & parameters )
+	{
+		App * app = context->get_current_app();
+
+		if ( ! app )
+		{
+			return;
+		}
+
+		lua_State * L = app->get_lua_state();
+
+		if ( ! L )
+		{
+			return;
+		}
+
+		const StringMap & globals( app->get_globals() );
+
+		for ( StringMap::const_iterator it = globals.begin(); it != globals.end(); ++it )
+		{
+			lua_pushstring( L , it->first.c_str() );
+			lua_rawget( L , LUA_GLOBALSINDEX );
+			if ( ! lua_isnil( L , -1 ) )
+			{
+				g_info( "%s (%s) = %s [%s]" , it->first.c_str() , lua_typename( L , lua_type( L , -1 ) ) , Util::describe_lua_value( L , -1 ).c_str() , it->second.c_str() );
+			}
+			lua_pop( L , 1 );
+		}
+
+	}
+};
+
 //=============================================================================
 
 class Handlers
@@ -827,6 +883,7 @@ public:
 		H( "fonts"  , Fonts );
 		H( "ui"     , UI );
 		H( "profile", Profile );
+		H( "globals", Globals );
 
 #undef H
 

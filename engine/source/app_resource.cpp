@@ -442,6 +442,8 @@ bool AppResource::is_child( const String & root_uri , const String & child_uri )
 		}
 	}
 
+	g_object_unref( root );
+	
 	return result;
 }
 
@@ -532,6 +534,8 @@ Util::Buffer AppResource::load_contents( App * app ) const
 		// caching stuff.
 
 		g_file_load_contents( file , 0 , & contents , & length , 0 , & error );
+
+		g_object_unref( file );
 
 		if ( error )
 		{

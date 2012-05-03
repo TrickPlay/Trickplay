@@ -104,11 +104,29 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Property: duration
 		
-		The duration property is an integer value specifying the length of the Timeline in milliseconds.
+		The duration property is an integer value specifying the length of the Timeline's animation in milliseconds.
+		
+		Note: While an animation is running, its duration property should not be modified. It is possible, however, to alter the duration of a looping animation in the Timeline object's on_completed() event handler by following the steps shown below.
+		
+		(code)
+		myTimeline = Timeline( { duration = 1000,
+		                         loop = true,
+		                         ...other Timeline settings...,
+		                         
+		                         on_completed = function( self )
+		                         	-- Change duration
+		                         	self.duration = 2000
+		                         	
+		                         	-- Stop and restart current animation
+		                         	self.stop()
+		                         	self.start()
+		                         end
+		} )
+		(end)
 		
 		*Default Setting:* 1000 milliseconds, i.e., one second
 		
-		*See Also:* the <delay> property
+		*See Also:* the <delay> and <loop> properties and the <on_completed> event handler
 	*/
 	
     int duration
@@ -300,7 +318,7 @@ class Timeline [[ClutterTimeline*]]
 	/*
 		Function: stop
 		
-		The stop() function halts a running Timeline and resets the Timeline to its starting position. The stop() function does *not* cause the on_completed() event handler to be called.
+		The stop() function halts a running Timeline and resets the Timeline to its starting position. The properties of all animating objects, however, remain at whatever intermediate values they were at when the animation was stopped.  The stop() function does *not* cause the on_completed() event handler to be called.
 		
 		*Arguments:* None
 		
@@ -346,7 +364,36 @@ class Timeline [[ClutterTimeline*]]
 	*/
 
     skip(int msecs)
-	[[clutter_timeline_skip(self,msecs);]];
+	[[
+	   if ( msecs < 0 )
+	   {
+	       luaL_error( L , "Duration argument to Timeline:skip must be positive." );
+	   }
+	   else
+	   {
+           guint elapsed = clutter_timeline_get_elapsed_time( self );
+           guint duration = clutter_timeline_get_duration( self );
+       
+    	   switch( clutter_timeline_get_direction( self ) )
+    	   {
+    	       case CLUTTER_TIMELINE_FORWARD:
+                   if ( msecs + elapsed > duration ) 
+                   {
+                       msecs = duration - elapsed;
+                   }
+                   break;
+                   
+               case CLUTTER_TIMELINE_BACKWARD:
+                   if ( int( elapsed ) - msecs < 0 )
+                   {
+                       msecs = ( duration - ( duration - elapsed ) ) -1;
+                   }                     
+                   break;
+    	   }
+    	   
+    	   clutter_timeline_skip( self , msecs );
+    	}
+	]];
 	
 	/*
 		Function: advance
@@ -367,15 +414,37 @@ class Timeline [[ClutterTimeline*]]
 	*/
 	
     advance(int msecs)
-	[[clutter_timeline_advance(self,msecs);]];
+	[[
+	   if ( msecs < 0 )
+	   {
+	       luaL_error( L , "Duration argument to Timeline:advance must be positive." );
+	   }
+	   else
+	   { 
+           int duration = clutter_timeline_get_duration( self );
+           
+           if ( msecs > duration ) 
+           {
+               msecs = duration;
+           }
+           
+	       clutter_timeline_advance(self,msecs);
+	   }
+	   
+	]];
 	
 	/*
 		Function: add_marker
 		
 		The add_marker() function defines a named marker that is attached to a specific time on the Timeline. During the running of the Timeline's animation, when the marked time is reached, the on_marker_reached() event handler is called.
 		
-		Each marker defined for the object must be a unique string. An attempt to add a marker with an existing name has no effect.
-		
+		Each marker defined for the object must have a unique name. If a marker with the specified name already exists on the Timeline, the new marker replaces the existing marker, as shown below.
+
+		(code)
+		someTimeline:add_marker( "myMarker", 1000 )  -- sets myMarker at 1000 milliseconds
+		someTimeline:add_marker( "myMarker", 2000 )  -- replaces existing myMarker; myMarker now set at 2000 msecs
+		(end)
+				
 		The marked time on the Timeline is specified in milliseconds from the start of the animation, not including any initial delay.
 		
 		A marker can be removed by calling the <remove_marker> function.
@@ -434,7 +503,14 @@ class Timeline [[ClutterTimeline*]]
 	*/
 
     add_marker(string name,int msecs)
-	[[clutter_timeline_add_marker_at_time(self,name,msecs);]];
+	[[
+	   if ( clutter_timeline_has_marker( self , name ) )
+	   {
+	       clutter_timeline_remove_marker( self , name );
+	   }
+	      
+	   clutter_timeline_add_marker_at_time( self , name , msecs );
+	]];
 
 	/*
 		Function: remove_marker

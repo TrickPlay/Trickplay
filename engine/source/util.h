@@ -306,7 +306,7 @@ private:
 
 namespace Util
 {
-    inline String format( const gchar * format, ... )
+	inline String format( const gchar * format, ... )
     {
         va_list args;
         va_start( args, format );
@@ -319,6 +319,8 @@ namespace Util
     }
 
     String random_string( guint length );
+
+    gpointer g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout );
 
     //-----------------------------------------------------------------------------
 
@@ -435,7 +437,7 @@ namespace Util
     {
     public:
 
-    	enum MemoryUse { MEMORY_USE_TAKE , MEMORY_USE_COPY };
+    	typedef enum { MEMORY_USE_TAKE , MEMORY_USE_COPY } MemoryUse;
 
     	Buffer();
 
@@ -463,6 +465,9 @@ namespace Util
 
     	GByteArray * bytes;
     };
+
+
+	String describe_lua_value( lua_State * L , int index );
 }
 
 #endif // _TRICKPLAY_UTIL_H

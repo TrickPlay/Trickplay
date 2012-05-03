@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'SaveAsDialog.ui'
+# Form implementation generated from reading ui file 'UI/SaveAsDialog.ui'
 #
-# Created: Wed Nov  9 16:03:56 2011
+# Created: Tue Feb 28 11:20:40 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,11 +18,16 @@ class Ui_saveAsDialog(object):
     def setupUi(self, saveAsDialog):
         saveAsDialog.setObjectName(_fromUtf8("saveAsDialog"))
         saveAsDialog.resize(427, 120)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        saveAsDialog.setFont(font)
         saveAsDialog.setModal(True)
         self.gridLayout_2 = QtGui.QGridLayout(saveAsDialog)
         self.gridLayout_2.setVerticalSpacing(12)
         self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
         self.buttonBox = QtGui.QDialogButtonBox(saveAsDialog)
+        self.buttonBox.setFocusPolicy(QtCore.Qt.TabFocus)
+        self.buttonBox.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
@@ -35,6 +40,7 @@ class Ui_saveAsDialog(object):
         self.horizontalLayout.setSpacing(3)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.directory = QtGui.QLineEdit(saveAsDialog)
+        self.directory.setText(_fromUtf8(""))
         self.directory.setReadOnly(True)
         self.directory.setPlaceholderText(_fromUtf8(""))
         self.directory.setObjectName(_fromUtf8("directory"))
@@ -44,6 +50,7 @@ class Ui_saveAsDialog(object):
         self.horizontalLayout.addWidget(self.browse)
         self.gridLayout.addLayout(self.horizontalLayout, 1, 1, 1, 1)
         self.filename = QtGui.QLineEdit(saveAsDialog)
+        self.filename.setFocus()
         self.filename.setPlaceholderText(_fromUtf8(""))
         self.filename.setObjectName(_fromUtf8("filename"))
         self.gridLayout.addWidget(self.filename, 0, 1, 1, 1)
@@ -59,10 +66,12 @@ class Ui_saveAsDialog(object):
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), saveAsDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), saveAsDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(saveAsDialog)
+        saveAsDialog.setTabOrder(self.filename, self.directory)
+        saveAsDialog.setTabOrder(self.directory, self.browse)
+        saveAsDialog.setTabOrder(self.browse, self.buttonBox)
 
     def retranslateUi(self, saveAsDialog):
         saveAsDialog.setWindowTitle(QtGui.QApplication.translate("saveAsDialog", "Save As", None, QtGui.QApplication.UnicodeUTF8))
-        self.directory.setText(QtGui.QApplication.translate("saveAsDialog", " ", None, QtGui.QApplication.UnicodeUTF8))
         self.browse.setText(QtGui.QApplication.translate("saveAsDialog", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.labelDirectory.setText(QtGui.QApplication.translate("saveAsDialog", "Folder", None, QtGui.QApplication.UnicodeUTF8))
         self.labelName.setText(QtGui.QApplication.translate("saveAsDialog", "File Name", None, QtGui.QApplication.UnicodeUTF8))

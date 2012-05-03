@@ -1,0 +1,283 @@
+
+REGISTER sip:asterisk-1.asterisk.trickplay.com SIP/2.0
+Via: SIP/2.0/UDP 10.0.190.153:50418;rport;branch=z9hG4bK3ad35939bc774abc933ec2849c221d84
+Max-Forwards: 70
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=1062a8cf69a34752bddad18fe4353ae9
+To: <sip:phone@asterisk-1.asterisk.trickplay.com>
+Call-ID: ec1333b6-636e-4bc5-a126-9565470af698
+CSeq: 101 REGISTER
+Contact: <sip:phone@10.0.190.153:50418>
+User-Agent: Python
+Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE
+Supported: timer, 100rel, path
+Content-Length: 0
+
+
+
+
+SIP/2.0 401 Unauthorized
+Via: SIP/2.0/UDP 10.0.190.153:50418;branch=z9hG4bK3ad35939bc774abc933ec2849c221d84;received=10.0.190.153;rport=50418
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=1062a8cf69a34752bddad18fe4353ae9
+To: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=as34b5cd3a
+Call-ID: ec1333b6-636e-4bc5-a126-9565470af698
+CSeq: 101 REGISTER
+Server: Asterisk PBX 1.8.7.1
+Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+Supported: replaces, timer
+WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="21fa3fea"
+Content-Length: 0
+
+
+
+
+REGISTER sip:asterisk-1.asterisk.trickplay.com SIP/2.0
+Via: SIP/2.0/UDP 10.0.190.153:50418;rport;branch=z9hG4bK54a9206153274ac5996e5566d34e765f
+Max-Forwards: 70
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=1062a8cf69a34752bddad18fe4353ae9
+To: <sip:phone@asterisk-1.asterisk.trickplay.com>
+Call-ID: ec1333b6-636e-4bc5-a126-9565470af698
+CSeq: 102 REGISTER
+Contact: <sip:phone@10.0.190.153:50418>
+User-Agent: Python
+Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE
+Supported: timer, 100rel, path
+Authorization: Digest username="phone", realm="asterisk", nonce="21fa3fea", algorithm=MD5, uri="sip:asterisk-1.asterisk.trickplay.com", response="b6dd98c613650b8add4b5bef7817c069"
+Content-Length: 0
+
+
+
+
+OPTIONS sip:phone@10.0.190.153:50418 SIP/2.0
+Via: SIP/2.0/UDP 50.112.24.155:5060;branch=z9hG4bK6e05130d;rport
+Max-Forwards: 70
+From: "asterisk" <sip:asterisk@50.112.24.155>;tag=as72a5f481
+To: <sip:phone@10.0.190.153:50418>
+Contact: <sip:asterisk@50.112.24.155:5060>
+Call-ID: 2bf72dca0f88f1370c11c6d14c15b732@50.112.24.155:5060
+CSeq: 102 OPTIONS
+User-Agent: Asterisk PBX 1.8.7.1
+Date: Wed, 29 Feb 2012 00:06:11 GMT
+Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+Supported: replaces, timer
+Content-Length: 0
+
+
+
+
+SIP/2.0 200 OK
+Via: SIP/2.0/UDP 50.112.24.155:5060;branch=z9hG4bK6e05130d;rport=5060;received=50.112.24.155
+From: "asterisk" <sip:asterisk@50.112.24.155>;tag=as72a5f481
+To: <sip:phone@10.0.190.153:50418>;tag=f679376a52e74353bfaa2d46068ad29a
+Call-ID: 2bf72dca0f88f1370c11c6d14c15b732@50.112.24.155:5060
+CSeq: 102 OPTIONS
+Contact: <sip:phone@10.0.190.153:50418>
+User-Agent: Python
+Accept: application/sdp
+Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE
+Supported: timer, 100rel
+Content-Length: 0
+
+
+
+
+SIP/2.0 200 OK
+Via: SIP/2.0/UDP 10.0.190.153:50418;branch=z9hG4bK54a9206153274ac5996e5566d34e765f;received=10.0.190.153;rport=50418
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=1062a8cf69a34752bddad18fe4353ae9
+To: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=as34b5cd3a
+Call-ID: ec1333b6-636e-4bc5-a126-9565470af698
+CSeq: 102 REGISTER
+Server: Asterisk PBX 1.8.7.1
+Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+Supported: replaces, timer
+Expires: 120
+Contact: <sip:phone@10.0.190.153:50418>;expires=120
+Date: Wed, 29 Feb 2012 00:06:11 GMT
+Content-Length: 0
+
+
+
+
+INVITE sip:rex_sip@asterisk-1.asterisk.trickplay.com SIP/2.0
+Via: SIP/2.0/UDP 10.0.190.153:50418;rport;branch=z9hG4bK6562f08233ce48f2b2f5855b0ab0eec8
+Max-Forwards: 70
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+To: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 101 INVITE
+Contact: <sip:phone@10.0.190.153:50418>
+User-Agent: Python
+Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE
+Supported: timer, 100rel, path
+Content-Length: 174
+
+v=0
+o=- 0 0 IN IP4 10.0.190.153
+s=phone
+c=IN IP4 10.0.190.153
+t=0 0
+a=range:npt=now-
+m=audio 7078 RTP/AVP 0
+a=rtpmap:0 PCMU/8000
+a=sendrecv
+m=video 0 RTP/AVP 34 99
+
+
+
+SIP/2.0 401 Unauthorized
+Via: SIP/2.0/UDP 10.0.190.153:50418;branch=z9hG4bK6562f08233ce48f2b2f5855b0ab0eec8;received=10.0.190.153;rport=50418
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+To: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>;tag=as3211b891
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 101 INVITE
+Server: Asterisk PBX 1.8.7.1
+Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+Supported: replaces, timer
+WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="72c25338"
+Content-Length: 0
+
+
+
+
+ACK sip:rex_sip@asterisk-1.asterisk.trickplay.com SIP/2.0
+Via: SIP/2.0/UDP 10.0.190.153:50418;rport;branch=z9hG4bK1030e97a704b471e83a768c068287212
+Max-Forwards: 70
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+To: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>;tag=as3211b891
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 101 ACK
+Content-Length: 0
+
+
+
+
+INVITE sip:rex_sip@asterisk-1.asterisk.trickplay.com SIP/2.0
+Via: SIP/2.0/UDP 10.0.190.153:50418;rport;branch=z9hG4bKdfc4de9fdfe34ff383cb1c92411a2049
+Max-Forwards: 70
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+To: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 102 INVITE
+Contact: <sip:phone@10.0.190.153:50418>
+User-Agent: Python
+Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE
+Supported: timer, 100rel, path
+Authorization: Digest username="phone", realm="asterisk", nonce="72c25338", algorithm=MD5, uri="sip:rex_sip@asterisk-1.asterisk.trickplay.com", response="e92186765721bc7036f300961d5ee770"
+Content-Length: 174
+
+v=0
+o=- 0 0 IN IP4 10.0.190.153
+s=phone
+c=IN IP4 10.0.190.153
+t=0 0
+a=range:npt=now-
+m=audio 7078 RTP/AVP 0
+a=rtpmap:0 PCMU/8000
+a=sendrecv
+m=video 0 RTP/AVP 34 99
+
+
+
+SIP/2.0 100 Trying
+Via: SIP/2.0/UDP 10.0.190.153:50418;branch=z9hG4bKdfc4de9fdfe34ff383cb1c92411a2049;received=10.0.190.153;rport=50418
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+To: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 102 INVITE
+Server: Asterisk PBX 1.8.7.1
+Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+Supported: replaces, timer
+Contact: <sip:rex_sip@50.112.24.155:5060>
+Content-Length: 0
+
+
+
+
+SIP/2.0 180 Ringing
+Via: SIP/2.0/UDP 10.0.190.153:50418;branch=z9hG4bKdfc4de9fdfe34ff383cb1c92411a2049;received=10.0.190.153;rport=50418
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+To: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>;tag=as43e5338f
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 102 INVITE
+Server: Asterisk PBX 1.8.7.1
+Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+Supported: replaces, timer
+Contact: <sip:rex_sip@50.112.24.155:5060>
+Content-Length: 0
+
+
+
+
+SIP/2.0 200 OK
+Via: SIP/2.0/UDP 10.0.190.153:50418;branch=z9hG4bKdfc4de9fdfe34ff383cb1c92411a2049;received=10.0.190.153;rport=50418
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+To: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>;tag=as43e5338f
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 102 INVITE
+Server: Asterisk PBX 1.8.7.1
+Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+Supported: replaces, timer
+Contact: <sip:rex_sip@50.112.24.155:5060>
+Content-Type: application/sdp
+Content-Length: 437
+
+v=0
+o=root 44260006 44260006 IN IP4 50.112.24.155
+s=Asterisk PBX 1.8.7.1
+c=IN IP4 50.112.24.155
+b=CT:9384
+t=0 0
+m=audio 19382 RTP/AVP 0 8 110 3 101
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+a=rtpmap:110 speex/8000
+a=rtpmap:3 GSM/8000
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-16
+a=silenceSupp:off - - - -
+a=ptime:20
+a=sendrecv
+m=video 11860 RTP/AVP 34 99
+a=rtpmap:34 H263/90000
+a=rtpmap:99 H264/90000
+a=se
+
+
+ACK sip:rex_sip@asterisk-1.asterisk.trickplay.com SIP/2.0
+Via: SIP/2.0/UDP 10.0.190.153:50418;rport;branch=z9hG4bKa5dbfa8e9e194b1389cd7dda0fc99156
+Max-Forwards: 70
+From: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+To: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>;tag=as43e5338f
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 102 ACK
+Authorization: Digest username="phone", realm="asterisk", nonce="72c25338", algorithm=MD5, uri="sip:rex_sip@asterisk-1.asterisk.trickplay.com", response="e92186765721bc7036f300961d5ee770"
+Content-Length: 0
+
+
+
+
+BYE sip:phone@10.0.190.153:50418 SIP/2.0
+Via: SIP/2.0/UDP 50.112.24.155:5060;branch=z9hG4bK14c1b84a;rport
+Max-Forwards: 70
+From: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>;tag=as43e5338f
+To: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 102 BYE
+User-Agent: Asterisk PBX 1.8.7.1
+Proxy-Authorization: Digest username="phone", realm="asterisk", algorithm=MD5, uri="sip:asterisk-1.asterisk.trickplay.com", nonce="", response="036ca8a5b1cec78d2b1032c4ef953fe9"
+X-Asterisk-HangupCause: Normal Clearing
+X-Asterisk-HangupCauseCode: 16
+Content-Length: 0
+
+
+
+
+SIP/2.0 200 OK
+Via: SIP/2.0/UDP 50.112.24.155:5060;branch=z9hG4bK14c1b84a;rport
+From: <sip:rex_sip@asterisk-1.asterisk.trickplay.com>;tag=as43e5338f
+To: <sip:phone@asterisk-1.asterisk.trickplay.com>;tag=84e8e23dc8694e4986a4a7b4e6cdd37c
+Call-ID: ecf9b196-e97e-42ec-a7d1-cd2f3b59d775
+CSeq: 102 BYE
+Content-Length: 0
+
+
+

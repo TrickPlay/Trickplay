@@ -115,6 +115,8 @@ public:
     struct LaunchInfo
     {
         LaunchInfo()
+        :
+        	debug( false )
         {}
 
         LaunchInfo( const String & _caller,
@@ -127,7 +129,8 @@ public:
             action( _action ),
             uri( _uri ? _uri : "" ),
             type( _type ? _type : "" ),
-            parameters( _parameters ? _parameters : "" )
+            parameters( _parameters ? _parameters : "" ),
+            debug( false )
         {}
 
         String  caller;
@@ -135,6 +138,8 @@ public:
         String  uri;
         String  type;
         String  parameters; // serialized Lua
+
+        bool	debug;
     };
 
     //.........................................................................
@@ -265,6 +270,13 @@ public:
 
     void audio_match( const String & json );
 
+    //.........................................................................
+
+    const StringMap & get_globals() const
+    {
+    	return globals;
+    }
+
 protected:
 
     ~App();
@@ -319,6 +331,10 @@ private:
 
     //.........................................................................
 
+    static int global_tracker( lua_State * L );
+
+    //.........................................................................
+
     TPContext       *       context;
     Metadata                metadata;
     String                  data_path;
@@ -331,6 +347,7 @@ private:
     guint32                 screen_gid;
     LaunchInfo              launch;
     gulong                  stage_allocation_handler;
+    StringMap				globals;
 
 #ifndef TP_PRODUCTION
 
