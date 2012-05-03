@@ -65,6 +65,7 @@ if (NATURAL_DOCS)
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/docs/oem
         COMMAND ${NATURAL_DOCS}
 			-r
+			--highlight Off
             -i ${PROJECT_SOURCE_DIR}/engine            
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/rte
             -xi ${PROJECT_SOURCE_DIR}/engine/docs/tutorials

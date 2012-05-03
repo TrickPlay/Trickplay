@@ -848,7 +848,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
     drawElements(GLenum mode, GLsizei count, GLenum type, GLintptr offset )
         [[
             _GET_CONTEXT_;
-            glDrawElements( mode , count , type , (GLvoid*) offset );
+            glDrawElements( mode , count , type , GINT_TO_POINTER( offset ) );
             clutter_actor_queue_redraw( self );
         ]];
 
@@ -2352,7 +2352,7 @@ interface WebGLRenderingContext [[ ClutterActor * ]]
     vertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLintptr offset )
         [[
             _GET_CONTEXT_;
-            glVertexAttribPointer( indx , size , type , normalized ? GL_TRUE : GL_FALSE , stride , (GLvoid*) offset );
+            glVertexAttribPointer( indx , size , type , normalized ? GL_TRUE : GL_FALSE , stride , GINT_TO_POINTER( offset ) );
         ]];
 
     viewport(GLint x, GLint y, GLsizei width, GLsizei height )

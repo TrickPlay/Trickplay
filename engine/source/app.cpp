@@ -182,11 +182,9 @@ public:
 		{
 			tplog2( "CALLING OPEN ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
 
-			lua_pushstring( L , app_id.c_str() );
-
 			int top_before = lua_gettop( L );
 
-			int result = (*it)->open( L , (*it)->plugin->user_data() );
+			int result = (*it)->open( L , app_id.c_str() , (*it)->plugin->user_data() );
 
 			if ( 0 != result )
 			{
@@ -209,10 +207,6 @@ public:
 			{
 				tpwarn( "  PLUGIN OPEN POPPED TOO MANY VALUES OFF THE STACK" );
 			}
-			else
-			{
-				lua_pop( L , 1 );
-			}
 		}
 	}
 
@@ -228,11 +222,9 @@ public:
 		{
 			tplog2( "CALLING CLOSE ON PLUGIN '%s'..." , (*it)->plugin->name().c_str() );
 
-			lua_pushstring( L , app_id.c_str() );
-
 			int top_before = lua_gettop( L );
 
-			(*it)->close( L , (*it)->plugin->user_data() );
+			(*it)->close( L , app_id.c_str() , (*it)->plugin->user_data() );
 
 			tplog2( "  PLUGIN CLOSED" );
 
@@ -247,10 +239,6 @@ public:
 			else if ( top_after < top_before )
 			{
 				tpwarn( "  PLUGIN CLOSE POPPED TOO MANY VALUES OFF THE STACK" );
-			}
-			else
-			{
-				lua_pop( L , 1 );
 			}
 		}
 	}

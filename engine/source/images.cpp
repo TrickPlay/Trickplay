@@ -1662,6 +1662,12 @@ bool Images::cache_has( const String & key )
 
 //=============================================================================
 
+#ifdef CLUTTER_VERSION_1_10
+#define TP_COGL_TEXTURE(t) (COGL_TEXTURE(t))
+#else
+#define TP_COGL_TEXTURE(t) (t)
+#endif
+
 Images::Cache::Entry::Entry( CoglHandle _handle , const JSON::Object & _tags )
 :
     handle( cogl_handle_ref( _handle ) ),
@@ -1670,7 +1676,7 @@ Images::Cache::Entry::Entry( CoglHandle _handle , const JSON::Object & _tags )
 {
 	// Size in MB
 
-	size = ( cogl_texture_get_height( handle ) * cogl_texture_get_rowstride( handle ) ) / ( 1024.0 * 1024.0 );
+	size = ( cogl_texture_get_height( TP_COGL_TEXTURE( handle ) ) * cogl_texture_get_rowstride( TP_COGL_TEXTURE( handle ) ) ) / ( 1024.0 * 1024.0 );
 }
 
 Images::Cache::Entry::~Entry()
@@ -1840,8 +1846,8 @@ void Images::Cache::dump()
 		{
 			g_info( "  %3d) %4u x %-4u : %8.2f KB : %8.3f s : %s" ,
 					i ,
-					cogl_texture_get_width( it->second->handle ),
-					cogl_texture_get_height( it->second->handle ),
+					cogl_texture_get_width( TP_COGL_TEXTURE( it->second->handle ) ),
+					cogl_texture_get_height( TP_COGL_TEXTURE( it->second->handle ) ),
 					it->second->size * 1024.0,
 					( now - it->second->timestamp ) / 1000,
 					it->first.c_str() );
