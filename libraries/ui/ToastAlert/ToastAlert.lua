@@ -42,6 +42,10 @@ ToastAlert = function(parameters)
 	----------------------------------------------------------------------------
 	--functions pertaining to getting and setting of attributes
 	
+	override_property(instance,"widget_type",
+		function() return "ToastAlert" end, nil
+	)
+    
 	override_property(instance,"icon",
 		
 		function(oldf)    return icon   end,
