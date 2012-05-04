@@ -1,3 +1,80 @@
+
+MENUBUTTON = true
+
+
+local default_parameters = {}
+MenuButton = function(parameter)
+    
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("MenuButton",parameters)
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+    ----------------------------------------------------------------------------
+	--The ButtonPicker Object inherits from LayoutManager
+	
+    local button = Button()
+    
+    local popup = LayoutManager{
+        vertical_spacing   = 0,
+        horizontal_spacing = 0,
+    }
+    
+	local instance = LayoutManager{
+        cells = {
+            {button},
+            {popup},
+        },
+    }
+    
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"items",
+		function(oldf) return   popup.cells     end,
+		function(oldf,self,v)  
+            
+            popup.cells = v
+            
+        end
+	)
+    ----------------------------------------------------------------------------
+    local direction
+	override_property(instance,"direction",
+		function(oldf) return   direction     end,
+		function(oldf,self,v)  
+            
+            if direction == v then return end
+            if v == "up" then
+                instance.cells.data = {
+                    {popup},
+                    {button},
+                }
+            elseif v == "down" then
+                instance.cells.data = {
+                    {button},
+                    {popup},
+                }
+            else
+                
+                error("ButtonPicker.direction expects 'horizontal' or 'vertical as its value. Received: "..v,2)
+                
+            end
+            direction = v
+        end
+	)
+    ----------------------------------------------------------------------------
+    
+	instance:set(parameters)
+	
+	return instance
+    
+end
+
+
+--[=[
+
 --[[
 Function: Menu Button
 ]]
@@ -839,3 +916,4 @@ button
 
     return umbrella
 end
+--]=]
