@@ -114,6 +114,10 @@ ProgressBar = function(parameters)
     
 	----------------------------------------------------------------------------
     
+	override_property(instance,"widget_type",
+		function() return "ProgressBar" end, nil
+	)
+    
     local expand_fill = function() 
         fill.clip = {
             0,
