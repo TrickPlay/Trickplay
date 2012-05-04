@@ -144,6 +144,13 @@ ArrowStyle = function(parameters)
                 children_using_this_style[object] = update_function
                 
             end,
+            to_json = function()
+                return json:stringify{
+                    size   = instance.size,
+                    offset = instance.offset,
+                    colors = instance.colors.name,
+                }
+            end,
             styles_json = arrowstyles_json
         },
         {
@@ -176,6 +183,7 @@ local borderstyles_json = function()
     for name,obj in pairs(all_border_styles) do
         
         t[name]           = {
+            name          = instance.name,
             width         = obj.width,
             corner_radius = obj.corner_radius,
             colors        = obj.colors.name,
@@ -243,6 +251,14 @@ BorderStyle = function(parameters)
                 
                 children_using_this_style[object] = update_function
                 
+            end,
+            to_json = function()
+                return json:stringify{
+                    name          = instance.name,
+                    width         = instance.width,
+                    corner_radius = instance.corner_radius,
+                    colors        = instance.colors.name,
+                }
             end,
             styles_json = borderstyles_json 
         },
@@ -336,6 +352,17 @@ TextStyle = function(parameters)
             
             children_using_this_style[object] = update_function
             
+        end,
+        to_json = function()
+            local t = {}
+            
+            for property, value in pairs(instance:get_table()) do
+                t[property] = value
+            end
+            t.name   = instance.name
+            t.colors = obj.colors.name
+            
+            return json:stringify(t)
         end,
         styles_json = textstyles_json 
     }
@@ -480,7 +507,19 @@ Style = function(parameters)
     }
     
     instance = setmetatable(
-        { styles_json = styles_json },
+        { 
+            styles_json = styles_json,
+            to_json = function()
+                
+                return json:stringify{
+                    name        = instance.name,
+                    arrow       = instance.arrow.name,
+                    border      = instance.border.name,
+                    text        = instance.text.name,
+                    fill_colors = instance.fill_colors.name,
+                }
+            end,
+        },
         {
             __newindex = function(t,k,v)
                 
