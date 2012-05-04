@@ -33,6 +33,9 @@ void free_attributes(attribute *attributes[], int length) {
 
 @implementation STUNClient
 
+@synthesize sock_fd;
+@synthesize publicHostPortSocket;
+
 - (id)initWithOutgoingAddress:(struct sockaddr_in)_outgoing_addr {
     self = [super init];
     
@@ -73,6 +76,8 @@ void free_attributes(attribute *attributes[], int length) {
         
         outgoing_addr = _outgoing_addr;
         
+        sock_fd = -1;
+        
         publicHostPortSocket = nil;
     }
     
@@ -86,10 +91,12 @@ void free_attributes(attribute *attributes[], int length) {
     
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
-    hints.ai_protocol = SOCK_DGRAM;
+    hints.ai_socktype = SOCK_DGRAM;
+    
+    fprintf(stderr, "stun server: %s\n", inet_ntoa(*((struct in_addr *)gethostbyname(STUN_HOST)->h_addr_list[0])));
     
     int rv;
-    if ((rv = getaddrinfo(STUN_HOST, [[NSString stringWithFormat:@"%d", STUN_PORT] UTF8String], &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(STUN_HOST, [[NSString stringWithFormat:@"%d", STUN_PORT] UTF8String], NULL, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return nil;
     }
@@ -97,16 +104,19 @@ void free_attributes(attribute *attributes[], int length) {
     for (p = servinfo; p != NULL; p = p->ai_next) {
         if ((sock_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
             perror("STUN socket could not be established");
+            continue;
         }
         
         if (bind(sock_fd, (struct sockaddr *)&outgoing_addr, sizeof(outgoing_addr)) != 0) {
             close(sock_fd);
             perror("STUN socket could not bind to outgoing address");
+            continue;
         }
         
         if (connect(sock_fd, p->ai_addr, p->ai_addrlen)) {
             close(sock_fd);
             perror("STUN socket could not connect to STUN server");
+            continue;
         }
         
         break;
@@ -114,15 +124,18 @@ void free_attributes(attribute *attributes[], int length) {
     
     if (p == NULL) {
         fprintf(stderr, "STUN client failed to connect\n");
+        freeaddrinfo(servinfo);
         return nil;
     }
+    
+    freeaddrinfo(servinfo);
     
     // Check the socket for writing the request
     fd_set wfds, rfds;
     struct timeval tv;
     
-    FD_ZERO(wfds);
-    FD_SET(sock_fd, wfds);
+    FD_ZERO(&wfds);
+    FD_SET(sock_fd, &wfds);
     
     tv.tv_sec = 5;
     tv.tv_usec = 0;
@@ -133,20 +146,20 @@ void free_attributes(attribute *attributes[], int length) {
     
     if (select(sock_fd+1, NULL, &wfds, NULL, &tv) > 0) {
         // Write the request and wait for a response
-        if (FD_ISSET(sock_fd, wfds)) {
-            if (send(sock_fd, request, sizeof(request), NULL) != 20) {
+        if (FD_ISSET(sock_fd, &wfds)) {
+            if (send(sock_fd, request, sizeof(request), 0) != 20) {
                 perror("Error Sending STUN request");
                 close(sock_fd);
                 return nil;
             }
             
-            FD_ZERO(rfds);
-            FD_SET(sock_fd, rfds);
+            FD_ZERO(&rfds);
+            FD_SET(sock_fd, &rfds);
             tv.tv_sec = 15;
             tv.tv_usec = 0;
             
             if (select(sock_fd+1, &rfds, NULL, NULL, &tv) > 0) {
-                if (FD_ISSET(sock_fd, rfds)) {
+                if (FD_ISSET(sock_fd, &rfds)) {
                     // TODO: No guarentee that the whole response packet was read!!
                     if ((resp_length = recv(sock_fd, response, sizeof(response), 0)) <= 0) {
                         perror("Error Receiving STUN response");
@@ -242,10 +255,12 @@ void free_attributes(attribute *attributes[], int length) {
                     return nil;
                 }
                 
-                uint16_t port = ntohs(((uint16_t *)value)[1]);
+                uint16_t port = ntohs(((uint16_t *)value)[1]); // TODO: This is flipping my bytes?
+                //uint16_t port = ((uint16_t *)value)[1];
                 
                 struct in_addr addr;
-                addr.s_addr = ntohl(((uint32_t *)value)[1]);
+                //addr.s_addr = ntohl(((uint32_t *)value)[1]);  // TODO: This is flipping my bytes?
+                addr.s_addr = ((uint32_t *)value)[1];
                 char str[INET_ADDRSTRLEN];
                 inet_ntop(AF_INET, &addr, str, INET_ADDRSTRLEN);
                 NSString *host = [NSString stringWithFormat:@"%s", str];
