@@ -17,22 +17,25 @@
 
 #import "net_common.h"
 
+#import "STUNClient.h"
 #import "MyExtensions.h"
 
-//#define ASTERISK_HOST "asterisk-1.asterisk.trickplay.com"
-#define ASTERISK_HOST "freeswitch.internal.trickplay.com"
+#define ASTERISK_HOST "asterisk-1.asterisk.trickplay.com"
+//#define ASTERISK_HOST "freeswitch.internal.trickplay.com"
 #define ASTERISK_PORT "5060"
 
 
 static NSString *const user = @"phone";
-/*
+//*
 static NSString *const contactURI = @"sip:phone@asterisk-1.asterisk.trickplay.com";
 static NSString *const remoteURI = @"sip:1002@asterisk-1.asterisk.trickplay.com";
 static NSString *const asteriskURI = @"sip:asterisk-1.asterisk.trickplay.com";
-*/
+//*/
+/*
 static NSString *const contactURI = @"sip:phone@freeswitch.internal.trickplay.com";
 static NSString *const remoteURI = @"sip:1002@freeswitch.internal.trickplay.com";
 static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
+//*/
 //static NSString *udpClientIP = @"10.0.190.153";
 static NSUInteger const udpClientPort = 50160;
 static NSUInteger const udpServerPort = 5060;
@@ -55,7 +58,7 @@ static NSUInteger const udpServerPort = 5060;
     return [self initWithSPS:nil PPS:nil delegate:nil];
 }
 
-- (id)initWithSPS:(NSData *)_sps PPS:(NSData *)_pps delegate:(id<SIPClientDelegate>)_delegate {
+- (id)initWithSPS:(NSData *)_sps PPS:(NSData *)_pps delegate:(id <SIPClientDelegate>)_delegate {
     self = [super init];
     if (self) {
         sipDialogs = [[NSMutableDictionary alloc] initWithCapacity:40];
@@ -66,7 +69,7 @@ static NSUInteger const udpServerPort = 5060;
         
         // Bind socket to appropriate port
         int sock = CFSocketGetNative(sipSocket);
-        // TODO: check to make suer host_addr4 returns something
+        // TODO: check to make sure host_addr4 returns something
         udpClientIP = [[NSString stringWithFormat:@"%s", host_addr4()] retain];
         //udpClientIP = [NSString stringWithString:@"66.201.49.178"];
         
@@ -361,12 +364,15 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
     
         if (p == NULL) {
             fprintf(stderr, "client: failed to connect\n");
+            freeaddrinfo(servinfo);
             return;
-        } else {
-            char str[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, p->ai_addr, str, INET_ADDRSTRLEN);
-            fprintf(stderr, "\nSIP IP address: %s\nSIP port: %d\n", str, ntohs(((struct sockaddr_in *)(p->ai_addr))->sin_port));
         }
+        
+        char str[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, p->ai_addr, str, INET_ADDRSTRLEN);
+        fprintf(stderr, "\nSIP IP address: %s\nSIP port: %d\n", str, ntohs(((struct sockaddr_in *)(p->ai_addr))->sin_port));
+        
+        freeaddrinfo(servinfo);
     
         @synchronized(self) {
             exit_thread = NO;

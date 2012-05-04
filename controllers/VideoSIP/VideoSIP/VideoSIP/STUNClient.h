@@ -50,6 +50,7 @@ typedef struct {
 
 void free_attributes(attribute *attributes[], int length);
 
+
 @interface STUNClient : NSObject {
     struct sockaddr_in outgoing_addr;
     
@@ -67,6 +68,9 @@ void free_attributes(attribute *attributes[], int length);
     int sock_fd;
     NSDictionary *publicHostPortSocket;
 }
+
+@property (nonatomic, readonly) int sock_fd;
+@property (nonatomic, readonly) NSDictionary *publicHostPortSocket;
 
 - (id)initWithOutgoingAddress:(struct sockaddr_in)outgoing_addr;
 - (NSDictionary *)getIPInfo;
