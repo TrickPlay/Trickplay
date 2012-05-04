@@ -193,6 +193,10 @@ public class DefaultMUGOccupant implements MUGOccupant {
 	 * @return The current presence.
 	 */
 	public Presence getPresence() {
+		return getPresence(false);
+	}
+	
+	public Presence getPresence(boolean to_self) {
 		Presence extendedPresence = presence.createCopy();
 		Element gameElement = extendedPresence.addChildElement("game", MUGService.mugNS);
 		Element item = gameElement.addElement("item");
@@ -201,6 +205,10 @@ public class DefaultMUGOccupant implements MUGOccupant {
 			item.addAttribute("role", getRoleName());
 		if (room.isNonAnonymous())
 			item.addAttribute("jid", getUserAddress().toString());
+		if (to_self) {
+			Element status = gameElement.addElement("status");
+			status.addAttribute("code", "110");
+		}
 		return extendedPresence;
 	}
 	

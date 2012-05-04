@@ -116,6 +116,14 @@ public interface MUGOccupant {
 	public Presence getPresence();
 	
 	/**
+	 * use this version of getPresence to add a (presence acknowledgment) status tag. a status tag with attribute "code" set to 110
+	 * will be placed in the presence packet if to_self parameter is true
+	 * @param to_self
+	 * @return
+	 */
+	public Presence getPresence(boolean to_self);
+	
+	/**
 	 * Get the {@see Affiliation} of this occupant.
 	 * The affiliation represents the authorization.
 	 * 

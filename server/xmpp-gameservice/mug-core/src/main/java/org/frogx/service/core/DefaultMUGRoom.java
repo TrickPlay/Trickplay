@@ -810,7 +810,7 @@ public class DefaultMUGRoom implements MUGRoom {
 		broadcastPresence(occupant);
 		
 		// Confirm and welcome the new occupant by his presence in the room
-		occupant.send(occupant.getPresence());
+		occupant.send(occupant.getPresence(true));
 		
 		
 		return occupant;
