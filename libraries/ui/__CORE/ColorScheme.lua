@@ -37,7 +37,8 @@ ColorScheme = function(parameters)
     
     local children_using_this_style = setmetatable( {}, { __mode = "k" } )
     
-    local instance = {
+    local instance
+    instance = {
         json = function()
             
             local t = {}
@@ -56,6 +57,15 @@ ColorScheme = function(parameters)
             
             return json:stringify(t)
             
+        end,
+        to_json = function()
+            local t = {}
+            
+            for property, value in pairs(instance:get_table()) do
+                t[property] = value
+            end
+            
+            return json:stringify(t)
         end,
         get_table = function()
             
