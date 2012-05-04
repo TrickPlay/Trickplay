@@ -7,7 +7,7 @@ test_area = "ui_element"
 test_api = "rotation"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 
 	local g = factory:Group{ x = 0, y = 0}
 
@@ -52,6 +52,53 @@ function generate_test_image (controller, factory)
 
 	return g
 end
+
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local g = Group{ x = 0, y = 0}
+
+	local r1 =  Rectangle{color = "0070E0", x = 5 * resize_ratio_w , y =  10 * resize_ratio_h, size = { 60 * resize_ratio_w , 60 * resize_ratio_h }}
+
+	r1.x_rotation = { 20, 30, 0  }
+
+	local r2 =  Rectangle{color = "0070E0", x = 5 * resize_ratio_w, y =  100 * resize_ratio_h, size = {  60  * resize_ratio_w, 60  * resize_ratio_h}}
+
+	r2.x_rotation = { 45, 30, 0  }
+
+	local r3 =  Rectangle{color = "0070E0", x = 5 * resize_ratio_w, y = 190 * resize_ratio_h, size = { 60  * resize_ratio_w, 60  * resize_ratio_h}}
+
+	r3.x_rotation = { 80, 30, 0  }
+
+	local r4 =  Rectangle{color = "0070E0", x = 105 * resize_ratio_w, y =  10 * resize_ratio_h, size = { 60  * resize_ratio_w, 60  * resize_ratio_h}}
+
+	r4.y_rotation = { 20, 30, 0  }
+
+	local r5 =  Rectangle{color = "0070E0", x = 105 * resize_ratio_w, y =  100 * resize_ratio_h, size = {  60 * resize_ratio_w , 60 * resize_ratio_h }}
+
+	r5.y_rotation = { 45, 30, 0  }
+
+	local r6 = Rectangle{color = "0070E0", x = 105 * resize_ratio_w, y = 190 * resize_ratio_h, size = { 60 * resize_ratio_w , 60 * resize_ratio_h }}
+
+	r6.y_rotation = { 80, 30, 0  }
+
+	local r7 = Rectangle{color = "0070E0", x = 200 * resize_ratio_w, y =  10 * resize_ratio_h, size = { 60 * resize_ratio_w , 60 * resize_ratio_h }}
+
+	r7.z_rotation = { 20, 30, 0  }
+
+	local r8 = Rectangle{color = "0070E0", x = 200 * resize_ratio_w, y =  100 * resize_ratio_h, size = {  60 * resize_ratio_w , 60 * resize_ratio_h }}
+
+	r8.z_rotation = { 45, 30, 0  }
+
+	local r9 = Rectangle{color = "0070E0", x = 200 * resize_ratio_w, y = 190 * resize_ratio_h, size = { 60 * resize_ratio_w , 60 * resize_ratio_h }}
+
+	r9.z_rotation = { 80, 30, 0  }
+
+
+	g:add(r1, r2, r3, r4, r5, r6, r7, r8, r9)
+
+	return g
+end
+
 
 
 	

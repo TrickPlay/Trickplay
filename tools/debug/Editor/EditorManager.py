@@ -132,55 +132,75 @@ class EditorManager(QWidget):
 		else:
 			editor = self.app.focusWidget()
 
-	
 		if isinstance(editor, Editor):
-			if editor.tempfile == False:
-				currentText = open(editor.path).read()
-			else:
-				self.saveas()
+			if editor.tempfile is True:
+				self.saveas(editor_index)
 				return 
 
-			index = self.tab.currentIndex()
-			#comment 2/3 next if block
-			"""
-			if self.tab.textBefores[index] != currentText:
-				if editor.text_status == 2: #TEXT_CHANGED
-					msg = QMessageBox()
-					msg.setText('The file "' + editor.path + '" changed on disk.')
-					msg.setInformativeText('If you save it external changes could be lost.')
-					msg.setStandardButtons(QMessageBox.Save | QMessageBox.Cancel)
-					msg.setDefaultButton(QMessageBox.Cancel)
-					msg.setWindowTitle("Warning")
-					ret = msg.exec_()
+			editor.save(None, editor_index)
 
-					if ret == QMessageBox.Save:
-						self.tab.textBefores[index] = editor.text()
-						editor.text_status = 1 #TEXT_READ
-						editor.save()
-					else:
-						return None
-			"""
-			editor.save()
-			self.tab.textBefores[index] = editor.text() ## new 2/3 
+			if self.editors.has_key(editor.path):
+			    self.editors[editor.path][2] = editor.text() 
 		else:
 			print '[VDBG] Failed to save because no text editor is currently selected.'                
 		
     def saveall(self):
 		index = 0 
 		for editor in self.tab.editors :
+			if self.tab.editors[index].tempfile is True :
+			    index_offset = 0
+			else :
+			    index_offset = 1
 			self.save(index)
-			index = index + 1
+			index = index + index_offset
 
-    def close(self):
-		index = self.tab.currentIndex()
-		self.tab.closeTab(index)
+    def close(self, editor_index = None):
+        if editor_index is None:
+            index = self.tab.currentIndex()
+        else:
+            index = editor_index
 
-    def saveas(self):
+        self.tab.closeTab(index)
+
+    def get_bp_path(self, file_path):
+        if re.search(str(self.deviceManager.path()), file_path) is not None :
+            n = re.search(str(self.deviceManager.path()), file_path).end()
+            editorName = str(file_path[n:])
+            if editorName.startswith("/"):
+                return editorName[1:]
+
+
+    def delete_marker(self, bp_file):
+
+        bp_file = self.get_bp_path(bp_file)
+
+        bp_cnt = len(self.bp_info[1]) 
+        if bp_cnt > 0:
+            idx=0
+            for r in range(0, bp_cnt):
+                bp_info = self.bp_info[2][idx]
+                n = re.search(":", bp_info).end()
+                fileName = bp_info[:n-1]
+                lineNum  = int(bp_info[n:]) -1
+                if fileName == bp_file :
+                    if self.deviceManager.debug_mode == True:
+                        self.deviceManager.send_debugger_command(DBG_CMD_DELETE+" %s"%str(idx))
+            
+                    self.bp_info[1].pop(idx)
+                    self.bp_info[2].pop(idx)
+                    self.debugWindow.ui.breakTable.removeRow(idx)
+                else:
+                    idx += 1
+
+    def saveas(self, editor_index= None):
 		self.dialog = QDialog()
 		self.ui = Ui_saveAsDialog()
 		self.ui.setupUi(self.dialog)
 
-		editor = self.app.focusWidget()
+		if editor_index is not None:
+			editor = self.tab.editors[editor_index]
+		else:
+			editor = self.app.focusWidget()
 
 		cur_file = re.search('(\w+)[.](\w+)', editor.path).group()
 		cur_dir = editor.path[:re.search('(\w+)[.](\w+)', editor.path).start()-1]
@@ -191,31 +211,64 @@ class EditorManager(QWidget):
 		QObject.connect(self.ui.browse, SIGNAL('clicked()'), self.chooseDirectoryDialog)
 
 		if self.dialog.exec_():
-			
 			cur_dir = self.ui.directory.text() 
 			cur_file = self.ui.filename.text() 
-
 			new_path = cur_dir+'/'+cur_file
+
+			if str(new_path) == str(editor.path) and editor.tempfile == False :
+			    msg = QMessageBox()
+			    msg.setText('The file named "' + cur_file + '" already exists in "'+ cur_dir + '". Do you want to replace it? ')
+			    msg.setInformativeText('Saving it will overwrite its contents.')
+			    msg.setStandardButtons(QMessageBox.Save | QMessageBox.Cancel)
+			    msg.setDefaultButton(QMessageBox.Cancel)
+			    msg.setWindowTitle("Warning")
+			    ret = msg.exec_()
+			    if ret == QMessageBox.Cancel:
+			        return 
+
 			print "[VDBG] Save As .. ' %s '"%new_path
+			bp_file = self.get_bp_path(new_path)
 
 			if editor.tempfile == False :
-				currentText = open(editor.path).read()
-				index = self.tab.currentIndex()
-				self.tab.textBefores[index] = editor.text()
-				editor.text_status = 1 
-				editor.path = new_path
-				editor.save()
+				currentText = editor.text()
+				editor.save(self.editors[editor.path][2], editor_index)
+				editor.set_temp_marker(bp_file)
+				editor.delete_marker()
 				self.close()
-				self.newEditor(new_path)
+				"""
+				if len(self.bp_info[1]) > 0:
+				    for i in range (0, len(self.bp_info[1])) :
+				        print self.bp_info[1][i]
+				        print self.bp_info[2][i]
+				"""
+				self.newEditor(new_path, None, None, None, False, None, False, currentText)
+				editor = self.app.focusWidget()
+				editor.save(None, editor_index)
+				editor.add_marker()
 			else :
-				index = self.tab.currentIndex()
-				self.tab.textBefores[index] = editor.text()
-				editor.text_status = 1 
-				editor.path = new_path
-				editor.save()
-				editor = self.newEditor(new_path)
+				currentText = editor.text()
+				editor.reload_marker()
+				if self.editors.has_key(editor.path):
+				    editor.setText(self.editors[editor.path][2])
+				editor.set_temp_marker(bp_file)
+				if editor.path != new_path :
+				    editor.delete_marker()
+				
+				self.close(editor_index)
 
-    def newEditor(self, path, tabGroup = None, line_no = None, prev_file = None, currentLine = False, fileIndex=None, tempfile = False):
+				"""
+				if len(self.bp_info[1]) > 0:
+				    for i in range (0, len(self.bp_info[1])) :
+				        print self.bp_info[1][i]
+				        print self.bp_info[2][i]
+				"""
+				self.newEditor(new_path, None, None, None, False, None, False, currentText)
+				editor = self.app.focusWidget()
+				editor.save()
+				editor.add_marker()
+                
+    def newEditor(self, path, tabGroup = None, line_no = None, prev_file = None, currentLine = False, fileIndex=None,
+    tempfile = False, currentText=None):
         """
         Create a tab group if both don't exist,
         then add an editor in the correct tab widget.
@@ -232,7 +285,8 @@ class EditorManager(QWidget):
         editor.tempfile = tempfile
         editor.fileIndex = fileIndex
 
-        closedTab = None
+        #closedTab = None
+        closedTab = []
 
         # Default to opening in the first tab group
         tabGroup = 0
@@ -244,19 +298,29 @@ class EditorManager(QWidget):
             self.tab = self.EditorTabWidget(self.splitter)
             self.editorGroups.append(self.tab) 
         # If the file is already open, just use the open document
+
         if self.editors.has_key(path):
             for k in self.editors:
-				if not k in self.tab.paths:
-					closedTab = k
+				if not str(k) in self.tab.paths:
+					#closedTab = k
+					closedTab.append(k)
 
-            if closedTab != None:
-        		self.editors.pop(closedTab)
+            #if closedTab != None:
+            if len(closedTab) > 0 :
+        		#self.editors.pop(closedTab)
+        		for c_idx in range (0, len(closedTab)):
+        		    self.editors.pop(closedTab[c_idx])
+
         		for k in self.tab.paths:
 					self.editors[k][1] = self.tab.paths.index(k) 
         		if editor.tempfile == False:
-        			editor.readFile(path) 
+        		    if currentText is None:
+        			    editor.readFile(path) 
+        		    else:
+        			    editor.setText(currentText) 
 
-            if closedTab != path:
+            #if closedTab != path:
+            if not path in closedTab :
 				for k in self.editors:
 					if path == k:
 						curIndex = self.editors[k][1]
@@ -280,7 +344,8 @@ class EditorManager(QWidget):
 										self.currentEditor.markerAdd(self.currentEditor.current_line, 
 																	Editor.DEACTIVE_BREAK_MARKER_NUM)
 								elif prev_file != None:
-									if closedTab != prev_file:
+									#if closedTab != prev_file:
+									if not prev_file in closedTab :
 										for j in self.editors:
 											if prev_file == j:
 												prevIndex = self.editors[j][1]
@@ -306,24 +371,29 @@ class EditorManager(QWidget):
 										self.currentEditor.markerDelete(nextCurLine, Editor.DEACTIVE_BREAK_MARKER_NUM)
 										self.currentEditor.markerAdd(nextCurLine, Editor.ARROW_DEACTIVE_BREAK_MARKER_NUM)
 									self.currentEditor.current_line = nextCurLine
+				#print ("return here - opened tab")
 				return self.currentEditor
         elif tempfile == False:
             path = os.path.join (self.deviceManager.path(), path)
-            editor.readFile(path)
+            if currentText is None:
+                editor.readFile(path)
+            else:
+                editor.setText(currentText) 
         
         if 0 == nTabGroups:
 			seperatorAction = self.windowsMenu.addSeparator()
 
         if not self.editors.has_key(path):
             self.tab.paths.append(path)
-            self.tab.textBefores.append(editor.text())
+            #self.tab.textBefores.append(editor.text())
+            #self.editors[path][2] = editor.text()
             self.tab.editors.append(editor)
 
         index = self.editorGroups[tabGroup].addTab(editor, name)
         editor.tabIndex = index
 
         if not self.editors.has_key(path):
-            self.editors[path] = [editor, index]
+            self.editors[path] = [editor, index, editor.text()]
         
         self.editorGroups[tabGroup].setCurrentIndex(index)
         editor.setFocus()
@@ -394,6 +464,7 @@ class EditorManager(QWidget):
                 else :
                     self.main.ui.actionUndo.setEnabled(False)
 
+        #print ("return there - new tab")
         return editor
 
     @pyqtSlot()

@@ -31,13 +31,17 @@
 		CD7CAA251461E29800CD75DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CD7CAA231461E29800CD75DA /* InfoPlist.strings */; };
 		CD7CAA271461E29800CD75DA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7CAA261461E29800CD75DA /* main.m */; };
 		CD7CAA2B1461E29800CD75DA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7CAA2A1461E29800CD75DA /* AppDelegate.m */; };
-		CD7CAA2E1461E29800CD75DA /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7CAA2D1461E29800CD75DA /* ViewController.m */; };
 		CD7CAA311461E29800CD75DA /* ViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD7CAA2F1461E29800CD75DA /* ViewController_iPhone.xib */; };
 		CD7CAA341461E29800CD75DA /* ViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD7CAA321461E29800CD75DA /* ViewController_iPad.xib */; };
 		CD7CAA3B1461E61700CD75DA /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD7CAA3A1461E61700CD75DA /* AVFoundation.framework */; };
 		CD7CAA3D1461E66E00CD75DA /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD7CAA3C1461E66E00CD75DA /* CoreMedia.framework */; };
 		CD7CAA3F1461E67400CD75DA /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD7CAA3E1461E67400CD75DA /* CoreVideo.framework */; };
 		CD7CAA411461F39E00CD75DA /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD7CAA401461F39E00CD75DA /* QuartzCore.framework */; };
+		CDAE7CBD14DB86E200F99E5A /* OpenCV.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDAE7CBC14DB86E200F99E5A /* OpenCV.framework */; };
+		CDAE7CC014DB874100F99E5A /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDAE7CBF14DB874100F99E5A /* ImageIO.framework */; };
+		CDAE7CC514DCD9F600F99E5A /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CDAE7CC414DCD9F600F99E5A /* ViewController.mm */; };
+		CDAE7CC714DCE05E00F99E5A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CDAE7CC614DCE05E00F99E5A /* libz.dylib */; };
+		CDAE7CD714E4BDE500F99E5A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDAE7CD614E4BDE400F99E5A /* OpenGLES.framework */; };
 		CDCCF4F614D1FE32002B73DA /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CDCCF4F514D1FE32002B73DA /* libAVCEncoder.a */; };
 /* End PBXBuildFile section */
 
@@ -92,13 +96,17 @@
 		CD7CAA291461E29800CD75DA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		CD7CAA2A1461E29800CD75DA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		CD7CAA2C1461E29800CD75DA /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		CD7CAA2D1461E29800CD75DA /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		CD7CAA301461E29800CD75DA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPhone.xib; sourceTree = "<group>"; };
 		CD7CAA331461E29800CD75DA /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPad.xib; sourceTree = "<group>"; };
 		CD7CAA3A1461E61700CD75DA /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		CD7CAA3C1461E66E00CD75DA /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		CD7CAA3E1461E67400CD75DA /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		CD7CAA401461F39E00CD75DA /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		CDAE7CBC14DB86E200F99E5A /* OpenCV.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OpenCV.framework; sourceTree = "<group>"; };
+		CDAE7CBF14DB874100F99E5A /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
+		CDAE7CC414DCD9F600F99E5A /* ViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
+		CDAE7CC614DCE05E00F99E5A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		CDAE7CD614E4BDE400F99E5A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		CDCCF4F514D1FE32002B73DA /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -107,6 +115,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CDAE7CD714E4BDE500F99E5A /* OpenGLES.framework in Frameworks */,
+				CDAE7CC714DCE05E00F99E5A /* libz.dylib in Frameworks */,
+				CDAE7CC014DB874100F99E5A /* ImageIO.framework in Frameworks */,
 				CD7CAA411461F39E00CD75DA /* QuartzCore.framework in Frameworks */,
 				CD7CAA3F1461E67400CD75DA /* CoreVideo.framework in Frameworks */,
 				CD7CAA3D1461E66E00CD75DA /* CoreMedia.framework in Frameworks */,
@@ -115,6 +126,7 @@
 				CD7CAA1B1461E29800CD75DA /* UIKit.framework in Frameworks */,
 				CD7CAA1D1461E29800CD75DA /* Foundation.framework in Frameworks */,
 				CDCCF4F614D1FE32002B73DA /* libAVCEncoder.a in Frameworks */,
+				CDAE7CBD14DB86E200F99E5A /* OpenCV.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -219,6 +231,10 @@
 			isa = PBXGroup;
 			children = (
 				CDCCF4F514D1FE32002B73DA /* libAVCEncoder.a */,
+				CDAE7CC614DCE05E00F99E5A /* libz.dylib */,
+				CDAE7CD614E4BDE400F99E5A /* OpenGLES.framework */,
+				CDAE7CBF14DB874100F99E5A /* ImageIO.framework */,
+				CDAE7CBC14DB86E200F99E5A /* OpenCV.framework */,
 				CD7CAA401461F39E00CD75DA /* QuartzCore.framework */,
 				CD7CAA3E1461E67400CD75DA /* CoreVideo.framework */,
 				CD7CAA3C1461E66E00CD75DA /* CoreMedia.framework */,
@@ -238,7 +254,7 @@
 				CD7CAA291461E29800CD75DA /* AppDelegate.h */,
 				CD7CAA2A1461E29800CD75DA /* AppDelegate.m */,
 				CD7CAA2C1461E29800CD75DA /* ViewController.h */,
-				CD7CAA2D1461E29800CD75DA /* ViewController.m */,
+				CDAE7CC414DCD9F600F99E5A /* ViewController.mm */,
 				CD7CAA2F1461E29800CD75DA /* ViewController_iPhone.xib */,
 				CD7CAA321461E29800CD75DA /* ViewController_iPad.xib */,
 				CD7CAA211461E29800CD75DA /* Supporting Files */,
@@ -322,7 +338,6 @@
 			files = (
 				CD7CAA271461E29800CD75DA /* main.m in Sources */,
 				CD7CAA2B1461E29800CD75DA /* AppDelegate.m in Sources */,
-				CD7CAA2E1461E29800CD75DA /* ViewController.m in Sources */,
 				CD45DA0914A126EB006A6BFB /* NSStreamAdditions.m in Sources */,
 				CD45DA0A14A126EB006A6BFB /* SocketManager.m in Sources */,
 				CD45DA2514A2C817006A6BFB /* rtp.c in Sources */,
@@ -341,6 +356,7 @@
 				CD45DA3714A2C83A006A6BFB /* rtpenc_h264.m in Sources */,
 				CD45DA3C14A2C8BE006A6BFB /* sm_math.m in Sources */,
 				CD45DA5714C77ECA006A6BFB /* RTSPClient.m in Sources */,
+				CDAE7CC514DCD9F600F99E5A /* ViewController.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,6 +438,10 @@
 		CD7CAA381461E29800CD75DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Video Streaming/Video Streaming-Prefix.pch";
 				INFOPLIST_FILE = "Video Streaming/Video Streaming-Info.plist";
@@ -437,6 +457,10 @@
 		CD7CAA391461E29800CD75DA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Video Streaming/Video Streaming-Prefix.pch";
 				INFOPLIST_FILE = "Video Streaming/Video Streaming-Info.plist";

@@ -15,19 +15,6 @@
 
 #import "RTSPClient.h"
 
-#include <ctype.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>    
-#include <netdb.h>    
-#include <unistd.h>
-#include "base64.h"
-
-#include <netinet/tcp.h>
-
-#import <CommonCrypto/CommonDigest.h>
-
 //RTSP Header Response Limits
 
 #define RTSP_MAX_HEADER 4095
@@ -40,7 +27,7 @@
 #define kDescribe		@"DESCRIBE %@ RTSP/1.0\r\n"
 #define kAnnounce		@"ANNOUNCE %@ RTSP/1.0\r\n"
 #define kSetupPublish	@"SETUP %@/streamid=%d RTSP/1.0\r\n"
-#define kSetupPlay		@"SETUP %@/trackID=%d RTSP/1.0\r\n"
+#define kSetupPlay		@"SETUP %@/trackid=%d RTSP/1.0\r\n"
 #define kRecord			@"RECORD %@ RTSP/1.0\r\n"
 #define kPlay			@"PLAY %@ RTSP/1.0\r\n"
 #define kTeardown		@"TEARDOWN %@ RTSP/1.0\r\n"
@@ -556,10 +543,12 @@
     
 	int ret = 0;
 	cSeq++ ;
+    /*
 	if(streamType == RTSP_PUBLISH)
 		[request appendFormat:kSetupPublish, self.url, streamID];
 	else 
-        [request appendFormat:kSetupPlay, self.url, 1];//streamID];
+    //*/
+        [request appendFormat:kSetupPlay, self.url, 2];//streamID];
 	
     /*
 	if(transport == RTSP_TRANSPORT_TCP) {

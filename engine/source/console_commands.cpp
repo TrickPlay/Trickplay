@@ -814,6 +814,44 @@ protected:
 	}
 };
 
+//.............................................................................
+
+class Globals : public Handler
+{
+protected:
+
+	virtual void operator() ( TPContext * context , const String & command , const String & parameters )
+	{
+		App * app = context->get_current_app();
+
+		if ( ! app )
+		{
+			return;
+		}
+
+		lua_State * L = app->get_lua_state();
+
+		if ( ! L )
+		{
+			return;
+		}
+
+		const StringMap & globals( app->get_globals() );
+
+		for ( StringMap::const_iterator it = globals.begin(); it != globals.end(); ++it )
+		{
+			lua_pushstring( L , it->first.c_str() );
+			lua_rawget( L , LUA_GLOBALSINDEX );
+			if ( ! lua_isnil( L , -1 ) )
+			{
+				g_info( "%s (%s) = %s [%s]" , it->first.c_str() , lua_typename( L , lua_type( L , -1 ) ) , Util::describe_lua_value( L , -1 ).c_str() , it->second.c_str() );
+			}
+			lua_pop( L , 1 );
+		}
+
+	}
+};
+
 //=============================================================================
 
 class Handlers
@@ -845,6 +883,7 @@ public:
 		H( "fonts"  , Fonts );
 		H( "ui"     , UI );
 		H( "profile", Profile );
+		H( "globals", Globals );
 
 #undef H
 
