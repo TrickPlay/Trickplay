@@ -173,7 +173,7 @@ public class GamePresenceExtension implements PacketExtension {
 									"affiliation"));
 							resp.getItem().setJid(parser.getAttributeValue(null, "jid"));
 						}
-					} else if (parser.getName().equals("status")) {
+					} else if (resp.getType() == null && parser.getName().equals("status")) {
 						resp.setType(Type.Status);
 						resp.setStatus(parser.nextText());
 					} else if (Type.Status.equals(resp.getType())) {
