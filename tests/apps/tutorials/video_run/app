@@ -1,7 +1,0 @@
-app=
-{	id = "com.trickplay.showVideoApp",
-	release = "1",
-	version = "1.0",
-	name = "Show Video App",
-	copyright = "Trickplay Inc."
-}

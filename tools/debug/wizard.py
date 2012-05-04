@@ -43,25 +43,32 @@ class Wizard():
             if os.path.exists(dir) and os.path.isdir(dir):
                 files = os.listdir(dir)
                 if len(files) <= 0:
-                    #return self.createAppDialog(dir)
                     msg = QMessageBox()
-                    msg.setText('Directory "' + os.path.basename(str(path)) +
+                    msg.setText('Directory "' + dir +
                     '" does not contain an "app" file and a "main.lua" file.')
-                    #msg.setInformativeText('If you pick an empty directory, you will be '
-                    #                       'prompted to create a new app there.');
                     msg.setWindowTitle("Error")
                     msg.exec_()
-                    return -1
+                    return 
                 else:
                     if 'app' in files and 'main.lua' in files:
                         return dir
                     else:
-                        sys.exit('Error >> ' + dir +
-                                 ' does not contain an app file and a main.lua file.')
+                        msg = QMessageBox()
+                        msg.setText('Directory "' + dir +
+                        '" does not contain an "app" file or a "main.lua" file.')
+                        msg.setWindowTitle("Error")
+                        msg.exec_()
+                        return 
+                        #sys.exit('Error >> ' + dir +
+                                 #' does not contain an app file and a main.lua file.')
             else:
                 #TODO: add dialog box for openApp or newApp 
-                print("[VDBG] YUGI 2")
-                return
+                msg = QMessageBox()
+                msg.setText('Directory "' + dir +
+                '" does not exist.')
+                msg.setWindowTitle("Error")
+                msg.exec_()
+                return 
 
 	    # Get a path from the user
         if openApp == False and newApp == True:
@@ -106,7 +113,7 @@ class Wizard():
                     #                       'prompted to create a new app there.');
                     msg.setWindowTitle("Error")
                     msg.exec_()
-                    return -1
+                    return 
                     #return self.createAppDialog(path)
                 else:
                     if 'app' in files and 'main.lua' in files:
@@ -120,7 +127,7 @@ class Wizard():
                         #                       'prompted to create a new app there.');
                         msg.setWindowTitle("Error")
                         msg.exec_()
-                        return -1
+                        return 
 
             else:
                 print('[VDBG] Error - ' + path + ' is not existing directory.')

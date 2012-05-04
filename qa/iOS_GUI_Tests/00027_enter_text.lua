@@ -7,7 +7,7 @@ test_area = "enter_text"
 test_api = "enter_text"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 	local result
 	function controller.on_ui_event (controller, text)
 		if text == "ABC123" then
@@ -33,5 +33,12 @@ function generate_test_image (controller, factory)
 
 
 	return nil
+end
+
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local t1 = Text{x = 10 * resize_ratio_w, y = 10 * resize_ratio_h, w = 310 * resize_ratio_w, h = 50 * resize_ratio_h, markup = "Text dialog appears.", color = "FFFFFF", font = "Verdana 30px", use_markup = true}
+
+	return t1
 end
 

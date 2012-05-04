@@ -1209,3 +1209,12 @@ void * lb_get_udata_check( lua_State * L , int index , const char * type )
     }
     return 0;
 }
+
+
+void lb_setglobal( lua_State * L , const char * name )
+{
+	lua_pushstring( L , name );
+	lua_pushvalue( L , -2 );
+	lua_rawset( L , LUA_GLOBALSINDEX );
+	lua_pop( L , 1 );
+}

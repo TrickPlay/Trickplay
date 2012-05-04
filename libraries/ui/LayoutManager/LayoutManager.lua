@@ -1,4 +1,458 @@
 
+LAYOUTMANAGER = true
+
+local default_parameters = {horizontal_spacing = 20, vertical_spacing = 20}--, number_of_rows=3,number_of_cols=3}
+
+LayoutManager = function(parameters)
+    
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("LayoutManager",parameters)
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+    ----------------------------------------------------------------------------
+	--The LayoutManager Object inherits from Widget
+	
+	local instance = Widget( parameters )
+    
+    local placeholder = Rectangle{w=200,h=200,color="ff0000"}
+    instance:add(placeholder)
+    placeholder:hide()
+	local cells
+    local cell_w, cell_h
+    local horizontal_spacing = 0
+    local vertical_spacing   = 0
+    local number_of_rows = parameters.number_of_rows
+    local number_of_cols = parameters.number_of_cols
+    
+    ----------------------------------------------------------------------------
+    
+    local col_widths  = {}
+    local row_heights = {}
+    
+    local widths_of_cols = function(cell,r,c)
+        
+        if cell.w  > (col_widths[c] or 0) then 
+            col_widths[c] = cell.w 
+        end
+    end
+    local heights_of_rows = function(cell,r,c)
+        if cell.h  > (row_heights[r] or 0) then 
+            row_heights[r] = cell.h
+        end
+    end
+    local position_cell = function(cell,r,c)
+        
+        --if not cells[r][c-1] then
+            cell.x = 0
+            for i = 1, c-1 do
+                cell.x = cell.x + (cell_w or col_widths[i]) + horizontal_spacing
+            end
+        --else
+        --    cell.x = cells[r][c-1].x + col_widths[c-1]  + horizontal_spacing
+        --end
+        --if not cells[r-1] or not cells[r-1][c] then
+            cell.y = 0
+            for i = 1, r-1 do
+                cell.y = cell.y + (cell_h or row_heights[i]) + vertical_spacing
+            end
+        --else
+        --    cell.y = cells[r-1][c].y + row_heights[r-1] +   vertical_spacing
+        --end
+        ---[[
+        cell.anchor_point = {cell.w/2,cell.h/2}--cell.center
+        cell:move_by(
+            (cell_w or col_widths[c])/2,
+            (cell_h or row_heights[r])/2
+        )
+        --]]
+    end
+    
+    local for_each_cell = function(f)
+        for r,row in instance.cells.pairs() do
+            for c,cell in row.pairs() do
+                if cell then f(cell,r,c) end
+            end
+        end
+    end
+    
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"number_of_rows",
+		function(oldf) return   number_of_rows     end,
+		function(oldf,self,v)   
+            
+            if number_of_rows > v then
+                
+                for i = number_of_rows,v+1,-1 do
+                --while number_of_rows < v do
+                    
+                    instance.cells.remove(i)--number_of_rows)
+                end
+                
+            elseif number_of_rows < v then
+                
+                for i = number_of_rows+1,v do
+                --while number_of_rows < v do
+                    
+                    instance.cells.insert(i)--number_of_rows+1)
+                end
+                
+            end
+            
+        end
+	)
+	override_property(instance,"number_of_cols",
+		function(oldf) return   number_of_cols     end,
+		function(oldf,self,v)   
+            
+            if number_of_cols > v then
+                
+                while number_of_cols < v do
+                    
+                    instance.cells[1].remove(i)
+                end
+                
+            elseif number_of_cols < v then
+                
+                while number_of_cols < v do
+                    
+                    instance.cells[1].insert(i+1)
+                end
+                
+            end
+            
+        end
+	)
+	override_property(instance,"cell_w",
+		function(oldf) return   cell_w     end,
+		function(oldf,self,v)   
+            cell_w = v 
+            for_each_cell(function(cell) cell.w = cell_w end)
+            col_widths  = {}
+            for_each_cell(widths_of_cols)
+            for_each_cell(position_cell)
+        end
+	)
+	override_property(instance,"cell_h",
+		function(oldf) return   cell_h     end,
+		function(oldf,self,v)   
+            cell_h = v 
+            for_each_cell(function(cell) cell.h = cell_h end)
+            row_heights = {}
+            for_each_cell(heights_of_rows)
+            for_each_cell(position_cell)
+        end
+	)
+	override_property(instance,"horizontal_spacing",
+		function(oldf) return   horizontal_spacing     end,
+		function(oldf,self,v)   
+            horizontal_spacing = v 
+            for_each_cell(position_cell)
+        end
+	)
+	override_property(instance,"vertical_spacing",
+		function(oldf) return   vertical_spacing     end,
+		function(oldf,self,v)   
+            vertical_spacing = v 
+            for_each_cell(position_cell)
+        end
+	)
+    
+    ----------------------------------------------------------------------------
+    cells = GridManager{  data = {},
+        
+        node_initializer=function(obj,r,c)
+            --[[
+            if cell_w then  obj.w = cell_w
+            
+            else  widths_of_cols(obj,r,c) end
+            
+            if cell_h then  obj.h = cell_h
+            
+            else  heights_of_rows(obj,r,c) end
+            --]]
+            col_widths  = {}
+            row_heights = {}
+            for_each_cell(widths_of_cols)
+            for_each_cell(heights_of_rows)
+            
+            --print(instance.cells.pairs(r))
+                for rr,row in instance.cells.pairs(r) do--rr = r, instance.number_of_rows do
+                    
+                    for cc,cell in row.pairs(c) do--= c, instance.number_of_cols do
+                        
+                        if cell then position_cell(cell,rr,cc) end
+                    end
+                end
+            
+        end,
+        node_constructor=function(obj,r,c)
+            
+            if obj == nil then  obj = Clone{source=placeholder}
+            
+            elseif type(obj) ~= "userdata" and obj.__types__.actor then 
+                
+                error("Must be a UIElement or nil. Received "..obj,2) 
+            
+            elseif obj.parent then  obj:unparent()  end
+            
+            instance:add(obj)
+            
+            return obj
+        end,
+        
+        node_destructor=function(obj) obj:unparent() end,
+        
+        on_size_change = function(r,c)
+            
+            number_of_rows = r
+            number_of_cols = c
+            col_widths  = {}
+            row_heights = {}
+            for_each_cell(widths_of_cols)
+            for_each_cell(heights_of_rows)
+            for_each_cell(position_cell)
+        end
+    }
+	override_property(instance,"cells",
+		function(oldf) return   cells     end,
+		function(oldf,self,v)  
+            
+            local num_cols = 0
+            
+            number_of_rows = number_of_rows or #v
+            
+            for r = 1,number_of_rows do
+                if not v[r] then 
+                    v[r] = {} 
+                elseif num_cols < #v[r] then  
+                    num_cols = #v[r]
+                end
+            end  
+            
+            number_of_cols = number_of_cols or num_cols
+            local data = {}
+            for r = 1,number_of_rows do
+                data[r] = {}
+                for c = 1,number_of_cols do
+                    
+                    data[r][c] = v[r][c] or
+                        Clone{source=placeholder}
+                        
+                end
+            end
+            
+            cells.data = data
+        end
+	)
+    
+    
+    local function set_and_nil(t,k)
+        
+        if t[k] == nil then return end
+        instance[k] = t[k]
+        t[k]        = nil
+        
+    end
+    
+	override_function(instance,"set", function(old_function, obj, t )
+		--need to force the setting of number_of_cols/rows before cells
+        set_and_nil(t,"number_of_cols")
+        set_and_nil(t,"number_of_rows")
+        
+        set_and_nil(t,"cells")
+        
+		old_function(obj, t)
+		
+	end)
+    
+    ----------------------------------------------------------------------------
+    
+	instance:set(parameters)
+	
+	return instance
+    
+end
+
+
+    ----------------------------------------------------------------------------
+    --[[
+    rows_metatable = {
+        insert = function(r,new_row)
+            
+            if type(r) ~= "number" or r <= 0 then
+                error("1st parameter must be positive number. Received "..r,2)
+            end
+            
+            if type(new_row) ~= "table" then
+                error("2nd parameter must be a table. Received "..new_row,2)
+            end
+            
+            table.insert(cells_interface, r)
+            table.insert(cells_data,      r)
+            
+            --triggers rows_metatable.__newindex
+            cells_interface[r] = new_row
+            
+            number_of_rows = number_of_rows + 1
+            
+        end,
+        remove = function(r)
+            
+            if type(r) ~= "number" or r <= 0 then
+                error("1st parameter must be positive number. Received "..r,2)
+            end
+            
+            for i=1,number_of_cols then 
+                if  cells_data[r][i] then 
+                    cells_data[r][i]:unparent() 
+                end 
+            end
+            
+            table.remove(cells_interface, r)
+            table.remove(cells_data,      r)
+            
+            number_of_rows = number_of_rows - 1
+            
+        end,
+        __newindex = function(t,r,new_row)
+            if type(r) ~= "number" then 
+                error("The index to 'rows' is not a number: "..r,2) 
+            end
+            if type(new_row) ~= "table" then 
+                error("Row must be a table, recevied: "..new_row,2) 
+            end
+            for i,cell in ipairs(cells_data[r]) do
+                if cell then cell:unparent() end
+            end
+            
+            if cells_interface[r] == nil then
+                cells_data[r] = {}
+                
+                rawset(
+                    cells_interface, r,
+                    setmetatable(
+                        {},
+                        recursive_overwrite(
+                            { data = cells_data[r] },
+                            cols_metatable
+                        )
+                    )
+                )
+            end
+            --triggers cols_metatable.__newindex for each entry
+            for i=1,number_of_cols then cells_interface[r][i] = new_row[i] end
+            
+        end
+    }
+    --]]
+    ----------------------------------------------------------------------------
+    --[[
+    cols_metatable = {
+        insert = function(c,new_col)
+            
+            if type(c) ~= "number" or c <= 0 then
+                error("1st parameter must be positive number. Received "..c,2)
+            end
+            
+            if type(new_col) ~= "table" then
+                error("2nd parameter must be a table. Received "..new_col,2)
+            end
+            
+            number_of_cols = number_of_cols + 1
+            
+            for i=1, number_of_rows then 
+                table.insert(cells_interface[i], c )
+                table.insert(cells_data[i],      c )
+                --triggers cols_metatable.__newindex
+                cells_interface[i][c] = new_col[i]
+            end
+            
+        end,
+        remove = function(c)
+            
+            if type(c) ~= "number" or c <= 0 then
+                error("1st parameter must be positive number. Received "..c,2)
+            end
+            
+            for i=1,number_of_rows then 
+                if  cells[i][c] then 
+                    cells[i][c]:unparent()
+                end 
+                table.remove(cells[i],c)
+            end
+            
+            number_of_cols = number_of_cols - 1
+            
+        end,
+        __index = function(t,k)  return getmetatable(t).data[k]  end,
+        __newindex = function(t,c,obj)
+            
+            if type(c) ~= "number" then 
+                error("The index to 'cells' is not a number: "..c,2) 
+            end
+            if type(obj) ~= "userdata" and obj.__types__.actor then 
+                error("Must be a UIElement"..obj,2) 
+            end
+            
+            if t[c] ~= nil then t[c]:unparent() end
+            
+            rawset(t,c,obj)
+            
+            if obj and obj.parent then obj:unparent() end
+			
+            if cell_w then
+                obj.w = cell_w
+            else
+                widths_of_cols(obj,t.index,c)
+            end
+            if cell_h then
+                obj.h = cell_h
+            else
+                heights_of_rows(obj,t.index)
+            end
+            
+            instance:add(obj)
+        end
+    }
+    --]]
+            --[[
+            if type(v) ~= "table" then 
+                error("LayoutManager.cells expected table",2) 
+            end
+            
+            instance:clear()
+            
+            number_of_rows = 0
+            number_of_cols = 0
+            
+            cells = {}
+            
+            for r,row in ipairs(v) do
+                if type(row) ~= "table" then 
+                    error("LayoutManager.cells expected table of tables",2) 
+                end
+                
+                if r > number_of_rows then number_of_rows = r end
+                
+                for c,obj in ipairs(row) do
+                    if type(obj) ~= "userdata" or obj.__types__.actor then 
+                        error("Must be a UIElement. Entry "..r.." "..c.." - "..obj,2) 
+                    end
+                    if c > number_of_cols then c = number_of_cols end
+                    
+                end
+            end
+            
+            setmetatable(cells,rows_metatable)
+            --]]
+
+
+
+
 
 --[[
 Function: Layout Manager
@@ -22,7 +476,7 @@ Extra Function:
     get_tile_group(r,c) - returns group for the tile at row 'r' and column 'c'
     animate_in() - performs the animate-in sequence
 ]]
---[[
+--[=[
 function ui_element.layoutManager(t)
     --default parameters
     local p = {
@@ -460,4 +914,4 @@ function ui_element.layoutManager(t)
     return slate
 end
 
---]]
+--]=]

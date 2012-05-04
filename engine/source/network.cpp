@@ -995,7 +995,6 @@ public:
 
         // Variables pulled out of the loop
 
-        GTimeVal tv;
         long timeout;
         glong pop_wait;
         int running_handles = 0;
@@ -1009,7 +1008,7 @@ public:
                 // If there are running requests, we just wait a tiny bit - to
                 // throttle this thread.
 
-                // 20 ms
+                // 20 µs
 
                 pop_wait = 20 * 1000;
             }
@@ -1030,10 +1029,7 @@ public:
             {
                 // Wait for a new request
 
-                g_get_current_time( &tv );
-                g_time_val_add( &tv, pop_wait );
-
-                event = ( Event * ) g_async_queue_timed_pop( queue, &tv );
+                event = ( Event *) Util::g_async_queue_timeout_pop( queue , pop_wait );
             }
             else
             {

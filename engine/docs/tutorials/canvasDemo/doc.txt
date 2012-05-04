@@ -3,7 +3,7 @@ Title: Canvas Sample Application
 
 The Canvas sample application uses the TrickPlay SDK Library's <Canvas> object to create composite screen graphics. This capability enables a TrickPlay application to generate graphics using data that may not be known or available until program runtime. Also, the combining of multiple objects into a single Canvas object reduces an application's system resource usage.
 
-The complete sample application, including source code and resource files, can be <downloaded here at http://www.trickplay.com/tutorials/canvasDemo.zip>.
+The complete sample application, including source code and resource files, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
 
 (see canvasDemo.png)
 

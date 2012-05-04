@@ -1,9 +1,9 @@
 WIDGET = true
 
 local uielement_properties = {
-	"x","y","z","w","h","anchor_point","name","gid",
+	"position","size","anchor_point","name","gid",
 	"x_rotation","y_rotation","z_rotation","scale",
-	"opacity","clip",""
+	"opacity","clip","is_visible"
 }
 
 
@@ -213,6 +213,9 @@ Widget = function(parameters)
 	override_property(instance,"to_json",
 		function() return to_json end,
 		function(oldf,self,v) to_json__overridden = v end
+	)
+	override_property(instance,"widget_type",
+		function() return "Widget" end, nil
 	)
 	
 	override_function(instance,"from_json", function(old_function,self,j)

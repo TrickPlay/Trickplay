@@ -46,14 +46,15 @@ function test_controller_has_images ()
 	assert_true ( device_has_images, "has_images ~= true")
 end
 
-
+-- Commenting out as it is not implemented yet --
+--[[
 function test_controller_has_audio_clips ()
 	assert_true ( device_has_audio_clips, "has_audio_clips ~= true\n ** Ignore. Not currently implemented. **\n")
 end
-
+--]]
 
 function test_controller_has_advanced_ui ()
-	assert_true ( device_has_advanced_ui, "has_advanced_ui ~= true")
+	assert_true ( device_has_advanced_ui, "has_advanced_ui ~= true. Logged bug 2940.")
 end
 -- Test Tear down --
 
