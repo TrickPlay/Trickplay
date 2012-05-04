@@ -44,6 +44,8 @@ class MainWindow(QMainWindow):
         
         QWidget.__init__(self, parent)
         
+        
+        self.closedByIDE = False
         self.untitled_idx = 1
         self.debug_mode = False
         self.apath = apath
@@ -481,7 +483,9 @@ class MainWindow(QMainWindow):
 
         if self._deviceManager.trickplay.state() == QProcess.Running:
             # Local Debugging / Run 
+            self.closedByIDE = True
             self._deviceManager.trickplay.close()
+            self.closedByIDE = False
         elif self._deviceManager.ui.comboBox.currentIndex() != 0:
             # Remote Debugging / Run 
             #if getattr(self._deviceManager, "debug_mode") == False :
