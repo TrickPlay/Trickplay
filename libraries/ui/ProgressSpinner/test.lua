@@ -91,5 +91,8 @@ ps3 = ProgressSpinner{x = 400,image = "ProgressSpinner/load-sun-spin.png",animat
 
 ps3.image = nil
 
+print(ps1:to_json())
+print(ps2:to_json())
+print(ps3:to_json())
 screen:add(ps1,ps2,ps3)
 

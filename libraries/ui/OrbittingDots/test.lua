@@ -33,5 +33,9 @@ od4.num_dots = 12
 od4.num_dots = 12
 od4.size = {200,200}
 
+print(od1:to_json())
+print(od2:to_json())
+print(od3:to_json())
+print(od4:to_json())
 screen:add(od1,od2,od3,od4)
 
