@@ -179,6 +179,10 @@ namespace Physics
 
         //.........................................................................
 
+        static gboolean on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , World * world );        
+        
+        //.........................................................................
+
         lua_State *     L;
 
         b2World         world;
@@ -199,6 +203,7 @@ namespace Physics
         typedef std::list< b2Body * > b2BodyList;
 
         b2BodyList      to_destroy;
+        
     };
 
     //=========================================================================
@@ -293,7 +298,7 @@ namespace Physics
     {
     public:
 
-        AABBQuery( lua_State * _L );
+        AABBQuery( lua_State * _LS );
 
         virtual bool ReportFixture( b2Fixture * fixture );
 

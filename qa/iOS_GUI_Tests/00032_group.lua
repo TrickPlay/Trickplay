@@ -7,7 +7,7 @@ test_area = "group"
 test_api = "find_child"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 
 	controller:declare_resource("panda", "assets/medium_640x420_panda.jpg")
 
@@ -39,6 +39,16 @@ function generate_test_image (controller, factory)
 
 	return g
 end
+
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local t1 = Text{x = 10 * resize_ratio_w, y = 10 * resize_ratio_h, w = 310 * resize_ratio_w, h = 50 * resize_ratio_h, markup = "Verify no UI items on device screen.", color = "FFFFFF", font = "Verdana 30px", use_markup = true}
+
+	return t1
+end
+
+
+
 
 
 	

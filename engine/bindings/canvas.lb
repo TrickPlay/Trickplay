@@ -26,7 +26,7 @@ module canvas;
     
     The Canvas class uses the <Cairo Vector Graphics library at http://www.cairographics.org>, but you do not need to understand that library before using the Canvas class. The basic information necessary to create and manipulate a Canvas object is described in this documentation. If you desire additional information about Cairo, refer to the <Cairo documentation at http://www.cairographics.org/documentation>.
     
-    This short introduction will acquaint you with Canvas concepts, the drawing tools, and supported operations. Detailed information describing each Canvas property and function follows this introduction.
+    This short introduction will acquaint you with Canvas concepts, the drawing tools, and supported operations. Detailed information describing each Canvas property and function follows this introduction. An additional code example is described in the <Canvas Sample Application> section.
     
     *Making a Line, Drawing a Shape*
     
@@ -72,7 +72,7 @@ class Canvas [[ cairo_t * ]]
     /*
         Constructor: Canvas
         
-        The Canvas constructor creates an empty in-memory drawing surface. Each pixel on the surface contains a Red, a Green, and a Blue color component and an Alpha transparency value.
+        The Canvas constructor creates an empty and transparent in-memory drawing surface. Each pixel on the surface contains a Red, a Green, and a Blue color component and an Alpha transparency value.
 
 		*Prototype:*
 		
@@ -87,7 +87,7 @@ class Canvas [[ cairo_t * ]]
 
         *Return Value:*
         
-        canvas - a Canvas object whose drawing surface is empty, i.e., all zeros. If insufficient memory exists to create the Canvas object, a Canvas object is still returned, but you will not be able to perform any operations with it. After creating a Canvas object, check the <ok> property to verify that a valid object exists.
+        canvas - a Canvas object whose drawing surface is empty and completely transparent. If insufficient memory exists to create the Canvas object, a Canvas object is still returned, but you will not be able to perform any operations with it. After creating a Canvas object, check the <ok> property to verify that a valid object exists.
     */
 
     Canvas( ... )

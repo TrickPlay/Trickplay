@@ -634,13 +634,15 @@ class HttpResponse : public HttpServer::Response
 {
 private:
 
-    HttpMessageContext * message_context;
+    HttpMessageContext *	message_context;
+    bool				 	paused;
 
 public:
 
 	HttpResponse( HttpMessageContext * ctx )
 	:
-	    message_context( ctx )
+	    message_context( ctx ),
+	    paused( false )
 	{
 		message_context->ref();
 
@@ -709,14 +711,15 @@ public:
         new ::StreamBody( message_context , stream_writer );
     }
 
-    virtual bool respond_with_file_contents( const String & file_name , const String & content_type )
+    virtual bool respond_with_file_contents( const String & file_name_or_uri , const String & content_type )
     {
-        if ( ! g_file_test( file_name.c_str() , G_FILE_TEST_EXISTS ) )
-        {
-            return false;
-        }
+        GFile * file = g_file_new_for_commandline_arg( file_name_or_uri.c_str() );
 
-        GFile * file = g_file_new_for_path( file_name.c_str() );
+        if ( ! g_file_query_exists( file , 0 ) )
+        {
+        	g_object_unref( file );
+        	return false;
+        }
 
         GFileInfo * info = g_file_query_info( file , G_FILE_ATTRIBUTE_STANDARD_SIZE , G_FILE_QUERY_INFO_NONE , 0 , 0 );
 
@@ -758,16 +761,29 @@ public:
 
     Response * pause()
     {
+    	g_assert( ! paused );
+
     	soup_server_pause_message( message_context->server , message_context->message );
 
     	ref();
 
+    	paused = true;
+
     	return this;
+    }
+
+    bool is_paused() const
+    {
+    	return paused;
     }
 
     void resume()
     {
+    	g_assert( paused );
+
     	soup_server_unpause_message( message_context->server , message_context->message );
+
+    	paused = false;
 
     	unref();
     }
@@ -827,7 +843,14 @@ void HttpServer::soup_server_callback(
         ud->handler->handle_http_delete( request , * response );
     }
 
-    tplog( ">> %u %s" , msg->status_code , msg->reason_phrase );
+    if ( response->is_paused() )
+    {
+    	tplog( ">> PAUSED" );
+    }
+    else
+    {
+    	tplog( ">> %u %s" , msg->status_code , msg->reason_phrase );
+    }
 
     message_context->unref();
 

@@ -287,7 +287,8 @@ end
 ------------------------------------
 
 function project_mng.open_debugger()
-	editor_lb:execute("~/code/trickplay/sdk/trickplay-debugger "..current_dir) 
+	--editor_lb:execute("~/code/trickplay/sdk/trickplay-debugger "..current_dir) 
+	editor_lb:execute(debugger_script.." "..current_dir) 
 end 
 ------------------------------------
 -- project_mng.open_project 

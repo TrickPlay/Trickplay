@@ -8,7 +8,6 @@
 #include "event_group.h"
 #include "debugger.h"
 #include "images.h"
-#include "sandbox.h"
 
 #define APP_METADATA_FILENAME   "app"
 #define APP_MAIN_FILENAME		"main.lua"
@@ -81,8 +80,6 @@ public:
 
         Metadata() : release( 0 ) {}
 
-        Sandbox		sandbox;
-
         String      id;
         String      name;
         int         release;
@@ -93,6 +90,23 @@ public:
         StringSet   attributes;
 
         Action::Map actions;
+
+        String get_root_uri() const
+        {
+        	return root_uri;
+        }
+
+        String get_root_native_path() const
+        {
+        	return root_native_path;
+        }
+
+        bool set_root( const String & uri_or_native_path );
+
+    private:
+
+        String		root_uri;
+        String		root_native_path;
     };
 
     //.........................................................................
@@ -101,6 +115,8 @@ public:
     struct LaunchInfo
     {
         LaunchInfo()
+        :
+        	debug( false )
         {}
 
         LaunchInfo( const String & _caller,
@@ -113,7 +129,8 @@ public:
             action( _action ),
             uri( _uri ? _uri : "" ),
             type( _type ? _type : "" ),
-            parameters( _parameters ? _parameters : "" )
+            parameters( _parameters ? _parameters : "" ),
+            debug( false )
         {}
 
         String  caller;
@@ -121,6 +138,8 @@ public:
         String  uri;
         String  type;
         String  parameters; // serialized Lua
+
+        bool	debug;
     };
 
     //.........................................................................
@@ -218,17 +237,6 @@ public:
     EventGroup * get_event_group();
 
     //.........................................................................
-    // Processes paths to ensure they are either URIs or valid paths within the
-    // app bundle. Also checks for links and handles custom schemes such as
-    // 'localized:'
-    //
-    // May return NULL if the path is invalid.
-    //
-    // CALLER HAS TO FREE RESULT
-
-    char * normalize_path( const gchar * path_or_uri, bool * is_uri = NULL, const StringSet & additional_uri_schemes = StringSet() );
-
-    //.........................................................................
     // ONLY FOR THE EDITOR - apps should not do this
 
     bool change_app_path( const char * path );
@@ -261,6 +269,13 @@ public:
     bool load_image_async( const gchar * source , bool read_tags , Image::DecodeAsyncCallback callback , gpointer user , GDestroyNotify destroy_notify );
 
     void audio_match( const String & json );
+
+    //.........................................................................
+
+    const StringMap & get_globals() const
+    {
+    	return globals;
+    }
 
 protected:
 
@@ -316,6 +331,10 @@ private:
 
     //.........................................................................
 
+    static int global_tracker( lua_State * L );
+
+    //.........................................................................
+
     TPContext       *       context;
     Metadata                metadata;
     String                  data_path;
@@ -328,6 +347,7 @@ private:
     guint32                 screen_gid;
     LaunchInfo              launch;
     gulong                  stage_allocation_handler;
+    StringMap				globals;
 
 #ifndef TP_PRODUCTION
 

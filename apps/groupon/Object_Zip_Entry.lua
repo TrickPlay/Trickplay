@@ -8,7 +8,6 @@ local zip_entry = Group{name="Zip Entry", x = 380, y = 347}
 local state = ENUM({"HIDDEN","ANIMATING_IN","ACTIVE","SENDING","ANIMATING_OUT"})
 
 local mouse_on = nil
-local cancel_object = nil
 local cursor_index  = 1
 local zip_digit_max = 5
 local cursor_base_x = 96
@@ -18,13 +17,37 @@ local digit_spacing = 50
 
 --zip_bg.anchor_point = {zip_bg.w/2,0}
 ---[[
+local base_text
 local prompt = Text{
     text="Enter a zip code:",
     font="DejaVu Sans Condensed Bold normal 20px",
     color="#86ad53",
     y = 15,
-	x = top_bg.w/2
+	x = top_bg.w/2,
 }
+local str
+local ellipsis_i = 0
+local ellipsis_max = 5
+prompt.ellipsis = Timer{
+    interval = 300,
+    on_timer = function()
+        
+        str = base_text
+        
+        ellipsis_i = (ellipsis_i+1)%ellipsis_max
+        
+        for i = 0,ellipsis_i do
+            
+            str = str.."."
+            
+        end
+        
+        prompt.text = str
+        
+    end
+}
+prompt.ellipsis:stop()
+
 prompt.anchor_point={prompt.w/2,0}
 prompt:move_anchor_point(prompt.w/2,prompt.h/2)
 
@@ -166,10 +189,23 @@ end
 
 local lat_lng_callback = function(zip_info)
 	
-    cancel_object = nil
+    if zip_info == false or
+        type(zip_info)                                  ~= "table" or
+        type(zip_info.results)                          ~= "table" or
+        type(zip_info.results[1])                       ~= "table" or
+        type(zip_info.results[1].address_components)    ~= "table" or
+        type(zip_info.results[1].geometry)              ~= "table" or
+        type(zip_info.results[1].geometry.location)     ~= "table" or
+        type(zip_info.results[1].geometry.location.lat) == "nil" or
+        type(zip_info.results[1].geometry.location.lng) == "nil" then 
+        
+        base_text = "Trying again"
+        
+        return
+        
+    end
     
     --local zip_info = json:parse(response_object.body)
-    
     if zip_info.status ~= "OK" or
         zip_info.results[1].address_components[
                 #zip_info.results[1].address_components
@@ -191,22 +227,26 @@ local lat_lng_callback = function(zip_info)
         
         --zip_prompt:unparent()
         
-        GET_DEALS(Rolodex_Constructor,lat,lng,50)
+        GET_DEALS(function(resp)
+            
+            if resp == false then
+                
+                base_text = "Trying again"
+                
+                return
+                
+            end
+            
+            settings.zip = zip_info.results[1].address_components[1].short_name
+            
+            state:change_state_to("ANIMATING_OUT")
+            
+            Rolodex_Constructor(resp)
+            
+        end,lat,lng,50)
         
         
-        Loading_G.opacity=255
-        
-        Loading_G.x = 450
-        
-        Loading_G.y = screen_h - 200
-        
-        Loading_G:raise_to_top()
-        
-        mouse:raise_to_top()
-        
-        Idle_Loop:add_function(Loading_G.spinning,Loading_G,2000,true)
-        App_State.state:change_state_to("LOADING")
-        state:change_state_to("ANIMATING_OUT")
+        --
         
         --App_State.state:change_state_to("LOADING")
         
@@ -284,15 +324,26 @@ App_State.state:add_state_change_function(
     "LOADING",
     nil
 )
+App_State.state:add_state_change_function(
+    function(prev_state,new_state)
+        
+        cancel()
+        
+        state:change_state_to("ANIMATING_OUT")
+    end,
+    "ZIP",
+    nil
+)
 state:add_state_change_function(
     function(prev_state,new_state)
         assert(App_State.state:current_state() == "ROLODEX")
         
         cursor.opacity = 0
         
-        prompt.text    = "Geocoding"
+        base_text    = "Searching"
+        prompt.ellipsis:start()
         prompt.anchor_point = {prompt.w/2,prompt.h/2}
-        cancel_object = GET_LAT_LNG(
+        GET_LAT_LNG(
             entry[1].text..
             entry[2].text..
             entry[3].text..
@@ -301,6 +352,9 @@ state:add_state_change_function(
             
             lat_lng_callback
         )
+        
+        App_State.state:change_state_to("LOADING")
+        
     end,
     nil,
     "SENDING"
@@ -337,12 +391,13 @@ state:add_state_change_function(
         if prev_state == "ANIMATING_IN" then
             Idle_Loop:remove_function(animate_in)
         end
-        x_btn.reactive = false
+        x_btn.reactive  = false
         btm_bg.reactive = false
         mouse.to_mouse[to_mouse] = nil
         mouse.to_keys[to_keys] = nil
         Idle_Loop:add_function(animate_out,zip_entry,500)
         App_State.rolodex.cards[App_State.rolodex.top_card]:fade_in_change_locs()
+        prompt.ellipsis:stop()
     end,
     nil,
     "ANIMATING_OUT"
@@ -350,10 +405,8 @@ state:add_state_change_function(
 
 --keys
 local cancel = function()
-    assert(cancel_object ~= nil)
 	--print("pre_cancel")
-	TRY_AGAIN:stop()
-    cancel_object:cancel()
+	CANCEL()
 	--print("post_cancel")
     state:change_state_to("ANIMATING_OUT")
     App_State.state:change_state_to("ROLODEX")

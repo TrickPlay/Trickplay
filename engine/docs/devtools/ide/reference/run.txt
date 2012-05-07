@@ -1,0 +1,35 @@
+
+Title: Running a TrickPlay Application in the IDE
+
+The TrickPlay IDE can run a TrickPlay application on the local computer terminal or it can deploy the application to a remote television and run the program directly on the TV. Typically, early-phase testing and debugging occurs on a local computer and the final-phase testing is done on the TV, but the developer is free to choose whatever workflow he prefers.
+
+Topic: Selecting a Target Device
+
+To specify the device on which to run your TrickPlay application (local computer, external TV, etc.), press the Target button on the left-most side of the IDE toolbar. A drop-down listbox containing the Emulator (i.e., local computer) and all connected devices will be shown. All connected devices are located automatically; there is no need to manually define an external device. Select the device that you want to run the application on.
+
+Topic: Running an Application
+
+To run a TrickPlay application from the IDE, press the Run button located on the IDE toolbar.
+
+If the target device is the Emulator (local computer), the TrickPlay Engine will launch on the computer and run the application. Note: Running the application on the local computer always starts a new instance of the TrickPlay Engine.
+
+If the target is a remote device, the application is deployed to the Engine running on the device, which then runs the application.
+
+When an application is run from the IDE, new IDE windows are opened to enable you to monitor and modify various variable settings. The Inspector Window will open and list the program's user interface elements in a hierarchical tree structure. Select an element to display its current property settings in the Properties Window located beneath the Inspector Window.
+
+Properties composed of multiple settings--such as the size property which is made up of width and height settings--have a right-arrow graphic beside their name. Click the graphic to expand the property and view its individual component settings. Expanded properties have a down-arrow graphic alongside them. Click the graphic to compress the property. 
+
+To change a property, select its setting by clicking on it, and then enter the new value. Press <Enter> to accept the modified setting. The new setting takes effect immediately in the running program. Thus, if you modify an element's position property, you can see the object in its new location by simply viewing the running program.
+
+Note: Changing a property setting in the Properties Window affects the running program only and does not affect the application's source code. When the running program is terminated, any changed property settings are lost. If you make property changes that you wish to retain, such as resizing or repositioning objects, you must incorporate those modified settings directly into the application's source files.
+
+Topic: The Console Window
+
+The Console Window (shown below) displays information and debug messages produced by the TrickPlay Engine. In addition, application output produced by Lua print statements is directed to the Console Window. The Console Window is also a complete TrickPlay Engine Console that can accept console commands entered in its command prompt, located at the bottom of the window. For a complete description of all available console commands, refer to <The Engine Console>.
+
+(see images/IdeConsoleWindow.png)
+
+Topic: Stopping a Running Application
+
+To stop a TrickPlay application that was started in the IDE, press the Stop button located in the IDE toolbar. The application will terminate immediately. If the program was run on the local computer, the instance of the TrickPlay Engine that was started with the program is also terminated.
+

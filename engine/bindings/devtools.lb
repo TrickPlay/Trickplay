@@ -5,6 +5,7 @@
 #include "context.h"
 #include "clutter_util.h"
 #include "images.h"
+#include "app_resource.h"
 
 //-----------------------------------------------------------------------------
 // __gc metamethod for markers
@@ -77,6 +78,17 @@ private:
         source = clutter_threads_add_repaint_func( on_tick , this , 0 );
         
         timer = g_timer_new(); 
+        
+        text = CLUTTER_TEXT( clutter_text_new_full( "DejaVu Sans Mono 40px" , "" , clutter_color_get_static( CLUTTER_COLOR_YELLOW ) ) );
+        
+        g_object_ref_sink( text );
+        
+        clutter_container_add_actor( CLUTTER_CONTAINER( stage ) , CLUTTER_ACTOR( text ) );
+        
+        time = 0;
+        frames = 0;
+        min_fps = 60;
+        max_fps = 0;
     }
     
     ~Graph()
@@ -84,9 +96,12 @@ private:
         if ( ClutterActor * parent = clutter_actor_get_parent( texture ) )
         {
             clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , texture );
+            
+            clutter_container_remove_actor( CLUTTER_CONTAINER( parent ) , CLUTTER_ACTOR( text ) );
         }
         
         g_object_unref( texture );
+        g_object_unref( text );
         
         g_free( bar );
         
@@ -106,7 +121,9 @@ private:
     
     void tick()
     {
-        gint y = g_timer_elapsed( timer , 0 ) * height;
+        gfloat t = g_timer_elapsed( timer , 0 ); 
+        
+        gint y = t * height;
         
         if ( y < 0 )
         {
@@ -138,6 +155,25 @@ private:
         
         clutter_actor_raise_top( texture );
         
+        time += t;
+        ++frames;
+        
+        if ( time >= 0.5 )
+        {
+            gfloat fps = frames / time;
+            min_fps = std::min( min_fps , fps );
+            max_fps = std::max( max_fps , fps );
+            
+            g_snprintf( buffer , sizeof( buffer ) , "%2.2f/%2.2f/%2.2f" , min_fps , fps , max_fps );
+            
+            clutter_text_set_text( text , buffer );
+            
+            clutter_actor_raise_top( CLUTTER_ACTOR( text ) );
+            
+            time = 0;
+            frames = 0;
+        }
+        
         g_timer_start( timer );
     }
     
@@ -146,9 +182,15 @@ private:
     guchar *        bar;
     guchar *        white_bar;
     ClutterActor *  texture;
+    ClutterText *   text;
     gint            x;
     guint           source;
     GTimer *        timer;
+    gfloat          time;
+    int             frames;
+    gfloat          min_fps;
+    gfloat          max_fps;
+    char            buffer[256];
 };
 ]]
 
@@ -282,7 +324,7 @@ global devtools [[ void * ]]
                 
                 App * app = App::get( L );
                 
-                String app_path = app->get_metadata().sandbox.get_root_native_path();
+                String app_path = app->get_metadata().get_root_native_path();
                 
                 if ( ! app_path.empty() )
                 {
@@ -342,6 +384,41 @@ global devtools [[ void * ]]
                 result = u->gc_tag( comment );
             } 
         ]];        
-                    
+
+    multi path_test( string path , int flags = 0 , table schemes = 0 )
+        [[
+            StringSet allowed_schemes;
+            
+            if ( schemes )
+            {
+                lua_pushnil( L );
+                while( lua_next( L , schemes ) )
+                {
+                    allowed_schemes.insert( lua_tostring( L , -1 ) );
+                    lua_pop( L , 1 );
+                }
+            }
+            
+            AppResource p( L , path , flags , allowed_schemes );
+            
+            if ( p )
+            {
+                lua_pushboolean( L , true );
+            }
+            else
+            {
+                lua_pushboolean( L , false );
+            }
+            
+            lua_pushstring( L , p.get_native_path().c_str() );
+            lua_pushstring( L , p.get_uri().c_str() );
+            
+            return 3;
+        ]];                     
+
+    fs( bool f)
+        [[
+            clutter_stage_set_fullscreen( CLUTTER_STAGE( clutter_stage_get_default() ) , f ? TRUE : FALSE );
+        ]];
 }
 

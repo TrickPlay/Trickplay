@@ -77,7 +77,7 @@ end
 
 --private methods
 
-local base_url = "http://10.0.190.158:8080/gameservice/rest"
+local base_url = "http://tp-gameservice-dev.elasticbeanstalk.com/rest"
 
 local base_header = {
     

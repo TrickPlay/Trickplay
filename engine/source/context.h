@@ -44,6 +44,7 @@
 #define TP_APP_PUSH_ENABLED_DEFAULT     	true
 #define TP_APP_PUSH_PORT_DEFAULT        	8888
 #define TP_TEXTURE_CACHE_LIMIT_DEFAULT		0
+#define TP_MEDIAPLAYER_SCHEMES_DEFAULT		"rtsp"
 
 // TODO: Don't like hard-coding this app id here
 
@@ -198,6 +199,11 @@ public:
     // Get a resource loader
 
     bool get_resource_loader( unsigned int resource_type , TPResourceLoader * loader , void * * user_data ) const;
+
+    typedef std::pair<OutputHandler, void *>                    OutputHandlerClosure;
+    typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
+
+    String get_control_message( App * app = 0 ) const;
 
 private:
 
@@ -365,9 +371,6 @@ private:
     typedef std::map<String, RequestHandlerClosure>             RequestHandlerMap;
 
     RequestHandlerMap                                           request_handlers;
-
-    typedef std::pair<OutputHandler, void *>                    OutputHandlerClosure;
-    typedef std::set<OutputHandlerClosure>                      OutputHandlerSet;
 
     OutputHandlerSet                                            output_handlers;
 

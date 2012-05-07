@@ -48,6 +48,7 @@ if(NOT GIT_CURRENT_TAG)
 endif (NOT GIT_CURRENT_TAG)
 
 string(REPLACE "\n" ", " GIT_CURRENT_TAG ${GIT_CURRENT_TAG})
+string(REPLACE "#"  "~"  GIT_CURRENT_TAG ${GIT_CURRENT_TAG})
 
 set(GIT_VERSION "${GIT_CURRENT_TAG}")
 
@@ -86,4 +87,5 @@ add_subdirectory( engine/docs EXCLUDE_FROM_ALL )
 add_subdirectory ( apps EXCLUDE_FROM_ALL )
 
 add_subdirectory( plugins )
+
 

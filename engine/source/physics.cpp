@@ -16,12 +16,12 @@
 namespace Physics
 {
 
-World::World( lua_State * _L , ClutterActor * _screen , float32 _pixels_per_meter )
+World::World( lua_State * _LS , ClutterActor * _screen , float32 _pixels_per_meter )
 :
     ppm( _pixels_per_meter ),
     z_for_y( false ),
     global_callbacks( 0 ),
-    L( _L ),
+    L( _LS ),
     world( b2Vec2( 0.0f , 10.0f ) , true ),
     next_handle( 1 ),
     velocity_iterations( 6 ),
@@ -871,6 +871,30 @@ void World::DrawTransform(const b2Transform& xf)
 
 //=========================================================================
 
+gboolean World::on_debug_draw( ClutterCairoTexture * texture , cairo_t * cr , World * world )
+{
+    world->debug_cairo = cr;
+    
+    cairo_scale( cr , world->ppm , world->ppm );
+
+    world->b2DebugDraw::SetFlags(
+            b2DebugDraw::e_shapeBit
+            | b2DebugDraw::e_aabbBit
+            | b2DebugDraw::e_centerOfMassBit
+            | b2DebugDraw::e_jointBit
+            | b2DebugDraw::e_pairBit
+            );
+
+    world->world.SetDebugDraw( world );
+
+    world->world.DrawDebugData();
+
+    world->world.SetDebugDraw( 0 );
+
+    world->debug_cairo = 0;
+    
+    return TRUE;
+}
 
 //.............................................................................
 
@@ -907,27 +931,25 @@ void World::draw_debug( int opacity )
 
     clutter_actor_set_opacity( debug_draw , opacity );
 
-    debug_cairo = clutter_cairo_texture_create( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
+#ifdef CLUTTER_VERSION_1_10
 
-    cairo_scale( debug_cairo , ppm , ppm );
 
-    b2DebugDraw::SetFlags(
-            b2DebugDraw::e_shapeBit
-            | b2DebugDraw::e_aabbBit
-            | b2DebugDraw::e_centerOfMassBit
-            | b2DebugDraw::e_jointBit
-            | b2DebugDraw::e_pairBit
-            );
+    gulong handler = g_signal_connect( debug_draw , "draw" , GCallback( on_debug_draw ) , this );
+    
+    clutter_cairo_texture_invalidate( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
+    
+    g_signal_handler_disconnect( debug_draw , handler );
 
-    world.SetDebugDraw( this );
+#else
 
-    world.DrawDebugData();
+    cairo_t * c = clutter_cairo_texture_create( CLUTTER_CAIRO_TEXTURE( debug_draw ) );
+    
+    on_debug_draw( CLUTTER_CAIRO_TEXTURE( debug_draw ) , c , this );
+    
+    cairo_destroy( c );
+    
+#endif    
 
-    world.SetDebugDraw( 0 );
-
-    cairo_destroy( debug_cairo );
-
-    debug_cairo = 0;
 }
 
 //.............................................................................
@@ -1174,9 +1196,9 @@ void Body::actor_mapped_notify( GObject * , GParamSpec * , Body * self )
 
 //.............................................................................
 
-AABBQuery::AABBQuery( lua_State * _L )
+AABBQuery::AABBQuery( lua_State * _LS )
 :
-    L( _L )
+    L( _LS )
 {
     lua_newtable( L );
 }

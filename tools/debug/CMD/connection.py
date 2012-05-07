@@ -49,6 +49,33 @@ def send(data):
         print(e)
         return False
         
+def getTrickplayData():
+    """
+    Get Trickplay UI tree data for the inspector
+    """
+    
+    s = CON.get()
+    r = urllib2.Request("http://" + s + "/debug/ui")
+    f = None
+    
+    try:
+        f = urllib2.urlopen(r)
+        return decode(f.read())
+    
+    # Connection refused
+    except urllib2.URLError, e:
+        print("Error >> Connection to Trickplay application unsuccessful.")
+        print(e)
+    
+    except httplib.BadStatusLine, e:
+        print("Error >> Trickplay application closed before data could be retreived.")
+        print(e)
+    
+    except httplib.InvalidURL, e:
+        print('Could not find a Trickplay device.')
+        print(e)
+        
+    return None
  
   
 def sendTrickplayDebugCommand(db_port, cmd, start=False):
@@ -60,6 +87,8 @@ def sendTrickplayDebugCommand(db_port, cmd, start=False):
 		print '\t'+"Connecting remote debugger ..."
 
     s = CON.address+":"+db_port
+    print s+"OOOOOOOOOOO"
+    print cmd
     conn = httplib.HTTPConnection( s )
     
     try:
@@ -113,33 +142,6 @@ def getTrickplayDebug():
         
     return None
     
-def getTrickplayData():
-    """
-    Get Trickplay UI tree data for the inspector
-    """
-    
-    s = CON.get()
-    r = urllib2.Request("http://" + s + "/debug/ui")
-    f = None
-    
-    try:
-        f = urllib2.urlopen(r)
-        return decode(f.read())
-    
-    # Connection refused
-    except urllib2.URLError, e:
-        print("Error >> Connection to Trickplay application unsuccessful.")
-        print(e)
-    
-    except httplib.BadStatusLine, e:
-        print("Error >> Trickplay application closed before data could be retreived.")
-        print(e)
-    
-    except httplib.InvalidURL, e:
-        print('Could not find a Trickplay device.')
-        print(e)
-        
-    return None
     
     
 def decode(input):

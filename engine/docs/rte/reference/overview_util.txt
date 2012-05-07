@@ -1,5 +1,11 @@
 
-Title: Utility Overview
+Title: Utility Functions Overview
 
-This is a placeholder for the Utility section of the TrickPlay Runtime Engine Reference
+The Utility Functions section describes useful functions that the SDK Libraries make available to a TrickPlay application.
+
+Included are debugging functions, such as <print>, <dumptable> and <reload>. An application can process Lua source code and import data from external files with the <dofile>, <loadfile> and <readfile> functions. 
+
+Functions are also provided to encode data in various manners, including encryption using the MD5, SHA-1, and SHA-256 hashing algorithms (the <md5>, <sha1> and <sha256> functions, respectively), and Base64 conversions are accomplished with <base64_encode> and <base64_decode>. Regular expressions are supported in the <regex> global variable which provides functions to find (<regex.find>) and replace (<regex.replace>) text in strings using a powerful regular expression syntax.
+
+Many other useful functions are provided. Scan the various Summary sections to see the complete lists.
 

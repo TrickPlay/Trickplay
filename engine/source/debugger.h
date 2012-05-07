@@ -42,10 +42,11 @@ private:
     JSON::Array get_locals( lua_State * L , lua_Debug * ar );
     JSON::Array get_breakpoints( lua_State * L , lua_Debug * ar );
     JSON::Object get_app_info();
+    JSON::Array get_globals( lua_State * L );
 
     StringVector * get_source( const String & pi_path );
 
-    bool handle_command( lua_State * L , lua_Debug * ar , Command * command );
+    bool handle_command( lua_State * L , lua_Debug * ar , Command * command , bool with_location );
 
     App *	app;
     bool    installed;
@@ -53,7 +54,19 @@ private:
     int 	returns;
     bool	in_break;
 
-    typedef std::pair< String, int > Breakpoint;
+    struct Breakpoint
+    {
+    	Breakpoint( const String & _file , int _line , bool _enabled = true )
+    	:
+    		file( _file ),
+    		line( _line ),
+    		enabled( _enabled )
+    	{}
+
+    	String	file;
+    	int		line;
+    	bool	enabled;
+    };
 
     typedef std::vector< Breakpoint > BreakpointList;
 

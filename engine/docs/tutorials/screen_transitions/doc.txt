@@ -1,0 +1,16 @@
+
+Title: Screen Transitions in a TrickPlay Application
+
+The Screen Transitions sample application demonstrates how to perform various types of screen transitions using the TrickPlay SDK Libraries.
+
+The complete application, including source code, can be <accessed here at https://github.com/TrickPlay/SampleApps>.
+
+(see ScreenTransitionsDemo.png)
+
+Group: General Program Structure
+
+The sample application transitions between two screens which are built in the constructScreenOne() and constructScreenTwo() functions. A menu of available transition types is shown on the left side of the display; the menu area is separate from the two screens and remains unchanged as transitions occur from one screen to the other.
+
+Pressing a numeric key causes the associated screen transition to occur.
+
+Each transition is implemented in stand-alone functions that should be a simple matter to cut-and-paste into your own TrickPlay application. The functions typically take two arguments: a <Group> object of the screen being transitioned from and another Group object of the screen being transitioned to. Some transitions are accomplished in a single function, while others begin an animation that may require some cleanup upon completion. The cleanup functions can refer to global variables, such as CurrentScreen, so some code modifications may be necessary to handle these references if cutting-and-pasting code.

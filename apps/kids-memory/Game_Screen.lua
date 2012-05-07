@@ -26,14 +26,7 @@ local spacing   =  36
 --local global for storing the first tile that was selected
 local first_selected   = nil
 
---size of the board, based on difficulty
 
-local board_spec = {
-    --left_x, top_y, scale of tile, num_rows, num_cols
-    {    534,    88,             1,        3,        4},
-    {    667,    38,           .85,        4,        4},
-    {    438,    56,            .8,        4,        6}
-}
 
 --function that determines the position of a tile based on its index
 local function x_y_from_index(i,j)
@@ -87,10 +80,10 @@ local fade_in = {
 						item = game_state.board[i][j].group
 						if msecs > item.delay and msecs < (item.delay+duration_per_tile) then
 							prog = (msecs-item.delay) / duration_per_tile
-							item.y_rotation = {90*(1-prog),0,0}
+							item.scale = {board_spec[game_state.difficulty][3]*prog,board_spec[game_state.difficulty][3]}--y_rotation = {90*(1-prog),0,0}
 							item.opacity = 255*prog
 						elseif msecs > (item.delay+duration_per_tile) then
-							item.y_rotation = {0,0,0}
+							item.scale = {board_spec[game_state.difficulty][3],board_spec[game_state.difficulty][3]}--y_rotation = {0,0,0}
 							item.opacity = 255
 						end
                         end
@@ -104,7 +97,7 @@ local fade_in = {
 				for j = 1, #game_state.board[i] do
                     if game_state.board[i][j] ~= 0 then
                         item = game_state.board[i][j].group
-                        item.y_rotation = {0,0,0}
+                        item.scale = {board_spec[game_state.difficulty][3],board_spec[game_state.difficulty][3]}--y_rotation = {0,0,0}
                         item.opacity = 255
                     end
                 end
@@ -250,9 +243,15 @@ local board_key_handler = {
         if focus_i[2] > 1 then
             focus_i[2] = focus_i[2] - 1
             --anim_focus( x_y_from_index(focus_i[1],focus_i[2]) )
+			
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
-            animate_list[anim_focus]=anim_focus
+			if animate_list[anim_focus] then
+				anim_focus:setup()
+				anim_focus.elapsed = 0
+			else
+				animate_list[anim_focus]=anim_focus
+			end
             --focus.y    = 200*focus_i[2]
             back_sel   = false
             play_sound_wrapper(audio.move_focus)
@@ -265,7 +264,12 @@ local board_key_handler = {
             --anim_focus( x_y_from_index(focus_i[1],focus_i[2])
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
-            animate_list[anim_focus]=anim_focus
+            if animate_list[anim_focus] then
+				anim_focus:setup()
+				anim_focus.elapsed = 0
+			else
+				animate_list[anim_focus]=anim_focus
+			end
             play_sound_wrapper(audio.move_focus)
             --)
         end
@@ -276,7 +280,12 @@ local board_key_handler = {
             --anim_focus( x_y_from_index(focus_i[1],focus_i[2]))
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
-            animate_list[anim_focus]=anim_focus
+            if animate_list[anim_focus] then
+				anim_focus:setup()
+				anim_focus.elapsed = 0
+			else
+				animate_list[anim_focus]=anim_focus
+			end
             play_sound_wrapper(audio.move_focus)
             --focus.x = 200*focus_i[1]
         end
@@ -288,7 +297,12 @@ local board_key_handler = {
             --anim_focus( x_y_from_index(focus_i[1],focus_i[2]))
             anim_focus.targ_x, anim_focus.targ_y = x_y_from_index(focus_i[1],focus_i[2])
             --table.insert(animate_list,anim_focus)
-            animate_list[anim_focus]=anim_focus
+            if animate_list[anim_focus] then
+				anim_focus:setup()
+				anim_focus.elapsed = 0
+			else
+				animate_list[anim_focus]=anim_focus
+			end
             --focus.x = 200*focus_i[1]
         else
             --table.insert(animate_list,corner_get_focus)

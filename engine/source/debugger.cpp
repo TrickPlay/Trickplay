@@ -10,6 +10,7 @@
 #include "util.h"
 #include "http_server.h"
 #include "user_data.h"
+#include "app_resource.h"
 
 //.............................................................................
 
@@ -38,6 +39,19 @@ public:
 		delete ( Command * ) me;
 	}
 
+	virtual void cancel()
+	{
+	}
+
+	typedef std::list<Command*> List;
+
+	class Filter
+	{
+	public:
+		virtual ~Filter() {}
+		virtual bool operator()( Command * command ) const = 0;
+	};
+
 private:
 
 	Command( const Command & ) {}
@@ -64,6 +78,23 @@ public:
 
 	virtual void disable_console() = 0;
 
+	virtual void clear_pending_commands() = 0;
+
+	virtual Command::List get_commands_matching( const Command::Filter & filter ) = 0;
+
+	Command::List get_all_commands()
+	{
+		class FilterNone : public Command::Filter
+		{
+			virtual bool operator()( Command * ) const
+			{
+				return true;
+			}
+		};
+
+		return get_commands_matching( FilterNone() );
+	}
+
 protected:
 
 	virtual ~Server() {}
@@ -84,7 +115,9 @@ class HCommand : public Debugger::Command
 {
 public:
 
-	HCommand( const HttpServer::Request::Body & body , HttpServer::Response & _response )
+	HCommand( GMainContext * _gctx , const HttpServer::Request::Body & body , HttpServer::Response & _response )
+	:
+		gctx( _gctx )
 	{
 		line = String( body.get_data() , body.get_length() );
 
@@ -93,10 +126,7 @@ public:
 
 	virtual ~HCommand()
 	{
-		if ( response )
-		{
-			response->resume();
-		}
+		resume();
 	}
 
 	virtual String get() const
@@ -106,11 +136,12 @@ public:
 
 	virtual bool reply( const JSON::Object & obj )
 	{
-		response->set_status( HttpServer::HTTP_STATUS_OK );
-		response->set_response( "application/json" , obj.stringify() );
-		response->resume();
+		if ( 0 == response )
+		{
+			return false;
+		}
 
-		response = 0;
+		resume( obj.stringify() );
 
 		fprintf( stdout , "\n" );
 		fflush( stdout );
@@ -118,8 +149,78 @@ public:
 		return true;
 	}
 
+	virtual void cancel()
+	{
+		if ( response )
+		{
+			response->unref();
+			response = 0;
+		}
+	}
+
 private:
 
+	// In order to execute the actual resume in the server thread,
+	// we create a struct with the response and the content and
+	// queue an idle source in that thread's main context.
+
+	struct ResumeInfo
+	{
+		ResumeInfo( const String & _content , HttpServer::Response * _response )
+		:
+			content( _content ),
+			response( _response )
+		{}
+
+		static void destroy( gpointer me )
+		{
+			ResumeInfo * info = ( ResumeInfo * ) me;
+
+			if ( info->response )
+			{
+				info->response->unref();
+			}
+
+			delete info;
+		}
+
+		String 					content;
+		HttpServer::Response * 	response;
+	};
+
+	static gboolean resume_it( gpointer resume_info )
+	{
+		ResumeInfo * info = ( ResumeInfo * ) resume_info;
+
+		if ( ! info->content.empty() )
+		{
+			info->response->set_status( HttpServer::HTTP_STATUS_OK );
+			info->response->set_response( "application/json" , info->content );
+		}
+
+		info->response->resume();
+
+		info->response = 0;
+
+		return FALSE;
+	}
+
+	void resume( const String & content = String() )
+	{
+		if ( response )
+		{
+			GSource * source = g_idle_source_new();
+			g_source_set_priority( source , G_PRIORITY_DEFAULT );
+			g_source_set_callback( source , resume_it , new ResumeInfo( content , response ) , ResumeInfo::destroy );
+			g_source_attach( source , gctx );
+			g_source_unref( source );
+
+			response = 0;
+		}
+	}
+
+
+	GMainContext *			gctx;
 	String 					line;
 	HttpServer::Response * 	response;
 
@@ -153,7 +254,9 @@ public:
 		}
 		else
 		{
-			tplog2( "HTTP SERVER READY ON PORT %u" , server->get_port() );
+            tp_context_set( context , TP_DEBUGGER_PORT , Util::format( "%u" , server->get_port() ).c_str() );
+
+			tplog( "HTTP SERVER READY ON PORT %u" , server->get_port() );
 
 			server->register_handler( "/debugger" , this );
 
@@ -211,6 +314,50 @@ public:
 		g_atomic_int_set( & console_enabled , 0 );
 	}
 
+	virtual void clear_pending_commands()
+	{
+		Debugger::Command::List commands = get_all_commands();
+
+		for ( Debugger::Command::List::const_iterator it = commands.begin(); it != commands.end(); ++it )
+		{
+			tplog( "CLEARING PENDING COMMAND %s" , (*it)->get().c_str() );
+
+			delete (*it);
+		}
+	}
+
+	virtual Debugger::Command::List get_commands_matching( const Debugger::Command::Filter & filter )
+	{
+		Debugger::Command::List result;
+		Debugger::Command::List putback;
+
+		g_async_queue_lock( queue );
+
+		while ( Debugger::Command * command = ( Debugger::Command * ) g_async_queue_try_pop_unlocked( queue ) )
+		{
+			if ( filter( command ) )
+			{
+				result.push_back( command );
+			}
+			else
+			{
+				putback.push_back( command );
+			}
+		}
+
+		if ( ! putback.empty() )
+		{
+			for ( Debugger::Command::List::const_iterator it = putback.begin(); it != putback.end(); ++it )
+			{
+				g_async_queue_push_unlocked( queue , * it );
+			}
+		}
+
+		g_async_queue_unlock( queue );
+
+		return result;
+	}
+
 protected:
 
 	virtual ~HServer()
@@ -224,6 +371,8 @@ protected:
 		{
 			tplog2( "STOPPING HTTP SERVER" );
 
+			server->unregister_handler( "/debugger" );
+
 			server->quit();
 
 			delete server;
@@ -234,6 +383,20 @@ protected:
 			tplog2( "WAITING FOR HTTP SERVER THREAD" );
 
 			( void ) g_thread_join( thread );
+		}
+
+		// Cancel any commands that are in the queue now. Otherwise, we will
+		// try to reply to them when the server has already been destroyed.
+
+		Debugger::Command::List list = get_all_commands();
+
+		for ( Debugger::Command::List::const_iterator it = list.begin(); it != list.end(); ++it )
+		{
+			tplog2( "CANCELLING COMMAND '%s'" , (*it)->get().c_str() );
+
+			(*it)->cancel();
+
+			delete (*it);
 		}
 
 		g_async_queue_unref( queue );
@@ -262,7 +425,7 @@ protected:
     		return;
     	}
 
-    	g_async_queue_push( queue , new HCommand( body , response ) );
+    	g_async_queue_push( queue , new HCommand( gctx , body , response ) );
     }
 
     static gpointer process( gpointer me )
@@ -337,6 +500,37 @@ protected:
     		}
 
     		//.................................................................
+    		// List globals
+
+    		key = obj.find( "globals" );
+
+    		if ( key != obj.end() )
+    		{
+    			JSON::Array array( key->second.as<JSON::Array>() );
+
+        		JSON::Array::Vector::iterator it;
+
+    			for ( it = array.begin(); it != array.end(); ++it )
+    			{
+    				JSON::Object & global( (*it).as<JSON::Object>() );
+
+    				const String & name = global[ "name" ].as<String>();
+
+    				if ( name != "(*temporary)" )
+    				{
+						fprintf( stdout , "%s (%s) = %s [%s]\n" ,
+								name.c_str(),
+								global[ "type" ].as<String>().c_str(),
+								global[ "value"].as<String>().c_str(),
+								global[ "defined"].as<String>().c_str());
+    				}
+    			}
+
+    			fflush( stdout );
+    		}
+
+
+    		//.................................................................
     		// Back trace
 
     		key = obj.find( "stack" );
@@ -393,10 +587,11 @@ protected:
 					{
 						JSON::Object & bp( (*it).as<JSON::Object>() );
 
-						fprintf( stdout , "[%d] %s:%lld\n" ,
+						fprintf( stdout , "[%d] %s:%lld%s\n" ,
 								i,
 								bp[ "file" ].as<String>().c_str(),
-								bp[ "line" ].as< long long >());
+								bp[ "line" ].as< long long >(),
+								bp[ "on" ].as<bool>() ? "" : " (disabled)" );
 					}
     			}
 
@@ -519,6 +714,12 @@ void Debugger::uninstall()
     if ( installed )
     {
         lua_sethook( app->get_lua_state(), lua_hook, 0, 0 );
+
+        server->clear_pending_commands();
+
+        installed = false;
+
+        tplog( "UNINSTALLED FOR %s" , app->get_id().c_str() );
     }
 }
 
@@ -530,8 +731,11 @@ void Debugger::install( bool break_next_line )
 
     if ( installed )
     {
+        tplog( "BREAK NEXT IS %s" , break_next ? "TRUE" : "FALSE" );
         return;
     }
+
+    tplog( "INSTALLED FOR %s : BREAK NEXT IS %s" , app->get_id().c_str() , break_next ? "TRUE" : "FALSE" );
 
     lua_sethook( app->get_lua_state(), lua_hook, /* LUA_MASKCALL | LUA_MASKRET |*/ LUA_MASKLINE, 0 );
 
@@ -552,8 +756,7 @@ void Debugger::lua_hook( lua_State * L, lua_Debug * ar )
 
 void Debugger::break_next_line()
 {
-    install();
-    break_next = true;
+    install( true );
 }
 
 //.............................................................................
@@ -618,25 +821,6 @@ JSON::Array Debugger::get_back_trace( lua_State * L , lua_Debug * ar )
 
 //.............................................................................
 
-static String get_value( lua_State * L , int index )
-{
-	switch( lua_type( L , index ) )
-	{
-	case LUA_TNUMBER:
-		return lua_tostring( L , index );
-	case LUA_TSTRING:
-		return Util::format( "\"%s\"" , lua_tostring( L , index ) );
-	case LUA_TBOOLEAN:
-		return lua_toboolean( L , index ) ? "true" : "false";
-	case LUA_TNIL:
-		return "nil";
-	default:
-		return UserData::describe( L , index );
-	}
-}
-
-//.............................................................................
-
 JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
 {
 	JSON::Array array;
@@ -657,7 +841,7 @@ JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
 		int type = lua_type( L , -1 );
 
 		local[ "type"  ] = lua_typename( L , type );
-		local[ "value" ] = get_value( L , -1 );
+		local[ "value" ] = Util::describe_lua_value( L , -1 );
 
 		lua_pop( L , 1 );
     }
@@ -687,7 +871,7 @@ JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
 			int type = lua_type( L , -1 );
 
 			local[ "type"  ] = lua_typename( L , type );
-			local[ "value" ] = get_value( L , -1 );
+			local[ "value" ] = Util::describe_lua_value( L , -1 );
 
 			lua_pop( L , 1 );
 		}
@@ -696,6 +880,38 @@ JSON::Array Debugger::get_locals( lua_State * L , lua_Debug * ar )
     lua_pop( L , 1 );
 
     return array;
+}
+
+//.............................................................................
+
+JSON::Array Debugger::get_globals( lua_State * L )
+{
+	JSON::Array array;
+
+	const StringMap & globals( app->get_globals() );
+
+	for ( StringMap::const_iterator it = globals.begin(); it != globals.end(); ++it )
+	{
+		lua_pushstring( L , it->first.c_str() );
+		lua_rawget( L , LUA_GLOBALSINDEX );
+
+		if ( ! lua_isnil( L , -1 ) )
+		{
+			JSON::Object & g( array.append<JSON::Object>() );
+
+			g[ "name"  ] = it->first;
+
+			int type = lua_type( L , -1 );
+
+			g[ "type"  ] = lua_typename( L , type );
+			g[ "value" ] = Util::describe_lua_value( L , -1 );
+			g[ "defined" ] = it->second;
+		}
+
+		lua_pop( L , 1 );
+	}
+
+	return array;
 }
 
 //.............................................................................
@@ -734,8 +950,9 @@ JSON::Array Debugger::get_breakpoints( lua_State * L , lua_Debug * ar )
 	{
 		JSON::Object & b = result.append<JSON::Object>();
 
-		b[ "file" ] = it->first;
-		b[ "line" ] = it->second;
+		b[ "file" ] = it->file;
+		b[ "line" ] = it->line;
+		b[ "on"   ] = it->enabled;
 	}
 
 	return result;
@@ -759,7 +976,7 @@ JSON::Object Debugger::get_app_info()
 
 	JSON::Array & array = result[ "contents" ].as<JSON::Array>();
 
-	StringList contents = md.sandbox.get_pi_children();
+	StringList contents = AppResource::get_pi_children( md.get_root_uri() );
 
 	for ( StringList::const_iterator it = contents.begin(); it != contents.end(); ++it )
 	{
@@ -771,19 +988,41 @@ JSON::Object Debugger::get_app_info()
 
 //.............................................................................
 
-bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server_command )
+bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server_command , bool with_location )
 {
 	bool result = false;
 
 	String command( server_command->get() );
 
-	JSON::Object reply( get_location( L , ar ) );
+	JSON::Object reply;
+
+	if ( with_location )
+	{
+		reply = get_location( L , ar );
+	}
+
+	reply[ "command" ] = command;
+
+	if ( command == "i" )
+	{
+		reply[ "locals" ] = get_locals( L , ar );
+		reply[ "stack" ] = get_back_trace( L , ar );
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
+		reply[ "globals" ] = get_globals( L );
+	}
 
 	// List locals
 
-	if ( command == "l" )
+	else if ( command == "l" )
 	{
 		reply[ "locals" ] = get_locals( L , ar );
+	}
+
+	// List globals
+
+	else if ( command == "g" )
+	{
+		reply[ "globals" ] = get_globals( L );
 	}
 
 	// Where
@@ -906,29 +1145,109 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		reply[ "app" ] = get_app_info();
 	}
 
-	// Set a breakpoint
+	// Batch breakpoints
 
-	else if ( 0 == command.find( "b " ) )
+	else if ( 0 == command.find( "bb " ) )
 	{
 		StringVector parts = split_string( command , " " , 2 );
 
-		if ( parts.size() != 2 )
+		if ( parts.size() == 2 )
 		{
-			reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>'";
-		}
-		else
-		{
-			parts = split_string( parts[ 1 ] , ":" , 2 );
+			JSON::Value root = JSON::Parser::parse( parts[ 1 ] );
 
-			if ( parts.size() != 2 )
+			if ( root.is<JSON::Object>() )
 			{
-				reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>'";
+				JSON::Object & o = root.as<JSON::Object>();
+
+				if ( o.has( "clear" ) &&  o["clear"].as<bool>() )
+				{
+					breakpoints.clear();
+				}
+
+				JSON::Array & b = o["add"].as<JSON::Array>();
+
+				for ( JSON::Array::Vector::iterator it = b.begin(); it != b.end(); ++it )
+				{
+					JSON::Object & bo = it->as<JSON::Object>();
+
+					String file = bo[ "file" ].as<String>();
+					int line = bo[ "line" ].as<long long>();
+					bool on = bo.has( "on" ) ? bo[ "on" ].as<bool>() : true;
+
+					breakpoints.push_back( Breakpoint( file , line , on ) );
+				}
+
+				b = o[ "delete" ].as<JSON::Array>();
+
+				for ( JSON::Array::Vector::iterator it = b.begin(); it != b.end(); ++it )
+				{
+					JSON::Object & bo = it->as<JSON::Object>();
+
+					String file = bo[ "file" ].as<String>();
+					int line = bo[ "line" ].as<long long>();
+
+					for ( BreakpointList::iterator ib = breakpoints.begin(); ib != breakpoints.end(); ++ib )
+					{
+						if ( ib->file == file && ib->line == line )
+						{
+							breakpoints.erase( ib );
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
+	}
+
+	// Set a breakpoint
+	// b 57 - set a breakpoint at line 57 of the current file
+	// b main.lua:57 - set a breakpoint at line 57 of main.lua
+	// b 1 on|off - enable/disable breakpoints
+
+	else if ( 0 == command.find( "b " ) )
+	{
+		StringVector parts = split_string( command , " " , 3 );
+
+		if ( parts.size() == 3 )
+		{
+			// This is an enable/disable command
+
+			unsigned int index = atoi( parts[ 1 ].c_str() );
+
+			if ( index >= breakpoints.size() )
+			{
+				reply[ "error" ] = Util::format( "Invalid breakpoint index '%u'" , index );
 			}
 			else
 			{
+				( breakpoints.begin() + index )->enabled = parts[ 2 ] == "on";
+			}
+		}
+		else if ( parts.size() == 2 )
+		{
+			parts = split_string( parts[ 1 ] , ":" , 2 );
+
+			if ( parts.size() == 1 )
+			{
+				// b <line>
+
+				breakpoints.push_back( Breakpoint( reply[ "file" ].as<String>() , atoi( parts[ 0 ].c_str() ) ) );
+			}
+			else if ( parts.size() == 2 )
+			{
+				// b <file>:<line>
+
 				breakpoints.push_back( Breakpoint( parts[ 0 ] , atoi( parts[ 1 ].c_str() ) ) );
 			}
 		}
+		else
+		{
+			reply[ "error" ] = "To set a breakpoint, enter 'b <file>:<line>' or 'b <line>'. To enable or disable breakpoints, enter 'b <index> on|off'";
+		}
+
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
 	}
 
 	// Delete a breakpoint
@@ -949,7 +1268,7 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 		{
 			unsigned int index = atoi( parts[ 1 ].c_str() );
 
-			if ( index >= 0 && index < breakpoints.size() )
+			if ( index < breakpoints.size() )
 			{
 				breakpoints.erase( breakpoints.begin() + index );
 			}
@@ -958,6 +1277,8 @@ bool Debugger::handle_command( lua_State * L , lua_Debug * ar , Command * server
 				reply[ "error" ] = "Invalid breakpoint index";
 			}
 		}
+
+		reply[ "breakpoints" ] = get_breakpoints( L , ar );
 	}
 
 	// Fetch a file
@@ -1003,12 +1324,33 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 {
 	lua_getinfo( L, "nSl", ar );
 
-    //.........................................................................
-	// Process any pending debugger commands here
-
-	for ( Command * server_command = server->get_next_command( false ); server_command; server_command = server->get_next_command( false ) )
 	{
-		( void ) handle_command( L , ar , server_command );
+		// Some commands can be (and should be) handled here, when we may not be
+		// breaking.
+
+		class NoBreakCommands : public Command::Filter
+		{
+			virtual bool operator()( Command * command ) const
+			{
+				String s( command->get() );
+
+				return s == "r" || s == "bn" || s == "q" || s == "b" || s == "a" ||
+						( 0 == s.find( "b ") ) ||
+						( 0 == s.find( "bb ") ) ||
+						( 0 == s.find( "d ") ) ||
+						( 0 == s.find( "f ") );
+			}
+		};
+
+		Command::List commands = server->get_commands_matching( NoBreakCommands() );
+
+		if ( ! commands.empty() )
+		{
+			for ( Command::List::const_iterator it = commands.begin(); it != commands.end(); ++it )
+			{
+				handle_command( L , ar , * it , false );
+			}
+		}
 	}
 
 	//.........................................................................
@@ -1053,7 +1395,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 
 				for ( BreakpointList::const_iterator it = breakpoints.begin(); it != breakpoints.end(); ++it )
 				{
-					if ( it->second == ar->currentline && g_str_has_suffix( ar->source, it->first.c_str() ) )
+					if ( it->enabled && it->line == ar->currentline && g_str_has_suffix( ar->source, it->file.c_str() ) )
 					{
 						should_break = true;
 						break;
@@ -1113,7 +1455,7 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
     	// Deal with the command, deletes it.
     	// If it returns true, it means we should jump out
 
-    	if ( handle_command( L , ar , server_command ) )
+    	if ( handle_command( L , ar , server_command , true ) )
     	{
     		break;
     	}
@@ -1145,13 +1487,11 @@ StringVector * Debugger::get_source( const String & pi_path )
 
 	StringVector * result = 0;
 
-	gsize length = 0;
+	Util::Buffer contents( AppResource( app , pi_path ).load_contents( app ) );
 
-	gchar * contents = app->get_metadata().sandbox.get_pi_child_contents( pi_path , length );
-
-	if ( contents && length )
+	if ( contents.length() )
 	{
-		imstream stream( contents , length );
+		imstream stream( ( char * ) contents.data() , contents.length() );
 
 		StringVector & lines = source[ pi_path ];
 
@@ -1164,8 +1504,6 @@ StringVector * Debugger::get_source( const String & pi_path )
 
 		result = & lines;
 	}
-
-	g_free( contents );
 
 	return result;
 }
