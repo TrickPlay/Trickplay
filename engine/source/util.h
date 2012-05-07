@@ -306,7 +306,7 @@ private:
 
 namespace Util
 {
-    inline String format( const gchar * format, ... )
+	inline String format( const gchar * format, ... )
     {
         va_list args;
         va_start( args, format );
@@ -319,6 +319,8 @@ namespace Util
     }
 
     String random_string( guint length );
+
+    gpointer g_async_queue_timeout_pop( GAsyncQueue * queue , guint64 timeout );
 
     //-----------------------------------------------------------------------------
 
@@ -424,59 +426,48 @@ namespace Util
     String canonical_external_path( const char * path , bool abort_on_error = true );
 
     //-----------------------------------------------------------------------------
-    // Converts a path using / to a platform path in place - modifies the string
-    // passed in.
-
-    inline gchar * path_to_native_path( gchar * path )
-    {
-        if ( G_DIR_SEPARATOR == '/' )
-        {
-            return path;
-        }
-        return g_strdelimit( path, "/", G_DIR_SEPARATOR );
-    }
-
-    //-----------------------------------------------------------------------------
-    // Given a root path and some other path, it makes the path relative and
-    // appends it to the root. Return value must be destroyed with g_free.
-    // Both root and path are converted to native paths.
-    //
-    // NOTE: if path contains any .. elements, this will abort. The assumption
-    // is that root is trusted and path came from Lua - and cannot be trusted
-
-    inline gchar * rebase_path( const gchar * root, const gchar * path , bool abort = true )
-    {
-        FreeLater free_later;
-
-        if ( strstr( path, ".." ) )
-        {
-            if ( abort )
-            {
-                g_error( "Invalid relative path '%s'", path );
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        gchar * p = path_to_native_path( g_strdup( path ) );
-        free_later( p );
-
-        const gchar * last = g_path_is_absolute( p ) ? g_path_skip_root( p ) : p;
-
-        gchar * first = path_to_native_path( g_strdup( root ) );
-        free_later( first );
-
-        return g_build_filename( first, last, ( gpointer ) 0 );
-    }
-
-    //-----------------------------------------------------------------------------
 
     String make_v1_uuid();
 
     String make_v4_uuid();
 
+    //-----------------------------------------------------------------------------
+
+    class Buffer
+    {
+    public:
+
+    	typedef enum { MEMORY_USE_TAKE , MEMORY_USE_COPY } MemoryUse;
+
+    	Buffer();
+
+    	Buffer( gconstpointer data , guint length );
+
+    	Buffer( MemoryUse memory_use , gpointer data , guint length );
+
+    	Buffer( GByteArray * _bytes );
+
+    	Buffer( const Buffer & other );
+
+    	virtual ~Buffer();
+
+    	const Buffer & operator = ( const Buffer & other );
+
+    	bool good() const;
+
+    	operator bool () const;
+
+    	const char * data() const;
+
+    	guint length() const;
+
+    private:
+
+    	GByteArray * bytes;
+    };
+
+
+	String describe_lua_value( lua_State * L , int index );
 }
 
 #endif // _TRICKPLAY_UTIL_H

@@ -32,12 +32,12 @@ namespace JPEGUtils
     	{
         	switch( orientation )
         	{
-        	case 2: return ( y * width + width - x ) * depth;
-        	case 3: return ( ( height - y  - 1 ) * width + width - x ) * depth;
+        	case 2: return ( ( y * width + width - x ) - 1 ) * depth;
+        	case 3: return ( ( ( height - y  - 1 ) * width + width - x ) - 1 ) * depth;
         	case 4: return ( ( height - y - 1 ) * width + x ) * depth;
         	case 5: return ( x * height + y ) * depth;
-        	case 6: return ( x * height + height - y ) * depth;
-        	case 7: return ( ( width - x - 1 ) * height + height - y ) * depth;
+        	case 6: return ( ( x * height + height - y ) - 1 ) * depth ;
+        	case 7: return ( ( ( width - x - 1 ) * height + height - y ) - 1 ) * depth;
         	case 8:	return ( ( width - x - 1 ) * height + y ) * depth;
         	}
         	return ( y * width + x ) * depth;

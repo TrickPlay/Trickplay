@@ -7,7 +7,7 @@ test_area = "ui_element"
 test_api = "scale"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 
 	local g = factory:Group{ x = 0, y = 0}
 
@@ -21,6 +21,25 @@ function generate_test_image (controller, factory)
 
 	r3.scale = { 2, 2 }
 
+
+	g:add(r1, r2, r3)
+
+	return g
+end
+
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local g = Group{ x = 0, y = 0}
+
+	local r1 = Rectangle{color = "0070E0", x = 0, y =  0, size = { 40 * resize_ratio_w , 40 * resize_ratio_h }}
+
+	r1.scale = { 0.5, 0.5 }
+
+	local r2 = Rectangle{color = "0070E0", x = 20* resize_ratio_w , y =  20 * resize_ratio_h , size = { 40* resize_ratio_w  , 40 * resize_ratio_h }}
+
+	local r3 = Rectangle{color = "0070E0", x = 60* resize_ratio_w , y = 60 * resize_ratio_h , size = { 40* resize_ratio_w  , 40 * resize_ratio_h  }}
+
+	r3.scale = { 2, 2 }
 
 	g:add(r1, r2, r3)
 

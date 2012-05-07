@@ -164,13 +164,15 @@ public:
 	    virtual void set_content_length( goffset content_length ) = 0;
 	    virtual String get_content_type( ) const = 0;
 	    virtual void set_stream_writer( StreamWriter * stream_writer ) = 0;
-	    virtual bool respond_with_file_contents( const String & file_name , const String & content_type = String() ) = 0;
+	    virtual bool respond_with_file_contents( const String & file_name_or_uri , const String & content_type = String() ) = 0;
 
 	    // pause increases the ref count on this response and returns a pointer to it.
 	    // This is so that you can defer processing of the response beyond the
 	    // handler callback.
 
 	    virtual Response * pause() = 0;
+
+	    virtual bool is_paused() const = 0;
 
 	    // Resume decreases the ref count and tells the server the response
 	    // is ready to be sent.

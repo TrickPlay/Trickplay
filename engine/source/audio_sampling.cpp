@@ -9,6 +9,7 @@
 #include "context.h"
 #include "util.h"
 #include "network.h"
+#include "plugin.h"
 
 //.............................................................................
 
@@ -81,13 +82,31 @@ struct TPAudioSampler
         //.....................................................................
         // List of plugins
 
-        struct Plugin
+        class ADPlugin
         {
-            static Plugin * make( const gchar * file_name );
+        public:
 
-            ~Plugin();
+        	ADPlugin( TrickPlay::Plugin * _plugin )
+        	:
+        		plugin( _plugin ),
+        		next_request( 0 ),
+        		last_response( 0 )
+        	{
+        		g_assert( plugin );
 
-            TPAudioDetectionPluginInfo      info;
+        		process_samples = ( TPAudioDetectionProcessSamples ) plugin->get_symbol( TP_AUDIO_DETECTION_PROCESS_SAMPLES );
+        		reset = ( TPAudioDetectionReset ) plugin->get_symbol( TP_AUDIO_DETECTION_RESET );
+
+        		g_assert( process_samples );
+        		g_assert( reset );
+        	}
+
+            ~ADPlugin()
+            {
+            	delete plugin;
+            }
+
+            TrickPlay::Plugin *				plugin;
             TPAudioDetectionProcessSamples  process_samples;
             TPAudioDetectionReset           reset;
             guint32                         next_request;
@@ -95,19 +114,9 @@ struct TPAudioSampler
 
         private:
 
-            Plugin( GModule * _module ,
-                    TPAudioDetectionInitialize initialize,
-                    TPAudioDetectionProcessSamples _process_samples,
-                    TPAudioDetectionReset _reset,
-                    TPAudioDetectionShutdown _shutdown );
-
-            static gpointer get_symbol( GModule * module , const gchar * name );
-
-            GModule *                       module;
-            TPAudioDetectionShutdown        shutdown;
         };
 
-        typedef std::list< Plugin * > PluginList;
+        typedef std::list< ADPlugin * > ADPluginList;
 
         //.....................................................................
 
@@ -140,7 +149,7 @@ struct TPAudioSampler
 
             static Event * make( TPAudioDetectionResult * result ,
                     GByteArray * response ,
-                    Plugin * plugin,
+                    ADPlugin * plugin,
                     guint32 request);
 
             static void destroy( Event * event );
@@ -149,7 +158,7 @@ struct TPAudioSampler
             TPAudioBuffer *             buffer;
             TPAudioDetectionResult *    result;
             GByteArray *                response;
-            Plugin *                    plugin;
+            ADPlugin *                  plugin;
             guint32                     request;
 
         private:
@@ -177,7 +186,7 @@ struct TPAudioSampler
         GMutex *        mutex;
         GAsyncQueue *   queue;
         GThread *       thread;
-        PluginList      plugins;
+        ADPluginList    plugins;
         guint32         max_buffer_kb;
         guint           max_interval;
 
@@ -186,7 +195,7 @@ struct TPAudioSampler
 
         struct RequestClosure
         {
-            RequestClosure( GAsyncQueue * _queue , TPAudioDetectionResult * _result , Plugin * _plugin )
+            RequestClosure( GAsyncQueue * _queue , TPAudioDetectionResult * _result , ADPlugin * _plugin )
             :
                 queue( g_async_queue_ref( _queue ) ),
                 result( _result ),
@@ -214,7 +223,7 @@ struct TPAudioSampler
 
             GAsyncQueue *               queue;
             TPAudioDetectionResult *    result;
-            Plugin *                    plugin;
+            ADPlugin *                  plugin;
             guint32                     request;
         };
 
@@ -392,7 +401,7 @@ TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioBuff
     return event;
 }
 
-TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioDetectionResult * result , GByteArray * response , Plugin * plugin , guint32 request )
+TPAudioSampler::Thread::Event * TPAudioSampler::Thread::Event::make( TPAudioDetectionResult * result , GByteArray * response , ADPlugin * plugin , guint32 request )
 {
     g_assert( result );
     g_assert( response );
@@ -431,130 +440,6 @@ void TPAudioSampler::Thread::Event::destroy( Event * event )
     }
 
     g_slice_free( Event , event );
-}
-
-//=============================================================================
-// TPAudioSampler::Thread::Plugin
-
-TPAudioSampler::Thread::Plugin * TPAudioSampler::Thread::Plugin::make( const gchar * file_name )
-{
-    g_assert( file_name );
-
-    tplog( "FOUND PLUGIN %s" , file_name );
-
-    GModule * module = g_module_open( file_name , G_MODULE_BIND_LOCAL );
-
-    if ( ! module )
-    {
-        tplog( "  FAILED TO OPEN : %s" , g_module_error() );
-        return 0;
-    }
-
-    TPAudioDetectionInitialize initialize = ( TPAudioDetectionInitialize ) get_symbol( module , TP_AUDIO_DETECTION_INITIALIZE );
-    TPAudioDetectionProcessSamples process_samples = ( TPAudioDetectionProcessSamples ) get_symbol( module , TP_AUDIO_DETECTION_PROCESS_SAMPLES );
-    TPAudioDetectionReset reset = ( TPAudioDetectionReset ) get_symbol( module , TP_AUDIO_DETECTION_RESET );
-    TPAudioDetectionShutdown shutdown = ( TPAudioDetectionShutdown ) get_symbol( module , TP_AUDIO_DETECTION_SHUTDOWN );
-
-    if ( ! initialize || ! process_samples || ! shutdown || ! reset )
-    {
-        g_module_close( module );
-        return 0;
-    }
-
-    return new Plugin( module , initialize , process_samples , reset , shutdown );
-}
-
-TPAudioSampler::Thread::Plugin::Plugin( GModule * _module ,
-        TPAudioDetectionInitialize initialize,
-        TPAudioDetectionProcessSamples _process_samples,
-        TPAudioDetectionReset _reset,
-        TPAudioDetectionShutdown _shutdown )
-:
-    process_samples( _process_samples ),
-    reset( _reset ),
-    next_request( 0 ),
-    last_response( 0 ),
-    module( _module ),
-    shutdown( _shutdown )
-{
-    g_assert( module );
-    g_assert( initialize );
-    g_assert( process_samples );
-    g_assert( shutdown );
-
-    gchar * config = 0;
-
-    // We look for a file that has the same name as the plugin but with
-    // the .config extension. If it is there, we load its contents and
-    // pass them to 'initialize'.
-
-    String file_name( g_module_name( module ) );
-
-    size_t dot = file_name.find_last_of( '.' );
-
-    if ( dot != String::npos )
-    {
-        file_name = file_name.substr( 0 , dot ) + ".config";
-
-        if ( g_file_get_contents( file_name.c_str() , & config , 0 , 0 ) )
-        {
-            tplog( "CONFIG LOADED" );
-        }
-    }
-
-    // Clear the plugin info structure and invoke the plugin's initialize
-    // function - passing the config.
-
-    memset( & info , 0 , sizeof( info ) );
-
-    initialize( & info , config );
-
-    g_free( config );
-
-    // Make sure we NULL-terminate these two.
-
-    info.name[ sizeof( info.name ) - 1 ] = 0;
-    info.version[ sizeof( info.version ) - 1 ] = 0;
-
-    tplog( "  NAME        : %s" , info.name );
-    tplog( "  VERSION     : %s" , info.version );
-    tplog( "  RESIDENT    : %s" , info.resident ? "YES" : "NO" );
-    tplog( "  MIN SECONDS : %u" , info.min_buffer_seconds );
-    tplog( "  USER DATA   : %p" , info.user_data );
-
-    if ( info.resident )
-    {
-        g_module_make_resident( module );
-    }
-}
-
-TPAudioSampler::Thread::Plugin::~Plugin()
-{
-    shutdown( info.user_data );
-
-    g_module_close( module );
-}
-
-gpointer TPAudioSampler::Thread::Plugin::get_symbol( GModule * module , const gchar * name )
-{
-    g_assert( module );
-    g_assert( name );
-
-    gpointer result = 0;
-
-    if ( ! g_module_symbol( module , name , & result ) )
-    {
-        tplog( "  MISSING SYMBOL '%s'" , name );
-        return 0;
-    }
-
-    if ( ! result )
-    {
-        tplog( "  SYMBOL '%s' IS NULL" , name );
-        return 0;
-    }
-
-    return result;
 }
 
 //=============================================================================
@@ -658,7 +543,7 @@ TPAudioSampler::Thread::~Thread()
     {
         tplog( "CLOSING PLUGINS..." );
 
-        for ( PluginList::iterator it = plugins.begin(); it != plugins.end(); ++ it )
+        for ( ADPluginList::iterator it = plugins.begin(); it != plugins.end(); ++ it )
         {
             delete * it;
         }
@@ -669,56 +554,18 @@ TPAudioSampler::Thread::~Thread()
 
 bool TPAudioSampler::Thread::scan_for_plugins( TPContext * context )
 {
-    if ( ! g_module_supported() )
-    {
-        tpwarn( "PLUGINS ARE NOT SUPPORTED ON THIS PLATFORM" );
+	StringList symbols;
+	symbols.push_back( TP_AUDIO_DETECTION_PROCESS_SAMPLES );
+	symbols.push_back( TP_AUDIO_DETECTION_RESET );
 
-        return false;
-    }
+	TrickPlay::Plugin::List list = TrickPlay::Plugin::scan( context , "tp_audio_detection-" , symbols );
 
-    const gchar * plugins_path = context->get( TP_PLUGINS_PATH );
+	for ( TrickPlay::Plugin::List::iterator it = list.begin(); it != list.end(); ++it )
+	{
+		plugins.push_back( new ADPlugin( * it ) );
+	}
 
-    if ( ! plugins_path )
-    {
-        tpwarn( "PLUGINS PATH IS NOT SET" );
-
-        return false;
-    }
-
-    GError * error = 0;
-
-    GDir * dir = g_dir_open( plugins_path , 0 , & error );
-
-    if ( ! dir )
-    {
-        tpwarn( "FAILED TO OPEN PLUGINS PATH '%s' : %s" , plugins_path , error->message );
-
-        g_clear_error( & error );
-
-        return false;
-    }
-
-    for ( const gchar * name = g_dir_read_name( dir ); name ; name = g_dir_read_name( dir ) )
-    {
-        if ( g_str_has_prefix( name , "tp_audio_detection-" ) )
-        {
-            if ( ! g_str_has_suffix( name , ".config" ) )
-            {
-                gchar * sub = g_build_filename( plugins_path , name , NULL );
-
-                if ( Plugin * plugin = Plugin::make( sub ) )
-                {
-                    plugins.push_back( plugin );
-                }
-
-                g_free( sub );
-            }
-        }
-    }
-
-    g_dir_close( dir );
-
-    return true;
+    return ! plugins.empty();
 }
 
 //.........................................................................
@@ -919,8 +766,6 @@ void TPAudioSampler::Thread::process()
 
     bool done = false;
 
-    GTimeVal t;
-
     BufferList buffers;
 
     gdouble buffered_seconds = 0;
@@ -931,14 +776,9 @@ void TPAudioSampler::Thread::process()
 
     while( ! done )
     {
-        // Create a time val for 10 seconds from now
+        // Pop an event from the queue, waiting if necessary up to 10 seconds
 
-        g_get_current_time( & t );
-        g_time_val_add( & t , 10 * G_USEC_PER_SEC );
-
-        // Pop an event from the queue, waiting if necessary
-
-        Event * event = ( Event * ) g_async_queue_timed_pop( queue , & t );
+        Event * event = ( Event * ) Util::g_async_queue_timeout_pop( queue , 10 * G_USEC_PER_SEC );
 
         // Nothing in the queue, carry on
 
@@ -1269,15 +1109,15 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
     s.frames = info->frames;
     s.samples = samples;
 
-    for( PluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
+    for( ADPluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
     {
-        Plugin * plugin = * it;
+        ADPlugin * plugin = * it;
 
         g_assert( plugin );
 
         tplog2( "  CALLING %s" , plugin->info.name );
 
-        TPAudioDetectionResult * result = plugin->process_samples( & s , plugin->info.user_data );
+        TPAudioDetectionResult * result = plugin->process_samples( & s , plugin->plugin->user_data() );
 
         // The plugin returned NULL, we carry on
 
@@ -1367,11 +1207,11 @@ void TPAudioSampler::Thread::invoke_plugins( SF_INFO * info , const float * samp
 
 void TPAudioSampler::Thread::invoke_plugins_reset( )
 {
-    for( PluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
+    for( ADPluginList::const_iterator it = plugins.begin(); it != plugins.end(); ++it )
     {
-        Plugin * plugin = * it;
+        ADPlugin * plugin = * it;
 
-        plugin->reset( plugin->info.user_data );
+        plugin->reset( plugin->plugin->user_data() );
 
         // To ignore any requests that are processing now and may
         // callback after this happens.

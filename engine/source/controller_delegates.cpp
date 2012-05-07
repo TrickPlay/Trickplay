@@ -21,18 +21,21 @@ extern int invoke_Controller_on_key_up( lua_State * , ControllerDelegate * , int
 extern int invoke_Controller_on_pointer_button_down( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_pointer_button_up( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_pointer_move( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_pointer_active( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_pointer_inactive( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_touch_down( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_touch_move( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_touch_up( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_scroll( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_ui_event( lua_State * , ControllerDelegate * , int , int );
 
 extern int invoke_controllers_on_controller_connected( lua_State * , ControllerListDelegate * , int , int );
 
 //=============================================================================
 
-ControllerDelegate::ControllerDelegate(lua_State * _L,Controller * _controller,ControllerListDelegate * _list)
+ControllerDelegate::ControllerDelegate(lua_State * _LS,Controller * _controller,ControllerListDelegate * _list)
 :
-    L(_L),
+    L(_LS),
     controller(_controller),
     list(_list)
 {
@@ -191,6 +194,20 @@ bool ControllerDelegate::pointer_button_up(int button,int x,int y,unsigned long 
 
 //.........................................................................
 
+void ControllerDelegate::pointer_active()
+{
+    invoke_Controller_on_pointer_active(L,this,0,0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::pointer_inactive()
+{
+    invoke_Controller_on_pointer_inactive(L,this,0,0);
+}
+
+//.........................................................................
+
 void ControllerDelegate::touch_down(int finger,int x,int y,unsigned long int modifiers)
 {
     lua_pushnumber(L,finger);
@@ -220,6 +237,28 @@ void ControllerDelegate::touch_up(int finger, int x,int y,unsigned long int modi
     lua_pushnumber(L,y);
     ClutterUtil::push_event_modifiers(L,modifiers);
     invoke_Controller_on_touch_up(L,this,4,0);
+}
+
+//.........................................................................
+
+bool ControllerDelegate::scroll( int direction , unsigned long int modifiers )
+{
+	lua_pushnumber( L , direction );
+    ClutterUtil::push_event_modifiers(L,modifiers);
+
+    bool result = true;
+
+    if ( invoke_Controller_on_scroll(L,this,2,1) )
+    {
+    	if ( lua_isboolean( L , -1 ) && ! lua_toboolean( L , -1 ) )
+    	{
+    		result = false;
+    	}
+
+    	lua_pop( L , 1 );
+    }
+
+    return result;
 }
 
 //.........................................................................

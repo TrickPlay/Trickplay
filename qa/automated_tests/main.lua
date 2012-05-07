@@ -18,7 +18,7 @@ local test_list_file = "all_tests_ubuntu_"..test_resolution..".txt"
 -- Options to run one test, all tests or just the last 2
 local automation_option_choices = { all_tests = 1, specific_test = 2, last_two_tests = 3 }
 local automation_option = 1
-local test_to_run = 53 -- if automation_option == 2
+local test_to_run =  89 -- if automation_option == 2
 
 -- if option 2 then it prints test results in a JSON formatted table to be copied and pasted into
 -- the package file. 
@@ -121,7 +121,8 @@ function do_test (tests)
 			background:set_source_color ("FFFFFF")
 			background:fill()
 			-- Taking this text out as it's causing a lot of failures in the compare utility
-	--[[		background:move_to (screen.w/2 - 500, 50)
+--[[
+			background:move_to (screen.w/2 - 500, 50)
 			background:text_path ("DejaVu Sans 30px","Description: "..test_description)
 			background:move_to (100, 10)
 			background:text_path ("DejaVu Sans 30px","Test Group: "..test_group)
