@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>346</width>
+    <height>571</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>200</width>
+    <height>200</height>
+   </size>
+  </property>
+  <property name="cursor">
+   <cursorShape>ArrowCursor</cursorShape>
+  </property>
+  <property name="windowTitle">
+   <string>TrickPlay Visual Editor </string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>346</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuOpen">
+     <property name="title">
+      <string>Open </string>
+     </property>
+     <addaction name="actionLua_File_Engine_UI_Elements"/>
+     <addaction name="actionJSON_New_UI_Elements"/>
+    </widget>
+    <addaction name="menuOpen"/>
+    <addaction name="action_Save_2"/>
+    <addaction name="action_Exit"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>Windows</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuRun">
+    <property name="title">
+     <string>Run</string>
+    </property>
+    <addaction name="action_Run"/>
+    <addaction name="action_Stop"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <widget class="QMenu" name="menuInsert_UI_Element">
+     <property name="title">
+      <string>Insert UI Element</string>
+     </property>
+     <addaction name="action_Button"/>
+     <addaction name="actionDialog_Box"/>
+     <addaction name="actionToastAlert"/>
+     <addaction name="actionProgressSpinner"/>
+     <addaction name="actionOrbitting_Dots"/>
+     <addaction name="actionTextInput"/>
+    </widget>
+    <addaction name="menuInsert_UI_Element"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuRun"/>
+   <addaction name="menuView"/>
+  </widget>
+  <widget class="QDockWidget" name="InspectorDock">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>325</width>
+     <height>45</height>
+    </size>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
+   <property name="features">
+    <set>QDockWidget::AllDockWidgetFeatures</set>
+   </property>
+   <property name="windowTitle">
+    <string>Property Editor</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="InspectorContainer">
+    <layout class="QGridLayout" name="gridLayout_7" rowstretch="0" columnstretch="0">
+     <property name="margin">
+      <number>1</number>
+     </property>
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item row="0" column="0">
+      <layout class="QGridLayout" name="InspectorLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="action_Exit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
+  <action name="action_Save">
+   <property name="text">
+    <string>Save file</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="action_New">
+   <property name="text">
+    <string>Create new  app...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+  </action>
+  <action name="action_Cut">
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="action_Copy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="action_Paste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="action_Delete">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select all</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="action_Close">
+   <property name="text">
+    <string>Close file</string>
+   </property>
+   <property name="iconText">
+    <string notr="true">Close file</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="action_Save_As">
+   <property name="text">
+    <string>Save file as...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="text">
+    <string>Debug</string>
+   </property>
+  </action>
+  <action name="actionRun">
+   <property name="text">
+    <string>Run</string>
+   </property>
+  </action>
+  <action name="actionStep_into">
+   <property name="text">
+    <string>Step Into</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionStep_over">
+   <property name="text">
+    <string>Step over</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
+   </property>
+  </action>
+  <action name="actionDebug_View">
+   <property name="text">
+    <string>Debug View</string>
+   </property>
+  </action>
+  <action name="actionRun_View">
+   <property name="text">
+    <string>Run View</string>
+   </property>
+  </action>
+  <action name="actionSave_All">
+   <property name="text">
+    <string>Save all files</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="text">
+    <string>Search...</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionSearch_Replace">
+   <property name="text">
+    <string>Find/Replace...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionGo_to_line">
+   <property name="text">
+    <string>Go to line...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+J</string>
+   </property>
+  </action>
+  <action name="actionSearch_in_Files">
+   <property name="text">
+    <string>Search in Files...</string>
+   </property>
+  </action>
+  <action name="actionBeutify_Selection">
+   <property name="text">
+    <string>Beutify Selection</string>
+   </property>
+  </action>
+  <action name="actionStrip_Whitespace">
+   <property name="text">
+    <string>Strip Whitespace</string>
+   </property>
+  </action>
+  <action name="actionStep_out">
+   <property name="text">
+    <string>Step out</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionPause">
+   <property name="text">
+    <string>Pause</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionContinue">
+   <property name="text">
+    <string>Continue</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionNew_File">
+   <property name="text">
+    <string>Create new file...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionNew_Folder">
+   <property name="text">
+    <string>New Folder</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionOpen_App">
+   <property name="text">
+    <string>Open existing app...</string>
+   </property>
+   <property name="font">
+    <font/>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionNew_App">
+   <property name="text">
+    <string>New App</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="action_Run">
+   <property name="text">
+    <string>Run</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F11</string>
+   </property>
+  </action>
+  <action name="action_Debug">
+   <property name="text">
+    <string>Debug</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
+   </property>
+  </action>
+  <action name="action_Stop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
+   </property>
+  </action>
+  <action name="actionPreference">
+   <property name="text">
+    <string>Preference...</string>
+   </property>
+  </action>
+  <action name="action_Button">
+   <property name="text">
+    <string>Button</string>
+   </property>
+  </action>
+  <action name="action_Save_2">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionDialog_Box">
+   <property name="text">
+    <string>Dialog Box</string>
+   </property>
+  </action>
+  <action name="actionToastAlert">
+   <property name="text">
+    <string>ToastAlert</string>
+   </property>
+  </action>
+  <action name="actionProgressSpinner">
+   <property name="text">
+    <string>ProgressSpinner</string>
+   </property>
+  </action>
+  <action name="actionOrbitting_Dots">
+   <property name="text">
+    <string>Orbitting Dots</string>
+   </property>
+  </action>
+  <action name="actionTextInput">
+   <property name="text">
+    <string>TextInput</string>
+   </property>
+  </action>
+  <action name="actionOpen_Engine_Group">
+   <property name="text">
+    <string>Open Engine Group</string>
+   </property>
+  </action>
+  <action name="actionLua_File_Engine_UI_Elements">
+   <property name="text">
+    <string>Lua File (Engine UI Elements)</string>
+   </property>
+  </action>
+  <action name="actionJSON_New_UI_Elements">
+   <property name="text">
+    <string>JSON (New UI Elements)</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
