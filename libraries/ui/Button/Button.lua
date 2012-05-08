@@ -218,6 +218,10 @@ Button = function(parameters)
 	----------------------------------------------------------------------------
 	--functions pertaining to getting and setting of attributes
 	
+	override_property(instance,"widget_type",
+		function() return "Button" end, nil
+	)
+    
 	override_property(instance,"images",
 		
 		function(oldf)    return images   end,
