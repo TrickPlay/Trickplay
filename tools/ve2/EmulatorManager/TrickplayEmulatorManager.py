@@ -1,4 +1,4 @@
-import telnetlib, base64, sys, random, json
+import os, telnetlib, base64, sys, random, json
 
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -14,7 +14,7 @@ class TrickplayEmulatorManager(QWidget):
                 
         self.main = main
         self.inspector = main._inspector
-        self._path = '/home/hjkim/code/trickplay/tools/test/VE'
+        self._path = os.path.join(self.main.apath, 'VE')
         self.trickplay = QProcess()
 
         QObject.connect(self.trickplay, SIGNAL('started()'), self.app_started)
