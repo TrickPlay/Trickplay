@@ -377,6 +377,11 @@ class TrickplayDeviceManager(QWidget):
 		                    if local_info is not None:
 		                        self.debugWindow.populateLocalTable(local_info)
 
+		                    # Global Variable Table
+		                    global_info = self.getGlobalInfo_Resp(data)
+		                    if global_info is not None:
+		                        self.debugWindow.populateGlobalTable(global_info)
+
 		                    # Stack Trace Table
 		                    stack_info = self.getStackInfo_Resp(data)
 		                    if stack_info is not None:
@@ -624,7 +629,44 @@ class TrickplayDeviceManager(QWidget):
 		else:
 		    return pdata
 
-		
+
+
+    def getGlobalInfo_Resp(self, data):
+		if "globals" in data:
+			print "GLOBAL is EXISTS"
+			name_var_list = []
+			type_var_list = []
+			value_var_list = []
+			global_vars_str = ""
+			global_vars = {}
+			for c in data["globals"]:
+				if c["name"] != "(*temporary)":
+					c_v = None
+					if global_vars_str != "":
+						global_vars_str = global_vars_str+"\n\t"
+
+					global_vars_str = global_vars_str+str(c["name"])+"("+str(c["type"])+")"
+					name_var_list.append(str(c["name"]))
+					type_var_list.append(str(c["type"]))
+					try:
+						c_v = c["value"]	
+					except KeyError: 
+						pass
+
+					if c_v:
+						global_vars_str = global_vars_str+" = "+str(c["value"])
+						value_var_list.append(str(c["value"]))
+					else:
+						value_var_list.append("")
+
+			global_vars[1] = name_var_list
+			global_vars[2] = type_var_list
+			global_vars[3] = value_var_list
+
+			return global_vars
+		else:
+			return None
+
     def getLocalInfo_Resp(self, data):
 		if "locals" in data:
 			name_var_list = []

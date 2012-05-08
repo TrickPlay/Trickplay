@@ -95,6 +95,11 @@ class TrickplayDebugger(QWidget):
         self.ui.localTable.setHorizontalHeaderLabels(self.headers)
         self.ui.localTable.verticalHeader().setDefaultSectionSize(18)
         
+        self.ui.globalTable.setSortingEnabled(False)
+        self.ui.globalTable.setColumnCount(len(self.headers))
+        self.ui.globalTable.setHorizontalHeaderLabels(self.headers)
+        self.ui.globalTable.verticalHeader().setDefaultSectionSize(18)
+
         self.ui.breakTable = MyTableWidget(self, self.ui.Breaks)
         self.ui.breakTable.setObjectName(_fromUtf8("breakTable"))
         self.ui.breakTable.setColumnCount(0)
@@ -297,6 +302,11 @@ class TrickplayDebugger(QWidget):
 
 		self.ui.breakTable.show()
 
+    def clearGlobalTable(self, row_num=0):
+		self.ui.globalTable.clear()
+		self.ui.globalTable.setHorizontalHeaderLabels(self.headers)
+		self.ui.globalTable.setRowCount(row_num)
+		
     def clearLocalTable(self, row_num=0):
 		self.ui.localTable.clear()
 		self.ui.localTable.setHorizontalHeaderLabels(self.headers)
@@ -310,6 +320,7 @@ class TrickplayDebugger(QWidget):
 			m = 0
 			for item in local_info[key]:
 				newitem = QTableWidgetItem(item)
+				newitem.setFlags(newitem.flags() & ~ Qt.ItemIsEditable)
 				newitem.setFont(self.font)
 				if n == 1 :  
 				    self.ui.localTable.setItem(m, n+1, newitem)
@@ -320,6 +331,26 @@ class TrickplayDebugger(QWidget):
 				m += 1
 			n += 1
 		self.ui.localTable.show()
+
+    def populateGlobalTable(self, global_info=None):
+		
+		self.clearGlobalTable(len(global_info[1]))
+		n = 0
+		for key in global_info:
+			m = 0
+			for item in global_info[key]:
+				newitem = QTableWidgetItem(item)
+				newitem.setFlags(newitem.flags() & ~ Qt.ItemIsEditable)
+				newitem.setFont(self.font)
+				if n == 1 :  
+				    self.ui.globalTable.setItem(m, n+1, newitem)
+				elif n == 2 :  
+				    self.ui.globalTable.setItem(m, n-1, newitem)
+				else :
+				    self.ui.globalTable.setItem(m, n, newitem)
+				m += 1
+			n += 1
+		self.ui.globalTable.show()
 
 class TrickplayBacktrace(QWidget):
     
