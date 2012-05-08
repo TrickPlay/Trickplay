@@ -188,6 +188,10 @@ OrbittingDots = function(parameters)
 	----------------------------------------------------------------------------
 	--functions pertaining to getting and setting of attributes
 	
+	override_property(instance,"widget_type",
+		function() return "OrbittingDots" end, nil
+	)
+    
 	override_property(instance,"dot_size",
 		
 		function(oldf)    return dot_size   end,
