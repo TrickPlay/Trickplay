@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		CD470196154F721000A89E9C /* STUNClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CD470195154F721000A89E9C /* STUNClient.m */; };
 		CD47019815534D0F00A89E9C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD47019715534D0F00A89E9C /* Security.framework */; };
+		CD4701D61559CE4500A89E9C /* VideoStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4701D51559CE4500A89E9C /* VideoStreamer.m */; };
 		CDABC64314FEC5870039DBE0 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC64214FEC5870039DBE0 /* UIKit.framework */; };
 		CDABC64514FEC5870039DBE0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC64414FEC5870039DBE0 /* Foundation.framework */; };
 		CDABC64714FEC5870039DBE0 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC64614FEC5870039DBE0 /* CoreGraphics.framework */; };
@@ -33,8 +34,6 @@
 		CDABC69614FEC7010039DBE0 /* rtpenc_aac.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC69314FEC7010039DBE0 /* rtpenc_aac.m */; };
 		CDABC69714FEC7010039DBE0 /* rtpenc_h264.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC69514FEC7010039DBE0 /* rtpenc_h264.m */; };
 		CDABC69A14FEC7090039DBE0 /* sm_math.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC69914FEC7090039DBE0 /* sm_math.m */; };
-		CDABC6A214FEC74C0039DBE0 /* NSStreamAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC69D14FEC74C0039DBE0 /* NSStreamAdditions.m */; };
-		CDABC6A314FEC74C0039DBE0 /* SocketManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC69F14FEC74C0039DBE0 /* SocketManager.m */; };
 		CDABC6A414FEC74C0039DBE0 /* RTSPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6A114FEC74C0039DBE0 /* RTSPClient.m */; };
 		CDABC6A614FEC7790039DBE0 /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6A514FEC7790039DBE0 /* libAVCEncoder.a */; };
 		CDABC6A814FEC7A20039DBE0 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6A714FEC7A20039DBE0 /* CoreVideo.framework */; };
@@ -54,6 +53,8 @@
 		CD470194154F721000A89E9C /* STUNClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUNClient.h; sourceTree = "<group>"; };
 		CD470195154F721000A89E9C /* STUNClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUNClient.m; sourceTree = "<group>"; };
 		CD47019715534D0F00A89E9C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		CD4701D41559CE4400A89E9C /* VideoStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoStreamer.h; sourceTree = "<group>"; };
+		CD4701D51559CE4500A89E9C /* VideoStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoStreamer.m; sourceTree = "<group>"; };
 		CDABC63E14FEC5870039DBE0 /* VideoSIP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VideoSIP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDABC64214FEC5870039DBE0 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		CDABC64414FEC5870039DBE0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -101,10 +102,6 @@
 		CDABC69514FEC7010039DBE0 /* rtpenc_h264.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = rtpenc_h264.m; sourceTree = "<group>"; };
 		CDABC69814FEC7090039DBE0 /* sm_math.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sm_math.h; sourceTree = "<group>"; };
 		CDABC69914FEC7090039DBE0 /* sm_math.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sm_math.m; sourceTree = "<group>"; };
-		CDABC69C14FEC74C0039DBE0 /* NSStreamAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStreamAdditions.h; sourceTree = "<group>"; };
-		CDABC69D14FEC74C0039DBE0 /* NSStreamAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStreamAdditions.m; sourceTree = "<group>"; };
-		CDABC69E14FEC74C0039DBE0 /* SocketManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocketManager.h; sourceTree = "<group>"; };
-		CDABC69F14FEC74C0039DBE0 /* SocketManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocketManager.m; sourceTree = "<group>"; };
 		CDABC6A014FEC74C0039DBE0 /* RTSPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTSPClient.h; sourceTree = "<group>"; };
 		CDABC6A114FEC74C0039DBE0 /* RTSPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTSPClient.m; sourceTree = "<group>"; };
 		CDABC6A514FEC7790039DBE0 /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
@@ -203,6 +200,8 @@
 				CDABC65714FEC5870039DBE0 /* ViewController_iPhone.xib */,
 				CDABC65A14FEC5870039DBE0 /* ViewController_iPad.xib */,
 				CDABC64914FEC5870039DBE0 /* Supporting Files */,
+				CD4701D41559CE4400A89E9C /* VideoStreamer.h */,
+				CD4701D51559CE4500A89E9C /* VideoStreamer.m */,
 			);
 			path = VideoSIP;
 			sourceTree = "<group>";
@@ -290,10 +289,6 @@
 				CDABC6CE1513D7270039DBE0 /* SDP */,
 				CDABC6B714FF18F90039DBE0 /* SIP */,
 				CD470192154F71DD00A89E9C /* STUN */,
-				CDABC69C14FEC74C0039DBE0 /* NSStreamAdditions.h */,
-				CDABC69D14FEC74C0039DBE0 /* NSStreamAdditions.m */,
-				CDABC69E14FEC74C0039DBE0 /* SocketManager.h */,
-				CDABC69F14FEC74C0039DBE0 /* SocketManager.m */,
 				CDABC6A014FEC74C0039DBE0 /* RTSPClient.h */,
 				CDABC6A114FEC74C0039DBE0 /* RTSPClient.m */,
 				CDABC6B414FEDE9F0039DBE0 /* NetworkManager.h */,
@@ -405,8 +400,6 @@
 				CDABC69614FEC7010039DBE0 /* rtpenc_aac.m in Sources */,
 				CDABC69714FEC7010039DBE0 /* rtpenc_h264.m in Sources */,
 				CDABC69A14FEC7090039DBE0 /* sm_math.m in Sources */,
-				CDABC6A214FEC74C0039DBE0 /* NSStreamAdditions.m in Sources */,
-				CDABC6A314FEC74C0039DBE0 /* SocketManager.m in Sources */,
 				CDABC6A414FEC74C0039DBE0 /* RTSPClient.m in Sources */,
 				CDABC6B614FEDE9F0039DBE0 /* NetworkManager.m in Sources */,
 				CDABC6BA150000D10039DBE0 /* SIPDialog.m in Sources */,
@@ -415,6 +408,7 @@
 				CDABC6C91511037F0039DBE0 /* SDPParser.m in Sources */,
 				CDABC6D11513D76E0039DBE0 /* MediaDescription.m in Sources */,
 				CD470196154F721000A89E9C /* STUNClient.m in Sources */,
+				CD4701D61559CE4500A89E9C /* VideoStreamer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

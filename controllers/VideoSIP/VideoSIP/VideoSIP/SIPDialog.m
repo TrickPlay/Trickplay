@@ -350,33 +350,6 @@
     NSArray *remoteVia = [[notifyPacket objectForKey:@"Via"] componentsSeparatedByString:@";"];
     
     // TODO: malformed received packets that have different information could crash this.
-    /*
-    NSString *response = [NSString stringWithFormat:@"SIP/2.0 481 Dialog/Transaction Does Not Exist\r\n"
-                          @"Via: %@;rport=%d;received=%s;%@\r\n"
-                          @"From: %@\r\n"
-                          @"To: %@;tag=%@\r\n"
-                          @"Call-ID: %@\r\n"
-                          @"CSeq: %@\r\n"
-                          @"Contact: %@\r\n"
-                          @"User-Agent: %@\r\n"
-                          @"Supported: %@\r\n"
-                          @"Event: %@\r\n"
-                          @"Allow-Events: %@\r\n"
-                          @"Subscription-State: %@\r\n"
-                          @"Content-Length: 0\r\n\r\n",
-                          [remoteVia objectAtIndex:0], ntohs(addr->sin_port), ip_string, [remoteVia objectAtIndex:2],
-                          [notifyPacket objectForKey:@"From"],
-                          [notifyPacket objectForKey:@"To"], [from objectForKey:@"tag"],
-                          [notifyPacket objectForKey:@"Call-ID"],
-                          [notifyPacket objectForKey:@"CSeq"],
-                          contact,
-                          userAgent,
-                          supported,
-                          [notifyPacket objectForKey:@"Event"],
-                          [notifyPacket objectForKey:@"Allow-Events"],
-                          [notifyPacket objectForKey:@"Subscription-State"]];
-    //*/
-    
     // copied from vippie
     NSString *response = [NSString stringWithFormat:@"SIP/2.0 200 OK\r\n"
                           @"Via: %@;rport=%d;received=%s;%@\r\n"
