@@ -89,10 +89,11 @@ class TrickplayDebugger(QWidget):
         self.ui = Ui_TrickplayDebugger()
         self.ui.setupUi(self)
 
-        self.headers = ["Name","Value","Type"]
+        self.headers = ["Name","Value","Type", "Defined"]
+        self.local_headers = ["Name","Value","Type"]
         self.ui.localTable.setSortingEnabled(False)
-        self.ui.localTable.setColumnCount(len(self.headers))
-        self.ui.localTable.setHorizontalHeaderLabels(self.headers)
+        self.ui.localTable.setColumnCount(len(self.local_headers))
+        self.ui.localTable.setHorizontalHeaderLabels(self.local_headers)
         self.ui.localTable.verticalHeader().setDefaultSectionSize(18)
         
         self.ui.globalTable.setSortingEnabled(False)
@@ -118,6 +119,8 @@ class TrickplayDebugger(QWidget):
         self.ui.breakTable.setContextMenuPolicy(Qt.CustomContextMenu)
         self.connect(self.ui.breakTable, SIGNAL('customContextMenuRequested(QPoint)'), self.contextMenu)
         self.connect(self.ui.breakTable, SIGNAL("cellClicked(int, int)"), self.cellClicked)
+        self.connect(self.ui.localTable, SIGNAL("cellClicked(int, int)"), self.local_cellClicked)
+        self.connect(self.ui.globalTable, SIGNAL("cellClicked(int, int)"), self.global_cellClicked)
 
         self.break_info = {}
 
@@ -172,7 +175,39 @@ class TrickplayDebugger(QWidget):
         self.editorManager.bp_info[2].pop(index)
 
         self.ui.breakTable.removeRow(index)
+    
+    def local_cellClicked(self, r, c, space=False):
+        pass
+        #cellItem= self.ui.localTable.item(r, 0) 
+        #search_res = self.editorManager.tab.editors[index].findFirst(expr,re,cs,wo,wrap,forward)
 
+        #print cellItem.text()
+
+    def global_cellClicked(self, r, c, space=False):
+        cellItem= self.ui.globalTable.item(r, 0) 
+        print cellItem.text(), r 
+
+        if self.deviceManager is None:
+            self.deviceManager = self.main.deviceManager
+
+        print self.global_info[4][r]
+        fileLine = self.global_info[4][r]
+
+        n = re.search(":", fileLine).end()
+        fileName = str(fileLine[:n-1])
+        if fileName.startswith("/"):
+            fileName = fileName[1:]
+        elif fileName.endswith("/"):
+            fileName= fileName[:len(fileName) - 1]
+
+        lineNum = int(fileLine[n:]) - 1
+
+        print self.deviceManager.path(), fileName
+        fileName = os.path.join(self.deviceManager.path(), fileName)
+        self.editorManager.newEditor(fileName, None, lineNum)
+        editor = self.editorManager.currentEditor 
+		
+        
     def cellClicked(self, r, c, space=False):
 
 		if self.deviceManager is None:
@@ -280,6 +315,7 @@ class TrickplayDebugger(QWidget):
 			for item in break_info[key]:
 				if key == 1:
 					newitem = QTableWidgetItem()
+					newitem.setFlags(newitem.flags() & ~ Qt.ItemIsEditable)
 					newitem.setFont(self.font)
 					if item == "on":
 						newitem.setCheckState(Qt.Checked)
@@ -309,7 +345,7 @@ class TrickplayDebugger(QWidget):
 		
     def clearLocalTable(self, row_num=0):
 		self.ui.localTable.clear()
-		self.ui.localTable.setHorizontalHeaderLabels(self.headers)
+		self.ui.localTable.setHorizontalHeaderLabels(self.local_headers)
 		self.ui.localTable.setRowCount(row_num)
 		
     def populateLocalTable(self, local_info=None):
@@ -332,8 +368,11 @@ class TrickplayDebugger(QWidget):
 			n += 1
 		self.ui.localTable.show()
 
-    def populateGlobalTable(self, global_info=None):
+    def populateGlobalTable(self, global_info=None, editorManager=None):
 		
+		self.global_info = global_info
+		self.editorManager = editorManager
+
 		self.clearGlobalTable(len(global_info[1]))
 		n = 0
 		for key in global_info:

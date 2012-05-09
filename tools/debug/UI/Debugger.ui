@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>287</width>
-    <height>321</height>
+    <width>558</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -72,12 +72,6 @@
       </layout>
      </widget>
      <widget class="QWidget" name="Globals">
-      <property name="maximumSize">
-       <size>
-        <width>480</width>
-        <height>16777215</height>
-       </size>
-      </property>
       <attribute name="title">
        <string>Globals</string>
       </attribute>
