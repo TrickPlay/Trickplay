@@ -14,6 +14,8 @@
 #import <netinet/in.h>
 #import "rtp.h"
 
+@class VideoStreamer;
+@class VideoStreamerContext;
 @class NetworkManager;
 
 @protocol NetworkManagerDelegate <NSObject>
@@ -21,7 +23,6 @@
 - (void)networkManagerEncoderReady:(NetworkManager *)networkManager;
 
 @end
-
 
 
 
@@ -45,6 +46,8 @@ typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
     
     SIPClient *sipClient;
     
+    VideoStreamerContext *streamerContext;
+    
     id <NetworkManagerDelegate> delegate;
 }
 
@@ -54,6 +57,7 @@ typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
 void rtp_avc_session_callback(struct rtp *session, rtp_event *e);
 void *get_in_addr(struct sockaddr *sa);
 
+- (id)initWithContext:(VideoStreamerContext *)streamerContext;
 - (void)startEncoder;
 - (void)packetize:(CMSampleBufferRef)sampleBuffer;
 

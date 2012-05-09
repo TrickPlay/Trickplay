@@ -255,8 +255,7 @@ void free_attributes(attribute *attributes[], int length) {
                     return nil;
                 }
                 
-                uint16_t port = ntohs(((uint16_t *)value)[1]); // TODO: This is flipping my bytes?
-                //uint16_t port = ((uint16_t *)value)[1];
+                uint16_t port = ntohs(((uint16_t *)value)[1]);
                 
                 struct in_addr addr;
                 //addr.s_addr = ntohl(((uint32_t *)value)[1]);  // TODO: This is flipping my bytes?

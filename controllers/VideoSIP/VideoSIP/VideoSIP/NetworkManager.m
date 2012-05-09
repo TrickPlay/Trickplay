@@ -12,6 +12,7 @@
 #import "base64.h"
 
 #import "MediaDescription.h"
+#import "VideoStreamer.h"
 
 
 enum avtype {
@@ -57,7 +58,7 @@ typedef enum avtype AVType;
 
 void rtp_avc_session_callback(struct rtp *session, rtp_event *e) {
     // TODO: check on the session. this callback should get called on rtcp messages
-    // i believe.
+    // I believe.
 }
 
 void *get_in_addr(struct sockaddr *sa) {
@@ -141,8 +142,19 @@ void *get_in_addr(struct sockaddr *sa) {
 #pragma mark Initialization
 
 - (id)init {
+    return [self initWithContext:nil];
+}
+
+// Designated Initializer
+- (id)initWithContext:(VideoStreamerContext *)_streamerContext {
+    if (!_streamerContext) {
+        return nil;
+    }
+    
     self = [super init];
     if (self) {
+        streamerContext = [_streamerContext retain];
+        
         timeout.tv_sec = 5;
         timeout.tv_usec = 0;
         avc_session_id = 99;
@@ -192,24 +204,25 @@ void *get_in_addr(struct sockaddr *sa) {
 		[packet release];
 		
         dispatch_async(socket_queue, ^(void) {
+            /*
             if (avQueue.count < 1) {// || sockfd < 1) {
                 return;
             }
+            */
             
             AVPacket *sendPacket = nil;
-            
             @synchronized(avQueue) {
-                sendPacket = [[avQueue objectAtIndex:0] retain];
-                [avQueue removeObjectAtIndex:0];
+                while (avQueue.count > 0) {
+                    sendPacket = [[avQueue objectAtIndex:0] retain];
+                    [avQueue removeObjectAtIndex:0];
+            
+                    int ret = send_nal(avc_session, sendPacket->time, avc_session_id, (uint8_t*) [sendPacket->data bytes], sendPacket->size, &timeout);
+            
+                    //fprintf(stderr, "ret: %d\n", ret);
+            
+                    [sendPacket release];
+                }
             }
-            
-            //send(sockfd, sendPacket->data.bytes, sendPacket->data.length, 0);
-            /* TODO: send stuff */
-            int ret = send_nal(avc_session, packet->time, avc_session_id, (uint8_t*) [packet->data bytes], packet->size, &timeout);
-            
-            //fprintf(stderr, "ret: %d\n", ret);
-            
-            [sendPacket release];
         });
         
     };
@@ -225,7 +238,7 @@ void *get_in_addr(struct sockaddr *sa) {
     //params.outHeight = 480;
     //params.bps = 60000;
     params.videoProfileLevel = AVVideoProfileLevelH264Main31;
-    //params.keyFrameInterval = 1;
+    params.keyFrameInterval = 100;
     //NSLog(@" %dx%d", profile.broadcastWidth, profile.broadcastHeight);
     /*
      params.outWidth = profile.broadcastWidth;
@@ -283,6 +296,10 @@ void *get_in_addr(struct sockaddr *sa) {
     if (avQueue) {
         [avQueue release];
         avQueue = nil;
+    }
+    
+    if (streamerContext) {
+        [streamerContext release];
     }
 }
 
