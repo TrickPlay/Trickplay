@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Debugger-2.ui'
+# Form implementation generated from reading ui file 'Debugger.ui'
 #
-# Created: Tue May  8 13:53:02 2012
+# Created: Tue May  8 16:41:21 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_TrickplayDebugger(object):
     def setupUi(self, TrickplayDebugger):
         TrickplayDebugger.setObjectName(_fromUtf8("TrickplayDebugger"))
-        TrickplayDebugger.resize(287, 321)
+        TrickplayDebugger.resize(558, 573)
         self.gridLayout = QtGui.QGridLayout(TrickplayDebugger)
         self.gridLayout.setMargin(0)
         self.gridLayout.setSpacing(0)
@@ -54,7 +54,6 @@ class Ui_TrickplayDebugger(object):
         self.gridLayout_3.addWidget(self.breakTable, 0, 0, 1, 1)
         self.tabWidget.addTab(self.Breaks, _fromUtf8(""))
         self.Globals = QtGui.QWidget()
-        self.Globals.setMaximumSize(QtCore.QSize(480, 16777215))
         self.Globals.setObjectName(_fromUtf8("Globals"))
         self.gridLayout_4 = QtGui.QGridLayout(self.Globals)
         self.gridLayout_4.setMargin(0)

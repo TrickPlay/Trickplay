@@ -380,7 +380,7 @@ class TrickplayDeviceManager(QWidget):
 		                    # Global Variable Table
 		                    global_info = self.getGlobalInfo_Resp(data)
 		                    if global_info is not None:
-		                        self.debugWindow.populateGlobalTable(global_info)
+		                        self.debugWindow.populateGlobalTable(global_info, self.editorManager)
 
 		                    # Stack Trace Table
 		                    stack_info = self.getStackInfo_Resp(data)
@@ -481,6 +481,7 @@ class TrickplayDeviceManager(QWidget):
 				            # clean backtrace and debug windows
 		                    self.backtraceWindow.clearTraceTable(0)
 		                    self.debugWindow.clearLocalTable(0)
+		                    self.debugWindow.clearGlobalTable(0)
     
 		                # Leave the debug UI disabled, and wait for the info command to return
 		                self.send_debugger_command( DBG_CMD_INFO )
@@ -633,10 +634,10 @@ class TrickplayDeviceManager(QWidget):
 
     def getGlobalInfo_Resp(self, data):
 		if "globals" in data:
-			print "GLOBAL is EXISTS"
 			name_var_list = []
 			type_var_list = []
 			value_var_list = []
+			defined_var_list = []
 			global_vars_str = ""
 			global_vars = {}
 			for c in data["globals"]:
@@ -648,6 +649,7 @@ class TrickplayDeviceManager(QWidget):
 					global_vars_str = global_vars_str+str(c["name"])+"("+str(c["type"])+")"
 					name_var_list.append(str(c["name"]))
 					type_var_list.append(str(c["type"]))
+					defined_var_list.append(str(c["defined"]))
 					try:
 						c_v = c["value"]	
 					except KeyError: 
@@ -662,6 +664,7 @@ class TrickplayDeviceManager(QWidget):
 			global_vars[1] = name_var_list
 			global_vars[2] = type_var_list
 			global_vars[3] = value_var_list
+			global_vars[4] = defined_var_list
 
 			return global_vars
 		else:
