@@ -133,6 +133,13 @@ ArrowStyle = function(parameters)
         offset = function() return offset or 10 end,
         colors = function() return arrow_colors end,
         type   = function() return "ARROWSTYLE" end,
+        attributes = function() 
+            return {
+                size   = instance.size,
+                offset = instance.offset,
+                colors = arrow_colors.attributes,
+            }
+        end,
     }
     
     local children_using_this_style = setmetatable( {}, { __mode = "k" } )
@@ -240,6 +247,13 @@ BorderStyle = function(parameters)
         corner_radius = function() return corner_radius or 10 end,
         colors        = function() return colors              end,
         type          = function() return "BORDERSTYLE"       end,
+        attributes    = function() 
+            return {
+                width         = instance.width,
+                corner_radius = instance.corner_radius,
+                colors        = colors.attributes,
+            }
+        end,
     }
     
     
@@ -392,7 +406,11 @@ TextStyle = function(parameters)
     
     local meta_getters = {
         colors = function() return colors end,
-        name   = function() return name   end,
+        attributes = function() 
+            local t = recursive_overwrite({}, properties)
+            t.colors = colors.properties
+            return t 
+        end,
     }
     
     setmetatable(
@@ -476,19 +494,19 @@ Style = function(parameters)
     
     parameters = is_table_or_nil("Style",parameters)
     
-    local instance, arrow, border,text, fill_colors, name
+    local instance, name
+    local arrow       = ArrowStyle()
+    local border      = BorderStyle()
+    local text        = TextStyle()
+    local fill_colors = ColorScheme(default_fill_colors)
+    
+    local children_using_this_style = setmetatable( {}, { __mode = "k" } )
     
     local meta_setters = {
-        arrow          = function(v) arrow       = matches_nil_table_or_type(ArrowStyle,  "ARROWSTYLE",  v)  end,
-        border         = function(v) border      = matches_nil_table_or_type(BorderStyle, "BORDERSTYLE", v)  end,
-        text           = function(v) text        = matches_nil_table_or_type(TextStyle,   "TEXTSTYLE",   v)  end,
-        fill_colors    = function(v) fill_colors = 
-            matches_nil_table_or_type(
-                ColorScheme,
-                "COLORSCHEME",
-                type(v) == "string" and v or recursive_overwrite(v, default_fill_colors)
-            )
-        end,
+        arrow       = function(v) recursive_overwrite(arrow,       v or {}) end,
+        border      = function(v) recursive_overwrite(border,      v or {}) end,
+        text        = function(v) recursive_overwrite(text,        v or {}) end,
+        fill_colors = function(v) recursive_overwrite(fill_colors, v or {}) end,
         name = function(v)
             
             if name ~= nil then all_styles[name] = nil end
@@ -508,26 +526,25 @@ Style = function(parameters)
     
     instance = setmetatable(
         { 
+            on_changed = function(self,object,update_function)
+                
+                children_using_this_style[object] = update_function
+                
+            end,
             styles_json = styles_json,
             to_json = function()
                 
                 return json:stringify{
                     name        = instance.name,
-                    arrow       = instance.arrow.name,
-                    border      = instance.border.name,
-                    text        = instance.text.name,
-                    fill_colors = instance.fill_colors.name,
+                    arrow       = instance.arrow.attributes,
+                    border      = instance.border.attributes,
+                    text        = instance.text.attributes,
+                    fill_colors = instance.fill_colors.attributes,
                 }
             end,
         },
         {
-            __newindex = function(t,k,v)
-                
-                func_upval = meta_setters[k]
-                
-                return func_upval and func_upval(v)
-                
-            end,
+            __newindex = __newindex(meta_setters, children_using_this_style),
             __index    = __index(meta_getters)
         }
     )
