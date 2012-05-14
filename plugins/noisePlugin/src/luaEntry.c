@@ -87,7 +87,7 @@ tp_plugin_shutdown( void * user_data ){
 int
 getPerlinNoise( lua_State *L ){
 
-	/* Pop function's arguments from stack */
+	/* Access function's arguments from Lua state */
 	double x = luaL_checknumber( L, 1 );
 	double y = luaL_checknumber( L, 2 );
 	double z = luaL_checknumber( L, 3 );
