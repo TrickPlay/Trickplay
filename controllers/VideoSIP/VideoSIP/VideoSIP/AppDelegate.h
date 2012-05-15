@@ -8,9 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
+#import "VideoStreamer.h"
+
 @class ViewController;
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate, VideoStreamerDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
