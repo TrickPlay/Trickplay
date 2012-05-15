@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Fri May  4 10:55:53 2012
+# Created: Mon May 14 14:41:46 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -224,8 +224,11 @@ class Ui_MainWindow(object):
         self.actionLua_File_Engine_UI_Elements.setObjectName(_fromUtf8("actionLua_File_Engine_UI_Elements"))
         self.actionJSON_New_UI_Elements = QtGui.QAction(MainWindow)
         self.actionJSON_New_UI_Elements.setObjectName(_fromUtf8("actionJSON_New_UI_Elements"))
+        self.actionNew_Layer = QtGui.QAction(MainWindow)
+        self.actionNew_Layer.setObjectName(_fromUtf8("actionNew_Layer"))
         self.menuOpen.addAction(self.actionLua_File_Engine_UI_Elements)
         self.menuOpen.addAction(self.actionJSON_New_UI_Elements)
+        self.menuFile.addAction(self.actionNew_Layer)
         self.menuFile.addAction(self.menuOpen.menuAction())
         self.menuFile.addAction(self.action_Save_2)
         self.menuFile.addAction(self.action_Exit)
@@ -326,4 +329,5 @@ class Ui_MainWindow(object):
         self.actionOpen_Engine_Group.setText(QtGui.QApplication.translate("MainWindow", "Open Engine Group", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLua_File_Engine_UI_Elements.setText(QtGui.QApplication.translate("MainWindow", "Lua File (Engine UI Elements)", None, QtGui.QApplication.UnicodeUTF8))
         self.actionJSON_New_UI_Elements.setText(QtGui.QApplication.translate("MainWindow", "JSON (New UI Elements)", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNew_Layer.setText(QtGui.QApplication.translate("MainWindow", "New Layer", None, QtGui.QApplication.UnicodeUTF8))
 

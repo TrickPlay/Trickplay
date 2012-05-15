@@ -12,8 +12,10 @@ class TrickplayElementModel(QStandardItemModel):
         self.inspector = inspector
         self.manager = QNetworkAccessManager()
         self.reply = None
+        self.theBigestGid = None
 
     def inspector_reply_finished(self, pdata=None):
+        
         if pdata is not None :
             root = self.invisibleRootItem()
             child = None
@@ -30,6 +32,7 @@ class TrickplayElementModel(QStandardItemModel):
                 print( "Could not find screen element." )
             else:
                 self.tpData = pdata
+                self.theBigestGid = 2
                 self.insertElement(root, child, pdata, True)
 
             self.inspector.ui.inspector.expandAll()
@@ -45,10 +48,19 @@ class TrickplayElementModel(QStandardItemModel):
 
             # Find the last item after getting new data so that
             # both trees reflect the changes
-            result = self.inspector.search(gid, 'gid')
-            if result:
-                self.inspector.selectItem(result)
-
+            if self.inspector.main.command == "newLayer":
+                result = self.inspector.search(self.theBigestGid , 'gid')
+                if result: 
+                    #print('Found', result['gid'], result['name'])
+                    self.inspector.selectItem(result)
+                else:
+                    print("UI Element not found")
+                self.inspector.main.command == ""
+            else:
+                result = self.inspector.search(gid, 'gid')
+                if result:
+                    self.inspector.selectItem(result)
+    
             return
 
 
@@ -75,7 +87,17 @@ class TrickplayElementModel(QStandardItemModel):
         value = data["name"]
         title = data["type"]
         gid = data['gid']
-        
+
+        if value[:5] == "Layer":
+            title = value
+            value = ""
+            self.inspector.curLayerGid = gid
+        else:
+            self.inspector.layerGid[gid] = self.inspector.curLayerGid
+
+        if gid > self.theBigestGid:
+            self.theBigestGid = gid 
+
         if "Texture" == title:
             title = "Image"
             
