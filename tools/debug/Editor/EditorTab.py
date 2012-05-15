@@ -1,4 +1,4 @@
-
+import os
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
@@ -21,10 +21,12 @@ class EditorTabWidget(QTabWidget):
         self.main = main
         self.paths = []
         self.editors = []
-        self.textBefores = []
+        #self.textBefores = []
         self.windowsMenu = windowsMenu
         self.fileSystem = fileSystem
         self.tabClosing = False 
+        self.prevChange = {}
+        self.checkedPath = None
         
         QObject.connect(self, SIGNAL('tabCloseRequested(int)'), self.closeTab)
         QObject.connect(self, SIGNAL('currentChanged(int)'), self.changeTab)
@@ -34,13 +36,41 @@ class EditorTabWidget(QTabWidget):
         
     def dropEvent(self, event):
         self.main.dropFileEvent(event, 'tab', self)
-        
+
+
+    def fixTabInfo(self, index):
+        editor = self.widget(index)
+        newPath = None
+        if editor is not None and editor.path is not None:
+            newPath = editor.path 
+
+        #newPath = os.path.join(self.main.main.path,  str(self.tabText(index)))
+
+        if self.paths[index] is not newPath:
+            i = 0 
+            for k in self.paths :
+                if k == newPath:
+                    break
+                i += 1
+
+            if i < len (self.paths) :
+                tempPath = self.paths[index]
+                self.paths[index] = newPath
+                self.paths[i] = tempPath
+    
+            if i < len (self.editors):
+                orgEditor = self.editors[index] 
+                newEditor = self.editors[i] 
+                self.editors[index] = newEditor 
+                self.editors[i] = orgEditor 
+
     def closeTab(self, index):
+
+		self.tabClosing = True 
 		if index < 0:
 			return 
-		# find current index tab 
-		#index = self.currentIndex()
 
+		self.fixTabInfo(index)
 		editor = self.editors[index] #self.app.focusWidget()
 		
 		# reset the windowsActions'shortcuts 
@@ -53,7 +83,9 @@ class EditorTabWidget(QTabWidget):
 		# save before close
 		if isinstance(editor, Editor):
 			currentText = editor.text()#open(editor.path).read()
-			if self.textBefores[index] != currentText:
+			textBefore = self.main.editors[editor.path][2]
+			#if self.textBefores[index] != currentText:
+			if textBefore != currentText:
 				if editor.text_status == 2: #TEXT_CHANGED
 					msg = QMessageBox()
 					msg.setText('The file "' + editor.path + '" changed.')
@@ -65,25 +97,32 @@ class EditorTabWidget(QTabWidget):
 					ret = msg.exec_()
 
 					if ret == QMessageBox.Save:
-						self.textBefores[index] = editor.text()
+						textBefore = editor.text()
+						self.main.editors[editor.path][2] = textBefore
+						
+                        #self.textBefores[index] = editor.text()
+
 						editor.text_status = 1 #TEXT_READ
 						if editor.tempfile == False:
 							editor.save()
 						else:
-							self.tabClosing = True 
+							#self.tabClosing = True 
 							ret = self.main.saveas()
-							self.tabClosing = False
+							#self.tabClosing = False
 							index = self.count() - 1
+
 					elif ret == QMessageBox.Cancel:
 						return 
-					else:
-						pass
+			if editor.tempfile == True:
+			    editor.delete_marker()
 
 		#close current index tab
+
 		edt = self.editors.pop(index) #new
 		self.windowsMenu.removeAction(edt.windowsAction)
 		self.removeTab(index)
 		self.paths.pop(index)
+
 		for k in self.paths:
 		    self.main.editors[k][1] = self.paths.index(k)
 
@@ -91,16 +130,62 @@ class EditorTabWidget(QTabWidget):
 			self.m.editorMenuEnabled(False)
 			self.close()
 			self.main.getEditorTabs().pop(self.main.getTabWidgetNumber(self))
+
+		if self.count() == 0 :
+		    self.main.main.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
+            
+		self.tabClosing = False
 				
     def changeTab(self, index):
+
+        editor = self.widget(index)
+
+        newPath = None
+        if editor is not None and editor.path is not None:
+            newPath = editor.path 
+            if self.prevChange.has_key(editor.path) and self.prevChange[editor.path] != open(editor.path).read() :
+                self.checkedPath = None
+            if editor.path == self.checkedPath:
+                return
+
+        #change mainwindow title with selected file, location 
+        if newPath is not None :
+            self.main.main.setWindowTitle(QApplication.translate("MainWindow", str(os.path.basename(str(newPath)))+" ["+str(os.path.dirname(newPath))+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
+        else :
+            self.main.main.setWindowTitle(QApplication.translate("MainWindow", str(os.path.basename(str(self.paths[index])))+" ["+str(os.path.dirname(str(self.paths[index])))+"] - "+"TrickPlay IDE [ "+str(os.path.basename(str(self.main.main.path))+" ]"), None, QApplication.UnicodeUTF8))
+            
+
+        if str(self.paths[index]) != str(newPath) and not self.tabClosing:
+            i = 0 
+            for k in self.paths :
+                if k == newPath:
+                    break
+                i += 1
+
+            if i < len(self.paths) :
+                tempPath = self.paths[index]
+                self.paths[index] = newPath
+                self.paths[i] = tempPath
+    
+            if i < len(self.editors):
+                orgEditor = self.editors[index] 
+                newEditor = self.editors[i] 
+                self.editors[index] = newEditor 
+                self.editors[i] = orgEditor 
 
         if index == -1:
             return 
 
         if len(self.main.fontSettingCheck) > 0 :
+            if self.main.fontSettingCheck.has_key(index) == False :
+                return
             if self.main.fontSettingCheck[index] == True :
                 self.main.fontSettingCheck[index] == False
-                self.textBefores[index] = self.editors[index].text()
+                #self.textBefores[index] = self.editors[index].text()
+
+                if editor.path is not None :
+                    self.main.editors[editor.path][2] = self.editors[index].text()
+
                 self.editors[index].text_status = 1 #TEXT_READ
                 return
     
@@ -122,7 +207,14 @@ class EditorTabWidget(QTabWidget):
             self.m.ui.action_Delete.setEnabled(False)
 
 	if self.editors[index].tempfile == False  :
-	    if self.textBefores[index] != currentText and self.tabClosing == False :
+
+
+	    #if self.textBefores[index] != currentText and self.tabClosing == False :
+	    if not self.main.editors.has_key(self.paths[index]) :
+	        textBefore =  currentText
+	    else :
+	        textBefore = self.main.editors[self.paths[index]][2] 
+	    if textBefore != currentText and self.tabClosing == False :
 		msg = QMessageBox()
 		msg.setText('The file "' + self.paths[index] + '" changed on disk.')
 		if self.editors[index].text_status == 2: #TEXT_CHANGED
@@ -132,22 +224,43 @@ class EditorTabWidget(QTabWidget):
 		msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
 		msg.setDefaultButton(QMessageBox.Cancel)
 		msg.setWindowTitle("Warning")
+		editor = self.widget(index)
+		msg.setGeometry(500,500,0,0)
 		ret = msg.exec_()
 
 		if ret == QMessageBox.Ok:
     		# Reload 
 		    self.editors[index].readFile(self.paths[index])
-		    self.textBefores[index] = self.editors[index].text()
+		    #self.textBefores[index] = self.editors[index].text()
+
+		    if self.main.editors.has_key(self.paths[index]) :
+		        self.main.editors[self.paths[index]][2] = self.editors[index].text()
+
 		    self.editors[index].text_status = 1 #TEXT_READ
+		    self.editors[index].delete_marker()
 		    self.editors[index].save() # added 2/3
-		    self.textBefores[index] = self.editors[index].text() #added 2/3
+		    #self.textBefores[index] = self.editors[index].text() #added 2/3
+
+		    if self.main.editors.has_key(self.paths[index]) :
+		        self.main.editors[self.paths[index]][2] = self.editors[index].text()
+		elif ret == QMessageBox.Cancel:
+		    self.checkedPath = editor.path
+		    self.prevChange[editor.path] = open(editor.path).read()
 	else:
 	    if self.tabClosing == False :
 	        self.editors[index].readFile(self.paths[index])
-		self.textBefores[index] = self.editors[index].text()
+		#self.textBefores[index] = self.editors[index].text()
+
+		if self.main.editors.has_key(self.paths[index]) :
+		    self.main.editors[self.paths[index]][2] = self.editors[index].text()
+
 		self.editors[index].text_status = 1 #TEXT_READ
 		self.editors[index].save() # added 2/3
-		self.textBefores[index] = self.editors[index].text() #added 2/3
+		#self.textBefores[index] = self.editors[index].text() #added 2/3
+
+		if self.main.editors.has_key(self.paths[index]) :
+		    self.main.editors[self.paths[index]][2] = self.editors[index].text()
+
 		self.editors[index].tempfile = True
 	    else:
 	        return

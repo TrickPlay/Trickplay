@@ -7,7 +7,7 @@ test_area = "sound"
 test_api = "play_sound"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 
 	local total = 0
   	if controller.has_sound then
@@ -31,3 +31,9 @@ function generate_test_image (controller, factory)
 
 end
 
+function generate_match_image (resize_ratio_w, resize_ratio_h)
+
+	local t1 = Text{x = 10 * resize_ratio_w, y = 10 * resize_ratio_h, w = 310 * resize_ratio_w, h = 50 * resize_ratio_h, markup = "No comparison image for this test.", color = "FFFFFF", font = "Verdana 30px", use_markup = true}
+
+	return t1
+end

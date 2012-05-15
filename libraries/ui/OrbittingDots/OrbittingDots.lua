@@ -188,6 +188,10 @@ OrbittingDots = function(parameters)
 	----------------------------------------------------------------------------
 	--functions pertaining to getting and setting of attributes
 	
+	override_property(instance,"widget_type",
+		function() return "OrbittingDots" end, nil
+	)
+    
 	override_property(instance,"dot_size",
 		
 		function(oldf)    return dot_size   end,
@@ -254,7 +258,7 @@ OrbittingDots = function(parameters)
 			
 			if type(v) ~= "boolean" then
 				
-				error("OrbittingDots.animating expects type boolean. Received "..type(v),2)
+				error("ProgressSpinner.animating expects type boolean. Received "..type(v),2)
 				
 			elseif animating == v then
 				
@@ -277,7 +281,47 @@ OrbittingDots = function(parameters)
 		end
 	)
 	
-	----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    ---[=[
+    local widget_to_json = instance.to_json
+	
+    
+	instance.to_json = function(_,t)
+		
+		t.animating = instance.animating
+		t.duration = instance.duration
+		t.num_dots = instance.num_dots
+		t.dot_size = instance.dot_size
+		
+		if (not canvas) and image.src and image.src ~= "[canvas]" then 
+            
+            t.image = image.src
+			
+		end
+		t.type = t.type or "ProgressSpinner"
+		
+		return t
+		
+	end
+	
+    ----------------------------------------------------------------------------
+	
+    local to_json__overridden
+	
+    local to_json = function(_,t)
+        
+        t = is_table_or_nil("OrbittingDots.to_json",t)
+        t = to_json__overridden and to_json__overridden(_,t) or t
+        
+        return widget_to_json(_,t)
+    end
+	
+	override_property(instance,"to_json",
+		function() return to_json end,
+		function(oldf,self,v) to_json__overridden = v end
+	)
+    --]=]
+    ----------------------------------------------------------------------------
 	
 	local style_callback = function() if canvas then flag_for_redraw = true end   end
 	

@@ -1,7 +1,0 @@
-app=
-{	id = "com.trickplay.expandingMenuApp",
-	release = "1",
-	version = "1.0",
-	name = "Expanding Menu App",
-	copyright = "Trickplay Inc."
-}

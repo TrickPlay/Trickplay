@@ -1,3 +1,202 @@
+PROGRESSBAR = true
+
+local create_fill = function(self)
+    
+    if self.style.fill_colors.focus_upper and self.style.fill_colors.focus_lower then
+        
+        local c = Canvas(1,self.h-2*self.style.border.width)
+        
+        c:rectangle(-1,0,3,c.h )
+        c:set_source_linear_pattern(
+            0,0,
+            0,c.h
+        )
+        c:add_source_pattern_color_stop( 0 , self.style.fill_colors.focus_upper )
+        c:add_source_pattern_color_stop( 1 , self.style.fill_colors.focus_lower )
+        c:fill()
+        
+        return c:Image()
+        
+    else
+        
+        return Rectangle{size={1,self.h},color=self.style.fill_colors.focus or "ff0000"}
+        
+    end
+    
+end
+
+local create_shell = function(self)
+    
+	local c = Canvas(self.w,self.h)
+	
+	c.line_width = self.style.border.width
+	
+	round_rectangle(c,self.style.border.corner_radius)
+    
+    if self.style.fill_colors.default_upper and self.style.border.colors.default_lower then
+        
+        c:set_source_linear_pattern(
+            0,0,
+            0,c.h
+        )
+        c:add_source_pattern_color_stop( 0 , self.style.fill_colors.default_upper )
+        c:add_source_pattern_color_stop( 1 , self.style.fill_colors.default_lower )
+        
+        c:fill(true)
+        
+    else
+        
+        c:set_source_color( self.style.fill_colors.default or "000000" )
+        
+        c:fill(true)
+        
+    end
+    
+    if self.style.border.colors.default_upper and self.style.border.colors.default_lower then
+        
+        c:set_source_linear_pattern(
+            0,0,
+            0,c.h
+        )
+        c:add_source_pattern_color_stop( 0 , self.style.border.colors.default_upper )
+        c:add_source_pattern_color_stop( 1 , self.style.border.colors.default_lower )
+        
+        c:stroke()
+        
+    else
+        
+        c:set_source_color( self.style.border.colors.default or "ffffff" )
+        
+        c:stroke()
+        
+    end
+    
+    return c:Image() 
+    
+end
+
+local default_parameters = {
+    w = 200, 
+    h = 50,
+    style = {
+        fill_colors = {
+            default_upper = {  0,  0,  0,255},
+            default_lower = {127,127,127,255},
+            focus_upper   = {255,  0,  0,255},
+            focus_lower   = { 96, 48, 48,255},
+        },
+        border = { 
+            corner_radius = 10,
+            colors = { default_upper = "ffffff",default_lower = "444444"}
+        }
+    }
+}
+
+ProgressBar = function(parameters)
+    
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("ProgressBar",parameters)
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+    local redraw_shell = false
+    local redraw_fill  = false
+    
+    dumptable(parameters)
+    
+	local instance = Widget( parameters )
+    local fill, shell
+    local progress = 0
+	
+    instance:add(bg,contents,border)
+    
+	----------------------------------------------------------------------------
+    
+	override_property(instance,"widget_type",
+		function() return "ProgressBar" end, nil
+	)
+    
+    local expand_fill = function() 
+        fill.clip = {
+            0,
+            0,
+            fill.w*progress,
+            fill.h
+        }
+    end
+	override_property(instance,"progress",
+		function(oldf) return progress end,
+		function(oldf,self,v)  
+            
+            progress = v
+            
+            if fill then expand_fill() end
+            
+        end 
+	)
+    
+	----------------------------------------------------------------------------
+	
+	instance:subscribe_to(
+		{"h","w","width","height","size"},
+		function()
+			redraw_shell = true 
+            redraw_fill  = true 
+		end
+	)
+	instance:subscribe_to(
+		nil,
+		function()
+			if redraw_shell then 
+                if shell then shell:unparent() end
+                shell = create_shell(instance)
+                instance:add(shell)
+                shell:lower_to_bottom()
+            end
+            if redraw_fill then
+                if fill then fill:unparent() end
+                fill = create_fill(instance)
+                instance:add(fill)
+                
+                fill.x = instance.style.border.width
+                fill.y = instance.style.border.width
+                
+                expand_fill()
+            end
+		end
+	)
+    
+	----------------------------------------------------------------------------
+	
+    local set_redraw_shell = function() redraw_shell = true end
+    local set_redraw_both  = function() redraw_shell = true redraw_fill  = true end
+    
+    
+	local function instance_on_style_changed()
+		
+		instance.style.fill_colors:on_changed(    instance, set_redraw_both  )
+		instance.style.border:on_changed(         instance, set_redraw_shell )
+		instance.style.border.colors:on_changed(  instance, set_redraw_shell )
+		
+		set_redraw_both()
+        
+	end
+	
+	instance:subscribe_to( "style", instance_on_style_changed )
+	
+	instance_on_style_changed()
+	
+	----------------------------------------------------------------------------
+	
+	instance:set(parameters)
+	
+	return instance
+    
+end
+
+
 --[[
 Function: Progress Bar
 
@@ -19,7 +218,7 @@ Extra Function:
 	set_progress(prog) - set the progress of the loading bar (meant to be called in an on_new_frame())
 ]]
 
-
+--[[
 local function draw_c_shell(ui_width, ui_height, empty_top_color, empty_bottom_color, border_color)
 
 	local c_shell = Canvas {
@@ -206,3 +405,4 @@ function ui_element.progressBar(t)
     
 	return l_bar_group
 end
+--]]

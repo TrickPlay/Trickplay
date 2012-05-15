@@ -7,7 +7,7 @@ test_area = "Text"
 test_api = "Pango"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 
 	local g = factory:Group{ x = 0, y = 0}
 	

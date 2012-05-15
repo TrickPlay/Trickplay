@@ -120,6 +120,8 @@ int lb_get_extra(lua_State * L);
 
 int lb_set_extra(lua_State * L);
 
+void lb_setglobal( lua_State * L , const char * name );
+
 //.........................................................................
 
 void lb_dump_table( lua_State * L );

@@ -1,3 +1,72 @@
+BUTTONPICKER = true
+
+
+local default_parameters = {}
+ButtonPicker = function(parameter)
+    
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("ButtonPicker",parameters)
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+    ----------------------------------------------------------------------------
+	--The ButtonPicker Object inherits from LayoutManager
+	
+    local prev_arrow = Button()
+    local next_arrow = Button()
+    
+    local text = Group()
+    
+    
+	local instance = LayoutManager()
+    local items = ArrayManager{
+    }
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"items",
+		function(oldf) return   items     end,
+		function(oldf,self,v)  
+            
+            items.data = v
+            
+        end
+	)
+    ----------------------------------------------------------------------------
+    local direction
+	override_property(instance,"direction",
+		function(oldf) return   direction     end,
+		function(oldf,self,v)  
+            
+            if direction == v then return end
+            if v == "horizontal" then
+                instance.cells.data = {prev_arrow,text,next_arrow}
+            elseif v == "vertical" then
+                instance.cells.data = {
+                    {prev_arrow},
+                    {text},
+                    {next_arrow},
+                }
+            else
+                
+                error("ButtonPicker.direction expects 'horizontal' or 'vertical as its value. Received: "..v,2)
+                
+            end
+            direction = v
+        end
+	)
+    ----------------------------------------------------------------------------
+    
+	instance:set(parameters)
+	
+	return instance
+    
+end
+
+
+
+
 --[[
 Function: buttonPicker
 
@@ -32,7 +101,7 @@ Extra Function:
 		remove_item(item) - Remove an item from the items table 
 ]]
 
-
+--[[
 function ui_element.buttonPicker(t) 
     local w_scale = 1
     local h_scale = 1
@@ -690,3 +759,4 @@ function ui_element.buttonPicker(t)
 
         return bp_group 
 end
+--]]
