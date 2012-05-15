@@ -151,6 +151,17 @@ ArrowStyle = function(parameters)
                 children_using_this_style[object] = update_function
                 
             end,
+            set = function(_,t)
+                
+                if type(t) ~= "table" then
+                    error("Expects a table. Received "..type(t),2)
+                end
+                
+                for k, v in pairs(t) do
+                    instance[k] = v
+                end
+                
+            end,
             to_json = function()
                 return json:stringify{
                     size   = instance.size,
@@ -273,6 +284,17 @@ BorderStyle = function(parameters)
                     corner_radius = instance.corner_radius,
                     colors        = instance.colors.name,
                 }
+            end,
+            set = function(_,t)
+                
+                if type(t) ~= "table" then
+                    error("Expects a table. Received "..type(t),2)
+                end
+                
+                for k, v in pairs(t) do
+                    instance[k] = v
+                end
+                
             end,
             styles_json = borderstyles_json 
         },
@@ -446,7 +468,7 @@ TextStyle = function(parameters)
     instance.name = parameters.name 
     instance:set(parameters)
     
-    properties.color = parameters.color or instance.colors.default
+    --properties.color = parameters.color or instance.colors.default
     
     return instance
     
@@ -503,11 +525,11 @@ Style = function(parameters)
     local children_using_this_style = setmetatable( {}, { __mode = "k" } )
     
     local meta_setters = {
-        arrow       = function(v) recursive_overwrite(arrow,       v or {}) end,
-        border      = function(v) recursive_overwrite(border,      v or {}) end,
-        text        = function(v) recursive_overwrite(text,        v or {}) end,
-        fill_colors = function(v) recursive_overwrite(fill_colors, v or {}) end,
-        name = function(v)
+        arrow       = function(v) arrow:set(      v or {}) end,
+        border      = function(v) border:set(     v or {}) end,
+        text        = function(v) text:set(       v or {}) end,
+        fill_colors = function(v) fill_colors:set(v or {}) end,
+        name        = function(v)
             
             if name ~= nil then all_styles[name] = nil end
             
@@ -556,7 +578,6 @@ Style = function(parameters)
     instance.border      = parameters.border
     instance.text        = parameters.text
     instance.fill_colors = parameters.fill_colors
-    
     return instance
     
 end
