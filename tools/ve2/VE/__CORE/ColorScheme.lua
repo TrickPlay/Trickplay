@@ -104,6 +104,9 @@ ColorScheme = function(parameters)
     local meta_getters = {
         name       = function() return name                     end,
         type       = function() return "COLORSCHEME"            end,
+        attributes = function() 
+            return recursive_overwrite({}, colors) 
+        end,
     }
     
     setmetatable(
