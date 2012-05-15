@@ -127,6 +127,10 @@ ToggleButton = function(parameters)
     local on_deselection, on_selection
     local selected = false
     
+	override_property(instance,"widget_type",
+		function() return "ToggleButton" end, nil
+	)
+    
 	override_property(instance,"group",
 		function() return radio_button_group end,
 		function(oldf,self,v)

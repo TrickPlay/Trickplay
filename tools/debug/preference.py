@@ -299,14 +299,16 @@ class Preference():
             # the user clicked OK and font is set to the font the user Selected
             family = font.family()
             size = font.pointSize()
+
             self.lexerLuaFontString[self.lexerIndex] = "%s"%family+" %i"%size
             self.ui.previewText.setText(self.lexerLuaFontString[self.lexerIndex]+"\n"+"abcdefghijk ABCDEFGHIJK")
             self.ui.previewText.setFont(font)
+
             settings = QSettings()
             settings.setValue(self.lexerLua[self.lexerIndex]+"String", self.lexerLuaFontString[self.lexerIndex])
             settings.setValue(self.lexerLua[self.lexerIndex], font)
             self.lexerLuaFont[self.lexerIndex] = font
-
+            
             if self.main.editorManager.tab != None:
                 self.editorCurrentIndex = self.main.editorManager.tab.currentIndex()
 
@@ -315,17 +317,9 @@ class Preference():
                 for i in range (0, tabCnt):
                     self.main.editorManager.fontSettingCheck[i] = True
 
-                #for index in range (0, tabCnt):
-                while tabCnt > 0 : 
-                    #index = self.main.editorManager.tab.currentIndex()
-                    editor = self.main.editorManager.tab.editors[0]
-                    #self.editorPaths.append(editor.path)
-                    editorPath = editor.path
-                    self.main.editorManager.fontSetting = True
-                    self.main.editorManager.tab.closeTab(0)
-                    #TODO : temp file ...
-                    self.main.editorManager.newEditor(editorPath)
-                    tabCnt -= 1 
+                for index in range (0, tabCnt):
+                    editor = self.main.editorManager.tab.editors[index]
+                    editor.setEditorStyle()
                 
                 self.main.editorManager.tab.setCurrentIndex(self.editorCurrentIndex)
         else:
@@ -336,6 +330,7 @@ class Preference():
         if color.isValid():
             self.ui.previewText.clear()
             self.ui.previewText.setTextBackgroundColor(color)
+
             settings = QSettings()
             settings.setValue(self.lexerLua[self.lexerIndex]+"BC", color.name())
             self.ui.previewText.setText(self.lexerLuaFontString[self.lexerIndex]+"\n"+"abcdefghijk ABCDEFGHIJK")
@@ -349,17 +344,9 @@ class Preference():
                 for i in range (0, tabCnt):
                     self.main.editorManager.fontSettingCheck[i] = True
 
-                #for index in range (0, tabCnt):
-                while tabCnt > 0 : 
-                    #index = self.main.editorManager.tab.currentIndex()
-                    editor = self.main.editorManager.tab.editors[0]
-                    #self.editorPaths.append(editor.path)
-                    editorPath = editor.path
-                    self.main.editorManager.fontSetting = True
-                    self.main.editorManager.tab.closeTab(0)
-                    #TODO : temp file ...
-                    self.main.editorManager.newEditor(editorPath)
-                    tabCnt -= 1 
+                for index in range (0, tabCnt):
+                    editor = self.main.editorManager.tab.editors[index]
+                    editor.setEditorStyle()
                 
                 self.main.editorManager.tab.setCurrentIndex(self.editorCurrentIndex)
         else:
@@ -385,17 +372,9 @@ class Preference():
                 for i in range (0, tabCnt):
                     self.main.editorManager.fontSettingCheck[i] = True
 
-                #for index in range (0, tabCnt):
-                while tabCnt > 0 : 
-                    #index = self.main.editorManager.tab.currentIndex()
-                    editor = self.main.editorManager.tab.editors[0]
-                    #self.editorPaths.append(editor.path)
-                    editorPath = editor.path
-                    self.main.editorManager.fontSetting = True
-                    self.main.editorManager.tab.closeTab(0)
-                    #TODO : temp file ...
-                    self.main.editorManager.newEditor(editorPath)
-                    tabCnt -= 1 
+                for index in range (0, tabCnt):
+                    editor = self.main.editorManager.tab.editors[index]
+                    editor.setEditorStyle()
                 
                 self.main.editorManager.tab.setCurrentIndex(self.editorCurrentIndex)
         else:

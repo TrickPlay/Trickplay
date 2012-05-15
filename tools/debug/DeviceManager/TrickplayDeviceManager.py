@@ -47,6 +47,7 @@ class TrickplayDeviceManager(QWidget):
         self._path = ''
         self.trickplay = QProcess()
         QObject.connect(self.trickplay, SIGNAL('started()'), self.app_started)
+        #QObject.connect(self.trickplay, SIGNAL('finished(int, QProcess.ExitStatus)'), self.app_finished)
         QObject.connect(self.trickplay, SIGNAL('finished(int)'), self.app_finished)
         QObject.connect(self.trickplay, SIGNAL('readyRead()'), self.app_ready_read)
 
@@ -241,6 +242,9 @@ class TrickplayDeviceManager(QWidget):
 		
 		while True:
 			# Read one line
+			if not self.trickplay.canReadLine():
+			    break
+			# Read one line
 			s = self.trickplay.readLine()
 			# If the line is null, it means there is nothing more
 			# to read during this iteration
@@ -414,13 +418,15 @@ class TrickplayDeviceManager(QWidget):
 		                        editor = self.editorManager.tab.editors[index]
 		                        nline = editor.margin_nline
     
-		                    if reply.command[:1] == DBG_CMD_DELETE :
+		                    if reply.command[:1] == DBG_CMD_DELETE and nline is not None:
 		                        if editor.current_line != nline :
 		                            editor.markerDelete(nline, -1)
 		                        else :
 		                            editor.markerDelete(nline, -1)
 		                            editor.markerAdd(nline, editor.ARROW_MARKER_NUM)
 		                        editor.line_click[nline] = 0
+		                        return
+		                    elif nline is None:
 		                        return
     
 		                    # Break Point Setting t
@@ -498,12 +504,37 @@ class TrickplayDeviceManager(QWidget):
 	        return True
 
     def app_finished(self, errorCode):
-		if self.trickplay.state() == QProcess.NotRunning :
-			print "[VDBG] Trickplay APP is finished"
-			self.inspector.clearTree()
-			self.inspector.ui.refresh.setEnabled(False)
-			self.inspector.ui.search.setEnabled(False)
-			self.main.stop()
+        if errorCode == 0 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", FailedToStart] the process failed to start. Either the invoked program is missing, or you may have insufficient permissions to invoke the program" )
+        elif errorCode == 1 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", Crashed] The process crashed some time after starting successfully.")
+        elif errorCode == 2 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", Timedout] The process crashed some time after starting successfully.")
+        elif errorCode == 3 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", ReadError] An error occurred when attempting to read from the process.  For example, the process may not be running.")
+        elif errorCode == 4 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", WriteError] An error occurred when attempting to write to the process.  For example, the process may not be running, or it may have closed its input channel.")
+        elif errorCode == 5 :
+            print ("[VDBG] Error Code : ["+str(errorCode)+", UnknownError] An unknown error occurred.")
+
+	if self.trickplay.state() == QProcess.NotRunning :
+	    print "[VDBG] Trickplay APP is finished"
+	    if self.trickplay.exitStatus() == QProcess.NormalExit :
+		print ("[VDBG] ExitStatus :  The process exited normally.")
+	    elif self.trickplay.exitStatus() == QProcess.CrashExit :
+		print ("[VDBG] ExitStatus :  The process crashed.")
+		if self.main.closedByIDE == False :
+		    msg = QMessageBox()
+		    msg.setText("The process crashed.")
+		    msg.setInformativeText('ErrorCode : [ '+str(errorCode)+' ]')
+		    msg.setWindowTitle("Warning")
+		    msg.setGeometry(500,500,0,0)
+		    msg.exec_()
+
+	    self.inspector.clearTree()
+	    self.inspector.ui.refresh.setEnabled(False)
+	    self.inspector.ui.search.setEnabled(False)
+	    self.main.stop()
 
 	
     def run(self, dMode=False):
@@ -515,13 +546,18 @@ class TrickplayDeviceManager(QWidget):
 
             env = self.trickplay.processEnvironment().systemEnvironment()
 
-            for item in env.toStringList():
-   				if item[:3] == "TP_":
-   					n = re.search("=", item).end()
-   					env.remove(item[:n-1])
+            if self.main.config is None :
+                print("[VDBG] .trickplay config file is ignored.")
+                for item in env.toStringList():
+   				    if item[:3] == "TP_":
+   					    n = re.search("=", item).end()
+   					    env.remove(item[:n-1])
+                env.insert("TP_config_file","")
+            else:
+                print("[VDBG] .trickplay config file is read.")
+                
 
             env.insert("TP_LOG", "bare")
-            env.insert("TP_config_file","")
 
             if dMode == True :
             	self.debug_mode = True

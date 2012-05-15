@@ -7,7 +7,7 @@ test_area = "camera"
 test_api = "request_image"
 
 
-function generate_test_image (controller, factory)
+function generate_device_image (controller, factory)
 	  
 	controller:request_image()
 	local total = 0
@@ -21,18 +21,23 @@ function generate_test_image (controller, factory)
 	  photo.size = { 320, 480}
 	  photo.position = { 675, 470 }        
 	  screen:add(photo)
-	end
 
- 	function idle.on_idle( idle , seconds )
-      total = total + seconds
-      if total >= 10 then
-        idle.on_idle = nil
-		screen:remove(photo)
-		photo = nil
- 		test_verify_txt.text = "Photo cleared for next test."
-      end
-    end
+ 	  function idle.on_idle( idle , seconds )
+	      total = total + seconds
+	      if total >= 5 then
+		idle.on_idle = nil
+			screen:remove(photo)
+			photo = nil
+	 		test_verify_txt.text = "Photo cleared for next test."
+	      end
+     	  end
+     end
+
+    
 
 	return nil
 end
+
+
+
 
