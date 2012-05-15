@@ -40,6 +40,7 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.actionLua_File_Engine_UI_Elements, SIGNAL("triggered()"),  self.openLua)
         QObject.connect(self.ui.actionJSON_New_UI_Elements, SIGNAL("triggered()"),  self.open)
         QObject.connect(self.ui.action_Save_2, SIGNAL("triggered()"),  self.save)
+        QObject.connect(self.ui.actionNew_Layer, SIGNAL("triggered()"),  self.newLayer)
         
 		#Edit Menu
         QObject.connect(self.ui.action_Button, SIGNAL("triggered()"),  self.button)
@@ -58,6 +59,7 @@ class MainWindow(QMainWindow):
         self.path = None
         QObject.connect(app, SIGNAL('aboutToQuit()'), self.exit)
         self.app = app
+        self.command = None
 
     
     @property
@@ -72,51 +74,65 @@ class MainWindow(QMainWindow):
         inputCmd = str("_VE_.openLuaFile()")
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
+        self.command = "openLuaFile"
         return True
     def open(self):
         inputCmd = str("_VE_.openFile()")
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
+        self.command = "openFile"
         return True
     
+    def newLayer(self):
+        inputCmd = str("_VE_.newLayer()")
+        self._emulatorManager.trickplay.write(inputCmd+"\n")
+        self._emulatorManager.trickplay.waitForBytesWritten()
+        self.command = "newLayer"
+        return True
+
     def save(self):
         inputCmd = str("_VE_.saveFile()")
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
+        self.command = "save"
         return True
 
     def textinput(self):
-        inputCmd = str("_VE_.insertUIElement('TextInput')")
+        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'TextInput')")
+        print inputCmd
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
+        self.command = "insertUIElement"
         return True
 
     def orbittingdots(self):
-        inputCmd = str("_VE_.insertUIElement('OrbittingDots')")
+        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'OrbittingDots')")
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
+        self.command = "insertUIElement"
         return True
 
     def progressspinner(self):
-        inputCmd = str("_VE_.insertUIElement('ProgressSpinner')")
+        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ProgressSpinner')")
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
         return True
 
     def toastalert(self):
-        inputCmd = str("_VE_.insertUIElement('ToastAlert')")
+        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToastAlert')")
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
         return True
 
     def dialogbox(self):
-        inputCmd = str("_VE_.insertUIElement('DialogBox')")
+        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'DialogBox')")
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
         return True
 
     def button(self):
-        inputCmd = str("_VE_.insertUIElement('Button')")
+        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
+        print inputCmd 
         self._emulatorManager.trickplay.write(inputCmd+"\n")
         self._emulatorManager.trickplay.waitForBytesWritten()
         return True

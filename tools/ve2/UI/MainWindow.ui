@@ -60,6 +60,7 @@
      <addaction name="actionLua_File_Engine_UI_Elements"/>
      <addaction name="actionJSON_New_UI_Elements"/>
     </widget>
+    <addaction name="actionNew_Layer"/>
     <addaction name="menuOpen"/>
     <addaction name="action_Save_2"/>
     <addaction name="action_Exit"/>
@@ -541,6 +542,11 @@
   <action name="actionJSON_New_UI_Elements">
    <property name="text">
     <string>JSON (New UI Elements)</string>
+   </property>
+  </action>
+  <action name="actionNew_Layer">
+   <property name="text">
+    <string>New Layer</string>
    </property>
   </action>
  </widget>

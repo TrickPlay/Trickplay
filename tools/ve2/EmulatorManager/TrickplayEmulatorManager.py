@@ -93,7 +93,6 @@ class TrickplayEmulatorManager(QWidget):
 				if s is not None and len(s) > 9 :
 				    if s[:9] == "getUIInfo":
 				        pdata = json.loads(s[9:])
-				        print("__VE__.getUIInfo()")
 				    elif s[:9] == "repUIInfo":
 				        pdata = json.loads(s[9:])
 				    elif s[:9] == "openInspc":
@@ -103,9 +102,7 @@ class TrickplayEmulatorManager(QWidget):
 				        pass
 
 				    if pdata is not None:
-				        #print("[VE] clear inspector tree")
 				        self.inspector.clearTree()
-				        #print("[VE] update inspector tree")
 				        self.inspector.inspectorModel.inspector_reply_finished(pdata)
 
 				    if gid is not None:

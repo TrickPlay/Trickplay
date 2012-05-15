@@ -40,30 +40,37 @@ local function dump_properties( o )
 end
 
 local uiNum = 0
+local layerNum = 0
 local dragging = nil
 json_head = '[ {"anchor_point":[0,0], "children":[{"anchor_point":[0,0], "children":'  
 json_tail = ' ,"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[0.5, 0.5],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}], "gid":0,"is_visible":true,"name":"stage","opacity":255,"position":[0,0,0],"scale":[1,1],"size":[960, 540],"type":"Stage","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}] ' 
 fake_json = '{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "Layer1", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": 3, "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group", "children": [{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "rectangle0", "anchor_point": [0,0],"border_color": [255,255,255,255], "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 4, "z_rotation": [0,0,0], "position": [0,0,0], "border_width": 0, "type": "Rectangle", "size": [212, 186]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "clone1", "anchor_point": [0,0], "x_rotation": [0,0,0], "source": {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "rectangle0", "anchor_point": [0,0], "border_color": [255,255,255,255], "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 4, "z_rotation": [0,0,0], "position": [216,160,0],"border_width": 0, "type": "Rectangle", "size": [212, 186]}, "gid": 5, "z_rotation": [0,0,0], "position": [216, 390, 0], "type": "Clone", "size": [212, 186]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "image2", "clip": [0,0,450,978], "src": "/assets/images/img_big_01.png", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": 6, "z_rotation": [0,0,0], "position": [208, 590, 0], "type": "Texture", "size": [978, 450]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "text3", "anchor_point": [0,0], "text": "TEXT", "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 7, "z_rotation": [0,0,0], "position": [224, 1046, 0], "font": "FreeSans Medium 30px", "type": "Text", "size": [39, 75]}], "size": [1186, 1121]}'
+
+fake_layer_name = '{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "'
+fake_layer_gid = '", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": '
+fake_layer_children = ', "children" : ['
+fake_layer_end = '], "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group", "size": [1186, 1121]}'
 
 _VE_ = {}
 
 -- GET 
 _VE_.getUIInfo = function()
     local t = {}
-    --[[
     for m,n in ipairs (screen.children) do
-        if n.children then --s1  
-            for a, b in ipairs (n.children) do 
-                print (b.name)
-                if b.to_json then -- s1.b1
-                    table.insert(t, json:parse(b:to_json()))
-                end
-            end
+        if string.find(n.name, "Layer") then  
+            fake_layer = fake_layer_name..n.name..fake_layer_gid..n.gid..fake_layer_children
+            for i,j in ipairs(n.children) do 
+                if j.to_json then 
+                    if i > 1 then
+                        fake_layer = fake_layer..','..j:to_json()
+                    else 
+                        fake_layer = fake_layer..j:to_json()
+                    end
+                end 
+            end 
+            fake_layer = fake_layer..fake_layer_end
+            table.insert(t, json:parse(fake_layer))
         end
-    end
-    ]]
-    for m,n in ipairs (screen.children) do
-        print (n.name)
         if n.to_json then -- s1.b1
             table.insert(t, json:parse(n:to_json()))
         end
@@ -159,6 +166,12 @@ _VE_.openLuaFile = function()
 end 
 
 
+_VE_.newLayer = function()
+    screen:add(Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
+    layerNum = layerNum + 1
+    _VE_.repUIInfo()
+end 
+
 _VE_.saveFile = function()
     local t = {}
 
@@ -175,6 +188,7 @@ _VE_.saveFile = function()
 
 end 
 
+
 local uiElementCreate_map = 
 {
     ['Button'] = function()  return Button() end, 
@@ -185,7 +199,7 @@ local uiElementCreate_map =
     ['TextInput'] = function() return TextInput() end,
 }
 
-_VE_.insertUIElement = function(uiTypeStr)
+_VE_.insertUIElement = function(curLayerGid, uiTypeStr)
     
     if uiElementCreate_map[uiTypeStr] then
         uiInstance = uiElementCreate_map[uiTypeStr](self)
@@ -217,7 +231,8 @@ _VE_.insertUIElement = function(uiTypeStr)
         dragging = nil
     end
 
-    screen:add(uiInstance)
+    devtools:gid(curLayerGid):add(uiInstance)
+    --screen:add(uiInstance)
     _VE_.repUIInfo(uiInstance)
 end
 

@@ -32,6 +32,8 @@ class TrickplayInspector(QWidget):
         self.preventChanges = False
 
         self.main = main
+        self.curLayerGid = None
+        self.layerGid = {}
         
         # Models
         self.inspectorModel = TrickplayElementModel(self)
@@ -150,7 +152,7 @@ class TrickplayInspector(QWidget):
         result = self.search(text, property)
         
         if result:
-            print('Found', result['gid'], result['name'])
+            #print('Found', result['gid'], result['name'])
             #self.lastSearchedText = text
             #self.lastSearchedItem = item
             self.selectItem(result)
@@ -218,7 +220,6 @@ class TrickplayInspector(QWidget):
         Re-populate the property view every time a new UI element
         is selected in the inspector view.
         """
-        
         if not self.preventChanges:
             self.preventChanges = True
             
@@ -226,7 +227,14 @@ class TrickplayInspector(QWidget):
             item = self.inspectorModel.itemFromIndex(index)
             data = item.TPJSON()
             
-            #self.propertyModel.fill(data)
+            if data.has_key('gid') == True:
+                if data['name'][:5] == "Layer":
+                    self.curLayerGid = int(data['gid'])
+                    #print("[VE] selectionChanged curLayerGid : ", self.curLayerGid)
+                elif self.layerGid[int(data['gid'])] : 
+                    self.curLayerGid = self.layerGid[int(data['gid'])] 
+                    #print("[VE] selectionChanged curLayerGid : ", self.curLayerGid)
+
             self.propertyFill(data)
             
             self.preventChanges = False
@@ -359,7 +367,6 @@ class TrickplayInspector(QWidget):
         """
         Make sure no old data remains in the tree
         """
-        
         old = self.preventChanges
         
         if not old:
@@ -370,5 +377,8 @@ class TrickplayInspector(QWidget):
         
         if not old:
             self.preventChanges = False
+
+        self.LayerGids = {}
+        self.curLayerGid = None
             
             
