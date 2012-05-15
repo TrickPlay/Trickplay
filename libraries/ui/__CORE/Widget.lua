@@ -9,10 +9,10 @@ local uielement_properties = {
 --------------------------------------------------------------------------------
 -- This function receives a UIElement as its parameter sets up the attributes
 -- and methods of Widget. Namely:
---    - subscribe_to()
 --    - focused
 --    - enabled
 --    - style
+--    - subscribe_to()
 --    - to_json()
 --    - from_json()
 --    - add_key_handler()
@@ -21,7 +21,7 @@ local uielement_properties = {
 -- Yes this is a messy way to set up WidgetGroup, WidgetRectangle, WidgetText,
 -- WidgetImage, and WidgetClone
 --------------------------------------------------------------------------------
-local function add_Widget_properties(instance)
+local function Widgetize(instance)
     
     --Pablo's function to duplicate the metatable of UIElements
     dupmetatable(instance)
@@ -153,6 +153,8 @@ local function add_Widget_properties(instance)
             -- 'subscriptions_all' happening after the callbacks
             -- in 'subscriptions'
             for f,_ in pairs(subscriptions_all ) do f(p) end
+            
+            return instance
             
         end)
 	end
@@ -338,7 +340,7 @@ local function add_Widget_properties(instance)
 	)
     
     ----------------------------------------------------------------------------
-    local style
+    local style = Style()
 	override_property(instance,"style",
 		function()   return style    end,
 		function(oldf,self,v) 
@@ -351,25 +353,64 @@ local function add_Widget_properties(instance)
 	override_property(instance,"widget_type",
 		function() return "Widget" end, nil
 	)
-end
-
-Widget = function(parameters)
-    
-	parameters = is_table_or_nil("Widget",parameters)
-    
-    
-    local instance = Group{}
-    
-    add_Widget_properties(instance)
-    
-    if parameters.style == nil then instance.style = nil end
-	
-    instance:set( parameters )
     
     return instance
+end
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+Widget_Group = function(parameters)
+    
+    return Widgetize(  Group()  ):set( 
+        
+        is_table_or_nil( "Widget_Group", parameters ) 
+        
+    )
     
 end
 
+Widget_Rectangle = function(parameters)
+    
+    return Widgetize(  Rectangle()  ):set( 
+        
+        is_table_or_nil( "Widget_Rectangle", parameters ) 
+        
+    )
+    
+end
+
+Widget_Text = function(parameters)
+    
+    return Widgetize(  Text()  ):set( 
+        
+        is_table_or_nil( "Widget_Text", parameters ) 
+        
+    )
+    
+end
+
+Widget_Image = function(parameters)
+    
+    return Widgetize(  Image()  ):set( 
+        
+        is_table_or_nil( "Widget_Image", parameters ) 
+        
+    )
+    
+end
+
+Widget_Clone = function(parameters)
+    
+    return Widgetize(  Clone()  ):set( 
+        
+        is_table_or_nil( "Widget_Clone", parameters ) 
+        
+    )
+    
+end
+
+Widget = Widget_Group
 
 
 
