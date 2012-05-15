@@ -143,6 +143,10 @@ ProgressSpinner = function(parameters)
 	
 	----------------------------------------------------------------------------
 	
+	override_property(instance,"widget_type",
+		function() return "ProgressSpinner" end, nil
+	)
+    
 	override_property(instance,"duration",
 		function(oldf) return duration     end,
 		function(oldf,self,v) duration = v end

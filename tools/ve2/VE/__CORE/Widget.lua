@@ -214,6 +214,9 @@ Widget = function(parameters)
 		function() return to_json end,
 		function(oldf,self,v) to_json__overridden = v end
 	)
+	override_property(instance,"widget_type",
+		function() return "Widget" end, nil
+	)
 	
 	override_function(instance,"from_json", function(old_function,self,j)
 		

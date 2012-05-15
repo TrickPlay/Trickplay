@@ -127,6 +127,11 @@ DialogBox = function(parameters)
 	----------------------------------------------------------------------------
 	--functions pertaining to getting and setting of attributes
 	
+    
+	override_property(instance,"widget_type",
+		function() return "DialogBox" end, nil
+	)
+    
 	override_property(instance,"image",
 		
 		function(oldf)    return image   end,

@@ -64,6 +64,10 @@ TextInput = function(parameters)
 		function(oldf,self,v) text.text = v end
 	)
 	
+	override_property(instance,"widget_type",
+		function() return "TextInput" end, nil
+	)
+    
 	instance:subscribe_to(
 		{"h","w","width","height","size"},
 		function()
