@@ -103,7 +103,6 @@ LayoutManager = function(parameters)
     local set_size = function(self)
         local last_cell = self[self.number_of_rows] and self[self.number_of_rows][self.number_of_cols]
         if last_cell then
-            print("huzzah")
             instance.w = last_cell.x + last_cell.w - last_cell.anchor_point[1]
             instance.h = last_cell.y + last_cell.h - last_cell.anchor_point[2]
         end
@@ -184,11 +183,9 @@ LayoutManager = function(parameters)
             instance:add(obj)
             
             if obj.subscribe_to then
-                print(instance,"subscribe")
                 obj:subscribe_to(
                     {"h","w","width","height","size"},
                     function()
-                        print("huzzah2")
                         cells:on_entries_changed()
                     end
                 )
