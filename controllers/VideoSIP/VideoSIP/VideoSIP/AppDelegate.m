@@ -26,11 +26,16 @@
 {
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     // Override point for customization after application launch.
+    /*
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         self.viewController = [[[ViewController alloc] initWithNibName:@"ViewController_iPhone" bundle:nil] autorelease];
     } else {
         self.viewController = [[[ViewController alloc] initWithNibName:@"ViewController_iPad" bundle:nil] autorelease];
     }
+    //*/
+    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
+    self.viewController = [[VideoStreamer alloc] initWithContext:context delegate:self];
+    [(VideoStreamer *)self.viewController startChat];
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
     return YES;
@@ -73,6 +78,22 @@
      Save data if appropriate.
      See also applicationDidEnterBackground:.
      */
+}
+
+
+#pragma mark -
+#pragma mark VideoStreamerDelegate methods
+
+- (void)videoStreamerInitiatingChat:(VideoStreamer *)videoStreamer {
+    NSLog(@"Chat Initiating");
+}
+
+- (void)videoStreamerChatStarted:(VideoStreamer *)videoStreamer {
+    NSLog(@"Chat Started");
+}
+
+- (void)videoStreamer:(VideoStreamer *)videoStreamer chatEndedWithInfo:(NSString *)reason {
+    NSLog(@"Chat Ended: %@", reason);
 }
 
 @end
