@@ -122,7 +122,7 @@
     <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
-    <string>Property Editor</string>
+    <string>Inspector : </string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
