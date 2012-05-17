@@ -83,6 +83,17 @@ ColorScheme = function(parameters)
             end
             
         end,
+        set = function(_,t)
+            
+            if type(t) ~= "table" then
+                error("Expects a table. Received "..type(t),2)
+            end
+            
+            for k, v in pairs(t) do
+                instance[k] = v
+            end
+            
+        end,
         on_changed = function(self,object,update_function)
             
             children_using_this_style[object] = update_function
