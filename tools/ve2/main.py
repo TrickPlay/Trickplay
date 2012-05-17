@@ -70,71 +70,49 @@ class MainWindow(QMainWindow):
     def inspector(self):
         return self._inspector
 
+    def sendLuaCommand(self, selfCmd, inputCmd):
+        self._emulatorManager.trickplay.write(inputCmd+"\n")
+        self._emulatorManager.trickplay.waitForBytesWritten()
+        self.command = selfCmd
+
     def openLua(self):
-        inputCmd = str("_VE_.openLuaFile()")
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
-        self.command = "openLuaFile"
+        self.sendLuaCommand("openLuaFile", "_VE_.openLuaFile()")
         return True
+
     def open(self):
-        inputCmd = str("_VE_.openFile()")
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
-        self.command = "openFile"
+        self.sendLuaCommand("openFile", "_VE_.openFile()")
         return True
     
     def newLayer(self):
-        inputCmd = str("_VE_.newLayer()")
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
-        self.command = "newLayer"
+        self.sendLuaCommand("newLayer", "_VE_.newLayer()")
         return True
 
     def save(self):
-        inputCmd = str("_VE_.saveFile()")
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
-        self.command = "save"
+        self.sendLuaCommand("save", "_VE_.saveFile()")
         return True
 
     def textinput(self):
-        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'TextInput')")
-        print inputCmd
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
-        self.command = "insertUIElement"
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'TextInput')")
         return True
 
     def orbittingdots(self):
-        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'OrbittingDots')")
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
-        self.command = "insertUIElement"
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'OrbittingDots')")
         return True
 
     def progressspinner(self):
-        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ProgressSpinner')")
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ProgressSpinner')")
         return True
 
     def toastalert(self):
-        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToastAlert')")
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'ToastAlert')")
         return True
 
     def dialogbox(self):
-        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'DialogBox')")
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'DialogBox')")
         return True
 
     def button(self):
-        inputCmd = str("_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
-        print inputCmd 
-        self._emulatorManager.trickplay.write(inputCmd+"\n")
-        self._emulatorManager.trickplay.waitForBytesWritten()
+        self.sendLuaCommand("insertUIElement", "_VE_.insertUIElement("+str(self._inspector.curLayerGid)+", 'Button')")
         return True
 
     def stop(self, serverStoped=False, exit=False):

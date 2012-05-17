@@ -33,6 +33,7 @@ class TrickplayInspector(QWidget):
 
         self.main = main
         self.curLayerGid = None
+        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector :" , None, QApplication.UnicodeUTF8))
         self.layerGid = {}
         
         # Models
@@ -230,10 +231,11 @@ class TrickplayInspector(QWidget):
             if data.has_key('gid') == True:
                 if data['name'][:5] == "Layer":
                     self.curLayerGid = int(data['gid'])
+                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector : "+"Layer"+str(self.curLayerGid), None, QApplication.UnicodeUTF8))
                     #print("[VE] selectionChanged curLayerGid : ", self.curLayerGid)
                 elif self.layerGid[int(data['gid'])] : 
                     self.curLayerGid = self.layerGid[int(data['gid'])] 
-                    #print("[VE] selectionChanged curLayerGid : ", self.curLayerGid)
+                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector : "+"Layer"+str(self.curLayerGid), None, QApplication.UnicodeUTF8))
 
             self.propertyFill(data)
             
@@ -380,5 +382,6 @@ class TrickplayInspector(QWidget):
 
         self.LayerGids = {}
         self.curLayerGid = None
+        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector :" , None, QApplication.UnicodeUTF8))
             
             

@@ -48,7 +48,7 @@ class TrickplayElementModel(QStandardItemModel):
 
             # Find the last item after getting new data so that
             # both trees reflect the changes
-            if self.inspector.main.command == "newLayer":
+            if self.inspector.main.command == "newLayer" or self.inspector.main.command == "insertUIElement" :
                 result = self.inspector.search(self.theBigestGid , 'gid')
                 if result: 
                     #print('Found', result['gid'], result['name'])

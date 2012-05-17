@@ -51,9 +51,20 @@ fake_layer_gid = '", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": '
 fake_layer_children = ', "children" : ['
 fake_layer_end = '], "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group", "size": [1186, 1121]}'
 
+fake_style_json = ''
+
 _VE_ = {}
 
 -- GET 
+_VE_.getStInfo = function()
+
+    local t = {}
+
+    table.insert(t, json:parse(fake_style_json))
+    print("getStInfo"..json:stringify(t))
+end 
+
+
 _VE_.getUIInfo = function()
     local t = {}
     for m,n in ipairs (screen.children) do
