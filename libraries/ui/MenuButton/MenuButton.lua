@@ -2,8 +2,13 @@
 MENUBUTTON = true
 
 
-local default_parameters = {}
-MenuButton = function(parameter)
+local default_parameters = {
+    direction = "down",
+    vertical_alignment = "top",
+    item_spacing = 0,
+    popup_offset = 10,
+}
+MenuButton = function(parameters)
     
 	-- input is either nil or a table
 	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
@@ -15,55 +20,100 @@ MenuButton = function(parameter)
     ----------------------------------------------------------------------------
 	--The ButtonPicker Object inherits from LayoutManager
 	
-    local button = Button()
+    local button = Button{w=300}
     
-    local popup = LayoutManager{
-        vertical_spacing   = 0,
-        horizontal_spacing = 0,
-    }
+    local popup = LayoutManager()
     
-	local instance = LayoutManager{
-        cells = {
-            {button},
-            {popup},
-        },
-    }
+	local instance = LayoutManager()
     
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"popup_offset",
+		function(oldf) return   instance.vertical_spacing     end,
+		function(oldf,self,v)   instance.vertical_spacing = v end
+	)
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"item_spacing",
+		function(oldf) return   popup.vertical_spacing     end,
+		function(oldf,self,v)   popup.vertical_spacing = v end
+	)
+    ----------------------------------------------------------------------------
+	
+    instance:subscribe_to(
+        "horizontal_alignment",
+        function()
+            popup.horizontal_alignment = instance.horizontal_alignment
+        end
+    )
     ----------------------------------------------------------------------------
     
 	override_property(instance,"items",
 		function(oldf) return   popup.cells     end,
 		function(oldf,self,v)  
             
-            popup.cells = v
+            if type(v) ~= "table" then error("Expected table. Received: ",2) end
+            
+            local items = {}
+            
+            for i, item in ipairs(v) do
+                if type(item) ~= "userdata" and item.__types__.actor then 
+                
+                    error("Must be a UIElement or nil. Received "..obj,2) 
+                    
+                end
+                
+                items[i] = {item}
+            end
+            print("pre set popup",popup)
+            popup:set{
+                number_of_cols = 1,
+                number_of_rows = #items,
+                cells = items,
+            }
+            print("post set popup",popup.w,popup.h)
+            
             
         end
 	)
     ----------------------------------------------------------------------------
     local direction
+    
+    local possible_directions = {
+        up    = {{popup},{button}},
+        down  = {{button},{popup}},
+        left  = {{popup,button}},
+        right = {{button,popup}},
+    }
+    
 	override_property(instance,"direction",
 		function(oldf) return   direction     end,
 		function(oldf,self,v)  
-            
-            if direction == v then return end
-            if v == "up" then
-                instance.cells.data = {
-                    {popup},
-                    {button},
-                }
-            elseif v == "down" then
-                instance.cells.data = {
-                    {button},
-                    {popup},
-                }
-            else
-                
-                error("ButtonPicker.direction expects 'horizontal' or 'vertical as its value. Received: "..v,2)
-                
+            print("dir")
+            if not possible_directions[v] then
+                error("MenuButton.direction expects 'up', 'down', 'left', or 'right'. Received: "..v,2)
             end
+            if direction == v then return end
+            instance:set{
+                number_of_rows = 
+                    ((v == "up"   or v == "down")  and 2) or
+                    ((v == "left" or v == "right") and 1),
+                number_of_cols = 
+                    ((v == "up"   or v == "down")  and 1) or
+                    ((v == "left" or v == "right") and 2),
+                cells = possible_directions[v],
+            }
             direction = v
+            
         end
 	)
+    ----------------------------------------------------------------------------
+    function button:on_pressed()
+        
+        popup[ popup.is_visible and "hide" or "show" ](popup)
+        
+    end
+    
     ----------------------------------------------------------------------------
     
 	instance:set(parameters)
