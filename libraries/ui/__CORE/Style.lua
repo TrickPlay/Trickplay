@@ -365,7 +365,6 @@ TextStyle = function(parameters)
         wrap    = true,
         x_offset = 0,
         y_offset = 0,
-        type = "TEXTSTYLE",
     }
     
     local children_using_this_style = setmetatable( {}, { __mode = "k" } )
@@ -478,7 +477,7 @@ end
 
 local all_styles =  setmetatable({},{__mode = 'v'})
 
-local styles_json = function()
+get_all_styles = function()
     
     local t = {}
     
@@ -486,13 +485,13 @@ local styles_json = function()
     
     for name,obj in pairs(all_styles) do
         
-        t[name]         = {
-            arrow       = obj.arrow.name,
-            border      = obj.border.name,
-            text        = obj.text.name,
-            fill_colors = obj.fill_colors.name,
+        t[name]         =  {
+            name        = obj.name,
+            arrow       = obj.arrow.attributes,
+            border      = obj.border.attributes,
+            text        = obj.text.attributes,
+            fill_colors = obj.fill_colors.attributes,
         }
-        
     end
     
     return json:stringify(t)
