@@ -1,8 +1,48 @@
 BUTTONPICKER = true
 
+local create_bg = function(self)
+	
+	local c = Canvas(self.window_w,self.window_h)
+	
+	c.line_width = self.style.border.width
+	
+	round_rectangle(c,self.style.border.corner_radius)
+	
+	c:set_source_color( self.style.fill_colors.default )     c:fill(true)
+	
+	return c:Image()
+	
+end
+local create_fg = function(self)
+	
+	local c = Canvas(self.window_w,self.window_h)
+	
+	c.line_width = self.style.border.width
+	
+	round_rectangle(c,self.style.border.corner_radius)
+	
+	c:set_source_color( self.style.border.colors.default )   c:stroke(true)
+	
+	return c:Image()
+	
+end
+local create_arrow = function(old_function,self,state)
+	
+	local c = Canvas(self.w,self.h)
+	
+    c:move_to(0,   c.h/2)
+    c:line_to(c.w,     0)
+    c:line_to(c.w,   c.h)
+    c:line_to(0,   c.h/2)
+    
+	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
+	
+	return c:Image()
+	
+end
 
-local default_parameters = {}
-ButtonPicker = function(parameter)
+local default_parameters = {window_w = 200,window_h = 70,orientation="horizontal"}
+ButtonPicker = function(parameters)
     
 	-- input is either nil or a table
 	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
@@ -11,52 +51,317 @@ ButtonPicker = function(parameter)
 	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
 	parameters = recursive_overwrite(parameters,default_parameters) 
     
+    local window_w = parameters.window_w
+    local window_h = parameters.window_h
     ----------------------------------------------------------------------------
 	--The ButtonPicker Object inherits from LayoutManager
 	
-    local prev_arrow = Button()
-    local next_arrow = Button()
-    
     local text = Group()
-    
-    
-	local instance = LayoutManager()
-    local items = ArrayManager{
+    local window = Group{children={bg,text,fg}}
+	local instance = LayoutManager(parameters)
+    local prev_arrow = Button{
+        label = "",
+        create_canvas = create_arrow,
     }
+    local next_arrow = Button{
+        label = "",
+        create_canvas = create_arrow,
+    }
+    local bg,fg
+    
+    local items
+    local animating, again
+    local next_item, prev_item,  direction
+    local curr_index = 1
+	
+    items = ArrayManager{
+        
+        node_constructor=function(obj,i)
+            
+            if type(obj) ~= "string" then  end
+            
+            obj = Text{text=obj}
+            obj:set(   instance.style.text:get_table()   )
+            obj.color = instance.style.text.colors.default
+            return obj
+        end,
+        node_destructor=function(obj,i)
+            
+            if obj.parent then  obj:unparent()  end
+            
+        end,
+        on_entries_changed = function(self)
+            
+            if animating then
+                
+                self[wrap_i(curr_index+direction)] = prev_item.position
+                self[curr_index].position  = next_item.position
+                
+            elseif next_item ~= self[curr_index] then
+                
+                if next_item then next_item:unparent() end
+                next_item = self[curr_index]
+                text:add(next_item)
+                next_item.anchor_point = {next_item.w/2,next_item.h/2}
+                next_item.x = window_w/2
+                next_item.y = window_h/2
+                
+            end
+            
+        end
+    }
+    ----------------------------------------------------------------------------
+	override_property(instance,"window_w",
+		function(oldf) return   window_w     end,
+		function(oldf,self,v)   window_w = v end
+	)
+	override_property(instance,"window_h",
+		function(oldf) return   window_h     end,
+		function(oldf,self,v)   window_h = v end
+	)
+    
+    local function redo_bg()
+        if bg and bg.parent then bg:unparent() end
+        bg = create_bg(instance)
+        window:add(bg)
+        bg:lower_to_bottom()
+    end
+    local function redo_fg()
+        if fg and fg.parent then fg:unparent() end
+        fg = create_fg(instance)
+        window:add(fg)
+    end
+	instance:subscribe_to(
+		{"window_h","window_w"},
+		function()
+			
+			redo_bg()
+			redo_fg()
+            window.w = window_w
+            window.h = window_h
+            window.clip = {
+                0,-- -window_w/2,
+                0,-- -window_h/2,
+                window_w,
+                window_h,
+            }
+            
+		end
+	)
     ----------------------------------------------------------------------------
     
 	override_property(instance,"items",
 		function(oldf) return   items     end,
 		function(oldf,self,v)  
             
+            if type(v) ~= "table" then error("Expected table. Received :"..type(v),2) end
+            
+            if #v == 0 then error("Table is empty.",2) end
+            
             items.data = v
             
         end
 	)
+    
+    
+	override_property(instance,"widget_type",
+		function() return "ButtonPicker" end, nil
+	)
+    
     ----------------------------------------------------------------------------
-    local direction
-	override_property(instance,"direction",
-		function(oldf) return   direction     end,
+    local next_i, prev_i
+    
+    local path = Interval(0,0)
+    
+    local animate_x = function(tl,ms,p) text.x = path:get_value(p) end
+    local animate_y = function(tl,ms,p) text.y = path:get_value(p) end
+    local wrap_i    = function(i) return (i - 1) % (items.length) + 1    end
+    local orientation
+    
+    local update = Timeline{
+        on_started = function(tl)
+            prev_item  = items[curr_index]
+            curr_index = wrap_i(curr_index + direction)
+            next_item  = items[curr_index]
+            
+            text:add(next_item)
+            next_item.anchor_point = {next_item.w/2,next_item.h/2}
+            if orientation == "horizontal" then
+                
+                next_item.x = window_w/2-window_w*direction
+                next_item.y = window_h/2
+                path.to = window_w*direction
+                
+                tl.on_new_frame = animate_x
+                
+            elseif orientation == "vertical" then
+                
+                next_item.x = window_w/2
+                next_item.y = window_h/2-window_h*direction
+                
+                path.to = window_h*direction
+                
+                tl.on_new_frame = animate_y
+                
+            else
+            end
+            
+        end,
+        on_completed = function()
+            prev_item:unparent()
+            text.x=0
+            text.y=0
+            next_item.x = window_w/2
+            next_item.y = window_h/2
+            
+            animating = nil
+            
+            if again == "BACK" then
+                prev_i()
+            elseif again == "FORWARD" then
+                next_i()
+            end
+            again = nil
+        end
+    }
+    
+	override_property(instance,"animate_duration",
+		function(oldf) return Timeline.duration     end,
+		function(oldf,self,v) Timeline.duration = v end
+	)
+    ----------------------------------------------------------------------------
+    
+    prev_i = function()
+        if items.length <= 1 then return end
+        if not animating then
+            animating  = "BACK"
+            direction = -1
+            
+            update:start()
+            
+        else
+            again = "BACK"
+        end
+    end
+    next_i = function()
+        if items.length <= 1 then return end
+        if not animating then
+            animating = "FORWARD"
+            direction = 1
+            
+            update:start()
+        else
+            again = "FORWARD"
+        end
+    end
+    
+    ----------------------------------------------------------------------------
+    
+    local undo_prev_function, undo_next_function
+	override_property(instance,"orientation",
+		function(oldf) return   orientation     end,
 		function(oldf,self,v)  
             
-            if direction == v then return end
+            if orientation == v then return end
+            
+            if undo_prev_function then undo_prev_function() end
+            if undo_next_function then undo_next_function() end
+            print("pos")
             if v == "horizontal" then
-                instance.cells.data = {prev_arrow,text,next_arrow}
-            elseif v == "vertical" then
-                instance.cells.data = {
-                    {prev_arrow},
-                    {text},
-                    {next_arrow},
+                prev_arrow:set{z_rotation={  0,0,0}}
+                next_arrow:set{z_rotation={180,0,0}}
+                instance:set{
+                    number_of_rows = 1,
+                    number_of_cols = 3,
+                    cells = {
+                        prev_arrow,
+                        window,
+                        next_arrow
+                    },
                 }
+                undo_prev_function = instance:add_key_handler(keys.Left, prev_i)
+                undo_next_function = instance:add_key_handler(keys.Right,next_i)
+            elseif v == "vertical" then
+                prev_arrow:set{z_rotation={ 90,0,0}}
+                next_arrow:set{z_rotation={270,0,0}}
+                instance:set{
+                    number_of_rows = 3,
+                    number_of_cols = 1,
+                    cells = {
+                        {prev_arrow},
+                        {window},
+                        {next_arrow},
+                    },
+                }
+                undo_prev_function = instance:add_key_handler(keys.Up,  prev_i)
+                undo_next_function = instance:add_key_handler(keys.Down,next_i)
             else
                 
                 error("ButtonPicker.direction expects 'horizontal' or 'vertical as its value. Received: "..v,2)
                 
             end
-            direction = v
+            orientation = v
         end
 	)
     ----------------------------------------------------------------------------
+    instance.window_w = parameters.window_w
+    instance.window_h = parameters.window_h
+    ---[[
+    local function update_labels()
+        for i,item in items.pairs() do
+            print(i)
+            item:set(   instance.style.text:get_table()   )
+            item.color = instance.style.text.colors.default
+        end
+    end
+    local function arrow_on_changed()
+        prev_arrow:set{
+            w = instance.style.arrow.size,
+            h = instance.style.arrow.size,
+            anchor_point = {
+                instance.style.arrow.size/2,
+                instance.style.arrow.size/2
+            },
+        }
+        next_arrow:set{
+            w = instance.style.arrow.size,
+            h = instance.style.arrow.size,
+            anchor_point = {
+                instance.style.arrow.size/2,
+                instance.style.arrow.size/2
+            },
+        }
+    end
+    local function arrow_colors_on_changed() 
+        prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+        next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+    end 
+    local function instance_on_style_changed()
+		
+		instance.style.text:on_changed(instance,update_labels)
+		instance.style.text.colors:on_changed(instance,update_labels)
+		
+		instance.style.fill_colors:on_changed(    instance, redo_bg )
+		instance.style.border:on_changed(         instance, redo_fg )
+		instance.style.border.colors:on_changed(  instance, redo_fg )
+		instance.style.arrow:on_changed(          instance, arrow_on_changed)
+		instance.style.arrow.colors:on_changed(   instance, arrow_colors_on_changed)
+		
+		update_labels()
+        redo_fg()
+        redo_bg()
+        arrow_on_changed()
+        
+        arrow_colors_on_changed()
+	end
+	
+	instance:subscribe_to(
+		"style",
+		instance_on_style_changed
+	)
+    instance_on_style_changed()
+	--]]
+    
     
 	instance:set(parameters)
 	
