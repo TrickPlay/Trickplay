@@ -28,13 +28,11 @@ test_group:unparent()
 
 
 
-
-
-
 screen:show()
-
+---[[
 lm1 = LayoutManager{
     number_of_rows = 2,
+    number_of_cols = 2,
     cells = {
         {Rectangle{w=100,h=100},Rectangle{w=100,h=100}},
         {Rectangle{w=100,h=100}},--Rectangle{w=100,h=100}},
@@ -43,4 +41,4 @@ lm1 = LayoutManager{
 }
 
 screen:add(lm1)
-
+--]]
