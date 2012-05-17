@@ -16,14 +16,14 @@
 /**
  * The TPAppViewControllerDelegate Protocol informs the delegate if the
  * TPAppViewController is no longer functional and also provides a
- * mechanism for using the camera. 
+ * mechanism for using the camera.
  *
  * The TPAppViewController may lose functionality when an error occurs
- * communicating with the TV. The delegate should release ownership to the 
+ * communicating with the TV. The delegate should release ownership to the
  * TPAppViewController provided by this method.
  *
  * Sometimes an app will request a user photo. If the delegate is set, it
- * will be responsible for presenting the camera as a ModalVieController
+ * will be responsible for presenting the camera as a ModalViewController
  * in a UIViewController.
  * Example:
  * - (void)tpAppViewController:(TPAppViewController *)tpAppViewController 
@@ -33,14 +33,14 @@
  *      }
  *
  * It is important to properly present the camera from a UIViewController
- * or risk stalling the app.
+ * or risk stalling the app on the TV which may need a photo to continue.
  *
  * All TPAppViewController objects depend on their view life-cycle methods
  * (viewDidAppear, viewDidDisapper, viewWillAppear, viewWillDisappear) being
  * called in order to function properly. The TPAppViewControllerDelegate
  * protocol provides some courtesy method calls that inform the receiver
  * that the TPAppViewController object's view life-cycle methods are being
- * called. The receiver can use these methods as an insurance that a
+ * called. The receiver can use these methods as an assurance that a
  * TPAppViewController is operating properly and to provide custom behavior
  * specific to the TPAppViewController's view life-cycle.
  */
