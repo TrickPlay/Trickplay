@@ -33,6 +33,10 @@ ClippingRegion = function(parameters)
             
         end
 	)
+    
+	override_property(instance,"widget_type",
+		function() return "ClippingRegion" end, nil
+	)
 	override_property(instance,"virtual_h",
 		function(oldf) return contents.h     end,
 		function(oldf,self,v) 
