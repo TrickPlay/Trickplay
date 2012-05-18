@@ -90,7 +90,11 @@ Button = function(parameters)
 	local define_label_animation = function()
 		
 		local label_colors = instance.style.text.colors
-		local prev_state = label and label.state and label.state.state
+		local prev_state
+        if label and label.state then
+            prev_state = label.state.state
+            label.state.timeline:stop()
+        end
 		
 		label.state = AnimationState{
 			duration    = 100,
@@ -111,7 +115,6 @@ Button = function(parameters)
 		}
 		
 		label.state:warp(prev_state or "DEFAULT")
-		
 	end
 	
 	----------------------------------------------------------------------------
@@ -260,28 +263,44 @@ Button = function(parameters)
     local on_focus_in  = parameters.on_focus_in
 	local on_focus_out = parameters.on_focus_out
 	
-	function instance:on_focus_in()
-		
-		--image
-		if images.focus then   images.focus.state.state = "ON"   end
-		--text
-		label.state.state = "FOCUS"
-		--event callback
-		if on_focus_in then on_focus_in() end
-		
-	end
-	
-	function instance:on_focus_out()
-		
-		--image
-		if images.focus then   images.focus.state.state = "OFF"   end
-		--text
-		label.state.state = "DEFAULT"
-		--event callback
-		if on_focus_out then on_focus_out() end
-		
-	end
-	
+	instance:subscribe_to( "enabled",
+		function()
+            if not instance.enabled then
+                print("here")
+                --image
+                if images.focus then   images.focus.state.state = "OFF"   end
+                --text
+                label.state.state = "DEFAULT"
+            elseif instance.focused then
+                --image
+                if images.focus then   images.focus.state.state = "ON"   end
+                --text
+                label.state.state = "FOCUS"
+                --event callback
+                if on_focus_in then on_focus_in() end
+            end
+        end
+	)
+	instance:subscribe_to( "focused",
+		function()
+            if not instance.enabled then return end
+            if instance.focused then
+                --image
+                if images.focus then   images.focus.state.state = "ON"   end
+                --text
+                label.state.state = "FOCUS"
+                --event callback
+                if on_focus_in then on_focus_in() end
+            else
+                --image
+                if images.focus then   images.focus.state.state = "OFF"   end
+                --text
+                label.state.state = "DEFAULT"
+                --event callback
+                if on_focus_out then on_focus_out() end
+            end
+        end
+	)
 	override_property(instance,"on_focus_in",  function() return on_focus_in  end, function(oldf,self,v) on_focus_in  = v end )
     override_property(instance,"on_focus_out", function() return on_focus_out end, function(oldf,self,v) on_focus_out = v end )
 	
@@ -338,6 +357,7 @@ Button = function(parameters)
     
     local widget_to_json
     
+    --sets to_json__overridden in Widget
 	instance.to_json = function(_,t)
 		
 		t.label = instance.label
@@ -371,8 +391,6 @@ Button = function(parameters)
         
         t = is_table_or_nil("Button.to_json",t)
         t = to_json__overridden and to_json__overridden(_,t) or t
-        
-        --t = widget_to_json(_,t)
         
         return widget_to_json(_,t)
     end
@@ -429,8 +447,11 @@ Button = function(parameters)
 	
 	local canvas_callback = function() if canvas then make_canvases() end end
 	
-	local function instance_on_style_changed()
+	local instance_on_style_changed
+    function instance_on_style_changed()
 		
+        instance.style:on_changed( instance, instance_on_style_changed )
+        
 		instance.style.text:on_changed(instance,update_label)
 		
 		instance.style.text.colors:on_changed(instance,define_label_animation)
@@ -438,6 +459,8 @@ Button = function(parameters)
 		instance.style.fill_colors:on_changed(    instance, canvas_callback )
 		instance.style.border:on_changed(         instance, canvas_callback )
 		instance.style.border.colors:on_changed(  instance, canvas_callback )
+		instance.style.arrow:on_changed(          instance, canvas_callback )
+		instance.style.arrow.colors:on_changed(   instance, canvas_callback )
 		
 		update_label()
 		define_label_animation()
