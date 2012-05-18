@@ -1,9 +1,11 @@
 #include <time.h>
 #include <sstream>
-#include "../../stringencode.h"
+
+#include <stringencode.h>
+#include <constants.h>
+#include <xmppclient.h>
+
 #include "presenceouttask.h"
-#include "../../constants.h"
-#include "../../xmppclient.h"
 
 using namespace txmpp;
 

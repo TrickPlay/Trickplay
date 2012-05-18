@@ -5,8 +5,10 @@
 #include <map>
 #include <list>
 #include <vector>
-#include "../../basictypes.h"
-#include "../../xmlconstants.h"
+
+#include <basictypes.h>
+#include <xmlconstants.h>
+
 #include "xmppmugconstants.h"
 
 namespace libgameservice {

@@ -1,13 +1,13 @@
 #ifndef _XMPPPUMP_H_
 #define _XMPPPUMP_H_
 
-#include "../../messagequeue.h"
-#include "../../taskrunner.h"
-#include "../../thread.h"
-#include "../../time.h"
-#include "../../xmppclient.h"
-#include "../../xmppengine.h"
-#include "../../xmpptask.h"
+#include <messagequeue.h>
+#include <taskrunner.h>
+#include <thread.h>
+#include <time.h>
+#include <xmppclient.h>
+#include <xmppengine.h>
+#include <xmpptask.h>
 
 namespace libgameservice {
 

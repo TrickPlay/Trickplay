@@ -1,9 +1,9 @@
-#include "xmpppump.h"
-
 #include <iostream>
 
-#include "../../logging.h"
-#include "../../prexmppauthimpl.h"
+#include <logging.h>
+#include <prexmppauthimpl.h>
+
+#include "xmpppump.h"
 #include "xmpptasks.h"
 
 namespace libgameservice {

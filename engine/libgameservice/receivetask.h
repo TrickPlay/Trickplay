@@ -1,9 +1,9 @@
 #ifndef _XMPP_RECEIVETASK_H_
 #define _XMPP_RECEIVETASK_H_
 
-#include "../../xmpptask.h"
-#include "../../taskparent.h"
-#include "../../xmlelement.h"
+#include <xmpptask.h>
+#include <taskparent.h>
+#include <xmlelement.h>
 
 using namespace txmpp;
 

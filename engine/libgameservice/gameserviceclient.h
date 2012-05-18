@@ -4,11 +4,12 @@
 #ifndef _GAMESERVICECLIENT_H_
 #define _GAMESERVICECLIENT_H_
 
-#include "../../basicdefs.h"
+#include <basicdefs.h>
 
-#include "../../xmppengine.h"
-#include "../../scoped_ptr.h"
-#include "../../xmppclientsettings.h"
+#include <xmppengine.h>
+#include <scoped_ptr.h>
+#include <xmppclientsettings.h>
+
 #include "libgameservice.h"
 #include "game.h"
 #include "status.h"

@@ -20,6 +20,7 @@ OPTION( SSL_USE_OPENSSL "Enable Use SSL" ON )
 OPTION( USE_SSLSTREAM "Enable USE SSLSTREAM" ON )
 
 include(../../../util.cmake)
+#include_directories( ${TXMPP_ROOT}/src ) 
 
 #------------------------------------------------------------------------------
 # Include directories
@@ -75,10 +76,6 @@ ELSE ( PKG_CONFIG_FOUND )
     
 ENDIF ( PKG_CONFIG_FOUND )
 
-#include_directories( ${TXMPP_ROOT}/src )
-
-MESSAGE( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
-MESSAGE( STATUS "TXMPP_ROOT: " ${TXMPP_ROOT} )
 
 set( TXMPP_SOURCE_FILES
 
@@ -179,7 +176,7 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/txmpp/config.h )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/txmpp)
+include_directories( ${CMAKE_CURRENT_BINARY_DIR}/include/txmpp )
 
 foreach( LIB ${TXMPP_LIBRARY_NAMES} )
     TP_FIND_LIBRARY( ${LIB} TXMPP_LIBRARIES )

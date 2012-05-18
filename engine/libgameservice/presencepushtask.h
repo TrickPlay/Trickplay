@@ -1,9 +1,10 @@
 #ifndef _PRESENCEPUSHTASK_H_
 #define _PRESENCEPUSHTASK_H_
 
-#include "../../xmppengine.h"
-#include "../../xmpptask.h"
-#include "../../sigslot.h"
+#include <xmppengine.h>
+#include <xmpptask.h>
+#include <sigslot.h>
+
 #include "status.h"
 
 namespace libgameservice {

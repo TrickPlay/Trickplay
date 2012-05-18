@@ -1,9 +1,11 @@
 #ifndef _STATUS_H_
 #define _STATUS_H_
 
-#include "../../jid.h"
-#include "../../constants.h"
+#include <jid.h>
+#include <constants.h>
+
 using namespace txmpp;
+
 namespace libgameservice {
 
 class Status {

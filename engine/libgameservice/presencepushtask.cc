@@ -1,7 +1,9 @@
-#include "../../stringencode.h"
-#include "presencepushtask.h"
-#include "../../constants.h"
 #include <sstream>
+
+#include <stringencode.h>
+#include <constants.h>
+
+#include "presencepushtask.h"
 
 
 namespace libgameservice {

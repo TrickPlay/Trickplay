@@ -1,8 +1,9 @@
 #ifndef _PRESENCEOUTTASK_H_
 #define _PRESENCEOUTTASK_H_
 
-#include "../../xmppengine.h"
-#include "../../xmpptask.h"
+#include <xmppengine.h>
+#include <xmpptask.h>
+
 #include "status.h"
 
 using namespace txmpp;
