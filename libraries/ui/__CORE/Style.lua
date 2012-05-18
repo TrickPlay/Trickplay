@@ -357,7 +357,8 @@ TextStyle = function(parameters)
     end
     
 	parameters = is_table_or_nil("TextStyle",parameters)
-    local colors,name
+    local colors = ColorScheme()
+    local name
     local properties = {
         font  = "Sans 40px",
         alignment = "CENTER",
@@ -394,8 +395,9 @@ TextStyle = function(parameters)
             for property, value in pairs(instance:get_table()) do
                 t[property] = value
             end
+            t.color  = nil
             t.name   = instance.name
-            t.colors = obj.colors.name
+            t.colors = obj.colors.attributes
             
             return json:stringify(t)
         end,
@@ -406,10 +408,7 @@ TextStyle = function(parameters)
     local meta_setters = {
         colors    = function(v) 
             
-            colors = matches_nil_table_or_type(
-                ColorScheme,  "COLORSCHEME",
-                type(v) == "string" and v or recursive_overwrite(v, default_text_colors)
-            )
+            colors:set(v or {})
             
             return true
             
@@ -429,7 +428,7 @@ TextStyle = function(parameters)
         colors = function() return colors end,
         attributes = function() 
             local t = recursive_overwrite({}, properties)
-            t.colors = colors.properties
+            t.colors = colors.attributes
             return t 
         end,
     }
