@@ -1,10 +1,11 @@
 #ifndef _XMPPTASKS_H_
 #define _XMPPTASKS_H_
 
-#include "../../taskparent.h"
-#include "../../xmpptask.h"
-#include "../../qname.h"
-#include "../../sigslot.h"
+#include <taskparent.h>
+#include <xmpptask.h>
+#include <qname.h>
+#include <sigslot.h>
+
 #include "libgameservice.h"
 #include "game.h"
 #include "matchstate.h"

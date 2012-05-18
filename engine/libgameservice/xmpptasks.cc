@@ -1,7 +1,9 @@
 #include <iostream>
-#include "../../constants.h"
-#include "../../logging.h"
-#include "../../xmppclient.h"
+
+#include <constants.h>
+#include <logging.h>
+#include <xmppclient.h>
+
 #include "xmppmugconstants.h"
 #include "xmpptasks.h"
 

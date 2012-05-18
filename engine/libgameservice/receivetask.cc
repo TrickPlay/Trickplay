@@ -1,5 +1,6 @@
+#include <constants.h>
+
 #include "receivetask.h"
-#include "../../constants.h"
 
 namespace libgameservice {
 

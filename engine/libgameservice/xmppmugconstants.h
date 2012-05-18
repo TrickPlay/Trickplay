@@ -2,7 +2,9 @@
 #define _XMPPMUGCONSTANTS_H_
 
 #include <string>
-#include "../../qname.h"
+
+#include <qname.h>
+
 namespace libgameservice {
 
 extern const std::string NS_MUG;

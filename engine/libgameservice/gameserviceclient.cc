@@ -1,14 +1,15 @@
 #include <assert.h>
 #include <iostream>
 #include <vector>
-#include "../../messagehandler.h"
-#include "../../sigslot.h"
-#include "../../messagequeue.h"
-#include "../../thread.h"
-#include "../../physicalsocketserver.h"
 
-#include "../../prexmppauthimpl.h"
-#include "../../xmppasyncsocketimpl.h"
+#include <messagehandler.h>
+#include <sigslot.h>
+#include <messagequeue.h>
+#include <thread.h>
+#include <physicalsocketserver.h>
+
+#include <prexmppauthimpl.h>
+#include <xmppasyncsocketimpl.h>
 
 #include "gameserviceclient.h"
 #include "presenceouttask.h"
