@@ -44,7 +44,7 @@ DialogBox = function(parameters)
 	parameters = recursive_overwrite(parameters,default_parameters) 
     
 	----------------------------------------------------------------------------
-	--The Button Object inherits from Widget
+	--The DialogBox Object inherits from Widget
 	
 	local instance = Widget( parameters )
 	
@@ -301,6 +301,7 @@ DialogBox = function(parameters)
 		title.x            = text_style.x_offset
 		title.y            = text_style.y_offset + title.h/2
 		title.w            = instance.w
+		title.color        = text_style.colors.default
 		
 	end
 	
