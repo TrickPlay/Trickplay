@@ -14,11 +14,6 @@ local test_group = Group()
 
 screen:add(test_group)
 local tests = {
-    function()
-        local cr = ClippingRegion()
-        test_group:add(cr)
-        return ps.image == img and ps.animating == true and ps.duration == 3000
-    end,
 }
 
 for i,test in ipairs(tests) do
