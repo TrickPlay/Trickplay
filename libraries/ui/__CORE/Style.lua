@@ -357,7 +357,7 @@ TextStyle = function(parameters)
     end
     
 	parameters = is_table_or_nil("TextStyle",parameters)
-    local colors = ColorScheme()
+    local colors = ColorScheme(default_text_colors)
     local name
     local properties = {
         font  = "Sans 40px",
