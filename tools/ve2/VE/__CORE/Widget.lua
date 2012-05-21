@@ -278,6 +278,7 @@ local function Widgetize(instance)
         
         t.style   = instance.style.name
         t.focused = instance.focused
+        t.enabled = instance.enabled
 		
 		t.type = t.type or "Widget"
         
