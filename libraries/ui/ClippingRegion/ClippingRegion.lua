@@ -1,6 +1,6 @@
 CLIPPINGREGION = true
 
-local default_parameters = {w = 400, h = 400,virtual_w=1000,virtual_h=1000,clip_to_size=true}
+local default_parameters = {w = 400, h = 400,virtual_w=1000,virtual_h=1000}
 
 ClippingRegion = function(parameters)
     
@@ -87,10 +87,28 @@ ClippingRegion = function(parameters)
             instance.virtual_x = instance.virtual_x
             instance.virtual_y = instance.virtual_y
             
+            contents.clip = {
+                instance.virtual_x,
+                instance.virtual_y,
+                instance.w,
+                instance.h,
+            }
+            
             
 		end
 	)
     
+	instance:subscribe_to(
+		{"virtual_x","virtual_y"},
+		function()
+            contents.clip = {
+                instance.virtual_x,
+                instance.virtual_y,
+                instance.w,
+                instance.h,
+            }
+        end
+    )
 	----------------------------------------------------------------------------
 	
     local set_border_width = function() border.border_width = instance.style.border.width          end
@@ -117,7 +135,13 @@ ClippingRegion = function(parameters)
 	----------------------------------------------------------------------------
 	
 	instance:set(parameters)
-	
+    
+    contents.clip = {
+        instance.virtual_x,
+        instance.virtual_y,
+        instance.w,
+        instance.h,
+    }
 	return instance
 	
 end
