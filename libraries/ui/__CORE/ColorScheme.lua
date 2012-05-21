@@ -89,9 +89,7 @@ ColorScheme = function(parameters)
                 error("Expects a table. Received "..type(t),2)
             end
             
-            for k, v in pairs(t) do
-                instance[k] = v
-            end
+            for k, v in pairs(t) do  instance[k] = v  end
             
         end,
         on_changed = function(self,object,update_function)
