@@ -155,6 +155,7 @@ Group: Engine Reference {
 		
 		Group: Globals {
 			File: app (no auto-title, bindings/app.lb)
+			File: devtools (no auto-title, bindings/devtools.lb)
 #			File: system* (no auto-title, bindings/system.lb)
 			File: trickplay (no auto-title, bindings/trickplay.lb)
 		}
