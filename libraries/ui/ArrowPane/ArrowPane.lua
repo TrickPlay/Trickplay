@@ -9,7 +9,7 @@ local create_arrow = function(old_function,self,state)
     c:line_to(c.w,   c.h)
     c:line_to(0,   c.h/2)
     
-	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
+	c:set_source_color( self.style.arrow.colors[state] )     c:fill(true)
 	
 	return c:Image()
 	
@@ -145,7 +145,7 @@ ArrowPane = function(parameters)
     end
     local function arrow_colors_on_changed() 
         for _,arrow in pairs(arrows) do
-            arrow.style.fill_colors = 
+            arrow.style.arrow.colors = 
                 instance.style.arrow.colors.attributes
         end
     end 
