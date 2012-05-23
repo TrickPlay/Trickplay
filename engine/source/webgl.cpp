@@ -464,7 +464,7 @@ bool Context::try_create_fbo( GLsizei width , GLsizei height , int flags )
 		for ( GLuintSet::const_iterator it = rb.begin(); it != rb.end(); ++it )
 		{
 			tplog2( "  DESTROYING RENDERBUFFER %u" , *it );
-			glDeleteBuffers( 1 , & * it );
+			glDeleteRenderbuffers( 1 , & * it );
 		}
 
 		tplog2( "* FRAMEBUFFER IS NOT COMPLETE" );
