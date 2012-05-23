@@ -15,7 +15,7 @@ local create_arrow = function(old_function,self,state)
 	
 end
 
-local default_parameters = {w = 400, h = 400,virtual_w=1000,virtual_h=1000}
+local default_parameters = {w = 400, h = 400,virtual_w=1000,virtual_h=1000, name="ArrowPane"}
 
 ArrowPane = function(parameters)
     
@@ -52,11 +52,61 @@ ArrowPane = function(parameters)
     }
     ----------------------------------------------------------------------------
     
+	override_property(instance,"virtual_w",
+		function(oldf) return   pane.virtual_w     end,
+		function(oldf,self,v)   pane.virtual_w = v end
+    )
+	override_property(instance,"virtual_h",
+		function(oldf) return   pane.virtual_h     end,
+		function(oldf,self,v)   pane.virtual_h = v end
+    )
+	override_property(instance,"pane_w",
+		function(oldf) return   pane.w     end,
+		function(oldf,self,v)   pane.w = v end
+    )
+	override_property(instance,"pane_h",
+		function(oldf) return   pane.h     end,
+		function(oldf,self,v)   pane.h = v end
+    )
+	instance:subscribe_to(
+		{"virtual_w","pane_w"},
+		function()
+            if instance.virtual_w <= instance.pane_w then
+                left:hide()
+                right:hide()
+            else
+                left:show()
+                right:show()
+            end
+        end
+    )
+	instance:subscribe_to(
+		{"virtual_h","pane_h"},
+		function()
+            
+            if instance.virtual_h <= instance.pane_h then
+                up:hide()
+                down:hide()
+            else
+                up:show()
+                down:show()
+            end
+        end
+    )
+    ----------------------------------------------------------------------------
+    
+    local move_by = 10
+    
+	override_property(instance,"move_by",
+		function(oldf) return   move_by     end,
+		function(oldf,self,v)   move_by = v end
+    )
+    
 	override_function(instance,"add",
 		function(oldf,self,...) pane:add(...) end
 	)
+    
     ----------------------------------------------------------------------------
-    local move_by = 10
     
     function up:on_released()
         pane.virtual_y = pane.virtual_y - move_by
