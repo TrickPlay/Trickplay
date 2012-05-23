@@ -579,3 +579,4 @@ Style = function(parameters)
     return instance
     
 end
+local default_style = Style("Default")

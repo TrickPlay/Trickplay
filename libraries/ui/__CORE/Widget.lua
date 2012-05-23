@@ -341,7 +341,7 @@ local function Widgetize(instance)
 	)
     
     ----------------------------------------------------------------------------
-    local style = Style()
+    local style = Style("Default")
 	override_property(instance,"style",
 		function()   return style    end,
 		function(oldf,self,v) 
