@@ -1,192 +1,221 @@
 LISTMANAGER = true
 
 ArrayManager = function(p)
+    local instance
+    -- Metatables
+    local instance_mt, row_mt
     
-    local instance = {}
-    local data     = {}
-    local indices  = {}
-    local mt       = {}
-    local setters  = {}
-    local getters  = {}
+    ----------------------------------------------------------------------------
+    -- Attributes
+    local number_of_rows = 0
+    local number_of_cols = 0
+    local number_of_rows_fixed = false
+    local number_of_cols_fixed = false
     
-    local set = function(k,new_entry)
-        --check inputs
-        if type(k) ~= "number" then 
-            if  setters[k] then
-                return setters[k](new_entry)
+    local node_constructor   = function(v) return v end
+    local node_destructor    = function() end
+    local on_entries_changed = function() end
+    local data = {}
+    
+    ----------------------------------------------------------------------------
+    --reports changes to the user, each function performs a test and set on
+    local test_and_set, report_change
+    do
+        local caller
+        test_and_set = function(v)
+            if caller ~= nil then return end
+            print("test_and_set1",v,caller)
+            caller = v
+            print("test_and_set2",v,caller)
+        end
+        report_change = function(v)
+            if caller ~= v then return end
+            print("report_change",v)
+            caller = nil
+            on_entries_changed(instance)
+        end
+    end
+    ----------------------------------------------------------------------------
+    
+    
+    ----------------------------------------------------------------------------
+    
+    instance = {}
+    
+    instance_mt = {
+        functions = {
+            insert = function(_,i,entry) 
+                test_and_set("insert")
+                --check inputs
+                if type(i) ~= "number" or i < 0 then
+                    error("1st parameter must be positive number. Received "..i,2)
+                end
+                
+                --you cant create the 10th node without having nodes 1-9
+                if i > instance.length then i = instance.length+1 end
+                
+                --insert a hole into the list
+                table.insert(data, i,false)
+                
+                --enter the value using mt.__newindex(instance,i,entry)
+                instance[i] = entry
+                report_change("insert")
+            end,
+            remove = function(_,i) 
+                test_and_set("remove")
+                --check inputs
+                if type(i) ~= "number" or i <= 0 then
+                    error("1st parameter must be positive number. Received "..i,2)
+                end
+                
+                --fill nil spot in the list
+                node_destructor(
+                    table.remove( data, i ),
+                    i
+                )
+                
+                report_change("remove")
+            end,
+            pairs  = function(from,to,inc)
+                
+                if from == nil then from = 1
+                elseif from < 0 or from > instance.length then 
+                    error("first parameter is outside bounds:0 < "..from.." < "..instance.length,2)
+                end
+                
+                if to == nil then to = instance.length
+                elseif to   < 0 or to > instance.length then 
+                end
+                
+                local inc = from <= to and 1 or -1
+                local i   = from - inc
+                return function()
+                    
+                    i = i + inc
+                    
+                    if i > instance.length then
+                        
+                        return nil
+                        
+                    else
+                        
+                        return i, instance[i]
+                        
+                    end
+                end
+            end,
+            
+            set = function(self,t)
+                test_and_set("set")
+                if type(t) ~= "table" then
+                    error("Expected table. Received "..type(t),2) 
+                end
+                
+                for k,v in pairs(t) do   self[k] = v   end
+                report_change("set")
+            end,
+        },
+        setters = {
+            length = function(_,v) 
+                test_and_set("length")
+                
+                if instance.length > v then
+                    
+                    for i = instance.length,v+1,-1 do
+                    --while number_of_rows < v do
+                        
+                        instance:remove(i)--number_of_rows)
+                    end
+                    
+                elseif instance.length < v then
+                    
+                    for i = instance.length+1,v do
+                    --while number_of_rows < v do
+                        
+                        instance:insert(i)--number_of_rows+1)
+                    end
+                    
+                end
+                report_change("length")
+                
+            end,
+            node_constructor = function(self,v) 
+                if type(v) ~= "function" then 
+                    error("Expected function. Received "..type(v),2) 
+                end 
+                node_constructor = v 
+            end,
+            node_destructor = function(self,v) 
+                if type(v) ~= "function" then 
+                    error("Expected function. Received "..type(v),2) 
+                end 
+                node_destructor = v 
+            end,
+            on_entries_changed = function(self,v) 
+                if type(v) ~= "function" then 
+                    error("Expected function. Received "..type(v),2) 
+                end 
+                on_entries_changed = v 
+            end,
+        },
+        getters = {
+            length             = function()     return #data              end,
+            node_constructor   = function(self) return node_constructor   end,
+            node_destructor    = function(self) return node_destructor    end,
+            on_entries_changed = function(self) return on_entries_changed end,
+        },
+        __index = function(self,k)
+            
+            if instance_mt.functions[k] then 
+                return instance_mt.functions[k]
+            elseif instance_mt.getters[k] then 
+                return instance_mt.getters[k]()
+            elseif type(k) ~= "number" or k < 1 or k > #data then
+                --error("Invalid index. 0 < '"..k.."' < "..#data,2)
+                return
             else
-                error("The index to is not a number: "..k,2) 
+                return data[k]
             end
-        end
-        
-        --returns if the entry is the same as the existing
-        if new_entry == data[k] then return end
-        
-        --deletes the old entry
-        if data[k] then 
-            p.node_destructor(data[k],k) 
-            if indices then indices[ data[k] ] = nil end
-        end
-        
-        if indices and new_entry ~= nil then
-            indices[new_entry] = k
-        end
-        
-        --inserts the new entry
-        data[k] = p.node_constructor(new_entry,k)
-        
-        if p.node_initializer then p.node_initializer(new_entry,k) end
-        
-    end
-    ----------------------------------------------------------------------------
-    -- mimicks table.insert()
-    mt.insert = function(i,entry) 
-        
-        --check inputs
-        if type(i) ~= "number" or i <= 0 then
-            error("1st parameter must be positive number. Received "..i,2)
-        end
-        
-        --you cant create the 10th node without having nodes 1-9
-        if i > instance.length then i = instance.length end
-        
-        --insert a hole into the list
-        table.insert(data, i,false)
-        
-        indices = false
-        
-        --enter the value using mt.__newindex(instance,i,entry)
-        set(i,entry)
-        
-        if p.on_length_change then p.on_length_change(#instance) end
-        if p.on_entries_changed then p.on_entries_changed(instance) end
-    end
-    ----------------------------------------------------------------------------
-    -- mimicks table.remove()
-    mt.remove = function(i) 
-        --check inputs
-        if type(i) ~= "number" or i <= 0 then
-            error("1st parameter must be positive number. Received "..i,2)
-        end
-        
-        --fill nil spot in the list
-        p.node_destructor(
-            table.remove( data, i ),
-            i
-        )
-        
-        indices = false
-        
-        if p.on_length_change then p.on_length_change(#instance) end
-        if p.on_entries_changed then p.on_entries_changed(instance) end
-    end
-    ----------------------------------------------------------------------------
-    -- returns the index of the node in the list, 
-    -- if the node is not present, then nil is returned
-    mt.index_of = function(cell) 
-        
-        if not indices then 
-            indices = {}
-            for index,cell in ipairs(data) do
-                indices[cell] = index
-            end
-        end
-        
-        return indices[cell]
-    end
-    ----------------------------------------------------------------------------
-    -- handles overwriting entries
-    
-    
-    mt.__newindex = function(_,k,new_entry) 
-        
-        set(k,new_entry)
-        
-        if p.on_entries_changed then p.on_entries_changed(instance) end
-        
-    end
-    setters.data = function(new_data) 
-        print("new_data",new_data)
-        --toss the old data
-        for i,_    in ipairs(    data) do  set(i,nil)  end
-        
-        --insert the new data
-        for i,cell in ipairs(new_data) do  set(i,cell) end
-        
-        indices = false
-        --if p.on_length_change then p.on_length_change(instance.length) end
-    end
-    --TODO when we incorporate lua 5.2, mt.__len will replace this
-    getters.length = function() return #data end
-    setters.length = function(v) 
-        
-        if instance.length > v then
+        end,
+        __newindex = function(_,k,v) 
             
-            for i = instance.length,v+1,-1 do
-            --while number_of_rows < v do
+            test_and_set("__newindex")
+            if instance_mt.setters[k] then instance_mt.setters[k](self,v)
+            
+            elseif type(k) == "number" then
                 
-                instance.remove(i)--number_of_rows)
-            end
-            
-        elseif instance.length < v then
-            
-            for i = instance.length+1,v do
-            --while number_of_rows < v do
+                if k < 1 or k > #data + 1 then
+                    --error("Invalid index. 0 < '"..k.."' < "..#data,2)
+                    return
+                end
                 
-                instance.insert(i)--number_of_rows+1)
-            end
-            
-        end
-        
-    end
-    
-    mt.pairs  = function(from,to,inc)
-        
-        if from == nil then from = 1
-        elseif from < 0 or from > instance.length then 
-            error("first parameter is outside bounds:0 < "..from.." < "..instance.length,2)
-        end
-        
-        if to == nil then to = instance.length
-        elseif to   < 0 or to > instance.length then 
-        end
-        
-        local inc = from <= to and 1 or -1
-        local i   = from - inc
-        return function()
-            
-            i = i + inc
-            
-            if i > instance.length then
+                --deletes the old entry
+                if data[k] then 
+                    node_destructor(data[k]) 
+                end
                 
-                return nil
+                --inserts the new entry
+                data[k] = node_constructor(v)
                 
             else
-                
-                return i, instance[i]
-                
+                error("Invalid index: "..k,2)
             end
-        end
-    end
+            report_change("__newindex")
+            
+        end,
+    }
     
-    ----------------------------------------------------------------------------
-    -- passes the data back
-    mt.__index = function(_,k)  
-        return getters[k] and getters[k]() or mt[k] or data[k] 
-    end
-    mt.__len = function() return #data end
+    setmetatable(instance,instance_mt)
     
-    mt.getters = getters
-    mt.setters = setters
-    
-    setmetatable( instance, mt )
-    
-    --insert the initialization data
-    instance.data = p.data or {}
+    if p then instance:set(p) end
     
     return instance
+    
 end
 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
 GridManager = function(p)
@@ -290,8 +319,8 @@ GridManager = function(p)
     end
     ----------------------------------------------------------------------------
     
-    
     instance = {}
+    
     instance_mt = {
         functions = {
             insert_row = function(self,r,entry)
@@ -537,7 +566,6 @@ GridManager = function(p)
                 for i = 1,number_of_cols do
                     data[k][i] = node_constructor(v[i])
                 end
-                
                 
             else
                 error("Invalid index: "..k,2)
