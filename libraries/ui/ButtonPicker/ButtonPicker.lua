@@ -35,7 +35,7 @@ local create_arrow = function(old_function,self,state)
     c:line_to(c.w,   c.h)
     c:line_to(0,   c.h/2)
     
-	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
+	c:set_source_color( self.style.arrow.colors[state] )     c:fill(true)
 	
 	return c:Image()
 	
@@ -339,8 +339,8 @@ ButtonPicker = function(parameters)
         }
     end
     local function arrow_colors_on_changed() 
-        prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
-        next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+        prev_arrow.style.arrow.colors = instance.style.arrow.colors.attributes
+        next_arrow.style.arrow.colors = instance.style.arrow.colors.attributes
     end 
     local function instance_on_style_changed()
 		
