@@ -158,7 +158,9 @@ ButtonPicker = function(parameters)
             
             if #v == 0 then error("Table is empty.",2) end
             
-            items.data = v
+            items.length = #v
+            
+            items:set(v)
             
         end
 	)
@@ -303,6 +305,10 @@ ButtonPicker = function(parameters)
             orientation = v
         end
 	)
+    
+    prev_arrow.on_released = prev_i
+    next_arrow.on_released = next_i
+    
     ----------------------------------------------------------------------------
     instance.window_w = parameters.window_w
     instance.window_h = parameters.window_h
