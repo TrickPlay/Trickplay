@@ -1,3 +1,127 @@
+SCROLLPANE = true
+
+local create_arrow = function(old_function,self,state)
+	
+	local c = Canvas(self.w,self.h)
+	
+    c:move_to(0,   c.h/2)
+    c:line_to(c.w,     0)
+    c:line_to(c.w,   c.h)
+    c:line_to(0,   c.h/2)
+    
+	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
+	
+	return c:Image()
+	
+end
+
+local default_parameters = {pane_w = 450, pane_h = 600,virtual_w=1000,virtual_h=1000, slider_thickness = 30}
+
+ScrollPane = function(parameters)
+    
+	-- input is either nil or a table
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = is_table_or_nil("ScrollPane",parameters)
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+	----------------------------------------------------------------------------
+	--The ScrollPane Object inherits from Widget
+	
+    local pane = ClippingRegion(parameters)
+    
+    local horizontal = Slider()
+    local vertical   = Slider{direction="vertical"}
+	local instance = LayoutManager{
+        number_of_rows = 2,
+        number_of_cols = 2,
+        cells = {
+            { pane,       vertical },
+            { horizontal, Clone()  },
+        },
+    }
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"virtual_w",
+		function(oldf) return   pane.virtual_w     end,
+		function(oldf,self,v)   pane.virtual_w = v end
+    )
+	override_property(instance,"virtual_h",
+		function(oldf) return   pane.virtual_h     end,
+		function(oldf,self,v)   pane.virtual_h = v end
+    )
+	override_property(instance,"pane_w",
+		function(oldf) return   pane.w     end,
+		function(oldf,self,v)   
+            horizontal.track.w = v
+            horizontal.grip.w  = v/10
+            pane.w       = v 
+        end
+    )
+	override_property(instance,"pane_h",
+		function(oldf) return   pane.h     end,
+		function(oldf,self,v)   
+            vertical.track.h   = v
+            vertical.grip.h    = v/10
+            pane.h     = v 
+        end
+    )
+	override_property(instance,"slider_thickness",
+		function(oldf) return   pane.h     end,
+		function(oldf,self,v)   
+            horizontal.track.h = v
+            horizontal.grip.h  = v
+            vertical.track.w   = v
+            vertical.grip.w    = v
+        end
+    )
+    
+    vertical:subscribe_to("progress",function()
+        pane.virtual_y = vertical.progress * pane.virtual_h
+    end)
+    horizontal:subscribe_to("progress",function()
+        pane.virtual_x = horizontal.progress * pane.virtual_w
+    end)
+    
+	instance:subscribe_to(
+		{"virtual_w","pane_w"},
+		function()
+            if instance.virtual_w <= instance.pane_w then
+                horizontal:hide()
+            else
+                horizontal:show()
+            end
+        end
+    )
+	instance:subscribe_to(
+		{"virtual_h","pane_h"},
+		function()
+            
+            if instance.virtual_h <= instance.pane_h then
+                vertical:hide()
+            else
+                vertical:show()
+            end
+        end
+    )
+    ----------------------------------------------------------------------------
+    
+	override_function(instance,"add",
+		function(oldf,self,...) pane:add(...) end
+	)
+    
+    ----------------------------------------------------------------------------
+    
+    instance:set(parameters)
+    
+    
+    pane.vertical_spacing = 2
+    return instance
+end
+
+
+
+--[=[
 --[[
 Function: Scroll Pane
 
@@ -848,3 +972,4 @@ function ui_element.scrollPane(t)
 
     return scroll_group
 end
+--]=]
