@@ -360,7 +360,8 @@ interface Controller [[ControllerDelegate*]]
         
         *See Also:* the <on_advanced_ui_ready> event handler
     */
-    /* Possible new names for "AdvancedUI": has_trickplay_support
+    
+    /* Possible new names for "AdvancedUI": has_trickplay_support */
 
     readonly bool has_advanced_ui
         [[
