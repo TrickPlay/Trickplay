@@ -66,6 +66,7 @@ function set_up_subscriptions(obj,mt,old__newindex,old_set)
         
         old_set(self, t)
         
+        if type(t) == "table" then
         local p = {}
         
         for key,_ in pairs(t) do
@@ -80,7 +81,7 @@ function set_up_subscriptions(obj,mt,old__newindex,old_set)
         -- 'subscriptions_all' happening after the callbacks
         -- in 'subscriptions'
         for f,_ in pairs(subscriptions_all ) do f(p) end
-        
+        end
         return self
         
     end
