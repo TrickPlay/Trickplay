@@ -586,8 +586,9 @@ Style = function(parameters)
                 if not all_styles[t] then
                     error("No existing style by the name "..t,2)
                 end
-                for k, v in pairs(t.attributes) do
-                    self[k] = v
+                
+                for k, v in pairs(all_styles[t].attributes) do
+                    if k ~= "name" then self[k] = v end
                 end
                 
             elseif type(t) == "table" then
