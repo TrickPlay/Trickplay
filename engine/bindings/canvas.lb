@@ -3091,4 +3091,5 @@ class Canvas [[ cairo_t * ]]
         [[
             // Does nothing - only for compatibility with the old canvas
         ]];
-}the fill results when the two circles in the rectangle move in opposite directions
+}
+
