@@ -83,15 +83,6 @@ ColorScheme = function(parameters)
             end
             
         end,
-        set = function(_,t)
-            
-            if type(t) ~= "table" then
-                error("Expects a table. Received "..type(t),2)
-            end
-            
-            for k, v in pairs(t) do  instance[k] = v  end
-            
-        end,
         on_changed = function(self,object,update_function)
             
             children_using_this_style[object] = update_function
@@ -121,23 +112,6 @@ ColorScheme = function(parameters)
     setmetatable(
         instance,
         {
-            __newindex = function(t,k,v)
-                
-                func_upval = meta_setters[k]
-                
-                if func_upval then
-                    
-                    func_upval(v)
-                    
-                else
-                    
-                    colors[k] = is_color(v)
-                    
-                    t:update()
-                    
-                end
-                
-            end,
             __index = function(t,k)
                 
                 func_upval = meta_getters[k]
@@ -154,6 +128,36 @@ ColorScheme = function(parameters)
                 
             end
         }
+    )
+    set_up_subscriptions( instance, getmetatable(instance),
+        
+        function(t,k,v)
+            
+            func_upval = meta_setters[k]
+            
+            if func_upval then
+                
+                func_upval(v)
+                
+            else
+                
+                colors[k] = is_color(v)
+                
+                t:update()
+                
+            end
+            
+        end,
+        
+        function(self,t)
+            
+            for k,v in pairs(t) do
+                
+                self[k] = v
+                
+            end
+            
+        end
     )
     
     if parameters.name == nil then instance.name = nil end

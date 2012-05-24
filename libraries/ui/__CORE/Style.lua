@@ -112,9 +112,9 @@ ArrowStyle = function(parameters)
     local instance, size, offset, colors, name
     
     local  meta_setters = {
-        size   = function(v) size          = v  end,
-        offset = function(v) offset        = v  end,
-        colors = function(v) arrow_colors  =
+        size   = function(v) size   = v  end,
+        offset = function(v) offset = v  end,
+        colors = function(v) colors =
             matches_nil_table_or_type(
                 ColorScheme,
                 "COLORSCHEME",
@@ -131,13 +131,13 @@ ArrowStyle = function(parameters)
         name   = function() return name         end,
         size   = function() return size   or 20 end,
         offset = function() return offset or 10 end,
-        colors = function() return arrow_colors end,
+        colors = function() return colors       end,
         type   = function() return "ARROWSTYLE" end,
         attributes = function() 
             return {
                 size   = instance.size,
                 offset = instance.offset,
-                colors = arrow_colors.attributes,
+                colors = colors.attributes,
             }
         end,
     }
@@ -146,22 +146,6 @@ ArrowStyle = function(parameters)
     
     instance = setmetatable(
         {
-            on_changed = function(self,object,update_function)
-                
-                children_using_this_style[object] = update_function
-                
-            end,
-            set = function(_,t)
-                
-                if type(t) ~= "table" then
-                    error("Expects a table. Received "..type(t),2)
-                end
-                
-                for k, v in pairs(t) do
-                    instance[k] = v
-                end
-                
-            end,
             to_json = function()
                 return json:stringify{
                     size   = instance.size,
@@ -172,9 +156,24 @@ ArrowStyle = function(parameters)
             styles_json = arrowstyles_json
         },
         {
-            __newindex = __newindex(meta_setters, children_using_this_style),
             __index    = __index(meta_getters)
         }
+    )
+    set_up_subscriptions( instance, getmetatable(instance),
+        
+        __newindex(meta_setters, children_using_this_style),
+        
+        function(self,t)
+            
+            if type(t) ~= "table" then
+                error("Expects a table. Received "..type(t),2)
+            end
+            
+            for k, v in pairs(t) do
+                self[k] = v
+            end
+            
+        end
     )
     
     --can't use a table, need to ensure some properties receive a nil in order
@@ -183,6 +182,7 @@ ArrowStyle = function(parameters)
     instance.size   = parameters.size
     instance.offset = parameters.offset
     instance.colors = parameters.colors
+    colors:subscribe_to( nil, function() instance:set{} end )
     
     return instance
     
@@ -272,11 +272,6 @@ BorderStyle = function(parameters)
     
     instance = setmetatable(
         {
-            on_changed = function(self,object,update_function)
-                
-                children_using_this_style[object] = update_function
-                
-            end,
             to_json = function()
                 return json:stringify{
                     name          = instance.name,
@@ -285,23 +280,27 @@ BorderStyle = function(parameters)
                     colors        = instance.colors.name,
                 }
             end,
-            set = function(_,t)
-                
-                if type(t) ~= "table" then
-                    error("Expects a table. Received "..type(t),2)
-                end
-                
-                for k, v in pairs(t) do
-                    instance[k] = v
-                end
-                
-            end,
             styles_json = borderstyles_json 
         },
         {
-            __newindex = __newindex(meta_setters, children_using_this_style),
             __index    = __index(meta_getters),
         }
+    )
+    set_up_subscriptions( instance, getmetatable(instance),
+        
+        __newindex(meta_setters, children_using_this_style),
+        
+        function(self,t)
+            
+            if type(t) ~= "table" then
+                error("Expects a table. Received "..type(t),2)
+            end
+            
+            for k, v in pairs(t) do
+                self[k] = v
+            end
+            
+        end
     )
     
     --can't use a table, need to ensure some properties receive a nil in order
@@ -310,6 +309,7 @@ BorderStyle = function(parameters)
     instance.width         = parameters.width
     instance.corner_radius = parameters.corner_radius
     instance.colors        = parameters.colors
+    colors:subscribe_to( nil, function() instance:set{} end )
     
     return instance
     
@@ -384,11 +384,6 @@ TextStyle = function(parameters)
             
         end,
         get_table  = function() return properties end,
-        on_changed = function(_,object,update_function)
-            
-            children_using_this_style[object] = update_function
-            
-        end,
         to_json = function()
             local t = {}
             
@@ -439,17 +434,6 @@ TextStyle = function(parameters)
         
         {
             
-            __newindex = function(t,k,v)
-                
-                func_upval = meta_setters[k]
-                
-                if      func_upval then func_upval(v)
-                elseif k ~= "type" then properties[k] = v end
-                
-                update_children(children_using_this_style)
-                
-            end,
-            
             __index    = function(t,k)
                 
                 func_upval = meta_getters[k]
@@ -461,10 +445,36 @@ TextStyle = function(parameters)
             
         }
     )
+    set_up_subscriptions( instance, getmetatable(instance),
+        
+        function(t,k,v)
+            
+            func_upval = meta_setters[k]
+            
+            if      func_upval then func_upval(v)
+            elseif k ~= "type" then properties[k] = v end
+            
+            update_children(children_using_this_style)
+            
+        end,
+        
+        function(self,parameters)
+            
+            for k,v in pairs(parameters) do
+                
+                self[k] = v
+                
+            end
+            
+            update_children(children_using_this_style)
+            
+        end
+    )
     
     if parameters.colors == nil then instance.colors = nil end
     instance.name = parameters.name 
     instance:set(parameters)
+    colors:subscribe_to( nil, function() instance:set{} end )
     
     --properties.color = parameters.color or instance.colors.default
     
@@ -555,45 +565,45 @@ Style = function(parameters)
     
     instance = setmetatable(
         { 
-            on_changed = function(self,object,update_function)
-                
-                children_using_this_style[object] = update_function
-                
-            end,
             styles_json = styles_json,
             to_json = function()
                 
                 return json:stringify(instance.attributes)
             end,
-            set = function(_,t)
-                
-                if type(t) == "string" then
-                    
-                    if not all_styles[t] then
-                        error("No existing style by the name "..t,2)
-                    end
-                    for k, v in pairs(t.attributes) do
-                        instance[k] = v
-                    end
-                    
-                elseif type(t) == "table" then
-                    
-                    for k, v in pairs(t) do
-                        instance[k] = v
-                    end
-                    
-                else
-                    error("Expects a string or a table. Received "..type(t),2)
-                end
-                
-                return instance
-            end,
         },
         {
-            __newindex = __newindex(meta_setters, children_using_this_style),
             __index    = __index(meta_getters)
         }
     )
+    set_up_subscriptions( instance, getmetatable(instance),
+        
+        __newindex(meta_setters, children_using_this_style),
+        
+        function(self,t)
+            
+            if type(t) == "string" then
+                
+                if not all_styles[t] then
+                    error("No existing style by the name "..t,2)
+                end
+                for k, v in pairs(t.attributes) do
+                    self[k] = v
+                end
+                
+            elseif type(t) == "table" then
+                
+                for k, v in pairs(t) do
+                    self[k] = v
+                end
+                
+            else
+                error("Expects a string or a table. Received "..type(t),2)
+            end
+            
+            return instance
+        end
+    )
+    
     
     --can't use a table, need to ensure some properties receive a nil in order
     --to trigger the default condition
@@ -602,6 +612,12 @@ Style = function(parameters)
     instance.border      = parameters.border
     instance.text        = parameters.text
     instance.fill_colors = parameters.fill_colors
+    
+    arrow:subscribe_to(       nil, function() instance:set{} end )
+    border:subscribe_to(      nil, function() instance:set{} end )
+    text:subscribe_to(        nil, function() instance:set{} end )
+    fill_colors:subscribe_to( nil, function() instance:set{} end )
+    
     return instance
     
 end

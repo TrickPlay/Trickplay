@@ -325,12 +325,12 @@ OrbittingDots = function(parameters)
 	
 	local style_callback = function() if canvas then flag_for_redraw = true end   end
 	
-	function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, style_callback )
-		instance.style.border:on_changed(         instance, style_callback )
-		instance.style.border.colors:on_changed(  instance, style_callback )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, style_callback )
+        instance.style.fill_colors:subscribe_to( nil, style_callback )
+        
 		style_callback()
 	end
 	
