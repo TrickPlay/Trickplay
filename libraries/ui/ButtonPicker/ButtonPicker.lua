@@ -342,17 +342,15 @@ ButtonPicker = function(parameters)
         prev_arrow.style.arrow.colors = instance.style.arrow.colors.attributes
         next_arrow.style.arrow.colors = instance.style.arrow.colors.attributes
     end 
-    local function instance_on_style_changed()
-		
-		instance.style.text:on_changed(instance,update_labels)
-		instance.style.text.colors:on_changed(instance,update_labels)
-		
-		instance.style.fill_colors:on_changed(    instance, redo_bg )
-		instance.style.border:on_changed(         instance, redo_fg )
-		instance.style.border.colors:on_changed(  instance, redo_fg )
-		instance.style.arrow:on_changed(          instance, arrow_on_changed)
-		instance.style.arrow.colors:on_changed(   instance, arrow_colors_on_changed)
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.arrow:subscribe_to(      nil, arrow_on_changed )
+        instance.style.arrow.colors:subscribe_to(      nil, arrow_on_changed )
+        instance.style.border:subscribe_to(      nil, redo_fg )
+        instance.style.fill_colors:subscribe_to( nil, redo_bg )
+        instance.style.text:subscribe_to( nil, update_labels )
+        
 		update_labels()
         redo_fg()
         redo_bg()

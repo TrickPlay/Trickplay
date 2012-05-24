@@ -149,11 +149,12 @@ ArrowPane = function(parameters)
                 instance.style.arrow.colors.attributes
         end
     end 
-    local function instance_on_style_changed()
-		
-		instance.style.arrow:on_changed(        instance, arrow_on_changed)
-		instance.style.arrow.colors:on_changed( instance, arrow_colors_on_changed)
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.arrow:subscribe_to(        nil, arrow_on_changed )
+        instance.style.arrow.colors:subscribe_to( nil, arrow_colors_on_changed )
+        
         arrow_on_changed()
         arrow_colors_on_changed()
 	end

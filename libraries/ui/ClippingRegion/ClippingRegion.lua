@@ -116,12 +116,13 @@ ClippingRegion = function(parameters)
     local set_bg_color     = function() bg.color            = instance.style.fill_colors.default   end
     
     
-	local function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, set_bg_color     )
-		instance.style.border:on_changed(         instance, set_border_width )
-		instance.style.border.colors:on_changed(  instance, set_border_color )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, set_border_width )
+        instance.style.border.colors:subscribe_to(      nil, set_border_color )
+        instance.style.fill_colors:subscribe_to( nil, set_bg_color )
+        
 		set_border_width()
 		set_border_color()
 		set_bg_color()
