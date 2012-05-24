@@ -148,7 +148,7 @@ ColorScheme = function(parameters)
                     
                 else
                     
-                    return colors[k] or "00000000"
+                    return colors[k]-- or "00000000"
                     
                 end
                 
