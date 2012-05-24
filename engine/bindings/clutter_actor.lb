@@ -2551,5 +2551,18 @@ interface actor [[ClutterActor*]]
             G_CALLBACK(actor_on_parent_changed),
             L);             
 	]];
-	
+
+    /* 
+    These two are experimental, Clutter warns about using them
+    */
+    
+    grab_pointer()
+    [[
+        clutter_grab_pointer( self );
+    ]];	
+    
+    ungrab_pointer()
+    [[
+        clutter_ungrab_pointer();
+    ]];
 }
