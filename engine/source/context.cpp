@@ -29,6 +29,10 @@
 #include "desktop_controller.h"
 #include "ansi_color.h"
 
+#ifdef TP_WITH_GAMESERVICE
+#include "gameservice_support.h"
+#endif
+
 //-----------------------------------------------------------------------------
 #ifndef TP_DEFAULT_RESOURCES_PATH
 #define TP_DEFAULT_RESOURCES_PATH   "/usr/share/trickplay/resources"
@@ -54,6 +58,9 @@ TPContext::TPContext()
     downloads( NULL ),
     installer( NULL ),
     current_app( NULL ),
+#ifdef TP_WITH_GAMESERVICE
+    gameservice_support( NULL ),
+#endif
     media_player_constructor( NULL ),
     media_player( NULL ),
     http_trickplay_api_support( NULL ),
@@ -738,6 +745,11 @@ int TPContext::run()
         g_info( "MEDIA PLAYER IS DISABLED..." );
     }
 
+    //.........................................................................
+    // connect to gameservice server
+#ifdef TP_WITH_GAMESERVICE
+    gameservice_support = new GameServiceSupport(this);
+#endif
     //.........................................................................
 
     load_background();
@@ -2052,6 +2064,15 @@ Console * TPContext::get_console() const
 {
     return console;
 }
+
+//-----------------------------------------------------------------------------
+
+#ifdef TP_WITH_GAMESERVICE
+GameServiceSupport * TPContext::get_gameservice() const
+{
+    return gameservice_support;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 

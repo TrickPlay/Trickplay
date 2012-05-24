@@ -57,7 +57,7 @@ PresencePushTask::ProcessStart() {
     return STATE_BLOCKED;
   Status s;
 
-  s.set_jid(Jid(stanza->Attr(QN_FROM)));
+  s.set_jid(stanza->Attr(QN_FROM));
 
   if (stanza->Attr(QN_TYPE) == STR_UNAVAILABLE) {
     s.set_available(false);

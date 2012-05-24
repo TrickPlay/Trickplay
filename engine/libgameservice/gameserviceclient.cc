@@ -8,6 +8,13 @@
 #include <thread.h>
 #include <physicalsocketserver.h>
 
+#include <basicdefs.h>
+
+#include <xmppengine.h>
+#include <scoped_ptr.h>
+#include <xmppclientsettings.h>
+#include <cryptstring.h>
+
 #include <prexmppauthimpl.h>
 #include <xmppasyncsocketimpl.h>
 
@@ -17,7 +24,26 @@
 #include "xmpppump.h"
 #include "xmpptasks.h"
 
+
 namespace libgameservice {
+
+static GameServiceClientNotify::ConnectionState convertToConnectionState(txmpp::XmppEngine::State state) {
+
+	switch(state) {
+	case XmppEngine::STATE_NONE:
+		return GameServiceClientNotify::STATE_NONE;
+	case XmppEngine::STATE_OPENING:
+		return GameServiceClientNotify::STATE_OPENING;
+	case XmppEngine::STATE_OPEN:
+		return GameServiceClientNotify::STATE_OPEN;
+	case XmppEngine::STATE_START:
+			return GameServiceClientNotify::STATE_START;
+	case XmppEngine::STATE_CLOSED:
+			return GameServiceClientNotify::STATE_CLOSED;
+	default:
+		GameServiceClientNotify::STATE_NONE;
+	}
+}
 
 enum {
 	MSG_START,
@@ -67,7 +93,7 @@ class GameServiceClientWorker: public txmpp::MessageHandler,
 		public XmppPumpNotify,
 		public txmpp::has_slots<> {
 public:
-	GameServiceClientWorker(GameServiceClient *gsc,
+	GameServiceClientWorker(GameServiceAsyncInterface *gsc,
 			GameServiceClientNotify *notify) :
 		worker_thread_(NULL), gsc_(gsc), notify_(notify), ppt_(NULL),
 				presence_listener_task_(NULL), message_listener_task_(NULL),
@@ -468,7 +494,7 @@ private:
 	void OnStateChangeW(txmpp::XmppEngine::State state) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		if (notify_)
-			notify_->OnStateChange(state);
+			notify_->OnStateChange(convertToConnectionState(state));
 	}
 
 	// incoming Start Message
@@ -1028,7 +1054,7 @@ private:
 	void OnStatusErrorW(const txmpp::XmlElement &stanza) {
 		assert(txmpp::ThreadManager::CurrentThread() != worker_thread_);
 		if (notify_)
-			notify_->OnStatusError(stanza);
+			notify_->OnStatusError(stanza.Str());
 	}
 
 	void OnStatusError(const txmpp::XmlElement &stanza) {
@@ -1070,7 +1096,7 @@ private:
 	txmpp::scoped_ptr<txmpp::Thread> main_thread_;
 	txmpp::Thread *worker_thread_;
 
-	GameServiceClient *gsc_;
+	GameServiceAsyncInterface *gsc_;
 	GameServiceClientNotify *notify_;
 	txmpp::XmppClientSettings xcs_;
 	txmpp::PhysicalSocketServer pss_;
@@ -1084,6 +1110,68 @@ private:
 };
 
 
+class GameServiceClient : public GameServiceAsyncInterface {
+public:
+	/* Provide the constructor with your interface. */
+	GameServiceClient(GameServiceClientNotify * notify);
+	~GameServiceClient();
+
+	/* Logs in and starts doing stuff
+	 *"127.0.0.1", 5222)
+	 */
+	StatusCode Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port);
+
+	StatusCode SendPresence(const Status & s);
+	// void OpenApp(const std::string &appId);
+
+	const AppId & CurrentApp() const {
+		return current_app_;
+	}
+	;
+
+	bool IsAppOpen() const {
+		return current_app_.is_valid();
+	}
+
+	StatusCode OpenApp(const AppId& app_id);
+
+	StatusCode CloseApp();
+
+	StatusCode ListGames();
+
+	StatusCode RegisterApp(const AppId & app);
+
+	StatusCode RegisterGame(const Game & game);
+
+	StatusCode StartMatch(const std::string& match_id, void* cb_data);
+
+	StatusCode LeaveMatch(const std::string& match_id, void* cb_data);
+
+	StatusCode JoinMatch(const std::string& match_id, const std::string& nick,
+			bool acquire_role, void* cb_data);
+
+	StatusCode JoinMatch(const std::string& match_id, const std::string& nick,
+			const std::string& role, void* cb_data);
+
+	StatusCode AssignMatch(const MatchRequest& match_request, void* cb_data);
+
+	StatusCode GetMatchData(const GameId& game_id);
+
+	StatusCode SendTurn(const std::string& match_id, const std::string& state,
+			bool terminate, void* cb_data);
+
+	/* Call this from the thread you want to receive callbacks on. Typically, this will be called
+	 * after your WakeupMainThread() notify function is called.
+	 *
+	 */
+	bool DoCallbacks(unsigned int wait_millis = 0);
+
+private:
+
+	GameServiceClientWorker * worker_;
+	AppId current_app_;
+};
+
 GameServiceClient::GameServiceClient(GameServiceClientNotify *notify) {
 	worker_ = new GameServiceClientWorker(this, notify);
 }
@@ -1093,7 +1181,18 @@ GameServiceClient::~GameServiceClient() {
 	worker_ = NULL;
 }
 
-StatusCode GameServiceClient::Login(const txmpp::XmppClientSettings & xcs) {
+StatusCode GameServiceClient::Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port) {
+//StatusCode GameServiceClient::Login(const txmpp::XmppClientSettings & xcs) {
+	txmpp::XmppClientSettings xcs;
+	xcs.set_user(user_id);
+	txmpp::InsecureCryptStringImpl insecure_passwd;
+	insecure_passwd.password() = password;
+	xcs.set_pass(txmpp::CryptString(insecure_passwd));
+	xcs.set_host(domain);
+	xcs.set_resource("smarttv");
+	xcs.set_use_tls(true);
+	xcs.set_server(txmpp::SocketAddress(host, port));
+
 	worker_->Login(xcs);
 	return OK;
 }
@@ -1196,6 +1295,10 @@ StatusCode GameServiceClient::GetMatchData(const GameId& game_id) {
 
 bool GameServiceClient::DoCallbacks(uint wait_millis) {
 	return worker_->DoCallbacks(wait_millis);
+}
+
+GameServiceAsyncInterface * newGameServiceAsyncImpl(GameServiceClientNotify *notify) {
+	return new GameServiceClient(notify);
 }
 
 }

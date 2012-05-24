@@ -28,7 +28,7 @@
  * SUCH DAMAGE.
  */
 
-#include "json.h"
+#include "json_parser.h"
 
 #ifdef _MSC_VER
    #ifndef _CRT_SECURE_NO_WARNINGS
