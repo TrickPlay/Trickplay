@@ -6,38 +6,7 @@
 #include <list>
 #include <vector>
 
-#include <basictypes.h>
-#include <xmlconstants.h>
-
-#include "xmppmugconstants.h"
-
 namespace libgameservice {
-
-/**
- * A list of strings.
- */
-typedef std::list<std::string> StringList;
-
-/**
- * A list of pointers to strings.
- */
-typedef std::list<std::string*> StringPList;
-
-/**
- * A map of strings.
- */
-typedef std::map<std::string, std::string> StringMap;
-
-/**
- * A multimap of strings.
- */
-typedef std::multimap<std::string, std::string> StringMultiMap;
-
-class StanzaExtension;
-/**
- * A list of StanzaExtensions.
- */
-typedef std::list<const StanzaExtension*> StanzaExtensionList;
 
 extern std::string intToString(int val);
 extern std::string longToString(long val);
@@ -46,6 +15,8 @@ extern std::string booleanToString(bool val);
 enum StatusCode {
 	OK,
 	FAILED,
+	LOGIN_FAILED,
+	NOT_CONNECTED,
 	APP_OPEN,
 	APP_ALREADY_OPEN,
 	APP_NOT_OPEN,

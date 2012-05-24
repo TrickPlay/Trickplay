@@ -9,6 +9,7 @@
 #include "mediaplayers.h"
 #include "controller_list.h"
 #include "app.h"
+
 //-----------------------------------------------------------------------------
 // Internal notifications
 
@@ -63,6 +64,11 @@ class ControllerLIRC;
 class AppPushServer;
 class HttpServer;
 class HttpTrickplayApiSupport;
+
+#ifdef TP_WITH_GAMESERVICE
+class GameServiceSupport;
+#endif
+
 
 //-----------------------------------------------------------------------------
 
@@ -166,6 +172,12 @@ public:
     //.........................................................................
 
     Console * get_console() const;
+
+    //.........................................................................
+
+#ifdef TP_WITH_GAMESERVICE
+    GameServiceSupport * get_gameservice() const;
+#endif
 
     //.........................................................................
 
@@ -349,6 +361,10 @@ private:
     Installer *                 installer;
 
     App *                       current_app;
+
+#ifdef TP_WITH_GAMESERVICE
+    GameServiceSupport * gameservice_support;
+#endif
 
     String                      first_app_id;
 

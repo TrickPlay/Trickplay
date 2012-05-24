@@ -1,0 +1,145 @@
+module gameservice_module;
+
+global gameservice [[void*]]
+{
+
+	/*
+	
+    	Event Handler: on_ready
+    	
+    	The on_ready() event handler is invoked after the Trickplay is able to successfully register a listener for the app events
+    	with the gameservice server.
+    	If the registration failed, the <on_error> event handler will be invoked, instead.
+    	
+    	*Prototype:*
+    	
+    		(code)
+    		on_ready( )
+    		(end)
+    		
+    	*Arguments:*
+    	
+    		None
+    		
+    	*Return Value:* None
+	*/
+	callback on_ready
+	[[ 
+	]];
+	
+	callback on_error
+	[[ 
+	]];
+
+/*
+/*	
+	
+table Role { name:string, cannot_start:bool, first_role:bool}
+
+table Game {
+
+	string name
+	
+	string description
+	
+	string category
+	
+	string policy
+	
+	string game_type
+	
+	bool join_after_start
+		 
+	int min_players_for_start
+
+	int max_duration_per_turn
+
+	bool abort_when_player_leaves
+	
+	table roles
+	
+}
+*/
+    readonly table games
+        [[
+        ]];
+
+	register_game(table game) 
+		[[
+		]];
+		
+	/*
+    	Event Handler: on_register_game_completed
+    	
+    	The on_loaded() event handler is invoked after the successful completion of a media-preparation operation started by the <load> function. If the preparation failed, the <on_error> event handler will be invoked, instead.
+    	
+    	*Prototype:*
+    	
+    		(code)
+    		on_loaded( mediaplayer )
+    		(end)
+    		
+    	*Arguments:*
+    	
+    		mediaplayer - reference to the mediaplayer variable that prepared the media resource
+    		
+    	*Return Value:* None
+    	
+    	*See Also:* the <load> function and the <on_error> event handler
+	*/
+	
+	callback on_register_game_completed; 
+	
+	assign_match()
+		[[
+		]];
+		
+	callback on_assign_match_completed
+	[[
+	]];
+	
+	join_match(string match_id)
+		[[
+		]];
+		
+	callback on_join_match_completed
+	[[
+	]];
+	
+	start_match(string match_id)
+		[[
+		]];
+		
+	callback on_start_match_completed
+	[[
+	]];
+	
+	send_turn(string match_id, string turn_data)
+		[[
+		]];
+		
+	callback on_send_turn_completed
+	[[
+	]];
+	
+	callback on_turn_received
+	[[
+	]];
+	
+	callback on_match_started
+	[[
+	]];
+	
+	callback on_participant_joined
+	[[
+	]];
+	
+	callback on_participant_left
+	[[
+	]];
+	
+	callback on_match_updated
+	[[
+	]];
+
+}

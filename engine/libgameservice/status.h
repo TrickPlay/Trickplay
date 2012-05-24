@@ -1,10 +1,7 @@
 #ifndef _STATUS_H_
 #define _STATUS_H_
 
-#include <jid.h>
-#include <constants.h>
-
-using namespace txmpp;
+#include <string>
 
 namespace libgameservice {
 
@@ -39,7 +36,7 @@ public:
     SHOW_CHAT     = 6,
   };
 
-  const Jid& jid() const { return jid_; }
+  const std::string& jid() const { return jid_str_; }
   int priority() const { return pri_; }
   Show show() const { return show_; }
   const std::string& status() const { return status_; }
@@ -57,7 +54,7 @@ public:
   bool feedback_probation() const { return feedback_probation_; }
   const std::string& sent_time() const { return sent_time_; }
 
-  void set_jid(const Jid& jid) { jid_ = jid; }
+  void set_jid(const std::string& jid) { jid_str_ = jid; }
   void set_priority(int pri) { pri_ = pri; }
   void set_show(Show show) { show_ = show; }
   void set_status(const std::string& status) { status_ = status; }
@@ -102,18 +99,7 @@ public:
 
   // Knowledge of other clients' silly automatic status strings -
   // Don't show these.
-  std::string QuietStatus() const {
-    if (jid_.resource().find("Psi") != std::string::npos) {
-      if (status_ == "Online" ||
-          status_.find("Auto Status") != std::string::npos)
-        return STR_EMPTY;
-    }
-    if (jid_.resource().find("Gaim") != std::string::npos) {
-      if (status_ == "Sorry, I ran out for a bit!")
-        return STR_EMPTY;
-    }
-    return TrimStatus(status_);
-  }
+  std::string QuietStatus() const;
 
   std::string ExplicitStatus() const {
     std::string result = QuietStatus();
@@ -177,7 +163,7 @@ public:
   }
 
 private:
-  Jid jid_;
+  std::string jid_str_;
   int pri_;
   Show show_;
   std::string status_;

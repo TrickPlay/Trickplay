@@ -13,6 +13,11 @@
 #include "plugin.h"
 #include "trickplay/plugins/lua-api.h"
 
+#ifdef TP_WITH_GAMESERVICE
+#include "game.h"
+#include "gameservice_support.h"
+#endif
+
 //.............................................................................
 
 #define TP_LOG_DOMAIN   "APP"
@@ -32,6 +37,7 @@
 #define APP_FIELD_VERSION       "version"
 #define APP_FIELD_ACTIONS       "actions"
 #define APP_FIELD_ATTRIBUTES    "attributes"
+#define APP_FIELD_GAMESERVICE_ATTRIBUTE    "gameservice"
 
 //-----------------------------------------------------------------------------
 // Bindings
@@ -83,6 +89,10 @@ extern int luaopen_keyboard( lua_State * L );
 extern int luaopen_http_module( lua_State * L );
 extern int luaopen_ease( lua_State * L );
 extern int luaopen_matrix( lua_State * L );
+
+#ifdef TP_WITH_GAMESERVICE
+extern int luaopen_gameservice( lua_State * L );
+#endif
 
 #ifdef TP_WITH_WEBGL
 extern int luaopen_typed_array( lua_State * L );
@@ -1149,6 +1159,14 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
 #ifdef TP_UPNP_CLIENT
     luaopen_upnp( L );
+#endif
+
+#ifdef TP_WITH_GAMESERVICE
+    if (metadata.attributes.find(APP_FIELD_GAMESERVICE_ATTRIBUTE) != metadata.attributes.end()) {
+    	luaopen_gameservice( L );
+
+    	context->get_gameservice()->OpenApp(libgameservice::AppId(metadata.name, 1));
+    }
 #endif
 
     luaopen_apps( L );

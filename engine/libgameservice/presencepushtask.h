@@ -7,6 +7,8 @@
 
 #include "status.h"
 
+using namespace txmpp;
+
 namespace libgameservice {
 
 class PresencePushTask : public XmppTask {

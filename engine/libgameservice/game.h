@@ -2,6 +2,7 @@
 #define _GAME_H_
 
 #include <vector>
+#include "libgameservice.h"
 #include "role.h"
 
 namespace libgameservice {

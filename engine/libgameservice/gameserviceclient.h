@@ -4,12 +4,6 @@
 #ifndef _GAMESERVICECLIENT_H_
 #define _GAMESERVICECLIENT_H_
 
-#include <basicdefs.h>
-
-#include <xmppengine.h>
-#include <scoped_ptr.h>
-#include <xmppclientsettings.h>
-
 #include "libgameservice.h"
 #include "game.h"
 #include "status.h"
@@ -21,23 +15,15 @@
 
 namespace libgameservice {
 
-class GameServiceClientWorker;
-
 class GameServiceClientNotify {
-private:
-	txmpp::XmppEngine::State state_;
-
-protected:
-	void set_state(txmpp::XmppEngine::State state) {
-		state_ = state;
-	}
-
 public:
-	GameServiceClientNotify() : state_(txmpp::XmppEngine::STATE_NONE) { }
-
-	txmpp::XmppEngine::State state() const {
-		return state_;
-	}
+	enum ConnectionState {
+		STATE_NONE = 0,
+		STATE_START,
+		STATE_OPENING,
+		STATE_OPEN,
+		STATE_CLOSED,
+	};
 
 	virtual ~GameServiceClientNotify() {
 	}
@@ -52,7 +38,7 @@ public:
 	 */
 	virtual void WakeupMainThread() = 0;
 
-	virtual void OnStateChange(txmpp::XmppEngine::State state) = 0;
+	virtual void OnStateChange(ConnectionState state) = 0;
 
 
 	/* Presence */
@@ -60,7 +46,7 @@ public:
 	virtual void OnStatusUpdate(const Status &status) = 0;
 
 	/* Called when a status update results in an error */
-	virtual void OnStatusError(const txmpp::XmlElement &stanza) = 0;
+	virtual void OnStatusError(const std::string &error_string) = 0;
 
 	virtual void OnRegisterAppResponse(const ResponseStatus& rs,
 			const AppId& app_id) = 0;
@@ -119,67 +105,49 @@ public:
 	virtual void OnXmppInput(const std::string &input) = 0;
 };
 
-class GameServiceClient {
+class GameServiceAsyncInterface {
+
 public:
-	/* Provide the constructor with your interface. */
-	GameServiceClient(GameServiceClientNotify * notify);
-	~GameServiceClient();
 
-	/* Logs in and starts doing stuff
-	 *
-	 */
-	StatusCode Login(const txmpp::XmppClientSettings & xcs);
+	virtual StatusCode Login(const std::string& user_id, const std::string& password, const std::string& domain, const std::string& host, int port) = 0;
 
-	StatusCode SendPresence(const Status & s);
-	// void OpenApp(const std::string &appId);
+	virtual StatusCode OpenApp(const AppId& app_id) = 0;
 
-	const AppId & CurrentApp() const {
-		return current_app_;
-	}
-	;
+	virtual StatusCode CloseApp() = 0;
 
-	bool IsAppOpen() const {
-		return current_app_.is_valid();
-	}
+	virtual StatusCode ListGames() = 0;
 
-	StatusCode OpenApp(const AppId& app_id);
+	virtual StatusCode RegisterApp(const AppId & app) = 0;
 
-	StatusCode CloseApp();
+	virtual StatusCode RegisterGame(const Game & game) = 0;
 
-	StatusCode ListGames();
+	virtual StatusCode StartMatch(const std::string& match_id, void* cb_data) = 0;
 
-	StatusCode RegisterApp(const AppId & app);
+	virtual StatusCode LeaveMatch(const std::string& match_id, void* cb_data) = 0;
 
-	StatusCode RegisterGame(const Game & game);
+	virtual StatusCode JoinMatch(const std::string& match_id, const std::string& nick,
+			bool acquire_role, void* cb_data) = 0;
 
-	StatusCode StartMatch(const std::string& match_id, void* cb_data);
+	virtual StatusCode JoinMatch(const std::string& match_id, const std::string& nick,
+			const std::string& role, void* cb_data) = 0;
 
-	StatusCode LeaveMatch(const std::string& match_id, void* cb_data);
+	virtual StatusCode AssignMatch(const MatchRequest& match_request, void* cb_data) = 0;
 
-	StatusCode JoinMatch(const std::string& match_id, const std::string& nick,
-			bool acquire_role, void* cb_data);
+	virtual StatusCode GetMatchData(const GameId& game_id) = 0;
 
-	StatusCode JoinMatch(const std::string& match_id, const std::string& nick,
-			const std::string& role, void* cb_data);
-
-	StatusCode AssignMatch(const MatchRequest& match_request, void* cb_data);
-
-	StatusCode GetMatchData(const GameId& game_id);
-
-	StatusCode SendTurn(const std::string& match_id, const std::string& state,
-			bool terminate, void* cb_data);
+	virtual StatusCode SendTurn(const std::string& match_id, const std::string& state,
+			bool terminate, void* cb_data) = 0;
 
 	/* Call this from the thread you want to receive callbacks on. Typically, this will be called
 	 * after your WakeupMainThread() notify function is called.
 	 *
 	 */
-	bool DoCallbacks(uint wait_millis = 0);
+	virtual bool DoCallbacks(unsigned int wait_millis = 0) = 0;
 
-private:
-
-	GameServiceClientWorker * worker_;
-	AppId current_app_;
 };
+
+
+extern GameServiceAsyncInterface * newGameServiceAsyncImpl(GameServiceClientNotify *notify);
 
 }
 #endif  // _GAMESERVICECLIENT_H_

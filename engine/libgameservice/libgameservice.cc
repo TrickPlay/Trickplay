@@ -32,6 +32,8 @@ std::string booleanToString(bool val) {
 static const char* kStatusCodeStrings[] = {
 	"OK",
 	"FAILED",
+	"LOGIN_FAILED",
+	"NOT_CONNECTED",
 	"APP_OPEN",
 	"APP_ALREADY_OPEN",
 	"APP_NOT_OPEN",

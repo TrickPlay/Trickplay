@@ -23,6 +23,8 @@ include( ${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/CMakeLists.txt )
 
 if ( TP_WITH_GAMESERVICE )
 	add_subdirectory( libgameservice )
+	include_directories( ${ENGINE_SRC}/libgameservice )
+	add_definitions( -DTP_WITH_GAMESERVICE=1 )
 endif( TP_WITH_GAMESERVICE )
 
 
@@ -466,7 +468,14 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/keyboard.lb
     ${BINDINGS_SRC}/ease.lb
     ${BINDINGS_SRC}/matrix.lb
+    
 )
+
+if (TP_WITH_GAMESERVICE)
+	list ( APPEND LB_FILES
+		${BINDINGS_SRC}/gameservice.lb
+	)	
+endif(TP_WITH_GAMESERVICE)
 
 #------------------------------------------------------------------------------
 
@@ -568,6 +577,12 @@ list( APPEND
     ${ENGINE_SRC}/source/desktop_controller.cpp
 )
 
+if (TP_WITH_GAMESERVICE)
+	list ( APPEND ENGINE_SOURCE_FILES
+		${ENGINE_SRC}/source/gameservice_support.cpp
+	)	
+endif(TP_WITH_GAMESERVICE)
+
 #------------------------------------------------------------------------------
 # OSX Cursor glue stuff
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -622,6 +637,7 @@ set_target_properties(
     COMPILE_FLAGS -fvisibility=hidden
 )
 
+if (TP_WITH_GAMESERVICE)
 
 target_link_libraries(
 
@@ -635,6 +651,21 @@ target_link_libraries(
     tptxmpp
     clutteralphamode
 )
+
+else (TP_WITH_GAMESERVICE)
+
+target_link_libraries(
+
+    tpcore
+
+    ${ENGINE_LIBRARIES}
+    m
+    dl
+    tplua
+    clutteralphamode
+)
+
+endif(TP_WITH_GAMESERVICE)
 
 
 
