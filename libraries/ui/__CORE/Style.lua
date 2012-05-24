@@ -542,6 +542,15 @@ Style = function(parameters)
         text        = function() return text        end,
         fill_colors = function() return fill_colors end,
         type        = function() return "STYLE"     end,
+        attributes  = function() 
+            return {
+                name        = instance.name,
+                arrow       = instance.arrow.attributes,
+                border      = instance.border.attributes,
+                text        = instance.text.attributes,
+                fill_colors = instance.fill_colors.attributes,
+            }
+        end,
     }
     
     instance = setmetatable(
@@ -554,13 +563,30 @@ Style = function(parameters)
             styles_json = styles_json,
             to_json = function()
                 
-                return json:stringify{
-                    name        = instance.name,
-                    arrow       = instance.arrow.attributes,
-                    border      = instance.border.attributes,
-                    text        = instance.text.attributes,
-                    fill_colors = instance.fill_colors.attributes,
-                }
+                return json:stringify(instance.attributes)
+            end,
+            set = function(_,t)
+                
+                if type(t) == "string" then
+                    
+                    if not all_styles[t] then
+                        error("No existing style by the name "..t,2)
+                    end
+                    for k, v in pairs(t.attributes) do
+                        instance[k] = v
+                    end
+                    
+                elseif type(t) == "table" then
+                    
+                    for k, v in pairs(t) do
+                        instance[k] = v
+                    end
+                    
+                else
+                    error("Expects a string or a table. Received "..type(t),2)
+                end
+                
+                return instance
             end,
         },
         {
@@ -579,4 +605,7 @@ Style = function(parameters)
     return instance
     
 end
-local default_style = Style("Default")
+--really dumb, but I need to hold a reference for the default style somewhere
+--so that the weak table doesn't throw it away (if i use a local, lua is smart
+--enough to realize its never going to be usedand will throw it away anyway)
+getmetatable(all_styles).default = Style("Default")
