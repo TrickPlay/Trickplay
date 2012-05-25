@@ -255,12 +255,12 @@ ProgressSpinner = function(parameters)
 		end
 	)
 	
-	function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, canvas_callback )
-		instance.style.border:on_changed(         instance, canvas_callback )
-		instance.style.border.colors:on_changed(  instance, canvas_callback )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, canvas_callback )
+        instance.style.fill_colors:subscribe_to( nil, canvas_callback )
+        
 		canvas_callback()
 	end
 	

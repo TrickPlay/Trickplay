@@ -40,5 +40,12 @@ lm1 = LayoutManager{
     }
 }
 
-screen:add(lm1)
+lm2 = ListManager{
+    x=500,
+    length = 2,
+    cells = {
+        Rectangle{w=100,h=100},Rectangle{w=100,h=100}
+    }
+}
+screen:add(lm1,lm2)
 --]]

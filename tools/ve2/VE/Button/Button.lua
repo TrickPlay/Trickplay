@@ -449,28 +449,19 @@ Button = function(parameters)
 	
 	local instance_on_style_changed
     function instance_on_style_changed()
-		
-        instance.style:on_changed( instance, instance_on_style_changed )
         
-		instance.style.text:on_changed(instance,update_label)
-		
-		instance.style.text.colors:on_changed(instance,define_label_animation)
-		
-		instance.style.fill_colors:on_changed(    instance, canvas_callback )
-		instance.style.border:on_changed(         instance, canvas_callback )
-		instance.style.border.colors:on_changed(  instance, canvas_callback )
-		instance.style.arrow:on_changed(          instance, canvas_callback )
-		instance.style.arrow.colors:on_changed(   instance, canvas_callback )
-		
+        instance.style.border:subscribe_to(      nil, canvas_callback )
+        instance.style.fill_colors:subscribe_to( nil, canvas_callback )
+        instance.style.text.colors:subscribe_to( nil, define_label_animation )
+        instance.style.text:subscribe_to( nil, update_label )
+        
 		update_label()
 		define_label_animation()
 		canvas_callback()
 	end
 	
-	instance:subscribe_to(
-		"style",
-		instance_on_style_changed
-	)
+    
+	instance:subscribe_to( "style", instance_on_style_changed )
 	
 	instance_on_style_changed()
 	
