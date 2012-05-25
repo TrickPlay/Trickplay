@@ -1,5 +1,8 @@
 modelToDataTable = {
     
+    'activation': lambda v: ('activation', colors(v)), 
+    'default': lambda v: ('default', colors(v)),
+    'focus': lambda v: ('focus', colors(v)),
     #'anchor_pointx': lambda v: ('anchor-x',  toFloat(v['x'])),
     #'anchor_pointy': lambda v: ('anchor-y',  toFloat(v['y'])),
     'anchor_pointx': lambda v: ('anchor',  toFloat(v['x'])),
@@ -29,17 +32,20 @@ modelToDataTable = {
     'border_colora': lambda v: ('border_color', color(v)),
     'is_visible': lambda v:('visible', toBool(v)),
     'name': lambda v: ('name',  toString(v)),
+    'style': lambda v: ('style',  toString(v)),
     'title': lambda v: ('title',  toString(v)),
     'message': lambda v: ('message',  toString(v)),
     'text': lambda v: ('text',  toString(v)),
     'font': lambda v: ('font',  toString(v)),
     'src': lambda v: ('src', toString(v)),
     'opacity': lambda v: ('opacity',  opacity(v)),
-    'width': lambda v: ('width',  width(v)), 
+    'width': lambda v: ('width',  toFloat(v)), 
     'height': lambda v: ('height',  toFloat(v)),
     #'sizew': lambda v: ('width',  toFloat(v['w'])), 
     #'sizeh': lambda v: ('height',  toFloat(v['h'])), 
+    'corner_radius': lambda v: ('corner_radius',  toFloat(v)), 
     'sizew': lambda v: ('width',  toFloat(v)), 
+    'width': lambda v: ('width',  toFloat(v)), 
     'sizeh': lambda v: ('height',  toFloat(v)), 
     'new_attra': lambda v: ('a attr',  toFloat(v['a'])), 
     'new_attrb': lambda v: ('b attr',  toFloat(v['b'])), 
@@ -78,6 +84,11 @@ dataToModelTable = {
 
 }
 
+def colors(v):
+    v = v[1:] 
+    v = v[:len(v)-1] 
+    v = "{"+v+"}"
+    return v
 def toString(v):
      return "'"+str(v)+"'"
 
@@ -127,7 +138,7 @@ def dataToModel(title, value):
 
 def modelToData(title, value):
     
-    return modelToDataTable[title](value)
+    return modelToDataTable[str(title)](value)
 
 def color(v):
     return 'rgba(' + str(v['r']) + ', ' + str(v['g']) + ', ' + str(v['b']) + ', ' + str(float(v['a'])/255) + ')'
