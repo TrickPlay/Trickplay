@@ -159,15 +159,13 @@ TextInput = function(parameters)
 		text.color = instance.style.text.colors.default
 		
 	end
-	function instance_on_style_changed()
-		
-		instance.style.text:on_changed(instance,update_text)
-		
-		instance.style.text.colors:on_changed(instance,update_text_color)
-		instance.style.fill_colors:on_changed(    instance, redraw )
-		instance.style.border:on_changed(         instance, redraw )
-		instance.style.border.colors:on_changed(  instance, redraw )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, redraw )
+        instance.style.fill_colors:subscribe_to( nil, redraw )
+        instance.style.text.colors:subscribe_to( nil, update_text_color )
+        
 		update_text()
 		update_text_color()
 		flag_for_redraw = true

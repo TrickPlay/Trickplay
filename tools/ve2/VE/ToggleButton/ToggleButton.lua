@@ -23,7 +23,7 @@ local create_canvas = function(old_function,self,state)
 	c:set_source_color( self.style.fill_colors[state] or "00000000" )
 	
 	c:fill(true)
-	
+    
 	c:set_source_color( self.style.border.colors[state] or "ffffff" )
 	
 	c:stroke()
@@ -56,7 +56,6 @@ end
 local default_parameters = {
 	states          = states,
 	create_canvas   = create_canvas,
-	style = {border = { colors = { selection = "ffffff"}}}
 }
 
 --------------------------------------------------------------------------------
