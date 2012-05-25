@@ -2,6 +2,7 @@ if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua") end
 if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")      end
 if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua") end
 if not CANVAS            then dofile("__UTILITIES/Canvas.lua")            end
+if not MISC              then dofile("__UTILITIES/Misc.lua")            end
 if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
 if not STYLE             then dofile("__CORE/Style.lua")                  end
 if not WIDGET            then dofile("__CORE/Widget.lua")                 end
@@ -51,7 +52,8 @@ fake_layer_gid = '", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": '
 fake_layer_children = ', "children" : ['
 fake_layer_end = '], "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group", "size": [1186, 1121]}'
 
-fake_style_json = ''
+fake_style_json =
+'{"Style":{"arrow":{"colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"offset":10,"size":20},"border":{"colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"corner_radius":10,"width":2},"fill_colors":{"activation":[155,155,155],"default":[0,0,0],"focus":[155,155,155]},"name":"Style","text":{"alignment":"CENTER","colors":{"activation":[255,0,0],"default":[255,255,255],"focus":[255,255,255]},"font":"Sans 40px","justify":true,"wrap":true,"x_offset":0,"y_offset":0}}}'
 
 _VE_ = {}
 
@@ -59,11 +61,16 @@ _VE_ = {}
 _VE_.getStInfo = function()
 
     local t = {}
-
-    table.insert(t, json:parse(fake_style_json))
+    --table.insert(t, json:parse(fake_style_json))
+    table.insert(t, json:parse(get_all_styles()))
     print("getStInfo"..json:stringify(t))
 end 
 
+_VE_.repStInfo = function()
+    local t = {}
+    table.insert(t, json:parse(get_all_styles()))
+    print("repStInfo"..json:stringify(t))
+end 
 
 _VE_.getUIInfo = function()
     local t = {}
@@ -97,13 +104,14 @@ end
 -- REPORT 
 _VE_.repUIInfo = function(uiInstance)
     _VE_.getUIInfo()
+    _VE_.getStInfo()
     --[[
     local t = {}
     if uiInstance.to_json then 
         table.insert(t, json:parse(uiInstance:to_json()))
     end 
-    print("repUIInfo"..json_head..json:stringify(t)..json_tail)
-    ]]
+    print("repUIInfo"..json:stringify(t))
+    ]] 
 end
 
 _VE_.repUIInfoWfakeJson = function(uiInstance)
@@ -154,7 +162,6 @@ _VE_.openLuaFile = function()
     g.reactive = false
     
     screen:add(g)
-    print("test1 opend")
 
     for i,j in ipairs(screen.children) do
         --dump_properties(j)
@@ -180,7 +187,9 @@ end
 _VE_.newLayer = function()
     screen:add(Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
     layerNum = layerNum + 1
-    _VE_.repUIInfo()
+    --_VE_.repUIInfo()
+    _VE_.getUIInfo()
+    _VE_.getStInfo()
 end 
 
 _VE_.saveFile = function()
@@ -221,13 +230,13 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
         print "error"
     end
 
-    print("--------------------")
-    print (uiInstance:to_json())
-    print("--------------------")
+    --print("--------------------")
+    --print (uiInstance:to_json())
+    --print("--------------------")
 
     if uiInstance.subscribe_to then  
         -- not nil because there is no in_use property supported
-        uiInstance:subscribe_to("position", function()  _VE_.repUIInfo(uiInstance) end) 
+        uiInstance:subscribe_to(nil, function()  _VE_.repUIInfo(uiInstance) end) 
  
     end 
 
@@ -244,7 +253,10 @@ _VE_.insertUIElement = function(curLayerGid, uiTypeStr)
 
     devtools:gid(curLayerGid):add(uiInstance)
     --screen:add(uiInstance)
-    _VE_.repUIInfo(uiInstance)
+
+    --_VE_.repUIInfo(uiInstance)
+    _VE_.getUIInfo()
+    _VE_.getStInfo()
 end
 
 function screen.on_motion( screen , x , y )
