@@ -13,8 +13,9 @@ class TrickplayElementModel(QStandardItemModel):
         self.manager = QNetworkAccessManager()
         self.reply = None
         self.theBigestGid = None
+        self.styleData = None
 
-    def inspector_reply_finished(self, pdata=None):
+    def inspector_reply_finished(self, pdata=None, sdata=None):
         
         if pdata is not None :
             root = self.invisibleRootItem()
@@ -22,6 +23,7 @@ class TrickplayElementModel(QStandardItemModel):
             #if not pdata.has_key(0):
             #    return
             pdata = pdata[0]
+            self.styleData = sdata
 
             for c in pdata["children"]:
                 if c["name"] == "screen":

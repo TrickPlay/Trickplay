@@ -69,20 +69,20 @@ PROP_LIST = [
     'style', 
     'focused',
     # Widget Style
-    'border',
-    'arrow',
-    'fill_colors',
+    #'border',
+    #'arrow',
+    #'fill_colors',
     # Style Text
     'x_offset',
     'y_offset',
-    'colors',
+    #'colors',
     # Style Border
     'width',
     'corner_radius',
-    'colors',
+    #'colors',
     # Style Arrow 
-    'offset',
-    'colors',
+    #'offset',
+    #'colors',
     # Color Scheme 
     'default_color', 
     'focus_color', 
@@ -177,6 +177,12 @@ PROP_LIST = [
 ]
 
 NESTED_PROP_LIST = {
+    'style' : ['arrow', 'border', 'fill_colors', 'text'], 
+    'arrow' : ['colors', 'offset', 'size'],
+    'border' : ['colors', 'corner_radius', 'width'],
+    'fill_colors' : ['activation', 'default', 'focus'],
+    'colors' : ['activation', 'default', 'focus'],
+    'text' : ['alignment', 'colors', 'font', 'justify', 'wrap', 'x_offset', 'y_offset'], 
     'position' : ['x', 'y', 'z'], 
     'size' : ['w', 'h'],
     'new_attr' : ['a', 'b','c'],
@@ -189,6 +195,5 @@ NESTED_PROP_LIST = {
     'x_rotation' : ['angle', 'y center', 'z center'],
     'y_rotation' : ['angle', 'x center', 'z center'],
     'z_rotation' : ['angle', 'x center', 'y center'],
-    #'z_rotation' : [0, 1, 2], 
     'tile' : ['x', 'y'], 
 }

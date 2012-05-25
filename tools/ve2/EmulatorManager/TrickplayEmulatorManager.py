@@ -29,22 +29,50 @@ class TrickplayEmulatorManager(QWidget):
         self.name = 'Emulator'  
         self.port = '6789'
         self.address = 'localhost'
+        self.pdata = None
         
         #CON.port = self.port
         #CON.address = self.address
 
         self.run()
 
+    def chgStyleName(self, gid, new_name, old_name):
+        self.setUIInfo(gid, "style", "Style('"+new_name+"'):set('"+old_name+"')")
+
+    def setStyleInfo(self, style_name, property1, property2, property3=None, value=None):
+        if property1 == 'name':
+            inputCmd = str("Style('"+str(style_name)+"')."+str(property1)+" = '"+str(property2)+"'")
+        elif property3 == "style":
+            inputCmd = str("Style('"+str(style_name)+"')."+str(property2)+"."+str(property1)+" = "+str(value))
+        else:
+            inputCmd = str("Style('"+str(style_name)+"')."+str(property3)+"."+str(property2)+"."+str(property1)+" = "+str(value))
+
+        print inputCmd
+        self.trickplay.write(inputCmd+"\n")
+        self.trickplay.waitForBytesWritten()
+        
     def setUIInfo(self, gid, property, value):
-        #print "TrickplayEmulatorManager.py setUIInfo ()"+str(value)
-        #inputCmd = str("_VE_.setUIInfo("+str(gid)+",'"+str(property)+"','"+str(value)+"')")
         inputCmd = str("_VE_.setUIInfo("+str(gid)+",'"+str(property)+"',"+str(value)+")")
+        print inputCmd
+        print inputCmd
+        self.trickplay.write(inputCmd+"\n")
+        self.trickplay.waitForBytesWritten()
+
+    def repStInfo(self):
+        inputCmd = str("_VE_.repStInfo()")
+        print inputCmd
+        self.trickplay.write(inputCmd+"\n")
+        self.trickplay.waitForBytesWritten()
+
+    def getStInfo(self):
+        inputCmd = str("_VE_.getStInfo()")
         print inputCmd
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
 
     def getUIInfo(self):
         inputCmd = str("_VE_.getUIInfo()")
+        print inputCmd
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
 
@@ -88,22 +116,26 @@ class TrickplayEmulatorManager(QWidget):
 					self.trickplay.close()
 			else:
 				# Output the log line
-				pdata = None
+				#pdata = None
+				sdata = None
 				gid = None
 				if s is not None and len(s) > 9 :
-				    if s[:9] == "getUIInfo":
-				        pdata = json.loads(s[9:])
-				    elif s[:9] == "repUIInfo":
-				        pdata = json.loads(s[9:])
-				    elif s[:9] == "openInspc":
+				    luaCmd= s[:9] 
+				    print luaCmd
+				    if luaCmd == "getUIInfo":
+				        self.pdata = json.loads(s[9:])
+				    elif luaCmd == "repUIInfo":
+				        self.pdata = json.loads(s[9:])
+				        print self.pdata
+				    elif luaCmd == "repStInfo" :
+				        sdata = json.loads(s[9:])
+				    elif luaCmd == "getStInfo" :
+				        sdata = json.loads(s[9:])
+				    elif luaCmd == "openInspc":
 				        gid = int(s[9:])
 				    else:
 				        #print(">> %s"%s)
 				        pass
-
-				    if pdata is not None:
-				        self.inspector.clearTree()
-				        self.inspector.inspectorModel.inspector_reply_finished(pdata)
 
 				    if gid is not None:
 					try:
@@ -122,6 +154,38 @@ class TrickplayEmulatorManager(QWidget):
 
 					except:
 					    print("error :(")
+
+				    if luaCmd == "repStInfo":
+				        print sdata
+				        self.inspector.inspectorModel.styleData = sdata
+				        self.inspector.propertyFill(self.inspector.curData, self.inspector.cbStyle.currentIndex())
+				        return
+
+				    elif luaCmd == "repUIInfo":
+				        self.inspector.clearTree()
+				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
+				        """
+				        self.pdata = self.pdata[0]
+				        #print self.inspector.inspectorModel.findItems(str(self.pdata['gid']), Qt.MatchStartsWith), "OOO"#.setTPJSON(self.pdata)
+				        result = self.inspector.search(self.pdata['gid'], 'gid')
+				        result.setTPJSON(self.pdata)
+				        print result.index(), result.index().row(), result.index().column() , "WOWOWOWOW"
+				        """
+				        """
+				        if result:
+				            print result.TPJSON(), "8989898"
+				            result.setTPJSON(self.pdata)
+				            print result.TPJSON(), "77777777"
+				            #self.inspector.selectItem(result)
+				        """
+
+				        #print self.inspector.inspectorModel.findItems("Group", Qt.MatchStartsWith)[0]., "Group"#.setTPJSON(self.pdata)
+				        return
+
+				    if sdata is not None and self.pdata is not None:
+				        self.inspector.clearTree()
+				        self.inspector.inspectorModel.inspector_reply_finished(self.pdata, sdata)
+                        
 				elif s is not None:
 				    #print(">> %s"%s)
 				    pass

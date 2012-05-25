@@ -1,6 +1,5 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
-
 #import connection
 
 #from TrickplayPropertyModel import TrickplayPropertyModel
@@ -15,6 +14,22 @@ from Data import dataToModel
 from UI.Inspector import Ui_TrickplayInspector
 
 
+class MyDelegate(QItemDelegate):
+    def __init__(self):
+        QItemDelegate.__init__(self)
+    def sizeHint(self, option, index):
+        return QSize(32,15)
+
+class MyStyle (QWidget):
+    def __init__ (self, parent):
+        QWidget.__init__ (self, parent)
+        self.setGeometry(QtCore.QRect(0, 0, 100, 15))
+        lo = QHBoxLayout()
+        self._cbFoo = QComboBox()
+        for x in ["ABC", "DEF", "GHI", "JKL"]:
+            self._cbFoo.addItem(x)
+        lo.addWidget (self._cbFoo, 3)
+        self.setLayout (lo)
 
 class TrickplayInspector(QWidget):
     
@@ -35,12 +50,15 @@ class TrickplayInspector(QWidget):
         self.curLayerGid = None
         self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector :" , None, QApplication.UnicodeUTF8))
         self.layerGid = {}
+        self.cbStyle_textChanged = False
         
         # Models
         self.inspectorModel = TrickplayElementModel(self)
         #self.propertyModel = TrickplayPropertyModel()
         
         self.ui.inspector.setModel(self.inspectorModel)
+        self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
+
 
         #self.ui.property.setModel(self.propertyModel)
 
@@ -62,6 +80,8 @@ class TrickplayInspector(QWidget):
         # For changing UI Element properties
         QObject.connect(self.ui.property, SIGNAL("itemChanged(QTreeWidgetItem*, int)"), 
                         self.propertyItemChanged)
+        QObject.connect(self.ui.property, SIGNAL("itemSelectionChanged()"), 
+                        self.itemSelectionChanged)
         """
         QObject.connect(self.ui.property, SIGNAL("itemExpanded(QTreeWidgetItem*)"), 
                         self.propertyItemExpanded)
@@ -75,10 +95,7 @@ class TrickplayInspector(QWidget):
                         SIGNAL("currentItemChanged(const QTreeWidgetItem& , const QTreeWidgetItem &)"), 
                         self.propertyDataChanged)
         """
-        #QObject.connect(self.propertyModel,
-                        #SIGNAL("dataChanged(const QModelIndex&,const QModelIndex&)"),
-                        #self.propertyDataChanged)
-        
+
     def refresh(self):
         """
         Fill the inspector with Trickplay UI element data
@@ -96,6 +113,7 @@ class TrickplayInspector(QWidget):
         # Get all new data
         self.inspectorModel.empty()
         self.main._emulatorManager.getUIInfo() 
+        self.main._emulatorManager.getStInfo() 
         #self.propertyModel.empty()
         
         self.preventChanges = False
@@ -182,10 +200,15 @@ class TrickplayInspector(QWidget):
             QItemSelection(topLeft, bottomRight),
             QItemSelectionModel.SelectCurrent)
     
-    def propertyFill(self, data):
+    def propertyFill(self, data, styleIndex=None):
+        self.cbStyle_textChanged = False
         self.ui.property.clear()
+        self.ui.property.setStyleSheet("QTreeWidget { background: lightYellow; alternate-background-color: white; }")
         self.ui.property.setColumnCount(2)
         items = []
+        n = 0 
+        style_n = 0 
+        #self.ui.property.setUniformRowHeights(False)
         for p in PropertyIter(None):
             if data.has_key(str(p)) == True:
                 i = QTreeWidgetItem() 
@@ -195,6 +218,28 @@ class TrickplayInspector(QWidget):
                 i.setText (1, str(data[str(p)]))
                 if p == "source":
                     i.setText (1, summarizeSource(data[str(p)]))
+                if p == "style":
+                        #TODO : style comboBox to show/select a style from predefined styles 
+                        #       push/toolButton with '+' icon image for adding new style  
+                        style_n = n
+                        self.cbStyle = QComboBox()
+                        #self.cbStyle.setEditable (True)
+                        idx = 0
+                        cbStyle_idx = 0
+                        for x in self.inspectorModel.styleData[0]:
+                            self.cbStyle.addItem(x)
+                            if x == str(data[str(p)]):
+                                cbStyle_idx = idx 
+                            idx = idx + 1
+
+                        if styleIndex is not None:
+                            self.cbStyle.setCurrentIndex(styleIndex)
+                        else:
+                            self.cbStyle.setCurrentIndex(cbStyle_idx)
+                        QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.styleChanged)
+                        QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
+                        QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
+                        #QObject.connect(self.cbStyle, SIGNAL('highlighted(int)'), self.highlighted)
 
                 if p in NESTED_PROP_LIST: # is 'z_rotation' :
                     z = data[str(p)]
@@ -208,12 +253,61 @@ class TrickplayInspector(QWidget):
                             j.setText (1, str(z[idx]))
                             j.setFlags(j.flags() ^Qt.ItemIsEditable)
                             idx += 1
+                    else:
+                        #TODO: find Style name from combo box  
+                        self.style_name = str(self.cbStyle.itemText(self.cbStyle.currentIndex()))
+                        z = self.inspectorModel.styleData[0][self.style_name]
+                        for sp in PropertyIter(p):
+                            j = QTreeWidgetItem(i) 
+                            sp = str(sp)
+                            j.setText (0, sp)
+                            q = z[sp]
+                            for ssp in PropertyIter(sp):
+                                if ssp in NESTED_PROP_LIST and  ssp is not 'size':
+                                    k = QTreeWidgetItem(j) 
+                                    k.setText (0, ssp)
+                                    r = q[ssp]
+                                    for sssp in PropertyIter(ssp):
+                                        m = QTreeWidgetItem(k)
+                                        sssp = str(sssp)
+                                        m.setText(0,sssp)
+                                        m.setText(1,str(r[sssp]))
+                                        m.setFlags(k.flags() ^Qt.ItemIsEditable)
+                                else :
+                                    l = QTreeWidgetItem(j)
+                                    l.setText(0,ssp)
+                                    l.setText(1,str(q[ssp]))
+                                    l.setFlags(l.flags() ^Qt.ItemIsEditable)
                 elif p is not "source" and p is not "gid":
                     i.setFlags(i.flags() ^Qt.ItemIsEditable)
 
                 items.append(i)
+                n = n + 1
 
         self.ui.property.addTopLevelItems(items)
+        if style_n is not 0 : 
+            self.ui.property.setItemWidget(self.ui.property.topLevelItem(style_n), 1, self.cbStyle)
+            self.ui.property.itemWidget(self.ui.property.topLevelItem(style_n),1).setStyleSheet("QComboBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
+
+    def itemSelectionChanged(self):
+        self.cbStyle.setEditable (False)
+
+    def styleActivated(self, index):
+        self.cbStyle.setEditable (True)
+
+    def editTextChanged(self, str):
+        if self.cbStyle_textChanged == False :
+            self.old_name = self.style_name
+        self.cbStyle_textChanged = True
+
+    def styleChanged(self, index):
+        self.style_name = str(self.cbStyle.itemText(self.cbStyle.currentIndex()))
+        if self.cbStyle_textChanged == True:
+            self.main._emulatorManager.chgStyleName(self.getGid(), self.style_name, self.old_name) 
+            self.cbStyle_textChanged = False
+        else:
+            self.sendData(self.getGid(), "style", self.style_name)
+        self.main._emulatorManager.repStInfo() 
 
     # "selectionChanged(QItemSelection, QItemSelection)"
     def selectionChanged(self, selected, deselected):    
@@ -226,18 +320,19 @@ class TrickplayInspector(QWidget):
             
             index = self.selected(self.ui.inspector)
             item = self.inspectorModel.itemFromIndex(index)
-            data = item.TPJSON()
+            sdata = self.inspectorModel.styleData
+            self.curData = item.TPJSON()
             
-            if data.has_key('gid') == True:
-                if data['name'][:5] == "Layer":
-                    self.curLayerGid = int(data['gid'])
+            if self.curData.has_key('gid') == True:
+                if self.curData['name'][:5] == "Layer":
+                    self.curLayerGid = int(self.curData['gid'])
                     self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector : "+"Layer"+str(self.curLayerGid), None, QApplication.UnicodeUTF8))
                     #print("[VE] selectionChanged curLayerGid : ", self.curLayerGid)
-                elif self.layerGid[int(data['gid'])] : 
-                    self.curLayerGid = self.layerGid[int(data['gid'])] 
+                elif self.layerGid[int(self.curData['gid'])] : 
+                    self.curLayerGid = self.layerGid[int(self.curData['gid'])] 
                     self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector : "+"Layer"+str(self.curLayerGid), None, QApplication.UnicodeUTF8))
 
-            self.propertyFill(data)
+            self.propertyFill(self.curData)
             
             self.preventChanges = False
     
@@ -297,6 +392,7 @@ class TrickplayInspector(QWidget):
     def getParentInfo(self, item):
         n = self.ui.property.indexFromItem(item).row()
         while self.ui.property.indexOfTopLevelItem(item) < 0 :
+            print "*", item.text(0)
             item = self.ui.property.itemAbove(item) 
         return n, item
 
@@ -306,7 +402,33 @@ class TrickplayInspector(QWidget):
         else:
             return False
 
+    def is_this_style(self, item):
+        if self.is_this_subItem(item) is True:
+            pitem = item.parent()
+            style_property = []
+            while pitem is not None:
+                style_property.append(pitem.text(0)) 
+                pitem = pitem.parent()
+            
+            if style_property[len(style_property)-1] == "style":
+                if not item.text(0) in NESTED_PROP_LIST:
+                    try:    
+                        property, value = modelToData(item.text(0), item.text(1))
+                    except BadDataException, (e):
+                        print("Error >> Invalid data entered", e.value)
+                        return True
+
+                self.main._emulatorManager.setStyleInfo(self.style_name, item.text(0), style_property[0], style_property[1], value)
+                return True
+        return False
+                
+
+        
     def propertyItemChanged(self, item, col):
+        
+        if self.is_this_style(item) is True:
+            return
+            
         if str(item.text(0)) in NESTED_PROP_LIST :
             return
         if self.is_this_subItem(item) is True:
@@ -349,7 +471,7 @@ class TrickplayInspector(QWidget):
         """
         Send changed properties to Trickplay device
         """
-        if not property in NESTED_PROP_LIST:
+        if not property in NESTED_PROP_LIST or property == 'style':
             try:    
                 property, value = modelToData(property, value)
             except BadDataException, (e):
