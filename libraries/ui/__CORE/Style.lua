@@ -109,18 +109,13 @@ ArrowStyle = function(parameters)
 	--input is either nil or a table
 	parameters = is_table_or_nil("ArrowStyle",parameters)
     
-    local instance, size, offset, colors, name
+    local instance, size, offset, name
+    local colors = ColorScheme(default_arrow_colors)
     
     local  meta_setters = {
         size   = function(v) size   = v  end,
         offset = function(v) offset = v  end,
-        colors = function(v) colors =
-            matches_nil_table_or_type(
-                ColorScheme,
-                "COLORSCHEME",
-                type(v) == "string" and v or recursive_overwrite(v, default_arrow_colors)
-            )
-        end,
+        colors = function(v) colors:set(v or {}) end,
         name = function(v)
             if name ~= nil then all_arrow_styles[name] = nil end
             
@@ -232,18 +227,13 @@ BorderStyle = function(parameters)
 	parameters = is_table_or_nil("BorderStyle",parameters)
     
     
-    local instance, width, corner_radius, colors, name
+    local instance, width, corner_radius, name
+    local colors = ColorScheme(default_border_colors)
     
     local  meta_setters = {
         width         = function(v) width         = v   end,
         corner_radius = function(v) corner_radius = v   end,
-        colors        = function(v) colors        =
-            matches_nil_table_or_type(
-                ColorScheme,
-                "COLORSCHEME",
-                type(v) == "string" and v or recursive_overwrite(v, default_border_colors)
-            )
-        end,
+        colors        = function(v) colors:set(v or {}) end,
         name = function(v)
             
             if name ~= nil then all_border_styles[name] = nil end
