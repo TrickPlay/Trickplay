@@ -52,7 +52,6 @@ local function Widgetize(instance)
     end
     
     function instance:on_key_down(key)
-        
         if not instance.enabled then return end
         
         if key_functions[key] then
@@ -134,33 +133,29 @@ local function Widgetize(instance)
 	
     ----------------------------------------------------------------------------
     
-    local to_json__overridden
-    
-    local to_json = function(_,t)
-        
-        t = is_table_or_nil("Widget.to_json",t)
-        t = to_json__overridden and to_json__overridden(_,t) or t
-        
-		
-		for _,k in pairs(uielement_properties) do
-			
-			t[k] = instance[k]
-			
-		end
-        
-        t.style   = instance.style.name
-        t.focused = instance.focused
-        t.enabled = instance.enabled
-		
-		t.type = t.type or "Widget"
-        
-        return json:stringify(t)
-    end
-	
-	override_property(instance,"to_json",
-		function() return to_json end,
-		function(oldf,self,v) to_json__overridden = v end
+	override_function(instance,"to_json",
+		function(old_function,self) return json:stringify(self.attributes) end
 	)
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = {}
+            
+            for _,k in pairs(uielement_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            
+            t.style   = self.style.name
+            t.focused = self.focused
+            t.enabled = self.enabled
+            
+            t.type = "Widget"
+            
+            return t
+        end,
+        function(oldf,self,v) self:set(v) end
+    )
 	
 	override_function(instance,"from_json", function(old_function,self,j)
 		
@@ -232,57 +227,174 @@ end
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-Widget_Group = function(parameters)
+Widget = function(parameters)
     
-    return Widgetize(  Group()  ):set( 
+    return  Widgetize(  Group()  ):set( 
         
         is_table_or_nil( "Widget_Group", parameters ) 
         
     )
     
 end
+Widget_Group = function(parameters)
+    
+    local instance =  Widgetize(  Group()  ):set( 
+        
+        is_table_or_nil( "Widget_Group", parameters ) 
+        
+    )
+    
+    ----------------------------------------------------------------------------
+    
+    local a
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.clip_to_size = self.clip_to_size
+            
+            t.children = {}
+            
+            for i,child in pairs(instance.children) do
+                a = child.attributes
+                if a then
+                    table.insert(t.children,a)
+                end
+                
+            end
+            return t
+        end
+    )
+    
+    return instance
+    
+end
 
+--------------------------------------------------------------------------------
+local rectangle_properties = {
+    "color","border_width","border_color",
+}
 Widget_Rectangle = function(parameters)
     
-    return Widgetize(  Rectangle()  ):set( 
+    local instance = Widgetize(  Rectangle()  ):set( 
         
         is_table_or_nil( "Widget_Rectangle", parameters ) 
         
     )
     
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            for _,k in pairs(rectangle_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            return t
+        end
+    )
+    
+    return instance
+    
 end
-
+local text_properties = {
+    "text","font","color","markup","use_markup","editable","wrap_mode",
+    "single_line","wants_enter","max_length","ellipsize","password_char",
+    "justify","alignment","baseline","line_spacing","cursor_position",
+    "selection_end","selected_text","selection_color","cursor_visible",
+    "cursor_color","cursor_size",
+}
 Widget_Text = function(parameters)
     
-    return Widgetize(  Text()  ):set( 
+    local instance = Widgetize(  Text()  ):set( 
         
         is_table_or_nil( "Widget_Text", parameters ) 
         
     )
     
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            for _,k in pairs(text_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            return t
+        end
+    )
+    
+    return instance
+    
 end
 
+local image_properties = {
+    "src","loaded","async","read_tags","tags","base_size","tile"
+}
 Widget_Image = function(parameters)
     
-    return Widgetize(  Image()  ):set( 
+    local instance = Widgetize(  Image()  ):set( 
         
         is_table_or_nil( "Widget_Image", parameters ) 
         
     )
     
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            for _,k in pairs(image_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            
+            return t
+        end
+    )
+    
+    return instance
+    
 end
 
+local clone_properties = { 
+    "source"
+}
 Widget_Clone = function(parameters)
     
-    return Widgetize(  Clone()  ):set( 
+    local instance = Widgetize(  Clone()  ):set( 
         
         is_table_or_nil( "Widget_Clone", parameters ) 
         
     )
     
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            for _,k in pairs(clone_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            return t
+        end
+    )
+    
+    return instance
+    
 end
 
-Widget = Widget_Group
 
 
 
