@@ -45,9 +45,9 @@ ArrowPane = function(parameters)
         number_of_rows = 3,
         number_of_cols = 3,
         cells = {
-            { Clone(), up,   Clone() },
-            { left,    pane, right   },
-            { Clone(), down, Clone() },
+            { Widget_Clone(),   up, Widget_Clone() },
+            {           left, pane,          right },
+            { Widget_Clone(), down, Widget_Clone() },
         },
     }
     ----------------------------------------------------------------------------
