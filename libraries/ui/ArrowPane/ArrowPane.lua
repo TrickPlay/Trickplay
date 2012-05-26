@@ -161,6 +161,24 @@ ArrowPane = function(parameters)
 	
 	instance:subscribe_to( "style", instance_on_style_changed )
     instance_on_style_changed()
+    
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.pane_w = instance.pane_w
+            t.pane_h = instance.pane_h
+            t.virtual_w = instance.virtual_w
+            t.virtual_h = instance.virtual_h
+            
+            t.type = "ArrowPane"
+            
+            return t
+        end
+    )
+    
     ----------------------------------------------------------------------------
     
     instance:set(parameters)
