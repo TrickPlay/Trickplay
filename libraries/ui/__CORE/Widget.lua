@@ -262,6 +262,9 @@ Widget_Group = function(parameters)
                 end
                 
             end
+            
+            t.type = "Widget_Group"
+            
             return t
         end
     )
@@ -293,6 +296,9 @@ Widget_Rectangle = function(parameters)
                 t[k] = self[k]
                 
             end
+            
+            t.type = "Widget_Rectangle"
+            
             return t
         end
     )
@@ -326,6 +332,9 @@ Widget_Text = function(parameters)
                 t[k] = self[k]
                 
             end
+            
+            t.type = "Widget_Text"
+            
             return t
         end
     )
@@ -357,6 +366,8 @@ Widget_Image = function(parameters)
                 
             end
             
+            t.type = "Widget_Image"
+            
             return t
         end
     )
@@ -387,6 +398,9 @@ Widget_Clone = function(parameters)
                 t[k] = self[k]
                 
             end
+            
+            t.type = "Widget_Clone"
+            
             return t
         end
     )
