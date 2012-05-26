@@ -37,7 +37,7 @@ ScrollPane = function(parameters)
         number_of_cols = 2,
         cells = {
             { pane,       vertical },
-            { horizontal, Clone()  },
+            { horizontal, Widget_Clone()  },
         },
     }
     ----------------------------------------------------------------------------

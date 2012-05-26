@@ -41,7 +41,15 @@ Slider = function(parameters)
             
             --this function is called by screen_on_motion
             g_dragging = drag
+            grip:grab_pointer()
             
+        end,
+        on_motion = function(self,...)
+            return g_dragging and g_dragging(...)
+        end,
+        on_button_up = function(self,...)
+            grip:ungrab_pointer()
+            g_dragging = nil
         end,
     }
 	override_property(instance,"grip",
@@ -71,20 +79,17 @@ Slider = function(parameters)
 	----------------------------------------------------------------------------
     track  = Widget_Rectangle{
         reactive = true,
-        on_button_down = function(self,new_position)
+        on_button_down = function(self,...)
             
-            grip:on_button_down(
+            position_grabbed_from =
                 --the transformed position of the grip
                 grip.transformed_position[direction_num]*
                 --transformed position value has to be converted to the 1920x1080 scale
                 screen[direction_dim]/screen.transformed_size[direction_num]+
                 -- transformed position doesn't take anchor point into account
                 grip[direction_dim]/2 
-                
-            )
             
-            g_dragging(new_position)
-            
+            drag(...)
         end,
     }
 	override_property(instance,"track",
@@ -122,13 +127,23 @@ Slider = function(parameters)
             grip.position = track.position
         end
     )
-    ----------------------------------------------------------------------------
-    -- mouse events for screen                                                --
-    ----------------------------------------------------------------------------
     
-    function screen:on_motion(...)  return g_dragging and g_dragging(...) end
-    function screen:on_button_up()         g_dragging = nil               end
-    
+	----------------------------------------------------------------------------
+	
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.direction = self.direction
+            t.progress  = self.progress
+            t.grip  = {w = grip.w, h = grip.h, }
+            t.track = {w = track.w,h = track.h,}
+            
+            t.type = "Slider"
+            
+            return t
+        end
+    )
     
     
 	----------------------------------------------------------------------------
