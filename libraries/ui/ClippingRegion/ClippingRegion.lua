@@ -33,10 +33,6 @@ ClippingRegion = function(parameters)
             
         end
 	)
-    
-	override_property(instance,"widget_type",
-		function() return "ClippingRegion" end, nil
-	)
 	override_property(instance,"virtual_h",
 		function(oldf) return contents.h     end,
 		function(oldf,self,v) 
@@ -69,9 +65,32 @@ ClippingRegion = function(parameters)
 		function(oldf) return y_offset     end,
 		function(oldf,self,v) y_offset = v end
 	)
+    
+	override_property(instance,"widget_type",
+		function() return "ClippingRegion" end, nil
+	)
 	override_function(instance,"add",
 		function(oldf,self,...) contents:add(...) end
 	)
+    
+	----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.virtual_x = self.virtual_x
+            t.virtual_y = self.virtual_y
+            t.virtual_w = self.virtual_w
+            t.virtual_h = self.virtual_h
+            t.sets_x_to = self.sets_x_to
+            t.sets_y_to = self.sets_y_to
+            
+            t.type = "ClippingRegion"
+            
+            return t
+        end
+    )
     
 	----------------------------------------------------------------------------
 	
