@@ -169,7 +169,21 @@ ProgressBar = function(parameters)
 	)
     
 	----------------------------------------------------------------------------
-	
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.progress = self.progress
+            
+            t.type = "ProgressBar"
+            
+            return t
+        end
+    )
+    
+	----------------------------------------------------------------------------
+    
     local set_redraw_shell = function() redraw_shell = true end
     local set_redraw_both  = function() redraw_shell = true redraw_fill  = true end
     

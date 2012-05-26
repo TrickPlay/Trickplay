@@ -564,7 +564,7 @@ GridManager = function(p)
                 --truncates entries beyond 'number_of_cols',
                 --'node_constructor' handles nil entries
                 for i = 1,number_of_cols do
-                    data[k][i] = node_constructor(v[i])
+                    data[k][i] = v[i]
                 end
                 
             else
