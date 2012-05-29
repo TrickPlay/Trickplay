@@ -28,11 +28,12 @@
 #import "Protocols.h"
 
 #import <uuid/uuid.h>
+#import <VideoStreamer/VideoStreamer.h>
 
 @interface TPAppViewControllerContext : TPAppViewController <SocketManagerDelegate, 
 CommandInterpreterAppDelegate, CameraViewControllerDelegate,
 UITextFieldDelegate, UIActionSheetDelegate,
-UINavigationControllerDelegate, VirtualRemoteDelegate> {
+UINavigationControllerDelegate, VirtualRemoteDelegate, VideoStreamerDelegate> {
 
 @private
     BOOL viewDidAppear;
@@ -98,6 +99,12 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
     // selecting images from the photo library, taking images with the camera,
     // and editing the images to be sent Trickplay.
     CameraViewController *camera;
+    
+    // This VideoStreamer object may be used to stream video via SIP from the iOS Device
+    // to an outside SIP server or client. The camera cannot be accessed while a video
+    // streamer exists and the video streamer is automatically destroyed when no longer
+    // needed.
+    VideoStreamer *videoStreamer;
     
     // The UIViewController for the virtual remote used to control the Television.
     VirtualRemoteViewController *virtualRemote;
@@ -1028,7 +1035,44 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
 }
 
 #pragma mark -
-#pragma mark - Modal Virtual Remote
+#pragma mark Video Streaming
+
+- (void)do_VS {
+    // TODO: Make sure that the camera is not in use first. Also, camera should destroy itself when not in use.
+    if (camera) {
+        // TODO: warn TrickPlay of cancellation with error message
+        return;
+    }
+    VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
+    if (!context) {
+        // TODO: warn TrickPlay of cancellation with error message
+        return;
+    }
+    videoStreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
+    if (!videoStreamer) {
+        // TODO: warn TrickPlay of cancellation with error message
+        return;
+    }
+    [videoStreamer startChat];
+    [delegate tpAppViewController:self wantsToPresentCamera:videoStreamer];
+}
+
+// TODO: If in any way the video streamer is destroyed, pass cancel message back to TrickPlay
+
+- (void)videoStreamerInitiatingChat:(id)_videoStreamer {
+    
+}
+
+- (void)videoStreamerChatStarted:(id)_videoStreamer {
+    
+}
+
+- (void)videoStreamer:(id)_videoStreamer chatEndedWithInfo:(NSString *)reason {
+    
+}
+
+#pragma mark -
+#pragma mark Modal Virtual Remote
 
 /**
  * SV = Show Virtual Remote
