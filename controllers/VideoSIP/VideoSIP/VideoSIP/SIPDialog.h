@@ -11,7 +11,6 @@
 #import <sys/types.h>
 #import <netinet/in.h>
 #import <sys/socket.h>
-#import <CoreFoundation/CoreFoundation.h>
 
 
 @class VideoStreamerContext;

@@ -307,6 +307,8 @@ void *get_in_addr(struct sockaddr *sa) {
     if (streamerContext) {
         [streamerContext release];
     }
+    
+    [super dealloc];
 }
 
 @end

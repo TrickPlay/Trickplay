@@ -33,6 +33,7 @@
         self.viewController = [[[ViewController alloc] initWithNibName:@"ViewController_iPad" bundle:nil] autorelease];
     }
     //*/
+    
     VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
     self.viewController = [[VideoStreamer alloc] initWithContext:context delegate:self];
     [(VideoStreamer *)self.viewController startChat];
