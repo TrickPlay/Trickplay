@@ -14,7 +14,8 @@
 #import <CoreMedia/CoreMedia.h>
 #import <QuartzCore/QuartzCore.h>
 
-#import "NetworkManager.h"
+@class VideoStreamer;
+@class NetworkManager;
 
 
 @protocol VideoStreamerDelegate <NSObject>
@@ -30,15 +31,7 @@
 
 
 
-@interface VideoStreamerContext : NSObject {
-@private
-    NSString *SIPPassword;
-    NSString *SIPUserName;
-    NSString *SIPRemoteUserName;
-    NSString *SIPServerHostName;
-    UInt16 SIPServerPort;       // defaults to 5060
-    UInt16 SIPClientPort;       // defaults to 5060
-}
+@interface VideoStreamerContext : NSObject
 
 @property (nonatomic, readonly) NSString *SIPPassword;
 @property (nonatomic, readonly) NSString *SIPUserName;
@@ -53,18 +46,7 @@
 
 
 
-@interface VideoStreamer : UIViewController <AVCaptureVideoDataOutputSampleBufferDelegate, NetworkManagerDelegate> {
-    NetworkManager *networkMan;
-    
-    AVCaptureSession *captureSession;
-    CALayer *customLayer;
-    
-    CVPixelBufferRef pxbuffer;
-    
-    VideoStreamerContext *streamerContext;
-    
-    id <VideoStreamerDelegate> delegate;
-}
+@interface VideoStreamer : UIViewController 
 
 @property (nonatomic, retain) AVCaptureSession *captureSession;
 @property (nonatomic, retain) CALayer *customLayer;

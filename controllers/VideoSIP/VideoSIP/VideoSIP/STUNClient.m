@@ -288,6 +288,8 @@ void free_attributes(attribute *attributes[], int length) {
     if (publicHostPortSocket) {
         [publicHostPortSocket release];
     }
+    
+    [super dealloc];
 }
 
 @end

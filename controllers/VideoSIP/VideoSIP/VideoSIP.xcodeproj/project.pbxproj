@@ -42,7 +42,6 @@
 		CDABC6AE14FEC7C10039DBE0 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6AD14FEC7C10039DBE0 /* QuartzCore.framework */; };
 		CDABC6B614FEDE9F0039DBE0 /* NetworkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6B514FEDE9F0039DBE0 /* NetworkManager.m */; };
 		CDABC6BA150000D10039DBE0 /* SIPDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6B9150000D10039DBE0 /* SIPDialog.m */; };
-		CDABC6BC15002E6D0039DBE0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6BB15002E6C0039DBE0 /* CoreFoundation.framework */; };
 		CDABC6BF150066560039DBE0 /* SIPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6BE150066550039DBE0 /* SIPClient.m */; };
 		CDABC6C6150563380039DBE0 /* MyExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6C5150563380039DBE0 /* MyExtensions.m */; };
 		CDABC6C91511037F0039DBE0 /* SDPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6C81511037E0039DBE0 /* SDPParser.m */; };
@@ -113,7 +112,6 @@
 		CDABC6B514FEDE9F0039DBE0 /* NetworkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetworkManager.m; sourceTree = "<group>"; };
 		CDABC6B8150000D10039DBE0 /* SIPDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SIPDialog.h; sourceTree = "<group>"; };
 		CDABC6B9150000D10039DBE0 /* SIPDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SIPDialog.m; sourceTree = "<group>"; };
-		CDABC6BB15002E6C0039DBE0 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		CDABC6BD150066540039DBE0 /* SIPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SIPClient.h; sourceTree = "<group>"; };
 		CDABC6BE150066550039DBE0 /* SIPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SIPClient.m; sourceTree = "<group>"; };
 		CDABC6C4150563380039DBE0 /* MyExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyExtensions.h; sourceTree = "<group>"; };
@@ -130,7 +128,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CD47019815534D0F00A89E9C /* Security.framework in Frameworks */,
-				CDABC6BC15002E6D0039DBE0 /* CoreFoundation.framework in Frameworks */,
 				CDABC6AE14FEC7C10039DBE0 /* QuartzCore.framework in Frameworks */,
 				CDABC6AC14FEC7B30039DBE0 /* AVFoundation.framework in Frameworks */,
 				CDABC6AA14FEC7AB0039DBE0 /* CoreMedia.framework in Frameworks */,
@@ -176,7 +173,6 @@
 			children = (
 				CDABC6A514FEC7790039DBE0 /* libAVCEncoder.a */,
 				CD47019715534D0F00A89E9C /* Security.framework */,
-				CDABC6BB15002E6C0039DBE0 /* CoreFoundation.framework */,
 				CDABC6AD14FEC7C10039DBE0 /* QuartzCore.framework */,
 				CDABC6AB14FEC7B30039DBE0 /* AVFoundation.framework */,
 				CDABC6A914FEC7AB0039DBE0 /* CoreMedia.framework */,
@@ -345,7 +341,7 @@
 		CDABC63514FEC5860039DBE0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = CDABC63814FEC5860039DBE0 /* Build configuration list for PBXProject "VideoSIP" */;
 			compatibilityVersion = "Xcode 3.2";

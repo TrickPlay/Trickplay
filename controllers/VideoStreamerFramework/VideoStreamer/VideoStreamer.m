@@ -7,19 +7,53 @@
 //
 
 #import "VideoStreamer.h"
+#import "NetworkManager.h"
 
 #import "rtpenc_h264.h"
 
+@interface _VideoStreamerContext : VideoStreamerContext {
+@private
+    NSString *SIPPassword;
+    NSString *SIPUserName;
+    NSString *SIPRemoteUserName;
+    NSString *SIPServerHostName;
+    UInt16 SIPServerPort;       // defaults to 5060
+    UInt16 SIPClientPort;       // defaults to 5060
+}
 
-@implementation VideoStreamerContext
+@end
 
-// TODO: Replace synthesis with read-only methods
-@synthesize SIPUserName;
-@synthesize SIPPassword;
-@synthesize SIPRemoteUserName;
-@synthesize SIPServerHostName;
-@synthesize SIPServerPort;
-@synthesize SIPClientPort;
+@implementation _VideoStreamerContext
+
+#pragma mark -
+#pragma mark Property Getters
+
+- (NSString *)SIPPassword {
+    return SIPPassword;
+}
+
+- (NSString *)SIPUserName {
+    return SIPUserName;
+}
+
+- (NSString *)SIPRemoteUserName {
+    return SIPRemoteUserName;
+}
+
+- (NSString *)SIPServerHostName {
+    return SIPServerHostName;
+}
+
+- (UInt16)SIPServerPort {
+    return SIPServerPort;
+}
+
+- (UInt16)SIPClientPort {
+    return SIPClientPort;
+}
+
+#pragma mark -
+#pragma mark init function
 
 - (id)init {
     return [self initWithUserName:nil password:nil remoteUserName:nil serverHostName:nil serverPort:0 clientPort:0];
@@ -52,14 +86,106 @@
     return self;
 }
 
-- (void)dealloc {
+- (void)dealloc {    
     [SIPUserName release];
     [SIPPassword release];
     [SIPRemoteUserName release];
     [SIPServerHostName release];
+    
+    [super dealloc];
 }
 
 @end
+
+
+
+
+
+
+@implementation VideoStreamerContext
+
++ (id)alloc {
+    if ([self isEqual:[VideoStreamerContext class]]) {
+        NSZone *temp = [self zone];
+        /** TODO: find out if release is necessary here via memory leaks in instruments
+         or release should be done in a placeholder class init method **/
+        
+        //fprintf(stderr, "retain count 1: %d\n", [self retainCount]);
+        [self release];
+        //fprintf(stderr, "retain count 2: %d\n", [self retainCount]);
+        return [_VideoStreamerContext allocWithZone:temp];
+    } else {
+        return [super alloc];
+    }
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    if ([self isEqual:[VideoStreamerContext class]]) {
+        //fprintf(stderr, "retain count 1: %d\n", [self retainCount]);
+        [self release];
+        //fprintf(stderr, "retain count 2: %d\n", [self retainCount]);
+        return [_VideoStreamerContext allocWithZone:zone];
+    } else {
+        return [super allocWithZone:zone];
+    }
+}
+
+- (id)initWithUserName:(NSString *)user password:(NSString *)password remoteUserName:(NSString *)remoteUser serverHostName:(NSString *)hostName serverPort:(NSUInteger)serverPort clientPort:(NSUInteger)clientPort {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSString *)SIPUserName {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSString *)SIPPassword {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSString *)SIPRemoteUserName {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (NSString *)SIPServerHostName {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (UInt16)SIPServerPort {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (UInt16)SIPClientPort {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (id)initWithUserName:(NSString *)user password:(NSString *)password remoteUserName:(NSString *)remoteUser {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+@end
+
+
+
+
+#pragma mark -
+#pragma mark VideoStreamer
+#pragma mark -
 
 
 
@@ -71,12 +197,56 @@
 @end
 
 
+@interface _VideoStreamer : VideoStreamer <AVCaptureVideoDataOutputSampleBufferDelegate, NetworkManagerDelegate> {
+    NetworkManager *networkMan;
+    
+    AVCaptureSession *captureSession;
+    CALayer *customLayer;
+    
+    CVPixelBufferRef pxbuffer;
+    
+    VideoStreamerContext *streamerContext;
+    
+    id <VideoStreamerDelegate> delegate;
+}
 
-@implementation VideoStreamer
+@end
 
-@synthesize captureSession;
-@synthesize customLayer;
-@synthesize delegate;
+
+
+@implementation _VideoStreamer
+
+#pragma mark -
+#pragma mark properties
+
+- (AVCaptureSession *)captureSession {
+    return captureSession;
+}
+
+- (void)setCaptureSession:(AVCaptureSession *)_captureSession {
+    [captureSession release];
+    captureSession = [_captureSession retain];
+}
+
+- (CALayer *)customLayer {
+    return customLayer;
+}
+
+- (void)setCustomLayer:(CALayer *)_customLayer {
+    [_customLayer release];
+    customLayer = [_customLayer retain];
+}
+
+- (id <VideoStreamerDelegate>)delegate {
+    return delegate;
+}
+
+- (void)setDelegate:(id <VideoStreamerDelegate>)_delegate {
+    delegate = _delegate;
+}
+
+#pragma mark -
+#pragma mark init functions
 
 - (id)init {
     return [self initWithContext:nil delegate:nil];
@@ -91,16 +261,23 @@
 }
 
 // Designated initializer
-- (id)initWithContext:(VideoStreamerContext *)_streamerContext delegate:(id<VideoStreamerDelegate>)_delegate {
+- (id)initWithContext:(VideoStreamerContext *)_streamerContext delegate:(id <VideoStreamerDelegate>)_delegate {
+    // Make sure there is a context
     if (!_streamerContext) {
         [self release];
         return nil;
     }
+    // Make sure a camera exists on the device
+    if (![AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo]) {
+        [self release];
+        return nil;
+    }
     
+    // TODO: no reason to load a nib! just init and set the view to stretch to parent view.
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        self = [super initWithNibName:@"ViewController_iPhone" bundle:nil];
+        self = [super initWithNibName:nil bundle:nil];
     } else {
-        self = [super initWithNibName:@"ViewController_iPad" bundle:nil];
+        self = [super initWithNibName:nil bundle:nil];
     }
     
     if (self) {
@@ -174,18 +351,18 @@
     [self.view.layer addSublayer:customLayer];
     
     /*
-    imageView = [[UIImageView alloc] init];
-    imageView.frame = CGRectMake(0.0, 0.0, 150.0, 150.0);
-    [self.view addSubview:imageView];
-    */
+     imageView = [[UIImageView alloc] init];
+     imageView.frame = CGRectMake(0.0, 0.0, 150.0, 150.0);
+     [self.view addSubview:imageView];
+     */
     
     /*
-    prevLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];
-    prevLayer.frame = CGRectMake(150.0, 0.0, 150.0, 150.0);
-    prevLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-    [self.view.layer addSublayer:prevLayer];
-    */
-     
+     prevLayer = [AVCaptureVideoPreviewLayer layerWithSession:captureSession];
+     prevLayer.frame = CGRectMake(150.0, 0.0, 150.0, 150.0);
+     prevLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+     [self.view.layer addSublayer:prevLayer];
+     */
+    
     //[networkMan startEncoder];
     //[captureSession startRunning];
 }
@@ -429,6 +606,129 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     if (pxbuffer) {
         CVPixelBufferUnlockBaseAddress(pxbuffer, 0);
     }
+    
+    [super dealloc];
+}
+
+@end
+
+
+
+
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+#pragma mark -
+
+
+
+@implementation VideoStreamer
+
++ (id)alloc {
+    if ([self isEqual:[VideoStreamer class]]) {
+        NSZone *temp = [self zone];
+        [self release];
+        return [_VideoStreamer allocWithZone:temp];
+    } else {
+        return [super alloc];
+    }
+}
+
++ (id)allocWithZone:(NSZone *)zone {
+    if ([self isEqual:[VideoStreamer class]]) {
+        [self release];
+        return [_VideoStreamer allocWithZone:zone];
+    } else {
+        return [super allocWithZone:zone];
+    }
+}
+
+- (AVCaptureSession *)captureSession {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setCaptureSession:(AVCaptureSession *)_captureSession {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (CALayer *)customLayer {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setCustomLayer:(CALayer *)_customLayer {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (id <VideoStreamerDelegate>)delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)setDelegate:(id <VideoStreamerDelegate>)_delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (id)init {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+// Designated initializer
+- (id)initWithContext:(VideoStreamerContext *)_streamerContext delegate:(id<VideoStreamerDelegate>)_delegate {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma User Chat controls
+
+- (void)startChat {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)endChat {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+#pragma mark -
+#pragma Video Capture
+
+- (void)initCapture {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
+}
+
+- (void)terminateCaptureWithInfo:(NSString *)info {
+    @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                   reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]
+                                 userInfo:nil];
 }
 
 @end

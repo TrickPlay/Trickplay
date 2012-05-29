@@ -13,7 +13,6 @@
 
 #import <Foundation/Foundation.h>
 
-#import <CoreFoundation/CoreFoundation.h>
 
 #import "SIPDialog.h"
 

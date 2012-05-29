@@ -8,7 +8,6 @@
 
 #import "SIPClient.h"
 
-#import <CoreFoundation/CoreFoundation.h>
 
 #import <sys/types.h>
 #import <sys/socket.h>

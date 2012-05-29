@@ -12,7 +12,6 @@
 #import "MyExtensions.h"
 
 #import <CommonCrypto/CommonDigest.h> // Need to import for CC_MD5 access
-#import <CoreFoundation/CoreFoundation.h>
 
 @implementation NSString (MyExtensions)
 

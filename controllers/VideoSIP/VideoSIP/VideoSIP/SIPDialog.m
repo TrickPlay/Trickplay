@@ -8,7 +8,6 @@
 
 #import "SIPDialog.h"
 
-#import <CoreFoundation/CoreFoundation.h>
 #import <netdb.h>
 #import <arpa/inet.h>
 
