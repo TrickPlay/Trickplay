@@ -19,10 +19,10 @@
 		4476FE0015212E8900B6CB4A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4476FDFF15212E8900B6CB4A /* libz.dylib */; };
 		44B48F821457335F00C14A7D /* libTestFlight.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 44B48F801457335F00C14A7D /* libTestFlight.a */; };
 		CD2D3149145B84A2009DA3D7 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD2D3148145B84A2009DA3D7 /* AVFoundation.framework */; };
-		CD32EAC31574754C00A3BA7B /* TakeControl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAC21574754C00A3BA7B /* TakeControl.framework */; };
 		CD32EAC51574757A00A3BA7B /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAC41574757A00A3BA7B /* CoreMedia.framework */; };
 		CD32EAC71574758000A3BA7B /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAC61574758000A3BA7B /* CoreVideo.framework */; };
 		CD32EAC91574758700A3BA7B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAC81574758700A3BA7B /* Security.framework */; };
+		CD32EAE415757CF400A3BA7B /* TakeControl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAE315757CF400A3BA7B /* TakeControl.framework */; };
 		CD4B2E96143A748A0073BB88 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E95143A748A0073BB88 /* UIKit.framework */; };
 		CD4B2E98143A748A0073BB88 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E97143A748A0073BB88 /* Foundation.framework */; };
 		CD4B2E9A143A748A0073BB88 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4B2E99143A748A0073BB88 /* CoreGraphics.framework */; };
@@ -54,10 +54,10 @@
 		44B48F801457335F00C14A7D /* libTestFlight.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libTestFlight.a; path = TestFlight/libTestFlight.a; sourceTree = SOURCE_ROOT; };
 		44B48F811457335F00C14A7D /* TestFlight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestFlight.h; path = TestFlight/TestFlight.h; sourceTree = SOURCE_ROOT; };
 		CD2D3148145B84A2009DA3D7 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		CD32EAC21574754C00A3BA7B /* TakeControl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TakeControl.framework; path = "../../../../Library/Developer/Xcode/DerivedData/TakeControl-fmjgmnryfewmcuhaixzdabsuvdjf/Build/Products/Release-iphoneos/TakeControl.framework"; sourceTree = "<group>"; };
 		CD32EAC41574757A00A3BA7B /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		CD32EAC61574758000A3BA7B /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		CD32EAC81574758700A3BA7B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		CD32EAE315757CF400A3BA7B /* TakeControl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TakeControl.framework; path = "../../../../Library/Developer/Xcode/DerivedData/TakeControl-fmjgmnryfewmcuhaixzdabsuvdjf/Build/Products/Release-iphoneos/TakeControl.framework"; sourceTree = "<group>"; };
 		CD4B2E91143A74890073BB88 /* TakeControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TakeControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD4B2E95143A748A0073BB88 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		CD4B2E97143A748A0073BB88 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -100,7 +100,7 @@
 				CD4B2E96143A748A0073BB88 /* UIKit.framework in Frameworks */,
 				CD4B2E98143A748A0073BB88 /* Foundation.framework in Frameworks */,
 				44B48F821457335F00C14A7D /* libTestFlight.a in Frameworks */,
-				CD32EAC31574754C00A3BA7B /* TakeControl.framework in Frameworks */,
+				CD32EAE415757CF400A3BA7B /* TakeControl.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -127,17 +127,9 @@
 			name = TestFlight;
 			sourceTree = "<group>";
 		};
-		CD32EACC1574762800A3BA7B /* AVCEncoder */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = AVCEncoder;
-			sourceTree = "<group>";
-		};
 		CD4B2E86143A74890073BB88 = {
 			isa = PBXGroup;
 			children = (
-				CD32EACC1574762800A3BA7B /* AVCEncoder */,
 				4476FDFF15212E8900B6CB4A /* libz.dylib */,
 				CD4B2E9B143A748A0073BB88 /* TakeControlApp */,
 				CD4B2E94143A748A0073BB88 /* Frameworks */,
@@ -156,10 +148,10 @@
 		CD4B2E94143A748A0073BB88 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CD32EAE315757CF400A3BA7B /* TakeControl.framework */,
 				CD32EAC81574758700A3BA7B /* Security.framework */,
 				CD32EAC61574758000A3BA7B /* CoreVideo.framework */,
 				CD32EAC41574757A00A3BA7B /* CoreMedia.framework */,
-				CD32EAC21574754C00A3BA7B /* TakeControl.framework */,
 				CD2D3148145B84A2009DA3D7 /* AVFoundation.framework */,
 				CD4B2F29143A76710073BB88 /* MobileCoreServices.framework */,
 				CD4B2F27143A76650073BB88 /* MediaPlayer.framework */,
@@ -382,7 +374,10 @@
 		44FE8A58143FAAC100F10442 /* Distribution */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = (
+					armv7,
+					armv6,
+				);
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -478,7 +473,10 @@
 		CD4B2EB4143A748A0073BB88 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = (
+					armv7,
+					armv6,
+				);
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -507,7 +505,10 @@
 		CD4B2EB5143A748A0073BB88 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = (
+					armv7,
+					armv6,
+				);
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				FRAMEWORK_SEARCH_PATHS = (

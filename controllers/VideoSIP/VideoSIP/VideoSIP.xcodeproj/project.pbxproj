@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CD32EADB1575703000A3BA7B /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EADA1575703000A3BA7B /* libAVCEncoder.a */; };
 		CD470196154F721000A89E9C /* STUNClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CD470195154F721000A89E9C /* STUNClient.m */; };
 		CD47019815534D0F00A89E9C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD47019715534D0F00A89E9C /* Security.framework */; };
 		CD4701D61559CE4500A89E9C /* VideoStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4701D51559CE4500A89E9C /* VideoStreamer.m */; };
@@ -17,8 +18,6 @@
 		CDABC64F14FEC5870039DBE0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC64E14FEC5870039DBE0 /* main.m */; };
 		CDABC65314FEC5870039DBE0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC65214FEC5870039DBE0 /* AppDelegate.m */; };
 		CDABC65614FEC5870039DBE0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC65514FEC5870039DBE0 /* ViewController.m */; };
-		CDABC65914FEC5870039DBE0 /* ViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDABC65714FEC5870039DBE0 /* ViewController_iPhone.xib */; };
-		CDABC65C14FEC5870039DBE0 /* ViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CDABC65A14FEC5870039DBE0 /* ViewController_iPad.xib */; };
 		CDABC68614FEC6F40039DBE0 /* rtp.c in Sources */ = {isa = PBXBuildFile; fileRef = CDABC67A14FEC6F40039DBE0 /* rtp.c */; };
 		CDABC68714FEC6F40039DBE0 /* sdp.c in Sources */ = {isa = PBXBuildFile; fileRef = CDABC67B14FEC6F40039DBE0 /* sdp.c */; };
 		CDABC68814FEC6F40039DBE0 /* net_udp.c in Sources */ = {isa = PBXBuildFile; fileRef = CDABC67C14FEC6F40039DBE0 /* net_udp.c */; };
@@ -35,7 +34,6 @@
 		CDABC69714FEC7010039DBE0 /* rtpenc_h264.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC69514FEC7010039DBE0 /* rtpenc_h264.m */; };
 		CDABC69A14FEC7090039DBE0 /* sm_math.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC69914FEC7090039DBE0 /* sm_math.m */; };
 		CDABC6A414FEC74C0039DBE0 /* RTSPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC6A114FEC74C0039DBE0 /* RTSPClient.m */; };
-		CDABC6A614FEC7790039DBE0 /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6A514FEC7790039DBE0 /* libAVCEncoder.a */; };
 		CDABC6A814FEC7A20039DBE0 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6A714FEC7A20039DBE0 /* CoreVideo.framework */; };
 		CDABC6AA14FEC7AB0039DBE0 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6A914FEC7AB0039DBE0 /* CoreMedia.framework */; };
 		CDABC6AC14FEC7B30039DBE0 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC6AB14FEC7B30039DBE0 /* AVFoundation.framework */; };
@@ -49,6 +47,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CD32EADA1575703000A3BA7B /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
 		CD470194154F721000A89E9C /* STUNClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUNClient.h; sourceTree = "<group>"; };
 		CD470195154F721000A89E9C /* STUNClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUNClient.m; sourceTree = "<group>"; };
 		CD47019715534D0F00A89E9C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
@@ -66,8 +65,6 @@
 		CDABC65214FEC5870039DBE0 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		CDABC65414FEC5870039DBE0 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		CDABC65514FEC5870039DBE0 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		CDABC65814FEC5870039DBE0 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPhone.xib; sourceTree = "<group>"; };
-		CDABC65B14FEC5870039DBE0 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPad.xib; sourceTree = "<group>"; };
 		CDABC66814FEC6C00039DBE0 /* AVCEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCEncoder.h; sourceTree = "<group>"; };
 		CDABC66914FEC6C00039DBE0 /* AVCParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCParameters.h; sourceTree = "<group>"; };
 		CDABC66D14FEC6F40039DBE0 /* rtp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtp.h; sourceTree = "<group>"; };
@@ -103,7 +100,6 @@
 		CDABC69914FEC7090039DBE0 /* sm_math.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = sm_math.m; sourceTree = "<group>"; };
 		CDABC6A014FEC74C0039DBE0 /* RTSPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTSPClient.h; sourceTree = "<group>"; };
 		CDABC6A114FEC74C0039DBE0 /* RTSPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTSPClient.m; sourceTree = "<group>"; };
-		CDABC6A514FEC7790039DBE0 /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
 		CDABC6A714FEC7A20039DBE0 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		CDABC6A914FEC7AB0039DBE0 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		CDABC6AB14FEC7B30039DBE0 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -135,7 +131,7 @@
 				CDABC64314FEC5870039DBE0 /* UIKit.framework in Frameworks */,
 				CDABC64514FEC5870039DBE0 /* Foundation.framework in Frameworks */,
 				CDABC64714FEC5870039DBE0 /* CoreGraphics.framework in Frameworks */,
-				CDABC6A614FEC7790039DBE0 /* libAVCEncoder.a in Frameworks */,
+				CD32EADB1575703000A3BA7B /* libAVCEncoder.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,7 +167,7 @@
 		CDABC64114FEC5870039DBE0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				CDABC6A514FEC7790039DBE0 /* libAVCEncoder.a */,
+				CD32EADA1575703000A3BA7B /* libAVCEncoder.a */,
 				CD47019715534D0F00A89E9C /* Security.framework */,
 				CDABC6AD14FEC7C10039DBE0 /* QuartzCore.framework */,
 				CDABC6AB14FEC7B30039DBE0 /* AVFoundation.framework */,
@@ -193,8 +189,6 @@
 				CDABC65214FEC5870039DBE0 /* AppDelegate.m */,
 				CDABC65414FEC5870039DBE0 /* ViewController.h */,
 				CDABC65514FEC5870039DBE0 /* ViewController.m */,
-				CDABC65714FEC5870039DBE0 /* ViewController_iPhone.xib */,
-				CDABC65A14FEC5870039DBE0 /* ViewController_iPad.xib */,
 				CDABC64914FEC5870039DBE0 /* Supporting Files */,
 				CD4701D41559CE4400A89E9C /* VideoStreamer.h */,
 				CD4701D51559CE4500A89E9C /* VideoStreamer.m */,
@@ -366,8 +360,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CDABC64D14FEC5870039DBE0 /* InfoPlist.strings in Resources */,
-				CDABC65914FEC5870039DBE0 /* ViewController_iPhone.xib in Resources */,
-				CDABC65C14FEC5870039DBE0 /* ViewController_iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -417,22 +409,6 @@
 				CDABC64C14FEC5870039DBE0 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		CDABC65714FEC5870039DBE0 /* ViewController_iPhone.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CDABC65814FEC5870039DBE0 /* en */,
-			);
-			name = ViewController_iPhone.xib;
-			sourceTree = "<group>";
-		};
-		CDABC65A14FEC5870039DBE0 /* ViewController_iPad.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				CDABC65B14FEC5870039DBE0 /* en */,
-			);
-			name = ViewController_iPad.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -486,6 +462,10 @@
 		CDABC66014FEC5870039DBE0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv7,
+					armv6,
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "VideoSIP/VideoSIP-Prefix.pch";
 				INFOPLIST_FILE = "VideoSIP/VideoSIP-Info.plist";
@@ -501,6 +481,10 @@
 		CDABC66114FEC5870039DBE0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					armv7,
+					armv6,
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "VideoSIP/VideoSIP-Prefix.pch";
 				INFOPLIST_FILE = "VideoSIP/VideoSIP-Info.plist";

@@ -3,6 +3,7 @@
 /build
 *.o
 *.a
+!libAVCEncoder.a
 trickplay.cfg
 .trickplay
 .DS_Store

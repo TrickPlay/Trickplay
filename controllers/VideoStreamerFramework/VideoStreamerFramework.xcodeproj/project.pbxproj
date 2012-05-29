@@ -7,15 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CD32EAAD1574679C00A3BA7B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4702BC1561E6A800A89E9C /* UIKit.framework */; };
-		CD32EAAE1574679E00A3BA7B /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4702B71561E68A00A89E9C /* libAVCEncoder.a */; };
-		CD32EAAF157467A100A3BA7B /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4702B91561E6A800A89E9C /* CoreGraphics.framework */; };
-		CD32EAB0157467A400A3BA7B /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4702BA1561E6A800A89E9C /* CoreMedia.framework */; };
-		CD32EAB1157467A700A3BA7B /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4702BB1561E6A800A89E9C /* CoreVideo.framework */; };
-		CD32EAB2157467AB00A3BA7B /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4702B51561E67900A89E9C /* QuartzCore.framework */; };
-		CD32EAB3157467AD00A3BA7B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4702B31561E67000A89E9C /* Security.framework */; };
-		CD32EAB4157467B200A3BA7B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4702B11561E66700A89E9C /* AVFoundation.framework */; };
-		CD32EAB5157467B400A3BA7B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD4702371561DF5600A89E9C /* Foundation.framework */; };
+		CD32EADD1575703D00A3BA7B /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EADC1575703D00A3BA7B /* libAVCEncoder.a */; };
 		CD4702501561E07500A89E9C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CD47024E1561E07500A89E9C /* InfoPlist.strings */; };
 		CD4702631561E43600A89E9C /* sm_math.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702601561E43600A89E9C /* sm_math.m */; };
 		CD4702641561E43600A89E9C /* MyExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702621561E43600A89E9C /* MyExtensions.m */; };
@@ -37,8 +29,6 @@
 		CD4702A11561E4E500A89E9C /* base64.c in Sources */ = {isa = PBXBuildFile; fileRef = CD4702951561E4E500A89E9C /* base64.c */; };
 		CD4702A21561E4E500A89E9C /* util.c in Sources */ = {isa = PBXBuildFile; fileRef = CD4702961561E4E500A89E9C /* util.c */; };
 		CD4702AF1561E60F00A89E9C /* VideoStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702AE1561E60F00A89E9C /* VideoStreamer.m */; };
-		CD4702C31561E71700A89E9C /* ViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD4702C11561E71700A89E9C /* ViewController_iPhone.xib */; };
-		CD4702C41561E71700A89E9C /* ViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = CD4702C21561E71700A89E9C /* ViewController_iPad.xib */; };
 		CD4702C61561E79600A89E9C /* VideoStreamer.h in Headers */ = {isa = PBXBuildFile; fileRef = CD4702AD1561E60F00A89E9C /* VideoStreamer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4702CB1561F43C00A89E9C /* SIPDialog.h in Headers */ = {isa = PBXBuildFile; fileRef = CD4702C71561F43C00A89E9C /* SIPDialog.h */; };
 		CD4702CC1561F43C00A89E9C /* SIPDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702C81561F43C00A89E9C /* SIPDialog.m */; };
@@ -51,7 +41,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		CD4702371561DF5600A89E9C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		CD32EADC1575703D00A3BA7B /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
 		CD4702481561E07400A89E9C /* VideoStreamer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VideoStreamer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD47024D1561E07500A89E9C /* VideoStreamer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "VideoStreamer-Info.plist"; sourceTree = "<group>"; };
 		CD47024F1561E07500A89E9C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -99,16 +89,6 @@
 		CD4702A61561E55F00A89E9C /* AVCParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCParameters.h; sourceTree = "<group>"; };
 		CD4702AD1561E60F00A89E9C /* VideoStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoStreamer.h; sourceTree = "<group>"; };
 		CD4702AE1561E60F00A89E9C /* VideoStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoStreamer.m; sourceTree = "<group>"; };
-		CD4702B11561E66700A89E9C /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		CD4702B31561E67000A89E9C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
-		CD4702B51561E67900A89E9C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		CD4702B71561E68A00A89E9C /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
-		CD4702B91561E6A800A89E9C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		CD4702BA1561E6A800A89E9C /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
-		CD4702BB1561E6A800A89E9C /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
-		CD4702BC1561E6A800A89E9C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		CD4702C11561E71700A89E9C /* ViewController_iPhone.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ViewController_iPhone.xib; sourceTree = "<group>"; };
-		CD4702C21561E71700A89E9C /* ViewController_iPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ViewController_iPad.xib; sourceTree = "<group>"; };
 		CD4702C71561F43C00A89E9C /* SIPDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SIPDialog.h; sourceTree = "<group>"; };
 		CD4702C81561F43C00A89E9C /* SIPDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SIPDialog.m; sourceTree = "<group>"; };
 		CD4702C91561F43C00A89E9C /* SIPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SIPClient.h; sourceTree = "<group>"; };
@@ -124,15 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD32EAAE1574679E00A3BA7B /* libAVCEncoder.a in Frameworks */,
-				CD32EAAF157467A100A3BA7B /* CoreGraphics.framework in Frameworks */,
-				CD32EAB0157467A400A3BA7B /* CoreMedia.framework in Frameworks */,
-				CD32EAB1157467A700A3BA7B /* CoreVideo.framework in Frameworks */,
-				CD32EAAD1574679C00A3BA7B /* UIKit.framework in Frameworks */,
-				CD32EAB2157467AB00A3BA7B /* QuartzCore.framework in Frameworks */,
-				CD32EAB3157467AD00A3BA7B /* Security.framework in Frameworks */,
-				CD32EAB4157467B200A3BA7B /* AVFoundation.framework in Frameworks */,
-				CD32EAB5157467B400A3BA7B /* Foundation.framework in Frameworks */,
+				CD32EADD1575703D00A3BA7B /* libAVCEncoder.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -159,15 +131,7 @@
 		CD4702361561DF5600A89E9C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				CD4702B71561E68A00A89E9C /* libAVCEncoder.a */,
-				CD4702B91561E6A800A89E9C /* CoreGraphics.framework */,
-				CD4702BA1561E6A800A89E9C /* CoreMedia.framework */,
-				CD4702BB1561E6A800A89E9C /* CoreVideo.framework */,
-				CD4702BC1561E6A800A89E9C /* UIKit.framework */,
-				CD4702B51561E67900A89E9C /* QuartzCore.framework */,
-				CD4702B31561E67000A89E9C /* Security.framework */,
-				CD4702B11561E66700A89E9C /* AVFoundation.framework */,
-				CD4702371561DF5600A89E9C /* Foundation.framework */,
+				CD32EADC1575703D00A3BA7B /* libAVCEncoder.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -175,8 +139,6 @@
 		CD47024B1561E07400A89E9C /* VideoStreamer */ = {
 			isa = PBXGroup;
 			children = (
-				CD4702C11561E71700A89E9C /* ViewController_iPhone.xib */,
-				CD4702C21561E71700A89E9C /* ViewController_iPad.xib */,
 				CD4702AD1561E60F00A89E9C /* VideoStreamer.h */,
 				CD4702AE1561E60F00A89E9C /* VideoStreamer.m */,
 				CD4702A41561E54F00A89E9C /* AVCEncoder */,
@@ -374,8 +336,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CD4702501561E07500A89E9C /* InfoPlist.strings in Resources */,
-				CD4702C31561E71700A89E9C /* ViewController_iPhone.xib in Resources */,
-				CD4702C41561E71700A89E9C /* ViewController_iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -487,6 +447,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/../../../../Library/Developer/Xcode/DerivedData/AVCEncoder-bwvpqofgiijvjrdiakcqilfijzgu/Build/Products/Release-iphoneos\"",
 				);
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
@@ -519,6 +480,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/../../../../Library/Developer/Xcode/DerivedData/AVCEncoder-bwvpqofgiijvjrdiakcqilfijzgu/Build/Products/Release-iphoneos\"",
 				);
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
