@@ -7,36 +7,10 @@ if not MISC              then dofile("__UTILITIES/Misc.lua")                end
 if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")              end
 if not STYLE             then dofile("__CORE/Style.lua")                    end
 if not WIDGET            then dofile("__CORE/Widget.lua")                   end
-if not PROGRESSSPINNER   then dofile("ProgressSpinner/ProgressSpinner.lua") end
-if not CLIPPINGREGION    then dofile("ClippingRegion/ClippingRegion.lua")   end
+if not SLIDER            then dofile("Slider/Slider.lua")                   end
 
-local test_group = Group()
+s1 = Slider()
 
-screen:add(test_group)
-local tests = {
-}
+screen:add(s1)
 
-for i,test in ipairs(tests) do
-    
-    if not test() then print("test "..i.." failed") end
-    test_group:clear()
-end
-
-test_group:unparent()
-
-
-
-
-
-
-
-screen:show()
-
-
-cr1 = ClippingRegion()
-
-cr1:add(Rectangle{w=1000,h=1000,color="ffff00"},Rectangle{w=100,h=100,color="ff0000"},Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
-
-
-screen:add(cr1)
-
+screen.reactive = true

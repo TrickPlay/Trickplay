@@ -44,7 +44,7 @@ DialogBox = function(parameters)
 	parameters = recursive_overwrite(parameters,default_parameters) 
     
 	----------------------------------------------------------------------------
-	--The Button Object inherits from Widget
+	--The DialogBox Object inherits from Widget
 	
 	local instance = Widget( parameters )
 	
@@ -213,56 +213,36 @@ DialogBox = function(parameters)
 		end
 	)
 	
-    ----------------------------------------------------------------------------
-    ---[=[
-    local widget_to_json = instance.to_json
-	
+	----------------------------------------------------------------------------
     
-	instance.to_json = function(_,t)
-		
-		t.title = instance.title
-		t.separator_y = instance.separator_y
-		t.title = instance.title
-		
-		if (not canvas) and bg.src and bg.src ~= "[canvas]" then 
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+                
+            t.title = self.title
+            t.separator_y = self.separator_y
+            t.title = self.title
             
-            t.image = bg.src
-			
-		end
-		
-        --[[
-        if content and content.to_json then
+            if (not canvas) and bg.src and bg.src ~= "[canvas]" then 
+                
+                t.image = bg.src
+                
+            end
             
-            t.children = 
+            --[[
+            if content and content.to_json then
+                
+                t.children = 
+                
+            end
+            --]]
             
+            t.type = "DialogBox"
+            
+            return t
         end
-        --]]
-        
-		t.type = t.type or "DialogBox"
-		
-		return t
-		
-	end
-	
-    ----------------------------------------------------------------------------
-	
-    local to_json__overridden
-	
-    local to_json = function(_,t)
-        
-        t = is_table_or_nil("DialogBox.to_json",t)
-        t = to_json__overridden and to_json__overridden(_,t) or t
-        
-        --t = widget_to_json(_,t)
-        
-        return widget_to_json(_,t)
-    end
-	
-	override_property(instance,"to_json",
-		function() return to_json end,
-		function(oldf,self,v) to_json__overridden = v end
-	)
-    --]=]
+    )
+    
     ----------------------------------------------------------------------------
 	
 	instance:subscribe_to(
@@ -301,19 +281,19 @@ DialogBox = function(parameters)
 		title.x            = text_style.x_offset
 		title.y            = text_style.y_offset + title.h/2
 		title.w            = instance.w
+		title.color        = text_style.colors.default
 		
 	end
 	
 	local canvas_callback = function() if canvas then make_canvas() end end
 	
-	function instance_on_style_changed()
-		
-		instance.style.text:on_changed(instance,update_title)
-		
-		instance.style.fill_colors:on_changed(    instance, canvas_callback )
-		instance.style.border:on_changed(         instance, canvas_callback )
-		instance.style.border.colors:on_changed(  instance, canvas_callback )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, canvas_callback )
+        instance.style.fill_colors:subscribe_to( nil, canvas_callback )
+        instance.style.text:subscribe_to( nil, update_title )
+        
 		update_title()
 		flag_for_redraw = true
 	end

@@ -1,3 +1,134 @@
+TABBAR = true
+
+local default_parameters = {tab_w = 200,tab_h = 50,pane_w = 400,pane_h = 300, tab_location = "top"}
+TabBar = function(parameters)
+    
+	--input is either nil or a table
+	parameters = is_table_or_nil("TabBar",parameters) -- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	
+	-- function is in __UTILITIES/TypeChecking_and_TableTraversal.lua
+	parameters = recursive_overwrite(parameters,default_parameters) 
+    
+	----------------------------------------------------------------------------
+	--The TabBar Object inherits from Widget
+	
+	local instance = ListManager()
+    local panes = {}
+	local rbg 
+    rbg= RadioButtonGroup{name = "TabBar",
+        on_selection_change = function()
+            for i,p in ipairs(panes) do
+                p[i == rbg.selected and "show" or "hide"](p)
+            end
+        end
+    }
+    
+    local panes_obj = Group{}
+    local tab_w = 200
+    local tab_h = 50
+    local tab_images
+    local tab_style = Style{border = { colors = { selection = "ffffff"}}}
+    local tab_location
+    local tabs = {}
+    local tabs_lm = ListManager{
+        node_constructor = function(obj)
+            
+            if obj == nil then obj = {label = "Tab",content = {}}
+            elseif type(obj) ~= "table" then
+                error("Expected tab entry to be a string. Received "..type(obj),2)
+            elseif type(obj.label) ~= "string" then
+                error("Received a tab without a label",2)
+            end
+            
+            local pane = Group{children = obj.contents}
+            obj = ToggleButton{
+                label  = obj.label,
+                w      = tab_w,
+                h      = tab_h,
+                style  = tab_style,
+                group  = rbg,
+                --images = tab_images,
+            }
+            
+            table.insert(tabs,obj)
+            table.insert(panes,pane)
+            panes_obj:add(pane)
+            
+            return obj
+        end
+    }
+    local tab_pane = ArrowPane{move_by = "210"}
+    tab_pane:add(tabs_lm)
+    
+    instance.cells = {tab_pane,panes_obj}
+	override_property(instance,"tabs",
+		function(oldf) return   instance.cells     end,
+		function(oldf,self,v)  
+            
+            if type(v) ~= "table" then error("Expected table. Received: ",2) end
+            print(1)
+            tabs_lm:set{
+                direction = "horizontal",
+                cells = v,
+            }
+            
+        end
+	)
+    local pane_w,pane_h
+	override_property(instance,"pane_w",
+		function(oldf) return   pane_w     end,
+		function(oldf,self,v)   pane_w = v end
+    )
+	override_property(instance,"pane_h",
+		function(oldf) return   pane_h     end,
+		function(oldf,self,v)   pane_h = v end
+    )
+	override_property(instance,"tab_w",
+		function(oldf) return   tab_w     end,
+		function(oldf,self,v)   tab_w = v end
+    )
+	override_property(instance,"tab_h",
+		function(oldf) return   tab_h     end,
+		function(oldf,self,v)   tab_h = v end
+    )
+	override_property(instance,"tab_location",
+		function(oldf) return   tab_location     end,
+		function(oldf,self,v)  
+            if tab_location == v then return end
+            
+            if v == "top" then
+                instance.direction  = "vertical"
+                tabs_lm.direction  = "horizontal"
+                print(1)
+                tab_pane.pane_w    = pane_w
+                print(2)
+                tab_pane.pane_h    = tab_h
+                print(3)
+                tab_pane.virtual_w = tabs_lm.w
+                tab_pane.virtual_h = tab_h
+                tab_pane.move_by   = tab_w + tabs_lm.spacing
+            elseif v == "left" then
+                instance.direction  = "horizontal"
+                tabs_lm.direction  = "vertical"
+                tab_pane.pane_w    = tab_w
+                tab_pane.pane_h    = pane_h
+                tab_pane.virtual_w = tab_w
+                tab_pane.virtual_h = tabs_lm.h
+                tab_pane.move_by   = tab_h + tabs_lm.spacing
+            else
+                error("Expected 'top' or 'left'. Received "..v,2)
+            end
+            
+            tab_location = v
+        end
+	)
+    instance.on_entries_changed = function() print("top_level") end
+    instance:set(parameters)
+    
+    return instance
+end
+
+--[[
 function ui_element.tabBar(t)
     
     --default parameters
@@ -507,3 +638,4 @@ function ui_element.tabBar(t)
 
     return umbrella
 end
+--]]

@@ -73,7 +73,6 @@ RadioButtonGroup = function(parameters)
 				  
 			end,
 			on_selection_change = function(v)
-				  
 				  on_selection_change = v
 				  
 			end,
@@ -153,6 +152,13 @@ RadioButtonGroup = function(parameters)
 						removing = false
 						
 				end,
+                set = function(self,t)
+                    if type(t) ~= "table" then
+                        error("Expected table. Received "..type(t),2) 
+                    end
+                    
+                    for k,v in pairs(t) do   self[k] = v   end
+                end,
 			},
 			{
 				  __index = function(t,k,v)
@@ -168,10 +174,12 @@ RadioButtonGroup = function(parameters)
 			}
 	  )
 	  
-	  
+	  --[[
 	  instance.name  = parameters.name
 	  if parameters.items then instance.items = parameters.items end
-	  
+	  --]]
+      instance:set(parameters)
+      
 	  return instance
 	  
 end

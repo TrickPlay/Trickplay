@@ -200,7 +200,10 @@ public:
 
 #ifdef TP_TIME_CONTROLLER_EVENTS
 
-        g_debug( "EVENT PROCESS TIME TYPE %d : %d ms" , type , int( timestamp() - create_time ) );
+        gsize t = timestamp();
+
+        g_debug( "EVENT TYPE %d : ARRIVED AT %" G_GSIZE_FORMAT " : PROCESSED AT %" G_GSIZE_FORMAT " : %d ms" , type , create_time , t ,  int( t - create_time ) );
+
 #endif
 
         switch ( type )
@@ -298,7 +301,7 @@ private:
 
 #ifdef TP_TIME_CONTROLLER_EVENTS
 
-    gulong          create_time;
+    gsize          	create_time;
 
 #endif
 

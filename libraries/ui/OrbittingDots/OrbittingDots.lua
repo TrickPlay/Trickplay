@@ -281,56 +281,38 @@ OrbittingDots = function(parameters)
 		end
 	)
 	
-    ----------------------------------------------------------------------------
-    ---[=[
-    local widget_to_json = instance.to_json
-	
+	----------------------------------------------------------------------------
     
-	instance.to_json = function(_,t)
-		
-		t.animating = instance.animating
-		t.duration = instance.duration
-		t.num_dots = instance.num_dots
-		t.dot_size = instance.dot_size
-		
-		if (not canvas) and image.src and image.src ~= "[canvas]" then 
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
             
-            t.image = image.src
-			
-		end
-		t.type = t.type or "ProgressSpinner"
-		
-		return t
-		
-	end
-	
-    ----------------------------------------------------------------------------
-	
-    local to_json__overridden
-	
-    local to_json = function(_,t)
-        
-        t = is_table_or_nil("OrbittingDots.to_json",t)
-        t = to_json__overridden and to_json__overridden(_,t) or t
-        
-        return widget_to_json(_,t)
-    end
-	
-	override_property(instance,"to_json",
-		function() return to_json end,
-		function(oldf,self,v) to_json__overridden = v end
-	)
-    --]=]
-    ----------------------------------------------------------------------------
-	
+            t.animating = self.animating
+            t.duration = self.duration
+            t.num_dots = instance.num_dots
+            t.dot_size = instance.dot_size
+            
+            if (not canvas) and image.src and image.src ~= "[canvas]" then 
+                
+                t.image = image.src
+                
+            end
+            t.type = "OrbittingDots"
+            
+            return t
+        end
+    )
+    
+	----------------------------------------------------------------------------
+    
 	local style_callback = function() if canvas then flag_for_redraw = true end   end
 	
-	function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, style_callback )
-		instance.style.border:on_changed(         instance, style_callback )
-		instance.style.border.colors:on_changed(  instance, style_callback )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, style_callback )
+        instance.style.fill_colors:subscribe_to( nil, style_callback )
+        
 		style_callback()
 	end
 	

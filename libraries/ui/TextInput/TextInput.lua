@@ -112,37 +112,19 @@ TextInput = function(parameters)
 	center_label()
 	
     ----------------------------------------------------------------------------
-    ---[=[
-    local widget_to_json = instance.to_json
 	
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.text = self.text
+            
+            t.type = "TextInput"
+            
+            return t
+        end
+    )
     
-	instance.to_json = function(_,t)
-		
-		t.text = instance.text
-		
-		t.type = t.type or "TextInput"
-		
-		return t
-		
-	end
-	
-    ----------------------------------------------------------------------------
-	
-    local to_json__overridden
-	
-    local to_json = function(_,t)
-        
-        t = is_table_or_nil("TextInput.to_json",t)
-        t = to_json__overridden and to_json__overridden(_,t) or t
-        
-        return widget_to_json(_,t)
-    end
-	
-	override_property(instance,"to_json",
-		function() return to_json end,
-		function(oldf,self,v) to_json__overridden = v end
-	)
-    --]=]
     ----------------------------------------------------------------------------
 	
 	local update_text  = function()
@@ -159,15 +141,13 @@ TextInput = function(parameters)
 		text.color = instance.style.text.colors.default
 		
 	end
-	function instance_on_style_changed()
-		
-		instance.style.text:on_changed(instance,update_text)
-		
-		instance.style.text.colors:on_changed(instance,update_text_color)
-		instance.style.fill_colors:on_changed(    instance, redraw )
-		instance.style.border:on_changed(         instance, redraw )
-		instance.style.border.colors:on_changed(  instance, redraw )
-		
+	local instance_on_style_changed
+    function instance_on_style_changed()
+        
+        instance.style.border:subscribe_to(      nil, redraw )
+        instance.style.fill_colors:subscribe_to( nil, redraw )
+        instance.style.text.colors:subscribe_to( nil, update_text_color )
+        
 		update_text()
 		update_text_color()
 		flag_for_redraw = true

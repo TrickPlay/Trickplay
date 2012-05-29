@@ -1,4 +1,5 @@
 
+
 if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua")   end
 if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")        end
 if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua")   end
@@ -9,43 +10,17 @@ if not STYLE             then dofile("__CORE/Style.lua")                    end
 if not WIDGET            then dofile("__CORE/Widget.lua")                   end
 if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
 if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
-
-local test_group = Group()
-
-screen:add(test_group)
-local tests = {
-    
-}
-
-for i,test in ipairs(tests) do
-    
-    if not test() then print("test "..i.." failed") end
-    test_group:clear()
-end
-
-test_group:unparent()
+if not BUTTON            then dofile("Button/Button.lua")                   end
+if not BUTTONPICKER      then dofile("ButtonPicker/ButtonPicker.lua")       end
 
 
 
 
 screen:show()
----[[
-lm1 = LayoutManager{
-    number_of_rows = 2,
-    number_of_cols = 2,
-    cells = {
-        {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-        {Widget_Rectangle{w=100,h=100}},--Rectangle{w=100,h=100}},
-        {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-    }
-}
 
-lm2 = ListManager{
-    x=500,
-    length = 2,
-    cells = {
-        Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}
-    }
-}
-screen:add(lm1,lm2)
---]]
+
+bp1 = ButtonPicker{orientation="vertical",items={"item1","item2","ite","itdddem2"}}
+
+screen:add(Rectangle{size=screen.size,color="666600"},bp1)
+
+dolater(function() bp1:grab_key_focus() end)

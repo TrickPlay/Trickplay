@@ -289,7 +289,9 @@ b1 = Button()
 
 --------------------------------------------------------------------------------
 b2 = Button{x = 100,y = 200, label = "LABEL"}--,style = style}
+print("b2")
 b2.style = style
+print("b2")
 b2.style.text.x_offset = 200
 b2.style.text.y_offset = -50
 b2.label = "lAbel"
@@ -307,15 +309,17 @@ b4 = Button{
     h = 150
 }
 b4.w = 300
-print(b4.h)
+
 --------------------------------------------------------------------------------
 style.text.font = "Sans Bold 40px"
+
 b5 = Button{y=900}
 
 b5:from_json(    b3:to_json()   )
 print(b3:to_json())
 print(b5:to_json())
+print(b5.style:to_json())
 b5.y = 700
-screen:add(Rectangle{size = screen.size, color = "000033"},b0,b1,b2,b3,b4,b5)
+screen:add(Rectangle{size = screen.size, color = "000033"},b1,b2,b3,b4,b5)
 
 controllers:start_pointer()

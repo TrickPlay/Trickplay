@@ -355,50 +355,30 @@ Button = function(parameters)
 	
     ----------------------------------------------------------------------------
     
-    local widget_to_json
-    
-    --sets to_json__overridden in Widget
-	instance.to_json = function(_,t)
-		
-		t.label = instance.label
-		
-		if not canvas then
-			
-			t.images = {}
-			
-			for state, img in pairs(images) do
-				
-				while img.source do img = img.source end
-				
-				if img.src and img.src ~= "[canvas]" then t.images[state] = img.src end
-			end
-			
-		end
-		
-		t.type = t.type or "Button"
-		
-		return t
-		
-	end
-	
-	widget_to_json = instance.to_json
-	
-    ----------------------------------------------------------------------------
-	
-    local to_json__overridden
-	
-    local to_json = function(_,t)
-        
-        t = is_table_or_nil("Button.to_json",t)
-        t = to_json__overridden and to_json__overridden(_,t) or t
-        
-        return widget_to_json(_,t)
-    end
-	
-	override_property(instance,"to_json",
-		function() return to_json end,
-		function(oldf,self,v) to_json__overridden = v end
-	)
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+                
+            t.label = self.label
+            
+            if not canvas then
+                
+                t.images = {}
+                
+                for state, img in pairs(images) do
+                    
+                    while img.source do img = img.source end
+                    
+                    if img.src and img.src ~= "[canvas]" then t.images[state] = img.src end
+                end
+                
+            end
+            
+            t.type = "Button"
+            
+            return t
+        end
+    )
     
 	----------------------------------------------------------------------------
 	--Widget/Style Event Callbacks, to notify if properties change
@@ -449,28 +429,19 @@ Button = function(parameters)
 	
 	local instance_on_style_changed
     function instance_on_style_changed()
-		
-        instance.style:on_changed( instance, instance_on_style_changed )
         
-		instance.style.text:on_changed(instance,update_label)
-		
-		instance.style.text.colors:on_changed(instance,define_label_animation)
-		
-		instance.style.fill_colors:on_changed(    instance, canvas_callback )
-		instance.style.border:on_changed(         instance, canvas_callback )
-		instance.style.border.colors:on_changed(  instance, canvas_callback )
-		instance.style.arrow:on_changed(          instance, canvas_callback )
-		instance.style.arrow.colors:on_changed(   instance, canvas_callback )
-		
+        instance.style.border:subscribe_to(      nil, canvas_callback )
+        instance.style.fill_colors:subscribe_to( nil, canvas_callback )
+        instance.style.text.colors:subscribe_to( nil, define_label_animation )
+        instance.style.text:subscribe_to( nil, update_label )
+        
 		update_label()
 		define_label_animation()
 		canvas_callback()
 	end
 	
-	instance:subscribe_to(
-		"style",
-		instance_on_style_changed
-	)
+    
+	instance:subscribe_to( "style", instance_on_style_changed )
 	
 	instance_on_style_changed()
 	
