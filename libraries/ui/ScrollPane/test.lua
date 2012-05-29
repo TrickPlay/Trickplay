@@ -7,45 +7,14 @@ if not MISC              then dofile("__UTILITIES/Misc.lua")                end
 if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")              end
 if not STYLE             then dofile("__CORE/Style.lua")                    end
 if not WIDGET            then dofile("__CORE/Widget.lua")                   end
+if not SLIDER            then dofile("Slider/Slider.lua")                   end
+if not CLIPPINGREGION    then dofile("ClippingRegion/ClippingRegion.lua")   end
 if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
 if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
+if not SCROLLPANE        then dofile("ScrollPane/ScrollPane.lua")           end
 
-local test_group = Group()
+s1 = ScrollPane()
+s1:add(Rectangle{w=1000,h=1000,color="ffff00"},Rectangle{w=100,h=100,color="ff0000"},Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
+screen:add(s1)
 
-screen:add(test_group)
-local tests = {
-    
-}
-
-for i,test in ipairs(tests) do
-    
-    if not test() then print("test "..i.." failed") end
-    test_group:clear()
-end
-
-test_group:unparent()
-
-
-
-
-screen:show()
----[[
-lm1 = LayoutManager{
-    number_of_rows = 2,
-    number_of_cols = 2,
-    cells = {
-        {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-        {Widget_Rectangle{w=100,h=100}},--Rectangle{w=100,h=100}},
-        {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
-    }
-}
-
-lm2 = ListManager{
-    x=500,
-    length = 2,
-    cells = {
-        Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}
-    }
-}
-screen:add(lm1,lm2)
---]]
+screen.reactive = true

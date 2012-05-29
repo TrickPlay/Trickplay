@@ -169,19 +169,32 @@ ProgressBar = function(parameters)
 	)
     
 	----------------------------------------------------------------------------
-	
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.progress = self.progress
+            
+            t.type = "ProgressBar"
+            
+            return t
+        end
+    )
+    
+	----------------------------------------------------------------------------
+    
     local set_redraw_shell = function() redraw_shell = true end
     local set_redraw_both  = function() redraw_shell = true redraw_fill  = true end
     
     
-	local function instance_on_style_changed()
-		
-		instance.style.fill_colors:on_changed(    instance, set_redraw_both  )
-		instance.style.border:on_changed(         instance, set_redraw_shell )
-		instance.style.border.colors:on_changed(  instance, set_redraw_shell )
-		
-		set_redraw_both()
+	local instance_on_style_changed
+    function instance_on_style_changed()
         
+        instance.style.border:subscribe_to(      nil, set_redraw_shell )
+        instance.style.fill_colors:subscribe_to( nil, set_redraw_both )
+        
+		set_redraw_both()
 	end
 	
 	instance:subscribe_to( "style", instance_on_style_changed )

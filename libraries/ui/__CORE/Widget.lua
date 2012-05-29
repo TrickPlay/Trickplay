@@ -26,138 +26,10 @@ local function Widgetize(instance)
     --Pablo's function to duplicate the metatable of UIElements
     dupmetatable(instance)
     
+    local mt = getmetatable(instance)
     ----------------------------------------------------------------------------
     -- subscribe_to() / unsubscribe()
-    do
-        -- the table of callbacks for specific attributes, 
-        local subscriptions     = {}
-        local subscriptions_all = {}
-        
-        --helper function called by subscribe_to()
-        local add = function(subscription,callback)
-            --lazy creation of second dimension of tables
-            if not subscriptions[subscription] then
-                
-                subscriptions[subscription] = {}
-                
-            end
-            
-            subscriptions[subscription][callback] = true
-            
-        end
-        
-        override_function(instance,"unsubscribe",
-            function(old_function,self,subscription,f)
-                
-                if type(f) ~= "function" then
-                    
-                    error( "2nd arg expected to be a function. Received "..type(f),2 )
-                    
-                end
-                
-                if type(subscription) == "nil" then
-                    
-                    subscriptions_all[subscription][f] = nil
-                    
-                elseif type(subscription) == "table" then
-                    
-                    for _,key in ipairs(subscription) do
-                        
-                        subscriptions[subscription][f] = nil
-                        
-                    end
-                    
-                elseif type(subscription) == "string" then
-                    
-                    subscriptions[subscription][f] = nil
-                    
-                else
-                    
-                    error(
-                        "1st arg expects a string, a table of strings,"..
-                        " or nil. Received "..type(subscription),2
-                    )
-                    
-                end
-                
-            end
-        )
-        override_function(instance,"subscribe_to",
-            function(old_function,self,subscription,f)
-                
-                if type(f) ~= "function" then
-                    
-                    error( "2nd arg expected to be a function. Received "..type(f),2 )
-                    
-                end
-                
-                if type(subscription) == "nil" then
-                    
-                    subscriptions_all[f] = true
-                    
-                elseif type(subscription) == "table" then
-                    
-                    for _,key in ipairs(subscription) do
-                        
-                        add(key,f)
-                        
-                    end
-                    
-                elseif type(subscription) == "string" then
-                    
-                    add(subscription,f)
-                    
-                else
-                    
-                    error(
-                        "1st arg expects a string, a table of strings,"..
-                        " or nil. Received "..type(subscription),2
-                    )
-                    
-                end
-                
-            end
-        )
-        ------------------------------------------------------------------------
-        -- override UIElement.set and __newindex, necessary in order for
-        -- subscribe_to to work
-        local instance_mt = getmetatable(instance)
-        local old__newindex = instance_mt.__newindex
-        function instance_mt:__newindex(key,value)
-            
-            old__newindex(self,key,value)
-            
-            if subscriptions[key] then
-                
-                for f,_ in pairs(subscriptions[key]) do f(key) end
-            end
-            for f,_ in pairs(subscriptions_all ) do f(key) end
-            
-        end
-        
-        override_function(instance,"set", function(old_function, obj, t )
-            
-            old_function(obj, t)
-            
-            local p = {}
-            
-            for key,_ in pairs(t) do
-                if subscriptions[key] then
-                    
-                    for f,_ in pairs(subscriptions[key]) do f(key) end
-                    
-                end
-                table.insert(p,key)
-            end
-            --functionality of widgets relies on the callbacks in 
-            -- 'subscriptions_all' happening after the callbacks
-            -- in 'subscriptions'
-            for f,_ in pairs(subscriptions_all ) do f(p) end
-            
-            return instance
-            
-        end)
-	end
+    set_up_subscriptions(mt,mt,mt.__newindex,mt.set)
     ----------------------------------------------------------------------------
     local key_functions = {}
     
@@ -180,7 +52,6 @@ local function Widgetize(instance)
     end
     
     function instance:on_key_down(key)
-        
         if not instance.enabled then return end
         
         if key_functions[key] then
@@ -262,32 +133,29 @@ local function Widgetize(instance)
 	
     ----------------------------------------------------------------------------
     
-    local to_json__overridden
-    
-    local to_json = function(_,t)
-        
-        t = is_table_or_nil("Widget.to_json",t)
-        t = to_json__overridden and to_json__overridden(_,t) or t
-        
-		
-		for _,k in pairs(uielement_properties) do
-			
-			t[k] = instance[k]
-			
-		end
-        
-        t.style   = instance.style.name
-        t.focused = instance.focused
-		
-		t.type = t.type or "Widget"
-        
-        return json:stringify(t)
-    end
-	
-	override_property(instance,"to_json",
-		function() return to_json end,
-		function(oldf,self,v) to_json__overridden = v end
+	override_function(instance,"to_json",
+		function(old_function,self) return json:stringify(self.attributes) end
 	)
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = {}
+            
+            for _,k in pairs(uielement_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            
+            t.style   = self.style.name
+            t.focused = self.focused
+            t.enabled = self.enabled
+            
+            t.type = "Widget"
+            
+            return t
+        end,
+        function(oldf,self,v) self:set(v) end
+    )
 	
 	override_function(instance,"from_json", function(old_function,self,j)
 		
@@ -340,7 +208,7 @@ local function Widgetize(instance)
 	)
     
     ----------------------------------------------------------------------------
-    local style = Style()
+    local style = Style("Default")
 	override_property(instance,"style",
 		function()   return style    end,
 		function(oldf,self,v) 
@@ -353,64 +221,194 @@ local function Widgetize(instance)
 	override_property(instance,"widget_type",
 		function() return "Widget" end, nil
 	)
-    
     return instance
 end
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-Widget_Group = function(parameters)
+Widget = function(parameters)
     
-    return Widgetize(  Group()  ):set( 
+    return  Widgetize(  Group()  ):set( 
         
         is_table_or_nil( "Widget_Group", parameters ) 
         
     )
     
 end
+Widget_Group = function(parameters)
+    
+    local instance =  Widgetize(  Group()  ):set( 
+        
+        is_table_or_nil( "Widget_Group", parameters ) 
+        
+    )
+    
+    ----------------------------------------------------------------------------
+    
+    local a
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            t.clip_to_size = self.clip_to_size
+            
+            t.children = {}
+            
+            for i,child in pairs(instance.children) do
+                a = child.attributes
+                if a then
+                    table.insert(t.children,a)
+                end
+                
+            end
+            
+            t.type = "Widget_Group"
+            
+            return t
+        end
+    )
+    
+    return instance
+    
+end
 
+--------------------------------------------------------------------------------
+local rectangle_properties = {
+    "color","border_width","border_color",
+}
 Widget_Rectangle = function(parameters)
     
-    return Widgetize(  Rectangle()  ):set( 
+    local instance = Widgetize(  Rectangle()  ):set( 
         
         is_table_or_nil( "Widget_Rectangle", parameters ) 
         
     )
     
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            for _,k in pairs(rectangle_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            
+            t.type = "Widget_Rectangle"
+            
+            return t
+        end
+    )
+    
+    return instance
+    
 end
-
+local text_properties = {
+    "text","font","color","markup","use_markup","editable","wrap_mode",
+    "single_line","wants_enter","max_length","ellipsize","password_char",
+    "justify","alignment","baseline","line_spacing","cursor_position",
+    "selection_end","selected_text","selection_color","cursor_visible",
+    "cursor_color","cursor_size",
+}
 Widget_Text = function(parameters)
     
-    return Widgetize(  Text()  ):set( 
+    local instance = Widgetize(  Text()  ):set( 
         
         is_table_or_nil( "Widget_Text", parameters ) 
         
     )
     
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            for _,k in pairs(text_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            
+            t.type = "Widget_Text"
+            
+            return t
+        end
+    )
+    
+    return instance
+    
 end
 
+local image_properties = {
+    "src","loaded","async","read_tags","tags","base_size","tile"
+}
 Widget_Image = function(parameters)
     
-    return Widgetize(  Image()  ):set( 
+    local instance = Widgetize(  Image()  ):set( 
         
         is_table_or_nil( "Widget_Image", parameters ) 
         
     )
     
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            for _,k in pairs(image_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            
+            t.type = "Widget_Image"
+            
+            return t
+        end
+    )
+    
+    return instance
+    
 end
 
+local clone_properties = { 
+    "source"
+}
 Widget_Clone = function(parameters)
     
-    return Widgetize(  Clone()  ):set( 
+    local instance = Widgetize(  Clone()  ):set( 
         
         is_table_or_nil( "Widget_Clone", parameters ) 
         
     )
     
+    ----------------------------------------------------------------------------
+    
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+            
+            for _,k in pairs(clone_properties) do
+                
+                t[k] = self[k]
+                
+            end
+            
+            t.type = "Widget_Clone"
+            
+            return t
+        end
+    )
+    
+    return instance
+    
 end
 
-Widget = Widget_Group
 
 
 
