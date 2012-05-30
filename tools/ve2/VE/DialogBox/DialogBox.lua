@@ -213,56 +213,36 @@ DialogBox = function(parameters)
 		end
 	)
 	
-    ----------------------------------------------------------------------------
-    ---[=[
-    local widget_to_json = instance.to_json
-	
+	----------------------------------------------------------------------------
     
-	instance.to_json = function(_,t)
-		
-		t.title = instance.title
-		t.separator_y = instance.separator_y
-		t.title = instance.title
-		
-		if (not canvas) and bg.src and bg.src ~= "[canvas]" then 
+	override_property(instance,"attributes",
+        function(oldf,self)
+            local t = oldf(self)
+                
+            t.title = self.title
+            t.separator_y = self.separator_y
+            t.title = self.title
             
-            t.image = bg.src
-			
-		end
-		
-        --[[
-        if content and content.to_json then
+            if (not canvas) and bg.src and bg.src ~= "[canvas]" then 
+                
+                t.image = bg.src
+                
+            end
             
-            t.children = 
+            --[[
+            if content and content.to_json then
+                
+                t.children = 
+                
+            end
+            --]]
             
+            t.type = "DialogBox"
+            
+            return t
         end
-        --]]
-        
-		t.type = t.type or "DialogBox"
-		
-		return t
-		
-	end
-	
-    ----------------------------------------------------------------------------
-	
-    local to_json__overridden
-	
-    local to_json = function(_,t)
-        
-        t = is_table_or_nil("DialogBox.to_json",t)
-        t = to_json__overridden and to_json__overridden(_,t) or t
-        
-        --t = widget_to_json(_,t)
-        
-        return widget_to_json(_,t)
-    end
-	
-	override_property(instance,"to_json",
-		function() return to_json end,
-		function(oldf,self,v) to_json__overridden = v end
-	)
-    --]=]
+    )
+    
     ----------------------------------------------------------------------------
 	
 	instance:subscribe_to(
