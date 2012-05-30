@@ -88,8 +88,7 @@ _VE_.getUIInfo = function()
             end 
             fake_layer = fake_layer..fake_layer_end
             table.insert(t, json:parse(fake_layer))
-        end
-        if n.to_json then -- s1.b1
+        elseif n.to_json then -- s1.b1
             table.insert(t, json:parse(n:to_json()))
         end
     end
@@ -185,7 +184,7 @@ end
 
 
 _VE_.newLayer = function()
-    screen:add(Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
+    screen:add(Widget_Group{name="Layer"..layerNum, size={1920, 1080}, position={0,0,0}})
     layerNum = layerNum + 1
     --_VE_.repUIInfo()
     _VE_.getUIInfo()
@@ -197,12 +196,13 @@ _VE_.saveFile = function()
 
     for a, b in ipairs (screen.children) do
             --editor:writefile("layer1.json", b.name, true) 
-            if b.extra.to_json then -- s1.b1
-                table.insert(t, json:parse(b.extra.to_json()))
+            if b.to_json then -- s1.b1
+                table.insert(t, json:parse(b:to_json()))
+                print (b.name, b:to_json())
             end
     end
 
-   editor:change_app_path("/home/hjkim/code/trickplay/tools/test/VE/project1")
+   editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
    editor:writefile("layer1.json", json:stringify(t), true) 
    --editor:writefile("layer1_user.lua", , true) 
 
