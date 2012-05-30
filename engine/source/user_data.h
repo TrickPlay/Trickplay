@@ -177,7 +177,7 @@ struct UserData
         	return 0;
         }
 
-        if ( sizeof( UserData ) != lua_objlen( L , index ) )
+        if ( sizeof( UserData ) != lua_rawlen( L , index ) )
         {
         	return 0;
         }

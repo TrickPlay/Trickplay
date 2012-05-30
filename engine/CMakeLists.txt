@@ -13,7 +13,7 @@ set( ENGINE_LIBRARY_NAMES )
 set( ENGINE_SOURCE_FILES )
 set( LB_FILES )
 
-include_directories( ${ENGINE_SRC}/lua/lua-5.1.4/src )
+include_directories( ${ENGINE_SRC}/lua/lua-5.2.0/src )
 include_directories( ${ENGINE_SRC}/clutter_alpha_mode )
 include_directories( ${PROJECT_BINARY_DIR}/engine )
 

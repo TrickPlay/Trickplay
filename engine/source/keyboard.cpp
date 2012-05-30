@@ -145,7 +145,7 @@ struct Layout
 
             using namespace JSON;
 
-            lua_State * L = lua_open();
+            lua_State * L = luaL_newstate();
 
             try
             {
