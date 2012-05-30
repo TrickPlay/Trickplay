@@ -890,10 +890,14 @@ JSON::Array Debugger::get_globals( lua_State * L )
 
 	const StringMap & globals( app->get_globals() );
 
+	lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
+
+	int g = lua_gettop( L );
+
 	for ( StringMap::const_iterator it = globals.begin(); it != globals.end(); ++it )
 	{
 		lua_pushstring( L , it->first.c_str() );
-		lua_rawget( L , LUA_GLOBALSINDEX );
+		lua_rawget( L , g );
 
 		if ( ! lua_isnil( L , -1 ) )
 		{
@@ -910,6 +914,8 @@ JSON::Array Debugger::get_globals( lua_State * L )
 
 		lua_pop( L , 1 );
 	}
+
+	lua_pop( L , 1 );
 
 	return array;
 }
@@ -1372,7 +1378,6 @@ void Debugger::debug_break( lua_State * L, lua_Debug * ar )
 			break;
 
 		case LUA_HOOKRET:
-		case LUA_HOOKTAILRET:
 			--returns;
 			tplog2( "HOOK RET %s RETURNS %d" , at.c_str() , returns );
 			if ( returns <= 0 )

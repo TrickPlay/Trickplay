@@ -382,7 +382,7 @@ bool App::load_metadata_from_data( const gchar * data ,  Metadata & md)
 
     // Open a state with no libraries - not even the base one
 
-    lua_State * L = lua_open();
+    lua_State * L = luaL_newstate( );
 
     g_assert( L );
 
@@ -892,7 +892,8 @@ App::App( TPContext * c, const App::Metadata & md, const String & dp, const Laun
 
     // Create the Lua state
 
-    L = lua_open();
+    L = luaL_newstate( );
+
     g_assert( L );
 
     // Install panic handler that throws an exception
@@ -1171,13 +1172,21 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
     // Install a __newindex metamethod on the globals table that stores
     // information about global values added by the user.
 
-    if ( lua_getmetatable( L , LUA_GLOBALSINDEX ) )
+    lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
+
+    if ( ! lua_isnil( L , -1 ) )
     {
-    	lua_pushliteral( L , "__newindex" );
-    	lua_pushcfunction( L , global_tracker );
-    	lua_rawset( L , -3 );
-    	lua_pop( L , 1 );
+		if ( lua_getmetatable( L , -1 ) )
+		{
+			lua_pushliteral( L , "__newindex" );
+			lua_pushcfunction( L , global_tracker );
+			lua_rawset( L , -3 );
+			lua_pop( L , 1 );
+		}
     }
+
+    lua_pop( L , 1 );
+
 
 #endif
 
@@ -1303,7 +1312,10 @@ void App::secure_lua_state( const StringSet & allowed_names )
 
     const luaL_Reg lualibs[] =
     {
-        { "", luaopen_base },
+        { "_G", luaopen_base },
+        {LUA_COLIBNAME, luaopen_coroutine},
+        {LUA_OSLIBNAME, luaopen_os},
+        {LUA_BITLIBNAME, luaopen_bit32},
         { LUA_TABLIBNAME, luaopen_table },
         { LUA_STRLIBNAME, luaopen_string },
         { LUA_MATHLIBNAME, luaopen_math },
@@ -1314,9 +1326,8 @@ void App::secure_lua_state( const StringSet & allowed_names )
 
     for ( const luaL_Reg * lib = lualibs; lib->func; ++lib )
     {
-        lua_pushcfunction( L, lib->func );
-        lua_pushstring( L, lib->name );
-        lua_call( L, 1, 0 );
+        luaL_requiref(L, lib->name, lib->func, 1);
+        lua_pop(L, 1);  /* remove lib */
     }
 
     //.........................................................................
@@ -1396,6 +1407,14 @@ void App::secure_lua_state( const StringSet & allowed_names )
         lua_pushnil( L );
         lua_setglobal( L, * name );
     }
+
+    //.........................................................................
+    // In Lua 5.2, unpack moved to table.unpack. We create a global for it.
+
+    lua_getglobal( L , "table" );
+    lua_getfield( L , -1 , "unpack" );
+    lua_setglobal( L , "unpack" );
+    lua_pop( L , 1 );
 
     //.........................................................................
 
