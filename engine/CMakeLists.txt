@@ -457,6 +457,7 @@ list( APPEND LB_FILES
     ${BINDINGS_SRC}/keyboard.lb
     ${BINDINGS_SRC}/ease.lb
     ${BINDINGS_SRC}/matrix.lb
+    ${BINDINGS_SRC}/physics_bullet.lb
 )
 
 #------------------------------------------------------------------------------
@@ -557,6 +558,7 @@ list( APPEND
     ${ENGINE_SRC}/source/app_resource.cpp
     ${ENGINE_SRC}/source/plugin.cpp
     ${ENGINE_SRC}/source/desktop_controller.cpp
+    ${ENGINE_SRC}/source/physics_bullet.cpp
 )
 
 #------------------------------------------------------------------------------
@@ -623,6 +625,11 @@ target_link_libraries(
     dl
     tplua
     clutteralphamode
+    
+    LinearMath
+    BulletDynamics
+    BulletCollision
+    BulletSoftBody
 )
 
 
