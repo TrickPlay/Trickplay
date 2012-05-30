@@ -265,15 +265,17 @@
     // Make sure there is a context
     if (!_streamerContext) {
         [self release];
+        // TODO: send an error message to caller
         return nil;
     }
     // Make sure a camera exists on the device
     if (![AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo]) {
         [self release];
+        // TODO: send an error message to caller
         return nil;
     }
     
-    // TODO: no reason to load a nib! just init and set the view to stretch to parent view.
+    // No reason to load a nib! just init and view auto stretches to parent view.
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         self = [super initWithNibName:nil bundle:nil];
     } else {

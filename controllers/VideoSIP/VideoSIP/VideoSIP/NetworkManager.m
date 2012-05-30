@@ -61,6 +61,10 @@ void rtp_avc_session_callback(struct rtp *session, rtp_event *e) {
     // I believe.
 }
 
+/**
+ * This function returns a pointer to the 32 bit IPv4 address
+ * or the 128 bit IPv6 address, depending on socket family.
+ */
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in *)sa)->sin_addr);
@@ -69,6 +73,9 @@ void *get_in_addr(struct sockaddr *sa) {
     return &(((struct sockaddr_in6 *)sa)->sin6_addr);
 }
 
+/**
+ * Tell the AVCEncoder to encode the sample.
+ */
 - (void)packetize:(CMSampleBufferRef)sampleBuffer {
     [avcEncoder encode:sampleBuffer];
 }

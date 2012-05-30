@@ -8,7 +8,6 @@
 
 #import "SIPClient.h"
 
-#import <CoreFoundation/CoreFoundation.h>
 
 #import <sys/types.h>
 #import <sys/socket.h>
@@ -144,7 +143,7 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
     RegisterDialog *registerDialog = [[[RegisterDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP writeQueue:writeQueue delegate:self] autorelease];
     
     //RegisterDialog *registerDialog = [[[RegisterDialog alloc] initWithUser:user contactURI:contactURI remoteURI:asteriskURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
-       
+    
     NSString *registerCallID = [NSString uuid];
     [registerDialog registerToAsteriskWithCallID:registerCallID];
     
@@ -229,7 +228,7 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
         OptionsDialog *options = [[[OptionsDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP writeQueue:writeQueue delegate:self] autorelease];
         
         //OptionsDialog *options = [[[OptionsDialog alloc] initWithUser:user contactURI:contactURI remoteURI:asteriskURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
-
+        
         [options receivedOptions:sipHdrDic fromAddr:remoteAddr];
     } else if ([statusLine rangeOfString:@"NOTIFY "].location != NSNotFound) {
         NotifyDialog *notify = [[[NotifyDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP writeQueue:writeQueue delegate:self] autorelease];
@@ -254,7 +253,7 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
     }
     
     NSString *sipPacket = [[NSString alloc] initWithData:sipData encoding:NSUTF8StringEncoding];
-    NSLog(@"Received packet:\n%@\n", sipPacket);
+    NSLog(@"Received SIP packet:\n%@\n", sipPacket);
     
     // Separate header and body
     NSArray *components = [sipPacket componentsSeparatedByString:@"\r\n\r\n"];
@@ -294,7 +293,7 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 
 /**
  * This is our CFSocket callback. This callback is NOT associated with the current
- * object of this SIPCient class. No instance variables are directly accessible from
+ * object of this SIPClient class. No instance variables are directly accessible from
  * this callback. Use the callback's void *info parameter to access 'self'.
  */
 void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
@@ -370,6 +369,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
                 [self.writeQueue removeObjectAtIndex:0];
                 if (error == kCFSocketError) {
                     fprintf(stderr, "Error Writing to socket\n");
+                    // TODO: inform delegate
                 } else if (error == kCFSocketTimeout) {
                     fprintf(stderr, "Timeout Writing to socket\n");
                 }
@@ -388,21 +388,21 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
 
 - (void)threadMain:(id)argument {
     @autoreleasepool {
-    
+        
         struct addrinfo hints, *servinfo, *p;
         int rv;
-    
+        
         memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_INET;
         hints.ai_socktype = SOCK_DGRAM;
-    
-    
+        
+        
         //if ((rv = getaddrinfo(ASTERISK_HOST, ASTERISK_PORT, &hints, &servinfo)) != 0) {
         if ((rv = getaddrinfo([streamerContext.SIPServerHostName UTF8String], [[NSString stringWithFormat:@"%d", streamerContext.SIPServerPort] UTF8String], &hints, &servinfo)) != 0) {
             fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
             return;
         }
-    
+        
         for (p = servinfo; p != NULL; p = p->ai_next) {
             CFDataRef addressRef = CFDataCreate(kCFAllocatorDefault, (UInt8 *)p->ai_addr, p->ai_addrlen);
             if (CFSocketConnectToAddress(sipSocket, addressRef, 0)) {
@@ -410,10 +410,10 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
                 perror("client: connect");
                 continue;
             }
-        
+            
             break;
         }
-    
+        
         if (p == NULL) {
             fprintf(stderr, "client: failed to connect\n");
             freeaddrinfo(servinfo);
@@ -425,16 +425,16 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
         fprintf(stderr, "\nSIP IP address: %s\nSIP port: %d\n", str, ntohs(((struct sockaddr_in *)(p->ai_addr))->sin_port));
         
         freeaddrinfo(servinfo);
-    
+        
         @synchronized(self) {
             exit_thread = NO;
-    
+            
             // Add my input sources here (sockets, etc.)
             CFRunLoopSourceRef rls = CFSocketCreateRunLoopSource(NULL, sipSocket, 0);
             assert(rls != NULL);
-    
+            
             CFRunLoopAddSource(CFRunLoopGetCurrent(), rls, kCFRunLoopDefaultMode);
-    
+            
             CFRelease(rls);
         }
     
