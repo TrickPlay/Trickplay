@@ -57,7 +57,7 @@ ButtonPicker = function(parameters)
 	--The ButtonPicker Object inherits from LayoutManager
 	
     local text = Group()
-    local window = Group{children={bg,text,fg}}
+    local window = Widget_Group{children={bg,text,fg}}
 	local instance = LayoutManager(parameters)
     local prev_arrow = Button{
         label = "",

@@ -34,9 +34,9 @@ lm1 = LayoutManager{
     number_of_rows = 2,
     number_of_cols = 2,
     cells = {
-        {Rectangle{w=100,h=100},Rectangle{w=100,h=100}},
-        {Rectangle{w=100,h=100}},--Rectangle{w=100,h=100}},
-        {Rectangle{w=100,h=100},Rectangle{w=100,h=100}},
+        {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
+        {Widget_Rectangle{w=100,h=100}},--Rectangle{w=100,h=100}},
+        {Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}},
     }
 }
 
@@ -44,7 +44,7 @@ lm2 = ListManager{
     x=500,
     length = 2,
     cells = {
-        Rectangle{w=100,h=100},Rectangle{w=100,h=100}
+        Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}
     }
 }
 screen:add(lm1,lm2)
