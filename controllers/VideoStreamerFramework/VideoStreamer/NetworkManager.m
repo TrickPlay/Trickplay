@@ -145,6 +145,8 @@ void *get_in_addr(struct sockaddr *sa) {
             avc_session = NULL;
         }
     }
+    
+    [delegate networkManagerInvalid:self];
 }
 
 - (void)client:(SIPClient *)client didDisconnectWithError:(NSInteger)error {
@@ -155,6 +157,7 @@ void *get_in_addr(struct sockaddr *sa) {
         rtp_done(avc_session);
         avc_session = NULL;
     }
+    [delegate networkManagerInvalid:self];
 }
 
 #pragma mark -
