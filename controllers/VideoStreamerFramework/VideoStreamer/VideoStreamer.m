@@ -300,14 +300,12 @@
         networkMan.delegate = self;
         [delegate videoStreamerInitiatingChat:self];
     } else {
-        [delegate videoStreamer:self chatEndedWithInfo:@"Chat Ended: Network Connection Failure"];
+        [delegate videoStreamer:self chatEndedWithInfo:@"Network Connection Failure"];
     }
 }
 
 - (void)endChat {
-    [self terminateCaptureWithInfo:@"Chat Ended: Call to method '- (void)endChat'"];
-    
-    // TODO: return some indication to the delegate
+    [self terminateCaptureWithInfo:@"Call to method '- (void)endChat'"];
 }
 
 #pragma mark -
@@ -525,10 +523,12 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         [networkMan startEncoder];
         [captureSession startRunning];
     } else {
-        [networkMan release];
-        networkMan = nil;
-        [self terminateCaptureWithInfo:@"Chat Ended: Network Connection Failure"];
+        [self terminateCaptureWithInfo:@"Network Connection Failure"];
     }
+}
+
+- (void)networkManagerInvalid:(NetworkManager *)networkManager {
+    [self terminateCaptureWithInfo:@"Chat Ended"];
 }
 
 #pragma mark - 

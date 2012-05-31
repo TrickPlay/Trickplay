@@ -26,6 +26,11 @@
  * and send video/audio packets.
  */
 - (void)networkManagerEncoderReady:(NetworkManager *)networkManager;
+/**
+ * Informs the Delegate that this NetworkManager no longer is good
+ * for use.
+ */
+- (void)networkManagerInvalid:(NetworkManager *)networkManager;
 
 @end
 
