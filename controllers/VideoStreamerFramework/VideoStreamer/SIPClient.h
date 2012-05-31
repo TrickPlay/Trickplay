@@ -23,6 +23,7 @@
 
 - (void)client:(SIPClient *)client beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
 - (void)client:(SIPClient *)client endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
+- (void)client:(SIPClient *)client didDisconnectWithError:(NSInteger)error;
 
 @end
 

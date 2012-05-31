@@ -18,8 +18,13 @@
 @class VideoStreamerContext;
 @class NetworkManager;
 
+
 @protocol NetworkManagerDelegate <NSObject>
 
+/**
+ * Informs the Delegate that this NetworkManager is ready to encode
+ * and send video/audio packets.
+ */
 - (void)networkManagerEncoderReady:(NetworkManager *)networkManager;
 
 @end
@@ -28,8 +33,14 @@
 
 static struct timeval timeout;
 
-typedef void (^socket_queue_callback)(const void* buffer, uint32_t length);
-
+/**
+ * The NetworkManager holds a SIPClient for regulating all SIP tasks,
+ * an AVCEncoder for encoding Video frames in H.264, and
+ * various rtp structs for sending encoded data to a destination
+ * determined by the SIP negotiation.
+ *
+ * TODO: An Audio encoder will be added later
+ */
 @interface NetworkManager : NSObject <SIPClientDelegate> {
     dispatch_queue_t socket_queue;
     

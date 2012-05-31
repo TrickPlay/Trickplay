@@ -139,6 +139,18 @@ void *get_in_addr(struct sockaddr *sa) {
         // thorough testing will determine this and there is the cost of having
         // avc_session split amongst too many threads if we do this.
         [avcEncoder stop];
+        if (avc_session) {
+            rtp_send_bye(avc_session);
+            rtp_done(avc_session);
+            avc_session = NULL;
+        }
+    }
+}
+
+- (void)client:(SIPClient *)client didDisconnectWithError:(NSInteger)error {
+    fprintf(stderr, "SIP Client disconnected with error: %d\n", error);
+    [avcEncoder stop];
+    if (avc_session) {
         rtp_send_bye(avc_session);
         rtp_done(avc_session);
         avc_session = NULL;
