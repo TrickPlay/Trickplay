@@ -228,7 +228,7 @@
 }
 
 - (void)cancel {
-    // Not sure why I created this way back. Maybe delete?
+    // TODO: Send BYE messages and whatnot to other UAS/UAC
 }
 
 #pragma mark -

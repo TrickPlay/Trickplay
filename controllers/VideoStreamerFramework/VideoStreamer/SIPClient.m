@@ -291,6 +291,14 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
     }
 }
 
+- (void)socketBrokeWithError:(NSInteger)error {
+    [self stopInBackground:nil];
+    
+    dispatch_async(dispatch_get_main_queue(), ^(void){
+        [delegate client:self didDisconnectWithError:error];
+    });
+}
+
 /**
  * This is our CFSocket callback. This callback is NOT associated with the current
  * object of this SIPClient class. No instance variables are directly accessible from
@@ -299,6 +307,9 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
                        const void *data, void *info) {
     //fprintf(stderr, "SIP Socket Callback\n");
+    if (!CFSocketIsValid(socket)) {
+        return;
+    }
     
     switch (type) {
         case kCFSocketReadCallBack:
@@ -343,6 +354,8 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             if (err != 0) {
                 NSLog(@"SIP error reading data; error code: %d", err);
                 //TODO: Tell the delegate that things messed the eff up
+                SIPClient *self = (SIPClient *)info;
+                [self socketBrokeWithError:err];
             }
             
             break;
@@ -363,15 +376,14 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             
             while (self.writeQueue.count > 0) {
                 CFDataRef packet = (CFDataRef)[self.writeQueue objectAtIndex:0];
-                // TODO: sometimes will receive EXC_BAD_ACCESS on CFSocketSendData.
-                // Should be fixed now. moved removeObjectAtIndex to after send data.
                 CFSocketError error = CFSocketSendData(socket, NULL, packet, 0);
                 [self.writeQueue removeObjectAtIndex:0];
                 if (error == kCFSocketError) {
                     fprintf(stderr, "Error Writing to socket\n");
-                    // TODO: inform delegate
+                    [self socketBrokeWithError:error];
                 } else if (error == kCFSocketTimeout) {
                     fprintf(stderr, "Timeout Writing to socket\n");
+                    [self socketBrokeWithError:error];
                 }
             }
             
@@ -450,6 +462,12 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             }
         }
     } while (!exit_thread);
+    
+    @synchronized(self) {
+        if (sipSocket && CFSocketIsValid(sipSocket)) {
+            CFSocketInvalidate(sipSocket);
+        }
+    }
 }
 
 /**
@@ -465,10 +483,6 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             }
         }
         
-        if (sipSocket) {
-            CFSocketInvalidate(sipSocket);
-        }
-        
         exit_thread = YES;
     }
 }
@@ -482,8 +496,9 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
 
 - (void)dealloc {
     // Technically this shouldn't need to be called since dealloc isn't called until
-    // sipThread exits. Thus, [self stop] should be called somewhere else on the main
-    // Thread in order to dealloc. Test to find out.
+    // sipThread exits (FYI: NSThread -initWithTarget: retains the target).
+    // Thus, [self stop] should be called somewhere else on the main
+    // Thread in order to dealloc. But no harm done having it here.
     [self stop];
     
     if (sipDialogs) {
