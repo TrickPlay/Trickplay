@@ -54,7 +54,7 @@ extern "C" int main( int argc , char ** argv )
 //    tp_context_set( context, TP_APP_PATH, "http://puckjr/~craig/test");
 
     tp_context_set( context, TP_RESOURCES_PATH, "/data/data/com.trickplay.Engine/files/resources");
-    tp_context_set( context, TP_FONTS_PATH, "/data/data/com.trickplay.Engine/files/resources/fonts");
+    tp_context_set( context, TP_FONTS_PATH, "/system/fonts;/data/data/com.trickplay.Engine/files/resources/fonts");
     tp_context_set( context, TP_PLUGINS_PATH, "/data/data/com.trickplay.Engine/files/plugins");
 
     tp_context_set( context, TP_SCAN_APP_SOURCES, "TRUE");
