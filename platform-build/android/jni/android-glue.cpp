@@ -110,6 +110,10 @@ void *load_sym( void* lib, const char *symbol)
 
 void preload_shared_libraries(ANativeActivity *activity)
 {
+    if(NULL == activity->internalDataPath)
+    {
+        activity->internalDataPath = "/data/data/com.trickplay.Engine/files";
+    }
     LOG( "About to load all DLLs from %s", activity->internalDataPath);
     load_library(activity->internalDataPath, "libgnustl_shared.so");
     load_library(activity->internalDataPath, "libiconv.so");
