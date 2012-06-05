@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Inspector2.ui'
+# Form implementation generated from reading ui file 'Inspector.ui'
 #
-# Created: Fri Apr  6 16:34:38 2012
+# Created: Fri Jun  1 11:54:19 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -56,7 +56,26 @@ class Ui_TrickplayInspector(object):
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.inspector = QtGui.QTreeView(self.ObjectInspector)
         self.inspector.setObjectName(_fromUtf8("inspector"))
-        self.gridLayout_3.addWidget(self.inspector, 0, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.inspector, 2, 0, 1, 1)
+        self.gridLayout_4 = QtGui.QGridLayout()
+        self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
+        self.insertScreen = QtGui.QToolButton(self.ObjectInspector)
+        self.insertScreen.setObjectName(_fromUtf8("insertScreen"))
+        self.gridLayout_4.addWidget(self.insertScreen, 0, 2, 1, 1)
+        self.screenCombo = QtGui.QComboBox(self.ObjectInspector)
+        self.screenCombo.setObjectName(_fromUtf8("screenCombo"))
+        self.gridLayout_4.addWidget(self.screenCombo, 0, 1, 1, 1)
+        self.label = QtGui.QLabel(self.ObjectInspector)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy)
+        self.label.setLineWidth(1)
+        self.label.setIndent(7)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.gridLayout_4.addWidget(self.label, 0, 0, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout_4, 1, 0, 1, 1)
         self.tabWidget.addTab(self.ObjectInspector, _fromUtf8(""))
         self.PropertyEditor = QtGui.QWidget()
         self.PropertyEditor.setEnabled(True)
@@ -76,7 +95,7 @@ class Ui_TrickplayInspector(object):
         font.setPointSize(9)
         self.property.setFont(font)
         self.property.setObjectName(_fromUtf8("property"))
-        #self.property.headerItem().setText(0, _fromUtf8("1"))
+        self.property.headerItem().setText(0, _fromUtf8("1"))
         self.property.header().setVisible(True)
         self.gridLayout_2.addWidget(self.property, 0, 1, 1, 1)
         self.tabWidget.addTab(self.PropertyEditor, _fromUtf8(""))
@@ -88,6 +107,8 @@ class Ui_TrickplayInspector(object):
 
     def retranslateUi(self, TrickplayInspector):
         TrickplayInspector.setWindowTitle(QtGui.QApplication.translate("TrickplayInspector", "Form", None, QtGui.QApplication.UnicodeUTF8))
+        self.insertScreen.setText(QtGui.QApplication.translate("TrickplayInspector", "-", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("TrickplayInspector", "Screens:   ", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.ObjectInspector), QtGui.QApplication.translate("TrickplayInspector", "Object Inspector", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.PropertyEditor), QtGui.QApplication.translate("TrickplayInspector", "Property Editor", None, QtGui.QApplication.UnicodeUTF8))
 

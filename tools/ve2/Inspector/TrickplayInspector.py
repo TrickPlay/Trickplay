@@ -42,15 +42,19 @@ class TrickplayInspector(QWidget):
         
         self.ui = Ui_TrickplayInspector()
         self.ui.setupUi(self)
-        
+              
         # Ignore signals while updating elements internally
         self.preventChanges = False
 
         self.main = main
+        self.curLayerName = None
         self.curLayerGid = None
-        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector :" , None, QApplication.UnicodeUTF8))
+        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector:" , None, QApplication.UnicodeUTF8))
+        self.layerName = {}
         self.layerGid = {}
+        self.screens = {"Default":[]}
         self.cbStyle_textChanged = False
+        self.screen_textChanged = False
         
         # Models
         self.inspectorModel = TrickplayElementModel(self)
@@ -59,6 +63,15 @@ class TrickplayInspector(QWidget):
         self.ui.inspector.setModel(self.inspectorModel)
         self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
 
+        #ScreenInspector
+        self.ui.screenCombo.addItem("Default")
+        self.currentScreenName = "Default"
+        self.ui.screenCombo.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;font-size:12px;}")
+        self.ui.insertScreen.setStyleSheet("QComboBox{padding-top: 0px;padding-bottom:1px;}")
+        QObject.connect(self.ui.insertScreen, SIGNAL('clicked()'), self.removeScreen)
+        QObject.connect(self.ui.screenCombo, SIGNAL('currentIndexChanged(int)'), self.screenChanged)
+        QObject.connect(self.ui.screenCombo, SIGNAL('activated(int)'), self.screenActivated)
+        QObject.connect(self.ui.screenCombo, SIGNAL('editTextChanged(const QString)'), self.screenEditTextChanged)
 
         #self.ui.property.setModel(self.propertyModel)
 
@@ -289,8 +302,69 @@ class TrickplayInspector(QWidget):
             self.ui.property.setItemWidget(self.ui.property.topLevelItem(style_n), 1, self.cbStyle)
             self.ui.property.itemWidget(self.ui.property.topLevelItem(style_n),1).setStyleSheet("QComboBox{padding-top: -5px;padding-bottom:-5px;font-size:12px;}")
 
+    def screen_json(self):
+        #[{"Default":["Layer1","Layer2"], "New":["Layer2"]}]
+        scrJSON = '[{'
+        
+        n = 0 
+        for scrName in self.screens:
+            if n > 0 : 
+                scrJSON = scrJSON + "," 
+            scrJSON = scrJSON + '\"' + scrName + '\": [\"' + '\",\"'.join(self.screens[scrName]) + '\"]'
+            n = n + 1
+
+        scrJSON = scrJSON + '}]'
+        print scrJSON
+
+        return scrJSON
+
     def itemSelectionChanged(self):
         self.cbStyle.setEditable (False)
+
+    def removeScreen(self):
+        print (self.currentScreenName+" deleted")
+        if self.currentScreenName is not "Default":
+            curIdx = self.ui.screenCombo.currentIndex()
+            del self.screens[self.currentScreenName]
+            self.ui.screenCombo.removeItem(curIdx)
+        print (self.screens)
+        
+    def screenActivated(self, index):
+        if self.screen_textChanged == True :
+            self.ui.screenCombo.setEditable (False)
+            self.screen_textChanged = False 
+        else:
+            self.old_screen_name = self.currentScreenName
+            self.ui.screenCombo.setEditable (True)
+
+    def screenEditTextChanged(self, str):
+        if self.screen_textChanged == False :
+            self.old_screen_name = self.currentScreenName
+        self.screen_textChanged = True
+
+    def screenChanged(self, index):
+        self.screen_textChanged = True
+        self.currentScreenName = str(self.ui.screenCombo.itemText(self.ui.screenCombo.currentIndex()))        
+        if self.screens.has_key(self.currentScreenName) == False:
+            self.screens[self.currentScreenName] = []
+            for layerName in self.screens[self.old_screen_name][:]:
+                self.screens[self.currentScreenName].append(layerName)
+        else:
+            #TODO: show the screen items 
+            for theLayer in self.screens["Default"][:] :
+                # the layer is in this selected screen and if it is not checked 
+                theItem = self.search(theLayer, 'name')
+                if self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Unchecked:
+                    self.sendData(theItem['gid'], "is_visible", True)
+                    theItem.setCheckState(Qt.Checked)
+                # the layer is not in this selected screen and if it is checked 
+                elif not self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Checked:
+                    self.sendData(theItem['gid'], "is_visible", False)
+                    theItem.setCheckState(Qt.Unchecked)
+                    
+        print("[ CurrentScreen name] : ", self.currentScreenName)
+        print("[ Screens ] : ", self.screens)
+
 
     def styleActivated(self, index):
         self.cbStyle.setEditable (True)
@@ -315,6 +389,7 @@ class TrickplayInspector(QWidget):
         Re-populate the property view every time a new UI element
         is selected in the inspector view.
         """
+        self.ui.screenCombo.setEditable (False)
         if not self.preventChanges:
             self.preventChanges = True
             
@@ -325,12 +400,13 @@ class TrickplayInspector(QWidget):
             
             if self.curData.has_key('gid') == True:
                 if self.curData['name'][:5] == "Layer":
-                    self.curLayerGid = int(self.curData['gid'])
-                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector : "+"Layer"+str(self.curLayerGid), None, QApplication.UnicodeUTF8))
-                    #print("[VE] selectionChanged curLayerGid : ", self.curLayerGid)
-                elif self.layerGid[int(self.curData['gid'])] : 
+                    self.curLayerName = self.curData['name']
+                    self.curLayerGid = self.curData['gid']
+                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name'])+")", None, QApplication.UnicodeUTF8))
+                elif self.layerName[int(self.curData['gid'])] : 
+                    self.curLayerName = self.layerName[int(self.curData['gid'])] 
                     self.curLayerGid = self.layerGid[int(self.curData['gid'])] 
-                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector : "+"Layer"+str(self.curLayerGid), None, QApplication.UnicodeUTF8))
+                    self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector: "+str(self.curLayerName)+" ("+str(self.curData['name']+")"), None, QApplication.UnicodeUTF8))
 
             self.propertyFill(self.curData)
             
@@ -352,12 +428,24 @@ class TrickplayInspector(QWidget):
             if 0 == item.column():
                 
                 checkState = bool(item.checkState())
-                
+
                 if self.sendData(item['gid'], 'is_visible', checkState):        
                 #if self.sendData(item['gid'], 'visible', checkState):        
                     item['is_visible'] = checkState
                     #item['visible'] = checkState
                     #self.propertyModel.fill(item.TPJSON())
+                    if item['name'][:5] == "Layer":
+                        if checkState == True :
+                            if not self.screens[self.currentScreenName].count(item['name']) > 0 :
+                                self.screens[self.currentScreenName].append(item['name'])
+                        else:
+                            index = 0 
+                            for layerName in self.screens[self.currentScreenName][:]:
+                                if layerName == item['name']:
+                                    del self.screens[self.currentScreenName][index]
+                                    break
+                                index = index + 1 
+                        print(self.screens)
             
             self.preventChanges = False
     
@@ -502,8 +590,8 @@ class TrickplayInspector(QWidget):
         if not old:
             self.preventChanges = False
 
-        self.LayerGids = {}
-        self.curLayerGid = None
-        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector :" , None, QApplication.UnicodeUTF8))
+        self.LayerName = {}
+        self.curLayerName = None
+        self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector:" , None, QApplication.UnicodeUTF8))
             
             

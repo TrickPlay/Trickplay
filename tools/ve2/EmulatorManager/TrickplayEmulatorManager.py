@@ -133,6 +133,26 @@ class TrickplayEmulatorManager(QWidget):
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "openInspc":
 				        gid = int(s[9:])
+				    elif luaCmd == "scrJSInfo":
+				        scrData = json.loads(s[9:])
+				        self.inspector.screens = {} 
+				        screenNames = []
+				        for i in scrData[0]:
+				            self.inspector.screens[str(i)]=[]
+				            screenNames.append(str(i))
+				            for j in scrData[0][i]:
+				                self.inspector.screens[str(i)].append(str(j))
+				        print self.inspector.screens
+				        print screenNames
+
+				        #TODO: setting screenCombo items
+				        for idx in range(0,self.inspector.ui.screenCombo.count()-1):
+				            if not self.inspector.ui.screenCombo.itemText(idx) in screenNames:
+				                self.inspector.ui.screenCombo.removeItem(idx)
+
+				        for scrName in self.inspector.screens:
+				            if self.inspector.ui.screenCombo.findText(scrName) < 0 :
+				                self.inspector.ui.screenCombo.addItem(scrName)
 				    else:
 				        #print(">> %s"%s)
 				        pass

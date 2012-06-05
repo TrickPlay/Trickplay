@@ -17,6 +17,9 @@ class TrickplayElementModel(QStandardItemModel):
 
     def inspector_reply_finished(self, pdata=None, sdata=None):
         
+        curScreenIdx = self.inspector.ui.screenCombo.currentIndex() 
+        print(curScreenIdx, "Current IDX")
+
         if pdata is not None :
             root = self.invisibleRootItem()
             child = None
@@ -63,6 +66,10 @@ class TrickplayElementModel(QStandardItemModel):
                 if result:
                     self.inspector.selectItem(result)
     
+            self.inspector.ui.screenCombo.setCurrentIndex(curScreenIdx) 
+            if self.inspector.currentScreenName is not "Default":
+                self.inspector.screenChanged(curScreenIdx)
+            print("After Insert Current Screen IDX:", self.inspector.ui.screenCombo.currentIndex() )
             return
 
 
@@ -93,9 +100,19 @@ class TrickplayElementModel(QStandardItemModel):
         if value[:5] == "Layer":
             title = value
             value = ""
-            self.inspector.curLayerGid = gid
+            self.inspector.curLayerName = title
+            self.inspector.curLayerGid = data['gid']
+
+            cnt = self.inspector.screens["Default"].count(title)
+            if not cnt > 0 :
+                self.inspector.screens["Default"].append(title)
+                if self.inspector.currentScreenName is not "Default":
+                    self.inspector.screens[self.inspector.currentScreenName].append(title)
+
+            print(self.inspector.screens)
         else:
-            self.inspector.layerGid[gid] = self.inspector.curLayerGid
+            self.inspector.layerName[int(gid)] = self.inspector.curLayerName
+            self.inspector.layerGid[int(gid)] = self.inspector.curLayerGid
 
         if gid > self.theBigestGid:
             self.theBigestGid = gid 
@@ -125,7 +142,7 @@ class TrickplayElementModel(QStandardItemModel):
             checkState = Qt.Unchecked
             if data['is_visible']:
                 checkState = Qt.Checked
-            
+
             node.setCheckState(checkState)
         
         # Screen has no is_visible property because changing it

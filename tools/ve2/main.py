@@ -88,7 +88,8 @@ class MainWindow(QMainWindow):
         return True
 
     def save(self):
-        self.sendLuaCommand("save", "_VE_.saveFile()")
+        #self.sendLuaCommand("save", "_VE_.saveFile()")
+        self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
         return True
 
     def textinput(self):
