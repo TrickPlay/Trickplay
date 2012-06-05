@@ -115,6 +115,31 @@ end
 
 local styles
 
+function load_styles(str)
+    
+    if type(styles) == "table" then
+        print("WARNING. Styles table already exists")
+    end
+    
+    if type(str) ~= "string" then
+        error("Expected string. Received "..type(str),2)
+    end
+    
+    styles = json:parse(str)
+    
+    if type(styles) ~= "table" then
+        error("String is not valid json",2)
+    end
+    
+    for name,attributes in pairs(styles) do
+        styles[name] = Style(name):set(attributes)
+    end
+    
+    return styles
+    
+end
+
+--[[
 local function load_styles()
     
     if not color_schemes then load_color_schemes() end
@@ -177,6 +202,7 @@ local function load_styles()
     end
     
 end
+]]
 
 --------------------------------------------------------------------------------
 
@@ -190,7 +216,46 @@ local constructors = {
 }
 
 local construct
+construct = function(t)
+    
+    if type(t) ~= "table" then
+        
+        return error("Expects table, received "..type(t),2)
+        
+    end
+    
+    for i,v in ipairs(t.children or {}) do
+        
+        t.children[i] = construct(v)
+        
+    end
+    
+    return _G[t.type] and _G[t.type](t) or
+        
+        error("Received invalid type "..t.type)
+    
+end
 
+function load_layer(str)
+    
+    if type(styles) ~= "table" then
+        print("WARNING. Styles table is empty")
+    end
+    if type(str) ~= "string" then
+        error("Expected string. Received "..type(str),2)
+    end
+    
+    local layer = json:parse(str)
+    
+    if type(layer) ~= "table" then
+        error("String is not valid json",2)
+    end
+    
+    return construct(layer)
+    
+end
+
+--[[
 construct = function(t)
     
     if type(t) ~= "table" then
@@ -284,6 +349,7 @@ load_layer = function(layer_name)
     return layer_object
     
 end
+]]
 
 --l = load_layer("fake")
 

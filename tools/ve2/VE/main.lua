@@ -15,7 +15,6 @@ if not DIALOGBOX         then dofile("DialogBox/DialogBox.lua")           end
 
 g = Group{name="Layer1"}
 
-
 dofile("ve_runtime")
 loadfile("test1.lua")(g)
 
@@ -43,8 +42,11 @@ end
 local uiNum = 0
 local layerNum = 0
 local dragging = nil
-json_head = '[ {"anchor_point":[0,0], "children":[{"anchor_point":[0,0], "children":'  
-json_tail = ' ,"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[0.5, 0.5],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}], "gid":0,"is_visible":true,"name":"stage","opacity":255,"position":[0,0,0],"scale":[1,1],"size":[960, 540],"type":"Stage","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}] ' 
+json_head = '[{"anchor_point":[0,0], "children":[{"anchor_point":[0,0], "children":'  
+json_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[0.5, 0.5],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}], "gid":0,"is_visible":true,"name":"stage","opacity":255,"position":[0,0,0],"scale":[1,1],"size":[960, 540],"type":"Stage","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
+
+sjson_head = '[{"anchor_point":[0,0], "children":'  
+sjson_tail = ',"gid":2,"is_visible":true,"name":"screen","opacity":255,"position":[0,0,0],"scale":[1, 1],"size":[1920, 1080],"type":"Group","x_rotation":[0,0,0],"y_rotation":[0,0,0],"z_rotation":[0,0,0]}]'
 fake_json = '{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "Layer1", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": 3, "z_rotation": [0,0,0], "position": [0,0,0], "type": "Group", "children": [{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "rectangle0", "anchor_point": [0,0],"border_color": [255,255,255,255], "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 4, "z_rotation": [0,0,0], "position": [0,0,0], "border_width": 0, "type": "Rectangle", "size": [212, 186]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "clone1", "anchor_point": [0,0], "x_rotation": [0,0,0], "source": {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "rectangle0", "anchor_point": [0,0], "border_color": [255,255,255,255], "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 4, "z_rotation": [0,0,0], "position": [216,160,0],"border_width": 0, "type": "Rectangle", "size": [212, 186]}, "gid": 5, "z_rotation": [0,0,0], "position": [216, 390, 0], "type": "Clone", "size": [212, 186]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "image2", "clip": [0,0,450,978], "src": "/assets/images/img_big_01.png", "anchor_point": [0,0], "x_rotation": [0,0,0], "gid": 6, "z_rotation": [0,0,0], "position": [208, 590, 0], "type": "Texture", "size": [978, 450]}, {"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "text3", "anchor_point": [0,0], "text": "TEXT", "x_rotation": [0,0,0], "color": [255,255,255,255], "gid": 7, "z_rotation": [0,0,0], "position": [224, 1046, 0], "font": "FreeSans Medium 30px", "type": "Text", "size": [39, 75]}], "size": [1186, 1121]}'
 
 fake_layer_name = '{"opacity": 255, "is_visible": true, "scale": [1,1], "y_rotation": [0,0,0], "name": "'
@@ -75,6 +77,7 @@ end
 _VE_.getUIInfo = function()
     local t = {}
     for m,n in ipairs (screen.children) do
+    --[[
         if string.find(n.name, "Layer") then  
             fake_layer = fake_layer_name..n.name..fake_layer_gid..n.gid..fake_layer_children
             for i,j in ipairs(n.children) do 
@@ -88,10 +91,12 @@ _VE_.getUIInfo = function()
             end 
             fake_layer = fake_layer..fake_layer_end
             table.insert(t, json:parse(fake_layer))
-        elseif n.to_json then -- s1.b1
+        else]]
+        if n.to_json then -- s1.b1
             table.insert(t, json:parse(n:to_json()))
         end
     end
+    
     print("getUIInfo"..json_head..json:stringify(t)..json_tail)
 end 
 -- SET
@@ -126,23 +131,58 @@ _VE_.openInspector = function(gid)
 end 
 
 _VE_.openFile = function()
-    s = load_layer("layer1.json")
+    --s = load_layer("layer1.json")
+    editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
     screen:clear()
-    s.reactive = false
+
+
+    layers_file = "layers.json"
+    styles_file = "styles.json"
+    screens_file = "screens.json"
+
+    --local scrJson = readfile(screens_file)
+    --print("scrJSInfo"..scrJson)
+
+    print("scrJSInfo"..readfile(screens_file))
+
+    if type(styles_file) ~= "string" then
+        
+        error("'load_layer()' expects type 'string'. Recieved "..type(styles_file),2)
+        
+    end
     
-    screen:add(s)
+    --the first time this function is called, styles will get set up
+    --if not styles then load_styles() end
+    
+    --load the json
+    local style = readfile(styles_file)
+    
+
+    style = string.sub(style, 2, string.len(style)-1)
+
+
+    load_styles(style) 
+
+    local layer = readfile(layers_file)
+    layer = string.sub(layer, 2, string.len(layer)-1)
+    
+    if layer == nil then
+        
+        error("Layer '"..layers_file.."' does not exist.",2)
+        
+    end
+
+    s = load_layer(layer)
+    --screen:add(s)
 
     for i,j in ipairs(s.children) do
-        --dump_properties(j)
-        j.extra.to_json = function() return fake_json end
-
         if j.subscribe_to then  
             j:subscribe_to(nil, function()  _VE_.repUIInfo(j) end)
         end 
         function j.on_button_down( j , x , y , button )
             dragging = { j , x - j.x , y - j.y }
             if button == 3 then
-                _VE_.openInspector(4)
+                _VE_.openInspector(j.gid)
             end
         end
     
@@ -151,8 +191,11 @@ _VE_.openFile = function()
         end
     
         j.reactive = true 
-        _VE_.repUIInfo(j)
+        --_VE_.repUIInfo(j)
+        j:unparent()
+        screen:add(j)
     end
+    _VE_.repUIInfo()
 end 
 
 _VE_.openLuaFile = function()
@@ -191,20 +234,25 @@ _VE_.newLayer = function()
     _VE_.getStInfo()
 end 
 
-_VE_.saveFile = function()
-    local t = {}
+_VE_.saveFile = function(scrJson)
+    local layer_t = {}
+    local style_t = {}
 
     for a, b in ipairs (screen.children) do
             --editor:writefile("layer1.json", b.name, true) 
             if b.to_json then -- s1.b1
-                table.insert(t, json:parse(b:to_json()))
-                print (b.name, b:to_json())
+                table.insert(layer_t, json:parse(b:to_json()))
+                --print (b.name, b:to_json())
             end
     end
 
-   editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
-   editor:writefile("layer1.json", json:stringify(t), true) 
-   --editor:writefile("layer1_user.lua", , true) 
+    table.insert(style_t, json:parse(get_all_styles()))
+
+    editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
+    editor:writefile("layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
+    editor:writefile("styles.json", json:stringify(style_t), true) 
+    editor:writefile("screens.json", scrJson, true) 
+    --editor:writefile("layer1_user.lua", , true) 
 
 end 
 
