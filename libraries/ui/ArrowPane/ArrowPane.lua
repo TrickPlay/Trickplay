@@ -30,10 +30,10 @@ ArrowPane = function(parameters)
 	
     local pane = ClippingRegion(parameters)
     
-    local up    = Button{ label = "", create_canvas = create_arrow, z_rotation = { 90,0,0} }
-    local down  = Button{ label = "", create_canvas = create_arrow, z_rotation = {270,0,0} }
-    local left  = Button{ label = "", create_canvas = create_arrow }
-    local right = Button{ label = "", create_canvas = create_arrow, z_rotation = {180,0,0} }
+    local up    = Button{ label = "", style = false, create_canvas = create_arrow, z_rotation = { 90,0,0} }
+    local down  = Button{ label = "", style = false, create_canvas = create_arrow, z_rotation = {270,0,0} }
+    local left  = Button{ label = "", style = false, create_canvas = create_arrow }
+    local right = Button{ label = "", style = false, create_canvas = create_arrow, z_rotation = {180,0,0} }
     
     local arrows = {
         up    = up,
