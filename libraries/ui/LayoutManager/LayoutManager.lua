@@ -54,18 +54,18 @@ ListManager = function(parameters)
         
         if i ~= 1 then
             if direction == "vertical" then
-                items[cell].neighbors.up = cells[i-1] print("assign")
+                items[cell].neighbors.up = cells[i-1]
             elseif direction == "horizontal" then
-                items[cell].neighbors.left = cells[i-1] print("assign")
+                items[cell].neighbors.left = cells[i-1]
             else
                 error("direction is invalid",2)
             end
         end
         if i ~= cells.length then
             if direction == "vertical" then
-                items[cell].neighbors.down = cells[i+1] print("assign")
+                items[cell].neighbors.down = cells[i+1]
             elseif direction == "horizontal" then
-                items[cell].neighbors.right = cells[i+1] print("assign")
+                items[cell].neighbors.right = cells[i+1]
             else
                 error("direction is invalid",2)
             end
@@ -234,25 +234,21 @@ ListManager = function(parameters)
                 key_functions = {
                     up    = obj:add_key_handler(keys.Up,   function() 
                         if  items[obj].neighbors.up then 
-                        print("up")
                             items[obj].neighbors.up:grab_key_focus() 
                         end 
                     end),
                     down  = obj:add_key_handler(keys.Down, function() 
                         if  items[obj].neighbors.down then 
-                        print("down")
                             items[obj].neighbors.down:grab_key_focus() 
                         end 
                     end),
                     left  = obj:add_key_handler(keys.Left, function() 
                         if  items[obj].neighbors.left then 
-                        print("left")
                             items[obj].neighbors.left:grab_key_focus() 
                         end 
                     end),
                     right = obj:add_key_handler(keys.Right,function() 
                         if  items[obj].neighbors.right then 
-                        print("right")
                             items[obj].neighbors.right:grab_key_focus() 
                         end 
                     end),
@@ -283,7 +279,6 @@ ListManager = function(parameters)
             max_w = 0
             for_each(self,widths_of_cols)
             max_h = 0
-            print(max_w,max_h)
             for_each(self,heights_of_rows)
             for_each(self,position_cell)
             set_size(self)
@@ -454,7 +449,6 @@ LayoutManager = function(parameters)
     local for_each = function(self,f)
         for r = 1, self.number_of_rows do
             for c = 1, self.number_of_cols do
-                print(r,c)
                 if self[r][c] then f(self[r][c],r,c,self) end
             end
         end
@@ -549,7 +543,7 @@ LayoutManager = function(parameters)
         end
 	)
     ----------------------------------------------------------------------------
-    
+    local in_on_entries = false
     cells = GridManager{  
         
         node_constructor=function(obj)
@@ -598,7 +592,9 @@ LayoutManager = function(parameters)
             if obj.subscribe_to then
                 obj:subscribe_to(
                     {"h","w","width","height","size"},
-                    function()
+                    function(...)
+                        if in_on_entries then return end
+                        print("heree")
                         cells:on_entries_changed()
                     end
                 )
@@ -615,6 +611,7 @@ LayoutManager = function(parameters)
         end,
         
         on_entries_changed = function(self)
+            in_on_entries = true
             col_widths  = {}
             row_heights = {}
             for_each(self,widths_of_cols)
@@ -623,6 +620,7 @@ LayoutManager = function(parameters)
             set_size(self)
             for_each(self,assign_neighbors)
             on_entries_changed()
+            in_on_entries = false
         end
     }
 	override_property(instance,"cells",
