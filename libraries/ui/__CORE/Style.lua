@@ -355,17 +355,15 @@ Style = function(parameters)
         fill_colors = function(v) fill_colors:set(v or {}) end,
         name        = function(v)
             
-            if v == false then
-                
-                name = false
-                
-            else
+            if v ~= false then
                 
                 if name then all_styles[name] = nil end
                 
-                name = check_name( all_styles, instance, v, "Style" )
+                v = check_name( all_styles, instance, v, "Style" )
                 
             end
+            
+            name = v
             
         end,
     }
