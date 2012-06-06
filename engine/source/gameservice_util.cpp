@@ -3,6 +3,8 @@
  *
  */
 #include <iostream>
+#include <string>
+#include <vector>
 #include "gameservice_util.h"
 #include "lb.h"
 
@@ -378,14 +380,176 @@ void push_app_id_arg( lua_State * L, const libgameservice::AppId& app_id )
 	lua_rawset( L , t );
 }
 
+/*
+ * match_request table of the following format:
+ * {
+ * 		game_id = "xyz",
+ * 		free_role = "true",
+ * 		role = "p1",
+ * 		new_match = "true",
+ * 		nick = "best_gamer"
+ * 	}
+ *
+ */
 void push_match_request_arg( lua_State * L, const libgameservice::MatchRequest& match_request )
 {
+	lua_newtable( L );
+	int t = lua_gettop( L );
+
+	lua_pushliteral( L , "game_id" );
+	lua_pushstring( L , match_request.game_id().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L , "free_role" );
+	lua_pushboolean( L , match_request.free_role() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L , "role" );
+	lua_pushstring( L , match_request.role().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L , "new_match" );
+	lua_pushboolean( L , match_request.new_match() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L , "nick" );
+	lua_pushstring( L , match_request.nick().c_str() );
+	lua_rawset( L , t );
 
 }
 
-void push_match_id_arg( lua_State * L, const std::string& match_id )
+void push_string_arg( lua_State * L, const std::string& str )
 {
+	lua_pushstring( L, str.c_str() );
+}
 
+void push_participant_arg( lua_State * L, const libgameservice::Participant& participant )
+{
+	lua_newtable( L );
+	int t = lua_gettop( L );
+
+	lua_pushliteral( L , "id" );
+	lua_pushstring( L , participant.id().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L , "nick" );
+	lua_pushstring( L , participant.nick().c_str() );
+	lua_rawset( L , t );
+}
+
+/*
+ * match_state =
+ * {
+ * 	string opaque,
+	bool terminate,
+	string first;
+	string next;
+	string last;
+	table players;
+ *
+ * }
+ */
+void push_match_state_arg( lua_State * L, const libgameservice::MatchState& match_state )
+{
+	lua_newtable( L );
+	int t = lua_gettop( L );
+
+	lua_pushliteral( L, "opaque" );
+	lua_pushstring( L , match_state.opaque().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "terminate" );
+	lua_pushboolean( L , match_state.terminate() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "first" );
+	lua_pushstring( L , match_state.first().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "next" );
+	lua_pushstring( L , match_state.next().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "last" );
+	lua_pushstring( L , match_state.last().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "players" );
+	lua_newtable( L );
+
+	//std::vector<String> players = match_state.const_players();
+	std::vector<String>::const_iterator it;
+	for ( it=match_state.const_players().begin() ; it < match_state.const_players().end(); it++ ) {
+		lua_pushstring( L, (*it).c_str() );
+		lua_rawseti( L, -2, 1 );
+	}
+
+	lua_rawset( L, t );
+
+}
+
+void push_match_status_arg( lua_State * L, const libgameservice::MatchStatus& match_status )
+{
+	lua_pushstring( L , libgameservice::matchStatusToString( match_status ).c_str() );
+}
+
+/*
+ * item =
+ * {
+ * 	string nick;
+	string role;
+	string affiliation;
+	string jid;
+	}
+ */
+void push_item_arg( lua_State * L, const libgameservice::Item& item )
+{
+	lua_newtable( L );
+	int t = lua_gettop( L );
+
+	lua_pushliteral( L, "nick" );
+	lua_pushstring( L , item.nick().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "role" );
+	lua_pushstring( L , item.role().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "affiliation" );
+	lua_pushstring( L , libgameservice::affiliationToString(item.affiliation()).c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "jid" );
+	lua_pushstring( L , item.jid().c_str() );
+	lua_rawset( L , t );
+
+
+}
+
+/*
+ * turn =
+ * {
+ * 	string new_state;
+	bool terminate;
+	string next_turn;
+ * }
+ */
+void push_turn_arg( lua_State * L, const libgameservice::Turn& turn_message )
+{
+	lua_newtable( L );
+	int t = lua_gettop( L );
+
+	lua_pushliteral( L, "new_state" );
+	lua_pushstring( L , turn_message.new_state().c_str() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "terminate" );
+	lua_pushboolean( L , turn_message.terminate() );
+	lua_rawset( L , t );
+
+	lua_pushliteral( L, "next_turn" );
+	lua_pushstring( L , turn_message.next_turn().c_str() );
+	lua_rawset( L , t );
 }
 
 
