@@ -8,8 +8,12 @@ namespace libgameservice {
 class MatchRequest {
 public:
 
+	MatchRequest() :
+		free_role_(false), new_match_(false) {
+	}
+
 	MatchRequest(const std::string& game_id) :
-		game_id_(game_id), free_role_(false), role_(), new_match_(false), nick_() {
+		game_id_(game_id), free_role_(false), new_match_(false) {
 	}
 
 	const std::string& role() const {

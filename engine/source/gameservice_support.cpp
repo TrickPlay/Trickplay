@@ -1,7 +1,9 @@
 #include <iostream>
 #include <string>
 #include "gameservice_support.h"
+#include "gameservice_util.h"
 #include "util.h"
+
 using namespace libgameservice;
 
 static std::string stateToStr(GameServiceSupport::State state) {
@@ -14,6 +16,13 @@ static std::string stateToStr(GameServiceSupport::State state) {
 		return "LOGIN_FAILED";
 	case GameServiceSupport::NO_CONNECTION:
 		return "NO_CONNECTION";
+	case GameServiceSupport::APP_OPEN:
+		return "APP_OPEN";
+	case GameServiceSupport::APP_OPENING:
+		return "APP_OPENING";
+	case GameServiceSupport::APP_CLOSING:
+		return "APP_CLOSING";
+
 	default:
 		return "UNKNOWN";
 	}
@@ -83,6 +92,7 @@ protected:
 		if (game_service_->state() == GameServiceSupport::LOGIN_IN_PROGRESS)
 			return true;
 		else if (game_service_->state() == GameServiceSupport::LOGIN_SUCCESSFUL) {
+			game_service_->state_ = GameServiceSupport::APP_OPENING;
 			game_service_->delegate_->OpenApp(app_id_);
 		} else {
 			ResponseStatus rs(libgameservice::NOT_CONNECTED, "Not connected to gameservice server");
@@ -123,12 +133,27 @@ StatusCode GameServiceSupport::Login(const std::string& user_id, const std::stri
 
 
 StatusCode GameServiceSupport::OpenApp(const AppId& app_id) {
+	if (state_ == APP_OPEN)
+		return libgameservice::APP_ALREADY_OPEN;
+
+	if (state_ == LOGIN_FAILED || state_ == NO_CONNECTION)
+		return libgameservice::NOT_CONNECTED;
+
+	if (state_ != LOGIN_SUCCESSFUL && state_ != LOGIN_IN_PROGRESS)
+		return libgameservice::FAILED;
+
 	::Action::post(new OpenAppAction(this, app_id));
 	return OK;
 	//return delegate_->OpenApp(app_id);
 }
 
 StatusCode GameServiceSupport::CloseApp() {
+	if (state_ == LOGIN_FAILED || state_ == NO_CONNECTION)
+			return libgameservice::NOT_CONNECTED;
+
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
+
 	return delegate_->CloseApp();
 }
 
@@ -141,37 +166,53 @@ StatusCode GameServiceSupport::RegisterApp(const AppId & app) {
 }
 
 StatusCode GameServiceSupport::RegisterGame(const Game & game) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
 	return delegate_->RegisterGame(game);
 }
 
 StatusCode GameServiceSupport::StartMatch(const std::string& match_id, void* cb_data) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
 	return delegate_->StartMatch(match_id, cb_data);
 }
 
 StatusCode GameServiceSupport::LeaveMatch(const std::string& match_id, void* cb_data) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
 	return delegate_->LeaveMatch(match_id, cb_data);
 }
 
 StatusCode GameServiceSupport::JoinMatch(const std::string& match_id, const std::string& nick,
 		bool acquire_role, void* cb_data) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
 	return delegate_->JoinMatch(match_id, nick, acquire_role, cb_data);
 }
 
 StatusCode GameServiceSupport::JoinMatch(const std::string& match_id, const std::string& nick,
 		const std::string& role, void* cb_data) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
 	return delegate_->JoinMatch(match_id, nick, role, cb_data);
 }
 
 StatusCode GameServiceSupport::AssignMatch(const MatchRequest& match_request, void* cb_data) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
 	return delegate_->AssignMatch(match_request, cb_data);
 }
 
 StatusCode GameServiceSupport::GetMatchData(const GameId& game_id) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
 	return delegate_->GetMatchData(game_id);
 }
 
 StatusCode GameServiceSupport::SendTurn(const std::string& match_id, const std::string& state,
 		bool terminate, void* cb_data) {
+	if (state_ != APP_OPEN)
+		return libgameservice::APP_NOT_OPEN;
 	return delegate_->SendTurn(match_id, state, terminate, cb_data);
 }
 
@@ -184,13 +225,18 @@ bool GameServiceSupport::DoCallbacks(unsigned int wait_millis) {
 }
 
 void GameServiceSupport::OnStateChange(ConnectionState state) {
-	if (state == GameServiceClientNotify::STATE_OPEN)
+	if (state == GameServiceClientNotify::STATE_OPEN) {
 		state_ = LOGIN_SUCCESSFUL;
-	else if (state == GameServiceClientNotify::STATE_CLOSED)
-		if (state_ == LOGIN_IN_PROGRESS)
+		notify( tpcontext_ , TP_NOTIFICATION_GAMESERVICE_LOGIN_SUCCESSFUL );
+	}
+	else if (state == GameServiceClientNotify::STATE_CLOSED) {
+		if (state_ == LOGIN_IN_PROGRESS) {
 			state_ = LOGIN_FAILED;
+			notify( tpcontext_ , TP_NOTIFICATION_GAMESERVICE_LOGIN_FAILED );
+		}
 		else
 			state_ = NO_CONNECTION;
+	}
 	std::cout << "State change: " << state << std::endl;
 }
 
@@ -229,16 +275,65 @@ void GameServiceSupport::OnListGamesResponse(const ResponseStatus& rs,
 void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId& app_id) {
 	std::cout << "OnOpenAppResponse(). status_code:" << statusToString(
 			rs.status_code()) << ", app_id:" << app_id.AsID() << std::endl;
+
+	lua_State* L = get_lua_state();
+
+	TPGameServiceUtil::push_response_status_arg( L, rs );
+
+	TPGameServiceUtil::push_app_id_arg( L, app_id );
+
+	if (rs.status_code() == OK) {
+		state_ = APP_OPEN;
+		app_id_ = app_id;
+
+
+		invoke_gameservice_on_ready( L, this, 2, 0 );
+
+		// call the on_ready lua callback
+	} else {
+		// call the on_error lua callback
+		state_ = LOGIN_SUCCESSFUL;
+
+		invoke_gameservice_on_error( L, this, 2, 0 );
+	}
 }
 
 void GameServiceSupport::OnCloseAppResponse(const ResponseStatus& rs, const AppId& app_id) {
 	std::cout << "OnCloseAppResponse(). status_code:" << statusToString(
 			rs.status_code()) << ", app_id:" << app_id.AsID() << std::endl;
+	if (rs.status_code() == OK) {
+		state_ = LOGIN_SUCCESSFUL;
+	} else {
+		state_ = APP_OPEN;
+	}
 }
 
 void GameServiceSupport::OnAssignMatchResponse(const ResponseStatus& rs,
 		const MatchRequest& match_request, const std::string& match_id, void* cb_data) {
 
+	std::cout << "OnAssignMatchResponse(). status_code:"
+			<< statusToString( rs.status_code() )
+			<< ", match_request:" << match_request.Str()
+			<< ", match_id:"
+			<< match_id
+			<< std::endl;
+
+		lua_State* L = get_lua_state();
+
+		TPGameServiceUtil::push_response_status_arg( L, rs );
+
+
+		if (rs.status_code() == OK) {
+
+			TPGameServiceUtil::push_match_request_arg( L, match_request );
+
+			TPGameServiceUtil::push_match_id_arg( L, match_id );
+
+			invoke_gameservice_on_assign_match_completed( L, this, 3, 0 );
+
+		} else {
+			invoke_gameservice_on_assign_match_completed( L, this, 1, 0 );
+		}
 }
 
 void GameServiceSupport::OnStart(const std::string& match_id, const Participant& from) {

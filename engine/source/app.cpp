@@ -1163,8 +1163,10 @@ void App::run_part2( const StringSet & allowed_names , RunCallback run_callback 
 
 #ifdef TP_WITH_GAMESERVICE
     if (metadata.attributes.find(APP_FIELD_GAMESERVICE_ATTRIBUTE) != metadata.attributes.end()) {
+    	g_info("Performing luaopen_gameservice()");
     	luaopen_gameservice( L );
 
+    	g_info("calling gameservice->OpenApp(%s, %d) ", metadata.name.c_str(), 1);
     	context->get_gameservice()->OpenApp(libgameservice::AppId(metadata.name, 1));
     }
 #endif

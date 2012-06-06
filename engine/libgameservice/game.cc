@@ -77,7 +77,7 @@ std::string Game::turn_policy_to_string(TurnPolicy tp) {
 	return kRoundRobin;
 }
 
-Game::GameType Game::game_type_from_string(std::string str) {
+Game::GameType Game::game_type_from_string(const std::string& str) {
 	if (kCorrespondence == str)
 		return correspondence;
 	else if (kOnline == str)
@@ -89,7 +89,7 @@ Game::GameType Game::game_type_from_string(std::string str) {
 
 }
 
-Game::TurnPolicy Game::turn_policy_from_string(std::string str) {
+Game::TurnPolicy Game::turn_policy_from_string(const std::string& str) {
 	if (kRoundRobin == str)
 		return roundrobin;
 	else if (kSimultaneous == str)
