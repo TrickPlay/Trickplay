@@ -601,7 +601,7 @@ public:
 
 	int load( lua_State * L , const String & chunk_name )
 	{
-		return lua_load( L , LuaLoader::lua_Reader , this , chunk_name.c_str() );
+		return lua_load( L , LuaLoader::lua_Reader , this , chunk_name.c_str() , 0 );
 	}
 
 protected:
