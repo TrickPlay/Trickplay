@@ -24,13 +24,10 @@ ArrayManager = function(p)
         local caller
         test_and_set = function(v)
             if caller ~= nil then return end
-            print("test_and_set1",v,caller)
             caller = v
-            print("test_and_set2",v,caller)
         end
         report_change = function(v)
             if caller ~= v then return end
-            print("report_change",v)
             caller = nil
             on_entries_changed(instance)
         end
