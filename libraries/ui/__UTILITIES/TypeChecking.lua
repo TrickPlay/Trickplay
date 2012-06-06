@@ -22,21 +22,21 @@ end
 
 
 
-check_name = function(table,instance,name,generic)
+check_name = function(curr_names,instance,name,generic)
     --print(generic)
     if name == nil then name = generic end
     
-    if table[name] == nil then
+    if curr_names[name] == nil then
         
-        table[name] = instance
+        curr_names[name] = instance
         
     else
         
         local i = 1
         
-        while table[name.." ("..i..")"] ~= nil do    i = i + 1    end
+        while curr_names[name.." ("..i..")"] ~= nil do    i = i + 1    end
         
-        table[name.." ("..i..")"] = instance
+        curr_names[name.." ("..i..")"] = instance
         
         name = name.." ("..i..")"
     end
