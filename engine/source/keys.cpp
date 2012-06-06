@@ -2124,7 +2124,8 @@ void luaopen_keys( lua_State * L )
 {
     LSG;
 
-    lua_pushvalue( L , LUA_GLOBALSINDEX );
+    lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
+    
     lua_pushliteral( L , "keys" );
 
     lua_newtable( L );
