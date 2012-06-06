@@ -47,13 +47,6 @@ PROP_LIST = [
     'h',
     'size',
     'separator_y',
-    'animate_in_duration',
-    'animate_out_duration',
-    'horizontal_icon_padding',
-    'horizontal_message_padding',
-    'message',
-    'message_color',
-    'on_screen_duration',
     'opacity', 
     'tile',
     'is_visible', 
@@ -68,6 +61,7 @@ PROP_LIST = [
     # Widget
     'style', 
     'focused',
+    'enabled',
     # Widget Style
     #'border',
     #'arrow',
