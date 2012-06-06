@@ -90,8 +90,14 @@ public:
 	static std::string game_type_to_string(GameType gt);
 	static std::string turn_policy_to_string(TurnPolicy tp);
 
-	static GameType game_type_from_string(std::string str);
-	static TurnPolicy turn_policy_from_string(std::string str);
+	static GameType game_type_from_string(const std::string& str);
+	static TurnPolicy turn_policy_from_string(const std::string& str);
+
+	Game() :
+		turn_policy_(roundrobin), game_type_(correspondence),
+		join_after_start_(true), min_players_for_start_(1), max_duration_per_turn_(0),
+		abort_when_player_leaves_(false)
+		{ }
 
 	Game(const GameId& game_id) :
 		game_id_(game_id), turn_policy_(roundrobin), game_type_(correspondence),

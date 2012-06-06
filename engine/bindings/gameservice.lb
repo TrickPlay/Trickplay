@@ -1,14 +1,32 @@
 module gameservice_module;
 
-global gameservice [[void*]]
+[[
+#include "context.h"
+#include "app.h"
+#include "gameservice_support.h"
+#include "gameservice_util.h"
+
+
+void gameservice_app_ready_handler(TPContext * context,const char *,void * l);
+void gameservice_app_error_handler(TPContext * context,const char *,void * l);
+]]
+
+global gameservice [[GameServiceSupport*]]
 {
 
+	gameservice()
+		[[
+			self=lb_construct( GameServiceSupport , App::get(L)->get_context()->get_gameservice() );
+			
+			self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_READY, gameservice_app_ready_handler,L);
+            self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_ERROR, gameservice_app_error_handler,L);
+		]];
 	/*
 	
     	Event Handler: on_ready
     	
-    	The on_ready() event handler is invoked after the Trickplay is able to successfully register a listener for the app events
-    	with the gameservice server.
+    	The on_ready() event handler is invoked after the Trickplay successfully 
+    	registers a listener for the game events with the gameservice server.
     	If the registration failed, the <on_error> event handler will be invoked, instead.
     	
     	*Prototype:*
@@ -22,50 +40,50 @@ global gameservice [[void*]]
     		None
     		
     	*Return Value:* None
+    	
 	*/
+	
+
 	callback on_ready
-	[[ 
-	]];
+	;
+	
 	
 	callback on_error
-	[[ 
-	]];
+	;
+
 
 /*
-/*	
-	
-table Role { name:string, cannot_start:bool, first_role:bool}
-
-table Game {
-
-	string name
-	
-	string description
-	
-	string category
-	
-	string policy
-	
-	string game_type
-	
-	bool join_after_start
-		 
-	int min_players_for_start
-
-	int max_duration_per_turn
-
-	bool abort_when_player_leaves
-	
-	table roles
-	
-}
-*/
-    readonly table games
+ * TODO: get the registered games from the server as payload of open_app call
+ */
+    readonly table registered_games
         [[
+        	TPGameServiceUtil::push_registered_games(L);
         ]];
 
-	register_game(table game) 
+/*		
+* props is a lua table of the following format:
+ *  {
+ *  	app_id = { name = "com.trickplay.games", version = 1 },
+ *  	name = "indy_car_race",
+ *  	description = "American style open-wheel car racing",
+ *	    category = "Car Racing",
+ *	    turn_policy = "roundrobin",
+ *	    game_type = "correspondence|specifiedRole",
+ *	    join_after_start = "true",
+ *      min_players_for_start = "2",
+ *      max_duration_per_turn = "1000", // in seconds
+ *      abort_when_player_leaves = "true",
+ *      roles = {
+ *      	{	name = "p1", cannot_start = "false", first_role = "true" },
+ *      	{   name = "p2", cannot_start = "true", first_role = "false" }
+ *      }
+ *  }
+*/
+	register_game(table props) 
 		[[
+			libgameservice::Game game_obj;
+			TPGameServiceUtil::populate_game(L, props, game_obj);
+			self->RegisterGame(game_obj);
 		]];
 		
 	/*
@@ -88,58 +106,79 @@ table Game {
     	*See Also:* the <load> function and the <on_error> event handler
 	*/
 	
-	callback on_register_game_completed; 
+	callback on_register_game_completed
+	; 
 	
-	assign_match()
+	assign_match(table props)
 		[[
+			libgameservice::MatchRequest match_request;
+			TPGameServiceUtil::populate_match_request(L, props, match_request);
+			self->AssignMatch(match_request, NULL);
 		]];
 		
-	callback on_assign_match_completed
-	[[
-	]];
+	callback on_assign_match_completed;
 	
-	join_match(string match_id)
+	join_match(string match_id, string nick, bool any_role)
 		[[
+			self->JoinMatch(match_id, nick, any_role, NULL);
+		]];
+
+	join_match_with_role(string match_id, string nick, string role)
+		[[
+			self->JoinMatch(match_id, nick, role, NULL);
 		]];
 		
+	
 	callback on_join_match_completed
-	[[
-	]];
+	;
+	
 	
 	start_match(string match_id)
 		[[
+			self->StartMatch(match_id, NULL);
 		]];
 		
-	callback on_start_match_completed
-	[[
-	]];
+	callback on_start_match_completed;
 	
-	send_turn(string match_id, string turn_data)
+	send_turn(string match_id, string turn_data, bool terminate)
 		[[
+			self->SendTurn(match_id, turn_data, terminate, NULL);
 		]];
 		
 	callback on_send_turn_completed
-	[[
-	]];
+	;
+	
 	
 	callback on_turn_received
-	[[
-	]];
+	;
+	
 	
 	callback on_match_started
-	[[
-	]];
+	;
+	
 	
 	callback on_participant_joined
-	[[
-	]];
+	;
+	
 	
 	callback on_participant_left
-	[[
-	]];
+	;
+	
 	
 	callback on_match_updated
-	[[
-	]];
+	;
 
+[[
+void gameservice_app_ready_handler(TPContext * context, const char *,void * l)
+{
+    lua_State * L=(lua_State*)l;
+    invoke_gameservice_on_ready(L, context->get_gameservice(), 0,0);
+}
+
+void gameservice_app_error_handler(TPContext * context, const char *,void * l)
+{
+    lua_State * L=(lua_State*)l;
+    invoke_gameservice_on_error(L, context->get_gameservice(), 0,0);
+}
+]]
 }

@@ -580,6 +580,7 @@ list( APPEND
 if (TP_WITH_GAMESERVICE)
 	list ( APPEND ENGINE_SOURCE_FILES
 		${ENGINE_SRC}/source/gameservice_support.cpp
+		${ENGINE_SRC}/source/gameservice_util.cpp
 	)	
 endif(TP_WITH_GAMESERVICE)
 

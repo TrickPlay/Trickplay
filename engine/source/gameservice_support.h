@@ -3,11 +3,31 @@
 
 #include "gameserviceclient.h"
 #include "context.h"
+#include "lua.h"
 
 using namespace libgameservice;
 class OpenAppAction;
 
-class GameServiceSupport : public GameServiceClientNotify, GameServiceAsyncInterface {
+extern int invoke_gameservice_on_ready(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_error(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_register_game_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_assign_match_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_join_match_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_start_match_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_send_turn_completed(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_turn_received(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_match_started(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_participant_joined(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_participant_left(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+extern int invoke_gameservice_on_match_updated(lua_State*L,GameServiceSupport* self,int nargs,int nresults);
+
+
+#define TP_NOTIFICATION_GAMESERVICE_LOGIN_SUCCESSFUL	"gameservice-login-successful"
+#define TP_NOTIFICATION_GAMESERVICE_LOGIN_FAILED		"gameservice-login-failed"
+#define TP_NOTIFICATION_GAMESERVICE_APP_READY           "gameservice-app-ready"
+#define TP_NOTIFICATION_GAMESERVICE_APP_ERROR           "gameservice-app-error"
+
+class GameServiceSupport : public GameServiceClientNotify, public GameServiceAsyncInterface, public Notify {
 
 public:
 
@@ -16,7 +36,11 @@ public:
 		LOGIN_IN_PROGRESS,
 		LOGIN_FAILED,
 		LOGIN_SUCCESSFUL,
+		APP_OPENING,
+		APP_OPEN,
+		APP_CLOSING,
 	};
+
 	GameServiceSupport(TPContext * context);
 
 	State state() const { return state_; }
@@ -57,6 +81,12 @@ public:
 	virtual bool DoCallbacks(unsigned int wait_millis = 0);
 
 
+	/* The following methods will be called by the worker thread when one of the following 2 things happens:
+	 * 1. A previously requested GameService task completes
+	 * 2. A notification to the logged-in user is received from the GameService server.
+	 *
+	 * These methods shouldn't be by the App developers.
+	 */
 	virtual void WakeupMainThread();
 
 	virtual void OnStateChange(ConnectionState state);
@@ -128,9 +158,14 @@ public:
 	friend class OpenAppAction;
 
 private:
+	inline lua_State * get_lua_state() {
+		return tpcontext_->get_current_app()->get_lua_state();
+	}
+
 	GameServiceAsyncInterface * delegate_;
 	TPContext * tpcontext_;
 	State state_;
+	AppId app_id_;
 };
 
 #endif /* _GAMESERVICE_SUPPORT_H_ */
