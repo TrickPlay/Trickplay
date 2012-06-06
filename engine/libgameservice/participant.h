@@ -3,6 +3,8 @@
 
 #include <string>
 
+namespace libgameservice {
+
 class Participant {
 
 public:
@@ -46,4 +48,6 @@ private:
 	std::string id_;
 	std::string nick_;
 };
+
+}
 #endif /* _PARTICIPANT_H_ */

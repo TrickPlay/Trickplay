@@ -278,23 +278,23 @@ void GameServiceSupport::OnOpenAppResponse(const ResponseStatus& rs, const AppId
 
 	lua_State* L = get_lua_state();
 
-	TPGameServiceUtil::push_response_status_arg( L, rs );
-
-	TPGameServiceUtil::push_app_id_arg( L, app_id );
-
 	if (rs.status_code() == OK) {
 		state_ = APP_OPEN;
 		app_id_ = app_id;
 
 
-		invoke_gameservice_on_ready( L, this, 2, 0 );
+		TPGameServiceUtil::push_app_id_arg( L, app_id );
+
+		invoke_gameservice_on_ready( L, this, 1, 0 );
 
 		// call the on_ready lua callback
 	} else {
 		// call the on_error lua callback
 		state_ = LOGIN_SUCCESSFUL;
 
-		invoke_gameservice_on_error( L, this, 2, 0 );
+		TPGameServiceUtil::push_response_status_arg( L, rs );
+
+		invoke_gameservice_on_error( L, this, 1, 0 );
 	}
 }
 
@@ -327,7 +327,7 @@ void GameServiceSupport::OnAssignMatchResponse(const ResponseStatus& rs,
 
 			TPGameServiceUtil::push_match_request_arg( L, match_request );
 
-			TPGameServiceUtil::push_match_id_arg( L, match_id );
+			TPGameServiceUtil::push_string_arg( L, match_id );
 
 			invoke_gameservice_on_assign_match_completed( L, this, 3, 0 );
 
@@ -336,52 +336,202 @@ void GameServiceSupport::OnAssignMatchResponse(const ResponseStatus& rs,
 		}
 }
 
-void GameServiceSupport::OnStart(const std::string& match_id, const Participant& from) {
-
-}
-
 void GameServiceSupport::OnStartMatchResponse(const ResponseStatus& rs, void* cb_data) {
+	std::cout << "OnStartMatchResponse(). status_code:"
+			<< statusToString( rs.status_code() )
+			<< std::endl;
 
-}
+		lua_State* L = get_lua_state();
 
-void GameServiceSupport::OnTurn(const std::string& match_id, const Participant& from,
-		const Turn& turn_message) {
+		TPGameServiceUtil::push_response_status_arg( L, rs );
 
+		invoke_gameservice_on_start_match_completed( L, this, 1, 0 );
 }
 
 void GameServiceSupport::OnTurnResponse(const ResponseStatus& rs, void* cb_data) {
+	std::cout << "OnTurnResponse(). status_code:"
+			<< statusToString( rs.status_code() )
+			<< std::endl;
 
-}
+		lua_State* L = get_lua_state();
 
-void GameServiceSupport::OnJoin(const std::string& match_id, const Participant& from,
-		const Item& item) {
+		TPGameServiceUtil::push_response_status_arg( L, rs );
 
+		invoke_gameservice_on_send_turn_completed( L, this, 1, 0 );
 }
 
 void GameServiceSupport::OnJoinMatchResponse(const ResponseStatus& rs,
 		const std::string& match_id, const Participant& from,
 		const Item& item, void* cb_data) {
+
+	std::cout << "OnJoinMatchResponse(). status_code:"
+			<< statusToString( rs.status_code() )
+			<< ", match_id:"
+			<< match_id
+			<< ", participant:"
+			<< from.Str()
+			<< ", item:"
+			<< item.Str()
+			<< std::endl;
+
+		lua_State* L = get_lua_state();
+
+		TPGameServiceUtil::push_response_status_arg( L, rs );
+
+
+		if (rs.status_code() == OK) {
+
+			TPGameServiceUtil::push_string_arg( L, match_id );
+
+			TPGameServiceUtil::push_participant_arg( L, from );
+
+			TPGameServiceUtil::push_item_arg( L, item );
+
+			invoke_gameservice_on_join_match_completed( L, this, 4, 0 );
+
+		} else {
+			invoke_gameservice_on_join_match_completed( L, this, 1, 0 );
+		}
 }
 
 void GameServiceSupport::OnLeaveMatchResponse(const ResponseStatus& rs, void* cb_data) {
+	std::cout << "OnLeaveMatchResponse(). status_code:"
+			<< statusToString( rs.status_code() )
+			<< ". no lua callback "
+			<< std::endl;
+
+	//	lua_State* L = get_lua_state();
+
+//		TPGameServiceUtil::push_response_status_arg( L, rs );
+
+	//	invoke_gameservice_on_( L, this, 1, 0 );
+
+}
+
+void GameServiceSupport::OnStart(const std::string& match_id, const Participant& from) {
+	std::cout << "OnStart()."
+			<< "match_id:"
+			<< match_id
+			<< ", from:"
+			<< from.Str()
+			<< std::endl;
+
+		lua_State* L = get_lua_state();
+
+
+		TPGameServiceUtil::push_string_arg( L, match_id );
+
+		TPGameServiceUtil::push_participant_arg( L, from );
+
+		invoke_gameservice_on_match_started( L, this, 2, 0 );
+}
+
+void GameServiceSupport::OnTurn(const std::string& match_id, const Participant& from,
+		const Turn& turn_message) {
+	std::cout << "OnTurn()."
+			<< "match_id:"
+			<< match_id
+			<< ", from:"
+			<< from.Str()
+			<< std::endl;
+
+		lua_State* L = get_lua_state();
+
+
+		TPGameServiceUtil::push_string_arg( L, match_id );
+
+		TPGameServiceUtil::push_participant_arg( L, from );
+
+		TPGameServiceUtil::push_turn_arg( L, turn_message);
+
+		invoke_gameservice_on_turn_received( L, this, 3, 0 );
+}
+
+void GameServiceSupport::OnJoin(const std::string& match_id, const Participant& from,
+		const Item& item) {
+	std::cout << "OnJoin()."
+			<< "match_id:"
+			<< match_id
+			<< ", from:"
+			<< from.Str()
+			<< ", item:"
+			<< item.Str()
+			<< std::endl;
+
+		lua_State* L = get_lua_state();
+
+
+		TPGameServiceUtil::push_string_arg( L, match_id );
+
+		TPGameServiceUtil::push_participant_arg( L, from );
+
+		TPGameServiceUtil::push_item_arg( L, item);
+
+		invoke_gameservice_on_participant_joined( L, this, 3, 0 );
 
 }
 
 void GameServiceSupport::OnLeave(const std::string& match_id, const Participant& participant) {
+	std::cout << "OnLeave()."
+			<< "match_id:"
+			<< match_id
+			<< ", participant:"
+			<< participant.Str()
+			<< std::endl;
+
+		lua_State* L = get_lua_state();
+
+
+		TPGameServiceUtil::push_string_arg( L, match_id );
+
+		TPGameServiceUtil::push_participant_arg( L, participant );
+
+		invoke_gameservice_on_participant_left( L, this, 2, 0);
 }
 
 void GameServiceSupport::OnUnavailable(const std::string& match_id,
 		const Participant& participant) {
-
+	std::cout << "OnUnavailable()."
+			<< "match_id:"
+			<< match_id
+			<< ", participant:"
+			<< participant.Str()
+			<< ". no lua callback"
+			<< std::endl;
 }
 
 void GameServiceSupport::OnNicknameChange(const std::string& match_id,
 		const Participant& participant, const std::string& new_nickname) {
-
+	std::cout << "OnNicknameChange()."
+				<< "match_id:"
+				<< match_id
+				<< ", participant:"
+				<< participant.Str()
+				<< ", new_nick:"
+				<< new_nickname
+				<< ". no lua callback"
+				<< std::endl;
 }
 
 void GameServiceSupport::OnCurrentMatchState(const std::string& match_id,
 		const MatchStatus& status, const MatchState& match_state) {
+	std::cout << "OnCurrentMatchState()."
+				<< "match_id:"
+				<< match_id
+				<< ", status:"
+				<< libgameservice::matchStatusToString(status)
+				<< std::endl;
+
+	lua_State* L = get_lua_state();
+
+
+	TPGameServiceUtil::push_string_arg( L, match_id );
+
+	TPGameServiceUtil::push_match_status_arg( L, status );
+
+	TPGameServiceUtil::push_match_state_arg( L, match_state );
+
+	invoke_gameservice_on_match_updated( L, this, 3, 0);
 
 }
 

@@ -27,6 +27,8 @@ public:
 	std::vector<std::string>& players() { return players_; }
 	void set_players(const std::vector<std::string>& players) { players_ = players; }
 
+	const std::vector<std::string>& const_players() const { return players_; }
+
 	MatchState& operator= (const MatchState& mstate) {
 		set_opaque(mstate.opaque());
 		set_terminate(mstate.terminate());
