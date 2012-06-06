@@ -89,9 +89,6 @@
     NSString *authLine;
     NSMutableDictionary *auth;
     
-    // Packet writing queue.
-    NSMutableArray *writeQueue;
-    
     // Delegate to SIPClient
     id <SIPDialogDelegate> delegate;
 }
@@ -120,16 +117,12 @@
 @property (nonatomic, retain) NSString *authLine;
 @property (nonatomic, retain) NSMutableDictionary *auth;
 
-@property (nonatomic, retain) NSMutableArray *writeQueue;
-
 @property (nonatomic, assign) id <SIPDialogDelegate> delegate;
 
 
 // methods
 
-- (id)initWithVideoStreamerContext:(VideoStreamerContext *)_context clientPublicIP:(NSString *)_clientPublicIP clientPrivateIP:(NSString *)_clientPrivateIP writeQueue:(NSMutableArray *)_writeQueue delegate:(id <SIPDialogDelegate>)_delegate;
-
-- (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue delegate:(id <SIPDialogDelegate>)_delegate;
+- (id)initWithVideoStreamerContext:(VideoStreamerContext *)_context clientPublicIP:(NSString *)_clientPublicIP clientPrivateIP:(NSString *)_clientPrivateIP delegate:(id <SIPDialogDelegate>)_delegate;
 
 - (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr;
 
@@ -182,10 +175,9 @@
     NSDictionary *mediaDestination;
 }
 
-- (id)initWithVideoStreamerContext:(VideoStreamerContext *)_context clientPublicIP:(NSString *)_clientPublicIP clientPrivateIP:(NSString *)_clientPrivateIP writeQueue:(NSMutableArray *)_writeQueue sps:(NSData *)_sps pps:(NSData *)_pps delegate:(id <SIPDialogDelegate>)_delegate;
+- (id)initWithVideoStreamerContext:(VideoStreamerContext *)_context clientPublicIP:(NSString *)_clientPublicIP clientPrivateIP:(NSString *)_clientPrivateIP sps:(NSData *)_sps pps:(NSData *)_pps delegate:(id <SIPDialogDelegate>)_delegate;
 
 - (void)inviteWithAuthHeader:(NSString *)key;
-- (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue sps:(NSData *)_sps pps:(NSData *)_pps delegate:(id <SIPDialogDelegate>)_delegate;
 
 @end
 

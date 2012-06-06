@@ -17,7 +17,6 @@
 		CDABC64D14FEC5870039DBE0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CDABC64B14FEC5870039DBE0 /* InfoPlist.strings */; };
 		CDABC64F14FEC5870039DBE0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC64E14FEC5870039DBE0 /* main.m */; };
 		CDABC65314FEC5870039DBE0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC65214FEC5870039DBE0 /* AppDelegate.m */; };
-		CDABC65614FEC5870039DBE0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CDABC65514FEC5870039DBE0 /* ViewController.m */; };
 		CDABC68614FEC6F40039DBE0 /* rtp.c in Sources */ = {isa = PBXBuildFile; fileRef = CDABC67A14FEC6F40039DBE0 /* rtp.c */; };
 		CDABC68714FEC6F40039DBE0 /* sdp.c in Sources */ = {isa = PBXBuildFile; fileRef = CDABC67B14FEC6F40039DBE0 /* sdp.c */; };
 		CDABC68814FEC6F40039DBE0 /* net_udp.c in Sources */ = {isa = PBXBuildFile; fileRef = CDABC67C14FEC6F40039DBE0 /* net_udp.c */; };
@@ -63,8 +62,6 @@
 		CDABC65014FEC5870039DBE0 /* VideoSIP-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VideoSIP-Prefix.pch"; sourceTree = "<group>"; };
 		CDABC65114FEC5870039DBE0 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		CDABC65214FEC5870039DBE0 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		CDABC65414FEC5870039DBE0 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		CDABC65514FEC5870039DBE0 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		CDABC66814FEC6C00039DBE0 /* AVCEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCEncoder.h; sourceTree = "<group>"; };
 		CDABC66914FEC6C00039DBE0 /* AVCParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCParameters.h; sourceTree = "<group>"; };
 		CDABC66D14FEC6F40039DBE0 /* rtp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtp.h; sourceTree = "<group>"; };
@@ -187,8 +184,6 @@
 				CDABC66714FEC6960039DBE0 /* AVCEncoder */,
 				CDABC65114FEC5870039DBE0 /* AppDelegate.h */,
 				CDABC65214FEC5870039DBE0 /* AppDelegate.m */,
-				CDABC65414FEC5870039DBE0 /* ViewController.h */,
-				CDABC65514FEC5870039DBE0 /* ViewController.m */,
 				CDABC64914FEC5870039DBE0 /* Supporting Files */,
 				CD4701D41559CE4400A89E9C /* VideoStreamer.h */,
 				CD4701D51559CE4500A89E9C /* VideoStreamer.m */,
@@ -372,7 +367,6 @@
 			files = (
 				CDABC64F14FEC5870039DBE0 /* main.m in Sources */,
 				CDABC65314FEC5870039DBE0 /* AppDelegate.m in Sources */,
-				CDABC65614FEC5870039DBE0 /* ViewController.m in Sources */,
 				CDABC68614FEC6F40039DBE0 /* rtp.c in Sources */,
 				CDABC68714FEC6F40039DBE0 /* sdp.c in Sources */,
 				CDABC68814FEC6F40039DBE0 /* net_udp.c in Sources */,

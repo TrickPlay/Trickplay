@@ -95,7 +95,8 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 - (void)client:(SIPClient *)client beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
-    if (avc_session) {
+    // If no current RTP sessions and 
+    if (avc_session || pcmu_session) {
         return;
     }
     // TODO: Audio
@@ -189,6 +190,7 @@ void *get_in_addr(struct sockaddr *sa) {
         [self setUpAvcEncoder];
         
         avc_session = NULL;
+        pcmu_session = NULL;
         
         //TODO:
         /*
@@ -199,7 +201,6 @@ void *get_in_addr(struct sockaddr *sa) {
 		}
         */
         
-        //sipClient = [[SIPClient alloc] initWithSPS:avcEncoder.sps PPS:avcEncoder.pps delegate:self];
         sipClient = [[SIPClient alloc] initWithSPS:avcEncoder.sps PPS:avcEncoder.pps context:streamerContext delegate:self];
         if (!sipClient) {
             [self release];
