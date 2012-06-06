@@ -18,6 +18,7 @@ modelToDataTable = {
     'tilex': lambda v: ('repeat-x', toBool(v)),
     'tiley': lambda v: ('repeat-y', toBool(v)),
     'focused': lambda v: ('focused', toBool(v)),
+    'enabled': lambda v: ('enabled', toBool(v)),
     'colorr': lambda v: ('color', color(v)),
     'colorg': lambda v: ('color', color(v)),
     'colorb': lambda v: ('color', color(v)),
