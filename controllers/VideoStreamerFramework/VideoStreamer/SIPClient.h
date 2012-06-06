@@ -19,19 +19,35 @@
 @class SIPClient;
 @class VideoStreamerContext;
 
+
+enum sip_client_error_t {
+    NO_ERROR = 0,
+    SOCKET_SETUP = 1,
+    SOCKET_READ = 2,
+    SOCKET_WRITE = 3,
+    RUNLOOP_FAILURE = 4
+};
+
+
+
 @protocol SIPClientDelegate <NSObject>
 
 - (void)client:(SIPClient *)client beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
 - (void)client:(SIPClient *)client endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest;
-- (void)client:(SIPClient *)client didDisconnectWithError:(NSInteger)error;
+- (void)client:(SIPClient *)client finishedWithError:(enum sip_client_error_t)error;
 
 @end
 
 
 @interface SIPClient : NSObject <SIPDialogDelegate> {
+    // all SIP stuff is handled in this thread
     NSThread *sipThread;
     // this variable belongs to sipThread
     BOOL exit_thread;
+    // determines if this SIPClient is working
+    BOOL valid;
+    // if there was an error then this was set
+    enum sip_client_error_t current_error;
     
     NSMutableDictionary *sipDialogs;
     
@@ -40,7 +56,6 @@
     
     NSString *clientPrivateIP;
     NSString *clientPublicIP;
-    //NSString *udpClientIP;
     
     NSData *sps;
     NSData *pps;
@@ -59,25 +74,14 @@
 - (void)initiateVideoCall;
 - (void)hangUp;
 - (void)disconnectFromService;
-
-// private
-void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
-                       const void *data, void*info);
-
-- (void)threadMain:(id)argument;
-
 /**
- * This calls stop in the sipThread which closes all open SIP
- * Dialogs, invalidates the sipSocket, and tells the thread
- * to exit safely. dealloc will not be called on this object
- * until this method is called and sipThread exits.
+ * Returns YES if the SIPClient is valid, NO otherwise
  */
-- (void)stop;
-
+- (BOOL)isValid;
 /**
- * Send the SIP data received over the network to this method.
+ * Gives the caller a description of the error
  */
-- (void)sipParse:(NSData *)sipData fromAddr:(NSData *)addr;
+- (NSString *)errorDescription:(enum sip_client_error_t)error;
 
 @end
 
