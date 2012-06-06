@@ -80,6 +80,23 @@ void *get_in_addr(struct sockaddr *sa) {
     [avcEncoder encode:sampleBuffer];
 }
 
+- (void)invalidate {
+    if (avcEncoder) {
+        [avcEncoder stop];
+        // TODO: AVCEncoder should do this automatically.
+        Block_release(avcEncoder.callback);
+        avcEncoder.callback = nil;
+    }
+    if (avc_session) {
+        rtp_send_bye(avc_session);
+        rtp_done(avc_session);
+        avc_session = NULL;
+    }
+    [sipClient setDelegate:nil];
+    
+    [delegate networkManagerInvalid:self];
+}
+
 #pragma mark -
 #pragma mark SIPClientDelegate Protocol
 
@@ -120,15 +137,18 @@ void *get_in_addr(struct sockaddr *sa) {
 			NSLog(@"Session is NULL");
 		}
     }
+    /*
     if (audio) {
         pcmu_session = rtp_init_udp([audio.host UTF8String], 21078, audio.port, 60, 2000, rtp_avc_session_callback, self);
         [NSTimer scheduledTimerWithTimeInterval:0.16 target:self selector:@selector(sendAudio:) userInfo:nil repeats:YES];
     }
+    */
     
     [delegate networkManagerEncoderReady:self];
 }
 
 - (void)client:(SIPClient *)client endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
+    /*
     MediaDescription *video = [mediaDest objectForKey:@"video"];
     
     if (video) {
@@ -145,20 +165,20 @@ void *get_in_addr(struct sockaddr *sa) {
             rtp_done(avc_session);
             avc_session = NULL;
         }
+        // TODO: AVCEncoder should do this automatically.
+        Block_release(avcEncoder.callback);
+        avcEncoder.callback = nil;
     }
     
     [delegate networkManagerInvalid:self];
+    */
+    
+    [self invalidate];
 }
 
-- (void)client:(SIPClient *)client didDisconnectWithError:(NSInteger)error {
-    fprintf(stderr, "SIP Client disconnected with error: %d\n", error);
-    [avcEncoder stop];
-    if (avc_session) {
-        rtp_send_bye(avc_session);
-        rtp_done(avc_session);
-        avc_session = NULL;
-    }
-    [delegate networkManagerInvalid:self];
+- (void)client:(SIPClient *)client finishedWithError:(enum sip_client_error_t)error {
+    NSLog(@"SIP Client finished with error: %@", [client errorDescription:error]);
+    [self invalidate];
 }
 
 #pragma mark -
@@ -207,7 +227,6 @@ void *get_in_addr(struct sockaddr *sa) {
             return nil;
         }
         [sipClient connectToService];
-        
         socket_queue = dispatch_queue_create("Network Queue", NULL);
     }
     
@@ -255,10 +274,9 @@ void *get_in_addr(struct sockaddr *sa) {
         });
         
     };
+    // TODO: Fix AVCEncoder and includ Block_copy and Block_release at appropriate moments.
+    // This will include adding a method - (void)setCallback to AVCEncoder.
     avcEncoder.callback = Block_copy(cb);
-    
-    // TODO: check retain count on callback; not sure if i should use Block_copy since
-    // Livu isn't, but I'm guessing that his code is wrong and not mine.
     
     //NSLog(@"retain count: %d", self.avcEncoder.callback.retainCount);
     

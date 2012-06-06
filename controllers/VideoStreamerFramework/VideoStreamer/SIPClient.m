@@ -539,9 +539,15 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
     
     // Tell the delegate that the thread and socket terminated.
     // Return any possible error values.
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
-        [delegate client:self finishedWithError:current_error];
-    });
+    
+    // TODO: currently we need to check that the delegate exists because
+    // if an RTP stream ends we throw away the NetworkManager that is
+    // likely this delegate.
+    if (self.delegate) {
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+            [self.delegate client:self finishedWithError:current_error];
+        });
+    }
 }
 
 /**
