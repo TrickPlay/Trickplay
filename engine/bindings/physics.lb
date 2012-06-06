@@ -317,7 +317,7 @@ interface Body [[ ClutterActor * ]]
             {
                 const b2Vec2 & pos( me->body->GetPosition() );
 
-                depth = - me->world->world_to_screen( pos.y );
+                depth = me->world->world_to_screen( pos.y );
             }
         ]]
         [[
@@ -331,7 +331,7 @@ interface Body [[ ClutterActor * ]]
             {
                 b2Vec2 pos( me->body->GetTransform().position );
 
-                pos.y = me->world->screen_to_world( - depth );
+                pos.y = me->world->screen_to_world( depth );
 
                 me->body->SetTransform( pos , me->body->GetAngle() );
 
