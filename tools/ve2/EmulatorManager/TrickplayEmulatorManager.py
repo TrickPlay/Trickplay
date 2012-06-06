@@ -4,8 +4,6 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.QtNetwork import  QTcpSocket, QNetworkAccessManager , QNetworkRequest , QNetworkReply
 
-#from connection import *
-
 class TrickplayEmulatorManager(QWidget):
     
     def __init__(self, main=None, parent = None):

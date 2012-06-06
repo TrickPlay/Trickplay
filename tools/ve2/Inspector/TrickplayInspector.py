@@ -2,15 +2,11 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 #import connection
 
-#from TrickplayPropertyModel import TrickplayPropertyModel
-#from TrickplayPropertyTree import TrickplayPropertyTree
 from TrickplayElementModel import TrickplayElementModel
 from Data import BadDataException, modelToData, summarizeSource
-
 from PropertyIter import *#PropertyIter
 from TrickplayElement import TrickplayElement
 from Data import dataToModel
-
 from UI.Inspector import Ui_TrickplayInspector
 
 

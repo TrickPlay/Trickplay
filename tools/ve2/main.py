@@ -1,10 +1,8 @@
-import os
-import signal
-
+import os, signal
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+
 from UI.MainWindow import Ui_MainWindow
-#from connection import *
 from Inspector.TrickplayInspector import TrickplayInspector
 from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
 
