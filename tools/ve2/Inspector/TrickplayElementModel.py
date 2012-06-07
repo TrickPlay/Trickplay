@@ -16,15 +16,9 @@ class TrickplayElementModel(QStandardItemModel):
         self.styleData = None
 
     def inspector_reply_finished(self, pdata=None, sdata=None):
-        
-        curScreenIdx = self.inspector.ui.screenCombo.currentIndex() 
-        print(curScreenIdx, "Current IDX")
-
         if pdata is not None :
             root = self.invisibleRootItem()
             child = None
-            #if not pdata.has_key(0):
-            #    return
             pdata = pdata[0]
             self.styleData = sdata
 
@@ -56,7 +50,6 @@ class TrickplayElementModel(QStandardItemModel):
             if self.inspector.main.command == "newLayer" or self.inspector.main.command == "insertUIElement" :
                 result = self.inspector.search(self.theBigestGid , 'gid')
                 if result: 
-                    #print('Found', result['gid'], result['name'])
                     self.inspector.selectItem(result)
                 else:
                     print("UI Element not found")
@@ -66,10 +59,8 @@ class TrickplayElementModel(QStandardItemModel):
                 if result:
                     self.inspector.selectItem(result)
     
-            self.inspector.ui.screenCombo.setCurrentIndex(curScreenIdx) 
-            if self.inspector.currentScreenName is not "Default":
-                self.inspector.screenChanged(curScreenIdx)
-            print("After Insert Current Screen IDX:", self.inspector.ui.screenCombo.currentIndex() )
+            if not self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName) < 0 :
+                self.inspector.ui.screenCombo.setCurrentIndex( self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))                
             return
 
 
@@ -93,6 +84,8 @@ class TrickplayElementModel(QStandardItemModel):
         ParentData is a reference to the dictionary containing data
         """
         
+        #print("insertElelement")
+
         value = data["name"]
         title = data["type"]
         gid = data['gid']
@@ -103,13 +96,12 @@ class TrickplayElementModel(QStandardItemModel):
             self.inspector.curLayerName = title
             self.inspector.curLayerGid = data['gid']
 
-            cnt = self.inspector.screens["Default"].count(title)
-            if not cnt > 0 :
-                self.inspector.screens["Default"].append(title)
-                if self.inspector.currentScreenName is not "Default":
-                    self.inspector.screens[self.inspector.currentScreenName].append(title)
+            if not self.inspector.screens["_AllScreens"].count(title) > 0:
+                self.inspector.screens["_AllScreens"].append(title)
+                if self.inspector.currentScreenName is not None:
+                    if not self.inspector.screens[self.inspector.currentScreenName].count(title) > 0:
+                        self.inspector.screens[self.inspector.currentScreenName].append(title)
 
-            print(self.inspector.screens)
         else:
             self.inspector.layerName[int(gid)] = self.inspector.curLayerName
             self.inspector.layerGid[int(gid)] = self.inspector.curLayerGid

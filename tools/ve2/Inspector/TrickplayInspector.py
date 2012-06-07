@@ -48,14 +48,12 @@ class TrickplayInspector(QWidget):
         self.main.ui.InspectorDock.setWindowTitle(QApplication.translate("MainWindow", "Inspector:" , None, QApplication.UnicodeUTF8))
         self.layerName = {}
         self.layerGid = {}
-        self.screens = {"Default":[]}
+        self.screens = {"_AllScreens":[],"Default":[]}
         self.cbStyle_textChanged = False
         self.screen_textChanged = False
         
         # Models
         self.inspectorModel = TrickplayElementModel(self)
-        #self.propertyModel = TrickplayPropertyModel()
-        
         self.ui.inspector.setModel(self.inspectorModel)
         self.ui.inspector.setStyleSheet("QTreeView { background: lightYellow; alternate-background-color: white; }")
 
@@ -73,7 +71,6 @@ class TrickplayInspector(QWidget):
 
         self.setHeaders(self.inspectorModel, ['UI Element', 'Name'])
         self.ui.property.setHeaderLabels(['Property', 'Value'])
-        #self.setHeaders(self.propertyModel, ['Property', 'Value'])
         
         # QTreeView selectionChanged signal doesn't seem to work here...
         # Use the selection model instead
@@ -123,7 +120,6 @@ class TrickplayInspector(QWidget):
         self.inspectorModel.empty()
         self.main._emulatorManager.getUIInfo() 
         self.main._emulatorManager.getStInfo() 
-        #self.propertyModel.empty()
         
         self.preventChanges = False
         
@@ -228,11 +224,8 @@ class TrickplayInspector(QWidget):
                 if p == "source":
                     i.setText (1, summarizeSource(data[str(p)]))
                 if p == "style":
-                        #TODO : style comboBox to show/select a style from predefined styles 
-                        #       push/toolButton with '+' icon image for adding new style  
                         style_n = n
                         self.cbStyle = QComboBox()
-                        #self.cbStyle.setEditable (True)
                         idx = 0
                         cbStyle_idx = 0
                         for x in self.inspectorModel.styleData[0]:
@@ -248,7 +241,6 @@ class TrickplayInspector(QWidget):
                         QObject.connect(self.cbStyle, SIGNAL('currentIndexChanged(int)'), self.styleChanged)
                         QObject.connect(self.cbStyle, SIGNAL('activated(int)'), self.styleActivated)
                         QObject.connect(self.cbStyle, SIGNAL('editTextChanged(const QString)'), self.editTextChanged)
-                        #QObject.connect(self.cbStyle, SIGNAL('highlighted(int)'), self.highlighted)
 
                 if p in NESTED_PROP_LIST: # is 'z_rotation' :
                     z = data[str(p)]
@@ -309,8 +301,9 @@ class TrickplayInspector(QWidget):
             scrJSON = scrJSON + '\"' + scrName + '\": [\"' + '\",\"'.join(self.screens[scrName]) + '\"]'
             n = n + 1
 
+        scrJSON = scrJSON + "," + '\"' + "currentScreenName" + '\": \"'+self.currentScreenName+'\"'
         scrJSON = scrJSON + '}]'
-        print scrJSON
+        #print scrJSON
 
         return scrJSON
 
@@ -318,13 +311,14 @@ class TrickplayInspector(QWidget):
         self.cbStyle.setEditable (False)
 
     def removeScreen(self):
-        print (self.currentScreenName+" deleted")
         if self.currentScreenName is not "Default":
             curIdx = self.ui.screenCombo.currentIndex()
             del self.screens[self.currentScreenName]
             self.ui.screenCombo.removeItem(curIdx)
-        print (self.screens)
-        
+        else:
+            pass 
+            #TODO:Error Message ..
+
     def screenActivated(self, index):
         if self.screen_textChanged == True :
             self.ui.screenCombo.setEditable (False)
@@ -339,15 +333,21 @@ class TrickplayInspector(QWidget):
         self.screen_textChanged = True
 
     def screenChanged(self, index):
+        if self.old_screen_name == "":
+            return
         self.screen_textChanged = True
         self.currentScreenName = str(self.ui.screenCombo.itemText(self.ui.screenCombo.currentIndex()))        
-        if self.screens.has_key(self.currentScreenName) == False:
+        if self.screens.has_key(self.currentScreenName) == False :
             self.screens[self.currentScreenName] = []
             for layerName in self.screens[self.old_screen_name][:]:
                 self.screens[self.currentScreenName].append(layerName)
+            if self.old_screen_name == "Default":
+                curIdx = self.ui.screenCombo.currentIndex()
+                del self.screens[self.old_screen_name]
+                self.ui.screenCombo.removeItem(curIdx-1)
         else:
             #TODO: show the screen items 
-            for theLayer in self.screens["Default"][:] :
+            for theLayer in self.screens["_AllScreens"][:] :
                 # the layer is in this selected screen and if it is not checked 
                 theItem = self.search(theLayer, 'name')
                 if self.screens[self.currentScreenName].count(theLayer) > 0 and theItem.checkState() == Qt.Unchecked:
@@ -358,10 +358,6 @@ class TrickplayInspector(QWidget):
                     self.sendData(theItem['gid'], "is_visible", False)
                     theItem.setCheckState(Qt.Unchecked)
                     
-        print("[ CurrentScreen name] : ", self.currentScreenName)
-        print("[ Screens ] : ", self.screens)
-
-
     def styleActivated(self, index):
         self.cbStyle.setEditable (True)
 
@@ -379,7 +375,6 @@ class TrickplayInspector(QWidget):
             self.sendData(self.getGid(), "style", self.style_name)
         self.main._emulatorManager.repStInfo() 
 
-    # "selectionChanged(QItemSelection, QItemSelection)"
     def selectionChanged(self, selected, deselected):    
         """
         Re-populate the property view every time a new UI element
@@ -441,7 +436,7 @@ class TrickplayInspector(QWidget):
                                     del self.screens[self.currentScreenName][index]
                                     break
                                 index = index + 1 
-                        print(self.screens)
+                        #print(self.screens)
             
             self.preventChanges = False
     
@@ -476,7 +471,7 @@ class TrickplayInspector(QWidget):
     def getParentInfo(self, item):
         n = self.ui.property.indexFromItem(item).row()
         while self.ui.property.indexOfTopLevelItem(item) < 0 :
-            print "*", item.text(0)
+            #print "*", item.text(0)
             item = self.ui.property.itemAbove(item) 
         return n, item
 
