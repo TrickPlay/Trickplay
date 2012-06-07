@@ -29,9 +29,6 @@ class TrickplayEmulatorManager(QWidget):
         self.address = 'localhost'
         self.pdata = None
         
-        #CON.port = self.port
-        #CON.address = self.address
-
         self.run()
 
     def chgStyleName(self, gid, new_name, old_name):
@@ -51,7 +48,6 @@ class TrickplayEmulatorManager(QWidget):
         
     def setUIInfo(self, gid, property, value):
         inputCmd = str("_VE_.setUIInfo("+str(gid)+",'"+str(property)+"',"+str(value)+")")
-        print inputCmd
         print inputCmd
         self.trickplay.write(inputCmd+"\n")
         self.trickplay.waitForBytesWritten()
@@ -119,12 +115,12 @@ class TrickplayEmulatorManager(QWidget):
 				gid = None
 				if s is not None and len(s) > 9 :
 				    luaCmd= s[:9] 
-				    print luaCmd
+				    #print luaCmd
 				    if luaCmd == "getUIInfo":
 				        self.pdata = json.loads(s[9:])
 				    elif luaCmd == "repUIInfo":
 				        self.pdata = json.loads(s[9:])
-				        print self.pdata
+				        #print self.pdata
 				    elif luaCmd == "repStInfo" :
 				        sdata = json.loads(s[9:])
 				    elif luaCmd == "getStInfo" :
@@ -136,23 +132,26 @@ class TrickplayEmulatorManager(QWidget):
 				        self.inspector.screens = {} 
 				        screenNames = []
 				        for i in scrData[0]:
-				            self.inspector.screens[str(i)]=[]
-				            screenNames.append(str(i))
-				            for j in scrData[0][i]:
-				                self.inspector.screens[str(i)].append(str(j))
-				        print self.inspector.screens
-				        print screenNames
+				            if i != "currentScreenName":
+				                self.inspector.screens[str(i)]=[]
+				                screenNames.append(str(i))
+				                for j in scrData[0][i]:
+				                    self.inspector.screens[str(i)].append(str(j))
+				            else:
+				                self.inspector.currentScreenName = scrData[0][i] 
+				                self.inspector.old_screen_name = ""
 
-				        #TODO: setting screenCombo items
-				        for idx in range(0,self.inspector.ui.screenCombo.count()-1):
-				            if not self.inspector.ui.screenCombo.itemText(idx) in screenNames:
-				                self.inspector.ui.screenCombo.removeItem(idx)
+				        while True:
+				            idx = self.inspector.ui.screenCombo.count()
+				            if idx == 0 :
+				                break
+				            self.inspector.ui.screenCombo.removeItem(idx - 1)
 
-				        for scrName in self.inspector.screens:
-				            if self.inspector.ui.screenCombo.findText(scrName) < 0 :
+				        for scrName in screenNames:
+				            if self.inspector.ui.screenCombo.findText(scrName) < 0 and scrName != "_AllScreens":
 				                self.inspector.ui.screenCombo.addItem(scrName)
+
 				    else:
-				        #print(">> %s"%s)
 				        pass
 
 				    if gid is not None:
