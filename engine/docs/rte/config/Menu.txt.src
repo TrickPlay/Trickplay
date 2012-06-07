@@ -133,11 +133,11 @@ Group: Engine Reference {
 		}
 	}
 	
-	Group: Physics Engine {
-		File: Overview* (no auto-title, docs/rte/reference/overview_physics.txt)
+	Group: 2D Physics Engine {
+		File: Overview (no auto-title, docs/rte/reference/overview_physics.txt)
 		
-		Group: Classes {
-			File: Shape, Body and Physics* (no auto-title, bindings/physics.lb)
+		Group: Globals {
+			File: physics Global Variable and Body Interface (no auto-title, bindings/physics.lb)
 		}
 	}
 	
@@ -283,4 +283,3 @@ Group: Development Tools {
 	}
 }
 
-Text: (*) section docs not yet complete
