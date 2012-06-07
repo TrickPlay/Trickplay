@@ -10,12 +10,94 @@ module physics_module;
 ]]
 
 /*===========================================================================*/
+/*
+	Title: The physics Global Variable and Body Interface
+
+*NOTE:* The 2D physics environment described in this section is EXPERIMENTAL and in-progress. Significant changes may occur to the environment's properties, functions and event handlers prior to its official release.
+
+The physics global variable places one or more UIElement-based objects in a two-dimensional environment where they are affected by physics-based forces, such as gravity and collisions.
+
+The physics global variable maintains the physics-based simulation. Similar to the way that objects are added to the screen global variable to show the object on the display, objects are added to the physics variable to place them within the physics world.
+
+Objects added to the physics variable are based on the UIElement interface, such as the Rectangle and Image classes. Before being added to the physics environment, however, the object is enhanced to include the properties, functions and event handlers of the Body interface. The Body interface provides physics-related settings and operations to enable the object to operate within the physics environment.
+
+When the physics world has been configured and the desired objects added to it, the physics simulation can begin by calling the variable's start() function.
+
+The simple program listing shown below creates two Rectangle objects: a dynamic object that will be affected by the physics forces placed upon it and an immobile static object that acts as a ground foundation. As gravity pulls the dynamic object down, it eventually hits and lands on the static ground object.
+
+	(code)
+	-- Basic 2D Physics Application
+	--
+	-- *********************************************************
+	function
+	displayMainScreen()
+
+		-- Use a simple colored background
+		local background = Rectangle( {
+								size     = { screen.width, screen.height },
+								position = { 0, 0, 0 },
+								color    = "azure3",
+		} )
+		screen:add( background )
+
+	end
+
+	-- *********************************************************
+	function
+	createPhysicsWorld()
+
+		-- Create a simple rectangle and add it to the screen
+		local gBox01 = Rectangle( { 
+							size     = { 100, 100 },
+							position = { (screen.width / 2) - 50, (screen.height / 4) - 50 },
+							color    = "SaddleBrown",
+		} )
+		screen:add( gBox01 )
+	
+		-- Make the rectangle a dynamic object, i.e., affected by physics; use default Body settings
+		gBox01 = physics:Body( gBox01, { } )
+	
+		-- Create a ground so the rectangle doesn't fall off the screen
+		local gGround = Rectangle( {
+							size     = { screen.width / 2, 1 },
+							position = { screen.width / 4, screen.height - (screen.height / 4) },
+							color    = "black",
+		} )
+		screen:add( gGround )
+	
+		-- Make the ground an immobile static object in the physics world
+		gGround = physics:Body( gGround,
+								{ type = "static",
+		} )
+	
+		-- Show the screen
+		screen:show()
+		
+		-- Start the physics simulation
+		physics:start()
+
+	end
+
+	-- *********************************************************
+	-- Program's main entry point
+
+		-- Show the main background screen
+		displayMainScreen()
+
+		-- Create "boxes" that will be affected by gravity
+		createPhysicsWorld()
+
+	-- *********************************************************
+	(end)
+	
+
+*/
 
 /*
 
-	Interface: Shape
+	InternalInterface: Shape
 	
-	TODO
+	The Shape interface is used internally by the Box2D physics engine. It is used to specify the shape of a fixture that is attached to a Body. Shapes can be created by calling the physics global variable's Box(), Edge(), Polygon() and Circle() functions. The Shape object is assigned to the fixture by passing it to the Body interface's add_fixture() function.
 	
 */
 
@@ -36,20 +118,25 @@ interface Shape [[ b2Shape * ]]
 
 /*
 	Interface: Body
-	
-	TODO
-	
+
+The Body interface provides properties, functions and event handlers that define physics-related characteristics that can be applied to a <UIElement>-based object, such as a Rectangle or Image object.
+
+The Body characteristics are defined as an Interface, so it is not possible to create an object of type Body. Instead, the Body characteristics are added to an existing UIElement-based object by calling the Body() function of the <physics> global variable.
+
 */
 
 interface Body [[ ClutterActor * ]]
 {
 
-	/* 
-		Property: handle
-		
-		The handle property is an integer that uniquely identifies this body. It is used in 
-		collision callbacks to refer to the two bodies that are colliding.
-	*/
+/***************************************
+	Property: handle
+
+	The handle property contains an integer value that uniquely identifies the Body/UIElement object. The handle identifier is assigned automatically to the object when the Body is created by the Body() function of the physics global variable. It is referenced in the various collision-detection event handlers, including on_begin_contact() and on_end_contact().
+
+	Default Setting: a unique integer value
+
+	See Also: the <on_begin_contact>, <on_end_contact>, <on_pre_solve_contact> and <on_post_solve_contact> event handlers
+*/
 	
 	readonly int handle
         [[
@@ -57,21 +144,19 @@ interface Body [[ ClutterActor * ]]
             handle = me->handle;
         ]];
 		
-	/*
-		Property: type
-		
-		The type property is a string specifying the Body object's type.
-		
-		*Supported Settings:* The type setting is case-sensitive.
-		
-		"static" - the body has infinite mass; it is immovable when operating under the influence of the physics engine, but can be moved manually by the user
-		"kinematic" - moves according to its velocity, but is not influenced by other forces, such as gravity or collisions. Behaves as if it had infinite mass.
-		"dynamic" - moves according to the forces placed upon it, such as gravity and collisions. Has finite, non-zero mass.
-		
-		*Default Settings:* "dynamic"
-		
-		TODO
-	*/
+/***************************************
+	Property: type
+
+	The type property is a string specifying whether the Body is static, dynamic or kinematic.
+
+	*Supported Settings:* The type setting is case-sensitive.
+
+	"static" - the body is solid and unmovable when colliding with other objects
+	"dynamic" - moves according to the forces placed upon it, such as gravity and collisions. Is affected when colliding into static and kinematic objects.
+	"kinematic" - moves according to its velocity, but is not affected by other forces, such as gravity and collisions. Is not affected when colliding into static and dynamic objects.
+
+	*Default Setting:* "dynamic"
+*/
 	
 	string type
 	    [[
@@ -123,14 +208,18 @@ interface Body [[ ClutterActor * ]]
             }
 	    ]];
 	    
-	/*
-		Property: awake
-		
-		When the physics engine determines that a body has come to rest, it is put to "sleep", 
-		waiting on a collision to wake it up. You can also explicitly wake up a body by setting
-		this property to true.
-	*/	    
-		
+/***************************************
+	Property: awake
+
+	The awake property is a boolean flag indicating whether the Body/UIElement object is awake or sleeping (true==awake). An awake object is included in any active physics simulation; a sleeping object is not included. Making objects sleep reduces the computational requirements of the physics simulation.
+
+	When an object is no longer in motion, it can be placed automatically in a sleeping state by setting the object's <sleeping_allowed> property to true. If a collision or other force occurs upon the object, it will wake up automatically and be included in the physics simulation. Alternatively, an object can be explicitly woken up by setting its awake property to true.
+
+	*Default Setting:* true
+
+	*See Also:* the <sleeping_allowed> property
+*/	    
+
 	bool awake
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -141,12 +230,15 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetAwake( awake );
 		]];
 		
-	/*
-		Property: active
-		
-		This property lets you specify whether a body participates in the physics simulation. A body
-		that is not active will be ignored.
-	*/
+/***************************************
+	Property: active
+
+	The active property is a boolean flag indicating whether or not the Body/UIElement object is active in the physics simulation (true==active). An inactive object is ignored by the physics simulation, which reduces the simulation's computational requirements.
+	
+	*Default Setting:* true
+	
+	*See Also:* the <awake> property 
+*/
 	
 	bool active
 		[[
@@ -158,11 +250,15 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetActive( active );
 		]];
 
-	/*
-		Property: position
-		
-		A table of X and Y screen coordinates for the position of the center of the body. 
-	*/
+/***************************************
+	Property: position
+
+	The position property is a table that contains the current X,Y screen coordinates of the center of the Body/UIElement object.
+	
+	*Default Setting:* { X, Y } coordinates of the object's center at the time the Body is created
+	
+	*See Also:* the <x>, <y>, <z> and <depth> properties
+*/
 	
 	table position
 		[[
@@ -192,11 +288,15 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
 		]];
 
-	/*
-		Property: x
-		
-		The X screen coordinate of the body's center.
-	*/
+/***************************************
+	Property: x
+
+	The x property specifies the current screen position on the X axis of the center of the Body/UIElement object.
+	
+	*Default Setting:* 0
+	
+	*See Also:* the <y> and <position> properties
+*/
 	
 	double x
         [[
@@ -218,11 +318,15 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
         ]];
 
-	/*
-		Property: y
-		
-		The Y screen coordinate of the body's center.
-	*/
+/***************************************
+	Property: y
+
+	The y property specifies the current screen position on the Y axis of the center of the Body/UIElement object.
+	
+	*Default Setting:* 0
+	
+	*See Also:* the <x> and <position> properties
+*/
 	
     double y
         [[
@@ -235,7 +339,7 @@ interface Body [[ ClutterActor * ]]
             else
             {
                 const b2Vec2 & pos( me->body->GetPosition() );
-    
+
                 y = me->world->world_to_screen( pos.y );
             }
         ]]
