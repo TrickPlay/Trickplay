@@ -80,13 +80,13 @@
 		CD16582F143FE12500FEB2DC /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45213B9895300158169 /* right.png */; };
 		CD165830143FE12500FEB2DC /* up-touch.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45313B9895300158169 /* up-touch.png */; };
 		CD165831143FE12500FEB2DC /* up.png in Resources */ = {isa = PBXBuildFile; fileRef = CD63B45413B9895300158169 /* up.png */; };
-		CD32EAE215757C7100A3BA7B /* VideoStreamer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EAE115757C7100A3BA7B /* VideoStreamer.framework */; };
 		CD4977C7143E7A6900387911 /* TVBrowserViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA541427D3600043C8BF /* TVBrowserViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977C8143E7A6900387911 /* AppBrowserViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA511427D3600043C8BF /* AppBrowserViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977C9143E7A6900387911 /* TPAppViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA521427D3600043C8BF /* TPAppViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CA143E7A6900387911 /* TVBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA531427D3600043C8BF /* TVBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CB143E7A6900387911 /* AppBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA501427D3600043C8BF /* AppBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CC143E7A6900387911 /* TVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA551427D3600043C8BF /* TVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CD64348D158037EA0061BF1B /* VideoStreamer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD64348C158037EA0061BF1B /* VideoStreamer.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -94,7 +94,6 @@
 		44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "TakeControl-Prefix.pch"; path = "Take Control Framework/TakeControl-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		44D2D083143F6FCB00E54755 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "Take Control Framework/en.lproj/InfoPlist.strings"; sourceTree = SOURCE_ROOT; };
 		44D2D085143F71DD00E54755 /* Protocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Protocols.h; path = "Take Control Framework/Classes/Protocols.h"; sourceTree = SOURCE_ROOT; };
-		CD32EAE115757C7100A3BA7B /* VideoStreamer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VideoStreamer.framework; sourceTree = "<group>"; };
 		CD49779C143E79DD00387911 /* TakeControl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TakeControl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD4E17A814353B7500356032 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
 		CD4E17A914353B7500356032 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
@@ -122,6 +121,7 @@
 		CD63B45213B9895300158169 /* right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = right.png; sourceTree = "<group>"; };
 		CD63B45313B9895300158169 /* up-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "up-touch.png"; sourceTree = "<group>"; };
 		CD63B45413B9895300158169 /* up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = up.png; sourceTree = "<group>"; };
+		CD64348C158037EA0061BF1B /* VideoStreamer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VideoStreamer.framework; sourceTree = "<group>"; };
 		CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "ios-generic-background.jpg"; sourceTree = "<group>"; };
 		CD91EA501427D3600043C8BF /* AppBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowser.h; path = "Public Headers/AppBrowser.h"; sourceTree = "<group>"; };
 		CD91EA511427D3600043C8BF /* AppBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowserViewController.h; path = "Public Headers/AppBrowserViewController.h"; sourceTree = "<group>"; };
@@ -211,7 +211,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD32EAE215757C7100A3BA7B /* VideoStreamer.framework in Frameworks */,
+				CD64348D158037EA0061BF1B /* VideoStreamer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,7 +303,7 @@
 		CD4977A0143E79DD00387911 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				CD32EAE115757C7100A3BA7B /* VideoStreamer.framework */,
+				CD64348C158037EA0061BF1B /* VideoStreamer.framework */,
 				44D2D082143F6FCB00E54755 /* InfoPlist.strings */,
 				44D2D07E143F6FBE00E54755 /* TakeControl-Info.plist */,
 				44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */,
