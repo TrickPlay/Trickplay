@@ -509,9 +509,20 @@ LayoutManager = function(parameters)
 		function(oldf)   return vertical_alignment     end,
 		function(oldf,self,v)   vertical_alignment = v end
 	)
+    local placeholders = {}
 	override_property(instance,"placeholder",
 		function(oldf)   return placeholder     end,
-		function(oldf,self,v)   placeholder = v end
+		function(oldf,self,v)   
+            instance:add(v)
+            v:hide()
+            
+            for obj, _ in pairs(placeholders) do
+                obj.source = v
+            end
+            
+            placeholder:unparent()
+            placeholder = v 
+        end
 	)
     
     instance:subscribe_to( 
@@ -568,8 +579,11 @@ LayoutManager = function(parameters)
                 obj = node_constructor(obj)
                 
             else -- default node_constructor
-                if obj == nil then  obj = Widget_Clone{source=placeholder}
-                
+                if obj == nil then  
+                    
+                    obj = Widget_Clone{source=placeholder}
+                    placeholders[obj] = true
+                    
                 elseif type(obj) ~= "userdata" and obj.__types__.actor then 
                     
                     error("Must be a UIElement or nil. Received "..obj,2) 
@@ -634,6 +648,7 @@ LayoutManager = function(parameters)
             for _,f in pairs(items[obj].key_functions) do f() end
             items[obj] = nil
             obj:unparent() 
+            placeholders[obj] = nil
         end,
         
         on_entries_changed = function(self)
