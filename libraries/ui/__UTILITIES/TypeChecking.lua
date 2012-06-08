@@ -1,5 +1,12 @@
 TYPECHECKING = true
 
+function expects(type_wanted, received)
+    return type(received) == type_wanted or error(
+        "Expected "..type_wanted..". Received "..type(received)..
+        " with value '"..received.."'",3
+    )
+end
+
 function is_table_or_nil(name,input)
     
     return input == nil and {} or
