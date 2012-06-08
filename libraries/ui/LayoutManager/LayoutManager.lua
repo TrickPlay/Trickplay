@@ -509,6 +509,10 @@ LayoutManager = function(parameters)
 		function(oldf)   return vertical_alignment     end,
 		function(oldf,self,v)   vertical_alignment = v end
 	)
+	override_property(instance,"placeholder",
+		function(oldf)   return placeholder     end,
+		function(oldf,self,v)   placeholder = v end
+	)
     
     instance:subscribe_to( 
         {
@@ -543,7 +547,19 @@ LayoutManager = function(parameters)
         end
 	)
     ----------------------------------------------------------------------------
+    local children_want_focus = true
+	override_property(instance,"children_want_focus",
+		function(oldf)   return children_want_focus     end,
+		function(oldf,self,v)   
+            if type(v) ~= "boolean" then
+                error("Expected boolean. Received "..type(v),2)
+            end
+            children_want_focus = v 
+        end
+	)
+    ----------------------------------------------------------------------------
     local in_on_entries = false
+    local focused_child = nil
     cells = GridManager{  
         
         node_constructor=function(obj)
@@ -569,22 +585,26 @@ LayoutManager = function(parameters)
                 key_functions = {
                     up    = obj:add_key_handler(keys.Up,   function() 
                         if  items[obj].neighbors.up then 
-                            items[obj].neighbors.up:grab_key_focus() 
+                            items[obj].neighbors.up:grab_key_focus()
+                            focused_child = items[obj].neighbors.up 
                         end 
                     end),
                     down  = obj:add_key_handler(keys.Down, function() 
                         if  items[obj].neighbors.down then 
                             items[obj].neighbors.down:grab_key_focus() 
+                            focused_child = items[obj].neighbors.down
                         end 
                     end),
                     left  = obj:add_key_handler(keys.Left, function() 
                         if  items[obj].neighbors.left then 
                             items[obj].neighbors.left:grab_key_focus() 
+                            focused_child = items[obj].neighbors.left
                         end 
                     end),
                     right = obj:add_key_handler(keys.Right,function() 
                         if  items[obj].neighbors.right then 
                             items[obj].neighbors.right:grab_key_focus() 
+                            focused_child = items[obj].neighbors.right
                         end 
                     end),
                 }
@@ -594,7 +614,7 @@ LayoutManager = function(parameters)
                     {"h","w","width","height","size"},
                     function(...)
                         if in_on_entries then return end
-                        print("heree")
+                        
                         cells:on_entries_changed()
                     end
                 )
@@ -604,7 +624,13 @@ LayoutManager = function(parameters)
         end,
         
         node_destructor=function(obj) 
-            
+            if obj == focused_child then 
+                focused_child = 
+                    items[obj].neighbors.up or 
+                    items[obj].neighbors.left or
+                    items[obj].neighbors.right or
+                    items[obj].neighbors.down 
+            end
             for _,f in pairs(items[obj].key_functions) do f() end
             items[obj] = nil
             obj:unparent() 
@@ -613,6 +639,11 @@ LayoutManager = function(parameters)
         on_entries_changed = function(self)
             if in_on_entries then return end
             in_on_entries = true
+            if children_want_focus and focused_child == nil and 
+                self.number_of_rows > 0 and self.number_of_cols > 0 then 
+                focused_child = self[1][1] 
+                focused_child:grab_key_focus()
+            end
             col_widths  = {}
             row_heights = {}
             for_each(self,widths_of_cols)
@@ -626,7 +657,12 @@ LayoutManager = function(parameters)
     }
 	override_property(instance,"cells",
 		function(oldf) return   cells           end,
-		function(oldf,self,v)   cells:set(v) end
+		function(oldf,self,v)   
+            cells:set(v) 
+            
+            focused_child = cells[1][1] 
+            focused_child:grab_key_focus()
+        end
 	)
     
     
@@ -654,12 +690,12 @@ LayoutManager = function(parameters)
         function(oldf,self)
             local t = oldf(self)
             
-            t.number_of_cols = instance.number_of_cols
-            t.number_of_rows = instance.number_of_rows
-            t.vertical_alignment = instance.vertical_alignment
+            t.number_of_cols       = instance.number_of_cols
+            t.number_of_rows       = instance.number_of_rows
+            t.vertical_alignment   = instance.vertical_alignment
             t.horizontal_alignment = instance.horizontal_alignment
-            t.vertical_spacing = instance.vertical_spacing
-            t.horizontal_spacing = instance.horizontal_spacing
+            t.vertical_spacing     = instance.vertical_spacing
+            t.horizontal_spacing   = instance.horizontal_spacing
             t.cell_h = instance.cell_h
             t.cell_w = instance.cell_w
             t.cells = {}
@@ -677,6 +713,16 @@ LayoutManager = function(parameters)
     )
     
     ----------------------------------------------------------------------------
+    
+	function instance:on_key_focus_in()    
+        print(children_want_focus,focused_child.type)
+        if children_want_focus and focused_child then 
+            dolater(function()
+                focused_child:grab_key_focus() 
+            end)
+        end
+        
+    end 
     
 	instance:set(parameters)
 	
