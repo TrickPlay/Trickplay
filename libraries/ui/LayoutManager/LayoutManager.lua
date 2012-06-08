@@ -611,6 +611,7 @@ LayoutManager = function(parameters)
         end,
         
         on_entries_changed = function(self)
+            if in_on_entries then return end
             in_on_entries = true
             col_widths  = {}
             row_heights = {}
@@ -619,7 +620,7 @@ LayoutManager = function(parameters)
             for_each(self,position_cell)
             set_size(self)
             for_each(self,assign_neighbors)
-            on_entries_changed()
+            on_entries_changed(self)
             in_on_entries = false
         end
     }
