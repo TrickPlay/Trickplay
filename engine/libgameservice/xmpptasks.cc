@@ -40,7 +40,7 @@ int MUGMessageListenerTask::ProcessResponse() {
 	std::string match_id(from.BareJid().Str());
 	Participant participant(Participant::parseParticipant(from.resource()));
 
-	const txmpp::XmlElement *childElement = stanza->NextElement();
+	const txmpp::XmlElement *childElement = stanza->FirstElement();
 	if (childElement == NULL) {
 		std::cout << "MUGMessageListenerTask::ProcessResponse. childElement is NULL" << std::endl;
 		return STATE_RESPONSE;
@@ -53,6 +53,7 @@ int MUGMessageListenerTask::ProcessResponse() {
 		SignalLeave(match_id, participant);
 	} else { // must be turn tag
 		// extract newstate, terminate and next
+		std::cout << "MUGMessageListenerTask::ProcessResponse. received a turn message" << std::endl;
 		Turn turn;
 		const txmpp::XmlElement* tmpElement = childElement->FirstNamed(QN_MUG_USER_NEWSTATE_TAG);
 		if (tmpElement != NULL)
@@ -79,7 +80,7 @@ bool MUGMessageListenerTask::HandleStanza(const txmpp::XmlElement *stanza) {
 			return false;
 
 		// start or leave or turn messages are accepted
-		const txmpp::XmlElement* nextElement = stanza->NextElement();
+		const txmpp::XmlElement* nextElement = stanza->FirstElement();
 		if (nextElement == NULL)
 			return false;
 		txmpp::QName elementName(nextElement->Name());

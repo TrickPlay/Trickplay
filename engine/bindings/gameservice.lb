@@ -21,6 +21,8 @@ global gameservice [[GameServiceSupport*]]
 			self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_READY, gameservice_app_ready_handler,L);
             self->add_notification_handler(TP_NOTIFICATION_GAMESERVICE_APP_ERROR, gameservice_app_error_handler,L);
 		]];
+	
+	
 	/*
 	
     	Event Handler: on_ready
@@ -32,12 +34,13 @@ global gameservice [[GameServiceSupport*]]
     	*Prototype:*
     	
     		(code)
-    		on_ready( )
+    		on_ready( self, app_id)
     		(end)
     		
     	*Arguments:*
     	
-    		None
+    		self - a reference to gameservice
+    		app_id - a table with following attributes: { name = "xxxx", version = "xxx" }
     		
     	*Return Value:* None
     	
@@ -47,7 +50,26 @@ global gameservice [[GameServiceSupport*]]
 	callback on_ready
 	;
 	
+	/*
 	
+    	Event Handler: on_error
+    	
+    	The on_error() event handler is invoked when the Trickplay fails on open_app call with gameservice.
+    	
+    	*Prototype:*
+    	
+    		(code)
+    		on_error( self, response_status, app_id)
+    		(end)
+    		
+    	*Arguments:*
+    	
+    		self - a reference to gameservice
+    		app_id - a table with following attributes: { name = "xxxx", version = "xxx" }
+    		
+    	*Return Value:* None
+    	
+	*/
 	callback on_error
 	;
 
@@ -109,6 +131,18 @@ global gameservice [[GameServiceSupport*]]
 	callback on_register_game_completed
 	; 
 	
+	/*
+	 * match_request table of the following format:
+	 * {
+	 * 		game_id = "xyz",
+	 * 		free_role = "true",
+	 * 		role = "p1",
+	 * 		new_match = "true",
+	 * 		nick = "best_gamer"
+	 * 	}
+	 *
+	 */
+ 
 	assign_match(table props)
 		[[
 			libgameservice::MatchRequest match_request;
