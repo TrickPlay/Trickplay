@@ -555,6 +555,9 @@ private:
 
 	void OnTurn(const std::string& match_id, const Participant& participant, const Turn& turn) {
 		assert(txmpp::ThreadManager::CurrentThread() == worker_thread_);
+		std::cout << "Received a turn message. match_id=" << match_id
+				<< ", participant=" << participant.Str()
+				<< std::endl;
 		main_thread_->Post(this, MSG_HANDLE_TURN,
 						new IncomingTurnMessageData(match_id, participant, turn));
 		if (notify_)

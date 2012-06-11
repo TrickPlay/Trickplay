@@ -81,17 +81,18 @@ class OpenAppAction : public Action {
 public:
 	OpenAppAction(GameServiceSupport * game_service, const AppId& app_id)
 	: game_service_(game_service), app_id_(app_id) {
-		std::cout << "Inside OpenAppAction constructor" << std::endl;
+//		std::cout << "Inside OpenAppAction constructor" << std::endl;
 	}
 	~OpenAppAction() {
-		std::cout << "Inside OpenAppAction destructor" << std::endl;
+//		std::cout << "Inside OpenAppAction destructor" << std::endl;
 	}
 protected:
 	bool run() {
-		std::cout << "Inside OpenAppAction" << std::endl;
+	//	std::cout << "Inside OpenAppAction" << std::endl;
 		if (game_service_->state() == GameServiceSupport::LOGIN_IN_PROGRESS)
 			return true;
 		else if (game_service_->state() == GameServiceSupport::LOGIN_SUCCESSFUL) {
+			std::cout << "Inside OpenAppAction. Login was successful. initiating OpenApp" << std::endl;
 			game_service_->state_ = GameServiceSupport::APP_OPENING;
 			game_service_->delegate_->OpenApp(app_id_);
 		} else {
@@ -308,6 +309,13 @@ void GameServiceSupport::OnCloseAppResponse(const ResponseStatus& rs, const AppI
 	}
 }
 
+/*
+ * pushes following arguments onto lua stack on success:
+ * [ response_status, match_request, match_id ]
+ *
+ * pushes following arguments onto lua stack on failure
+ * [ response_status ]
+ */
 void GameServiceSupport::OnAssignMatchResponse(const ResponseStatus& rs,
 		const MatchRequest& match_request, const std::string& match_id, void* cb_data) {
 
@@ -360,6 +368,13 @@ void GameServiceSupport::OnTurnResponse(const ResponseStatus& rs, void* cb_data)
 		invoke_gameservice_on_send_turn_completed( L, this, 1, 0 );
 }
 
+/*
+ * pushes following arguments onto lua stack on success:
+ * [ response_status, match_id, from, item ]
+ *
+ * pushes following arguments onto lua stack on failure
+ * [ response_status ]
+ */
 void GameServiceSupport::OnJoinMatchResponse(const ResponseStatus& rs,
 		const std::string& match_id, const Participant& from,
 		const Item& item, void* cb_data) {
