@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		20F48A42158117D600276ADE /* CoreMotionController.h in Headers */ = {isa = PBXBuildFile; fileRef = 20F48A40158117D600276ADE /* CoreMotionController.h */; };
+		20F48A43158117D600276ADE /* CoreMotionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 20F48A41158117D600276ADE /* CoreMotionController.m */; };
 		446B2EC9143F7FCA00629B54 /* TVBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA741427D4E50043C8BF /* TVBrowserViewController.m */; };
 		446B2ECA143F7FCA00629B54 /* AppBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA721427D4E50043C8BF /* AppBrowserViewController.m */; };
 		446B2ECB143F7FCA00629B54 /* TPAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA731427D4E50043C8BF /* TPAppViewController.m */; };
@@ -89,6 +91,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		20F48A40158117D600276ADE /* CoreMotionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreMotionController.h; sourceTree = SOURCE_ROOT; };
+		20F48A41158117D600276ADE /* CoreMotionController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreMotionController.m; sourceTree = SOURCE_ROOT; };
 		44D2D07E143F6FBE00E54755 /* TakeControl-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "TakeControl-Info.plist"; path = "Take Control Framework/TakeControl-Info.plist"; sourceTree = SOURCE_ROOT; };
 		44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "TakeControl-Prefix.pch"; path = "Take Control Framework/TakeControl-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		44D2D083143F6FCB00E54755 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "Take Control Framework/en.lproj/InfoPlist.strings"; sourceTree = SOURCE_ROOT; };
@@ -488,6 +492,8 @@
 		CDFEBEBA130C704800A14307 /* UserInput */ = {
 			isa = PBXGroup;
 			children = (
+				20F48A40158117D600276ADE /* CoreMotionController.h */,
+				20F48A41158117D600276ADE /* CoreMotionController.m */,
 				CD91EABA1427D6090043C8BF /* AccelerometerController.h */,
 				CD91EABB1427D6090043C8BF /* AccelerometerController.m */,
 				CD91EACE1427D6090043C8BF /* TouchController.h */,
@@ -524,6 +530,7 @@
 				CD4977CC143E7A6900387911 /* TVConnection.h in Headers */,
 				44D2D081143F6FBE00E54755 /* TakeControl-Prefix.pch in Headers */,
 				44D2D086143F71DD00E54755 /* Protocols.h in Headers */,
+				20F48A42158117D600276ADE /* CoreMotionController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -661,6 +668,7 @@
 				44D2D0A5143F723700E54755 /* ImageEditorHelpViewControllerPhone.m in Sources */,
 				44D2D0A6143F723700E54755 /* ImageEditorViewController.m in Sources */,
 				44D2D0A7143F723700E54755 /* AudioRecordingViewController.m in Sources */,
+				20F48A43158117D600276ADE /* CoreMotionController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
