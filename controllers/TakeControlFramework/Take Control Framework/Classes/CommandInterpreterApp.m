@@ -89,6 +89,18 @@
         [delegate do_SA:args];
     } else if ([command compare:@"PA"] == NSOrderedSame) {
         [delegate do_PA:args];
+    } else if ([command compare:@"SG"] == NSOrderedSame) {
+        [delegate do_SG:args];
+    } else if ([command compare:@"PG"] == NSOrderedSame) {
+        [delegate do_PG:args];
+    } else if ([command compare:@"SM"] == NSOrderedSame) {
+        [delegate do_SM:args];
+    } else if ([command compare:@"PM"] == NSOrderedSame) {
+        [delegate do_PM:args];
+    } else if ([command compare:@"SD"] == NSOrderedSame) {
+        [delegate do_SD:args];
+    } else if ([command compare:@"PD"] == NSOrderedSame) {
+        [delegate do_PD:args];
     } else if ([command compare:@"SS"] == NSOrderedSame) {
         [delegate do_SS:args];
     } else if ([command compare:@"PS"] == NSOrderedSame) {

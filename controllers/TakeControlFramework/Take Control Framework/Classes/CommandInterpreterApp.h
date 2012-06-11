@@ -32,6 +32,13 @@
 - (void)do_SS:(NSArray *)args;
 - (void)do_PS:(NSArray *)args;
 
+- (void)do_SG:(NSArray *)args;
+- (void)do_PG:(NSArray *)args;
+- (void)do_SM:(NSArray *)args;
+- (void)do_PM:(NSArray *)args;
+- (void)do_SD:(NSArray *)args;
+- (void)do_PD:(NSArray *)args;
+
 // Welcome Message
 - (void)do_WM:(NSArray *)args;
 
