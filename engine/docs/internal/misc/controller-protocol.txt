@@ -1,5 +1,11 @@
-Version 4.3
+Version 4.4
 -----------
+
+Summary of changes between 4.3 and 4.4
+
+    Added SGY/PGY, SMM/PMM, SAT/PAT for start/stop of gyroscope, magnetometer, and attitude events
+    Added GY, MM, AT for those events
+    Added FM (HAS FULL MOTION) to handshake
 
 Summary of changes between 4.2 and 4.3
 --------------------------------------
@@ -78,13 +84,14 @@ Controller->Server
 ------------------
 
     (version must be >=4)
-    
+
     ID <version> <name> <cap>* <size> <id>
-    
+
         caps are:
-        
+
             KY  - HAS KEYS
             AX  - HAS ACCELEROMETER
+            FM  - HAS FULL MOTION
             TC  - HAS TOUCHES
             MC  - HAS MULTIPLE_CHOICE
             SD  - HAS SOUND
@@ -95,213 +102,240 @@ Controller->Server
             AC  - HAS AUDIO CLIPS (Added in v3.1)
             UX  - HAS ADVANCED UI (Added in v3.2)
             VR  - HAS VIRTUAL REMOTE (Added in v4.2)
-            
+
             CK  - HAS CLICKS (Removed in v3)
-            
+
 
         size is:
-        
+
             IS=<w>x<h>
             US=<w>x<h>
-    
+
         id is:
-        
+
             ID=<id> (Added in v4.3)
-    
+
     Key down
         KD <key> <unicode>
-    
+
     Key up
         KU <key> <unicode>
-    
+
     Key press (both down and up)
         KP <key> <unicode>
-    
+
     Click (Removed in v3)
         CK <x> <y>
-        
+
     Accelerometer
         AX <x> <y> <z>
 
+    Gyroscope
+        GY <x> <y> <z>
+
+    Magnetometer
+        MM <x> <y> <z>
+
+    Attitude
+        AT <roll> <pitch> <yaw>
+
     Pointer move (Added in v3)
         PM <x> <y>
-        
+
     Pointer down (Added in v3)
         <button> starts with 1
-        
+
         PD <button> <x> <y>
-        
+
     Pointer up (Added in v3)
         <button> starts with 1
-        
+
         PU <button> <x> <y>
-        
+
     UI event
         UI <text>
         UI <type> <text> (changed in v4.0)
-        
+
         Type is one of the following:
-        
+
             ET - for enter text
             MC - for multiple choice
             CI - for cancel image (in this case, the text parameter can be omitted)
             CA - for cancel audio (in this case, the text parameter can be omitted)
             UX - for advanced UI events. <text> is a JSON string. (Added in 4.1)
-    
+
     Touch down (Changed in v3)
         <finger> starts with 1
-        
+
         TD <finger> <x> <y>
-    
+
     Touch move (Changed in v3)
         <finger> starts with 1
-    
+
         TM <finger> <x> <y>
-    
+
     Touch up (Changed in v3)
         <finger> starts with 1
-    
+
         TU <finger> <x> <y>
-       
+
     Advanced UI connection (Added in v3.4)
         UX <controller id>
-        
+
             This message tells the server that this connection will, from
             this point forward, be used to exchange advanced UI messages
-            synchronously. The server will stop reading from this connection, 
-            until it writes a UX message.    
-            
+            synchronously. The server will stop reading from this connection,
+            until it writes a UX message.
+
             The <controller id> was received by the controller in the WM message.
-    
+
             The controller should create a new connection to the server and send
             this message as the initial message, instead of ID. Then, it should not
-            write anything else, but begin an asynchronous read. 
-            
+            write anything else, but begin an asynchronous read.
+
             When the controller reads a complete UX message from the server, it should
             process it and write a reply synchronously. Then, it should start another
             asynchronous read - waiting for the next message.
-            
-    
+
+
 Server->Controller
 ------------------
     Reset
         RT
-        
+
     Start AX
         SA <filter> <interval>
-        
+
         filter:
             N - None
             L - Low pass
             H - High pass
-            
+
         interval:
             double, seconds
-        
+
     Stop AX
         PA
-        
+
+    Start GY
+        SGY <interval>
+
+    Stop GY
+        PGY
+
+    Start MM
+        SMM <interval>
+
+    Stop MM
+        PMM
+
+    Start AT
+        SAT <interval>
+
+    Stop AT
+        PAT
+
     Start clicks (Removed in v3)
         SC
-        
+
     Stop clicks (Removed in v3)
         PC
-        
+
     Start pointer (Added in v3)
         SP
-        
+
     Stop pointer (Added in v3)
         PP
-    
+
     Start touches
         ST
-        
+
     Stop touches
         PT
-        
+
     Multiple choice
         MC <label> (<id1> <choice>)*
-        
+
     Clear UI
         CU
-        
+
     Set UI background image
         UB <resource> <mode>
-        
+
         mode:
             C - Center
             S - Stretch
             T - Tile
-            
+
     Set UI image
         UG <resource> <x> <y> <width> <height>
-    
+
     Play sound
         SS <resource> <loop>
-        
+
         loop:
             unsigned int
             0 - play forever
             1 - play once
             2 - play twice
             etc.
-            
+
     Stop sound
         PS
-        
+
     Enter text
         ET <label> <text>
-        
+
     Declare resource
         DR <resource> <uri/address> <group> (group added in v3.1)
-        
+
             uri/address:
-            
+
                 string. Either a uri with an http: or https: scheme or
                 anything else: get from host,port of controller with uri:
                     http://<host>:<port>/<address>
-                    
+
             group:
-            
+
                 a string that groups this resource with others.
-    
+
     Drop resource group
-        DG <group> (Added in v3.1)    
-        
-    
-    Welcome 
+        DG <group> (Added in v3.1)
+
+
+    Welcome
         WM <version> <http port>  (Added in v3.1)
         WM <version> <http port>  <controller id> (Changed in in v3.4)
-        
+
             This message is sent to the controller right after the server
-            receives its ID message. 
-            
-            <version> 
-            
+            receives its ID message.
+
+            <version>
+
                 An integer denoting the protocol version the server supports. This will
-                always have at least two digits. The last digit is the minor version, which 
+                always have at least two digits. The last digit is the minor version, which
                 will never be more than 9. So, for version 3.0, this will be '30'. For version
                 3.1, this will be '31'. For version 10.0, this will be '100'.
-            
-            <http port> 
-            
+
+            <http port>
+
                 The port for HTTP requests. This should be used to fetch resources and submit
                 pictures or audio clips.
-                
+
             <controller id> (Added in v3.4)
-            
+
                 An unsigned integer that uniquely identifies this controller on the server.
-            
+
     Submit picture
         PI <path> (Added in v3.1)
         PI <path> <max width> <max height> <edit> <mask resource> (Changed in v3.3)
-        
+
             This message asks the controller to send a picture. Path is the part portion
             of a URI that should use the same host as the controller connection and the
-            HTTP port received in the WM message. The controller should let the user 
-            choose a picture or take one and then send it to the server using an HTTP 
+            HTTP port received in the WM message. The controller should let the user
+            choose a picture or take one and then send it to the server using an HTTP
             POST to the path.
-            
+
             <max width> and <max height> are unsigned integers. If they are not zero, the
             picture should be scaled to the maximums given before it is sent. Either one, neither
             or both could be zero.
@@ -310,31 +344,31 @@ Server->Controller
             <mask resource> is a string that can be empty. If it is not empty, it is the name
             of a resource (given with DR). The controller should composite the picture with
             the mask before it submits it.
-            
-    Submit audio clip            
+
+    Submit audio clip
         AC <path> (Added in v3.1)
-        
+
             This message asks the controller to send an audio clip. Path is the part portion
             of a URI that should use the same host as the controller connection and the
             HTTP port received in the WM message. The controller should let the user
             record a short clip and then send it to the server using an HTTP POST to the
             path.
-        
+
     Advanced UI
-    
+
         UX <command> <JSON array> (Added in v3.2)
-        
+
             <command> is one of "CREATE" "DESTROY" "SET" "GET"
 
             <Description>
-        
+
     Show Virtual Remote (Added in 4.2)
-    
+
         SV
-        
+
     Hide Virtual Remote (Added in 4.2)
-    
-        HV       
-    
-        
-                
+
+        HV
+
+
+
