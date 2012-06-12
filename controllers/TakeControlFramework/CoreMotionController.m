@@ -150,7 +150,7 @@
         rotationY = gyroData.rotationRate.y;
         rotationZ = gyroData.rotationRate.z;
         
-        NSString *sentData = [NSString stringWithFormat:@"GS\t%f\t%f\t%f\n", rotationX,rotationY,rotationZ];
+        NSString *sentData = [NSString stringWithFormat:@"GY\t%f\t%f\t%f\n", rotationX,rotationY,rotationZ];
         //NSLog(@"Gyro Data: %@", sentData);
         [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
     }];
@@ -198,7 +198,7 @@
         pitch = motion.attitude.pitch;
         yaw = motion.attitude.yaw;
         
-        NSString *sentData = [NSString stringWithFormat:@"DM\t%f\t%f\t%f\n", roll,pitch,yaw];
+        NSString *sentData = [NSString stringWithFormat:@"AT\t%f\t%f\t%f\n", roll,pitch,yaw];
         //NSLog(@"DevMo Data: %@", sentData);
         [socketManager sendData:[sentData UTF8String] numberOfBytes:[sentData length]];
     }];
