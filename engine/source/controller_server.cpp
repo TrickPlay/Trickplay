@@ -693,6 +693,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_ACCELEROMETER;
                 }
+                else if ( cmp2( cap, "FM" ) )
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_FULL_MOTION;
+                }
                 else if ( cmp2( cap, "PT" ) )
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_POINTER;
@@ -859,6 +863,42 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         }
 
         tp_controller_accelerometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "GY" ) )
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_gyroscope( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "MM" ) )
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_magnetometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "AT" ) )
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_attitude( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "UI" ) )
     {
