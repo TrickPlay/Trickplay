@@ -501,8 +501,8 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  */
 - (void)do_WM:(NSArray *)args {
     version = [[args objectAtIndex:0] retain];
-    if ([version floatValue] < 4.3) {
-        NSLog(@"WARNING: Protocol Version is less than 4.3, please update Trickplay.");
+    if ([version floatValue] < 4.4) {
+        NSLog(@"WARNING: Protocol Version is less than 4.4, please update Trickplay.");
     }
     
     //[tvConnection setHttp_port:[[args objectAtIndex:1] unsignedIntValue]];
