@@ -32,7 +32,6 @@
 		44D2D094143F723700E54755 /* AsyncImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABD1427D6090043C8BF /* AsyncImageView.m */; };
 		44D2D095143F723700E54755 /* EditableTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC51427D6090043C8BF /* EditableTextView.m */; };
 		44D2D096143F723700E54755 /* GestureImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAC71427D6090043C8BF /* GestureImageView.m */; };
-		44D2D097143F723700E54755 /* AccelerometerController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EABB1427D6090043C8BF /* AccelerometerController.m */; };
 		44D2D098143F723700E54755 /* TouchController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EACF1427D6090043C8BF /* TouchController.m */; };
 		44D2D099143F723700E54755 /* TVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAE61427D66D0043C8BF /* TVConnection.m */; };
 		44D2D09A143F723700E54755 /* CommandInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EAE91427D6780043C8BF /* CommandInterpreter.m */; };
@@ -174,8 +173,6 @@
 		CD91EAA71427D5AC0043C8BF /* TrickplayTextHTML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayTextHTML.m; path = "Take Control Framework/Classes/TrickplayTextHTML.m"; sourceTree = SOURCE_ROOT; };
 		CD91EAA81427D5AC0043C8BF /* TrickplayUIElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TrickplayUIElement.h; path = "Take Control Framework/Classes/TrickplayUIElement.h"; sourceTree = SOURCE_ROOT; };
 		CD91EAA91427D5AC0043C8BF /* TrickplayUIElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TrickplayUIElement.m; path = "Take Control Framework/Classes/TrickplayUIElement.m"; sourceTree = SOURCE_ROOT; };
-		CD91EABA1427D6090043C8BF /* AccelerometerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AccelerometerController.h; path = "Take Control Framework/Classes/AccelerometerController.h"; sourceTree = SOURCE_ROOT; };
-		CD91EABB1427D6090043C8BF /* AccelerometerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AccelerometerController.m; path = "Take Control Framework/Classes/AccelerometerController.m"; sourceTree = SOURCE_ROOT; };
 		CD91EABC1427D6090043C8BF /* AsyncImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AsyncImageView.h; path = "Take Control Framework/Classes/AsyncImageView.h"; sourceTree = SOURCE_ROOT; };
 		CD91EABD1427D6090043C8BF /* AsyncImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AsyncImageView.m; path = "Take Control Framework/Classes/AsyncImageView.m"; sourceTree = SOURCE_ROOT; };
 		CD91EABE1427D6090043C8BF /* AudioController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioController.h; path = "Take Control Framework/Classes/AudioController.h"; sourceTree = SOURCE_ROOT; };
@@ -494,8 +491,6 @@
 			children = (
 				20F48A40158117D600276ADE /* CoreMotionController.h */,
 				20F48A41158117D600276ADE /* CoreMotionController.m */,
-				CD91EABA1427D6090043C8BF /* AccelerometerController.h */,
-				CD91EABB1427D6090043C8BF /* AccelerometerController.m */,
 				CD91EACE1427D6090043C8BF /* TouchController.h */,
 				CD91EACF1427D6090043C8BF /* TouchController.m */,
 			);
@@ -651,7 +646,6 @@
 				44D2D094143F723700E54755 /* AsyncImageView.m in Sources */,
 				44D2D095143F723700E54755 /* EditableTextView.m in Sources */,
 				44D2D096143F723700E54755 /* GestureImageView.m in Sources */,
-				44D2D097143F723700E54755 /* AccelerometerController.m in Sources */,
 				44D2D098143F723700E54755 /* TouchController.m in Sources */,
 				44D2D099143F723700E54755 /* TVConnection.m in Sources */,
 				44D2D09A143F723700E54755 /* CommandInterpreter.m in Sources */,
