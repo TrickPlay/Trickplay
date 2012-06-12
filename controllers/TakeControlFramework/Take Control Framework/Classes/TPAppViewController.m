@@ -324,7 +324,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
         NSLog(@"deviceID: %@", deviceID);
         
         // Tell the service what this device is capable of
-        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.3\t%@\tKY\tAX\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *welcomeData = [[NSString stringWithFormat:@"ID\t4.4\t%@\tKY\tAX\tFM\tTC\tMC\tSD\tUI\tUX\tVR\tTE%@\tIS=%dx%d\tUS=%dx%d\tID=%@\n", [UIDevice currentDevice].name, hasPictures, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, (NSInteger)backgroundWidth, (NSInteger)backgroundHeight, deviceID] dataUsingEncoding:NSUTF8StringEncoding];
         
         [socketManager sendData:[welcomeData bytes] numberOfBytes:[welcomeData length]];
         
@@ -867,7 +867,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * Passes one argument:
  *  0. Interval between events (in milliseconds)
  */
-- (void)do_SG:(NSArray *)args {
+- (void)do_SGY:(NSArray *)args {
     [coreMotionController startGyroscopeWithInterval:[[args objectAtIndex:0] floatValue]];
 }
 
@@ -877,7 +877,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * Tells the GyroscopeController to stop sending gyroscope events to the
  * server.
  */
-- (void)do_PG:(NSArray *)args {
+- (void)do_PGY:(NSArray *)args {
     [coreMotionController pauseGyroscope];
 }
 
@@ -891,7 +891,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * Passes one argument:
  *  0. Interval between events (in milliseconds)
  */
-- (void)do_SM:(NSArray *)args {
+- (void)do_SMM:(NSArray *)args {
     [coreMotionController startMagnetometerWithInterval:[[args objectAtIndex:0] floatValue]];
 }
 
@@ -901,7 +901,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * Tells the MagnetometerController to stop sending magnetometer events to the
  * server.
  */
-- (void)do_PM:(NSArray *)args {
+- (void)do_PMM:(NSArray *)args {
     [coreMotionController pauseMagnetometer];
 }
 
@@ -915,7 +915,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * Passes one argument:
  *  0. Interval between events (in milliseconds)
  */
-- (void)do_SD:(NSArray *)args {
+- (void)do_SAT:(NSArray *)args {
     [coreMotionController startDeviceMotionWithInterval:[[args objectAtIndex:0] floatValue]];
 }
 
@@ -925,7 +925,7 @@ UINavigationControllerDelegate, VirtualRemoteDelegate> {
  * Tells the DeviceMotionController to stop sending DeviceMotion events to the
  * server.
  */
-- (void)do_PD:(NSArray *)args {
+- (void)do_PAT:(NSArray *)args {
     [coreMotionController pauseDeviceMotion];
 }
 
