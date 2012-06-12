@@ -1879,6 +1879,36 @@ void tp_controller_accelerometer( TPController * controller, double x, double y,
     }
 }
 
+void tp_controller_gyroscope( TPController * controller, double x, double y, double z , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    if ( controller->controller->wants_gyroscope_events() )
+    {
+        controller->list->post_event( Event::make_gyroscope( controller->controller, x, y, z , modifiers ) );
+    }
+}
+
+void tp_controller_magnetometer( TPController * controller, double x, double y, double z , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    if ( controller->controller->wants_magnetometer_events() )
+    {
+        controller->list->post_event( Event::make_magnetometer( controller->controller, x, y, z , modifiers ) );
+    }
+}
+
+void tp_controller_attitude( TPController * controller, double roll, double pitch, double yaw , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    if ( controller->controller->wants_attitude_events() )
+    {
+        controller->list->post_event( Event::make_attitude( controller->controller, roll, pitch, yaw , modifiers ) );
+    }
+}
+
 void tp_controller_pointer_move( TPController * controller, int x, int y , unsigned long int modifiers )
 {
     TPController::check( controller );

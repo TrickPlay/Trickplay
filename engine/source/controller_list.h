@@ -315,6 +315,9 @@ private:
     friend void tp_controller_key_down( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers );
     friend void tp_controller_key_up( TPController * controller, unsigned int key_code, unsigned long int unicode , unsigned long int modifiers );
     friend void tp_controller_accelerometer( TPController * controller, double x, double y, double z , unsigned long int modifiers );
+    friend void tp_controller_gyroscope( TPController * controller, double x, double y, double z , unsigned long int modifiers );
+    friend void tp_controller_magnetometer( TPController * controller, double x, double y, double z , unsigned long int modifiers );
+    friend void tp_controller_attitude( TPController * controller, double roll, double pitch, double yaw , unsigned long int modifiers );
     friend void tp_controller_pointer_move( TPController * controller, int x, int y , unsigned long int modifiers );
     friend void tp_controller_pointer_button_down( TPController * controller, int button, int x, int y , unsigned long int modifiers );
     friend void tp_controller_pointer_button_up( TPController * controller, int button, int x, int y , unsigned long int modifiers );
