@@ -56,7 +56,7 @@ enum StreamType {
 typedef enum _rtsp_transport rtsp_transport_t;
 typedef enum StreamType stream_t;
 
-
+void *get_in_addr(struct sockaddr *sa);
 
 @interface RTSPClient : NSObject {
 
@@ -84,7 +84,7 @@ typedef enum StreamType stream_t;
 @property (nonatomic, copy) NSString *user, *pass;
 @property (nonatomic, assign, readonly) int port;
 @property (nonatomic, readonly) NSString *url;
-@property (nonatomic, retain, readonly) NSDictionary *responseHeader;
+@property (nonatomic, retain, readonly) NSMutableDictionary *responseHeader;
 @property (nonatomic, copy) NSString *sdp;
 @property (nonatomic, readonly) int mediaCount;
 @property (nonatomic, assign, readonly) NSString *session;

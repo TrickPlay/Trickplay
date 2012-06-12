@@ -63,6 +63,7 @@ int		inet_aton(const char *name, struct in_addr *addr);
 void	socket_error(const char *msg, ...);
 int     addr_valid(const char *addr);
 
+const char *host_addr4_iphone(void);
 const char *host_addr4(void);
 const char *host_addr6(void);
 

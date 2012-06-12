@@ -44,6 +44,8 @@ typedef enum avtype AVType;
 @end
 
 
+static struct timeval timeout;
+
 // TODO: rather than pass the media host/port combos up to here from SIPDialog, make avc/aac encoders
 // members of SIPDialog and pass a connection context up to the Video/Audio samplers
 // (which are currently in ViewController.m)
@@ -265,8 +267,10 @@ void *get_in_addr(struct sockaddr *sa) {
                     [avQueue removeObjectAtIndex:0];
             
                     int ret = send_nal(avc_session, sendPacket->time, avc_session_id, (uint8_t*) [sendPacket->data bytes], sendPacket->size, &timeout);
-            
-                    //fprintf(stderr, "ret: %d\n", ret);
+                    
+                    if (ret || !ret) {  // this gets rid of dead store warning
+                        //fprintf(stderr, "ret: %d\n", ret);
+                    }
             
                     [sendPacket release];
                 }

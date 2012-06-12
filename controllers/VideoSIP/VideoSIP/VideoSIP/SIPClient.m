@@ -120,17 +120,18 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
         
         STUNClient *stun = [[STUNClient alloc] initWithOutgoingAddress:client_address];
         NSDictionary *ipInfo = [stun getIPInfo];
-        if (!ipInfo) {
-            [self release];
-            return nil;
-        }
-        clientPublicIP = [[ipInfo objectForKey:@"host"] retain];
         // We are going to create a new socket for SIP, so close the socket from STUN
         if (close(stun.sock_fd)) {
             perror("STUN socket could not close");
         }
         // Release STUN
         [stun release];
+        
+        if (!ipInfo) {
+            [self release];
+            return nil;
+        }
+        clientPublicIP = [[ipInfo objectForKey:@"host"] retain];
         
         // This contains all the currently active SIP Dialogs
         sipDialogs = [[NSMutableDictionary alloc] initWithCapacity:40];
@@ -305,7 +306,7 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
         return;
     }
     
-    NSString *sipPacket = [[NSString alloc] initWithData:sipData encoding:NSUTF8StringEncoding];
+    NSString *sipPacket = [[[NSString alloc] initWithData:sipData encoding:NSUTF8StringEncoding] autorelease];
     NSLog(@"Received SIP packet:\n%@\n", sipPacket);
     
     // Separate header and body
@@ -468,9 +469,11 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
         if (CFSocketConnectToAddress(sipSocket, addressRef, 0)) {
             CFSocketInvalidate(sipSocket);
             perror("client: connect");
+            CFRelease(addressRef);
             current_error = SOCKET_SETUP;
             continue;
         }
+        CFRelease(addressRef);
         
         break;
     }
