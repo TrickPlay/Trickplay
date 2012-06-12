@@ -406,7 +406,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGContextRef newContext = CGBitmapContextCreate(baseAddress, width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
     CGContextRotateCTM(newContext, M_PI_2);
-    CFAbsoluteTime begin = CFAbsoluteTimeGetCurrent();
+    //CFAbsoluteTime begin = CFAbsoluteTimeGetCurrent();
     CGImageRef newImage = CGBitmapContextCreateImage(newContext);
     
     /*
@@ -443,7 +443,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     //CGContextRelease(context);
     CGColorSpaceRelease(colorSpace);
     
-    CFAbsoluteTime starttime = CFAbsoluteTimeGetCurrent();
+    //CFAbsoluteTime starttime = CFAbsoluteTimeGetCurrent();
     
     //fprintf(stderr, "\nSetup time = %lf\n", (starttime - begin)*1000.0);
     
@@ -494,7 +494,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     
     //[self rotateBuffer:imageBuffer];
     
-    CFAbsoluteTime endtime = CFAbsoluteTimeGetCurrent();
+    //CFAbsoluteTime endtime = CFAbsoluteTimeGetCurrent();
     
     //fprintf(stderr, "Total time = %lf\n", (endtime - starttime)*1000.0);
     

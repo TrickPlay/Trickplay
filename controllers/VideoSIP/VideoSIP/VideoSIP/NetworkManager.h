@@ -36,8 +36,6 @@
 
 
 
-static struct timeval timeout;
-
 /**
  * The NetworkManager holds a SIPClient for regulating all SIP tasks,
  * an AVCEncoder for encoding Video frames in H.264, and

@@ -86,7 +86,7 @@
 		CD4977CA143E7A6900387911 /* TVBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA531427D3600043C8BF /* TVBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CB143E7A6900387911 /* AppBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA501427D3600043C8BF /* AppBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CD4977CC143E7A6900387911 /* TVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = CD91EA551427D3600043C8BF /* TVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		CD64348D158037EA0061BF1B /* VideoStreamer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD64348C158037EA0061BF1B /* VideoStreamer.framework */; };
+		CDB5E2771587C80900803037 /* VideoStreamer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDB5E2761587C80900803037 /* VideoStreamer.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -121,7 +121,6 @@
 		CD63B45213B9895300158169 /* right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = right.png; sourceTree = "<group>"; };
 		CD63B45313B9895300158169 /* up-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "up-touch.png"; sourceTree = "<group>"; };
 		CD63B45413B9895300158169 /* up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = up.png; sourceTree = "<group>"; };
-		CD64348C158037EA0061BF1B /* VideoStreamer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VideoStreamer.framework; sourceTree = "<group>"; };
 		CD6C178C13BA6B1500F52BFE /* ios-generic-background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "ios-generic-background.jpg"; sourceTree = "<group>"; };
 		CD91EA501427D3600043C8BF /* AppBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowser.h; path = "Public Headers/AppBrowser.h"; sourceTree = "<group>"; };
 		CD91EA511427D3600043C8BF /* AppBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppBrowserViewController.h; path = "Public Headers/AppBrowserViewController.h"; sourceTree = "<group>"; };
@@ -203,6 +202,7 @@
 		CD91EAED1427D6790043C8BF /* CommandInterpreterApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CommandInterpreterApp.m; path = "Take Control Framework/Classes/CommandInterpreterApp.m"; sourceTree = SOURCE_ROOT; };
 		CD91EAF41427D6980043C8BF /* ResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ResourceManager.h; path = "Take Control Framework/Classes/ResourceManager.h"; sourceTree = SOURCE_ROOT; };
 		CD91EAF51427D6980043C8BF /* ResourceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ResourceManager.m; path = "Take Control Framework/Classes/ResourceManager.m"; sourceTree = SOURCE_ROOT; };
+		CDB5E2761587C80900803037 /* VideoStreamer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VideoStreamer.framework; sourceTree = "<group>"; };
 		CDCE76FF13B28A0E00768A2A /* ImageEditorHelpViewPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ImageEditorHelpViewPad.xib; path = Classes/ImageEditorHelpViewPad.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -211,7 +211,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD64348D158037EA0061BF1B /* VideoStreamer.framework in Frameworks */,
+				CDB5E2771587C80900803037 /* VideoStreamer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,7 +303,7 @@
 		CD4977A0143E79DD00387911 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				CD64348C158037EA0061BF1B /* VideoStreamer.framework */,
+				CDB5E2761587C80900803037 /* VideoStreamer.framework */,
 				44D2D082143F6FCB00E54755 /* InfoPlist.strings */,
 				44D2D07E143F6FBE00E54755 /* TakeControl-Info.plist */,
 				44D2D07F143F6FBE00E54755 /* TakeControl-Prefix.pch */,
@@ -568,7 +568,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TakeControl" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -702,6 +702,7 @@
 					armv7,
 				);
 				COPY_PHASE_STRIP = NO;
+				GCC_THUMB_SUPPORT = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -716,6 +717,7 @@
 					armv6,
 					armv7,
 				);
+				GCC_THUMB_SUPPORT = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -737,6 +739,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
@@ -760,6 +763,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
@@ -783,6 +787,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
@@ -804,6 +809,7 @@
 					armv6,
 					armv7,
 				);
+				GCC_THUMB_SUPPORT = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

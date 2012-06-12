@@ -6,6 +6,7 @@
  *           Bill Fenner     <fenner@research.att.com>
  *           Timur Friedman  <timur@research.att.com>
  *			 Steve McFarlin  <steve@stevemcfarlin.com>
+ *           Rex Fenley      <rex.fenley@gmail.com>
  *
  * The routines in this file implement the Real-time Transport Protocol,
  * RTP, as specified in RFC1889 with current updates under discussion in
@@ -33,6 +34,7 @@
  * 4. Neither the name of the University nor of the Department may be used
  *    to endorse or promote products derived from this software without
  *    specific prior written permission.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHORS AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -1863,7 +1865,7 @@ static void rtp_process_ctrl(struct rtp *session, uint8_t *buffer, int buflen)
 	rtp_event	 event;
 	struct timeval	 event_ts;
 	rtcp_t		*packet;
-	uint8_t 	 initVec[8] = {0,0,0,0,0,0,0,0};
+	//uint8_t 	 initVec[8] = {0,0,0,0,0,0,0,0};
 	int		 first;
 	uint32_t	 packet_ssrc = rtp_my_ssrc(session);
 	
@@ -2469,11 +2471,11 @@ int rtp_send_data(struct rtp *session, uint32_t rtp_ts, char pt, int m,
 				  char *extn, uint16_t extn_len, uint16_t extn_type,
 				  struct timeval *timeout)
 {
-	int		 buffer_len, i, rc, pad, pad_len, tcp_hdr_len = 0;
+	int		 buffer_len, i, rc = -1, pad, pad_len, tcp_hdr_len = 0;
 	//uint8_t		*buffer;
 	char		*buffer;
 	rtp_packet	*packet;
-	uint8_t 	 initVec[8] = {0,0,0,0,0,0,0,0};
+	//uint8_t 	 initVec[8] = {0,0,0,0,0,0,0,0};
 	
 	check_database(session);
 	
@@ -2626,7 +2628,7 @@ int rtp_send_data(struct rtp *session, uint32_t rtp_ts, char pt, int m,
 
 int rtp_send_data_iov(struct rtp *session, uint32_t rtp_ts, char pt, int m, int cc, uint32_t csrc[], struct iovec *iov, int iov_count, char *extn, uint16_t extn_len, uint16_t extn_type)
 {
-	int		 buffer_len, i, rc;
+	int		 buffer_len, i, rc = -1;
 	//SV-XXX uint8_t		*buffer;
 	char            *buffer;
 	rtp_packet	*packet;
@@ -2982,9 +2984,9 @@ static void send_rtcp(struct rtp *session, uint32_t rtp_ts,
 	uint8_t	   buffer[RTP_MAX_PACKET_LEN + MAX_ENCRYPTION_PAD + RTP_TCP_HEADER_LEN];	/* The +8 is to allow for padding when encrypting */
 	uint8_t	  *ptr = buffer;
 	uint8_t   *old_ptr;
-	uint8_t   *lpt;		/* the last packet in the compound */
+	//uint8_t   *lpt;		/* the last packet in the compound */
 	rtcp_app  *app;
-	uint8_t    initVec[8] = {0,0,0,0,0,0,0,0};
+	//uint8_t    initVec[8] = {0,0,0,0,0,0,0,0};
 	
 	check_database(session);
 	
@@ -3013,7 +3015,7 @@ static void send_rtcp(struct rtp *session, uint32_t rtp_ts,
 	/* adding RRs. The correct fix would be to calculate the length of the SDES items  */
 	/* in advance and subtract this from the buffer length but this is non-trivial and */
 	/* probably not worth it.                                                          */
-	lpt = ptr;
+	//lpt = ptr;
 	ptr = format_rtcp_sdes(ptr, RTP_MAX_PACKET_LEN - (ptr - buffer), rtp_my_ssrc(session), session);
 	
 	/* If we have any CSRCs, we include SDES items for each of them in turn...         */
@@ -3026,7 +3028,7 @@ static void send_rtcp(struct rtp *session, uint32_t rtp_ts,
 	/* if there is insufficient space in the buffer: this is bad, since we always drop */
 	/* the reports from the same sources (those at the end of the hash table).         */
 	while ((session->sender_count > 0)  && ((RTP_MAX_PACKET_LEN - (ptr - buffer)) >= 8)) {
-		lpt = ptr;
+		//lpt = ptr;
 		ptr = format_rtcp_rr(ptr, RTP_MAX_PACKET_LEN - (ptr - buffer), session);
 	}
 	
@@ -3034,7 +3036,7 @@ static void send_rtcp(struct rtp *session, uint32_t rtp_ts,
 	old_ptr = ptr;
 	if (appcallback) {
 		while ((app = (*appcallback)(session, rtp_ts, RTP_MAX_PACKET_LEN - (ptr - buffer)))) {
-			lpt = ptr;
+			//lpt = ptr;
 			ptr = format_rtcp_app(ptr, RTP_MAX_PACKET_LEN - (ptr - buffer), rtp_my_ssrc(session), app);
 			assert(ptr > old_ptr);
 			old_ptr = ptr;
@@ -3226,7 +3228,7 @@ static void rtp_send_bye_now(struct rtp *session)
 	uint8_t	 	 buffer[RTP_MAX_PACKET_LEN + MAX_ENCRYPTION_PAD + RTP_TCP_HEADER_LEN];	/* + 8 to allow for padding when encrypting */
 	uint8_t		*ptr = buffer;
 	rtcp_common	*common;
-	uint8_t    	 initVec[8] = {0,0,0,0,0,0,0,0};
+	//uint8_t    	 initVec[8] = {0,0,0,0,0,0,0,0};
 	
 	check_database(session);
 	/* If encryption is enabled, add a 32 bit random prefix to the packet */
@@ -3274,7 +3276,7 @@ static void rtp_send_bye_now(struct rtp *session)
 	//	}
 	//SV-XXX udp_send(session->rtcp_socket, buffer, ptr - buffer);
 	if(session->transport == RTP_TRANSPORT_UDP) {
-		udp_send(session->rtcp_socket, (char *) buffer, ptr - buffer);
+		udp_send(session->rtcp_socket, (char *)buffer, ptr - buffer);
 	}
 	else if(session->transport == RTP_TRANSPORT_TCP) {
 //		uint8_t *pb8 = buffer;
@@ -3282,7 +3284,7 @@ static void rtp_send_bye_now(struct rtp *session)
 //		pb8[1] = session->rtsp_rtcp;
 //		uint16_t *pb16 = (uint16_t*) pb8[2];
 //		*pb16 = htons(ptr - buffer - RTP_TCP_HEADER_LEN);
-		tcp_send(session->rtsp_socket, session->rtsp_rtcp, buffer, ptr - buffer);	
+		tcp_send(session->rtsp_socket, session->rtsp_rtcp, (char *)buffer, ptr - buffer);	
 	}
 	
 	/* Loop the data back to ourselves so local participant can */

@@ -405,8 +405,10 @@
 
 - (NSString *)genSDP {
     
+    NSString *sdp = nil;
+    /*
     unsigned char csps[32], cpps[32];
-	NSString *b64sps = nil, *b64pps = nil, *sdp = nil;
+	NSString *b64sps = nil, *b64pps = nil;
 	
     int length = base64encode(((unsigned char *)[sps bytes]) + 4, [sps length] - 4, csps, 32);
     csps[length] = '\0';
@@ -415,8 +417,7 @@
     length = base64encode(((unsigned char *)[pps bytes]) + 4, [pps length] - 4, cpps, 32);
     cpps[length] = '\0';
     b64pps = [NSString stringWithCString:(const char*)cpps encoding:NSASCIIStringEncoding];
-    
-    //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 97\r\nb=AS:1372\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@==\r\nmpeg4-esid:201\r\n", udpClientIP, user, udpClientIP, b64sps, b64pps];
+    //*/
     
     struct sockaddr_in client_address;
     client_address.sin_family = AF_INET;

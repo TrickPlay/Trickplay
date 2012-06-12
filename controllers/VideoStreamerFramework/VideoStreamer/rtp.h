@@ -2,6 +2,7 @@
  * FILE:   rtp.h
  * AUTHOR: Colin Perkins <c.perkins@cs.ucl.ac.uk>
  * MODIFIED: Steve McFarlin <steve@stevemcfarlin.com>
+ * MODIFIED: Rex Fenley <rex.fenley@gmail.com>
  *
  * $Revision: 690 $ 
  * $Date: 2004-11-25 17:25:22 +0000 (Thu, 25 Nov 2004) $
@@ -45,6 +46,7 @@ extern "C" {
 #define __RTP_H__
 
 #include "stdint.h"
+#include "config_unix.h"
 
 #define RTP_VERSION 2
 #define RTP_MAX_PACKET_LEN 1500
@@ -238,6 +240,10 @@ int 		rtp_get_option(struct rtp *session, rtp_option optname, int *optval);
 
 int 		rtp_recv(struct rtp *session, 
 					 struct timeval *timeout, uint32_t curr_rtp_ts);
+int         rtp_recv_udp(struct rtp *session,
+                         struct timeval *timeout, uint32_t curr_rtp_ts);
+int         rtp_recv_tcp(struct rtp *session,
+                         struct timeval *timeout, uint32_t curr_rtp_ts);
 
 int			rtp_send_data(struct rtp *session, 
 						  uint32_t rtp_ts, char pt, int m, 
