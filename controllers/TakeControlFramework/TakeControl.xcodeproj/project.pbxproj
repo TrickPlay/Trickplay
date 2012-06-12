@@ -555,7 +555,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TakeControl" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -683,14 +683,9 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					armv6,
-					armv7,
-				);
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_THUMB_SUPPORT = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -700,13 +695,8 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					armv6,
-					armv7,
-				);
 				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_THUMB_SUPPORT = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -724,13 +714,14 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
 				);
 				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
-				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
+				INSTALL_PATH = "$(SDKROOT)/Library";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
@@ -745,13 +736,14 @@
 				DEAD_CODE_STRIPPING = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
 				);
 				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
-				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
+				INSTALL_PATH = "$(SDKROOT)/Library";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
@@ -766,13 +758,14 @@
 				DEAD_CODE_STRIPPING = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
 				HEADER_SEARCH_PATHS = (
 					"\"Take Control Framework\"",
 					"\"Take Control Framework/Public Headers\"",
 				);
 				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
-				INSTALL_PATH = "$(SDKROOT)/Library/Frameworks";
+				INSTALL_PATH = "$(SDKROOT)/Library";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
@@ -784,13 +777,8 @@
 		CD91EA4A1427CCD00043C8BF /* Distribution */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					armv6,
-					armv7,
-				);
 				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_THUMB_SUPPORT = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
