@@ -10,6 +10,9 @@
 extern int new_Controller( lua_State * );
 
 extern int invoke_Controller_on_accelerometer( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_gyroscope( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_magnetometer( lua_State * , ControllerDelegate * , int , int );
+extern int invoke_Controller_on_attitude( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_advanced_ui_event( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_advanced_ui_ready( lua_State * , ControllerDelegate * , int , int );
 extern int invoke_Controller_on_audio_clip_cancelled( lua_State * , ControllerDelegate * , int , int );
@@ -122,6 +125,39 @@ void ControllerDelegate::accelerometer(double x,double y,double z,unsigned long 
     lua_pushnumber(L,z);
     ClutterUtil::push_event_modifiers(L,modifiers);
     invoke_Controller_on_accelerometer(L,this,4,0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::gyroscope(double x,double y,double z,unsigned long int modifiers)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    lua_pushnumber(L,z);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_Controller_on_gyroscope(L,this,4,0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::magnetometer(double x,double y,double z,unsigned long int modifiers)
+{
+    lua_pushnumber(L,x);
+    lua_pushnumber(L,y);
+    lua_pushnumber(L,z);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_Controller_on_magnetometer(L,this,4,0);
+}
+
+//.........................................................................
+
+void ControllerDelegate::attitude(double roll,double pitch,double yaw,unsigned long int modifiers)
+{
+    lua_pushnumber(L,roll);
+    lua_pushnumber(L,pitch);
+    lua_pushnumber(L,yaw);
+    ClutterUtil::push_event_modifiers(L,modifiers);
+    invoke_Controller_on_attitude(L,this,4,0);
 }
 
 //.........................................................................

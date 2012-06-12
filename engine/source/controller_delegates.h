@@ -33,6 +33,9 @@ public:
     virtual bool key_down(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers);
     virtual bool key_up(unsigned int key_code,unsigned long int unicode,unsigned long int modifiers);
     virtual void accelerometer(double x,double y,double z,unsigned long int modifiers);
+    virtual void gyroscope(double x,double y,double z,unsigned long int modifiers);
+    virtual void magnetometer(double x,double y,double z,unsigned long int modifiers);
+    virtual void attitude(double roll,double pitch,double yaw,unsigned long int modifiers);
     virtual bool pointer_move( int x, int y ,unsigned long int modifiers);
     virtual bool pointer_button_down( int button , int x, int y ,unsigned long int modifiers);
     virtual bool pointer_button_up( int button , int x, int y ,unsigned long int modifiers);
