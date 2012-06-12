@@ -52,6 +52,12 @@ public:
 
     void accelerometer( double x, double y, double z , unsigned long int modifiers );
 
+    void gyroscope( double x, double y, double z , unsigned long int modifiers );
+
+    void magnetometer( double x, double y, double z , unsigned long int modifiers );
+
+    void attitude( double roll, double pitch, double yaw , unsigned long int modifiers );
+
     void pointer_move( int x, int y , unsigned long int modifiers );
 
     void pointer_button_down( int button , int x, int y , unsigned long int modifiers );
@@ -77,7 +83,7 @@ public:
     void submit_audio_clip( void * data, unsigned int size, const char * mime_type );
 
     void cancel_image ( void );
-    
+
     void cancel_audio_clip ( void );
 
     void advanced_ui_ready( void );
@@ -94,6 +100,9 @@ public:
         virtual bool key_down( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers ) = 0;
         virtual bool key_up( unsigned int key_code, unsigned long int unicode , unsigned long int modifiers ) = 0;
         virtual void accelerometer( double x, double y, double z , unsigned long int modifiers ) = 0;
+        virtual void gyroscope( double x, double y, double z , unsigned long int modifiers ) = 0;
+        virtual void magnetometer( double x, double y, double z , unsigned long int modifiers ) = 0;
+        virtual void attitude( double roll, double pitch, double yaw , unsigned long int modifiers ) = 0;
         virtual bool pointer_move( int x, int y , unsigned long int modifiers ) = 0;
         virtual bool pointer_button_down( int button , int x, int y , unsigned long int modifiers ) = 0;
         virtual bool pointer_button_up( int button , int x, int y , unsigned long int modifiers ) = 0;
@@ -120,13 +129,25 @@ public:
     // Things you can tell a controller to do
 
     enum UIBackgroundMode {CENTER, STRETCH, TILE};
-    enum AccelerometerFilter {NONE, LOW, HIGH};
+    enum MotionFilter {NONE, LOW, HIGH};
 
     bool reset();
 
-    bool start_accelerometer( AccelerometerFilter filter, double interval );
+    bool start_accelerometer( MotionFilter filter, double interval );
 
     bool stop_accelerometer();
+
+    bool start_gyroscope( double interval );
+
+    bool stop_gyroscope();
+
+    bool start_magnetometer( double interval );
+
+    bool stop_magnetometer();
+
+    bool start_attitude( double interval );
+
+    bool stop_attitude();
 
     bool start_pointer();
 
@@ -177,6 +198,21 @@ public:
         return ( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) && g_atomic_int_get( & ts_accelerometer_started );
     }
 
+    inline bool wants_gyroscope_events() const
+    {
+        return ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) && g_atomic_int_get( & ts_gyroscope_started );
+    }
+
+    inline bool wants_magnetometer_events() const
+    {
+        return ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) && g_atomic_int_get( & ts_magnetometer_started );
+    }
+
+    inline bool wants_attitude_events() const
+    {
+        return ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) && g_atomic_int_get( & ts_attitude_started );
+    }
+
     inline bool wants_pointer_events() const
     {
         return ( spec.capabilities & TP_CONTROLLER_HAS_POINTER ) && g_atomic_int_get( & ts_pointer_started );
@@ -224,6 +260,9 @@ private:
     KeyMap              key_map;
 
     gint                ts_accelerometer_started;
+    gint                ts_gyroscope_started;
+    gint                ts_magnetometer_started;
+    gint                ts_attitude_started;
     gint                ts_pointer_started;
     gint                ts_touch_started;
 
