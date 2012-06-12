@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CD32EADD1575703D00A3BA7B /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EADC1575703D00A3BA7B /* libAVCEncoder.a */; };
 		CD4702501561E07500A89E9C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CD47024E1561E07500A89E9C /* InfoPlist.strings */; };
 		CD4702631561E43600A89E9C /* sm_math.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702601561E43600A89E9C /* sm_math.m */; };
 		CD4702641561E43600A89E9C /* MyExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702621561E43600A89E9C /* MyExtensions.m */; };
@@ -38,10 +37,10 @@
 		CD4702D41561F44600A89E9C /* SDPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702D01561F44600A89E9C /* SDPParser.m */; };
 		CD4702D51561F44600A89E9C /* MediaDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = CD4702D11561F44600A89E9C /* MediaDescription.h */; };
 		CD4702D61561F44600A89E9C /* MediaDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4702D21561F44600A89E9C /* MediaDescription.m */; };
+		CD5746261587FDA5008FC87B /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD5746251587FDA5008FC87B /* libAVCEncoder.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		CD32EADC1575703D00A3BA7B /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
 		CD4702481561E07400A89E9C /* VideoStreamer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VideoStreamer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD47024D1561E07500A89E9C /* VideoStreamer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "VideoStreamer-Info.plist"; sourceTree = "<group>"; };
 		CD47024F1561E07500A89E9C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -97,6 +96,7 @@
 		CD4702D01561F44600A89E9C /* SDPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDPParser.m; sourceTree = "<group>"; };
 		CD4702D11561F44600A89E9C /* MediaDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaDescription.h; sourceTree = "<group>"; };
 		CD4702D21561F44600A89E9C /* MediaDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaDescription.m; sourceTree = "<group>"; };
+		CD5746251587FDA5008FC87B /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,7 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD32EADD1575703D00A3BA7B /* libAVCEncoder.a in Frameworks */,
+				CD5746261587FDA5008FC87B /* libAVCEncoder.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,7 +131,7 @@
 		CD4702361561DF5600A89E9C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				CD32EADC1575703D00A3BA7B /* libAVCEncoder.a */,
+				CD5746251587FDA5008FC87B /* libAVCEncoder.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

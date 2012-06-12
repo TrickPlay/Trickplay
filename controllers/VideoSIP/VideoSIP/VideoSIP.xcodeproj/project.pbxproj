@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CD32EADB1575703000A3BA7B /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD32EADA1575703000A3BA7B /* libAVCEncoder.a */; };
 		CD470196154F721000A89E9C /* STUNClient.m in Sources */ = {isa = PBXBuildFile; fileRef = CD470195154F721000A89E9C /* STUNClient.m */; };
 		CD47019815534D0F00A89E9C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD47019715534D0F00A89E9C /* Security.framework */; };
 		CD4701D61559CE4500A89E9C /* VideoStreamer.m in Sources */ = {isa = PBXBuildFile; fileRef = CD4701D51559CE4500A89E9C /* VideoStreamer.m */; };
+		CD5746231587FB9D008FC87B /* libAVCEncoder.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD5746221587FB9D008FC87B /* libAVCEncoder.a */; };
 		CDABC64314FEC5870039DBE0 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC64214FEC5870039DBE0 /* UIKit.framework */; };
 		CDABC64514FEC5870039DBE0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC64414FEC5870039DBE0 /* Foundation.framework */; };
 		CDABC64714FEC5870039DBE0 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDABC64614FEC5870039DBE0 /* CoreGraphics.framework */; };
@@ -46,12 +46,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		CD32EADA1575703000A3BA7B /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
 		CD470194154F721000A89E9C /* STUNClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUNClient.h; sourceTree = "<group>"; };
 		CD470195154F721000A89E9C /* STUNClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUNClient.m; sourceTree = "<group>"; };
 		CD47019715534D0F00A89E9C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		CD4701D41559CE4400A89E9C /* VideoStreamer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoStreamer.h; sourceTree = "<group>"; };
 		CD4701D51559CE4500A89E9C /* VideoStreamer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoStreamer.m; sourceTree = "<group>"; };
+		CD5746221587FB9D008FC87B /* libAVCEncoder.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libAVCEncoder.a; sourceTree = "<group>"; };
 		CDABC63E14FEC5870039DBE0 /* VideoSIP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VideoSIP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDABC64214FEC5870039DBE0 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		CDABC64414FEC5870039DBE0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -128,7 +128,7 @@
 				CDABC64314FEC5870039DBE0 /* UIKit.framework in Frameworks */,
 				CDABC64514FEC5870039DBE0 /* Foundation.framework in Frameworks */,
 				CDABC64714FEC5870039DBE0 /* CoreGraphics.framework in Frameworks */,
-				CD32EADB1575703000A3BA7B /* libAVCEncoder.a in Frameworks */,
+				CD5746231587FB9D008FC87B /* libAVCEncoder.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,7 +164,7 @@
 		CDABC64114FEC5870039DBE0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				CD32EADA1575703000A3BA7B /* libAVCEncoder.a */,
+				CD5746221587FB9D008FC87B /* libAVCEncoder.a */,
 				CD47019715534D0F00A89E9C /* Security.framework */,
 				CDABC6AD14FEC7C10039DBE0 /* QuartzCore.framework */,
 				CDABC6AB14FEC7B30039DBE0 /* AVFoundation.framework */,
