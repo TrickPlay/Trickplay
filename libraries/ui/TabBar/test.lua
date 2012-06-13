@@ -16,8 +16,46 @@ if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
 if not ARROWPANE         then dofile("ArrowPane/ArrowPane.lua")             end
 if not TABBAR            then dofile("TabBar/TabBar.lua")                   end
 
+local style = {
+    border = {
+        width = 10,
+        colors = {
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
+    },
+    text = {
+        font = "Sans 50px",
+        colors = {
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
+    },
+    fill_colors    = {
+        default    = {80,0,0},
+        focus      = {155,155,155},
+        activation = {155,155,155}
+    }
+}
 
 tb1 = TabBar{
+    position = {100,100},
+    tabs = {
+        {label="One",   contents = {Rectangle{w=400,h=400,color="ff0000"},Button()}},
+        {label="Two",   contents = {Rectangle{w=400,h=400,color="00ff00"}}},
+        {label="Three", contents = {Rectangle{w=400,h=400,color="0000ff"}}},
+        {label="Four",  contents = {Rectangle{w=400,h=400,color="ffff00"}}},
+        {label="Five",  contents = {Rectangle{w=400,h=400,color="ff00ff"}}},
+        {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
+    }
+}
+---[[
+tb2 = TabBar{
+    tab_location = "left",
+    style = style,
+    position = {600,100},
     tabs = {
         {label="One",   contents = {Rectangle{w=400,h=400,color="ff0000"}}},
         {label="Two",   contents = {Rectangle{w=400,h=400,color="00ff00"}}},
@@ -27,5 +65,5 @@ tb1 = TabBar{
         {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
     }
 }
-
-screen:add(tb1)
+--]]
+screen:add(tb1,tb2)

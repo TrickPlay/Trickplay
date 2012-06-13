@@ -213,8 +213,14 @@ local function Widgetize(instance)
 		function()   return style    end,
 		function(oldf,self,v) 
             
-			style = matches_nil_table_or_type(Style, "STYLE", v)
-            
+            if v == false then
+                
+                local attr = style.attributes
+                attr.name = nil
+                style = Style{name=false}:set(attr)
+            else
+                style = matches_nil_table_or_type(Style, "STYLE", v)
+            end
         end
 	)
     

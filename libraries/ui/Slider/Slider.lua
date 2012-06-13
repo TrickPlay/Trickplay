@@ -33,7 +33,7 @@ Slider = function(parameters)
         
     end 
     
-    grip   = Widget_Rectangle{
+    grip   = NineSlice{
         reactive = true,
         on_button_down = function(self,...)
             
@@ -77,7 +77,7 @@ Slider = function(parameters)
         end
     )
 	----------------------------------------------------------------------------
-    track  = Widget_Rectangle{
+    track  = NineSlice{
         reactive = true,
         on_button_down = function(self,...)
             

@@ -1,7 +1,6 @@
 ARROWPANE = true
 
-local create_arrow = function(old_function,self,state)
-	
+local create_arrow = function(self,state)
 	local c = Canvas(self.w,self.h)
 	
     c:move_to(0,   c.h/2)
@@ -28,12 +27,12 @@ ArrowPane = function(parameters)
 	----------------------------------------------------------------------------
 	--The ArrowPane Object inherits from Widget
 	
-    local pane = ClippingRegion(parameters)
+    local pane = ClippingRegion{style = false}:set(parameters)
     
-    local up    = Button{ label = "", create_canvas = create_arrow, z_rotation = { 90,0,0} }
-    local down  = Button{ label = "", create_canvas = create_arrow, z_rotation = {270,0,0} }
-    local left  = Button{ label = "", create_canvas = create_arrow }
-    local right = Button{ label = "", create_canvas = create_arrow, z_rotation = {180,0,0} }
+    local up    = Button{ label = "", style = false, create_canvas = create_arrow, z_rotation = { 90,0,0} }
+    local down  = Button{ label = "", style = false, create_canvas = create_arrow, z_rotation = {270,0,0} }
+    local left  = Button{ label = "", style = false, create_canvas = create_arrow }
+    local right = Button{ label = "", style = false, create_canvas = create_arrow, z_rotation = {180,0,0} }
     
     local arrows = {
         up    = up,
@@ -44,14 +43,25 @@ ArrowPane = function(parameters)
 	local instance = LayoutManager{
         number_of_rows = 3,
         number_of_cols = 3,
+        placeholder = Widget_Clone(),
         cells = {
-            { Widget_Clone(),   up, Widget_Clone() },
-            {           left, pane,          right },
-            { Widget_Clone(), down, Widget_Clone() },
+            {  nil,   up,   nil },
+            { left, pane, right },
+            {  nil, down,   nil },
         },
     }
+    
+    pane:lower_to_bottom()
     ----------------------------------------------------------------------------
     
+	override_property(instance,"virtual_x",
+		function(oldf) return   pane.virtual_x     end,
+		function(oldf,self,v)   pane.virtual_x = v end
+    )
+	override_property(instance,"virtual_y",
+		function(oldf) return   pane.virtual_y     end,
+		function(oldf,self,v)   pane.virtual_y = v end
+    )
 	override_property(instance,"virtual_w",
 		function(oldf) return   pane.virtual_w     end,
 		function(oldf,self,v)   pane.virtual_w = v end
@@ -71,28 +81,75 @@ ArrowPane = function(parameters)
 	instance:subscribe_to(
 		{"virtual_w","pane_w"},
 		function()
-            if instance.virtual_w <= instance.pane_w then
-                left:hide()
-                right:hide()
-            else
-                left:show()
-                right:show()
+            if pane.virtual_w <= pane.w then
+                if instance.number_of_cols == 3 then
+                    instance.cells:remove_col(3)
+                    instance.cells:remove_col(1)
+                end
+            elseif instance.number_of_cols == 1 then
+                if instance.number_of_rows == 1 then
+                    instance.cells:insert_col(1,{left})
+                    instance.cells:insert_col(3,{right})
+                elseif instance.number_of_rows == 3 then
+                    instance.cells:insert_col(1,{nil,left,nil})
+                    instance.cells:insert_col(3,{nil,right,nil})
+                else
+                    error("impossible number of rows "..instance.number_of_rows,2)
+                end
             end
         end
     )
 	instance:subscribe_to(
 		{"virtual_h","pane_h"},
 		function()
+            if pane.virtual_h <= pane.h then
+                if instance.number_of_rows == 3 then
+                    instance.cells:remove_row(3)
+                    instance.cells:remove_row(1)
+                end
+            elseif instance.number_of_rows == 1 then
+                if instance.number_of_cols == 1 then
+                    instance.cells:insert_row(1,{up})
+                    instance.cells:insert_row(3,{down})
+                elseif instance.number_of_cols == 3 then
+                    instance.cells:insert_row(1,{nil,up,  nil})
+                    instance.cells:insert_row(3,{nil,down,nil})
+                else
+                    error("impossible number of cols "..instance.number_of_rows,2)
+                end
+            end
             
-            if instance.virtual_h <= instance.pane_h then
-                up:hide()
+            
+        end
+    )
+    --[[
+	pane:subscribe_to(
+		"virtual_x",
+		function()
+            if pane.virtual_x == pane.virtual_w then 
+                right:hide()
+            elseif pane.virtual_x == 0 then 
+                left:hide()
+            elseif pane.virtual_w > pane.w then
+                left:show()
+                right:show()
+            end
+        end
+    )
+	pane:subscribe_to(
+		"virtual_y",
+		function()
+            if pane.virtual_y == pane.virtual_h then 
                 down:hide()
-            else
+            elseif pane.virtual_y == 0 then 
+                up:hide()
+            elseif pane.virtual_h > pane.h then
                 up:show()
                 down:show()
             end
         end
     )
+    --]]
     ----------------------------------------------------------------------------
     
     local move_by = 10
@@ -142,6 +199,9 @@ ArrowPane = function(parameters)
                 },
             }
         end
+        
+        instance.horizontal_spacing = instance.style.arrow.offset
+        instance.vertical_spacing = instance.style.arrow.offset
     end
     local function arrow_colors_on_changed() 
         for _,arrow in pairs(arrows) do
@@ -149,11 +209,16 @@ ArrowPane = function(parameters)
                 instance.style.arrow.colors.attributes
         end
     end 
+    local function pane_on_changed() 
+        pane.style:set(instance.style.attributes)
+    end
 	local instance_on_style_changed
     function instance_on_style_changed()
         
         instance.style.arrow:subscribe_to(        nil, arrow_on_changed )
         instance.style.arrow.colors:subscribe_to( nil, arrow_colors_on_changed )
+        instance.style.border:subscribe_to(        nil, pane_on_changed )
+        instance.style.fill_colors:subscribe_to(   nil, pane_on_changed )
         
         arrow_on_changed()
         arrow_colors_on_changed()
@@ -182,6 +247,9 @@ ArrowPane = function(parameters)
     ----------------------------------------------------------------------------
     
     instance:set(parameters)
+    
+    if not parameters.virtual_x then instance.virtual_x = 0 end
+    if not parameters.virtual_y then instance.virtual_y = 0 end
     
     return instance
 end

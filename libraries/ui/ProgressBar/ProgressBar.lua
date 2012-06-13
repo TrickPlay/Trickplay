@@ -15,11 +15,11 @@ local create_fill = function(self)
         c:add_source_pattern_color_stop( 1 , self.style.fill_colors.focus_lower )
         c:fill()
         
-        return c:Image()
+        return c:Image{name = "fill"} 
         
     else
         
-        return Rectangle{size={1,self.h},color=self.style.fill_colors.focus or "ff0000"}
+        return Rectangle{name = "fill", size={1,self.h},color=self.style.fill_colors.focus or "ff0000"}
         
     end
     
@@ -71,7 +71,7 @@ local create_shell = function(self)
         
     end
     
-    return c:Image() 
+    return c:Image{name = "shell"} 
     
 end
 
@@ -119,12 +119,7 @@ ProgressBar = function(parameters)
 	)
     
     local expand_fill = function() 
-        fill.clip = {
-            0,
-            0,
-            fill.w*progress,
-            fill.h
-        }
+        fill.w = (shell.w-2*instance.style.border.width)*progress
     end
 	override_property(instance,"progress",
 		function(oldf) return progress end,
@@ -203,6 +198,8 @@ ProgressBar = function(parameters)
 	
 	----------------------------------------------------------------------------
 	
+	redraw_shell = true 
+    redraw_fill  = true 
 	instance:set(parameters)
 	
 	return instance
