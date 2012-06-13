@@ -86,7 +86,6 @@ ListManager = function(parameters)
                 cell.y = cell.y + cells[j].h + spacing
             end
         end
-        
         local ap = {0,0}
         if direction == "vertical" then
             if horizontal_alignment == "left" then
@@ -98,6 +97,9 @@ ListManager = function(parameters)
                 ap[1] = cell.w
                 cell:move_by(max_w,0)
             end
+        else
+            ap[1] = cell.w/2
+            cell:move_by(cell.w/2,0)
         end
         if direction == "horizontal" then
             if vertical_alignment == "top" then
@@ -109,6 +111,9 @@ ListManager = function(parameters)
                 ap[2] = cell.h
                 cell:move_by(0,max_h)
             end
+        else
+            ap[2] = cell.h/2
+            cell:move_by(0,cell.h/2)
         end
         cell.anchor_point = ap
         
@@ -123,8 +128,8 @@ ListManager = function(parameters)
     local set_size = function(self)
         local last_cell = self[self.length]
         if last_cell then
-            instance.w = last_cell.x + last_cell.w - last_cell.anchor_point[1]
-            instance.h = last_cell.y + last_cell.h - last_cell.anchor_point[2]
+            instance.w = last_cell.x + max_w - last_cell.anchor_point[1]
+            instance.h = last_cell.y + max_h - last_cell.anchor_point[2]
         end
     end
     ----------------------------------------------------------------------------
@@ -203,7 +208,6 @@ ListManager = function(parameters)
             if type(v) ~= "function" then
                 error("Expected function. Received "..type(v),2)
             end
-            print("garrrr")
             on_entries_changed = v 
         end
 	)
@@ -212,7 +216,6 @@ ListManager = function(parameters)
     cells = ArrayManager{  
         
         node_constructor=function(obj)
-            print("NODE1",obj)
             if node_constructor then
                 
                 obj = node_constructor(obj)
@@ -227,7 +230,6 @@ ListManager = function(parameters)
                 elseif obj.parent then  obj:unparent()  end
             end
             instance:add(obj)
-            print("NODE2",obj)
             
             items[obj] = {
                 neighbors = { },
@@ -361,6 +363,8 @@ LayoutManager = function(parameters)
     
     local node_constructor
 	local cells
+    local w = 0
+    local h = 0
     local cell_w, cell_h
     local horizontal_spacing = 0
     local vertical_spacing   = 0
@@ -383,6 +387,17 @@ LayoutManager = function(parameters)
             row_heights[r] = cell.h
         end
     end
+    local find_w = function(cell,r,c)
+        
+        if w < cell.x + cell.w - cell.anchor_point[1] then 
+            w = cell.x + cell.w - cell.anchor_point[1]
+        end
+    end
+    local find_h = function(cell,r,c)
+        if h < cell.y + cell.h - cell.anchor_point[2] then 
+            h = cell.y + cell.h - cell.anchor_point[2]
+        end
+    end
     local vertical_alignment   = "center"
     local horizontal_alignment = "center"
     
@@ -402,7 +417,6 @@ LayoutManager = function(parameters)
         end
     end
     local position_cell = function(cell,r,c)
-        
         --if not cells[r][c-1] then
             cell.x = 0
             for i = 1, c-1 do
@@ -457,8 +471,8 @@ LayoutManager = function(parameters)
     local set_size = function(self)
         local last_cell = self[self.number_of_rows] and self[self.number_of_rows][self.number_of_cols]
         if last_cell then
-            instance.w = last_cell.x + last_cell.w - last_cell.anchor_point[1]
-            instance.h = last_cell.y + last_cell.h - last_cell.anchor_point[2]
+            instance.w = last_cell.x + (cell_w or col_widths[self.number_of_cols]  or last_cell.w) - last_cell.anchor_point[1]
+            instance.h = last_cell.y + (cell_h or row_heights[self.number_of_rows] or last_cell.h) - last_cell.anchor_point[2]
         end
     end
     ----------------------------------------------------------------------------
@@ -579,6 +593,7 @@ LayoutManager = function(parameters)
                 obj = node_constructor(obj)
                 
             else -- default node_constructor
+                
                 if obj == nil then  
                     
                     obj = Widget_Clone{source=placeholder}
@@ -591,8 +606,9 @@ LayoutManager = function(parameters)
                 elseif obj.parent then  obj:unparent()  end
             end
             
-            
-            instance:add(obj)
+            --TODO: fix this hack
+            -- the add method is overwritten in some Widgets, screen holds a handle to the original
+            screen.add(instance,obj)
             
             items[obj] = {
                 neighbors = { },
@@ -637,7 +653,7 @@ LayoutManager = function(parameters)
             return obj
         end,
         
-        node_destructor=function(obj) 
+        node_destructor=function(obj,r,c) 
             if obj == focused_child then 
                 focused_child = 
                     items[obj].neighbors.up or 
@@ -661,10 +677,15 @@ LayoutManager = function(parameters)
             end
             col_widths  = {}
             row_heights = {}
+            w = 0
+            h = 0
             for_each(self,widths_of_cols)
             for_each(self,heights_of_rows)
             for_each(self,position_cell)
-            set_size(self)
+            for_each(self,find_w)
+            for_each(self,find_h)
+            --set_size(self)
+            instance.size = {w,h}
             for_each(self,assign_neighbors)
             on_entries_changed(self)
             in_on_entries = false
@@ -730,7 +751,6 @@ LayoutManager = function(parameters)
     ----------------------------------------------------------------------------
     
 	function instance:on_key_focus_in()    
-        print(children_want_focus,focused_child.type)
         if children_want_focus and focused_child then 
             dolater(function()
                 focused_child:grab_key_focus() 
