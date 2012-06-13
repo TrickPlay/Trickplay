@@ -429,7 +429,7 @@
 				GCC_PREFIX_HEADER = "VideoStreamer/VideoStreamer-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "VideoStreamer/VideoStreamer-Info.plist";
-				INSTALL_PATH = "\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"";
+				INSTALL_PATH = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
 				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)\"";
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
@@ -447,7 +447,7 @@
 				GCC_PREFIX_HEADER = "VideoStreamer/VideoStreamer-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "VideoStreamer/VideoStreamer-Info.plist";
-				INSTALL_PATH = "\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"";
+				INSTALL_PATH = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
 				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)\"";
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
