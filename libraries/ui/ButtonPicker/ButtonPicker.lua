@@ -276,7 +276,7 @@ ButtonPicker = function(parameters)
             
             if undo_prev_function then undo_prev_function() end
             if undo_next_function then undo_next_function() end
-            print("pos")
+            
             if v == "horizontal" then
                 prev_arrow:set{z_rotation={  0,0,0}}
                 next_arrow:set{z_rotation={180,0,0}}
@@ -306,7 +306,6 @@ ButtonPicker = function(parameters)
     ---[[
     local function update_labels()
         for i,item in items.pairs() do
-            print(i)
             item:set(   instance.style.text:get_table()   )
             item.color = instance.style.text.colors.default
         end
