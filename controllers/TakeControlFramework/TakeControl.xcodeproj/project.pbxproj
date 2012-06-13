@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		20F48A42158117D600276ADE /* CoreMotionController.h in Headers */ = {isa = PBXBuildFile; fileRef = 20F48A40158117D600276ADE /* CoreMotionController.h */; };
 		20F48A43158117D600276ADE /* CoreMotionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 20F48A41158117D600276ADE /* CoreMotionController.m */; };
+		4437300415882D5600DCC706 /* VideoStreamer.framework in Resources */ = {isa = PBXBuildFile; fileRef = CD5746281587FDCF008FC87B /* VideoStreamer.framework */; };
 		446B2EC9143F7FCA00629B54 /* TVBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA741427D4E50043C8BF /* TVBrowserViewController.m */; };
 		446B2ECA143F7FCA00629B54 /* AppBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA721427D4E50043C8BF /* AppBrowserViewController.m */; };
 		446B2ECB143F7FCA00629B54 /* TPAppViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD91EA731427D4E50043C8BF /* TPAppViewController.m */; };
@@ -632,6 +633,7 @@
 				CD165817143FE11900FEB2DC /* VirtualRemoteViewController.xib in Resources */,
 				CD165818143FE11900FEB2DC /* ImageEditorHelpViewPad.xib in Resources */,
 				44D2D084143F6FCB00E54755 /* InfoPlist.strings in Resources */,
+				4437300415882D5600DCC706 /* VideoStreamer.framework in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -650,6 +652,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "cp -a \"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\" \"${INSTALL_PATH}\"";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -737,7 +740,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = "\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"";
+				FRAMEWORK_SEARCH_PATHS = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
@@ -764,7 +767,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = "\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"";
+				FRAMEWORK_SEARCH_PATHS = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
@@ -786,7 +789,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = "\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"";
+				FRAMEWORK_SEARCH_PATHS = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
