@@ -2,7 +2,7 @@ TABBAR = true
 
 local top_tabs = function(self,state)
 	local c = Canvas(self.w,self.h)
-	print("woo")
+	
 	c.op = "SOURCE"
 	
 	c.line_width = self.style.border.width
@@ -208,7 +208,15 @@ TabBar = function(parameters)
     
     --instance.on_entries_changed = function() print("top_level") end
     
-    
+    instance:subscribe_to( {"tab_w","tab_h"},
+        function()
+            for i,t in pairs(tabs) do
+                
+                t.size = {tab_w,tab_h}
+                
+            end
+        end
+    )
     
     local function tab_style_changed()
         for i,t in pairs(tabs) do
