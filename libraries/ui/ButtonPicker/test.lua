@@ -19,8 +19,9 @@ if not BUTTONPICKER      then dofile("ButtonPicker/ButtonPicker.lua")       end
 screen:show()
 
 
-bp1 = ButtonPicker{orientation="vertical",items={"item1","item2","ite","itdddem2"}}
+bp1 = ButtonPicker{items={"one","two","333","for"}}
+bp2 = ButtonPicker{x = 400,window_h = 200,orientation="vertical",items={"item1","item2","ite","itdddem2"}}
 
-screen:add(Rectangle{size=screen.size,color="666600"},bp1)
+screen:add(Rectangle{size=screen.size,color="666600"},bp1,bp2)
 
 dolater(function() bp1:grab_key_focus() end)
