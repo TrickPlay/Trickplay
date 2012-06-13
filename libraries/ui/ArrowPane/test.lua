@@ -17,4 +17,13 @@ if not ARROWPANE         then dofile("ArrowPane/ArrowPane.lua")             end
 ap1 = ArrowPane()
 
 ap1:add(Rectangle{w=1000,h=1000,color="ffff00"},Rectangle{w=100,h=100,color="ff0000"},Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
-screen:add(ap1)
+ap2 = ArrowPane{x = 500,virtual_w = 400}
+
+ap2:add(Rectangle{w=1000,h=1000,color="ffff00"},Rectangle{w=100,h=100,color="ff0000"},Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
+---[[
+ap3 = ArrowPane{x = 1000,virtual_w = 400,virtual_h = 400}
+ap3:add(Rectangle{w=1000,h=1000,color="ffff00"},Rectangle{w=100,h=100,color="ff0000"},Rectangle{x = 300,y=300,w=100,h=100,color="00ff00"})
+
+ap3.virtual_w = 1000
+--]]
+screen:add(ap1,ap2,ap3)
