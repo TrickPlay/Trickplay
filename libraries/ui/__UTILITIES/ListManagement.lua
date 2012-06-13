@@ -287,6 +287,26 @@ GridManager = function(p)
             end
                     
         end
+        row_mt.__insert = function(self,i,d)
+            if i < 1 or i > number_of_cols+1 then
+                --error("Invalid index. 0 < '"..k.."' < "..number_of_cols,2)
+                print("row_mt.__index oob",1,i,number_of_cols)
+                return 
+            else
+                return table.insert(row_data,i,d)
+            end
+            
+        end
+        row_mt.__remove = function(self,i)
+            if i < 1 or i > number_of_cols then
+                --error("Invalid index. 0 < '"..k.."' < "..number_of_cols,2)
+                print("row_mt.__index oob",1,i,number_of_cols)
+                return 
+            else
+                return table.remove(row_data,i)
+            end
+            
+        end
         row_mt.__index = function(self,k)
             if row_mt[k] then
                 return row_mt[k]
@@ -347,9 +367,7 @@ GridManager = function(p)
                 --truncates entries beyond 'number_of_cols',
                 --'node_constructor' handles nil entries
                 for i = 1,number_of_rows do
-                    table.insert(data[i],c,
-                        node_constructor(entry[i],i,c)
-                    )
+                    data[i]:__insert(c, node_constructor(entry[i],i,c) )
                 end
                 report_change("insert_col")
             end,
@@ -361,9 +379,8 @@ GridManager = function(p)
                 if r < 1 or r > number_of_rows then 
                     error("Received invalid index. 1 < '"..r.."' < "..#data,2) 
                 end
-                number_of_rows = number_of_rows - 1
                 --if no rows, then just inc number_of_cols
-                if number_of_cols == 0 then return end
+                if number_of_cols ~= 0 then
                 --if inserting a column of placeholders
                 
                 local row = table.remove(data,r)
@@ -372,6 +389,8 @@ GridManager = function(p)
                 for i = 1,number_of_cols do
                     node_destructor(row[i],r,i)
                 end
+                end
+                number_of_rows = number_of_rows - 1
                 report_change("remove_row")
             end,
             remove_col = function(self,c)
@@ -383,16 +402,18 @@ GridManager = function(p)
                 if c < 1 or c > number_of_cols then 
                     error("Received invalid index. 1 < '"..c.."' < "..number_of_cols,2) 
                 end
-                number_of_cols = number_of_cols - 1
                 --if no rows, then just inc number_of_cols
-                if number_of_rows == 0 then return end
+                if number_of_rows ~= 0 then 
                 --if inserting a column of placeholders
                 
                 --truncates entries beyond 'number_of_cols',
                 --'node_constructor' handles nil entries
                 for i = 1,number_of_rows do
-                    node_destructor(table.remove(data[i],c),r,i)
+                    node_destructor(data[i]:__remove(c),c,i)
+                    --data[i][c] = nil
                 end
+                end
+                number_of_cols = number_of_cols - 1
                 report_change("remove_col")
             end,
             pairs  = function(self,from,to)
@@ -548,6 +569,7 @@ GridManager = function(p)
                     return
                 end
                 
+                --TODO: use is_nil_or_table()
                 v = v == nil and {} or 
                     type(v) == "table" and v or
                     error("Value is expected to be nil or table",2) 
