@@ -100,7 +100,7 @@
 		CD49779C143E79DD00387911 /* TakeControl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TakeControl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD4E17A814353B7500356032 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
 		CD4E17A914353B7500356032 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
-		CD5746281587FDCF008FC87B /* VideoStreamer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = VideoStreamer.framework; sourceTree = "<group>"; };
+		CD5746281587FDCF008FC87B /* VideoStreamer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoStreamer.framework; path = Library/VideoStreamer.framework; sourceTree = SDKROOT; };
 		CD5CFD6613D50F01002334E7 /* click.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = click.wav; sourceTree = "<group>"; };
 		CD63B43E13B9895300158169 /* arrows-generic-controls-comp.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "arrows-generic-controls-comp.jpg"; sourceTree = "<group>"; };
 		CD63B43F13B9895300158169 /* back-touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "back-touch.png"; sourceTree = "<group>"; };
@@ -554,6 +554,7 @@
 				CD4977C6143E7A5600387911 /* Headers */,
 				CD49779A143E79DD00387911 /* Resources */,
 				CD32EABF157472A200A3BA7B /* Frameworks */,
+				44105D8A1588135200633840 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -635,6 +636,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		44105D8A1588135200633840 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cp -a \"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\" \"${INSTALL_PATH}\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		CD497798143E79DD00387911 /* Sources */ = {
@@ -720,9 +737,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"\"$(SRCROOT)/Take Control Framework\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
@@ -737,6 +752,7 @@
 				);
 				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -748,9 +764,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"\"$(SRCROOT)/Take Control Framework\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
@@ -760,6 +774,7 @@
 				);
 				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -771,9 +786,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEAD_CODE_STRIPPING = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"\"$(SRCROOT)/Take Control Framework\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Take Control Framework/TakeControl-Prefix.pch";
 				GCC_THUMB_SUPPORT = NO;
@@ -783,6 +796,7 @@
 				);
 				IBC_FLATTEN_NIBS = NO;
 				INFOPLIST_FILE = "Take Control Framework/TakeControl-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
 				LINK_WITH_STANDARD_LIBRARIES = NO;
 				MACH_O_TYPE = mh_object;
 				PRODUCT_NAME = "$(TARGET_NAME)";
