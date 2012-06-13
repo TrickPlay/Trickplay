@@ -7,6 +7,7 @@ if not MISC              then dofile("__UTILITIES/Misc.lua")                end
 if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")              end
 if not STYLE             then dofile("__CORE/Style.lua")                    end
 if not WIDGET            then dofile("__CORE/Widget.lua")                   end
+if not NINESLICE         then dofile("NineSlice/NineSlice.lua")             end
 if not SLIDER            then dofile("Slider/Slider.lua")                   end
 if not CLIPPINGREGION    then dofile("ClippingRegion/ClippingRegion.lua")   end
 if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
