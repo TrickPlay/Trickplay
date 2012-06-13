@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4433AEE41587CF1400BC2135 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4433AEE31587CF1400BC2135 /* CoreMotion.framework */; };
+		4437300A15882D9700DCC706 /* TakeControl.framework in Resources */ = {isa = PBXBuildFile; fileRef = CD32EAE315757CF400A3BA7B /* TakeControl.framework */; };
 		4452F75A143F8368002809DB /* background@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F758143F8368002809DB /* background@2x~iphone.png */; };
 		4452F75B143F8368002809DB /* background~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F759143F8368002809DB /* background~iphone.png */; };
 		4452F75E143F836E002809DB /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = 4452F75D143F836E002809DB /* background.png */; };
@@ -281,6 +282,7 @@
 				4452F75A143F8368002809DB /* background@2x~iphone.png in Resources */,
 				4452F75B143F8368002809DB /* background~iphone.png in Resources */,
 				4452F75E143F836E002809DB /* background.png in Resources */,
+				4437300A15882D9700DCC706 /* TakeControl.framework in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -299,6 +301,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
 			shellScript = "rm -f \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/TakeControl.Framework/TakeControl\"\n\n\nGIT_REVISION=`git --git-dir=\"${PROJECT_DIR}/../../.git\" --work-tree=\"${PROJECT_DIR}/../..\" describe --tags --dirty`\n\nINFO_PLIST=\"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/Info\"\n\ndefaults write \"${INFO_PLIST}\" CFBundleShortVersionString \"${GIT_REVISION}\"";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -367,7 +370,7 @@
 				CLANG_ENABLE_OBJC_ARC = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"",
+					"$(SDKROOT)$(LOCAL_LIBRARY_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
@@ -426,7 +429,7 @@
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"",
+					"$(SDKROOT)$(LOCAL_LIBRARY_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
@@ -445,7 +448,7 @@
 				CLANG_WARN_OBJCPP_ARC_ABI = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)\"",
+					"$(SDKROOT)$(LOCAL_LIBRARY_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TakeControlApp/TakeControlApp-Prefix.pch";
