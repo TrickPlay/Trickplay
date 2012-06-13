@@ -52,6 +52,11 @@ ListManager = function(parameters)
     
     local assign_neighbors = function(cell,i,cells)
         
+        items[cell].neighbors.up = nil
+        items[cell].neighbors.down = nil
+        items[cell].neighbors.left = nil
+        items[cell].neighbors.right = nil
+        
         if i ~= 1 then
             if direction == "vertical" then
                 items[cell].neighbors.up = cells[i-1]
@@ -394,6 +399,7 @@ LayoutManager = function(parameters)
         end
     end
     local find_h = function(cell,r,c)
+        
         if h < cell.y + cell.h - cell.anchor_point[2] then 
             h = cell.y + cell.h - cell.anchor_point[2]
         end
@@ -402,6 +408,11 @@ LayoutManager = function(parameters)
     local horizontal_alignment = "center"
     
     local assign_neighbors = function(cell,r,c,cells)
+        items[cell].neighbors.up = nil
+        items[cell].neighbors.down = nil
+        items[cell].neighbors.left = nil
+        items[cell].neighbors.right = nil
+        
         if r ~= 1 then
             items[cell].neighbors.up = cells[r-1][c]
         end
@@ -547,7 +558,7 @@ LayoutManager = function(parameters)
         },
         function() 
             for_each(cells,position_cell) 
-            set_size(cells)
+            --set_size(cells)
         end
     )
     ----------------------------------------------------------------------------
