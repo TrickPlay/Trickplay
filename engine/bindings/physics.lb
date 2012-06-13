@@ -23,71 +23,38 @@ Objects added to the physics variable are based on the UIElement interface, such
 
 When the physics world has been configured and the desired objects added to it, the physics simulation can begin by calling the variable's start() function.
 
-The simple program listing shown below creates two Rectangle objects: a dynamic object that will be affected by the physics forces placed upon it and an immobile static object that acts as a ground foundation. As gravity pulls the dynamic object down, it eventually hits and lands on the static ground object.
+The simple program listing shown below creates two Rectangle objects: a dynamic object that will be affected by the physics forces placed upon it and an immobile static object that acts as a ground foundation. As gravity pulls the dynamic object down, the Rectangle falls until it eventually lands on the static ground object.
 
 	(code)
 	-- Basic 2D Physics Application
-	--
-	-- *********************************************************
-	function
-	displayMainScreen()
 
-		-- Use a simple colored background
-		local background = Rectangle( {
-								size     = { screen.width, screen.height },
-								position = { 0, 0, 0 },
-								color    = "azure3",
-		} )
-		screen:add( background )
+	-- Create a simple rectangle and add it to the screen
+	local gBox01 = Rectangle( { 
+						size     = { 100, 100 },
+						position = { (screen.width / 2) - 50, (screen.height / 4) - 50 },
+						color    = "SaddleBrown",
+	} )
+	screen:add( gBox01 )
 
-	end
+	-- Make the rectangle a dynamic object, i.e., affected by physics; use default Body settings
+	gBox01 = physics:Body( gBox01, { } )
 
-	-- *********************************************************
-	function
-	createPhysicsWorld()
+	-- Create a ground so the rectangle doesn't fall off the screen
+	local gGround = Rectangle( {
+						size     = { screen.width / 2, 2 },
+						position = { screen.width / 4, screen.height - (screen.height / 4) },
+						color    = "AntiqueWhite",
+	} )
+	screen:add( gGround )
 
-		-- Create a simple rectangle and add it to the screen
-		local gBox01 = Rectangle( { 
-							size     = { 100, 100 },
-							position = { (screen.width / 2) - 50, (screen.height / 4) - 50 },
-							color    = "SaddleBrown",
-		} )
-		screen:add( gBox01 )
-	
-		-- Make the rectangle a dynamic object, i.e., affected by physics; use default Body settings
-		gBox01 = physics:Body( gBox01, { } )
-	
-		-- Create a ground so the rectangle doesn't fall off the screen
-		local gGround = Rectangle( {
-							size     = { screen.width / 2, 1 },
-							position = { screen.width / 4, screen.height - (screen.height / 4) },
-							color    = "black",
-		} )
-		screen:add( gGround )
-	
-		-- Make the ground an immobile static object in the physics world
-		gGround = physics:Body( gGround,
-								{ type = "static",
-		} )
-	
-		-- Show the screen
-		screen:show()
-		
-		-- Start the physics simulation
-		physics:start()
+	-- Make the ground an immobile static object in the physics world
+	gGround = physics:Body( gGround, { type = "static" } )
 
-	end
+	-- Show the screen
+	screen:show()
 
-	-- *********************************************************
-	-- Program's main entry point
-
-		-- Show the main background screen
-		displayMainScreen()
-
-		-- Create "boxes" that will be affected by gravity
-		createPhysicsWorld()
-
-	-- *********************************************************
+	-- Start the physics simulation
+	physics:start()
 	(end)
 	
 
@@ -294,7 +261,7 @@ interface Body [[ ClutterActor * ]]
 	
 	*Default Setting:* 0
 	
-	*See Also:* the <y> and <position> properties
+	*See Also:* the <y>, <z> and <position> properties
 */
 	
 	double x
@@ -322,9 +289,11 @@ interface Body [[ ClutterActor * ]]
 
 	The y property specifies the current screen position on the Y axis of the center of the Body/UIElement object.
 	
+	The physics variable implements a two-dimensional physics environment that uses the X/Y plane by default. A program can alternatively use the X/Z plane; refer to the physics variable's z_for_y property for details.
+	
 	*Default Setting:* 0
 	
-	*See Also:* the <x> and <position> properties
+	*See Also:* the <x>, <z>, <position> and <physics.z_for_y> properties
 */
 	
     double y
@@ -361,12 +330,17 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
+/***************************************
+	Property: z
 
-    /*
-        Property: z
-
-        The Z coordinate of the body's center.
-    */
+	The z property specifies the current screen position on the Z axis of the center of the Body/UIElement object.
+	
+	The two-dimensional environment controlled by the physics variable does not normally use the Z axis; the physics simulation occurs entirely on the X/Y plane. A program can, however, substitute the X/Y plane with the X/Z plane, causing the physics simulation to occur in depth. Refer to the physics variable's z_for_y property for details.
+	
+	*Default Setting:* 0
+	
+	*See Also:* the <x>, <y>, <depth> and <physics.z_for_y> properties
+*/
 
     double z
         [[
@@ -402,11 +376,13 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
-    /*
-        Property: depth
+/***************************************
+	Property: depth
 
-        The Z coordinate of the body's center.
-    */
+	The depth property is equivalent to the <z> property; it specifies the current screen position on the Z axis of the center of the Body/UIElement object. Refer to the description of the <z> property for further details.
+	
+	*See Also:* the <x>, <y>, and <z> properties
+*/
 
     double depth
         [[
@@ -442,11 +418,17 @@ interface Body [[ ClutterActor * ]]
             }
         ]];
 
-	/*
-		Property: angle
+/***************************************
+	Property: angle
 
-		The angle of rotation (in degrees) along the Z axis.
-	*/
+	The angle property specifies the object's rotation in degrees along the Z axis.
+	
+	If the physics variable's z_for_y property is true, the object rotates along the Y axis.
+	
+	*Default Setting:* 0
+	
+	*See Also:* the <rotation> and <physics.z_for_y> properties
+*/
 
 	double angle
 		[[
@@ -463,11 +445,13 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
 		]];
 
-	/*
-		Property: rotation
+/***************************************
+	Property: rotation
 
-		Same as <angle>.
-	*/
+	The rotation property is equivalent to the <angle> property; it specifies the object's rotation in degrees along the Z axis. Refer to the <angle> property for details.
+	
+	*See Also:* the <angle> property
+*/
 
     double rotation
         [[
@@ -484,11 +468,15 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_actor();
         ]];
 
-	/*
-		Property: world_center
+/***************************************
+	Property: world_center
 
-		A table of X and Y coordinates for the world center of this body.
-	*/
+	The world_center property is a table containing the { X, Y } coordinates of the center position in the physics environment of the object's mass. Depending upon the number of fixtures attached to a Body and each fixture's density, the center of the object's mass may differ from its screen position, which is based on the center of its Body.
+
+	*Format:* { center-of-mass X coordinate, center-of-mass Y coordinate } where each coordinate is relative to the physics environment
+
+	*See Also:* the <local_center> and <position> properties
+*/
 
     readonly table world_center
         [[
@@ -501,11 +489,15 @@ interface Body [[ ClutterActor * ]]
             lua_rawseti( L , -2 , 2 );
         ]];
 
-	/*
-		Property: local_center
+/***************************************
+	Property: local_center
 
-	    A table of X and Y coordinates for this body's center.
-	*/
+	The local_center property is a table containing the { X, Y } coordinates of the center position of the object's mass relative to the center of its Body. Depending upon the number of fixtures attached to a Body and each fixture's density, the center of the object's mass may differ from the center of its Body.
+	
+	*Format:* { center-of-mass X coordinate, center-of-mass Y coordinate } where each coordinate is relative to the center of the object's Body
+	
+	*See Also:* the <world_center> and <position> properties
+*/
 
 	readonly table local_center
         [[
@@ -518,11 +510,23 @@ interface Body [[ ClutterActor * ]]
             lua_rawseti( L , -2 , 2 );
         ]];
 
-	/*
-		Property: linear_velocity
+/***************************************
+	Property: linear_velocity
 
-		A table of velocity in X and Y direction.
-	*/
+	The linear_velocity property is a table containing the amount of linear velocity to apply along the X and/or Y axis.
+	
+	Negative X values push the object to the left; positive X values push it to the right. Negative Y values push the object up; positive Y values push it down.
+	
+	*Format:* { X-axis velocity, Y-axis velocity }
+	
+	*Code Example:* Apply a linear_velocity force to an object to push it up
+	
+		(code)
+		gBox01.linear_velocity = { 0, -10 }
+		(end)
+		
+	*See Also:* the <angular_velocity> property
+*/
 
 	table linear_velocity
 		[[
@@ -546,11 +550,15 @@ interface Body [[ ClutterActor * ]]
 			lua_pop( L , 2 );
 		]];
 
-	/*
-		Property: angular_velocity
+/***************************************
+	Property: angular_velocity
 
-		The velocity of the body's rotation around the Z axis.
-	*/
+	The angular_velocity property is a double value specifying the object's rotation in degrees around the Z-axis.
+	
+	Positive values rotate in a clockwise direction; negative values rotate counter-clockwise.
+
+	*See Also:* the <linear_velocity> property
+*/
 
 	double angular_velocity
 		[[
@@ -564,11 +572,13 @@ interface Body [[ ClutterActor * ]]
 			me->body->SetAngularVelocity( Physics::World::degrees_to_radians( angular_velocity ) );
 		]];
 
-	/*
-		Property: mass
+/***************************************
+	Property: mass
 
-		The mass of the body.
-	*/
+	The mass property specifies the mass of the object. Mass is calculated automatically and depends on the density of the body's fixtures.
+	
+	*See Also:* the <add_fixture> function
+*/
 
 	readonly double mass
         [[
@@ -577,13 +587,19 @@ interface Body [[ ClutterActor * ]]
             mass = me->body->GetMass();
         ]];
 
-	/* TODO: mass_data */
+/***************************************
+	TODO: mass_data
+*/
 
-	/*
-		Property: linear_damping
+/***************************************
+	Property: linear_damping
 
-		Damping value for the body's linear velocity.
-	*/
+	The linear_damping property specifies the damping factor to apply to the object's linear velocity. The range of valid settings is 0 to infinity, but common settings are between 0.0 and 0.1.
+
+	*Default Setting:* 0.0
+	
+	*See Also:* the <linear_velocity> property
+*/
 
 	double linear_damping
         [[
@@ -597,11 +613,15 @@ interface Body [[ ClutterActor * ]]
             me->body->SetLinearDamping( linear_damping );
         ]];
 
-	/*
-		Property: angular_damping
+/***************************************
+	Property: angular_damping
 
-		Damping value for the body's angular velocity.
-	*/
+	The angular_damping property specifies the damping factor to apply to the object's angular velocity. The range of valid settings is 0 to infinity, but common settings are between 0.0 and 0.1.
+	
+	*Default Setting:* 0.0
+	
+	*See Also:* the <angular_velocity> property
+*/
 
 	double angular_damping
         [[
@@ -615,13 +635,17 @@ interface Body [[ ClutterActor * ]]
             me->body->SetAngularDamping( angular_damping );
         ]];
 
-	/*
-		Property: bullet
+/***************************************
+	Property: bullet
 
-		Whether this body is considered a bullet (a very fast-moving body). This
-		has implications on collision detection for the body; extra work is performed
-		to avoid tunneling.
-	*/
+	The bullet property is a boolean flag indicating whether or not the object should be processed as a fast-moving bullet (true=is bullet).
+	
+	A fast-moving object can move a long distance between steps of the physics simulation. Because of this speed, it's possible for the object to pass through other objects without a collision being detected. This event is called "tunneling." To prevent tunneling, the fast-moving object should be flagged as a "bullet" to enable "continuous collision detection" (CCD). With CCD enabled, collisions are detected for even fast-moving objects. For performance reasons, CCD is disabled by default.
+	
+	The bullet property affects Body objects of type "dynamic" only.
+	
+	*Default Setting:* false, i.e., is not a fast-moving object
+*/
 
 	bool bullet
         [[
@@ -635,11 +659,15 @@ interface Body [[ ClutterActor * ]]
             me->body->SetBullet( bullet );
         ]];
 
-	/*
-		Property: sleeping_allowed
+/***************************************
+	Property: sleeping_allowed
 
-		Whether the body is allowed to go to sleep when it comes to rest.
-	*/
+	The sleeping_allowed property is a boolean flag indicating whether or not an object that has stopped moving can enter a sleep mode in which the object can be temporarily removed from the physics simulation so as to improve performance (true=sleeping allowed). The object will exit sleep mode automatically if it is involved in a collision or some other force is acted upon it.
+	
+	*Default Setting:* true, i.e., can automatically enter sleep mode when inactive
+	
+	*See Also:* the <awake> property
+*/
 
 	bool sleeping_allowed
         [[
@@ -653,12 +681,17 @@ interface Body [[ ClutterActor * ]]
             me->body->SetSleepingAllowed( sleeping_allowed );
         ]];
 
-	/*
-		Property: fixed_rotation
+/***************************************
+	UndocumentedProperty: fixed_rotation
 
-		If fixed rotation is set to true, the body will not rotate
-		along the Z axis.
-	*/
+	Note: The fixed_rotation property has no effect. With fixed_rotation set to true, the object will still rotate by setting the angular_velocity property.  Grep'ing the Box2D source code shows no calls to the underlying SetFixedRotation() and IsFixedRotation() functions. Also, on-line forums also show people claiming that SetFixedRotation() has no effect. Until this property can be shown to work as expected, it will remain undocumented.
+	
+	The fixed_rotation property is a boolean flag indicating whether or not the body can rotate around the Z axis (true==cannot rotate).
+	
+	*Default Setting:* false, i.e., the object can rotate
+	
+	*See Also:* the <angular_velocity> property
+*/
 
 	bool fixed_rotation
         [[
@@ -672,12 +705,34 @@ interface Body [[ ClutterActor * ]]
             me->body->SetFixedRotation( fixed_rotation );
         ]];
 
-	/*
-		Property: contacts
+/***************************************
+	Property: contacts
 
-		A table of current contacts for this body (touch points
-		with other bodies).
-	*/
+	The contacts property is a table that contains the points on the object where it is touching other Body objects. If the object is not touching any objects, the property's value is nil.
+	
+	Each entry in the contacts table includes the following keys.
+	
+		enabled - boolean flag indicating whether or not the contact is enabled (true==enabled). A contact can be disabled in the physics global variable's <on_pre_solve_contact> event handler.
+		touching - boolean flag indicating whether or not the two objects are touching (true==touching). Note: Contact may occur between the bounding boxes of two objects, but the actual objects do not touch.
+		point - table containing two keys. Key "1" contains the contact point's X coordinate. Key "2" contains the contact point's Y coordinate.
+		bodies - table containing two keys. Key "1" contains the <handle> for one of the objects. Key "2" contains the handle for the other object.
+		other_body - table containing two keys. One key is the <handle> of the current object; its value is the handle of the other object. The second key is the handle of the other object; its value is the handle of the current object. For example, if the object with handle 2 is touching the object with handle 4, the other_body table for the object with handle 2 would contain { 2=4, 4=2 }. This table enables the program to access the other object by using the current object's handle as an index, as in contactObject = Object2.contacts.other_body[ Object2.handle ].
+		fixtures - table containing two keys. Key "1" contains the fixture handle for one of the fixtures. Key "2" contains the fixture handle for the other fixture. The fixture handle is returned by the <add_fixture> function.
+		other_fixture - table containing two keys. One key is the fixture handle of the current fixture; its value is the fixture handle of the other fixture. The second key is the fixture handle of the other fixture; its value is the fixture handle of the current fixture. For example, if the fixture with handle 3 is touching the fixture with handle 5, the other_fixture table for the fixture with handle 3 would contain { 3=5, 5=3 }. This table enables the program to access the other fixture by using the current fixture's handle as an index, as in contactFixture = ObjectX.contacts.other_fixture[ ObjectXFixtureHandle ].
+	
+	*Default Setting:* nil
+	
+	*Code Example:*
+	
+		(code)
+		-- Display the complete contents of an object's contacts table
+		if( Object.contacts ~= nil )then
+			dumptable( Object.contacts )
+		end
+		(end)
+	
+	*See Also:* the <handle> property, the <add_fixture> function, and the <on_pre_solve_contact> event handler
+*/
 
 	readonly table contacts
         [[
@@ -686,11 +741,17 @@ interface Body [[ ClutterActor * ]]
             me->world->push_contact_list( me->body->GetContactList() );
         ]];
 
-	/*
-		Function: synchronize
+/***************************************
+	Function: synchronize
 
-		Explicitly insures that this body and its UIElement are in synch.
-	*/
+	The synchronize() function forces the Body's position and rotation to match that of its related UIElement-based object.
+	
+	The synchronize() function may alter the following Body properties: <x>, <y>, <position>, <angle> and <rotation>.
+	
+	*Return Value:* None
+	
+	*See Also:* the <x>, <y>, <position>, <angle> and <rotation> properties
+*/
 
 	synchronize( )
         [[
@@ -699,17 +760,33 @@ interface Body [[ ClutterActor * ]]
             me->synchronize_body();
         ]];
 
-	/*
-		Function: apply_force
+/***************************************
+	Function: apply_force
+
+	The apply_force() function applies a directional force on an object.
+	
+	Applying force on an object is similar to setting the object's <linear_velocity>, but linear velocity is always applied to the center of the object's mass, while force can be applied to any X,Y coordinate. If force is applied anywhere other than the center of the object's mass, a torque is created which affects the <angular_velocity>.
+	
+	*Code Example:*
+	
+		(code)
+		-- Use force to push object up
+		gObject:apply_force( { 0, -500 }, { gObject.x, gObject.y } )
+		
+		-- Use force to push object left
+		gObject:apply_force( { 100, 0 }, { gObject.x, gObject.y } )
+		(end)
+
+
 
 		Apply a force to the body.
 
 		force - A table of X and Y forces.
 		point - The point, on the body where the force should be applied. This is a
 		        table of X and Y coordinates.
-	*/
+*/
 
-	apply_force( table force , table point )
+	apply_force( table force, table point )
 		[[
             Physics::Body * me = Physics::Body::get( self );
 
