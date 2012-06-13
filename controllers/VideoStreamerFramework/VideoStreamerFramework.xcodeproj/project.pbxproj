@@ -404,6 +404,32 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		44A9CC8D158824AB00BBCE6F /* Distribution */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				SDKROOT = iphoneos;
+			};
+			name = Distribution;
+		};
+		44A9CC8E158824AB00BBCE6F /* Distribution */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEAD_CODE_STRIPPING = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "VideoStreamer/VideoStreamer-Prefix.pch";
+				GCC_THUMB_SUPPORT = NO;
+				INFOPLIST_FILE = "VideoStreamer/VideoStreamer-Info.plist";
+				INSTALL_PATH = "$(SDKROOT)$(LOCAL_LIBRARY_DIR)";
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)\"";
+				LINK_WITH_STANDARD_LIBRARIES = NO;
+				MACH_O_TYPE = mh_object;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Distribution;
+		};
 		CD47023F1561DF5600A89E9C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -465,18 +491,20 @@
 			buildConfigurations = (
 				CD47023F1561DF5600A89E9C /* Debug */,
 				CD4702401561DF5600A89E9C /* Release */,
+				44A9CC8D158824AB00BBCE6F /* Distribution */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Distribution;
 		};
 		CD4702521561E07500A89E9C /* Build configuration list for PBXNativeTarget "VideoStreamer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CD4702531561E07500A89E9C /* Debug */,
 				CD4702541561E07500A89E9C /* Release */,
+				44A9CC8E158824AB00BBCE6F /* Distribution */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Distribution;
 		};
 /* End XCConfigurationList section */
 	};
