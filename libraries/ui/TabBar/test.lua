@@ -39,7 +39,7 @@ local style = {
         activation = {155,155,155}
     }
 }
-
+---[[
 tb1 = TabBar{
     position = {100,100},
     tabs = {
@@ -51,8 +51,23 @@ tb1 = TabBar{
         {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
     }
 }
----[[
+--]]
 tb2 = TabBar{
+    pane_w = 500,
+    tab_h  = 100,
+    style = style,
+    position = {100,600},
+    tabs = {
+        {label="One",   contents = {Rectangle{w=400,h=400,color="ff0000"},Button()}},
+        {label="Two",   contents = {Rectangle{w=400,h=400,color="00ff00"}}},
+        {label="Three", contents = {Rectangle{w=400,h=400,color="0000ff"}}},
+        {label="Four",  contents = {Rectangle{w=400,h=400,color="ffff00"}}},
+        {label="Five",  contents = {Rectangle{w=400,h=400,color="ff00ff"}}},
+        {label="Six",   contents = {Rectangle{w=400,h=400,color="00ffff"}}},
+    }
+}
+---[[
+tb3 = TabBar{
     tab_location = "left",
     style = style,
     position = {600,100},
@@ -66,4 +81,4 @@ tb2 = TabBar{
     }
 }
 --]]
-screen:add(tb1,tb2)
+screen:add(tb1,tb2,tb3)
