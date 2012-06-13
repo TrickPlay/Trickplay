@@ -2676,3 +2676,4 @@ void tp_context_set_image_decoder( TPContext * context, TPImageDecoder decoder, 
 }
 
 //-----------------------------------------------------------------------------
+
