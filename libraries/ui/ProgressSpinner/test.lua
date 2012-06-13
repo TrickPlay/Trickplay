@@ -81,14 +81,40 @@ test_group:unparent()
 
 
 
+local style = {
+    border = {
+        width = 10,
+        colors = {
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
+    },
+    text = {
+        font = "Sans 50px",
+        colors = {
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
+    },
+    fill_colors    = {
+        default    = {80,0,0},
+        focus      = {155,155,155},
+        activation = {155,155,155}
+    }
+}
+
+
 
 
 ps1 = ProgressSpinner()
 
 ps2 = ProgressSpinner{x = 200,image = "ProgressSpinner/load-sun-spin.png",animating = true,}
 
-ps3 = ProgressSpinner{x = 400,image = "ProgressSpinner/load-sun-spin.png",animating = true, duration = 4000}
+ps3 = ProgressSpinner{x = 400,style = style,animating = true, duration = 4000}
 
+ps3.image = "ProgressSpinner/load-sun-spin.png"
 ps3.image = nil
 
 print(ps1:to_json())
