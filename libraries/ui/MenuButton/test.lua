@@ -31,16 +31,67 @@ test_group:unparent()
 
 
 
+local style = {
+    border = {
+        width = 10,
+        colors = {
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
+    },
+    text = {
+        font = "Sans 50px",
+        colors = {
+            default    = {255,255,155},
+            focus      = {255,255,155},
+            activation = {155,255,255}
+        }
+    },
+    fill_colors    = {
+        default    = {80,0,0},
+        focus      = {155,155,155},
+        activation = {155,155,155}
+    }
+}
 
 
 
 screen:show()
 
+mb0 = MenuButton()
 mb1 = MenuButton{
+    x = 300,
     items = {
-        Button(),Button()--Rectangle{w=100,h=100},Rectangle{w=100,h=100},
+        Button(),Button()
+    }
+}
+mb2 = MenuButton{
+    x = 600,
+    direction = "up",
+    items = {
+        Button(),Button()
+    }
+}
+mb3 = MenuButton{
+    x = 300, y = 250,
+    direction = "right",
+    items = {
+        Button(),Button()
+    }
+}
+mb4 = MenuButton{
+    x = 300, y = 500,
+    style = style,
+    direction = "left",
+    items = {
+        Button(),Button()
     }
 }
 
-screen:add(mb1)
+screen:add(
+    Rectangle{x=300,size = {20,1000}},
+    Rectangle{x=600,size = {20,1000}},
+    mb0,mb1,mb2,mb3,mb4
+)
 

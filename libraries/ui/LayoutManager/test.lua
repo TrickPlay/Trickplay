@@ -9,6 +9,7 @@ if not STYLE             then dofile("__CORE/Style.lua")                    end
 if not WIDGET            then dofile("__CORE/Widget.lua")                   end
 if not LISTMANAGER       then dofile("__UTILITIES/ListManagement.lua")      end
 if not LAYOUTMANAGER     then dofile("LayoutManager/LayoutManager.lua")     end
+if not BUTTON            then dofile("Button/Button.lua")                 end
 
 local test_group = Group()
 
@@ -40,12 +41,26 @@ lm1 = LayoutManager{
     }
 }
 
-lm2 = ListManager{
+lm2 = LayoutManager{
+    y = 400,
+    number_of_rows = 3,
+    number_of_cols = 2,
+    cells = {
+        {Button(),Button()},
+        {Button(),Button()},
+        {Button(),Button()},
+    }
+}
+
+lm3 = ListManager{
     x=500,
     length = 2,
     cells = {
         Widget_Rectangle{w=100,h=100},Widget_Rectangle{w=100,h=100}
     }
 }
-screen:add(lm1,lm2)
+dolater(function()
+    lm2:grab_key_focus()
+end)
+screen:add(lm1,lm2,lm3)
 --]]

@@ -130,8 +130,8 @@ TextInput = function(parameters)
 	local update_text  = function()
 		text_style = instance.style.text
 		
-		text.font  = text_style.font
-		text.color = text_style.colors.default
+		text:set(   text_style.attributes   )
+        
 		text.anchor_point = {0,text.h/2}
 		text.y            =  instance.h/2
 		
@@ -146,6 +146,7 @@ TextInput = function(parameters)
         
         instance.style.border:subscribe_to(      nil, redraw )
         instance.style.fill_colors:subscribe_to( nil, redraw )
+        instance.style.text:subscribe_to( nil, update_text )
         instance.style.text.colors:subscribe_to( nil, update_text_color )
         
 		update_text()

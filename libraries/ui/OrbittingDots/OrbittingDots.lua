@@ -3,7 +3,7 @@ ORBITTINGDOTS = true
 
 local canvas_dot = function(self)
 	
-	local c = Canvas(self.w,self.h)
+	local c = Canvas(self.dot_size,self.dot_size)
 	
 	c.line_width = self.style.border.width
 	
@@ -252,6 +252,7 @@ OrbittingDots = function(parameters)
 		function(oldf) return load_timeline.duration     end,
 		function(oldf,self,v) load_timeline.duration = v end
 	)
+    local animating = false
 	override_property(instance,"animating",
 		function(oldf) return load_timeline.is_playing end,
 		function(oldf,self,v)

@@ -26,7 +26,7 @@ local create_fg = function(self)
 	return c:Image()
 	
 end
-local create_arrow = function(old_function,self,state)
+local create_arrow = function(self,state)
 	
 	local c = Canvas(self.w,self.h)
 	
@@ -58,7 +58,6 @@ ButtonPicker = function(parameters)
 	
     local text = Group()
     local window = Widget_Group{children={bg,text,fg}}
-	local instance = LayoutManager(parameters)
     local prev_arrow = Button{
         label = "",
         create_canvas = create_arrow,
@@ -66,6 +65,13 @@ ButtonPicker = function(parameters)
     local next_arrow = Button{
         label = "",
         create_canvas = create_arrow,
+    }
+	local instance = ListManager{
+        cells = {
+            prev_arrow,
+            window,
+            next_arrow
+        },
     }
     local bg,fg
     
@@ -272,29 +278,11 @@ ButtonPicker = function(parameters)
             if v == "horizontal" then
                 prev_arrow:set{z_rotation={  0,0,0}}
                 next_arrow:set{z_rotation={180,0,0}}
-                instance:set{
-                    number_of_rows = 1,
-                    number_of_cols = 3,
-                    cells = {
-                        prev_arrow,
-                        window,
-                        next_arrow
-                    },
-                }
                 undo_prev_function = instance:add_key_handler(keys.Left, prev_i)
                 undo_next_function = instance:add_key_handler(keys.Right,next_i)
             elseif v == "vertical" then
                 prev_arrow:set{z_rotation={ 90,0,0}}
                 next_arrow:set{z_rotation={270,0,0}}
-                instance:set{
-                    number_of_rows = 3,
-                    number_of_cols = 1,
-                    cells = {
-                        {prev_arrow},
-                        {window},
-                        {next_arrow},
-                    },
-                }
                 undo_prev_function = instance:add_key_handler(keys.Up,  prev_i)
                 undo_next_function = instance:add_key_handler(keys.Down,next_i)
             else
@@ -303,6 +291,7 @@ ButtonPicker = function(parameters)
                 
             end
             orientation = v
+            instance.direction = v
         end
 	)
     
