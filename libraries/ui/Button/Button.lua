@@ -3,7 +3,7 @@ BUTTON = true
 local states = {"default","focus","activation"}
 
 --default create_canvas function
-local create_canvas = function(old_function,self,state)
+local create_canvas = function(self,state)
 	
 	local c = Canvas(self.w,self.h)
 	
@@ -11,9 +11,9 @@ local create_canvas = function(old_function,self,state)
 	
 	round_rectangle(c,self.style.border.corner_radius)
 	
-	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
+	c:set_source_color( self.style.fill_colors[state] or self.style.fill_colors.default )     c:fill(true)
 	
-	c:set_source_color( self.style.border.colors[state] )   c:stroke(true)
+	c:set_source_color( self.style.border.colors[state] or self.style.border.colors.default )   c:stroke(true)
 	
 	return c:Image()
 	
@@ -57,6 +57,7 @@ Button = function(parameters)
 	local states = parameters.states or states
 	
 	local label = Text()
+    local local_create_canvas = create_canvas
 	
 	----------------------------------------------------------------------------
 	-- Helper functions that setup animation states
@@ -266,7 +267,6 @@ Button = function(parameters)
 	instance:subscribe_to( "enabled",
 		function()
             if not instance.enabled then
-                print("here")
                 --image
                 if images.focus then   images.focus.state.state = "OFF"   end
                 --text
@@ -313,9 +313,9 @@ Button = function(parameters)
 	
 	override_function(instance,"click", function(old_function,self)
 		
-		self:press()
+		instance:press()
 		
-		dolater( 150, function()   self:release()   end)
+		dolater( 150, function()   instance:release()   end)
 		
 	end)
 	
@@ -384,10 +384,16 @@ Button = function(parameters)
 	--Widget/Style Event Callbacks, to notify if properties change
 	
 	--sets the function that creates canvases for individual button states
-	override_function(instance,"create_canvas", parameters.create_canvas or create_canvas)
-	
+	override_property(instance,"create_canvas",
+        function(oldf,self)
+            return local_create_canvas
+        end,
+        function(oldf,self,v)
+            local_create_canvas =v or create_canvas
+        end
+    )
 	instance:subscribe_to(
-		{"h","w","width","height","size"},
+		{"h","w","width","height","size","create_canvas"},
 		function()
 			
 			flag_for_redraw = true
@@ -468,8 +474,10 @@ Button = function(parameters)
 	--define_label_animation()
 	
 	-- if no images, the instance.images is set to nil, causing the canvases to be drawn
-	if not canvas then instance.images = parameters.images end
+	
+    if not canvas then instance.images = parameters.images end
 	instance.label  = parameters.label
+	instance.create_canvas  = parameters.create_canvas
 	
 	return instance
 	
