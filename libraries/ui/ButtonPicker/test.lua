@@ -24,7 +24,7 @@ bp2 = ButtonPicker{style = false, x = 400,window_h = 200,orientation="vertical",
 print("MEEEEEERP")
 bp2.style.arrow.colors.default = "009999"
 bp2.style.arrow.size = 40
-bp2.style.arrow.offset = -45
+bp2.style.arrow.offset = 0
 
 screen:add(Rectangle{size=screen.size,color="666600"},bp1,bp2)
 
