@@ -21,26 +21,40 @@ Slider = function(parameters)
     local grip, track
     local direction, direction_pos, direction_dim, direction_num 
 	----------------------------------------------------------------------------
-    local position_grabbed_from, p, delta--upvals
-    local drag = function(...)
-        
-        delta = position_grabbed_from + ({...})[direction_num] - position_grabbed_from
-        
-        p = (delta-track[direction_pos])/(track[direction_dim]-grip[direction_dim])
-        
-        p = p > 1 and 1 or p > 0 and p or 0
-        instance.progress = p
-        
-    end 
+    
+    local pixels_to_progress_ratio
+    local prev_pos
+    
+    
+    local p = 0
+    local drag = {
+        horizontal= function(x,_)
+            p = p + ( x - prev_pos )*pixels_to_progress_ratio
+            
+            prev_pos = x
+            
+            instance.progress = p > 1 and 1 or p > 0 and p or 0
+        end,
+        vertical = function(_,y)
+            p = p + ( y - prev_pos )*pixels_to_progress_ratio
+            
+            prev_pos = y
+            
+            instance.progress = p > 1 and 1 or p > 0 and p or 0
+        end,
+    }
     
     grip   = NineSlice{
         reactive = true,
         on_button_down = function(self,...)
             
-            position_grabbed_from = ({...})[direction_num]
+            pixels_to_progress_ratio = 1/(track[direction_dim]-grip[direction_dim])
+            
+            --position_grabbed_from = ({...})[direction_num]
+            prev_pos = ({...})[direction_num]
             
             --this function is called by screen_on_motion
-            g_dragging = drag
+            g_dragging = drag[direction]
             grip:grab_pointer()
             
         end,
@@ -50,6 +64,7 @@ Slider = function(parameters)
         on_button_up = function(self,...)
             grip:ungrab_pointer()
             g_dragging = nil
+            p = instance.progress
         end,
     }
 	override_property(instance,"grip",
