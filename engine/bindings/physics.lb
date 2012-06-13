@@ -47,16 +47,16 @@ The simple program listing shown below creates two Rectangle objects: a dynamic 
 	createPhysicsWorld()
 
 		-- Create a simple rectangle and add it to the screen
-		local gBox01 = Rectangle( { 
+		local gBox01 = Rectangle( {
 							size     = { 100, 100 },
 							position = { (screen.width / 2) - 50, (screen.height / 4) - 50 },
 							color    = "SaddleBrown",
 		} )
 		screen:add( gBox01 )
-	
+
 		-- Make the rectangle a dynamic object, i.e., affected by physics; use default Body settings
 		gBox01 = physics:Body( gBox01, { } )
-	
+
 		-- Create a ground so the rectangle doesn't fall off the screen
 		local gGround = Rectangle( {
 							size     = { screen.width / 2, 1 },
@@ -64,15 +64,15 @@ The simple program listing shown below creates two Rectangle objects: a dynamic 
 							color    = "black",
 		} )
 		screen:add( gGround )
-	
+
 		-- Make the ground an immobile static object in the physics world
 		gGround = physics:Body( gGround,
 								{ type = "static",
 		} )
-	
+
 		-- Show the screen
 		screen:show()
-		
+
 		-- Start the physics simulation
 		physics:start()
 
@@ -89,15 +89,15 @@ The simple program listing shown below creates two Rectangle objects: a dynamic 
 
 	-- *********************************************************
 	(end)
-	
+
 
 */
 
 /*
 	InternalInterface: Shape
-	
+
 	The Shape interface is used internally by the Box2D physics engine. It is used to specify the shape of a fixture that is attached to a Body. Shapes can be created by calling the physics global variable's Box(), Edge(), Polygon() and Circle() functions. The Shape object is assigned to the fixture by passing it to the Body interface's add_fixture() function.
-	
+
 */
 
 interface Shape [[ b2Shape * ]]
@@ -136,13 +136,13 @@ interface Body [[ ClutterActor * ]]
 
 	See Also: the <on_begin_contact>, <on_end_contact>, <on_pre_solve_contact> and <on_post_solve_contact> event handlers
 */
-	
+
 	readonly int handle
         [[
             Physics::Body * me = Physics::Body::get( self );
             handle = me->handle;
         ]];
-		
+
 /***************************************
 	Property: type
 
@@ -156,7 +156,7 @@ interface Body [[ ClutterActor * ]]
 
 	*Default Setting:* "dynamic"
 */
-	
+
 	string type
 	    [[
             Physics::Body * me = Physics::Body::get( self );
@@ -206,7 +206,7 @@ interface Body [[ ClutterActor * ]]
                 }
             }
 	    ]];
-	    
+
 /***************************************
 	Property: awake
 
@@ -217,7 +217,7 @@ interface Body [[ ClutterActor * ]]
 	*Default Setting:* true
 
 	*See Also:* the <sleeping_allowed> property
-*/	    
+*/
 
 	bool awake
 		[[
@@ -228,17 +228,17 @@ interface Body [[ ClutterActor * ]]
             Physics::Body * me = Physics::Body::get( self );
 			me->body->SetAwake( awake );
 		]];
-		
+
 /***************************************
 	Property: active
 
 	The active property is a boolean flag indicating whether or not the Body/UIElement object is active in the physics simulation (true==active). An inactive object is ignored by the physics simulation, which reduces the simulation's computational requirements.
-	
+
 	*Default Setting:* true
-	
-	*See Also:* the <awake> property 
+
+	*See Also:* the <awake> property
 */
-	
+
 	bool active
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -253,12 +253,12 @@ interface Body [[ ClutterActor * ]]
 	Property: position
 
 	The position property is a table that contains the current X,Y screen coordinates of the center of the Body/UIElement object.
-	
+
 	*Default Setting:* { X, Y } coordinates of the object's center at the time the Body is created
-	
+
 	*See Also:* the <x>, <y>, <z> and <depth> properties
 */
-	
+
 	table position
 		[[
             Physics::Body * me = Physics::Body::get( self );
@@ -291,12 +291,12 @@ interface Body [[ ClutterActor * ]]
 	Property: x
 
 	The x property specifies the current screen position on the X axis of the center of the Body/UIElement object.
-	
+
 	*Default Setting:* 0
-	
+
 	*See Also:* the <y> and <position> properties
 */
-	
+
 	double x
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -321,12 +321,12 @@ interface Body [[ ClutterActor * ]]
 	Property: y
 
 	The y property specifies the current screen position on the Y axis of the center of the Body/UIElement object.
-	
+
 	*Default Setting:* 0
-	
+
 	*See Also:* the <x> and <position> properties
 */
-	
+
     double y
         [[
             Physics::Body * me = Physics::Body::get( self );
@@ -1530,6 +1530,15 @@ global physics [[ Physics::World * ]]
 	Body Body( UIElement element , table properties )
 		[[
             lb_check_udata_type( L , element , "actor" );
+
+            // Use default density of 1, because 0 is stupid
+            lua_getfield( L , properties , "density" );
+            if ( lua_isnil( L , -1 ) )
+            {
+                lua_pushnumber( L , 1.0 );
+                lua_setfield( L , properties , "density" );
+            }
+            lua_pop( L , 1 );
 
             int n = self->create_body( element , properties , BODY_METATABLE );
 
