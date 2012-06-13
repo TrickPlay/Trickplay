@@ -35,7 +35,7 @@ local create_arrow = function(self,state)
     c:line_to(c.w,   c.h)
     c:line_to(0,   c.h/2)
     
-	c:set_source_color( self.style.arrow.colors[state] )     c:fill(true)
+	c:set_source_color( self.style.fill_colors[state] )     c:fill(true)
 	
 	return c:Image()
 	
@@ -59,10 +59,12 @@ ButtonPicker = function(parameters)
     local text = Group()
     local window = Widget_Group{children={bg,text,fg}}
     local prev_arrow = Button{
+        style = false,
         label = "",
         create_canvas = create_arrow,
     }
     local next_arrow = Button{
+        style = false,
         label = "",
         create_canvas = create_arrow,
     }
@@ -326,16 +328,19 @@ ButtonPicker = function(parameters)
                 instance.style.arrow.size/2
             },
         }
+        instance.spacing = instance.style.arrow.offset
     end
     local function arrow_colors_on_changed() 
-        prev_arrow.style.arrow.colors = instance.style.arrow.colors.attributes
-        next_arrow.style.arrow.colors = instance.style.arrow.colors.attributes
+        
+        prev_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+        next_arrow.style.fill_colors = instance.style.arrow.colors.attributes
+        
     end 
 	local instance_on_style_changed
     function instance_on_style_changed()
         
         instance.style.arrow:subscribe_to(      nil, arrow_on_changed )
-        instance.style.arrow.colors:subscribe_to(      nil, arrow_on_changed )
+        instance.style.arrow.colors:subscribe_to(      nil, arrow_colors_on_changed )
         instance.style.border:subscribe_to(      nil, redo_fg )
         instance.style.fill_colors:subscribe_to( nil, redo_bg )
         instance.style.text:subscribe_to( nil, update_labels )
