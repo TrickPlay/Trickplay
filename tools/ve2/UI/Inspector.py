@@ -59,9 +59,9 @@ class Ui_TrickplayInspector(object):
         self.gridLayout_3.addWidget(self.inspector, 2, 0, 1, 1)
         self.gridLayout_4 = QtGui.QGridLayout()
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
-        self.insertScreen = QtGui.QToolButton(self.ObjectInspector)
-        self.insertScreen.setObjectName(_fromUtf8("insertScreen"))
-        self.gridLayout_4.addWidget(self.insertScreen, 0, 2, 1, 1)
+        self.deleteScreen = QtGui.QToolButton(self.ObjectInspector)
+        self.deleteScreen.setObjectName(_fromUtf8("deleteScreen"))
+        self.gridLayout_4.addWidget(self.deleteScreen, 0, 2, 1, 1)
         self.screenCombo = QtGui.QComboBox(self.ObjectInspector)
         self.screenCombo.setObjectName(_fromUtf8("screenCombo"))
         self.gridLayout_4.addWidget(self.screenCombo, 0, 1, 1, 1)
@@ -107,7 +107,7 @@ class Ui_TrickplayInspector(object):
 
     def retranslateUi(self, TrickplayInspector):
         TrickplayInspector.setWindowTitle(QtGui.QApplication.translate("TrickplayInspector", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.insertScreen.setText(QtGui.QApplication.translate("TrickplayInspector", "-", None, QtGui.QApplication.UnicodeUTF8))
+        self.deleteScreen.setText(QtGui.QApplication.translate("TrickplayInspector", "-", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("TrickplayInspector", "Screens:   ", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.ObjectInspector), QtGui.QApplication.translate("TrickplayInspector", "Object Inspector", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.PropertyEditor), QtGui.QApplication.translate("TrickplayInspector", "Property Editor", None, QtGui.QApplication.UnicodeUTF8))
