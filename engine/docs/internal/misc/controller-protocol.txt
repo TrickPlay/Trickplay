@@ -242,13 +242,13 @@ Controller->Server
             should be "CALLER".  If the callee ended the call, then <who> should be "CALLEE".  If
             the server initiates a hangup using SVEC, then <who> should be "CALLER".
 
-        SVCS <status> <address>
+        SVCS <status> <arg>
             This message notifies the server of the current streaming video status.  Possible
             values of <status> are:
 
-            "READY"         -- <address> should be "" and the controller is ready to make calls
-            "CONNECTED"     -- controller is currently streaming video to <address>
-            "WAIT"          -- <address> should be "" and the controller is not ready to make calls
+            "READY"         -- <arg> should be "NA" and the controller is ready to make calls
+            "CONNECTED"     -- controller is currently streaming video to the address give by <arg>
+            "WAIT"          -- <arg> should be "NA" and the controller is not ready to make calls
 
             This message may be sent at any time by the controller to notify the server of status
             changes, and MUST be sent by the controller in response to a SVSS request from the server
