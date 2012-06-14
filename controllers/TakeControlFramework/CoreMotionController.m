@@ -192,7 +192,7 @@
     motionManager.deviceMotionUpdateInterval = interval;
     
     //Tell the motion manager to start device motion updates in the motionQueue
-    [motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryZVertical toQueue:motionQueue withHandler:^(CMDeviceMotion *motion, NSError *error) {
+    [motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryCorrectedZVertical toQueue:motionQueue withHandler:^(CMDeviceMotion *motion, NSError *error) {
         //Insert Device Motion Handler code here!
         roll = motion.attitude.roll;
         pitch = motion.attitude.pitch;
