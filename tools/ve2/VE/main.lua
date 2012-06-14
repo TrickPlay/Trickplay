@@ -1,21 +1,21 @@
-if not OVERRIDEMETATABLE then dofile("__UTILITIES/OverrideMetatable.lua") end
-if not TYPECHECKING      then dofile("__UTILITIES/TypeChecking.lua")      end
-if not TABLEMANIPULATION then dofile("__UTILITIES/TableManipulation.lua") end
-if not CANVAS            then dofile("__UTILITIES/Canvas.lua")            end
-if not MISC              then dofile("__UTILITIES/Misc.lua")            end
-if not COLORSCHEME       then dofile("__CORE/ColorScheme.lua")            end
-if not STYLE             then dofile("__CORE/Style.lua")                  end
-if not WIDGET            then dofile("__CORE/Widget.lua")                 end
-if not BUTTON            then dofile("Button/Button.lua")                 end
-if not TEXTINPUT         then dofile("TextInput/TextInput.lua")           end
-if not ORBITTINGDOTS     then dofile("OrbittingDots/OrbittingDots.lua")   end
-if not PROGRESSSPINNER   then dofile("ProgressSpinner/ProgressSpinner.lua") end
-if not TOASTALERT        then dofile("ToastAlert/ToastAlert.lua")         end
-if not DIALOGBOX         then dofile("DialogBox/DialogBox.lua")           end
+if not OVERRIDEMETATABLE then dofile("LIB/Widget/__UTILITIES/OverrideMetatable.lua") end
+if not TYPECHECKING      then dofile("LIB/Widget/__UTILITIES/TypeChecking.lua")      end
+if not TABLEMANIPULATION then dofile("LIB/Widget/__UTILITIES/TableManipulation.lua") end
+if not CANVAS            then dofile("LIB/Widget/__UTILITIES/Canvas.lua")            end
+if not MISC              then dofile("LIB/Widget/__UTILITIES/Misc.lua")            end
+if not COLORSCHEME       then dofile("LIB/Widget/__CORE/ColorScheme.lua")            end
+if not STYLE             then dofile("LIB/Widget/__CORE/Style.lua")                  end
+if not WIDGET            then dofile("LIB/Widget/__CORE/Widget.lua")                 end
+if not BUTTON            then dofile("LIB/Widget/Button/Button.lua")                 end
+if not TEXTINPUT         then dofile("LIB/Widget/TextInput/TextInput.lua")           end
+if not ORBITTINGDOTS     then dofile("LIB/Widget/OrbittingDots/OrbittingDots.lua")   end
+if not PROGRESSSPINNER   then dofile("LIB/Widget/ProgressSpinner/ProgressSpinner.lua") end
+if not TOASTALERT        then dofile("LIB/Widget/ToastAlert/ToastAlert.lua")         end
+if not DIALOGBOX         then dofile("LIB/Widget/DialogBox/DialogBox.lua")           end
 
 g = Group{name="Layer1"}
 
-dofile("ve_runtime")
+dofile("LIB/VE/ve_runtime")
 loadfile("test1.lua")(g)
 
 local function dump_properties( o )
@@ -101,7 +101,6 @@ _VE_.getUIInfo = function()
 end 
 -- SET
 _VE_.setUIInfo = function(gid, property, value)
-    
     devtools:gid(gid)[property] = value 
 end 
 
@@ -130,11 +129,15 @@ _VE_.openInspector = function(gid)
     print("openInspc"..gid)
 end 
 
-_VE_.openFile = function()
-    --s = load_layer("layer1.json")
-    editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
-    screen:clear()
+_VE_.setAppPath = function(path)
+    editor:change_app_path(path)
+end 
 
+_VE_.openFile = function(path)
+    --s = load_layer("layer1.json")
+    --editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
+    editor:change_app_path(path)
+    screen:clear()
 
     layers_file = "layers.json"
     styles_file = "styles.json"
@@ -198,6 +201,7 @@ _VE_.openFile = function()
     _VE_.repUIInfo()
 end 
 
+
 _VE_.openLuaFile = function()
     --s = load_layer("layer1.json")
     screen:clear()
@@ -248,7 +252,7 @@ _VE_.saveFile = function(scrJson)
 
     table.insert(style_t, json:parse(get_all_styles()))
 
-    editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
+    --editor:change_app_path("/home/hjkim/code/trickplay/tools/ve2/VE/project1")
     editor:writefile("layers.json", sjson_head..json:stringify(layer_t)..sjson_tail, true) 
     editor:writefile("styles.json", json:stringify(style_t), true) 
     editor:writefile("screens.json", scrJson, true) 

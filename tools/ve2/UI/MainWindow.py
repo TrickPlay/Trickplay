@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Mon May 14 14:41:46 2012
+# Created: Thu Jun  7 16:24:18 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -226,8 +226,17 @@ class Ui_MainWindow(object):
         self.actionJSON_New_UI_Elements.setObjectName(_fromUtf8("actionJSON_New_UI_Elements"))
         self.actionNew_Layer = QtGui.QAction(MainWindow)
         self.actionNew_Layer.setObjectName(_fromUtf8("actionNew_Layer"))
+        self.actionNew_Project = QtGui.QAction(MainWindow)
+        self.actionNew_Project.setObjectName(_fromUtf8("actionNew_Project"))
+        self.actionOpen_Project = QtGui.QAction(MainWindow)
+        self.actionOpen_Project.setObjectName(_fromUtf8("actionOpen_Project"))
+        self.actionSave_Project = QtGui.QAction(MainWindow)
+        self.actionSave_Project.setObjectName(_fromUtf8("actionSave_Project"))
         self.menuOpen.addAction(self.actionLua_File_Engine_UI_Elements)
         self.menuOpen.addAction(self.actionJSON_New_UI_Elements)
+        self.menuFile.addAction(self.actionNew_Project)
+        self.menuFile.addAction(self.actionOpen_Project)
+        self.menuFile.addAction(self.actionSave_Project)
         self.menuFile.addAction(self.actionNew_Layer)
         self.menuFile.addAction(self.menuOpen.menuAction())
         self.menuFile.addAction(self.action_Save_2)
@@ -257,7 +266,7 @@ class Ui_MainWindow(object):
         self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuInsert_UI_Element.setTitle(QtGui.QApplication.translate("MainWindow", "Insert UI Element", None, QtGui.QApplication.UnicodeUTF8))
-        self.InspectorDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Property Editor", None, QtGui.QApplication.UnicodeUTF8))
+        self.InspectorDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Inspector : ", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Exit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
@@ -330,4 +339,7 @@ class Ui_MainWindow(object):
         self.actionLua_File_Engine_UI_Elements.setText(QtGui.QApplication.translate("MainWindow", "Lua File (Engine UI Elements)", None, QtGui.QApplication.UnicodeUTF8))
         self.actionJSON_New_UI_Elements.setText(QtGui.QApplication.translate("MainWindow", "JSON (New UI Elements)", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew_Layer.setText(QtGui.QApplication.translate("MainWindow", "New Layer", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNew_Project.setText(QtGui.QApplication.translate("MainWindow", "New Project...", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpen_Project.setText(QtGui.QApplication.translate("MainWindow", "Open Project...", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSave_Project.setText(QtGui.QApplication.translate("MainWindow", "Save Project", None, QtGui.QApplication.UnicodeUTF8))
 

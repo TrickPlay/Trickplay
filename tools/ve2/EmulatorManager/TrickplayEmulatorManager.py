@@ -102,7 +102,28 @@ class TrickplayEmulatorManager(QWidget):
 			# Look for the VE_READY line
 			if s.startswith( "<<VE_READY>>:" ):
 				try:
-					#self.getUIInfo()
+					#self.main.open() # load setting path !! 
+                    
+					if self.main and self.main.currentProject : #and self.main.currentProject is not "unsaved_temp":
+					     print "Loading .... %s"%self.main.currentProject
+					     self.main.open() 
+					else :
+					    #TODO :  
+					    print "New Proect !!!"
+					    #self.main.setAppPath()
+
+                        # 1. create temp layer 
+					    self.main.newLayer()
+                        
+                        # 2. save ! 
+					    self.main.save()
+
+                        # 3. set settings.path to unsaved project, default screen, layer1 
+					    settings = QSettings()
+					    if settings.value('path') is not None:
+					        path = os.path.join(self.main.apath, 'VE/unsaved_temp')
+					        settings.setValue('path', path)
+
 					self.inspector.refresh() 
 				except:
 					print( "[VE] Failed to obtain ui info" )
@@ -234,4 +255,6 @@ class TrickplayEmulatorManager(QWidget):
         self.trickplay.setProcessChannelMode( QProcess.MergedChannels )
 
         self.trickplay.setProcessEnvironment(env)
+        print self.path(), "**********"
+        
         ret = self.trickplay.start('trickplay', [self.path()])
