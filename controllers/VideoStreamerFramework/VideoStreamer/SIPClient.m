@@ -8,7 +8,6 @@
 
 #import "SIPClient.h"
 
-#import <CoreFoundation/CoreFoundation.h>
 
 #import <sys/types.h>
 #import <sys/socket.h>
@@ -43,8 +42,40 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 
 
 @interface SIPClient()
+// private methods/functions/properties
 
 @property (nonatomic, retain) NSMutableArray *writeQueue;
+
+/**
+ * This function gets called back every time the sipSocket is
+ * ready to read or write data.
+ */
+void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
+                       const void *data, void*info);
+/**
+ * This is the sipThread execution target.
+ */
+- (void)threadMain:(id)argument;
+/**
+ * This calls stop in the sipThread which closes all open SIP
+ * Dialogs, invalidates the sipSocket, and tells the thread
+ * to exit safely. dealloc will not be called on this object
+ * until this method is called and sipThread exits.
+ */
+- (void)stop;
+/**
+ * This method sets the value of current_error to error and then calls
+ * terminate.
+ */
+- (void)terminateThreadWithError:(enum sip_client_error_t)error;
+/**
+ * End all SIP service without properly tearing down the connection.
+ */
+- (void)terminate;
+/**
+ * Send the SIP data received over the network to this method.
+ */
+- (void)sipParse:(NSData *)sipData fromAddr:(NSData *)addr;
 
 @end
 
@@ -55,10 +86,16 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 @synthesize writeQueue;
 @synthesize delegate;
 
+#pragma mark -
+#pragma mark Initialization
+
 - (id)init {
     return [self initWithSPS:nil PPS:nil context:nil delegate:nil];
 }
 
+/**
+ * This is our designated initializer
+ */
 - (id)initWithSPS:(NSData *)_sps PPS:(NSData *)_pps context:(VideoStreamerContext *)_context delegate:(id <SIPClientDelegate>)_delegate {
     if (!_sps || !_pps || !_context) {
         return nil;
@@ -83,17 +120,18 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
         
         STUNClient *stun = [[STUNClient alloc] initWithOutgoingAddress:client_address];
         NSDictionary *ipInfo = [stun getIPInfo];
-        if (!ipInfo) {
-            [self release];
-            return nil;
-        }
-        clientPublicIP = [[ipInfo objectForKey:@"host"] retain];
         // We are going to create a new socket for SIP, so close the socket from STUN
         if (close(stun.sock_fd)) {
             perror("STUN socket could not close");
         }
         // Release STUN
         [stun release];
+        
+        if (!ipInfo) {
+            [self release];
+            return nil;
+        }
+        clientPublicIP = [[ipInfo objectForKey:@"host"] retain];
         
         // This contains all the currently active SIP Dialogs
         sipDialogs = [[NSMutableDictionary alloc] initWithCapacity:40];
@@ -130,6 +168,9 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
         sps = [_sps retain];
         pps = [_pps retain];
         
+        valid = YES;
+        current_error = 0;
+        
         streamerContext = [_context retain];
         self.delegate = _delegate;
     }
@@ -141,10 +182,8 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 #pragma mark User Control
 
 - (void)registerToAsterisk:(id)arg {
-    RegisterDialog *registerDialog = [[[RegisterDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP writeQueue:writeQueue delegate:self] autorelease];
-    
-    //RegisterDialog *registerDialog = [[[RegisterDialog alloc] initWithUser:user contactURI:contactURI remoteURI:asteriskURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
-       
+    RegisterDialog *registerDialog = [[[RegisterDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP delegate:self] autorelease];
+        
     NSString *registerCallID = [NSString uuid];
     [registerDialog registerToAsteriskWithCallID:registerCallID];
     
@@ -156,20 +195,20 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
     [self performSelector:@selector(registerToAsterisk:) onThread:sipThread withObject:nil waitUntilDone:NO];
 }
 
-// TODO: Since this call is public but needs to run on sipThread this should be changed
-// to leverage performSelector:onThread:
-- (void)initiateVideoCall {
-    InviteDialog *inviteDialog = [[[InviteDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP writeQueue:writeQueue sps:sps pps:pps delegate:self] autorelease];
-    
-    //InviteDialog *inviteDialog = [[[InviteDialog alloc] initWithUser:user contactURI:contactURI remoteURI:remoteURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue sps:sps pps:pps delegate:self] autorelease];
-    
+- (void)sendInvite:(id)arg {
+    InviteDialog *inviteDialog = [[[InviteDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP sps:sps pps:pps delegate:self] autorelease];
+        
     [sipDialogs setObject:inviteDialog forKey:inviteDialog.callID];
     
     [inviteDialog inviteWithAuthHeader:nil];
 }
 
+- (void)initiateVideoCall {
+    [self performSelector:@selector(sendInvite:) onThread:sipThread withObject:nil waitUntilDone:NO];
+}
+
 - (void)hangUp {
-    
+    // TODO: Check if there are any active Invite Dialogs and cancel them (on sipThread)
 }
 
 - (void)disconnectFromService {
@@ -179,6 +218,10 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 #pragma mark -
 #pragma mark SIPDialogDelegate Protocol
 
+/**
+ * This method is used by a SIPDialog to to send a SIP message
+ * over the network.
+ */
 - (void)dialog:(SIPDialog *)dialog wantsToSendData:(NSData *)data {
     // Queue the packet
     [writeQueue addObject:data];
@@ -186,6 +229,10 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
     CFSocketEnableCallBacks(sipSocket, kCFSocketWriteCallBack);
 }
 
+/**
+ * This delegate method informs this SIPClient that
+ * a dialog has begun for the given SIPDialog
+ */
 - (void)dialogSessionStarted:(SIPDialog *)dialog {
     
 }
@@ -205,15 +252,19 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
     [sipDialogs removeObjectForKey:dialog.callID];
 }
 
+/**
+ * Informs our SIPClient that an SDP packet was properly parsed and we may now
+ * form an RTP stream with another client.
+ */
 - (void)dialog:(SIPDialog *)dialog beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
-    // TODO: SIP connection could possibly die on sipThread before this gets called.
-    // Handle this possible race condition gracefully.
-    // delegate callbacks may have already taken care of that by using async dispatching however...
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         [self.delegate client:self beganRTPStreamWithMediaDestination:mediaDest];
     });
 }
 
+/**
+ * Informs our SIPClient an RTP stream with the provided media destination has terminated.
+ */
 - (void)dialog:(SIPDialog *)dialog endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
     dispatch_async(dispatch_get_main_queue(), ^(void) {
         [self.delegate client:self endRTPStreamWithMediaDestination:mediaDest];
@@ -223,19 +274,19 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 #pragma mark -
 #pragma mark Network
 
+/**
+ * If a packet arrived over the network associated with an unknown SIP Dialog then this method
+ * will attempt to discover if this packet contains a new dialog which may be negotiated with.
+ */
 - (void)handleNewDialogWithHdr:(NSDictionary *)sipHdrDic body:(NSString *)sipBody fromAddr:(NSData *)remoteAddr {
     NSString *statusLine = [sipHdrDic objectForKey:@"Status-Line"];
     if ([statusLine rangeOfString:@"OPTIONS "].location != NSNotFound) {
-        OptionsDialog *options = [[[OptionsDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP writeQueue:writeQueue delegate:self] autorelease];
-        
-        //OptionsDialog *options = [[[OptionsDialog alloc] initWithUser:user contactURI:contactURI remoteURI:asteriskURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
-
+        OptionsDialog *options = [[[OptionsDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP delegate:self] autorelease];
+                
         [options receivedOptions:sipHdrDic fromAddr:remoteAddr];
     } else if ([statusLine rangeOfString:@"NOTIFY "].location != NSNotFound) {
-        NotifyDialog *notify = [[[NotifyDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP writeQueue:writeQueue delegate:self] autorelease];
-        
-        //NotifyDialog *notify = [[[NotifyDialog alloc] initWithUser:user contactURI:contactURI remoteURI:asteriskURI udpClientIP:udpClientIP udpClientPort:udpClientPort udpServerPort:udpServerPort writeQueue:writeQueue delegate:self] autorelease];
-        
+        NotifyDialog *notify = [[[NotifyDialog alloc] initWithVideoStreamerContext:streamerContext clientPublicIP:clientPublicIP clientPrivateIP:clientPrivateIP delegate:self] autorelease];
+                
         [notify receivedNotify:sipHdrDic fromAddr:remoteAddr];
     } else if ([statusLine rangeOfString:@"BYE "].location != NSNotFound) {
         NSLog(@"Fix handling extra BYEs here\n");
@@ -245,6 +296,8 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 }
 
 /**
+ * This is where we parse a SIP packet.
+ *
  * This is broken, it assumes that the buffer only holds exactly 1 SIP packet at a time.
  * TODO: Fix this later.
  */
@@ -253,8 +306,8 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
         return;
     }
     
-    NSString *sipPacket = [[NSString alloc] initWithData:sipData encoding:NSUTF8StringEncoding];
-    NSLog(@"Received packet:\n%@\n", sipPacket);
+    NSString *sipPacket = [[[NSString alloc] initWithData:sipData encoding:NSUTF8StringEncoding] autorelease];
+    NSLog(@"Received SIP packet:\n%@\n", sipPacket);
     
     // Separate header and body
     NSArray *components = [sipPacket componentsSeparatedByString:@"\r\n\r\n"];
@@ -294,12 +347,19 @@ static NSString *const asteriskURI = @"sip:freeswitch.internal.trickplay.com";
 
 /**
  * This is our CFSocket callback. This callback is NOT associated with the current
- * object of this SIPCient class. No instance variables are directly accessible from
+ * object of this SIPClient class. No instance variables are directly accessible from
  * this callback. Use the callback's void *info parameter to access 'self'.
  */
 void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef address,
                        const void *data, void *info) {
     //fprintf(stderr, "SIP Socket Callback\n");
+    SIPClient *self = (SIPClient *)info;
+    
+    // Don't use [self isValid] because thread lock may slow down
+    // socket behavior.
+    if (!CFSocketIsValid(socket) || !self->valid) {
+        return;
+    }
     
     switch (type) {
         case kCFSocketReadCallBack:
@@ -342,8 +402,8 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             }
             
             if (err != 0) {
-                NSLog(@"SIP error reading data; error code: %d", err);
-                //TODO: Tell the delegate that things messed the eff up
+                strerror(err);
+                [self terminateThreadWithError:SOCKET_READ];
             }
             
             break;
@@ -364,14 +424,14 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             
             while (self.writeQueue.count > 0) {
                 CFDataRef packet = (CFDataRef)[self.writeQueue objectAtIndex:0];
-                // TODO: sometimes will receive EXC_BAD_ACCESS on CFSocketSendData.
-                // Should be fixed now. moved removeObjectAtIndex to after send data.
                 CFSocketError error = CFSocketSendData(socket, NULL, packet, 0);
                 [self.writeQueue removeObjectAtIndex:0];
                 if (error == kCFSocketError) {
                     fprintf(stderr, "Error Writing to socket\n");
+                    [self terminateThreadWithError:SOCKET_WRITE];
                 } else if (error == kCFSocketTimeout) {
                     fprintf(stderr, "Timeout Writing to socket\n");
+                    [self terminateThreadWithError:SOCKET_WRITE];
                 }
             }
             
@@ -386,58 +446,77 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
 #pragma mark -
 #pragma mark Thread Execution and Runloop
 
-- (void)threadMain:(id)argument {
-    @autoreleasepool {
+/**
+ * Connect sipSocket to the appropriate address.
+ * If anything fails then current_error is set.
+ */
+- (void)createSocket {
+    struct addrinfo hints, *servinfo, *p;
+    int rv;
     
-        struct addrinfo hints, *servinfo, *p;
-        int rv;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
     
-        memset(&hints, 0, sizeof(hints));
-        hints.ai_family = AF_INET;
-        hints.ai_socktype = SOCK_DGRAM;
+    if ((rv = getaddrinfo([streamerContext.SIPServerHostName UTF8String], [[NSString stringWithFormat:@"%d", streamerContext.SIPServerPort] UTF8String], &hints, &servinfo)) != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        current_error = SOCKET_SETUP;
+        return;
+    }
     
-    
-        //if ((rv = getaddrinfo(ASTERISK_HOST, ASTERISK_PORT, &hints, &servinfo)) != 0) {
-        if ((rv = getaddrinfo([streamerContext.SIPServerHostName UTF8String], [[NSString stringWithFormat:@"%d", streamerContext.SIPServerPort] UTF8String], &hints, &servinfo)) != 0) {
-            fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-            return;
+    for (p = servinfo; p != NULL; p = p->ai_next) {
+        CFDataRef addressRef = CFDataCreate(kCFAllocatorDefault, (UInt8 *)p->ai_addr, p->ai_addrlen);
+        if (CFSocketConnectToAddress(sipSocket, addressRef, 0)) {
+            CFSocketInvalidate(sipSocket);
+            perror("client: connect");
+            CFRelease(addressRef);
+            current_error = SOCKET_SETUP;
+            continue;
         }
+        CFRelease(addressRef);
+        
+        break;
+    }
     
-        for (p = servinfo; p != NULL; p = p->ai_next) {
-            CFDataRef addressRef = CFDataCreate(kCFAllocatorDefault, (UInt8 *)p->ai_addr, p->ai_addrlen);
-            if (CFSocketConnectToAddress(sipSocket, addressRef, 0)) {
-                close(CFSocketGetNative(sipSocket));
-                perror("client: connect");
-                continue;
-            }
-        
-            break;
-        }
-    
-        if (p == NULL) {
-            fprintf(stderr, "client: failed to connect\n");
-            freeaddrinfo(servinfo);
-            return;
-        }
-        
-        char str[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, p->ai_addr, str, INET_ADDRSTRLEN);
-        fprintf(stderr, "\nSIP IP address: %s\nSIP port: %d\n", str, ntohs(((struct sockaddr_in *)(p->ai_addr))->sin_port));
-        
+    if (p == NULL) {
+        fprintf(stderr, "client: failed to connect\n");
         freeaddrinfo(servinfo);
+        current_error = SOCKET_SETUP;
+        return;
+    }
     
+    char str[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, p->ai_addr, str, INET_ADDRSTRLEN);
+    fprintf(stderr, "\nSIP IP address: %s\nSIP port: %d\n", str, ntohs(((struct sockaddr_in *)(p->ai_addr))->sin_port));
+    
+    freeaddrinfo(servinfo);
+}
+
+/**
+ * SIP Thread's main point of execution.
+ */
+- (void)threadMain:(id)argument {
+    // First create our SIP Socket for this thread and add it as a Run Loop Source
+    @autoreleasepool {
+        [self createSocket];
+        
         @synchronized(self) {
-            exit_thread = NO;
-    
-            // Add my input sources here (sockets, etc.)
-            CFRunLoopSourceRef rls = CFSocketCreateRunLoopSource(NULL, sipSocket, 0);
-            assert(rls != NULL);
-    
-            CFRunLoopAddSource(CFRunLoopGetCurrent(), rls, kCFRunLoopDefaultMode);
-    
-            CFRelease(rls);
+            if (current_error == NO_ERROR) {
+                exit_thread = NO;
+            
+                // Add my input sources here (sockets, etc.)
+                CFRunLoopSourceRef rls = CFSocketCreateRunLoopSource(NULL, sipSocket, 0);
+                assert(rls != NULL);
+                if (rls) {
+                    CFRunLoopAddSource(CFRunLoopGetCurrent(), rls, kCFRunLoopDefaultMode);
+                    CFRelease(rls);
+                } else {
+                    exit_thread = YES;
+                }
+            } else {
+                exit_thread = YES;
+            }
         }
-    
     }
     
     do {
@@ -450,6 +529,28 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             }
         }
     } while (!exit_thread);
+    
+    @synchronized(self) {
+        // We invalidate our socket in ONE place, here and here alone.
+        // Having this in only one place makes coding easier.
+        if (sipSocket && CFSocketIsValid(sipSocket)) {
+            CFSocketInvalidate(sipSocket);
+        }
+        
+        valid = NO;
+    }
+    
+    // Tell the delegate that the thread and socket terminated.
+    // Return any possible error values.
+    
+    // TODO: currently we need to check that the delegate exists because
+    // if an RTP stream ends we throw away the NetworkManager that is
+    // likely this delegate.
+    if (self.delegate) {
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+            [self.delegate client:self finishedWithError:current_error];
+        });
+    }
 }
 
 /**
@@ -465,11 +566,58 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
             }
         }
         
-        if (sipSocket) {
-            CFSocketInvalidate(sipSocket);
+        // TODO: Rather than immediately exit, wait for the 200 responses
+        // and then exit the thread.
+        exit_thread = YES;
+    }
+}
+
+- (void)terminateThreadWithError:(enum sip_client_error_t)error {
+    current_error = error;
+    // Terminate all dialogs and exit the thread
+    [self terminate];
+}
+
+- (void)terminate {
+    @synchronized (self) {
+        // Destroy all SIP Dialogs, don't wait for proper termination
+        if (sipDialogs) {
+            [sipDialogs removeAllObjects];
         }
         
         exit_thread = YES;
+        valid = NO;
+    }
+}
+
+#pragma mark -
+#pragma mark Thread Agnostic Methods
+
+- (BOOL)isValid {
+    BOOL temp;
+    @synchronized(self) {
+        temp = valid;
+    }
+    
+    return temp;
+}
+
+- (NSString *)errorDescription:(enum sip_client_error_t)error {
+    // TODO: return a description of the error to the caller
+    switch (error) {
+        case NO_ERROR:
+            return nil;
+        case SOCKET_SETUP:
+            return @"The SIP socket failed to connect to the server";
+        case SOCKET_READ:
+            return @"An error occurred while reading from the SIP socket";
+        case SOCKET_WRITE:
+            return @"An error occurred while writing to the SIP socket";
+        case RUNLOOP_FAILURE:
+            return @"The SIPClient NSRunLoop failed during execution";
+            
+        default:
+            return @"Not a valid error";
     }
 }
 
@@ -482,8 +630,9 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
 
 - (void)dealloc {
     // Technically this shouldn't need to be called since dealloc isn't called until
-    // sipThread exits. Thus, [self stop] should be called somewhere else on the main
-    // Thread in order to dealloc. Test to find out.
+    // sipThread exits (FYI: NSThread -initWithTarget: retains the target).
+    // Thus, [self stop] should be called somewhere else on the main
+    // Thread in order to dealloc. But no harm done having it here.
     [self stop];
     
     if (sipDialogs) {
@@ -531,6 +680,11 @@ void sipSocketCallback(CFSocketRef socket, CFSocketCallBackType type, CFDataRef 
     if (pps) {
         [pps release];
         pps = nil;
+    }
+    
+    if (streamerContext) {
+        [streamerContext release];
+        streamerContext = nil;
     }
     
     [super dealloc];

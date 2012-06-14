@@ -412,31 +412,15 @@ int UserData::set_callback( const char * name , lua_State * L , int index , int 
 
     int fn = abs_index( L , function_index );
 
-
-    lua_getfenv( L , me );
-
-    // To ensure that this instance has a unique environment table, we
-    // check to see if it contains a key for its pointer. If it doesn't
-    // we create a new env table for it.
-
-    void * p = lua_touserdata( L , me );
-
-    lua_pushlightuserdata( L , p );
-    lua_rawget( L , -2 );
+    lua_getuservalue( L , index );
 
     if ( lua_isnil( L , -1 ) )
     {
-    	lua_pop( L , 2 );
+    	lua_pop( L , 1 );
+
     	lua_newtable( L );
     	lua_pushvalue( L , -1 );
-    	lua_setfenv( L , me );
-    	lua_pushlightuserdata( L , p );
-    	lua_pushboolean( L , true );
-    	lua_rawset( L , -3 );
-    }
-    else
-    {
-    	lua_pop( L , 1 );
+    	lua_setuservalue( L , me );
     }
 
     lua_pushstring( L , name );
@@ -460,7 +444,7 @@ int UserData::get_callback( const char * name )
 
     push_proxy();
 
-    lua_getfenv( L , -1 );
+    lua_getuservalue( L , -1 );
     lua_remove( L , -2 );
 
     if ( ! lua_isnil( L , -1 ) )
@@ -514,8 +498,8 @@ void UserData::clear_callbacks( lua_State * L , int index )
 	index = abs_index( L , index );
 	if ( ! lua_isnil( L , index ) )
 	{
-		lua_newtable( L );
-		lua_setfenv( L , index );
+		lua_pushnil( L );
+		lua_setuservalue( L , index );
 	}
 }
 

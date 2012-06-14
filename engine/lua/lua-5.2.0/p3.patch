@@ -1,0 +1,81 @@
+loadlib.c:
+95c95
+< #define LIBPREFIX	"LOADLIB: "
+---
+> #define CLIBS		"_CLIBS"
+251,266c251,256
+< 
+< static void **ll_register (lua_State *L, const char *path) {
+<   void **plib;
+<   lua_pushfstring(L, "%s%s", LIBPREFIX, path);
+<   lua_gettable(L, LUA_REGISTRYINDEX);  /* check library in registry? */
+<   if (!lua_isnil(L, -1))  /* is there an entry? */
+<     plib = (void **)lua_touserdata(L, -1);
+<   else {  /* no entry yet; create one */
+<     lua_pop(L, 1);  /* remove result from gettable */
+<     plib = (void **)lua_newuserdata(L, sizeof(const void *));
+<     *plib = NULL;
+<     luaL_setmetatable(L, "_LOADLIB");
+<     lua_pushfstring(L, "%s%s", LIBPREFIX, path);
+<     lua_pushvalue(L, -2);
+<     lua_settable(L, LUA_REGISTRYINDEX);
+<   }
+---
+> static void *ll_checkclib (lua_State *L, const char *path) {
+>   void *plib;
+>   lua_getfield(L, LUA_REGISTRYINDEX, CLIBS);
+>   lua_getfield(L, -1, path);
+>   plib = lua_touserdata(L, -1);  /* plib = CLIBS[path] */
+>   lua_pop(L, 2);  /* pop CLIBS table and 'plib' */
+270a261,270
+> static void ll_addtoclib (lua_State *L, const char *path, void *plib) {
+>   lua_getfield(L, LUA_REGISTRYINDEX, CLIBS);
+>   lua_pushlightuserdata(L, plib);
+>   lua_pushvalue(L, -1);
+>   lua_setfield(L, -3, path);  /* CLIBS[path] = plib */
+>   lua_rawseti(L, -2, luaL_len(L, -2) + 1);  /* CLIBS[#CLIBS + 1] = plib */
+>   lua_pop(L, 1);  /* pop CLIBS table */
+> }
+> 
+> 
+272,273c272,273
+< ** __gc tag method: calls library's `ll_unloadlib' function with the lib
+< ** handle
+---
+> ** __gc tag method for CLIBS table: calls 'll_unloadlib' for all lib
+> ** handles in list CLIBS
+276,278c276,281
+<   void **lib = (void **)luaL_checkudata(L, 1, "_LOADLIB");
+<   if (*lib) ll_unloadlib(*lib);
+<   *lib = NULL;  /* mark library as closed */
+---
+>   int n = luaL_len(L, 1);
+>   for (; n >= 1; n--) {  /* for each handle, in reverse order */
+>     lua_rawgeti(L, 1, n);  /* get handle CLIBS[n] */
+>     ll_unloadlib(lua_touserdata(L, -1));
+>     lua_pop(L, 1);  /* pop handle */
+>   }
+284,286c287,292
+<   void **reg = ll_register(L, path);
+<   if (*reg == NULL) *reg = ll_load(L, path, *sym == '*');
+<   if (*reg == NULL) return ERRLIB;  /* unable to load library */
+---
+>   void *reg = ll_checkclib(L, path);  /* check loaded C libraries */
+>   if (reg == NULL) {  /* must load library? */
+>     reg = ll_load(L, path, *sym == '*');
+>     if (reg == NULL) return ERRLIB;  /* unable to load library */
+>     ll_addtoclib(L, path, reg);
+>   }
+292c298
+<     lua_CFunction f = ll_sym(L, *reg, sym);
+---
+>     lua_CFunction f = ll_sym(L, reg, sym);
+675,676c681,683
+<   /* create new type _LOADLIB */
+<   luaL_newmetatable(L, "_LOADLIB");
+---
+>   /* create table CLIBS to keep track of loaded C libraries */
+>   luaL_getsubtable(L, LUA_REGISTRYINDEX, CLIBS);
+>   lua_createtable(L, 0, 1);  /* metatable for CLIBS */
+678a686
+>   lua_setmetatable(L, -2);

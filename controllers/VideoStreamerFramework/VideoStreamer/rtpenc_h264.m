@@ -23,7 +23,7 @@ int send_nal(struct rtp *session, int64_t rtp_ts, uint8_t pt, const uint8_t *buf
 	size -= 4;
 	buff += 4;
 
-	uint8_t type = buff[0] & 0x1F;
+	//uint8_t type = buff[0] & 0x1F;
 	
 		
 	rtp_ts = rescale(rtp_ts, kAVBaseTime, kRTPAVCBaseTime);
@@ -31,7 +31,7 @@ int send_nal(struct rtp *session, int64_t rtp_ts, uint8_t pt, const uint8_t *buf
 	//NSLog(@"Video TS: %u",*buff);
 	
 	if(size <= kMaxPayloadSize) {
-		uint8_t type = buff[0] & 0x1F;
+		//uint8_t type = buff[0] & 0x1F;
 		//printf("NALU of type %d and size %d\n", type, size);
 		ret = rtp_send_data(session, rtp_ts, pt, 1, 0, NULL, (char*) buff, size, NULL, 0, 0, timeout);
 	}

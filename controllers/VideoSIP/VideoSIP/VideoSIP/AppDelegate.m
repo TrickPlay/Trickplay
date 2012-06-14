@@ -8,7 +8,6 @@
 
 #import "AppDelegate.h"
 
-#import "ViewController.h"
 
 @implementation AppDelegate
 
@@ -33,11 +32,16 @@
         self.viewController = [[[ViewController alloc] initWithNibName:@"ViewController_iPad" bundle:nil] autorelease];
     }
     //*/
+    
     VideoStreamerContext *context = [[[VideoStreamerContext alloc] initWithUserName:@"phone" password:@"1234" remoteUserName:@"1002" serverHostName:@"asterisk-1.asterisk.trickplay.com" serverPort:5060 clientPort:50160] autorelease];
-    self.viewController = [[VideoStreamer alloc] initWithContext:context delegate:self];
-    [(VideoStreamer *)self.viewController startChat];
+    VideoStreamer *videostreamer = [[VideoStreamer alloc] initWithContext:context delegate:self];
+    //[(VideoStreamer *)self.viewController startChat];
+    self.viewController = [[[UIViewController alloc] initWithNibName:nil bundle:nil] autorelease];
     self.window.rootViewController = self.viewController;
     [self.window makeKeyAndVisible];
+    [self.viewController presentViewController:videostreamer animated:YES completion:^(void) {
+        [videostreamer startChat];
+    }];
     return YES;
 }
 
@@ -94,6 +98,11 @@
 
 - (void)videoStreamer:(VideoStreamer *)videoStreamer chatEndedWithInfo:(NSString *)reason {
     NSLog(@"Chat Ended: %@", reason);
+    UIViewController *presented = self.viewController.presentedViewController;
+    [self.viewController dismissViewControllerAnimated:YES completion:^(void){
+        // TODO: figure out why this never gets called
+        [presented autorelease];
+    }];
 }
 
 @end

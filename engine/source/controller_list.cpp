@@ -59,7 +59,7 @@ struct Event
     {
         ADDED, REMOVED,
         KEY_DOWN, KEY_UP,
-        ACCELEROMETER,
+        ACCELEROMETER, GYROSCOPE, MAGNETOMETER, ATTITUDE,
         POINTER_MOVE , POINTER_DOWN , POINTER_UP, POINTER_ACTIVE, POINTER_INACTIVE,
         TOUCH_DOWN, TOUCH_MOVE, TOUCH_UP,
         UI, SUBMIT_IMAGE, SUBMIT_AUDIO_CLIP, CANCEL_IMAGE, CANCEL_AUDIO_CLIP,
@@ -139,6 +139,42 @@ public:
         event->accelerometer.x = x;
         event->accelerometer.y = y;
         event->accelerometer.z = z;
+        event->modifiers = modifiers;
+
+        return event;
+    }
+
+    inline static Event * make_gyroscope( Controller * controller, double x, double y, double z , unsigned long int modifiers )
+    {
+        Event * event = make( GYROSCOPE, controller );
+
+        event->gyroscope.x = x;
+        event->gyroscope.y = y;
+        event->gyroscope.z = z;
+        event->modifiers = modifiers;
+
+        return event;
+    }
+
+    inline static Event * make_magnetometer( Controller * controller, double x, double y, double z , unsigned long int modifiers )
+    {
+        Event * event = make( MAGNETOMETER, controller );
+
+        event->magnetometer.x = x;
+        event->magnetometer.y = y;
+        event->magnetometer.z = z;
+        event->modifiers = modifiers;
+
+        return event;
+    }
+
+    inline static Event * make_attitude( Controller * controller, double roll, double pitch, double yaw, unsigned long int modifiers )
+    {
+        Event * event = make( ATTITUDE, controller );
+
+        event->attitude.roll = roll;
+        event->attitude.pitch = pitch;
+        event->attitude.yaw = yaw;
         event->modifiers = modifiers;
 
         return event;
@@ -226,6 +262,18 @@ public:
 
             case ACCELEROMETER:
                 controller->accelerometer( accelerometer.x, accelerometer.y, accelerometer.z , modifiers );
+                break;
+
+            case GYROSCOPE:
+                controller->gyroscope( gyroscope.x, gyroscope.y, gyroscope.z , modifiers );
+                break;
+
+            case MAGNETOMETER:
+                controller->magnetometer( magnetometer.x, magnetometer.y, magnetometer.z , modifiers );
+                break;
+
+            case ATTITUDE:
+                controller->attitude( attitude.roll, attitude.pitch, attitude.yaw, modifiers );
                 break;
 
             case POINTER_MOVE:
@@ -324,6 +372,27 @@ private:
 
         struct
         {
+            double x;
+            double y;
+            double z;
+        }                     		gyroscope;
+
+        struct
+        {
+            double x;
+            double y;
+            double z;
+        }                     		magnetometer;
+
+        struct
+        {
+            double roll;
+            double pitch;
+            double yaw;
+        }                     		attitude;
+
+        struct
+        {
             int button_or_finger;
             int x;
             int y;
@@ -361,6 +430,9 @@ Controller::Controller( ControllerList * _list, TPContext * _context , const cha
     context( _context ),
     loaded_external_map( false ),
     ts_accelerometer_started( 0 ),
+    ts_gyroscope_started( 0 ),
+    ts_magnetometer_started( 0 ),
+    ts_attitude_started( 0 ),
     ts_pointer_started( 0 ),
     ts_touch_started( 0 ),
     advanced_ui_is_ready( false )
@@ -653,6 +725,51 @@ void Controller::accelerometer( double x, double y, double z , unsigned long int
     for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
     {
         ( *it )->accelerometer( x, y, z , modifiers );
+    }
+}
+
+//.............................................................................
+
+void Controller::gyroscope( double x, double y, double z , unsigned long int modifiers )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->gyroscope( x, y, z , modifiers );
+    }
+}
+
+//.............................................................................
+
+void Controller::magnetometer( double x, double y, double z , unsigned long int modifiers )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->magnetometer( x, y, z , modifiers );
+    }
+}
+
+//.............................................................................
+
+void Controller::attitude( double roll, double pitch, double yaw, unsigned long int modifiers )
+{
+    if ( !connected )
+    {
+        return;
+    }
+
+    for ( DelegateSet::iterator it = delegates.begin(); it != delegates.end(); ++it )
+    {
+        ( *it )->attitude( roll, pitch, yaw, modifiers );
     }
 }
 
@@ -973,6 +1090,9 @@ void Controller::remove_delegate( Delegate * delegate )
 bool Controller::reset()
 {
     g_atomic_int_set( & ts_accelerometer_started , 0 );
+    g_atomic_int_set( & ts_gyroscope_started , 0 );
+    g_atomic_int_set( & ts_magnetometer_started , 0 );
+    g_atomic_int_set( & ts_attitude_started , 0 );
     g_atomic_int_set( & ts_pointer_started , 0 );
     g_atomic_int_set( & ts_touch_started , 0 );
 
@@ -985,7 +1105,7 @@ bool Controller::reset()
               data ) == 0 );
 }
 
-bool Controller::start_accelerometer( AccelerometerFilter filter, double interval )
+bool Controller::start_accelerometer( MotionFilter filter, double interval )
 {
     if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_ACCELEROMETER ) )
     {
@@ -993,20 +1113,20 @@ bool Controller::start_accelerometer( AccelerometerFilter filter, double interva
 
     }
 
-    TPControllerStartAccelerometer parameters;
+    TPControllerStartMotion parameters;
 
     switch ( filter )
     {
         case LOW:
-            parameters.filter = TP_CONTROLLER_ACCELEROMETER_FILTER_LOW;
+            parameters.filter = TP_CONTROLLER_MOTION_FILTER_LOW;
             break;
 
         case HIGH:
-            parameters.filter = TP_CONTROLLER_ACCELEROMETER_FILTER_HIGH;
+            parameters.filter = TP_CONTROLLER_MOTION_FILTER_HIGH;
             break;
 
         default:
-            parameters.filter = TP_CONTROLLER_ACCELEROMETER_FILTER_NONE;
+            parameters.filter = TP_CONTROLLER_MOTION_FILTER_NONE;
             break;
     }
 
@@ -1033,6 +1153,123 @@ bool Controller::stop_accelerometer()
         ( spec.execute_command(
               tp_controller,
               TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::start_gyroscope( double interval )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) )
+    {
+        return false;
+
+    }
+
+    TPControllerStartMotion parameters;
+
+    parameters.filter = TP_CONTROLLER_MOTION_FILTER_NONE;
+
+    parameters.interval = interval;
+
+    bool gyroscope_started = spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_START_GYROSCOPE,
+               &parameters,
+               data ) == 0;
+
+    g_atomic_int_set( & ts_gyroscope_started , gyroscope_started ? 1 : 0 );
+
+    return gyroscope_started;
+}
+
+bool Controller::stop_gyroscope()
+{
+    g_atomic_int_set( & ts_gyroscope_started , 0 );
+
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_STOP_GYROSCOPE,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::start_magnetometer( double interval )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) )
+    {
+        return false;
+
+    }
+
+    TPControllerStartMotion parameters;
+
+    parameters.filter = TP_CONTROLLER_MOTION_FILTER_NONE;
+
+    parameters.interval = interval;
+
+    bool magnetometer_started = spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_START_MAGNETOMETER,
+               &parameters,
+               data ) == 0;
+
+    g_atomic_int_set( & ts_magnetometer_started , magnetometer_started ? 1 : 0 );
+
+    return magnetometer_started;
+}
+
+bool Controller::stop_magnetometer()
+{
+    g_atomic_int_set( & ts_magnetometer_started , 0 );
+
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_STOP_MAGNETOMETER,
+              NULL,
+              data ) == 0 );
+}
+
+bool Controller::start_attitude( double interval )
+{
+    if ( !connected || !( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) )
+    {
+        return false;
+
+    }
+
+    TPControllerStartMotion parameters;
+
+    parameters.filter = TP_CONTROLLER_MOTION_FILTER_NONE;
+
+    parameters.interval = interval;
+
+    bool attitude_started = spec.execute_command(
+               tp_controller,
+               TP_CONTROLLER_COMMAND_START_ATTITUDE,
+               &parameters,
+               data ) == 0;
+
+    g_atomic_int_set( & ts_attitude_started , attitude_started ? 1 : 0 );
+
+    return attitude_started;
+}
+
+bool Controller::stop_attitude()
+{
+    g_atomic_int_set( & ts_attitude_started , 0 );
+
+    return
+        ( connected ) &&
+        ( spec.capabilities & TP_CONTROLLER_HAS_FULL_MOTION ) &&
+        ( spec.execute_command(
+              tp_controller,
+              TP_CONTROLLER_COMMAND_STOP_ATTITUDE,
               NULL,
               data ) == 0 );
 }
@@ -1639,6 +1876,36 @@ void tp_controller_accelerometer( TPController * controller, double x, double y,
     if ( controller->controller->wants_accelerometer_events() )
     {
         controller->list->post_event( Event::make_accelerometer( controller->controller, x, y, z , modifiers ) );
+    }
+}
+
+void tp_controller_gyroscope( TPController * controller, double x, double y, double z , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    if ( controller->controller->wants_gyroscope_events() )
+    {
+        controller->list->post_event( Event::make_gyroscope( controller->controller, x, y, z , modifiers ) );
+    }
+}
+
+void tp_controller_magnetometer( TPController * controller, double x, double y, double z , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    if ( controller->controller->wants_magnetometer_events() )
+    {
+        controller->list->post_event( Event::make_magnetometer( controller->controller, x, y, z , modifiers ) );
+    }
+}
+
+void tp_controller_attitude( TPController * controller, double roll, double pitch, double yaw , unsigned long int modifiers )
+{
+    TPController::check( controller );
+
+    if ( controller->controller->wants_attitude_events() )
+    {
+        controller->list->post_event( Event::make_attitude( controller->controller, roll, pitch, yaw , modifiers ) );
     }
 }
 

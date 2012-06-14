@@ -32,7 +32,7 @@
 
 //-----------------------------------------------------------------------------
 
-#define CONTROLLER_PROTOCOL_VERSION		"43"
+#define CONTROLLER_PROTOCOL_VERSION		"44"
 
 //-----------------------------------------------------------------------------
 // This is how quickly we disconnect a controller that has not identified itself
@@ -169,17 +169,17 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
 
         case TP_CONTROLLER_COMMAND_START_ACCELEROMETER   :
         {
-            TPControllerStartAccelerometer * sa = ( TPControllerStartAccelerometer * )parameters;
+            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
 
             const char * filter = "N";
 
             switch ( sa->filter )
             {
-                case TP_CONTROLLER_ACCELEROMETER_FILTER_LOW:
+                case TP_CONTROLLER_MOTION_FILTER_LOW:
                     filter = "L";
                     break;
 
-                case TP_CONTROLLER_ACCELEROMETER_FILTER_HIGH:
+                case TP_CONTROLLER_MOTION_FILTER_HIGH:
                     filter = "H";
                     break;
             }
@@ -192,6 +192,51 @@ int ControllerServer::execute_command( TPController * controller, unsigned int c
         case TP_CONTROLLER_COMMAND_STOP_ACCELEROMETER    :
         {
             server->write( connection, "PA\n" );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_START_GYROSCOPE  :
+        {
+            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+
+            server->write_printf( connection, "SGY\t%f\n", sa->interval );
+
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_STOP_GYROSCOPE    :
+        {
+            server->write( connection, "PGY\n" );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_START_MAGNETOMETER   :
+        {
+            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+
+            server->write_printf( connection, "SMM\t%f\n", sa->interval );
+
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_STOP_MAGNETOMETER    :
+        {
+            server->write( connection, "PMM\n" );
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_START_ATTITUDE   :
+        {
+            TPControllerStartMotion * sa = ( TPControllerStartMotion * )parameters;
+
+            server->write_printf( connection, "SAT\t%f\n", sa->interval );
+
+            break;
+        }
+
+        case TP_CONTROLLER_COMMAND_STOP_ATTITUDE   :
+        {
+            server->write( connection, "PAT\n" );
             break;
         }
 
@@ -648,6 +693,10 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_ACCELEROMETER;
                 }
+                else if ( cmp2( cap, "FM" ) )
+                {
+                    spec.capabilities |= TP_CONTROLLER_HAS_FULL_MOTION;
+                }
                 else if ( cmp2( cap, "PT" ) )
                 {
                     spec.capabilities |= TP_CONTROLLER_HAS_POINTER;
@@ -814,6 +863,42 @@ void ControllerServer::process_command( gpointer connection, ConnectionInfo & in
         }
 
         tp_controller_accelerometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "GY" ) )
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_gyroscope( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "MM" ) )
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_magnetometer( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
+    }
+    else if ( cmp2( cmd, "AT" ) )
+    {
+        // Acelerometer
+        // AX <x> <y> <z>
+
+        if ( count < 4 || !info.controller )
+        {
+            return;
+        }
+
+        tp_controller_attitude( info.controller, atof( parts[1] ), atof( parts[2] ), atof( parts[3] ) , TP_CONTROLLER_MODIFIER_NONE );
     }
     else if ( cmp2( cmd, "UI" ) )
     {
