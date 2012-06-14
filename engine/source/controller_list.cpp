@@ -502,7 +502,7 @@ String Controller::get_name() const
 
 //.............................................................................
 
-unsigned int Controller::get_capabilities() const
+unsigned long long Controller::get_capabilities() const
 {
     return spec.capabilities;
 }

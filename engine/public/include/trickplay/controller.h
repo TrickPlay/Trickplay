@@ -92,21 +92,21 @@ typedef struct TPController TPController;
 
 */
 
-#define TP_CONTROLLER_HAS_KEYS                      0x0001
-#define TP_CONTROLLER_HAS_ACCELEROMETER             0x0002
-#define TP_CONTROLLER_HAS_POINTER                   0x0004
-#define TP_CONTROLLER_HAS_TOUCHES                   0x0008
-#define TP_CONTROLLER_HAS_MULTIPLE_CHOICE           0x0010
-#define TP_CONTROLLER_HAS_SOUND                     0x0020
-#define TP_CONTROLLER_HAS_UI                        0x0040
-#define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0080
-#define TP_CONTROLLER_HAS_IMAGES                	0x0100
-#define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0200
-#define TP_CONTROLLER_HAS_VIRTUAL_REMOTE			0x0400
-#define TP_CONTROLLER_HAS_SCROLL					0x0800
-#define TP_CONTROLLER_HAS_ADVANCED_UI               0x1000
-#define TP_CONTROLLER_HAS_POINTER_CURSOR			0x2000
-#define TP_CONTROLLER_HAS_FULL_MOTION               0x4000
+#define TP_CONTROLLER_HAS_KEYS                      0x0000000000000001UL
+#define TP_CONTROLLER_HAS_ACCELEROMETER             0x0000000000000002UL
+#define TP_CONTROLLER_HAS_POINTER                   0x0000000000000004UL
+#define TP_CONTROLLER_HAS_TOUCHES                   0x0000000000000008UL
+#define TP_CONTROLLER_HAS_MULTIPLE_CHOICE           0x0000000000000010UL
+#define TP_CONTROLLER_HAS_SOUND                     0x0000000000000020UL
+#define TP_CONTROLLER_HAS_UI                        0x0000000000000040UL
+#define TP_CONTROLLER_HAS_TEXT_ENTRY                0x0000000000000080UL
+#define TP_CONTROLLER_HAS_IMAGES                	0x0000000000000100UL
+#define TP_CONTROLLER_HAS_AUDIO_CLIPS               0x0000000000000200UL
+#define TP_CONTROLLER_HAS_VIRTUAL_REMOTE			0x0000000000000400UL
+#define TP_CONTROLLER_HAS_SCROLL					0x0000000000000800UL
+#define TP_CONTROLLER_HAS_ADVANCED_UI               0x0000000000001000UL
+#define TP_CONTROLLER_HAS_POINTER_CURSOR			0x0000000000002000UL
+#define TP_CONTROLLER_HAS_FULL_MOTION               0x0000000000004000UL
 
 /*-----------------------------------------------------------------------------*/
 
@@ -160,7 +160,7 @@ struct TPControllerSpec
         A combination of <Capabilities> constants.
     */
 
-    unsigned int capabilities;
+    unsigned long long capabilities;
 
     /*
         Field: input_width

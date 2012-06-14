@@ -26,9 +26,9 @@ public:
     	return id;
     }
 
-    unsigned int get_capabilities() const;
+    unsigned long long get_capabilities() const;
 
-    inline bool has_cap( int cap ) const
+    inline bool has_cap( unsigned long long cap ) const
     {
         return spec.capabilities & cap;
     }

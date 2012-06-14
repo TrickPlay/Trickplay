@@ -21,7 +21,7 @@ public:
         return controller;
     }
 
-    inline bool has_cap( unsigned int cap )
+    inline bool has_cap( unsigned long long cap )
     {
         return controller->get_capabilities( ) & cap;
     }
