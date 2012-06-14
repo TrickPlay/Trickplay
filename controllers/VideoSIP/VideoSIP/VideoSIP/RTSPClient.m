@@ -61,7 +61,7 @@
 @property (nonatomic, retain, readwrite) NSString *host, *path;
 @property (nonatomic, assign, readwrite) int port;
 @property (nonatomic, retain, readwrite) NSMutableDictionary *responseHeader;
-@property (nonatomic, assign, readwrite) int session;
+@property (nonatomic, assign, readwrite) NSString *session;
 
 - (NSString*)md5HexDigest:(NSString*)input;
 
@@ -157,8 +157,8 @@
 
 - (int) connectTo:(NSString*) _host onPort:(int) _port withPath:(NSString*) _path {
 	
-	struct sockaddr_in server;
-	struct hostent *hp;
+	//struct sockaddr_in server;
+	//struct hostent *hp;
 	
 	//TODO: State checks
 	

@@ -838,10 +838,13 @@ protected:
 
 		const StringMap & globals( app->get_globals() );
 
+		lua_rawgeti( L , LUA_REGISTRYINDEX , LUA_RIDX_GLOBALS );
+		int g = lua_gettop( L );
+
 		for ( StringMap::const_iterator it = globals.begin(); it != globals.end(); ++it )
 		{
 			lua_pushstring( L , it->first.c_str() );
-			lua_rawget( L , LUA_GLOBALSINDEX );
+			lua_rawget( L , g );
 			if ( ! lua_isnil( L , -1 ) )
 			{
 				g_info( "%s (%s) = %s [%s]" , it->first.c_str() , lua_typename( L , lua_type( L , -1 ) ) , Util::describe_lua_value( L , -1 ).c_str() , it->second.c_str() );
@@ -849,6 +852,7 @@ protected:
 			lua_pop( L , 1 );
 		}
 
+		lua_pop( L , 1 );
 	}
 };
 

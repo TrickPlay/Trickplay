@@ -5,6 +5,7 @@
 //  Created by Steve McFarlin on 8/5/11.
 //  Copyright 2011 Steve McFarlin. All rights reserved.
 //
+//  Modified: Rex Fenley
 
 #include "config_unix.h"
 #include "net_tcp.h"
@@ -67,7 +68,7 @@ int tcp_recv(socket_tcp *s, char *buffer, int buflen, uint8_t *channel) {
 			len = recv(s->fd, &cb, 1, 0);
 			
 			if(len == 0) continue; //XXX: Should be do this?
-			
+#warning This is some idiotic code and unfortunately I have no idea what McFarlin was attempting
 			if(cb == '\r' || cb == '\n') { cr_count++ ; }
 			else { cr_count = 0; }
 			printf("INFINITE LOOPING");
@@ -100,6 +101,8 @@ int tcp_recv(socket_tcp *s, char *buffer, int buflen, uint8_t *channel) {
 
 static int tcp_send6(socket_tcp *s, char *buffer, int buflen)
 {
+#warning TCP send over IPv6 not implemented
+    return -1;
 }
 
 
@@ -145,7 +148,7 @@ int tcp_send(socket_tcp *s, int channel, char *buffer, int buflen) {
 }
 
 
-static fd_set	rfd, wfd;
+//static fd_set	rfd, wfd;
 static fd_t	max_fd;
 
 /**

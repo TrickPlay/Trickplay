@@ -8,7 +8,6 @@
 
 #import "SIPDialog.h"
 
-#import <CoreFoundation/CoreFoundation.h>
 #import <netdb.h>
 #import <arpa/inet.h>
 
@@ -45,17 +44,16 @@
 @synthesize authLine;
 @synthesize auth;
 
-@synthesize writeQueue;
-
 @synthesize delegate;
 
-- (id)initWithVideoStreamerContext:(VideoStreamerContext *)_context clientPublicIP:(NSString *)_clientPublicIP clientPrivateIP:(NSString *)_clientPrivateIP writeQueue:(NSMutableArray *)_writeQueue delegate:(id <SIPDialogDelegate>)_delegate {
-    if (!_context || !_writeQueue || !_delegate || !_clientPublicIP || !_clientPrivateIP) {
+- (id)initWithVideoStreamerContext:(VideoStreamerContext *)_context clientPublicIP:(NSString *)_clientPublicIP clientPrivateIP:(NSString *)_clientPrivateIP delegate:(id <SIPDialogDelegate>)_delegate {
+    if (!_context || !_delegate || !_clientPublicIP || !_clientPrivateIP) {
         return nil;
     }
     
     self = [super init];
     if (self) {
+        // Go through and construct all the necessary pieces for any SIP packet
         self.user = _context.SIPUserName;
         self.contactURI = [NSString stringWithFormat:@"sip:%@@%@", _context.SIPUserName, _context.SIPServerHostName];
         self.remoteURI = [NSString stringWithFormat:@"sip:%@@%@", _context.SIPRemoteUserName, _context.SIPServerHostName];
@@ -94,59 +92,7 @@
         self.branch = nil;
         self.authLine = nil;
         self.auth = [NSMutableDictionary dictionaryWithCapacity:10];
-        
-        self.writeQueue = _writeQueue;
-        
-        self.delegate = _delegate;
-    }
-    
-    return self;
-}
-
-- (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue delegate:(id<SIPDialogDelegate>)_delegate {
-
-    self = [super init];
-    if (self) {
-        self.user = _user;
-        self.contactURI = _contactURI;
-        self.remoteURI = _remoteURI;
-        self.sipURI = _remoteURI;
-        self.clientPublicIP = _udpClientIP;
-        self.udpClientPort = _udpClientPort;
-        self.udpServerPort = _udpServerPort;
-        
-        self.via = [NSMutableDictionary dictionaryWithCapacity:3];
-        [via setObject:@"SIP/2.0/UDP" forKey:@"protocol"];
-        [via setObject:clientPublicIP forKey:@"clientIP"];
-        [via setObject:[NSNumber numberWithUnsignedInt:udpClientPort] forKey:@"clientPort"];
-        
-        self.maxForwards = 70;
-        
-        self.from = [NSMutableDictionary dictionaryWithCapacity:2];
-        NSString *fromTag = [NSString uuid];
-        [from setObject:[NSString stringWithFormat:@"<%@>", contactURI] forKey:@"sender"];
-        [from setObject:fromTag forKey:@"tag"];
                 
-        self.to = [NSMutableDictionary dictionaryWithCapacity:2];
-        [to setObject:[NSString stringWithFormat:@"<%@>", remoteURI] forKey:@"remoteContact"];
-        
-        self.callID = [NSString uuid];
-        
-        self.cseq = 101;
-        
-        self.contact = [NSString stringWithFormat:@"<sip:%@@%@:%d>", user, clientPublicIP, udpClientPort];
-        
-        self.userAgent = @"Phone";
-        
-        self.allow = @"INVITE, ACK, BYE, CANCEL, OPTIONS, PRACK, MESSAGE, UPDATE";
-        self.supported = @"timer, 100rel, path";
-        
-        self.branch = nil;
-        self.authLine = nil;
-        self.auth = [NSMutableDictionary dictionaryWithCapacity:10];
-        
-        self.writeQueue = _writeQueue;
-        
         self.delegate = _delegate;
     }
     
@@ -161,6 +107,10 @@
     return [NSString stringWithFormat:@"z9hG4bK%@", branchSuffix];
 }
 
+/**
+ * This method returns an NSString that is the line one should add to any
+ * SIP header using WWW-Authentication or Proxy-Authentication.
+ */
 - (NSString *)generateAuthLine:(NSString *)requestType headerKey:(NSString *)key {
     NSString *nonce = [auth objectForKey:@"nonce"];
     NSString *realm = [auth objectForKey:@"realm"];
@@ -184,14 +134,6 @@
         NSString *ha2 = [[NSString stringWithFormat:@"%@:%@", requestType, sipURI] md5];
         NSString *ha3 = [[NSString stringWithFormat:@"%@:%@:00000001:%@:%@:%@", ha1, nonce, cnonce, qop, ha2] md5];
         
-        /*
-        NSString *ha_1 = [[NSString stringWithFormat:@"1002:%@:1234", realm] md5];
-        NSString *ha_2 = [[NSString stringWithFormat:@"%@:%@", requestType, sipURI] md5];
-        NSString *ha_jitsi = [[NSString stringWithFormat:@"%@:bb9e430e-7876-11e1-9775-eb625bf41e15:00000001:xyz:%@:%@", ha_1, qop, ha_2] md5];
-        
-        NSLog(@"Jitsi:\n%@\n", ha_jitsi);
-        */
-        
         self.authLine = [NSString stringWithFormat:@"%@: Digest username=\"%@\", realm=\"%@\", nonce=\"%@\", nc=00000001, cnonce=\"%@\", qop=\"%@\", algorithm=MD5, uri=\"%@\", response=\"%@\"\r\n", key, user, realm, nonce, cnonce, qop, sipURI, ha3];
         
         return authLine;
@@ -202,8 +144,12 @@
     return [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 7078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 9078 RTP/AVP 99\r\nb=AS:1372\r\na=rtpmap:99 H264/90000\r\na=fmtp:99 packetization-mode=1;sprop-parameter-sets=Z0IAHo1oCgPz,aM4jyA==\r\nmpeg4-esid:201\r\n", clientPublicIP, user, clientPublicIP];
 }
 
+/**
+ * When a SIP Header from over the network asks for Authentication
+ * this method parses that SIP line and adds all Authentication
+ * paramters to this SIPDialog's auth NSMutableDictionary.
+ */
 - (void)parseAuthentication:(NSString *)authResponse {
-    //NSArray *components = [authLine componentsSeparatedByString:@", "];
     // Make sure the challenge is Digest
     NSRange authTypeRange = [authResponse rangeOfString:@"Digest "];
     if (authTypeRange.location == NSNotFound) {
@@ -229,7 +175,8 @@
 }
 
 - (void)cancel {
-    // Not sure why I created this way back. Maybe delete?
+    // TODO: Send BYE messages and whatnot to other UAS/UAC. Only Dialogs that need to send
+    // BYE should override this method.
 }
 
 #pragma mark -
@@ -257,7 +204,6 @@
     self.branch = nil;
     self.authLine = nil;
     self.auth = nil;
-    self.writeQueue = nil;
     
     self.delegate = nil;
     
@@ -332,8 +278,6 @@
     NSString *packet = [self generateRegister];
     
     [delegate dialog:self wantsToSendData:[packet dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    //[writeQueue addObject:[packet dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
 - (void)interpretSIP:(NSDictionary *)parsedPacket body:(NSString *)body fromAddr:(NSData *)remoteAddr {
@@ -437,28 +381,14 @@
 
 @implementation InviteDialog
 
-- (id)initWithVideoStreamerContext:(VideoStreamerContext *)_context clientPublicIP:(NSString *)_clientPublicIP clientPrivateIP:(NSString *)_clientPrivateIP writeQueue:(NSMutableArray *)_writeQueue sps:(NSData *)_sps pps:(NSData *)_pps delegate:(id<SIPDialogDelegate>)_delegate {
+- (id)initWithVideoStreamerContext:(VideoStreamerContext *)_context clientPublicIP:(NSString *)_clientPublicIP clientPrivateIP:(NSString *)_clientPrivateIP sps:(NSData *)_sps pps:(NSData *)_pps delegate:(id <SIPDialogDelegate>)_delegate {
     
     if (!_sps || !_pps) {
         [self release];
         return nil;
     }
     
-    self = [super initWithVideoStreamerContext:_context clientPublicIP:_clientPublicIP clientPrivateIP:_clientPrivateIP writeQueue:_writeQueue delegate:_delegate];
-    
-    if (self) {
-        previousAcks = [[NSMutableDictionary alloc] initWithCapacity:10];
-        
-        sps = [_sps retain];
-        pps = [_pps retain];
-    }
-    
-    return self;
-}
-
-- (id)initWithUser:(NSString *)_user contactURI:(NSString *)_contactURI remoteURI:(NSString *)_remoteURI udpClientIP:(NSString *)_udpClientIP udpClientPort:(NSUInteger)_udpClientPort udpServerPort:(NSUInteger)_udpServerPort writeQueue:(NSMutableArray *)_writeQueue sps:(NSData *)_sps pps:(NSData *)_pps delegate:(id <SIPDialogDelegate>)_delegate {
-    
-    self = [super initWithUser:_user contactURI:_contactURI remoteURI:_remoteURI udpClientIP:_udpClientIP udpClientPort:_udpClientPort udpServerPort:_udpServerPort writeQueue:_writeQueue delegate:_delegate];
+    self = [super initWithVideoStreamerContext:_context clientPublicIP:_clientPublicIP clientPrivateIP:_clientPrivateIP delegate:_delegate];
     
     if (self) {
         previousAcks = [[NSMutableDictionary alloc] initWithCapacity:10];
@@ -475,21 +405,19 @@
 
 - (NSString *)genSDP {
     
+    NSString *sdp = nil;
+    /*
     unsigned char csps[32], cpps[32];
-	NSString *b64sps = nil, *b64pps = nil, *sdp = nil;
+	NSString *b64sps = nil, *b64pps = nil;
 	
-	//if (profile.broadcastType != kBroadcastTypeAudio) {
     int length = base64encode(((unsigned char *)[sps bytes]) + 4, [sps length] - 4, csps, 32);
     csps[length] = '\0';
     b64sps = [NSString stringWithCString:(const char*)csps encoding:NSASCIIStringEncoding];
-    
-    //NSLog(@"SPS Len: %d", length);
-    
+        
     length = base64encode(((unsigned char *)[pps bytes]) + 4, [pps length] - 4, cpps, 32);
     cpps[length] = '\0';
     b64pps = [NSString stringWithCString:(const char*)cpps encoding:NSASCIIStringEncoding];
-    
-    //sdp = [NSString stringWithFormat:@"v=0\r\no=- 0 0 IN IP4 %@\r\ns=%@\r\nc=IN IP4 %@\r\nt=0 0\r\na=range:npt=now-\r\nm=audio 21078 RTP/AVP 0\r\na=rtpmap:0 PCMU/8000\r\na=sendrecv\r\nm=video 22078 RTP/AVP 97\r\nb=AS:1372\r\na=rtpmap:97 H264/90000\r\na=fmtp:97 packetization-mode=1;sprop-parameter-sets=%@,%@==\r\nmpeg4-esid:201\r\n", udpClientIP, user, udpClientIP, b64sps, b64pps];
+    //*/
     
     struct sockaddr_in client_address;
     client_address.sin_family = AF_INET;
@@ -564,9 +492,7 @@
     }
     
     invite = [NSString stringWithFormat:@"%@%@%d%@%@", invite, @"Content-Type: application/sdp\r\nContent-Length: ", [sdpPacket length], @"\r\n\r\n", sdpPacket];
-    
-    //cseq += 1;
-    
+        
     return invite;
 }
 
@@ -617,7 +543,7 @@
 
 
 // TODO: Respond to all BYE Requests, not just the first one. May need to use
-// some 400 error to get Asterisk to shut up.
+// some 400 error to get Freeswitch to shut up.
 - (void)byeResponse:(NSDictionary *)request fromAddr:(NSData *)remoteAddr {
     struct sockaddr_in *addr = (struct sockaddr_in *)[remoteAddr bytes];
     char ip_string[INET_ADDRSTRLEN];
@@ -664,8 +590,6 @@
     }
     
     [delegate dialog:self wantsToSendData:[packet dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    //[writeQueue addObject:[packet dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
 #pragma mark -

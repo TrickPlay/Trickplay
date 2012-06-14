@@ -44,6 +44,8 @@ typedef enum avtype AVType;
 @end
 
 
+static struct timeval timeout;
+
 // TODO: rather than pass the media host/port combos up to here from SIPDialog, make avc/aac encoders
 // members of SIPDialog and pass a connection context up to the Video/Audio samplers
 // (which are currently in ViewController.m)
@@ -61,6 +63,10 @@ void rtp_avc_session_callback(struct rtp *session, rtp_event *e) {
     // I believe.
 }
 
+/**
+ * This function returns a pointer to the 32 bit IPv4 address
+ * or the 128 bit IPv6 address, depending on socket family.
+ */
 void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in *)sa)->sin_addr);
@@ -69,8 +75,28 @@ void *get_in_addr(struct sockaddr *sa) {
     return &(((struct sockaddr_in6 *)sa)->sin6_addr);
 }
 
+/**
+ * Tell the AVCEncoder to encode the sample.
+ */
 - (void)packetize:(CMSampleBufferRef)sampleBuffer {
     [avcEncoder encode:sampleBuffer];
+}
+
+- (void)invalidate {
+    if (avcEncoder) {
+        [avcEncoder stop];
+        // TODO: AVCEncoder should do this automatically.
+        Block_release(avcEncoder.callback);
+        avcEncoder.callback = nil;
+    }
+    if (avc_session) {
+        rtp_send_bye(avc_session);
+        rtp_done(avc_session);
+        avc_session = NULL;
+    }
+    [sipClient setDelegate:nil];
+    
+    [delegate networkManagerInvalid:self];
 }
 
 #pragma mark -
@@ -88,7 +114,8 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 - (void)client:(SIPClient *)client beganRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
-    if (avc_session) {
+    // If no current RTP sessions and 
+    if (avc_session || pcmu_session) {
         return;
     }
     // TODO: Audio
@@ -112,15 +139,18 @@ void *get_in_addr(struct sockaddr *sa) {
 			NSLog(@"Session is NULL");
 		}
     }
+    /*
     if (audio) {
         pcmu_session = rtp_init_udp([audio.host UTF8String], 21078, audio.port, 60, 2000, rtp_avc_session_callback, self);
         [NSTimer scheduledTimerWithTimeInterval:0.16 target:self selector:@selector(sendAudio:) userInfo:nil repeats:YES];
     }
+    */
     
     [delegate networkManagerEncoderReady:self];
 }
 
 - (void)client:(SIPClient *)client endRTPStreamWithMediaDestination:(NSDictionary *)mediaDest {
+    /*
     MediaDescription *video = [mediaDest objectForKey:@"video"];
     
     if (video) {
@@ -132,10 +162,25 @@ void *get_in_addr(struct sockaddr *sa) {
         // thorough testing will determine this and there is the cost of having
         // avc_session split amongst too many threads if we do this.
         [avcEncoder stop];
-        rtp_send_bye(avc_session);
-        rtp_done(avc_session);
-        avc_session = NULL;
+        if (avc_session) {
+            rtp_send_bye(avc_session);
+            rtp_done(avc_session);
+            avc_session = NULL;
+        }
+        // TODO: AVCEncoder should do this automatically.
+        Block_release(avcEncoder.callback);
+        avcEncoder.callback = nil;
     }
+    
+    [delegate networkManagerInvalid:self];
+    */
+    
+    [self invalidate];
+}
+
+- (void)client:(SIPClient *)client finishedWithError:(enum sip_client_error_t)error {
+    NSLog(@"SIP Client finished with error: %@", [client errorDescription:error]);
+    [self invalidate];
 }
 
 #pragma mark -
@@ -167,6 +212,7 @@ void *get_in_addr(struct sockaddr *sa) {
         [self setUpAvcEncoder];
         
         avc_session = NULL;
+        pcmu_session = NULL;
         
         //TODO:
         /*
@@ -177,14 +223,12 @@ void *get_in_addr(struct sockaddr *sa) {
 		}
         */
         
-        //sipClient = [[SIPClient alloc] initWithSPS:avcEncoder.sps PPS:avcEncoder.pps delegate:self];
         sipClient = [[SIPClient alloc] initWithSPS:avcEncoder.sps PPS:avcEncoder.pps context:streamerContext delegate:self];
         if (!sipClient) {
             [self release];
             return nil;
         }
         [sipClient connectToService];
-        
         socket_queue = dispatch_queue_create("Network Queue", NULL);
     }
     
@@ -223,8 +267,10 @@ void *get_in_addr(struct sockaddr *sa) {
                     [avQueue removeObjectAtIndex:0];
             
                     int ret = send_nal(avc_session, sendPacket->time, avc_session_id, (uint8_t*) [sendPacket->data bytes], sendPacket->size, &timeout);
-            
-                    //fprintf(stderr, "ret: %d\n", ret);
+                    
+                    if (ret || !ret) {  // this gets rid of dead store warning
+                        //fprintf(stderr, "ret: %d\n", ret);
+                    }
             
                     [sendPacket release];
                 }
@@ -232,14 +278,13 @@ void *get_in_addr(struct sockaddr *sa) {
         });
         
     };
+    // TODO: Fix AVCEncoder and includ Block_copy and Block_release at appropriate moments.
+    // This will include adding a method - (void)setCallback to AVCEncoder.
     avcEncoder.callback = Block_copy(cb);
-    
-    // TODO: check retain count on callback; not sure if i should use Block_copy since
-    // Livu isn't, but I'm guessing that his code is wrong and not mine.
     
     //NSLog(@"retain count: %d", self.avcEncoder.callback.retainCount);
     
-    AVCParameters *params = [[AVCParameters alloc] init];
+    AVCParameters *params = [[[AVCParameters alloc] init] autorelease];
     //params.outWidth = 640;
     //params.outHeight = 480;
     //params.bps = 60000;
@@ -307,6 +352,8 @@ void *get_in_addr(struct sockaddr *sa) {
     if (streamerContext) {
         [streamerContext release];
     }
+    
+    [super dealloc];
 }
 
 @end
