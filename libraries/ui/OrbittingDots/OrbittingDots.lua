@@ -20,7 +20,7 @@ local canvas_dot = function(self)
 	
 end
 
-default_parameters = {w = 100, h = 100, num_dots = 12}
+local default_parameters = {w = 100, h = 100, num_dots = 12}
 
 OrbittingDots = function(parameters)
 	
