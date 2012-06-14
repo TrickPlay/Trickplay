@@ -32,7 +32,7 @@ local canvas_dot = function(self)
 	
 end
 
-default_parameters = {w = 100, h = 100, duration = 2000}
+local default_parameters = {w = 100, h = 100, duration = 2000}
 
 ProgressSpinner = function(parameters)
 	
