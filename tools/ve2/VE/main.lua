@@ -129,9 +129,11 @@ _VE_.openInspector = function(gid)
     print("openInspc"..gid)
 end 
 
+---[[
 _VE_.setAppPath = function(path)
     editor:change_app_path(path)
 end 
+--]]
 
 _VE_.openFile = function(path)
     --s = load_layer("layer1.json")

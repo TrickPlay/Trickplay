@@ -10,6 +10,7 @@ from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+"""
 class MyThread (threading.Thread) :
 	def __init__ (self, main=None) :
 		self.main = main
@@ -24,6 +25,7 @@ class MyThread (threading.Thread) :
 			#print "[VE] %s auto saved ... "%self.main.currentProject
             #TODO : backup current project 
 			time.sleep(60)
+"""
 
 class MainWindow(QMainWindow):
     
@@ -74,7 +76,7 @@ class MainWindow(QMainWindow):
 		
         # Restore sizes/positions of docks
         #self.restoreState(settings.value("mainWindowState").toByteArray());
-        self.path = None
+        self.path =  None#os.path.join(self.apath, 'VE')
         self.app = app
         self.command = None
         self.currentProject = None
@@ -108,8 +110,8 @@ class MainWindow(QMainWindow):
         return True
     
     def setAppPath(self):
-        if self.path.startswith('/'):
-            self.path = self.path[1:]
+        #if self.path.startswith('/'):
+            #self.path = self.path[1:]
         self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+self.path+'")')
         return True
 
@@ -118,23 +120,21 @@ class MainWindow(QMainWindow):
         return True
 
     def newProject(self):
-        #print("newProject")
         orgPath = self.path
-        #print orgPath, "ORG PATH"
         wizard = Wizard(self)
         path = wizard.start("", False, True)
-        print "NEW PATH : %s"%path
-        if path and path != orgPath :
-            settings = QSettings()
-            if settings.value('path') is not None:
-                settings.setValue('path', path)
-                pass
-        
-        self.start(path)
-        self.setAppPath()
-        self.run()
-        #kkkk self.
-        return True
+        if path is not None:
+            #print "NEW PATH : %s"%path
+            if path and path != orgPath :
+                settings = QSettings()
+                if settings.value('path') is not None:
+                    settings.setValue('path', path)
+                    pass
+            
+            self.start(path)
+            self.setAppPath()
+            self.run()
+            return True
 
     def openProject(self):
         print("openProject")
@@ -208,10 +208,8 @@ class MainWindow(QMainWindow):
         """
         Initialize widgets on the main window with a given app path
         """
-        print("main start !!!!!!!!!")
         self.path = path
         #self._emulatorManager.setPath(path)
-
         if path is not -1:
             self.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
             self.currentProject = str(os.path.basename(str(path)))
