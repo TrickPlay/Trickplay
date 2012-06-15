@@ -247,7 +247,6 @@ class Wizard():
         if result == -4:
             self.warningMsg("Warning", '\'' + os.path.basename(str(path)) + '\' is not a valid directory. Please select another empty directory to create a new app.')
         else:
-            print path, "!!!"
             self.ui.directory.setText(path)
             self.ui.id.setReadOnly(False)
             self.ui.name.setReadOnly(False)

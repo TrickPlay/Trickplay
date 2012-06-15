@@ -103,12 +103,22 @@ class TrickplayEmulatorManager(QWidget):
 			if s.startswith( "<<VE_READY>>:" ):
 				try:
 					#self.main.open() # load setting path !! 
+					print "Currnet Project:%s"%self.main.currentProject
                     
-					if self.main and self.main.currentProject : 
-					     print "Loading .... %s"%self.main.currentProject
-					     self.main.open() 
-					else :
+					if self.main and self.main.currentProject is None: 
+					     return
+					elif self.main and self.main.currentProject : 
+					     if self.main.command == "newProject":
+					        self.main.newLayer()
+					        self.main.inspector.screens["Default"].append("Layer0")
+					        self.main.save() 
+					     else:
+					        print "Loading .... %s"%self.main.currentProject
+					        self.main.open() 
+					else:
 					    #TODO :  
+					    print ("When ?????????")
+					    """
 					    print "New Project !!!"
                         # 1. create temp layer 
 					    self.main.newLayer()
@@ -119,6 +129,7 @@ class TrickplayEmulatorManager(QWidget):
 					    if settings.value('path') is not None:
 					        path = os.path.join(self.main.apath, 'VE')
 					        settings.setValue('path', path)
+					    """
 
 					self.inspector.refresh() 
 				except:
@@ -251,6 +262,5 @@ class TrickplayEmulatorManager(QWidget):
         self.trickplay.setProcessChannelMode( QProcess.MergedChannels )
 
         self.trickplay.setProcessEnvironment(env)
-        print self.path(), "**********"
         
         ret = self.trickplay.start('trickplay', [self.path()])
