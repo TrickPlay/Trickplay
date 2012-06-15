@@ -107,6 +107,7 @@ typedef struct TPController TPController;
 #define TP_CONTROLLER_HAS_ADVANCED_UI               0x0000000000001000UL
 #define TP_CONTROLLER_HAS_POINTER_CURSOR			0x0000000000002000UL
 #define TP_CONTROLLER_HAS_FULL_MOTION               0x0000000000004000UL
+#define TP_CONTROLLER_HAS_STREAMING_VIDEO           0x0000000000008000UL
 
 /*-----------------------------------------------------------------------------*/
 
@@ -647,6 +648,11 @@ struct TPControllerSpec
 #define TP_CONTROLLER_COMMAND_STOP_MAGNETOMETER     403
 #define TP_CONTROLLER_COMMAND_START_ATTITUDE        404
 #define TP_CONTROLLER_COMMAND_STOP_ATTITUDE         405
+
+
+#define TP_CONTROLLER_COMMAND_VIDEO_START_CALL      500
+#define TP_CONTROLLER_COMMAND_VIDEO_END_CALL        501
+#define TP_CONTROLLER_COMMAND_VIDEO_SEND_STATUS     502
 
 /*-----------------------------------------------------------------------------*/
 
@@ -1737,6 +1743,113 @@ struct TPControllerSetPointerCursor
 
 		TPController * controller,
 		const char * json);
+
+/*
+	Callback: tp_controller_streaming_video_connected
+
+	Report that a call connected successfully
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		address	   -    A NULL terminated string.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_streaming_video_connected(
+
+		TPController * controller,
+		const char * address);
+
+/*
+	Callback: tp_controller_streaming_video_failed
+
+	Report that a call failed to connect successfully
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		address	   -    A NULL terminated string.
+
+		reason     -    A NULL terminated string.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_streaming_video_failed(
+
+		TPController * controller,
+		const char * address,
+		const char * reason);
+
+/*
+	Callback: tp_controller_streaming_video_dropped
+
+	Report that a call which had connected has shut down abnormally
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		address	   -    A NULL terminated string.
+
+		reason     -    A NULL terminated string.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_streaming_video_dropped(
+
+		TPController * controller,
+		const char * address,
+		const char * reason);
+
+/*
+	Callback: tp_controller_streaming_video_ended
+
+	Report that a call connected successfully
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		address	   -    A NULL terminated string.
+
+		who        -    A NULL terminated string.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_streaming_video_ended(
+
+		TPController * controller,
+		const char * address,
+		const char * who);
+
+/*
+	Callback: tp_controller_streaming_video_status
+
+	Report the current status of the video calling system
+
+	Arguments:
+
+		controller -    The controller returned by <tp_context_add_controller>.
+
+		status	   -    A NULL terminated string.
+
+		arg        -    A NULL terminated string.
+*/
+
+	TP_API_EXPORT
+	void
+	tp_controller_streaming_video_status(
+
+		TPController * controller,
+		const char * status,
+		const char * arg);
 
 
 /*-----------------------------------------------------------------------------*/
