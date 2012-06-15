@@ -18,6 +18,8 @@ APP = """
 VE_NEW_PROJECT_ROLE = 0
 VE_OPEN_PROJECT_ROLE = 1
 
+# To add dialog background image later ?
+
 class MyDialog(QDialog):
     def __init__(self):
         QDialog.__init__(self)

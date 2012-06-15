@@ -50,7 +50,7 @@ def main(argv):
             #settings.setValue('path', None) 
             settings.setValue('path', path) 
             app.setActiveWindow(main)
-            main.start(path, wizard.filesToOpen())
+            main.setCurrentProject(path, wizard.filesToOpen())
 
         #main.show()
         #main.raise_()
