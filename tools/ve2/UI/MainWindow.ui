@@ -65,7 +65,6 @@
     <addaction name="actionSave_Project"/>
     <addaction name="actionNew_Layer"/>
     <addaction name="menuOpen"/>
-    <addaction name="action_Save_2"/>
     <addaction name="action_Exit"/>
    </widget>
    <widget class="QMenu" name="menuView">

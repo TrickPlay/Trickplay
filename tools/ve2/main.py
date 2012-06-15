@@ -141,7 +141,6 @@ class MainWindow(QMainWindow):
             return True
 
     def openProject(self):
-        print("openProject")
         wizard = Wizard()
         path = -1
         while path == -1 :
@@ -163,8 +162,9 @@ class MainWindow(QMainWindow):
         return True
 
     def saveProject(self):
-        print("saveProject")
-        self.sendLuaCommand("saveProject", "_VE_.saveProject()")
+        self.setAppPath()
+        self.sendLuaCommand("save", "_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
+        print("_VE_.saveFile(\'"+self.inspector.screen_json()+"\')")
         return True
 
     def save(self):
