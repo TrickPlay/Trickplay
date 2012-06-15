@@ -142,7 +142,24 @@ class MainWindow(QMainWindow):
 
     def openProject(self):
         print("openProject")
-        self.sendLuaCommand("openProject", "_VE_.openProject()")
+        wizard = Wizard()
+        path = -1
+        while path == -1 :
+            if self.path is None:
+		        self.path = self.apath
+            path = QFileDialog.getExistingDirectory(None, 'Open Project', self.path, QFileDialog.ShowDirsOnly)
+            path = wizard.start(path, True)
+        print ("[VDBG] Open Project [%s]"%path)
+        if path:
+            settings = QSettings()
+            if settings.value('path') is not None:
+                self.stop()
+            settings.setValue('path', path)
+            self.start(str(path))
+            self.setAppPath()
+            self.run()
+            self.command = "openProject"
+            self.inspector.screens = {"_AllScreens":[],"Default":[]}
         return True
 
     def saveProject(self):
