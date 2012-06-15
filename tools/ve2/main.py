@@ -10,23 +10,6 @@ from EmulatorManager.TrickplayEmulatorManager import TrickplayEmulatorManager
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-"""
-class MyThread (threading.Thread) :
-	def __init__ (self, main=None) :
-		self.main = main
-		threading.Thread.__init__(self)
-		self.stop_event = threading.Event()
-
-	def stop(self):
-		self.stop_event.set()
-
-	def run (self):
-		while not self.stop_event.isSet():
-			#print "[VE] %s auto saved ... "%self.main.currentProject
-            #TODO : backup current project 
-			time.sleep(60)
-"""
-
 class MainWindow(QMainWindow):
     
     def __init__(self, app, apath=None, parent = None):
@@ -56,7 +39,6 @@ class MainWindow(QMainWindow):
         QObject.connect(self.ui.action_Exit, SIGNAL("triggered()"),  self.exit)
         QObject.connect(self.ui.actionLua_File_Engine_UI_Elements, SIGNAL("triggered()"),  self.openLua)
         QObject.connect(self.ui.actionJSON_New_UI_Elements, SIGNAL("triggered()"),  self.open)
-        QObject.connect(self.ui.action_Save_2, SIGNAL("triggered()"),  self.save)
         QObject.connect(self.ui.actionNew_Layer, SIGNAL("triggered()"),  self.newLayer)
         QObject.connect(self.ui.actionNew_Project, SIGNAL("triggered()"),  self.newProject)
         QObject.connect(self.ui.actionOpen_Project, SIGNAL("triggered()"),  self.openProject)
@@ -81,9 +63,6 @@ class MainWindow(QMainWindow):
         self.command = None
         self.currentProject = None
 
-        #Start AutoSave Thread
-        #self.autoSave = MyThread(self)
-        #self.autoSave.start()
         QObject.connect(app, SIGNAL('aboutToQuit()'), self.exit)
 
     
@@ -106,14 +85,10 @@ class MainWindow(QMainWindow):
         return True
 
     def open(self):
-        #self.sendLuaCommand("openFile", '_VE_.openFile("'+self.path+'")')
         self.sendLuaCommand("openFile", '_VE_.openFile("'+str(os.path.join(self.path, 'screens'))+'")')
         return True
     
     def setAppPath(self):
-        #if self.path.startswith('/'):
-            #self.path = self.path[1:]
-        #self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+self.path+'")')
         self.sendLuaCommand("setAppPath", '_VE_.setAppPath("'+str(os.path.join(self.path, 'screens'))+'")')
         return True
 
@@ -126,14 +101,13 @@ class MainWindow(QMainWindow):
         wizard = Wizard(self)
         path = wizard.start("", False, True)
         if path is not None:
-            #print "NEW PATH : %s"%path
             if path and path != orgPath :
                 settings = QSettings()
                 if settings.value('path') is not None:
                     settings.setValue('path', path)
                     pass
             
-            self.start(path)
+            self.setCurrentProject(path)
             self.setAppPath()
             self.run()
             self.command = "newProject"
@@ -154,7 +128,7 @@ class MainWindow(QMainWindow):
             if settings.value('path') is not None:
                 self.stop()
             settings.setValue('path', path)
-            self.start(str(path))
+            self.setCurrentProject(str(path))
             self.setAppPath()
             self.run()
             self.command = "openProject"
@@ -225,12 +199,11 @@ class MainWindow(QMainWindow):
     		self.ui.InspectorDock.show()
     		self.windows['inspector'] = True
 
-    def start(self, path, openList = None):
+    def setCurrentProject(self, path, openList = None):
         """
         Initialize widgets on the main window with a given app path
         """
         self.path = path
-        #self._emulatorManager.setPath(path)
         if path is not -1:
             self.setWindowTitle(QApplication.translate("MainWindow", "TrickPlay VE2 [ "+str(os.path.basename(str(path))+" ]"), None, QApplication.UnicodeUTF8))
             self.currentProject = str(os.path.basename(str(path)))

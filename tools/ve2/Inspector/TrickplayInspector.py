@@ -333,6 +333,7 @@ class TrickplayInspector(QWidget):
         self.screen_textChanged = True
 
     def screenChanged(self, index):
+        print("screenChanged")
         if self.old_screen_name == "":
             return
         self.screen_textChanged = True

@@ -179,6 +179,7 @@ class TrickplayEmulatorManager(QWidget):
 				            if self.inspector.ui.screenCombo.findText(scrName) < 0 and scrName != "_AllScreens":
 				                self.inspector.ui.screenCombo.addItem(scrName)
 
+				        #self.inspector.ui.screenCombo.setCurrentIndex(self.inspector.ui.screenCombo.findText(self.inspector.currentScreenName))
 				    else:
 				        pass
 
